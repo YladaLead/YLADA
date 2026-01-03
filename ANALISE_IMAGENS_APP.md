@@ -216,3 +216,4 @@ npx ts-node scripts/renomear-imagens-app.ts
 
 **Execute o script de renomeação quando estiver pronto!** 🚀
 
+

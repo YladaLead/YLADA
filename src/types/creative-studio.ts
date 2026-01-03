@@ -30,6 +30,33 @@ export interface VideoClip {
   }
 }
 
+// Sistema de Legendas/Captions
+export interface Caption {
+  id: string
+  text: string
+  startTime: number
+  endTime: number
+  style: CaptionStyle
+  position: CaptionPosition
+  animation?: CaptionAnimation
+  highlightWords?: string[] // Palavras para destacar
+}
+
+export type CaptionStyle = 'hook' | 'dor' | 'solucao' | 'cta' | 'default'
+export type CaptionPosition = 'center' | 'top' | 'bottom' | 'middle-top' | 'middle-bottom'
+export type CaptionAnimation = 'fade-in' | 'slide-up' | 'slide-down' | 'zoom' | 'typewriter' | 'none'
+
+export interface CaptionStyleConfig {
+  fontSize: number
+  fontWeight: string
+  color: string
+  backgroundColor?: string
+  padding: number
+  borderRadius: number
+  shadow?: boolean
+  highlightColor?: string
+}
+
 export interface Project {
   id: string
   name: string

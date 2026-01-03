@@ -284,3 +284,4 @@ Criar editor de vídeos IA que use:
 
 **O planejamento está alinhado com a implementação, mas faltam peças críticas para completar o sistema!** 🎯
 
+

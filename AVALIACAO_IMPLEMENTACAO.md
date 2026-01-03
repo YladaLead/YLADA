@@ -386,3 +386,4 @@ await execAsync(`ffmpeg -i video1.mp4 -i audio.mp3 -vf "subtitles=subtitles.srt"
 
 **A implementação é VIÁVEL e a QUALIDADE será ALTA!** 🎯
 
+

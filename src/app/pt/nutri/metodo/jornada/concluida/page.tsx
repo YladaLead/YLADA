@@ -32,7 +32,7 @@ export default function JornadaConcluidaPage() {
 
           {/* Destaque da LYA */}
           <div className="bg-gradient-to-r from-purple-100 to-indigo-100 rounded-xl p-6 mb-8 border border-purple-200">
-            <div className="text-4xl mb-3">🤖💜</div>
+            <div className="text-4xl mb-3">👩‍💼💜</div>
             <h2 className="text-xl font-bold text-gray-900 mb-2">
               Você e a LYA: parceiras de jornada
             </h2>
@@ -101,7 +101,7 @@ export default function JornadaConcluidaPage() {
             href="/pt/nutri/home"
             className="block w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-8 py-4 rounded-xl font-bold text-lg hover:from-blue-700 hover:to-indigo-700 transition-all shadow-lg hover:shadow-xl"
           >
-            🤖 Conversar com a LYA
+            👩‍💼 Conversar com a LYA
           </Link>
         </div>
       </div>

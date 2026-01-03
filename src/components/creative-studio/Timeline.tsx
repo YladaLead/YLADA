@@ -2,11 +2,11 @@
 
 import { useCreativeStudioStore } from '@/stores/creative-studio-store'
 import { VideoClip } from '@/types/creative-studio'
-import { Film, Image, Type, Trash2 } from 'lucide-react'
+import { Film, Image, Type, Trash2, Copy } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 export function Timeline() {
-  const { clips, selectedClipId, setSelectedClipId, deleteClip, currentTime } = useCreativeStudioStore()
+  const { clips, selectedClipId, setSelectedClipId, deleteClip, duplicateClip, currentTime } = useCreativeStudioStore()
 
   const formatTime = (seconds: number) => {
     if (!seconds || isNaN(seconds)) return '0:00'
@@ -124,15 +124,28 @@ export function Timeline() {
                   </div>
                 )}
               </div>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation()
-                  deleteClip(clip.id)
-                }}
-                className="p-1.5 rounded hover:bg-red-100 text-red-600"
-              >
-                <Trash2 className="w-4 h-4" />
-              </button>
+              <div className="flex gap-1">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    duplicateClip(clip.id)
+                  }}
+                  className="p-1.5 rounded hover:bg-blue-100 text-blue-600"
+                  title="Duplicar imagem"
+                >
+                  <Copy className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    deleteClip(clip.id)
+                  }}
+                  className="p-1.5 rounded hover:bg-red-100 text-red-600"
+                  title="Remover imagem"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
             </div>
           </div>
         ))}

@@ -52,10 +52,10 @@ export function VideoPlayer() {
     }
   }, [clips, setDuration])
 
-  // Controlar play/pause do vídeo
+  // Controlar play/pause do vídeo (apenas para vídeos, não imagens)
   useEffect(() => {
     const video = videoRef.current
-    if (!video) return
+    if (!video || currentClip?.type === 'image') return
 
     if (isPlaying) {
       video.play().catch((err) => {
@@ -65,7 +65,7 @@ export function VideoPlayer() {
     } else {
       video.pause()
     }
-  }, [isPlaying, setIsPlaying])
+  }, [isPlaying, setIsPlaying, currentClip])
 
   // Sincronizar tempo do vídeo com o store
   useEffect(() => {
@@ -86,8 +86,13 @@ export function VideoPlayer() {
     }
   }, [currentTime, currentClip])
 
-  // Atualizar currentTime quando vídeo está reproduzindo
+  // Atualizar currentTime quando vídeo está reproduzindo (ou avançar automaticamente para imagens)
   useEffect(() => {
+    if (currentClip?.type === 'image') {
+      // Para imagens, apenas manter o tempo atual
+      return
+    }
+
     const video = videoRef.current
     if (!video || !isPlaying || !currentClip) return
 
@@ -95,12 +100,24 @@ export function VideoPlayer() {
       if (video) {
         const relativeTime = video.currentTime
         const absoluteTime = currentClip.startTime + relativeTime
-        setCurrentTime(absoluteTime)
+        
+        // Avançar para próximo clip quando terminar
+        if (absoluteTime >= currentClip.endTime) {
+          const nextClip = clips.find(c => c.startTime > currentClip.endTime)
+          if (nextClip) {
+            setCurrentTime(nextClip.startTime)
+          } else {
+            setIsPlaying(false)
+            setCurrentTime(currentClip.endTime)
+          }
+        } else {
+          setCurrentTime(absoluteTime)
+        }
       }
     }, 100)
 
     return () => clearInterval(interval)
-  }, [isPlaying, currentClip, setCurrentTime])
+  }, [isPlaying, currentClip, setCurrentTime, clips, setIsPlaying])
 
   const formatTime = (seconds: number) => {
     if (!seconds || isNaN(seconds)) return '0:00'
@@ -136,6 +153,30 @@ export function VideoPlayer() {
     handleSeek(currentTime + seconds)
   }
 
+  // Auto-play para imagens quando não está pausado
+  useEffect(() => {
+    if (currentClip?.type === 'image' && isPlaying) {
+      const imageDuration = currentClip.endTime - currentClip.startTime
+      const elapsed = currentTime - currentClip.startTime
+      const remaining = imageDuration - elapsed
+      
+      if (remaining > 0) {
+        const timer = setTimeout(() => {
+          // Avançar para próximo clip quando imagem terminar
+          const nextClip = clips.find(c => c.startTime > currentClip.endTime)
+          if (nextClip) {
+            setCurrentTime(nextClip.startTime)
+          } else {
+            setIsPlaying(false)
+            setCurrentTime(currentClip.endTime)
+          }
+        }, remaining * 1000)
+        
+        return () => clearTimeout(timer)
+      }
+    }
+  }, [currentClip, isPlaying, currentTime, clips, setIsPlaying, setCurrentTime])
+
   if (clips.length === 0) {
     return (
       <div className="bg-gray-900 rounded-lg aspect-video flex items-center justify-center">
@@ -152,34 +193,54 @@ export function VideoPlayer() {
       >
         {currentClip?.source ? (
           <>
-            <video
-              ref={videoRef}
-              src={currentClip.source}
-              className="w-full h-full object-contain"
-              onEnded={() => setIsPlaying(false)}
-              onError={(e) => {
-                console.error('Erro ao carregar vídeo:', e)
-              }}
-              onLoadedMetadata={() => {
-                // Garantir que o vídeo está no tempo correto quando carrega
-                if (videoRef.current && currentClip) {
-                  const relativeTime = currentTime - currentClip.startTime
-                  const clipDuration = currentClip.endTime - currentClip.startTime
-                  const videoTime = Math.max(0, Math.min(clipDuration, relativeTime))
-                  videoRef.current.currentTime = videoTime
-                }
-                // Atualizar dimensões quando vídeo carregar
-                if (containerRef.current) {
-                  const rect = containerRef.current.getBoundingClientRect()
-                  setDimensions({ width: rect.width, height: rect.height })
-                }
-              }}
-            />
-            <VideoRenderer
-              videoElement={videoRef.current}
-              width={dimensions.width}
-              height={dimensions.height}
-            />
+            {currentClip.type === 'image' ? (
+              <img
+                src={currentClip.source}
+                alt=""
+                className="w-full h-full object-cover"
+                onLoad={() => {
+                  // Atualizar dimensões quando imagem carregar
+                  if (containerRef.current) {
+                    const rect = containerRef.current.getBoundingClientRect()
+                    setDimensions({ width: rect.width, height: rect.height })
+                  }
+                }}
+                onError={(e) => {
+                  console.error('Erro ao carregar imagem:', e)
+                }}
+              />
+            ) : (
+              <video
+                ref={videoRef}
+                src={currentClip.source}
+                className="w-full h-full object-contain"
+                onEnded={() => setIsPlaying(false)}
+                onError={(e) => {
+                  console.error('Erro ao carregar vídeo:', e)
+                }}
+                onLoadedMetadata={() => {
+                  // Garantir que o vídeo está no tempo correto quando carrega
+                  if (videoRef.current && currentClip) {
+                    const relativeTime = currentTime - currentClip.startTime
+                    const clipDuration = currentClip.endTime - currentClip.startTime
+                    const videoTime = Math.max(0, Math.min(clipDuration, relativeTime))
+                    videoRef.current.currentTime = videoTime
+                  }
+                  // Atualizar dimensões quando vídeo carregar
+                  if (containerRef.current) {
+                    const rect = containerRef.current.getBoundingClientRect()
+                    setDimensions({ width: rect.width, height: rect.height })
+                  }
+                }}
+              />
+            )}
+            {currentClip.type !== 'image' && (
+              <VideoRenderer
+                videoElement={videoRef.current}
+                width={dimensions.width}
+                height={dimensions.height}
+              />
+            )}
           </>
         ) : (
           <div className="w-full h-full flex items-center justify-center text-gray-400">
@@ -190,10 +251,33 @@ export function VideoPlayer() {
 
       {/* Controles */}
       <div className="bg-gray-800 p-4 space-y-3">
-        {/* Timeline - Arrastável para navegação rápida - MELHORADA */}
+                {/* Timeline - Arrastável para navegação rápida - MELHORADA */}
         <div className="relative">
-          {/* Timeline visual melhorada */}
-          <div className="relative h-8 mb-2">
+          {/* Timeline visual melhorada - CLICÁVEL E ARRASTÁVEL */}
+          <div 
+            className="relative h-8 mb-2 cursor-pointer"
+            onMouseDown={(e) => {
+              const rect = e.currentTarget.getBoundingClientRect()
+              const percent = (e.clientX - rect.left) / rect.width
+              const newTime = Math.max(0, Math.min(duration, percent * duration))
+              handleSeek(newTime)
+              
+              const handleMouseMove = (moveEvent: MouseEvent) => {
+                const moveRect = e.currentTarget.getBoundingClientRect()
+                const movePercent = (moveEvent.clientX - moveRect.left) / moveRect.width
+                const moveTime = Math.max(0, Math.min(duration, movePercent * duration))
+                handleSeek(moveTime)
+              }
+              
+              const handleMouseUp = () => {
+                document.removeEventListener('mousemove', handleMouseMove)
+                document.removeEventListener('mouseup', handleMouseUp)
+              }
+              
+              document.addEventListener('mousemove', handleMouseMove)
+              document.addEventListener('mouseup', handleMouseUp)
+            }}
+          >
             {/* Barra de progresso visual */}
             {duration > 0 && (
               <>

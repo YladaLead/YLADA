@@ -270,7 +270,7 @@ export default function ChatIA({ isOpen, onClose, area = 'nutri' }: ChatIAProps)
           style={{ backgroundColor: config.corHex }}
         >
           <div className="flex items-center space-x-2">
-            <span className="text-lg">🤖</span>
+            <span className="text-lg">👩‍💼</span>
             <div>
               <h3 className="font-semibold">{area === 'coach' ? 'Carol' : `Assistente IA ${config.nomeCurto}`}</h3>
               <p className="text-xs opacity-90">Online agora</p>

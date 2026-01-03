@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { ScriptSegment, VideoClip, Project } from '@/types/creative-studio'
+import { ScriptSegment, VideoClip, Project, Caption } from '@/types/creative-studio'
 
 interface CreativeStudioState {
   // Projeto atual
@@ -52,8 +52,11 @@ interface CreativeStudioState {
     lastSearchType: 'images' | 'videos' | null
   }
   
+  // Legendas/Captions
+  captions: Caption[]
+  
   // Undo/Redo
-  history: Array<{ clips: VideoClip[]; script: ScriptSegment[] }>
+  history: Array<{ clips: VideoClip[]; script: ScriptSegment[]; captions: Caption[] }>
   historyIndex: number
   maxHistorySize: number
   isUndoRedo: boolean
@@ -68,6 +71,7 @@ interface CreativeStudioState {
   addClip: (clip: VideoClip) => void
   updateClip: (id: string, updates: Partial<VideoClip>) => void
   deleteClip: (id: string) => void
+  duplicateClip: (id: string) => void
   setClips: (clips: VideoClip[]) => void
   
   setCurrentTime: (time: number) => void
@@ -96,6 +100,12 @@ interface CreativeStudioState {
   addSearchVideos: (videos: Array<{ id: string; url: string; thumbnail: string; source: string; duration?: number }>) => void
   clearSearchResults: () => void
   setSearching: (isSearching: boolean, type?: 'images' | 'videos', query?: string) => void
+  
+  // Captions Actions
+  addCaption: (caption: Caption) => void
+  updateCaption: (id: string, updates: Partial<Caption>) => void
+  deleteCaption: (id: string) => void
+  setCaptions: (captions: Caption[]) => void
   
   // Undo/Redo Actions
   saveToHistory: () => void
@@ -129,8 +139,11 @@ export const useCreativeStudioStore = create<CreativeStudioState>((set, get) => 
     lastSearchType: null,
   },
   
+  // Legendas/Captions
+  captions: [],
+  
   // Undo/Redo
-  history: [{ clips: [], script: [] }],
+  history: [{ clips: [], script: [], captions: [] }],
   historyIndex: 0,
   maxHistorySize: 50,
   isUndoRedo: false,
@@ -182,6 +195,44 @@ export const useCreativeStudioStore = create<CreativeStudioState>((set, get) => 
     set((state) => ({
       clips: state.clips.filter((clip) => clip.id !== id),
     })),
+  
+  duplicateClip: (id) =>
+    set((state) => {
+      const clipToDuplicate = state.clips.find((clip) => clip.id === id)
+      if (!clipToDuplicate) return state
+      
+      const duration = clipToDuplicate.endTime - clipToDuplicate.startTime
+      const newStartTime = clipToDuplicate.endTime
+      const newEndTime = newStartTime + duration
+      
+      const duplicatedClip: VideoClip = {
+        ...clipToDuplicate,
+        id: `${clipToDuplicate.id}-copy-${Date.now()}`,
+        startTime: newStartTime,
+        endTime: newEndTime,
+      }
+      
+      // Inserir após o clip original
+      const clipIndex = state.clips.findIndex((clip) => clip.id === id)
+      const newClips = [...state.clips]
+      newClips.splice(clipIndex + 1, 0, duplicatedClip)
+      
+      // Recalcular timings dos próximos clips
+      const adjustedClips = newClips.map((clip, idx) => {
+        if (idx > clipIndex + 1) {
+          const prevClip = newClips[idx - 1]
+          const offset = duration
+          return {
+            ...clip,
+            startTime: prevClip.endTime,
+            endTime: prevClip.endTime + (clip.endTime - clip.startTime),
+          }
+        }
+        return clip
+      })
+      
+      return { clips: adjustedClips }
+    }),
   
   setClips: (clips) => {
     set({ clips })
@@ -269,6 +320,29 @@ export const useCreativeStudioStore = create<CreativeStudioState>((set, get) => 
       },
     })),
   
+  // Captions Actions
+  addCaption: (caption) =>
+    set((state) => ({
+      captions: [...state.captions, caption].sort((a, b) => a.startTime - b.startTime),
+    })),
+  
+  updateCaption: (id, updates) =>
+    set((state) => ({
+      captions: state.captions.map((cap) =>
+        cap.id === id ? { ...cap, ...updates } : cap
+      ).sort((a, b) => a.startTime - b.startTime),
+    })),
+  
+  deleteCaption: (id) =>
+    set((state) => ({
+      captions: state.captions.filter((cap) => cap.id !== id),
+    })),
+  
+  setCaptions: (captions) => {
+    set({ captions: captions.sort((a, b) => a.startTime - b.startTime) })
+    get().saveToHistory()
+  },
+  
   // Undo/Redo
   setIsUndoRedo: (value) => set({ isUndoRedo: value }),
   
@@ -280,13 +354,15 @@ export const useCreativeStudioStore = create<CreativeStudioState>((set, get) => 
     const currentState = {
       clips: JSON.parse(JSON.stringify(state.clips)),
       script: JSON.parse(JSON.stringify(state.script)),
+      captions: JSON.parse(JSON.stringify(state.captions)),
     }
     
     const lastState = newHistory[newHistory.length - 1]
     if (
       lastState &&
       JSON.stringify(lastState.clips) === JSON.stringify(currentState.clips) &&
-      JSON.stringify(lastState.script) === JSON.stringify(currentState.script)
+      JSON.stringify(lastState.script) === JSON.stringify(currentState.script) &&
+      JSON.stringify(lastState.captions) === JSON.stringify(currentState.captions)
     ) {
       return
     }
@@ -315,6 +391,7 @@ export const useCreativeStudioStore = create<CreativeStudioState>((set, get) => 
       set({
         clips: JSON.parse(JSON.stringify(previousState.clips)),
         script: JSON.parse(JSON.stringify(previousState.script)),
+        captions: JSON.parse(JSON.stringify(previousState.captions)),
         historyIndex: state.historyIndex - 1,
         isUndoRedo: false,
       })
@@ -329,6 +406,7 @@ export const useCreativeStudioStore = create<CreativeStudioState>((set, get) => 
       set({
         clips: JSON.parse(JSON.stringify(nextState.clips)),
         script: JSON.parse(JSON.stringify(nextState.script)),
+        captions: JSON.parse(JSON.stringify(nextState.captions)),
         historyIndex: state.historyIndex + 1,
         isUndoRedo: false,
       })

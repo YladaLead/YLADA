@@ -4,6 +4,8 @@ import { useState, useRef, useEffect } from 'react'
 import { Send, Bot, User, Loader2, Sparkles, Video, Scissors, Zap, Plus, Check, X, RotateCcw, Lightbulb } from 'lucide-react'
 import { useAuthenticatedFetch } from '@/hooks/useAuthenticatedFetch'
 import { useCreativeStudioStore } from '@/stores/creative-studio-store'
+import { ScriptPaste } from './ScriptPaste'
+import { parseScriptScenes, type Scene } from '@/lib/parse-script-scenes'
 
 interface EditorChatProps {
   mode?: 'edit' | 'create'
@@ -15,6 +17,9 @@ interface EditorChatProps {
 
 export function EditorChat({ mode = 'edit', area = 'nutri', purpose = 'quick-ad', objective = '', onSearchComplete }: EditorChatProps) {
   const getInitialMessage = () => {
+    if (mode === 'create' && objective === 'criar-do-zero') {
+      return 'Olá! Vou criar seu vídeo do zero! 🎬\n\nCole seu roteiro completo no card acima e eu busco as imagens, você escolhe e eu monto tudo automaticamente!'
+    }
     if (mode === 'create') {
       return 'Olá! Sou seu assistente de criação de vídeos. 🎬\n\nMe diga o que você precisa e vou criar o vídeo completo para você!'
     }
@@ -41,7 +46,7 @@ export function EditorChat({ mode = 'edit', area = 'nutri', purpose = 'quick-ad'
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const authenticatedFetch = useAuthenticatedFetch()
-  const { videoAnalysis, clips, script, uploadedVideo, setVideoAnalysis, setUploadedVideo, addClip, setClips, updateClip, setCurrentTime, setIsPlaying, addDynamicSuggestion, addSuggestedCut, clearSuggestedCuts, setSearching, addSearchImages, addSearchVideos, setSearchResults } = useCreativeStudioStore()
+  const { videoAnalysis, clips, script, uploadedVideo, setVideoAnalysis, setUploadedVideo, addClip, setClips, updateClip, setCurrentTime, setIsPlaying, addDynamicSuggestion, addSuggestedCut, clearSuggestedCuts, setSearching, addSearchImages, addSearchVideos, setSearchResults, searchResults } = useCreativeStudioStore()
   const analyzedVideoRef = useRef<File | null>(null)
 
   const scrollToBottom = (force = false) => {
@@ -208,6 +213,19 @@ export function EditorChat({ mode = 'edit', area = 'nutri', purpose = 'quick-ad'
         textareaRef.current.style.height = '48px'
       }
     }
+    // Detectar se é um roteiro completo com cenas ANTES de enviar
+    const hasScenes = /CENA\s+\d+/i.test(userMessage) || /(\d+)[–-](\d+)s?\s*:/i.test(userMessage)
+    const isFullScript = userMessage.includes('Criar vídeo completo com este roteiro') || 
+                        userMessage.includes('roteiro completo') ||
+                        (hasScenes && userMessage.length > 200)
+    
+    let scenesToSearch: Scene[] = []
+    if (isFullScript && hasScenes) {
+      // Extrair cenas do roteiro
+      scenesToSearch = parseScriptScenes(userMessage)
+      console.log('🎬 [DEBUG] Cenas detectadas:', scenesToSearch.length, scenesToSearch)
+    }
+    
     setMessages((prev) => [...prev, { role: 'user', content: userMessage }])
     setIsLoading(true)
 
@@ -458,6 +476,112 @@ export function EditorChat({ mode = 'edit', area = 'nutri', purpose = 'quick-ad'
       const data = await response.json()
       let assistantMessage = data.response
 
+      // Se detectou cenas no roteiro, buscar imagens para cada cena automaticamente
+      if (scenesToSearch.length > 0) {
+        console.log('🎬 [DEBUG] Buscando imagens para', scenesToSearch.length, 'cenas automaticamente')
+        console.log('🎬 [DEBUG] Cenas:', scenesToSearch.map(s => ({ num: s.number, query: s.searchQuery })))
+        
+        setMessages((prev) => [
+          ...prev,
+          {
+            role: 'assistant',
+            content: `🎬 Detectei ${scenesToSearch.length} cena(s)! Buscando imagens automaticamente...`,
+          },
+        ])
+        
+        // Buscar imagens para todas as cenas em paralelo (mais rápido)
+        const allSearchedImages: Array<{ id: string; url: string; thumbnail: string; source: string; sceneNumber?: number }> = []
+        
+        setIsSearchingImages(true)
+        setSearchStatus(`🔍 Buscando imagens para ${scenesToSearch.length} cena(s)...`)
+        
+        const searchPromises = scenesToSearch.map(async (scene) => {
+          try {
+            console.log('🎬 [DEBUG] Buscando CENA', scene.number, 'com query:', scene.searchQuery)
+            
+            // Buscar diretamente em APIs externas (Pexels) - mais simples e confiável
+            const imageResponse = await authenticatedFetch('/api/creative-studio/search-images', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                query: scene.searchQuery,
+                type: 'search',
+                count: 8, // Mais opções por cena
+              }),
+            })
+            
+            if (imageResponse.ok) {
+              const imageData = await imageResponse.json()
+              if (imageData.images && imageData.images.length > 0) {
+                const images = imageData.images.map((img: any) => ({
+                  id: `scene-${scene.number}-${img.id || Date.now()}-${Math.random()}`,
+                  url: img.url,
+                  thumbnail: img.thumbnail || img.url,
+                  source: img.source || 'pexels',
+                  sceneNumber: scene.number,
+                }))
+                console.log('✅ Encontrei', images.length, 'imagens para CENA', scene.number)
+                return images
+              } else {
+                console.warn('⚠️ Nenhuma imagem encontrada para CENA', scene.number, 'com query:', scene.searchQuery)
+                return []
+              }
+            } else {
+              const errorText = await imageResponse.text().catch(() => 'Erro desconhecido')
+              console.error('❌ Erro na API para CENA', scene.number, ':', imageResponse.status, errorText)
+              return []
+            }
+          } catch (error: any) {
+            console.error('❌ Erro ao buscar imagens para cena', scene.number, ':', error?.message || error)
+            return []
+          }
+        })
+        
+        // Aguardar todas as buscas em paralelo
+        const results = await Promise.all(searchPromises)
+        
+        // Consolidar todas as imagens encontradas
+        results.forEach((images) => {
+          if (images.length > 0) {
+            allSearchedImages.push(...images)
+            addSearchImages(images)
+          }
+        })
+        
+        setIsSearchingImages(false)
+        setSearchStatus(null)
+        setSearching(false)
+        
+        // Garantir que as imagens estão no store
+        console.log('🎬 [DEBUG] Total de imagens buscadas:', allSearchedImages.length)
+        console.log('🎬 [DEBUG] Imagens no store após busca:', searchResults.images?.length || 0)
+        
+        if (allSearchedImages.length > 0) {
+          // Abrir aba de busca automaticamente
+          if (onSearchComplete) {
+            onSearchComplete('images')
+          }
+          
+          setMessages((prev) => [
+            ...prev,
+            {
+              role: 'assistant',
+              content: `✅ Encontrei ${allSearchedImages.length} imagem(ns) para ${scenesToSearch.length} cena(s)! Veja na aba "Busca". Escolha as imagens e diga "ok pode aplicar" para montar o vídeo automaticamente.`,
+            },
+          ])
+        } else {
+          setMessages((prev) => [
+            ...prev,
+            {
+              role: 'assistant',
+              content: `⚠️ Não encontrei imagens. Verifique se os termos de busca estão corretos ou peça para criar imagens com IA.`,
+            },
+          ])
+        }
+      }
+      
       // Detectar se o assistente sugeriu imagens/vídeos na resposta e buscar automaticamente
       const imageKeywords = ['imagem', 'foto', 'fotos', 'imagens', 'visual', 'elemento visual', 'gráfico', 'gráficos', 'ilustração', 'ilustrações']
       const videoKeywords = ['vídeo', 'video', 'vídeos', 'videos', 'clip', 'clips', 'filmagem', 'gravação']
@@ -844,6 +968,16 @@ export function EditorChat({ mode = 'edit', area = 'nutri', purpose = 'quick-ad'
               }))
               foundImages = ownImages
               addSearchImages(foundImages)
+              
+              // Abrir automaticamente a aba de busca
+              if (onSearchComplete) {
+                onSearchComplete('images')
+              }
+              
+              // Adicionar mensagem sobre as imagens encontradas
+              if (!assistantMessage.includes('📸')) {
+                assistantMessage += `\n\n📸 Encontrei ${foundImages.length} imagem(ns) no banco próprio! Veja na aba "Busca".`
+              }
             }
           }
 
@@ -891,6 +1025,29 @@ export function EditorChat({ mode = 'edit', area = 'nutri', purpose = 'quick-ad'
                   !m.content.includes('🔍 Buscando imagens relacionadas...')
                 )
                 return filtered
+              })
+            } else {
+              // NÃO ENCONTROU IMAGENS - Oferecer criar com IA
+              setMessages((prev) => {
+                const filtered = prev.filter(m => 
+                  !m.content.includes('🔍 Buscando imagens relacionadas...')
+                )
+                return [
+                  ...filtered,
+                  {
+                    role: 'assistant',
+                    content: `❌ Não encontrei imagens relacionadas a "${searchQuery}".\n\n💡 Quer que eu crie uma imagem personalizada com IA?`,
+                  },
+                ]
+              })
+              
+              // Adicionar sugestão de criar imagem
+              addDynamicSuggestion({
+                id: `create-image-${Date.now()}`,
+                title: 'Criar imagem com IA',
+                description: `Criar imagem personalizada de "${searchQuery}" usando DALL-E`,
+                type: 'image',
+                createdAt: Date.now(),
               })
             }
           }
@@ -1256,26 +1413,72 @@ export function EditorChat({ mode = 'edit', area = 'nutri', purpose = 'quick-ad'
         }
 
         // Adicionar imagens automaticamente quando usuário aceitar
-        if (foundImages.length > 0) {
+        // Buscar imagens nas mensagens anteriores do assistente E nos resultados de busca
+        const imagesToAdd: Array<{ id: string; url: string; thumbnail: string; source: string }> = []
+        
+        console.log('🎬 [DEBUG] Verificando imagens para adicionar:', {
+          searchResultsImages: searchResults.images?.length || 0,
+          foundImages: foundImages.length,
+          messagesCount: messages.length
+        })
+        
+        // PRIORIDADE 1: Procurar imagens nos resultados de busca (searchResults) - MAIS IMPORTANTE
+        if (searchResults.images && searchResults.images.length > 0) {
+          console.log('🎬 [DEBUG] ✅ Encontrei', searchResults.images.length, 'imagens em searchResults')
+          imagesToAdd.push(...searchResults.images)
+        }
+        
+        // PRIORIDADE 2: Procurar imagens nas mensagens do assistente (últimas 10 mensagens)
+        messages.slice(-10).forEach((msg) => {
+          if (msg.role === 'assistant' && msg.images && msg.images.length > 0) {
+            // Só adicionar se não estiver já em searchResults
+            msg.images.forEach(img => {
+              if (!imagesToAdd.some(existing => existing.url === img.url)) {
+                imagesToAdd.push(img)
+              }
+            })
+          }
+        })
+        
+        // PRIORIDADE 3: Se não encontrou, usar foundImages (da busca atual)
+        const finalImages = imagesToAdd.length > 0 ? imagesToAdd : foundImages
+        
+        console.log('🎬 [DEBUG] Total de imagens para adicionar:', finalImages.length, {
+          fromSearchResults: searchResults.images?.length || 0,
+          fromMessages: imagesToAdd.length - (searchResults.images?.length || 0),
+          fromFoundImages: foundImages.length,
+          finalCount: finalImages.length
+        })
+        
+        // Remover duplicatas por URL
+        const uniqueImages = finalImages.filter((img, index, self) => 
+          index === self.findIndex((i) => i.url === img.url)
+        )
+        
+        if (uniqueImages.length > 0) {
+          console.log('🎬 [DEBUG] Adicionando imagens ao aceitar:', uniqueImages.length, uniqueImages)
+          
           setMessages((prev) => [
             ...prev,
             {
               role: 'assistant',
-              content: `📸 Adicionando ${foundImages.length} imagem(ns) à timeline... Você pode ver no preview acima em tempo real!`,
+              content: `📸 Adicionando ${uniqueImages.length} imagem(ns) à timeline... Você pode ver no preview acima em tempo real!`,
             },
           ])
 
           // Adicionar cada imagem à timeline com delay para feedback visual
-          foundImages.forEach((img, index) => {
+          uniqueImages.forEach((img, index) => {
             setTimeout(() => {
-              // Usar função que obtém o estado atualizado
+              // Obter estado atualizado dos clips (usar função do store)
               const currentClips = clips.length > 0 ? clips : []
               const lastClip = currentClips.length > 0 ? currentClips[currentClips.length - 1] : null
               const startTime = lastClip ? lastClip.endTime : 0
               const endTime = startTime + 5 // 5 segundos por imagem
 
+              console.log('🎬 [DEBUG] Adicionando clip:', { startTime, endTime, url: img.url })
+
               addClip({
-                id: `img-auto-${img.id}-${Date.now()}-${index}`,
+                id: `img-auto-${img.id || Date.now()}-${index}`,
                 startTime,
                 endTime,
                 source: img.url,
@@ -1283,19 +1486,29 @@ export function EditorChat({ mode = 'edit', area = 'nutri', purpose = 'quick-ad'
               })
 
               // Feedback final após adicionar todas
-              if (index === foundImages.length - 1) {
+              if (index === uniqueImages.length - 1) {
                 setTimeout(() => {
                   setMessages((prev) => [
                     ...prev,
                     {
                       role: 'assistant',
-                      content: `✅ Adicionei ${foundImages.length} imagem(ns) à timeline! Veja no preview acima.`,
+                      content: `✅ Adicionei ${uniqueImages.length} imagem(ns) à timeline! Veja no preview acima.`,
                     },
                   ])
+                  console.log('🎬 [DEBUG] Todas as imagens foram adicionadas!')
                 }, 300)
               }
             }, index * 300) // Delay entre cada imagem
           })
+        } else {
+          console.log('🎬 [DEBUG] Nenhuma imagem encontrada para adicionar')
+          setMessages((prev) => [
+            ...prev,
+            {
+              role: 'assistant',
+              content: '⚠️ Não encontrei imagens para adicionar. Peça para eu buscar imagens primeiro ou adicione manualmente na aba "Busca".',
+            },
+          ])
         }
       }
     } catch (error: any) {
@@ -1924,7 +2137,7 @@ export function EditorChat({ mode = 'edit', area = 'nutri', purpose = 'quick-ad'
   }
 
   return (
-    <div className="flex flex-col h-full bg-white">
+    <div className="flex flex-col h-full bg-white overflow-hidden">
       {/* Header - Mobile Responsive */}
       <div className="p-2 sm:p-4 border-b border-gray-200 bg-gradient-to-r from-purple-50 to-blue-50">
         <div className="flex items-center gap-1.5 sm:gap-2">
@@ -1949,6 +2162,23 @@ export function EditorChat({ mode = 'edit', area = 'nutri', purpose = 'quick-ad'
 
       {/* Messages - Mobile Responsive */}
       <div className="flex-1 overflow-y-auto p-2 sm:p-4 space-y-2 sm:space-y-4">
+        {/* Componente de Colar Roteiro - Apenas no modo create */}
+        {(mode === 'create' && (messages.length <= 1 || objective === 'criar-do-zero')) && (
+          <ScriptPaste 
+            onScriptPasted={async (script) => {
+              // Enviar roteiro para a IA processar
+              await handleSend(`Criar vídeo completo com este roteiro:\n\n${script}\n\nBusque as imagens necessárias, eu escolho e você monta o vídeo automaticamente.`)
+            }}
+            onRequestScript={async () => {
+              // Pedir para IA criar o roteiro
+              await handleSend(`Crie um roteiro completo para um vídeo de ${purpose === 'quick-ad' ? 'anúncio rápido' : purpose === 'sales-page' ? 'página de vendas' : purpose === 'educational' ? 'conteúdo educativo' : 'vídeo'} na área ${area}. Após criar o roteiro, busque as imagens necessárias automaticamente.`)
+            }}
+            isLoading={isLoading}
+            area={area}
+            purpose={purpose}
+          />
+        )}
+        
         {messages.map((msg, idx) => (
           <div key={idx}>
             <div

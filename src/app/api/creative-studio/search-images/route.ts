@@ -36,7 +36,8 @@ export async function POST(request: NextRequest) {
           'Authorization': pexelsApiKey || '',
         }
 
-        const pexelsUrl = `https://api.pexels.com/v1/search?query=${encodeURIComponent(query)}&per_page=${count}&orientation=landscape`
+        // Para vídeos verticais (9:16), usar portrait ou sem orientação específica
+        const pexelsUrl = `https://api.pexels.com/v1/search?query=${encodeURIComponent(query)}&per_page=${count}&orientation=portrait`
         
         const response = await fetch(pexelsUrl, {
           headers: pexelsApiKey ? headers : undefined,

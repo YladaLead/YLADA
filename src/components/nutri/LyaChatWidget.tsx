@@ -19,6 +19,7 @@ export default function LyaChatWidget() {
   const [loading, setLoading] = useState(false)
   const [threadId, setThreadId] = useState<string | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -27,6 +28,16 @@ export default function LyaChatWidget() {
   useEffect(() => {
     scrollToBottom()
   }, [messages])
+
+  // Auto-resize do textarea conforme o texto
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = '48px' // Reset altura
+      const scrollHeight = textareaRef.current.scrollHeight
+      const newHeight = Math.min(Math.max(scrollHeight, 48), 120) // Mínimo 48px, máximo 120px
+      textareaRef.current.style.height = `${newHeight}px`
+    }
+  }, [inputMessage])
   
   // Listener para evento customizado de abrir chat
   useEffect(() => {
@@ -65,6 +76,10 @@ export default function LyaChatWidget() {
 
     setLoading(true)
     setInputMessage('')
+    // Resetar altura do textarea após limpar
+    if (textareaRef.current) {
+      textareaRef.current.style.height = '48px'
+    }
 
     // Adicionar mensagem do usuário
     const userMessage: Message = {
@@ -128,7 +143,7 @@ export default function LyaChatWidget() {
   }
 
   // Formatar mensagem com markdown para deixar números e títulos mais escuros
-  const formatarMensagemLYA = (texto: string) => {
+  const formatarMensagemLYA = (texto: string, isUserMessage: boolean = false) => {
     const linhas = texto.split('\n')
     
     return linhas.map((linha, index) => {
@@ -146,28 +161,30 @@ export default function LyaChatWidget() {
         // Verificar se tem negrito no conteúdo
         if (conteudo.includes('**')) {
           const partes = conteudo.split(/(\*\*[^*]+\*\*)/g)
+          const textColor = isUserMessage ? 'text-white' : 'text-gray-900'
           return (
             <p key={index} className="mb-2">
-              <span className="font-bold text-gray-900" style={{ fontWeight: 700 }}>{numero}.</span>{' '}
+              <span className={`font-bold ${textColor}`} style={{ fontWeight: 700 }}>{numero}.</span>{' '}
               {partes.map((parte, i) => {
                 if (parte.startsWith('**') && parte.endsWith('**')) {
                   return (
-                    <span key={i} className="font-bold text-gray-900" style={{ fontWeight: 700 }}>
+                    <span key={i} className={`font-bold ${textColor}`} style={{ fontWeight: 700 }}>
                       {parte.replace(/\*\*/g, '')}
                     </span>
                   )
                 }
-                return <span key={i}>{parte}</span>
+                return <span key={i} className={textColor}>{parte}</span>
               })}
             </p>
           )
         }
         
         // Lista numerada sem negrito
+        const textColor = isUserMessage ? 'text-white' : 'text-gray-900'
         return (
           <p key={index} className="mb-2">
-            <span className="font-bold text-gray-900" style={{ fontWeight: 700 }}>{numero}.</span>{' '}
-            <span className="text-gray-900">{conteudo}</span>
+            <span className={`font-bold ${textColor}`} style={{ fontWeight: 700 }}>{numero}.</span>{' '}
+            <span className={textColor}>{conteudo}</span>
           </p>
         )
       }
@@ -175,25 +192,27 @@ export default function LyaChatWidget() {
       // Detectar texto em negrito simples
       if (linha.includes('**')) {
         const partes = linha.split(/(\*\*[^*]+\*\*)/g)
+        const textColor = isUserMessage ? 'text-white' : 'text-gray-900'
         return (
           <p key={index} className="mb-2">
             {partes.map((parte, i) => {
               if (parte.startsWith('**') && parte.endsWith('**')) {
                 return (
-                  <span key={i} className="font-bold text-gray-900" style={{ fontWeight: 700 }}>
+                  <span key={i} className={`font-bold ${textColor}`} style={{ fontWeight: 700 }}>
                     {parte.replace(/\*\*/g, '')}
                   </span>
                 )
               }
-              return <span key={i} className="text-gray-900">{parte}</span>
+              return <span key={i} className={textColor}>{parte}</span>
             })}
           </p>
         )
       }
       
       // Linha normal
+      const textColor = isUserMessage ? 'text-white' : 'text-gray-900'
       return (
-        <p key={index} className="mb-2 text-gray-900">
+        <p key={index} className={`mb-2 ${textColor}`}>
           {linha}
         </p>
       )
@@ -264,14 +283,16 @@ export default function LyaChatWidget() {
                 <div
                   className={`max-w-[80%] rounded-lg p-3 ${
                     msg.sender_type === 'user'
-                      ? 'bg-blue-600 text-white'
+                      ? 'bg-blue-500 text-white'
                       : msg.sender_type === 'system'
                       ? 'bg-yellow-100 text-yellow-800 text-sm'
                       : 'bg-white border border-gray-200 text-gray-900'
                   }`}
                 >
-                  <div className="whitespace-pre-wrap text-sm leading-relaxed text-gray-900">
-                    {formatarMensagemLYA(msg.message)}
+                  <div className={`whitespace-pre-wrap text-sm leading-relaxed ${
+                    msg.sender_type === 'user' ? 'text-white' : 'text-gray-900'
+                  }`}>
+                    {formatarMensagemLYA(msg.message, msg.sender_type === 'user')}
                   </div>
                   {msg.created_at && (
                     <span className="text-xs opacity-70 mt-1 block">
@@ -319,20 +340,22 @@ export default function LyaChatWidget() {
 
           {/* Input */}
           <div className="p-4 border-t border-gray-200 bg-white">
-            <div className="flex space-x-2">
-              <input
-                type="text"
+            <div className="flex space-x-2 items-end">
+              <textarea
+                ref={textareaRef}
                 value={inputMessage}
                 onChange={(e) => setInputMessage(e.target.value)}
                 onKeyPress={handleKeyPress}
                 placeholder="Digite sua mensagem..."
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none overflow-hidden min-h-[48px] max-h-[120px]"
                 disabled={loading}
+                rows={1}
+                style={{ height: '48px' }}
               />
               <button
                 onClick={() => sendMessage()}
                 disabled={loading || !inputMessage.trim()}
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors mb-0"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />

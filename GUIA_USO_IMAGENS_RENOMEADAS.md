@@ -169,3 +169,4 @@ imagens-app/
 
 **Todas as imagens estão organizadas e prontas para uso!** 🎉
 
+

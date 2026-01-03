@@ -80,3 +80,4 @@ echo "✅ Renomeação concluída!"
 echo ""
 echo "📋 Verifique os nomes e ajuste se necessário"
 
+

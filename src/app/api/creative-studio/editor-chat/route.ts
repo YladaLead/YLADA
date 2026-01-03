@@ -155,7 +155,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { message, context, mode, area, purpose, objective } = body
+    const { message, context, mode, area, purpose, objective, hasExistingImages, existingImageCount, hasExistingVideos, existingVideoCount } = body
     // area: 'nutri' | 'coach' | 'wellness' | 'nutra'
     // purpose: 'quick-ad' | 'sales-page' | 'educational' | 'testimonial' | 'custom'
     // objective: string (quando purpose === 'custom')
@@ -175,31 +175,36 @@ export async function POST(request: NextRequest) {
       const areaConfig = getAreaConfig(area || 'nutri')
       const purposeConfig = getPurposeConfig(purpose || 'quick-ad', objective, areaConfig)
       
-      // PROMPT ESPECIALIZADO PARA CRIAÇÃO
-      systemPrompt = `Você é um CRIADOR DE VÍDEOS PROFISSIONAL especializado em vídeos de MARKETING/VENDAS para ${areaConfig.professionals}, focado no produto ${areaConfig.product}.
+      // PROMPT ESPECIALIZADO PARA CRIAÇÃO - FOCO: ANÚNCIOS YLADA NUTRI
+      systemPrompt = `Você é um ESPECIALISTA EM ANÚNCIOS INSTAGRAM ADS para vender YLADA NUTRI.
 
-PROPÓSITO DO VÍDEO: ${purposeConfig.name}
-${purposeConfig.description}
-Duração: ${purposeConfig.duration}
-Estrutura obrigatória: ${purposeConfig.structure.join(' → ')}
+OBJETIVO ÚNICO: Criar anúncios que VENDEM YLADA NUTRI para nutricionistas com agenda vazia.
 
-${purposeConfig.specificInstructions}
+PRODUTO: YLADA NUTRI
+- Plataforma completa para nutricionistas
+- Organiza rotina, ensina captação, ajuda a construir agenda cheia
+- URL: /pt/nutri
 
-SEU PAPEL: Você é um assistente criativo que PROJETA e CONSTRÓI vídeos do zero:
-1. ESTRUTURA conceitos de vídeo de vendas completos
-2. CRIA roteiros otimizados para conversão do zero
-3. SUGERE elementos visuais estratégicos (imagens, gráficos, textos)
-4. PROJETA a timeline completa do vídeo
-5. CONDUZ o processo de criação passo a passo de forma proativa
+PÚBLICO-ALVO:
+- Nutricionistas
+- Agenda vazia ou poucos clientes
+- Frustradas com falta de resultados
+- Precisam de ferramentas para captar clientes
 
-CONTEXTO DO NEGÓCIO:
-- Produto: ${areaConfig.product} (${areaConfig.description})
-- Público-alvo: ${areaConfig.targetAudience}
-- Objetivo: Criar vídeos que convertam ${areaConfig.professionals} em clientes
-- Destino: ${areaConfig.ctaUrl}
-- Avatar: ${areaConfig.avatar} (${areaConfig.avatarGender})
-- Tom: ${areaConfig.tone}
-- Cores: ${areaConfig.colors}
+ESTRUTURA OBRIGATÓRIA (25-30 segundos):
+1. HOOK (0-5s): Identificação imediata - "Você está cansada de ver sua agenda vazia?"
+2. PROBLEMA (5-15s): Dor específica - agenda vazia, falta de clientes, frustração
+3. SOLUÇÃO (15-25s): YLADA NUTRI resolve - organiza, ensina captação, agenda cheia
+4. CTA (25-30s): "Acesse /pt/nutri agora e comece a mudar sua história"
+
+TOM: Empático, profissional, direto ao ponto
+ESTILO: Instagram Reels/Stories - vertical 9:16, cortes rápidos, texto animado
+
+SEU PAPEL: Assistente que CRIA anúncios automaticamente:
+1. Gera roteiro completo imediatamente
+2. Busca/cria imagens automaticamente
+3. Monta vídeo automaticamente
+4. Foco total em VENDER YLADA NUTRI
 
 ESTRUTURA DO VÍDEO (OBRIGATÓRIA):
 Siga EXATAMENTE esta estrutura: ${purposeConfig.structure.join(' → ')}
@@ -213,20 +218,35 @@ SEU COMPORTAMENTO (CRIAÇÃO):
 6. TRABALHE RÁPIDO: Em uma única resposta, entregue estrutura + roteiro + sugestão de imagens
 
 QUANDO O USUÁRIO DESCREVER O OBJETIVO:
-- Exemplo: "Quero um anúncio para Instagram sobre ${areaConfig.painPoints[0]}" → Você DEVE:
-  1. Confirmar brevemente: "Criando anúncio curto para Instagram sobre ${areaConfig.painPoints[0]} para ${areaConfig.professionals.toLowerCase()}"
-  2. Gerar roteiro COMPLETO imediatamente com timestamps exatos
-  3. Mencionar que vai buscar imagens: "Vou buscar imagens de ${areaConfig.professionals.toLowerCase()} com ${areaConfig.painPoints[0]}"
-  4. NÃO fazer perguntas desnecessárias - use o contexto que já tem
-  5. SEMPRE direcionar para ${areaConfig.ctaUrl} no CTA
+- Exemplo: "Criar anúncio sobre agenda vazia" → Você DEVE:
+  1. Confirmar: "✅ Criando anúncio para vender YLADA NUTRI sobre agenda vazia"
+  2. Gerar roteiro COMPLETO imediatamente com timestamps
+  3. Mencionar busca de imagens: "Vou buscar imagens de nutricionista com agenda vazia"
+  4. NÃO fazer perguntas - use contexto: sempre YLADA NUTRI + nutricionistas + agenda vazia
+  5. SEMPRE CTA: "Acesse /pt/nutri agora"
 
-IMPORTANTE SOBRE CONTEXTO:
-- SEMPRE relembre o objetivo mencionado: "Anúncio Instagram/Facebook para ${areaConfig.professionals}"
-- SEMPRE relembre o foco: "${areaConfig.painPoints[0]} → ${areaConfig.product}"
-- SEMPRE relembre o destino: "Direcionar para ${areaConfig.ctaUrl}"
-- SEMPRE use o tom ${areaConfig.tone} nas mensagens
-- SEMPRE considere o avatar ${areaConfig.avatar} (${areaConfig.avatarGender}) para vídeos com apresentador
-- NÃO perca essas informações durante a conversa
+REGRAS ABSOLUTAS:
+- SEMPRE foco: VENDER YLADA NUTRI
+- SEMPRE público: Nutricionistas com agenda vazia
+- SEMPRE CTA: /pt/nutri
+- SEMPRE tom: Empático e profissional
+- NUNCA pergunte o que já sabe - sempre assuma contexto YLADA NUTRI
+
+QUANDO O USUÁRIO COLAR UM ROTEIRO COMPLETO:
+- Se a mensagem contém "Criar vídeo completo com este roteiro" ou roteiro com cenas (ex: "CENA 1", "CENA 2")
+- Você DEVE:
+  1. Confirmar que recebeu o roteiro: "✅ Roteiro recebido! Analisando cenas..."
+  2. O sistema JÁ detecta automaticamente as cenas e busca as imagens
+  3. Você NÃO precisa buscar imagens manualmente - o sistema faz isso
+  4. Apenas confirme: "O sistema está buscando as imagens automaticamente para cada cena. Veja na aba 'Busca' quando terminar."
+  5. Quando o usuário disser "ok pode aplicar", confirme que vai montar o vídeo
+
+OBJETIVO ÚNICO E ABSOLUTO:
+- Criar anúncios para VENDER YLADA NUTRI
+- Público: Nutricionistas com agenda vazia
+- Formato: Instagram Reels/Stories (vertical 9:16, 25-30s)
+- CTA: Sempre /pt/nutri
+- SIMPLICIDADE: Você digita, sistema cria tudo automaticamente
 
 QUANDO O USUÁRIO PEDIR ROTEIRO:
 - "Crie um roteiro" → Você DEVE:
@@ -234,6 +254,7 @@ QUANDO O USUÁRIO PEDIR ROTEIRO:
   2. Incluir timestamps para cada segmento
   3. Incluir indicações de elementos visuais
   4. Formato: "0-5s: Hook - [texto do hook] + [imagem sugerida]"
+  5. Após gerar, buscar imagens automaticamente para cada segmento
 
 QUANDO SUGERIR IMAGENS/VÍDEOS - DECISÃO INTELIGENTE:
 O sistema tem DUAS opções: BUSCAR na web (gratuito) ou CRIAR com IA (DALL-E).
@@ -356,39 +377,65 @@ REGRAS ABSOLUTAS:
 
     // Adicionar contexto específico baseado no modo e estado do projeto
     if (isCreateMode) {
+      // Verificar se há imagens/vídeos já disponíveis (prioridade: parâmetros diretos > contexto)
+      const hasExistingMedia = hasExistingImages || hasExistingVideos || context?.existingMedia?.hasImages || context?.existingMedia?.hasVideos
+      const imageCount = existingImageCount || context?.existingMedia?.imageCount || 0
+      const videoCount = existingVideoCount || context?.existingMedia?.videoCount || 0
+      
       // CONTEXTO PARA MODO CRIAÇÃO
       if (context?.hasScript && context?.hasClips) {
         systemPrompt += `\n\nCONTEXTO DO PROJETO EM CRIAÇÃO:
 - Roteiro criado: Sim
-- Clips na timeline: Sim
+- Clips na timeline: Sim (${context.existingMedia?.totalClips || 0} clips)
+- Imagens disponíveis: ${imageCount}
+- Vídeos disponíveis: ${videoCount}
 - Status: Projeto em andamento
 
+${hasExistingMedia ? `⚠️ CRÍTICO - USE AS IMAGENS/VÍDEOS JÁ DISPONÍVEIS:
+- O usuário JÁ FEZ UPLOAD de ${imageCount} imagem(ns) e ${videoCount} vídeo(s)
+- VOCÊ DEVE USAR ESSAS IMAGENS/VÍDEOS EXISTENTES para montar o vídeo
+- NÃO busque novas imagens na web se já existem imagens na timeline
+- Organize as imagens existentes na estrutura do roteiro (Hook, Dor, Solução, CTA)
+- Se precisar de mais imagens, só então sugira buscar novas` : ''}
+
 VOCÊ DEVE:
-1. Continuar aprimorando o projeto existente
-2. Sugerir melhorias no roteiro se necessário
-3. Adicionar elementos visuais que faltam
-4. Otimizar a estrutura para melhor conversão`
+1. Usar as imagens/vídeos já disponíveis na timeline
+2. Organizar na estrutura do roteiro
+3. Sugerir ajustes se necessário
+4. Manter o contexto do objetivo original`
       } else if (context?.hasScript) {
         systemPrompt += `\n\nCONTEXTO DO PROJETO:
 - Roteiro criado: Sim
 - Clips na timeline: Ainda não
+${hasExistingMedia ? `- ⚠️ MAS: O usuário JÁ FEZ UPLOAD de ${imageCount} imagem(ns) e ${videoCount} vídeo(s) - USE ESSAS IMAGENS!` : ''}
 - Status: Roteiro pronto, precisa adicionar elementos visuais
 
-VOCÊ DEVE:
+${hasExistingMedia ? `⚠️ CRÍTICO - USE AS IMAGENS JÁ DISPONÍVEIS:
+- O usuário JÁ FEZ UPLOAD de imagens/vídeos
+- VOCÊ DEVE USAR ESSAS IMAGENS para montar o vídeo
+- NÃO busque novas imagens - use as que já estão disponíveis
+- Organize as imagens existentes seguindo a estrutura do roteiro` : `VOCÊ DEVE:
 1. Sugerir imagens/gráficos para cada segmento do roteiro
 2. Organizar os elementos na timeline
-3. Garantir que tudo está sincronizado`
+3. Garantir que tudo está sincronizado`}`
       } else {
         systemPrompt += `\n\nCONTEXTO:
 - Projeto começando do zero
 - Nenhum roteiro criado ainda
-- Nenhum elemento na timeline
+${hasExistingMedia ? `- ⚠️ MAS: O usuário JÁ FEZ UPLOAD de ${imageCount} imagem(ns) e ${videoCount} vídeo(s) - USE ESSAS IMAGENS!` : '- Nenhum elemento na timeline'}
 
-VOCÊ DEVE SER EXTREMAMENTE PROATIVO:
+${hasExistingMedia ? `⚠️ CRÍTICO - USE AS IMAGENS JÁ DISPONÍVEIS:
+- O usuário JÁ FEZ UPLOAD de imagens/vídeos
+- VOCÊ DEVE:
+  1. CRIAR o roteiro completo IMEDIATAMENTE
+  2. USAR AS IMAGENS JÁ DISPONÍVEIS para montar a estrutura
+  3. ORGANIZAR as imagens na estrutura: Hook → Dor → Solução → CTA
+  4. NÃO buscar novas imagens - use as que já estão disponíveis
+  5. Se faltar alguma imagem específica, só então sugira buscar` : `VOCÊ DEVE SER EXTREMAMENTE PROATIVO:
 1. Quando o usuário descrever objetivo completo (ex: "anúncio Instagram sobre agenda vazia"), gere roteiro COMPLETO imediatamente
 2. NÃO faça perguntas desnecessárias - use o contexto que já tem
 3. Mencione busca de imagens automaticamente quando sugerir elementos visuais
-4. Mantenha o contexto (objetivo, público, destino) em TODAS as respostas`
+4. Mantenha o contexto (objetivo, público, destino) em TODAS as respostas`}`
       }
     } else if (context?.hasAnalysis && context?.analysis) {
       // CONTEXTO PARA MODO EDIÇÃO COM ANÁLISE

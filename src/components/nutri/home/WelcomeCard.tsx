@@ -56,7 +56,7 @@ export default function WelcomeCard({ currentDay, userName, onOpenLyaChat }: Wel
         {/* Card da LYA - compacto */}
         <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-xl p-5 border border-purple-200 mb-6">
           <div className="flex items-center gap-4">
-            <div className="text-3xl">🤖</div>
+            <div className="text-3xl">👩‍💼</div>
             <div className="flex-1">
               <h3 className="font-semibold text-gray-900">LYA - Sua Mentora</h3>
               <p className="text-sm text-gray-600">Estou aqui para qualquer dúvida ou desafio!</p>
@@ -160,7 +160,7 @@ export default function WelcomeCard({ currentDay, userName, onOpenLyaChat }: Wel
           
           {/* Badge da LYA */}
           <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-full px-4 py-2 mb-6">
-            <span className="text-xl">🤖</span>
+            <span className="text-xl">👩‍💼</span>
             <span className="font-semibold text-sm">LYA - Sua Mentora</span>
           </div>
           
