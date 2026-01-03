@@ -10,9 +10,10 @@ interface EditorChatProps {
   area?: 'nutri' | 'coach' | 'wellness' | 'nutra'
   purpose?: 'quick-ad' | 'sales-page' | 'educational' | 'testimonial' | 'custom'
   objective?: string
+  onSearchComplete?: (type: 'images' | 'videos') => void // Callback quando busca for concluída
 }
 
-export function EditorChat({ mode = 'edit', area = 'nutri', purpose = 'quick-ad', objective = '' }: EditorChatProps) {
+export function EditorChat({ mode = 'edit', area = 'nutri', purpose = 'quick-ad', objective = '', onSearchComplete }: EditorChatProps) {
   const getInitialMessage = () => {
     if (mode === 'create') {
       return 'Olá! Sou seu assistente de criação de vídeos. 🎬\n\nMe diga o que você precisa e vou criar o vídeo completo para você!'
@@ -73,7 +74,13 @@ export function EditorChat({ mode = 'edit', area = 'nutri', purpose = 'quick-ad'
   }, [input])
 
   // Detectar quando um novo vídeo é carregado e fazer análise automática
+  // APENAS no modo 'edit', não no modo 'create'
   useEffect(() => {
+    // NO MODO CREATE: Não fazer análise automática de vídeo
+    if (mode === 'create') {
+      return
+    }
+    
     // Detectar vídeo mesmo que não esteja na timeline ainda
     // O vídeo pode estar apenas na área de upload
     if (uploadedVideo && uploadedVideo !== analyzedVideoRef.current && !videoAnalysis && !isAnalyzing) {
@@ -104,7 +111,7 @@ export function EditorChat({ mode = 'edit', area = 'nutri', purpose = 'quick-ad'
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [uploadedVideo, videoAnalysis, isAnalyzing])
+  }, [uploadedVideo, videoAnalysis, isAnalyzing, mode])
 
   const analyzeVideo = async (file: File) => {
     setIsAnalyzing(true)
@@ -222,22 +229,35 @@ export function EditorChat({ mode = 'edit', area = 'nutri', purpose = 'quick-ad'
         }
         
         // Detectar elementos DOM e objetos React ANTES de processar
-        if (data instanceof HTMLElement || 
-            data instanceof SVGElement || 
-            data instanceof Element ||
-            data instanceof Node) {
-          return null
+        // Verificar por instanceof primeiro (mais confiável)
+        try {
+          if (data instanceof HTMLElement || 
+              data instanceof SVGElement || 
+              data instanceof SVGSVGElement ||
+              data instanceof Element ||
+              data instanceof Node ||
+              (typeof window !== 'undefined' && data === window) ||
+              (typeof document !== 'undefined' && data === document)) {
+            return null
+          }
+        } catch (e) {
+          // Se instanceof falhar, tentar por nome do construtor
         }
         
-        // Detectar objetos React Fiber por nome do construtor
+        // Detectar objetos React Fiber e elementos DOM por nome do construtor
         if (data && typeof data === 'object' && data.constructor) {
           const constructorName = data.constructor.name
           if (constructorName.includes('Fiber') || 
               constructorName.includes('React') ||
               constructorName.startsWith('HTML') ||
+              constructorName.startsWith('SVG') ||
               constructorName === 'HTMLButtonElement' ||
               constructorName === 'HTMLDivElement' ||
-              constructorName === 'HTMLInputElement') {
+              constructorName === 'HTMLInputElement' ||
+              constructorName === 'SVGSVGElement' ||
+              constructorName === 'SVGElement' ||
+              constructorName === 'Window' ||
+              constructorName === 'Document') {
             return null
           }
         }
@@ -269,27 +289,39 @@ export function EditorChat({ mode = 'edit', area = 'nutri', purpose = 'quick-ad'
               // Ignorar funções
               if (typeof value === 'function') continue
               
-              // Ignorar elementos DOM
-              if (value instanceof HTMLElement || 
-                  value instanceof SVGElement ||
-                  value instanceof Element ||
-                  value instanceof Node) {
-                continue
+              // Ignorar elementos DOM (com try-catch para segurança)
+              try {
+                if (value instanceof HTMLElement || 
+                    value instanceof SVGElement ||
+                    value instanceof SVGSVGElement ||
+                    value instanceof Element ||
+                    value instanceof Node ||
+                    (typeof window !== 'undefined' && value === window) ||
+                    (typeof document !== 'undefined' && value === document)) {
+                  continue
+                }
+              } catch (e) {
+                // Se instanceof falhar, continuar para verificar por nome
               }
               
-              // Ignorar objetos React por nome do construtor
+              // Ignorar objetos React e elementos DOM por nome do construtor
               if (value && typeof value === 'object' && value.constructor) {
                 const constructorName = value.constructor.name
                 if (constructorName.includes('Fiber') || 
                     constructorName.includes('React') ||
-                    constructorName.startsWith('HTML')) {
+                    constructorName.startsWith('HTML') ||
+                    constructorName.startsWith('SVG') ||
+                    constructorName === 'SVGSVGElement' ||
+                    constructorName === 'SVGElement' ||
+                    constructorName === 'Window' ||
+                    constructorName === 'Document') {
                   continue
                 }
               }
               
               cleaned[key] = cleanData(value, visited, depth + 1)
             } catch (e) {
-              // Ignorar propriedades que causam erro
+              // Ignorar propriedades que causam erro (pode ser referência circular ou elemento DOM)
               continue
             }
           }
@@ -300,6 +332,10 @@ export function EditorChat({ mode = 'edit', area = 'nutri', purpose = 'quick-ad'
       }
 
       // Construir contexto do vídeo (apenas dados serializáveis - SEM elementos DOM)
+      // Incluir informações sobre imagens/vídeos já na timeline
+      const existingImages = clips.filter(c => c.type === 'image')
+      const existingVideos = clips.filter(c => c.type === 'video')
+      
       const rawContext = {
         hasAnalysis: !!videoAnalysis,
         hasClips: clips.length > 0,
@@ -308,6 +344,23 @@ export function EditorChat({ mode = 'edit', area = 'nutri', purpose = 'quick-ad'
         videoFileName: uploadedVideo?.name || null,
         videoSize: uploadedVideo?.size || null,
         videoInTimeline: clips.some(c => c.type === 'video'),
+        // Informações sobre mídia já disponível
+        existingMedia: {
+          hasImages: existingImages.length > 0,
+          imageCount: existingImages.length,
+          hasVideos: existingVideos.length > 0,
+          videoCount: existingVideos.length,
+          totalClips: clips.length,
+          // Informações básicas dos clips (sem URLs que podem ser blob:)
+          clipsInfo: clips.map(c => ({
+            id: c.id,
+            type: c.type,
+            startTime: c.startTime,
+            endTime: c.endTime,
+            // Apenas nome do arquivo se for blob, não a URL completa
+            sourceInfo: c.source?.includes('blob:') ? 'uploaded-file' : (c.source?.split('/').pop()?.slice(0, 30) || 'media'),
+          })),
+        },
         analysis: videoAnalysis
           ? {
               transcription: videoAnalysis.transcription || null,
@@ -343,28 +396,47 @@ export function EditorChat({ mode = 'edit', area = 'nutri', purpose = 'quick-ad'
         area, // Enviar a área (nutri/coach/wellness/nutra)
         purpose, // Enviar o propósito do vídeo
         objective, // Enviar objetivo customizado se houver
+        // Informar sobre imagens existentes
+        hasExistingImages: existingImages.length > 0,
+        existingImageCount: existingImages.length,
+        hasExistingVideos: existingVideos.length > 0,
+        existingVideoCount: existingVideos.length,
       }
       
-      // Testar serialização antes de enviar
+      // Testar serialização antes de enviar com múltiplas tentativas
       let bodyString: string
       try {
+        // Primeira tentativa: usar requestBody completo
         bodyString = JSON.stringify(requestBody)
-      } catch (error) {
-        console.error('Erro ao serializar requestBody, usando contexto mínimo:', error)
-        // Se ainda houver erro, usar contexto mínimo
-        requestBody = {
-          message: userMessage,
-          context: {
-            hasAnalysis: !!videoAnalysis,
-            hasClips: clips.length > 0,
-            hasScript: script.length > 0,
-          },
-          mode,
-          area,
-          purpose,
-          objective,
+      } catch (error: any) {
+        console.error('Erro ao serializar requestBody (tentativa 1), limpando novamente:', error)
+        
+        // Segunda tentativa: limpar requestBody novamente
+        try {
+          const cleanedRequestBody = cleanData(requestBody)
+          bodyString = JSON.stringify(cleanedRequestBody)
+          requestBody = cleanedRequestBody
+        } catch (error2: any) {
+          console.error('Erro ao serializar requestBody (tentativa 2), usando contexto mínimo:', error2)
+          // Terceira tentativa: usar contexto mínimo absoluto
+          requestBody = {
+            message: userMessage,
+            context: {
+              hasAnalysis: !!videoAnalysis,
+              hasClips: clips.length > 0,
+              hasScript: script.length > 0,
+              hasImages: existingImages.length > 0,
+              imageCount: existingImages.length,
+              hasVideos: existingVideos.length > 0,
+              videoCount: existingVideos.length,
+            },
+            mode,
+            area,
+            purpose,
+            objective,
+          }
+          bodyString = JSON.stringify(requestBody)
         }
-        bodyString = JSON.stringify(requestBody)
       }
 
       const response = await authenticatedFetch('/api/creative-studio/editor-chat', {
@@ -471,10 +543,25 @@ export function EditorChat({ mode = 'edit', area = 'nutri', purpose = 'quick-ad'
         userMessage.toLowerCase().includes(keyword)
       )
       
-      // Buscar se assistente sugeriu OU usuário pediu (mas não se for para criar)
-      const shouldSearchImages = (assistantSuggestsImages || userWantsImages) && !shouldCreate
+      // IMPORTANTE: Verificar se já existem imagens na timeline
+      // Se existem imagens, NÃO buscar novas (a menos que usuário peça explicitamente)
+      const hasExistingImages = clips.some(c => c.type === 'image')
+      const hasExistingVideos = clips.some(c => c.type === 'video')
+      
+      // Buscar apenas se:
+      // 1. Assistente sugeriu OU usuário pediu explicitamente
+      // 2. NÃO for para criar (DALL-E)
+      // 3. NÃO existem imagens já disponíveis (a menos que usuário peça explicitamente)
+      const userExplicitlyWantsSearch = userMessage.toLowerCase().includes('buscar') || 
+                                        userMessage.toLowerCase().includes('procurar') ||
+                                        userMessage.toLowerCase().includes('encontrar')
+      
+      const shouldSearchImages = (assistantSuggestsImages || (userWantsImages && userExplicitlyWantsSearch)) && 
+                                 !shouldCreate && 
+                                 (!hasExistingImages || userExplicitlyWantsSearch)
       const shouldCreateImages = shouldCreate && (assistantSuggestsImages || userWantsImages)
-      const shouldSearchVideos = assistantSuggestsVideos || userWantsVideos
+      const shouldSearchVideos = (assistantSuggestsVideos || userWantsVideos) && 
+                                (!hasExistingVideos || userExplicitlyWantsSearch)
 
       // Debug: verificar se está detectando corretamente
       if (assistantSuggestsImages || userWantsImages) {
@@ -726,21 +813,56 @@ export function EditorChat({ mode = 'edit', area = 'nutri', purpose = 'quick-ad'
           searchQuery = searchQuery.replace(new RegExp(pt, 'gi'), en)
         })
 
+        // Variável compartilhada para verificar se encontrou no banco próprio
+        let foundInOwnDatabase = false
+
         try {
-          // Buscar imagens automaticamente
-          const imageResponse = await authenticatedFetch('/api/creative-studio/search-images', {
+          // PRIMEIRO: Buscar no banco próprio (media_library)
+          let imageResponse = await authenticatedFetch('/api/creative-studio/search-media-library', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
             },
             body: JSON.stringify({
               query: searchQuery,
-              type: 'search',
+              type: 'image',
+              area: area,
+              purpose: purpose,
               count: 8,
             }),
           })
-
           if (imageResponse.ok) {
+            const ownData = await imageResponse.json()
+            if (ownData.images && ownData.images.length > 0) {
+              foundInOwnDatabase = true
+              // Usar resultados do banco próprio
+              const ownImages = ownData.images.map((img: any) => ({
+                id: img.id || `img-${Date.now()}-${Math.random()}`,
+                url: img.url,
+                thumbnail: img.thumbnail || img.url,
+                source: img.source || 'media_library',
+              }))
+              foundImages = ownImages
+              addSearchImages(foundImages)
+            }
+          }
+
+          // SEGUNDO: Se não encontrou no banco próprio, buscar em APIs externas
+          if (!foundInOwnDatabase) {
+            imageResponse = await authenticatedFetch('/api/creative-studio/search-images', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                query: searchQuery,
+                type: 'search',
+                count: 8,
+              }),
+            })
+          }
+
+          if (imageResponse.ok && !foundInOwnDatabase) {
             const imageData = await imageResponse.json()
             if (imageData.images && imageData.images.length > 0) {
               foundImages = imageData.images.map((img: any) => ({
@@ -753,9 +875,14 @@ export function EditorChat({ mode = 'edit', area = 'nutri', purpose = 'quick-ad'
               // Adicionar ao store para exibir na aba de busca
               addSearchImages(foundImages)
               
+              // Abrir automaticamente a aba de busca
+              if (onSearchComplete) {
+                onSearchComplete('images')
+              }
+              
               // Adicionar mensagem sobre as imagens encontradas
               if (!assistantMessage.includes('📸')) {
-                assistantMessage += `\n\n📸 Encontrei ${foundImages.length} imagem(ns) relacionadas. Veja na aba "Busca" e selecione as que você quer usar:`
+                assistantMessage += `\n\n📸 Encontrei ${foundImages.length} imagem(ns) relacionadas! Veja na aba "Busca" (aberta automaticamente) e selecione as que você quer usar.`
               }
               
               // Remover mensagem de progresso e adicionar resultado
@@ -792,23 +919,10 @@ export function EditorChat({ mode = 'edit', area = 'nutri', purpose = 'quick-ad'
 
       // Buscar vídeos se mencionado
       if (shouldSearchVideos) {
-        setIsSearchingVideos(true)
-        setSearchStatus('🎬 Buscando vídeos...')
-        setSearching(true, 'videos', searchQuery || '')
+        // Extrair termos de busca para vídeos
+        let videoSearchQuery: string = ''
         
-        // Adicionar mensagem de progresso no chat
-        setMessages((prev) => [
-          ...prev,
-          {
-            role: 'assistant',
-            content: '🎬 Buscando vídeos relacionados...',
-          },
-        ])
-        
-        // Extrair termos de busca - priorizar sugestões do assistente
-        let searchQuery = ''
-        
-        // Primeiro tentar extrair da mensagem do assistente (sugestões)
+        // Primeiro tentar extrair da mensagem do assistente
         if (assistantSuggestsVideos) {
           const patterns = [
             /(?:vídeo|video|clip)\s+(?:de|para|sobre|com)\s+([^.,!?]+)/i,
@@ -818,15 +932,15 @@ export function EditorChat({ mode = 'edit', area = 'nutri', purpose = 'quick-ad'
           for (const pattern of patterns) {
             const match = assistantMessage.match(pattern)
             if (match && match[1]) {
-              searchQuery = match[1].trim()
+              videoSearchQuery = match[1].trim()
               break
             }
           }
         }
         
-        // Se ainda não encontrou, tentar da mensagem do usuário
-        if (!searchQuery || searchQuery.length < 3) {
-          searchQuery = userMessage
+        // Se não encontrou, usar mensagem do usuário
+        if (!videoSearchQuery || videoSearchQuery.length < 3) {
+          videoSearchQuery = userMessage
             .toLowerCase()
             .replace(/(?:quero|preciso|buscar|adicionar|incluir|colocar|usar)\s+/g, '')
             .replace(/(?:vídeo|video|vídeos|videos|clip|clips|filmagem|gravação)/g, '')
@@ -835,9 +949,22 @@ export function EditorChat({ mode = 'edit', area = 'nutri', purpose = 'quick-ad'
         }
         
         // Fallback
-        if (!searchQuery || searchQuery.length < 3) {
-          searchQuery = 'nutritionist professional consultation healthy lifestyle'
+        if (!videoSearchQuery || videoSearchQuery.length < 3) {
+          videoSearchQuery = 'nutritionist professional consultation'
         }
+        
+        setIsSearchingVideos(true)
+        setSearchStatus('🎬 Buscando vídeos...')
+        setSearching(true, 'videos', videoSearchQuery)
+        
+        // Adicionar mensagem de progresso no chat
+        setMessages((prev) => [
+          ...prev,
+          {
+            role: 'assistant',
+            content: `🎬 Buscando vídeos relacionados a "${videoSearchQuery}"...`,
+          },
+        ])
 
         // Traduzir termos comuns para inglês
         const translations: Record<string, string> = {
@@ -858,24 +985,62 @@ export function EditorChat({ mode = 'edit', area = 'nutri', purpose = 'quick-ad'
         }
         
         Object.entries(translations).forEach(([pt, en]) => {
-          searchQuery = searchQuery.replace(new RegExp(pt, 'gi'), en)
+          videoSearchQuery = videoSearchQuery.replace(new RegExp(pt, 'gi'), en)
         })
 
+        // Variável para verificar se encontrou vídeos no banco próprio
+        let foundVideosInOwnDatabase = false
+
         try {
-          // Buscar vídeos automaticamente
-          const videoResponse = await authenticatedFetch('/api/creative-studio/search-images', {
+          // PRIMEIRO: Buscar vídeos no banco próprio (media_library)
+          let videoResponse = await authenticatedFetch('/api/creative-studio/search-media-library', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-              query: searchQuery,
-              type: 'search-videos',
+              query: videoSearchQuery,
+              type: 'video',
+              area: area,
+              purpose: purpose,
               count: 8,
             }),
           })
 
           if (videoResponse.ok) {
+            const ownVideoData = await videoResponse.json()
+            if (ownVideoData.videos && ownVideoData.videos.length > 0) {
+              foundVideosInOwnDatabase = true
+              foundVideos = ownVideoData.videos.map((vid: any) => ({
+                id: vid.id || `vid-${Date.now()}-${Math.random()}`,
+                url: vid.url,
+                thumbnail: vid.thumbnail || vid.url,
+                source: vid.source || 'media_library',
+                duration: vid.duration || 0,
+              }))
+              addSearchVideos(foundVideos)
+              if (onSearchComplete) {
+                onSearchComplete('videos')
+              }
+            }
+          }
+
+          // SEGUNDO: Se não encontrou no banco próprio, buscar em APIs externas
+          if (!foundVideosInOwnDatabase) {
+            videoResponse = await authenticatedFetch('/api/creative-studio/search-images', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                query: videoSearchQuery,
+                type: 'search-videos',
+                count: 8,
+              }),
+            })
+          }
+
+          if (videoResponse.ok && !foundVideosInOwnDatabase) {
             const videoData = await videoResponse.json()
             if (videoData.videos && videoData.videos.length > 0) {
               foundVideos = videoData.videos.map((vid: any) => ({
@@ -889,9 +1054,14 @@ export function EditorChat({ mode = 'edit', area = 'nutri', purpose = 'quick-ad'
               // Adicionar ao store para exibir na aba de busca
               addSearchVideos(foundVideos)
               
+              // Abrir automaticamente a aba de busca
+              if (onSearchComplete) {
+                onSearchComplete('videos')
+              }
+              
               // Adicionar mensagem sobre os vídeos encontrados
               if (!assistantMessage.includes('🎬')) {
-                assistantMessage += `\n\n🎬 Encontrei ${foundVideos.length} vídeo(s) relacionado(s). Veja na aba "Busca" e selecione os que você quer usar:`
+                assistantMessage += `\n\n🎬 Encontrei ${foundVideos.length} vídeo(s) relacionado(s)! Veja na aba "Busca" (aberta automaticamente) e selecione os que você quer usar.`
               }
               
               // Remover mensagem de progresso
@@ -1550,6 +1720,10 @@ export function EditorChat({ mode = 'edit', area = 'nutri', purpose = 'quick-ad'
           return null
         }
 
+        // Informações sobre mídia já disponível (para o segundo contexto também)
+        const existingImages2 = clips.filter(c => c.type === 'image')
+        const existingVideos2 = clips.filter(c => c.type === 'video')
+        
         const rawContext = {
           hasAnalysis: !!videoAnalysis,
           hasClips: clips.length > 0,
@@ -1558,6 +1732,20 @@ export function EditorChat({ mode = 'edit', area = 'nutri', purpose = 'quick-ad'
           videoFileName: uploadedVideo?.name || null,
           videoSize: uploadedVideo?.size || null,
           videoInTimeline: clips.some(c => c.type === 'video'),
+          existingMedia: {
+            hasImages: existingImages2.length > 0,
+            imageCount: existingImages2.length,
+            hasVideos: existingVideos2.length > 0,
+            videoCount: existingVideos2.length,
+            totalClips: clips.length,
+            clipsInfo: clips.map(c => ({
+              id: c.id,
+              type: c.type,
+              startTime: c.startTime,
+              endTime: c.endTime,
+              sourceInfo: c.source?.includes('blob:') ? 'uploaded-file' : (c.source?.split('/').pop()?.slice(0, 30) || 'media'),
+            })),
+          },
           analysis: videoAnalysis
             ? {
                 transcription: videoAnalysis.transcription || null,

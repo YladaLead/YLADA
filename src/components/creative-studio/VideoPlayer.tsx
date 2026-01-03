@@ -1,9 +1,10 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useCreativeStudioStore } from '@/stores/creative-studio-store'
 import { Play, Pause, SkipBack, SkipForward } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { VideoRenderer } from './VideoRenderer'
 
 export function VideoPlayer() {
   const {
@@ -17,6 +18,8 @@ export function VideoPlayer() {
     suggestedCuts,
   } = useCreativeStudioStore()
   const videoRef = useRef<HTMLVideoElement>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
+  const [dimensions, setDimensions] = useState({ width: 1280, height: 720 })
 
   // Encontrar clip atual baseado no tempo
   // Melhorado para lidar com bordas (incluindo o último frame)
@@ -26,6 +29,20 @@ export function VideoPlayer() {
       return currentTime >= clip.startTime && currentTime <= clip.endTime
     }
   ) || clips[0] // Fallback para o primeiro clip se não encontrar
+
+  // Atualizar dimensões do container
+  useEffect(() => {
+    const updateDimensions = () => {
+      if (containerRef.current) {
+        const rect = containerRef.current.getBoundingClientRect()
+        setDimensions({ width: rect.width, height: rect.height })
+      }
+    }
+    
+    updateDimensions()
+    window.addEventListener('resize', updateDimensions)
+    return () => window.removeEventListener('resize', updateDimensions)
+  }, [])
 
   // Atualizar duração total quando clips mudam
   useEffect(() => {
@@ -128,27 +145,42 @@ export function VideoPlayer() {
   }
 
   return (
-    <div className="bg-gray-900 rounded-lg overflow-hidden">
-      <div className="relative aspect-video bg-black">
+    <div className="bg-gray-900 rounded-lg overflow-hidden" data-video-container>
+      <div 
+        ref={containerRef}
+        className="relative aspect-video bg-black"
+      >
         {currentClip?.source ? (
-          <video
-            ref={videoRef}
-            src={currentClip.source}
-            className="w-full h-full object-contain"
-            onEnded={() => setIsPlaying(false)}
-            onError={(e) => {
-              console.error('Erro ao carregar vídeo:', e)
-            }}
-            onLoadedMetadata={() => {
-              // Garantir que o vídeo está no tempo correto quando carrega
-              if (videoRef.current && currentClip) {
-                const relativeTime = currentTime - currentClip.startTime
-                const clipDuration = currentClip.endTime - currentClip.startTime
-                const videoTime = Math.max(0, Math.min(clipDuration, relativeTime))
-                videoRef.current.currentTime = videoTime
-              }
-            }}
-          />
+          <>
+            <video
+              ref={videoRef}
+              src={currentClip.source}
+              className="w-full h-full object-contain"
+              onEnded={() => setIsPlaying(false)}
+              onError={(e) => {
+                console.error('Erro ao carregar vídeo:', e)
+              }}
+              onLoadedMetadata={() => {
+                // Garantir que o vídeo está no tempo correto quando carrega
+                if (videoRef.current && currentClip) {
+                  const relativeTime = currentTime - currentClip.startTime
+                  const clipDuration = currentClip.endTime - currentClip.startTime
+                  const videoTime = Math.max(0, Math.min(clipDuration, relativeTime))
+                  videoRef.current.currentTime = videoTime
+                }
+                // Atualizar dimensões quando vídeo carregar
+                if (containerRef.current) {
+                  const rect = containerRef.current.getBoundingClientRect()
+                  setDimensions({ width: rect.width, height: rect.height })
+                }
+              }}
+            />
+            <VideoRenderer
+              videoElement={videoRef.current}
+              width={dimensions.width}
+              height={dimensions.height}
+            />
+          </>
         ) : (
           <div className="w-full h-full flex items-center justify-center text-gray-400">
             Sem vídeo selecionado
