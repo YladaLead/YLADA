@@ -9,6 +9,7 @@ import WellnessNavBar from '@/components/wellness/WellnessNavBar'
 import { useAuth } from '@/contexts/AuthContext'
 import { useAuthenticatedFetch } from '@/hooks/useAuthenticatedFetch'
 import { translateError } from '@/lib/error-messages'
+import { createClient } from '@/lib/supabase-client'
 import PushNotificationManager from '@/components/push/PushNotificationManager'
 
 export default function WellnessConfiguracaoPage() {
@@ -272,9 +273,10 @@ export default function WellnessConfiguracaoPage() {
       return
     }
 
-    // Validar que o slug não contém hífens (deve ser um nome unificado)
-    if (perfil.userSlug.includes('-')) {
-      setErro('O slug deve ser um nome único sem hífens. Use apenas letras e números.')
+    // Validar formato do slug: apenas letras minúsculas, números e hífens (formato nome-sobrenome)
+    const slugRegex = /^[a-z0-9]+(-[a-z0-9]+)*$/
+    if (!slugRegex.test(perfil.userSlug)) {
+      setErro('O slug deve conter apenas letras minúsculas, números e hífens. Formato: nome-sobrenome (ex: joao-silva)')
       setTimeout(() => setErro(null), 5000)
       return
     }
@@ -312,6 +314,57 @@ export default function WellnessConfiguracaoPage() {
       const responseData = await response.json()
 
       if (!response.ok) {
+        // Se erro 401 (não autenticado), tentar fazer refresh da sessão
+        if (response.status === 401) {
+          console.warn('⚠️ Erro 401 detectado, tentando fazer refresh da sessão...')
+          try {
+            const supabase = createClient()
+            const { data: { session: refreshedSession }, error: refreshError } = await supabase.auth.refreshSession()
+            
+            if (refreshedSession && !refreshError) {
+              console.log('✅ Sessão atualizada com sucesso, tentando salvar novamente...')
+              // Tentar salvar novamente após refresh
+              const retryResponse = await authenticatedFetch('/api/wellness/profile', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  nome: perfil.nome,
+                  email: perfil.email,
+                  telefone: perfil.telefone,
+                  whatsapp: perfil.whatsapp,
+                  countryCode: perfil.countryCode,
+                  bio: perfil.bio,
+                  userSlug: perfil.userSlug
+                })
+              })
+              
+              const retryData = await retryResponse.json()
+              
+              if (retryResponse.ok) {
+                console.log('✅ Perfil salvo com sucesso após refresh da sessão:', retryData)
+                setSalvoComSucesso(true)
+                setErro(null)
+                await carregarPerfil()
+                setTimeout(() => setSalvoComSucesso(false), 8000)
+                return // Sucesso, sair da função
+              } else {
+                // Se ainda falhou após refresh, mostrar erro
+                console.error('❌ Erro persistiu após refresh da sessão:', {
+                  status: retryResponse.status,
+                  errorData: retryData
+                })
+                throw new Error(retryData.error || 'Erro ao salvar. Por favor, faça login novamente.')
+              }
+            } else {
+              console.error('❌ Não foi possível atualizar a sessão:', refreshError)
+              throw new Error('Sua sessão expirou. Por favor, faça login novamente.')
+            }
+          } catch (refreshErr: any) {
+            console.error('❌ Erro ao tentar atualizar sessão:', refreshErr)
+            throw new Error('Sua sessão expirou. Por favor, faça login novamente.')
+          }
+        }
+        
         // Log detalhado do erro para debug
         console.error('❌ Erro ao salvar perfil:', {
           status: response.status,
