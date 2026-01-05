@@ -153,8 +153,15 @@ export function FileUploader() {
       }
 
       const fileType = getFileType(file)
+      console.log('📁 Arquivo processado:', {
+        name: file.name,
+        type: file.type,
+        size: file.size,
+        detectedType: fileType,
+      })
+      
       if (fileType === 'other') {
-        newErrors.push(`${file.name}: Formato não suportado`)
+        newErrors.push(`${file.name}: Formato não suportado (tipo: ${file.type || 'desconhecido'})`)
         continue
       }
 
@@ -241,17 +248,30 @@ export function FileUploader() {
   const addToTimeline = useCallback(
     (uploadedFile: UploadedFile) => {
       try {
-        const clipType: VideoClip['type'] =
-          uploadedFile.type === 'video' ? 'video' : uploadedFile.type === 'image' ? 'image' : 'video'
+        // Garantir que o tipo seja detectado corretamente
+        const fileType = uploadedFile.type || getFileType(uploadedFile.file)
+        
+        // Determinar o tipo do clip baseado no arquivo
+        let clipType: VideoClip['type'] = 'image'
+        if (fileType === 'video') {
+          clipType = 'video'
+        } else if (fileType === 'image') {
+          clipType = 'image'
+        } else if (fileType === 'audio') {
+          // Áudio será tratado separadamente, mas por enquanto como vídeo
+          clipType = 'video'
+        }
 
         const lastClip = clips.length > 0 ? clips[clips.length - 1] : null
         const startTime = lastClip ? lastClip.endTime : 0
         const endTime = startTime + (uploadedFile.duration || 5)
 
-        let source = uploadedFile.file.name
+        // Criar URL do arquivo
+        let source = ''
         if (uploadedFile.preview && uploadedFile.preview.startsWith('blob:')) {
           source = uploadedFile.preview
-        } else if (uploadedFile.type === 'audio') {
+        } else {
+          // Criar blob URL se não tiver preview
           source = URL.createObjectURL(uploadedFile.file)
         }
 
@@ -266,19 +286,27 @@ export function FileUploader() {
         addClip(clip)
 
         // Salvar arquivo original se for vídeo (para análise automática)
-        if (uploadedFile.type === 'video') {
+        if (fileType === 'video') {
           setUploadedVideo(uploadedFile.file)
         }
 
-        if (endTime > (clips.length > 0 ? Math.max(...clips.map((c) => c.endTime)) : 0)) {
+        const maxEndTime = clips.length > 0 ? Math.max(...clips.map((c) => c.endTime)) : 0
+        if (endTime > maxEndTime) {
           setDuration(endTime)
         }
+        
+        console.log('✅ Arquivo adicionado à timeline:', {
+          name: uploadedFile.file.name,
+          type: fileType,
+          clipType,
+          duration: uploadedFile.duration,
+        })
       } catch (error) {
         console.error('Erro ao adicionar à timeline:', error)
-        alert(`Erro ao adicionar ${uploadedFile.file.name} à timeline.`)
+        alert(`Erro ao adicionar ${uploadedFile.file.name} à timeline: ${error instanceof Error ? error.message : 'Erro desconhecido'}`)
       }
     },
-    [clips, addClip, setDuration]
+    [clips, addClip, setDuration, setUploadedVideo]
   )
 
   const addAllToTimeline = useCallback(() => {

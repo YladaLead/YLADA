@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { ScriptSegment, VideoClip, Project, Caption } from '@/types/creative-studio'
+import { ScriptSegment, VideoClip, Project, Caption, AudioClip } from '@/types/creative-studio'
 
 interface CreativeStudioState {
   // Projeto atual
@@ -55,6 +55,9 @@ interface CreativeStudioState {
   // Legendas/Captions
   captions: Caption[]
   
+  // Áudio/Narração
+  audioClips: AudioClip[]
+  
   // Undo/Redo
   history: Array<{ clips: VideoClip[]; script: ScriptSegment[]; captions: Caption[] }>
   historyIndex: number
@@ -107,6 +110,12 @@ interface CreativeStudioState {
   deleteCaption: (id: string) => void
   setCaptions: (captions: Caption[]) => void
   
+  // Audio Actions
+  addAudioClip: (audio: AudioClip) => void
+  updateAudioClip: (id: string, updates: Partial<AudioClip>) => void
+  deleteAudioClip: (id: string) => void
+  setAudioClips: (audioClips: AudioClip[]) => void
+  
   // Undo/Redo Actions
   saveToHistory: () => void
   undo: () => void
@@ -141,6 +150,9 @@ export const useCreativeStudioStore = create<CreativeStudioState>((set, get) => 
   
   // Legendas/Captions
   captions: [],
+  
+  // Áudio/Narração
+  audioClips: [],
   
   // Undo/Redo
   history: [{ clips: [], script: [], captions: [] }],
@@ -340,6 +352,29 @@ export const useCreativeStudioStore = create<CreativeStudioState>((set, get) => 
   
   setCaptions: (captions) => {
     set({ captions: captions.sort((a, b) => a.startTime - b.startTime) })
+    get().saveToHistory()
+  },
+  
+  // Audio Actions
+  addAudioClip: (audio) =>
+    set((state) => ({
+      audioClips: [...state.audioClips, audio].sort((a, b) => a.startTime - b.startTime),
+    })),
+  
+  updateAudioClip: (id, updates) =>
+    set((state) => ({
+      audioClips: state.audioClips.map((audio) =>
+        audio.id === id ? { ...audio, ...updates } : audio
+      ).sort((a, b) => a.startTime - b.startTime),
+    })),
+  
+  deleteAudioClip: (id) =>
+    set((state) => ({
+      audioClips: state.audioClips.filter((audio) => audio.id !== id),
+    })),
+  
+  setAudioClips: (audioClips) => {
+    set({ audioClips: audioClips.sort((a, b) => a.startTime - b.startTime) })
     get().saveToHistory()
   },
   

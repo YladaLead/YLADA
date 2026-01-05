@@ -17,6 +17,12 @@ function AdminLoginPage() {
   const [showPasswordResetSuccess, setShowPasswordResetSuccess] = useState(false)
 
   useEffect(() => {
+    // Verificar se supabase está configurado
+    if (!supabase) {
+      console.warn('⚠️ AdminLogin: Supabase não está configurado. Verifique as variáveis de ambiente.')
+      return
+    }
+
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event, session) => {
@@ -31,7 +37,11 @@ function AdminLoginPage() {
       }
     })
 
-    return () => subscription.unsubscribe()
+    return () => {
+      if (subscription) {
+        subscription.unsubscribe()
+      }
+    }
   }, [])
 
   // Verificar searchParams no cliente (após hidratação)
@@ -49,6 +59,16 @@ function AdminLoginPage() {
     e.preventDefault()
     setError(null)
     setLoading(true)
+
+    // Verificar se supabase está configurado
+    if (!supabase) {
+      // Supabase não configurado - apenas logar, não mostrar erro técnico na UI
+      console.warn('⚠️ AdminLogin: Supabase não está configurado')
+      setError('Erro de configuração. Entre em contato com o suporte.')
+      setLoading(false)
+      return
+    }
+    // Supabase configurado, continuar normalmente
 
     try {
       console.log('🔐 Tentando fazer login...')

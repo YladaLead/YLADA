@@ -198,8 +198,8 @@ export function HorizontalTimeline() {
           </div>
         </div>
 
-        {/* Track de Vídeo/Imagem */}
-        <div className="relative h-24 overflow-x-auto overflow-y-hidden" style={{ maxHeight: '96px' }}>
+        {/* Track de Vídeo/Imagem - ESTILO CAPCUT */}
+        <div className="relative h-32 overflow-x-auto overflow-y-hidden bg-gray-50" style={{ maxHeight: '128px' }}>
           <div
             className="relative h-full"
             style={{
@@ -227,67 +227,88 @@ export function HorizontalTimeline() {
                 <div
                   key={clip.id}
                   className={cn(
-                    'absolute top-2 bottom-2 rounded border-2 cursor-move transition-all',
-                    getClipColor(clip.type),
-                    isSelected ? 'ring-2 ring-purple-400 ring-offset-2' : 'border-gray-300',
-                    draggingClip === clip.id && 'opacity-75'
+                    'absolute top-1 bottom-1 rounded-lg border-2 cursor-move transition-all shadow-md hover:shadow-lg',
+                    isSelected 
+                      ? 'ring-4 ring-purple-400 ring-offset-1 border-purple-500 z-10' 
+                      : 'border-gray-400 hover:border-gray-500',
+                    draggingClip === clip.id && 'opacity-80 scale-105',
+                    getClipColor(clip.type)
                   )}
                   style={{
                     left: `${clipLeft}px`,
-                    width: `${clipWidth}px`,
-                    minWidth: '40px',
+                    width: `${Math.max(clipWidth, 60)}px`, // Mínimo 60px para melhor visualização
+                    minWidth: '60px',
                   }}
                   onClick={(e) => {
                     e.stopPropagation()
                     setSelectedClipId(clip.id)
+                    // Pular para o início do clip quando clicar
+                    setCurrentTime(clip.startTime)
                   }}
                 >
-                  {/* Handle de arrastar */}
-                  <div
-                    className="absolute inset-0 flex items-center justify-center cursor-grab active:cursor-grabbing"
-                    onMouseDown={(e) => handleClipDragStart(clip.id, e)}
-                  >
-                    <GripVertical className="w-4 h-4 text-white opacity-50" />
-                  </div>
-
-                  {/* Thumbnail ou ícone */}
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    {clip.type === 'image' && (
+                  {/* Thumbnail ou ícone - MAIOR E MAIS VISÍVEL */}
+                  <div className="absolute inset-0 flex items-center justify-center overflow-hidden rounded-lg">
+                    {clip.type === 'image' ? (
                       <img
                         src={clip.source}
-                        alt=""
-                        className="w-full h-full object-cover rounded"
+                        alt={`Clip ${clip.id}`}
+                        className="w-full h-full object-cover"
                         onError={(e) => {
+                          // Se erro, mostrar ícone
                           e.currentTarget.style.display = 'none'
                         }}
                       />
-                    )}
-                    {clip.type !== 'image' && (
-                      <div className="text-white">{getClipIcon(clip.type)}</div>
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center bg-black bg-opacity-30">
+                        {getClipIcon(clip.type)}
+                      </div>
                     )}
                   </div>
 
-                  {/* Label do clip */}
-                  <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white text-xs px-1 py-0.5 rounded-b">
-                    <div className="flex items-center justify-between">
-                      <span className="truncate">
-                        {clip.type === 'image' ? 'Imagem' : clip.type === 'video' ? 'Vídeo' : 'Texto'}
+                  {/* Handle de arrastar - VISÍVEL NO HOVER */}
+                  <div
+                    className="absolute inset-0 flex items-center justify-center cursor-grab active:cursor-grabbing opacity-0 hover:opacity-100 transition-opacity bg-black bg-opacity-20 rounded-lg"
+                    onMouseDown={(e) => {
+                      e.stopPropagation()
+                      handleClipDragStart(clip.id, e)
+                    }}
+                  >
+                    <GripVertical className="w-6 h-6 text-white" />
+                  </div>
+
+                  {/* Label do clip - MAIS VISÍVEL */}
+                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black via-black/80 to-transparent text-white text-xs px-2 py-1.5 rounded-b-lg">
+                    <div className="flex items-center justify-between font-medium">
+                      <span className="truncate text-[10px]">
+                        {clip.type === 'image' ? '📷' : clip.type === 'video' ? '🎬' : '📝'}
                       </span>
-                      <span className="text-xs opacity-75">
+                      <span className="text-[10px] font-bold ml-1">
                         {formatTime(clip.endTime - clip.startTime)}
                       </span>
                     </div>
                   </div>
 
-                  {/* Handles de resize */}
+                  {/* Handles de resize - MAIS VISÍVEIS E FÁCEIS DE USAR */}
                   <div
-                    className="absolute left-0 top-0 bottom-0 w-2 cursor-ew-resize bg-white bg-opacity-50 hover:bg-opacity-100"
-                    onMouseDown={(e) => handleClipResizeStart(clip.id, 'left', e)}
-                  />
+                    className="absolute left-0 top-0 bottom-0 w-3 cursor-ew-resize bg-white bg-opacity-70 hover:bg-opacity-100 border-r-2 border-white rounded-l-lg flex items-center justify-center group"
+                    onMouseDown={(e) => {
+                      e.stopPropagation()
+                      handleClipResizeStart(clip.id, 'left', e)
+                    }}
+                    title="Ajustar início"
+                  >
+                    <div className="w-1 h-6 bg-gray-600 group-hover:bg-gray-800 rounded" />
+                  </div>
                   <div
-                    className="absolute right-0 top-0 bottom-0 w-2 cursor-ew-resize bg-white bg-opacity-50 hover:bg-opacity-100"
-                    onMouseDown={(e) => handleClipResizeStart(clip.id, 'right', e)}
-                  />
+                    className="absolute right-0 top-0 bottom-0 w-3 cursor-ew-resize bg-white bg-opacity-70 hover:bg-opacity-100 border-l-2 border-white rounded-r-lg flex items-center justify-center group"
+                    onMouseDown={(e) => {
+                      e.stopPropagation()
+                      handleClipResizeStart(clip.id, 'right', e)
+                    }}
+                    title="Ajustar fim"
+                  >
+                    <div className="w-1 h-6 bg-gray-600 group-hover:bg-gray-800 rounded" />
+                  </div>
                 </div>
               )
             })}

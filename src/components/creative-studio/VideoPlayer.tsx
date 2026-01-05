@@ -9,6 +9,7 @@ import { VideoRenderer } from './VideoRenderer'
 export function VideoPlayer() {
   const {
     clips,
+    audioClips,
     currentTime,
     duration,
     isPlaying,
@@ -18,14 +19,21 @@ export function VideoPlayer() {
     suggestedCuts,
   } = useCreativeStudioStore()
   const videoRef = useRef<HTMLVideoElement>(null)
+  const audioRef = useRef<HTMLAudioElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
-  const [dimensions, setDimensions] = useState({ width: 1280, height: 720 })
+  // Formato vertical 9:16 para Instagram (1080x1920)
+  const [dimensions, setDimensions] = useState({ width: 1080, height: 1920 })
 
   // Encontrar clip atual baseado no tempo
   // Melhorado para lidar com bordas (incluindo o último frame)
   const currentClip = clips.find(
     (clip) => {
       // Incluir o último frame do clip (endTime)
+      // Para imagens, usar <= para incluir o último momento
+      // Para vídeos, usar < para não incluir o frame final (que pode ser do próximo clip)
+      if (clip.type === 'image') {
+        return currentTime >= clip.startTime && currentTime < clip.endTime
+      }
       return currentTime >= clip.startTime && currentTime <= clip.endTime
     }
   ) || clips[0] // Fallback para o primeiro clip se não encontrar
@@ -52,39 +60,70 @@ export function VideoPlayer() {
     }
   }, [clips, setDuration])
 
-  // Controlar play/pause do vídeo (apenas para vídeos, não imagens)
+  // Encontrar áudio atual baseado no tempo
+  const currentAudio = audioClips.find(
+    (audio) => currentTime >= audio.startTime && currentTime <= audio.endTime
+  )
+
+  // Controlar play/pause do vídeo e áudio
   useEffect(() => {
     const video = videoRef.current
-    if (!video || currentClip?.type === 'image') return
+    const audio = audioRef.current
 
     if (isPlaying) {
-      video.play().catch((err) => {
-        console.error('Erro ao reproduzir vídeo:', err)
-        setIsPlaying(false)
-      })
+      if (video && currentClip?.type !== 'image') {
+        video.play().catch((err) => {
+          console.error('Erro ao reproduzir vídeo:', err)
+          setIsPlaying(false)
+        })
+      }
+      if (audio && currentAudio) {
+        audio.play().catch((err) => {
+          console.error('Erro ao reproduzir áudio:', err)
+        })
+      }
     } else {
-      video.pause()
+      if (video) video.pause()
+      if (audio) audio.pause()
     }
-  }, [isPlaying, setIsPlaying, currentClip])
+  }, [isPlaying, setIsPlaying, currentClip, currentAudio])
 
-  // Sincronizar tempo do vídeo com o store
+  // Sincronizar tempo do vídeo e áudio com o store
   useEffect(() => {
     const video = videoRef.current
-    if (!video || !currentClip) return
+    const audio = audioRef.current
 
-    try {
-      const relativeTime = currentTime - currentClip.startTime
-      const clipDuration = currentClip.endTime - currentClip.startTime
-      const videoTime = Math.max(0, Math.min(clipDuration, relativeTime))
+    // Sincronizar vídeo
+    if (video && currentClip && currentClip.type !== 'image') {
+      try {
+        const relativeTime = currentTime - currentClip.startTime
+        const clipDuration = currentClip.endTime - currentClip.startTime
+        const videoTime = Math.max(0, Math.min(clipDuration, relativeTime))
 
-      // Sincronizar apenas se a diferença for significativa (evitar loops)
-      if (Math.abs(video.currentTime - videoTime) > 0.3) {
-        video.currentTime = videoTime
+        // Sincronizar apenas se a diferença for significativa (evitar loops)
+        if (Math.abs(video.currentTime - videoTime) > 0.3) {
+          video.currentTime = videoTime
+        }
+      } catch (error) {
+        console.error('Erro ao sincronizar tempo do vídeo:', error)
       }
-    } catch (error) {
-      console.error('Erro ao sincronizar tempo do vídeo:', error)
     }
-  }, [currentTime, currentClip])
+
+    // Sincronizar áudio
+    if (audio && currentAudio) {
+      try {
+        const relativeTime = currentTime - currentAudio.startTime
+        const audioTime = Math.max(0, Math.min(currentAudio.duration, relativeTime))
+
+        // Sincronizar apenas se a diferença for significativa (evitar loops)
+        if (Math.abs(audio.currentTime - audioTime) > 0.3) {
+          audio.currentTime = audioTime
+        }
+      } catch (error) {
+        console.error('Erro ao sincronizar tempo do áudio:', error)
+      }
+    }
+  }, [currentTime, currentClip, currentAudio])
 
   // Atualizar currentTime quando vídeo está reproduzindo (ou avançar automaticamente para imagens)
   useEffect(() => {
@@ -163,7 +202,7 @@ export function VideoPlayer() {
       if (remaining > 0) {
         const timer = setTimeout(() => {
           // Avançar para próximo clip quando imagem terminar
-          const nextClip = clips.find(c => c.startTime > currentClip.endTime)
+          const nextClip = clips.find(c => c.startTime >= currentClip.endTime)
           if (nextClip) {
             setCurrentTime(nextClip.startTime)
           } else {
@@ -173,13 +212,34 @@ export function VideoPlayer() {
         }, remaining * 1000)
         
         return () => clearTimeout(timer)
+      } else {
+        // Se já passou do tempo, avançar imediatamente
+        const nextClip = clips.find(c => c.startTime >= currentClip.endTime)
+        if (nextClip) {
+          setCurrentTime(nextClip.startTime)
+        } else {
+          setIsPlaying(false)
+          setCurrentTime(currentClip.endTime)
+        }
       }
     }
   }, [currentClip, isPlaying, currentTime, clips, setIsPlaying, setCurrentTime])
+  
+  // Forçar atualização do preview quando currentClip muda
+  useEffect(() => {
+    // Isso garante que a imagem seja atualizada quando mudamos de clip
+    if (currentClip?.type === 'image') {
+      // Forçar re-render da imagem
+      const img = containerRef.current?.querySelector('img')
+      if (img && img.src !== currentClip.source) {
+        img.src = currentClip.source
+      }
+    }
+  }, [currentClip?.id, currentClip?.source])
 
   if (clips.length === 0) {
     return (
-      <div className="bg-gray-900 rounded-lg aspect-video flex items-center justify-center">
+      <div className="bg-gray-900 rounded-lg aspect-[9/16] flex items-center justify-center">
         <p className="text-gray-400">Adicione clips para visualizar o vídeo</p>
       </div>
     )
@@ -189,26 +249,48 @@ export function VideoPlayer() {
     <div className="bg-gray-900 rounded-lg overflow-hidden" data-video-container>
       <div 
         ref={containerRef}
-        className="relative aspect-video bg-black"
+        className="relative aspect-[9/16] bg-black flex items-center justify-center"
+        style={{
+          aspectRatio: '9/16',
+          minHeight: '400px',
+        }}
       >
         {currentClip?.source ? (
           <>
             {currentClip.type === 'image' ? (
-              <img
-                src={currentClip.source}
-                alt=""
-                className="w-full h-full object-cover"
-                onLoad={() => {
-                  // Atualizar dimensões quando imagem carregar
-                  if (containerRef.current) {
-                    const rect = containerRef.current.getBoundingClientRect()
-                    setDimensions({ width: rect.width, height: rect.height })
-                  }
-                }}
-                onError={(e) => {
-                  console.error('Erro ao carregar imagem:', e)
-                }}
-              />
+              <div className="w-full h-full relative overflow-hidden bg-black">
+                <img
+                  key={currentClip.id}
+                  src={currentClip.source}
+                  alt={`Cena ${currentClip.id}`}
+                  className="w-full h-full object-cover object-center"
+                  style={{
+                    objectFit: 'cover',
+                    objectPosition: 'center',
+                    minWidth: '100%',
+                    minHeight: '100%',
+                  }}
+                  onLoad={() => {
+                    // Atualizar dimensões quando imagem carregar
+                    if (containerRef.current) {
+                      const rect = containerRef.current.getBoundingClientRect()
+                      setDimensions({ width: rect.width, height: rect.height })
+                    }
+                  }}
+                  onError={(e) => {
+                    console.error('Erro ao carregar imagem:', currentClip.source, e)
+                    // Mostrar placeholder em caso de erro
+                    const target = e.target as HTMLImageElement
+                    target.style.display = 'none'
+                  }}
+                />
+                {/* Renderizar legendas sobre a imagem */}
+                <VideoRenderer
+                  videoElement={null}
+                  width={dimensions.width}
+                  height={dimensions.height}
+                />
+              </div>
             ) : (
               <video
                 ref={videoRef}
@@ -239,6 +321,29 @@ export function VideoPlayer() {
                 videoElement={videoRef.current}
                 width={dimensions.width}
                 height={dimensions.height}
+              />
+            )}
+            
+            {/* Áudio/Narração */}
+            {currentAudio && (
+              <audio
+                ref={audioRef}
+                src={currentAudio.source}
+                volume={currentAudio.volume || 1.0}
+                onEnded={() => {
+                  // Áudio terminou, mas vídeo pode continuar
+                }}
+                onTimeUpdate={(e) => {
+                  // Sincronizar áudio com store se necessário
+                  const audio = e.currentTarget
+                  if (isPlaying && currentAudio) {
+                    const newTime = currentAudio.startTime + audio.currentTime
+                    if (Math.abs(newTime - currentTime) > 0.5) {
+                      setCurrentTime(newTime)
+                    }
+                  }
+                }}
+                style={{ display: 'none' }}
               />
             )}
           </>

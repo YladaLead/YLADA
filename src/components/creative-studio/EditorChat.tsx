@@ -1027,7 +1027,13 @@ export function EditorChat({ mode = 'edit', area = 'nutri', purpose = 'quick-ad'
                 return filtered
               })
             } else {
-              // NÃO ENCONTROU IMAGENS - Oferecer criar com IA
+              // NÃO ENCONTROU IMAGENS - Sugerir Envato ou criar com IA
+              // Converter termo de busca para formato adequado ao Envato
+              const envatoSearchTerm = searchQuery
+                .split(' ')
+                .map(word => word.toLowerCase())
+                .join(' ')
+              
               setMessages((prev) => {
                 const filtered = prev.filter(m => 
                   !m.content.includes('🔍 Buscando imagens relacionadas...')
@@ -1036,17 +1042,25 @@ export function EditorChat({ mode = 'edit', area = 'nutri', purpose = 'quick-ad'
                   ...filtered,
                   {
                     role: 'assistant',
-                    content: `❌ Não encontrei imagens relacionadas a "${searchQuery}".\n\n💡 Quer que eu crie uma imagem personalizada com IA?`,
+                    content: `❌ Não encontrei imagens relacionadas a "${searchQuery}" no banco de dados.\n\n💡 **OPÇÕES:**\n\n1. **Vá ao Envato Elements** e busque: "${envatoSearchTerm}"\n   → Depois, arraste a imagem aqui ou clique em "Adicionar" na área de upload\n\n2. **Ou peça para eu criar** uma imagem personalizada com IA (DALL-E)`,
                   },
                 ]
               })
               
-              // Adicionar sugestão de criar imagem
+              // Adicionar sugestões dinâmicas
               addDynamicSuggestion({
                 id: `create-image-${Date.now()}`,
                 title: 'Criar imagem com IA',
                 description: `Criar imagem personalizada de "${searchQuery}" usando DALL-E`,
                 type: 'image',
+                createdAt: Date.now(),
+              })
+              
+              addDynamicSuggestion({
+                id: `envato-upload-${Date.now()}`,
+                title: 'Buscar no Envato e arrastar aqui',
+                description: `Vá ao Envato Elements, busque "${envatoSearchTerm}" e arraste a imagem aqui`,
+                type: 'upload',
                 createdAt: Date.now(),
               })
             }
