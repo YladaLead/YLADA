@@ -12,7 +12,7 @@ interface ResultadoProteina {
   proteinaDiaria: number
   porRefeicao: number
   interpretacao: string
-  cor: string
+  cor: 'green' | 'blue' | 'orange'
   recomendacoes: string[]
 }
 
@@ -64,36 +64,98 @@ export default function CalculadoraProteina({ config }: TemplateBaseProps) {
     const porRefeicao = Math.round(proteinaDiaria / 5) // 5 refeições
 
     let interpretacao = ''
-    let cor = ''
+    let cor: 'green' | 'blue' | 'orange' = 'green'
     let recomendacoes: string[] = []
 
-    if (proteinaDiaria >= 100) {
-      interpretacao = 'Consumo ideal para seus objetivos!'
-      cor = 'green'
-      recomendacoes = [
-        'Manter consumo proteico regular',
-        'Distribuir entre 5 refeições',
-        'Incluir fontes variadas de proteína',
-        'Monitorar resultados mensais'
-      ]
-    } else if (proteinaDiaria >= 70) {
-      interpretacao = 'Boa quantidade, pode aumentar para otimizar resultados.'
-      cor = 'blue'
-      recomendacoes = [
-        'Aumentar consumo proteico gradualmente',
-        'Incluir proteína em cada refeição',
-        'Considerar suplementação',
-        'Monitorar progresso'
-      ]
+    // Personalizar recomendações baseado no objetivo
+    if (objetivo === 'perder') {
+      if (proteinaDiaria >= 100) {
+        interpretacao = 'Consumo ideal para perda de peso!'
+        cor = 'green'
+        recomendacoes = [
+          'Manter consumo proteico para preservar massa muscular durante perda de peso',
+          'Distribuir entre 5 refeições para manter saciedade',
+          'Priorizar proteínas magras para otimizar perda de gordura',
+          'Monitorar progresso semanalmente'
+        ]
+      } else if (proteinaDiaria >= 70) {
+        interpretacao = 'Boa quantidade para perda de peso, pode aumentar para otimizar resultados.'
+        cor = 'blue'
+        recomendacoes = [
+          'Aumentar consumo proteico gradualmente para preservar massa muscular',
+          'Incluir proteína em cada refeição para melhor saciedade',
+          'Priorizar fontes magras durante o processo de perda de peso',
+          'Monitorar progresso e ajustar conforme necessário'
+        ]
+      } else {
+        interpretacao = 'Consumo abaixo do ideal para perda de peso saudável.'
+        cor = 'orange'
+        recomendacoes = [
+          'Aumentar ingestão de proteína urgentemente para evitar perda de massa muscular',
+          'Incluir fontes magras como peixes, frango, ovos e leguminosas',
+          'Considerar suplementação proteica para atingir a meta diária',
+          'Consultar especialista para plano personalizado de perda de peso'
+        ]
+      }
+    } else if (objetivo === 'ganhar') {
+      if (proteinaDiaria >= 100) {
+        interpretacao = 'Consumo ideal para ganho de massa muscular!'
+        cor = 'green'
+        recomendacoes = [
+          'Manter consumo proteico regular para síntese muscular',
+          'Distribuir entre 5 refeições para otimizar absorção',
+          'Incluir fontes variadas de proteína de alta qualidade',
+          'Monitorar ganho de massa mensalmente'
+        ]
+      } else if (proteinaDiaria >= 70) {
+        interpretacao = 'Boa quantidade, pode aumentar para otimizar ganho de massa.'
+        cor = 'blue'
+        recomendacoes = [
+          'Aumentar consumo proteico gradualmente para maximizar ganhos',
+          'Incluir proteína em cada refeição, especialmente pós-treino',
+          'Considerar suplementação para atingir a meta diária',
+          'Monitorar progresso de ganho de massa'
+        ]
+      } else {
+        interpretacao = 'Consumo abaixo do ideal para ganho de massa muscular.'
+        cor = 'orange'
+        recomendacoes = [
+          'Aumentar ingestão de proteína urgentemente para ganho de massa',
+          'Incluir fontes como carnes, ovos, leguminosas e laticínios',
+          'Considerar suplementação proteica para atingir a meta',
+          'Consultar especialista para plano personalizado de ganho de massa'
+        ]
+      }
     } else {
-      interpretacao = 'Consumo abaixo do ideal para seus objetivos.'
-      cor = 'orange'
-      recomendacoes = [
-        'Aumentar ingestão de proteína urgentemente',
-        'Incluir fontes como carnes, ovos, leguminosas',
-        'Considerar suplementação proteica',
-        'Consultar especialista para plano personalizado'
-      ]
+      // Objetivo: manter peso
+      if (proteinaDiaria >= 100) {
+        interpretacao = 'Consumo ideal para seus objetivos!'
+        cor = 'green'
+        recomendacoes = [
+          'Manter consumo proteico regular',
+          'Distribuir entre 5 refeições',
+          'Incluir fontes variadas de proteína',
+          'Monitorar resultados mensais'
+        ]
+      } else if (proteinaDiaria >= 70) {
+        interpretacao = 'Boa quantidade, pode aumentar para otimizar resultados.'
+        cor = 'blue'
+        recomendacoes = [
+          'Aumentar consumo proteico gradualmente',
+          'Incluir proteína em cada refeição',
+          'Considerar suplementação',
+          'Monitorar progresso'
+        ]
+      } else {
+        interpretacao = 'Consumo abaixo do ideal para seus objetivos.'
+        cor = 'orange'
+        recomendacoes = [
+          'Aumentar ingestão de proteína urgentemente',
+          'Incluir fontes como carnes, ovos, leguminosas',
+          'Considerar suplementação proteica',
+          'Consultar especialista para plano personalizado'
+        ]
+      }
     }
 
     setResultado({
@@ -281,7 +343,7 @@ export default function CalculadoraProteina({ config }: TemplateBaseProps) {
                 >
                   <option value="">Selecione</option>
                   <option value="manter">Manter peso</option>
-                  <option value="perder">Perder gordura</option>
+                  <option value="perder">Perda de peso</option>
                   <option value="ganhar">Ganhar massa muscular</option>
                 </select>
               </div>
