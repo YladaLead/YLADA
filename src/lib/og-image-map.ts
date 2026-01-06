@@ -53,7 +53,14 @@ const OG_IMAGE_SLUG_MAP: Record<string, string> = {
   'pronto-emagrecer': 'pronto-emagrecer.jpg',
   'tipo-fome': 'tipo-fome.jpg',
   'sindrome-metabolica': 'sindrome-metabolica.jpg',
-  'retencao-liquidos': 'retencao-liquidos.jpg',
+  'retencao-liquidos': 'retencao-liquidos.png',
+  'retencao-inchaco-nas-pernas-e-rosto': 'retencao-liquidos.png',
+  'retencao-inchaço': 'retencao-liquidos.png',
+  'retencao-inchaco': 'retencao-liquidos.png',
+  'retencao-inchaço-nas-pernas-e-rosto': 'retencao-liquidos.png',
+  'fluxo-vendas-retencao-inchaço': 'retencao-liquidos.png',
+  'fluxo-vendas-retencao-inchaco': 'retencao-liquidos.png',
+  'fluxo-vendas-retencao-inchaço-nas-pernas-e-rosto': 'retencao-liquidos.png',
   'conhece-seu-corpo': 'conhece-seu-corpo.jpg',
   'nutrido-vs-alimentado': 'nutrido-vs-alimentado.jpg',
   'alimentacao-rotina': 'alimentacao-rotina.jpg',
@@ -122,8 +129,16 @@ export function getOGImageUrl(
     normalized = normalizeTemplateSlug(templateSlug)
   }
   
-  // Obter nome do arquivo do mapeamento
-  const fileName = OG_IMAGE_SLUG_MAP[normalized] || OG_IMAGE_SLUG_MAP.default
+  // ✅ Normalizar acentos para garantir que funcione mesmo com acentos no slug
+  // Ex: "retencao-inchaço" -> "retencao-inchaco"
+  const normalizedWithoutAccents = normalized
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+  
+  // Tentar primeiro com acentos, depois sem acentos
+  const fileName = OG_IMAGE_SLUG_MAP[normalized] || 
+                   OG_IMAGE_SLUG_MAP[normalizedWithoutAccents] || 
+                   OG_IMAGE_SLUG_MAP.default
   
   // Construir caminho completo com área
   const imagePath = `/images/og/${area}/${fileName}`
@@ -132,9 +147,10 @@ export function getOGImageUrl(
   console.log(`[OG Image] Looking for image (area: ${area}):`, {
     originalSlug: templateSlug,
     normalized,
+    normalizedWithoutAccents,
     fileName,
     imagePath,
-    hasMapping: !!OG_IMAGE_SLUG_MAP[normalized],
+    hasMapping: !!OG_IMAGE_SLUG_MAP[normalized] || !!OG_IMAGE_SLUG_MAP[normalizedWithoutAccents],
   })
   
   return imagePath
