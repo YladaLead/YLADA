@@ -29,11 +29,16 @@ export default function PWAInitializer() {
         
         // Verificar se service worker já está ativo
         try {
-          const swActive = await isServiceWorkerActive()
-          if (swActive) {
-            console.log('[PWA Initializer] ✅ Service Worker já está ativo, não precisa registrar novamente')
+          // Verificar se a função existe e é uma função antes de chamar
+          if (isServiceWorkerActive && typeof isServiceWorkerActive === 'function') {
+            const swActive = await isServiceWorkerActive()
+            if (swActive) {
+              console.log('[PWA Initializer] ✅ Service Worker já está ativo, não precisa registrar novamente')
+            } else {
+              console.log('[PWA Initializer] ⚠️ Service Worker não está ativo, mas não vamos forçar registro aqui')
+            }
           } else {
-            console.log('[PWA Initializer] ⚠️ Service Worker não está ativo, mas não vamos forçar registro aqui')
+            console.warn('[PWA Initializer] isServiceWorkerActive não está disponível')
           }
         } catch (error) {
           console.warn('[PWA Initializer] Erro ao verificar service worker:', error)
@@ -73,7 +78,9 @@ export default function PWAInitializer() {
       }
 
       // Adicionar listeners para detectar quando app volta
-      document.addEventListener('visibilitychange', handleVisibilityChange)
+      if (typeof document !== 'undefined') {
+        document.addEventListener('visibilitychange', handleVisibilityChange)
+      }
       
       // Para PWA, também ouvir eventos de pageshow (quando volta de cache)
       const handlePageShow = (event: PageTransitionEvent) => {
@@ -84,11 +91,17 @@ export default function PWAInitializer() {
         }
       }
 
-      window.addEventListener('pageshow', handlePageShow)
+      if (typeof window !== 'undefined') {
+        window.addEventListener('pageshow', handlePageShow)
+      }
 
       return () => {
-        document.removeEventListener('visibilitychange', handleVisibilityChange)
-        window.removeEventListener('pageshow', handlePageShow)
+        if (typeof document !== 'undefined') {
+          document.removeEventListener('visibilitychange', handleVisibilityChange)
+        }
+        if (typeof window !== 'undefined') {
+          window.removeEventListener('pageshow', handlePageShow)
+        }
       }
     }
 

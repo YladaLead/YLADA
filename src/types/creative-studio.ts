@@ -13,7 +13,7 @@ export interface VideoClip {
   startTime: number
   endTime: number
   source: string
-  type: 'video' | 'image' | 'text'
+  type: 'video' | 'image' | 'text' | 'audio'
   effects?: string[]
   speed?: number
   rotation?: number
@@ -28,6 +28,17 @@ export interface VideoClip {
     contrast: number
     saturation: number
   }
+}
+
+export interface AudioClip {
+  id: string
+  startTime: number
+  endTime: number
+  source: string // URL ou data URL do áudio
+  text: string // Texto que foi narrado
+  voice: string // Voz usada (alloy, echo, etc)
+  duration: number // Duração em segundos
+  volume?: number // Volume (0-1)
 }
 
 // Sistema de Legendas/Captions

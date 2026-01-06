@@ -1,5 +1,5 @@
 import { ReactNode } from 'react'
-import AdminProtectedRoute from '@/components/auth/AdminProtectedRoute'
+import ProtectedRoute from '@/components/auth/ProtectedRoute'
 
 interface CreativeStudioLayoutProps {
   children: ReactNode
@@ -7,13 +7,13 @@ interface CreativeStudioLayoutProps {
 
 /**
  * Layout protegido para Creative Studio
- * Apenas administradores podem acessar
+ * Requer autenticação, mas não necessariamente admin
  */
 export default function CreativeStudioLayout({ children }: CreativeStudioLayoutProps) {
   return (
-    <AdminProtectedRoute>
+    <ProtectedRoute allowAdmin={true}>
       {children}
-    </AdminProtectedRoute>
+    </ProtectedRoute>
   )
 }
 

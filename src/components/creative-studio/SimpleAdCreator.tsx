@@ -6,6 +6,7 @@ import { useAuthenticatedFetch } from '@/hooks/useAuthenticatedFetch'
 import { useCreativeStudioStore } from '@/stores/creative-studio-store'
 import { VideoPlayer } from './VideoPlayer'
 import { VideoExporter } from './VideoExporter'
+import { VoiceGenerator } from './VoiceGenerator'
 import { Timeline } from './Timeline'
 import { HorizontalTimeline } from './HorizontalTimeline'
 import { FileUploader } from './FileUploader'
@@ -13,6 +14,14 @@ import { ScriptReview } from './ScriptReview'
 import { StoryboardView } from './StoryboardView'
 import { ManualImageSearch } from './ManualImageSearch'
 import { SceneImageSelector } from './SceneImageSelector'
+import { ImagePromptGenerator } from './ImagePromptGenerator'
+import { CaptionEditor } from './CaptionEditor'
+import { AutoVideoBuilder } from './AutoVideoBuilder'
+import { ResizablePanel } from './ResizablePanel'
+import { SimpleVideoPreview } from './SimpleVideoPreview'
+import { SimpleTimeline } from './SimpleTimeline'
+import { SimpleOptions } from './SimpleOptions'
+import { identifyDor, getSearchTermsForDor, getImagePromptForDor, type DorType } from '@/lib/creative-studio/dor-mapper'
 
 interface Script {
   hook: string
@@ -41,6 +50,8 @@ export function SimpleAdCreator() {
   const [showManualSearch, setShowManualSearch] = useState(false)
   const [approvedScenes, setApprovedScenes] = useState<Map<number, string[]>>(new Map())
   const [currentSceneIndex, setCurrentSceneIndex] = useState(0)
+  const [missingImagePrompts, setMissingImagePrompts] = useState<Map<number, { prompt: string; dor: DorType; description: string }>>(new Map())
+  const [autoSearchImages, setAutoSearchImages] = useState(false) // Modo "Só Roteiro" por padrão
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const authenticatedFetch = useAuthenticatedFetch()
   const { clips, addClip, setClips, deleteClip, duplicateClip, updateClip } = useCreativeStudioStore()
@@ -268,8 +279,24 @@ export function SimpleAdCreator() {
           scenes: adjustedScenes,
         }
 
-        // Buscar imagens automaticamente para todas as cenas
+        // Definir script pendente
         setPendingScript(adjustedScript)
+        
+        // Se autoSearchImages estiver desativado, apenas mostrar roteiro
+        if (!autoSearchImages) {
+          setMessages((prev) => [
+            ...prev,
+            {
+              role: 'assistant',
+              content: `✅ Roteiro criado! ${adjustedScript.scenes.length} cenas prontas.\n\n📝 **Modo Manual Ativado:** Você pode adicionar imagens manualmente usando:\n• Botão "Buscar Imagens Manualmente" acima\n• Ou adicionar imagens diretamente nas cenas abaixo\n\n💡 Dica: Ative "Buscar Imagens Automaticamente" se quiser que o sistema busque por você.`,
+              script: adjustedScript,
+            },
+          ])
+          setIsLoading(false)
+          return
+        }
+
+        // Buscar imagens automaticamente para todas as cenas (só se autoSearchImages estiver ativo)
         setMessages((prev) => [
           ...prev,
           {
@@ -282,22 +309,18 @@ export function SimpleAdCreator() {
         // Buscar imagens para cada cena em paralelo
         const imagePromises = adjustedScript.scenes.map(async (scene: any) => {
           try {
-            // Verificar se precisa de imagem YLADA
+            // Verificar se precisa de imagem YLADA (dashboard, logo, etc)
             const needsYladaImage = scene.imageDescription?.toLowerCase().includes('dashboard') ||
                                    scene.imageDescription?.toLowerCase().includes('ylada') ||
                                    scene.imageDescription?.toLowerCase().includes('marca') ||
                                    scene.imageDescription?.toLowerCase().includes('logo') ||
                                    scene.imageDescription?.toLowerCase().includes('plataforma') ||
                                    scene.imageDescription?.toLowerCase().includes('programilada')
-            
-            const shouldCreate = needsYladaImage ||
-                               scene.imageDescription?.toLowerCase().includes('botão') ||
-                               scene.imageDescription?.toLowerCase().includes('gráfico') ||
-                               scene.imageDescription?.toLowerCase().includes('customizado')
 
             let imageUrl: string | null = null
+            const newMissingPrompts = new Map(missingImagePrompts)
 
-            // Prioridade 1: Biblioteca YLADA (se necessário)
+            // PRIORIDADE 1: Biblioteca YLADA (se necessário para dashboard/logo)
             if (needsYladaImage) {
               try {
                 const yladaResponse = await authenticatedFetch('/api/creative-studio/search-media-library', {
@@ -307,15 +330,15 @@ export function SimpleAdCreator() {
                     query: scene.imageDescription,
                     area: 'nutri',
                     purpose: scene.number <= 2 ? 'hook' : scene.number <= 3 ? 'solucao' : 'cta',
-                    mediaType: 'image',
+                    type: 'image',
                     count: 1,
                   }),
                 })
                 
                 if (yladaResponse.ok) {
                   const yladaData = await yladaResponse.json()
-                  if (yladaData.media && yladaData.media.length > 0) {
-                    imageUrl = yladaData.media[0].file_url
+                  if (yladaData.images && yladaData.images.length > 0) {
+                    imageUrl = yladaData.images[0].url
                   }
                 }
               } catch (err) {
@@ -323,75 +346,97 @@ export function SimpleAdCreator() {
               }
             }
 
-            // Prioridade 2: Criar com DALL-E (se necessário e não encontrou YLADA)
-            if (shouldCreate && !imageUrl) {
-              try {
-                const createResponse = await authenticatedFetch('/api/creative-studio/search-images', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({
-                    query: `Professional ${scene.imageDescription}, Instagram ads style, vertical 9:16, high quality, modern design`,
-                    type: 'create',
-                    count: 1,
-                  }),
-                })
-
-                if (createResponse.ok) {
-                  const createData = await createResponse.json()
-                  if (createData.images?.[0]) {
-                    imageUrl = createData.images[0].url
-                  }
-                }
-              } catch (err) {
-                console.warn(`Erro ao criar imagem para CENA ${scene.number}:`, err)
-              }
-            }
-
-            // Prioridade 3: Buscar no Pexels/Biblioteca (se ainda não encontrou)
+            // PRIORIDADE 2: Buscar no acervo próprio (Envato) usando mapeamento de dores
             if (!imageUrl) {
               try {
-                // Tentar biblioteca própria primeiro
-                const libraryResponse = await authenticatedFetch('/api/creative-studio/search-media-library', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({
-                    query: scene.imageDescription,
-                    area: 'nutri',
-                    purpose: scene.number <= 2 ? 'hook' : scene.number <= 3 ? 'solucao' : 'cta',
-                    mediaType: 'image',
-                    count: 1,
-                  }),
-                })
+                // Identificar a dor da cena
+                const dor = identifyDor(scene.imageDescription || scene.text || '')
+                const searchTerms = getSearchTermsForDor(dor)
                 
-                if (libraryResponse.ok) {
-                  const libraryData = await libraryResponse.json()
-                  if (libraryData.media && libraryData.media.length > 0) {
-                    imageUrl = libraryData.media[0].file_url
+                // Tentar buscar com termos específicos da dor
+                let libraryResponse = null
+                for (const term of searchTerms.slice(0, 3)) { // Tentar até 3 termos
+                  libraryResponse = await authenticatedFetch('/api/creative-studio/search-media-library', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      query: term,
+                      area: 'nutri',
+                      purpose: scene.number <= 2 ? 'hook' : scene.number <= 3 ? 'solucao' : 'cta',
+                      type: 'image',
+                      count: 1,
+                    }),
+                  })
+                  
+                  if (libraryResponse.ok) {
+                    const libraryData = await libraryResponse.json()
+                    if (libraryData.images && libraryData.images.length > 0) {
+                      imageUrl = libraryData.images[0].url
+                      break // Encontrou, parar busca
+                    }
                   }
                 }
 
-                // Se não encontrou na biblioteca, buscar no Pexels
+                // Se não encontrou com termos específicos, tentar com descrição original
                 if (!imageUrl) {
-                  const pexelsResponse = await authenticatedFetch('/api/creative-studio/search-images', {
+                  libraryResponse = await authenticatedFetch('/api/creative-studio/search-media-library', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                       query: scene.imageDescription,
-                      type: 'search',
+                      area: 'nutri',
+                      purpose: scene.number <= 2 ? 'hook' : scene.number <= 3 ? 'solucao' : 'cta',
+                      type: 'image',
                       count: 1,
                     }),
                   })
-
-                  if (pexelsResponse.ok) {
-                    const pexelsData = await pexelsResponse.json()
-                    if (pexelsData.images?.[0]) {
-                      imageUrl = pexelsData.images[0].url
+                  
+                  if (libraryResponse.ok) {
+                    const libraryData = await libraryResponse.json()
+                    if (libraryData.images && libraryData.images.length > 0) {
+                      imageUrl = libraryData.images[0].url
                     }
                   }
                 }
               } catch (err) {
-                console.warn(`Erro ao buscar imagem para CENA ${scene.number}:`, err)
+                console.warn(`Erro ao buscar no acervo para CENA ${scene.number}:`, err)
               }
+            }
+
+            // PRIORIDADE 3: Buscar no Pexels (gratuito) como fallback
+            if (!imageUrl) {
+              try {
+                const pexelsResponse = await authenticatedFetch('/api/creative-studio/search-images', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    query: scene.imageDescription,
+                    type: 'search',
+                    count: 1,
+                  }),
+                })
+
+                if (pexelsResponse.ok) {
+                  const pexelsData = await pexelsResponse.json()
+                  if (pexelsData.images?.[0]) {
+                    imageUrl = pexelsData.images[0].url
+                  }
+                }
+              } catch (err) {
+                console.warn(`Erro ao buscar no Pexels para CENA ${scene.number}:`, err)
+              }
+            }
+
+            // PRIORIDADE 4: Se não encontrou em lugar nenhum, gerar prompt para ChatGPT
+            // NÃO criar automaticamente com DALL-E (economia de créditos)
+            if (!imageUrl) {
+              const dor = identifyDor(scene.imageDescription || scene.text || '')
+              const prompt = getImagePromptForDor(dor, scene.imageDescription)
+              newMissingPrompts.set(scene.number, {
+                prompt,
+                dor,
+                description: scene.imageDescription || scene.text || ''
+              })
             }
 
             return { sceneNumber: scene.number, imageUrl }
@@ -406,23 +451,47 @@ export function SimpleAdCreator() {
         
         // Adicionar imagens encontradas como sugestões
         const newApprovedScenes = new Map<number, string[]>()
+        const newMissingPrompts = new Map<number, { prompt: string; dor: DorType; description: string }>()
+        
         imageResults.forEach(({ sceneNumber, imageUrl }) => {
           if (imageUrl) {
             newApprovedScenes.set(sceneNumber, [imageUrl])
           }
         })
         
+        // Coletar prompts de cenas sem imagem
+        adjustedScript.scenes.forEach((scene: any) => {
+          if (!newApprovedScenes.has(scene.number)) {
+            const dor = identifyDor(scene.imageDescription || scene.text || '')
+            const prompt = getImagePromptForDor(dor, scene.imageDescription)
+            newMissingPrompts.set(scene.number, {
+              prompt,
+              dor,
+              description: scene.imageDescription || scene.text || ''
+            })
+          }
+        })
+        
         setApprovedScenes(newApprovedScenes)
+        setMissingImagePrompts(newMissingPrompts)
 
         // Atualizar mensagem
         const foundCount = imageResults.filter(r => r.imageUrl).length
+        const missingCount = adjustedScript.scenes.length - foundCount
+        
+        let messageContent = `✅ Roteiro criado! Encontrei imagens para ${foundCount} de ${adjustedScript.scenes.length} cenas.`
+        
+        if (missingCount > 0) {
+          messageContent += `\n\n⚠️ ${missingCount} cena(s) não encontrou imagem no acervo. Veja abaixo os prompts para gerar no ChatGPT.`
+        }
+        
         setMessages((prev) => {
           const lastMsg = prev[prev.length - 1]
           return [
             ...prev.slice(0, -1),
             {
               ...lastMsg,
-              content: `✅ Roteiro criado! Encontrei imagens para ${foundCount} de ${adjustedScript.scenes.length} cenas. Revise abaixo e ajuste se necessário.`,
+              content: messageContent,
             },
           ]
         })
@@ -446,15 +515,60 @@ export function SimpleAdCreator() {
   const handleApproveScript = async () => {
     if (!pendingScript) return
 
-    // Não buscar automaticamente - mostrar seletor de imagens por cena
+    // 1. Auto-preencher legendas com os textos das cenas
+    const { addCaption } = useCreativeStudioStore.getState()
+    
+    pendingScript.scenes.forEach((scene: any) => {
+      // Determinar estilo baseado no tipo de cena
+      let style: 'hook' | 'dor' | 'solucao' | 'cta' | 'default' = 'default'
+      const textLower = scene.text.toLowerCase()
+      if (textLower.includes('agenda') || textLower.includes('vazia') || textLower.includes('frustração')) {
+        style = 'dor'
+      } else if (textLower.includes('ylada') || textLower.includes('solução') || textLower.includes('organiza')) {
+        style = 'solucao'
+      } else if (textLower.includes('acesse') || textLower.includes('comece') || textLower.includes('mudar')) {
+        style = 'cta'
+      }
+      
+      addCaption({
+        id: `auto-caption-${scene.number}-${Date.now()}`,
+        text: scene.text,
+        startTime: scene.startTime,
+        endTime: scene.endTime,
+        style,
+        position: 'center',
+        animation: 'fade-in',
+        highlightWords: [],
+      })
+    })
+
+    // 2. Verificar se já tem imagens aprovadas para todas as cenas
+    const allScenesHaveImages = pendingScript.scenes.every((scene: any) => {
+      const sceneImages = approvedScenes.get(scene.number)
+      return sceneImages && Array.isArray(sceneImages) && sceneImages.length > 0
+    })
+
+    // 3. Se já tem imagens em todas as cenas, montar vídeo diretamente
+    if (allScenesHaveImages) {
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: 'assistant',
+          content: `✅ Todas as cenas já têm imagens! Legendas criadas automaticamente. Montando vídeo agora...`,
+        },
+      ])
+      handleFinalizeVideo()
+      return
+    }
+
+    // 4. Se não tem todas as imagens, mostrar seletor por cena
     setCurrentSceneIndex(0)
-    setApprovedScenes(new Map())
     
     setMessages((prev) => [
       ...prev,
       {
         role: 'assistant',
-        content: `✅ Roteiro aprovado! Agora vamos escolher as imagens para cada cena.\n\nVocê pode:\n• Criar imagem com IA\n• Fazer upload da sua imagem\n• Aprovar a imagem sugerida`,
+        content: `✅ Roteiro aprovado! Legendas criadas automaticamente.\n\nAgora vamos escolher as imagens para cada cena.\n\nVocê pode:\n• Criar imagem com IA\n• Fazer upload da sua imagem\n• Aprovar a imagem sugerida`,
       },
     ])
   }
@@ -462,7 +576,7 @@ export function SimpleAdCreator() {
   const handleSceneImageApprove = async (sceneNumber: number, imageUrl: string) => {
     setApprovedScenes((prev) => {
       const newMap = new Map(prev)
-      newMap.set(sceneNumber, imageUrl)
+      newMap.set(sceneNumber, [imageUrl])
       return newMap
     })
 
@@ -533,7 +647,10 @@ export function SimpleAdCreator() {
       // Adicionar imagens aprovadas primeiro (suporta múltiplas imagens por cena)
       const images: Array<{ url: string; sceneNumber: number; startTime: number; endTime: number }> = []
       
-      for (const scene of scriptToUse.scenes) {
+      // Ordenar cenas por número para garantir ordem correta
+      const sortedScenes = [...scriptToUse.scenes].sort((a, b) => a.number - b.number)
+      
+      for (const scene of sortedScenes) {
         const approvedImages = approvedScenes.get(scene.number)
         if (approvedImages && approvedImages.length > 0) {
           // Se tem múltiplas imagens, dividir o tempo da cena entre elas
@@ -553,6 +670,8 @@ export function SimpleAdCreator() {
           })
         }
       }
+      
+      console.log(`📸 Imagens aprovadas coletadas: ${images.length} imagens de ${approvedScenes.size} cenas`)
 
       // Buscar imagens para cenas que não foram aprovadas
       for (let i = 0; i < scriptToUse.scenes.length; i++) {
@@ -591,16 +710,16 @@ export function SimpleAdCreator() {
                 query: scene.imageDescription,
                 area: 'nutri',
                 purpose: scene.number <= 2 ? 'hook' : scene.number <= 3 ? 'solucao' : 'cta',
-                mediaType: 'image',
+                type: 'image',
                 count: 1,
               }),
             })
             
             if (yladaResponse.ok) {
               const yladaData = await yladaResponse.json()
-              if (yladaData.media && yladaData.media.length > 0) {
+              if (yladaData.images && yladaData.images.length > 0) {
                 images.push({
-                  url: yladaData.media[0].file_url,
+                  url: yladaData.images[0].url,
                   sceneNumber: scene.number,
                   startTime: scene.startTime,
                   endTime: scene.endTime,
@@ -614,41 +733,9 @@ export function SimpleAdCreator() {
           }
         }
         
-        if (shouldCreate && !imageFound) {
-          // Criar com DALL-E
-          console.log(`🎨 Criando imagem com DALL-E para CENA ${scene.number}`)
-          try {
-            const imageResponse = await authenticatedFetch('/api/creative-studio/search-images', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                query: `Professional ${scene.imageDescription}, Instagram ads style, vertical 9:16, high quality, modern design`,
-                type: 'create',
-                count: 1,
-              }),
-            })
-
-            if (imageResponse.ok) {
-              const imageData = await imageResponse.json()
-              if (imageData.images?.[0]) {
-                images.push({
-                  url: imageData.images[0].url,
-                  sceneNumber: scene.number,
-                  startTime: scene.startTime,
-                  endTime: scene.endTime,
-                })
-                console.log(`✅ Imagem criada para CENA ${scene.number}`)
-                imageFound = true
-              } else {
-                console.warn(`⚠️ Nenhuma imagem retornada para CENA ${scene.number}`)
-              }
-            } else {
-              console.error(`❌ Erro ao criar imagem para CENA ${scene.number}`)
-            }
-          } catch (err) {
-            console.error(`❌ Erro ao criar imagem para CENA ${scene.number}:`, err)
-          }
-        }
+        // REMOVIDO: Criação automática com DALL-E
+        // Agora o sistema gera prompt para ChatGPT ao invés de criar automaticamente
+        // Isso economiza créditos e dá controle ao usuário
         
         if (!imageFound) {
           // Buscar no Pexels ou biblioteca própria
@@ -663,16 +750,16 @@ export function SimpleAdCreator() {
                 query: scene.imageDescription,
                 area: 'nutri',
                 purpose: scene.number <= 2 ? 'hook' : scene.number <= 3 ? 'solucao' : 'cta',
-                mediaType: 'image',
+                type: 'image',
                 count: 1,
               }),
             })
             
             if (libraryResponse.ok) {
               const libraryData = await libraryResponse.json()
-              if (libraryData.media && libraryData.media.length > 0) {
+              if (libraryData.images && libraryData.images.length > 0) {
                 images.push({
-                  url: libraryData.media[0].file_url,
+                  url: libraryData.images[0].url,
                   sceneNumber: scene.number,
                   startTime: scene.startTime,
                   endTime: scene.endTime,
@@ -744,10 +831,12 @@ export function SimpleAdCreator() {
         console.log(`📊 Total de imagens encontradas: ${images.length} de ${scriptToUse.scenes.length}`)
 
       // Adicionar imagens à timeline com duração garantida de 2-3 segundos
+      // IMPORTANTE: Manter os tempos originais das cenas, não recalcular
       const newClips = images.map((img, index) => {
-        // Garantir duração mínima de 2.5 segundos e máxima de 3 segundos
-        const duration = Math.max(2.5, Math.min(3, img.endTime - img.startTime))
-        const adjustedStartTime = index === 0 ? 0 : images[index - 1].endTime
+        // Usar os tempos originais da cena, garantindo duração mínima de 2.5s
+        const originalDuration = img.endTime - img.startTime
+        const duration = Math.max(2.5, originalDuration)
+        const adjustedStartTime = img.startTime
         const adjustedEndTime = adjustedStartTime + duration
         
         return {
@@ -758,8 +847,24 @@ export function SimpleAdCreator() {
           type: 'image' as const,
         }
       })
+      
+      // Ordenar clips por startTime para garantir ordem correta
+      newClips.sort((a, b) => a.startTime - b.startTime)
+      
+      console.log(`🎬 Clips criados:`, newClips.map(c => ({
+        id: c.id,
+        start: c.startTime,
+        end: c.endTime,
+        duration: c.endTime - c.startTime,
+        source: c.source.substring(0, 50) + '...'
+      })))
 
       setClips(newClips)
+
+      // Limpar estados após montar o vídeo
+      setPendingScript(null)
+      setCurrentSceneIndex(0)
+      setApprovedScenes(new Map())
 
       setMessages((prev) => [
         ...prev,
@@ -820,43 +925,53 @@ export function SimpleAdCreator() {
 
   return (
     <div className="h-full flex gap-4 overflow-hidden">
-      {/* LADO ESQUERDO - COMPACTO, TUDO VISÍVEL, SEM SCROLL */}
-      <div className="w-[400px] flex-shrink-0 flex flex-col gap-3 overflow-hidden">
-        {/* Preview */}
+      {/* LADO ESQUERDO - REDIMENSIONÁVEL */}
+      <ResizablePanel defaultWidth={400} minWidth={300} maxWidth={800}>
+        {/* Preview Simplificado */}
         <div className="flex-shrink-0 bg-white rounded-lg shadow-sm p-3">
-          <h3 className="text-xs font-semibold text-gray-700 mb-2 uppercase">Preview</h3>
-          {clips.length > 0 ? (
-            <div className="aspect-video bg-black rounded overflow-hidden">
-              <VideoPlayer />
-            </div>
-          ) : (
-            <div className="aspect-video bg-gray-100 rounded border-2 border-dashed border-gray-300 flex items-center justify-center">
-              <p className="text-gray-400 text-xs text-center px-2">Nenhum clip na timeline</p>
-            </div>
-          )}
+          <h3 className="text-xs font-semibold text-gray-700 mb-2 uppercase">Preview do Vídeo</h3>
+          <SimpleVideoPreview />
         </div>
 
-        {/* Exportar */}
+        {/* Opções Simples */}
         <div className="flex-shrink-0">
-          <VideoExporter />
+          <SimpleOptions />
         </div>
 
-        {/* Timeline - Horizontal Estilo CapCut */}
-        <div className="flex-shrink-0 bg-white rounded-lg shadow-sm p-3">
-          <h3 className="text-xs font-semibold text-gray-700 mb-2 uppercase">Timeline</h3>
-          <div className="max-h-[200px] overflow-y-auto">
-            <HorizontalTimeline />
+        {/* Montagem Automática - NOVO MODO SIMPLIFICADO */}
+        <div className="flex-shrink-0">
+          <AutoVideoBuilder 
+            script={pendingScript || undefined}
+            images={Array.from(approvedScenes.values()).flat()}
+          />
+        </div>
+
+        {/* Gerador de Voz */}
+        <div className="flex-shrink-0">
+          <VoiceGenerator />
+        </div>
+
+        {/* Timeline Simplificada */}
+        <div className="bg-white rounded-lg shadow-sm p-3">
+          <SimpleTimeline />
+        </div>
+
+        {/* Editor de Legendas */}
+        <div className="bg-white rounded-lg shadow-sm p-3">
+          <h3 className="text-xs font-semibold text-gray-700 mb-2 uppercase">Legendas</h3>
+          <div className="max-h-[250px] overflow-y-auto">
+            <CaptionEditor />
           </div>
         </div>
 
         {/* Upload - Compacto */}
-        <div className="flex-shrink-0 bg-white rounded-lg shadow-sm p-3">
+        <div className="bg-white rounded-lg shadow-sm p-3">
           <h3 className="text-xs font-semibold text-gray-700 mb-2 uppercase">Adicionar Arquivos</h3>
           <div className="max-h-[100px] overflow-y-auto">
             <FileUploader />
           </div>
         </div>
-      </div>
+      </ResizablePanel>
 
       {/* LADO DIREITO - CHAT COM SCROLL */}
       <div className="flex-1 flex flex-col min-h-0 bg-white rounded-lg shadow-sm overflow-hidden">
@@ -867,13 +982,33 @@ export function SimpleAdCreator() {
             <h3 className="font-semibold text-gray-900">Assistente</h3>
           </div>
           <p className="text-xs text-gray-600 mt-1">Digite o que você quer e eu crio tudo automaticamente</p>
-          <button
-            onClick={() => setShowManualSearch(!showManualSearch)}
-            className="mt-2 px-3 py-1.5 text-xs bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 font-medium flex items-center gap-1"
-          >
-            <Search className="w-3 h-3" />
-            {showManualSearch ? 'Fechar' : 'Buscar Imagens Manualmente'}
-          </button>
+          <div className="flex gap-2 mt-2">
+            <button
+              onClick={() => setShowManualSearch(!showManualSearch)}
+              className="px-3 py-1.5 text-xs bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 font-medium flex items-center gap-1"
+            >
+              <Search className="w-3 h-3" />
+              {showManualSearch ? 'Fechar' : 'Buscar Imagens Manualmente'}
+            </button>
+            <button
+              onClick={() => setAutoSearchImages(!autoSearchImages)}
+              className={`px-3 py-1.5 text-xs rounded-lg font-medium flex items-center gap-1 ${
+                autoSearchImages
+                  ? 'bg-green-100 text-green-700 hover:bg-green-200'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              {autoSearchImages ? (
+                <>
+                  <span>✓</span> Busca Automática Ativa
+                </>
+              ) : (
+                <>
+                  <span>○</span> Só Roteiro (Manual)
+                </>
+              )}
+            </button>
+          </div>
         </div>
 
         {/* Mensagens - Scroll Independente */}
@@ -903,29 +1038,31 @@ export function SimpleAdCreator() {
                   </div>
                 )}
               </div>
-              {msg.script && (
-                <StoryboardView
-                  script={msg.script}
-                  approvedImages={approvedScenes}
-                  onTextChange={(sceneNumber, newText) => {
-                    handleEditScene(sceneNumber, newText)
-                    // Atualizar o script na mensagem também
-                    setMessages((prev) =>
-                      prev.map((m) => {
-                        if (m.script && m.script.scenes.some((s: any) => s.number === sceneNumber)) {
-                          const updatedScenes = m.script.scenes.map((s: any) =>
-                            s.number === sceneNumber ? { ...s, text: newText } : s
-                          )
-                          return { ...m, script: { ...m.script, scenes: updatedScenes } }
-                        }
-                        return m
-                      })
-                    )
-                  }}
+              {msg.script && !pendingScript && (
+                <>
+                  <StoryboardView
+                    script={msg.script}
+                    approvedImages={approvedScenes}
+                    onTextChange={(sceneNumber, newText) => {
+                      handleEditScene(sceneNumber, newText)
+                      // Atualizar o script na mensagem também
+                      setMessages((prev) =>
+                        prev.map((m) => {
+                          if (m.script && m.script.scenes.some((s: any) => s.number === sceneNumber)) {
+                            const updatedScenes = m.script.scenes.map((s: any) =>
+                              s.number === sceneNumber ? { ...s, text: newText } : s
+                            )
+                            return { ...m, script: { ...m.script, scenes: updatedScenes } }
+                          }
+                          return m
+                        })
+                      )
+                    }}
                   onImageSelect={(sceneNumber, imageUrl) => {
                     setApprovedScenes((prev) => {
                       const newMap = new Map(prev)
-                      const currentImages = newMap.get(sceneNumber) || []
+                      const currentImagesRaw = newMap.get(sceneNumber)
+                      const currentImages = Array.isArray(currentImagesRaw) ? currentImagesRaw : []
                       // Adicionar nova imagem se não existir
                       if (!currentImages.includes(imageUrl)) {
                         newMap.set(sceneNumber, [...currentImages, imageUrl])
@@ -933,50 +1070,87 @@ export function SimpleAdCreator() {
                       return newMap
                     })
                   }}
-                  onImageRemove={(sceneNumber, imageIndex) => {
-                    setApprovedScenes((prev) => {
-                      const newMap = new Map(prev)
-                      const currentImages = newMap.get(sceneNumber) || []
-                      const updatedImages = currentImages.filter((_, idx) => idx !== imageIndex)
-                      if (updatedImages.length > 0) {
-                        newMap.set(sceneNumber, updatedImages)
-                      } else {
-                        newMap.delete(sceneNumber)
-                      }
-                      return newMap
-                    })
-                  }}
-                  onCreateImage={async (sceneNumber, customPrompt) => {
-                    const scene = msg.script?.scenes.find(s => s.number === sceneNumber)
+                    onCreateImage={async (sceneNumber, customPrompt) => {
+                      // NÃO criar automaticamente - retornar null para forçar uso do prompt
+                      return null
+                    }}
+                    onUploadImage={async (sceneNumber, file) => {
+                      return await handleUploadSceneImage(sceneNumber, file)
+                    }}
+                    onApprove={handleApproveScript}
+                  />
+                  
+                  {/* Mostrar prompts para cenas sem imagem */}
+                  {Array.from(missingImagePrompts.entries()).map(([sceneNumber, { prompt, dor, description }]) => {
+                    const scene = msg.script?.scenes.find((s: any) => s.number === sceneNumber)
                     if (!scene) return null
                     
-                    const prompt = customPrompt || scene.imageDescription
-                    try {
-                      const imageResponse = await authenticatedFetch('/api/creative-studio/search-images', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                          query: `Professional ${prompt}, Instagram ads style, vertical 9:16, high quality, modern design`,
-                          type: 'create',
-                          count: 1,
-                        }),
-                      })
-                      
-                      if (imageResponse.ok) {
-                        const imageData = await imageResponse.json()
-                        return imageData.images?.[0]?.url || null
-                      }
-                      return null
-                    } catch (error) {
-                      console.error('Erro ao criar imagem:', error)
-                      return null
-                    }
-                  }}
-                  onUploadImage={async (sceneNumber, file) => {
-                    return await handleUploadSceneImage(sceneNumber, file)
-                  }}
-                  onApprove={handleApproveScript}
-                />
+                    return (
+                      <div key={sceneNumber} className="mt-4">
+                        <ImagePromptGenerator
+                          sceneDescription={description}
+                          sceneNumber={sceneNumber}
+                          onPromptGenerated={(generatedPrompt, dorType) => {
+                            // Opcional: salvar prompt gerado
+                            console.log(`Prompt gerado para CENA ${sceneNumber}:`, generatedPrompt)
+                          }}
+                          onUploadImage={async (file) => {
+                            return await handleUploadSceneImage(sceneNumber, file)
+                          }}
+                          onCreateWithYaki={async (prompt) => {
+                            // Criar imagem com Yaki usando o prompt
+                            try {
+                              const imageResponse = await authenticatedFetch('/api/creative-studio/search-images', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                  query: prompt,
+                                  type: 'create',
+                                  count: 1,
+                                }),
+                              })
+                              
+                              if (imageResponse.ok) {
+                                const imageData = await imageResponse.json()
+                                const imageUrl = imageData.images?.[0]?.url || null
+                                
+                                // Adicionar automaticamente à cena se criou com sucesso
+                                if (imageUrl) {
+                                  setApprovedScenes((prev) => {
+                                    const newMap = new Map(prev)
+                                    const currentImages = newMap.get(sceneNumber) || []
+                                    if (!currentImages.includes(imageUrl)) {
+                                      newMap.set(sceneNumber, [...currentImages, imageUrl])
+                                    }
+                                    return newMap
+                                  })
+                                }
+                                
+                                return imageUrl
+                              }
+                              return null
+                            } catch (error) {
+                              console.error('Erro ao criar com Yaki:', error)
+                              return null
+                            }
+                          }}
+                          onEditImage={(imageUrl) => {
+                            // Abrir editor de imagem (pode ser um modal ou redirecionar)
+                            // Por enquanto, apenas adiciona à cena
+                            setApprovedScenes((prev) => {
+                              const newMap = new Map(prev)
+                              const currentImages = newMap.get(sceneNumber) || []
+                              if (!currentImages.includes(imageUrl)) {
+                                newMap.set(sceneNumber, [...currentImages, imageUrl])
+                              }
+                              return newMap
+                            })
+                          }}
+                        />
+                      </div>
+                    )
+                  })}
+                </>
               )}
             </div>
           ))}
@@ -996,12 +1170,13 @@ export function SimpleAdCreator() {
                 scene={pendingScript.scenes[currentSceneIndex]}
                 onApprove={(imageUrl) => handleSceneImageApprove(pendingScript.scenes[currentSceneIndex].number, imageUrl)}
                 onCreateWithAI={() => handleCreateSceneImage(pendingScript.scenes[currentSceneIndex])}
-                  onUpload={(file) => {
-                    const scene = pendingScript?.scenes[currentSceneIndex]
-                    if (scene) {
-                      handleUploadSceneImage(scene.number, file)
-                    }
-                  }}
+                onUpload={async (file) => {
+                  const scene = pendingScript?.scenes[currentSceneIndex]
+                  if (scene) {
+                    return await handleUploadSceneImage(scene.number, file)
+                  }
+                  return null
+                }}
                 onSkip={() => {
                   if (currentSceneIndex < pendingScript.scenes.length - 1) {
                     setCurrentSceneIndex(currentSceneIndex + 1)

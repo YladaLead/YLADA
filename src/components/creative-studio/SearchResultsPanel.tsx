@@ -191,9 +191,20 @@ export function SearchResultsPanel({ area = 'nutri', purpose = 'quick-ad' }: Sea
                 </p>
                 <p className="text-xs text-gray-400 mb-4">
                   {searchResults.searchQuery 
-                    ? `Não encontrei resultados para "${searchResults.searchQuery}"`
+                    ? `Não encontrei resultados para "${searchResults.searchQuery}" no banco de dados.`
                     : 'Peça ao assistente para buscar imagens.'}
                 </p>
+                {searchResults.searchQuery && (
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
+                    <p className="text-xs text-blue-800 font-medium mb-2">
+                      💡 Não encontrei no banco. Opções:
+                    </p>
+                    <ol className="text-xs text-blue-700 space-y-1 list-decimal list-inside">
+                      <li>Vá ao <strong>Envato Elements</strong> e busque: "{searchResults.searchQuery}"</li>
+                      <li>Depois, <strong>arraste a imagem aqui</strong> ou clique em "Adicionar"</li>
+                    </ol>
+                  </div>
+                )}
                 {searchResults.searchQuery && (
                   <button
                     onClick={async () => {

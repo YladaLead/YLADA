@@ -4,6 +4,7 @@
   "description": "YLADA - Your Lead Advanced Data Assistant for Health & Wellness",
   "private": true,
   "scripts": {
+    "predev": "bash scripts/sync-env-local.sh || true",
     "dev": "next dev",
     "dev:mobile": "next dev -H 0.0.0.0",
     "build": "next build",

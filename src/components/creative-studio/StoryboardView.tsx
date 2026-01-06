@@ -113,7 +113,8 @@ export function StoryboardView({
       onImageRemove(sceneNumber, imageIndex)
     } else {
       // Fallback: remover todas e adicionar as restantes
-      const currentImages = approvedImages.get(sceneNumber) || []
+      const currentImagesRaw = approvedImages.get(sceneNumber)
+      const currentImages = Array.isArray(currentImagesRaw) ? currentImagesRaw : []
       const updatedImages = currentImages.filter((_, idx) => idx !== imageIndex)
       // Por enquanto, apenas log - o componente pai precisa implementar onImageRemove
       console.log(`Remover imagem ${imageIndex} da cena ${sceneNumber}`)
@@ -141,7 +142,9 @@ export function StoryboardView({
       {/* Cenas em formato Storyboard */}
       <div className="space-y-4">
         {script.scenes.map((scene) => {
-          const sceneImages = approvedImages.get(scene.number) || []
+          const sceneImagesRaw = approvedImages.get(scene.number)
+          // Garantir que sempre seja um array
+          const sceneImages = Array.isArray(sceneImagesRaw) ? sceneImagesRaw : []
           const hasImage = sceneImages.length > 0
 
           return (

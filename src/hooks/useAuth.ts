@@ -164,6 +164,14 @@ export function useAuth() {
     const loadAuthData = async () => {
       if (!mounted) return
       
+      // Verificar se supabase está configurado
+      if (!supabase) {
+        console.warn('⚠️ useAuth: Supabase não está configurado. Verifique as variáveis de ambiente.')
+        setLoading(false)
+        setIsStable(true)
+        return
+      }
+      
       console.log('🔄 useAuth: Iniciando carregamento...', { isPWA })
       setIsStable(false) // Marcar como instável durante carregamento
       
@@ -177,7 +185,7 @@ export function useAuth() {
         
         // 🚀 FASE 2: Fallback para localStorage se cookies falharem
         let sessionToUse = currentSession
-        if (!sessionToUse && typeof window !== 'undefined') {
+        if (!sessionToUse && typeof window !== 'undefined' && supabase) {
           try {
             // Tentar recuperar do localStorage (Supabase armazena lá também)
             const storedSession = localStorage.getItem(`sb-${process.env.NEXT_PUBLIC_SUPABASE_URL?.split('//')[1]?.split('.')[0]}-auth-token`)
@@ -295,6 +303,11 @@ export function useAuth() {
     const timeoutDuration = isPWA ? 6000 : 8000
     loadingTimeout = setTimeout(() => {
       if (!mounted) return
+      if (!supabase) {
+        setLoading(false)
+        setIsStable(true)
+        return
+      }
       // Verificar se ainda está em loading e não temos sessão
       supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
         if (!mounted) return
@@ -307,9 +320,14 @@ export function useAuth() {
           setTimeout(() => {
             if (!mounted) return
             // Verificar novamente antes de marcar como não autenticado
+            if (!supabase) {
+              setLoading(false)
+              setIsStable(true)
+              return
+            }
             supabase.auth.getSession().then(({ data: { session: finalSession } }) => {
               if (!mounted) return
-              if (!finalSession) {
+              if (!finalSession && supabase) {
                 // Tentar refresh da sessão como último recurso
                 supabase.auth.refreshSession().then(({ data: { session: refreshedSession } }) => {
                   if (!mounted) return
@@ -357,6 +375,12 @@ export function useAuth() {
     let lastAuthEventTime = 0
     // 🚀 OTIMIZAÇÃO: Debounce reduzido de 1000ms para 300ms - mais responsivo
     const AUTH_EVENT_DEBOUNCE = 300 // 300ms entre eventos (reduzido de 1s)
+    
+    if (!supabase) {
+      setLoading(false)
+      setIsStable(true)
+      return () => {}
+    }
     
     const {
       data: { subscription },
@@ -493,6 +517,10 @@ export function useAuth() {
           }
           
           try {
+            if (!supabase) {
+              checkingSessionRef = false
+              return
+            }
             const { data: { session: currentSession } } = await supabase.auth.getSession()
             if (!mounted) {
               checkingSessionRef = false
@@ -580,6 +608,15 @@ export function useAuth() {
       } else if (currentPath.includes('/admin/')) {
         redirectPath = '/admin/login'
       }
+    }
+    
+    if (!supabase) {
+      console.warn('⚠️ signOut: Supabase não está configurado')
+      setUser(null)
+      setSession(null)
+      setUserProfile(null)
+      router.push(redirectPath)
+      return
     }
     
     await supabase.auth.signOut()
