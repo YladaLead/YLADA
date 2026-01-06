@@ -106,11 +106,28 @@ export async function GET(request: NextRequest) {
       templates = []
     }
 
+    // ✅ FILTRAR: Excluir template "Seu corpo está pedindo Detox?" das opções de vendas
+    // (incompleto no Wellness - sem template dedicado e diagnóstico específico)
+    const templatesFiltrados = templates.filter(template => {
+      const nomeLower = (template.name || '').toLowerCase()
+      const slugLower = (template.slug || '').toLowerCase()
+      
+      // Excluir se contiver "pedindo detox" ou "quiz-pedindo-detox"
+      const isPedindoDetox = nomeLower.includes('pedindo detox') || 
+                             nomeLower.includes('pedindo-detox') ||
+                             slugLower.includes('quiz-pedindo-detox') ||
+                             slugLower.includes('seu-corpo-esta-pedindo-detox') ||
+                             slugLower.includes('pedindo-detox')
+      
+      return !isPedindoDetox
+    })
+
     // Transformar para formato esperado pelo frontend
-    const formattedTemplates = formatTemplates(templates)
+    const formattedTemplates = formatTemplates(templatesFiltrados)
 
     // Log para debug
     console.log(`[API Wellness Templates] Templates encontrados: ${templates.length}`)
+    console.log(`[API Wellness Templates] Templates após filtro: ${templatesFiltrados.length}`)
     console.log(`[API Wellness Templates] Templates formatados: ${formattedTemplates.length}`)
 
     return NextResponse.json({

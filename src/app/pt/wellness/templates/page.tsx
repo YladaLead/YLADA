@@ -772,13 +772,16 @@ export default function WellnessTemplatesPage() {
                         (templateNameLower.includes('quiz') && templateNameLower.includes('perfil'))
                       )
                       
+                      // ✅ Excluído: "seu corpo está pedindo detox" (incompleto no Wellness)
                       const isQuizDetox = isQuizType && (
                         templateIdLower.includes('quiz-detox') || 
                         templateNameLower.includes('quiz detox') ||
-                        templateNameLower.includes('seu corpo está pedindo detox') ||
-                        templateNameLower.includes('corpo está pedindo detox') ||
-                        (templateNameLower.includes('quiz') && templateNameLower.includes('detox')) ||
-                        (templateNameLower.includes('detox') && templateNameLower.includes('corpo'))
+                        (templateNameLower.includes('quiz') && templateNameLower.includes('detox'))
+                      ) && !(
+                        templateNameLower.includes('pedindo detox') ||
+                        templateNameLower.includes('pedindo-detox') ||
+                        templateIdLower.includes('quiz-pedindo-detox') ||
+                        templateIdLower.includes('seu-corpo-esta-pedindo-detox')
                       )
                       
                       const isQuizEnergetico = isQuizType && (
