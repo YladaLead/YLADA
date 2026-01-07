@@ -12,11 +12,32 @@ interface EditorChatProps {
   area?: 'nutri' | 'coach' | 'wellness' | 'nutra'
   purpose?: 'quick-ad' | 'sales-page' | 'educational' | 'testimonial' | 'custom'
   objective?: string
+  campaignType?: string | null
+  ctaType?: string | null
   onSearchComplete?: (type: 'images' | 'videos') => void // Callback quando busca for concluída
 }
 
-export function EditorChat({ mode = 'edit', area = 'nutri', purpose = 'quick-ad', objective = '', onSearchComplete }: EditorChatProps) {
+export function EditorChat({ mode = 'edit', area = 'nutri', purpose = 'quick-ad', objective = '', campaignType = null, ctaType = null, onSearchComplete }: EditorChatProps) {
   const getInitialMessage = () => {
+    if (mode === 'create' && objective === 'kit-capcut-completo') {
+      return `🎬 Olá! Sou seu gerador de Kit CapCut Completo!
+
+Estou pronto para gerar materiais detalhados para seu editor de vídeo.
+
+📋 O que você vai receber:
+✅ Roteiro completo (narração segundo a segundo)
+✅ Termos de busca no Envato para cada imagem
+✅ Instruções detalhadas do CapCut
+✅ Checklist completo para o editor
+
+💬 Como usar:
+Apenas me diga o que você quer! Por exemplo:
+• "Kit sobre agenda vazia"
+• "Materiais para vídeo sobre templates prontos"
+• "Kit completo sobre captação de leads"
+
+Vou gerar tudo automaticamente e você pode copiar e entregar para seu editor! 🚀`
+    }
     if (mode === 'create' && objective === 'criar-do-zero') {
       return 'Olá! Vou criar seu vídeo do zero! 🎬\n\nCole seu roteiro completo no card acima e eu busco as imagens, você escolhe e eu monto tudo automaticamente!'
     }
@@ -203,6 +224,111 @@ export function EditorChat({ mode = 'edit', area = 'nutri', purpose = 'quick-ad'
 
   const handleSend = async (customMessage?: string) => {
     const messageToSend = customMessage || input.trim()
+    
+    // Detectar se o usuário está pedindo kit completo para editor de vídeo
+    // OU se já está na página de kit CapCut (objective === 'kit-capcut-completo')
+    // OU se pedir roteiro/anúncio (sempre usar kit com cenas de 3s)
+    const isKitRequest = objective === 'kit-capcut-completo' || 
+      /kit completo|editor de vídeo|capcut|materiais para editor|instruções para editor|detalhes para editor|roteiro|anúncio|vídeo de anúncio|crie para/i.test(messageToSend)
+    
+    if (isKitRequest && mode === 'create') {
+      // Extrair objetivo do contexto ou da mensagem
+      // Se já está na página de kit CapCut, usar a mensagem como objetivo
+      let kitObjective = messageToSend.trim()
+      
+      // Se a mensagem menciona "kit" ou similar, remover essas palavras para pegar o tema
+      if (/kit|editor|capcut|materiais|instruções|detalhes/gi.test(kitObjective)) {
+        kitObjective = kitObjective.replace(/kit completo|editor de vídeo|capcut|materiais para|instruções para|detalhes para|gerar|preciso de|quero/gi, '').trim()
+      }
+      
+      // Se não tiver objetivo claro, usar o objetivo padrão ou a mensagem completa
+      if (!kitObjective || kitObjective.length < 5) {
+        kitObjective = objective && objective !== 'kit-capcut-completo' ? objective : messageToSend.trim() || 'Anúncio YLADA NUTRI'
+      }
+      
+      setIsLoading(true)
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: 'user',
+          content: messageToSend,
+        },
+        {
+          role: 'assistant',
+          content: '🎬 Gerando kit completo para CapCut... Isso pode levar alguns segundos.',
+        },
+      ])
+      
+      try {
+        // Chamar API de geração de kit
+        const kitResponse = await authenticatedFetch('/api/creative-studio/generate-capcut-kit', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            objective: kitObjective,
+            area,
+            duration: 18,
+            style: purpose === 'sales-page' ? 'sales-page' : purpose === 'educational' ? 'educational' : 'quick-ad',
+            campaignType: campaignType || undefined,
+            ctaType: ctaType || undefined,
+          }),
+        })
+        
+        if (kitResponse.ok) {
+          const kitData = await kitResponse.json()
+          if (kitData.success && kitData.kit) {
+            const kit = kitData.kit
+            
+            // Formatar resposta OBJETIVA - apenas roteiro e imagens
+            let formattedKit = `🎬 ROTEIRO PARA CAPCUT
+
+${kit.script.scenes.map(scene => {
+  const imageInfo = kit.images.find(img => img.sceneNumber === scene.number)
+  return `CENA ${scene.number} (${scene.startTime}s - ${scene.endTime}s) - ${scene.type.toUpperCase()}
+Texto: "${scene.text}"
+Duração: ${scene.duration}s
+Transição: ${scene.transition || 'cut'}
+Imagem Envato: ${imageInfo?.searchTerms.join(', ') || 'sem termos'}
+💡 ${scene.notes || 'Trocar imagem a cada 3 segundos'}
+
+`
+}).join('\n')}
+
+📝 NARRAÇÃO COMPLETA:
+${kit.script.narration}
+
+🎨 IMAGENS (BUSCAR NO ENVATO):
+${kit.images.map(img => {
+  const scene = kit.script.scenes.find(s => s.number === img.sceneNumber)
+  return `Cena ${img.sceneNumber} (${scene?.type}): ${img.searchTerms.join(', ')}`
+}).join('\n')}`
+            
+            setMessages((prev) => [
+              ...prev.slice(0, -1), // Remove mensagem de "gerando..."
+              {
+                role: 'assistant',
+                content: formattedKit,
+              },
+            ])
+            setIsLoading(false)
+            return // Não continuar com o fluxo normal do chat
+          }
+        }
+      } catch (error: any) {
+        console.error('Erro ao gerar kit:', error)
+        setMessages((prev) => [
+          ...prev.slice(0, -1),
+          {
+            role: 'assistant',
+            content: `❌ Erro ao gerar kit completo. Tente novamente ou descreva o objetivo do anúncio.`,
+          },
+        ])
+        setIsLoading(false)
+        return
+      }
+    }
     if (!messageToSend || isLoading) return
 
     const userMessage = messageToSend
@@ -477,7 +603,8 @@ export function EditorChat({ mode = 'edit', area = 'nutri', purpose = 'quick-ad'
       let assistantMessage = data.response
 
       // Se detectou cenas no roteiro, buscar imagens para cada cena automaticamente
-      if (scenesToSearch.length > 0) {
+      // MAS: Pular busca automática se for kit CapCut (já vem com termos do Envato)
+      if (scenesToSearch.length > 0 && !isKitRequest) {
         console.log('🎬 [DEBUG] Buscando imagens para', scenesToSearch.length, 'cenas automaticamente')
         console.log('🎬 [DEBUG] Cenas:', scenesToSearch.map(s => ({ num: s.number, query: s.searchQuery })))
         
@@ -902,18 +1029,21 @@ export function EditorChat({ mode = 'edit', area = 'nutri', purpose = 'quick-ad'
         }
         
         // Agora que temos o termo de busca, iniciar a busca
+        // MAS: Pular mensagens intermediárias se for kit CapCut
         setIsSearchingImages(true)
         setSearchStatus('🔍 Buscando imagens...')
         setSearching(true, 'images', searchQuery)
         
-        // Adicionar mensagem de progresso no chat
-        setMessages((prev) => [
-          ...prev,
-          {
-            role: 'assistant',
-            content: `🔍 Buscando imagens relacionadas a "${searchQuery}"...`,
-          },
-        ])
+        // Adicionar mensagem de progresso no chat (apenas se NÃO for kit CapCut)
+        if (!isKitRequest) {
+          setMessages((prev) => [
+            ...prev,
+            {
+              role: 'assistant',
+              content: `🔍 Buscando imagens relacionadas a "${searchQuery}"...`,
+            },
+          ])
+        }
 
         // Traduzir termos comuns para inglês
         const translations: Record<string, string> = {
@@ -1034,18 +1164,21 @@ export function EditorChat({ mode = 'edit', area = 'nutri', purpose = 'quick-ad'
                 .map(word => word.toLowerCase())
                 .join(' ')
               
-              setMessages((prev) => {
-                const filtered = prev.filter(m => 
-                  !m.content.includes('🔍 Buscando imagens relacionadas...')
-                )
-                return [
-                  ...filtered,
-                  {
-                    role: 'assistant',
-                    content: `❌ Não encontrei imagens relacionadas a "${searchQuery}" no banco de dados.\n\n💡 **OPÇÕES:**\n\n1. **Vá ao Envato Elements** e busque: "${envatoSearchTerm}"\n   → Depois, arraste a imagem aqui ou clique em "Adicionar" na área de upload\n\n2. **Ou peça para eu criar** uma imagem personalizada com IA (DALL-E)`,
-                  },
-                ]
-              })
+              // Não mostrar mensagem de erro se for kit CapCut (já vem com termos do Envato)
+              if (!isKitRequest) {
+                setMessages((prev) => {
+                  const filtered = prev.filter(m => 
+                    !m.content.includes('🔍 Buscando imagens relacionadas...')
+                  )
+                  return [
+                    ...filtered,
+                    {
+                      role: 'assistant',
+                      content: `❌ Não encontrei imagens relacionadas a "${searchQuery}" no banco de dados.\n\n💡 **OPÇÕES:**\n\n1. **Vá ao Envato Elements** e busque: "${envatoSearchTerm}"\n   → Depois, arraste a imagem aqui ou clique em "Adicionar" na área de upload\n\n2. **Ou peça para eu criar** uma imagem personalizada com IA (DALL-E)`,
+                    },
+                  ]
+                })
+              }
               
               // Adicionar sugestões dinâmicas
               addDynamicSuggestion({
@@ -1128,14 +1261,16 @@ export function EditorChat({ mode = 'edit', area = 'nutri', purpose = 'quick-ad'
         setSearchStatus('🎬 Buscando vídeos...')
         setSearching(true, 'videos', videoSearchQuery)
         
-        // Adicionar mensagem de progresso no chat
-        setMessages((prev) => [
-          ...prev,
-          {
-            role: 'assistant',
-            content: `🎬 Buscando vídeos relacionados a "${videoSearchQuery}"...`,
-          },
-        ])
+        // Adicionar mensagem de progresso no chat (apenas se NÃO for kit CapCut)
+        if (!isKitRequest) {
+          setMessages((prev) => [
+            ...prev,
+            {
+              role: 'assistant',
+              content: `🎬 Buscando vídeos relacionados a "${videoSearchQuery}"...`,
+            },
+          ])
+        }
 
         // Traduzir termos comuns para inglês
         const translations: Record<string, string> = {
