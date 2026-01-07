@@ -395,17 +395,6 @@ function LinksUnificadosPageContent() {
 
   // Unificar todos os itens (recalcular quando profile mudar)
   const itensUnificados: ItemUnificado[] = useMemo(() => [
-    // HOM ao vivo
-    {
-      id: 'hom-agendadas',
-      nome: 'HOM ao vivo',
-      tipo: 'fluxo-recrutamento' as const,
-      categoria: 'Recrutamento',
-      link: `${baseUrl}/pt/wellness/system/recrutar/enviar-link`,
-      descricao: 'Segunda-feira às 20h • Quarta-feira às 9h',
-      icon: '📅',
-      metadata: { tipo: 'hom-agendadas' }
-    },
     // HOM gravada
     {
       id: 'hom-gravada',
@@ -638,23 +627,119 @@ function LinksUnificadosPageContent() {
         })
         return
       }
-      const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(link)}`
-      const response = await fetch(qrUrl)
-      if (!response.ok) throw new Error('Erro ao gerar QR code')
-      const blob = await response.blob()
-      await navigator.clipboard.write([
-        new ClipboardItem({ 'image/png': blob })
-      ])
-      setQrCopiado(id)
-      setTimeout(() => setQrCopiado(null), 2000)
-      
-      // Encontrar o item para mostrar informações
-      const item = itemsUnificados.find(i => i.id === id)
-      showSuccess('QR Code copiado!', {
-        message: item ? `QR Code da ferramenta "${item.nome}" copiado para a área de transferência.` : 'QR Code copiado para a área de transferência.',
-        link: link,
-        icon: 'qr',
-        duration: 5000,
+
+      // Importar a biblioteca qrcode dinamicamente (só quando necessário)
+      const QRCodeLib = (await import('qrcode')).default
+
+      // Verificar se ClipboardItem está disponível
+      const supportsClipboardItem = typeof window !== 'undefined' && 'ClipboardItem' in window
+
+      if (!supportsClipboardItem) {
+        // Fallback para navegadores que não suportam ClipboardItem
+        // Gerar QR code como data URL e criar um link de download
+        const dataUrl = await QRCodeLib.toDataURL(link, {
+          width: 300,
+          margin: 2,
+          color: {
+            dark: '#000000',
+            light: '#FFFFFF'
+          }
+        })
+        
+        // Criar um elemento temporário para download
+        const linkElement = document.createElement('a')
+        linkElement.href = dataUrl
+        linkElement.download = `qr-code-${id}.png`
+        document.body.appendChild(linkElement)
+        linkElement.click()
+        document.body.removeChild(linkElement)
+        
+        // Copiar o link também
+        await navigator.clipboard.writeText(link)
+        
+        setQrCopiado(id)
+        setTimeout(() => setQrCopiado(null), 2000)
+        
+        const item = itemsUnificados.find(i => i.id === id)
+        showSuccess('QR Code gerado!', {
+          message: item ? `QR Code da ferramenta "${item.nome}" foi baixado. O link também foi copiado.` : 'QR Code foi baixado. O link também foi copiado.',
+          link: link,
+          icon: 'qr',
+          duration: 5000,
+        })
+        return
+      }
+
+      // Continuar com a geração usando canvas para navegadores que suportam ClipboardItem
+
+      // Gerar QR code usando a biblioteca local
+      const canvas = document.createElement('canvas')
+      await QRCodeLib.toCanvas(canvas, link, {
+        width: 300,
+        margin: 2,
+        color: {
+          dark: '#000000',
+          light: '#FFFFFF'
+        }
+      })
+
+      // Converter canvas para blob
+      return new Promise<void>((resolve, reject) => {
+        canvas.toBlob(async (blob) => {
+          if (!blob) {
+            reject(new Error('Erro ao gerar blob do QR code'))
+            return
+          }
+
+          try {
+            // Tentar copiar para a área de transferência
+            await navigator.clipboard.write([
+              new ClipboardItem({ 'image/png': blob })
+            ])
+            
+            setQrCopiado(id)
+            setTimeout(() => setQrCopiado(null), 2000)
+            
+            const item = itemsUnificados.find(i => i.id === id)
+            showSuccess('QR Code copiado!', {
+              message: item ? `QR Code da ferramenta "${item.nome}" copiado para a área de transferência.` : 'QR Code copiado para a área de transferência.',
+              link: link,
+              icon: 'qr',
+              duration: 5000,
+            })
+            resolve()
+          } catch (clipboardError) {
+            console.warn('Erro ao copiar para clipboard, fazendo download:', clipboardError)
+            // Se falhar ao copiar, fazer download
+            const url = URL.createObjectURL(blob)
+            const linkElement = document.createElement('a')
+            linkElement.href = url
+            linkElement.download = `qr-code-${id}.png`
+            document.body.appendChild(linkElement)
+            linkElement.click()
+            document.body.removeChild(linkElement)
+            URL.revokeObjectURL(url)
+            
+            // Copiar o link também
+            try {
+              await navigator.clipboard.writeText(link)
+            } catch (e) {
+              console.warn('Erro ao copiar link:', e)
+            }
+            
+            setQrCopiado(id)
+            setTimeout(() => setQrCopiado(null), 2000)
+            
+            const item = itemsUnificados.find(i => i.id === id)
+            showSuccess('QR Code gerado!', {
+              message: item ? `QR Code da ferramenta "${item.nome}" foi baixado. O link também foi copiado.` : 'QR Code foi baixado. O link também foi copiado.',
+              link: link,
+              icon: 'qr',
+              duration: 5000,
+            })
+            resolve()
+          }
+        }, 'image/png')
       })
     } catch (error) {
       console.error('Erro ao copiar QR code:', error)
@@ -662,14 +747,14 @@ function LinksUnificadosPageContent() {
         // Fallback: copiar o link se QR code não funcionar
         await navigator.clipboard.writeText(link)
         showSuccess('Link copiado', {
-          message: 'QR code não suportado, mas o link foi copiado para a área de transferência.',
+          message: 'Erro ao gerar QR code, mas o link foi copiado para a área de transferência.',
           link: link,
           icon: 'link',
           duration: 5000,
         })
       } catch (e) {
         showError('Erro ao copiar', {
-          message: 'Tente salvar a imagem manualmente.',
+          message: 'Tente copiar o link manualmente.',
         })
       }
     }
@@ -962,19 +1047,8 @@ Você vai adorar! 😊`
           let item = itensUnificados.find(i => i.id === previewAberto)
           
           // Se não encontrou, pode ser um item HOM (que não está em itensUnificados)
-          if (!item && (previewAberto === 'hom-agendadas' || previewAberto === 'hom-gravada')) {
-            if (previewAberto === 'hom-agendadas') {
-              item = {
-                id: 'hom-agendadas',
-                nome: 'HOM ao vivo',
-                tipo: 'fluxo-recrutamento' as const,
-                categoria: 'Recrutamento',
-                link: '/pt/wellness/system/recrutar/enviar-link',
-                descricao: 'Segunda-feira às 20h • Quarta-feira às 9h',
-                icon: '📅',
-                metadata: { tipo: 'hom-agendadas' }
-              }
-            } else if (previewAberto === 'hom-gravada') {
+          if (!item && previewAberto === 'hom-gravada') {
+            if (previewAberto === 'hom-gravada') {
               const linkHOM = gerarLinkHOM()
               item = {
                 id: 'hom-gravada',
@@ -1136,30 +1210,6 @@ Você vai adorar! 😊`
                         />
                       )
                     })()
-                  ) : item.metadata?.tipo === 'hom-agendadas' ? (
-                    <div className="p-6">
-                      <h3 className="text-xl font-bold text-gray-900 mb-4">📅 HOM ao vivo</h3>
-                      <div className="space-y-4">
-                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                          <p className="text-blue-800 font-semibold mb-2">Horários das Apresentações:</p>
-                          <ul className="text-blue-700 space-y-2 text-sm">
-                            <li>• Segunda-feira às 20h</li>
-                            <li>• Quarta-feira às 9h</li>
-                          </ul>
-                        </div>
-                        <p className="text-gray-700 text-sm">
-                          Links do Zoom e apresentação online disponíveis na página completa.
-                        </p>
-                        <div className="flex gap-3 mt-4">
-                          <Link
-                            href="/pt/wellness/system/recrutar/enviar-link"
-                            className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700"
-                          >
-                            Abrir Página Completa →
-                          </Link>
-                        </div>
-                      </div>
-                    </div>
                   ) : item.metadata?.tipo === 'hom-gravada' ? (
                     <div className="p-6">
                       <h3 className="text-xl font-bold text-gray-900 mb-4">🎥 Link da HOM gravada</h3>
