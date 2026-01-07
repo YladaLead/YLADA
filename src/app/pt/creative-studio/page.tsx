@@ -13,6 +13,18 @@ export default function CreativeStudioPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-green-50 flex items-center justify-center p-4">
       <div className="max-w-2xl w-full bg-white rounded-2xl shadow-xl p-8 sm:p-12 text-center">
+        {/* Botão de Atalho CapCut Kit */}
+        <div className="mb-6">
+          <button
+            onClick={() => router.push('/pt/creative-studio/capcut-kit')}
+            className="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white py-2.5 px-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center gap-2 text-sm font-medium"
+          >
+            <Sparkles className="w-4 h-4" />
+            <span>🎬 CapCut Kit</span>
+            <ArrowRight className="w-4 h-4" />
+          </button>
+        </div>
+
         <div className="mb-8">
           <div className="w-20 h-20 bg-gradient-to-br from-purple-600 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-6">
             <Sparkles className="w-10 h-10 text-white" />
@@ -29,6 +41,20 @@ export default function CreativeStudioPage() {
         </div>
 
         <div className="space-y-4 mb-8">
+          {/* Botão Kit CapCut */}
+          <button
+            onClick={() => router.push('/pt/creative-studio/capcut-kit')}
+            className="w-full bg-gradient-to-r from-green-600 to-blue-600 text-white py-4 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center gap-3 group"
+          >
+            <Sparkles className="w-6 h-6 group-hover:rotate-12 transition-transform" />
+            <div className="text-left">
+              <div className="font-bold text-lg">🎬 Gerar Kit CapCut Completo</div>
+              <div className="text-sm text-green-100">
+                Materiais detalhados para editor de vídeo
+              </div>
+            </div>
+            <ArrowRight className="w-5 h-5 ml-auto group-hover:translate-x-1 transition-transform" />
+          </button>
           <div className="flex items-start gap-3 text-left">
             <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
               <span className="text-green-600 font-bold text-sm">1</span>
