@@ -101,7 +101,8 @@ async function executeNoelFunction(functionName: string, arguments_: any, userId
           tipo_lead: arguments_.tipo_lead || null,
           necessidade: arguments_.necessidade || null,
           palavras_chave: arguments_.palavras_chave || null,
-          objetivo: arguments_.objetivo || null
+          objetivo: arguments_.objetivo || null,
+          user_id: userId // Sempre incluir user_id para gerar link personalizado
         }
         break
 
