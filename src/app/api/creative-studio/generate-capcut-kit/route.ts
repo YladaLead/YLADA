@@ -149,10 +149,18 @@ export async function POST(request: NextRequest) {
     const totalWeight = Object.values(structure).reduce((sum: number, s: any) => sum + s.weight, 0)
     
     // Ajustar durações para o tempo total desejado
+    // IMPORTANTE: Solução sempre limitada a máximo 9s (3 cenas de 3s)
     const adjustedStructure = Object.entries(structure).reduce((acc: any, [key, value]: [string, any]) => {
+      let calculatedDuration = Math.round((value.weight / totalWeight) * duration)
+      
+      // Limitar solução a máximo 9s
+      if (key === 'solution' && calculatedDuration > 9) {
+        calculatedDuration = 9
+      }
+      
       acc[key] = {
         ...value,
-        duration: Math.round((value.weight / totalWeight) * duration),
+        duration: calculatedDuration,
       }
       return acc
     }, {})
@@ -272,14 +280,15 @@ REGRAS CRÍTICAS DE CONVERSÃO:
 - Remova a culpa da pessoa
 - Crie identificação, não vergonha
 
-🎯 SOLUÇÃO (Quebra de Crença + Mistério - MÁXIMO 9s):
-- Seja CONCISO: máximo 2-3 frases curtas
+🎯 SOLUÇÃO (Quebra de Crença + Mistério - MÁXIMO 9s = 3 cenas de 3s):
+- Seja MUITO CONCISO: máximo 2-3 frases curtas (não mais que 20-25 palavras)
 - NÃO explique como funciona (mata curiosidade)
 - NÃO use linguagem genérica: "lotar agenda", "aumentar vendas", "sistema completo"
 - DIGA: "Nutricionistas não precisam trabalhar mais. Precisam trabalhar com sistema."
 - Crie mistério: "Não é um curso. Não é só uma ferramenta. É um apoio estratégico."
 - NÃO prometa demais, mantenha curiosidade
-- Exemplo ideal: "Nutricionistas não precisam trabalhar mais. Precisam trabalhar com sistema. Não é um curso. É um apoio estratégico." (9s total)
+- Exemplo ideal (9s = 3 cenas): "Nutricionistas não precisam trabalhar mais. Precisam trabalhar com sistema. Não é um curso. É um apoio estratégico."
+- ⚠️ IMPORTANTE: Se o texto for muito longo, encurte para caber em 9s (máximo 3 cenas)
 
 ✅ CTA (Descoberta Honesta + Instagram):
 ${ctaInstructions}
@@ -315,12 +324,15 @@ EXEMPLOS DE FRASES FORTES (específicas e curiosas):
 Retorne APENAS um JSON válido com este formato:
 {
   "hook": "Texto do hook completo (máximo 6s, DEVE começar com '${config.professionals === 'nutricionistas' ? 'Você é nutricionista' : config.professionals}' ou similar, direto e impactante)",
-  "problem": "Texto do problema com quebra de culpa (não genérico)",
-  "solution": "Texto da solução com mistério (não explique demais)",
-  "cta": "Texto do CTA honesto (sem URLs, sem promessas vazias)"
+  "problem": "Texto do problema com quebra de culpa (não genérico, máximo 6s)",
+  "solution": "Texto da solução com mistério (MÁXIMO 9s = 20-25 palavras, não explique demais, seja conciso)",
+  "cta": "Texto do CTA (SEMPRE começar com 'Clique no botão abaixo', sem URLs, sem promessas vazias, máximo 3s)"
 }
 
-⚠️ LEMBRE-SE: O hook DEVE mencionar "${config.professionals}" nos primeiros 3 segundos. NUNCA comece genérico.`
+⚠️ REGRAS CRÍTICAS:
+1. Hook DEVE mencionar "${config.professionals}" nos primeiros 3 segundos. NUNCA comece genérico.
+2. Solução MÁXIMO 9s (20-25 palavras). Seja muito conciso.
+3. CTA SEMPRE começar com "Clique no botão abaixo" (é Instagram, o botão já está na tela).`
 
     const completion = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
@@ -439,7 +451,7 @@ Retorne APENAS um JSON válido com este formato:
       })
     }
 
-    // Solução - dividir em cenas de 3s se necessário
+    // Solução - dividir em cenas de 3s se necessário (MÁXIMO 9s = 3 cenas)
     if (scriptData.solution) {
       const solutionText = scriptData.solution
       const solutionMapping = {
@@ -459,9 +471,13 @@ Retorne APENAS um JSON válido com este formato:
           'business growth chart',
         ],
       }
-      const solutionScenes = splitTextIntoScenes(solutionText, adjustedStructure.solution.duration, sceneDuration)
+      // FORÇAR máximo de 9s (3 cenas) para solução
+      const maxSolutionDuration = Math.min(adjustedStructure.solution.duration, 9)
+      const solutionScenes = splitTextIntoScenes(solutionText, maxSolutionDuration, sceneDuration)
+      // Limitar a 3 cenas máximo
+      const limitedSolutionScenes = solutionScenes.slice(0, 3)
       
-      solutionScenes.forEach((sceneText, index) => {
+      limitedSolutionScenes.forEach((sceneText, index) => {
         scenes.push({
           number: sceneNumber++,
           type: 'solution',
@@ -480,8 +496,23 @@ Retorne APENAS um JSON válido com este formato:
     }
 
     // CTA - dividir em cenas de 3s se necessário
+    // GARANTIR que sempre comece com "Clique no botão abaixo"
     if (scriptData.cta) {
-      const ctaText = scriptData.cta
+      let ctaText = scriptData.cta.trim()
+      
+      // Se o CTA não começar com "Clique no botão abaixo", adicionar
+      if (!ctaText.toLowerCase().startsWith('clique no botão abaixo')) {
+        // Se já começar com "clique", pode ser variação - verificar
+        if (!ctaText.toLowerCase().startsWith('clique')) {
+          ctaText = `Clique no botão abaixo e ${ctaText.toLowerCase()}`
+        } else {
+          // Já tem "clique" mas não tem "no botão abaixo" - adicionar
+          if (!ctaText.toLowerCase().includes('botão abaixo')) {
+            ctaText = ctaText.replace(/^clique/i, 'Clique no botão abaixo e')
+          }
+        }
+      }
+      
       const ctaScenes = splitTextIntoScenes(ctaText, adjustedStructure.cta.duration, sceneDuration)
       
       ctaScenes.forEach((sceneText, index) => {
