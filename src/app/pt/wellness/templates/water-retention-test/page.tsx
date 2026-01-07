@@ -349,34 +349,36 @@ export default function TesteRetencaoLiquidos({ config }: TemplateBaseProps) {
               )}
             </div>
 
-            <LeadCapturePostResult
-              config={config}
-              ferramenta="Teste de Retenção de Líquidos"
-              resultadoTexto={`Perfil: ${resultado.perfil} (${resultado.score}/15 pontos)`}
-              mensagemConvite="💧 Quer reduzir a retenção de líquidos?"
-              beneficios={[
-                'Plano nutricional para desinchar',
-                'Alimentos e estratégias para reduzir edema',
-                'Orientações sobre hidratação adequada',
-                'Acompanhamento personalizado'
-              ]}
-            />
+                        {/* Formulário de coleta de dados temporariamente desabilitado */}
+                        {/* Formulário de coleta de dados temporariamente desabilitado */}
+            {/* <LeadCapturePostResult */}
+            {/* config={config} */}
+            {/* ferramenta="Teste de Retenção de Líquidos" */}
+            {/* resultadoTexto={`Perfil: ${resultado.perfil} (${resultado.score}/15 pontos)`} */}
+            {/* mensagemConvite="💧 Quer reduzir a retenção de líquidos?" */}
+            {/* beneficios={[ */}
+            {/* 'Plano nutricional para desinchar', */}
+            {/* 'Alimentos e estratégias para reduzir edema', */}
+            {/* 'Orientações sobre hidratação adequada', */}
+            {/* 'Acompanhamento personalizado' */}
+            {/* ]} */}
+            {/* /> */}
 
             <WellnessActionButtons
-              onRecalcular={() => {
-                setPerguntaAtual(0)
-                setRespostas([])
-                setResultado(null)
-                setEtapa('quiz')
-              }}
-              onVoltarInicio={() => {
-                setPerguntaAtual(0)
-                setRespostas([])
-                setResultado(null)
-                setEtapa('landing')
-              }}
-              textoRecalcular="↺ Refazer Teste"
-            />
+          onRecalcular={() => {
+          setPerguntaAtual(0)
+          setRespostas([])
+          setResultado(null)
+          setEtapa('quiz')
+          }}
+          onVoltarInicio={() => {
+          setPerguntaAtual(0)
+          setRespostas([])
+          setResultado(null)
+          setEtapa('landing')
+          }}
+          textoRecalcular="↺ Refazer Teste"
+          />
           </div>
         )}
       </main>

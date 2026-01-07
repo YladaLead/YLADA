@@ -380,42 +380,44 @@ export default function Desafio7Dias({ config }: TemplateBaseProps) {
               </div>
             </div>
 
-            <LeadCapturePostResult
-              config={config}
-              ferramenta="Desafio 7 Dias"
-              resultadoTexto={`Nível: ${resultado.nivelDesafio === 'desafioBasico' ? 'Básico' : resultado.nivelDesafio === 'desafioModerado' ? 'Moderado' : 'Avançado'} | Objetivo: ${dados.objetivo}`}
-              mensagemConvite="🎯 Quer continuar evoluindo após o desafio?"
-              beneficios={[
-                'Plano de continuidade personalizado',
-                'Novos desafios para manter motivação',
-                'Acompanhamento profissional dos resultados',
-                'Ajustes conforme sua evolução'
-              ]}
-            />
+                        {/* Formulário de coleta de dados temporariamente desabilitado */}
+                        {/* Formulário de coleta de dados temporariamente desabilitado */}
+            {/* <LeadCapturePostResult */}
+            {/* config={config} */}
+            {/* ferramenta="Desafio 7 Dias" */}
+            {/* resultadoTexto={`Nível: ${resultado.nivelDesafio === 'desafioBasico' ? 'Básico' : resultado.nivelDesafio === 'desafioModerado' ? 'Moderado' : 'Avançado'} | Objetivo: ${dados.objetivo}`} */}
+            {/* mensagemConvite="🎯 Quer continuar evoluindo após o desafio?" */}
+            {/* beneficios={[ */}
+            {/* 'Plano de continuidade personalizado', */}
+            {/* 'Novos desafios para manter motivação', */}
+            {/* 'Acompanhamento profissional dos resultados', */}
+            {/* 'Ajustes conforme sua evolução' */}
+            {/* ]} */}
+            {/* /> */}
 
             <WellnessActionButtons
-              onRecalcular={() => {
-                setDados({
-                  experiencia: '',
-                  objetivo: '',
-                  disponibilidade: ''
-                })
-                setResultado(null)
-                setDiagnostico(null)
-                setEtapa('formulario')
-              }}
-              onVoltarInicio={() => {
-                setDados({
-                  experiencia: '',
-                  objetivo: '',
-                  disponibilidade: ''
-                })
-                setResultado(null)
-                setDiagnostico(null)
-                setEtapa('landing')
-              }}
-              textoRecalcular="↺ Ajustar Desafio"
-            />
+          onRecalcular={() => {
+          setDados({
+          experiencia: '',
+          objetivo: '',
+          disponibilidade: ''
+          })
+          setResultado(null)
+          setDiagnostico(null)
+          setEtapa('formulario')
+          }}
+          onVoltarInicio={() => {
+          setDados({
+          experiencia: '',
+          objetivo: '',
+          disponibilidade: ''
+          })
+          setResultado(null)
+          setDiagnostico(null)
+          setEtapa('landing')
+          }}
+          textoRecalcular="↺ Ajustar Desafio"
+          />
           </div>
         )}
       </main>

@@ -349,7 +349,8 @@ export default function VoceConheceSeuCorpo({ config }: TemplateBaseProps) {
               )}
             </div>
 
-            <LeadCapturePostResult
+            {/* Formulário de coleta de dados temporariamente desabilitado */}
+            {/* <LeadCapturePostResult
               config={config}
               ferramenta="Consciência Corporal"
               resultadoTexto={`Perfil: ${resultado.perfil} (${resultado.score}/15 pontos)`}
@@ -360,7 +361,7 @@ export default function VoceConheceSeuCorpo({ config }: TemplateBaseProps) {
                 'Técnicas para reconhecer sinais de fome e saciedade',
                 'Acompanhamento para mudança de hábitos sustentável'
               ]}
-            />
+            /> */}
 
             <WellnessActionButtons
               onRecalcular={() => {

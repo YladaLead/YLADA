@@ -175,7 +175,8 @@ export default function StoryInterativo({ config }: TemplateBaseProps) {
               </div>
             )}
 
-            <LeadCapturePostResult
+            {/* Formulário de coleta de dados temporariamente desabilitado */}
+            {/* <LeadCapturePostResult
               config={config}
               ferramenta="Story Interativo"
               resultadoTexto={`Nível: ${resultado.nivel}`}
@@ -186,7 +187,7 @@ export default function StoryInterativo({ config }: TemplateBaseProps) {
                 'Acompanhamento da sua evolução',
                 'Novos capítulos conforme progresso'
               ]}
-            />
+            /> */}
           </div>
         )}
       </main>

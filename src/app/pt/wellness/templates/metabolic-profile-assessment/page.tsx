@@ -349,34 +349,36 @@ export default function AvaliacaoPerfilMetabolico({ config }: TemplateBaseProps)
               )}
             </div>
 
-            <LeadCapturePostResult
-              config={config}
-              ferramenta="Avaliação de Perfil Metabólico"
-              resultadoTexto={`Perfil: ${resultado.perfil} (${resultado.score}/15 pontos)`}
-              mensagemConvite="⚡ Quer otimizar seu metabolismo?"
-              beneficios={[
-                'Plano nutricional para acelerar metabolismo',
-                'Estratégias para queima de gordura eficiente',
-                'Suplementação adequada, se necessário',
-                'Acompanhamento de resultados e ajustes'
-              ]}
-            />
+                        {/* Formulário de coleta de dados temporariamente desabilitado */}
+                        {/* Formulário de coleta de dados temporariamente desabilitado */}
+            {/* <LeadCapturePostResult */}
+            {/* config={config} */}
+            {/* ferramenta="Avaliação de Perfil Metabólico" */}
+            {/* resultadoTexto={`Perfil: ${resultado.perfil} (${resultado.score}/15 pontos)`} */}
+            {/* mensagemConvite="⚡ Quer otimizar seu metabolismo?" */}
+            {/* beneficios={[ */}
+            {/* 'Plano nutricional para acelerar metabolismo', */}
+            {/* 'Estratégias para queima de gordura eficiente', */}
+            {/* 'Suplementação adequada, se necessário', */}
+            {/* 'Acompanhamento de resultados e ajustes' */}
+            {/* ]} */}
+            {/* /> */}
 
             <WellnessActionButtons
-              onRecalcular={() => {
-                setPerguntaAtual(0)
-                setRespostas([])
-                setResultado(null)
-                setEtapa('quiz')
-              }}
-              onVoltarInicio={() => {
-                setPerguntaAtual(0)
-                setRespostas([])
-                setResultado(null)
-                setEtapa('landing')
-              }}
-              textoRecalcular="↺ Refazer Avaliação"
-            />
+          onRecalcular={() => {
+          setPerguntaAtual(0)
+          setRespostas([])
+          setResultado(null)
+          setEtapa('quiz')
+          }}
+          onVoltarInicio={() => {
+          setPerguntaAtual(0)
+          setRespostas([])
+          setResultado(null)
+          setEtapa('landing')
+          }}
+          textoRecalcular="↺ Refazer Avaliação"
+          />
           </div>
         )}
       </main>

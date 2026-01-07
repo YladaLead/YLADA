@@ -349,34 +349,36 @@ export default function RiscoSindromeMetabolica({ config }: TemplateBaseProps) {
               )}
             </div>
 
-            <LeadCapturePostResult
-              config={config}
-              ferramenta="Risco de Síndrome Metabólica"
-              resultadoTexto={`Perfil: ${resultado.perfil} (${resultado.score}/15 pontos)`}
-              mensagemConvite="❤️ Quer prevenir a síndrome metabólica?"
-              beneficios={[
-                'Plano nutricional preventivo personalizado',
-                'Estratégias para controle de glicemia e colesterol',
-                'Orientações sobre atividade física adequada',
-                'Monitoramento e acompanhamento profissional'
-              ]}
-            />
+                        {/* Formulário de coleta de dados temporariamente desabilitado */}
+                        {/* Formulário de coleta de dados temporariamente desabilitado */}
+            {/* <LeadCapturePostResult */}
+            {/* config={config} */}
+            {/* ferramenta="Risco de Síndrome Metabólica" */}
+            {/* resultadoTexto={`Perfil: ${resultado.perfil} (${resultado.score}/15 pontos)`} */}
+            {/* mensagemConvite="❤️ Quer prevenir a síndrome metabólica?" */}
+            {/* beneficios={[ */}
+            {/* 'Plano nutricional preventivo personalizado', */}
+            {/* 'Estratégias para controle de glicemia e colesterol', */}
+            {/* 'Orientações sobre atividade física adequada', */}
+            {/* 'Monitoramento e acompanhamento profissional' */}
+            {/* ]} */}
+            {/* /> */}
 
             <WellnessActionButtons
-              onRecalcular={() => {
-                setPerguntaAtual(0)
-                setRespostas([])
-                setResultado(null)
-                setEtapa('quiz')
-              }}
-              onVoltarInicio={() => {
-                setPerguntaAtual(0)
-                setRespostas([])
-                setResultado(null)
-                setEtapa('landing')
-              }}
-              textoRecalcular="↺ Refazer Avaliação"
-            />
+          onRecalcular={() => {
+          setPerguntaAtual(0)
+          setRespostas([])
+          setResultado(null)
+          setEtapa('quiz')
+          }}
+          onVoltarInicio={() => {
+          setPerguntaAtual(0)
+          setRespostas([])
+          setResultado(null)
+          setEtapa('landing')
+          }}
+          textoRecalcular="↺ Refazer Avaliação"
+          />
           </div>
         )}
       </main>

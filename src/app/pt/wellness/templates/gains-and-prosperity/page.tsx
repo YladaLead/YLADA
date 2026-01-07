@@ -349,34 +349,36 @@ export default function QuizGanhosProsperidade({ config }: TemplateBaseProps) {
               )}
             </div>
 
-            <LeadCapturePostResult
-              config={config}
-              ferramenta="Ganhos e Prosperidade"
-              resultadoTexto={`Perfil: ${resultado.perfil} (${resultado.score}/15 pontos)`}
-              mensagemConvite="💰 Quer prosperar em todas as áreas da vida?"
-              beneficios={[
-                'Estratégias para prosperidade integral',
-                'Mindset de abundância e crescimento',
-                'Plano de ação personalizado',
-                'Acompanhamento holístico do progresso'
-              ]}
-            />
+                        {/* Formulário de coleta de dados temporariamente desabilitado */}
+                        {/* Formulário de coleta de dados temporariamente desabilitado */}
+            {/* <LeadCapturePostResult */}
+            {/* config={config} */}
+            {/* ferramenta="Ganhos e Prosperidade" */}
+            {/* resultadoTexto={`Perfil: ${resultado.perfil} (${resultado.score}/15 pontos)`} */}
+            {/* mensagemConvite="💰 Quer prosperar em todas as áreas da vida?" */}
+            {/* beneficios={[ */}
+            {/* 'Estratégias para prosperidade integral', */}
+            {/* 'Mindset de abundância e crescimento', */}
+            {/* 'Plano de ação personalizado', */}
+            {/* 'Acompanhamento holístico do progresso' */}
+            {/* ]} */}
+            {/* /> */}
 
             <WellnessActionButtons
-              onRecalcular={() => {
-                setPerguntaAtual(0)
-                setRespostas([])
-                setResultado(null)
-                setEtapa('quiz')
-              }}
-              onVoltarInicio={() => {
-                setPerguntaAtual(0)
-                setRespostas([])
-                setResultado(null)
-                setEtapa('landing')
-              }}
-              textoRecalcular="↺ Refazer Quiz"
-            />
+          onRecalcular={() => {
+          setPerguntaAtual(0)
+          setRespostas([])
+          setResultado(null)
+          setEtapa('quiz')
+          }}
+          onVoltarInicio={() => {
+          setPerguntaAtual(0)
+          setRespostas([])
+          setResultado(null)
+          setEtapa('landing')
+          }}
+          textoRecalcular="↺ Refazer Quiz"
+          />
           </div>
         )}
       </main>

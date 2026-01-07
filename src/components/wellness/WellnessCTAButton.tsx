@@ -47,7 +47,9 @@ export default function WellnessCTAButton({
   const [dadosEnviados, setDadosEnviados] = useState(false)
 
   // Verificar se precisa coletar dados
-  const precisaColetarDados = config.leader_data_collection?.coletar_dados === true
+  // ⚠️ COLETA DE DADOS DESABILITADA NA ÁREA WELLNESS
+  // O formulário de coleta de dados foi removido conforme solicitado
+  const precisaColetarDados = false // Sempre false na área Wellness
   const camposColeta = config.leader_data_collection?.campos_coleta || {}
   
   // Função para enviar dados coletados

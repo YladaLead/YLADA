@@ -324,32 +324,34 @@ export default function QuizProposito({ config }: TemplateBaseProps) {
               )}
             </div>
 
-            <LeadCapturePostResult
-              config={config}
-              ferramenta="Propósito"
-              resultadoTexto={`${resultado.perfil} (${resultado.score}/12 pontos)`}
-              mensagemConvite="🎯 Quer descobrir e viver seu propósito?"
-              beneficios={[
-                'Clareza sobre sua missão de vida',
-                'Alinhamento de ações com propósito',
-                'Estratégias para vida com significado',
-                'Acompanhamento da jornada'
-              ]}
-            />
+                        {/* Formulário de coleta de dados temporariamente desabilitado */}
+                        {/* Formulário de coleta de dados temporariamente desabilitado */}
+            {/* <LeadCapturePostResult */}
+            {/* config={config} */}
+            {/* ferramenta="Propósito" */}
+            {/* resultadoTexto={`${resultado.perfil} (${resultado.score}/12 pontos)`} */}
+            {/* mensagemConvite="🎯 Quer descobrir e viver seu propósito?" */}
+            {/* beneficios={[ */}
+            {/* 'Clareza sobre sua missão de vida', */}
+            {/* 'Alinhamento de ações com propósito', */}
+            {/* 'Estratégias para vida com significado', */}
+            {/* 'Acompanhamento da jornada' */}
+            {/* ]} */}
+            {/* /> */}
 
             <WellnessActionButtons
-              onRecalcular={() => {
-                setPerguntaAtual(0)
-                setRespostas([])
-                setEtapa('quiz')
-              }}
-              onVoltarInicio={() => {
-                setPerguntaAtual(0)
-                setRespostas([])
-                setEtapa('landing')
-              }}
-              textoRecalcular="↺ Fazer Quiz Novamente"
-            />
+          onRecalcular={() => {
+          setPerguntaAtual(0)
+          setRespostas([])
+          setEtapa('quiz')
+          }}
+          onVoltarInicio={() => {
+          setPerguntaAtual(0)
+          setRespostas([])
+          setEtapa('landing')
+          }}
+          textoRecalcular="↺ Fazer Quiz Novamente"
+          />
           </div>
         )}
       </main>

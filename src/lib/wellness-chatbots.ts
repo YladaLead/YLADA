@@ -23,7 +23,7 @@ export const WELLNESS_CHATBOTS: Record<string, ChatbotConfig> = {
     corHex: '#2563EB',
     descricao: 'Suporte geral',
     foco: ['suporte', 'ajuda', 'dúvidas', 'orientações gerais'],
-    mensagemInicial: `Olá! Eu sou o **Noel** 💬\n\nEstou aqui para te ajudar com suporte geral e dúvidas sobre a plataforma.\n\n**Posso te ajudar com:**\n\n📋 **Dúvidas Gerais** — Qualquer questão sobre o sistema\n\n🛠️ **Ferramentas** — Como usar as ferramentas disponíveis\n\n🎨 **Templates** — Explorar e usar templates prontos\n\n🌐 **Portals** — Criar portais de captação\n\n❓ **Quizzes** — Criar e gerenciar quizzes\n\n📊 **Dashboard** — Navegar e usar o dashboard\n\n⚙️ **Configuração** — Ajustar perfil e configurações\n\nComo posso te ajudar hoje?`
+    mensagemInicial: `Eu sou o **NOEL**, seu assistente da área Wellness.\n\nComo posso te ajudar hoje?\n\n💡 Posso ajudar com:\n\n- Estratégias e metas\n- Uso do sistema\n- Bebidas e produtos\n- Scripts e campanhas\n\nEstou à sua disposição! 🚀`
   },
   'mentor': {
     id: 'mentor',

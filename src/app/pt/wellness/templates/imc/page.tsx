@@ -6,6 +6,7 @@ import WellnessHeader from '@/components/wellness/WellnessHeader'
 import WellnessLanding from '@/components/wellness/WellnessLanding'
 import LeadCapturePostResult from '@/components/wellness/LeadCapturePostResult'
 import WellnessActionButtons from '@/components/wellness/WellnessActionButtons'
+import WellnessCTAButton from '@/components/wellness/WellnessCTAButton'
 import { getTemplateBenefits } from '@/lib/template-benefits'
 
 interface ResultadoIMC {
@@ -294,19 +295,61 @@ export default function CalculadoraIMC({ config }: TemplateBaseProps) {
                   ))}
                 </ul>
               </div>
+            </div>
 
-              <LeadCapturePostResult
-                config={config}
-                ferramenta="Calculadora de IMC"
-                resultadoTexto={`IMC: ${resultado.imc} - ${resultado.categoria}`}
-                mensagemConvite="✨ Quer alcançar seu peso ideal?"
-                beneficios={[
-                  'Plano alimentar personalizado para seu objetivo',
-                  'Estratégias para perder peso de forma saudável',
-                  'Acompanhamento nutricional profissional',
-                  'Manter resultados de forma sustentável'
-                ]}
-              />
+            {/* CTA Section - Mensagem e Benefícios (sem formulário de coleta) */}
+            <div 
+              className="rounded-2xl p-8 border-2 mb-6"
+              style={{
+                background: config?.custom_colors
+                  ? `linear-gradient(135deg, ${config.custom_colors.principal}10 0%, ${config.custom_colors.secundaria}10 100%)`
+                  : 'linear-gradient(135deg, #eff6ff 0%, #faf5ff 100%)',
+                borderColor: config?.custom_colors?.principal || '#93c5fd'
+              }}
+            >
+              {/* Título convidativo */}
+              <div className="text-center mb-6">
+                <h3 className="text-2xl font-bold text-gray-900 mb-3">
+                  ✨ Quer alcançar seu peso ideal?
+                </h3>
+                <p className="text-gray-600">
+                  Te ajudo a alcançar seus objetivos de forma personalizada!
+                </p>
+              </div>
+
+              {/* Benefícios */}
+              <div className="bg-white/60 backdrop-blur-sm rounded-xl p-6 mb-6">
+                <h4 className="font-semibold text-gray-900 mb-4 flex items-center">
+                  <span className="text-2xl mr-2">✨</span>
+                  O que você vai receber:
+                </h4>
+                <ul className="space-y-2">
+                  <li className="flex items-start">
+                    <span className="text-green-600 mr-2 text-lg">✓</span>
+                    <span className="text-gray-700">Plano alimentar personalizado para seu objetivo</span>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-green-600 mr-2 text-lg">✓</span>
+                    <span className="text-gray-700">Estratégias para perder peso de forma saudável</span>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-green-600 mr-2 text-lg">✓</span>
+                    <span className="text-gray-700">Acompanhamento nutricional profissional</span>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-green-600 mr-2 text-lg">✓</span>
+                    <span className="text-gray-700">Manter resultados de forma sustentável</span>
+                  </li>
+                </ul>
+              </div>
+
+              {/* CTA Button - Botão do WhatsApp sem coleta de dados */}
+              {config && (
+                <WellnessCTAButton
+                  config={config}
+                  resultadoTexto={`IMC: ${resultado.imc} - ${resultado.categoria}`}
+                />
+              )}
             </div>
 
             <WellnessActionButtons

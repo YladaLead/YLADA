@@ -349,34 +349,36 @@ export default function ProntoEmagrecer({ config }: TemplateBaseProps) {
               )}
             </div>
 
-            <LeadCapturePostResult
-              config={config}
-              ferramenta="Pronto para Emagrecer"
-              resultadoTexto={`Perfil: ${resultado.perfil} (${resultado.score}/15 pontos)`}
-              mensagemConvite="🎯 Quer iniciar seu processo de emagrecimento de verdade?"
-              beneficios={[
-                'Plano personalizado para perda de peso sustentável',
-                'Estratégias para vencer bloqueios mentais',
-                'Suporte profissional durante toda jornada',
-                'Foco em mudanças permanentes, não dietas temporárias'
-              ]}
-            />
+                        {/* Formulário de coleta de dados temporariamente desabilitado */}
+                        {/* Formulário de coleta de dados temporariamente desabilitado */}
+            {/* <LeadCapturePostResult */}
+            {/* config={config} */}
+            {/* ferramenta="Pronto para Emagrecer" */}
+            {/* resultadoTexto={`Perfil: ${resultado.perfil} (${resultado.score}/15 pontos)`} */}
+            {/* mensagemConvite="🎯 Quer iniciar seu processo de emagrecimento de verdade?" */}
+            {/* beneficios={[ */}
+            {/* 'Plano personalizado para perda de peso sustentável', */}
+            {/* 'Estratégias para vencer bloqueios mentais', */}
+            {/* 'Suporte profissional durante toda jornada', */}
+            {/* 'Foco em mudanças permanentes, não dietas temporárias' */}
+            {/* ]} */}
+            {/* /> */}
 
             <WellnessActionButtons
-              onRecalcular={() => {
-                setPerguntaAtual(0)
-                setRespostas([])
-                setResultado(null)
-                setEtapa('quiz')
-              }}
-              onVoltarInicio={() => {
-                setPerguntaAtual(0)
-                setRespostas([])
-                setResultado(null)
-                setEtapa('landing')
-              }}
-              textoRecalcular="↺ Refazer Avaliação"
-            />
+          onRecalcular={() => {
+          setPerguntaAtual(0)
+          setRespostas([])
+          setResultado(null)
+          setEtapa('quiz')
+          }}
+          onVoltarInicio={() => {
+          setPerguntaAtual(0)
+          setRespostas([])
+          setResultado(null)
+          setEtapa('landing')
+          }}
+          textoRecalcular="↺ Refazer Avaliação"
+          />
           </div>
         )}
       </main>

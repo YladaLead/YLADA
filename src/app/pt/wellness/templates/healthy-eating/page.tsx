@@ -270,32 +270,34 @@ export default function QuizAlimentacao({ config }: TemplateBaseProps) {
               </div>
             </div>
 
-            <LeadCapturePostResult
-              config={config}
-              ferramenta="Alimentação Saudável"
-              resultadoTexto={`${resultado.perfil} (${resultado.score}/12 pontos)`}
-              mensagemConvite="🥗 Quer transformar sua alimentação?"
-              beneficios={[
-                'Plano alimentar saudável e prático',
-                'Receitas simples e nutritivas',
-                'Educação nutricional personalizada',
-                'Mudanças sustentáveis e duradouras'
-              ]}
-            />
+                        {/* Formulário de coleta de dados temporariamente desabilitado */}
+                        {/* Formulário de coleta de dados temporariamente desabilitado */}
+            {/* <LeadCapturePostResult */}
+            {/* config={config} */}
+            {/* ferramenta="Alimentação Saudável" */}
+            {/* resultadoTexto={`${resultado.perfil} (${resultado.score}/12 pontos)`} */}
+            {/* mensagemConvite="🥗 Quer transformar sua alimentação?" */}
+            {/* beneficios={[ */}
+            {/* 'Plano alimentar saudável e prático', */}
+            {/* 'Receitas simples e nutritivas', */}
+            {/* 'Educação nutricional personalizada', */}
+            {/* 'Mudanças sustentáveis e duradouras' */}
+            {/* ]} */}
+            {/* /> */}
 
             <WellnessActionButtons
-              onRecalcular={() => {
-                setPerguntaAtual(0)
-                setRespostas([])
-                setEtapa('quiz')
-              }}
-              onVoltarInicio={() => {
-                setPerguntaAtual(0)
-                setRespostas([])
-                setEtapa('landing')
-              }}
-              textoRecalcular="↺ Fazer Quiz Novamente"
-            />
+          onRecalcular={() => {
+          setPerguntaAtual(0)
+          setRespostas([])
+          setEtapa('quiz')
+          }}
+          onVoltarInicio={() => {
+          setPerguntaAtual(0)
+          setRespostas([])
+          setEtapa('landing')
+          }}
+          textoRecalcular="↺ Fazer Quiz Novamente"
+          />
           </div>
         )}
       </main>

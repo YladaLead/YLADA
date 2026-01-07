@@ -305,8 +305,8 @@ async function buildStrategicProfileContext(userId: string): Promise<string> {
         context += '   → Menos volume, mais lucro unitário\n'
         context += '   → ESTRATÉGIA DE PRODUTOS:\n'
         context += '      • Prioridade: Shake, Fiber, NRG, Herbal, Creatina, CR7\n'
-        context += '      • Foco: follow-up estruturado, ciclo de recompra\n'
-        context += '   → ENTREGAR: Scripts de vendas de produtos fechados, estratégia de follow-up, ciclo de recompra\n'
+        context += '      • Foco: acompanhamento estruturado, ciclo de recompra\n'
+        context += '   → ENTREGAR: Scripts de vendas de produtos fechados, estratégia de acompanhamento, ciclo de recompra\n'
       } else if (profile.tipo_trabalho === 'cliente_que_indica') {
         context += '   → Perfil que APENAS INDICA (não vende diretamente)\n'
         context += '   → Foco em duplicação simples\n'
@@ -515,7 +515,7 @@ A HOM Gravada é uma página personalizada do consultor com a apresentação com
    - 24-48h após enviar: verificar se assistiu
    - Se clicou em "🚀 Gostei quero começar" → ALTA PRIORIDADE, responder imediatamente
    - Se clicou em "💬 Quero tirar dúvida" → responder em até 2h
-   - Se não respondeu → follow-up em 3-5 dias
+   - Se não respondeu → acompanhamento em 3-5 dias
    - Use scripts da Base de Conhecimento sobre "hom-gravada-acompanhamento"
 
 5. **VERIFICAÇÃO DE VISUALIZAÇÃO:**
@@ -813,14 +813,14 @@ Quando detectar qualquer uma das situações acima, SEMPRE responda assim:
 - ✅ Captam leads automaticamente
 - ✅ Educam o cliente sem pressão
 - ✅ Geram interesse natural
-- ✅ Facilitam o follow-up
+- ✅ Facilitam o acompanhamento
 - ✅ Convertem melhor que abordagem direta
 
 📚 **Como usar:**
 1. Escolha o link apropriado para a situação
 2. Envie com o script sugerido
 3. Acompanhe se a pessoa preencheu
-4. Faça follow-up em 24-48h
+4. Faça acompanhamento em 24-48h
 5. Use o resultado para próximo passo
 
 **EXEMPLOS DE RESPOSTAS PROATIVAS:**
@@ -1016,7 +1016,7 @@ Exemplo de resposta:
 
 2. **produtos_fechados** (vende produtos fechados):
    - Prioridade: Shake, Fiber, NRG, Herbal, Creatina, CR7
-   - Foco: valor maior por venda, follow-up estruturado, ciclo de recompra
+   - Foco: valor maior por venda, acompanhamento estruturado, ciclo de recompra
    - Menos volume, mais lucro unitário
    - Scripts: apresentação de produto fechado → diagnóstico rápido → fechamento leve (2 opções sempre)
    - Metas: baseadas em quantidade de produtos fechados por semana
@@ -1186,7 +1186,7 @@ Resposta: Usar o resultado + adicionar scripts e ações diárias baseadas no ti
       focusInstructions = `
 Foco da resposta: Estratégia, planejamento e comportamento.
 - Ajude com metas de PV, metas financeiras e metas de clientes.
-- Ensine duplicação, convite, follow-up e vendas.
+- Ensine duplicação, convite, acompanhamento e vendas.
 - Seja motivacional mas realista.
 - Personalize baseado no perfil do consultor.
 

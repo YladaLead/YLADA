@@ -455,46 +455,48 @@ export default function GuiaHidratacao({ config }: TemplateBaseProps) {
               </div>
             </div>
 
-            <LeadCapturePostResult
-              config={config}
-              ferramenta="Guia de Hidratação"
-              resultadoTexto={`Nível: ${resultado.nivelHidratacao === 'baixaHidratacao' ? 'Baixa' : resultado.nivelHidratacao === 'hidratacaoModerada' ? 'Moderada' : 'Alta'} | ${resultado.necessidadeAgua}L/dia`}
-              mensagemConvite="💧 Quer dominar a arte da hidratação?"
-              beneficios={[
-                'Plano de hidratação estratégico personalizado',
-                'Orientações sobre tipos de água e eletrólitos',
-                'Cronograma adaptado à sua rotina',
-                'Impacto positivo em energia, pele e saúde'
-              ]}
-            />
+                        {/* Formulário de coleta de dados temporariamente desabilitado */}
+                        {/* Formulário de coleta de dados temporariamente desabilitado */}
+            {/* <LeadCapturePostResult */}
+            {/* config={config} */}
+            {/* ferramenta="Guia de Hidratação" */}
+            {/* resultadoTexto={`Nível: ${resultado.nivelHidratacao === 'baixaHidratacao' ? 'Baixa' : resultado.nivelHidratacao === 'hidratacaoModerada' ? 'Moderada' : 'Alta'} | ${resultado.necessidadeAgua}L/dia`} */}
+            {/* mensagemConvite="💧 Quer dominar a arte da hidratação?" */}
+            {/* beneficios={[ */}
+            {/* 'Plano de hidratação estratégico personalizado', */}
+            {/* 'Orientações sobre tipos de água e eletrólitos', */}
+            {/* 'Cronograma adaptado à sua rotina', */}
+            {/* 'Impacto positivo em energia, pele e saúde' */}
+            {/* ]} */}
+            {/* /> */}
 
             <WellnessActionButtons
-              onRecalcular={() => {
-                setDados({
-                  peso: '',
-                  atividade: '',
-                  clima: '',
-                  aguaAtual: '',
-                  sintomas: []
-                })
-                setResultado(null)
-                setDiagnostico(null)
-                setEtapa('formulario')
-              }}
-              onVoltarInicio={() => {
-                setDados({
-                  peso: '',
-                  atividade: '',
-                  clima: '',
-                  aguaAtual: '',
-                  sintomas: []
-                })
-                setResultado(null)
-                setDiagnostico(null)
-                setEtapa('landing')
-              }}
-              textoRecalcular="↺ Refazer Cálculo"
-            />
+          onRecalcular={() => {
+          setDados({
+          peso: '',
+          atividade: '',
+          clima: '',
+          aguaAtual: '',
+          sintomas: []
+          })
+          setResultado(null)
+          setDiagnostico(null)
+          setEtapa('formulario')
+          }}
+          onVoltarInicio={() => {
+          setDados({
+          peso: '',
+          atividade: '',
+          clima: '',
+          aguaAtual: '',
+          sintomas: []
+          })
+          setResultado(null)
+          setDiagnostico(null)
+          setEtapa('landing')
+          }}
+          textoRecalcular="↺ Refazer Cálculo"
+          />
           </div>
         )}
       </main>

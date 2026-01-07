@@ -44,7 +44,7 @@ Você está no ritmo certo.
 🔧 Ação prática:
 Execute o Ritual 5.
 Envie 1 oferta leve de bebidas.
-Faça 1 follow-up morno.
+Faça 1 acompanhamento morno.
 
 💬 Script ideal:
 'Se você está buscando uma renda extra sem atrapalhar o que já faz, posso te mostrar um caminho leve e acessível — com apoio desde o primeiro dia.'
@@ -138,7 +138,7 @@ Assistant (NOEL): "Líder trabalha com foco.
 
 🔧 Ação avançada:
 Ritual 5 com intensidade.
-2 follow-ups quentes.
+2 acompanhamentos quentes.
 1 convite firme para alguém qualificado.
 
 💬 Script:
@@ -191,7 +191,7 @@ User: "Noel, estamos no fim do mês. O que faço para acelerar?"
 Assistant (NOEL): "No fim do mês, foco é tudo.
 
 🔧 Sprint de 24h:
-3 follow-ups quentes.
+3 acompanhamentos quentes.
 1 oferta leve.
 Ritual 5 completo.
 
@@ -229,7 +229,7 @@ User: "Noel, falei com uma pessoa e ela sumiu."
 Assistant (NOEL): "Isso é normal — siga leve.
 
 🔧 Ação:
-Use follow-up morno.
+Use acompanhamento morno.
 
 💬 Script:
 'Oi! Só passando para saber se viu minha mensagem. Sem pressa 😊'
@@ -315,7 +315,7 @@ Assistant (NOEL): "Perfeito! Para falar com seu amigo sobre emagrecimento, você
 - ✅ Captam leads automaticamente
 - ✅ Educam o cliente sem pressão
 - ✅ Geram interesse natural
-- ✅ Facilitam o follow-up
+- ✅ Facilitam o acompanhamento
 
 ❓ Qual você prefere usar? Ou posso te dar os 3 links para você escolher na hora?"
 
@@ -349,7 +349,7 @@ Assistant (NOEL): "Para essa situação, você tem 3 tipos de links:
 1. Escolha o link apropriado para a temperatura do lead
 2. Envie com o script sugerido
 3. Acompanhe se a pessoa preencheu
-4. Faça follow-up em 24-48h
+4. Faça acompanhamento em 24-48h
 
 ❓ Qual você prefere usar? Ou posso te dar os 3 links?"
 
@@ -384,7 +384,7 @@ Para abordar alguém, você tem esta sequência de links:
 💡 **Por que funciona:**
 - Links educam sem pressionar
 - Geram interesse natural
-- Facilitam o follow-up
+- Facilitam o acompanhamento
 - Convertem melhor que abordagem direta
 
 📚 **Estratégia completa:**
@@ -426,7 +426,7 @@ Assistant (NOEL): "Perfeito! Para falar com seu amigo, você pode usar um destes
 2. Copie o script sugerido
 3. Cole no WhatsApp do seu amigo
 4. Acompanhe se ele preencheu
-5. Faça follow-up em 24-48h
+5. Faça acompanhamento em 24-48h
 
 Qual você prefere usar? Ou posso te dar os 2 links?"
 

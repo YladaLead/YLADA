@@ -349,34 +349,36 @@ export default function AvaliacaoIntolerancia({ config }: TemplateBaseProps) {
               )}
             </div>
 
-            <LeadCapturePostResult
-              config={config}
-              ferramenta="Avaliação de Intolerâncias"
-              resultadoTexto={`Perfil: ${resultado.perfil} (${resultado.score}/15 pontos)`}
-              mensagemConvite="🔍 Quer identificar suas intolerâncias?"
-              beneficios={[
-                'Protocolo de dieta de eliminação personalizado',
-                'Identificação de alimentos gatilho',
-                'Cardápio sem alimentos problemáticos',
-                'Acompanhamento durante processo de investigação'
-              ]}
-            />
+                        {/* Formulário de coleta de dados temporariamente desabilitado */}
+                        {/* Formulário de coleta de dados temporariamente desabilitado */}
+            {/* <LeadCapturePostResult */}
+            {/* config={config} */}
+            {/* ferramenta="Avaliação de Intolerâncias" */}
+            {/* resultadoTexto={`Perfil: ${resultado.perfil} (${resultado.score}/15 pontos)`} */}
+            {/* mensagemConvite="🔍 Quer identificar suas intolerâncias?" */}
+            {/* beneficios={[ */}
+            {/* 'Protocolo de dieta de eliminação personalizado', */}
+            {/* 'Identificação de alimentos gatilho', */}
+            {/* 'Cardápio sem alimentos problemáticos', */}
+            {/* 'Acompanhamento durante processo de investigação' */}
+            {/* ]} */}
+            {/* /> */}
 
             <WellnessActionButtons
-              onRecalcular={() => {
-                setPerguntaAtual(0)
-                setRespostas([])
-                setResultado(null)
-                setEtapa('quiz')
-              }}
-              onVoltarInicio={() => {
-                setPerguntaAtual(0)
-                setRespostas([])
-                setResultado(null)
-                setEtapa('landing')
-              }}
-              textoRecalcular="↺ Refazer Avaliação"
-            />
+          onRecalcular={() => {
+          setPerguntaAtual(0)
+          setRespostas([])
+          setResultado(null)
+          setEtapa('quiz')
+          }}
+          onVoltarInicio={() => {
+          setPerguntaAtual(0)
+          setRespostas([])
+          setResultado(null)
+          setEtapa('landing')
+          }}
+          textoRecalcular="↺ Refazer Avaliação"
+          />
           </div>
         )}
       </main>

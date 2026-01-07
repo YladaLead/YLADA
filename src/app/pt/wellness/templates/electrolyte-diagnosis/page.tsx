@@ -349,34 +349,36 @@ export default function DiagnosticoEletrolitos({ config }: TemplateBaseProps) {
               )}
             </div>
 
-            <LeadCapturePostResult
-              config={config}
-              ferramenta="Diagnóstico de Eletrólitos"
-              resultadoTexto={`Perfil: ${resultado.perfil} (${resultado.score}/15 pontos)`}
-              mensagemConvite="⚡ Quer equilibrar seus eletrólitos?"
-              beneficios={[
-                'Plano de suplementação personalizado',
-                'Orientações sobre alimentação rica em minerais',
-                'Prevenção de cãibras e fadiga',
-                'Melhorar hidratação e desempenho físico'
-              ]}
-            />
+                        {/* Formulário de coleta de dados temporariamente desabilitado */}
+                        {/* Formulário de coleta de dados temporariamente desabilitado */}
+            {/* <LeadCapturePostResult */}
+            {/* config={config} */}
+            {/* ferramenta="Diagnóstico de Eletrólitos" */}
+            {/* resultadoTexto={`Perfil: ${resultado.perfil} (${resultado.score}/15 pontos)`} */}
+            {/* mensagemConvite="⚡ Quer equilibrar seus eletrólitos?" */}
+            {/* beneficios={[ */}
+            {/* 'Plano de suplementação personalizado', */}
+            {/* 'Orientações sobre alimentação rica em minerais', */}
+            {/* 'Prevenção de cãibras e fadiga', */}
+            {/* 'Melhorar hidratação e desempenho físico' */}
+            {/* ]} */}
+            {/* /> */}
 
             <WellnessActionButtons
-              onRecalcular={() => {
-                setPerguntaAtual(0)
-                setRespostas([])
-                setResultado(null)
-                setEtapa('quiz')
-              }}
-              onVoltarInicio={() => {
-                setPerguntaAtual(0)
-                setRespostas([])
-                setResultado(null)
-                setEtapa('landing')
-              }}
-              textoRecalcular="↺ Refazer Diagnóstico"
-            />
+          onRecalcular={() => {
+          setPerguntaAtual(0)
+          setRespostas([])
+          setResultado(null)
+          setEtapa('quiz')
+          }}
+          onVoltarInicio={() => {
+          setPerguntaAtual(0)
+          setRespostas([])
+          setResultado(null)
+          setEtapa('landing')
+          }}
+          textoRecalcular="↺ Refazer Diagnóstico"
+          />
           </div>
         )}
       </main>

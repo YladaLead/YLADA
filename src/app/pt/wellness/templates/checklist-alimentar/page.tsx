@@ -459,30 +459,32 @@ export default function ChecklistAlimentar({ config }: TemplateBaseProps) {
             </div>
 
             {/* Botão CTA */}
-            <LeadCapturePostResult
-              config={config}
-              ferramenta="Checklist Alimentar"
-              resultadoTexto={`Perfil: ${resultado.perfil} (${resultado.score} pontos)`}
-              mensagemConvite="✅ Quer melhorar ainda mais sua alimentação?"
-              beneficios={[
-                'Plano alimentar personalizado para seus pontos fracos',
-                'Estratégias práticas para implementar no dia a dia',
-                'Lista de alimentos essenciais para sua rotina',
-                'Acompanhamento e ajustes conforme evolução'
-              ]}
-            />
+                        {/* Formulário de coleta de dados temporariamente desabilitado */}
+                        {/* Formulário de coleta de dados temporariamente desabilitado */}
+            {/* <LeadCapturePostResult */}
+            {/* config={config} */}
+            {/* ferramenta="Checklist Alimentar" */}
+            {/* resultadoTexto={`Perfil: ${resultado.perfil} (${resultado.score} pontos)`} */}
+            {/* mensagemConvite="✅ Quer melhorar ainda mais sua alimentação?" */}
+            {/* beneficios={[ */}
+            {/* 'Plano alimentar personalizado para seus pontos fracos', */}
+            {/* 'Estratégias práticas para implementar no dia a dia', */}
+            {/* 'Lista de alimentos essenciais para sua rotina', */}
+            {/* 'Acompanhamento e ajustes conforme evolução' */}
+            {/* ]} */}
+            {/* /> */}
 
-            {/* Botões de Ação */}
+            // {/* Botões de Ação */}
             <WellnessActionButtons
-              onRecalcular={reiniciar}
-              onVoltarInicio={() => {
-                setPerguntaAtual(0)
-                setRespostas([])
-                setResultado(null)
-                setEtapa('landing')
-              }}
-              textoRecalcular="🔄 Fazer Novamente"
-            />
+          onRecalcular={reiniciar}
+          onVoltarInicio={() => {
+          setPerguntaAtual(0)
+          setRespostas([])
+          setResultado(null)
+          setEtapa('landing')
+          }}
+          textoRecalcular="🔄 Fazer Novamente"
+          />
             <div className="flex justify-center mt-2">
               <button
                 onClick={() => window.print()}
