@@ -161,52 +161,52 @@ export async function POST(request: NextRequest) {
     const ctaMapping: Record<string, { phrases: string[], description: string, url?: string }> = {
       'pagina-descoberta': {
         phrases: [
-          'Descubra se isso faz sentido pra você',
-          'Veja como funciona',
-          'Entre e explore',
-          'Descubra se encaixa no seu momento'
+          'Clique no botão abaixo e descubra se faz sentido pra você',
+          'Clique no botão abaixo e veja como funciona',
+          'Clique no botão abaixo e explore',
+          'Clique no botão abaixo e descubra se encaixa no seu momento'
         ],
-        description: 'Página leve, explicativa, sem pressão - para tráfego frio',
+        description: 'Página leve, explicativa, sem pressão - para tráfego frio. SEMPRE mencionar "Clique no botão abaixo" para Instagram.',
         url: '/pt/nutri/descobrir'
       },
       'whatsapp': {
         phrases: [
-          'Fale com alguém que entende sua rotina',
-          'Converse com a gente',
-          'Explique sua situação',
-          'Fale com quem já passou por isso'
+          'Clique no botão abaixo e fale com alguém que entende sua rotina',
+          'Clique no botão abaixo e converse com a gente',
+          'Clique no botão abaixo e explique sua situação',
+          'Clique no botão abaixo e fale com quem já passou por isso'
         ],
-        description: 'Atendimento humanizado - para dores emocionais profundas',
+        description: 'Atendimento humanizado - para dores emocionais profundas. SEMPRE mencionar "Clique no botão abaixo" para Instagram.',
         url: 'WhatsApp (configurar número)'
       },
       'pagina-ylada': {
         phrases: [
-          'Descubra o YLADA',
-          'Veja por dentro',
-          'Entenda o conceito',
-          'Conheça o YLADA'
+          'Clique no botão abaixo e descubra o YLADA',
+          'Clique no botão abaixo e veja por dentro',
+          'Clique no botão abaixo e entenda o conceito',
+          'Clique no botão abaixo e conheça o YLADA'
         ],
-        description: 'Descoberta + convite - para curiosidade',
+        description: 'Descoberta + convite - para curiosidade. SEMPRE mencionar "Clique no botão abaixo" para Instagram.',
         url: '/pt/nutri'
       },
       'aula-apresentacao': {
         phrases: [
-          'Participe da apresentação gratuita',
-          'Assista à apresentação estratégica',
-          'Participe do encontro de clareza',
-          'Veja a apresentação gratuita'
+          'Clique no botão abaixo e participe da apresentação gratuita',
+          'Clique no botão abaixo e assista à apresentação estratégica',
+          'Clique no botão abaixo e participe do encontro de clareza',
+          'Clique no botão abaixo e veja a apresentação gratuita'
         ],
-        description: 'Apresentação estratégica gratuita - clareza sem venda',
+        description: 'Apresentação estratégica gratuita - clareza sem venda. SEMPRE mencionar "Clique no botão abaixo" para Instagram.',
         url: 'Página de inscrição (criar)'
       },
       'pagina-venda': {
         phrases: [
-          'Comece agora',
-          'Transforme sua carreira',
-          'Acesse e comece hoje',
-          'Comece sua transformação'
+          'Clique no botão abaixo e comece agora',
+          'Clique no botão abaixo e transforme sua carreira',
+          'Clique no botão abaixo e acesse',
+          'Clique no botão abaixo e comece sua transformação'
         ],
-        description: 'Venda direta - para remarketing',
+        description: 'Venda direta - para remarketing. SEMPRE mencionar "Clique no botão abaixo" para Instagram.',
         url: '/pt/nutri/checkout'
       }
     }
@@ -217,7 +217,7 @@ export async function POST(request: NextRequest) {
 ${selectedCTA.url ? `URL de destino: ${selectedCTA.url} (NÃO mencione na narração, apenas direcione para o botão)` : ''}
 Use uma dessas frases: ${selectedCTA.phrases.join(', ')}
 NUNCA mencione URLs ou links na narração. O botão do Instagram já leva para a página.`
-      : 'CTA: Descoberta honesta - "Descubra se faz sentido", sem promessas vazias'
+      : 'CTA: SEMPRE comece com "Clique no botão abaixo" + descoberta honesta. Exemplo: "Clique no botão abaixo e descubra se faz sentido pra você". NUNCA mencione URLs ou links na narração.'
 
     // Mapear dores baseado no tipo de campanha
     const campaignDores: Record<string, string[]> = {
@@ -272,18 +272,22 @@ REGRAS CRÍTICAS DE CONVERSÃO:
 - Remova a culpa da pessoa
 - Crie identificação, não vergonha
 
-🎯 SOLUÇÃO (Quebra de Crença + Mistério):
+🎯 SOLUÇÃO (Quebra de Crença + Mistério - MÁXIMO 9s):
+- Seja CONCISO: máximo 2-3 frases curtas
 - NÃO explique como funciona (mata curiosidade)
 - NÃO use linguagem genérica: "lotar agenda", "aumentar vendas", "sistema completo"
 - DIGA: "Nutricionistas não precisam trabalhar mais. Precisam trabalhar com sistema."
 - Crie mistério: "Não é um curso. Não é só uma ferramenta. É um apoio estratégico."
 - NÃO prometa demais, mantenha curiosidade
+- Exemplo ideal: "Nutricionistas não precisam trabalhar mais. Precisam trabalhar com sistema. Não é um curso. É um apoio estratégico." (9s total)
 
-✅ CTA (Descoberta Honesta):
+✅ CTA (Descoberta Honesta + Instagram):
 ${ctaInstructions}
-- NUNCA mencione URLs ou links
+- SEMPRE comece com "Clique no botão abaixo" (é Instagram, o botão já está na tela)
+- NUNCA mencione URLs ou links na narração
 - NÃO seja vendedor: "Transforme sua carreira agora!" (promessa vazia)
 - Menos promessa, mais descoberta
+- Exemplo correto: "Clique no botão abaixo e descubra se faz sentido pra você"
 
 REGRAS GERAIS:
 - Evite linguagem genérica de marketing
