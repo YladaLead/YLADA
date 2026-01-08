@@ -54,6 +54,7 @@ function LinksUnificadosPageContent() {
   const [filtroTipo, setFiltroTipo] = useState<'todos' | 'recrutamento' | 'vendas' | 'hype'>('todos')
   const [busca, setBusca] = useState('')
   const [modoRanking, setModoRanking] = useState(false)
+  const [ordenarPor, setOrdenarPor] = useState<'visualizacoes' | 'conversoes'>('visualizacoes')
 
   // Verificar se veio da home com parâmetro de ranking
   useEffect(() => {
@@ -607,17 +608,23 @@ function LinksUnificadosPageContent() {
       return matchBusca && (item.link || isFluxo)
     })
 
-    // Se estiver em modo ranking, ordenar por cliques (views) decrescente
+    // Se estiver em modo ranking, ordenar por visualizações ou conversões
     if (modoRanking) {
       filtrados = [...filtrados].sort((a, b) => {
-        const clicksA = a.views || 0
-        const clicksB = b.views || 0
-        return clicksB - clicksA // Ordenar do maior para o menor
+        if (ordenarPor === 'visualizacoes') {
+          const viewsA = a.views || 0
+          const viewsB = b.views || 0
+          return viewsB - viewsA // Ordenar do maior para o menor
+        } else {
+          const convA = a.conversions || 0
+          const convB = b.conversions || 0
+          return convB - convA // Ordenar do maior para o menor
+        }
       })
     }
 
     return filtrados
-  }, [itensUnificados, filtroTipo, busca, modoRanking])
+  }, [itensUnificados, filtroTipo, busca, modoRanking, ordenarPor])
 
   // Copiar link
   const copiarLink = async (link: string, id: string, event?: React.MouseEvent) => {
@@ -935,16 +942,39 @@ Você vai adorar! 😊`
         {/* Modo Ranking - Toggle e Info */}
         {modoRanking && (
           <div className="mb-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-4 border border-green-200">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between mb-3">
               <div>
-                <h2 className="text-lg font-semibold text-gray-900 mb-1">🏆 Ranking de Cliques</h2>
-                <p className="text-xs text-gray-600">Links ordenados por número de cliques (do maior para o menor)</p>
+                <h2 className="text-lg font-semibold text-gray-900 mb-1">🏆 Ranking</h2>
+                <p className="text-xs text-gray-600">Links ordenados por {ordenarPor === 'visualizacoes' ? 'visualizações' : 'conversões'} (do maior para o menor)</p>
               </div>
               <button
                 onClick={() => setModoRanking(false)}
                 className="px-3 py-1.5 bg-white text-green-600 rounded-lg text-sm font-medium hover:bg-green-50 border border-green-200 transition-colors"
               >
                 Ver todos
+              </button>
+            </div>
+            {/* Filtro de ordenação */}
+            <div className="flex gap-2">
+              <button
+                onClick={() => setOrdenarPor('visualizacoes')}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  ordenarPor === 'visualizacoes'
+                    ? 'bg-green-600 text-white'
+                    : 'bg-white text-gray-700 hover:bg-green-50 border border-green-200'
+                }`}
+              >
+                👁️ Mais Visualizações
+              </button>
+              <button
+                onClick={() => setOrdenarPor('conversoes')}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  ordenarPor === 'conversoes'
+                    ? 'bg-green-600 text-white'
+                    : 'bg-white text-gray-700 hover:bg-green-50 border border-green-200'
+                }`}
+              >
+                ✅ Mais Conversões
               </button>
             </div>
           </div>
@@ -1051,13 +1081,17 @@ Você vai adorar! 😊`
                   </div>
                 </div>
 
-                {/* Estatísticas - Modo Ranking mostra apenas cliques */}
+                {/* Estatísticas - Modo normal mostra visualizações e conversões, ranking mostra apenas o selecionado */}
                 {modoRanking ? (
                   <div className="mb-3 p-3 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border border-green-200">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-xs text-gray-500 mb-1">👆 Cliques</p>
-                        <p className="text-2xl font-bold text-green-600">{item.views || 0}</p>
+                        <p className="text-xs text-gray-500 mb-1">
+                          {ordenarPor === 'visualizacoes' ? '👁️ Visualizações' : '✅ Conversões'}
+                        </p>
+                        <p className="text-2xl font-bold text-green-600">
+                          {ordenarPor === 'visualizacoes' ? (item.views || 0) : (item.conversions || 0)}
+                        </p>
                       </div>
                       {itensFiltrados.findIndex(i => i.id === item.id) < 3 && (
                         <div className="text-3xl">
@@ -1069,18 +1103,14 @@ Você vai adorar! 😊`
                     </div>
                   </div>
                 ) : (
-                  (item.views !== undefined || item.leads !== undefined || item.conversions !== undefined) && (
-                    <div className="grid grid-cols-3 gap-2 mb-3 p-2 bg-gray-50 rounded-lg">
+                  (item.views !== undefined || item.conversions !== undefined) && (
+                    <div className="grid grid-cols-2 gap-2 mb-3 p-2 bg-gray-50 rounded-lg">
                       <div className="text-center">
-                        <p className="text-xs text-gray-500 mb-1">Visualizações</p>
+                        <p className="text-xs text-gray-500 mb-1">👁️ Visualizações</p>
                         <p className="text-sm font-bold text-gray-900">{item.views || 0}</p>
                       </div>
                       <div className="text-center">
-                        <p className="text-xs text-gray-500 mb-1">Leads</p>
-                        <p className="text-sm font-bold text-blue-600">{item.leads || 0}</p>
-                      </div>
-                      <div className="text-center">
-                        <p className="text-xs text-gray-500 mb-1">Conversões</p>
+                        <p className="text-xs text-gray-500 mb-1">✅ Conversões</p>
                         <p className="text-sm font-bold text-green-600">{item.conversions || 0}</p>
                       </div>
                     </div>
