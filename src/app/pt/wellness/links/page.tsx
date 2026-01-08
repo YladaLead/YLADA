@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useMemo } from 'react'
+import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import WellnessNavBar from '@/components/wellness/WellnessNavBar'
@@ -40,14 +41,26 @@ interface ItemUnificado {
   descricao?: string
   icon?: string
   metadata?: any
+  views?: number
+  leads?: number
+  conversions?: number
 }
 
 function LinksUnificadosPageContent() {
+  const searchParams = useSearchParams()
   const { profile, loading: loadingProfile } = useWellnessProfile()
   const [templates, setTemplates] = useState<Template[]>([])
   const [carregandoTemplates, setCarregandoTemplates] = useState(true)
   const [filtroTipo, setFiltroTipo] = useState<'todos' | 'recrutamento' | 'vendas' | 'hype'>('todos')
   const [busca, setBusca] = useState('')
+  const [modoRanking, setModoRanking] = useState(false)
+
+  // Verificar se veio da home com parâmetro de ranking
+  useEffect(() => {
+    if (searchParams.get('ranking') === 'true') {
+      setModoRanking(true)
+    }
+  }, [searchParams])
   const [previewAberto, setPreviewAberto] = useState<string | null>(null)
   const [linkCopiado, setLinkCopiado] = useState<string | null>(null)
   const [qrCopiado, setQrCopiado] = useState<string | null>(null)
@@ -137,6 +150,8 @@ function LinksUnificadosPageContent() {
 
   // Estado para armazenar ferramentas criadas pelo usuário
   const [ferramentasUsuario, setFerramentasUsuario] = useState<Record<string, string>>({}) // template_slug -> tool_slug
+  // Estado para armazenar estatísticas das ferramentas
+  const [estatisticasFerramentas, setEstatisticasFerramentas] = useState<Record<string, { views: number; leads: number; conversions: number }>>({}) // slug -> estatísticas
 
   // Carregar ferramentas criadas pelo usuário
   useEffect(() => {
@@ -154,14 +169,27 @@ function LinksUnificadosPageContent() {
           
           // Criar mapa: template_slug -> tool_slug
           const mapa: Record<string, string> = {}
+          // Criar mapa de estatísticas: slug -> estatísticas
+          const statsMap: Record<string, { views: number; leads: number; conversions: number }> = {}
+          
           tools.forEach((tool: any) => {
             if (tool.template_slug && tool.slug) {
               mapa[tool.template_slug] = tool.slug
             }
+            // Armazenar estatísticas pelo slug da ferramenta
+            if (tool.slug) {
+              statsMap[tool.slug] = {
+                views: tool.views || 0,
+                leads: tool.leads_count || 0,
+                conversions: tool.conversions_count || 0
+              }
+            }
           })
           
           setFerramentasUsuario(mapa)
+          setEstatisticasFerramentas(statsMap)
           console.log('✅ Ferramentas do usuário carregadas:', mapa)
+          console.log('✅ Estatísticas carregadas:', statsMap)
         }
       } catch (error) {
         console.error('Erro ao carregar ferramentas do usuário:', error)
@@ -394,114 +422,150 @@ function LinksUnificadosPageContent() {
   })
 
   // Unificar todos os itens (recalcular quando profile mudar)
-  const itensUnificados: ItemUnificado[] = useMemo(() => [
-    // HOM gravada
-    {
-      id: 'hom-gravada',
-      nome: 'Link da HOM gravada',
-      tipo: 'fluxo-recrutamento' as const,
-      categoria: 'Recrutamento',
-      link: gerarLinkHOM() || '',
-      descricao: 'Oportunidade: Bebidas Funcionais',
-      icon: '🎥',
-      metadata: { tipo: 'hom-gravada', linkHOM: gerarLinkHOM() }
-    },
-    // Quizzes de Recrutamento (os 3 específicos)
-    ...quizzesRecrutamento.map(t => ({
-      id: `recrutamento-quiz-${t.id}`,
-      nome: t.nome,
-      tipo: 'fluxo-recrutamento' as const,
-      categoria: 'Recrutamento',
-      link: gerarLinkTemplate(t) || '',
-      descricao: t.description || t.descricao,
-      icon: '🎯',
-      metadata: { 
-        template: {
-          ...t,
-          content: t.content, // GARANTIR que content está presente
-          id: t.id || t.templateId,
-          slug: t.slug,
-          type: t.type,
-          name: t.name || t.nome,
-          nome: t.nome || t.name
-        }, 
-        isQuiz: true 
-      }
-    })),
-    // Templates Hype Drink (6 templates específicos)
-    ...templatesHype.map(t => ({
-      id: `hype-${t.id}`,
-      nome: t.nome,
-      tipo: 'fluxo-vendas' as const, // Usar tipo vendas para compatibilidade
-      categoria: 'HYPE',
-      link: t.link || '',
-      descricao: t.description,
-      icon: t.icon,
-      metadata: { 
-        template: {
-          id: t.id,
-          slug: t.slug,
-          type: t.type,
-          name: t.nome,
-          nome: t.nome,
-          description: t.description,
-          icon: t.icon
-        }, 
-        isTemplate: true,
-        isHype: true
-      }
-    })),
-    // Templates de Vendas (todos os outros templates)
-    ...templatesVendas.map(t => ({
-      id: `vendas-template-${t.id}`,
-      nome: t.nome,
-      tipo: 'fluxo-vendas' as const,
-      categoria: 'Vendas',
-      link: gerarLinkTemplate(t) || '',
-      descricao: t.description || t.descricao,
-      icon: t.icon || '📋',
-      metadata: { 
-        template: {
-          ...t,
-          content: t.content,
-          id: t.id || t.templateId,
-          slug: t.slug,
-          type: t.type,
-          name: t.name || t.nome,
-          nome: t.nome || t.name
-        }, 
-        isTemplate: true 
-      }
-    })),
-    // Fluxos de Recrutamento
-    ...fluxosRecrutamento.map(f => {
-      const link = gerarLinkFluxoRecrutamento(f) || ''
-      return {
-        id: `recrutamento-${f.id}`,
-        nome: f.nome,
+  const itensUnificados: ItemUnificado[] = useMemo(() => {
+    // Função auxiliar para obter estatísticas baseado no slug
+    const obterEstatisticas = (slug: string) => {
+      return estatisticasFerramentas[slug] || { views: 0, leads: 0, conversions: 0 }
+    }
+
+    return [
+      // HOM gravada
+      {
+        id: 'hom-gravada',
+        nome: 'Link da HOM gravada',
         tipo: 'fluxo-recrutamento' as const,
         categoria: 'Recrutamento',
-        link,
-        descricao: f.objetivo,
-        icon: '👥',
-        metadata: { fluxo: f }
-      }
-    }),
-    // Fluxos de Vendas
-    ...fluxosClientes.map(f => {
-      const link = gerarLinkFluxoVendas(f) || ''
-      return {
-        id: `vendas-${f.id}`,
-        nome: f.nome,
-        tipo: 'fluxo-vendas' as const,
-        categoria: 'Vendas',
-        link,
-        descricao: f.objetivo,
-        icon: '💰',
-        metadata: { fluxo: f }
-      }
-    })
-  ], [templates, profile?.userSlug, ferramentasUsuario, templatesHype, baseUrl])
+        link: gerarLinkHOM() || '',
+        descricao: 'Oportunidade: Bebidas Funcionais',
+        icon: '🎥',
+        metadata: { tipo: 'hom-gravada', linkHOM: gerarLinkHOM() },
+        views: 0,
+        leads: 0,
+        conversions: 0
+      },
+      // Quizzes de Recrutamento (os 3 específicos)
+      ...quizzesRecrutamento.map(t => {
+        const toolSlug = ferramentasUsuario[t.slug] || t.slug
+        const stats = obterEstatisticas(toolSlug)
+        return {
+          id: `recrutamento-quiz-${t.id}`,
+          nome: t.nome,
+          tipo: 'fluxo-recrutamento' as const,
+          categoria: 'Recrutamento',
+          link: gerarLinkTemplate(t) || '',
+          descricao: t.description || t.descricao,
+          icon: '🎯',
+          metadata: { 
+            template: {
+              ...t,
+              content: t.content, // GARANTIR que content está presente
+              id: t.id || t.templateId,
+              slug: t.slug,
+              type: t.type,
+              name: t.name || t.nome,
+              nome: t.nome || t.name
+            }, 
+            isQuiz: true 
+          },
+          views: stats.views,
+          leads: stats.leads,
+          conversions: stats.conversions
+        }
+      }),
+      // Templates Hype Drink (6 templates específicos)
+      ...templatesHype.map(t => {
+        const stats = obterEstatisticas(t.slug)
+        return {
+          id: `hype-${t.id}`,
+          nome: t.nome,
+          tipo: 'fluxo-vendas' as const, // Usar tipo vendas para compatibilidade
+          categoria: 'HYPE',
+          link: t.link || '',
+          descricao: t.description,
+          icon: t.icon,
+          metadata: { 
+            template: {
+              id: t.id,
+              slug: t.slug,
+              type: t.type,
+              name: t.nome,
+              nome: t.nome,
+              description: t.description,
+              icon: t.icon
+            }, 
+            isTemplate: true,
+            isHype: true
+          },
+          views: stats.views,
+          leads: stats.leads,
+          conversions: stats.conversions
+        }
+      }),
+      // Templates de Vendas (todos os outros templates)
+      ...templatesVendas.map(t => {
+        const toolSlug = ferramentasUsuario[t.slug] || t.slug
+        const stats = obterEstatisticas(toolSlug)
+        return {
+          id: `vendas-template-${t.id}`,
+          nome: t.nome,
+          tipo: 'fluxo-vendas' as const,
+          categoria: 'Vendas',
+          link: gerarLinkTemplate(t) || '',
+          descricao: t.description || t.descricao,
+          icon: t.icon || '📋',
+          metadata: { 
+            template: {
+              ...t,
+              content: t.content,
+              id: t.id || t.templateId,
+              slug: t.slug,
+              type: t.type,
+              name: t.name || t.nome,
+              nome: t.nome || t.name
+            }, 
+            isTemplate: true 
+          },
+          views: stats.views,
+          leads: stats.leads,
+          conversions: stats.conversions
+        }
+      }),
+      // Fluxos de Recrutamento
+      ...fluxosRecrutamento.map(f => {
+        const link = gerarLinkFluxoRecrutamento(f) || ''
+        return {
+          id: `recrutamento-${f.id}`,
+          nome: f.nome,
+          tipo: 'fluxo-recrutamento' as const,
+          categoria: 'Recrutamento',
+          link,
+          descricao: f.objetivo,
+          icon: '👥',
+          metadata: { fluxo: f },
+          views: 0,
+          leads: 0,
+          conversions: 0
+        }
+      }),
+      // Fluxos de Vendas
+      ...fluxosClientes.map(f => {
+        const link = gerarLinkFluxoVendas(f) || ''
+        return {
+          id: `vendas-${f.id}`,
+          nome: f.nome,
+          tipo: 'fluxo-vendas' as const,
+          categoria: 'Vendas',
+          link,
+          descricao: f.objetivo,
+          icon: '💰',
+          metadata: { fluxo: f },
+          views: 0,
+          leads: 0,
+          conversions: 0
+        }
+      })
+    ]
+  }, [templates, profile?.userSlug, ferramentasUsuario, templatesHype, baseUrl, estatisticasFerramentas])
 
   // Debug: verificar quantos itens foram unificados
   useEffect(() => {
@@ -520,27 +584,40 @@ function LinksUnificadosPageContent() {
     })
   }, [itensUnificados.length, quizzesRecrutamento.length, templatesVendas.length, fluxosRecrutamento.length, fluxosClientes.length])
 
-  // Filtrar itens
-  const itensFiltrados = itensUnificados.filter(item => {
-    // Filtro por tipo principal (todos, recrutamento, vendas ou hype)
-    const matchTipo = 
-      filtroTipo === 'todos' ||
-      (filtroTipo === 'recrutamento' && item.tipo === 'fluxo-recrutamento') ||
-      (filtroTipo === 'vendas' && item.tipo === 'fluxo-vendas' && item.categoria !== 'HYPE') ||
-      (filtroTipo === 'hype' && item.categoria === 'HYPE')
-    
-    if (!matchTipo) return false
-    
-    // Filtro de busca
-    const matchBusca = busca === '' || 
-      item.nome.toLowerCase().includes(busca.toLowerCase()) ||
-      item.descricao?.toLowerCase().includes(busca.toLowerCase()) ||
-      item.categoria.toLowerCase().includes(busca.toLowerCase())
+  // Filtrar e ordenar itens
+  const itensFiltrados = useMemo(() => {
+    let filtrados = itensUnificados.filter(item => {
+      // Filtro por tipo principal (todos, recrutamento, vendas ou hype)
+      const matchTipo = 
+        filtroTipo === 'todos' ||
+        (filtroTipo === 'recrutamento' && item.tipo === 'fluxo-recrutamento') ||
+        (filtroTipo === 'vendas' && item.tipo === 'fluxo-vendas' && item.categoria !== 'HYPE') ||
+        (filtroTipo === 'hype' && item.categoria === 'HYPE')
+      
+      if (!matchTipo) return false
+      
+      // Filtro de busca
+      const matchBusca = busca === '' || 
+        item.nome.toLowerCase().includes(busca.toLowerCase()) ||
+        item.descricao?.toLowerCase().includes(busca.toLowerCase()) ||
+        item.categoria.toLowerCase().includes(busca.toLowerCase())
 
-    // Permitir fluxos mesmo sem link (podem ser gerados depois)
-    const isFluxo = item.metadata?.fluxo !== undefined
-    return matchBusca && (item.link || isFluxo)
-  })
+      // Permitir fluxos mesmo sem link (podem ser gerados depois)
+      const isFluxo = item.metadata?.fluxo !== undefined
+      return matchBusca && (item.link || isFluxo)
+    })
+
+    // Se estiver em modo ranking, ordenar por cliques (views) decrescente
+    if (modoRanking) {
+      filtrados = [...filtrados].sort((a, b) => {
+        const clicksA = a.views || 0
+        const clicksB = b.views || 0
+        return clicksB - clicksA // Ordenar do maior para o menor
+      })
+    }
+
+    return filtrados
+  }, [itensUnificados, filtroTipo, busca, modoRanking])
 
   // Copiar link
   const copiarLink = async (link: string, id: string, event?: React.MouseEvent) => {
@@ -855,6 +932,24 @@ Você vai adorar! 😊`
       <WellnessNavBar showTitle title="Meus Links" />
       
       <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Modo Ranking - Toggle e Info */}
+        {modoRanking && (
+          <div className="mb-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-4 border border-green-200">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-lg font-semibold text-gray-900 mb-1">🏆 Ranking de Cliques</h2>
+                <p className="text-xs text-gray-600">Links ordenados por número de cliques (do maior para o menor)</p>
+              </div>
+              <button
+                onClick={() => setModoRanking(false)}
+                className="px-3 py-1.5 bg-white text-green-600 rounded-lg text-sm font-medium hover:bg-green-50 border border-green-200 transition-colors"
+              >
+                Ver todos
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Cabeçalho */}
         <div className="text-center mb-8">
           <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
@@ -955,6 +1050,42 @@ Você vai adorar! 😊`
                     </div>
                   </div>
                 </div>
+
+                {/* Estatísticas - Modo Ranking mostra apenas cliques */}
+                {modoRanking ? (
+                  <div className="mb-3 p-3 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border border-green-200">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-xs text-gray-500 mb-1">👆 Cliques</p>
+                        <p className="text-2xl font-bold text-green-600">{item.views || 0}</p>
+                      </div>
+                      {itensFiltrados.findIndex(i => i.id === item.id) < 3 && (
+                        <div className="text-3xl">
+                          {itensFiltrados.findIndex(i => i.id === item.id) === 0 && '🥇'}
+                          {itensFiltrados.findIndex(i => i.id === item.id) === 1 && '🥈'}
+                          {itensFiltrados.findIndex(i => i.id === item.id) === 2 && '🥉'}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ) : (
+                  (item.views !== undefined || item.leads !== undefined || item.conversions !== undefined) && (
+                    <div className="grid grid-cols-3 gap-2 mb-3 p-2 bg-gray-50 rounded-lg">
+                      <div className="text-center">
+                        <p className="text-xs text-gray-500 mb-1">Visualizações</p>
+                        <p className="text-sm font-bold text-gray-900">{item.views || 0}</p>
+                      </div>
+                      <div className="text-center">
+                        <p className="text-xs text-gray-500 mb-1">Leads</p>
+                        <p className="text-sm font-bold text-blue-600">{item.leads || 0}</p>
+                      </div>
+                      <div className="text-center">
+                        <p className="text-xs text-gray-500 mb-1">Conversões</p>
+                        <p className="text-sm font-bold text-green-600">{item.conversions || 0}</p>
+                      </div>
+                    </div>
+                  )
+                )}
 
                 {/* Quatro Botões - Grid 2x2 */}
                 <div className="grid grid-cols-2 gap-2">
