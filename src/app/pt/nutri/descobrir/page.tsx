@@ -50,6 +50,21 @@ export default function NutriDescobrirPage() {
                   Sem promessas vazias. Sem pressão. Só clareza.
                 </span>
               </p>
+
+              {/* Imagem Hero - Nutricionista usando a plataforma (ESTÁTICA) */}
+              <div className="mt-12 max-w-4xl mx-auto">
+                <div className="relative rounded-2xl overflow-hidden shadow-2xl">
+                  <Image
+                    src="/images/discovery/nutricionista-plataforma.png"
+                    alt="Nutricionista usando a plataforma YLADA Nutri"
+                    width={1920}
+                    height={1080}
+                    className="w-full h-auto"
+                    priority
+                    unoptimized={false}
+                  />
+                </div>
+              </div>
             </div>
           </div>
         </section>
@@ -130,7 +145,7 @@ export default function NutriDescobrirPage() {
                 Como funciona?
               </h2>
               
-              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-8 text-center">
+              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-8 text-center mb-8">
                 <p className="text-xl text-gray-700 leading-relaxed mb-6">
                   É um sistema que te guia.
                 </p>
@@ -145,6 +160,26 @@ export default function NutriDescobrirPage() {
                 <p className="text-base text-gray-500 italic">
                   Mas o melhor jeito de entender é explorando. 
                   Não prometemos resultados mágicos. Prometemos clareza e método.
+                </p>
+              </div>
+
+              {/* Vídeo Dashboard - Resultado (agenda cheia) - VÍDEO CURTO */}
+              <div className="mt-8 max-w-4xl mx-auto">
+                <div className="relative rounded-2xl overflow-hidden shadow-2xl bg-gray-900">
+                  <video
+                    src="/videos/discovery/dashboard-agenda-cheia.mp4"
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                    className="w-full h-auto"
+                    style={{ display: 'block' }}
+                  >
+                    Seu navegador não suporta vídeos.
+                  </video>
+                </div>
+                <p className="text-center text-sm text-gray-500 mt-4 italic">
+                  Um exemplo de como sua rotina pode ficar organizada
                 </p>
               </div>
             </div>
