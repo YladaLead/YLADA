@@ -6,6 +6,7 @@ import WellnessHeader from '@/components/wellness/WellnessHeader'
 import WellnessLanding from '@/components/wellness/WellnessLanding'
 import LeadCapturePostResult from '@/components/wellness/LeadCapturePostResult'
 import WellnessActionButtons from '@/components/wellness/WellnessActionButtons'
+import WellnessCTAButton from '@/components/wellness/WellnessCTAButton'
 import { getTemplateBenefits } from '@/lib/template-benefits'
 import { propositoEquilibrioDiagnosticos } from '@/lib/diagnostics'
 
@@ -324,20 +325,13 @@ export default function QuizProposito({ config }: TemplateBaseProps) {
               )}
             </div>
 
-                        {/* Formulário de coleta de dados temporariamente desabilitado */}
-                        {/* Formulário de coleta de dados temporariamente desabilitado */}
-            {/* <LeadCapturePostResult */}
-            {/* config={config} */}
-            {/* ferramenta="Propósito" */}
-            {/* resultadoTexto={`${resultado.perfil} (${resultado.score}/12 pontos)`} */}
-            {/* mensagemConvite="🎯 Quer descobrir e viver seu propósito?" */}
-            {/* beneficios={[ */}
-            {/* 'Clareza sobre sua missão de vida', */}
-            {/* 'Alinhamento de ações com propósito', */}
-            {/* 'Estratégias para vida com significado', */}
-            {/* 'Acompanhamento da jornada' */}
-            {/* ]} */}
-            {/* /> */}
+            {/* CTA WhatsApp com resultado */}
+            {config && (
+              <WellnessCTAButton
+                config={config}
+                resultadoTexto={`${resultado.perfil} (${resultado.score}/12 pontos)`}
+              />
+            )}
 
             <WellnessActionButtons
           onRecalcular={() => {

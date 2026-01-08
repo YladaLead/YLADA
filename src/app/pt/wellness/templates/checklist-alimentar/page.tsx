@@ -6,6 +6,7 @@ import WellnessHeader from '@/components/wellness/WellnessHeader'
 import WellnessLanding from '@/components/wellness/WellnessLanding'
 import LeadCapturePostResult from '@/components/wellness/LeadCapturePostResult'
 import WellnessActionButtons from '@/components/wellness/WellnessActionButtons'
+import WellnessCTAButton from '@/components/wellness/WellnessCTAButton'
 import { checklistAlimentarDiagnosticos } from '@/lib/diagnosticos-nutri'
 import { getTemplateBenefits } from '@/lib/template-benefits'
 
@@ -458,23 +459,15 @@ export default function ChecklistAlimentar({ config }: TemplateBaseProps) {
               </ul>
             </div>
 
-            {/* Botão CTA */}
-                        {/* Formulário de coleta de dados temporariamente desabilitado */}
-                        {/* Formulário de coleta de dados temporariamente desabilitado */}
-            {/* <LeadCapturePostResult */}
-            {/* config={config} */}
-            {/* ferramenta="Checklist Alimentar" */}
-            {/* resultadoTexto={`Perfil: ${resultado.perfil} (${resultado.score} pontos)`} */}
-            {/* mensagemConvite="✅ Quer melhorar ainda mais sua alimentação?" */}
-            {/* beneficios={[ */}
-            {/* 'Plano alimentar personalizado para seus pontos fracos', */}
-            {/* 'Estratégias práticas para implementar no dia a dia', */}
-            {/* 'Lista de alimentos essenciais para sua rotina', */}
-            {/* 'Acompanhamento e ajustes conforme evolução' */}
-            {/* ]} */}
-            {/* /> */}
+            {/* CTA WhatsApp com resultado */}
+            {config && (
+              <WellnessCTAButton
+                config={config}
+                resultadoTexto={`Perfil: ${resultado.perfil} (${resultado.score} pontos)`}
+              />
+            )}
 
-            // {/* Botões de Ação */}
+            {/* Botões de Ação */}
             <WellnessActionButtons
           onRecalcular={reiniciar}
           onVoltarInicio={() => {

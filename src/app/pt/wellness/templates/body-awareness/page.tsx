@@ -6,6 +6,7 @@ import WellnessHeader from '@/components/wellness/WellnessHeader'
 import WellnessLanding from '@/components/wellness/WellnessLanding'
 import LeadCapturePostResult from '@/components/wellness/LeadCapturePostResult'
 import WellnessActionButtons from '@/components/wellness/WellnessActionButtons'
+import WellnessCTAButton from '@/components/wellness/WellnessCTAButton'
 import { getTemplateBenefits } from '@/lib/template-benefits'
 import { conheceSeuCorpoDiagnosticos } from '@/lib/diagnostics'
 
@@ -349,19 +350,13 @@ export default function VoceConheceSeuCorpo({ config }: TemplateBaseProps) {
               )}
             </div>
 
-            {/* Formulário de coleta de dados temporariamente desabilitado */}
-            {/* <LeadCapturePostResult
-              config={config}
-              ferramenta="Consciência Corporal"
-              resultadoTexto={`Perfil: ${resultado.perfil} (${resultado.score}/15 pontos)`}
-              mensagemConvite="🧘 Quer melhorar sua conexão com seu corpo?"
-              beneficios={[
-                'Orientações para desenvolver consciência corporal',
-                'Estratégias de nutrição intuitiva',
-                'Técnicas para reconhecer sinais de fome e saciedade',
-                'Acompanhamento para mudança de hábitos sustentável'
-              ]}
-            /> */}
+            {/* CTA WhatsApp com resultado */}
+            {config && (
+              <WellnessCTAButton
+                config={config}
+                resultadoTexto={`Perfil: ${resultado.perfil} (${resultado.score}/15 pontos)`}
+              />
+            )}
 
             <WellnessActionButtons
               onRecalcular={() => {

@@ -6,6 +6,7 @@ import WellnessHeader from '@/components/wellness/WellnessHeader'
 import WellnessLanding from '@/components/wellness/WellnessLanding'
 import LeadCapturePostResult from '@/components/wellness/LeadCapturePostResult'
 import WellnessActionButtons from '@/components/wellness/WellnessActionButtons'
+import WellnessCTAButton from '@/components/wellness/WellnessCTAButton'
 import { getTemplateBenefits } from '@/lib/template-benefits'
 import { alimentacaoRotinaDiagnosticos } from '@/lib/diagnostics'
 
@@ -347,20 +348,13 @@ export default function VoceAlimentandoConformeRotina({ config }: TemplateBasePr
               )}
             </div>
 
-                        {/* Formulário de coleta de dados temporariamente desabilitado */}
-                        {/* Formulário de coleta de dados temporariamente desabilitado */}
-            {/* <LeadCapturePostResult */}
-            {/* config={config} */}
-            {/* ferramenta="Rotina Alimentar" */}
-            {/* resultadoTexto={`Perfil: ${resultado.perfil} (${resultado.score}/15 pontos)`} */}
-            {/* mensagemConvite="⏰ Quer criar uma rotina alimentar saudável?" */}
-            {/* beneficios={[ */}
-            {/* 'Cronograma de refeições personalizado', */}
-            {/* 'Receitas rápidas para seu dia a dia', */}
-            {/* 'Estratégias para manter consistência', */}
-            {/* 'Plano adaptado à sua rotina' */}
-            {/* ]} */}
-            {/* /> */}
+            {/* CTA WhatsApp com resultado */}
+            {config && (
+              <WellnessCTAButton
+                config={config}
+                resultadoTexto={`Perfil: ${resultado.perfil} (${resultado.score}/15 pontos)`}
+              />
+            )}
 
             <WellnessActionButtons
           onRecalcular={() => {

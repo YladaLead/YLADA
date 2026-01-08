@@ -142,7 +142,13 @@ export default function WellnessCTAButton({
   const formatarMensagem = (mensagem: string): string => {
     let msg = mensagem
     if (resultadoTexto) {
+      // Substituir placeholder [RESULTADO] se existir
       msg = msg.replace(/\[RESULTADO\]/g, resultadoTexto)
+      // Se não tiver placeholder mas tiver resultadoTexto, adicionar automaticamente ao final da mensagem
+      // (como funciona na área Nutri)
+      if (!mensagem.includes('[RESULTADO]')) {
+        msg = `${msg}\n\n📊 Meu resultado: ${resultadoTexto}`
+      }
     }
     if (nomeCliente) {
       msg = msg.replace(/\[NOME_CLIENTE\]/g, nomeCliente)

@@ -6,6 +6,7 @@ import WellnessHeader from '@/components/wellness/WellnessHeader'
 import WellnessLanding from '@/components/wellness/WellnessLanding'
 import LeadCapturePostResult from '@/components/wellness/LeadCapturePostResult'
 import WellnessActionButtons from '@/components/wellness/WellnessActionButtons'
+import WellnessCTAButton from '@/components/wellness/WellnessCTAButton'
 import { getTemplateBenefits } from '@/lib/template-benefits'
 import { intoleranciaDiagnosticos } from '@/lib/diagnostics'
 
@@ -349,20 +350,13 @@ export default function AvaliacaoIntolerancia({ config }: TemplateBaseProps) {
               )}
             </div>
 
-                        {/* Formulário de coleta de dados temporariamente desabilitado */}
-                        {/* Formulário de coleta de dados temporariamente desabilitado */}
-            {/* <LeadCapturePostResult */}
-            {/* config={config} */}
-            {/* ferramenta="Avaliação de Intolerâncias" */}
-            {/* resultadoTexto={`Perfil: ${resultado.perfil} (${resultado.score}/15 pontos)`} */}
-            {/* mensagemConvite="🔍 Quer identificar suas intolerâncias?" */}
-            {/* beneficios={[ */}
-            {/* 'Protocolo de dieta de eliminação personalizado', */}
-            {/* 'Identificação de alimentos gatilho', */}
-            {/* 'Cardápio sem alimentos problemáticos', */}
-            {/* 'Acompanhamento durante processo de investigação' */}
-            {/* ]} */}
-            {/* /> */}
+            {/* CTA WhatsApp com resultado */}
+            {config && (
+              <WellnessCTAButton
+                config={config}
+                resultadoTexto={`Perfil: ${resultado.perfil} (${resultado.score}/15 pontos)`}
+              />
+            )}
 
             <WellnessActionButtons
           onRecalcular={() => {

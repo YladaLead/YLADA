@@ -6,6 +6,7 @@ import WellnessHeader from '@/components/wellness/WellnessHeader'
 import WellnessLanding from '@/components/wellness/WellnessLanding'
 import LeadCapturePostResult from '@/components/wellness/LeadCapturePostResult'
 import WellnessActionButtons from '@/components/wellness/WellnessActionButtons'
+import WellnessCTAButton from '@/components/wellness/WellnessCTAButton'
 import { getTemplateBenefits } from '@/lib/template-benefits'
 import { ganhosProsperidadeDiagnosticos } from '@/lib/diagnostics'
 
@@ -324,20 +325,13 @@ export default function QuizGanhos({ config }: TemplateBaseProps) {
               )}
             </div>
 
-                        {/* Formulário de coleta de dados temporariamente desabilitado */}
-                        {/* Formulário de coleta de dados temporariamente desabilitado */}
-            {/* <LeadCapturePostResult */}
-            {/* config={config} */}
-            {/* ferramenta="Ganhos" */}
-            {/* resultadoTexto={`${resultado.perfil} (${resultado.score}/12 pontos)`} */}
-            {/* mensagemConvite="💎 Quer multiplicar seus ganhos?" */}
-            {/* beneficios={[ */}
-            {/* 'Estratégias para ganhos reais', */}
-            {/* 'Mindset de prosperidade', */}
-            {/* 'Plano de ação concreto', */}
-            {/* 'Acompanhamento de resultados' */}
-            {/* ]} */}
-            {/* /> */}
+            {/* CTA WhatsApp com resultado */}
+            {config && (
+              <WellnessCTAButton
+                config={config}
+                resultadoTexto={`${resultado.perfil} (${resultado.score}/12 pontos)`}
+              />
+            )}
 
             <WellnessActionButtons
           onRecalcular={() => {

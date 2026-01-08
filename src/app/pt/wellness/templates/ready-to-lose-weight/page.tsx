@@ -6,6 +6,7 @@ import WellnessHeader from '@/components/wellness/WellnessHeader'
 import WellnessLanding from '@/components/wellness/WellnessLanding'
 import LeadCapturePostResult from '@/components/wellness/LeadCapturePostResult'
 import WellnessActionButtons from '@/components/wellness/WellnessActionButtons'
+import WellnessCTAButton from '@/components/wellness/WellnessCTAButton'
 import { getTemplateBenefits } from '@/lib/template-benefits'
 import { prontoEmagrecerDiagnosticos } from '@/lib/diagnostics'
 
@@ -349,20 +350,13 @@ export default function ProntoEmagrecer({ config }: TemplateBaseProps) {
               )}
             </div>
 
-                        {/* Formulário de coleta de dados temporariamente desabilitado */}
-                        {/* Formulário de coleta de dados temporariamente desabilitado */}
-            {/* <LeadCapturePostResult */}
-            {/* config={config} */}
-            {/* ferramenta="Pronto para Emagrecer" */}
-            {/* resultadoTexto={`Perfil: ${resultado.perfil} (${resultado.score}/15 pontos)`} */}
-            {/* mensagemConvite="🎯 Quer iniciar seu processo de emagrecimento de verdade?" */}
-            {/* beneficios={[ */}
-            {/* 'Plano personalizado para perda de peso sustentável', */}
-            {/* 'Estratégias para vencer bloqueios mentais', */}
-            {/* 'Suporte profissional durante toda jornada', */}
-            {/* 'Foco em mudanças permanentes, não dietas temporárias' */}
-            {/* ]} */}
-            {/* /> */}
+            {/* CTA WhatsApp com resultado */}
+            {config && (
+              <WellnessCTAButton
+                config={config}
+                resultadoTexto={`Perfil: ${resultado.perfil} (${resultado.score}/15 pontos)`}
+              />
+            )}
 
             <WellnessActionButtons
           onRecalcular={() => {

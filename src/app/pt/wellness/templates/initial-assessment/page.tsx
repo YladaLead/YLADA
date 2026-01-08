@@ -6,6 +6,7 @@ import WellnessHeader from '@/components/wellness/WellnessHeader'
 import WellnessLanding from '@/components/wellness/WellnessLanding'
 import LeadCapturePostResult from '@/components/wellness/LeadCapturePostResult'
 import WellnessActionButtons from '@/components/wellness/WellnessActionButtons'
+import WellnessCTAButton from '@/components/wellness/WellnessCTAButton'
 import { getTemplateBenefits } from '@/lib/template-benefits'
 import { avaliacaoInicialDiagnosticos } from '@/lib/diagnostics'
 
@@ -347,20 +348,13 @@ export default function AvaliacaoInicial({ config }: TemplateBaseProps) {
               )}
             </div>
 
-                        {/* Formulário de coleta de dados temporariamente desabilitado */}
-                        {/* Formulário de coleta de dados temporariamente desabilitado */}
-            {/* <LeadCapturePostResult */}
-            {/* config={config} */}
-            {/* ferramenta="Avaliação Inicial" */}
-            {/* resultadoTexto={`Perfil: ${resultado.perfil} (${resultado.score}/15 pontos)`} */}
-            {/* mensagemConvite="🎯 Quer um plano personalizado baseado na sua avaliação?" */}
-            {/* beneficios={[ */}
-            {/* 'Plano nutricional completo adaptado ao seu perfil', */}
-            {/* 'Estratégias específicas para seus objetivos', */}
-            {/* 'Acompanhamento profissional personalizado', */}
-            {/* 'Ajustes conforme sua evolução' */}
-            {/* ]} */}
-            {/* /> */}
+            {/* CTA WhatsApp com resultado */}
+            {config && (
+              <WellnessCTAButton
+                config={config}
+                resultadoTexto={`Perfil: ${resultado.perfil} (${resultado.score}/15 pontos)`}
+              />
+            )}
 
             <WellnessActionButtons
           onRecalcular={() => {

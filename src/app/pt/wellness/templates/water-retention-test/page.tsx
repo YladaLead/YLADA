@@ -6,6 +6,7 @@ import WellnessHeader from '@/components/wellness/WellnessHeader'
 import WellnessLanding from '@/components/wellness/WellnessLanding'
 import LeadCapturePostResult from '@/components/wellness/LeadCapturePostResult'
 import WellnessActionButtons from '@/components/wellness/WellnessActionButtons'
+import WellnessCTAButton from '@/components/wellness/WellnessCTAButton'
 import { getTemplateBenefits } from '@/lib/template-benefits'
 import { retencaoLiquidosDiagnosticos } from '@/lib/diagnostics'
 
@@ -349,20 +350,13 @@ export default function TesteRetencaoLiquidos({ config }: TemplateBaseProps) {
               )}
             </div>
 
-                        {/* Formulário de coleta de dados temporariamente desabilitado */}
-                        {/* Formulário de coleta de dados temporariamente desabilitado */}
-            {/* <LeadCapturePostResult */}
-            {/* config={config} */}
-            {/* ferramenta="Teste de Retenção de Líquidos" */}
-            {/* resultadoTexto={`Perfil: ${resultado.perfil} (${resultado.score}/15 pontos)`} */}
-            {/* mensagemConvite="💧 Quer reduzir a retenção de líquidos?" */}
-            {/* beneficios={[ */}
-            {/* 'Plano nutricional para desinchar', */}
-            {/* 'Alimentos e estratégias para reduzir edema', */}
-            {/* 'Orientações sobre hidratação adequada', */}
-            {/* 'Acompanhamento personalizado' */}
-            {/* ]} */}
-            {/* /> */}
+            {/* CTA WhatsApp com resultado */}
+            {config && (
+              <WellnessCTAButton
+                config={config}
+                resultadoTexto={`Perfil: ${resultado.perfil} (${resultado.score}/15 pontos)`}
+              />
+            )}
 
             <WellnessActionButtons
           onRecalcular={() => {

@@ -6,6 +6,7 @@ import WellnessHeader from '@/components/wellness/WellnessHeader'
 import WellnessLanding from '@/components/wellness/WellnessLanding'
 import LeadCapturePostResult from '@/components/wellness/LeadCapturePostResult'
 import WellnessActionButtons from '@/components/wellness/WellnessActionButtons'
+import WellnessCTAButton from '@/components/wellness/WellnessCTAButton'
 import { getTemplateBenefits } from '@/lib/template-benefits'
 import { sintomasIntestinaisDiagnosticos } from '@/lib/diagnostics'
 
@@ -349,20 +350,13 @@ export default function DiagnosticoSintomasIntestinais({ config }: TemplateBaseP
               )}
             </div>
 
-                        {/* Formulário de coleta de dados temporariamente desabilitado */}
-                        {/* Formulário de coleta de dados temporariamente desabilitado */}
-            {/* <LeadCapturePostResult */}
-            {/* config={config} */}
-            {/* ferramenta="Diagnóstico de Sintomas Intestinais" */}
-            {/* resultadoTexto={`Perfil: ${resultado.perfil} (${resultado.score}/15 pontos)`} */}
-            {/* mensagemConvite="🩺 Quer melhorar sua saúde intestinal?" */}
-            {/* beneficios={[ */}
-            {/* 'Plano alimentar para saúde digestiva', */}
-            {/* 'Identificação de possíveis alergias/intolerâncias', */}
-            {/* 'Protocolo de suplementação, se necessário', */}
-            {/* 'Estratégias para reduzir desconfortos' */}
-            {/* ]} */}
-            {/* /> */}
+            {/* CTA WhatsApp com resultado */}
+            {config && (
+              <WellnessCTAButton
+                config={config}
+                resultadoTexto={`Perfil: ${resultado.perfil} (${resultado.score}/15 pontos)`}
+              />
+            )}
 
             <WellnessActionButtons
           onRecalcular={() => {

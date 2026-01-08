@@ -6,6 +6,7 @@ import WellnessHeader from '@/components/wellness/WellnessHeader'
 import WellnessLanding from '@/components/wellness/WellnessLanding'
 import LeadCapturePostResult from '@/components/wellness/LeadCapturePostResult'
 import WellnessActionButtons from '@/components/wellness/WellnessActionButtons'
+import WellnessCTAButton from '@/components/wellness/WellnessCTAButton'
 import { getTemplateBenefits } from '@/lib/template-benefits'
 import { potencialCrescimentoDiagnosticos } from '@/lib/diagnostics'
 
@@ -324,20 +325,13 @@ export default function QuizPotencial({ config }: TemplateBaseProps) {
               )}
             </div>
 
-                        {/* Formulário de coleta de dados temporariamente desabilitado */}
-                        {/* Formulário de coleta de dados temporariamente desabilitado */}
-            {/* <LeadCapturePostResult */}
-            {/* config={config} */}
-            {/* ferramenta="Potencial" */}
-            {/* resultadoTexto={`${resultado.perfil} (${resultado.score}/12 pontos)`} */}
-            {/* mensagemConvite="⚡ Quer ativar todo seu potencial?" */}
-            {/* beneficios={[ */}
-            {/* 'Identificação de forças únicas', */}
-            {/* 'Estratégias para superar bloqueios', */}
-            {/* 'Plano de expansão personalizado', */}
-            {/* 'Suporte no desenvolvimento contínuo' */}
-            {/* ]} */}
-            {/* /> */}
+            {/* CTA WhatsApp com resultado */}
+            {config && (
+              <WellnessCTAButton
+                config={config}
+                resultadoTexto={`${resultado.perfil} (${resultado.score}/12 pontos)`}
+              />
+            )}
 
             <WellnessActionButtons
           onRecalcular={() => {
