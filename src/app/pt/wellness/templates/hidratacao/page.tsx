@@ -8,6 +8,7 @@ import LeadCapturePostResult from '@/components/wellness/LeadCapturePostResult'
 import WellnessActionButtons from '@/components/wellness/WellnessActionButtons'
 import WellnessCTAButton from '@/components/wellness/WellnessCTAButton'
 import { getTemplateBenefits } from '@/lib/template-benefits'
+import { calculadoraAguaDiagnosticos } from '@/lib/diagnostics/wellness/calculadora-agua'
 
 interface ResultadoHidratacao {
   aguaDiaria: number
@@ -15,6 +16,7 @@ interface ResultadoHidratacao {
   interpretacao: string
   cor: string
   recomendacoes: string[]
+  diagnostico?: typeof calculadoraAguaDiagnosticos.wellness.baixaHidratacao
 }
 
 export default function CalculadoraHidratacao({ config }: TemplateBaseProps) {
@@ -64,26 +66,9 @@ export default function CalculadoraHidratacao({ config }: TemplateBaseProps) {
     let interpretacao = ''
     let cor = ''
     let recomendacoes: string[] = []
+    let diagnosticoSelecionado
 
-    if (aguaL >= 3) {
-      interpretacao = 'Sua necessidade diária de hidratação é alta!'
-      cor = 'blue'
-      recomendacoes = [
-        'Beber água regularmente ao longo do dia',
-        'Manter garrafa de água sempre à mão',
-        'Aumentar ingestão nos momentos de treino',
-        'Monitorar sinais de desidratação'
-      ]
-    } else if (aguaL >= 2) {
-      interpretacao = 'Sua necessidade diária de hidratação está adequada.'
-      cor = 'green'
-      recomendacoes = [
-        'Manter o consumo regular de água',
-        'Beber água ao acordar',
-        'Hidratar antes e após atividades físicas',
-        'Incluir alimentos ricos em água'
-      ]
-    } else {
+    if (aguaL < 2) {
       interpretacao = 'Importante manter uma boa hidratação diária.'
       cor = 'orange'
       recomendacoes = [
@@ -92,6 +77,27 @@ export default function CalculadoraHidratacao({ config }: TemplateBaseProps) {
         'Beber água a cada hora',
         'Criar lembretes para beber água'
       ]
+      diagnosticoSelecionado = calculadoraAguaDiagnosticos.wellness.baixaHidratacao
+    } else if (aguaL >= 2 && aguaL < 3) {
+      interpretacao = 'Sua necessidade diária de hidratação está adequada.'
+      cor = 'green'
+      recomendacoes = [
+        'Manter o consumo regular de água',
+        'Beber água ao acordar',
+        'Hidratar antes e após atividades físicas',
+        'Incluir alimentos ricos em água'
+      ]
+      diagnosticoSelecionado = calculadoraAguaDiagnosticos.wellness.hidratacaoModerada
+    } else {
+      interpretacao = 'Sua necessidade diária de hidratação é alta!'
+      cor = 'blue'
+      recomendacoes = [
+        'Beber água regularmente ao longo do dia',
+        'Manter garrafa de água sempre à mão',
+        'Aumentar ingestão nos momentos de treino',
+        'Monitorar sinais de desidratação'
+      ]
+      diagnosticoSelecionado = calculadoraAguaDiagnosticos.wellness.altaHidratacao
     }
 
     setResultado({
@@ -99,7 +105,8 @@ export default function CalculadoraHidratacao({ config }: TemplateBaseProps) {
       copos,
       interpretacao,
       cor,
-      recomendacoes
+      recomendacoes,
+      diagnostico: diagnosticoSelecionado
     })
     setEtapa('resultado')
   }
@@ -255,6 +262,49 @@ export default function CalculadoraHidratacao({ config }: TemplateBaseProps) {
                 </ul>
               </div>
             </div>
+
+            {/* Diagnóstico Completo */}
+            {resultado.diagnostico && (
+              <div className="bg-white rounded-2xl shadow-lg p-8 border-2 border-cyan-200">
+                <div className="bg-gradient-to-r from-cyan-50 to-blue-50 rounded-xl p-6 border-2 border-cyan-200 mb-6">
+                  <h3 className="font-bold text-gray-900 mb-4 text-xl flex items-center">
+                    <span className="text-2xl mr-2">📋</span>
+                    Diagnóstico Completo
+                  </h3>
+                  <div className="space-y-4">
+                    <div className="bg-white rounded-lg p-4">
+                      <p className="text-gray-800 whitespace-pre-line">{resultado.diagnostico.diagnostico}</p>
+                    </div>
+                    <div className="bg-white rounded-lg p-4">
+                      <p className="text-gray-800 whitespace-pre-line">{resultado.diagnostico.causaRaiz}</p>
+                    </div>
+                    <div className="bg-white rounded-lg p-4">
+                      <p className="text-gray-800 whitespace-pre-line">{resultado.diagnostico.acaoImediata}</p>
+                    </div>
+                    {resultado.diagnostico.plano7Dias && (
+                      <div className="bg-white rounded-lg p-4">
+                        <p className="text-gray-800 whitespace-pre-line">{resultado.diagnostico.plano7Dias}</p>
+                      </div>
+                    )}
+                    {resultado.diagnostico.suplementacao && (
+                      <div className="bg-white rounded-lg p-4">
+                        <p className="text-gray-800 whitespace-pre-line">{resultado.diagnostico.suplementacao}</p>
+                      </div>
+                    )}
+                    {resultado.diagnostico.alimentacao && (
+                      <div className="bg-white rounded-lg p-4">
+                        <p className="text-gray-800 whitespace-pre-line">{resultado.diagnostico.alimentacao}</p>
+                      </div>
+                    )}
+                    {resultado.diagnostico.proximoPasso && (
+                      <div className="bg-purple-50 rounded-lg p-4 border border-purple-200">
+                        <p className="text-gray-800 font-semibold whitespace-pre-line">{resultado.diagnostico.proximoPasso}</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* CTA Section - Mensagem e Benefícios (sem formulário de coleta) */}
             <div 

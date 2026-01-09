@@ -7,6 +7,7 @@ import WellnessLanding from '@/components/wellness/WellnessLanding'
 import LeadCapturePostResult from '@/components/wellness/LeadCapturePostResult'
 import WellnessCTAButton from '@/components/wellness/WellnessCTAButton'
 import { getTemplateBenefits } from '@/lib/template-benefits'
+import { calculadoraCaloriasDiagnosticos } from '@/lib/diagnostics/wellness/calculadora-calorias'
 
 interface ResultadoCalorias {
   tmb: number // Taxa Metabólica Basal
@@ -16,6 +17,7 @@ interface ResultadoCalorias {
   cor: string
   descricao: string
   recomendacoes: string[]
+  diagnostico?: typeof calculadoraCaloriasDiagnosticos.wellness.deficitCalorico
 }
 
 export default function CalculadoraCalorias({ config }: TemplateBaseProps) {
@@ -70,6 +72,7 @@ export default function CalculadoraCalorias({ config }: TemplateBaseProps) {
     let descricao = ''
     let cor = 'green'
     let recomendacoes: string[] = []
+    let diagnosticoSelecionado
 
     if (objetivo === 'perder') {
       calorias = Math.round(tdee * 0.85) // Déficit de 15%
@@ -81,6 +84,7 @@ export default function CalculadoraCalorias({ config }: TemplateBaseProps) {
         'Praticar exercícios regulares combinando cardio e força',
         'Acompanhamento profissional para garantir perda saudável'
       ]
+      diagnosticoSelecionado = calculadoraCaloriasDiagnosticos.wellness.deficitCalorico
     } else if (objetivo === 'manter') {
       calorias = Math.round(tdee)
       descricao = 'Para manter seu peso atual, você precisa consumir a mesma quantidade de calorias que gasta.'
@@ -91,6 +95,7 @@ export default function CalculadoraCalorias({ config }: TemplateBaseProps) {
         'Monitorar peso periodicamente',
         'Manter hábitos saudáveis de sono e hidratação'
       ]
+      diagnosticoSelecionado = calculadoraCaloriasDiagnosticos.wellness.manutencaoCalorica
     } else if (objetivo === 'ganhar') {
       calorias = Math.round(tdee * 1.15) // Superávit de 15%
       descricao = 'Para ganhar peso de forma saudável, você precisa de um superávit calórico moderado.'
@@ -101,6 +106,7 @@ export default function CalculadoraCalorias({ config }: TemplateBaseProps) {
         'Praticar exercícios de força regularmente',
         'Acompanhamento profissional para garantir ganho saudável'
       ]
+      diagnosticoSelecionado = calculadoraCaloriasDiagnosticos.wellness.superavitCalorico
     }
 
     setResultado({
@@ -110,7 +116,8 @@ export default function CalculadoraCalorias({ config }: TemplateBaseProps) {
       objetivo,
       cor,
       descricao,
-      recomendacoes
+      recomendacoes,
+      diagnostico: diagnosticoSelecionado
     })
     setEtapa('resultado')
   }
@@ -377,6 +384,49 @@ export default function CalculadoraCalorias({ config }: TemplateBaseProps) {
                 ))}
               </ul>
             </div>
+
+            {/* Diagnóstico Completo */}
+            {resultado.diagnostico && (
+              <div className="bg-white rounded-2xl shadow-lg p-8 border-2 border-orange-200 mb-6">
+                <div className="bg-gradient-to-r from-orange-50 to-red-50 rounded-xl p-6 border-2 border-orange-200 mb-6">
+                  <h3 className="font-bold text-gray-900 mb-4 text-xl flex items-center">
+                    <span className="text-2xl mr-2">📋</span>
+                    Diagnóstico Completo
+                  </h3>
+                  <div className="space-y-4">
+                    <div className="bg-white rounded-lg p-4">
+                      <p className="text-gray-800 whitespace-pre-line">{resultado.diagnostico.diagnostico}</p>
+                    </div>
+                    <div className="bg-white rounded-lg p-4">
+                      <p className="text-gray-800 whitespace-pre-line">{resultado.diagnostico.causaRaiz}</p>
+                    </div>
+                    <div className="bg-white rounded-lg p-4">
+                      <p className="text-gray-800 whitespace-pre-line">{resultado.diagnostico.acaoImediata}</p>
+                    </div>
+                    {resultado.diagnostico.plano7Dias && (
+                      <div className="bg-white rounded-lg p-4">
+                        <p className="text-gray-800 whitespace-pre-line">{resultado.diagnostico.plano7Dias}</p>
+                      </div>
+                    )}
+                    {resultado.diagnostico.suplementacao && (
+                      <div className="bg-white rounded-lg p-4">
+                        <p className="text-gray-800 whitespace-pre-line">{resultado.diagnostico.suplementacao}</p>
+                      </div>
+                    )}
+                    {resultado.diagnostico.alimentacao && (
+                      <div className="bg-white rounded-lg p-4">
+                        <p className="text-gray-800 whitespace-pre-line">{resultado.diagnostico.alimentacao}</p>
+                      </div>
+                    )}
+                    {resultado.diagnostico.proximoPasso && (
+                      <div className="bg-purple-50 rounded-lg p-4 border border-purple-200">
+                        <p className="text-gray-800 font-semibold whitespace-pre-line">{resultado.diagnostico.proximoPasso}</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* CTA */}
             {/* CTA Section - Mensagem e Benefícios (sem formulário de coleta) */}

@@ -8,6 +8,7 @@ import LeadCapturePostResult from '@/components/wellness/LeadCapturePostResult'
 import WellnessActionButtons from '@/components/wellness/WellnessActionButtons'
 import WellnessCTAButton from '@/components/wellness/WellnessCTAButton'
 import { getTemplateBenefits } from '@/lib/template-benefits'
+import { calculadoraImcDiagnosticos } from '@/lib/diagnostics/wellness/calculadora-imc'
 
 interface ResultadoIMC {
   imc: number
@@ -15,6 +16,7 @@ interface ResultadoIMC {
   cor: string
   descricao: string
   recomendacoes: string[]
+  diagnostico?: typeof calculadoraImcDiagnosticos.wellness.baixoPeso
 }
 
 export default function CalculadoraIMC({ config }: TemplateBaseProps) {
@@ -52,6 +54,7 @@ export default function CalculadoraIMC({ config }: TemplateBaseProps) {
     let cor = ''
     let descricao = ''
     let recomendacoes: string[] = []
+    let diagnosticoSelecionado
 
     if (imc < 18.5) {
       categoria = 'Abaixo do Peso'
@@ -63,6 +66,7 @@ export default function CalculadoraIMC({ config }: TemplateBaseProps) {
         'Considerar exercícios de fortalecimento',
         'Acompanhar crescimento gradual'
       ]
+      diagnosticoSelecionado = calculadoraImcDiagnosticos.wellness.baixoPeso
     } else if (imc >= 18.5 && imc < 25) {
       categoria = 'Peso Normal'
       cor = 'green'
@@ -73,6 +77,7 @@ export default function CalculadoraIMC({ config }: TemplateBaseProps) {
         'Alimentação balanceada',
         'Acompanhamento preventivo'
       ]
+      diagnosticoSelecionado = calculadoraImcDiagnosticos.wellness.pesoNormal
     } else if (imc >= 25 && imc < 30) {
       categoria = 'Sobrepeso'
       cor = 'orange'
@@ -83,26 +88,28 @@ export default function CalculadoraIMC({ config }: TemplateBaseProps) {
         'Estabelecer metas realistas',
         'Acompanhamento profissional'
       ]
-    } else if (imc >= 30 && imc < 35) {
-      categoria = 'Obesidade Grau I'
-      cor = 'red'
-      descricao = 'É importante buscar orientação profissional para um plano personalizado.'
-      recomendacoes = [
-        'Consultar urgentemente um especialista',
-        'Plano nutricional supervisionado',
-        'Atividade física acompanhada',
-        'Suporte profissional contínuo'
-      ]
+      diagnosticoSelecionado = calculadoraImcDiagnosticos.wellness.sobrepeso
     } else {
-      categoria = 'Obesidade Grau II ou III'
+      // IMC >= 30 (Obesidade Grau I, II ou III)
+      categoria = imc >= 35 ? 'Obesidade Grau II ou III' : 'Obesidade Grau I'
       cor = 'red'
-      descricao = 'É essencial buscar acompanhamento médico especializado.'
-      recomendacoes = [
-        'Buscar orientação médica imediata',
-        'Plano personalizado e supervisionado',
-        'Equipe multidisciplinar',
-        'Acompanhamento contínuo'
-      ]
+      descricao = imc >= 35 
+        ? 'É essencial buscar acompanhamento médico especializado.'
+        : 'É importante buscar orientação profissional para um plano personalizado.'
+      recomendacoes = imc >= 35
+        ? [
+            'Buscar orientação médica imediata',
+            'Plano personalizado e supervisionado',
+            'Equipe multidisciplinar',
+            'Acompanhamento contínuo'
+          ]
+        : [
+            'Consultar urgentemente um especialista',
+            'Plano nutricional supervisionado',
+            'Atividade física acompanhada',
+            'Suporte profissional contínuo'
+          ]
+      diagnosticoSelecionado = calculadoraImcDiagnosticos.wellness.obesidade
     }
 
     setResultado({
@@ -110,7 +117,8 @@ export default function CalculadoraIMC({ config }: TemplateBaseProps) {
       categoria,
       cor,
       descricao,
-      recomendacoes
+      recomendacoes,
+      diagnostico: diagnosticoSelecionado
     })
     setEtapa('resultado')
   }
@@ -296,6 +304,49 @@ export default function CalculadoraIMC({ config }: TemplateBaseProps) {
                 </ul>
               </div>
             </div>
+
+            {/* Diagnóstico Completo */}
+            {resultado.diagnostico && (
+              <div className="bg-white rounded-2xl shadow-lg p-8 border-2 border-blue-200">
+                <div className="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-xl p-6 border-2 border-blue-200 mb-6">
+                  <h3 className="font-bold text-gray-900 mb-4 text-xl flex items-center">
+                    <span className="text-2xl mr-2">📋</span>
+                    Diagnóstico Completo
+                  </h3>
+                  <div className="space-y-4">
+                    <div className="bg-white rounded-lg p-4">
+                      <p className="text-gray-800 whitespace-pre-line">{resultado.diagnostico.diagnostico}</p>
+                    </div>
+                    <div className="bg-white rounded-lg p-4">
+                      <p className="text-gray-800 whitespace-pre-line">{resultado.diagnostico.causaRaiz}</p>
+                    </div>
+                    <div className="bg-white rounded-lg p-4">
+                      <p className="text-gray-800 whitespace-pre-line">{resultado.diagnostico.acaoImediata}</p>
+                    </div>
+                    {resultado.diagnostico.plano7Dias && (
+                      <div className="bg-white rounded-lg p-4">
+                        <p className="text-gray-800 whitespace-pre-line">{resultado.diagnostico.plano7Dias}</p>
+                      </div>
+                    )}
+                    {resultado.diagnostico.suplementacao && (
+                      <div className="bg-white rounded-lg p-4">
+                        <p className="text-gray-800 whitespace-pre-line">{resultado.diagnostico.suplementacao}</p>
+                      </div>
+                    )}
+                    {resultado.diagnostico.alimentacao && (
+                      <div className="bg-white rounded-lg p-4">
+                        <p className="text-gray-800 whitespace-pre-line">{resultado.diagnostico.alimentacao}</p>
+                      </div>
+                    )}
+                    {resultado.diagnostico.proximoPasso && (
+                      <div className="bg-purple-50 rounded-lg p-4 border border-purple-200">
+                        <p className="text-gray-800 font-semibold whitespace-pre-line">{resultado.diagnostico.proximoPasso}</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* CTA Section - Mensagem e Benefícios (sem formulário de coleta) */}
             <div 

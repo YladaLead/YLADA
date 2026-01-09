@@ -8,6 +8,7 @@ import LeadCapturePostResult from '@/components/wellness/LeadCapturePostResult'
 import WellnessActionButtons from '@/components/wellness/WellnessActionButtons'
 import WellnessCTAButton from '@/components/wellness/WellnessCTAButton'
 import { getTemplateBenefits } from '@/lib/template-benefits'
+import { calculadoraProteinaDiagnosticos } from '@/lib/diagnostics/wellness/calculadora-proteina'
 
 interface ResultadoProteina {
   proteinaDiaria: number
@@ -15,6 +16,7 @@ interface ResultadoProteina {
   interpretacao: string
   cor: 'green' | 'blue' | 'orange'
   recomendacoes: string[]
+  diagnostico?: typeof calculadoraProteinaDiagnosticos.wellness.baixaProteina
 }
 
 export default function CalculadoraProteina({ config }: TemplateBaseProps) {
@@ -63,6 +65,16 @@ export default function CalculadoraProteina({ config }: TemplateBaseProps) {
 
     const proteinaDiaria = Math.round(pesoNum * fator)
     const porRefeicao = Math.round(proteinaDiaria / 5) // 5 refeições
+
+    // Determinar qual diagnóstico usar baseado no fator calculado
+    let diagnosticoSelecionado
+    if (fator < 1.6) {
+      diagnosticoSelecionado = calculadoraProteinaDiagnosticos.wellness.baixaProteina
+    } else if (fator <= 2.2) {
+      diagnosticoSelecionado = calculadoraProteinaDiagnosticos.wellness.proteinaNormal
+    } else {
+      diagnosticoSelecionado = calculadoraProteinaDiagnosticos.wellness.altaProteina
+    }
 
     let interpretacao = ''
     let cor: 'green' | 'blue' | 'orange' = 'green'
@@ -164,7 +176,8 @@ export default function CalculadoraProteina({ config }: TemplateBaseProps) {
       porRefeicao,
       interpretacao,
       cor,
-      recomendacoes
+      recomendacoes,
+      diagnostico: diagnosticoSelecionado
     })
     setEtapa('resultado')
   }
@@ -393,6 +406,49 @@ export default function CalculadoraProteina({ config }: TemplateBaseProps) {
                 </ul>
               </div>
             </div>
+
+            {/* Diagnóstico Completo */}
+            {resultado.diagnostico && (
+              <div className="bg-white rounded-2xl shadow-lg p-8 border-2 border-orange-200">
+                <div className="bg-gradient-to-r from-orange-50 to-red-50 rounded-xl p-6 border-2 border-orange-200 mb-6">
+                  <h3 className="font-bold text-gray-900 mb-4 text-xl flex items-center">
+                    <span className="text-2xl mr-2">📋</span>
+                    Diagnóstico Completo
+                  </h3>
+                  <div className="space-y-4">
+                    <div className="bg-white rounded-lg p-4">
+                      <p className="text-gray-800 whitespace-pre-line">{resultado.diagnostico.diagnostico}</p>
+                    </div>
+                    <div className="bg-white rounded-lg p-4">
+                      <p className="text-gray-800 whitespace-pre-line">{resultado.diagnostico.causaRaiz}</p>
+                    </div>
+                    <div className="bg-white rounded-lg p-4">
+                      <p className="text-gray-800 whitespace-pre-line">{resultado.diagnostico.acaoImediata}</p>
+                    </div>
+                    {resultado.diagnostico.plano7Dias && (
+                      <div className="bg-white rounded-lg p-4">
+                        <p className="text-gray-800 whitespace-pre-line">{resultado.diagnostico.plano7Dias}</p>
+                      </div>
+                    )}
+                    {resultado.diagnostico.suplementacao && (
+                      <div className="bg-white rounded-lg p-4">
+                        <p className="text-gray-800 whitespace-pre-line">{resultado.diagnostico.suplementacao}</p>
+                      </div>
+                    )}
+                    {resultado.diagnostico.alimentacao && (
+                      <div className="bg-white rounded-lg p-4">
+                        <p className="text-gray-800 whitespace-pre-line">{resultado.diagnostico.alimentacao}</p>
+                      </div>
+                    )}
+                    {resultado.diagnostico.proximoPasso && (
+                      <div className="bg-purple-50 rounded-lg p-4 border border-purple-200">
+                        <p className="text-gray-800 font-semibold whitespace-pre-line">{resultado.diagnostico.proximoPasso}</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* CTA Section - Mensagem e Benefícios (sem formulário de coleta) */}
             <div 
