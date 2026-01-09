@@ -11,6 +11,7 @@ import RequireDiagnostico from '@/components/auth/RequireDiagnostico'
 import { useRouter } from 'next/navigation'
 import BrandingPreview from '@/components/nutri/BrandingPreview'
 import LyaChatWidget from '@/components/nutri/LyaChatWidget'
+import CancelRetentionModal from '@/components/nutri/CancelRetentionModal'
 import { supabase } from '@/lib/supabase'
 
 function NutriConfiguracaoContent() {
@@ -50,6 +51,14 @@ function NutriConfiguracaoContent() {
   const [uploadingLogo, setUploadingLogo] = useState(false)
   const [logoError, setLogoError] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  // Estados para assinatura
+  const [subscription, setSubscription] = useState<any>(null)
+  const [loadingSubscription, setLoadingSubscription] = useState(true)
+  const [showCancelModal, setShowCancelModal] = useState(false)
+  const [canceling, setCanceling] = useState(false)
+  const [cancelReason, setCancelReason] = useState('')
+  const [requestRefund, setRequestRefund] = useState(false)
 
   // Função para tratar slug (lowercase, sem espaços/acentos, SEM hífens - apenas um nome unificado)
   const tratarSlug = (texto: string): string => {
@@ -201,6 +210,32 @@ function NutriConfiguracaoContent() {
     }
   }
 
+  // Carregar assinatura
+  const carregarAssinatura = async () => {
+    if (!user) return
+    
+    try {
+      setLoadingSubscription(true)
+      const response = await fetch('/api/nutri/subscription', {
+        credentials: 'include'
+      })
+      
+      if (response.ok) {
+        const data = await response.json()
+        if (data.hasActiveSubscription) {
+          setSubscription(data.subscription)
+        } else {
+          setSubscription(null)
+        }
+      }
+    } catch (error) {
+      console.error('Erro ao carregar assinatura:', error)
+      setSubscription(null)
+    } finally {
+      setLoadingSubscription(false)
+    }
+  }
+
   // Preencher dados iniciais do usuário logado imediatamente
   useEffect(() => {
     if (user && user.email) {
@@ -212,6 +247,8 @@ function NutriConfiguracaoContent() {
       }))
       // Carregar perfil completo da API
       carregarPerfil()
+      // Carregar assinatura
+      carregarAssinatura()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user])
@@ -391,6 +428,48 @@ function NutriConfiguracaoContent() {
   // Remover logo
   const handleRemoveLogo = () => {
     setPerfil(prev => ({ ...prev, logoUrl: '' }))
+  }
+
+  // Calcular dias desde compra
+  const calcularDiasDesdeCompra = () => {
+    if (!subscription) return null
+    const dataInicio = new Date(subscription.current_period_start || subscription.created_at)
+    const hoje = new Date()
+    return Math.floor((hoje.getTime() - dataInicio.getTime()) / (1000 * 60 * 60 * 24))
+  }
+
+  // Verificar se está dentro da garantia
+  const dentroGarantia = () => {
+    const dias = calcularDiasDesdeCompra()
+    return dias !== null && dias <= 7
+  }
+
+  // Formatar valor
+  const formatarValor = (valor: number) => {
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL'
+    }).format(valor / 100) // Assumindo que valor está em centavos
+  }
+
+  // Formatar data
+  const formatarData = (data: string) => {
+    return new Date(data).toLocaleDateString('pt-BR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    })
+  }
+
+  // Processar cancelamento (chamado após confirmação no modal)
+  const processarCancelamento = async () => {
+    // Recarregar assinatura
+    await carregarAssinatura()
+    
+    // Redirecionar para home após 2 segundos
+    setTimeout(() => {
+      window.location.href = '/pt/nutri'
+    }, 2000)
   }
 
   return (
@@ -744,6 +823,81 @@ function NutriConfiguracaoContent() {
           </div>
         </div>
 
+        {/* Assinatura */}
+        {!loadingSubscription && subscription && (
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+            <h2 className="text-xl font-bold text-gray-900 mb-6">📦 Minha Assinatura</h2>
+            
+            <div className="space-y-4">
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Plano Atual</label>
+                  <p className="text-lg font-semibold text-gray-900">
+                    {subscription.plan_type === 'annual' ? 'Plano Anual' : 'Plano Mensal'}
+                  </p>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Valor</label>
+                  <p className="text-lg font-semibold text-gray-900">
+                    {subscription.amount ? formatarValor(subscription.amount) : 'N/A'}
+                  </p>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Data de Início</label>
+                  <p className="text-gray-900">
+                    {formatarData(subscription.current_period_start || subscription.created_at)}
+                  </p>
+                </div>
+                
+                {subscription.plan_type === 'monthly' && subscription.current_period_end && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Próximo Vencimento</label>
+                    <p className="text-gray-900">
+                      {formatarData(subscription.current_period_end)}
+                    </p>
+                  </div>
+                )}
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                  <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold ${
+                    subscription.status === 'active' 
+                      ? 'bg-green-100 text-green-800' 
+                      : 'bg-gray-100 text-gray-800'
+                  }`}>
+                    {subscription.status === 'active' ? '✅ Ativa' : '❌ Cancelada'}
+                  </span>
+                </div>
+                
+                {dentroGarantia() && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Garantia de 7 Dias</label>
+                    <p className="text-green-600 font-semibold">
+                      ✅ Você está dentro do prazo de garantia
+                    </p>
+                    <p className="text-xs text-gray-500 mt-1">
+                      {7 - (calcularDiasDesdeCompra() || 0)} dias restantes
+                    </p>
+                  </div>
+                )}
+              </div>
+              
+              {subscription.status === 'active' && (
+                <div className="pt-4 border-t border-gray-200">
+                  <button
+                    onClick={() => setShowCancelModal(true)}
+                    className="text-sm text-gray-500 hover:text-gray-700 underline transition-colors"
+                  >
+                    {dentroGarantia() ? 'Solicitar Reembolso (Garantia de 7 dias)' : 'Cancelar Assinatura'}
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* Segurança */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           <h2 className="text-xl font-bold text-gray-900 mb-6">🔒 Segurança</h2>
@@ -923,6 +1077,22 @@ function NutriConfiguracaoContent() {
           </div>
         </div>
       </main>
+      
+      {/* Modal de Cancelamento com Retenção */}
+      {showCancelModal && subscription && (
+        <CancelRetentionModal
+          isOpen={showCancelModal}
+          onClose={() => {
+            setShowCancelModal(false)
+            setCancelReason('')
+            setRequestRefund(false)
+          }}
+          onConfirmCancel={processarCancelamento}
+          subscription={subscription}
+          daysSincePurchase={calcularDiasDesdeCompra() || 0}
+          withinGuarantee={dentroGarantia()}
+        />
+      )}
       
       {/* Widget da LYA para ajudar com personalização */}
       <LyaChatWidget />
