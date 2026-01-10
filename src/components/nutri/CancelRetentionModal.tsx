@@ -157,13 +157,23 @@ export default function CancelRetentionModal({
         throw new Error(data.error || 'Erro ao processar')
       }
 
-      // Sucesso! Fechar modal e recarregar
-      alert(data.message || 'Perfeito! Sua assinatura foi atualizada.')
+      // Sucesso! Fechar modal e redirecionar baseado na ação
       onClose()
-      window.location.reload()
+      
+      // Redirecionar baseado no tipo de retenção
+      if (retentionOffer.type === 'guided_tour') {
+        // Redirecionar para home com LYA aberto (via query param)
+        window.location.href = '/pt/nutri/home?lya=tour'
+      } else if (retentionOffer.type === 'show_feature') {
+        // Redirecionar para criar ferramenta
+        window.location.href = '/pt/nutri/ferramentas/nova'
+      } else {
+        // Para extend_trial e pause_subscription, apenas recarregar
+        alert(data.message || 'Perfeito! Sua assinatura foi atualizada.')
+        window.location.reload()
+      }
     } catch (err: any) {
       setError(err.message || 'Erro ao processar. Tente novamente.')
-    } finally {
       setProcessing(false)
     }
   }
@@ -221,10 +231,47 @@ export default function CancelRetentionModal({
         throw new Error(data.error || 'Erro ao cancelar')
       }
 
-      // Sucesso!
-      alert(data.message || 'Assinatura cancelada com sucesso.')
-      onConfirmCancel()
-      onClose()
+      // Sucesso! Verificar se realmente cancelou
+      try {
+        const verifyResponse = await fetch('/api/nutri/subscription', {
+          credentials: 'include'
+        })
+        
+        const verifyData = await verifyResponse.json()
+        const isCanceled = !verifyData.hasActiveSubscription || verifyData.subscription?.status === 'canceled'
+        
+        if (isCanceled) {
+          alert(data.message || 'Assinatura cancelada com sucesso.')
+          onConfirmCancel()
+          onClose()
+        } else {
+          // Se não cancelou, mas a API retornou sucesso, pode ser que ainda esteja processando
+          console.warn('⚠️ Assinatura ainda aparece como ativa após cancelamento. Verificando novamente...')
+          // Aguardar um pouco e verificar novamente
+          setTimeout(async () => {
+            const recheckResponse = await fetch('/api/nutri/subscription', {
+              credentials: 'include'
+            })
+            const recheckData = await recheckResponse.json()
+            const recheckCanceled = !recheckData.hasActiveSubscription || recheckData.subscription?.status === 'canceled'
+            
+            if (recheckCanceled) {
+              alert(data.message || 'Assinatura cancelada com sucesso.')
+              onConfirmCancel()
+              onClose()
+            } else {
+              setError('Houve um problema ao cancelar. A assinatura pode ainda estar processando. Entre em contato com o suporte se o problema persistir.')
+              setProcessing(false)
+            }
+          }, 2000)
+        }
+      } catch (verifyError) {
+        // Se falhar a verificação, mas a API de cancelamento retornou sucesso, confiar na resposta
+        console.warn('⚠️ Erro ao verificar cancelamento, mas API retornou sucesso:', verifyError)
+        alert(data.message || 'Assinatura cancelada com sucesso.')
+        onConfirmCancel()
+        onClose()
+      }
     } catch (err: any) {
       setError(err.message || 'Erro ao cancelar. Tente novamente.')
     } finally {
@@ -244,19 +291,24 @@ export default function CancelRetentionModal({
   }
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6 max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
+      <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 max-h-[90vh] overflow-y-auto animate-in zoom-in-95 duration-200 border border-gray-100">
         {/* Header */}
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-2xl font-bold text-gray-900">
-            {step === 'reason' && 'Antes de cancelar...'}
-            {step === 'offer' && 'Que tal tentar isso?'}
-            {step === 'confirming' && 'Confirmar cancelamento'}
-          </h3>
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h3 className="text-2xl font-bold text-gray-900 mb-1">
+              {step === 'reason' && 'Antes de cancelar...'}
+              {step === 'offer' && 'Que tal tentar isso?'}
+              {step === 'confirming' && 'Confirmar cancelamento'}
+            </h3>
+            {step === 'reason' && (
+              <p className="text-sm text-gray-500">Nos ajude a entender o motivo</p>
+            )}
+          </div>
           {!processing && (
             <button
               onClick={handleClose}
-              className="text-gray-400 hover:text-gray-600 text-2xl"
+              className="text-gray-400 hover:text-gray-600 text-2xl w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors"
               aria-label="Fechar"
             >
               ×
@@ -274,24 +326,26 @@ export default function CancelRetentionModal({
         {/* Step 1: Selecionar motivo */}
         {step === 'reason' && (
           <div className="space-y-4">
-            <p className="text-gray-700 mb-4">
+            <p className="text-gray-700 mb-6 text-base">
               Conta pra gente rapidinho: por que você está cancelando?
             </p>
             
-            <div className="space-y-2">
+            <div className="space-y-3">
               {(['no_time', 'didnt_understand', 'no_value', 'forgot_trial', 'too_expensive', 'found_alternative'] as CancelReason[]).map((reason) => (
                 <button
                   key={reason}
                   onClick={() => handleReasonSelect(reason)}
                   disabled={processing}
-                  className="w-full text-left px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 hover:border-gray-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full text-left px-5 py-3.5 border-2 border-gray-200 rounded-xl hover:bg-blue-50 hover:border-blue-300 hover:shadow-sm transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed group"
                 >
-                  {reason === 'no_time' && 'Não tive tempo de usar'}
-                  {reason === 'didnt_understand' && 'Não entendi como funciona'}
-                  {reason === 'no_value' && 'Não vi valor ainda'}
-                  {reason === 'forgot_trial' && 'Esqueci que o trial acabava'}
-                  {reason === 'too_expensive' && 'Achei muito caro'}
-                  {reason === 'found_alternative' && 'Encontrei uma alternativa'}
+                  <span className="text-gray-700 group-hover:text-blue-700 font-medium">
+                    {reason === 'no_time' && '⏰ Não tive tempo de usar'}
+                    {reason === 'didnt_understand' && '🤔 Não entendi como funciona'}
+                    {reason === 'no_value' && '💭 Não vi valor ainda'}
+                    {reason === 'forgot_trial' && '📅 Esqueci que o trial acabava'}
+                    {reason === 'too_expensive' && '💰 Achei muito caro'}
+                    {reason === 'found_alternative' && '🔄 Encontrei uma alternativa'}
+                  </span>
                 </button>
               ))}
               
@@ -301,9 +355,9 @@ export default function CancelRetentionModal({
                   setStep('offer')
                 }}
                 disabled={processing}
-                className="w-full text-left px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 hover:border-gray-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full text-left px-5 py-3.5 border-2 border-gray-200 rounded-xl hover:bg-gray-50 hover:border-gray-300 hover:shadow-sm transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Outro motivo
+                <span className="text-gray-700 font-medium">📝 Outro motivo</span>
               </button>
             </div>
 
@@ -318,10 +372,12 @@ export default function CancelRetentionModal({
 
         {/* Step 2: Oferta de retenção */}
         {step === 'offer' && cancelReason && (
-          <div className="space-y-4">
-            <p className="text-gray-700 mb-4">
-              {retentionOffer?.message || RETENTION_STRATEGY[cancelReason].message}
-            </p>
+          <div className="space-y-5">
+            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-5 border border-blue-100">
+              <p className="text-gray-800 text-base leading-relaxed">
+                {retentionOffer?.message || RETENTION_STRATEGY[cancelReason].message}
+              </p>
+            </div>
 
             {cancelReason === 'other' && (
               <div className="mb-4">
@@ -347,21 +403,28 @@ export default function CancelRetentionModal({
               </div>
             )}
 
-            <div className="flex space-x-3">
+            <div className="flex flex-col sm:flex-row gap-3">
               {retentionOffer?.actionButton && (
                 <button
                   onClick={handleAcceptRetention}
                   disabled={processing}
-                  className="flex-1 px-4 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 px-5 py-3.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-semibold hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
                 >
-                  {processing ? 'Processando...' : retentionOffer.actionButton}
+                  {processing ? (
+                    <span className="flex items-center justify-center gap-2">
+                      <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                      Processando...
+                    </span>
+                  ) : (
+                    retentionOffer.actionButton
+                  )}
                 </button>
               )}
               
               <button
                 onClick={() => setStep('confirming')}
                 disabled={processing}
-                className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 px-5 py-3.5 border-2 border-gray-300 text-gray-700 rounded-xl font-medium hover:bg-gray-50 hover:border-gray-400 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {retentionOffer?.secondaryButton || 'Cancelar agora'}
               </button>
@@ -436,9 +499,16 @@ export default function CancelRetentionModal({
               <button
                 onClick={handleConfirmCancel}
                 disabled={processing}
-                className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 px-5 py-3 bg-red-600 text-white rounded-xl font-semibold hover:bg-red-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg"
               >
-                {processing ? 'Processando...' : 'Confirmar Cancelamento'}
+                {processing ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                    Processando...
+                  </span>
+                ) : (
+                  'Confirmar Cancelamento'
+                )}
               </button>
             </div>
           </div>

@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
+import { useSearchParams } from 'next/navigation'
 import RequireDiagnostico from '@/components/auth/RequireDiagnostico'
 import NutriSidebar from '@/components/nutri/NutriSidebar'
 import { useAuth } from '@/contexts/AuthContext'
@@ -26,9 +27,41 @@ export default function NutriHome() {
 
 function NutriHomeContent() {
   const { user, loading: authLoading, userProfile } = useAuth()
+  const searchParams = useSearchParams()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [lyaChatOpen, setLyaChatOpen] = useState(false)
   const { progress, loading: progressLoading } = useJornadaProgress()
+  
+  // Função para abrir o chat LYA
+  const handleOpenLyaChat = useCallback(() => {
+    setLyaChatOpen(true)
+    // Disparar evento para o widget ou tentar clicar no botão
+    setTimeout(() => {
+      const lyaButton = document.querySelector('button[aria-label="Abrir chat com Mentora LYA"]') as HTMLButtonElement
+      if (lyaButton) {
+        lyaButton.click()
+      }
+      // Também disparar evento customizado
+      window.dispatchEvent(new CustomEvent('open-lya-chat'))
+    }, 100)
+  }, [])
+  
+  // Verificar se veio com query param para abrir LYA
+  useEffect(() => {
+    const lyaParam = searchParams.get('lya')
+    if (lyaParam === 'tour' && !authLoading && !progressLoading && user) {
+      // Aguardar um pouco para garantir que o widget está carregado
+      setTimeout(() => {
+        handleOpenLyaChat()
+        // Limpar URL para não abrir novamente ao recarregar
+        if (typeof window !== 'undefined') {
+          const url = new URL(window.location.href)
+          url.searchParams.delete('lya')
+          window.history.replaceState({}, '', url.toString())
+        }
+      }, 800)
+    }
+  }, [searchParams, authLoading, progressLoading, user, handleOpenLyaChat])
   
   // Verificar se completou Dia 1 (current_day >= 2 ou completed_days >= 1)
   const dia1Completo = progress && (progress.current_day !== null && progress.current_day >= 2 || progress.completed_days >= 1)
@@ -78,18 +111,6 @@ function NutriHomeContent() {
   
   const userName = getUserName()
   
-  // Função para abrir o chat LYA
-  const handleOpenLyaChat = () => {
-    setLyaChatOpen(true)
-    // Disparar evento para o widget ou tentar clicar no botão
-    setTimeout(() => {
-      const lyaButton = document.querySelector('button[aria-label="Abrir chat com Mentora LYA"]') as HTMLButtonElement
-      if (lyaButton) {
-        lyaButton.click()
-      }
-    }, 100)
-  }
-  
   // Listener para evento customizado
   useEffect(() => {
     const handleOpenLya = () => {
@@ -99,7 +120,7 @@ function NutriHomeContent() {
     return () => {
       window.removeEventListener('open-lya-chat', handleOpenLya)
     }
-  }, [])
+  }, [handleOpenLyaChat])
 
   // Aguardar autenticação E progresso da jornada (evita flash do Dia 1)
   if (authLoading || progressLoading) {
