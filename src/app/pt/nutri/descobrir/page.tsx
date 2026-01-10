@@ -264,7 +264,7 @@ export default function NutriDescobrirPage() {
                   onClick={handleWhatsApp}
                   className="inline-block bg-green-500 hover:bg-green-600 text-white px-8 py-4 rounded-xl text-lg font-bold transition-all shadow-xl hover:shadow-2xl transform hover:-translate-y-1"
                 >
-                  Falar com alguém
+                  Fale conosco
                 </button>
               </div>
 
