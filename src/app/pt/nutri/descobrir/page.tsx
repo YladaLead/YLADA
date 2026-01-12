@@ -31,9 +31,9 @@ export default function NutriDescobrirPage() {
             <Image
               src="/images/logo/nutri-horizontal.png"
               alt="YLADA Nutri"
-              width={133}
-              height={40}
-              className="h-8 w-auto"
+              width={186}
+              height={56}
+              className="h-11 w-auto"
               priority
             />
           </Link>
@@ -42,9 +42,13 @@ export default function NutriDescobrirPage() {
 
       <main>
         {/* HERO - Tom Leve e Exploratório */}
-        <section className="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 pt-16 pb-20">
+        <section className="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 pt-12 pb-16">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="max-w-4xl mx-auto text-center">
+              <p className="text-lg sm:text-xl text-gray-600 mb-4 font-medium">
+                Pare de se sentir sozinha tentando descobrir como fazer seu negócio funcionar.
+              </p>
+              
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 text-gray-900 leading-tight">
                 O que é o YLADA Nutri?
               </h1>
@@ -57,19 +61,24 @@ export default function NutriDescobrirPage() {
                 </span>
               </p>
 
-              {/* Imagem Hero - Nutricionista usando a plataforma (ESTÁTICA) */}
-              <div className="mt-12 max-w-4xl mx-auto">
-                <div className="relative rounded-2xl overflow-hidden shadow-2xl">
-                  <Image
-                    src="/images/discovery/nutricionista-plataforma.png"
-                    alt="Nutricionista usando a plataforma YLADA Nutri"
-                    width={1920}
-                    height={1080}
+              {/* Vídeo Hero - Impacto Imediato */}
+              <div className="mt-8 max-w-4xl mx-auto">
+                <div className="relative rounded-2xl overflow-hidden shadow-2xl bg-gray-900">
+                  <video
+                    src="/videos/discovery/dashboard-agenda-cheia.mp4"
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
                     className="w-full h-auto"
-                    priority
-                    unoptimized={false}
-                  />
+                    style={{ display: 'block' }}
+                  >
+                    Seu navegador não suporta vídeos.
+                  </video>
                 </div>
+                <p className="text-center text-sm text-gray-500 mt-3 italic">
+                  Veja como sua rotina pode ficar organizada
+                </p>
               </div>
             </div>
           </div>
@@ -85,7 +94,10 @@ export default function NutriDescobrirPage() {
               
               <div className="space-y-8 text-lg text-gray-700 leading-relaxed">
                 <div className="bg-blue-50 rounded-xl p-6 border-l-4 border-blue-500">
-                  <p className="font-semibold text-gray-900 mb-2">É um apoio estratégico para sua rotina.</p>
+                  <p className="font-semibold text-gray-900 mb-2">Respire fundo. Você não está quebrada.</p>
+                  <p className="mb-2">
+                    O problema não é você. O problema é que ninguém te ensinou a parte empresarial.
+                  </p>
                   <p>
                     O YLADA Nutri ajuda você a organizar o que já sabe fazer, mas de forma que funcione de verdade.
                   </p>
@@ -111,6 +123,10 @@ export default function NutriDescobrirPage() {
                     Não é sobre aprender nutrição (isso você já sabe). É sobre <strong>transformar seu conhecimento 
                     em um negócio que funciona</strong> — sem depender só de indicação ou sorte.
                   </p>
+                  
+                  <p className="font-semibold text-gray-900">
+                    E agora você tem a chance de aprender. Não precisa mais tentar sozinha.
+                  </p>
                 </div>
               </div>
             </div>
@@ -121,11 +137,29 @@ export default function NutriDescobrirPage() {
         <section className="py-16 bg-gray-50">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="max-w-3xl mx-auto">
-              <h2 className="text-3xl font-bold text-center mb-12 text-gray-900">
-                Pode fazer sentido pra você se:
+              <h2 className="text-3xl font-bold text-center mb-8 text-gray-900">
+                Você já se sentiu assim?
               </h2>
               
-              <div className="space-y-4">
+              <div className="space-y-4 mb-8">
+                <p className="text-lg font-semibold text-blue-600 text-center mb-6">
+                  Você já acordou de manhã pensando: "Será que hoje alguém vai me procurar?"
+                </p>
+                
+                <p className="text-lg font-semibold text-blue-600 text-center mb-6">
+                  Você já se sentiu uma fraude quando alguém perguntou quanto você cobra e você não soube responder?
+                </p>
+                
+                <p className="text-lg font-semibold text-blue-600 text-center mb-8">
+                  Você já chorou de frustração depois de mais um mês sem conseguir organizar seu negócio?
+                </p>
+              </div>
+              
+              <h3 className="text-2xl font-bold text-center mb-8 text-gray-900">
+                Pode fazer sentido pra você se:
+              </h3>
+              
+              <div className="space-y-4 mb-12">
                 {[
                   'Você olha pra sua agenda e vê mais dias vazios do que preenchidos',
                   'Você trabalha muito, mas não sente que está crescendo',
@@ -138,6 +172,33 @@ export default function NutriDescobrirPage() {
                     <p className="text-gray-700 flex-1">{item}</p>
                   </div>
                 ))}
+              </div>
+
+              {/* CTA Intermediário - Melhorado */}
+              <div className="bg-gradient-to-r from-blue-600 to-indigo-700 rounded-2xl p-8 text-center shadow-xl">
+                <h3 className="text-2xl sm:text-3xl font-bold mb-4 text-white">
+                  Quer parar de se sentir perdida e começar a crescer?
+                </h3>
+                <p className="text-lg text-blue-100 mb-6 leading-relaxed">
+                  Descubra como transformar sua carreira de nutricionista em um negócio que funciona de verdade. Sem precisar descobrir tudo sozinha.
+                </p>
+                <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                  <button
+                    onClick={handleWhatsApp}
+                    className="inline-block bg-white text-blue-600 px-8 py-3 rounded-xl text-lg font-bold hover:bg-gray-100 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1 w-full sm:w-auto"
+                  >
+                    Fale conosco no WhatsApp
+                  </button>
+                  <Link
+                    href="/pt/nutri#como-funciona"
+                    className="inline-block bg-blue-500 hover:bg-blue-400 text-white px-8 py-3 rounded-xl text-lg font-bold transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1 w-full sm:w-auto"
+                  >
+                    Ver mais detalhes
+                  </Link>
+                </div>
+                <p className="text-sm text-blue-200 mt-4">
+                  Sem pressão. Sem compromisso. Só clareza sobre o seu próximo passo.
+                </p>
               </div>
             </div>
           </div>
@@ -169,23 +230,20 @@ export default function NutriDescobrirPage() {
                 </p>
               </div>
 
-              {/* Vídeo Dashboard - Resultado (agenda cheia) - VÍDEO CURTO */}
-              <div className="mt-8 max-w-4xl mx-auto">
-                <div className="relative rounded-2xl overflow-hidden shadow-2xl bg-gray-900">
-                  <video
-                    src="/videos/discovery/dashboard-agenda-cheia.mp4"
-                    autoPlay
-                    loop
-                    muted
-                    playsInline
+              {/* Imagem de Contexto - Mostrando a Plataforma em Ação */}
+              <div className="mt-8 max-w-3xl mx-auto">
+                <div className="relative rounded-xl overflow-hidden shadow-lg">
+                  <Image
+                    src="/images/discovery/nutricionista-plataforma.png"
+                    alt="Plataforma YLADA Nutri em ação"
+                    width={1400}
+                    height={788}
                     className="w-full h-auto"
-                    style={{ display: 'block' }}
-                  >
-                    Seu navegador não suporta vídeos.
-                  </video>
+                    priority={false}
+                  />
                 </div>
-                <p className="text-center text-sm text-gray-500 mt-4 italic">
-                  Um exemplo de como sua rotina pode ficar organizada
+                <p className="text-center text-sm text-gray-500 mt-3 italic">
+                  Interface intuitiva e organizada para sua rotina profissional
                 </p>
               </div>
             </div>
@@ -220,7 +278,15 @@ export default function NutriDescobrirPage() {
                   },
                   {
                     pergunta: 'E se não funcionar?',
-                    resposta: 'Temos garantia de 7 dias. Se você acessar, explorar, e perceber que não faz sentido pro seu momento, devolvemos 100% do investimento. Sem perguntas.'
+                    resposta: 'Temos garantia de 7 dias. Se você acessar, explorar, e perceber que não faz sentido pro seu momento, devolvemos 100% do investimento. Sem perguntas, sem burocracia. Teste sem medo.'
+                  },
+                  {
+                    pergunta: 'E se eu não conseguir usar tudo? Vou ter desperdiçado meu dinheiro?',
+                    resposta: 'Você não precisa usar tudo. O YLADA não é sobre usar todas as ferramentas. É sobre usar as ferramentas certas, no momento certo. A LYA te ajuda a focar no que é prioritário para o seu momento atual. E com a garantia de 7 dias, você pode testar sem risco.'
+                  },
+                  {
+                    pergunta: 'E se eu não tiver tempo para isso?',
+                    resposta: 'O YLADA foi feito para economizar seu tempo, não para consumir. A ideia é você trabalhar menos e ganhar mais. A LYA te guia para focar no que realmente importa, sem perder tempo com o que não faz diferença agora. O método foi pensado para nutricionistas que já têm uma rotina corrida.'
                   }
                 ].map((item, index) => (
                   <div key={index} className="bg-white rounded-xl shadow-sm overflow-hidden">
@@ -245,37 +311,44 @@ export default function NutriDescobrirPage() {
           </div>
         </section>
 
-        {/* CTA - Descoberta Honesta */}
+        {/* CTA Final - Melhorado */}
         <section className="py-20 bg-gradient-to-br from-blue-600 to-indigo-700 text-white">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="max-w-3xl mx-auto text-center">
               <h2 className="text-3xl sm:text-4xl font-bold mb-6">
-                Quer descobrir se faz sentido pra você?
+                Você não precisa continuar tentando sozinha.
               </h2>
               
+              <p className="text-xl text-blue-100 mb-4 leading-relaxed">
+                Cada dia que você adia é mais um dia longe da carreira que você quer ter.
+              </p>
+              
+              <p className="text-lg text-blue-200 mb-4">
+                Você não precisa mais acordar ansiosa. Você não precisa mais se sentir sozinha. Você não precisa mais tentar descobrir sozinha.
+              </p>
+              
               <p className="text-xl text-blue-100 mb-8 leading-relaxed">
-                Você pode explorar o YLADA sem compromisso. 
-                Veja como funciona, entenda o método, e decida se encaixa no seu momento.
+                Veja como funciona, entenda o método, e descubra se o YLADA é o caminho certo para você.
               </p>
 
-              <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+              <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-6">
+                <button
+                  onClick={handleWhatsApp}
+                  className="inline-block bg-green-500 hover:bg-green-600 text-white px-10 py-4 rounded-xl text-lg font-bold transition-all shadow-xl hover:shadow-2xl transform hover:-translate-y-1 w-full sm:w-auto"
+                >
+                  💬 Fale conosco no WhatsApp
+                </button>
+                
                 <Link
                   href="/pt/nutri#como-funciona"
-                  className="inline-block bg-white text-blue-600 px-8 py-4 rounded-xl text-lg font-bold hover:bg-gray-100 transition-all shadow-xl hover:shadow-2xl transform hover:-translate-y-1"
+                  className="inline-block bg-white text-blue-600 px-10 py-4 rounded-xl text-lg font-bold hover:bg-gray-100 transition-all shadow-xl hover:shadow-2xl transform hover:-translate-y-1 w-full sm:w-auto"
                 >
                   Ver mais detalhes
                 </Link>
-                
-                <button
-                  onClick={handleWhatsApp}
-                  className="inline-block bg-green-500 hover:bg-green-600 text-white px-8 py-4 rounded-xl text-lg font-bold transition-all shadow-xl hover:shadow-2xl transform hover:-translate-y-1"
-                >
-                  Fale conosco
-                </button>
               </div>
 
-              <p className="text-sm text-blue-200 mt-6">
-                Sem pressão. Sem compromisso. Só clareza.
+              <p className="text-sm text-blue-200">
+                Sem pressão. Sem compromisso. Só clareza sobre o seu próximo passo.
               </p>
             </div>
           </div>

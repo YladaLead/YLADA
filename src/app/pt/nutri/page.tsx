@@ -55,6 +55,10 @@ export default function NutriLandingPage() {
         <section className="bg-gradient-to-br from-[#2563EB] to-[#3B82F6] text-white pt-12 sm:pt-16 lg:pt-20 pb-16 sm:pb-20 lg:pb-24">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="max-w-4xl mx-auto text-center">
+              <p className="text-lg sm:text-xl text-white/80 mb-4 font-medium">
+                Pare de se sentir sozinha tentando descobrir como fazer seu negócio funcionar.
+              </p>
+              
               <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-black mb-6 sm:mb-8 leading-tight">
                 Você não precisa ser só Nutricionista.
                 <br />
@@ -71,7 +75,7 @@ export default function NutriLandingPage() {
                 href="#como-funciona"
                 className="inline-block bg-white text-[#2563EB] px-8 sm:px-12 py-4 sm:py-5 rounded-xl text-lg sm:text-xl font-bold hover:bg-gray-100 transition-all shadow-2xl hover:shadow-3xl transform hover:-translate-y-1"
               >
-                Quero entender como me tornar uma Nutri-Empresária
+                Quero parar de me sentir perdida e começar a crescer agora
               </Link>
             </div>
           </div>
@@ -84,6 +88,20 @@ export default function NutriLandingPage() {
               <h2 className="text-3xl sm:text-4xl font-bold text-center mb-12 text-[#1A1A1A]">
                 Você já se sentiu assim?
               </h2>
+              
+              <div className="space-y-6 text-lg sm:text-xl text-gray-700 leading-relaxed mb-8">
+                <p className="font-semibold text-[#2563EB]">
+                  Você já acordou de manhã pensando: "Será que hoje alguém vai me procurar?"
+                </p>
+                
+                <p className="font-semibold text-[#2563EB]">
+                  Você já se sentiu uma fraude quando alguém perguntou quanto você cobra e você não soube responder?
+                </p>
+                
+                <p className="font-semibold text-[#2563EB]">
+                  Você já chorou de frustração depois de mais um mês sem conseguir organizar seu negócio?
+                </p>
+              </div>
               
               <div className="space-y-6 text-lg sm:text-xl text-gray-700 leading-relaxed">
                 <p>
@@ -125,6 +143,10 @@ export default function NutriLandingPage() {
               </h2>
               
               <div className="bg-white rounded-xl shadow-lg p-8 sm:p-10 mb-8">
+                <p className="text-lg sm:text-xl text-gray-700 mb-6 leading-relaxed font-semibold">
+                  Respire fundo. Você não está quebrada. Você não é incompetente. Você simplesmente não aprendeu a parte que ninguém te ensinou.
+                </p>
+                
                 <p className="text-lg sm:text-xl text-gray-700 mb-6 leading-relaxed">
                   Você passou anos estudando nutrição. Aprendeu bioquímica, fisiologia, patologia. Aprendeu a fazer anamnese, calcular dietas, interpretar exames.
                 </p>
@@ -160,8 +182,12 @@ export default function NutriLandingPage() {
                   Isso não é culpa sua. Isso é uma lacuna do sistema.
                 </p>
                 
-                <p className="text-lg sm:text-xl text-gray-700 leading-relaxed">
-                  Você não está sozinha nessa. Milhares de nutricionistas talentosas passam pela mesma frustração. A diferença entre quem consegue construir uma carreira sólida e quem fica presa no ciclo de "tentativa e erro" não é talento. <strong>É método.</strong>
+                <p className="text-lg sm:text-xl text-gray-700 leading-relaxed mb-4">
+                  Você não está sozinha nessa. Muitas nutricionistas talentosas passam pela mesma frustração. A diferença entre quem consegue construir uma carreira sólida e quem fica presa no ciclo de "tentativa e erro" não é talento. <strong>É método.</strong>
+                </p>
+                
+                <p className="text-lg sm:text-xl text-gray-700 leading-relaxed font-semibold">
+                  E agora você tem a chance de aprender. Não precisa mais tentar sozinha.
                 </p>
               </div>
             </div>
@@ -546,7 +572,19 @@ export default function NutriLandingPage() {
                   <ul className="space-y-3 text-lg text-gray-700">
                     <li className="flex items-start">
                       <span className="text-[#FF4F4F] mr-3 text-xl font-bold">✗</span>
-                      <span>Dependia de indicação ou sorte para ter clientes</span>
+                      <span>Acordava ansiosa, sem saber se teria clientes</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="text-[#FF4F4F] mr-3 text-xl font-bold">✗</span>
+                      <span>Sentia vergonha quando não sabia quanto cobrar</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="text-[#FF4F4F] mr-3 text-xl font-bold">✗</span>
+                      <span>Se sentia sozinha, sem ninguém para ajudar</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="text-[#FF4F4F] mr-3 text-xl font-bold">✗</span>
+                      <span>Dormia frustrada, pensando que nunca ia dar certo</span>
                     </li>
                     <li className="flex items-start">
                       <span className="text-[#FF4F4F] mr-3 text-xl font-bold">✗</span>
@@ -554,19 +592,7 @@ export default function NutriLandingPage() {
                     </li>
                     <li className="flex items-start">
                       <span className="text-[#FF4F4F] mr-3 text-xl font-bold">✗</span>
-                      <span>Sentia insegurança para cobrar (não sabia quanto valia seu trabalho)</span>
-                    </li>
-                    <li className="flex items-start">
-                      <span className="text-[#FF4F4F] mr-3 text-xl font-bold">✗</span>
-                      <span>Postava muito no Instagram, mas gerava pouco resultado real</span>
-                    </li>
-                    <li className="flex items-start">
-                      <span className="text-[#FF4F4F] mr-3 text-xl font-bold">✗</span>
                       <span>Tentava organizar processos, mas sempre voltava à desorganização</span>
-                    </li>
-                    <li className="flex items-start">
-                      <span className="text-[#FF4F4F] mr-3 text-xl font-bold">✗</span>
-                      <span>Se sentia sozinha, sem clareza sobre como crescer</span>
                     </li>
                     <li className="flex items-start">
                       <span className="text-[#FF4F4F] mr-3 text-xl font-bold">✗</span>
@@ -584,7 +610,19 @@ export default function NutriLandingPage() {
                   <ul className="space-y-3 text-lg text-gray-700">
                     <li className="flex items-start">
                       <span className="text-[#29CC6A] mr-3 text-xl font-bold">✓</span>
-                      <span>Cria sistemas de captação que funcionam de forma previsível</span>
+                      <span>Acorda tranquila, sabendo que tem sistema de captação funcionando</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="text-[#29CC6A] mr-3 text-xl font-bold">✓</span>
+                      <span>Se sente confiante para cobrar o valor que realmente vale</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="text-[#29CC6A] mr-3 text-xl font-bold">✓</span>
+                      <span>Tem mentoria e comunidade que apoiam seu crescimento</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="text-[#29CC6A] mr-3 text-xl font-bold">✓</span>
+                      <span>Dorme realizada, vendo seu negócio crescer de forma organizada</span>
                     </li>
                     <li className="flex items-start">
                       <span className="text-[#29CC6A] mr-3 text-xl font-bold">✓</span>
@@ -592,19 +630,7 @@ export default function NutriLandingPage() {
                     </li>
                     <li className="flex items-start">
                       <span className="text-[#29CC6A] mr-3 text-xl font-bold">✓</span>
-                      <span>Tem clareza sobre precificação e valor do seu trabalho</span>
-                    </li>
-                    <li className="flex items-start">
-                      <span className="text-[#29CC6A] mr-3 text-xl font-bold">✓</span>
-                      <span>Usa ferramentas estratégicas que geram leads qualificados</span>
-                    </li>
-                    <li className="flex items-start">
-                      <span className="text-[#29CC6A] mr-3 text-xl font-bold">✓</span>
                       <span>Segue processos definidos que funcionam sem você precisar improvisar</span>
-                    </li>
-                    <li className="flex items-start">
-                      <span className="text-[#29CC6A] mr-3 text-xl font-bold">✓</span>
-                      <span>Tem mentoria estratégica (LYA) e suporte para crescer</span>
                     </li>
                     <li className="flex items-start">
                       <span className="text-[#29CC6A] mr-3 text-xl font-bold">✓</span>
@@ -627,81 +653,8 @@ export default function NutriLandingPage() {
           </div>
         </section>
 
-        {/* BLOCO 10 — PROVAS SOCIAIS (RESULTADOS REAIS) */}
+        {/* BLOCO 10 — POR QUE O YLADA ACELERA RESULTADOS */}
         <section className="py-16 sm:py-20 lg:py-24 bg-white">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="max-w-6xl mx-auto">
-              <h2 className="text-3xl sm:text-4xl font-bold text-center mb-12 text-[#1A1A1A]">
-                Resultados reais de nutricionistas que se tornaram Nutri-Empresárias
-              </h2>
-              
-              <div className="grid md:grid-cols-2 gap-8">
-                <div className="bg-white rounded-xl shadow-lg p-8 border border-gray-200">
-                  <div className="flex items-center mb-4">
-                    <div className="w-16 h-16 bg-[#E9F1FF] rounded-full flex items-center justify-center text-2xl font-bold text-[#2563EB]">
-                      M
-                    </div>
-                    <div className="ml-4">
-                      <h4 className="font-bold text-[#1A1A1A]">Maria Silva</h4>
-                      <p className="text-sm text-gray-600">Nutricionista Clínica</p>
-                    </div>
-                  </div>
-                  <p className="text-gray-700 italic leading-relaxed">
-                    "Antes do YLADA, eu estava sempre desorganizada. Perdia informações de clientes, esquecia follow-ups, trabalhava na base do improviso. Hoje, tenho tudo organizado no sistema. Sei exatamente onde cada cliente está no processo. Minha mente ficou livre para focar no que realmente importa: atender bem."
-                  </p>
-                </div>
-
-                <div className="bg-white rounded-xl shadow-lg p-8 border border-gray-200">
-                  <div className="flex items-center mb-4">
-                    <div className="w-16 h-16 bg-[#E9F1FF] rounded-full flex items-center justify-center text-2xl font-bold text-[#2563EB]">
-                      A
-                    </div>
-                    <div className="ml-4">
-                      <h4 className="font-bold text-[#1A1A1A]">Ana Costa</h4>
-                      <p className="text-sm text-gray-600">Nutricionista Esportiva</p>
-                    </div>
-                  </div>
-                  <p className="text-gray-700 italic leading-relaxed">
-                    "Minha agenda era um caos. Ou estava vazia demais ou cheia demais, sem controle. Com o YLADA, aprendi a criar sistemas de captação que funcionam. Hoje, tenho agenda organizada e previsível. Não dependo mais de indicação."
-                  </p>
-                </div>
-
-                <div className="bg-white rounded-xl shadow-lg p-8 border border-gray-200">
-                  <div className="flex items-center mb-4">
-                    <div className="w-16 h-16 bg-[#E9F1FF] rounded-full flex items-center justify-center text-2xl font-bold text-[#2563EB]">
-                      J
-                    </div>
-                    <div className="ml-4">
-                      <h4 className="font-bold text-[#1A1A1A]">Juliana Mendes</h4>
-                      <p className="text-sm text-gray-600">Nutricionista Funcional</p>
-                    </div>
-                  </div>
-                  <p className="text-gray-700 italic leading-relaxed">
-                    "Eu tinha muita insegurança para cobrar. Não sabia quanto valia meu trabalho. Com a formação do YLADA, desenvolvi clareza sobre precificação e valor. Hoje, cobro o que realmente vale e me sinto confiante para isso."
-                  </p>
-                </div>
-
-                <div className="bg-white rounded-xl shadow-lg p-8 border border-gray-200">
-                  <div className="flex items-center mb-4">
-                    <div className="w-16 h-16 bg-[#E9F1FF] rounded-full flex items-center justify-center text-2xl font-bold text-[#2563EB]">
-                      C
-                    </div>
-                    <div className="ml-4">
-                      <h4 className="font-bold text-[#1A1A1A]">Carla Santos</h4>
-                      <p className="text-sm text-gray-600">Nutricionista Online</p>
-                    </div>
-                  </div>
-                  <p className="text-gray-700 italic leading-relaxed">
-                    "Eu estava presa no ciclo de 'tentar e não dar certo'. Comprava planilhas, baixava apps, tentava criar rotinas. Mas sempre voltava ao mesmo lugar. Com o YLADA, finalmente tenho um método que funciona. Estou crescendo de forma organizada, não mais na base da tentativa e erro."
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* BLOCO 11 — POR QUE O YLADA ACELERA RESULTADOS */}
-        <section className="py-16 sm:py-20 lg:py-24 bg-[#F5F7FA]">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="max-w-6xl mx-auto">
               <h2 className="text-3xl sm:text-4xl font-bold text-center mb-12 text-[#1A1A1A]">
@@ -748,12 +701,35 @@ export default function NutriLandingPage() {
         </section>
 
         {/* BLOCO 12 — ANCORAGEM DE VALOR (ANTES DO PREÇO) */}
-        <section className="py-16 sm:py-20 lg:py-24 bg-white">
+        <section className="py-16 sm:py-20 lg:py-24 bg-[#F5F7FA]">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="max-w-4xl mx-auto">
-              <h2 className="text-3xl sm:text-4xl font-bold text-center mb-12 text-[#1A1A1A]">
-                Quanto custa continuar tentando sozinha?
+              <h2 className="text-3xl sm:text-4xl font-bold text-center mb-8 text-[#1A1A1A]">
+                Antes de mostrar o investimento, vamos falar sobre o que você está perdendo enquanto não decide:
               </h2>
+              
+              <div className="grid md:grid-cols-3 gap-6 mb-8">
+                <div className="bg-white rounded-xl p-6 border-2 border-[#FF9800] text-center">
+                  <div className="text-4xl mb-4">😔</div>
+                  <p className="text-lg font-bold text-gray-700">
+                    Cada mês sem método = mais frustração acumulada
+                  </p>
+                </div>
+                
+                <div className="bg-white rounded-xl p-6 border-2 border-[#FF4F4F] text-center">
+                  <div className="text-4xl mb-4">💸</div>
+                  <p className="text-lg font-bold text-gray-700">
+                    Cada cliente que você perde por falta de organização = dinheiro que não volta
+                  </p>
+                </div>
+                
+                <div className="bg-white rounded-xl p-6 border-2 border-[#2563EB] text-center">
+                  <div className="text-4xl mb-4">⏰</div>
+                  <p className="text-lg font-bold text-gray-700">
+                    Cada dia que você adia = mais tempo longe da carreira que você quer ter
+                  </p>
+                </div>
+              </div>
               
               <div className="space-y-8">
                 <div className="bg-[#FFF4E6] rounded-xl p-8 border-2 border-[#FF9800]">
@@ -1023,15 +999,18 @@ export default function NutriLandingPage() {
                 Válida para ambos os planos
               </p>
               <p className="text-xl mb-4 text-gray-700">
-                Cartão obrigatório na entrada. Se por qualquer motivo você não estiver satisfeita com a LYA e a mentoria estratégica, devolvemos 100% do seu investimento. Sem perguntas, sem burocracia.
+                Se você não sentir que está no caminho certo, devolvemos 100% do seu investimento. Sem burocracia, sem letras miúdas, sem julgamento.
               </p>
               <p className="text-lg text-gray-600 mb-4">
-                Por quê? Porque acreditamos no método. E porque queremos que você tenha certeza de que está fazendo a escolha certa.
+                Por quê? Porque acreditamos no método. E porque queremos que você tenha certeza de que está fazendo a escolha certa para sua carreira.
               </p>
-              <p className="text-lg text-gray-600">
+              <p className="text-lg text-gray-600 mb-6">
                 Como funciona: Entre em contato com nosso suporte dentro de 7 dias após a compra. Devolvemos todo o valor, sem questionamentos.
               </p>
-              <p className="text-xl font-bold text-[#2563EB] mt-6">
+              <p className="text-xl font-bold text-[#2563EB] mb-4">
+                Teste sem medo. Se não funcionar, você não perde nada.
+              </p>
+              <p className="text-lg text-gray-600">
                 Simples assim.
               </p>
             </div>
@@ -1058,7 +1037,10 @@ export default function NutriLandingPage() {
                 Você pode escolher ter método, clareza e suporte.
               </p>
               <p className="text-xl mb-4 text-white/90">
-                Junte-se a centenas de Nutricionistas que já se tornaram Nutri-Empresárias.
+                Cada dia que você adia é mais um dia longe da carreira que você quer ter.
+              </p>
+              <p className="text-lg mb-4 text-white/80">
+                Você não precisa mais acordar ansiosa. Você não precisa mais se sentir sozinha. Você não precisa mais tentar descobrir sozinha.
               </p>
               <p className="text-lg mb-8 text-white/80">
                 Você não está sozinha. Existe um caminho. Existe um método. Existe suporte.
@@ -1116,6 +1098,14 @@ export default function NutriLandingPage() {
                   {
                     pergunta: 'E se eu não usar todas as ferramentas?',
                     resposta: 'Tudo bem. O YLADA não é sobre usar tudo. É sobre usar o que você precisa, quando precisa. A LYA te ajuda a focar no que é prioritário para o seu momento atual. Você não precisa usar todas as ferramentas. Precisa usar as ferramentas certas, no momento certo. O método te guia. Você não precisa descobrir sozinha.'
+                  },
+                  {
+                    pergunta: 'E se eu não conseguir usar tudo? Vou ter desperdiçado meu dinheiro?',
+                    resposta: 'Você não precisa usar tudo. O YLADA não é sobre usar todas as ferramentas. É sobre usar as ferramentas certas, no momento certo. A LYA te ajuda a focar no que é prioritário para o seu momento atual. Você não precisa descobrir sozinha. E com a garantia de 7 dias, você pode testar sem risco.'
+                  },
+                  {
+                    pergunta: 'E se eu não tiver tempo para isso?',
+                    resposta: 'O YLADA foi feito para economizar seu tempo, não para consumir. A ideia é você trabalhar menos e ganhar mais. A LYA te guia para focar no que realmente importa, sem perder tempo com o que não faz diferença agora. O método foi pensado para nutricionistas que já têm uma rotina corrida.'
                   }
                 ].map((item, index) => (
                   <div key={index} className="bg-white rounded-xl shadow-lg overflow-hidden">
