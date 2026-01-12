@@ -1,11 +1,17 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
+import { trackNutriDiscoveryView } from '@/lib/facebook-pixel'
 
 export default function NutriDescobrirPage() {
   const [faqOpen, setFaqOpen] = useState<number | null>(null)
+
+  // Rastrear visualização da página de descoberta
+  useEffect(() => {
+    trackNutriDiscoveryView()
+  }, [])
 
   const toggleFaq = (index: number) => {
     setFaqOpen(faqOpen === index ? null : index)

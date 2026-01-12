@@ -3,6 +3,7 @@ import './globals.css'
 import { AuthProviderWrapper } from '@/components/providers/AuthProviderWrapper'
 import CookieConsentBanner from '@/components/legal/CookieConsentBanner'
 import PWAInitializer from '@/components/pwa/PWAInitializer'
+import FacebookPixel from '@/components/analytics/FacebookPixel'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -64,6 +65,9 @@ export default function RootLayout({
 }: {
   children: React.ReactNode
 }) {
+  // Pixel ID do Facebook - usar variável de ambiente ou valor padrão
+  const pixelId = process.env.NEXT_PUBLIC_FACEBOOK_PIXEL_ID || '881640870918286' // YLADA NUTRI
+  
   return (
     <html lang="pt">
       <head>
@@ -79,6 +83,7 @@ export default function RootLayout({
         <meta httpEquiv="Expires" content="0" />
       </head>
       <body className={inter.className}>
+        <FacebookPixel pixelId={pixelId} />
         <PWAInitializer />
         <AuthProviderWrapper>
           {children}

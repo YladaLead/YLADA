@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useAuth } from '@/contexts/AuthContext'
+import { trackNutriCheckoutMonthly, trackNutriCheckoutAnnual } from '@/lib/facebook-pixel'
 
 export default function NutriCheckoutPage() {
   const router = useRouter()
@@ -56,9 +57,16 @@ export default function NutriCheckoutPage() {
       if (plan === 'annual') {
         setPlanType('annual')
         setPlanLocked(true) // Bloquear alteração após definir pela URL
+        // Rastrear evento de checkout anual
+        trackNutriCheckoutAnnual()
       } else if (plan === 'monthly') {
         setPlanType('monthly')
         setPlanLocked(true) // Bloquear alteração após definir pela URL
+        // Rastrear evento de checkout mensal
+        trackNutriCheckoutMonthly()
+      } else {
+        // Se não tiver parâmetro, assumir mensal e rastrear
+        trackNutriCheckoutMonthly()
       }
       
       if (canceledParam === 'true') {

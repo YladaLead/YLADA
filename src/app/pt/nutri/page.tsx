@@ -1,14 +1,20 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import LyaSalesWidget from '@/components/nutri/LyaSalesWidget'
 import { landingPageVideos } from '@/lib/landing-pages-assets'
+import { trackNutriSalesView } from '@/lib/facebook-pixel'
 
 export default function NutriLandingPage() {
   const [faqOpen, setFaqOpen] = useState<number | null>(null)
   const [lyaWidgetOpen, setLyaWidgetOpen] = useState(false)
+
+  // Rastrear visualização da página de vendas
+  useEffect(() => {
+    trackNutriSalesView()
+  }, [])
 
   const toggleFaq = (index: number) => {
     setFaqOpen(faqOpen === index ? null : index)
@@ -46,7 +52,7 @@ export default function NutriLandingPage() {
 
       <main>
         {/* BLOCO 1 — HERO (DOBRA INICIAL | RUPTURA + IDENTIDADE) */}
-        <section className="bg-gradient-to-br from-[#0B57FF] to-[#2572FF] text-white pt-12 sm:pt-16 lg:pt-20 pb-16 sm:pb-20 lg:pb-24">
+        <section className="bg-gradient-to-br from-[#2563EB] to-[#3B82F6] text-white pt-12 sm:pt-16 lg:pt-20 pb-16 sm:pb-20 lg:pb-24">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="max-w-4xl mx-auto text-center">
               <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-black mb-6 sm:mb-8 leading-tight">
@@ -63,7 +69,7 @@ export default function NutriLandingPage() {
               
               <Link
                 href="#como-funciona"
-                className="inline-block bg-white text-[#0B57FF] px-8 sm:px-12 py-4 sm:py-5 rounded-xl text-lg sm:text-xl font-bold hover:bg-gray-100 transition-all shadow-2xl hover:shadow-3xl transform hover:-translate-y-1"
+                className="inline-block bg-white text-[#2563EB] px-8 sm:px-12 py-4 sm:py-5 rounded-xl text-lg sm:text-xl font-bold hover:bg-gray-100 transition-all shadow-2xl hover:shadow-3xl transform hover:-translate-y-1"
               >
                 Quero entender como me tornar uma Nutri-Empresária
               </Link>
@@ -129,23 +135,23 @@ export default function NutriLandingPage() {
                 
                 <ul className="space-y-3 text-lg text-gray-700 mb-6">
                   <li className="flex items-start">
-                    <span className="text-[#0B57FF] mr-3 text-xl font-bold">•</span>
+                    <span className="text-[#2563EB] mr-3 text-xl font-bold">•</span>
                     <span>Captar clientes de forma previsível</span>
                   </li>
                   <li className="flex items-start">
-                    <span className="text-[#0B57FF] mr-3 text-xl font-bold">•</span>
+                    <span className="text-[#2563EB] mr-3 text-xl font-bold">•</span>
                     <span>Organizar seu negócio para crescer</span>
                   </li>
                   <li className="flex items-start">
-                    <span className="text-[#0B57FF] mr-3 text-xl font-bold">•</span>
+                    <span className="text-[#2563EB] mr-3 text-xl font-bold">•</span>
                     <span>Cobrar o valor que você realmente vale</span>
                   </li>
                   <li className="flex items-start">
-                    <span className="text-[#0B57FF] mr-3 text-xl font-bold">•</span>
+                    <span className="text-[#2563EB] mr-3 text-xl font-bold">•</span>
                     <span>Criar processos que funcionem sem você precisar estar presente o tempo todo</span>
                   </li>
                   <li className="flex items-start">
-                    <span className="text-[#0B57FF] mr-3 text-xl font-bold">•</span>
+                    <span className="text-[#2563EB] mr-3 text-xl font-bold">•</span>
                     <span>Transformar conhecimento técnico em um negócio lucrativo</span>
                   </li>
                 </ul>
@@ -208,8 +214,8 @@ export default function NutriLandingPage() {
               </h2>
               
               <div className="grid md:grid-cols-2 gap-8 mb-12">
-                <div className="bg-[#E9F1FF] rounded-xl p-8 border-2 border-[#0B57FF]">
-                  <h3 className="text-2xl font-bold mb-6 text-[#0B57FF]">O Que a Faculdade Ensinou</h3>
+                <div className="bg-[#E9F1FF] rounded-xl p-8 border-2 border-[#2563EB]">
+                  <h3 className="text-2xl font-bold mb-6 text-[#2563EB]">O Que a Faculdade Ensinou</h3>
                   <p className="text-lg text-gray-700 mb-4">
                     A faculdade te preparou para ser uma excelente nutricionista clínica. Você aprendeu:
                   </p>
@@ -244,7 +250,7 @@ export default function NutriLandingPage() {
                 </div>
               </div>
               
-              <div className="bg-[#0B57FF] rounded-xl p-8 text-center text-white">
+              <div className="bg-[#2563EB] rounded-xl p-8 text-center text-white">
                 <p className="text-xl sm:text-2xl font-bold mb-4">
                   O mercado exige que você seja duas coisas ao mesmo tempo:
                 </p>
@@ -314,7 +320,7 @@ export default function NutriLandingPage() {
                 </div>
               </div>
               
-              <div className="bg-gradient-to-r from-[#0B57FF] to-[#2572FF] rounded-xl p-8 text-center text-white">
+              <div className="bg-gradient-to-r from-[#2563EB] to-[#3B82F6] rounded-xl p-8 text-center text-white">
                 <p className="text-xl sm:text-2xl font-bold mb-4">
                   A Nutri-Empresária não é um título que você ganha.
                 </p>
@@ -337,7 +343,7 @@ export default function NutriLandingPage() {
                 O que é o YLADA Nutri?
               </h2>
               
-              <div className="bg-white rounded-xl shadow-lg p-8 sm:p-10 mb-8 border-2 border-[#0B57FF]">
+              <div className="bg-white rounded-xl shadow-lg p-8 sm:p-10 mb-8 border-2 border-[#2563EB]">
                 <p className="text-xl sm:text-2xl font-bold text-gray-800 mb-6">
                   O YLADA Nutri não é apenas uma plataforma. É um sistema completo de transformação profissional.
                 </p>
@@ -352,27 +358,27 @@ export default function NutriLandingPage() {
                 
                 <ul className="space-y-3 text-lg text-gray-700 mb-6">
                   <li className="flex items-start">
-                    <span className="text-[#0B57FF] mr-3 text-xl font-bold">•</span>
+                    <span className="text-[#2563EB] mr-3 text-xl font-bold">•</span>
                     <span><strong>Formação empresarial</strong> (método, mentalidade, estratégia)</span>
                   </li>
                   <li className="flex items-start">
-                    <span className="text-[#0B57FF] mr-3 text-xl font-bold">•</span>
+                    <span className="text-[#2563EB] mr-3 text-xl font-bold">•</span>
                     <span><strong>Ferramentas profissionais</strong> (captação, gestão, acompanhamento)</span>
                   </li>
                   <li className="flex items-start">
-                    <span className="text-[#0B57FF] mr-3 text-xl font-bold">•</span>
+                    <span className="text-[#2563EB] mr-3 text-xl font-bold">•</span>
                     <span><strong>Mentoria estratégica</strong> (LYA, sua mentora digital)</span>
                   </li>
                   <li className="flex items-start">
-                    <span className="text-[#0B57FF] mr-3 text-xl font-bold">•</span>
+                    <span className="text-[#2563EB] mr-3 text-xl font-bold">•</span>
                     <span><strong>Comunidade e suporte</strong> (você não está sozinha)</span>
                   </li>
                 </ul>
               </div>
               
               <div className="grid md:grid-cols-2 gap-8">
-                <div className="bg-[#E9F1FF] rounded-xl p-8 border-2 border-[#0B57FF]">
-                  <h3 className="text-2xl font-bold mb-6 text-[#0B57FF]">Para Quem É</h3>
+                <div className="bg-[#E9F1FF] rounded-xl p-8 border-2 border-[#2563EB]">
+                  <h3 className="text-2xl font-bold mb-6 text-[#2563EB]">Para Quem É</h3>
                   <ul className="space-y-2 text-gray-700">
                     <li>• Querem construir uma carreira organizada e lucrativa</li>
                     <li>• Estão cansadas de depender de sorte ou indicação</li>
@@ -434,7 +440,7 @@ export default function NutriLandingPage() {
                     desc: 'Você não está sozinha. Tem a LYA como mentora estratégica digital, que guia suas decisões e te ajuda a focar no que realmente importa. Tem acesso a comunidade, materiais, suporte. Cresce com suporte, não na base da tentativa e erro.'
                   }
                 ].map((item, index) => (
-                  <div key={index} className="bg-white rounded-xl shadow-lg p-8 border-l-4 border-[#0B57FF]">
+                  <div key={index} className="bg-white rounded-xl shadow-lg p-8 border-l-4 border-[#2563EB]">
                     <h3 className="text-xl sm:text-2xl font-bold mb-4 text-[#1A1A1A]">{item.title}</h3>
                     <p className="text-lg text-gray-700 leading-relaxed">
                       <strong>O que isso muda na sua vida:</strong> {item.desc}
@@ -447,7 +453,7 @@ export default function NutriLandingPage() {
                 <p className="text-lg sm:text-xl text-gray-700 mb-4">
                   Cada ponto responde à pergunta: <strong>"O que isso muda na minha vida?"</strong>
                 </p>
-                <p className="text-lg sm:text-xl font-bold text-[#0B57FF]">
+                <p className="text-lg sm:text-xl font-bold text-[#2563EB]">
                   A resposta é sempre: clareza, organização, crescimento e segurança.
                 </p>
               </div>
@@ -466,7 +472,7 @@ export default function NutriLandingPage() {
                 Direcionamento diário, clareza de foco e execução prática
               </p>
               
-              <div className="bg-gradient-to-br from-[#0B57FF] to-[#2572FF] rounded-xl shadow-lg p-8 sm:p-10 mb-8 text-white">
+              <div className="bg-gradient-to-br from-[#2563EB] to-[#3B82F6] rounded-xl shadow-lg p-8 sm:p-10 mb-8 text-white">
                 <p className="text-xl sm:text-2xl font-bold mb-6">
                   LYA não é "uma IA". LYA é sua mentora estratégica digital.
                 </p>
@@ -482,29 +488,29 @@ export default function NutriLandingPage() {
               
               <div className="grid md:grid-cols-2 gap-8 mb-8">
                 <div className="bg-[#E9F1FF] rounded-xl p-8">
-                  <h3 className="text-xl font-bold mb-4 text-[#0B57FF]">O Papel Dela na Jornada</h3>
+                  <h3 className="text-xl font-bold mb-4 text-[#2563EB]">O Papel Dela na Jornada</h3>
                   <ul className="space-y-3 text-gray-700">
                     <li className="flex items-start">
-                      <span className="text-[#0B57FF] mr-3 text-xl">✓</span>
+                      <span className="text-[#2563EB] mr-3 text-xl">✓</span>
                       <span><strong>Tomar decisões estratégicas</strong> (não apenas operacionais)</span>
                     </li>
                     <li className="flex items-start">
-                      <span className="text-[#0B57FF] mr-3 text-xl">✓</span>
+                      <span className="text-[#2563EB] mr-3 text-xl">✓</span>
                       <span><strong>Manter foco</strong> (não se perder em excesso de informação)</span>
                     </li>
                     <li className="flex items-start">
-                      <span className="text-[#0B57FF] mr-3 text-xl">✓</span>
+                      <span className="text-[#2563EB] mr-3 text-xl">✓</span>
                       <span><strong>Seguir o método</strong> (não voltar para a tentativa e erro)</span>
                     </li>
                     <li className="flex items-start">
-                      <span className="text-[#0B57FF] mr-3 text-xl">✓</span>
+                      <span className="text-[#2563EB] mr-3 text-xl">✓</span>
                       <span><strong>Crescer de forma organizada</strong> (passo a passo, com clareza)</span>
                     </li>
                   </ul>
                 </div>
                 
                 <div className="bg-[#E9F1FF] rounded-xl p-8">
-                  <h3 className="text-xl font-bold mb-4 text-[#0B57FF]">Como Ela Guia</h3>
+                  <h3 className="text-xl font-bold mb-4 text-[#2563EB]">Como Ela Guia</h3>
                   <p className="text-gray-700 mb-4">
                     LYA analisa seu perfil estratégico, progresso real, objetivos e travas, e responde sempre com:
                   </p>
@@ -517,8 +523,8 @@ export default function NutriLandingPage() {
                 </div>
               </div>
               
-              <div className="text-center bg-white rounded-xl shadow-lg p-8 border-2 border-[#0B57FF]">
-                <p className="text-xl sm:text-2xl font-bold text-[#0B57FF]">
+              <div className="text-center bg-white rounded-xl shadow-lg p-8 border-2 border-[#2563EB]">
+                <p className="text-xl sm:text-2xl font-bold text-[#2563EB]">
                   LYA não é tecnologia. LYA é mentoria estratégica que funciona.
                 </p>
               </div>
@@ -632,7 +638,7 @@ export default function NutriLandingPage() {
               <div className="grid md:grid-cols-2 gap-8">
                 <div className="bg-white rounded-xl shadow-lg p-8 border border-gray-200">
                   <div className="flex items-center mb-4">
-                    <div className="w-16 h-16 bg-[#E9F1FF] rounded-full flex items-center justify-center text-2xl font-bold text-[#0B57FF]">
+                    <div className="w-16 h-16 bg-[#E9F1FF] rounded-full flex items-center justify-center text-2xl font-bold text-[#2563EB]">
                       M
                     </div>
                     <div className="ml-4">
@@ -647,7 +653,7 @@ export default function NutriLandingPage() {
 
                 <div className="bg-white rounded-xl shadow-lg p-8 border border-gray-200">
                   <div className="flex items-center mb-4">
-                    <div className="w-16 h-16 bg-[#E9F1FF] rounded-full flex items-center justify-center text-2xl font-bold text-[#0B57FF]">
+                    <div className="w-16 h-16 bg-[#E9F1FF] rounded-full flex items-center justify-center text-2xl font-bold text-[#2563EB]">
                       A
                     </div>
                     <div className="ml-4">
@@ -662,7 +668,7 @@ export default function NutriLandingPage() {
 
                 <div className="bg-white rounded-xl shadow-lg p-8 border border-gray-200">
                   <div className="flex items-center mb-4">
-                    <div className="w-16 h-16 bg-[#E9F1FF] rounded-full flex items-center justify-center text-2xl font-bold text-[#0B57FF]">
+                    <div className="w-16 h-16 bg-[#E9F1FF] rounded-full flex items-center justify-center text-2xl font-bold text-[#2563EB]">
                       J
                     </div>
                     <div className="ml-4">
@@ -677,7 +683,7 @@ export default function NutriLandingPage() {
 
                 <div className="bg-white rounded-xl shadow-lg p-8 border border-gray-200">
                   <div className="flex items-center mb-4">
-                    <div className="w-16 h-16 bg-[#E9F1FF] rounded-full flex items-center justify-center text-2xl font-bold text-[#0B57FF]">
+                    <div className="w-16 h-16 bg-[#E9F1FF] rounded-full flex items-center justify-center text-2xl font-bold text-[#2563EB]">
                       C
                     </div>
                     <div className="ml-4">
@@ -782,8 +788,8 @@ export default function NutriLandingPage() {
                   </p>
                 </div>
                 
-                <div className="bg-[#E9F1FF] rounded-xl p-8 border-2 border-[#0B57FF]">
-                  <h3 className="text-2xl font-bold mb-4 text-[#0B57FF]">Investir no YLADA não é um gasto. É uma decisão estratégica.</h3>
+                <div className="bg-[#E9F1FF] rounded-xl p-8 border-2 border-[#2563EB]">
+                  <h3 className="text-2xl font-bold mb-4 text-[#2563EB]">Investir no YLADA não é um gasto. É uma decisão estratégica.</h3>
                   <p className="text-lg text-gray-700 mb-4">
                     É escolher ter:
                   </p>
@@ -804,7 +810,7 @@ export default function NutriLandingPage() {
         </section>
 
         {/* BLOCO 13 — OFERTA (ESCOLHA SEU COMPROMISSO) */}
-        <section id="oferta" className="py-16 sm:py-20 lg:py-24 bg-gradient-to-br from-[#0B57FF] to-[#2572FF] relative z-0" style={{ position: 'relative', zIndex: 1 }}>
+        <section id="oferta" className="py-16 sm:py-20 lg:py-24 bg-gradient-to-br from-[#2563EB] to-[#3B82F6] relative z-0" style={{ position: 'relative', zIndex: 1 }}>
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="max-w-5xl mx-auto">
               <h2 className="text-3xl sm:text-4xl font-bold text-center mb-6 text-white">
@@ -832,7 +838,7 @@ export default function NutriLandingPage() {
                     <p className="text-gray-600 mb-4">Para quem decidiu se comprometer com a própria evolução profissional</p>
                   </div>
                   
-                  <div className="bg-gradient-to-br from-[#0B57FF] to-[#2572FF] rounded-xl p-6 mb-6 text-center text-white">
+                  <div className="bg-gradient-to-br from-[#2563EB] to-[#3B82F6] rounded-xl p-6 mb-6 text-center text-white">
                     <p className="text-3xl sm:text-4xl font-bold">
                       12× de R$ 197
                     </p>
@@ -888,7 +894,7 @@ export default function NutriLandingPage() {
                       onMouseDown={(e) => {
                         e.stopPropagation()
                       }}
-                      className="w-full bg-gradient-to-r from-[#0B57FF] to-[#2572FF] text-white px-6 py-4 rounded-xl text-lg font-bold hover:from-[#2572FF] hover:to-[#0B57FF] transition-all shadow-xl cursor-pointer active:scale-95"
+                      className="w-full bg-gradient-to-r from-[#2563EB] to-[#3B82F6] text-white px-6 py-4 rounded-xl text-lg font-bold hover:from-[#3B82F6] hover:to-[#1D4ED8] transition-all shadow-xl cursor-pointer active:scale-95"
                       style={{ 
                         touchAction: 'manipulation', 
                         WebkitTapHighlightColor: 'transparent',
@@ -1025,7 +1031,7 @@ export default function NutriLandingPage() {
               <p className="text-lg text-gray-600">
                 Como funciona: Entre em contato com nosso suporte dentro de 7 dias após a compra. Devolvemos todo o valor, sem questionamentos.
               </p>
-              <p className="text-xl font-bold text-[#0B57FF] mt-6">
+              <p className="text-xl font-bold text-[#2563EB] mt-6">
                 Simples assim.
               </p>
             </div>
@@ -1033,7 +1039,7 @@ export default function NutriLandingPage() {
         </section>
 
         {/* BLOCO 15 — CTA FINAL (DECISÃO) */}
-        <section className="py-16 sm:py-20 lg:py-24 bg-gradient-to-br from-[#0B57FF] to-[#2572FF] text-white">
+        <section className="py-16 sm:py-20 lg:py-24 bg-gradient-to-br from-[#2563EB] to-[#3B82F6] text-white">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="max-w-4xl mx-auto text-center">
               <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-6">
@@ -1062,7 +1068,7 @@ export default function NutriLandingPage() {
               </p>
               <Link
                 href="#oferta"
-                className="inline-block bg-white text-[#0B57FF] px-10 py-5 rounded-xl text-xl sm:text-2xl font-bold hover:bg-gray-100 transition-all shadow-2xl"
+                className="inline-block bg-white text-[#2563EB] px-10 py-5 rounded-xl text-xl sm:text-2xl font-bold hover:bg-gray-100 transition-all shadow-2xl"
               >
                 Quero me tornar uma Nutri-Empresária agora
               </Link>
@@ -1118,7 +1124,7 @@ export default function NutriLandingPage() {
                       className="w-full px-6 py-4 text-left flex justify-between items-center hover:bg-gray-50 transition-colors"
                     >
                       <span className="font-semibold text-[#1A1A1A] pr-4">{item.pergunta}</span>
-                      <span className="text-[#0B57FF] text-2xl flex-shrink-0">
+                      <span className="text-[#2563EB] text-2xl flex-shrink-0">
                         {faqOpen === index ? '−' : '+'}
                       </span>
                     </button>
@@ -1138,7 +1144,7 @@ export default function NutriLandingPage() {
       {/* Botão flutuante fixo - LYA IA Vendedora */}
       <button
         onClick={openLyaWidget}
-        className="fixed bottom-6 right-6 z-40 bg-gradient-to-r from-[#0B57FF] to-[#2572FF] text-white px-4 sm:px-6 py-3 sm:py-4 rounded-full shadow-2xl hover:from-[#2572FF] hover:to-[#0B57FF] transition-all flex items-center gap-2 sm:gap-3 font-semibold text-sm sm:text-base pointer-events-auto"
+        className="fixed bottom-6 right-6 z-40 bg-gradient-to-r from-[#2563EB] to-[#3B82F6] text-white px-4 sm:px-6 py-3 sm:py-4 rounded-full shadow-2xl hover:from-[#3B82F6] hover:to-[#1D4ED8] transition-all flex items-center gap-2 sm:gap-3 font-semibold text-sm sm:text-base pointer-events-auto"
         style={{ bottom: '80px', zIndex: 40 }}
       >
         <span className="text-xl sm:text-2xl">💬</span>
