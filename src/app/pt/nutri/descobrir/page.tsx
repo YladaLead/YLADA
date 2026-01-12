@@ -13,7 +13,7 @@ export default function NutriDescobrirPage() {
 
   const handleWhatsApp = () => {
     const message = encodeURIComponent('Olá! Vi o YLADA Nutri e gostaria de entender melhor como funciona.')
-    window.open(`https://wa.me/5511999999999?text=${message}`, '_blank')
+    window.open(`https://wa.me/5519997230912?text=${message}`, '_blank')
   }
 
   return (
