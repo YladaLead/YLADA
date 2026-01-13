@@ -268,6 +268,10 @@ export function formatarRespostaCompleta(
     partes.push('')
     partes.push('💬 Script:')
     partes.push(estrutura.script_sugerido.conteudo)
+    
+    // 🚀 NOVO: Adicionar dica proativa sobre pedir indicações
+    partes.push('')
+    partes.push('💡 Dica: Não esqueça de pedir indicações também para seus inscritos que já têm indicações! Eles podem conhecer outras pessoas interessadas. Sempre peça de forma natural após enviar o link.')
   }
 
   // Parte 5: Reforço emocional

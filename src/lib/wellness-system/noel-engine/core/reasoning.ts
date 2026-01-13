@@ -36,10 +36,40 @@ export function processarMensagem(
   let tipo_interacao: TipoInteracao = 'pergunta'
   let intencao = 'geral'
 
-  // Detectar tipo de interação
-  if (mensagem.match(/script|mensagem|texto|o que dizer/i)) {
+  // Detectar tipo de interação - MELHORADO: Detecção mais robusta de solicitação de script
+  const padroesScript = [
+    // Padrões diretos
+    /script|mensagem|texto|o que dizer/i,
+    // Padrões de solicitação
+    /me dá.*script|preciso.*script|quero.*script|melhore.*script|melhorar.*script/i,
+    /cria.*script|criar.*script|faça.*script|fazer.*script/i,
+    /passe.*script|passar.*script|envie.*script|enviar.*script/i,
+    // Padrões com contexto
+    /script.*para|script.*pra|script.*sobre|script.*de|script.*com/i,
+    /script.*imc|script.*calculadora|script.*link|script.*ferramenta/i,
+    // Padrões de melhoria
+    /melhore.*mensagem|melhorar.*mensagem|melhore.*texto|melhorar.*texto/i,
+    // Padrões de criação
+    /cria.*mensagem|criar.*mensagem|faça.*mensagem|fazer.*mensagem/i
+  ]
+  
+  const isSolicitacaoScript = padroesScript.some(padrao => padrao.test(mensagem))
+  
+  if (isSolicitacaoScript) {
     tipo_interacao = 'solicitacao_script'
     palavras_chave.push('script')
+    
+    // Detectar ferramenta mencionada
+    if (mensagem.match(/imc|calculadora.*imc/i)) {
+      palavras_chave.push('imc')
+      intencao = 'imc'
+    } else if (mensagem.match(/calculadora|calc/i)) {
+      palavras_chave.push('calculadora')
+    } else if (mensagem.match(/quiz/i)) {
+      palavras_chave.push('quiz')
+    } else if (mensagem.match(/link|ferramenta/i)) {
+      palavras_chave.push('ferramenta')
+    }
   } else if (mensagem.match(/objeção|dificuldade|problema|não quer/i)) {
     tipo_interacao = 'objeção'
     palavras_chave.push('objeção')

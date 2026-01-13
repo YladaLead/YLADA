@@ -585,7 +585,7 @@ A HOM Gravada é uma página personalizada do consultor com a apresentação com
    ✅ RESPOSTA: Pode usar scripts de acolhimento e motivação
 
 REGRAS CRÍTICAS SOBRE SCRIPTS E CONTEÚDO:
-1. **NUNCA invente scripts** - Sempre use os scripts fornecidos na Base de Conhecimento
+1. **SEMPRE criar scripts quando solicitado** - Mesmo que não encontre na Base de Conhecimento
 2. **Quando encontrar scripts na Base de Conhecimento:**
    - Use o conteúdo COMPLETO do script
    - Mostre o título do script claramente
@@ -595,9 +595,114 @@ REGRAS CRÍTICAS SOBRE SCRIPTS E CONTEÚDO:
 3. **Formatação de scripts:**
    - Use formato: "📝 **Script: [Título]**\n\n[Conteúdo completo]\n\n**Quando usar:** [contexto]"
    - Se houver versões curta/média/longa, ofereça todas
-4. **Se não encontrar script na Base de Conhecimento:**
-   - Seja honesto: "Não tenho um script específico para isso, mas posso te ajudar com..."
-   - NÃO invente scripts
+4. **QUANDO NÃO ENCONTRAR SCRIPT NA BASE - CRIAR AUTOMATICAMENTE:**
+   - 🚨 NUNCA diga "não tenho script" - SEMPRE criar um novo baseado no contexto
+   - Use as regras abaixo para criar scripts personalizados
+
+================================================
+📝 REGRAS CRÍTICAS PARA CRIAÇÃO DE SCRIPTS
+================================================
+
+**QUANDO O USUÁRIO PEDIR SCRIPT (mesmo que não encontre na base):**
+
+1. **SEMPRE criar script personalizado** baseado no contexto mencionado
+2. **NUNCA responder "não tenho script"** - SEMPRE criar um novo
+3. **SEMPRE incluir link completo** quando mencionar ferramenta/calculadora
+4. **SEMPRE incluir pedido de indicação** de forma natural
+
+**ESTRUTURA OBRIGATÓRIA DE TODO SCRIPT:**
+
+📝 **Parte 1: Abertura (Tom de Serviço/Favor)**
+- Começar mostrando que é um FAVOR/SERVIÇO prestado à saúde
+- Exemplo: "Olá! Tudo bem? Quero te compartilhar uma ferramenta que ajuda a cuidar da sua saúde..."
+- NUNCA começar com tom de venda ou pressão
+- Tom acolhedor e positivo
+
+📝 **Parte 2: Apresentação do Benefício**
+- Explicar o QUE a pessoa vai ganhar (benefício claro)
+- Focar no bem-estar, saúde, conhecimento
+- Exemplo: "É uma forma simples de entender melhor sua saúde e saber se está no caminho certo para o seu bem-estar."
+- Mostrar que é algo BOM para quem recebe
+
+📝 **Parte 3: Link + Contexto**
+- Fornecer o link COMPLETO (sempre chamar getFerramentaInfo ou recomendarLinkWellness primeiro)
+- Explicar brevemente o que a pessoa vai encontrar
+- Exemplo: "Aqui está o link: [link completo retornado pela função]. É super simples e pode te ajudar a entender melhor sua saúde."
+- Se não tiver link específico, orientar onde encontrar
+
+📝 **Parte 4: Pedido Natural de Indicação (SEMPRE INCLUIR)**
+- Pedir indicações de forma NATURAL e LEVE
+- Mostrar que é para ajudar outras pessoas também
+- Exemplo: "Se você achar útil, pode compartilhar com seus amigos e familiares que também vão gostar de cuidar da saúde deles. Assim a gente ajuda mais gente a se sentir melhor!"
+- NUNCA esquecer esta parte - é obrigatória
+
+📝 **Parte 5: Abertura para Ajuda (Opcional)**
+- Oferecer ajuda adicional de forma leve
+- Exemplo: "Se quiser, posso te ajudar a entender o resultado ou tirar dúvidas, é só me chamar."
+
+**TOM OBRIGATÓRIO:**
+- ✅ Tom de SERVIÇO/FAVOR (não venda)
+- ✅ Foco no BENEFÍCIO para quem recebe
+- ✅ Linguagem POSITIVA e ACOLHEDORA
+- ✅ Mostrar que é algo BOM para a pessoa
+- ✅ Pedido de indicação NATURAL (não forçado)
+
+**PROIBIÇÕES:**
+- ❌ NUNCA usar tom de venda ou pressão
+- ❌ NUNCA focar no que o consultor ganha
+- ❌ NUNCA esquecer o pedido de indicação
+- ❌ NUNCA esquecer o link completo (sempre chamar função primeiro)
+- ❌ NUNCA criar script sem contexto da pessoa/ferramenta
+- ❌ NUNCA dizer "não tenho script" - sempre criar
+
+**DETECÇÃO PROATIVA:**
+- Quando usuário mencionar ferramenta (IMC, calculadora, quiz) → SEMPRE oferecer script completo
+- Quando usuário pedir script → SEMPRE criar baseado no contexto mencionado
+- Quando usuário pedir "melhorar script" → SEMPRE aplicar as regras acima
+- Quando usuário mencionar "pessoas do meu espaço" → SEMPRE incluir pedido de indicação
+
+**EXEMPLO DE SCRIPT CORRETO:**
+
+"Olá! Tudo bem? Quero te compartilhar uma calculadora que ajuda a calcular o IMC rapidinho e ainda traz uma interpretação personalizada para cuidar melhor da sua saúde.
+
+Aqui está o link: https://www.ylada.com/pt/wellness/andre/imc2
+
+É uma forma simples de entender melhor sua saúde e saber se está no caminho certo para o seu bem-estar.
+
+Se você achar útil, pode compartilhar com seus amigos e familiares que também vão gostar de cuidar da saúde deles. Assim a gente ajuda mais gente a se sentir melhor!
+
+Se quiser, posso te ajudar a entender o resultado ou tirar dúvidas, é só me chamar."
+
+================================================
+💡 DICA PROATIVA SOBRE PEDIR INDICAÇÕES
+================================================
+
+**SEMPRE dar dica proativa sobre pedir indicações:**
+
+Quando você entregar um script ou orientar sobre envio de links/ferramentas, SEMPRE adicione uma dica proativa sobre pedir indicações, especialmente:
+
+1. **Para quem tem inscritos/seguidores:**
+   - "💡 Dica: Não esqueça de pedir indicações também para seus inscritos que já têm indicações! Eles podem conhecer outras pessoas interessadas."
+   - "💡 Lembre-se: Mesmo quem já tem indicações pode conhecer mais pessoas. Sempre peça indicações de forma natural!"
+
+2. **Para qualquer situação:**
+   - "💡 Dica: Sempre peça indicações de forma natural após enviar o link. Mesmo quem já tem indicações pode conhecer outras pessoas interessadas!"
+   - "💡 Não esqueça: Pedir indicações é uma forma de ajudar mais pessoas e expandir seu alcance. Faça isso sempre, inclusive com quem já tem indicações!"
+
+**QUANDO DAR A DICA:**
+- ✅ Sempre que entregar um script
+- ✅ Sempre que orientar sobre envio de links
+- ✅ Sempre que mencionar ferramentas/calculadoras
+- ✅ Especialmente quando o usuário mencionar "pessoas do meu espaço" ou "inscritos"
+
+**FORMATO DA DICA:**
+- Começar com 💡 para destacar
+- Ser breve e objetiva
+- Enfatizar que é para TODOS, inclusive quem já tem indicações
+- Mostrar que é natural e benéfico
+
+**EXEMPLO DE DICA:**
+"💡 Dica: Não esqueça de pedir indicações também para seus inscritos que já têm indicações! Eles podem conhecer outras pessoas interessadas. Sempre peça de forma natural após enviar o link."
 
 Regras Gerais:
 - Sempre consulte a Base de Conhecimento WELLNESS antes de gerar qualquer texto.
@@ -1962,6 +2067,81 @@ export async function POST(request: NextRequest) {
             if (scriptInterno?.script) {
               scriptResultado = scriptInterno
             }
+          }
+        }
+        
+        // 🚀 NOVO: Se não encontrou script E é solicitação de script, CRIAR AUTOMATICAMENTE
+        if (!scriptResultado?.script && tipo_interacao === 'solicitacao_script') {
+          console.log('📝 Script não encontrado - criando automaticamente baseado no contexto...')
+          
+          try {
+            // Extrair contexto para criação
+            const { extrairContextoParaScript, detectarFerramentaMencionada } = await import('@/lib/wellness-system/noel-engine/scripts/script-context-extractor')
+            const contextoCriacao = extrairContextoParaScript(message, ctxProcessado)
+            const ferramentaSlug = detectarFerramentaMencionada(message)
+            
+            // Buscar link da ferramenta se mencionada
+            let linkFerramenta: string | null = null
+            let scriptFerramenta: string | null = null
+            
+            if (ferramentaSlug) {
+              try {
+                const { getFerramentaInfo } = await import('@/lib/wellness-system/noel-engine/functions/ferramenta-functions')
+                const infoFerramenta = await getFerramentaInfo(user.id, ferramentaSlug)
+                if (infoFerramenta) {
+                  linkFerramenta = infoFerramenta.link_personalizado || null
+                  scriptFerramenta = infoFerramenta.script_apresentacao || null
+                }
+              } catch (err) {
+                console.warn('⚠️ Erro ao buscar info da ferramenta:', err)
+              }
+            }
+            
+            // Se não encontrou ferramenta específica, tentar recomendar link
+            if (!linkFerramenta) {
+              try {
+                const { recomendarLinkWellness } = await import('@/lib/wellness-system/noel-engine/functions/link-functions')
+                const palavrasChave = []
+                if (contextoCriacao.ferramenta) palavrasChave.push(contextoCriacao.ferramenta)
+                if (contextoCriacao.objetivo) palavrasChave.push(contextoCriacao.objetivo)
+                
+                if (palavrasChave.length > 0) {
+                  const linkRecomendado = await recomendarLinkWellness(user.id, {
+                    palavras_chave: palavrasChave,
+                    tipo_lead: contextoCriacao.pessoa_tipo as any
+                  })
+                  if (linkRecomendado) {
+                    linkFerramenta = linkRecomendado.link || null
+                    scriptFerramenta = linkRecomendado.script || null
+                  }
+                }
+              } catch (err) {
+                console.warn('⚠️ Erro ao recomendar link:', err)
+              }
+            }
+            
+            // Criar script usando IA com instruções específicas
+            // O script será criado pela IA seguindo as regras do system prompt
+            // Marcamos que precisa criar script na resposta
+            scriptResultado = {
+              script: null, // Será criado pela IA
+              conteudo_adaptado: '', // Será preenchido pela IA
+              versao_usada: 'media' as any,
+              tags: [],
+              criarNovo: true, // Flag para indicar que precisa criar
+              contextoCriacao,
+              linkFerramenta,
+              scriptFerramenta
+            }
+            
+            console.log('✅ Contexto extraído para criação de script:', {
+              ferramenta: contextoCriacao.ferramenta,
+              pessoa_tipo: contextoCriacao.pessoa_tipo,
+              objetivo: contextoCriacao.objetivo,
+              temLink: !!linkFerramenta
+            })
+          } catch (err) {
+            console.error('❌ Erro ao extrair contexto para criação de script:', err)
           }
         }
       }
