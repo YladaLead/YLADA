@@ -226,7 +226,7 @@ function DiagnosticosPageContent() {
               Nenhum diagnóstico encontrado
             </p>
             <Link
-              href="/pt/wellness/system/vender/fluxos"
+              href="/pt/wellness/fluxos"
               className="inline-block px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
             >
               Ver Fluxos Disponíveis
