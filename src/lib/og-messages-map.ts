@@ -157,6 +157,10 @@ export const OG_MESSAGES_MAP: Record<string, { title: string; description: strin
     title: 'Quiz interativo personalizado',
     description: 'Participe de um quiz interativo e descubra insights personalizados sobre seu bem-estar'
   },
+  'quiz-detox': {
+    title: '🧽 Seu Corpo Está Pedindo Detox?',
+    description: 'Identifique sinais de sobrecarga tóxica e receba orientações personalizadas para um processo de desintoxicação seguro e eficaz'
+  },
   
   // Planilhas
   'planilha-meal-planner': {
