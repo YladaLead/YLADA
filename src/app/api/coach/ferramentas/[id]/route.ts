@@ -41,12 +41,13 @@ export async function GET(
     const authenticatedUserId = user.id
 
     // Buscar ferramenta específica (só se pertencer ao usuário ou for admin)
+    // ✅ CORRIGIDO: Incluir links onde profession é NULL (links antigos) ou igual a 'coach'
     const { data: toolData, error } = await supabaseAdmin
       .from('coach_user_templates')
       .select('id, title, template_slug, slug, status, views, leads_count, conversions_count, created_at, updated_at, user_id, profession, content, short_code, description, emoji, custom_colors, cta_type, whatsapp_number, external_url, cta_button_text, custom_whatsapp_message, show_whatsapp_button')
       .eq('id', id)
-      .eq('profession', profession)
       .eq('user_id', authenticatedUserId) // 🔒 Garantir que pertence ao usuário
+      .or(`profession.eq.${profession},profession.is.null`) // ✅ Incluir links com profession='coach' ou NULL (links antigos)
       .single()
 
     if (error) {

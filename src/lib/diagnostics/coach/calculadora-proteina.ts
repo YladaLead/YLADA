@@ -7,22 +7,22 @@ import { DiagnosticosPorFerramenta } from '../types'
 export const calculadoraProteinaDiagnosticos: DiagnosticosPorFerramenta = {
   coach: {
     baixaProteina: {
-      diagnostico: '📋 DIAGNÓSTICO: Sua ingestão proteica está abaixo do recomendado, o que pode afetar massa muscular, recuperação e saciedade.',
-      causaRaiz: '🔍 CAUSA RAIZ: Consumo insuficiente de alimentos proteicos ou planejamento inadequado das refeições. Estudos indicam que 70% das pessoas que treinam consomem menos proteína do que precisam para otimizar resultados. Uma avaliação de bem-estar identifica exatamente qual é sua necessidade real e como alcançá-la.',
-      acaoImediata: '⚡ AÇÃO IMEDIATA: Aumente proteínas em todas as refeições principais. Busque avaliação de bem-estar para um plano personalizado que distribua proteína ao longo do dia de forma estratégica',
-      proximoPasso: '🎯 PRÓXIMO PASSO: Seu corpo precisa de proteína adequada para resultados — descubra em minutos como otimizar sua ingestão proteica com um plano personalizado.'
+      diagnostico: '📋 ANÁLISE: Sua ingestão proteica estimada está abaixo do recomendado, o que pode impactar energia, saciedade, recuperação muscular e manutenção de massa magra.',
+      causaRaiz: '🔍 CONTEXTO MAIS COMUM: Em ações educativas, observamos que muitas mulheres consomem menos proteína do que imaginam, principalmente por falta de planejamento ou rotina alimentar irregular — algo comum fora do Brasil.',
+      acaoImediata: '⚡ ORIENTAÇÃO GERAL: Aumentar a presença de fontes proteicas nas refeições principais costuma ser o primeiro ajuste recomendado.',
+      proximoPasso: '🎯 PRÓXIMO PASSO (educativo): Essa verificação mostra apenas um recorte. Uma análise de bem-estar mais ampla ajuda a entender quanto, quando e como ajustar proteína de forma adequada à sua rotina.'
     },
     proteinaNormal: {
-      diagnostico: '📋 DIAGNÓSTICO: Sua ingestão proteica está adequada, mantenha o padrão e considere otimizações estratégicas.',
-      causaRaiz: '🔍 CAUSA RAIZ: Boa distribuição proteica ao longo do dia estabelecida. Pesquisas mostram que otimizações de timing podem aumentar síntese proteica em até 25%. Uma análise de bem-estar identifica oportunidades específicas para você.',
-      acaoImediata: '⚡ AÇÃO IMEDIATA: Mantenha consumo atual e otimize timing das refeições proteicas. Considere avaliação para identificar oportunidades de melhoria na distribuição',
-      proximoPasso: '🎯 PRÓXIMO PASSO: Parabéns! Seu consumo proteico está adequado. Descubra como estratégias avançadas de timing podem potencializar ainda mais seus resultados.'
+      diagnostico: '📋 ANÁLISE: Sua ingestão proteica estimada está dentro de uma faixa adequada para seu nível de atividade e objetivo informado.',
+      causaRaiz: '🔍 CONTEXTO MAIS COMUM: Mesmo quando a quantidade está adequada, ajustes de distribuição ao longo do dia podem melhorar aproveitamento nutricional.',
+      acaoImediata: '⚡ ORIENTAÇÃO GERAL: Manter o consumo atual e observar como a proteína está distribuída entre as refeições.',
+      proximoPasso: '🎯 PRÓXIMO PASSO (educativo): Uma análise mais detalhada pode identificar oportunidades simples de otimização nutricional.'
     },
     altaProteina: {
-      diagnostico: '📋 DIAGNÓSTICO: Sua ingestão proteica está elevada, o que pode ser otimizada para máximo benefício com menor sobrecarga.',
-      causaRaiz: '🔍 CAUSA RAIZ: Ingestão proteica acima do necessário pode não trazer benefícios adicionais. Estudos mostram que acima de 2.2g/kg há pouco ganho adicional. Uma avaliação de bem-estar identifica se está dentro da faixa ideal ou pode ser ajustada.',
-      acaoImediata: '⚡ AÇÃO IMEDIATA: Mantenha proteína em nível adequado (1.6-2.0g/kg) e redistribua calorias para outros nutrientes essenciais. Considere avaliação para otimização do plano',
-      proximoPasso: '🎯 PRÓXIMO PASSO: Esse é o primeiro passo. O próximo é descobrir como otimizar sua bem-estar de forma completa e equilibrada com apoio personalizado.'
+      diagnostico: '📋 ANÁLISE: Sua ingestão proteica estimada está acima da faixa normalmente necessária para a maioria das pessoas.',
+      causaRaiz: '🔍 CONTEXTO MAIS COMUM: Consumir proteína em excesso nem sempre gera benefícios adicionais e pode indicar desequilíbrio na distribuição de outros nutrientes.',
+      acaoImediata: '⚡ ORIENTAÇÃO GERAL: Ajustar a ingestão para uma faixa mais eficiente costuma trazer melhor equilíbrio nutricional.',
+      proximoPasso: '🎯 PRÓXIMO PASSO (educativo): Uma análise de bem-estar ajuda a entender se sua ingestão está adequada ou pode ser otimizada.'
     }
   }
 }

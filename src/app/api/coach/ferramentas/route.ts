@@ -29,12 +29,13 @@ export async function GET(request: NextRequest) {
       // Buscar ferramenta específica (só se pertencer ao usuário ou for admin)
       // 🚀 OTIMIZAÇÃO: Selecionar apenas campos necessários em vez de select('*')
       // CORRIGIDO: Incluir todos os campos usados no frontend (emoji, custom_colors, cta_type, etc)
+      // ✅ CORRIGIDO: Incluir links onde profession é NULL (links antigos) ou igual a 'coach'
       const { data: toolData, error } = await supabaseAdmin
         .from('coach_user_templates')
         .select('id, title, template_slug, slug, status, views, leads_count, conversions_count, created_at, updated_at, user_id, profession, content, short_code, description, emoji, custom_colors, cta_type, whatsapp_number, external_url, cta_button_text, custom_whatsapp_message')
         .eq('id', toolId)
-        .eq('profession', profession)
         .eq('user_id', authenticatedUserId) // 🔒 Garantir que pertence ao usuário
+        .or(`profession.eq.${profession},profession.is.null`) // Incluir links com profession='coach' ou NULL (links antigos)
         .single()
 
       if (error) throw error
@@ -72,11 +73,12 @@ export async function GET(request: NextRequest) {
     // Listar ferramentas do usuário autenticado
     // 🚀 OTIMIZAÇÃO: Selecionar apenas campos necessários em vez de select('*')
     // CORRIGIDO: Incluir todos os campos usados no frontend (emoji, custom_colors, cta_type, etc)
+    // ✅ CORRIGIDO: Incluir links onde profession é NULL (links antigos) ou igual a 'coach'
     const { data: toolsData, error } = await supabaseAdmin
       .from('coach_user_templates')
       .select('id, title, template_slug, slug, status, views, leads_count, conversions_count, created_at, updated_at, user_id, profession, short_code, description, emoji, custom_colors, cta_type, whatsapp_number, external_url, cta_button_text, custom_whatsapp_message, show_whatsapp_button')
       .eq('user_id', authenticatedUserId) // 🔒 Sempre usar user_id do token
-      .eq('profession', profession)
+      .or(`profession.eq.${profession},profession.is.null`) // Incluir links com profession='coach' ou NULL (links antigos)
       .order('created_at', { ascending: false })
 
     if (error) throw error

@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
       `)
       .eq('user_profiles.user_slug', userSlug)
       .eq('slug', toolSlug)
-      .eq('profession', 'coach')
+      .or('profession.eq.coach,profession.is.null') // ✅ Incluir links com profession='coach' ou NULL (links antigos)
       .eq('status', 'active')
       .single()
     
@@ -91,12 +91,13 @@ export async function GET(request: NextRequest) {
         }
         
         // Buscar ferramenta diretamente pelo user_id e slug
+        // ✅ CORRIGIDO: Incluir links onde profession é NULL (links antigos) ou igual a 'coach'
         const { data: toolData, error: toolError } = await supabaseAdmin
           .from('coach_user_templates')
           .select('*')
           .eq('user_id', profile.user_id)
           .eq('slug', toolSlug)
-          .eq('profession', 'coach')
+          .or('profession.eq.coach,profession.is.null') // ✅ Incluir links com profession='coach' ou NULL (links antigos)
           .eq('status', 'active')
           .single()
         

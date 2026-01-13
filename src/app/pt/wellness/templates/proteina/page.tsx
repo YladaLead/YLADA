@@ -1,14 +1,17 @@
 'use client'
 
 import { useState } from 'react'
+import { usePathname, useParams } from 'next/navigation'
 import { TemplateBaseProps } from '@/types/wellness'
 import WellnessHeader from '@/components/wellness/WellnessHeader'
 import WellnessLanding from '@/components/wellness/WellnessLanding'
 import LeadCapturePostResult from '@/components/wellness/LeadCapturePostResult'
 import WellnessActionButtons from '@/components/wellness/WellnessActionButtons'
 import WellnessCTAButton from '@/components/wellness/WellnessCTAButton'
+import PhoneInputWithCountry from '@/components/PhoneInputWithCountry'
 import { getTemplateBenefits } from '@/lib/template-benefits'
 import { calculadoraProteinaDiagnosticos } from '@/lib/diagnostics/wellness/calculadora-proteina'
+import { calculadoraProteinaDiagnosticos as calculadoraProteinaDiagnosticosCoach } from '@/lib/diagnostics/coach/calculadora-proteina'
 
 interface ResultadoProteina {
   proteinaDiaria: number
@@ -16,10 +19,16 @@ interface ResultadoProteina {
   interpretacao: string
   cor: 'green' | 'blue' | 'orange'
   recomendacoes: string[]
-  diagnostico?: typeof calculadoraProteinaDiagnosticos.wellness.baixaProteina
+  diagnostico?: typeof calculadoraProteinaDiagnosticos.wellness.baixaProteina | typeof calculadoraProteinaDiagnosticosCoach.coach.baixaProteina
 }
 
 export default function CalculadoraProteina({ config }: TemplateBaseProps) {
+  const pathname = usePathname()
+  const params = useParams()
+  const isCoach = pathname?.includes('/coach/') || pathname?.includes('/c/')
+  const toolSlug = params?.['tool-slug'] as string | undefined
+  const userSlug = params?.['user-slug'] as string | undefined
+  
   const [etapa, setEtapa] = useState<'landing' | 'formulario' | 'resultado'>('landing')
   const [idade, setIdade] = useState('')
   const [genero, setGenero] = useState('')
@@ -28,9 +37,67 @@ export default function CalculadoraProteina({ config }: TemplateBaseProps) {
   const [atividade, setAtividade] = useState('')
   const [objetivo, setObjetivo] = useState('')
   const [resultado, setResultado] = useState<ResultadoProteina | null>(null)
+  
+  // Estados para captura de lead (Coach)
+  const [nomeLead, setNomeLead] = useState('')
+  const [telefoneLead, setTelefoneLead] = useState('')
+  const [phoneCountryCode, setPhoneCountryCode] = useState('BR')
+  const [enviandoLead, setEnviandoLead] = useState(false)
+  const [leadEnviado, setLeadEnviado] = useState(false)
 
   const iniciarCalculo = () => {
     setEtapa('formulario')
+  }
+
+  // Função para salvar lead (Coach)
+  const handleSalvarLead = async (e: React.FormEvent) => {
+    e.preventDefault()
+
+    if (!nomeLead.trim()) {
+      alert('Por favor, preencha seu nome.')
+      return
+    }
+
+    if (!telefoneLead.trim()) {
+      alert('Por favor, preencha seu telefone.')
+      return
+    }
+
+    setEnviandoLead(true)
+
+    try {
+      const dadosEnvio = {
+        name: nomeLead.trim(),
+        phone: telefoneLead,
+        phone_country_code: phoneCountryCode,
+        tool_slug: toolSlug,
+        user_slug: userSlug,
+        ferramenta: 'Calculadora de Proteína',
+        resultado: `${resultado?.proteinaDiaria}g de proteína/dia`,
+        template_id: config?.id
+      }
+
+      const response = await fetch('/api/leads', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(dadosEnvio)
+      })
+
+      const data = await response.json()
+
+      if (data.success) {
+        setLeadEnviado(true)
+        console.log('✅ Lead capturado com sucesso! ID:', data.data?.leadId)
+      } else {
+        const errorMessage = data.error || 'Erro ao enviar contato. Tente novamente.'
+        alert(`Erro: ${errorMessage}`)
+      }
+    } catch (error: any) {
+      console.error('❌ Erro ao enviar lead:', error)
+      alert(`Erro ao enviar contato: ${error.message || 'Erro desconhecido'}.`)
+    } finally {
+      setEnviandoLead(false)
+    }
   }
 
   const calcularProteina = () => {
@@ -67,13 +134,17 @@ export default function CalculadoraProteina({ config }: TemplateBaseProps) {
     const porRefeicao = Math.round(proteinaDiaria / 5) // 5 refeições
 
     // Determinar qual diagnóstico usar baseado no fator calculado
+    // ✅ Usar diagnósticos do Coach se for área Coach
+    const diagnosticos = isCoach ? calculadoraProteinaDiagnosticosCoach : calculadoraProteinaDiagnosticos
+    const area = isCoach ? 'coach' : 'wellness'
+    
     let diagnosticoSelecionado
     if (fator < 1.6) {
-      diagnosticoSelecionado = calculadoraProteinaDiagnosticos.wellness.baixaProteina
+      diagnosticoSelecionado = diagnosticos[area].baixaProteina
     } else if (fator <= 2.2) {
-      diagnosticoSelecionado = calculadoraProteinaDiagnosticos.wellness.proteinaNormal
+      diagnosticoSelecionado = diagnosticos[area].proteinaNormal
     } else {
-      diagnosticoSelecionado = calculadoraProteinaDiagnosticos.wellness.altaProteina
+      diagnosticoSelecionado = diagnosticos[area].altaProteina
     }
 
     let interpretacao = ''
@@ -460,48 +531,128 @@ export default function CalculadoraProteina({ config }: TemplateBaseProps) {
                 borderColor: config?.custom_colors?.principal || '#93c5fd'
               }}
             >
-              {/* Título convidativo */}
-              <div className="text-center mb-6">
-                <h3 className="text-2xl font-bold text-gray-900 mb-3">
-                  💪 Quer otimizar sua ingestão de proteínas?
-                </h3>
-                <p className="text-gray-600">
-                  Te ajudo a alcançar seus objetivos de forma personalizada!
-                </p>
-              </div>
+              {isCoach ? (
+                // ✅ CTA Educativo para Coach (estilo ILADA) com captura de lead
+                <>
+                  <div className="text-center mb-6">
+                    <p className="text-gray-700 text-lg leading-relaxed">
+                      Se quiser entender melhor esse resultado dentro da sua rotina, é possível aprofundar essa análise com orientação personalizada.
+                    </p>
+                  </div>
+                  
+                  {!leadEnviado ? (
+                    // Formulário de captura de lead
+                    <form onSubmit={handleSalvarLead} className="space-y-4 mb-6">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Nome Completo <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          value={nomeLead}
+                          onChange={(e) => setNomeLead(e.target.value)}
+                          placeholder="Digite seu nome"
+                          required
+                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-lg"
+                        />
+                      </div>
 
-              {/* Benefícios */}
-              <div className="bg-white/60 backdrop-blur-sm rounded-xl p-6 mb-6">
-                <h4 className="font-semibold text-gray-900 mb-4 flex items-center">
-                  <span className="text-2xl mr-2">✨</span>
-                  O que você vai receber:
-                </h4>
-                <ul className="space-y-2">
-                  <li className="flex items-start">
-                    <span className="text-green-600 mr-2 text-lg">✓</span>
-                    <span className="text-gray-700">Cardápio personalizado com fontes de proteína ideais</span>
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-green-600 mr-2 text-lg">✓</span>
-                    <span className="text-gray-700">Distribuição estratégica ao longo do dia</span>
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-green-600 mr-2 text-lg">✓</span>
-                    <span className="text-gray-700">Suplementação adequada, se necessário</span>
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-green-600 mr-2 text-lg">✓</span>
-                    <span className="text-gray-700">Alcançar seus objetivos de forma mais rápida</span>
-                  </li>
-                </ul>
-              </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          WhatsApp <span className="text-red-500">*</span>
+                        </label>
+                        <PhoneInputWithCountry
+                          value={telefoneLead}
+                          onChange={(phone, countryCode) => {
+                            setTelefoneLead(phone)
+                            setPhoneCountryCode(countryCode || 'BR')
+                          }}
+                          defaultCountryCode={phoneCountryCode}
+                          className="w-full"
+                          placeholder="11 99999-9999"
+                        />
+                      </div>
 
-              {/* CTA Button - Botão do WhatsApp sem coleta de dados */}
-              {config && (
-                <WellnessCTAButton
-                  config={config}
-                  resultadoTexto={`${resultado.proteinaDiaria}g de proteína/dia`}
-                />
+                      <button
+                        type="submit"
+                        disabled={enviandoLead}
+                        className="w-full py-4 text-white rounded-lg font-semibold text-lg transition-all transform hover:scale-[1.02] shadow-lg hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
+                        style={{
+                          backgroundColor: config?.custom_colors?.principal || '#8B5CF6'
+                        }}
+                      >
+                        {enviandoLead ? 'Enviando...' : '👉 Quero saber mais'}
+                      </button>
+                    </form>
+                  ) : (
+                    // Mensagem de sucesso após envio
+                    <div className="bg-green-50 border-2 border-green-200 rounded-lg p-6 text-center mb-6">
+                      <p className="text-green-800 font-semibold text-lg mb-2">
+                        ✅ Obrigado! Recebemos seus dados.
+                      </p>
+                      <p className="text-green-700">
+                        Entraremos em contato em breve para aprofundar sua análise.
+                      </p>
+                    </div>
+                  )}
+                  
+                  {/* CTA Button - Botão do WhatsApp (mostrar apenas se lead foi enviado) */}
+                  {config && leadEnviado && (
+                    <div className="flex justify-center">
+                      <WellnessCTAButton
+                        config={config}
+                        resultadoTexto={`${resultado.proteinaDiaria}g de proteína/dia`}
+                      />
+                    </div>
+                  )}
+                </>
+              ) : (
+                // CTA Original para Wellness
+                <>
+                  {/* Título convidativo */}
+                  <div className="text-center mb-6">
+                    <h3 className="text-2xl font-bold text-gray-900 mb-3">
+                      💪 Quer otimizar sua ingestão de proteínas?
+                    </h3>
+                    <p className="text-gray-600">
+                      Te ajudo a alcançar seus objetivos de forma personalizada!
+                    </p>
+                  </div>
+
+                  {/* Benefícios */}
+                  <div className="bg-white/60 backdrop-blur-sm rounded-xl p-6 mb-6">
+                    <h4 className="font-semibold text-gray-900 mb-4 flex items-center">
+                      <span className="text-2xl mr-2">✨</span>
+                      O que você vai receber:
+                    </h4>
+                    <ul className="space-y-2">
+                      <li className="flex items-start">
+                        <span className="text-green-600 mr-2 text-lg">✓</span>
+                        <span className="text-gray-700">Cardápio personalizado com fontes de proteína ideais</span>
+                      </li>
+                      <li className="flex items-start">
+                        <span className="text-green-600 mr-2 text-lg">✓</span>
+                        <span className="text-gray-700">Distribuição estratégica ao longo do dia</span>
+                      </li>
+                      <li className="flex items-start">
+                        <span className="text-green-600 mr-2 text-lg">✓</span>
+                        <span className="text-gray-700">Suplementação adequada, se necessário</span>
+                      </li>
+                      <li className="flex items-start">
+                        <span className="text-green-600 mr-2 text-lg">✓</span>
+                        <span className="text-gray-700">Alcançar seus objetivos de forma mais rápida</span>
+                      </li>
+                    </ul>
+                  </div>
+
+                  {/* CTA Button - Botão do WhatsApp sem coleta de dados */}
+                  {config && (
+                    <WellnessCTAButton
+                      config={config}
+                      resultadoTexto={`${resultado.proteinaDiaria}g de proteína/dia`}
+                    />
+                  )}
+                </>
               )}
             </div>
 
