@@ -53,6 +53,7 @@ const OG_IMAGE_SLUG_MAP: Record<string, string> = {
   'pronto-emagrecer': 'pronto-emagrecer.jpg',
   'tipo-fome': 'tipo-fome.jpg',
   'sindrome-metabolica': 'sindrome-metabolica.jpg',
+  'quiz-detox': 'cardapio-detox.jpg', // ✅ Quiz Detox - usando cardapio-detox temporariamente até criar imagem específica
   'retencao-liquidos': 'retencao-liquidos.png',
   'retencao-inchaco-nas-pernas-e-rosto': 'retencao-liquidos.png',
   'retencao-inchaço': 'retencao-liquidos.png',
