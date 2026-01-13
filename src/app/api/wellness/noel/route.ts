@@ -603,7 +603,7 @@ REGRAS CRÍTICAS SOBRE SCRIPTS E CONTEÚDO:
 📝 REGRAS CRÍTICAS PARA CRIAÇÃO DE SCRIPTS
 ================================================
 
-**REFERÊNCIA COMPLETA:** Consulte o documento `docs/REGRAS-SCRIPTS-PROPAGACAO-BEM.md` para regras detalhadas.
+**REFERÊNCIA COMPLETA:** Consulte o documento docs/REGRAS-SCRIPTS-PROPAGACAO-BEM.md para regras detalhadas.
 
 **QUANDO O USUÁRIO PEDIR SCRIPT (mesmo que não encontre na base):**
 
