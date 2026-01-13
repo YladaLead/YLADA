@@ -329,6 +329,10 @@ const formatResultadoLabel = (resultadoId: string) => {
     'parasitoseBasica': 'Parasitose Básica',
     'parasitoseModerada': 'Parasitose Moderada',
     'parasitoseAvancada': 'Parasitose Avançada',
+    // Quiz Detox
+    'baixaToxicidade': 'Baixa Toxicidade',
+    'toxicidadeModerada': 'Toxicidade Moderada',
+    'altaToxicidade': 'Alta Toxicidade',
   }
 
   // Se existe mapeamento, retorna o título formatado
@@ -690,6 +694,36 @@ export default function DynamicTemplatePreview({
     const respostasArray = Object.values(respostas).filter(r => r !== null && r !== undefined)
     if (respostasArray.length < totalPerguntas) return null
     
+    // Lógica específica para quiz-detox: sistema de pontuação
+    // Cada resposta: a=1, b=2, c=3, d=4, e=5 pontos
+    // Ranges: 5-10 = baixaToxicidade, 11-20 = toxicidadeModerada, 21-25 = altaToxicidade
+    if (fallbackDiagnosticsSlug.includes('quiz-detox') || (fallbackDiagnosticsSlug.includes('detox') && fallbackDiagnosticsSlug.includes('quiz'))) {
+      const pontosPorResposta: Record<string, number> = {
+        'a': 1,
+        'b': 2,
+        'c': 3,
+        'd': 4,
+        'e': 5
+      }
+      
+      let scoreTotal = 0
+      respostasArray.forEach((resposta: any) => {
+        scoreTotal += pontosPorResposta[resposta] || 0
+      })
+      
+      // Determinar diagnóstico baseado no score
+      if (scoreTotal >= 5 && scoreTotal <= 10) {
+        return 'baixaToxicidade'
+      } else if (scoreTotal >= 11 && scoreTotal <= 20) {
+        return 'toxicidadeModerada'
+      } else if (scoreTotal >= 21 && scoreTotal <= 25) {
+        return 'altaToxicidade'
+      } else {
+        // Fallback: usar o primeiro diagnóstico disponível se score estiver fora do range esperado
+        return diagnosticsInfo.entries[0]?.resultadoId || 'baixaToxicidade'
+      }
+    }
+    
     // Lógica específica para perfil-intestino
     if (fallbackDiagnosticsSlug.includes('perfil-intestino')) {
       const respostasBaixas = respostasArray.filter((r: any) => r === 'a' || r === 'b').length
@@ -817,6 +851,20 @@ export default function DynamicTemplatePreview({
     const mensagem = ctaConfig.mensagem || '💬 Quer saber mais?'
     const botaoTexto = ctaConfig.botao || 'Saiba Mais'
     
+    // Calcular diagnóstico e obter texto formatado para incluir na mensagem do WhatsApp
+    let resultadoTexto: string | undefined = undefined
+    if (!isPreview && questionsArray && questionsArray.length > 0) {
+      const diagnosticoId = calcularDiagnosticoCliente(questionsArray.length)
+      if (diagnosticoId) {
+        const entry = diagnosticsInfo.entries.find(e => e.resultadoId === diagnosticoId)
+        if (entry) {
+          // Formatar resultado como texto para incluir no WhatsApp
+          const resultadoLabel = formatResultadoLabel(diagnosticoId)
+          resultadoTexto = `${resultadoLabel}: ${entry.diagnostico.diagnostico}`
+        }
+      }
+    }
+    
     return (
       <div className="mt-8 pt-6 border-t border-gray-200 space-y-4">
         {/* Mensagem explicativa - APENAS NO PREVIEW (para o dono) */}
@@ -853,7 +901,7 @@ export default function DynamicTemplatePreview({
                 <span className="ml-2">→</span>
               </button>
             ) : (
-              // No link copiado, usar WellnessCTAButton real
+              // No link copiado, usar WellnessCTAButton real com diagnóstico incluído
               <WellnessCTAButton
                 config={{
                   cta_type: 'whatsapp',
@@ -863,6 +911,7 @@ export default function DynamicTemplatePreview({
                   custom_whatsapp_message: mensagem,
                   template_slug: template.slug
                 }}
+                resultadoTexto={resultadoTexto}
               />
             )}
           </div>

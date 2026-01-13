@@ -44,7 +44,7 @@ export default function QuizDetoxPreview({ etapa, onEtapaChange }: QuizDetoxPrev
     },
     {
       numero: 5,
-      texto: 'Faz uso de produtos de limpeza ou vive em ambiente poluído?',
+      texto: 'Você está frequentemente exposto a produtos químicos (limpeza, cosméticos) ou ambientes poluídos (trânsito, indústria)?',
       cor: 'violet'
     }
   ]

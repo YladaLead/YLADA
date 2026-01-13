@@ -66,7 +66,7 @@ SET
       },
       {
         "id": 5,
-        "question": "Faz uso de produtos de limpeza ou vive em ambiente poluído?",
+        "question": "Você está frequentemente exposto a produtos químicos (limpeza, cosméticos) ou ambientes poluídos (trânsito, indústria)?",
         "type": "multiple_choice",
         "options": [
           {"id": "a", "label": "Nunca"},
