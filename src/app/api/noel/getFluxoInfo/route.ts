@@ -176,26 +176,21 @@ export async function POST(request: NextRequest) {
     // Gerar link do fluxo
     const baseUrl = getAppUrl()
     
-    // IMPORTANTE: A rota /pt/wellness/system/vender/fluxos/[id] usa getFluxoById que busca em array estático
-    // Os fluxos do banco não estão nesse array, então não podemos usar essa rota diretamente
-    // Solução: Retornar link para a biblioteca onde o usuário pode encontrar o fluxo
-    // OU retornar null e deixar o NOEL apresentar o conteúdo diretamente
+    // IMPORTANTE: As rotas /pt/wellness/system/vender/fluxos e /pt/wellness/system/recrutar/fluxos
+    // não devem ser mencionadas porque não funcionam corretamente com fluxos do banco.
+    // Solução: Retornar null e deixar o NOEL apresentar o conteúdo completo diretamente.
+    // O NOEL deve apresentar o conteúdo completo do fluxo (título, descrição, passos, scripts)
+    // sem mencionar links genéricos.
     
-    // Por enquanto, vamos retornar link para a biblioteca de fluxos
-    // O NOEL pode apresentar o conteúdo completo do fluxo na resposta
-    let link = `${baseUrl}/pt/wellness/system/vender/fluxos`
-    
-    // Se a categoria for recrutamento, usar rota de recrutamento
-    if (fluxo.categoria === 'recrutamento' || fluxo.categoria === 'apresentacao') {
-      link = `${baseUrl}/pt/wellness/system/recrutar/fluxos`
-    }
+    // Retornar null para que o NOEL apresente apenas o conteúdo completo
+    let link: string | null = null
     
     console.log('🔗 [getFluxoInfo] Link gerado:', {
       categoria_original: fluxo.categoria,
       fluxo_id: fluxo.id,
       fluxo_codigo: fluxo.codigo,
-      link,
-      nota: 'Link direciona para lista de fluxos (fluxos do banco serão apresentados pelo NOEL diretamente)'
+      link: link || 'null (conteúdo completo será apresentado pelo NOEL)',
+      nota: 'Link genérico não retornado - NOEL deve apresentar conteúdo completo diretamente'
     })
 
     // Determinar quando usar baseado na categoria
@@ -227,7 +222,7 @@ export async function POST(request: NextRequest) {
           total_passos: passos?.length || 0,
           passos: passosCompletos,
           // Informação adicional para o NOEL
-          nota_link: 'Este fluxo está disponível na biblioteca do sistema. O conteúdo completo está incluído nesta resposta para você apresentar diretamente ao usuário.'
+          nota_link: 'Link genérico não retornado. Apresente o conteúdo completo do fluxo (título, descrição, passos, scripts) diretamente na resposta. NÃO mencione links genéricos como "system/vender/fluxos" - esses links não existem mais.'
         }
       }
       

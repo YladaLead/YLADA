@@ -38,26 +38,30 @@ export const scriptsPorFerramenta: ScriptsFerramentaConfig[] = [
         id: 'agua-quente-1',
         tipo: 'lista_quente',
         titulo: 'Para Conhecidos',
-        texto: `Oi [Nome]! 👋
+        texto: `Olá! Tudo bem?
 
-Lembra que você comentou sobre querer beber mais água? Achei uma calculadora que mostra exatamente quanto você precisa beber por dia baseado no seu peso e atividade.
+Lembra que você comentou sobre querer beber mais água? Existe uma calculadora que mostra exatamente quanto cada pessoa precisa beber por dia baseado no peso e atividade. É uma forma simples de cuidar melhor da nossa hidratação e saúde.
 
-É rapidinho, menos de 1 minuto! Quer testar?
+Posso te enviar o link? Você já pode compartilhar com seus amigos e familiares que você gosta. Hidratação é fundamental pra saúde de todos nós!
 
-[LINK]`,
+[LINK]
+
+Compartilhe com quem você gosta! Assim a gente ajuda mais gente a se hidratar melhor. É uma coisa boa pra todos! 💧`,
         dica: 'Use quando a pessoa já mencionou algo sobre hidratação ou saúde'
       },
       {
         id: 'agua-fria-1',
         tipo: 'lista_fria',
         titulo: 'Para Desconhecidos',
-        texto: `Você sabia que 75% das pessoas bebem menos água do que deveriam? 💧
+        texto: `Olá! Tudo bem?
 
-Criei uma calculadora gratuita que mostra quanto você realmente precisa beber por dia.
+Existe uma calculadora que mostra exatamente quanto de água cada pessoa precisa beber por dia baseado no peso e atividade. É uma forma simples de cuidar melhor da nossa hidratação e saúde.
 
-Leva menos de 1 minuto. Quer descobrir?
+Posso te enviar o link? Você já pode compartilhar com seus amigos e familiares que você gosta. Hidratação é fundamental pra saúde de todos nós!
 
-[LINK]`,
+[LINK]
+
+Compartilhe com quem você gosta! Assim a gente ajuda mais gente a se hidratar melhor. É uma coisa boa pra todos! 💧`,
         dica: 'Boa para stories, posts ou mensagens frias'
       },
       {
@@ -68,7 +72,9 @@ Leva menos de 1 minuto. Quer descobrir?
 
 O resultado te surpreendeu?
 
-Olha, você conhece alguém que também poderia se beneficiar sabendo quanto precisa beber de água? Me indica que eu mando pra pessoa!`,
+Compartilhe com seus amigos e familiares que você gosta! Assim a gente ajuda mais gente a se hidratar melhor. Hidratação é fundamental pra saúde de todos nós!
+
+É uma coisa boa pra todos! 💧`,
         dica: 'Enviar logo após a pessoa ver o resultado'
       }
     ]
@@ -83,37 +89,43 @@ Olha, você conhece alguém que também poderia se beneficiar sabendo quanto pre
         id: 'proteina-quente-1',
         tipo: 'lista_quente',
         titulo: 'Para Conhecidos',
-        texto: `Ei [Nome]! 💪
+        texto: `Olá! Tudo bem?
 
-Você sabia que a maioria das pessoas não consome proteína suficiente? Achei uma calculadora que mostra exatamente quanto você precisa por dia.
+Existe uma calculadora que mostra exatamente quantas gramas de proteína cada pessoa precisa por dia baseado no peso, atividade física e objetivo. É uma forma simples de entender melhor nossas necessidades nutricionais e cuidar da nossa saúde.
 
-É super rápido! Quer ver quanto você precisa?
+Posso te enviar o link? Você já pode compartilhar com seus amigos e familiares que você gosta. Proteína adequada é fundamental pra saúde de todos nós!
 
-[LINK]`,
+[LINK]
+
+Compartilhe com quem você gosta! Assim a gente ajuda mais gente a cuidar da nutrição. É uma coisa boa pra todos! 🥩`,
         dica: 'Ideal para quem já demonstrou interesse em fitness ou alimentação'
       },
       {
         id: 'proteina-fria-1',
         tipo: 'lista_fria',
         titulo: 'Para Desconhecidos',
-        texto: `Sabia que consumir a quantidade certa de proteína ajuda a ter mais energia e manter o peso? 🥩
+        texto: `Olá! Tudo bem?
 
-Criei uma calculadora gratuita que mostra exatamente quanto você precisa por dia baseado no seu objetivo.
+Existe uma calculadora que mostra exatamente quantas gramas de proteína cada pessoa precisa por dia baseado no peso, atividade física e objetivo. É uma forma simples de entender melhor nossas necessidades nutricionais e cuidar da nossa saúde.
 
-Quer descobrir? Leva 1 minuto!
+Posso te enviar o link? Você já pode compartilhar com seus amigos e familiares que você gosta. Proteína adequada é fundamental pra saúde de todos nós!
 
-[LINK]`,
+[LINK]
+
+Compartilhe com quem você gosta! Assim a gente ajuda mais gente a cuidar da nutrição. É uma coisa boa pra todos! 🥩`,
         dica: 'Funciona bem em grupos de saúde e bem-estar'
       },
       {
         id: 'proteina-indicacao-1',
         tipo: 'indicacao',
         titulo: 'Pegar Indicação',
-        texto: `Legal! Você viu seu resultado? 
+        texto: `Que legal que você fez o cálculo! 🎉
 
-O que achou? A maioria das pessoas se surpreende!
+O resultado te surpreendeu? A maioria das pessoas se surpreende!
 
-Conhece alguém que também gostaria de saber quanto de proteína precisa? Me indica que eu mando o link! 😊`,
+Compartilhe com seus amigos e familiares que você gosta! Assim a gente ajuda mais gente a cuidar da nutrição. Proteína adequada é fundamental pra saúde de todos nós!
+
+É uma coisa boa pra todos! 🥩`,
         dica: 'Aproveite o momento de surpresa com o resultado'
       }
     ]
@@ -128,37 +140,43 @@ Conhece alguém que também gostaria de saber quanto de proteína precisa? Me in
         id: 'imc-quente-1',
         tipo: 'lista_quente',
         titulo: 'Para Conhecidos',
-        texto: `Oi [Nome]!
+        texto: `Olá! Tudo bem?
 
-Você já sabe qual é seu IMC? Achei uma calculadora que além de mostrar o número, explica o que significa e dá dicas personalizadas.
+Existe uma calculadora de IMC que indica nossos índices de saúde, massa e gordura. Além de calcular o número, explica o que significa e dá orientações personalizadas. É uma forma simples de entender melhor nossa saúde e saber se estamos no caminho certo para o bem-estar.
 
-Quer fazer? É bem rápido!
+Posso te enviar o link? Você já pode compartilhar com seus amigos e familiares que você gosta. Isso é importante pra toda nossa família cuidar da saúde!
 
-[LINK]`,
+[LINK]
+
+Compartilhe com quem você gosta! Assim a gente ajuda mais gente a cuidar da saúde. É uma coisa boa pra todos! ⚖️`,
         dica: 'Bom para quem já falou sobre peso ou saúde'
       },
       {
         id: 'imc-fria-1',
         tipo: 'lista_fria',
         titulo: 'Para Desconhecidos',
-        texto: `Você sabe qual é seu IMC e o que ele significa para sua saúde? ⚖️
+        texto: `Olá! Tudo bem?
 
-Tenho uma calculadora gratuita que mostra seu IMC e explica se você está na faixa ideal.
+Existe uma calculadora de IMC que indica nossos índices de saúde, massa e gordura. Além de calcular o número, explica o que significa e dá orientações personalizadas. É uma forma simples de entender melhor nossa saúde e saber se estamos no caminho certo para o bem-estar.
 
-Leva menos de 30 segundos! Quer testar?
+Posso te enviar o link? Você já pode compartilhar com seus amigos e familiares que você gosta. Isso é importante pra toda nossa família cuidar da saúde!
 
-[LINK]`,
+[LINK]
+
+Compartilhe com quem você gosta! Assim a gente ajuda mais gente a cuidar da saúde. É uma coisa boa pra todos! ⚖️`,
         dica: 'Funciona bem como curiosidade'
       },
       {
         id: 'imc-indicacao-1',
         tipo: 'indicacao',
         titulo: 'Pegar Indicação',
-        texto: `E aí, viu seu resultado? O que achou?
+        texto: `Que legal que você fez o cálculo! 🎉
 
-Conhece mais alguém que gostaria de saber o IMC? Me manda o contato que eu envio o link! 
+O resultado te surpreendeu? Às vezes a gente nem imagina que está fora da faixa ideal, né?
 
-Às vezes a gente nem imagina que está fora da faixa ideal, né?`,
+Compartilhe com seus amigos e familiares que você gosta! Assim a gente ajuda mais gente a cuidar da saúde. Isso é importante pra toda nossa família!
+
+É uma coisa boa pra todos! ⚖️`,
         dica: 'Seja sensível - IMC é um tema delicado para algumas pessoas'
       }
     ]
@@ -176,37 +194,43 @@ Conhece mais alguém que gostaria de saber o IMC? Me manda o contato que eu envi
         id: 'energia-quente-1',
         tipo: 'lista_quente',
         titulo: 'Para Conhecidos',
-        texto: `Oi [Nome]! ⚡
+        texto: `Olá! Tudo bem?
 
-Lembra que você falou que anda cansado(a)? Achei um quiz rápido que identifica o que pode estar causando isso.
+Lembra que você falou que anda cansado(a)? Existe um quiz que identifica nosso perfil de energia e mostra o que pode estar causando cansaço ou falta de disposição. É uma forma de entender melhor nossa energia e descobrir estratégias para melhorar.
 
-São só 5 perguntas e você descobre seu perfil de energia! Quer fazer?
+Posso te enviar o link? Você já pode compartilhar com seus amigos e familiares que você gosta. Energia é importante pra toda nossa família!
 
-[LINK]`,
+[LINK]
+
+Compartilhe com quem você gosta! Assim a gente ajuda mais gente a entender e melhorar a energia. É uma coisa boa pra todos! ⚡`,
         dica: 'Perfeito para quem já reclamou de cansaço'
       },
       {
         id: 'energia-fria-1',
         tipo: 'lista_fria',
         titulo: 'Para Desconhecidos',
-        texto: `Você sente que sua energia não é mais a mesma? 😴
+        texto: `Olá! Tudo bem?
 
-Criei um quiz gratuito que identifica seu perfil de energia e mostra o que pode estar faltando.
+Existe um quiz que identifica nosso perfil de energia e mostra o que pode estar causando cansaço ou falta de disposição. É uma forma de entender melhor nossa energia e descobrir estratégias para melhorar.
 
-Leva menos de 2 minutos. Quer descobrir?
+Posso te enviar o link? Você já pode compartilhar com seus amigos e familiares que você gosta. Energia é importante pra toda nossa família!
 
-[LINK]`,
+[LINK]
+
+Compartilhe com quem você gosta! Assim a gente ajuda mais gente a entender e melhorar a energia. É uma coisa boa pra todos! ⚡`,
         dica: 'Tema universal - funciona com quase todo mundo'
       },
       {
         id: 'energia-indicacao-1',
         tipo: 'indicacao',
         titulo: 'Pegar Indicação',
-        texto: `E aí, qual foi seu perfil? Se identificou?
+        texto: `Que legal que você fez o quiz! 🎉
 
-Olha, esse quiz ajuda muita gente a entender o que está faltando. Você conhece alguém que vive reclamando de cansaço?
+Qual foi seu perfil? Se identificou? Esse quiz ajuda muita gente a entender o que está faltando!
 
-Me indica que eu mando o quiz! Pode ajudar muito a pessoa! 💪`,
+Compartilhe com seus amigos e familiares que você gosta! Assim a gente ajuda mais gente a entender e melhorar a energia. Energia é importante pra toda nossa família!
+
+É uma coisa boa pra todos! ⚡`,
         dica: 'Cansaço é uma reclamação comum - fácil de indicar'
       }
     ]
@@ -221,39 +245,43 @@ Me indica que eu mando o quiz! Pode ajudar muito a pessoa! 💪`,
         id: 'intestino-quente-1',
         tipo: 'lista_quente',
         titulo: 'Para Conhecidos',
-        texto: `Oi [Nome]!
+        texto: `Olá! Tudo bem?
 
-Sabia que a saúde intestinal afeta tudo? Humor, energia, imunidade...
+Sabia que a saúde intestinal afeta tudo? Humor, energia, imunidade... Existe um quiz que identifica nosso perfil intestinal e mostra como está nossa saúde digestiva. É uma forma de entender melhor nossa saúde e descobrir o que pode estar afetando nosso bem-estar.
 
-Achei um quiz que identifica como está seu intestino. São 10 perguntas rápidas!
+Posso te enviar o link? Você já pode compartilhar com seus amigos e familiares que você gosta. Saúde intestinal é importante pra toda nossa família!
 
-Quer fazer? Te conto o resultado!
+[LINK]
 
-[LINK]`,
+Compartilhe com quem você gosta! Assim a gente ajuda mais gente a cuidar da saúde intestinal. É uma coisa boa pra todos! 🫃`,
         dica: 'Bom para quem já falou de problemas digestivos'
       },
       {
         id: 'intestino-fria-1',
         tipo: 'lista_fria',
         titulo: 'Para Desconhecidos',
-        texto: `Você sabia que 70% da sua imunidade está no intestino? 🫃
+        texto: `Olá! Tudo bem?
 
-Criei um quiz que identifica seu perfil intestinal e mostra se você está cuidando bem dessa área.
+Você sabia que 70% da nossa imunidade está no intestino? Existe um quiz que identifica nosso perfil intestinal e mostra se estamos cuidando bem dessa área. É uma forma de entender melhor nossa saúde e descobrir o que pode estar afetando nosso bem-estar.
 
-São só 2 minutos. Quer descobrir seu perfil?
+Posso te enviar o link? Você já pode compartilhar com seus amigos e familiares que você gosta. Saúde intestinal é importante pra toda nossa família!
 
-[LINK]`,
+[LINK]
+
+Compartilhe com quem você gosta! Assim a gente ajuda mais gente a cuidar da saúde intestinal. É uma coisa boa pra todos! 🫃`,
         dica: 'Tema que desperta curiosidade'
       },
       {
         id: 'intestino-indicacao-1',
         tipo: 'indicacao',
         titulo: 'Pegar Indicação',
-        texto: `O que achou do resultado? Fez sentido pra você?
+        texto: `Que legal que você fez o quiz! 🎉
 
-Esse quiz ajuda muita gente a entender problemas que nem sabia que tinha!
+O que achou do resultado? Fez sentido pra você? Esse quiz ajuda muita gente a entender problemas que nem sabia que tinha!
 
-Conhece alguém que vive com problema de intestino ou digestão? Me indica que eu mando o quiz!`,
+Compartilhe com seus amigos e familiares que você gosta! Assim a gente ajuda mais gente a cuidar da saúde intestinal. Saúde intestinal é importante pra toda nossa família!
+
+É uma coisa boa pra todos! 🫃`,
         dica: 'Problema comum mas pouco falado'
       }
     ]
@@ -271,37 +299,43 @@ Conhece alguém que vive com problema de intestino ou digestão? Me indica que e
         id: 'ganhos-quente-1',
         tipo: 'lista_quente',
         titulo: 'Para Conhecidos',
-        texto: `Oi [Nome]! 
+        texto: `Olá! Tudo bem?
 
-Lembra que você comentou sobre querer uma renda extra? Achei um quiz que mostra qual seu perfil de ganhos e qual oportunidade combina mais com você.
+Lembra que você comentou sobre querer uma renda extra? Existe um quiz que identifica nosso perfil de ganhos e mostra qual oportunidade combina mais com nosso perfil. É uma forma de entender melhor nossas características e descobrir oportunidades que fazem sentido.
 
-São só 5 perguntas! Quer fazer?
+Posso te enviar o link? Você já pode compartilhar com seus amigos e familiares que você gosta. Renda extra é importante pra toda nossa família!
 
-[LINK]`,
+[LINK]
+
+Compartilhe com quem você gosta! Assim a gente ajuda mais gente a descobrir novas oportunidades. É uma coisa boa pra todos! 💰`,
         dica: 'Perfeito para quem já demonstrou interesse em renda extra'
       },
       {
         id: 'ganhos-fria-1',
         tipo: 'lista_fria',
         titulo: 'Para Desconhecidos',
-        texto: `Você já pensou em ter uma renda extra? 💰
+        texto: `Olá! Tudo bem?
 
-Criei um quiz que identifica seu perfil de ganhos e mostra qual oportunidade combina mais com você.
+Existe um quiz que identifica nosso perfil de ganhos e mostra qual oportunidade combina mais com nosso perfil. É uma forma de entender melhor nossas características e descobrir oportunidades que fazem sentido.
 
-São 5 perguntas rápidas. Quer descobrir seu perfil?
+Posso te enviar o link? Você já pode compartilhar com seus amigos e familiares que você gosta. Renda extra é importante pra toda nossa família!
 
-[LINK]`,
+[LINK]
+
+Compartilhe com quem você gosta! Assim a gente ajuda mais gente a descobrir novas oportunidades. É uma coisa boa pra todos! 💰`,
         dica: 'Funciona bem em grupos de empreendedorismo'
       },
       {
         id: 'ganhos-indicacao-1',
         tipo: 'indicacao',
         titulo: 'Pegar Indicação',
-        texto: `E aí, qual foi seu perfil? Fez sentido pra você?
+        texto: `Que legal que você fez o quiz! 🎉
 
-Olha, muita gente se identifica e acaba descobrindo uma oportunidade incrível!
+Qual foi seu perfil? Fez sentido pra você? Muita gente se identifica e acaba descobrindo uma oportunidade incrível!
 
-Você conhece alguém que também está buscando uma renda extra? Me indica que eu mando o quiz!`,
+Compartilhe com seus amigos e familiares que você gosta! Assim a gente ajuda mais gente a descobrir novas oportunidades. Renda extra é importante pra toda nossa família!
+
+É uma coisa boa pra todos! 💰`,
         dica: 'Momento ideal para expandir a rede'
       }
     ]
@@ -316,37 +350,43 @@ Você conhece alguém que também está buscando uma renda extra? Me indica que 
         id: 'potencial-quente-1',
         tipo: 'lista_quente',
         titulo: 'Para Conhecidos',
-        texto: `Oi [Nome]!
+        texto: `Olá! Tudo bem?
 
-Você já parou pra pensar no seu potencial de crescimento? Achei um quiz que analisa suas características e mostra até onde você pode chegar.
+Você já parou pra pensar no nosso potencial de crescimento? Existe um quiz que analisa nossas características e mostra até onde podemos chegar. É uma forma de entender melhor nosso potencial e descobrir oportunidades que combinam com nosso perfil.
 
-Quer fazer? São só 5 perguntas!
+Posso te enviar o link? Você já pode compartilhar com seus amigos e familiares que você gosta. Crescimento é importante pra toda nossa família!
 
-[LINK]`,
+[LINK]
+
+Compartilhe com quem você gosta! Assim a gente ajuda mais gente a descobrir seu potencial. É uma coisa boa pra todos! 📈`,
         dica: 'Bom para pessoas ambiciosas ou que querem mudança'
       },
       {
         id: 'potencial-fria-1',
         tipo: 'lista_fria',
         titulo: 'Para Desconhecidos',
-        texto: `Você sabe qual é seu potencial de crescimento? 📈
+        texto: `Olá! Tudo bem?
 
-Criei um quiz que analisa suas características e mostra oportunidades que combinam com seu perfil.
+Existe um quiz que analisa nosso potencial de crescimento e mostra oportunidades que combinam com nosso perfil. É uma forma de entender melhor nosso potencial e descobrir até onde podemos chegar.
 
-Leva menos de 2 minutos. Quer descobrir?
+Posso te enviar o link? Você já pode compartilhar com seus amigos e familiares que você gosta. Crescimento é importante pra toda nossa família!
 
-[LINK]`,
+[LINK]
+
+Compartilhe com quem você gosta! Assim a gente ajuda mais gente a descobrir seu potencial. É uma coisa boa pra todos! 📈`,
         dica: 'Apela para o desejo de evolução'
       },
       {
         id: 'potencial-indicacao-1',
         tipo: 'indicacao',
         titulo: 'Pegar Indicação',
-        texto: `O que achou do seu resultado? Se identificou?
+        texto: `Que legal que você fez o quiz! 🎉
 
-Esse quiz ajuda muita gente a enxergar oportunidades que não via antes!
+O que achou do seu resultado? Se identificou? Esse quiz ajuda muita gente a enxergar oportunidades que não via antes!
 
-Conhece alguém que está buscando crescer profissionalmente? Me indica que eu mando!`,
+Compartilhe com seus amigos e familiares que você gosta! Assim a gente ajuda mais gente a descobrir seu potencial. Crescimento é importante pra toda nossa família!
+
+É uma coisa boa pra todos! 📈`,
         dica: 'Crescimento é desejo universal'
       }
     ]
@@ -361,37 +401,43 @@ Conhece alguém que está buscando crescer profissionalmente? Me indica que eu m
         id: 'proposito-quente-1',
         tipo: 'lista_quente',
         titulo: 'Para Conhecidos',
-        texto: `Oi [Nome]!
+        texto: `Olá! Tudo bem?
 
-Você sente que está vivendo com propósito? Achei um quiz que analisa seu momento e mostra caminhos para ter mais equilíbrio.
+Você sente que está vivendo com propósito? Existe um quiz que analisa nosso momento e mostra caminhos para ter mais equilíbrio na vida. É uma forma de entender melhor nossa situação e descobrir áreas que precisam de atenção.
 
-São 5 perguntas reflexivas. Quer fazer?
+Posso te enviar o link? Você já pode compartilhar com seus amigos e familiares que você gosta. Equilíbrio é importante pra toda nossa família!
 
-[LINK]`,
+[LINK]
+
+Compartilhe com quem você gosta! Assim a gente ajuda mais gente a encontrar mais equilíbrio. É uma coisa boa pra todos! ⚖️`,
         dica: 'Para pessoas em momento de reflexão ou mudança'
       },
       {
         id: 'proposito-fria-1',
         tipo: 'lista_fria',
         titulo: 'Para Desconhecidos',
-        texto: `Você sente que sua vida está equilibrada? ⚖️
+        texto: `Olá! Tudo bem?
 
-Criei um quiz que ajuda a identificar áreas que precisam de atenção e mostra caminhos para mais equilíbrio.
+Existe um quiz que ajuda a identificar áreas que precisam de atenção e mostra caminhos para mais equilíbrio na vida. É uma forma de entender melhor nossa situação e descobrir como viver com mais propósito.
 
-Leva 2 minutos. Quer descobrir?
+Posso te enviar o link? Você já pode compartilhar com seus amigos e familiares que você gosta. Equilíbrio é importante pra toda nossa família!
 
-[LINK]`,
+[LINK]
+
+Compartilhe com quem você gosta! Assim a gente ajuda mais gente a encontrar mais equilíbrio. É uma coisa boa pra todos! ⚖️`,
         dica: 'Tema profundo que gera engajamento'
       },
       {
         id: 'proposito-indicacao-1',
         tipo: 'indicacao',
         titulo: 'Pegar Indicação',
-        texto: `O resultado te fez refletir?
+        texto: `Que legal que você fez o quiz! 🎉
 
-Muita gente que faz esse quiz acaba descobrindo que precisa de mudanças...
+O resultado te fez refletir? Muita gente que faz esse quiz acaba descobrindo que precisa de mudanças...
 
-Conhece alguém que está buscando mais equilíbrio na vida? Me indica que eu envio!`,
+Compartilhe com seus amigos e familiares que você gosta! Assim a gente ajuda mais gente a encontrar mais equilíbrio. Equilíbrio é importante pra toda nossa família!
+
+É uma coisa boa pra todos! ⚖️`,
         dica: 'Momento de reflexão gera abertura para indicações'
       }
     ]
@@ -409,37 +455,43 @@ Conhece alguém que está buscando mais equilíbrio na vida? Me indica que eu en
         id: 'hom-quente-1',
         tipo: 'lista_quente',
         titulo: 'Para Conhecidos',
-        texto: `Oi [Nome]! 👋
+        texto: `Olá! Tudo bem?
 
-Lembra que você falou sobre querer uma renda extra? Tenho uma apresentação de uma oportunidade incrível com bebidas funcionais.
+Lembra que você falou sobre querer uma renda extra? Existe uma apresentação sobre uma oportunidade interessante no mercado de bebidas funcionais. É uma forma de conhecer uma oportunidade que pode fazer sentido para nossa família e pessoas que a gente gosta.
 
-São só alguns minutos e pode mudar sua visão sobre negócios! Quer ver?
+Posso te enviar o link? Você já pode compartilhar com seus amigos e familiares que você gosta. Renda extra é importante pra toda nossa família!
 
-[LINK]`,
+[LINK]
+
+Compartilhe com quem você gosta! Assim a gente ajuda mais gente a descobrir novas oportunidades. É uma coisa boa pra todos! 💰`,
         dica: 'Seja direto mas sem pressão'
       },
       {
         id: 'hom-fria-1',
         tipo: 'lista_fria',
         titulo: 'Para Desconhecidos',
-        texto: `Você já ouviu falar do mercado de bebidas funcionais? 🍹
+        texto: `Olá! Tudo bem?
 
-É um mercado em crescimento e estou trabalhando com uma oportunidade muito interessante.
+Existe uma apresentação sobre uma oportunidade interessante no mercado de bebidas funcionais. É uma forma de conhecer uma oportunidade que pode fazer sentido para nossa família e pessoas que a gente gosta.
 
-Preparei uma apresentação curta que explica tudo. Quer dar uma olhada?
+Posso te enviar o link? Você já pode compartilhar com seus amigos e familiares que você gosta. Renda extra é importante pra toda nossa família!
 
-[LINK]`,
+[LINK]
+
+Compartilhe com quem você gosta! Assim a gente ajuda mais gente a descobrir novas oportunidades. É uma coisa boa pra todos! 💰`,
         dica: 'Foque na curiosidade, não na venda'
       },
       {
         id: 'hom-indicacao-1',
         tipo: 'indicacao',
         titulo: 'Pegar Indicação',
-        texto: `O que achou da apresentação? Alguma dúvida?
+        texto: `Que legal que você assistiu a apresentação! 🎉
 
-Olha, mesmo que não seja pra você agora, você conhece alguém que poderia se interessar por uma renda extra?
+O que achou? Alguma dúvida? Mesmo que não seja pra você agora, pode fazer sentido para alguém que você conhece!
 
-Me indica que eu mando a apresentação! Isso me ajuda muito! 🙏`,
+Compartilhe com seus amigos e familiares que você gosta! Assim a gente ajuda mais gente a descobrir novas oportunidades. Renda extra é importante pra toda nossa família!
+
+É uma coisa boa pra todos! 💰`,
         dica: 'SEMPRE peça indicação, mesmo se a pessoa não se interessar'
       }
     ]
@@ -457,33 +509,43 @@ Me indica que eu mando a apresentação! Isso me ajuda muito! 🙏`,
         id: 'geral-quente-1',
         tipo: 'lista_quente',
         titulo: 'Para Conhecidos',
-        texto: `Oi [Nome]!
+        texto: `Olá! Tudo bem?
 
-Achei uma ferramenta que pode te ajudar! É gratuita e leva menos de 2 minutos.
+Existe uma ferramenta que pode ajudar a cuidar melhor da nossa saúde e bem-estar. É uma forma simples de entender melhor nossa situação e descobrir o que pode estar afetando nosso bem-estar.
 
-Quer testar?
+Posso te enviar o link? Você já pode compartilhar com seus amigos e familiares que você gosta. Saúde é importante pra toda nossa família!
 
-[LINK]`,
+[LINK]
+
+Compartilhe com quem você gosta! Assim a gente ajuda mais gente a cuidar da saúde. É uma coisa boa pra todos! 💚`,
         dica: 'Script genérico para qualquer ferramenta'
       },
       {
         id: 'geral-fria-1',
         tipo: 'lista_fria',
         titulo: 'Para Desconhecidos',
-        texto: `Tenho uma ferramenta gratuita que pode te ajudar!
+        texto: `Olá! Tudo bem?
 
-Leva menos de 2 minutos. Quer testar?
+Existe uma ferramenta que pode ajudar a cuidar melhor da nossa saúde e bem-estar. É uma forma simples de entender melhor nossa situação e descobrir o que pode estar afetando nosso bem-estar.
 
-[LINK]`,
+Posso te enviar o link? Você já pode compartilhar com seus amigos e familiares que você gosta. Saúde é importante pra toda nossa família!
+
+[LINK]
+
+Compartilhe com quem você gosta! Assim a gente ajuda mais gente a cuidar da saúde. É uma coisa boa pra todos! 💚`,
         dica: 'Mantenha simples e direto'
       },
       {
         id: 'geral-indicacao-1',
         tipo: 'indicacao',
         titulo: 'Pegar Indicação',
-        texto: `Gostou? O que achou?
+        texto: `Que legal que você usou a ferramenta! 🎉
 
-Você conhece alguém que também poderia gostar? Me indica que eu mando pra pessoa!`,
+Gostou? O que achou?
+
+Compartilhe com seus amigos e familiares que você gosta! Assim a gente ajuda mais gente a cuidar da saúde. Saúde é importante pra toda nossa família!
+
+É uma coisa boa pra todos! 💚`,
         dica: 'Sempre peça indicação após qualquer interação'
       }
     ]
