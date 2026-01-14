@@ -12,10 +12,10 @@ interface YLADALogoProps {
 }
 
 const tamanhos = {
-  sm: { h: 24, w: 80 },     // Horizontal pequeno (melhor qualidade)
-  md: { h: 32, w: 107 },    // Horizontal médio (melhor qualidade)
-  lg: { h: 40, w: 133 },    // Horizontal grande (melhor qualidade)
-  xl: { h: 48, w: 160 }     // Horizontal extra grande (melhor qualidade)
+  sm: { h: 40, w: 133 },    // Horizontal pequeno (melhor qualidade - aumentado)
+  md: { h: 48, w: 160 },    // Horizontal médio (melhor qualidade - aumentado)
+  lg: { h: 60, w: 200 },    // Horizontal grande (melhor qualidade - aumentado)
+  xl: { h: 72, w: 240 }     // Horizontal extra grande (melhor qualidade - aumentado)
 }
 
 const tamanhosQuadrado = {
@@ -78,6 +78,7 @@ export default function YLADALogo({
         style={{ backgroundColor: 'transparent' }}
         quality={100}
         priority
+        unoptimized={false}
       />
     </div>
   )

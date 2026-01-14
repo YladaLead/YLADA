@@ -96,7 +96,7 @@ export default function HomePage() {
       {/* Header */}
       <header className="sticky top-0 z-50 border-b border-gray-200 bg-white shadow-sm h-16 sm:h-20 flex items-center">
         <div className="container mx-auto px-4 py-0.5 flex items-center justify-between">
-          <YLADALogo size="sm" responsive={true} className="bg-transparent" />
+          <YLADALogo size="md" responsive={true} className="bg-transparent" />
           <LanguageSelector />
         </div>
       </header>
@@ -407,7 +407,7 @@ export default function HomePage() {
         <div className="container mx-auto px-4 py-8">
           <div className="flex flex-col items-center justify-center">
             <div className="mb-4">
-              <YLADALogo size="md" className="bg-transparent" />
+              <YLADALogo size="lg" className="bg-transparent" />
             </div>
             <p className="text-gray-600 text-sm mb-4 text-center">
               YLADA — Your Leading Advanced Data Assistant
