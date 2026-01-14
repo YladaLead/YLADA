@@ -94,13 +94,30 @@ export default function WellnessPage() {
         <section className="bg-gradient-to-br from-purple-50 via-green-50 to-emerald-50 py-12 sm:py-16 lg:py-20">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center max-w-3xl mx-auto">
+              {/* Gancho emocional */}
+              <div className="mb-4 sm:mb-6">
+                <p className="text-lg sm:text-xl text-gray-700 mb-2 font-semibold">
+                  Você já se sentiu travado na hora de convidar alguém?
+                </p>
+                <p className="text-lg sm:text-xl text-gray-700 mb-2 font-semibold">
+                  Você já ficou sem saber o que responder quando alguém perguntou sobre seu negócio?
+                </p>
+                <p className="text-lg sm:text-xl text-gray-700 font-semibold">
+                  Você já desistiu de falar com alguém porque não sabia como começar?
+                </p>
+              </div>
+
               <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-4 sm:mb-6 leading-tight">
-                Falar com mais pessoas sobre Bem Estar pode ser simples, leve e natural.
+                Pare de se sentir travado na hora de falar sobre Bem Estar.
               </h1>
+              
+              <p className="text-lg sm:text-xl text-gray-700 mb-4 sm:mb-6 font-semibold">
+                Com os links inteligentes e o NOEL, você para de adivinhar e começa a agir com clareza.
+              </p>
               
               <div className="bg-white/80 backdrop-blur-sm rounded-xl p-5 sm:p-6 mb-6 sm:mb-8 border border-gray-200 shadow-lg">
                 <p className="text-base sm:text-lg text-gray-700 mb-3 sm:mb-4 leading-relaxed">
-                  <strong className="font-bold">Com os links inteligentes e o NOEL, você não carrega tudo sozinho.</strong>
+                  <strong className="font-bold">Você não precisa mais carregar tudo sozinho.</strong>
                 </p>
                 <p className="text-base sm:text-lg text-gray-700 mb-4 sm:mb-6 leading-relaxed">
                   As conversas fluem melhor, e os resultados começam a aparecer.
@@ -121,6 +138,16 @@ export default function WellnessPage() {
                   </li>
                 </ul>
               </div>
+
+              {/* CTA emocional no Hero */}
+              <div className="text-center">
+                <Link
+                  href="/pt/wellness/checkout?plan=annual"
+                  className="inline-block w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition-colors text-base sm:text-lg"
+                >
+                  👉 Quero parar de me sentir travado e começar a conversar com mais pessoas
+                </Link>
+              </div>
             </div>
           </div>
         </section>
@@ -131,10 +158,13 @@ export default function WellnessPage() {
             <div className="max-w-4xl mx-auto">
               <div className="text-center mb-6 sm:mb-8">
                 <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-3 sm:mb-4">
-                  🎥 Veja como isso funciona na prática
+                  Veja como outras pessoas pararam de se sentir travadas
                 </h2>
+                <p className="text-base sm:text-lg text-gray-600 px-2 mb-2">
+                  Sem pressão. Sem complicação. Sem precisar decorar nada.
+                </p>
                 <p className="text-base sm:text-lg text-gray-600 px-2">
-                  Entenda como o Wellness, com links inteligentes e o NOEL, pode trazer mais leveza, organização e confiança para o seu dia a dia. Sem pressão, sem complicação.
+                  Entenda como o Wellness, com links inteligentes e o NOEL, pode trazer mais leveza, organização e confiança para o seu dia a dia.
                 </p>
               </div>
               
@@ -193,7 +223,7 @@ export default function WellnessPage() {
                   href="/pt/wellness/checkout?plan=annual"
                   className="inline-block w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition-colors text-base sm:text-lg text-center"
                 >
-                  👉 Quero meus links inteligentes
+                  👉 Quero parar de me sentir travado e começar a conversar com mais pessoas
                 </Link>
               </div>
             </div>
@@ -204,8 +234,13 @@ export default function WellnessPage() {
         <section className="py-16 sm:py-20 lg:py-24 bg-white">
           <div className="container mx-auto px-6 lg:px-8">
             <div className="max-w-4xl mx-auto">
+              {/* Gancho emocional */}
+              <p className="text-xl sm:text-2xl text-gray-700 text-center mb-4 font-semibold">
+                Você já se sentiu sobrecarregado tentando explicar tudo sozinho?
+              </p>
+
               <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 text-center mb-8">
-                Menos peso. Mais clareza.
+                Você não precisa mais carregar tudo sozinho.
               </h2>
               
               <p className="text-lg text-gray-700 text-center mb-6 leading-relaxed">
@@ -231,6 +266,9 @@ export default function WellnessPage() {
                 <p className="text-lg text-gray-700 mb-2">
                   Você passa a contar com Links Inteligentes e com o NOEL, que te orienta em cada passo.
                 </p>
+                <p className="text-lg text-gray-700 font-semibold mt-4">
+                  E agora você tem apoio. Não precisa mais tentar sozinho.
+                </p>
               </div>
             </div>
           </div>
@@ -240,11 +278,19 @@ export default function WellnessPage() {
         <section className="bg-gray-50 py-16 sm:py-20 lg:py-24">
           <div className="container mx-auto px-6 lg:px-8">
             <div className="max-w-5xl mx-auto">
+              {/* Gancho emocional */}
+              <p className="text-xl sm:text-2xl text-gray-700 text-center mb-4 font-semibold">
+                Você já desistiu de falar com alguém porque não sabia como começar?
+              </p>
+
               <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 text-center mb-8">
-                🔗 Links Inteligentes: você envia. Eles abrem conversas.
+                Links que fazem você parar de se sentir travado na hora de convidar
               </h2>
 
               <div className="bg-white rounded-xl p-8 mb-8 shadow-lg border border-gray-200">
+                <p className="text-lg text-gray-700 mb-4 font-semibold">
+                  Imagine não precisar mais improvisar. Não precisar mais decorar. Não precisar mais se sentir pressionado.
+                </p>
                 <p className="text-lg text-gray-700 mb-6 font-semibold">
                   Na prática, a plataforma Wellness funciona assim:
                 </p>
@@ -282,13 +328,13 @@ export default function WellnessPage() {
                 </ul>
                 <div className="bg-green-50 rounded-lg p-4 border border-green-200">
                   <p className="text-lg font-semibold text-gray-900 mb-2">
-                    👉 O link não pressiona.
+                    👉 Você não precisa mais se sentir pressionado.
                   </p>
                   <p className="text-lg font-semibold text-gray-900 mb-2">
-                    👉 O link não convence.
+                    👉 Você não precisa mais convencer ninguém.
                   </p>
                   <p className="text-lg font-semibold text-gray-900">
-                    👉 O link conecta.
+                    👉 Você só precisa compartilhar algo que faz sentido.
                   </p>
                 </div>
               </div>
@@ -347,8 +393,13 @@ export default function WellnessPage() {
         <section className="py-16 sm:py-20 lg:py-24 bg-white">
           <div className="container mx-auto px-6 lg:px-8">
             <div className="max-w-5xl mx-auto">
+              {/* Gancho emocional */}
+              <p className="text-xl sm:text-2xl text-gray-700 text-center mb-4 font-semibold">
+                Você já ficou sem saber o que responder quando alguém perguntou sobre seu negócio?
+              </p>
+
               <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 text-center mb-8">
-                🤖 NOEL: orientação quando você precisa
+                NOEL: você não precisa mais ficar sem saber o que responder
               </h2>
 
               <div className="bg-gradient-to-r from-blue-50 to-emerald-50 rounded-xl p-8 shadow-lg border-2 border-green-200">
@@ -384,8 +435,11 @@ export default function WellnessPage() {
                     <p className="text-gray-700">quer se comunicar com mais segurança</p>
                   </div>
                 </div>
-                <p className="text-lg text-gray-700 italic">
+                <p className="text-lg text-gray-700 italic mb-4">
                   É como ter alguém experiente te orientando, sem julgamento e sem cobrança.
+                </p>
+                <p className="text-lg text-gray-700 font-semibold">
+                  Você não precisa mais tentar sozinho. Você tem apoio.
                 </p>
               </div>
             </div>
@@ -396,8 +450,13 @@ export default function WellnessPage() {
         <section className="py-16 sm:py-20 lg:py-24 bg-gray-50">
           <div className="container mx-auto px-6 lg:px-8">
             <div className="max-w-4xl mx-auto">
+              {/* Gancho emocional */}
+              <p className="text-xl sm:text-2xl text-gray-700 text-center mb-4 font-semibold">
+                Você já se sentiu sobrecarregado tentando fazer tudo sozinho?
+              </p>
+
               <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 text-center mb-8">
-                Tudo flui melhor quando você tem apoio
+                Você não precisa mais se sentir sobrecarregado
               </h2>
 
               <div className="bg-white rounded-xl p-8 shadow-lg border border-gray-200">
@@ -429,6 +488,9 @@ export default function WellnessPage() {
                 <p className="text-lg font-semibold text-gray-900 mt-6">
                   Você para de adivinhar e começa a agir com mais clareza.
                 </p>
+                <p className="text-lg text-gray-700 font-semibold mt-4">
+                  E agora você tem clareza. Não precisa mais tentar sozinho.
+                </p>
               </div>
             </div>
           </div>
@@ -438,12 +500,21 @@ export default function WellnessPage() {
         <section className="py-16 sm:py-20 lg:py-24 bg-white">
           <div className="container mx-auto px-6 lg:px-8">
             <div className="max-w-5xl mx-auto">
+              {/* Gancho emocional */}
+              <p className="text-xl sm:text-2xl text-gray-700 text-center mb-6 font-semibold">
+                Você se sente travado na hora de conversar sobre Bem Estar?
+              </p>
+
               <div className="grid sm:grid-cols-2 gap-8">
                 {/* Para quem é */}
                 <div className="bg-green-50 rounded-xl p-8 border-2 border-green-200">
-                  <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-6">
-                    Para quem a Plataforma Wellness é ideal?
+                  <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">
+                    Para quem quer parar de se sentir travado
                   </h2>
+                  
+                  <p className="text-lg text-gray-700 mb-4">
+                    Se você se sente travado, sobrecarregado ou sem saber como começar, o Wellness é para você.
+                  </p>
                   
                   <p className="text-lg font-semibold text-gray-900 mb-4">Para quem trabalha com:</p>
                   <ul className="space-y-2 mb-6 text-gray-700">
@@ -531,9 +602,18 @@ export default function WellnessPage() {
         {/* 🚀 Escolha seu Plano */}
         <section className="bg-gradient-to-br from-green-50 to-emerald-50 py-16 sm:py-20 lg:py-24">
           <div className="container mx-auto px-6 lg:px-8">
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 text-center mb-12">
-              Comece agora
+            {/* Gancho emocional */}
+            <p className="text-xl sm:text-2xl text-gray-700 text-center mb-4 font-semibold">
+              Você está pronto para parar de se sentir travado?
+            </p>
+
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 text-center mb-4">
+              Você não precisa mais se sentir travado. Comece agora.
             </h2>
+
+            <p className="text-lg text-gray-700 text-center mb-12">
+              Sem compromisso. Sem pressão. Sem precisar decorar nada.
+            </p>
             
             <div className="max-w-5xl mx-auto grid sm:grid-cols-2 gap-8">
               {/* Plano Anual */}
@@ -570,7 +650,7 @@ export default function WellnessPage() {
                   href="/pt/wellness/checkout?plan=annual"
                   className="block w-full text-center px-6 py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition-colors"
                 >
-                  👉 💚 Quero começar com o Plano Anual
+                  👉 Quero parar de me sentir travado e começar a conversar com mais pessoas
                 </Link>
               </div>
               
@@ -605,7 +685,7 @@ export default function WellnessPage() {
                   href="/pt/wellness/checkout?plan=monthly"
                   className="block w-full text-center px-6 py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition-colors"
                 >
-                  👉 💚 Quero começar com o Plano Mensal
+                  👉 Quero parar de me sentir travado e começar a conversar com mais pessoas
                 </Link>
               </div>
             </div>
@@ -618,10 +698,10 @@ export default function WellnessPage() {
             <div className="max-w-3xl mx-auto text-center">
               <div className="bg-gradient-to-r from-blue-50 to-green-50 rounded-xl p-8 border-2 border-green-200">
                 <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-6">
-                  🛡 Garantia de 7 dias
+                  Teste sem medo. Se não funcionar, você não perde nada.
                 </h2>
                 <p className="text-xl text-gray-700 leading-relaxed">
-                  Se não fizer sentido para você,
+                  Se você não sentir que está no caminho certo,
                 </p>
                 <p className="text-2xl font-bold text-green-600 mt-2">
                   devolvemos 100% do valor.
@@ -639,27 +719,33 @@ export default function WellnessPage() {
           <div className="container mx-auto px-6 lg:px-8">
             <div className="max-w-3xl mx-auto text-center">
               <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-6">
-                Você não precisa complicar.
+                Você não precisa mais se sentir travado.
               </h2>
+              <p className="text-xl text-green-50 mb-4 leading-relaxed">
+                Cada dia que você adia é mais um dia longe da carreira que você quer ter.
+              </p>
               <p className="text-xl text-green-50 mb-6 leading-relaxed">
                 O Wellness existe para deixar seu trabalho:
               </p>
-              <ul className="text-lg text-green-50 mb-8 space-y-2">
+              <ul className="text-lg text-green-50 mb-6 space-y-2">
                 <li>• mais leve</li>
                 <li>• mais claro</li>
                 <li>• mais organizado</li>
                 <li>• mais natural</li>
               </ul>
-              <div className="mb-8 text-green-50">
+              <div className="mb-6 text-green-50">
                 <p className="text-lg mb-2">🔗 Com links que ajudam</p>
                 <p className="text-lg mb-2">🤖 Com uma inteligência que orienta</p>
-                <p className="text-lg">💚 Com apoio no dia a dia</p>
+                <p className="text-lg mb-4">💚 Com apoio no dia a dia</p>
               </div>
+              <p className="text-lg text-green-50 mb-8 leading-relaxed">
+                Você não precisa mais acordar ansioso. Você não precisa mais se sentir sozinho. Você não precisa mais tentar descobrir tudo sozinho.
+              </p>
               <Link
                 href="/pt/wellness/checkout?plan=annual"
                 className="inline-flex items-center px-10 py-5 bg-white text-green-600 text-xl font-bold rounded-xl hover:bg-green-50 transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:-translate-y-1"
               >
-                👉 Quero começar agora
+                👉 Quero parar de me sentir travado e começar a conversar com mais pessoas
               </Link>
             </div>
           </div>
