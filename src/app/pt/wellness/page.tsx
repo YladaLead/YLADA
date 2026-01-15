@@ -85,7 +85,15 @@ export default function WellnessPage() {
               priority
             />
           </div>
-          <LanguageSelector />
+          <div className="flex items-center gap-4">
+            <Link
+              href="/pt/wellness/login"
+              className="px-4 py-2 text-green-600 font-semibold rounded-lg hover:bg-green-50 transition-colors text-sm sm:text-base"
+            >
+              Entrar
+            </Link>
+            <LanguageSelector />
+          </div>
         </div>
       </header>
 
