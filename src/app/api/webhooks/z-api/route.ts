@@ -275,10 +275,11 @@ export async function POST(request: NextRequest) {
   try {
     const body: ZApiWebhookPayload = await request.json()
 
-    console.log('[Z-API Webhook] Mensagem recebida:', {
+    console.log('[Z-API Webhook] 📥 Mensagem recebida:', {
       phone: body.phone,
       message: body.message?.substring(0, 50),
       instanceId: body.instanceId,
+      fullBody: JSON.stringify(body).substring(0, 200), // Log completo para debug
     })
 
     // Validar payload
@@ -317,8 +318,11 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    console.log('[Z-API Webhook] 🔍 InstanceId encontrado:', instanceId)
+
     // 1. Identificar área (sempre Nutri para esta instância)
     const area = await identifyArea(body.phone, body.message, instanceId)
+    console.log('[Z-API Webhook] 🏷️ Área identificada:', area)
 
     // 2. Criar ou buscar conversa
     const conversationId = await getOrCreateConversation(
@@ -327,17 +331,21 @@ export async function POST(request: NextRequest) {
       body.name,
       area
     )
+    console.log('[Z-API Webhook] 💬 Conversa ID:', conversationId)
 
     // 3. Salvar mensagem
     await saveMessage(conversationId, instanceId, body)
+    console.log('[Z-API Webhook] ✅ Mensagem salva no banco')
 
     // 4. Notificar administradores
     await notifyAdmins(conversationId, body.phone, body.message)
+    console.log('[Z-API Webhook] 🔔 Notificações enviadas')
 
     // 5. TODO: Processar com bot (NOEL, Nutri, etc.) se configurado
     // Isso será implementado depois
 
-    return NextResponse.json({ received: true, conversationId })
+    console.log('[Z-API Webhook] ✅ Processamento completo')
+    return NextResponse.json({ received: true, conversationId, area })
   } catch (error: any) {
     console.error('[Z-API Webhook] Erro:', error)
     return NextResponse.json(

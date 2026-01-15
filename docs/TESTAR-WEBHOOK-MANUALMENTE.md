@@ -1,160 +1,109 @@
-# 🧪 Como Testar o Webhook Manualmente
+# 🧪 Testar Webhook Manualmente
 
 ## 🎯 OBJETIVO
 
-Testar se o webhook está acessível e funcionando antes de verificar os logs.
+Testar se o webhook está funcionando enviando uma requisição manual.
 
 ---
 
-## 🚀 TESTE 1: Verificar se o Webhook Está Acessível
+## 📋 TESTE 1: Via cURL (Terminal)
 
-### Passo a Passo:
+Execute no terminal:
 
-1. **Abra o navegador**
+```bash
+curl -X POST https://www.ylada.com/api/webhooks/z-api \
+  -H "Content-Type: application/json" \
+  -d '{
+    "phone": "5511999999999",
+    "message": "Teste manual do webhook",
+    "name": "Teste Manual",
+    "instanceId": "3ED484E8415CF126D6009EBD599F8B90",
+    "timestamp": "2026-01-15T22:30:00Z"
+  }'
+```
 
-2. **Acesse:**
+**Resultado esperado:**
+```json
+{"received": true, "conversationId": "..."}
+```
+
+---
+
+## 📋 TESTE 2: Via Postman/Insomnia
+
+1. **Método:** POST
+2. **URL:** `https://www.ylada.com/api/webhooks/z-api`
+3. **Headers:**
    ```
-   https://www.ylada.com/api/webhooks/mercado-pago/test
+   Content-Type: application/json
    ```
-
-3. **O que deve aparecer:**
+4. **Body (JSON):**
    ```json
    {
-     "success": true,
-     "message": "Webhook está acessível!",
-     "url": "...",
-     "timestamp": "...",
-     "environment": "production"
+     "phone": "5511999999999",
+     "message": "Teste manual do webhook",
+     "name": "Teste Manual",
+     "instanceId": "3ED484E8415CF126D6009EBD599F8B90",
+     "timestamp": "2026-01-15T22:30:00Z"
    }
    ```
 
-4. **Se aparecer isso:**
-   - ✅ O webhook está acessível
-   - ✅ A rota está funcionando
-   - ✅ Pode verificar os logs agora
+---
 
-5. **Se der erro 404:**
-   - ❌ A rota não existe
-   - ❌ Precisa fazer deploy
+## 📋 TESTE 3: Verificar se Salvou no Banco
+
+Após enviar o teste acima, execute no Supabase:
+
+```sql
+SELECT * FROM whatsapp_messages 
+WHERE message LIKE '%Teste manual%'
+ORDER BY created_at DESC 
+LIMIT 1;
+```
+
+**Se aparecer:** Webhook está funcionando! ✅  
+**Se não aparecer:** Webhook não está salvando (verificar logs)
 
 ---
 
-## 📤 TESTE 2: Simular um Webhook do Mercado Pago
+## 🔍 VERIFICAR LOGS DA VERCEL
 
-### Passo a Passo:
-
-1. **Abra o navegador** (ou use Postman/Insomnia)
-
-2. **Faça uma requisição POST para:**
-   ```
-   https://www.ylada.com/api/webhooks/mercado-pago/test
-   ```
-
-3. **Com este corpo (JSON):**
-   ```json
-   {
-     "type": "payment",
-     "action": "payment.created",
-     "data": {
-       "id": "123456789",
-       "status": "approved",
-       "payer": {
-         "email": "teste@email.com"
-       }
-     }
-   }
-   ```
-
-4. **O que deve aparecer:**
-   ```json
-   {
-     "success": true,
-     "message": "Webhook de teste recebido com sucesso!",
-     "receivedData": { ... },
-     "timestamp": "..."
-   }
-   ```
-
-5. **Depois, verifique os logs:**
-   - Vercel Dashboard → Logs
-   - Procure por: `🧪 TESTE DE WEBHOOK`
-   - Se aparecer, significa que os logs estão funcionando!
+1. Acesse: https://vercel.com/dashboard
+2. Vá em **Deployments** → Último deploy
+3. Clique em **Functions** → `/api/webhooks/z-api`
+4. Procure por:
+   - `[Z-API Webhook] Mensagem recebida`
+   - `[Z-API Webhook] Erro:`
+   - Qualquer erro em vermelho
 
 ---
 
-## 🔍 TESTE 3: Verificar se o Webhook Real Está Sendo Chamado
+## 🐛 PROBLEMAS COMUNS
 
-### Passo a Passo:
+### **Erro 404: Not Found**
+- Webhook não está configurado corretamente
+- Verificar URL na Z-API
 
-1. **Acesse o Mercado Pago Dashboard:**
-   - https://www.mercadopago.com.br/developers/panel
+### **Erro 500: Internal Server Error**
+- Verificar logs da Vercel
+- Verificar se migration foi executada
+- Verificar variáveis de ambiente
 
-2. **Vá em "Webhooks" ou "Notificações"**
-
-3. **Verifique o histórico:**
-   - Há tentativas de notificação?
-   - Status: Sucesso (200) ou Falha (500, 404, etc.)?
-   - Quando foi a última tentativa?
-
-4. **Se houver tentativas com falha:**
-   - Veja o erro retornado
-   - Pode ser 404 (rota não encontrada)
-   - Pode ser 500 (erro interno)
-   - Pode ser timeout
-
-5. **Se não houver tentativas:**
-   - O webhook pode não estar configurado
-   - Ou os eventos não estão sendo disparados
+### **Mensagem não aparece no banco**
+- Verificar logs da Vercel
+- Verificar se instância está cadastrada
+- Verificar se há erros no código
 
 ---
 
-## 📊 INTERPRETAÇÃO DOS RESULTADOS
+## ✅ CHECKLIST
 
-### ✅ **Cenário 1: Teste 1 Funciona, Teste 2 Funciona**
-
-**Significado:**
-- ✅ Webhook está acessível
-- ✅ Rota está funcionando
-- ✅ Logs estão funcionando
-
-**Próximo passo:**
-- Verificar se o Mercado Pago está chamando o webhook
-- Verificar logs do webhook real no Vercel
+- [ ] Webhook testado manualmente (curl/Postman)
+- [ ] Mensagem apareceu no banco (verificar com SQL)
+- [ ] Logs da Vercel verificados
+- [ ] Instância cadastrada no banco
+- [ ] Migration executada
 
 ---
 
-### ❌ **Cenário 2: Teste 1 Funciona, Teste 2 Não Funciona**
-
-**Significado:**
-- ✅ Webhook está acessível
-- ❌ Processamento do webhook tem erro
-
-**Próximo passo:**
-- Verificar logs do erro
-- Verificar código do webhook
-
----
-
-### ❌ **Cenário 3: Teste 1 Não Funciona**
-
-**Significado:**
-- ❌ Webhook não está acessível
-- ❌ Rota não existe ou não está deployada
-
-**Próximo passo:**
-- Verificar se o código está no repositório
-- Fazer deploy da aplicação
-
----
-
-## 🎯 CHECKLIST
-
-- [ ] Testei se o webhook está acessível (`/api/webhooks/mercado-pago/test`)
-- [ ] Testei simular um webhook (POST com dados de teste)
-- [ ] Verifiquei logs no Vercel após o teste
-- [ ] Verifiquei histórico de webhooks no Mercado Pago Dashboard
-
----
-
-**Última atualização:** 11/11/2025
-
+**Execute o teste manual e me diga o resultado!**
