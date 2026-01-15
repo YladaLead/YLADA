@@ -46,11 +46,29 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Não autenticado' }, { status: 401 })
     }
 
-    // Verificar se é admin
-    const isAdmin = user.user_metadata?.role === 'admin'
+    // Verificar se é admin (verificar tanto role quanto is_admin no perfil)
+    const roleAdmin = user.user_metadata?.role === 'admin'
+    
+    // Buscar perfil para verificar is_admin
+    const { data: profile } = await supabaseAdmin
+      .from('user_profiles')
+      .select('is_admin')
+      .eq('user_id', user.id)
+      .single()
+    
+    const isAdmin = roleAdmin || profile?.is_admin === true
 
     if (!isAdmin) {
-      return NextResponse.json({ error: 'Acesso negado' }, { status: 403 })
+      console.error('[WhatsApp Conversations] Acesso negado para:', {
+        userId: user.id,
+        email: user.email,
+        role: user.user_metadata?.role,
+        is_admin: profile?.is_admin
+      })
+      return NextResponse.json({ 
+        error: 'Acesso negado. Você precisa ser administrador.',
+        hint: 'Verifique se seu usuário tem is_admin = true no user_profiles ou role = "admin" no user_metadata'
+      }, { status: 403 })
     }
 
     // Parâmetros de query
