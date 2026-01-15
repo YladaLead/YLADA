@@ -278,7 +278,7 @@ User: "Noel, quero me tornar líder. O que faço a partir de agora?"
 Assistant (NOEL): "Liderança é duplicação.
 
 🔧 Ação avançada:
-Domine o Ritual 2-5-10.
+Domine o Ritual de falar com 10 pessoas.
 Ensine alguém a fazer o simples.
 Crie consistência em 21 dias.
 

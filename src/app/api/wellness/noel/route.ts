@@ -326,7 +326,7 @@ async function buildStrategicProfileContext(userId: string): Promise<string> {
         context += '   → ENTREGAR: Plano de R$500-1500/mês, fluxo básico bebidas + kits, tarefas semanais simples\n'
       } else if (profile.foco_trabalho === 'plano_carreira') {
         context += '   → Alta ambição, estrutura pesada\n'
-        context += '   → ENTREGAR: Acesso ao Plano Presidente, treinamento de carreira, scripts de recrutamento, diário 2-5-10 completo\n'
+        context += '   → ENTREGAR: Acesso ao Plano Presidente, treinamento de carreira, scripts de recrutamento, diário completo de falar com 10 pessoas\n'
       } else if (profile.foco_trabalho === 'ambos') {
         context += '   → Resultado rápido + crescimento futuro\n'
         context += '   → ENTREGAR: Mistura dos dois planos, metas táticas (3 meses) + estratégicas (1 ano)\n'
@@ -340,7 +340,7 @@ async function buildStrategicProfileContext(userId: string): Promise<string> {
       if (profile.ganhos_prioritarios === 'vendas') {
         context += '   → ENTREGAR: Metas diárias e semanais de vendas, scripts de conversão, cardápios e pacotes, estratégia de recorrência\n'
       } else if (profile.ganhos_prioritarios === 'equipe') {
-        context += '   → ENTREGAR: Scripts de convite e apresentação, mini-pitch do negócio, plano de duplicação, como convidar diariamente (2-5-10)\n'
+        context += '   → ENTREGAR: Scripts de convite e apresentação, mini-pitch do negócio, plano de duplicação, como convidar diariamente (falar com 10 pessoas)\n'
       } else if (profile.ganhos_prioritarios === 'ambos') {
         context += '   → ENTREGAR: Modelo híbrido, 50% vendas / 50% equipe, dashboard de metas combinadas\n'
       }
@@ -380,7 +380,7 @@ async function buildStrategicProfileContext(userId: string): Promise<string> {
     // 6. Dias por Semana (PRIORIDADE: usar novo campo)
     if (profile.dias_por_semana) {
       context += `6️⃣ DIAS POR SEMANA: ${profile.dias_por_semana}\n`
-      context += '   → Quanto mais dias: maior a meta, maior a velocidade, mais forte o fluxo 2-5-10\n\n'
+      context += '   → Quanto mais dias: maior a meta, maior a velocidade, mais forte o hábito de falar com 10 pessoas\n\n'
     } else {
       // Se não tem, assumir padrão conservador
       context += `6️⃣ DIAS POR SEMANA: não informado (assumindo padrão: 3-4 dias)\n\n`
@@ -612,12 +612,14 @@ REGRAS CRÍTICAS SOBRE SCRIPTS E CONTEÚDO:
 3. **SEMPRE incluir link completo** quando mencionar ferramenta/calculadora
 4. **SEMPRE usar abordagem "Propagação do Bem"** com linguagem coletiva
 
-**ESTRUTURA OBRIGATÓRIA DE TODO SCRIPT (8 PARTES):**
+**ESTRUTURA OBRIGATÓRIA DE TODO SCRIPT (9 PARTES):**
 
-📝 **Parte 1: Abertura**
-- "Olá! Tudo bem?"
+📝 **Parte 1: Abertura com "Lembrei de você" (quando apropriado)**
+- Para contatos conhecidos/quentes: "Oi [nome]! Lembrei de você hoje e queria te contar sobre..."
+- Para contatos frios: "Olá! Tudo bem?"
 - Saudação simples e acolhedora
 - Tom pessoal mas respeitoso
+- Use "lembrei de você" quando houver relação prévia ou contexto pessoal
 
 📝 **Parte 2: Apresentação (Terceira Pessoa + Coletivo)**
 - Use "Existe uma calculadora/ferramenta que indica nossos índices de saúde..."
@@ -625,36 +627,42 @@ REGRAS CRÍTICAS SOBRE SCRIPTS E CONTEÚDO:
 - Use linguagem coletiva ("nossos índices", "nossa saúde", "nossa família")
 - Tom de informação pública, não venda
 
-📝 **Parte 3: Benefício Coletivo**
+📝 **Parte 3: Conscientização sobre Saúde da Família e Amigos**
+- "Estou fazendo um trabalho muito importante para ajudar as pessoas a protegerem a saúde delas e das famílias que amam. Afinal, cuidar da saúde é cuidar de quem a gente mais quer."
+- Foco: importância da saúde da família e pessoas que amamos
+- Tom: conscientização e cuidado
+- Conecte com benefícios coletivos
+
+📝 **Parte 4: Benefício Coletivo**
 - "É uma forma de cuidar melhor da nossa saúde..."
 - Explique o benefício para TODOS
 - Use linguagem coletiva
 - Foque no bem-estar geral
 
-📝 **Parte 4: Pedido de Permissão**
-- "Posso te enviar o link?"
+📝 **Parte 5: Solicitação de Coleta de Dados (ANTES de enviar link)**
+- "Para eu te enviar o link, preciso de algumas informações rápidas: seu nome completo, telefone (WhatsApp) e email. É só para eu poder te enviar o link personalizado e acompanhar se você conseguiu acessar."
+- SEMPRE solicite: nome, telefone (WhatsApp) e email
+- Explique o motivo (link personalizado, acompanhamento)
+- Tom leve e natural, sem pressão
+
+📝 **Parte 6: Pedido de Permissão (após coleta)**
+- "Agora posso te enviar o link?"
 - SEMPRE peça permissão antes de enviar
 - Respeite o espaço da pessoa
 - Dê controle à pessoa
 
-📝 **Parte 5: Sugestão de Compartilhamento**
+📝 **Parte 7: Sugestão de Compartilhamento**
 - "Você já pode compartilhar com seus amigos e familiares que você gosta."
 - NÃO peça indicação diretamente
 - SUGIRA compartilhamento natural
 - Tom afetivo e natural
 
-📝 **Parte 6: Propósito Maior**
-- "Isso é importante pra toda nossa família!"
-- Reforce o propósito coletivo
-- Use "nossa família" (sentido amplo)
-- Crie senso de comunidade
-
-📝 **Parte 7: Link Completo**
+📝 **Parte 8: Link Completo**
 - [LINK COMPLETO] - sempre chamar getFerramentaInfo ou recomendarLinkWellness primeiro
 - NUNCA use placeholder [LINK] sem substituir
 - Use link personalizado quando disponível
 
-📝 **Parte 8: Encerramento (Propagação do Bem)**
+📝 **Parte 9: Encerramento (Propagação do Bem)**
 - "Compartilhe com quem você gosta! Assim a gente ajuda mais gente... É uma coisa boa pra todos! [EMOJI]"
 - Reforce o compartilhamento natural
 - Use "coisa boa pra todos" (NÃO "pra humanidade")
@@ -684,13 +692,17 @@ REGRAS CRÍTICAS SOBRE SCRIPTS E CONTEÚDO:
 - Quando usuário pedir "melhorar script" → SEMPRE aplicar as regras acima
 - Quando usuário mencionar "pessoas do meu espaço" → SEMPRE incluir sugestão de compartilhamento
 
-**EXEMPLO DE SCRIPT CORRETO:**
+**EXEMPLO DE SCRIPT CORRETO (COM COLETA DE DADOS E "LEMBREI DE VOCÊ"):**
 
-"Olá! Tudo bem?
+"Oi [nome]! Lembrei de você hoje e queria te contar sobre uma novidade importante de bem-estar.
 
 Existe uma calculadora de IMC que indica nossos índices de saúde, massa e gordura. Além de calcular o número, explica o que significa e dá orientações personalizadas. É uma forma simples de entender melhor nossa saúde e saber se estamos no caminho certo para o bem-estar.
 
-Posso te enviar o link? Você já pode compartilhar com seus amigos e familiares que você gosta. Isso é importante pra toda nossa família cuidar da saúde!
+Estou fazendo um trabalho muito importante para ajudar as pessoas a protegerem a saúde delas e das famílias que amam. Afinal, cuidar da saúde é cuidar de quem a gente mais quer.
+
+Para eu te enviar o link, preciso de algumas informações rápidas: seu nome completo, telefone (WhatsApp) e email. É só para eu poder te enviar o link personalizado e acompanhar se você conseguiu acessar.
+
+Agora posso te enviar o link? Você já pode compartilhar com seus amigos e familiares que você gosta. Isso é importante pra toda nossa família cuidar da saúde!
 
 [LINK COMPLETO]
 
@@ -1225,8 +1237,9 @@ Quando detectar estas situações, chame a função correspondente PRIMEIRO (ANT
 
 **ESTRUTURA OBRIGATÓRIA DO SCRIPT DE INDICAÇÃO (FOCADO EM BENEFÍCIOS):**
 
-📝 **Parte 1: Abertura com Conscientização sobre Saúde da Família**
-- "Oi [nome], tudo bem? Estou fazendo um trabalho muito importante para ajudar as pessoas a protegerem a saúde delas e das famílias que amam. Afinal, cuidar da saúde é cuidar de quem a gente mais quer."
+📝 **Parte 1: Abertura com "Lembrei de você" e Conscientização sobre Saúde da Família**
+- "Oi [nome]! Lembrei de você hoje e queria te contar sobre uma novidade importante de bem-estar. Estou fazendo um trabalho muito importante para ajudar as pessoas a protegerem a saúde delas e das famílias que amam. Afinal, cuidar da saúde é cuidar de quem a gente mais quer."
+- SEMPRE incluir "lembrei de você" quando houver relação prévia ou contexto pessoal
 - Foco: importância da saúde da família e pessoas que amamos
 - Tom: conscientização e cuidado
 
@@ -1236,7 +1249,13 @@ Quando detectar estas situações, chame a função correspondente PRIMEIRO (ANT
 - Benefícios: disposição, energia, qualidade de vida
 - NUNCA mencionar "IMC" ou "calculadora" → SEMPRE focar nos BENEFÍCIOS
 
-📝 **Parte 3: Apresentação do Link (Focada em Benefícios)**
+📝 **Parte 3: Solicitação de Coleta de Dados (ANTES de apresentar link)**
+- "Para eu te enviar o link, preciso de algumas informações rápidas: seu nome completo, telefone (WhatsApp) e email. É só para eu poder te enviar o link personalizado e acompanhar se você conseguiu acessar."
+- SEMPRE solicite: nome, telefone (WhatsApp) e email
+- Explique o motivo (link personalizado, acompanhamento)
+- Tom leve e natural, sem pressão
+
+📝 **Parte 4: Apresentação do Link (Focada em Benefícios)**
 - "Eu tenho um link que faz essa avaliação rapidinho, é só preencher os dados e ver como está sua saúde. Quero muito que você faça e também compartilhe com sua família e amigos, porque saúde é coisa séria e quanto mais gente cuidando, melhor."
 - Foco: avaliação de saúde, compartilhamento com família
 - Tom: cuidado coletivo
@@ -1246,12 +1265,18 @@ Quando detectar estas situações, chame a função correspondente PRIMEIRO (ANT
 - Foco: compartilhamento natural, proteção da família
 - Tom: afetivo e natural
 
-📝 **Parte 5: Link Completo**
+📝 **Parte 5: Solicitação de Coleta de Dados (ANTES de enviar link)**
+- "Para eu te enviar o link, preciso de algumas informações rápidas: seu nome completo, telefone (WhatsApp) e email. É só para eu poder te enviar o link personalizado e acompanhar se você conseguiu acessar."
+- SEMPRE solicite: nome, telefone (WhatsApp) e email
+- Explique o motivo (link personalizado, acompanhamento)
+- Tom leve e natural, sem pressão
+
+📝 **Parte 6: Link Completo**
 - [LINK COMPLETO] - sempre chamar getFerramentaInfo ou recomendarLinkWellness primeiro
 - NUNCA use placeholder [LINK] sem substituir
 - Use link personalizado quando disponível
 
-📝 **Parte 6: Encerramento (Propagação do Bem)**
+📝 **Parte 7: Encerramento (Propagação do Bem)**
 - "Compartilhe com quem você gosta! Assim a gente ajuda mais gente a cuidar da saúde. É uma coisa boa pra todos! 💚"
 - Reforce o compartilhamento natural
 - Use "coisa boa pra todos" (NÃO "pra humanidade")

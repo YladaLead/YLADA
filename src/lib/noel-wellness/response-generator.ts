@@ -228,7 +228,7 @@ function buildAdjustmentContext(context: NoelContext): string {
   if (context.progressoHoje) {
     const progresso = context.progressoHoje
     if (progresso.ritual_2_executado || progresso.ritual_5_executado || progresso.ritual_10_executado) {
-      parts.push('Ritual 2-5-10: Em andamento')
+      parts.push('Ritual de falar com 10 pessoas: Em andamento')
     }
     if (progresso.microtarefas_completadas > 0) {
       parts.push(`Microtarefas: ${progresso.microtarefas_completadas}/${progresso.microtarefas_total} completas`)
@@ -314,7 +314,7 @@ export function detectTopicAndIntent(mensagem: string): {
     'recrutar|recrutamento|equipe': 'recrutamento',
     'shake|bebida|herbalife': 'produtos',
     'script|mensagem|texto': 'scripts',
-    'ritual|2-5-10': 'ritual',
+    'ritual|falar com 10 pessoas': 'ritual',
     'plano|planejamento': 'plano',
     'meta|objetivo': 'metas',
     'dificuldade|problema|desafio': 'desafios',
