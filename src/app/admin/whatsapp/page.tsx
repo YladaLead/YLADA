@@ -201,10 +201,15 @@ function WhatsAppChatContent() {
           </Link>
         </div>
 
-        {/* Filtros - Apenas Nutri */}
+        {/* Info */}
         <div className="mt-4">
-          <div className="px-3 py-2 bg-green-50 border border-green-200 rounded text-sm text-green-800">
-            📱 Área: <strong>Nutri</strong> - Apenas conversas da área Nutri são exibidas
+          <div className="px-4 py-3 bg-blue-50 border border-blue-200 rounded-lg">
+            <p className="text-sm text-blue-800">
+              💬 <strong>Todas as conversas</strong> que chegarem no número <strong>5519997230912</strong> aparecerão aqui automaticamente.
+            </p>
+            <p className="text-xs text-blue-600 mt-1">
+              Envie uma mensagem de teste para ver aparecer em alguns segundos.
+            </p>
           </div>
         </div>
       </div>
@@ -213,9 +218,26 @@ function WhatsAppChatContent() {
         {/* Lista de Conversas */}
         <div className="w-80 bg-white border-r border-gray-200 overflow-y-auto">
           {loading ? (
-            <div className="p-4 text-center text-gray-500">Carregando...</div>
+            <div className="p-4 text-center text-gray-500">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-500 mx-auto mb-2"></div>
+              Carregando conversas...
+            </div>
           ) : conversations.length === 0 ? (
-            <div className="p-4 text-center text-gray-500">Nenhuma conversa encontrada</div>
+            <div className="p-8 text-center">
+              <div className="text-6xl mb-4">💬</div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Nenhuma conversa ainda</h3>
+              <p className="text-sm text-gray-500 mb-4">
+                Quando alguém enviar mensagem para <strong>5519997230912</strong>, aparecerá aqui automaticamente.
+              </p>
+              <div className="bg-gray-50 rounded-lg p-4 text-left text-sm text-gray-600">
+                <p className="font-semibold mb-2">📱 Para testar:</p>
+                <ol className="list-decimal list-inside space-y-1">
+                  <li>Envie uma mensagem do seu WhatsApp para <strong>5519997230912</strong></li>
+                  <li>Aguarde 5-10 segundos</li>
+                  <li>A conversa aparecerá aqui automaticamente</li>
+                </ol>
+              </div>
+            </div>
           ) : (
             conversations.map((conv) => (
               <button
@@ -336,8 +358,12 @@ function WhatsAppChatContent() {
               </div>
             </>
           ) : (
-            <div className="flex-1 flex items-center justify-center text-gray-500">
-              Selecione uma conversa para começar
+            <div className="flex-1 flex flex-col items-center justify-center text-gray-500 p-8">
+              <div className="text-6xl mb-4">👈</div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Selecione uma conversa</h3>
+              <p className="text-sm text-gray-500">
+                Clique em uma conversa à esquerda para ver as mensagens e responder
+              </p>
             </div>
           )}
         </div>
