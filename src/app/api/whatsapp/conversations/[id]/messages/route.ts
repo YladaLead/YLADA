@@ -1,0 +1,224 @@
+/**
+ * API para mensagens de uma conversa
+ * GET /api/whatsapp/conversations/[id]/messages - Lista mensagens
+ * POST /api/whatsapp/conversations/[id]/messages - Envia mensagem
+ */
+
+import { NextRequest, NextResponse } from 'next/server'
+import { createClient } from '@supabase/supabase-js'
+import { createServerClient } from '@supabase/ssr'
+import { cookies } from 'next/headers'
+import { sendWhatsAppMessage } from '@/lib/z-api'
+
+const supabaseAdmin = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+)
+
+/**
+ * GET /api/whatsapp/conversations/[id]/messages
+ * Lista mensagens de uma conversa
+ */
+export async function GET(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    // Autenticação
+    const cookieStore = await cookies()
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          getAll() {
+            return cookieStore.getAll()
+          },
+          setAll(cookiesToSet) {
+            cookiesToSet.forEach(({ name, value, options }) =>
+              cookieStore.set(name, value, options)
+            )
+          },
+        },
+      }
+    )
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+
+    if (!user) {
+      return NextResponse.json({ error: 'Não autenticado' }, { status: 401 })
+    }
+
+    const isAdmin = user.user_metadata?.role === 'admin'
+    if (!isAdmin) {
+      return NextResponse.json({ error: 'Acesso negado' }, { status: 403 })
+    }
+
+    const conversationId = params.id
+
+    // Buscar mensagens
+    const { data: messages, error } = await supabaseAdmin
+      .from('whatsapp_messages')
+      .select('*')
+      .eq('conversation_id', conversationId)
+      .order('created_at', { ascending: true })
+
+    if (error) {
+      throw error
+    }
+
+    // Marcar mensagens como lidas
+    await supabaseAdmin
+      .from('whatsapp_messages')
+      .update({ read_at: new Date().toISOString() })
+      .eq('conversation_id', conversationId)
+      .eq('sender_type', 'customer')
+      .is('read_at', null)
+
+    // Atualizar unread_count da conversa
+    await supabaseAdmin
+      .from('whatsapp_conversations')
+      .update({ unread_count: 0 })
+      .eq('id', conversationId)
+
+    return NextResponse.json({ messages: messages || [] })
+  } catch (error: any) {
+    console.error('[WhatsApp Messages] Erro:', error)
+    return NextResponse.json(
+      { error: error.message || 'Erro ao buscar mensagens' },
+      { status: 500 }
+    )
+  }
+}
+
+/**
+ * POST /api/whatsapp/conversations/[id]/messages
+ * Envia mensagem
+ */
+export async function POST(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    // Autenticação
+    const cookieStore = await cookies()
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          getAll() {
+            return cookieStore.getAll()
+          },
+          setAll(cookiesToSet) {
+            cookiesToSet.forEach(({ name, value, options }) =>
+              cookieStore.set(name, value, options)
+            )
+          },
+        },
+      }
+    )
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+
+    if (!user) {
+      return NextResponse.json({ error: 'Não autenticado' }, { status: 401 })
+    }
+
+    const isAdmin = user.user_metadata?.role === 'admin'
+    if (!isAdmin) {
+      return NextResponse.json({ error: 'Acesso negado' }, { status: 403 })
+    }
+
+    const conversationId = params.id
+    const body = await request.json()
+    const { message } = body
+
+    if (!message) {
+      return NextResponse.json({ error: 'Mensagem é obrigatória' }, { status: 400 })
+    }
+
+    // Buscar conversa
+    const { data: conversation, error: convError } = await supabaseAdmin
+      .from('whatsapp_conversations')
+      .select(
+        `
+        *,
+        z_api_instances:instance_id (
+          instance_id,
+          token
+        )
+      `
+      )
+      .eq('id', conversationId)
+      .single()
+
+    if (convError || !conversation) {
+      return NextResponse.json(
+        { error: 'Conversa não encontrada' },
+        { status: 404 }
+      )
+    }
+
+    const instance = conversation.z_api_instances
+
+    if (!instance) {
+      return NextResponse.json(
+        { error: 'Instância não encontrada' },
+        { status: 404 }
+      )
+    }
+
+    // Enviar mensagem via Z-API
+    const result = await sendWhatsAppMessage(
+      conversation.phone,
+      message,
+      instance.instance_id,
+      instance.token
+    )
+
+    if (!result.success) {
+      return NextResponse.json(
+        { error: result.error || 'Erro ao enviar mensagem' },
+        { status: 500 }
+      )
+    }
+
+    // Salvar mensagem no banco
+    const { data: savedMessage, error: msgError } = await supabaseAdmin
+      .from('whatsapp_messages')
+      .insert({
+        conversation_id: conversationId,
+        instance_id: conversation.instance_id,
+        z_api_message_id: result.id || null,
+        sender_type: 'agent',
+        sender_id: user.id,
+        sender_name: user.user_metadata?.name || user.email || 'Admin',
+        message,
+        message_type: 'text',
+        status: 'sent',
+        is_bot_response: false,
+      })
+      .select()
+      .single()
+
+    if (msgError) {
+      console.error('[WhatsApp Messages] Erro ao salvar:', msgError)
+    }
+
+    return NextResponse.json({
+      success: true,
+      message: savedMessage,
+    })
+  } catch (error: any) {
+    console.error('[WhatsApp Messages] Erro:', error)
+    return NextResponse.json(
+      { error: error.message || 'Erro ao enviar mensagem' },
+      { status: 500 }
+    )
+  }
+}

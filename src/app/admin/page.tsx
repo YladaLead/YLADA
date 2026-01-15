@@ -173,6 +173,15 @@ function AdminDashboardContent() {
       color: 'bg-gray-500'
     },
     {
+      id: 'whatsapp-chat',
+      title: 'WhatsApp Chat',
+      description: 'Atendimento WhatsApp em tempo real',
+      icon: '💬',
+      link: '/admin/whatsapp',
+      color: 'bg-green-500',
+      destaque: true
+    },
+    {
       id: 'support-agents',
       title: 'Atendentes de Suporte',
       description: 'Gerenciar equipe de atendimento',
