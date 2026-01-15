@@ -5,9 +5,26 @@
  * Configurar na Z-API:
  * - URL: https://seu-site.com/api/webhooks/z-api
  * - Eventos: "Ao receber" (On receive)
+ * 
+ * IMPORTANTE: Este endpoint só aceita POST (não GET)
  */
 
 import { NextRequest, NextResponse } from 'next/server'
+
+/**
+ * GET /api/webhooks/z-api (não suportado)
+ * Webhooks só funcionam com POST
+ */
+export async function GET(request: NextRequest) {
+  return NextResponse.json(
+    { 
+      error: 'Método não permitido',
+      message: 'Este endpoint só aceita requisições POST. Webhooks devem ser configurados na Z-API para enviar POST requests.',
+      hint: 'Configure o webhook na Z-API com a URL: https://www.ylada.com/api/webhooks/z-api'
+    },
+    { status: 405 }
+  )
+}
 import { createClient } from '@supabase/supabase-js'
 import { sendWhatsAppMessage } from '@/lib/z-api'
 

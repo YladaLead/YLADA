@@ -82,7 +82,7 @@ function WhatsAppChatContent() {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}))
-        console.error('Erro ao carregar conversas:', {
+        console.error('❌ Erro ao carregar conversas:', {
           status: response.status,
           statusText: response.statusText,
           error: errorData
@@ -90,11 +90,17 @@ function WhatsAppChatContent() {
         
         if (response.status === 401) {
           console.error('❌ Não autenticado. Faça login como admin.')
+          alert('⚠️ Você precisa estar logado como administrador para ver as conversas.\n\nFaça logout e login novamente.')
+          return
         } else if (response.status === 403) {
           console.error('❌ Acesso negado. Você precisa ser admin.')
+          alert('⚠️ Acesso negado.\n\nVocê precisa ter permissão de administrador para acessar esta área.\n\nVerifique se seu usuário tem is_admin = true no banco de dados.')
+          return
         }
         
-        throw new Error(errorData.error || `Erro ${response.status}: ${response.statusText}`)
+        // Para outros erros, apenas logar
+        console.error('Erro desconhecido:', errorData)
+        return
       }
 
       const data = await response.json()
