@@ -28,8 +28,21 @@ interface ZApiWebhookPayload {
 
 /**
  * Identifica área baseado no número ou contexto
+ * IMPORTANTE: Esta instância é apenas para Nutri
  */
-async function identifyArea(phone: string, message: string): Promise<string | null> {
+async function identifyArea(phone: string, message: string, instanceId: string): Promise<string | null> {
+  // Verificar qual instância está recebendo (garantir que é Nutri)
+  const { data: instance } = await supabase
+    .from('z_api_instances')
+    .select('area')
+    .eq('instance_id', instanceId)
+    .single()
+
+  // Se a instância é Nutri, sempre retornar 'nutri'
+  if (instance?.area === 'nutri') {
+    return 'nutri'
+  }
+
   // 1. Buscar no banco de dados por telefone
   const { data: conversation } = await supabase
     .from('whatsapp_conversations')
@@ -56,20 +69,16 @@ async function identifyArea(phone: string, message: string): Promise<string | nu
     return lead.area
   }
 
-  // 3. Análise por palavras-chave
+  // 3. Análise por palavras-chave (priorizar Nutri)
   const messageLower = message.toLowerCase()
-  const wellnessKeywords = ['herbalife', 'shake', 'pv', 'consultor', 'wellness', 'hom']
-  const nutriKeywords = ['nutrição', 'nutricionista', 'dieta', 'nutri']
-
-  if (wellnessKeywords.some((keyword) => messageLower.includes(keyword))) {
-    return 'wellness'
-  }
+  const nutriKeywords = ['nutrição', 'nutricionista', 'dieta', 'nutri', 'emagrecer', 'alimentação']
 
   if (nutriKeywords.some((keyword) => messageLower.includes(keyword))) {
     return 'nutri'
   }
 
-  return null
+  // Por padrão, se não identificar, retornar 'nutri' (já que esta instância é Nutri)
+  return 'nutri'
 }
 
 /**
@@ -308,8 +317,8 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // 1. Identificar área
-    const area = await identifyArea(body.phone, body.message)
+    // 1. Identificar área (sempre Nutri para esta instância)
+    const area = await identifyArea(body.phone, body.message, instanceId)
 
     // 2. Criar ou buscar conversa
     const conversationId = await getOrCreateConversation(

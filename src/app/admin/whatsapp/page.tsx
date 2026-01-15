@@ -47,7 +47,7 @@ function WhatsAppChatContent() {
   const [newMessage, setNewMessage] = useState('')
   const [loading, setLoading] = useState(true)
   const [sending, setSending] = useState(false)
-  const [areaFilter, setAreaFilter] = useState<string>('all')
+  const [areaFilter, setAreaFilter] = useState<string>('nutri') // Apenas Nutri por padrão
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   // Carregar conversas
@@ -80,9 +80,25 @@ function WhatsAppChatContent() {
       }`
       const response = await fetch(url, { credentials: 'include' })
 
-      if (!response.ok) throw new Error('Erro ao carregar conversas')
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        console.error('Erro ao carregar conversas:', {
+          status: response.status,
+          statusText: response.statusText,
+          error: errorData
+        })
+        
+        if (response.status === 401) {
+          console.error('❌ Não autenticado. Faça login como admin.')
+        } else if (response.status === 403) {
+          console.error('❌ Acesso negado. Você precisa ser admin.')
+        }
+        
+        throw new Error(errorData.error || `Erro ${response.status}: ${response.statusText}`)
+      }
 
       const data = await response.json()
+      console.log('✅ Conversas carregadas:', data.conversations?.length || 0)
       setConversations(data.conversations || [])
 
       // Se não tem conversa selecionada e tem conversas, selecionar a primeira
@@ -91,6 +107,7 @@ function WhatsAppChatContent() {
       }
     } catch (error) {
       console.error('Erro ao carregar conversas:', error)
+      // Não mostrar erro para o usuário, apenas logar
     } finally {
       setLoading(false)
     }
@@ -184,38 +201,11 @@ function WhatsAppChatContent() {
           </Link>
         </div>
 
-        {/* Filtros */}
-        <div className="mt-4 flex gap-2">
-          <button
-            onClick={() => setAreaFilter('all')}
-            className={`px-3 py-1 text-sm rounded ${
-              areaFilter === 'all'
-                ? 'bg-green-500 text-white'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-            }`}
-          >
-            Todas
-          </button>
-          <button
-            onClick={() => setAreaFilter('nutri')}
-            className={`px-3 py-1 text-sm rounded ${
-              areaFilter === 'nutri'
-                ? 'bg-green-500 text-white'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-            }`}
-          >
-            Nutri
-          </button>
-          <button
-            onClick={() => setAreaFilter('wellness')}
-            className={`px-3 py-1 text-sm rounded ${
-              areaFilter === 'wellness'
-                ? 'bg-green-500 text-white'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-            }`}
-          >
-            Wellness
-          </button>
+        {/* Filtros - Apenas Nutri */}
+        <div className="mt-4">
+          <div className="px-3 py-2 bg-green-50 border border-green-200 rounded text-sm text-green-800">
+            📱 Área: <strong>Nutri</strong> - Apenas conversas da área Nutri são exibidas
+          </div>
         </div>
       </div>
 

@@ -55,12 +55,12 @@ export async function GET(request: NextRequest) {
 
     // Parâmetros de query
     const searchParams = request.nextUrl.searchParams
-    const area = searchParams.get('area')
+    const area = searchParams.get('area') || 'nutri' // Apenas Nutri por padrão
     const status = searchParams.get('status') || 'active'
     const limit = parseInt(searchParams.get('limit') || '50')
     const offset = parseInt(searchParams.get('offset') || '0')
 
-    // Query base
+    // Query base - SEMPRE filtrar por área Nutri
     let query = supabaseAdmin
       .from('whatsapp_conversations')
       .select(
@@ -75,14 +75,11 @@ export async function GET(request: NextRequest) {
       `,
         { count: 'exact' }
       )
+      .eq('area', 'nutri') // SEMPRE apenas Nutri
       .order('last_message_at', { ascending: false })
       .range(offset, offset + limit - 1)
 
     // Filtros
-    if (area) {
-      query = query.eq('area', area)
-    }
-
     if (status) {
       query = query.eq('status', status)
     }
