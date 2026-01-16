@@ -224,11 +224,14 @@ export async function POST(
     }
 
     // Enviar notificação para número configurado (quando admin envia mensagem)
+    console.log('[WhatsApp Messages] 🔔 INÍCIO: Verificando notificação após envio de mensagem')
+    
     const notificationPhone = process.env.Z_API_NOTIFICATION_PHONE
     console.log('[WhatsApp Messages] 🔔 Verificando notificação:', {
       notificationPhone: notificationPhone || 'NÃO CONFIGURADO',
       phoneLength: notificationPhone?.length || 0,
-      hasNotificationPhone: !!notificationPhone
+      hasNotificationPhone: !!notificationPhone,
+      envKeys: Object.keys(process.env).filter(k => k.includes('NOTIFICATION') || k.includes('Z_API')).join(', ')
     })
     
     if (notificationPhone) {

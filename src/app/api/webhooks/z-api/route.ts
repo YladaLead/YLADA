@@ -249,51 +249,106 @@ async function saveMessage(
  * Envia notificação para administradores
  */
 async function notifyAdmins(conversationId: string, phone: string, message: string) {
+  // Log inicial para debug
+  console.log('[Z-API Webhook] 🔔 INÍCIO: Função notifyAdmins chamada', {
+    conversationId,
+    phone,
+    messageLength: message?.length || 0
+  })
+  
   // Buscar administradores
-  const { data: admins } = await supabase
+  console.log('[Z-API Webhook] 👥 Buscando administradores...')
+  const { data: admins, error: adminsError } = await supabase
     .from('auth.users')
     .select('id')
     .eq('raw_user_meta_data->>role', 'admin')
     .limit(10)
 
+  console.log('[Z-API Webhook] 👥 Resultado busca admins:', {
+    found: admins?.length || 0,
+    error: adminsError?.message,
+    adminIds: admins?.map(a => a.id) || []
+  })
+
   if (!admins || admins.length === 0) {
-    return
+    console.log('[Z-API Webhook] ⚠️ Nenhum administrador encontrado, pulando notificações no banco')
+    // Continuar mesmo sem admins para enviar notificação via WhatsApp
   }
 
-  // Criar notificações
-  const notifications = admins.map((admin) => ({
-    conversation_id: conversationId,
-    user_id: admin.id,
-    notification_type: 'new_message',
-    title: 'Nova mensagem WhatsApp',
-    message: `Nova mensagem de ${phone}: ${message.substring(0, 100)}`,
-    metadata: { phone, message_preview: message.substring(0, 100) },
-  }))
+  // Criar notificações no banco (se houver admins)
+  if (admins && admins.length > 0) {
+    const notifications = admins.map((admin) => ({
+      conversation_id: conversationId,
+      user_id: admin.id,
+      notification_type: 'new_message',
+      title: 'Nova mensagem WhatsApp',
+      message: `Nova mensagem de ${phone}: ${message.substring(0, 100)}`,
+      metadata: { phone, message_preview: message.substring(0, 100) },
+    }))
 
-  await supabase.from('whatsapp_notifications').insert(notifications)
+    const { error: notifyError } = await supabase.from('whatsapp_notifications').insert(notifications)
+    if (notifyError) {
+      console.error('[Z-API Webhook] ❌ Erro ao salvar notificações no banco:', notifyError)
+    } else {
+      console.log('[Z-API Webhook] ✅ Notificações salvas no banco para', admins.length, 'admin(s)')
+    }
+  }
 
   // Enviar notificação via Z-API para número de notificação (se configurado)
   const notificationPhone = process.env.Z_API_NOTIFICATION_PHONE
+  
+  // Log detalhado da variável de ambiente
   console.log('[Z-API Webhook] 🔔 Verificando notificação:', {
     notificationPhone: notificationPhone || 'NÃO CONFIGURADO',
     phoneLength: notificationPhone?.length || 0,
-    hasNotificationPhone: !!notificationPhone
+    hasNotificationPhone: !!notificationPhone,
+    envKeys: Object.keys(process.env).filter(k => k.includes('NOTIFICATION') || k.includes('Z_API')).join(', ')
   })
   
   if (notificationPhone) {
     try {
       // Buscar instância da área Nutri (ou usar a instância atual)
-      const { data: instances } = await supabase
+      console.log('[Z-API Webhook] 🔍 Buscando instância Z-API para enviar notificação...')
+      const { data: instances, error: instanceError } = await supabase
         .from('z_api_instances')
-        .select('instance_id, token')
+        .select('instance_id, token, status, area')
         .eq('area', 'nutri')
-        .eq('status', 'connected')
         .limit(1)
       
-      const instance = instances && instances.length > 0 ? instances[0] : null
+      console.log('[Z-API Webhook] 🔍 Resultado busca instância:', {
+        found: instances?.length || 0,
+        instances: instances?.map(i => ({ instance_id: i.instance_id, status: i.status, area: i.area })),
+        error: instanceError?.message
+      })
       
-      if (instance) {
-        console.log('[Z-API Webhook] 📱 Enviando notificação para:', notificationPhone)
+      // Tentar buscar qualquer instância conectada se não encontrar da área nutri
+      let instance = instances && instances.length > 0 ? instances[0] : null
+      
+      if (!instance || instance.status !== 'connected') {
+        console.log('[Z-API Webhook] ⚠️ Instância Nutri não encontrada ou não conectada, buscando qualquer instância conectada...')
+        const { data: anyInstances } = await supabase
+          .from('z_api_instances')
+          .select('instance_id, token, status, area')
+          .eq('status', 'connected')
+          .limit(1)
+        
+        if (anyInstances && anyInstances.length > 0) {
+          instance = anyInstances[0]
+          console.log('[Z-API Webhook] ✅ Usando instância alternativa:', {
+            instance_id: instance.instance_id,
+            status: instance.status,
+            area: instance.area
+          })
+        }
+      }
+      
+      if (instance && instance.instance_id && instance.token) {
+        console.log('[Z-API Webhook] 📱 Enviando notificação para:', {
+          notificationPhone,
+          instanceId: instance.instance_id,
+          tokenLength: instance.token.length,
+          tokenPreview: `${instance.token.substring(0, 4)}...${instance.token.substring(instance.token.length - 4)}`
+        })
         
         // Formatar número de notificação (garantir formato internacional)
         let formattedNotificationPhone = notificationPhone.replace(/\D/g, '')
@@ -306,6 +361,12 @@ async function notifyAdmins(conversationId: string, phone: string, message: stri
           formattedNotificationPhone = `55${formattedNotificationPhone}`
         }
         
+        console.log('[Z-API Webhook] 📤 Chamando sendWhatsAppMessage com:', {
+          phone: formattedNotificationPhone,
+          messageLength: message.substring(0, 200).length,
+          instanceId: instance.instance_id
+        })
+        
         const result = await sendWhatsAppMessage(
           formattedNotificationPhone,
           `🔔 Nova mensagem WhatsApp\n\n📱 De: ${phone}\n💬 ${message.substring(0, 200)}`,
@@ -313,13 +374,28 @@ async function notifyAdmins(conversationId: string, phone: string, message: stri
           instance.token
         )
         
+        console.log('[Z-API Webhook] 📤 Resultado sendWhatsAppMessage:', {
+          success: result.success,
+          error: result.error,
+          id: result.id
+        })
+        
         if (result.success) {
           console.log('[Z-API Webhook] ✅ Notificação enviada com sucesso para:', formattedNotificationPhone)
         } else {
-          console.error('[Z-API Webhook] ❌ Erro ao enviar notificação:', result.error)
+          console.error('[Z-API Webhook] ❌ Erro ao enviar notificação:', {
+            error: result.error,
+            phone: formattedNotificationPhone,
+            instanceId: instance.instance_id
+          })
         }
       } else {
-        console.warn('[Z-API Webhook] ⚠️ Instância não encontrada para enviar notificação')
+        console.warn('[Z-API Webhook] ⚠️ Instância não encontrada ou sem token para enviar notificação:', {
+          hasInstance: !!instance,
+          hasInstanceId: !!instance?.instance_id,
+          hasToken: !!instance?.token,
+          instanceStatus: instance?.status
+        })
       }
     } catch (error) {
       console.error('[Z-API Webhook] ❌ Erro ao enviar notificação:', error)
@@ -331,6 +407,10 @@ async function notifyAdmins(conversationId: string, phone: string, message: stri
 
 /**
  * POST /api/webhooks/z-api
+ * 
+ * Este webhook recebe eventos da Z-API:
+ * - "Ao receber": Quando mensagem chega
+ * - "Ao enviar": Quando mensagem é enviada (opcional)
  */
 export async function POST(request: NextRequest) {
   try {
@@ -338,6 +418,10 @@ export async function POST(request: NextRequest) {
     
     // Log completo do payload recebido para debug
     console.log('[Z-API Webhook] 📥 Payload completo recebido:', JSON.stringify(rawBody, null, 2))
+    
+    // Verificar tipo de evento (receber ou enviar)
+    const eventType = rawBody.type || rawBody.event || 'received'
+    console.log('[Z-API Webhook] 🎯 Tipo de evento:', eventType)
 
     // Normalizar payload - Z-API envia em formato específico
     // Formato Z-API: { phone, text: { message }, instance, etc. }
@@ -497,8 +581,16 @@ export async function POST(request: NextRequest) {
     console.log('[Z-API Webhook] ✅ Mensagem salva no banco')
 
     // 4. Notificar administradores
-    await notifyAdmins(conversationId, phone, message)
-    console.log('[Z-API Webhook] 🔔 Notificações enviadas')
+    try {
+      await notifyAdmins(conversationId, phone, message)
+      console.log('[Z-API Webhook] 🔔 Notificações processadas')
+    } catch (notifyError: any) {
+      console.error('[Z-API Webhook] ❌ Erro ao processar notificações:', {
+        error: notifyError.message,
+        stack: notifyError.stack
+      })
+      // Não falhar o webhook se notificação falhar
+    }
 
     // 5. TODO: Processar com bot (NOEL, Nutri, etc.) se configurado
     // Isso será implementado depois
