@@ -297,11 +297,27 @@ async function notifyAdmins(conversationId: string, phone: string, message: stri
   // Enviar notificação via Z-API para número de notificação (se configurado)
   const notificationPhone = process.env.Z_API_NOTIFICATION_PHONE
   
+  // IMPORTANTE: Prevenir loop infinito - não enviar notificação se a mensagem veio do próprio número de notificação
+  const notificationPhoneClean = notificationPhone?.replace(/\D/g, '') || ''
+  const phoneClean = phone.replace(/\D/g, '')
+  
+  // Verificar se a mensagem veio do próprio número de notificação
+  if (notificationPhoneClean && phoneClean === notificationPhoneClean) {
+    console.log('[Z-API Webhook] ⚠️ Mensagem veio do próprio número de notificação, evitando loop infinito:', {
+      phone: phoneClean,
+      notificationPhone: notificationPhoneClean
+    })
+    return // Não enviar notificação para evitar loop
+  }
+  
   // Log detalhado da variável de ambiente
   console.log('[Z-API Webhook] 🔔 Verificando notificação:', {
     notificationPhone: notificationPhone || 'NÃO CONFIGURADO',
     phoneLength: notificationPhone?.length || 0,
     hasNotificationPhone: !!notificationPhone,
+    phoneOrigem: phoneClean,
+    phoneNotificacao: notificationPhoneClean,
+    isLoop: phoneClean === notificationPhoneClean,
     envKeys: Object.keys(process.env).filter(k => k.includes('NOTIFICATION') || k.includes('Z_API')).join(', ')
   })
   
@@ -404,9 +420,21 @@ async function notifyAdmins(conversationId: string, phone: string, message: stri
           instanceId: instance.instance_id
         })
         
+        // Formatar mensagem de notificação de forma limpa
+        const formattedMessage = `🔔 Nova mensagem WhatsApp
+
+📱 De: ${phone}
+💬 ${message.substring(0, 150)}${message.length > 150 ? '...' : ''}`
+
+        console.log('[Z-API Webhook] 📤 Enviando notificação formatada:', {
+          phone: formattedNotificationPhone,
+          messageLength: formattedMessage.length,
+          messagePreview: formattedMessage.substring(0, 100)
+        })
+        
         const result = await sendWhatsAppMessage(
           formattedNotificationPhone,
-          `🔔 Nova mensagem WhatsApp\n\n📱 De: ${phone}\n💬 ${message.substring(0, 200)}`,
+          formattedMessage,
           instance.instance_id,
           instance.token
         )
@@ -459,6 +487,20 @@ export async function POST(request: NextRequest) {
     // Verificar tipo de evento (receber ou enviar)
     const eventType = rawBody.type || rawBody.event || 'received'
     console.log('[Z-API Webhook] 🎯 Tipo de evento:', eventType)
+    
+    // IMPORTANTE: Ignorar mensagens enviadas por nós mesmos (fromMe = true)
+    // Isso previne loops quando enviamos notificações
+    if (rawBody.fromMe === true || rawBody.from_api === true || rawBody.fromApi === true) {
+      console.log('[Z-API Webhook] ⚠️ Mensagem enviada por nós mesmos, ignorando:', {
+        fromMe: rawBody.fromMe,
+        from_api: rawBody.from_api,
+        fromApi: rawBody.fromApi
+      })
+      return NextResponse.json({ 
+        received: true, 
+        message: 'Mensagem enviada por nós mesmos, ignorada para evitar loop' 
+      })
+    }
 
     // Normalizar payload - Z-API envia em formato específico
     // Formato Z-API: { phone, text: { message }, instance, etc. }
