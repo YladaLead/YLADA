@@ -84,6 +84,9 @@ export class ZApiClient {
       // Adicionar Client-Token se configurado
       if (clientToken) {
         headers['Client-Token'] = clientToken
+        console.log('[Z-API] 🔑 Client-Token configurado no header')
+      } else {
+        console.warn('[Z-API] ⚠️ Client-Token não configurado. Configure Z_API_CLIENT_TOKEN nas variáveis de ambiente.')
       }
 
       const response = await fetch(
