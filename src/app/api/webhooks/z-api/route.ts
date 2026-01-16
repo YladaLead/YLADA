@@ -270,18 +270,33 @@ async function notifyAdmins(conversationId: string, phone: string, message: stri
   const notificationPhone = process.env.Z_API_NOTIFICATION_PHONE
   if (notificationPhone) {
     try {
-      const instance = await getInstanceForArea(null)
+      // Buscar instância da área Nutri (ou usar a instância atual)
+      const { data: instances } = await supabase
+        .from('z_api_instances')
+        .select('instance_id, token')
+        .eq('area', 'nutri')
+        .eq('status', 'connected')
+        .limit(1)
+      
+      const instance = instances && instances.length > 0 ? instances[0] : null
+      
       if (instance) {
+        console.log('[Z-API Webhook] 📱 Enviando notificação para:', notificationPhone)
         await sendWhatsAppMessage(
           notificationPhone,
           `🔔 Nova mensagem WhatsApp\n\n📱 De: ${phone}\n💬 ${message.substring(0, 200)}`,
-          instance.instanceId,
+          instance.instance_id,
           instance.token
         )
+        console.log('[Z-API Webhook] ✅ Notificação enviada com sucesso')
+      } else {
+        console.warn('[Z-API Webhook] ⚠️ Instância não encontrada para enviar notificação')
       }
     } catch (error) {
-      console.error('[Z-API Webhook] Erro ao enviar notificação:', error)
+      console.error('[Z-API Webhook] ❌ Erro ao enviar notificação:', error)
     }
+  } else {
+    console.log('[Z-API Webhook] ℹ️ Z_API_NOTIFICATION_PHONE não configurado')
   }
 }
 
