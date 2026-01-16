@@ -321,7 +321,28 @@ export async function POST(request: NextRequest) {
     const body: any = rawBody
     
     // Extrair phone (Z-API envia como 'phone')
-    const phone = body.phone || body.from || body.sender || null
+    let phone = body.phone || body.from || body.sender || null
+    
+    // Garantir formato internacional (55 + número)
+    if (phone) {
+      // Limpar número (remover caracteres não numéricos)
+      let cleanPhone = phone.replace(/\D/g, '')
+      
+      // Se não começar com 55, adicionar
+      if (!cleanPhone.startsWith('55')) {
+        // Se começar com 0, remover o 0 antes de adicionar 55
+        if (cleanPhone.startsWith('0')) {
+          cleanPhone = cleanPhone.substring(1)
+        }
+        cleanPhone = `55${cleanPhone}`
+      }
+      
+      phone = cleanPhone
+      console.log('[Z-API Webhook] 📱 Número formatado:', {
+        original: body.phone || body.from || body.sender,
+        formatted: phone
+      })
+    }
     
     // Extrair message - Z-API envia como text.message ou diretamente como message
     let message: string | null = null

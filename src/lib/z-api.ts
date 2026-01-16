@@ -52,7 +52,22 @@ export class ZApiClient {
       const { phone, message, delayMessage = 2 } = params
 
       // Limpar número (remover caracteres não numéricos)
-      const cleanPhone = phone.replace(/\D/g, '')
+      let cleanPhone = phone.replace(/\D/g, '')
+      
+      // Garantir formato internacional (55 + número)
+      // Se não começar com 55, adicionar
+      if (!cleanPhone.startsWith('55')) {
+        // Se começar com 0, remover o 0 antes de adicionar 55
+        if (cleanPhone.startsWith('0')) {
+          cleanPhone = cleanPhone.substring(1)
+        }
+        cleanPhone = `55${cleanPhone}`
+      }
+      
+      console.log('[Z-API] 📤 Formatando número:', {
+        original: phone,
+        cleaned: cleanPhone
+      })
 
       const response = await fetch(
         `${this.baseUrl}/instances/${this.config.instanceId}/token/${this.config.token}/send-text`,
