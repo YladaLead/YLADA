@@ -274,6 +274,12 @@ async function notifyAdmins(conversationId: string, phone: string, message: stri
 
   // Enviar notificação via Z-API para número de notificação (se configurado)
   const notificationPhone = process.env.Z_API_NOTIFICATION_PHONE
+  console.log('[Z-API Webhook] 🔔 Verificando notificação:', {
+    notificationPhone: notificationPhone || 'NÃO CONFIGURADO',
+    phoneLength: notificationPhone?.length || 0,
+    hasNotificationPhone: !!notificationPhone
+  })
+  
   if (notificationPhone) {
     try {
       // Buscar instância da área Nutri (ou usar a instância atual)

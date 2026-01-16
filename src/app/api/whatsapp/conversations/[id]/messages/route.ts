@@ -225,6 +225,12 @@ export async function POST(
 
     // Enviar notificação para número configurado (quando admin envia mensagem)
     const notificationPhone = process.env.Z_API_NOTIFICATION_PHONE
+    console.log('[WhatsApp Messages] 🔔 Verificando notificação:', {
+      notificationPhone: notificationPhone || 'NÃO CONFIGURADO',
+      phoneLength: notificationPhone?.length || 0,
+      hasNotificationPhone: !!notificationPhone
+    })
+    
     if (notificationPhone) {
       try {
         // Formatar número de notificação (garantir formato internacional)
