@@ -57,70 +57,41 @@ export default function WellnessSidebar({ isMobileOpen = false, onMobileClose }:
       color: 'green'
     },
     {
-      title: 'Fluxos & Ações',
-      icon: '🔄',
-      color: 'green',
-      href: '/pt/wellness/fluxos', // Link direto para a página principal
-      items: [
-        { title: 'Todos os Fluxos', icon: '📋', href: '/pt/wellness/fluxos' },
-        { title: 'Ação Diária', icon: '⚡', href: '/pt/wellness/fluxos/acao-diaria' },
-        { title: 'Vendas', icon: '💰', href: '/pt/wellness/fluxos/vendas' },
-        { title: 'Acompanhamento', icon: '👥', href: '/pt/wellness/fluxos/acompanhamento' },
-        { title: 'Apresentação', icon: '🎯', href: '/pt/wellness/fluxos/apresentacao' },
-        { title: 'Treino Novos', icon: '🎓', href: '/pt/wellness/fluxos/treino-novos' }
-      ]
-    },
-    {
-      title: 'Biblioteca',
-      icon: '📚',
-      color: 'orange',
-      href: '/pt/wellness/biblioteca', // Link direto para a página principal
-      items: [
-        { title: 'Materiais', icon: '📄', href: '/pt/wellness/biblioteca/materiais' },
-        { title: 'Cartilhas', icon: '📖', href: '/pt/wellness/biblioteca/cartilhas' },
-        { title: 'Produtos', icon: '🥤', href: '/pt/wellness/biblioteca/produtos' },
-        { title: 'Scripts', icon: '💬', href: '/pt/wellness/biblioteca/scripts' },
-        { title: 'Vídeos', icon: '🎥', href: '/pt/wellness/biblioteca/videos' }
-      ]
-    },
-    {
       title: 'Mentoria NOEL',
       icon: '🤖',
       href: '/pt/wellness/noel',
       color: 'blue'
     },
     {
-      title: 'Comunidade',
-      icon: '🏘️',
-      href: '/pt/wellness/comunidade',
+      title: 'Filosofia LADA',
+      icon: '💬',
+      href: '/pt/wellness/filosofia-lada',
+      color: 'purple'
+    },
+    {
+      title: 'Meu Perfil e Metas',
+      icon: '👤',
+      href: '/pt/wellness/conta/perfil',
       color: 'green'
     },
     {
-      title: 'Treinos & Plano',
-      icon: '🎯',
-      color: 'purple',
-      href: '/pt/wellness/treinos', // Link direto para a página principal
-      items: [
-        { title: 'Treino 2-5-10', icon: '⚡', href: '/pt/wellness/treinos/2-5-10' },
-        { title: 'Filosofia YLADA', icon: '✨', href: '/pt/wellness/treinos/filosofia' },
-        { title: 'Liderança', icon: '👑', href: '/pt/wellness/treinos/lideranca' },
-        { title: 'Plano Presidente', icon: '🏆', href: '/pt/wellness/treinos/plano-presidente' }
-      ]
-    },
-    {
-      title: 'Minha Conta',
+      title: 'Configurações',
       icon: '⚙️',
-      color: 'gray',
-      href: '/pt/wellness/conta', // Link direto para a página principal
-      items: [
-        { title: 'Perfil', icon: '👤', href: '/pt/wellness/conta/perfil' },
-        { title: 'Metas', icon: '🎯', href: '/pt/wellness/conta/metas' },
-        { title: 'Vendas', icon: '💰', href: '/pt/wellness/conta/vendas' },
-        { title: 'Materiais', icon: '📥', href: '/pt/wellness/conta/materiais' },
-        { title: 'Histórico NOEL', icon: '💬', href: '/pt/wellness/conta/historico' },
-        { title: 'Configurações', icon: '⚙️', href: '/pt/wellness/configuracao' }
-      ]
+      href: '/pt/wellness/configuracao',
+      color: 'gray'
     }
+    // Itens removidos (podem ser adicionados no futuro se necessário):
+    // - Minha Conta (removido - apenas Configurações como item principal)
+    // - Perfil (movido para item principal - "Meu Perfil e Metas")
+    // - Metas (unificado com Perfil - o NOEL usa o perfil como base de referência)
+    // - Vendas (foco atual é geração de contato, não registro de vendas)
+    // - Materiais (vazio)
+    // - Histórico NOEL (vazio)
+    // Itens escondidos (podem ser revelados pelo NOEL quando necessário):
+    // - Fluxos & Ações
+    // - Biblioteca
+    // - Comunidade
+    // - Treinos & Plano
   ]
 
   const getColorClasses = (color?: string, isActive?: boolean) => {

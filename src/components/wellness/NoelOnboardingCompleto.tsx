@@ -4,17 +4,19 @@ import { useState } from 'react'
 import type { WellnessConsultantProfile } from '@/types/wellness-system'
 
 interface NoelOnboardingCompletoProps {
-  onComplete: (data: Partial<WellnessConsultantProfile>) => void
+  onComplete: (data: Partial<WellnessConsultantProfile>) => void | Promise<void>
   initialData?: Partial<WellnessConsultantProfile>
   onClose?: () => void
   inline?: boolean // Se true, renderiza inline sem modal
+  hideNavigation?: boolean // Se true, esconde indicadores de progresso e botões de navegação
 }
 
 export default function NoelOnboardingCompleto({ 
   onComplete, 
   initialData,
   onClose,
-  inline = false
+  inline = false,
+  hideNavigation = false
 }: NoelOnboardingCompletoProps) {
   const [section, setSection] = useState(1)
   const [saving, setSaving] = useState(false)
@@ -131,29 +133,31 @@ export default function NoelOnboardingCompleto({
       )}
       
       <div className={inline ? 'space-y-6' : 'p-8'}>
-          <div className="text-center mb-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">
-              🎯 Perfil Estratégico do Distribuidor
-            </h2>
-            <p className="text-gray-600">
-              Configure seu perfil para o NOEL personalizar sua experiência
-            </p>
-            <div className="mt-4 flex justify-center gap-2">
-              {[1, 2, 3].map((s) => (
-                <div
-                  key={s}
-                  className={`h-2 rounded-full transition-all ${
-                    s <= section ? 'bg-green-600 w-8' : 'bg-gray-200 w-2'
-                  }`}
-                />
-              ))}
+          {!hideNavigation && (
+            <div className="text-center mb-8">
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                🎯 Perfil Estratégico do Distribuidor
+              </h2>
+              <p className="text-gray-600">
+                Configure seu perfil para o NOEL personalizar sua experiência
+              </p>
+              <div className="mt-4 flex justify-center gap-2">
+                {[1, 2, 3].map((s) => (
+                  <div
+                    key={s}
+                    className={`h-2 rounded-full transition-all ${
+                      s <= section ? 'bg-green-600 w-8' : 'bg-gray-200 w-2'
+                    }`}
+                  />
+                ))}
+              </div>
+              <div className="mt-2 text-sm text-gray-500">
+                {section === 1 && 'Perguntas Essenciais (1-4)'}
+                {section === 2 && 'Tempo e Metas (5-7)'}
+                {section === 3 && 'Metas Temporais (8-9)'}
+              </div>
             </div>
-            <div className="mt-2 text-sm text-gray-500">
-              {section === 1 && 'Perguntas Essenciais (1-4)'}
-              {section === 2 && 'Tempo e Metas (5-7)'}
-              {section === 3 && 'Metas Temporais (8-9)'}
-            </div>
-          </div>
+          )}
 
           {/* SEÇÃO 1: PERGUNTAS 1-4 */}
           {section === 1 && (
@@ -564,33 +568,35 @@ export default function NoelOnboardingCompleto({
             </div>
           )}
 
-          <div className="mt-8 flex justify-between">
-            <button
-              onClick={handleBack}
-              disabled={section === 1 || saving}
-              className={`px-6 py-2 rounded-lg font-medium ${
-                section === 1 || saving
-                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-              }`}
-            >
-              Voltar
-            </button>
-            <button
-              onClick={handleNext}
-              disabled={saving}
-              className="px-6 py-2 rounded-lg font-medium bg-green-600 text-white hover:bg-green-700 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed flex items-center gap-2"
-            >
-              {saving ? (
-                <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                  <span>Salvando...</span>
-                </>
-              ) : (
-                <span>{section === totalSections ? 'Finalizar' : 'Próximo'}</span>
-              )}
-            </button>
-          </div>
+          {!hideNavigation && (
+            <div className="mt-8 flex justify-between">
+              <button
+                onClick={handleBack}
+                disabled={section === 1 || saving}
+                className={`px-6 py-2 rounded-lg font-medium ${
+                  section === 1 || saving
+                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                }`}
+              >
+                Voltar
+              </button>
+              <button
+                onClick={handleNext}
+                disabled={saving}
+                className="px-6 py-2 rounded-lg font-medium bg-green-600 text-white hover:bg-green-700 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed flex items-center gap-2"
+              >
+                {saving ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                    <span>Salvando...</span>
+                  </>
+                ) : (
+                  <span>{section === totalSections ? 'Finalizar' : 'Próximo'}</span>
+                )}
+              </button>
+            </div>
+          )}
         </div>
       </div>
   )

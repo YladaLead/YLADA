@@ -10,12 +10,6 @@ import ConditionalWellnessSidebar from '@/components/wellness/ConditionalWellnes
 import NoelOnboardingCompleto from '@/components/wellness/NoelOnboardingCompleto'
 import WellnessOnboardingBanners from '@/components/wellness/WellnessOnboardingBanners'
 
-interface PlanProgress {
-  current_day: number
-  total_days: number
-  task_of_day?: string
-}
-
 interface Stats {
   totalClientes: number
   pvMensal: number
@@ -24,7 +18,8 @@ interface Stats {
 }
 
 interface LinkStats {
-  totalClicks: number
+  totalClicks: number // Cliques nos links (views)
+  totalWhatsAppClicks: number // Cliques no WhatsApp (conversions_count)
 }
 
 interface Diagnostico {
@@ -67,7 +62,6 @@ function WellnessHomeContent() {
   
   const [showOnboarding, setShowOnboarding] = useState(false)
   const [onboardingComplete, setOnboardingComplete] = useState(false)
-  const [planProgress, setPlanProgress] = useState<PlanProgress | null>(null)
   const [stats, setStats] = useState<Stats | null>(null)
   const [diagnostico, setDiagnostico] = useState<Diagnostico | null>(null)
   const [recomendacoes, setRecomendacoes] = useState<Recomendacao[]>([])
@@ -80,6 +74,11 @@ function WellnessHomeContent() {
   const [metasCalculadas, setMetasCalculadas] = useState<any>(null)
   const [loadingTimeout, setLoadingTimeout] = useState(false) // Timeout de segurança para evitar loading infinito
   const [linkStats, setLinkStats] = useState<LinkStats | null>(null)
+  const [metasResumo, setMetasResumo] = useState<{
+    metaPV?: number
+    metaGanhoMensal?: number
+    metaRecrutamento?: number
+  } | null>(null)
 
   // Carregar perfil NOEL e calcular metas
   // CORREÇÃO: Aguardar autenticação completar antes de fazer requisições
@@ -121,6 +120,51 @@ function WellnessHomeContent() {
     loadNoelProfile()
   }, [authenticatedFetch, authLoading, user, session])
 
+  // Recarregar resumo de metas quando o perfil NOEL for carregado
+  useEffect(() => {
+    if (!noelProfile || authLoading || !user || !session) return
+    
+    const carregarResumoMetas = async () => {
+      try {
+        const [pvResponse, construcaoResponse] = await Promise.all([
+          authenticatedFetch('/api/wellness/pv/mensal'),
+          authenticatedFetch('/api/wellness/metas-construcao')
+        ])
+        
+        const resumo: any = {}
+        
+        // Meta de Ganho Mensal com Vendas (do perfil estratégico - PRIORIDADE)
+        if (noelProfile?.meta_financeira) {
+          resumo.metaGanhoMensal = noelProfile.meta_financeira
+        }
+        
+        // Meta PV Mensal (estimula trabalho mensal)
+        if (pvResponse.ok) {
+          const pvData = await pvResponse.json()
+          if (pvData.pv_mensal?.meta_pv) {
+            resumo.metaPV = pvData.pv_mensal.meta_pv
+          }
+        }
+        
+        // Meta de Recrutamento (estimula trabalho mensal)
+        if (construcaoResponse.ok) {
+          const construcaoData = await construcaoResponse.json()
+          if (construcaoData.metas?.meta_recrutamento) {
+            resumo.metaRecrutamento = construcaoData.metas.meta_recrutamento
+          }
+        }
+        
+        if (Object.keys(resumo).length > 0) {
+          setMetasResumo(resumo)
+        }
+      } catch (e) {
+        console.error('Erro ao carregar resumo de metas:', e)
+      }
+    }
+    
+    carregarResumoMetas()
+  }, [noelProfile, authenticatedFetch, authLoading, user, session])
+
   // Carregar dados iniciais
   // CORREÇÃO: Aguardar autenticação completar antes de fazer requisições
   useEffect(() => {
@@ -135,45 +179,7 @@ function WellnessHomeContent() {
         setLoading(true)
         console.log('🔍 Home: Carregando dados para user:', user.id)
 
-        // Carregar progresso do plano
-        if (user?.id) {
-          try {
-            // Buscar diretamente do Supabase via API interna (usando authenticatedFetch)
-            const planResponse = await authenticatedFetch('/api/wellness/plano/progresso')
-            if (planResponse.ok) {
-              const planData = await planResponse.json()
-              if (planData.success && planData.data) {
-                setPlanProgress({
-                  current_day: planData.data.current_day || 1,
-                  total_days: 90,
-                  task_of_day: `Dia ${planData.data.current_day || 1} do seu plano`
-                })
-              } else {
-                // Se não tiver progresso, começar do dia 1
-                setPlanProgress({
-                  current_day: 1,
-                  total_days: 90,
-                  task_of_day: 'Dia 1 do seu plano'
-                })
-              }
-            } else {
-              // Fallback: dia 1
-              setPlanProgress({
-                current_day: 1,
-                total_days: 90,
-                task_of_day: 'Dia 1 do seu plano'
-              })
-            }
-          } catch (e) {
-            console.error('Erro ao carregar plano:', e)
-            // Fallback: dia 1
-            setPlanProgress({
-              current_day: 1,
-              total_days: 90,
-              task_of_day: 'Dia 1 do seu plano'
-            })
-          }
-        }
+        // Progresso do plano removido - não está sendo usado atualmente
 
         // Carregar estatísticas (usando authenticatedFetch)
         try {
@@ -193,22 +199,25 @@ function WellnessHomeContent() {
           console.error('Erro ao carregar estatísticas:', e)
         }
 
-        // Carregar estatísticas dos links (apenas cliques/views)
+        // Carregar estatísticas dos links (cliques nos links + cliques no WhatsApp)
         try {
-          // Buscar ferramentas para obter total de cliques
+          // Buscar ferramentas para obter total de cliques e conversões
           const ferramentasResponse = await authenticatedFetch('/api/wellness/ferramentas?profession=wellness')
           if (ferramentasResponse.ok) {
             const ferramentasData = await ferramentasResponse.json()
             const tools = ferramentasData.tools || []
             const totalClicks = tools.reduce((acc: number, tool: any) => acc + (tool.views || 0), 0)
+            const totalWhatsAppClicks = tools.reduce((acc: number, tool: any) => acc + (tool.conversions_count || 0), 0)
             
             setLinkStats({
-              totalClicks: totalClicks
+              totalClicks: totalClicks,
+              totalWhatsAppClicks: totalWhatsAppClicks
             })
           }
         } catch (e) {
           console.error('Erro ao carregar estatísticas dos links:', e)
         }
+
 
         // Carregar diagnóstico (usando authenticatedFetch)
         try {
@@ -349,13 +358,36 @@ function WellnessHomeContent() {
   }
 
   const userName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Consultor'
+  
+  // Frases motivacionais de Mark Hughes, Jim Rohn e Eric Worre
+  // As frases trocam a cada carregamento da página (aleatório)
   const frasesMotivacionais = [
-    'Movimento gera clareza.',
-    'Consistência cria confiança.',
-    'Pequenos passos diários viram grandes resultados.',
-    'Ação gera resultado.'
+    // Mark Hughes
+    { frase: 'Grandes histórias começam com passos pequenos — mas com intenção gigante.', autor: 'Mark Hughes' },
+    { frase: 'Quando você está em movimento, tudo ao redor começa a se mover com você.', autor: 'Mark Hughes' },
+    { frase: 'O que você faz repetidamente constrói o que você se torna.', autor: 'Mark Hughes' },
+    { frase: 'Quando sua visão é clara, sua energia aumenta.', autor: 'Mark Hughes' },
+    { frase: 'As pessoas seguem quem está em movimento. Seja esse movimento.', autor: 'Mark Hughes' },
+    { frase: 'Todo dia é uma chance de construir algo maior.', autor: 'Mark Hughes' },
+    { frase: 'A forma como você chega determina a forma como as pessoas respondem.', autor: 'Mark Hughes' },
+    // Jim Rohn
+    { frase: 'A disciplina que você exerce hoje é a liberdade que você vive amanhã.', autor: 'Jim Rohn' },
+    { frase: 'O seu potencial é maior do que suas desculpas.', autor: 'Jim Rohn' },
+    { frase: 'Trabalhe mais em você do que no seu negócio.', autor: 'Jim Rohn' },
+    { frase: 'O progresso de hoje é a vitória de amanhã.', autor: 'Jim Rohn' },
+    { frase: 'Sua vida não melhora por acaso, melhora por mudança.', autor: 'Jim Rohn' },
+    { frase: 'Não deseje que fosse mais fácil. Deseje ser melhor.', autor: 'Jim Rohn' },
+    // Eric Worre
+    { frase: 'Amadores tentam. Profissionais fazem até dar certo.', autor: 'Eric Worre' },
+    { frase: 'Não existe dia perfeito. Existe decisão.', autor: 'Eric Worre' },
+    { frase: 'Profissionais têm rotina. E rotina gera resultado.', autor: 'Eric Worre' },
+    { frase: 'A diferença entre os melhores e os medíocres é o treino constante.', autor: 'Eric Worre' },
+    { frase: 'Quando você trata o negócio como hobby, ele te paga como hobby. Quando trata como profissão, ele te paga como profissão.', autor: 'Eric Worre' }
   ]
   const fraseMotivacional = frasesMotivacionais[Math.floor(Math.random() * frasesMotivacionais.length)]
+  
+  // Objetivo principal do perfil (para mostrar no card de metas)
+  const objetivoPrincipal = noelProfile?.objetivo_principal || 'Crescer no projeto'
 
   // 🚨 CORREÇÃO: Timeout de segurança para evitar loading infinito
   // Se autenticação já terminou e temos usuário, mostra conteúdo mesmo que dados ainda estejam carregando
@@ -406,55 +438,111 @@ function WellnessHomeContent() {
 
         {/* BLOCO 1 — Boas-vindas do NOEL */}
         <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-5 sm:p-6 border border-green-200 shadow-sm mb-6">
-          <div className="flex items-start gap-4">
-            <div className="flex-shrink-0">
-              <div className="w-16 h-16 bg-green-600 rounded-full flex items-center justify-center text-3xl shadow-md">
-                👤
-              </div>
-            </div>
-            <div className="flex-1">
-              <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">
-                Olá, {userName.split(' ')[0]}! 👋
-              </h1>
-              <p className="text-gray-700 mb-4">
-                "Pequenas ações diárias criam grandes resultados."
-              </p>
-              <button
-                onClick={() => router.push('/pt/wellness/noel')}
-                className="bg-green-600 hover:bg-green-700 text-white font-semibold py-2.5 px-6 rounded-lg text-sm transition-colors shadow-md hover:shadow-lg"
-              >
-                Perguntar ao NOEL →
-              </button>
-            </div>
+          <div className="flex-1">
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">
+              Olá, {userName.split(' ')[0]}! 👋
+            </h1>
+            <p className="text-gray-700 mb-4">
+              "Pequenas ações diárias criam grandes resultados."
+            </p>
+            <button
+              onClick={() => router.push('/pt/wellness/noel')}
+              className="bg-green-600 hover:bg-green-700 text-white font-semibold py-2.5 px-6 rounded-lg text-sm transition-colors shadow-md hover:shadow-lg"
+            >
+              Perguntar ao NOEL →
+            </button>
           </div>
         </div>
 
-        {/* BLOCO 2 — Ação do Dia (MAIS IMPORTANTE - NO TOPO) */}
-        {planProgress && (
-          <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-5 sm:p-6 border border-green-200 shadow-sm mb-6">
-            <div className="flex items-start gap-3 mb-4">
-              <span className="text-2xl">🎯</span>
-              <div className="flex-1">
-                <h2 className="text-lg font-semibold text-gray-900 mb-1">Sua Ação de Hoje</h2>
-                <p className="text-gray-700 text-sm sm:text-base mb-2">
-                  Dia {planProgress.current_day} / {planProgress.total_days} – Plano de Crescimento
-                </p>
-              </div>
+        {/* BLOCO 1.5 — Card de Resumo do Perfil e Metas */}
+        <div className="bg-gradient-to-br from-purple-50 to-blue-50 rounded-xl p-5 sm:p-6 border border-purple-200 shadow-sm mb-6">
+          <div className="mb-4 pb-4 border-b border-purple-200">
+            <h2 className="text-lg font-semibold text-gray-900 mb-3">📋 Resumo do Perfil e Metas</h2>
+            
+            {/* Objetivo Principal */}
+            <div className="mb-3">
+              <p className="text-xs text-gray-600 mb-1">🎯 Objetivo Principal</p>
+              <p className="text-gray-800 font-medium text-base">
+                {objetivoPrincipal}
+              </p>
             </div>
-            <button
-              onClick={() => router.push(`/pt/wellness/plano/${planProgress.current_day}`)}
-              className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-4 rounded-lg text-base transition-colors shadow-md hover:shadow-lg"
-            >
-              Ver ação do dia
-            </button>
-          </div>
-        )}
 
-        {/* BLOCO 2.5 — Estatísticas dos Links (Apenas Cliques) */}
+            {/* Resumo de Metas Mensais (que estimulam o trabalho) */}
+            {metasResumo && (
+              <div className="mt-4 space-y-3">
+                {metasResumo.metaGanhoMensal && metasResumo.metaGanhoMensal > 0 && (
+                  <div className="bg-white/80 rounded-lg p-3 border border-purple-200">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="text-lg">💵</span>
+                        <span className="text-sm text-gray-600">Meta de Ganho no Mês (Vendas)</span>
+                      </div>
+                      <span className="font-bold text-lg text-green-600">
+                        R$ {metasResumo.metaGanhoMensal.toLocaleString('pt-BR')}
+                      </span>
+                    </div>
+                  </div>
+                )}
+                {metasResumo.metaPV && metasResumo.metaPV > 0 && (
+                  <div className="bg-white/80 rounded-lg p-3 border border-purple-200">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="text-lg">💰</span>
+                        <span className="text-sm text-gray-600">Meta PV Mensal</span>
+                      </div>
+                      <span className="font-bold text-lg text-blue-600">
+                        {metasResumo.metaPV.toLocaleString('pt-BR')} PV
+                      </span>
+                    </div>
+                  </div>
+                )}
+                {metasResumo.metaRecrutamento && metasResumo.metaRecrutamento > 0 && (
+                  <div className="bg-white/80 rounded-lg p-3 border border-purple-200">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="text-lg">🚀</span>
+                        <span className="text-sm text-gray-600">Meta de Recrutamento</span>
+                      </div>
+                      <span className="font-bold text-lg text-purple-600">
+                        {metasResumo.metaRecrutamento} pessoas
+                      </span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+            
+            <div className="mt-4 pt-3 border-t border-purple-200">
+              <button
+                onClick={() => router.push('/pt/wellness/conta/perfil')}
+                className="text-sm text-purple-600 hover:text-purple-700 font-medium"
+              >
+                Ver perfil completo →
+              </button>
+            </div>
+          </div>
+          
+          <div className="mb-4 pb-4 border-b border-purple-200">
+            <h3 className="text-sm font-semibold text-gray-700 mb-2">💫 Inspiração do Dia</h3>
+            <p className="text-gray-700 italic text-sm">
+              "{fraseMotivacional.frase}"
+            </p>
+            <p className="text-gray-500 text-xs mt-1">— {fraseMotivacional.autor}</p>
+          </div>
+
+          <div className="bg-white/60 rounded-lg p-4 border border-purple-200">
+            <h3 className="text-sm font-semibold text-gray-900 mb-2">💬 Lembrete Diário</h3>
+            <p className="text-sm text-gray-700">
+              <strong>10 links por dia para vendas</strong> e <strong>10 links por dia para recrutamento</strong>
+            </p>
+          </div>
+        </div>
+
+        {/* BLOCO 2 — Estatísticas dos Links (Cliques nos Links + Cliques no WhatsApp) */}
         {linkStats && (
-          <div className="bg-white rounded-xl p-4 sm:p-5 border border-gray-200 shadow-sm mb-6">
+          <div className="mb-6">
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-sm font-medium text-gray-500">📊 Cliques nos Links</h3>
+              <h3 className="text-sm font-medium text-gray-500">📊 Estatísticas de Engajamento</h3>
               <button
                 onClick={() => router.push('/pt/wellness/links?ranking=true')}
                 className="text-xs text-green-600 hover:text-green-700 font-medium"
@@ -462,51 +550,28 @@ function WellnessHomeContent() {
                 Ver ranking →
               </button>
             </div>
-            <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg p-4 border border-green-100 text-center">
-              <p className="text-xs text-gray-500 mb-1">👆 Total de Cliques</p>
-              <p className="text-3xl font-bold text-green-600">{linkStats.totalClicks}</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {/* Card: Cliques nos Links */}
+              <div className="bg-white rounded-xl p-4 sm:p-5 border border-gray-200 shadow-sm">
+                <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg p-4 border border-green-100 text-center">
+                  <p className="text-xs text-gray-500 mb-1">🔗 Cliques nos Links</p>
+                  <p className="text-3xl font-bold text-green-600">{linkStats.totalClicks}</p>
+                  <p className="text-xs text-gray-500 mt-1">Quando acessam o quiz/diagnóstico</p>
+                </div>
+              </div>
+              
+              {/* Card: Cliques no WhatsApp */}
+              <div className="bg-white rounded-xl p-4 sm:p-5 border border-gray-200 shadow-sm">
+                <div className="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-lg p-4 border border-blue-100 text-center">
+                  <p className="text-xs text-gray-500 mb-1">💬 Cliques no WhatsApp</p>
+                  <p className="text-3xl font-bold text-blue-600">{linkStats.totalWhatsAppClicks}</p>
+                  <p className="text-xs text-gray-500 mt-1">Quando clicam no botão WhatsApp</p>
+                </div>
+              </div>
             </div>
           </div>
         )}
 
-        {/* BLOCO 6 — Recomendações do NOEL (2 cards apenas) */}
-        {recomendacoes.length > 0 && (
-          <div className="mb-6">
-            <h3 className="text-sm font-medium text-gray-500 mb-3">💡 Recomendações do NOEL</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {recomendacoes.map((rec) => (
-                <button
-                  key={rec.id}
-                  onClick={() => rec.link && router.push(rec.link)}
-                  className="bg-white rounded-lg p-4 border border-gray-200 shadow-sm hover:shadow-md transition-all text-left"
-                >
-                  <h4 className="font-semibold text-gray-900 mb-1 text-sm">{rec.titulo}</h4>
-                  <p className="text-xs text-gray-600 mb-2">{rec.descricao}</p>
-                  <p className="text-xs text-green-600 font-medium">{rec.acao || 'Ver mais'} →</p>
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* BLOCO 7 — Próximos Passos (3 linhas simples) */}
-        <div className="bg-white rounded-xl p-4 sm:p-5 border border-gray-200 shadow-sm">
-          <h3 className="text-sm font-medium text-gray-500 mb-3">📌 Próximos Passos</h3>
-          <ul className="space-y-2 text-sm text-gray-700">
-            <li className="flex items-start gap-2">
-              <span className="text-green-600 mt-0.5">1.</span>
-              <span>Enviar convites (ação do dia)</span>
-            </li>
-            <li className="flex items-start gap-2">
-              <span className="text-green-600 mt-0.5">2.</span>
-              <span>Fazer acompanhamento</span>
-            </li>
-            <li className="flex items-start gap-2">
-              <span className="text-green-600 mt-0.5">3.</span>
-              <span>Publicar divulgação simples</span>
-            </li>
-          </ul>
-        </div>
       </main>
     </div>
   )
