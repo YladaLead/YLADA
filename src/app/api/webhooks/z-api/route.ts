@@ -34,13 +34,19 @@ const supabase = createClient(
 )
 
 interface ZApiWebhookPayload {
-  phone: string
-  message: string
+  phone?: string
+  from?: string // Z-API pode enviar 'from' ao invés de 'phone'
+  message?: string
+  text?: string // Z-API pode enviar 'text' ao invés de 'message'
+  body?: string // Z-API pode enviar 'body' ao invés de 'message'
   name?: string
   timestamp?: string
   instanceId?: string
+  instance?: string // Z-API pode enviar 'instance' ao invés de 'instanceId'
   messageId?: string
   type?: string
+  // Campos adicionais que Z-API pode enviar
+  [key: string]: any
 }
 
 /**
@@ -305,29 +311,89 @@ async function notifyAdmins(conversationId: string, phone: string, message: stri
  */
 export async function POST(request: NextRequest) {
   try {
-    const body: ZApiWebhookPayload = await request.json()
+    const rawBody = await request.json()
+    
+    // Log completo do payload recebido para debug
+    console.log('[Z-API Webhook] 📥 Payload completo recebido:', JSON.stringify(rawBody, null, 2))
 
-    console.log('[Z-API Webhook] 📥 Mensagem recebida:', {
-      phone: body.phone,
-      message: body.message?.substring(0, 50),
-      instanceId: body.instanceId,
-      fullBody: JSON.stringify(body).substring(0, 200), // Log completo para debug
+    // Normalizar payload - Z-API envia em formato específico
+    // Formato Z-API: { phone, text: { message }, instance, etc. }
+    const body: any = rawBody
+    
+    // Extrair phone (Z-API envia como 'phone')
+    const phone = body.phone || body.from || body.sender || null
+    
+    // Extrair message - Z-API envia como text.message ou diretamente como message
+    let message: string | null = null
+    if (body.text && typeof body.text === 'object' && body.text.message) {
+      // Formato Z-API: { text: { message: "..." } }
+      message = body.text.message
+    } else if (body.text && typeof body.text === 'string') {
+      // Formato alternativo: { text: "..." }
+      message = body.text
+    } else if (body.message) {
+      // Formato direto: { message: "..." }
+      message = body.message
+    } else if (body.body) {
+      // Formato alternativo: { body: "..." }
+      message = body.body
+    }
+    
+    // Extrair instanceId (Z-API pode enviar como 'instance' ou 'instanceId')
+    const instanceId = body.instanceId || body.instance || body.instance_id || null
+    
+    // Extrair name (Z-API pode enviar como 'name', 'senderName', 'contactName', etc.)
+    const name = body.name || body.senderName || body.contactName || body.contact?.name || null
+    
+    // Extrair type (Z-API envia como 'type')
+    const type = body.type || 'text'
+    
+    // Extrair messageId (Z-API envia como 'messageId')
+    const messageId = body.messageId || null
+    
+    // Extrair timestamp (Z-API pode enviar como 'momment' em milissegundos ou 'timestamp')
+    let timestamp: string | null = null
+    if (body.momment) {
+      // Converter milissegundos para ISO string
+      timestamp = new Date(body.momment).toISOString()
+    } else if (body.timestamp) {
+      timestamp = body.timestamp
+    } else {
+      timestamp = new Date().toISOString()
+    }
+    
+    console.log('[Z-API Webhook] 🔍 Dados normalizados:', {
+      phone,
+      message: message?.substring(0, 50),
+      instanceId,
+      name,
+      type,
+      rawKeys: Object.keys(rawBody)
     })
 
     // Validar payload
-    if (!body.phone || !body.message) {
+    if (!phone || !message) {
+      console.error('[Z-API Webhook] ❌ Payload inválido:', {
+        phone: phone || 'FALTANDO',
+        message: message ? message.substring(0, 50) : 'FALTANDO',
+        rawBody: JSON.stringify(rawBody).substring(0, 500)
+      })
       return NextResponse.json(
-        { error: 'phone e message são obrigatórios' },
+        { 
+          error: 'phone/from e message/text são obrigatórios',
+          received: rawBody,
+          hint: 'Z-API deve enviar: phone/from e message/text/body'
+        },
         { status: 400 }
       )
     }
 
     // O webhook da Z-API envia o instanceId no payload
     // Se não vier, usa do banco de dados (melhor para múltiplas instâncias)
-    let instanceId = body.instanceId
+    let finalInstanceId = instanceId
     
     // Se não veio no payload, buscar do banco (primeira instância conectada)
-    if (!instanceId) {
+    if (!finalInstanceId) {
       const { data: instance } = await supabase
         .from('z_api_instances')
         .select('instance_id')
@@ -336,41 +402,52 @@ export async function POST(request: NextRequest) {
         .single()
       
       if (instance) {
-        instanceId = instance.instance_id
+        finalInstanceId = instance.instance_id
       } else {
         // Fallback: usar do env (útil para testes)
-        instanceId = process.env.Z_API_INSTANCE_ID
+        finalInstanceId = process.env.Z_API_INSTANCE_ID
       }
     }
     
-    if (!instanceId) {
+    if (!finalInstanceId) {
+      console.error('[Z-API Webhook] ❌ InstanceId não encontrado')
       return NextResponse.json(
         { error: 'instanceId não encontrado. Configure no banco ou no .env' },
         { status: 400 }
       )
     }
 
-    console.log('[Z-API Webhook] 🔍 InstanceId encontrado:', instanceId)
+    console.log('[Z-API Webhook] 🔍 InstanceId encontrado:', finalInstanceId)
 
     // 1. Identificar área (sempre Nutri para esta instância)
-    const area = await identifyArea(body.phone, body.message, instanceId)
+    const area = await identifyArea(phone, message, finalInstanceId)
     console.log('[Z-API Webhook] 🏷️ Área identificada:', area)
 
     // 2. Criar ou buscar conversa
     const conversationId = await getOrCreateConversation(
-      instanceId,
-      body.phone,
-      body.name,
+      finalInstanceId,
+      phone,
+      name || null,
       area
     )
     console.log('[Z-API Webhook] 💬 Conversa ID:', conversationId)
 
-    // 3. Salvar mensagem
-    await saveMessage(conversationId, instanceId, body)
+    // 3. Salvar mensagem (usar payload normalizado)
+    const normalizedPayload: ZApiWebhookPayload = {
+      phone,
+      message,
+      name: name || null,
+      instanceId: finalInstanceId,
+      messageId: messageId || null,
+      type: type || 'text',
+      timestamp: timestamp || new Date().toISOString()
+    }
+    
+    await saveMessage(conversationId, finalInstanceId, normalizedPayload)
     console.log('[Z-API Webhook] ✅ Mensagem salva no banco')
 
     // 4. Notificar administradores
-    await notifyAdmins(conversationId, body.phone, body.message)
+    await notifyAdmins(conversationId, phone, message)
     console.log('[Z-API Webhook] 🔔 Notificações enviadas')
 
     // 5. TODO: Processar com bot (NOEL, Nutri, etc.) se configurado
