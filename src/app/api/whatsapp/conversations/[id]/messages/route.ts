@@ -175,7 +175,9 @@ export async function POST(
     console.log('[WhatsApp Messages] 📤 Enviando mensagem:', {
       to: conversation.phone,
       message: message.substring(0, 50),
-      instanceId: instance.instance_id
+      instanceId: instance.instance_id,
+      tokenLength: instance.token?.length || 0,
+      tokenPreview: instance.token ? `${instance.token.substring(0, 4)}...${instance.token.substring(instance.token.length - 4)}` : 'NULL'
     })
 
     // Enviar mensagem via Z-API
