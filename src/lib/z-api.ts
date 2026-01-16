@@ -74,13 +74,23 @@ export class ZApiClient {
         countryCode: hasCountryCode ? cleanPhone.substring(0, 3) : '55 (assumido BR)'
       })
 
+      // Z-API requer Client-Token no header (Account Security Token)
+      const clientToken = process.env.Z_API_CLIENT_TOKEN || ''
+      
+      const headers: HeadersInit = {
+        'Content-Type': 'application/json',
+      }
+      
+      // Adicionar Client-Token se configurado
+      if (clientToken) {
+        headers['Client-Token'] = clientToken
+      }
+
       const response = await fetch(
         `${this.baseUrl}/instances/${this.config.instanceId}/token/${this.config.token}/send-text`,
         {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
+          headers,
           body: JSON.stringify({
             phone: cleanPhone,
             message: message,
