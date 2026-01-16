@@ -313,13 +313,47 @@ async function notifyAdmins(conversationId: string, phone: string, message: stri
         .from('z_api_instances')
         .select('instance_id, token, status, area')
         .eq('area', 'nutri')
+        .eq('status', 'connected')
+        .neq('instance_id', 'SEU_INSTANCE_ID_AQUI') // Excluir instâncias de exemplo
+        .neq('instance_id', 'YOUR_INSTANCE_ID') // Excluir instâncias de exemplo
+        .order('updated_at', { ascending: false }) // Pegar a mais recente
         .limit(1)
       
       console.log('[Z-API Webhook] 🔍 Resultado busca instância:', {
         found: instances?.length || 0,
-        instances: instances?.map(i => ({ instance_id: i.instance_id, status: i.status, area: i.area })),
+        instances: instances?.map(i => ({ 
+          instance_id: i.instance_id, 
+          status: i.status, 
+          area: i.area,
+          tokenLength: i.token?.length || 0,
+          tokenPreview: i.token ? `${i.token.substring(0, 4)}...${i.token.substring(i.token.length - 4)}` : 'NULL'
+        })),
         error: instanceError?.message
       })
+      
+      // Filtrar instâncias de exemplo/placeholder
+      if (instances && instances.length > 0) {
+        const validInstances = instances.filter(i => 
+          i.instance_id && 
+          i.instance_id !== 'SEU_INSTANCE_ID_AQUI' &&
+          i.instance_id !== 'YOUR_INSTANCE_ID' &&
+          !i.instance_id.includes('EXEMPLO') &&
+          !i.instance_id.includes('EXAMPLE') &&
+          i.token &&
+          i.token !== 'SEU_TOKEN_AQUI' &&
+          i.token !== 'YOUR_TOKEN' &&
+          !i.token.includes('EXEMPLO') &&
+          !i.token.includes('EXAMPLE')
+        )
+        
+        if (validInstances.length > 0) {
+          instances = validInstances
+          console.log('[Z-API Webhook] ✅ Instâncias válidas após filtro:', validInstances.length)
+        } else {
+          console.warn('[Z-API Webhook] ⚠️ Apenas instâncias de exemplo encontradas, removendo...')
+          instances = []
+        }
+      }
       
       // Tentar buscar qualquer instância conectada se não encontrar da área nutri
       let instance = instances && instances.length > 0 ? instances[0] : null
@@ -330,6 +364,9 @@ async function notifyAdmins(conversationId: string, phone: string, message: stri
           .from('z_api_instances')
           .select('instance_id, token, status, area')
           .eq('status', 'connected')
+          .neq('instance_id', 'SEU_INSTANCE_ID_AQUI') // Excluir instâncias de exemplo
+          .neq('instance_id', 'YOUR_INSTANCE_ID') // Excluir instâncias de exemplo
+          .order('updated_at', { ascending: false }) // Pegar a mais recente
           .limit(1)
         
         if (anyInstances && anyInstances.length > 0) {
