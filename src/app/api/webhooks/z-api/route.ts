@@ -288,13 +288,30 @@ async function notifyAdmins(conversationId: string, phone: string, message: stri
       
       if (instance) {
         console.log('[Z-API Webhook] 📱 Enviando notificação para:', notificationPhone)
-        await sendWhatsAppMessage(
-          notificationPhone,
+        
+        // Formatar número de notificação (garantir formato internacional)
+        let formattedNotificationPhone = notificationPhone.replace(/\D/g, '')
+        const countryCodes = ['1', '55', '52', '54', '56', '57', '58', '591', '592', '593', '594', '595', '596', '597', '598', '599']
+        const hasCountryCode = countryCodes.some(code => formattedNotificationPhone.startsWith(code))
+        if (!hasCountryCode) {
+          if (formattedNotificationPhone.startsWith('0')) {
+            formattedNotificationPhone = formattedNotificationPhone.substring(1)
+          }
+          formattedNotificationPhone = `55${formattedNotificationPhone}`
+        }
+        
+        const result = await sendWhatsAppMessage(
+          formattedNotificationPhone,
           `🔔 Nova mensagem WhatsApp\n\n📱 De: ${phone}\n💬 ${message.substring(0, 200)}`,
           instance.instance_id,
           instance.token
         )
-        console.log('[Z-API Webhook] ✅ Notificação enviada com sucesso')
+        
+        if (result.success) {
+          console.log('[Z-API Webhook] ✅ Notificação enviada com sucesso para:', formattedNotificationPhone)
+        } else {
+          console.error('[Z-API Webhook] ❌ Erro ao enviar notificação:', result.error)
+        }
       } else {
         console.warn('[Z-API Webhook] ⚠️ Instância não encontrada para enviar notificação')
       }

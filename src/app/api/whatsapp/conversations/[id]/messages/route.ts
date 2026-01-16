@@ -223,6 +223,42 @@ export async function POST(
       console.error('[WhatsApp Messages] Erro ao salvar:', msgError)
     }
 
+    // Enviar notificação para número configurado (quando admin envia mensagem)
+    const notificationPhone = process.env.Z_API_NOTIFICATION_PHONE
+    if (notificationPhone) {
+      try {
+        // Formatar número de notificação (garantir formato internacional)
+        let formattedNotificationPhone = notificationPhone.replace(/\D/g, '')
+        const countryCodes = ['1', '55', '52', '54', '56', '57', '58', '591', '592', '593', '594', '595', '596', '597', '598', '599']
+        const hasCountryCode = countryCodes.some(code => formattedNotificationPhone.startsWith(code))
+        if (!hasCountryCode) {
+          if (formattedNotificationPhone.startsWith('0')) {
+            formattedNotificationPhone = formattedNotificationPhone.substring(1)
+          }
+          formattedNotificationPhone = `55${formattedNotificationPhone}`
+        }
+        
+        console.log('[WhatsApp Messages] 📱 Enviando notificação de mensagem enviada para:', formattedNotificationPhone)
+        const notificationResult = await sendWhatsAppMessage(
+          formattedNotificationPhone,
+          `✅ Mensagem enviada\n\n📱 Para: ${conversation.phone}\n💬 ${message.substring(0, 200)}`,
+          instance.instance_id,
+          instance.token
+        )
+        
+        if (notificationResult.success) {
+          console.log('[WhatsApp Messages] ✅ Notificação enviada com sucesso')
+        } else {
+          console.error('[WhatsApp Messages] ❌ Erro ao enviar notificação:', notificationResult.error)
+        }
+      } catch (error: any) {
+        console.error('[WhatsApp Messages] ❌ Erro ao enviar notificação:', error)
+        // Não falhar a requisição se notificação falhar
+      }
+    } else {
+      console.log('[WhatsApp Messages] ℹ️ Z_API_NOTIFICATION_PHONE não configurado')
+    }
+
     return NextResponse.json({
       success: true,
       message: savedMessage,
