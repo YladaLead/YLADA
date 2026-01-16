@@ -1,0 +1,53 @@
+===========================================
+4 PERGUNTAS PARA TESTAR NOEL v3.7
+Teste das melhorias: formato enxuto, tudo integrado, entrega de links
+===========================================
+
+TESTE 1: ENTREGA DE LINK E FORMATO ENXUTO
+------------------------------------------------------
+Preciso de um script pra mandar pra minha mãe que tá sempre cansada
+
+TESTE 2: DETECÇÃO DE CONTEXTO (RECRUTAMENTO)
+------------------------------------------------------
+Como eu convenço alguém que disse que não tem dinheiro?
+
+TESTE 3: ENTREGA DE LINK QUANDO SOLICITADO
+------------------------------------------------------
+Não sei qual link eu uso pra começar a vender
+
+TESTE 4: PERGUNTA VAGA (DEVE FAZER PERGUNTA DIRECIONADA)
+------------------------------------------------------
+Preciso de ajuda
+
+===========================================
+O QUE OBSERVAR NAS RESPOSTAS:
+===========================================
+
+✅ FORMATO ENXUTO:
+- Resposta 50-60% mais curta?
+- Tudo integrado no script (benefícios, link, pedido de indicação)?
+- Sem seções separadas de "Como oferecer" ou "Passos"?
+
+✅ ENTREGA DE LINKS:
+- O NOEL entrega o link DIRETAMENTE no script?
+- Sempre fornece link quando menciona?
+
+✅ DETECÇÃO DE CONTEXTO:
+- "Não tem dinheiro" → Recrutamento (não vendas)?
+- "Cansaço" → Quiz Energético (não Calculadora de Água)?
+
+✅ PERGUNTA DIRECIONADA:
+- "Preciso de ajuda" → Faz UMA pergunta direcionada?
+- Não assume contexto sem clarificar?
+
+===========================================
+COPIAR E COLAR NO CHAT DO NOEL:
+===========================================
+
+Preciso de um script pra mandar pra minha mãe que tá sempre cansada
+
+Como eu convenço alguém que disse que não tem dinheiro?
+
+Não sei qual link eu uso pra começar a vender
+
+Preciso de ajuda

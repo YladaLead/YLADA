@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { useAuthenticatedFetch } from '@/hooks/useAuthenticatedFetch'
+import { useAuth } from '@/contexts/AuthContext'
 // REMOVIDO: ProtectedRoute e RequireSubscription - layout server-side cuida disso
 import ConditionalWellnessSidebar from '@/components/wellness/ConditionalWellnessSidebar'
 import FormatarMensagem from '@/components/wellness/FormatarMensagem'
@@ -43,6 +44,7 @@ interface MensagemSerializada {
 }
 
 export default function NoelChatPage() {
+  const { user } = useAuth()
   const [mensagens, setMensagens] = useState<Mensagem[]>([])
   const [perguntaAtual, setPerguntaAtual] = useState('')
   const [enviando, setEnviando] = useState(false)
@@ -53,6 +55,10 @@ export default function NoelChatPage() {
   const mensagensEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const carregadoRef = useRef(false) // Flag para evitar carregar múltiplas vezes
+
+  // Obter nome do usuário
+  const userName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Consultor'
+  const primeiroNome = userName.split(' ')[0]
 
   // Funções para gerenciar localStorage
   const salvarMensagens = (msgs: Mensagem[]) => {
@@ -157,7 +163,7 @@ export default function NoelChatPage() {
       // Mensagem inicial de boas-vindas apenas se não houver histórico
       setMensagens([{
         id: '1',
-        texto: `Olá! Bem-vindo! 👋\n\nEu sou o **NOEL**, seu assistente da área Wellness.\n\n**Como posso te ajudar hoje?**\n\n💡 Posso ajudar com:\n- Estratégias e metas\n- Uso do sistema\n- Bebidas e produtos\n- Scripts e campanhas\n\nEstou à sua disposição! 🚀`,
+        texto: `${primeiroNome}, como posso te ajudar hoje?`,
         tipo: 'noel',
         timestamp: new Date()
       }])
@@ -338,7 +344,7 @@ export default function NoelChatPage() {
   const limparConversa = () => {
     const mensagemInicial: Mensagem = {
       id: '1',
-      texto: `Olá! Bem-vindo! 👋\n\nEu sou o **NOEL**, seu assistente da área Wellness.\n\n**Como posso te ajudar hoje?**\n\n💡 Posso ajudar com:\n- Estratégias e metas\n- Uso do sistema\n- Bebidas e produtos\n- Scripts e campanhas\n\nEstou à sua disposição! 🚀`,
+      texto: `${primeiroNome}, como posso te ajudar hoje?`,
       tipo: 'noel',
       timestamp: new Date()
     }
@@ -492,23 +498,18 @@ export default function NoelChatPage() {
     <ConditionalWellnessSidebar>
           <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
         {/* Header */}
-        <div className="bg-white border-b border-gray-200 shadow-sm">
+        <div className="bg-gradient-to-r from-green-600 to-emerald-600 border-b border-green-700 shadow-md">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
             <div className="flex items-center justify-between">
               <div>
-                <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-                  <span className="text-3xl">👤</span>
-                  NOEL Mentor Wellness
-                </h1>
-                <p className="text-sm text-gray-600 mt-1">
-                  Seu amigo e mentor - estratégias, técnicas e suporte
-                </p>
+                <h1 className="text-3xl font-bold text-white">Mentor NOEL</h1>
+                <p className="text-sm font-semibold text-white mt-2 italic">"A disciplina é a ponte entre metas e realizações" - Jim Rohn</p>
               </div>
               <div className="flex items-center gap-2">
                 {mensagens.length > 1 && (
                   <button
                     onClick={copiarTodaConversa}
-                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2"
+                    className="px-4 py-2 text-sm font-medium text-white bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg hover:bg-white/30 transition-colors flex items-center gap-2"
                     title="Copiar toda a conversa"
                   >
                     {copiadoId === 'toda-conversa' ? '✅ Copiado!' : '📋 Copiar Conversa'}
@@ -516,7 +517,7 @@ export default function NoelChatPage() {
                 )}
                 <button
                   onClick={limparConversa}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                  className="px-4 py-2 text-sm font-medium text-white bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg hover:bg-white/30 transition-colors"
                 >
                   🔄 Limpar Conversa
                 </button>
@@ -525,36 +526,29 @@ export default function NoelChatPage() {
           </div>
         </div>
 
-        {/* Indicador de Módulo Ativo - Sempre mostra MENTOR */}
-        {moduloAtivo && (
-          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
-            <div className={`bg-gradient-to-r ${getModuloInfo('mentor').cor} text-white rounded-lg px-4 py-2 flex items-center gap-3 shadow-md`}>
-              <span className="text-2xl">{getModuloInfo('mentor').emoji}</span>
-              <div>
-                <div className="font-bold">{getModuloInfo('mentor').nome}</div>
-                <div className="text-xs opacity-90">{getModuloInfo('mentor').desc}</div>
-              </div>
-            </div>
-          </div>
-        )}
 
         {/* Chat Container */}
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden flex flex-col" style={{ height: 'calc(100vh - 250px)', minHeight: '600px' }}>
+          <div className="bg-white rounded-xl shadow-xl border border-gray-200 flex flex-col" style={{ height: 'calc(100vh - 250px)', minHeight: '600px' }}>
             {/* Mensagens */}
-            <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-gray-50">
+            <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-gradient-to-b from-white to-gray-50" style={{ minHeight: 0 }}>
               {mensagens.map((msg) => (
                 <div
                   key={msg.id}
-                  className={`flex ${msg.tipo === 'usuario' ? 'justify-end' : 'justify-start'}`}
+                  className={`flex items-start gap-3 ${msg.tipo === 'usuario' ? 'justify-end' : 'justify-start'}`}
                 >
-                  <div className="max-w-3xl w-full">
+                  {msg.tipo === 'noel' && (
+                    <div className="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-br from-green-600 to-emerald-600 flex items-center justify-center shadow-md text-2xl">
+                      🏆
+                    </div>
+                  )}
+                  <div className={`max-w-3xl w-full ${msg.tipo === 'usuario' ? 'flex flex-col items-end' : ''}`}>
                     <div className="relative group">
                       <div
-                        className={`rounded-lg p-4 ${
+                        className={`rounded-xl p-4 ${
                           msg.tipo === 'usuario'
-                            ? 'bg-gradient-to-r from-green-600 to-emerald-600 text-white shadow-md ml-auto'
-                            : 'bg-white text-gray-800 border border-gray-200 shadow-sm'
+                            ? 'bg-gradient-to-r from-green-600 to-emerald-600 text-white shadow-md'
+                            : 'bg-gradient-to-br from-blue-50 to-cyan-50 text-gray-800 border border-blue-200 shadow-sm'
                         }`}
                       >
                         {msg.tipo === 'noel' ? (
@@ -582,7 +576,7 @@ export default function NoelChatPage() {
                         )}
                       </button>
                     </div>
-                    <div className={`text-xs text-gray-500 mt-1 flex items-center gap-2 ${msg.tipo === 'usuario' ? 'justify-end' : 'justify-start'}`}>
+                    <div className={`text-xs text-gray-500 mt-1 ${msg.tipo === 'usuario' ? 'text-right' : 'text-left'}`}>
                       <span>{msg.timestamp.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</span>
                     </div>
                   </div>
@@ -591,11 +585,11 @@ export default function NoelChatPage() {
 
               {enviando && (
                 <div className="flex justify-start">
-                  <div className="bg-white border border-gray-200 rounded-lg p-4">
+                  <div className="bg-gradient-to-br from-blue-50 to-cyan-50 border border-blue-200 rounded-xl p-4 shadow-sm">
                     <div className="flex space-x-1">
-                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                      <div className="w-2 h-2 bg-green-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                      <div className="w-2 h-2 bg-emerald-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                      <div className="w-2 h-2 bg-teal-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
                     </div>
                   </div>
                 </div>
@@ -605,7 +599,7 @@ export default function NoelChatPage() {
             </div>
 
             {/* Input */}
-            <div className="border-t border-gray-200 p-4 bg-white">
+            <div className="border-t border-gray-200 p-4 bg-white flex-shrink-0">
               <div className="flex gap-3">
                 <input
                   ref={inputRef}
@@ -613,8 +607,8 @@ export default function NoelChatPage() {
                   value={perguntaAtual}
                   onChange={(e) => setPerguntaAtual(e.target.value)}
                   onKeyPress={handleKeyPress}
-                  placeholder="Digite sua pergunta... (Ex: Como definir metas de PV? Como preparar shake? Como criar quiz?)"
-                  className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-sm"
+                  placeholder="Digite sua pergunta"
+                  className="flex-1 px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-green-600 focus:border-green-600 text-sm bg-white shadow-sm"
                   disabled={enviando}
                 />
                 <button

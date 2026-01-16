@@ -11,9 +11,23 @@
  * 4. Executa function no backend (/api/noel/[function])
  * 5. Retorna resultado para Assistants API
  * 6. Recebe resposta final
+ * 
+ * OTIMIZAÇÕES PARA GPT-4.1 MINI:
+ * - Cache de respostas comuns
+ * - Pré-processamento de mensagens
+ * - Limitação de histórico
+ * - Otimização de contexto
  */
 
 import OpenAI from 'openai'
+import {
+  getCachedResponse,
+  cacheResponse,
+  preprocessMessage,
+  optimizeMessageForMini,
+  shouldUseCache,
+  needsFunctionCall,
+} from './noel-assistant-optimizer'
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -277,12 +291,38 @@ export async function processMessageWithAssistant(
     console.log('♻️ [NOEL Handler] Usando thread existente:', currentThreadId)
   }
 
-  // Adicionar mensagem do usuário
+  // ⚡ OTIMIZAÇÃO: Verificar cache antes de processar
+  if (shouldUseCache(message)) {
+    const cached = getCachedResponse(message, userId)
+    if (cached) {
+      console.log('✅ [NOEL Handler] Retornando resposta do cache')
+      return {
+        response: cached,
+        newThreadId: currentThreadId,
+      }
+    }
+  }
+
+  // ⚡ OTIMIZAÇÃO: Pré-processar mensagem (remover espaços, limitar tamanho)
+  const processedMessage = optimizeMessageForMini(preprocessMessage(message))
+  console.log('⚡ [NOEL Handler] Mensagem otimizada:', {
+    original: message.length,
+    processed: processedMessage.length,
+    tokens: Math.ceil(processedMessage.length / 4),
+  })
+
+  // ⚡ OTIMIZAÇÃO: Detectar se precisa de function call (para logging)
+  const functionNeeds = needsFunctionCall(processedMessage)
+  if (functionNeeds.needs) {
+    console.log('🔍 [NOEL Handler] Function sugerida:', functionNeeds.suggestedFunction)
+  }
+
+  // Adicionar mensagem do usuário (otimizada)
   console.log('📝 [NOEL Handler] Adicionando mensagem do usuário ao thread...')
   try {
     await openai.beta.threads.messages.create(currentThreadId, {
       role: 'user',
-      content: message,
+      content: processedMessage, // Usar mensagem otimizada
     })
     console.log('✅ [NOEL Handler] Mensagem adicionada ao thread')
   } catch (messageError: any) {
@@ -572,8 +612,17 @@ export async function processMessageWithAssistant(
     .map((item: any) => item.text.value)
     .join('\n')
 
+  const finalResponse = responseText || 'Desculpe, não consegui gerar uma resposta.'
+
+  // ⚡ OTIMIZAÇÃO: Cachear resposta se apropriado
+  // Usar processedMessage se disponível, senão usar message original
+  const messageToCache = processedMessage || message
+  if (shouldUseCache(messageToCache)) {
+    cacheResponse(messageToCache, userId, finalResponse)
+  }
+
   return {
-    response: responseText || 'Desculpe, não consegui gerar uma resposta.',
+    response: finalResponse,
     newThreadId: currentThreadId,
     functionCalls: functionCalls.length > 0 ? functionCalls : undefined,
   }
