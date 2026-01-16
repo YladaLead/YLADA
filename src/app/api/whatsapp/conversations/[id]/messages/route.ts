@@ -145,33 +145,38 @@ export async function POST(
     // Buscar conversa
     const { data: conversation, error: convError } = await supabaseAdmin
       .from('whatsapp_conversations')
-      .select(
-        `
-        *,
-        z_api_instances:instance_id (
-          instance_id,
-          token
-        )
-      `
-      )
+      .select('*')
       .eq('id', conversationId)
       .single()
 
     if (convError || !conversation) {
+      console.error('[WhatsApp Messages] Erro ao buscar conversa:', convError)
       return NextResponse.json(
         { error: 'Conversa não encontrada' },
         { status: 404 }
       )
     }
 
-    const instance = conversation.z_api_instances
+    // Buscar instância Z-API
+    const { data: instance, error: instanceError } = await supabaseAdmin
+      .from('z_api_instances')
+      .select('instance_id, token')
+      .eq('id', conversation.instance_id)
+      .single()
 
-    if (!instance) {
+    if (instanceError || !instance) {
+      console.error('[WhatsApp Messages] Erro ao buscar instância:', instanceError)
       return NextResponse.json(
-        { error: 'Instância não encontrada' },
+        { error: 'Instância Z-API não encontrada' },
         { status: 404 }
       )
     }
+
+    console.log('[WhatsApp Messages] 📤 Enviando mensagem:', {
+      to: conversation.phone,
+      message: message.substring(0, 50),
+      instanceId: instance.instance_id
+    })
 
     // Enviar mensagem via Z-API
     const result = await sendWhatsAppMessage(
@@ -180,6 +185,12 @@ export async function POST(
       instance.instance_id,
       instance.token
     )
+
+    console.log('[WhatsApp Messages] 📤 Resultado Z-API:', {
+      success: result.success,
+      error: result.error,
+      id: result.id
+    })
 
     if (!result.success) {
       return NextResponse.json(

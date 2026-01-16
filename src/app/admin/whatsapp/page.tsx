@@ -150,14 +150,25 @@ function WhatsAppChatContent() {
         }
       )
 
-      if (!response.ok) throw new Error('Erro ao enviar mensagem')
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        console.error('❌ Erro ao enviar mensagem:', {
+          status: response.status,
+          statusText: response.statusText,
+          error: errorData
+        })
+        throw new Error(errorData.error || 'Erro ao enviar mensagem')
+      }
+
+      const data = await response.json()
+      console.log('✅ Mensagem enviada com sucesso:', data)
 
       setNewMessage('')
       await loadMessages(selectedConversation.id)
       await loadConversations() // Atualizar lista de conversas
-    } catch (error) {
-      console.error('Erro ao enviar mensagem:', error)
-      alert('Erro ao enviar mensagem. Tente novamente.')
+    } catch (error: any) {
+      console.error('❌ Erro ao enviar mensagem:', error)
+      alert(`Erro ao enviar mensagem: ${error.message || 'Tente novamente.'}`)
     } finally {
       setSending(false)
     }
