@@ -205,7 +205,12 @@ function WhatsAppChatContent() {
       <div className="bg-white border-b border-gray-200 px-6 py-4">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">WhatsApp Chat</h1>
+            <div className="flex items-center gap-3">
+              <h1 className="text-2xl font-bold text-gray-900">WhatsApp Chat</h1>
+              <span className="text-xs text-gray-400 font-normal">WHATS</span>
+              <span className="text-xs text-gray-400 font-normal">•</span>
+              <span className="text-xs text-gray-400 font-normal">Nutri</span>
+            </div>
             <p className="text-sm text-gray-500 mt-1">
               {conversations.length} conversas • {unreadTotal} não lidas
             </p>
@@ -216,18 +221,6 @@ function WhatsAppChatContent() {
           >
             ← Voltar
           </Link>
-        </div>
-
-        {/* Info */}
-        <div className="mt-4">
-          <div className="px-4 py-3 bg-blue-50 border border-blue-200 rounded-lg">
-            <p className="text-sm text-blue-800">
-              💬 <strong>Todas as conversas</strong> que chegarem no número <strong>5519997230912</strong> aparecerão aqui automaticamente.
-            </p>
-            <p className="text-xs text-blue-600 mt-1">
-              Envie uma mensagem de teste para ver aparecer em alguns segundos.
-            </p>
-          </div>
         </div>
       </div>
 
