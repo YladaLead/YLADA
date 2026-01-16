@@ -116,6 +116,20 @@ export async function validateProtectedAccess(
 
     // 1. Criar cliente Supabase server-side
     const cookieStore = await cookies()
+    
+    // 🚨 DEBUG: Verificar se há cookies de sessão
+    const allCookies = cookieStore.getAll()
+    const hasAuthCookies = allCookies.some(c => 
+      c.name.includes('sb-') || c.name.includes('supabase') || c.name.includes('auth')
+    )
+    
+    if (!hasAuthCookies) {
+      console.log(`⚠️ ProtectedLayout [${area}]: Nenhum cookie de autenticação encontrado`, {
+        totalCookies: allCookies.length,
+        cookieNames: allCookies.map(c => c.name)
+      })
+    }
+    
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
@@ -131,31 +145,38 @@ export async function validateProtectedAccess(
       }
     )
 
-    // 2. Verificar autenticação (usar getUser() para segurança)
-    // getUser() valida com o servidor Supabase, mais seguro que getSession()
-    // 🚨 CORREÇÃO: Tentar getSession() primeiro (mais rápido), depois getUser() se necessário
+    // 2. Verificar autenticação
+    // 🚨 CORREÇÃO: Tentar getSession() primeiro (mais rápido e confiável no server-side)
+    // No server-side, getSession() lê dos cookies, que é a fonte de verdade
     let user = null
     let userError = null
+    let session = null // Declarar session aqui para usar em todo o escopo
     
-    // 🚨 CORREÇÃO: Usar getUser() primeiro para validação segura (conforme aviso do Supabase)
-    // getUser() valida com o servidor, enquanto getSession() apenas lê do storage (pode ser inseguro)
-    const getUserResult = await supabase.auth.getUser()
-    user = getUserResult.data?.user || null
-    userError = getUserResult.error || null
+    // Primeiro tentar getSession() (lê dos cookies no server)
+    const sessionResult = await supabase.auth.getSession()
+    session = sessionResult.data?.session || null
     
-    if (user) {
-      console.log(`✅ ProtectedLayout [${area}]: Usuário autenticado via getUser() para user:`, user.email)
+    if (session?.user) {
+      user = session.user
+      console.log(`✅ ProtectedLayout [${area}]: Usuário autenticado via getSession() para user:`, user.email)
     } else {
-      // Fallback: Tentar getSession() se getUser() falhar (para casos de rede lenta)
-      const sessionResult = await supabase.auth.getSession()
-      const session = sessionResult.data?.session || null
-      if (session?.user) {
-        user = session.user
-        console.log(`⚠️ ProtectedLayout [${area}]: Usando getSession() como fallback (getUser() falhou) para user:`, user.email)
-        console.log(`⚠️ Aviso: getSession() pode não ser seguro - erro do getUser():`, userError?.message)
+      // Fallback: Tentar getUser() se getSession() não retornar sessão
+      // Isso pode acontecer se os cookies não estiverem sincronizados
+      const getUserResult = await supabase.auth.getUser()
+      user = getUserResult.data?.user || null
+      userError = getUserResult.error || null
+      
+      if (user) {
+        console.log(`✅ ProtectedLayout [${area}]: Usuário autenticado via getUser() (fallback) para user:`, user.email)
+        // Se getUser() funcionou mas getSession() não, tentar buscar sessão novamente
+        if (!session) {
+          const sessionResultRetry = await supabase.auth.getSession()
+          session = sessionResultRetry.data?.session || null
+        }
       } else {
         console.log(`⚠️ ProtectedLayout [${area}]: getSession() e getUser() não retornaram usuário`, { 
           sessionExists: !!session, 
+          hasAccessToken: !!session?.access_token,
           getUserError: userError?.message 
         })
       }
@@ -165,7 +186,9 @@ export async function validateProtectedAccess(
       console.log(`❌ ProtectedLayout [${area}]: Usuário não autenticado, redirecionando para login`, {
         hasError: !!userError,
         errorMessage: userError?.message,
-        hasUser: !!user
+        hasUser: !!user,
+        hasSession: !!session,
+        hasAccessToken: !!session?.access_token
       })
       redirect(`/pt/${area}/login`)
     }
@@ -239,10 +262,12 @@ export async function validateProtectedAccess(
     }
 
     // Buscar sessão apenas para retornar (não para validação)
-    // Usar getSession() apenas para obter o objeto de sessão completo
-    let session = null
-    const sessionResult = await supabase.auth.getSession()
-    session = sessionResult.data?.session || null
+    // 🚨 CORREÇÃO: session já foi declarado e buscado acima, apenas garantir que está disponível
+    // Se por algum motivo session ainda não foi definido, buscar novamente
+    if (!session) {
+      const sessionResultForReturn = await supabase.auth.getSession()
+      session = sessionResultForReturn.data?.session || null
+    }
 
     return {
       session,

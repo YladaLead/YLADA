@@ -249,6 +249,7 @@ export async function POST(request: NextRequest) {
       meta_3_meses,
       meta_1_ano,
       observacoes_adicionais,
+      anotacoes_bebidas_funcionais,
       
       // Dados antigos (compatibilidade)
       tem_lista_contatos,
@@ -500,6 +501,11 @@ export async function POST(request: NextRequest) {
     if (observacoes_adicionais !== undefined && observacoes_adicionais !== null && observacoes_adicionais.trim() !== '') {
       // Limitar a 500 caracteres
       profileData.observacoes_adicionais = observacoes_adicionais.trim().substring(0, 500)
+    }
+    
+    if (anotacoes_bebidas_funcionais !== undefined && anotacoes_bebidas_funcionais !== null && anotacoes_bebidas_funcionais.trim() !== '') {
+      // Limitar a 1000 caracteres
+      profileData.anotacoes_bebidas_funcionais = anotacoes_bebidas_funcionais.trim().substring(0, 1000)
     }
     
     // profile_type não é salvo em wellness_noel_profile, apenas em user_profiles (veja abaixo)

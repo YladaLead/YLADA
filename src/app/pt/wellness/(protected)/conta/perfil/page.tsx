@@ -18,6 +18,7 @@ interface MetasConstrucao {
   royalties_atual: number
   nivel_carreira_alvo: string
   prazo_meses: number
+  reflexao_metas?: string
 }
 
 interface MetasPV {
@@ -59,7 +60,8 @@ export default function ContaPerfilPage() {
     meta_royalties: 0,
     royalties_atual: 0,
     nivel_carreira_alvo: 'consultor_ativo',
-    prazo_meses: 12
+    prazo_meses: 12,
+    reflexao_metas: ''
   })
 
   const [savingMetas, setSavingMetas] = useState(false)
@@ -170,7 +172,8 @@ export default function ContaPerfilPage() {
           meta_recrutamento: metasConstrucao.meta_recrutamento,
           meta_royalties: metasConstrucao.meta_royalties,
           nivel_carreira_alvo: metasConstrucao.nivel_carreira_alvo,
-          prazo_meses: metasConstrucao.prazo_meses
+          prazo_meses: metasConstrucao.prazo_meses,
+          reflexao_metas: metasConstrucao.reflexao_metas
         })
       })
 
@@ -686,6 +689,29 @@ export default function ContaPerfilPage() {
                         placeholder="Ex: 12"
                       />
                     </div>
+                  </div>
+
+                  {/* REFLEXÃO SOBRE METAS */}
+                  <div className="bg-gradient-to-br from-purple-50 to-blue-50 rounded-lg p-4 border border-purple-200">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">💭 Sua Reflexão sobre as Metas</h3>
+                    <p className="text-sm text-gray-600 mb-4">
+                      Escreva aqui o que te motiva, seus sonhos, desafios ou qualquer coisa importante sobre suas metas. 
+                      O NOEL vai usar isso para te orientar de forma mais personalizada e te ajudar a alcançar seus objetivos.
+                    </p>
+                    <textarea
+                      value={metasConstrucao.reflexao_metas || ''}
+                      onChange={(e) => {
+                        const value = e.target.value.substring(0, 1000)
+                        setMetasConstrucao(prev => ({ ...prev, reflexao_metas: value }))
+                      }}
+                      placeholder="Ex: Quero alcançar essas metas porque... / Meu maior desafio é... / O que mais me motiva é..."
+                      rows={6}
+                      maxLength={1000}
+                      className="w-full px-4 py-3 border border-purple-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white"
+                    />
+                    <p className="text-xs text-gray-500 mt-2">
+                      {(metasConstrucao.reflexao_metas || '').length}/1000 caracteres
+                    </p>
                   </div>
 
                   {/* BOTÃO SALVAR METAS */}

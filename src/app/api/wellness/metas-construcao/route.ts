@@ -58,7 +58,8 @@ export async function PUT(request: NextRequest) {
       meta_recrutamento,
       meta_royalties,
       nivel_carreira_alvo,
-      prazo_meses
+      prazo_meses,
+      reflexao_metas
     } = body
 
     const updateData: any = {
@@ -70,6 +71,7 @@ export async function PUT(request: NextRequest) {
     if (meta_royalties !== undefined) updateData.meta_royalties = meta_royalties
     if (nivel_carreira_alvo !== undefined) updateData.nivel_carreira_alvo = nivel_carreira_alvo
     if (prazo_meses !== undefined) updateData.prazo_meses = prazo_meses
+    if (reflexao_metas !== undefined) updateData.reflexao_metas = reflexao_metas
 
     const { data, error } = await supabaseAdmin
       .from('wellness_metas_construcao')

@@ -34,6 +34,7 @@ export default function NoelOnboardingCompleto({
     meta_3_meses: initialData?.meta_3_meses,
     meta_1_ano: initialData?.meta_1_ano,
     observacoes_adicionais: initialData?.observacoes_adicionais,
+    anotacoes_bebidas_funcionais: (initialData as any)?.anotacoes_bebidas_funcionais || '',
     
     // Campos antigos (compatibilidade)
     cidade: initialData?.cidade || '',
@@ -162,19 +163,19 @@ export default function NoelOnboardingCompleto({
           {/* SEÇÃO 1: PERGUNTAS 1-4 */}
           {section === 1 && (
             <div className="space-y-6">
-              {/* Pergunta 1: Como pretende trabalhar */}
+              {/* Pergunta 1: Como trabalha */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-3">
-                  1️⃣ Como você pretende trabalhar? <span className="text-red-500">*</span>
+                  1️⃣ Como você trabalha? <span className="text-red-500">*</span>
                 </label>
                 <p className="text-xs text-gray-500 mb-3">
-                  Define o fluxo principal que o NOEL vai ativar
+                  Define o fluxo principal que o NOEL vai ativar para te ajudar no plano Herbalife
                 </p>
                 <div className="space-y-2">
                   {[
-                    { value: 'bebidas_funcionais', label: 'Servindo bebidas funcionais', icon: '🥤', desc: 'Trabalho local/presencial, alta conversão rápida' },
-                    { value: 'produtos_fechados', label: 'Vendendo produtos fechados', icon: '📦', desc: 'Foco em valor maior por venda, menos volume' },
-                    { value: 'cliente_que_indica', label: 'Cliente que indica', icon: '👥', desc: 'Cliente afiliado que recomenda e ganha' }
+                    { value: 'bebidas_funcionais', label: 'Servindo bebidas', icon: '🥤', desc: 'EVS trabalho local delivery' },
+                    { value: 'produtos_fechados', label: 'Trabalhando com produtos fechados', icon: '📦', desc: 'Venda de produtos prontos, foco em valor maior por venda, menos volume' },
+                    { value: 'cliente_que_indica', label: 'Desenvolvendo clientes que indicam', icon: '👥', desc: 'Foco em criar clientes afiliados que recomendam e ganham com o negócio' }
                   ].map((option) => (
                     <button
                       key={option.value}
@@ -198,6 +199,33 @@ export default function NoelOnboardingCompleto({
                     </button>
                   ))}
                 </div>
+                
+                {/* Campo de observações para bebidas funcionais */}
+                {data.tipo_trabalho === 'bebidas_funcionais' && (
+                  <div className="mt-4 bg-blue-50 rounded-lg p-4 border border-blue-200">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      💬 Observações
+                    </label>
+                    <p className="text-xs text-gray-600 mb-3">
+                      Coloque aqui algumas informações que o NOEL pode usar como referência para te responder melhor. 
+                      Ex: como você trabalha, rotina, desafios, o que funciona bem, etc.
+                    </p>
+                    <textarea
+                      value={(data as any).anotacoes_bebidas_funcionais || ''}
+                      onChange={(e) => {
+                        const value = e.target.value.substring(0, 1000)
+                        setData(prev => ({ ...prev, anotacoes_bebidas_funcionais: value } as any))
+                      }}
+                      placeholder="Ex: Trabalho com delivery, preparo bebidas pela manhã e entrego no almoço. Meu maior desafio é manter a rotina quando tenho muitos pedidos..."
+                      rows={5}
+                      maxLength={1000}
+                      className="w-full px-4 py-3 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                    />
+                    <p className="text-xs text-gray-500 mt-2">
+                      {((data as any).anotacoes_bebidas_funcionais || '').length}/1000 caracteres
+                    </p>
+                  </div>
+                )}
               </div>
 
               {/* Pergunta 2: Foco de trabalho */}

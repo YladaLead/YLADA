@@ -292,6 +292,7 @@ async function buildStrategicProfileContext(userId: string): Promise<string> {
       context += `1️⃣ COMO PRETENDE TRABALHAR: ${profile.tipo_trabalho}\n`
       if (profile.tipo_trabalho === 'bebidas_funcionais') {
         context += '   → Distribuidor que SERVE GARRAFAS FECHADAS (bebidas funcionais)\n'
+        context += '   → Pode ser espaço da saudável ou trabalho com bebidas funcionais\n'
         context += '   → Trabalho local/presencial\n'
         context += '   → Foco em rotina de atendimento, margem de lucro e volume\n'
         context += '   → ESTRATÉGIA DE PRODUTOS:\n'
@@ -299,6 +300,14 @@ async function buildStrategicProfileContext(userId: string): Promise<string> {
         context += '      • Depois: pincelar outras bebidas (Turbo Detox, Hype Drink, Litrão Detox) em kits avulsos\n'
         context += '      • Upsell: produtos fechados após consolidar carteira\n'
         context += '   → ENTREGAR: Fluxo de Bebidas, estratégia kits R$39,90, metas diárias, scripts de upsell\n'
+        
+        // Adicionar anotações pessoais sobre bebidas funcionais se existirem
+        if ((profile as any).anotacoes_bebidas_funcionais && (profile as any).anotacoes_bebidas_funcionais.trim()) {
+          context += '\n   💬 ANOTAÇÕES PESSOAIS DO DISTRIBUIDOR SOBRE BEBIDAS FUNCIONAIS:\n'
+          context += `   "${(profile as any).anotacoes_bebidas_funcionais}"\n`
+          context += '   → Use essas informações para personalizar orientações, scripts e estratégias\n'
+          context += '   → Considere o contexto específico mencionado (espaço, rotina, desafios, o que funciona bem)\n'
+        }
       } else if (profile.tipo_trabalho === 'produtos_fechados') {
         context += '   → Distribuidor que VENDE PRODUTOS FECHADOS\n'
         context += '   → Foco em valor maior por venda\n'
@@ -2282,11 +2291,25 @@ export async function POST(request: NextRequest) {
             
             if (ferramentaSlug) {
               try {
-                const { getFerramentaInfo } = await import('@/lib/wellness-system/noel-engine/functions/ferramenta-functions')
-                const infoFerramenta = await getFerramentaInfo(user.id, ferramentaSlug)
-                if (infoFerramenta) {
-                  linkFerramenta = infoFerramenta.link_personalizado || null
-                  scriptFerramenta = infoFerramenta.script_apresentacao || null
+                // Chamar API ao invés de importar função local
+                const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/noel/getFerramentaInfo`, {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${session?.access_token}`
+                  },
+                  body: JSON.stringify({
+                    ferramenta_slug: ferramentaSlug,
+                    user_id: user.id
+                  })
+                })
+                
+                if (response.ok) {
+                  const data = await response.json()
+                  if (data.success && data.ferramenta) {
+                    linkFerramenta = data.ferramenta.link_personalizado || data.ferramenta.link || null
+                    scriptFerramenta = data.ferramenta.script_apresentacao || data.ferramenta.whatsapp_message || null
+                  }
                 }
               } catch (err) {
                 console.warn('⚠️ Erro ao buscar info da ferramenta:', err)
@@ -2296,19 +2319,31 @@ export async function POST(request: NextRequest) {
             // Se não encontrou ferramenta específica, tentar recomendar link
             if (!linkFerramenta) {
               try {
-                const { recomendarLinkWellness } = await import('@/lib/wellness-system/noel-engine/functions/link-functions')
                 const palavrasChave = []
                 if (contextoCriacao.ferramenta) palavrasChave.push(contextoCriacao.ferramenta)
                 if (contextoCriacao.objetivo) palavrasChave.push(contextoCriacao.objetivo)
                 
                 if (palavrasChave.length > 0) {
-                  const linkRecomendado = await recomendarLinkWellness(user.id, {
-                    palavras_chave: palavrasChave,
-                    tipo_lead: contextoCriacao.pessoa_tipo as any
+                  // Chamar API ao invés de importar função local
+                  const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/noel/recomendarLinkWellness`, {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json',
+                      'Authorization': `Bearer ${session?.access_token}`
+                    },
+                    body: JSON.stringify({
+                      palavras_chave: palavrasChave,
+                      tipo_lead: contextoCriacao.pessoa_tipo as any,
+                      user_id: user.id
+                    })
                   })
-                  if (linkRecomendado) {
-                    linkFerramenta = linkRecomendado.link || null
-                    scriptFerramenta = linkRecomendado.script || null
+                  
+                  if (response.ok) {
+                    const data = await response.json()
+                    if (data.success && data.data) {
+                      linkFerramenta = data.data.link || data.data.link_personalizado || null
+                      scriptFerramenta = data.data.script_curto || null
+                    }
                   }
                 }
               } catch (err) {
