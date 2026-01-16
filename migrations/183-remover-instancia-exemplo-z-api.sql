@@ -69,11 +69,14 @@ ORDER BY updated_at DESC;
 -- 4. Verificar se a instância correta está configurada
 SELECT 
   CASE 
-    WHEN COUNT(*) = 1 AND instance_id = '3ED484E8415CF126D6009EBD599F8B90' 
+    WHEN COUNT(*) = 1 
     THEN '✅ Instância correta configurada'
     ELSE '❌ ERRO: Instância não encontrada ou incorreta'
   END as status_verificacao,
-  COUNT(*) as total_instancias
+  COUNT(*) as total_instancias,
+  MAX(instance_id) as instance_id_encontrado,
+  MAX(token) as token_encontrado,
+  MAX(status) as status_encontrado
 FROM z_api_instances
 WHERE instance_id = '3ED484E8415CF126D6009EBD599F8B90'
   AND token = '6633B5CACF7FC081FCAC3611'
