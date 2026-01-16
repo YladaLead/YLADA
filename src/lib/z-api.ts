@@ -54,9 +54,12 @@ export class ZApiClient {
       // Limpar número (remover caracteres não numéricos)
       let cleanPhone = phone.replace(/\D/g, '')
       
-      // Garantir formato internacional (55 + número)
-      // Se não começar com 55, adicionar
-      if (!cleanPhone.startsWith('55')) {
+      // Verificar se já tem código de país conhecido
+      const countryCodes = ['1', '55', '52', '54', '56', '57', '58', '591', '592', '593', '594', '595', '596', '597', '598', '599']
+      const hasCountryCode = countryCodes.some(code => cleanPhone.startsWith(code))
+      
+      // Se não tem código de país, assumir que é brasileiro e adicionar 55
+      if (!hasCountryCode) {
         // Se começar com 0, remover o 0 antes de adicionar 55
         if (cleanPhone.startsWith('0')) {
           cleanPhone = cleanPhone.substring(1)
@@ -66,7 +69,9 @@ export class ZApiClient {
       
       console.log('[Z-API] 📤 Formatando número:', {
         original: phone,
-        cleaned: cleanPhone
+        cleaned: cleanPhone,
+        hasCountryCode,
+        countryCode: hasCountryCode ? cleanPhone.substring(0, 3) : '55 (assumido BR)'
       })
 
       const response = await fetch(
