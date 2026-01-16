@@ -90,8 +90,23 @@ export class ZApiClient {
       )
 
       if (!response.ok) {
-        const error = await response.json().catch(() => ({ message: 'Erro desconhecido' }))
-        throw new Error(error.message || `Erro HTTP ${response.status}`)
+        const errorData = await response.json().catch(async () => {
+          // Se não conseguir parsear JSON, tentar ler como texto
+          const text = await response.text().catch(() => 'Erro desconhecido')
+          return { message: text, raw: text }
+        })
+        
+        console.error('[Z-API] ❌ Erro detalhado:', {
+          status: response.status,
+          statusText: response.statusText,
+          errorData,
+          phone: cleanPhone,
+          instanceId: this.config.instanceId
+        })
+        
+        // Mensagem de erro mais detalhada
+        const errorMessage = errorData.message || errorData.error || errorData.raw || `Erro HTTP ${response.status}`
+        throw new Error(errorMessage)
       }
 
       const data = await response.json()
