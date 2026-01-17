@@ -78,15 +78,18 @@ export async function POST(request: NextRequest) {
       // Se tiver user_id, tentar buscar ferramenta personalizada
       let link = ''
       let scriptApresentacao = ''
+      let profile: { user_slug: string } | null = null
       
       if (user_id) {
         // Buscar user_slug
         console.log('🔍 [getFerramentaInfo] Buscando user_slug para user_id:', user_id)
-        const { data: profile, error: profileError } = await supabaseAdmin
+        const { data: profileData, error: profileError } = await supabaseAdmin
           .from('user_profiles')
           .select('user_slug')
           .eq('user_id', user_id)
           .maybeSingle()
+        
+        profile = profileData || null
         
         if (profileError) {
           console.warn('⚠️ [getFerramentaInfo] Erro ao buscar profile (continuando sem user_slug):', profileError.message)
@@ -282,25 +285,43 @@ export async function POST(request: NextRequest) {
         }
       }
       
-      // Se não tiver link ainda, usar template base genérico
+      // Se não tiver link ainda, tentar buscar ferramenta genérica com slug correto
       if (!link) {
-        console.log('⚠️ [getFerramentaInfo] Usando link genérico (sem user_slug)')
-        // Tentar usar link genérico da ferramenta (se existir no banco)
-        // Caso contrário, usar link do template base
+        console.log('⚠️ [getFerramentaInfo] Nenhuma ferramenta personalizada encontrada, tentando buscar ferramenta genérica')
+        
+        // Normalizar template_slug para buscar ferramenta genérica
+        let templateSlugNormalizadoFallback = ''
+        try {
+          templateSlugNormalizadoFallback = normalizeTemplateSlug(ferramenta_slug, 'wellness')
+        } catch (normalizeError: any) {
+          console.warn('⚠️ [getFerramentaInfo] Erro ao normalizar slug no fallback, usando original:', normalizeError)
+          templateSlugNormalizadoFallback = ferramenta_slug
+        }
+        
+        // Tentar buscar ferramenta genérica que tenha um slug válido
+        // Buscar por template_slug normalizado primeiro
         const { data: ferramentaGenerica } = await supabaseAdmin
           .from('wellness_ferramentas')
-          .select('id, slug')
-          .eq('template_slug', ferramenta_slug)
+          .select('id, slug, template_slug')
+          .eq('template_slug', templateSlugNormalizadoFallback || ferramenta_slug)
           .eq('status', 'active')
           .maybeSingle()
         
-        if (ferramentaGenerica?.id) {
-          link = `${baseUrl}/pt/wellness/ferramenta/${ferramentaGenerica.id}`
-          console.log('✅ [getFerramentaInfo] Link genérico encontrado via wellness_ferramentas:', link)
+        if (ferramentaGenerica?.id && ferramentaGenerica?.slug) {
+          // Se tiver user_slug, usar formato personalizado
+          if (profile?.user_slug) {
+            link = buildWellnessToolUrl(profile.user_slug, ferramentaGenerica.slug)
+            console.log('✅ [getFerramentaInfo] Link genérico encontrado com user_slug:', link)
+          } else {
+            // Sem user_slug, usar formato de fallback com ID
+            link = `${baseUrl}/pt/wellness/ferramenta/${ferramentaGenerica.id}`
+            console.log('✅ [getFerramentaInfo] Link genérico encontrado via wellness_ferramentas (sem user_slug):', link)
+          }
         } else {
-          // Fallback: usar link do template (pode não funcionar se não houver rota)
-          link = `${baseUrl}/pt/wellness/ferramenta/${templateBase.slug}`
-          console.log('⚠️ [getFerramentaInfo] Usando link do template (pode não existir):', link)
+          // Se não encontrou ferramenta genérica, não gerar link incorreto
+          // Retornar null para que o NOEL saiba que não há link disponível
+          console.warn('⚠️ [getFerramentaInfo] Nenhuma ferramenta encontrada (nem personalizada nem genérica). Não gerando link.')
+          link = null
         }
         
         scriptApresentacao = templateBase.whatsapp_message || 
