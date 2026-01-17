@@ -11,6 +11,7 @@ import { useAuthenticatedFetch } from '@/hooks/useAuthenticatedFetch'
 import { translateError } from '@/lib/error-messages'
 import { createClient } from '@/lib/supabase-client'
 import PushNotificationManager from '@/components/push/PushNotificationManager'
+import CancelRetentionModal from '@/components/wellness/CancelRetentionModal'
 
 export default function WellnessConfiguracaoPage() {
   const router = useRouter()
@@ -44,6 +45,7 @@ export default function WellnessConfiguracaoPage() {
   const [sucessoSenha, setSucessoSenha] = useState(false)
   const [subscription, setSubscription] = useState<any>(null)
   const [carregandoAssinatura, setCarregandoAssinatura] = useState(true)
+  const [showCancelModal, setShowCancelModal] = useState(false)
 
   // Função para tratar slug (lowercase, sem espaços/acentos, COM hífens - formato nome-sobrenome)
   const tratarSlug = (texto: string): string => {
@@ -742,18 +744,29 @@ export default function WellnessConfiguracaoPage() {
               </div>
               
               <div className="flex flex-col sm:flex-row gap-3">
-                <Link
-                  href="/pt/wellness/checkout"
-                  className="flex-1 px-6 py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition-colors text-center shadow-md hover:shadow-lg"
-                >
-                  🔄 {subscription.status === 'active' ? 'Renovar Assinatura' : 'Ativar Assinatura'}
-                </Link>
-                {subscription.is_migrated && (
-                  <div className="px-4 py-3 bg-blue-50 border border-blue-200 rounded-lg">
-                    <p className="text-xs text-blue-800">
-                      ℹ️ Assinatura migrada - Renove para ativar renovação automática
-                    </p>
-                  </div>
+                {subscription.status === 'active' && (
+                  <>
+                    <Link
+                      href="/pt/wellness/checkout"
+                      className="flex-1 px-6 py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition-colors text-center shadow-md hover:shadow-lg"
+                    >
+                      🔄 Renovar Assinatura
+                    </Link>
+                    <button
+                      onClick={() => setShowCancelModal(true)}
+                      className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 underline transition-colors"
+                    >
+                      Cancelar assinatura
+                    </button>
+                  </>
+                )}
+                {subscription.status !== 'active' && (
+                  <Link
+                    href="/pt/wellness/checkout"
+                    className="flex-1 px-6 py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition-colors text-center shadow-md hover:shadow-lg"
+                  >
+                    🚀 Ativar Assinatura
+                  </Link>
                 )}
               </div>
             </div>
@@ -1001,6 +1014,33 @@ export default function WellnessConfiguracaoPage() {
           </div>
         </div>
       </main>
+
+      {/* Modal de Cancelamento */}
+      {subscription && subscription.status === 'active' && (
+        <CancelRetentionModal
+          isOpen={showCancelModal}
+          onClose={() => setShowCancelModal(false)}
+          onConfirmCancel={async () => {
+            // Recarregar assinatura após cancelamento
+            await carregarAssinatura()
+            setShowCancelModal(false)
+          }}
+          subscription={subscription}
+          daysSincePurchase={(() => {
+            if (!subscription.current_period_start && !subscription.created_at) return 0
+            const dataInicio = new Date(subscription.current_period_start || subscription.created_at)
+            const hoje = new Date()
+            return Math.floor((hoje.getTime() - dataInicio.getTime()) / (1000 * 60 * 60 * 24))
+          })()}
+          withinGuarantee={(() => {
+            if (!subscription.current_period_start && !subscription.created_at) return false
+            const dataInicio = new Date(subscription.current_period_start || subscription.created_at)
+            const hoje = new Date()
+            const diasDesdeCompra = Math.floor((hoje.getTime() - dataInicio.getTime()) / (1000 * 60 * 60 * 24))
+            return diasDesdeCompra <= 7
+          })()}
+        />
+      )}
     </div>
   )
 }

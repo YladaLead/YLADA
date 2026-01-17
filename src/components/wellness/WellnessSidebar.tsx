@@ -63,7 +63,7 @@ export default function WellnessSidebar({ isMobileOpen = false, onMobileClose }:
       color: 'blue'
     },
     {
-      title: 'Filosofia LADA',
+      title: 'Filosofia YLADA',
       icon: '💬',
       href: '/pt/wellness/filosofia-lada',
       color: 'purple'

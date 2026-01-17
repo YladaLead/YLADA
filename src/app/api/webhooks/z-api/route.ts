@@ -659,10 +659,56 @@ export async function POST(request: NextRequest) {
     await saveMessage(conversationId, finalInstanceId, normalizedPayload)
     console.log('[Z-API Webhook] ✅ Mensagem salva no banco')
 
-    // 4. Notificar administradores
+    // 4. Processar automações (respostas automáticas, etc.)
     try {
-      await notifyAdmins(conversationId, phone, message)
-      console.log('[Z-API Webhook] 🔔 Notificações processadas')
+      const { processAutomations } = await import('@/lib/whatsapp-automation')
+      
+      // Verificar se é primeira mensagem da conversa
+      const { data: existingMessages } = await supabase
+        .from('whatsapp_messages')
+        .select('id')
+        .eq('conversation_id', conversationId)
+        .eq('sender_type', 'customer')
+        .limit(1)
+      
+      const isFirstMessage = !existingMessages || existingMessages.length === 0
+      
+      const automationResult = await processAutomations(
+        conversationId,
+        phone,
+        message,
+        area,
+        finalInstanceId,
+        isFirstMessage
+      )
+      
+      if (automationResult.messagesSent > 0) {
+        console.log('[Z-API Webhook] 🤖 Automações processadas:', {
+          messagesSent: automationResult.messagesSent,
+          rulesExecuted: automationResult.rulesExecuted
+        })
+      }
+    } catch (automationError: any) {
+      console.error('[Z-API Webhook] ❌ Erro ao processar automações:', {
+        error: automationError.message,
+        stack: automationError.stack
+      })
+      // Não falhar o webhook se automação falhar
+    }
+
+    // 5. Notificar administradores (com regras inteligentes)
+    try {
+      const { shouldNotify } = await import('@/lib/whatsapp-automation')
+      
+      // Verificar se deve notificar baseado nas regras
+      const notificationCheck = await shouldNotify(phone, message, area, conversationId)
+      
+      if (notificationCheck.shouldNotify) {
+        await notifyAdmins(conversationId, phone, message)
+        console.log('[Z-API Webhook] 🔔 Notificações processadas:', notificationCheck.reason)
+      } else {
+        console.log('[Z-API Webhook] ⏭️ Notificação ignorada:', notificationCheck.reason)
+      }
     } catch (notifyError: any) {
       console.error('[Z-API Webhook] ❌ Erro ao processar notificações:', {
         error: notifyError.message,
@@ -670,9 +716,6 @@ export async function POST(request: NextRequest) {
       })
       // Não falhar o webhook se notificação falhar
     }
-
-    // 5. TODO: Processar com bot (NOEL, Nutri, etc.) se configurado
-    // Isso será implementado depois
 
     console.log('[Z-API Webhook] ✅ Processamento completo')
     return NextResponse.json({ received: true, conversationId, area })

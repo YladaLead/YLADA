@@ -1,0 +1,94 @@
+Assunto: Problema Crítico - Crédito Acabou em 6 Dias (Renovação 28/12/2024)
+
+Olá equipe do Cursor,
+
+Estou enfrentando um problema crítico com minha assinatura Pro e preciso de ajuda urgente.
+
+INFORMAÇÕES DA CONTA:
+- Nome: André Faula
+- Email: faulaandre@gmail.com
+- Plano: Pro ($20/mês)
+- Data de Renovação: 28 de dezembro de 2024
+
+PROBLEMA RELATADO:
+
+1. HISTÓRICO DE USO (Meses anteriores - COMPORTAMENTO NORMAL):
+   - Sempre usei o modelo "Auto"
+   - Sempre usei muito (centenas de requisições por dia)
+   - O crédito de $20 durava o mês inteiro (30 dias completos)
+   - NUNCA acabou o crédito antes
+   - NUNCA fui cobrado on-demand
+   - Funcionava perfeitamente por meses
+
+2. SITUAÇÃO ATUAL (Após renovação em 28/12/2024):
+   - Estou usando da MESMA forma (modelo "Auto")
+   - Em apenas 6 DIAS (28/12 a 03/01) o crédito de $20 acabou
+   - Começou a cobrar on-demand
+   - Já gastei mais de $100 em poucos dias
+   - Projeção: $500+/mês (antes era $20/mês)
+
+EVIDÊNCIAS:
+
+- Dashboard mostra 515+ requisições em 7 dias
+- Todas usando modelo "auto"
+- Muitas requisições grandes (1-3 milhões de tokens)
+- Custos variando de $0.02 a $0.90 por requisição
+- Período: 30/12/2024 a 05/01/2026
+
+COMPARAÇÃO:
+
+ANTES:
+- Uso: Muito intenso
+- Modelo: "Auto"
+- Crédito: Durava 30 dias
+- Custo: $20/mês
+
+AGORA:
+- Uso: MESMO padrão
+- Modelo: "Auto" (MESMO)
+- Crédito: Acabou em 6 dias
+- Custo: $500+/mês (projeção)
+
+IMPACTO:
+- Aumento de 2.400% no custo mensal
+- Para o MESMO padrão de uso
+- MESMO modelo
+- MESMO comportamento
+
+SOLICITAÇÕES:
+
+1. Revisão da conta:
+   - Verificar se houve erro no cálculo
+   - Comparar uso anterior vs atual
+   - Verificar se há bug no sistema
+
+2. Ajuste de crédito:
+   - Reembolso ou crédito adicional
+   - Considerando que o uso foi o mesmo de antes
+
+3. Esclarecimento:
+   - Houve mudança na política?
+   - Por que o modelo "Auto" mudou de comportamento?
+   - Quando essa mudança aconteceu?
+
+4. Solução:
+   - Restaurar comportamento anterior
+   - OU ajustar política para uso normal
+   - OU aumentar crédito incluído
+
+OBSERVAÇÕES IMPORTANTES:
+
+- Realizei trabalho intenso com imagens e visão computacional (multimodalidade) nestes dias.
+- SEMPRE realizei este mesmo tipo de trabalho nos meses anteriores e o crédito de $20 era suficiente.
+- Agora, o processamento dessas mesmas tarefas esgotou o plano em tempo recorde (6 dias).
+- Gostaria de saber se houve mudança específica no custo de tokens de visão/imagem.
+- Não mudei meu padrão de uso, apenas a cobrança parece ter disparado.
+
+Preciso resolver isso urgentemente, pois não posso pagar $500+/mês para o mesmo uso que antes custava $20/mês.
+
+Aguardando resposta urgente.
+
+Atenciosamente,
+André Faula
+faulaandre@gmail.com
+

@@ -53,6 +53,7 @@ interface CapCutKit {
       narration: string
       backgroundMusic?: string
       soundEffects?: string[]
+      voiceStyle?: string
     }
     export: {
       format: string

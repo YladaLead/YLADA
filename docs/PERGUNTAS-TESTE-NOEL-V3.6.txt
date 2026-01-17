@@ -1,0 +1,93 @@
+===========================================
+PERGUNTAS PARA TESTAR NOEL v3.6
+Teste das melhorias: entrega de links, escolha de ferramenta, proatividade
+===========================================
+
+TESTE 1: ENTREGA DE LINK (não deve pedir dados antes)
+------------------------------------------------------
+Preciso de um script pra mandar pra minha mãe que tá sempre cansada
+
+TESTE 2: ESCOLHA DE FERRAMENTA (deve escolher Quiz Energético para cansaço)
+------------------------------------------------------
+Tenho um amigo que quer emagrecer, o que eu falo pra ele?
+
+TESTE 3: ENTREGA DE LINK QUANDO SOLICITADO
+------------------------------------------------------
+Não sei qual link eu uso pra começar a vender
+
+TESTE 4: RECRUTAMENTO COM LINK
+------------------------------------------------------
+Como eu convenço alguém que disse que não tem dinheiro?
+
+TESTE 5: RECONEXÃO (não deve pedir dados)
+------------------------------------------------------
+A pessoa visualizou minha mensagem mas não respondeu, o que eu faço?
+
+TESTE 6: PROATIVIDADE (deve interpretar e entregar)
+------------------------------------------------------
+Não sei o que fazer agora
+
+TESTE 7: VENDAS (deve entregar fluxo de vendas, não reconexão)
+------------------------------------------------------
+Como faço pra vender as bebidas funcionais?
+
+TESTE 8: PERGUNTA VAGA (deve fazer pergunta direcionada)
+------------------------------------------------------
+Preciso de ajuda
+
+TESTE 9: SCRIPT COM INDICAÇÃO
+------------------------------------------------------
+Preciso de um script para abordar alguém
+
+TESTE 10: HIDRATAÇÃO (deve escolher Calculadora de Água)
+------------------------------------------------------
+Quero ajudar alguém a beber mais água
+
+===========================================
+O QUE OBSERVAR NAS RESPOSTAS:
+===========================================
+
+✅ ENTREGA DE LINKS:
+- O NOEL entrega o link DIRETAMENTE no script?
+- NÃO pede dados (nome, telefone, email) antes do link?
+- Sempre fornece link quando menciona?
+
+✅ ESCOLHA DE FERRAMENTA:
+- Cansaço/Energia/Emagrecimento → Quiz Energético?
+- Hidratação → Calculadora de Água?
+- Vendas → Link de vendas?
+- Recrutamento → Link HOM + recrutamento?
+
+✅ PROATIVIDADE:
+- Interpreta perguntas vagas?
+- Faz pergunta direcionada quando não há clareza?
+- Entrega solução completa após clarificação?
+
+✅ SCRIPTS:
+- Inclui pedido de indicação?
+- Usa linguagem coletiva?
+- Explica benefícios antes da proposta?
+
+===========================================
+COPIAR E COLAR NO CHAT DO NOEL:
+===========================================
+
+Preciso de um script pra mandar pra minha mãe que tá sempre cansada
+
+Tenho um amigo que quer emagrecer, o que eu falo pra ele?
+
+Não sei qual link eu uso pra começar a vender
+
+Como eu convenço alguém que disse que não tem dinheiro?
+
+A pessoa visualizou minha mensagem mas não respondeu, o que eu faço?
+
+Não sei o que fazer agora
+
+Como faço pra vender as bebidas funcionais?
+
+Preciso de ajuda
+
+Preciso de um script para abordar alguém
+
+Quero ajudar alguém a beber mais água

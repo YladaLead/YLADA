@@ -56,6 +56,10 @@ export default function NoelChatPage() {
   const inputRef = useRef<HTMLInputElement>(null)
   const carregadoRef = useRef(false) // Flag para evitar carregar múltiplas vezes
 
+  // Obter nome do usuário
+  const userName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Consultor'
+  const primeiroNome = userName.split(' ')[0]
+
   // Funções para gerenciar localStorage
   const salvarMensagens = (msgs: Mensagem[]) => {
     if (typeof window === 'undefined') return
@@ -168,7 +172,7 @@ export default function NoelChatPage() {
       // Mensagem inicial de boas-vindas apenas se não houver histórico
       setMensagens([{
         id: '1',
-        texto: `Olá! Bem-vindo! 👋\n\nEu sou o **NOEL**, seu assistente da área Wellness.\n\n**Como posso te ajudar hoje?**\n\n💡 Posso ajudar com:\n- Estratégias e metas\n- Uso do sistema\n- Bebidas e produtos\n- Scripts e campanhas\n\nEstou à sua disposição! 🚀`,
+        texto: `Olá, ${primeiroNome}!\n\nEu sou o NOEL, seu mentor e assistente.\n\nComo posso te ajudar hoje?`,
         tipo: 'noel',
         timestamp: new Date()
       }])
@@ -215,9 +219,10 @@ export default function NoelChatPage() {
     inputRef.current?.focus()
   }, [])
 
-  const enviarMensagem = async () => {
+  const enviarMensagem = async (perguntaForcada?: string) => {
     // 🚀 CORREÇÃO: Bloquear requisições durante carregamento de autenticação
-    if (!perguntaAtual.trim() || enviando) return
+    const perguntaParaEnviar = perguntaForcada || perguntaAtual.trim()
+    if (!perguntaParaEnviar || enviando) return
     
     // Aguardar autenticação carregar antes de fazer requisição
     // 🚀 CORREÇÃO: Aumentado para 6 segundos para dar tempo ao evento SIGNED_IN chegar
@@ -256,7 +261,7 @@ export default function NoelChatPage() {
       return
     }
 
-    const pergunta = perguntaAtual.trim()
+    const pergunta = perguntaParaEnviar
     setPerguntaAtual('')
     setEnviando(true)
 
@@ -393,7 +398,7 @@ export default function NoelChatPage() {
   const limparConversa = () => {
     const mensagemInicial: Mensagem = {
       id: '1',
-      texto: `Olá! Bem-vindo! 👋\n\nEu sou o **NOEL**, seu assistente da área Wellness.\n\n**Como posso te ajudar hoje?**\n\n💡 Posso ajudar com:\n- Estratégias e metas\n- Uso do sistema\n- Bebidas e produtos\n- Scripts e campanhas\n\nEstou à sua disposição! 🚀`,
+      texto: `Olá, ${primeiroNome}!\n\nEu sou o NOEL, seu mentor e assistente.\n\nComo posso te ajudar hoje?`,
       tipo: 'noel',
       timestamp: new Date()
     }
@@ -552,11 +557,11 @@ export default function NoelChatPage() {
             <div className="flex items-center justify-between">
               <div>
                 <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-                  <span className="text-3xl">👤</span>
+                  <span className="text-3xl">🤖</span>
                   NOEL Mentor Wellness
                 </h1>
                 <p className="text-sm text-gray-600 mt-1">
-                  Seu amigo e mentor - estratégias, técnicas e suporte
+                  Escolha uma ação rápida abaixo ou digite sua pergunta
                 </p>
               </div>
               <div className="flex items-center gap-2">
@@ -595,9 +600,9 @@ export default function NoelChatPage() {
 
         {/* Chat Container */}
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden flex flex-col" style={{ height: 'calc(100vh - 250px)', minHeight: '600px' }}>
+          <div className="bg-white rounded-xl shadow-lg border border-gray-200 flex flex-col" style={{ height: 'calc(100vh - 250px)', minHeight: '600px' }}>
             {/* Mensagens */}
-            <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-gray-50">
+            <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-gray-50" style={{ minHeight: 0 }}>
               {mensagens.map((msg) => (
                 <div
                   key={msg.id}
@@ -659,8 +664,93 @@ export default function NoelChatPage() {
               <div ref={mensagensEndRef} />
             </div>
 
+            {/* Botões de Ação Rápida - Sempre visíveis */}
+            <div className="border-t-2 border-gray-300 p-4 bg-white flex-shrink-0" style={{ zIndex: 10, position: 'relative', display: 'block', visibility: 'visible' }}>
+              <p className="text-sm text-gray-700 mb-3 font-semibold">💡 Escolha uma ação rápida:</p>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                  <button
+                    onClick={async () => {
+                      const pergunta = 'Como faço pra vender as bebidas funcionais?'
+                      setPerguntaAtual(pergunta)
+                      await new Promise(resolve => setTimeout(resolve, 100))
+                      await enviarMensagem(pergunta)
+                    }}
+                    disabled={enviando}
+                    className="px-4 py-3 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-lg hover:from-green-600 hover:to-emerald-600 transition-all shadow-sm font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  >
+                    <span>💰</span>
+                    <span>Vender</span>
+                  </button>
+                  <button
+                    onClick={async () => {
+                      const pergunta = 'Como faço pra recrutar novos distribuidores?'
+                      setPerguntaAtual(pergunta)
+                      await new Promise(resolve => setTimeout(resolve, 100))
+                      await enviarMensagem(pergunta)
+                    }}
+                    disabled={enviando}
+                    className="px-4 py-3 bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-lg hover:from-purple-600 hover:to-indigo-600 transition-all shadow-sm font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  >
+                    <span>🚀</span>
+                    <span>Recrutar</span>
+                  </button>
+                  <button
+                    onClick={async () => {
+                      const pergunta = 'Preciso de um script para abordar alguém'
+                      setPerguntaAtual(pergunta)
+                      await new Promise(resolve => setTimeout(resolve, 100))
+                      await enviarMensagem(pergunta)
+                    }}
+                    disabled={enviando}
+                    className="px-4 py-3 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-lg hover:from-blue-600 hover:to-cyan-600 transition-all shadow-sm font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  >
+                    <span>📝</span>
+                    <span>Script</span>
+                  </button>
+                  <button
+                    onClick={async () => {
+                      const pergunta = 'Não tenho lista de contatos, não sei com quem falar'
+                      setPerguntaAtual(pergunta)
+                      await new Promise(resolve => setTimeout(resolve, 100))
+                      await enviarMensagem(pergunta)
+                    }}
+                    disabled={enviando}
+                    className="px-4 py-3 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-lg hover:from-orange-600 hover:to-red-600 transition-all shadow-sm font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  >
+                    <span>👥</span>
+                    <span>Com quem falar</span>
+                  </button>
+                  <button
+                    onClick={async () => {
+                      const pergunta = 'Preciso de dicas para melhorar meus resultados'
+                      setPerguntaAtual(pergunta)
+                      await new Promise(resolve => setTimeout(resolve, 100))
+                      await enviarMensagem(pergunta)
+                    }}
+                    disabled={enviando}
+                    className="px-4 py-3 bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-lg hover:from-pink-600 hover:to-rose-600 transition-all shadow-sm font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  >
+                    <span>💡</span>
+                    <span>Dicas</span>
+                  </button>
+                  <button
+                    onClick={async () => {
+                      const pergunta = 'Não sei o que fazer agora'
+                      setPerguntaAtual(pergunta)
+                      await new Promise(resolve => setTimeout(resolve, 100))
+                      await enviarMensagem(pergunta)
+                    }}
+                    disabled={enviando}
+                    className="px-4 py-3 bg-gradient-to-r from-gray-500 to-slate-500 text-white rounded-lg hover:from-gray-600 hover:to-slate-600 transition-all shadow-sm font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  >
+                    <span>❓</span>
+                    <span>O que fazer?</span>
+                  </button>
+                </div>
+              </div>
+
             {/* Input */}
-            <div className="border-t border-gray-200 p-4 bg-white">
+            <div className="border-t border-gray-200 p-4 bg-white flex-shrink-0">
               <div className="flex gap-3">
                 <input
                   ref={inputRef}

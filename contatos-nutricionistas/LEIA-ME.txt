@@ -1,0 +1,15 @@
+📋 INSTRUÇÕES
+
+Coloque todos os seus arquivos Excel (.xlsx ou .xls) com contatos de nutricionistas nesta pasta.
+
+O script irá:
+✅ Processar todos os arquivos automaticamente
+✅ Detectar colunas de nome, email e telefone
+✅ Remover duplicatas
+✅ Gerar arquivo CSV pronto para Meta Ads
+
+Depois de colocar os arquivos aqui, execute:
+npm run organizar-contatos-meta
+
+O arquivo final será gerado em: contatos-meta-ads.csv (na raiz do projeto)
+

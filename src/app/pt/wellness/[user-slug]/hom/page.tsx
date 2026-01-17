@@ -159,7 +159,7 @@ export default function HOMPage() {
     
     const mensagem = `Olá! 👋
 
-Gostei da oportunidade e quero minha licença! Quero começar fazendo a licença.`
+Assisti o vídeo, gostei e gostaria de adquirir minha licença.`
     
     const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(mensagem)}`
     console.log('🔗 Abrindo WhatsApp:', whatsappUrl)
@@ -199,7 +199,7 @@ Gostei da oportunidade e quero minha licença! Quero começar fazendo a licença
     
     const mensagem = `Olá! 👋
 
-Assisti o vídeo e tenho dúvidas.`
+Assisti o vídeo, gostei e gostaria de adquirir minha licença.`
     
     const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(mensagem)}`
     console.log('🔗 Abrindo WhatsApp:', whatsappUrl)
@@ -220,26 +220,27 @@ Assisti o vídeo e tenho dúvidas.`
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-50">
-      <div className="max-w-4xl mx-auto px-4 py-8">
+      <div className="max-w-4xl mx-auto px-4 py-3 sm:py-4">
         {/* Cabeçalho com Título - Design Premium */}
-        <div className="bg-gradient-to-br from-amber-500 via-yellow-500 to-orange-500 rounded-2xl shadow-2xl p-8 mb-6 relative overflow-hidden">
+        <div className="bg-gradient-to-br from-amber-500 via-yellow-500 to-orange-500 rounded-xl shadow-xl p-3 sm:p-4 mb-4 relative overflow-hidden">
           {/* Efeito de brilho de fundo */}
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent transform -skew-x-12 animate-pulse"></div>
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent transform -skew-x-12"></div>
           
           <div className="relative z-10 text-center">
             {/* Título */}
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-white mb-3 drop-shadow-lg">
-              🍹 <span className="whitespace-nowrap">Oportunidade: Bebidas</span> Funcionais
+            <h1 className="text-lg sm:text-2xl md:text-3xl font-extrabold text-white mb-1 sm:mb-2 drop-shadow-lg leading-tight">
+              <span className="inline-block align-middle mr-1">🍹</span>
+              <span className="inline-block align-middle">Oportunidade: Bebidas Funcionais</span>
             </h1>
-            <p className="text-amber-100 text-base sm:text-lg md:text-xl font-medium">
+            <p className="text-amber-100 text-xs sm:text-sm md:text-base font-medium">
               Uma oportunidade de negócio que está transformando vidas
             </p>
           </div>
         </div>
 
         {/* Vídeo do YouTube */}
-        <div className="bg-white rounded-xl shadow-xl p-6 mb-6 border-2 border-amber-200">
-          <h2 className="text-xl font-bold text-gray-900 mb-4 text-center">
+        <div className="bg-white rounded-xl shadow-xl p-3 sm:p-4 mb-4 border-2 border-amber-200">
+          <h2 className="text-base sm:text-lg font-bold text-gray-900 mb-2 sm:mb-3 text-center">
             Assista à apresentação
           </h2>
           <div className="aspect-video w-full rounded-lg overflow-hidden bg-gray-900 shadow-lg">
@@ -264,17 +265,17 @@ Assisti o vídeo e tenho dúvidas.`
         </div>
 
         {/* Botões de Ação - Apenas 2 com design premium */}
-        <div className="bg-white rounded-xl shadow-xl p-6 border-2 border-amber-200">
-          <div className="flex flex-col sm:flex-row gap-4">
+        <div className="bg-white rounded-xl shadow-xl p-3 sm:p-4 border-2 border-amber-200">
+          <div className="flex flex-col sm:flex-row gap-3">
             <button
               onClick={tirarDuvida}
-              className="flex-1 px-6 py-4 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-lg font-semibold transition-all transform hover:scale-105 shadow-lg flex items-center justify-center gap-2 text-lg"
+              className="flex-1 px-4 py-3 sm:px-6 sm:py-4 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-lg font-semibold transition-all transform hover:scale-105 shadow-lg flex items-center justify-center gap-2 text-sm sm:text-base md:text-lg"
             >
               💬 Quero tirar dúvida
             </button>
             <button
               onClick={abrirWhatsApp}
-              className="flex-1 px-6 py-4 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white rounded-lg font-semibold transition-all transform hover:scale-105 shadow-lg flex items-center justify-center gap-2 text-lg"
+              className="flex-1 px-4 py-3 sm:px-6 sm:py-4 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white rounded-lg font-semibold transition-all transform hover:scale-105 shadow-lg flex items-center justify-center gap-2 text-sm sm:text-base md:text-lg"
             >
               🚀 Gostei quero começar
             </button>

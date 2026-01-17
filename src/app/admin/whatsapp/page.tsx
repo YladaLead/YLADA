@@ -200,27 +200,36 @@ function WhatsAppChatContent() {
   const unreadTotal = conversations.reduce((sum, conv) => sum + conv.unread_count, 0)
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white border-b border-gray-200 px-6 py-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <div className="flex items-center gap-3">
-              <h1 className="text-2xl font-bold text-gray-900">WhatsApp Chat</h1>
-              <span className="text-xs text-gray-400 font-normal">WHATS</span>
-              <span className="text-xs text-gray-400 font-normal">•</span>
-              <span className="text-xs text-gray-400 font-normal">Nutri</span>
+    <div className="min-h-screen bg-gray-50 pb-safe">
+      {/* Header Mobile-First */}
+      <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
+        <div className="px-4 py-3">
+          <div className="flex items-center justify-between mb-2">
+            <Link
+              href="/admin"
+              className="text-gray-600 hover:text-gray-900 text-sm"
+            >
+              ← Voltar
+            </Link>
+            <div className="text-center flex-1">
+              <h1 className="text-lg font-bold text-gray-900">WhatsApp</h1>
+              <p className="text-xs text-gray-500">Nutri</p>
             </div>
-            <p className="text-sm text-gray-500 mt-1">
-              {conversations.length} conversas • {unreadTotal} não lidas
-            </p>
+            <Link
+              href="/admin/whatsapp/automation"
+              className="text-green-600 hover:text-green-700 text-sm font-medium"
+            >
+              ⚙️
+            </Link>
           </div>
-          <Link
-            href="/admin"
-            className="px-4 py-2 text-sm text-gray-600 hover:text-gray-900"
-          >
-            ← Voltar
-          </Link>
+          <div className="flex items-center justify-between text-xs text-gray-500">
+            <span>{conversations.length} conversas</span>
+            {unreadTotal > 0 && (
+              <span className="bg-green-500 text-white px-2 py-1 rounded-full">
+                {unreadTotal} não lidas
+              </span>
+            )}
+          </div>
         </div>
       </div>
 
@@ -287,8 +296,8 @@ function WhatsAppChatContent() {
           )}
         </div>
 
-        {/* Área de Chat */}
-        <div className="flex-1 flex flex-col">
+        {/* Área de Chat - Mobile First */}
+        <div className="flex-1 flex flex-col min-w-0">
           {selectedConversation ? (
             <>
               {/* Header da Conversa */}

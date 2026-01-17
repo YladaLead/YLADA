@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireApiAuth } from '@/lib/api-auth'
 import { supabaseAdmin } from '@/lib/supabase'
 import { cancelMercadoPagoSubscription } from '@/lib/mercado-pago-helpers'
+import { notifyAdminRefundRequest } from '@/lib/refund-notifications'
 
 /**
  * POST /api/nutri/subscription/confirm-cancel
@@ -165,6 +166,43 @@ export async function POST(request: NextRequest) {
         daysSincePurchase: diasDesdeCompra,
         mercadoPagoCanceled
       })
+
+      // Buscar dados do usuário para notificação
+      let userEmail = user.email || ''
+      let userName = user.user_metadata?.full_name || user.user_metadata?.name || 'Usuário'
+
+      try {
+        const { data: profile } = await supabaseAdmin
+          .from('nutri_profiles')
+          .select('nome, email')
+          .eq('user_id', user.id)
+          .single()
+
+        if (profile) {
+          userName = profile.nome || userName
+          userEmail = profile.email || userEmail
+        }
+      } catch (error) {
+        console.warn('[Refund Notification] Erro ao buscar perfil do usuário:', error)
+      }
+
+      // Enviar notificação por email e WhatsApp
+      try {
+        await notifyAdminRefundRequest({
+          subscriptionId: subscription.id,
+          userId: user.id,
+          userEmail,
+          userName,
+          area: 'nutri',
+          amount: subscription.amount || 0,
+          reason: reason || cancelAttempt.cancel_reason || 'other',
+          daysSincePurchase: diasDesdeCompra,
+          cancelAttemptId: cancelAttemptId
+        })
+      } catch (notificationError) {
+        console.error('[Refund Notification] Erro ao enviar notificação:', notificationError)
+        // Não falhar o cancelamento se a notificação falhar
+      }
     }
 
     // Mensagem de sucesso
