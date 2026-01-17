@@ -7,6 +7,7 @@ import { PaymentGateway, detectPaymentGateway, detectCountryCode } from './payme
 import { createPreference, CreatePreferenceRequest } from './mercado-pago'
 import { createRecurringSubscription, CreateSubscriptionRequest } from './mercado-pago-subscriptions'
 import { getStripeInstance, getStripePriceId } from './stripe-helpers'
+import { resend, FROM_EMAIL, FROM_NAME, isResendConfigured } from './resend'
 import Stripe from 'stripe'
 
 export interface CheckoutRequest {
@@ -39,7 +40,44 @@ export interface CheckoutResponse {
 }
 
 /**
+ * Lista de países onde o Mercado Pago opera (América Latina)
+ */
+const MERCADO_PAGO_COUNTRIES = [
+  'BR', // Brasil
+  'AR', // Argentina
+  'CL', // Chile
+  'CO', // Colômbia
+  'MX', // México
+  'PE', // Peru
+  'UY', // Uruguai
+  'PY', // Paraguai
+  'BO', // Bolívia
+  'EC', // Equador
+  'VE', // Venezuela
+  'CR', // Costa Rica
+  'PA', // Panamá
+  'GT', // Guatemala
+  'HN', // Honduras
+  'NI', // Nicarágua
+  'SV', // El Salvador
+  'DO', // República Dominicana
+  'CU', // Cuba
+  'JM', // Jamaica
+  'TT', // Trinidad e Tobago
+  'BZ', // Belize
+]
+
+/**
+ * Verifica se o país tem suporte ao Mercado Pago
+ */
+function isMercadoPagoSupported(countryCode: string): boolean {
+  return MERCADO_PAGO_COUNTRIES.includes(countryCode.toUpperCase())
+}
+
+/**
  * Obtém preço baseado em área, plano e tipo de produto
+ * ⚠️ IMPORTANTE: Valores USD são enviados diretamente como BRL (sem conversão)
+ * O cartão do cliente faz a conversão automaticamente na hora do pagamento
  */
 function getPrice(
   area: string, 
@@ -83,15 +121,16 @@ function getPrice(
     return prices[area]?.[planType] || 0
   }
 
-  // Preços em USD para internacional
+  // Preços em USD para internacional (enviados diretamente como BRL, sem conversão)
+  // O cartão do cliente converte automaticamente na hora do pagamento
   const prices: Record<string, Record<string, number>> = {
     wellness: {
-      monthly: 15.00,
-      annual: 150.00,
+      monthly: 15.00, // R$ 15,00 (cliente paga ~$15 USD, cartão converte)
+      annual: 150.00, // R$ 150,00 (cliente paga ~$150 USD, cartão converte)
     },
     nutri: {
-      monthly: 25.00,
-      annual: 198.00,
+      monthly: 25.00, // R$ 25,00 (cliente paga ~$25 USD, cartão converte)
+      annual: 198.00, // R$ 198,00 (cliente paga ~$198 USD, cartão converte)
     },
     coach: {
       monthly: 25.00,
@@ -115,6 +154,12 @@ async function createMercadoPagoCheckout(
   console.log('💳 Criando checkout Mercado Pago...')
   const amount = getPrice(request.area, request.planType, request.countryCode || 'BR', request.productType)
   
+  // Log informativo (se for internacional)
+  if (request.countryCode && request.countryCode !== 'BR') {
+    console.log(`🌍 Pagamento internacional detectado (${request.countryCode})`)
+    console.log(`💳 Valor será processado em BRL, cartão do cliente converte automaticamente`)
+  }
+  
   // Validação: garantir que o valor está correto
   if (amount <= 0) {
     throw new Error(`Valor inválido para ${request.area} ${request.planType}: ${amount}`)
@@ -125,7 +170,7 @@ async function createMercadoPagoCheckout(
     console.warn(`⚠️ Valor mensal muito alto: R$ ${amount}`)
   }
   
-  console.log(`💰 Valor: R$ ${amount.toFixed(2)} (${Math.round(amount * 100)} centavos)`)
+  console.log(`💰 Valor final em BRL: R$ ${amount.toFixed(2)}`)
   
   // Validar baseUrl
   if (!baseUrl || baseUrl === 'undefined' || baseUrl.includes('undefined')) {
@@ -389,12 +434,35 @@ export async function createCheckout(
     countryCode = 'UNKNOWN'
   }
 
+  // ⚠️ BLOQUEAR: Apenas países onde Mercado Pago opera podem pagar
+  if (!isMercadoPagoSupported(countryCode)) {
+    // Enviar notificação por email quando alguém tentar pagar de país não suportado
+    try {
+      await notifyUnsupportedCountryPayment({
+        countryCode,
+        area: request.area,
+        planType: request.planType,
+        userEmail: request.userEmail,
+        userId: request.userId,
+      })
+    } catch (notifyError) {
+      console.error('Erro ao enviar notificação de país não suportado:', notifyError)
+      // Não falhar o checkout se a notificação falhar
+    }
+    
+    throw new Error(
+      `Pagamentos disponíveis apenas para países da América Latina. ` +
+      `Entre em contato conosco através do suporte para uma solução alternativa de pagamento.`
+    )
+  }
+
   // Detectar gateway baseado no país
+  // ⚠️ FORÇADO: Todos os países usam Mercado Pago (Stripe removido)
   let gateway: PaymentGateway
   if (httpRequest) {
     gateway = detectPaymentGateway(httpRequest)
   } else {
-    gateway = countryCode === 'BR' ? 'mercadopago' : 'stripe'
+    gateway = 'mercadopago' // Sempre Mercado Pago
   }
 
   // Obter URL base (prioridade: env > request origin > localhost)
@@ -446,3 +514,98 @@ export async function createCheckout(
   }
 }
 
+/**
+ * Notifica admin quando alguém tenta pagar de país não suportado
+ */
+interface UnsupportedCountryNotificationData {
+  countryCode: string
+  area: string
+  planType: string
+  userEmail?: string
+  userId?: string
+}
+
+async function notifyUnsupportedCountryPayment(data: UnsupportedCountryNotificationData): Promise<void> {
+  if (!isResendConfigured() || !resend) {
+    console.warn('[Payment Gateway] Resend não configurado, notificação não será enviada')
+    return
+  }
+
+  try {
+    const adminEmail = process.env.ADMIN_EMAIL || FROM_EMAIL
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL_PRODUCTION || 
+                   process.env.NEXT_PUBLIC_APP_URL || 
+                   'https://www.ylada.com'
+
+    const emailHtml = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8">
+        </head>
+        <body style="font-family: Arial, sans-serif; padding: 20px; background-color: #f5f5f5;">
+          <div style="max-width: 600px; margin: 0 auto; background-color: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+            <h1 style="color: #dc2626; margin-bottom: 20px;">⚠️ Tentativa de Pagamento de País Não Suportado</h1>
+            
+            <div style="background-color: #fef2f2; padding: 20px; border-radius: 6px; margin-bottom: 20px; border-left: 4px solid #dc2626;">
+              <h2 style="color: #991b1b; margin-top: 0;">Detalhes da Tentativa</h2>
+              
+              <table style="width: 100%; border-collapse: collapse;">
+                <tr>
+                  <td style="padding: 8px 0; font-weight: bold; color: #374151; width: 150px;">País:</td>
+                  <td style="padding: 8px 0; color: #111827;"><strong>${data.countryCode}</strong></td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 0; font-weight: bold; color: #374151;">Área:</td>
+                  <td style="padding: 8px 0; color: #111827;">${data.area.toUpperCase()}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 0; font-weight: bold; color: #374151;">Plano:</td>
+                  <td style="padding: 8px 0; color: #111827;">${data.planType === 'monthly' ? 'Mensal' : 'Anual'}</td>
+                </tr>
+                ${data.userEmail ? `
+                <tr>
+                  <td style="padding: 8px 0; font-weight: bold; color: #374151;">E-mail:</td>
+                  <td style="padding: 8px 0; color: #111827;">${data.userEmail}</td>
+                </tr>
+                ` : ''}
+                ${data.userId ? `
+                <tr>
+                  <td style="padding: 8px 0; font-weight: bold; color: #374151;">User ID:</td>
+                  <td style="padding: 8px 0; color: #111827; font-family: monospace;">${data.userId}</td>
+                </tr>
+                ` : ''}
+              </table>
+            </div>
+
+            <div style="background-color: #f0f9ff; padding: 20px; border-radius: 6px; margin-bottom: 20px; border-left: 4px solid #0284c7;">
+              <h3 style="color: #0c4a6e; margin-top: 0;">📞 Contato do Cliente</h3>
+              <p style="color: #075985; margin: 0;">
+                <strong>WhatsApp:</strong> <a href="https://wa.me/5519996049800" style="color: #0284c7;">55 1999604-9800</a><br>
+                <strong>E-mail:</strong> <a href="mailto:${adminEmail}" style="color: #0284c7;">${adminEmail}</a>
+              </p>
+            </div>
+
+            <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
+              <p style="color: #6b7280; font-size: 12px; margin: 0;">
+                <strong>Data/Hora:</strong> ${new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })}
+              </p>
+            </div>
+          </div>
+        </body>
+      </html>
+    `
+
+    await resend.emails.send({
+      from: `${FROM_NAME} <${FROM_EMAIL}>`,
+      to: adminEmail,
+      subject: `⚠️ Tentativa de Pagamento de País Não Suportado: ${data.countryCode} - ${data.area.toUpperCase()}`,
+      html: emailHtml,
+    })
+
+    console.log(`[Payment Gateway] ✅ Notificação enviada para ${adminEmail}`)
+  } catch (error: any) {
+    console.error('[Payment Gateway] Erro ao enviar notificação:', error)
+    // Não lançar erro - apenas logar
+  }
+}

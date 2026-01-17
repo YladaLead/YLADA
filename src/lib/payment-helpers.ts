@@ -1,7 +1,6 @@
 /**
  * Helpers para detecção de país e gateway de pagamento
- * BR → Mercado Pago
- * Resto → Stripe US
+ * ⚠️ Todos os países usam Mercado Pago (Stripe removido)
  */
 
 export type PaymentGateway = 'mercadopago' | 'stripe'
@@ -22,19 +21,11 @@ export function detectCountryCode(request: Request): CountryCode {
 
 /**
  * Detecta qual gateway de pagamento usar baseado no país
- * BR → Mercado Pago
- * Resto → Stripe
+ * ⚠️ FORÇADO: Todos os países usam Mercado Pago (Stripe removido)
  */
 export function detectPaymentGateway(request: Request): PaymentGateway {
-  const countryCode = detectCountryCode(request)
-  
-  // Brasil usa Mercado Pago
-  if (countryCode === 'BR') {
-    return 'mercadopago'
-  }
-  
-  // Resto do mundo usa Stripe
-  return 'stripe'
+  // Sempre retorna Mercado Pago (Stripe foi removido)
+  return 'mercadopago'
 }
 
 /**
