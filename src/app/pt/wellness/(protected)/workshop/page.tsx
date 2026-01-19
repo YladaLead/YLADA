@@ -64,16 +64,6 @@ export default function WellnessWorkshopPage() {
       localStorage.setItem('wellness_workshop_assistido', 'true')
     }
 
-    // TODO: Salvar no banco (opcional)
-    // try {
-    //   await fetch('/api/wellness/workshop/marcar-assistido', {
-    //     method: 'POST',
-    //     credentials: 'include'
-    //   })
-    // } catch (err) {
-    //   console.error('Erro ao salvar status:', err)
-    // }
-
     setAssistido(true)
     setLoading(false)
 
