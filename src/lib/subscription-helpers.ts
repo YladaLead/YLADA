@@ -2,7 +2,7 @@ import { supabaseAdmin } from '@/lib/supabase'
 
 /**
  * Verifica se usuário tem assinatura ativa para uma área específica
- * Inclui planos pagos (monthly, annual) e gratuitos (free)
+ * Inclui planos pagos (monthly, annual), gratuitos (free) e trials (trial)
  */
 export async function hasActiveSubscription(
   userId: string,

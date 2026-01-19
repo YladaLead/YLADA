@@ -1,0 +1,56 @@
+📋 PERGUNTAS DE TESTE - DETECÇÃO DE OBJEÇÕES E CONFLITOS
+================================================
+
+🎯 OBJETIVO: Testar se o NOEL está detectando objeções, validando situações difíceis e oferecendo estratégias específicas antes de entregar scripts.
+
+---
+
+PERGUNTA 1 - TESTE DE OBJEÇÃO EXPLÍCITA:
+==========================================
+
+Tenho um cunhado que critica tudo que eu faço na Herbalife mas eu quero que ele propague o link da água pra mim como que eu posso conduzir isso
+
+✅ RESPOSTA ESPERADA:
+- Deve DETECTAR a objeção ("critica", "mas")
+- Deve VALIDAR a situação difícil primeiro
+- Deve OFERECER estratégia específica (não mencionar Herbalife, usar linguagem neutra)
+- Deve ENTREGAR script ajustado (sem elementos comerciais)
+- NÃO deve ignorar a crítica e ir direto para script genérico
+
+---
+
+PERGUNTA 2 - TESTE DE PERGUNTA DIRETA (SEM OBJEÇÃO):
+=====================================================
+
+Preciso de um script pra mandar pra minha mãe que tá sempre cansada
+
+✅ RESPOSTA ESPERADA:
+- Deve usar formato DIRETO (não precisa validar objeção)
+- Deve CHAMAR getFerramentaInfo("calculadora-agua") ou getQuizInfo("quiz-energetico") PRIMEIRO
+- Deve ENTREGAR script completo diretamente
+- Deve incluir link e pedido de indicação
+- NÃO deve começar com validação de objeção (não há objeção aqui)
+
+---
+
+PERGUNTA 3 - TESTE DE OBJEÇÃO IMPLÍCITA:
+========================================
+
+Minha irmã não gosta quando eu falo de produtos da Herbalife mas ela quer emagrecer, como eu posso ajudar ela?
+
+✅ RESPOSTA ESPERADA:
+- Deve DETECTAR a objeção implícita ("não gosta", "mas")
+- Deve VALIDAR a situação (ela não gosta de produtos, mas quer emagrecer)
+- Deve OFERECER estratégia (focar em ferramentas de diagnóstico, não em produtos)
+- Deve SUGERIR link apropriado (quiz energético ou avaliação metabólica)
+- Deve ENTREGAR script ajustado (sem mencionar produtos Herbalife diretamente)
+- NÃO deve oferecer script de venda de produtos
+
+---
+
+📝 OBSERVAÇÕES IMPORTANTES:
+
+1. Se o NOEL ignorar a objeção na pergunta 1 ou 3 → PROBLEMA: não está detectando
+2. Se o NOEL validar objeção na pergunta 2 → PROBLEMA: está detectando objeção onde não há
+3. Se o NOEL não oferecer estratégia específica → PROBLEMA: não está seguindo estrutura de objeção
+4. Se o NOEL não ajustar o script (remover elementos comerciais) → PROBLEMA: não está adaptando ao contexto
