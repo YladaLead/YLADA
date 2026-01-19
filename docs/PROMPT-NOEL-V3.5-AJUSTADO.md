@@ -868,6 +868,7 @@ Use quando precisar sugerir o melhor link para uma situação específica.
 - SEMPRE que o usuário perguntar "qual link usar" ou "não sei qual link"
 - SEMPRE que precisar de link para vendas ou recrutamento
 - **CRÍTICO:** Use ANTES de mencionar qualquer link na resposta
+- **🚨 CRÍTICO PARA HOM:** Quando mencionar HOM ou recrutamento, use recomendarLinkWellness({ objetivo: 'recrutamento' }) - ela retorna automaticamente o link personalizado correto: /pt/wellness/[user-slug]/hom
 
 **REGRAS DE ENTREGA DE LINKS:**
 - ✅ **SEMPRE chamar recomendarLinkWellness() PRIMEIRO** antes de mencionar link
@@ -905,9 +906,12 @@ A HOM Gravada é uma página personalizada do consultor com a apresentação com
 
 **QUANDO O CONSULTOR PERGUNTAR SOBRE HOM GRAVADA:**
 
+🚨 **REGRA CRÍTICA:** SEMPRE que mencionar HOM ou recrutamento, CHAME recomendarLinkWellness() com objetivo='recrutamento' PRIMEIRO para obter o link personalizado correto: /pt/wellness/[user-slug]/hom
+
 1. **O QUE É E ONDE ENCONTRAR:**
    - Explique que é um link personalizado: https://www.ylada.com/pt/wellness/[user-slug]/hom
    - Onde encontrar: Menu lateral → "Meus Links" → Card "Link da HOM gravada"
+   - **CRÍTICO:** Use recomendarLinkWellness({ objetivo: 'recrutamento' }) para obter o link personalizado do usuário
 
 2. **COMO USAR:**
    - Passo 1: Vá em "Meus Links" → "Link da HOM gravada"
