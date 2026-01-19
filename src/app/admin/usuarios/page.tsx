@@ -588,24 +588,24 @@ export default function AdminUsuarios() {
                 <p className="text-gray-500">Nenhum usuário encontrado</p>
               </div>
             ) : (
-              <div className="overflow-hidden">
-                <table className="w-full table-fixed divide-y divide-gray-200">
+              <div className="overflow-x-auto">
+                <table className="w-full min-w-[1000px] divide-y divide-gray-200">
                   <thead className="bg-gray-50">
                     <tr>
-                      <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[30%]">Usuário</th>
-                      <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[8%]">Área</th>
-                      <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[16%]">Presidente</th>
-                      <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[8%]">Status</th>
-                      <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[18%]">Assinatura</th>
-                      <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[10%]">Leads</th>
-                      <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[10%]">Ações</th>
+                      <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Usuário</th>
+                      <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Área</th>
+                      <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Presidente</th>
+                      <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                      <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Assinatura</th>
+                      <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Leads</th>
+                      <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
                     {usuarios.map((usuario) => (
                       <tr key={usuario.id} className="hover:bg-gray-50">
                         <td className="px-3 py-4">
-                          <div className="flex items-center">
+                          <div className="flex items-center min-w-[200px]">
                             <div className="flex-shrink-0 h-10 w-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold">
                               {usuario.nome.charAt(0).toUpperCase()}
                             </div>
@@ -619,7 +619,7 @@ export default function AdminUsuarios() {
                             </div>
                           </div>
                         </td>
-                        <td className="px-3 py-4">
+                        <td className="px-3 py-4 whitespace-nowrap">
                           <div className="flex items-center">
                             <span className="text-xl mr-2">{getAreaIcon(usuario.area)}</span>
                             <span
@@ -630,7 +630,7 @@ export default function AdminUsuarios() {
                             </span>
                           </div>
                         </td>
-                        <td className="px-3 py-4">
+                        <td className="px-3 py-4 min-w-[150px]">
                           <div className="text-sm text-gray-900 truncate" title={usuario.nome_presidente || ''}>
                             {usuario.nome_presidente || <span className="text-gray-400 italic">Não definido</span>}
                           </div>
@@ -638,8 +638,8 @@ export default function AdminUsuarios() {
                         <td className="px-3 py-4 whitespace-nowrap">
                           {getStatusBadge(usuario.status)}
                         </td>
-                        <td className="px-3 py-4">
-                          <div className="flex items-center gap-2">
+                        <td className="px-3 py-4 min-w-[180px]">
+                          <div className="flex items-center gap-2 flex-wrap">
                             {getAssinaturaStatusBadge(usuario.assinaturaSituacao)}
                             <span className="text-sm text-gray-900">
                               {getAssinaturaTipoLabel(usuario.assinatura)}
@@ -669,34 +669,38 @@ export default function AdminUsuarios() {
                             </div>
                           )}
                         </td>
-                        <td className="px-3 py-4 whitespace-nowrap">
-                          <div className="text-sm font-semibold text-gray-900">{usuario.leadsGerados}</div>
-                          <div className="text-[11px] text-gray-600 leading-4">
-                            <span className="font-medium">Links:</span> {usuario.linksEnviados ?? 0}
-                          </div>
-                          <div className="text-[11px] text-gray-600 leading-4">
-                            <span className="font-medium">Cliques:</span> {usuario.cliquesLinks ?? 0}
+                        <td className="px-3 py-4 whitespace-nowrap min-w-[100px]">
+                          <div className="text-[11px] text-gray-600 space-y-1">
+                            <div>
+                              <span className="font-medium">Leads:</span> <span className="text-gray-900 font-semibold">{usuario.leadsGerados}</span>
+                            </div>
+                            <div>
+                              <span className="font-medium">Links:</span> <span className="text-gray-900 font-semibold">{usuario.linksEnviados ?? 0}</span>
+                            </div>
+                            <div>
+                              <span className="font-medium">Cliques:</span> <span className="text-gray-900 font-semibold">{usuario.cliquesLinks ?? 0}</span>
+                            </div>
                           </div>
                         </td>
-                        <td className="px-3 py-4 whitespace-nowrap text-sm font-medium">
-                          <div className="flex items-center space-x-2">
+                        <td className="px-3 py-4 whitespace-nowrap text-sm font-medium min-w-[140px]">
+                          <div className="flex items-center gap-2 flex-wrap">
                             <button
                               onClick={() => abrirEditarUsuario(usuario)}
-                              className="text-blue-600 hover:text-blue-900"
+                              className="text-blue-600 hover:text-blue-900 whitespace-nowrap"
                             >
                               Editar
                             </button>
                             {usuario.assinaturaId && (
                               <button
                                 onClick={() => abrirEditarAssinatura(usuario)}
-                                className="text-green-600 hover:text-green-900"
+                                className="text-green-600 hover:text-green-900 whitespace-nowrap"
                               >
                                 Assinatura
                               </button>
                             )}
                             <button
                               onClick={() => abrirDeletarUsuario(usuario)}
-                              className="text-red-600 hover:text-red-900"
+                              className="text-red-600 hover:text-red-900 whitespace-nowrap"
                             >
                               Deletar
                             </button>
