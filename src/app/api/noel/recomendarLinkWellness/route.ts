@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { validateNoelFunctionAuth } from '@/lib/noel-functions-auth'
 import { recommendLink, type RecomendacaoContext } from '@/lib/noel-wellness/links-recommender'
 import { supabaseAdmin } from '@/lib/supabase'
+import { buildWellnessToolUrl } from '@/lib/url-utils'
 
 /**
  * POST /api/noel/recomendarLinkWellness
@@ -36,7 +37,14 @@ export async function POST(request: NextRequest) {
 
     // Gerar link personalizado se tiver user_id
     let linkPersonalizado = link.url || null
-    if (user_id && !linkPersonalizado) {
+    
+    // 🚨 CRÍTICO: Se for HOM (recrutamento), gerar link personalizado: /pt/wellness/[user-slug]/hom
+    const isHOM = link.codigo?.toLowerCase().includes('hom') || 
+                  link.nome?.toLowerCase().includes('hom') ||
+                  objetivo === 'recrutamento' ||
+                  palavras_chave?.some(k => k.toLowerCase().includes('hom') || k.toLowerCase().includes('recrutamento'))
+    
+    if (user_id) {
       // Buscar user_slug
       const { data: profile } = await supabaseAdmin
         .from('user_profiles')
@@ -45,11 +53,17 @@ export async function POST(request: NextRequest) {
         .maybeSingle()
       
       if (profile?.user_slug) {
-        const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://ylada.app'
-        // Gerar link personalizado baseado no código do link
-        // Se o link for uma ferramenta/template, usar formato: /pt/wellness/[user-slug]/[codigo]
-        // Se for um link genérico, usar formato: /pt/wellness/links/[codigo]
-        linkPersonalizado = `${baseUrl}/pt/wellness/${profile.user_slug}/links/${link.codigo}`
+        if (isHOM) {
+          // Link da HOM: /pt/wellness/[user-slug]/hom
+          linkPersonalizado = buildWellnessToolUrl(profile.user_slug, 'hom')
+          console.log('✅ [recomendarLinkWellness] Link HOM personalizado gerado:', linkPersonalizado)
+        } else if (!linkPersonalizado) {
+          // Gerar link personalizado baseado no código do link
+          // Se o link for uma ferramenta/template, usar formato: /pt/wellness/[user-slug]/[codigo]
+          // Se for um link genérico, usar formato: /pt/wellness/links/[codigo]
+          const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://ylada.app'
+          linkPersonalizado = `${baseUrl}/pt/wellness/${profile.user_slug}/links/${link.codigo}`
+        }
       }
     }
 
