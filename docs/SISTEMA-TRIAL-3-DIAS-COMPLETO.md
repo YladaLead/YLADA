@@ -251,9 +251,94 @@ console.log('Link para compartilhar:', data.invite_url)
 
 ---
 
+## 🏆 Sistema de Autorização de Presidentes
+
+### **Visão Geral**
+
+O ambiente de presidentes (`/pt/wellness/trial/presidentes`) requer **autorização prévia**. Apenas presidentes que estão na lista de autorizados podem criar conta.
+
+### **Como Funciona**
+
+1. **Admin adiciona presidente** → `/admin/presidentes`
+2. **Presidente tenta criar conta** → `/pt/wellness/trial/presidentes`
+3. **Sistema valida nome** → Busca na lista de autorizados
+4. **Se autorizado** → Cria conta com trial
+5. **Se não autorizado** → Retorna erro 403
+
+### **Tabela: `presidentes_autorizados`**
+
+```sql
+CREATE TABLE presidentes_autorizados (
+  id UUID PRIMARY KEY,
+  nome_completo TEXT NOT NULL,        -- Nome usado para validação
+  email TEXT,                          -- Opcional
+  status TEXT DEFAULT 'ativo',         -- 'ativo' ou 'inativo'
+  autorizado_por_user_id UUID,        -- Quem autorizou
+  autorizado_por_email TEXT,
+  observacoes TEXT,                    -- Observações
+  metadata JSONB,
+  created_at TIMESTAMPTZ,
+  updated_at TIMESTAMPTZ
+);
+```
+
+**Validação:**
+- Busca **parcial** por nome (case-insensitive)
+- Apenas presidentes com `status = 'ativo'` podem criar conta
+- Se não encontrar, retorna erro: "Presidente não encontrado na lista de autorizados"
+
+### **Interface Admin**
+
+**Página:** `/admin/presidentes`
+
+**Funcionalidades:**
+- ✅ Adicionar presidente autorizado
+- ✅ Ver lista completa (ativos e inativos)
+- ✅ Desativar presidente (não remove, apenas marca como inativo)
+- ✅ Busca e filtros
+
+**Campos do formulário:**
+- Nome Completo do Presidente * (obrigatório)
+- Email (opcional)
+- Observações (opcional)
+
+### **Endpoint Admin**
+
+**POST** `/api/admin/presidentes/autorizar`
+- Adiciona novo presidente à lista
+- Se já existe (inativo), reativa
+- Se já existe (ativo), retorna erro
+
+**GET** `/api/admin/presidentes/autorizar`
+- Lista todos os presidentes autorizados
+
+**DELETE** `/api/admin/presidentes/autorizar`
+- Desativa presidente (marca como inativo)
+
+### **Validação no Trial**
+
+Quando alguém tenta criar conta no ambiente de presidentes:
+
+1. **Campo obrigatório:** Nome do Presidente Autorizado
+2. **Validação:** Busca na tabela `presidentes_autorizados`
+3. **Critério:** Nome parcial (case-insensitive) + status = 'ativo'
+4. **Resultado:**
+   - ✅ Encontrou → Cria conta
+   - ❌ Não encontrou → Erro 403
+
+**Exemplo de erro:**
+```json
+{
+  "error": "Presidente não encontrado na lista de autorizados. Verifique o nome digitado ou entre em contato com o suporte."
+}
+```
+
+---
+
 ## 📝 Próximos Passos (Opcional)
 
 1. Adicionar banner de expiração (quando faltar 1 dia)
 2. Adicionar página de admin para ver convites criados
 3. Adicionar estatísticas de conversão
 4. Adicionar notificação quando trial expirar
+5. Adicionar validação por email (além do nome)

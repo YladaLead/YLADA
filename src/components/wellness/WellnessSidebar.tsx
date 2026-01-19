@@ -12,6 +12,8 @@ interface MenuItem {
   href?: string
   color?: string
   badge?: number
+  external?: boolean
+  target?: string
 }
 
 interface MenuSection {
@@ -20,6 +22,8 @@ interface MenuSection {
   href?: string
   color?: string
   items?: MenuItem[]
+  external?: boolean
+  target?: string
 }
 
 interface WellnessSidebarProps {
@@ -34,6 +38,11 @@ export default function WellnessSidebar({ isMobileOpen = false, onMobileClose }:
   const [hoveredSection, setHoveredSection] = useState<string | null>(null)
   const [expandedSections, setExpandedSections] = useState<string[]>([])
 
+  const whatsappGroupInviteUrl = (
+    process.env.NEXT_PUBLIC_WELLNESS_WHATSAPP_GROUP_INVITE_URL ||
+    'https://chat.whatsapp.com/G5qbyl5Ks2E3QebmYDu0mP'
+  ).trim()
+
   const toggleSection = (section: string) => {
     const sectionId = section.toLowerCase().replace(/\s+/g, '-')
     setExpandedSections(prev =>
@@ -43,18 +52,12 @@ export default function WellnessSidebar({ isMobileOpen = false, onMobileClose }:
     )
   }
 
-  const menuItems: MenuSection[] = [
+  const primaryMenuItems: MenuSection[] = [
     {
       title: 'Home',
       icon: '🏠',
       href: '/pt/wellness/home',
       color: 'gray'
-    },
-    {
-      title: 'Workshop Completo',
-      icon: '🎓',
-      href: '/pt/wellness/workshop',
-      color: 'purple'
     },
     {
       title: 'Meus Links',
@@ -63,16 +66,10 @@ export default function WellnessSidebar({ isMobileOpen = false, onMobileClose }:
       color: 'green'
     },
     {
-      title: 'Mentoria NOEL',
-      icon: '🤖',
+      title: 'NOEL',
+      icon: '🙋🏻‍♂️',
       href: '/pt/wellness/noel',
       color: 'blue'
-    },
-    {
-      title: 'Filosofia YLADA',
-      icon: '💬',
-      href: '/pt/wellness/filosofia-lada',
-      color: 'purple'
     },
     {
       title: 'Meu Perfil e Metas',
@@ -98,6 +95,29 @@ export default function WellnessSidebar({ isMobileOpen = false, onMobileClose }:
     // - Biblioteca
     // - Comunidade
     // - Treinos & Plano
+  ]
+
+  const secondaryMenuItems: MenuSection[] = [
+    {
+      title: 'Workshop Completo',
+      icon: '🎓',
+      href: '/pt/wellness/workshop',
+      color: 'purple'
+    },
+    {
+      title: 'Grupo WhatsApp',
+      icon: '💬',
+      href: whatsappGroupInviteUrl,
+      color: 'green',
+      external: true,
+      target: '_blank',
+    },
+    {
+      title: 'Filosofia YLADA',
+      icon: '💡',
+      href: '/pt/wellness/filosofia-lada',
+      color: 'purple'
+    },
   ]
 
   const getColorClasses = (color?: string, isActive?: boolean) => {
@@ -174,7 +194,7 @@ export default function WellnessSidebar({ isMobileOpen = false, onMobileClose }:
 
         {/* Navigation */}
         <nav className="p-3 space-y-1 overflow-y-auto h-[calc(100vh-4rem)]">
-          {menuItems.map((item) => {
+          {primaryMenuItems.map((item) => {
             const sectionId = item.title.toLowerCase().replace(/\s+/g, '-')
             const isExpanded = expandedSections.includes(sectionId)
             const isHovered = hoveredSection === sectionId
@@ -292,18 +312,194 @@ export default function WellnessSidebar({ isMobileOpen = false, onMobileClose }:
 
             // Item simples (sem subitens)
             const itemActive = isItemActive(item.href)
+            const className = `
+              flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm transition-all
+              ${itemActive
+                ? `${colors.bg} ${colors.text} font-medium`
+                : 'text-gray-700 hover:bg-gray-50'
+              }
+            `
+
+            if (item.external && item.href) {
+              return (
+                <a
+                  key={item.title}
+                  href={item.href}
+                  target={item.target || '_blank'}
+                  rel="noopener noreferrer"
+                  onClick={onMobileClose}
+                  className={className}
+                >
+                  <span className="text-lg">{item.icon}</span>
+                  <span className="flex-1">{item.title}</span>
+                </a>
+              )
+            }
+
             return (
               <Link
                 key={item.title}
                 href={item.href || '#'}
                 onClick={onMobileClose}
-                className={`
-                  flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm transition-all
-                  ${itemActive
-                    ? `${colors.bg} ${colors.text} font-medium`
-                    : 'text-gray-700 hover:bg-gray-50'
-                  }
-                `}
+                className={className}
+              >
+                <span className="text-lg">{item.icon}</span>
+                <span className="flex-1">{item.title}</span>
+              </Link>
+            )
+          })}
+
+          {/* Divisor (bloco secundário) */}
+          <div className="pt-3 mt-3 border-t border-gray-200" />
+
+          {secondaryMenuItems.map((item) => {
+            const sectionId = item.title.toLowerCase().replace(/\s+/g, '-')
+            const isExpanded = expandedSections.includes(sectionId)
+            const isHovered = hoveredSection === sectionId
+            const sectionIsActive = isSectionActive(item)
+            const colors = getColorClasses(item.color, sectionIsActive)
+
+            // Se tem subitens, mostrar dropdown
+            if (item.items && item.items.length > 0) {
+              return (
+                <div
+                  key={item.title}
+                  className="relative"
+                  onMouseEnter={() => setHoveredSection(sectionId)}
+                  onMouseLeave={() => setHoveredSection(null)}
+                >
+                  <div className="flex items-center gap-1">
+                    {/* Link direto para o item principal se tiver href */}
+                    {item.href ? (
+                      <Link
+                        href={item.href}
+                        onClick={(e) => {
+                          // Se clicar no link principal, não expandir (só navegar)
+                          // Mas permitir que o botão de expandir funcione
+                          onMobileClose?.()
+                        }}
+                        className={`flex-1 flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm transition-all ${
+                          sectionIsActive || isHovered
+                            ? `${colors.bg} ${colors.text} font-medium`
+                            : 'text-gray-700 hover:bg-gray-50'
+                        }`}
+                      >
+                        <span className="text-lg flex-shrink-0">{item.icon}</span>
+                        <span className="flex-1 text-left truncate">{item.title}</span>
+                      </Link>
+                    ) : (
+                      <span className={`flex-1 flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm ${
+                        sectionIsActive || isHovered
+                          ? `${colors.bg} ${colors.text} font-medium`
+                          : 'text-gray-700'
+                      }`}>
+                        <span className="text-lg flex-shrink-0">{item.icon}</span>
+                        <span className="flex-1 text-left truncate">{item.title}</span>
+                      </span>
+                    )}
+                    {/* Botão para expandir/recolher */}
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault()
+                        e.stopPropagation()
+                        toggleSection(sectionId)
+                      }}
+                      onMouseEnter={(e) => {
+                        // Manter hover ao passar mouse sobre a seta
+                        e.stopPropagation()
+                      }}
+                      className={`p-2 rounded-lg transition-all flex-shrink-0 ${
+                        sectionIsActive || isHovered
+                          ? `${colors.bg} ${colors.text}`
+                          : 'text-gray-500 hover:bg-gray-50'
+                      }`}
+                      title={isExpanded ? 'Recolher' : 'Expandir'}
+                    >
+                      <svg
+                        className={`w-4 h-4 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </button>
+                  </div>
+
+                  {/* Subitens */}
+                  {(isHovered || isExpanded) && (
+                    <div className={`
+                      mt-1 space-y-1
+                      ${isExpanded 
+                        ? 'block' // Se expandido via clique, sempre mostrar embaixo
+                        : isHovered 
+                          ? 'lg:absolute lg:left-full lg:ml-2 lg:top-0 lg:bg-white lg:border lg:border-gray-200 lg:rounded-lg lg:shadow-lg lg:p-2 lg:min-w-[200px] lg:z-50' // Hover no desktop mostra popup
+                          : 'hidden'
+                      }
+                    `}>
+                      {item.items.map((subItem) => {
+                        const subItemActive = isItemActive(subItem.href)
+                        return (
+                          <Link
+                            key={subItem.title}
+                            href={subItem.href || '#'}
+                            onClick={onMobileClose}
+                            className={`
+                              flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all
+                              ${subItemActive
+                                ? `${colors.bg} ${colors.text} font-medium`
+                                : 'text-gray-600 hover:bg-gray-50'
+                              }
+                            `}
+                          >
+                            <span className="text-base">{subItem.icon}</span>
+                            <span className="flex-1">{subItem.title}</span>
+                            {subItem.badge && (
+                              <span className="bg-green-600 text-white text-xs px-2 py-0.5 rounded-full">
+                                {subItem.badge}
+                              </span>
+                            )}
+                          </Link>
+                        )
+                      })}
+                    </div>
+                  )}
+                </div>
+              )
+            }
+
+            // Item simples (sem subitens)
+            const itemActive = isItemActive(item.href)
+            const className = `
+              flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm transition-all
+              ${itemActive
+                ? `${colors.bg} ${colors.text} font-medium`
+                : 'text-gray-700 hover:bg-gray-50'
+              }
+            `
+
+            if (item.external && item.href) {
+              return (
+                <a
+                  key={item.title}
+                  href={item.href}
+                  target={item.target || '_blank'}
+                  rel="noopener noreferrer"
+                  onClick={onMobileClose}
+                  className={className}
+                >
+                  <span className="text-lg">{item.icon}</span>
+                  <span className="flex-1">{item.title}</span>
+                </a>
+              )
+            }
+
+            return (
+              <Link
+                key={item.title}
+                href={item.href || '#'}
+                onClick={onMobileClose}
+                className={className}
               >
                 <span className="text-lg">{item.icon}</span>
                 <span className="flex-1">{item.title}</span>

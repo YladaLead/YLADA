@@ -75,6 +75,10 @@ function LinksUnificadosPageContent() {
   } | null>(null)
 
   const baseUrl = getAppUrl()
+  const whatsappGroupInviteUrl = (
+    process.env.NEXT_PUBLIC_WELLNESS_WHATSAPP_GROUP_INVITE_URL ||
+    'https://chat.whatsapp.com/G5qbyl5Ks2E3QebmYDu0mP'
+  ).trim()
 
   // Função para gerar slug amigável a partir do nome do fluxo
   const gerarSlugFluxo = (nome: string): string => {
@@ -917,16 +921,49 @@ Você vai adorar! 😊`
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
         <WellnessNavBar showTitle title="Meus Links" />
         <main className="container mx-auto px-4 py-8">
-          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6 text-center">
-            <p className="text-yellow-800 mb-4">
-              ⚠️ Configure seu <strong>user_slug</strong> no perfil para gerar links personalizados.
-            </p>
-            <Link
-              href="/pt/wellness/configuracao"
-              className="inline-flex items-center px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700"
-            >
-              Ir para Configurações
-            </Link>
+          <div className="max-w-2xl mx-auto space-y-4">
+            {whatsappGroupInviteUrl && (
+              <div className="bg-white border border-gray-200 rounded-xl p-6">
+                <div className="flex items-start gap-3">
+                  <div className="text-3xl">💬</div>
+                  <div className="flex-1">
+                    <h2 className="text-lg font-bold text-gray-900 mb-1">Comunidade WhatsApp</h2>
+                    <p className="text-sm text-gray-600 mb-4">
+                      Entre no grupo para receber avisos, materiais e próximos passos.
+                    </p>
+                    <div className="flex flex-col sm:flex-row gap-2">
+                      <a
+                        href={whatsappGroupInviteUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center justify-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                      >
+                        Entrar no Grupo →
+                      </a>
+                      <button
+                        onClick={(e) => copiarLink(whatsappGroupInviteUrl, 'whatsapp-grupo', e)}
+                        className="inline-flex items-center justify-center px-4 py-2 bg-gray-100 text-gray-800 rounded-lg hover:bg-gray-200"
+                      >
+                        📋 Copiar link do grupo
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                <p className="text-xs text-gray-500 mt-3 break-all">{whatsappGroupInviteUrl}</p>
+              </div>
+            )}
+
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6 text-center">
+              <p className="text-yellow-800 mb-4">
+                ⚠️ Configure seu <strong>user_slug</strong> no perfil para gerar links personalizados.
+              </p>
+              <Link
+                href="/pt/wellness/configuracao"
+                className="inline-flex items-center px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700"
+              >
+                Ir para Configurações
+              </Link>
+            </div>
           </div>
         </main>
       </div>
@@ -939,6 +976,42 @@ Você vai adorar! 😊`
       <WellnessNavBar showTitle title="Meus Links" />
       
       <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Comunidade WhatsApp */}
+        {whatsappGroupInviteUrl && (
+          <div className="max-w-4xl mx-auto mb-6">
+            <div className="bg-white rounded-xl p-5 border border-gray-200 shadow-sm">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div className="flex items-start gap-3">
+                  <div className="text-3xl">💬</div>
+                  <div>
+                    <h2 className="text-lg font-bold text-gray-900">Comunidade WhatsApp</h2>
+                    <p className="text-sm text-gray-600">
+                      Link direto para novos inscritos entrarem no grupo.
+                    </p>
+                  </div>
+                </div>
+                <div className="flex flex-col sm:flex-row gap-2">
+                  <button
+                    onClick={(e) => copiarLink(whatsappGroupInviteUrl, 'whatsapp-grupo', e)}
+                    className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors"
+                  >
+                    📋 Copiar link do grupo
+                  </button>
+                  <a
+                    href={whatsappGroupInviteUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-4 py-2 bg-white hover:bg-gray-50 text-gray-900 text-sm font-medium rounded-lg border border-gray-300 transition-colors text-center"
+                  >
+                    Entrar no Grupo →
+                  </a>
+                </div>
+              </div>
+              <p className="text-xs text-gray-400 mt-3 break-all">{whatsappGroupInviteUrl}</p>
+            </div>
+          </div>
+        )}
+
         {/* Modo Ranking - Toggle e Info */}
         {modoRanking && (
           <div className="mb-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-4 border border-green-200">

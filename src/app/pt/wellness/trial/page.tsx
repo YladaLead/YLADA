@@ -13,6 +13,11 @@ export default function TrialPublicPage() {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState<{
+    loginUrl?: string | null
+    email?: string
+    nome?: string
+  } | null>(null)
   const [presidentes, setPresidentes] = useState<Presidente[]>([])
   const [loadingPresidentes, setLoadingPresidentes] = useState(true)
   const [formData, setFormData] = useState({
@@ -32,6 +37,11 @@ export default function TrialPublicPage() {
   // Obter código telefônico do país selecionado
   const selectedCountry = getCountryByCode(formData.countryCode)
   const phoneCode = selectedCountry?.phoneCode || '55'
+
+  const whatsappGroupInviteUrl = (
+    process.env.NEXT_PUBLIC_WELLNESS_WHATSAPP_GROUP_INVITE_URL ||
+    'https://chat.whatsapp.com/G5qbyl5Ks2E3QebmYDu0mP'
+  ).trim()
 
   // Carregar lista de presidentes
   useEffect(() => {
@@ -58,6 +68,7 @@ export default function TrialPublicPage() {
     e.preventDefault()
     setLoading(true)
     setError(null)
+    setSuccess(null)
 
     // Validações
     if (!formData.nome_presidente) {
@@ -136,13 +147,12 @@ export default function TrialPublicPage() {
       const data = await response.json()
 
       if (response.ok && data.success) {
-        // Redirecionar para login ou área Wellness
-        if (data.login_url) {
-          window.location.href = data.login_url
-        } else {
-          // Redirecionar para login sem parâmetro trial para evitar redirecionamento automático
-          router.push('/pt/wellness/login')
-        }
+        // Exibir tela de sucesso com botões (grupo WhatsApp + acesso)
+        setSuccess({
+          loginUrl: data.login_url || null,
+          email: requestBody.email,
+          nome: requestBody.nome_completo,
+        })
       } else {
         // Mostrar mensagem de erro específica da API
         const errorMessage = data.error || 'Erro ao criar conta. Tente novamente.'
@@ -170,6 +180,78 @@ export default function TrialPublicPage() {
           </p>
         </div>
 
+        {success ? (
+          <div className="space-y-4">
+            <div className="bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-lg text-sm">
+              <p className="font-semibold mb-1">Conta criada com sucesso!</p>
+              <p>
+                {success.email ? <>Seu acesso foi liberado para <strong>{success.email}</strong>.</> : 'Seu acesso foi liberado.'}
+              </p>
+            </div>
+
+            {whatsappGroupInviteUrl ? (
+              <div className="bg-white border border-gray-200 rounded-lg p-4">
+                <p className="font-semibold text-gray-900 mb-1">📣 Entre no Grupo do WhatsApp</p>
+                <p className="text-sm text-gray-600 mb-3">
+                  Entre no grupo para receber avisos, materiais e próximos passos.
+                </p>
+                <div className="flex gap-2">
+                  <a
+                    href={whatsappGroupInviteUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex-1 text-center bg-green-600 text-white py-2 rounded-lg font-semibold hover:bg-green-700 transition"
+                  >
+                    Entrar no Grupo →
+                  </a>
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      try {
+                        await navigator.clipboard.writeText(whatsappGroupInviteUrl)
+                      } catch {
+                        // fallback silencioso: não bloquear a UI
+                      }
+                    }}
+                    className="px-4 bg-gray-100 text-gray-800 py-2 rounded-lg font-semibold hover:bg-gray-200 transition"
+                    title="Copiar link do grupo"
+                  >
+                    📋
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="bg-yellow-50 border border-yellow-200 text-yellow-800 px-4 py-3 rounded-lg text-sm">
+                Link do grupo ainda não configurado.
+              </div>
+            )}
+
+            <button
+              type="button"
+              onClick={() => {
+                if (success.loginUrl) {
+                  window.location.href = success.loginUrl
+                  return
+                }
+                router.push('/pt/wellness/login')
+              }}
+              className="w-full bg-emerald-600 text-white py-3 rounded-lg font-semibold hover:bg-emerald-700 transition"
+            >
+              Acessar a plataforma agora →
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setSuccess(null)
+                setError(null)
+              }}
+              className="w-full bg-white border border-gray-300 text-gray-800 py-3 rounded-lg font-semibold hover:bg-gray-50 transition"
+            >
+              Criar outra conta
+            </button>
+          </div>
+        ) : (
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Campo de Presidente (Obrigatório) */}
           <div>
@@ -349,6 +431,7 @@ export default function TrialPublicPage() {
             Seu trial de 3 dias começa imediatamente após a criação.
           </p>
         </form>
+        )}
       </div>
     </div>
   )
