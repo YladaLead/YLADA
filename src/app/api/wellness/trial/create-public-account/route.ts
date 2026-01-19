@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
 import { createTrialSubscription } from '@/lib/trial-helpers'
+import { generateAvailableUserSlug } from '@/lib/user-slug-generator'
 
 /**
  * POST /api/wellness/trial/create-public-account
@@ -136,6 +137,15 @@ export async function POST(request: NextRequest) {
 
     const userId = newUser.user.id
 
+    // 🚀 Gerar user_slug automaticamente baseado no primeiro nome
+    const userSlug = await generateAvailableUserSlug(nome_completo)
+    
+    if (!userSlug) {
+      console.warn('⚠️ Não foi possível gerar user_slug automaticamente, continuando sem slug')
+    } else {
+      console.log(`✅ user_slug gerado automaticamente: ${userSlug}`)
+    }
+
     // Criar perfil (ou atualizar se já existir - pode ter sido criado por trigger)
     const { error: profileError } = await supabaseAdmin
       .from('user_profiles')
@@ -146,6 +156,7 @@ export async function POST(request: NextRequest) {
         whatsapp: whatsapp?.trim() || null,
         perfil: 'wellness',
         nome_presidente: presidenteNome || null, // Adicionar nome do presidente
+        user_slug: userSlug || null, // 🚀 Adicionar user_slug gerado automaticamente
         updated_at: new Date().toISOString(),
       }, {
         onConflict: 'user_id'
