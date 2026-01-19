@@ -17,6 +17,21 @@ export default function WellnessWorkshopPage() {
   const [copiado, setCopiado] = useState(false)
   const [loading, setLoading] = useState(false)
 
+  // Verificar se já assistiu (opcional - pode salvar no banco depois)
+  // IMPORTANTE: useEffect deve vir ANTES de qualquer return condicional
+  useEffect(() => {
+    if (typeof window !== 'undefined' && !authLoading) {
+      const jaAssistiuIntro = localStorage.getItem('wellness_workshop_intro_assistido')
+      const jaAssistiu = localStorage.getItem('wellness_workshop_assistido')
+      if (jaAssistiuIntro === 'true') {
+        setStep('workshop')
+      }
+      if (jaAssistiu === 'true') {
+        setAssistido(true)
+      }
+    }
+  }, [authLoading])
+
   // Loading enquanto autenticação carrega
   if (authLoading) {
     return (
@@ -30,20 +45,6 @@ export default function WellnessWorkshopPage() {
       </ConditionalWellnessSidebar>
     )
   }
-
-  // Verificar se já assistiu (opcional - pode salvar no banco depois)
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const jaAssistiuIntro = localStorage.getItem('wellness_workshop_intro_assistido')
-      const jaAssistiu = localStorage.getItem('wellness_workshop_assistido')
-      if (jaAssistiuIntro === 'true') {
-        setStep('workshop')
-      }
-      if (jaAssistiu === 'true') {
-        setAssistido(true)
-      }
-    }
-  }, [])
 
   const handleAssistiuIntro = async () => {
     setLoading(true)
