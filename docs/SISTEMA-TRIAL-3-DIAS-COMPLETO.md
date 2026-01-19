@@ -2,14 +2,38 @@
 
 ## 📋 Visão Geral
 
-Sistema completo para compartilhar links de convite que permitem acesso automático ao trial de 3 dias, sem necessidade de login/cadastro manual.
+Sistema completo para trial de 3 dias com **dois modos de uso**:
+
+1. **Link Público Fixo** (qualquer pessoa pode usar)
+   - `/pt/wellness/trial` - Ambiente geral
+   - `/pt/wellness/trial/presidentes` - Ambiente exclusivo para presidentes
+   - Pessoa preenche dados e cria conta automaticamente
+
+2. **Link de Convite Personalizado** (com dados pré-preenchidos)
+   - Link único gerado por pessoa
+   - Dados já vêm preenchidos
+   - Pessoa só precisa criar senha
 
 ---
 
 ## 🔄 Como Funciona
 
-### **Fluxo Completo:**
+### **MODO 1: Link Público Fixo (Recomendado para página de venda)**
 
+**Fluxo:**
+1. **Você compartilha link fixo** → `https://www.ylada.com/pt/wellness/trial`
+2. **Qualquer pessoa clica** → Vai para página de cadastro
+3. **Pessoa preenche dados** → Email, nome, WhatsApp, senha
+4. **Cria conta automaticamente** → Trial de 3 dias ativado
+5. **Login automático** → Redireciona para área Wellness
+
+**Links disponíveis:**
+- **Geral:** `/pt/wellness/trial`
+- **Presidentes:** `/pt/wellness/trial/presidentes`
+
+### **MODO 2: Link de Convite Personalizado (Com dados pré-preenchidos)**
+
+**Fluxo:**
 1. **Você gera um link** → Endpoint `/api/wellness/trial/generate-invite`
 2. **Compartilha o link** → Pessoa recebe link único
 3. **Pessoa clica no link** → Vai para `/pt/wellness/trial/[token]`
@@ -24,7 +48,27 @@ Sistema completo para compartilhar links de convite que permitem acesso automát
 
 ## 🚀 Como Usar
 
-### **1. Gerar Link de Convite**
+### **OPÇÃO 1: Link Público Fixo (Para página de venda)**
+
+**Links disponíveis:**
+- **Geral:** `https://www.ylada.com/pt/wellness/trial`
+- **Presidentes:** `https://www.ylada.com/pt/wellness/trial/presidentes`
+
+**Como usar:**
+1. Coloque o link na sua página de venda
+2. Qualquer pessoa pode clicar e criar conta
+3. Sistema cria trial automaticamente
+4. Separação automática por ambiente (geral vs presidentes)
+
+**Exemplo de botão na página de venda:**
+```html
+<a href="https://www.ylada.com/pt/wellness/trial" 
+   class="btn-trial">
+   🎁 Teste Grátis por 3 Dias
+</a>
+```
+
+### **OPÇÃO 2: Gerar Link de Convite Personalizado**
 
 **Endpoint:** `POST /api/wellness/trial/generate-invite`
 

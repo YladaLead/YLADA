@@ -26,6 +26,9 @@ CREATE TABLE IF NOT EXISTS trial_invites (
   -- Expiração
   expires_at TIMESTAMPTZ NOT NULL,
   
+  -- Ambiente/Grupo (para separar presidentes)
+  trial_group TEXT DEFAULT 'geral', -- 'geral', 'presidentes', etc
+  
   -- Metadados
   metadata JSONB DEFAULT '{}'::jsonb,
   
@@ -40,6 +43,7 @@ CREATE INDEX IF NOT EXISTS idx_trial_invites_email ON trial_invites(email);
 CREATE INDEX IF NOT EXISTS idx_trial_invites_status ON trial_invites(status);
 CREATE INDEX IF NOT EXISTS idx_trial_invites_created_by ON trial_invites(created_by_user_id);
 CREATE INDEX IF NOT EXISTS idx_trial_invites_expires_at ON trial_invites(expires_at);
+CREATE INDEX IF NOT EXISTS idx_trial_invites_trial_group ON trial_invites(trial_group);
 
 -- RLS (Row Level Security)
 ALTER TABLE trial_invites ENABLE ROW LEVEL SECURITY;
