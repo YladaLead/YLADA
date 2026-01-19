@@ -1,12 +1,18 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import Link from 'next/link'
+import { useEffect, useState } from 'react'
 import Image from 'next/image'
+import Link from 'next/link'
 import PhoneInputWithCountry from '@/components/PhoneInputWithCountry'
-import { trackNutriWorkshopView, trackNutriWorkshopLead } from '@/lib/facebook-pixel'
+import { trackNutriWorkshopLead, trackNutriWorkshopView } from '@/lib/facebook-pixel'
 
-export default function WorkshopPage() {
+function buildWhatsappUrl(opts: { phone: string; message: string }) {
+  const numeroLimpo = (opts.phone || '').replace(/[^0-9]/g, '')
+  if (!numeroLimpo) return null
+  return `https://wa.me/${numeroLimpo}?text=${encodeURIComponent(opts.message)}`
+}
+
+export default function WorkshopAgendaInstavelPage() {
   const [formData, setFormData] = useState({
     nome: '',
     email: '',
@@ -18,7 +24,18 @@ export default function WorkshopPage() {
   const [showSuccess, setShowSuccess] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  // Rastrear visualização da página de workshop
+  const whatsappNumber =
+    process.env.NEXT_PUBLIC_NUTRI_WHATSAPP_NUMBER ||
+    process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ||
+    '5519997230912'
+
+  const whatsappUrl = buildWhatsappUrl({
+    phone: whatsappNumber,
+    message:
+      'Olá! Acabei de me inscrever na Aula Prática ao Vivo (Agenda Instável) da YLADA Nutri e gostaria de agendar uma conversa rápida para entender os próximos passos.'
+  })
+
+  // Rastrear visualização da página
   useEffect(() => {
     trackNutriWorkshopView()
   }, [])
@@ -46,14 +63,14 @@ export default function WorkshopPage() {
           email: formData.email,
           telefone: formData.telefone,
           crn: formData.crn || null,
-          source: 'workshop_landing_page'
+          source: 'workshop_agenda_instavel_landing_page'
         }),
       })
 
       // Verificar se a resposta tem conteúdo antes de fazer parse
       const text = await response.text()
       let data: any = {}
-      
+
       if (text) {
         try {
           data = JSON.parse(text)
@@ -70,7 +87,7 @@ export default function WorkshopPage() {
       // Sucesso
       setShowSuccess(true)
       setFormData({ nome: '', email: '', telefone: '', crn: '', countryCode: 'BR' })
-      
+
       // Disparar evento do Pixel (Lead)
       trackNutriWorkshopLead()
 
@@ -80,10 +97,8 @@ export default function WorkshopPage() {
       }, 100)
     } catch (error: any) {
       console.error('Erro ao enviar inscrição:', error)
-      
-      // Mensagens de erro mais específicas
+
       let errorMessage = 'Erro ao enviar inscrição. Por favor, tente novamente.'
-      
       if (error.message) {
         errorMessage = error.message
       } else if (error instanceof SyntaxError) {
@@ -91,17 +106,104 @@ export default function WorkshopPage() {
       } else if (error instanceof TypeError) {
         errorMessage = 'Erro de conexão. Verifique sua internet e tente novamente.'
       }
-      
+
       setError(errorMessage)
     } finally {
       setSubmitting(false)
     }
   }
 
+  if (showSuccess) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-blue-600 to-blue-800">
+        {/* Header */}
+        <header className="sticky top-0 z-50 border-b border-gray-200 bg-white shadow-sm h-16 sm:h-20 flex items-center">
+          <div className="container mx-auto px-6 lg:px-8 py-3 flex items-center justify-between">
+            <Link href="/pt/nutri">
+              <Image
+                src="/images/logo/nutri-horizontal.png"
+                alt="YLADA Nutri"
+                width={133}
+                height={40}
+                className="h-8 sm:h-10 w-auto"
+                priority
+              />
+            </Link>
+          </div>
+        </header>
+
+        <main className="px-4 sm:px-6 lg:px-8 py-10 sm:py-14">
+          <div className="max-w-3xl mx-auto">
+            <div className="bg-gradient-to-br from-green-50 to-emerald-50 border-4 border-green-300 rounded-xl p-8 text-center shadow-2xl">
+              <div className="text-5xl sm:text-6xl mb-4">✅</div>
+              <h3 className="text-2xl sm:text-3xl font-black text-green-800 mb-3">
+                Cadastro Confirmado!
+              </h3>
+              <div className="bg-white rounded-lg p-6 mb-4">
+                <p className="text-base sm:text-lg font-bold text-gray-800 mb-3">
+                  Você vai receber as informações da próxima aula prática ao vivo:
+                </p>
+                <div className="space-y-2 text-left max-w-md mx-auto">
+                  <div className="flex items-center">
+                    <span className="text-2xl mr-3">📱</span>
+                    <span className="text-gray-700">Por WhatsApp (número cadastrado)</span>
+                  </div>
+                  <div className="flex items-center">
+                    <span className="text-2xl mr-3">📧</span>
+                    <span className="text-gray-700">Por e-mail (verifique spam)</span>
+                  </div>
+                </div>
+              </div>
+
+              {whatsappUrl && (
+                <div className="max-w-md mx-auto">
+                  <a
+                    href={whatsappUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block w-full bg-green-500 hover:bg-green-600 text-white px-6 py-4 rounded-lg font-black text-base sm:text-lg transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                  >
+                    Quero agendar no WhatsApp agora
+                  </a>
+                </div>
+              )}
+            </div>
+          </div>
+        </main>
+
+        {/* Footer */}
+        <footer className="bg-white border-t border-gray-200 py-8">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="max-w-4xl mx-auto text-center">
+              <Link href="/pt/nutri">
+                <Image
+                  src="/images/logo/nutri-horizontal.png"
+                  alt="YLADA Nutri"
+                  width={133}
+                  height={40}
+                  className="h-8 mx-auto mb-4 opacity-90"
+                />
+              </Link>
+              <p className="text-gray-600 text-sm">
+                © {new Date().getFullYear()} YLADA. Todos os direitos reservados.
+              </p>
+              <p className="text-gray-500 text-xs mt-2">
+                Portal Solutions Tech & Innovation LTDA
+              </p>
+              <p className="text-gray-500 text-xs">
+                CNPJ: 63.447.492/0001-88
+              </p>
+            </div>
+          </div>
+        </footer>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
       {/* Header */}
-      <header className="sticky top-0 z-50 border-b border-gray-200 bg-white/95 backdrop-blur-sm shadow-sm h-16 sm:h-20 flex items-center">
+      <header className="sticky top-0 z-50 border-b border-gray-200 bg-white shadow-sm h-16 sm:h-20 flex items-center">
         <div className="container mx-auto px-6 lg:px-8 py-3 flex items-center justify-between">
           <Link href="/pt/nutri">
             <Image
@@ -121,56 +223,29 @@ export default function WorkshopPage() {
         <section className="bg-gradient-to-br from-blue-500 via-blue-600 to-blue-700 text-white pt-8 sm:pt-12 lg:pt-16 pb-12 sm:pb-16 lg:pb-20">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="max-w-6xl mx-auto">
-              {/* Mensagem de Sucesso */}
-              {showSuccess && (
-                <div className="mb-8 bg-gradient-to-br from-green-50 to-emerald-50 border-4 border-green-300 rounded-xl p-8 text-center shadow-2xl">
-                  <div className="text-6xl mb-4">🎉</div>
-                  <h3 className="text-3xl font-black text-green-800 mb-3">
-                    Cadastro Confirmado!
-                  </h3>
-                  <div className="bg-white rounded-lg p-6 mb-4">
-                    <p className="text-lg font-bold text-gray-800 mb-3">
-                      Você será avisada quando o próximo workshop for agendado:
-                    </p>
-                    <div className="space-y-2 text-left max-w-md mx-auto">
-                      <div className="flex items-center">
-                        <span className="text-2xl mr-3">📱</span>
-                        <span className="text-gray-700">Por WhatsApp (número cadastrado)</span>
-                      </div>
-                      <div className="flex items-center">
-                        <span className="text-2xl mr-3">📧</span>
-                        <span className="text-gray-700">Por email (verifique spam)</span>
-                      </div>
-                    </div>
-                  </div>
-                  <p className="text-sm text-green-700 font-semibold">
-                    Fique de olho! Você receberá a data e o link de acesso em breve.
-                  </p>
-                </div>
-              )}
-
               {/* Grid: DOR + FORMULÁRIO lado a lado desde o início */}
               <div className="grid lg:grid-cols-2 gap-6 lg:gap-8 items-start">
                 {/* Lado Esquerdo: DOR DIRETA */}
                 <div className="w-full">
                   <div className="flex flex-wrap gap-2 mb-3">
                     <div className="inline-block bg-amber-400 text-blue-800 px-3 py-1.5 rounded-full text-xs font-bold shadow-md">
-                      🎓 WORKSHOP AO VIVO
+                      🎓 AULA PRÁTICA AO VIVO
                     </div>
                     <div className="inline-block bg-emerald-500 text-white px-3 py-1.5 rounded-full text-xs font-bold shadow-md">
                       ✅ 100% GRATUITO
                     </div>
                   </div>
-                  
+
                   <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black mb-4 leading-tight text-white drop-shadow-sm">
-                    Você é nutricionista, mas se sente perdida sobre o que fazer para o negócio funcionar?
+                    Sua agenda fica cheia num mês e vazia no outro?
                   </h1>
-                  
+
                   <p className="text-lg sm:text-xl text-white mb-6 leading-relaxed font-semibold drop-shadow-sm">
-                    Esse workshop ao vivo é para quem está cansada de tentar de tudo e quer, antes de qualquer coisa, <strong className="font-black">parar de se sentir perdida</strong> e ver um caminho claro.
+                    Você vai descobrir o que está travando sua agenda e sair com um plano simples de ajustes para começar a gerar procura
+                    com mais constância.
                   </p>
-                  
-                  {/* Bloco de Identificação - DOres Emocionais (DIRETO) */}
+
+                  {/* Bloco de Identificação - AGENDA INSTÁVEL */}
                   <div className="bg-white rounded-xl p-5 sm:p-6 mb-4 border-2 border-blue-200 shadow-xl">
                     <h2 className="text-lg sm:text-xl font-black text-gray-900 mb-4">
                       Se você se identifica com pelo menos um desses pontos:
@@ -178,35 +253,36 @@ export default function WorkshopPage() {
                     <div className="space-y-2.5">
                       <div className="flex items-start bg-blue-50 rounded-lg p-2.5 border border-blue-200">
                         <span className="text-amber-500 text-lg mr-2.5 font-black flex-shrink-0 mt-0.5">•</span>
-                        <span className="text-gray-800 text-sm sm:text-base leading-relaxed font-bold">"Não sei se estou fazendo certo" <span className="text-gray-600 text-xs font-semibold">(confusão)</span></span>
+                        <span className="text-gray-800 text-sm sm:text-base leading-relaxed font-bold">
+                          “Dependo de indicação e fico no alto e baixo”
+                        </span>
                       </div>
                       <div className="flex items-start bg-blue-50 rounded-lg p-2.5 border border-blue-200">
                         <span className="text-amber-500 text-lg mr-2.5 font-black flex-shrink-0 mt-0.5">•</span>
-                        <span className="text-gray-800 text-sm sm:text-base leading-relaxed font-bold">"Tenho medo de não conseguir viver disso" <span className="text-gray-600 text-xs font-semibold">(medo)</span></span>
+                        <span className="text-gray-800 text-sm sm:text-base leading-relaxed font-bold">
+                          “Tenho semanas vazias e não sei o que fazer”
+                        </span>
                       </div>
                       <div className="flex items-start bg-blue-50 rounded-lg p-2.5 border border-blue-200">
                         <span className="text-amber-500 text-lg mr-2.5 font-black flex-shrink-0 mt-0.5">•</span>
-                        <span className="text-gray-800 text-sm sm:text-base leading-relaxed font-bold">"Trabalho muito e ganho pouco" <span className="text-gray-600 text-xs font-semibold">(frustração)</span></span>
+                        <span className="text-gray-800 text-sm sm:text-base leading-relaxed font-bold">
+                          “Até posto, mas não vira consulta”
+                        </span>
                       </div>
                       <div className="flex items-start bg-blue-50 rounded-lg p-2.5 border border-blue-200">
                         <span className="text-amber-500 text-lg mr-2.5 font-black flex-shrink-0 mt-0.5">•</span>
-                        <span className="text-gray-800 text-sm sm:text-base leading-relaxed font-bold">"Tenho medo de cobrar" <span className="text-gray-600 text-xs font-semibold">(insegurança)</span></span>
-                      </div>
-                      <div className="flex items-start bg-blue-50 rounded-lg p-2.5 border border-blue-200">
-                        <span className="text-amber-500 text-lg mr-2.5 font-black flex-shrink-0 mt-0.5">•</span>
-                        <span className="text-gray-800 text-sm sm:text-base leading-relaxed font-bold">"Estou cansada e desanimada" <span className="text-gray-600 text-xs font-semibold">(cansaço)</span></span>
-                      </div>
-                      <div className="flex items-start bg-blue-50 rounded-lg p-2.5 border border-blue-200">
-                        <span className="text-amber-500 text-lg mr-2.5 font-black flex-shrink-0 mt-0.5">•</span>
-                        <span className="text-gray-800 text-sm sm:text-base leading-relaxed font-bold">"Outras crescem e eu não" <span className="text-gray-600 text-xs font-semibold">(comparação)</span></span>
+                        <span className="text-gray-800 text-sm sm:text-base leading-relaxed font-bold">
+                          “Trabalho muito, mas a agenda não estabiliza”
+                        </span>
                       </div>
                     </div>
                   </div>
 
-                  {/* Reposicionamento CURTO */}
+                  {/* Promessa objetiva */}
                   <div className="bg-white rounded-xl p-4 mb-4 border-2 border-amber-300 shadow-lg">
                     <p className="text-gray-800 text-sm sm:text-base leading-relaxed font-semibold">
-                      <strong className="text-amber-500 font-black">⚠️</strong> Esse não é mais um curso que te deixa sozinha. É um encontro para você <strong className="font-black text-gray-900">parar de se sentir perdida</strong> e ver um caminho claro.
+                      <strong className="text-amber-500 font-black">Direto ao ponto:</strong> você vai conseguir fazer um autodiagnóstico,
+                      entender com clareza o que está te travando e sair com um plano prático de ajustes.
                     </p>
                   </div>
                 </div>
@@ -223,15 +299,18 @@ export default function WorkshopPage() {
                       </div>
                     </div>
                     <h2 className="text-xl sm:text-2xl lg:text-3xl font-black text-gray-900 mb-3">
-                      Quero parar de me sentir perdida
+                      Quero estabilizar minha agenda
                     </h2>
                     <p className="text-gray-600 text-xs sm:text-sm mb-2">
-                      Cadastre-se agora e receba por WhatsApp:
+                      Cadastre-se e receba por WhatsApp:
                     </p>
                     <div className="text-gray-700 font-bold text-sm sm:text-base mb-4 space-y-1">
-                      <p>📅 Data e horário do próximo workshop</p>
-                      <p>🔗 Link de acesso exclusivo</p>
-                      <p>⏰ Lembrete 1h antes do evento</p>
+                      <p>📅 Data e horário da próxima aula</p>
+                    </div>
+                    <div className="mt-3">
+                      <span className="inline-block bg-blue-50 text-blue-800 border border-blue-200 px-3 py-1 rounded-full text-xs sm:text-sm font-black">
+                        🔒 Exclusivo para nutricionistas
+                      </span>
                     </div>
                   </div>
 
@@ -258,7 +337,7 @@ export default function WorkshopPage() {
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Email <span className="text-red-600">*</span>
+                        E-mail <span className="text-red-600">*</span>
                       </label>
                       <input
                         type="email"
@@ -300,12 +379,23 @@ export default function WorkshopPage() {
                       disabled={submitting}
                       className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white px-6 py-4 rounded-lg font-black text-lg hover:from-blue-600 hover:to-blue-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
                     >
-                      {submitting ? 'Cadastrando...' : 'Quero parar de me sentir perdida'}
+                      {submitting ? 'Cadastrando...' : 'Quero o plano para estabilizar minha agenda'}
                     </button>
+
+                    {whatsappUrl && (
+                      <a
+                        href={whatsappUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="block w-full text-center px-6 py-3 rounded-lg font-bold border-2 border-green-500 text-green-700 hover:bg-green-50 transition-all"
+                      >
+                        Prefiro falar no WhatsApp agora
+                      </a>
+                    )}
 
                     <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-3 mt-4">
                       <p className="text-xs text-emerald-800 text-center font-semibold">
-                        🔒 Seus dados estão seguros. Você receberá apenas informações sobre o workshop.
+                        🔒 Seus dados estão seguros. Você receberá apenas informações sobre a aula.
                       </p>
                     </div>
                   </form>
@@ -315,7 +405,7 @@ export default function WorkshopPage() {
           </div>
         </section>
 
-        {/* Promessa de Satisfação - FOCO EM SENTIMENTOS */}
+        {/* Promessa de Saída - FOCO EM AGENDA */}
         <section className="py-12 sm:py-16 bg-gradient-to-br from-blue-500 via-blue-600 to-blue-700">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="max-w-4xl mx-auto">
@@ -324,24 +414,24 @@ export default function WorkshopPage() {
                   <span className="text-emerald-500 text-4xl mr-4 flex-shrink-0">✓</span>
                   <div>
                     <p className="text-gray-900 text-xl sm:text-2xl font-black mb-4">
-                      Você vai sair do workshop com:
+                      Você vai sair da aula com:
                     </p>
                     <ul className="text-gray-800 text-base sm:text-lg space-y-3 font-semibold">
                       <li className="flex items-start">
                         <span className="text-emerald-500 mr-3 text-xl">→</span>
-                        <span><strong className="font-black text-gray-900">Clareza</strong> <span className="text-gray-600">(não mais confusão)</span></span>
+                        <span><strong className="font-black text-gray-900">Diagnóstico</strong> do que está travando sua agenda hoje</span>
                       </li>
                       <li className="flex items-start">
                         <span className="text-emerald-500 mr-3 text-xl">→</span>
-                        <span><strong className="font-black text-gray-900">Segurança</strong> <span className="text-gray-600">(não mais medo)</span></span>
+                        <span><strong className="font-black text-gray-900">Ajustes práticos</strong> para aplicar nesta semana</span>
                       </li>
                       <li className="flex items-start">
                         <span className="text-emerald-500 mr-3 text-xl">→</span>
-                        <span><strong className="font-black text-gray-900">Direção</strong> <span className="text-gray-600">(não mais perdida)</span></span>
+                        <span><strong className="font-black text-gray-900">Plano simples</strong> para gerar procura com mais constância</span>
                       </li>
                       <li className="flex items-start">
                         <span className="text-emerald-500 mr-3 text-xl">→</span>
-                        <span><strong className="font-black text-gray-900">Confiança</strong> <span className="text-gray-600">(não mais insegurança)</span></span>
+                        <span><strong className="font-black text-gray-900">Próximo passo</strong> (sem compromisso) para estabilizar sua agenda</span>
                       </li>
                     </ul>
                   </div>
@@ -351,43 +441,54 @@ export default function WorkshopPage() {
           </div>
         </section>
 
-        {/* O que vai acontecer no workshop */}
+        {/* O que vai acontecer na aula */}
         <section className="py-12 sm:py-16 bg-white">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="max-w-4xl mx-auto">
               <h2 className="text-2xl sm:text-3xl font-black text-gray-900 mb-6 text-center">
-                🧭 O que vai acontecer no workshop
+                📌 O que vai acontecer na aula prática ao vivo
               </h2>
               <div className="grid sm:grid-cols-2 gap-4">
-                <div className="bg-gradient-to-br from-blue-50 to-sky-50 rounded-xl p-5 border-2 border-blue-200 shadow-md">
-                  <div className="text-amber-500 text-3xl font-black mb-2">1</div>
-                  <p className="text-gray-700 text-base font-medium leading-relaxed">Entender por que esforço não está virando resultado</p>
+                <div className="bg-gradient-to-br from-blue-50 to-sky-50 rounded-xl p-4 border-2 border-blue-200 shadow-md">
+                  <p className="text-gray-800 text-base font-semibold leading-relaxed">
+                    <span className="text-amber-500 font-black mr-2">1</span>
+                    Identificar o ponto exato que está travando sua agenda <span className="text-gray-600">(sem achismo)</span>
+                  </p>
                 </div>
-                <div className="bg-gradient-to-br from-blue-50 to-sky-50 rounded-xl p-5 border-2 border-blue-200 shadow-md">
-                  <div className="text-amber-500 text-3xl font-black mb-2">2</div>
-                  <p className="text-gray-700 text-base font-medium leading-relaxed">Identificar o erro mais comum na comunicação da nutricionista</p>
+                <div className="bg-gradient-to-br from-blue-50 to-sky-50 rounded-xl p-4 border-2 border-blue-200 shadow-md">
+                  <p className="text-gray-800 text-base font-semibold leading-relaxed">
+                    <span className="text-amber-500 font-black mr-2">2</span>
+                    Ajustar sua oferta e sua mensagem para virar consulta <span className="text-gray-600">(não só curtida)</span>
+                  </p>
                 </div>
-                <div className="bg-gradient-to-br from-blue-50 to-sky-50 rounded-xl p-5 border-2 border-blue-200 shadow-md">
-                  <div className="text-amber-500 text-3xl font-black mb-2">3</div>
-                  <p className="text-gray-700 text-base font-medium leading-relaxed">Ver como criar previsibilidade sem depender de indicação</p>
+                <div className="bg-gradient-to-br from-blue-50 to-sky-50 rounded-xl p-4 border-2 border-blue-200 shadow-md">
+                  <p className="text-gray-800 text-base font-semibold leading-relaxed">
+                    <span className="text-amber-500 font-black mr-2">3</span>
+                    Montar uma rotina mínima de captação + follow-up <span className="text-gray-600">(previsibilidade)</span>
+                  </p>
                 </div>
-                <div className="bg-gradient-to-br from-blue-50 to-sky-50 rounded-xl p-5 border-2 border-blue-200 shadow-md">
-                  <div className="text-amber-500 text-3xl font-black mb-2">4</div>
-                  <p className="text-gray-700 text-base font-medium leading-relaxed">Sair com um mapa simples de próximos passos</p>
+                <div className="bg-gradient-to-br from-blue-50 to-sky-50 rounded-xl p-4 border-2 border-blue-200 shadow-md">
+                  <p className="text-gray-800 text-base font-semibold leading-relaxed">
+                    <span className="text-amber-500 font-black mr-2">4</span>
+                    Sair com um plano simples para aplicar nesta semana <span className="text-gray-600">(passo a passo)</span>
+                  </p>
                 </div>
               </div>
+              <p className="mt-6 text-sm sm:text-base text-gray-600 text-center font-semibold">
+                No final, se fizer sentido, você conhece o <strong className="text-gray-900">Método YLADA</strong> (R$197/mês) para estabilizar sua agenda com estrutura e acompanhamento.
+              </p>
             </div>
           </div>
         </section>
 
-        {/* Seção: Quem Conduz (SEM EGO) */}
+        {/* Seção: Quem Conduz */}
         <section className="py-12 sm:py-16 bg-gradient-to-b from-gray-50 to-white">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="max-w-4xl mx-auto">
               <h2 className="text-2xl sm:text-3xl font-black text-gray-900 mb-6 text-center">
-                Quem vai conduzir o workshop
+                Quem vai conduzir a aula
               </h2>
-              
+
               <div className="bg-white rounded-2xl p-6 sm:p-8 shadow-lg border-2 border-gray-200">
                 <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 sm:gap-8">
                   {/* Foto */}
@@ -404,14 +505,15 @@ export default function WorkshopPage() {
                       />
                     </div>
                   </div>
-                  
+
                   {/* Nome e Descrição */}
                   <div className="flex-1 text-center sm:text-left">
                     <h3 className="text-2xl sm:text-3xl font-black text-gray-900 mb-4">
                       Andre Faula
                     </h3>
                     <p className="text-lg sm:text-xl text-gray-700 leading-relaxed">
-                      Profissional com mais de <strong>20 anos ajudando profissionais da área do bem estar</strong> a se organizarem em comunicação, rotina e geração de cliente através de <strong>métodos simples, claros e práticos</strong>.
+                      Profissional com mais de <strong>20 anos ajudando profissionais da área do bem estar</strong> a se organizarem em
+                      comunicação, rotina e geração de cliente através de <strong>métodos simples, claros e práticos</strong>.
                     </p>
                   </div>
                 </div>
@@ -420,13 +522,13 @@ export default function WorkshopPage() {
           </div>
         </section>
 
-        {/* Bloco de Rejeição (ESSENCIAL PARA CONVERSÃO) */}
+        {/* Bloco de Rejeição */}
         <section className="py-12 sm:py-16 bg-gradient-to-b from-amber-50 to-white">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="max-w-3xl mx-auto">
               <div className="bg-white rounded-2xl p-6 sm:p-8 shadow-lg border-2 border-gray-200">
                 <h2 className="text-xl sm:text-2xl lg:text-3xl font-black text-gray-900 mb-6 text-center">
-                  Esse workshop não é para você se:
+                  Essa aula não é para você se:
                 </h2>
                 <div className="space-y-3 sm:space-y-4 mb-6 sm:mb-8">
                   <div className="flex items-start">
@@ -442,13 +544,13 @@ export default function WorkshopPage() {
                     <span className="text-gray-700 text-base sm:text-lg leading-relaxed">Você não está disposta a testar algo diferente</span>
                   </div>
                 </div>
-                
+
                 <div className="bg-emerald-50 border-2 border-emerald-200 rounded-xl p-5 sm:p-6">
                   <p className="text-base sm:text-lg font-bold text-emerald-800 text-center mb-2">
                     ✅ Mas é para você se quer:
                   </p>
                   <p className="text-gray-700 text-center text-base sm:text-lg">
-                    Clareza, direção e controle do seu negócio
+                    Previsibilidade, rotina e agenda mais estável (sem depender de sorte)
                   </p>
                 </div>
               </div>
@@ -461,15 +563,15 @@ export default function WorkshopPage() {
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="max-w-3xl mx-auto text-center">
               <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black mb-4 sm:mb-5 text-white drop-shadow-sm">
-                Quer parar de se sentir perdida?
+                Quer estabilizar sua agenda?
               </h2>
               <p className="text-lg sm:text-xl text-white mb-3 sm:mb-4 font-semibold drop-shadow-sm">
-                Garanta sua vaga no próximo workshop ao vivo
+                Garanta sua vaga na próxima aula prática ao vivo
               </p>
               <p className="text-base sm:text-lg text-white/90 mb-6 sm:mb-8 font-semibold">
-                ⚡ Você será avisada por WhatsApp e e-mail quando a próxima turma abrir
+                ⚡ Você será avisada por WhatsApp e e-mail com data, horário e link de acesso
               </p>
-              
+
               <Link
                 href="#top"
                 className="inline-block bg-amber-400 text-blue-800 px-6 sm:px-8 lg:px-12 py-3 sm:py-4 lg:py-5 rounded-xl text-base sm:text-lg lg:text-xl font-black hover:bg-amber-300 transition-all shadow-2xl hover:shadow-3xl transform hover:-translate-y-1"
@@ -478,7 +580,7 @@ export default function WorkshopPage() {
                   window.scrollTo({ top: 0, behavior: 'smooth' })
                 }}
               >
-                Quero parar de me sentir perdida
+                Quero o plano para estabilizar minha agenda
               </Link>
             </div>
           </div>
