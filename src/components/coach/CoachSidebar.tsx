@@ -67,6 +67,7 @@ export default function CoachSidebar({ isMobileOpen = false, onMobileClose }: Co
         { title: 'Kanban de Clientes', icon: '🗂️', href: '/pt/coach/clientes/kanban' },
         { title: 'Agenda', icon: '📅', href: '/pt/coach/agenda' },
         { title: 'Acompanhamento', icon: '📊', href: '/pt/coach/acompanhamento' },
+        { title: 'Protocolos', icon: '📑', href: '/pt/coach/protocolos' },
         { title: 'Relatórios de Gestão', icon: '📈', href: '/pt/coach/relatorios-gestao' },
       ]
     },
