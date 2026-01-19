@@ -18,7 +18,48 @@ import { createTrialSubscription } from '@/lib/trial-helpers'
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { email, nome_completo, whatsapp, password, trial_group = 'geral' } = body
+    const { email, nome_completo, whatsapp, password, trial_group = 'geral', nome_presidente, is_outro } = body
+
+    // Se for ambiente de presidentes, validar presidente selecionado
+    let presidenteNome = null
+    if (trial_group === 'presidentes') {
+      if (!nome_presidente) {
+        return NextResponse.json(
+          { error: 'Selecione o presidente' },
+          { status: 400 }
+        )
+      }
+
+      // Se for "Outro", usar o nome digitado diretamente
+      if (is_outro) {
+        if (!nome_presidente || nome_presidente.length < 3) {
+          return NextResponse.json(
+            { error: 'Digite o nome do presidente (mínimo 3 caracteres)' },
+            { status: 400 }
+          )
+        }
+        presidenteNome = nome_presidente.trim()
+        console.log('📝 Presidente (Outro) digitado:', presidenteNome)
+      } else {
+        // Buscar nome do presidente pelo ID
+        const { data: presidente, error: presError } = await supabaseAdmin
+          .from('presidentes_autorizados')
+          .select('id, nome_completo, status')
+          .eq('id', nome_presidente)
+          .eq('status', 'ativo')
+          .single()
+
+        if (presError || !presidente) {
+          return NextResponse.json(
+            { error: 'Presidente não encontrado ou não autorizado' },
+            { status: 400 }
+          )
+        }
+
+        presidenteNome = presidente.nome_completo
+        console.log('📝 Presidente selecionado:', presidenteNome)
+      }
+    }
 
     // Validações
     if (!email || !email.includes('@')) {
@@ -31,6 +72,13 @@ export async function POST(request: NextRequest) {
     if (!nome_completo || nome_completo.length < 3) {
       return NextResponse.json(
         { error: 'Nome completo é obrigatório (mínimo 3 caracteres)' },
+        { status: 400 }
+      )
+    }
+
+    if (!whatsapp || whatsapp.length < 10) {
+      return NextResponse.json(
+        { error: 'WhatsApp é obrigatório (mínimo 10 caracteres)' },
         { status: 400 }
       )
     }
@@ -107,8 +155,9 @@ export async function POST(request: NextRequest) {
         token: `public_${userId}_${Date.now()}`, // Token único para tracking
         email: email.toLowerCase().trim(),
         nome_completo: nome_completo.trim(),
-        whatsapp: whatsapp?.trim() || null,
+        whatsapp: whatsapp.trim(),
         trial_group: trial_group,
+        nome_presidente: presidenteNome || null, // Nome do presidente (se aplicável)
         status: 'used', // Já foi usado (criado diretamente)
         used_at: new Date().toISOString(),
         used_by_user_id: userId,

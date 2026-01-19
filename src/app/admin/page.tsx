@@ -131,6 +131,23 @@ function AdminDashboardContent() {
       destaque: true
     },
     {
+      id: 'trials',
+      title: 'Trials de 3 Dias',
+      description: 'Visualizar e coordenar trials ativos',
+      icon: '🎁',
+      link: '/admin/trials',
+      color: 'bg-green-500',
+      destaque: true
+    },
+    {
+      id: 'presidentes',
+      title: 'Presidentes Autorizados',
+      description: 'Gerenciar lista de presidentes para trial',
+      icon: '🏆',
+      link: '/admin/presidentes',
+      color: 'bg-purple-500'
+    },
+    {
       id: 'email-authorizations',
       title: 'Autorizações por Email',
       description: 'Autorizar emails antes do cadastro',
