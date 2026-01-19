@@ -748,7 +748,7 @@ function LinksUnificadosPageContent() {
         setQrCopiado(id)
         setTimeout(() => setQrCopiado(null), 2000)
         
-        const item = itemsUnificados.find(i => i.id === id)
+        const item = itensUnificados.find(i => i.id === id)
         showSuccess('QR Code gerado!', {
           message: item ? `QR Code da ferramenta "${item.nome}" foi baixado. O link também foi copiado.` : 'QR Code foi baixado. O link também foi copiado.',
           link: link,
@@ -788,7 +788,7 @@ function LinksUnificadosPageContent() {
             setQrCopiado(id)
             setTimeout(() => setQrCopiado(null), 2000)
             
-            const item = itemsUnificados.find(i => i.id === id)
+            const item = itensUnificados.find(i => i.id === id)
             showSuccess('QR Code copiado!', {
               message: item ? `QR Code da ferramenta "${item.nome}" copiado para a área de transferência.` : 'QR Code copiado para a área de transferência.',
               link: link,
@@ -818,7 +818,7 @@ function LinksUnificadosPageContent() {
             setQrCopiado(id)
             setTimeout(() => setQrCopiado(null), 2000)
             
-            const item = itemsUnificados.find(i => i.id === id)
+            const item = itensUnificados.find(i => i.id === id)
             showSuccess('QR Code gerado!', {
               message: item ? `QR Code da ferramenta "${item.nome}" foi baixado. O link também foi copiado.` : 'QR Code foi baixado. O link também foi copiado.',
               link: link,

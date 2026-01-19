@@ -115,6 +115,26 @@ export const OG_MESSAGES_MAP: Record<string, { title: string; description: strin
     title: 'Diagnostique seus sintomas intestinais',
     description: 'Avalie seus sintomas intestinais e descubra o que pode estar afetando sua saúde digestiva'
   },
+  'template-diagnostico-parasitose': {
+    title: 'Diagnóstico de Parasitose',
+    description: 'Identifique sinais de parasitose e receba orientações iniciais personalizadas'
+  },
+  'diagnostico-parasitose': {
+    title: 'Diagnóstico de Parasitose',
+    description: 'Identifique sinais de parasitose e receba orientações iniciais personalizadas'
+  },
+  'parasitose': {
+    title: 'Diagnóstico de Parasitose',
+    description: 'Identifique sinais de parasitose e receba orientações iniciais personalizadas'
+  },
+  'perfil-intestino': {
+    title: 'Qual é seu perfil de intestino?',
+    description: 'Descubra como está seu funcionamento intestinal e receba recomendações personalizadas'
+  },
+  'qual-e-seu-perfil-de-intestino': {
+    title: 'Qual é seu perfil de intestino?',
+    description: 'Descubra como está seu funcionamento intestinal e receba recomendações personalizadas'
+  },
   
   // Outros Quizzes
   'pronto-emagrecer': {

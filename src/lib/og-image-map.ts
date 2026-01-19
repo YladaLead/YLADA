@@ -48,6 +48,12 @@ const OG_IMAGE_SLUG_MAP: Record<string, string> = {
   // Diagnósticos
   'diagnostico-eletrolitos': 'diagnostico-eletrolitos.jpg',
   'diagnostico-sintomas-intestinais': 'diagnostico-sintomas-intestinais.jpg',
+  // ✅ Cada ferramenta com nome de arquivo próprio (mesmo design por enquanto)
+  'template-diagnostico-parasitose': 'diagnostico-parasitose.jpg',
+  'diagnostico-parasitose': 'diagnostico-parasitose.jpg',
+  'parasitose': 'diagnostico-parasitose.jpg',
+  'perfil-intestino': 'perfil-intestino.jpg',
+  'qual-e-seu-perfil-de-intestino': 'perfil-intestino.jpg',
   
   // Outros Quizzes
   'pronto-emagrecer': 'pronto-emagrecer.jpg',
