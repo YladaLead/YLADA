@@ -173,12 +173,15 @@ export default function ContaPerfilPage() {
           meta_royalties: metasConstrucao.meta_royalties,
           nivel_carreira_alvo: metasConstrucao.nivel_carreira_alvo,
           prazo_meses: metasConstrucao.prazo_meses,
-          reflexao_metas: metasConstrucao.reflexao_metas
+          ...(metasConstrucao.reflexao_metas?.trim()
+            ? { reflexao_metas: metasConstrucao.reflexao_metas }
+            : {})
         })
       })
 
       if (!construcaoResponse.ok) {
-        throw new Error('Erro ao salvar metas de construção')
+        const errBody = await construcaoResponse.json().catch(() => null as any)
+        throw new Error(errBody?.error || errBody?.message || 'Erro ao salvar metas de construção')
       }
 
       setSuccess(true)

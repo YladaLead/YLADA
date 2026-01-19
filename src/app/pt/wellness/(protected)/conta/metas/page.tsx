@@ -122,7 +122,8 @@ export default function ContaMetasPage() {
       })
 
       if (!construcaoResponse.ok) {
-        throw new Error('Erro ao salvar metas de construção')
+        const errBody = await construcaoResponse.json().catch(() => null as any)
+        throw new Error(errBody?.error || errBody?.message || 'Erro ao salvar metas de construção')
       }
 
       setSuccess(true)

@@ -275,6 +275,14 @@ async function buildStrategicProfileContext(userId: string): Promise<string> {
       return ''
     }
 
+    // Buscar metas de construção (inclui o campo novo reflexao_metas, se existir no banco)
+    // Usar select('*') para ser retrocompatível caso a coluna ainda não exista em algum ambiente.
+    const { data: metasConstrucao } = await supabaseAdmin
+      .from('wellness_metas_construcao')
+      .select('*')
+      .eq('user_id', userId)
+      .maybeSingle()
+
     // Verificar se tem novos campos estratégicos (prioridade)
     const temPerfilNovo = profile.tipo_trabalho && profile.foco_trabalho && profile.ganhos_prioritarios && profile.nivel_herbalife
     
@@ -421,6 +429,21 @@ async function buildStrategicProfileContext(userId: string): Promise<string> {
       context += `💬 OBSERVAÇÕES ADICIONAIS:\n${profile.observacoes_adicionais}\n\n`
       context += '   → IMPORTANTE: Use essas informações para personalizar ainda mais suas orientações\n'
       context += '   → Considere limitações, preferências e situações especiais mencionadas\n\n'
+    }
+
+    // Reflexão sobre metas (campo novo em metas de construção)
+    const reflexaoMetas = (metasConstrucao as any)?.reflexao_metas
+    if (typeof reflexaoMetas === 'string' && reflexaoMetas.trim()) {
+      const texto = reflexaoMetas.trim().substring(0, 1000)
+      context += '================================================\n'
+      context += '💭 REFLEXÃO PESSOAL DO DISTRIBUIDOR SOBRE SUAS METAS\n'
+      context += '================================================\n'
+      context += `"${texto}"\n\n`
+      context += '→ Use este texto como referência direta para:\n'
+      context += '- Tom e motivação (o que importa pra pessoa)\n'
+      context += '- Ajustar metas e tarefas ao contexto real\n'
+      context += '- Dar conselhos que façam sentido pra visão/sonhos/desafios citados\n'
+      context += '================================================\n\n'
     }
 
     // 10. Calcular e incluir metas automáticas
@@ -1717,17 +1740,24 @@ export async function POST(request: NextRequest) {
         // DETECÇÃO DE PERFIL E INTENÇÃO
         // ⚡ OTIMIZAÇÃO: Paralelizar operações independentes
         // ============================================
-        const [userProfile, intention, strategicProfileResult] = await Promise.all([
+        const [userProfile, intention, strategicProfileResult, metasConstrucaoResult] = await Promise.all([
           detectUserProfile(user.id, message),
           Promise.resolve(classifyIntention(message)), // classifyIntention é síncrono, mas mantém paralelo
           supabaseAdmin
             .from('wellness_noel_profile')
             .select('tipo_trabalho, meta_financeira, meta_pv, carga_horaria_diaria, dias_por_semana, foco_trabalho, ganhos_prioritarios, nivel_herbalife')
             .eq('user_id', user.id)
+            .maybeSingle(),
+          // Buscar metas de construção para trazer reflexão (retrocompatível via select('*'))
+          supabaseAdmin
+            .from('wellness_metas_construcao')
+            .select('*')
+            .eq('user_id', user.id)
             .maybeSingle()
         ])
         
         const strategicProfile = strategicProfileResult.data
+        const metasConstrucao = metasConstrucaoResult.data as any
         
         // Se perfil não detectado e não for pergunta de clarificação, perguntar
         if (!userProfile && !message.toLowerCase().includes('bebida') && 
@@ -1754,6 +1784,11 @@ export async function POST(request: NextRequest) {
           if (strategicProfile.meta_financeira) profileInfo.push(`Meta financeira: R$ ${strategicProfile.meta_financeira}`)
           if (strategicProfile.meta_pv) profileInfo.push(`Meta PV: ${strategicProfile.meta_pv}`)
           if (strategicProfile.carga_horaria_diaria) profileInfo.push(`Carga horária: ${strategicProfile.carga_horaria_diaria}`)
+          
+          const reflexao = metasConstrucao?.reflexao_metas
+          if (typeof reflexao === 'string' && reflexao.trim()) {
+            profileInfo.push(`Reflexão metas: "${reflexao.trim().substring(0, 500)}"`)
+          }
           
           if (profileInfo.length > 0) {
             contextMessage = `[CONTEXTO DO PERFIL] ${profileInfo.join(' | ')}\n\n[MENSAGEM DO USUÁRIO] ${message}`

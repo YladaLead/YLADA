@@ -73,16 +73,41 @@ export async function PUT(request: NextRequest) {
     if (prazo_meses !== undefined) updateData.prazo_meses = prazo_meses
     if (reflexao_metas !== undefined) updateData.reflexao_metas = reflexao_metas
 
-    const { data, error } = await supabaseAdmin
-      .from('wellness_metas_construcao')
-      .upsert({
-        user_id: user.id,
-        ...updateData
-      }, {
-        onConflict: 'user_id'
-      })
-      .select()
-      .single()
+    const doUpsert = async (payload: any) => {
+      return await supabaseAdmin
+        .from('wellness_metas_construcao')
+        .upsert(payload, { onConflict: 'user_id' })
+        .select()
+        .single()
+    }
+
+    let { data, error } = await doUpsert({
+      user_id: user.id,
+      ...updateData
+    })
+
+    // Retrocompatibilidade: se o banco ainda não tiver a coluna nova, salvar sem ela
+    if (error) {
+      const msg = `${error.message || ''} ${error.details || ''} ${error.hint || ''}`.toLowerCase()
+      const shouldRetryWithoutReflexao =
+        (msg.includes('reflexao_metas') && (msg.includes('schema cache') || msg.includes('column') || msg.includes('does not exist'))) ||
+        error.code === '42703'
+
+      if (shouldRetryWithoutReflexao) {
+        console.warn('⚠️ Coluna reflexao_metas não encontrada no banco; salvando metas sem esse campo.', {
+          code: error.code,
+          message: error.message
+        })
+        // Recriar payload sem reflexao_metas
+        const { reflexao_metas: _ignored, ...updateDataSemReflexao } = updateData
+        const retry = await doUpsert({
+          user_id: user.id,
+          ...updateDataSemReflexao
+        })
+        data = retry.data
+        error = retry.error
+      }
+    }
 
     if (error) {
       console.error('❌ Erro ao atualizar metas de construção:', error)
