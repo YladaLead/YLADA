@@ -16,7 +16,7 @@ import { requireApiAuth } from '@/lib/api-auth'
  */
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> | { id: string } }
 ) {
   try {
     // Verificar se é admin
@@ -25,7 +25,9 @@ export async function PUT(
       return authResult
     }
 
-    const userId = params.id
+    // Resolver params (Next.js 15 usa Promise)
+    const resolvedParams = await Promise.resolve(params)
+    const userId = resolvedParams.id
     const body = await request.json()
     const { area, nome_completo, nome_presidente } = body
 
@@ -81,7 +83,7 @@ export async function PUT(
  */
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> | { id: string } }
 ) {
   try {
     // Verificar se é admin
@@ -90,7 +92,9 @@ export async function DELETE(
       return authResult
     }
 
-    const userId = params.id
+    // Resolver params (Next.js 15 usa Promise)
+    const resolvedParams = await Promise.resolve(params)
+    const userId = resolvedParams.id
 
     // Deletar usuário do Supabase Auth (isso vai deletar automaticamente o perfil por CASCADE)
     const { error: deleteError } = await supabaseAdmin.auth.admin.deleteUser(userId)
