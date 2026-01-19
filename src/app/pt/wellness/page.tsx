@@ -122,7 +122,7 @@ export default function WellnessPage() {
               </div>
 
               <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-4 sm:mb-6 leading-tight">
-                Pare de se sentir travado na hora de falar sobre Bem Estar.
+                Fale com 10 vezes mais pessoas de forma simples, eficiente e eficaz.
               </h1>
               
               <p className="text-lg sm:text-xl text-gray-700 mb-4 sm:mb-6 font-semibold">
