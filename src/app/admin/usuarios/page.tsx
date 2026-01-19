@@ -19,6 +19,8 @@ interface Usuario {
   dataCadastro: string | null
   leadsGerados: number
   cursosCompletos: number
+  linksEnviados?: number
+  cliquesLinks?: number
   isMigrado?: boolean
   assinaturaSituacao: 'ativa' | 'vencida' | 'sem'
   assinaturaDiasVencida: number | null
@@ -404,6 +406,22 @@ export default function AdminUsuarios() {
     }
   }
 
+  const getAreaLabel = (area: Usuario['area']) => {
+    // Compactar o texto para evitar scroll horizontal após adicionar "Presidente"
+    switch (area) {
+      case 'wellness':
+        return 'Well'
+      case 'nutri':
+        return 'Nutri'
+      case 'coach':
+        return 'Coach'
+      case 'nutra':
+        return 'Nutra'
+      default:
+        return area
+    }
+  }
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'ativo':
@@ -570,50 +588,57 @@ export default function AdminUsuarios() {
                 <p className="text-gray-500">Nenhum usuário encontrado</p>
               </div>
             ) : (
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
+              <div className="overflow-hidden">
+                <table className="w-full table-fixed divide-y divide-gray-200">
                   <thead className="bg-gray-50">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Usuário</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Área</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Presidente</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Assinatura</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Leads</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
+                      <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[30%]">Usuário</th>
+                      <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[8%]">Área</th>
+                      <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[16%]">Presidente</th>
+                      <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[8%]">Status</th>
+                      <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[18%]">Assinatura</th>
+                      <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[10%]">Leads</th>
+                      <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[10%]">Ações</th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
                     {usuarios.map((usuario) => (
                       <tr key={usuario.id} className="hover:bg-gray-50">
-                        <td className="px-6 py-4 whitespace-nowrap">
+                        <td className="px-3 py-4">
                           <div className="flex items-center">
                             <div className="flex-shrink-0 h-10 w-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold">
                               {usuario.nome.charAt(0).toUpperCase()}
                             </div>
-                            <div className="ml-4">
-                              <div className="text-sm font-medium text-gray-900">{usuario.nome}</div>
-                              <div className="text-sm text-gray-500">{usuario.email}</div>
+                            <div className="ml-3 min-w-0">
+                              <div className="text-sm font-medium text-gray-900 truncate" title={usuario.nome}>
+                                {usuario.nome}
+                              </div>
+                              <div className="text-sm text-gray-500 truncate" title={usuario.email}>
+                                {usuario.email}
+                              </div>
                             </div>
                           </div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
+                        <td className="px-3 py-4">
                           <div className="flex items-center">
                             <span className="text-xl mr-2">{getAreaIcon(usuario.area)}</span>
-                            <span className={`px-3 py-1 rounded-full text-xs font-medium ${getAreaColor(usuario.area)} capitalize`}>
-                              {usuario.area}
+                            <span
+                              className={`px-2 py-0.5 rounded-full text-[11px] font-semibold ${getAreaColor(usuario.area)}`}
+                              title={usuario.area}
+                            >
+                              {getAreaLabel(usuario.area)}
                             </span>
                           </div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900">
+                        <td className="px-3 py-4">
+                          <div className="text-sm text-gray-900 truncate" title={usuario.nome_presidente || ''}>
                             {usuario.nome_presidente || <span className="text-gray-400 italic">Não definido</span>}
                           </div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
+                        <td className="px-3 py-4 whitespace-nowrap">
                           {getStatusBadge(usuario.status)}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
+                        <td className="px-3 py-4">
                           <div className="flex items-center gap-2">
                             {getAssinaturaStatusBadge(usuario.assinaturaSituacao)}
                             <span className="text-sm text-gray-900">
@@ -644,11 +669,16 @@ export default function AdminUsuarios() {
                             </div>
                           )}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm font-medium text-gray-900">{usuario.leadsGerados}</div>
-                          <div className="text-xs text-gray-500">{usuario.cursosCompletos} cursos</div>
+                        <td className="px-3 py-4 whitespace-nowrap">
+                          <div className="text-sm font-semibold text-gray-900">{usuario.leadsGerados}</div>
+                          <div className="text-[11px] text-gray-600 leading-4">
+                            <span className="font-medium">Links:</span> {usuario.linksEnviados ?? 0}
+                          </div>
+                          <div className="text-[11px] text-gray-600 leading-4">
+                            <span className="font-medium">Cliques:</span> {usuario.cliquesLinks ?? 0}
+                          </div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <td className="px-3 py-4 whitespace-nowrap text-sm font-medium">
                           <div className="flex items-center space-x-2">
                             <button
                               onClick={() => abrirEditarUsuario(usuario)}

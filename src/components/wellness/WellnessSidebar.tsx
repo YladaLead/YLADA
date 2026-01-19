@@ -51,6 +51,12 @@ export default function WellnessSidebar({ isMobileOpen = false, onMobileClose }:
       color: 'gray'
     },
     {
+      title: 'Workshop Completo',
+      icon: '🎓',
+      href: '/pt/wellness/workshop',
+      color: 'purple'
+    },
+    {
       title: 'Meus Links',
       icon: '🔗',
       href: '/pt/wellness/links',

@@ -87,14 +87,16 @@ export async function GET(request: NextRequest) {
     // Buscar templates (cursos/ferramentas) por usuário
     const { data: templates } = await supabaseAdmin
       .from('user_templates')
-      .select('user_id')
+      .select('user_id, views')
       .in('user_id', userIds)
 
     // Contar templates por usuário
     const templatesPorUsuario: Record<string, number> = {}
+    const cliquesPorUsuario: Record<string, number> = {}
     if (templates) {
       templates.forEach(template => {
         templatesPorUsuario[template.user_id] = (templatesPorUsuario[template.user_id] || 0) + 1
+        cliquesPorUsuario[template.user_id] = (cliquesPorUsuario[template.user_id] || 0) + (template.views || 0)
       })
     }
 
@@ -161,7 +163,9 @@ export async function GET(request: NextRequest) {
         assinaturaVencimento: assinaturaVencimento ? new Date(assinaturaVencimento).toISOString().split('T')[0] : null,
         dataCadastro: profile.created_at ? new Date(profile.created_at).toISOString().split('T')[0] : null,
         leadsGerados: leadsPorUsuario[profile.user_id] || 0,
-        cursosCompletos: templatesPorUsuario[profile.user_id] || 0,
+        cursosCompletos: templatesPorUsuario[profile.user_id] || 0, // legacy (UI não deve mais exibir como cursos)
+        linksEnviados: templatesPorUsuario[profile.user_id] || 0,
+        cliquesLinks: cliquesPorUsuario[profile.user_id] || 0,
         isMigrado: subscriptionForStatus?.is_migrated || false,
         assinaturaSituacao,
         assinaturaDiasVencida,

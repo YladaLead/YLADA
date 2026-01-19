@@ -186,7 +186,7 @@ export async function POST(request: NextRequest) {
 
     // Gerar magic link para login automático
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.ylada.com'
-    const redirectTo = `${baseUrl}/auth/callback?next=${encodeURIComponent('/pt/wellness/home')}`
+    const redirectTo = `${baseUrl}/auth/callback?next=${encodeURIComponent('/pt/wellness/workshop')}`
 
     const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
       type: 'magiclink',
