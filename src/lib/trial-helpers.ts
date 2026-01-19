@@ -127,50 +127,83 @@ export async function createTrialSubscription(
   const periodEnd = new Date()
   periodEnd.setDate(periodEnd.getDate() + 3) // 3 dias de trial
 
-  // Verificar se já tem trial ativo
-  const existingTrial = await supabaseAdmin
+  const nowIso = new Date().toISOString()
+
+  // Verificar se já tem trial ativo (compatível com bancos que ainda não aceitam plan_type='trial')
+  // Regra: qualquer subscription ativa e não expirada cujo stripe_subscription_id comece com 'trial_'
+  const { data: existingTrial, error: existingTrialError } = await supabaseAdmin
     .from('subscriptions')
-    .select('id')
+    .select('id, current_period_end')
     .eq('user_id', userId)
     .eq('area', area)
-    .eq('plan_type', 'trial')
     .eq('status', 'active')
-    .gt('current_period_end', new Date().toISOString())
+    .like('stripe_subscription_id', 'trial_%')
+    .gt('current_period_end', nowIso)
+    .order('current_period_end', { ascending: false })
     .maybeSingle()
+
+  if (existingTrialError) {
+    console.warn('⚠️ Erro ao verificar trial existente (seguindo mesmo assim):', existingTrialError)
+  }
 
   if (existingTrial?.id) {
     console.log('⚠️ Usuário já tem trial ativo, retornando existente')
-    const { data: sub } = await supabaseAdmin
-      .from('subscriptions')
-      .select('id, current_period_end')
-      .eq('id', existingTrial.id)
-      .single()
-    
     return {
-      subscription_id: sub!.id,
-      expires_at: sub!.current_period_end,
+      subscription_id: existingTrial.id,
+      expires_at: existingTrial.current_period_end,
     }
   }
 
+  const stripeSubId = `trial_${userId}_${Date.now()}`
+
   // Criar trial
-  const { data: subscription, error } = await supabaseAdmin
-    .from('subscriptions')
-    .insert({
-      user_id: userId,
-      area,
-      plan_type: 'trial',
-      status: 'active',
-      current_period_start: periodStart.toISOString(),
-      current_period_end: periodEnd.toISOString(),
-      stripe_account: null,
-      stripe_subscription_id: `trial_${userId}_${Date.now()}`,
-      stripe_customer_id: null,
-      stripe_price_id: null,
-      amount: 0,
-      currency: 'BRL',
-    })
-    .select('id, current_period_end')
-    .single()
+  // 1) Tentativa principal: plan_type = 'trial'
+  // 2) Fallback: se o banco ainda não tem a constraint atualizada, usar plan_type = 'free' mas com expiração de 3 dias
+  let subscription: { id: string; current_period_end: string } | null = null
+  let error: any = null
+
+  const attemptInsert = async (plan_type: 'trial' | 'free') => {
+    return await supabaseAdmin
+      .from('subscriptions')
+      .insert({
+        user_id: userId,
+        area,
+        plan_type,
+        status: 'active',
+        current_period_start: periodStart.toISOString(),
+        current_period_end: periodEnd.toISOString(),
+        stripe_account: null,
+        stripe_subscription_id: stripeSubId,
+        stripe_customer_id: null,
+        stripe_price_id: null,
+        amount: 0,
+        currency: 'BRL',
+      })
+      .select('id, current_period_end')
+      .single()
+  }
+
+  const primary = await attemptInsert('trial')
+  subscription = primary.data as any
+  error = primary.error
+
+  if (error) {
+    const msg = `${error.message || ''} ${error.details || ''} ${error.hint || ''}`.toLowerCase()
+    const isPlanTypeConstraint =
+      error.code === '23514' || // check_violation
+      msg.includes('subscriptions_plan_type_check') ||
+      (msg.includes('plan_type') && msg.includes('check'))
+
+    if (isPlanTypeConstraint) {
+      console.warn('⚠️ Banco sem plan_type=trial. Usando fallback plan_type=free (expira em 3 dias).', {
+        code: error.code,
+        message: error.message,
+      })
+      const fallback = await attemptInsert('free')
+      subscription = fallback.data as any
+      error = fallback.error
+    }
+  }
 
   if (error) {
     console.error('❌ Erro ao criar trial:', error)

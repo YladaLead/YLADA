@@ -30,11 +30,13 @@ export async function GET(request: NextRequest) {
     const statusFilter = searchParams.get('status') || 'all' // 'active', 'expired', 'all'
     const groupFilter = searchParams.get('trial_group') || 'all' // 'geral', 'presidentes', 'all'
 
-    // Buscar todas as subscriptions do tipo trial
+    // Buscar todas as subscriptions de trial
+    // Compatível com bancos que ainda não aceitam plan_type='trial':
+    // também considera registros com stripe_subscription_id começando com 'trial_' (mesmo que plan_type seja 'free').
     let query = supabaseAdmin
       .from('subscriptions')
-      .select('id, user_id, area, plan_type, status, current_period_start, current_period_end, created_at')
-      .eq('plan_type', 'trial')
+      .select('id, user_id, area, plan_type, status, current_period_start, current_period_end, created_at, stripe_subscription_id')
+      .or("plan_type.eq.trial,stripe_subscription_id.like.trial_%")
       .eq('area', 'wellness')
       .order('created_at', { ascending: false })
 
