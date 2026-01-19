@@ -82,17 +82,15 @@ export default function WellnessWorkshopPage() {
 
   return (
     <ConditionalWellnessSidebar>
-      <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 py-8">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+      <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 py-4 sm:py-6">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
           {/* Header */}
-          <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-100 mb-4">
-              <span className="text-3xl">{step === 'intro' ? '🎬' : '🎓'}</span>
-            </div>
-            <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
-              {step === 'intro' ? 'Introdução (vídeo rápido)' : 'Workshop Completo - Filosofia Wellness'}
+          <div className="text-center mb-4 sm:mb-6">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2 inline-flex items-center justify-center gap-2">
+              <span className="text-xl sm:text-2xl">{step === 'intro' ? '🎬' : '🎓'}</span>
+              <span>{step === 'intro' ? 'Introdução (vídeo rápido)' : 'Workshop Completo - Filosofia Wellness'}</span>
             </h1>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            <p className="text-sm sm:text-base text-gray-600 max-w-2xl mx-auto">
               {step === 'intro'
                 ? 'Assista este vídeo de introdução. Se você já assistiu, pode pular direto para o workshop completo.'
                 : 'Antes de começar a usar a plataforma, é fundamental entender toda a filosofia e metodologia por trás do sistema Wellness.'}
@@ -102,18 +100,16 @@ export default function WellnessWorkshopPage() {
           {/* Card Principal */}
           <div className="bg-white rounded-2xl shadow-xl overflow-hidden mb-6">
             {/* Mensagem de Importância */}
-            <div className="bg-gradient-to-r from-green-600 to-emerald-600 px-6 py-6 sm:px-8 sm:py-8">
-              <div className="flex items-start gap-4">
-                <div className="flex-shrink-0">
-                  <span className="text-4xl">💡</span>
-                </div>
+            <div className="bg-green-50 border-b border-green-100 px-5 py-4 sm:px-6 sm:py-5">
+              <div className="flex items-start gap-3">
                 <div className="flex-1">
-                  <h2 className="text-xl sm:text-2xl font-bold text-white mb-3">
-                    {step === 'intro' ? 'Por que assistir esta introdução?' : 'Por que assistir este workshop?'}
+                  <h2 className="text-base sm:text-lg font-bold text-green-900 mb-2 inline-flex items-center gap-2">
+                    <span className="text-lg">💡</span>
+                    <span>{step === 'intro' ? 'Por que assistir esta introdução?' : 'Por que assistir este workshop?'}</span>
                   </h2>
-                  <ul className="space-y-2 text-green-50 text-sm sm:text-base">
+                  <ul className="space-y-1.5 text-green-950/80 text-sm">
                     <li className="flex items-start gap-2">
-                      <span className="text-green-200 mt-1">✓</span>
+                      <span className="text-green-700 mt-1">✓</span>
                       <span>
                         {step === 'intro'
                           ? 'Entenda rapidamente o que é o Wellness e como ele destrava suas conversas'
@@ -121,15 +117,15 @@ export default function WellnessWorkshopPage() {
                       </span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <span className="text-green-200 mt-1">✓</span>
+                      <span className="text-green-700 mt-1">✓</span>
                       <span>Descubra como usar a plataforma com máxima eficiência</span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <span className="text-green-200 mt-1">✓</span>
+                      <span className="text-green-700 mt-1">✓</span>
                       <span>Aprenda dicas práticas e estratégias comprovadas</span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <span className="text-green-200 mt-1">✓</span>
+                      <span className="text-green-700 mt-1">✓</span>
                       <span>Tenha uma base sólida para começar sua jornada</span>
                     </li>
                   </ul>
@@ -138,9 +134,9 @@ export default function WellnessWorkshopPage() {
             </div>
 
             {/* Vídeo (Intro ou Workshop) */}
-            <div className="p-6 sm:p-8">
+            <div className="p-4 sm:p-6">
               {step === 'intro' ? (
-                <div className="bg-gray-100 rounded-xl overflow-hidden shadow-lg aspect-video">
+                <div className="bg-gray-100 rounded-xl overflow-hidden shadow aspect-video">
                   <video
                     className="w-full h-full object-cover"
                     controls
@@ -167,7 +163,7 @@ export default function WellnessWorkshopPage() {
             </div>
 
             {/* Ações */}
-            <div className="px-6 sm:px-8 pb-6 sm:pb-8">
+            <div className="px-4 sm:px-6 pb-4 sm:pb-6">
               <div className="flex flex-col sm:flex-row gap-4">
                 {/* Botão Já Assistido */}
                 <button
@@ -217,8 +213,8 @@ export default function WellnessWorkshopPage() {
               </div>
 
               {/* Link direto */}
-              <div className="mt-4 pt-4 border-t border-gray-200">
-                <p className="text-sm text-gray-600 mb-2">Ou acesse diretamente:</p>
+              <div className="mt-3 pt-3 border-t border-gray-200">
+                <p className="text-xs text-gray-600 mb-1.5">Ou acesse diretamente:</p>
                 <a
                   href={WORKSHOP_YOUTUBE_URL}
                   target="_blank"
@@ -232,12 +228,12 @@ export default function WellnessWorkshopPage() {
           </div>
 
           {/* Card de Dicas */}
-          <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8">
-            <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+          <div className="bg-white rounded-2xl shadow-lg p-4 sm:p-6">
+            <h3 className="text-lg font-bold text-gray-900 mb-3 flex items-center gap-2">
               <span>💚</span>
               <span>Dicas para aproveitar ao máximo</span>
             </h3>
-            <ul className="space-y-3 text-gray-700">
+            <ul className="space-y-2.5 text-gray-700 text-sm">
               <li className="flex items-start gap-3">
                 <span className="text-green-600 mt-1">•</span>
                 <span>Assista com atenção e anote os pontos principais</span>
