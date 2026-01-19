@@ -140,17 +140,18 @@ export default function WellnessWorkshopPage() {
             {/* Vídeo (Intro ou Workshop) */}
             <div className="p-6 sm:p-8">
               {step === 'intro' ? (
-                <div className="bg-gray-100 rounded-xl overflow-hidden shadow-lg aspect-video flex items-center justify-center">
-                  <div className="text-center p-8">
-                    <div className="text-6xl mb-4">🎬</div>
-                    <h3 className="text-xl font-bold text-gray-900 mb-2">Vídeo de Introdução</h3>
-                    <p className="text-gray-600 mb-4">
-                      O vídeo de introdução será disponibilizado em breve.
-                    </p>
-                    <p className="text-sm text-gray-500">
-                      Por enquanto, você pode pular direto para o workshop completo abaixo.
-                    </p>
-                  </div>
+                <div className="bg-gray-100 rounded-xl overflow-hidden shadow-lg aspect-video">
+                  <video
+                    className="w-full h-full object-cover"
+                    controls
+                    loop
+                    playsInline
+                    preload="metadata"
+                    poster={landingPageVideos.wellnessHeroPoster}
+                  >
+                    <source src={landingPageVideos.wellnessHero} type="video/mp4" />
+                    Seu navegador não suporta vídeo HTML5.
+                  </video>
                 </div>
               ) : (
                 <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
