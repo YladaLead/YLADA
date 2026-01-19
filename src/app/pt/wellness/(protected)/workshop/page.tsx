@@ -11,11 +11,25 @@ const WORKSHOP_VIDEO_ID = 'riDEYlrfu0E'
 
 export default function WellnessWorkshopPage() {
   const router = useRouter()
-  const { user } = useAuth()
+  const { user, loading: authLoading } = useAuth()
   const [step, setStep] = useState<'intro' | 'workshop'>('intro')
   const [assistido, setAssistido] = useState(false)
   const [copiado, setCopiado] = useState(false)
   const [loading, setLoading] = useState(false)
+
+  // Loading enquanto autenticação carrega
+  if (authLoading) {
+    return (
+      <ConditionalWellnessSidebar>
+        <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">Carregando...</p>
+          </div>
+        </div>
+      </ConditionalWellnessSidebar>
+    )
+  }
 
   // Verificar se já assistiu (opcional - pode salvar no banco depois)
   useEffect(() => {
