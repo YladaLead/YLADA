@@ -43,6 +43,7 @@ export async function POST(request: NextRequest) {
       console.log('📝 Presidente (Outro) digitado:', presidenteNome)
     } else {
       // Buscar nome do presidente pelo ID
+      console.log('🔍 Buscando presidente com ID:', nome_presidente)
       const { data: presidente, error: presError } = await supabaseAdmin
         .from('presidentes_autorizados')
         .select('id, nome_completo, status')
@@ -50,15 +51,24 @@ export async function POST(request: NextRequest) {
         .eq('status', 'ativo')
         .single()
 
-      if (presError || !presidente) {
+      if (presError) {
+        console.error('❌ Erro ao buscar presidente:', presError)
         return NextResponse.json(
-          { error: 'Presidente não encontrado ou não autorizado' },
+          { error: `Erro ao buscar presidente: ${presError.message}` },
+          { status: 400 }
+        )
+      }
+
+      if (!presidente) {
+        console.error('❌ Presidente não encontrado com ID:', nome_presidente)
+        return NextResponse.json(
+          { error: 'Presidente não encontrado ou não autorizado. Selecione outro presidente ou escolha "Outro".' },
           { status: 400 }
         )
       }
 
       presidenteNome = presidente.nome_completo
-      console.log('📝 Presidente selecionado:', presidenteNome)
+      console.log('✅ Presidente selecionado:', presidenteNome)
     }
 
     // Validações
@@ -126,20 +136,26 @@ export async function POST(request: NextRequest) {
 
     const userId = newUser.user.id
 
-    // Criar perfil
+    // Criar perfil (ou atualizar se já existir - pode ter sido criado por trigger)
     const { error: profileError } = await supabaseAdmin
       .from('user_profiles')
-      .insert({
+      .upsert({
         user_id: userId,
         email: email.toLowerCase().trim(),
         nome_completo: nome_completo.trim(),
         whatsapp: whatsapp?.trim() || null,
         perfil: 'wellness',
+        nome_presidente: presidenteNome || null, // Adicionar nome do presidente
+        updated_at: new Date().toISOString(),
+      }, {
+        onConflict: 'user_id'
       })
 
     if (profileError) {
-      console.error('❌ Erro ao criar perfil:', profileError)
+      console.error('❌ Erro ao criar/atualizar perfil:', profileError)
       // Continuar mesmo assim - pode ser que trigger já criou
+    } else {
+      console.log('✅ Perfil criado/atualizado com sucesso')
     }
 
     // Criar trial de 3 dias (sem token, pois é público)
@@ -201,8 +217,12 @@ export async function POST(request: NextRequest) {
     })
   } catch (error: any) {
     console.error('❌ Erro ao criar conta de trial público:', error)
+    console.error('❌ Stack trace:', error.stack)
     return NextResponse.json(
-      { error: error.message || 'Erro ao criar conta' },
+      { 
+        error: error.message || 'Erro ao criar conta. Tente novamente ou entre em contato com o suporte.',
+        details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+      },
       { status: 500 }
     )
   }

@@ -111,22 +111,26 @@ export default function TrialPublicPage() {
     }
 
     try {
+      const requestBody = {
+        nome_presidente: temPresidente
+          ? (isOutroSelecionado 
+              ? formData.nome_presidente_outro.trim() 
+              : formData.nome_presidente.trim())
+          : null,
+        email: formData.email.toLowerCase().trim(),
+        nome_completo: formData.nome_completo.trim(),
+        whatsapp: whatsappCompleto,
+        password: formData.password,
+        trial_group: temPresidente ? 'presidentes' : 'geral',
+        is_outro: isOutroSelecionado,
+      }
+      
+      console.log('📤 Enviando dados para API:', { ...requestBody, password: '***' })
+      
       const response = await fetch('/api/wellness/trial/create-public-account', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          nome_presidente: temPresidente
-            ? (isOutroSelecionado 
-                ? formData.nome_presidente_outro.trim() 
-                : formData.nome_presidente.trim())
-            : null,
-          email: formData.email.toLowerCase().trim(),
-          nome_completo: formData.nome_completo.trim(),
-          whatsapp: whatsappCompleto,
-          password: formData.password,
-          trial_group: temPresidente ? 'presidentes' : 'geral',
-          is_outro: isOutroSelecionado,
-        }),
+        body: JSON.stringify(requestBody),
       })
 
       const data = await response.json()
@@ -140,10 +144,14 @@ export default function TrialPublicPage() {
           router.push('/pt/wellness/login')
         }
       } else {
-        setError(data.error || 'Erro ao criar conta. Tente novamente.')
+        // Mostrar mensagem de erro específica da API
+        const errorMessage = data.error || 'Erro ao criar conta. Tente novamente.'
+        setError(errorMessage)
+        console.error('Erro ao criar conta:', data)
       }
     } catch (err: any) {
-      setError('Erro ao criar conta. Tente novamente.')
+      const errorMessage = err.message || 'Erro ao criar conta. Verifique sua conexão e tente novamente.'
+      setError(errorMessage)
       console.error('Erro ao criar conta:', err)
     } finally {
       setLoading(false)
