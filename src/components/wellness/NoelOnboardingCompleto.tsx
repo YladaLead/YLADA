@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { WellnessConsultantProfile } from '@/types/wellness-system'
 
 interface NoelOnboardingCompletoProps {
@@ -21,6 +21,7 @@ export default function NoelOnboardingCompleto({
   const [section, setSection] = useState(1)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [hasHydratedFromInitialData, setHasHydratedFromInitialData] = useState(false)
   
   const [data, setData] = useState<Partial<WellnessConsultantProfile>>({
     // Novos campos estratégicos
@@ -40,6 +41,66 @@ export default function NoelOnboardingCompleto({
     cidade: initialData?.cidade || '',
     idade: initialData?.idade,
   })
+
+  // ⚠️ Importante: initialData chega async (fetch). O useState acima só roda no mount,
+  // então precisamos "hidratar" o form quando initialData atualizar.
+  // Regra: preencher apenas campos vazios/undefined para não sobrescrever edição em andamento.
+  useEffect(() => {
+    if (!initialData) return
+
+    setData(prev => {
+      const next: Partial<WellnessConsultantProfile> = { ...prev }
+
+      const fillIfEmpty = <K extends keyof WellnessConsultantProfile>(
+        key: K,
+        value: WellnessConsultantProfile[K] | undefined
+      ) => {
+        if (value === undefined || value === null) return
+        const current = (next as any)[key]
+
+        // Strings: preencher somente se estiver vazio
+        if (typeof value === 'string') {
+          if (typeof current !== 'string' || current.trim() === '') {
+            ;(next as any)[key] = value
+          }
+          return
+        }
+
+        // Números/booleans/outros: preencher somente se estiver undefined/null
+        if (current === undefined || current === null) {
+          ;(next as any)[key] = value
+        }
+      }
+
+      fillIfEmpty('tipo_trabalho', initialData.tipo_trabalho)
+      fillIfEmpty('foco_trabalho', initialData.foco_trabalho)
+      fillIfEmpty('ganhos_prioritarios', initialData.ganhos_prioritarios)
+      fillIfEmpty('nivel_herbalife', initialData.nivel_herbalife)
+      fillIfEmpty('carga_horaria_diaria', initialData.carga_horaria_diaria)
+      fillIfEmpty('dias_por_semana', initialData.dias_por_semana)
+      fillIfEmpty('meta_financeira', initialData.meta_financeira)
+      fillIfEmpty('meta_3_meses', initialData.meta_3_meses)
+      fillIfEmpty('meta_1_ano', initialData.meta_1_ano)
+      fillIfEmpty('observacoes_adicionais', initialData.observacoes_adicionais)
+      fillIfEmpty('cidade', initialData.cidade)
+      fillIfEmpty('idade', initialData.idade)
+
+      // Campo extra (não tipado no WellnessConsultantProfile)
+      const anotacoes = (initialData as any)?.anotacoes_bebidas_funcionais
+      if (typeof anotacoes === 'string') {
+        const current = (next as any).anotacoes_bebidas_funcionais
+        if (typeof current !== 'string' || current.trim() === '') {
+          ;(next as any).anotacoes_bebidas_funcionais = anotacoes
+        }
+      }
+
+      return next
+    })
+
+    if (!hasHydratedFromInitialData) {
+      setHasHydratedFromInitialData(true)
+    }
+  }, [initialData, hasHydratedFromInitialData])
 
   const totalSections = 3
 
