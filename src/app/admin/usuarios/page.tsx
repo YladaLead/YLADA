@@ -22,6 +22,7 @@ interface Usuario {
   isMigrado?: boolean
   assinaturaSituacao: 'ativa' | 'vencida' | 'sem'
   assinaturaDiasVencida: number | null
+  nome_presidente: string | null
 }
 
 interface Stats {
@@ -56,13 +57,38 @@ export default function AdminUsuarios() {
   // Formulários
   const [formUsuario, setFormUsuario] = useState({
     area: 'wellness' as 'wellness' | 'nutri' | 'coach' | 'nutra',
-    nome_completo: ''
+    nome_completo: '',
+    nome_presidente: '' as string | null
   })
+
+  // Lista de presidentes autorizados
+  const [presidentesAutorizados, setPresidentesAutorizados] = useState<Array<{ nome_completo: string }>>([])
 
   const [formAssinatura, setFormAssinatura] = useState({
     current_period_end: '',
     plan_type: 'monthly' as 'monthly' | 'annual' | 'free'
   })
+
+  // Carregar lista de presidentes autorizados
+  const carregarPresidentes = async () => {
+    try {
+      const response = await fetch('/api/admin/presidentes/autorizar', {
+        credentials: 'include'
+      })
+      if (response.ok) {
+        const data = await response.json()
+        if (data.success && data.presidentes) {
+          // Filtrar apenas presidentes ativos
+          const ativos = data.presidentes
+            .filter((p: any) => p.status === 'ativo')
+            .map((p: any) => ({ nome_completo: p.nome_completo }))
+          setPresidentesAutorizados(ativos)
+        }
+      }
+    } catch (err) {
+      console.error('Erro ao carregar presidentes:', err)
+    }
+  }
 
   // Buscar dados da API
   const carregarUsuarios = async () => {
@@ -101,6 +127,7 @@ export default function AdminUsuarios() {
   }
 
   useEffect(() => {
+    carregarPresidentes()
     const timeoutId = setTimeout(() => {
       carregarUsuarios()
     }, busca ? 500 : 0)
@@ -113,7 +140,8 @@ export default function AdminUsuarios() {
     setUsuarioSelecionado(usuario)
     setFormUsuario({
       area: usuario.area,
-      nome_completo: usuario.nome
+      nome_completo: usuario.nome,
+      nome_presidente: usuario.nome_presidente || null
     })
     setMostrarEditarUsuario(true)
   }
@@ -548,6 +576,7 @@ export default function AdminUsuarios() {
                     <tr>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Usuário</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Área</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Presidente</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Assinatura</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Leads</th>
@@ -574,6 +603,11 @@ export default function AdminUsuarios() {
                             <span className={`px-3 py-1 rounded-full text-xs font-medium ${getAreaColor(usuario.area)} capitalize`}>
                               {usuario.area}
                             </span>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-900">
+                            {usuario.nome_presidente || <span className="text-gray-400 italic">Não definido</span>}
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
@@ -675,6 +709,24 @@ export default function AdminUsuarios() {
                   <option value="coach">Coach</option>
                   <option value="nutra">Nutra</option>
                 </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Presidente</label>
+                <select
+                  value={formUsuario.nome_presidente || ''}
+                  onChange={(e) => setFormUsuario({ ...formUsuario, nome_presidente: e.target.value || null })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="">Não definido</option>
+                  {presidentesAutorizados.map((presidente) => (
+                    <option key={presidente.nome_completo} value={presidente.nome_completo}>
+                      {presidente.nome_completo}
+                    </option>
+                  ))}
+                </select>
+                <p className="mt-1 text-xs text-gray-500">
+                  Selecione o presidente ao qual este usuário pertence
+                </p>
               </div>
               <div className="mt-6 pt-4 border-t border-gray-200">
                 <h3 className="text-sm font-medium text-gray-700 mb-3">🔑 Senha Provisória</h3>

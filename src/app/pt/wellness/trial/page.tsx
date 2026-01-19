@@ -1,19 +1,58 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { COUNTRIES, getCountryByCode } from '@/components/CountrySelector'
+
+interface Presidente {
+  id: string
+  nome_completo: string
+}
 
 export default function TrialPublicPage() {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [presidentes, setPresidentes] = useState<Presidente[]>([])
+  const [loadingPresidentes, setLoadingPresidentes] = useState(true)
   const [formData, setFormData] = useState({
+    nome_presidente: '', // ID do presidente selecionado ou 'outro'
+    nome_presidente_outro: '', // Nome digitado quando seleciona "Outro"
     email: '',
     nome_completo: '',
+    countryCode: 'BR', // Código do país (padrão Brasil)
     whatsapp: '',
     password: '',
     confirm_password: '',
   })
+
+  const isOutroSelecionado = formData.nome_presidente === 'outro'
+  const temPresidente = formData.nome_presidente && formData.nome_presidente !== ''
+
+  // Obter código telefônico do país selecionado
+  const selectedCountry = getCountryByCode(formData.countryCode)
+  const phoneCode = selectedCountry?.phoneCode || '55'
+
+  // Carregar lista de presidentes
+  useEffect(() => {
+    const carregarPresidentes = async () => {
+      try {
+        const response = await fetch('/api/wellness/trial/presidentes-list')
+        if (response.ok) {
+          const data = await response.json()
+          if (data.success) {
+            setPresidentes(data.presidentes || [])
+          }
+        }
+      } catch (err) {
+        console.error('Erro ao carregar presidentes:', err)
+      } finally {
+        setLoadingPresidentes(false)
+      }
+    }
+
+    carregarPresidentes()
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -21,6 +60,21 @@ export default function TrialPublicPage() {
     setError(null)
 
     // Validações
+    if (!formData.nome_presidente) {
+      setError('Selecione o presidente')
+      setLoading(false)
+      return
+    }
+
+    // Se selecionou "Outro", validar nome digitado
+    if (isOutroSelecionado) {
+      if (!formData.nome_presidente_outro || formData.nome_presidente_outro.trim().length < 3) {
+        setError('Digite o nome do presidente (mínimo 3 caracteres)')
+        setLoading(false)
+        return
+      }
+    }
+
     if (!formData.email || !formData.email.includes('@')) {
       setError('Email é obrigatório e deve ser válido')
       setLoading(false)
@@ -33,11 +87,16 @@ export default function TrialPublicPage() {
       return
     }
 
-    if (!formData.whatsapp || formData.whatsapp.length < 10) {
-      setError('WhatsApp é obrigatório (mínimo 10 caracteres)')
+    // Validar WhatsApp (número sem código do país)
+    const whatsappNumber = formData.whatsapp.trim().replace(/\D/g, '') // Remove tudo que não é número
+    if (!whatsappNumber || whatsappNumber.length < 8) {
+      setError('WhatsApp é obrigatório (mínimo 8 dígitos)')
       setLoading(false)
       return
     }
+
+    // Montar número completo com código do país
+    const whatsappCompleto = `${phoneCode}${whatsappNumber}`
 
     if (!formData.password || formData.password.length < 6) {
       setError('Senha deve ter pelo menos 6 caracteres')
@@ -56,11 +115,17 @@ export default function TrialPublicPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          nome_presidente: temPresidente
+            ? (isOutroSelecionado 
+                ? formData.nome_presidente_outro.trim() 
+                : formData.nome_presidente.trim())
+            : null,
           email: formData.email.toLowerCase().trim(),
           nome_completo: formData.nome_completo.trim(),
-          whatsapp: formData.whatsapp.trim(),
+          whatsapp: whatsappCompleto,
           password: formData.password,
-          trial_group: 'geral', // Pode ser 'presidentes' ou 'geral'
+          trial_group: temPresidente ? 'presidentes' : 'geral',
+          is_outro: isOutroSelecionado,
         }),
       })
 
@@ -71,7 +136,8 @@ export default function TrialPublicPage() {
         if (data.login_url) {
           window.location.href = data.login_url
         } else {
-          router.push('/pt/wellness/login?trial=success')
+          // Redirecionar para login sem parâmetro trial para evitar redirecionamento automático
+          router.push('/pt/wellness/login')
         }
       } else {
         setError(data.error || 'Erro ao criar conta. Tente novamente.')
@@ -89,14 +155,68 @@ export default function TrialPublicPage() {
       <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-8">
         <div className="text-center mb-6">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            🎉 Teste Grátis por 3 Dias!
+            🎉 Teste Grátis por 30 Dias!
           </h1>
           <p className="text-gray-600">
-            Experimente o YLADA Wellness sem compromisso
+            Experimente Wellness sem compromisso
           </p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Campo de Presidente (Obrigatório) */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Seu presidente *
+            </label>
+            {loadingPresidentes ? (
+              <div className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-500">
+                Carregando presidentes...
+              </div>
+            ) : presidentes.length > 0 ? (
+              <>
+                <select
+                  value={formData.nome_presidente}
+                  onChange={(e) => setFormData({ 
+                    ...formData, 
+                    nome_presidente: e.target.value,
+                    nome_presidente_outro: '' // Limpar campo "outro" ao mudar seleção
+                  })}
+                  required
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                >
+                  <option value="">Selecione seu presidente</option>
+                  {presidentes.map((presidente) => (
+                    <option key={presidente.id} value={presidente.id}>
+                      {presidente.nome_completo}
+                    </option>
+                  ))}
+                  <option value="outro">Outro</option>
+                </select>
+                
+                {isOutroSelecionado && (
+                  <div className="mt-3">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Digite o nome do seu presidente *
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.nome_presidente_outro}
+                      onChange={(e) => setFormData({ ...formData, nome_presidente_outro: e.target.value })}
+                      required={isOutroSelecionado}
+                      minLength={3}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      placeholder="Ex: Nome do seu presidente"
+                    />
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="w-full px-4 py-2 border border-red-300 rounded-lg bg-red-50 text-red-700">
+                Nenhum presidente disponível. Entre em contato com o suporte.
+              </div>
+            )}
+          </div>
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Nome Completo *
@@ -130,15 +250,46 @@ export default function TrialPublicPage() {
             <label className="block text-sm font-medium text-gray-700 mb-1">
               WhatsApp *
             </label>
-            <input
-              type="tel"
-              value={formData.whatsapp}
-              onChange={(e) => setFormData({ ...formData, whatsapp: e.target.value })}
-              required
-              minLength={10}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-              placeholder="11999999999"
-            />
+            <div className="flex items-stretch gap-2">
+              {/* Seletor de País - à esquerda (DDD com bandeira + código) */}
+              <div className="relative flex-shrink-0" style={{ width: '90px' }}>
+                <select
+                  value={formData.countryCode}
+                  onChange={(e) => setFormData({ ...formData, countryCode: e.target.value })}
+                  className="w-full h-full px-3 py-2 pr-6 border border-gray-300 rounded-l-lg focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white appearance-none cursor-pointer text-sm"
+                >
+                  {COUNTRIES.map((country) => (
+                    <option key={country.code} value={country.code}>
+                      {country.flag} +{country.phoneCode}
+                    </option>
+                  ))}
+                </select>
+                {/* Ícone de seta */}
+                <div className="absolute right-1 top-1/2 transform -translate-y-1/2 pointer-events-none">
+                  <svg className="w-3 h-3 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
+              </div>
+              
+              {/* Campo de Número - à direita */}
+              <input
+                type="tel"
+                value={formData.whatsapp}
+                onChange={(e) => {
+                  // Permite apenas números
+                  const value = e.target.value.replace(/\D/g, '')
+                  setFormData({ ...formData, whatsapp: value })
+                }}
+                required
+                minLength={8}
+                className="flex-1 px-4 py-2 border border-gray-300 border-l-0 rounded-r-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                placeholder={formData.countryCode === 'BR' ? '11999999999' : '999999999'}
+              />
+            </div>
+            <p className="text-xs text-gray-500 mt-1">
+              Digite o número e selecione o país
+            </p>
           </div>
 
           <div>

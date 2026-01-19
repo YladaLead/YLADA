@@ -122,7 +122,8 @@ export default function TrialPresidentesPage() {
         if (data.login_url) {
           window.location.href = data.login_url
         } else {
-          router.push('/pt/wellness/login?trial=success')
+          // Redirecionar para login sem parâmetro trial para evitar redirecionamento automático
+          router.push('/pt/wellness/login')
         }
       } else {
         setError(data.error || 'Erro ao criar conta. Tente novamente.')

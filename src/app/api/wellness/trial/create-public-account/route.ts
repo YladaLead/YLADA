@@ -20,45 +20,45 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { email, nome_completo, whatsapp, password, trial_group = 'geral', nome_presidente, is_outro } = body
 
-    // Se for ambiente de presidentes, validar presidente selecionado
+    // Presidente é obrigatório - validar e determinar trial_group
+    if (!nome_presidente) {
+      return NextResponse.json(
+        { error: 'Selecione o presidente' },
+        { status: 400 }
+      )
+    }
+
     let presidenteNome = null
-    if (trial_group === 'presidentes') {
-      if (!nome_presidente) {
+    let finalTrialGroup = 'presidentes' // Sempre presidentes agora
+    
+    // Se for "Outro", usar o nome digitado diretamente
+    if (is_outro) {
+      if (!nome_presidente || nome_presidente.length < 3) {
         return NextResponse.json(
-          { error: 'Selecione o presidente' },
+          { error: 'Digite o nome do presidente (mínimo 3 caracteres)' },
+          { status: 400 }
+        )
+      }
+      presidenteNome = nome_presidente.trim()
+      console.log('📝 Presidente (Outro) digitado:', presidenteNome)
+    } else {
+      // Buscar nome do presidente pelo ID
+      const { data: presidente, error: presError } = await supabaseAdmin
+        .from('presidentes_autorizados')
+        .select('id, nome_completo, status')
+        .eq('id', nome_presidente)
+        .eq('status', 'ativo')
+        .single()
+
+      if (presError || !presidente) {
+        return NextResponse.json(
+          { error: 'Presidente não encontrado ou não autorizado' },
           { status: 400 }
         )
       }
 
-      // Se for "Outro", usar o nome digitado diretamente
-      if (is_outro) {
-        if (!nome_presidente || nome_presidente.length < 3) {
-          return NextResponse.json(
-            { error: 'Digite o nome do presidente (mínimo 3 caracteres)' },
-            { status: 400 }
-          )
-        }
-        presidenteNome = nome_presidente.trim()
-        console.log('📝 Presidente (Outro) digitado:', presidenteNome)
-      } else {
-        // Buscar nome do presidente pelo ID
-        const { data: presidente, error: presError } = await supabaseAdmin
-          .from('presidentes_autorizados')
-          .select('id, nome_completo, status')
-          .eq('id', nome_presidente)
-          .eq('status', 'ativo')
-          .single()
-
-        if (presError || !presidente) {
-          return NextResponse.json(
-            { error: 'Presidente não encontrado ou não autorizado' },
-            { status: 400 }
-          )
-        }
-
-        presidenteNome = presidente.nome_completo
-        console.log('📝 Presidente selecionado:', presidenteNome)
-      }
+      presidenteNome = presidente.nome_completo
+      console.log('📝 Presidente selecionado:', presidenteNome)
     }
 
     // Validações
@@ -76,9 +76,9 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    if (!whatsapp || whatsapp.length < 10) {
+    if (!whatsapp || whatsapp.trim().length < 8) {
       return NextResponse.json(
-        { error: 'WhatsApp é obrigatório (mínimo 10 caracteres)' },
+        { error: 'WhatsApp é obrigatório (mínimo 8 caracteres para números internacionais)' },
         { status: 400 }
       )
     }
@@ -112,7 +112,7 @@ export async function POST(request: NextRequest) {
         name: nome_completo,
         full_name: nome_completo,
         perfil: 'wellness',
-        trial_group: trial_group, // Armazenar grupo no metadata
+        trial_group: finalTrialGroup, // Armazenar grupo no metadata
       },
     })
 
@@ -156,7 +156,7 @@ export async function POST(request: NextRequest) {
         email: email.toLowerCase().trim(),
         nome_completo: nome_completo.trim(),
         whatsapp: whatsapp.trim(),
-        trial_group: trial_group,
+        trial_group: finalTrialGroup,
         nome_presidente: presidenteNome || null, // Nome do presidente (se aplicável)
         status: 'used', // Já foi usado (criado diretamente)
         used_at: new Date().toISOString(),

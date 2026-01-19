@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
     // Buscar todos os perfis de usuários
     let profilesQuery = supabaseAdmin
       .from('user_profiles')
-      .select('id, user_id, nome_completo, email, perfil, created_at')
+      .select('id, user_id, nome_completo, email, perfil, created_at, nome_presidente')
 
     // Aplicar filtro de área
     if (areaFiltro !== 'todos') {
@@ -164,7 +164,8 @@ export async function GET(request: NextRequest) {
         cursosCompletos: templatesPorUsuario[profile.user_id] || 0,
         isMigrado: subscriptionForStatus?.is_migrated || false,
         assinaturaSituacao,
-        assinaturaDiasVencida
+        assinaturaDiasVencida,
+        nome_presidente: profile.nome_presidente || null
       }
     }).filter(u => u !== null) // Remover nulls do filtro de status
 

@@ -85,10 +85,16 @@ export default function WellnessPage() {
               priority
             />
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3 sm:gap-4">
+            <Link
+              href="/pt/wellness/trial"
+              className="px-3 sm:px-4 py-2 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition-colors text-xs sm:text-sm whitespace-nowrap"
+            >
+              🎁 Teste 3 dias grátis
+            </Link>
             <Link
               href="/pt/wellness/login"
-              className="px-4 py-2 text-green-600 font-semibold rounded-lg hover:bg-green-50 transition-colors text-sm sm:text-base"
+              className="px-3 sm:px-4 py-2 text-green-600 font-semibold rounded-lg hover:bg-green-50 transition-colors text-xs sm:text-sm sm:text-base"
             >
               Entrar
             </Link>

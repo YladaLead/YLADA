@@ -27,7 +27,7 @@ export async function PUT(
 
     const userId = params.id
     const body = await request.json()
-    const { area, nome_completo } = body
+    const { area, nome_completo, nome_presidente } = body
 
     // Validar área se fornecida
     if (area && !['wellness', 'nutri', 'coach', 'nutra'].includes(area)) {
@@ -41,6 +41,7 @@ export async function PUT(
     const updateData: any = {}
     if (area) updateData.perfil = area
     if (nome_completo !== undefined) updateData.nome_completo = nome_completo
+    if (nome_presidente !== undefined) updateData.nome_presidente = nome_presidente || null
     updateData.updated_at = new Date().toISOString()
 
     // Atualizar perfil
