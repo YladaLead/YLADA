@@ -165,7 +165,7 @@ export async function POST(request: NextRequest) {
     )
 
     // Registrar no trial_invites para tracking (opcional, mas útil)
-    await supabaseAdmin
+    const { error: inviteError } = await supabaseAdmin
       .from('trial_invites')
       .insert({
         token: `public_${userId}_${Date.now()}`, // Token único para tracking
@@ -179,10 +179,11 @@ export async function POST(request: NextRequest) {
         used_by_user_id: userId,
         expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 dias
       })
-      .catch(err => {
-        // Não é crítico se falhar - é apenas para tracking
-        console.warn('⚠️ Erro ao registrar trial_invite (não crítico):', err)
-      })
+
+    if (inviteError) {
+      // Não é crítico se falhar - é apenas para tracking
+      console.warn('⚠️ Erro ao registrar trial_invite (não crítico):', inviteError)
+    }
 
     // Gerar magic link para login automático
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.ylada.com'
