@@ -200,7 +200,7 @@ function WhatsAppChatContent() {
   const unreadTotal = conversations.reduce((sum, conv) => sum + conv.unread_count, 0)
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-safe">
+    <div className="min-h-[100dvh] bg-gray-50 pb-safe flex flex-col overflow-x-hidden">
       {/* Header Mobile-First */}
       <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
         <div className="px-4 py-3">
@@ -233,9 +233,15 @@ function WhatsAppChatContent() {
         </div>
       </div>
 
-      <div className="flex h-[calc(100vh-140px)]">
+      <div className="flex-1 min-h-0 flex flex-col md:flex-row">
         {/* Lista de Conversas */}
-        <div className="w-80 bg-white border-r border-gray-200 overflow-y-auto">
+        <div
+          className={[
+            'w-full md:w-80 bg-white md:border-r border-gray-200 overflow-y-auto',
+            // Mobile: se uma conversa está selecionada, mostra somente o chat
+            selectedConversation ? 'hidden md:block' : 'block',
+          ].join(' ')}
+        >
           {loading ? (
             <div className="p-4 text-center text-gray-500">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-500 mx-auto mb-2"></div>
@@ -297,24 +303,43 @@ function WhatsAppChatContent() {
         </div>
 
         {/* Área de Chat - Mobile First */}
-        <div className="flex-1 flex flex-col min-w-0">
+        <div
+          className={[
+            'flex-1 min-w-0 flex-col',
+            // Mobile: só mostra o chat quando tem conversa selecionada
+            selectedConversation ? 'flex' : 'hidden md:flex',
+          ].join(' ')}
+        >
           {selectedConversation ? (
             <>
               {/* Header da Conversa */}
-              <div className="bg-white border-b border-gray-200 px-6 py-4">
-                <h2 className="font-semibold text-gray-900">
-                  {selectedConversation.name || formatPhone(selectedConversation.phone)}
-                </h2>
-                <p className="text-sm text-gray-500">{formatPhone(selectedConversation.phone)}</p>
-                {selectedConversation.area && (
-                  <span className="inline-block mt-1 px-2 py-0.5 text-xs bg-gray-100 text-gray-600 rounded">
-                    {selectedConversation.area}
-                  </span>
-                )}
+              <div className="bg-white border-b border-gray-200 px-4 sm:px-6 py-3 sm:py-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <h2 className="font-semibold text-gray-900 truncate">
+                      {selectedConversation.name || formatPhone(selectedConversation.phone)}
+                    </h2>
+                    <p className="text-sm text-gray-500 truncate">{formatPhone(selectedConversation.phone)}</p>
+                    {selectedConversation.area && (
+                      <span className="inline-block mt-1 px-2 py-0.5 text-xs bg-gray-100 text-gray-600 rounded">
+                        {selectedConversation.area}
+                      </span>
+                    )}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedConversation(null)}
+                    className="md:hidden shrink-0 px-3 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200"
+                    aria-label="Voltar para lista de conversas"
+                    title="Conversas"
+                  >
+                    ← Conversas
+                  </button>
+                </div>
               </div>
 
               {/* Mensagens */}
-              <div className="flex-1 overflow-y-auto p-6 bg-gray-50">
+              <div className="flex-1 min-h-0 overflow-y-auto p-4 sm:p-6 bg-gray-50">
                 {messages.map((msg) => (
                   <div
                     key={msg.id}
@@ -323,7 +348,7 @@ function WhatsAppChatContent() {
                     }`}
                   >
                     <div
-                      className={`max-w-[70%] rounded-lg px-4 py-2 ${
+                      className={`max-w-[85%] sm:max-w-[70%] rounded-lg px-4 py-2 ${
                         msg.sender_type === 'customer'
                           ? 'bg-white border border-gray-200'
                           : 'bg-green-500 text-white'
@@ -355,7 +380,7 @@ function WhatsAppChatContent() {
               </div>
 
               {/* Input de Mensagem */}
-              <div className="bg-white border-t border-gray-200 px-6 py-4">
+              <div className="bg-white border-t border-gray-200 px-4 sm:px-6 py-3 sm:py-4">
                 <div className="flex gap-2">
                   <input
                     type="text"
@@ -377,7 +402,7 @@ function WhatsAppChatContent() {
               </div>
             </>
           ) : (
-            <div className="flex-1 flex flex-col items-center justify-center text-gray-500 p-8">
+            <div className="hidden md:flex flex-1 flex-col items-center justify-center text-gray-500 p-8">
               <div className="text-6xl mb-4">👈</div>
               <h3 className="text-lg font-semibold text-gray-900 mb-2">Selecione uma conversa</h3>
               <p className="text-sm text-gray-500">
