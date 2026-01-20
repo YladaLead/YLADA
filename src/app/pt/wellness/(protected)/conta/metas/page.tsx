@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 // REMOVIDO: ProtectedRoute e RequireSubscription - layout server-side cuida disso
 import ConditionalWellnessSidebar from '@/components/wellness/ConditionalWellnessSidebar'
 import { useAuth } from '@/contexts/AuthContext'
+import { useAuthenticatedFetch } from '@/hooks/useAuthenticatedFetch'
 
 interface MetasConstrucao {
   id?: string
@@ -25,6 +26,7 @@ interface MetasPV {
 
 export default function ContaMetasPage() {
   const { user } = useAuth()
+  const authenticatedFetch = useAuthenticatedFetch()
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -50,7 +52,7 @@ export default function ContaMetasPage() {
   // Carregar metas
   useEffect(() => {
     loadMetas()
-  }, [])
+  }, [authenticatedFetch])
 
   const loadMetas = async () => {
     try {
@@ -58,7 +60,7 @@ export default function ContaMetasPage() {
       setError(null)
 
       // Buscar meta PV mensal
-      const pvResponse = await fetch('/api/wellness/pv/mensal')
+      const pvResponse = await authenticatedFetch('/api/wellness/pv/mensal')
       if (pvResponse.ok) {
         const pvData = await pvResponse.json()
         if (pvData.pv_mensal) {
@@ -71,7 +73,7 @@ export default function ContaMetasPage() {
       }
 
       // Buscar metas de construção
-      const construcaoResponse = await fetch('/api/wellness/metas-construcao')
+      const construcaoResponse = await authenticatedFetch('/api/wellness/metas-construcao')
       if (construcaoResponse.ok) {
         const construcaoData = await construcaoResponse.json()
         if (construcaoData.metas) {
@@ -94,7 +96,7 @@ export default function ContaMetasPage() {
 
       // Salvar meta PV mensal
       if (metasPV.meta_pv > 0) {
-        const pvResponse = await fetch('/api/wellness/pv/mensal', {
+        const pvResponse = await authenticatedFetch('/api/wellness/pv/mensal', {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -109,7 +111,7 @@ export default function ContaMetasPage() {
       }
 
       // Salvar metas de construção
-      const construcaoResponse = await fetch('/api/wellness/metas-construcao', {
+      const construcaoResponse = await authenticatedFetch('/api/wellness/metas-construcao', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

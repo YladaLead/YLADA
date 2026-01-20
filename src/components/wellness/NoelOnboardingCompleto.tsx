@@ -9,6 +9,7 @@ interface NoelOnboardingCompletoProps {
   onClose?: () => void
   inline?: boolean // Se true, renderiza inline sem modal
   hideNavigation?: boolean // Se true, esconde indicadores de progresso e botões de navegação
+  singlePage?: boolean // Se true, renderiza todas as seções em uma página (rolando)
 }
 
 export default function NoelOnboardingCompleto({ 
@@ -16,12 +17,17 @@ export default function NoelOnboardingCompleto({
   initialData,
   onClose,
   inline = false,
-  hideNavigation = false
+  hideNavigation = false,
+  singlePage = false
 }: NoelOnboardingCompletoProps) {
   const [section, setSection] = useState(1)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [hasHydratedFromInitialData, setHasHydratedFromInitialData] = useState(false)
+
+  // Quando queremos "uma única página rolando", mostramos todas as seções em sequência
+  // (mantém compatibilidade: hideNavigation já era usado como "editor inline" no Perfil).
+  const isSinglePage = singlePage || hideNavigation
   
   const [data, setData] = useState<Partial<WellnessConsultantProfile>>({
     // Novos campos estratégicos
@@ -195,7 +201,7 @@ export default function NoelOnboardingCompleto({
       )}
       
       <div className={inline ? 'space-y-6' : 'p-8'}>
-          {!hideNavigation && (
+          {!hideNavigation && !isSinglePage && (
             <div className="text-center mb-8">
               <h2 className="text-2xl font-bold text-gray-900 mb-2">
                 🎯 Perfil Estratégico do Distribuidor
@@ -222,8 +228,14 @@ export default function NoelOnboardingCompleto({
           )}
 
           {/* SEÇÃO 1: PERGUNTAS 1-4 */}
-          {section === 1 && (
+          {(isSinglePage || section === 1) && (
             <div className="space-y-6">
+              {isSinglePage && (
+                <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                  <p className="text-sm font-semibold text-gray-900">Seção 1 — Base do seu perfil</p>
+                  <p className="text-xs text-gray-600 mt-1">Responda as perguntas essenciais (1–4).</p>
+                </div>
+              )}
               {/* Pergunta 1: Como trabalha */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-3">
@@ -406,8 +418,14 @@ export default function NoelOnboardingCompleto({
           )}
 
           {/* SEÇÃO 2: PERGUNTAS 5-7 */}
-          {section === 2 && (
+          {(isSinglePage || section === 2) && (
             <div className="space-y-6">
+              {isSinglePage && (
+                <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                  <p className="text-sm font-semibold text-gray-900">Seção 2 — Tempo e metas</p>
+                  <p className="text-xs text-gray-600 mt-1">Responda as perguntas obrigatórias (5–7).</p>
+                </div>
+              )}
               {/* Pergunta 5: Carga horária */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-3">
@@ -535,8 +553,14 @@ export default function NoelOnboardingCompleto({
           )}
 
           {/* SEÇÃO 3: PERGUNTAS 8-9 */}
-          {section === 3 && (
+          {(isSinglePage || section === 3) && (
             <div className="space-y-6">
+              {isSinglePage && (
+                <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                  <p className="text-sm font-semibold text-gray-900">Seção 3 — Metas temporais</p>
+                  <p className="text-xs text-gray-600 mt-1">Opcional, mas recomendado (8–9).</p>
+                </div>
+              )}
               {/* Pergunta 8: Meta 3 meses */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-3">
@@ -657,7 +681,7 @@ export default function NoelOnboardingCompleto({
             </div>
           )}
 
-          {!hideNavigation && (
+          {!hideNavigation && !isSinglePage && (
             <div className="mt-8 flex justify-between">
               <button
                 onClick={handleBack}
@@ -684,6 +708,28 @@ export default function NoelOnboardingCompleto({
                   <span>{section === totalSections ? 'Finalizar' : 'Próximo'}</span>
                 )}
               </button>
+            </div>
+          )}
+
+          {isSinglePage && (
+            <div className="mt-8">
+              <button
+                onClick={handleSave}
+                disabled={saving}
+                className="w-full px-6 py-3 rounded-lg font-semibold bg-green-600 text-white hover:bg-green-700 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                {saving ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                    <span>Salvando...</span>
+                  </>
+                ) : (
+                  <span>Salvar perfil</span>
+                )}
+              </button>
+              <p className="text-xs text-gray-500 mt-2 text-center">
+                Ao salvar, o NOEL passa a personalizar suas recomendações com base no seu perfil.
+              </p>
             </div>
           )}
         </div>

@@ -344,6 +344,9 @@ function WellnessHomeContent() {
 
       if (responseData.success) {
         console.log('✅ Onboarding salvo com sucesso')
+        if (responseData.profile) {
+          setNoelProfile(responseData.profile)
+        }
         setShowOnboarding(false)
         setOnboardingComplete(true)
       } else {
@@ -427,6 +430,8 @@ function WellnessHomeContent() {
       {/* Onboarding Modal */}
       {showOnboarding && (
         <NoelOnboardingCompleto 
+          singlePage={true}
+          initialData={noelProfile || undefined}
           onComplete={handleOnboardingComplete}
           onClose={() => setShowOnboarding(false)}
         />

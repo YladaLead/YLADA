@@ -226,7 +226,7 @@ export default function WorkshopAgendaInstavelPage() {
               {/* Grid: DOR + FORMULÁRIO lado a lado desde o início */}
               <div className="grid lg:grid-cols-2 gap-6 lg:gap-8 items-start">
                 {/* Lado Esquerdo: DOR DIRETA */}
-                <div className="w-full">
+                <div className="w-full order-2 lg:order-1">
                   <div className="flex flex-wrap gap-2 mb-3">
                     <div className="inline-block bg-amber-400 text-blue-800 px-3 py-1.5 rounded-full text-xs font-bold shadow-md">
                       🎓 AULA PRÁTICA AO VIVO
@@ -288,7 +288,7 @@ export default function WorkshopAgendaInstavelPage() {
                 </div>
 
                 {/* Formulário à Direita - VISÍVEL DESDE O INÍCIO */}
-                <div className="bg-white rounded-2xl shadow-2xl p-5 sm:p-6 lg:p-8 border-4 border-amber-400 w-full lg:sticky lg:top-24">
+                <div className="bg-white rounded-2xl shadow-2xl p-5 sm:p-6 lg:p-8 border-4 border-amber-400 w-full order-1 lg:order-2 lg:sticky lg:top-24">
                   <div className="text-center mb-5">
                     <div className="flex flex-wrap gap-2 justify-center mb-3">
                       <div className="inline-block bg-amber-400 text-blue-800 px-3 sm:px-4 py-1 rounded-full text-xs font-bold shadow-md">

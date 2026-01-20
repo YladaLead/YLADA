@@ -69,6 +69,7 @@ function WellnessDashboardNovoContent() {
   const [filtroTipo, setFiltroTipo] = useState<'todos' | 'vendas' | 'recrutamento'>('todos')
   const [filtroCategoria, setFiltroCategoria] = useState<string>('todas')
   const [filtroObjetivo, setFiltroObjetivo] = useState<string>('todos')
+  const [noelProfile, setNoelProfile] = useState<any>(null)
 
   // Carregar templates disponíveis
   useEffect(() => {
@@ -106,6 +107,9 @@ function WellnessDashboardNovoContent() {
         
         if (response.ok) {
           const data = await response.json()
+          if (data.profile) {
+            setNoelProfile(data.profile)
+          }
           // Mostrar onboarding se não estiver completo OU se precisa atualizar para novos campos
           if (!data.onboardingComplete || data.needsUpdate) {
             setShowOnboarding(true)
@@ -156,6 +160,9 @@ function WellnessDashboardNovoContent() {
         setShowOnboarding(false)
         setOnboardingComplete(true)
         setOnboardingChecked(true) // Marcar como verificado após salvar
+        if (responseData.profile) {
+          setNoelProfile(responseData.profile)
+        }
         setUserObjective({
           objetivo_principal: onboardingData.objetivo_principal,
           tempo_disponivel: onboardingData.tempo_disponivel,
@@ -279,6 +286,7 @@ function WellnessDashboardNovoContent() {
       {/* Onboarding Modal */}
       {showOnboarding && (
         <NoelOnboardingCompleto 
+          initialData={noelProfile || undefined}
           onComplete={handleOnboardingComplete}
           onClose={() => setShowOnboarding(false)}
         />
