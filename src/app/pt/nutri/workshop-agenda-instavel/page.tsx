@@ -382,16 +382,9 @@ export default function WorkshopAgendaInstavelPage() {
                       {submitting ? 'Cadastrando...' : 'Quero o plano para estabilizar minha agenda'}
                     </button>
 
-                    {whatsappUrl && (
-                      <a
-                        href={whatsappUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="block w-full text-center px-6 py-3 rounded-lg font-bold border-2 border-green-500 text-green-700 hover:bg-green-50 transition-all"
-                      >
-                        Prefiro falar no WhatsApp agora
-                      </a>
-                    )}
+                    <p className="text-xs text-gray-500 text-center">
+                      Após confirmar o cadastro, você poderá falar no WhatsApp sem perder sua inscrição.
+                    </p>
 
                     <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-3 mt-4">
                       <p className="text-xs text-emerald-800 text-center font-semibold">
