@@ -15,6 +15,34 @@ export interface ZApiSendMessageParams {
   delayMessage?: number // Delay em segundos (opcional, padrão: 2)
 }
 
+export interface ZApiSendImageParams {
+  phone: string
+  image: string // URL pública ou base64 (com prefixo data:)
+  caption?: string
+  delayMessage?: number
+}
+
+export interface ZApiSendVideoParams {
+  phone: string
+  video: string // URL pública ou base64 (com prefixo data:)
+  caption?: string
+  delayMessage?: number
+}
+
+export interface ZApiSendAudioParams {
+  phone: string
+  audio: string // URL pública ou base64 (com prefixo data:)
+  delayMessage?: number
+}
+
+export interface ZApiSendDocumentParams {
+  phone: string
+  document: string // URL pública ou base64 (com prefixo data:)
+  fileName?: string
+  extension: string // ex: pdf, docx, png, etc. (usado na rota send-document/{extension})
+  delayMessage?: number
+}
+
 export interface ZApiMessageResponse {
   id?: string
   success: boolean
@@ -44,6 +72,17 @@ export class ZApiClient {
     this.baseUrl = config.baseUrl || 'https://api.z-api.io'
   }
 
+  private formatInternationalPhone(phone: string) {
+    let cleanPhone = phone.replace(/\D/g, '')
+    const countryCodes = ['1', '55', '52', '54', '56', '57', '58', '591', '592', '593', '594', '595', '596', '597', '598', '599']
+    const hasCountryCode = countryCodes.some(code => cleanPhone.startsWith(code))
+    if (!hasCountryCode) {
+      if (cleanPhone.startsWith('0')) cleanPhone = cleanPhone.substring(1)
+      cleanPhone = `55${cleanPhone}`
+    }
+    return cleanPhone
+  }
+
   /**
    * Envia mensagem de texto via Z-API
    */
@@ -51,27 +90,12 @@ export class ZApiClient {
     try {
       const { phone, message, delayMessage = 2 } = params
 
-      // Limpar número (remover caracteres não numéricos)
-      let cleanPhone = phone.replace(/\D/g, '')
-      
-      // Verificar se já tem código de país conhecido
-      const countryCodes = ['1', '55', '52', '54', '56', '57', '58', '591', '592', '593', '594', '595', '596', '597', '598', '599']
-      const hasCountryCode = countryCodes.some(code => cleanPhone.startsWith(code))
-      
-      // Se não tem código de país, assumir que é brasileiro e adicionar 55
-      if (!hasCountryCode) {
-        // Se começar com 0, remover o 0 antes de adicionar 55
-        if (cleanPhone.startsWith('0')) {
-          cleanPhone = cleanPhone.substring(1)
-        }
-        cleanPhone = `55${cleanPhone}`
-      }
+      const cleanPhone = this.formatInternationalPhone(phone)
       
       console.log('[Z-API] 📤 Formatando número:', {
         original: phone,
         cleaned: cleanPhone,
-        hasCountryCode,
-        countryCode: hasCountryCode ? cleanPhone.substring(0, 3) : '55 (assumido BR)'
+        countryCode: cleanPhone.substring(0, 3)
       })
 
       // Z-API requer Client-Token no header (Account Security Token)
@@ -231,6 +255,143 @@ export class ZApiClient {
         connected: false,
         error: error.message,
       }
+    }
+  }
+
+  private buildHeaders(): HeadersInit {
+    const clientToken = process.env.Z_API_CLIENT_TOKEN || ''
+    const headers: HeadersInit = { 'Content-Type': 'application/json' }
+    if (clientToken) {
+      headers['Client-Token'] = clientToken
+    }
+    return headers
+  }
+
+  /**
+   * Envia imagem via Z-API
+   * Endpoint: /send-image
+   */
+  async sendImageMessage(params: ZApiSendImageParams): Promise<ZApiMessageResponse> {
+    try {
+      const { phone, image, caption, delayMessage = 2 } = params
+      const cleanPhone = this.formatInternationalPhone(phone)
+      const response = await fetch(
+        `${this.baseUrl}/instances/${this.config.instanceId}/token/${this.config.token}/send-image`,
+        {
+          method: 'POST',
+          headers: this.buildHeaders(),
+          body: JSON.stringify({
+            phone: cleanPhone,
+            image,
+            caption,
+            delayMessage,
+          }),
+        }
+      )
+      if (!response.ok) {
+        const errorData = await response.json().catch(async () => ({ message: await response.text() }))
+        throw new Error(errorData.message || `Erro HTTP ${response.status}`)
+      }
+      const data = await response.json()
+      return { success: true, id: data.id, message: 'Imagem enviada com sucesso' }
+    } catch (error: any) {
+      return { success: false, error: error.message || 'Erro ao enviar imagem' }
+    }
+  }
+
+  /**
+   * Envia vídeo via Z-API
+   * Endpoint: /send-video
+   */
+  async sendVideoMessage(params: ZApiSendVideoParams): Promise<ZApiMessageResponse> {
+    try {
+      const { phone, video, caption, delayMessage = 2 } = params
+      const cleanPhone = this.formatInternationalPhone(phone)
+      const response = await fetch(
+        `${this.baseUrl}/instances/${this.config.instanceId}/token/${this.config.token}/send-video`,
+        {
+          method: 'POST',
+          headers: this.buildHeaders(),
+          body: JSON.stringify({
+            phone: cleanPhone,
+            video,
+            caption,
+            delayMessage,
+          }),
+        }
+      )
+      if (!response.ok) {
+        const errorData = await response.json().catch(async () => ({ message: await response.text() }))
+        throw new Error(errorData.message || `Erro HTTP ${response.status}`)
+      }
+      const data = await response.json()
+      return { success: true, id: data.id, message: 'Vídeo enviado com sucesso' }
+    } catch (error: any) {
+      return { success: false, error: error.message || 'Erro ao enviar vídeo' }
+    }
+  }
+
+  /**
+   * Envia áudio via Z-API
+   * Endpoint: /send-audio
+   */
+  async sendAudioMessage(params: ZApiSendAudioParams): Promise<ZApiMessageResponse> {
+    try {
+      const { phone, audio, delayMessage = 2 } = params
+      const cleanPhone = this.formatInternationalPhone(phone)
+      const response = await fetch(
+        `${this.baseUrl}/instances/${this.config.instanceId}/token/${this.config.token}/send-audio`,
+        {
+          method: 'POST',
+          headers: this.buildHeaders(),
+          body: JSON.stringify({
+            phone: cleanPhone,
+            audio,
+            delayMessage,
+          }),
+        }
+      )
+      if (!response.ok) {
+        const errorData = await response.json().catch(async () => ({ message: await response.text() }))
+        throw new Error(errorData.message || `Erro HTTP ${response.status}`)
+      }
+      const data = await response.json()
+      return { success: true, id: data.id, message: 'Áudio enviado com sucesso' }
+    } catch (error: any) {
+      return { success: false, error: error.message || 'Erro ao enviar áudio' }
+    }
+  }
+
+  /**
+   * Envia documento via Z-API
+   * Endpoint: /send-document/{extension}
+   */
+  async sendDocumentMessage(params: ZApiSendDocumentParams): Promise<ZApiMessageResponse> {
+    try {
+      const { phone, document, fileName, extension, delayMessage = 2 } = params
+      const cleanPhone = this.formatInternationalPhone(phone)
+      const ext = (extension || 'pdf').toLowerCase().replace(/[^a-z0-9]/g, '') || 'pdf'
+      const response = await fetch(
+        `${this.baseUrl}/instances/${this.config.instanceId}/token/${this.config.token}/send-document/${ext}`,
+        {
+          method: 'POST',
+          headers: this.buildHeaders(),
+          body: JSON.stringify({
+            phone: cleanPhone,
+            document,
+            fileName,
+            delayMessage,
+          }),
+        }
+      )
+      if (!response.ok) {
+        const errorData = await response.json().catch(async () => ({ message: await response.text() }))
+        throw new Error(errorData.message || `Erro HTTP ${response.status}`)
+      }
+      const data = await response.json()
+      return { success: true, id: data.id, message: 'Documento enviado com sucesso' }
+    } catch (error: any) {
+      return { success: false, error: error.message || 'Erro ao enviar documento' }
     }
   }
 }

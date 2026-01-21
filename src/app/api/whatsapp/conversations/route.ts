@@ -73,7 +73,6 @@ export async function GET(request: NextRequest) {
 
     // Parâmetros de query
     const searchParams = request.nextUrl.searchParams
-    const area = searchParams.get('area') || 'nutri' // Apenas Nutri por padrão
     const status = searchParams.get('status') || 'active'
     const limit = parseInt(searchParams.get('limit') || '50')
     const offset = parseInt(searchParams.get('offset') || '0')
@@ -88,7 +87,8 @@ export async function GET(request: NextRequest) {
           id,
           name,
           area,
-          phone_number
+          phone_number,
+          status
         )
       `,
         { count: 'exact' }
@@ -108,8 +108,58 @@ export async function GET(request: NextRequest) {
       throw error
     }
 
+    // Incluir preview da última mensagem (para UI estilo WhatsApp)
+    const conversationList = conversations || []
+    let conversationsWithPreview: any[] = conversationList
+
+    if (conversationList.length > 0) {
+      const conversationIds = conversationList.map((c: any) => c.id).filter(Boolean)
+
+      const { data: lastMessages, error: lastMsgError } = await supabaseAdmin
+        .from('whatsapp_messages')
+        .select('conversation_id,message,message_type,created_at,sender_type')
+        .in('conversation_id', conversationIds)
+        .order('created_at', { ascending: false })
+        .limit(Math.max(200, conversationIds.length * 5))
+
+      if (lastMsgError) {
+        console.error('[WhatsApp Conversations] Erro ao buscar previews:', lastMsgError)
+      }
+
+      const lastByConversation = new Map<string, any>()
+      ;(lastMessages || []).forEach((m: any) => {
+        if (!lastByConversation.has(m.conversation_id)) {
+          lastByConversation.set(m.conversation_id, m)
+        }
+      })
+
+      conversationsWithPreview = conversationList.map((conv: any) => {
+        const last = lastByConversation.get(conv.id)
+        const preview =
+          last?.message_type && last.message_type !== 'text'
+            ? last.message_type === 'image'
+              ? '📷 Foto'
+              : last.message_type === 'video'
+                ? '🎥 Vídeo'
+                : last.message_type === 'audio'
+                  ? '🎤 Áudio'
+                  : last.message_type === 'document'
+                    ? '📎 Documento'
+                    : '📎 Mídia'
+            : (last?.message || '')
+
+        return {
+          ...conv,
+          last_message_preview: typeof preview === 'string' ? preview.substring(0, 80) : '',
+          last_message_type: last?.message_type || null,
+          last_message_created_at: last?.created_at || null,
+          last_message_sender_type: last?.sender_type || null,
+        }
+      })
+    }
+
     return NextResponse.json({
-      conversations: conversations || [],
+      conversations: conversationsWithPreview,
       total: count || 0,
       limit,
       offset,

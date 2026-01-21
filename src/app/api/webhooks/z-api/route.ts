@@ -154,7 +154,8 @@ async function getOrCreateConversation(
   instanceId: string,
   phone: string,
   name: string | undefined,
-  area: string | null
+  area: string | null,
+  contextPatch?: Record<string, any> | null
 ) {
   // Buscar instância no banco
   const { data: instance } = await supabase
@@ -170,19 +171,27 @@ async function getOrCreateConversation(
   // Buscar conversa existente
   const { data: existing } = await supabase
     .from('whatsapp_conversations')
-    .select('id')
+    .select('id, area, name, context')
     .eq('instance_id', instance.id)
     .eq('phone', phone)
     .limit(1)
     .single()
 
   if (existing) {
-    // Atualizar área se não tiver
-    if (!existing.area && area) {
-      await supabase
-        .from('whatsapp_conversations')
-        .update({ area, name: name || undefined })
-        .eq('id', existing.id)
+    // Atualizar área/nome/context se necessário
+    const updateData: any = {}
+    if (!existing.area && area) updateData.area = area
+    if (!existing.name && name) updateData.name = name
+
+    if (contextPatch && typeof contextPatch === 'object') {
+      const prev = (existing.context && typeof existing.context === 'object' && !Array.isArray(existing.context))
+        ? (existing.context as any)
+        : {}
+      updateData.context = { ...prev, ...contextPatch }
+    }
+
+    if (Object.keys(updateData).length > 0) {
+      await supabase.from('whatsapp_conversations').update(updateData).eq('id', existing.id)
     }
     return existing.id
   }
@@ -196,6 +205,7 @@ async function getOrCreateConversation(
       name: name || null,
       area: area || null,
       status: 'active',
+      context: contextPatch || null,
     })
     .select('id')
     .single()
@@ -587,6 +597,13 @@ export async function POST(request: NextRequest) {
     
     // Extrair name (Z-API pode enviar como 'name', 'senderName', 'contactName', etc.)
     const name = body.name || body.senderName || body.contactName || body.contact?.name || null
+
+    // Extrair se é grupo (Z-API costuma enviar isGroup)
+    const isGroup =
+      body.isGroup === true ||
+      body.is_group === true ||
+      body?.data?.isGroup === true ||
+      body?.data?.is_group === true
     
     // Extrair type (Z-API envia como 'type')
     const type = body.type || 'text'
@@ -610,6 +627,7 @@ export async function POST(request: NextRequest) {
       message: message?.substring(0, 50),
       instanceId,
       name,
+      isGroup,
       type,
       rawKeys: Object.keys(rawBody)
     })
@@ -689,6 +707,8 @@ export async function POST(request: NextRequest) {
       phone,
       name || null,
       area
+      ,
+      { is_group: isGroup }
     )
     console.log('[Z-API Webhook] 💬 Conversa ID:', conversationId)
 
