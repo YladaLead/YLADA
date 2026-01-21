@@ -97,12 +97,30 @@ function AdminDashboardContent() {
 
   const acoesRapidas = [
     {
+      id: 'whatsapp-chat',
+      title: 'WhatsApp Chat',
+      description: 'Atendimento WhatsApp em tempo real',
+      icon: '💬',
+      link: '/admin/whatsapp',
+      color: 'bg-green-500',
+      destaque: true
+    },
+    {
       id: 'usuarios',
       title: 'Usuários',
       description: 'Gerenciar nutricionistas, coaches, nutras e wellness',
       icon: '👥',
       link: '/admin/usuarios',
       color: 'bg-blue-500',
+      destaque: true
+    },
+    {
+      id: 'subscriptions',
+      title: 'Gerenciar Assinaturas',
+      description: 'Criar planos gratuitos e migrar assinaturas',
+      icon: '🎁',
+      link: '/admin/subscriptions',
+      color: 'bg-green-500',
       destaque: true
     },
     {
@@ -120,15 +138,6 @@ function AdminDashboardContent() {
       icon: '💰',
       link: '/admin/receitas',
       color: 'bg-yellow-500'
-    },
-    {
-      id: 'subscriptions',
-      title: 'Gerenciar Assinaturas',
-      description: 'Criar planos gratuitos e migrar assinaturas',
-      icon: '🎁',
-      link: '/admin/subscriptions',
-      color: 'bg-green-500',
-      destaque: true
     },
     {
       id: 'trials',
@@ -188,15 +197,6 @@ function AdminDashboardContent() {
       icon: '⚙️',
       link: '/admin/config',
       color: 'bg-gray-500'
-    },
-    {
-      id: 'whatsapp-chat',
-      title: 'WhatsApp Chat',
-      description: 'Atendimento WhatsApp em tempo real',
-      icon: '💬',
-      link: '/admin/whatsapp',
-      color: 'bg-green-500',
-      destaque: true
     },
     {
       id: 'support-agents',

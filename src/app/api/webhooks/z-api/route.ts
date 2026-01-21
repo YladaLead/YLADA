@@ -505,6 +505,16 @@ export async function POST(request: NextRequest) {
     // Normalizar payload - Z-API envia em formato específico
     // Formato Z-API: { phone, text: { message }, instance, etc. }
     const body: any = rawBody
+
+    const pickFirstNonEmptyString = (...values: any[]): string | null => {
+      for (const v of values) {
+        if (typeof v === 'string') {
+          const trimmed = v.trim()
+          if (trimmed.length > 0) return trimmed
+        }
+      }
+      return null
+    }
     
     // Extrair phone (Z-API envia como 'phone')
     let phone = body.phone || body.from || body.sender || null
@@ -536,21 +546,41 @@ export async function POST(request: NextRequest) {
       })
     }
     
-    // Extrair message - Z-API envia como text.message ou diretamente como message
-    let message: string | null = null
-    if (body.text && typeof body.text === 'object' && body.text.message) {
-      // Formato Z-API: { text: { message: "..." } }
-      message = body.text.message
-    } else if (body.text && typeof body.text === 'string') {
-      // Formato alternativo: { text: "..." }
-      message = body.text
-    } else if (body.message) {
-      // Formato direto: { message: "..." }
-      message = body.message
-    } else if (body.body) {
-      // Formato alternativo: { body: "..." }
-      message = body.body
-    }
+    // Extrair message - Z-API pode enviar em múltiplos formatos (e às vezes envia eventos sem mensagem)
+    const message = pickFirstNonEmptyString(
+      // Formato Z-API comum
+      body?.text?.message,
+      body?.text?.text,
+      typeof body?.text === 'string' ? body.text : null,
+
+      // Formatos diretos
+      typeof body?.message === 'string' ? body.message : null,
+      typeof body?.body === 'string' ? body.body : null,
+      typeof body?.content === 'string' ? body.content : null,
+
+      // Alguns payloads vêm com message como objeto
+      body?.message?.text?.message,
+      body?.message?.text,
+      body?.message?.message,
+      body?.message?.body,
+      body?.message?.content,
+      body?.message?.caption,
+
+      // Alguns payloads vêm dentro de data
+      body?.data?.text?.message,
+      body?.data?.text,
+      body?.data?.message,
+      body?.data?.body,
+      body?.data?.content,
+
+      // Alguns payloads vêm em arrays
+      body?.messages?.[0]?.text?.message,
+      body?.messages?.[0]?.text,
+      body?.messages?.[0]?.message,
+      body?.messages?.[0]?.body,
+      body?.messages?.[0]?.content,
+      body?.messages?.[0]?.caption,
+    )
     
     // Extrair instanceId (Z-API pode enviar como 'instance' ou 'instanceId')
     const instanceId = body.instanceId || body.instance || body.instance_id || null
@@ -585,17 +615,34 @@ export async function POST(request: NextRequest) {
     })
 
     // Validar payload
-    if (!phone || !message) {
-      console.error('[Z-API Webhook] ❌ Payload inválido:', {
+    // Se não tem message, provavelmente é evento de status/presença/ack.
+    // Retornar 200 evita retries da Z-API e mantém logs limpos.
+    if (!message) {
+      console.log('[Z-API Webhook] ⏭️ Evento sem mensagem (ignorando)', {
+        eventType,
+        phone: phone || null,
+        hasChatId: !!body?.chatId,
+        hasConnectedPhone: !!body?.connectedPhone,
+        keys: Object.keys(rawBody),
+      })
+      return NextResponse.json({
+        received: true,
+        ignored: true,
+        reason: 'Evento sem mensagem (status/presença/ack)',
+      })
+    }
+
+    if (!phone) {
+      console.error('[Z-API Webhook] ❌ Payload inválido (sem phone):', {
         phone: phone || 'FALTANDO',
-        message: message ? message.substring(0, 50) : 'FALTANDO',
+        message: message.substring(0, 50),
         rawBody: JSON.stringify(rawBody).substring(0, 500)
       })
       return NextResponse.json(
-        { 
-          error: 'phone/from e message/text são obrigatórios',
+        {
+          error: 'phone/from é obrigatório',
           received: rawBody,
-          hint: 'Z-API deve enviar: phone/from e message/text/body'
+          hint: 'Z-API deve enviar: phone/from'
         },
         { status: 400 }
       )

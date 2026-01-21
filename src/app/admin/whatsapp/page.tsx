@@ -49,6 +49,7 @@ function WhatsAppChatContent() {
   const [sending, setSending] = useState(false)
   const [areaFilter, setAreaFilter] = useState<string>('nutri') // Apenas Nutri por padrão
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   // Carregar conversas
   useEffect(() => {
@@ -107,10 +108,15 @@ function WhatsAppChatContent() {
       console.log('✅ Conversas carregadas:', data.conversations?.length || 0)
       setConversations(data.conversations || [])
 
-      // Se não tem conversa selecionada e tem conversas, selecionar a primeira
-      if (!selectedConversation && data.conversations?.length > 0) {
-        setSelectedConversation(data.conversations[0])
-      }
+      // Manter conversa selecionada (evita "voltar" para outra conversa)
+      // IMPORTANTE: usar update funcional para evitar closures antigas do setInterval
+      setSelectedConversation((prev) => {
+        const list: Conversation[] = data.conversations || []
+        if (list.length === 0) return null
+        if (!prev) return list[0]
+        const stillExists = list.find((c) => c.id === prev.id)
+        return stillExists || list[0]
+      })
     } catch (error) {
       console.error('Erro ao carregar conversas:', error)
       // Não mostrar erro para o usuário, apenas logar
@@ -339,7 +345,7 @@ function WhatsAppChatContent() {
               </div>
 
               {/* Mensagens */}
-              <div className="flex-1 min-h-0 overflow-y-auto p-4 sm:p-6 bg-gray-50">
+              <div className="flex-1 min-h-0 overflow-y-auto p-4 sm:p-6 bg-[#efeae2]">
                 {messages.map((msg) => (
                   <div
                     key={msg.id}
@@ -348,27 +354,22 @@ function WhatsAppChatContent() {
                     }`}
                   >
                     <div
-                      className={`max-w-[85%] sm:max-w-[70%] rounded-lg px-4 py-2 ${
+                      className={`max-w-[90%] sm:max-w-[70%] rounded-2xl px-4 py-2 shadow-sm ${
                         msg.sender_type === 'customer'
-                          ? 'bg-white border border-gray-200'
-                          : 'bg-green-500 text-white'
+                          ? 'bg-white'
+                          : 'bg-[#dcf8c6] text-gray-900'
                       }`}
                     >
-                      {msg.sender_type === 'customer' && (
-                        <div className="text-xs text-gray-500 mb-1">
-                          {msg.sender_name || 'Cliente'}
-                        </div>
-                      )}
                       <p
                         className={`text-sm ${
-                          msg.sender_type === 'customer' ? 'text-gray-900' : 'text-white'
+                          msg.sender_type === 'customer' ? 'text-gray-900' : 'text-gray-900'
                         }`}
                       >
                         {msg.message}
                       </p>
                       <div
                         className={`text-xs mt-1 ${
-                          msg.sender_type === 'customer' ? 'text-gray-400' : 'text-green-100'
+                          msg.sender_type === 'customer' ? 'text-gray-400' : 'text-gray-500'
                         }`}
                       >
                         {formatTime(msg.created_at)}
@@ -381,7 +382,28 @@ function WhatsAppChatContent() {
 
               {/* Input de Mensagem */}
               <div className="bg-white border-t border-gray-200 px-4 sm:px-6 py-3 sm:py-4">
-                <div className="flex gap-2">
+                <div className="flex gap-2 items-center">
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    className="hidden"
+                    onChange={() => {
+                      // UI pronto para anexos; envio via Z-API será implementado depois
+                      if (fileInputRef.current?.files?.length) {
+                        alert('Anexos: em breve (UI já pronta).')
+                        fileInputRef.current.value = ''
+                      }
+                    }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="h-10 w-10 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 text-gray-700"
+                    aria-label="Anexar arquivo"
+                    title="Anexar"
+                  >
+                    📎
+                  </button>
                   <input
                     type="text"
                     value={newMessage}
