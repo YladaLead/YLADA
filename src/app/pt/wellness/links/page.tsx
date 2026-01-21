@@ -1382,7 +1382,7 @@ Você vai adorar! 😊`
                         />
                       )
                     })()
-                  ) : item.metadata?.isTemplate && item.metadata?.template ? (
+                  ) : item.metadata?.isTemplate && item.metadata?.template && !item.metadata?.isHype ? (
                     (() => {
                       const templateParaPreview = {
                         id: item.metadata.template.id || item.metadata.template.templateId,
