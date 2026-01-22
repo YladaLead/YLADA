@@ -47,6 +47,12 @@ export default function NutriLandingPage() {
               priority
             />
           </Link>
+          <Link
+            href="/pt/nutri/login"
+            className="inline-flex items-center px-4 sm:px-6 py-2 sm:py-2.5 bg-[#2563EB] text-white text-sm sm:text-base font-semibold rounded-lg hover:bg-[#1D4ED8] transition-all shadow-md hover:shadow-lg"
+          >
+            Entrar
+          </Link>
         </div>
       </header>
 

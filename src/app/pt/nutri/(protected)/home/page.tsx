@@ -70,41 +70,38 @@ function NutriHomeContent() {
   const currentDay = progress?.current_day || null
   const isFirstDays = currentDay === null || currentDay <= 1
   
-  // Extrair nome da usuária para saudação personalizada
-  // Priorizar nome completo do perfil, depois metadata, depois email
+  // Extrair nome do usuário para saudação personalizada
+  // Usar o nome exatamente como configurado pelo usuário (sem adicionar títulos automaticamente)
   const getUserName = () => {
-    // Se tem nome completo no perfil, usar ele (pode ter "Dra." já)
+    // Priorizar nome completo do perfil (usar exatamente como configurado)
     if (userProfile?.nome_completo) {
       const nome = userProfile.nome_completo.trim()
-      // Se já tem "Dra." ou "Dra ", retornar como está
-      if (nome.toLowerCase().startsWith('dra.')) {
-        return nome
+      if (nome) {
+        // Se o nome já tem título (Dra., Dr., Doutora, Doutor), usar como está
+        // Caso contrário, usar o nome completo ou primeiro nome
+        const primeiroNome = nome.split(' ')[0]
+        return primeiroNome || nome
       }
-      // Se não tem, pegar primeiro nome e adicionar "Dra."
-      const primeiroNome = nome.split(' ')[0]
-      return primeiroNome ? `Dra. ${primeiroNome}` : null
     }
     // Tentar metadata
     if (user?.user_metadata?.full_name) {
       const nome = user.user_metadata.full_name.trim()
-      if (nome.toLowerCase().startsWith('dra.')) {
-        return nome
+      if (nome) {
+        const primeiroNome = nome.split(' ')[0]
+        return primeiroNome || nome
       }
-      const primeiroNome = nome.split(' ')[0]
-      return primeiroNome ? `Dra. ${primeiroNome}` : null
     }
     if (user?.user_metadata?.name) {
       const nome = user.user_metadata.name.trim()
-      if (nome.toLowerCase().startsWith('dra.')) {
-        return nome
+      if (nome) {
+        const primeiroNome = nome.split(' ')[0]
+        return primeiroNome || nome
       }
-      const primeiroNome = nome.split(' ')[0]
-      return primeiroNome ? `Dra. ${primeiroNome}` : null
     }
-    // Fallback: email
+    // Fallback: email (sem título)
     if (user?.email) {
       const emailPart = user.email.split('@')[0]
-      return emailPart ? `Dra. ${emailPart}` : null
+      return emailPart || null
     }
     return null
   }

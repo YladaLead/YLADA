@@ -57,18 +57,11 @@ export default function LyaChatWidget() {
     if (isOpen && messages.length === 0) {
       setMessages([{
         sender_type: 'lya',
-        message: 'Olá! Sou a LYA, sua mentora empresarial. Estou aqui para te ajudar com organização, posicionamento e crescimento do seu negócio nutricional.\n\nComo posso te ajudar hoje?',
+        message: 'Olá! Sou a LYA, sua mentora empresarial. Estou aqui para te ajudar com organização, posicionamento e crescimento do seu negócio.\n\nComo posso te ajudar hoje?',
         created_at: new Date().toISOString()
       }])
     }
   }, [isOpen])
-
-  // Sugestões rápidas
-  const sugestoesRapidas = [
-    { emoji: '💡', texto: 'Preciso de orientação', comando: 'Preciso de orientação sobre como organizar meu negócio' },
-    { emoji: '🆘', texto: 'Falar com suporte', comando: 'Preciso falar com suporte técnico' },
-    { emoji: '📚', texto: 'Ver minha jornada', comando: 'Onde estou na minha jornada? O que preciso fazer hoje?' },
-  ]
 
   const sendMessage = async (messageText?: string) => {
     const message = messageText || inputMessage.trim()
@@ -236,33 +229,55 @@ export default function LyaChatWidget() {
     )
   }
 
+  const handleClose = (e?: React.MouseEvent) => {
+    if (e) {
+      e.preventDefault()
+      e.stopPropagation()
+    }
+    setIsOpen(false)
+    setIsMinimized(false)
+    setMessages([])
+    setThreadId(null)
+  }
+
+  const handleMinimize = (e?: React.MouseEvent) => {
+    if (e) {
+      e.preventDefault()
+      e.stopPropagation()
+    }
+    setIsMinimized(!isMinimized)
+  }
+
   return (
-    <div className={`fixed bottom-6 right-6 w-96 bg-white rounded-lg shadow-2xl z-50 flex flex-col transition-all ${isMinimized ? 'h-16' : 'h-[600px]'}`}>
+    <div 
+      className={`fixed bottom-6 right-6 w-96 bg-white rounded-lg shadow-2xl z-50 flex flex-col transition-all ${isMinimized ? 'h-16' : 'h-[600px]'}`}
+      style={{ pointerEvents: 'auto' }}
+      onClick={(e) => e.stopPropagation()}
+    >
       {/* Header */}
-      <div className="bg-blue-600 text-white p-4 rounded-t-lg flex items-center justify-between">
+      <div className="bg-blue-600 text-white p-4 rounded-t-lg flex items-center justify-between" style={{ pointerEvents: 'auto' }}>
         <div className="flex items-center space-x-2">
           <div className="w-3 h-3 bg-green-400 rounded-full"></div>
           <span className="font-semibold">LYA - Mentora Empresarial</span>
         </div>
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-2" style={{ pointerEvents: 'auto' }}>
           <button
-            onClick={() => setIsMinimized(!isMinimized)}
-            className="hover:bg-blue-700 rounded p-1"
+            onClick={handleMinimize}
+            className="hover:bg-blue-700 rounded p-1 transition-colors"
             aria-label={isMinimized ? 'Expandir' : 'Minimizar'}
+            type="button"
+            style={{ pointerEvents: 'auto', cursor: 'pointer' }}
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={isMinimized ? "M5 15l7-7 7 7" : "M19 9l-7 7-7-7"} />
             </svg>
           </button>
           <button
-            onClick={() => {
-              setIsOpen(false)
-              setIsMinimized(false)
-              setMessages([])
-              setThreadId(null)
-            }}
-            className="hover:bg-blue-700 rounded p-1"
+            onClick={handleClose}
+            className="hover:bg-blue-700 rounded p-1 transition-colors"
             aria-label="Fechar"
+            type="button"
+            style={{ pointerEvents: 'auto', cursor: 'pointer' }}
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -317,26 +332,6 @@ export default function LyaChatWidget() {
 
             <div ref={messagesEndRef} />
           </div>
-
-          {/* Sugestões Rápidas */}
-          {messages.length <= 1 && (
-            <div className="px-4 py-3 border-t border-gray-200 bg-gray-50">
-              <p className="text-xs text-gray-600 mb-2 font-medium">💡 Sugestões rápidas:</p>
-              <div className="space-y-2">
-                {sugestoesRapidas.map((sugestao, index) => (
-                  <button
-                    key={index}
-                    onClick={() => sendMessage(sugestao.comando)}
-                    disabled={loading}
-                    className="w-full text-left px-3 py-2 bg-white border border-gray-200 rounded-lg hover:border-blue-400 hover:bg-blue-50 transition-all text-xs disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    <span className="mr-2">{sugestao.emoji}</span>
-                    <span className="text-gray-700">{sugestao.texto}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
 
           {/* Input */}
           <div className="p-4 border-t border-gray-200 bg-white">

@@ -289,23 +289,114 @@ export default function TemplatesNutri() {
         })
         return
       }
-      const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(link)}`
-      const response = await fetch(qrUrl)
-      if (!response.ok) throw new Error('Erro ao gerar QR code')
-      const blob = await response.blob()
-      await navigator.clipboard.write([
-        new ClipboardItem({ 'image/png': blob })
-      ])
-      setQrCopiado(templateId)
-      setTimeout(() => setQrCopiado(null), 2000)
-      
-      // Encontrar o template para mostrar informações
-      const template = templates.find(t => t.id === templateId)
-      showSuccess('QR Code copiado!', {
-        message: template ? `QR Code da ferramenta "${template.nome}" copiado para a área de transferência.` : 'QR Code copiado para a área de transferência.',
-        link: link,
-        icon: 'qr',
-        duration: 5000,
+
+      // Importar a biblioteca qrcode dinamicamente (só quando necessário)
+      const QRCodeLib = (await import('qrcode')).default
+
+      // Verificar se ClipboardItem está disponível
+      const supportsClipboardItem = typeof window !== 'undefined' && 'ClipboardItem' in window
+
+      if (!supportsClipboardItem) {
+        // Fallback para navegadores que não suportam ClipboardItem
+        // Gerar QR code como data URL e criar um link de download
+        const dataUrl = await QRCodeLib.toDataURL(link, {
+          width: 300,
+          margin: 2,
+          color: {
+            dark: '#000000',
+            light: '#FFFFFF'
+          }
+        })
+        
+        // Criar um elemento temporário para download
+        const linkElement = document.createElement('a')
+        linkElement.href = dataUrl
+        linkElement.download = `qr-code-${templateId}.png`
+        document.body.appendChild(linkElement)
+        linkElement.click()
+        document.body.removeChild(linkElement)
+        
+        // Copiar o link também
+        await navigator.clipboard.writeText(link)
+        
+        setQrCopiado(templateId)
+        setTimeout(() => setQrCopiado(null), 2000)
+        
+        const template = templates.find(t => t.id === templateId)
+        showSuccess('QR Code gerado!', {
+          message: template ? `QR Code da ferramenta "${template.nome}" foi baixado. O link também foi copiado.` : 'QR Code foi baixado. O link também foi copiado.',
+          link: link,
+          icon: 'qr',
+          duration: 5000,
+        })
+        return
+      }
+
+      // Continuar com a geração usando canvas para navegadores que suportam ClipboardItem
+      // Gerar QR code usando a biblioteca local
+      const canvas = document.createElement('canvas')
+      await QRCodeLib.toCanvas(canvas, link, {
+        width: 300,
+        margin: 2,
+        color: {
+          dark: '#000000',
+          light: '#FFFFFF'
+        }
+      })
+
+      // Converter canvas para blob
+      return new Promise<void>((resolve, reject) => {
+        canvas.toBlob(async (blob) => {
+          if (!blob) {
+            reject(new Error('Erro ao gerar blob do QR code'))
+            return
+          }
+
+          try {
+            // Tentar copiar para a área de transferência
+            await navigator.clipboard.write([
+              new ClipboardItem({ 'image/png': blob })
+            ])
+            
+            setQrCopiado(templateId)
+            setTimeout(() => setQrCopiado(null), 2000)
+            
+            const template = templates.find(t => t.id === templateId)
+            showSuccess('QR Code copiado!', {
+              message: template ? `QR Code da ferramenta "${template.nome}" copiado para a área de transferência.` : 'QR Code copiado para a área de transferência.',
+              link: link,
+              icon: 'qr',
+              duration: 5000,
+            })
+            resolve()
+          } catch (clipboardError) {
+            console.warn('Erro ao copiar para clipboard, fazendo download:', clipboardError)
+            // Se falhar ao copiar, fazer download
+            const url = URL.createObjectURL(blob)
+            const linkElement = document.createElement('a')
+            linkElement.href = url
+            linkElement.download = `qr-code-${templateId}.png`
+            document.body.appendChild(linkElement)
+            linkElement.click()
+            document.body.removeChild(linkElement)
+            URL.revokeObjectURL(url)
+            
+            // Copiar o link também
+            await navigator.clipboard.writeText(link)
+            
+            setQrCopiado(templateId)
+            setTimeout(() => setQrCopiado(null), 2000)
+            
+            const template = templates.find(t => t.id === templateId)
+            showSuccess('QR Code gerado!', {
+              message: template ? `QR Code da ferramenta "${template.nome}" foi baixado. O link também foi copiado.` : 'QR Code foi baixado. O link também foi copiado.',
+              link: link,
+              icon: 'qr',
+              duration: 5000,
+            })
+            resolve()
+          }
+        }, 'image/png')
       })
     } catch (error) {
       console.error('Erro ao copiar QR code:', error)

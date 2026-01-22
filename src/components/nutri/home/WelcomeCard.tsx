@@ -36,10 +36,8 @@ export default function WelcomeCard({ currentDay, userName, onOpenLyaChat }: Wel
   
   // 🎉 JORNADA CONCLUÍDA: Layout simplificado pós-30 dias
   if (currentDay && currentDay > 30) {
-    // Formatar nome com "Dra." se não tiver
-    const displayName = userName 
-      ? (userName.startsWith('Dra.') || userName.startsWith('Dra ') ? userName : `Dra. ${userName}`)
-      : 'Dra.'
+    // Usar nome exatamente como configurado (sem adicionar título automaticamente)
+    const displayName = userName || 'Nutricionista'
     
     return (
       <div className="mb-8">
@@ -152,9 +150,7 @@ export default function WelcomeCard({ currentDay, userName, onOpenLyaChat }: Wel
           {/* Saudação personalizada com nome */}
           <p className="text-xl sm:text-2xl text-blue-50 mb-4">
             Olá, <span className="font-semibold text-white">
-              {userName 
-                ? (userName.startsWith('Dra.') || userName.startsWith('Dra ') ? userName : `Dra. ${userName}`)
-                : 'Dra.'}
+              {userName || 'Nutricionista'}
             </span> 👋
           </p>
           
