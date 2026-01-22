@@ -92,12 +92,33 @@ async function identifyArea(phone: string, message: string, instanceId: string):
     return lead.area
   }
 
-  // 3. Análise por palavras-chave (priorizar Nutri)
+  // 3. Análise por palavras-chave (detectar segmento específico)
   const messageLower = message.toLowerCase()
-  const nutriKeywords = ['nutrição', 'nutricionista', 'dieta', 'nutri', 'emagrecer', 'alimentação']
-
-  if (nutriKeywords.some((keyword) => messageLower.includes(keyword))) {
+  
+  // Palavras-chave para AULA PRÁTICA (Nutri)
+  const aulaPraticaKeywords = [
+    'aula prática', 'aula pratica', 'workshop', 'apresentação', 'consulta',
+    'nutrição', 'nutricionista', 'dieta', 'nutri', 'emagrecer', 'alimentação',
+    'plano nutricional', 'acompanhamento nutricional', 'agendar consulta'
+  ]
+  
+  // Palavras-chave para BEBIDAS FUNCIONAIS (Wellness)
+  const bebidasKeywords = [
+    'bebida funcional', 'bebidas funcionais', 'kit energia', 'acelera',
+    'turbo detox', 'hype drink', 'herbalife', 'distribuidor', 'oportunidade',
+    'renda extra', 'negócio', 'vender bebidas'
+  ]
+  
+  // Verificar se é aula prática (nutri)
+  if (aulaPraticaKeywords.some((keyword) => messageLower.includes(keyword))) {
+    console.log('[identifyArea] ✅ Detectado: Aula Prática (Nutri)')
     return 'nutri'
+  }
+  
+  // Verificar se é bebidas funcionais (wellness)
+  if (bebidasKeywords.some((keyword) => messageLower.includes(keyword))) {
+    console.log('[identifyArea] ✅ Detectado: Bebidas Funcionais (Wellness)')
+    return 'wellness'
   }
 
   // Por padrão, se não identificar, retornar 'nutri' (já que esta instância é Nutri)
@@ -530,27 +551,48 @@ export async function POST(request: NextRequest) {
       rawBody.from_api === true || 
       rawBody.fromApi === true ||
       rawBody.fromMe === 'true' ||
+      rawBody.fromMe === 1 ||
       rawBody.isFromMe === true ||
       rawBody.is_from_me === true ||
       // Se o evento é "sent" ou "enviado", é mensagem nossa
       eventType === 'sent' ||
       eventType === 'enviado' ||
+      eventType === 'message_sent' ||
       rawBody.event === 'sent' ||
       rawBody.event === 'enviado' ||
+      rawBody.event === 'message_sent' ||
       // Se o phone é o número da instância (mensagem enviada)
-      (rawBody.phone && rawBody.phone === process.env.Z_API_PHONE_NUMBER)
+      (rawBody.phone && rawBody.phone === process.env.Z_API_PHONE_NUMBER) ||
+      // Verificar se é mensagem de status (enviada)
+      rawBody.status === 'sent' ||
+      rawBody.status === 'delivered' ||
+      // Verificar se tem campo indicando envio
+      rawBody.isSent === true ||
+      rawBody.is_sent === true ||
+      // Verificar se o remetente é o próprio número conectado
+      (rawBody.from && rawBody.from === process.env.Z_API_PHONE_NUMBER)
+    
+    console.log('[Z-API Webhook] 🔍 Detecção de mensagem enviada:', {
+      isFromUs,
+      fromMe: rawBody.fromMe,
+      from_api: rawBody.from_api,
+      fromApi: rawBody.fromApi,
+      isFromMe: rawBody.isFromMe,
+      is_from_me: rawBody.is_from_me,
+      eventType,
+      event: rawBody.event,
+      phone: rawBody.phone,
+      from: rawBody.from,
+      status: rawBody.status,
+      isSent: rawBody.isSent,
+      is_sent: rawBody.is_sent,
+      allKeys: Object.keys(rawBody)
+    })
     
     if (isFromUs) {
-      console.log('[Z-API Webhook] 📤 Mensagem enviada por nós mesmos (salvando no banco):', {
-        fromMe: rawBody.fromMe,
-        from_api: rawBody.from_api,
-        fromApi: rawBody.fromApi,
-        eventType,
-        event: rawBody.event,
-        phone: rawBody.phone,
-        allKeys: Object.keys(rawBody)
-      })
-      // Continuar processamento para salvar mensagem enviada
+      console.log('[Z-API Webhook] 📤 ✅ MENSAGEM ENVIADA POR NÓS - Salvando no banco')
+    } else {
+      console.log('[Z-API Webhook] 📥 Mensagem recebida do cliente')
     }
 
     // Normalizar payload - Z-API envia em formato específico
@@ -786,16 +828,29 @@ export async function POST(request: NextRequest) {
       timestamp: timestamp || new Date().toISOString()
     }
     
-    await saveMessage(conversationId, finalInstanceId, normalizedPayload, finalIsFromUs)
-    console.log('[Z-API Webhook] ✅ Mensagem salva no banco', {
-      isFromUs: finalIsFromUs,
-      senderType: finalIsFromUs ? 'agent' : 'customer'
-    })
+    try {
+      await saveMessage(conversationId, finalInstanceId, normalizedPayload, finalIsFromUs)
+      console.log('[Z-API Webhook] ✅ Mensagem salva no banco com sucesso', {
+        conversationId,
+        isFromUs: finalIsFromUs,
+        senderType: finalIsFromUs ? 'agent' : 'customer',
+        messagePreview: message?.substring(0, 50)
+      })
+    } catch (saveError: any) {
+      console.error('[Z-API Webhook] ❌ ERRO ao salvar mensagem:', {
+        error: saveError.message,
+        stack: saveError.stack,
+        conversationId,
+        isFromUs: finalIsFromUs,
+        payload: normalizedPayload
+      })
+      // Não retornar erro para Z-API, apenas logar
+    }
 
     // 4. Processar automações (respostas automáticas, etc.)
     // IMPORTANTE: Só processar automações se NÃO for mensagem enviada por nós
     // (para evitar loops e respostas automáticas para nossas próprias mensagens)
-    if (!isFromUs) {
+    if (!finalIsFromUs) {
       try {
         const { processAutomations } = await import('@/lib/whatsapp-automation')
         

@@ -115,6 +115,15 @@ function AdminDashboardContent() {
       destaque: true
     },
     {
+      id: 'whatsapp-relatorios',
+      title: 'Relatórios WhatsApp',
+      description: 'Índices e diagnósticos por tags',
+      icon: '📊',
+      link: '/admin/whatsapp/relatorios',
+      color: 'bg-green-700',
+      destaque: true
+    },
+    {
       id: 'usuarios',
       title: 'Usuários',
       description: 'Gerenciar nutricionistas, coaches, nutras e wellness',

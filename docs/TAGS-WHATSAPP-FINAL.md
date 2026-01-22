@@ -19,6 +19,11 @@
    - **Automática** quando automação envia convite
    - Cor: Roxo
 
+4. **`recebeu_segundo_link`** 📅📅
+   - Recebeu segundo convite (após reagendar ou não participar)
+   - **Manual** - adicionar quando enviar segundo link
+   - Cor: Roxo escuro
+
 ### **FASE 3: PARTICIPAÇÃO** (Verde/Vermelho/Amarelo)
 4. **`participou_aula`** ✅
    - Confirmou presença e participou da aula
@@ -95,6 +100,12 @@
 📅 recebeu_link_workshop
     ↓
     ├─→ ✅ participou_aula
+    ├─→ ❌ nao_participou_aula
+    │       ↓
+    │       📅📅 recebeu_segundo_link (novo convite)
+    └─→ ⏸️ adiou_aula
+            ↓
+            📅📅 recebeu_segundo_link (novo convite)
     │       ↓
     │       ├─→ 💡 interessado
     │       │       ↓

@@ -74,8 +74,9 @@ export async function GET(request: NextRequest) {
     // Parâmetros de query
     const searchParams = request.nextUrl.searchParams
     const status = searchParams.get('status') || 'active'
-    const limit = parseInt(searchParams.get('limit') || '50')
+    const limit = parseInt(searchParams.get('limit') || '200') // Aumentado de 50 para 200
     const offset = parseInt(searchParams.get('offset') || '0')
+    const search = searchParams.get('search') || '' // Busca por nome/telefone
 
     // Query base - SEMPRE filtrar por área Nutri
     let query = supabaseAdmin
@@ -95,12 +96,20 @@ export async function GET(request: NextRequest) {
       )
       .eq('area', 'nutri') // SEMPRE apenas Nutri
       .order('last_message_at', { ascending: false })
-      .range(offset, offset + limit - 1)
 
     // Filtros
     if (status) {
       query = query.eq('status', status)
     }
+
+    // Busca por nome ou telefone
+    if (search.trim()) {
+      const searchLower = search.trim().toLowerCase()
+      query = query.or(`name.ilike.%${searchLower}%,phone.ilike.%${searchLower}%,context->>display_name.ilike.%${searchLower}%`)
+    }
+
+    // Aplicar paginação DEPOIS dos filtros
+    query = query.range(offset, offset + limit - 1)
 
     const { data: conversations, error, count } = await query
 
