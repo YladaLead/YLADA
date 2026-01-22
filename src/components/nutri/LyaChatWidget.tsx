@@ -139,11 +139,64 @@ export default function LyaChatWidget() {
   const formatarMensagemLYA = (texto: string, isUserMessage: boolean = false) => {
     const linhas = texto.split('\n')
     
+    // Função auxiliar para processar links markdown [texto](url)
+    const processarLinks = (textoLinha: string, textColor: string) => {
+      const linkRegex = /\[([^\]]+)\]\(([^)]+)\)/g
+      const partes: Array<string | JSX.Element> = []
+      let ultimoIndex = 0
+      let match
+      
+      while ((match = linkRegex.exec(textoLinha)) !== null) {
+        // Adicionar texto antes do link
+        if (match.index > ultimoIndex) {
+          const textoAntes = textoLinha.substring(ultimoIndex, match.index)
+          if (textoAntes) {
+            partes.push(textoAntes)
+          }
+        }
+        
+        // Adicionar o link
+        const linkTexto = match[1]
+        const linkUrl = match[2]
+        const isAbsoluteUrl = linkUrl.startsWith('http')
+        
+        partes.push(
+          <a
+            key={`link-${match.index}`}
+            href={linkUrl}
+            target={isAbsoluteUrl ? '_blank' : undefined}
+            rel={isAbsoluteUrl ? 'noopener noreferrer' : undefined}
+            className="text-blue-600 hover:text-blue-800 underline font-medium break-all"
+            onClick={(e) => {
+              // Se for link relativo, prevenir navegação padrão e usar Next.js router
+              if (!isAbsoluteUrl) {
+                e.preventDefault()
+                window.location.href = linkUrl
+              }
+            }}
+          >
+            {linkTexto}
+          </a>
+        )
+        
+        ultimoIndex = match.index + match[0].length
+      }
+      
+      // Adicionar texto restante
+      if (ultimoIndex < textoLinha.length) {
+        partes.push(textoLinha.substring(ultimoIndex))
+      }
+      
+      return partes.length > 0 ? partes : [textoLinha]
+    }
+    
     return linhas.map((linha, index) => {
       // Se linha está vazia, retornar espaço
       if (linha.trim() === '') {
         return <br key={index} />
       }
+      
+      const textColor = isUserMessage ? 'text-white' : 'text-gray-900'
       
       // Detectar listas numeradas (ex: "1. **Texto**" ou "1. Texto")
       const matchLista = linha.match(/^(\d+)\.\s+(.+)$/)
@@ -151,33 +204,93 @@ export default function LyaChatWidget() {
         const numero = matchLista[1]
         const conteudo = matchLista[2]
         
+        // Processar links primeiro
+        const conteudoComLinks = processarLinks(conteudo, textColor)
+        
         // Verificar se tem negrito no conteúdo
         if (conteudo.includes('**')) {
-          const partes = conteudo.split(/(\*\*[^*]+\*\*)/g)
-          const textColor = isUserMessage ? 'text-white' : 'text-gray-900'
           return (
-            <p key={index} className="mb-2">
+            <p key={index} className="mb-2 break-words">
               <span className={`font-bold ${textColor}`} style={{ fontWeight: 700 }}>{numero}.</span>{' '}
-              {partes.map((parte, i) => {
-                if (parte.startsWith('**') && parte.endsWith('**')) {
+              {conteudoComLinks.map((parte, i) => {
+                if (typeof parte === 'string') {
+                  // Processar negrito dentro do texto
+                  const partesNegrito = parte.split(/(\*\*[^*]+\*\*)/g)
                   return (
-                    <span key={i} className={`font-bold ${textColor}`} style={{ fontWeight: 700 }}>
-                      {parte.replace(/\*\*/g, '')}
+                    <span key={i}>
+                      {partesNegrito.map((p, j) => {
+                        if (p.startsWith('**') && p.endsWith('**')) {
+                          return (
+                            <span key={j} className={`font-bold ${textColor}`} style={{ fontWeight: 700 }}>
+                              {p.replace(/\*\*/g, '')}
+                            </span>
+                          )
+                        }
+                        return <span key={j} className={textColor}>{p}</span>
+                      })}
                     </span>
                   )
                 }
-                return <span key={i} className={textColor}>{parte}</span>
+                return parte
               })}
             </p>
           )
         }
         
         // Lista numerada sem negrito
-        const textColor = isUserMessage ? 'text-white' : 'text-gray-900'
         return (
-          <p key={index} className="mb-2">
+          <p key={index} className="mb-2 break-words">
             <span className={`font-bold ${textColor}`} style={{ fontWeight: 700 }}>{numero}.</span>{' '}
-            <span className={textColor}>{conteudo}</span>
+            {conteudoComLinks.map((parte, i) => {
+              if (typeof parte === 'string') {
+                return <span key={i} className={textColor}>{parte}</span>
+              }
+              return parte
+            })}
+          </p>
+        )
+      }
+      
+      // Detectar links markdown na linha
+      if (linha.includes('[') && linha.includes('](')) {
+        const partesComLinks = processarLinks(linha, textColor)
+        
+        // Verificar se tem negrito
+        if (linha.includes('**')) {
+          return (
+            <p key={index} className="mb-2 break-words">
+              {partesComLinks.map((parte, i) => {
+                if (typeof parte === 'string') {
+                  const partesNegrito = parte.split(/(\*\*[^*]+\*\*)/g)
+                  return (
+                    <span key={i}>
+                      {partesNegrito.map((p, j) => {
+                        if (p.startsWith('**') && p.endsWith('**')) {
+                          return (
+                            <span key={j} className={`font-bold ${textColor}`} style={{ fontWeight: 700 }}>
+                              {p.replace(/\*\*/g, '')}
+                            </span>
+                          )
+                        }
+                        return <span key={j} className={textColor}>{p}</span>
+                      })}
+                    </span>
+                  )
+                }
+                return parte
+              })}
+            </p>
+          )
+        }
+        
+        return (
+          <p key={index} className={`mb-2 break-words ${textColor}`}>
+            {partesComLinks.map((parte, i) => {
+              if (typeof parte === 'string') {
+                return <span key={i}>{parte}</span>
+              }
+              return parte
+            })}
           </p>
         )
       }
@@ -185,9 +298,8 @@ export default function LyaChatWidget() {
       // Detectar texto em negrito simples
       if (linha.includes('**')) {
         const partes = linha.split(/(\*\*[^*]+\*\*)/g)
-        const textColor = isUserMessage ? 'text-white' : 'text-gray-900'
         return (
-          <p key={index} className="mb-2">
+          <p key={index} className="mb-2 break-words">
             {partes.map((parte, i) => {
               if (parte.startsWith('**') && parte.endsWith('**')) {
                 return (
@@ -203,9 +315,8 @@ export default function LyaChatWidget() {
       }
       
       // Linha normal
-      const textColor = isUserMessage ? 'text-white' : 'text-gray-900'
       return (
-        <p key={index} className={`mb-2 ${textColor}`}>
+        <p key={index} className={`mb-2 break-words ${textColor}`}>
           {linha}
         </p>
       )
@@ -313,10 +424,11 @@ export default function LyaChatWidget() {
                       ? 'bg-yellow-100 text-yellow-800 text-sm'
                       : 'bg-white border border-gray-200 text-gray-900'
                   }`}
+                  style={{ wordBreak: 'break-word', overflowWrap: 'break-word' }}
                 >
                   <div className={`whitespace-pre-wrap text-sm leading-relaxed ${
                     msg.sender_type === 'user' ? 'text-white' : 'text-gray-900'
-                  }`}>
+                  }`} style={{ wordBreak: 'break-word', overflowWrap: 'break-word' }}>
                     {formatarMensagemLYA(msg.message, msg.sender_type === 'user')}
                   </div>
                   {msg.created_at && (
