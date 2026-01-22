@@ -106,6 +106,15 @@ function AdminDashboardContent() {
       destaque: true
     },
     {
+      id: 'whatsapp-workshop',
+      title: 'Workshop WhatsApp',
+      description: 'Gerenciar sessões e apresentações',
+      icon: '📅',
+      link: '/admin/whatsapp/workshop',
+      color: 'bg-green-600',
+      destaque: true
+    },
+    {
       id: 'usuarios',
       title: 'Usuários',
       description: 'Gerenciar nutricionistas, coaches, nutras e wellness',

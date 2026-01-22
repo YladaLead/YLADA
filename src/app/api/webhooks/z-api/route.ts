@@ -223,7 +223,8 @@ async function getOrCreateConversation(
 async function saveMessage(
   conversationId: string,
   instanceId: string,
-  payload: ZApiWebhookPayload
+  payload: ZApiWebhookPayload,
+  isFromUs: boolean = false
 ) {
   // Buscar ID da instância no banco
   const { data: instance } = await supabase
@@ -236,16 +237,34 @@ async function saveMessage(
     throw new Error('Instância não encontrada')
   }
 
+  // Se é mensagem enviada por nós, verificar se já existe para evitar duplicatas
+  if (isFromUs && payload.messageId) {
+    const { data: existing } = await supabase
+      .from('whatsapp_messages')
+      .select('id')
+      .eq('z_api_message_id', payload.messageId)
+      .maybeSingle()
+    
+    if (existing) {
+      console.log('[Z-API Webhook] ⏭️ Mensagem já existe, ignorando duplicata:', payload.messageId)
+      return // Mensagem já existe, não salvar novamente
+    }
+  }
+
+  // Determinar sender_type baseado em isFromUs
+  const senderType = isFromUs ? 'agent' : 'customer'
+  const status = isFromUs ? 'sent' : 'delivered'
+
   const { error } = await supabase.from('whatsapp_messages').insert({
     conversation_id: conversationId,
     instance_id: instance.id,
     z_api_message_id: payload.messageId || null,
-    sender_type: 'customer',
-    sender_name: payload.name || null,
+    sender_type: senderType,
+    sender_name: isFromUs ? 'Telefone' : (payload.name || null),
     sender_phone: payload.phone,
     message: payload.message,
     message_type: payload.type || 'text',
-    status: 'delivered',
+    status: status,
     is_bot_response: false,
   })
 
@@ -253,6 +272,12 @@ async function saveMessage(
     console.error('[Z-API Webhook] Erro ao salvar mensagem:', error)
     throw error
   }
+  
+  console.log('[Z-API Webhook] ✅ Mensagem salva:', {
+    type: senderType,
+    status,
+    isFromUs
+  })
 }
 
 /**
@@ -498,18 +523,16 @@ export async function POST(request: NextRequest) {
     const eventType = rawBody.type || rawBody.event || 'received'
     console.log('[Z-API Webhook] 🎯 Tipo de evento:', eventType)
     
-    // IMPORTANTE: Ignorar mensagens enviadas por nós mesmos (fromMe = true)
-    // Isso previne loops quando enviamos notificações
-    if (rawBody.fromMe === true || rawBody.from_api === true || rawBody.fromApi === true) {
-      console.log('[Z-API Webhook] ⚠️ Mensagem enviada por nós mesmos, ignorando:', {
+    // Verificar se é mensagem enviada por nós mesmos
+    const isFromUs = rawBody.fromMe === true || rawBody.from_api === true || rawBody.fromApi === true
+    
+    if (isFromUs) {
+      console.log('[Z-API Webhook] 📤 Mensagem enviada por nós mesmos (salvando no banco):', {
         fromMe: rawBody.fromMe,
         from_api: rawBody.from_api,
         fromApi: rawBody.fromApi
       })
-      return NextResponse.json({ 
-        received: true, 
-        message: 'Mensagem enviada por nós mesmos, ignorada para evitar loop' 
-      })
+      // Continuar processamento para salvar mensagem enviada
     }
 
     // Normalizar payload - Z-API envia em formato específico
@@ -723,65 +746,77 @@ export async function POST(request: NextRequest) {
       timestamp: timestamp || new Date().toISOString()
     }
     
-    await saveMessage(conversationId, finalInstanceId, normalizedPayload)
+    await saveMessage(conversationId, finalInstanceId, normalizedPayload, isFromUs)
     console.log('[Z-API Webhook] ✅ Mensagem salva no banco')
 
     // 4. Processar automações (respostas automáticas, etc.)
-    try {
-      const { processAutomations } = await import('@/lib/whatsapp-automation')
-      
-      // Verificar se é primeira mensagem da conversa
-      const { data: existingMessages } = await supabase
-        .from('whatsapp_messages')
-        .select('id')
-        .eq('conversation_id', conversationId)
-        .eq('sender_type', 'customer')
-        .limit(1)
-      
-      const isFirstMessage = !existingMessages || existingMessages.length === 0
-      
-      const automationResult = await processAutomations(
-        conversationId,
-        phone,
-        message,
-        area,
-        finalInstanceId,
-        isFirstMessage
-      )
-      
-      if (automationResult.messagesSent > 0) {
-        console.log('[Z-API Webhook] 🤖 Automações processadas:', {
-          messagesSent: automationResult.messagesSent,
-          rulesExecuted: automationResult.rulesExecuted
+    // IMPORTANTE: Só processar automações se NÃO for mensagem enviada por nós
+    // (para evitar loops e respostas automáticas para nossas próprias mensagens)
+    if (!isFromUs) {
+      try {
+        const { processAutomations } = await import('@/lib/whatsapp-automation')
+        
+        // Verificar se é primeira mensagem da conversa
+        const { data: existingMessages } = await supabase
+          .from('whatsapp_messages')
+          .select('id')
+          .eq('conversation_id', conversationId)
+          .eq('sender_type', 'customer')
+          .limit(1)
+        
+        const isFirstMessage = !existingMessages || existingMessages.length === 0
+        
+        const automationResult = await processAutomations(
+          conversationId,
+          phone,
+          message,
+          area,
+          finalInstanceId,
+          isFirstMessage
+        )
+        
+        if (automationResult.messagesSent > 0) {
+          console.log('[Z-API Webhook] 🤖 Automações processadas:', {
+            messagesSent: automationResult.messagesSent,
+            rulesExecuted: automationResult.rulesExecuted
+          })
+        }
+      } catch (automationError: any) {
+        console.error('[Z-API Webhook] ❌ Erro ao processar automações:', {
+          error: automationError.message,
+          stack: automationError.stack
         })
+        // Não falhar o webhook se automação falhar
       }
-    } catch (automationError: any) {
-      console.error('[Z-API Webhook] ❌ Erro ao processar automações:', {
-        error: automationError.message,
-        stack: automationError.stack
-      })
-      // Não falhar o webhook se automação falhar
+    } else {
+      console.log('[Z-API Webhook] ⏭️ Pulando automações (mensagem enviada por nós)')
     }
 
     // 5. Notificar administradores (com regras inteligentes)
-    try {
-      const { shouldNotify } = await import('@/lib/whatsapp-automation')
-      
-      // Verificar se deve notificar baseado nas regras
-      const notificationCheck = await shouldNotify(phone, message, area, conversationId)
-      
-      if (notificationCheck.shouldNotify) {
-        await notifyAdmins(conversationId, phone, message)
-        console.log('[Z-API Webhook] 🔔 Notificações processadas:', notificationCheck.reason)
-      } else {
-        console.log('[Z-API Webhook] ⏭️ Notificação ignorada:', notificationCheck.reason)
+    // IMPORTANTE: Só notificar se NÃO for mensagem enviada por nós
+    // (para evitar notificações de nossas próprias mensagens)
+    if (!isFromUs) {
+      try {
+        const { shouldNotify } = await import('@/lib/whatsapp-automation')
+        
+        // Verificar se deve notificar baseado nas regras
+        const notificationCheck = await shouldNotify(phone, message, area, conversationId)
+        
+        if (notificationCheck.shouldNotify) {
+          await notifyAdmins(conversationId, phone, message)
+          console.log('[Z-API Webhook] 🔔 Notificações processadas:', notificationCheck.reason)
+        } else {
+          console.log('[Z-API Webhook] ⏭️ Notificação ignorada:', notificationCheck.reason)
+        }
+      } catch (notifyError: any) {
+        console.error('[Z-API Webhook] ❌ Erro ao processar notificações:', {
+          error: notifyError.message,
+          stack: notifyError.stack
+        })
+        // Não falhar o webhook se notificação falhar
       }
-    } catch (notifyError: any) {
-      console.error('[Z-API Webhook] ❌ Erro ao processar notificações:', {
-        error: notifyError.message,
-        stack: notifyError.stack
-      })
-      // Não falhar o webhook se notificação falhar
+    } else {
+      console.log('[Z-API Webhook] ⏭️ Pulando notificações (mensagem enviada por nós)')
     }
 
     console.log('[Z-API Webhook] ✅ Processamento completo')

@@ -313,6 +313,48 @@ function WhatsAppChatContent() {
   const isFavorite = (conv: Conversation) => !!(conv.context as any)?.favorite
   const isPinned = (conv: Conversation) => !!(conv.context as any)?.pinned
   const isGroup = (conv: Conversation) => !!(conv.context as any)?.is_group
+  
+  const getTags = (conv: Conversation): string[] => {
+    const ctx = (conv.context || {}) as any
+    return Array.isArray(ctx.tags) ? ctx.tags : []
+  }
+
+  const getTagInfo = (tag: string): { label: string; color: string; icon: string } => {
+    const tagMap: Record<string, { label: string; color: string; icon: string }> = {
+      // Fase 1: Captação
+      'veio_aula_pratica': { label: 'Aula Prática', color: 'bg-blue-100 text-blue-700', icon: '📝' },
+      'primeiro_contato': { label: '1º Contato', color: 'bg-blue-50 text-blue-600', icon: '👋' },
+      
+      // Fase 2: Convite
+      'recebeu_link_workshop': { label: 'Link Workshop', color: 'bg-purple-100 text-purple-700', icon: '📅' },
+      
+      // Fase 3: Participação
+      'participou_aula': { label: 'Participou', color: 'bg-green-100 text-green-700', icon: '✅' },
+      'nao_participou_aula': { label: 'Não Participou', color: 'bg-red-100 text-red-700', icon: '❌' },
+      'adiou_aula': { label: 'Adiou', color: 'bg-yellow-100 text-yellow-700', icon: '⏸️' },
+      
+      // Fase 4: Remarketing
+      'interessado': { label: 'Interessado', color: 'bg-purple-50 text-purple-600', icon: '💡' },
+      'duvidas': { label: 'Dúvidas', color: 'bg-indigo-100 text-indigo-700', icon: '❓' },
+      'analisando': { label: 'Analisando', color: 'bg-yellow-50 text-yellow-600', icon: '🤔' },
+      'objeções': { label: 'Objeções', color: 'bg-orange-100 text-orange-700', icon: '🚫' },
+      'negociando': { label: 'Negociando', color: 'bg-orange-50 text-orange-600', icon: '💰' },
+      
+      // Fase 5: Conversão
+      'cliente_nutri': { label: 'Cliente Nutri', color: 'bg-green-200 text-green-800', icon: '🎉' },
+      'perdeu': { label: 'Perdeu', color: 'bg-gray-200 text-gray-700', icon: '😔' },
+      
+      // Extras
+      'retorno': { label: 'Retorno', color: 'bg-cyan-100 text-cyan-700', icon: '🔄' },
+      'urgencia': { label: 'Urgência', color: 'bg-red-200 text-red-800', icon: '⚡' },
+      
+      // Tags antigas (compatibilidade)
+      'form_lead': { label: 'Form', color: 'bg-blue-100 text-blue-700', icon: '📝' },
+      'workshop_invited': { label: 'Workshop', color: 'bg-purple-100 text-purple-700', icon: '📅' },
+    }
+    
+    return tagMap[tag] || { label: tag, color: 'bg-gray-100 text-gray-600', icon: '🏷️' }
+  }
 
   const visibleConversations = conversations
     .filter((conv) => {
@@ -339,9 +381,9 @@ function WhatsAppChatContent() {
     })
 
   return (
-    <div className="min-h-[100dvh] bg-gray-50 pb-safe flex flex-col overflow-x-hidden">
+    <div className="h-screen bg-gray-50 flex flex-col overflow-hidden">
       {/* Header Mobile-First */}
-      <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
+      <div className="bg-white border-b border-gray-200 flex-shrink-0 z-10">
         <div className="px-4 py-3">
           <div className="flex items-center justify-between mb-2">
             <Link
@@ -360,6 +402,14 @@ function WhatsAppChatContent() {
             >
               ⚙️
             </Link>
+            <Link
+              href="/admin/whatsapp/workshop"
+              className="text-blue-600 hover:text-blue-700 text-sm font-medium ml-3"
+              title="Agenda do Workshop"
+              aria-label="Agenda do Workshop"
+            >
+              📅
+            </Link>
           </div>
           <div className="flex items-center justify-between text-xs text-gray-500">
             <span>{conversations.length} conversas</span>
@@ -372,17 +422,17 @@ function WhatsAppChatContent() {
         </div>
       </div>
 
-      <div className="flex-1 min-h-0 flex flex-col md:flex-row">
-        {/* Lista de Conversas */}
+      <div className="flex-1 min-h-0 flex flex-col md:flex-row overflow-hidden">
+        {/* Lista de Conversas - Scroll Independente */}
         <div
           className={[
-            'w-full md:w-80 bg-white md:border-r border-gray-200 overflow-y-auto',
+            'w-full md:w-80 bg-white md:border-r border-gray-200 flex flex-col overflow-hidden',
             // Mobile: se uma conversa está selecionada, mostra somente o chat
-            selectedConversation ? 'hidden md:block' : 'block',
+            selectedConversation ? 'hidden md:flex' : 'flex',
           ].join(' ')}
         >
-          {/* Tabs + Busca (estilo WhatsApp) */}
-          <div className="sticky top-0 bg-white z-10 border-b border-gray-100">
+          {/* Tabs + Busca (estilo WhatsApp) - Fixo no topo */}
+          <div className="flex-shrink-0 bg-white border-b border-gray-100">
             <div className="px-3 pt-3">
               <input
                 value={searchTerm}
@@ -415,6 +465,8 @@ function WhatsAppChatContent() {
             </div>
           </div>
 
+          {/* Lista de Conversas - Scroll Independente */}
+          <div className="flex-1 min-h-0 overflow-y-auto">
           {loading ? (
             <div className="p-4 text-center text-gray-500">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-500 mx-auto mb-2"></div>
@@ -493,7 +545,7 @@ function WhatsAppChatContent() {
                       )}
                     </div>
                     <div className="mt-1 flex items-center justify-between">
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 flex-wrap">
                         {conv.z_api_instances?.status === 'connected' ? (
                           <span className="inline-flex items-center gap-1 text-[11px] text-green-700">
                             <span className="h-2 w-2 bg-green-500 rounded-full" />
@@ -510,6 +562,19 @@ function WhatsAppChatContent() {
                             Grupo
                           </span>
                         )}
+                        {/* Exibir tags */}
+                        {getTags(conv).map((tag) => {
+                          const tagInfo = getTagInfo(tag)
+                          return (
+                            <span
+                              key={tag}
+                              className={`text-[10px] px-1.5 py-0.5 rounded ${tagInfo.color}`}
+                              title={tag}
+                            >
+                              {tagInfo.icon} {tagInfo.label}
+                            </span>
+                          )
+                        })}
                       </div>
 
                       {/* Ações rápidas */}
@@ -580,20 +645,21 @@ function WhatsAppChatContent() {
               )
             })
           )}
+          </div>
         </div>
 
-        {/* Área de Chat - Mobile First */}
+        {/* Área de Chat - Mobile First - Scroll Independente */}
         <div
           className={[
-            'flex-1 min-w-0 flex-col',
+            'flex-1 min-w-0 flex flex-col overflow-hidden',
             // Mobile: só mostra o chat quando tem conversa selecionada
             selectedConversation ? 'flex' : 'hidden md:flex',
           ].join(' ')}
         >
           {selectedConversation ? (
             <>
-              {/* Header da Conversa */}
-              <div className="bg-white border-b border-gray-200 px-4 sm:px-6 py-3 sm:py-4">
+              {/* Header da Conversa - Fixo */}
+              <div className="flex-shrink-0 bg-white border-b border-gray-200 px-4 sm:px-6 py-3 sm:py-4">
                 <div className="flex items-center justify-between gap-3">
                   <div className="flex items-center gap-3 min-w-0">
                     <div className="shrink-0">
@@ -615,7 +681,20 @@ function WhatsAppChatContent() {
                         {getDisplayName(selectedConversation)}
                       </h2>
                       <p className="text-sm text-gray-500 truncate">{formatPhone(selectedConversation.phone)}</p>
-                      <div className="mt-1 flex items-center gap-2">
+                      <div className="mt-1 flex items-center gap-2 flex-wrap">
+                        {/* Tags */}
+                        {getTags(selectedConversation).map((tag) => {
+                          const tagInfo = getTagInfo(tag)
+                          return (
+                            <span
+                              key={tag}
+                              className={`text-[10px] px-1.5 py-0.5 rounded ${tagInfo.color}`}
+                              title={tag}
+                            >
+                              {tagInfo.icon} {tagInfo.label}
+                            </span>
+                          )
+                        })}
                         {selectedConversation.z_api_instances?.status === 'connected' ? (
                           <span className="inline-flex items-center gap-1 text-[11px] text-green-700">
                             <span className="h-2 w-2 bg-green-500 rounded-full" />
@@ -637,6 +716,30 @@ function WhatsAppChatContent() {
                   </div>
 
                   <div className="flex items-center gap-2 shrink-0">
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        try {
+                          const res = await fetch(
+                            `/api/whatsapp/conversations/${selectedConversation.id}/send-workshop-invite`,
+                            { method: 'POST', credentials: 'include' }
+                          )
+                          const json = await res.json().catch(() => ({}))
+                          if (!res.ok) throw new Error(json.error || 'Erro ao enviar convite')
+                          setTimeout(() => {
+                            loadMessages(selectedConversation.id)
+                            loadConversations()
+                          }, 200)
+                        } catch (err: any) {
+                          alert(err.message || 'Erro ao enviar convite')
+                        }
+                      }}
+                      className="h-10 w-10 flex items-center justify-center rounded-full bg-blue-50 hover:bg-blue-100 text-blue-700"
+                      title="Enviar flyer + detalhes da próxima aula"
+                      aria-label="Enviar flyer + detalhes da próxima aula"
+                    >
+                      📩
+                    </button>
                     <button
                       type="button"
                       onClick={() => window.open(`/api/whatsapp/conversations/${selectedConversation.id}/export`, '_blank')}
@@ -866,8 +969,8 @@ function WhatsAppChatContent() {
                 )}
               </div>
 
-              {/* Input de Mensagem */}
-              <div className="bg-white border-t border-gray-200 px-4 sm:px-6 py-3 sm:py-4">
+              {/* Input de Mensagem - Fixo no rodapé */}
+              <div className="flex-shrink-0 bg-white border-t border-gray-200 px-4 sm:px-6 py-3 sm:py-4">
                 <div className="flex gap-2 items-center">
                   <input
                     ref={fileInputRef}
