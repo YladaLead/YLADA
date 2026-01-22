@@ -524,13 +524,31 @@ export async function POST(request: NextRequest) {
     console.log('[Z-API Webhook] 🎯 Tipo de evento:', eventType)
     
     // Verificar se é mensagem enviada por nós mesmos
-    const isFromUs = rawBody.fromMe === true || rawBody.from_api === true || rawBody.fromApi === true
+    // Z-API pode enviar de várias formas quando mensagem é enviada pelo telefone
+    const isFromUs = 
+      rawBody.fromMe === true || 
+      rawBody.from_api === true || 
+      rawBody.fromApi === true ||
+      rawBody.fromMe === 'true' ||
+      rawBody.isFromMe === true ||
+      rawBody.is_from_me === true ||
+      // Se o evento é "sent" ou "enviado", é mensagem nossa
+      eventType === 'sent' ||
+      eventType === 'enviado' ||
+      rawBody.event === 'sent' ||
+      rawBody.event === 'enviado' ||
+      // Se o phone é o número da instância (mensagem enviada)
+      (rawBody.phone && rawBody.phone === process.env.Z_API_PHONE_NUMBER)
     
     if (isFromUs) {
       console.log('[Z-API Webhook] 📤 Mensagem enviada por nós mesmos (salvando no banco):', {
         fromMe: rawBody.fromMe,
         from_api: rawBody.from_api,
-        fromApi: rawBody.fromApi
+        fromApi: rawBody.fromApi,
+        eventType,
+        event: rawBody.event,
+        phone: rawBody.phone,
+        allKeys: Object.keys(rawBody)
       })
       // Continuar processamento para salvar mensagem enviada
     }
@@ -735,6 +753,28 @@ export async function POST(request: NextRequest) {
     )
     console.log('[Z-API Webhook] 💬 Conversa ID:', conversationId)
 
+    // 2.5. Verificação adicional: Se a conversa já existe e tem mensagens nossas recentes,
+    // e o webhook não detectou fromMe, pode ser mensagem enviada pelo telefone
+    let finalIsFromUs = isFromUs
+    if (!isFromUs && conversationId) {
+      // Verificar se há mensagens recentes enviadas por nós (últimas 5 minutos)
+      const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString()
+      const { data: recentOurMessages } = await supabase
+        .from('whatsapp_messages')
+        .select('id')
+        .eq('conversation_id', conversationId)
+        .eq('sender_type', 'agent')
+        .gte('created_at', fiveMinutesAgo)
+        .limit(1)
+      
+      // Se há mensagens nossas recentes e esta mensagem tem o mesmo conteúdo ou é muito similar,
+      // provavelmente é confirmação de envio
+      if (recentOurMessages && recentOurMessages.length > 0) {
+        console.log('[Z-API Webhook] 🔍 Detectada possível mensagem enviada (há mensagens recentes nossas)')
+        // Não marcar como fromUs automaticamente, mas adicionar log para debug
+      }
+    }
+
     // 3. Salvar mensagem (usar payload normalizado)
     const normalizedPayload: ZApiWebhookPayload = {
       phone,
@@ -746,8 +786,11 @@ export async function POST(request: NextRequest) {
       timestamp: timestamp || new Date().toISOString()
     }
     
-    await saveMessage(conversationId, finalInstanceId, normalizedPayload, isFromUs)
-    console.log('[Z-API Webhook] ✅ Mensagem salva no banco')
+    await saveMessage(conversationId, finalInstanceId, normalizedPayload, finalIsFromUs)
+    console.log('[Z-API Webhook] ✅ Mensagem salva no banco', {
+      isFromUs: finalIsFromUs,
+      senderType: finalIsFromUs ? 'agent' : 'customer'
+    })
 
     // 4. Processar automações (respostas automáticas, etc.)
     // IMPORTANTE: Só processar automações se NÃO for mensagem enviada por nós
