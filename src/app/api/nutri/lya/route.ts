@@ -173,6 +173,24 @@ Foque no Dia 3. O resto vem no momento certo.`
           // Buscar contexto do usuário para passar como variáveis
           const { supabaseAdmin } = await import('@/lib/supabase')
           
+          // Buscar diagnóstico completo
+          const diagnosticoResult = await supabaseAdmin
+            .from('nutri_diagnostico')
+            .select('*')
+            .eq('user_id', user.id)
+            .maybeSingle()
+          
+          const diagnostico = diagnosticoResult.data
+          
+          // Buscar perfil estratégico
+          const perfilEstrategicoResult = await supabaseAdmin
+            .from('nutri_perfil_estrategico')
+            .select('*')
+            .eq('user_id', user.id)
+            .maybeSingle()
+          
+          const perfilEstrategico = perfilEstrategicoResult.data
+          
           // Buscar progresso da jornada
           const jornadaResult = await supabaseAdmin
             .from('journey_progress')
@@ -184,10 +202,10 @@ Foque no Dia 3. O resto vem no momento certo.`
           
           const jornadaDiaAtual = jornadaResult.data?.day_number || null
           
-          // Buscar perfil do usuário (incluindo branding)
+          // Buscar perfil do usuário (incluindo branding e user_slug)
           const perfilResult = await supabaseAdmin
             .from('user_profiles')
-            .select('logo_url, brand_color, brand_name, professional_credential')
+            .select('logo_url, brand_color, brand_name, professional_credential, user_slug')
             .eq('user_id', user.id)
             .maybeSingle()
           
@@ -201,6 +219,67 @@ Foque no Dia 3. O resto vem no momento certo.`
             credencial: perfilResult.data.professional_credential || 'Não definida'
           } : null
           
+          const userSlug = perfilResult.data?.user_slug || null
+          
+          // Buscar ferramentas ativas do usuário para fornecer links reais
+          const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://ylada.app'
+          const [toolsResult, quizzesResult] = await Promise.all([
+            supabaseAdmin
+              .from('user_templates')
+              .select('id, title, slug, status, template_slug')
+              .eq('user_id', user.id)
+              .eq('profession', 'nutri')
+              .eq('status', 'active')
+              .order('created_at', { ascending: false })
+              .limit(10),
+            supabaseAdmin
+              .from('quizzes')
+              .select('id, titulo, slug, status')
+              .eq('user_id', user.id)
+              .eq('profession', 'nutri')
+              .eq('status', 'active')
+              .order('created_at', { ascending: false })
+              .limit(10)
+          ])
+          
+          // Construir lista de links virais reais
+          const linksVirais: Array<{ nome: string; link: string; tipo: string }> = []
+          
+          if (userSlug) {
+            // Adicionar links das ferramentas (user_templates)
+            if (toolsResult.data) {
+              toolsResult.data.forEach(tool => {
+                if (tool.slug) {
+                  linksVirais.push({
+                    nome: tool.title || 'Ferramenta sem nome',
+                    link: `${baseUrl}/pt/nutri/${userSlug}/${tool.slug}`,
+                    tipo: tool.template_slug?.startsWith('quiz-') ? 'Quiz' : 
+                          tool.template_slug?.startsWith('calc-') ? 'Calculadora' :
+                          tool.template_slug?.startsWith('checklist-') ? 'Checklist' :
+                          tool.template_slug?.startsWith('guia-') ? 'Guia' : 'Ferramenta'
+                  })
+                }
+              })
+            }
+            
+            // Adicionar links dos quizzes personalizados
+            if (quizzesResult.data) {
+              quizzesResult.data.forEach(quiz => {
+                if (quiz.slug) {
+                  linksVirais.push({
+                    nome: quiz.titulo || 'Quiz sem nome',
+                    link: `${baseUrl}/pt/nutri/${userSlug}/${quiz.slug}`,
+                    tipo: 'Quiz Personalizado'
+                  })
+                }
+              })
+            }
+          }
+          
+          const linksViraisInfo = linksVirais.length > 0 
+            ? `LINKS VIRAIS DISPONÍVEIS (${linksVirais.length}):\n${linksVirais.map(l => `- ${l.nome} (${l.tipo}): ${l.link}`).join('\n')}\n\nIMPORTANTE: Quando a nutricionista perguntar sobre "link de valor" ou "organizar links", SEMPRE use estes links reais para estruturar a resposta. NUNCA mencione Linktree, Lnk.Bio ou ferramentas externas.`
+            : 'Nenhum link viral criado ainda. A nutricionista precisa criar ferramentas em [Ferramentas](https://ylada.app/pt/nutri/ferramentas) primeiro.\n\nIMPORTANTE: Quando a nutricionista perguntar sobre "link de valor", oriente para criar ferramentas primeiro. NUNCA mencione Linktree, Lnk.Bio ou ferramentas externas.'
+          
           // Buscar semana do dia atual na tabela journey_days
           let semanaAtual = null
           if (jornadaDiaAtual) {
@@ -212,29 +291,74 @@ Foque no Dia 3. O resto vem no momento certo.`
             semanaAtual = dayResult.data?.week_number || Math.ceil(jornadaDiaAtual / 7)
           }
           
-          // Buscar reflexões recentes (incluindo ações práticas e exercícios)
+          // Buscar TODAS as reflexões dos 30 dias (incluindo ações práticas e exercícios)
           const reflexoesResult = await supabaseAdmin
             .from('journey_checklist_notes')
             .select('day_number, item_index, nota')
             .eq('user_id', user.id)
-            .order('created_at', { ascending: false })
-            .limit(10) // Aumentar para incluir mais contexto
+            .order('day_number', { ascending: true })
+            .order('item_index', { ascending: true })
           
-          const reflexoes = reflexoesResult.data
+          // Buscar TODAS as anotações diárias dos 30 dias
+          const dailyNotesResult = await supabaseAdmin
+            .from('journey_daily_notes')
+            .select('day_number, conteudo')
+            .eq('user_id', user.id)
+            .order('day_number', { ascending: true })
+          
+          // Combinar reflexões dos exercícios
+          const reflexoesExercicios = reflexoesResult.data
             ?.filter(r => r.nota && r.nota.trim())
             .map(r => {
               const tipo = r.item_index === -1 ? 'Ação Prática' : `Exercício ${r.item_index + 1}`
               return `Dia ${r.day_number} - ${tipo}: ${r.nota}`
             })
-            .join('\n') || 'Nenhuma reflexão ainda.'
+            .join('\n') || ''
+          
+          // Combinar anotações diárias
+          const reflexoesDiarias = dailyNotesResult.data
+            ?.filter(r => r.conteudo && r.conteudo.trim())
+            .map(r => `Dia ${r.day_number} - Reflexão do Dia: ${r.conteudo}`)
+            .join('\n') || ''
+          
+          // Combinar tudo
+          const reflexoes = [reflexoesExercicios, reflexoesDiarias]
+            .filter(r => r.trim())
+            .join('\n\n') || 'Nenhuma reflexão ainda.'
           
           console.log('📊 [LYA] Contexto da jornada:', {
             dia: jornadaDiaAtual,
             semana: semanaAtual,
-            reflexoesCount: reflexoesResult.data?.length || 0,
+            reflexoesExerciciosCount: reflexoesResult.data?.length || 0,
+            reflexoesDiariasCount: dailyNotesResult.data?.length || 0,
             reflexoesPreview: reflexoes.substring(0, 150) + (reflexoes.length > 150 ? '...' : '')
           })
           
+          // Preparar dados do diagnóstico para variáveis
+          const diagnosticoInfo = diagnostico ? `DIAGNÓSTICO COMPLETO:
+- Tipo de Atuação: ${diagnostico.tipo_atuacao || 'Não informado'}
+- Tempo de Atuação: ${diagnostico.tempo_atuacao || 'Não informado'}
+- Autoavaliação: ${diagnostico.autoavaliacao || 'Não informado'}
+- Situação Atual: ${diagnostico.situacao_atual || 'Não informado'}
+- Processos Existentes:
+  * Captação: ${diagnostico.processos_captacao ? 'Sim ✅' : 'Não ❌'}
+  * Avaliação: ${diagnostico.processos_avaliacao ? 'Sim ✅' : 'Não ❌'}
+  * Fechamento: ${diagnostico.processos_fechamento ? 'Sim ✅' : 'Não ❌'}
+  * Acompanhamento: ${diagnostico.processos_acompanhamento ? 'Sim ✅' : 'Não ❌'}
+- Objetivo Principal: ${diagnostico.objetivo_principal || 'Não informado'}
+- Meta Financeira: ${diagnostico.meta_financeira || 'Não informado'}
+- Travas: ${diagnostico.travas?.join(', ') || 'Nenhuma'}
+- Tempo Disponível: ${diagnostico.tempo_disponivel || 'Não informado'}
+- Preferência: ${diagnostico.preferencia || 'Não informado'}
+- Campo Aberto: ${diagnostico.campo_aberto || 'Não preenchido'}` : 'Diagnóstico não encontrado.'
+
+          const perfilInfo = perfilEstrategico ? `PERFIL ESTRATÉGICO:
+- Tipo: ${perfilEstrategico.tipo_nutri || 'Não definido'}
+- Nível Empresarial: ${perfilEstrategico.nivel_empresarial || 'Não definido'}
+- Foco Prioritário: ${perfilEstrategico.foco_prioritario || 'Não definido'}
+- Tom LYA: ${perfilEstrategico.tom_lya || 'Não definido'}
+- Ritmo de Condução: ${perfilEstrategico.ritmo_conducao || 'Não definido'}` : 'Perfil estratégico não encontrado.'
+
           // Chamar Responses API
           const response = await (openai as any).responses.create({
             model: 'gpt-4o-mini', // Modelo recomendado para LYA
@@ -246,6 +370,9 @@ Foque no Dia 3. O resto vem no momento certo.`
                 semana_atual: semanaAtual?.toString() || 'N/A',
                 reflexoes_recentes: reflexoes || 'Nenhuma reflexão ainda.',
                 historico_conversa: conversationHistory.map(m => `${m.role}: ${m.content}`).join('\n') || 'Nenhuma conversa anterior.',
+                diagnostico_completo: diagnosticoInfo,
+                perfil_estrategico: perfilInfo,
+                links_virais: linksViraisInfo,
                 branding_info: brandingInfo ? `MARCA PROFISSIONAL:
 - Logo: ${brandingInfo.temLogo ? 'Sim ✅' : 'Não ❌'}
 - Cor da marca: ${brandingInfo.cor}
@@ -307,6 +434,24 @@ Se ela já tem uma cor definida, valide e reforce a escolha se apropriada.` : 'P
         console.log('🧵 [LYA] Thread ID:', threadId || 'novo (será criado)')
         console.log('🆔 [LYA] Assistant ID:', assistantId)
         
+        // Buscar diagnóstico completo
+        const diagnosticoResult = await supabaseAdmin
+          .from('nutri_diagnostico')
+          .select('*')
+          .eq('user_id', user.id)
+          .maybeSingle()
+        
+        const diagnostico = diagnosticoResult.data
+        
+        // Buscar perfil estratégico
+        const perfilEstrategicoResult = await supabaseAdmin
+          .from('nutri_perfil_estrategico')
+          .select('*')
+          .eq('user_id', user.id)
+          .maybeSingle()
+        
+        const perfilEstrategico = perfilEstrategicoResult.data
+        
         // Buscar contexto da jornada para incluir na mensagem
         const jornadaResult = await supabaseAdmin
           .from('journey_progress')
@@ -329,21 +474,132 @@ Se ela já tem uma cor definida, valide e reforce a escolha se apropriada.` : 'P
           semanaAtual = dayResult.data?.week_number || Math.ceil(jornadaDiaAtual / 7)
         }
         
-        // Buscar reflexões recentes (incluindo ações práticas e exercícios)
+        // Buscar TODAS as reflexões dos 30 dias (incluindo ações práticas e exercícios)
         const reflexoesResult = await supabaseAdmin
           .from('journey_checklist_notes')
           .select('day_number, item_index, nota')
           .eq('user_id', user.id)
-          .order('created_at', { ascending: false })
-          .limit(10) // Aumentar para incluir mais contexto
+          .order('day_number', { ascending: true })
+          .order('item_index', { ascending: true })
         
-        const reflexoes = reflexoesResult.data
+        // Buscar TODAS as anotações diárias dos 30 dias
+        const dailyNotesResult = await supabaseAdmin
+          .from('journey_daily_notes')
+          .select('day_number, conteudo')
+          .eq('user_id', user.id)
+          .order('day_number', { ascending: true })
+        
+        // Combinar reflexões dos exercícios
+        const reflexoesExercicios = reflexoesResult.data
           ?.filter(r => r.nota && r.nota.trim())
           .map(r => {
             const tipo = r.item_index === -1 ? 'Ação Prática' : `Exercício ${r.item_index + 1}`
             return `Dia ${r.day_number} - ${tipo}: ${r.nota}`
           })
-          .join('\n') || 'Nenhuma reflexão ainda.'
+          .join('\n') || ''
+        
+        // Combinar anotações diárias
+        const reflexoesDiarias = dailyNotesResult.data
+          ?.filter(r => r.conteudo && r.conteudo.trim())
+          .map(r => `Dia ${r.day_number} - Reflexão do Dia: ${r.conteudo}`)
+          .join('\n') || ''
+        
+        // Combinar tudo
+        const reflexoes = [reflexoesExercicios, reflexoesDiarias]
+          .filter(r => r.trim())
+          .join('\n\n') || 'Nenhuma reflexão ainda.'
+        
+        // Buscar perfil do usuário para obter user_slug
+        const perfilUserResult = await supabaseAdmin
+          .from('user_profiles')
+          .select('user_slug')
+          .eq('user_id', user.id)
+          .maybeSingle()
+        
+        const userSlug = perfilUserResult.data?.user_slug || null
+        
+        // Buscar ferramentas ativas do usuário para fornecer links reais
+        const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://ylada.app'
+        const [toolsResult, quizzesResult] = await Promise.all([
+          supabaseAdmin
+            .from('user_templates')
+            .select('id, title, slug, status, template_slug')
+            .eq('user_id', user.id)
+            .eq('profession', 'nutri')
+            .eq('status', 'active')
+            .order('created_at', { ascending: false })
+            .limit(10),
+          supabaseAdmin
+            .from('quizzes')
+            .select('id, titulo, slug, status')
+            .eq('user_id', user.id)
+            .eq('profession', 'nutri')
+            .eq('status', 'active')
+            .order('created_at', { ascending: false })
+            .limit(10)
+        ])
+        
+        // Construir lista de links virais reais
+        const linksVirais: Array<{ nome: string; link: string; tipo: string }> = []
+        
+        if (userSlug) {
+          if (toolsResult.data) {
+            toolsResult.data.forEach(tool => {
+              if (tool.slug) {
+                linksVirais.push({
+                  nome: tool.title || 'Ferramenta sem nome',
+                  link: `${baseUrl}/pt/nutri/${userSlug}/${tool.slug}`,
+                  tipo: tool.template_slug?.startsWith('quiz-') ? 'Quiz' : 
+                        tool.template_slug?.startsWith('calc-') ? 'Calculadora' :
+                        tool.template_slug?.startsWith('checklist-') ? 'Checklist' :
+                        tool.template_slug?.startsWith('guia-') ? 'Guia' : 'Ferramenta'
+                })
+              }
+            })
+          }
+          
+          if (quizzesResult.data) {
+            quizzesResult.data.forEach(quiz => {
+              if (quiz.slug) {
+                linksVirais.push({
+                  nome: quiz.titulo || 'Quiz sem nome',
+                  link: `${baseUrl}/pt/nutri/${userSlug}/${quiz.slug}`,
+                  tipo: 'Quiz Personalizado'
+                })
+              }
+            })
+          }
+        }
+        
+        const linksViraisInfo = linksVirais.length > 0 
+          ? `\n\n[LINKS VIRAIS DISPONÍVEIS (${linksVirais.length})]\n${linksVirais.map(l => `- ${l.nome} (${l.tipo}): ${l.link}`).join('\n')}\n\nIMPORTANTE: Quando a nutricionista perguntar sobre "link de valor" ou "organizar links", SEMPRE use estes links reais para estruturar a resposta. NUNCA mencione Linktree, Lnk.Bio ou ferramentas externas.`
+          : '\n\n[Nenhum link viral criado ainda. A nutricionista precisa criar ferramentas em [Ferramentas](https://ylada.app/pt/nutri/ferramentas) primeiro.]\n\nIMPORTANTE: Quando a nutricionista perguntar sobre "link de valor", oriente para criar ferramentas primeiro. NUNCA mencione Linktree, Lnk.Bio ou ferramentas externas.'
+        
+        // Preparar contexto completo do diagnóstico
+        const contextoDiagnostico = diagnostico ? `\n\n[DIAGNÓSTICO COMPLETO]\n` +
+          `- Tipo de Atuação: ${diagnostico.tipo_atuacao || 'Não informado'}\n` +
+          `- Tempo de Atuação: ${diagnostico.tempo_atuacao || 'Não informado'}\n` +
+          `- Autoavaliação: ${diagnostico.autoavaliacao || 'Não informado'}\n` +
+          `- Situação Atual: ${diagnostico.situacao_atual || 'Não informado'}\n` +
+          `- Processos Existentes:\n` +
+          `  * Captação: ${diagnostico.processos_captacao ? 'Sim ✅' : 'Não ❌'}\n` +
+          `  * Avaliação: ${diagnostico.processos_avaliacao ? 'Sim ✅' : 'Não ❌'}\n` +
+          `  * Fechamento: ${diagnostico.processos_fechamento ? 'Sim ✅' : 'Não ❌'}\n` +
+          `  * Acompanhamento: ${diagnostico.processos_acompanhamento ? 'Sim ✅' : 'Não ❌'}\n` +
+          `- Objetivo Principal: ${diagnostico.objetivo_principal || 'Não informado'}\n` +
+          `- Meta Financeira: ${diagnostico.meta_financeira || 'Não informado'}\n` +
+          `- Travas: ${diagnostico.travas?.join(', ') || 'Nenhuma'}\n` +
+          `- Tempo Disponível: ${diagnostico.tempo_disponivel || 'Não informado'}\n` +
+          `- Preferência: ${diagnostico.preferencia || 'Não informado'}\n` +
+          `- Campo Aberto: ${diagnostico.campo_aberto || 'Não preenchido'}\n` : ''
+        
+        // Preparar contexto do perfil estratégico
+        const contextoPerfil = perfilEstrategico ? `\n\n[PERFIL ESTRATÉGICO]\n` +
+          `- Tipo: ${perfilEstrategico.tipo_nutri || 'Não definido'}\n` +
+          `- Nível Empresarial: ${perfilEstrategico.nivel_empresarial || 'Não definido'}\n` +
+          `- Foco Prioritário: ${perfilEstrategico.foco_prioritario || 'Não definido'}\n` +
+          `- Tom LYA: ${perfilEstrategico.tom_lya || 'Não definido'}\n` +
+          `- Ritmo de Condução: ${perfilEstrategico.ritmo_conducao || 'Não definido'}\n` : ''
         
         // Construir mensagem com contexto - SEMPRE incluir contexto da jornada
         const contextoJornada = `\n\n[CONTEXTO DA JORNADA]\n` +
@@ -351,7 +607,7 @@ Se ela já tem uma cor definida, valide e reforce a escolha se apropriada.` : 'P
           `- Semana atual: ${semanaAtual || 'N/A'}\n` +
           `- Reflexões recentes:\n${reflexoes}\n`
         
-        const mensagemComContexto = message + contextoJornada
+        const mensagemComContexto = message + contextoDiagnostico + contextoPerfil + contextoJornada + linksViraisInfo
         
         console.log('📊 [LYA] Contexto da jornada adicionado:', {
           dia: jornadaDiaAtual,
@@ -492,6 +748,24 @@ Se ela já tem uma cor definida, valide e reforce a escolha se apropriada.` : 'P
       console.log('⚠️ [LYA] Nenhum ID configurado, usando Chat Completions como fallback')
       
       try {
+        // Buscar diagnóstico completo
+        const diagnosticoResult = await supabaseAdmin
+          .from('nutri_diagnostico')
+          .select('*')
+          .eq('user_id', user.id)
+          .maybeSingle()
+        
+        const diagnostico = diagnosticoResult.data
+        
+        // Buscar perfil estratégico
+        const perfilEstrategicoResult = await supabaseAdmin
+          .from('nutri_perfil_estrategico')
+          .select('*')
+          .eq('user_id', user.id)
+          .maybeSingle()
+        
+        const perfilEstrategico = perfilEstrategicoResult.data
+        
         // Buscar contexto da jornada
         const jornadaResult = await supabaseAdmin
           .from('journey_progress')
@@ -515,25 +789,45 @@ Se ela já tem uma cor definida, valide e reforce a escolha se apropriada.` : 'P
         }
         
         // Buscar reflexões recentes
+        // Buscar TODAS as reflexões dos 30 dias (incluindo ações práticas e exercícios)
         const reflexoesResult = await supabaseAdmin
           .from('journey_checklist_notes')
-          .select('day_number, nota')
+          .select('day_number, item_index, nota')
           .eq('user_id', user.id)
-          .order('created_at', { ascending: false })
-          .limit(10)
+          .order('day_number', { ascending: true })
+          .order('item_index', { ascending: true })
         
-        const reflexoes = reflexoesResult.data
+        // Buscar TODAS as anotações diárias dos 30 dias
+        const dailyNotesResult = await supabaseAdmin
+          .from('journey_daily_notes')
+          .select('day_number, conteudo')
+          .eq('user_id', user.id)
+          .order('day_number', { ascending: true })
+        
+        // Combinar reflexões dos exercícios
+        const reflexoesExercicios = reflexoesResult.data
           ?.filter(r => r.nota && r.nota.trim())
           .map(r => {
             const tipo = r.item_index === -1 ? 'Ação Prática' : `Exercício ${r.item_index + 1}`
             return `Dia ${r.day_number} - ${tipo}: ${r.nota}`
           })
-          .join('\n') || 'Nenhuma reflexão ainda.'
+          .join('\n') || ''
         
-        // Buscar perfil do usuário (incluindo branding)
+        // Combinar anotações diárias
+        const reflexoesDiarias = dailyNotesResult.data
+          ?.filter(r => r.conteudo && r.conteudo.trim())
+          .map(r => `Dia ${r.day_number} - Reflexão do Dia: ${r.conteudo}`)
+          .join('\n') || ''
+        
+        // Combinar tudo
+        const reflexoes = [reflexoesExercicios, reflexoesDiarias]
+          .filter(r => r.trim())
+          .join('\n\n') || 'Nenhuma reflexão ainda.'
+        
+        // Buscar perfil do usuário (incluindo branding e user_slug)
         const perfilResult = await supabaseAdmin
           .from('user_profiles')
-          .select('logo_url, brand_color, brand_name, professional_credential')
+          .select('logo_url, brand_color, brand_name, professional_credential, user_slug')
           .eq('user_id', user.id)
           .maybeSingle()
         
@@ -547,19 +841,109 @@ Se ela já tem uma cor definida, valide e reforce a escolha se apropriada.` : 'P
           credencial: perfilResult.data.professional_credential || 'Não definida'
         } : null
         
+        const userSlug = perfilResult.data?.user_slug || null
+        
+        // Buscar ferramentas ativas do usuário para fornecer links reais
+        const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://ylada.app'
+        const [toolsResult, quizzesResult] = await Promise.all([
+          supabaseAdmin
+            .from('user_templates')
+            .select('id, title, slug, status, template_slug')
+            .eq('user_id', user.id)
+            .eq('profession', 'nutri')
+            .eq('status', 'active')
+            .order('created_at', { ascending: false })
+            .limit(10),
+          supabaseAdmin
+            .from('quizzes')
+            .select('id, titulo, slug, status')
+            .eq('user_id', user.id)
+            .eq('profession', 'nutri')
+            .eq('status', 'active')
+            .order('created_at', { ascending: false })
+            .limit(10)
+        ])
+        
+        // Construir lista de links virais reais
+        const linksVirais: Array<{ nome: string; link: string; tipo: string }> = []
+        
+        if (userSlug) {
+          if (toolsResult.data) {
+            toolsResult.data.forEach(tool => {
+              if (tool.slug) {
+                linksVirais.push({
+                  nome: tool.title || 'Ferramenta sem nome',
+                  link: `${baseUrl}/pt/nutri/${userSlug}/${tool.slug}`,
+                  tipo: tool.template_slug?.startsWith('quiz-') ? 'Quiz' : 
+                        tool.template_slug?.startsWith('calc-') ? 'Calculadora' :
+                        tool.template_slug?.startsWith('checklist-') ? 'Checklist' :
+                        tool.template_slug?.startsWith('guia-') ? 'Guia' : 'Ferramenta'
+                })
+              }
+            })
+          }
+          
+          if (quizzesResult.data) {
+            quizzesResult.data.forEach(quiz => {
+              if (quiz.slug) {
+                linksVirais.push({
+                  nome: quiz.titulo || 'Quiz sem nome',
+                  link: `${baseUrl}/pt/nutri/${userSlug}/${quiz.slug}`,
+                  tipo: 'Quiz Personalizado'
+                })
+              }
+            })
+          }
+        }
+        
+        const linksViraisInfo = linksVirais.length > 0 
+          ? `\n\nLINKS VIRAIS DISPONÍVEIS (${linksVirais.length}):\n${linksVirais.map(l => `- ${l.nome} (${l.tipo}): ${l.link}`).join('\n')}\n\nIMPORTANTE: Quando a nutricionista perguntar sobre "link de valor" ou "organizar links", SEMPRE use estes links reais para estruturar a resposta. NUNCA mencione Linktree, Lnk.Bio ou ferramentas externas.`
+          : '\n\nNenhum link viral criado ainda. A nutricionista precisa criar ferramentas em [Ferramentas](https://ylada.app/pt/nutri/ferramentas) primeiro.\n\nIMPORTANTE: Quando a nutricionista perguntar sobre "link de valor", oriente para criar ferramentas primeiro. NUNCA mencione Linktree, Lnk.Bio ou ferramentas externas.'
+        
         // Importar prompt de branding
         const { getLyaBrandingPrompt } = await import('@/lib/nutri/lya-prompts')
         const brandingPrompt = getLyaBrandingPrompt()
         
-        // Construir system prompt com contexto
-        const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://ylada.app'
+        // Preparar contexto do diagnóstico para o prompt
+        const diagnosticoContexto = diagnostico ? `
+DIAGNÓSTICO COMPLETO DA NUTRICIONISTA:
+- Tipo de Atuação: ${diagnostico.tipo_atuacao || 'Não informado'}
+- Tempo de Atuação: ${diagnostico.tempo_atuacao || 'Não informado'}
+- Autoavaliação: ${diagnostico.autoavaliacao || 'Não informado'}
+- Situação Atual: ${diagnostico.situacao_atual || 'Não informado'}
+- Processos Existentes:
+  * Captação: ${diagnostico.processos_captacao ? 'Sim ✅' : 'Não ❌'}
+  * Avaliação: ${diagnostico.processos_avaliacao ? 'Sim ✅' : 'Não ❌'}
+  * Fechamento: ${diagnostico.processos_fechamento ? 'Sim ✅' : 'Não ❌'}
+  * Acompanhamento: ${diagnostico.processos_acompanhamento ? 'Sim ✅' : 'Não ❌'}
+- Objetivo Principal: ${diagnostico.objetivo_principal || 'Não informado'}
+- Meta Financeira: ${diagnostico.meta_financeira || 'Não informado'}
+- Travas: ${diagnostico.travas?.join(', ') || 'Nenhuma'}
+- Tempo Disponível: ${diagnostico.tempo_disponivel || 'Não informado'}
+- Preferência: ${diagnostico.preferencia || 'Não informado'}
+- Campo Aberto: ${diagnostico.campo_aberto || 'Não preenchido'}
+` : 'Diagnóstico não encontrado.'
+
+        const perfilContexto = perfilEstrategico ? `
+PERFIL ESTRATÉGICO:
+- Tipo: ${perfilEstrategico.tipo_nutri || 'Não definido'}
+- Nível Empresarial: ${perfilEstrategico.nivel_empresarial || 'Não definido'}
+- Foco Prioritário: ${perfilEstrategico.foco_prioritario || 'Não definido'}
+- Tom LYA: ${perfilEstrategico.tom_lya || 'Não definido'}
+- Ritmo de Condução: ${perfilEstrategico.ritmo_conducao || 'Não definido'}
+` : 'Perfil estratégico não encontrado.'
+
+        // Construir system prompt com contexto (baseUrl já foi declarado acima)
         const systemPrompt = `Você é LYA, mentora estratégica oficial da plataforma Nutri YLADA. Você ajuda nutricionistas a desenvolverem sua mentalidade, organização e posicionamento como Nutri-Empresárias. Seja direta, acolhedora e focada no próximo passo certo.
 
+${diagnosticoContexto}
+${perfilContexto}
 CONTEXTO DA JORNADA DA NUTRICIONISTA:
 - Dia atual da jornada: ${jornadaDiaAtual || 'Jornada não iniciada'}
 - Semana atual: ${semanaAtual || 'N/A'}
 - Reflexões recentes:
 ${reflexoes}
+${linksViraisInfo}
 
 ${brandingInfo ? `MARCA PROFISSIONAL ATUAL:
 - Logo: ${brandingInfo.temLogo ? 'Sim ✅' : 'Não ❌'}

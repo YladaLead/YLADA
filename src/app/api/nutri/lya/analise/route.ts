@@ -248,11 +248,24 @@ Perfil Estratégico:
 - Tipo: ${perfil.tipo_nutri}
 - Nível Empresarial: ${perfil.nivel_empresarial}
 - Foco Prioritário: ${perfil.foco_prioritario}
+- Tom LYA: ${perfil.tom_lya}
+- Ritmo de Condução: ${perfil.ritmo_conducao}
 
-Diagnóstico:
+Diagnóstico Completo:
+- Tipo de Atuação: ${diagnostico.tipo_atuacao || 'Não informado'}
+- Tempo de Atuação: ${diagnostico.tempo_atuacao || 'Não informado'}
+- Autoavaliação: ${diagnostico.autoavaliacao || 'Não informado'}
 - Situação Atual: ${diagnostico.situacao_atual}
-- Objetivo: ${diagnostico.objetivo_principal}
+- Processos Existentes:
+  * Captação: ${diagnostico.processos_captacao ? 'Sim ✅' : 'Não ❌'}
+  * Avaliação: ${diagnostico.processos_avaliacao ? 'Sim ✅' : 'Não ❌'}
+  * Fechamento: ${diagnostico.processos_fechamento ? 'Sim ✅' : 'Não ❌'}
+  * Acompanhamento: ${diagnostico.processos_acompanhamento ? 'Sim ✅' : 'Não ❌'}
+- Objetivo Principal: ${diagnostico.objetivo_principal}
+- Meta Financeira: ${diagnostico.meta_financeira || 'Não informado'}
 - Travas: ${diagnostico.travas.join(', ')}
+- Tempo Disponível: ${diagnostico.tempo_disponivel || 'Não informado'}
+- Preferência: ${diagnostico.preferencia || 'Não informado'}
 ${campoAbertoInfo}
 
 Jornada:

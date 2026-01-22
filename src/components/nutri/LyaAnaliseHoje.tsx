@@ -18,6 +18,8 @@ export default function LyaAnaliseHoje() {
   const [loading, setLoading] = useState(true)
   const [regenerando, setRegenerando] = useState(false)
   const [isPrimeiraAnalise, setIsPrimeiraAnalise] = useState(false)
+  const [erro, setErro] = useState<string | null>(null)
+  const [tentouGerarAutomaticamente, setTentouGerarAutomaticamente] = useState(false)
 
   useEffect(() => {
     const carregarAnalise = async () => {
@@ -47,30 +49,53 @@ export default function LyaAnaliseHoje() {
             return
           }
           
-          // Se não tem análise ou está no formato antigo, gerar nova
-          console.log('🔄 [LYA] Gerando nova análise (formato antigo ou ausente)...')
-          setRegenerando(true)
-          const postResponse = await fetch('/api/nutri/lya/analise', {
-            credentials: 'include',
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
+          // Se não tem análise, tentar gerar automaticamente (apenas uma vez)
+          if (!tentouGerarAutomaticamente) {
+            console.log('🔄 [LYA] Nenhuma análise encontrada. Tentando gerar automaticamente...')
+            setTentouGerarAutomaticamente(true)
+            setRegenerando(true)
+            
+            try {
+              const postResponse = await fetch('/api/nutri/lya/analise', {
+                method: 'POST',
+                credentials: 'include',
+                headers: {
+                  'Content-Type': 'application/json'
+                }
+              })
+              
+              if (postResponse.ok) {
+                const postData = await postResponse.json()
+                if (postData.analise && postData.analise.foco_prioritario) {
+                  console.log('✅ [LYA] Análise gerada automaticamente com sucesso')
+                  setAnalise(postData.analise)
+                  setIsPrimeiraAnalise(true) // Se está gerando nova, é primeira análise
+                  setLoading(false)
+                  setRegenerando(false)
+                  return
+                }
+              } else {
+                // Se falhou, verificar se é porque não tem diagnóstico
+                const errorData = await postResponse.json().catch(() => ({ error: 'Erro desconhecido' }))
+                if (postResponse.status === 404 && (errorData.error?.includes('Diagnóstico') || errorData.error?.includes('diagnóstico'))) {
+                  console.log('ℹ️ [LYA] Diagnóstico não encontrado. Mostrando botão para usuário.')
+                  // Não mostrar erro, apenas mostrar botão
+                } else {
+                  console.warn('⚠️ [LYA] Erro ao gerar análise automaticamente:', errorData.error || 'Erro desconhecido')
+                  // Não mostrar erro no carregamento automático
+                }
+              }
+            } catch (autoError) {
+              console.warn('⚠️ [LYA] Erro ao gerar análise automaticamente (não crítico):', autoError)
+              // Não mostrar erro no carregamento automático
             }
-          })
-          
-          if (postResponse.ok) {
-            const postData = await postResponse.json()
-            if (postData.analise && postData.analise.foco_prioritario) {
-              console.log('✅ [LYA] Nova análise gerada com sucesso')
-              setAnalise(postData.analise)
-              setIsPrimeiraAnalise(true) // Se está gerando nova, é primeira análise
-            } else {
-              console.warn('⚠️ [LYA] Nova análise não retornou formato correto')
-            }
+          } else {
+            console.log('ℹ️ [LYA] Já tentou gerar automaticamente. Mostrando botão para usuário.')
           }
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error('❌ Erro ao carregar análise da LYA:', error)
+        // Não mostrar erro no carregamento inicial, apenas se usuário tentar gerar
       } finally {
         setLoading(false)
         setRegenerando(false)
@@ -78,10 +103,11 @@ export default function LyaAnaliseHoje() {
     }
 
     carregarAnalise()
-  }, [])
+  }, [tentouGerarAutomaticamente])
 
   const regenerarAnalise = async () => {
     setRegenerando(true)
+    setErro(null) // Limpar erro anterior
     try {
       const response = await fetch('/api/nutri/lya/analise', {
         method: 'POST',
@@ -91,15 +117,40 @@ export default function LyaAnaliseHoje() {
         }
       })
       
-      if (response.ok) {
-        const data = await response.json()
-        if (data.analise && data.analise.foco_prioritario) {
-          setAnalise(data.analise)
-          setIsPrimeiraAnalise(false) // Não é mais primeira após regenerar
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Erro desconhecido' }))
+        
+        // Tratar erros específicos
+        if (response.status === 404) {
+          if (errorData.error?.includes('Diagnóstico') || errorData.error?.includes('diagnóstico')) {
+            setErro('Você precisa completar o diagnóstico primeiro. Clique aqui para completar.')
+            return
+          }
+          setErro('Análise não encontrada. Tente novamente.')
+          return
         }
+        
+        if (response.status === 500) {
+          setErro('Erro ao gerar análise. Por favor, tente novamente em alguns instantes.')
+          return
+        }
+        
+        setErro(errorData.error || errorData.message || 'Erro ao gerar análise. Tente novamente.')
+        return
       }
-    } catch (error) {
+      
+      const data = await response.json()
+      
+      if (data.analise && data.analise.foco_prioritario) {
+        setAnalise(data.analise)
+        setIsPrimeiraAnalise(false) // Não é mais primeira após regenerar
+        setErro(null) // Limpar erro se sucesso
+      } else {
+        setErro('A análise foi gerada, mas não está no formato esperado. Tente novamente.')
+      }
+    } catch (error: any) {
       console.error('❌ Erro ao regenerar análise:', error)
+      setErro('Erro de conexão. Verifique sua internet e tente novamente.')
     } finally {
       setRegenerando(false)
     }
@@ -162,12 +213,41 @@ export default function LyaAnaliseHoje() {
           <p className="text-gray-700 mb-4">
             A LYA está pronta para analisar seu perfil Nutri-Empresária e criar sua orientação estratégica personalizada.
           </p>
+          
+          {/* Mensagem de erro */}
+          {erro && (
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+              <p className="text-sm text-red-700">
+                {erro.includes('diagnóstico') && erro.includes('completar') ? (
+                  <>
+                    {erro.split('Clique aqui para completar.')[0]}
+                    <Link 
+                      href="/pt/nutri/diagnostico" 
+                      className="text-red-700 underline font-semibold ml-1"
+                    >
+                      Clique aqui para completar.
+                    </Link>
+                  </>
+                ) : (
+                  erro
+                )}
+              </p>
+            </div>
+          )}
+          
           <button
             onClick={regenerarAnalise}
             disabled={regenerando}
-            className="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors disabled:opacity-50"
+            className="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {regenerando ? 'Gerando análise...' : 'Gerar minha primeira análise'}
+            {regenerando ? (
+              <span className="flex items-center gap-2">
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                Gerando análise...
+              </span>
+            ) : (
+              'Gerar minha primeira análise'
+            )}
           </button>
         </div>
       </div>

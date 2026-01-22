@@ -56,9 +56,19 @@ export async function POST(request: NextRequest) {
     // ============================================
     const variables = {
       diagnostico: JSON.stringify({
+        tipo_atuacao: diagnostico.tipo_atuacao || 'Não informado',
+        tempo_atuacao: diagnostico.tempo_atuacao || 'Não informado',
+        autoavaliacao: diagnostico.autoavaliacao || 'Não informado',
         situacao_atual: diagnostico.situacao_atual,
+        processos_captacao: diagnostico.processos_captacao || false,
+        processos_avaliacao: diagnostico.processos_avaliacao || false,
+        processos_fechamento: diagnostico.processos_fechamento || false,
+        processos_acompanhamento: diagnostico.processos_acompanhamento || false,
         objetivo_principal: diagnostico.objetivo_principal,
-        travas: diagnostico.travas,
+        meta_financeira: diagnostico.meta_financeira || 'Não informado',
+        travas: diagnostico.travas || [],
+        tempo_disponivel: diagnostico.tempo_disponivel || 'Não informado',
+        preferencia: diagnostico.preferencia || 'Não informado',
         campo_aberto: diagnostico.campo_aberto || 'Não preenchido'
       }),
       perfil: JSON.stringify({
