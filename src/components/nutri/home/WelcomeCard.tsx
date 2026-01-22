@@ -8,31 +8,14 @@ import Link from 'next/link'
 interface WelcomeCardProps {
   currentDay: number | null
   userName?: string | null
-  onOpenLyaChat?: () => void
 }
 
-export default function WelcomeCard({ currentDay, userName, onOpenLyaChat }: WelcomeCardProps) {
+export default function WelcomeCard({ currentDay, userName }: WelcomeCardProps) {
   const router = useRouter()
   const { progress } = useJornadaProgress()
   
   const phase = getLyaPhase(currentDay)
   const lyaConfig = getLyaConfig(phase)
-  
-  // Função para abrir o widget LYA
-  const handleOpenLyaChat = () => {
-    if (onOpenLyaChat) {
-      onOpenLyaChat()
-    } else {
-      // Fallback: tentar encontrar o botão do widget LYA
-      const lyaButton = document.querySelector('button[aria-label="Abrir chat com Mentora LYA"]') as HTMLButtonElement
-      if (lyaButton) {
-        lyaButton.click()
-      } else {
-        // Se não encontrar, tentar disparar evento customizado
-        window.dispatchEvent(new CustomEvent('open-lya-chat'))
-      }
-    }
-  }
   
   // 🎉 JORNADA CONCLUÍDA: Layout simplificado pós-30 dias
   if (currentDay && currentDay > 30) {
@@ -57,14 +40,8 @@ export default function WelcomeCard({ currentDay, userName, onOpenLyaChat }: Wel
             <div className="text-3xl">👩‍💼</div>
             <div className="flex-1">
               <h3 className="font-semibold text-gray-900">LYA - Sua Mentora</h3>
-              <p className="text-sm text-gray-600">Estou aqui para qualquer dúvida ou desafio!</p>
+              <p className="text-sm text-gray-600">Estou aqui para qualquer dúvida ou desafio! Use o botão azul no canto inferior direito para conversar.</p>
             </div>
-            <button
-              onClick={handleOpenLyaChat}
-              className="bg-purple-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-purple-700 transition-colors"
-            >
-              Conversar
-            </button>
           </div>
         </div>
 

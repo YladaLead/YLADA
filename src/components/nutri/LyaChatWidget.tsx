@@ -234,10 +234,11 @@ export default function LyaChatWidget() {
       e.preventDefault()
       e.stopPropagation()
     }
-    setIsOpen(false)
+    // Fechar de forma síncrona - garantir que todos os estados são atualizados
     setIsMinimized(false)
     setMessages([])
     setThreadId(null)
+    setIsOpen(false)
   }
 
   const handleMinimize = (e?: React.MouseEvent) => {
@@ -245,14 +246,15 @@ export default function LyaChatWidget() {
       e.preventDefault()
       e.stopPropagation()
     }
-    setIsMinimized(!isMinimized)
+    setIsMinimized(prev => !prev)
   }
 
   return (
     <div 
       className={`fixed bottom-6 right-6 w-96 bg-white rounded-lg shadow-2xl z-50 flex flex-col transition-all ${isMinimized ? 'h-16' : 'h-[600px]'}`}
-      style={{ pointerEvents: 'auto' }}
+      style={{ pointerEvents: 'auto', zIndex: 9999 }}
       onClick={(e) => e.stopPropagation()}
+      onMouseDown={(e) => e.stopPropagation()}
     >
       {/* Header */}
       <div className="bg-blue-600 text-white p-4 rounded-t-lg flex items-center justify-between" style={{ pointerEvents: 'auto' }}>
@@ -263,10 +265,14 @@ export default function LyaChatWidget() {
         <div className="flex items-center space-x-2" style={{ pointerEvents: 'auto' }}>
           <button
             onClick={handleMinimize}
+            onMouseDown={(e) => {
+              e.preventDefault()
+              e.stopPropagation()
+            }}
             className="hover:bg-blue-700 rounded p-1 transition-colors"
             aria-label={isMinimized ? 'Expandir' : 'Minimizar'}
             type="button"
-            style={{ pointerEvents: 'auto', cursor: 'pointer' }}
+            style={{ pointerEvents: 'auto', cursor: 'pointer', zIndex: 1000 }}
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={isMinimized ? "M5 15l7-7 7 7" : "M19 9l-7 7-7-7"} />
@@ -274,10 +280,14 @@ export default function LyaChatWidget() {
           </button>
           <button
             onClick={handleClose}
+            onMouseDown={(e) => {
+              e.preventDefault()
+              e.stopPropagation()
+            }}
             className="hover:bg-blue-700 rounded p-1 transition-colors"
             aria-label="Fechar"
             type="button"
-            style={{ pointerEvents: 'auto', cursor: 'pointer' }}
+            style={{ pointerEvents: 'auto', cursor: 'pointer', zIndex: 1000 }}
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
