@@ -95,6 +95,17 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Arquivar conversas com números inválidos
+    if (toArchive.length > 0) {
+      for (const id of toArchive) {
+        await supabaseAdmin
+          .from('whatsapp_conversations')
+          .update({ status: 'archived' })
+          .eq('id', id)
+      }
+      console.log(`[Corrigir Telefones] ${toArchive.length} conversas arquivadas`)
+    }
+
     return NextResponse.json({
       success: true,
       message: `Corrigidas ${corrigidas} conversas`,
