@@ -308,11 +308,13 @@ async function saveMessage(
   // Atualizar contadores
   if (senderType === 'customer') {
     // Incrementar unread_count se for mensagem do cliente
-    await supabase.rpc('increment', {
-      table_name: 'whatsapp_conversations',
-      column_name: 'unread_count',
-      row_id: conversationId,
-    }).catch(() => {
+    try {
+      await supabase.rpc('increment', {
+        table_name: 'whatsapp_conversations',
+        column_name: 'unread_count',
+        row_id: conversationId,
+      })
+    } catch {
       // Se RPC não existir, fazer update manual
       const { data: conv } = await supabase
         .from('whatsapp_conversations')
@@ -326,15 +328,17 @@ async function saveMessage(
           .update({ unread_count: (conv.unread_count || 0) + 1 })
           .eq('id', conversationId)
       }
-    })
+    }
   }
   
   // Incrementar total_messages
-  await supabase.rpc('increment', {
-    table_name: 'whatsapp_conversations',
-    column_name: 'total_messages',
-    row_id: conversationId,
-  }).catch(() => {
+  try {
+    await supabase.rpc('increment', {
+      table_name: 'whatsapp_conversations',
+      column_name: 'total_messages',
+      row_id: conversationId,
+    })
+  } catch {
     // Se RPC não existir, fazer update manual
     const { data: conv } = await supabase
       .from('whatsapp_conversations')
@@ -348,7 +352,7 @@ async function saveMessage(
         .update({ total_messages: (conv.total_messages || 0) + 1 })
         .eq('id', conversationId)
     }
-  })
+  }
   
   console.log('[Z-API Webhook] ✅ Mensagem salva e conversa atualizada:', {
     type: senderType,

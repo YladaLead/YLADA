@@ -53,6 +53,16 @@ export async function POST(request: NextRequest) {
       if (cleanPhone.length < 10 || cleanPhone.length > 15) {
         invalidas++
         console.warn(`[Corrigir Telefones] Telefone inválido: ${originalPhone} (${cleanPhone.length} dígitos)`)
+        
+        // Se o número é muito longo (provavelmente é ID do WhatsApp), arquivar a conversa
+        if (cleanPhone.length > 15) {
+          await supabaseAdmin
+            .from('whatsapp_conversations')
+            .update({ status: 'archived' })
+            .eq('id', conv.id)
+          console.log(`[Corrigir Telefones] Conversa arquivada (número inválido): ${conv.id}`)
+        }
+        
         return // Pular esta conversa
       }
 
