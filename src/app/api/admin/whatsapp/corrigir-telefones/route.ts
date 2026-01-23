@@ -36,8 +36,9 @@ export async function POST(request: NextRequest) {
     let corrigidas = 0
     let invalidas = 0
     const updates: Array<{ id: string; phone: string }> = []
+    const toArchive: Array<string> = []
 
-    conversations.forEach((conv: any) => {
+    for (const conv of conversations) {
       const originalPhone = conv.phone || ''
       let cleanPhone = originalPhone.replace(/\D/g, '')
 
@@ -54,16 +55,13 @@ export async function POST(request: NextRequest) {
         invalidas++
         console.warn(`[Corrigir Telefones] Telefone inválido: ${originalPhone} (${cleanPhone.length} dígitos)`)
         
-        // Se o número é muito longo (provavelmente é ID do WhatsApp), arquivar a conversa
+        // Se o número é muito longo (provavelmente é ID do WhatsApp), marcar para arquivar
         if (cleanPhone.length > 15) {
-          await supabaseAdmin
-            .from('whatsapp_conversations')
-            .update({ status: 'archived' })
-            .eq('id', conv.id)
-          console.log(`[Corrigir Telefones] Conversa arquivada (número inválido): ${conv.id}`)
+          toArchive.push(conv.id)
+          console.log(`[Corrigir Telefones] Conversa marcada para arquivar (número inválido): ${conv.id}`)
         }
         
-        return // Pular esta conversa
+        continue // Pular esta conversa
       }
 
       // Normalizar telefone brasileiro
@@ -83,7 +81,7 @@ export async function POST(request: NextRequest) {
         })
         corrigidas++
       }
-    })
+    }
 
     // Atualizar telefones no banco
     if (updates.length > 0) {
