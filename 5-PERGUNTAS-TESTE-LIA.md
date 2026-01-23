@@ -46,9 +46,9 @@ Preciso de conteúdo pronto, CTA e roteiro para direct."
 
 **Pergunta para fazer à LIA:**
 ```
-"Lia, como eu organizo meu link de valor? 
-Tenho muitos botões e está confuso."
-```
+"Lia, ."
+```como eu organizo meu link de valor? 
+Tenho muitos botões e está confuso
 
 **O que verificar na resposta:**
 - ✅ Sugeriu estrutura clara (3-4 botões máximo)

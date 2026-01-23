@@ -119,10 +119,97 @@ export async function GET(request: NextRequest) {
 
     // Incluir preview da última mensagem (para UI estilo WhatsApp)
     const conversationList = conversations || []
-    let conversationsWithPreview: any[] = conversationList
+    
+    // Agrupar conversas duplicadas por telefone (manter apenas a mais recente)
+    // IMPORTANTE: Preservar códigos de país para suportar outros países
+    const phoneMap = new Map<string, any>()
+    const duplicatesFound: string[] = []
+    
+    conversationList.forEach((conv: any) => {
+      // Normalizar telefone: remover tudo que não é número, mas manter código do país
+      let phoneKey = (conv.phone || '').replace(/\D/g, '')
+      
+      // Para números brasileiros: agrupar variantes com/sem código 55
+      // Ex: "5519997230912" e "19997230912" são o mesmo número
+      // Mas preservar códigos de outros países (1, 52, 54, etc)
+      if (phoneKey.startsWith('55') && phoneKey.length >= 13) {
+        // Número brasileiro com código do país
+        // Criar chave normalizada: remover 55 mas marcar como BR
+        const withoutCountry = phoneKey.substring(2)
+        // Também criar chave alternativa sem código para agrupar
+        phoneKey = `BR_${withoutCountry}`
+      } else if (phoneKey.length >= 10 && phoneKey.length <= 11) {
+        // Número brasileiro sem código do país (começa com DDD)
+        // Remover zero inicial se houver
+        if (phoneKey.startsWith('0')) {
+          phoneKey = phoneKey.substring(1)
+        }
+        phoneKey = `BR_${phoneKey}`
+      } else if (phoneKey.length < 10) {
+        // Telefone inválido - tentar agrupar por nome se disponível
+        const nameKey = (conv.name || '').toLowerCase().trim()
+        if (nameKey && nameKey.length > 3) {
+          phoneKey = `name_${nameKey}`
+        } else {
+          phoneKey = `id_${conv.id}`
+        }
+      }
+      // Para outros países, manter código do país (não agrupar)
+      
+      if (!phoneMap.has(phoneKey)) {
+        phoneMap.set(phoneKey, conv)
+      } else {
+        // Duplicata encontrada
+        duplicatesFound.push(phoneKey)
+        
+        // Se já existe, manter a que tem última mensagem mais recente
+        const existing = phoneMap.get(phoneKey)
+        const existingDate = existing.last_message_at 
+          ? new Date(existing.last_message_at).getTime() 
+          : (existing.created_at ? new Date(existing.created_at).getTime() : 0)
+        const currentDate = conv.last_message_at 
+          ? new Date(conv.last_message_at).getTime() 
+          : (conv.created_at ? new Date(conv.created_at).getTime() : 0)
+        
+        // Manter a mais recente
+        if (currentDate > existingDate) {
+          phoneMap.set(phoneKey, conv)
+        }
+      }
+    })
+    
+    if (duplicatesFound.length > 0) {
+      console.log('[WhatsApp Conversations] 🔍 Duplicatas agrupadas:', {
+        total: duplicatesFound.length,
+        antes: conversationList.length,
+        depois: phoneMap.size,
+        duplicatas: duplicatesFound.slice(0, 5) // Mostrar primeiras 5 para debug
+      })
+    } else {
+      // Log para debug: verificar se há conversas com mesmo nome
+      const nameCounts = new Map<string, number>()
+      conversationList.forEach((conv: any) => {
+        const name = (conv.name || '').toLowerCase().trim()
+        if (name) {
+          nameCounts.set(name, (nameCounts.get(name) || 0) + 1)
+        }
+      })
+      const duplicateNames = Array.from(nameCounts.entries()).filter(([_, count]) => count > 1)
+      if (duplicateNames.length > 0) {
+        console.log('[WhatsApp Conversations] ⚠️ Conversas com mesmo nome (mas telefones diferentes):', duplicateNames)
+      }
+    }
+    
+    // Converter map de volta para array e reordenar por última mensagem
+    let conversationsWithPreview: any[] = Array.from(phoneMap.values())
+      .sort((a: any, b: any) => {
+        const dateA = a.last_message_at ? new Date(a.last_message_at).getTime() : 0
+        const dateB = b.last_message_at ? new Date(b.last_message_at).getTime() : 0
+        return dateB - dateA // Mais recente primeiro
+      })
 
-    if (conversationList.length > 0) {
-      const conversationIds = conversationList.map((c: any) => c.id).filter(Boolean)
+    if (conversationsWithPreview.length > 0) {
+      const conversationIds = conversationsWithPreview.map((c: any) => c.id).filter(Boolean)
 
       const { data: lastMessages, error: lastMsgError } = await supabaseAdmin
         .from('whatsapp_messages')
@@ -142,7 +229,7 @@ export async function GET(request: NextRequest) {
         }
       })
 
-      conversationsWithPreview = conversationList.map((conv: any) => {
+      conversationsWithPreview = conversationsWithPreview.map((conv: any) => {
         const last = lastByConversation.get(conv.id)
         const preview =
           last?.message_type && last.message_type !== 'text'

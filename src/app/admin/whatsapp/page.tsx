@@ -145,17 +145,73 @@ function WhatsAppChatContent() {
       }
 
       const data = await response.json()
-      console.log('✅ Conversas carregadas:', data.conversations?.length || 0)
-      setConversations(data.conversations || [])
+      let conversationsList = data.conversations || []
+      
+      // Agrupamento adicional no frontend (fallback caso API não agrupe corretamente)
+      // IMPORTANTE: Preservar códigos de país para suportar outros países
+      const phoneMap = new Map<string, Conversation>()
+      conversationsList.forEach((conv: Conversation) => {
+        // Normalizar telefone preservando código do país
+        let phoneKey = (conv.phone || '').replace(/\D/g, '')
+        
+        // Para números brasileiros: agrupar variantes com/sem código 55
+        if (phoneKey.startsWith('55') && phoneKey.length >= 13) {
+          const withoutCountry = phoneKey.substring(2)
+          phoneKey = `BR_${withoutCountry}`
+        } else if (phoneKey.length >= 10 && phoneKey.length <= 11 && !phoneKey.match(/^[1-9]/)) {
+          if (phoneKey.startsWith('0')) {
+            phoneKey = phoneKey.substring(1)
+          }
+          phoneKey = `BR_${phoneKey}`
+        } else if (phoneKey.length < 10) {
+          phoneKey = `id_${conv.id}`
+        }
+        // Para outros países, manter código do país (não agrupar)
+        
+        if (!phoneMap.has(phoneKey)) {
+          phoneMap.set(phoneKey, conv)
+        } else {
+          const existing = phoneMap.get(phoneKey)!
+          const existingDate = existing.last_message_at 
+            ? new Date(existing.last_message_at).getTime() 
+            : (existing.created_at ? new Date(existing.created_at).getTime() : 0)
+          const currentDate = conv.last_message_at 
+            ? new Date(conv.last_message_at).getTime() 
+            : (conv.created_at ? new Date(conv.created_at).getTime() : 0)
+          
+          if (currentDate > existingDate) {
+            phoneMap.set(phoneKey, conv)
+          }
+        }
+      })
+      
+      conversationsList = Array.from(phoneMap.values())
+      console.log('✅ Conversas carregadas e agrupadas:', {
+        antes: data.conversations?.length || 0,
+        depois: conversationsList.length
+      })
+      setConversations(conversationsList)
 
       // Manter conversa selecionada (evita "voltar" para outra conversa)
       // IMPORTANTE: usar update funcional para evitar closures antigas do setInterval
       setSelectedConversation((prev) => {
-        const list: Conversation[] = data.conversations || []
+        const list: Conversation[] = conversationsList || []
         if (list.length === 0) return null
         if (!prev) return list[0]
+        
+        // Buscar conversa selecionada na lista atualizada
         const stillExists = list.find((c) => c.id === prev.id)
-        return stillExists || list[0]
+        
+        if (stillExists) {
+          // Conversa ainda existe na lista - manter selecionada
+          return stillExists
+        } else {
+          // Conversa não existe mais na lista (foi removida/arquivada)
+          // NÃO voltar para list[0] automaticamente - manter prev para não mudar de conversa
+          // Isso evita que o sistema "pule" para outra conversa quando você está lendo uma
+          console.log('[WhatsApp Admin] ⚠️ Conversa selecionada não encontrada na lista atualizada, mantendo seleção:', prev.id)
+          return prev
+        }
       })
     } catch (error) {
       console.error('Erro ao carregar conversas:', error)
@@ -177,7 +233,13 @@ function WhatsAppChatContent() {
         credentials: 'include',
       })
 
-      if (!response.ok) throw new Error('Erro ao carregar mensagens')
+      if (!response.ok) {
+        if (response.status === 404) {
+          console.warn(`⚠️ Conversa ${conversationId} não encontrada`)
+          return // Não mostrar erro para conversas que podem ter sido deletadas
+        }
+        throw new Error(`Erro ao carregar mensagens: ${response.status}`)
+      }
 
       const data = await response.json()
       const nextMessages: Message[] = data.messages || []
@@ -234,14 +296,87 @@ function WhatsAppChatContent() {
   }
 
   const formatPhone = (phone: string) => {
-    // Formatar telefone: 5511999999999 -> (11) 99999-9999
-    if (phone.length === 13 && phone.startsWith('55')) {
-      const ddd = phone.substring(2, 4)
-      const part1 = phone.substring(4, 9)
-      const part2 = phone.substring(9)
-      return `(${ddd}) ${part1}-${part2}`
+    if (!phone) return 'Sem telefone'
+    
+    // Remover caracteres não numéricos e espaços
+    let clean = phone.replace(/\D/g, '')
+    
+    // Se contém @, é ID do WhatsApp - extrair apenas o número
+    if (phone.includes('@')) {
+      const match = phone.match(/(\d{10,15})/)
+      if (match) {
+        clean = match[1]
+      } else {
+        // Se não conseguir extrair, retornar como está
+        return phone
+      }
     }
-    return phone
+    
+    // Validar se é um telefone válido (10-15 dígitos)
+    if (clean.length < 10 || clean.length > 15) {
+      // Número inválido - pode ser ID ou outro formato
+      console.warn('[formatPhone] Número inválido:', { original: phone, clean, length: clean.length })
+      return phone.length > 25 ? phone.substring(0, 25) + '...' : phone
+    }
+    
+    // Formatar telefone brasileiro: 5511999999999 -> +55 11 99999-9999 (formato WhatsApp Web)
+    // Formato exato do WhatsApp Web: +55 XX XXXXX-XXXX
+    if (clean.startsWith('55') && clean.length === 13) {
+      const ddd = clean.substring(2, 4)
+      const part1 = clean.substring(4, 9)  // 5 dígitos
+      const part2 = clean.substring(9)     // 4 dígitos
+      return `+55 ${ddd} ${part1}-${part2}`
+    }
+    
+    // Formatar telefone brasileiro sem código: 11999999999 -> +55 11 99999-9999
+    if (clean.length === 11 && clean.startsWith('1')) {
+      const ddd = clean.substring(0, 2)
+      const part1 = clean.substring(2, 7)  // 5 dígitos
+      const part2 = clean.substring(7)     // 4 dígitos
+      return `+55 ${ddd} ${part1}-${part2}`
+    }
+    
+    // Formatar telefone brasileiro com 10 dígitos: 1999999999 -> +55 19 99999-9999
+    if (clean.length === 10) {
+      const ddd = clean.substring(0, 2)
+      const part1 = clean.substring(2, 7)  // 5 dígitos
+      const part2 = clean.substring(7)     // 4 dígitos
+      return `+55 ${ddd} ${part1}-${part2}`
+    }
+    
+    // Para outros países: formato genérico
+    // EUA/Canadá: +1 XXX XXX-XXXX
+    if (clean.startsWith('1') && clean.length === 11) {
+      const area = clean.substring(1, 4)
+      const part1 = clean.substring(4, 7)
+      const part2 = clean.substring(7)
+      return `+1 ${area} ${part1}-${part2}`
+    }
+    
+    // Outros países: tentar formatar com código do país
+    // Assumir que primeiros 2 dígitos são código do país
+    if (clean.length >= 12 && clean.length <= 15) {
+      const countryCode = clean.substring(0, 2)
+      const rest = clean.substring(2)
+      
+      // Se resto tem 10 dígitos (formato brasileiro), formatar
+      if (rest.length === 10) {
+        const ddd = rest.substring(0, 2)
+        const part1 = rest.substring(2, 7)
+        const part2 = rest.substring(7)
+        return `+${countryCode} ${ddd} ${part1}-${part2}`
+      }
+      
+      // Se resto tem 9 dígitos, formatar sem DDD
+      if (rest.length === 9) {
+        const part1 = rest.substring(0, 5)
+        const part2 = rest.substring(5)
+        return `+${countryCode} ${part1}-${part2}`
+      }
+    }
+    
+    // Se não conseguir formatar, retornar limpo
+    return `+${clean}`
   }
 
   const formatTime = (dateString: string) => {
@@ -282,7 +417,19 @@ function WhatsAppChatContent() {
   const getDisplayName = (conv: Conversation) => {
     const ctx = (conv.context || {}) as any
     const override = typeof ctx.display_name === 'string' ? ctx.display_name.trim() : ''
-    return override || conv.name || formatPhone(conv.phone)
+    
+    // Se tem override e não é "Ylada Nutri" (nome padrão), usar
+    if (override && override.toLowerCase() !== 'ylada nutri' && override.toLowerCase() !== 'ylada') {
+      return override
+    }
+    
+    // Se tem nome real e não é "Ylada Nutri", usar
+    if (conv.name && conv.name.trim() && conv.name.toLowerCase() !== 'ylada nutri' && conv.name.toLowerCase() !== 'ylada') {
+      return conv.name.trim()
+    }
+    
+    // Senão, usar telefone formatado (como WhatsApp Web faz)
+    return formatPhone(conv.phone)
   }
 
   const getAvatarUrl = (conv: Conversation) => {
@@ -538,7 +685,11 @@ function WhatsAppChatContent() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-2">
                       <div className="min-w-0 flex items-center gap-2">
-                        <h3 className="font-semibold text-gray-900 truncate">{displayName}</h3>
+                        <h3 className="font-semibold text-gray-900 truncate">
+                          {conv.name && conv.name.trim() && conv.name.toLowerCase() !== 'ylada nutri' 
+                            ? conv.name 
+                            : formatPhone(conv.phone)}
+                        </h3>
                         {pinned && <span className="text-xs text-gray-400">📌</span>}
                         {fav && <span className="text-xs text-yellow-500">★</span>}
                       </div>
@@ -546,10 +697,19 @@ function WhatsAppChatContent() {
                         {timeSource ? formatTime(timeSource) : ''}
                       </div>
                     </div>
+                    {/* Mostrar preview ou telefone formatado */}
                     <div className="flex items-center justify-between gap-2 mt-0.5">
-                      <p className="text-sm text-gray-600 truncate">
-                        {preview || formatPhone(conv.phone)}
-                      </p>
+                      <div className="min-w-0 flex-1">
+                        {preview ? (
+                          <p className="text-sm text-gray-600 truncate">{preview}</p>
+                        ) : (
+                          <p className="text-sm text-gray-500 truncate">
+                            {conv.name && conv.name.trim() && conv.name.toLowerCase() !== 'ylada nutri'
+                              ? formatPhone(conv.phone)
+                              : 'Sem mensagens'}
+                          </p>
+                        )}
+                      </div>
                       {conv.unread_count > 0 && (
                         <span className="bg-green-500 text-white text-xs rounded-full px-2 py-0.5 shrink-0">
                           {conv.unread_count}

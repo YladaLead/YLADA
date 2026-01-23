@@ -27,21 +27,22 @@ export async function sendWorkshopInviteToFormLead(
   userId: string
 ): Promise<{ success: boolean; error?: string; messageId?: string }> {
   try {
-    // 1. Buscar próxima sessão ativa
-    const { data: session } = await supabaseAdmin
+    // 1. Buscar as duas próximas sessões ativas
+    const { data: sessions } = await supabaseAdmin
       .from('whatsapp_workshop_sessions')
       .select('*')
       .eq('area', area)
       .eq('is_active', true)
       .gte('starts_at', new Date().toISOString())
       .order('starts_at', { ascending: true })
-      .limit(1)
-      .maybeSingle()
+      .limit(2)
 
-    if (!session) {
+    if (!sessions || sessions.length === 0) {
       console.log('[Form Automation] ⚠️ Nenhuma sessão ativa encontrada para área:', area)
       return { success: false, error: 'Nenhuma sessão ativa encontrada' }
     }
+
+    const session = sessions[0] // Primeira sessão (para contexto)
 
     // 2. Buscar configurações (flyer, etc)
     const { data: settings } = await supabaseAdmin
@@ -66,43 +67,28 @@ export async function sendWorkshopInviteToFormLead(
 
     const client = createZApiClient(instance.instance_id, instance.token)
 
-    // 4. Formatar mensagem
-    const { weekday, date, time } = formatSessionPtBR(session.starts_at)
-    const greeting = leadName ? `Olá ${leadName}! 👋\n\n` : 'Olá! 👋\n\n'
-    const messageText = `${greeting}Obrigada por preencher o formulário! 
+    // 4. Formatar mensagem de recepção com as duas próximas opções
+    const greeting = leadName ? `Olá ${leadName}, seja bem-vindo! 👋\n\n` : 'Olá, seja bem-vindo! 👋\n\n'
+    
+    // Formatar as duas próximas opções
+    let optionsText = ''
+    sessions.forEach((sess, index) => {
+      const { weekday, date, time } = formatSessionPtBR(sess.starts_at)
+      optionsText += `\n📅 **Opção ${index + 1}:**\n${weekday}, ${date}\n🕒 ${time} (Brasília)\n🔗 ${sess.zoom_link}\n`
+    })
 
-🗓️ ${session.title}
+    const receptionMessage = `${greeting}Obrigada por fazer sua inscrição na Aula Prática ao Vivo de Como Encher a Agenda! 🎉
 
-📅 ${weekday}, ${date}
-🕒 ${time} (Brasília)
-🔗 ${session.zoom_link}
+Aqui estão as duas próximas opções de aula:
 
-✅ Se precisar reagendar, responda REAGENDAR.`
+${optionsText}✅ Se precisar reagendar, responda REAGENDAR.
 
-    // 5. Enviar flyer (se configurado)
-    if (settings?.flyer_url) {
-      const caption = settings.flyer_caption?.trim()
-        ? settings.flyer_caption
-        : `${session.title}\n${weekday}, ${date} • ${time}`
+Qualquer dúvida, é só me chamar! 💚`
 
-      const flyerResult = await client.sendImageMessage({
-        phone,
-        image: settings.flyer_url,
-        caption,
-      })
-
-      if (!flyerResult.success) {
-        console.error('[Form Automation] ❌ Erro ao enviar flyer:', flyerResult.error)
-        // Continuar mesmo se flyer falhar
-      } else {
-        console.log('[Form Automation] ✅ Flyer enviado com sucesso')
-      }
-    }
-
-    // 6. Enviar mensagem de texto
+    // 5. Enviar mensagem de recepção com opções
     const result = await client.sendTextMessage({
       phone,
-      message: messageText,
+      message: receptionMessage,
     })
 
     if (!result.success) {
@@ -175,8 +161,8 @@ export async function sendWorkshopInviteToFormLead(
         instance_id: instance.id,
         z_api_message_id: result.id || null,
         sender_type: 'bot',
-        sender_name: 'Automação',
-        message: messageText,
+        sender_name: 'Carol - Secretária',
+        message: receptionMessage,
         message_type: 'text',
         status: 'sent',
         is_bot_response: true,

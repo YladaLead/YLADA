@@ -124,6 +124,24 @@ function AdminDashboardContent() {
       destaque: true
     },
     {
+      id: 'whatsapp-carol',
+      title: 'Carol - IA de Atendimento',
+      description: 'Automação e disparos automáticos',
+      icon: '🤖',
+      link: '/admin/whatsapp/carol',
+      color: 'bg-purple-600',
+      destaque: true
+    },
+    {
+      id: 'whatsapp-agendadas',
+      title: 'Agendadas para Aula',
+      description: 'Filtrar por data, hora e sessão',
+      icon: '📅',
+      link: '/admin/whatsapp/agendadas',
+      color: 'bg-blue-600',
+      destaque: true
+    },
+    {
       id: 'usuarios',
       title: 'Usuários',
       description: 'Gerenciar nutricionistas, coaches, nutras e wellness',

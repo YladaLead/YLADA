@@ -546,7 +546,9 @@ export async function POST(request: NextRequest) {
     
     // Verificar se é mensagem enviada por nós mesmos
     // Z-API pode enviar de várias formas quando mensagem é enviada pelo telefone
+    // IMPORTANTE: Se o evento é "Ao enviar", SEMPRE é mensagem nossa
     const isFromUs = 
+      // Campos diretos de "fromMe"
       rawBody.fromMe === true || 
       rawBody.from_api === true || 
       rawBody.fromApi === true ||
@@ -558,9 +560,11 @@ export async function POST(request: NextRequest) {
       eventType === 'sent' ||
       eventType === 'enviado' ||
       eventType === 'message_sent' ||
+      eventType === 'send' ||
       rawBody.event === 'sent' ||
       rawBody.event === 'enviado' ||
       rawBody.event === 'message_sent' ||
+      rawBody.event === 'send' ||
       // Se o phone é o número da instância (mensagem enviada)
       (rawBody.phone && rawBody.phone === process.env.Z_API_PHONE_NUMBER) ||
       // Verificar se é mensagem de status (enviada)
@@ -570,7 +574,12 @@ export async function POST(request: NextRequest) {
       rawBody.isSent === true ||
       rawBody.is_sent === true ||
       // Verificar se o remetente é o próprio número conectado
-      (rawBody.from && rawBody.from === process.env.Z_API_PHONE_NUMBER)
+      (rawBody.from && rawBody.from === process.env.Z_API_PHONE_NUMBER) ||
+      // Verificar se é webhook "Ao enviar" (sempre mensagem nossa)
+      rawBody.type === 'send' ||
+      rawBody.type === 'sent' ||
+      // Verificar se tem campo "to" (mensagem enviada tem "to", recebida tem "from")
+      (rawBody.to && !rawBody.from)
     
     console.log('[Z-API Webhook] 🔍 Detecção de mensagem enviada:', {
       isFromUs,
@@ -609,20 +618,129 @@ export async function POST(request: NextRequest) {
       return null
     }
     
-    // Extrair phone (Z-API envia como 'phone')
-    let phone = body.phone || body.from || body.sender || null
+    // Extrair phone - LÓGICA CORRIGIDA:
+    // Se mensagem RECEBIDA: telefone do cliente está em 'from' ou 'phone'
+    // Se mensagem ENVIADA: telefone do cliente está em 'to' ou 'phone'
+    let phone: string | null = null
+    
+    if (isFromUs) {
+      // Mensagem ENVIADA por nós - telefone do cliente está em 'to'
+      phone = body.to || body.phone || body.number || null
+      console.log('[Z-API Webhook] 📤 Mensagem ENVIADA - Buscando telefone do DESTINATÁRIO:', {
+        to: body.to,
+        phone: body.phone,
+        number: body.number,
+        selected: phone
+      })
+    } else {
+      // Mensagem RECEBIDA do cliente - telefone do cliente está em 'from' ou 'phone'
+      phone = body.from || body.phone || body.sender || body.number || null
+      console.log('[Z-API Webhook] 📥 Mensagem RECEBIDA - Buscando telefone do REMETENTE:', {
+        from: body.from,
+        phone: body.phone,
+        sender: body.sender,
+        number: body.number,
+        selected: phone
+      })
+    }
+    
+    // Log completo de todos os campos para análise
+    console.log('[Z-API Webhook] 📱 TODOS os campos do payload relacionados a telefone:', {
+      phone: body.phone,
+      from: body.from,
+      to: body.to,
+      sender: body.sender,
+      number: body.number,
+      remoteJid: body.remoteJid,
+      chatId: body.chatId,
+      isFromUs,
+      selected: phone
+    })
+    
+    // Se phone contém @ (ID do WhatsApp), extrair apenas o número
+    // Formato: 5519997230912@c.us ou 5519997230912@s.whatsapp.net
+    if (phone && typeof phone === 'string' && phone.includes('@')) {
+      const originalPhone = phone
+      const beforeAt = phone.split('@')[0]
+      phone = beforeAt
+      console.log('[Z-API Webhook] 🔍 Extraído número de ID do WhatsApp:', { 
+        original: originalPhone, 
+        extracted: beforeAt 
+      })
+    }
+    
+    // IMPORTANTE: NUNCA usar remoteJid ou chatId - são IDs do WhatsApp, não números reais
+    // Se phone ainda é null ou parece ser ID inválido, tentar outros campos válidos
+    if (!phone || (phone.length > 20 && phone.includes('@'))) {
+      // Se ainda não tem telefone válido, tentar extrair de outros campos
+      const alternativeFields = [
+        body.contact?.phone,
+        body.contact?.number,
+        body.participant, // Para grupos
+      ]
+      
+      for (const field of alternativeFields) {
+        if (field && typeof field === 'string') {
+          const clean = field.replace(/\D/g, '')
+          if (clean.length >= 10 && clean.length <= 15) {
+            phone = field
+            console.log('[Z-API Webhook] ✅ Telefone encontrado em campo alternativo:', {
+              field: field,
+              clean: clean
+            })
+            break
+          }
+        }
+      }
+    }
     
     // Garantir formato internacional (só adicionar 55 se for brasileiro)
     if (phone) {
-      // Limpar número (remover caracteres não numéricos)
-      let cleanPhone = phone.replace(/\D/g, '')
+      // Converter para string e limpar
+      let cleanPhone = String(phone).replace(/\D/g, '')
+      
+      // VALIDAÇÃO CRÍTICA: Rejeitar números muito longos (provavelmente são IDs, não telefones)
+      // Telefones válidos têm 10-15 dígitos. Números com mais de 15 dígitos são IDs do WhatsApp
+      if (cleanPhone.length > 15) {
+        console.error('[Z-API Webhook] ❌ Número rejeitado: muito longo (provavelmente é ID do WhatsApp):', {
+          original: phone,
+          clean: cleanPhone,
+          length: cleanPhone.length,
+          warning: 'Este não é um número de telefone válido. Rejeitando para evitar salvar IDs incorretos.'
+        })
+        return NextResponse.json(
+          { error: 'Número de telefone inválido (muito longo, provavelmente é ID do WhatsApp)' },
+          { status: 400 }
+        )
+      }
+      
+      // Validar se é um telefone válido (10-15 dígitos)
+      if (cleanPhone.length < 10 || cleanPhone.length > 15) {
+        console.warn('[Z-API Webhook] ⚠️ Número inválido (comprimento incorreto):', {
+          original: phone,
+          clean: cleanPhone,
+          length: cleanPhone.length
+        })
+        // Tentar extrair número válido do original
+        const match = String(phone).match(/(\d{10,15})/)
+        if (match && match[1]) {
+          cleanPhone = match[1]
+          console.log('[Z-API Webhook] ✅ Número extraído:', cleanPhone)
+        } else {
+          console.error('[Z-API Webhook] ❌ Não foi possível extrair telefone válido de:', phone)
+          return NextResponse.json(
+            { error: 'Número de telefone inválido: não foi possível extrair um número válido (10-15 dígitos)' },
+            { status: 400 }
+          )
+        }
+      }
       
       // Verificar se já tem código de país conhecido
       const countryCodes = ['1', '55', '52', '54', '56', '57', '58', '591', '592', '593', '594', '595', '596', '597', '598', '599']
       const hasCountryCode = countryCodes.some(code => cleanPhone.startsWith(code))
       
-      // Se não tem código de país, assumir que é brasileiro e adicionar 55
-      if (!hasCountryCode) {
+      // Se não tem código de país e tem 10-11 dígitos, assumir que é brasileiro
+      if (!hasCountryCode && cleanPhone.length >= 10 && cleanPhone.length <= 11) {
         // Se começar com 0, remover o 0 antes de adicionar 55
         if (cleanPhone.startsWith('0')) {
           cleanPhone = cleanPhone.substring(1)
@@ -630,15 +748,49 @@ export async function POST(request: NextRequest) {
         cleanPhone = `55${cleanPhone}`
       }
       
+      // Validar novamente após normalização
+      if (cleanPhone.length < 10 || cleanPhone.length > 15) {
+        console.error('[Z-API Webhook] ❌ Número ainda inválido após normalização:', {
+          cleanPhone,
+          length: cleanPhone.length,
+          original: phone
+        })
+        return NextResponse.json(
+          { error: 'Número de telefone inválido após normalização', received: phone, clean: cleanPhone },
+          { status: 400 }
+        )
+      }
+      
       phone = cleanPhone
-      console.log('[Z-API Webhook] 📱 Número formatado:', {
+      console.log('[Z-API Webhook] 📱 Número final formatado:', {
         original: body.phone || body.from || body.sender,
         formatted: phone,
         hasCountryCode,
-        countryCode: hasCountryCode ? cleanPhone.substring(0, 3) : '55 (assumido BR)'
+        length: cleanPhone.length
       })
     }
     
+    // IMPORTANTE: Ignorar mensagens do número de notificação ANTES de processar
+    // Este número é apenas para receber avisos, não deve criar conversas
+    const notificationPhone = process.env.Z_API_NOTIFICATION_PHONE
+    if (notificationPhone) {
+      const notificationPhoneClean = notificationPhone.replace(/\D/g, '')
+      const phoneClean = phone.replace(/\D/g, '')
+      
+      if (phoneClean === notificationPhoneClean) {
+        console.log('[Z-API Webhook] ⚠️ Mensagem do número de notificação ignorada (não cria conversa):', {
+          phone: phoneClean,
+          notificationPhone: notificationPhoneClean,
+          messagePreview: (rawBody.text?.message || rawBody.message || '').substring(0, 50)
+        })
+        // Retornar sucesso mas não processar
+        return NextResponse.json({ 
+          success: true, 
+          message: 'Mensagem do número de notificação ignorada' 
+        })
+      }
+    }
+
     // Extrair message - Z-API pode enviar em múltiplos formatos (e às vezes envia eventos sem mensagem)
     const message = pickFirstNonEmptyString(
       // Formato Z-API comum
@@ -847,13 +999,11 @@ export async function POST(request: NextRequest) {
       // Não retornar erro para Z-API, apenas logar
     }
 
-    // 4. Processar automações (respostas automáticas, etc.)
+    // 4. Processar automações com Carol (IA de atendimento)
     // IMPORTANTE: Só processar automações se NÃO for mensagem enviada por nós
     // (para evitar loops e respostas automáticas para nossas próprias mensagens)
     if (!finalIsFromUs) {
       try {
-        const { processAutomations } = await import('@/lib/whatsapp-automation')
-        
         // Verificar se é primeira mensagem da conversa
         const { data: existingMessages } = await supabase
           .from('whatsapp_messages')
@@ -863,28 +1013,70 @@ export async function POST(request: NextRequest) {
           .limit(1)
         
         const isFirstMessage = !existingMessages || existingMessages.length === 0
+
+        // Processar com Carol (IA de atendimento)
+        // IMPORTANTE: Não processar se mensagem veio do número de notificação
+        const notificationPhone = process.env.Z_API_NOTIFICATION_PHONE
+        const shouldProcessCarol = !notificationPhone || phone.replace(/\D/g, '') !== notificationPhone.replace(/\D/g, '')
         
-        const automationResult = await processAutomations(
-          conversationId,
-          phone,
-          message,
-          area,
-          finalInstanceId,
-          isFirstMessage
-        )
-        
-        if (automationResult.messagesSent > 0) {
-          console.log('[Z-API Webhook] 🤖 Automações processadas:', {
-            messagesSent: automationResult.messagesSent,
-            rulesExecuted: automationResult.rulesExecuted
-          })
+        if (shouldProcessCarol) {
+          console.log('[Z-API Webhook] 🤖 Iniciando processamento com Carol...')
+          
+          const { processIncomingMessageWithCarol } = await import('@/lib/whatsapp-carol-ai')
+          
+          const carolResult = await processIncomingMessageWithCarol(
+            conversationId,
+            phone,
+            message,
+            area,
+            finalInstanceId
+          )
+
+          if (carolResult.success) {
+            console.log('[Z-API Webhook] ✅ Carol respondeu automaticamente:', {
+              responsePreview: carolResult.response?.substring(0, 100)
+            })
+          } else {
+            console.error('[Z-API Webhook] ❌ Carol não conseguiu responder:', {
+              error: carolResult.error,
+              conversationId,
+              phone,
+              messagePreview: message?.substring(0, 50),
+              hasOpenAIKey: !!process.env.OPENAI_API_KEY
+            })
+          }
+        } else {
+          console.log('[Z-API Webhook] ⏭️ Pulando Carol (mensagem do número de notificação)')
         }
-      } catch (automationError: any) {
-        console.error('[Z-API Webhook] ❌ Erro ao processar automações:', {
-          error: automationError.message,
-          stack: automationError.stack
+
+        // Também processar automações antigas (se houver regras configuradas)
+        try {
+          const { processAutomations } = await import('@/lib/whatsapp-automation')
+          const automationResult = await processAutomations(
+            conversationId,
+            phone,
+            message,
+            area,
+            finalInstanceId,
+            isFirstMessage
+          )
+          
+          if (automationResult.messagesSent > 0) {
+            console.log('[Z-API Webhook] 🤖 Automações processadas:', {
+              messagesSent: automationResult.messagesSent,
+              rulesExecuted: automationResult.rulesExecuted
+            })
+          }
+        } catch (automationError: any) {
+          // Ignorar erros de automações antigas
+          console.warn('[Z-API Webhook] ⚠️ Erro em automações antigas:', automationError.message)
+        }
+      } catch (carolError: any) {
+        console.error('[Z-API Webhook] ❌ Erro ao processar com Carol:', {
+          error: carolError.message,
+          stack: carolError.stack
         })
-        // Não falhar o webhook se automação falhar
+        // Não falhar o webhook se Carol falhar
       }
     } else {
       console.log('[Z-API Webhook] ⏭️ Pulando automações (mensagem enviada por nós)')
