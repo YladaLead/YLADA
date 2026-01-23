@@ -231,18 +231,26 @@ export async function GET(request: NextRequest) {
 
       conversationsWithPreview = conversationsWithPreview.map((conv: any) => {
         const last = lastByConversation.get(conv.id)
-        const preview =
-          last?.message_type && last.message_type !== 'text'
-            ? last.message_type === 'image'
-              ? '📷 Foto'
-              : last.message_type === 'video'
-                ? '🎥 Vídeo'
-                : last.message_type === 'audio'
-                  ? '🎤 Áudio'
-                  : last.message_type === 'document'
-                    ? '📎 Documento'
-                    : '📎 Mídia'
-            : (last?.message || '')
+        
+        // Preview: mostrar texto se disponível, senão mostrar tipo de mídia
+        let preview = ''
+        if (last) {
+          if (last.message_type === 'text' || !last.message_type) {
+            // Mensagem de texto: mostrar o texto
+            preview = last.message || ''
+          } else if (last.message && last.message.trim()) {
+            // Mídia com legenda: mostrar legenda
+            preview = last.message
+          } else {
+            // Mídia sem legenda: mostrar tipo
+            preview = 
+              last.message_type === 'image' ? '📷 Foto' :
+              last.message_type === 'video' ? '🎥 Vídeo' :
+              last.message_type === 'audio' ? '🎤 Áudio' :
+              last.message_type === 'document' ? '📎 Documento' :
+              '📎 Mídia'
+          }
+        }
 
         return {
           ...conv,

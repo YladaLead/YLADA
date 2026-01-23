@@ -221,6 +221,33 @@ export async function POST(
 
     if (msgError) {
       console.error('[WhatsApp Messages] Erro ao salvar:', msgError)
+    } else {
+      // Atualizar last_message_at e last_message_from da conversa
+      const now = new Date().toISOString()
+      await supabaseAdmin
+        .from('whatsapp_conversations')
+        .update({
+          last_message_at: now,
+          last_message_from: 'agent',
+          updated_at: now,
+        })
+        .eq('id', conversationId)
+      
+      // Incrementar total_messages
+      const { data: conv } = await supabaseAdmin
+        .from('whatsapp_conversations')
+        .select('total_messages')
+        .eq('id', conversationId)
+        .single()
+      
+      if (conv) {
+        await supabaseAdmin
+          .from('whatsapp_conversations')
+          .update({ total_messages: (conv.total_messages || 0) + 1 })
+          .eq('id', conversationId)
+      }
+      
+      console.log('[WhatsApp Messages] ✅ Mensagem salva e conversa atualizada')
     }
 
     // Enviar notificação para número configurado (quando admin envia mensagem)

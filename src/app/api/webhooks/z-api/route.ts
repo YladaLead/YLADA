@@ -294,10 +294,67 @@ async function saveMessage(
     throw error
   }
   
-  console.log('[Z-API Webhook] ✅ Mensagem salva:', {
+  // Atualizar last_message_at e last_message_from da conversa
+  const now = new Date().toISOString()
+  await supabase
+    .from('whatsapp_conversations')
+    .update({
+      last_message_at: now,
+      last_message_from: senderType === 'agent' ? 'agent' : 'customer',
+      updated_at: now,
+    })
+    .eq('id', conversationId)
+  
+  // Atualizar contadores
+  if (senderType === 'customer') {
+    // Incrementar unread_count se for mensagem do cliente
+    await supabase.rpc('increment', {
+      table_name: 'whatsapp_conversations',
+      column_name: 'unread_count',
+      row_id: conversationId,
+    }).catch(() => {
+      // Se RPC não existir, fazer update manual
+      const { data: conv } = await supabase
+        .from('whatsapp_conversations')
+        .select('unread_count')
+        .eq('id', conversationId)
+        .single()
+      
+      if (conv) {
+        await supabase
+          .from('whatsapp_conversations')
+          .update({ unread_count: (conv.unread_count || 0) + 1 })
+          .eq('id', conversationId)
+      }
+    })
+  }
+  
+  // Incrementar total_messages
+  await supabase.rpc('increment', {
+    table_name: 'whatsapp_conversations',
+    column_name: 'total_messages',
+    row_id: conversationId,
+  }).catch(() => {
+    // Se RPC não existir, fazer update manual
+    const { data: conv } = await supabase
+      .from('whatsapp_conversations')
+      .select('total_messages')
+      .eq('id', conversationId)
+      .single()
+    
+    if (conv) {
+      await supabase
+        .from('whatsapp_conversations')
+        .update({ total_messages: (conv.total_messages || 0) + 1 })
+        .eq('id', conversationId)
+    }
+  })
+  
+  console.log('[Z-API Webhook] ✅ Mensagem salva e conversa atualizada:', {
     type: senderType,
     status,
-    isFromUs
+    isFromUs,
+    conversationId
   })
 }
 
@@ -592,6 +649,7 @@ export async function POST(request: NextRequest) {
       event: rawBody.event,
       phone: rawBody.phone,
       from: rawBody.from,
+      to: rawBody.to,
       status: rawBody.status,
       isSent: rawBody.isSent,
       is_sent: rawBody.is_sent,
