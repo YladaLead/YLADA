@@ -151,16 +151,30 @@ INSTRUÇÕES:
       content: msg.content,
     }))
 
+    // Importar função de geração
+    const { generateCarolResponse } = await import('@/lib/whatsapp-carol-ai')
+
+    // Preparar histórico de conversa (apenas user/assistant)
+    const historyForCarol = (history || []).map((msg: any) => ({
+      role: msg.role === 'user' ? 'user' as const : 'assistant' as const,
+      content: msg.content,
+    }))
+
     // Gerar resposta da Carol
+    // O contexto do sistema será incluído automaticamente pela função generateCarolResponse
+    // Mas vamos adicionar informações específicas no contexto
     const response = await generateCarolResponse(
       message,
-      history,
+      historyForCarol,
       {
         tags: [],
         leadName: 'Administrador',
-        isFirstMessage: history.length === 0,
+        isFirstMessage: historyForCarol.length === 0,
       }
     )
+    
+    // Adicionar dados do sistema à resposta se a pergunta for sobre status
+    let finalResponse = response
 
     // Adicionar contexto do sistema à resposta se necessário
     let finalResponse = response
