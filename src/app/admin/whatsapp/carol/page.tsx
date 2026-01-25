@@ -11,6 +11,8 @@ function CarolControlContent() {
   const [testResult, setTestResult] = useState<any>(null)
   const [testConversationId, setTestConversationId] = useState('')
   const [testMessage, setTestMessage] = useState('Olá, quero agendar uma aula')
+  const [analysisData, setAnalysisData] = useState<any>(null)
+  const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({})
 
   const handleDisparo = async (tipo: 'welcome' | 'remarketing' | 'reminders') => {
     setLoading(true)
@@ -272,32 +274,7 @@ function CarolControlContent() {
                 })
                 const data = await response.json()
                 if (data.total !== undefined) {
-                  const resumo = data.resumo
-                  const detalhes = data.detalhes || []
-                  
-                  let mensagem = `📊 ANÁLISE DAS CONVERSAS\n\n`
-                  mensagem += `Total: ${resumo.total} conversas\n\n`
-                  mensagem += `📋 RESUMO:\n`
-                  mensagem += `• Sem tags: ${resumo.sem_tags}\n`
-                  mensagem += `• Sem mensagem da Carol: ${resumo.sem_mensagem_carol}\n`
-                  mensagem += `• Participou da aula: ${resumo.participou_aula}\n`
-                  mensagem += `• Não participou: ${resumo.nao_participou_aula}\n`
-                  mensagem += `• Agendou aula: ${resumo.agendou_aula}\n`
-                  mensagem += `• Veio mas não agendou: ${resumo.nao_agendou}\n`
-                  mensagem += `• Carol ativa: ${resumo.carol_ativa}\n\n`
-                  
-                  // Agrupar por ação necessária
-                  const porAcao: Record<string, number> = {}
-                  detalhes.forEach((d: any) => {
-                    porAcao[d.precisa_acao] = (porAcao[d.precisa_acao] || 0) + 1
-                  })
-                  
-                  mensagem += `🎯 AÇÕES NECESSÁRIAS:\n`
-                  Object.entries(porAcao).forEach(([acao, count]) => {
-                    mensagem += `• ${acao}: ${count}\n`
-                  })
-                  
-                  alert(mensagem)
+                  setAnalysisData(data)
                 } else {
                   alert(`Erro: ${data.error || 'Erro desconhecido'}`)
                 }
@@ -312,6 +289,110 @@ function CarolControlContent() {
           >
             {loading ? 'Analisando...' : '📊 Analisar Conversas'}
           </button>
+          
+          {analysisData && (() => {
+            const resumo = analysisData.resumo
+            const detalhes = analysisData.detalhes || []
+            
+            // Agrupar por ação necessária (exceto "Enviar primeira mensagem")
+            const porAcao: Record<string, Array<{phone: string, name: string, tags: string[]}>> = {}
+            detalhes.forEach((d: any) => {
+              if (d.precisa_acao !== 'Enviar primeira mensagem') {
+                if (!porAcao[d.precisa_acao]) {
+                  porAcao[d.precisa_acao] = []
+                }
+                porAcao[d.precisa_acao].push({
+                  phone: d.phone,
+                  name: d.name,
+                  tags: d.tags || []
+                })
+              }
+            })
+            
+            const formatPhone = (phone: string) => {
+              if (phone.length === 13 && phone.startsWith('55')) {
+                const ddd = phone.substring(2, 4)
+                const part1 = phone.substring(4, 9)
+                const part2 = phone.substring(9)
+                return `(${ddd}) ${part1}-${part2}`
+              }
+              return phone
+            }
+            
+            return (
+              <div className="mt-6 space-y-4">
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <h3 className="font-semibold text-blue-900 mb-2">📊 Resumo</h3>
+                  <div className="text-sm text-blue-800 space-y-1">
+                    <p><strong>Total:</strong> {resumo.total} conversas</p>
+                    <p><strong>Sem tags:</strong> {resumo.sem_tags}</p>
+                    <p><strong>Sem mensagem da Carol:</strong> {resumo.sem_mensagem_carol}</p>
+                    <p><strong>Participou da aula:</strong> {resumo.participou_aula}</p>
+                    <p><strong>Não participou:</strong> {resumo.nao_participou_aula}</p>
+                    <p><strong>Agendou aula:</strong> {resumo.agendou_aula}</p>
+                    <p><strong>Veio mas não agendou:</strong> {resumo.nao_agendou}</p>
+                    <p><strong>Carol ativa:</strong> {resumo.carol_ativa}</p>
+                  </div>
+                </div>
+                
+                <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                  <h3 className="font-semibold text-gray-900 mb-4">🎯 Ações Necessárias</h3>
+                  <div className="space-y-3">
+                    {Object.entries(porAcao).map(([acao, pessoas]) => {
+                      const isExpanded = expandedCategories[acao] || false
+                      return (
+                        <div key={acao} className="border border-gray-300 rounded-lg overflow-hidden">
+                          <button
+                            onClick={() => setExpandedCategories({...expandedCategories, [acao]: !isExpanded})}
+                            className="w-full px-4 py-3 bg-white hover:bg-gray-50 flex items-center justify-between text-left"
+                          >
+                            <span className="font-medium text-gray-900">
+                              {acao}: <span className="text-blue-600">{pessoas.length}</span>
+                            </span>
+                            <span className="text-gray-500">
+                              {isExpanded ? '🔽' : '▶️'}
+                            </span>
+                          </button>
+                          {isExpanded && (
+                            <div className="bg-white border-t border-gray-200 p-4">
+                              <div className="space-y-2">
+                                {pessoas.map((pessoa, idx) => (
+                                  <div key={idx} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-0">
+                                    <div className="flex-1">
+                                      <p className="font-medium text-gray-900">{pessoa.name}</p>
+                                      <p className="text-sm text-gray-600">{formatPhone(pessoa.phone)}</p>
+                                      {pessoa.tags.length > 0 && (
+                                        <div className="flex flex-wrap gap-1 mt-1">
+                                          {pessoa.tags.slice(0, 3).map((tag: string, i: number) => (
+                                            <span key={i} className="text-xs px-2 py-0.5 bg-gray-100 text-gray-700 rounded">
+                                              {tag}
+                                            </span>
+                                          ))}
+                                          {pessoa.tags.length > 3 && (
+                                            <span className="text-xs text-gray-500">+{pessoa.tags.length - 3}</span>
+                                          )}
+                                        </div>
+                                      )}
+                                    </div>
+                                    <Link
+                                      href={`/admin/whatsapp?phone=${encodeURIComponent(pessoa.phone)}`}
+                                      className="ml-4 px-3 py-1.5 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                                    >
+                                      Ver →
+                                    </Link>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              </div>
+            )
+          })()}
         </div>
 
         {/* Processar Conversas Existentes */}
