@@ -6,7 +6,7 @@ import Link from 'next/link'
 
 function CarolControlContent() {
   const [loading, setLoading] = useState(false)
-  const [result, setResult] = useState<{ sent: number; errors: number } | null>(null)
+  const [result, setResult] = useState<{ sent: number; errors: number; skipped?: number } | null>(null)
   const [testLoading, setTestLoading] = useState(false)
   const [testResult, setTestResult] = useState<any>(null)
   const [testConversationId, setTestConversationId] = useState('')
