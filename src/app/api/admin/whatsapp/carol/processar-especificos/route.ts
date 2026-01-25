@@ -125,9 +125,9 @@ export async function POST(request: NextRequest) {
           )
         } else {
           // Mensagem de remarketing para quem não participou
-          // Primeiro pergunta se ainda tem interesse, SEM enviar datas ainda
+          // Primeiro pergunta se ainda tem interesse, focando na DOR (encher agenda), SEM enviar datas ainda
           messageToSend = await generateCarolResponse(
-            'Você ainda tem interesse em participar de uma aula? Quer saber mais sobre o programa?',
+            'Você ainda tem interesse em aprender como encher sua agenda? Quer saber como ter mais clientes?',
             conversationHistory,
             {
               tags: [...tags, 'nao_participou_aula'],
@@ -138,13 +138,13 @@ export async function POST(request: NextRequest) {
             }
           )
           
-          // Se a mensagem não menciona interesse ou pergunta, adicionar contexto
+          // Se a mensagem não menciona interesse ou pergunta, adicionar contexto focado na dor
           if (!messageToSend.toLowerCase().includes('interesse') && !messageToSend.toLowerCase().includes('?')) {
             messageToSend = `Olá ${conversation.name || 'querido(a)'}! 👋
 
 Vi que você não conseguiu participar da aula anterior. Tudo bem, acontece! 😊
 
-Você ainda tem interesse em participar de uma aula? Você realmente quer saber mais sobre o programa?
+Você ainda tem interesse em aprender como encher sua agenda? Você realmente quer saber como ter mais clientes?
 
 Se sim, me avise que eu passo as datas das próximas aulas disponíveis! 💚
 
