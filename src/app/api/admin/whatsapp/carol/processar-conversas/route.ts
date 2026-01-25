@@ -141,6 +141,15 @@ export async function POST(request: NextRequest) {
 
         if (naoParticipou && !participated) {
           // Remarketing: agendou mas não participou
+          // MAS não enviar se já fechou ou foi direcionado
+          const jaFechou = tags.includes('cliente_nutri')
+          const jaDirecionado = context.redirected_to_support === true
+          
+          if (jaFechou || jaDirecionado) {
+            details.push(`⏭️ ${conversation.phone}: Já fechou/direcionado - não enviar remarketing`)
+            continue
+          }
+          
           messageToSend = await generateCarolResponse(
             'Quero reagendar',
             conversationHistory,
