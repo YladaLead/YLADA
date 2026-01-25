@@ -32,6 +32,9 @@ function CadastrosWorkshopContent() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [filter, setFilter] = useState<'all' | 'no_conversation' | 'no_tags'>('all')
   const [searchTerm, setSearchTerm] = useState('')
+  const [tagsModalOpen, setTagsModalOpen] = useState(false)
+  const [selectedTags, setSelectedTags] = useState<string[]>([])
+  const [newTagInput, setNewTagInput] = useState('')
 
   useEffect(() => {
     loadRegistrations()
@@ -134,18 +137,63 @@ function CadastrosWorkshopContent() {
     }
   }
 
-  const handleAddTagsToSelected = async () => {
+  const getTagInfo = (tag: string): { label: string; color: string; icon: string } => {
+    const tagMap: Record<string, { label: string; color: string; icon: string }> = {
+      // Fase 1: Captação
+      'veio_aula_pratica': { label: 'Aula Prática', color: 'bg-blue-100 text-blue-700', icon: '📝' },
+      'primeiro_contato': { label: '1º Contato', color: 'bg-blue-50 text-blue-600', icon: '👋' },
+      'cliente_iniciou': { label: 'Cliente Iniciou', color: 'bg-blue-100 text-blue-700', icon: '👤' },
+      'agente_iniciou': { label: 'Agente Iniciou', color: 'bg-blue-50 text-blue-600', icon: '👨‍💼' },
+      'carol_ativa': { label: 'Carol Ativa', color: 'bg-purple-100 text-purple-700', icon: '🤖' },
+      'aguardando_resposta': { label: 'Aguardando Resposta', color: 'bg-yellow-100 text-yellow-700', icon: '⏳' },
+      
+      // Fase 2: Convite
+      'recebeu_link_workshop': { label: 'Link Workshop', color: 'bg-purple-100 text-purple-700', icon: '📅' },
+      'recebeu_segundo_link': { label: '2º Link', color: 'bg-purple-200 text-purple-800', icon: '📅📅' },
+      
+      // Fase 3: Participação
+      'participou_aula': { label: 'Participou', color: 'bg-green-100 text-green-700', icon: '✅' },
+      'nao_participou_aula': { label: 'Não Participou', color: 'bg-red-100 text-red-700', icon: '❌' },
+      'adiou_aula': { label: 'Adiou', color: 'bg-yellow-100 text-yellow-700', icon: '⏸️' },
+      
+      // Fase 4: Remarketing
+      'interessado': { label: 'Interessado', color: 'bg-purple-50 text-purple-600', icon: '💡' },
+      'duvidas': { label: 'Dúvidas', color: 'bg-indigo-100 text-indigo-700', icon: '❓' },
+      'analisando': { label: 'Analisando', color: 'bg-yellow-50 text-yellow-600', icon: '🤔' },
+      'objeções': { label: 'Objeções', color: 'bg-orange-100 text-orange-700', icon: '🚫' },
+      'negociando': { label: 'Negociando', color: 'bg-orange-50 text-orange-600', icon: '💰' },
+      
+      // Fase 5: Conversão
+      'cliente_nutri': { label: 'Cliente Nutri', color: 'bg-green-200 text-green-800', icon: '🎉' },
+      'perdeu': { label: 'Perdeu', color: 'bg-gray-200 text-gray-700', icon: '😔' },
+      
+      // Extras
+      'retorno': { label: 'Retorno', color: 'bg-cyan-100 text-cyan-700', icon: '🔄' },
+      'urgencia': { label: 'Urgência', color: 'bg-red-200 text-red-800', icon: '⚡' },
+      
+      // Tags antigas (compatibilidade)
+      'form_lead': { label: 'Form', color: 'bg-blue-100 text-blue-700', icon: '📝' },
+      'workshop_invited': { label: 'Workshop', color: 'bg-purple-100 text-purple-700', icon: '📅' },
+    }
+    
+    return tagMap[tag] || { label: tag, color: 'bg-gray-100 text-gray-600', icon: '🏷️' }
+  }
+
+  const handleAddTagsToSelected = () => {
     if (selectedIds.size === 0) {
       alert('Selecione pelo menos um cadastro')
       return
     }
+    setSelectedTags([])
+    setNewTagInput('')
+    setTagsModalOpen(true)
+  }
 
-    const tagsInput = prompt('Digite as tags separadas por vírgula (ex: veio_aula_pratica, primeiro_contato):')
-    if (!tagsInput || !tagsInput.trim()) {
+  const handleSaveTags = async () => {
+    if (selectedTags.length === 0) {
+      alert('Selecione ou crie pelo menos uma tag')
       return
     }
-
-    const tags = tagsInput.split(',').map(t => t.trim()).filter(t => t.length > 0)
 
     setProcessing(true)
     try {
@@ -155,7 +203,7 @@ function CadastrosWorkshopContent() {
         credentials: 'include',
         body: JSON.stringify({
           registrationIds: Array.from(selectedIds),
-          tags
+          tags: selectedTags
         })
       })
 
@@ -164,6 +212,8 @@ function CadastrosWorkshopContent() {
         alert(`✅ Tags adicionadas com sucesso!\n\n- Atualizadas: ${data.updated}`)
         await loadRegistrations()
         setSelectedIds(new Set())
+        setTagsModalOpen(false)
+        setSelectedTags([])
       } else {
         alert(`Erro: ${data.error}`)
       }
@@ -374,6 +424,301 @@ function CadastrosWorkshopContent() {
           </ul>
         </div>
       </div>
+
+      {/* Modal de Tags */}
+      {tagsModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] flex flex-col">
+            {/* Header */}
+            <div className="flex items-center justify-between p-6 border-b border-gray-200">
+              <h2 className="text-xl font-bold text-gray-900">🏷️ Adicionar Tags</h2>
+              <button
+                type="button"
+                onClick={() => setTagsModalOpen(false)}
+                className="text-gray-400 hover:text-gray-600 text-2xl"
+              >
+                ×
+              </button>
+            </div>
+
+            {/* Conteúdo */}
+            <div className="flex-1 overflow-y-auto p-6">
+              <div className="mb-4 text-sm text-gray-600">
+                Adicionando tags para <strong>{selectedIds.size}</strong> cadastro(s) selecionado(s)
+              </div>
+
+              {/* Tags Selecionadas */}
+              {selectedTags.length > 0 && (
+                <div className="mb-6">
+                  <h3 className="text-sm font-semibold text-gray-700 mb-3">Tags Selecionadas:</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedTags.map((tag) => {
+                      const tagInfo = getTagInfo(tag)
+                      return (
+                        <span
+                          key={tag}
+                          className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm ${tagInfo.color} cursor-pointer hover:opacity-80`}
+                          onClick={() => setSelectedTags(selectedTags.filter((t) => t !== tag))}
+                        >
+                          {tagInfo.icon} {tagInfo.label}
+                          <span className="ml-1">×</span>
+                        </span>
+                      )
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* Tags Pré-definidas por Fase */}
+              <div className="space-y-6">
+                {/* FASE 1: CAPTAÇÃO */}
+                <div>
+                  <h3 className="text-sm font-semibold text-blue-700 mb-3">📝 Fase 1: Captação</h3>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                    {[
+                      { tag: 'veio_aula_pratica', label: 'Aula Prática', icon: '📝' },
+                      { tag: 'primeiro_contato', label: '1º Contato', icon: '👋' },
+                    ].map(({ tag, label, icon }) => (
+                      <button
+                        key={tag}
+                        type="button"
+                        onClick={() => {
+                          if (selectedTags.includes(tag)) {
+                            setSelectedTags(selectedTags.filter((t) => t !== tag))
+                          } else {
+                            setSelectedTags([...selectedTags, tag])
+                          }
+                        }}
+                        className={`px-3 py-2 rounded-lg text-sm text-left border-2 transition-all ${
+                          selectedTags.includes(tag)
+                            ? 'bg-blue-100 border-blue-500 text-blue-700'
+                            : 'bg-white border-gray-200 text-gray-700 hover:border-blue-300'
+                        }`}
+                      >
+                        {icon} {label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* FASE 2: CONVITE */}
+                <div>
+                  <h3 className="text-sm font-semibold text-purple-700 mb-3">📅 Fase 2: Convite</h3>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                    {[
+                      { tag: 'recebeu_link_workshop', label: 'Link Workshop', icon: '📅' },
+                      { tag: 'recebeu_segundo_link', label: '2º Link', icon: '📅📅' },
+                    ].map(({ tag, label, icon }) => (
+                      <button
+                        key={tag}
+                        type="button"
+                        onClick={() => {
+                          if (selectedTags.includes(tag)) {
+                            setSelectedTags(selectedTags.filter((t) => t !== tag))
+                          } else {
+                            setSelectedTags([...selectedTags, tag])
+                          }
+                        }}
+                        className={`px-3 py-2 rounded-lg text-sm text-left border-2 transition-all ${
+                          selectedTags.includes(tag)
+                            ? 'bg-purple-100 border-purple-500 text-purple-700'
+                            : 'bg-white border-gray-200 text-gray-700 hover:border-purple-300'
+                        }`}
+                      >
+                        {icon} {label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* FASE 3: PARTICIPAÇÃO */}
+                <div>
+                  <h3 className="text-sm font-semibold text-green-700 mb-3">✅ Fase 3: Participação</h3>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                    {[
+                      { tag: 'participou_aula', label: 'Participou', icon: '✅' },
+                      { tag: 'nao_participou_aula', label: 'Não Participou', icon: '❌' },
+                      { tag: 'adiou_aula', label: 'Adiou', icon: '⏸️' },
+                    ].map(({ tag, label, icon }) => (
+                      <button
+                        key={tag}
+                        type="button"
+                        onClick={() => {
+                          if (selectedTags.includes(tag)) {
+                            setSelectedTags(selectedTags.filter((t) => t !== tag))
+                          } else {
+                            setSelectedTags([...selectedTags, tag])
+                          }
+                        }}
+                        className={`px-3 py-2 rounded-lg text-sm text-left border-2 transition-all ${
+                          selectedTags.includes(tag)
+                            ? 'bg-green-100 border-green-500 text-green-700'
+                            : 'bg-white border-gray-200 text-gray-700 hover:border-green-300'
+                        }`}
+                      >
+                        {icon} {label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* FASE 4: REMARKETING */}
+                <div>
+                  <h3 className="text-sm font-semibold text-orange-700 mb-3">💡 Fase 4: Remarketing</h3>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                    {[
+                      { tag: 'interessado', label: 'Interessado', icon: '💡' },
+                      { tag: 'duvidas', label: 'Dúvidas', icon: '❓' },
+                      { tag: 'analisando', label: 'Analisando', icon: '🤔' },
+                      { tag: 'objeções', label: 'Objeções', icon: '🚫' },
+                      { tag: 'negociando', label: 'Negociando', icon: '💰' },
+                    ].map(({ tag, label, icon }) => (
+                      <button
+                        key={tag}
+                        type="button"
+                        onClick={() => {
+                          if (selectedTags.includes(tag)) {
+                            setSelectedTags(selectedTags.filter((t) => t !== tag))
+                          } else {
+                            setSelectedTags([...selectedTags, tag])
+                          }
+                        }}
+                        className={`px-3 py-2 rounded-lg text-sm text-left border-2 transition-all ${
+                          selectedTags.includes(tag)
+                            ? 'bg-orange-100 border-orange-500 text-orange-700'
+                            : 'bg-white border-gray-200 text-gray-700 hover:border-orange-300'
+                        }`}
+                      >
+                        {icon} {label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* FASE 5: CONVERSÃO */}
+                <div>
+                  <h3 className="text-sm font-semibold text-green-800 mb-3">🎉 Fase 5: Conversão</h3>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                    {[
+                      { tag: 'cliente_nutri', label: 'Cliente Nutri', icon: '🎉' },
+                      { tag: 'perdeu', label: 'Perdeu', icon: '😔' },
+                    ].map(({ tag, label, icon }) => (
+                      <button
+                        key={tag}
+                        type="button"
+                        onClick={() => {
+                          if (selectedTags.includes(tag)) {
+                            setSelectedTags(selectedTags.filter((t) => t !== tag))
+                          } else {
+                            setSelectedTags([...selectedTags, tag])
+                          }
+                        }}
+                        className={`px-3 py-2 rounded-lg text-sm text-left border-2 transition-all ${
+                          selectedTags.includes(tag)
+                            ? 'bg-green-200 border-green-600 text-green-800'
+                            : 'bg-white border-gray-200 text-gray-700 hover:border-green-400'
+                        }`}
+                      >
+                        {icon} {label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* EXTRAS */}
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-700 mb-3">🔄 Extras</h3>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                    {[
+                      { tag: 'retorno', label: 'Retorno', icon: '🔄' },
+                      { tag: 'urgencia', label: 'Urgência', icon: '⚡' },
+                    ].map(({ tag, label, icon }) => (
+                      <button
+                        key={tag}
+                        type="button"
+                        onClick={() => {
+                          if (selectedTags.includes(tag)) {
+                            setSelectedTags(selectedTags.filter((t) => t !== tag))
+                          } else {
+                            setSelectedTags([...selectedTags, tag])
+                          }
+                        }}
+                        className={`px-3 py-2 rounded-lg text-sm text-left border-2 transition-all ${
+                          selectedTags.includes(tag)
+                            ? 'bg-cyan-100 border-cyan-500 text-cyan-700'
+                            : 'bg-white border-gray-200 text-gray-700 hover:border-cyan-300'
+                        }`}
+                      >
+                        {icon} {label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Criar Nova Tag */}
+              <div className="mt-6 pt-6 border-t border-gray-200">
+                <h3 className="text-sm font-semibold text-gray-700 mb-3">➕ Criar Nova Tag</h3>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={newTagInput}
+                    onChange={(e) => setNewTagInput(e.target.value)}
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter' && newTagInput.trim()) {
+                        const newTag = newTagInput.trim().toLowerCase().replace(/\s+/g, '_')
+                        if (!selectedTags.includes(newTag)) {
+                          setSelectedTags([...selectedTags, newTag])
+                        }
+                        setNewTagInput('')
+                      }
+                    }}
+                    placeholder="Digite o nome da tag (ex: tag_personalizada)"
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (newTagInput.trim()) {
+                        const newTag = newTagInput.trim().toLowerCase().replace(/\s+/g, '_')
+                        if (!selectedTags.includes(newTag)) {
+                          setSelectedTags([...selectedTags, newTag])
+                        }
+                        setNewTagInput('')
+                      }
+                    }}
+                    className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+                  >
+                    Adicionar
+                  </button>
+                </div>
+                <p className="text-xs text-gray-500 mt-2">
+                  A tag será criada automaticamente em minúsculas com underscores
+                </p>
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="flex items-center justify-end gap-3 p-6 border-t border-gray-200">
+              <button
+                type="button"
+                onClick={() => setTagsModalOpen(false)}
+                className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={handleSaveTags}
+                disabled={processing || selectedTags.length === 0}
+                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {processing ? 'Salvando...' : 'Salvar Tags'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
