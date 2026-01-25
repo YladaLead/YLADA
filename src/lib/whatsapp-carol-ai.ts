@@ -219,7 +219,23 @@ IMPORTANTE:
 - SEMPRE provoque que a pessoa manifeste objeções
 - NUNCA aceite um "não" sem entender o motivo real
 - Trabalhe o emocional SEMPRE, não apenas o racional
-- Lembre o motivo pelo qual ela veio até aqui`
+- Lembre o motivo pelo qual ela veio até aqui
+
+QUANDO PRECISAR DE ATENDIMENTO HUMANO:
+- Se a pessoa pedir explicitamente para falar com alguém: "quero falar com alguém", "preciso de atendimento", "quero falar com suporte"
+- Se a pessoa tiver problemas técnicos complexos que você não consegue resolver
+- Se a pessoa tiver questões sobre pagamento, reembolso ou problemas financeiros que você não consegue resolver
+- Se a pessoa estiver insatisfeita ou reclamando de forma que exija intervenção humana
+- Se a pessoa pedir para cancelar ou desistir e você já tentou trabalhar a objeção sem sucesso
+- Se a situação for muito complexa ou específica que você não tem informações suficientes
+
+Quando detectar necessidade de atendimento humano, você DEVE:
+1. Ser empática e acolhedora
+2. Informar que vai direcionar para o atendimento humano
+3. Garantir que a pessoa será atendida
+4. NÃO tente resolver sozinha se realmente precisa de humano
+
+IMPORTANTE: Se você detectar necessidade de atendimento humano, inclua na sua resposta uma indicação clara, mas continue sendo acolhedora.`
 
 /**
  * Gera resposta da Carol usando OpenAI
@@ -417,6 +433,106 @@ export async function generateCarolResponse(
     console.error('[Carol AI] Erro ao gerar resposta:', error)
     return 'Olá! Sou a Carol, secretária da YLADA Nutri. Como posso te ajudar? 😊'
   }
+}
+
+/**
+ * Detecta se a conversa precisa de atendimento humano
+ */
+function detectNeedsHumanSupport(
+  carolResponse: string,
+  userMessage: string,
+  conversationHistory: Array<{ role: 'user' | 'assistant'; content: string }>
+): { detected: boolean; reason: string } {
+  const responseLower = carolResponse.toLowerCase()
+  const messageLower = userMessage.toLowerCase()
+  
+  // Palavras-chave na mensagem do usuário que indicam necessidade de humano
+  const userKeywords = [
+    'quero falar com alguém',
+    'quero falar com uma pessoa',
+    'preciso de atendimento',
+    'quero atendimento humano',
+    'quero falar com suporte',
+    'quero cancelar',
+    'quero desistir',
+    'quero reembolso',
+    'quero meu dinheiro de volta',
+    'estou insatisfeita',
+    'estou insatisfeito',
+    'não estou satisfeita',
+    'não estou satisfeito',
+    'reclamação',
+    'reclamar',
+    'problema com pagamento',
+    'erro no pagamento',
+    'não recebi',
+    'não funcionou',
+    'não consigo acessar',
+    'problema técnico',
+  ]
+  
+  // Palavras-chave na resposta da Carol que indicam que ela detectou necessidade de humano
+  const carolKeywords = [
+    'vou direcionar',
+    'direcionar para',
+    'atendimento humano',
+    'atendimento pessoal',
+    'vou transferir',
+    'transferir para',
+    'não consigo ajudar',
+    'precisa de ajuda',
+    'vou encaminhar',
+    'encaminhar para',
+    'suporte técnico',
+    'equipe de suporte',
+  ]
+  
+  // Verificar mensagem do usuário
+  const userNeedsHuman = userKeywords.some(keyword => messageLower.includes(keyword))
+  
+  // Verificar resposta da Carol
+  const carolDetected = carolKeywords.some(keyword => responseLower.includes(keyword))
+  
+  if (userNeedsHuman) {
+    // Identificar motivo específico
+    if (messageLower.includes('cancelar') || messageLower.includes('desistir')) {
+      return { detected: true, reason: 'Cliente quer cancelar/desistir' }
+    }
+    if (messageLower.includes('reembolso') || messageLower.includes('dinheiro de volta')) {
+      return { detected: true, reason: 'Solicitação de reembolso' }
+    }
+    if (messageLower.includes('pagamento') || messageLower.includes('paguei')) {
+      return { detected: true, reason: 'Problema com pagamento' }
+    }
+    if (messageLower.includes('insatisfeit') || messageLower.includes('reclama')) {
+      return { detected: true, reason: 'Cliente insatisfeito/reclamação' }
+    }
+    if (messageLower.includes('técnico') || messageLower.includes('não funciona')) {
+      return { detected: true, reason: 'Problema técnico' }
+    }
+    return { detected: true, reason: 'Cliente pediu atendimento humano' }
+  }
+  
+  if (carolDetected) {
+    return { detected: true, reason: 'Carol detectou necessidade de atendimento humano' }
+  }
+  
+  // Verificar se há muitas mensagens sem progresso (possível frustração)
+  const recentUserMessages = conversationHistory
+    .filter(m => m.role === 'user')
+    .slice(-3)
+    .map(m => m.content.toLowerCase())
+  
+  const hasRepeatedQuestions = recentUserMessages.length >= 2 && 
+    recentUserMessages.some(msg => 
+      msg.includes('?') && recentUserMessages.filter(m => m.includes('?')).length >= 2
+    )
+  
+  if (hasRepeatedQuestions && conversationHistory.length > 6) {
+    return { detected: true, reason: 'Múltiplas perguntas sem resolução - possível frustração' }
+  }
+  
+  return { detected: false, reason: '' }
 }
 
 /**
@@ -1133,7 +1249,69 @@ Carol - Secretária YLADA Nutri`
       is_bot_response: true,
     })
 
-    // 10. Atualizar última mensagem da conversa
+    // 10. Detectar se precisa de atendimento humano e enviar notificação
+    const needsHumanSupport = detectNeedsHumanSupport(carolResponse, message, conversationHistory)
+    if (needsHumanSupport.detected) {
+      try {
+        const notificationPhone = process.env.Z_API_NOTIFICATION_PHONE
+        if (notificationPhone) {
+          const { data: convData } = await supabaseAdmin
+            .from('whatsapp_conversations')
+            .select('name, phone, context')
+            .eq('id', conversationId)
+            .single()
+          
+          if (convData) {
+            const tags = Array.isArray(convData.context?.tags) ? convData.context.tags : []
+            const notificationMessage = `🚨 *ATENDIMENTO HUMANO NECESSÁRIO*\n\n👤 *Nome:* ${convData.name || 'Sem nome'}\n📱 *Telefone:* ${convData.phone}\n\n📝 *Última mensagem da pessoa:*\n"${message.substring(0, 200)}${message.length > 200 ? '...' : ''}"\n\n🤖 *Resposta da Carol:*\n"${carolResponse.substring(0, 200)}${carolResponse.length > 200 ? '...' : ''}"\n\n🔍 *Motivo:* ${needsHumanSupport.reason}\n\n🏷️ *Tags:* ${tags.length > 0 ? tags.join(', ') : 'Nenhuma'}\n\n⚠️ *Ação necessária:* Entrar na conversa e atender pessoalmente`
+            
+            // Buscar instância Z-API para enviar notificação
+            const { data: notificationInstance } = await supabaseAdmin
+              .from('z_api_instances')
+              .select('instance_id, token')
+              .eq('status', 'connected')
+              .limit(1)
+              .maybeSingle()
+            
+            if (notificationInstance) {
+              const notificationClient = createZApiClient({
+                instanceId: notificationInstance.instance_id,
+                token: notificationInstance.token,
+              })
+              
+              await notificationClient.sendTextMessage({
+                phone: notificationPhone,
+                message: notificationMessage,
+              })
+              
+              console.log('[Carol AI] ✅ Notificação de atendimento humano enviada para', notificationPhone)
+              
+              // Adicionar tag de atendimento manual
+              const newTags = [...new Set([...tags, 'atendimento_manual', 'precisa_atendimento_humano'])]
+              await supabaseAdmin
+                .from('whatsapp_conversations')
+                .update({
+                  context: {
+                    ...convData.context,
+                    tags: newTags,
+                    needs_human_support: true,
+                    needs_human_support_at: new Date().toISOString(),
+                    needs_human_support_reason: needsHumanSupport.reason,
+                  },
+                })
+                .eq('id', conversationId)
+            } else {
+              console.warn('[Carol AI] ⚠️ Instância Z-API não encontrada para enviar notificação de atendimento humano')
+            }
+          }
+        }
+      } catch (notificationError: any) {
+        console.error('[Carol AI] ❌ Erro ao enviar notificação de atendimento humano:', notificationError)
+        // Não falhar o processamento se a notificação falhar
+      }
+    }
+
+    // 11. Atualizar última mensagem da conversa
     await supabaseAdmin
       .from('whatsapp_conversations')
       .update({
