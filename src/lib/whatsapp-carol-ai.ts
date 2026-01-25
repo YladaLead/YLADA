@@ -245,23 +245,28 @@ async function generateCarolResponse(
     }
   }
 
-    // Incluir mais mensagens do histórico para melhor contexto (últimas 10 ao invés de 6)
+    // Incluir histórico completo (últimas 15 mensagens para melhor contexto)
+    // Aumentado de 10 para 15 para Carol ter mais contexto da conversa
     const messages: OpenAI.Chat.ChatCompletionMessageParam[] = [
       {
         role: 'system',
         content: CAROL_SYSTEM_PROMPT + contextText,
       },
-      ...conversationHistory.slice(-10), // Últimas 10 mensagens para melhor contexto
+      ...conversationHistory.slice(-15), // Últimas 15 mensagens para melhor contexto
       {
         role: 'user',
         content: message,
       },
     ]
     
-    console.log('[Carol AI] 📜 Histórico de mensagens:', {
+    console.log('[Carol AI] 📜 Histórico enviado para OpenAI:', {
       totalHistory: conversationHistory.length,
-      usingLast: Math.min(10, conversationHistory.length),
-      messages: messages.map(m => ({ role: m.role, contentLength: typeof m.content === 'string' ? m.content.length : 0 }))
+      usingLast: Math.min(15, conversationHistory.length),
+      messages: messages.map(m => ({ 
+        role: m.role, 
+        contentLength: typeof m.content === 'string' ? m.content.length : 0,
+        preview: typeof m.content === 'string' ? m.content.substring(0, 80) : ''
+      }))
     })
 
   try {
@@ -762,20 +767,31 @@ Carol - Secretária YLADA Nutri`
       }
     }
 
-    // 5. Buscar histórico de mensagens
+    // 5. Buscar histórico de mensagens (aumentado para 30 para melhor contexto)
     const { data: messages } = await supabaseAdmin
       .from('whatsapp_messages')
-      .select('sender_type, message')
+      .select('sender_type, message, created_at')
       .eq('conversation_id', conversationId)
+      .eq('status', 'active') // Apenas mensagens não deletadas
       .order('created_at', { ascending: true })
-      .limit(20)
+      .limit(30) // Aumentado de 20 para 30 mensagens
 
     const conversationHistory = (messages || [])
       .filter(m => m.sender_type === 'customer' || m.sender_type === 'bot' || m.sender_type === 'agent')
+      .filter(m => m.message && m.message.trim().length > 0) // Apenas mensagens com conteúdo
       .map(m => ({
         role: m.sender_type === 'customer' ? 'user' as const : 'assistant' as const,
         content: m.message || '',
       }))
+    
+    console.log('[Carol AI] 📚 Histórico carregado:', {
+      totalMessages: messages?.length || 0,
+      filteredHistory: conversationHistory.length,
+      lastMessages: conversationHistory.slice(-5).map(m => ({
+        role: m.role,
+        preview: m.content.substring(0, 50)
+      }))
+    })
 
     // 6. Gerar resposta da Carol
     console.log('[Carol AI] 💭 Gerando resposta com contexto:', {
