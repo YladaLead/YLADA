@@ -55,7 +55,7 @@ export function useAuth() {
       console.log('🔍 Buscando perfil para user_id:', userId)
       
       // 🚨 CORREÇÃO: Adicionar timeout para evitar travamento
-      // Criar uma Promise com timeout de 10 segundos
+      // Criar uma Promise com timeout de 15 segundos (aumentado)
       const profileQuery = supabase
         .from('user_profiles')
         .select('id, user_id, perfil, nome_completo, email, is_admin, is_support')
@@ -63,10 +63,10 @@ export function useAuth() {
         .maybeSingle()
       
       const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('Timeout ao buscar perfil (10s)')), 10000)
+        setTimeout(() => reject(new Error('Timeout ao buscar perfil (15s)')), 15000)
       })
       
-      // Buscar perfil com timeout de 10 segundos
+      // Buscar perfil com timeout de 15 segundos
       try {
         const { data, error } = await Promise.race([
           profileQuery,
@@ -74,6 +74,12 @@ export function useAuth() {
         ]) as any
 
         if (error) {
+          // Se for timeout, apenas logar como warning (não é crítico)
+          if (error.message?.includes('Timeout')) {
+            console.warn('⚠️ Timeout ao buscar perfil (15s) - continuando sem perfil')
+            return null
+          }
+          
           console.error('❌ Erro ao buscar perfil:', {
             code: error.code,
             message: error.message
@@ -260,7 +266,7 @@ export function useAuth() {
           // 🚨 CORREÇÃO: Adicionar timeout para evitar travamento
           const profilePromise = fetchUserProfile(sessionToUse.user.id, true)
           const timeoutPromise = new Promise((_, reject) => {
-            setTimeout(() => reject(new Error('Timeout ao buscar perfil (10s)')), 10000)
+            setTimeout(() => reject(new Error('Timeout ao buscar perfil (15s)')), 15000)
           })
           
           Promise.race([profilePromise, timeoutPromise])
@@ -276,7 +282,12 @@ export function useAuth() {
             })
             .catch(err => {
               if (!mounted) return
-              console.error('❌ useAuth: Erro ao buscar perfil:', err?.message || err)
+              // Se for timeout, apenas logar como warning (não é crítico)
+              if (err?.message?.includes('Timeout')) {
+                console.warn('⚠️ useAuth: Timeout ao buscar perfil (15s) - continuando sem perfil')
+              } else {
+                console.error('❌ useAuth: Erro ao buscar perfil:', err?.message || err)
+              }
               setUserProfile(null)
               setLoading(false) // Marcar loading=false mesmo em caso de erro ou timeout
             })
