@@ -52,16 +52,56 @@ export async function sendWorkshopInviteToFormLead(
       .maybeSingle()
 
     // 3. Buscar instância Z-API para a área
-    const { data: instance } = await supabaseAdmin
+    // Primeiro tenta buscar por área e status connected
+    let { data: instance } = await supabaseAdmin
       .from('z_api_instances')
-      .select('id, instance_id, token')
+      .select('id, instance_id, token, status, area')
       .eq('area', area)
-      .eq('is_active', true)
+      .eq('status', 'connected')
       .limit(1)
       .maybeSingle()
 
+    // Se não encontrou, tenta buscar apenas por área (sem filtro de status)
     if (!instance) {
-      console.error('[Form Automation] ❌ Instância Z-API não encontrada para área:', area)
+      const { data: instanceByArea } = await supabaseAdmin
+        .from('z_api_instances')
+        .select('id, instance_id, token, status, area')
+        .eq('area', area)
+        .limit(1)
+        .maybeSingle()
+      
+      if (instanceByArea) {
+        instance = instanceByArea
+        console.log('[Form Automation] ⚠️ Instância encontrada mas status não é "connected":', instanceByArea.status)
+      }
+    }
+
+    // Se ainda não encontrou, tenta buscar qualquer instância conectada (fallback)
+    if (!instance) {
+      const { data: anyInstance } = await supabaseAdmin
+        .from('z_api_instances')
+        .select('id, instance_id, token, status, area')
+        .eq('status', 'connected')
+        .limit(1)
+        .maybeSingle()
+      
+      if (anyInstance) {
+        instance = anyInstance
+        console.log('[Form Automation] ⚠️ Usando instância de outra área como fallback:', anyInstance.area)
+      }
+    }
+
+    if (!instance) {
+      // Log detalhado para debug
+      const { data: allInstances } = await supabaseAdmin
+        .from('z_api_instances')
+        .select('id, instance_id, status, area')
+        .limit(10)
+      
+      console.error('[Form Automation] ❌ Instância Z-API não encontrada para área:', area, {
+        searchedArea: area,
+        allInstances: allInstances || []
+      })
       return { success: false, error: 'Instância WhatsApp não configurada' }
     }
 
