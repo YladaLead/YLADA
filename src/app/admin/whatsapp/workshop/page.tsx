@@ -82,6 +82,7 @@ function WorkshopContent() {
     const weekStart = new Date(now)
     weekStart.setDate(now.getDate() - daysToMonday + (weekOffset * 7))
     weekStart.setHours(0, 0, 0, 0)
+    weekStart.setMinutes(0, 0, 0)
     
     const weekEnd = new Date(weekStart)
     weekEnd.setDate(weekStart.getDate() + 6)
@@ -90,7 +91,11 @@ function WorkshopContent() {
     return sessions
       .filter(s => {
         const sessionDate = new Date(s.starts_at)
-        return sessionDate >= weekStart && sessionDate <= weekEnd
+        // Comparar apenas data (ignorar timezone)
+        const sessionDateOnly = new Date(sessionDate.getFullYear(), sessionDate.getMonth(), sessionDate.getDate())
+        const weekStartOnly = new Date(weekStart.getFullYear(), weekStart.getMonth(), weekStart.getDate())
+        const weekEndOnly = new Date(weekEnd.getFullYear(), weekEnd.getMonth(), weekEnd.getDate())
+        return sessionDateOnly >= weekStartOnly && sessionDateOnly <= weekEndOnly
       })
       .sort((a, b) => new Date(a.starts_at).getTime() - new Date(b.starts_at).getTime())
   }
@@ -441,6 +446,11 @@ function WorkshopContent() {
                     Sessões <span className="font-medium text-green-700">abertas</span> são divulgadas pela Carol. 
                     Sessões <span className="font-medium text-red-700">fechadas</span> não aparecem nas opções.
                   </p>
+                  {sessions.length > 0 && (
+                    <p className="text-xs text-blue-600 mt-1 font-medium">
+                      📊 Total de {sessions.length} sessão{sessions.length !== 1 ? 'ões' : ''} cadastrada{sessions.length !== 1 ? 's' : ''}
+                    </p>
+                  )}
                 </div>
                 <div className="flex items-center gap-2">
                   <button
