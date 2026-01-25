@@ -44,7 +44,7 @@ Obrigada por se inscrever na nossa Aula Prática ao Vivo de Como Encher a Agenda
 
 Para continuarmos nossa conversa e eu te enviar as opções de dias e horários, clique no link abaixo para me chamar no WhatsApp:
 
-🔗 https://wa.me/5519997230912?text=Olá!%20Acabei%20de%20me%20inscrever%20na%20Aula%20Prática%20ao%20Vivo%20(Agenda%20Instável)%20da%20YLADA%20Nutri%20e%20gostaria%20de%20agendar%20uma%20conversa%20rápida%20para%20entender%20os%20próximos%20passos.
+🔗 https://wa.me/5519997230912?text=Acabei%20de%20me%20inscrever%20na%20aula%20prática%20da%20YLADA%20Nutri%20e%20gostaria%20de%20agendar%20uma%20conversa%20rápida%20para%20entender%20os%20próximos%20passos.
 
 Ou copie e cole este número no WhatsApp: (19) 99723-0912
 
