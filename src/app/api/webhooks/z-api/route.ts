@@ -1108,8 +1108,10 @@ export async function POST(request: NextRequest) {
         const isFirstMessage = !existingMessages || existingMessages.length === 0
 
         // 🔒 VERIFICAR SE JÁ EXISTE MENSAGEM DA CAROL RECENTE (evitar duplicação)
-        // Se a automação de formulário já enviou mensagem, não enviar novamente
+        // Mas permitir resposta se a última mensagem é do cliente (perguntas legítimas)
         const cincoMinutosAtras = new Date(Date.now() - 5 * 60 * 1000).toISOString()
+        
+        // Buscar última mensagem da Carol
         const { data: recentCarolMessages } = await supabase
           .from('whatsapp_messages')
           .select('id, created_at')
@@ -1117,17 +1119,58 @@ export async function POST(request: NextRequest) {
           .eq('sender_type', 'bot')
           .eq('sender_name', 'Carol - Secretária')
           .gte('created_at', cincoMinutosAtras)
+          .order('created_at', { ascending: false })
+          .limit(1)
+        
+        // Buscar última mensagem do cliente (antes desta que acabou de chegar)
+        const { data: lastCustomerMessage } = await supabase
+          .from('whatsapp_messages')
+          .select('id, created_at')
+          .eq('conversation_id', conversationId)
+          .eq('sender_type', 'customer')
+          .order('created_at', { ascending: false })
+          .limit(1)
+        
+        // Buscar última mensagem da Carol (qualquer uma, não apenas recente)
+        const { data: lastCarolMessage } = await supabase
+          .from('whatsapp_messages')
+          .select('id, created_at')
+          .eq('conversation_id', conversationId)
+          .eq('sender_type', 'bot')
+          .eq('sender_name', 'Carol - Secretária')
+          .order('created_at', { ascending: false })
           .limit(1)
         
         const hasRecentCarolMessage = recentCarolMessages && recentCarolMessages.length > 0
+        
+        // 🆕 Permitir resposta se:
+        // 1. Não há mensagem recente da Carol (mais de 5 minutos), OU
+        // 2. A última mensagem do cliente é mais recente que a última mensagem da Carol
+        //    (ou seja, o cliente está fazendo uma pergunta após receber a mensagem da Carol)
+        let shouldAllowResponse = true
+        
+        if (hasRecentCarolMessage && lastCarolMessage && lastCustomerMessage) {
+          const lastCarolTime = new Date(lastCarolMessage.created_at).getTime()
+          const lastCustomerTime = new Date(lastCustomerMessage.created_at).getTime()
+          
+          // Se a última mensagem da Carol é mais recente que a última do cliente,
+          // significa que a Carol acabou de enviar e o cliente ainda não respondeu
+          // Nesse caso, bloquear para evitar duplicação
+          if (lastCarolTime > lastCustomerTime) {
+            shouldAllowResponse = false
+            console.log('[Z-API Webhook] ⏭️ Bloqueando Carol: última mensagem da Carol é mais recente que a do cliente')
+          } else {
+            console.log('[Z-API Webhook] ✅ Permitindo Carol: cliente fez pergunta após mensagem da Carol')
+          }
+        }
 
         // Processar com Carol (IA de atendimento)
         // IMPORTANTE: Não processar se mensagem veio do número de notificação
-        // IMPORTANTE: Não processar se já existe mensagem da Carol recente (evitar duplicação)
+        // IMPORTANTE: Não processar se já existe mensagem da Carol recente E a última mensagem é da Carol (evitar duplicação)
         const notificationPhone = process.env.Z_API_NOTIFICATION_PHONE
         const shouldProcessCarol = 
           (!notificationPhone || phone.replace(/\D/g, '') !== notificationPhone.replace(/\D/g, '')) &&
-          !hasRecentCarolMessage // 🔒 Evitar duplicação
+          shouldAllowResponse // 🆕 Usar lógica melhorada
         
         if (shouldProcessCarol) {
           console.log('[Z-API Webhook] 🤖 Iniciando processamento com Carol...')
