@@ -134,6 +134,31 @@ function CarolControlContent() {
               </div>
             )}
           </div>
+
+          {/* Disparo de Lembretes */}
+          <div className="bg-white rounded-lg shadow p-6">
+            <h2 className="text-xl font-bold text-gray-900 mb-4">⏰ Disparo de Lembretes de Reunião</h2>
+            <p className="text-sm text-gray-600 mb-4">
+              Envia lembretes para participantes agendados:
+              <br />• Padrão: 12h antes da reunião
+              <br />• Segunda 10h: lembrete no domingo às 17h
+              <br />• Respeita horário permitido (8h-19h seg-sex, até 13h sábado)
+            </p>
+            <button
+              onClick={() => handleDisparo('reminders')}
+              disabled={loading}
+              className="w-full px-4 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50"
+            >
+              {loading ? 'Processando...' : '⏰ Disparar Lembretes'}
+            </button>
+            {result && result.skipped !== undefined && (
+              <div className="mt-4 p-3 bg-purple-50 rounded-lg">
+                <p className="text-sm text-purple-800">
+                  ✅ Enviadas: {result.sent} | ❌ Erros: {result.errors} | ⏭️ Ignoradas: {result.skipped || 0}
+                </p>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Teste de Carol */}
