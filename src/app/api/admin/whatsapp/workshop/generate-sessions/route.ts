@@ -19,6 +19,18 @@ export async function POST(request: NextRequest) {
 
     const result = await generateWorkshopSessions(weeksAhead)
 
+    if (result.error) {
+      return NextResponse.json(
+        { 
+          success: false,
+          error: result.error,
+          created: result.created,
+          errors: result.errors
+        },
+        { status: 400 }
+      )
+    }
+
     return NextResponse.json({
       success: true,
       ...result,

@@ -46,6 +46,7 @@ export const WORKSHOP_SCHEDULE = {
 export async function generateWorkshopSessions(weeksAhead: number = 4): Promise<{
   created: number
   errors: number
+  error?: string
 }> {
   try {
     const now = new Date()
@@ -240,6 +241,10 @@ export async function generateWorkshopSessions(weeksAhead: number = 4): Promise<
     return { created, errors }
   } catch (error: any) {
     console.error('[Workshop Schedule] Erro ao gerar sessões:', error)
-    return { created: 0, errors: 0 }
+    return { 
+      created: 0, 
+      errors: 1,
+      error: error.message || 'Erro ao gerar sessões'
+    }
   }
 }

@@ -391,12 +391,19 @@ function WorkshopContent() {
                         credentials: 'include',
                         body: JSON.stringify({ weeksAhead: 4 }),
                       })
-                              const json = await res.json().catch(() => ({}))
-                              if (!res.ok) throw new Error(json.error || 'Erro ao gerar sessões')
-                              setSuccess(json.message || `Criadas ${json.created} sessões!`)
-                              await loadAll()
-                              // Voltar para semana atual após gerar
-                              setCurrentWeek(0)
+                      const json = await res.json().catch(() => ({}))
+                      if (!res.ok) {
+                        throw new Error(json.error || json.details || 'Erro ao gerar sessões')
+                      }
+                      
+                      if (json.created === 0) {
+                        setError('⚠️ Nenhuma sessão foi criada. Verifique se os links do Zoom (9h e 15h) estão configurados nas variáveis de ambiente ou adicione manualmente pelo menos uma sessão às 9:00 e outra às 15:00.')
+                      } else {
+                        setSuccess(json.message || `✅ Criadas ${json.created} sessões!`)
+                      }
+                      await loadAll()
+                      // Voltar para semana atual após gerar
+                      setCurrentWeek(0)
                     } catch (e: any) {
                       setError(e.message || 'Erro ao gerar sessões')
                     } finally {
@@ -419,7 +426,13 @@ function WorkshopContent() {
                   <li>Segunda a Sexta às 15:00 (link das 15:00)</li>
                   <li>Quarta-feira às 20:00 (link específico)</li>
                 </ul>
-                <p className="mt-2 text-xs">Configure os links das 9:00 e 15:00 nas variáveis de ambiente ou adicione manualmente uma sessão com esses links primeiro.</p>
+                <p className="mt-2 text-xs font-medium">
+                  ⚠️ <strong>Importante:</strong> Para gerar sessões automaticamente, você precisa:
+                </p>
+                <ol className="mt-1 ml-4 list-decimal text-xs">
+                  <li>Configurar <code className="bg-blue-100 px-1 rounded">ZOOM_LINK_9H</code> e <code className="bg-blue-100 px-1 rounded">ZOOM_LINK_15H</code> nas variáveis de ambiente, OU</li>
+                  <li>Adicionar manualmente pelo menos uma sessão às <strong>9:00</strong> e outra às <strong>15:00</strong> (o sistema detectará os links automaticamente)</li>
+                </ol>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-4 gap-3 mb-4">
