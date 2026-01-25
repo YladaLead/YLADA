@@ -408,6 +408,7 @@ function WorkshopContent() {
                 >
                   {saving ? 'Gerando...' : '🔄 Gerar Sessões Automáticas (4 semanas)'}
                 </button>
+                </div>
               </div>
 
               <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-800">
