@@ -1160,10 +1160,13 @@ Carol - Secretária YLADA Nutri`
       isFirstMessage
     })
 
+    // 🆕 Buscar nome do context se não tiver em conversation.name
+    const leadName = conversation.name || (context as any)?.lead_name || undefined
+    
     const carolResponse = await generateCarolResponse(message, conversationHistory, {
       tags,
       workshopSessions,
-      leadName: conversation.name || undefined,
+      leadName: leadName, // 🆕 Sempre passar o nome se disponível
       hasScheduled,
       scheduledDate,
       participated: participated ? true : (tags.includes('nao_participou_aula') ? false : undefined),
