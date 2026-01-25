@@ -1,0 +1,165 @@
+import { NextRequest, NextResponse } from 'next/server'
+import { requireApiAuth } from '@/lib/api-auth'
+import { supabaseAdmin } from '@/lib/supabase'
+
+/**
+ * GET /api/admin/whatsapp/analisar-conversas
+ * Analisa todas as conversas e retorna resumo por status/tags
+ */
+export async function GET(request: NextRequest) {
+  try {
+    // Verificar se é admin
+    const authResult = await requireApiAuth(request, ['admin'])
+    if (authResult instanceof NextResponse) {
+      return authResult
+    }
+
+    const { searchParams } = new URL(request.url)
+    const area = searchParams.get('area') || 'nutri'
+
+    // Buscar todas as conversas ativas
+    const { data: conversations, error } = await supabaseAdmin
+      .from('whatsapp_conversations')
+      .select('id, phone, name, context, created_at, last_message_at')
+      .eq('area', area)
+      .eq('status', 'active')
+      .order('last_message_at', { ascending: false })
+
+    if (error) {
+      return NextResponse.json(
+        { error: `Erro ao buscar conversas: ${error.message}` },
+        { status: 500 }
+      )
+    }
+
+    if (!conversations || conversations.length === 0) {
+      return NextResponse.json({
+        total: 0,
+        resumo: {},
+        detalhes: []
+      })
+    }
+
+    // Análise detalhada
+    const resumo: Record<string, number> = {
+      total: conversations.length,
+      sem_tags: 0,
+      sem_mensagem_carol: 0,
+      participou_aula: 0,
+      nao_participou_aula: 0,
+      agendou_aula: 0,
+      nao_agendou: 0,
+      veio_aula_pratica: 0,
+      recebeu_link_workshop: 0,
+      interessado: 0,
+      duvidas: 0,
+      cliente_nutri: 0,
+      carol_ativa: 0,
+    }
+
+    const detalhes: Array<{
+      phone: string
+      name: string
+      tags: string[]
+      tem_mensagem_carol: boolean
+      status: string
+      precisa_acao: string
+    }> = []
+
+    // Verificar cada conversa
+    for (const conv of conversations) {
+      const context = conv.context || {}
+      const tags = Array.isArray(context.tags) ? context.tags : []
+
+      // Verificar se tem mensagem da Carol
+      const { data: carolMessages } = await supabaseAdmin
+        .from('whatsapp_messages')
+        .select('id')
+        .eq('conversation_id', conv.id)
+        .eq('sender_type', 'bot')
+        .eq('sender_name', 'Carol - Secretária')
+        .limit(1)
+        .maybeSingle()
+
+      const temMensagemCarol = carolMessages !== null
+
+      // Contar tags
+      if (tags.length === 0) resumo.sem_tags++
+      if (!temMensagemCarol) resumo.sem_mensagem_carol++
+      if (tags.includes('participou_aula')) resumo.participou_aula++
+      if (tags.includes('nao_participou_aula')) resumo.nao_participou_aula++
+      if (tags.includes('agendou_aula') || tags.includes('recebeu_link_workshop')) resumo.agendou_aula++
+      if (tags.includes('veio_aula_pratica')) resumo.veio_aula_pratica++
+      if (tags.includes('recebeu_link_workshop')) resumo.recebeu_link_workshop++
+      if (tags.includes('interessado')) resumo.interessado++
+      if (tags.includes('duvidas')) resumo.duvidas++
+      if (tags.includes('cliente_nutri')) resumo.cliente_nutri++
+      if (tags.includes('carol_ativa')) resumo.carol_ativa++
+
+      // Determinar status e ação necessária
+      const hasScheduled = tags.includes('agendou_aula') || tags.includes('recebeu_link_workshop')
+      const participated = tags.includes('participou_aula')
+      const naoParticipou = tags.includes('nao_participou_aula')
+      const veioAulaPratica = tags.includes('veio_aula_pratica')
+
+      let status = 'indefinido'
+      let precisaAcao = ''
+
+      if (participated) {
+        status = 'participou_aula'
+        if (!tags.includes('recebeu_link_cadastro')) {
+          precisaAcao = 'Enviar mensagem pós-aula'
+        } else {
+          precisaAcao = 'OK - já recebeu pós-aula'
+        }
+      } else if (naoParticipou) {
+        status = 'nao_participou'
+        precisaAcao = 'Enviar remarketing'
+      } else if (hasScheduled) {
+        status = 'agendou'
+        precisaAcao = 'OK - aguardando aula'
+      } else if (veioAulaPratica) {
+        status = 'veio_mas_nao_agendou'
+        if (!temMensagemCarol) {
+          precisaAcao = 'Enviar boas-vindas'
+        } else {
+          precisaAcao = 'OK - já recebeu mensagem'
+        }
+      } else {
+        status = 'sem_contexto'
+        if (!temMensagemCarol) {
+          precisaAcao = 'Enviar primeira mensagem'
+        } else {
+          precisaAcao = 'Revisar tags'
+        }
+      }
+
+      // Contar não agendou
+      if (veioAulaPratica && !hasScheduled && !participated) {
+        resumo.nao_agendou++
+      }
+
+      detalhes.push({
+        phone: conv.phone,
+        name: conv.name || 'Sem nome',
+        tags,
+        tem_mensagem_carol: temMensagemCarol,
+        status,
+        precisa_acao: precisaAcao
+      })
+    }
+
+    return NextResponse.json({
+      total: conversations.length,
+      resumo,
+      detalhes: detalhes.slice(0, 100) // Limitar a 100 primeiras para não sobrecarregar
+    })
+
+  } catch (error: any) {
+    console.error('[Analisar Conversas] Erro:', error)
+    return NextResponse.json(
+      { error: error.message || 'Erro ao analisar conversas' },
+      { status: 500 }
+    )
+  }
+}

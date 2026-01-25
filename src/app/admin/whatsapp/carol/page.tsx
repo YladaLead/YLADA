@@ -256,6 +256,64 @@ function CarolControlContent() {
           </button>
         </div>
 
+        {/* Analisar Conversas */}
+        <div className="bg-white rounded-lg shadow p-6 mb-6">
+          <h2 className="text-xl font-bold text-gray-900 mb-4">📊 Analisar Conversas Existentes</h2>
+          <p className="text-sm text-gray-600 mb-4">
+            Analisa todas as conversas e mostra resumo por status, tags e ações necessárias.
+          </p>
+          <button
+            onClick={async () => {
+              setLoading(true)
+              try {
+                const response = await fetch('/api/admin/whatsapp/analisar-conversas?area=nutri', {
+                  method: 'GET',
+                  credentials: 'include'
+                })
+                const data = await response.json()
+                if (data.total !== undefined) {
+                  const resumo = data.resumo
+                  const detalhes = data.detalhes || []
+                  
+                  let mensagem = `📊 ANÁLISE DAS CONVERSAS\n\n`
+                  mensagem += `Total: ${resumo.total} conversas\n\n`
+                  mensagem += `📋 RESUMO:\n`
+                  mensagem += `• Sem tags: ${resumo.sem_tags}\n`
+                  mensagem += `• Sem mensagem da Carol: ${resumo.sem_mensagem_carol}\n`
+                  mensagem += `• Participou da aula: ${resumo.participou_aula}\n`
+                  mensagem += `• Não participou: ${resumo.nao_participou_aula}\n`
+                  mensagem += `• Agendou aula: ${resumo.agendou_aula}\n`
+                  mensagem += `• Veio mas não agendou: ${resumo.nao_agendou}\n`
+                  mensagem += `• Carol ativa: ${resumo.carol_ativa}\n\n`
+                  
+                  // Agrupar por ação necessária
+                  const porAcao: Record<string, number> = {}
+                  detalhes.forEach((d: any) => {
+                    porAcao[d.precisa_acao] = (porAcao[d.precisa_acao] || 0) + 1
+                  })
+                  
+                  mensagem += `🎯 AÇÕES NECESSÁRIAS:\n`
+                  Object.entries(porAcao).forEach(([acao, count]) => {
+                    mensagem += `• ${acao}: ${count}\n`
+                  })
+                  
+                  alert(mensagem)
+                } else {
+                  alert(`Erro: ${data.error || 'Erro desconhecido'}`)
+                }
+              } catch (error: any) {
+                alert(`Erro: ${error.message}`)
+              } finally {
+                setLoading(false)
+              }
+            }}
+            disabled={loading}
+            className="w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 mb-3"
+          >
+            {loading ? 'Analisando...' : '📊 Analisar Conversas'}
+          </button>
+        </div>
+
         {/* Processar Conversas Existentes */}
         <div className="bg-white rounded-lg shadow p-6 mb-6">
           <h2 className="text-xl font-bold text-gray-900 mb-4">🚀 Processar Conversas Existentes</h2>
