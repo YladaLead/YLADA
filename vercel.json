@@ -3,28 +3,4 @@
   "env": {
     "NEXT_PUBLIC_BASE_DOMAIN": "ylada.com"
   }
-  // Cron jobs desativados temporariamente (conta Hobby tem limitação)
-  // Para reativar depois, descomente a seção abaixo:
-  // "crons": [
-  //   {
-  //     "path": "/api/cron/whatsapp-carol?tipo=follow-up",
-  //     "schedule": "0 * * * *"
-  //   },
-  //   {
-  //     "path": "/api/cron/whatsapp-carol?tipo=pre-class",
-  //     "schedule": "0 * * * *"
-  //   },
-  //   {
-  //     "path": "/api/cron/whatsapp-carol?tipo=post-class",
-  //     "schedule": "0 * * * *"
-  //   },
-  //   {
-  //     "path": "/api/cron/whatsapp-carol?tipo=remarketing",
-  //     "schedule": "0 10 * * *"
-  //   },
-  //   {
-  //     "path": "/api/cron/whatsapp-carol?tipo=sales-follow-up",
-  //     "schedule": "0 * * * *"
-  //   }
-  // ]
 }
