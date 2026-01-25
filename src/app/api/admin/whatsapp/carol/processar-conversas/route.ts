@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireApiAuth } from '@/lib/api-auth'
 import { supabaseAdmin } from '@/lib/supabase'
 import { createZApiClient } from '@/lib/z-api'
-import { generateCarolResponse } from '@/lib/whatsapp-carol-ai'
+import { generateCarolResponse, isAllowedTimeToSendMessage } from '@/lib/whatsapp-carol-ai'
 
 /**
  * POST /api/admin/whatsapp/carol/processar-conversas
@@ -243,7 +243,6 @@ export async function POST(request: NextRequest) {
 
         // Verificar horário permitido (mas permitir processamento manual)
         // Para processamento manual, vamos apenas logar mas não bloquear
-        const { isAllowedTimeToSendMessage } = await import('@/lib/whatsapp-carol-ai')
         const timeCheck = isAllowedTimeToSendMessage()
         if (!timeCheck.allowed) {
           details.push(`⏰ ${conversation.phone}: Fora do horário permitido (${timeCheck.reason}) - será enviado no próximo horário`)
