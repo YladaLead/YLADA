@@ -452,32 +452,58 @@ function WorkshopContent() {
                 <button
                   onClick={async () => {
                     try {
+                      console.log('[Workshop] Iniciando geração de sessões...')
                       setSaving(true)
                       setError(null)
                       setSuccess(null)
+                      
                       const res = await fetch('/api/admin/whatsapp/workshop/generate-sessions', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         credentials: 'include',
                         body: JSON.stringify({ weeksAhead: 4 }),
                       })
-                      const json = await res.json().catch(() => ({}))
+                      
+                      console.log('[Workshop] Resposta recebida:', res.status, res.statusText)
+                      
+                      let json: any = {}
+                      try {
+                        json = await res.json()
+                        console.log('[Workshop] JSON recebido:', json)
+                      } catch (parseError) {
+                        console.error('[Workshop] Erro ao parsear JSON:', parseError)
+                        const text = await res.text()
+                        console.error('[Workshop] Resposta como texto:', text)
+                        throw new Error('Resposta inválida do servidor')
+                      }
+                      
                       if (!res.ok) {
-                        throw new Error(json.error || json.details || 'Erro ao gerar sessões')
+                        const errorMsg = json.error || json.details || `Erro HTTP ${res.status}`
+                        console.error('[Workshop] Erro na resposta:', errorMsg)
+                        throw new Error(errorMsg)
                       }
                       
                       if (json.created === 0) {
-                        setError('⚠️ Nenhuma sessão foi criada. Verifique se os links do Zoom (9h e 15h) estão configurados nas variáveis de ambiente ou adicione manualmente pelo menos uma sessão às 9:00 e outra às 15:00.')
+                        const errorMsg = '⚠️ Nenhuma sessão foi criada. Os links do Zoom estão fixos no código. Verifique se há sessões futuras para criar.'
+                        console.warn('[Workshop]', errorMsg)
+                        setError(errorMsg)
                       } else {
-                        setSuccess(json.message || `✅ Criadas ${json.created} sessões!`)
+                        const successMsg = json.message || `✅ Criadas ${json.created} sessões!`
+                        console.log('[Workshop] Sucesso:', successMsg)
+                        setSuccess(successMsg)
                       }
+                      
                       await loadAll()
                       // Voltar para semana atual após gerar
                       setCurrentWeek(0)
                     } catch (e: any) {
-                      setError(e.message || 'Erro ao gerar sessões')
+                      console.error('[Workshop] Erro capturado:', e)
+                      const errorMsg = e.message || 'Erro ao gerar sessões. Verifique o console para mais detalhes.'
+                      setError(errorMsg)
+                      alert(`Erro: ${errorMsg}\n\nVerifique o console (F12) para mais detalhes.`)
                     } finally {
                       setSaving(false)
+                      console.log('[Workshop] Finalizado')
                     }
                   }}
                   disabled={saving}
