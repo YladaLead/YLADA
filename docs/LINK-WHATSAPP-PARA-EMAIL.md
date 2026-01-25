@@ -29,7 +29,7 @@ https://wa.me/5519997230912?text=Acabei de me inscrever na aula prática da YLAD
 
 ### **1. Copiar o Link:**
 ```
-https://wa.me/5519997230912?text=Olá!%20Acabei%20de%20me%20inscrever%20na%20Aula%20Prática%20ao%20Vivo%20(Agenda%20Instável)%20da%20YLADA%20Nutri%20e%20gostaria%20de%20agendar%20uma%20conversa%20rápida%20para%20entender%20os%20próximos%20passos.
+https://wa.me/5519997230912?text=Acabei%20de%20me%20inscrever%20na%20aula%20prática%20da%20YLADA%20Nutri%20e%20gostaria%20de%20agendar%20uma%20conversa%20rápida%20para%20entender%20os%20próximos%20passos.
 ```
 
 ### **2. Enviar por E-mail:**
