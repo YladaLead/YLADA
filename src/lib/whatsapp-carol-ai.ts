@@ -889,6 +889,50 @@ Carol - Secretária YLADA Nutri`
             })
             .eq('id', conversationId)
           
+          // 🆕 Enviar notificação para telefone de notificação sobre o agendamento
+          try {
+            const notificationPhone = process.env.Z_API_NOTIFICATION_PHONE
+            if (notificationPhone) {
+              const conversation = await supabaseAdmin
+                .from('whatsapp_conversations')
+                .select('name, phone')
+                .eq('id', conversationId)
+                .single()
+              
+              if (conversation.data) {
+                const { weekday, date, time } = formatSessionDateTime(selectedSession.starts_at)
+                const notificationMessage = `🎉 *NOVO AGENDAMENTO DE AULA!*\n\n👤 *Nome:* ${conversation.data.name || 'Sem nome'}\n📱 *Telefone:* ${conversation.data.phone}\n📅 *Data/Hora:* ${weekday}, ${date} às ${time}\n🔗 *Link Zoom:* ${selectedSession.zoom_link}\n\n✅ A pessoa já recebeu o link da aula!`
+                
+                // Buscar instância Z-API para enviar notificação
+                const { data: notificationInstance } = await supabaseAdmin
+                  .from('z_api_instances')
+                  .select('instance_id, token')
+                  .eq('status', 'connected')
+                  .limit(1)
+                  .maybeSingle()
+                
+                if (notificationInstance) {
+                  const notificationClient = createZApiClient({
+                    instanceId: notificationInstance.instance_id,
+                    token: notificationInstance.token,
+                  })
+                  
+                  await notificationClient.sendTextMessage({
+                    phone: notificationPhone,
+                    message: notificationMessage,
+                  })
+                  
+                  console.log('[Carol AI] ✅ Notificação de agendamento enviada para', notificationPhone)
+                } else {
+                  console.warn('[Carol AI] ⚠️ Instância Z-API não encontrada para enviar notificação')
+                }
+              }
+            }
+          } catch (notificationError: any) {
+            console.error('[Carol AI] ❌ Erro ao enviar notificação de agendamento:', notificationError)
+            // Não falhar o agendamento se a notificação falhar
+          }
+          
           // 🆕 Enviar lembrete imediatamente se necessário
           if (reminderToSend) {
             setTimeout(async () => {
