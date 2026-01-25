@@ -88,26 +88,50 @@ function WorkshopContent() {
     weekEnd.setDate(weekStart.getDate() + 6)
     weekEnd.setHours(23, 59, 59, 999)
 
-    return sessions
-      .filter(s => {
-        const sessionDate = new Date(s.starts_at)
-        // Comparar apenas data (ignorar timezone)
-        const sessionDateOnly = new Date(sessionDate.getFullYear(), sessionDate.getMonth(), sessionDate.getDate())
-        const weekStartOnly = new Date(weekStart.getFullYear(), weekStart.getMonth(), weekStart.getDate())
-        const weekEndOnly = new Date(weekEnd.getFullYear(), weekEnd.getMonth(), weekEnd.getDate())
-        return sessionDateOnly >= weekStartOnly && sessionDateOnly <= weekEndOnly
-      })
-      .sort((a, b) => new Date(a.starts_at).getTime() - new Date(b.starts_at).getTime())
+    const filtered = sessions.filter(s => {
+      const sessionDate = new Date(s.starts_at)
+      // Comparar apenas data (ignorar timezone)
+      const sessionDateOnly = new Date(sessionDate.getFullYear(), sessionDate.getMonth(), sessionDate.getDate())
+      const weekStartOnly = new Date(weekStart.getFullYear(), weekStart.getMonth(), weekStart.getDate())
+      const weekEndOnly = new Date(weekEnd.getFullYear(), weekEnd.getMonth(), weekEnd.getDate())
+      return sessionDateOnly >= weekStartOnly && sessionDateOnly <= weekEndOnly
+    })
+    
+    console.log('[Workshop] getWeekSessions:', {
+      totalSessions: sessions.length,
+      weekStart: weekStart.toISOString(),
+      weekEnd: weekEnd.toISOString(),
+      filteredCount: filtered.length,
+      filtered: filtered.map(s => ({ id: s.id, starts_at: s.starts_at }))
+    })
+    
+    return filtered.sort((a, b) => new Date(a.starts_at).getTime() - new Date(b.starts_at).getTime())
   }
 
   // Organizar sessões por dia e horário
   const organizeSessionsByDay = (weekSessions: WorkshopSession[]) => {
     const organized: Record<string, Record<string, WorkshopSession[]>> = {}
     
+    // Mapear nomes dos dias em português
+    const dayNames: Record<number, string> = {
+      0: 'Domingo',
+      1: 'Segunda-feira',
+      2: 'Terça-feira',
+      3: 'Quarta-feira',
+      4: 'Quinta-feira',
+      5: 'Sexta-feira',
+      6: 'Sábado',
+    }
+    
     weekSessions.forEach(session => {
       const date = new Date(session.starts_at)
-      const dayKey = date.toLocaleDateString('pt-BR', { weekday: 'long' })
-      const timeKey = date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+      const dayOfWeek = date.getDay()
+      const dayKey = dayNames[dayOfWeek] || date.toLocaleDateString('pt-BR', { weekday: 'long' })
+      
+      // Formatar horário como HH:MM (2 dígitos)
+      const hours = String(date.getHours()).padStart(2, '0')
+      const minutes = String(date.getMinutes()).padStart(2, '0')
+      const timeKey = `${hours}:${minutes}`
       
       if (!organized[dayKey]) organized[dayKey] = {}
       if (!organized[dayKey][timeKey]) organized[dayKey][timeKey] = []
