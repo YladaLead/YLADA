@@ -19,6 +19,88 @@ const openai = new OpenAI({
 const WHATSAPP_NUMBER = '5519997230912' // Número principal
 
 /**
+ * Verifica se está em horário permitido para enviar mensagens automáticas
+ * Regras:
+ * - Segunda a sexta: 8h00 às 19h00 (horário de Brasília)
+ * - Sábado: até 13h00
+ * - Domingo: não enviar (exceto lembretes específicos)
+ */
+export function isAllowedTimeToSendMessage(): { allowed: boolean; reason?: string; nextAllowedTime?: Date } {
+  const now = new Date()
+  
+  // Converter para horário de Brasília
+  const brasiliaTime = new Date(now.toLocaleString('en-US', { timeZone: 'America/Sao_Paulo' }))
+  const hour = brasiliaTime.getHours()
+  const dayOfWeek = brasiliaTime.getDay() // 0 = domingo, 1 = segunda, ..., 6 = sábado
+  
+  // Domingo: não permitir (exceto lembretes específicos)
+  if (dayOfWeek === 0) {
+    const nextMonday = new Date(brasiliaTime)
+    nextMonday.setDate(brasiliaTime.getDate() + 1) // Próxima segunda
+    nextMonday.setHours(8, 0, 0, 0) // 8h00
+    return { 
+      allowed: false, 
+      reason: 'Domingo - mensagens automáticas não são enviadas',
+      nextAllowedTime: nextMonday
+    }
+  }
+  
+  // Sábado: até 13h00
+  if (dayOfWeek === 6) {
+    if (hour < 8) {
+      const saturday8am = new Date(brasiliaTime)
+      saturday8am.setHours(8, 0, 0, 0)
+      return { 
+        allowed: false, 
+        reason: 'Antes das 8h00 - aguarde até 8h00',
+        nextAllowedTime: saturday8am
+      }
+    }
+    if (hour >= 13) {
+      const nextMonday = new Date(brasiliaTime)
+      nextMonday.setDate(brasiliaTime.getDate() + 2) // Próxima segunda (pula domingo)
+      nextMonday.setHours(8, 0, 0, 0) // 8h00
+      return { 
+        allowed: false, 
+        reason: 'Sábado após 13h00 - aguarde até segunda-feira 8h00',
+        nextAllowedTime: nextMonday
+      }
+    }
+    return { allowed: true }
+  }
+  
+  // Segunda a sexta: 8h00 às 19h00
+  if (hour < 8) {
+    const today8am = new Date(brasiliaTime)
+    today8am.setHours(8, 0, 0, 0)
+    return { 
+      allowed: false, 
+      reason: 'Antes das 8h00 - aguarde até 8h00',
+      nextAllowedTime: today8am
+    }
+  }
+  
+  if (hour >= 19) {
+    const tomorrow8am = new Date(brasiliaTime)
+    tomorrow8am.setDate(brasiliaTime.getDate() + 1)
+    tomorrow8am.setHours(8, 0, 0, 0)
+    
+    // Se for sexta após 19h, próxima segunda
+    if (dayOfWeek === 5) {
+      tomorrow8am.setDate(brasiliaTime.getDate() + 3) // Pula sábado e domingo
+    }
+    
+    return { 
+      allowed: false, 
+      reason: 'Após 19h00 - aguarde até próximo horário permitido',
+      nextAllowedTime: tomorrow8am
+    }
+  }
+  
+  return { allowed: true }
+}
+
+/**
  * System Prompt da Carol
  */
 const CAROL_SYSTEM_PROMPT = `Você é a Carol, secretária da YLADA Nutri. Você é profissional, acolhedora e eficiente.
@@ -1029,6 +1111,16 @@ export async function sendWelcomeToNonContactedLeads(): Promise<{
   errors: number
 }> {
   try {
+    // 0. Verificar se está em horário permitido
+    const timeCheck = isAllowedTimeToSendMessage()
+    if (!timeCheck.allowed) {
+      console.log('[Carol] ⏰ Disparo de boas-vindas fora do horário:', {
+        reason: timeCheck.reason,
+        nextAllowedTime: timeCheck.nextAllowedTime?.toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })
+      })
+      return { sent: 0, errors: 0 }
+    }
+
     // 1. Buscar leads que preencheram workshop mas não têm conversa ativa
     // Buscar de workshop_inscricoes OU de leads com source = workshop_agenda_instavel_landing_page
     const seteDiasAtras = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
@@ -1642,6 +1734,16 @@ export async function sendPostClassNotifications(): Promise<{
   errors: number
 }> {
   try {
+    // Verificar se está em horário permitido
+    const timeCheck = isAllowedTimeToSendMessage()
+    if (!timeCheck.allowed) {
+      console.log('[Carol] ⏰ Disparo de pós-aula fora do horário:', {
+        reason: timeCheck.reason,
+        nextAllowedTime: timeCheck.nextAllowedTime?.toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })
+      })
+      return { sent: 0, errors: 0 }
+    }
+
     const now = new Date()
     const area = 'nutri'
 
@@ -2344,6 +2446,204 @@ Carol - Secretária YLADA Nutri`
   } catch (error: any) {
     console.error('[Carol] Erro ao enviar link de cadastro:', error)
     return { success: false, error: error.message }
+  }
+}
+
+/**
+ * Envia lembretes de reunião para participantes agendados
+ * Regras:
+ * - Padrão: 12h antes da reunião
+ * - Exceção: Segunda às 10h → lembrete no domingo às 17h
+ * - Respeita horário permitido (8h-19h seg-sex, até 13h sábado)
+ */
+export async function sendWorkshopReminders(): Promise<{
+  sent: number
+  errors: number
+  skipped: number
+}> {
+  try {
+    const now = new Date()
+    const area = 'nutri'
+
+    // Buscar instância Z-API
+    const { data: instance } = await supabaseAdmin
+      .from('z_api_instances')
+      .select('id, instance_id, token')
+      .eq('area', area)
+      .eq('status', 'connected')
+      .limit(1)
+      .maybeSingle()
+
+    if (!instance) {
+      console.log('[Carol Reminders] ⚠️ Instância Z-API não encontrada')
+      return { sent: 0, errors: 0, skipped: 0 }
+    }
+
+    // Buscar todas as sessões ativas futuras
+    const { data: sessions } = await supabaseAdmin
+      .from('whatsapp_workshop_sessions')
+      .select('id, title, starts_at, zoom_link')
+      .eq('area', area)
+      .eq('is_active', true)
+      .gte('starts_at', new Date().toISOString())
+      .order('starts_at', { ascending: true })
+
+    if (!sessions || sessions.length === 0) {
+      return { sent: 0, errors: 0, skipped: 0 }
+    }
+
+    // Buscar todas as conversas com sessões agendadas
+    const { data: conversations } = await supabaseAdmin
+      .from('whatsapp_conversations')
+      .select('id, phone, name, context')
+      .eq('area', area)
+      .eq('status', 'active')
+
+    if (!conversations || conversations.length === 0) {
+      return { sent: 0, errors: 0, skipped: 0 }
+    }
+
+    const client = createZApiClient(instance.instance_id, instance.token)
+    let sent = 0
+    let errors = 0
+    let skipped = 0
+
+    // Processar cada sessão
+    for (const session of sessions) {
+      const sessionDate = new Date(session.starts_at)
+      const sessionTime = sessionDate.getTime()
+      const nowTime = now.getTime()
+      
+      // Formatar data/hora da sessão
+      const { weekday, date, time } = formatSessionDateTime(session.starts_at)
+      
+      // Verificar se é segunda-feira às 10h00
+      const isMonday10am = sessionDate.getDay() === 1 && sessionDate.getHours() === 10
+      
+      // Calcular quando enviar lembrete
+      let reminderTime: Date | null = null
+      
+      if (isMonday10am) {
+        // Exceção: Segunda 10h → lembrete domingo 17h
+        const reminderDate = new Date(sessionDate)
+        reminderDate.setDate(sessionDate.getDate() - 1) // Domingo
+        reminderDate.setHours(17, 0, 0, 0) // 17h00
+        reminderTime = reminderDate
+      } else {
+        // Padrão: 12h antes da reunião
+        reminderTime = new Date(sessionTime - 12 * 60 * 60 * 1000)
+      }
+
+      // Verificar se já passou o horário do lembrete
+      if (nowTime < reminderTime.getTime()) {
+        continue // Ainda não é hora de enviar
+      }
+
+      // Verificar se está dentro da janela de envio (até 2h após o horário do lembrete)
+      const reminderWindowEnd = reminderTime.getTime() + 2 * 60 * 60 * 1000
+      if (nowTime > reminderWindowEnd) {
+        continue // Janela de envio já passou
+      }
+
+      // Verificar se está em horário permitido (mas permitir domingo para lembretes especiais)
+      const timeCheck = isAllowedTimeToSendMessage()
+      if (!timeCheck.allowed && !isMonday10am) {
+        // Se for domingo e for lembrete de segunda 10h, permitir
+        const isSunday = now.getDay() === 0
+        if (!isSunday || !isMonday10am) {
+          skipped++
+          continue
+        }
+      }
+
+      // Buscar participantes desta sessão
+      const participants = conversations.filter((conv: any) => {
+        const context = conv.context || {}
+        return context.workshop_session_id === session.id
+      })
+
+      if (participants.length === 0) {
+        continue
+      }
+
+      // Enviar lembrete para cada participante
+      for (const participant of participants) {
+        try {
+          const context = participant.context || {}
+          const reminderKey = `reminder_${session.id}`
+          
+          // Verificar se já enviou lembrete para esta sessão
+          if (context[reminderKey]?.sent) {
+            continue
+          }
+
+          // Formatar mensagem de lembrete
+          const leadName = participant.name || 'Olá'
+          const reminderMessage = `${leadName}! 👋
+
+Lembrete: Sua aula está agendada para:
+
+📅 ${weekday}, ${date}
+🕒 ${time} (horário de Brasília)
+
+Aqui está o link da sua aula:
+${session.zoom_link}
+
+Nos vemos em breve! 😊
+
+Carol - Secretária YLADA Nutri`
+
+          // Enviar mensagem
+          const result = await client.sendTextMessage({
+            phone: participant.phone,
+            message: reminderMessage
+          })
+
+          if (result.success) {
+            // Salvar mensagem
+            await supabaseAdmin.from('whatsapp_messages').insert({
+              conversation_id: participant.id,
+              instance_id: instance.id,
+              z_api_message_id: result.id || null,
+              sender_type: 'bot',
+              sender_name: 'Carol - Secretária',
+              message: reminderMessage,
+              message_type: 'text',
+              status: 'sent',
+              is_bot_response: true
+            })
+
+            // Marcar como enviado
+            context[reminderKey] = {
+              sent: true,
+              sent_at: new Date().toISOString()
+            }
+
+            await supabaseAdmin
+              .from('whatsapp_conversations')
+              .update({ context })
+              .eq('id', participant.id)
+
+            sent++
+            console.log(`[Carol Reminders] ✅ Lembrete enviado para ${participant.phone} - Sessão: ${date} ${time}`)
+          } else {
+            errors++
+            console.error(`[Carol Reminders] ❌ Erro ao enviar para ${participant.phone}:`, result.error)
+          }
+
+          // Pequeno delay entre mensagens
+          await new Promise(resolve => setTimeout(resolve, 500))
+        } catch (err: any) {
+          errors++
+          console.error(`[Carol Reminders] ❌ Erro ao processar participante:`, err)
+        }
+      }
+    }
+
+    return { sent, errors, skipped }
+  } catch (error: any) {
+    console.error('[Carol Reminders] ❌ Erro geral:', error)
+    return { sent: 0, errors: 1, skipped: 0 }
   }
 }
 

@@ -5,6 +5,7 @@
 
 import { supabaseAdmin } from '@/lib/supabase'
 import { createZApiClient } from '@/lib/z-api'
+import { isAllowedTimeToSendMessage } from '@/lib/whatsapp-carol-ai'
 
 /**
  * Formata data/hora da sessão em PT-BR
@@ -107,7 +108,20 @@ export async function sendWorkshopInviteToFormLead(
 
     const client = createZApiClient(instance.instance_id, instance.token)
 
-    // 4. Formatar mensagem de recepção com as duas próximas opções
+    // 4. Verificar se está em horário permitido para enviar mensagem automática
+    const timeCheck = isAllowedTimeToSendMessage()
+    if (!timeCheck.allowed) {
+      console.log('[Form Automation] ⏰ Fora do horário permitido:', {
+        reason: timeCheck.reason,
+        nextAllowedTime: timeCheck.nextAllowedTime?.toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })
+      })
+      return { 
+        success: false, 
+        error: `Mensagem automática não enviada: ${timeCheck.reason}. Próximo horário permitido: ${timeCheck.nextAllowedTime?.toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })}` 
+      }
+    }
+
+    // 5. Formatar mensagem de recepção com as duas próximas opções
     const greeting = leadName ? `Olá ${leadName}, seja bem-vindo! 👋\n\n` : 'Olá, seja bem-vindo! 👋\n\n'
     
     // Formatar as duas próximas opções
@@ -126,7 +140,7 @@ Teremos aula na próxima ${firstSessionDate.weekday}, ${firstSessionDate.date}. 
 
 ${optionsText}Qual você prefere? 💚`
 
-    // 5. Enviar mensagem de recepção com opções
+    // 6. Enviar mensagem de recepção com opções
     const result = await client.sendTextMessage({
       phone,
       message: receptionMessage,

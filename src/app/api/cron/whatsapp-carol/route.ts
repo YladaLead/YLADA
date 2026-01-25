@@ -5,7 +5,8 @@ import {
   sendPreClassNotifications,
   sendPostClassNotifications,
   sendFollowUpToNonResponders,
-  sendSalesFollowUpAfterClass
+  sendSalesFollowUpAfterClass,
+  sendWorkshopReminders
 } from '@/lib/whatsapp-carol-ai'
 
 /**
@@ -33,7 +34,7 @@ export async function GET(request: NextRequest) {
     }
 
     const searchParams = request.nextUrl.searchParams
-    const tipo = searchParams.get('tipo') // 'welcome', 'remarketing', 'pre-class', 'post-class', 'follow-up', 'sales-follow-up'
+    const tipo = searchParams.get('tipo') // 'welcome', 'remarketing', 'pre-class', 'post-class', 'follow-up', 'sales-follow-up', 'reminders'
 
     let result
 
@@ -49,9 +50,11 @@ export async function GET(request: NextRequest) {
       result = await sendFollowUpToNonResponders()
     } else if (tipo === 'sales-follow-up') {
       result = await sendSalesFollowUpAfterClass()
+    } else if (tipo === 'reminders') {
+      result = await sendWorkshopReminders()
     } else {
       return NextResponse.json(
-        { error: 'Tipo inválido. Use "welcome", "remarketing", "pre-class", "post-class", "follow-up" ou "sales-follow-up"' },
+        { error: 'Tipo inválido. Use "welcome", "remarketing", "pre-class", "post-class", "follow-up", "sales-follow-up" ou "reminders"' },
         { status: 400 }
       )
     }

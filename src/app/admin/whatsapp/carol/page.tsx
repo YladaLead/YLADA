@@ -12,7 +12,7 @@ function CarolControlContent() {
   const [testConversationId, setTestConversationId] = useState('')
   const [testMessage, setTestMessage] = useState('Olá, quero agendar uma aula')
 
-  const handleDisparo = async (tipo: 'welcome' | 'remarketing') => {
+  const handleDisparo = async (tipo: 'welcome' | 'remarketing' | 'reminders') => {
     setLoading(true)
     setResult(null)
 

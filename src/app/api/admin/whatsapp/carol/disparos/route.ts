@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireApiAuth } from '@/lib/api-auth'
-import { sendWelcomeToNonContactedLeads, sendRemarketingToNonParticipants } from '@/lib/whatsapp-carol-ai'
+import { sendWelcomeToNonContactedLeads, sendRemarketingToNonParticipants, sendWorkshopReminders } from '@/lib/whatsapp-carol-ai'
 
 /**
  * POST /api/admin/whatsapp/carol/disparos
@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { tipo } = body // 'welcome' ou 'remarketing'
+    const { tipo } = body // 'welcome', 'remarketing' ou 'reminders'
 
     if (tipo === 'welcome') {
       // Disparar boas-vindas para quem preencheu mas não chamou
@@ -33,9 +33,17 @@ export async function POST(request: NextRequest) {
         tipo: 'remarketing',
         ...result,
       })
+    } else if (tipo === 'reminders') {
+      // Disparar lembretes de reunião
+      const result = await sendWorkshopReminders()
+      return NextResponse.json({
+        success: true,
+        tipo: 'reminders',
+        ...result,
+      })
     } else {
       return NextResponse.json(
-        { error: 'Tipo inválido. Use "welcome" ou "remarketing"' },
+        { error: 'Tipo inválido. Use "welcome", "remarketing" ou "reminders"' },
         { status: 400 }
       )
     }
