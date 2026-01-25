@@ -142,6 +142,15 @@ function AdminDashboardContent() {
       destaque: true
     },
     {
+      id: 'whatsapp-cadastros-workshop',
+      title: 'Cadastros do Workshop',
+      description: 'Listar e processar cadastros em massa',
+      icon: '📋',
+      link: '/admin/whatsapp/cadastros-workshop',
+      color: 'bg-purple-500',
+      destaque: true
+    },
+    {
       id: 'usuarios',
       title: 'Usuários',
       description: 'Gerenciar nutricionistas, coaches, nutras e wellness',
