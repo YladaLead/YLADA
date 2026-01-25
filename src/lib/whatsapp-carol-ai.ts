@@ -181,14 +181,45 @@ export async function processIncomingMessageWithCarol(
     }
 
     // 1. Buscar contexto da conversa
-    const { data: conversation } = await supabaseAdmin
-      .from('whatsapp_conversations')
-      .select('context, customer_name')
-      .eq('id', conversationId)
-      .single()
+    // Usar maybeSingle() para evitar erro se não encontrar (pode ser problema de timing)
+    let conversation: any = null
+    let retries = 0
+    const maxRetries = 3
+    
+    while (!conversation && retries < maxRetries) {
+      if (retries > 0) {
+        // Aguardar um pouco antes de tentar novamente (problema de timing)
+        await new Promise(resolve => setTimeout(resolve, 300 * retries))
+      }
+      
+      const { data: conv, error: convError } = await supabaseAdmin
+        .from('whatsapp_conversations')
+        .select('context, customer_name, name')
+        .eq('id', conversationId)
+        .maybeSingle()
+
+      if (convError) {
+        console.error('[Carol AI] ❌ Erro ao buscar conversa:', convError)
+        if (retries === maxRetries - 1) {
+          return { success: false, error: `Erro ao buscar conversa: ${convError.message}` }
+        }
+        retries++
+        continue
+      }
+
+      if (conv) {
+        conversation = conv
+        break
+      }
+      
+      retries++
+      if (retries < maxRetries) {
+        console.log(`[Carol AI] ⏳ Conversa não encontrada, tentando novamente (${retries}/${maxRetries})...`)
+      }
+    }
 
     if (!conversation) {
-      console.error('[Carol AI] ❌ Conversa não encontrada:', conversationId)
+      console.error('[Carol AI] ❌ Conversa não encontrada após', maxRetries, 'tentativas:', conversationId)
       return { success: false, error: 'Conversa não encontrada' }
     }
 
