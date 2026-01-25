@@ -391,77 +391,7 @@ function WorkshopContent() {
           <div className="text-center py-8 text-gray-500">Carregando...</div>
         ) : (
           <>
-            <div className="bg-white rounded-xl border border-gray-200 p-4">
-              <h2 className="font-semibold text-gray-900 mb-3">Flyer padrão</h2>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Imagem (URL)</label>
-                  <div className="flex gap-2">
-                    <input
-                      value={flyerUrl}
-                      onChange={(e) => setFlyerUrl(e.target.value)}
-                      placeholder="https://..."
-                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg"
-                    />
-                    <label className="px-3 py-2 bg-gray-100 rounded-lg border border-gray-200 cursor-pointer text-sm">
-                      Upload
-                      <input
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        onChange={async (e) => {
-                          const file = e.target.files?.[0]
-                          if (!file) return
-                          try {
-                            setSaving(true)
-                            const url = await uploadFlyer(file)
-                            setFlyerUrl(url)
-                            setSuccess('Flyer enviado. Clique em “Salvar” para aplicar.')
-                          } catch (err: any) {
-                            setError(err.message || 'Erro ao subir flyer')
-                          } finally {
-                            setSaving(false)
-                            e.target.value = ''
-                          }
-                        }}
-                      />
-                    </label>
-                  </div>
-                  <p className="text-xs text-gray-500 mt-1">Esse flyer será enviado como imagem no WhatsApp.</p>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Legenda (opcional)</label>
-                  <input
-                    value={flyerCaption}
-                    onChange={(e) => setFlyerCaption(e.target.value)}
-                    placeholder="Ex.: Aula prática gratuita"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                  />
-                  <p className="text-xs text-gray-500 mt-1">Se vazio, a legenda usa título + data/hora.</p>
-                </div>
-              </div>
-
-              {flyerUrl && (
-                <div className="mt-4">
-                  <div className="text-sm text-gray-700 mb-2">Preview</div>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={flyerUrl} alt="Flyer" className="max-h-80 rounded-lg border border-gray-200" />
-                </div>
-              )}
-
-              <div className="mt-4 flex justify-end">
-                <button
-                  onClick={saveSettings}
-                  disabled={saving}
-                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50"
-                >
-                  {saving ? 'Salvando...' : 'Salvar'}
-                </button>
-              </div>
-            </div>
-
+            {/* AGENDA - PRIMEIRA SEÇÃO */}
             <div className="bg-white rounded-xl border border-gray-200 p-4">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex-1">
@@ -469,7 +399,7 @@ function WorkshopContent() {
                     <h2 className="font-semibold text-gray-900 text-lg">Agenda (próximas aulas)</h2>
                     {sessions.length > 0 && (
                       <span className="px-3 py-1 text-xs font-semibold bg-blue-100 text-blue-700 rounded-full">
-                        {sessions.length} sessão{sessions.length !== 1 ? 'ões' : ''}
+                        📊 Total de {sessions.length} sessão{sessions.length !== 1 ? 'ões' : ''} cadastrada{sessions.length !== 1 ? 's' : ''}
                       </span>
                     )}
                   </div>
@@ -480,7 +410,7 @@ function WorkshopContent() {
                 </div>
                 <div className="flex items-center gap-2">
                   <button
-                    onClick={() => setViewMode(viewMode === 'table' ? 'calendar' : 'table')}
+                    onClick={() => setViewMode('calendar')}
                     className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
                       viewMode === 'calendar'
                         ? 'bg-blue-600 text-white hover:bg-blue-700'
@@ -490,7 +420,7 @@ function WorkshopContent() {
                     📅 Agenda
                   </button>
                   <button
-                    onClick={() => setViewMode(viewMode === 'table' ? 'calendar' : 'table')}
+                    onClick={() => setViewMode('table')}
                     className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
                       viewMode === 'table'
                         ? 'bg-blue-600 text-white hover:bg-blue-700'
@@ -814,12 +744,181 @@ function WorkshopContent() {
                 )
               })()}
 
+              {/* Visualização em Tabela */}
+              {viewMode === 'table' && (
+                <div className="mt-4">
+                  <div className="mb-3">
+                    <h3 className="text-sm font-semibold text-gray-700 mb-1">📋 Lista de Todas as Sessões</h3>
+                    <p className="text-xs text-gray-500">
+                      {sessions.length > 0 
+                        ? `${sessions.length} sessão${sessions.length !== 1 ? 'ões' : ''} cadastrada${sessions.length !== 1 ? 's' : ''}`
+                        : 'Nenhuma sessão cadastrada'}
+                    </p>
+                  </div>
+                  {sessions.length === 0 ? (
+                    <div className="text-center py-8 text-gray-500">
+                      <p>Nenhuma sessão cadastrada ainda.</p>
+                      <p className="text-xs mt-2">Use o botão "Gerar Sessões Automáticas" acima para criar sessões.</p>
+                    </div>
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <table className="min-w-full border-collapse border border-gray-200">
+                        <thead>
+                          <tr className="bg-gray-50">
+                            <th className="border border-gray-200 px-4 py-3 text-left text-xs font-medium text-gray-700">Data/Hora</th>
+                            <th className="border border-gray-200 px-4 py-3 text-left text-xs font-medium text-gray-700">Status</th>
+                            <th className="border border-gray-200 px-4 py-3 text-left text-xs font-medium text-gray-700">Participantes</th>
+                            <th className="border border-gray-200 px-4 py-3 text-left text-xs font-medium text-gray-700">Link Zoom</th>
+                            <th className="border border-gray-200 px-4 py-3 text-center text-xs font-medium text-gray-700">Ações</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {sessions.map(session => (
+                            <tr key={session.id} className="hover:bg-gray-50">
+                              <td className="border border-gray-200 px-4 py-3 text-sm text-gray-900">
+                                {formatPtBR(session.starts_at)}
+                              </td>
+                              <td className="border border-gray-200 px-4 py-3">
+                                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                  session.is_active
+                                    ? 'bg-green-100 text-green-800'
+                                    : 'bg-red-100 text-red-800'
+                                }`}>
+                                  {session.is_active ? '✅ Aberta' : '🔒 Fechada'}
+                                </span>
+                              </td>
+                              <td className="border border-gray-200 px-4 py-3">
+                                {session.confirmed_participants !== undefined && session.confirmed_participants > 0 ? (
+                                  <button
+                                    onClick={() => loadParticipants(session)}
+                                    className="text-sm text-blue-600 hover:underline font-medium"
+                                  >
+                                    ✅ {session.confirmed_participants} confirmado{session.confirmed_participants !== 1 ? 's' : ''} - Clique para ver
+                                  </button>
+                                ) : (
+                                  <span className="text-sm text-gray-500">Sem participantes</span>
+                                )}
+                              </td>
+                              <td className="border border-gray-200 px-4 py-3">
+                                <a
+                                  href={session.zoom_link}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="text-xs text-blue-600 hover:underline break-all"
+                                >
+                                  {session.zoom_link.substring(0, 40)}...
+                                </a>
+                              </td>
+                              <td className="border border-gray-200 px-4 py-3">
+                                <div className="flex items-center justify-center gap-2">
+                                  <button
+                                    onClick={() => toggleActive(session)}
+                                    disabled={saving}
+                                    className={`text-xs px-2 py-1 rounded ${
+                                      session.is_active
+                                        ? 'bg-red-100 text-red-700 hover:bg-red-200'
+                                        : 'bg-green-100 text-green-700 hover:bg-green-200'
+                                    } disabled:opacity-50`}
+                                    title={session.is_active ? 'Fechar' : 'Abrir'}
+                                  >
+                                    {session.is_active ? '🔒' : '✅'}
+                                  </button>
+                                  <button
+                                    onClick={() => deleteSession(session.id)}
+                                    disabled={saving}
+                                    className="text-xs px-2 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200 disabled:opacity-50"
+                                    title="Deletar"
+                                  >
+                                    🗑️
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+              )}
 
               {upcoming.length > 0 && (
                 <div className="mt-4 text-sm text-gray-700">
                   <span className="font-medium">Próxima ativa:</span> {formatPtBR(upcoming[0].starts_at)}
                 </div>
               )}
+            </div>
+
+            {/* FLYER - SEGUNDA SEÇÃO */}
+            <div className="bg-white rounded-xl border border-gray-200 p-4">
+              <h2 className="font-semibold text-gray-900 mb-3">Flyer padrão</h2>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Imagem (URL)</label>
+                  <div className="flex gap-2">
+                    <input
+                      value={flyerUrl}
+                      onChange={(e) => setFlyerUrl(e.target.value)}
+                      placeholder="https://..."
+                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg"
+                    />
+                    <label className="px-3 py-2 bg-gray-100 rounded-lg border border-gray-200 cursor-pointer text-sm">
+                      Upload
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0]
+                          if (!file) return
+                          try {
+                            setSaving(true)
+                            const url = await uploadFlyer(file)
+                            setFlyerUrl(url)
+                            setSuccess('Flyer enviado. Clique em “Salvar” para aplicar.')
+                          } catch (err: any) {
+                            setError(err.message || 'Erro ao subir flyer')
+                          } finally {
+                            setSaving(false)
+                            e.target.value = ''
+                          }
+                        }}
+                      />
+                    </label>
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1">Esse flyer será enviado como imagem no WhatsApp.</p>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Legenda (opcional)</label>
+                  <input
+                    value={flyerCaption}
+                    onChange={(e) => setFlyerCaption(e.target.value)}
+                    placeholder="Ex.: Aula prática gratuita"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Se vazio, a legenda usa título + data/hora.</p>
+                </div>
+              </div>
+
+              {flyerUrl && (
+                <div className="mt-4">
+                  <div className="text-sm text-gray-700 mb-2">Preview</div>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={flyerUrl} alt="Flyer" className="max-h-80 rounded-lg border border-gray-200" />
+                </div>
+              )}
+
+              <div className="mt-4 flex justify-end">
+                <button
+                  onClick={saveSettings}
+                  disabled={saving}
+                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50"
+                >
+                  {saving ? 'Salvando...' : 'Salvar'}
+                </button>
+              </div>
             </div>
 
             {/* Modal de Participantes */}
