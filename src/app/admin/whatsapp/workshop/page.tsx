@@ -140,7 +140,7 @@ function WorkshopContent() {
     try {
       const [settingsRes, sessionsRes] = await Promise.all([
         fetch('/api/admin/whatsapp/workshop-settings', { credentials: 'include' }),
-        fetch('/api/admin/whatsapp/workshop-sessions?onlyConfirmed=true', { credentials: 'include' }),
+        fetch('/api/admin/whatsapp/workshop-sessions', { credentials: 'include' }),
       ])
       const settingsJson = await settingsRes.json()
       const sessionsJson = await sessionsRes.json()
@@ -149,11 +149,8 @@ function WorkshopContent() {
       if (!sessionsRes.ok) throw new Error(sessionsJson.error || 'Erro ao carregar sessões')
 
       setSettings(settingsJson.settings)
-      // Filtrar apenas sessões com participantes confirmados (>= 1)
-      const sessionsWithParticipants = (sessionsJson.sessions || []).filter(
-        (s: WorkshopSession) => (s.confirmed_participants || 0) > 0
-      )
-      setSessions(sessionsWithParticipants)
+      // Mostrar TODAS as sessões (não filtrar por participantes)
+      setSessions(sessionsJson.sessions || [])
 
       setFlyerUrl(settingsJson.settings?.flyer_url || '')
       setFlyerCaption(settingsJson.settings?.flyer_caption || '')
@@ -648,9 +645,8 @@ function WorkshopContent() {
                                 {time}
                               </td>
                               {weekdays.map(day => {
-                                const daySessions = (organized[day]?.[time] || []).filter(
-                                  (s: WorkshopSession) => (s.confirmed_participants || 0) > 0
-                                )
+                                // Mostrar TODAS as sessões, não apenas as com participantes
+                                const daySessions = organized[day]?.[time] || []
                                 return (
                                   <td key={`${day}-${time}`} className="border border-gray-200 px-2 py-2 min-h-[80px]">
                                     {daySessions.map(session => (
