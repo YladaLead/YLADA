@@ -2,37 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireApiAuth } from '@/lib/api-auth'
 import { supabaseAdmin } from '@/lib/supabase'
 import { createZApiClient } from '@/lib/z-api'
-import { generateCarolResponse } from '@/lib/whatsapp-carol-ai'
-
-// Função auxiliar para formatar data/hora
-function formatSessionDateTime(startsAt: string): { weekday: string; date: string; time: string } {
-  const date = new Date(startsAt)
-  const options: Intl.DateTimeFormatOptions = {
-    timeZone: 'America/Sao_Paulo',
-    weekday: 'long',
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-  }
-  
-  const formatter = new Intl.DateTimeFormat('pt-BR', options)
-  const parts = formatter.formatToParts(date)
-  
-  const weekday = parts.find(p => p.type === 'weekday')?.value || ''
-  const day = parts.find(p => p.type === 'day')?.value || ''
-  const month = parts.find(p => p.type === 'month')?.value || ''
-  const year = parts.find(p => p.type === 'year')?.value || ''
-  const hour = parts.find(p => p.type === 'hour')?.value || ''
-  const minute = parts.find(p => p.type === 'minute')?.value || ''
-  
-  return {
-    weekday: weekday.charAt(0).toUpperCase() + weekday.slice(1),
-    date: `${day}/${month}/${year}`,
-    time: `${hour}:${minute}`
-  }
-}
+import { generateCarolResponse, formatSessionDateTime } from '@/lib/whatsapp-carol-ai'
 
 /**
  * POST /api/admin/whatsapp/cadastros-workshop/processar
