@@ -145,17 +145,8 @@ INSTRUÇÕES:
     // Importar função de geração de resposta
     const { generateCarolResponse } = await import('@/lib/whatsapp-carol-ai')
 
-    // Preparar histórico de conversa
-    const history = (conversationHistory || []).map((msg: any) => ({
-      role: msg.role === 'user' ? 'user' as const : 'assistant' as const,
-      content: msg.content,
-    }))
-
-    // Importar função de geração
-    const { generateCarolResponse } = await import('@/lib/whatsapp-carol-ai')
-
     // Preparar histórico de conversa (apenas user/assistant)
-    const historyForCarol = (history || []).map((msg: any) => ({
+    const historyForCarol = (conversationHistory || []).map((msg: any) => ({
       role: msg.role === 'user' ? 'user' as const : 'assistant' as const,
       content: msg.content,
     }))
@@ -178,9 +169,6 @@ INSTRUÇÕES:
     )
     
     // Adicionar dados do sistema à resposta se a pergunta for sobre status
-    let finalResponse = response
-
-    // Adicionar contexto do sistema à resposta se necessário
     let finalResponse = response
 
     // Se a pergunta é sobre lembretes, adicionar dados específicos
