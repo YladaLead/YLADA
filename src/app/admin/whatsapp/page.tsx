@@ -70,6 +70,30 @@ function WhatsAppChatContent() {
   const messagesContainerRef = useRef<HTMLDivElement>(null)
   const shouldAutoScrollRef = useRef(true)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const userClearedSelectionRef = useRef(false) // Flag para indicar que o usuário explicitamente limpou a seleção
+  const hasInitializedFromUrlRef = useRef(false) // Flag para indicar se já inicializou a partir da URL
+
+  // Verificar parâmetro da URL na primeira carga
+  useEffect(() => {
+    if (hasInitializedFromUrlRef.current) return // Já inicializou
+    
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search)
+      const conversationId = params.get('conversation')
+      if (conversationId && conversations.length > 0) {
+        const conv = conversations.find(c => c.id === conversationId)
+        if (conv) {
+          userClearedSelectionRef.current = false // Resetar flag quando seleciona via URL
+          setSelectedConversation(conv)
+          hasInitializedFromUrlRef.current = true
+          // Limpar parâmetro da URL sem recarregar a página
+          const newUrl = new URL(window.location.href)
+          newUrl.searchParams.delete('conversation')
+          window.history.replaceState({}, '', newUrl.toString())
+        }
+      }
+    }
+  }, [conversations])
 
   // Carregar conversas
   useEffect(() => {
@@ -200,7 +224,17 @@ function WhatsAppChatContent() {
       setSelectedConversation((prev) => {
         const list: Conversation[] = conversationsList || []
         if (list.length === 0) return null
-        if (!prev) return list[0]
+        
+        // Se o usuário explicitamente limpou a seleção (clicou em "← Conversas"),
+        // não selecionar automaticamente nenhuma conversa
+        if (userClearedSelectionRef.current) {
+          return null
+        }
+        
+        if (!prev) {
+          // Apenas selecionar automaticamente na primeira carga (quando não há flag de limpeza)
+          return list[0]
+        }
         
         // Buscar conversa selecionada na lista atualizada
         const stillExists = list.find((c) => c.id === prev.id)
@@ -668,7 +702,10 @@ function WhatsAppChatContent() {
               return (
               <button
                 key={conv.id}
-                onClick={() => setSelectedConversation(conv)}
+                onClick={() => {
+                  userClearedSelectionRef.current = false // Resetar flag quando usuário seleciona uma conversa
+                  setSelectedConversation(conv)
+                }}
                 className={`w-full px-3 py-3 border-b border-gray-100 hover:bg-gray-50 text-left ${
                   selectedConversation?.id === conv.id ? 'bg-green-50 border-l-4 border-l-green-500' : ''
                 }`}
@@ -1057,7 +1094,10 @@ function WhatsAppChatContent() {
                     </div>
                     <button
                       type="button"
-                      onClick={() => setSelectedConversation(null)}
+                      onClick={() => {
+                        userClearedSelectionRef.current = true // Marcar que o usuário explicitamente limpou a seleção
+                        setSelectedConversation(null)
+                      }}
                       className="md:hidden shrink-0 px-3 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200"
                       aria-label="Voltar para lista de conversas"
                       title="Conversas"

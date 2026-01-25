@@ -21,6 +21,17 @@ type WorkshopSession = {
   confirmed_participants?: number
 }
 
+type Participant = {
+  conversationId: string
+  phone: string
+  name: string | null
+  hasParticipated: boolean
+  hasNotParticipated: boolean
+  tags: string[]
+  createdAt: string
+  lastMessageAt: string | null
+}
+
 function formatDateTimeLocal(iso: string) {
   const d = new Date(iso)
   const pad = (n: number) => String(n).padStart(2, '0')
@@ -264,6 +275,60 @@ function WorkshopContent() {
     } finally {
       setSaving(false)
     }
+  }
+
+  const loadParticipants = async (session: WorkshopSession) => {
+    try {
+      setLoadingParticipants(true)
+      setError(null)
+      const res = await fetch(`/api/admin/whatsapp/workshop/participants?session_id=${session.id}`, {
+        credentials: 'include',
+      })
+      const json = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(json.error || 'Erro ao carregar participantes')
+      setParticipants(json.participants || [])
+      setSelectedSessionForParticipants(session)
+    } catch (e: any) {
+      setError(e.message || 'Erro ao carregar participantes')
+    } finally {
+      setLoadingParticipants(false)
+    }
+  }
+
+  const markParticipated = async (conversationId: string, participated: boolean) => {
+    try {
+      setSaving(true)
+      setError(null)
+      const res = await fetch('/api/admin/whatsapp/workshop/participants', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ conversationId, participated }),
+      })
+      const json = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(json.error || 'Erro ao marcar participação')
+      setSuccess(json.message || 'Participação atualizada!')
+      // Recarregar participantes
+      if (selectedSessionForParticipants) {
+        await loadParticipants(selectedSessionForParticipants)
+      }
+      // Recarregar sessões para atualizar contagem
+      await loadAll()
+    } catch (e: any) {
+      setError(e.message || 'Erro ao marcar participação')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const formatPhone = (phone: string) => {
+    if (phone.length === 13 && phone.startsWith('55')) {
+      const ddd = phone.substring(2, 4)
+      const part1 = phone.substring(4, 9)
+      const part2 = phone.substring(9)
+      return `(${ddd}) ${part1}-${part2}`
+    }
+    return phone
   }
 
   return (
@@ -626,8 +691,16 @@ function WorkshopContent() {
                                           {formatPtBR(session.starts_at)}
                                         </div>
                                         {session.confirmed_participants !== undefined && (
-                                          <div className="text-xs font-medium text-blue-600 mt-1">
-                                            👥 {session.confirmed_participants} confirmado{session.confirmed_participants !== 1 ? 's' : ''}
+                                          <div className="flex items-center justify-between mt-1">
+                                            <div className="text-xs font-medium text-blue-600">
+                                              👥 {session.confirmed_participants} confirmado{session.confirmed_participants !== 1 ? 's' : ''}
+                                            </div>
+                                            <button
+                                              onClick={() => loadParticipants(session)}
+                                              className="text-xs px-2 py-0.5 bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
+                                            >
+                                              Ver participantes
+                                            </button>
                                           </div>
                                         )}
                                       </div>
@@ -686,8 +759,16 @@ function WorkshopContent() {
                                   {s.is_active ? '✅ Aberta (Carol divulga)' : '🔒 Fechada (não divulgada)'}
                                 </span>
                                 {s.confirmed_participants !== undefined && s.confirmed_participants > 0 && (
-                                  <div className="text-xs font-medium text-blue-600">
-                                    👥 {s.confirmed_participants} confirmado{s.confirmed_participants !== 1 ? 's' : ''}
+                                  <div className="flex items-center justify-between">
+                                    <div className="text-xs font-medium text-blue-600">
+                                      👥 {s.confirmed_participants} confirmado{s.confirmed_participants !== 1 ? 's' : ''}
+                                    </div>
+                                    <button
+                                      onClick={() => loadParticipants(s)}
+                                      className="text-xs px-2 py-0.5 bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
+                                    >
+                                      Ver participantes
+                                    </button>
                                   </div>
                                 )}
                               </div>
@@ -727,6 +808,107 @@ function WorkshopContent() {
                 </div>
               )}
             </div>
+
+            {/* Modal de Participantes */}
+            {selectedSessionForParticipants && (
+              <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+                <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+                  <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+                    <div>
+                      <h2 className="text-xl font-bold text-gray-900">
+                        👥 Participantes Confirmados
+                      </h2>
+                      <p className="text-sm text-gray-500 mt-1">
+                        {formatPtBR(selectedSessionForParticipants.starts_at)}
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => {
+                        setSelectedSessionForParticipants(null)
+                        setParticipants([])
+                      }}
+                      className="text-gray-400 hover:text-gray-600 text-2xl"
+                    >
+                      ×
+                    </button>
+                  </div>
+                  <div className="p-6">
+                    {loadingParticipants ? (
+                      <div className="text-center py-8">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
+                        <p className="text-gray-600">Carregando participantes...</p>
+                      </div>
+                    ) : participants.length === 0 ? (
+                      <div className="text-center py-8">
+                        <p className="text-gray-500">Nenhum participante confirmado para esta sessão.</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-3">
+                        {participants.map((participant) => (
+                          <div
+                            key={participant.conversationId}
+                            className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50"
+                          >
+                            <div className="flex items-start justify-between">
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2 mb-1">
+                                  <p className="font-semibold text-gray-900">
+                                    {participant.name || 'Sem nome'}
+                                  </p>
+                                  {participant.hasParticipated && (
+                                    <span className="text-xs px-2 py-0.5 bg-green-100 text-green-700 rounded-full">
+                                      ✅ Participou
+                                    </span>
+                                  )}
+                                  {participant.hasNotParticipated && (
+                                    <span className="text-xs px-2 py-0.5 bg-red-100 text-red-700 rounded-full">
+                                      ❌ Não participou
+                                    </span>
+                                  )}
+                                </div>
+                                <p className="text-sm text-gray-600">{formatPhone(participant.phone)}</p>
+                                <Link
+                                  href={`/admin/whatsapp?conversation=${participant.conversationId}`}
+                                  className="text-xs text-blue-600 hover:underline mt-1 inline-block"
+                                >
+                                  Ver conversa →
+                                </Link>
+                              </div>
+                              <div className="flex gap-2">
+                                <button
+                                  onClick={() => markParticipated(participant.conversationId, true)}
+                                  disabled={saving || participant.hasParticipated}
+                                  className={`px-3 py-1.5 text-sm rounded-lg ${
+                                    participant.hasParticipated
+                                      ? 'bg-green-100 text-green-700 cursor-not-allowed'
+                                      : 'bg-green-600 text-white hover:bg-green-700'
+                                  } disabled:opacity-50`}
+                                  title="Marcar como participou (1h01 após o horário da aula)"
+                                >
+                                  ✅ Participou
+                                </button>
+                                <button
+                                  onClick={() => markParticipated(participant.conversationId, false)}
+                                  disabled={saving || participant.hasNotParticipated}
+                                  className={`px-3 py-1.5 text-sm rounded-lg ${
+                                    participant.hasNotParticipated
+                                      ? 'bg-red-100 text-red-700 cursor-not-allowed'
+                                      : 'bg-red-600 text-white hover:bg-red-700'
+                                  } disabled:opacity-50`}
+                                  title="Marcar como não participou"
+                                >
+                                  ❌ Não participou
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
           </>
         )}
       </div>
