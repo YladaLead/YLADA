@@ -63,49 +63,10 @@ export async function generateWorkshopSessions(weeksAhead: number = 4): Promise<
     let created = 0
     let errors = 0
 
-    // Buscar links do banco (por horário específico)
-    let zoomLink9h = process.env.ZOOM_LINK_9H || ''
-    let zoomLink15h = process.env.ZOOM_LINK_15H || ''
-
-    // Se não estiver em variável de ambiente, buscar do banco
-    // Buscar sessões ativas e identificar links por horário
-    if (!zoomLink9h || !zoomLink15h) {
-      const { data: existingSessions } = await supabaseAdmin
-        .from('whatsapp_workshop_sessions')
-        .select('starts_at, zoom_link')
-        .eq('area', area)
-        .eq('is_active', true)
-        .gte('starts_at', new Date().toISOString())
-        .order('starts_at', { ascending: true })
-        .limit(50)
-
-      if (existingSessions && existingSessions.length > 0) {
-        // Identificar links por horário (em BRT)
-        for (const session of existingSessions) {
-          const sessionDate = new Date(session.starts_at)
-          // Converter para BRT para verificar horário
-          const brtDate = new Date(sessionDate.toLocaleString('en-US', { timeZone: 'America/Sao_Paulo' }))
-          const hour = brtDate.getHours()
-
-          if (hour === 9 && !zoomLink9h) {
-            zoomLink9h = session.zoom_link
-          } else if (hour === 15 && !zoomLink15h) {
-            zoomLink15h = session.zoom_link
-          }
-
-          // Se já encontrou ambos, pode parar
-          if (zoomLink9h && zoomLink15h) break
-        }
-      }
-    }
-
-    // Se ainda não tiver, avisar
-    if (!zoomLink9h) {
-      console.warn('⚠️ ZOOM_LINK_9H não encontrado. Adicione uma sessão às 9:00 primeiro ou configure ZOOM_LINK_9H no .env')
-    }
-    if (!zoomLink15h) {
-      console.warn('⚠️ ZOOM_LINK_15H não encontrado. Adicione uma sessão às 15:00 primeiro ou configure ZOOM_LINK_15H no .env')
-    }
+    // Usar links fixos (sempre os mesmos)
+    const zoomLink9h = ZOOM_LINKS.LINK_9H
+    const zoomLink15h = ZOOM_LINKS.LINK_15H
+    const zoomLink20h = ZOOM_LINKS.LINK_20H
 
     const sessionsToCreate: Array<{
       title: string
