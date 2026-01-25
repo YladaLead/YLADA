@@ -1383,6 +1383,97 @@ function WhatsAppChatContent() {
                     className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                     disabled={sending || uploading}
                   />
+                  {/* Botão para enviar como cliente e ativar Carol */}
+                  {selectedConversation && getTags(selectedConversation).includes('carol_ativa') && (
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        if (!selectedConversation || !newMessage.trim()) return
+                        if (!confirm('Enviar esta mensagem como se fosse do cliente e deixar a Carol responder automaticamente?')) return
+                        
+                        const messageText = newMessage.trim() // Salvar antes de limpar
+                        
+                        try {
+                          setSending(true)
+                          
+                          // 1. Salvar mensagem como se fosse do cliente
+                          const { data: instance } = await supabase
+                            .from('z_api_instances')
+                            .select('id')
+                            .eq('instance_id', selectedConversation.instance_id)
+                            .single()
+                          
+                          if (!instance) {
+                            throw new Error('Instância não encontrada')
+                          }
+                          
+                          // Salvar mensagem do cliente no banco
+                          await supabase.from('whatsapp_messages').insert({
+                            conversation_id: selectedConversation.id,
+                            instance_id: instance.id,
+                            sender_type: 'customer',
+                            sender_name: selectedConversation.name || 'Cliente',
+                            message: messageText,
+                            message_type: 'text',
+                            status: 'delivered',
+                            is_bot_response: false,
+                          })
+                          
+                          // Atualizar última mensagem da conversa
+                          await supabase
+                            .from('whatsapp_conversations')
+                            .update({
+                              last_message_at: new Date().toISOString(),
+                              last_message_from: 'customer',
+                            })
+                            .eq('id', selectedConversation.id)
+                          
+                          // 2. Limpar campo de mensagem
+                          setNewMessage('')
+                          
+                          // 3. Recarregar mensagens
+                          await loadMessages(selectedConversation.id)
+                          
+                          // 4. Aguardar um pouco e processar com Carol
+                          setTimeout(async () => {
+                            try {
+                              const carolResult = await fetch('/api/admin/whatsapp/test-carol', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                credentials: 'include',
+                                body: JSON.stringify({
+                                  conversationId: selectedConversation.id,
+                                  message: messageText, // Usar o valor salvo
+                                }),
+                              })
+                              
+                              const data = await carolResult.json()
+                              
+                              if (data.success && data.response) {
+                                // Recarregar mensagens para ver a resposta da Carol
+                                await loadMessages(selectedConversation.id)
+                                await loadConversations()
+                              } else {
+                                console.error('Carol não respondeu:', data.error)
+                              }
+                            } catch (err: any) {
+                              console.error('Erro ao processar com Carol:', err)
+                            }
+                          }, 1000)
+                          
+                        } catch (err: any) {
+                          alert(err.message || 'Erro ao enviar mensagem')
+                        } finally {
+                          setSending(false)
+                        }
+                      }}
+                      disabled={!newMessage.trim() || sending || uploading}
+                      className="px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                      title="Enviar como cliente e deixar Carol responder"
+                    >
+                      🤖 Carol
+                    </button>
+                  )}
                   <button
                     onClick={sendMessage}
                     disabled={!newMessage.trim() || sending || uploading}
