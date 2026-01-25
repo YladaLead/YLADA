@@ -395,6 +395,49 @@ function CarolControlContent() {
           })()}
         </div>
 
+        {/* Disparar para Pendentes */}
+        <div className="bg-white rounded-lg shadow p-6 mb-6">
+          <h2 className="text-xl font-bold text-gray-900 mb-4">📤 Disparar para Pendentes</h2>
+          <p className="text-sm text-gray-600 mb-4">
+            Envia mensagens para quem ainda não escolheu agenda ou ainda está na primeira mensagem.
+            <br />• <strong>Primeira mensagem:</strong> Quem ainda não recebeu mensagem da Carol
+            <br />• <strong>Não escolheu agenda:</strong> Quem veio do workshop mas ainda não agendou
+          </p>
+          <button
+            onClick={async () => {
+              if (!confirm('Isso vai enviar mensagens para quem não escolheu agenda e quem ainda está na primeira mensagem. Continuar?')) {
+                return
+              }
+              setLoading(true)
+              try {
+                const response = await fetch('/api/admin/whatsapp/carol/disparar-pendentes', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  credentials: 'include',
+                  body: JSON.stringify({ 
+                    area: 'nutri',
+                    tipos: ['primeira_mensagem', 'nao_escolheu_agenda']
+                  })
+                })
+                const data = await response.json()
+                if (data.success) {
+                  alert(`✅ Disparo concluído!\n\n📊 Estatísticas:\n- Processadas: ${data.processed}\n- Enviadas: ${data.sent}\n- Erros: ${data.errors}\n\n📋 Detalhes:\n${data.details?.slice(0, 20).join('\n') || 'Nenhum detalhe disponível'}${data.details && data.details.length > 20 ? `\n\n... e mais ${data.details.length - 20}` : ''}`)
+                } else {
+                  alert(`Erro: ${data.error}`)
+                }
+              } catch (error: any) {
+                alert(`Erro: ${error.message}`)
+              } finally {
+                setLoading(false)
+              }
+            }}
+            disabled={loading}
+            className="w-full px-4 py-3 bg-orange-600 text-white rounded-lg hover:bg-orange-700 disabled:opacity-50"
+          >
+            {loading ? 'Disparando...' : '📤 Disparar para Pendentes (Primeira Mensagem + Não Escolheu Agenda)'}
+          </button>
+        </div>
+
         {/* Processar Conversas Existentes */}
         <div className="bg-white rounded-lg shadow p-6 mb-6">
           <h2 className="text-xl font-bold text-gray-900 mb-4">🚀 Processar Conversas Existentes</h2>
