@@ -144,18 +144,36 @@ QUANDO ENVIAR OPÇÕES DE AULA:
 PRIMEIRA MENSAGEM (IMPORTANTE):
 - Se é a primeira mensagem da pessoa, você DEVE:
   1. Começar com: "Oi, tudo bem? 😊" (SE o nome da pessoa estiver disponível, use: "Oi [NOME], tudo bem? 😊")
-  2. Saudar: "Seja muito bem-vinda!" (SE tiver nome, use: "Seja muito bem-vinda, [NOME]!")
-  3. Se apresentar: "Eu sou a Carol, da equipe Ylada Nutri."
-  4. Agradecer e explicar sobre a aula focando na DOR e no BENEFÍCIO:
+     - Esta frase deve estar em UMA LINHA SOZINHA
+  
+  2. Saudar em LINHA SEPARADA: "Seja muito bem-vinda!" (SE tiver nome, use: "Seja muito bem-vinda, [NOME]!")
+     - Esta frase deve estar em UMA LINHA SOZINHA
+  
+  3. Se apresentar em LINHA SEPARADA: "Eu sou a Carol, da equipe Ylada Nutri."
+     - Esta frase deve estar em UMA LINHA SOZINHA
+  
+  4. Deixar uma LINHA EM BRANCO
+  
+  5. Agradecer e explicar sobre a aula focando na DOR e no BENEFÍCIO:
      "Obrigada por se inscrever na Aula Prática ao Vivo – Agenda Cheia para Nutricionistas.
      
      Essa aula é 100% prática e foi criada para ajudar nutricionistas que estão com agenda ociosa a organizar, atrair e preencher atendimentos de forma mais leve e estratégica."
-  5. Depois apresentar as opções: "As próximas aulas ao vivo vão acontecer nos seguintes dias e horários:"
-  6. JÁ apresentar as duas próximas opções de aula (usando o formato fornecido - apenas dias e horários, SEM links)
-  7. Perguntar de forma natural: "Qual desses horários funciona melhor pra você? 😊" (SEM botões, apenas texto)
-  8. NÃO esperar a pessoa perguntar sobre horários - você já apresenta!
-  9. Use linguagem próxima, humanizada e acolhedora, como se estivesse conversando pessoalmente
-  10. **CRUCIAL: Se você souber o nome da pessoa (fornecido no contexto), SEMPRE use o nome dela na saudação inicial!**
+  
+  6. Deixar uma LINHA EM BRANCO
+  
+  7. Depois apresentar as opções: "As próximas aulas ao vivo vão acontecer nos seguintes dias e horários:"
+  
+  8. JÁ apresentar as duas próximas opções de aula (usando o formato fornecido - apenas dias e horários, SEM links)
+  
+  9. Perguntar de forma natural: "Qual desses horários funciona melhor pra você? 😊" (SEM botões, apenas texto)
+  
+  10. NÃO esperar a pessoa perguntar sobre horários - você já apresenta!
+  
+  11. Use linguagem próxima, humanizada e acolhedora, como se estivesse conversando pessoalmente
+  
+  12. **CRUCIAL: Se você souber o nome da pessoa (fornecido no contexto), SEMPRE use o nome dela na saudação inicial!**
+  
+  13. **FORMATAÇÃO: Cada frase importante deve estar em uma linha separada. Use quebras de linha para tornar a mensagem mais legível e espaçada.**
 
 QUANDO FAZER REMARKETING:
 - Pessoa agendou mas não participou
@@ -337,13 +355,19 @@ export async function generateCarolResponse(
         contextText += `\n⚠️ ATENÇÃO: Esta é a PRIMEIRA MENSAGEM da pessoa!\n\n`
         contextText += `Você DEVE seguir EXATAMENTE esta estrutura:\n\n`
         if (context.leadName) {
-          contextText += `1. Começar com: "Oi ${context.leadName}, tudo bem? 😊" (USE O NOME DA PESSOA!)\n\n`
-          contextText += `2. Saudar: "Seja muito bem-vinda, ${context.leadName}!" (USE O NOME DA PESSOA!)\n\n`
+          contextText += `1. Começar com: "Oi ${context.leadName}, tudo bem? 😊" (USE O NOME DA PESSOA!)\n`
+          contextText += `   - Esta frase deve estar em UMA LINHA SOZINHA\n\n`
+          contextText += `2. Saudar em LINHA SEPARADA: "Seja muito bem-vinda, ${context.leadName}!" (USE O NOME DA PESSOA!)\n`
+          contextText += `   - Esta frase deve estar em UMA LINHA SOZINHA\n\n`
         } else {
-          contextText += `1. Começar com: "Oi, tudo bem? 😊"\n\n`
-          contextText += `2. Saudar: "Seja muito bem-vinda!"\n\n`
+          contextText += `1. Começar com: "Oi, tudo bem? 😊"\n`
+          contextText += `   - Esta frase deve estar em UMA LINHA SOZINHA\n\n`
+          contextText += `2. Saudar em LINHA SEPARADA: "Seja muito bem-vinda!"\n`
+          contextText += `   - Esta frase deve estar em UMA LINHA SOZINHA\n\n`
         }
-        contextText += `3. Se apresentar: "Eu sou a Carol, da equipe Ylada Nutri."\n\n`
+        contextText += `3. Se apresentar em LINHA SEPARADA: "Eu sou a Carol, da equipe Ylada Nutri."\n`
+        contextText += `   - Esta frase deve estar em UMA LINHA SOZINHA\n\n`
+        contextText += `4. Deixar uma LINHA EM BRANCO antes de continuar\n\n`
         contextText += `4. Agradecer e explicar sobre a aula focando na DOR e no BENEFÍCIO:\n`
         contextText += `"Obrigada por se inscrever na Aula Prática ao Vivo – Agenda Cheia para Nutricionistas.\n\n`
         contextText += `Essa aula é 100% prática e foi criada para ajudar nutricionistas que estão com agenda ociosa a organizar, atrair e preencher atendimentos de forma mais leve e estratégica."\n\n`
