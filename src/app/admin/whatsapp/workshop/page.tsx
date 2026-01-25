@@ -49,6 +49,8 @@ function WorkshopContent() {
   const [newStartsAt, setNewStartsAt] = useState('')
   const [newZoomLink, setNewZoomLink] = useState('')
   const [newActive, setNewActive] = useState(true)
+  const [viewMode, setViewMode] = useState<'table' | 'calendar'>('calendar')
+  const [currentWeek, setCurrentWeek] = useState(0) // 0 = semana atual, 1 = próxima semana, etc.
 
   const upcoming = useMemo(
     () => sessions.filter((s) => s.is_active).sort((a, b) => new Date(a.starts_at).getTime() - new Date(b.starts_at).getTime()),
@@ -309,6 +311,13 @@ function WorkshopContent() {
                     Sessões <span className="font-medium text-red-700">fechadas</span> não aparecem nas opções.
                   </p>
                 </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setViewMode(viewMode === 'table' ? 'calendar' : 'table')}
+                    className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg hover:bg-gray-50"
+                  >
+                    {viewMode === 'table' ? '📅 Ver Agenda' : '📋 Ver Tabela'}
+                  </button>
                 <button
                   onClick={async () => {
                     try {
@@ -321,10 +330,12 @@ function WorkshopContent() {
                         credentials: 'include',
                         body: JSON.stringify({ weeksAhead: 4 }),
                       })
-                      const json = await res.json().catch(() => ({}))
-                      if (!res.ok) throw new Error(json.error || 'Erro ao gerar sessões')
-                      setSuccess(json.message || `Criadas ${json.created} sessões!`)
-                      await loadAll()
+                              const json = await res.json().catch(() => ({}))
+                              if (!res.ok) throw new Error(json.error || 'Erro ao gerar sessões')
+                              setSuccess(json.message || `Criadas ${json.created} sessões!`)
+                              await loadAll()
+                              // Voltar para semana atual após gerar
+                              setCurrentWeek(0)
                     } catch (e: any) {
                       setError(e.message || 'Erro ao gerar sessões')
                     } finally {
@@ -460,6 +471,7 @@ function WorkshopContent() {
                   </tbody>
                 </table>
               </div>
+              )}
 
               {upcoming.length > 0 && (
                 <div className="mt-4 text-sm text-gray-700">
