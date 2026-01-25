@@ -2517,18 +2517,21 @@ export async function sendWorkshopReminders(): Promise<{
       // Formatar data/hora da sessão
       const { weekday, date, time } = formatSessionDateTime(session.starts_at)
       
-      // Verificar se é segunda-feira às 10h00
-      const isMonday10am = sessionDate.getDay() === 1 && sessionDate.getHours() === 10
+      // Converter para horário de Brasília para verificar dia/hora
+      const brasiliaDate = new Date(sessionDate.toLocaleString('en-US', { timeZone: 'America/Sao_Paulo' }))
+      const isMonday10am = brasiliaDate.getDay() === 1 && brasiliaDate.getHours() === 10
       
       // Calcular quando enviar lembrete
       let reminderTime: Date | null = null
       
       if (isMonday10am) {
-        // Exceção: Segunda 10h → lembrete domingo 17h
+        // Exceção: Segunda 10h → lembrete domingo 17h (horário de Brasília)
         const reminderDate = new Date(sessionDate)
         reminderDate.setDate(sessionDate.getDate() - 1) // Domingo
         reminderDate.setHours(17, 0, 0, 0) // 17h00
-        reminderTime = reminderDate
+        // Ajustar para timezone de Brasília
+        const reminderBrasilia = new Date(reminderDate.toLocaleString('en-US', { timeZone: 'America/Sao_Paulo' }))
+        reminderTime = reminderBrasilia
       } else {
         // Padrão: 12h antes da reunião
         reminderTime = new Date(sessionTime - 12 * 60 * 60 * 1000)
@@ -2547,9 +2550,11 @@ export async function sendWorkshopReminders(): Promise<{
 
       // Verificar se está em horário permitido (mas permitir domingo para lembretes especiais)
       const timeCheck = isAllowedTimeToSendMessage()
-      if (!timeCheck.allowed && !isMonday10am) {
+      const nowBrasilia = new Date(now.toLocaleString('en-US', { timeZone: 'America/Sao_Paulo' }))
+      const isSunday = nowBrasilia.getDay() === 0
+      
+      if (!timeCheck.allowed) {
         // Se for domingo e for lembrete de segunda 10h, permitir
-        const isSunday = now.getDay() === 0
         if (!isSunday || !isMonday10am) {
           skipped++
           continue
