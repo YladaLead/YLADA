@@ -1337,6 +1337,10 @@ Carol - Secretária YLADA Nutri`
         } else {
           errors++
         }
+
+        // Delay entre mensagens para não sobrecarregar o WhatsApp
+        // Intervalo de 2-3 segundos é mais seguro para evitar bloqueios
+        await new Promise(resolve => setTimeout(resolve, 2500))
       } catch (error: any) {
         console.error(`[Carol] Erro ao enviar para ${lead.telefone}:`, error)
         errors++
@@ -2075,6 +2079,10 @@ Carol - Secretária YLADA Nutri`
           } else {
             errors++
           }
+
+          // Delay entre mensagens para não sobrecarregar o WhatsApp
+          // Intervalo de 2-3 segundos é mais seguro para evitar bloqueios
+          await new Promise(resolve => setTimeout(resolve, 2500))
         }
       } catch (error: any) {
         console.error(`[Carol] Erro ao enviar follow-up para ${conv.phone}:`, error)
