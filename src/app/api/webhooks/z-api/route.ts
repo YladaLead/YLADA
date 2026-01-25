@@ -1107,10 +1107,27 @@ export async function POST(request: NextRequest) {
         
         const isFirstMessage = !existingMessages || existingMessages.length === 0
 
+        // 🔒 VERIFICAR SE JÁ EXISTE MENSAGEM DA CAROL RECENTE (evitar duplicação)
+        // Se a automação de formulário já enviou mensagem, não enviar novamente
+        const cincoMinutosAtras = new Date(Date.now() - 5 * 60 * 1000).toISOString()
+        const { data: recentCarolMessages } = await supabase
+          .from('whatsapp_messages')
+          .select('id, created_at')
+          .eq('conversation_id', conversationId)
+          .eq('sender_type', 'bot')
+          .eq('sender_name', 'Carol - Secretária')
+          .gte('created_at', cincoMinutosAtras)
+          .limit(1)
+        
+        const hasRecentCarolMessage = recentCarolMessages && recentCarolMessages.length > 0
+
         // Processar com Carol (IA de atendimento)
         // IMPORTANTE: Não processar se mensagem veio do número de notificação
+        // IMPORTANTE: Não processar se já existe mensagem da Carol recente (evitar duplicação)
         const notificationPhone = process.env.Z_API_NOTIFICATION_PHONE
-        const shouldProcessCarol = !notificationPhone || phone.replace(/\D/g, '') !== notificationPhone.replace(/\D/g, '')
+        const shouldProcessCarol = 
+          (!notificationPhone || phone.replace(/\D/g, '') !== notificationPhone.replace(/\D/g, '')) &&
+          !hasRecentCarolMessage // 🔒 Evitar duplicação
         
         if (shouldProcessCarol) {
           console.log('[Z-API Webhook] 🤖 Iniciando processamento com Carol...')
@@ -1139,7 +1156,11 @@ export async function POST(request: NextRequest) {
             })
           }
         } else {
-          console.log('[Z-API Webhook] ⏭️ Pulando Carol (mensagem do número de notificação)')
+          if (hasRecentCarolMessage) {
+            console.log('[Z-API Webhook] ⏭️ Pulando Carol (já existe mensagem da Carol nos últimos 5 minutos - evitando duplicação)')
+          } else {
+            console.log('[Z-API Webhook] ⏭️ Pulando Carol (mensagem do número de notificação)')
+          }
         }
 
         // Também processar automações antigas (se houver regras configuradas)
