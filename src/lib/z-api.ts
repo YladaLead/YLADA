@@ -43,6 +43,13 @@ export interface ZApiSendDocumentParams {
   delayMessage?: number
 }
 
+export interface ZApiSendButtonParams {
+  phone: string
+  message: string // Texto da mensagem
+  buttons: Array<{ id: string; text: string }> // Máximo 3 botões
+  delayMessage?: number
+}
+
 export interface ZApiMessageResponse {
   id?: string
   success: boolean
@@ -359,6 +366,56 @@ export class ZApiClient {
       return { success: true, id: data.id, message: 'Áudio enviado com sucesso' }
     } catch (error: any) {
       return { success: false, error: error.message || 'Erro ao enviar áudio' }
+    }
+  }
+
+  /**
+   * Envia mensagem com botões interativos via Z-API
+   * Endpoint: /send-button
+   */
+  async sendButtonMessage(params: ZApiSendButtonParams): Promise<ZApiMessageResponse> {
+    try {
+      const { phone, message, buttons, delayMessage = 2 } = params
+      const cleanPhone = this.formatInternationalPhone(phone)
+      
+      // Validar: máximo 3 botões
+      if (buttons.length > 3) {
+        return { success: false, error: 'Máximo de 3 botões permitidos' }
+      }
+      
+      // Validar: cada botão precisa de id e text
+      for (const button of buttons) {
+        if (!button.id || !button.text) {
+          return { success: false, error: 'Cada botão precisa de id e text' }
+        }
+        if (button.text.length > 20) {
+          return { success: false, error: 'Texto do botão deve ter no máximo 20 caracteres' }
+        }
+      }
+      
+      const response = await fetch(
+        `${this.baseUrl}/instances/${this.config.instanceId}/token/${this.config.token}/send-button`,
+        {
+          method: 'POST',
+          headers: this.buildHeaders(),
+          body: JSON.stringify({
+            phone: cleanPhone,
+            message,
+            buttons: buttons.map(b => ({ id: b.id, text: b.text })),
+            delayMessage,
+          }),
+        }
+      )
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(async () => ({ message: await response.text() }))
+        throw new Error(errorData.message || `Erro HTTP ${response.status}`)
+      }
+      
+      const data = await response.json()
+      return { success: true, id: data.id, message: 'Mensagem com botões enviada com sucesso' }
+    } catch (error: any) {
+      return { success: false, error: error.message || 'Erro ao enviar mensagem com botões' }
     }
   }
 

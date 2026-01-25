@@ -1,5 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { sendWelcomeToNonContactedLeads, sendRemarketingToNonParticipants } from '@/lib/whatsapp-carol-ai'
+import { 
+  sendWelcomeToNonContactedLeads, 
+  sendRemarketingToNonParticipants,
+  sendPreClassNotifications,
+  sendPostClassNotifications,
+  sendFollowUpToNonResponders,
+  sendSalesFollowUpAfterClass
+} from '@/lib/whatsapp-carol-ai'
 
 /**
  * GET /api/cron/whatsapp-carol
@@ -26,7 +33,7 @@ export async function GET(request: NextRequest) {
     }
 
     const searchParams = request.nextUrl.searchParams
-    const tipo = searchParams.get('tipo') // 'welcome' ou 'remarketing'
+    const tipo = searchParams.get('tipo') // 'welcome', 'remarketing', 'pre-class', 'post-class', 'follow-up', 'sales-follow-up'
 
     let result
 
@@ -34,9 +41,17 @@ export async function GET(request: NextRequest) {
       result = await sendWelcomeToNonContactedLeads()
     } else if (tipo === 'remarketing') {
       result = await sendRemarketingToNonParticipants()
+    } else if (tipo === 'pre-class') {
+      result = await sendPreClassNotifications()
+    } else if (tipo === 'post-class') {
+      result = await sendPostClassNotifications()
+    } else if (tipo === 'follow-up') {
+      result = await sendFollowUpToNonResponders()
+    } else if (tipo === 'sales-follow-up') {
+      result = await sendSalesFollowUpAfterClass()
     } else {
       return NextResponse.json(
-        { error: 'Tipo inválido. Use "welcome" ou "remarketing"' },
+        { error: 'Tipo inválido. Use "welcome", "remarketing", "pre-class", "post-class", "follow-up" ou "sales-follow-up"' },
         { status: 400 }
       )
     }

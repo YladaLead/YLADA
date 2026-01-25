@@ -853,8 +853,16 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Verificar se é clique em botão (Z-API envia buttonId quando botão é clicado)
+    const buttonId = body?.buttonId || body?.button_id || body?.button?.id || body?.data?.buttonId || null
+    const buttonText = body?.buttonText || body?.button_text || body?.button?.text || body?.data?.buttonText || null
+    
     // Extrair message - Z-API pode enviar em múltiplos formatos (e às vezes envia eventos sem mensagem)
-    const message = pickFirstNonEmptyString(
+    // Se for clique em botão, usar o buttonId como mensagem para detecção
+    let message = pickFirstNonEmptyString(
+      // Se for clique em botão, priorizar buttonId
+      buttonId ? buttonId : null,
+      
       // Formato Z-API comum
       body?.text?.message,
       body?.text?.text,
@@ -888,6 +896,10 @@ export async function POST(request: NextRequest) {
       body?.messages?.[0]?.content,
       body?.messages?.[0]?.caption,
     )
+    
+    if (buttonId) {
+      console.log('[Z-API Webhook] 🔘 Clique em botão detectado:', { buttonId, buttonText, message })
+    }
     
     // Extrair instanceId (Z-API pode enviar como 'instance' ou 'instanceId')
     const instanceId = body.instanceId || body.instance || body.instance_id || null

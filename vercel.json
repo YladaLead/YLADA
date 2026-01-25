@@ -2,5 +2,31 @@
   "version": 2,
   "env": {
     "NEXT_PUBLIC_BASE_DOMAIN": "ylada.com"
-  }
+  },
+  "crons": [
+    {
+      "path": "/api/cron/whatsapp-carol?tipo=welcome",
+      "schedule": "0 9 * * *"
+    },
+    {
+      "path": "/api/cron/whatsapp-carol?tipo=follow-up",
+      "schedule": "0 * * * *"
+    },
+    {
+      "path": "/api/cron/whatsapp-carol?tipo=pre-class",
+      "schedule": "0 * * * *"
+    },
+    {
+      "path": "/api/cron/whatsapp-carol?tipo=post-class",
+      "schedule": "0 * * * *"
+    },
+    {
+      "path": "/api/cron/whatsapp-carol?tipo=remarketing",
+      "schedule": "0 10 * * *"
+    },
+    {
+      "path": "/api/cron/whatsapp-carol?tipo=sales-follow-up",
+      "schedule": "0 * * * *"
+    }
+  ]
 }

@@ -34,10 +34,10 @@ REGRAS IMPORTANTES:
 1. Sempre seja acolhedora e profissional
 2. Use emojis moderadamente (1-2 por mensagem)
 3. Seja direta e objetiva
-4. NUNCA repita informações que já foram ditas na conversa
-5. Leia o histórico antes de responder para não repetir
+4. NUNCA repita informações que já foram ditas na conversa - LEIA O HISTÓRICO PRIMEIRO
+5. Se a pessoa já sabe sobre a aula, NÃO explique novamente - apenas responda a pergunta específica
 6. Seja natural e conversacional
-7. Sempre ofereça as opções de dias/horários quando apropriado
+7. Quando enviar opções de aula, use EXATAMENTE o formato fornecido no contexto
 8. Para reagendamentos, seja flexível e ajude a encontrar melhor data
 
 CONTEXTO DA AULA:
@@ -50,7 +50,10 @@ QUANDO ENVIAR OPÇÕES DE AULA:
 - Quando pessoa pergunta sobre dias/horários
 - Quando pessoa quer agendar
 - Quando pessoa pede para reagendar
-- Sempre inclua: dia da semana, data, hora e link do Zoom
+- Use EXATAMENTE o formato das opções fornecidas no contexto (não invente horários)
+- NUNCA inclua links do Zoom nas opções iniciais
+- Apenas mostre dias e horários
+- Quando a pessoa escolher uma opção, você enviará o link específico
 
 QUANDO FAZER REMARKETING:
 - Pessoa agendou mas não participou
@@ -59,17 +62,18 @@ QUANDO FAZER REMARKETING:
 - Seja persistente mas respeitosa
 
 IMPORTANTE - NÃO REPETIR:
-- Leia o histórico da conversa antes de responder
-- Se você já explicou algo, não repita a mesma informação
-- Seja natural e continue a conversa sem repetir o que já foi dito
-- Se a pessoa já sabe sobre a aula, não explique novamente a menos que peça
+- SEMPRE leia o histórico completo antes de responder
+- Se você JÁ explicou o que é a aula, NÃO explique novamente
+- Se você JÁ enviou opções, NÃO envie novamente a menos que a pessoa peça
+- Se a pessoa faz uma pergunta simples, responda APENAS a pergunta, sem repetir contexto
+- Continue a conversa naturalmente, como se fosse uma conversa real
 
-RESPOSTAS DEVE SER:
-- Curta (máximo 3-4 linhas)
+FORMATO DE RESPOSTAS:
+- Curta (máximo 3-4 linhas quando não enviar opções)
 - Clara e direta
 - Acolhedora
-- Sem repetir informações já ditas
-- Com call-to-action quando apropriado`
+- SEM repetir informações já ditas
+- Quando enviar opções, use o formato exato fornecido no contexto`
 
 /**
  * Gera resposta da Carol usando OpenAI
@@ -79,7 +83,7 @@ async function generateCarolResponse(
   conversationHistory: Array<{ role: 'user' | 'assistant'; content: string }> = [],
   context?: {
     tags?: string[]
-    workshopSessions?: Array<{ title: string; starts_at: string; zoom_link: string }>
+    workshopSessions?: Array<{ id?: string; title: string; starts_at: string; zoom_link: string }>
     leadName?: string
     hasScheduled?: boolean
     scheduledDate?: string
@@ -90,8 +94,43 @@ async function generateCarolResponse(
     return 'Olá! Sou a Carol, secretária da YLADA Nutri. Como posso te ajudar? 😊'
   }
 
+  // Função para formatar data/hora corretamente (timezone de São Paulo)
+  // Exportada para uso em outras funções
+  function formatSessionDateTime(startsAt: string): { weekday: string; date: string; time: string } {
+    const date = new Date(startsAt)
+    // Usar timezone de São Paulo
+    const options: Intl.DateTimeFormatOptions = {
+      timeZone: 'America/Sao_Paulo',
+      weekday: 'long',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+    }
+    
+    const formatter = new Intl.DateTimeFormat('pt-BR', options)
+    const parts = formatter.formatToParts(date)
+    
+    const weekday = parts.find(p => p.type === 'weekday')?.value || ''
+    const day = parts.find(p => p.type === 'day')?.value || ''
+    const month = parts.find(p => p.type === 'month')?.value || ''
+    const year = parts.find(p => p.type === 'year')?.value || ''
+    const hour = parts.find(p => p.type === 'hour')?.value || ''
+    const minute = parts.find(p => p.type === 'minute')?.value || ''
+    
+    return {
+      weekday: weekday.charAt(0).toUpperCase() + weekday.slice(1),
+      date: `${day}/${month}/${year}`,
+      time: `${hour}:${minute}`
+    }
+  }
+
   // Construir contexto adicional
   let contextText = ''
+  let formattedSessionsText = ''
+  let shouldSendOptions = false
+  
   if (context) {
     if (context.tags && context.tags.length > 0) {
       contextText += `\nTags da conversa: ${context.tags.join(', ')}\n`
@@ -103,14 +142,31 @@ async function generateCarolResponse(
       contextText += `\n⚠️ IMPORTANTE: Esta pessoa agendou mas NÃO participou da aula. Faça remarketing oferecendo novas opções.\n`
     }
     if (context.workshopSessions && context.workshopSessions.length > 0) {
-      contextText += `\nOpções de aula disponíveis:\n`
+      // Formatar opções de forma bonita - APENAS dias/horários (SEM links)
+      formattedSessionsText = '📅 *Opções de Aula Disponíveis:*\n\n'
       context.workshopSessions.forEach((session, index) => {
-        const date = new Date(session.starts_at)
-        const weekday = date.toLocaleDateString('pt-BR', { weekday: 'long' })
-        const dateStr = date.toLocaleDateString('pt-BR')
-        const time = date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
-        contextText += `${index + 1}. ${weekday}, ${dateStr} às ${time} - ${session.zoom_link}\n`
+        const { weekday, date, time } = formatSessionDateTime(session.starts_at)
+        formattedSessionsText += `*Opção ${index + 1}:*\n`
+        formattedSessionsText += `${weekday}, ${date}\n`
+        formattedSessionsText += `🕒 ${time} (horário de Brasília)\n\n`
       })
+      formattedSessionsText += `💬 *Qual você prefere?*\n`
+      formattedSessionsText += `Digite o número da opção (ex: "1", "opção 1", "primeira") ou o dia/horário (ex: "segunda às 10:00")\n`
+      
+      contextText += `\nIMPORTANTE: Quando a pessoa perguntar sobre horários, dias, agendamento ou quiser agendar, você DEVE usar EXATAMENTE este formato de opções (SEM links, SEM URLs, apenas dias e horários):\n\n${formattedSessionsText}\n\nNUNCA inclua links do Zoom nas opções. Apenas mostre dias e horários. Quando a pessoa escolher uma opção, você enviará o link específico com a imagem.\n`
+      
+      // Verificar se a mensagem do usuário pede opções
+      const messageLower = message.toLowerCase()
+      shouldSendOptions = messageLower.includes('horário') || 
+                         messageLower.includes('horario') ||
+                         messageLower.includes('dia') ||
+                         messageLower.includes('agendar') ||
+                         messageLower.includes('opção') ||
+                         messageLower.includes('opcao') ||
+                         messageLower.includes('disponível') ||
+                         messageLower.includes('disponivel') ||
+                         messageLower.includes('quando') ||
+                         messageLower.includes('quais')
     }
   }
 
@@ -137,11 +193,59 @@ async function generateCarolResponse(
     const completion = await openai.chat.completions.create({
       model: 'gpt-4o-mini', // Modelo mais barato e rápido
       messages,
-      temperature: 0.7,
-      max_tokens: 300, // Respostas curtas
+      temperature: 0.6, // Reduzido para respostas mais consistentes
+      max_tokens: 400, // Aumentado para permitir formatação melhor
     })
 
-    return completion.choices[0]?.message?.content || 'Desculpe, não consegui processar sua mensagem. Pode repetir?'
+    let response = completion.choices[0]?.message?.content || 'Desculpe, não consegui processar sua mensagem. Pode repetir?'
+    
+    // Se deve enviar opções, FORÇAR o formato correto (sem links)
+    if (shouldSendOptions && formattedSessionsText) {
+      // Remover TODOS os links que a IA possa ter adicionado
+      response = response.replace(/\[Link do Zoom\]\([^)]+\)/gi, '')
+      response = response.replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // Remove markdown links mas mantém texto
+      response = response.replace(/https?:\/\/[^\s\)]+/g, '') // Remove URLs
+      response = response.replace(/zoom\.us[^\s\)]*/gi, '') // Remove referências ao Zoom
+      
+      // Verificar se a resposta menciona opções ou horários
+      const mentionsOptions = response.toLowerCase().includes('opção') || 
+                              response.toLowerCase().includes('horário') ||
+                              response.toLowerCase().includes('disponível')
+      
+      if (mentionsOptions) {
+        // Se menciona opções mas não tem o formato correto, substituir completamente
+        const hasCorrectFormat = response.includes('Opção 1:') && 
+                                 !response.includes('http') &&
+                                 !response.includes('zoom')
+        
+        if (!hasCorrectFormat) {
+          // Extrair apenas a saudação inicial (até primeira quebra de linha ou ponto)
+          const lines = response.split('\n')
+          let greeting = lines[0] || 'Olá! 😊'
+          
+          // Limpar saudação de links
+          greeting = greeting.replace(/\[Link do Zoom\]\([^)]+\)/gi, '')
+          greeting = greeting.replace(/https?:\/\/[^\s]+/g, '')
+          greeting = greeting.trim()
+          
+          // Se a saudação está vazia ou muito curta, usar padrão
+          if (greeting.length < 5) {
+            greeting = 'Olá! 😊 Que ótimo que você se inscreveu!'
+          }
+          
+          // Criar resposta com saudação + opções formatadas (SEM links)
+          response = `${greeting}\n\n${formattedSessionsText.trim()}`
+        } else {
+          // Se já tem formato correto, apenas garantir que não tem links
+          response = response.replace(/\[Link do Zoom\]\([^)]+\)/gi, '')
+          response = response.replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+          response = response.replace(/https?:\/\/[^\s\)]+/g, '')
+          response = response.replace(/zoom\.us[^\s\)]*/gi, '')
+        }
+      }
+    }
+    
+    return response
   } catch (error: any) {
     console.error('[Carol AI] Erro ao gerar resposta:', error)
     return 'Olá! Sou a Carol, secretária da YLADA Nutri. Como posso te ajudar? 😊'
@@ -244,28 +348,51 @@ export async function processIncomingMessageWithCarol(
     const tags = Array.isArray(context.tags) ? context.tags : []
     const workshopSessionId = context.workshop_session_id
 
-    // 2. Buscar sessões de workshop disponíveis
-    let workshopSessions: Array<{ title: string; starts_at: string; zoom_link: string }> = []
+    // 2. Buscar sessões de workshop disponíveis (com ID para poder buscar depois)
+    let workshopSessions: Array<{ id: string; title: string; starts_at: string; zoom_link: string }> = []
     if (workshopSessionId) {
       const { data: session } = await supabaseAdmin
         .from('whatsapp_workshop_sessions')
-        .select('title, starts_at, zoom_link')
+        .select('id, title, starts_at, zoom_link')
         .eq('id', workshopSessionId)
         .single()
       if (session) {
         workshopSessions.push(session)
       }
     } else {
-      // Buscar próximas 2 sessões
+      // Buscar próximas 2 sessões (apenas futuras, com buffer de 5 minutos)
+      // Usar horário atual em UTC para comparar com o banco
+      const now = new Date()
+      // Adicionar buffer de 5 minutos para evitar sessões que acabaram de passar
+      const bufferMinutes = 5
+      const minDate = new Date(now.getTime() + bufferMinutes * 60 * 1000)
+      
+      console.log('[Carol AI] 🔍 Buscando sessões futuras:', {
+        now: now.toISOString(),
+        minDate: minDate.toISOString(),
+        area
+      })
+      
       const { data: sessions } = await supabaseAdmin
         .from('whatsapp_workshop_sessions')
-        .select('title, starts_at, zoom_link')
+        .select('id, title, starts_at, zoom_link')
         .eq('area', area)
         .eq('is_active', true)
-        .gte('starts_at', new Date().toISOString())
+        .gte('starts_at', minDate.toISOString())
         .order('starts_at', { ascending: true })
         .limit(2)
+      
       workshopSessions = sessions || []
+      
+      console.log('[Carol AI] 📅 Sessões encontradas:', {
+        count: workshopSessions.length,
+        sessions: workshopSessions.map(s => ({
+          id: s.id,
+          title: s.title,
+          starts_at: s.starts_at,
+          zoom_link: s.zoom_link?.substring(0, 50) + '...'
+        }))
+      })
     }
 
     // 3. Verificar se participou ou não
@@ -273,7 +400,190 @@ export async function processIncomingMessageWithCarol(
     const hasScheduled = tags.includes('recebeu_link_workshop') || workshopSessionId
     const scheduledDate = context.scheduled_date || null
 
-    // 4. Buscar histórico de mensagens
+    // 4. Verificar se a pessoa está escolhendo uma opção de aula
+    // Detectar escolha: "1", "opção 1", "primeira", "segunda às 10:00", etc
+    let selectedSession: { id: string; title: string; starts_at: string; zoom_link: string } | null = null
+    
+    if (workshopSessions.length > 0) {
+      const messageLower = message.toLowerCase().trim()
+      
+      // Detectar por número: "1", "opção 1", "primeira", "segundo", "prefiro a primeira", etc
+      const numberMatch = messageLower.match(/(?:opção|opcao|op|escolho|prefiro|quero)\s*(?:a\s*)?(\d+)|^(\d+)$|(primeira|segunda|terceira|quarta|quinta)|(?:prefiro|escolho|quero)\s*(?:a\s*)?(primeira|segunda|terceira|quarta|quinta)/)
+      
+      if (numberMatch) {
+        let optionIndex = -1
+        if (numberMatch[1]) {
+          optionIndex = parseInt(numberMatch[1]) - 1
+        } else if (numberMatch[2]) {
+          optionIndex = parseInt(numberMatch[2]) - 1
+        } else if (numberMatch[3]) {
+          const words: Record<string, number> = {
+            'primeira': 0,
+            'segunda': 1,
+            'terceira': 2,
+            'quarta': 3,
+            'quinta': 4
+          }
+          optionIndex = words[numberMatch[3]] || -1
+        } else if (numberMatch[4]) {
+          const words: Record<string, number> = {
+            'primeira': 0,
+            'segunda': 1,
+            'terceira': 2,
+            'quarta': 3,
+            'quinta': 4
+          }
+          optionIndex = words[numberMatch[4]] || -1
+        }
+        
+        if (optionIndex >= 0 && optionIndex < workshopSessions.length) {
+          // Usar sessão já encontrada (já tem ID)
+          selectedSession = {
+            id: workshopSessions[optionIndex].id,
+            title: workshopSessions[optionIndex].title,
+            starts_at: workshopSessions[optionIndex].starts_at,
+            zoom_link: workshopSessions[optionIndex].zoom_link
+          }
+        }
+      }
+      
+      // Detectar por dia/horário: "segunda às 10:00", "26/01 às 10:00", etc
+      if (!selectedSession) {
+        for (const sessionItem of workshopSessions) {
+          const { weekday, date, time } = formatSessionDateTime(sessionItem.starts_at)
+          const weekdayLower = weekday.toLowerCase()
+          
+          // Verificar se mensagem contém dia da semana ou data
+          if (
+            messageLower.includes(weekdayLower.substring(0, 5)) || // "segunda", "terça", etc
+            messageLower.includes(date.replace(/\//g, '')) || // "26012026"
+            messageLower.includes(date.split('/')[0]) // "26"
+          ) {
+            // Verificar se também menciona horário
+            if (messageLower.includes(time.replace(':', '')) || messageLower.includes(time)) {
+              // Usar sessão já encontrada (já tem ID)
+              selectedSession = {
+                id: sessionItem.id,
+                title: sessionItem.title,
+                starts_at: sessionItem.starts_at,
+                zoom_link: sessionItem.zoom_link
+              }
+              break
+            }
+          }
+        }
+      }
+    }
+
+    // Se detectou escolha, enviar imagem + link e retornar
+    if (selectedSession) {
+      console.log('[Carol AI] ✅ Escolha detectada:', {
+        sessionId: selectedSession.id,
+        startsAt: selectedSession.starts_at,
+        message
+      })
+      
+      // Buscar instância Z-API
+      const isUUID = instanceId.includes('-') && instanceId.length === 36
+      const { data: instance } = await supabaseAdmin
+        .from('z_api_instances')
+        .select('id, instance_id, token, status')
+        .eq(isUUID ? 'id' : 'instance_id', instanceId)
+        .single()
+      
+      if (!instance) {
+        console.error('[Carol AI] ❌ Instância não encontrada para enviar imagem')
+        // Continuar com resposta normal
+      } else {
+        // Buscar configurações do workshop (flyer)
+        const { data: settings } = await supabaseAdmin
+          .from('whatsapp_workshop_settings')
+          .select('flyer_url, flyer_caption')
+          .eq('area', area)
+          .maybeSingle()
+        
+        const flyerUrl = settings?.flyer_url
+        const flyerCaption = settings?.flyer_caption || ''
+        
+        const client = createZApiClient(instance.instance_id, instance.token)
+        const { weekday, date, time } = formatSessionDateTime(selectedSession.starts_at)
+        
+        // 1. Enviar imagem do flyer (se configurado)
+        if (flyerUrl) {
+          const caption = flyerCaption?.trim() 
+            ? flyerCaption 
+            : `${selectedSession.title}\n${weekday}, ${date} • ${time}`
+          
+          const imageResult = await client.sendImageMessage({
+            phone,
+            image: flyerUrl,
+            caption,
+          })
+          
+          if (imageResult.success) {
+            // Salvar mensagem da imagem
+            await supabaseAdmin.from('whatsapp_messages').insert({
+              conversation_id: conversationId,
+              instance_id: instance.id,
+              z_api_message_id: imageResult.id || null,
+              sender_type: 'bot',
+              sender_name: 'Carol - Secretária',
+              message: caption,
+              message_type: 'image',
+              media_url: flyerUrl,
+              status: 'sent',
+              is_bot_response: true,
+            })
+          }
+        }
+        
+        // 2. Enviar mensagem com link
+        const linkMessage = `✅ *Perfeito! Aqui está o link da sua aula:*\n\n📅 ${weekday}, ${date}\n🕒 ${time} (horário de Brasília)\n\n🔗 ${selectedSession.zoom_link}\n\n✅ Se precisar reagendar, responda REAGENDAR.\n\nQualquer dúvida, estou aqui! 💚`
+        
+        const textResult = await client.sendTextMessage({
+          phone,
+          message: linkMessage,
+        })
+        
+        if (textResult.success) {
+          // Salvar mensagem do link
+          await supabaseAdmin.from('whatsapp_messages').insert({
+            conversation_id: conversationId,
+            instance_id: instance.id,
+            z_api_message_id: textResult.id || null,
+            sender_type: 'bot',
+            sender_name: 'Carol - Secretária',
+            message: linkMessage,
+            message_type: 'text',
+            status: 'sent',
+            is_bot_response: true,
+          })
+          
+          // Atualizar contexto da conversa
+          const prevContext = context
+          const prevTags = Array.isArray(prevContext.tags) ? prevContext.tags : []
+          const newTags = [...new Set([...prevTags, 'recebeu_link_workshop', 'agendou_aula'])]
+          
+          await supabaseAdmin
+            .from('whatsapp_conversations')
+            .update({
+              context: {
+                ...prevContext,
+                tags: newTags,
+                workshop_session_id: selectedSession.id,
+                scheduled_date: selectedSession.starts_at,
+              },
+              last_message_at: new Date().toISOString(),
+              last_message_from: 'bot',
+            })
+            .eq('id', conversationId)
+          
+          return { success: true, response: linkMessage }
+        }
+      }
+    }
+
+    // 5. Buscar histórico de mensagens
     const { data: messages } = await supabaseAdmin
       .from('whatsapp_messages')
       .select('sender_type, message')
@@ -288,13 +598,14 @@ export async function processIncomingMessageWithCarol(
         content: m.message || '',
       }))
 
-    // 5. Gerar resposta da Carol
+    // 6. Gerar resposta da Carol
     console.log('[Carol AI] 💭 Gerando resposta com contexto:', {
       tags,
       hasSessions: workshopSessions.length > 0,
       leadName: conversation.name,
       hasScheduled,
-      participated
+      participated,
+      shouldSendButtons
     })
 
     const carolResponse = await generateCarolResponse(message, conversationHistory, {
@@ -311,7 +622,7 @@ export async function processIncomingMessageWithCarol(
       length: carolResponse?.length
     })
 
-    // 6. Buscar instância Z-API
+    // 7. Buscar instância Z-API
     // IMPORTANTE: instanceId pode ser instance_id (string) ou id (UUID)
     // Se for UUID (36 caracteres com hífens), buscar por id
     // Se for instance_id (32 caracteres sem hífens), buscar por instance_id
@@ -374,7 +685,7 @@ export async function processIncomingMessageWithCarol(
       status: instance.status
     })
 
-    // 7. Enviar resposta
+    // 8. Enviar resposta
     console.log('[Carol AI] 📤 Enviando resposta via Z-API:', {
       phone,
       messageLength: carolResponse?.length,
@@ -399,7 +710,7 @@ export async function processIncomingMessageWithCarol(
       return { success: false, error: sendResult.error || 'Erro ao enviar mensagem via Z-API' }
     }
 
-    // 8. Salvar mensagem no banco
+    // 9. Salvar mensagem no banco
     await supabaseAdmin.from('whatsapp_messages').insert({
       conversation_id: conversationId,
       instance_id: instanceId,
@@ -412,7 +723,7 @@ export async function processIncomingMessageWithCarol(
       is_bot_response: true,
     })
 
-    // 9. Atualizar última mensagem da conversa
+    // 10. Atualizar última mensagem da conversa
     await supabaseAdmin
       .from('whatsapp_conversations')
       .update({
@@ -801,6 +1112,837 @@ Carol - Secretária YLADA Nutri`
     return { sent, errors }
   } catch (error: any) {
     console.error('[Carol] Erro ao processar remarketing:', error)
+    return { sent: 0, errors: 0 }
+  }
+}
+
+/**
+ * Função auxiliar para formatar data/hora (exportada)
+ */
+export function formatSessionDateTime(startsAt: string): { weekday: string; date: string; time: string } {
+  const date = new Date(startsAt)
+  const options: Intl.DateTimeFormatOptions = {
+    timeZone: 'America/Sao_Paulo',
+    weekday: 'long',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+  }
+  
+  const formatter = new Intl.DateTimeFormat('pt-BR', options)
+  const parts = formatter.formatToParts(date)
+  
+  const weekday = parts.find(p => p.type === 'weekday')?.value || ''
+  const day = parts.find(p => p.type === 'day')?.value || ''
+  const month = parts.find(p => p.type === 'month')?.value || ''
+  const year = parts.find(p => p.type === 'year')?.value || ''
+  const hour = parts.find(p => p.type === 'hour')?.value || ''
+  const minute = parts.find(p => p.type === 'minute')?.value || ''
+  
+  return {
+    weekday: weekday.charAt(0).toUpperCase() + weekday.slice(1),
+    date: `${day}/${month}/${year}`,
+    time: `${hour}:${minute}`
+  }
+}
+
+/**
+ * Envia notificações pré-aula para quem agendou
+ * - 24h antes: Lembrete
+ * - 12h antes: Recomendação computador
+ * - 2h antes: Aviso Zoom
+ * - 30min antes: Sala aberta
+ */
+export async function sendPreClassNotifications(): Promise<{
+  sent: number
+  errors: number
+}> {
+  try {
+    const now = new Date()
+    const area = 'nutri'
+    
+    // Buscar instância Z-API
+    const { data: instance } = await supabaseAdmin
+      .from('z_api_instances')
+      .select('id, instance_id, token')
+      .eq('area', area)
+      .eq('is_active', true)
+      .limit(1)
+      .maybeSingle()
+
+    if (!instance) {
+      return { sent: 0, errors: 0 }
+    }
+
+    // Buscar conversas com sessão agendada
+    const { data: conversations } = await supabaseAdmin
+      .from('whatsapp_conversations')
+      .select('id, phone, name, context')
+      .eq('area', area)
+      .eq('status', 'active')
+      .not('context->workshop_session_id', 'is', null)
+
+    if (!conversations || conversations.length === 0) {
+      return { sent: 0, errors: 0 }
+    }
+
+    let sent = 0
+    let errors = 0
+
+    for (const conv of conversations) {
+      try {
+        const context = conv.context || {}
+        const sessionId = context.workshop_session_id
+        if (!sessionId) continue
+
+        // Buscar sessão
+        const { data: session } = await supabaseAdmin
+          .from('whatsapp_workshop_sessions')
+          .select('id, title, starts_at, zoom_link')
+          .eq('id', sessionId)
+          .single()
+
+        if (!session) continue
+
+        const sessionDate = new Date(session.starts_at)
+        const timeDiff = sessionDate.getTime() - now.getTime()
+        const hoursDiff = timeDiff / (1000 * 60 * 60)
+        const minutesDiff = timeDiff / (1000 * 60)
+
+        const { weekday, date, time } = formatSessionDateTime(session.starts_at)
+        const client = createZApiClient(instance.instance_id, instance.token)
+
+        // Verificar qual notificação enviar baseado no tempo restante
+        let message: string | null = null
+        let shouldSend = false
+        const notificationKey = `pre_class_${sessionId}`
+
+        // 24 horas antes (entre 24h e 25h)
+        if (hoursDiff >= 24 && hoursDiff < 25 && !context[notificationKey]?.sent_24h) {
+          message = `Olá! 👋
+
+Lembrete: Sua aula é amanhã!
+
+📅 ${weekday}, ${date}
+🕒 ${time} (horário de Brasília)
+
+🔗 ${session.zoom_link}
+
+Nos vemos lá! 😊
+
+Carol - Secretária YLADA Nutri`
+          shouldSend = true
+          if (!context[notificationKey]) context[notificationKey] = {}
+          context[notificationKey].sent_24h = true
+        }
+        // 12 horas antes (entre 12h e 13h)
+        else if (hoursDiff >= 12 && hoursDiff < 13 && !context[notificationKey]?.sent_12h) {
+          message = `Olá! 
+
+Sua aula é hoje às ${time}! 
+
+💻 *Recomendação importante:*
+
+O ideal é participar pelo computador ou notebook, pois:
+* Compartilhamos slides
+* Fazemos explicações visuais
+* É importante acompanhar e anotar
+
+Pelo celular, a experiência fica limitada e você pode perder partes importantes da aula.
+
+🔗 ${session.zoom_link}
+
+Carol - Secretária YLADA Nutri`
+          shouldSend = true
+          if (!context[notificationKey]) context[notificationKey] = {}
+          context[notificationKey].sent_12h = true
+        }
+        // 2 horas antes (entre 2h e 2h30)
+        else if (hoursDiff >= 2 && hoursDiff < 2.5 && !context[notificationKey]?.sent_2h) {
+          message = `Olá! 
+
+Sua aula começa em 2 horas! ⏰
+
+⚠️ *Aviso importante:*
+
+A sala do Zoom será aberta 10 minutos antes do horário da aula.
+
+⏰ Após o início da aula, não será permitido entrar, ok?
+
+Isso porque os 10 primeiros minutos são essenciais:
+é nesse momento que identificamos os principais desafios das participantes para que a aula seja realmente prática e personalizada.
+
+🔗 ${session.zoom_link}
+
+Nos vemos em breve! 😊
+
+Carol - Secretária YLADA Nutri`
+          shouldSend = true
+          if (!context[notificationKey]) context[notificationKey] = {}
+          context[notificationKey].sent_2h = true
+        }
+        // 10 minutos antes (entre 10min e 12min)
+        else if (minutesDiff >= 10 && minutesDiff < 12 && !context[notificationKey]?.sent_10min) {
+          message = `Olá! 
+
+A sala do Zoom já está aberta! 🎉
+
+Você pode entrar agora:
+
+🔗 ${session.zoom_link}
+
+Nos vemos em 10 minutos! 😊
+
+Carol - Secretária YLADA Nutri`
+          shouldSend = true
+          if (!context[notificationKey]) context[notificationKey] = {}
+          context[notificationKey].sent_10min = true
+        }
+
+        if (shouldSend && message) {
+          const result = await client.sendTextMessage({
+            phone: conv.phone,
+            message,
+          })
+
+          if (result.success) {
+            // Salvar mensagem
+            await supabaseAdmin.from('whatsapp_messages').insert({
+              conversation_id: conv.id,
+              instance_id: instance.id,
+              z_api_message_id: result.id || null,
+              sender_type: 'bot',
+              sender_name: 'Carol - Secretária',
+              message,
+              message_type: 'text',
+              status: 'sent',
+              is_bot_response: true,
+            })
+
+            // Atualizar contexto
+            await supabaseAdmin
+              .from('whatsapp_conversations')
+              .update({
+                context,
+                last_message_at: new Date().toISOString(),
+                last_message_from: 'bot',
+              })
+              .eq('id', conv.id)
+
+            sent++
+          } else {
+            errors++
+          }
+        }
+      } catch (error: any) {
+        console.error(`[Carol] Erro ao enviar notificação pré-aula para ${conv.phone}:`, error)
+        errors++
+      }
+    }
+
+    return { sent, errors }
+  } catch (error: any) {
+    console.error('[Carol] Erro ao processar notificações pré-aula:', error)
+    return { sent: 0, errors: 0 }
+  }
+}
+
+/**
+ * Envia notificações pós-aula para quem participou
+ * - 15min depois: Como foi?
+ * - 2h depois: Como está se sentindo?
+ * - 24h depois: Como está aplicando?
+ */
+export async function sendPostClassNotifications(): Promise<{
+  sent: number
+  errors: number
+}> {
+  try {
+    const now = new Date()
+    const area = 'nutri'
+
+    // Buscar instância Z-API
+    const { data: instance } = await supabaseAdmin
+      .from('z_api_instances')
+      .select('id, instance_id, token')
+      .eq('area', area)
+      .eq('is_active', true)
+      .limit(1)
+      .maybeSingle()
+
+    if (!instance) {
+      return { sent: 0, errors: 0 }
+    }
+
+    // Buscar conversas que participaram da aula
+    const { data: conversations } = await supabaseAdmin
+      .from('whatsapp_conversations')
+      .select('id, phone, name, context')
+      .eq('area', area)
+      .eq('status', 'active')
+
+    if (!conversations || conversations.length === 0) {
+      return { sent: 0, errors: 0 }
+    }
+
+    // Filtrar quem participou
+    const participants = conversations.filter((conv) => {
+      const context = conv.context || {}
+      const tags = Array.isArray(context.tags) ? context.tags : []
+      return tags.includes('participou_aula')
+    })
+
+    if (participants.length === 0) {
+      return { sent: 0, errors: 0 }
+    }
+
+    let sent = 0
+    let errors = 0
+
+    for (const conv of participants) {
+      try {
+        const context = conv.context || {}
+        const sessionId = context.workshop_session_id
+        if (!sessionId) continue
+
+        // Buscar sessão
+        const { data: session } = await supabaseAdmin
+          .from('whatsapp_workshop_sessions')
+          .select('id, title, starts_at, zoom_link')
+          .eq('id', sessionId)
+          .single()
+
+        if (!session) continue
+
+        const sessionDate = new Date(session.starts_at)
+        const sessionEndDate = new Date(sessionDate.getTime() + 45 * 60 * 1000) // 45 minutos depois
+        const timeDiff = now.getTime() - sessionEndDate.getTime()
+        const hoursDiff = timeDiff / (1000 * 60 * 60)
+        const minutesDiff = timeDiff / (1000 * 60)
+
+        const client = createZApiClient(instance.instance_id, instance.token)
+        const notificationKey = `post_class_${sessionId}`
+
+        let message: string | null = null
+        let shouldSend = false
+
+        // 15 minutos depois (entre 15min e 20min)
+        if (minutesDiff >= 15 && minutesDiff < 20 && !context[notificationKey]?.sent_15min) {
+          message = `Olá! 
+
+Espero que tenha gostado da aula! 😊
+
+Como foi sua experiência? Tem alguma dúvida?
+
+Carol - Secretária YLADA Nutri`
+          shouldSend = true
+          if (!context[notificationKey]) context[notificationKey] = {}
+          context[notificationKey].sent_15min = true
+        }
+        // 2 horas depois (entre 2h e 2h30)
+        else if (hoursDiff >= 2 && hoursDiff < 2.5 && !context[notificationKey]?.sent_2h) {
+          message = `Olá! 
+
+Como está se sentindo após a aula? 
+
+Se tiver alguma dúvida sobre o que foi apresentado, estou aqui para ajudar! 😊
+
+Carol - Secretária YLADA Nutri`
+          shouldSend = true
+          if (!context[notificationKey]) context[notificationKey] = {}
+          context[notificationKey].sent_2h = true
+        }
+        // 24 horas depois (entre 24h e 25h)
+        else if (hoursDiff >= 24 && hoursDiff < 25 && !context[notificationKey]?.sent_24h) {
+          message = `Olá! 
+
+Passou um dia desde a aula. Como está sendo aplicar o que aprendeu?
+
+Se precisar de ajuda ou tiver dúvidas, estou aqui! 💚
+
+Carol - Secretária YLADA Nutri`
+          shouldSend = true
+          if (!context[notificationKey]) context[notificationKey] = {}
+          context[notificationKey].sent_24h = true
+        }
+
+        if (shouldSend && message) {
+          const result = await client.sendTextMessage({
+            phone: conv.phone,
+            message,
+          })
+
+          if (result.success) {
+            // Salvar mensagem
+            await supabaseAdmin.from('whatsapp_messages').insert({
+              conversation_id: conv.id,
+              instance_id: instance.id,
+              z_api_message_id: result.id || null,
+              sender_type: 'bot',
+              sender_name: 'Carol - Secretária',
+              message,
+              message_type: 'text',
+              status: 'sent',
+              is_bot_response: true,
+            })
+
+            // Atualizar contexto
+            await supabaseAdmin
+              .from('whatsapp_conversations')
+              .update({
+                context,
+                last_message_at: new Date().toISOString(),
+                last_message_from: 'bot',
+              })
+              .eq('id', conv.id)
+
+            sent++
+          } else {
+            errors++
+          }
+        }
+      } catch (error: any) {
+        console.error(`[Carol] Erro ao enviar notificação pós-aula para ${conv.phone}:`, error)
+        errors++
+      }
+    }
+
+    return { sent, errors }
+  } catch (error: any) {
+    console.error('[Carol] Erro ao processar notificações pós-aula:', error)
+    return { sent: 0, errors: 0 }
+  }
+}
+
+/**
+ * Envia notificações para quem não respondeu após boas-vindas
+ * - 24h depois: Notificação 1
+ * - 48h depois: Notificação 2
+ * - 72h depois: Notificação 3 (última)
+ */
+export async function sendFollowUpToNonResponders(): Promise<{
+  sent: number
+  errors: number
+}> {
+  try {
+    const now = new Date()
+    const area = 'nutri'
+
+    // Buscar instância Z-API
+    const { data: instance } = await supabaseAdmin
+      .from('z_api_instances')
+      .select('id, instance_id, token')
+      .eq('area', area)
+      .eq('is_active', true)
+      .limit(1)
+      .maybeSingle()
+
+    if (!instance) {
+      return { sent: 0, errors: 0 }
+    }
+
+    // Buscar próximas 2 sessões
+    const { data: sessions } = await supabaseAdmin
+      .from('whatsapp_workshop_sessions')
+      .select('title, starts_at, zoom_link')
+      .eq('area', area)
+      .eq('is_active', true)
+      .gte('starts_at', new Date().toISOString())
+      .order('starts_at', { ascending: true })
+      .limit(2)
+
+    // Buscar conversas que receberam boas-vindas mas não responderam
+    const { data: conversations } = await supabaseAdmin
+      .from('whatsapp_conversations')
+      .select('id, phone, name, context, created_at')
+      .eq('area', area)
+      .eq('status', 'active')
+
+    if (!conversations || conversations.length === 0) {
+      return { sent: 0, errors: 0 }
+    }
+
+    let sent = 0
+    let errors = 0
+
+    for (const conv of conversations) {
+      try {
+        const context = conv.context || {}
+        const tags = Array.isArray(context.tags) ? context.tags : []
+        
+        // Verificar se recebeu boas-vindas mas não agendou
+        const receivedWelcome = tags.includes('recebeu_link_workshop') || tags.includes('veio_aula_pratica')
+        const hasScheduled = tags.includes('agendou_aula') || context.workshop_session_id
+        
+        if (!receivedWelcome || hasScheduled) continue
+
+        // Verificar se cliente já enviou mensagem
+        const { data: customerMessage } = await supabaseAdmin
+          .from('whatsapp_messages')
+          .select('id, created_at')
+          .eq('conversation_id', conv.id)
+          .eq('sender_type', 'customer')
+          .order('created_at', { ascending: true })
+          .limit(1)
+          .maybeSingle()
+
+        // Se cliente já enviou mensagem, não enviar follow-up
+        if (customerMessage) continue
+
+        // Calcular tempo desde criação da conversa
+        const convDate = new Date(conv.created_at)
+        const timeDiff = now.getTime() - convDate.getTime()
+        const hoursDiff = timeDiff / (1000 * 60 * 60)
+
+        const client = createZApiClient(instance.instance_id, instance.token)
+        const notificationKey = 'follow_up_welcome'
+
+        let message: string | null = null
+        let shouldSend = false
+
+        // 24 horas depois
+        if (hoursDiff >= 24 && hoursDiff < 25 && !context[notificationKey]?.sent_24h) {
+          message = `Olá! 👋
+
+Vi que você ainda não escolheu um horário para a aula. 
+
+Ainda está disponível? Se precisar de ajuda, é só me chamar! 😊
+
+Carol - Secretária YLADA Nutri`
+          shouldSend = true
+          if (!context[notificationKey]) context[notificationKey] = {}
+          context[notificationKey].sent_24h = true
+        }
+        // 48 horas depois
+        else if (hoursDiff >= 48 && hoursDiff < 49 && !context[notificationKey]?.sent_48h) {
+          // Formatar opções
+          let optionsText = ''
+          if (sessions && sessions.length > 0) {
+            sessions.forEach((session, index) => {
+              const { weekday, date, time } = formatSessionDateTime(session.starts_at)
+              optionsText += `\n*Opção ${index + 1}:*\n${weekday}, ${date}\n🕒 ${time} (horário de Brasília)\n\n`
+            })
+          }
+
+          message = `Olá! 
+
+Ainda estou aqui caso queira agendar a aula. 
+
+Se alguma dessas opções funcionar, é só me avisar:
+
+📅 *Opções Disponíveis:*
+${optionsText}Qualquer dúvida, estou à disposição! 💚
+
+Carol - Secretária YLADA Nutri`
+          shouldSend = true
+          if (!context[notificationKey]) context[notificationKey] = {}
+          context[notificationKey].sent_48h = true
+        }
+        // 72 horas depois (última)
+        else if (hoursDiff >= 72 && hoursDiff < 73 && !context[notificationKey]?.sent_72h) {
+          message = `Olá! 
+
+Esta é minha última mensagem sobre a aula. Se ainda tiver interesse, me avise! 
+
+Caso contrário, tudo bem também. 😊
+
+Carol - Secretária YLADA Nutri`
+          shouldSend = true
+          if (!context[notificationKey]) context[notificationKey] = {}
+          context[notificationKey].sent_72h = true
+          // Adicionar tag
+          const newTags = [...new Set([...tags, 'sem_resposta'])]
+          context.tags = newTags
+        }
+
+        if (shouldSend && message) {
+          const result = await client.sendTextMessage({
+            phone: conv.phone,
+            message,
+          })
+
+          if (result.success) {
+            // Salvar mensagem
+            await supabaseAdmin.from('whatsapp_messages').insert({
+              conversation_id: conv.id,
+              instance_id: instance.id,
+              z_api_message_id: result.id || null,
+              sender_type: 'bot',
+              sender_name: 'Carol - Secretária',
+              message,
+              message_type: 'text',
+              status: 'sent',
+              is_bot_response: true,
+            })
+
+            // Atualizar contexto
+            await supabaseAdmin
+              .from('whatsapp_conversations')
+              .update({
+                context,
+                last_message_at: new Date().toISOString(),
+                last_message_from: 'bot',
+              })
+              .eq('id', conv.id)
+
+            sent++
+          } else {
+            errors++
+          }
+        }
+      } catch (error: any) {
+        console.error(`[Carol] Erro ao enviar follow-up para ${conv.phone}:`, error)
+        errors++
+      }
+    }
+
+    return { sent, errors }
+  } catch (error: any) {
+    console.error('[Carol] Erro ao processar follow-up:', error)
+    return { sent: 0, errors: 0 }
+  }
+}
+
+/**
+ * Processo de fechamento/vendas pós-aula
+ * Ativado quando admin adiciona tag "participou_aula"
+ * Trabalha o emocional e lembra o motivo
+ */
+export async function sendSalesFollowUpAfterClass(): Promise<{
+  sent: number
+  errors: number
+}> {
+  try {
+    const now = new Date()
+    const area = 'nutri'
+
+    // Buscar instância Z-API
+    const { data: instance } = await supabaseAdmin
+      .from('z_api_instances')
+      .select('id, instance_id, token')
+      .eq('area', area)
+      .eq('is_active', true)
+      .limit(1)
+      .maybeSingle()
+
+    if (!instance) {
+      return { sent: 0, errors: 0 }
+    }
+
+    // Buscar conversas que participaram mas ainda não receberam follow-up de vendas
+    const { data: conversations } = await supabaseAdmin
+      .from('whatsapp_conversations')
+      .select('id, phone, name, context')
+      .eq('area', area)
+      .eq('status', 'active')
+
+    if (!conversations || conversations.length === 0) {
+      return { sent: 0, errors: 0 }
+    }
+
+    // Filtrar quem participou mas não recebeu follow-up de vendas
+    const participants = conversations.filter((conv) => {
+      const context = conv.context || {}
+      const tags = Array.isArray(context.tags) ? context.tags : []
+      const hasParticipated = tags.includes('participou_aula')
+      const hasReceivedSalesFollowUp = context.sales_follow_up_sent === true
+      const isClient = tags.includes('cliente_nutri')
+      
+      return hasParticipated && !hasReceivedSalesFollowUp && !isClient
+    })
+
+    if (participants.length === 0) {
+      return { sent: 0, errors: 0 }
+    }
+
+    let sent = 0
+    let errors = 0
+
+    for (const conv of participants) {
+      try {
+        const context = conv.context || {}
+        const sessionId = context.workshop_session_id
+        const leadName = conv.name || 'querido(a)'
+        
+        // Buscar sessão para saber quando foi
+        let sessionDate: Date | null = null
+        if (sessionId) {
+          const { data: session } = await supabaseAdmin
+            .from('whatsapp_workshop_sessions')
+            .select('starts_at')
+            .eq('id', sessionId)
+            .single()
+          
+          if (session) {
+            sessionDate = new Date(session.starts_at)
+          }
+        }
+
+        const client = createZApiClient(instance.instance_id, instance.token)
+        const notificationKey = 'sales_follow_up'
+
+        // Calcular tempo desde a aula (se tiver data)
+        let hoursSinceClass = 0
+        if (sessionDate) {
+          const sessionEndDate = new Date(sessionDate.getTime() + 45 * 60 * 1000) // 45 minutos depois
+          const timeDiff = now.getTime() - sessionEndDate.getTime()
+          hoursSinceClass = timeDiff / (1000 * 60 * 60)
+        }
+
+        let message: string | null = null
+        let shouldSend = false
+
+        // Primeira mensagem de fechamento (após 3 horas da aula)
+        if (hoursSinceClass >= 3 && hoursSinceClass < 4 && !context[notificationKey]?.sent_3h) {
+          message = `Olá ${leadName}! 💚
+
+Espero que a aula tenha sido transformadora para você! 
+
+Lembro que você veio porque tinha um sonho, um objetivo... algo que te moveu a buscar essa mudança. 🌟
+
+Agora que você já viu o caminho, que tal darmos o próximo passo juntas?
+
+Estou aqui para te ajudar a transformar esse sonho em realidade. 
+
+Quer conversar sobre como podemos fazer isso acontecer? 😊
+
+Carol - Secretária YLADA Nutri`
+          shouldSend = true
+          if (!context[notificationKey]) context[notificationKey] = {}
+          context[notificationKey].sent_3h = true
+        }
+        // Segunda mensagem (após 6 horas)
+        else if (hoursSinceClass >= 6 && hoursSinceClass < 7 && !context[notificationKey]?.sent_6h) {
+          message = `Olá ${leadName}! 
+
+Pensando em você aqui... 💭
+
+Sabe, muitas vezes a gente sabe o que precisa fazer, mas falta aquele empurrãozinho, aquele apoio para realmente começar.
+
+Você não precisa fazer isso sozinha. 
+
+Estou aqui para te apoiar em cada passo dessa jornada. 
+
+Que tal conversarmos sobre como podemos fazer isso acontecer? 💚
+
+Carol - Secretária YLADA Nutri`
+          shouldSend = true
+          if (!context[notificationKey]) context[notificationKey] = {}
+          context[notificationKey].sent_6h = true
+        }
+        // Terceira mensagem (após 12 horas)
+        else if (hoursSinceClass >= 12 && hoursSinceClass < 13 && !context[notificationKey]?.sent_12h) {
+          message = `Olá ${leadName}! 
+
+Lembro do motivo que te trouxe até aqui... 🌟
+
+Você tinha um objetivo, um sonho. Algo que te moveu a buscar essa mudança.
+
+Não deixe que esse momento passe. Não deixe que a rotina te distraia do que realmente importa.
+
+Você merece ver esse sonho se tornar realidade. 
+
+Estou aqui para te ajudar. Vamos conversar? 💚
+
+Carol - Secretária YLADA Nutri`
+          shouldSend = true
+          if (!context[notificationKey]) context[notificationKey] = {}
+          context[notificationKey].sent_12h = true
+        }
+        // Quarta mensagem (após 24 horas)
+        else if (hoursSinceClass >= 24 && hoursSinceClass < 25 && !context[notificationKey]?.sent_24h) {
+          message = `Olá ${leadName}! 
+
+Passou um dia desde a aula... 
+
+E eu fico pensando: será que você já começou a aplicar o que aprendeu? 
+
+Ou será que ainda está esperando o "momento perfeito"? 
+
+Sabe, o momento perfeito não existe. O momento certo é AGORA. 
+
+Você já deu o primeiro passo ao participar da aula. 
+
+Agora é hora de dar o segundo passo e transformar isso em realidade. 
+
+Estou aqui para te ajudar. Vamos conversar? 💚
+
+Carol - Secretária YLADA Nutri`
+          shouldSend = true
+          if (!context[notificationKey]) context[notificationKey] = {}
+          context[notificationKey].sent_24h = true
+        }
+        // Quinta mensagem (após 48 horas - última)
+        else if (hoursSinceClass >= 48 && hoursSinceClass < 49 && !context[notificationKey]?.sent_48h) {
+          message = `Olá ${leadName}! 
+
+Esta é minha última mensagem sobre isso... 
+
+Mas antes, quero te lembrar: você veio até aqui por um motivo. 
+
+Você tinha um sonho, um objetivo. Algo que te moveu. 
+
+Não deixe que esse momento passe. Não deixe que a vida te distraia do que realmente importa. 
+
+Você merece ver esse sonho se tornar realidade. 
+
+Se ainda quiser conversar sobre como podemos fazer isso acontecer, estou aqui. 
+
+Mas não deixe passar mais tempo. O momento é AGORA. 💚
+
+Carol - Secretária YLADA Nutri`
+          shouldSend = true
+          if (!context[notificationKey]) context[notificationKey] = {}
+          context[notificationKey].sent_48h = true
+          context.sales_follow_up_sent = true
+        }
+
+        if (shouldSend && message) {
+          const result = await client.sendTextMessage({
+            phone: conv.phone,
+            message,
+          })
+
+          if (result.success) {
+            // Salvar mensagem
+            await supabaseAdmin.from('whatsapp_messages').insert({
+              conversation_id: conv.id,
+              instance_id: instance.id,
+              z_api_message_id: result.id || null,
+              sender_type: 'bot',
+              sender_name: 'Carol - Secretária',
+              message,
+              message_type: 'text',
+              status: 'sent',
+              is_bot_response: true,
+            })
+
+            // Atualizar contexto
+            await supabaseAdmin
+              .from('whatsapp_conversations')
+              .update({
+                context,
+                last_message_at: new Date().toISOString(),
+                last_message_from: 'bot',
+              })
+              .eq('id', conv.id)
+
+            sent++
+          } else {
+            errors++
+          }
+        }
+      } catch (error: any) {
+        console.error(`[Carol] Erro ao enviar follow-up de vendas para ${conv.phone}:`, error)
+        errors++
+      }
+    }
+
+    return { sent, errors }
+  } catch (error: any) {
+    console.error('[Carol] Erro ao processar follow-up de vendas:', error)
     return { sent: 0, errors: 0 }
   }
 }
