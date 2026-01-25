@@ -934,40 +934,122 @@ function WhatsAppChatContent() {
                   <div className="flex items-center gap-2 shrink-0">
                     {/* Botão Desativar Carol (visível quando ativa) */}
                     {selectedConversation && getTags(selectedConversation).includes('carol_ativa') && (
-                      <button
-                        type="button"
-                        onClick={async () => {
-                          if (!confirm('Desativar Carol nesta conversa? Ela não responderá mais automaticamente.')) {
-                            return
-                          }
-                          try {
-                            const currentTags = getTags(selectedConversation)
-                            const newTags = currentTags
-                              .filter(t => t !== 'carol_ativa')
-                              .concat('atendimento_manual')
+                      <>
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            if (!selectedConversation) return
                             
-                            await patchConversation(selectedConversation.id, {
-                              context: {
-                                ...(selectedConversation.context as any),
-                                tags: newTags,
-                                carol_disabled_at: new Date().toISOString(),
+                            // Buscar sessões disponíveis (incluindo quarta 20h)
+                            try {
+                              const res = await fetch('/api/admin/whatsapp/workshop-sessions?area=nutri&onlyActive=true', {
+                                credentials: 'include',
+                              })
+                              const data = await res.json()
+                              const sessions = data.sessions || []
+                              
+                              // Filtrar apenas futuras
+                              const now = new Date()
+                              const futureSessions = sessions.filter((s: any) => new Date(s.starts_at) > now)
+                              
+                              if (futureSessions.length === 0) {
+                                alert('Não há sessões disponíveis. Crie uma sessão primeiro em /admin/whatsapp/workshop')
+                                return
                               }
-                            })
-                            
-                            alert('✅ Carol desativada com sucesso!')
-                            await loadConversations()
-                            if (selectedConversation) {
-                              await loadMessages(selectedConversation.id)
+                              
+                              // Mostrar opções para o usuário escolher
+                              const sessionOptions = futureSessions.map((s: any, idx: number) => {
+                                const date = new Date(s.starts_at)
+                                const weekday = date.toLocaleDateString('pt-BR', { weekday: 'long' })
+                                const dateStr = date.toLocaleDateString('pt-BR')
+                                const timeStr = date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+                                return `${idx + 1}. ${weekday}, ${dateStr} às ${timeStr}`
+                              }).join('\n')
+                              
+                              const escolha = prompt(`Escolha uma sessão para enviar:\n\n${sessionOptions}\n\nDigite o número da opção:`)
+                              
+                              if (!escolha) return
+                              
+                              const idx = parseInt(escolha) - 1
+                              if (idx < 0 || idx >= futureSessions.length) {
+                                alert('Opção inválida')
+                                return
+                              }
+                              
+                              const selectedSession = futureSessions[idx]
+                              
+                              if (!confirm(`Enviar opção de ${new Date(selectedSession.starts_at).toLocaleDateString('pt-BR')} para ${selectedConversation.name || 'esta pessoa'}?`)) {
+                                return
+                              }
+                              
+                              try {
+                                setSending(true)
+                                const res = await fetch('/api/admin/whatsapp/carol/enviar-opcao', {
+                                  method: 'POST',
+                                  headers: { 'Content-Type': 'application/json' },
+                                  credentials: 'include',
+                                  body: JSON.stringify({
+                                    conversationId: selectedConversation.id,
+                                    sessionId: selectedSession.id,
+                                  }),
+                                })
+                                
+                                const data = await res.json()
+                                if (!res.ok) throw new Error(data.error || 'Erro ao enviar')
+                                
+                                alert('✅ Opção enviada! A Carol continuará o fluxo automaticamente.')
+                                await loadMessages(selectedConversation.id)
+                                await loadConversations()
+                              } catch (err: any) {
+                                alert(err.message || 'Erro ao enviar opção')
+                              } finally {
+                                setSending(false)
+                              }
+                            } catch (err: any) {
+                              alert(err.message || 'Erro ao buscar sessões')
                             }
-                          } catch (err: any) {
-                            alert(err.message || 'Erro ao desativar Carol')
-                          }
-                        }}
-                        className="px-3 py-1.5 text-xs font-medium bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors"
-                        title="Desativar Carol - Ela não responderá mais automaticamente"
-                      >
-                        🚫 Desativar Carol
-                      </button>
+                          }}
+                          disabled={sending}
+                          className="px-3 py-1.5 text-xs font-medium bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition-colors disabled:opacity-50"
+                          title="Enviar opção de sessão e deixar Carol continuar"
+                        >
+                          📅 Enviar Opção
+                        </button>
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            if (!confirm('Desativar Carol nesta conversa? Ela não responderá mais automaticamente.')) {
+                              return
+                            }
+                            try {
+                              const currentTags = getTags(selectedConversation)
+                              const newTags = currentTags
+                                .filter(t => t !== 'carol_ativa')
+                                .concat('atendimento_manual')
+                              
+                              await patchConversation(selectedConversation.id, {
+                                context: {
+                                  ...(selectedConversation.context as any),
+                                  tags: newTags,
+                                  carol_disabled_at: new Date().toISOString(),
+                                }
+                              })
+                              
+                              alert('✅ Carol desativada com sucesso!')
+                              await loadConversations()
+                              if (selectedConversation) {
+                                await loadMessages(selectedConversation.id)
+                              }
+                            } catch (err: any) {
+                              alert(err.message || 'Erro ao desativar Carol')
+                            }
+                          }}
+                          className="px-3 py-1.5 text-xs font-medium bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors"
+                          title="Desativar Carol - Ela não responderá mais automaticamente"
+                        >
+                          🚫 Desativar Carol
+                        </button>
+                      </>
                     )}
                     <button
                       type="button"
