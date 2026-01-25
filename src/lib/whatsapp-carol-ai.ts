@@ -34,8 +34,11 @@ REGRAS IMPORTANTES:
 1. Sempre seja acolhedora e profissional
 2. Use emojis moderadamente (1-2 por mensagem)
 3. Seja direta e objetiva
-4. Sempre ofereça as opções de dias/horários quando apropriado
-5. Para reagendamentos, seja flexível e ajude a encontrar melhor data
+4. NUNCA repita informações que já foram ditas na conversa
+5. Leia o histórico antes de responder para não repetir
+6. Seja natural e conversacional
+7. Sempre ofereça as opções de dias/horários quando apropriado
+8. Para reagendamentos, seja flexível e ajude a encontrar melhor data
 
 CONTEXTO DA AULA:
 - Nome: "Aula Prática ao Vivo de Como Encher a Agenda"
@@ -55,10 +58,17 @@ QUANDO FAZER REMARKETING:
 - Ofereça novas opções de data/hora
 - Seja persistente mas respeitosa
 
+IMPORTANTE - NÃO REPETIR:
+- Leia o histórico da conversa antes de responder
+- Se você já explicou algo, não repita a mesma informação
+- Seja natural e continue a conversa sem repetir o que já foi dito
+- Se a pessoa já sabe sobre a aula, não explique novamente a menos que peça
+
 RESPOSTAS DEVE SER:
 - Curta (máximo 3-4 linhas)
 - Clara e direta
 - Acolhedora
+- Sem repetir informações já ditas
 - Com call-to-action quando apropriado`
 
 /**
@@ -104,17 +114,24 @@ async function generateCarolResponse(
     }
   }
 
-  const messages: OpenAI.Chat.ChatCompletionMessageParam[] = [
-    {
-      role: 'system',
-      content: CAROL_SYSTEM_PROMPT + contextText,
-    },
-    ...conversationHistory.slice(-6), // Últimas 6 mensagens
-    {
-      role: 'user',
-      content: message,
-    },
-  ]
+    // Incluir mais mensagens do histórico para melhor contexto (últimas 10 ao invés de 6)
+    const messages: OpenAI.Chat.ChatCompletionMessageParam[] = [
+      {
+        role: 'system',
+        content: CAROL_SYSTEM_PROMPT + contextText,
+      },
+      ...conversationHistory.slice(-10), // Últimas 10 mensagens para melhor contexto
+      {
+        role: 'user',
+        content: message,
+      },
+    ]
+    
+    console.log('[Carol AI] 📜 Histórico de mensagens:', {
+      totalHistory: conversationHistory.length,
+      usingLast: Math.min(10, conversationHistory.length),
+      messages: messages.map(m => ({ role: m.role, contentLength: typeof m.content === 'string' ? m.content.length : 0 }))
+    })
 
   try {
     const completion = await openai.chat.completions.create({
