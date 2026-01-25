@@ -342,7 +342,8 @@ export async function generateCarolResponse(
     }
     if (context.workshopSessions && context.workshopSessions.length > 0) {
       // Formatar opções de forma bonita - APENAS dias/horários (SEM links)
-      formattedSessionsText = '📅 *Opções de Aula Disponíveis:*\n\n'
+      // Nota: Usar 🗓️ em vez de 📅 pois o emoji 📅 mostra data atual do sistema
+      formattedSessionsText = '🗓️ *Opções de Aula Disponíveis:*\n\n'
       context.workshopSessions.forEach((session, index) => {
         const { weekday, date, time } = formatSessionDateTime(session.starts_at)
         formattedSessionsText += `*Opção ${index + 1}:*\n`
@@ -961,7 +962,8 @@ export async function processIncomingMessageWithCarol(
         }
         
         // 2. Enviar mensagem com link (mais entusiasmada e criando expectativa)
-        const linkMessage = `✅ *Perfeito! Você vai adorar essa aula!* 🎉\n\n📅 ${weekday}, ${date}\n🕒 ${time} (horário de Brasília)\n\n🔗 ${selectedSession.zoom_link}\n\n💡 *Dica importante:* A sala do Zoom será aberta 10 minutos antes do horário da aula. Chegue com antecedência para garantir sua vaga! 😊\n\nEstou super animada para te ver lá! Qualquer dúvida, é só me chamar! 💚`
+        // Nota: Não usar emoji 📅 pois ele mostra a data atual do sistema, não a data da aula
+        const linkMessage = `✅ *Perfeito! Você vai adorar essa aula!* 🎉\n\n🗓️ ${weekday}, ${date}\n🕒 ${time} (horário de Brasília)\n\n🔗 ${selectedSession.zoom_link}\n\n💡 *Dica importante:* A sala do Zoom será aberta 10 minutos antes do horário da aula. Chegue com antecedência para garantir sua vaga! 😊\n\nEstou super animada para te ver lá! Qualquer dúvida, é só me chamar! 💚`
         
         const textResult = await client.sendTextMessage({
           phone,
