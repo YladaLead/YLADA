@@ -312,13 +312,41 @@ export async function processIncomingMessageWithCarol(
       .single()
 
     if (instanceError) {
-      console.error('[Carol AI] ❌ Erro ao buscar instância:', instanceError)
+      console.error('[Carol AI] ❌ Erro ao buscar instância:', {
+        error: instanceError,
+        code: instanceError.code,
+        message: instanceError.message,
+        instanceId,
+        isUUID,
+        searchField: isUUID ? 'id' : 'instance_id'
+      })
+      
+      // Tentar buscar todas as instâncias para debug
+      const { data: allInstances } = await supabaseAdmin
+        .from('z_api_instances')
+        .select('id, instance_id, name, status, area')
+        .limit(10)
+      console.log('[Carol AI] 🔍 Todas as instâncias no banco:', allInstances)
+      
       return { success: false, error: `Erro ao buscar instância: ${instanceError.message}` }
     }
 
     if (!instance) {
-      console.error('[Carol AI] ❌ Instância Z-API não encontrada:', { instanceId })
-      return { success: false, error: 'Instância Z-API não encontrada' }
+      console.error('[Carol AI] ❌ Instância Z-API não encontrada:', { 
+        instanceId,
+        isUUID,
+        searchField: isUUID ? 'id' : 'instance_id',
+        length: instanceId.length
+      })
+      
+      // Tentar buscar todas as instâncias para debug
+      const { data: allInstances } = await supabaseAdmin
+        .from('z_api_instances')
+        .select('id, instance_id, name, status, area')
+        .limit(10)
+      console.log('[Carol AI] 🔍 Todas as instâncias no banco (para debug):', allInstances)
+      
+      return { success: false, error: `Instância Z-API não encontrada. InstanceId buscado: ${instanceId}` }
     }
 
     console.log('[Carol AI] ✅ Instância encontrada:', {
