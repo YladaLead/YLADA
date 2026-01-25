@@ -114,16 +114,17 @@ export async function sendWorkshopInviteToFormLead(
     let optionsText = ''
     sessions.forEach((sess, index) => {
       const { weekday, date, time } = formatSessionPtBR(sess.starts_at)
-      optionsText += `\n📅 **Opção ${index + 1}:**\n${weekday}, ${date}\n🕒 ${time} (Brasília)\n🔗 ${sess.zoom_link}\n`
+      optionsText += `\n📅 Opção ${index + 1}:\n${weekday}, ${date}\n🕒 ${time} (Brasília)\n`
     })
 
+    // Pegar a data da primeira sessão para mencionar
+    const firstSessionDate = formatSessionPtBR(sessions[0].starts_at)
+    
     const receptionMessage = `${greeting}Obrigada por fazer sua inscrição na Aula Prática ao Vivo de Como Encher a Agenda! 🎉
 
-Aqui estão as duas próximas opções de aula:
+Teremos aula na próxima ${firstSessionDate.weekday}, ${firstSessionDate.date}. Aqui estão as opções:
 
-${optionsText}✅ Se precisar reagendar, responda REAGENDAR.
-
-Qualquer dúvida, é só me chamar! 💚`
+${optionsText}Qual você prefere? 💚`
 
     // 5. Enviar mensagem de recepção com opções
     const result = await client.sendTextMessage({
