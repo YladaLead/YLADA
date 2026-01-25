@@ -194,7 +194,7 @@ export async function processIncomingMessageWithCarol(
       
       const { data: conv, error: convError } = await supabaseAdmin
         .from('whatsapp_conversations')
-        .select('context, customer_name, name')
+        .select('context, name')
         .eq('id', conversationId)
         .maybeSingle()
 
@@ -275,7 +275,7 @@ export async function processIncomingMessageWithCarol(
     console.log('[Carol AI] 💭 Gerando resposta com contexto:', {
       tags,
       hasSessions: workshopSessions.length > 0,
-      leadName: conversation.customer_name,
+      leadName: conversation.name,
       hasScheduled,
       participated
     })
@@ -283,7 +283,7 @@ export async function processIncomingMessageWithCarol(
     const carolResponse = await generateCarolResponse(message, conversationHistory, {
       tags,
       workshopSessions,
-      leadName: conversation.customer_name || undefined,
+      leadName: conversation.name || undefined,
       hasScheduled,
       scheduledDate,
       participated: participated ? true : (tags.includes('nao_participou_aula') ? false : undefined),
@@ -539,7 +539,7 @@ Carol - Secretária YLADA Nutri`
                 phone: lead.telefone,
                 instance_id: instance.id,
                 area: 'nutri',
-                customer_name: lead.nome,
+                name: lead.nome,
                 context: {
                   tags: ['veio_aula_pratica', 'recebeu_link_workshop', 'primeiro_contato'],
                   source: 'welcome_automation',
@@ -594,7 +594,7 @@ export async function sendRemarketingToNonParticipants(): Promise<{
     // 1. Buscar conversas com tag "nao_participou_aula" ou "adiou_aula"
     const { data: conversations } = await supabaseAdmin
       .from('whatsapp_conversations')
-      .select('id, phone, customer_name, context')
+      .select('id, phone, name, context')
       .eq('area', 'nutri')
       .eq('status', 'active')
 
@@ -657,7 +657,7 @@ export async function sendRemarketingToNonParticipants(): Promise<{
           })
         }
 
-        const remarketingMessage = `Olá ${conv.customer_name || 'querido(a)'}! 👋
+        const remarketingMessage = `Olá ${conv.name || 'querido(a)'}! 👋
 
 Vi que você não conseguiu participar da aula anterior. Tudo bem, acontece! 😊
 
