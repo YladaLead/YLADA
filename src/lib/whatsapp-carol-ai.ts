@@ -139,8 +139,9 @@ IMPORTANTE:
 
 /**
  * Gera resposta da Carol usando OpenAI
+ * Exportada para uso em testes e simulações
  */
-async function generateCarolResponse(
+export async function generateCarolResponse(
   message: string,
   conversationHistory: Array<{ role: 'user' | 'assistant'; content: string }> = [],
   context?: {
