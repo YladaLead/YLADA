@@ -62,7 +62,13 @@ function WorkshopContent() {
   const [newZoomLink, setNewZoomLink] = useState('')
   const [newActive, setNewActive] = useState(true)
   const [viewMode, setViewMode] = useState<'table' | 'calendar'>('calendar')
-  const [currentWeek, setCurrentWeek] = useState(0) // 0 = semana atual, 1 = próxima semana, etc.
+  // Se hoje for domingo, já mostra a próxima semana (que começa na segunda)
+  const getInitialWeek = () => {
+    const today = new Date()
+    const dayOfWeek = today.getDay() // 0 = domingo, 1 = segunda, etc.
+    return dayOfWeek === 0 ? 1 : 0 // Se domingo, próxima semana; senão, semana atual
+  }
+  const [currentWeek, setCurrentWeek] = useState(getInitialWeek()) // 0 = semana atual, 1 = próxima semana, etc.
   const [selectedSessionForParticipants, setSelectedSessionForParticipants] = useState<WorkshopSession | null>(null)
   const [participants, setParticipants] = useState<Participant[]>([])
   const [loadingParticipants, setLoadingParticipants] = useState(false)

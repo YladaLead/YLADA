@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireApiAuth } from '@/lib/api-auth'
 import { supabaseAdmin } from '@/lib/supabase'
+import { sendRegistrationLinkAfterClass } from '@/lib/whatsapp-carol-ai'
 
 /**
  * GET /api/admin/whatsapp/workshop/participants
@@ -113,6 +114,10 @@ export async function POST(request: NextRequest) {
       newTags.push('nao_participou_aula')
     }
 
+    // Verificar se a tag "participou_aula" está sendo adicionada agora
+    const hadParticipatedTag = tags.includes('participou_aula')
+    const isAddingParticipatedTag = participated && !hadParticipatedTag
+
     // Atualizar conversa
     const { data: updated, error: updateError } = await supabaseAdmin
       .from('whatsapp_conversations')
@@ -129,6 +134,15 @@ export async function POST(request: NextRequest) {
 
     if (updateError) {
       throw updateError
+    }
+
+    // 🚀 Disparar flow automaticamente quando tag "participou_aula" é adicionada
+    if (isAddingParticipatedTag) {
+      console.log('[Workshop Participants] 🎉 Tag participou_aula adicionada - disparando flow automaticamente')
+      // Disparar em background (não bloquear a resposta)
+      sendRegistrationLinkAfterClass(conversationId).catch((error: any) => {
+        console.error('[Workshop Participants] ❌ Erro ao disparar flow:', error)
+      })
     }
 
     return NextResponse.json({

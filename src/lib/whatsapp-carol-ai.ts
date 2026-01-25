@@ -2489,7 +2489,50 @@ export async function sendSalesFollowUpAfterClass(): Promise<{
       try {
         const context = conv.context || {}
         const sessionId = context.workshop_session_id
-        const leadName = conv.name || 'querido(a)'
+        
+        // Buscar nome do cadastro (priorizar sobre nome do WhatsApp)
+        let leadName = conv.name || 'querido(a)'
+        let registrationName: string | null = null
+        
+        try {
+          const phoneClean = conv.phone.replace(/\D/g, '')
+          
+          // Tentar buscar de workshop_inscricoes primeiro
+          const { data: workshopReg } = await supabaseAdmin
+            .from('workshop_inscricoes')
+            .select('nome')
+            .ilike('telefone', `%${phoneClean.slice(-8)}%`) // Buscar pelos últimos 8 dígitos
+            .limit(1)
+            .maybeSingle()
+          
+          if (workshopReg?.nome) {
+            registrationName = workshopReg.nome
+          } else {
+            // Fallback para contact_submissions
+            const { data: contactReg } = await supabaseAdmin
+              .from('contact_submissions')
+              .select('name, nome')
+              .or(`phone.ilike.%${phoneClean.slice(-8)}%,telefone.ilike.%${phoneClean.slice(-8)}%`)
+              .limit(1)
+              .maybeSingle()
+            
+            if (contactReg?.name || contactReg?.nome) {
+              registrationName = contactReg.name || contactReg.nome || null
+            }
+          }
+          
+          // Priorizar nome do cadastro sobre nome do WhatsApp
+          if (registrationName) {
+            leadName = registrationName
+            // Atualizar lead_name no context se encontrou nome do cadastro
+            if (registrationName !== (context as any)?.lead_name) {
+              context.lead_name = registrationName
+            }
+          }
+        } catch (error: any) {
+          console.warn('[Carol] Erro ao buscar nome do cadastro no remarketing:', error.message)
+          // Continuar com o nome do WhatsApp se houver erro
+        }
         
         // Buscar sessão para saber quando foi
         let sessionDate: Date | null = null
@@ -2523,15 +2566,17 @@ export async function sendSalesFollowUpAfterClass(): Promise<{
         if (hoursSinceClass >= 3 && hoursSinceClass < 4 && !context[notificationKey]?.sent_3h) {
           message = `Olá ${leadName}! 💚
 
-Espero que a aula tenha sido transformadora para você! 
+Espero que a aula tenha sido transformadora para você!
 
 Lembro que você veio porque tinha um sonho, um objetivo... algo que te moveu a buscar essa mudança. 🌟
 
-Agora que você já viu o caminho, que tal darmos o próximo passo juntas?
+Você já recebeu o link para escolher seu plano. Vi que ainda não escolheu...
 
-Estou aqui para te ajudar a transformar esse sonho em realidade. 
+O que está te impedindo de dar esse próximo passo? É alguma dúvida sobre investimento, formas de pagamento ou como funciona?
 
-Quer conversar sobre como podemos fazer isso acontecer? 😊
+Estou aqui para te ajudar a esclarecer qualquer coisa e te mostrar como podemos fazer esse sonho se tornar realidade. 
+
+Quer conversar sobre isso? 😊
 
 Carol - Secretária YLADA Nutri`
           shouldSend = true
@@ -2548,7 +2593,11 @@ Sabe, muitas vezes a gente sabe o que precisa fazer, mas falta aquele empurrãoz
 
 Você não precisa fazer isso sozinha. 
 
-Estou aqui para te apoiar em cada passo dessa jornada. 
+Você já deu o primeiro passo ao participar da aula. Agora é hora de dar o segundo e transformar esse sonho em realidade.
+
+O que está te impedindo? É o investimento? O tempo? Alguma dúvida específica?
+
+Me conta o que está passando pela sua cabeça que eu te ajudo a resolver! 
 
 Que tal conversarmos sobre como podemos fazer isso acontecer? 💚
 
@@ -2567,7 +2616,11 @@ Você tinha um objetivo, um sonho. Algo que te moveu a buscar essa mudança.
 
 Não deixe que esse momento passe. Não deixe que a rotina te distraia do que realmente importa.
 
-Você merece ver esse sonho se tornar realidade. 
+Você merece ver esse sonho se tornar realidade.
+
+Se a questão é investimento, temos opções de pagamento que podem se encaixar no seu orçamento. Se é tempo, nossos programas são pensados para quem tem rotina corrida.
+
+O que está te travando? Me fala que a gente resolve juntas!
 
 Estou aqui para te ajudar. Vamos conversar? 💚
 
@@ -2580,19 +2633,15 @@ Carol - Secretária YLADA Nutri`
         else if (hoursSinceClass >= 24 && hoursSinceClass < 25 && !context[notificationKey]?.sent_24h) {
           message = `Olá ${leadName}! 
 
-Passou um dia desde a aula... 
+Já passou um dia desde a aula...
 
-E eu fico pensando: será que você já começou a aplicar o que aprendeu? 
+O momento perfeito não existe. O momento certo é AGORA.
 
-Ou será que ainda está esperando o "momento perfeito"? 
+Você já deu o primeiro passo ao participar. Agora é hora de dar o segundo e transformar isso em realidade.
 
-Sabe, o momento perfeito não existe. O momento certo é AGORA. 
+Se ainda tem alguma objeção ou dúvida, me fala. Estou aqui para te ajudar a resolver e te mostrar como podemos fazer isso acontecer.
 
-Você já deu o primeiro passo ao participar da aula. 
-
-Agora é hora de dar o segundo passo e transformar isso em realidade. 
-
-Estou aqui para te ajudar. Vamos conversar? 💚
+Vamos conversar? 💚
 
 Carol - Secretária YLADA Nutri`
           shouldSend = true
@@ -2603,19 +2652,15 @@ Carol - Secretária YLADA Nutri`
         else if (hoursSinceClass >= 48 && hoursSinceClass < 49 && !context[notificationKey]?.sent_48h) {
           message = `Olá ${leadName}! 
 
-Esta é minha última mensagem sobre isso... 
+Esta é minha última mensagem sobre isso...
 
-Mas antes, quero te lembrar: você veio até aqui por um motivo. 
+Você veio até aqui por um motivo. Você tinha um objetivo.
 
-Você tinha um sonho, um objetivo. Algo que te moveu. 
+Se ainda tem alguma objeção - seja investimento, tempo, ou qualquer outra coisa - me fala. Estou aqui para te ajudar a resolver.
 
-Não deixe que esse momento passe. Não deixe que a vida te distraia do que realmente importa. 
+Mas não deixe passar mais tempo. O momento é AGORA.
 
-Você merece ver esse sonho se tornar realidade. 
-
-Se ainda quiser conversar sobre como podemos fazer isso acontecer, estou aqui. 
-
-Mas não deixe passar mais tempo. O momento é AGORA. 💚
+Quer conversar? Estou aqui! 💚
 
 Carol - Secretária YLADA Nutri`
           shouldSend = true
@@ -2644,11 +2689,14 @@ Carol - Secretária YLADA Nutri`
               is_bot_response: true,
             })
 
-            // Atualizar contexto
+            // Atualizar contexto (incluindo lead_name se foi encontrado)
             await supabaseAdmin
               .from('whatsapp_conversations')
               .update({
-                context,
+                context: {
+                  ...context,
+                  ...(registrationName && registrationName !== (context as any)?.lead_name ? { lead_name: registrationName } : {})
+                },
                 last_message_at: new Date().toISOString(),
                 last_message_from: 'bot',
               })
@@ -2723,28 +2771,79 @@ export async function sendRegistrationLinkAfterClass(conversationId: string): Pr
     }
 
     const client = createZApiClient(instance.instance_id, instance.token)
-    const leadName = conversation.name || 'querido(a)'
+    
+    // Buscar nome do cadastro (priorizar sobre nome do WhatsApp)
+    let leadName = conversation.name || 'querido(a)'
+    let registrationName: string | null = null
+    
+    try {
+      const phoneClean = conversation.phone.replace(/\D/g, '')
+      
+      // Tentar buscar de workshop_inscricoes primeiro
+      const { data: workshopReg } = await supabaseAdmin
+        .from('workshop_inscricoes')
+        .select('nome')
+        .ilike('telefone', `%${phoneClean.slice(-8)}%`) // Buscar pelos últimos 8 dígitos
+        .limit(1)
+        .maybeSingle()
+      
+      if (workshopReg?.nome) {
+        registrationName = workshopReg.nome
+      } else {
+        // Fallback para contact_submissions
+        const { data: contactReg } = await supabaseAdmin
+          .from('contact_submissions')
+          .select('name, nome')
+          .or(`phone.ilike.%${phoneClean.slice(-8)}%,telefone.ilike.%${phoneClean.slice(-8)}%`)
+          .limit(1)
+          .maybeSingle()
+        
+        if (contactReg?.name || contactReg?.nome) {
+          registrationName = contactReg.name || contactReg.nome || null
+        }
+      }
+      
+      // Priorizar nome do cadastro sobre nome do WhatsApp
+      if (registrationName) {
+        leadName = registrationName
+        // Atualizar lead_name no context se encontrou nome do cadastro
+        if (registrationName !== (context as any)?.lead_name) {
+          context.lead_name = registrationName
+          await supabaseAdmin
+            .from('whatsapp_conversations')
+            .update({
+              context: {
+                ...context,
+                lead_name: registrationName
+              }
+            })
+            .eq('id', conversationId)
+        }
+      }
+    } catch (error: any) {
+      console.warn('[Carol] Erro ao buscar nome do cadastro:', error.message)
+      // Continuar com o nome do WhatsApp se houver erro
+    }
 
     // Link de cadastro (configurável via variável de ambiente ou banco)
     const registrationUrl = process.env.NUTRI_REGISTRATION_URL || 'https://ylada.com/pt/nutri/cadastro'
 
-    // Mensagem com link de cadastro e argumentação
-    const message = `Olá ${leadName}! 🎉
+    // Mensagem persuasiva focada em fechamento e trabalho emocional
+    const message = `Olá ${leadName}! 💚
 
-Que alegria ter você aqui! Espero que a aula tenha sido transformadora para você! 💚
+Tenho certeza que a aula pode ser a transformação que você buscava.
+
+Você veio até aqui porque tinha um sonho, um objetivo... algo que te moveu a buscar essa mudança. 🌟
 
 Agora que você já viu o caminho, que tal darmos o próximo passo juntas?
 
-Temos programas incríveis que vão te ajudar a transformar seu sonho em realidade:
+Abaixo segue o link para você escolher o melhor plano para começar:
 
-🌟 *Qual você prefere começar?*
+🔗 ${registrationUrl}
 
-🔗 *Acesse aqui para ver os programas e fazer seu cadastro:*
-${registrationUrl}
+Tem alguma dúvida sobre valores, formas de pagamento ou como funciona? 
 
-O que você acha? Já quer começar ou tem alguma dúvida? 
-
-Estou aqui para te ajudar em cada passo! 😊
+Estou aqui para te ajudar a transformar esse sonho em realidade. O que você acha? 😊
 
 Carol - Secretária YLADA Nutri`
 

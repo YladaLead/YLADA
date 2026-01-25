@@ -21,6 +21,7 @@ interface Conversation {
   last_message_type?: string | null
   last_message_created_at?: string | null
   last_message_sender_type?: string | null
+  instance_id?: string | null // UUID da tabela z_api_instances
   z_api_instances: {
     name: string
     area: string
@@ -64,6 +65,9 @@ function WhatsAppChatContent() {
   const [carolModalOpen, setCarolModalOpen] = useState(false)
   const [carolDiagnostic, setCarolDiagnostic] = useState<any>(null)
   const [activatingCarol, setActivatingCarol] = useState(false)
+  const [sessionSelectModalOpen, setSessionSelectModalOpen] = useState(false)
+  const [availableSessions, setAvailableSessions] = useState<any[]>([])
+  const [loadingSessions, setLoadingSessions] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
   const [contactMenuOpen, setContactMenuOpen] = useState(false)
   const [showScrollToBottom, setShowScrollToBottom] = useState(false)
@@ -940,7 +944,10 @@ function WhatsAppChatContent() {
                           onClick={async () => {
                             if (!selectedConversation) return
                             
-                            // Buscar sessões disponíveis (incluindo quarta 20h)
+                            // Buscar sessões disponíveis
+                            setLoadingSessions(true)
+                            setSessionSelectModalOpen(true)
+                            
                             try {
                               const res = await fetch('/api/admin/whatsapp/workshop-sessions?area=nutri&onlyActive=true', {
                                 credentials: 'include',
@@ -952,61 +959,17 @@ function WhatsAppChatContent() {
                               const now = new Date()
                               const futureSessions = sessions.filter((s: any) => new Date(s.starts_at) > now)
                               
+                              setAvailableSessions(futureSessions)
+                              
                               if (futureSessions.length === 0) {
                                 alert('Não há sessões disponíveis. Crie uma sessão primeiro em /admin/whatsapp/workshop')
-                                return
-                              }
-                              
-                              // Mostrar opções para o usuário escolher
-                              const sessionOptions = futureSessions.map((s: any, idx: number) => {
-                                const date = new Date(s.starts_at)
-                                const weekday = date.toLocaleDateString('pt-BR', { weekday: 'long' })
-                                const dateStr = date.toLocaleDateString('pt-BR')
-                                const timeStr = date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
-                                return `${idx + 1}. ${weekday}, ${dateStr} às ${timeStr}`
-                              }).join('\n')
-                              
-                              const escolha = prompt(`Escolha uma sessão para enviar:\n\n${sessionOptions}\n\nDigite o número da opção:`)
-                              
-                              if (!escolha) return
-                              
-                              const idx = parseInt(escolha) - 1
-                              if (idx < 0 || idx >= futureSessions.length) {
-                                alert('Opção inválida')
-                                return
-                              }
-                              
-                              const selectedSession = futureSessions[idx]
-                              
-                              if (!confirm(`Enviar opção de ${new Date(selectedSession.starts_at).toLocaleDateString('pt-BR')} para ${selectedConversation.name || 'esta pessoa'}?`)) {
-                                return
-                              }
-                              
-                              try {
-                                setSending(true)
-                                const res = await fetch('/api/admin/whatsapp/carol/enviar-opcao', {
-                                  method: 'POST',
-                                  headers: { 'Content-Type': 'application/json' },
-                                  credentials: 'include',
-                                  body: JSON.stringify({
-                                    conversationId: selectedConversation.id,
-                                    sessionId: selectedSession.id,
-                                  }),
-                                })
-                                
-                                const data = await res.json()
-                                if (!res.ok) throw new Error(data.error || 'Erro ao enviar')
-                                
-                                alert('✅ Opção enviada! A Carol continuará o fluxo automaticamente.')
-                                await loadMessages(selectedConversation.id)
-                                await loadConversations()
-                              } catch (err: any) {
-                                alert(err.message || 'Erro ao enviar opção')
-                              } finally {
-                                setSending(false)
+                                setSessionSelectModalOpen(false)
                               }
                             } catch (err: any) {
                               alert(err.message || 'Erro ao buscar sessões')
+                              setSessionSelectModalOpen(false)
+                            } finally {
+                              setLoadingSessions(false)
                             }
                           }}
                           disabled={sending}
@@ -1479,20 +1442,43 @@ function WhatsAppChatContent() {
                           setSending(true)
                           
                           // 1. Salvar mensagem como se fosse do cliente
-                          const { data: instance } = await supabase
-                            .from('z_api_instances')
-                            .select('id')
-                            .eq('instance_id', selectedConversation.instance_id)
-                            .single()
+                          // Buscar instância: instance_id na conversa é o UUID da tabela z_api_instances
+                          let instanceId: string | null = null
                           
-                          if (!instance) {
-                            throw new Error('Instância não encontrada')
+                          if (selectedConversation.instance_id) {
+                            // Tentar buscar pelo ID da instância da conversa
+                            const { data: instance } = await supabase
+                              .from('z_api_instances')
+                              .select('id')
+                              .eq('id', selectedConversation.instance_id)
+                              .single()
+                            
+                            if (instance) {
+                              instanceId = instance.id
+                            }
+                          }
+                          
+                          // Fallback: buscar pela área se não encontrou pelo ID
+                          if (!instanceId) {
+                            const { data: instanceByArea } = await supabase
+                              .from('z_api_instances')
+                              .select('id')
+                              .eq('area', selectedConversation.area || 'nutri')
+                              .eq('status', 'connected')
+                              .limit(1)
+                              .single()
+                            
+                            if (!instanceByArea) {
+                              throw new Error('Instância não encontrada. Verifique se há uma instância Z-API conectada para a área ' + (selectedConversation.area || 'nutri'))
+                            }
+                            
+                            instanceId = instanceByArea.id
                           }
                           
                           // Salvar mensagem do cliente no banco
                           await supabase.from('whatsapp_messages').insert({
                             conversation_id: selectedConversation.id,
-                            instance_id: instance.id,
+                            instance_id: instanceId,
                             sender_type: 'customer',
                             sender_name: selectedConversation.name || 'Cliente',
                             message: messageText,
@@ -2049,6 +2035,127 @@ function WhatsAppChatContent() {
                 className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
               >
                 Salvar Tags
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Seleção de Sessão */}
+      {sessionSelectModalOpen && selectedConversation && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] flex flex-col">
+            {/* Header */}
+            <div className="flex items-center justify-between p-6 border-b border-gray-200">
+              <h2 className="text-xl font-bold text-gray-900">📅 Escolher Sessão para Enviar</h2>
+              <button
+                type="button"
+                onClick={() => {
+                  setSessionSelectModalOpen(false)
+                  setAvailableSessions([])
+                }}
+                className="text-gray-400 hover:text-gray-600 text-2xl"
+              >
+                ×
+              </button>
+            </div>
+
+            {/* Conteúdo */}
+            <div className="flex-1 overflow-y-auto p-6">
+              {loadingSessions ? (
+                <div className="flex items-center justify-center py-12">
+                  <div className="text-gray-500">Carregando sessões...</div>
+                </div>
+              ) : availableSessions.length === 0 ? (
+                <div className="text-center py-12">
+                  <p className="text-gray-600 mb-4">Não há sessões disponíveis.</p>
+                  <p className="text-sm text-gray-500">
+                    Crie uma sessão primeiro em{' '}
+                    <Link href="/admin/whatsapp/workshop" className="text-purple-600 hover:underline">
+                      /admin/whatsapp/workshop
+                    </Link>
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  <p className="text-sm text-gray-600 mb-4">
+                    Selecione a sessão que deseja enviar para <strong>{selectedConversation.name || 'esta pessoa'}</strong>:
+                  </p>
+                  {availableSessions.map((session) => {
+                    const date = new Date(session.starts_at)
+                    const weekday = date.toLocaleDateString('pt-BR', { weekday: 'long' })
+                    const dateStr = date.toLocaleDateString('pt-BR')
+                    const timeStr = date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+                    
+                    return (
+                      <button
+                        key={session.id}
+                        type="button"
+                        onClick={async () => {
+                          try {
+                            setSending(true)
+                            const res = await fetch('/api/admin/whatsapp/carol/enviar-opcao', {
+                              method: 'POST',
+                              headers: { 'Content-Type': 'application/json' },
+                              credentials: 'include',
+                              body: JSON.stringify({
+                                conversationId: selectedConversation.id,
+                                sessionId: session.id,
+                              }),
+                            })
+                            
+                            const data = await res.json()
+                            if (!res.ok) throw new Error(data.error || 'Erro ao enviar')
+                            
+                            alert('✅ Opção enviada! A Carol continuará o fluxo automaticamente.')
+                            setSessionSelectModalOpen(false)
+                            setAvailableSessions([])
+                            await loadMessages(selectedConversation.id)
+                            await loadConversations()
+                          } catch (err: any) {
+                            alert(err.message || 'Erro ao enviar opção')
+                          } finally {
+                            setSending(false)
+                          }
+                        }}
+                        disabled={sending}
+                        className="w-full text-left p-4 border-2 border-gray-200 rounded-lg hover:border-purple-400 hover:bg-purple-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <div className="font-semibold text-gray-900">
+                              {weekday.charAt(0).toUpperCase() + weekday.slice(1)}, {dateStr}
+                            </div>
+                            <div className="text-sm text-gray-600 mt-1">
+                              🕒 {timeStr} (horário de Brasília)
+                            </div>
+                            {session.title && (
+                              <div className="text-xs text-gray-500 mt-1">{session.title}</div>
+                            )}
+                          </div>
+                          <div className="text-purple-600 font-medium">
+                            {sending ? 'Enviando...' : '→'}
+                          </div>
+                        </div>
+                      </button>
+                    )
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* Footer */}
+            <div className="flex items-center justify-end gap-3 p-6 border-t border-gray-200">
+              <button
+                type="button"
+                onClick={() => {
+                  setSessionSelectModalOpen(false)
+                  setAvailableSessions([])
+                }}
+                className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200"
+                disabled={sending}
+              >
+                Cancelar
               </button>
             </div>
           </div>
