@@ -529,12 +529,28 @@ export async function processIncomingMessageWithCarol(
         
         if (optionIndex >= 0 && optionIndex < workshopSessions.length) {
           // Usar sessão já encontrada (já tem ID)
+          const { weekday, date, time } = formatSessionDateTime(workshopSessions[optionIndex].starts_at)
+          console.log('[Carol AI] ✅ Sessão detectada por número/ordem:', {
+            optionIndex: optionIndex + 1,
+            sessionId: workshopSessions[optionIndex].id,
+            weekday,
+            date,
+            time,
+            starts_at: workshopSessions[optionIndex].starts_at,
+            message: messageLower
+          })
           selectedSession = {
             id: workshopSessions[optionIndex].id,
             title: workshopSessions[optionIndex].title,
             starts_at: workshopSessions[optionIndex].starts_at,
             zoom_link: workshopSessions[optionIndex].zoom_link
           }
+        } else {
+          console.log('[Carol AI] ⚠️ Índice de opção inválido:', {
+            optionIndex,
+            sessionsCount: workshopSessions.length,
+            message: messageLower
+          })
         }
       }
       
