@@ -57,6 +57,67 @@ function WorkshopContent() {
     [sessions]
   )
 
+  // Função para obter sessões da semana atual
+  const getWeekSessions = (weekOffset: number = 0) => {
+    const now = new Date()
+    // Calcular segunda-feira da semana (getDay() retorna 0=domingo, 1=segunda, etc)
+    const currentDay = now.getDay()
+    const daysToMonday = currentDay === 0 ? 6 : currentDay - 1 // Se domingo, volta 6 dias; senão, volta (dia-1)
+    
+    const weekStart = new Date(now)
+    weekStart.setDate(now.getDate() - daysToMonday + (weekOffset * 7))
+    weekStart.setHours(0, 0, 0, 0)
+    
+    const weekEnd = new Date(weekStart)
+    weekEnd.setDate(weekStart.getDate() + 6)
+    weekEnd.setHours(23, 59, 59, 999)
+
+    return sessions
+      .filter(s => {
+        const sessionDate = new Date(s.starts_at)
+        return sessionDate >= weekStart && sessionDate <= weekEnd
+      })
+      .sort((a, b) => new Date(a.starts_at).getTime() - new Date(b.starts_at).getTime())
+  }
+
+  // Organizar sessões por dia e horário
+  const organizeSessionsByDay = (weekSessions: WorkshopSession[]) => {
+    const organized: Record<string, Record<string, WorkshopSession[]>> = {}
+    
+    weekSessions.forEach(session => {
+      const date = new Date(session.starts_at)
+      const dayKey = date.toLocaleDateString('pt-BR', { weekday: 'long' })
+      const timeKey = date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+      
+      if (!organized[dayKey]) organized[dayKey] = {}
+      if (!organized[dayKey][timeKey]) organized[dayKey][timeKey] = []
+      organized[dayKey][timeKey].push(session)
+    })
+    
+    return organized
+  }
+
+  // Obter data da semana
+  const getWeekDateRange = (weekOffset: number = 0) => {
+    const now = new Date()
+    const currentDay = now.getDay()
+    const daysToMonday = currentDay === 0 ? 6 : currentDay - 1
+    
+    const weekStart = new Date(now)
+    weekStart.setDate(now.getDate() - daysToMonday + (weekOffset * 7))
+    weekStart.setHours(0, 0, 0, 0)
+    
+    const weekEnd = new Date(weekStart)
+    weekEnd.setDate(weekStart.getDate() + 6)
+    
+    return {
+      start: weekStart,
+      end: weekEnd,
+      startStr: weekStart.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }),
+      endStr: weekEnd.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' }),
+    }
+  }
+
   const loadAll = async () => {
     setError(null)
     setSuccess(null)
