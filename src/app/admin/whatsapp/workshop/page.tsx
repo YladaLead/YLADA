@@ -439,25 +439,41 @@ function WorkshopContent() {
             </div>
 
             <div className="bg-white rounded-xl border border-gray-200 p-4">
-              <div className="flex items-center justify-between mb-3">
-                <div>
-                  <h2 className="font-semibold text-gray-900">Agenda (próximas aulas)</h2>
-                  <p className="text-xs text-gray-500 mt-1">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex-1">
+                  <div className="flex items-center gap-3 mb-2">
+                    <h2 className="font-semibold text-gray-900 text-lg">Agenda (próximas aulas)</h2>
+                    {sessions.length > 0 && (
+                      <span className="px-3 py-1 text-xs font-semibold bg-blue-100 text-blue-700 rounded-full">
+                        {sessions.length} sessão{sessions.length !== 1 ? 'ões' : ''}
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-xs text-gray-500">
                     Sessões <span className="font-medium text-green-700">abertas</span> são divulgadas pela Carol. 
                     Sessões <span className="font-medium text-red-700">fechadas</span> não aparecem nas opções.
                   </p>
-                  {sessions.length > 0 && (
-                    <p className="text-xs text-blue-600 mt-1 font-medium">
-                      📊 Total de {sessions.length} sessão{sessions.length !== 1 ? 'ões' : ''} cadastrada{sessions.length !== 1 ? 's' : ''}
-                    </p>
-                  )}
                 </div>
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => setViewMode(viewMode === 'table' ? 'calendar' : 'table')}
-                    className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg hover:bg-gray-50"
+                    className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                      viewMode === 'calendar'
+                        ? 'bg-blue-600 text-white hover:bg-blue-700'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
                   >
-                    {viewMode === 'table' ? '📅 Ver Agenda' : '📋 Ver Tabela'}
+                    📅 Agenda
+                  </button>
+                  <button
+                    onClick={() => setViewMode(viewMode === 'table' ? 'calendar' : 'table')}
+                    className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                      viewMode === 'table'
+                        ? 'bg-blue-600 text-white hover:bg-blue-700'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                  >
+                    📋 Tabela
                   </button>
                 <button
                   onClick={async () => {
@@ -596,7 +612,15 @@ function WorkshopContent() {
                 const fixedTimes = ['09:00', '10:00', '15:00', '20:00']
 
                 return (
-                  <div className="space-y-4">
+                  <div className="mt-4 space-y-4">
+                    <div className="mb-3">
+                      <h3 className="text-sm font-semibold text-gray-700 mb-1">📅 Agenda Semanal</h3>
+                      <p className="text-xs text-gray-500">
+                        {weekSessions.length > 0 
+                          ? `${weekSessions.length} sessão${weekSessions.length !== 1 ? 'ões' : ''} nesta semana`
+                          : 'Nenhuma sessão nesta semana'}
+                      </p>
+                    </div>
                     {/* Navegação da Semana */}
                     <div className="flex items-center justify-between">
                       <button
