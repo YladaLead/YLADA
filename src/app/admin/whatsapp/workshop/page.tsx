@@ -653,11 +653,17 @@ function WorkshopContent() {
                                     {daySessions.map(session => (
                                       <div
                                         key={session.id}
-                                        className={`mb-2 p-2 rounded-lg border-2 ${
+                                        onClick={() => loadParticipants(session)}
+                                        className={`mb-2 p-2 rounded-lg border-2 cursor-pointer hover:shadow-md transition-shadow ${
                                           session.is_active
-                                            ? 'bg-green-50 border-green-300'
+                                            ? session.confirmed_participants && session.confirmed_participants > 0
+                                              ? 'bg-blue-50 border-blue-400 border-2'
+                                              : 'bg-green-50 border-green-300'
                                             : 'bg-red-50 border-red-300'
                                         }`}
+                                        title={session.confirmed_participants && session.confirmed_participants > 0 
+                                          ? `Clique para ver ${session.confirmed_participants} participante(s) confirmado(s)`
+                                          : 'Sessão sem participantes confirmados'}
                                       >
                                         <div className="flex items-center justify-between mb-1">
                                           <span className={`text-xs font-medium ${
@@ -666,7 +672,10 @@ function WorkshopContent() {
                                             {session.is_active ? '✅ Aberta' : '🔒 Fechada'}
                                           </span>
                                           <button
-                                            onClick={() => toggleActive(session)}
+                                            onClick={(e) => {
+                                              e.stopPropagation()
+                                              toggleActive(session)
+                                            }}
                                             disabled={saving}
                                             className={`text-xs px-2 py-0.5 rounded ${
                                               session.is_active
@@ -690,17 +699,11 @@ function WorkshopContent() {
                                         <div className="text-xs text-gray-500 mt-1">
                                           {formatPtBR(session.starts_at)}
                                         </div>
-                                        {session.confirmed_participants !== undefined && (
-                                          <div className="flex items-center justify-between mt-1">
-                                            <div className="text-xs font-medium text-blue-600">
-                                              👥 {session.confirmed_participants} confirmado{session.confirmed_participants !== 1 ? 's' : ''}
+                                        {session.confirmed_participants !== undefined && session.confirmed_participants > 0 && (
+                                          <div className="mt-2">
+                                            <div className="text-xs font-bold text-white bg-blue-600 px-2 py-1 rounded shadow-sm">
+                                              ✅ {session.confirmed_participants} CONFIRMADO{session.confirmed_participants !== 1 ? 'S' : ''} - Clique para gerenciar
                                             </div>
-                                            <button
-                                              onClick={() => loadParticipants(session)}
-                                              className="text-xs px-2 py-0.5 bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
-                                            >
-                                              Ver participantes
-                                            </button>
                                           </div>
                                         )}
                                       </div>
