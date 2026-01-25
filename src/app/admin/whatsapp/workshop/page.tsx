@@ -987,8 +987,66 @@ function WorkshopContent() {
                         <p className="text-gray-600">Carregando participantes...</p>
                       </div>
                     ) : participants.length === 0 ? (
-                      <div className="text-center py-8">
+                      <div className="text-center py-8 space-y-4">
                         <p className="text-gray-500">Nenhum participante confirmado para esta sessão.</p>
+                        <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                          <h3 className="text-sm font-semibold text-blue-900 mb-2">➕ Adicionar Participante Manualmente</h3>
+                          <div className="flex gap-2">
+                            <input
+                              type="text"
+                              id="add-participant-phone"
+                              placeholder="Telefone (ex: 5519997230912)"
+                              className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                            />
+                            <button
+                              onClick={async () => {
+                                const input = document.getElementById('add-participant-phone') as HTMLInputElement
+                                const phone = input.value.trim().replace(/\D/g, '')
+                                
+                                if (!phone || phone.length < 10) {
+                                  alert('Digite um telefone válido')
+                                  return
+                                }
+                                
+                                if (!selectedSessionForParticipants) {
+                                  alert('Selecione uma sessão primeiro')
+                                  return
+                                }
+                                
+                                try {
+                                  setSaving(true)
+                                  setError(null)
+                                  const res = await fetch('/api/admin/whatsapp/workshop/participants/adicionar', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    credentials: 'include',
+                                    body: JSON.stringify({
+                                      sessionId: selectedSessionForParticipants.id,
+                                      phone: phone
+                                    })
+                                  })
+                                  const json = await res.json()
+                                  if (!res.ok) throw new Error(json.error || 'Erro ao adicionar participante')
+                                  setSuccess(json.message || 'Participante adicionado!')
+                                  input.value = ''
+                                  await loadParticipants(selectedSessionForParticipants)
+                                  await loadAll()
+                                } catch (e: any) {
+                                  setError(e.message || 'Erro ao adicionar participante')
+                                } finally {
+                                  setSaving(false)
+                                }
+                              }}
+                              disabled={saving}
+                              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 text-sm"
+                            >
+                              {saving ? 'Adicionando...' : 'Adicionar'}
+                            </button>
+                          </div>
+                          <p className="text-xs text-gray-600 mt-2">
+                            Digite o telefone da pessoa (apenas números, com DDD e código do país)
+                          </p>
+                        </div>
                       </div>
                     ) : (
                       <div className="space-y-3">
