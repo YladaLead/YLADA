@@ -28,16 +28,37 @@ export async function GET(request: NextRequest) {
       registrations = workshopRegs
     } else {
       // Fallback para contact_submissions
-      const { data: contactRegs, error: contactError } = await supabaseAdmin
+      // Tentar buscar com filtro de source primeiro
+      let contactRegs: any[] = []
+      let contactError: any = null
+      
+      const { data: withSource, error: sourceError } = await supabaseAdmin
         .from('contact_submissions')
         .select('*')
         .eq('source', 'workshop_landing_page')
         .order('created_at', { ascending: false })
 
-      if (contactRegs && !contactError) {
-        registrations = contactRegs
+      if (withSource && !sourceError) {
+        contactRegs = withSource
       } else {
-        error = contactError || workshopError
+        // Se coluna source não existe, buscar todos (sem filtro)
+        const { data: allContacts, error: allError } = await supabaseAdmin
+          .from('contact_submissions')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(1000) // Limitar para não sobrecarregar
+
+        if (allContacts && !allError) {
+          contactRegs = allContacts
+        } else {
+          contactError = allError || sourceError
+        }
+      }
+
+      if (contactRegs.length > 0) {
+        registrations = contactRegs
+      } else if (contactError) {
+        error = contactError
       }
     }
 
