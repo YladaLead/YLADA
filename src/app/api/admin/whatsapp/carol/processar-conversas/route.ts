@@ -119,9 +119,25 @@ export async function POST(request: NextRequest) {
         const customerMessages = (messages || []).filter(m => m.sender_type === 'customer')
         const isFirstMessage = customerMessages.length === 0 || customerMessages.length === 1
 
+        // Verificar se já tem mensagem da Carol recente (evitar duplicação)
+        const { data: existingCarolMessages } = await supabaseAdmin
+          .from('whatsapp_messages')
+          .select('id, created_at')
+          .eq('conversation_id', conversation.id)
+          .eq('sender_type', 'bot')
+          .eq('sender_name', 'Carol - Secretária')
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle()
+
+        // Se já tem mensagem da Carol, verificar se precisa enviar nova
+        // (só enviar se for caso específico que precisa de nova mensagem)
+        const hasRecentCarolMessage = existingCarolMessages !== null
+
         // Determinar qual mensagem enviar baseado no status
         let messageToSend = ''
         let newTags: string[] = [...tags]
+        let shouldSend = false
 
         if (naoParticipou && !participated) {
           // Remarketing: agendou mas não participou
@@ -157,7 +173,13 @@ export async function POST(request: NextRequest) {
           if (!newTags.includes('recebeu_link_workshop')) {
             newTags.push('recebeu_link_workshop')
           }
-          details.push(`📱 ${conversation.phone}: Boas-vindas (não agendou)`)
+          // Só enviar se não tem mensagem da Carol ainda
+          shouldSend = !hasRecentCarolMessage
+          if (shouldSend) {
+            details.push(`📱 ${conversation.phone}: Boas-vindas (não agendou)`)
+          } else {
+            details.push(`⏭️ ${conversation.phone}: Já tem mensagem da Carol`)
+          }
         } else if (!veioAulaPratica && !hasScheduled) {
           // Primeira mensagem: ainda não veio do workshop
           messageToSend = await generateCarolResponse(
@@ -176,9 +198,56 @@ export async function POST(request: NextRequest) {
           if (!newTags.includes('primeiro_contato')) {
             newTags.push('primeiro_contato')
           }
-          details.push(`📱 ${conversation.phone}: Primeira mensagem`)
+          // Só enviar se não tem mensagem da Carol ainda
+          shouldSend = !hasRecentCarolMessage
+          if (shouldSend) {
+            details.push(`📱 ${conversation.phone}: Primeira mensagem`)
+          } else {
+            details.push(`⏭️ ${conversation.phone}: Já tem mensagem da Carol`)
+          }
+        } else if (participated) {
+          // Quem participou: pode enviar mensagem pós-aula se ainda não enviou
+          const hasPostClassMessage = tags.includes('recebeu_link_cadastro') || context.post_class_message_sent
+          if (!hasPostClassMessage) {
+            messageToSend = await generateCarolResponse(
+              'Obrigada por participar da aula',
+              conversationHistory,
+              {
+                tags: newTags,
+                workshopSessions,
+                leadName: conversation.name || undefined,
+                hasScheduled: true,
+                participated: true,
+                isFirstMessage: false
+              }
+            )
+            shouldSend = true
+            if (!newTags.includes('recebeu_link_cadastro')) {
+              newTags.push('recebeu_link_cadastro')
+            }
+            context.post_class_message_sent = true
+            details.push(`📱 ${conversation.phone}: Pós-aula (participou)`)
+          } else {
+            details.push(`⏭️ ${conversation.phone}: Já recebeu mensagem pós-aula`)
+          }
         } else {
           // Já processada ou não precisa de ação
+          details.push(`⏭️ ${conversation.phone}: Não precisa de ação`)
+          continue
+        }
+
+        // Verificar se deve enviar
+        if (!shouldSend || !messageToSend) {
+          continue
+        }
+
+        // Verificar horário permitido (mas permitir processamento manual)
+        // Para processamento manual, vamos apenas logar mas não bloquear
+        const { isAllowedTimeToSendMessage } = await import('@/lib/whatsapp-carol-ai')
+        const timeCheck = isAllowedTimeToSendMessage()
+        if (!timeCheck.allowed) {
+          details.push(`⏰ ${conversation.phone}: Fora do horário permitido (${timeCheck.reason}) - será enviado no próximo horário`)
+          // Continuar processando mas não enviar agora
           continue
         }
 
