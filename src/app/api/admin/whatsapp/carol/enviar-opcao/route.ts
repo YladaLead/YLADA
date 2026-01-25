@@ -68,26 +68,124 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Se não forneceu sessão, buscar próximas 2 sessões (incluindo quarta 20h se existir)
-    let workshopSessions: Array<{ id: string; title: string; starts_at: string; zoom_link: string }> = []
-    
+    const client = createZApiClient(instance.instance_id, instance.token)
+    const context = conversation.context || {}
+    const tags = Array.isArray(context.tags) ? context.tags : []
+
+    // Se forneceu uma sessão específica, enviar diretamente o flyer + link (não perguntar novamente)
     if (session) {
-      workshopSessions = [session]
-    } else {
-      const now = new Date()
-      const minDate = new Date(now.getTime() + 5 * 60 * 1000) // Buffer de 5 minutos
-      
-      const { data: sessions } = await supabaseAdmin
-        .from('whatsapp_workshop_sessions')
-        .select('id, title, starts_at, zoom_link')
+      // Buscar configurações do workshop (flyer)
+      const { data: settings } = await supabaseAdmin
+        .from('whatsapp_workshop_settings')
+        .select('flyer_url, flyer_caption')
         .eq('area', conversation.area || 'nutri')
-        .eq('is_active', true)
-        .gte('starts_at', minDate.toISOString())
-        .order('starts_at', { ascending: true })
-        .limit(3) // Buscar 3 para incluir quarta 20h se existir
+        .maybeSingle()
       
-      workshopSessions = sessions || []
+      const flyerUrl = settings?.flyer_url
+      const flyerCaption = settings?.flyer_caption || ''
+      
+      // Formatar data/hora
+      const sessionDate = new Date(session.starts_at)
+      const weekday = sessionDate.toLocaleDateString('pt-BR', { weekday: 'long' })
+      const date = sessionDate.toLocaleDateString('pt-BR')
+      const time = sessionDate.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+      
+      // 1. Enviar imagem do flyer (se configurado)
+      if (flyerUrl) {
+        const caption = flyerCaption?.trim() 
+          ? flyerCaption 
+          : `${session.title}\n${weekday}, ${date} • ${time}`
+        
+        const imageResult = await client.sendImageMessage({
+          phone: conversation.phone,
+          image: flyerUrl,
+          caption,
+        })
+        
+        if (imageResult.success) {
+          // Salvar mensagem da imagem
+          await supabaseAdmin.from('whatsapp_messages').insert({
+            conversation_id: conversationId,
+            instance_id: instance.id,
+            z_api_message_id: imageResult.id || null,
+            sender_type: 'bot',
+            sender_name: 'Carol - Secretária',
+            message: caption,
+            message_type: 'image',
+            media_url: flyerUrl,
+            status: 'sent',
+            is_bot_response: true,
+          })
+        }
+      }
+      
+      // 2. Enviar mensagem com link
+      const linkMessage = `✅ *Perfeito! Você vai adorar essa aula!* 🎉\n\n🗓️ ${weekday}, ${date}\n🕒 ${time} (horário de Brasília)\n\n🔗 ${session.zoom_link}\n\n💡 *Dica importante:* A sala do Zoom será aberta 10 minutos antes do horário da aula. Chegue com antecedência para garantir sua vaga! 😊\n\nEstou super animada para te ver lá! Qualquer dúvida, é só me chamar! 💚`
+      
+      const textResult = await client.sendTextMessage({
+        phone: conversation.phone,
+        message: linkMessage,
+      })
+      
+      if (!textResult.success) {
+        return NextResponse.json(
+          { error: textResult.error || 'Erro ao enviar mensagem' },
+          { status: 500 }
+        )
+      }
+      
+      // Salvar mensagem do link
+      await supabaseAdmin.from('whatsapp_messages').insert({
+        conversation_id: conversationId,
+        instance_id: instance.id,
+        z_api_message_id: textResult.id || null,
+        sender_type: 'bot',
+        sender_name: 'Carol - Secretária',
+        message: linkMessage,
+        message_type: 'text',
+        status: 'sent',
+        is_bot_response: true,
+      })
+      
+      // Atualizar contexto da conversa
+      const prevTags = Array.isArray(context.tags) ? context.tags : []
+      const newTags = [...new Set([...prevTags, 'recebeu_link_workshop', 'agendou_aula'])]
+      
+      await supabaseAdmin
+        .from('whatsapp_conversations')
+        .update({
+          context: {
+            ...context,
+            tags: newTags,
+            workshop_session_id: session.id,
+            scheduled_date: session.starts_at,
+          },
+          last_message_at: new Date().toISOString(),
+          last_message_from: 'bot',
+        })
+        .eq('id', conversationId)
+      
+      return NextResponse.json({
+        success: true,
+        message: 'Link da aula enviado com sucesso!',
+        carolMessage: linkMessage,
+      })
     }
+
+    // Se não forneceu sessão, buscar próximas sessões e gerar mensagem com opções
+    const now = new Date()
+    const minDate = new Date(now.getTime() + 5 * 60 * 1000) // Buffer de 5 minutos
+    
+    const { data: sessions } = await supabaseAdmin
+      .from('whatsapp_workshop_sessions')
+      .select('id, title, starts_at, zoom_link')
+      .eq('area', conversation.area || 'nutri')
+      .eq('is_active', true)
+      .gte('starts_at', minDate.toISOString())
+      .order('starts_at', { ascending: true })
+      .limit(3)
+    
+    const workshopSessions = sessions || []
 
     // Buscar histórico de mensagens
     const { data: messages } = await supabaseAdmin
@@ -106,8 +204,6 @@ export async function POST(request: NextRequest) {
       }))
 
     // Buscar nome do cadastro
-    const context = conversation.context || {}
-    const tags = Array.isArray(context.tags) ? context.tags : []
     let registrationName: string | null = null
     
     try {
@@ -140,11 +236,8 @@ export async function POST(request: NextRequest) {
 
     const leadName = registrationName || (context as any)?.lead_name || conversation.name || undefined
 
-    // Gerar mensagem da Carol oferecendo a opção
-    // Se forneceu uma mensagem customizada, usar ela como prompt
-    const userMessage = message || (session 
-      ? 'Quero agendar para quarta-feira às 20h' 
-      : 'Quais são as próximas opções de aula disponíveis?')
+    // Gerar mensagem da Carol oferecendo as opções
+    const userMessage = message || 'Quais são as próximas opções de aula disponíveis?'
 
     const carolMessage = await generateCarolResponse(
       userMessage,
@@ -159,7 +252,6 @@ export async function POST(request: NextRequest) {
     )
 
     // Enviar mensagem via Z-API
-    const client = createZApiClient(instance.instance_id, instance.token)
     const result = await client.sendTextMessage({
       phone: conversation.phone,
       message: carolMessage,
