@@ -1193,6 +1193,32 @@ function WhatsAppChatContent() {
                             {msg.sender_type !== 'customer' && (
                               <span className={`text-[11px] ${ticks.className}`}>{ticks.text}</span>
                             )}
+                            {/* Botão para deletar mensagens da Carol */}
+                            {(msg.is_bot_response || msg.sender_name?.includes('Carol') || msg.sender_type === 'bot') && (
+                              <button
+                                onClick={async () => {
+                                  if (!confirm('Tem certeza que deseja deletar esta mensagem da Carol?')) return
+                                  try {
+                                    const res = await fetch(
+                                      `/api/whatsapp/conversations/${selectedConversation?.id}/messages/${msg.id}`,
+                                      { method: 'DELETE', credentials: 'include' }
+                                    )
+                                    const json = await res.json().catch(() => ({}))
+                                    if (!res.ok) throw new Error(json.error || 'Erro ao deletar mensagem')
+                                    // Recarregar mensagens
+                                    if (selectedConversation) {
+                                      await loadMessages(selectedConversation.id)
+                                    }
+                                  } catch (err: any) {
+                                    alert(err.message || 'Erro ao deletar mensagem')
+                                  }
+                                }}
+                                className="text-[10px] text-red-600 hover:text-red-800 px-1"
+                                title="Deletar esta mensagem"
+                              >
+                                🗑️
+                              </button>
+                            )}
                           </div>
                         </div>
                       </div>

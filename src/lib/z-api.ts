@@ -57,6 +57,14 @@ export interface ZApiMessageResponse {
   error?: string
 }
 
+export interface ZApiDeleteMessageParams {
+  messageId: string
+  fromMe: boolean
+  phone: string // Número do destinatário (para mensagens individuais)
+  wuid?: string // Para mensagens de grupo (opcional)
+  from?: 'me' | 'everyone' // Escopo: 'me' (apenas para mim) ou 'everyone' (para todos)
+}
+
 export interface ZApiWebhookMessage {
   phone: string
   message: string
@@ -449,6 +457,41 @@ export class ZApiClient {
       return { success: true, id: data.id, message: 'Documento enviado com sucesso' }
     } catch (error: any) {
       return { success: false, error: error.message || 'Erro ao enviar documento' }
+    }
+  }
+
+  /**
+   * Deleta mensagem via Z-API
+   * Endpoint: /chat/deleteMessage
+   */
+  async deleteMessage(params: ZApiDeleteMessageParams): Promise<ZApiMessageResponse> {
+    try {
+      const { messageId, fromMe, phone, wuid, from = 'everyone' } = params
+      const cleanPhone = this.formatInternationalPhone(phone)
+      
+      const response = await fetch(
+        `${this.baseUrl}/instances/${this.config.instanceId}/token/${this.config.token}/chat/deleteMessage?from=${from}`,
+        {
+          method: 'DELETE',
+          headers: this.buildHeaders(),
+          body: JSON.stringify({
+            messageId,
+            fromMe,
+            phone: cleanPhone,
+            ...(wuid && { wuid }),
+          }),
+        }
+      )
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(async () => ({ message: await response.text() }))
+        throw new Error(errorData.message || `Erro HTTP ${response.status}`)
+      }
+      
+      const data = await response.json()
+      return { success: true, message: 'Mensagem deletada com sucesso' }
+    } catch (error: any) {
+      return { success: false, error: error.message || 'Erro ao deletar mensagem' }
     }
   }
 }
