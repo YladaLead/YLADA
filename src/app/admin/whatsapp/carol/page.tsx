@@ -81,12 +81,20 @@ function CarolControlContent() {
               <h1 className="text-2xl font-bold text-gray-900">🤖 Carol - IA de Atendimento</h1>
               <p className="text-sm text-gray-500 mt-1">Sistema de automação e remarketing</p>
             </div>
-            <Link
-              href="/admin/whatsapp"
-              className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
-            >
-              ← Voltar
-            </Link>
+            <div className="flex items-center gap-3">
+              <Link
+                href="/admin/whatsapp/carol/chat"
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm flex items-center gap-2"
+              >
+                💬 Chat com Carol
+              </Link>
+              <Link
+                href="/admin/whatsapp"
+                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+              >
+                ← Voltar
+              </Link>
+            </div>
           </div>
         </div>
       </div>
