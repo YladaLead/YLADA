@@ -960,8 +960,8 @@ export async function processIncomingMessageWithCarol(
           }
         }
         
-        // 2. Enviar mensagem com link
-        const linkMessage = `✅ *Perfeito! Aqui está o link da sua aula:*\n\n📅 ${weekday}, ${date}\n🕒 ${time} (horário de Brasília)\n\n🔗 ${selectedSession.zoom_link}\n\n✅ Se precisar reagendar, responda REAGENDAR.\n\nQualquer dúvida, estou aqui! 💚`
+        // 2. Enviar mensagem com link (mais entusiasmada e criando expectativa)
+        const linkMessage = `✅ *Perfeito! Você vai adorar essa aula!* 🎉\n\n📅 ${weekday}, ${date}\n🕒 ${time} (horário de Brasília)\n\n🔗 ${selectedSession.zoom_link}\n\n💡 *Dica importante:* A sala do Zoom será aberta 10 minutos antes do horário da aula. Chegue com antecedência para garantir sua vaga! 😊\n\nEstou super animada para te ver lá! Qualquer dúvida, é só me chamar! 💚`
         
         const textResult = await client.sendTextMessage({
           phone,
