@@ -418,21 +418,17 @@ function WorkshopContent() {
                 </div>
               </div>
 
-              <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-800">
-                <strong>Horários fixos configurados:</strong>
+              <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg text-sm text-green-800">
+                <strong>✅ Links do Zoom configurados:</strong>
                 <ul className="mt-1 ml-4 list-disc">
                   <li>Segunda-feira às 10:00 (usa link das 9:00)</li>
                   <li>Terça a Sexta às 9:00 (link das 9:00)</li>
                   <li>Segunda a Sexta às 15:00 (link das 15:00)</li>
                   <li>Quarta-feira às 20:00 (link específico)</li>
                 </ul>
-                <p className="mt-2 text-xs font-medium">
-                  ⚠️ <strong>Importante:</strong> Para gerar sessões automaticamente, você precisa:
+                <p className="mt-2 text-xs">
+                  Os links estão fixos no sistema. Você pode gerar sessões automaticamente clicando no botão acima.
                 </p>
-                <ol className="mt-1 ml-4 list-decimal text-xs">
-                  <li>Configurar <code className="bg-blue-100 px-1 rounded">ZOOM_LINK_9H</code> e <code className="bg-blue-100 px-1 rounded">ZOOM_LINK_15H</code> nas variáveis de ambiente, OU</li>
-                  <li>Adicionar manualmente pelo menos uma sessão às <strong>9:00</strong> e outra às <strong>15:00</strong> (o sistema detectará os links automaticamente)</li>
-                </ol>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-4 gap-3 mb-4">

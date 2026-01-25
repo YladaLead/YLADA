@@ -7,6 +7,15 @@
 import { supabaseAdmin } from '@/lib/supabase'
 
 /**
+ * Links fixos do Zoom (sempre os mesmos)
+ */
+const ZOOM_LINKS = {
+  LINK_9H: 'https://us02web.zoom.us/j/84314536380?pwd=Uk22sJGQu0Z0XByd6MvwtsqNmwW94c.1',
+  LINK_15H: 'https://us02web.zoom.us/j/88152277642?pwd=ejGMTUzEb5Ybjy0O77FtakWIkchQWU.1',
+  LINK_20H: 'https://us02web.zoom.us/j/88212513126?pwd=8KROrQtFJacJKRaaCwSsAM2avjeWfs.1',
+}
+
+/**
  * Configuração de horários fixos
  */
 export const WORKSHOP_SCHEDULE = {
@@ -15,28 +24,28 @@ export const WORKSHOP_SCHEDULE = {
     weekday: 1, // Segunda-feira (0 = domingo, 1 = segunda)
     hour: 10,
     minute: 0,
-    zoomLink: process.env.ZOOM_LINK_9H || '', // Link das 9:00
+    zoomLink: ZOOM_LINKS.LINK_9H,
   },
   // Terça a Sexta às 9:00 - link das 9:00
   tuesday_to_friday_9: {
     weekdays: [2, 3, 4, 5], // Terça a Sexta
     hour: 9,
     minute: 0,
-    zoomLink: process.env.ZOOM_LINK_9H || '', // Link das 9:00
+    zoomLink: ZOOM_LINKS.LINK_9H,
   },
   // Segunda a Sexta às 15:00 - link das 15:00
   monday_to_friday_15: {
     weekdays: [1, 2, 3, 4, 5], // Segunda a Sexta
     hour: 15,
     minute: 0,
-    zoomLink: process.env.ZOOM_LINK_15H || '', // Link das 15:00
+    zoomLink: ZOOM_LINKS.LINK_15H,
   },
   // Quarta-feira às 20:00 - link das 20:00
   wednesday_20: {
     weekday: 3, // Quarta-feira
     hour: 20,
     minute: 0,
-    zoomLink: 'https://us02web.zoom.us/j/88212513126?pwd=8KROrQtFJacJKRaaCwSsAM2avjeWfs.1',
+    zoomLink: ZOOM_LINKS.LINK_20H,
   },
 }
 
@@ -170,7 +179,7 @@ export async function generateWorkshopSessions(weeksAhead: number = 4): Promise<
         sessionsToCreate.push({
           title: 'Aula Prática ao Vivo (Agenda Instável)',
           starts_at: wednesdayDate.toISOString(),
-          zoom_link: 'https://us02web.zoom.us/j/88212513126?pwd=8KROrQtFJacJKRaaCwSsAM2avjeWfs.1',
+          zoom_link: zoomLink20h,
         })
       }
     }
