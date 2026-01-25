@@ -177,6 +177,54 @@ export async function POST(request: NextRequest) {
         const context = conversation.context || {}
         const tags = Array.isArray(context.tags) ? context.tags : []
         
+        // 🆕 Buscar nome do cadastro (prioridade sobre nome do WhatsApp)
+        let registrationName: string | null = null
+        const phoneClean = conversation.phone.replace(/\D/g, '')
+        
+        try {
+          // Tentar buscar de workshop_inscricoes primeiro
+          const { data: workshopReg } = await supabaseAdmin
+            .from('workshop_inscricoes')
+            .select('nome')
+            .ilike('telefone', `%${phoneClean.slice(-8)}%`) // Buscar pelos últimos 8 dígitos
+            .limit(1)
+            .maybeSingle()
+          
+          if (workshopReg?.nome) {
+            registrationName = workshopReg.nome
+          } else {
+            // Fallback para contact_submissions
+            const { data: contactReg } = await supabaseAdmin
+              .from('contact_submissions')
+              .select('name, nome')
+              .or(`phone.ilike.%${phoneClean.slice(-8)}%,telefone.ilike.%${phoneClean.slice(-8)}%`)
+              .limit(1)
+              .maybeSingle()
+            
+            if (contactReg?.name || contactReg?.nome) {
+              registrationName = contactReg.name || contactReg.nome || null
+            }
+          }
+        } catch (error: any) {
+          console.warn('[Disparar Pendentes] Erro ao buscar nome do cadastro:', error.message)
+        }
+        
+        // 🆕 Atualizar lead_name no context se encontrou nome do cadastro
+        if (registrationName && registrationName !== (context as any)?.lead_name) {
+          await supabaseAdmin
+            .from('whatsapp_conversations')
+            .update({
+              context: {
+                ...context,
+                lead_name: registrationName
+              }
+            })
+            .eq('id', conversation.id)
+          
+          // Atualizar context local
+          context.lead_name = registrationName
+        }
+        
         // Verificar status da conversa
         const hasScheduled = tags.includes('agendou_aula') || tags.includes('recebeu_link_workshop')
         const veioAulaPratica = tags.includes('veio_aula_pratica')
@@ -240,8 +288,8 @@ export async function POST(request: NextRequest) {
 
         if (tipoProcessamento === 'primeira_mensagem') {
           // Primeira mensagem: boas-vindas com opções
-          // 🆕 Buscar nome do context se não tiver em conversation.name
-          const leadName = conversation.name || (context as any)?.lead_name || undefined
+          // 🆕 Priorizar nome do cadastro sobre nome do WhatsApp
+          const leadName = registrationName || (context as any)?.lead_name || conversation.name || undefined
           messageToSend = await generateCarolResponse(
             'Olá, quero agendar uma aula',
             conversationHistory,
@@ -258,8 +306,8 @@ export async function POST(request: NextRequest) {
           }
         } else if (tipoProcessamento === 'nao_escolheu_agenda') {
           // Não escolheu agenda: relembrar opções
-          // 🆕 Buscar nome do context se não tiver em conversation.name
-          const leadName = conversation.name || (context as any)?.lead_name || undefined
+          // 🆕 Priorizar nome do cadastro sobre nome do WhatsApp
+          const leadName = registrationName || (context as any)?.lead_name || conversation.name || undefined
           messageToSend = await generateCarolResponse(
             'Quais são os horários disponíveis? Quero agendar',
             conversationHistory,

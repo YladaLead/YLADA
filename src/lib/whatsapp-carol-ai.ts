@@ -1166,18 +1166,75 @@ Carol - Secretária YLADA Nutri`
       }))
     })
 
-    // 6. Gerar resposta da Carol
+    // 6. Buscar nome do cadastro (prioridade sobre nome do WhatsApp)
+    let registrationName: string | null = null
+    try {
+      // Buscar telefone da conversa
+      const { data: convWithPhone } = await supabaseAdmin
+        .from('whatsapp_conversations')
+        .select('phone')
+        .eq('id', conversationId)
+        .single()
+      
+      if (convWithPhone?.phone) {
+        const phoneClean = convWithPhone.phone.replace(/\D/g, '')
+        
+        // Tentar buscar de workshop_inscricoes primeiro
+        const { data: workshopReg } = await supabaseAdmin
+          .from('workshop_inscricoes')
+          .select('nome')
+          .ilike('telefone', `%${phoneClean.slice(-8)}%`) // Buscar pelos últimos 8 dígitos
+          .limit(1)
+          .maybeSingle()
+        
+        if (workshopReg?.nome) {
+          registrationName = workshopReg.nome
+        } else {
+          // Fallback para contact_submissions
+          const { data: contactReg } = await supabaseAdmin
+            .from('contact_submissions')
+            .select('name, nome')
+            .or(`phone.ilike.%${phoneClean.slice(-8)}%,telefone.ilike.%${phoneClean.slice(-8)}%`)
+            .limit(1)
+            .maybeSingle()
+          
+          if (contactReg?.name || contactReg?.nome) {
+            registrationName = contactReg.name || contactReg.nome || null
+          }
+        }
+        
+        // Atualizar lead_name no context se encontrou nome do cadastro
+        if (registrationName && registrationName !== (context as any)?.lead_name) {
+          await supabaseAdmin
+            .from('whatsapp_conversations')
+            .update({
+              context: {
+                ...context,
+                lead_name: registrationName
+              }
+            })
+            .eq('id', conversationId)
+          
+          // Atualizar context local
+          context.lead_name = registrationName
+        }
+      }
+    } catch (error: any) {
+      console.warn('[Carol AI] Erro ao buscar nome do cadastro:', error.message)
+    }
+
+    // 7. Gerar resposta da Carol
     console.log('[Carol AI] 💭 Gerando resposta com contexto:', {
       tags,
       hasSessions: workshopSessions.length > 0,
-      leadName: conversation.name,
+      leadName: registrationName || (context as any)?.lead_name || conversation.name,
       hasScheduled,
       participated,
       isFirstMessage
     })
 
-    // 🆕 Buscar nome do context se não tiver em conversation.name
-    const leadName = conversation.name || (context as any)?.lead_name || undefined
+    // 🆕 Priorizar nome do cadastro sobre nome do WhatsApp
+    const leadName = registrationName || (context as any)?.lead_name || conversation.name || undefined
     
     const carolResponse = await generateCarolResponse(message, conversationHistory, {
       tags,
