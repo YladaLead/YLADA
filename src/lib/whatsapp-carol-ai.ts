@@ -295,17 +295,47 @@ export async function processIncomingMessageWithCarol(
     })
 
     // 6. Buscar instância Z-API
-    const { data: instance } = await supabaseAdmin
+    // IMPORTANTE: instanceId pode ser instance_id (string) ou id (UUID)
+    // Se for UUID (36 caracteres com hífens), buscar por id
+    // Se for instance_id (32 caracteres sem hífens), buscar por instance_id
+    const isUUID = instanceId.includes('-') && instanceId.length === 36
+    console.log('[Carol AI] 🔍 Buscando instância Z-API:', { 
+      instanceId, 
+      isUUID,
+      length: instanceId.length 
+    })
+    
+    const { data: instance, error: instanceError } = await supabaseAdmin
       .from('z_api_instances')
-      .select('instance_id, token')
-      .eq('id', instanceId)
+      .select('id, instance_id, token, status')
+      .eq(isUUID ? 'id' : 'instance_id', instanceId)
       .single()
 
+    if (instanceError) {
+      console.error('[Carol AI] ❌ Erro ao buscar instância:', instanceError)
+      return { success: false, error: `Erro ao buscar instância: ${instanceError.message}` }
+    }
+
     if (!instance) {
+      console.error('[Carol AI] ❌ Instância Z-API não encontrada:', { instanceId })
       return { success: false, error: 'Instância Z-API não encontrada' }
     }
 
+    console.log('[Carol AI] ✅ Instância encontrada:', {
+      id: instance.id,
+      instance_id: instance.instance_id,
+      hasToken: !!instance.token,
+      tokenLength: instance.token?.length,
+      status: instance.status
+    })
+
     // 7. Enviar resposta
+    console.log('[Carol AI] 📤 Enviando resposta via Z-API:', {
+      phone,
+      messageLength: carolResponse?.length,
+      instance_id: instance.instance_id
+    })
+    
     const sendResult = await sendWhatsAppMessage(
       phone,
       carolResponse,
@@ -313,8 +343,15 @@ export async function processIncomingMessageWithCarol(
       instance.token
     )
 
+    console.log('[Carol AI] 📤 Resultado do envio:', {
+      success: sendResult.success,
+      error: sendResult.error,
+      messageId: sendResult.messageId
+    })
+
     if (!sendResult.success) {
-      return { success: false, error: sendResult.error }
+      console.error('[Carol AI] ❌ Erro ao enviar mensagem:', sendResult.error)
+      return { success: false, error: sendResult.error || 'Erro ao enviar mensagem via Z-API' }
     }
 
     // 8. Salvar mensagem no banco
