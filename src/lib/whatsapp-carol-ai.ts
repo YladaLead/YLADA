@@ -963,7 +963,7 @@ export async function processIncomingMessageWithCarol(
         
         // 2. Enviar mensagem com link (mais entusiasmada e criando expectativa)
         // Nota: Não usar emoji 📅 pois ele mostra a data atual do sistema, não a data da aula
-        const linkMessage = `✅ *Perfeito! Você vai adorar essa aula!* 🎉\n\n🗓️ ${weekday}, ${date}\n🕒 ${time} (horário de Brasília)\n\n🔗 ${selectedSession.zoom_link}\n\n💡 *Dica importante:* A sala do Zoom será aberta 10 minutos antes do horário da aula. Chegue com antecedência para garantir sua vaga! 😊\n\nEstou super animada para te ver lá! Qualquer dúvida, é só me chamar! 💚`
+        const linkMessage = `✅ *Perfeito! Você vai adorar essa aula!* 🎉\n\n🗓️ ${weekday}, ${date}\n🕒 ${time} (horário de Brasília)\n\n🔗 ${selectedSession.zoom_link}\n\n💡 *Dica importante:* A sala do Zoom será aberta 10 minutos antes do horário da aula. Chegue com antecedência para garantir sua vaga! 😊\n\nQualquer dúvida, é só me chamar! 💚`
         
         const textResult = await client.sendTextMessage({
           phone,
@@ -2651,8 +2651,23 @@ export async function sendSalesFollowUpAfterClass(): Promise<{
         let message: string | null = null
         let shouldSend = false
 
-        // Primeira mensagem de fechamento (após 12 horas da aula)
-        if (hoursSinceClass >= 12 && hoursSinceClass < 13 && !context[notificationKey]?.sent_12h) {
+        // Primeira mensagem de follow-up (após 3 horas - caso não tenha respondido)
+        if (hoursSinceClass >= 3 && hoursSinceClass < 4 && !context[notificationKey]?.sent_3h) {
+          message = `Oi ${leadName}! 
+
+Ficou alguma dúvida? 
+
+Você não quer começar? Vamos começar?
+
+O que está passando pela sua cabeça? 😊
+
+Carol - Secretária YLADA Nutri`
+          shouldSend = true
+          if (!context[notificationKey]) context[notificationKey] = {}
+          context[notificationKey].sent_3h = true
+        }
+        // Segunda mensagem de fechamento (após 12 horas da aula)
+        else if (hoursSinceClass >= 12 && hoursSinceClass < 13 && !context[notificationKey]?.sent_12h) {
           message = `Olá ${leadName}! 💚
 
 Lembro do motivo que te trouxe até aqui... 🌟
@@ -2667,7 +2682,7 @@ Pensa no que você vai ganhar: um estado de espírito completamente diferente, a
 
 E você pode começar pelo menos com o mensal para se certificar de que é isso mesmo que você quer. Sem compromisso de longo prazo.
 
-Qual é a sua maior dúvida ou objeção para começar agora? Me fala que eu te ajudo a resolver! 😊
+Qual é a sua maior dúvida ou objeção para começar agora? 😊
 
 Carol - Secretária YLADA Nutri`
           shouldSend = true
@@ -2694,7 +2709,7 @@ Pensa no estado de espírito que você vai adquirir, na transformação que voc�
 
 E você pode começar pelo menos com o mensal para se certificar. Sem pressão, sem compromisso de longo prazo.
 
-O que está te impedindo de começar agora? É o investimento, o tempo, ou alguma dúvida específica? Me conta que eu te ajudo! 💚
+O que está te impedindo de começar agora? É o investimento, o tempo, ou alguma dúvida específica? 💚
 
 Carol - Secretária YLADA Nutri`
           shouldSend = true
@@ -2723,9 +2738,9 @@ Não deixe que esse momento passe. Não deixe que a vida te distraia do que real
 
 Você merece ver esse sonho se tornar realidade.
 
-Qual é a sua maior objeção? Investimento, tempo, ou outra coisa? Me fala exatamente o que está te travando que eu te ajudo a resolver agora mesmo!
+Qual é a sua maior objeção? Investimento, tempo, ou outra coisa? 
 
-O momento é AGORA. Vamos conversar? 💚
+O que está te travando exatamente? O momento é AGORA. Vamos conversar? 💚
 
 Carol - Secretária YLADA Nutri`
           shouldSend = true
@@ -2924,22 +2939,20 @@ export async function sendRegistrationLinkAfterClass(conversationId: string): Pr
     // Link de cadastro (configurável via variável de ambiente ou banco)
     const registrationUrl = process.env.NUTRI_REGISTRATION_URL || 'https://ylada.com/pt/nutri/cadastro'
 
-    // Mensagem persuasiva focada em fechamento e trabalho emocional
+    // Mensagem imediata após participar da aula
     const message = `Olá ${leadName}! 💚
 
-Tenho certeza que a aula pode ser a transformação que você buscava.
+Excelente! Parabéns por ter participado! 🎉
 
-Você veio até aqui porque tinha um sonho, um objetivo... algo que te moveu a buscar essa mudança. 🌟
+Espero que tenha gostado e tenho certeza que isso realmente pode fazer diferença na sua vida.
 
-Agora que você já viu o caminho, que tal darmos o próximo passo juntas?
+Agora me conta: o que você mais gostou? E como você prefere começar?
 
-Abaixo segue o link para você escolher o melhor plano para começar:
+Você prefere começar com o plano mensal para validar e verificar, ou você já está determinado a mudar sua vida e prefere o plano anual?
 
 🔗 ${registrationUrl}
 
-Qual é a sua maior dúvida ou objeção para começar agora? É sobre valores, formas de pagamento, ou como funciona? 
-
-Me fala que eu te ajudo a resolver e te mostro como podemos fazer esse sonho se tornar realidade! 😊
+O que você acha? 😊
 
 Carol - Secretária YLADA Nutri`
 
