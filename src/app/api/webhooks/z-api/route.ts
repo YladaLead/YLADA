@@ -258,8 +258,8 @@ async function saveMessage(
     throw new Error('Instância não encontrada')
   }
 
-  // Se é mensagem enviada por nós, verificar se já existe para evitar duplicatas
-  if (isFromUs && payload.messageId) {
+  // Verificar se já existe para evitar duplicatas (tanto mensagens enviadas quanto recebidas)
+  if (payload.messageId) {
     const { data: existing } = await supabase
       .from('whatsapp_messages')
       .select('id')
@@ -269,6 +269,24 @@ async function saveMessage(
     if (existing) {
       console.log('[Z-API Webhook] ⏭️ Mensagem já existe, ignorando duplicata:', payload.messageId)
       return // Mensagem já existe, não salvar novamente
+    }
+  }
+  
+  // Verificação adicional: se não tem messageId, verificar por conteúdo + timestamp (últimos 30 segundos)
+  if (!payload.messageId && !isFromUs) {
+    const trintaSegundosAtras = new Date(Date.now() - 30 * 1000).toISOString()
+    const { data: recentDuplicate } = await supabase
+      .from('whatsapp_messages')
+      .select('id')
+      .eq('conversation_id', conversationId)
+      .eq('sender_type', 'customer')
+      .eq('message', payload.message)
+      .gte('created_at', trintaSegundosAtras)
+      .maybeSingle()
+    
+    if (recentDuplicate) {
+      console.log('[Z-API Webhook] ⏭️ Mensagem duplicada detectada (mesmo conteúdo nos últimos 30s), ignorando')
+      return // Mensagem duplicada, não salvar novamente
     }
   }
 
@@ -1167,10 +1185,40 @@ export async function POST(request: NextRequest) {
         // Processar com Carol (IA de atendimento)
         // IMPORTANTE: Não processar se mensagem veio do número de notificação
         // IMPORTANTE: Não processar se já existe mensagem da Carol recente E a última mensagem é da Carol (evitar duplicação)
+        // IMPORTANTE: Verificar se já processou esta mensagem específica (evitar duplicação de webhook)
         const notificationPhone = process.env.Z_API_NOTIFICATION_PHONE
+        
+        // Verificar se já processou esta mensagem específica (mesmo conteúdo do cliente + resposta da Carol nos últimos 2 minutos)
+        const doisMinutosAtras = new Date(Date.now() - 2 * 60 * 1000).toISOString()
+        const { data: recentSameMessage } = await supabase
+          .from('whatsapp_messages')
+          .select('id, created_at')
+          .eq('conversation_id', conversationId)
+          .eq('sender_type', 'customer')
+          .eq('message', message)
+          .gte('created_at', doisMinutosAtras)
+          .order('created_at', { ascending: false })
+          .limit(1)
+        
+        // Se encontrou mensagem idêntica recente, verificar se já há resposta da Carol
+        let alreadyProcessed = false
+        if (recentSameMessage && recentSameMessage.length > 0) {
+          const { data: carolResponseAfter } = await supabase
+            .from('whatsapp_messages')
+            .select('id')
+            .eq('conversation_id', conversationId)
+            .eq('sender_type', 'bot')
+            .eq('sender_name', 'Carol - Secretária')
+            .gte('created_at', recentSameMessage[0].created_at)
+            .limit(1)
+          
+          alreadyProcessed = carolResponseAfter && carolResponseAfter.length > 0
+        }
+        
         const shouldProcessCarol = 
           (!notificationPhone || phone.replace(/\D/g, '') !== notificationPhone.replace(/\D/g, '')) &&
-          shouldAllowResponse // 🆕 Usar lógica melhorada
+          shouldAllowResponse && // 🆕 Usar lógica melhorada
+          !alreadyProcessed // 🆕 Não processar se já respondeu recentemente
         
         if (shouldProcessCarol) {
           console.log('[Z-API Webhook] 🤖 Iniciando processamento com Carol...')
@@ -1199,7 +1247,9 @@ export async function POST(request: NextRequest) {
             })
           }
         } else {
-          if (hasRecentCarolMessage) {
+          if (alreadyProcessed) {
+            console.log('[Z-API Webhook] ⏭️ Pulando Carol (já processou mensagem recentemente - evitando duplicação)')
+          } else if (hasRecentCarolMessage) {
             console.log('[Z-API Webhook] ⏭️ Pulando Carol (já existe mensagem da Carol nos últimos 5 minutos - evitando duplicação)')
           } else {
             console.log('[Z-API Webhook] ⏭️ Pulando Carol (mensagem do número de notificação)')

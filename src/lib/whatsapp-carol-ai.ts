@@ -151,7 +151,7 @@ PRIMEIRA MENSAGEM (IMPORTANTE):
 - Se é a primeira mensagem da pessoa, você DEVE enviar TUDO em UMA ÚNICA mensagem:
   1. Primeira linha: "Oi, tudo bem? 😊" (SE o nome da pessoa estiver disponível, use: "Oi [NOME], tudo bem? 😊")
   
-  2. Segunda linha: "Seja muito bem-vinda!" (SE tiver nome, use: "Seja muito bem-vinda, [NOME]!")
+  2. Segunda linha: "Seja muito bem-vinda!" (NÃO repita o nome aqui - use apenas "Seja muito bem-vinda!")
   
   3. Terceira linha: "Eu sou a Carol, da equipe Ylada Nutri."
   
@@ -364,7 +364,7 @@ export async function generateCarolResponse(
         contextText += `Você DEVE seguir EXATAMENTE esta estrutura:\n\n`
         if (context.leadName) {
           contextText += `1. Primeira linha: "Oi ${context.leadName}, tudo bem? 😊" (USE O NOME DA PESSOA!)\n`
-          contextText += `2. Segunda linha: "Seja muito bem-vinda, ${context.leadName}!" (USE O NOME DA PESSOA!)\n`
+          contextText += `2. Segunda linha: "Seja muito bem-vinda!" (NÃO repita o nome aqui - use apenas "Seja muito bem-vinda!")\n`
         } else {
           contextText += `1. Primeira linha: "Oi, tudo bem? 😊"\n`
           contextText += `2. Segunda linha: "Seja muito bem-vinda!"\n`
