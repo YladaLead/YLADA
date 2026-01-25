@@ -538,29 +538,96 @@ export async function processIncomingMessageWithCarol(
         }
       }
       
-      // Detectar por dia/horário: "segunda às 10:00", "26/01 às 10:00", etc
+      // Detectar por dia/horário: "segunda às 10:00", "26/01 às 10:00", "segunda s 10hs", etc
       if (!selectedSession) {
+        // Extrair números de horário da mensagem (ex: "10", "15", "9", "20")
+        const hourMatches = messageLower.match(/\b(\d{1,2})\s*(?:h|hs|horas|:)/g)
+        const hoursInMessage: number[] = []
+        if (hourMatches) {
+          hourMatches.forEach(match => {
+            const hour = parseInt(match.replace(/\D/g, ''))
+            if (hour >= 0 && hour <= 23) {
+              hoursInMessage.push(hour)
+            }
+          })
+        }
+        
+        // Se não encontrou padrão "10h", tentar números soltos que podem ser horários
+        if (hoursInMessage.length === 0) {
+          const numberMatches = messageLower.match(/\b([0-9]|1[0-9]|2[0-3])\b/g)
+          if (numberMatches) {
+            numberMatches.forEach(match => {
+              const hour = parseInt(match)
+              if (hour >= 0 && hour <= 23) {
+                hoursInMessage.push(hour)
+              }
+            })
+          }
+        }
+
+        console.log('[Carol AI] 🔍 Detecção de horário:', {
+          message: messageLower,
+          hoursInMessage,
+          sessions: workshopSessions.map(s => {
+            const { weekday, date, time } = formatSessionDateTime(s.starts_at)
+            const hour = parseInt(time.split(':')[0])
+            return { weekday, time, hour, starts_at: s.starts_at }
+          })
+        })
+
         for (const sessionItem of workshopSessions) {
           const { weekday, date, time } = formatSessionDateTime(sessionItem.starts_at)
           const weekdayLower = weekday.toLowerCase()
+          const sessionHour = parseInt(time.split(':')[0]) // Extrair apenas a hora (ex: "10:00" -> 10)
           
           // Verificar se mensagem contém dia da semana ou data
-          if (
+          const hasDayMatch = 
             messageLower.includes(weekdayLower.substring(0, 5)) || // "segunda", "terça", etc
             messageLower.includes(date.replace(/\//g, '')) || // "26012026"
             messageLower.includes(date.split('/')[0]) // "26"
-          ) {
-            // Verificar se também menciona horário
-            if (messageLower.includes(time.replace(':', '')) || messageLower.includes(time)) {
-              // Usar sessão já encontrada (já tem ID)
-              selectedSession = {
-                id: sessionItem.id,
-                title: sessionItem.title,
-                starts_at: sessionItem.starts_at,
-                zoom_link: sessionItem.zoom_link
-              }
-              break
+          
+          // Verificar se menciona horário de várias formas
+          const hasTimeMatch = 
+            messageLower.includes(time.replace(':', '')) || // "10:00" -> "1000"
+            messageLower.includes(time) || // "10:00"
+            messageLower.includes(`${sessionHour}h`) || // "10h"
+            messageLower.includes(`${sessionHour}hs`) || // "10hs"
+            messageLower.includes(`${sessionHour} horas`) || // "10 horas"
+            hoursInMessage.includes(sessionHour) // Número extraído corresponde ao horário
+          
+          if (hasDayMatch && hasTimeMatch) {
+            console.log('[Carol AI] ✅ Sessão detectada por dia/horário:', {
+              sessionId: sessionItem.id,
+              weekday,
+              time,
+              hour: sessionHour,
+              message: messageLower
+            })
+            selectedSession = {
+              id: sessionItem.id,
+              title: sessionItem.title,
+              starts_at: sessionItem.starts_at,
+              zoom_link: sessionItem.zoom_link
             }
+            break
+          }
+          
+          // Se não encontrou dia mas encontrou horário exato, usar mesmo assim
+          // (útil quando pessoa só diz "10h" ou "15h")
+          if (!selectedSession && hasTimeMatch && hoursInMessage.length === 1) {
+            console.log('[Carol AI] ✅ Sessão detectada apenas por horário:', {
+              sessionId: sessionItem.id,
+              time,
+              hour: sessionHour,
+              message: messageLower
+            })
+            selectedSession = {
+              id: sessionItem.id,
+              title: sessionItem.title,
+              starts_at: sessionItem.starts_at,
+              zoom_link: sessionItem.zoom_link
+            }
+            break
           }
         }
       }
