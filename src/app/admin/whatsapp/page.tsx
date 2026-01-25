@@ -932,6 +932,43 @@ function WhatsAppChatContent() {
                   </div>
 
                   <div className="flex items-center gap-2 shrink-0">
+                    {/* Botão Desativar Carol (visível quando ativa) */}
+                    {selectedConversation && getTags(selectedConversation).includes('carol_ativa') && (
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          if (!confirm('Desativar Carol nesta conversa? Ela não responderá mais automaticamente.')) {
+                            return
+                          }
+                          try {
+                            const currentTags = getTags(selectedConversation)
+                            const newTags = currentTags
+                              .filter(t => t !== 'carol_ativa')
+                              .concat('atendimento_manual')
+                            
+                            await patchConversation(selectedConversation.id, {
+                              context: {
+                                ...(selectedConversation.context as any),
+                                tags: newTags,
+                                carol_disabled_at: new Date().toISOString(),
+                              }
+                            })
+                            
+                            alert('✅ Carol desativada com sucesso!')
+                            await loadConversations()
+                            if (selectedConversation) {
+                              await loadMessages(selectedConversation.id)
+                            }
+                          } catch (err: any) {
+                            alert(err.message || 'Erro ao desativar Carol')
+                          }
+                        }}
+                        className="px-3 py-1.5 text-xs font-medium bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors"
+                        title="Desativar Carol - Ela não responderá mais automaticamente"
+                      >
+                        🚫 Desativar Carol
+                      </button>
+                    )}
                     <button
                       type="button"
                       onClick={async () => {
@@ -1018,35 +1055,77 @@ function WhatsAppChatContent() {
                           >
                             🏷️ Etiquetas (tags)
                           </button>
-                          <button
-                            type="button"
-                            onClick={async () => {
-                              if (!selectedConversation) return
-                              setContactMenuOpen(false)
-                              try {
-                                setActivatingCarol(true)
-                                const res = await fetch(
-                                  `/api/admin/whatsapp/diagnose-conversation?id=${selectedConversation.id}`,
-                                  { credentials: 'include' }
-                                )
-                                const data = await res.json()
-                                if (data.diagnostic) {
-                                  setCarolDiagnostic(data.diagnostic)
-                                  setCarolModalOpen(true)
-                                } else {
-                                  alert(data.error || 'Erro ao diagnosticar conversa')
+                          {getTags(selectedConversation).includes('carol_ativa') ? (
+                            <button
+                              type="button"
+                              onClick={async () => {
+                                if (!selectedConversation) return
+                                if (!confirm('Desativar Carol nesta conversa? Ela não responderá mais automaticamente.')) {
+                                  return
                                 }
-                              } catch (err: any) {
-                                alert(err.message || 'Erro ao diagnosticar conversa')
-                              } finally {
-                                setActivatingCarol(false)
-                              }
-                            }}
-                            disabled={activatingCarol}
-                            className="w-full text-left px-4 py-2 text-sm hover:bg-gray-50 text-purple-600"
-                          >
-                            {activatingCarol ? '⏳ Diagnosticando...' : '🤖 Ativar Carol'}
-                          </button>
+                                setContactMenuOpen(false)
+                                try {
+                                  setActivatingCarol(true)
+                                  const currentTags = getTags(selectedConversation)
+                                  const newTags = currentTags
+                                    .filter(t => t !== 'carol_ativa')
+                                    .concat('atendimento_manual')
+                                  
+                                  await patchConversation(selectedConversation.id, {
+                                    context: {
+                                      ...(selectedConversation.context as any),
+                                      tags: newTags,
+                                      carol_disabled_at: new Date().toISOString(),
+                                    }
+                                  })
+                                  
+                                  alert('✅ Carol desativada com sucesso!')
+                                  await loadConversations()
+                                  if (selectedConversation) {
+                                    await loadMessages(selectedConversation.id)
+                                  }
+                                } catch (err: any) {
+                                  alert(err.message || 'Erro ao desativar Carol')
+                                } finally {
+                                  setActivatingCarol(false)
+                                }
+                              }}
+                              disabled={activatingCarol}
+                              className="w-full text-left px-4 py-2 text-sm hover:bg-gray-50 text-red-600"
+                            >
+                              {activatingCarol ? '⏳ Desativando...' : '🚫 Desativar Carol'}
+                            </button>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={async () => {
+                                if (!selectedConversation) return
+                                setContactMenuOpen(false)
+                                try {
+                                  setActivatingCarol(true)
+                                  const res = await fetch(
+                                    `/api/admin/whatsapp/diagnose-conversation?id=${selectedConversation.id}`,
+                                    { credentials: 'include' }
+                                  )
+                                  const data = await res.json()
+                                  if (data.diagnostic) {
+                                    setCarolDiagnostic(data.diagnostic)
+                                    setCarolModalOpen(true)
+                                  } else {
+                                    alert(data.error || 'Erro ao diagnosticar conversa')
+                                  }
+                                } catch (err: any) {
+                                  alert(err.message || 'Erro ao diagnosticar conversa')
+                                } finally {
+                                  setActivatingCarol(false)
+                                }
+                              }}
+                              disabled={activatingCarol}
+                              className="w-full text-left px-4 py-2 text-sm hover:bg-gray-50 text-purple-600"
+                            >
+                              {activatingCarol ? '⏳ Diagnosticando...' : '🤖 Ativar Carol'}
+                            </button>
+                          )}
                           <button
                             type="button"
                             onClick={() => {
