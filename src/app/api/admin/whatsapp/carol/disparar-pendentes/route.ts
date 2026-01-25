@@ -183,13 +183,14 @@ export async function POST(request: NextRequest) {
         const participated = tags.includes('participou_aula')
         const naoParticipou = tags.includes('nao_participou_aula')
         
-        // Verificar se tem mensagem da Carol
+        // Verificar se tem mensagem da Carol (qualquer mensagem, não apenas recente)
         const { data: carolMessages } = await supabaseAdmin
           .from('whatsapp_messages')
-          .select('id')
+          .select('id, created_at')
           .eq('conversation_id', conversation.id)
           .eq('sender_type', 'bot')
           .eq('sender_name', 'Carol - Secretária')
+          .order('created_at', { ascending: false })
           .limit(1)
           .maybeSingle()
 
@@ -277,7 +278,20 @@ export async function POST(request: NextRequest) {
           continue
         }
 
-        // Verificar se já tem mensagem recente da Carol (evitar duplicação)
+        // 🆕 Verificar se JÁ TEM QUALQUER mensagem da Carol (não apenas recente)
+        // Se já tem mensagem da Carol, não enviar novamente
+        if (temMensagemCarol) {
+          const ultimaMensagemData = carolMessages?.created_at
+          const dataUltimaMensagem = ultimaMensagemData ? new Date(ultimaMensagemData) : null
+          const diasDesdeUltimaMensagem = dataUltimaMensagem 
+            ? (Date.now() - dataUltimaMensagem.getTime()) / (1000 * 60 * 60 * 24)
+            : 0
+          
+          details.push(`⏭️ ${conversation.phone}: Já tem mensagem da Carol${diasDesdeUltimaMensagem > 0 ? ` (há ${Math.round(diasDesdeUltimaMensagem)} dia(s))` : ''}`)
+          continue
+        }
+        
+        // Verificar também mensagens muito recentes (últimos 5 minutos) como segurança extra
         const cincoMinutosAtras = new Date(Date.now() - 5 * 60 * 1000).toISOString()
         const { data: recentCarolMessages } = await supabaseAdmin
           .from('whatsapp_messages')
@@ -289,7 +303,7 @@ export async function POST(request: NextRequest) {
           .limit(1)
 
         if (recentCarolMessages && recentCarolMessages.length > 0) {
-          details.push(`⏭️ ${conversation.phone}: Já tem mensagem recente da Carol`)
+          details.push(`⏭️ ${conversation.phone}: Já tem mensagem muito recente da Carol (últimos 5 minutos)`)
           continue
         }
 
