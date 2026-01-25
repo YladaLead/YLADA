@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireApiAuth } from '@/lib/api-auth'
 import { supabaseAdmin } from '@/lib/supabase'
 import { createZApiClient } from '@/lib/z-api'
-import { generateCarolResponse } from '@/lib/whatsapp-carol-ai'
+import { generateCarolResponse, formatSessionDateTime } from '@/lib/whatsapp-carol-ai'
 
 /**
  * POST /api/admin/whatsapp/carol/enviar-opcao
@@ -84,11 +84,8 @@ export async function POST(request: NextRequest) {
       const flyerUrl = settings?.flyer_url
       const flyerCaption = settings?.flyer_caption || ''
       
-      // Formatar data/hora
-      const sessionDate = new Date(session.starts_at)
-      const weekday = sessionDate.toLocaleDateString('pt-BR', { weekday: 'long' })
-      const date = sessionDate.toLocaleDateString('pt-BR')
-      const time = sessionDate.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+      // Formatar data/hora usando função que considera timezone de São Paulo
+      const { weekday, date, time } = formatSessionDateTime(session.starts_at)
       
       // 1. Enviar imagem do flyer (se configurado)
       if (flyerUrl) {
