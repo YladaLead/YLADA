@@ -698,10 +698,16 @@ function WorkshopContent() {
                                         <div className="text-xs text-gray-500 mt-1">
                                           {formatPtBR(session.starts_at)}
                                         </div>
-                                        {session.confirmed_participants !== undefined && session.confirmed_participants > 0 && (
+                                        {session.confirmed_participants !== undefined && session.confirmed_participants > 0 ? (
                                           <div className="mt-2">
                                             <div className="text-xs font-bold text-white bg-blue-600 px-2 py-1 rounded shadow-sm">
                                               ✅ {session.confirmed_participants} CONFIRMADO{session.confirmed_participants !== 1 ? 'S' : ''} - Clique para gerenciar
+                                            </div>
+                                          </div>
+                                        ) : (
+                                          <div className="mt-2">
+                                            <div className="text-xs text-gray-500 italic">
+                                              Sem participantes confirmados - Clique para ver
                                             </div>
                                           </div>
                                         )}
