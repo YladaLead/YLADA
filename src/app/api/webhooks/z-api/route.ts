@@ -834,22 +834,41 @@ export async function POST(request: NextRequest) {
     
     // IMPORTANTE: Ignorar mensagens do número de notificação ANTES de processar
     // Este número é apenas para receber avisos, não deve criar conversas
+    // EXCEÇÃO: Se o número já tem uma conversa existente, processar normalmente (é um cliente legítimo)
     const notificationPhone = process.env.Z_API_NOTIFICATION_PHONE
     if (notificationPhone) {
       const notificationPhoneClean = notificationPhone.replace(/\D/g, '')
       const phoneClean = phone.replace(/\D/g, '')
       
       if (phoneClean === notificationPhoneClean) {
-        console.log('[Z-API Webhook] ⚠️ Mensagem do número de notificação ignorada (não cria conversa):', {
-          phone: phoneClean,
-          notificationPhone: notificationPhoneClean,
-          messagePreview: (rawBody.text?.message || rawBody.message || '').substring(0, 50)
-        })
-        // Retornar sucesso mas não processar
-        return NextResponse.json({ 
-          success: true, 
-          message: 'Mensagem do número de notificação ignorada' 
-        })
+        // Verificar se já existe uma conversa para este número
+        // Se existir, significa que é um cliente legítimo e deve ser processado
+        const { data: existingConversation } = await supabase
+          .from('whatsapp_conversations')
+          .select('id')
+          .eq('phone', phoneClean)
+          .limit(1)
+          .maybeSingle()
+        
+        if (!existingConversation) {
+          // Não tem conversa = número de notificação puro, ignorar
+          console.log('[Z-API Webhook] ⚠️ Mensagem do número de notificação ignorada (não cria conversa):', {
+            phone: phoneClean,
+            notificationPhone: notificationPhoneClean,
+            messagePreview: (rawBody.text?.message || rawBody.message || '').substring(0, 50)
+          })
+          // Retornar sucesso mas não processar
+          return NextResponse.json({ 
+            success: true, 
+            message: 'Mensagem do número de notificação ignorada' 
+          })
+        } else {
+          // Tem conversa = cliente legítimo, processar normalmente
+          console.log('[Z-API Webhook] ✅ Número de notificação com conversa existente, processando normalmente:', {
+            phone: phoneClean,
+            conversationId: existingConversation.id
+          })
+        }
       }
     }
 
