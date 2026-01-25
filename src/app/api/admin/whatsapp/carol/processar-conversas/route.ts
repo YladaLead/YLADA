@@ -287,8 +287,9 @@ export async function POST(request: NextRequest) {
           details.push(`❌ ${conversation.phone}: Erro ao enviar - ${result.error}`)
         }
 
-        // Delay entre mensagens para não sobrecarregar
-        await new Promise(resolve => setTimeout(resolve, 1000))
+        // Delay entre mensagens para não sobrecarregar o WhatsApp
+        // Intervalo de 2-3 segundos é mais seguro para evitar bloqueios
+        await new Promise(resolve => setTimeout(resolve, 2500))
 
       } catch (error: any) {
         errors++

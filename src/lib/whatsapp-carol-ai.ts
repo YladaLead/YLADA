@@ -2636,8 +2636,9 @@ Carol - Secretária YLADA Nutri`
             console.error(`[Carol Reminders] ❌ Erro ao enviar para ${participant.phone}:`, result.error)
           }
 
-          // Pequeno delay entre mensagens
-          await new Promise(resolve => setTimeout(resolve, 500))
+          // Delay entre mensagens para não sobrecarregar o WhatsApp
+          // Intervalo de 2-3 segundos é mais seguro para evitar bloqueios
+          await new Promise(resolve => setTimeout(resolve, 2500))
         } catch (err: any) {
           errors++
           console.error(`[Carol Reminders] ❌ Erro ao processar participante:`, err)
