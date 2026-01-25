@@ -471,67 +471,225 @@ function WorkshopContent() {
                 </div>
               </div>
 
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quando</th>
-                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Link</th>
-                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                      <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {sessions.length === 0 ? (
+              {/* Visualização em Agenda Semanal */}
+              {viewMode === 'calendar' && (() => {
+                const weekSessions = getWeekSessions(currentWeek)
+                const organized = organizeSessionsByDay(weekSessions)
+                const weekRange = getWeekDateRange(currentWeek)
+                const weekdays = ['Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira']
+                const fixedTimes = ['09:00', '10:00', '15:00', '20:00']
+
+                return (
+                  <div className="space-y-4">
+                    {/* Navegação da Semana */}
+                    <div className="flex items-center justify-between">
+                      <button
+                        onClick={() => setCurrentWeek(Math.max(0, currentWeek - 1))}
+                        disabled={currentWeek === 0}
+                        className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        ← Semana Anterior
+                      </button>
+                      <div className="text-center">
+                        <h3 className="font-semibold text-gray-900">
+                          {currentWeek === 0 ? 'Esta Semana' : `Semana ${currentWeek + 1}`}
+                        </h3>
+                        <p className="text-xs text-gray-500">
+                          {weekRange.startStr} a {weekRange.endStr}
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => setCurrentWeek(currentWeek + 1)}
+                        className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg hover:bg-gray-50"
+                      >
+                        Próxima Semana →
+                      </button>
+                    </div>
+
+                    {/* Gerar Sessões da Semana */}
+                    {weekSessions.length === 0 && (
+                      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                        <div className="flex items-center justify-between">
+                          <p className="text-sm text-yellow-800">
+                            ⚠️ Nenhuma sessão cadastrada para esta semana. Clique em "Gerar Sessões" para criar automaticamente.
+                          </p>
+                          <button
+                            onClick={async () => {
+                              try {
+                                setSaving(true)
+                                setError(null)
+                                setSuccess(null)
+                                const res = await fetch('/api/admin/whatsapp/workshop/generate-sessions', {
+                                  method: 'POST',
+                                  headers: { 'Content-Type': 'application/json' },
+                                  credentials: 'include',
+                                  body: JSON.stringify({ weeksAhead: 1 }),
+                                })
+                                const json = await res.json().catch(() => ({}))
+                                if (!res.ok) throw new Error(json.error || 'Erro ao gerar sessões')
+                                setSuccess(json.message || `Criadas ${json.created} sessões!`)
+                                await loadAll()
+                                setCurrentWeek(0)
+                              } catch (e: any) {
+                                setError(e.message || 'Erro ao gerar sessões')
+                              } finally {
+                                setSaving(false)
+                              }
+                            }}
+                            disabled={saving}
+                            className="px-3 py-1.5 text-sm bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 disabled:opacity-50"
+                          >
+                            {saving ? 'Gerando...' : '🔄 Gerar Sessões desta Semana'}
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Agenda Semanal */}
+                    <div className="overflow-x-auto">
+                      <table className="min-w-full border-collapse">
+                        <thead>
+                          <tr>
+                            <th className="border border-gray-200 bg-gray-50 px-3 py-2 text-left text-xs font-medium text-gray-700">Horário</th>
+                            {weekdays.map(day => (
+                              <th key={day} className="border border-gray-200 bg-gray-50 px-3 py-2 text-center text-xs font-medium text-gray-700">
+                                {day}
+                              </th>
+                            ))}
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {fixedTimes.map(time => (
+                            <tr key={time}>
+                              <td className="border border-gray-200 bg-gray-50 px-3 py-2 text-sm font-medium text-gray-700">
+                                {time}
+                              </td>
+                              {weekdays.map(day => {
+                                const daySessions = organized[day]?.[time] || []
+                                return (
+                                  <td key={`${day}-${time}`} className="border border-gray-200 px-2 py-2 min-h-[80px]">
+                                    {daySessions.map(session => (
+                                      <div
+                                        key={session.id}
+                                        className={`mb-2 p-2 rounded-lg border-2 ${
+                                          session.is_active
+                                            ? 'bg-green-50 border-green-300'
+                                            : 'bg-red-50 border-red-300'
+                                        }`}
+                                      >
+                                        <div className="flex items-center justify-between mb-1">
+                                          <span className={`text-xs font-medium ${
+                                            session.is_active ? 'text-green-700' : 'text-red-700'
+                                          }`}>
+                                            {session.is_active ? '✅ Aberta' : '🔒 Fechada'}
+                                          </span>
+                                          <button
+                                            onClick={() => toggleActive(session)}
+                                            disabled={saving}
+                                            className={`text-xs px-2 py-0.5 rounded ${
+                                              session.is_active
+                                                ? 'bg-red-100 text-red-700 hover:bg-red-200'
+                                                : 'bg-green-100 text-green-700 hover:bg-green-200'
+                                            } disabled:opacity-50`}
+                                            title={session.is_active ? 'Fechar' : 'Abrir'}
+                                          >
+                                            {session.is_active ? '🔒' : '✅'}
+                                          </button>
+                                        </div>
+                                        <a
+                                          href={session.zoom_link}
+                                          target="_blank"
+                                          rel="noreferrer"
+                                          className="text-xs text-blue-600 hover:underline break-all"
+                                          onClick={(e) => e.stopPropagation()}
+                                        >
+                                          {session.zoom_link.substring(0, 30)}...
+                                        </a>
+                                        <div className="text-xs text-gray-500 mt-1">
+                                          {formatPtBR(session.starts_at)}
+                                        </div>
+                                      </div>
+                                    ))}
+                                    {daySessions.length === 0 && (
+                                      <div className="text-xs text-gray-400 text-center py-2">
+                                        —
+                                      </div>
+                                    )}
+                                  </td>
+                                )
+                              })}
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )
+              })()}
+
+              {/* Visualização em Tabela (original) */}
+              {viewMode === 'table' && (
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
                       <tr>
-                        <td colSpan={4} className="px-3 py-6 text-center text-gray-500">
-                          Nenhuma sessão cadastrada.
-                        </td>
+                        <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quando</th>
+                        <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Link</th>
+                        <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                        <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
                       </tr>
-                    ) : (
-                      sessions.map((s) => (
-                        <tr key={s.id}>
-                          <td className="px-3 py-3 whitespace-nowrap">
-                            <div className="text-sm font-medium text-gray-900">{formatPtBR(s.starts_at)}</div>
-                            <div className="text-xs text-gray-500">{s.title}</div>
-                          </td>
-                          <td className="px-3 py-3">
-                            <a className="text-sm text-blue-600 underline break-all" href={s.zoom_link} target="_blank" rel="noreferrer">
-                              {s.zoom_link}
-                            </a>
-                          </td>
-                          <td className="px-3 py-3 whitespace-nowrap">
-                            <span className={`text-xs px-2 py-1 rounded-full font-medium ${s.is_active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                              {s.is_active ? '✅ Aberta (Carol divulga)' : '🔒 Fechada (não divulgada)'}
-                            </span>
-                          </td>
-                          <td className="px-3 py-3 whitespace-nowrap text-right">
-                            <button
-                              onClick={() => toggleActive(s)}
-                              disabled={saving}
-                              className={`text-sm font-medium px-3 py-1.5 rounded-lg mr-3 ${
-                                s.is_active 
-                                  ? 'bg-red-50 text-red-700 hover:bg-red-100 border border-red-200' 
-                                  : 'bg-green-50 text-green-700 hover:bg-green-100 border border-green-200'
-                              } disabled:opacity-50`}
-                              title={s.is_active ? 'Fechar esta sessão para que a Carol não a divulgue' : 'Abrir esta sessão para que a Carol possa divulgá-la'}
-                            >
-                              {s.is_active ? '🔒 Fechar' : '✅ Abrir'}
-                            </button>
-                            <button
-                              onClick={() => deleteSession(s)}
-                              disabled={saving}
-                              className="text-sm text-red-600 hover:text-red-800"
-                            >
-                              Deletar
-                            </button>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {sessions.length === 0 ? (
+                        <tr>
+                          <td colSpan={4} className="px-3 py-6 text-center text-gray-500">
+                            Nenhuma sessão cadastrada.
                           </td>
                         </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
-              </div>
+                      ) : (
+                        sessions.map((s) => (
+                          <tr key={s.id}>
+                            <td className="px-3 py-3 whitespace-nowrap">
+                              <div className="text-sm font-medium text-gray-900">{formatPtBR(s.starts_at)}</div>
+                              <div className="text-xs text-gray-500">{s.title}</div>
+                            </td>
+                            <td className="px-3 py-3">
+                              <a className="text-sm text-blue-600 underline break-all" href={s.zoom_link} target="_blank" rel="noreferrer">
+                                {s.zoom_link}
+                              </a>
+                            </td>
+                            <td className="px-3 py-3 whitespace-nowrap">
+                              <span className={`text-xs px-2 py-1 rounded-full font-medium ${s.is_active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                                {s.is_active ? '✅ Aberta (Carol divulga)' : '🔒 Fechada (não divulgada)'}
+                              </span>
+                            </td>
+                            <td className="px-3 py-3 whitespace-nowrap text-right">
+                              <button
+                                onClick={() => toggleActive(s)}
+                                disabled={saving}
+                                className={`text-sm font-medium px-3 py-1.5 rounded-lg mr-3 ${
+                                  s.is_active 
+                                    ? 'bg-red-50 text-red-700 hover:bg-red-100 border border-red-200' 
+                                    : 'bg-green-50 text-green-700 hover:bg-green-100 border border-green-200'
+                                } disabled:opacity-50`}
+                                title={s.is_active ? 'Fechar esta sessão para que a Carol não a divulgue' : 'Abrir esta sessão para que a Carol possa divulgá-la'}
+                              >
+                                {s.is_active ? '🔒 Fechar' : '✅ Abrir'}
+                              </button>
+                              <button
+                                onClick={() => deleteSession(s)}
+                                disabled={saving}
+                                className="text-sm text-red-600 hover:text-red-800"
+                              >
+                                Deletar
+                              </button>
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
               )}
 
               {upcoming.length > 0 && (
