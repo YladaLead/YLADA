@@ -207,8 +207,35 @@ export async function POST(request: NextRequest) {
           }
         } else if (participated) {
           // Quem participou: pode enviar mensagem pós-aula se ainda não enviou
+          // MAS não enviar se já fechou, já foi direcionado ou já conversou recentemente
+          const jaFechou = tags.includes('cliente_nutri')
+          const jaDirecionado = context.redirected_to_support === true
           const hasPostClassMessage = tags.includes('recebeu_link_cadastro') || context.post_class_message_sent
-          if (!hasPostClassMessage) {
+          
+          // Verificar se tem mensagens recentes (se você já conversou)
+          const { data: recentMessages } = await supabaseAdmin
+            .from('whatsapp_messages')
+            .select('created_at, sender_type')
+            .eq('conversation_id', conversation.id)
+            .order('created_at', { ascending: false })
+            .limit(5)
+          
+          const temMensagensRecentes = recentMessages && recentMessages.length > 0
+          const ultimaMensagem = recentMessages?.[0]
+          const ultimaMensagemEhBot = ultimaMensagem?.sender_type === 'bot'
+          const diasDesdeUltimaMensagem = ultimaMensagem 
+            ? (Date.now() - new Date(ultimaMensagem.created_at).getTime()) / (1000 * 60 * 60 * 24)
+            : 999
+          
+          const jaConversou = temMensagensRecentes && (!ultimaMensagemEhBot || diasDesdeUltimaMensagem < 7)
+          
+          if (jaFechou || jaDirecionado) {
+            details.push(`⏭️ ${conversation.phone}: Já fechou/direcionado - não enviar pós-aula`)
+            continue
+          } else if (jaConversou) {
+            details.push(`⏭️ ${conversation.phone}: Já conversou recentemente - não enviar pós-aula`)
+            continue
+          } else if (!hasPostClassMessage) {
             messageToSend = await generateCarolResponse(
               'Obrigada por participar da aula',
               conversationHistory,

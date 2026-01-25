@@ -107,10 +107,37 @@ export async function GET(request: NextRequest) {
 
       if (participated) {
         status = 'participou_aula'
-        if (!tags.includes('recebeu_link_cadastro')) {
-          precisaAcao = 'Enviar mensagem pós-aula'
-        } else {
+        // Verificar se já fechou ou foi direcionado
+        const jaFechou = tags.includes('cliente_nutri')
+        const jaRecebeuPosAula = tags.includes('recebeu_link_cadastro') || context.post_class_message_sent
+        const jaDirecionado = context.redirected_to_support === true
+        
+        if (jaFechou || jaDirecionado) {
+          precisaAcao = 'OK - já fechou/direcionado'
+        } else if (jaRecebeuPosAula) {
           precisaAcao = 'OK - já recebeu pós-aula'
+        } else {
+          // Verificar se tem mensagens recentes (se você já conversou)
+          const { data: recentMessages } = await supabaseAdmin
+            .from('whatsapp_messages')
+            .select('created_at, sender_type')
+            .eq('conversation_id', conv.id)
+            .order('created_at', { ascending: false })
+            .limit(5)
+          
+          const temMensagensRecentes = recentMessages && recentMessages.length > 0
+          const ultimaMensagem = recentMessages?.[0]
+          const ultimaMensagemEhBot = ultimaMensagem?.sender_type === 'bot'
+          const diasDesdeUltimaMensagem = ultimaMensagem 
+            ? (Date.now() - new Date(ultimaMensagem.created_at).getTime()) / (1000 * 60 * 60 * 24)
+            : 999
+          
+          // Se você já conversou recentemente (última mensagem não é bot ou tem menos de 7 dias), não precisa de pós-aula
+          if (temMensagensRecentes && (!ultimaMensagemEhBot || diasDesdeUltimaMensagem < 7)) {
+            precisaAcao = 'OK - já conversou recentemente'
+          } else {
+            precisaAcao = 'Enviar mensagem pós-aula'
+          }
         }
       } else if (naoParticipou) {
         status = 'nao_participou'
