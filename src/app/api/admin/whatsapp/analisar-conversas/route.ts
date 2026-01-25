@@ -141,7 +141,21 @@ export async function GET(request: NextRequest) {
         }
       } else if (naoParticipou) {
         status = 'nao_participou'
-        precisaAcao = 'Enviar remarketing'
+        // Verificar se já fechou ou foi direcionado
+        const jaFechou = tags.includes('cliente_nutri')
+        const jaDirecionado = context.redirected_to_support === true
+        
+        if (jaFechou || jaDirecionado) {
+          precisaAcao = 'OK - já fechou/direcionado'
+        } else {
+          // Verificar se já recebeu segundo link
+          const jaRecebeuSegundoLink = tags.includes('recebeu_segundo_link')
+          if (jaRecebeuSegundoLink) {
+            precisaAcao = 'OK - já recebeu remarketing'
+          } else {
+            precisaAcao = 'Enviar remarketing'
+          }
+        }
       } else if (hasScheduled) {
         status = 'agendou'
         precisaAcao = 'OK - aguardando aula'
