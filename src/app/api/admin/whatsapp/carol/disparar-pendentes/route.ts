@@ -328,8 +328,8 @@ export async function POST(request: NextRequest) {
           details.push(`❌ ${conversation.phone}: ${result.error || 'Erro ao enviar'}`)
         }
 
-        // Delay entre mensagens (3.5 segundos para evitar bloqueio do WhatsApp)
-        await new Promise(resolve => setTimeout(resolve, 3500))
+        // Delay entre mensagens (5 segundos para evitar bloqueio do WhatsApp)
+        await new Promise(resolve => setTimeout(resolve, 5000))
       } catch (error: any) {
         errors++
         details.push(`❌ ${conversation.phone}: ${error.message || 'Erro desconhecido'}`)
