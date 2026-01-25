@@ -13,6 +13,8 @@ function CarolControlContent() {
   const [testMessage, setTestMessage] = useState('Olá, quero agendar uma aula')
   const [analysisData, setAnalysisData] = useState<any>(null)
   const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({})
+  const [cancelling, setCancelling] = useState(false)
+  const [abortController, setAbortController] = useState<AbortController | null>(null)
 
   const handleDisparo = async (tipo: 'welcome' | 'remarketing' | 'reminders') => {
     setLoading(true)
@@ -403,39 +405,75 @@ function CarolControlContent() {
             <br />• <strong>Primeira mensagem:</strong> Quem ainda não recebeu mensagem da Carol
             <br />• <strong>Não escolheu agenda:</strong> Quem veio do workshop mas ainda não agendou
           </p>
-          <button
-            onClick={async () => {
-              if (!confirm('Isso vai enviar mensagens para quem não escolheu agenda e quem ainda está na primeira mensagem. Continuar?')) {
-                return
-              }
-              setLoading(true)
-              try {
-                const response = await fetch('/api/admin/whatsapp/carol/disparar-pendentes', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  credentials: 'include',
-                  body: JSON.stringify({ 
-                    area: 'nutri',
-                    tipos: ['primeira_mensagem', 'nao_escolheu_agenda']
-                  })
-                })
-                const data = await response.json()
-                if (data.success) {
-                  alert(`✅ Disparo concluído!\n\n📊 Estatísticas:\n- Processadas: ${data.processed}\n- Enviadas: ${data.sent}\n- Erros: ${data.errors}\n\n📋 Detalhes:\n${data.details?.slice(0, 20).join('\n') || 'Nenhum detalhe disponível'}${data.details && data.details.length > 20 ? `\n\n... e mais ${data.details.length - 20}` : ''}`)
-                } else {
-                  alert(`Erro: ${data.error}`)
+          <div className="space-y-2">
+            <button
+              onClick={async () => {
+                if (!confirm('Isso vai enviar mensagens para quem não escolheu agenda e quem ainda está na primeira mensagem. Continuar?')) {
+                  return
                 }
-              } catch (error: any) {
-                alert(`Erro: ${error.message}`)
-              } finally {
-                setLoading(false)
-              }
-            }}
-            disabled={loading}
-            className="w-full px-4 py-3 bg-orange-600 text-white rounded-lg hover:bg-orange-700 disabled:opacity-50"
-          >
-            {loading ? 'Disparando...' : '📤 Disparar para Pendentes (Primeira Mensagem + Não Escolheu Agenda)'}
-          </button>
+                setLoading(true)
+                setCancelling(false)
+                const controller = new AbortController()
+                setAbortController(controller)
+                
+                try {
+                  const response = await fetch('/api/admin/whatsapp/carol/disparar-pendentes', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    signal: controller.signal,
+                    body: JSON.stringify({ 
+                      area: 'nutri',
+                      tipos: ['primeira_mensagem', 'nao_escolheu_agenda']
+                    })
+                  })
+                  
+                  if (cancelling) {
+                    return // Cancelado pelo usuário
+                  }
+                  
+                  const data = await response.json()
+                  if (data.success) {
+                    alert(`✅ Disparo concluído!\n\n📊 Estatísticas:\n- Processadas: ${data.processed}\n- Enviadas: ${data.sent}\n- Erros: ${data.errors}\n\n📋 Detalhes:\n${data.details?.slice(0, 20).join('\n') || 'Nenhum detalhe disponível'}${data.details && data.details.length > 20 ? `\n\n... e mais ${data.details.length - 20}` : ''}`)
+                  } else {
+                    alert(`Erro: ${data.error}`)
+                  }
+                } catch (error: any) {
+                  if (error.name === 'AbortError' || cancelling) {
+                    alert('⚠️ Disparo cancelado. Algumas mensagens podem ter sido enviadas antes do cancelamento.')
+                  } else {
+                    alert(`Erro: ${error.message}`)
+                  }
+                } finally {
+                  setLoading(false)
+                  setCancelling(false)
+                  setAbortController(null)
+                }
+              }}
+              disabled={loading || cancelling}
+              className="w-full px-4 py-3 bg-orange-600 text-white rounded-lg hover:bg-orange-700 disabled:opacity-50"
+            >
+              {loading ? 'Disparando...' : '📤 Disparar para Pendentes (Primeira Mensagem + Não Escolheu Agenda)'}
+            </button>
+            
+            {loading && (
+              <button
+                onClick={() => {
+                  if (confirm('Tem certeza que deseja cancelar o disparo? Algumas mensagens podem já ter sido enviadas.')) {
+                    setCancelling(true)
+                    if (abortController) {
+                      abortController.abort()
+                    }
+                    setLoading(false)
+                    setAbortController(null)
+                  }
+                }}
+                className="w-full px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+              >
+                🛑 Cancelar Disparo
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Processar Conversas Existentes */}
