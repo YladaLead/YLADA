@@ -1460,13 +1460,42 @@ function WhatsAppChatContent() {
                           
                           // Fallback: buscar pela área se não encontrou pelo ID
                           if (!instanceId) {
-                            const { data: instanceByArea } = await supabase
+                            // Primeiro tenta buscar por área e status connected
+                            let { data: instanceByArea } = await supabase
                               .from('z_api_instances')
                               .select('id')
                               .eq('area', selectedConversation.area || 'nutri')
                               .eq('status', 'connected')
                               .limit(1)
-                              .single()
+                              .maybeSingle()
+                            
+                            // Se não encontrou, tenta buscar apenas por área (sem filtro de status)
+                            if (!instanceByArea) {
+                              const { data: instanceByAreaOnly } = await supabase
+                                .from('z_api_instances')
+                                .select('id')
+                                .eq('area', selectedConversation.area || 'nutri')
+                                .limit(1)
+                                .maybeSingle()
+                              
+                              if (instanceByAreaOnly) {
+                                instanceByArea = instanceByAreaOnly
+                              }
+                            }
+                            
+                            // Se ainda não encontrou, tenta buscar qualquer instância conectada (fallback final)
+                            if (!instanceByArea) {
+                              const { data: instanceFallback } = await supabase
+                                .from('z_api_instances')
+                                .select('id')
+                                .eq('status', 'connected')
+                                .limit(1)
+                                .maybeSingle()
+                              
+                              if (instanceFallback) {
+                                instanceByArea = instanceFallback
+                              }
+                            }
                             
                             if (!instanceByArea) {
                               throw new Error('Instância não encontrada. Verifique se há uma instância Z-API conectada para a área ' + (selectedConversation.area || 'nutri'))
