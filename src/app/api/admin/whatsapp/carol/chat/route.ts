@@ -160,11 +160,15 @@ INSTRUÇÕES:
       content: msg.content,
     }))
 
+    // Construir mensagem com contexto do sistema
+    // Vamos adicionar o contexto do sistema como parte da mensagem inicial
+    const messageWithContext = historyForCarol.length === 0 
+      ? `${systemContext}\n\nPergunta do administrador: ${message}`
+      : message
+
     // Gerar resposta da Carol
-    // O contexto do sistema será incluído automaticamente pela função generateCarolResponse
-    // Mas vamos adicionar informações específicas no contexto
     const response = await generateCarolResponse(
-      message,
+      messageWithContext,
       historyForCarol,
       {
         tags: [],
