@@ -136,12 +136,13 @@ export async function POST(request: NextRequest) {
           .insert({
             instance_id: instance.id,
             phone: registration.phone,
-            name: registration.name,
+            name: registration.name || 'Cliente',
             area: area,
             status: 'active',
             context: {
               tags: ['veio_aula_pratica', 'primeiro_contato'],
-              source: 'workshop_registration'
+              source: 'workshop_registration',
+              lead_name: registration.name || 'Cliente' // 🆕 Salvar nome também no context
             }
           })
           .select('id, phone, name, context')
@@ -238,13 +239,15 @@ export async function POST(request: NextRequest) {
 
         if (tipoProcessamento === 'primeira_mensagem') {
           // Primeira mensagem: boas-vindas com opções
+          // 🆕 Buscar nome do context se não tiver em conversation.name
+          const leadName = conversation.name || (context as any)?.lead_name || undefined
           messageToSend = await generateCarolResponse(
             'Olá, quero agendar uma aula',
             conversationHistory,
             {
               tags: newTags,
               workshopSessions,
-              leadName: conversation.name || undefined,
+              leadName: leadName, // 🆕 Sempre passar o nome se disponível
               hasScheduled: false,
               isFirstMessage: true,
             }
@@ -254,13 +257,15 @@ export async function POST(request: NextRequest) {
           }
         } else if (tipoProcessamento === 'nao_escolheu_agenda') {
           // Não escolheu agenda: relembrar opções
+          // 🆕 Buscar nome do context se não tiver em conversation.name
+          const leadName = conversation.name || (context as any)?.lead_name || undefined
           messageToSend = await generateCarolResponse(
             'Quais são os horários disponíveis? Quero agendar',
             conversationHistory,
             {
               tags: newTags,
               workshopSessions,
-              leadName: conversation.name || undefined,
+              leadName: leadName,
               hasScheduled: false,
               isFirstMessage: false,
             }

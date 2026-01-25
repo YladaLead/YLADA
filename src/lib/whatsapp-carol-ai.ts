@@ -143,8 +143,8 @@ QUANDO ENVIAR OPÇÕES DE AULA:
 
 PRIMEIRA MENSAGEM (IMPORTANTE):
 - Se é a primeira mensagem da pessoa, você DEVE:
-  1. Começar com: "Oi, tudo bem? 😊"
-  2. Saudar: "Seja muito bem-vinda!"
+  1. Começar com: "Oi, tudo bem? 😊" (SE o nome da pessoa estiver disponível, use: "Oi [NOME], tudo bem? 😊")
+  2. Saudar: "Seja muito bem-vinda!" (SE tiver nome, use: "Seja muito bem-vinda, [NOME]!")
   3. Se apresentar: "Eu sou a Carol, da equipe Ylada Nutri."
   4. Agradecer e explicar sobre a aula focando na DOR e no BENEFÍCIO:
      "Obrigada por se inscrever na Aula Prática ao Vivo – Agenda Cheia para Nutricionistas.
@@ -155,6 +155,7 @@ PRIMEIRA MENSAGEM (IMPORTANTE):
   7. Perguntar de forma natural: "Qual desses horários funciona melhor pra você? 😊" (SEM botões, apenas texto)
   8. NÃO esperar a pessoa perguntar sobre horários - você já apresenta!
   9. Use linguagem próxima, humanizada e acolhedora, como se estivesse conversando pessoalmente
+  10. **CRUCIAL: Se você souber o nome da pessoa (fornecido no contexto), SEMPRE use o nome dela na saudação inicial!**
 
 QUANDO FAZER REMARKETING:
 - Pessoa agendou mas não participou
@@ -304,6 +305,13 @@ export async function generateCarolResponse(
   let shouldSendOptions = false
   
   if (context) {
+    // 🆕 Nome da pessoa (MUITO IMPORTANTE - sempre incluir se disponível)
+    if (context.leadName) {
+      contextText += `\n⚠️ NOME DA PESSOA: ${context.leadName}\n`
+      contextText += `IMPORTANTE: Você DEVE usar o nome "${context.leadName}" na saudação inicial!\n`
+      contextText += `Exemplo: "Oi ${context.leadName}, tudo bem? 😊" ou "Seja muito bem-vinda, ${context.leadName}!"\n`
+    }
+    
     if (context.tags && context.tags.length > 0) {
       contextText += `\nTags da conversa: ${context.tags.join(', ')}\n`
     }
@@ -328,8 +336,13 @@ export async function generateCarolResponse(
       if (context.isFirstMessage) {
         contextText += `\n⚠️ ATENÇÃO: Esta é a PRIMEIRA MENSAGEM da pessoa!\n\n`
         contextText += `Você DEVE seguir EXATAMENTE esta estrutura:\n\n`
-        contextText += `1. Começar com: "Oi, tudo bem? 😊"\n\n`
-        contextText += `2. Saudar: "Seja muito bem-vinda!"\n\n`
+        if (context.leadName) {
+          contextText += `1. Começar com: "Oi ${context.leadName}, tudo bem? 😊" (USE O NOME DA PESSOA!)\n\n`
+          contextText += `2. Saudar: "Seja muito bem-vinda, ${context.leadName}!" (USE O NOME DA PESSOA!)\n\n`
+        } else {
+          contextText += `1. Começar com: "Oi, tudo bem? 😊"\n\n`
+          contextText += `2. Saudar: "Seja muito bem-vinda!"\n\n`
+        }
         contextText += `3. Se apresentar: "Eu sou a Carol, da equipe Ylada Nutri."\n\n`
         contextText += `4. Agradecer e explicar sobre a aula focando na DOR e no BENEFÍCIO:\n`
         contextText += `"Obrigada por se inscrever na Aula Prática ao Vivo – Agenda Cheia para Nutricionistas.\n\n`
