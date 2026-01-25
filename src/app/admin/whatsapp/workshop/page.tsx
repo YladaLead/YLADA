@@ -66,6 +66,7 @@ function WorkshopContent() {
   const [selectedSessionForParticipants, setSelectedSessionForParticipants] = useState<WorkshopSession | null>(null)
   const [participants, setParticipants] = useState<Participant[]>([])
   const [loadingParticipants, setLoadingParticipants] = useState(false)
+  const [showPastSessions, setShowPastSessions] = useState(false)
 
   const upcoming = useMemo(
     () => sessions.filter((s) => s.is_active).sort((a, b) => new Date(a.starts_at).getTime() - new Date(b.starts_at).getTime()),
@@ -751,35 +752,62 @@ function WorkshopContent() {
               })()}
 
               {/* Visualização em Tabela */}
-              {viewMode === 'table' && (
-                <div className="mt-4">
-                  <div className="mb-3">
-                    <h3 className="text-sm font-semibold text-gray-700 mb-1">📋 Lista de Todas as Sessões</h3>
-                    <p className="text-xs text-gray-500">
-                      {sessions.length > 0 
-                        ? `${sessions.length} sessão${sessions.length !== 1 ? 'ões' : ''} cadastrada${sessions.length !== 1 ? 's' : ''}`
-                        : 'Nenhuma sessão cadastrada'}
-                    </p>
-                  </div>
-                  {sessions.length === 0 ? (
-                    <div className="text-center py-8 text-gray-500">
-                      <p>Nenhuma sessão cadastrada ainda.</p>
-                      <p className="text-xs mt-2">Use o botão "Gerar Sessões Automáticas" acima para criar sessões.</p>
+              {viewMode === 'table' && (() => {
+                const now = new Date()
+                const futureSessions = sessions.filter(s => new Date(s.starts_at) >= now)
+                const pastSessions = sessions.filter(s => new Date(s.starts_at) < now)
+                const sessionsToShow = showPastSessions ? sessions : futureSessions
+
+                return (
+                  <div className="mt-4">
+                    <div className="mb-3 flex items-center justify-between">
+                      <div>
+                        <h3 className="text-sm font-semibold text-gray-700 mb-1">📋 Lista de Todas as Sessões</h3>
+                        <p className="text-xs text-gray-500">
+                          {futureSessions.length > 0 
+                            ? `${futureSessions.length} sessão${futureSessions.length !== 1 ? 'ões' : ''} futura${futureSessions.length !== 1 ? 's' : ''}`
+                            : 'Nenhuma sessão futura'}
+                          {pastSessions.length > 0 && (
+                            <span className="ml-2">
+                              • {pastSessions.length} anterior{pastSessions.length !== 1 ? 'es' : ''}
+                            </span>
+                          )}
+                        </p>
+                      </div>
+                      {pastSessions.length > 0 && (
+                        <button
+                          onClick={() => setShowPastSessions(!showPastSessions)}
+                          className="px-4 py-2 text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+                        >
+                          {showPastSessions ? '🔽 Ocultar Anteriores' : '🔼 Ver Anteriores'}
+                        </button>
+                      )}
                     </div>
-                  ) : (
-                    <div className="overflow-x-auto">
-                      <table className="min-w-full border-collapse border border-gray-200">
-                        <thead>
-                          <tr className="bg-gray-50">
-                            <th className="border border-gray-200 px-4 py-3 text-left text-xs font-medium text-gray-700">Data/Hora</th>
-                            <th className="border border-gray-200 px-4 py-3 text-left text-xs font-medium text-gray-700">Status</th>
-                            <th className="border border-gray-200 px-4 py-3 text-left text-xs font-medium text-gray-700">Participantes</th>
-                            <th className="border border-gray-200 px-4 py-3 text-left text-xs font-medium text-gray-700">Link Zoom</th>
-                            <th className="border border-gray-200 px-4 py-3 text-center text-xs font-medium text-gray-700">Ações</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {sessions.map(session => (
+                    {sessions.length === 0 ? (
+                      <div className="text-center py-8 text-gray-500">
+                        <p>Nenhuma sessão cadastrada ainda.</p>
+                        <p className="text-xs mt-2">Use o botão "Gerar Sessões Automáticas" acima para criar sessões.</p>
+                      </div>
+                    ) : (
+                      <>
+                        {sessionsToShow.length === 0 ? (
+                          <div className="text-center py-8 text-gray-500">
+                            <p>Nenhuma sessão para exibir.</p>
+                          </div>
+                        ) : (
+                          <div className="overflow-x-auto">
+                            <table className="min-w-full border-collapse border border-gray-200">
+                              <thead>
+                                <tr className="bg-gray-50">
+                                  <th className="border border-gray-200 px-4 py-3 text-left text-xs font-medium text-gray-700">Data/Hora</th>
+                                  <th className="border border-gray-200 px-4 py-3 text-left text-xs font-medium text-gray-700">Status</th>
+                                  <th className="border border-gray-200 px-4 py-3 text-left text-xs font-medium text-gray-700">Participantes</th>
+                                  <th className="border border-gray-200 px-4 py-3 text-left text-xs font-medium text-gray-700">Link Zoom</th>
+                                  <th className="border border-gray-200 px-4 py-3 text-center text-xs font-medium text-gray-700">Ações</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {sessionsToShow.map(session => (
                             <tr key={session.id} className="hover:bg-gray-50">
                               <td className="border border-gray-200 px-4 py-3 text-sm text-gray-900">
                                 {formatPtBR(session.starts_at)}
@@ -845,8 +873,10 @@ function WorkshopContent() {
                       </table>
                     </div>
                   )}
-                </div>
-              )}
+                  </>
+                )}
+              </div>
+            )})()}
 
               {upcoming.length > 0 && (
                 <div className="mt-4 text-sm text-gray-700">
