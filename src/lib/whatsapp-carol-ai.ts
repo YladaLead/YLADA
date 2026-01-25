@@ -1066,7 +1066,7 @@ Carol - Secretária YLADA Nutri`
               
               if (conversation.data) {
                 const { weekday, date, time } = formatSessionDateTime(selectedSession.starts_at)
-                const notificationMessage = `🎉 *NOVO AGENDAMENTO DE AULA!*\n\n👤 *Nome:* ${conversation.data.name || 'Sem nome'}\n📱 *Telefone:* ${conversation.data.phone}\n📅 *Data/Hora:* ${weekday}, ${date} às ${time}\n🔗 *Link Zoom:* ${selectedSession.zoom_link}\n\n✅ A pessoa já recebeu o link da aula!`
+                const notificationMessage = `🎉 *NOVO AGENDAMENTO DE AULA!*\n\n👤 *Nome:* ${conversation.data.name || 'Sem nome'}\n📱 *Telefone:* ${conversation.data.phone}\n🗓️ *Data/Hora:* ${weekday}, ${date} às ${time}\n🔗 *Link Zoom:* ${selectedSession.zoom_link}\n\n✅ A pessoa já recebeu o link da aula!`
                 
                 // Buscar instância Z-API para enviar notificação
                 const { data: notificationInstance } = await supabaseAdmin
@@ -1581,7 +1581,7 @@ export async function sendWelcomeToNonContactedLeads(): Promise<{
             const weekday = date.toLocaleDateString('pt-BR', { weekday: 'long' })
             const dateStr = date.toLocaleDateString('pt-BR')
             const time = date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
-            optionsText += `\n📅 **Opção ${index + 1}:**\n${weekday}, ${dateStr}\n🕒 ${time} (Brasília)\n🔗 ${session.zoom_link}\n`
+            optionsText += `\n🗓️ **Opção ${index + 1}:**\n${weekday}, ${dateStr}\n🕒 ${time} (Brasília)\n🔗 ${session.zoom_link}\n`
           })
         }
 
@@ -1757,7 +1757,7 @@ export async function sendRemarketingToNonParticipants(): Promise<{
             const weekday = date.toLocaleDateString('pt-BR', { weekday: 'long' })
             const dateStr = date.toLocaleDateString('pt-BR')
             const time = date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
-            optionsText += `\n📅 **Opção ${index + 1}:**\n${weekday}, ${dateStr}\n🕒 ${time} (Brasília)\n🔗 ${session.zoom_link}\n`
+            optionsText += `\n🗓️ **Opção ${index + 1}:**\n${weekday}, ${dateStr}\n🕒 ${time} (Brasília)\n🔗 ${session.zoom_link}\n`
           })
         }
 
@@ -1936,7 +1936,7 @@ export async function sendPreClassNotifications(): Promise<{
 
 Lembrete: Sua aula é amanhã!
 
-📅 ${weekday}, ${date}
+🗓️ ${weekday}, ${date}
 🕒 ${time} (horário de Brasília)
 
 🔗 ${session.zoom_link}
@@ -2353,7 +2353,7 @@ Ainda estou aqui caso queira agendar a aula.
 
 Se alguma dessas opções funcionar, é só me avisar:
 
-📅 *Opções Disponíveis:*
+🗓️ *Opções Disponíveis:*
 ${optionsText}Qualquer dúvida, estou à disposição! 💚
 
 Carol - Secretária YLADA Nutri`
@@ -2929,7 +2929,7 @@ export async function sendWorkshopReminders(): Promise<{
 
 Lembrete: Sua aula está agendada para:
 
-📅 ${weekday}, ${date}
+🗓️ ${weekday}, ${date}
 🕒 ${time} (horário de Brasília)
 
 Aqui está o link da sua aula:
