@@ -433,6 +433,136 @@ function CarolControlContent() {
           </button>
         </div>
 
+        {/* Processar Pessoas Específicas */}
+        <div className="bg-white rounded-lg shadow p-6 mb-6">
+          <h2 className="text-xl font-bold text-gray-900 mb-4">🎯 Processar Pessoas Específicas</h2>
+          <p className="text-sm text-gray-600 mb-4">
+            Processa pessoas específicas para fechamento (quem participou) ou remarketing (quem não participou).
+            Cole os telefones separados por vírgula ou quebra de linha.
+          </p>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Telefones (separados por vírgula ou quebra de linha)
+              </label>
+              <textarea
+                id="telefones-especificos"
+                rows={4}
+                placeholder="Ex: 5519997230912, 5511999999999&#10;ou um por linha"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+              />
+            </div>
+            <div className="flex gap-3">
+              <button
+                onClick={async () => {
+                  const textarea = document.getElementById('telefones-especificos') as HTMLTextAreaElement
+                  const telefonesText = textarea.value.trim()
+                  
+                  if (!telefonesText) {
+                    alert('Digite pelo menos um telefone')
+                    return
+                  }
+                  
+                  const telefones = telefonesText
+                    .split(/[,\n]/)
+                    .map(t => t.trim())
+                    .filter(t => t.length > 0)
+                  
+                  if (telefones.length === 0) {
+                    alert('Nenhum telefone válido encontrado')
+                    return
+                  }
+                  
+                  if (!confirm(`Enviar mensagem de FECHAMENTO para ${telefones.length} pessoa(s)?`)) {
+                    return
+                  }
+                  
+                  setLoading(true)
+                  try {
+                    const response = await fetch('/api/admin/whatsapp/carol/processar-especificos', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      credentials: 'include',
+                      body: JSON.stringify({
+                        telefones,
+                        tipo: 'fechamento'
+                      })
+                    })
+                    const data = await response.json()
+                    if (data.success) {
+                      alert(`✅ Processamento concluído!\n\n📊 Estatísticas:\n- Processadas: ${data.processed}\n- Enviadas: ${data.sent}\n- Erros: ${data.errors}\n\n${data.results.map((r: any) => `${r.success ? '✅' : '❌'} ${r.name}: ${r.error || 'Enviado'}`).join('\n')}`)
+                      textarea.value = ''
+                    } else {
+                      alert(`Erro: ${data.error}`)
+                    }
+                  } catch (error: any) {
+                    alert(`Erro: ${error.message}`)
+                  } finally {
+                    setLoading(false)
+                  }
+                }}
+                disabled={loading}
+                className="flex-1 px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50"
+              >
+                {loading ? 'Processando...' : '💰 Enviar Fechamento (Quem Participou)'}
+              </button>
+              <button
+                onClick={async () => {
+                  const textarea = document.getElementById('telefones-especificos') as HTMLTextAreaElement
+                  const telefonesText = textarea.value.trim()
+                  
+                  if (!telefonesText) {
+                    alert('Digite pelo menos um telefone')
+                    return
+                  }
+                  
+                  const telefones = telefonesText
+                    .split(/[,\n]/)
+                    .map(t => t.trim())
+                    .filter(t => t.length > 0)
+                  
+                  if (telefones.length === 0) {
+                    alert('Nenhum telefone válido encontrado')
+                    return
+                  }
+                  
+                  if (!confirm(`Enviar mensagem de REMARKETING para ${telefones.length} pessoa(s)?`)) {
+                    return
+                  }
+                  
+                  setLoading(true)
+                  try {
+                    const response = await fetch('/api/admin/whatsapp/carol/processar-especificos', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      credentials: 'include',
+                      body: JSON.stringify({
+                        telefones,
+                        tipo: 'remarketing'
+                      })
+                    })
+                    const data = await response.json()
+                    if (data.success) {
+                      alert(`✅ Processamento concluído!\n\n📊 Estatísticas:\n- Processadas: ${data.processed}\n- Enviadas: ${data.sent}\n- Erros: ${data.errors}\n\n${data.results.map((r: any) => `${r.success ? '✅' : '❌'} ${r.name}: ${r.error || 'Enviado'}`).join('\n')}`)
+                      textarea.value = ''
+                    } else {
+                      alert(`Erro: ${data.error}`)
+                    }
+                  } catch (error: any) {
+                    alert(`Erro: ${error.message}`)
+                  } finally {
+                    setLoading(false)
+                  }
+                }}
+                disabled={loading}
+                className="flex-1 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+              >
+                {loading ? 'Processando...' : '🔄 Enviar Remarketing (Quem Não Participou)'}
+              </button>
+            </div>
+          </div>
+        </div>
+
         {/* Limpar Duplicatas */}
         <div className="bg-white rounded-lg shadow p-6 mb-6">
           <h2 className="text-xl font-bold text-gray-900 mb-4">🧹 Limpar Duplicatas do Banco</h2>
