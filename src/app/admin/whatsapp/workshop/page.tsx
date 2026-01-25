@@ -63,6 +63,9 @@ function WorkshopContent() {
   const [newActive, setNewActive] = useState(true)
   const [viewMode, setViewMode] = useState<'table' | 'calendar'>('calendar')
   const [currentWeek, setCurrentWeek] = useState(0) // 0 = semana atual, 1 = próxima semana, etc.
+  const [selectedSessionForParticipants, setSelectedSessionForParticipants] = useState<WorkshopSession | null>(null)
+  const [participants, setParticipants] = useState<Participant[]>([])
+  const [loadingParticipants, setLoadingParticipants] = useState(false)
 
   const upcoming = useMemo(
     () => sessions.filter((s) => s.is_active).sort((a, b) => new Date(a.starts_at).getTime() - new Date(b.starts_at).getTime()),
