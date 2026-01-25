@@ -358,6 +358,7 @@ export default function WorkshopAgendaInstavelPage() {
                         onChange={(phone, countryCode) => {
                           setFormData({ ...formData, telefone: phone, countryCode: countryCode || 'BR' })
                         }}
+                        defaultCountryCode="BR"
                       />
                     </div>
 
