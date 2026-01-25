@@ -1545,13 +1545,42 @@ export async function sendWelcomeToNonContactedLeads(): Promise<{
     }
 
     // 3. Buscar instância Z-API
-    const { data: instance } = await supabaseAdmin
+    // Primeiro tenta buscar por área e status connected
+    let { data: instance } = await supabaseAdmin
       .from('z_api_instances')
       .select('id, instance_id, token')
       .eq('area', 'nutri')
-      .eq('is_active', true)
+      .eq('status', 'connected')
       .limit(1)
       .maybeSingle()
+
+    // Se não encontrou, tenta buscar apenas por área (sem filtro de status)
+    if (!instance) {
+      const { data: instanceByArea } = await supabaseAdmin
+        .from('z_api_instances')
+        .select('id, instance_id, token')
+        .eq('area', 'nutri')
+        .limit(1)
+        .maybeSingle()
+      
+      if (instanceByArea) {
+        instance = instanceByArea
+      }
+    }
+
+    // Se ainda não encontrou, tenta buscar qualquer instância conectada (fallback)
+    if (!instance) {
+      const { data: instanceFallback } = await supabaseAdmin
+        .from('z_api_instances')
+        .select('id, instance_id, token')
+        .eq('status', 'connected')
+        .limit(1)
+        .maybeSingle()
+      
+      if (instanceFallback) {
+        instance = instanceFallback
+      }
+    }
 
     if (!instance) {
       return { sent: 0, errors: leadsToContact.length }
@@ -1721,13 +1750,42 @@ export async function sendRemarketingToNonParticipants(): Promise<{
     }
 
     // 3. Buscar instância Z-API
-    const { data: instance } = await supabaseAdmin
+    // Primeiro tenta buscar por área e status connected
+    let { data: instance } = await supabaseAdmin
       .from('z_api_instances')
       .select('id, instance_id, token')
       .eq('area', 'nutri')
-      .eq('is_active', true)
+      .eq('status', 'connected')
       .limit(1)
       .maybeSingle()
+
+    // Se não encontrou, tenta buscar apenas por área (sem filtro de status)
+    if (!instance) {
+      const { data: instanceByArea } = await supabaseAdmin
+        .from('z_api_instances')
+        .select('id, instance_id, token')
+        .eq('area', 'nutri')
+        .limit(1)
+        .maybeSingle()
+      
+      if (instanceByArea) {
+        instance = instanceByArea
+      }
+    }
+
+    // Se ainda não encontrou, tenta buscar qualquer instância conectada (fallback)
+    if (!instance) {
+      const { data: instanceFallback } = await supabaseAdmin
+        .from('z_api_instances')
+        .select('id, instance_id, token')
+        .eq('status', 'connected')
+        .limit(1)
+        .maybeSingle()
+      
+      if (instanceFallback) {
+        instance = instanceFallback
+      }
+    }
 
     if (!instance) {
       return { sent: 0, errors: nonParticipants.length }
@@ -2444,13 +2502,44 @@ export async function sendSalesFollowUpAfterClass(): Promise<{
     const area = 'nutri'
 
     // Buscar instância Z-API
-    const { data: instance } = await supabaseAdmin
+    // Primeiro tenta buscar por área e status connected
+    let { data: instance } = await supabaseAdmin
       .from('z_api_instances')
       .select('id, instance_id, token')
       .eq('area', area)
-      .eq('is_active', true)
+      .eq('status', 'connected')
       .limit(1)
       .maybeSingle()
+
+    // Se não encontrou, tenta buscar apenas por área (sem filtro de status)
+    if (!instance) {
+      const { data: instanceByArea } = await supabaseAdmin
+        .from('z_api_instances')
+        .select('id, instance_id, token')
+        .eq('area', area)
+        .limit(1)
+        .maybeSingle()
+      
+      if (instanceByArea) {
+        instance = instanceByArea
+        console.log('[Carol] ⚠️ Instância encontrada mas status não é "connected":', instanceByArea)
+      }
+    }
+
+    // Se ainda não encontrou, tenta buscar qualquer instância conectada (fallback)
+    if (!instance) {
+      const { data: instanceFallback } = await supabaseAdmin
+        .from('z_api_instances')
+        .select('id, instance_id, token')
+        .eq('status', 'connected')
+        .limit(1)
+        .maybeSingle()
+      
+      if (instanceFallback) {
+        instance = instanceFallback
+        console.log('[Carol] ⚠️ Usando instância fallback (não é da área nutri):', instanceFallback)
+      }
+    }
 
     if (!instance) {
       return { sent: 0, errors: 0 }
@@ -2562,105 +2651,81 @@ export async function sendSalesFollowUpAfterClass(): Promise<{
         let message: string | null = null
         let shouldSend = false
 
-        // Primeira mensagem de fechamento (após 3 horas da aula)
-        if (hoursSinceClass >= 3 && hoursSinceClass < 4 && !context[notificationKey]?.sent_3h) {
+        // Primeira mensagem de fechamento (após 12 horas da aula)
+        if (hoursSinceClass >= 12 && hoursSinceClass < 13 && !context[notificationKey]?.sent_12h) {
           message = `Olá ${leadName}! 💚
-
-Espero que a aula tenha sido transformadora para você!
-
-Lembro que você veio porque tinha um sonho, um objetivo... algo que te moveu a buscar essa mudança. 🌟
-
-Você já recebeu o link para escolher seu plano. Vi que ainda não escolheu...
-
-O que está te impedindo de dar esse próximo passo? É alguma dúvida sobre investimento, formas de pagamento ou como funciona?
-
-Estou aqui para te ajudar a esclarecer qualquer coisa e te mostrar como podemos fazer esse sonho se tornar realidade. 
-
-Quer conversar sobre isso? 😊
-
-Carol - Secretária YLADA Nutri`
-          shouldSend = true
-          if (!context[notificationKey]) context[notificationKey] = {}
-          context[notificationKey].sent_3h = true
-        }
-        // Segunda mensagem (após 6 horas)
-        else if (hoursSinceClass >= 6 && hoursSinceClass < 7 && !context[notificationKey]?.sent_6h) {
-          message = `Olá ${leadName}! 
-
-Pensando em você aqui... 💭
-
-Sabe, muitas vezes a gente sabe o que precisa fazer, mas falta aquele empurrãozinho, aquele apoio para realmente começar.
-
-Você não precisa fazer isso sozinha. 
-
-Você já deu o primeiro passo ao participar da aula. Agora é hora de dar o segundo e transformar esse sonho em realidade.
-
-O que está te impedindo? É o investimento? O tempo? Alguma dúvida específica?
-
-Me conta o que está passando pela sua cabeça que eu te ajudo a resolver! 
-
-Que tal conversarmos sobre como podemos fazer isso acontecer? 💚
-
-Carol - Secretária YLADA Nutri`
-          shouldSend = true
-          if (!context[notificationKey]) context[notificationKey] = {}
-          context[notificationKey].sent_6h = true
-        }
-        // Terceira mensagem (após 12 horas)
-        else if (hoursSinceClass >= 12 && hoursSinceClass < 13 && !context[notificationKey]?.sent_12h) {
-          message = `Olá ${leadName}! 
 
 Lembro do motivo que te trouxe até aqui... 🌟
 
-Você tinha um objetivo, um sonho. Algo que te moveu a buscar essa mudança.
+Você tinha um sonho, um objetivo. Algo que te moveu a buscar essa mudança.
 
-Não deixe que esse momento passe. Não deixe que a rotina te distraia do que realmente importa.
+Pensa comigo: quanto custa NÃO mudar? Quanto custa continuar adiando esse sonho?
 
-Você merece ver esse sonho se tornar realidade.
+O investimento é de apenas R$ 197 por mês. Menos de R$ 7 por dia.
 
-Se a questão é investimento, temos opções de pagamento que podem se encaixar no seu orçamento. Se é tempo, nossos programas são pensados para quem tem rotina corrida.
+Pensa no que você vai ganhar: um estado de espírito completamente diferente, a transformação que você busca, a realização desse sonho que te moveu até aqui.
 
-O que está te travando? Me fala que a gente resolve juntas!
+E você pode começar pelo menos com o mensal para se certificar de que é isso mesmo que você quer. Sem compromisso de longo prazo.
 
-Estou aqui para te ajudar. Vamos conversar? 💚
+Qual é a sua maior dúvida ou objeção para começar agora? Me fala que eu te ajudo a resolver! 😊
 
 Carol - Secretária YLADA Nutri`
           shouldSend = true
           if (!context[notificationKey]) context[notificationKey] = {}
           context[notificationKey].sent_12h = true
         }
-        // Quarta mensagem (após 24 horas)
+        // Segunda mensagem (após 24 horas)
         else if (hoursSinceClass >= 24 && hoursSinceClass < 25 && !context[notificationKey]?.sent_24h) {
           message = `Olá ${leadName}! 
 
-Já passou um dia desde a aula...
+Passou um dia desde a aula... 
 
-O momento perfeito não existe. O momento certo é AGORA.
+E eu fico pensando: será que você já começou a aplicar o que aprendeu? 
 
-Você já deu o primeiro passo ao participar. Agora é hora de dar o segundo e transformar isso em realidade.
+Ou será que ainda está esperando o "momento perfeito"? 
 
-Se ainda tem alguma objeção ou dúvida, me fala. Estou aqui para te ajudar a resolver e te mostrar como podemos fazer isso acontecer.
+Sabe, o momento perfeito não existe. O momento certo é AGORA. 
 
-Vamos conversar? 💚
+Você veio até aqui porque tinha um sonho. Pensa: quanto custa NÃO realizar esse sonho? Quanto custa continuar adiando?
+
+O investimento é de apenas R$ 197 por mês. Menos de R$ 7 por dia para transformar sua vida.
+
+Pensa no estado de espírito que você vai adquirir, na transformação que você busca, na realização desse sonho.
+
+E você pode começar pelo menos com o mensal para se certificar. Sem pressão, sem compromisso de longo prazo.
+
+O que está te impedindo de começar agora? É o investimento, o tempo, ou alguma dúvida específica? Me conta que eu te ajudo! 💚
 
 Carol - Secretária YLADA Nutri`
           shouldSend = true
           if (!context[notificationKey]) context[notificationKey] = {}
           context[notificationKey].sent_24h = true
         }
-        // Quinta mensagem (após 48 horas - última)
+        // Terceira mensagem (após 48 horas - última)
         else if (hoursSinceClass >= 48 && hoursSinceClass < 49 && !context[notificationKey]?.sent_48h) {
           message = `Olá ${leadName}! 
 
-Esta é minha última mensagem sobre isso...
+Esta é minha última mensagem sobre isso... 
 
-Você veio até aqui por um motivo. Você tinha um objetivo.
+Mas antes, quero te lembrar: você veio até aqui por um motivo. 
 
-Se ainda tem alguma objeção - seja investimento, tempo, ou qualquer outra coisa - me fala. Estou aqui para te ajudar a resolver.
+Você tinha um sonho, um objetivo. Algo que te moveu. 
 
-Mas não deixe passar mais tempo. O momento é AGORA.
+Pensa: quanto custa NÃO mudar? Quanto custa continuar adiando esse sonho que te trouxe até aqui?
 
-Quer conversar? Estou aqui! 💚
+O investimento é de apenas R$ 197 por mês. Menos de R$ 7 por dia.
+
+Pensa no que você vai ganhar: um estado de espírito completamente diferente, a transformação que você busca, a realização desse sonho.
+
+E você pode começar pelo menos com o mensal para se certificar. Sem compromisso, sem pressão.
+
+Não deixe que esse momento passe. Não deixe que a vida te distraia do que realmente importa. 
+
+Você merece ver esse sonho se tornar realidade.
+
+Qual é a sua maior objeção? Investimento, tempo, ou outra coisa? Me fala exatamente o que está te travando que eu te ajudo a resolver agora mesmo!
+
+O momento é AGORA. Vamos conversar? 💚
 
 Carol - Secretária YLADA Nutri`
           shouldSend = true
@@ -2758,16 +2823,47 @@ export async function sendRegistrationLinkAfterClass(conversationId: string): Pr
     }
 
     // Buscar instância Z-API
-    const { data: instance } = await supabaseAdmin
+    // Primeiro tenta buscar por área e status connected
+    let { data: instance } = await supabaseAdmin
       .from('z_api_instances')
       .select('id, instance_id, token')
       .eq('area', area)
-      .eq('is_active', true)
+      .eq('status', 'connected')
       .limit(1)
       .maybeSingle()
 
+    // Se não encontrou, tenta buscar apenas por área (sem filtro de status)
     if (!instance) {
-      return { success: false, error: 'Instância Z-API não encontrada' }
+      const { data: instanceByArea } = await supabaseAdmin
+        .from('z_api_instances')
+        .select('id, instance_id, token')
+        .eq('area', area)
+        .limit(1)
+        .maybeSingle()
+      
+      if (instanceByArea) {
+        instance = instanceByArea
+        console.log('[Carol] ⚠️ Instância encontrada mas status não é "connected":', instanceByArea)
+      }
+    }
+
+    // Se ainda não encontrou, tenta buscar qualquer instância conectada (fallback)
+    if (!instance) {
+      const { data: instanceFallback } = await supabaseAdmin
+        .from('z_api_instances')
+        .select('id, instance_id, token')
+        .eq('status', 'connected')
+        .limit(1)
+        .maybeSingle()
+      
+      if (instanceFallback) {
+        instance = instanceFallback
+        console.log('[Carol] ⚠️ Usando instância fallback (não é da área nutri):', instanceFallback)
+      }
+    }
+
+    if (!instance) {
+      return { success: false, error: 'Instância Z-API não encontrada. Verifique se há uma instância Z-API conectada para a área nutri' }
     }
 
     const client = createZApiClient(instance.instance_id, instance.token)
@@ -2841,9 +2937,9 @@ Abaixo segue o link para você escolher o melhor plano para começar:
 
 🔗 ${registrationUrl}
 
-Tem alguma dúvida sobre valores, formas de pagamento ou como funciona? 
+Qual é a sua maior dúvida ou objeção para começar agora? É sobre valores, formas de pagamento, ou como funciona? 
 
-Estou aqui para te ajudar a transformar esse sonho em realidade. O que você acha? 😊
+Me fala que eu te ajudo a resolver e te mostro como podemos fazer esse sonho se tornar realidade! 😊
 
 Carol - Secretária YLADA Nutri`
 
