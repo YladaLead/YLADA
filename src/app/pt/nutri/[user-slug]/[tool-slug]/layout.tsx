@@ -62,7 +62,7 @@ async function fetchToolFromSupabase(userSlug: string, toolSlug: string) {
       .eq('user_id', profile.user_id)
       .eq('slug', toolSlug)
       .eq('profession', 'nutri')
-      .single()
+      .maybeSingle()
 
     if (error) {
       console.error('[OG Metadata] ❌ Supabase query failed:', {
@@ -72,6 +72,11 @@ async function fetchToolFromSupabase(userSlug: string, toolSlug: string) {
         code: error.code,
         details: error.details
       })
+      return null
+    }
+
+    // Se não encontrou resultado, retornar null silenciosamente (fallback via API será usado)
+    if (!data) {
       return null
     }
 

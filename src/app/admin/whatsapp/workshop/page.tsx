@@ -18,6 +18,7 @@ type WorkshopSession = {
   starts_at: string
   zoom_link: string
   is_active: boolean
+  confirmed_participants?: number
 }
 
 function formatDateTimeLocal(iso: string) {
@@ -125,7 +126,7 @@ function WorkshopContent() {
     try {
       const [settingsRes, sessionsRes] = await Promise.all([
         fetch('/api/admin/whatsapp/workshop-settings', { credentials: 'include' }),
-        fetch('/api/admin/whatsapp/workshop-sessions', { credentials: 'include' }),
+        fetch('/api/admin/whatsapp/workshop-sessions?onlyConfirmed=true', { credentials: 'include' }),
       ])
       const settingsJson = await settingsRes.json()
       const sessionsJson = await sessionsRes.json()
@@ -134,7 +135,11 @@ function WorkshopContent() {
       if (!sessionsRes.ok) throw new Error(sessionsJson.error || 'Erro ao carregar sessões')
 
       setSettings(settingsJson.settings)
-      setSessions(sessionsJson.sessions || [])
+      // Filtrar apenas sessões com participantes confirmados (>= 1)
+      const sessionsWithParticipants = (sessionsJson.sessions || []).filter(
+        (s: WorkshopSession) => (s.confirmed_participants || 0) > 0
+      )
+      setSessions(sessionsWithParticipants)
 
       setFlyerUrl(settingsJson.settings?.flyer_url || '')
       setFlyerCaption(settingsJson.settings?.flyer_caption || '')
@@ -575,7 +580,9 @@ function WorkshopContent() {
                                 {time}
                               </td>
                               {weekdays.map(day => {
-                                const daySessions = organized[day]?.[time] || []
+                                const daySessions = (organized[day]?.[time] || []).filter(
+                                  (s: WorkshopSession) => (s.confirmed_participants || 0) > 0
+                                )
                                 return (
                                   <td key={`${day}-${time}`} className="border border-gray-200 px-2 py-2 min-h-[80px]">
                                     {daySessions.map(session => (
@@ -618,6 +625,11 @@ function WorkshopContent() {
                                         <div className="text-xs text-gray-500 mt-1">
                                           {formatPtBR(session.starts_at)}
                                         </div>
+                                        {session.confirmed_participants !== undefined && (
+                                          <div className="text-xs font-medium text-blue-600 mt-1">
+                                            👥 {session.confirmed_participants} confirmado{session.confirmed_participants !== 1 ? 's' : ''}
+                                          </div>
+                                        )}
                                       </div>
                                     ))}
                                     {daySessions.length === 0 && (
@@ -669,9 +681,16 @@ function WorkshopContent() {
                               </a>
                             </td>
                             <td className="px-3 py-3 whitespace-nowrap">
-                              <span className={`text-xs px-2 py-1 rounded-full font-medium ${s.is_active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                                {s.is_active ? '✅ Aberta (Carol divulga)' : '🔒 Fechada (não divulgada)'}
-                              </span>
+                              <div className="space-y-1">
+                                <span className={`text-xs px-2 py-1 rounded-full font-medium ${s.is_active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                                  {s.is_active ? '✅ Aberta (Carol divulga)' : '🔒 Fechada (não divulgada)'}
+                                </span>
+                                {s.confirmed_participants !== undefined && s.confirmed_participants > 0 && (
+                                  <div className="text-xs font-medium text-blue-600">
+                                    👥 {s.confirmed_participants} confirmado{s.confirmed_participants !== 1 ? 's' : ''}
+                                  </div>
+                                )}
+                              </div>
                             </td>
                             <td className="px-3 py-3 whitespace-nowrap text-right">
                               <button
