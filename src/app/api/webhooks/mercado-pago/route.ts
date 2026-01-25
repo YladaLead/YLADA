@@ -3,6 +3,7 @@ import { supabaseAdmin } from '@/lib/supabase'
 import { verifyPayment } from '@/lib/mercado-pago'
 import { createAccessToken } from '@/lib/email-tokens'
 import { sendWelcomeEmail } from '@/lib/email-templates'
+import { redirectToSupportAfterPayment } from '@/lib/whatsapp-carol-ai'
 
 /**
  * Determina features baseado em área, planType e productType
@@ -647,6 +648,86 @@ async function handlePaymentEvent(data: any, isTest: boolean = false) {
     if (paymentError) {
       console.error('❌ Erro ao salvar pagamento:', paymentError)
       throw paymentError
+    }
+
+    // 🆕 NOVO: Direcionar para suporte via WhatsApp (apenas para área nutri)
+    if (area === 'nutri') {
+      try {
+        console.log('📱 Tentando direcionar para suporte via WhatsApp...')
+        
+        // Buscar conversa pelo telefone ou email
+        let conversationId: string | null = null
+        
+        // Tentar buscar pelo telefone do pagador (se disponível)
+        const payerPhone = fullData.payer?.phone?.number || null
+        if (payerPhone) {
+          const phoneClean = payerPhone.replace(/\D/g, '')
+          const phoneFormatted = phoneClean.startsWith('55') ? phoneClean : `55${phoneClean}`
+          
+          const { data: convByPhone } = await supabaseAdmin
+            .from('whatsapp_conversations')
+            .select('id')
+            .eq('phone', phoneFormatted)
+            .eq('area', 'nutri')
+            .eq('status', 'active')
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .maybeSingle()
+          
+          if (convByPhone) {
+            conversationId = convByPhone.id
+            console.log('✅ Conversa encontrada pelo telefone:', conversationId)
+          }
+        }
+        
+        // Se não encontrou pelo telefone, tentar pelo email
+        if (!conversationId && payerEmail) {
+          // Buscar em user_profiles e depois em whatsapp_conversations
+          const { data: profile } = await supabaseAdmin
+            .from('user_profiles')
+            .select('id')
+            .eq('email', payerEmail)
+            .maybeSingle()
+          
+          if (profile) {
+            // Tentar encontrar conversa relacionada (pode precisar de lógica adicional)
+            // Por enquanto, vamos tentar buscar pelo nome se disponível
+            const { data: convByEmail } = await supabaseAdmin
+              .from('whatsapp_conversations')
+              .select('id, name')
+              .eq('area', 'nutri')
+              .eq('status', 'active')
+              .ilike('name', `%${payerEmail.split('@')[0]}%`)
+              .order('created_at', { ascending: false })
+              .limit(1)
+              .maybeSingle()
+            
+            if (convByEmail) {
+              conversationId = convByEmail.id
+              console.log('✅ Conversa encontrada pelo email:', conversationId)
+            }
+          }
+        }
+        
+        // Se encontrou conversa, direcionar para suporte
+        if (conversationId) {
+          const redirectResult = await redirectToSupportAfterPayment(conversationId, {
+            amount,
+            plan: `${area}_${planType}`,
+          })
+          
+          if (redirectResult.success) {
+            console.log('✅ Direcionado para suporte com sucesso!')
+          } else {
+            console.warn('⚠️ Erro ao direcionar para suporte:', redirectResult.error)
+          }
+        } else {
+          console.log('ℹ️ Conversa não encontrada para direcionar ao suporte')
+        }
+      } catch (whatsappError: any) {
+        // Não falhar o webhook se houver erro no WhatsApp
+        console.error('❌ Erro ao direcionar para suporte (não bloqueia webhook):', whatsappError)
+      }
     }
 
     // IMPORTANTE: Verificar ANTES de enviar se já foi enviado (proteção contra duplicação)

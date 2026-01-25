@@ -301,7 +301,53 @@ function WorkshopContent() {
             </div>
 
             <div className="bg-white rounded-xl border border-gray-200 p-4">
-              <h2 className="font-semibold text-gray-900 mb-3">Agenda (próximas aulas)</h2>
+              <div className="flex items-center justify-between mb-3">
+                <div>
+                  <h2 className="font-semibold text-gray-900">Agenda (próximas aulas)</h2>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Sessões <span className="font-medium text-green-700">abertas</span> são divulgadas pela Carol. 
+                    Sessões <span className="font-medium text-red-700">fechadas</span> não aparecem nas opções.
+                  </p>
+                </div>
+                <button
+                  onClick={async () => {
+                    try {
+                      setSaving(true)
+                      setError(null)
+                      setSuccess(null)
+                      const res = await fetch('/api/admin/whatsapp/workshop/generate-sessions', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        credentials: 'include',
+                        body: JSON.stringify({ weeksAhead: 4 }),
+                      })
+                      const json = await res.json().catch(() => ({}))
+                      if (!res.ok) throw new Error(json.error || 'Erro ao gerar sessões')
+                      setSuccess(json.message || `Criadas ${json.created} sessões!`)
+                      await loadAll()
+                    } catch (e: any) {
+                      setError(e.message || 'Erro ao gerar sessões')
+                    } finally {
+                      setSaving(false)
+                    }
+                  }}
+                  disabled={saving}
+                  className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 text-sm"
+                >
+                  {saving ? 'Gerando...' : '🔄 Gerar Sessões Automáticas (4 semanas)'}
+                </button>
+              </div>
+
+              <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-800">
+                <strong>Horários fixos configurados:</strong>
+                <ul className="mt-1 ml-4 list-disc">
+                  <li>Segunda-feira às 10:00 (usa link das 9:00)</li>
+                  <li>Terça a Sexta às 9:00 (link das 9:00)</li>
+                  <li>Segunda a Sexta às 15:00 (link das 15:00)</li>
+                  <li>Quarta-feira às 20:00 (link específico)</li>
+                </ul>
+                <p className="mt-2 text-xs">Configure os links das 9:00 e 15:00 nas variáveis de ambiente ou adicione manualmente uma sessão com esses links primeiro.</p>
+              </div>
 
               <div className="grid grid-cols-1 md:grid-cols-4 gap-3 mb-4">
                 <div className="md:col-span-2">
@@ -322,13 +368,15 @@ function WorkshopContent() {
                   />
                 </div>
                 <div className="flex items-end gap-2">
-                  <label className="flex items-center gap-2 text-sm text-gray-700">
+                  <label className="flex items-center gap-2 text-sm text-gray-700" title="Se marcado, a sessão será divulgada pela Carol. Se desmarcado, não aparecerá nas opções.">
                     <input
                       type="checkbox"
                       checked={newActive}
                       onChange={(e) => setNewActive(e.target.checked)}
                     />
-                    Ativa
+                    <span className={newActive ? 'text-green-700 font-medium' : 'text-gray-500'}>
+                      {newActive ? '✅ Aberta' : '🔒 Fechada'}
+                    </span>
                   </label>
                 </div>
                 <div className="md:col-span-3">
@@ -381,17 +429,22 @@ function WorkshopContent() {
                             </a>
                           </td>
                           <td className="px-3 py-3 whitespace-nowrap">
-                            <span className={`text-xs px-2 py-1 rounded-full ${s.is_active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
-                              {s.is_active ? 'Ativa' : 'Inativa'}
+                            <span className={`text-xs px-2 py-1 rounded-full font-medium ${s.is_active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                              {s.is_active ? '✅ Aberta (Carol divulga)' : '🔒 Fechada (não divulgada)'}
                             </span>
                           </td>
                           <td className="px-3 py-3 whitespace-nowrap text-right">
                             <button
                               onClick={() => toggleActive(s)}
                               disabled={saving}
-                              className="text-sm text-gray-700 hover:text-gray-900 mr-3"
+                              className={`text-sm font-medium px-3 py-1.5 rounded-lg mr-3 ${
+                                s.is_active 
+                                  ? 'bg-red-50 text-red-700 hover:bg-red-100 border border-red-200' 
+                                  : 'bg-green-50 text-green-700 hover:bg-green-100 border border-green-200'
+                              } disabled:opacity-50`}
+                              title={s.is_active ? 'Fechar esta sessão para que a Carol não a divulgue' : 'Abrir esta sessão para que a Carol possa divulgá-la'}
                             >
-                              {s.is_active ? 'Desativar' : 'Ativar'}
+                              {s.is_active ? '🔒 Fechar' : '✅ Abrir'}
                             </button>
                             <button
                               onClick={() => deleteSession(s)}

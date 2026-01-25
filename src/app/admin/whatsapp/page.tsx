@@ -61,6 +61,9 @@ function WhatsAppChatContent() {
   const [tagsModalOpen, setTagsModalOpen] = useState(false)
   const [selectedTags, setSelectedTags] = useState<string[]>([])
   const [newTagInput, setNewTagInput] = useState('')
+  const [carolModalOpen, setCarolModalOpen] = useState(false)
+  const [carolDiagnostic, setCarolDiagnostic] = useState<any>(null)
+  const [activatingCarol, setActivatingCarol] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
   const [contactMenuOpen, setContactMenuOpen] = useState(false)
   const [showScrollToBottom, setShowScrollToBottom] = useState(false)
@@ -482,6 +485,10 @@ function WhatsAppChatContent() {
       // Fase 1: Captação
       'veio_aula_pratica': { label: 'Aula Prática', color: 'bg-blue-100 text-blue-700', icon: '📝' },
       'primeiro_contato': { label: '1º Contato', color: 'bg-blue-50 text-blue-600', icon: '👋' },
+      'cliente_iniciou': { label: 'Cliente Iniciou', color: 'bg-blue-100 text-blue-700', icon: '👤' },
+      'agente_iniciou': { label: 'Agente Iniciou', color: 'bg-blue-50 text-blue-600', icon: '👨‍💼' },
+      'carol_ativa': { label: 'Carol Ativa', color: 'bg-purple-100 text-purple-700', icon: '🤖' },
+      'aguardando_resposta': { label: 'Aguardando Resposta', color: 'bg-yellow-100 text-yellow-700', icon: '⏳' },
       
       // Fase 2: Convite
       'recebeu_link_workshop': { label: 'Link Workshop', color: 'bg-purple-100 text-purple-700', icon: '📅' },
@@ -976,6 +983,35 @@ function WhatsAppChatContent() {
                           </button>
                           <button
                             type="button"
+                            onClick={async () => {
+                              if (!selectedConversation) return
+                              setContactMenuOpen(false)
+                              try {
+                                setActivatingCarol(true)
+                                const res = await fetch(
+                                  `/api/admin/whatsapp/diagnose-conversation?id=${selectedConversation.id}`,
+                                  { credentials: 'include' }
+                                )
+                                const data = await res.json()
+                                if (data.diagnostic) {
+                                  setCarolDiagnostic(data.diagnostic)
+                                  setCarolModalOpen(true)
+                                } else {
+                                  alert(data.error || 'Erro ao diagnosticar conversa')
+                                }
+                              } catch (err: any) {
+                                alert(err.message || 'Erro ao diagnosticar conversa')
+                              } finally {
+                                setActivatingCarol(false)
+                              }
+                            }}
+                            disabled={activatingCarol}
+                            className="w-full text-left px-4 py-2 text-sm hover:bg-gray-50 text-purple-600"
+                          >
+                            {activatingCarol ? '⏳ Diagnosticando...' : '🤖 Ativar Carol'}
+                          </button>
+                          <button
+                            type="button"
                             onClick={() => {
                               const current = (selectedConversation.context as any)?.notes || ''
                               const next = prompt('Notas internas (não vão para o cliente):', current)
@@ -1223,6 +1259,185 @@ function WhatsAppChatContent() {
           )}
         </div>
       </div>
+
+      {/* Modal de Ativação Carol */}
+      {carolModalOpen && selectedConversation && carolDiagnostic && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] flex flex-col">
+            {/* Header */}
+            <div className="flex items-center justify-between p-6 border-b border-gray-200">
+              <h2 className="text-xl font-bold text-gray-900">🤖 Ativar Carol nesta Conversa</h2>
+              <button
+                type="button"
+                onClick={() => {
+                  setCarolModalOpen(false)
+                  setCarolDiagnostic(null)
+                }}
+                className="text-gray-400 hover:text-gray-600 text-2xl"
+              >
+                ×
+              </button>
+            </div>
+
+            {/* Conteúdo */}
+            <div className="flex-1 overflow-y-auto p-6">
+              {/* Diagnóstico */}
+              <div className="mb-6">
+                <h3 className="text-sm font-semibold text-gray-700 mb-3">📊 Diagnóstico da Conversa</h3>
+                <div className="bg-gray-50 rounded-lg p-4 space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Total de mensagens:</span>
+                    <span className="font-medium">{carolDiagnostic.totalMessages}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Mensagens do cliente:</span>
+                    <span className="font-medium">{carolDiagnostic.customerMessages}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Mensagens do agente:</span>
+                    <span className="font-medium">{carolDiagnostic.agentMessages}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Quem começou:</span>
+                    <span className="font-medium">
+                      {carolDiagnostic.firstMessageFrom === 'customer' ? '👤 Cliente' :
+                       carolDiagnostic.firstMessageFrom === 'agent' ? '👨‍💼 Agente' :
+                       carolDiagnostic.firstMessageFrom === 'bot' ? '🤖 Bot' : '❓ Desconhecido'}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Última mensagem:</span>
+                    <span className="font-medium">
+                      {carolDiagnostic.lastMessageFrom === 'customer' ? '👤 Cliente' :
+                       carolDiagnostic.lastMessageFrom === 'agent' ? '👨‍💼 Agente' :
+                       carolDiagnostic.lastMessageFrom === 'bot' ? '🤖 Bot' : '❓ Desconhecido'}
+                    </span>
+                  </div>
+                  {carolDiagnostic.hasWorkshopContext && (
+                    <div className="mt-2 pt-2 border-t border-gray-200">
+                      <span className="text-green-600 font-medium">✅ Tem contexto de workshop</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Tags Atuais */}
+              {carolDiagnostic.currentTags.length > 0 && (
+                <div className="mb-6">
+                  <h3 className="text-sm font-semibold text-gray-700 mb-3">🏷️ Tags Atuais</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {carolDiagnostic.currentTags.map((tag: string) => {
+                      const tagInfo = getTagInfo(tag)
+                      return (
+                        <span
+                          key={tag}
+                          className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm ${tagInfo.color}`}
+                        >
+                          {tagInfo.icon} {tagInfo.label}
+                        </span>
+                      )
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* Tags Sugeridas */}
+              {carolDiagnostic.suggestedTags.length > 0 && (
+                <div className="mb-6">
+                  <h3 className="text-sm font-semibold text-gray-700 mb-3">💡 Tags Sugeridas</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {carolDiagnostic.suggestedTags.map((tag: string) => {
+                      const tagInfo = getTagInfo(tag)
+                      return (
+                        <span
+                          key={tag}
+                          className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm ${tagInfo.color}`}
+                        >
+                          {tagInfo.icon} {tagInfo.label}
+                        </span>
+                      )
+                    })}
+                  </div>
+                  <p className="text-xs text-gray-500 mt-2">
+                    Essas tags serão adicionadas automaticamente ao ativar Carol
+                  </p>
+                </div>
+              )}
+
+              {/* Status de Ativação */}
+              {!carolDiagnostic.canActivateCarol && (
+                <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+                  <p className="text-sm text-red-700 font-medium">⚠️ Não é possível ativar Carol</p>
+                  <p className="text-xs text-red-600 mt-1">{carolDiagnostic.reason}</p>
+                </div>
+              )}
+
+              {carolDiagnostic.canActivateCarol && (
+                <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+                  <p className="text-sm text-green-700 font-medium">✅ Pronto para ativar Carol</p>
+                  <p className="text-xs text-green-600 mt-1">
+                    A Carol será ativada e começará a responder automaticamente nesta conversa
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* Footer */}
+            <div className="flex items-center justify-end gap-3 p-6 border-t border-gray-200">
+              <button
+                type="button"
+                onClick={() => {
+                  setCarolModalOpen(false)
+                  setCarolDiagnostic(null)
+                }}
+                className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200"
+              >
+                Cancelar
+              </button>
+              {carolDiagnostic.canActivateCarol && (
+                <button
+                  type="button"
+                  onClick={async () => {
+                    if (!selectedConversation) return
+                    try {
+                      setActivatingCarol(true)
+                      const res = await fetch('/api/admin/whatsapp/activate-carol', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        credentials: 'include',
+                        body: JSON.stringify({
+                          conversationIds: [selectedConversation.id],
+                          tags: carolDiagnostic.suggestedTags,
+                        }),
+                      })
+                      const data = await res.json()
+                      if (data.success || data.message) {
+                        alert('✅ Carol ativada com sucesso!')
+                        setCarolModalOpen(false)
+                        setCarolDiagnostic(null)
+                        await loadConversations()
+                        if (selectedConversation) {
+                          await loadMessages(selectedConversation.id)
+                        }
+                      } else {
+                        alert(data.error || 'Erro ao ativar Carol')
+                      }
+                    } catch (err: any) {
+                      alert(err.message || 'Erro ao ativar Carol')
+                    } finally {
+                      setActivatingCarol(false)
+                    }
+                  }}
+                  disabled={activatingCarol}
+                  className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50"
+                >
+                  {activatingCarol ? 'Ativando...' : '✅ Ativar Carol'}
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Modal de Tags */}
       {tagsModalOpen && selectedConversation && (

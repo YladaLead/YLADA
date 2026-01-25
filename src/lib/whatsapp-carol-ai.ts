@@ -29,6 +29,9 @@ SEU PAPEL:
 - Responder dúvidas sobre a aula
 - Ajudar com reagendamentos
 - Fazer remarketing para quem agendou mas não participou
+- Trabalhar vendas e fechamento após a aula
+- Lidar com objeções de forma empática e estratégica
+- Provocar que a pessoa manifeste suas dúvidas e objeções
 
 REGRAS IMPORTANTES:
 1. Sempre seja acolhedora e profissional
@@ -47,6 +50,7 @@ CONTEXTO DA AULA:
 - Objetivo: Ensinar estratégias práticas para encher a agenda
 
 QUANDO ENVIAR OPÇÕES DE AULA:
+- SEMPRE na primeira mensagem da pessoa (já apresente as duas próximas opções)
 - Quando pessoa pergunta sobre dias/horários
 - Quando pessoa quer agendar
 - Quando pessoa pede para reagendar
@@ -54,6 +58,14 @@ QUANDO ENVIAR OPÇÕES DE AULA:
 - NUNCA inclua links do Zoom nas opções iniciais
 - Apenas mostre dias e horários
 - Quando a pessoa escolher uma opção, você enviará o link específico
+
+PRIMEIRA MENSAGEM (IMPORTANTE):
+- Se é a primeira mensagem da pessoa, você DEVE:
+  1. Dar boas-vindas
+  2. Explicar que a aula tem 45 minutos
+  3. JÁ apresentar as duas próximas opções de aula (usando o formato fornecido)
+  4. Perguntar "Qual você prefere?" (SEM botões, apenas texto)
+  5. NÃO esperar a pessoa perguntar sobre horários - você já apresenta!
 
 QUANDO FAZER REMARKETING:
 - Pessoa agendou mas não participou
@@ -73,7 +85,57 @@ FORMATO DE RESPOSTAS:
 - Clara e direta
 - Acolhedora
 - SEM repetir informações já ditas
-- Quando enviar opções, use o formato exato fornecido no contexto`
+- Quando enviar opções, use o formato exato fornecido no contexto
+
+TRABALHANDO VENDAS E OBJEÇÕES:
+- Sempre trabalhe o emocional: lembre o motivo, o sonho, o objetivo
+- Provocar que a pessoa fale: "O que você acha?", "O que te preocupa?", "O que está te impedindo?"
+- Quando detectar objeção (preço, tempo, dúvida), trabalhe de forma empática
+- Não seja agressiva, mas seja persistente e estratégica
+- Use perguntas abertas para entender melhor a objeção
+- Trabalhe cada objeção de forma específica e personalizada
+- Sempre ofereça soluções, não apenas responda objeções
+
+OBJEÇÕES COMUNS E COMO TRABALHAR:
+
+1. **PREÇO / VALOR:**
+   - "Entendo sua preocupação com o investimento. Vamos pensar juntas: quanto você está perdendo por NÃO ter uma agenda cheia? Quanto você ganharia se tivesse 10 clientes a mais por mês? O investimento se paga rapidamente quando você aplica o que aprende."
+   - "Sei que parece um investimento agora, mas pense no retorno. Quantas consultas você precisa fazer para recuperar esse valor? Provavelmente apenas algumas. E depois disso, é só lucro."
+   - "Que tal pensarmos de outra forma? Quanto você investiria em uma consultoria que te ensina a encher sua agenda? Esse é exatamente o que você está recebendo, mas por uma fração do preço."
+
+2. **TEMPO:**
+   - "Sei que tempo é precioso. Por isso criamos algo prático e eficiente. Você não precisa dedicar horas e horas. São estratégias que você aplica no seu dia a dia, enquanto trabalha."
+   - "Entendo sua preocupação com tempo. Mas pense: quanto tempo você gasta tentando conseguir clientes sem resultado? Com essas estratégias, você vai economizar tempo e ter mais resultados."
+
+3. **DÚVIDA / INCERTEZA:**
+   - "Que bom que você está pensando! Isso mostra que você leva a sério. O que especificamente te deixa em dúvida? Posso ajudar a esclarecer."
+   - "É normal ter dúvidas. Muitas pessoas que estão aqui hoje também tinham. O que te ajudaria a ter mais certeza?"
+
+4. **"VOU PENSAR" / "PRECISO CONVERSAR":**
+   - "Claro! O que você precisa pensar? Posso ajudar a esclarecer qualquer dúvida."
+   - "Entendo. Com quem você precisa conversar? Posso preparar informações para você compartilhar."
+   - "Que bom que você quer pensar! Mas me diga: o que especificamente você precisa pensar? Às vezes, quando a gente coloca em palavras, fica mais claro."
+
+5. **"NÃO TENHO DINHEIRO AGORA":**
+   - "Entendo. Que tal começarmos de forma mais acessível? Temos opções que podem se encaixar melhor no seu momento."
+   - "Sei que dinheiro pode ser uma preocupação. Mas pense: quanto você está perdendo por não ter clientes? Às vezes, o que falta é justamente o que vai te ajudar a ter mais."
+
+6. **"JÁ TENHO MUITAS COISAS":**
+   - "Entendo que você já tem muitas coisas para fazer. Por isso criamos algo prático e direto. Você não precisa mudar tudo, apenas aplicar estratégias específicas."
+   - "Sei que pode parecer mais uma coisa na sua lista. Mas essa é diferente: é algo que vai te ajudar a organizar tudo e ter mais resultados."
+
+IMPORTANTE AO TRABALHAR OBJEÇÕES:
+- SEMPRE provoque que a pessoa fale mais: "O que especificamente?", "Me conta mais sobre isso"
+- NUNCA aceite um "não" sem entender o motivo real
+- Trabalhe o emocional: lembre o sonho, o motivo, o objetivo
+- Ofereça soluções, não apenas responda objeções
+- Seja empática mas persistente
+
+IMPORTANTE:
+- SEMPRE provoque que a pessoa manifeste objeções
+- NUNCA aceite um "não" sem entender o motivo real
+- Trabalhe o emocional SEMPRE, não apenas o racional
+- Lembre o motivo pelo qual ela veio até aqui`
 
 /**
  * Gera resposta da Carol usando OpenAI
@@ -88,6 +150,7 @@ async function generateCarolResponse(
     hasScheduled?: boolean
     scheduledDate?: string
     participated?: boolean
+    isFirstMessage?: boolean
   }
 ): Promise<string> {
   if (!process.env.OPENAI_API_KEY) {
@@ -151,22 +214,34 @@ async function generateCarolResponse(
         formattedSessionsText += `🕒 ${time} (horário de Brasília)\n\n`
       })
       formattedSessionsText += `💬 *Qual você prefere?*\n`
-      formattedSessionsText += `Digite o número da opção (ex: "1", "opção 1", "primeira") ou o dia/horário (ex: "segunda às 10:00")\n`
       
-      contextText += `\nIMPORTANTE: Quando a pessoa perguntar sobre horários, dias, agendamento ou quiser agendar, você DEVE usar EXATAMENTE este formato de opções (SEM links, SEM URLs, apenas dias e horários):\n\n${formattedSessionsText}\n\nNUNCA inclua links do Zoom nas opções. Apenas mostre dias e horários. Quando a pessoa escolher uma opção, você enviará o link específico com a imagem.\n`
-      
-      // Verificar se a mensagem do usuário pede opções
-      const messageLower = message.toLowerCase()
-      shouldSendOptions = messageLower.includes('horário') || 
-                         messageLower.includes('horario') ||
-                         messageLower.includes('dia') ||
-                         messageLower.includes('agendar') ||
-                         messageLower.includes('opção') ||
-                         messageLower.includes('opcao') ||
-                         messageLower.includes('disponível') ||
-                         messageLower.includes('disponivel') ||
-                         messageLower.includes('quando') ||
-                         messageLower.includes('quais')
+      // 🆕 Se for primeira mensagem, instruir para já apresentar opções com explicação
+      if (context.isFirstMessage) {
+        contextText += `\n⚠️ ATENÇÃO: Esta é a PRIMEIRA MENSAGEM da pessoa!\n\n`
+        contextText += `Você DEVE:\n`
+        contextText += `1. Dar boas-vindas acolhedora\n`
+        contextText += `2. Explicar que a aula tem 45 minutos e é online via Zoom\n`
+        contextText += `3. JÁ apresentar as duas próximas opções usando EXATAMENTE este formato:\n\n${formattedSessionsText}\n\n`
+        contextText += `4. Perguntar "Qual você prefere?" (SEM botões, apenas texto)\n\n`
+        contextText += `NÃO espere a pessoa perguntar sobre horários - você já apresenta as opções na primeira mensagem!\n`
+        contextText += `NUNCA inclua links do Zoom nas opções. Apenas mostre dias e horários.\n`
+        shouldSendOptions = true
+      } else {
+        contextText += `\nIMPORTANTE: Quando a pessoa perguntar sobre horários, dias, agendamento ou quiser agendar, você DEVE usar EXATAMENTE este formato de opções (SEM links, SEM URLs, apenas dias e horários):\n\n${formattedSessionsText}\n\nNUNCA inclua links do Zoom nas opções. Apenas mostre dias e horários. Quando a pessoa escolher uma opção, você enviará o link específico com a imagem.\n`
+        
+        // Verificar se a mensagem do usuário pede opções
+        const messageLower = message.toLowerCase()
+        shouldSendOptions = messageLower.includes('horário') || 
+                           messageLower.includes('horario') ||
+                           messageLower.includes('dia') ||
+                           messageLower.includes('agendar') ||
+                           messageLower.includes('opção') ||
+                           messageLower.includes('opcao') ||
+                           messageLower.includes('disponível') ||
+                           messageLower.includes('disponivel') ||
+                           messageLower.includes('quando') ||
+                           messageLower.includes('quais')
+      }
     }
   }
 
@@ -395,12 +470,22 @@ export async function processIncomingMessageWithCarol(
       })
     }
 
-    // 3. Verificar se participou ou não
+    // 3. Verificar histórico para detectar primeira mensagem
+    const { data: messageHistory } = await supabaseAdmin
+      .from('whatsapp_messages')
+      .select('id, sender_type, created_at')
+      .eq('conversation_id', conversationId)
+      .order('created_at', { ascending: true })
+    
+    const customerMessages = messageHistory?.filter(m => m.sender_type === 'customer') || []
+    const isFirstMessage = customerMessages.length === 1 // Primeira mensagem do cliente
+    
+    // 4. Verificar se participou ou não
     const participated = tags.includes('participou_aula')
     const hasScheduled = tags.includes('recebeu_link_workshop') || workshopSessionId
     const scheduledDate = context.scheduled_date || null
 
-    // 4. Verificar se a pessoa está escolhendo uma opção de aula
+    // 5. Verificar se a pessoa está escolhendo uma opção de aula
     // Detectar escolha: "1", "opção 1", "primeira", "segunda às 10:00", etc
     let selectedSession: { id: string; title: string; starts_at: string; zoom_link: string } | null = null
     
@@ -564,6 +649,57 @@ export async function processIncomingMessageWithCarol(
           const prevTags = Array.isArray(prevContext.tags) ? prevContext.tags : []
           const newTags = [...new Set([...prevTags, 'recebeu_link_workshop', 'agendou_aula'])]
           
+          // 🆕 Verificar tempo restante e enviar lembrete apropriado
+          const sessionDate = new Date(selectedSession.starts_at)
+          const now = new Date()
+          const timeDiff = sessionDate.getTime() - now.getTime()
+          const hoursDiff = timeDiff / (1000 * 60 * 60)
+          
+          // Se está entre 12h e 13h antes, já enviar lembrete de 12h
+          // Se está entre 2h e 2h30 antes, já enviar lembrete de 2h
+          let reminderToSend: string | null = null
+          if (hoursDiff >= 12 && hoursDiff < 13) {
+            // Lembrete de 12h (recomendação computador)
+            const { weekday, date, time } = formatSessionDateTime(selectedSession.starts_at)
+            reminderToSend = `Olá! 
+
+Sua aula é hoje às ${time}! 
+
+💻 *Recomendação importante:*
+
+O ideal é participar pelo computador ou notebook, pois:
+* Compartilhamos slides
+* Fazemos explicações visuais
+* É importante acompanhar e anotar
+
+Pelo celular, a experiência fica limitada e você pode perder partes importantes da aula.
+
+🔗 ${selectedSession.zoom_link}
+
+Carol - Secretária YLADA Nutri`
+          } else if (hoursDiff >= 2 && hoursDiff < 2.5) {
+            // Lembrete de 2h (aviso Zoom)
+            const { weekday, date, time } = formatSessionDateTime(selectedSession.starts_at)
+            reminderToSend = `Olá! 
+
+Sua aula começa em 2 horas! ⏰
+
+⚠️ *Aviso importante:*
+
+A sala do Zoom será aberta 10 minutos antes do horário da aula.
+
+⏰ Após o início da aula, não será permitido entrar, ok?
+
+Isso porque os 10 primeiros minutos são essenciais:
+é nesse momento que identificamos os principais desafios das participantes para que a aula seja realmente prática e personalizada.
+
+🔗 ${selectedSession.zoom_link}
+
+Nos vemos em breve! 😊
+
+Carol - Secretária YLADA Nutri`
+          }
+          
           await supabaseAdmin
             .from('whatsapp_conversations')
             .update({
@@ -577,6 +713,49 @@ export async function processIncomingMessageWithCarol(
               last_message_from: 'bot',
             })
             .eq('id', conversationId)
+          
+          // 🆕 Enviar lembrete imediatamente se necessário
+          if (reminderToSend) {
+            setTimeout(async () => {
+              try {
+                const reminderResult = await client.sendTextMessage({
+                  phone,
+                  message: reminderToSend!,
+                })
+                
+                if (reminderResult.success) {
+                  await supabaseAdmin.from('whatsapp_messages').insert({
+                    conversation_id: conversationId,
+                    instance_id: instance.id,
+                    z_api_message_id: reminderResult.id || null,
+                    sender_type: 'bot',
+                    sender_name: 'Carol - Secretária',
+                    message: reminderToSend!,
+                    message_type: 'text',
+                    status: 'sent',
+                    is_bot_response: true,
+                  })
+                  
+                  // Marcar que já enviou esse lembrete
+                  const notificationKey = `pre_class_${selectedSession.id}`
+                  const updatedContext = {
+                    ...prevContext,
+                    tags: newTags,
+                    workshop_session_id: selectedSession.id,
+                    scheduled_date: selectedSession.starts_at,
+                    [notificationKey]: hoursDiff >= 12 ? { sent_12h: true } : { sent_2h: true },
+                  }
+                  
+                  await supabaseAdmin
+                    .from('whatsapp_conversations')
+                    .update({ context: updatedContext })
+                    .eq('id', conversationId)
+                }
+              } catch (error: any) {
+                console.error('[Carol] Erro ao enviar lembrete imediato:', error)
+              }
+            }, 2000) // Aguardar 2 segundos antes de enviar
+          }
           
           return { success: true, response: linkMessage }
         }
@@ -605,7 +784,7 @@ export async function processIncomingMessageWithCarol(
       leadName: conversation.name,
       hasScheduled,
       participated,
-      shouldSendButtons
+      isFirstMessage
     })
 
     const carolResponse = await generateCarolResponse(message, conversationHistory, {
@@ -615,6 +794,7 @@ export async function processIncomingMessageWithCarol(
       hasScheduled,
       scheduledDate,
       participated: participated ? true : (tags.includes('nao_participou_aula') ? false : undefined),
+      isFirstMessage, // 🆕 Passar flag de primeira mensagem
     })
 
     console.log('[Carol AI] ✅ Resposta gerada:', {
@@ -1944,5 +2124,245 @@ Carol - Secretária YLADA Nutri`
   } catch (error: any) {
     console.error('[Carol] Erro ao processar follow-up de vendas:', error)
     return { sent: 0, errors: 0 }
+  }
+}
+
+/**
+ * Envia link de cadastro imediatamente após pessoa participar da aula
+ * Ativado quando admin adiciona tag "participou_aula"
+ * Inclui argumentação e provoca manifestação de interesse/objeções
+ */
+export async function sendRegistrationLinkAfterClass(conversationId: string): Promise<{
+  success: boolean
+  error?: string
+}> {
+  try {
+    const area = 'nutri'
+
+    // Buscar conversa
+    const { data: conversation } = await supabaseAdmin
+      .from('whatsapp_conversations')
+      .select('id, phone, name, context')
+      .eq('id', conversationId)
+      .eq('area', area)
+      .single()
+
+    if (!conversation) {
+      return { success: false, error: 'Conversa não encontrada' }
+    }
+
+    const context = conversation.context || {}
+    const tags = Array.isArray(context.tags) ? context.tags : []
+
+    // Verificar se já participou
+    if (!tags.includes('participou_aula')) {
+      return { success: false, error: 'Pessoa ainda não participou da aula' }
+    }
+
+    // Verificar se já recebeu link de cadastro
+    if (context.registration_link_sent === true) {
+      return { success: false, error: 'Link de cadastro já foi enviado' }
+    }
+
+    // Buscar instância Z-API
+    const { data: instance } = await supabaseAdmin
+      .from('z_api_instances')
+      .select('id, instance_id, token')
+      .eq('area', area)
+      .eq('is_active', true)
+      .limit(1)
+      .maybeSingle()
+
+    if (!instance) {
+      return { success: false, error: 'Instância Z-API não encontrada' }
+    }
+
+    const client = createZApiClient(instance.instance_id, instance.token)
+    const leadName = conversation.name || 'querido(a)'
+
+    // Link de cadastro (configurável via variável de ambiente ou banco)
+    const registrationUrl = process.env.NUTRI_REGISTRATION_URL || 'https://ylada.com/pt/nutri/cadastro'
+
+    // Mensagem com link de cadastro e argumentação
+    const message = `Olá ${leadName}! 🎉
+
+Que alegria ter você aqui! Espero que a aula tenha sido transformadora para você! 💚
+
+Agora que você já viu o caminho, que tal darmos o próximo passo juntas?
+
+Temos programas incríveis que vão te ajudar a transformar seu sonho em realidade:
+
+🌟 *Qual você prefere começar?*
+
+🔗 *Acesse aqui para ver os programas e fazer seu cadastro:*
+${registrationUrl}
+
+O que você acha? Já quer começar ou tem alguma dúvida? 
+
+Estou aqui para te ajudar em cada passo! 😊
+
+Carol - Secretária YLADA Nutri`
+
+    const result = await client.sendTextMessage({
+      phone: conversation.phone,
+      message,
+    })
+
+    if (result.success) {
+      // Salvar mensagem
+      await supabaseAdmin.from('whatsapp_messages').insert({
+        conversation_id: conversation.id,
+        instance_id: instance.id,
+        z_api_message_id: result.id || null,
+        sender_type: 'bot',
+        sender_name: 'Carol - Secretária',
+        message,
+        message_type: 'text',
+        status: 'sent',
+        is_bot_response: true,
+      })
+
+      // Atualizar contexto
+      context.registration_link_sent = true
+      context.registration_link_sent_at = new Date().toISOString()
+
+      await supabaseAdmin
+        .from('whatsapp_conversations')
+        .update({
+          context,
+          last_message_at: new Date().toISOString(),
+          last_message_from: 'bot',
+        })
+        .eq('id', conversation.id)
+
+      return { success: true }
+    } else {
+      return { success: false, error: 'Erro ao enviar mensagem' }
+    }
+  } catch (error: any) {
+    console.error('[Carol] Erro ao enviar link de cadastro:', error)
+    return { success: false, error: error.message }
+  }
+}
+
+/**
+ * Direciona pessoa para suporte após pagamento confirmado
+ * Envia mensagem com link para WhatsApp do suporte: 5519996049800
+ */
+export async function redirectToSupportAfterPayment(
+  conversationId: string,
+  paymentInfo?: { amount?: number; plan?: string }
+): Promise<{
+  success: boolean
+  error?: string
+}> {
+  try {
+    const area = 'nutri'
+    const supportPhone = '5519996049800'
+
+    // Buscar conversa
+    const { data: conversation } = await supabaseAdmin
+      .from('whatsapp_conversations')
+      .select('id, phone, name, context')
+      .eq('id', conversationId)
+      .eq('area', area)
+      .single()
+
+    if (!conversation) {
+      return { success: false, error: 'Conversa não encontrada' }
+    }
+
+    const context = conversation.context || {}
+    const tags = Array.isArray(context.tags) ? context.tags : []
+
+    // Verificar se já foi direcionado
+    if (context.redirected_to_support === true) {
+      return { success: false, error: 'Já foi direcionado para suporte' }
+    }
+
+    // Buscar instância Z-API
+    const { data: instance } = await supabaseAdmin
+      .from('z_api_instances')
+      .select('id, instance_id, token')
+      .eq('area', area)
+      .eq('is_active', true)
+      .limit(1)
+      .maybeSingle()
+
+    if (!instance) {
+      return { success: false, error: 'Instância Z-API não encontrada' }
+    }
+
+    const client = createZApiClient(instance.instance_id, instance.token)
+    const leadName = conversation.name || 'querido(a)'
+
+    // Criar link do WhatsApp do suporte
+    const supportWhatsAppLink = `https://wa.me/${supportPhone.replace(/\D/g, '')}`
+
+    // Mensagem de direcionamento para suporte
+    const message = `Olá ${leadName}! 🎉
+
+Parabéns! Seu pagamento foi confirmado! 🎉
+
+Agora você vai receber todo o suporte e orientação que precisa para começar sua jornada!
+
+📱 *Entre em contato com nosso suporte:*
+${supportWhatsAppLink}
+
+Ou envie uma mensagem para: ${supportPhone}
+
+Lá você vai receber:
+✅ Materiais de suporte e orientação
+✅ Acompanhamento personalizado
+✅ Tudo que precisa para começar
+
+Estamos aqui para te apoiar em cada passo! 💚
+
+Carol - Secretária YLADA Nutri`
+
+    const result = await client.sendTextMessage({
+      phone: conversation.phone,
+      message,
+    })
+
+    if (result.success) {
+      // Salvar mensagem
+      await supabaseAdmin.from('whatsapp_messages').insert({
+        conversation_id: conversation.id,
+        instance_id: instance.id,
+        z_api_message_id: result.id || null,
+        sender_type: 'bot',
+        sender_name: 'Carol - Secretária',
+        message,
+        message_type: 'text',
+        status: 'sent',
+        is_bot_response: true,
+      })
+
+      // Atualizar contexto e tags
+      context.redirected_to_support = true
+      context.redirected_to_support_at = new Date().toISOString()
+      context.payment_confirmed = true
+      context.payment_info = paymentInfo || {}
+
+      const newTags = [...new Set([...tags, 'pagamento_confirmado', 'direcionado_suporte'])]
+
+      await supabaseAdmin
+        .from('whatsapp_conversations')
+        .update({
+          context,
+          tags: newTags,
+          last_message_at: new Date().toISOString(),
+          last_message_from: 'bot',
+        })
+        .eq('id', conversation.id)
+
+      return { success: true }
+    } else {
+      return { success: false, error: 'Erro ao enviar mensagem' }
+    }
+  } catch (error: any) {
+    console.error('[Carol] Erro ao direcionar para suporte:', error)
+    return { success: false, error: error.message }
   }
 }

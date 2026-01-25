@@ -13,6 +13,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
+import { sendRegistrationLinkAfterClass } from '@/lib/whatsapp-carol-ai'
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -107,8 +108,27 @@ export async function PATCH(
 
     if (context && typeof context === 'object') {
       const prevContext = normalizeContext(existing.context)
+      const prevTags = Array.isArray(prevContext.tags) ? prevContext.tags : []
       const nextContext = { ...prevContext, ...normalizeContext(context) }
+      const nextTags = Array.isArray(nextContext.tags) ? nextContext.tags : []
       updateData.context = nextContext
+      
+      // 🆕 Detectar se tag "participou_aula" foi adicionada
+      const hadParticipatedTag = prevTags.includes('participou_aula')
+      const hasParticipatedTag = nextTags.includes('participou_aula')
+      
+      if (!hadParticipatedTag && hasParticipatedTag) {
+        // Tag foi adicionada agora - enviar link de cadastro imediatamente
+        console.log('[WhatsApp Conversation] 🎉 Tag participou_aula adicionada - enviando link de cadastro')
+        try {
+          // Não bloquear a atualização se houver erro no envio
+          sendRegistrationLinkAfterClass(conversationId).catch((error: any) => {
+            console.error('[WhatsApp Conversation] ❌ Erro ao enviar link de cadastro:', error)
+          })
+        } catch (error: any) {
+          console.error('[WhatsApp Conversation] ❌ Erro ao enviar link de cadastro:', error)
+        }
+      }
     }
 
     if (Object.keys(updateData).length === 0) {
