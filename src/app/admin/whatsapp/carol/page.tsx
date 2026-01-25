@@ -231,6 +231,44 @@ function CarolControlContent() {
           </button>
         </div>
 
+        {/* Processar Conversas Existentes */}
+        <div className="bg-white rounded-lg shadow p-6 mb-6">
+          <h2 className="text-xl font-bold text-gray-900 mb-4">🚀 Processar Conversas Existentes</h2>
+          <p className="text-sm text-gray-600 mb-4">
+            Analisa conversas existentes, identifica status (agendou, não agendou, participou, etc.) e envia mensagens apropriadas da Carol automaticamente.
+          </p>
+          <button
+            onClick={async () => {
+              if (!confirm('Isso vai analisar todas as conversas e enviar mensagens da Carol. Continuar?')) {
+                return
+              }
+              setLoading(true)
+              try {
+                const response = await fetch('/api/admin/whatsapp/carol/processar-conversas', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  credentials: 'include',
+                  body: JSON.stringify({ area: 'nutri' })
+                })
+                const data = await response.json()
+                if (data.success) {
+                  alert(`✅ Processamento concluído!\n\n📊 Estatísticas:\n- Analisadas: ${data.analyzed}\n- Processadas: ${data.processed}\n- Enviadas: ${data.sent}\n- Erros: ${data.errors}\n\n📋 Detalhes:\n${data.details || 'Nenhum detalhe disponível'}`)
+                } else {
+                  alert(`Erro: ${data.error}`)
+                }
+              } catch (error: any) {
+                alert(`Erro: ${error.message}`)
+              } finally {
+                setLoading(false)
+              }
+            }}
+            disabled={loading}
+            className="w-full px-4 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50"
+          >
+            {loading ? 'Processando...' : '🚀 Processar Todas as Conversas'}
+          </button>
+        </div>
+
         {/* Limpar Duplicatas */}
         <div className="bg-white rounded-lg shadow p-6 mb-6">
           <h2 className="text-xl font-bold text-gray-900 mb-4">🧹 Limpar Duplicatas do Banco</h2>
