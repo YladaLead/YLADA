@@ -206,10 +206,13 @@ function CadastrosWorkshopContent() {
             <div className="text-sm text-gray-600">Total de Cadastros</div>
             <div className="text-2xl font-bold text-gray-900">{registrations.length}</div>
           </div>
-          <div className="bg-white rounded-lg shadow p-4">
-            <div className="text-sm text-gray-600">Sem Conversa</div>
+          <div className="bg-white rounded-lg shadow p-4 border-2 border-orange-300">
+            <div className="text-sm text-gray-600 font-semibold">⚠️ Sem Conversa no WhatsApp</div>
             <div className="text-2xl font-bold text-orange-600">
               {registrations.filter(r => !r.has_conversation).length}
+            </div>
+            <div className="text-xs text-gray-500 mt-1">
+              Cadastrou mas não iniciou conversa
             </div>
           </div>
           <div className="bg-white rounded-lg shadow p-4">
@@ -245,7 +248,7 @@ function CadastrosWorkshopContent() {
               className="px-4 py-2 border border-gray-300 rounded-lg"
             >
               <option value="all">Todos</option>
-              <option value="no_conversation">Sem conversa</option>
+              <option value="no_conversation">⚠️ Sem conversa (não iniciou WhatsApp)</option>
               <option value="no_tags">Sem tags</option>
             </select>
 
@@ -328,12 +331,15 @@ function CadastrosWorkshopContent() {
                         {reg.has_conversation ? (
                           <Link
                             href={`/admin/whatsapp?conversation=${reg.conversation_id}`}
-                            className="text-sm text-blue-600 hover:underline"
+                            className="text-sm text-blue-600 hover:underline font-medium"
                           >
                             ✅ Ver conversa
                           </Link>
                         ) : (
-                          <span className="text-sm text-gray-400">❌ Sem conversa</span>
+                          <div className="flex flex-col">
+                            <span className="text-sm text-orange-600 font-semibold">⚠️ Não iniciou conversa</span>
+                            <span className="text-xs text-gray-500">Cadastrou mas não chamou no WhatsApp</span>
+                          </div>
                         )}
                       </td>
                       <td className="px-4 py-3">
