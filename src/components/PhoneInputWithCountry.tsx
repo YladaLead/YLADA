@@ -23,6 +23,13 @@ export default function PhoneInputWithCountry({
   const [otherCountryCode, setOtherCountryCode] = useState('')
 
   useEffect(() => {
+    // Se o valor estiver vazio, resetar para o país padrão
+    if (!value || value.trim() === '') {
+      setCountryCode(defaultCountryCode)
+      setPhoneNumber('')
+      return
+    }
+
     // Try to infer country code from the value if it starts with a known country code
     let inferredCountryCode = defaultCountryCode
     let remainingPhoneNumber = value
