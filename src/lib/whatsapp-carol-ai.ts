@@ -141,6 +141,12 @@ QUANDO ENVIAR OPÇÕES DE AULA:
 - Apenas mostre dias e horários
 - Quando a pessoa escolher uma opção, você enviará o link específico
 
+IMPORTANTE - SUGERIR SESSÕES ALTERNATIVAS:
+- Se a pessoa mencionar preferência por "noite", "tarde" ou "manhã" e as opções mostradas não corresponderem, você DEVE sugerir a sessão que melhor se encaixa
+- Exemplo: Se pessoa diz "prefiro à noite" e você mostrou apenas opções de manhã/tarde, sugira a sessão noturna (quarta 20h se existir)
+- Se a pessoa mencionar preferência de período e não houver correspondência nas opções mostradas, busque nas próximas sessões disponíveis e sugira a melhor opção
+- Seja proativa: "Vi que você prefere à noite! Temos uma opção perfeita: quarta-feira às 20h. Quer que eu te envie o link?"
+
 PRIMEIRA MENSAGEM (IMPORTANTE):
 - Se é a primeira mensagem da pessoa, você DEVE enviar TUDO em UMA ÚNICA mensagem:
   1. Primeira linha: "Oi, tudo bem? 😊" (SE o nome da pessoa estiver disponível, use: "Oi [NOME], tudo bem? 😊")
@@ -894,6 +900,156 @@ export async function processIncomingMessageWithCarol(
               zoom_link: sessionItem.zoom_link
             }
             break
+          }
+        }
+        
+        // 🆕 Detectar preferência por período do dia (noite, tarde, manhã) e sugerir sessão apropriada
+        if (!selectedSession) {
+          const messageLower = message.toLowerCase()
+          const prefersNight = messageLower.includes('noite') || 
+                              messageLower.includes('noturno') || 
+                              messageLower.includes('à noite') ||
+                              messageLower.includes('a noite') ||
+                              messageLower.includes('noitinha')
+          const prefersAfternoon = messageLower.includes('tarde') || 
+                                  messageLower.includes('à tarde') ||
+                                  messageLower.includes('a tarde')
+          const prefersMorning = messageLower.includes('manhã') || 
+                                messageLower.includes('manha') ||
+                                messageLower.includes('de manhã') ||
+                                messageLower.includes('de manha')
+          
+          if (prefersNight || prefersAfternoon || prefersMorning) {
+            // Buscar sessões que correspondam ao período preferido
+            for (const sessionItem of workshopSessions) {
+              const { weekday, date, time } = formatSessionDateTime(sessionItem.starts_at)
+              const sessionHour = parseInt(time.split(':')[0])
+              
+              // Noite: 18h-23h
+              if (prefersNight && sessionHour >= 18 && sessionHour <= 23) {
+                console.log('[Carol AI] ✅ Sessão noturna detectada por preferência:', {
+                  sessionId: sessionItem.id,
+                  weekday,
+                  time,
+                  hour: sessionHour,
+                  message: messageLower
+                })
+                selectedSession = {
+                  id: sessionItem.id,
+                  title: sessionItem.title,
+                  starts_at: sessionItem.starts_at,
+                  zoom_link: sessionItem.zoom_link
+                }
+                break
+              }
+              
+              // Tarde: 12h-17h
+              if (prefersAfternoon && sessionHour >= 12 && sessionHour < 18) {
+                console.log('[Carol AI] ✅ Sessão da tarde detectada por preferência:', {
+                  sessionId: sessionItem.id,
+                  weekday,
+                  time,
+                  hour: sessionHour,
+                  message: messageLower
+                })
+                selectedSession = {
+                  id: sessionItem.id,
+                  title: sessionItem.title,
+                  starts_at: sessionItem.starts_at,
+                  zoom_link: sessionItem.zoom_link
+                }
+                break
+              }
+              
+              // Manhã: 6h-11h
+              if (prefersMorning && sessionHour >= 6 && sessionHour < 12) {
+                console.log('[Carol AI] ✅ Sessão da manhã detectada por preferência:', {
+                  sessionId: sessionItem.id,
+                  weekday,
+                  time,
+                  hour: sessionHour,
+                  message: messageLower
+                })
+                selectedSession = {
+                  id: sessionItem.id,
+                  title: sessionItem.title,
+                  starts_at: sessionItem.starts_at,
+                  zoom_link: sessionItem.zoom_link
+                }
+                break
+              }
+            }
+            
+            // Se não encontrou nas opções já mostradas, buscar TODAS as sessões futuras para encontrar a melhor correspondência
+            if (!selectedSession) {
+              const now = new Date()
+              const minDate = new Date(now.getTime() + 5 * 60 * 1000)
+              
+              const { data: allSessions } = await supabaseAdmin
+                .from('whatsapp_workshop_sessions')
+                .select('id, title, starts_at, zoom_link')
+                .eq('area', area)
+                .eq('is_active', true)
+                .gte('starts_at', minDate.toISOString())
+                .order('starts_at', { ascending: true })
+                .limit(10) // Buscar mais sessões para encontrar correspondência
+              
+              if (allSessions && allSessions.length > 0) {
+                for (const sessionItem of allSessions) {
+                  const { weekday, date, time } = formatSessionDateTime(sessionItem.starts_at)
+                  const sessionHour = parseInt(time.split(':')[0])
+                  
+                  // Noite: 18h-23h (prioridade para 20h se existir)
+                  if (prefersNight && sessionHour >= 18 && sessionHour <= 23) {
+                    // Priorizar 20h se existir
+                    if (sessionHour === 20) {
+                      console.log('[Carol AI] ✅ Sessão noturna (20h) encontrada:', {
+                        sessionId: sessionItem.id,
+                        weekday,
+                        time
+                      })
+                      selectedSession = {
+                        id: sessionItem.id,
+                        title: sessionItem.title,
+                        starts_at: sessionItem.starts_at,
+                        zoom_link: sessionItem.zoom_link
+                      }
+                      break
+                    } else if (!selectedSession) {
+                      // Se não encontrou 20h ainda, guardar esta como opção
+                      selectedSession = {
+                        id: sessionItem.id,
+                        title: sessionItem.title,
+                        starts_at: sessionItem.starts_at,
+                        zoom_link: sessionItem.zoom_link
+                      }
+                    }
+                  }
+                  
+                  // Tarde: 12h-17h
+                  if (prefersAfternoon && sessionHour >= 12 && sessionHour < 18 && !selectedSession) {
+                    selectedSession = {
+                      id: sessionItem.id,
+                      title: sessionItem.title,
+                      starts_at: sessionItem.starts_at,
+                      zoom_link: sessionItem.zoom_link
+                    }
+                    break
+                  }
+                  
+                  // Manhã: 6h-11h
+                  if (prefersMorning && sessionHour >= 6 && sessionHour < 12 && !selectedSession) {
+                    selectedSession = {
+                      id: sessionItem.id,
+                      title: sessionItem.title,
+                      starts_at: sessionItem.starts_at,
+                      zoom_link: sessionItem.zoom_link
+                    }
+                    break
+                  }
+                }
+              }
+            }
           }
         }
       }
