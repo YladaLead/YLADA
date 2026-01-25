@@ -20,7 +20,7 @@ https://wa.me/5519997230912?text=Olá!%20Acabei%20de%20me%20inscrever%20na%20Aul
 ### **Link Formatado (mais legível):**
 
 ```
-https://wa.me/5519997230912?text=Olá! Acabei de me inscrever na Aula Prática ao Vivo (Agenda Instável) da YLADA Nutri e gostaria de agendar uma conversa rápida para entender os próximos passos.
+https://wa.me/5519997230912?text=Acabei de me inscrever na aula prática da YLADA Nutri e gostaria de agendar uma conversa rápida para entender os próximos passos.
 ```
 
 ---
@@ -59,7 +59,7 @@ Carol - Secretária YLADA Nutri
 
 - **Número:** 5519997230912
 - **Formato:** `https://wa.me/[número]?text=[mensagem codificada]`
-- **Mensagem:** "Olá! Acabei de me inscrever na Aula Prática ao Vivo (Agenda Instável) da YLADA Nutri e gostaria de agendar uma conversa rápida para entender os próximos passos."
+- **Mensagem:** "Acabei de me inscrever na aula prática da YLADA Nutri e gostaria de agendar uma conversa rápida para entender os próximos passos."
 
 ---
 

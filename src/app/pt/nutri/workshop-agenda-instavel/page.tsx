@@ -32,7 +32,7 @@ export default function WorkshopAgendaInstavelPage() {
   const whatsappUrl = buildWhatsappUrl({
     phone: whatsappNumber,
     message:
-      'Olá! Acabei de me inscrever na Aula Prática ao Vivo (Agenda Instável) da YLADA Nutri e gostaria de agendar uma conversa rápida para entender os próximos passos.'
+      'Acabei de me inscrever na aula prática da YLADA Nutri e gostaria de agendar uma conversa rápida para entender os próximos passos.'
   })
 
   // Rastrear visualização da página
