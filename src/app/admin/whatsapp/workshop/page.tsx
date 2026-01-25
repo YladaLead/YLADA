@@ -980,6 +980,63 @@ function WorkshopContent() {
                       ×
                     </button>
                   </div>
+                  <div className="px-6 py-3 bg-blue-50 border-b border-blue-200">
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        id="add-participant-phone-existing"
+                        placeholder="Telefone (ex: 5519997230912)"
+                        className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                      />
+                      <button
+                        onClick={async () => {
+                          const input = document.getElementById('add-participant-phone-existing') as HTMLInputElement
+                          const phone = input.value.trim().replace(/\D/g, '')
+                          
+                          if (!phone || phone.length < 10) {
+                            alert('Digite um telefone válido')
+                            return
+                          }
+                          
+                          if (!selectedSessionForParticipants) {
+                            alert('Selecione uma sessão primeiro')
+                            return
+                          }
+                          
+                          try {
+                            setSaving(true)
+                            setError(null)
+                            const res = await fetch('/api/admin/whatsapp/workshop/participants/adicionar', {
+                              method: 'POST',
+                              headers: { 'Content-Type': 'application/json' },
+                              credentials: 'include',
+                              body: JSON.stringify({
+                                sessionId: selectedSessionForParticipants.id,
+                                phone: phone
+                              })
+                            })
+                            const json = await res.json()
+                            if (!res.ok) throw new Error(json.error || 'Erro ao adicionar participante')
+                            setSuccess(json.message || 'Participante adicionado!')
+                            input.value = ''
+                            await loadParticipants(selectedSessionForParticipants)
+                            await loadAll()
+                          } catch (e: any) {
+                            setError(e.message || 'Erro ao adicionar participante')
+                          } finally {
+                            setSaving(false)
+                          }
+                        }}
+                        disabled={saving}
+                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 text-sm"
+                      >
+                        {saving ? 'Adicionando...' : '➕ Adicionar'}
+                      </button>
+                    </div>
+                    <p className="text-xs text-gray-600 mt-1">
+                      Digite o telefone da pessoa (apenas números, com DDD e código do país)
+                    </p>
+                  </div>
                   <div className="p-6">
                     {loadingParticipants ? (
                       <div className="text-center py-8">
