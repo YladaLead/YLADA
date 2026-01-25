@@ -397,6 +397,12 @@ function WorkshopContent() {
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-2">
                     <h2 className="font-semibold text-gray-900 text-lg">Agenda (próximas aulas)</h2>
+                    <Link
+                      href="/admin/whatsapp/cadastros-workshop"
+                      className="px-3 py-1.5 text-sm bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors flex items-center gap-1.5"
+                    >
+                      📋 Cadastros
+                    </Link>
                     {sessions.length > 0 && (
                       <span className="px-3 py-1 text-xs font-semibold bg-blue-100 text-blue-700 rounded-full">
                         📊 Total de {sessions.length} sessão{sessions.length !== 1 ? 'ões' : ''} cadastrada{sessions.length !== 1 ? 's' : ''}
