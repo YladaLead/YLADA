@@ -53,15 +53,57 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    if (!conversations || conversations.length === 0) {
-      return NextResponse.json({
-        success: true,
-        processed: 0,
-        sent: 0,
-        errors: 0,
-        details: 'Nenhuma conversa encontrada'
-      })
+    // 🆕 Buscar cadastros do workshop que ainda não têm conversa
+    let registrationsWithoutConversation: Array<{ phone: string; name: string }> = []
+    
+    try {
+      // Tentar buscar de workshop_inscricoes
+      const { data: workshopRegs } = await supabaseAdmin
+        .from('workshop_inscricoes')
+        .select('telefone, nome')
+        .not('telefone', 'is', null)
+        .limit(1000)
+
+      if (workshopRegs && workshopRegs.length > 0) {
+        // Verificar quais não têm conversa
+        const existingPhones = new Set(
+          (conversations || []).map(c => c.phone.replace(/\D/g, ''))
+        )
+
+        registrationsWithoutConversation = workshopRegs
+          .map(reg => ({
+            phone: (reg.telefone || '').replace(/\D/g, ''),
+            name: reg.nome || 'Cliente'
+          }))
+          .filter(reg => reg.phone.length >= 10 && !existingPhones.has(reg.phone))
+      }
+    } catch (error: any) {
+      // Se workshop_inscricoes não existir, tentar contact_submissions
+      try {
+        const { data: contactRegs } = await supabaseAdmin
+          .from('contact_submissions')
+          .select('phone, name')
+          .not('phone', 'is', null)
+          .limit(1000)
+
+        if (contactRegs && contactRegs.length > 0) {
+          const existingPhones = new Set(
+            (conversations || []).map(c => c.phone.replace(/\D/g, ''))
+          )
+
+          registrationsWithoutConversation = contactRegs
+            .map(reg => ({
+              phone: (reg.phone || '').replace(/\D/g, ''),
+              name: reg.name || 'Cliente'
+            }))
+            .filter(reg => reg.phone.length >= 10 && !existingPhones.has(reg.phone))
+        }
+      } catch (contactError: any) {
+        console.warn('[Disparar Pendentes] Erro ao buscar cadastros:', contactError.message)
+      }
     }
+
+    const allConversations = conversations || []
 
     // Buscar próximas 2 sessões
     const { data: sessions } = await supabaseAdmin
@@ -85,8 +127,51 @@ export async function POST(request: NextRequest) {
     let errors = 0
     const details: string[] = []
 
-    // Processar cada conversa
-    for (const conversation of conversations) {
+    // 🆕 Primeiro: Criar conversas para cadastros sem conversa
+    for (const registration of registrationsWithoutConversation) {
+      try {
+        // Criar conversa
+        const { data: newConv, error: createError } = await supabaseAdmin
+          .from('whatsapp_conversations')
+          .insert({
+            instance_id: instance.id,
+            phone: registration.phone,
+            name: registration.name,
+            area: area,
+            status: 'active',
+            context: {
+              tags: ['veio_aula_pratica', 'primeiro_contato'],
+              source: 'workshop_registration'
+            }
+          })
+          .select('id, phone, name, context')
+          .single()
+
+        if (createError || !newConv) {
+          errors++
+          details.push(`❌ ${registration.phone}: Erro ao criar conversa - ${createError?.message || 'Erro desconhecido'}`)
+          continue
+        }
+
+        // Adicionar à lista de conversas para processar
+        allConversations.push({
+          id: newConv.id,
+          phone: newConv.phone,
+          name: newConv.name,
+          context: newConv.context || {},
+          area: area,
+          last_message_at: new Date().toISOString()
+        })
+
+        details.push(`✅ ${registration.phone}: Conversa criada para cadastro sem conversa`)
+      } catch (error: any) {
+        errors++
+        details.push(`❌ ${registration.phone}: ${error.message || 'Erro ao criar conversa'}`)
+      }
+    }
+
+    // Processar cada conversa (incluindo as recém-criadas)
+    for (const conversation of allConversations) {
       try {
         const context = conversation.context || {}
         const tags = Array.isArray(context.tags) ? context.tags : []
