@@ -2356,9 +2356,28 @@ export async function sendPreClassNotifications(): Promise<{
           continue
         }
 
+        // Calcular se é hoje ou amanhã
+        const isToday = nowBrasilia.toDateString() === sessionBrasilia.toDateString()
+        const isTomorrow = new Date(nowBrasilia.getTime() + 24 * 60 * 60 * 1000).toDateString() === sessionBrasilia.toDateString()
+        
+        console.log(`[Carol Pre-Class] Verificando notificação para ${conv.phone}:`, {
+          sessionId,
+          hoursDiff: hoursDiff.toFixed(2),
+          minutesDiff: minutesDiff.toFixed(2),
+          isToday,
+          isTomorrow,
+          sent_24h: context[notificationKey]?.sent_24h,
+          sent_12h: context[notificationKey]?.sent_12h,
+          sent_2h: context[notificationKey]?.sent_2h,
+          sent_10min: context[notificationKey]?.sent_10min
+        })
+
         // 24 horas antes (entre 24h e 25h) OU se passou mas ainda não enviou e sessão é amanhã/hoje
+        // Melhorado: Se sessão é amanhã e ainda não enviou, enviar mesmo se passou a janela de 24h
         if (!context[notificationKey]?.sent_24h && 
-            ((hoursDiff >= 24 && hoursDiff < 25) || (hoursDiff >= 12 && hoursDiff < 24))) {
+            ((hoursDiff >= 24 && hoursDiff < 25) || 
+             (hoursDiff >= 12 && hoursDiff < 24) ||
+             (isTomorrow && hoursDiff >= 12 && hoursDiff < 36))) {
           message = `Olá ${leadName}! 👋
 
 Lembrete: Sua aula é amanhã!
@@ -2375,9 +2394,13 @@ Carol - Secretária YLADA Nutri`
           if (!context[notificationKey]) context[notificationKey] = {}
           context[notificationKey].sent_24h = true
         }
-        // 12 horas antes (entre 12h e 13h) OU se passou mas ainda não enviou e sessão é hoje
-        else if (!context[notificationKey]?.sent_12h && 
-                 ((hoursDiff >= 12 && hoursDiff < 13) || (hoursDiff >= 2 && hoursDiff < 12))) {
+        // 12 horas antes (entre 12h e 13h) OU se passou mas ainda não enviou e sessão é hoje/amanhã
+        // Melhorado: Se sessão é hoje e ainda não enviou, enviar mesmo se passou a janela de 12h
+        if (!context[notificationKey]?.sent_12h && 
+            ((hoursDiff >= 12 && hoursDiff < 13) || 
+             (hoursDiff >= 2 && hoursDiff < 12) || 
+             (isToday && hoursDiff >= 0.5 && hoursDiff < 12) ||
+             (isTomorrow && hoursDiff >= 12 && hoursDiff < 36))) {
           message = `Olá ${leadName}! 
 
 Sua aula é hoje às ${time}! 

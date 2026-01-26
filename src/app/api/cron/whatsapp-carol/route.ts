@@ -35,6 +35,13 @@ export async function GET(request: NextRequest) {
 
     const searchParams = request.nextUrl.searchParams
     const tipo = searchParams.get('tipo') // 'welcome', 'remarketing', 'pre-class', 'post-class', 'follow-up', 'sales-follow-up', 'reminders'
+    
+    if (!tipo) {
+      return NextResponse.json(
+        { error: 'Parâmetro "tipo" é obrigatório' },
+        { status: 400 }
+      )
+    }
 
     let result
 
