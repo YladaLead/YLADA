@@ -1147,10 +1147,10 @@ function WorkshopContent() {
                                 <button
                                   onClick={() => markParticipated(participant.conversationId, true)}
                                   disabled={saving || participant.hasParticipated}
-                                  className={`px-3 py-1.5 text-sm rounded-lg ${
+                                  className={`px-3 py-1.5 text-sm rounded-lg font-medium transition-all ${
                                     participant.hasParticipated
-                                      ? 'bg-green-100 text-green-700 cursor-not-allowed'
-                                      : 'bg-green-600 text-white hover:bg-green-700'
+                                      ? 'bg-green-600 text-white shadow-md cursor-not-allowed'
+                                      : 'bg-green-100 text-green-700 hover:bg-green-200 border border-green-300'
                                   } disabled:opacity-50`}
                                   title="Marcar como participou (1h01 após o horário da aula)"
                                 >
@@ -1159,10 +1159,10 @@ function WorkshopContent() {
                                 <button
                                   onClick={() => markParticipated(participant.conversationId, false)}
                                   disabled={saving || participant.hasNotParticipated}
-                                  className={`px-3 py-1.5 text-sm rounded-lg ${
+                                  className={`px-3 py-1.5 text-sm rounded-lg font-medium transition-all ${
                                     participant.hasNotParticipated
-                                      ? 'bg-red-100 text-red-700 cursor-not-allowed'
-                                      : 'bg-red-600 text-white hover:bg-red-700'
+                                      ? 'bg-red-600 text-white shadow-md cursor-not-allowed'
+                                      : 'bg-red-100 text-red-700 hover:bg-red-200 border border-red-300'
                                   } disabled:opacity-50`}
                                   title="Marcar como não participou"
                                 >
