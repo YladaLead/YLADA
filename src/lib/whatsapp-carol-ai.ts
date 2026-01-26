@@ -1146,10 +1146,45 @@ export async function processIncomingMessageWithCarol(
           const newTags = [...new Set([...prevTags, 'recebeu_link_workshop', 'agendou_aula'])]
           
           // 🆕 Verificar tempo restante e enviar lembrete apropriado
+          // Usar timezone de Brasília para cálculo correto
           const sessionDate = new Date(selectedSession.starts_at)
           const now = new Date()
-          const timeDiff = sessionDate.getTime() - now.getTime()
+          const nowBrasilia = new Date(now.toLocaleString('en-US', { timeZone: 'America/Sao_Paulo' }))
+          const sessionBrasilia = new Date(sessionDate.toLocaleString('en-US', { timeZone: 'America/Sao_Paulo' }))
+          const timeDiff = sessionBrasilia.getTime() - nowBrasilia.getTime()
           const hoursDiff = timeDiff / (1000 * 60 * 60)
+          
+          // Buscar nome do cadastro para usar no lembrete
+          let leadNameForReminder = conversation.name || 'querido(a)'
+          try {
+            const phoneClean = phone.replace(/\D/g, '')
+            
+            // Tentar buscar de workshop_inscricoes primeiro
+            const { data: workshopReg } = await supabaseAdmin
+              .from('workshop_inscricoes')
+              .select('nome')
+              .ilike('telefone', `%${phoneClean.slice(-8)}%`)
+              .limit(1)
+              .maybeSingle()
+            
+            if (workshopReg?.nome) {
+              leadNameForReminder = workshopReg.nome
+            } else {
+              // Fallback para contact_submissions
+              const { data: contactReg } = await supabaseAdmin
+                .from('contact_submissions')
+                .select('name, nome')
+                .or(`phone.ilike.%${phoneClean.slice(-8)}%,telefone.ilike.%${phoneClean.slice(-8)}%`)
+                .limit(1)
+                .maybeSingle()
+              
+              if (contactReg?.name || contactReg?.nome) {
+                leadNameForReminder = contactReg.name || contactReg.nome || leadNameForReminder
+              }
+            }
+          } catch (error: any) {
+            console.warn('[Carol] Erro ao buscar nome do cadastro para lembrete:', error.message)
+          }
           
           // Se está entre 12h e 13h antes, já enviar lembrete de 12h
           // Se está entre 2h e 2h30 antes, já enviar lembrete de 2h
@@ -1157,7 +1192,7 @@ export async function processIncomingMessageWithCarol(
           if (hoursDiff >= 12 && hoursDiff < 13) {
             // Lembrete de 12h (recomendação computador)
             const { weekday, date, time } = formatSessionDateTime(selectedSession.starts_at)
-            reminderToSend = `Olá! 
+            reminderToSend = `Olá ${leadNameForReminder}! 
 
 Sua aula é hoje às ${time}! 
 
@@ -1176,7 +1211,7 @@ Carol - Secretária YLADA Nutri`
           } else if (hoursDiff >= 2 && hoursDiff < 2.5) {
             // Lembrete de 2h (aviso Zoom)
             const { weekday, date, time } = formatSessionDateTime(selectedSession.starts_at)
-            reminderToSend = `Olá! 
+            reminderToSend = `Olá ${leadNameForReminder}! 
 
 Sua aula começa em 2 horas! ⏰
 
@@ -2309,13 +2344,48 @@ export async function sendPreClassNotifications(): Promise<{
 
         if (!session) continue
 
+        // Calcular diferença de tempo usando timezone de Brasília
         const sessionDate = new Date(session.starts_at)
-        const timeDiff = sessionDate.getTime() - now.getTime()
+        const nowBrasilia = new Date(now.toLocaleString('en-US', { timeZone: 'America/Sao_Paulo' }))
+        const sessionBrasilia = new Date(sessionDate.toLocaleString('en-US', { timeZone: 'America/Sao_Paulo' }))
+        const timeDiff = sessionBrasilia.getTime() - nowBrasilia.getTime()
         const hoursDiff = timeDiff / (1000 * 60 * 60)
         const minutesDiff = timeDiff / (1000 * 60)
 
         const { weekday, date, time } = formatSessionDateTime(session.starts_at)
         const client = createZApiClient(instance.instance_id, instance.token)
+
+        // Buscar nome do cadastro (priorizar sobre nome do WhatsApp)
+        let leadName = conv.name || 'querido(a)'
+        try {
+          const phoneClean = conv.phone.replace(/\D/g, '')
+          
+          // Tentar buscar de workshop_inscricoes primeiro
+          const { data: workshopReg } = await supabaseAdmin
+            .from('workshop_inscricoes')
+            .select('nome')
+            .ilike('telefone', `%${phoneClean.slice(-8)}%`)
+            .limit(1)
+            .maybeSingle()
+          
+          if (workshopReg?.nome) {
+            leadName = workshopReg.nome
+          } else {
+            // Fallback para contact_submissions
+            const { data: contactReg } = await supabaseAdmin
+              .from('contact_submissions')
+              .select('name, nome')
+              .or(`phone.ilike.%${phoneClean.slice(-8)}%,telefone.ilike.%${phoneClean.slice(-8)}%`)
+              .limit(1)
+              .maybeSingle()
+            
+            if (contactReg?.name || contactReg?.nome) {
+              leadName = contactReg.name || contactReg.nome || leadName
+            }
+          }
+        } catch (error: any) {
+          console.warn('[Carol] Erro ao buscar nome do cadastro em lembretes:', error.message)
+        }
 
         // Verificar qual notificação enviar baseado no tempo restante
         let message: string | null = null
@@ -2330,7 +2400,7 @@ export async function sendPreClassNotifications(): Promise<{
         // 24 horas antes (entre 24h e 25h) OU se passou mas ainda não enviou e sessão é amanhã/hoje
         if (!context[notificationKey]?.sent_24h && 
             ((hoursDiff >= 24 && hoursDiff < 25) || (hoursDiff >= 12 && hoursDiff < 24))) {
-          message = `Olá! 👋
+          message = `Olá ${leadName}! 👋
 
 Lembrete: Sua aula é amanhã!
 
@@ -2349,7 +2419,7 @@ Carol - Secretária YLADA Nutri`
         // 12 horas antes (entre 12h e 13h) OU se passou mas ainda não enviou e sessão é hoje
         else if (!context[notificationKey]?.sent_12h && 
                  ((hoursDiff >= 12 && hoursDiff < 13) || (hoursDiff >= 2 && hoursDiff < 12))) {
-          message = `Olá! 
+          message = `Olá ${leadName}! 
 
 Sua aula é hoje às ${time}! 
 
@@ -2372,7 +2442,7 @@ Carol - Secretária YLADA Nutri`
         // 2 horas antes (entre 2h e 2h30) OU se passou mas ainda não enviou e sessão é hoje
         else if (!context[notificationKey]?.sent_2h && 
                  ((hoursDiff >= 2 && hoursDiff < 2.5) || (hoursDiff >= 0.5 && hoursDiff < 2))) {
-          message = `Olá! 
+          message = `Olá ${leadName}! 
 
 Sua aula começa em 2 horas! ⏰
 
