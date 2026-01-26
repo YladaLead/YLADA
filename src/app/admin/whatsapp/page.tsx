@@ -14,6 +14,7 @@ interface Conversation {
   area: string | null
   status: string
   last_message_at: string
+  created_at?: string | null
   unread_count: number
   total_messages: number
   context?: any
@@ -39,6 +40,7 @@ interface Message {
   status?: string | null
   created_at: string
   read_at: string | null
+  is_bot_response?: boolean | null
 }
 
 function WhatsAppChatPage() {
