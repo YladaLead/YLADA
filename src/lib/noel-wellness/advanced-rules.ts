@@ -98,7 +98,7 @@ export function shouldBeEmotionalTrainer(context: {
     context.isAfraid ||
     context.hasLowConfidence ||
     context.feelsIncapable
-  }
+  )
 }
 
 /**
