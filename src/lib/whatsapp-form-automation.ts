@@ -28,6 +28,75 @@ export async function sendWorkshopInviteToFormLead(
   userId: string
 ): Promise<{ success: boolean; error?: string; messageId?: string }> {
   try {
+    // 🕐 DELAY: Aguardar 15 segundos antes de enviar para evitar duplicação
+    // A pessoa pode clicar no botão do WhatsApp após preencher o cadastro
+    console.log('[Form Automation] ⏳ Aguardando 15 segundos antes de enviar mensagem automática...')
+    await new Promise(resolve => setTimeout(resolve, 15000))
+    
+    // 🛡️ Verificar se já existe conversa ativa para evitar duplicação
+    const phoneClean = phone.replace(/\D/g, '')
+    
+    // Buscar instância primeiro para verificar conversa
+    let { data: instance } = await supabaseAdmin
+      .from('z_api_instances')
+      .select('id, instance_id, token, status, area')
+      .eq('area', area)
+      .eq('status', 'connected')
+      .limit(1)
+      .maybeSingle()
+    
+    if (!instance) {
+      const { data: instanceByArea } = await supabaseAdmin
+        .from('z_api_instances')
+        .select('id, instance_id, token, status, area')
+        .eq('area', area)
+        .limit(1)
+        .maybeSingle()
+      
+      if (instanceByArea) {
+        instance = instanceByArea
+      }
+    }
+    
+    if (!instance) {
+      const { data: anyInstance } = await supabaseAdmin
+        .from('z_api_instances')
+        .select('id, instance_id, token, status, area')
+        .eq('status', 'connected')
+        .limit(1)
+        .maybeSingle()
+      
+      if (anyInstance) {
+        instance = anyInstance
+      }
+    }
+    
+    if (instance) {
+      // Verificar se já existe conversa com mensagens recentes (últimos 2 minutos)
+      const twoMinutesAgo = new Date(Date.now() - 2 * 60 * 1000).toISOString()
+      const { data: existingConv } = await supabaseAdmin
+        .from('whatsapp_conversations')
+        .select('id, context, last_message_at')
+        .eq('phone', phoneClean)
+        .eq('instance_id', instance.id)
+        .maybeSingle()
+      
+      if (existingConv) {
+        // Verificar se já recebeu mensagem de boas-vindas recentemente
+        const context = existingConv.context || {}
+        const tags = Array.isArray(context.tags) ? context.tags : []
+        const hasWelcomeTag = tags.includes('veio_aula_pratica') || tags.includes('recebeu_link_workshop')
+        const recentMessage = existingConv.last_message_at && new Date(existingConv.last_message_at) > new Date(twoMinutesAgo)
+        
+        if (hasWelcomeTag || recentMessage) {
+          console.log('[Form Automation] ⚠️ Conversa já existe e já recebeu mensagem recente. Evitando duplicação.')
+          return { 
+            success: false, 
+            error: 'Mensagem já foi enviada recentemente para esta conversa' 
+          }
+        }
+      }
+    }
     // 1. Buscar as duas próximas sessões ativas
     const { data: sessions } = await supabaseAdmin
       .from('whatsapp_workshop_sessions')
@@ -52,46 +121,7 @@ export async function sendWorkshopInviteToFormLead(
       .eq('area', area)
       .maybeSingle()
 
-    // 3. Buscar instância Z-API para a área
-    // Primeiro tenta buscar por área e status connected
-    let { data: instance } = await supabaseAdmin
-      .from('z_api_instances')
-      .select('id, instance_id, token, status, area')
-      .eq('area', area)
-      .eq('status', 'connected')
-      .limit(1)
-      .maybeSingle()
-
-    // Se não encontrou, tenta buscar apenas por área (sem filtro de status)
-    if (!instance) {
-      const { data: instanceByArea } = await supabaseAdmin
-        .from('z_api_instances')
-        .select('id, instance_id, token, status, area')
-        .eq('area', area)
-        .limit(1)
-        .maybeSingle()
-      
-      if (instanceByArea) {
-        instance = instanceByArea
-        console.log('[Form Automation] ⚠️ Instância encontrada mas status não é "connected":', instanceByArea.status)
-      }
-    }
-
-    // Se ainda não encontrou, tenta buscar qualquer instância conectada (fallback)
-    if (!instance) {
-      const { data: anyInstance } = await supabaseAdmin
-        .from('z_api_instances')
-        .select('id, instance_id, token, status, area')
-        .eq('status', 'connected')
-        .limit(1)
-        .maybeSingle()
-      
-      if (anyInstance) {
-        instance = anyInstance
-        console.log('[Form Automation] ⚠️ Usando instância de outra área como fallback:', anyInstance.area)
-      }
-    }
-
+    // 3. Instância já foi buscada acima na verificação de duplicação
     if (!instance) {
       // Log detalhado para debug
       const { data: allInstances } = await supabaseAdmin
@@ -121,7 +151,8 @@ export async function sendWorkshopInviteToFormLead(
       }
     }
 
-    // 5. Formatar mensagem de recepção com as duas próximas opções
+    // 5. Usar nome do cadastro (leadName já vem do cadastro, mas garantir que está correto)
+    // leadName já é o nome do cadastro passado como parâmetro
     const greeting = leadName ? `Olá ${leadName}, seja bem-vindo! 👋\n\n` : 'Olá, seja bem-vindo! 👋\n\n'
     
     // Formatar as duas próximas opções

@@ -109,6 +109,11 @@ export async function POST(request: NextRequest) {
           content: msg.message,
         }))
 
+        // Buscar nome do cadastro usando função helper
+        const { getRegistrationName } = await import('@/lib/whatsapp-carol-ai')
+        const registrationName = await getRegistrationName(conversation.phone, conversation.area || 'nutri')
+        const leadName = registrationName || conversation.name || undefined
+
         let messageToSend = ''
 
         if (tipo === 'fechamento') {
@@ -118,7 +123,7 @@ export async function POST(request: NextRequest) {
             conversationHistory,
             {
               tags: [...tags, 'participou_aula'],
-              leadName: conversation.name || undefined,
+              leadName: leadName,
               participated: true,
               isFirstMessage: false,
             }
@@ -131,7 +136,7 @@ export async function POST(request: NextRequest) {
             conversationHistory,
             {
               tags: [...tags, 'nao_participou_aula'],
-              leadName: conversation.name || undefined,
+              leadName: leadName,
               hasScheduled: false,
               participated: false,
               isFirstMessage: false,
@@ -140,7 +145,7 @@ export async function POST(request: NextRequest) {
           
           // Se a mensagem não menciona interesse ou pergunta, adicionar contexto focado na dor
           if (!messageToSend.toLowerCase().includes('interesse') && !messageToSend.toLowerCase().includes('?')) {
-            messageToSend = `Olá ${conversation.name || 'querido(a)'}! 👋
+            messageToSend = `Olá ${leadName || 'querido(a)'}! 👋
 
 Vi que você não conseguiu participar da aula anterior. Tudo bem, acontece! 😊
 

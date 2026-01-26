@@ -101,6 +101,49 @@ export function isAllowedTimeToSendMessage(): { allowed: boolean; reason?: strin
 }
 
 /**
+ * Busca nome do cadastro (workshop_inscricoes ou contact_submissions)
+ * Prioriza workshop_inscricoes sobre contact_submissions
+ * Retorna null se não encontrar (não retorna nome do WhatsApp)
+ */
+export async function getRegistrationName(
+  phone: string,
+  area: string = 'nutri'
+): Promise<string | null> {
+  try {
+    const phoneClean = phone.replace(/\D/g, '')
+    
+    // 1. Tentar buscar de workshop_inscricoes primeiro (prioridade)
+    const { data: workshopReg } = await supabaseAdmin
+      .from('workshop_inscricoes')
+      .select('nome')
+      .ilike('telefone', `%${phoneClean.slice(-8)}%`)
+      .limit(1)
+      .maybeSingle()
+    
+    if (workshopReg?.nome) {
+      return workshopReg.nome
+    }
+    
+    // 2. Fallback para contact_submissions (apenas se não encontrou em workshop_inscricoes)
+    const { data: contactReg } = await supabaseAdmin
+      .from('contact_submissions')
+      .select('name, nome')
+      .or(`phone.ilike.%${phoneClean.slice(-8)}%,telefone.ilike.%${phoneClean.slice(-8)}%`)
+      .limit(1)
+      .maybeSingle()
+    
+    if (contactReg?.name || contactReg?.nome) {
+      return contactReg.name || contactReg.nome || null
+    }
+    
+    return null
+  } catch (error: any) {
+    console.warn('[Carol] Erro ao buscar nome do cadastro:', error.message)
+    return null
+  }
+}
+
+/**
  * System Prompt da Carol
  */
 const CAROL_SYSTEM_PROMPT = `Você é a Carol, secretária da YLADA Nutri. Você é profissional, acolhedora e eficiente.
@@ -1057,25 +1100,11 @@ export async function processIncomingMessageWithCarol(
 
     // Se detectou escolha, enviar imagem + link e retornar
     if (selectedSession) {
-      // 🛡️ Verificar se já agendou para evitar duplicação
-      const hasScheduled = tags.includes('agendou_aula') || tags.includes('recebeu_link_workshop') || context.workshop_session_id
-      
-      if (hasScheduled) {
-        console.log('[Carol AI] ⚠️ Pessoa já agendou, evitando envio duplicado:', {
-          sessionId: selectedSession.id,
-          existingTags: tags,
-          existingSessionId: context.workshop_session_id
-        })
-        // Não enviar mensagem de confirmação novamente, apenas continuar com resposta normal
-        // (não retornar aqui, deixar continuar o fluxo normal de resposta)
-        selectedSession = null // Resetar para não processar como novo agendamento
-      } else {
-        console.log('[Carol AI] ✅ Escolha detectada:', {
-          sessionId: selectedSession.id,
-          startsAt: selectedSession.starts_at,
-          message
-        })
-      }
+      console.log('[Carol AI] ✅ Escolha detectada:', {
+        sessionId: selectedSession.id,
+        startsAt: selectedSession.starts_at,
+        message
+      })
       
       // Buscar instância Z-API
       const isUUID = instanceId.includes('-') && instanceId.length === 36
@@ -1088,8 +1117,7 @@ export async function processIncomingMessageWithCarol(
       if (!instance) {
         console.error('[Carol AI] ❌ Instância não encontrada para enviar imagem')
         // Continuar com resposta normal
-      } else if (!hasScheduled) {
-        // Só enviar mensagem de confirmação se ainda não agendou
+      } else {
         // Buscar configurações do workshop (flyer)
         const { data: settings } = await supabaseAdmin
           .from('whatsapp_workshop_settings')
@@ -1170,36 +1198,8 @@ export async function processIncomingMessageWithCarol(
           const hoursDiff = timeDiff / (1000 * 60 * 60)
           
           // Buscar nome do cadastro para usar no lembrete
-          let leadNameForReminder = conversation.name || 'querido(a)'
-          try {
-            const phoneClean = phone.replace(/\D/g, '')
-            
-            // Tentar buscar de workshop_inscricoes primeiro
-            const { data: workshopReg } = await supabaseAdmin
-              .from('workshop_inscricoes')
-              .select('nome')
-              .ilike('telefone', `%${phoneClean.slice(-8)}%`)
-              .limit(1)
-              .maybeSingle()
-            
-            if (workshopReg?.nome) {
-              leadNameForReminder = workshopReg.nome
-            } else {
-              // Fallback para contact_submissions
-              const { data: contactReg } = await supabaseAdmin
-                .from('contact_submissions')
-                .select('name, nome')
-                .or(`phone.ilike.%${phoneClean.slice(-8)}%,telefone.ilike.%${phoneClean.slice(-8)}%`)
-                .limit(1)
-                .maybeSingle()
-              
-              if (contactReg?.name || contactReg?.nome) {
-                leadNameForReminder = contactReg.name || contactReg.nome || leadNameForReminder
-              }
-            }
-          } catch (error: any) {
-            console.warn('[Carol] Erro ao buscar nome do cadastro para lembrete:', error.message)
-          }
+          const registrationNameForReminder = await getRegistrationName(phone, area)
+          const leadNameForReminder = registrationNameForReminder || conversation.name || 'querido(a)'
           
           // Se está entre 12h e 13h antes, já enviar lembrete de 12h
           // Se está entre 2h e 2h30 antes, já enviar lembrete de 2h
@@ -1299,8 +1299,9 @@ Carol - Secretária YLADA Nutri`
                 }
               }
             }
-          } catch (notifError: any) {
-            console.warn('[Carol AI] ⚠️ Erro ao enviar notificação de agendamento:', notifError.message)
+          } catch (notificationError: any) {
+            console.error('[Carol AI] ❌ Erro ao enviar notificação de agendamento:', notificationError)
+            // Não falhar o agendamento se a notificação falhar
           }
           
           // 🆕 Enviar lembrete imediatamente se necessário
@@ -1377,58 +1378,25 @@ Carol - Secretária YLADA Nutri`
       }))
     })
 
-    // 6. Buscar nome do cadastro (prioridade sobre nome do WhatsApp)
+    // 6. Buscar nome do cadastro usando função helper (prioridade sobre nome do WhatsApp)
     let registrationName: string | null = null
     try {
-      // Buscar telefone da conversa
-      const { data: convWithPhone } = await supabaseAdmin
-        .from('whatsapp_conversations')
-        .select('phone')
-        .eq('id', conversationId)
-        .single()
+      registrationName = await getRegistrationName(phone, area)
       
-      if (convWithPhone?.phone) {
-        const phoneClean = convWithPhone.phone.replace(/\D/g, '')
+      // Atualizar lead_name no context se encontrou nome do cadastro
+      if (registrationName && registrationName !== (context as any)?.lead_name) {
+        await supabaseAdmin
+          .from('whatsapp_conversations')
+          .update({
+            context: {
+              ...context,
+              lead_name: registrationName
+            }
+          })
+          .eq('id', conversationId)
         
-        // Tentar buscar de workshop_inscricoes primeiro
-        const { data: workshopReg } = await supabaseAdmin
-          .from('workshop_inscricoes')
-          .select('nome')
-          .ilike('telefone', `%${phoneClean.slice(-8)}%`) // Buscar pelos últimos 8 dígitos
-          .limit(1)
-          .maybeSingle()
-        
-        if (workshopReg?.nome) {
-          registrationName = workshopReg.nome
-        } else {
-          // Fallback para contact_submissions
-          const { data: contactReg } = await supabaseAdmin
-            .from('contact_submissions')
-            .select('name, nome')
-            .or(`phone.ilike.%${phoneClean.slice(-8)}%,telefone.ilike.%${phoneClean.slice(-8)}%`)
-            .limit(1)
-            .maybeSingle()
-          
-          if (contactReg?.name || contactReg?.nome) {
-            registrationName = contactReg.name || contactReg.nome || null
-          }
-        }
-        
-        // Atualizar lead_name no context se encontrou nome do cadastro
-        if (registrationName && registrationName !== (context as any)?.lead_name) {
-          await supabaseAdmin
-            .from('whatsapp_conversations')
-            .update({
-              context: {
-                ...context,
-                lead_name: registrationName
-              }
-            })
-            .eq('id', conversationId)
-          
-          // Atualizar context local
-          context.lead_name = registrationName
-        }
+        // Atualizar context local
+        context.lead_name = registrationName
       }
     } catch (error: any) {
       console.warn('[Carol AI] Erro ao buscar nome do cadastro:', error.message)
@@ -2013,7 +1981,9 @@ export async function sendRemarketingToNonParticipant(conversationId: string): P
       optionsText = '\n📅 Em breve teremos novas datas disponíveis! Fique de olho! 😊\n'
     }
 
-    const leadName = conversation.name || 'querido(a)'
+    // Buscar nome do cadastro usando função helper
+    const registrationName = await getRegistrationName(conversation.phone, 'nutri')
+    const leadName = registrationName || conversation.name || 'querido(a)'
     const remarketingMessage = `Olá ${leadName}! 👋
 
 Vi que você não conseguiu participar da aula anterior. Tudo bem, acontece! 😊
@@ -2173,7 +2143,10 @@ export async function sendRemarketingToNonParticipants(): Promise<{
           })
         }
 
-        const remarketingMessage = `Olá ${conv.name || 'querido(a)'}! 👋
+        // Buscar nome do cadastro usando função helper
+        const registrationName = await getRegistrationName(conv.phone, 'nutri')
+        const leadName = registrationName || conv.name || 'querido(a)'
+        const remarketingMessage = `Olá ${leadName}! 👋
 
 Vi que você não conseguiu participar da aula anterior. Tudo bem, acontece! 😊
 
@@ -2369,37 +2342,9 @@ export async function sendPreClassNotifications(): Promise<{
         const { weekday, date, time } = formatSessionDateTime(session.starts_at)
         const client = createZApiClient(instance.instance_id, instance.token)
 
-        // Buscar nome do cadastro (priorizar sobre nome do WhatsApp)
-        let leadName = conv.name || 'querido(a)'
-        try {
-          const phoneClean = conv.phone.replace(/\D/g, '')
-          
-          // Tentar buscar de workshop_inscricoes primeiro
-          const { data: workshopReg } = await supabaseAdmin
-            .from('workshop_inscricoes')
-            .select('nome')
-            .ilike('telefone', `%${phoneClean.slice(-8)}%`)
-            .limit(1)
-            .maybeSingle()
-          
-          if (workshopReg?.nome) {
-            leadName = workshopReg.nome
-          } else {
-            // Fallback para contact_submissions
-            const { data: contactReg } = await supabaseAdmin
-              .from('contact_submissions')
-              .select('name, nome')
-              .or(`phone.ilike.%${phoneClean.slice(-8)}%,telefone.ilike.%${phoneClean.slice(-8)}%`)
-              .limit(1)
-              .maybeSingle()
-            
-            if (contactReg?.name || contactReg?.nome) {
-              leadName = contactReg.name || contactReg.nome || leadName
-            }
-          }
-        } catch (error: any) {
-          console.warn('[Carol] Erro ao buscar nome do cadastro em lembretes:', error.message)
-        }
+        // Buscar nome do cadastro usando função helper
+        const registrationName = await getRegistrationName(conv.phone, 'nutri')
+        const leadName = registrationName || conv.name || 'querido(a)'
 
         // Verificar qual notificação enviar baseado no tempo restante
         let message: string | null = null
@@ -3005,48 +2950,13 @@ export async function sendSalesFollowUpAfterClass(): Promise<{
         const context = conv.context || {}
         const sessionId = context.workshop_session_id
         
-        // Buscar nome do cadastro (priorizar sobre nome do WhatsApp)
-        let leadName = conv.name || 'querido(a)'
-        let registrationName: string | null = null
+        // Buscar nome do cadastro usando função helper
+        const registrationName = await getRegistrationName(conv.phone, 'nutri')
+        let leadName = registrationName || conv.name || 'querido(a)'
         
-        try {
-          const phoneClean = conv.phone.replace(/\D/g, '')
-          
-          // Tentar buscar de workshop_inscricoes primeiro
-          const { data: workshopReg } = await supabaseAdmin
-            .from('workshop_inscricoes')
-            .select('nome')
-            .ilike('telefone', `%${phoneClean.slice(-8)}%`) // Buscar pelos últimos 8 dígitos
-            .limit(1)
-            .maybeSingle()
-          
-          if (workshopReg?.nome) {
-            registrationName = workshopReg.nome
-          } else {
-            // Fallback para contact_submissions
-            const { data: contactReg } = await supabaseAdmin
-              .from('contact_submissions')
-              .select('name, nome')
-              .or(`phone.ilike.%${phoneClean.slice(-8)}%,telefone.ilike.%${phoneClean.slice(-8)}%`)
-              .limit(1)
-              .maybeSingle()
-            
-            if (contactReg?.name || contactReg?.nome) {
-              registrationName = contactReg.name || contactReg.nome || null
-            }
-          }
-          
-          // Priorizar nome do cadastro sobre nome do WhatsApp
-          if (registrationName) {
-            leadName = registrationName
-            // Atualizar lead_name no context se encontrou nome do cadastro
-            if (registrationName !== (context as any)?.lead_name) {
-              context.lead_name = registrationName
-            }
-          }
-        } catch (error: any) {
-          console.warn('[Carol] Erro ao buscar nome do cadastro no remarketing:', error.message)
-          // Continuar com o nome do WhatsApp se houver erro
+        // Atualizar lead_name no context se encontrou nome do cadastro
+        if (registrationName && registrationName !== (context as any)?.lead_name) {
+          context.lead_name = registrationName
         }
         
         // Buscar sessão para saber quando foi
@@ -3693,7 +3603,10 @@ export async function redirectToSupportAfterPayment(
     }
 
     const client = createZApiClient(instance.instance_id, instance.token)
-    const leadName = conversation.name || 'querido(a)'
+    
+    // Buscar nome do cadastro usando função helper
+    const registrationName = await getRegistrationName(conversation.phone, 'nutri')
+    const leadName = registrationName || conversation.name || 'querido(a)'
 
     // Criar link do WhatsApp do suporte
     const supportWhatsAppLink = `https://wa.me/${supportPhone.replace(/\D/g, '')}`
