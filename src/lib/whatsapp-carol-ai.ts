@@ -2422,8 +2422,11 @@ Carol - Secretária YLADA Nutri`
           context[notificationKey].sent_12h = true
         }
         // 2 horas antes (entre 2h e 2h30) OU se passou mas ainda não enviou e sessão é hoje
+        // Melhorado: Se sessão é hoje e ainda não enviou, enviar mesmo se passou a janela de 2h
         else if (!context[notificationKey]?.sent_2h && 
-                 ((hoursDiff >= 2 && hoursDiff < 2.5) || (hoursDiff >= 0.5 && hoursDiff < 2))) {
+                 ((hoursDiff >= 2 && hoursDiff < 2.5) || 
+                  (hoursDiff >= 0.5 && hoursDiff < 2) ||
+                  (isToday && hoursDiff >= 0.1 && hoursDiff < 2))) {
           message = `Olá ${leadName}! 
 
 Sua aula começa em 2 horas! ⏰
