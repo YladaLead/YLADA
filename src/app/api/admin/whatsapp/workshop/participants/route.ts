@@ -119,11 +119,13 @@ export async function POST(request: NextRequest) {
     const isAddingParticipatedTag = participated && !hadParticipatedTag
 
     // Verificar se a tag "nao_participou_aula" está sendo adicionada agora
-    // IMPORTANTE: Disparar remarketing se:
-    // 1. Está marcando como "não participou" E a tag não existia antes
-    // 2. OU estava marcado como "participou" antes e agora está mudando para "não participou"
+    // IMPORTANTE: Disparar remarketing sempre que marcar como "não participou"
+    // (mesmo se a tag já existia, pois pode ser uma correção ou mudança de status)
     const hadNotParticipatedTag = tags.includes('nao_participou_aula')
     const wasParticipatedBefore = hadParticipatedTag && !hadNotParticipatedTag
+    // Disparar se está marcando como "não participou" E:
+    // - A tag não existia antes, OU
+    // - Estava marcado como "participou" antes (mudança de status)
     const isAddingNotParticipatedTag = !participated && (!hadNotParticipatedTag || wasParticipatedBefore)
 
     // Atualizar conversa
@@ -153,30 +155,33 @@ export async function POST(request: NextRequest) {
       })
     }
 
-    // 🚀 Disparar remarketing automaticamente quando tag "nao_participou_aula" é adicionada
-    // Disparar se:
-    // 1. Está marcando como "não participou" E a tag não existia antes
-    // 2. OU estava marcado como "participou" e agora está mudando para "não participou"
-    if (isAddingNotParticipatedTag) {
-      console.log('[Workshop Participants] 📱 Tag nao_participou_aula adicionada - disparando remarketing automaticamente', {
+    // 🚀 Disparar remarketing automaticamente quando marca como "não participou"
+    // SEMPRE disparar quando marcar como "não participou", independente de ter a tag antes
+    // (a função sendRemarketingToNonParticipant já verifica se já enviou recentemente)
+    if (!participated) {
+      console.log('[Workshop Participants] 📱 Marcado como "não participou" - disparando remarketing automaticamente', {
         conversationId,
         hadNotParticipatedTag,
         hadParticipatedTag,
         wasParticipatedBefore,
-        participated
+        participated,
+        newTags
       })
       // Disparar em background (não bloquear a resposta)
-      sendRemarketingToNonParticipant(conversationId).catch((error: any) => {
-        console.error('[Workshop Participants] ❌ Erro ao disparar remarketing:', error)
-      })
-    } else {
-      console.log('[Workshop Participants] ⏭️ Remarketing não disparado:', {
-        conversationId,
-        participated,
-        hadNotParticipatedTag,
-        hadParticipatedTag,
-        isAddingNotParticipatedTag
-      })
+      // Aguardar um pouco para garantir que a tag foi salva no banco
+      setTimeout(() => {
+        sendRemarketingToNonParticipant(conversationId)
+          .then((result) => {
+            if (result.success) {
+              console.log('[Workshop Participants] ✅ Remarketing enviado com sucesso para', conversationId)
+            } else {
+              console.warn('[Workshop Participants] ⚠️ Remarketing não enviado:', result.error)
+            }
+          })
+          .catch((error: any) => {
+            console.error('[Workshop Participants] ❌ Erro ao disparar remarketing:', error)
+          })
+      }, 500) // Aguardar 500ms para garantir que a tag foi salva
     }
 
     return NextResponse.json({
