@@ -261,7 +261,7 @@ export async function requireApiAuth(
     if (allowedProfiles && allowedProfiles.length > 0) {
       // Admin sempre tem acesso
       if (profile.is_admin) {
-        return { user: session.user, profile }
+        return { user: user, profile }
       }
 
       // Suporte (funcionários/parceiros) pode acessar todas as áreas para guiar usuários
@@ -367,8 +367,15 @@ export async function getAuthenticatedUserId(): Promise<string | null> {
         },
       }
     )
-    const { data: { session } } = await supabase.auth.getSession()
-    return session?.user?.id || null
+    // Usar getUser() ao invés de getSession() para segurança
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      return user?.id || null
+    } catch {
+      // Fallback para getSession() se getUser() falhar
+      const { data: { session } } = await supabase.auth.getSession()
+      return session?.user?.id || null
+    }
   } catch (error) {
     console.error('Erro ao obter user_id autenticado:', error)
     return null
