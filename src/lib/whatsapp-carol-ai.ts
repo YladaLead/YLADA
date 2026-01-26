@@ -2131,6 +2131,28 @@ export async function sendRemarketingToNonParticipants(): Promise<{
 
     for (const conv of nonParticipants) {
       try {
+        const context = conv.context || {}
+        
+        // Verificar se já recebeu remarketing recentemente (evitar spam)
+        // Se já enviou há menos de 2 horas, pular
+        if (context.last_remarketing_at) {
+          const lastRemarketing = new Date(context.last_remarketing_at)
+          const now = new Date()
+          const hoursSinceLastRemarketing = (now.getTime() - lastRemarketing.getTime()) / (1000 * 60 * 60)
+          
+          if (hoursSinceLastRemarketing < 2) {
+            console.log(`[Carol Remarketing] ⏭️ Pulando ${conv.phone} - já recebeu remarketing há ${hoursSinceLastRemarketing.toFixed(2)}h`)
+            continue
+          }
+        }
+        
+        // Verificar se já tem tag "remarketing_enviado" (evitar duplicação)
+        const tags = Array.isArray(context.tags) ? context.tags : []
+        if (tags.includes('remarketing_enviado')) {
+          console.log(`[Carol Remarketing] ⏭️ Pulando ${conv.phone} - já tem tag remarketing_enviado`)
+          continue
+        }
+        
         // Formatar opções
         let optionsText = ''
         if (sessions && sessions.length > 0) {
@@ -2166,10 +2188,9 @@ Carol - Secretária YLADA Nutri`
         )
 
         if (sendResult.success) {
-          // Atualizar tag
-          const context = conv.context || {}
+          // Atualizar tag e contexto
           const tags = Array.isArray(context.tags) ? context.tags : []
-          const newTags = [...new Set([...tags, 'recebeu_segundo_link'])]
+          const newTags = [...new Set([...tags, 'recebeu_segundo_link', 'remarketing_enviado'])]
 
           await supabaseAdmin
             .from('whatsapp_conversations')
@@ -2178,6 +2199,7 @@ Carol - Secretária YLADA Nutri`
                 ...context,
                 tags: newTags,
                 last_remarketing_at: new Date().toISOString(),
+                remarketing_sent_at: new Date().toISOString(),
               },
             })
             .eq('id', conv.id)
