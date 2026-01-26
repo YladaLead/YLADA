@@ -1568,8 +1568,10 @@ Carol - Secretária YLADA Nutri`
               
               console.log('[Carol AI] ✅ Notificação de atendimento humano enviada para', notificationPhone)
               
-              // Adicionar tag de atendimento manual
-              const newTags = [...new Set([...tags, 'atendimento_manual', 'precisa_atendimento_humano'])]
+              // NÃO adicionar tag de atendimento_manual automaticamente
+              // Apenas adicionar tag precisa_atendimento_humano para indicar que precisa de atenção
+              // A tag atendimento_manual só deve ser adicionada quando admin desativa Carol manualmente
+              const newTags = [...new Set([...tags, 'precisa_atendimento_humano'])]
               await supabaseAdmin
                 .from('whatsapp_conversations')
                 .update({
