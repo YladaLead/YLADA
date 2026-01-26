@@ -2396,10 +2396,11 @@ Carol - Secretária YLADA Nutri`
         }
         // 12 horas antes (entre 12h e 13h) OU se passou mas ainda não enviou e sessão é hoje/amanhã
         // Melhorado: Se sessão é hoje e ainda não enviou, enviar mesmo se passou a janela de 12h
+        // IMPORTANTE: Se sessão é hoje e ainda não enviou nenhum lembrete, enviar o de 12h
         if (!context[notificationKey]?.sent_12h && 
             ((hoursDiff >= 12 && hoursDiff < 13) || 
              (hoursDiff >= 2 && hoursDiff < 12) || 
-             (isToday && hoursDiff >= 0.5 && hoursDiff < 12) ||
+             (isToday && hoursDiff >= 0.5 && hoursDiff < 12 && !context[notificationKey]?.sent_2h) ||
              (isTomorrow && hoursDiff >= 12 && hoursDiff < 36))) {
           message = `Olá ${leadName}! 
 
@@ -2423,6 +2424,7 @@ Carol - Secretária YLADA Nutri`
         }
         // 2 horas antes (entre 2h e 2h30) OU se passou mas ainda não enviou e sessão é hoje
         // Melhorado: Se sessão é hoje e ainda não enviou, enviar mesmo se passou a janela de 2h
+        // IMPORTANTE: Se sessão é hoje e ainda não enviou nenhum lembrete, enviar o de 2h
         else if (!context[notificationKey]?.sent_2h && 
                  ((hoursDiff >= 2 && hoursDiff < 2.5) || 
                   (hoursDiff >= 0.5 && hoursDiff < 2) ||
@@ -2449,8 +2451,11 @@ Carol - Secretária YLADA Nutri`
           if (!context[notificationKey]) context[notificationKey] = {}
           context[notificationKey].sent_2h = true
         }
-        // 10 minutos antes (entre 10min e 12min)
-        else if (minutesDiff >= 10 && minutesDiff < 12 && !context[notificationKey]?.sent_10min) {
+        // 10 minutos antes (entre 10min e 12min) OU se sessão é hoje e ainda não enviou
+        // IMPORTANTE: Se sessão é hoje e ainda não enviou nenhum lembrete, enviar o de 10min se estiver próximo
+        else if (!context[notificationKey]?.sent_10min && 
+                 ((minutesDiff >= 10 && minutesDiff < 12) ||
+                  (isToday && minutesDiff >= 5 && minutesDiff < 12 && !context[notificationKey]?.sent_2h))) {
           message = `Olá! 
 
 A sala do Zoom já está aberta! 🎉
