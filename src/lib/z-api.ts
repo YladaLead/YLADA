@@ -137,13 +137,46 @@ export class ZApiClient {
     try {
       const { phone, message, delayMessage = 2 } = params
 
+      // Validar mensagem
+      if (!message || message.trim().length === 0) {
+        return {
+          success: false,
+          error: 'Mensagem não pode estar vazia'
+        }
+      }
+
+      // Validar tamanho da mensagem (Z-API tem limite)
+      if (message.length > 4096) {
+        return {
+          success: false,
+          error: `Mensagem muito longa (${message.length} caracteres). Limite: 4096 caracteres.`
+        }
+      }
+
       const cleanPhone = this.formatInternationalPhone(phone)
       
       console.log('[Z-API] 📤 Formatando número:', {
         original: phone,
         cleaned: cleanPhone,
-        countryCode: cleanPhone.substring(0, 3)
+        countryCode: cleanPhone.substring(0, 2),
+        ddd: cleanPhone.startsWith('55') ? cleanPhone.substring(2, 4) : 'N/A',
+        numberLength: cleanPhone.startsWith('55') ? cleanPhone.substring(4).length : cleanPhone.length
       })
+
+      // Verificar status da instância antes de enviar (opcional, mas ajuda a identificar problemas)
+      try {
+        const statusResult = await this.getInstanceStatus()
+        if (!statusResult.connected) {
+          console.warn('[Z-API] ⚠️ Instância não está conectada:', statusResult)
+          return {
+            success: false,
+            error: `Instância Z-API não está conectada. Status: ${statusResult.status || 'desconhecido'}`
+          }
+        }
+      } catch (statusError) {
+        // Se não conseguir verificar status, continuar mesmo assim (pode ser problema de permissão)
+        console.warn('[Z-API] ⚠️ Não foi possível verificar status da instância:', statusError)
+      }
 
       // Z-API requer Client-Token no header (Account Security Token)
       const clientToken = process.env.Z_API_CLIENT_TOKEN || ''
@@ -160,16 +193,26 @@ export class ZApiClient {
         console.warn('[Z-API] ⚠️ Client-Token não configurado. Configure Z_API_CLIENT_TOKEN nas variáveis de ambiente.')
       }
 
+      const requestBody = {
+        phone: cleanPhone,
+        message: message,
+        delayMessage: delayMessage,
+      }
+
+      console.log('[Z-API] 📤 Enviando mensagem:', {
+        phone: cleanPhone,
+        messageLength: message.length,
+        delayMessage,
+        instanceId: this.config.instanceId,
+        hasClientToken: !!clientToken
+      })
+
       const response = await fetch(
         `${this.baseUrl}/instances/${this.config.instanceId}/token/${this.config.token}/send-text`,
         {
           method: 'POST',
           headers,
-          body: JSON.stringify({
-            phone: cleanPhone,
-            message: message,
-            delayMessage: delayMessage,
-          }),
+          body: JSON.stringify(requestBody),
         }
       )
 
