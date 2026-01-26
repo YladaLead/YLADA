@@ -1916,8 +1916,36 @@ export async function sendRemarketingToNonParticipant(conversationId: string): P
     const tags = Array.isArray(context.tags) ? context.tags : []
 
     // Verificar se realmente não participou
+    // Se não tem a tag, tentar buscar novamente (pode ser problema de timing)
     if (!tags.includes('nao_participou_aula')) {
-      return { success: false, error: 'Pessoa não está marcada como não participou' }
+      console.warn('[Carol Remarketing] ⚠️ Tag não encontrada, tentando buscar conversa novamente...', {
+        conversationId,
+        tags,
+        hasContext: !!context
+      })
+      
+      // Tentar buscar novamente após 1 segundo
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      const { data: retryConversation } = await supabaseAdmin
+        .from('whatsapp_conversations')
+        .select('context')
+        .eq('id', conversationId)
+        .single()
+      
+      if (retryConversation) {
+        const retryContext = retryConversation.context || {}
+        const retryTags = Array.isArray(retryContext.tags) ? retryContext.tags : []
+        
+        if (!retryTags.includes('nao_participou_aula')) {
+          return { success: false, error: 'Pessoa não está marcada como não participou (após retry)' }
+        }
+        
+        // Usar tags do retry
+        Object.assign(context, retryContext)
+        tags.push(...retryTags.filter(t => !tags.includes(t)))
+      } else {
+        return { success: false, error: 'Pessoa não está marcada como não participou' }
+      }
     }
 
     // Verificar se já recebeu remarketing recentemente (evitar spam)

@@ -165,23 +165,38 @@ export async function POST(request: NextRequest) {
         hadParticipatedTag,
         wasParticipatedBefore,
         participated,
-        newTags
+        newTags,
+        phone: updated?.phone
       })
       // Disparar em background (não bloquear a resposta)
-      // Aguardar um pouco para garantir que a tag foi salva no banco
-      setTimeout(() => {
-        sendRemarketingToNonParticipant(conversationId)
-          .then((result) => {
-            if (result.success) {
-              console.log('[Workshop Participants] ✅ Remarketing enviado com sucesso para', conversationId)
-            } else {
-              console.warn('[Workshop Participants] ⚠️ Remarketing não enviado:', result.error)
+      // Aguardar mais tempo para garantir que a tag foi salva no banco e commitada
+      setTimeout(async () => {
+        try {
+          // Aguardar um pouco mais e verificar se a tag foi salva
+          await new Promise(resolve => setTimeout(resolve, 1000))
+          
+          const result = await sendRemarketingToNonParticipant(conversationId)
+          if (result.success) {
+            console.log('[Workshop Participants] ✅ Remarketing enviado com sucesso para', conversationId)
+          } else {
+            console.warn('[Workshop Participants] ⚠️ Remarketing não enviado:', result.error)
+            // Se falhou porque tag não existe, tentar novamente após mais tempo
+            if (result.error?.includes('não está marcada')) {
+              console.log('[Workshop Participants] 🔄 Tentando novamente após 2 segundos...')
+              setTimeout(async () => {
+                const retryResult = await sendRemarketingToNonParticipant(conversationId)
+                if (retryResult.success) {
+                  console.log('[Workshop Participants] ✅ Remarketing enviado na segunda tentativa para', conversationId)
+                } else {
+                  console.error('[Workshop Participants] ❌ Remarketing falhou na segunda tentativa:', retryResult.error)
+                }
+              }, 2000)
             }
-          })
-          .catch((error: any) => {
-            console.error('[Workshop Participants] ❌ Erro ao disparar remarketing:', error)
-          })
-      }, 500) // Aguardar 500ms para garantir que a tag foi salva
+          }
+        } catch (error: any) {
+          console.error('[Workshop Participants] ❌ Erro ao disparar remarketing:', error)
+        }
+      }, 1000) // Aguardar 1 segundo para garantir que a tag foi salva
     }
 
     return NextResponse.json({
