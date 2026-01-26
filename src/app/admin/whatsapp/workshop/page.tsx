@@ -1116,41 +1116,53 @@ function WorkshopContent() {
                         {participants.map((participant) => (
                           <div
                             key={participant.conversationId}
-                            className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50"
+                            className={`border-2 rounded-lg p-4 transition-all ${
+                              participant.hasParticipated
+                                ? 'bg-green-50 border-green-300 shadow-sm'
+                                : participant.hasNotParticipated
+                                ? 'bg-red-50 border-red-300 shadow-sm'
+                                : 'border-gray-200 bg-white hover:bg-gray-50'
+                            }`}
                           >
                             <div className="flex items-start justify-between">
                               <div className="flex-1">
-                                <div className="flex items-center gap-2 mb-1">
-                                  <p className="font-semibold text-gray-900">
+                                <div className="flex items-center gap-2 mb-2">
+                                  <p className={`font-bold text-lg ${
+                                    participant.hasParticipated
+                                      ? 'text-green-800'
+                                      : participant.hasNotParticipated
+                                      ? 'text-red-800'
+                                      : 'text-gray-900'
+                                  }`}>
                                     {participant.name || 'Sem nome'}
                                   </p>
                                   {participant.hasParticipated && (
-                                    <span className="text-xs px-2 py-0.5 bg-green-100 text-green-700 rounded-full">
+                                    <span className="text-sm px-3 py-1 bg-green-600 text-white rounded-full font-semibold shadow-sm">
                                       ✅ Participou
                                     </span>
                                   )}
                                   {participant.hasNotParticipated && (
-                                    <span className="text-xs px-2 py-0.5 bg-red-100 text-red-700 rounded-full">
+                                    <span className="text-sm px-3 py-1 bg-red-600 text-white rounded-full font-semibold shadow-sm">
                                       ❌ Não participou
                                     </span>
                                   )}
                                 </div>
-                                <p className="text-sm text-gray-600">{formatPhone(participant.phone)}</p>
+                                <p className="text-sm text-gray-600 mb-2">{formatPhone(participant.phone)}</p>
                                 <Link
                                   href={`/admin/whatsapp?conversation=${participant.conversationId}`}
-                                  className="text-xs text-blue-600 hover:underline mt-1 inline-block"
+                                  className="text-xs text-blue-600 hover:underline inline-block"
                                 >
                                   Ver conversa →
                                 </Link>
                               </div>
-                              <div className="flex gap-2">
+                              <div className="flex gap-2 ml-4">
                                 <button
                                   onClick={() => markParticipated(participant.conversationId, true)}
                                   disabled={saving || participant.hasParticipated}
-                                  className={`px-3 py-1.5 text-sm rounded-lg font-medium transition-all ${
+                                  className={`px-4 py-2 text-sm rounded-lg font-semibold transition-all ${
                                     participant.hasParticipated
-                                      ? 'bg-green-600 text-white shadow-md cursor-not-allowed'
-                                      : 'bg-green-100 text-green-700 hover:bg-green-200 border border-green-300'
+                                      ? 'bg-green-600 text-white shadow-lg cursor-not-allowed ring-2 ring-green-400'
+                                      : 'bg-green-100 text-green-700 hover:bg-green-200 border-2 border-green-300'
                                   } disabled:opacity-50`}
                                   title="Marcar como participou (1h01 após o horário da aula)"
                                 >
@@ -1159,10 +1171,10 @@ function WorkshopContent() {
                                 <button
                                   onClick={() => markParticipated(participant.conversationId, false)}
                                   disabled={saving || participant.hasNotParticipated}
-                                  className={`px-3 py-1.5 text-sm rounded-lg font-medium transition-all ${
+                                  className={`px-4 py-2 text-sm rounded-lg font-semibold transition-all ${
                                     participant.hasNotParticipated
-                                      ? 'bg-red-600 text-white shadow-md cursor-not-allowed'
-                                      : 'bg-red-100 text-red-700 hover:bg-red-200 border border-red-300'
+                                      ? 'bg-red-600 text-white shadow-lg cursor-not-allowed ring-2 ring-red-400'
+                                      : 'bg-red-100 text-red-700 hover:bg-red-200 border-2 border-red-300'
                                   } disabled:opacity-50`}
                                   title="Marcar como não participou"
                                 >
