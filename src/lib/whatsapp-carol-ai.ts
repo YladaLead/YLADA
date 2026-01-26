@@ -1057,11 +1057,25 @@ export async function processIncomingMessageWithCarol(
 
     // Se detectou escolha, enviar imagem + link e retornar
     if (selectedSession) {
-      console.log('[Carol AI] ✅ Escolha detectada:', {
-        sessionId: selectedSession.id,
-        startsAt: selectedSession.starts_at,
-        message
-      })
+      // 🛡️ Verificar se já agendou para evitar duplicação
+      const hasScheduled = tags.includes('agendou_aula') || tags.includes('recebeu_link_workshop') || context.workshop_session_id
+      
+      if (hasScheduled) {
+        console.log('[Carol AI] ⚠️ Pessoa já agendou, evitando envio duplicado:', {
+          sessionId: selectedSession.id,
+          existingTags: tags,
+          existingSessionId: context.workshop_session_id
+        })
+        // Não enviar mensagem de confirmação novamente, apenas continuar com resposta normal
+        // (não retornar aqui, deixar continuar o fluxo normal de resposta)
+        selectedSession = null // Resetar para não processar como novo agendamento
+      } else {
+        console.log('[Carol AI] ✅ Escolha detectada:', {
+          sessionId: selectedSession.id,
+          startsAt: selectedSession.starts_at,
+          message
+        })
+      }
       
       // Buscar instância Z-API
       const isUUID = instanceId.includes('-') && instanceId.length === 36
@@ -1074,7 +1088,8 @@ export async function processIncomingMessageWithCarol(
       if (!instance) {
         console.error('[Carol AI] ❌ Instância não encontrada para enviar imagem')
         // Continuar com resposta normal
-      } else {
+      } else if (!hasScheduled) {
+        // Só enviar mensagem de confirmação se ainda não agendou
         // Buscar configurações do workshop (flyer)
         const { data: settings } = await supabaseAdmin
           .from('whatsapp_workshop_settings')
@@ -1284,9 +1299,8 @@ Carol - Secretária YLADA Nutri`
                 }
               }
             }
-          } catch (notificationError: any) {
-            console.error('[Carol AI] ❌ Erro ao enviar notificação de agendamento:', notificationError)
-            // Não falhar o agendamento se a notificação falhar
+          } catch (notifError: any) {
+            console.warn('[Carol AI] ⚠️ Erro ao enviar notificação de agendamento:', notifError.message)
           }
           
           // 🆕 Enviar lembrete imediatamente se necessário
