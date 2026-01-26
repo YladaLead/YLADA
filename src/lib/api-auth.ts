@@ -295,7 +295,7 @@ export async function requireApiAuth(
       }
     }
 
-    return { user: session.user, profile }
+    return { user, profile }
   } catch (error: any) {
     console.error('❌ Erro na verificação de autenticação da API:', {
       error,
