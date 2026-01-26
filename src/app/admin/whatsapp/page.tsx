@@ -1428,6 +1428,52 @@ function WhatsAppChatContent() {
                     className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                     disabled={sending || uploading}
                   />
+                  {/* Botão para disparar remarketing diretamente */}
+                  {selectedConversation && getTags(selectedConversation).includes('nao_participou_aula') && (
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        if (!selectedConversation) return
+                        if (!confirm('Enviar mensagem de remarketing para esta pessoa com novas opções de aula?')) return
+                        
+                        try {
+                          setSending(true)
+                          const res = await fetch('/api/admin/whatsapp/carol/processar-especificos', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            credentials: 'include',
+                            body: JSON.stringify({
+                              telefones: [selectedConversation.phone],
+                              tipo: 'remarketing'
+                            })
+                          })
+                          
+                          const data = await res.json()
+                          if (data.success) {
+                            const result = data.results?.[0]
+                            if (result?.success) {
+                              alert(`✅ Remarketing enviado com sucesso para ${selectedConversation.name || 'esta pessoa'}!`)
+                            } else {
+                              alert(`⚠️ ${result?.error || 'Erro ao enviar remarketing'}`)
+                            }
+                            await loadMessages(selectedConversation.id)
+                            await loadConversations()
+                          } else {
+                            alert(`❌ Erro: ${data.error || 'Erro ao enviar remarketing'}`)
+                          }
+                        } catch (err: any) {
+                          alert(`❌ Erro: ${err.message || 'Erro ao enviar remarketing'}`)
+                        } finally {
+                          setSending(false)
+                        }
+                      }}
+                      disabled={sending}
+                      className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                      title="Enviar fluxo de remarketing (novas opções de aula)"
+                    >
+                      🔄 Remarketing
+                    </button>
+                  )}
                   {/* Botão para enviar como cliente e ativar Carol */}
                   {selectedConversation && getTags(selectedConversation).includes('carol_ativa') && (
                     <button
