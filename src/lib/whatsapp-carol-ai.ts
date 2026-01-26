@@ -1873,6 +1873,155 @@ Carol - Secretária YLADA Nutri`
 }
 
 /**
+ * Envia mensagem de remarketing para uma pessoa específica que não participou
+ * Disparado automaticamente quando admin marca como "não participou"
+ */
+export async function sendRemarketingToNonParticipant(conversationId: string): Promise<{
+  success: boolean
+  error?: string
+}> {
+  try {
+    const area = 'nutri'
+
+    // Buscar conversa
+    const { data: conversation } = await supabaseAdmin
+      .from('whatsapp_conversations')
+      .select('id, phone, name, context')
+      .eq('id', conversationId)
+      .eq('area', area)
+      .single()
+
+    if (!conversation) {
+      return { success: false, error: 'Conversa não encontrada' }
+    }
+
+    const context = conversation.context || {}
+    const tags = Array.isArray(context.tags) ? context.tags : []
+
+    // Verificar se realmente não participou
+    if (!tags.includes('nao_participou_aula')) {
+      return { success: false, error: 'Pessoa não está marcada como não participou' }
+    }
+
+    // Verificar se já recebeu remarketing recentemente (evitar spam)
+    if (context.last_remarketing_at) {
+      const lastRemarketing = new Date(context.last_remarketing_at)
+      const now = new Date()
+      const hoursSinceLastRemarketing = (now.getTime() - lastRemarketing.getTime()) / (1000 * 60 * 60)
+      
+      if (hoursSinceLastRemarketing < 2) {
+        return { success: false, error: 'Remarketing já foi enviado recentemente' }
+      }
+    }
+
+    // Buscar instância Z-API
+    let { data: instance } = await supabaseAdmin
+      .from('z_api_instances')
+      .select('id, instance_id, token')
+      .eq('area', area)
+      .eq('status', 'connected')
+      .limit(1)
+      .maybeSingle()
+
+    if (!instance) {
+      const { data: instanceByArea } = await supabaseAdmin
+        .from('z_api_instances')
+        .select('id, instance_id, token')
+        .eq('area', area)
+        .limit(1)
+        .maybeSingle()
+      
+      if (instanceByArea) {
+        instance = instanceByArea
+      }
+    }
+
+    if (!instance) {
+      return { success: false, error: 'Instância Z-API não encontrada' }
+    }
+
+    // Buscar próximas 2 sessões disponíveis
+    const { data: sessions } = await supabaseAdmin
+      .from('whatsapp_workshop_sessions')
+      .select('title, starts_at, zoom_link')
+      .eq('area', 'nutri')
+      .eq('is_active', true)
+      .gte('starts_at', new Date().toISOString())
+      .order('starts_at', { ascending: true })
+      .limit(2)
+
+    // Formatar opções de horários
+    let optionsText = ''
+    if (sessions && sessions.length > 0) {
+      sessions.forEach((session, index) => {
+        const date = new Date(session.starts_at)
+        const weekday = date.toLocaleDateString('pt-BR', { weekday: 'long' })
+        const dateStr = date.toLocaleDateString('pt-BR')
+        const time = date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+        optionsText += `\n🗓️ **Opção ${index + 1}:**\n${weekday}, ${dateStr}\n🕒 ${time} (Brasília)\n🔗 ${session.zoom_link}\n`
+      })
+    } else {
+      optionsText = '\n📅 Em breve teremos novas datas disponíveis! Fique de olho! 😊\n'
+    }
+
+    const leadName = conversation.name || 'querido(a)'
+    const remarketingMessage = `Olá ${leadName}! 👋
+
+Vi que você não conseguiu participar da aula anterior. Tudo bem, acontece! 😊
+
+Que tal tentarmos novamente? Aqui estão novas opções de dias e horários:
+
+${optionsText}Se alguma dessas opções funcionar para você, é só me avisar! 
+
+Qualquer dúvida, estou aqui! 💚
+
+Carol - Secretária YLADA Nutri`
+
+    const client = createZApiClient(instance.instance_id, instance.token)
+    const result = await client.sendTextMessage({
+      phone: conversation.phone,
+      message: remarketingMessage,
+    })
+
+    if (result.success) {
+      // Salvar mensagem
+      await supabaseAdmin.from('whatsapp_messages').insert({
+        conversation_id: conversation.id,
+        instance_id: instance.id,
+        z_api_message_id: result.id || null,
+        sender_type: 'bot',
+        sender_name: 'Carol - Secretária',
+        message: remarketingMessage,
+        message_type: 'text',
+        status: 'sent',
+        is_bot_response: true,
+      })
+
+      // Atualizar contexto
+      const newTags = [...new Set([...tags, 'recebeu_segundo_link'])]
+      context.last_remarketing_at = new Date().toISOString()
+      context.tags = newTags
+
+      await supabaseAdmin
+        .from('whatsapp_conversations')
+        .update({
+          context,
+          last_message_at: new Date().toISOString(),
+          last_message_from: 'bot',
+        })
+        .eq('id', conversation.id)
+
+      return { success: true }
+    } else {
+      return { success: false, error: 'Erro ao enviar mensagem' }
+    }
+  } catch (error: any) {
+    console.error('[Carol] Erro ao enviar remarketing:', error)
+    return { success: false, error: error.message }
+  }
+}
+
+/**
  * Dispara remarketing para quem agendou mas não participou
  */
 export async function sendRemarketingToNonParticipants(): Promise<{
@@ -2089,13 +2238,42 @@ export async function sendPreClassNotifications(): Promise<{
     const area = 'nutri'
     
     // Buscar instância Z-API
-    const { data: instance } = await supabaseAdmin
+    // Primeiro tenta buscar por área e status connected
+    let { data: instance } = await supabaseAdmin
       .from('z_api_instances')
       .select('id, instance_id, token')
       .eq('area', area)
-      .eq('is_active', true)
+      .eq('status', 'connected')
       .limit(1)
       .maybeSingle()
+
+    // Se não encontrou, tenta buscar apenas por área (sem filtro de status)
+    if (!instance) {
+      const { data: instanceByArea } = await supabaseAdmin
+        .from('z_api_instances')
+        .select('id, instance_id, token')
+        .eq('area', area)
+        .limit(1)
+        .maybeSingle()
+      
+      if (instanceByArea) {
+        instance = instanceByArea
+      }
+    }
+
+    // Se ainda não encontrou, tenta buscar qualquer instância conectada (fallback)
+    if (!instance) {
+      const { data: instanceFallback } = await supabaseAdmin
+        .from('z_api_instances')
+        .select('id, instance_id, token')
+        .eq('status', 'connected')
+        .limit(1)
+        .maybeSingle()
+      
+      if (instanceFallback) {
+        instance = instanceFallback
+      }
+    }
 
     if (!instance) {
       return { sent: 0, errors: 0 }
@@ -2143,9 +2321,15 @@ export async function sendPreClassNotifications(): Promise<{
         let message: string | null = null
         let shouldSend = false
         const notificationKey = `pre_class_${sessionId}`
+        
+        // Se a sessão já aconteceu, não enviar
+        if (hoursDiff < 0) {
+          continue
+        }
 
-        // 24 horas antes (entre 24h e 25h)
-        if (hoursDiff >= 24 && hoursDiff < 25 && !context[notificationKey]?.sent_24h) {
+        // 24 horas antes (entre 24h e 25h) OU se passou mas ainda não enviou e sessão é amanhã/hoje
+        if (!context[notificationKey]?.sent_24h && 
+            ((hoursDiff >= 24 && hoursDiff < 25) || (hoursDiff >= 12 && hoursDiff < 24))) {
           message = `Olá! 👋
 
 Lembrete: Sua aula é amanhã!
@@ -2162,8 +2346,9 @@ Carol - Secretária YLADA Nutri`
           if (!context[notificationKey]) context[notificationKey] = {}
           context[notificationKey].sent_24h = true
         }
-        // 12 horas antes (entre 12h e 13h)
-        else if (hoursDiff >= 12 && hoursDiff < 13 && !context[notificationKey]?.sent_12h) {
+        // 12 horas antes (entre 12h e 13h) OU se passou mas ainda não enviou e sessão é hoje
+        else if (!context[notificationKey]?.sent_12h && 
+                 ((hoursDiff >= 12 && hoursDiff < 13) || (hoursDiff >= 2 && hoursDiff < 12))) {
           message = `Olá! 
 
 Sua aula é hoje às ${time}! 
@@ -2184,8 +2369,9 @@ Carol - Secretária YLADA Nutri`
           if (!context[notificationKey]) context[notificationKey] = {}
           context[notificationKey].sent_12h = true
         }
-        // 2 horas antes (entre 2h e 2h30)
-        else if (hoursDiff >= 2 && hoursDiff < 2.5 && !context[notificationKey]?.sent_2h) {
+        // 2 horas antes (entre 2h e 2h30) OU se passou mas ainda não enviou e sessão é hoje
+        else if (!context[notificationKey]?.sent_2h && 
+                 ((hoursDiff >= 2 && hoursDiff < 2.5) || (hoursDiff >= 0.5 && hoursDiff < 2))) {
           message = `Olá! 
 
 Sua aula começa em 2 horas! ⏰
@@ -3093,7 +3279,9 @@ export async function sendRegistrationLinkAfterClass(conversationId: string): Pr
     }
 
     // Link de cadastro (configurável via variável de ambiente ou banco)
-    const registrationUrl = process.env.NUTRI_REGISTRATION_URL || 'https://ylada.com/pt/nutri/cadastro'
+    // Aponta para página de vendas na seção de oferta (#oferta)
+    // A pessoa vê toda a argumentação e depois escolhe o plano no checkout
+    const registrationUrl = process.env.NUTRI_REGISTRATION_URL || 'https://www.ylada.com/pt/nutri#oferta'
 
     // Mensagem imediata após participar da aula
     const message = `Olá ${leadName}! 💚
@@ -3247,10 +3435,24 @@ export async function sendWorkshopReminders(): Promise<{
         continue // Ainda não é hora de enviar
       }
 
+      // Verificar se a sessão já aconteceu (se sim, não enviar lembrete)
+      if (nowTime >= sessionTime) {
+        continue // Sessão já aconteceu, não enviar lembrete
+      }
+
       // Verificar se está dentro da janela de envio (até 2h após o horário do lembrete)
+      // MAS se a sessão é hoje e ainda não aconteceu, permitir enviar mesmo se passou a janela
       const reminderWindowEnd = reminderTime.getTime() + 2 * 60 * 60 * 1000
-      if (nowTime > reminderWindowEnd) {
-        continue // Janela de envio já passou
+      const isToday = nowBrasilia.toDateString() === brasiliaDate.toDateString()
+      const isWithinWindow = nowTime <= reminderWindowEnd
+      
+      if (!isWithinWindow && !isToday) {
+        continue // Janela de envio já passou E não é hoje
+      }
+      
+      // Se é hoje e ainda não aconteceu, permitir enviar mesmo se passou a janela do lembrete
+      if (isToday && nowTime < sessionTime) {
+        console.log(`[Carol Reminders] ⚠️ Janela passou mas sessão é hoje - permitindo envio: ${date} ${time}`)
       }
 
       // Verificar se está em horário permitido (mas permitir domingo para lembretes especiais)
