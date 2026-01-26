@@ -56,10 +56,7 @@ export async function POST(request: NextRequest) {
       .order('starts_at', { ascending: true })
       .limit(2)
 
-    const client = createZApiClient({
-      instanceId: instance.instance_id,
-      token: instance.token,
-    })
+    const client = createZApiClient(instance.instance_id, instance.token)
 
     const results: Array<{ phone: string; name: string; success: boolean; error?: string }> = []
 
@@ -72,7 +69,7 @@ export async function POST(request: NextRequest) {
         // Buscar conversa
         const { data: conversation } = await supabaseAdmin
           .from('whatsapp_conversations')
-          .select('id, phone, name, context')
+          .select('id, phone, name, context, area')
           .eq('area', area)
           .eq('status', 'active')
           .or(`phone.eq.${phoneClean},phone.like.%${phoneClean.slice(-8)}%`)
@@ -101,8 +98,8 @@ export async function POST(request: NextRequest) {
           .limit(20)
 
         const conversationHistory = (messages || []).map((msg: any) => ({
-          role: msg.sender_type === 'bot' ? 'assistant' : 'user',
-          content: msg.message,
+          role: (msg.sender_type === 'bot' ? 'assistant' : 'user') as 'user' | 'assistant',
+          content: msg.message || '',
         }))
 
         // Buscar nome do cadastro usando função helper

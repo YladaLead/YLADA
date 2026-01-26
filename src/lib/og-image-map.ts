@@ -11,7 +11,7 @@ import { normalizeNutriTemplateSlug } from './template-slug-map-nutri'
 export type AreaType = 'wellness' | 'coach' | 'nutri'
 
 // Mapeamento base de slugs para nomes de arquivos (sem área)
-const OG_IMAGE_SLUG_MAP: Record<string, string> = {
+export const OG_IMAGE_SLUG_MAP: Record<string, string> = {
   // Calculadoras
   'calc-imc': 'calc-imc.jpg',
   'calc-proteina': 'calc-proteina.jpg',

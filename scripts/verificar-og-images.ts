@@ -5,9 +5,15 @@
 
 import { readdir } from 'fs/promises'
 import { join } from 'path'
-import { OG_IMAGE_MAP } from '../src/lib/og-image-map'
+import { OG_IMAGE_SLUG_MAP } from '../src/lib/og-image-map'
 import { OG_MESSAGES_MAP } from '../src/lib/og-messages-map'
 import { existsSync } from 'fs'
+
+// Construir mapeamento completo de slugs para caminhos de imagem
+const OG_IMAGE_MAP: Record<string, string> = {}
+for (const [slug, fileName] of Object.entries(OG_IMAGE_SLUG_MAP)) {
+  OG_IMAGE_MAP[slug] = `/images/og/wellness/${fileName}`
+}
 
 async function verificarImagensOG() {
   console.log('🔍 Verificando imagens OG...\n')

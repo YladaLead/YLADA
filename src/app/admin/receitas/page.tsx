@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, ReactElement } from 'react'
 
 interface Receita {
   id: string
@@ -112,7 +112,7 @@ export default function AdminReceitas() {
         // Adicionar filtros de período avançado (apenas se não for "todos")
         if (periodoTipo === 'rapido' && periodoRapido !== 'todos') {
           const hoje = new Date()
-          let inicio: Date, fim: Date
+          let inicio: Date | undefined, fim: Date | undefined
           
           switch (periodoRapido) {
             case 'este_mes':
@@ -418,7 +418,7 @@ export default function AdminReceitas() {
   }
 
   const getStatusBadge = (status: string, isMigrated?: boolean) => {
-    const badges: Record<string, JSX.Element> = {
+    const badges: Record<string, ReactElement> = {
       'ativa': <span className="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">Ativa</span>,
       'cancelada': <span className="px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">Cancelada</span>,
       'expirada': <span className="px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">Expirada</span>,
@@ -440,7 +440,7 @@ export default function AdminReceitas() {
   const getCategoriaBadge = (categoria?: string) => {
     if (!categoria) return null
     
-    const badges: Record<string, JSX.Element> = {
+    const badges: Record<string, ReactElement> = {
       'pagante': <span className="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800" title="Cliente pagante">💳 Pagante</span>,
       'gratuita': <span className="px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800" title="Plano gratuito">🆓 Gratuita</span>,
       'suporte': <span className="px-2 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-800" title="Admin/Suporte">🛟 Suporte</span>
