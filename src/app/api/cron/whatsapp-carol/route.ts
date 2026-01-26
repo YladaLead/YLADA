@@ -22,16 +22,9 @@ import {
  */
 export async function GET(request: NextRequest) {
   try {
-    // Verificar se é chamada do cron (Vercel Cron envia header Authorization)
-    const authHeader = request.headers.get('authorization')
-    const cronSecret = process.env.CRON_SECRET || 'your-secret-key'
-
-    if (authHeader !== `Bearer ${cronSecret}`) {
-      return NextResponse.json(
-        { error: 'Não autorizado' },
-        { status: 401 }
-      )
-    }
+    // NOTA: Este endpoint não é mais usado por crons do Vercel
+    // Mantido apenas para compatibilidade ou uso manual
+    // A autenticação foi removida pois não há mais crons configurados
 
     const searchParams = request.nextUrl.searchParams
     const tipo = searchParams.get('tipo') // 'welcome', 'remarketing', 'pre-class', 'post-class', 'follow-up', 'sales-follow-up', 'reminders'
