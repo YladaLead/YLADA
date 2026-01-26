@@ -163,20 +163,9 @@ export class ZApiClient {
         numberLength: cleanPhone.startsWith('55') ? cleanPhone.substring(4).length : cleanPhone.length
       })
 
-      // Verificar status da instância antes de enviar (opcional, mas ajuda a identificar problemas)
-      try {
-        const statusResult = await this.getInstanceStatus()
-        if (!statusResult.connected) {
-          console.warn('[Z-API] ⚠️ Instância não está conectada:', statusResult)
-          return {
-            success: false,
-            error: `Instância Z-API não está conectada. Status: ${statusResult.status || 'desconhecido'}`
-          }
-        }
-      } catch (statusError) {
-        // Se não conseguir verificar status, continuar mesmo assim (pode ser problema de permissão)
-        console.warn('[Z-API] ⚠️ Não foi possível verificar status da instância:', statusError)
-      }
+      // Não verificar status antes de enviar - deixar a Z-API retornar erro se não estiver conectada
+      // A verificação de status pode falhar mesmo quando a instância está funcionando
+      // É melhor tentar enviar e tratar o erro se vier
 
       // Z-API requer Client-Token no header (Account Security Token)
       const clientToken = process.env.Z_API_CLIENT_TOKEN || ''

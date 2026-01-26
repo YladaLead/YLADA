@@ -266,7 +266,7 @@ export async function requireApiAuth(
 
       // Suporte (funcionários/parceiros) pode acessar todas as áreas para guiar usuários
       if (profile.is_support) {
-        return { user: session.user, profile }
+        return { user: user, profile }
       }
 
       // Verificar se o perfil do usuário está na lista de permitidos
