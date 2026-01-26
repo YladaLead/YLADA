@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireApiAuth } from '@/lib/api-auth'
 import { supabaseAdmin } from '@/lib/supabase'
-import { sendRegistrationLinkAfterClass } from '@/lib/whatsapp-carol-ai'
+import { sendRegistrationLinkAfterClass, sendRemarketingToNonParticipant } from '@/lib/whatsapp-carol-ai'
 
 /**
  * GET /api/admin/whatsapp/workshop/participants
@@ -118,6 +118,14 @@ export async function POST(request: NextRequest) {
     const hadParticipatedTag = tags.includes('participou_aula')
     const isAddingParticipatedTag = participated && !hadParticipatedTag
 
+    // Verificar se a tag "nao_participou_aula" está sendo adicionada agora
+    // IMPORTANTE: Disparar remarketing se:
+    // 1. Está marcando como "não participou" E a tag não existia antes
+    // 2. OU estava marcado como "participou" antes e agora está mudando para "não participou"
+    const hadNotParticipatedTag = tags.includes('nao_participou_aula')
+    const wasParticipatedBefore = hadParticipatedTag && !hadNotParticipatedTag
+    const isAddingNotParticipatedTag = !participated && (!hadNotParticipatedTag || wasParticipatedBefore)
+
     // Atualizar conversa
     const { data: updated, error: updateError } = await supabaseAdmin
       .from('whatsapp_conversations')
@@ -142,6 +150,32 @@ export async function POST(request: NextRequest) {
       // Disparar em background (não bloquear a resposta)
       sendRegistrationLinkAfterClass(conversationId).catch((error: any) => {
         console.error('[Workshop Participants] ❌ Erro ao disparar flow:', error)
+      })
+    }
+
+    // 🚀 Disparar remarketing automaticamente quando tag "nao_participou_aula" é adicionada
+    // Disparar se:
+    // 1. Está marcando como "não participou" E a tag não existia antes
+    // 2. OU estava marcado como "participou" e agora está mudando para "não participou"
+    if (isAddingNotParticipatedTag) {
+      console.log('[Workshop Participants] 📱 Tag nao_participou_aula adicionada - disparando remarketing automaticamente', {
+        conversationId,
+        hadNotParticipatedTag,
+        hadParticipatedTag,
+        wasParticipatedBefore,
+        participated
+      })
+      // Disparar em background (não bloquear a resposta)
+      sendRemarketingToNonParticipant(conversationId).catch((error: any) => {
+        console.error('[Workshop Participants] ❌ Erro ao disparar remarketing:', error)
+      })
+    } else {
+      console.log('[Workshop Participants] ⏭️ Remarketing não disparado:', {
+        conversationId,
+        participated,
+        hadNotParticipatedTag,
+        hadParticipatedTag,
+        isAddingNotParticipatedTag
       })
     }
 
