@@ -116,6 +116,79 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Detectar comandos de ação antes de processar
+    const messageLower = message.toLowerCase().trim()
+    let actionExecuted = false
+    let actionResult: string | null = null
+
+    // Comando: Enviar remarketing para pessoa específica
+    if (messageLower.includes('envie remarketing') || messageLower.includes('enviar remarketing') || 
+        messageLower.includes('disparar remarketing') || messageLower.includes('remarketing para')) {
+      try {
+        // Extrair nome da pessoa da mensagem
+        const nameMatch = message.match(/(?:para|pra|à|a)\s+([A-Za-zÀ-ÿ\s]+?)(?:\s|$|,|\.)/i)
+        const targetName = nameMatch ? nameMatch[1].trim() : null
+
+        if (targetName) {
+          // Buscar conversa pelo nome
+          const { data: conversation } = await supabaseAdmin
+            .from('whatsapp_conversations')
+            .select('id, phone, name, context')
+            .eq('area', 'nutri')
+            .eq('status', 'active')
+            .ilike('name', `%${targetName}%`)
+            .limit(1)
+            .maybeSingle()
+
+          if (conversation) {
+            const { sendRemarketingToNonParticipant } = await import('@/lib/whatsapp-carol-ai')
+            const result = await sendRemarketingToNonParticipant(conversation.id)
+            
+            if (result.success) {
+              actionExecuted = true
+              actionResult = `✅ Remarketing enviado com sucesso para ${conversation.name || targetName}!`
+            } else {
+              actionExecuted = true
+              actionResult = `⚠️ ${result.error || 'Erro ao enviar remarketing'}`
+            }
+          } else {
+            actionExecuted = true
+            actionResult = `❌ Não encontrei ninguém com o nome "${targetName}". Verifique se o nome está correto.`
+          }
+        } else {
+          actionExecuted = true
+          actionResult = `❌ Por favor, especifique o nome da pessoa. Exemplo: "envie remarketing para Maria Lins"`
+        }
+      } catch (error: any) {
+        actionExecuted = true
+        actionResult = `❌ Erro ao executar comando: ${error.message}`
+      }
+    }
+
+    // Comando: Disparar lembretes
+    if (!actionExecuted && (messageLower.includes('disparar lembretes') || messageLower.includes('enviar lembretes') || 
+        messageLower.includes('lembretes de hoje'))) {
+      try {
+        const { sendWorkshopReminders } = await import('@/lib/whatsapp-carol-ai')
+        const result = await sendWorkshopReminders()
+        
+        actionExecuted = true
+        actionResult = `✅ Lembretes processados!\n\n📊 Resultado:\n• Enviados: ${result.sent}\n• Erros: ${result.errors}\n• Ignorados: ${result.skipped || 0}`
+      } catch (error: any) {
+        actionExecuted = true
+        actionResult = `❌ Erro ao disparar lembretes: ${error.message}`
+      }
+    }
+
+    // Se executou uma ação, retornar resultado direto
+    if (actionExecuted && actionResult) {
+      return NextResponse.json({
+        success: true,
+        response: actionResult,
+        actionExecuted: true,
+      })
+    }
+
     // Construir contexto para a Carol
     const systemContext = `
 Você é a Carol, secretária da YLADA Nutri. Você está em um chat direto com o administrador do sistema.
@@ -133,10 +206,16 @@ DADOS DO SISTEMA (HOJE - ${hoje.toLocaleDateString('pt-BR')}):
 - Total de sessões: ${sessoesHoje?.length || 0}
 - Participantes confirmados: ${participantesHoje}
 
+COMANDOS DISPONÍVEIS:
+- "envie remarketing para [nome]" - Envia fluxo de remarketing para pessoa específica
+- "disparar lembretes" - Dispara lembretes para participantes agendados
+- "enviar lembretes de hoje" - Envia lembretes para sessões de hoje
+
 INSTRUÇÕES:
 - Seja natural e conversacional
 - Responda perguntas sobre status, lembretes, agendamentos
 - Use os dados acima para responder perguntas específicas
+- Se o administrador pedir para executar uma ação, confirme que executou
 - Se não souber algo, seja honesta
 - Use emojis moderadamente
 - Seja profissional mas amigável
