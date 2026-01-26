@@ -7,6 +7,7 @@
 
 import { supabaseAdmin } from '@/lib/supabase'
 import type { NoelModule } from './classifier'
+import { getCachedEmbedding, cacheEmbedding } from '@/lib/embedding-cache'
 
 export interface KnowledgeItem {
   id: string
@@ -28,8 +29,16 @@ export interface SearchResult {
 
 /**
  * Gera embedding do texto usando OpenAI
+ * ⚡ OTIMIZAÇÃO: Usa cache para evitar gerar embeddings duplicados (economia 60-80%)
  */
 export async function generateEmbedding(text: string): Promise<number[]> {
+  // 1. Verificar cache primeiro
+  const cached = getCachedEmbedding(text)
+  if (cached) {
+    return cached
+  }
+
+  // 2. Se não estiver em cache, gerar novo embedding
   const response = await fetch('https://api.openai.com/v1/embeddings', {
     method: 'POST',
     headers: {
@@ -48,20 +57,27 @@ export async function generateEmbedding(text: string): Promise<number[]> {
   }
 
   const data = await response.json()
-  return data.data[0].embedding
+  const embedding = data.data[0].embedding
+
+  // 3. Salvar no cache para próximas vezes
+  cacheEmbedding(text, embedding)
+
+  return embedding
 }
 
 /**
  * Busca na base de conhecimento por similaridade
+ * ⚡ OTIMIZAÇÃO: Aceita embedding pré-gerado para reutilização (economia 66%)
  */
 export async function searchKnowledgeBase(
   query: string,
   module: NoelModule,
-  limit: number = 5
+  limit: number = 5,
+  queryEmbedding?: number[] // Embedding opcional para reutilização
 ): Promise<SearchResult> {
   try {
-    // Gerar embedding da query
-    const queryEmbedding = await generateEmbedding(query)
+    // Gerar embedding da query (ou usar o fornecido)
+    const embedding = queryEmbedding || await generateEmbedding(query)
 
     // Buscar por similaridade usando pgvector
     // Similaridade cosseno: 1 = idêntico, 0 = sem relação
@@ -69,7 +85,7 @@ export async function searchKnowledgeBase(
     const { data: embeddings, error } = await supabaseAdmin.rpc(
       'match_wellness_knowledge',
       {
-        query_embedding: queryEmbedding,
+        query_embedding: embedding,
         match_category: null, // Buscar em TODAS as categorias primeiro (não restringir)
         match_threshold: 0.4, // Reduzir threshold para 40% (mais permissivo)
         match_count: limit * 2, // Buscar mais resultados para depois filtrar

@@ -90,6 +90,17 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Agendar notificações pré-aula (em background, não bloquear resposta)
+    setTimeout(async () => {
+      try {
+        const { schedulePreClassNotifications } = await import('@/lib/whatsapp-automation/pre-class')
+        await schedulePreClassNotifications(conversation.id, sessionId)
+        console.log('[Adicionar Participante] ✅ Notificações pré-aula agendadas para', conversation.id)
+      } catch (error: any) {
+        console.error('[Adicionar Participante] ❌ Erro ao agendar notificações pré-aula:', error)
+      }
+    }, 1000)
+
     return NextResponse.json({
       success: true,
       message: `${conversation.name || 'Participante'} adicionado(a) à sessão`,

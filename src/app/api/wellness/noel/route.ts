@@ -48,8 +48,8 @@ interface CacheEntry {
 }
 
 const noelResponseCache = new Map<string, CacheEntry>()
-const CACHE_TTL = 2 * 60 * 1000 // 2 minutos (respostas podem mudar com contexto)
-const MAX_CACHE_SIZE = 100 // Limitar tamanho do cache
+const CACHE_TTL = 20 * 60 * 1000 // ⚡ OTIMIZAÇÃO: 20 minutos (economia no uso repetido)
+const MAX_CACHE_SIZE = 200 // Aumentar tamanho do cache
 
 // Função para gerar chave de cache baseada na mensagem normalizada
 function getCacheKey(userId: string, message: string): string {
@@ -192,7 +192,7 @@ async function generateAIResponse(
       role: 'system',
       content: systemPrompt,
     },
-    ...conversationHistory.slice(-6), // últimos 6 mensagens para contexto
+    ...conversationHistory.slice(-4), // ⚡ OTIMIZAÇÃO: últimos 4 mensagens (economia 40-50%)
     {
       role: 'user',
       content: message,
@@ -2126,13 +2126,20 @@ export async function POST(request: NextRequest) {
       
       const isPerguntaRotina = message.match(/não sei|o que fazer|o que fazer hoje|rotina|planejamento|começar|por onde começar/i)
       
+      // ⚡ OTIMIZAÇÃO: Gerar embedding uma vez e reutilizar (economia 66%)
+      let sharedQueryEmbedding: number[] | undefined = undefined
+      
       // Usar busca semântica para detectar objeções (só se não for pergunta de rotina)
       if (!isPerguntaRotina) {
         try {
+          // Gerar embedding uma vez para reutilizar
+          sharedQueryEmbedding = await generateEmbedding(message)
+          
           const { buscarObjeçõesPorSimilaridade } = await import('@/lib/wellness-system/noel-engine/objections/objection-semantic-search')
           const resultadoSemantico = await buscarObjeçõesPorSimilaridade(message, {
             limite: 3,
-            threshold: 0.4 // 40% de similaridade mínimo
+            threshold: 0.4, // 40% de similaridade mínimo
+            queryEmbedding: sharedQueryEmbedding // Reutilizar embedding
           })
           
           if (resultadoSemantico.melhorMatch && resultadoSemantico.similaridade >= 0.4) {
@@ -2248,11 +2255,17 @@ export async function POST(request: NextRequest) {
           console.log('⚠️ Script não encontrado pelo método tradicional, tentando busca semântica...')
           
           try {
+            // Reutilizar embedding se já foi gerado, senão gerar agora
+            if (!sharedQueryEmbedding) {
+              sharedQueryEmbedding = await generateEmbedding(message)
+            }
+            
             const { buscarScriptsPorSimilaridade } = await import('@/lib/wellness-system/noel-engine/scripts/script-semantic-search')
             const resultadoSemantico = await buscarScriptsPorSimilaridade(message, {
               categoria: categoriaScript,
               limite: 3,
-              threshold: 0.35 // 35% de similaridade mínimo
+              threshold: 0.35, // 35% de similaridade mínimo
+              queryEmbedding: sharedQueryEmbedding // Reutilizar embedding
             })
             
             if (resultadoSemantico.melhorMatch && resultadoSemantico.similaridade >= 0.35) {

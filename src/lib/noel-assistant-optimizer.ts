@@ -23,7 +23,7 @@ interface CachedResponse {
 
 // Cache simples em memória (pode ser migrado para Redis em produção)
 const responseCache = new Map<string, CachedResponse>()
-const CACHE_TTL = 5 * 60 * 1000 // 5 minutos
+const CACHE_TTL = 20 * 60 * 1000 // ⚡ OTIMIZAÇÃO: 20 minutos (economia no uso repetido)
 
 /**
  * Limpa cache expirado

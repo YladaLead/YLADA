@@ -744,7 +744,7 @@ function detectNeedsHumanSupport(
 /**
  * Envia mensagem via WhatsApp usando Z-API
  */
-async function sendWhatsAppMessage(
+export async function sendWhatsAppMessage(
   phone: string,
   message: string,
   instanceId: string,

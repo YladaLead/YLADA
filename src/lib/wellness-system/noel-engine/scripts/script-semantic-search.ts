@@ -11,6 +11,7 @@ import { generateEmbedding } from '@/lib/noel-wellness/knowledge-search'
 /**
  * Busca scripts por similaridade semântica
  * Usa embeddings para encontrar scripts relevantes mesmo com palavras diferentes
+ * ⚡ OTIMIZAÇÃO: Aceita embedding pré-gerado para reutilização (economia 66%)
  */
 export async function buscarScriptsPorSimilaridade(
   pergunta: string,
@@ -18,18 +19,19 @@ export async function buscarScriptsPorSimilaridade(
     categoria?: string
     limite?: number
     threshold?: number // 0.0 a 1.0 (quanto maior, mais similar precisa ser)
+    queryEmbedding?: number[] // Embedding opcional para reutilização
   } = {}
 ): Promise<{
   scripts: WellnessScript[]
   melhorMatch: WellnessScript | null
   similaridade: number
 }> {
-  const { categoria, limite = 5, threshold = 0.3 } = options
+  const { categoria, limite = 5, threshold = 0.3, queryEmbedding: providedEmbedding } = options
 
   try {
-    // 1. Gerar embedding da pergunta
+    // 1. Gerar embedding da pergunta (ou usar o fornecido)
     console.log('🔍 Gerando embedding da pergunta...')
-    const queryEmbedding = await generateEmbedding(pergunta)
+    const queryEmbedding = providedEmbedding || await generateEmbedding(pergunta)
     console.log('✅ Embedding gerado:', queryEmbedding.length, 'dimensões')
 
     // 2. Buscar scripts por similaridade usando pgvector

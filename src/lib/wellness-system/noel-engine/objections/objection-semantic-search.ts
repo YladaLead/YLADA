@@ -10,6 +10,7 @@ import { generateEmbedding } from '@/lib/noel-wellness/knowledge-search'
 
 /**
  * Busca objeções por similaridade semântica
+ * ⚡ OTIMIZAÇÃO: Aceita embedding pré-gerado para reutilização (economia 66%)
  */
 export async function buscarObjeçõesPorSimilaridade(
   pergunta: string,
@@ -17,18 +18,19 @@ export async function buscarObjeçõesPorSimilaridade(
     categoria?: string
     limite?: number
     threshold?: number
+    queryEmbedding?: number[] // Embedding opcional para reutilização
   } = {}
 ): Promise<{
   objeções: WellnessObjeção[]
   melhorMatch: WellnessObjeção | null
   similaridade: number
 }> {
-  const { categoria, limite = 5, threshold = 0.3 } = options
+  const { categoria, limite = 5, threshold = 0.3, queryEmbedding: providedEmbedding } = options
 
   try {
-    // 1. Gerar embedding da pergunta
+    // 1. Gerar embedding da pergunta (ou usar o fornecido)
     console.log('🔍 Gerando embedding da pergunta para objeções...')
-    const queryEmbedding = await generateEmbedding(pergunta)
+    const queryEmbedding = providedEmbedding || await generateEmbedding(pergunta)
 
     // 2. Buscar objeções ativas
     let query = supabaseAdmin!

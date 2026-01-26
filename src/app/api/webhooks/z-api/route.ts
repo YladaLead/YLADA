@@ -1110,7 +1110,19 @@ export async function POST(request: NextRequest) {
       // Não retornar erro para Z-API, apenas logar
     }
 
-    // 4. Processar automações com Carol (IA de atendimento)
+    // 4. Cancelar mensagens agendadas se pessoa respondeu
+    // IMPORTANTE: Só cancelar se NÃO for mensagem enviada por nós
+    if (!finalIsFromUs && conversationId) {
+      try {
+        const { cancelPendingMessagesForConversation } = await import('@/lib/whatsapp-automation/scheduler')
+        await cancelPendingMessagesForConversation(conversationId, 'user_responded')
+      } catch (error: any) {
+        // Não bloquear se falhar o cancelamento
+        console.error('[Z-API Webhook] Erro ao cancelar mensagens agendadas:', error)
+      }
+    }
+
+    // 5. Processar automações com Carol (IA de atendimento)
     // IMPORTANTE: Só processar automações se NÃO for mensagem enviada por nós
     // (para evitar loops e respostas automáticas para nossas próprias mensagens)
     if (!finalIsFromUs) {
