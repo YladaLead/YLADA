@@ -144,6 +144,111 @@ export async function getRegistrationName(
 }
 
 /**
+ * Função helper centralizada para buscar instância Z-API
+ * Tenta múltiplas estratégias para encontrar uma instância válida
+ */
+export async function getZApiInstance(area: string = 'nutri'): Promise<{
+  id: string
+  instance_id: string
+  token: string
+} | null> {
+  try {
+    // Estratégia 1: Buscar por área e status connected (prioridade)
+    let { data: instance } = await supabaseAdmin
+      .from('z_api_instances')
+      .select('id, instance_id, token')
+      .eq('area', area)
+      .eq('status', 'connected')
+      .limit(1)
+      .maybeSingle()
+
+    if (instance) {
+      console.log('[getZApiInstance] ✅ Instância encontrada (área + connected):', {
+        id: instance.id,
+        instance_id: instance.instance_id,
+        area
+      })
+      return instance
+    }
+
+    // Estratégia 2: Buscar apenas por área (sem filtro de status)
+    console.log('[getZApiInstance] ⚠️ Instância não encontrada com status connected, tentando apenas por área...')
+    const { data: instanceByArea } = await supabaseAdmin
+      .from('z_api_instances')
+      .select('id, instance_id, token, status')
+      .eq('area', area)
+      .limit(1)
+      .maybeSingle()
+    
+    if (instanceByArea) {
+      console.log('[getZApiInstance] ⚠️ Instância encontrada mas status não é "connected":', {
+        id: instanceByArea.id,
+        instance_id: instanceByArea.instance_id,
+        status: instanceByArea.status,
+        area
+      })
+      return {
+        id: instanceByArea.id,
+        instance_id: instanceByArea.instance_id,
+        token: instanceByArea.token
+      }
+    }
+
+    // Estratégia 3: Buscar qualquer instância conectada (fallback)
+    console.log('[getZApiInstance] ⚠️ Instância da área não encontrada, tentando qualquer instância conectada...')
+    const { data: instanceFallback } = await supabaseAdmin
+      .from('z_api_instances')
+      .select('id, instance_id, token, area')
+      .eq('status', 'connected')
+      .limit(1)
+      .maybeSingle()
+    
+    if (instanceFallback) {
+      console.log('[getZApiInstance] ⚠️ Usando instância fallback (não é da área solicitada):', {
+        id: instanceFallback.id,
+        instance_id: instanceFallback.instance_id,
+        area: instanceFallback.area,
+        requestedArea: area
+      })
+      return {
+        id: instanceFallback.id,
+        instance_id: instanceFallback.instance_id,
+        token: instanceFallback.token
+      }
+    }
+
+    // Estratégia 4: Buscar qualquer instância (último recurso)
+    console.log('[getZApiInstance] ⚠️ Nenhuma instância conectada encontrada, tentando qualquer instância...')
+    const { data: anyInstance } = await supabaseAdmin
+      .from('z_api_instances')
+      .select('id, instance_id, token, area, status')
+      .limit(1)
+      .maybeSingle()
+    
+    if (anyInstance) {
+      console.log('[getZApiInstance] ⚠️ Usando qualquer instância disponível (último recurso):', {
+        id: anyInstance.id,
+        instance_id: anyInstance.instance_id,
+        area: anyInstance.area,
+        status: anyInstance.status,
+        requestedArea: area
+      })
+      return {
+        id: anyInstance.id,
+        instance_id: anyInstance.instance_id,
+        token: anyInstance.token
+      }
+    }
+
+    console.error('[getZApiInstance] ❌ Nenhuma instância Z-API encontrada no banco de dados')
+    return null
+  } catch (error: any) {
+    console.error('[getZApiInstance] ❌ Erro ao buscar instância Z-API:', error)
+    return null
+  }
+}
+
+/**
  * System Prompt da Carol
  */
 const CAROL_SYSTEM_PROMPT = `Você é a Carol, secretária da YLADA Nutri. Você é profissional, acolhedora e eficiente.
@@ -470,11 +575,15 @@ export async function generateCarolResponse(
     })
 
   try {
+    // Aumentar max_tokens para primeira mensagem (precisa de mais espaço para formatação completa)
+    const isFirstMessage = context?.isFirstMessage || false
+    const maxTokens = isFirstMessage ? 800 : 400
+    
     const completion = await openai.chat.completions.create({
       model: 'gpt-4o-mini', // Modelo mais barato e rápido
       messages,
       temperature: 0.6, // Reduzido para respostas mais consistentes
-      max_tokens: 400, // Aumentado para permitir formatação melhor
+      max_tokens: maxTokens, // 800 para primeira mensagem, 400 para outras
     })
 
     let response = completion.choices[0]?.message?.content || 'Desculpe, não consegui processar sua mensagem. Pode repetir?'
@@ -750,10 +859,11 @@ export async function processIncomingMessageWithCarol(
       console.log('[Carol AI] 🔍 Buscando sessões futuras:', {
         now: now.toISOString(),
         minDate: minDate.toISOString(),
-        area
+        area,
+        conversationId
       })
       
-      const { data: sessions } = await supabaseAdmin
+      const { data: sessions, error: sessionsError } = await supabaseAdmin
         .from('whatsapp_workshop_sessions')
         .select('id, title, starts_at, zoom_link')
         .eq('area', area)
@@ -762,17 +872,28 @@ export async function processIncomingMessageWithCarol(
         .order('starts_at', { ascending: true })
         .limit(2)
       
+      if (sessionsError) {
+        console.error('[Carol AI] ❌ Erro ao buscar sessões:', sessionsError)
+      }
+      
       workshopSessions = sessions || []
       
       console.log('[Carol AI] 📅 Sessões encontradas:', {
         count: workshopSessions.length,
+        hasError: !!sessionsError,
+        error: sessionsError?.message,
         sessions: workshopSessions.map(s => ({
           id: s.id,
           title: s.title,
           starts_at: s.starts_at,
-          zoom_link: s.zoom_link?.substring(0, 50) + '...'
+          zoom_link: s.zoom_link ? s.zoom_link.substring(0, 50) + '...' : null
         }))
       })
+      
+      // Se não encontrou sessões e é primeira mensagem, pode ser problema de detecção de workshop
+      if (workshopSessions.length === 0 && isFirstMessage) {
+        console.warn('[Carol AI] ⚠️ Nenhuma sessão encontrada para primeira mensagem - pode ser problema de detecção de workshop')
+      }
     }
 
     // 3. Verificar histórico para detectar primeira mensagem
@@ -784,6 +905,15 @@ export async function processIncomingMessageWithCarol(
     
     const customerMessages = messageHistory?.filter(m => m.sender_type === 'customer') || []
     const isFirstMessage = customerMessages.length === 1 // Primeira mensagem do cliente
+    
+    console.log('[Carol AI] 🔍 Detecção de primeira mensagem:', {
+      conversationId,
+      totalMessages: messageHistory?.length || 0,
+      customerMessages: customerMessages.length,
+      isFirstMessage,
+      hasWorkshopTag: tags.includes('veio_aula_pratica') || tags.includes('recebeu_link_workshop'),
+      workshopSessionId
+    })
     
     // 4. Verificar se participou ou não
     const participated = tags.includes('participou_aula')
@@ -1961,30 +2091,12 @@ export async function sendRemarketingToNonParticipant(conversationId: string): P
       }
     }
 
-    // Buscar instância Z-API
-    let { data: instance } = await supabaseAdmin
-      .from('z_api_instances')
-      .select('id, instance_id, token')
-      .eq('area', area)
-      .eq('status', 'connected')
-      .limit(1)
-      .maybeSingle()
+    // Buscar instância Z-API usando função helper centralizada
+    const instance = await getZApiInstance(area)
 
     if (!instance) {
-      const { data: instanceByArea } = await supabaseAdmin
-        .from('z_api_instances')
-        .select('id, instance_id, token')
-        .eq('area', area)
-        .limit(1)
-        .maybeSingle()
-      
-      if (instanceByArea) {
-        instance = instanceByArea
-      }
-    }
-
-    if (!instance) {
-      return { success: false, error: 'Instância Z-API não encontrada' }
+      console.error('[Carol Remarketing] ❌ Instância Z-API não encontrada para área:', area)
+      return { success: false, error: 'Instância Z-API não encontrada. Verifique se há uma instância Z-API cadastrada no sistema.' }
     }
 
     // Buscar próximas 2 sessões disponíveis
@@ -3256,48 +3368,12 @@ export async function sendRegistrationLinkAfterClass(conversationId: string): Pr
       return { success: false, error: 'Link de cadastro já foi enviado' }
     }
 
-    // Buscar instância Z-API
-    // Primeiro tenta buscar por área e status connected
-    let { data: instance } = await supabaseAdmin
-      .from('z_api_instances')
-      .select('id, instance_id, token')
-      .eq('area', area)
-      .eq('status', 'connected')
-      .limit(1)
-      .maybeSingle()
-
-    // Se não encontrou, tenta buscar apenas por área (sem filtro de status)
-    if (!instance) {
-      const { data: instanceByArea } = await supabaseAdmin
-        .from('z_api_instances')
-        .select('id, instance_id, token')
-        .eq('area', area)
-        .limit(1)
-        .maybeSingle()
-      
-      if (instanceByArea) {
-        instance = instanceByArea
-        console.log('[Carol] ⚠️ Instância encontrada mas status não é "connected":', instanceByArea)
-      }
-    }
-
-    // Se ainda não encontrou, tenta buscar qualquer instância conectada (fallback)
-    if (!instance) {
-      const { data: instanceFallback } = await supabaseAdmin
-        .from('z_api_instances')
-        .select('id, instance_id, token')
-        .eq('status', 'connected')
-        .limit(1)
-        .maybeSingle()
-      
-      if (instanceFallback) {
-        instance = instanceFallback
-        console.log('[Carol] ⚠️ Usando instância fallback (não é da área nutri):', instanceFallback)
-      }
-    }
+    // Buscar instância Z-API usando função helper centralizada
+    const instance = await getZApiInstance(area)
 
     if (!instance) {
-      return { success: false, error: 'Instância Z-API não encontrada. Verifique se há uma instância Z-API conectada para a área nutri' }
+      console.error('[Carol] ❌ Instância Z-API não encontrada para área:', area)
+      return { success: false, error: 'Instância Z-API não encontrada. Verifique se há uma instância Z-API cadastrada no sistema.' }
     }
 
     const client = createZApiClient(instance.instance_id, instance.token)

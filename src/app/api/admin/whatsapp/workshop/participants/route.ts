@@ -148,11 +148,37 @@ export async function POST(request: NextRequest) {
 
     // 🚀 Disparar flow automaticamente quando tag "participou_aula" é adicionada
     if (isAddingParticipatedTag) {
-      console.log('[Workshop Participants] 🎉 Tag participou_aula adicionada - disparando flow automaticamente')
-      // Disparar em background (não bloquear a resposta)
-      sendRegistrationLinkAfterClass(conversationId).catch((error: any) => {
-        console.error('[Workshop Participants] ❌ Erro ao disparar flow:', error)
+      console.log('[Workshop Participants] 🎉 Tag participou_aula adicionada - disparando flow automaticamente', {
+        conversationId,
+        phone: updated?.phone,
+        name: updated?.name
       })
+      // Disparar em background (não bloquear a resposta)
+      // Aguardar um pouco para garantir que a tag foi salva no banco
+      setTimeout(async () => {
+        try {
+          const result = await sendRegistrationLinkAfterClass(conversationId)
+          if (result.success) {
+            console.log('[Workshop Participants] ✅ Flow disparado com sucesso para', conversationId)
+          } else {
+            console.error('[Workshop Participants] ❌ Erro ao disparar flow:', result.error)
+            // Tentar novamente após mais tempo se falhou
+            if (result.error?.includes('não encontrada') || result.error?.includes('não participou')) {
+              console.log('[Workshop Participants] 🔄 Tentando novamente após 2 segundos...')
+              setTimeout(async () => {
+                const retryResult = await sendRegistrationLinkAfterClass(conversationId)
+                if (retryResult.success) {
+                  console.log('[Workshop Participants] ✅ Flow disparado na segunda tentativa para', conversationId)
+                } else {
+                  console.error('[Workshop Participants] ❌ Flow falhou na segunda tentativa:', retryResult.error)
+                }
+              }, 2000)
+            }
+          }
+        } catch (error: any) {
+          console.error('[Workshop Participants] ❌ Erro ao disparar flow:', error)
+        }
+      }, 1000) // Aguardar 1 segundo para garantir que a tag foi salva
     }
 
     // 🚀 Disparar remarketing automaticamente quando marca como "não participou"

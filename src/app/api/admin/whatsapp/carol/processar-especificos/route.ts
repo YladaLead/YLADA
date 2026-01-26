@@ -34,18 +34,14 @@ export async function POST(request: NextRequest) {
 
     const area = 'nutri'
 
-    // Buscar instância Z-API
-    const { data: instance } = await supabaseAdmin
-      .from('z_api_instances')
-      .select('id, instance_id, token')
-      .eq('area', area)
-      .eq('status', 'connected')
-      .limit(1)
-      .maybeSingle()
+    // Buscar instância Z-API usando função helper centralizada
+    const { getZApiInstance } = await import('@/lib/whatsapp-carol-ai')
+    const instance = await getZApiInstance(area)
 
     if (!instance) {
+      console.error('[Processar Específicos] ❌ Instância Z-API não encontrada para área:', area)
       return NextResponse.json(
-        { error: 'Instância Z-API não encontrada' },
+        { error: 'Instância Z-API não encontrada. Verifique se há uma instância Z-API cadastrada no sistema.' },
         { status: 500 }
       )
     }
