@@ -91,55 +91,76 @@ export async function requireApiAuth(
       }
     )
     
-    // Obter sessão do cookie
-    let { data: { session }, error: sessionError } = await supabase.auth.getSession()
+    // ✅ CORREÇÃO: Usar getUser() ao invés de getSession() para segurança
+    // getUser() valida com o servidor Supabase Auth, enquanto getSession() apenas lê dos cookies
+    let user = null
+    let session = null
+    let sessionError = null
     
-    // FALLBACK: Se não encontrou sessão nos cookies, tentar usar access token do header
-    if ((sessionError || !session || !session.user) && accessToken) {
-      try {
-        // Validar o access token diretamente
-        const { data: { user }, error: tokenError } = await supabase.auth.getUser(accessToken)
-        
-        if (!tokenError && user) {
-          // Criar uma sessão "sintética" a partir do token
-          // Isso permite que a API funcione mesmo quando cookies falharem
-          session = {
-            user,
-            access_token: accessToken,
-            refresh_token: '', // Não temos refresh token aqui, mas não é crítico para APIs
-            expires_in: 3600,
-            expires_at: Math.floor(Date.now() / 1000) + 3600,
-            token_type: 'bearer'
-          } as any
+    // Primeiro tentar getUser() (mais seguro, valida com servidor)
+    const { data: { user: fetchedUser }, error: userError } = await supabase.auth.getUser()
+    
+    if (!userError && fetchedUser) {
+      user = fetchedUser
+      
+      // Se getUser() funcionou, buscar sessão para ter o access_token
+      const { data: { session: fetchedSession } } = await supabase.auth.getSession()
+      session = fetchedSession
+      
+      if (process.env.NODE_ENV === 'development') {
+        console.log('✅ API Auth - Usuário autenticado via getUser()')
+      }
+    } else {
+      // FALLBACK: Se getUser() falhou, tentar usar access token do header
+      if (accessToken) {
+        try {
+          // Validar o access token diretamente
+          const { data: { user: tokenUser }, error: tokenError } = await supabase.auth.getUser(accessToken)
           
-          sessionError = null
-          
+          if (!tokenError && tokenUser) {
+            user = tokenUser
+            // Criar uma sessão "sintética" a partir do token
+            session = {
+              user: tokenUser,
+              access_token: accessToken,
+              refresh_token: '', // Não temos refresh token aqui, mas não é crítico para APIs
+              expires_in: 3600,
+              expires_at: Math.floor(Date.now() / 1000) + 3600,
+              token_type: 'bearer'
+            } as any
+            
+            if (process.env.NODE_ENV === 'development') {
+              console.log('✅ API Auth - Usuário autenticado via access token (fallback)')
+            }
+          } else {
+            sessionError = tokenError
+          }
+        } catch (tokenErr) {
+          // Se o token também falhar, continuar com o fluxo normal de erro
+          sessionError = tokenErr as any
           if (process.env.NODE_ENV === 'development') {
-            console.log('✅ API Auth - Sessão recuperada via access token (fallback)')
+            console.warn('⚠️ Access token também falhou:', tokenErr)
           }
         }
-      } catch (tokenErr) {
-        // Se o token também falhar, continuar com o fluxo normal de erro
-        if (process.env.NODE_ENV === 'development') {
-          console.warn('⚠️ Access token também falhou:', tokenErr)
-        }
+      } else {
+        sessionError = userError
       }
     }
     
     // Debug: log da sessão (apenas em desenvolvimento)
     if (process.env.NODE_ENV === 'development') {
-      console.log('🔍 API Auth - Sessão:', {
+      console.log('🔍 API Auth - Autenticação:', {
+        hasUser: !!user,
         hasSession: !!session,
-        hasUser: !!session?.user,
-        userId: session?.user?.id,
+        userId: user?.id || session?.user?.id,
         error: sessionError?.message,
         errorCode: sessionError?.status,
         hasCookies: !!requestCookies,
-        usedAccessToken: !!accessToken && !!session
+        usedAccessToken: !!accessToken && !!user
       })
     }
     
-    if (sessionError || !session || !session.user) {
+    if (sessionError || !user) {
       return NextResponse.json(
         { 
           error: 'Você precisa fazer login para continuar.',
@@ -156,10 +177,11 @@ export async function requireApiAuth(
     }
 
     // Buscar perfil do usuário
+    const userId = user.id
     let { data: profile, error: profileError } = await supabase
       .from('user_profiles')
       .select('*')
-      .eq('user_id', session.user.id)
+      .eq('user_id', userId)
       .maybeSingle()
 
     // Se perfil não existe, criar automaticamente com o perfil inferido da rota
@@ -178,17 +200,17 @@ export async function requireApiAuth(
       }
 
       if (inferredProfile) {
-        console.log(`📝 Criando perfil automaticamente para usuário ${session.user.id} com perfil: ${inferredProfile}`)
+        console.log(`📝 Criando perfil automaticamente para usuário ${userId} com perfil: ${inferredProfile}`)
         
         // Buscar email do usuário usando supabaseAdmin
-        const { data: authUser } = await supabaseAdmin.auth.admin.getUserById(session.user.id)
-        const email = authUser?.user?.email || session.user.email || ''
+        const { data: authUser } = await supabaseAdmin.auth.admin.getUserById(userId)
+        const email = authUser?.user?.email || user.email || ''
         
         // Criar perfil básico usando supabaseAdmin
         const { data: newProfile, error: createError } = await supabaseAdmin
           .from('user_profiles')
           .insert({
-            user_id: session.user.id,
+            user_id: userId,
             perfil: inferredProfile,
             nome_completo: authUser?.user?.user_metadata?.full_name || '',
             email: email
@@ -225,7 +247,7 @@ export async function requireApiAuth(
       const { data: updatedProfile, error: updateError } = await supabaseAdmin
         .from('user_profiles')
         .update({ perfil: inferredProfile })
-        .eq('user_id', session.user.id)
+        .eq('user_id', userId)
         .select()
         .single()
 
@@ -252,7 +274,7 @@ export async function requireApiAuth(
         console.error('❌ Perfil não autorizado:', {
           required: allowedProfiles,
           current: profile.perfil,
-          userId: session.user.id,
+          userId: userId,
           is_admin: profile.is_admin,
           is_support: profile.is_support
         })
@@ -263,7 +285,7 @@ export async function requireApiAuth(
             your_profile: profile.perfil || 'não definido',
             technical: process.env.NODE_ENV === 'development' ? {
               profileId: profile.id,
-              userId: session.user.id,
+              userId: userId,
               is_admin: profile.is_admin,
               is_support: profile.is_support
             } : undefined
