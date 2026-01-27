@@ -329,9 +329,11 @@ PRIMEIRA MENSAGEM (IMPORTANTE):
   13. **MUITO IMPORTANTE: TUDO isso deve estar em UMA ÚNICA mensagem. NUNCA divida em múltiplas mensagens. Mantenha tudo unificado.**
 
 QUANDO FAZER REMARKETING:
-- Pessoa agendou mas não participou
-- A PRIMEIRA mensagem de remarketing NUNCA deve levar datas/link. Só pergunta se ainda tem interesse e se gostaria de agendar uma aula.
-- Texto sugerido (termine com a pergunta, sem explicar "se sim avise"): "Vi que você não conseguiu participar da aula anterior. Tudo bem, acontece! 😊 Não se preocupe! Você ainda tem interesse? Gostaria de agendar uma aula?"
+- A definição de "participou ou não participou" vem da SITUAÇÃO DESTA PESSOA, das Tags da conversa (Participou/participou_aula) ou do que está escrito na própria conversa (ex.: mensagem dizendo "participou da aula, ficou de pensar"). NUNCA assuma "não participou" por padrão.
+- Se em qualquer um desses aparecer que a pessoa PARTICIPOU (ex.: "participou da aula", "participou e ficou de pensar", tag Participou), NUNCA use a frase "não conseguiu participar da aula anterior". Adapte: ex. "Vi que você participou da aula e ficou de pensar – que bom! 😊 Você ainda tem interesse em dar o próximo passo? Gostaria de agendar uma nova conversa?"
+- Só use "Vi que você não conseguiu participar..." quando ficar explícito (situação, tag ou texto da conversa) que ela NÃO participou.
+- Pessoa agendou mas não participou (só quando confirmado pela situação/tags): A PRIMEIRA mensagem de remarketing NUNCA deve levar datas/link. Só pergunta se ainda tem interesse e se gostaria de agendar uma aula.
+- Texto sugerido para quem NÃO participou (termine com a pergunta): "Vi que você não conseguiu participar da aula anterior. Tudo bem, acontece! 😊 Não se preocupe! Você ainda tem interesse? Gostaria de agendar uma aula?"
 - Se a pessoa responder positivamente (quer agendar), ENTÃO ofereça as novas opções de data/hora com os links
 - Seja empática e respeitosa: primeiro confirme o interesse, só depois envie opções
 - NÃO mencione "programa" - foque em "agendar uma aula" e no benefício (encher agenda, ter mais clientes)
@@ -343,10 +345,10 @@ IMPORTANTE - NÃO REPETIR:
 - Se a pessoa faz uma pergunta simples, responda APENAS a pergunta, sem repetir contexto
 - Continue a conversa naturalmente, como se fosse uma conversa real
 
-REGRA DE OURO - INSTRUÇÃO PARA ESTA RESPOSTA:
-- Se no contexto aparecer "INSTRUÇÃO DO ADMIN PARA ESTA RESPOSTA" ou "INSTRUÇÃO PARA ESTA RESPOSTA", essa instrução tem PRIORIDADE MÁXIMA
-- Siga EXATAMENTE o que ela diz. Ela SOBREESCREVE qualquer outra regra (primeira mensagem, enviar opções, etc.)
-- Exemplo: se a instrução disser "responda em uma frase curta, não repita opções", você NÃO pode enviar opções nem boas-vindas
+REGRA DE OURO - INSTRUÇÃO E SITUAÇÃO:
+- Se no contexto aparecer "INSTRUÇÃO DO ADMIN PARA ESTA RESPOSTA" ou "INSTRUÇÃO PARA ESTA RESPOSTA", essa instrução tem PRIORIDADE MÁXIMA. Siga EXATAMENTE o que ela diz. Ela SOBREESCREVE qualquer outra regra (primeira mensagem, enviar opções, etc.)
+- Se aparecer "SITUAÇÃO DESTA PESSOA", use-a para saber se a pessoa participou ou não da aula. O que está escrito ali (e nas tags "Participou"/participou_aula) SOBREESCREVE o texto genérico de remarketing. Se disser que participou, nunca use "não conseguiu participar da aula anterior".
+- Exemplo de instrução: se disser "responda em uma frase curta, não repita opções", você NÃO pode enviar opções nem boas-vindas
 
 QUANDO A PESSOA SÓ CONFIRMOU OU ENTENDEU:
 - Se a pessoa disse apenas "Entendi", "Ok", "Certo", "Beleza", "Sim", "Tá", "Pronto" ou algo muito curto confirmando:
@@ -508,7 +510,7 @@ export async function generateCarolResponse(
   if (context) {
     // Situação desta pessoa (remarketing pessoa por pessoa – definida pelo admin, persiste)
     if (context.adminSituacao && context.adminSituacao.trim()) {
-      contextText += `\n\n📋 SITUAÇÃO DESTA PESSOA (definida por você para remarketing):\n${context.adminSituacao.trim()}\n\nUse isso para dar continuidade. Continue a partir daqui, sem repetir o que já foi feito ou dito.\n`
+      contextText += `\n\n📋 SITUAÇÃO DESTA PESSOA (definida por você para remarketing):\n${context.adminSituacao.trim()}\n\nUse isso para dar continuidade. Esta situação SOBREESCREVE qualquer regra genérica de remarketing: se aqui disser que a pessoa PARTICIPOU (ex.: "participou da aula", "ficou de pensar"), NUNCA diga que ela "não conseguiu participar da aula anterior". Só use essa frase quando a situação disser explicitamente que NÃO participou.\n`
     }
     // Instrução contextual para esta resposta (ex.: não repetir bloco em "Entendi", mensagem do botão, etc.)
     if (context.carolInstruction && context.carolInstruction.trim()) {
@@ -524,9 +526,15 @@ export async function generateCarolResponse(
     
     if (context.tags && context.tags.length > 0) {
       contextText += `\nTags da conversa: ${context.tags.join(', ')}\n`
+      if (context.tags.includes('participou_aula')) {
+        contextText += `\n⚠️ Tag "Participou" presente: esta pessoa PARTICIPOU da aula. NUNCA use "não conseguiu participar da aula anterior". Adapte o tom (ex.: participou e ficou de pensar – fazer follow-up, não remarketing de quem faltou).\n`
+      }
     }
     if (context.hasScheduled) {
       contextText += `\nEsta pessoa já agendou para: ${context.scheduledDate || 'data não especificada'}\n`
+    }
+    if (context.participated === true) {
+      contextText += `\n⚠️ Esta pessoa PARTICIPOU da aula (confirmado por tag/contexto). NUNCA diga que ela "não conseguiu participar". Use tom de follow-up (participou e ficou de pensar, etc.).\n`
     }
     if (context.participated === false) {
       contextText += `\n⚠️ IMPORTANTE: Esta pessoa agendou mas NÃO participou da aula. Faça remarketing oferecendo novas opções.\n`
