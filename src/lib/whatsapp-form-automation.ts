@@ -5,7 +5,6 @@
 
 import { supabaseAdmin } from '@/lib/supabase'
 import { createZApiClient } from '@/lib/z-api'
-import { isAllowedTimeToSendMessage } from '@/lib/whatsapp-carol-ai'
 
 /**
  * Formata data/hora da sessão em PT-BR
@@ -138,18 +137,9 @@ export async function sendWorkshopInviteToFormLead(
 
     const client = createZApiClient(instance.instance_id, instance.token)
 
-    // 4. Verificar se está em horário permitido para enviar mensagem automática
-    const timeCheck = isAllowedTimeToSendMessage()
-    if (!timeCheck.allowed) {
-      console.log('[Form Automation] ⏰ Fora do horário permitido:', {
-        reason: timeCheck.reason,
-        nextAllowedTime: timeCheck.nextAllowedTime?.toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })
-      })
-      return { 
-        success: false, 
-        error: `Mensagem automática não enviada: ${timeCheck.reason}. Próximo horário permitido: ${timeCheck.nextAllowedTime?.toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })}` 
-      }
-    }
+    // 4. NÃO verificar horário aqui - quando pessoa faz cadastro e clica no botão,
+    // ela está esperando resposta imediata, independente de dia/horário
+    // Esta é uma resposta a uma ação direta do usuário, não uma mensagem automática
 
     // 5. Usar nome do cadastro (leadName já vem do cadastro, mas garantir que está correto)
     // leadName já é o nome do cadastro passado como parâmetro
