@@ -68,7 +68,7 @@ function WorkshopContent() {
     const dayOfWeek = today.getDay() // 0 = domingo, 1 = segunda, etc.
     return dayOfWeek === 0 ? 1 : 0 // Se domingo, próxima semana; senão, semana atual
   }
-  const [currentWeek, setCurrentWeek] = useState(getInitialWeek()) // 0 = semana atual, 1 = próxima semana, etc.
+  const [currentWeek, setCurrentWeek] = useState(getInitialWeek()) // 0 = esta semana, 1 = próxima, -1 = anterior, etc.
   const [selectedSessionForParticipants, setSelectedSessionForParticipants] = useState<WorkshopSession | null>(null)
   const [participants, setParticipants] = useState<Participant[]>([])
   const [loadingParticipants, setLoadingParticipants] = useState(false)
@@ -618,15 +618,22 @@ function WorkshopContent() {
                     {/* Navegação da Semana */}
                     <div className="flex items-center justify-between">
                       <button
-                        onClick={() => setCurrentWeek(Math.max(0, currentWeek - 1))}
-                        disabled={currentWeek === 0}
-                        className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                        onClick={() => setCurrentWeek(currentWeek - 1)}
+                        className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg hover:bg-gray-50"
                       >
                         ← Semana Anterior
                       </button>
                       <div className="text-center">
                         <h3 className="font-semibold text-gray-900">
-                          {currentWeek === 0 ? 'Esta Semana' : `Semana ${currentWeek + 1}`}
+                          {currentWeek === 0
+                            ? 'Esta Semana'
+                            : currentWeek === -1
+                              ? 'Semana anterior'
+                              : currentWeek < -1
+                                ? `${-currentWeek} semanas atrás`
+                                : currentWeek === 1
+                                  ? 'Próxima Semana'
+                                  : `Daqui ${currentWeek} semana${currentWeek > 1 ? 's' : ''}`}
                         </h3>
                         <p className="text-xs text-gray-500">
                           {weekRange.startStr} a {weekRange.endStr}

@@ -6,6 +6,8 @@
  *
  * Comandos especiais (não simulados como cliente):
  * - "Envie lembrete da aula de hoje" → envia só o lembrete da sessão de HOJE (uma mensagem), nunca "opções".
+ * - "ficou de participar e não participou" / "mande o texto pra quando não participa" → remarketing
+ *   "não participou": envia mensagem que PERGUNTA SE AINDA TEM INTERESSE primeiro (sem opções de aula).
  * - "chama ela" / "lembra ela" / "a [Nome] ficou de ver a melhor data" → follow-up acolhedor: pergunta se
  *   conseguiu ver qual horário, inclui opções, NÃO abre com "Oi [nome]" (tom neutro "Oi, tudo bem?").
  *
@@ -234,6 +236,79 @@ Pelo celular, a experiência fica limitada e você pode perder partes importante
 
     const ctx = (conversation.context as Record<string, unknown>) || {}
     const tags = Array.isArray(ctx.tags) ? ctx.tags : []
+
+    // —— Comando: "ficou de participar e não participou" / "mande texto pra quando não participa" — remarketing: pergunta interesse primeiro (SEM opções)
+    const looksLikeRemarketingNaoParticipou =
+      /ficou\s+de\s+participar\s+.*e\s+n[ãa]o\s+participou/i.test(messageToUse) ||
+      /(mande|envie)\s+(o\s+)?(mesmo\s+)?texto\s+pra\s+quando\s+(a\s+pessoa\s+)?(fica\s+de\s+participar\s+e\s+)?não\s+participa/i.test(messageToUse) ||
+      /(mande|envie)\s+.*(quando\s+)?(a\s+pessoa\s+)?não\s+participa/i.test(messageToUse) ||
+      /remarketing\s+.*não\s+participou|não\s+participou\s+.*(mande|remarketing|texto)/i.test(messageToUse)
+
+    if (looksLikeRemarketingNaoParticipou) {
+      const registrationName = await getRegistrationName(conversation.phone, area)
+      let leadName =
+        getFirstName(registrationName || (ctx as { lead_name?: string })?.lead_name || conversation.name) ||
+        'querido(a)'
+      if (leadName && /ylada/i.test(leadName.trim())) leadName = 'querido(a)'
+
+      // Primeira mensagem de remarketing: pergunta interesse primeiro. NÃO envia opções/datas.
+      const remarketingMessage = `Olá ${leadName}! 👋
+
+Vi que você não conseguiu participar da aula anterior. Tudo bem, acontece! 😊
+
+Você ainda tem interesse em aprender a ter sua agenda cheia? Gostaria que eu te encaixasse numa nova data?`
+
+      const instance = await getZApiInstance(area)
+      if (!instance) {
+        return NextResponse.json(
+          { success: false, error: 'Instância Z-API não encontrada para a área nutri' },
+          { status: 502 }
+        )
+      }
+      const client = createZApiClient(instance.instance_id, instance.token)
+      const sendResult = await client.sendTextMessage({
+        phone: conversation.phone,
+        message: remarketingMessage,
+      })
+
+      if (!sendResult.success) {
+        return NextResponse.json(
+          { success: false, error: sendResult.error || 'Erro ao enviar remarketing' },
+          { status: 500 }
+        )
+      }
+
+      await supabaseAdmin.from('whatsapp_messages').insert({
+        conversation_id: conversation.id,
+        instance_id: instance.id,
+        z_api_message_id: sendResult.id || null,
+        sender_type: 'bot',
+        sender_name: 'Carol - Secretária',
+        message: remarketingMessage,
+        message_type: 'text',
+        status: 'sent',
+        is_bot_response: true,
+      })
+
+      const newTags = [...new Set([...tags, 'nao_participou_aula', 'remarketing_enviado'])]
+      await supabaseAdmin
+        .from('whatsapp_conversations')
+        .update({
+          context: {
+            ...ctx,
+            tags: newTags,
+            last_remarketing_at: new Date().toISOString(),
+          },
+          last_message_at: new Date().toISOString(),
+          last_message_from: 'bot',
+        })
+        .eq('id', conversation.id)
+
+      return NextResponse.json({
+        success: true,
+        response: 'Remarketing enviado. Carol perguntou se ainda tem interesse (sem opções de aula).',
+      })
+    }
 
     // —— Comando: "chama ela" / "lembra ela" / "ficou de ver a melhor data" — follow-up acolhedor (NÃO simula como cliente)
     const looksLikeFollowUp =

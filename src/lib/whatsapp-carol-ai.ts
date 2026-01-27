@@ -661,6 +661,14 @@ export async function generateCarolResponse(
     }
   }
 
+  // Última troca — Carol deve reler antes de responder (evita perder contexto, ex.: "Sim" após "tem interesse?" → enviar opções)
+  const lastAssistant = conversationHistory.filter((m) => m.role === 'assistant').slice(-1)[0]?.content?.trim() || ''
+  if (conversationHistory.length > 0) {
+    const lastBotPreview = lastAssistant.slice(0, 400) + (lastAssistant.length > 400 ? '...' : '')
+    const userReplyPreview = message.trim().slice(0, 200)
+    contextText += `\n\n⚠️ ÚLTIMA TROCA — LEIA ANTES DE RESPONDER:\nSua última mensagem nesta conversa foi: "${lastBotPreview}".\nA pessoa acabou de responder: "${userReplyPreview}".\nUse esse contexto para decidir sua resposta. Ex.: se você perguntou se tem interesse em agendar e ela disse "Sim"/"Quero", envie as opções de aula; não responda com "Qualquer dúvida, é só me chamar".\n`
+  }
+
     // Incluir histórico completo (últimas 15 mensagens para melhor contexto)
     // Aumentado de 10 para 15 para Carol ter mais contexto da conversa
     const messages: OpenAI.Chat.ChatCompletionMessageParam[] = [
@@ -1790,7 +1798,14 @@ Nos vemos em breve! 😊
         ? `A pessoa acabou de clicar no botão do workshop ("Acabei de me inscrever... gostaria de agendar"). NÃO repita boas-vindas nem a lista completa de opções. Seja educada: faça um resumo curto das opções que já foram enviadas e pergunte qual horário funciona melhor. Responda usando exatamente este formato: "Oi! Como te enviei em cima: ${optionRecap}. Qual desses horários funciona melhor para você? 😊"`
         : 'A pessoa acabou de clicar no botão do workshop ("Acabei de me inscrever... gostaria de agendar"). NÃO repita boas-vindas nem a lista de opções. Responda em 1–2 frases, de forma educada: as opções foram enviadas acima (ou estão chegando) e pergunte qual horário funciona melhor. Exemplo: "Oi! As opções já foram enviadas na mensagem acima. Qual delas funciona melhor para você? 😊"'
     } else if (isShortNeutralReply && (formAlreadySentWelcome || workshopSessions.length > 0)) {
-      carolInstruction = 'A pessoa só confirmou/entendeu (ex.: "Entendi", "Ok", "Certo"). NÃO repita opções nem boas-vindas; responda em UMA frase curta e amigável, tipo "Qualquer dúvida, é só me chamar! 😊" ou "Fico no aguardo da sua escolha! 💚".'
+      // Exceção: remarketing "não participou" — pessoa respondeu que TEM INTERESSE ("Sim", "Quero") → enviar opções de aula, NÃO "Qualquer dúvida..."
+      const isRemarketingNaoParticipou = tags.includes('nao_participou_aula') || tags.includes('remarketing_enviado')
+      const isPositiveInterestReply = /^(sim|quero|tenho\s+interesse|gostaria|quero\s+sim|com\s+certeza|pode\s+ser|pode\s+encaixar|claro|por\s+favor|tem\s+interesse)$/i.test(msgNorm.trim())
+      if (isRemarketingNaoParticipou && isPositiveInterestReply && workshopSessions.length > 0) {
+        carolInstruction = 'A pessoa acabou de responder que TEM INTERESSE à sua pergunta "Você ainda tem interesse? Gostaria que eu te encaixasse numa nova data?". Ela disse Sim/Quero/Tenho interesse. Você DEVE enviar as opções de aula (dia e hora) disponíveis no formato das opções e perguntar qual horário ela prefere. NÃO responda com "Qualquer dúvida, é só me chamar". Inclua as opções de aula (Opção 1, Opção 2 com dia e hora).'
+      } else {
+        carolInstruction = 'A pessoa só confirmou/entendeu (ex.: "Entendi", "Ok", "Certo"). NÃO repita opções nem boas-vindas; responda em UMA frase curta e amigável, tipo "Qualquer dúvida, é só me chamar! 😊" ou "Fico no aguardo da sua escolha! 💚".'
+      }
     } else {
       carolInstruction = typeof carolInstructionFromContext === 'string' ? carolInstructionFromContext : undefined
     }
