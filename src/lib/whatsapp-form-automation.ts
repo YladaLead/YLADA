@@ -234,12 +234,15 @@ ${optionsText}💬 Qual você prefere? 💚`
       // Adicionar tags se não existirem (em português)
       const newTags = [...new Set([...prevTags, 'veio_aula_pratica', 'recebeu_link_workshop', 'primeiro_contato'])]
       
+      // workshop_options_ids: ordem exata Opção 1/2 que a pessoa viu — ao responder "Opção 2", Carol usa [1] e evita trocar por terça
+      const workshopOptionsIds = sessions.map((s: { id: string }) => s.id)
       await supabaseAdmin
         .from('whatsapp_conversations')
         .update({
           context: {
             ...prevContext,
             workshop_session_id: session.id,
+            workshop_options_ids: workshopOptionsIds,
             source: 'form_automation',
             form_lead: true,
             tags: newTags,
@@ -248,6 +251,7 @@ ${optionsText}💬 Qual você prefere? 💚`
         .eq('id', conversationId)
     } else {
       // Criar nova conversa com tags (name + customer_name alinhados; não gravar email como nome)
+      const workshopOptionsIds = sessions.map((s: { id: string }) => s.id)
       const { data: newConv, error: convError } = await supabaseAdmin
         .from('whatsapp_conversations')
         .insert({
@@ -258,6 +262,7 @@ ${optionsText}💬 Qual você prefere? 💚`
           customer_name: displayName || null,
           context: {
             workshop_session_id: session.id,
+            workshop_options_ids: workshopOptionsIds,
             source: 'form_automation',
             form_lead: true,
             tags: ['veio_aula_pratica', 'recebeu_link_workshop', 'primeiro_contato'],

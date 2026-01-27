@@ -76,6 +76,7 @@ function WhatsAppChatContent() {
   const [messagePhasePreview, setMessagePhasePreview] = useState('')
   const [messagePhaseLoading, setMessagePhaseLoading] = useState(false)
   const [sendingWorkshopInvite, setSendingWorkshopInvite] = useState(false)
+  const [sendOptionsOpen, setSendOptionsOpen] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
   const [contactMenuOpen, setContactMenuOpen] = useState(false)
   const [showScrollToBottom, setShowScrollToBottom] = useState(false)
@@ -1068,33 +1069,57 @@ function WhatsAppChatContent() {
                         </button>
                       </>
                     )}
-                    <button
-                      type="button"
-                      disabled={sendingWorkshopInvite}
-                      onClick={async () => {
-                        if (!selectedConversation || sendingWorkshopInvite) return
-                        setSendingWorkshopInvite(true)
-                        try {
-                          const res = await fetch(
-                            `/api/whatsapp/conversations/${selectedConversation.id}/send-workshop-invite`,
-                            { method: 'POST', credentials: 'include' }
-                          )
-                          const json = await res.json().catch(() => ({}))
-                          if (!res.ok) throw new Error(json.error || 'Erro ao enviar convite')
-                          await loadMessages(selectedConversation.id)
-                          await loadConversations()
-                        } catch (err: any) {
-                          alert(err.message || 'Erro ao enviar convite')
-                        } finally {
-                          setSendingWorkshopInvite(false)
-                        }
-                      }}
-                      className="h-10 w-10 flex items-center justify-center rounded-full bg-blue-50 hover:bg-blue-100 text-blue-700 disabled:opacity-50 disabled:pointer-events-none"
-                      title="Enviar flyer + detalhes da próxima aula"
-                      aria-label="Enviar flyer + detalhes da próxima aula"
-                    >
-                      {sendingWorkshopInvite ? '…' : '📩'}
-                    </button>
+                    <div className="relative">
+                      <button
+                        type="button"
+                        disabled={sendingWorkshopInvite}
+                        onClick={() => {
+                          setContactMenuOpen(false)
+                          setSendOptionsOpen((v) => !v)
+                        }}
+                        className="h-10 w-10 flex items-center justify-center rounded-full bg-blue-50 hover:bg-blue-100 text-blue-700 disabled:opacity-50 disabled:pointer-events-none"
+                        title="Opções de envio"
+                        aria-label="Opções de envio"
+                        aria-expanded={sendOptionsOpen}
+                      >
+                        {sendingWorkshopInvite ? '…' : '📩'}
+                      </button>
+                      {sendOptionsOpen && (
+                        <div className="absolute right-0 mt-2 w-64 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden z-20">
+                          <div className="px-3 py-2 text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-100">
+                            Enviar para esta conversa
+                          </div>
+                          <button
+                            type="button"
+                            disabled={sendingWorkshopInvite}
+                            onClick={async () => {
+                              if (!selectedConversation || sendingWorkshopInvite) return
+                              setSendingWorkshopInvite(true)
+                              try {
+                                const res = await fetch(
+                                  `/api/whatsapp/conversations/${selectedConversation.id}/send-workshop-invite`,
+                                  { method: 'POST', credentials: 'include' }
+                                )
+                                const json = await res.json().catch(() => ({}))
+                                if (!res.ok) throw new Error(json.error || 'Erro ao enviar convite')
+                                setSendOptionsOpen(false)
+                                await loadMessages(selectedConversation.id)
+                                await loadConversations()
+                              } catch (err: any) {
+                                alert(err.message || 'Erro ao enviar convite')
+                              } finally {
+                                setSendingWorkshopInvite(false)
+                              }
+                            }}
+                            className="w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 flex items-center gap-2"
+                          >
+                            <span>📅</span>
+                            <span>Enviar flyer + detalhes da próxima aula</span>
+                          </button>
+                          {/* Espaço para futuras opções de envio */}
+                        </div>
+                      )}
+                    </div>
                     <button
                       type="button"
                       onClick={() => window.open(`/api/whatsapp/conversations/${selectedConversation.id}/export`, '_blank')}
@@ -1107,7 +1132,10 @@ function WhatsAppChatContent() {
                     <div className="relative">
                       <button
                         type="button"
-                        onClick={() => setContactMenuOpen((v) => !v)}
+                        onClick={() => {
+                          setSendOptionsOpen(false)
+                          setContactMenuOpen((v) => !v)
+                        }}
                         className="h-10 w-10 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 text-gray-700"
                         title="Mais opções"
                         aria-label="Mais opções"

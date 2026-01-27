@@ -1087,30 +1087,38 @@ export async function processIncomingMessageWithCarol(
           optionIndex = words[numberMatch[4]] || -1
         }
         
-        if (optionIndex >= 0 && optionIndex < workshopSessions.length) {
-          // Usar sessão já encontrada (já tem ID)
-          const { weekday, date, time } = formatSessionDateTime(workshopSessions[optionIndex].starts_at)
-          console.log('[Carol AI] ✅ Sessão detectada por número/ordem:', {
-            optionIndex: optionIndex + 1,
-            sessionId: workshopSessions[optionIndex].id,
-            weekday,
-            date,
-            time,
-            starts_at: workshopSessions[optionIndex].starts_at,
-            message: messageLower
-          })
-          selectedSession = {
-            id: workshopSessions[optionIndex].id,
-            title: workshopSessions[optionIndex].title,
-            starts_at: workshopSessions[optionIndex].starts_at,
-            zoom_link: workshopSessions[optionIndex].zoom_link
+        if (optionIndex >= 0) {
+          // Priorizar a ordem exata que a pessoa viu: workshop_options_ids foi gravado pelo form ao enviar "Opção 1/2"
+          const optionIds = Array.isArray(context.workshop_options_ids) ? (context.workshop_options_ids as string[]) : null
+          const chosenId = (optionIds && optionIds[optionIndex] != null) ? optionIds[optionIndex] : workshopSessions[optionIndex]?.id
+          let sessionToUse = chosenId ? list.find((s: { id: string }) => s.id === chosenId) : null
+          if (!sessionToUse && optionIndex < workshopSessions.length) sessionToUse = workshopSessions[optionIndex]
+          if (sessionToUse) {
+            const { weekday, date, time } = formatSessionDateTime(sessionToUse.starts_at)
+            console.log('[Carol AI] ✅ Sessão detectada por número/ordem:', {
+              optionIndex: optionIndex + 1,
+              sessionId: sessionToUse.id,
+              weekday,
+              date,
+              time,
+              starts_at: sessionToUse.starts_at,
+              message: messageLower,
+              usedWorkshopOptionsIds: !!optionIds
+            })
+            selectedSession = {
+              id: sessionToUse.id,
+              title: sessionToUse.title,
+              starts_at: sessionToUse.starts_at,
+              zoom_link: sessionToUse.zoom_link
+            }
+          } else {
+            console.log('[Carol AI] ⚠️ Índice de opção inválido ou sessão não encontrada:', {
+              optionIndex,
+              chosenId: chosenId ?? '(nenhum)',
+              sessionsCount: workshopSessions.length,
+              message: messageLower
+            })
           }
-        } else {
-          console.log('[Carol AI] ⚠️ Índice de opção inválido:', {
-            optionIndex,
-            sessionsCount: workshopSessions.length,
-            message: messageLower
-          })
         }
       }
       
@@ -1539,6 +1547,14 @@ Nos vemos em breve! 😊
 `
           }
           
+          const { weekday: _w, date: _d, time: _t } = formatSessionDateTime(selectedSession.starts_at)
+          console.log('[Carol AI] 📌 Gravando workshop_session_id (escolha detectada):', {
+            conversationId,
+            workshop_session_id: selectedSession.id,
+            scheduled_date: selectedSession.starts_at,
+            sessionSummary: `${_w}, ${_d} • ${_t}`,
+            messagePreview: message?.substring(0, 60)
+          })
           await supabaseAdmin
             .from('whatsapp_conversations')
             .update({
@@ -1693,6 +1709,21 @@ Nos vemos em breve! 😊
       }
     } catch (error: any) {
       console.warn('[Carol AI] Erro ao buscar nome do cadastro:', error.message)
+    }
+
+    // Persistir ordem Opção 1/2 quando Carol envia opções na primeira mensagem (form já grava; aqui cobre fluxo sem form)
+    if (isFirstMessage && workshopSessions.length > 0) {
+      const optionIds = workshopSessions.map(s => s.id)
+      await supabaseAdmin
+        .from('whatsapp_conversations')
+        .update({
+          context: {
+            ...context,
+            workshop_options_ids: optionIds,
+          },
+        })
+        .eq('id', conversationId)
+      ;(context as any).workshop_options_ids = optionIds
     }
 
     // 7. Gerar resposta da Carol
@@ -2733,11 +2764,11 @@ Pelo celular, a experiência fica limitada e você pode perder partes importante
         }
         // 2 horas antes (entre 2h e 2h30) OU se passou mas ainda não enviou e sessão é hoje
         // Melhorado: Se sessão é hoje e ainda não enviou, enviar mesmo se passou a janela de 2h
-        // IMPORTANTE: Se sessão é hoje e ainda não enviou nenhum lembrete, enviar o de 2h
+        // "Disparo agora": isToday && hoursDiff > 0 && hoursDiff < 2 — envia até os últimos minutos antes da aula
         else if (!context[notificationKey]?.sent_2h && 
                  ((hoursDiff >= 2 && hoursDiff < 2.5) || 
                   (hoursDiff >= 0.5 && hoursDiff < 2) ||
-                  (isToday && hoursDiff >= 0.1 && hoursDiff < 2))) {
+                  (isToday && hoursDiff > 0 && hoursDiff < 2))) {
           message = `Olá ${leadName}! 
 
 Sua aula começa em 2 horas! ⏰

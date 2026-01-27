@@ -665,6 +665,10 @@ function AutomationContent() {
                     <p>Processadas: {result.process?.processed || 0} | Enviadas: {result.process?.sent || 0} | Falhadas: {result.process?.failed || 0}</p>
                   </div>
                   <div>
+                    <h3 className="font-semibold mb-2">⏰ Lembretes de aula (2h, 12h, 10min):</h3>
+                    <p>Enviados: {result.pre_class?.sent || 0} | Erros: {result.pre_class?.errors || 0}</p>
+                  </div>
+                  <div>
                     <h3 className="font-semibold mb-2">💰 Reprocessar Participou:</h3>
                     <p>Processadas: {result.reprocess_participou?.processed || 0} | Enviadas: {result.reprocess_participou?.sent || 0} | Erros: {result.reprocess_participou?.errors || 0}</p>
                   </div>
@@ -692,6 +696,10 @@ function AutomationContent() {
               <li>
                 <strong>Processar Pendentes:</strong> Verifica mensagens agendadas que estão prontas 
                 para envio e envia automaticamente. Cancela se a pessoa já respondeu.
+              </li>
+              <li>
+                <strong>Lembretes de aula:</strong> Envia lembrete 2h, 12h ou 10min antes para quem tem 
+                sessão agendada (context.workshop_session_id). Rodando &quot;Processar tudo&quot; agora envia para quem ainda não recebeu.
               </li>
               <li>
                 <strong>Remarketing:</strong> Envia mensagem para quem agendou mas não participou da aula.

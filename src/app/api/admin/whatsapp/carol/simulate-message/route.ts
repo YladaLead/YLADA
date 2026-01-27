@@ -4,13 +4,23 @@
  * Simula uma mensagem do cliente e dispara a Carol.
  * Tudo roda no servidor (instância Z-API via service role), evitando RLS no client.
  *
+ * Comandos especiais (não simulados como cliente):
+ * - "Envie lembrete da aula de hoje" → envia só o lembrete da sessão de HOJE (uma mensagem), nunca "opções".
+ *
  * Se o admin digitar "envia o link da quarta" ou "envia link opção 2" ou "link amanhã 9h",
  * normaliza para "Opção 2" (ou "2") para a Carol enviar só o link daquela sessão.
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { requireApiAuth } from '@/lib/api-auth'
-import { processIncomingMessageWithCarol, getZApiInstance } from '@/lib/whatsapp-carol-ai'
+import { processIncomingMessageWithCarol, getZApiInstance, formatSessionDateTime } from '@/lib/whatsapp-carol-ai'
+import { createZApiClient } from '@/lib/z-api'
 import { supabaseAdmin } from '@/lib/supabase'
+
+function getFirstName(name: string | null | undefined): string {
+  if (!name || typeof name !== 'string') return 'Olá'
+  const parts = name.trim().split(/\s+/)
+  return parts[0] || 'Olá'
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -32,8 +42,118 @@ export async function POST(request: NextRequest) {
     const area = 'nutri'
     let messageToUse = message.trim()
 
+    // —— Comando: "Envie lembrete da aula de hoje" — envia SOMENTE a sessão de hoje (nunca as duas opções)
+    const looksLikeLembreteHoje =
+      /lembrete\s+(da\s+)?aula\s+(de\s+)?hoje|lembrete\s+da\s+aula\s+hoje|envie(r)?\s+lembrete\s+(da\s+)?aula\s+(de\s+)?hoje|enviar\s+lembrete\s+(da\s+)?aula\s+(de\s+)?hoje/i.test(messageToUse) ||
+      /lembrete\s+de\s+hoje|lembrete\s+hoje/i.test(messageToUse)
+
+    if (looksLikeLembreteHoje) {
+      const { data: conversation, error: convError } = await supabaseAdmin
+        .from('whatsapp_conversations')
+        .select('id, phone, name, context, area, instance_id')
+        .eq('id', conversationId)
+        .eq('area', area)
+        .single()
+
+      if (convError || !conversation) {
+        return NextResponse.json(
+          { success: false, error: 'Conversa não encontrada' },
+          { status: 404 }
+        )
+      }
+
+      const now = new Date()
+      const todayBr = new Date(now.toLocaleString('en-US', { timeZone: 'America/Sao_Paulo' }))
+      const todayStr = todayBr.toLocaleDateString('en-CA', { timeZone: 'America/Sao_Paulo' }) // YYYY-MM-DD
+
+      const { data: sessions } = await supabaseAdmin
+        .from('whatsapp_workshop_sessions')
+        .select('id, title, starts_at, zoom_link')
+        .eq('area', area)
+        .eq('is_active', true)
+        .gte('starts_at', now.toISOString())
+        .order('starts_at', { ascending: true })
+        .limit(20)
+
+      const sessionHoje = (sessions || []).find(
+        (s) => new Date(s.starts_at).toLocaleDateString('en-CA', { timeZone: 'America/Sao_Paulo' }) === todayStr
+      )
+
+      if (!sessionHoje) {
+        return NextResponse.json(
+          { success: false, error: 'Nenhuma aula agendada para hoje. Cadastre uma sessão com data de hoje na agenda.' },
+          { status: 400 }
+        )
+      }
+
+      const ctx = (conversation.context as Record<string, unknown>) || {}
+      const leadName = getFirstName((ctx.leadName as string) || conversation.name)
+      const { time } = formatSessionDateTime(sessionHoje.starts_at)
+
+      const reminderMessage = `Olá ${leadName}! 
+
+Sua aula é hoje às ${time}! 
+
+💻 *Recomendação importante:*
+
+O ideal é participar pelo computador ou notebook, pois:
+* Compartilhamos slides
+* Fazemos explicações visuais
+* É importante acompanhar e anotar
+
+Pelo celular, a experiência fica limitada e você pode perder partes importantes da aula.
+
+🔗 ${sessionHoje.zoom_link}
+`
+
+      let instance = await getZApiInstance(area)
+      if (!instance) {
+        return NextResponse.json(
+          { success: false, error: 'Instância Z-API não encontrada para a área nutri' },
+          { status: 502 }
+        )
+      }
+      const client = createZApiClient(instance.instance_id, instance.token)
+      const sendResult = await client.sendTextMessage({
+        phone: conversation.phone,
+        message: reminderMessage,
+      })
+
+      if (!sendResult.success) {
+        return NextResponse.json(
+          { success: false, error: sendResult.error || 'Erro ao enviar lembrete' },
+          { status: 500 }
+        )
+      }
+
+      await supabaseAdmin.from('whatsapp_messages').insert({
+        conversation_id: conversation.id,
+        instance_id: instance.id,
+        z_api_message_id: sendResult.id || null,
+        sender_type: 'bot',
+        sender_name: 'Carol - Secretária',
+        message: reminderMessage,
+        message_type: 'text',
+        status: 'sent',
+        is_bot_response: true,
+      })
+
+      await supabaseAdmin
+        .from('whatsapp_conversations')
+        .update({
+          context: { ...ctx, workshop_session_id: sessionHoje.id, scheduled_date: sessionHoje.starts_at },
+          last_message_at: new Date().toISOString(),
+          last_message_from: 'bot',
+        })
+        .eq('id', conversation.id)
+
+      return NextResponse.json({
+        success: true,
+        response: `Lembrete da aula de hoje (${time}) enviado com sucesso.`,
+      })
+    }
+
     // Normalizar instruções do admin "envia link da quarta / opção 2 / amanhã 9h" → "Opção 2" ou "2"
-    const lower = messageToUse.toLowerCase()
     const looksLikeSendLink =
       /envia(r)?\s*(o)?\s*link|manda(r)?\s*(o)?\s*link|link\s*(da|de|para)\s*(quarta|opção|op|amanhã|amanha|\d+h)/i.test(messageToUse) ||
       /(envia|manda)\s+.*\s+link\s+.*\s+(quarta|opção\s*2|op\s*2|amanhã\s*9h|9h)/i.test(messageToUse) ||

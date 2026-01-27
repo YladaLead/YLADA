@@ -357,6 +357,33 @@ function WorkshopContent() {
     }
   }
 
+  const removerAgendamento = async (conversationId: string) => {
+    if (!selectedSessionForParticipants) return
+    if (!confirm('Remover esta pessoa do agendamento desta aula? Ela deixará de constar como confirmada e poderá receber novas opções de horário.')) return
+    try {
+      setSaving(true)
+      setError(null)
+      const res = await fetch('/api/admin/whatsapp/workshop/participants/remover', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          conversationId,
+          sessionId: selectedSessionForParticipants.id,
+        }),
+      })
+      const json = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(json.error || 'Erro ao remover agendamento')
+      setSuccess(json.message || 'Agendamento removido.')
+      await loadParticipants(selectedSessionForParticipants)
+      await loadAll()
+    } catch (e: any) {
+      setError(e.message || 'Erro ao remover agendamento')
+    } finally {
+      setSaving(false)
+    }
+  }
+
   const formatPhone = (phone: string) => {
     if (phone.length === 13 && phone.startsWith('55')) {
       const ddd = phone.substring(2, 4)
@@ -1155,7 +1182,7 @@ function WorkshopContent() {
                                   Ver conversa →
                                 </Link>
                               </div>
-                              <div className="flex gap-2 ml-4">
+                              <div className="flex flex-wrap gap-2 ml-4 items-center">
                                 <button
                                   onClick={() => markParticipated(participant.conversationId, true)}
                                   disabled={saving || participant.hasParticipated}
@@ -1179,6 +1206,14 @@ function WorkshopContent() {
                                   title="Marcar como não participou"
                                 >
                                   ❌ Não participou
+                                </button>
+                                <button
+                                  onClick={() => removerAgendamento(participant.conversationId)}
+                                  disabled={saving}
+                                  className="px-4 py-2 text-sm rounded-lg font-semibold bg-amber-100 text-amber-800 hover:bg-amber-200 border-2 border-amber-300 disabled:opacity-50"
+                                  title="Remover do agendamento desta aula (desagendar)"
+                                >
+                                  🚫 Remover agendamento
                                 </button>
                               </div>
                             </div>

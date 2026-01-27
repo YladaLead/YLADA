@@ -3,8 +3,9 @@
  * Processa TUDO automaticamente:
  * 1. Agenda boas-vindas para leads novos
  * 2. Processa mensagens pendentes
- * 3. Detecta quem não agendou e envia follow-up
- * 4. Reprocessa quem tem tags mas não recebeu fluxo
+ * 3. Envia lembretes de aula (2h, 12h, 10min) para quem tem sessão agendada
+ * 4. Detecta quem não agendou e envia follow-up
+ * 5. Reprocessa quem tem tags mas não recebeu fluxo
  */
 
 import { NextRequest, NextResponse } from 'next/server'
@@ -12,7 +13,7 @@ import { requireApiAuth } from '@/lib/api-auth'
 import { supabaseAdmin } from '@/lib/supabase'
 import { scheduleWelcomeMessages } from '@/lib/whatsapp-automation/welcome'
 import { processScheduledMessages } from '@/lib/whatsapp-automation/worker'
-import { sendRemarketingToNonParticipant, sendRegistrationLinkAfterClass } from '@/lib/whatsapp-carol-ai'
+import { sendRemarketingToNonParticipant, sendRegistrationLinkAfterClass, sendPreClassNotifications } from '@/lib/whatsapp-carol-ai'
 
 export async function POST(request: NextRequest) {
   try {
@@ -24,6 +25,7 @@ export async function POST(request: NextRequest) {
     const results: any = {
       welcome: { scheduled: 0, skipped: 0, errors: 0 },
       process: { processed: 0, sent: 0, failed: 0, cancelled: 0, errors: 0 },
+      pre_class: { sent: 0, errors: 0 },
       followup: { processed: 0, sent: 0, errors: 0 },
       reprocess_participou: { processed: 0, sent: 0, errors: 0 },
       reprocess_nao_participou: { processed: 0, sent: 0, errors: 0 },
@@ -39,8 +41,18 @@ export async function POST(request: NextRequest) {
     const processResult = await processScheduledMessages(50)
     results.process = processResult
 
-    // 3. Detectar quem não agendou e enviar follow-up
-    console.log('[Process All] 3️⃣ Detectando quem não agendou...')
+    // 3. Enviar lembretes de aula (2h, 12h, 10min antes) para quem tem sessão agendada
+    console.log('[Process All] 3️⃣ Enviando lembretes de aula (2h, 12h, 10min)...')
+    try {
+      const preClassResult = await sendPreClassNotifications()
+      results.pre_class = { sent: preClassResult.sent, errors: preClassResult.errors }
+    } catch (preClassErr: any) {
+      console.error('[Process All] Erro ao enviar lembretes de aula:', preClassErr)
+      results.pre_class = { sent: 0, errors: 1 }
+    }
+
+    // 4. Detectar quem não agendou e enviar follow-up
+    console.log('[Process All] 4️⃣ Detectando quem não agendou...')
     const { data: conversations } = await supabaseAdmin
       .from('whatsapp_conversations')
       .select('id, phone, name, context, created_at')
@@ -81,8 +93,8 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // 4. Reprocessar quem tem tag "participou_aula" mas não recebeu link
-    console.log('[Process All] 4️⃣ Reprocessando quem participou...')
+    // 5. Reprocessar quem tem tag "participou_aula" mas não recebeu link
+    console.log('[Process All] 5️⃣ Reprocessando quem participou...')
     if (conversations) {
       const participantes = conversations.filter((conv) => {
         const context = conv.context || {}
@@ -107,8 +119,8 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // 5. Reprocessar quem tem tag "nao_participou_aula" mas não recebeu remarketing
-    console.log('[Process All] 5️⃣ Reprocessando quem não participou...')
+    // 6. Reprocessar quem tem tag "nao_participou_aula" mas não recebeu remarketing
+    console.log('[Process All] 6️⃣ Reprocessando quem não participou...')
     if (conversations) {
       const naoParticipantes = conversations.filter((conv) => {
         const context = conv.context || {}
