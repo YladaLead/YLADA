@@ -344,28 +344,29 @@ function WhatsAppChatContent() {
     }
   }
 
-  const formatPhone = (phone: string) => {
-    if (!phone) return 'Sem telefone'
+  const formatPhone = (phone: string | unknown) => {
+    const s = typeof phone === 'string' ? phone : typeof phone === 'number' ? String(phone) : ''
+    if (!s) return 'Sem telefone'
     
     // Remover caracteres não numéricos e espaços
-    let clean = phone.replace(/\D/g, '')
+    let clean = s.replace(/\D/g, '')
     
     // Se contém @, é ID do WhatsApp - extrair apenas o número
-    if (phone.includes('@')) {
-      const match = phone.match(/(\d{10,15})/)
+    if (s.includes('@')) {
+      const match = s.match(/(\d{10,15})/)
       if (match) {
         clean = match[1]
       } else {
-        // Se não conseguir extrair, retornar como está
-        return phone
+        return s
       }
     }
     
     // Validar se é um telefone válido (10-15 dígitos)
     if (clean.length < 10 || clean.length > 15) {
-      // Número inválido - pode ser ID ou outro formato
-      console.warn('[formatPhone] Número inválido:', { original: phone, clean, length: clean.length })
-      return phone.length > 25 ? phone.substring(0, 25) + '...' : phone
+      if (typeof phone === 'object' && phone !== null) {
+        return 'Sem telefone'
+      }
+      return s.length > 25 ? s.substring(0, 25) + '...' : s
     }
     
     // Formatar telefone brasileiro: 5511999999999 -> +55 11 99999-9999 (formato WhatsApp Web)
