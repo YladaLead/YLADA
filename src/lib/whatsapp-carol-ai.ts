@@ -948,6 +948,29 @@ export async function processIncomingMessageWithCarol(
     const tags = Array.isArray(context.tags) ? context.tags : []
     const workshopSessionId = context.workshop_session_id
 
+    // 1b. Se a pessoa pedir para cancelar/desagendar e estiver agendada, desagendar e responder com mensagem curta
+    const querCancelar =
+      /não\s+vou\s+poder|não\s+posso\s+mais|quero\s+cancelar|quero\s+desmarcar|desmarcar|desistir|não\s+quero\s+mais\s+participar|não\s+quero\s+participar|tirar\s+(me)?\s+da\s+(lista|aula)|remover\s+(me)?\s+do\s+agendamento|cancelar\s+(minha\s+)?(participação|aula|inscrição)/i.test(message) ||
+      /desmarcar\s+minha\s+aula|não\s+poderei\s+ir|não\s+vou\s+conseguir\s+ir/i.test(message)
+    let desagendarResponse: string | null = null
+    if (workshopSessionId && querCancelar) {
+      const tagsFiltered = tags.filter(
+        (t: string) => t !== 'agendou_aula' && t !== 'recebeu_link_workshop'
+      )
+      const { workshop_session_id, scheduled_date, ...restContext } = context as Record<string, unknown>
+      const newContext = {
+        ...restContext,
+        tags: tagsFiltered,
+        workshop_session_id: null,
+        scheduled_date: null,
+      }
+      await supabaseAdmin
+        .from('whatsapp_conversations')
+        .update({ context: newContext })
+        .eq('id', conversationId)
+      desagendarResponse = 'Tudo bem! Desmarquei sua participação. Se quiser agendar em outro horário, é só me avisar. 😊'
+    }
+
     // 2. Buscar sessões de workshop: SEMPRE as mesmas 2 opções que a pessoa viu (próxima + manhã 9h/10h quando existir).
     // Não usar só workshop_session_id para montar a lista — senão "Opção 2" falha (só há 1 sessão na lista).
     let workshopSessions: Array<{ id: string; title: string; starts_at: string; zoom_link: string }> = []
@@ -1758,17 +1781,19 @@ Nos vemos em breve! 😊
       carolInstruction = typeof carolInstructionFromContext === 'string' ? carolInstructionFromContext : undefined
     }
 
-    const carolResponse = await generateCarolResponse(message, conversationHistory, {
-      tags,
-      workshopSessions,
-      leadName: leadName, // 🆕 Sempre passar o nome se disponível
-      hasScheduled,
-      scheduledDate,
-      participated: participated ? true : (tags.includes('nao_participou_aula') ? false : undefined),
-      isFirstMessage, // 🆕 Passar flag de primeira mensagem
-      carolInstruction,
-      adminSituacao: (context as any)?.admin_situacao, // remarketing pessoa por pessoa (persistente)
-    })
+    const carolResponse =
+      desagendarResponse ??
+      (await generateCarolResponse(message, conversationHistory, {
+        tags,
+        workshopSessions,
+        leadName: leadName, // 🆕 Sempre passar o nome se disponível
+        hasScheduled,
+        scheduledDate,
+        participated: participated ? true : (tags.includes('nao_participou_aula') ? false : undefined),
+        isFirstMessage, // 🆕 Passar flag de primeira mensagem
+        carolInstruction,
+        adminSituacao: (context as any)?.admin_situacao, // remarketing pessoa por pessoa (persistente)
+      }))
 
     console.log('[Carol AI] ✅ Resposta gerada:', {
       responsePreview: carolResponse?.substring(0, 100),

@@ -165,6 +165,68 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Comando: Remover/desagendar pessoa do agendamento
+    if (!actionExecuted && (messageLower.includes('remover') && (messageLower.includes('agendamento') || messageLower.includes('da aula') || messageLower.includes('do agendamento'))) ||
+        messageLower.includes('desagendar') || messageLower.includes('tirar') && messageLower.includes('da lista')) {
+      try {
+        const nameMatch = message.match(/(?:remover|desagendar|tirar)\s+([A-Za-zÀ-ÿ\s]+?)(?:\s+do agendamento|\s+da aula|\s+da lista|$|,|\.)/i) ||
+          message.match(/(?:remover|desagendar)\s+([A-Za-zÀ-ÿ\s]+)/i)
+        const targetName = nameMatch ? nameMatch[1].trim() : null
+
+        if (targetName) {
+          const { data: byName } = await supabaseAdmin
+            .from('whatsapp_conversations')
+            .select('id, phone, name, customer_name, context')
+            .eq('area', 'nutri')
+            .eq('status', 'active')
+            .ilike('name', `%${targetName}%`)
+            .limit(1)
+            .maybeSingle()
+
+          let conv = byName
+          if (!conv) {
+            const { data: byCustomerName } = await supabaseAdmin
+              .from('whatsapp_conversations')
+              .select('id, phone, name, customer_name, context')
+              .eq('area', 'nutri')
+              .eq('status', 'active')
+              .ilike('customer_name', `%${targetName}%`)
+              .limit(1)
+              .maybeSingle()
+            conv = byCustomerName
+          }
+          if (conv) {
+            const base = new URL(request.url).origin
+            const res = await fetch(`${base}/api/admin/whatsapp/workshop/participants/remover`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                Cookie: request.headers.get('cookie') || '',
+              },
+              body: JSON.stringify({ conversationId: conv.id }),
+            })
+            const data = await res.json().catch(() => ({}))
+            if (res.ok && data.success) {
+              actionExecuted = true
+              actionResult = `✅ ${conv.name || targetName} foi desagendado(a). Não consta mais como confirmado(a) para a aula.`
+            } else {
+              actionExecuted = true
+              actionResult = `⚠️ ${data.error || 'Erro ao remover agendamento'}`
+            }
+          } else {
+            actionExecuted = true
+            actionResult = `❌ Não encontrei ninguém com o nome "${targetName}". Verifique o nome ou use a agenda para remover manualmente.`
+          }
+        } else {
+          actionExecuted = true
+          actionResult = `❌ Por favor, informe o nome da pessoa. Ex.: "remover Maria do agendamento" ou "desagendar João"`
+        }
+      } catch (error: any) {
+        actionExecuted = true
+        actionResult = `❌ Erro ao desagendar: ${error.message}`
+      }
+    }
+
     // Comando: Disparar lembretes
     if (!actionExecuted && (messageLower.includes('disparar lembretes') || messageLower.includes('enviar lembretes') || 
         messageLower.includes('lembretes de hoje'))) {
@@ -208,6 +270,7 @@ DADOS DO SISTEMA (HOJE - ${hoje.toLocaleDateString('pt-BR')}):
 
 COMANDOS DISPONÍVEIS:
 - "envie remarketing para [nome]" - Envia fluxo de remarketing para pessoa específica
+- "remover [nome] do agendamento" / "desagendar [nome]" - Remove a pessoa da lista de confirmados da aula
 - "disparar lembretes" - Dispara lembretes para participantes agendados
 - "enviar lembretes de hoje" - Envia lembretes para sessões de hoje
 
