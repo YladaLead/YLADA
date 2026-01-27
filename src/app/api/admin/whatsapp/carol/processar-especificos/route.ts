@@ -136,17 +136,13 @@ export async function POST(request: NextRequest) {
             }
           )
           
-          // Se a mensagem não menciona interesse ou pergunta, adicionar contexto focado na dor
+          // Fallback: primeira msg de remarketing só pergunta interesse e se quer agendar (sem datas)
           if (!messageToSend.toLowerCase().includes('interesse') && !messageToSend.toLowerCase().includes('?')) {
             messageToSend = `Olá ${leadName || 'querido(a)'}! 👋
 
 Vi que você não conseguiu participar da aula anterior. Tudo bem, acontece! 😊
 
-Você ainda tem interesse em aprender como encher sua agenda? Você realmente quer saber como ter mais clientes?
-
-Se sim, me avise que eu passo as datas das próximas aulas disponíveis! 💚
-
-Carol - Secretária YLADA Nutri`
+Não se preocupe! Você ainda tem interesse? Gostaria de agendar uma aula?`
           }
         }
 

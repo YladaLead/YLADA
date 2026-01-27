@@ -64,9 +64,7 @@ Lembrete: Sua aula é amanhã!
 
 🔗 ${session.zoom_link}
 
-Nos vemos lá! 😊
-
-Carol - Secretária YLADA Nutri`
+Nos vemos lá! 😊`
 
     const result24h = await scheduleMessage({
       conversationId,
@@ -95,9 +93,7 @@ O ideal é participar pelo computador ou notebook, pois:
 
 Pelo celular, a experiência fica limitada e você pode perder partes importantes da aula.
 
-🔗 ${session.zoom_link}
-
-Carol - Secretária YLADA Nutri`
+🔗 ${session.zoom_link}`
 
     const result12h = await scheduleMessage({
       conversationId,
@@ -128,9 +124,7 @@ Isso porque os 10 primeiros minutos são essenciais:
 
 🔗 ${session.zoom_link}
 
-Nos vemos em breve! 😊
-
-Carol - Secretária YLADA Nutri`
+Nos vemos em breve! 😊`
 
     const result2h = await scheduleMessage({
       conversationId,
@@ -154,9 +148,7 @@ A sala já está aberta! 🎉
 
 Você pode entrar agora e já começar a se preparar! 
 
-Nos vemos em breve! 😊
-
-Carol - Secretária YLADA Nutri`
+Nos vemos em breve! 😊`
 
     const result30min = await scheduleMessage({
       conversationId,

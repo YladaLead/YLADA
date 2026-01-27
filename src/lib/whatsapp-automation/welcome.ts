@@ -184,9 +184,7 @@ Aqui estão as duas próximas opções de aula:
 
 ${optionsText}✅ Se precisar reagendar, responda REAGENDAR.
 
-Qualquer dúvida, é só me chamar! 💚
-
-Carol - Secretária YLADA Nutri`
+Qualquer dúvida, é só me chamar! 💚`
 
           // Agendar mensagem (scheduledFor já foi definido no início da função)
 

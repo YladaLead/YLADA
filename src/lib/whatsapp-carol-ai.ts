@@ -330,12 +330,11 @@ PRIMEIRA MENSAGEM (IMPORTANTE):
 
 QUANDO FAZER REMARKETING:
 - Pessoa agendou mas não participou
-- PRIMEIRO pergunte se ainda tem interesse, FOCANDO NA DOR: "Você ainda tem interesse em aprender como encher sua agenda?" ou "Você quer saber como ter mais clientes?"
-- NÃO mencione "programa" - foque na dor e no benefício específico (encher agenda, ter mais clientes)
-- Seja empática: "Vi que você não conseguiu participar da aula anterior. Tudo bem, acontece! 😊"
-- Se a pessoa responder positivamente, ENTÃO ofereça novas opções de data/hora
-- Seja persistente mas respeitosa
-- IMPORTANTE: Não envie as datas imediatamente. Primeiro confirme o interesse focando na dor dela!
+- A PRIMEIRA mensagem de remarketing NUNCA deve levar datas/link. Só pergunta se ainda tem interesse e se gostaria de agendar uma aula.
+- Texto sugerido (termine com a pergunta, sem explicar "se sim avise"): "Vi que você não conseguiu participar da aula anterior. Tudo bem, acontece! 😊 Não se preocupe! Você ainda tem interesse? Gostaria de agendar uma aula?"
+- Se a pessoa responder positivamente (quer agendar), ENTÃO ofereça as novas opções de data/hora com os links
+- Seja empática e respeitosa: primeiro confirme o interesse, só depois envie opções
+- NÃO mencione "programa" - foque em "agendar uma aula" e no benefício (encher agenda, ter mais clientes)
 
 IMPORTANTE - NÃO REPETIR:
 - SEMPRE leia o histórico completo antes de responder
@@ -365,6 +364,10 @@ FORMATO DE RESPOSTAS:
 - **CRUCIAL: SEMPRE envie TUDO em UMA ÚNICA mensagem. NUNCA divida sua resposta em múltiplas mensagens.**
 - **IMPORTANTE: Mantenha a mensagem unificada e coesa. Não separe informações que deveriam estar juntas.**
 
+ASSINATURA E ENCERRAMENTO (OBRIGATÓRIO):
+- NUNCA assine suas mensagens com "Carol - Secretária YLADA Nutri" ou similar. Mantenha o tom humanizado, como conversa natural.
+- Sempre que fizer sentido, termine sua resposta com uma pergunta, para manter a conversa fluindo.
+
 TRABALHANDO VENDAS E OBJEÇÕES:
 - Sempre trabalhe o emocional: lembre o motivo, o sonho, o objetivo
 - Provocar que a pessoa fale: "O que você acha?", "O que te preocupa?", "O que está te impedindo?"
@@ -374,7 +377,17 @@ TRABALHANDO VENDAS E OBJEÇÕES:
 - Trabalhe cada objeção de forma específica e personalizada
 - Sempre ofereça soluções, não apenas responda objeções
 
-OBJEÇÕES COMUNS E COMO TRABALHAR:
+FASE DE CONVITE (antes de escolher horário) – TOM MAIS LEVE:
+- Se a pessoa ainda NÃO escolheu horário e traz objeção ("não tenho tempo", "não dá nesses dias", "quanto custa?", "vou pensar"), você está na FASE DE CONVITE.
+- Nessa fase: NÃO seja agressiva. Ainda é convite para uma aula gratuita, não venda. Responde à objeção de forma curta e acolhedora, SEM repetir o bloco inteiro de boas-vindas.
+- Quando a objeção for DISPONIBILIDADE (não tenho horário, não dá nesses dias, esses horários não funcionam):
+  → Pergunte qual dia da semana é mais tranquilo para ela
+  → Se tiver sessão à noite (ex.: quarta 20h), sugira: "Te encaixa melhor à noite? Temos quarta-feira às 20h, por exemplo. Quer que eu te envie o link?"
+  → Ofereça ajudar a encontrar um horário: "Qual período costuma funcionar melhor pra você – manhã, tarde ou noite?"
+  → Não invente datas; use apenas as opções que você tem no contexto. Se não houver correspondência, diga que vai verificar outras datas e pergunte o preferido
+- Objeções de preço/tempo/"vou pensar" na fase de convite: responda em 1–2 frases, suave. Ex.: preço – "A aula é gratuita! 😊 É só escolher um horário que funcione pra você." Tempo – "São só 45 min e você aplica no dia a dia. Qual desses horários te encaixa melhor?" "Vou pensar" – "Claro! Qualquer dúvida, me chama. Qual horário tende a ser melhor pra você – manhã, tarde ou noite?"
+
+OBJEÇÕES COMUNS E COMO TRABALHAR (fase de vendas / pós-aula – tom pode ser mais direto):
 
 1. **PREÇO / VALOR:**
    - "Entendo sua preocupação com o investimento. Vamos pensar juntas: quanto você está perdendo por NÃO ter uma agenda cheia? Quanto você ganharia se tivesse 10 clientes a mais por mês? O investimento se paga rapidamente quando você aplica o que aprende."
@@ -1398,8 +1411,7 @@ O ideal é participar pelo computador ou notebook, pois:
 Pelo celular, a experiência fica limitada e você pode perder partes importantes da aula.
 
 🔗 ${selectedSession.zoom_link}
-
-Carol - Secretária YLADA Nutri`
+`
           } else if (hoursDiff >= 2 && hoursDiff < 2.5) {
             // Lembrete de 2h (aviso Zoom)
             const { weekday, date, time } = formatSessionDateTime(selectedSession.starts_at)
@@ -1419,8 +1431,7 @@ Isso porque os 10 primeiros minutos são essenciais:
 🔗 ${selectedSession.zoom_link}
 
 Nos vemos em breve! 😊
-
-Carol - Secretária YLADA Nutri`
+`
           }
           
           await supabaseAdmin
@@ -1995,8 +2006,7 @@ Aqui estão as duas próximas opções de aula:
 ${optionsText}✅ Se precisar reagendar, responda REAGENDAR.
 
 Qualquer dúvida, é só me chamar! 💚
-
-Carol - Secretária YLADA Nutri`
+`
 
         const sendResult = await sendWhatsAppMessage(
           lead.telefone,
@@ -2179,44 +2189,17 @@ export async function sendRemarketingToNonParticipant(conversationId: string): P
       return { success: false, error: 'Instância Z-API não encontrada. Verifique se há uma instância Z-API cadastrada no sistema.' }
     }
 
-    // Buscar próximas 2 sessões disponíveis
-    const { data: sessions } = await supabaseAdmin
-      .from('whatsapp_workshop_sessions')
-      .select('title, starts_at, zoom_link')
-      .eq('area', 'nutri')
-      .eq('is_active', true)
-      .gte('starts_at', new Date().toISOString())
-      .order('starts_at', { ascending: true })
-      .limit(2)
-
-    // Formatar opções de horários
-    let optionsText = ''
-    if (sessions && sessions.length > 0) {
-      sessions.forEach((session, index) => {
-        const date = new Date(session.starts_at)
-        const weekday = date.toLocaleDateString('pt-BR', { weekday: 'long' })
-        const dateStr = date.toLocaleDateString('pt-BR')
-        const time = date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
-        optionsText += `\n🗓️ **Opção ${index + 1}:**\n${weekday}, ${dateStr}\n🕒 ${time} (Brasília)\n🔗 ${session.zoom_link}\n`
-      })
-    } else {
-      optionsText = '\n📅 Em breve teremos novas datas disponíveis! Fique de olho! 😊\n'
-    }
-
     // Buscar nome do cadastro usando função helper
     const registrationName = await getRegistrationName(conversation.phone, 'nutri')
     const leadName = registrationName || conversation.name || 'querido(a)'
+
+    // Primeira mensagem de remarketing: só pergunta interesse e se quer agendar. NÃO envia datas/link.
+    // Quando a pessoa responder positivamente no chat, a Carol envia as opções (via processIncomingMessageWithCarol).
     const remarketingMessage = `Olá ${leadName}! 👋
 
 Vi que você não conseguiu participar da aula anterior. Tudo bem, acontece! 😊
 
-Que tal tentarmos novamente? Aqui estão novas opções de dias e horários:
-
-${optionsText}Se alguma dessas opções funcionar para você, é só me avisar! 
-
-Qualquer dúvida, estou aqui! 💚
-
-Carol - Secretária YLADA Nutri`
+Não se preocupe! Você ainda tem interesse? Gostaria de agendar uma aula?`
 
     const client = createZApiClient(instance.instance_id, instance.token)
     const result = await client.sendTextMessage({
@@ -2337,17 +2320,7 @@ export async function sendRemarketingToNonParticipants(): Promise<{
       return { sent: 0, errors: nonParticipants.length }
     }
 
-    // 4. Buscar próximas 2 sessões
-    const { data: sessions } = await supabaseAdmin
-      .from('whatsapp_workshop_sessions')
-      .select('title, starts_at, zoom_link')
-      .eq('area', 'nutri')
-      .eq('is_active', true)
-      .gte('starts_at', new Date().toISOString())
-      .order('starts_at', { ascending: true })
-      .limit(2)
-
-    // 5. Enviar mensagem de remarketing
+    // 4. Mensagem de remarketing: primeira msg só pergunta interesse e se quer agendar (sem enviar datas/link)
     let sent = 0
     let errors = 0
 
@@ -2374,18 +2347,6 @@ export async function sendRemarketingToNonParticipants(): Promise<{
           console.log(`[Carol Remarketing] ⏭️ Pulando ${conv.phone} - já tem tag remarketing_enviado`)
           continue
         }
-        
-        // Formatar opções
-        let optionsText = ''
-        if (sessions && sessions.length > 0) {
-          sessions.forEach((session, index) => {
-            const date = new Date(session.starts_at)
-            const weekday = date.toLocaleDateString('pt-BR', { weekday: 'long' })
-            const dateStr = date.toLocaleDateString('pt-BR')
-            const time = date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
-            optionsText += `\n🗓️ **Opção ${index + 1}:**\n${weekday}, ${dateStr}\n🕒 ${time} (Brasília)\n🔗 ${session.zoom_link}\n`
-          })
-        }
 
         // Buscar nome do cadastro usando função helper
         const registrationName = await getRegistrationName(conv.phone, 'nutri')
@@ -2394,13 +2355,7 @@ export async function sendRemarketingToNonParticipants(): Promise<{
 
 Vi que você não conseguiu participar da aula anterior. Tudo bem, acontece! 😊
 
-Que tal tentarmos novamente? Aqui estão novas opções de dias e horários:
-
-${optionsText}Se alguma dessas opções funcionar para você, é só me avisar! 
-
-Qualquer dúvida, estou aqui! 💚
-
-Carol - Secretária YLADA Nutri`
+Não se preocupe! Você ainda tem interesse? Gostaria de agendar uma aula?`
 
         const sendResult = await sendWhatsAppMessage(
           conv.phone,
@@ -2632,8 +2587,7 @@ Lembrete: Sua aula é amanhã!
 🔗 ${session.zoom_link}
 
 Nos vemos lá! 😊
-
-Carol - Secretária YLADA Nutri`
+`
           shouldSend = true
           if (!context[notificationKey]) context[notificationKey] = {}
           context[notificationKey].sent_24h = true
@@ -2660,8 +2614,7 @@ O ideal é participar pelo computador ou notebook, pois:
 Pelo celular, a experiência fica limitada e você pode perder partes importantes da aula.
 
 🔗 ${session.zoom_link}
-
-Carol - Secretária YLADA Nutri`
+`
           shouldSend = true
           if (!context[notificationKey]) context[notificationKey] = {}
           context[notificationKey].sent_12h = true
@@ -2689,8 +2642,7 @@ Isso porque os 10 primeiros minutos são essenciais:
 🔗 ${session.zoom_link}
 
 Nos vemos em breve! 😊
-
-Carol - Secretária YLADA Nutri`
+`
           shouldSend = true
           if (!context[notificationKey]) context[notificationKey] = {}
           context[notificationKey].sent_2h = true
@@ -2709,8 +2661,7 @@ Você pode entrar agora:
 🔗 ${session.zoom_link}
 
 Nos vemos em 10 minutos! 😊
-
-Carol - Secretária YLADA Nutri`
+`
           shouldSend = true
           if (!context[notificationKey]) context[notificationKey] = {}
           context[notificationKey].sent_10min = true
@@ -2860,8 +2811,7 @@ export async function sendPostClassNotifications(): Promise<{
 Espero que tenha gostado da aula! 😊
 
 Como foi sua experiência? Tem alguma dúvida?
-
-Carol - Secretária YLADA Nutri`
+`
           shouldSend = true
           if (!context[notificationKey]) context[notificationKey] = {}
           context[notificationKey].sent_15min = true
@@ -2873,8 +2823,7 @@ Carol - Secretária YLADA Nutri`
 Como está se sentindo após a aula? 
 
 Se tiver alguma dúvida sobre o que foi apresentado, estou aqui para ajudar! 😊
-
-Carol - Secretária YLADA Nutri`
+`
           shouldSend = true
           if (!context[notificationKey]) context[notificationKey] = {}
           context[notificationKey].sent_2h = true
@@ -2886,8 +2835,7 @@ Carol - Secretária YLADA Nutri`
 Passou um dia desde a aula. Como está sendo aplicar o que aprendeu?
 
 Se precisar de ajuda ou tiver dúvidas, estou aqui! 💚
-
-Carol - Secretária YLADA Nutri`
+`
           shouldSend = true
           if (!context[notificationKey]) context[notificationKey] = {}
           context[notificationKey].sent_24h = true
@@ -3034,8 +2982,7 @@ export async function sendFollowUpToNonResponders(): Promise<{
 Vi que você ainda não escolheu um horário para a aula. 
 
 Ainda está disponível? Se precisar de ajuda, é só me chamar! 😊
-
-Carol - Secretária YLADA Nutri`
+`
           shouldSend = true
           if (!context[notificationKey]) context[notificationKey] = {}
           context[notificationKey].sent_24h = true
@@ -3059,8 +3006,7 @@ Se alguma dessas opções funcionar, é só me avisar:
 
 🗓️ *Opções Disponíveis:*
 ${optionsText}Qualquer dúvida, estou à disposição! 💚
-
-Carol - Secretária YLADA Nutri`
+`
           shouldSend = true
           if (!context[notificationKey]) context[notificationKey] = {}
           context[notificationKey].sent_48h = true
@@ -3072,8 +3018,7 @@ Carol - Secretária YLADA Nutri`
 Esta é minha última mensagem sobre a aula. Se ainda tiver interesse, me avise! 
 
 Caso contrário, tudo bem também. 😊
-
-Carol - Secretária YLADA Nutri`
+`
           shouldSend = true
           if (!context[notificationKey]) context[notificationKey] = {}
           context[notificationKey].sent_72h = true
@@ -3271,8 +3216,7 @@ Ficou alguma dúvida?
 Você não quer começar? Vamos começar?
 
 O que está passando pela sua cabeça? 😊
-
-Carol - Secretária YLADA Nutri`
+`
           shouldSend = true
           if (!context[notificationKey]) context[notificationKey] = {}
           context[notificationKey].sent_3h = true
@@ -3294,8 +3238,7 @@ Pensa no que você vai ganhar: um estado de espírito completamente diferente, a
 E você pode começar pelo menos com o mensal para se certificar de que é isso mesmo que você quer. Sem compromisso de longo prazo.
 
 Qual é a sua maior dúvida ou objeção para começar agora? 😊
-
-Carol - Secretária YLADA Nutri`
+`
           shouldSend = true
           if (!context[notificationKey]) context[notificationKey] = {}
           context[notificationKey].sent_12h = true
@@ -3321,8 +3264,7 @@ Pensa no estado de espírito que você vai adquirir, na transformação que voc�
 E você pode começar pelo menos com o mensal para se certificar. Sem pressão, sem compromisso de longo prazo.
 
 O que está te impedindo de começar agora? É o investimento, o tempo, ou alguma dúvida específica? 💚
-
-Carol - Secretária YLADA Nutri`
+`
           shouldSend = true
           if (!context[notificationKey]) context[notificationKey] = {}
           context[notificationKey].sent_24h = true
@@ -3352,8 +3294,7 @@ Você merece ver esse sonho se tornar realidade.
 Qual é a sua maior objeção? Investimento, tempo, ou outra coisa? 
 
 O que está te travando exatamente? O momento é AGORA. Vamos conversar? 💚
-
-Carol - Secretária YLADA Nutri`
+`
           shouldSend = true
           if (!context[notificationKey]) context[notificationKey] = {}
           context[notificationKey].sent_48h = true
@@ -3543,8 +3484,7 @@ Você prefere começar com o plano mensal para validar e verificar, ou você já
 🔗 ${registrationUrl}
 
 O que você acha? 😊
-
-Carol - Secretária YLADA Nutri`
+`
 
     const result = await client.sendTextMessage({
       phone: conversation.phone,
@@ -3748,8 +3688,7 @@ Aqui está o link da sua aula:
 ${session.zoom_link}
 
 Nos vemos em breve! 😊
-
-Carol - Secretária YLADA Nutri`
+`
 
           // Enviar mensagem
           const result = await client.sendTextMessage({
@@ -3881,8 +3820,7 @@ Lá você vai receber:
 ✅ Tudo que precisa para começar
 
 Estamos aqui para te apoiar em cada passo! 💚
-
-Carol - Secretária YLADA Nutri`
+`
 
     const result = await client.sendTextMessage({
       phone: conversation.phone,
