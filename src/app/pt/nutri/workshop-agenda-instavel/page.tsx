@@ -172,17 +172,17 @@ export default function WorkshopAgendaInstavelPage() {
           </div>
         </main>
 
-        {/* Footer - mesma imagem temática da aula */}
+        {/* Footer - logo Nutri */}
         <footer className="bg-white border-t border-gray-200 py-8">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="max-w-4xl mx-auto text-center">
-              <Link href="/pt/nutri" className="inline-block">
+              <Link href="/pt/nutri">
                 <Image
-                  src="/images/workshop-agenda-instavel/banner-aula-agenda.png"
-                  alt="Aula prática: sua agenda cheia - YLADA Nutri"
-                  width={280}
-                  height={56}
-                  className="h-10 sm:h-12 mx-auto mb-4 opacity-90 object-contain"
+                  src="/images/logo/nutri-horizontal.png"
+                  alt="YLADA Nutri"
+                  width={133}
+                  height={40}
+                  className="h-8 mx-auto mb-4 opacity-90"
                 />
               </Link>
               <p className="text-gray-600 text-sm">
@@ -583,17 +583,17 @@ export default function WorkshopAgendaInstavelPage() {
         </section>
       </main>
 
-      {/* Footer - mesma imagem temática da aula */}
+      {/* Footer - logo Nutri */}
       <footer className="bg-white border-t border-gray-200 py-8">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-4xl mx-auto text-center">
-            <Link href="/pt/nutri" className="inline-block">
+            <Link href="/pt/nutri">
               <Image
-                src="/images/workshop-agenda-instavel/banner-aula-agenda.png"
-                alt="Aula prática: sua agenda cheia - YLADA Nutri"
-                width={280}
-                height={56}
-                className="h-10 sm:h-12 mx-auto mb-4 opacity-90 object-contain"
+                src="/images/logo/nutri-horizontal.png"
+                alt="YLADA Nutri"
+                width={133}
+                height={40}
+                className="h-8 mx-auto mb-4 opacity-90"
               />
             </Link>
             <p className="text-gray-600 text-sm">
