@@ -1226,16 +1226,21 @@ function WhatsAppChatContent() {
                           )}
                           <button
                             type="button"
-                            onClick={() => {
+                            onClick={async () => {
                               const current = (selectedConversation.context as any)?.carol_instruction || ''
                               const next = prompt(
-                                'Instrução para a Carol (será usada na próxima resposta e depois apagada):\nEx.: "Considerar que esta pessoa já fez apresentação"',
+                                'Instrução para a Carol (será usada na próxima resposta e depois apagada).\n\nMantenha a Carol ATIVA. A instrução só é usada quando:\n• a pessoa enviar a próxima mensagem no WhatsApp, ou\n• você usar o botão "Carol" (roxo) para simular uma mensagem dela.\n\nEx.: "Essa pessoa fez a apresentação, gostou e ficou de pensar. Continuar daqui."',
                                 current
                               )
                               setContactMenuOpen(false)
                               if (next === null) return
-                              patchConversation(selectedConversation.id, { context: { carol_instruction: next.trim() || null } }).catch((err) => alert(err.message))
-                              loadConversations()
+                              try {
+                                await patchConversation(selectedConversation.id, { context: { carol_instruction: next.trim() || null } })
+                                alert('✅ Instrução salva!\n\nSerá usada quando esta pessoa enviar a próxima mensagem (ou quando você clicar no botão "Carol" para simular). Depois a Carol apaga a instrução.\n\nMantenha a Carol ativa nesta conversa.')
+                                setTimeout(() => loadConversations(), 0)
+                              } catch (err: any) {
+                                alert(err?.message || 'Erro ao salvar instrução')
+                              }
                             }}
                             className="w-full text-left px-4 py-2 text-sm hover:bg-gray-50"
                           >
@@ -1243,16 +1248,21 @@ function WhatsAppChatContent() {
                           </button>
                           <button
                             type="button"
-                            onClick={() => {
+                            onClick={async () => {
                               const current = (selectedConversation.context as any)?.admin_situacao || ''
                               const next = prompt(
-                                'Situação desta pessoa (remarketing) – fica salva até você mudar.\nA Carol usa isso em toda resposta para continuar daqui.\n\nEx.: "Não participou da última aula. Fazer remarketing oferecendo quarta 20h."\nEx.: "Disse que prefere à noite, já enviei opção quarta 20h – aguardando confirmação."',
+                                'Situação desta pessoa (remarketing) – fica salva até você mudar.\nA Carol usa isso em toda resposta para continuar daqui. Mantenha a Carol ativa.\n\nEx.: "Não participou da última aula. Fazer remarketing oferecendo quarta 20h."\nEx.: "Fez apresentação, gostou e ficou de pensar – continuar daqui."',
                                 current
                               )
                               setContactMenuOpen(false)
                               if (next === null) return
-                              patchConversation(selectedConversation.id, { context: { admin_situacao: next.trim() || null } }).catch((err) => alert(err.message))
-                              loadConversations()
+                              try {
+                                await patchConversation(selectedConversation.id, { context: { admin_situacao: next.trim() || null } })
+                                alert('✅ Situação salva!\n\nA Carol vai usar isso em todas as respostas até você mudar. Mantenha a Carol ativa.')
+                                setTimeout(() => loadConversations(), 0)
+                              } catch (err: any) {
+                                alert(err?.message || 'Erro ao salvar situação')
+                              }
                             }}
                             className="w-full text-left px-4 py-2 text-sm hover:bg-gray-50"
                           >
