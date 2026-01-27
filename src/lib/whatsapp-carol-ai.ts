@@ -2091,6 +2091,19 @@ export async function sendRemarketingToNonParticipant(conversationId: string): P
       }
     }
 
+    // Verificar se está em horário permitido para enviar mensagem automática
+    const timeCheck = isAllowedTimeToSendMessage()
+    if (!timeCheck.allowed) {
+      console.log('[Carol Remarketing] ⏰ Fora do horário permitido:', {
+        reason: timeCheck.reason,
+        nextAllowedTime: timeCheck.nextAllowedTime?.toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })
+      })
+      return { 
+        success: false, 
+        error: `Mensagem automática não enviada: ${timeCheck.reason}. Próximo horário permitido: ${timeCheck.nextAllowedTime?.toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })}` 
+      }
+    }
+
     // Buscar instância Z-API usando função helper centralizada
     const instance = await getZApiInstance(area)
 
@@ -3366,6 +3379,19 @@ export async function sendRegistrationLinkAfterClass(conversationId: string): Pr
     // Verificar se já recebeu link de cadastro
     if (context.registration_link_sent === true) {
       return { success: false, error: 'Link de cadastro já foi enviado' }
+    }
+
+    // Verificar se está em horário permitido para enviar mensagem automática
+    const timeCheck = isAllowedTimeToSendMessage()
+    if (!timeCheck.allowed) {
+      console.log('[Carol Registration Link] ⏰ Fora do horário permitido:', {
+        reason: timeCheck.reason,
+        nextAllowedTime: timeCheck.nextAllowedTime?.toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })
+      })
+      return { 
+        success: false, 
+        error: `Mensagem automática não enviada: ${timeCheck.reason}. Próximo horário permitido: ${timeCheck.nextAllowedTime?.toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })}` 
+      }
     }
 
     // Buscar instância Z-API usando função helper centralizada

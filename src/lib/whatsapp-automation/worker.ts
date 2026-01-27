@@ -7,7 +7,7 @@
 import { supabaseAdmin } from '@/lib/supabase'
 import { createZApiClient } from '@/lib/z-api'
 import { getPendingMessages, markAsSent, markAsFailed, ScheduledMessage } from './scheduler'
-import { sendWhatsAppMessage } from '../whatsapp-carol-ai'
+import { sendWhatsAppMessage, isAllowedTimeToSendMessage } from '../whatsapp-carol-ai'
 
 /**
  * Processa mensagens agendadas pendentes
@@ -83,6 +83,35 @@ export async function processScheduledMessages(limit: number = 50): Promise<{
           await markAsFailed(message.id, 'Telefone não encontrado')
           failed++
           errors++
+          continue
+        }
+
+        // Verificar se está em horário permitido para enviar
+        const timeCheck = isAllowedTimeToSendMessage()
+        if (!timeCheck.allowed) {
+          // Se não está em horário permitido, verificar se a mensagem já passou do horário agendado
+          const scheduledFor = new Date(message.scheduled_for)
+          const now = new Date()
+          
+          // Se a mensagem foi agendada para um horário específico e ainda não passou, manter pendente
+          if (now < scheduledFor) {
+            // Ainda não é hora de enviar, manter pendente
+            continue
+          }
+          
+          // Se já passou do horário agendado mas não está em horário permitido,
+          // reagendar para o próximo horário permitido
+          const nextAllowedTime = timeCheck.nextAllowedTime || new Date(Date.now() + 24 * 60 * 60 * 1000)
+          
+          await supabaseAdmin
+            .from('whatsapp_scheduled_messages')
+            .update({
+              scheduled_for: nextAllowedTime.toISOString(),
+              updated_at: new Date().toISOString(),
+            })
+            .eq('id', message.id)
+          
+          console.log(`[Worker] ⏰ Mensagem ${message.id} reagendada para ${nextAllowedTime.toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })} - ${timeCheck.reason}`)
           continue
         }
 

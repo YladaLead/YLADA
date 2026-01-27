@@ -23,14 +23,15 @@ export async function scheduleWelcomeMessages(): Promise<{
   try {
     // Verificar se está em horário permitido
     const timeCheck = isAllowedTimeToSendMessage()
+    const scheduledFor = timeCheck.allowed 
+      ? new Date() // Se está em horário permitido, agendar para agora
+      : (timeCheck.nextAllowedTime || new Date(Date.now() + 24 * 60 * 60 * 1000)) // Senão, próximo horário permitido
+    
     if (!timeCheck.allowed) {
-      console.log('[Welcome] ⏰ Fora do horário permitido:', {
+      console.log('[Welcome] ⏰ Fora do horário permitido, agendando para:', {
         reason: timeCheck.reason,
-        nextAllowedTime: timeCheck.nextAllowedTime?.toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })
+        nextAllowedTime: scheduledFor.toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })
       })
-      // Se fora do horário, agendar para o próximo horário permitido
-      const scheduledFor = timeCheck.nextAllowedTime || new Date(Date.now() + 24 * 60 * 60 * 1000)
-      // Continuar processamento mas agendar para depois
     }
 
     // 1. Buscar leads dos últimos 7 dias
@@ -178,12 +179,7 @@ Qualquer dúvida, é só me chamar! 💚
 
 Carol - Secretária YLADA Nutri`
 
-          // Agendar mensagem
-          // Se está em horário permitido, agendar para agora
-          // Se não, agendar para próximo horário permitido
-          const scheduledFor = timeCheck.allowed 
-            ? new Date() 
-            : (timeCheck.nextAllowedTime || new Date(Date.now() + 24 * 60 * 60 * 1000))
+          // Agendar mensagem (scheduledFor já foi definido no início da função)
 
           const result = await scheduleMessage({
             phone: phoneFormatted,
