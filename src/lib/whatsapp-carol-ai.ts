@@ -123,6 +123,23 @@ export function getFirstName(fullName: string | null | undefined): string {
 }
 
 /**
+ * Verifica se o texto é nome da empresa e NUNCA deve ser usado como nome da pessoa.
+ * Evita que a Carol chame o lead de "Ylada" quando o payload/conversa traz o nome do negócio.
+ */
+function isBusinessName(name: string | null | undefined): boolean {
+  if (!name || typeof name !== 'string') return false
+  const s = name.trim().toLowerCase()
+  if (!s) return false
+  return (
+    s === 'ylada' ||
+    s.startsWith('ylada nutri') ||
+    s === 'ylada nutri' ||
+    /^ylada\s*nutri$/i.test(s) ||
+    (s.includes('ylada') && s.length <= 15)
+  )
+}
+
+/**
  * Busca nome do cadastro (workshop_inscricoes ou contact_submissions)
  * Prioriza workshop_inscricoes sobre contact_submissions
  * Retorna null se não encontrar (não retorna nome do WhatsApp)
@@ -1097,7 +1114,38 @@ export async function processIncomingMessageWithCarol(
         }
       }
       
-      // Detectar por dia/horário: "segunda às 10:00", "26/01 às 10:00", "segunda s 10hs", etc
+      // Detectar por dia da semana quando a mensagem pede "link da quarta", "opção quarta", "quarta 9h", etc.
+      // "quarta" aqui é dia da semana (quarta-feira), não a 4ª opção — só temos Opção 1 e Opção 2.
+      if (!selectedSession) {
+        const weekdayKeywords: Record<string, string> = {
+          'segunda': 'segunda', 'terça': 'terça', 'terca': 'terça', 'quarta': 'quarta', 'quinta': 'quinta',
+          'sexta': 'sexta', 'sábado': 'sábado', 'sabado': 'sábado', 'domingo': 'domingo'
+        }
+        for (const sessionItem of workshopSessions) {
+          const { weekday } = formatSessionDateTime(sessionItem.starts_at)
+          const weekdayLower = weekday.toLowerCase()
+          for (const [key, _] of Object.entries(weekdayKeywords)) {
+            if (weekdayLower.includes(key) && messageLower.includes(key)) {
+              selectedSession = {
+                id: sessionItem.id,
+                title: sessionItem.title,
+                starts_at: sessionItem.starts_at,
+                zoom_link: sessionItem.zoom_link
+              }
+              console.log('[Carol AI] ✅ Sessão detectada por dia da semana:', {
+                sessionId: sessionItem.id,
+                weekday,
+                key,
+                message: messageLower
+              })
+              break
+            }
+          }
+          if (selectedSession) break
+        }
+      }
+
+      // Detectar por dia/horário: "segunda às 10:00", "26/01 às 10:00", "9h", "amanhã 9h", etc
       if (!selectedSession) {
         // Extrair números de horário da mensagem (ex: "10", "15", "9", "20")
         const hourMatches = messageLower.match(/\b(\d{1,2})\s*(?:h|hs|horas|:)/g)
@@ -1657,10 +1705,16 @@ Nos vemos em breve! 😊
       isFirstMessage
     })
 
-    // 🆕 Priorizar nome do cadastro, customer_name (form) e context; Carol usa apenas PRIMEIRO NOME
+    // 🆕 Priorizar nome do cadastro; NUNCA usar "Ylada"/"Ylada Nutri" como nome da pessoa (payload às vezes traz nome do negócio)
     const conv = conversation as { name?: string | null; customer_name?: string | null }
-    const rawName = registrationName || (context as any)?.lead_name || conversation.name || conv?.customer_name || ''
-    const leadName = getFirstName(rawName) || 'querido(a)'
+    let rawName = registrationName || (context as any)?.lead_name || conversation.name || conv?.customer_name || ''
+    if (isBusinessName(rawName)) {
+      rawName = registrationName || (context as any)?.lead_name || ''
+    }
+    let leadName = getFirstName(rawName) || 'querido(a)'
+    if (isBusinessName(leadName)) {
+      leadName = 'querido(a)'
+    }
 
     // Mensagem do botão → instrução para NÃO repetir boas-vindas/opções (form envia em 15s ou já enviou)
     const carolInstructionFromContext = (context as any)?.carol_instruction

@@ -75,6 +75,7 @@ function WhatsAppChatContent() {
   const [messagePhaseTipo, setMessagePhaseTipo] = useState<'fechamento' | 'remarketing' | null>(null)
   const [messagePhasePreview, setMessagePhasePreview] = useState('')
   const [messagePhaseLoading, setMessagePhaseLoading] = useState(false)
+  const [sendingWorkshopInvite, setSendingWorkshopInvite] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
   const [contactMenuOpen, setContactMenuOpen] = useState(false)
   const [showScrollToBottom, setShowScrollToBottom] = useState(false)
@@ -1069,7 +1070,10 @@ function WhatsAppChatContent() {
                     )}
                     <button
                       type="button"
+                      disabled={sendingWorkshopInvite}
                       onClick={async () => {
+                        if (!selectedConversation || sendingWorkshopInvite) return
+                        setSendingWorkshopInvite(true)
                         try {
                           const res = await fetch(
                             `/api/whatsapp/conversations/${selectedConversation.id}/send-workshop-invite`,
@@ -1077,19 +1081,19 @@ function WhatsAppChatContent() {
                           )
                           const json = await res.json().catch(() => ({}))
                           if (!res.ok) throw new Error(json.error || 'Erro ao enviar convite')
-                          setTimeout(() => {
-                            loadMessages(selectedConversation.id)
-                            loadConversations()
-                          }, 200)
+                          await loadMessages(selectedConversation.id)
+                          await loadConversations()
                         } catch (err: any) {
                           alert(err.message || 'Erro ao enviar convite')
+                        } finally {
+                          setSendingWorkshopInvite(false)
                         }
                       }}
-                      className="h-10 w-10 flex items-center justify-center rounded-full bg-blue-50 hover:bg-blue-100 text-blue-700"
+                      className="h-10 w-10 flex items-center justify-center rounded-full bg-blue-50 hover:bg-blue-100 text-blue-700 disabled:opacity-50 disabled:pointer-events-none"
                       title="Enviar flyer + detalhes da próxima aula"
                       aria-label="Enviar flyer + detalhes da próxima aula"
                     >
-                      📩
+                      {sendingWorkshopInvite ? '…' : '📩'}
                     </button>
                     <button
                       type="button"

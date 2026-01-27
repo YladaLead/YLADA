@@ -1047,11 +1047,17 @@ export async function POST(request: NextRequest) {
     const area = await identifyArea(phone, message, finalInstanceId)
     console.log('[Z-API Webhook] 🏷️ Área identificada:', area)
 
+    // Não usar "Ylada"/"Ylada Nutri" como nome do contato quando a mensagem é do cliente (payload às vezes traz nome do negócio)
+    const nameForConv =
+      !isFromUs && name && /ylada(\s*nutri)?/i.test(String(name).trim())
+        ? null
+        : name || null
+
     // 2. Criar ou buscar conversa
     const conversationId = await getOrCreateConversation(
       finalInstanceId,
       phone,
-      name || null,
+      nameForConv,
       area
       ,
       { is_group: isGroup }
