@@ -21,19 +21,50 @@ function CarolControlContent() {
     setResult(null)
 
     try {
-      const response = await fetch('/api/admin/whatsapp/carol/disparos', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ tipo }),
-      })
+      // Se for welcome, usar novo endpoint de agendamento
+      if (tipo === 'welcome') {
+        const response = await fetch('/api/admin/whatsapp/automation/welcome', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+        })
 
-      const data = await response.json()
+        const data = await response.json()
 
-      if (data.success) {
-        setResult({ sent: data.sent, errors: data.errors })
+        if (data.success) {
+          setResult({ sent: data.scheduled, errors: data.errors, skipped: data.skipped })
+          // Depois de agendar, processar pendentes
+          setTimeout(async () => {
+            try {
+              await fetch('/api/admin/whatsapp/automation/process', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ limit: 50 }),
+              })
+            } catch (e) {
+              // Ignorar erro silenciosamente
+            }
+          }, 1000)
+        } else {
+          alert(`Erro: ${data.error}`)
+        }
       } else {
-        alert(`Erro: ${data.error}`)
+        // Para remarketing e reminders, usar endpoint antigo (ainda funciona)
+        const response = await fetch('/api/admin/whatsapp/carol/disparos', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ tipo }),
+        })
+
+        const data = await response.json()
+
+        if (data.success) {
+          setResult({ sent: data.sent, errors: data.errors })
+        } else {
+          alert(`Erro: ${data.error}`)
+        }
       }
     } catch (error: any) {
       alert(`Erro ao disparar: ${error.message}`)
@@ -83,6 +114,13 @@ function CarolControlContent() {
             </div>
             <div className="flex items-center gap-3">
               <Link
+                href="/admin/whatsapp/automation"
+                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm flex items-center gap-2"
+                title="Nova Interface de Automação"
+              >
+                ⚙️ Automação
+              </Link>
+              <Link
                 href="/admin/whatsapp/carol/chat"
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm flex items-center gap-2"
               >
@@ -101,6 +139,32 @@ function CarolControlContent() {
 
       {/* Conteúdo */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Aviso sobre Nova Interface */}
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+          <div className="flex items-start gap-3">
+            <div className="flex-shrink-0">
+              <span className="text-2xl">✨</span>
+            </div>
+            <div className="flex-1">
+              <h3 className="font-semibold text-blue-900 mb-1">Nova Interface de Automação Disponível!</h3>
+              <p className="text-sm text-blue-700 mb-3">
+                Agora temos uma interface mais simples e focada para gerenciar automações WhatsApp.
+                Use o botão "⚙️ Automação" no topo ou{' '}
+                <Link href="/admin/whatsapp/automation" className="underline font-medium">
+                  clique aqui
+                </Link>
+                .
+              </p>
+              <Link
+                href="/admin/whatsapp/automation"
+                className="inline-block px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm"
+              >
+                Ir para Nova Interface →
+              </Link>
+            </div>
+          </div>
+        </div>
+
         {/* Cards de Ação */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
           {/* Disparo de Boas-vindas */}
@@ -119,8 +183,13 @@ function CarolControlContent() {
             {result && (
               <div className="mt-4 p-3 bg-green-50 rounded-lg">
                 <p className="text-sm text-green-800">
-                  ✅ Enviadas: {result.sent} | ❌ Erros: {result.errors}
+                  ✅ Agendadas: {result.sent || 0} | ⏭️ Puladas: {result.skipped || 0} | ❌ Erros: {result.errors || 0}
                 </p>
+                {result.sent > 0 && (
+                  <p className="text-xs text-green-600 mt-1">
+                    💡 Mensagens foram agendadas. Use "Verificar e Processar" na nova interface para enviar.
+                  </p>
+                )}
               </div>
             )}
           </div>
@@ -405,121 +474,49 @@ function CarolControlContent() {
           })()}
         </div>
 
-        {/* Disparar para Pendentes */}
+        {/* Processar Mensagens Agendadas */}
         <div className="bg-white rounded-lg shadow p-6 mb-6">
-          <h2 className="text-xl font-bold text-gray-900 mb-4">📤 Disparar para Pendentes</h2>
+          <h2 className="text-xl font-bold text-gray-900 mb-4">⚙️ Processar Mensagens Agendadas</h2>
           <p className="text-sm text-gray-600 mb-4">
-            Envia mensagens para quem ainda não escolheu agenda ou ainda está na primeira mensagem.
-            <br />• <strong>Primeira mensagem:</strong> Quem ainda não recebeu mensagem da Carol
-            <br />• <strong>Não escolheu agenda:</strong> Quem veio do workshop mas ainda não agendou
+            Processa mensagens que foram agendadas e estão prontas para envio.
+            <br />💡 <strong>Dica:</strong> Use a nova interface de automação para mais opções.
           </p>
           <div className="space-y-2">
             <button
               onClick={async () => {
-                if (!confirm('Isso vai enviar mensagens para quem não escolheu agenda e quem ainda está na primeira mensagem. Continuar?')) {
-                  return
-                }
                 setLoading(true)
-                setCancelling(false)
-                const controller = new AbortController()
-                setAbortController(controller)
-                
                 try {
-                  const response = await fetch('/api/admin/whatsapp/carol/disparar-pendentes', {
+                  const response = await fetch('/api/admin/whatsapp/automation/process', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     credentials: 'include',
-                    signal: controller.signal,
-                    body: JSON.stringify({ 
-                      area: 'nutri',
-                      tipos: ['primeira_mensagem', 'nao_escolheu_agenda']
-                    })
+                    body: JSON.stringify({ limit: 50 }),
                   })
-                  
-                  if (cancelling) {
-                    return // Cancelado pelo usuário
-                  }
                   
                   const data = await response.json()
                   if (data.success) {
-                    alert(`✅ Disparo concluído!\n\n📊 Estatísticas:\n- Processadas: ${data.processed}\n- Enviadas: ${data.sent}\n- Erros: ${data.errors}\n\n📋 Detalhes:\n${data.details?.slice(0, 20).join('\n') || 'Nenhum detalhe disponível'}${data.details && data.details.length > 20 ? `\n\n... e mais ${data.details.length - 20}` : ''}`)
+                    alert(`✅ Processamento concluído!\n\n📊 Estatísticas:\n- Processadas: ${data.processed}\n- Enviadas: ${data.sent}\n- Falhadas: ${data.failed}\n- Canceladas: ${data.cancelled}\n- Erros: ${data.errors}`)
                   } else {
                     alert(`Erro: ${data.error}`)
                   }
                 } catch (error: any) {
-                  if (error.name === 'AbortError' || cancelling) {
-                    alert('⚠️ Disparo cancelado. Algumas mensagens podem ter sido enviadas antes do cancelamento.')
-                  } else {
-                    alert(`Erro: ${error.message}`)
-                  }
+                  alert(`Erro: ${error.message}`)
                 } finally {
                   setLoading(false)
-                  setCancelling(false)
-                  setAbortController(null)
                 }
               }}
-              disabled={loading || cancelling}
-              className="w-full px-4 py-3 bg-orange-600 text-white rounded-lg hover:bg-orange-700 disabled:opacity-50"
+              disabled={loading}
+              className="w-full px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50"
             >
-              {loading ? 'Disparando...' : '📤 Disparar para Pendentes (Primeira Mensagem + Não Escolheu Agenda)'}
+              {loading ? 'Processando...' : '⚙️ Verificar e Processar Mensagens Agendadas'}
             </button>
-            
-            {loading && (
-              <button
-                onClick={() => {
-                  if (confirm('Tem certeza que deseja cancelar o disparo? Algumas mensagens podem já ter sido enviadas.')) {
-                    setCancelling(true)
-                    if (abortController) {
-                      abortController.abort()
-                    }
-                    setLoading(false)
-                    setAbortController(null)
-                  }
-                }}
-                className="w-full px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
-              >
-                🛑 Cancelar Disparo
-              </button>
-            )}
+            <Link
+              href="/admin/whatsapp/automation"
+              className="block w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-center text-sm"
+            >
+              Ir para Nova Interface de Automação →
+            </Link>
           </div>
-        </div>
-
-        {/* Processar Conversas Existentes */}
-        <div className="bg-white rounded-lg shadow p-6 mb-6">
-          <h2 className="text-xl font-bold text-gray-900 mb-4">🚀 Processar Conversas Existentes</h2>
-          <p className="text-sm text-gray-600 mb-4">
-            Analisa conversas existentes, identifica status (agendou, não agendou, participou, etc.) e envia mensagens apropriadas da Carol automaticamente.
-          </p>
-          <button
-            onClick={async () => {
-              if (!confirm('Isso vai analisar todas as conversas e enviar mensagens da Carol. Continuar?')) {
-                return
-              }
-              setLoading(true)
-              try {
-                const response = await fetch('/api/admin/whatsapp/carol/processar-conversas', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  credentials: 'include',
-                  body: JSON.stringify({ area: 'nutri' })
-                })
-                const data = await response.json()
-                if (data.success) {
-                  alert(`✅ Processamento concluído!\n\n📊 Estatísticas:\n- Analisadas: ${data.analyzed}\n- Processadas: ${data.processed}\n- Enviadas: ${data.sent}\n- Erros: ${data.errors}\n\n📋 Detalhes:\n${data.details || 'Nenhum detalhe disponível'}`)
-                } else {
-                  alert(`Erro: ${data.error}`)
-                }
-              } catch (error: any) {
-                alert(`Erro: ${error.message}`)
-              } finally {
-                setLoading(false)
-              }
-            }}
-            disabled={loading}
-            className="w-full px-4 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50"
-          >
-            {loading ? 'Processando...' : '🚀 Processar Todas as Conversas'}
-          </button>
         </div>
 
         {/* Processar Pessoas Específicas */}
