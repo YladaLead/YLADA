@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import AdminProtectedRoute from '@/components/auth/AdminProtectedRoute'
 import Link from 'next/link'
 
@@ -13,6 +13,19 @@ function AutomationContent() {
   const [testConversationId, setTestConversationId] = useState('')
   const [testMessage, setTestMessage] = useState('Olá, quero agendar uma aula')
   const [telefonesEspecificos, setTelefonesEspecificos] = useState('')
+  const [autoProcess, setAutoProcess] = useState(false)
+
+  // Processar automaticamente ao carregar (se habilitado)
+  useEffect(() => {
+    const saved = localStorage.getItem('whatsapp-auto-process')
+    if (saved === 'true') {
+      setAutoProcess(true)
+      // Processar após 1 segundo (dar tempo para carregar)
+      setTimeout(() => {
+        handleProcessAll()
+      }, 1000)
+    }
+  }, [])
 
   // Agendar Boas-vindas
   const handleWelcome = async () => {
@@ -304,13 +317,27 @@ function AutomationContent() {
             <p className="text-purple-100 mb-4 text-sm">
               Processa tudo de uma vez: agenda boas-vindas, processa pendentes, reprocessa quem tem tags mas não recebeu fluxo.
             </p>
-            <button
-              onClick={handleProcessAll}
-              disabled={processing}
-              className="w-full bg-white text-purple-600 px-6 py-3 rounded-lg hover:bg-purple-50 disabled:opacity-50 disabled:cursor-not-allowed font-semibold"
-            >
-              {processing ? 'Processando TUDO...' : '🚀 Processar TUDO Automaticamente'}
-            </button>
+            <div className="space-y-3">
+              <button
+                onClick={handleProcessAll}
+                disabled={processing}
+                className="w-full bg-white text-purple-600 px-6 py-3 rounded-lg hover:bg-purple-50 disabled:opacity-50 disabled:cursor-not-allowed font-semibold"
+              >
+                {processing ? 'Processando TUDO...' : '🚀 Processar TUDO Automaticamente'}
+              </button>
+              <label className="flex items-center gap-2 text-purple-100 text-sm cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={autoProcess}
+                  onChange={(e) => {
+                    setAutoProcess(e.target.checked)
+                    localStorage.setItem('whatsapp-auto-process', e.target.checked ? 'true' : 'false')
+                  }}
+                  className="w-4 h-4 rounded"
+                />
+                Processar automaticamente ao abrir esta página
+              </label>
+            </div>
           </div>
 
           {/* Cards Principais */}
