@@ -1,0 +1,8 @@
+Coloque aqui a imagem da aula "Encher a agenda para nutricionista".
+
+Nome do arquivo: banner-aula-agenda.jpg (ou .png)
+
+A imagem será exibida no header da página:
+https://www.ylada.com/pt/nutri/workshop-agenda-instavel
+
+Sugestão: imagem que represente aula ao vivo, agenda, nutricionista, planejamento (ex.: calendário, pessoas em aula, agenda preenchida).

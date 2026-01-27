@@ -119,14 +119,15 @@ export default function WorkshopAgendaInstavelPage() {
         {/* Header */}
         <header className="sticky top-0 z-50 border-b border-gray-200 bg-white shadow-sm h-16 sm:h-20 flex items-center">
           <div className="container mx-auto px-6 lg:px-8 py-3 flex items-center justify-between">
-            <Link href="/pt/nutri">
+            <Link href="/pt/nutri" className="block">
               <Image
-                src="/images/logo/nutri-horizontal.png"
-                alt="YLADA Nutri"
-                width={133}
-                height={40}
-                className="h-8 sm:h-10 w-auto"
+                src="/images/workshop-agenda-instavel/banner-aula-agenda.png"
+                alt="Aula prática: sua agenda cheia - YLADA Nutri"
+                width={280}
+                height={56}
+                className="h-10 sm:h-12 w-auto object-contain"
                 priority
+                unoptimized={process.env.NODE_ENV === 'development'}
               />
             </Link>
           </div>
@@ -202,17 +203,18 @@ export default function WorkshopAgendaInstavelPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
-      {/* Header */}
+      {/* Header - imagem temática da aula de encher agenda (não o logo Nutri) */}
       <header className="sticky top-0 z-50 border-b border-gray-200 bg-white shadow-sm h-16 sm:h-20 flex items-center">
         <div className="container mx-auto px-6 lg:px-8 py-3 flex items-center justify-between">
-          <Link href="/pt/nutri">
+          <Link href="/pt/nutri" className="block">
             <Image
-              src="/images/logo/nutri-horizontal.png"
-              alt="YLADA Nutri"
-              width={133}
-              height={40}
-              className="h-8 sm:h-10 w-auto"
+              src="/images/workshop-agenda-instavel/banner-aula-agenda.png"
+              alt="Aula prática: sua agenda cheia - YLADA Nutri"
+              width={280}
+              height={56}
+              className="h-10 sm:h-12 w-auto object-contain"
               priority
+              unoptimized={process.env.NODE_ENV === 'development'}
             />
           </Link>
         </div>
