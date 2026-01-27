@@ -103,9 +103,9 @@ export async function POST(request: NextRequest) {
         }))
 
         // Buscar nome do cadastro usando função helper
-        const { getRegistrationName } = await import('@/lib/whatsapp-carol-ai')
+        const { getRegistrationName, getFirstName } = await import('@/lib/whatsapp-carol-ai')
         const registrationName = await getRegistrationName(conversation.phone, conversation.area || 'nutri')
-        const leadName = registrationName || conversation.name || undefined
+        const leadName = getFirstName(registrationName || conversation.name) || undefined
 
         let messageToSend = ''
 

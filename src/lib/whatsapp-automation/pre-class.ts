@@ -5,7 +5,7 @@
 
 import { supabaseAdmin } from '@/lib/supabase'
 import { scheduleMessage, cancelPendingMessagesForConversation } from './scheduler'
-import { formatSessionDateTime, getRegistrationName } from '../whatsapp-carol-ai'
+import { formatSessionDateTime, getRegistrationName, getFirstName } from '../whatsapp-carol-ai'
 
 /**
  * Agenda notificações pré-aula quando alguém agenda uma sessão
@@ -41,7 +41,7 @@ export async function schedulePreClassNotifications(
 
     // 2. Buscar nome do lead
     const registrationName = await getRegistrationName(conversation.phone, 'nutri')
-    const leadName = registrationName || conversation.name || 'querido(a)'
+    const leadName = getFirstName(registrationName || conversation.name) || 'querido(a)'
 
     // 3. Formatar data/hora da sessão
     const { weekday, date, time } = formatSessionDateTime(session.starts_at)

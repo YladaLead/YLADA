@@ -5,7 +5,7 @@
 
 import { supabaseAdmin } from '@/lib/supabase'
 import { scheduleMessage, cancelPendingMessagesForPhone } from './scheduler'
-import { isAllowedTimeToSendMessage } from '../whatsapp-carol-ai'
+import { isAllowedTimeToSendMessage, getFirstName } from '../whatsapp-carol-ai'
 
 /**
  * Agenda boas-vindas para leads que preencheram workshop mas não têm conversa ativa
@@ -176,7 +176,8 @@ export async function scheduleWelcomeMessages(): Promise<{
             })
           }
 
-          const welcomeMessage = `Olá ${lead.nome}, seja bem-vindo! 👋
+          const firstName = getFirstName(lead.nome) || lead.nome
+          const welcomeMessage = `Olá ${firstName}, seja bem-vindo! 👋
 
 Obrigada por fazer sua inscrição na Aula Prática ao Vivo de Como Encher a Agenda! 🎉
 
