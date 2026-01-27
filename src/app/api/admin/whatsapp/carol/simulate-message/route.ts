@@ -6,21 +6,24 @@
  *
  * Comandos especiais (não simulados como cliente):
  * - "Envie lembrete da aula de hoje" → envia só o lembrete da sessão de HOJE (uma mensagem), nunca "opções".
+ * - "chama ela" / "lembra ela" / "a [Nome] ficou de ver a melhor data" → follow-up acolhedor: pergunta se
+ *   conseguiu ver qual horário, inclui opções, NÃO abre com "Oi [nome]" (tom neutro "Oi, tudo bem?").
  *
  * Se o admin digitar "envia o link da quarta" ou "envia link opção 2" ou "link amanhã 9h",
  * normaliza para "Opção 2" (ou "2") para a Carol enviar só o link daquela sessão.
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { requireApiAuth } from '@/lib/api-auth'
-import { processIncomingMessageWithCarol, getZApiInstance, formatSessionDateTime } from '@/lib/whatsapp-carol-ai'
+import {
+  processIncomingMessageWithCarol,
+  getZApiInstance,
+  formatSessionDateTime,
+  generateCarolResponse,
+  getRegistrationName,
+  getFirstName,
+} from '@/lib/whatsapp-carol-ai'
 import { createZApiClient } from '@/lib/z-api'
 import { supabaseAdmin } from '@/lib/supabase'
-
-function getFirstName(name: string | null | undefined): string {
-  if (!name || typeof name !== 'string') return 'Olá'
-  const parts = name.trim().split(/\s+/)
-  return parts[0] || 'Olá'
-}
 
 export async function POST(request: NextRequest) {
   try {
@@ -87,7 +90,7 @@ export async function POST(request: NextRequest) {
       }
 
       const ctx = (conversation.context as Record<string, unknown>) || {}
-      const leadName = getFirstName((ctx.leadName as string) || conversation.name)
+      const leadName = getFirstName((ctx.leadName as string) || conversation.name) || 'querido(a)'
       const { time } = formatSessionDateTime(sessionHoje.starts_at)
 
       const reminderMessage = `Olá ${leadName}! 
@@ -215,10 +218,10 @@ Pelo celular, a experiência fica limitada e você pode perder partes importante
       }
     }
 
-    // 1. Buscar conversa
+    // 1. Buscar conversa (com context para follow-up / lembrete)
     const { data: conversation, error: convError } = await supabaseAdmin
       .from('whatsapp_conversations')
-      .select('id, phone, name, area, instance_id')
+      .select('id, phone, name, area, instance_id, context')
       .eq('id', conversationId)
       .single()
 
@@ -227,6 +230,114 @@ Pelo celular, a experiência fica limitada e você pode perder partes importante
         { success: false, error: 'Conversa não encontrada' },
         { status: 404 }
       )
+    }
+
+    const ctx = (conversation.context as Record<string, unknown>) || {}
+    const tags = Array.isArray(ctx.tags) ? ctx.tags : []
+
+    // —— Comando: "chama ela" / "lembra ela" / "ficou de ver a melhor data" — follow-up acolhedor (NÃO simula como cliente)
+    const looksLikeFollowUp =
+      /(chama|lembra)\s+(ela|a\s*\w+)/i.test(messageToUse) ||
+      /ficou\s+de\s+ver(indificar)?\s*(a\s+melhor\s+)?data/i.test(messageToUse) ||
+      /\w+\s+ficou\s+de\s+ver/i.test(messageToUse) ||
+      /pergunta\s+se\s+(ela\s+)?conseguiu\s+ver/i.test(messageToUse)
+
+    if (looksLikeFollowUp) {
+      const { data: messages } = await supabaseAdmin
+        .from('whatsapp_messages')
+        .select('message, sender_type, created_at')
+        .eq('conversation_id', conversation.id)
+        .order('created_at', { ascending: true })
+        .limit(20)
+
+      const conversationHistory = (messages || []).map((msg: { message?: string; sender_type?: string }) => ({
+        role: (msg.sender_type === 'bot' ? 'assistant' : 'user') as 'user' | 'assistant',
+        content: msg.message || '',
+      }))
+
+      const now = new Date().toISOString()
+      const { data: sessions } = await supabaseAdmin
+        .from('whatsapp_workshop_sessions')
+        .select('id, title, starts_at, zoom_link')
+        .eq('area', area)
+        .eq('is_active', true)
+        .gte('starts_at', now)
+        .order('starts_at', { ascending: true })
+        .limit(8)
+
+      const hourBR = (startsAt: string) =>
+        parseInt(
+          new Date(startsAt).toLocaleString('en-US', { timeZone: 'America/Sao_Paulo', hour: 'numeric', hour12: false }),
+          10
+        )
+      const isManha = (s: { starts_at: string }) => {
+        const h = hourBR(s.starts_at)
+        return h === 9 || h === 10
+      }
+      const first = sessions?.[0]
+      const soonestManha = sessions?.find(isManha)
+      const second = soonestManha && soonestManha.id !== first?.id ? soonestManha : sessions?.[1]
+      const workshopSessions = first && second ? [first, second] : first ? [first] : []
+
+      const registrationName = await getRegistrationName(conversation.phone, area)
+      let leadName = getFirstName(registrationName || (ctx as { lead_name?: string })?.lead_name || conversation.name) || undefined
+      if (leadName && /ylada/i.test(leadName.trim())) leadName = undefined
+
+      const carolInstruction =
+        'O admin está pedindo para você fazer um follow-up com essa pessoa. Ela havia ficado de verificar a melhor data para participar da Aula Prática (Como Encher a Agenda). NÃO abra com "Oi [nome]" – use tom mais neutro, ex.: "Oi, tudo bem? 😊" ou "Seja muito bem-vinda!". Sua mensagem DEVE: (1) cumprimentar de forma leve (ex.: "Oi, tudo bem? 😊" ou "Seja muito bem-vinda!"); (2) dizer algo como "Vi que você estava analisando a melhor data para a Aula Prática ao Vivo de Como Encher a Agenda. Conseguiu ver qual horário funciona melhor pra você?"; (3) incluir as opções de aula (dia e hora). O objetivo é que ela aprenda como encher a agenda – seja acolhedora e ofereça as opções.'
+
+      const messageToSend = await generateCarolResponse('Quero saber os horários da aula', conversationHistory, {
+        tags: [...tags],
+        workshopSessions,
+        leadName,
+        isFirstMessage: false,
+        carolInstruction,
+      })
+
+      let instance = await getZApiInstance(area)
+      if (!instance) {
+        return NextResponse.json(
+          { success: false, error: 'Instância Z-API não encontrada para a área nutri' },
+          { status: 502 }
+        )
+      }
+      const client = createZApiClient(instance.instance_id, instance.token)
+      const sendResult = await client.sendTextMessage({
+        phone: conversation.phone,
+        message: messageToSend,
+      })
+
+      if (!sendResult.success) {
+        return NextResponse.json(
+          { success: false, error: sendResult.error || 'Erro ao enviar follow-up' },
+          { status: 500 }
+        )
+      }
+
+      await supabaseAdmin.from('whatsapp_messages').insert({
+        conversation_id: conversation.id,
+        instance_id: instance.id,
+        z_api_message_id: sendResult.id || null,
+        sender_type: 'bot',
+        sender_name: 'Carol - Secretária',
+        message: messageToSend,
+        message_type: 'text',
+        status: 'sent',
+        is_bot_response: true,
+      })
+
+      await supabaseAdmin
+        .from('whatsapp_conversations')
+        .update({
+          last_message_at: new Date().toISOString(),
+          last_message_from: 'bot',
+        })
+        .eq('id', conversation.id)
+
+      return NextResponse.json({
+        success: true,
+        response: 'Follow-up enviado. Carol perguntou se conseguiu ver o horário e incluiu as opções.',
+      })
     }
 
     // 2. Resolver instância Z-API (servidor usa service role → sem RLS)
