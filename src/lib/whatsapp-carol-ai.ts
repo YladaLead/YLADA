@@ -1770,11 +1770,25 @@ Nos vemos em breve! 😊
       leadName = 'querido(a)'
     }
 
-    // Mensagem do botão → instrução para NÃO repetir boas-vindas/opções (form envia em 15s ou já enviou)
+    // Mensagem do botão → resposta educada com resumo das opções (dia + hora) quando ela pergunta de novo sobre horário
     const carolInstructionFromContext = (context as any)?.carol_instruction
     let carolInstruction: string | undefined
     if (isMessageFromButton) {
-      carolInstruction = 'A pessoa acabou de clicar no botão do workshop ("Acabei de me inscrever... gostaria de agendar"). NÃO repita boas-vindas nem a lista de opções. Responda em 1–2 frases: as opções foram enviadas acima (ou estão chegando) e pergunte qual horário funciona melhor. Exemplo: "Oi! As opções já foram enviadas na mensagem acima. Qual delas funciona melhor para você? 😊"'
+      const fmtOpt = (s: { starts_at: string }) => {
+        const d = new Date(s.starts_at)
+        const w = d.toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo', weekday: 'long' })
+        const t = d.toLocaleTimeString('pt-BR', { timeZone: 'America/Sao_Paulo', hour: '2-digit', minute: '2-digit' })
+        return `${w.charAt(0).toUpperCase() + w.slice(1)} ${t}`
+      }
+      const optionRecap =
+        workshopSessions.length >= 2
+          ? `Opção 1 ${fmtOpt(workshopSessions[0])}, Opção 2 ${fmtOpt(workshopSessions[1])}`
+          : workshopSessions.length === 1
+            ? `Opção 1 ${fmtOpt(workshopSessions[0])}`
+            : ''
+      carolInstruction = optionRecap
+        ? `A pessoa acabou de clicar no botão do workshop ("Acabei de me inscrever... gostaria de agendar"). NÃO repita boas-vindas nem a lista completa de opções. Seja educada: faça um resumo curto das opções que já foram enviadas e pergunte qual horário funciona melhor. Responda usando exatamente este formato: "Oi! Como te enviei em cima: ${optionRecap}. Qual desses horários funciona melhor para você? 😊"`
+        : 'A pessoa acabou de clicar no botão do workshop ("Acabei de me inscrever... gostaria de agendar"). NÃO repita boas-vindas nem a lista de opções. Responda em 1–2 frases, de forma educada: as opções foram enviadas acima (ou estão chegando) e pergunte qual horário funciona melhor. Exemplo: "Oi! As opções já foram enviadas na mensagem acima. Qual delas funciona melhor para você? 😊"'
     } else if (isShortNeutralReply && (formAlreadySentWelcome || workshopSessions.length > 0)) {
       carolInstruction = 'A pessoa só confirmou/entendeu (ex.: "Entendi", "Ok", "Certo"). NÃO repita opções nem boas-vindas; responda em UMA frase curta e amigável, tipo "Qualquer dúvida, é só me chamar! 😊" ou "Fico no aguardo da sua escolha! 💚".'
     } else {

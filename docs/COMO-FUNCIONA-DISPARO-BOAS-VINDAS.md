@@ -2,48 +2,39 @@
 
 ## 🎯 RESUMO
 
-O disparo de boas-vindas pode funcionar de **DUAS FORMAS**:
+O sistema **não usa mais Cron**. A automação é feita por **Worker on-demand**:
 
-1. **AUTOMÁTICO** (via Cron Job) - Executa sozinho todos os dias
-2. **MANUAL** (via Interface Admin) - Você dispara quando quiser
+1. **Cadastro no workshop** — 60s depois, se a pessoa **não** tiver clicado no WhatsApp, enviamos a mensagem de boas-vindas (ela nos chama primeiro; nós não iniciamos a conversa em massa).
+2. **Worker (process-all)** — rodar **POST** `/api/admin/whatsapp/automation/process-all` (pelo admin ou por agendamento externo 1x/dia ou 1x a cada 1–2h). Agenda boas-vindas, processa fila, pré-aula, follow-up, participou/não participou.
 
----
-
-## ✅ FORMA 1: AUTOMÁTICO (Recomendado)
-
-### **Como Funciona:**
-- O sistema executa **automaticamente todos os dias às 09:00**
-- Busca pessoas que preencheram o formulário nos últimos 7 dias
-- Verifica se elas **NÃO** têm conversa ativa no WhatsApp
-- Envia mensagem de boas-vindas automaticamente
-
-### **Onde está configurado:**
-- Arquivo: `vercel.json`
-- Cron: `0 9 * * *` (todos os dias às 09:00)
-
-### **Você precisa fazer algo?**
-- ❌ **NÃO!** Funciona sozinho
-- ✅ Apenas certifique-se de que o cron está ativo no Vercel
+Documento único: **`docs/CAROL-OPERACAO-WORKER-ESTADOS-E-CENARIOS.md`**.
 
 ---
 
-## ✅ FORMA 2: MANUAL (Quando quiser)
+## ✅ FORMA 1: APÓS CADASTRO (automático no fluxo)
 
 ### **Como Funciona:**
-- Você acessa a interface administrativa
-- Clica no botão "Disparar Boas-vindas"
-- O sistema processa na hora
+- A pessoa preenche o formulário do workshop.
+- O sistema espera **60 segundos**. Se ela **já** clicou no botão do WhatsApp nesse tempo, **não** enviamos (ela nos chamou).
+- Se após 60s ela **não** mandou mensagem, enviamos a mensagem de boas-vindas com opções.
+
+### **Onde está:**
+- `src/lib/whatsapp-form-automation.ts` → `sendWorkshopInviteToFormLead`
+
+---
+
+## ✅ FORMA 2: VIA WORKER (Process-all)
+
+### **Como Funciona:**
+- Rodar o Worker **process-all** (pela interface de automação ou chamando a API).
+- O process-all agenda boas-vindas para leads que ainda não têm mensagem e processa o resto da fila.
 
 ### **Onde fazer:**
-1. Acesse: `/admin/whatsapp/carol`
-2. Clique em: **"Disparar Boas-vindas"**
-3. Aguarde o processamento
-4. Veja quantas foram enviadas
+1. Acesse a interface de automação (ex.: `/admin/whatsapp/automation`) e use **"Processar tudo"**, ou
+2. Chame **POST** `/api/admin/whatsapp/automation/process-all` (com auth de admin).
 
 ### **Quando usar:**
-- Quando quiser disparar fora do horário automático
-- Quando quiser testar
-- Quando quiser forçar um novo disparo
+- 1x por dia ou a cada 1–2h (via agendador externo, se quiser), ou manualmente quando quiser.
 
 ---
 
@@ -69,14 +60,12 @@ O disparo de boas-vindas pode funcionar de **DUAS FORMAS**:
 
 ## 🔍 COMO VERIFICAR SE ESTÁ FUNCIONANDO
 
-### **1. Verificar Logs do Cron (Automático)**
-- Acesse: Vercel → Seu projeto → Logs
-- Filtre por: `[Cron Carol]` ou `welcome`
-- Deve aparecer: "Enviadas: X | Erros: Y"
+### **1. Verificar Logs do Worker**
+- Após rodar process-all, verifique a resposta da API ou a interface de automação.
+- Ex.: "welcome: { scheduled: X, skipped: Y, errors: Z }"
 
-### **2. Verificar Interface Admin (Manual)**
-- Após clicar em "Disparar Boas-vindas"
-- Aparece: "✅ Enviadas: X | ❌ Erros: Y"
+### **2. Verificar Interface Admin**
+- Após "Processar tudo" (ou equivalente), conferir totais enviados/erros.
 
 ### **3. Verificar Conversas**
 - Acesse: `/admin/whatsapp`
@@ -87,48 +76,24 @@ O disparo de boas-vindas pode funcionar de **DUAS FORMAS**:
 
 ## ⚙️ CONFIGURAÇÃO
 
-### **Para o Automático funcionar:**
-
-1. **Verificar `vercel.json`:**
-```json
-{
-  "crons": [
-    {
-      "path": "/api/cron/whatsapp-carol?tipo=welcome",
-      "schedule": "0 9 * * *"
-    }
-  ]
-}
-```
-
-2. **Verificar variável de ambiente:**
-```
-CRON_SECRET=sua-chave-secreta
-```
-
-3. **Deploy no Vercel:**
-- O cron será ativado automaticamente após o deploy
+- **Worker:** usar **POST** `/api/admin/whatsapp/automation/process-all` (requer auth admin).
+- Se quiser execução periódica, usar um **agendador externo** (ex.: cron-job.org, Vercel Cron, etc.) para chamar esse endpoint 1x/dia ou a cada 1–2h.
+- O sistema **não usa mais** cron no `vercel.json` para essa automação.
 
 ---
 
 ## ❓ PERGUNTAS FREQUENTES
 
-### **P: Preciso fazer algo para o automático funcionar?**
-R: Não! Depois do deploy, funciona sozinho.
+### **P: Onde está a configuração de “cron”?**
+R: Não usamos cron. A automação é Worker on-demand (process-all). Ver `docs/CAROL-OPERACAO-WORKER-ESTADOS-E-CENARIOS.md`.
 
-### **P: Posso desativar o automático?**
-R: Sim, remova o cron do `vercel.json` e faça apenas manual.
+### **P: E o disparo logo após o cadastro?**
+R: 60s depois do cadastro, se a pessoa não tiver clicado no WhatsApp, enviamos a mensagem. Se ela já mandou mensagem, não enviamos (ela nos chamou).
 
-### **P: O automático substitui o manual?**
-R: Não! Você pode usar os dois. O manual é útil para testar ou disparar fora do horário.
-
-### **P: Quantas vezes por dia o automático executa?**
-R: Uma vez por dia, às 09:00.
-
-### **P: E se eu quiser disparar mais vezes?**
-R: Use o botão manual ou ajuste o cron no `vercel.json`.
+### **P: Quantas vezes rodar o process-all?**
+R: 1x por dia ou a cada 1–2h, conforme necessidade. Pode ser manual ou via agendador externo.
 
 ---
 
-**Última atualização:** 2026-01-25
-**Versão:** 1.0
+**Última atualização:** 2026-01-27
+**Versão:** 1.1

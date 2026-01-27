@@ -353,7 +353,7 @@ Carol - Secretária YLADA Nutri
 
 | Fase | Quando | Intervalo | Ação |
 |------|--------|-----------|------|
-| **Boas-vindas** | Após preencher workshop | Imediato (cron diário) | Envia opções |
+| **Boas-vindas** | Após preencher workshop | 60s depois (se ela não clicou no WhatsApp) ou Worker (process-all) | Envia opções |
 | **Não responde** | Após boas-vindas | 24h, 48h, 72h | Notifica |
 | **Responde mas não agenda** | Após resposta | 12h | Oferece ajuda |
 | **Agendou** | Imediato | 0h | Envia link + flyer |
@@ -483,23 +483,16 @@ Isso porque os 10 primeiros minutos são essenciais:
 
 ## ⚙️ IMPLEMENTAÇÃO TÉCNICA
 
-### **Cron Jobs Necessários:**
+### **Worker (não usar Cron)**
 
-1. **Boas-vindas (Diário - 09:00)**
-   - Função: `sendWelcomeToNonContactedLeads()`
+O sistema usa **Worker on-demand**. Automação oficial:
 
-2. **Notificações Pré-Aula (A cada hora)**
-   - Verifica quem agendou
-   - Envia lembretes conforme horário
+- **POST** `/api/admin/whatsapp/automation/process-all` — agenda boas-vindas, processa fila, pré-aula, follow-up, participou/não participou.
+- **POST** `/api/admin/whatsapp/automation/process` — só processa fila de mensagens agendadas.
 
-3. **Follow-up Pós-Aula (A cada hora)**
-   - Verifica quem participou
-   - Envia mensagens conforme horário
-
-4. **Remarketing (Diário - 10:00)**
-   - Função: `sendRemarketingToNonParticipants()`
+Detalhes, estados e cenários: **`docs/CAROL-OPERACAO-WORKER-ESTADOS-E-CENARIOS.md`**.
 
 ---
 
-**Última atualização:** 2026-01-25
-**Versão:** 1.0
+**Última atualização:** 2026-01-27
+**Versão:** 1.1

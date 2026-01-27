@@ -1,9 +1,9 @@
 /**
  * GET /api/cron/whatsapp-carol/pre-class
  *
- * Envia lembretes de aula (2h, 12h, 10min antes) para quem tem sessão agendada.
- * Chamado automaticamente pelo cron a cada 15 min (vercel.json).
- * Também pode ser chamado manualmente para "disparo agora".
+ * @deprecated Use Worker. Envia lembretes pré-aula (2h, 12h, 10min antes).
+ * Automação oficial: POST /api/admin/whatsapp/automation/process-all
+ * ou incluir pre-class no worker. Mantido para chamada manual.
  */
 import { NextResponse } from 'next/server'
 import { sendPreClassNotifications } from '@/lib/whatsapp-carol-ai'

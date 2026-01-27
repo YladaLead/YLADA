@@ -12,13 +12,11 @@ import {
 /**
  * GET /api/cron/whatsapp-carol
  *
- * ⚠️ LEGADO – O projeto não usa mais Cron para automação.
- * A automação é feita via WORKER ON-DEMAND:
- * - POST /api/admin/whatsapp/automation/process       → processa mensagens agendadas (worker)
- * - POST /api/admin/whatsapp/automation/process-all   → agenda boas-vindas + processa worker + reprocessa participou/não participou
- * - Mensagens entram na fila (whatsapp_scheduled_messages) e o worker envia quando acionado.
- *
- * Este endpoint permanece apenas para chamadas manuais ou compatibilidade.
+ * @deprecated Use WORKER on-demand. O sistema não usa mais Cron.
+ * Automação oficial:
+ *   POST /api/admin/whatsapp/automation/process-all  → boas-vindas + worker + participou/não participou
+ *   POST /api/admin/whatsapp/automation/process      → processa fila de mensagens agendadas
+ * Este endpoint fica só para compatibilidade/chamada manual.
  */
 export async function GET(request: NextRequest) {
   try {
@@ -64,9 +62,9 @@ export async function GET(request: NextRequest) {
       ...result,
     })
   } catch (error: any) {
-    console.error('[Cron Carol] Erro:', error)
+    console.error('[Worker/Legacy Carol] Erro:', error)
     return NextResponse.json(
-      { error: 'Erro ao processar cron', details: error.message },
+      { error: 'Erro ao processar', details: error.message },
       { status: 500 }
     )
   }

@@ -5,6 +5,7 @@
 
 import { supabaseAdmin } from '@/lib/supabase'
 import { createZApiClient } from '@/lib/z-api'
+import { getFirstName } from '@/lib/whatsapp-carol-ai'
 
 /**
  * Formata data/hora da sessão em PT-BR (horário de Brasília)
@@ -41,10 +42,11 @@ export async function sendWorkshopInviteToFormLead(
   userId: string
 ): Promise<{ success: boolean; error?: string; messageId?: string }> {
   try {
-    // 🕐 DELAY: Aguardar 15 segundos antes de enviar para evitar duplicação
-    // A pessoa pode clicar no botão do WhatsApp após preencher o cadastro
-    console.log('[Form Automation] ⏳ Aguardando 15 segundos antes de enviar mensagem automática...')
-    await new Promise(resolve => setTimeout(resolve, 15000))
+    // 🕐 DELAY: 60 segundos para dar tempo dela clicar no botão do WhatsApp primeiro.
+    // Se ela clicar, a mensagem dela chega e nós respondemos (ela "nos chama"). Evita nós
+    // iniciarmos a conversa em massa e reduz risco de problema com WhatsApp.
+    console.log('[Form Automation] ⏳ Aguardando 60 segundos antes de enviar mensagem automática (prioridade: ela chamar primeiro)...')
+    await new Promise(resolve => setTimeout(resolve, 60000))
     
     // 📱 Normalizar telefone no mesmo padrão do webhook (BR = 55 + 10/11 dígitos) para evitar 2 conversas
     let phoneNormalized = phone.replace(/\D/g, '')
@@ -91,8 +93,6 @@ export async function sendWorkshopInviteToFormLead(
     }
     
     if (instance) {
-      // Verificar se já existe conversa com mensagens recentes (últimos 2 minutos)
-      const twoMinutesAgo = new Date(Date.now() - 2 * 60 * 1000).toISOString()
       const { data: existingConv } = await supabaseAdmin
         .from('whatsapp_conversations')
         .select('id, context, last_message_at')
@@ -101,18 +101,26 @@ export async function sendWorkshopInviteToFormLead(
         .maybeSingle()
       
       if (existingConv) {
-        // Verificar se já recebeu mensagem de boas-vindas recentemente
+        // Se ela já mandou qualquer mensagem = já "nos chamou". Não enviar auto-mensagem.
+        const { data: customerMessages } = await supabaseAdmin
+          .from('whatsapp_messages')
+          .select('id')
+          .eq('conversation_id', existingConv.id)
+          .eq('sender_type', 'customer')
+          .limit(1)
+        if (customerMessages && customerMessages.length > 0) {
+          console.log('[Form Automation] ⚠️ Pessoa já enviou mensagem (clicou no WhatsApp). Não enviamos — ela nos chamou.')
+          return { success: false, error: 'Pessoa já iniciou a conversa pelo WhatsApp' }
+        }
+        // Já recebeu boas-vindas ou tem atividade recente → não duplicar
         const context = existingConv.context || {}
         const tags = Array.isArray(context.tags) ? context.tags : []
         const hasWelcomeTag = tags.includes('veio_aula_pratica') || tags.includes('recebeu_link_workshop')
+        const twoMinutesAgo = new Date(Date.now() - 2 * 60 * 1000).toISOString()
         const recentMessage = existingConv.last_message_at && new Date(existingConv.last_message_at) > new Date(twoMinutesAgo)
-        
         if (hasWelcomeTag || recentMessage) {
-          console.log('[Form Automation] ⚠️ Conversa já existe e já recebeu mensagem recente. Evitando duplicação.')
-          return { 
-            success: false, 
-            error: 'Mensagem já foi enviada recentemente para esta conversa' 
-          }
+          console.log('[Form Automation] ⚠️ Conversa já tem boas-vindas ou mensagem recente. Evitando duplicação.')
+          return { success: false, error: 'Mensagem já foi enviada recentemente para esta conversa' }
         }
       }
     }
@@ -173,11 +181,10 @@ export async function sendWorkshopInviteToFormLead(
     // ela está esperando resposta imediata, independente de dia/horário
     // Esta é uma resposta a uma ação direta do usuário, não uma mensagem automática
 
-    // 5. Usar nome do cadastro na saudação só se for nome real (nunca email).
-    // Tom alinhado à Carol: "Oi [Nome], tudo bem? Seja muito bem-vinda! Eu sou a Carol, da equipe Ylada Nutri."
-    const displayName = (leadName && leadName.trim() && !String(leadName).includes('@'))
-      ? leadName.trim()
-      : ''
+    // 5. Usar apenas o primeiro nome do cadastro na saudação (nome real, nunca email).
+    // Ex.: "Maria Silva" → "Maria". Tom alinhado à Carol.
+    const rawName = (leadName && leadName.trim() && !String(leadName).includes('@')) ? leadName.trim() : ''
+    const displayName = rawName ? getFirstName(rawName) : ''
     const greetingLines: string[] = []
     if (displayName) {
       greetingLines.push(`Oi ${displayName}, tudo bem? 😊`)
