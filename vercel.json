@@ -2,11 +2,5 @@
   "version": 2,
   "env": {
     "NEXT_PUBLIC_BASE_DOMAIN": "ylada.com"
-  },
-  "crons": [
-    {
-      "path": "/api/cron/whatsapp-carol/pre-class",
-      "schedule": "*/15 * * * *"
-    }
-  ]
+  }
 }
