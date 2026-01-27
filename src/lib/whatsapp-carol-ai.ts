@@ -2371,17 +2371,18 @@ export async function sendRemarketingToNonParticipant(conversationId: string): P
       return { success: false, error: 'Instância Z-API não encontrada. Verifique se há uma instância Z-API cadastrada no sistema.' }
     }
 
-    // Buscar nome do cadastro (Carol usa apenas primeiro nome)
+    // Buscar nome do cadastro (Carol usa apenas primeiro nome). Nunca chamar de "Ylada"/nome do negócio.
     const registrationName = await getRegistrationName(conversation.phone, 'nutri')
-    const leadName = getFirstName(registrationName || conversation.name) || 'querido(a)'
+    let leadName = getFirstName(registrationName || (conversation.context as any)?.lead_name || conversation.name) || 'querido(a)'
+    if (isBusinessName(leadName)) leadName = 'querido(a)'
 
-    // Primeira mensagem de remarketing: só pergunta interesse e se quer agendar. NÃO envia datas/link.
+    // Primeira mensagem de remarketing: persuasiva, com benefício (agenda cheia). NÃO envia datas/link.
     // Quando a pessoa responder positivamente no chat, a Carol envia as opções (via processIncomingMessageWithCarol).
     const remarketingMessage = `Olá ${leadName}! 👋
 
 Vi que você não conseguiu participar da aula anterior. Tudo bem, acontece! 😊
 
-Não se preocupe! Você ainda tem interesse? Gostaria de agendar uma aula?`
+Você ainda tem interesse em aprender a ter sua agenda cheia? Gostaria que eu te encaixasse numa nova data?`
 
     const client = createZApiClient(instance.instance_id, instance.token)
     const result = await client.sendTextMessage({
@@ -2530,14 +2531,15 @@ export async function sendRemarketingToNonParticipants(): Promise<{
           continue
         }
 
-        // Carol usa apenas primeiro nome
+        // Carol usa apenas primeiro nome. Nunca chamar de "Ylada"/nome do negócio.
         const registrationName = await getRegistrationName(conv.phone, 'nutri')
-        const leadName = getFirstName(registrationName || conv.name) || 'querido(a)'
+        let leadName = getFirstName(registrationName || (context as any)?.lead_name || conv.name) || 'querido(a)'
+        if (isBusinessName(leadName)) leadName = 'querido(a)'
         const remarketingMessage = `Olá ${leadName}! 👋
 
 Vi que você não conseguiu participar da aula anterior. Tudo bem, acontece! 😊
 
-Não se preocupe! Você ainda tem interesse? Gostaria de agendar uma aula?`
+Você ainda tem interesse em aprender a ter sua agenda cheia? Gostaria que eu te encaixasse numa nova data?`
 
         const sendResult = await sendWhatsAppMessage(
           conv.phone,
