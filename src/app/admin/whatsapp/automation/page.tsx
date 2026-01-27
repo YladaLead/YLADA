@@ -75,6 +75,39 @@ function AutomationContent() {
     }
   }
 
+  // Processar TUDO automaticamente
+  const handleProcessAll = async () => {
+    if (!confirm('Isso vai processar TUDO automaticamente:\n\n1. Agendar boas-vindas para leads novos\n2. Processar mensagens pendentes\n3. Reprocessar quem tem tags mas não recebeu fluxo\n\nPode demorar alguns minutos. Continuar?')) {
+      return
+    }
+
+    setProcessing(true)
+    setResult(null)
+
+    try {
+      const response = await fetch('/api/admin/whatsapp/automation/process-all', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+      })
+
+      const data = await response.json()
+
+      if (data.success) {
+        setResult({
+          type: 'process-all',
+          ...data,
+        })
+      } else {
+        alert(`Erro: ${data.error}`)
+      }
+    } catch (error: any) {
+      alert(`Erro ao processar tudo: ${error.message}`)
+    } finally {
+      setProcessing(false)
+    }
+  }
+
   // Disparar Remarketing
   const handleRemarketing = async () => {
     setLoading(true)
@@ -263,6 +296,21 @@ function AutomationContent() {
             <p className="text-gray-600 mt-2">
               Gerencie mensagens agendadas, disparos e automações
             </p>
+          </div>
+
+          {/* Botão Processar TUDO */}
+          <div className="bg-gradient-to-r from-purple-600 to-blue-600 rounded-lg shadow-lg p-6 mb-6 text-white">
+            <h2 className="text-2xl font-bold mb-2">🚀 Processar TUDO Automaticamente</h2>
+            <p className="text-purple-100 mb-4 text-sm">
+              Processa tudo de uma vez: agenda boas-vindas, processa pendentes, reprocessa quem tem tags mas não recebeu fluxo.
+            </p>
+            <button
+              onClick={handleProcessAll}
+              disabled={processing}
+              className="w-full bg-white text-purple-600 px-6 py-3 rounded-lg hover:bg-purple-50 disabled:opacity-50 disabled:cursor-not-allowed font-semibold"
+            >
+              {processing ? 'Processando TUDO...' : '🚀 Processar TUDO Automaticamente'}
+            </button>
           </div>
 
           {/* Cards Principais */}
@@ -576,6 +624,27 @@ function AutomationContent() {
                   <p><strong>Processadas:</strong> {result.processed}</p>
                   <p><strong>Enviadas:</strong> {result.sent}</p>
                   <p><strong>Erros:</strong> {result.errors}</p>
+                </div>
+              )}
+
+              {result.type === 'process-all' && (
+                <div className="space-y-4">
+                  <div>
+                    <h3 className="font-semibold mb-2">👋 Boas-vindas:</h3>
+                    <p>Agendadas: {result.welcome?.scheduled || 0} | Puladas: {result.welcome?.skipped || 0} | Erros: {result.welcome?.errors || 0}</p>
+                  </div>
+                  <div>
+                    <h3 className="font-semibold mb-2">⚙️ Processar Pendentes:</h3>
+                    <p>Processadas: {result.process?.processed || 0} | Enviadas: {result.process?.sent || 0} | Falhadas: {result.process?.failed || 0}</p>
+                  </div>
+                  <div>
+                    <h3 className="font-semibold mb-2">💰 Reprocessar Participou:</h3>
+                    <p>Processadas: {result.reprocess_participou?.processed || 0} | Enviadas: {result.reprocess_participou?.sent || 0} | Erros: {result.reprocess_participou?.errors || 0}</p>
+                  </div>
+                  <div>
+                    <h3 className="font-semibold mb-2">🔄 Reprocessar Não Participou:</h3>
+                    <p>Processadas: {result.reprocess_nao_participou?.processed || 0} | Enviadas: {result.reprocess_nao_participou?.sent || 0} | Erros: {result.reprocess_nao_participou?.errors || 0}</p>
+                  </div>
                 </div>
               )}
 
