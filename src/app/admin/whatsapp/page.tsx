@@ -1583,7 +1583,7 @@ function WhatsAppChatContent() {
                       🔄 Remarketing
                     </button>
                   )}
-                  {/* Botão para enviar como cliente e ativar Carol */}
+                  {/* Botão para enviar como cliente e ativar Carol (tudo no servidor → evita RLS em z_api_instances) */}
                   {selectedConversation && getTags(selectedConversation).includes('carol_ativa') && (
                     <button
                       type="button"
@@ -1591,130 +1591,28 @@ function WhatsAppChatContent() {
                         if (!selectedConversation || !newMessage.trim()) return
                         if (!confirm('Enviar esta mensagem como se fosse do cliente e deixar a Carol responder automaticamente?')) return
                         
-                        const messageText = newMessage.trim() // Salvar antes de limpar
-                        
+                        const messageText = newMessage.trim()
                         try {
                           setSending(true)
-                          
-                          // 1. Salvar mensagem como se fosse do cliente
-                          // Buscar instância: instance_id na conversa é o UUID da tabela z_api_instances
-                          let instanceId: string | null = null
-                          
-                          if (selectedConversation.instance_id) {
-                            // Tentar buscar pelo ID da instância da conversa
-                            const { data: instance } = await supabase
-                              .from('z_api_instances')
-                              .select('id')
-                              .eq('id', selectedConversation.instance_id)
-                              .single()
-                            
-                            if (instance) {
-                              instanceId = instance.id
-                            }
-                          }
-                          
-                          // Fallback: buscar pela área se não encontrou pelo ID
-                          if (!instanceId) {
-                            // Primeiro tenta buscar por área e status connected
-                            let { data: instanceByArea } = await supabase
-                              .from('z_api_instances')
-                              .select('id')
-                              .eq('area', selectedConversation.area || 'nutri')
-                              .eq('status', 'connected')
-                              .limit(1)
-                              .maybeSingle()
-                            
-                            // Se não encontrou, tenta buscar apenas por área (sem filtro de status)
-                            if (!instanceByArea) {
-                              const { data: instanceByAreaOnly } = await supabase
-                                .from('z_api_instances')
-                                .select('id')
-                                .eq('area', selectedConversation.area || 'nutri')
-                                .limit(1)
-                                .maybeSingle()
-                              
-                              if (instanceByAreaOnly) {
-                                instanceByArea = instanceByAreaOnly
-                              }
-                            }
-                            
-                            // Se ainda não encontrou, tenta buscar qualquer instância conectada (fallback final)
-                            if (!instanceByArea) {
-                              const { data: instanceFallback } = await supabase
-                                .from('z_api_instances')
-                                .select('id')
-                                .eq('status', 'connected')
-                                .limit(1)
-                                .maybeSingle()
-                              
-                              if (instanceFallback) {
-                                instanceByArea = instanceFallback
-                              }
-                            }
-                            
-                            if (!instanceByArea) {
-                              throw new Error('Instância não encontrada. Verifique se há uma instância Z-API conectada para a área ' + (selectedConversation.area || 'nutri'))
-                            }
-                            
-                            instanceId = instanceByArea.id
-                          }
-                          
-                          // Salvar mensagem do cliente no banco
-                          await supabase.from('whatsapp_messages').insert({
-                            conversation_id: selectedConversation.id,
-                            instance_id: instanceId,
-                            sender_type: 'customer',
-                            sender_name: selectedConversation.name || 'Cliente',
-                            message: messageText,
-                            message_type: 'text',
-                            status: 'delivered',
-                            is_bot_response: false,
-                          })
-                          
-                          // Atualizar última mensagem da conversa
-                          await supabase
-                            .from('whatsapp_conversations')
-                            .update({
-                              last_message_at: new Date().toISOString(),
-                              last_message_from: 'customer',
-                            })
-                            .eq('id', selectedConversation.id)
-                          
-                          // 2. Limpar campo de mensagem
                           setNewMessage('')
-                          
-                          // 3. Recarregar mensagens
-                          await loadMessages(selectedConversation.id)
-                          
-                          // 4. Aguardar um pouco e processar com Carol
-                          setTimeout(async () => {
-                            try {
-                              const carolResult = await fetch('/api/admin/whatsapp/test-carol', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                credentials: 'include',
-                                body: JSON.stringify({
-                                  conversationId: selectedConversation.id,
-                                  message: messageText, // Usar o valor salvo
-                                }),
-                              })
-                              
-                              const data = await carolResult.json()
-                              
-                              if (data.success && data.response) {
-                                // Recarregar mensagens para ver a resposta da Carol
-                                await loadMessages(selectedConversation.id)
-                                await loadConversations()
-                              } else {
-                                console.error('Carol não respondeu:', data.error)
-                              }
-                            } catch (err: any) {
-                              console.error('Erro ao processar com Carol:', err)
-                            }
-                          }, 1000)
-                          
+                          const res = await fetch('/api/admin/whatsapp/carol/simulate-message', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            credentials: 'include',
+                            body: JSON.stringify({
+                              conversationId: selectedConversation.id,
+                              message: messageText,
+                            }),
+                          })
+                          const data = await res.json()
+                          if (data.success) {
+                            await loadMessages(selectedConversation.id)
+                            loadConversations()
+                          } else {
+                            alert(data.error || 'Erro ao simular mensagem e processar com Carol')
+                          }
                         } catch (err: any) {
-                          alert(err.message || 'Erro ao enviar mensagem')
+                          alert(err?.message || 'Erro ao enviar mensagem')
                         } finally {
                           setSending(false)
                         }
