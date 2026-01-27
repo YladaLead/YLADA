@@ -1233,6 +1233,36 @@ export async function POST(request: NextRequest) {
           !alreadyProcessed // 🆕 Não processar se já respondeu recentemente
         
         if (shouldProcessCarol) {
+          // 🆕 Enriquecer conversa com nome do cadastro (workshop_inscricoes/contact_submissions)
+          // Quando a pessoa preenche o workshop e clica no botão WhatsApp, a primeira resposta da Carol
+          // deve usar o nome do cadastro — não o "name" do payload (que pode vir vazio ou errado).
+          try {
+            const { getRegistrationName } = await import('@/lib/whatsapp-carol-ai')
+            const registrationName = await getRegistrationName(phone, area || 'nutri')
+            if (registrationName) {
+              const { data: conv } = await supabase
+                .from('whatsapp_conversations')
+                .select('id, name, context')
+                .eq('id', conversationId)
+                .single()
+              if (conv) {
+                const prevContext = (conv.context && typeof conv.context === 'object' && !Array.isArray(conv.context))
+                  ? (conv.context as Record<string, unknown>)
+                  : {}
+                await supabase
+                  .from('whatsapp_conversations')
+                  .update({
+                    name: conv.name || registrationName,
+                    context: { ...prevContext, lead_name: registrationName },
+                  })
+                  .eq('id', conversationId)
+                console.log('[Z-API Webhook] ✅ Conversa enriquecida com nome do cadastro:', registrationName)
+              }
+            }
+          } catch (enrichErr: any) {
+            console.warn('[Z-API Webhook] ⚠️ Erro ao enriquecer conversa com nome do cadastro:', enrichErr?.message)
+          }
+
           console.log('[Z-API Webhook] 🤖 Iniciando processamento com Carol...')
           
           const { processIncomingMessageWithCarol } = await import('@/lib/whatsapp-carol-ai')

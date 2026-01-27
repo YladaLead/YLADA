@@ -7,14 +7,28 @@ import { supabaseAdmin } from '@/lib/supabase'
 import { createZApiClient } from '@/lib/z-api'
 
 /**
- * Formata data/hora da sessão em PT-BR
+ * Formata data/hora da sessão em PT-BR (horário de Brasília)
+ * Mesmo critério da Carol para evitar horários diferentes entre form e Carol.
  */
 function formatSessionPtBR(startsAtIso: string) {
   const d = new Date(startsAtIso)
-  const weekday = d.toLocaleDateString('pt-BR', { weekday: 'long' })
-  const date = d.toLocaleDateString('pt-BR')
-  const time = d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
-  return { weekday, date, time }
+  const opts: Intl.DateTimeFormatOptions = {
+    timeZone: 'America/Sao_Paulo',
+    weekday: 'long',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+  }
+  const weekday = d.toLocaleDateString('pt-BR', { ...opts, weekday: 'long' })
+  const date = d.toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo', day: '2-digit', month: '2-digit', year: 'numeric' })
+  const time = d.toLocaleTimeString('pt-BR', { timeZone: 'America/Sao_Paulo', hour: '2-digit', minute: '2-digit' })
+  return {
+    weekday: weekday.charAt(0).toUpperCase() + weekday.slice(1),
+    date,
+    time,
+  }
 }
 
 /**
@@ -102,20 +116,32 @@ export async function sendWorkshopInviteToFormLead(
         }
       }
     }
-    // 1. Buscar as duas próximas sessões ativas
-    const { data: sessions } = await supabaseAdmin
+    // 1. Buscar próximas sessões ativas (mais que 2 para incluir manhã quando existir)
+    const { data: allSessions } = await supabaseAdmin
       .from('whatsapp_workshop_sessions')
       .select('*')
       .eq('area', area)
       .eq('is_active', true)
       .gte('starts_at', new Date().toISOString())
       .order('starts_at', { ascending: true })
-      .limit(2)
+      .limit(8)
 
-    if (!sessions || sessions.length === 0) {
+    if (!allSessions || allSessions.length === 0) {
       console.log('[Form Automation] ⚠️ Nenhuma sessão ativa encontrada para área:', area)
       return { success: false, error: 'Nenhuma sessão ativa encontrada' }
     }
+
+    // Incluir sessão da manhã (9h/10h BRT) quando existir, em vez de só as 2 primeiras por ordem
+    const hourBR = (startsAt: string) =>
+      parseInt(new Date(startsAt).toLocaleString('en-US', { timeZone: 'America/Sao_Paulo', hour: 'numeric', hour12: false }), 10)
+    const isManha = (s: { starts_at: string }) => {
+      const h = hourBR(s.starts_at)
+      return h === 9 || h === 10
+    }
+    const first = allSessions[0]
+    const soonestManha = allSessions.find(isManha)
+    const second = soonestManha && soonestManha.id !== first.id ? soonestManha : allSessions[1]
+    const sessions = second ? [first, second] : [first]
 
     const session = sessions[0] // Primeira sessão (para contexto)
 

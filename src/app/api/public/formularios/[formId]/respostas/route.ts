@@ -230,7 +230,7 @@ export async function POST(
 
                 const automationResult = await sendWorkshopInviteToFormLead(
                   phoneClean,
-                  extractedData.name || 'Nutricionista',
+                  extractedData.name?.trim() || '',
                   'nutri',
                   form.user_id
                 )

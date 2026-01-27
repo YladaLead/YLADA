@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireApiAuth } from '@/lib/api-auth'
 import { supabaseAdmin } from '@/lib/supabase'
-import { sendRegistrationLinkAfterClass, sendRemarketingToNonParticipant } from '@/lib/whatsapp-carol-ai'
+import { sendRegistrationLinkAfterClass, sendRemarketingToNonParticipant, getRegistrationName } from '@/lib/whatsapp-carol-ai'
 
 /**
  * GET /api/admin/whatsapp/workshop/participants
@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
     // Buscar conversas que têm workshop_session_id = sessionId
     const { data: conversations, error } = await supabaseAdmin
       .from('whatsapp_conversations')
-      .select('id, phone, name, context, created_at, last_message_at')
+      .select('id, phone, name, customer_name, context, created_at, last_message_at')
       .eq('area', 'nutri')
       .eq('status', 'active')
       .contains('context', { workshop_session_id: sessionId })
@@ -34,23 +34,37 @@ export async function GET(request: NextRequest) {
     }
 
     // Enriquecer com informações de participação
-    const participants = (conversations || []).map((conv: any) => {
-      const context = conv.context || {}
-      const tags = Array.isArray(context.tags) ? context.tags : []
-      const hasParticipated = tags.includes('participou_aula')
-      const hasNotParticipated = tags.includes('nao_participou_aula')
+    // Nome: priorizar customer_name (form/cadastro) e context.lead_name sobre name (evitar "Ylada Nutri");
+    // se ainda vazio, buscar em workshop_inscricoes/contact_submissions via getRegistrationName
+    const participants = await Promise.all(
+      (conversations || []).map(async (conv: any) => {
+        const context = conv.context || {}
+        const tags = Array.isArray(context.tags) ? context.tags : []
+        const hasParticipated = tags.includes('participou_aula')
+        const hasNotParticipated = tags.includes('nao_participou_aula')
+        let displayName =
+          conv.customer_name ||
+          (context.lead_name && String(context.lead_name).trim()) ||
+          (conv.name && conv.name !== 'Ylada Nutri' ? conv.name : null) ||
+          null
 
-      return {
-        conversationId: conv.id,
-        phone: conv.phone,
-        name: conv.name || null,
-        hasParticipated,
-        hasNotParticipated,
-        tags,
-        createdAt: conv.created_at,
-        lastMessageAt: conv.last_message_at,
-      }
-    })
+        if (!displayName && conv.phone) {
+          const regName = await getRegistrationName(conv.phone, 'nutri')
+          displayName = regName || null
+        }
+
+        return {
+          conversationId: conv.id,
+          phone: conv.phone,
+          name: displayName || null,
+          hasParticipated,
+          hasNotParticipated,
+          tags,
+          createdAt: conv.created_at,
+          lastMessageAt: conv.last_message_at,
+        }
+      })
+    )
 
     return NextResponse.json({
       success: true,

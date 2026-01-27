@@ -11,20 +11,18 @@ import {
 
 /**
  * GET /api/cron/whatsapp-carol
- * 
- * Endpoint para cron jobs (Vercel Cron ou similar)
- * 
- * Executa automaticamente:
- * - Boas-vindas para quem preencheu mas não chamou (a cada 1 hora)
- * - Remarketing para quem não participou (a cada 6 horas)
- * 
- * Proteção: Verificar header de autenticação do cron
+ *
+ * ⚠️ LEGADO – O projeto não usa mais Cron para automação.
+ * A automação é feita via WORKER ON-DEMAND:
+ * - POST /api/admin/whatsapp/automation/process       → processa mensagens agendadas (worker)
+ * - POST /api/admin/whatsapp/automation/process-all   → agenda boas-vindas + processa worker + reprocessa participou/não participou
+ * - Mensagens entram na fila (whatsapp_scheduled_messages) e o worker envia quando acionado.
+ *
+ * Este endpoint permanece apenas para chamadas manuais ou compatibilidade.
  */
 export async function GET(request: NextRequest) {
   try {
-    // NOTA: Este endpoint não é mais usado por crons do Vercel
-    // Mantido apenas para compatibilidade ou uso manual
-    // A autenticação foi removida pois não há mais crons configurados
+    // Automação principal = worker on-demand (process/process-all), não cron.
 
     const searchParams = request.nextUrl.searchParams
     const tipo = searchParams.get('tipo') // 'welcome', 'remarketing', 'pre-class', 'post-class', 'follow-up', 'sales-follow-up', 'reminders'

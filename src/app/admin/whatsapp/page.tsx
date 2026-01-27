@@ -61,6 +61,7 @@ function WhatsAppChatContent() {
   const [uploading, setUploading] = useState(false)
   const [areaFilter, setAreaFilter] = useState<string>('nutri') // Apenas Nutri por padrão
   const [listTab, setListTab] = useState<'all' | 'unread' | 'favorites' | 'groups' | 'archived'>('all')
+  const [tagFilter, setTagFilter] = useState<string | null>(null) // Filtro por fase/tag: null | 'sem_participacao' | 'participou_aula' | 'nao_participou_aula' | 'fez_apresentacao'
   const [tagsModalOpen, setTagsModalOpen] = useState(false)
   const [selectedTags, setSelectedTags] = useState<string[]>([])
   const [newTagInput, setNewTagInput] = useState('')
@@ -70,6 +71,10 @@ function WhatsAppChatContent() {
   const [sessionSelectModalOpen, setSessionSelectModalOpen] = useState(false)
   const [availableSessions, setAvailableSessions] = useState<any[]>([])
   const [loadingSessions, setLoadingSessions] = useState(false)
+  const [messagePhaseModalOpen, setMessagePhaseModalOpen] = useState(false)
+  const [messagePhaseTipo, setMessagePhaseTipo] = useState<'fechamento' | 'remarketing' | null>(null)
+  const [messagePhasePreview, setMessagePhasePreview] = useState('')
+  const [messagePhaseLoading, setMessagePhaseLoading] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
   const [contactMenuOpen, setContactMenuOpen] = useState(false)
   const [showScrollToBottom, setShowScrollToBottom] = useState(false)
@@ -272,9 +277,10 @@ function WhatsAppChatContent() {
         shouldAutoScrollRef.current = isNearBottom(messagesEl)
       }
 
-      const response = await fetch(`/api/whatsapp/conversations/${conversationId}/messages`, {
-        credentials: 'include',
-      })
+      const response = await fetch(
+        `/api/whatsapp/conversations/${conversationId}/messages?limit=5000`,
+        { credentials: 'include' }
+      )
 
       if (!response.ok) {
         if (response.status === 404) {
@@ -538,6 +544,7 @@ function WhatsAppChatContent() {
       'participou_aula': { label: 'Participou', color: 'bg-green-100 text-green-700', icon: '✅' },
       'nao_participou_aula': { label: 'Não Participou', color: 'bg-red-100 text-red-700', icon: '❌' },
       'adiou_aula': { label: 'Adiou', color: 'bg-yellow-100 text-yellow-700', icon: '⏸️' },
+      'fez_apresentacao': { label: 'Fez Apresentação', color: 'bg-teal-100 text-teal-700', icon: '🎤' },
       
       // Fase 4: Remarketing
       'interessado': { label: 'Interessado', color: 'bg-purple-50 text-purple-600', icon: '💡' },
@@ -562,12 +569,22 @@ function WhatsAppChatContent() {
     return tagMap[tag] || { label: tag, color: 'bg-gray-100 text-gray-600', icon: '🏷️' }
   }
 
+  const PARTICIPACAO_TAGS = ['participou_aula', 'nao_participou_aula', 'adiou_aula', 'fez_apresentacao']
+
   const visibleConversations = conversations
     .filter((conv) => {
       if (listTab === 'unread') return conv.unread_count > 0
       if (listTab === 'favorites') return isFavorite(conv)
       if (listTab === 'groups') return isGroup(conv)
       return true
+    })
+    .filter((conv) => {
+      if (!tagFilter) return true
+      const tags = getTags(conv)
+      if (tagFilter === 'sem_participacao') {
+        return !PARTICIPACAO_TAGS.some((t) => tags.includes(t))
+      }
+      return tags.includes(tagFilter)
     })
     .filter((conv) => {
       if (!searchTerm.trim()) return true
@@ -615,6 +632,14 @@ function WhatsAppChatContent() {
               aria-label="Agenda do Workshop"
             >
               📅
+            </Link>
+            <Link
+              href="/admin/whatsapp/atualizar-fases"
+              className="text-teal-600 hover:text-teal-700 text-sm font-medium ml-3"
+              title="Atualizar fases manualmente"
+              aria-label="Atualizar fases"
+            >
+              🏷️
             </Link>
           </div>
           <div className="flex items-center justify-between text-xs text-gray-500">
@@ -668,6 +693,31 @@ function WhatsAppChatContent() {
                   {t.label}
                 </button>
               ))}
+            </div>
+            <div className="px-2 pb-2">
+              <span className="text-xs text-gray-500 mr-2">Por fase:</span>
+              <div className="flex gap-1.5 flex-wrap">
+                {[
+                  { id: null, label: 'Todas' },
+                  { id: 'sem_participacao', label: 'Sem tag de participação' },
+                  { id: 'participou_aula', label: 'Participou' },
+                  { id: 'nao_participou_aula', label: 'Não participou' },
+                  { id: 'fez_apresentacao', label: 'Fez apresentação' },
+                ].map((t) => (
+                  <button
+                    key={t.id ?? 'all'}
+                    type="button"
+                    onClick={() => setTagFilter(t.id)}
+                    className={`px-2.5 py-1 rounded-full text-xs whitespace-nowrap ${
+                      tagFilter === t.id
+                        ? 'bg-teal-600 text-white'
+                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    }`}
+                  >
+                    {t.label}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
 
@@ -1173,6 +1223,52 @@ function WhatsAppChatContent() {
                               {activatingCarol ? '⏳ Diagnosticando...' : '🤖 Ativar Carol'}
                             </button>
                           )}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const current = (selectedConversation.context as any)?.carol_instruction || ''
+                              const next = prompt(
+                                'Instrução para a Carol (será usada na próxima resposta e depois apagada):\nEx.: "Considerar que esta pessoa já fez apresentação"',
+                                current
+                              )
+                              setContactMenuOpen(false)
+                              if (next === null) return
+                              patchConversation(selectedConversation.id, { context: { carol_instruction: next.trim() || null } }).catch((err) => alert(err.message))
+                              loadConversations()
+                            }}
+                            className="w-full text-left px-4 py-2 text-sm hover:bg-gray-50"
+                          >
+                            🤖 Instrução para Carol
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const current = (selectedConversation.context as any)?.admin_situacao || ''
+                              const next = prompt(
+                                'Situação desta pessoa (remarketing) – fica salva até você mudar.\nA Carol usa isso em toda resposta para continuar daqui.\n\nEx.: "Não participou da última aula. Fazer remarketing oferecendo quarta 20h."\nEx.: "Disse que prefere à noite, já enviei opção quarta 20h – aguardando confirmação."',
+                                current
+                              )
+                              setContactMenuOpen(false)
+                              if (next === null) return
+                              patchConversation(selectedConversation.id, { context: { admin_situacao: next.trim() || null } }).catch((err) => alert(err.message))
+                              loadConversations()
+                            }}
+                            className="w-full text-left px-4 py-2 text-sm hover:bg-gray-50"
+                          >
+                            📋 Situação / Remarketing
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setContactMenuOpen(false)
+                              setMessagePhaseTipo(null)
+                              setMessagePhasePreview('')
+                              setMessagePhaseModalOpen(true)
+                            }}
+                            className="w-full text-left px-4 py-2 text-sm hover:bg-gray-50"
+                          >
+                            📤 Enviar mensagem de fase
+                          </button>
                           <button
                             type="button"
                             onClick={() => {
@@ -1930,6 +2026,7 @@ function WhatsAppChatContent() {
                       { tag: 'participou_aula', label: 'Participou', icon: '✅' },
                       { tag: 'nao_participou_aula', label: 'Não Participou', icon: '❌' },
                       { tag: 'adiou_aula', label: 'Adiou', icon: '⏸️' },
+                      { tag: 'fez_apresentacao', label: 'Fez Apresentação', icon: '🎤' },
                     ].map(({ tag, label, icon }) => (
                       <button
                         key={tag}
@@ -2233,6 +2330,143 @@ function WhatsAppChatContent() {
                 disabled={sending}
               >
                 Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Enviar mensagem de fase */}
+      {messagePhaseModalOpen && selectedConversation && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] flex flex-col">
+            <div className="flex items-center justify-between p-6 border-b border-gray-200">
+              <h2 className="text-xl font-bold text-gray-900">Enviar mensagem de fase</h2>
+              <button
+                type="button"
+                onClick={() => {
+                  setMessagePhaseModalOpen(false)
+                  setMessagePhaseTipo(null)
+                  setMessagePhasePreview('')
+                }}
+                className="text-gray-400 hover:text-gray-600 text-2xl"
+              >
+                ×
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto p-6 space-y-4">
+              <p className="text-sm text-gray-600">
+                Escolha a fase, gere o preview e confira antes de enviar. Nenhuma mensagem é enviada até você clicar em Enviar.
+              </p>
+              <div>
+                <span className="text-sm font-medium text-gray-700">Fase:</span>
+                <div className="flex gap-2 mt-2">
+                  <button
+                    type="button"
+                    onClick={() => { setMessagePhaseTipo('fechamento'); setMessagePhasePreview('') }}
+                    className={`px-3 py-2 rounded-lg text-sm ${messagePhaseTipo === 'fechamento' ? 'bg-green-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                  >
+                    Fechamento (participou)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { setMessagePhaseTipo('remarketing'); setMessagePhasePreview('') }}
+                    className={`px-3 py-2 rounded-lg text-sm ${messagePhaseTipo === 'remarketing' ? 'bg-orange-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                  >
+                    Remarketing (não participou)
+                  </button>
+                </div>
+              </div>
+              {messagePhaseTipo && (
+                <button
+                  type="button"
+                  onClick={async () => {
+                    setMessagePhaseLoading(true)
+                    try {
+                      const res = await fetch('/api/admin/whatsapp/carol/message-phase', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        credentials: 'include',
+                        body: JSON.stringify({
+                          conversationId: selectedConversation.id,
+                          tipo: messagePhaseTipo,
+                          action: 'preview',
+                        }),
+                      })
+                      const data = await res.json()
+                      if (!res.ok) throw new Error(data.error || 'Erro ao gerar preview')
+                      setMessagePhasePreview(data.message || '')
+                    } catch (err: any) {
+                      alert(err.message || 'Erro ao gerar preview')
+                    } finally {
+                      setMessagePhaseLoading(false)
+                    }
+                  }}
+                  disabled={messagePhaseLoading}
+                  className="px-3 py-2 rounded-lg text-sm bg-teal-100 text-teal-800 hover:bg-teal-200 disabled:opacity-50"
+                >
+                  {messagePhaseLoading ? 'Gerando...' : 'Gerar preview'}
+                </button>
+              )}
+              {messagePhasePreview && (
+                <div>
+                  <span className="text-sm font-medium text-gray-700">Preview da mensagem:</span>
+                  <pre className="mt-2 p-4 bg-gray-50 rounded-lg text-sm text-gray-800 whitespace-pre-wrap overflow-x-auto max-h-48 overflow-y-auto">
+                    {messagePhasePreview}
+                  </pre>
+                </div>
+              )}
+            </div>
+            <div className="flex items-center justify-end gap-3 p-6 border-t border-gray-200">
+              <button
+                type="button"
+                onClick={() => {
+                  setMessagePhaseModalOpen(false)
+                  setMessagePhaseTipo(null)
+                  setMessagePhasePreview('')
+                }}
+                className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={async () => {
+                  if (!messagePhasePreview) {
+                    alert('Gere o preview antes de enviar.')
+                    return
+                  }
+                  setMessagePhaseLoading(true)
+                  try {
+                    const res = await fetch('/api/admin/whatsapp/carol/message-phase', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      credentials: 'include',
+                      body: JSON.stringify({
+                        conversationId: selectedConversation.id,
+                        tipo: messagePhaseTipo,
+                        action: 'send',
+                        message: messagePhasePreview,
+                      }),
+                    })
+                    const data = await res.json()
+                    if (!res.ok) throw new Error(data.error || 'Erro ao enviar')
+                    alert('Mensagem enviada com sucesso.')
+                    setMessagePhaseModalOpen(false)
+                    setMessagePhaseTipo(null)
+                    setMessagePhasePreview('')
+                    await loadMessages(selectedConversation.id)
+                    await loadConversations()
+                  } catch (err: any) {
+                    alert(err.message || 'Erro ao enviar')
+                  } finally {
+                    setMessagePhaseLoading(false)
+                  }
+                }}
+                disabled={!messagePhasePreview || messagePhaseLoading}
+                className="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {messagePhaseLoading ? 'Enviando...' : 'Enviar'}
               </button>
             </div>
           </div>

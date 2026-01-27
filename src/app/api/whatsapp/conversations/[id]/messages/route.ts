@@ -57,13 +57,17 @@ export async function GET(
     }
 
     const conversationId = params.id
+    const { searchParams } = new URL(request.url)
+    const limitParam = searchParams.get('limit')
+    const maxMessages = limitParam ? Math.min(Number(limitParam) || 5000, 10000) : 5000
 
-    // Buscar mensagens
+    // Buscar mensagens (limite alto para remarketing: ver histórico completo)
     const { data: messages, error } = await supabaseAdmin
       .from('whatsapp_messages')
       .select('*')
       .eq('conversation_id', conversationId)
       .order('created_at', { ascending: true })
+      .limit(maxMessages)
 
     if (error) {
       throw error

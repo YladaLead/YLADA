@@ -80,15 +80,23 @@ export async function scheduleWelcomeMessages(): Promise<{
       return { scheduled: 0, skipped: 0, errors: 0 }
     }
 
-    // 2. Buscar próximas 2 sessões para incluir na mensagem
-    const { data: sessions } = await supabaseAdmin
+    // 2. Buscar próximas sessões (mesma regra do form/Carol: próxima + manhã 9h/10h quando existir)
+    const { data: allSessions } = await supabaseAdmin
       .from('whatsapp_workshop_sessions')
       .select('title, starts_at, zoom_link')
       .eq('area', 'nutri')
       .eq('is_active', true)
       .gte('starts_at', new Date().toISOString())
       .order('starts_at', { ascending: true })
-      .limit(2)
+      .limit(8)
+    const list = allSessions || []
+    const hourBR = (startsAt: string) =>
+      parseInt(new Date(startsAt).toLocaleString('en-US', { timeZone: 'America/Sao_Paulo', hour: 'numeric', hour12: false }), 10)
+    const isManha = (s: { starts_at: string }) => (hourBR(s.starts_at) === 9 || hourBR(s.starts_at) === 10)
+    const first = list[0]
+    const soonestManha = list.find(isManha)
+    const second = soonestManha && soonestManha.starts_at !== first?.starts_at ? soonestManha : list[1]
+    const sessions = first && second ? [first, second] : first ? [first] : []
 
     // 3. Verificar quais precisam de boas-vindas e agendar
     let scheduled = 0
@@ -155,14 +163,15 @@ export async function scheduleWelcomeMessages(): Promise<{
             continue
           }
 
-          // Formatar opções de aula
+          // Formatar opções de aula (horário de Brasília para não sair 18h/12h em UTC)
           let optionsText = ''
+          const tz = 'America/Sao_Paulo'
           if (sessions && sessions.length > 0) {
             sessions.forEach((session, index) => {
               const date = new Date(session.starts_at)
-              const weekday = date.toLocaleDateString('pt-BR', { weekday: 'long' })
-              const dateStr = date.toLocaleDateString('pt-BR')
-              const time = date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+              const weekday = date.toLocaleDateString('pt-BR', { timeZone: tz, weekday: 'long' })
+              const dateStr = date.toLocaleDateString('pt-BR', { timeZone: tz, day: '2-digit', month: '2-digit', year: 'numeric' })
+              const time = date.toLocaleTimeString('pt-BR', { timeZone: tz, hour: '2-digit', minute: '2-digit' })
               optionsText += `\n🗓️ **Opção ${index + 1}:**\n${weekday}, ${dateStr}\n🕒 ${time} (Brasília)\n🔗 ${session.zoom_link}\n`
             })
           }

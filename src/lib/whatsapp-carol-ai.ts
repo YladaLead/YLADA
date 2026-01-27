@@ -344,6 +344,18 @@ IMPORTANTE - NÃO REPETIR:
 - Se a pessoa faz uma pergunta simples, responda APENAS a pergunta, sem repetir contexto
 - Continue a conversa naturalmente, como se fosse uma conversa real
 
+REGRA DE OURO - INSTRUÇÃO PARA ESTA RESPOSTA:
+- Se no contexto aparecer "INSTRUÇÃO DO ADMIN PARA ESTA RESPOSTA" ou "INSTRUÇÃO PARA ESTA RESPOSTA", essa instrução tem PRIORIDADE MÁXIMA
+- Siga EXATAMENTE o que ela diz. Ela SOBREESCREVE qualquer outra regra (primeira mensagem, enviar opções, etc.)
+- Exemplo: se a instrução disser "responda em uma frase curta, não repita opções", você NÃO pode enviar opções nem boas-vindas
+
+QUANDO A PESSOA SÓ CONFIRMOU OU ENTENDEU:
+- Se a pessoa disse apenas "Entendi", "Ok", "Certo", "Beleza", "Sim", "Tá", "Pronto" ou algo muito curto confirmando:
+  → NÃO repita opções de aula
+  → NÃO repita boas-vindas nem explicação da aula
+  → Responda em UMA frase curta e amigável, ex.: "Qualquer dúvida, é só me chamar! 😊" ou "Fico no aguardo! 💚"
+- Essas respostas curtas evitam poluir a conversa e dão sequência natural
+
 FORMATO DE RESPOSTAS:
 - Curta (máximo 3-4 linhas quando não enviar opções)
 - Clara e direta
@@ -435,6 +447,8 @@ export async function generateCarolResponse(
     participated?: boolean
     isFirstMessage?: boolean
     carolInstruction?: string
+    /** Situação definida pelo admin (remarketing pessoa por pessoa). Persiste até ser alterada. */
+    adminSituacao?: string
   }
 ): Promise<string> {
   if (!process.env.OPENAI_API_KEY) {
@@ -479,9 +493,13 @@ export async function generateCarolResponse(
   let shouldSendOptions = false
   
   if (context) {
-    // Instrução do admin para esta resposta (ex.: "tratar como quem já fez apresentação")
+    // Situação desta pessoa (remarketing pessoa por pessoa – definida pelo admin, persiste)
+    if (context.adminSituacao && context.adminSituacao.trim()) {
+      contextText += `\n\n📋 SITUAÇÃO DESTA PESSOA (definida por você para remarketing):\n${context.adminSituacao.trim()}\n\nUse isso para dar continuidade. Continue a partir daqui, sem repetir o que já foi feito ou dito.\n`
+    }
+    // Instrução contextual para esta resposta (ex.: não repetir bloco em "Entendi", mensagem do botão, etc.)
     if (context.carolInstruction && context.carolInstruction.trim()) {
-      contextText += `\n⚠️ INSTRUÇÃO DO ADMIN PARA ESTA RESPOSTA: ${context.carolInstruction.trim()}\nSiga esta instrução na sua próxima resposta.\n`
+      contextText += `\n\n🚨 PRIORIDADE MÁXIMA - INSTRUÇÃO PARA ESTA RESPOSTA:\n${context.carolInstruction.trim()}\n\nEsta instrução SOBREESCREVE qualquer outra regra. Siga EXATAMENTE. Não repita opções, boas-vindas ou explicações se a instrução disser para responder curto.\n`
     }
     // 🆕 Nome da pessoa (MUITO IMPORTANTE - sempre incluir se disponível)
     if (context.leadName) {
@@ -843,64 +861,54 @@ export async function processIncomingMessageWithCarol(
     const tags = Array.isArray(context.tags) ? context.tags : []
     const workshopSessionId = context.workshop_session_id
 
-    // 2. Buscar sessões de workshop disponíveis (com ID para poder buscar depois)
+    // 2. Buscar sessões de workshop: SEMPRE as mesmas 2 opções que a pessoa viu (próxima + manhã 9h/10h quando existir).
+    // Não usar só workshop_session_id para montar a lista — senão "Opção 2" falha (só há 1 sessão na lista).
     let workshopSessions: Array<{ id: string; title: string; starts_at: string; zoom_link: string }> = []
-    if (workshopSessionId) {
-      const { data: session } = await supabaseAdmin
-        .from('whatsapp_workshop_sessions')
-        .select('id, title, starts_at, zoom_link')
-        .eq('id', workshopSessionId)
-        .single()
-      if (session) {
-        workshopSessions.push(session)
-      }
-    } else {
-      // Buscar próximas 2 sessões (apenas futuras, com buffer de 5 minutos)
-      // Usar horário atual em UTC para comparar com o banco
-      const now = new Date()
-      // Adicionar buffer de 5 minutos para evitar sessões que acabaram de passar
-      const bufferMinutes = 5
-      const minDate = new Date(now.getTime() + bufferMinutes * 60 * 1000)
-      
-      console.log('[Carol AI] 🔍 Buscando sessões futuras:', {
-        now: now.toISOString(),
-        minDate: minDate.toISOString(),
-        area,
-        conversationId
-      })
-      
-      const { data: sessions, error: sessionsError } = await supabaseAdmin
-        .from('whatsapp_workshop_sessions')
-        .select('id, title, starts_at, zoom_link')
-        .eq('area', area)
-        .eq('is_active', true)
-        .gte('starts_at', minDate.toISOString())
-        .order('starts_at', { ascending: true })
-        .limit(2)
-      
-      if (sessionsError) {
-        console.error('[Carol AI] ❌ Erro ao buscar sessões:', sessionsError)
-      }
-      
-      workshopSessions = sessions || []
-      
-      console.log('[Carol AI] 📅 Sessões encontradas:', {
-        count: workshopSessions.length,
-        hasError: !!sessionsError,
-        error: sessionsError?.message,
-        sessions: workshopSessions.map(s => ({
-          id: s.id,
-          title: s.title,
-          starts_at: s.starts_at,
-          zoom_link: s.zoom_link ? s.zoom_link.substring(0, 50) + '...' : null
-        }))
-      })
-      
-      // Se não encontrou sessões e é primeira mensagem, pode ser problema de detecção de workshop
-      if (workshopSessions.length === 0 && isFirstMessage) {
-        console.warn('[Carol AI] ⚠️ Nenhuma sessão encontrada para primeira mensagem - pode ser problema de detecção de workshop')
-      }
+    const now = new Date()
+    const minDateIso = now.toISOString()
+
+    console.log('[Carol AI] 🔍 Buscando sessões futuras (sempre 2 opções: próxima + manhã):', {
+      now: minDateIso,
+      area,
+      conversationId,
+      workshopSessionId: workshopSessionId ?? '(nenhum)'
+    })
+
+    const { data: allSessions, error: sessionsError } = await supabaseAdmin
+      .from('whatsapp_workshop_sessions')
+      .select('id, title, starts_at, zoom_link')
+      .eq('area', area)
+      .eq('is_active', true)
+      .gte('starts_at', minDateIso)
+      .order('starts_at', { ascending: true })
+      .limit(8)
+
+    if (sessionsError) {
+      console.error('[Carol AI] ❌ Erro ao buscar sessões:', sessionsError)
     }
+
+    const list = allSessions || []
+    const hourBR = (startsAt: string) =>
+      parseInt(new Date(startsAt).toLocaleString('en-US', { timeZone: 'America/Sao_Paulo', hour: 'numeric', hour12: false }), 10)
+    const isManha = (s: { starts_at: string }) => {
+      const h = hourBR(s.starts_at)
+      return h === 9 || h === 10
+    }
+    const first = list[0]
+    const soonestManha = list.find(isManha)
+    const second = soonestManha && soonestManha.id !== first?.id ? soonestManha : list[1]
+    workshopSessions = first && second ? [first, second] : first ? [first] : []
+
+    console.log('[Carol AI] 📅 Sessões para opções (Opção 1/2):', {
+      count: workshopSessions.length,
+      hasError: !!sessionsError,
+      sessions: workshopSessions.map(s => ({
+        id: s.id,
+        title: s.title,
+        starts_at: s.starts_at,
+        zoom_link: s.zoom_link ? s.zoom_link.substring(0, 50) + '...' : null
+      }))
+    })
 
     // 3. Verificar histórico para detectar primeira mensagem
     const { data: messageHistory } = await supabaseAdmin
@@ -932,7 +940,11 @@ export async function processIncomingMessageWithCarol(
     const isShortNeutralReply = shortNeutralWords.includes(msgNorm) ||
       (msgNorm.length <= 4 && !msgNorm.endsWith('?'))
 
-    const isFirstMessage = rawIsFirstMessage && !formAlreadySentWelcome && !isShortNeutralReply
+    // a5: Mensagem do botão do WhatsApp ("Acabei de me inscrever... gostaria de agendar") → não repetir bloco;
+    // o form envia em 15s ou já enviou; Carol não deve reenviar boas-vindas + opções
+    const isMessageFromButton = /acabei\s+de\s+me\s+inscrever|me\s+inscrev(i|er)|gostaria\s+de\s+agendar|inscrev(er|i).*aula|ylada\s+nutri.*agendar/i.test(msgNorm)
+
+    const isFirstMessage = rawIsFirstMessage && !formAlreadySentWelcome && !isShortNeutralReply && !isMessageFromButton
     
     console.log('[Carol AI] 🔍 Detecção de primeira mensagem:', {
       conversationId,
@@ -941,6 +953,7 @@ export async function processIncomingMessageWithCarol(
       rawIsFirstMessage,
       formAlreadySentWelcome,
       isShortNeutralReply,
+      isMessageFromButton,
       isFirstMessage,
       hasWorkshopTag: tags.includes('veio_aula_pratica') || tags.includes('recebeu_link_workshop'),
       workshopSessionId
@@ -1579,8 +1592,18 @@ Carol - Secretária YLADA Nutri`
     // 🆕 Priorizar nome do cadastro, customer_name (form) e context; evitar "Ylada Nutri" como nome
     const conv = conversation as { name?: string | null; customer_name?: string | null }
     const leadName = registrationName || (context as any)?.lead_name || conversation.name || conv?.customer_name || undefined
-    
-    const carolInstruction = (context as any)?.carol_instruction
+
+    // Mensagem do botão → instrução para NÃO repetir boas-vindas/opções (form envia em 15s ou já enviou)
+    const carolInstructionFromContext = (context as any)?.carol_instruction
+    let carolInstruction: string | undefined
+    if (isMessageFromButton) {
+      carolInstruction = 'A pessoa acabou de clicar no botão do workshop ("Acabei de me inscrever... gostaria de agendar"). NÃO repita boas-vindas nem a lista de opções. Responda em 1–2 frases: as opções foram enviadas acima (ou estão chegando) e pergunte qual horário funciona melhor. Exemplo: "Oi! As opções já foram enviadas na mensagem acima. Qual delas funciona melhor para você? 😊"'
+    } else if (isShortNeutralReply && (formAlreadySentWelcome || workshopSessions.length > 0)) {
+      carolInstruction = 'A pessoa só confirmou/entendeu (ex.: "Entendi", "Ok", "Certo"). NÃO repita opções nem boas-vindas; responda em UMA frase curta e amigável, tipo "Qualquer dúvida, é só me chamar! 😊" ou "Fico no aguardo da sua escolha! 💚".'
+    } else {
+      carolInstruction = typeof carolInstructionFromContext === 'string' ? carolInstructionFromContext : undefined
+    }
+
     const carolResponse = await generateCarolResponse(message, conversationHistory, {
       tags,
       workshopSessions,
@@ -1589,7 +1612,8 @@ Carol - Secretária YLADA Nutri`
       scheduledDate,
       participated: participated ? true : (tags.includes('nao_participou_aula') ? false : undefined),
       isFirstMessage, // 🆕 Passar flag de primeira mensagem
-      carolInstruction: typeof carolInstruction === 'string' ? carolInstruction : undefined,
+      carolInstruction,
+      adminSituacao: (context as any)?.admin_situacao, // remarketing pessoa por pessoa (persistente)
     })
 
     console.log('[Carol AI] ✅ Resposta gerada:', {
