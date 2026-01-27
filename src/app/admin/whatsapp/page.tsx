@@ -111,8 +111,8 @@ function WhatsAppChatContent() {
   // Carregar conversas
   useEffect(() => {
     loadConversations()
-    // Atualizar a cada 5 segundos
-    const interval = setInterval(loadConversations, 5000)
+    // Atualizar a cada 3 segundos (mais frequente para evitar "10 min pra trás")
+    const interval = setInterval(loadConversations, 3000)
     return () => clearInterval(interval)
   }, [areaFilter, listTab, searchTerm])
 
@@ -123,8 +123,8 @@ function WhatsAppChatContent() {
       // Ao trocar de conversa, voltar a auto-scrollar para o final
       shouldAutoScrollRef.current = true
       loadMessages(selectedConversation.id)
-      // Atualizar mensagens a cada 3 segundos
-      const interval = setInterval(() => loadMessages(selectedConversation.id), 3000)
+      // Atualizar mensagens a cada 2 segundos (quase em tempo real)
+      const interval = setInterval(() => loadMessages(selectedConversation.id), 2000)
       return () => clearInterval(interval)
     }
   }, [selectedConversation])
@@ -991,6 +991,18 @@ function WhatsAppChatContent() {
                   </div>
 
                   <div className="flex items-center gap-2 shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        loadConversations()
+                        if (selectedConversation) loadMessages(selectedConversation.id)
+                      }}
+                      className="h-10 w-10 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 text-gray-700"
+                      title="Atualizar conversas e mensagens"
+                      aria-label="Atualizar"
+                    >
+                      🔄
+                    </button>
                     {/* Botão Desativar Carol (visível quando ativa) */}
                     {selectedConversation && getTags(selectedConversation).includes('carol_ativa') && (
                       <>
@@ -1144,6 +1156,35 @@ function WhatsAppChatContent() {
                       </button>
                       {contactMenuOpen && (
                         <div className="absolute right-0 mt-2 w-56 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden z-20">
+                          <button
+                            type="button"
+                            onClick={async () => {
+                              if (!selectedConversation) return
+                              setContactMenuOpen(false)
+                              try {
+                                const res = await fetch('/api/admin/whatsapp/carol/reprocess-last', {
+                                  method: 'POST',
+                                  headers: { 'Content-Type': 'application/json' },
+                                  credentials: 'include',
+                                  body: JSON.stringify({ conversationId: selectedConversation.id }),
+                                })
+                                const data = await res.json()
+                                if (data.success) {
+                                  await loadMessages(selectedConversation.id)
+                                  await loadConversations()
+                                  alert('✅ Carol respondeu à última mensagem do cliente.')
+                                } else {
+                                  alert(data.error || 'Erro ao reprocessar com Carol')
+                                }
+                              } catch (err: any) {
+                                alert(err?.message || 'Erro ao chamar Carol')
+                              }
+                            }}
+                            className="w-full text-left px-4 py-2 text-sm hover:bg-gray-50 text-purple-600"
+                            title="Quando a Carol não respondeu automaticamente (ex.: webhook atrasou)"
+                          >
+                            🔄 Carol: responder à última mensagem
+                          </button>
                           <button
                             type="button"
                             onClick={() => {
