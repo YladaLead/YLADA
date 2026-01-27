@@ -417,6 +417,88 @@ function AutomationContent() {
             </div>
           </div>
 
+          {/* Reprocessar Quem Já Tem Tags */}
+          <div className="bg-white rounded-lg shadow p-6 mb-6">
+            <h2 className="text-xl font-semibold mb-4">🔄 Reprocessar Quem Já Tem Tags</h2>
+            <p className="text-gray-600 mb-4 text-sm">
+              Se você já etiquetou quem participou/não participou mas o fluxo não aconteceu, use estes botões para reprocessar.
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <button
+                onClick={async () => {
+                  if (!confirm('Isso vai enviar link de cadastro para TODAS as pessoas que têm tag "participou_aula" mas ainda não receberam. Continuar?')) {
+                    return
+                  }
+                  setLoading(true)
+                  setResult(null)
+                  try {
+                    // Buscar todas conversas com tag participou_aula
+                    const response = await fetch('/api/admin/whatsapp/automation/reprocessar-participou', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      credentials: 'include',
+                    })
+                    const data = await response.json()
+                    if (data.success) {
+                      setResult({
+                        type: 'reprocessar',
+                        processed: data.processed,
+                        sent: data.sent,
+                        errors: data.errors,
+                      })
+                    } else {
+                      alert(`Erro: ${data.error}`)
+                    }
+                  } catch (error: any) {
+                    alert(`Erro: ${error.message}`)
+                  } finally {
+                    setLoading(false)
+                  }
+                }}
+                disabled={loading}
+                className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 disabled:opacity-50"
+              >
+                {loading ? 'Processando...' : '💰 Reprocessar Participou'}
+              </button>
+              <button
+                onClick={async () => {
+                  if (!confirm('Isso vai enviar remarketing para TODAS as pessoas que têm tag "nao_participou_aula" mas ainda não receberam. Continuar?')) {
+                    return
+                  }
+                  setLoading(true)
+                  setResult(null)
+                  try {
+                    // Buscar todas conversas com tag nao_participou_aula
+                    const response = await fetch('/api/admin/whatsapp/automation/reprocessar-nao-participou', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      credentials: 'include',
+                    })
+                    const data = await response.json()
+                    if (data.success) {
+                      setResult({
+                        type: 'reprocessar',
+                        processed: data.processed,
+                        sent: data.sent,
+                        errors: data.errors,
+                      })
+                    } else {
+                      alert(`Erro: ${data.error}`)
+                    }
+                  } catch (error: any) {
+                    alert(`Erro: ${error.message}`)
+                  } finally {
+                    setLoading(false)
+                  }
+                }}
+                disabled={loading}
+                className="bg-orange-600 text-white px-4 py-2 rounded hover:bg-orange-700 disabled:opacity-50"
+              >
+                {loading ? 'Processando...' : '🔄 Reprocessar Não Participou'}
+              </button>
+            </div>
+          </div>
+
           {/* Diagnóstico */}
           <div className="bg-yellow-50 rounded-lg p-4 mb-6 border border-yellow-200">
             <h3 className="text-sm font-semibold text-yellow-800 mb-2">🔍 Diagnóstico</h3>
@@ -486,6 +568,14 @@ function AutomationContent() {
                       </div>
                     </div>
                   )}
+                </div>
+              )}
+
+              {result.type === 'reprocessar' && (
+                <div className="space-y-2">
+                  <p><strong>Processadas:</strong> {result.processed}</p>
+                  <p><strong>Enviadas:</strong> {result.sent}</p>
+                  <p><strong>Erros:</strong> {result.errors}</p>
                 </div>
               )}
 
