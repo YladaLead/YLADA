@@ -96,7 +96,7 @@ function CarolChatContent() {
     <div className="min-h-screen bg-gray-50">
       <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
         <div className="px-4 py-3 max-w-4xl mx-auto flex items-center justify-between">
-          <Link href="/admin/whatsapp/carol" className="text-gray-600 hover:text-gray-900 text-sm">
+          <Link href="/admin/whatsapp/automation" className="text-gray-600 hover:text-gray-900 text-sm">
             ← Voltar
           </Link>
           <div className="text-center">

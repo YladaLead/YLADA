@@ -124,11 +124,11 @@ function AdminDashboardContent() {
       destaque: true
     },
     {
-      id: 'whatsapp-carol',
-      title: 'Carol - IA de Atendimento',
-      description: 'Automação e disparos automáticos',
+      id: 'whatsapp-automation',
+      title: 'Automação WhatsApp',
+      description: 'Agendar mensagens, disparos e automações',
       icon: '🤖',
-      link: '/admin/whatsapp/carol',
+      link: '/admin/whatsapp/automation',
       color: 'bg-purple-600',
       destaque: true
     },
