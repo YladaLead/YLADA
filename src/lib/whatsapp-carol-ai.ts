@@ -434,6 +434,7 @@ export async function generateCarolResponse(
     scheduledDate?: string
     participated?: boolean
     isFirstMessage?: boolean
+    carolInstruction?: string
   }
 ): Promise<string> {
   if (!process.env.OPENAI_API_KEY) {
@@ -478,11 +479,16 @@ export async function generateCarolResponse(
   let shouldSendOptions = false
   
   if (context) {
+    // Instrução do admin para esta resposta (ex.: "tratar como quem já fez apresentação")
+    if (context.carolInstruction && context.carolInstruction.trim()) {
+      contextText += `\n⚠️ INSTRUÇÃO DO ADMIN PARA ESTA RESPOSTA: ${context.carolInstruction.trim()}\nSiga esta instrução na sua próxima resposta.\n`
+    }
     // 🆕 Nome da pessoa (MUITO IMPORTANTE - sempre incluir se disponível)
     if (context.leadName) {
       contextText += `\n⚠️ NOME DA PESSOA: ${context.leadName}\n`
       contextText += `IMPORTANTE: Você DEVE usar o nome "${context.leadName}" na saudação inicial!\n`
       contextText += `Exemplo: "Oi ${context.leadName}, tudo bem? 😊" ou "Seja muito bem-vinda, ${context.leadName}!"\n`
+      contextText += `NUNCA use "Ylada Nutri", "da Nutri" ou "Nutri" como nome da pessoa. O nome da pessoa é APENAS "${context.leadName}".\n`
     }
     
     if (context.tags && context.tags.length > 0) {
@@ -804,7 +810,7 @@ export async function processIncomingMessageWithCarol(
       
       const { data: conv, error: convError } = await supabaseAdmin
         .from('whatsapp_conversations')
-        .select('context, name')
+        .select('context, name, customer_name')
         .eq('id', conversationId)
         .maybeSingle()
 
@@ -904,12 +910,37 @@ export async function processIncomingMessageWithCarol(
       .order('created_at', { ascending: true })
     
     const customerMessages = messageHistory?.filter(m => m.sender_type === 'customer') || []
-    const isFirstMessage = customerMessages.length === 1 // Primeira mensagem do cliente
+    const rawIsFirstMessage = customerMessages.length === 1
+
+    // a3: Se o form já enviou boas-vindas com opções, não reenviar bloco de "primeira mensagem"
+    let formAlreadySentWelcome = false
+    if (rawIsFirstMessage && (tags.includes('veio_aula_pratica') || tags.includes('recebeu_link_workshop'))) {
+      const { data: botMessages } = await supabaseAdmin
+        .from('whatsapp_messages')
+        .select('message')
+        .eq('conversation_id', conversationId)
+        .eq('sender_type', 'bot')
+      const hasWelcomeWithOptions = botMessages?.some((m: { message?: string | null }) =>
+        /qual\s*voc[eê]\s*prefere/i.test(String(m?.message ?? ''))
+      )
+      formAlreadySentWelcome = !!hasWelcomeWithOptions
+    }
+
+    // a4: Não reenviar boas-vindas/opções para "Ok" e mensagens curtas/neutras
+    const shortNeutralWords = ['ok', 'certo', 'beleza', 'tudo bem', 'tudo bom', 'sim', 'não', 'nao', 'ah', 'tá', 'ta', 'pronto', 'entendi', 'obrigada', 'obrigado', 'valeu', 'blz', 'legal']
+    const msgNorm = message.trim().toLowerCase().replace(/\s+/g, ' ')
+    const isShortNeutralReply = shortNeutralWords.includes(msgNorm) ||
+      (msgNorm.length <= 4 && !msgNorm.endsWith('?'))
+
+    const isFirstMessage = rawIsFirstMessage && !formAlreadySentWelcome && !isShortNeutralReply
     
     console.log('[Carol AI] 🔍 Detecção de primeira mensagem:', {
       conversationId,
       totalMessages: messageHistory?.length || 0,
       customerMessages: customerMessages.length,
+      rawIsFirstMessage,
+      formAlreadySentWelcome,
+      isShortNeutralReply,
       isFirstMessage,
       hasWorkshopTag: tags.includes('veio_aula_pratica') || tags.includes('recebeu_link_workshop'),
       workshopSessionId
@@ -1229,8 +1260,11 @@ export async function processIncomingMessageWithCarol(
     }
 
     // Se detectou escolha, enviar imagem + link e retornar
-    if (selectedSession) {
-      console.log('[Carol AI] ✅ Escolha detectada:', {
+    // Só enviar "Perfeito! Você vai adorar!" + link quando a conversa estiver no fluxo de workshop/aula prática.
+    // Evita disparar para contatos que não são de agendamento (ex.: alguém que disse "2" em outro contexto).
+    const isInWorkshopFlow = tags.includes('veio_aula_pratica') || tags.includes('recebeu_link_workshop')
+    if (selectedSession && isInWorkshopFlow) {
+      console.log('[Carol AI] ✅ Escolha detectada (conversa no fluxo workshop):', {
         sessionId: selectedSession.id,
         startsAt: selectedSession.starts_at,
         message
@@ -1542,9 +1576,11 @@ Carol - Secretária YLADA Nutri`
       isFirstMessage
     })
 
-    // 🆕 Priorizar nome do cadastro sobre nome do WhatsApp
-    const leadName = registrationName || (context as any)?.lead_name || conversation.name || undefined
+    // 🆕 Priorizar nome do cadastro, customer_name (form) e context; evitar "Ylada Nutri" como nome
+    const conv = conversation as { name?: string | null; customer_name?: string | null }
+    const leadName = registrationName || (context as any)?.lead_name || conversation.name || conv?.customer_name || undefined
     
+    const carolInstruction = (context as any)?.carol_instruction
     const carolResponse = await generateCarolResponse(message, conversationHistory, {
       tags,
       workshopSessions,
@@ -1553,6 +1589,7 @@ Carol - Secretária YLADA Nutri`
       scheduledDate,
       participated: participated ? true : (tags.includes('nao_participou_aula') ? false : undefined),
       isFirstMessage, // 🆕 Passar flag de primeira mensagem
+      carolInstruction: typeof carolInstruction === 'string' ? carolInstruction : undefined,
     })
 
     console.log('[Carol AI] ✅ Resposta gerada:', {
@@ -1725,13 +1762,19 @@ Carol - Secretária YLADA Nutri`
       }
     }
 
-    // 11. Atualizar última mensagem da conversa
+    // 11. Atualizar última mensagem da conversa e limpar instrução da Carol (já usada)
+    const updatePayload: { last_message_at: string; last_message_from: string; context?: Record<string, unknown> } = {
+      last_message_at: new Date().toISOString(),
+      last_message_from: 'bot',
+    }
+    if (carolInstruction) {
+      const prevCtx = (context || {}) as Record<string, unknown>
+      const { carol_instruction: _, ...rest } = prevCtx
+      updatePayload.context = rest
+    }
     await supabaseAdmin
       .from('whatsapp_conversations')
-      .update({
-        last_message_at: new Date().toISOString(),
-        last_message_from: 'bot',
-      })
+      .update(updatePayload)
       .eq('id', conversationId)
 
     return { success: true, response: carolResponse }

@@ -32,8 +32,14 @@ export async function sendWorkshopInviteToFormLead(
     console.log('[Form Automation] ⏳ Aguardando 15 segundos antes de enviar mensagem automática...')
     await new Promise(resolve => setTimeout(resolve, 15000))
     
+    // 📱 Normalizar telefone no mesmo padrão do webhook (BR = 55 + 10/11 dígitos) para evitar 2 conversas
+    let phoneNormalized = phone.replace(/\D/g, '')
+    if (phoneNormalized.length >= 10 && phoneNormalized.length <= 11 && !phoneNormalized.startsWith('55')) {
+      if (phoneNormalized.startsWith('0')) phoneNormalized = phoneNormalized.slice(1)
+      phoneNormalized = '55' + phoneNormalized
+    }
+    
     // 🛡️ Verificar se já existe conversa ativa para evitar duplicação
-    const phoneClean = phone.replace(/\D/g, '')
     
     // Buscar instância primeiro para verificar conversa
     let { data: instance } = await supabaseAdmin
@@ -76,7 +82,7 @@ export async function sendWorkshopInviteToFormLead(
       const { data: existingConv } = await supabaseAdmin
         .from('whatsapp_conversations')
         .select('id, context, last_message_at')
-        .eq('phone', phoneClean)
+        .eq('phone', phoneNormalized)
         .eq('instance_id', instance.id)
         .maybeSingle()
       
@@ -141,29 +147,39 @@ export async function sendWorkshopInviteToFormLead(
     // ela está esperando resposta imediata, independente de dia/horário
     // Esta é uma resposta a uma ação direta do usuário, não uma mensagem automática
 
-    // 5. Usar nome do cadastro (leadName já vem do cadastro, mas garantir que está correto)
-    // leadName já é o nome do cadastro passado como parâmetro
-    const greeting = leadName ? `Olá ${leadName}, seja bem-vindo! 👋\n\n` : 'Olá, seja bem-vindo! 👋\n\n'
+    // 5. Usar nome do cadastro na saudação só se for nome real (nunca email).
+    // Tom alinhado à Carol: "Oi [Nome], tudo bem? Seja muito bem-vinda! Eu sou a Carol, da equipe Ylada Nutri."
+    const displayName = (leadName && leadName.trim() && !String(leadName).includes('@'))
+      ? leadName.trim()
+      : ''
+    const greetingLines: string[] = []
+    if (displayName) {
+      greetingLines.push(`Oi ${displayName}, tudo bem? 😊`)
+    } else {
+      greetingLines.push('Oi, tudo bem? 😊')
+    }
+    greetingLines.push('Seja muito bem-vinda!')
+    greetingLines.push('Eu sou a Carol, da equipe Ylada Nutri.')
+    const greeting = greetingLines.join('\n\n') + '\n\n'
     
-    // Formatar as duas próximas opções
+    // Formatar as duas próximas opções (igual ao formato da Carol)
     let optionsText = ''
     sessions.forEach((sess, index) => {
       const { weekday, date, time } = formatSessionPtBR(sess.starts_at)
-      optionsText += `\n📅 Opção ${index + 1}:\n${weekday}, ${date}\n🕒 ${time} (Brasília)\n`
+      optionsText += `\n*Opção ${index + 1}:*\n${weekday}, ${date}\n🕒 ${time} (horário de Brasília)\n\n`
     })
 
-    // Pegar a data da primeira sessão para mencionar
-    const firstSessionDate = formatSessionPtBR(sessions[0].starts_at)
-    
-    const receptionMessage = `${greeting}Obrigada por fazer sua inscrição na Aula Prática ao Vivo de Como Encher a Agenda! 🎉
+    const receptionMessage = `${greeting}Obrigada por se inscrever na Aula Prática ao Vivo – Agenda Cheia para Nutricionistas.
 
-Teremos aula na próxima ${firstSessionDate.weekday}, ${firstSessionDate.date}. Aqui estão as opções:
+Essa aula é 100% prática e foi criada para ajudar nutricionistas que estão com agenda ociosa a organizar, atrair e preencher atendimentos de forma mais leve e estratégica.
 
-${optionsText}Qual você prefere? 💚`
+As próximas aulas ao vivo vão acontecer nos seguintes dias e horários:
+
+${optionsText}💬 Qual você prefere? 💚`
 
     // 6. Enviar mensagem de recepção com opções
     const result = await client.sendTextMessage({
-      phone,
+      phone: phoneNormalized,
       message: receptionMessage,
     })
 
@@ -175,11 +191,11 @@ ${optionsText}Qual você prefere? 💚`
     // 7. Criar ou atualizar conversa
     let conversationId: string | null = null
 
-    // Buscar conversa existente
+    // Buscar conversa existente (mesmo formato do webhook)
     const { data: existingConv } = await supabaseAdmin
       .from('whatsapp_conversations')
       .select('id')
-      .eq('phone', phone)
+      .eq('phone', phoneNormalized)
       .eq('instance_id', instance.id)
       .maybeSingle()
 
@@ -205,14 +221,15 @@ ${optionsText}Qual você prefere? 💚`
         })
         .eq('id', conversationId)
     } else {
-      // Criar nova conversa com tags
+      // Criar nova conversa com tags (name + customer_name alinhados; não gravar email como nome)
       const { data: newConv, error: convError } = await supabaseAdmin
         .from('whatsapp_conversations')
         .insert({
-          phone,
+          phone: phoneNormalized,
           instance_id: instance.id,
           area,
-          customer_name: leadName || null,
+          name: displayName || null,
+          customer_name: displayName || null,
           context: {
             workshop_session_id: session.id,
             source: 'form_automation',
@@ -245,7 +262,7 @@ ${optionsText}Qual você prefere? 💚`
       })
     }
 
-    console.log('[Form Automation] ✅ Mensagem enviada com sucesso para:', phone)
+    console.log('[Form Automation] ✅ Mensagem enviada com sucesso para:', phoneNormalized)
     return { success: true, messageId: result.id }
   } catch (error: any) {
     console.error('[Form Automation] ❌ Erro geral:', error)
