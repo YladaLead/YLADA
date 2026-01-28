@@ -1559,7 +1559,6 @@ Pelo celular, a experiência fica limitada e você pode perder partes importante
           } else if (hoursDiff >= 2 && hoursDiff < 2.5) {
             // Lembrete de 2h (aviso Zoom)
             const { weekday, date, time } = formatSessionDateTime(selectedSession.starts_at)
-            const { weekday, date, time } = formatSessionDateTime(selectedSession.starts_at)
             reminderToSend = `${leadNameForReminder ? `Olá ${leadNameForReminder}! ` : ''}Só um aviso: começaremos pontualmente na ${weekday}, ${date} às ${time} (horário de Brasília).
 
 💡 Dicas: use o computador, tenha caneta e papel à mão e mantenha a câmera aberta — é uma aula prática.
