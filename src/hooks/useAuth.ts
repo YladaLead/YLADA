@@ -460,7 +460,7 @@ export function useAuth() {
           // 🚨 CORREÇÃO: Adicionar timeout para evitar travamento
           const profilePromise = fetchUserProfile(session.user.id, !shouldInvalidateCache)
           const timeoutPromise = new Promise((_, reject) => {
-            setTimeout(() => reject(new Error('Timeout ao buscar perfil após auth change (10s)')), 10000)
+            setTimeout(() => reject(new Error('Timeout ao buscar perfil após auth change (15s)')), 15000)
           })
           
           const profile = await Promise.race([profilePromise, timeoutPromise]) as UserProfile | null

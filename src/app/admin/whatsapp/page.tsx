@@ -1679,6 +1679,7 @@ function WhatsAppChatContent() {
                             Texto fixo = menu. IA = só “responder à última mensagem”.
                           </div>
                           {[
+                            { id: 'boas_vindas', label: '👋 Enviar boas-vindas (1ª mensagem)', isReprocess: true as const, title: 'Faz a Carol enviar boas-vindas + opções de horário (ex.: quem clicou no botão e não recebeu)' },
                             { id: 'pergunta_nao_respondeu', label: '💬 Perguntar interesse (não respondeu)', templateId: 'pergunta_interesse_nao_respondeu' as const },
                             { id: 'pergunta_nao_participou', label: '💬 Perguntar interesse (não participou)', templateId: 'pergunta_interesse_nao_participou' as const },
                             { id: 'ficou_pensar', label: '💭 Participou e ficou de pensar', templateId: 'followup_ficou_pensar' as const },
@@ -1707,7 +1708,7 @@ function WhatsAppChatContent() {
                                     if (data.success) {
                                       await loadMessages(selectedConversation.id)
                                       await loadConversations()
-                                      alert('✅ Carol respondeu à última mensagem do cliente.')
+                                      alert(item.id === 'boas_vindas' ? '✅ Boas-vindas enviadas! A Carol enviou a mensagem com as opções de horário.' : '✅ Carol respondeu à última mensagem do cliente.')
                                     } else {
                                       alert(data.error || 'Erro ao reprocessar com Carol')
                                     }
@@ -1755,6 +1756,7 @@ function WhatsAppChatContent() {
                                 }
                               }}
                               className="w-full text-left px-3 py-2 text-sm hover:bg-purple-50 text-gray-800"
+                              title={'title' in item ? (item as { title?: string }).title : undefined}
                             >
                               {item.label}
                             </button>
