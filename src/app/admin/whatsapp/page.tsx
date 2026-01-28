@@ -87,6 +87,7 @@ function WhatsAppChatContent() {
   const [contactMenuOpen, setContactMenuOpen] = useState(false)
   const [carolActionsOpen, setCarolActionsOpen] = useState(false)
   const [showScrollToBottom, setShowScrollToBottom] = useState(false)
+  const [carolStatus, setCarolStatus] = useState<{ disabled: boolean; message?: string } | null>(null)
   const messagesContainerRef = useRef<HTMLDivElement>(null)
   const carolActionsRef = useRef<HTMLDivElement>(null)
   const shouldAutoScrollRef = useRef(true)
@@ -115,6 +116,22 @@ function WhatsAppChatContent() {
       }
     }
   }, [conversations])
+
+  // Status da automação Carol (ligada/desligada) para exibir no admin
+  useEffect(() => {
+    let cancelled = false
+    fetch('/api/admin/whatsapp/carol/status', { credentials: 'include' })
+      .then((res) => res.json())
+      .then((data) => {
+        if (!cancelled && typeof data.disabled === 'boolean') {
+          setCarolStatus({ disabled: data.disabled, message: data.message })
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setCarolStatus(null)
+      })
+    return () => { cancelled = true }
+  }, [])
 
   // Carregar conversas
   useEffect(() => {
@@ -709,6 +726,32 @@ function WhatsAppChatContent() {
           </div>
         </div>
       </div>
+
+      {/* Status Carol: ligada / desligada — instruções para ligar (item 6) */}
+      {carolStatus && (
+        <div
+          className={`flex-shrink-0 px-4 py-2 text-sm ${
+            carolStatus.disabled
+              ? 'bg-amber-50 border-b border-amber-200 text-amber-800'
+              : 'bg-green-50 border-b border-green-200 text-green-800'
+          }`}
+        >
+          <div className="flex items-center justify-between gap-2 flex-wrap">
+            <span className="font-medium">
+              {carolStatus.disabled ? (
+                <>🤖 Carol: <strong>desligada</strong> — reprocessar e disparos retornam 503 até você ligar.</>
+              ) : (
+                <>🤖 Carol: <strong>ligada</strong></>
+              )}
+            </span>
+            {carolStatus.disabled && (
+              <span className="text-xs">
+                Para ligar: Vercel → Settings → Environment Variables → <code className="bg-amber-100 px-1 rounded">CAROL_AUTOMATION_DISABLED=false</code> → Redeploy.
+              </span>
+            )}
+          </div>
+        </div>
+      )}
 
       <div className="flex-1 min-h-0 flex flex-col md:flex-row overflow-hidden">
         {/* Lista de Conversas - Scroll Independente */}

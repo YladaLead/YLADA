@@ -73,11 +73,21 @@ function WorkshopContent() {
   const [participants, setParticipants] = useState<Participant[]>([])
   const [loadingParticipants, setLoadingParticipants] = useState(false)
   const [showPastSessions, setShowPastSessions] = useState(false)
+  const [selectedForLembrete, setSelectedForLembrete] = useState<Set<string>>(new Set())
+  const [sendingLembrete, setSendingLembrete] = useState(false)
+  const [lembreteResult, setLembreteResult] = useState<{ sent: number; errors?: string[] } | null>(null)
 
   const upcoming = useMemo(
     () => sessions.filter((s) => s.is_active).sort((a, b) => new Date(a.starts_at).getTime() - new Date(b.starts_at).getTime()),
     [sessions]
   )
+
+  useEffect(() => {
+    if (selectedSessionForParticipants) {
+      setSelectedForLembrete(new Set())
+      setLembreteResult(null)
+    }
+  }, [selectedSessionForParticipants])
 
   // Função para obter sessões da semana atual
   const getWeekSessions = (weekOffset: number = 0) => {
@@ -382,6 +392,60 @@ function WorkshopContent() {
     } finally {
       setSaving(false)
     }
+  }
+
+  type LembreteTipo = 'aula_hoje' | '30min' | '10min'
+  const sendLembretes = async (tipo: LembreteTipo) => {
+    if (!selectedSessionForParticipants) return
+    const ids = selectedForLembrete.size > 0
+      ? Array.from(selectedForLembrete)
+      : participants.map((p) => p.conversationId)
+    if (ids.length === 0) {
+      alert('Nenhum participante selecionado.')
+      return
+    }
+    const label = tipo === 'aula_hoje' ? 'Lembrete da aula de hoje' : tipo === '30min' ? '30 min antes' : '10 min antes'
+    if (!confirm(`Enviar "${label}" para ${ids.length} participante(s) por WhatsApp?`)) return
+    setSendingLembrete(true)
+    setLembreteResult(null)
+    setError(null)
+    try {
+      const res = await fetch('/api/admin/whatsapp/workshop/participants/enviar-lembretes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          sessionId: selectedSessionForParticipants.id,
+          conversationIds: ids,
+          tipo,
+        }),
+      })
+      const json = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(json.error || 'Erro ao enviar lembretes')
+      setLembreteResult({ sent: json.sent, errors: json.errors })
+      setSuccess(`Enviado: ${json.sent} de ${json.total}. ${json.errors?.length ? `Erros: ${json.errors.length}` : ''}`)
+    } catch (e: any) {
+      setError(e.message || 'Erro ao enviar lembretes')
+    } finally {
+      setSendingLembrete(false)
+    }
+  }
+
+  const toggleSelectAllLembrete = () => {
+    if (selectedForLembrete.size >= participants.length) {
+      setSelectedForLembrete(new Set())
+    } else {
+      setSelectedForLembrete(new Set(participants.map((p) => p.conversationId)))
+    }
+  }
+
+  const toggleParticipantLembrete = (conversationId: string) => {
+    setSelectedForLembrete((prev) => {
+      const next = new Set(prev)
+      if (next.has(conversationId)) next.delete(conversationId)
+      else next.add(conversationId)
+      return next
+    })
   }
 
   const formatPhone = (phone: string) => {
@@ -1077,6 +1141,54 @@ function WorkshopContent() {
                       Digite o telefone da pessoa (apenas números, com DDD e código do país)
                     </p>
                   </div>
+                  {!loadingParticipants && participants.length > 0 && (
+                    <div className="px-6 py-3 bg-amber-50 border-b border-amber-200">
+                      <div className="flex flex-wrap items-center gap-2 mb-2">
+                        <span className="text-sm font-medium text-amber-900">Enviar lembrete:</span>
+                        <button
+                          type="button"
+                          onClick={toggleSelectAllLembrete}
+                          className="text-xs px-2 py-1 rounded bg-amber-200 text-amber-900 hover:bg-amber-300"
+                        >
+                          {selectedForLembrete.size >= participants.length ? 'Desmarcar todos' : 'Selecionar todos'}
+                        </button>
+                        <span className="text-xs text-amber-700">
+                          {selectedForLembrete.size > 0 ? `${selectedForLembrete.size} selecionado(s)` : 'Nenhum selecionado = envia para todos'}
+                        </span>
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        <button
+                          type="button"
+                          onClick={() => sendLembretes('aula_hoje')}
+                          disabled={sendingLembrete}
+                          className="px-3 py-1.5 text-sm rounded-lg bg-blue-100 text-blue-800 hover:bg-blue-200 disabled:opacity-50 font-medium"
+                        >
+                          📅 Lembrete da aula de hoje
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => sendLembretes('30min')}
+                          disabled={sendingLembrete}
+                          className="px-3 py-1.5 text-sm rounded-lg bg-amber-100 text-amber-800 hover:bg-amber-200 disabled:opacity-50 font-medium"
+                        >
+                          ⏰ 30 min antes
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => sendLembretes('10min')}
+                          disabled={sendingLembrete}
+                          className="px-3 py-1.5 text-sm rounded-lg bg-green-100 text-green-800 hover:bg-green-200 disabled:opacity-50 font-medium"
+                        >
+                          ⏰ 10 min antes
+                        </button>
+                      </div>
+                      {lembreteResult && (
+                        <p className="text-xs text-amber-800 mt-2">
+                          Enviados: {lembreteResult.sent}. {lembreteResult.errors?.length ? `Erros: ${lembreteResult.errors.join('; ')}` : ''}
+                        </p>
+                      )}
+                    </div>
+                  )}
                   <div className="p-6">
                     {loadingParticipants ? (
                       <div className="text-center py-8">
@@ -1158,8 +1270,17 @@ function WorkshopContent() {
                                 : 'border-gray-200 bg-white hover:bg-gray-50'
                             }`}
                           >
-                            <div className="flex items-start justify-between">
-                              <div className="flex-1">
+                            <div className="flex items-start justify-between gap-3">
+                              <label className="flex items-center gap-2 shrink-0 cursor-pointer" title="Selecionar para enviar lembrete">
+                                <input
+                                  type="checkbox"
+                                  checked={selectedForLembrete.has(participant.conversationId)}
+                                  onChange={() => toggleParticipantLembrete(participant.conversationId)}
+                                  className="rounded border-gray-300 text-amber-600 focus:ring-amber-500"
+                                />
+                                <span className="text-xs text-gray-500">Lembrete</span>
+                              </label>
+                              <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-2 mb-2">
                                   <p className={`font-bold text-lg ${
                                     participant.hasParticipated

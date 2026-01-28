@@ -151,8 +151,6 @@ export async function sendWorkshopInviteToFormLead(
     const second = soonestManha && soonestManha.id !== first.id ? soonestManha : allSessions[1]
     const sessions = second ? [first, second] : [first]
 
-    const session = sessions[0] // Primeira sessão (para contexto)
-
     // 2. Buscar configurações (flyer, etc)
     const { data: settings } = await supabaseAdmin
       .from('whatsapp_workshop_settings')
@@ -242,13 +240,13 @@ ${optionsText}💬 Qual você prefere? 💚`
       const newTags = [...new Set([...prevTags, 'veio_aula_pratica', 'recebeu_link_workshop', 'primeiro_contato'])]
       
       // workshop_options_ids: ordem exata Opção 1/2 que a pessoa viu — ao responder "Opção 2", Carol usa [1] e evita trocar por terça
+      // NÃO setar workshop_session_id aqui: a pessoa ainda não escolheu. Só a Carol seta quando detectar "Opção 1"/"Opção 2" no chat.
       const workshopOptionsIds = sessions.map((s: { id: string }) => s.id)
       await supabaseAdmin
         .from('whatsapp_conversations')
         .update({
           context: {
             ...prevContext,
-            workshop_session_id: session.id,
             workshop_options_ids: workshopOptionsIds,
             source: 'form_automation',
             form_lead: true,
@@ -258,6 +256,7 @@ ${optionsText}💬 Qual você prefere? 💚`
         .eq('id', conversationId)
     } else {
       // Criar nova conversa com tags (name + customer_name alinhados; não gravar email como nome)
+      // NÃO setar workshop_session_id: a pessoa ainda não escolheu horário no chat. Só a Carol seta ao detectar "Opção 1"/"Opção 2".
       const workshopOptionsIds = sessions.map((s: { id: string }) => s.id)
       const { data: newConv, error: convError } = await supabaseAdmin
         .from('whatsapp_conversations')
@@ -268,7 +267,6 @@ ${optionsText}💬 Qual você prefere? 💚`
           name: displayName || null,
           customer_name: displayName || null,
           context: {
-            workshop_session_id: session.id,
             workshop_options_ids: workshopOptionsIds,
             source: 'form_automation',
             form_lead: true,
