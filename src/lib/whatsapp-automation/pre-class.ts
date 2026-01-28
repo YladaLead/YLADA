@@ -138,15 +138,13 @@ Nos vemos em breve! 😊`
     })
     if (result2h.success) scheduled++
 
-    // Notificação 30min antes
+    // Notificação 30min antes — "Começamos em 30 minutos"
     const date30min = new Date(sessionDate.getTime() - 30 * 60 * 1000)
     const message30min = `Olá ${leadName}! 
 
-A sala já está aberta! 🎉
+Começamos em 30 minutos! ⏰
 
 🔗 ${session.zoom_link}
-
-Você pode entrar agora e já começar a se preparar! 
 
 Nos vemos em breve! 😊`
 
@@ -161,6 +159,30 @@ Nos vemos em breve! 😊`
       },
     })
     if (result30min.success) scheduled++
+
+    // Notificação 10min antes — "A sala está aberta"
+    const date10min = new Date(sessionDate.getTime() - 10 * 60 * 1000)
+    const message10min = `Olá ${leadName}! 
+
+A sala está aberta! 🎉
+
+🔗 ${session.zoom_link}
+
+Você pode entrar agora e já começar a se preparar. 
+
+Nos vemos em breve! 😊`
+
+    const result10min = await scheduleMessage({
+      conversationId,
+      messageType: 'pre_class_10min',
+      scheduledFor: date10min,
+      messageData: {
+        message: message10min,
+        session_id: sessionId,
+        lead_name: leadName,
+      },
+    })
+    if (result10min.success) scheduled++
 
     return { success: true, scheduled }
   } catch (error: any) {

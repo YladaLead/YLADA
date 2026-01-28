@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
+import { isCarolAutomationDisabled } from '@/config/whatsapp-automation'
 
 /**
  * Extrai dados do cliente das respostas do formulário
@@ -220,30 +221,24 @@ export async function POST(
             leadCreated = true
             console.log(`✅ Lead criado automaticamente em ${leadsTable}:`, leadId)
 
-            // 🚀 AUTOMAÇÃO: Enviar mensagem WhatsApp automaticamente
-            // Apenas para área nutri e se tiver telefone
-            if (userPerfil === 'nutri' && extractedData.phone) {
+            // 🚀 AUTOMAÇÃO: Enviar mensagem WhatsApp automaticamente (desligada quando isCarolAutomationDisabled)
+            if (userPerfil === 'nutri' && extractedData.phone && !isCarolAutomationDisabled()) {
               try {
                 const { sendWorkshopInviteToFormLead } = await import('@/lib/whatsapp-form-automation')
-                // Z-API formata automaticamente o telefone (adiciona 55 se necessário)
                 const phoneClean = extractedData.phone.replace(/\D/g, '')
-
                 const automationResult = await sendWorkshopInviteToFormLead(
                   phoneClean,
                   extractedData.name?.trim() || '',
                   'nutri',
                   form.user_id
                 )
-
                 if (automationResult.success) {
                   console.log('✅ Mensagem WhatsApp automática enviada para:', phoneClean)
                 } else {
                   console.warn('⚠️ Falha ao enviar mensagem automática:', automationResult.error)
-                  // Não falhar o processo se automação falhar
                 }
               } catch (automationError: any) {
                 console.error('⚠️ Erro ao executar automação WhatsApp:', automationError)
-                // Não falhar o processo se automação falhar
               }
             }
           }

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
 import { resend, FROM_EMAIL, FROM_NAME, isResendConfigured } from '@/lib/resend'
+import { isCarolAutomationDisabled } from '@/config/whatsapp-automation'
 
 /**
  * POST - Salvar inscrição no workshop
@@ -172,31 +173,24 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // 🚀 AUTOMAÇÃO: Enviar mensagem WhatsApp automaticamente
-    // Apenas para área nutri e se tiver telefone
-    if (sanitizedData.telefone) {
+    // 🚀 AUTOMAÇÃO: Enviar mensagem WhatsApp automaticamente (desligada quando isCarolAutomationDisabled)
+    if (sanitizedData.telefone && !isCarolAutomationDisabled()) {
       try {
         const { sendWorkshopInviteToFormLead } = await import('@/lib/whatsapp-form-automation')
-        // Buscar user_id do sistema (primeiro admin ou primeiro usuário nutri)
         const { data: adminUser } = await supabaseAdmin
           .from('user_profiles')
           .select('user_id')
           .or('is_admin.eq.true,perfil.eq.nutri')
           .limit(1)
           .maybeSingle()
-        
         const userId = adminUser?.user_id || '00000000-0000-0000-0000-000000000000'
-        
-        // Z-API formata automaticamente o telefone (adiciona 55 se necessário)
         const phoneClean = sanitizedData.telefone.replace(/\D/g, '')
-
         const automationResult = await sendWorkshopInviteToFormLead(
           phoneClean,
           sanitizedData.nome,
           'nutri',
           userId
         )
-
         if (automationResult.success) {
           console.log('✅ Mensagem WhatsApp automática enviada para:', phoneClean)
         } else {
@@ -204,8 +198,9 @@ export async function POST(request: NextRequest) {
         }
       } catch (automationError: any) {
         console.error('⚠️ Erro ao executar automação WhatsApp:', automationError)
-        // Não falhar a requisição se a automação falhar
       }
+    } else if (sanitizedData.telefone && isCarolAutomationDisabled()) {
+      console.log('[Workshop Inscrição] Automação desligada - mensagem WhatsApp não enviada.')
     }
 
     // Enviar email de notificação para o admin

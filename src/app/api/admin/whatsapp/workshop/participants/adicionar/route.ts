@@ -4,7 +4,9 @@ import { supabaseAdmin } from '@/lib/supabase'
 
 /**
  * POST /api/admin/whatsapp/workshop/participants/adicionar
- * Adiciona uma conversa como participante confirmado de uma sessão
+ * Adiciona uma conversa como participante confirmado de uma sessão.
+ * Se não existir conversa para o telefone, cria uma — assim "estar cadastrado na sessão"
+ * (sistema ou manual) é o gatilho único para receber os lembretes pré-aula.
  */
 export async function POST(request: NextRequest) {
   try {
@@ -37,14 +39,33 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Buscar conversa pelo telefone
+    // Instância Z-API (necessária para criar conversa se não existir)
+    const { data: instance } = await supabaseAdmin
+      .from('z_api_instances')
+      .select('id')
+      .eq('area', 'nutri')
+      .eq('status', 'connected')
+      .limit(1)
+      .maybeSingle()
+
+    if (!instance) {
+      return NextResponse.json(
+        { error: 'Instância Z-API não encontrada' },
+        { status: 500 }
+      )
+    }
+
     const phoneClean = phone.replace(/\D/g, '')
+    const phoneNorm = phoneClean.startsWith('55') ? phoneClean : '55' + phoneClean
+
+    // Buscar conversa pelo telefone (mesma instância nutri)
     const { data: conversation, error: convError } = await supabaseAdmin
       .from('whatsapp_conversations')
       .select('id, phone, name, context')
       .eq('area', 'nutri')
       .eq('status', 'active')
-      .or(`phone.eq.${phoneClean},phone.like.%${phoneClean.slice(-8)}%`)
+      .eq('instance_id', instance.id)
+      .or(`phone.eq.${phoneNorm},phone.like.%${phoneClean.slice(-8)}%`)
       .limit(1)
       .maybeSingle()
 
@@ -55,47 +76,73 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    if (!conversation) {
-      return NextResponse.json(
-        { error: 'Conversa não encontrada para este telefone' },
-        { status: 404 }
-      )
+    let conversationId: string
+    let updated: { id: string; phone: string; name: string | null; context: unknown }
+
+    if (conversation) {
+      // Já existe conversa: atualizar context para associar à sessão
+      const context = conversation.context || {}
+      const tags = Array.isArray(context.tags) ? context.tags : []
+      const newTags = [...new Set([...tags, 'agendou_aula', 'recebeu_link_workshop'])]
+
+      const { data: updatedConv, error: updateError } = await supabaseAdmin
+        .from('whatsapp_conversations')
+        .update({
+          context: {
+            ...context,
+            tags: newTags,
+            workshop_session_id: sessionId,
+            scheduled_date: session.starts_at,
+          },
+        })
+        .eq('id', conversation.id)
+        .select('id, phone, name, context')
+        .single()
+
+      if (updateError) {
+        return NextResponse.json(
+          { error: `Erro ao associar à sessão: ${updateError.message}` },
+          { status: 500 }
+        )
+      }
+      conversationId = conversation.id
+      updated = updatedConv!
+    } else {
+      // Não existe conversa: criar para que a pessoa entre na lista e receba lembretes
+      const { data: newConv, error: insertError } = await supabaseAdmin
+        .from('whatsapp_conversations')
+        .insert({
+          instance_id: instance.id,
+          phone: phoneNorm,
+          name: null,
+          area: 'nutri',
+          status: 'active',
+          context: {
+            tags: ['agendou_aula', 'recebeu_link_workshop'],
+            workshop_session_id: sessionId,
+            scheduled_date: session.starts_at,
+            source: 'workshop_participant_add',
+          },
+        })
+        .select('id, phone, name, context')
+        .single()
+
+      if (insertError || !newConv) {
+        return NextResponse.json(
+          { error: `Erro ao criar conversa: ${insertError?.message || 'Erro desconhecido'}` },
+          { status: 500 }
+        )
+      }
+      conversationId = newConv.id
+      updated = newConv
     }
 
-    // Atualizar context da conversa para associar à sessão
-    const context = conversation.context || {}
-    const tags = Array.isArray(context.tags) ? context.tags : []
-
-    // Adicionar tags se não existirem
-    const newTags = [...new Set([...tags, 'agendou_aula', 'recebeu_link_workshop'])]
-
-    const { data: updated, error: updateError } = await supabaseAdmin
-      .from('whatsapp_conversations')
-      .update({
-        context: {
-          ...context,
-          tags: newTags,
-          workshop_session_id: sessionId,
-          scheduled_date: session.starts_at,
-        },
-      })
-      .eq('id', conversation.id)
-      .select('id, phone, name, context')
-      .single()
-
-    if (updateError) {
-      return NextResponse.json(
-        { error: `Erro ao associar à sessão: ${updateError.message}` },
-        { status: 500 }
-      )
-    }
-
-    // Agendar notificações pré-aula (em background, não bloquear resposta)
+    // Agendar notificações pré-aula (em background)
     setTimeout(async () => {
       try {
         const { schedulePreClassNotifications } = await import('@/lib/whatsapp-automation/pre-class')
-        await schedulePreClassNotifications(conversation.id, sessionId)
-        console.log('[Adicionar Participante] ✅ Notificações pré-aula agendadas para', conversation.id)
+        await schedulePreClassNotifications(conversationId, sessionId)
+        console.log('[Adicionar Participante] ✅ Notificações pré-aula agendadas para', conversationId)
       } catch (error: any) {
         console.error('[Adicionar Participante] ❌ Erro ao agendar notificações pré-aula:', error)
       }
@@ -103,7 +150,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: `${conversation.name || 'Participante'} adicionado(a) à sessão`,
+      message: conversation ? `${updated.name || 'Participante'} adicionado(a) à sessão` : 'Participante adicionado à sessão — conversa criada; receberá lembretes pré-aula.',
       conversation: updated,
     })
   } catch (error: any) {

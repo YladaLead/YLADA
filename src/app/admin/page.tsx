@@ -133,6 +133,15 @@ function AdminDashboardContent() {
       destaque: true
     },
     {
+      id: 'carol-v2',
+      title: 'Carol v2',
+      description: 'Conversas por fase, worker e disparos (link, remarketing)',
+      icon: '📲',
+      link: '/admin/whatsapp/v2',
+      color: 'bg-teal-600',
+      destaque: true
+    },
+    {
       id: 'whatsapp-agendadas',
       title: 'Agendadas para Aula',
       description: 'Filtrar por data, hora e sessão',

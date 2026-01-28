@@ -8,6 +8,9 @@
  * - "Envie lembrete da aula de hoje" → envia só o lembrete da sessão de HOJE (uma mensagem), nunca "opções".
  * - "ficou de participar e não participou" / "mande o texto pra quando não participa" → remarketing
  *   "não participou": envia mensagem que PERGUNTA SE AINDA TEM INTERESSE primeiro (sem opções de aula).
+ * - "participou e ficou de pensar" / "remarketing com ela ela ficou de pensar" → fechamento com abertura
+ *   suave: "Oi [nome], como você está?" e acompanhamento de quem ficou de pensar — NÃO usar copy pesada
+ *   "improviso volta / virada agora" na abertura.
  * - "chama ela" / "lembra ela" / "a [Nome] ficou de ver a melhor data" → follow-up acolhedor: pergunta se
  *   conseguiu ver qual horário, inclui opções, NÃO abre com "Oi [nome]" (tom neutro "Oi, tudo bem?").
  *
@@ -16,6 +19,7 @@
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { requireApiAuth } from '@/lib/api-auth'
+import { isCarolAutomationDisabled } from '@/config/whatsapp-automation'
 import {
   processIncomingMessageWithCarol,
   getZApiInstance,
@@ -28,12 +32,12 @@ import { createZApiClient } from '@/lib/z-api'
 import { supabaseAdmin } from '@/lib/supabase'
 
 export async function POST(request: NextRequest) {
+  const authResult = await requireApiAuth(request, ['admin'])
+  if (authResult instanceof NextResponse) return authResult
+  if (isCarolAutomationDisabled()) {
+    return NextResponse.json({ disabled: true, message: 'Automação temporariamente desligada' }, { status: 503 })
+  }
   try {
-    const authResult = await requireApiAuth(request, ['admin'])
-    if (authResult instanceof NextResponse) {
-      return authResult
-    }
-
     const body = await request.json().catch(() => ({}))
     const { conversationId, message } = body
 
@@ -238,11 +242,12 @@ Pelo celular, a experiência fica limitada e você pode perder partes importante
     const tags = Array.isArray(ctx.tags) ? ctx.tags : []
 
     // —— Comando: "ficou de participar e não participou" / "mande texto pra quando não participa" — remarketing: pergunta interesse primeiro (SEM opções)
+    const msgNorm = messageToUse.replace(/\s+/g, ' ').trim()
     const looksLikeRemarketingNaoParticipou =
-      /ficou\s+de\s+participar\s+.*e\s+n[ãa]o\s+participou/i.test(messageToUse) ||
-      /(mande|envie)\s+(o\s+)?(mesmo\s+)?texto\s+pra\s+quando\s+(a\s+pessoa\s+)?(fica\s+de\s+participar\s+e\s+)?não\s+participa/i.test(messageToUse) ||
-      /(mande|envie)\s+.*(quando\s+)?(a\s+pessoa\s+)?não\s+participa/i.test(messageToUse) ||
-      /remarketing\s+.*não\s+participou|não\s+participou\s+.*(mande|remarketing|texto)/i.test(messageToUse)
+      /ficou\s+de\s+participar\s+.*e\s+n[ãa]o\s+participou/i.test(msgNorm) ||
+      /(mande|envie)\s+(o\s+)?(mesmo\s+)?texto\s+pra\s+quando\s+(a\s+pessoa\s+)?(fica\s+de\s+participar\s+e\s+)?n[ãa]o\s+participa(r)?/i.test(msgNorm) ||
+      /(mande|envie)\s+.*(quando\s+)?(a\s+pessoa\s+)?n[ãa]o\s+participa(r)?/i.test(msgNorm) ||
+      /remarketing\s+.*n[ãa]o\s+participou|n[ãa]o\s+participou\s+.*(mande|remarketing|texto)/i.test(msgNorm)
 
     if (looksLikeRemarketingNaoParticipou) {
       const registrationName = await getRegistrationName(conversation.phone, area)
@@ -307,6 +312,136 @@ Você ainda tem interesse em aprender a ter sua agenda cheia? Gostaria que eu te
       return NextResponse.json({
         success: true,
         response: 'Remarketing enviado. Carol perguntou se ainda tem interesse (sem opções de aula).',
+      })
+    }
+
+    // —— Comando: "participou e ficou de pensar" / "remarketing com ela ela ficou de pensar" — fechamento com abertura suave (NÃO copy pesada na abertura)
+    const hasFicouDePensar = /ficou\s+de\s+pensar/i.test(msgNorm)
+    const hasParticipou = /participou/i.test(msgNorm)
+    const hasRemarketingComNome = /(remarketing|remarque|remarking)\s+(com\s+)?(a\s+)?\w+/i.test(msgNorm) || /(faz|faça|fazer)\s+(o\s+)?(remarketing|remarque)\s+com/i.test(msgNorm)
+    const looksLikeRemarketingFicouDePensar =
+      /participou\s+(e\s+)?ficou\s+de\s+pensar|participou\s+.*ficou\s+de\s+pensar/i.test(msgNorm) ||
+      hasFicouDePensar ||
+      /(faz|faça|fazer)\s+(o\s+)?remarketing\s+.*(ficou\s+de\s+pensar|participou)/i.test(msgNorm) ||
+      /(preciso|quero)\s+.*(remarketing|remarque|remarking).*ficou\s+de\s+pensar/i.test(msgNorm) ||
+      /remarketing\s+(com\s+)?(ela|a\s+\w+).*ficou\s+de\s+pensar|ficou\s+de\s+pensar.*remarketing/i.test(msgNorm) ||
+      /remar?k(e|ing)\s+.*ficou\s+de\s+pensar/i.test(msgNorm) ||
+      (hasRemarketingComNome && (hasFicouDePensar || hasParticipou))
+
+    if (looksLikeRemarketingFicouDePensar) {
+      const { data: messages } = await supabaseAdmin
+        .from('whatsapp_messages')
+        .select('message, sender_type, created_at')
+        .eq('conversation_id', conversation.id)
+        .order('created_at', { ascending: true })
+        .limit(20)
+
+      const conversationHistory = (messages || []).map((msg: { message?: string; sender_type?: string }) => ({
+        role: (msg.sender_type === 'bot' ? 'assistant' : 'user') as 'user' | 'assistant',
+        content: msg.message || '',
+      }))
+
+      const now = new Date().toISOString()
+      const { data: sessions } = await supabaseAdmin
+        .from('whatsapp_workshop_sessions')
+        .select('id, title, starts_at, zoom_link')
+        .eq('area', area)
+        .eq('is_active', true)
+        .gte('starts_at', now)
+        .order('starts_at', { ascending: true })
+        .limit(8)
+
+      const hourBR = (startsAt: string) =>
+        parseInt(
+          new Date(startsAt).toLocaleString('en-US', { timeZone: 'America/Sao_Paulo', hour: 'numeric', hour12: false }),
+          10
+        )
+      const isManha = (s: { starts_at: string }) => {
+        const h = hourBR(s.starts_at)
+        return h === 9 || h === 10
+      }
+      const first = sessions?.[0]
+      const soonestManha = sessions?.find(isManha)
+      const second = soonestManha && soonestManha.id !== first?.id ? soonestManha : sessions?.[1]
+      const workshopSessions = first && second ? [first, second] : first ? [first] : []
+
+      const registrationName = await getRegistrationName(conversation.phone, area)
+      let leadName =
+        getFirstName(registrationName || (ctx as { lead_name?: string })?.lead_name || conversation.name) ||
+        undefined
+      if (leadName && /ylada/i.test(leadName.trim())) leadName = undefined
+
+      // Abertura fixa em código para garantir que a Carol não ignore a solicitação do admin
+      const opener =
+        leadName ? `Oi ${leadName}, tudo bem? Como você está? 😊` : 'Oi, tudo bem? Como você está? 😊'
+
+      const carolInstruction =
+        'Você está escrevendo SOMENTE a continuação da mensagem. A abertura já está definida e é: "' +
+        opener +
+        '". NÃO escreva de novo "Oi", saudação nem abertura. Escreva APENAS o trecho seguinte: 2 a 4 frases curtas para alguém que PARTICIPOU da aula e FICOU DE PENSAR. Reconheça que ela participou e disse que ia pensar. Exemplo: "Vi que você participou e disse que ia pensar. Teve tempo de pensar no que a gente conversou?" ou "Como está sendo para você desde então?" Tom leve, sem pressionar. PROIBIDO usar nesta parte: "improviso volta", "virada agora", "Você viu como funciona". Sua resposta será colada logo depois da abertura.'
+
+      const continuation = await generateCarolResponse(
+        'Quero saber mais sobre o programa depois da aula',
+        conversationHistory,
+        {
+          tags: [...tags, 'participou_aula'],
+          workshopSessions,
+          leadName,
+          participated: true,
+          isFirstMessage: false,
+          carolInstruction,
+        }
+      )
+      // Se a IA ainda colocou "Oi..." no início, remove para não duplicar
+      const semSaudacao = continuation.replace(
+        /^\s*Oi\s+[\p{L}\s]+,?\s*(tudo\s+bem\??\s*)?(como\s+você\s+está\??\s*)?[.\s]*/iu,
+        ''
+      ).trim()
+      const messageToSend = semSaudacao ? `${opener}\n\n${semSaudacao}` : opener
+
+      const instance = await getZApiInstance(area)
+      if (!instance) {
+        return NextResponse.json(
+          { success: false, error: 'Instância Z-API não encontrada para a área nutri' },
+          { status: 502 }
+        )
+      }
+      const client = createZApiClient(instance.instance_id, instance.token)
+      const sendResult = await client.sendTextMessage({
+        phone: conversation.phone,
+        message: messageToSend,
+      })
+
+      if (!sendResult.success) {
+        return NextResponse.json(
+          { success: false, error: sendResult.error || 'Erro ao enviar fechamento' },
+          { status: 500 }
+        )
+      }
+
+      await supabaseAdmin.from('whatsapp_messages').insert({
+        conversation_id: conversation.id,
+        instance_id: instance.id,
+        z_api_message_id: sendResult.id || null,
+        sender_type: 'bot',
+        sender_name: 'Carol - Secretária',
+        message: messageToSend,
+        message_type: 'text',
+        status: 'sent',
+        is_bot_response: true,
+      })
+
+      await supabaseAdmin
+        .from('whatsapp_conversations')
+        .update({
+          last_message_at: new Date().toISOString(),
+          last_message_from: 'bot',
+        })
+        .eq('id', conversation.id)
+
+      return NextResponse.json({
+        success: true,
+        response: 'Fechamento enviado. Carol abriu com "como você está?" e acompanhamento de quem ficou de pensar (sem copy pesada na abertura).',
       })
     }
 

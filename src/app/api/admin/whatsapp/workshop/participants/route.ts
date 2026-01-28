@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireApiAuth } from '@/lib/api-auth'
 import { supabaseAdmin } from '@/lib/supabase'
 import { sendRegistrationLinkAfterClass, sendRemarketingToNonParticipant, getRegistrationName } from '@/lib/whatsapp-carol-ai'
+import { isCarolAutomationDisabled } from '@/config/whatsapp-automation'
 
 /**
  * GET /api/admin/whatsapp/workshop/participants
@@ -160,15 +161,13 @@ export async function POST(request: NextRequest) {
       throw updateError
     }
 
-    // 🚀 Disparar flow automaticamente quando tag "participou_aula" é adicionada
-    if (isAddingParticipatedTag) {
+    // 🚀 Disparar flow automaticamente quando tag "participou_aula" é adicionada (desligado quando isCarolAutomationDisabled)
+    if (isAddingParticipatedTag && !isCarolAutomationDisabled()) {
       console.log('[Workshop Participants] 🎉 Tag participou_aula adicionada - disparando flow automaticamente', {
         conversationId,
         phone: updated?.phone,
         name: updated?.name
       })
-      // Disparar em background (não bloquear a resposta)
-      // Aguardar um pouco para garantir que a tag foi salva no banco
       setTimeout(async () => {
         try {
           const result = await sendRegistrationLinkAfterClass(conversationId)
@@ -176,9 +175,7 @@ export async function POST(request: NextRequest) {
             console.log('[Workshop Participants] ✅ Flow disparado com sucesso para', conversationId)
           } else {
             console.error('[Workshop Participants] ❌ Erro ao disparar flow:', result.error)
-            // Tentar novamente após mais tempo se falhou
             if (result.error?.includes('não encontrada') || result.error?.includes('não participou')) {
-              console.log('[Workshop Participants] 🔄 Tentando novamente após 2 segundos...')
               setTimeout(async () => {
                 const retryResult = await sendRegistrationLinkAfterClass(conversationId)
                 if (retryResult.success) {
@@ -192,37 +189,26 @@ export async function POST(request: NextRequest) {
         } catch (error: any) {
           console.error('[Workshop Participants] ❌ Erro ao disparar flow:', error)
         }
-      }, 1000) // Aguardar 1 segundo para garantir que a tag foi salva
+      }, 1000)
+    } else if (isAddingParticipatedTag && isCarolAutomationDisabled()) {
+      console.log('[Workshop Participants] Automação desligada - link pós-participou não enviado.')
     }
 
-    // 🚀 Disparar remarketing automaticamente quando marca como "não participou"
-    // SEMPRE disparar quando marcar como "não participou", independente de ter a tag antes
-    // (a função sendRemarketingToNonParticipant já verifica se já enviou recentemente)
-    if (!participated) {
+    // 🚀 Disparar remarketing quando marca como "não participou" (desligado quando isCarolAutomationDisabled)
+    if (!participated && !isCarolAutomationDisabled()) {
       console.log('[Workshop Participants] 📱 Marcado como "não participou" - disparando remarketing automaticamente', {
         conversationId,
-        hadNotParticipatedTag,
-        hadParticipatedTag,
-        wasParticipatedBefore,
-        participated,
-        newTags,
         phone: updated?.phone
       })
-      // Disparar em background (não bloquear a resposta)
-      // Aguardar mais tempo para garantir que a tag foi salva no banco e commitada
       setTimeout(async () => {
         try {
-          // Aguardar um pouco mais e verificar se a tag foi salva
           await new Promise(resolve => setTimeout(resolve, 1000))
-          
           const result = await sendRemarketingToNonParticipant(conversationId)
           if (result.success) {
             console.log('[Workshop Participants] ✅ Remarketing enviado com sucesso para', conversationId)
           } else {
             console.warn('[Workshop Participants] ⚠️ Remarketing não enviado:', result.error)
-            // Se falhou porque tag não existe, tentar novamente após mais tempo
             if (result.error?.includes('não está marcada')) {
-              console.log('[Workshop Participants] 🔄 Tentando novamente após 2 segundos...')
               setTimeout(async () => {
                 const retryResult = await sendRemarketingToNonParticipant(conversationId)
                 if (retryResult.success) {
@@ -236,7 +222,9 @@ export async function POST(request: NextRequest) {
         } catch (error: any) {
           console.error('[Workshop Participants] ❌ Erro ao disparar remarketing:', error)
         }
-      }, 1000) // Aguardar 1 segundo para garantir que a tag foi salva
+      }, 1000)
+    } else if (!participated && isCarolAutomationDisabled()) {
+      console.log('[Workshop Participants] Automação desligada - remarketing não enviado.')
     }
 
     return NextResponse.json({

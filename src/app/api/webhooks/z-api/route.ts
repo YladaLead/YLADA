@@ -27,6 +27,7 @@ export async function GET(request: NextRequest) {
 }
 import { createClient } from '@supabase/supabase-js'
 import { sendWhatsAppMessage } from '@/lib/z-api'
+import { isCarolAutomationDisabled } from '@/config/whatsapp-automation'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -189,14 +190,32 @@ async function getOrCreateConversation(
     throw new Error('Instância não encontrada no banco')
   }
 
-  // Buscar conversa existente
-  const { data: existing } = await supabase
-    .from('whatsapp_conversations')
-    .select('id, area, name, context')
-    .eq('instance_id', instance.id)
-    .eq('phone', phone)
-    .limit(1)
-    .single()
+  // Buscar conversa existente (phone já normalizado 55+DDD+9+8 = 13 dígitos)
+  let existing = (
+    await supabase
+      .from('whatsapp_conversations')
+      .select('id, area, name, context')
+      .eq('instance_id', instance.id)
+      .eq('phone', phone)
+      .limit(1)
+      .maybeSingle()
+  ).data
+
+  // Unificar: se não achou e phone é 13 dígitos (celular BR), tentar formato antigo 12 dígitos
+  if (!existing && phone.startsWith('55') && phone.length === 13) {
+    const phoneAntigo = phone.slice(0, 4) + phone.slice(5)
+    const { data: found } = await supabase
+      .from('whatsapp_conversations')
+      .select('id, area, name, context')
+      .eq('instance_id', instance.id)
+      .eq('phone', phoneAntigo)
+      .limit(1)
+      .maybeSingle()
+    if (found) {
+      await supabase.from('whatsapp_conversations').update({ phone }).eq('id', found.id)
+      existing = found
+    }
+  }
 
   if (existing) {
     // Atualizar área/nome/context se necessário
@@ -842,11 +861,14 @@ export async function POST(request: NextRequest) {
       }
       
       phone = cleanPhone
+      // Unificar celular BR: 55+DDD+8 dígitos (12) → 55+DDD+9+8 (13) para não criar 2 conversas
+      const { normalizePhoneBr } = await import('@/lib/phone-br')
+      phone = normalizePhoneBr(phone)
       console.log('[Z-API Webhook] 📱 Número final formatado:', {
         original: body.phone || body.from || body.sender,
         formatted: phone,
         hasCountryCode,
-        length: cleanPhone.length
+        length: phone.length
       })
     }
     
@@ -1047,11 +1069,12 @@ export async function POST(request: NextRequest) {
     const area = await identifyArea(phone, message, finalInstanceId)
     console.log('[Z-API Webhook] 🏷️ Área identificada:', area)
 
-    // Não usar "Ylada"/"Ylada Nutri" como nome do contato quando a mensagem é do cliente (payload às vezes traz nome do negócio)
+    // Não usar "Ylada"/"Ylada Nutri" nem numeração como nome (payload às vezes traz número ou nome do negócio)
+    const nameStr = (name || '').trim()
     const nameForConv =
-      !isFromUs && name && /ylada(\s*nutri)?/i.test(String(name).trim())
-        ? null
-        : name || null
+      !isFromUs && nameStr && !/ylada(\s*nutri)?/i.test(nameStr) && !/^[\d\s\-\+\(\)]{8,}$/.test(nameStr)
+        ? nameStr
+        : null
 
     // 2. Criar ou buscar conversa
     const conversationId = await getOrCreateConversation(
@@ -1063,6 +1086,15 @@ export async function POST(request: NextRequest) {
       { is_group: isGroup }
     )
     console.log('[Z-API Webhook] 💬 Conversa ID:', conversationId)
+
+    // 2.4. Na primeira conexão, gravar nome e telefone do cadastro na conversa (workshop_inscricoes / contact_submissions)
+    try {
+      const { syncConversationFromCadastro } = await import('@/lib/whatsapp-conversation-enrichment')
+      const synced = await syncConversationFromCadastro(conversationId, phone)
+      if (synced) console.log('[Z-API Webhook] ✅ Nome/telefone do cadastro gravados na conversa')
+    } catch (e: any) {
+      console.warn('[Z-API Webhook] ⚠️ syncConversationFromCadastro:', e?.message)
+    }
 
     // 2.5. Verificação adicional: Se a conversa já existe e tem mensagens nossas recentes,
     // e o webhook não detectou fromMe, pode ser mensagem enviada pelo telefone
@@ -1117,8 +1149,8 @@ export async function POST(request: NextRequest) {
     }
 
     // 4. Cancelar mensagens agendadas se pessoa respondeu
-    // IMPORTANTE: Só cancelar se NÃO for mensagem enviada por nós
-    if (!finalIsFromUs && conversationId) {
+    // IMPORTANTE: Só cancelar se NÃO for mensagem enviada por nós (e automação ligada)
+    if (!finalIsFromUs && conversationId && !isCarolAutomationDisabled()) {
       try {
         const { cancelPendingMessagesForConversation } = await import('@/lib/whatsapp-automation/scheduler')
         await cancelPendingMessagesForConversation(conversationId, 'user_responded')
@@ -1129,9 +1161,11 @@ export async function POST(request: NextRequest) {
     }
 
     // 5. Processar automações com Carol (IA de atendimento)
-    // IMPORTANTE: Só processar automações se NÃO for mensagem enviada por nós
-    // (para evitar loops e respostas automáticas para nossas próprias mensagens)
-    if (!finalIsFromUs) {
+    // IMPORTANTE: Desligado quando CAROL_AUTOMATION_DISABLED (ver PASSO-A-PASSO-DESLIGAR-AUTOMACAO.md)
+    if (!finalIsFromUs && isCarolAutomationDisabled()) {
+      console.log('[Z-API Webhook] Automação desligada (kill-switch) - Carol e processAutomations não executados.')
+    }
+    if (!finalIsFromUs && !isCarolAutomationDisabled()) {
       try {
         // Verificar se é primeira mensagem da conversa
         const { data: existingMessages } = await supabase
@@ -1232,11 +1266,38 @@ export async function POST(request: NextRequest) {
           
           alreadyProcessed = carolResponseAfter && carolResponseAfter.length > 0
         }
+
+        // Idempotência por messageId (Z-API): se esta mensagem já foi processada (mesmo z_api_message_id + Carol já respondeu), não processar de novo (evita duplicata quando o webhook é chamado duas vezes)
+        let alreadyProcessedByMessageId = false
+        if (messageId && !alreadyProcessed) {
+          const { data: existingByMessageId } = await supabase
+            .from('whatsapp_messages')
+            .select('id, created_at')
+            .eq('conversation_id', conversationId)
+            .eq('z_api_message_id', messageId)
+            .eq('sender_type', 'customer')
+            .maybeSingle()
+          if (existingByMessageId) {
+            const { data: carolAfterThis } = await supabase
+              .from('whatsapp_messages')
+              .select('id')
+              .eq('conversation_id', conversationId)
+              .eq('sender_type', 'bot')
+              .eq('sender_name', 'Carol - Secretária')
+              .gte('created_at', existingByMessageId.created_at)
+              .limit(1)
+            alreadyProcessedByMessageId = carolAfterThis && carolAfterThis.length > 0
+            if (alreadyProcessedByMessageId) {
+              console.log('[Z-API Webhook] ⏭️ Mensagem já processada (z_api_message_id), pulando Carol:', messageId)
+            }
+          }
+        }
         
         const shouldProcessCarol = 
           (!notificationPhone || phone.replace(/\D/g, '') !== notificationPhone.replace(/\D/g, '')) &&
           shouldAllowResponse && // 🆕 Usar lógica melhorada
-          !alreadyProcessed // 🆕 Não processar se já respondeu recentemente
+          !alreadyProcessed && // 🆕 Não processar se já respondeu recentemente
+          !alreadyProcessedByMessageId // Idempotência por messageId (evita duplicata quando webhook é chamado 2x)
         
         if (shouldProcessCarol) {
           // 🆕 Enriquecer conversa com nome do cadastro (workshop_inscricoes/contact_submissions)
@@ -1295,7 +1356,9 @@ export async function POST(request: NextRequest) {
             })
           }
         } else {
-          if (alreadyProcessed) {
+          if (alreadyProcessedByMessageId) {
+            console.log('[Z-API Webhook] ⏭️ Pulando Carol (mensagem já processada por messageId - evitando duplicação)')
+          } else if (alreadyProcessed) {
             console.log('[Z-API Webhook] ⏭️ Pulando Carol (já processou mensagem recentemente - evitando duplicação)')
           } else if (hasRecentCarolMessage) {
             console.log('[Z-API Webhook] ⏭️ Pulando Carol (já existe mensagem da Carol nos últimos 5 minutos - evitando duplicação)')

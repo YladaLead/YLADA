@@ -1,20 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireApiAuth } from '@/lib/api-auth'
+import { isCarolAutomationDisabled } from '@/config/whatsapp-automation'
 import { supabaseAdmin } from '@/lib/supabase'
 import { createZApiClient } from '@/lib/z-api'
 import { generateCarolResponse, formatSessionDateTime } from '@/lib/whatsapp-carol-ai'
 
 /**
  * POST /api/admin/whatsapp/carol/processar-especificos
- * Processa pessoas específicas para fechamento (quem participou) ou remarketing (quem não participou)
+ * Desligado quando isCarolAutomationDisabled (PASSO-A-PASSO-DESLIGAR-AUTOMACAO.md).
  */
 export async function POST(request: NextRequest) {
+  const authResult = await requireApiAuth(request, ['admin'])
+  if (authResult instanceof NextResponse) return authResult
+  if (isCarolAutomationDisabled()) {
+    return NextResponse.json({ disabled: true, message: 'Automação temporariamente desligada' }, { status: 503 })
+  }
   try {
-    const authResult = await requireApiAuth(request, ['admin'])
-    if (authResult instanceof NextResponse) {
-      return authResult
-    }
-
     const body = await request.json()
     const { telefones, tipo } = body // tipo: 'fechamento' ou 'remarketing'
 

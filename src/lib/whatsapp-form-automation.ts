@@ -48,12 +48,14 @@ export async function sendWorkshopInviteToFormLead(
     console.log('[Form Automation] ⏳ Aguardando 60 segundos antes de enviar mensagem automática (prioridade: ela chamar primeiro)...')
     await new Promise(resolve => setTimeout(resolve, 60000))
     
-    // 📱 Normalizar telefone no mesmo padrão do webhook (BR = 55 + 10/11 dígitos) para evitar 2 conversas
+    // 📱 Normalizar telefone no mesmo padrão do webhook (BR = 55 + DDD + 9 + 8 dígitos) para evitar 2 conversas
     let phoneNormalized = phone.replace(/\D/g, '')
     if (phoneNormalized.length >= 10 && phoneNormalized.length <= 11 && !phoneNormalized.startsWith('55')) {
       if (phoneNormalized.startsWith('0')) phoneNormalized = phoneNormalized.slice(1)
       phoneNormalized = '55' + phoneNormalized
     }
+    const { normalizePhoneBr } = await import('@/lib/phone-br')
+    phoneNormalized = normalizePhoneBr(phoneNormalized)
     
     // 🛡️ Verificar se já existe conversa ativa para evitar duplicação
     
@@ -93,6 +95,28 @@ export async function sendWorkshopInviteToFormLead(
     }
     
     if (instance) {
+      // 🛡️ Evitar duplicata: se já enviamos qualquer mensagem de bot para este telefone (mesma instância) nos últimos 5 min, não enviar de novo (ex.: double submit do formulário)
+      const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString()
+      const { data: convsForPhone } = await supabaseAdmin
+        .from('whatsapp_conversations')
+        .select('id')
+        .eq('phone', phoneNormalized)
+        .eq('instance_id', instance.id)
+      const convIds = (convsForPhone || []).map((c: { id: string }) => c.id)
+      if (convIds.length > 0) {
+        const { data: recentBotToPhone } = await supabaseAdmin
+          .from('whatsapp_messages')
+          .select('id')
+          .eq('sender_type', 'bot')
+          .in('conversation_id', convIds)
+          .gte('created_at', fiveMinutesAgo)
+          .limit(1)
+        if (recentBotToPhone && recentBotToPhone.length > 0) {
+          console.log('[Form Automation] ⚠️ Já enviamos mensagem para este telefone nos últimos 5 min. Evitando duplicata.')
+          return { success: false, error: 'Mensagem já enviada recentemente para este número' }
+        }
+      }
+
       const { data: existingConv } = await supabaseAdmin
         .from('whatsapp_conversations')
         .select('id, context, last_message_at')
@@ -227,25 +251,27 @@ ${optionsText}💬 Qual você prefere? 💚`
     // Buscar conversa existente (mesmo formato do webhook)
     const { data: existingConv } = await supabaseAdmin
       .from('whatsapp_conversations')
-      .select('id')
+      .select('id, context')
       .eq('phone', phoneNormalized)
       .eq('instance_id', instance.id)
       .maybeSingle()
 
     if (existingConv) {
       conversationId = existingConv.id
-      // Atualizar conversa existente com tags e contexto
+      // Atualizar conversa existente com tags, contexto e nome/telefone do cadastro (primeira conexão = transferir pra cá)
       const prevContext = (existingConv.context || {}) as any
       const prevTags = Array.isArray(prevContext.tags) ? prevContext.tags : []
       
-      // Adicionar tags se não existirem (em português)
-      const newTags = [...new Set([...prevTags, 'veio_aula_pratica', 'recebeu_link_workshop', 'primeiro_contato'])]
+      // Adicionar só veio_aula_pratica e primeiro_contato. "Link Workshop" só quando receber msg com link (ex.: pré-aula).
+      const newTags = [...new Set([...prevTags, 'veio_aula_pratica', 'primeiro_contato'])]
       
       // workshop_options_ids: ordem exata Opção 1/2 que a pessoa viu — ao responder "Opção 2", Carol usa [1] e evita trocar por terça
       const workshopOptionsIds = sessions.map((s: { id: string }) => s.id)
+      const nomeDoCadastro = (leadName || '').trim() || null
       await supabaseAdmin
         .from('whatsapp_conversations')
         .update({
+          ...(nomeDoCadastro ? { name: nomeDoCadastro, customer_name: nomeDoCadastro } : {}),
           context: {
             ...prevContext,
             workshop_session_id: session.id,
@@ -253,6 +279,7 @@ ${optionsText}💬 Qual você prefere? 💚`
             source: 'form_automation',
             form_lead: true,
             tags: newTags,
+            ...(nomeDoCadastro ? { display_name: nomeDoCadastro, display_phone: phoneNormalized } : {}),
           },
         })
         .eq('id', conversationId)
@@ -272,7 +299,7 @@ ${optionsText}💬 Qual você prefere? 💚`
             workshop_options_ids: workshopOptionsIds,
             source: 'form_automation',
             form_lead: true,
-            tags: ['veio_aula_pratica', 'recebeu_link_workshop', 'primeiro_contato'],
+            tags: ['veio_aula_pratica', 'primeiro_contato'],
           },
         })
         .select('id')

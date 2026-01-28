@@ -1,19 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireApiAuth } from '@/lib/api-auth'
+import { isCarolAutomationDisabled } from '@/config/whatsapp-automation'
 import { generateCarolResponse } from '@/lib/whatsapp-carol-ai'
 
 /**
  * POST /api/admin/whatsapp/carol/test
- * Endpoint para testar a Carol sem salvar no banco
+ * Endpoint para testar a Carol sem salvar no banco. Desligado quando isCarolAutomationDisabled.
  */
 export async function POST(request: NextRequest) {
+  const authResult = await requireApiAuth(request, ['admin'])
+  if (authResult instanceof NextResponse) return authResult
+  if (isCarolAutomationDisabled()) {
+    return NextResponse.json({ disabled: true, message: 'Automação temporariamente desligada' }, { status: 503 })
+  }
   try {
-    // Verificar se é admin
-    const authResult = await requireApiAuth(request, ['admin'])
-    if (authResult instanceof NextResponse) {
-      return authResult
-    }
-
     const body = await request.json()
     const { message, conversationHistory, context } = body
 

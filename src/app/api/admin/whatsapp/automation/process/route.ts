@@ -1,20 +1,22 @@
 /**
  * POST /api/admin/whatsapp/automation/process
- * Worker on-demand - Processa mensagens agendadas pendentes
+ * Worker on-demand. Desligado quando isCarolAutomationDisabled (PASSO-A-PASSO-DESLIGAR-AUTOMACAO.md).
  */
 
 import { NextRequest, NextResponse } from 'next/server'
 import { requireApiAuth } from '@/lib/api-auth'
+import { isCarolAutomationDisabled } from '@/config/whatsapp-automation'
 import { processScheduledMessages } from '@/lib/whatsapp-automation/worker'
 
 export async function POST(request: NextRequest) {
+  const authResult = await requireApiAuth(request, ['admin'])
+  if (authResult instanceof NextResponse) {
+    return authResult
+  }
+  if (isCarolAutomationDisabled()) {
+    return NextResponse.json({ disabled: true, message: 'Automação temporariamente desligada' }, { status: 200 })
+  }
   try {
-    // Verificar se é admin
-    const authResult = await requireApiAuth(request, ['admin'])
-    if (authResult instanceof NextResponse) {
-      return authResult
-    }
-
     const body = await request.json().catch(() => ({}))
     const limit = typeof body.limit === 'number' ? body.limit : 50
 

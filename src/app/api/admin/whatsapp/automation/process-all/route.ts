@@ -1,27 +1,25 @@
 /**
  * POST /api/admin/whatsapp/automation/process-all
- * Processa TUDO automaticamente:
- * 1. Agenda boas-vindas para leads novos
- * 2. Processa mensagens pendentes
- * 3. Envia lembretes de aula (2h, 12h, 10min) para quem tem sessão agendada
- * 4. Detecta quem não agendou e envia follow-up
- * 5. Reprocessa quem tem tags mas não recebeu fluxo
+ * Desligado quando isCarolAutomationDisabled (PASSO-A-PASSO-DESLIGAR-AUTOMACAO.md).
  */
 
 import { NextRequest, NextResponse } from 'next/server'
 import { requireApiAuth } from '@/lib/api-auth'
+import { isCarolAutomationDisabled } from '@/config/whatsapp-automation'
 import { supabaseAdmin } from '@/lib/supabase'
 import { scheduleWelcomeMessages } from '@/lib/whatsapp-automation/welcome'
 import { processScheduledMessages } from '@/lib/whatsapp-automation/worker'
 import { sendRemarketingToNonParticipant, sendRegistrationLinkAfterClass, sendPreClassNotifications } from '@/lib/whatsapp-carol-ai'
 
 export async function POST(request: NextRequest) {
+  const authResult = await requireApiAuth(request, ['admin'])
+  if (authResult instanceof NextResponse) {
+    return authResult
+  }
+  if (isCarolAutomationDisabled()) {
+    return NextResponse.json({ disabled: true, message: 'Automação temporariamente desligada' }, { status: 200 })
+  }
   try {
-    const authResult = await requireApiAuth(request, ['admin'])
-    if (authResult instanceof NextResponse) {
-      return authResult
-    }
-
     const results: any = {
       welcome: { scheduled: 0, skipped: 0, errors: 0 },
       process: { processed: 0, sent: 0, failed: 0, cancelled: 0, errors: 0 },

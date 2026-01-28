@@ -18,6 +18,7 @@
     "upload-nutri-video": "tsx scripts/upload-nutri-hero-video.ts",
     "extract-nutri-poster": "tsx scripts/extract-nutri-video-poster.ts",
     "test-video-url": "tsx scripts/test-video-url.ts",
+    "test:fase": "tsx src/lib/carol-v2/fase.casos.ts",
     "organizar-contatos-meta": "node scripts/organizar-contatos-meta-ads.js"
   },
   "dependencies": {

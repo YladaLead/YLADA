@@ -1,27 +1,19 @@
+import { NextResponse } from 'next/server'
+
 /**
  * GET /api/cron/whatsapp-carol/pre-class
  *
- * @deprecated Use Worker. Envia lembretes pré-aula (2h, 12h, 10min antes).
- * Automação oficial: POST /api/admin/whatsapp/automation/process-all
- * ou incluir pre-class no worker. Mantido para chamada manual.
+ * Cron não é mais usado. Pré-aula e demais disparos são feitos pelo worker:
+ *   POST /api/admin/whatsapp/automation/process-all
+ * Este endpoint existe só por compatibilidade e sempre retorna esta mensagem.
  */
-import { NextResponse } from 'next/server'
-import { sendPreClassNotifications } from '@/lib/whatsapp-carol-ai'
-
 export async function GET() {
-  try {
-    const result = await sendPreClassNotifications()
-    return NextResponse.json({
-      success: true,
-      tipo: 'pre-class',
-      timestamp: new Date().toISOString(),
-      ...result,
-    })
-  } catch (error: any) {
-    console.error('[Cron Pre-Class] Erro:', error)
-    return NextResponse.json(
-      { success: false, error: error.message, details: error.message },
-      { status: 500 }
-    )
-  }
+  return NextResponse.json(
+    {
+      cron_nao_usado: true,
+      message: 'Cron não é usado. Use o worker: POST /api/admin/whatsapp/automation/process-all',
+      worker_process_all: '/api/admin/whatsapp/automation/process-all',
+    },
+    { status: 200 }
+  )
 }

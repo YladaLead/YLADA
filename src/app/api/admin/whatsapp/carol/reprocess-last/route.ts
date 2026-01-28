@@ -6,14 +6,17 @@
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { requireApiAuth } from '@/lib/api-auth'
+import { isCarolAutomationDisabled } from '@/config/whatsapp-automation'
 import { supabaseAdmin } from '@/lib/supabase'
 import { processIncomingMessageWithCarol } from '@/lib/whatsapp-carol-ai'
 
 export async function POST(request: NextRequest) {
+  const authResult = await requireApiAuth(request, ['admin'])
+  if (authResult instanceof NextResponse) return authResult
+  if (isCarolAutomationDisabled()) {
+    return NextResponse.json({ disabled: true, message: 'Automação temporariamente desligada' }, { status: 503 })
+  }
   try {
-    const authResult = await requireApiAuth(request, ['admin'])
-    if (authResult instanceof NextResponse) return authResult
-
     const body = await request.json().catch(() => ({}))
     const { conversationId } = body as { conversationId?: string }
 

@@ -1,20 +1,21 @@
 /**
  * POST /api/admin/whatsapp/automation/reprocessar-nao-participou
- * Reprocessa quem tem tag "nao_participou_aula" mas ainda não recebeu remarketing
+ * Desligado quando isCarolAutomationDisabled (PASSO-A-PASSO-DESLIGAR-AUTOMACAO.md).
  */
 
 import { NextRequest, NextResponse } from 'next/server'
 import { requireApiAuth } from '@/lib/api-auth'
+import { isCarolAutomationDisabled } from '@/config/whatsapp-automation'
 import { supabaseAdmin } from '@/lib/supabase'
 import { sendRemarketingToNonParticipant } from '@/lib/whatsapp-carol-ai'
 
 export async function POST(request: NextRequest) {
+  const authResult = await requireApiAuth(request, ['admin'])
+  if (authResult instanceof NextResponse) return authResult
+  if (isCarolAutomationDisabled()) {
+    return NextResponse.json({ disabled: true, message: 'Automação temporariamente desligada' }, { status: 503 })
+  }
   try {
-    const authResult = await requireApiAuth(request, ['admin'])
-    if (authResult instanceof NextResponse) {
-      return authResult
-    }
-
     // Buscar todas conversas com tag "nao_participou_aula"
     const { data: conversations, error } = await supabaseAdmin
       .from('whatsapp_conversations')
