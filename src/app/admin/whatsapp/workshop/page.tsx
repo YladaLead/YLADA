@@ -73,6 +73,8 @@ function WorkshopContent() {
   const [participants, setParticipants] = useState<Participant[]>([])
   const [loadingParticipants, setLoadingParticipants] = useState(false)
   const [showPastSessions, setShowPastSessions] = useState(false)
+  const [workerRunning, setWorkerRunning] = useState(false)
+  const [workerResult, setWorkerResult] = useState<{ ok: boolean; preAula?: { enviados: number; erros: number }; reason?: string; error?: string } | null>(null)
 
   const upcoming = useMemo(
     () => sessions.filter((s) => s.is_active).sort((a, b) => new Date(a.starts_at).getTime() - new Date(b.starts_at).getTime()),
@@ -1014,19 +1016,20 @@ function WorkshopContent() {
                       onClick={() => {
                         setSelectedSessionForParticipants(null)
                         setParticipants([])
+                        setWorkerResult(null)
                       }}
                       className="text-gray-400 hover:text-gray-600 text-2xl"
                     >
                       ×
                     </button>
                   </div>
-                  <div className="px-6 py-3 bg-blue-50 border-b border-blue-200">
-                    <div className="flex gap-2">
+                  <div className="px-6 py-3 bg-blue-50 border-b border-blue-200 space-y-3">
+                    <div className="flex flex-wrap items-center gap-2">
                       <input
                         type="text"
                         id="add-participant-phone-existing"
                         placeholder="Telefone (ex: 5519997230912)"
-                        className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                        className="flex-1 min-w-[180px] px-3 py-2 border border-gray-300 rounded-lg text-sm"
                       />
                       <button
                         onClick={async () => {
@@ -1072,10 +1075,49 @@ function WorkshopContent() {
                       >
                         {saving ? 'Adicionando...' : '➕ Adicionar'}
                       </button>
+                      <button
+                        onClick={async () => {
+                          setWorkerResult(null)
+                          setWorkerRunning(true)
+                          try {
+                            const res = await fetch('/api/admin/whatsapp/v2/worker', {
+                              method: 'POST',
+                              headers: { 'Content-Type': 'application/json' },
+                              credentials: 'include',
+                              body: JSON.stringify({ area: 'nutri' })
+                            })
+                            const data = await res.json()
+                            if (!res.ok) throw new Error(data.error || data.details || 'Erro ao rodar worker')
+                            setWorkerResult({
+                              ok: data.ok,
+                              preAula: data.preAula,
+                              reason: data.reason,
+                              error: data.error
+                            })
+                            if (data.preAula?.enviados) setSuccess(`Lembretes enviados: ${data.preAula.enviados} (pré-aula)`)
+                          } catch (e: any) {
+                            setWorkerResult({ ok: false, error: e.message })
+                            setError(e.message || 'Erro ao enviar lembretes')
+                          } finally {
+                            setWorkerRunning(false)
+                          }
+                        }}
+                        disabled={workerRunning}
+                        className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 text-sm font-medium"
+                      >
+                        {workerRunning ? 'Enviando…' : '📩 Enviar lembretes'}
+                      </button>
                     </div>
-                    <p className="text-xs text-gray-600 mt-1">
-                      Digite o telefone da pessoa (apenas números, com DDD e código do país)
+                    <p className="text-xs text-gray-600">
+                      Adicionar: telefone com DDD e país. <strong>Enviar lembretes</strong>: envia comunicados de pré-aula (2h, 30min, 10min) para todos desta sessão, conforme o horário atual.
                     </p>
+                    {workerResult && (
+                      <div className={`text-sm px-3 py-2 rounded-lg ${workerResult.ok ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                        {workerResult.reason && <p>{workerResult.reason}</p>}
+                        {workerResult.preAula && <p>Pré-aula: {workerResult.preAula.enviados} enviados, {workerResult.preAula.erros} erros</p>}
+                        {workerResult.error && <p>{workerResult.error}</p>}
+                      </div>
+                    )}
                   </div>
                   <div className="p-6">
                     {loadingParticipants ? (

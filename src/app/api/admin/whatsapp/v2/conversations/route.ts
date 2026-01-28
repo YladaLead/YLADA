@@ -36,21 +36,41 @@ export async function GET(request: NextRequest) {
   const faseFilter = searchParams.get('fase') as Fase | null
   const area = searchParams.get('area') || 'nutri'
 
-  const { data: rows, error } = await supabaseAdmin
-    .from('whatsapp_conversations')
-    .select('id, phone, name, customer_name, last_message_at, created_at, context')
-    .eq('area', area)
-    .eq('status', 'active')
-    .order('last_message_at', { ascending: false })
-    .limit(300)
+  // Quando filtro é "Agendou": buscar TODAS as conversas com workshop_session_id (igual à agenda Workshop),
+  // para não perder quem está agendado mas tem última mensagem antiga (fora do top 300).
+  const onlyAgendou = faseFilter === 'agendou'
+  let rows: Record<string, unknown>[] = []
 
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
+  if (onlyAgendou) {
+    const { data: agendados, error: errAgendados } = await supabaseAdmin
+      .from('whatsapp_conversations')
+      .select('id, phone, name, customer_name, last_message_at, created_at, context')
+      .eq('area', area)
+      .eq('status', 'active')
+      .not('context->workshop_session_id', 'is', null)
+      .order('last_message_at', { ascending: false })
+      .limit(500)
+    if (errAgendados) {
+      return NextResponse.json({ error: errAgendados.message }, { status: 500 })
+    }
+    rows = agendados || []
+  } else {
+    const { data: allRows, error } = await supabaseAdmin
+      .from('whatsapp_conversations')
+      .select('id, phone, name, customer_name, last_message_at, created_at, context')
+      .eq('area', area)
+      .eq('status', 'active')
+      .order('last_message_at', { ascending: false })
+      .limit(300)
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 500 })
+    }
+    rows = allRows || []
   }
 
   const maps = await buildInscricoesMaps()
 
-  const list: ConversationWithFase[] = (rows || []).map((r: Record<string, unknown>) => {
+  const list: ConversationWithFase[] = rows.map((r: Record<string, unknown>) => {
     const ctx = (r.context || {}) as Record<string, unknown>
     const tags = Array.isArray(ctx.tags) ? (ctx.tags as string[]) : []
     const fase = getFaseFromTagsAndContext(tags, {
