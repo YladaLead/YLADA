@@ -2832,11 +2832,7 @@ Nos vemos em breve! 😊
                   (isToday && minutesDiff >= 5 && minutesDiff < 12 && !context[notificationKey]?.sent_2h))) {
           message = `A sala está aberta! 🎉
 
-Você pode entrar agora:
-
 🔗 ${session.zoom_link}
-
-Nos vemos em breve! 😊
 `
           shouldSend = true
           if (!context[notificationKey]) context[notificationKey] = {}

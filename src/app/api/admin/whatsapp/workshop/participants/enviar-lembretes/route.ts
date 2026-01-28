@@ -113,24 +113,11 @@ Ideal participar pelo computador e ter caneta e papel à mão — a aula é bem 
 🔗 ${session.zoom_link}
 `
       } else if (tipo === '30min') {
-        message = `${firstName ? `Olá ${firstName}! ` : ''}Só um aviso: começaremos pontualmente na ${weekday}, ${date} às ${time} (horário de Brasília).
-
-💡 Dicas: use o computador, tenha caneta e papel à mão e mantenha a câmera aberta — é uma aula prática.
-
-⚠️ Após 10 minutos do início não será mais permitida a entrada.
-
-Nos vemos em breve! 😊
-
-🔗 ${session.zoom_link}
-`
+        message = `${firstName ? `Olá ${firstName}! ` : ''}Em breve começaremos juntos! ⏰`
       } else {
         message = `A sala está aberta! 🎉
 
-Você pode entrar agora:
-
 🔗 ${session.zoom_link}
-
-Nos vemos em breve! 😊
 `
       }
 

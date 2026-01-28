@@ -133,13 +133,7 @@ Nos vemos em breve! 😊
 
     // Notificação 30min antes
     const date30min = new Date(sessionDate.getTime() - 30 * 60 * 1000)
-    const message30min = `${leadName ? `Olá ${leadName}! ` : ''}Em breve estaremos juntos! ⏰
-
-A sala vai abrir 10 minutos antes do horário da aula.
-
-🔗 ${session.zoom_link}
-
-Nos vemos em breve! 😊`
+    const message30min = `${leadName ? `Olá ${leadName}! ` : ''}Em breve começaremos juntos! ⏰`
 
     const result30min = await scheduleMessage({
       conversationId,
