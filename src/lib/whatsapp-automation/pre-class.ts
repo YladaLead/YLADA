@@ -109,22 +109,15 @@ Pelo celular, a experiência fica limitada e você pode perder partes importante
 
     // Notificação 2h antes
     const date2h = new Date(sessionDate.getTime() - 2 * 60 * 60 * 1000)
-    const message2h = `Olá ${leadName}! 
+    const message2h = `${leadName ? `Olá ${leadName}! ` : ''}Só um aviso: começaremos pontualmente na ${weekday}, ${date} às ${time} (horário de Brasília).
 
-Sua aula começa em 2 horas! ⏰
+💡 Dicas: use o computador, tenha caneta e papel à mão e mantenha a câmera aberta — é uma aula prática.
 
-⚠️ *Aviso importante:*
+⚠️ Após 10 minutos do início não será mais permitida a entrada.
 
-A sala do Zoom será aberta 10 minutos antes do horário da aula.
+Nos vemos em breve! 😊
 
-⏰ Após o início da aula, não será permitido entrar, ok?
-
-Isso porque os 10 primeiros minutos são essenciais:
-é nesse momento que identificamos os principais desafios das participantes para que a aula seja realmente prática e personalizada.
-
-🔗 ${session.zoom_link}
-
-Nos vemos em breve! 😊`
+🔗 ${session.zoom_link}`
 
     const result2h = await scheduleMessage({
       conversationId,
@@ -138,11 +131,11 @@ Nos vemos em breve! 😊`
     })
     if (result2h.success) scheduled++
 
-    // Notificação 30min antes — "Começamos em 30 minutos"
+    // Notificação 30min antes
     const date30min = new Date(sessionDate.getTime() - 30 * 60 * 1000)
-    const message30min = `Olá ${leadName}! 
+    const message30min = `${leadName ? `Olá ${leadName}! ` : ''}Em breve estaremos juntos! ⏰
 
-Começamos em 30 minutos! ⏰
+A sala vai abrir 10 minutos antes do horário da aula.
 
 🔗 ${session.zoom_link}
 
@@ -159,30 +152,6 @@ Nos vemos em breve! 😊`
       },
     })
     if (result30min.success) scheduled++
-
-    // Notificação 10min antes — "A sala está aberta"
-    const date10min = new Date(sessionDate.getTime() - 10 * 60 * 1000)
-    const message10min = `Olá ${leadName}! 
-
-A sala está aberta! 🎉
-
-🔗 ${session.zoom_link}
-
-Você pode entrar agora e já começar a se preparar. 
-
-Nos vemos em breve! 😊`
-
-    const result10min = await scheduleMessage({
-      conversationId,
-      messageType: 'pre_class_10min',
-      scheduledFor: date10min,
-      messageData: {
-        message: message10min,
-        session_id: sessionId,
-        lead_name: leadName,
-      },
-    })
-    if (result10min.success) scheduled++
 
     return { success: true, scheduled }
   } catch (error: any) {

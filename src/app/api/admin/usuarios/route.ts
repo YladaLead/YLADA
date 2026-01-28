@@ -169,6 +169,7 @@ export async function GET(request: NextRequest) {
         isMigrado: subscriptionForStatus?.is_migrated || false,
         assinaturaSituacao,
         assinaturaDiasVencida,
+        statusAssinatura: subscriptionForStatus?.status || null, // active | canceled | past_due (para admin editar)
         nome_presidente: profile.nome_presidente || null
       }
     }).filter(u => u !== null) // Remover nulls do filtro de status

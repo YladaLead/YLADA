@@ -12,7 +12,6 @@ export type MessageType =
   | 'pre_class_12h'
   | 'pre_class_2h'
   | 'pre_class_30min'
-  | 'pre_class_10min'
   | 'reminder_12h'
 
 export type ScheduledMessageStatus = 'pending' | 'sent' | 'cancelled' | 'failed'

@@ -23,6 +23,7 @@ interface Usuario {
   cliquesLinks?: number
   isMigrado?: boolean
   assinaturaSituacao: 'ativa' | 'vencida' | 'sem'
+  statusAssinatura?: 'active' | 'canceled' | 'past_due' | null
   assinaturaDiasVencida: number | null
   nome_presidente: string | null
 }
@@ -68,7 +69,8 @@ export default function AdminUsuarios() {
 
   const [formAssinatura, setFormAssinatura] = useState({
     current_period_end: '',
-    plan_type: 'monthly' as 'monthly' | 'annual' | 'free'
+    plan_type: 'monthly' as 'monthly' | 'annual' | 'free',
+    status: 'active' as 'active' | 'canceled' | 'past_due'
   })
 
   // Carregar lista de presidentes autorizados
@@ -166,7 +168,8 @@ export default function AdminUsuarios() {
     setFormAssinatura({
       current_period_end: dataFormatada,
       plan_type: usuario.assinatura === 'mensal' ? 'monthly' : 
-                 usuario.assinatura === 'anual' ? 'annual' : 'free'
+                 usuario.assinatura === 'anual' ? 'annual' : 'free',
+      status: (usuario.statusAssinatura as 'active' | 'canceled' | 'past_due') || 'active'
     })
     setMostrarEditarAssinatura(true)
   }
@@ -235,7 +238,8 @@ export default function AdminUsuarios() {
 
       // Converter data para ISO se fornecida
       const body: any = {
-        plan_type: formAssinatura.plan_type
+        plan_type: formAssinatura.plan_type,
+        status: formAssinatura.status
       }
       if (formAssinatura.current_period_end) {
         const date = new Date(formAssinatura.current_period_end)
@@ -830,6 +834,19 @@ export default function AdminUsuarios() {
                   onChange={(e) => setFormAssinatura({ ...formAssinatura, current_period_end: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                 />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Status da assinatura</label>
+                <select
+                  value={formAssinatura.status}
+                  onChange={(e) => setFormAssinatura({ ...formAssinatura, status: e.target.value as 'active' | 'canceled' | 'past_due' })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="active">Ativa</option>
+                  <option value="canceled">Cancelada (ex.: reembolso feito)</option>
+                  <option value="past_due">Past due (atraso)</option>
+                </select>
+                <p className="text-xs text-gray-500 mt-1">Use &quot;Cancelada&quot; quando o reembolso foi feito no Mercado Pago e a pessoa deve sair do ativo.</p>
               </div>
               <div className="flex justify-end space-x-3 mt-6">
                 <button

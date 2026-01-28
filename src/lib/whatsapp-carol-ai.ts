@@ -292,9 +292,6 @@ export async function getZApiInstance(area: string = 'nutri'): Promise<{
  */
 const CAROL_SYSTEM_PROMPT = `Você é a Carol, secretária da YLADA Nutri. Você é profissional, acolhedora e eficiente.
 
-REGRA ZERO (vale para QUALQUER tipo de mensagem que chegar):
-- Você NÃO pode apenas "responder". Você DEVE primeiro VER o contexto anterior (histórico, fase, última troca), INTERPRETAR onde a conversa está e o que a pessoa quis dizer com aquela mensagem naquele contexto, e só então redigir sua resposta. Sua resposta é consequência da sua interpretação — nunca genérica ou "no vácuo".
-
 SEU PAPEL:
 - Recepcionar pessoas que se inscreveram na Aula Prática ao Vivo
 - Enviar opções de dias e horários disponíveis
@@ -404,12 +401,8 @@ Proibidas: "Posso ajudar em algo?" | "Você tem alguma dúvida?" | "Quer que eu 
 
 CÓPIAS POR SITUAÇÃO (use como referência de estilo e estrutura):
 SITUAÇÃO 1 — Não respondeu / não agendou: reabrir + micro "sim" ou "não". Ex.: "Passando rápido por aqui. Sem sistema, a agenda vira improviso. Você quer resolver isso agora?" Ou: "Deixa eu ser objetiva: você quer aprender a gerar conversas todos os dias ou prefere seguir dependendo de indicação?"
-EXCEÇÃO SITUAÇÃO 1 e 2: Quando a SITUAÇÃO ou a INSTRUÇÃO pedir "pergunta se ainda tem interesse" (ou "não respondeu, pergunta se tem interesse"), NÃO use "Sem sistema, a agenda vira improviso" nem "Você quer resolver isso agora?" na mensagem. Use abertura suave: "Oi [nome], tudo bem? Você ainda tem interesse em agendar uma aula / em aprender a ter sua agenda cheia? Gostaria que eu te encaixasse numa nova data?" — só pergunte se tem interesse.
-SITUAÇÃO 2 — Agendou e não participou: recuperar sem julgamento.
-PRIMEIRA mensagem (ela ainda nem respondeu): NÃO seja agressiva. NÃO use "Sem sistema a gente volta pro improviso" nem "Quer que eu te encaixe em outro horário?" na abertura. Só PERGUNTE se ainda tem interesse. Ex.: "Oi [nome], tudo bem? 😊 Vi que você não conseguiu participar da aula. Tudo bem, acontece! Você ainda tem interesse em aprender a ter sua agenda cheia? Gostaria que eu te encaixasse numa nova data?" A âncora "improviso" e a oferta de horários só DEPOIS que ela disser que tem interesse.
-Se já trocou mensagens e ela demonstrou interesse: aí sim pode usar "Sem sistema a gente volta pro improviso. Quer que eu te encaixe em outro horário?" ou "O que te impediu: tempo, imprevisto ou esquecimento? Quer que eu te coloque na próxima turma?"
+SITUAÇÃO 2 — Agendou e não participou: recuperar sem julgamento. Ex.: "Vi que você não conseguiu entrar, acontece. Sem sistema a gente volta pro improviso. Quer que eu te encaixe em outro horário?" Ou: "O que te impediu: tempo, imprevisto ou esquecimento? Quer que eu te coloque na próxima turma ou prefere deixar pra depois?"
 SITUAÇÃO 3 — Participou e ficou de resolver (fechamento emocional; nunca pedir "dúvidas"). Ex.: "Você viu como funciona. Sem sistema, amanhã o improviso volta. Você quer dar essa virada agora?" Ou: "Não é sobre entender mais. É sobre decidir. Você quer decidir agora?" Ou: "Quanto custa mais um mês com agenda instável? Isso pesa mais… ou o investimento pra sair disso?"
-EXCEÇÃO OBRIGATÓRIA: Quando a INSTRUÇÃO PARA ESTA RESPOSTA (ou o admin) disser que é remarketing "participou e FICOU DE PENSAR", NUNCA use a copy da SITUAÇÃO 3 na abertura. Nesse caso a abertura DEVE ser "Oi [nome], tudo bem? Como você está?" (ou similar), e só depois acompanhamento leve (ex.: "Teve tempo de pensar no que a gente conversou?"). A copy "improviso volta / virada agora" só pode vir depois de acolher, se couber, e com leveza.
 
 RESPOSTA A OBJEÇÕES (sempre curta; formato light copy):
 "Vou pensar" → "Claro. Só me diz uma coisa: pensar mais te ajuda a decidir ou te coloca no mesmo ciclo?"
@@ -423,20 +416,16 @@ SEMPRE: conduzir decisão, não convencer | repetir sistema × improviso | usar 
 QUANDO FAZER REMARKETING:
 - A definição de "participou ou não participou" vem da SITUAÇÃO DESTA PESSOA, das Tags da conversa (Participou/participou_aula) ou do que está escrito na conversa. NUNCA assuma "não participou" por padrão.
 - Se a pessoa PARTICIPOU (situação/tag/texto): NUNCA use "não conseguiu participar da aula anterior". Use o formato COPY E DECISÃO (contexto + âncora + pergunta reflexiva). Ex.: "Você viu como funciona. Sem sistema, amanhã o improviso volta. Você quer dar essa virada agora?"
-- Se a pessoa NÃO participou (confirmado): na PRIMEIRA mensagem, só pergunte se ainda tem interesse — NÃO use "Sem sistema a gente volta pro improviso" nem "Quer que eu te encaixe em outro horário?" na abertura. Ex.: "Oi [nome], tudo bem? Vi que você não conseguiu participar. Tudo bem, acontece! Você ainda tem interesse? Gostaria que eu te encaixasse numa nova data?" Só depois que ela disser que tem interesse, aí ofereça opções e pode usar âncora leve.
-- Pessoa agendou mas não participou: primeira mensagem NUNCA leva datas/link. Só pergunta interesse (sem copy pesada). Se responder que quer agendar, aí ofereça opções.
+- Se a pessoa NÃO participou (confirmado): use o formato 3 linhas. Ex.: "Vi que você não conseguiu entrar, acontece. Sem sistema a gente volta pro improviso. Quer que eu te encaixe em outro horário?"
+- Pessoa agendou mas não participou: primeira mensagem NUNCA leva datas/link. Só pergunta interesse + âncora + pergunta reflexiva. Se responder que quer agendar, aí ofereça opções.
 - NÃO mencione "programa" — foque em "agendar uma aula" e decisão (sistema × improviso).
 
-REGRA ZERO - INTERPRETAR ANTES DE RESPONDER (vale para QUALQUER tipo de mensagem):
-- Para QUALQUER mensagem que chegar, você NÃO pode só "responder". Você DEVE: (1) Ler o histórico completo e a seção ONDE PARAMOS, (2) Identificar a fase/stage desta pessoa e o que já foi dito, (3) INTERPRETAR o que ela quis dizer com aquela mensagem NAQUELE contexto (ex.: "Sim" após "tem interesse?" = quer opções; "Bom dia"/"Oi"/"Boa tarde" em conversa existente = reengajamento — recepcione e retome o fio), (4) Só então redigir sua resposta. Sua resposta é consequência da sua interpretação — nunca "no vácuo" ou genérica.
-
 IMPORTANTE - NÃO REPETIR:
-- SEMPRE leia o histórico completo antes de responder. Use a seção "ONDE PARAMOS" (quando aparecer) e as tags/situação para saber em que fase a pessoa está e continuar dali.
-- Se a pessoa disse "Bom dia", "Oi", "Boa tarde", "Tudo bem" em uma conversa que JÁ EXISTE: é REENGAJAMENTO. NÃO trate como primeira mensagem. NÃO envie boas-vindas nem opções do zero. Recepcione em uma linha (ex.: "Bom dia! 😊") e retome o fio da conversa usando a fase dela (participou? não participou? ficou de ver data?).
+- SEMPRE leia o histórico completo antes de responder
 - Se você JÁ explicou o que é a aula, NÃO explique novamente
 - Se você JÁ enviou opções, NÃO envie novamente a menos que a pessoa peça
 - Se a pessoa faz uma pergunta simples, responda APENAS a pergunta, sem repetir contexto
-- Continue a conversa naturalmente, como se fosse uma conversa real. Aja por si: use o histórico e a fase para dar continuidade, não responda genérico.
+- Continue a conversa naturalmente, como se fosse uma conversa real
 
 REGRA DE OURO - INSTRUÇÃO E SITUAÇÃO:
 - Se no contexto aparecer "INSTRUÇÃO DO ADMIN PARA ESTA RESPOSTA" ou "INSTRUÇÃO PARA ESTA RESPOSTA", essa instrução tem PRIORIDADE MÁXIMA. Siga EXATAMENTE o que ela diz. Ela SOBREESCREVE qualquer outra regra (primeira mensagem, enviar opções, etc.)
@@ -540,8 +529,6 @@ export async function generateCarolResponse(
     carolInstruction?: string
     /** Situação definida pelo admin (remarketing pessoa por pessoa). Persiste até ser alterada. */
     adminSituacao?: string
-    /** Fase/estágio da conversa setada pelo menu (templates). Ex.: ASK_INTEREST_NO_RESPONSE, ASK_INTEREST_NO_SHOW, FOLLOWUP_DECIDING, LAST_CHANCE. */
-    stage?: string
   }
 ): Promise<string> {
   if (!process.env.OPENAI_API_KEY) {
@@ -580,34 +567,19 @@ export async function generateCarolResponse(
     }
   }
 
-  // Construir contexto adicional — toda mensagem passa por interpretação do contexto antes de resposta
+  // Construir contexto adicional
   let contextText = ''
-  contextText += `\n\n🎯 INTERPRETE ANTES DE RESPONDER (obrigatório para qualquer mensagem):\n`
-  contextText += `A pessoa acabou de dizer: "${message.trim().slice(0, 200)}${message.length > 200 ? '...' : ''}".\n`
-  contextText += `Você DEVE: (1) Ler o histórico e a seção ONDE PARAMOS abaixo, (2) Identificar a fase/stage desta pessoa e o que já foi dito, (3) INTERPRETAR o que ela quis dizer com essa mensagem NESSE contexto (ex.: "Sim" após pergunta de interesse = quer opções; "Bom dia"/"Oi"/"Boa tarde" em conversa existente = reengajamento; "Qual valor?" = objeção preço), (4) Só então redigir sua resposta. Nunca responda sem interpretar — sua resposta é consequência da sua leitura do contexto.\n`
-
   let formattedSessionsText = ''
   let shouldSendOptions = false
   
   if (context) {
     // Situação desta pessoa (remarketing pessoa por pessoa – definida pelo admin, persiste)
     if (context.adminSituacao && context.adminSituacao.trim()) {
-      const sit = context.adminSituacao.trim()
-      contextText += `\n\n📋 SITUAÇÃO DESTA PESSOA (definida por você para remarketing):\n${sit}\n\nUse isso para dar continuidade. Esta situação SOBREESCREVE qualquer regra genérica de remarketing: se aqui disser que a pessoa PARTICIPOU (ex.: "participou da aula", "ficou de pensar"), NUNCA diga que ela "não conseguiu participar da aula anterior". Só use essa frase quando a situação disser explicitamente que NÃO participou.\n`
-      // Quando o admin pede "pergunta se ainda tem interesse" (com ou sem "não participou"/"não respondeu") → abertura suave, SEM copy pesada
-      const pedeInteresse = /pergunta\s+se\s+(ela\s+)?ainda\s+tem\s+interesse|pergunta\s+se\s+ainda\s+tem\s+interesse/i.test(sit) ||
-        (/n[ãa]o\s+(respondeu|participou|conseguiu\s+participar)/i.test(sit) && /(tem\s+)?interesse|pergunta/i.test(sit))
-      if (pedeInteresse) {
-        contextText += `\n⚠️ O time pediu para PERGUNTAR SE AINDA TEM INTERESSE. Use abertura suave: "Oi [nome], tudo bem? Você ainda tem interesse em aprender a ter sua agenda cheia / em agendar uma aula? Gostaria que eu te encaixasse numa nova data?" NÃO use "Sem sistema, a agenda vira improviso" nem "Você quer resolver isso agora?" nem "Quer que eu te encaixe em outro horário?" nesta mensagem. Só pergunte se tem interesse.\n`
-      }
+      contextText += `\n\n📋 SITUAÇÃO DESTA PESSOA (definida por você para remarketing):\n${context.adminSituacao.trim()}\n\nUse isso para dar continuidade. Esta situação SOBREESCREVE qualquer regra genérica de remarketing: se aqui disser que a pessoa PARTICIPOU (ex.: "participou da aula", "ficou de pensar"), NUNCA diga que ela "não conseguiu participar da aula anterior". Só use essa frase quando a situação disser explicitamente que NÃO participou.\n`
     }
     // Instrução contextual para esta resposta (ex.: não repetir bloco em "Entendi", mensagem do botão, etc.)
     if (context.carolInstruction && context.carolInstruction.trim()) {
       contextText += `\n\n🚨 PRIORIDADE MÁXIMA - INSTRUÇÃO PARA ESTA RESPOSTA:\n${context.carolInstruction.trim()}\n\nEsta instrução SOBREESCREVE qualquer outra regra. Siga EXATAMENTE. Não repita opções, boas-vindas ou explicações se a instrução disser para responder curto.\n`
-      const inst = context.carolInstruction.trim()
-      if (/pergunta\s+se\s+(ela\s+)?ainda\s+tem\s+interesse|n[ãa]o\s+respondeu.*(pergunta\s+)?(tem\s+)?interesse/i.test(inst)) {
-        contextText += `\n⚠️ A instrução pede PERGUNTAR SE AINDA TEM INTERESSE. Use abertura suave: "Oi [nome], tudo bem? Você ainda tem interesse? Gostaria que eu te encaixasse numa nova data?" NÃO use "Sem sistema, a agenda vira improviso" nem "Você quer resolver isso agora?".\n`
-      }
     }
     // 🆕 Nome da pessoa (sempre APENAS primeiro nome – ex.: Maria Silva → Maria)
     if (context.leadName) {
@@ -689,64 +661,22 @@ export async function generateCarolResponse(
     }
   }
 
-  // ONDE PARAMOS — Carol deve reler o histórico e entender onde a conversa está (evita perder contexto e respostas genéricas)
-  const lastN = conversationHistory.slice(-10) // Últimas 10 mensagens para resumir
-  let ondeParamos = ''
-  if (lastN.length > 0) {
-    const trocas = lastN.map((m, i) => {
-      const quem = m.role === 'assistant' ? 'Nós (Carol/time)' : 'Ela'
-      const trecho = (m.content || '').trim().slice(0, 120)
-      return `• ${quem}: "${trecho}${(m.content || '').length > 120 ? '...' : ''}"`
-    })
-    ondeParamos += `\n\n📍 ONDE PARAMOS — LEIA O HISTÓRICO E CONTINUE DAQUI:\n`
-    ondeParamos += `Últimas trocas nesta conversa:\n${trocas.join('\n')}\n`
-    ondeParamos += `→ Agora ela acabou de dizer: "${message.trim().slice(0, 250)}${message.length > 250 ? '...' : ''}"\n`
-    // Fase derivada de stage (menu/template), tags ou situação
-    const tags = context?.tags || []
-    const stageObjetivo: Record<string, string> = {
-      ASK_INTEREST_NO_RESPONSE: 'Acabamos de perguntar se ainda tem interesse (ela não respondeu antes). Se ela disser SIM → ofereça opções. Se NÃO → encerre educadamente. NÃO use "improviso" nem "resolver agora".',
-      ASK_INTEREST_NO_SHOW: 'Acabamos de perguntar se ainda tem interesse (ela não participou da aula). Se ela disser SIM → ofereça opções. Se NÃO → encerre educadamente. NÃO use "improviso" nem "encaixe em outro horário" ainda.',
-      FOLLOWUP_DECIDING: 'Participou e ficou de pensar. Acabamos de perguntar se faz sentido colocar o sistema em prática. Continue conduzindo decisão com leveza.',
-      LAST_CHANCE: 'Última chance — perguntamos se quer reservar vaga ou deixar pra depois. Respeite a resposta. Se sim → opções. Se não → encerre.',
-    }
-    const stage = (context as any)?.stage as string | undefined
-    const fase =
-      stage && stageObjetivo[stage]
-        ? `Stage: ${stage}. Objetivo agora: ${stageObjetivo[stage]}`
-        : context?.adminSituacao && String(context.adminSituacao).trim()
-          ? `Situação definida pelo time: "${String(context.adminSituacao).trim().slice(0, 200)}"`
-          : tags.includes('participou_aula')
-            ? 'Esta pessoa PARTICIPOU da aula. Pode ser follow-up (ficou de pensar, fechamento).'
-            : tags.includes('nao_participou_aula') || tags.includes('remarketing_enviado')
-              ? 'Esta pessoa NÃO participou da aula. Na primeira mensagem: só PERGUNTE se ainda tem interesse. NÃO use "improviso" nem "Quer que eu te encaixe em outro horário?" na abertura. Seja suave.'
-              : tags.includes('carol_ativa')
-                ? 'Conversa ativa. Use o histórico acima para continuar de onde paramos.'
-                : 'Use o histórico acima para continuar de onde paramos.'
-    ondeParamos += `\nFase desta pessoa: ${fase}\n`
-    ondeParamos += `\n⚠️ INTERPRETE e só então responda: use esse contexto para entender onde a conversa está e o que a pessoa quis dizer. Sua resposta deve ser consequência direta da sua interpretação — não ignore o contexto, não responda genérico. Ex.: "Sim" após pergunta de interesse → envie opções; "Bom dia"/"Oi"/"Boa tarde" em conversa existente → recepcione e retome o fio; dúvida específica → responda só aquilo.\n`
-    contextText += ondeParamos
+  // Última troca — Carol deve reler antes de responder (evita perder contexto, ex.: "Sim" após "tem interesse?" → enviar opções)
+  const lastAssistant = conversationHistory.filter((m) => m.role === 'assistant').slice(-1)[0]?.content?.trim() || ''
+  if (conversationHistory.length > 0) {
+    const lastBotPreview = lastAssistant.slice(0, 400) + (lastAssistant.length > 400 ? '...' : '')
+    const userReplyPreview = message.trim().slice(0, 200)
+    contextText += `\n\n⚠️ ÚLTIMA TROCA — LEIA ANTES DE RESPONDER:\nSua última mensagem nesta conversa foi: "${lastBotPreview}".\nA pessoa acabou de responder: "${userReplyPreview}".\nUse esse contexto para decidir sua resposta. Ex.: se você perguntou se tem interesse em agendar e ela disse "Sim"/"Quero", envie as opções de aula; não responda com "Qualquer dúvida, é só me chamar".\n`
   }
 
-  // Reengajamento: pessoa disse "bom dia", "oi", "boa tarde", "olá" etc. em conversa que já existe — recepcione e retome o fio (não trate como primeira mensagem, não perca contexto)
-  const msgNorm = message.trim().toLowerCase()
-  const isReengajamento =
-    !(context?.isFirstMessage) &&
-    (
-      /^(oi|olá|ola|bom\s+dia|boa\s+(tarde|noite|dia)|tudo\s+bem\??|td\s+bem|e\s+aí|eai|hey|opa|salve)(\s+!?)?\.?$/i.test(msgNorm) ||
-      /^(oi|olá|ola|bom\s+dia|boa\s+tarde|boa\s+noite|boa\s+dia|tudo\s+bem)\s*,?\s*[.!]?\s*$/i.test(msgNorm)
-    )
-  if (isReengajamento && lastN.length > 0) {
-    // Sempre que a pessoa cumprimenta em conversa existente: recepcione e retome o fio (não exige que a última mensagem nossa tenha sido reabertura — ex.: ela pode ter dado "bom dia" no início do dia)
-    contextText += `\n\n🔄 REENGAJAMENTO: A pessoa está cumprimentando (ex.: "Bom dia", "Oi", "Boa tarde") em uma conversa que JÁ EXISTE. NÃO trate como primeira mensagem. NÃO envie bloco de boas-vindas nem lista de opções do zero. RECEPCIONE em uma linha (ex.: "Bom dia! 😊" / "Oi! Tudo bem?") e RETOME o fio da conversa: use o histórico e a fase dela (participou? não participou? ficou de ver data? agendou?) para continuar de onde pararam. Seja natural e acolhedora.\n`
-  }
-
-    // Incluir histórico completo (últimas 20 mensagens para Carol ter mais contexto e "agir por si")
+    // Incluir histórico completo (últimas 15 mensagens para melhor contexto)
+    // Aumentado de 10 para 15 para Carol ter mais contexto da conversa
     const messages: OpenAI.Chat.ChatCompletionMessageParam[] = [
       {
         role: 'system',
         content: CAROL_SYSTEM_PROMPT + contextText,
       },
-      ...conversationHistory.slice(-20), // Últimas 20 mensagens para melhor contexto e continuidade
+      ...conversationHistory.slice(-15), // Últimas 15 mensagens para melhor contexto
       {
         role: 'user',
         content: message,
@@ -755,7 +685,7 @@ export async function generateCarolResponse(
     
     console.log('[Carol AI] 📜 Histórico enviado para OpenAI:', {
       totalHistory: conversationHistory.length,
-      usingLast: Math.min(20, conversationHistory.length),
+      usingLast: Math.min(15, conversationHistory.length),
       messages: messages.map(m => ({ 
         role: m.role, 
         contentLength: typeof m.content === 'string' ? m.content.length : 0,
@@ -1128,11 +1058,11 @@ export async function processIncomingMessageWithCarol(
     const isShortNeutralReply = shortNeutralWords.includes(msgNorm) ||
       (msgNorm.length <= 4 && !msgNorm.endsWith('?'))
 
-    // a5: Mensagem do botão do WhatsApp ("Acabei de me inscrever... gostaria de agendar") → não repetir bloco;
-    // o form envia em 15s ou já enviou; Carol não deve reenviar boas-vindas + opções
+    // a5: Mensagem do botão ("Acabei de me inscrever... gostaria de agendar") — se a pessoa clicou
+    // antes do form enviar (60s), o form não manda; então Carol DEVE enviar boas-vindas + opções.
     const isMessageFromButton = /acabei\s+de\s+me\s+inscrever|me\s+inscrev(i|er)|gostaria\s+de\s+agendar|inscrev(er|i).*aula|ylada\s+nutri.*agendar/i.test(msgNorm)
 
-    const isFirstMessage = rawIsFirstMessage && !formAlreadySentWelcome && !isShortNeutralReply && !isMessageFromButton
+    const isFirstMessage = rawIsFirstMessage && !formAlreadySentWelcome && !isShortNeutralReply
     
     console.log('[Carol AI] 🔍 Detecção de primeira mensagem:', {
       conversationId,
@@ -1152,27 +1082,17 @@ export async function processIncomingMessageWithCarol(
     const hasScheduled = tags.includes('recebeu_link_workshop') || workshopSessionId
     const scheduledDate = context.scheduled_date || null
 
-    // Pessoa está adiando/recusando por motivo pessoal (imprevisto, cirurgia, hospital) → NÃO tratar "Boa tarde" como escolha de horário; responder com empatia
-    const messageLowerForDecline = message.trim().toLowerCase().replace(/\s+/g, ' ')
-    const isDecliningOrPostponing = /hospitalizada|hospitalizado|cirurgia|emergência|emergencia|imprevisto|aguardar\s+(uma\s+)?(pr[oó]xima\s+)?oportunidade|pr[oó]ximo\s+momento|n[ãa]o\s+d[áa]\s+agora|peço\s+desculpas?|em\s+tratamento|recupera[çc][ãa]o|estou\s+hospitalizada/i.test(messageLowerForDecline)
-
     // 5. Verificar se a pessoa está escolhendo uma opção de aula
     // Detectar escolha: "1", "opção 1", "primeira", "segunda às 10:00", etc
     let selectedSession: { id: string; title: string; starts_at: string; zoom_link: string } | null = null
-    let isRefusingOptions = false // "não tenho horário", "esses horários não servem" → Carol responde em texto (FASE DE CONVITE), não envia link
     
     if (workshopSessions.length > 0) {
       const messageLower = message.toLowerCase().trim()
-      // Se a pessoa está dizendo que NÃO tem horário / que os horários não servem → NÃO tratar como escolha de opção 1 ou 2
-      isRefusingOptions =
-        /n[ãa]o\s+tenho\s+hor[áa]rio|n[ãa]o\s+d[áa](\s+pra\s+mim)?|n[ãa]o\s+serve|n[ãa]o\s+funcionam|esses\s+hor[áa]rios\s+n[ãa]o|ruim\s+pra\s+mim|n[ãa]o\s+consegui|n[ãa]o\s+posso\s+nesses|indispon[íi]vel/i.test(
-          messageLower
-        )
-
+      
       // Detectar por número: "1", "opção 1", "primeira", "segundo", "prefiro a primeira", etc
       const numberMatch = messageLower.match(/(?:opção|opcao|op|escolho|prefiro|quero)\s*(?:a\s*)?(\d+)|^(\d+)$|(primeira|segunda|terceira|quarta|quinta)|(?:prefiro|escolho|quero)\s*(?:a\s*)?(primeira|segunda|terceira|quarta|quinta)/)
       
-      if (numberMatch && !isRefusingOptions) {
+      if (numberMatch) {
         let optionIndex = -1
         if (numberMatch[1]) {
           optionIndex = parseInt(numberMatch[1]) - 1
@@ -1339,8 +1259,8 @@ export async function processIncomingMessageWithCarol(
           }
           
           // Se não encontrou dia mas encontrou horário exato, usar mesmo assim
-          // (útil quando pessoa diz "10h", "15h", "20:00 hs", "20h" etc – mesmo que hoursInMessage tenha [20,0] de "20:00 hs")
-          if (!selectedSession && hasTimeMatch && hoursInMessage.includes(sessionHour)) {
+          // (útil quando pessoa só diz "10h" ou "15h")
+          if (!selectedSession && hasTimeMatch && hoursInMessage.length === 1) {
             console.log('[Carol AI] ✅ Sessão detectada apenas por horário:', {
               sessionId: sessionItem.id,
               time,
@@ -1358,7 +1278,6 @@ export async function processIncomingMessageWithCarol(
         }
         
         // 🆕 Detectar preferência por período do dia (noite, tarde, manhã) e sugerir sessão apropriada
-        // NÃO tratar quando a pessoa está adiando/recusando por imprevisto (ex.: "Boa tarde... estou hospitalizada... aguardar outra oportunidade")
         if (!selectedSession) {
           const messageLower = message.toLowerCase()
           const prefersNight = messageLower.includes('noite') || 
@@ -1374,7 +1293,7 @@ export async function processIncomingMessageWithCarol(
                                 messageLower.includes('de manhã') ||
                                 messageLower.includes('de manha')
           
-          if ((prefersNight || prefersAfternoon || prefersMorning) && !isDecliningOrPostponing) {
+          if (prefersNight || prefersAfternoon || prefersMorning) {
             // Buscar sessões que correspondam ao período preferido
             for (const sessionItem of workshopSessions) {
               const { weekday, date, time } = formatSessionDateTime(sessionItem.starts_at)
@@ -1512,15 +1431,9 @@ export async function processIncomingMessageWithCarol(
 
     // Se detectou escolha, enviar imagem + link e retornar
     // Só enviar "Perfeito! Você vai adorar!" + link quando a conversa estiver no fluxo de workshop/aula prática.
-    // NUNCA enviar link quando a pessoa está adiando/recusando por imprevisto (hospital, cirurgia, aguardar outra oportunidade).
-    const isInWorkshopFlow =
-      tags.includes('veio_aula_pratica') ||
-      tags.includes('recebeu_link_workshop') ||
-      tags.includes('nao_participou_aula') ||
-      tags.includes('remarketing_enviado')
-    // Se a pessoa disse que não tem horário / que os horários não servem, não enviar link; Carol responde em texto (FASE DE CONVITE)
-    if (isRefusingOptions && selectedSession) selectedSession = null
-    if (selectedSession && isInWorkshopFlow && !isDecliningOrPostponing) {
+    // Evita disparar para contatos que não são de agendamento (ex.: alguém que disse "2" em outro contexto).
+    const isInWorkshopFlow = tags.includes('veio_aula_pratica') || tags.includes('recebeu_link_workshop')
+    if (selectedSession && isInWorkshopFlow) {
       console.log('[Carol AI] ✅ Escolha detectada (conversa no fluxo workshop):', {
         sessionId: selectedSession.id,
         startsAt: selectedSession.starts_at,
@@ -1646,22 +1559,16 @@ Pelo celular, a experiência fica limitada e você pode perder partes importante
           } else if (hoursDiff >= 2 && hoursDiff < 2.5) {
             // Lembrete de 2h (aviso Zoom)
             const { weekday, date, time } = formatSessionDateTime(selectedSession.starts_at)
-            reminderToSend = `Olá ${leadNameForReminder}! 
+            const { weekday, date, time } = formatSessionDateTime(selectedSession.starts_at)
+            reminderToSend = `${leadNameForReminder ? `Olá ${leadNameForReminder}! ` : ''}Só um aviso: começaremos pontualmente na ${weekday}, ${date} às ${time} (horário de Brasília).
 
-Sua aula começa em 2 horas! ⏰
+💡 Dicas: use o computador, tenha caneta e papel à mão e mantenha a câmera aberta — é uma aula prática.
 
-⚠️ *Aviso importante:*
-
-A sala do Zoom será aberta 10 minutos antes do horário da aula.
-
-⏰ Após o início da aula, não será permitido entrar, ok?
-
-Isso porque os 10 primeiros minutos são essenciais:
-é nesse momento que identificamos os principais desafios das participantes para que a aula seja realmente prática e personalizada.
-
-🔗 ${selectedSession.zoom_link}
+⚠️ Após 10 minutos do início não será mais permitida a entrada.
 
 Nos vemos em breve! 😊
+
+🔗 ${selectedSession.zoom_link}
 `
           }
           
@@ -1779,14 +1686,14 @@ Nos vemos em breve! 😊
       }
     }
 
-    // 5. Buscar últimas mensagens desta conversa — quando a pessoa envia qualquer mensagem, a Carol verifica o histórico para manter contexto e responder em continuidade (não genérico)
+    // 5. Buscar histórico de mensagens (aumentado para 30 para melhor contexto)
     const { data: messages } = await supabaseAdmin
       .from('whatsapp_messages')
       .select('sender_type, message, created_at')
       .eq('conversation_id', conversationId)
       .eq('status', 'active') // Apenas mensagens não deletadas
       .order('created_at', { ascending: true })
-      .limit(30) // Últimas 30 mensagens desta conversa
+      .limit(30) // Aumentado de 20 para 30 mensagens
 
     const conversationHistory = (messages || [])
       .filter(m => m.sender_type === 'customer' || m.sender_type === 'bot' || m.sender_type === 'agent')
@@ -1865,13 +1772,11 @@ Nos vemos em breve! 😊
       leadName = 'querido(a)'
     }
 
-    // Mensagem do botão → resposta educada com resumo das opções (dia + hora) quando ela pergunta de novo sobre horário
+    // Mensagem do botão: se for primeira mensagem (ninguém enviou nada ainda), Carol envia boas-vindas + opções.
+    // Se já tinha mensagem nossa (form enviou), só resumo curto para não repetir.
     const carolInstructionFromContext = (context as any)?.carol_instruction
     let carolInstruction: string | undefined
-    if (isDecliningOrPostponing) {
-      // Pessoa explicou imprevisto/cirurgia/hospitalização e vai aguardar outra oportunidade → NÃO enviar link nem opções; responder com empatia
-      carolInstruction = `A pessoa está explicando que teve imprevisto, cirurgia, hospitalização ou situação pessoal e vai aguardar outra oportunidade. NÃO envie link nem opções de aula. Responda com empatia em 2–3 frases: reconheça a situação, deseje melhoras, diga que estará à disposição quando ela estiver melhor. Ex.: "Oi [nome], sinto muito pelo que passou! Que você se recupere bem. Quando estiver melhor, estarei por aqui. Qualquer coisa, é só me chamar. Melhoras! 💚" Use o nome da pessoa.`
-    } else if (isMessageFromButton) {
+    if (isMessageFromButton && !isFirstMessage) {
       const fmtOpt = (s: { starts_at: string }) => {
         const d = new Date(s.starts_at)
         const w = d.toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo', weekday: 'long' })
@@ -1887,8 +1792,7 @@ Nos vemos em breve! 😊
       carolInstruction = optionRecap
         ? `A pessoa acabou de clicar no botão do workshop ("Acabei de me inscrever... gostaria de agendar"). NÃO repita boas-vindas nem a lista completa de opções. Seja educada: faça um resumo curto das opções que já foram enviadas e pergunte qual horário funciona melhor. Responda usando exatamente este formato: "Oi! Como te enviei em cima: ${optionRecap}. Qual desses horários funciona melhor para você? 😊"`
         : 'A pessoa acabou de clicar no botão do workshop ("Acabei de me inscrever... gostaria de agendar"). NÃO repita boas-vindas nem a lista de opções. Responda em 1–2 frases, de forma educada: as opções foram enviadas acima (ou estão chegando) e pergunte qual horário funciona melhor. Exemplo: "Oi! As opções já foram enviadas na mensagem acima. Qual delas funciona melhor para você? 😊"'
-    } else if (isShortNeutralReply && !selectedSession && (formAlreadySentWelcome || workshopSessions.length > 0)) {
-      // Só usar "Qualquer dúvida..." quando NÃO for escolha de opção (1 ou 2). Se a pessoa disse "1" ou "2", selectedSession já foi setado e vamos enviar o link; não sobrescrever com resposta genérica.
+    } else if (isShortNeutralReply && (formAlreadySentWelcome || workshopSessions.length > 0)) {
       // Exceção: remarketing "não participou" — pessoa respondeu que TEM INTERESSE ("Sim", "Quero") → enviar opções de aula, NÃO "Qualquer dúvida..."
       const isRemarketingNaoParticipou = tags.includes('nao_participou_aula') || tags.includes('remarketing_enviado')
       const isPositiveInterestReply = /^(sim|quero|tenho\s+interesse|gostaria|quero\s+sim|com\s+certeza|pode\s+ser|pode\s+encaixar|claro|por\s+favor|tem\s+interesse)$/i.test(msgNorm.trim())
@@ -1906,14 +1810,13 @@ Nos vemos em breve! 😊
       (await generateCarolResponse(message, conversationHistory, {
         tags,
         workshopSessions,
-        leadName: leadName,
+        leadName: leadName, // 🆕 Sempre passar o nome se disponível
         hasScheduled,
         scheduledDate,
         participated: participated ? true : (tags.includes('nao_participou_aula') ? false : undefined),
-        isFirstMessage,
+        isFirstMessage, // 🆕 Passar flag de primeira mensagem
         carolInstruction,
-        adminSituacao: (context as any)?.admin_situacao,
-        stage: (context as any)?.stage, // Setado pelo menu (send-template); Carol usa para saber "objetivo agora"
+        adminSituacao: (context as any)?.admin_situacao, // remarketing pessoa por pessoa (persistente)
       }))
 
     console.log('[Carol AI] ✅ Resposta gerada:', {
@@ -2083,44 +1986,6 @@ Nos vemos em breve! 😊
       } catch (notificationError: any) {
         console.error('[Carol AI] ❌ Erro ao enviar notificação de atendimento humano:', notificationError)
         // Não falhar o processamento se a notificação falhar
-      }
-    }
-
-    // 10b. Se a pessoa disse que os horários não servem → notificar humano com telefone (para encaixar manualmente ou criar sessão)
-    if (isRefusingOptions) {
-      try {
-        const notificationPhone = process.env.Z_API_NOTIFICATION_PHONE
-        if (notificationPhone) {
-          const { data: convData } = await supabaseAdmin
-            .from('whatsapp_conversations')
-            .select('name, phone, context')
-            .eq('id', conversationId)
-            .single()
-          if (convData) {
-            const displayName =
-              convData.name || (convData.context as any)?.lead_name || (convData.context as any)?.customer_name || 'Sem nome'
-            const notificationMessage = `⏰ *HORÁRIOS NÃO SERVEM*\n\nA pessoa disse que não tem disponibilidade / que os horários mostrados não servem.\n\n👤 *Nome:* ${displayName}\n📱 *Telefone:* ${convData.phone}\n\n📝 *Mensagem:* "${message.substring(0, 150)}${message.length > 150 ? '...' : ''}"\n\n✅ A Carol já respondeu (perguntou período, etc.). Você pode encaixar manualmente em outra sessão ou criar nova data.`
-            const { data: notificationInstance } = await supabaseAdmin
-              .from('z_api_instances')
-              .select('instance_id, token')
-              .eq('status', 'connected')
-              .limit(1)
-              .maybeSingle()
-            if (notificationInstance) {
-              const notificationClient = createZApiClient({
-                instanceId: notificationInstance.instance_id,
-                token: notificationInstance.token,
-              })
-              await notificationClient.sendTextMessage({
-                phone: notificationPhone,
-                message: notificationMessage,
-              })
-              console.log('[Carol AI] ✅ Notificação "horários não servem" enviada para humano:', notificationPhone)
-            }
-          }
-        }
-      } catch (notificationError: any) {
-        console.error('[Carol AI] ❌ Erro ao enviar notificação horários não servem:', notificationError)
       }
     }
 
@@ -2929,18 +2794,9 @@ Nos vemos lá! 😊
              (hoursDiff >= 2 && hoursDiff < 12) || 
              (isToday && hoursDiff >= 0.5 && hoursDiff < 12 && !context[notificationKey]?.sent_2h) ||
              (isTomorrow && hoursDiff >= 12 && hoursDiff < 36))) {
-          message = `Olá ${leadName}! 
+          message = `${leadName ? `Olá ${leadName}! ` : ''}Sua aula é hoje às ${time}! 
 
-Sua aula é hoje às ${time}! 
-
-💻 *Recomendação importante:*
-
-O ideal é participar pelo computador ou notebook, pois:
-* Compartilhamos slides
-* Fazemos explicações visuais
-* É importante acompanhar e anotar
-
-Pelo celular, a experiência fica limitada e você pode perder partes importantes da aula.
+Ideal participar pelo computador e ter caneta e papel à mão — a aula é bem prática.
 
 🔗 ${session.zoom_link}
 `
@@ -2955,22 +2811,16 @@ Pelo celular, a experiência fica limitada e você pode perder partes importante
                  ((hoursDiff >= 2 && hoursDiff < 2.5) || 
                   (hoursDiff >= 0.5 && hoursDiff < 2) ||
                   (isToday && hoursDiff > 0 && hoursDiff < 2))) {
-          message = `Olá ${leadName}! 
+          const { weekday, date, time } = formatSessionDateTime(session.starts_at)
+          message = `${leadName ? `Olá ${leadName}! ` : ''}Só um aviso: começaremos pontualmente na ${weekday}, ${date} às ${time} (horário de Brasília).
 
-Sua aula começa em 2 horas! ⏰
+💡 Dicas: use o computador, tenha caneta e papel à mão e mantenha a câmera aberta — é uma aula prática.
 
-⚠️ *Aviso importante:*
-
-A sala do Zoom será aberta 10 minutos antes do horário da aula.
-
-⏰ Após o início da aula, não será permitido entrar, ok?
-
-Isso porque os 10 primeiros minutos são essenciais:
-é nesse momento que identificamos os principais desafios das participantes para que a aula seja realmente prática e personalizada.
-
-🔗 ${session.zoom_link}
+⚠️ Após 10 minutos do início não será mais permitida a entrada.
 
 Nos vemos em breve! 😊
+
+🔗 ${session.zoom_link}
 `
           shouldSend = true
           if (!context[notificationKey]) context[notificationKey] = {}
@@ -2981,15 +2831,13 @@ Nos vemos em breve! 😊
         else if (!context[notificationKey]?.sent_10min && 
                  ((minutesDiff >= 10 && minutesDiff < 12) ||
                   (isToday && minutesDiff >= 5 && minutesDiff < 12 && !context[notificationKey]?.sent_2h))) {
-          message = `Olá! 
-
-A sala do Zoom já está aberta! 🎉
+          message = `A sala está aberta! 🎉
 
 Você pode entrar agora:
 
 🔗 ${session.zoom_link}
 
-Nos vemos em 10 minutos! 😊
+Nos vemos em breve! 😊
 `
           shouldSend = true
           if (!context[notificationKey]) context[notificationKey] = {}
