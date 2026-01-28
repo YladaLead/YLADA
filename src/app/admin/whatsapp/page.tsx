@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { createClient } from '@/lib/supabase-client'
 import AdminProtectedRoute from '@/components/auth/AdminProtectedRoute'
 import Link from 'next/link'
+import { normalizePhoneBr } from '@/lib/phone-br'
 
 const supabase = createClient()
 
@@ -11,6 +12,7 @@ interface Conversation {
   id: string
   phone: string
   name: string | null
+  customer_name?: string | null
   area: string | null
   status: string
   last_message_at: string
@@ -28,6 +30,10 @@ interface Conversation {
     area: string
     status?: string
   } | null
+  /** Nome de workshop_inscricoes/contact_submissions (enriquecido pela API). */
+  display_name?: string | null
+  /** Telefone formatado das inscrições (enriquecido pela API). */
+  display_phone?: string | null
 }
 
 interface Message {
@@ -79,8 +85,10 @@ function WhatsAppChatContent() {
   const [sendOptionsOpen, setSendOptionsOpen] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
   const [contactMenuOpen, setContactMenuOpen] = useState(false)
+  const [carolActionsOpen, setCarolActionsOpen] = useState(false)
   const [showScrollToBottom, setShowScrollToBottom] = useState(false)
   const messagesContainerRef = useRef<HTMLDivElement>(null)
+  const carolActionsRef = useRef<HTMLDivElement>(null)
   const shouldAutoScrollRef = useRef(true)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const userClearedSelectionRef = useRef(false) // Flag para indicar que o usuário explicitamente limpou a seleção
@@ -120,6 +128,7 @@ function WhatsAppChatContent() {
   useEffect(() => {
     if (selectedConversation) {
       setContactMenuOpen(false)
+      setCarolActionsOpen(false)
       // Ao trocar de conversa, voltar a auto-scrollar para o final
       shouldAutoScrollRef.current = true
       loadMessages(selectedConversation.id)
@@ -128,6 +137,18 @@ function WhatsAppChatContent() {
       return () => clearInterval(interval)
     }
   }, [selectedConversation])
+
+  // Fechar menu "O que a Carol faça?" ao clicar fora
+  useEffect(() => {
+    if (!carolActionsOpen) return
+    const onDocClick = (e: MouseEvent) => {
+      if (carolActionsRef.current && !carolActionsRef.current.contains(e.target as Node)) {
+        setCarolActionsOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', onDocClick)
+    return () => document.removeEventListener('mousedown', onDocClick)
+  }, [carolActionsOpen])
 
   const isNearBottom = (el: HTMLElement) => {
     const distance = el.scrollHeight - el.scrollTop - el.clientHeight
@@ -187,41 +208,46 @@ function WhatsAppChatContent() {
       const data = await response.json()
       let conversationsList = data.conversations || []
       
-      // Agrupamento adicional no frontend (fallback caso API não agrupe corretamente)
-      // IMPORTANTE: Preservar códigos de país para suportar outros países
+      // Agrupamento no frontend (mesma lógica da API: BR 12→13 dígitos, preferir conversa com nome)
       const phoneMap = new Map<string, Conversation>()
+      const hasName = (c: Conversation) => {
+        const n = (c.name || '').trim()
+        const d = ((c.context as any)?.display_name || '').trim()
+        const cust = (c.customer_name || '').trim()
+        const reject = (s: string) => !s || /^[\d\s\-\+\(\)]{8,}$/.test(s)
+        return (n && !reject(n)) || (d && !reject(d)) || (cust && !reject(cust))
+      }
+      const mergeContext = (a: Conversation, b: Conversation) => ({
+        ...((a.context as any) || {}),
+        ...((b.context as any) || {}),
+      })
       conversationsList.forEach((conv: Conversation) => {
-        // Normalizar telefone preservando código do país
-        let phoneKey = (conv.phone || '').replace(/\D/g, '')
-        
-        // Para números brasileiros: agrupar variantes com/sem código 55
-        if (phoneKey.startsWith('55') && phoneKey.length >= 13) {
-          const withoutCountry = phoneKey.substring(2)
-          phoneKey = `BR_${withoutCountry}`
-        } else if (phoneKey.length >= 10 && phoneKey.length <= 11 && !phoneKey.match(/^[1-9]/)) {
-          if (phoneKey.startsWith('0')) {
-            phoneKey = phoneKey.substring(1)
-          }
-          phoneKey = `BR_${phoneKey}`
-        } else if (phoneKey.length < 10) {
-          phoneKey = `id_${conv.id}`
-        }
-        // Para outros países, manter código do país (não agrupar)
-        
+        let digits = (conv.phone || '').replace(/\D/g, '')
+        if (digits.startsWith('55') && digits.length === 12) digits = normalizePhoneBr(digits)
+        let phoneKey: string
+        if (digits.startsWith('55') && digits.length >= 13) phoneKey = `BR_${digits.substring(2)}`
+        else if (digits.length >= 10 && digits.length <= 11) {
+          if (digits.startsWith('0')) digits = digits.slice(1)
+          phoneKey = `BR_${digits}`
+        } else if (digits.length < 10) phoneKey = `id_${conv.id}`
+        else phoneKey = digits
+
         if (!phoneMap.has(phoneKey)) {
           phoneMap.set(phoneKey, conv)
         } else {
           const existing = phoneMap.get(phoneKey)!
-          const existingDate = existing.last_message_at 
-            ? new Date(existing.last_message_at).getTime() 
-            : (existing.created_at ? new Date(existing.created_at).getTime() : 0)
-          const currentDate = conv.last_message_at 
-            ? new Date(conv.last_message_at).getTime() 
-            : (conv.created_at ? new Date(conv.created_at).getTime() : 0)
-          
-          if (currentDate > existingDate) {
-            phoneMap.set(phoneKey, conv)
-          }
+          const existingDate = existing.last_message_at ? new Date(existing.last_message_at).getTime() : (existing.created_at ? new Date(existing.created_at).getTime() : 0)
+          const currentDate = conv.last_message_at ? new Date(conv.last_message_at).getTime() : (conv.created_at ? new Date(conv.created_at).getTime() : 0)
+          const existingHasName = hasName(existing)
+          const currentHasName = hasName(conv)
+          let winner: Conversation = currentDate > existingDate ? conv : existing
+          if (existingHasName && !currentHasName) winner = existing
+          else if (currentHasName && !existingHasName) winner = conv
+          else if (currentDate > existingDate) winner = conv
+          else winner = existing
+          const other = winner === conv ? existing : conv
+          winner = { ...winner, context: mergeContext(winner, other) } as Conversation
+          phoneMap.set(phoneKey, winner)
         }
       })
       
@@ -425,9 +451,28 @@ function WhatsAppChatContent() {
         const part2 = rest.substring(5)
         return `+${countryCode} ${part1}-${part2}`
       }
+
+      // BR com dígito extra na frente: 15581999999999 → tratar como 55 81 99999-9999
+      if (clean.startsWith('155') && clean.length === 14) {
+        const d = clean.slice(2)
+        if (d.length === 12) {
+          const ddd = d.substring(0, 2)
+          const part1 = d.substring(2, 7)
+          const part2 = d.substring(7)
+          return `+55 ${ddd} ${part1}-${part2}`
+        }
+      }
+      // 15 dígitos começando com 55: usar 55 + 11 dígitos (descartar extras)
+      if (clean.startsWith('55') && clean.length >= 13) {
+        const d = clean.slice(0, 13)
+        const ddd = d.substring(2, 4)
+        const part1 = d.substring(4, 9)
+        const part2 = d.substring(9)
+        return `+55 ${ddd} ${part1}-${part2}`
+      }
     }
     
-    // Se não conseguir formatar, retornar limpo
+    // Sempre numeração completa: quando não der para formatar, exibir o número inteiro
     return `+${clean}`
   }
 
@@ -467,20 +512,29 @@ function WhatsAppChatContent() {
   const unreadTotal = conversations.reduce((sum, conv) => sum + conv.unread_count, 0)
 
   const getDisplayName = (conv: Conversation) => {
+    const reject = (s: string) =>
+      !s || s.toLowerCase() === 'ylada nutri' || s.toLowerCase() === 'ylada' || /^[\d\s\-\+\(\)]{8,}$/.test(s.trim())
+    // 1) Nome do workshop (o que preencheu na inscrição)
+    const fromWorkshop = typeof conv.display_name === 'string' ? conv.display_name.trim() : ''
+    if (fromWorkshop && !reject(fromWorkshop)) return fromWorkshop
+    // 2) Nome que aparece no próprio WhatsApp (perfil do contato)
+    if (conv.name && conv.name.trim() && !reject(conv.name)) return conv.name.trim()
+    // 3) customer_name e context.display_name
+    const cust = typeof conv.customer_name === 'string' ? conv.customer_name.trim() : ''
+    if (cust && !reject(cust)) return cust
     const ctx = (conv.context || {}) as any
     const override = typeof ctx.display_name === 'string' ? ctx.display_name.trim() : ''
-    
-    // Se tem override e não é "Ylada Nutri" (nome padrão), usar
-    if (override && override.toLowerCase() !== 'ylada nutri' && override.toLowerCase() !== 'ylada') {
-      return override
+    if (override && !reject(override)) return override
+    // Sem nome: usar telefone do cadastro (display_phone) quando existir, para não exibir número grande
+    if (typeof conv.display_phone === 'string' && conv.display_phone.trim()) return conv.display_phone.trim()
+    return formatPhone(conv.phone)
+  }
+
+  /** Telefone para exibição: prioriza o enriquecido (inscrições), senão formata conv.phone */
+  const getDisplayPhone = (conv: Conversation) => {
+    if (typeof conv.display_phone === 'string' && conv.display_phone.trim()) {
+      return conv.display_phone.trim()
     }
-    
-    // Se tem nome real e não é "Ylada Nutri", usar
-    if (conv.name && conv.name.trim() && conv.name.toLowerCase() !== 'ylada nutri' && conv.name.toLowerCase() !== 'ylada') {
-      return conv.name.trim()
-    }
-    
-    // Senão, usar telefone formatado (como WhatsApp Web faz)
     return formatPhone(conv.phone)
   }
 
@@ -593,7 +647,7 @@ function WhatsAppChatContent() {
       if (!searchTerm.trim()) return true
       const q = searchTerm.trim().toLowerCase()
       const name = getDisplayName(conv).toLowerCase()
-      const phone = formatPhone(conv.phone).toLowerCase()
+      const phone = getDisplayPhone(conv).toLowerCase()
       const preview = (conv.last_message_preview || '').toLowerCase()
       return name.includes(q) || phone.includes(q) || preview.includes(q)
     })
@@ -752,6 +806,7 @@ function WhatsAppChatContent() {
           ) : (
             visibleConversations.map((conv) => {
               const displayName = getDisplayName(conv)
+              const displayPhone = getDisplayPhone(conv)
               const avatarUrl = getAvatarUrl(conv)
               const preview = conv.last_message_preview || ''
               const timeSource = conv.last_message_created_at || conv.last_message_at
@@ -788,10 +843,8 @@ function WhatsAppChatContent() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-2">
                       <div className="min-w-0 flex items-center gap-2">
-                        <h3 className="font-semibold text-gray-900 truncate">
-                          {conv.name && conv.name.trim() && conv.name.toLowerCase() !== 'ylada nutri' 
-                            ? conv.name 
-                            : formatPhone(conv.phone)}
+                        <h3 className="font-semibold text-gray-900 truncate" title={displayName}>
+                          {displayName}
                         </h3>
                         {pinned && <span className="text-xs text-gray-400">📌</span>}
                         {fav && <span className="text-xs text-yellow-500">★</span>}
@@ -800,18 +853,12 @@ function WhatsAppChatContent() {
                         {timeSource ? formatTime(timeSource) : ''}
                       </div>
                     </div>
-                    {/* Mostrar preview ou telefone formatado */}
+                    {/* Telefone sempre visível na 2ª linha para localizar; preview depois quando couber */}
                     <div className="flex items-center justify-between gap-2 mt-0.5">
                       <div className="min-w-0 flex-1">
-                        {preview ? (
-                          <p className="text-sm text-gray-600 truncate">{preview}</p>
-                        ) : (
-                          <p className="text-sm text-gray-500 truncate">
-                            {conv.name && conv.name.trim() && conv.name.toLowerCase() !== 'ylada nutri'
-                              ? formatPhone(conv.phone)
-                              : 'Sem mensagens'}
-                          </p>
-                        )}
+                        <p className="text-sm text-gray-500 truncate" title={displayPhone}>
+                          {displayPhone}{preview ? ` · ${preview}` : ''}
+                        </p>
                       </div>
                       {conv.unread_count > 0 && (
                         <span className="bg-green-500 text-white text-xs rounded-full px-2 py-0.5 shrink-0">
@@ -955,7 +1002,9 @@ function WhatsAppChatContent() {
                       <h2 className="font-semibold text-gray-900 truncate">
                         {getDisplayName(selectedConversation)}
                       </h2>
-                      <p className="text-sm text-gray-500 truncate">{formatPhone(selectedConversation.phone)}</p>
+                      <p className="text-sm text-gray-500 truncate" title={getDisplayPhone(selectedConversation)}>
+                        {getDisplayPhone(selectedConversation)}
+                      </p>
                       <div className="mt-1 flex items-center gap-2 flex-wrap">
                         {/* Tags */}
                         {getTags(selectedConversation).map((tag) => {
@@ -1191,9 +1240,11 @@ function WhatsAppChatContent() {
                               const next = prompt('Nome do contato (aparece na lista):', getDisplayName(selectedConversation))
                               setContactMenuOpen(false)
                               if (next === null) return
-                              patchConversation(selectedConversation.id, { context: { display_name: next } }).catch((err) =>
-                                alert(err.message)
-                              )
+                              const nome = (next || '').trim()
+                              patchConversation(selectedConversation.id, {
+                                name: nome || undefined,
+                                context: { display_name: nome || undefined },
+                              }).catch((err) => alert(err.message))
                             }}
                             className="w-full text-left px-4 py-2 text-sm hover:bg-gray-50"
                           >
@@ -1610,6 +1661,108 @@ function WhatsAppChatContent() {
                     className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                     disabled={sending || uploading}
                   />
+                  {/* Menu "O que a Carol faça?" — ações pré-montadas (só quando Carol ativa) */}
+                  {selectedConversation && getTags(selectedConversation).includes('carol_ativa') && (
+                    <div ref={carolActionsRef} className="relative flex-shrink-0">
+                      <button
+                        type="button"
+                        onClick={() => setCarolActionsOpen((o) => !o)}
+                        disabled={sending || uploading}
+                        className="flex items-center gap-1 px-3 py-2 rounded-lg bg-purple-100 text-purple-800 hover:bg-purple-200 disabled:opacity-50 text-sm font-medium"
+                        title="Clique e escolha o que a Carol deve fazer (textos pré-montados)"
+                      >
+                        O que a Carol faça? <span className="text-xs">▼</span>
+                      </button>
+                      {carolActionsOpen && (
+                        <div className="absolute bottom-full left-0 mb-1 w-72 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden z-30">
+                          <div className="p-2 border-b border-gray-100 bg-gray-50 text-xs text-gray-600 font-medium">
+                            Texto fixo = menu. IA = só “responder à última mensagem”.
+                          </div>
+                          {[
+                            { id: 'pergunta_nao_respondeu', label: '💬 Perguntar interesse (não respondeu)', templateId: 'pergunta_interesse_nao_respondeu' as const },
+                            { id: 'pergunta_nao_participou', label: '💬 Perguntar interesse (não participou)', templateId: 'pergunta_interesse_nao_participou' as const },
+                            { id: 'ficou_pensar', label: '💭 Participou e ficou de pensar', templateId: 'followup_ficou_pensar' as const },
+                            { id: 'ultima_chance', label: '⏱️ Última chance (limite respeitoso)', templateId: 'ultima_chance' as const },
+                            { id: 'chama', label: '📞 Follow-up (chama ela / ficou de ver data)', simulateMsg: 'chama ela' as const },
+                            { id: 'lembrete', label: '📅 Lembrete da aula de hoje', simulateMsg: 'Envie lembrete da aula de hoje' as const },
+                            { id: 'reprocess', label: '🤖 Carol: responder à última mensagem (IA)', isReprocess: true as const },
+                          ].map((item) => (
+                            <button
+                              key={item.id}
+                              type="button"
+                              disabled={sending}
+                              onClick={async () => {
+                                setCarolActionsOpen(false)
+                                if (!selectedConversation) return
+                                try {
+                                  setSending(true)
+                                  if ('isReprocess' in item && item.isReprocess) {
+                                    const res = await fetch('/api/admin/whatsapp/carol/reprocess-last', {
+                                      method: 'POST',
+                                      headers: { 'Content-Type': 'application/json' },
+                                      credentials: 'include',
+                                      body: JSON.stringify({ conversationId: selectedConversation.id }),
+                                    })
+                                    const data = await res.json()
+                                    if (data.success) {
+                                      await loadMessages(selectedConversation.id)
+                                      await loadConversations()
+                                      alert('✅ Carol respondeu à última mensagem do cliente.')
+                                    } else {
+                                      alert(data.error || 'Erro ao reprocessar com Carol')
+                                    }
+                                  } else if ('templateId' in item && item.templateId) {
+                                    const res = await fetch('/api/admin/whatsapp/carol/send-template', {
+                                      method: 'POST',
+                                      headers: { 'Content-Type': 'application/json' },
+                                      credentials: 'include',
+                                      body: JSON.stringify({
+                                        conversationId: selectedConversation.id,
+                                        templateId: item.templateId,
+                                      }),
+                                    })
+                                    const data = await res.json()
+                                    if (data.success) {
+                                      await loadMessages(selectedConversation.id)
+                                      await loadConversations()
+                                      alert('✅ Mensagem enviada (texto fixo).')
+                                    } else {
+                                      alert(data.error || 'Erro ao enviar')
+                                    }
+                                  } else if ('simulateMsg' in item && item.simulateMsg) {
+                                    const res = await fetch('/api/admin/whatsapp/carol/simulate-message', {
+                                      method: 'POST',
+                                      headers: { 'Content-Type': 'application/json' },
+                                      credentials: 'include',
+                                      body: JSON.stringify({
+                                        conversationId: selectedConversation.id,
+                                        message: item.simulateMsg,
+                                      }),
+                                    })
+                                    const data = await res.json()
+                                    if (data.success) {
+                                      await loadMessages(selectedConversation.id)
+                                      await loadConversations()
+                                      alert(data.response || '✅ Ação enviada.')
+                                    } else {
+                                      alert(data.error || 'Erro ao enviar')
+                                    }
+                                  }
+                                } catch (err: any) {
+                                  alert(err?.message || 'Erro ao enviar')
+                                } finally {
+                                  setSending(false)
+                                }
+                              }}
+                              className="w-full text-left px-3 py-2 text-sm hover:bg-purple-50 text-gray-800"
+                            >
+                              {item.label}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
                   {/* Botão para disparar remarketing diretamente */}
                   {selectedConversation && getTags(selectedConversation).includes('nao_participou_aula') && (
                     <button

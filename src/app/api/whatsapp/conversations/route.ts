@@ -1,12 +1,15 @@
 /**
  * API para gerenciar conversas WhatsApp
  * GET /api/whatsapp/conversations - Lista conversas
+ * Enriquece nome e telefone a partir de workshop_inscricoes e contact_submissions.
  */
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
+import { buildInscricoesMaps, findInscricao } from '@/lib/whatsapp-conversation-enrichment'
+import { normalizePhoneBr } from '@/lib/phone-br'
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -126,55 +129,55 @@ export async function GET(request: NextRequest) {
     const duplicatesFound: string[] = []
     
     conversationList.forEach((conv: any) => {
-      // Normalizar telefone: remover tudo que não é número, mas manter código do país
-      let phoneKey = (conv.phone || '').replace(/\D/g, '')
-      
-      // Para números brasileiros: agrupar variantes com/sem código 55
-      // Ex: "5519997230912" e "19997230912" são o mesmo número
-      // Mas preservar códigos de outros países (1, 52, 54, etc)
-      if (phoneKey.startsWith('55') && phoneKey.length >= 13) {
-        // Número brasileiro com código do país
-        // Criar chave normalizada: remover 55 mas marcar como BR
-        const withoutCountry = phoneKey.substring(2)
-        // Também criar chave alternativa sem código para agrupar
-        phoneKey = `BR_${withoutCountry}`
-      } else if (phoneKey.length >= 10 && phoneKey.length <= 11) {
-        // Número brasileiro sem código do país (começa com DDD)
-        // Remover zero inicial se houver
-        if (phoneKey.startsWith('0')) {
-          phoneKey = phoneKey.substring(1)
-        }
-        phoneKey = `BR_${phoneKey}`
-      } else if (phoneKey.length < 10) {
-        // Telefone inválido - tentar agrupar por nome se disponível
-        const nameKey = (conv.name || '').toLowerCase().trim()
-        if (nameKey && nameKey.length > 3) {
-          phoneKey = `name_${nameKey}`
-        } else {
-          phoneKey = `id_${conv.id}`
-        }
+      // Normalizar telefone: BR 12 dígitos vira 13 (55+DDD+9+8) para agrupar com a mesma pessoa
+      let digits = (conv.phone || '').replace(/\D/g, '')
+      if (digits.startsWith('55') && digits.length === 12) {
+        digits = normalizePhoneBr(digits)
       }
-      // Para outros países, manter código do país (não agrupar)
-      
+      let phoneKey: string
+      if (digits.startsWith('55') && digits.length >= 13) {
+        phoneKey = `BR_${digits.substring(2)}`
+      } else if (digits.length >= 10 && digits.length <= 11) {
+        if (digits.startsWith('0')) digits = digits.slice(1)
+        phoneKey = `BR_${digits}`
+      } else if (digits.length < 10) {
+        const nameKey = (conv.name || '').toLowerCase().trim()
+        phoneKey = nameKey && nameKey.length > 3 ? `name_${nameKey}` : `id_${conv.id}`
+      } else {
+        phoneKey = digits
+      }
+
+      const hasName = (c: any) => {
+        const n = (c.name || '').trim()
+        const d = (c.context?.display_name || '').trim()
+        const cust = (c.customer_name || '').trim()
+        const reject = (s: string) => !s || /^[\d\s\-\+\(\)]{8,}$/.test(s)
+        return (n && !reject(n)) || (d && !reject(d)) || (cust && !reject(cust))
+      }
+      const mergeContext = (winner: any, other: any) => {
+        const w = winner.context && typeof winner.context === 'object' ? winner.context : {}
+        const o = other.context && typeof other.context === 'object' ? other.context : {}
+        return { ...w, ...o }
+      }
+
       if (!phoneMap.has(phoneKey)) {
         phoneMap.set(phoneKey, conv)
       } else {
-        // Duplicata encontrada
         duplicatesFound.push(phoneKey)
-        
-        // Se já existe, manter a que tem última mensagem mais recente
         const existing = phoneMap.get(phoneKey)
-        const existingDate = existing.last_message_at 
-          ? new Date(existing.last_message_at).getTime() 
-          : (existing.created_at ? new Date(existing.created_at).getTime() : 0)
-        const currentDate = conv.last_message_at 
-          ? new Date(conv.last_message_at).getTime() 
-          : (conv.created_at ? new Date(conv.created_at).getTime() : 0)
-        
-        // Manter a mais recente
-        if (currentDate > existingDate) {
-          phoneMap.set(phoneKey, conv)
-        }
+        const existingDate = existing.last_message_at ? new Date(existing.last_message_at).getTime() : (existing.created_at ? new Date(existing.created_at).getTime() : 0)
+        const currentDate = conv.last_message_at ? new Date(conv.last_message_at).getTime() : (conv.created_at ? new Date(conv.created_at).getTime() : 0)
+        // Preferir a que tem nome (evitar mostrar número quando usuário já cadastrou nome)
+        const existingHasName = hasName(existing)
+        const currentHasName = hasName(conv)
+        let winner = currentDate > existingDate ? conv : existing
+        if (existingHasName && !currentHasName) winner = existing
+        else if (currentHasName && !existingHasName) winner = conv
+        else if (currentDate > existingDate) winner = conv
+        else winner = existing
+        const other = winner === conv ? existing : conv
+        winner = { ...winner, context: mergeContext(winner, other) }
+        phoneMap.set(phoneKey, winner)
       }
     })
     
@@ -261,6 +264,17 @@ export async function GET(request: NextRequest) {
         }
       })
     }
+
+    // Enriquecer com nome e telefone de workshop_inscricoes e contact_submissions (estilo WhatsApp Web)
+    const maps = await buildInscricoesMaps()
+    conversationsWithPreview = conversationsWithPreview.map((conv: any) => {
+      const fromInscricao = findInscricao(conv.phone, conv.context || {}, maps)
+      return {
+        ...conv,
+        display_name: fromInscricao?.nome ?? null,
+        display_phone: fromInscricao?.telefone ?? null,
+      }
+    })
 
     return NextResponse.json({
       conversations: conversationsWithPreview,
