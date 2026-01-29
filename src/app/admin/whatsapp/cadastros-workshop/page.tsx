@@ -199,6 +199,34 @@ function CadastrosWorkshopContent() {
     }
   }
 
+  const handleMarkSentAllFiltered = async () => {
+    if (filteredRegistrations.length === 0) {
+      alert('Nenhum cadastro para marcar')
+      return
+    }
+    const ids = filteredRegistrations.map((r) => r.id)
+    if (!confirm(`Marcar como "já enviei" para ${ids.length} cadastro(s) exibido(s)? Isso NÃO envia WhatsApp.`)) {
+      return
+    }
+    setProcessing(true)
+    try {
+      const res = await fetch('/api/admin/whatsapp/cadastros-workshop/marcar-enviado', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ registrationIds: ids }),
+      })
+      const data = await res.json()
+      if (!data.success) throw new Error(data.error || 'Erro ao marcar')
+      await loadRegistrations()
+      setSelectedIds(new Set())
+    } catch (e: any) {
+      alert(e.message || 'Erro ao marcar')
+    } finally {
+      setProcessing(false)
+    }
+  }
+
   const handleMarkSentOne = async (id: string) => {
     setProcessing(true)
     try {
@@ -309,10 +337,10 @@ function CadastrosWorkshopContent() {
   const pendingCount = registrations.filter(r => r.needs_manual_whatsapp).length
 
   return (
-    <div className="h-[100dvh] bg-gray-50 flex flex-col overflow-hidden">
+    <div className="h-[100dvh] bg-white flex flex-col overflow-hidden">
       {/* Header (fixo) */}
       <div className="bg-white border-b border-gray-200 flex-shrink-0">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+        <div className="w-full max-w-[1400px] mx-auto px-4 sm:px-6 py-3">
           <div className="flex items-center justify-between">
             <div className="min-w-0">
               <h1 className="text-xl font-bold text-gray-900 truncate">📋 Cadastros do Workshop</h1>
@@ -332,57 +360,58 @@ function CadastrosWorkshopContent() {
 
       {/* Conteúdo (sem scroll da página; só a tabela rola) */}
       <div className="flex-1 min-h-0 overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 h-full flex flex-col gap-4 min-h-0">
+        <div className="w-full max-w-[1400px] mx-auto px-4 sm:px-6 py-3 h-full flex flex-col gap-3 min-h-0">
         {pendingCount > 0 && (
-          <div className="mb-6 bg-amber-50 border border-amber-200 rounded-lg p-4">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div>
-                <p className="font-semibold text-amber-900">⚠️ Pendentes de disparo manual</p>
-                <p className="text-sm text-amber-800">
-                  {pendingCount} cadastro(s) ainda não receberam a 1ª mensagem do WhatsApp.
-                </p>
-              </div>
+          <div className="bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 flex items-center justify-between gap-3 flex-shrink-0">
+            <div className="text-sm text-amber-900">
+              <span className="font-semibold">⚠️ Pendentes:</span> {pendingCount} pessoa(s) ainda aparecem como “Pendente (1ª msg)”.
+            </div>
+            <div className="flex items-center gap-2">
               <button
                 type="button"
                 onClick={() => setFilter('pending_welcome')}
-                className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700"
+                className="px-3 py-1.5 bg-amber-600 text-white rounded-lg hover:bg-amber-700 text-sm font-semibold"
               >
-                Ver pendentes
+                Ver
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  if (filter !== 'pending_welcome') setFilter('pending_welcome')
+                  setTimeout(() => handleMarkSentAllFiltered(), 0)
+                }}
+                disabled={processing}
+                className="px-3 py-1.5 bg-slate-700 text-white rounded-lg hover:bg-slate-800 disabled:opacity-50 text-sm font-semibold"
+                title="Marca como já enviado e etiqueta (não dispara WhatsApp)"
+              >
+                ✅ Marcar todos como já enviados
               </button>
             </div>
           </div>
         )}
 
-        {/* Estatísticas */}
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-3 flex-shrink-0">
-          <div className="bg-white rounded-lg shadow p-4">
-            <div className="text-sm text-gray-600">Total de Cadastros</div>
-            <div className="text-2xl font-bold text-gray-900">{registrations.length}</div>
-          </div>
-          <div className="bg-white rounded-lg shadow p-4 border-2 border-amber-300">
-            <div className="text-sm text-gray-600 font-semibold">⚠️ Pendentes (1ª msg)</div>
-            <div className="text-2xl font-bold text-amber-700">{pendingCount}</div>
-            <div className="text-xs text-gray-500 mt-1">Ainda não receberam a 1ª mensagem</div>
-          </div>
-          <div className="bg-white rounded-lg shadow p-4 border-2 border-orange-300">
-            <div className="text-sm text-gray-600 font-semibold">⚠️ Sem Conversa no WhatsApp</div>
-            <div className="text-2xl font-bold text-orange-600">
-              {registrations.filter(r => !r.has_conversation).length}
-            </div>
-            <div className="text-xs text-gray-500 mt-1">
-              Cadastrou mas não iniciou conversa
-            </div>
-          </div>
-          <div className="bg-white rounded-lg shadow p-4">
-            <div className="text-sm text-gray-600">Sem Tags</div>
-            <div className="text-2xl font-bold text-yellow-600">
-              {registrations.filter(r => !r.conversation_tags || r.conversation_tags.length === 0).length}
-            </div>
-          </div>
-          <div className="bg-white rounded-lg shadow p-4">
-            <div className="text-sm text-gray-600">Selecionados</div>
-            <div className="text-2xl font-bold text-blue-600">{selectedIds.size}</div>
-          </div>
+        {/* Resumo compacto */}
+        <div className="flex flex-wrap gap-2 items-center flex-shrink-0">
+          <span className="px-2.5 py-1 rounded-full bg-gray-100 text-gray-800 text-sm font-semibold">
+            Total: {registrations.length}
+          </span>
+          <button
+            type="button"
+            onClick={() => setFilter('pending_welcome')}
+            className="px-2.5 py-1 rounded-full bg-amber-100 text-amber-900 text-sm font-semibold hover:bg-amber-200"
+            title="Filtrar pendentes"
+          >
+            ⚠️ Pendentes (1ª msg): {pendingCount}
+          </button>
+          <span className="px-2.5 py-1 rounded-full bg-orange-100 text-orange-900 text-sm font-semibold">
+            ⚠️ Sem conversa: {registrations.filter(r => !r.has_conversation).length}
+          </span>
+          <span className="px-2.5 py-1 rounded-full bg-yellow-100 text-yellow-900 text-sm font-semibold">
+            Sem tags: {registrations.filter(r => !r.conversation_tags || r.conversation_tags.length === 0).length}
+          </span>
+          <span className="px-2.5 py-1 rounded-full bg-blue-100 text-blue-900 text-sm font-semibold">
+            Selecionados: {selectedIds.size}
+          </span>
         </div>
 
         {/* Filtros e Ações */}
@@ -410,6 +439,18 @@ function CadastrosWorkshopContent() {
               <option value="no_conversation">⚠️ Sem conversa (não iniciou WhatsApp)</option>
               <option value="no_tags">Sem tags</option>
             </select>
+
+            {filter === 'pending_welcome' && filteredRegistrations.length > 0 && (
+              <button
+                type="button"
+                onClick={handleMarkSentAllFiltered}
+                disabled={processing}
+                className="px-4 py-2 bg-slate-700 text-white rounded-lg hover:bg-slate-800 disabled:opacity-50 font-semibold"
+                title="Marca como já enviado e etiqueta (não dispara WhatsApp)"
+              >
+                ✅ Marcar {filteredRegistrations.length} como já enviei
+              </button>
+            )}
 
             {/* Ações */}
             <button
@@ -577,16 +618,16 @@ function CadastrosWorkshopContent() {
         </div>
 
         {/* Info */}
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 flex-shrink-0">
-          <h3 className="font-semibold text-blue-900 mb-2">ℹ️ Como usar:</h3>
-          <ul className="text-sm text-blue-800 space-y-1 list-disc list-inside">
-            <li><strong>Selecionar:</strong> Marque os cadastros que deseja processar</li>
-            <li><strong>Adicionar Tags:</strong> Adicione tags manualmente antes de processar</li>
-            <li><strong>Disparar 1ª mensagem:</strong> Envia a primeira mensagem (boas-vindas + opções) e marca como enviado</li>
-            <li><strong>✅ Já enviei:</strong> Apenas marca como enviado (não dispara WhatsApp) — útil se você já mandou manualmente antes</li>
-            <li><strong>Filtros:</strong> Use os filtros para encontrar cadastros específicos</li>
+        <details className="bg-blue-50 border border-blue-200 rounded-lg p-3 flex-shrink-0">
+          <summary className="cursor-pointer font-semibold text-blue-900 text-sm">
+            ℹ️ Como usar (clique para expandir)
+          </summary>
+          <ul className="mt-2 text-sm text-blue-800 space-y-1 list-disc list-inside">
+            <li><strong>Disparar 1ª mensagem:</strong> envia a primeira mensagem (boas-vindas + opções)</li>
+            <li><strong>✅ Já enviei:</strong> só etiqueta/marca como enviado (não dispara WhatsApp)</li>
+            <li><strong>Filtros:</strong> use “Pendentes (1ª msg)” para limpar rapidamente</li>
           </ul>
-        </div>
+        </details>
         </div>
       </div>
 
