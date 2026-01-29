@@ -1421,155 +1421,8 @@ export async function processIncomingMessageWithCarol(
           }
         }
         
-        // 🆕 Detectar preferência por período do dia (noite, tarde, manhã) e sugerir sessão apropriada
-        if (!selectedSession) {
-          const messageLower = message.toLowerCase()
-          const prefersNight = messageLower.includes('noite') || 
-                              messageLower.includes('noturno') || 
-                              messageLower.includes('à noite') ||
-                              messageLower.includes('a noite') ||
-                              messageLower.includes('noitinha')
-          const prefersAfternoon = messageLower.includes('tarde') || 
-                                  messageLower.includes('à tarde') ||
-                                  messageLower.includes('a tarde')
-          const prefersMorning = messageLower.includes('manhã') || 
-                                messageLower.includes('manha') ||
-                                messageLower.includes('de manhã') ||
-                                messageLower.includes('de manha')
-          
-          if (prefersNight || prefersAfternoon || prefersMorning) {
-            // Buscar sessões que correspondam ao período preferido
-            for (const sessionItem of workshopSessions) {
-              const { weekday, date, time } = formatSessionDateTime(sessionItem.starts_at)
-              const sessionHour = parseInt(time.split(':')[0])
-              
-              // Noite: 18h-23h
-              if (prefersNight && sessionHour >= 18 && sessionHour <= 23) {
-                console.log('[Carol AI] ✅ Sessão noturna detectada por preferência:', {
-                  sessionId: sessionItem.id,
-                  weekday,
-                  time,
-                  hour: sessionHour,
-                  message: messageLower
-                })
-                selectedSession = {
-                  id: sessionItem.id,
-                  title: sessionItem.title,
-                  starts_at: sessionItem.starts_at,
-                  zoom_link: sessionItem.zoom_link
-                }
-                break
-              }
-              
-              // Tarde: 12h-17h
-              if (prefersAfternoon && sessionHour >= 12 && sessionHour < 18) {
-                console.log('[Carol AI] ✅ Sessão da tarde detectada por preferência:', {
-                  sessionId: sessionItem.id,
-                  weekday,
-                  time,
-                  hour: sessionHour,
-                  message: messageLower
-                })
-                selectedSession = {
-                  id: sessionItem.id,
-                  title: sessionItem.title,
-                  starts_at: sessionItem.starts_at,
-                  zoom_link: sessionItem.zoom_link
-                }
-                break
-              }
-              
-              // Manhã: 6h-11h
-              if (prefersMorning && sessionHour >= 6 && sessionHour < 12) {
-                console.log('[Carol AI] ✅ Sessão da manhã detectada por preferência:', {
-                  sessionId: sessionItem.id,
-                  weekday,
-                  time,
-                  hour: sessionHour,
-                  message: messageLower
-                })
-                selectedSession = {
-                  id: sessionItem.id,
-                  title: sessionItem.title,
-                  starts_at: sessionItem.starts_at,
-                  zoom_link: sessionItem.zoom_link
-                }
-                break
-              }
-            }
-            
-            // Se não encontrou nas opções já mostradas, buscar TODAS as sessões futuras para encontrar a melhor correspondência
-            if (!selectedSession) {
-              const now = new Date()
-              const minDate = new Date(now.getTime() + 5 * 60 * 1000)
-              
-              const { data: allSessions } = await supabaseAdmin
-                .from('whatsapp_workshop_sessions')
-                .select('id, title, starts_at, zoom_link')
-                .eq('area', area)
-                .eq('is_active', true)
-                .gte('starts_at', minDate.toISOString())
-                .order('starts_at', { ascending: true })
-                .limit(10) // Buscar mais sessões para encontrar correspondência
-              
-              if (allSessions && allSessions.length > 0) {
-                for (const sessionItem of allSessions) {
-                  const { weekday, date, time } = formatSessionDateTime(sessionItem.starts_at)
-                  const sessionHour = parseInt(time.split(':')[0])
-                  
-                  // Noite: 18h-23h (prioridade para 20h se existir)
-                  if (prefersNight && sessionHour >= 18 && sessionHour <= 23) {
-                    // Priorizar 20h se existir
-                    if (sessionHour === 20) {
-                      console.log('[Carol AI] ✅ Sessão noturna (20h) encontrada:', {
-                        sessionId: sessionItem.id,
-                        weekday,
-                        time
-                      })
-                      selectedSession = {
-                        id: sessionItem.id,
-                        title: sessionItem.title,
-                        starts_at: sessionItem.starts_at,
-                        zoom_link: sessionItem.zoom_link
-                      }
-                      break
-                    } else if (!selectedSession) {
-                      // Se não encontrou 20h ainda, guardar esta como opção
-                      selectedSession = {
-                        id: sessionItem.id,
-                        title: sessionItem.title,
-                        starts_at: sessionItem.starts_at,
-                        zoom_link: sessionItem.zoom_link
-                      }
-                    }
-                  }
-                  
-                  // Tarde: 12h-17h
-                  if (prefersAfternoon && sessionHour >= 12 && sessionHour < 18 && !selectedSession) {
-                    selectedSession = {
-                      id: sessionItem.id,
-                      title: sessionItem.title,
-                      starts_at: sessionItem.starts_at,
-                      zoom_link: sessionItem.zoom_link
-                    }
-                    break
-                  }
-                  
-                  // Manhã: 6h-11h
-                  if (prefersMorning && sessionHour >= 6 && sessionHour < 12 && !selectedSession) {
-                    selectedSession = {
-                      id: sessionItem.id,
-                      title: sessionItem.title,
-                      starts_at: sessionItem.starts_at,
-                      zoom_link: sessionItem.zoom_link
-                    }
-                    break
-                  }
-                }
-              }
-            }
-          }
-        }
+        // Nota: preferência por período (manhã/tarde/noite) NÃO deve auto-selecionar sessão nem enviar link.
+        // Isso é tratado na resposta da Carol (enviar opções e pedir "1 ou 2"), para evitar enviar link cedo demais.
       }
     }
 
@@ -1961,6 +1814,14 @@ Nos vemos em breve! 😊
       // Exceção: remarketing "não participou" — pessoa respondeu que TEM INTERESSE ("Sim", "Quero") → enviar opções de aula, NÃO "Qualquer dúvida..."
       const isRemarketingNaoParticipou = tags.includes('nao_participou_aula') || tags.includes('remarketing_enviado')
       const isPositiveInterestReply = /^(sim|quero|tenho\s+interesse|tenho\s+sim|gostaria|quero\s+sim|com\s+certeza|pode\s+ser|pode\s+encaixar|claro|por\s+favor|tem\s+interesse)$/i.test(msgNorm.trim())
+      const msgLower = msgNorm.toLowerCase()
+      const prefersNight =
+        msgLower.includes('noite') || msgLower.includes('noturno') || msgLower.includes('noitinha') || msgLower.includes('a noite') || msgLower.includes('à noite')
+      const prefersAfternoon = msgLower.includes('tarde') || msgLower.includes('a tarde') || msgLower.includes('à tarde')
+      const prefersMorning =
+        msgLower.includes('manhã') || msgLower.includes('manha') || msgLower.includes('de manhã') || msgLower.includes('de manha')
+      const isPeriodReply = prefersNight || prefersAfternoon || prefersMorning
+
       if (isRemarketingNaoParticipou && isPositiveInterestReply && workshopSessions.length > 0) {
         carolInstruction = `A pessoa acabou de responder que TEM INTERESSE ao remarketing ("Você ainda tem interesse em participar?"). Ela disse algo como "Tenho sim".
 
@@ -1975,6 +1836,14 @@ As próximas aulas acontecerão nos seguintes dias e horários:
 [Inclua Opção 1 e Opção 2 com dia e hora, UMA VEZ cada]
 
 Responde 1 ou 2 😊`
+      } else if (isRemarketingNaoParticipou && isPeriodReply && workshopSessions.length > 0) {
+        carolInstruction = `A pessoa respondeu com um período do dia (ex.: "tarde", "manhã" ou "noite") ao remarketing.
+
+Você DEVE responder de forma curta e objetiva, SEM saudação e SEM boas-vindas. PROIBIDO escrever "Oi", "tudo bem", "Seja bem-vinda" ou "Eu sou a Carol". NÃO faça explicação longa.
+
+Você deve listar as opções disponíveis. Se houver opção que combine com o período (ex.: tarde = 12h–17h, manhã = 6h–11h, noite = 18h–23h), coloque essa como Opção 1. Se não, mostre as opções normalmente.
+
+Finalize com: "Responde 1 ou 2 😊".`
       } else {
         carolInstruction = 'A pessoa só confirmou/entendeu (ex.: "Entendi", "Ok", "Certo"). NÃO repita opções nem boas-vindas; responda em UMA frase curta e amigável, tipo "Qualquer dúvida, é só me chamar! 😊" ou "Fico no aguardo da sua escolha! 💚".'
       }
