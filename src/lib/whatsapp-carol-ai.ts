@@ -1773,11 +1773,17 @@ Nos vemos em breve! 😊
       isFirstMessage
     })
 
-    // 🆕 Priorizar nome do cadastro; NUNCA usar "Ylada"/"Ylada Nutri" como nome da pessoa (payload às vezes traz nome do negócio)
+    // 🆕 Priorizar nome do cadastro; evitar usar nomes do WhatsApp quando não confiáveis
     const conv = conversation as { name?: string | null; customer_name?: string | null }
     let rawName = registrationName || (context as any)?.lead_name || conversation.name || conv?.customer_name || ''
     if (isBusinessName(rawName)) {
       rawName = registrationName || (context as any)?.lead_name || ''
+    }
+    // Caso comum: pessoa clica no botão do WhatsApp com texto "Acabei de me inscrever..."
+    // Se NÃO conseguimos match do cadastro (telefone diferente / preenchido errado), não use o nome do WhatsApp
+    // (pode ser nome de marca, clínica, etc). Melhor: saudação neutra.
+    if (isMessageFromButton && !registrationName && !(context as any)?.lead_name) {
+      rawName = ''
     }
     let leadName = getFirstName(rawName) || 'querido(a)'
     if (isBusinessName(leadName)) {
@@ -1833,8 +1839,8 @@ Nos vemos em breve! 😊
         .single()
       if (instanceEarly?.token) {
         const greetingOnly = leadName && leadName !== 'querido(a)'
-          ? `Oi ${leadName}, tudo bem? 😊\n\nSeja muito bem-vinda!\n\nEu sou a Carol, da equipe Ylada Nutri.`
-          : `Oi, tudo bem? 😊\n\nSeja muito bem-vinda!\n\nEu sou a Carol, da equipe Ylada Nutri.`
+          ? `Oi ${leadName}! 😊\n\nSeja muito bem-vinda!\n\nEu sou a Carol, da equipe Ylada Nutri.`
+          : `Oi! 😊\n\nSeja muito bem-vinda!\n\nEu sou a Carol, da equipe Ylada Nutri.`
         const sendGreeting = await sendWhatsAppMessage(
           phone,
           greetingOnly,
@@ -1853,7 +1859,15 @@ Nos vemos em breve! 😊
             status: 'sent',
             is_bot_response: true,
           })
-          carolInstruction = `PROIBIDO repetir a saudação. Sua mensagem NÃO pode conter "Oi" / "tudo bem?" / "Seja muito bem-vinda!" / "Eu sou a Carol" — isso já foi enviado na mensagem anterior. Comece DIRETAMENTE com "Obrigada por se inscrever na Aula Prática ao Vivo – Agenda Cheia para Nutricionistas." e o parágrafo sobre a aula, depois "As próximas aulas ao vivo vão acontecer nos seguintes dias e horários:", depois as duas opções (formato do contexto, UMA VEZ cada), depois "Qual desses horários funciona melhor pra você? 😊". Se você escrever Oi ou Seja bem-vinda ou Eu sou a Carol, apague isso — a primeira frase da sua resposta deve ser "Obrigada por se inscrever...".`
+          carolInstruction = `PROIBIDO repetir a saudação. Sua mensagem NÃO pode conter "Oi" / "tudo bem?" / "Seja muito bem-vinda!" / "Eu sou a Carol" — isso já foi enviado na mensagem anterior.
+
+Comece DIRETAMENTE com:
+1) "A próxima aula é prática e vai te ajudar a ter mais constância pra preencher sua agenda."
+2) Depois: "As próximas aulas acontecerão nos seguintes dias e horários:"
+3) Depois: as opções (formato do contexto, UMA VEZ cada)
+4) Finalize com: "Responde 1 ou 2 😊"
+
+Se você escrever Oi/boas-vindas/Eu sou a Carol, apague — sua primeira frase deve ser "A próxima aula é prática...".`
         }
       }
     }
@@ -1874,7 +1888,7 @@ Nos vemos em breve! 😊
 
     // Se enviamos saudação em mensagem separada, remover qualquer repetição de saudação na segunda parte
     if (isFirstMessage && carolInstruction?.includes('PROIBIDO repetir a saudação')) {
-      const startMarker = 'Obrigada por se inscrever'
+      const startMarker = 'A próxima aula é prática'
       const idx = carolResponse.indexOf(startMarker)
       if (idx > 0) {
         const before = carolResponse.slice(0, idx).toLowerCase()
@@ -2461,13 +2475,20 @@ export async function sendRemarketingToNonParticipant(
     let leadName = getFirstName(registrationName || (conversation.context as any)?.lead_name || conversation.name) || 'querido(a)'
     if (isBusinessName(leadName)) leadName = 'querido(a)'
 
-    // Primeira mensagem de remarketing: persuasiva, com benefício (agenda cheia). NÃO envia datas/link.
+    // Primeira mensagem de remarketing: persuasiva, com benefício. NÃO envia datas/link.
     // Quando a pessoa responder positivamente no chat, a Carol envia as opções (via processIncomingMessageWithCarol).
-    const remarketingMessage = `Olá ${leadName}! 👋
+    const { getFlowTemplate, applyTemplate } = await import('@/lib/whatsapp-flow-templates')
+    const remarketingTemplate = await getFlowTemplate('nutri', 'remarketing_nao_participou')
+    const remarketingMessage = remarketingTemplate
+      ? applyTemplate(remarketingTemplate, { nome: leadName })
+      : `Olá ${leadName}! 💚
 
-Vi que você não conseguiu participar da aula anterior. Tudo bem, acontece! 😊
+Vi que você não conseguiu entrar na aula. Fica tranquilo(a), isso acontece.
 
-Você ainda tem interesse em aprender a ter sua agenda cheia? Gostaria que eu te encaixasse numa nova data?`
+Eu sei como é frustrante ver a agenda oscilando e sentir que você está fazendo tudo “certo”, mas mesmo assim não consegue preencher com constância. A aula foi justamente pra te mostrar um caminho mais claro e prático pra organizar isso.
+
+Você ainda tem interesse em participar?
+Se sim, eu te encaixo no próximo horário. Qual período fica melhor pra você: manhã, tarde ou noite?`
 
     const client = createZApiClient(instance.instance_id, instance.token)
     const result = await client.sendTextMessage({
@@ -2621,11 +2642,18 @@ export async function sendRemarketingToNonParticipants(): Promise<{
         const registrationName = await getRegistrationName(conv.phone, 'nutri')
         let leadName = getFirstName(registrationName || (context as any)?.lead_name || conv.name) || 'querido(a)'
         if (isBusinessName(leadName)) leadName = 'querido(a)'
-        const remarketingMessage = `Olá ${leadName}! 👋
+        const { getFlowTemplate, applyTemplate } = await import('@/lib/whatsapp-flow-templates')
+        const remarketingTemplate = await getFlowTemplate('nutri', 'remarketing_nao_participou')
+        const remarketingMessage = remarketingTemplate
+          ? applyTemplate(remarketingTemplate, { nome: leadName })
+          : `Olá ${leadName}! 💚
 
-Vi que você não conseguiu participar da aula anterior. Tudo bem, acontece! 😊
+Vi que você não conseguiu entrar na aula. Fica tranquilo(a), isso acontece.
 
-Você ainda tem interesse em aprender a ter sua agenda cheia? Gostaria que eu te encaixasse numa nova data?`
+Eu sei como é frustrante ver a agenda oscilando e sentir que você está fazendo tudo “certo”, mas mesmo assim não consegue preencher com constância. A aula foi justamente pra te mostrar um caminho mais claro e prático pra organizar isso.
+
+Você ainda tem interesse em participar?
+Se sim, eu te encaixo no próximo horário. Qual período fica melhor pra você: manhã, tarde ou noite?`
 
         const sendResult = await sendWhatsAppMessage(
           conv.phone,
@@ -3651,7 +3679,18 @@ export async function sendRegistrationLinkAfterClass(conversationId: string): Pr
       const linkTemplate = await getFlowTemplate('nutri', 'link_after_participou')
       const msgForManual = linkTemplate
         ? applyTemplate(linkTemplate, { nome: '[NOME]', link: registrationUrl })
-        : `Olá [NOME]! 💚\n\nExcelente! Parabéns por ter participado! 🎉\n\n...\n\n🔗 ${registrationUrl}\n\nO que você acha? 😊`
+        : `Olá [NOME]! 💚
+
+Parabéns por ter participado da aula — espero que tenha esclarecido os pontos que você precisava para realmente dar sua virada e começar a preencher sua agenda com mais segurança e estratégia.
+
+Agora me conta: o que mais fez sentido pra você hoje?
+Você está disposto(a) a mudar sua situação e começar agora?
+
+Se sim, me diz: você prefere começar pelo plano *mensal* (pra validar com calma) ou já quer ir direto no *anual* (pra acelerar seus resultados)?
+
+🔗 ${registrationUrl}
+
+O que você acha? 😊`
       return { 
         success: false, 
         error: `Mensagem automática não enviada: ${timeCheck.reason}. Use o texto abaixo para enviar manualmente.`,
@@ -3733,13 +3772,12 @@ export async function sendRegistrationLinkAfterClass(conversationId: string): Pr
       ? applyTemplate(linkTemplate, { nome: leadName, link: registrationUrl })
       : `Olá ${leadName}! 💚
 
-Excelente! Parabéns por ter participado! 🎉
+Parabéns por ter participado da aula — espero que tenha esclarecido os pontos que você precisava para realmente dar sua virada e começar a preencher sua agenda com mais segurança e estratégia.
 
-Espero que tenha gostado e tenho certeza que isso realmente pode fazer diferença na sua vida.
+Agora me conta: o que mais fez sentido pra você hoje?
+Você está disposto(a) a mudar sua situação e começar agora?
 
-Agora me conta: o que você mais gostou? E como você prefere começar?
-
-Você prefere começar com o plano mensal para validar e verificar, ou você já está determinado a mudar sua vida e prefere o plano anual?
+Se sim, me diz: você prefere começar pelo plano *mensal* (pra validar com calma) ou já quer ir direto no *anual* (pra acelerar seus resultados)?
 
 🔗 ${registrationUrl}
 

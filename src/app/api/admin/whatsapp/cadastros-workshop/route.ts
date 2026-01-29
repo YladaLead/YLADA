@@ -202,7 +202,15 @@ export async function GET(request: NextRequest) {
           : null
       const context = conversation?.context || {}
       const tags = Array.isArray(context.tags) ? context.tags : []
-      const hasWelcome = conversation?.id ? !!welcomeByConversationId[conversation.id]?.has : false
+      const hasManualMark =
+        (conversation?.context &&
+          typeof conversation.context === 'object' &&
+          !Array.isArray(conversation.context) &&
+          ((conversation.context as any).manual_welcome_sent_at || (Array.isArray((conversation.context as any).tags) && (conversation.context as any).tags.includes('manual_welcome_sent'))))
+          ? true
+          : false
+      const hasWelcome =
+        (conversation?.id ? !!welcomeByConversationId[conversation.id]?.has : false) || hasManualMark
       const sentAt =
         (conversation?.context && typeof conversation.context === 'object' && !Array.isArray(conversation.context) && (conversation.context as any).manual_welcome_sent_at)
           ? String((conversation.context as any).manual_welcome_sent_at)

@@ -170,6 +170,54 @@ function CadastrosWorkshopContent() {
     }
   }
 
+  const handleMarkSentSelected = async () => {
+    if (selectedIds.size === 0) {
+      alert('Selecione pelo menos um cadastro')
+      return
+    }
+
+    if (!confirm(`Marcar como "já enviei" para ${selectedIds.size} cadastro(s)? Isso NÃO envia WhatsApp.`)) {
+      return
+    }
+
+    setProcessing(true)
+    try {
+      const res = await fetch('/api/admin/whatsapp/cadastros-workshop/marcar-enviado', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ registrationIds: Array.from(selectedIds) }),
+      })
+      const data = await res.json()
+      if (!data.success) throw new Error(data.error || 'Erro ao marcar')
+      await loadRegistrations()
+      setSelectedIds(new Set())
+    } catch (e: any) {
+      alert(e.message || 'Erro ao marcar')
+    } finally {
+      setProcessing(false)
+    }
+  }
+
+  const handleMarkSentOne = async (id: string) => {
+    setProcessing(true)
+    try {
+      const res = await fetch('/api/admin/whatsapp/cadastros-workshop/marcar-enviado', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ registrationIds: [id] }),
+      })
+      const data = await res.json()
+      if (!data.success) throw new Error(data.error || 'Erro ao marcar')
+      await loadRegistrations()
+    } catch (e: any) {
+      alert(e.message || 'Erro ao marcar')
+    } finally {
+      setProcessing(false)
+    }
+  }
+
   const getTagInfo = (tag: string): { label: string; color: string; icon: string } => {
     const tagMap: Record<string, { label: string; color: string; icon: string }> = {
       // Fase 1: Captação
@@ -261,15 +309,15 @@ function CadastrosWorkshopContent() {
   const pendingCount = registrations.filter(r => r.needs_manual_whatsapp).length
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+    <div className="h-[100dvh] bg-gray-50 flex flex-col overflow-hidden">
+      {/* Header (fixo) */}
+      <div className="bg-white border-b border-gray-200 flex-shrink-0">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
           <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">📋 Cadastros do Workshop</h1>
-              <p className="text-sm text-gray-500 mt-1">
-                Lista de todas as pessoas que se cadastraram no workshop
+            <div className="min-w-0">
+              <h1 className="text-xl font-bold text-gray-900 truncate">📋 Cadastros do Workshop</h1>
+              <p className="text-xs text-gray-500 mt-1">
+                Disparo manual e controle de pendências
               </p>
             </div>
             <Link
@@ -282,8 +330,9 @@ function CadastrosWorkshopContent() {
         </div>
       </div>
 
-      {/* Conteúdo */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      {/* Conteúdo (sem scroll da página; só a tabela rola) */}
+      <div className="flex-1 min-h-0 overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 h-full flex flex-col gap-4 min-h-0">
         {pendingCount > 0 && (
           <div className="mb-6 bg-amber-50 border border-amber-200 rounded-lg p-4">
             <div className="flex flex-wrap items-center justify-between gap-3">
@@ -305,7 +354,7 @@ function CadastrosWorkshopContent() {
         )}
 
         {/* Estatísticas */}
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-3 flex-shrink-0">
           <div className="bg-white rounded-lg shadow p-4">
             <div className="text-sm text-gray-600">Total de Cadastros</div>
             <div className="text-2xl font-bold text-gray-900">{registrations.length}</div>
@@ -337,8 +386,8 @@ function CadastrosWorkshopContent() {
         </div>
 
         {/* Filtros e Ações */}
-        <div className="bg-white rounded-lg shadow p-6 mb-6">
-          <div className="flex flex-wrap gap-4 items-center mb-4">
+        <div className="bg-white rounded-lg shadow p-4 flex-shrink-0">
+          <div className="flex flex-wrap gap-3 items-center">
             {/* Busca */}
             <div className="flex-1 min-w-[200px]">
               <input
@@ -373,6 +422,14 @@ function CadastrosWorkshopContent() {
             {selectedIds.size > 0 && (
               <>
                 <button
+                  onClick={handleMarkSentSelected}
+                  disabled={processing}
+                  className="px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-700 disabled:opacity-50"
+                  title="Marca como já enviado (não dispara WhatsApp)"
+                >
+                  {processing ? '…' : '✅ Já enviei'}
+                </button>
+                <button
                   onClick={handleAddTagsToSelected}
                   disabled={processing}
                   className="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 disabled:opacity-50"
@@ -392,15 +449,15 @@ function CadastrosWorkshopContent() {
         </div>
 
         {/* Tabela */}
-        <div className="bg-white rounded-lg shadow overflow-hidden">
+        <div className="bg-white rounded-lg shadow overflow-hidden flex-1 min-h-0 flex flex-col">
           {loading ? (
             <div className="p-8 text-center text-gray-500">Carregando...</div>
           ) : filteredRegistrations.length === 0 ? (
             <div className="p-8 text-center text-gray-500">Nenhum cadastro encontrado</div>
           ) : (
-            <div className="overflow-x-auto">
+            <div className="flex-1 min-h-0 overflow-auto">
               <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
+                <thead className="bg-gray-50 sticky top-0 z-10">
                   <tr>
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                       <input
@@ -499,6 +556,17 @@ function CadastrosWorkshopContent() {
                         >
                           {reg.has_welcome_message ? '—' : '📤 Disparar'}
                         </button>
+                        {!reg.has_welcome_message && (
+                          <button
+                            type="button"
+                            disabled={processing}
+                            onClick={() => handleMarkSentOne(reg.id)}
+                            className="ml-2 px-3 py-1.5 text-sm rounded-lg font-semibold bg-slate-600 text-white hover:bg-slate-700 disabled:opacity-50"
+                            title="Marcar como já enviado (não dispara WhatsApp)"
+                          >
+                            ✅ Já enviei
+                          </button>
+                        )}
                       </td>
                     </tr>
                   ))}
@@ -509,14 +577,16 @@ function CadastrosWorkshopContent() {
         </div>
 
         {/* Info */}
-        <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 flex-shrink-0">
           <h3 className="font-semibold text-blue-900 mb-2">ℹ️ Como usar:</h3>
           <ul className="text-sm text-blue-800 space-y-1 list-disc list-inside">
             <li><strong>Selecionar:</strong> Marque os cadastros que deseja processar</li>
             <li><strong>Adicionar Tags:</strong> Adicione tags manualmente antes de processar</li>
             <li><strong>Disparar 1ª mensagem:</strong> Envia a primeira mensagem (boas-vindas + opções) e marca como enviado</li>
+            <li><strong>✅ Já enviei:</strong> Apenas marca como enviado (não dispara WhatsApp) — útil se você já mandou manualmente antes</li>
             <li><strong>Filtros:</strong> Use os filtros para encontrar cadastros específicos</li>
           </ul>
+        </div>
         </div>
       </div>
 
