@@ -20,7 +20,7 @@ function normalizePhone(raw: string): string {
 function buildIntroQuestion(name: string | null | undefined): string {
   const firstName = (name || '').trim().split(/\s+/)[0] || ''
   const hi = firstName ? `Oi, ${firstName} 😊` : 'Oi! 😊'
-  return `${hi}\nSou a Carol, da YLADA Nutri.\n\nVi sua inscrição na aula e queria te perguntar rapidinho:\nvocê já começou a atender ou ainda não?\n\n1️⃣ ainda não comecei\n2️⃣ comecei, mas bem devagar\n3️⃣ já atendo com mais frequência\n\nMe responde só o número 🙂`
+  return `${hi}\nSou a Carol, da YLADA Nutri.\n\nParabéns por ter se inscrito na aula prática.\n\nPara eu te direcionar melhor, você já começou a atender?\n\n1️⃣ ainda não comecei\n2️⃣ comecei, mas bem devagar\n3️⃣ já atendo com mais frequência\n\nMe responde só o número 🙂`
 }
 
 /**

@@ -178,6 +178,16 @@ async function getOrCreateConversation(
   area: string | null,
   contextPatch?: Record<string, any> | null
 ) {
+  const isPlaceholderName = (s: any): boolean => {
+    if (typeof s !== 'string') return true
+    const t = s.trim()
+    if (!t) return true
+    const lower = t.toLowerCase()
+    if (lower === 'cliente' || lower === 'sem nome' || lower === 'unknown') return true
+    if (/^\d+$/.test(t)) return true
+    return false
+  }
+
   // Buscar instância no banco
   const { data: instance } = await supabase
     .from('z_api_instances')
@@ -202,7 +212,7 @@ async function getOrCreateConversation(
     // Atualizar área/nome/context se necessário
     const updateData: any = {}
     if (!existing.area && area) updateData.area = area
-    if (!existing.name && name) updateData.name = name
+    if (name && (isPlaceholderName(existing.name) || (!existing.name && name))) updateData.name = name
 
     if (contextPatch && typeof contextPatch === 'object') {
       const prev = (existing.context && typeof existing.context === 'object' && !Array.isArray(existing.context))
@@ -1060,7 +1070,7 @@ export async function POST(request: NextRequest) {
       nameForConv,
       area
       ,
-      { is_group: isGroup }
+      { is_group: isGroup, wa_name: nameForConv }
     )
     console.log('[Z-API Webhook] 💬 Conversa ID:', conversationId)
 

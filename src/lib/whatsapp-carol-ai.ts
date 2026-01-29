@@ -142,6 +142,30 @@ function buildWorkshopOptionsText(
   return out.trim()
 }
 
+function isLikelyPersonName(name: string | null | undefined): boolean {
+  if (!name || typeof name !== 'string') return false
+  const s = name.trim()
+  if (!s) return false
+  if (s.length < 3) return false
+  if (/^\d+$/.test(s)) return false
+  const lower = s.toLowerCase()
+  // evita termos comuns de marca/empresa
+  const bad = ['nutri', 'nutric', 'clini', 'clín', 'clin', 'saude', 'saúde', 'studio', 'consult', 'oficial']
+  if (bad.some((k) => lower.includes(k))) return false
+  if (isBusinessName(s)) return false
+  // nomes de pessoa geralmente têm pelo menos 2 palavras ou não são tudo maiúsculo
+  const hasSpace = /\s/.test(s)
+  const isAllCaps = s.length >= 6 && s === s.toUpperCase()
+  return hasSpace || !isAllCaps
+}
+
+function buildIntroSecondMessageForStage(leadName?: string): string {
+  // Esta mensagem é enviada após a saudação curta já ter sido enviada em separado.
+  // Portanto, NÃO começa com "Oi" nem repete "Sou a Carol".
+  const namePart = leadName ? `, ${leadName}` : ''
+  return `Parabéns por ter se inscrito na aula prática${namePart}.\n\nPara eu te direcionar melhor, você já começou a atender?\n\n1️⃣ ainda não comecei\n2️⃣ comecei, mas bem devagar\n3️⃣ já atendo com mais frequência\n\nMe responde só o número 🙂`
+}
+
 /**
  * Verifica se o texto é nome da empresa e NUNCA deve ser usado como nome da pessoa.
  * Evita que a Carol chame o lead de "Ylada" quando o payload/conversa traz o nome do negócio.
@@ -1167,12 +1191,13 @@ export async function processIncomingMessageWithCarol(
         .eq('id', conversationId)
 
       const optText = buildWorkshopOptionsText(workshopSessions, 'bold')
+      const basePromo = 'Perfeito 😊 Isso é mais comum do que você imagina, e a aula vai te dar clareza para você ajustar isso de imediato.'
       const reply =
         nivel === '1'
-          ? `Perfeito 😊 Isso é mais comum do que você imagina.\n\nAgora me diz: qual horário fica melhor pra você?\n\n${optText}\n\nMe responde com 1 ou 2 🙂`
+          ? `${basePromo}\n\nQual horário fica melhor pra você?\n\n${optText}\n\nMe responde com 1 ou 2 🙂`
           : nivel === '2'
-            ? `Entendi 😊 Esse começo é o mais confuso mesmo.\n\nQual horário fica melhor pra você?\n\n${optText}\n\nMe responde com 1 ou 2 🙂`
-            : `Perfeito 👍\n\nQual horário fica melhor pra você?\n\n${optText}\n\nMe responde com 1 ou 2 🙂`
+            ? `Entendi 😊 Esse começo é o mais confuso mesmo. ${basePromo}\n\nQual horário fica melhor pra você?\n\n${optText}\n\nMe responde com 1 ou 2 🙂`
+            : `Perfeito 👍 ${basePromo}\n\nQual horário fica melhor pra você?\n\n${optText}\n\nMe responde com 1 ou 2 🙂`
 
       // Enviar resposta curta e sair (não continua para detecção de escolha de opção aqui)
       const instanceToSend = await getZApiInstance(area || 'nutri')
@@ -1880,7 +1905,14 @@ Nos vemos em breve! 😊
 
     // 🆕 Priorizar nome do cadastro; evitar usar nomes do WhatsApp quando não confiáveis
     const conv = conversation as { name?: string | null; customer_name?: string | null }
-    let rawName = registrationName || (context as any)?.lead_name || conversation.name || conv?.customer_name || ''
+    const waName = (context as any)?.wa_name as string | undefined
+    let rawName =
+      registrationName ||
+      (context as any)?.lead_name ||
+      (isLikelyPersonName(waName) ? waName : '') ||
+      conversation.name ||
+      conv?.customer_name ||
+      ''
     if (isBusinessName(rawName)) {
       rawName = registrationName || (context as any)?.lead_name || ''
     }
@@ -1888,25 +1920,21 @@ Nos vemos em breve! 😊
     // Se NÃO conseguimos match do cadastro (telefone diferente / preenchido errado), não use o nome do WhatsApp
     // (pode ser nome de marca, clínica, etc). Melhor: saudação neutra.
     if (isMessageFromButton && !registrationName && !(context as any)?.lead_name) {
-      rawName = ''
+      // Se não achamos cadastro, só usa o nome do WhatsApp se parecer nome de pessoa.
+      rawName = isLikelyPersonName(waName) ? String(waName) : ''
     }
     // Se não temos nome confiável, não use "querido(a)" como nome — prefira saudação neutra.
     let leadName = getFirstName(rawName) || ''
     if (isBusinessName(leadName)) leadName = ''
 
-    // Se for primeira mensagem e temos sessões, preferir template curto (sem IA) para evitar textão.
+    // Se for primeira mensagem, preferir fluxo curto (sem IA): pergunta 1/2/3 (nível).
+    // Depois que ela responder 1/2/3, enviamos os horários (1/2).
     let cannedFirstMessageBody: string | null = null
-    if (isFirstMessage && workshopSessions.length > 0) {
-      const optionsText = buildWorkshopOptionsText(workshopSessions, 'bold')
-      const bodyTemplate = await getFlowTemplate(area || 'nutri', 'welcome_form_body')
-      if (bodyTemplate) {
-        cannedFirstMessageBody = applyTemplate(bodyTemplate, { nome: leadName })
-          .replace(/\[OPÇÕES inseridas automaticamente\]/gi, optionsText)
-          .replace(/\{\{opcoes\}\}/gi, optionsText)
-      } else {
-        // Fallback curto (sem parágrafos longos)
-        cannedFirstMessageBody = `Obrigada por se inscrever na Aula Prática ao Vivo – Agenda Cheia para Nutricionistas.\n\n${optionsText}\n\nQual desses horários funciona melhor pra você? 😊`
-      }
+    if (isFirstMessage) {
+      const introTemplate = await getFlowTemplate(area || 'nutri', 'welcome_form_intro_question')
+      cannedFirstMessageBody = introTemplate
+        ? applyTemplate(introTemplate, { nome: leadName })
+        : buildIntroSecondMessageForStage(leadName || undefined)
     }
 
     // Mensagem do botão: se for primeira mensagem (ninguém enviou nada ainda), Carol envia boas-vindas + opções.
@@ -1961,8 +1989,8 @@ Nos vemos em breve! 😊
         const greetingOnly = greetingTemplate
           ? applyTemplate(greetingTemplate, { nome: leadName })
           : (leadName
-              ? `Oi ${leadName}! 😊\n\nSeja muito bem-vinda!\n\nEu sou a Carol, da equipe Ylada Nutri.`
-              : `Oi! 😊\n\nSeja muito bem-vinda!\n\nEu sou a Carol, da equipe Ylada Nutri.`)
+              ? `Oi, ${leadName}, tudo bem? 😊\n\nSeja muito bem-vinda!\n\nEu sou a Carol, da equipe Ylada Nutri.`
+              : `Oi, tudo bem? 😊\n\nSeja muito bem-vinda!\n\nEu sou a Carol, da equipe Ylada Nutri.`)
         const sendGreeting = await sendWhatsAppMessage(
           phone,
           greetingOnly,
