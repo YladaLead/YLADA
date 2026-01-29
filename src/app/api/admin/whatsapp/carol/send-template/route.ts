@@ -31,7 +31,11 @@ Você ainda tem interesse em agendar uma nova data?`,
   },
   followup_ficou_pensar: {
     body: `Oi, [NOME] 😊
-Você conseguiu pensar se faz sentido pra você colocar esse sistema em prática?`,
+Eu vi o seu interesse em se desenvolver de verdade, e isso pode começar agora.
+
+A partir do momento que você faz a sua inscrição, você já tem acesso imediato à LYA e ganha a segurança que precisava pra saber exatamente o que fazer, passo a passo, pra preencher sua agenda com mais constância.
+
+Vamos começar agora?`,
     stage: 'FOLLOWUP_DECIDING',
   },
   ultima_chance: {
