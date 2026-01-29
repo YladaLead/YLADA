@@ -113,7 +113,11 @@ Ideal participar pelo computador e ter caneta e papel à mão — a aula é bem 
       } else if (tipo === '30min') {
         message = `${firstName ? `Olá ${firstName}! ` : ''}Em breve começaremos juntos! ⏰`
       } else {
-        message = `✅ A sala está aberta!
+        message = `✅ A sala já está aberta!
+
+Entra agora pra garantir seu lugar, porque vamos começar pontualmente em poucos minutos.
+
+Se puder, entra pelo computador e já deixa caneta e papel por perto (a aula é bem prática).
 
 🔗 ${session.zoom_link}
 `

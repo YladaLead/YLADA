@@ -3054,7 +3054,11 @@ Nos vemos em breve! 😊
         else if (!context[notificationKey]?.sent_10min && 
                  ((minutesDiff >= 10 && minutesDiff < 12) ||
                   (isToday && minutesDiff >= 5 && minutesDiff < 12 && !context[notificationKey]?.sent_2h))) {
-          message = `✅ A sala está aberta!
+          message = `✅ A sala já está aberta!
+
+Entra agora pra garantir seu lugar, porque vamos começar pontualmente em poucos minutos.
+
+Se puder, entra pelo computador e já deixa caneta e papel por perto (a aula é bem prática).
 
 🔗 ${session.zoom_link}
 `

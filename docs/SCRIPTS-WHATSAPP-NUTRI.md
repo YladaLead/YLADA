@@ -246,7 +246,11 @@ Olá {NOME}! Em breve começaremos juntos! ⏰
 ### 6.3 Tipo “sala aberta”
 
 ```text
-✅ A sala está aberta!
+✅ A sala já está aberta!
+
+Entra agora pra garantir seu lugar, porque vamos começar pontualmente em poucos minutos.
+
+Se puder, entra pelo computador e já deixa caneta e papel por perto (a aula é bem prática).
 
 🔗 {LINK_ZOOM}
 ```

@@ -17,10 +17,17 @@ function normalizePhone(raw: string): string {
   return d
 }
 
-function buildIntroQuestion(name: string | null | undefined): string {
-  const firstName = (name || '').trim().split(/\s+/)[0] || ''
-  const hi = firstName ? `Oi, ${firstName} 😊` : 'Oi! 😊'
-  return `${hi}\nSou a Carol, da YLADA Nutri.\n\nParabéns por ter se inscrito na aula prática.\n\nPara eu te direcionar melhor, você já começou a atender?\n\n1️⃣ ainda não comecei\n2️⃣ comecei, mas bem devagar\n3️⃣ já atendo com mais frequência\n\nMe responde só o número 🙂`
+function getFirstName(name: string | null | undefined): string {
+  return String(name || '').trim().split(/\s+/)[0] || ''
+}
+
+function formatSessionPtBR(startsAtIso: string) {
+  const tz = 'America/Sao_Paulo'
+  const d = new Date(startsAtIso)
+  const weekday = d.toLocaleDateString('pt-BR', { timeZone: tz, weekday: 'long' })
+  const date = d.toLocaleDateString('pt-BR', { timeZone: tz, day: '2-digit', month: '2-digit', year: 'numeric' })
+  const time = d.toLocaleTimeString('pt-BR', { timeZone: tz, hour: '2-digit', minute: '2-digit' })
+  return { weekday, date, time }
 }
 
 /**
@@ -90,6 +97,12 @@ export async function POST(request: NextRequest) {
       starts_at: s.starts_at,
       zoom_link: s.zoom_link,
     }))
+    if (workshopSessions.length === 0) {
+      return NextResponse.json(
+        { error: 'Nenhuma sessão futura encontrada para disparo' },
+        { status: 400 }
+      )
+    }
 
     // Buscar cadastros
     let registrations: any[] = []
@@ -134,6 +147,7 @@ export async function POST(request: NextRequest) {
 
         const name = reg.nome || reg.name || 'Cliente'
         // const email = reg.email || reg.email_address || ''
+        const displayName = getFirstName(name)
 
         // Buscar ou criar conversa
         let conversationId: string | null = null
@@ -207,12 +221,30 @@ export async function POST(request: NextRequest) {
           .eq('sender_name', 'Carol - Secretária')
           .limit(1)
 
-        // Se não tem mensagem, enviar 1ª mensagem curta (diagnóstico 1/2/3)
+        // Se não tem mensagem, enviar boas-vindas com opções (1/2) — sem pergunta 1/2/3 (nível).
         if (!existingMessages || existingMessages.length === 0) {
-          const introTemplate = await getFlowTemplate('nutri', 'welcome_form_intro_question')
-          const message = introTemplate
-            ? applyTemplate(introTemplate, { nome: name })
-            : buildIntroQuestion(name)
+          // Montar opções (1/2) no fuso de Brasília (sem link do Zoom)
+          let optionsText = ''
+          workshopSessions.forEach((sess, index) => {
+            const { weekday, date, time } = formatSessionPtBR(sess.starts_at)
+            optionsText += `*Opção ${index + 1}:*\n${weekday}, ${date}\n🕒 ${time} (horário de Brasília)\n\n`
+          })
+
+          // Templates editáveis (mesmos do fluxo pós-form): greeting + body
+          const greetingTemplate = await getFlowTemplate('nutri', 'welcome_form_greeting')
+          const bodyTemplate = await getFlowTemplate('nutri', 'welcome_form_body')
+
+          const greeting = greetingTemplate
+            ? applyTemplate(greetingTemplate, { nome: displayName })
+            : (displayName ? `Oi ${displayName}, tudo bem? 😊\n\nSou a Carol, da equipe Ylada Nutri.` : 'Oi, tudo bem? 😊\n\nSou a Carol, da equipe Ylada Nutri.')
+
+          const body = bodyTemplate
+            ? applyTemplate(bodyTemplate, { nome: displayName })
+              .replace(/\[OPÇÕES inseridas automaticamente\]/gi, optionsText.trim())
+              .replace(/\{\{opcoes\}\}/gi, optionsText.trim())
+            : `Pra eu te encaixar na aula prática exclusiva para nutricionistas, escolhe um horário:\n\n${optionsText.trim()}\n\nMe responde só *1* ou *2* 😊`
+
+          const message = `${String(greeting || '').trim()}\n\n${String(body || '').trim()}`.trim()
 
           const result = await client.sendTextMessage({
             phone,
@@ -253,7 +285,10 @@ export async function POST(request: NextRequest) {
               tags: newTags,
               manual_welcome_sent_at: (context as any)?.manual_welcome_sent_at || new Date().toISOString(),
               manual_welcome_source: 'admin_cadastros_workshop',
-              workshop_intro_stage: (context as any)?.workshop_intro_stage || 'qual_nivel',
+              // Estado leve (router): acabamos de perguntar a escolha 1/2 de horário.
+              last_bot_intent: (context as any)?.last_bot_intent || 'ask_schedule_choice',
+              last_bot_template: (context as any)?.last_bot_template || 'schedule_choice_v1',
+              last_bot_at: (context as any)?.last_bot_at || new Date().toISOString(),
             },
             last_message_at: new Date().toISOString(),
             last_message_from: 'bot'
