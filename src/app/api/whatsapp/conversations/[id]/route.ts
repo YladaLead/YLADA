@@ -29,9 +29,16 @@ function normalizeContext(input: any): Record<string, any> {
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> | { id: string } }
 ) {
   try {
+    const resolvedParams = typeof (params as any)?.then === 'function' ? await (params as Promise<{ id: string }>) : (params as { id: string })
+    const conversationId = resolvedParams.id
+
+    if (!conversationId) {
+      return NextResponse.json({ error: 'ID da conversa é obrigatório' }, { status: 400 })
+    }
+
     // Autenticação
     const cookieStore = await cookies()
     const supabase = createServerClient(
@@ -71,8 +78,6 @@ export async function PATCH(
     if (!isAdmin) {
       return NextResponse.json({ error: 'Acesso negado' }, { status: 403 })
     }
-
-    const conversationId = params.id
     const body = await request.json().catch(() => ({}))
 
     // Campos suportados
@@ -83,10 +88,10 @@ export async function PATCH(
       context, // partial merge
     } = body || {}
 
-    // Buscar conversa atual
+    // Buscar conversa atual (phone e area para sincronizar duplicatas)
     const { data: existing, error: existingError } = await supabaseAdmin
       .from('whatsapp_conversations')
-      .select('id,status,unread_count,name,context')
+      .select('id,status,unread_count,name,context,phone,area')
       .eq('id', conversationId)
       .single()
 
@@ -151,11 +156,35 @@ export async function PATCH(
       return NextResponse.json({ success: true, conversation: existing })
     }
 
+    // Quando atualizamos context (ex.: tags), atualizar TODAS as conversas com o mesmo telefone e área.
+    // A listagem agrupa duplicatas e faz merge do context; se só atualizarmos uma linha, a outra continua
+    // com as tags antigas e o merge faz a tag "voltar" (ex.: não conseguir tirar "Link Workshop").
+    let idsToUpdate: string[] = [conversationId]
+    if (updateData.context && existing.phone) {
+      const area = (existing as any).area || 'nutri'
+      const digits = String(existing.phone).replace(/\D/g, '')
+      if (digits.length >= 10) {
+        const phone13 = digits.startsWith('55') && digits.length >= 13 ? digits : '55' + (digits.startsWith('0') ? digits.slice(1) : digits)
+        const phone12 = phone13.startsWith('55') && phone13.length === 13 ? phone13.slice(0, 4) + phone13.slice(5) : ''
+        const variants = [phone13, existing.phone].filter(Boolean) as string[]
+        if (phone12) variants.push(phone12)
+        const { data: samePhone } = await supabaseAdmin
+          .from('whatsapp_conversations')
+          .select('id')
+          .eq('area', area)
+          .in('phone', [...new Set(variants)])
+        if (samePhone?.length) {
+          idsToUpdate = samePhone.map((r: { id: string }) => r.id)
+        }
+      }
+    }
+
     const { data: updated, error: updateError } = await supabaseAdmin
       .from('whatsapp_conversations')
       .update(updateData)
-      .eq('id', conversationId)
+      .in('id', idsToUpdate)
       .select('*')
+      .eq('id', conversationId)
       .single()
 
     if (updateError) {
