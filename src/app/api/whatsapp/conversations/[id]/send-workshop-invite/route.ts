@@ -19,9 +19,15 @@ function formatSessionPtBR(startsAtIso: string) {
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> | { id: string } }
 ) {
   try {
+    const resolvedParams = typeof (params as any)?.then === 'function' ? await (params as Promise<{ id: string }>) : (params as { id: string })
+    const conversationId = resolvedParams.id
+    if (!conversationId) {
+      return NextResponse.json({ error: 'ID da conversa é obrigatório' }, { status: 400 })
+    }
+
     // Auth (admin)
     const cookieStore = await cookies()
     const supabase = createServerClient(
@@ -57,8 +63,6 @@ export async function POST(
     if (!roleAdmin && profile?.is_admin !== true) {
       return NextResponse.json({ error: 'Acesso negado' }, { status: 403 })
     }
-
-    const conversationId = params.id
 
     const { data: conversation } = await supabaseAdmin
       .from('whatsapp_conversations')

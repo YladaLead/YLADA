@@ -6,6 +6,7 @@
 import { supabaseAdmin } from '@/lib/supabase'
 import { createZApiClient } from '@/lib/z-api'
 import { getFirstName } from '@/lib/whatsapp-carol-ai'
+import { getFlowTemplate, applyTemplate } from '@/lib/whatsapp-flow-templates'
 
 /**
  * Formata data/hora da sessão em PT-BR (horário de Brasília)
@@ -179,33 +180,43 @@ export async function sendWorkshopInviteToFormLead(
     // Esta é uma resposta a uma ação direta do usuário, não uma mensagem automática
 
     // 5. Usar apenas o primeiro nome do cadastro na saudação (nome real, nunca email).
-    // Ex.: "Maria Silva" → "Maria". Tom alinhado à Carol.
     const rawName = (leadName && leadName.trim() && !String(leadName).includes('@')) ? leadName.trim() : ''
     const displayName = rawName ? getFirstName(rawName) : ''
-    // Mensagem 1: só saudação (separada para não vir um bloco único e repetido)
-    const greetingLines: string[] = []
-    if (displayName) {
-      greetingLines.push(`Oi ${displayName}, tudo bem? 😊`)
+    // Mensagem 1: saudação (template editável em /admin/whatsapp/fluxo ou padrão)
+    let message1Greeting: string
+    const greetingTemplate = await getFlowTemplate(area, 'welcome_form_greeting')
+    if (greetingTemplate) {
+      message1Greeting = applyTemplate(greetingTemplate, { nome: displayName })
     } else {
-      greetingLines.push('Oi, tudo bem? 😊')
+      const greetingLines: string[] = []
+      if (displayName) greetingLines.push(`Oi ${displayName}, tudo bem? 😊`)
+      else greetingLines.push('Oi, tudo bem? 😊')
+      greetingLines.push('Seja muito bem-vinda!')
+      greetingLines.push('Eu sou a Carol, da equipe Ylada Nutri.')
+      message1Greeting = greetingLines.join('\n\n')
     }
-    greetingLines.push('Seja muito bem-vinda!')
-    greetingLines.push('Eu sou a Carol, da equipe Ylada Nutri.')
-    const message1Greeting = greetingLines.join('\n\n')
 
-    // Mensagem 2: texto da aula + opções (cada data/horário UMA vez só)
+    // Mensagem 2: texto da aula + opções (template editável ou padrão)
     let optionsText = ''
     sessions.forEach((sess, index) => {
       const { weekday, date, time } = formatSessionPtBR(sess.starts_at)
       optionsText += `*Opção ${index + 1}:*\n${weekday}, ${date}\n🕒 ${time} (horário de Brasília)\n\n`
     })
-    const message2Body = `Obrigada por se inscrever na Aula Prática ao Vivo – Agenda Cheia para Nutricionistas.
+    let message2Body: string
+    const bodyTemplate = await getFlowTemplate(area, 'welcome_form_body')
+    if (bodyTemplate) {
+      message2Body = applyTemplate(bodyTemplate, { nome: displayName })
+        .replace(/\[OPÇÕES inseridas automaticamente\]/gi, optionsText.trim())
+        .replace(/\{\{opcoes\}\}/gi, optionsText.trim())
+    } else {
+      message2Body = `Obrigada por se inscrever na Aula Prática ao Vivo – Agenda Cheia para Nutricionistas.
 
 Essa aula é 100% prática e foi criada para ajudar nutricionistas que estão com agenda ociosa a organizar, atrair e preencher atendimentos de forma mais leve e estratégica.
 
 As próximas aulas ao vivo vão acontecer nos seguintes dias e horários:
 
 ${optionsText}💬 Qual você prefere? 💚`
+    }
 
     // 5.5 Evitar reenviar opções se já enviamos ou se a pessoa já nos chamou (recheck após 60s — evita corrida)
     const { data: convsBeforeSend } = await supabaseAdmin

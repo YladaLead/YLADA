@@ -5,6 +5,7 @@
  */
 
 import { supabaseAdmin } from '@/lib/supabase'
+import { normalizePhoneBr } from '@/lib/phone-br'
 
 export interface ConversationDiagnostic {
   conversationId: string
@@ -240,15 +241,17 @@ export async function activateCarolInConversation(
     }
 
     // 4. Encontrar todas as conversas com o mesmo telefone/área (duplicatas) e atualizar todas
+    // Usar normalizePhoneBr para cobrir 12 dígitos (55+DDD+8) → 13 (55+DDD+9+8) e todas as variantes.
     let idsToUpdate: string[] = [conversationId]
     const phone = (conversation as any).phone
     const area = (conversation as any).area || 'nutri'
     if (phone) {
       const digits = String(phone).replace(/\D/g, '')
       if (digits.length >= 10) {
-        const phone13 = digits.startsWith('55') && digits.length >= 13 ? digits : '55' + (digits.startsWith('0') ? digits.slice(1) : digits)
-        const phone12 = phone13.startsWith('55') && phone13.length === 13 ? phone13.slice(0, 4) + phone13.slice(5) : ''
-        const variants = [phone13, phone].filter(Boolean) as string[]
+        const canonical = normalizePhoneBr(digits)
+        const phone13 = digits.startsWith('55') && digits.length >= 13 ? digits : (canonical.startsWith('55') && canonical.length >= 13 ? canonical : '55' + (digits.startsWith('0') ? digits.slice(1) : digits))
+        const phone12 = phone13.startsWith('55') && phone13.length === 13 ? phone13.slice(0, 4) + phone13.slice(5) : (canonical.startsWith('55') && canonical.length === 12 ? canonical : '')
+        const variants = [phone13, canonical, phone, digits].filter(Boolean) as string[]
         if (phone12) variants.push(phone12)
         const { data: samePhone } = await supabaseAdmin
           .from('whatsapp_conversations')

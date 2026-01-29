@@ -1444,9 +1444,10 @@ export async function processIncomingMessageWithCarol(
     }
 
     // Se detectou escolha, enviar imagem + link e retornar
-    // Só enviar "Perfeito! Você vai adorar!" + link quando a conversa estiver no fluxo de workshop/aula prática.
-    // Evita disparar para contatos que não são de agendamento (ex.: alguém que disse "2" em outro contexto).
-    const isInWorkshopFlow = tags.includes('veio_aula_pratica') || tags.includes('recebeu_link_workshop')
+    // Enviar link quando: tem tag de workshop OU o form já gravou workshop_options_ids (opções enviadas).
+    // Assim, mesmo sem tag recebeu_link_workshop (ex.: admin removeu), se a pessoa escolhe opção 1/2, envia o link.
+    const hasWorkshopOptionsFromForm = Array.isArray(context.workshop_options_ids) && context.workshop_options_ids.length > 0
+    const isInWorkshopFlow = tags.includes('veio_aula_pratica') || tags.includes('recebeu_link_workshop') || hasWorkshopOptionsFromForm
     if (selectedSession && isInWorkshopFlow) {
       console.log('[Carol AI] ✅ Escolha detectada (conversa no fluxo workshop):', {
         sessionId: selectedSession.id,
@@ -3650,19 +3651,11 @@ export async function sendRegistrationLinkAfterClass(conversationId: string): Pr
         reason: timeCheck.reason,
         nextAllowedTime: timeCheck.nextAllowedTime?.toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })
       })
-      const msgForManual = `Olá [NOME]! 💚
-
-Excelente! Parabéns por ter participado! 🎉
-
-Espero que tenha gostado e tenho certeza que isso realmente pode fazer diferença na sua vida.
-
-Agora me conta: o que você mais gostou? E como você prefere começar?
-
-Você prefere começar com o plano mensal para validar e verificar, ou você já está determinado a mudar sua vida e prefere o plano anual?
-
-🔗 ${registrationUrl}
-
-O que você acha? 😊`
+      const { getFlowTemplate, applyTemplate } = await import('@/lib/whatsapp-flow-templates')
+      const linkTemplate = await getFlowTemplate('nutri', 'link_after_participou')
+      const msgForManual = linkTemplate
+        ? applyTemplate(linkTemplate, { nome: '[NOME]', link: registrationUrl })
+        : `Olá [NOME]! 💚\n\nExcelente! Parabéns por ter participado! 🎉\n\n...\n\n🔗 ${registrationUrl}\n\nO que você acha? 😊`
       return { 
         success: false, 
         error: `Mensagem automática não enviada: ${timeCheck.reason}. Use o texto abaixo para enviar manualmente.`,
@@ -3737,8 +3730,12 @@ O que você acha? 😊`
       // Continuar com o nome do WhatsApp se houver erro
     }
 
-    // Mensagem imediata após participar da aula
-    const message = `Olá ${leadName}! 💚
+    // Mensagem imediata após participar da aula (template editável em /admin/whatsapp/fluxo ou padrão)
+    const { getFlowTemplate, applyTemplate } = await import('@/lib/whatsapp-flow-templates')
+    const linkTemplate = await getFlowTemplate('nutri', 'link_after_participou')
+    const message = linkTemplate
+      ? applyTemplate(linkTemplate, { nome: leadName, link: registrationUrl })
+      : `Olá ${leadName}! 💚
 
 Excelente! Parabéns por ter participado! 🎉
 

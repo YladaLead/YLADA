@@ -710,6 +710,14 @@ function WhatsAppChatContent() {
                 📅
               </Link>
               <Link
+                href="/admin/whatsapp/fluxo"
+                className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg text-purple-600 hover:text-purple-700 hover:bg-purple-50 active:bg-purple-100 text-lg"
+                title="Fluxo e textos (editar mensagens do fluxo)"
+                aria-label="Fluxo e textos"
+              >
+                📋
+              </Link>
+              <Link
                 href="/admin/whatsapp/atualizar-fases"
                 className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg text-teal-600 hover:text-teal-700 hover:bg-teal-50 active:bg-teal-100 text-lg"
                 title="Atualizar fases"
@@ -1208,7 +1216,13 @@ function WhatsAppChatContent() {
                                   `/api/whatsapp/conversations/${selectedConversation.id}/send-workshop-invite`,
                                   { method: 'POST', credentials: 'include' }
                                 )
-                                const json = await res.json().catch(() => ({}))
+                                let json: { error?: string } = {}
+                                try {
+                                  const text = await res.text()
+                                  if (text.trim()) json = JSON.parse(text)
+                                } catch (_) {
+                                  if (!res.ok) throw new Error(res.status === 500 ? 'Erro no servidor ao enviar. Tente de novo.' : `Erro ${res.status}`)
+                                }
                                 if (!res.ok) throw new Error(json.error || 'Erro ao enviar convite')
                                 setSendOptionsOpen(false)
                                 alert('✅ Flyer e link enviados!')
@@ -2546,7 +2560,13 @@ function WhatsAppChatContent() {
                                 `/api/whatsapp/conversations/${selectedConversation.id}/send-workshop-invite`,
                                 { method: 'POST', credentials: 'include' }
                               )
-                              const data = await res.json()
+                              let data: { error?: string } = {}
+                              try {
+                                const text = await res.text()
+                                if (text.trim()) data = JSON.parse(text)
+                              } catch (_) {
+                                if (!res.ok) throw new Error(res.status === 500 ? 'Erro no servidor ao enviar link. Tente de novo.' : `Erro ${res.status}`)
+                              }
                               if (!res.ok) throw new Error(data.error || 'Erro ao enviar link')
                               alert('✅ Sessão definida e link enviado!')
                             } else {
@@ -2559,7 +2579,13 @@ function WhatsAppChatContent() {
                                   sessionId: session.id,
                                 }),
                               })
-                              const data = await res.json()
+                              let data: { error?: string } = {}
+                              try {
+                                const text = await res.text()
+                                if (text.trim()) data = JSON.parse(text)
+                              } catch (_) {
+                                if (!res.ok) throw new Error(res.status === 500 ? 'Erro no servidor. Tente de novo.' : `Erro ${res.status}`)
+                              }
                               if (!res.ok) throw new Error(data.error || 'Erro ao enviar')
                               alert('✅ Opção enviada! A Carol continuará o fluxo automaticamente.')
                             }

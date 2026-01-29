@@ -31,18 +31,16 @@ export async function PUT(request: NextRequest) {
   const body = await request.json().catch(() => ({}))
   const flyer_url = typeof body.flyer_url === 'string' ? body.flyer_url.trim() : null
   const flyer_caption = typeof body.flyer_caption === 'string' ? body.flyer_caption.trim() : null
+  const flow_templates = body.flow_templates && typeof body.flow_templates === 'object' ? body.flow_templates : undefined
 
-  // Upsert por área
+  const payload: Record<string, unknown> = { area: 'nutri' }
+  if (body.flyer_url !== undefined) payload.flyer_url = flyer_url
+  if (body.flyer_caption !== undefined) payload.flyer_caption = flyer_caption
+  if (flow_templates !== undefined) payload.flow_templates = flow_templates
+
   const { data, error } = await supabaseAdmin
     .from('whatsapp_workshop_settings')
-    .upsert(
-      {
-        area: 'nutri',
-        flyer_url: flyer_url || null,
-        flyer_caption: flyer_caption || null,
-      },
-      { onConflict: 'area' }
-    )
+    .upsert(payload, { onConflict: 'area' })
     .select('*')
     .single()
 

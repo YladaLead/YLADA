@@ -16,6 +16,7 @@ import { cookies } from 'next/headers'
 import { isCarolAutomationDisabled } from '@/config/whatsapp-automation'
 import { sendRegistrationLinkAfterClass } from '@/lib/whatsapp-carol-ai'
 import { buildInscricoesMaps, findInscricaoByName } from '@/lib/whatsapp-conversation-enrichment'
+import { normalizePhoneBr } from '@/lib/phone-br'
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -159,14 +160,16 @@ export async function PATCH(
     // Quando atualizamos context (ex.: tags), atualizar TODAS as conversas com o mesmo telefone e área.
     // A listagem agrupa duplicatas e faz merge do context; se só atualizarmos uma linha, a outra continua
     // com as tags antigas e o merge faz a tag "voltar" (ex.: não conseguir tirar "Link Workshop").
+    // Usar normalizePhoneBr para cobrir 12 dígitos (55+DDD+8) → 13 (55+DDD+9+8) e todas as variantes.
     let idsToUpdate: string[] = [conversationId]
     if (updateData.context && existing.phone) {
       const area = (existing as any).area || 'nutri'
       const digits = String(existing.phone).replace(/\D/g, '')
       if (digits.length >= 10) {
-        const phone13 = digits.startsWith('55') && digits.length >= 13 ? digits : '55' + (digits.startsWith('0') ? digits.slice(1) : digits)
-        const phone12 = phone13.startsWith('55') && phone13.length === 13 ? phone13.slice(0, 4) + phone13.slice(5) : ''
-        const variants = [phone13, existing.phone].filter(Boolean) as string[]
+        const canonical = normalizePhoneBr(digits)
+        const phone13 = digits.startsWith('55') && digits.length >= 13 ? digits : (canonical.startsWith('55') && canonical.length >= 13 ? canonical : '55' + (digits.startsWith('0') ? digits.slice(1) : digits))
+        const phone12 = phone13.startsWith('55') && phone13.length === 13 ? phone13.slice(0, 4) + phone13.slice(5) : (canonical.startsWith('55') && canonical.length === 12 ? canonical : '')
+        const variants = [phone13, canonical, existing.phone, digits].filter(Boolean) as string[]
         if (phone12) variants.push(phone12)
         const { data: samePhone } = await supabaseAdmin
           .from('whatsapp_conversations')
