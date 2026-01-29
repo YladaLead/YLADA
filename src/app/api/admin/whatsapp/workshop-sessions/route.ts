@@ -67,7 +67,7 @@ export async function POST(request: NextRequest) {
   if (authResult instanceof NextResponse) return authResult
 
   const body = await request.json().catch(() => ({}))
-  const title = typeof body.title === 'string' && body.title.trim() ? body.title.trim() : 'Aula Prática ao Vivo (Agenda Instável)'
+  const title = typeof body.title === 'string' && body.title.trim() ? body.title.trim() : 'Aula prática exclusiva para nutricionistas'
   const starts_at = typeof body.starts_at === 'string' ? body.starts_at : null
   const zoom_link = typeof body.zoom_link === 'string' ? body.zoom_link.trim() : ''
   const is_active = body.is_active !== false

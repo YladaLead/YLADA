@@ -15,14 +15,14 @@ Para gerar sessões automaticamente, o sistema precisa dos links do Zoom das **9
 1. **Acesse:** `/admin/whatsapp/workshop`
 
 2. **Adicione uma sessão às 9:00:**
-   - Título: `Aula Prática ao Vivo (Agenda Instável)`
+- Título: `Aula prática exclusiva para nutricionistas`
    - Data e hora: Escolha qualquer dia às **09:00**
    - Link Zoom: Cole o link do Zoom das 9:00
    - Marque como **✅ Aberta**
    - Clique em **"+ Adicionar"**
 
 3. **Adicione uma sessão às 15:00:**
-   - Título: `Aula Prática ao Vivo (Agenda Instável)`
+- Título: `Aula prática exclusiva para nutricionistas`
    - Data e hora: Escolha qualquer dia às **15:00**
    - Link Zoom: Cole o link do Zoom das 15:00
    - Marque como **✅ Aberta**
@@ -81,7 +81,7 @@ Se quiser verificar diretamente no Supabase, a tabela é:
 
 **Campos importantes:**
 - `area`: `'nutri'` (fixo)
-- `title`: `'Aula Prática ao Vivo (Agenda Instável)'`
+- `title`: `'Aula prática exclusiva para nutricionistas'`
 - `starts_at`: Data/hora da sessão (em UTC)
 - `zoom_link`: Link completo do Zoom
 - `is_active`: `true` (para ser detectada)

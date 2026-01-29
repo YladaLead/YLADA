@@ -246,7 +246,7 @@ Olá {NOME}! Em breve começaremos juntos! ⏰
 ### 6.3 Tipo “sala aberta”
 
 ```text
-A sala está aberta! 🎉
+✅ A sala está aberta!
 
 🔗 {LINK_ZOOM}
 ```

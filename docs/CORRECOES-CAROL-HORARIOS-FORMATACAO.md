@@ -175,7 +175,7 @@ Agora os logs mostram:
   count: 2,
   sessions: [
     {
-      title: "Aula Prática ao Vivo (Agenda Instável)",
+      title: "Aula prática exclusiva para nutricionistas",
       starts_at: "2026-01-26T13:00:00.000Z",
       zoom_link: "https://..."
     }

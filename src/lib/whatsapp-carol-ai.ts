@@ -3054,7 +3054,7 @@ Nos vemos em breve! 😊
         else if (!context[notificationKey]?.sent_10min && 
                  ((minutesDiff >= 10 && minutesDiff < 12) ||
                   (isToday && minutesDiff >= 5 && minutesDiff < 12 && !context[notificationKey]?.sent_2h))) {
-          message = `A sala está aberta! 🎉
+          message = `✅ A sala está aberta!
 
 🔗 ${session.zoom_link}
 `

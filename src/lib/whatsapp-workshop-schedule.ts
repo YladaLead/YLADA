@@ -89,7 +89,7 @@ export async function generateWorkshopSessions(weeksAhead: number = 4): Promise<
       
       if (mondayDate > now && zoomLink9h) {
         sessionsToCreate.push({
-          title: 'Aula Prática ao Vivo (Agenda Instável)',
+          title: 'Aula prática exclusiva para nutricionistas',
           starts_at: mondayDate.toISOString(),
           zoom_link: zoomLink9h,
         })
@@ -105,7 +105,7 @@ export async function generateWorkshopSessions(weeksAhead: number = 4): Promise<
         
         if (dayDate > now && zoomLink9h) {
           sessionsToCreate.push({
-            title: 'Aula Prática ao Vivo (Agenda Instável)',
+            title: 'Aula prática exclusiva para nutricionistas',
             starts_at: dayDate.toISOString(),
             zoom_link: zoomLink9h,
           })
@@ -122,7 +122,7 @@ export async function generateWorkshopSessions(weeksAhead: number = 4): Promise<
         
         if (dayDate > now && zoomLink15h) {
           sessionsToCreate.push({
-            title: 'Aula Prática ao Vivo (Agenda Instável)',
+            title: 'Aula prática exclusiva para nutricionistas',
             starts_at: dayDate.toISOString(),
             zoom_link: zoomLink15h,
           })
@@ -138,7 +138,7 @@ export async function generateWorkshopSessions(weeksAhead: number = 4): Promise<
       
       if (wednesdayDate > now) {
         sessionsToCreate.push({
-          title: 'Aula Prática ao Vivo (Agenda Instável)',
+          title: 'Aula prática exclusiva para nutricionistas',
           starts_at: wednesdayDate.toISOString(),
           zoom_link: zoomLink20h,
         })

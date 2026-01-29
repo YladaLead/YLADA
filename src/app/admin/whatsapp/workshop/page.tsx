@@ -57,7 +57,7 @@ function WorkshopContent() {
   const [flyerUrl, setFlyerUrl] = useState('')
   const [flyerCaption, setFlyerCaption] = useState('')
 
-  const [newTitle, setNewTitle] = useState('Aula Prática ao Vivo (Agenda Instável)')
+  const [newTitle, setNewTitle] = useState('Aula prática exclusiva para nutricionistas')
   const [newStartsAt, setNewStartsAt] = useState('')
   const [newZoomLink, setNewZoomLink] = useState('')
   const [newActive, setNewActive] = useState(true)

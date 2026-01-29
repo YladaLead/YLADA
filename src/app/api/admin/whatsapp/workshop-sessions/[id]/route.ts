@@ -13,7 +13,7 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
   const body = await request.json().catch(() => ({}))
   const update: any = {}
 
-  if (typeof body.title === 'string') update.title = body.title.trim() || 'Aula Prática ao Vivo (Agenda Instável)'
+  if (typeof body.title === 'string') update.title = body.title.trim() || 'Aula prática exclusiva para nutricionistas'
   if (typeof body.starts_at === 'string' && body.starts_at.trim()) update.starts_at = body.starts_at.trim()
   if (typeof body.zoom_link === 'string') update.zoom_link = body.zoom_link.trim()
   if (typeof body.is_active === 'boolean') update.is_active = body.is_active
