@@ -70,20 +70,39 @@ export async function POST(
       return NextResponse.json({ error: 'Conversa não encontrada' }, { status: 404 })
     }
 
-    // Próxima sessão ativa
-    const { data: session } = await supabaseAdmin
-      .from('whatsapp_workshop_sessions')
-      .select('*')
-      .eq('area', 'nutri')
-      .eq('is_active', true)
-      .gte('starts_at', new Date().toISOString())
-      .order('starts_at', { ascending: true })
-      .limit(1)
-      .maybeSingle()
+    const ctx = conversation.context && typeof conversation.context === 'object' && !Array.isArray(conversation.context)
+      ? conversation.context
+      : {}
+    const existingSessionId = (ctx as any).workshop_session_id as string | undefined
+
+    // Usar sessão já definida na conversa (ex.: admin colocou manualmente "amanhã 15h") ou próxima ativa
+    let session: { id: string; title: string; starts_at: string; zoom_link: string } | null = null
+    if (existingSessionId) {
+      const { data: existingSession } = await supabaseAdmin
+        .from('whatsapp_workshop_sessions')
+        .select('id, title, starts_at, zoom_link, is_active')
+        .eq('id', existingSessionId)
+        .single()
+      if (existingSession && existingSession.zoom_link) {
+        session = existingSession
+      }
+    }
+    if (!session) {
+      const { data: nextSession } = await supabaseAdmin
+        .from('whatsapp_workshop_sessions')
+        .select('*')
+        .eq('area', 'nutri')
+        .eq('is_active', true)
+        .gte('starts_at', new Date().toISOString())
+        .order('starts_at', { ascending: true })
+        .limit(1)
+        .maybeSingle()
+      session = nextSession
+    }
 
     if (!session) {
       return NextResponse.json(
-        { error: 'Nenhuma sessão ativa encontrada. Cadastre a agenda no admin.' },
+        { error: 'Nenhuma sessão ativa encontrada. Cadastre a agenda no admin ou defina uma sessão na conversa.' },
         { status: 400 }
       )
     }
@@ -167,15 +186,24 @@ export async function POST(
       is_bot_response: false,
     })
 
-    // Guardar referência da sessão no context da conversa
+    // Guardar sessão e tags (recebeu_link_workshop, agendou_aula) no context da conversa
     const prevContext =
       conversation.context && typeof conversation.context === 'object' && !Array.isArray(conversation.context)
         ? conversation.context
         : {}
+    const prevTags = Array.isArray((prevContext as any).tags) ? (prevContext as any).tags : []
+    const newTags = [...new Set([...prevTags, 'recebeu_link_workshop', 'agendou_aula'])]
     await supabaseAdmin
       .from('whatsapp_conversations')
       .update({
-        context: { ...prevContext, workshop_session_id: session.id },
+        context: {
+          ...prevContext,
+          workshop_session_id: session.id,
+          scheduled_date: session.starts_at,
+          tags: newTags,
+        },
+        last_message_at: new Date().toISOString(),
+        last_message_from: 'agent',
       })
       .eq('id', conversationId)
 

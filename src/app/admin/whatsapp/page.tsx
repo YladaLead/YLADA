@@ -75,6 +75,7 @@ function WhatsAppChatContent() {
   const [carolDiagnostic, setCarolDiagnostic] = useState<any>(null)
   const [activatingCarol, setActivatingCarol] = useState(false)
   const [sessionSelectModalOpen, setSessionSelectModalOpen] = useState(false)
+  const [sessionModalPurpose, setSessionModalPurpose] = useState<'opcao' | 'link'>('opcao')
   const [availableSessions, setAvailableSessions] = useState<any[]>([])
   const [loadingSessions, setLoadingSessions] = useState(false)
   const [messagePhaseModalOpen, setMessagePhaseModalOpen] = useState(false)
@@ -1105,7 +1106,8 @@ function WhatsAppChatContent() {
                           onClick={async () => {
                             if (!selectedConversation) return
                             
-                            // Buscar sessões disponíveis
+                            // Buscar sessões disponíveis (modal para enviar opção)
+                            setSessionModalPurpose('opcao')
                             setLoadingSessions(true)
                             setSessionSelectModalOpen(true)
                             
@@ -1209,6 +1211,7 @@ function WhatsAppChatContent() {
                                 const json = await res.json().catch(() => ({}))
                                 if (!res.ok) throw new Error(json.error || 'Erro ao enviar convite')
                                 setSendOptionsOpen(false)
+                                alert('✅ Flyer e link enviados!')
                                 await loadMessages(selectedConversation.id)
                                 await loadConversations()
                               } catch (err: any) {
@@ -1220,9 +1223,41 @@ function WhatsAppChatContent() {
                             className="w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 flex items-center gap-2"
                           >
                             <span>📅</span>
-                            <span>Enviar flyer + detalhes da próxima aula</span>
+                            <span>Enviar flyer + link da aula</span>
                           </button>
-                          {/* Espaço para futuras opções de envio */}
+                          <p className="px-4 py-1 text-xs text-gray-500 border-t border-gray-100">
+                            Usa a sessão já definida na conversa ou a próxima ativa.
+                          </p>
+                          <button
+                            type="button"
+                            disabled={sendingWorkshopInvite}
+                            onClick={async () => {
+                              if (!selectedConversation) return
+                              setSendOptionsOpen(false)
+                              setSessionModalPurpose('link')
+                              setLoadingSessions(true)
+                              setSessionSelectModalOpen(true)
+                              try {
+                                const res = await fetch('/api/admin/whatsapp/workshop-sessions?area=nutri&onlyActive=true', { credentials: 'include' })
+                                const data = await res.json()
+                                const sessions = (data.sessions || []).filter((s: any) => new Date(s.starts_at) > new Date())
+                                setAvailableSessions(sessions)
+                                if (sessions.length === 0) {
+                                  alert('Não há sessões futuras. Crie em /admin/whatsapp/workshop')
+                                  setSessionSelectModalOpen(false)
+                                }
+                              } catch (err: any) {
+                                alert(err.message || 'Erro ao buscar sessões')
+                                setSessionSelectModalOpen(false)
+                              } finally {
+                                setLoadingSessions(false)
+                              }
+                            }}
+                            className="w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 flex items-center gap-2 border-t border-gray-100"
+                          >
+                            <span>📅</span>
+                            <span>Definir sessão e enviar link agora</span>
+                          </button>
                         </div>
                       )}
                     </div>
@@ -1312,8 +1347,9 @@ function WhatsAppChatContent() {
                           <button
                             type="button"
                             onClick={() => {
-                              const current = ((selectedConversation.context as any)?.tags || [])
-                              setSelectedTags([...current])
+                              const conv = conversations.find((c) => c.id === selectedConversation.id) || selectedConversation
+                              const current = ((conv.context as any)?.tags || [])
+                              setSelectedTags(Array.isArray(current) ? [...current] : [])
                               setNewTagInput('')
                               setTagsModalOpen(true)
                               setContactMenuOpen(false)
@@ -2426,9 +2462,9 @@ function WhatsAppChatContent() {
                     try {
                     await patchConversation(selectedConversation.id, { context: { tags: selectedTags } })
                     setTagsModalOpen(false)
-                    // Não chamar loadConversations() aqui: patchConversation já atualiza lista e conversa selecionada com a resposta da API
+                    // patchConversation já atualiza lista e conversa selecionada com a resposta da API
                   } catch (err: any) {
-                    alert(err.message || 'Erro ao salvar tags')
+                    alert('Erro ao salvar tags: ' + (err?.message || 'Tente novamente.'))
                   }
                 }}
                 className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
@@ -2446,7 +2482,9 @@ function WhatsAppChatContent() {
           <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] flex flex-col">
             {/* Header */}
             <div className="flex items-center justify-between p-6 border-b border-gray-200">
-              <h2 className="text-xl font-bold text-gray-900">📅 Escolher Sessão para Enviar</h2>
+              <h2 className="text-xl font-bold text-gray-900">
+                {sessionModalPurpose === 'link' ? '📅 Definir sessão e enviar link' : '📅 Escolher Sessão para Enviar'}
+              </h2>
               <button
                 type="button"
                 onClick={() => {
@@ -2485,34 +2523,52 @@ function WhatsAppChatContent() {
                     const weekday = date.toLocaleDateString('pt-BR', { weekday: 'long' })
                     const dateStr = date.toLocaleDateString('pt-BR')
                     const timeStr = date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+                    const isLinkMode = sessionModalPurpose === 'link'
                     
                     return (
                       <button
                         key={session.id}
                         type="button"
                         onClick={async () => {
+                          if (!selectedConversation) return
                           try {
                             setSending(true)
-                            const res = await fetch('/api/admin/whatsapp/carol/enviar-opcao', {
-                              method: 'POST',
-                              headers: { 'Content-Type': 'application/json' },
-                              credentials: 'include',
-                              body: JSON.stringify({
-                                conversationId: selectedConversation.id,
-                                sessionId: session.id,
-                              }),
-                            })
-                            
-                            const data = await res.json()
-                            if (!res.ok) throw new Error(data.error || 'Erro ao enviar')
-                            
-                            alert('✅ Opção enviada! A Carol continuará o fluxo automaticamente.')
+                            if (isLinkMode) {
+                              // Definir sessão na conversa e enviar flyer + link
+                              await patchConversation(selectedConversation.id, {
+                                context: {
+                                  ...(selectedConversation.context as any),
+                                  workshop_session_id: session.id,
+                                  scheduled_date: session.starts_at,
+                                },
+                              })
+                              const res = await fetch(
+                                `/api/whatsapp/conversations/${selectedConversation.id}/send-workshop-invite`,
+                                { method: 'POST', credentials: 'include' }
+                              )
+                              const data = await res.json()
+                              if (!res.ok) throw new Error(data.error || 'Erro ao enviar link')
+                              alert('✅ Sessão definida e link enviado!')
+                            } else {
+                              const res = await fetch('/api/admin/whatsapp/carol/enviar-opcao', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                credentials: 'include',
+                                body: JSON.stringify({
+                                  conversationId: selectedConversation.id,
+                                  sessionId: session.id,
+                                }),
+                              })
+                              const data = await res.json()
+                              if (!res.ok) throw new Error(data.error || 'Erro ao enviar')
+                              alert('✅ Opção enviada! A Carol continuará o fluxo automaticamente.')
+                            }
                             setSessionSelectModalOpen(false)
                             setAvailableSessions([])
                             await loadMessages(selectedConversation.id)
                             await loadConversations()
                           } catch (err: any) {
-                            alert(err.message || 'Erro ao enviar opção')
+                            alert(err.message || (isLinkMode ? 'Erro ao enviar link' : 'Erro ao enviar opção'))
                           } finally {
                             setSending(false)
                           }
@@ -2533,7 +2589,7 @@ function WhatsAppChatContent() {
                             )}
                           </div>
                           <div className="text-purple-600 font-medium">
-                            {sending ? 'Enviando...' : '→'}
+                            {sending ? 'Enviando...' : isLinkMode ? 'Enviar link' : '→'}
                           </div>
                         </div>
                       </button>
