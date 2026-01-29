@@ -710,6 +710,14 @@ function WhatsAppChatContent() {
                 📅
               </Link>
               <Link
+                href="/admin/whatsapp/cadastros-workshop"
+                className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg text-amber-700 hover:text-amber-800 hover:bg-amber-50 active:bg-amber-100 text-lg"
+                title="Cadastros do workshop (disparo manual)"
+                aria-label="Cadastros do workshop"
+              >
+                🧾
+              </Link>
+              <Link
                 href="/admin/whatsapp/fluxo"
                 className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg text-purple-600 hover:text-purple-700 hover:bg-purple-50 active:bg-purple-100 text-lg"
                 title="Fluxo e textos (editar mensagens do fluxo)"
