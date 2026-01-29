@@ -1960,9 +1960,21 @@ Nos vemos em breve! 😊
     } else if (isShortNeutralReply && (formAlreadySentWelcome || workshopSessions.length > 0)) {
       // Exceção: remarketing "não participou" — pessoa respondeu que TEM INTERESSE ("Sim", "Quero") → enviar opções de aula, NÃO "Qualquer dúvida..."
       const isRemarketingNaoParticipou = tags.includes('nao_participou_aula') || tags.includes('remarketing_enviado')
-      const isPositiveInterestReply = /^(sim|quero|tenho\s+interesse|gostaria|quero\s+sim|com\s+certeza|pode\s+ser|pode\s+encaixar|claro|por\s+favor|tem\s+interesse)$/i.test(msgNorm.trim())
+      const isPositiveInterestReply = /^(sim|quero|tenho\s+interesse|tenho\s+sim|gostaria|quero\s+sim|com\s+certeza|pode\s+ser|pode\s+encaixar|claro|por\s+favor|tem\s+interesse)$/i.test(msgNorm.trim())
       if (isRemarketingNaoParticipou && isPositiveInterestReply && workshopSessions.length > 0) {
-        carolInstruction = 'A pessoa acabou de responder que TEM INTERESSE à sua pergunta "Você ainda tem interesse? Gostaria que eu te encaixasse numa nova data?". Ela disse Sim/Quero/Tenho interesse. Você DEVE enviar as opções de aula (dia e hora) disponíveis no formato das opções e perguntar qual horário ela prefere. NÃO responda com "Qualquer dúvida, é só me chamar". Inclua as opções de aula (Opção 1, Opção 2 com dia e hora).'
+        carolInstruction = `A pessoa acabou de responder que TEM INTERESSE ao remarketing ("Você ainda tem interesse em participar?"). Ela disse algo como "Tenho sim".
+
+Você DEVE responder de forma curta e objetiva, SEM saudação e SEM boas-vindas. PROIBIDO escrever "Oi", "tudo bem", "Seja bem-vinda" ou "Eu sou a Carol". NÃO faça explicação longa.
+
+Responda exatamente neste formato:
+
+A próxima aula é prática e vai te ajudar a ter mais constância pra preencher sua agenda.
+
+As próximas aulas acontecerão nos seguintes dias e horários:
+
+[Inclua Opção 1 e Opção 2 com dia e hora, UMA VEZ cada]
+
+Responde 1 ou 2 😊`
       } else {
         carolInstruction = 'A pessoa só confirmou/entendeu (ex.: "Entendi", "Ok", "Certo"). NÃO repita opções nem boas-vindas; responda em UMA frase curta e amigável, tipo "Qualquer dúvida, é só me chamar! 😊" ou "Fico no aguardo da sua escolha! 💚".'
       }
