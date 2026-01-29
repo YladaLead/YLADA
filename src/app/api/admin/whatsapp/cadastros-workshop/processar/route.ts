@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireApiAuth } from '@/lib/api-auth'
 import { supabaseAdmin } from '@/lib/supabase'
 import { createZApiClient } from '@/lib/z-api'
-import { generateCarolResponse } from '@/lib/whatsapp-carol-ai'
+import { getFlowTemplate, applyTemplate } from '@/lib/whatsapp-flow-templates'
 
 function digits(input: string): string {
   return String(input || '').replace(/\D/g, '')
@@ -15,6 +15,12 @@ function normalizePhone(raw: string): string {
   // se for BR sem DDI (10/11), adiciona 55
   if ((d.length === 10 || d.length === 11) && !d.startsWith('55')) d = `55${d}`
   return d
+}
+
+function buildIntroQuestion(name: string | null | undefined): string {
+  const firstName = (name || '').trim().split(/\s+/)[0] || ''
+  const hi = firstName ? `Oi, ${firstName} 😊` : 'Oi! 😊'
+  return `${hi}\nSou a Carol, da YLADA Nutri.\n\nVi sua inscrição na aula e queria te perguntar rapidinho:\nvocê já começou a atender ou ainda não?\n\n1️⃣ ainda não comecei\n2️⃣ comecei, mas bem devagar\n3️⃣ já atendo com mais frequência\n\nMe responde só o número 🙂`
 }
 
 /**
@@ -201,24 +207,12 @@ export async function POST(request: NextRequest) {
           .eq('sender_name', 'Carol - Secretária')
           .limit(1)
 
-        // Se não tem mensagem, enviar boas-vindas
+        // Se não tem mensagem, enviar 1ª mensagem curta (diagnóstico 1/2/3)
         if (!existingMessages || existingMessages.length === 0) {
-          if (workshopSessions.length === 0) {
-            errors++
-            details.push(`❌ ${name}: Nenhuma sessão ativa encontrada (crie a agenda em /admin/whatsapp/workshop)`)
-            continue
-          }
-
-          const message = await generateCarolResponse(
-            'Olá, quero agendar uma aula',
-            [],
-            {
-              tags: newTags,
-              workshopSessions,
-              leadName: name,
-              isFirstMessage: true
-            }
-          )
+          const introTemplate = await getFlowTemplate('nutri', 'welcome_form_intro_question')
+          const message = introTemplate
+            ? applyTemplate(introTemplate, { nome: name })
+            : buildIntroQuestion(name)
 
           const result = await client.sendTextMessage({
             phone,
@@ -259,6 +253,7 @@ export async function POST(request: NextRequest) {
               tags: newTags,
               manual_welcome_sent_at: (context as any)?.manual_welcome_sent_at || new Date().toISOString(),
               manual_welcome_source: 'admin_cadastros_workshop',
+              workshop_intro_stage: (context as any)?.workshop_intro_stage || 'qual_nivel',
             },
             last_message_at: new Date().toISOString(),
             last_message_from: 'bot'

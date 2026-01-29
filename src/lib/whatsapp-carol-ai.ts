@@ -1143,6 +1143,61 @@ export async function processIncomingMessageWithCarol(
     const hasScheduled = tags.includes('recebeu_link_workshop') || workshopSessionId
     const scheduledDate = context.scheduled_date || null
 
+    // 4.5 Fluxo curto (diagnóstico): se a 1ª mensagem foi a pergunta 1/2/3, NÃO tratar 1/2/3 como escolha de horário.
+    const introStage = (context as any)?.workshop_intro_stage as string | undefined
+    const msgNormStage = message.trim().toLowerCase().replace(/\s+/g, ' ')
+    const matchNivel = msgNormStage.match(/^\s*(1|2|3)\s*$/)
+    if (introStage === 'qual_nivel' && matchNivel) {
+      const nivel = matchNivel[1]
+      const prevTags = Array.isArray((context as any)?.tags) ? (context as any).tags : []
+      const tagNivel =
+        nivel === '1' ? 'nivel_nao_comecou' : nivel === '2' ? 'nivel_devagar' : 'nivel_frequente'
+      const nextTags = [...new Set([...prevTags, tagNivel, 'nivel_identificado'])]
+
+      await supabaseAdmin
+        .from('whatsapp_conversations')
+        .update({
+          context: {
+            ...(context as any),
+            tags: nextTags,
+            workshop_intro_stage: 'escolher_horario',
+            workshop_nivel: nivel,
+          },
+        })
+        .eq('id', conversationId)
+
+      const optText = buildWorkshopOptionsText(workshopSessions, 'bold')
+      const reply =
+        nivel === '1'
+          ? `Perfeito 😊 Isso é mais comum do que você imagina.\n\nAgora me diz: qual horário fica melhor pra você?\n\n${optText}\n\nMe responde com 1 ou 2 🙂`
+          : nivel === '2'
+            ? `Entendi 😊 Esse começo é o mais confuso mesmo.\n\nQual horário fica melhor pra você?\n\n${optText}\n\nMe responde com 1 ou 2 🙂`
+            : `Perfeito 👍\n\nQual horário fica melhor pra você?\n\n${optText}\n\nMe responde com 1 ou 2 🙂`
+
+      // Enviar resposta curta e sair (não continua para detecção de escolha de opção aqui)
+      const instanceToSend = await getZApiInstance(area || 'nutri')
+      if (instanceToSend?.token) {
+        await sendWhatsAppMessage(phone, reply, instanceToSend.instance_id, instanceToSend.token)
+        await supabaseAdmin.from('whatsapp_messages').insert({
+          conversation_id: conversationId,
+          instance_id: instanceToSend.id,
+          z_api_message_id: null,
+          sender_type: 'bot',
+          sender_name: 'Carol - Secretária',
+          message: reply,
+          message_type: 'text',
+          status: 'sent',
+          is_bot_response: true,
+        })
+        await supabaseAdmin
+          .from('whatsapp_conversations')
+          .update({ last_message_at: new Date().toISOString(), last_message_from: 'bot' })
+          .eq('id', conversationId)
+      }
+
+      return { success: true, response: reply }
+    }
+
     // 5. Verificar se a pessoa está escolhendo uma opção de aula
     // Detectar escolha: "1", "opção 1", "primeira", "segunda às 10:00", etc
     let selectedSession: { id: string; title: string; starts_at: string; zoom_link: string } | null = null
