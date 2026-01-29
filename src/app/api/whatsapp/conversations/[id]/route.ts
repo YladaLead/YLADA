@@ -112,6 +112,10 @@ export async function PATCH(
       const prevContext = normalizeContext(existing.context)
       const prevTags = Array.isArray(prevContext.tags) ? prevContext.tags : []
       const nextContext = { ...prevContext, ...normalizeContext(context) }
+      // Garantir substituição explícita do array de tags (remover tag = persistir a lista sem ela)
+      if (context.tags !== undefined) {
+        nextContext.tags = Array.isArray(context.tags) ? [...context.tags] : []
+      }
       const nextTags = Array.isArray(nextContext.tags) ? nextContext.tags : []
       // Ao salvar nome/display_name: buscar telefone no cadastro e preencher display_phone
       const nomeParaBusca = (nextContext.display_name as string) || updateData.name || (existing.name as string)

@@ -177,11 +177,13 @@ export async function diagnoseMultipleConversations(
 }
 
 /**
- * Ativa Carol em uma conversa (adiciona tags e prepara contexto)
+ * Ativa Carol em uma conversa (adiciona tags e prepara contexto).
+ * @param force - Se true, remove carol_disabled/atendimento_manual e ativa mesmo quando o diagnóstico bloqueia por "atendimento manual"
  */
 export async function activateCarolInConversation(
   conversationId: string,
-  tagsToAdd: string[] = []
+  tagsToAdd: string[] = [],
+  force: boolean = false
 ): Promise<{ success: boolean; error?: string }> {
   try {
     // 1. Diagnosticar primeiro
@@ -191,7 +193,10 @@ export async function activateCarolInConversation(
       return { success: false, error: 'Conversa não encontrada' }
     }
 
-    if (!diagnostic.canActivateCarol) {
+    const blockedByManual = !diagnostic.canActivateCarol && (
+      diagnostic.reason === 'Conversa marcada para atendimento manual'
+    )
+    if (!diagnostic.canActivateCarol && !(force && blockedByManual)) {
       return { 
         success: false, 
         error: diagnostic.reason || 'Não é possível ativar Carol nesta conversa' 
@@ -210,7 +215,13 @@ export async function activateCarolInConversation(
     }
 
     const currentContext = conversation.context || {}
-    const currentTags = Array.isArray(currentContext.tags) ? currentContext.tags : []
+    let currentTags = Array.isArray(currentContext.tags) ? currentContext.tags : []
+    // Forçar ativação: remover tags que bloqueiam
+    if (force && blockedByManual) {
+      currentTags = currentTags.filter(
+        (t: string) => t !== 'carol_disabled' && t !== 'atendimento_manual'
+      )
+    }
 
     // 3. Combinar tags sugeridas + tags fornecidas + tags atuais (sem duplicatas)
     const allTags = [...new Set([
@@ -249,7 +260,8 @@ export async function activateCarolInConversation(
  */
 export async function activateCarolInMultipleConversations(
   conversationIds: string[],
-  tagsToAdd: string[] = []
+  tagsToAdd: string[] = [],
+  force: boolean = false
 ): Promise<{ 
   success: number
   errors: number
@@ -260,7 +272,7 @@ export async function activateCarolInMultipleConversations(
   let errors = 0
 
   for (const id of conversationIds) {
-    const result = await activateCarolInConversation(id, tagsToAdd)
+    const result = await activateCarolInConversation(id, tagsToAdd, force)
     results.push({
       conversationId: id,
       success: result.success,

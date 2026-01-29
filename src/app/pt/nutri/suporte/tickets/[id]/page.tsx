@@ -41,6 +41,7 @@ export default function TicketDetailPage() {
   const [isAgent, setIsAgent] = useState(false)
 
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const sendingRef = useRef(false)
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -130,11 +131,12 @@ export default function TicketDetailPage() {
 
   const sendMessage = async () => {
     if (!messageInput.trim() || sending) return
+    if (sendingRef.current) return
+    sendingRef.current = true
+    setSending(true)
+    setError(null)
 
     try {
-      setSending(true)
-      setError(null)
-
       const response = await fetch('/api/nutri/support/messages', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -153,14 +155,22 @@ export default function TicketDetailPage() {
       const data = await response.json()
       if (data.success) {
         setMessageInput('')
-        // Recarregar mensagens
+        // Uma única fonte: só recarregar mensagens (evita duplicar com loadTicket)
         await loadMessages()
-        await loadTicket()
+        // Atualizar dados do ticket (status, etc.) sem sobrescrever mensagens
+        const ticketRes = await fetch(`/api/nutri/support/tickets/${ticketId}`, { credentials: 'include' })
+        if (ticketRes.ok) {
+          const ticketData = await ticketRes.json()
+          if (ticketData.success && ticketData.ticket) {
+            setTicket((prev) => (prev ? { ...prev, ...ticketData.ticket, messages: prev.messages } : { ...ticketData.ticket, messages: [] }))
+          }
+        }
       }
     } catch (err: any) {
       console.error('Erro ao enviar mensagem:', err)
       setError(err.message || 'Erro ao enviar mensagem')
     } finally {
+      sendingRef.current = false
       setSending(false)
     }
   }

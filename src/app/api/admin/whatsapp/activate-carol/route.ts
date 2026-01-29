@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { conversationIds, tags } = body
+    const { conversationIds, tags, force } = body
 
     if (!conversationIds || !Array.isArray(conversationIds) || conversationIds.length === 0) {
       return NextResponse.json(
@@ -25,10 +25,11 @@ export async function POST(request: NextRequest) {
     }
 
     const tagsToAdd = Array.isArray(tags) ? tags : []
+    const forceActivate = force === true
 
     // Se for apenas uma conversa, usar função simples
     if (conversationIds.length === 1) {
-      const result = await activateCarolInConversation(conversationIds[0], tagsToAdd)
+      const result = await activateCarolInConversation(conversationIds[0], tagsToAdd, forceActivate)
       
       if (!result.success) {
         return NextResponse.json(
@@ -44,7 +45,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Múltiplas conversas
-    const result = await activateCarolInMultipleConversations(conversationIds, tagsToAdd)
+    const result = await activateCarolInMultipleConversations(conversationIds, tagsToAdd, forceActivate)
 
     return NextResponse.json({
       success: result.success,

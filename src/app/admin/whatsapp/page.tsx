@@ -2033,7 +2033,6 @@ function WhatsAppChatContent() {
                   <p className="text-xs text-red-600 mt-1">{carolDiagnostic.reason}</p>
                 </div>
               )}
-
               {carolDiagnostic.canActivateCarol && (
                 <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
                   <p className="text-sm text-green-700 font-medium">✅ Pronto para ativar Carol</p>
@@ -2045,7 +2044,7 @@ function WhatsAppChatContent() {
             </div>
 
             {/* Footer */}
-            <div className="flex items-center justify-end gap-3 p-6 border-t border-gray-200">
+            <div className="flex items-center justify-end gap-3 p-6 border-t border-gray-200 flex-wrap">
               <button
                 type="button"
                 onClick={() => {
@@ -2056,6 +2055,47 @@ function WhatsAppChatContent() {
               >
                 Cancelar
               </button>
+              {/* Forçar ativação: quando bloqueado só por "atendimento manual", permitir remover bloqueio */}
+              {!carolDiagnostic.canActivateCarol && carolDiagnostic.reason === 'Conversa marcada para atendimento manual' && (
+                <button
+                  type="button"
+                  onClick={async () => {
+                    if (!selectedConversation) return
+                    if (!confirm('Remover a marca de atendimento manual e ativar a Carol nesta conversa?')) return
+                    try {
+                      setActivatingCarol(true)
+                      const res = await fetch('/api/admin/whatsapp/activate-carol', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        credentials: 'include',
+                        body: JSON.stringify({
+                          conversationIds: [selectedConversation.id],
+                          tags: carolDiagnostic.suggestedTags,
+                          force: true,
+                        }),
+                      })
+                      const data = await res.json()
+                      if (data.success || data.message) {
+                        alert('✅ Carol ativada com sucesso!')
+                        setCarolModalOpen(false)
+                        setCarolDiagnostic(null)
+                        await loadConversations()
+                        if (selectedConversation) await loadMessages(selectedConversation.id)
+                      } else {
+                        alert(data.error || 'Erro ao ativar Carol')
+                      }
+                    } catch (err: any) {
+                      alert(err.message || 'Erro ao ativar Carol')
+                    } finally {
+                      setActivatingCarol(false)
+                    }
+                  }}
+                  disabled={activatingCarol}
+                  className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 disabled:opacity-50"
+                >
+                  {activatingCarol ? 'Ativando...' : '🔓 Remover bloqueio e ativar Carol'}
+                </button>
+              )}
               {carolDiagnostic.canActivateCarol && (
                 <button
                   type="button"
@@ -2383,10 +2423,10 @@ function WhatsAppChatContent() {
               <button
                 type="button"
                 onClick={async () => {
-                  try {
+                    try {
                     await patchConversation(selectedConversation.id, { context: { tags: selectedTags } })
                     setTagsModalOpen(false)
-                    loadConversations() // Atualizar lista
+                    // Não chamar loadConversations() aqui: patchConversation já atualiza lista e conversa selecionada com a resposta da API
                   } catch (err: any) {
                     alert(err.message || 'Erro ao salvar tags')
                   }

@@ -341,6 +341,10 @@ QUANDO ENVIAR OPÇÕES DE AULA:
 - Apenas mostre dias e horários
 - Quando a pessoa escolher uma opção, você enviará o link específico
 
+QUANDO A PESSOA ESCOLHE UMA OPÇÃO (1, 2, Opção 1, Opção 2, 15:00, 09:00, etc.):
+- O SISTEMA envia o link do Zoom automaticamente. Você NÃO deve responder com "Ótima escolha!" seguido da lista de opções.
+- NUNCA repita as opções (Opção 1, Opção 2 com dia/hora) quando a pessoa já escolheu. Se por algum motivo você for acionada nesse momento, responda APENAS uma frase curta: "Perfeito! Você já vai receber o link em instantes. 😊" — nada mais.
+
 IMPORTANTE - SUGERIR SESSÕES ALTERNATIVAS:
 - Se a pessoa mencionar preferência por "noite", "tarde" ou "manhã" e as opções mostradas não corresponderem, você DEVE sugerir a sessão que melhor se encaixa
 - Exemplo: Se pessoa diz "prefiro à noite" e você mostrou apenas opções de manhã/tarde, sugira a sessão noturna (quarta 20h se existir)
@@ -434,10 +438,11 @@ REGRA DE OURO - INSTRUÇÃO E SITUAÇÃO:
 - Exemplo de instrução: se disser "responda em uma frase curta, não repita opções", você NÃO pode enviar opções nem boas-vindas
 
 QUANDO A PESSOA SÓ CONFIRMOU OU ENTENDEU:
-- Se a pessoa disse apenas "Entendi", "Ok", "Certo", "Beleza", "Sim", "Tá", "Pronto" ou algo muito curto confirmando:
+- Se a pessoa disse apenas "Entendi", "Ok", "Certo", "Beleza", "Tá", "Pronto" ou algo muito curto confirmando (e NÃO está escolhendo opção):
   → NÃO repita opções de aula
   → NÃO repita boas-vindas nem explicação da aula
   → Responda em UMA frase curta e amigável, ex.: "Qualquer dúvida, é só me chamar! 😊" ou "Fico no aguardo! 💚"
+- Se a pessoa disse "1", "2", "Opção 1", "Opção 2" ou um horário (ex.: 15:00): ela está ESCOLHENDO, não só confirmando. O sistema envia o link. NÃO responda com "Ótima escolha!" + opções nem com "Qualquer dúvida, é só me chamar!" — no máximo uma linha: "Perfeito! Você já vai receber o link em instantes. 😊"
 - Essas respostas curtas evitam poluir a conversa e dão sequência natural
 
 FORMATO DE RESPOSTAS:
@@ -1057,8 +1062,12 @@ export async function processIncomingMessageWithCarol(
     // a4: Não reenviar boas-vindas/opções para "Ok" e mensagens curtas/neutras
     const shortNeutralWords = ['ok', 'certo', 'beleza', 'tudo bem', 'tudo bom', 'sim', 'não', 'nao', 'ah', 'tá', 'ta', 'pronto', 'entendi', 'obrigada', 'obrigado', 'valeu', 'blz', 'legal']
     const msgNorm = message.trim().toLowerCase().replace(/\s+/g, ' ')
-    const isShortNeutralReply = shortNeutralWords.includes(msgNorm) ||
+    // "1" e "2" são escolha de opção, não resposta neutra — não responder "Qualquer dúvida, é só me chamar!"
+    const isChoiceOnly = (workshopSessions.length >= 1 && (msgNorm === '1' || msgNorm === '2'))
+    const isShortNeutralReply = !isChoiceOnly && (
+      shortNeutralWords.includes(msgNorm) ||
       (msgNorm.length <= 4 && !msgNorm.endsWith('?'))
+    )
 
     // a5: Mensagem do botão ("Acabei de me inscrever... gostaria de agendar") — se a pessoa clicou
     // antes do form enviar (60s), o form não manda; então Carol DEVE enviar boas-vindas + opções.
@@ -1126,6 +1135,8 @@ export async function processIncomingMessageWithCarol(
           const chosenId = (optionIds && optionIds[optionIndex] != null) ? optionIds[optionIndex] : workshopSessions[optionIndex]?.id
           let sessionToUse = chosenId ? list.find((s: { id: string }) => s.id === chosenId) : null
           if (!sessionToUse && optionIndex < workshopSessions.length) sessionToUse = workshopSessions[optionIndex]
+          // Fallback: mensagem é só "1" ou "2" — usar diretamente a sessão pela ordem
+          if (!sessionToUse && optionIndex < list.length) sessionToUse = list[optionIndex]
           if (sessionToUse) {
             const { weekday, date, time } = formatSessionDateTime(sessionToUse.starts_at)
             console.log('[Carol AI] ✅ Sessão detectada por número/ordem:', {
@@ -1261,8 +1272,9 @@ export async function processIncomingMessageWithCarol(
           }
           
           // Se não encontrou dia mas encontrou horário exato, usar mesmo assim
-          // (útil quando pessoa só diz "10h" ou "15h")
-          if (!selectedSession && hasTimeMatch && hoursInMessage.length === 1) {
+          // (útil quando pessoa diz "10h", "15h", "15:00 horas", "Opção 2 às 15:00")
+          const onlyOneHourOrMatches = hoursInMessage.length === 1 || hoursInMessage.includes(sessionHour)
+          if (!selectedSession && hasTimeMatch && onlyOneHourOrMatches) {
             console.log('[Carol AI] ✅ Sessão detectada apenas por horário:', {
               sessionId: sessionItem.id,
               time,
@@ -1802,6 +1814,12 @@ Nos vemos em breve! 😊
       } else {
         carolInstruction = 'A pessoa só confirmou/entendeu (ex.: "Entendi", "Ok", "Certo"). NÃO repita opções nem boas-vindas; responda em UMA frase curta e amigável, tipo "Qualquer dúvida, é só me chamar! 😊" ou "Fico no aguardo da sua escolha! 💚".'
       }
+    } else if (isChoiceOnly && workshopSessions.length > 0) {
+      // Pessoa disse "1" ou "2" (escolha) mas o link já foi/será enviado pelo sistema — não repetir opções nem "Ótima escolha!"
+      carolInstruction = 'A pessoa escolheu uma opção (1 ou 2). Responda APENAS com esta frase, nada mais: "Perfeito! Você já vai receber o link em instantes. 😊"'
+    } else if (/^(opção|opcao)\s*[12]|^\s*[12]\s*$|(\d{1,2}:\d{2}|\d{1,2}\s*h)/i.test(msgNorm.trim()) && workshopSessions.length > 0 && (tags.includes('veio_aula_pratica') || tags.includes('recebeu_link_workshop'))) {
+      // Mensagem parece escolha (Opção 1/2, 15:00, 9h) no fluxo workshop — resposta mínima
+      carolInstruction = 'A pessoa está escolhendo horário. Responda APENAS: "Perfeito! Você já vai receber o link em instantes. 😊" — nada mais, sem opções, sem "Ótima escolha!".'
     } else {
       carolInstruction = typeof carolInstructionFromContext === 'string' ? carolInstructionFromContext : undefined
     }
@@ -1836,12 +1854,12 @@ Nos vemos em breve! 😊
             status: 'sent',
             is_bot_response: true,
           })
-          carolInstruction = `A saudação (Oi, tudo bem? Seja bem-vinda! Eu sou a Carol...) já foi enviada em outra mensagem. Sua resposta deve ser APENAS a segunda parte: comece com "Obrigada por se inscrever na Aula Prática ao Vivo – Agenda Cheia para Nutricionistas." e o parágrafo sobre a aula, depois "As próximas aulas ao vivo vão acontecer nos seguintes dias e horários:", depois as duas opções (use o formato fornecido no contexto UMA ÚNICA VEZ cada), depois "Qual desses horários funciona melhor pra você? 😊". NÃO inclua Oi, tudo bem? nem Seja bem-vinda! nem Eu sou a Carol.`
+          carolInstruction = `PROIBIDO repetir a saudação. Sua mensagem NÃO pode conter "Oi" / "tudo bem?" / "Seja muito bem-vinda!" / "Eu sou a Carol" — isso já foi enviado na mensagem anterior. Comece DIRETAMENTE com "Obrigada por se inscrever na Aula Prática ao Vivo – Agenda Cheia para Nutricionistas." e o parágrafo sobre a aula, depois "As próximas aulas ao vivo vão acontecer nos seguintes dias e horários:", depois as duas opções (formato do contexto, UMA VEZ cada), depois "Qual desses horários funciona melhor pra você? 😊". Se você escrever Oi ou Seja bem-vinda ou Eu sou a Carol, apague isso — a primeira frase da sua resposta deve ser "Obrigada por se inscrever...".`
         }
       }
     }
 
-    const carolResponse =
+    let carolResponse =
       desagendarResponse ??
       (await generateCarolResponse(message, conversationHistory, {
         tags,
@@ -1854,6 +1872,19 @@ Nos vemos em breve! 😊
         carolInstruction,
         adminSituacao: (context as any)?.admin_situacao, // remarketing pessoa por pessoa (persistente)
       }))
+
+    // Se enviamos saudação em mensagem separada, remover qualquer repetição de saudação na segunda parte
+    if (isFirstMessage && carolInstruction?.includes('PROIBIDO repetir a saudação')) {
+      const startMarker = 'Obrigada por se inscrever'
+      const idx = carolResponse.indexOf(startMarker)
+      if (idx > 0) {
+        const before = carolResponse.slice(0, idx).toLowerCase()
+        if (before.includes('oi') && (before.includes('tudo bem') || before.includes('bem-vinda') || before.includes('eu sou a carol'))) {
+          carolResponse = carolResponse.slice(idx).trim()
+          console.log('[Carol AI] 🧹 Saudação repetida removida da segunda mensagem')
+        }
+      }
+    }
 
     console.log('[Carol AI] ✅ Resposta gerada:', {
       responsePreview: carolResponse?.substring(0, 100),
