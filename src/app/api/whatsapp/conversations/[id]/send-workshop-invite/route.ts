@@ -9,11 +9,14 @@ import { createZApiClient } from '@/lib/z-api'
  * Envia flyer padrão + detalhes da próxima sessão ativa (Nutri) para o contato.
  */
 
+const TZ_BRASILIA = 'America/Sao_Paulo'
+
 function formatSessionPtBR(startsAtIso: string) {
   const d = new Date(startsAtIso)
-  const weekday = d.toLocaleDateString('pt-BR', { weekday: 'long' })
-  const date = d.toLocaleDateString('pt-BR')
-  const time = d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+  const opts = { timeZone: TZ_BRASILIA } as const
+  const weekday = d.toLocaleDateString('pt-BR', { ...opts, weekday: 'long' })
+  const date = d.toLocaleDateString('pt-BR', opts)
+  const time = d.toLocaleTimeString('pt-BR', { ...opts, hour: '2-digit', minute: '2-digit' })
   return { weekday, date, time }
 }
 
@@ -133,8 +136,9 @@ export async function POST(
 
     const client = createZApiClient(instance.instance_id, instance.token)
 
+    // Mensagem do ENVIO MANUAL (admin): deve ser diferente da automação (Carol não usa "Perfeito! Você vai adorar!" aqui).
     const { weekday, date, time } = formatSessionPtBR(session.starts_at)
-    const infoText = `🗓️ ${session.title}\n\n📅 ${weekday}, ${date}\n🕒 ${time} (Brasília)\n🔗 ${session.zoom_link}\n\n✅ Se precisar reagendar, responda REAGENDAR.`
+    const infoText = `Segue o agendamento da aula:\n\n🗓️ ${session.title}\n\n📅 ${weekday}, ${date}\n🕒 ${time} (horário de Brasília)\n\n🔗 ${session.zoom_link}\n\n✅ Se precisar reagendar, responda REAGENDAR.`
 
     // 1) Enviar flyer (se configurado)
     if (flyerUrl) {
