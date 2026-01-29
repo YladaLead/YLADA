@@ -92,16 +92,15 @@ export async function sendWorkshopInviteToFormLead(
       }
     }
     
-    if (instance) {
-      const { data: existingConv } = await supabaseAdmin
-        .from('whatsapp_conversations')
-        .select('id, context, last_message_at')
-        .eq('phone', phoneNormalized)
-        .eq('instance_id', instance.id)
-        .maybeSingle()
-      
-      if (existingConv) {
-        // Se ela já mandou qualquer mensagem = já "nos chamou". Não enviar auto-mensagem.
+    // Verificar por telefone em QUALQUER conversa (qualquer instância) para evitar duplicata:
+    // se a pessoa já clicou no WhatsApp, a conversa pode ter sido criada pelo webhook em outra instância.
+    const { data: allConvsForPhone } = await supabaseAdmin
+      .from('whatsapp_conversations')
+      .select('id, context, last_message_at')
+      .eq('phone', phoneNormalized)
+
+    if (allConvsForPhone && allConvsForPhone.length > 0) {
+      for (const existingConv of allConvsForPhone) {
         const { data: customerMessages } = await supabaseAdmin
           .from('whatsapp_messages')
           .select('id')
@@ -112,10 +111,9 @@ export async function sendWorkshopInviteToFormLead(
           console.log('[Form Automation] ⚠️ Pessoa já enviou mensagem (clicou no WhatsApp). Não enviamos — ela nos chamou.')
           return { success: false, error: 'Pessoa já iniciou a conversa pelo WhatsApp' }
         }
-        // Já recebeu boas-vindas ou tem atividade recente → não duplicar
         const context = existingConv.context || {}
         const tags = Array.isArray(context.tags) ? context.tags : []
-        const hasWelcomeTag = tags.includes('veio_aula_pratica') || tags.includes('recebeu_link_workshop')
+        const hasWelcomeTag = tags.includes('veio_aula_pratica')
         const twoMinutesAgo = new Date(Date.now() - 2 * 60 * 1000).toISOString()
         const recentMessage = existingConv.last_message_at && new Date(existingConv.last_message_at) > new Date(twoMinutesAgo)
         if (hasWelcomeTag || recentMessage) {
@@ -124,6 +122,7 @@ export async function sendWorkshopInviteToFormLead(
         }
       }
     }
+
     // 1. Buscar próximas sessões ativas (mais que 2 para incluir manhã quando existir)
     const { data: allSessions } = await supabaseAdmin
       .from('whatsapp_workshop_sessions')
@@ -183,6 +182,7 @@ export async function sendWorkshopInviteToFormLead(
     // Ex.: "Maria Silva" → "Maria". Tom alinhado à Carol.
     const rawName = (leadName && leadName.trim() && !String(leadName).includes('@')) ? leadName.trim() : ''
     const displayName = rawName ? getFirstName(rawName) : ''
+    // Mensagem 1: só saudação (separada para não vir um bloco único e repetido)
     const greetingLines: string[] = []
     if (displayName) {
       greetingLines.push(`Oi ${displayName}, tudo bem? 😊`)
@@ -191,16 +191,15 @@ export async function sendWorkshopInviteToFormLead(
     }
     greetingLines.push('Seja muito bem-vinda!')
     greetingLines.push('Eu sou a Carol, da equipe Ylada Nutri.')
-    const greeting = greetingLines.join('\n\n') + '\n\n'
-    
-    // Formatar as duas próximas opções (igual ao formato da Carol)
+    const message1Greeting = greetingLines.join('\n\n')
+
+    // Mensagem 2: texto da aula + opções (cada data/horário UMA vez só)
     let optionsText = ''
     sessions.forEach((sess, index) => {
       const { weekday, date, time } = formatSessionPtBR(sess.starts_at)
-      optionsText += `\n*Opção ${index + 1}:*\n${weekday}, ${date}\n🕒 ${time} (horário de Brasília)\n\n`
+      optionsText += `*Opção ${index + 1}:*\n${weekday}, ${date}\n🕒 ${time} (horário de Brasília)\n\n`
     })
-
-    const receptionMessage = `${greeting}Obrigada por se inscrever na Aula Prática ao Vivo – Agenda Cheia para Nutricionistas.
+    const message2Body = `Obrigada por se inscrever na Aula Prática ao Vivo – Agenda Cheia para Nutricionistas.
 
 Essa aula é 100% prática e foi criada para ajudar nutricionistas que estão com agenda ociosa a organizar, atrair e preencher atendimentos de forma mais leve e estratégica.
 
@@ -208,39 +207,62 @@ As próximas aulas ao vivo vão acontecer nos seguintes dias e horários:
 
 ${optionsText}💬 Qual você prefere? 💚`
 
-    // 5.5 Evitar reenviar opções se já enviamos (ex.: pessoa preencheu o form e depois clicou no botão e disparou de novo)
-    const { data: convBeforeSend } = await supabaseAdmin
+    // 5.5 Evitar reenviar opções se já enviamos ou se a pessoa já nos chamou (recheck após 60s — evita corrida)
+    const { data: convsBeforeSend } = await supabaseAdmin
       .from('whatsapp_conversations')
       .select('id')
       .eq('phone', phoneNormalized)
-      .eq('instance_id', instance.id)
-      .maybeSingle()
 
-    if (convBeforeSend) {
-      const { data: botMessages } = await supabaseAdmin
-        .from('whatsapp_messages')
-        .select('message')
-        .eq('conversation_id', convBeforeSend.id)
-        .eq('sender_type', 'bot')
-      const alreadySentOptions = (botMessages || []).some((m: { message?: string | null }) => {
-        const msg = String(m.message ?? '')
-        return msg.includes('Opções de Aula') || msg.includes('Qual você prefere')
-      })
-      if (alreadySentOptions) {
-        console.log('[Form Automation] ⚠️ Esta conversa já recebeu as opções de aula. Não reenviar.')
-        return { success: false, error: 'Opções de aula já foram enviadas para esta conversa' }
+    if (convsBeforeSend && convsBeforeSend.length > 0) {
+      const doisMinutosAtras = new Date(Date.now() - 2 * 60 * 1000).toISOString()
+      for (const conv of convsBeforeSend) {
+        const { data: recentCustomerMsg } = await supabaseAdmin
+          .from('whatsapp_messages')
+          .select('id')
+          .eq('conversation_id', conv.id)
+          .eq('sender_type', 'customer')
+          .gte('created_at', doisMinutosAtras)
+          .limit(1)
+        if (recentCustomerMsg && recentCustomerMsg.length > 0) {
+          console.log('[Form Automation] ⚠️ Pessoa já enviou mensagem nos últimos 2 min (clicou no WhatsApp). Não enviamos.')
+          return { success: false, error: 'Pessoa já iniciou a conversa pelo WhatsApp' }
+        }
+      }
+      const convIdToCheck = convsBeforeSend[0]?.id
+      if (convIdToCheck) {
+        const { data: botMessages } = await supabaseAdmin
+          .from('whatsapp_messages')
+          .select('message')
+          .eq('conversation_id', convIdToCheck)
+          .eq('sender_type', 'bot')
+        const alreadySentOptions = (botMessages || []).some((m: { message?: string | null }) => {
+          const msg = String(m.message ?? '')
+          return msg.includes('Opções de Aula') || msg.includes('Qual você prefere')
+        })
+        if (alreadySentOptions) {
+          console.log('[Form Automation] ⚠️ Esta conversa já recebeu as opções de aula. Não reenviar.')
+          return { success: false, error: 'Opções de aula já foram enviadas para esta conversa' }
+        }
       }
     }
 
-    // 6. Enviar mensagem de recepção com opções
-    const result = await client.sendTextMessage({
+    // 6. Enviar em duas mensagens separadas (saudação primeiro; depois texto + opções, sem repetir data/hora)
+    const result1 = await client.sendTextMessage({
       phone: phoneNormalized,
-      message: receptionMessage,
+      message: message1Greeting,
     })
-
-    if (!result.success) {
-      console.error('[Form Automation] ❌ Erro ao enviar mensagem:', result.error)
-      return { success: false, error: result.error || 'Erro ao enviar mensagem' }
+    if (!result1.success) {
+      console.error('[Form Automation] ❌ Erro ao enviar 1ª mensagem:', result1.error)
+      return { success: false, error: result1.error || 'Erro ao enviar mensagem' }
+    }
+    await new Promise((r) => setTimeout(r, 1500))
+    const result2 = await client.sendTextMessage({
+      phone: phoneNormalized,
+      message: message2Body,
+    })
+    if (!result2.success) {
+      console.error('[Form Automation] ❌ Erro ao enviar 2ª mensagem:', result2.error)
+      return { success: false, error: result2.error || 'Erro ao enviar segunda mensagem' }
     }
 
     // 7. Criar ou atualizar conversa
@@ -261,7 +283,8 @@ ${optionsText}💬 Qual você prefere? 💚`
       const prevTags = Array.isArray(prevContext.tags) ? prevContext.tags : []
       
       // Adicionar tags se não existirem (em português)
-      const newTags = [...new Set([...prevTags, 'veio_aula_pratica', 'recebeu_link_workshop', 'primeiro_contato'])]
+      // Só veio_aula_pratica e primeiro_contato aqui; recebeu_link_workshop só quando enviar o link do Zoom (após escolher opção)
+      const newTags = [...new Set([...prevTags, 'veio_aula_pratica', 'primeiro_contato'])]
       
       // workshop_options_ids: ordem exata Opção 1/2 que a pessoa viu — ao responder "Opção 2", Carol usa [1] e evita trocar por terça
       // NÃO setar workshop_session_id aqui: a pessoa ainda não escolheu. Só a Carol seta quando detectar "Opção 1"/"Opção 2" no chat.
@@ -294,7 +317,7 @@ ${optionsText}💬 Qual você prefere? 💚`
             workshop_options_ids: workshopOptionsIds,
             source: 'form_automation',
             form_lead: true,
-            tags: ['veio_aula_pratica', 'recebeu_link_workshop', 'primeiro_contato'],
+            tags: ['veio_aula_pratica', 'primeiro_contato'],
           },
         })
         .select('id')
@@ -307,23 +330,36 @@ ${optionsText}💬 Qual você prefere? 💚`
       }
     }
 
-    // 8. Salvar mensagem no banco
+    // 8. Salvar as duas mensagens no banco
     if (conversationId) {
-      await supabaseAdmin.from('whatsapp_messages').insert({
-        conversation_id: conversationId,
-        instance_id: instance.id,
-        z_api_message_id: result.id || null,
-        sender_type: 'bot',
-        sender_name: 'Carol - Secretária',
-        message: receptionMessage,
-        message_type: 'text',
-        status: 'sent',
-        is_bot_response: true,
-      })
+      await supabaseAdmin.from('whatsapp_messages').insert([
+        {
+          conversation_id: conversationId,
+          instance_id: instance.id,
+          z_api_message_id: result1.id || null,
+          sender_type: 'bot',
+          sender_name: 'Carol - Secretária',
+          message: message1Greeting,
+          message_type: 'text',
+          status: 'sent',
+          is_bot_response: true,
+        },
+        {
+          conversation_id: conversationId,
+          instance_id: instance.id,
+          z_api_message_id: result2.id || null,
+          sender_type: 'bot',
+          sender_name: 'Carol - Secretária',
+          message: message2Body,
+          message_type: 'text',
+          status: 'sent',
+          is_bot_response: true,
+        },
+      ])
     }
 
-    console.log('[Form Automation] ✅ Mensagem enviada com sucesso para:', phoneNormalized)
-    return { success: true, messageId: result.id }
+    console.log('[Form Automation] ✅ Duas mensagens enviadas com sucesso para:', phoneNormalized)
+    return { success: true, messageId: result2.id }
   } catch (error: any) {
     console.error('[Form Automation] ❌ Erro geral:', error)
     return { success: false, error: error.message || 'Erro desconhecido' }

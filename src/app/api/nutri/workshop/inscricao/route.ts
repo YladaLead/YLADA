@@ -173,32 +173,38 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // 🚀 AUTOMAÇÃO: Enviar mensagem WhatsApp automaticamente (desligada quando isCarolAutomationDisabled)
+    // 🚀 AUTOMAÇÃO: Enviar mensagem WhatsApp em background (não bloqueia a resposta da API).
+    // A função espera 60s antes de enviar, para dar tempo da pessoa clicar no botão WhatsApp primeiro.
+    // Se ela clicar, a mensagem dela chega e a Carol responde; aí a automação não envia (evita duplicata).
     if (sanitizedData.telefone && !isCarolAutomationDisabled()) {
-      try {
-        const { sendWorkshopInviteToFormLead } = await import('@/lib/whatsapp-form-automation')
-        const { data: adminUser } = await supabaseAdmin
-          .from('user_profiles')
-          .select('user_id')
-          .or('is_admin.eq.true,perfil.eq.nutri')
-          .limit(1)
-          .maybeSingle()
-        const userId = adminUser?.user_id || '00000000-0000-0000-0000-000000000000'
-        const phoneClean = sanitizedData.telefone.replace(/\D/g, '')
-        const automationResult = await sendWorkshopInviteToFormLead(
-          phoneClean,
-          sanitizedData.nome,
-          'nutri',
-          userId
-        )
-        if (automationResult.success) {
-          console.log('✅ Mensagem WhatsApp automática enviada para:', phoneClean)
-        } else {
-          console.warn('⚠️ Falha ao enviar mensagem automática:', automationResult.error)
+      const phoneClean = sanitizedData.telefone.replace(/\D/g, '')
+      const leadName = sanitizedData.nome
+      const userIdPromise = supabaseAdmin
+        .from('user_profiles')
+        .select('user_id')
+        .or('is_admin.eq.true,perfil.eq.nutri')
+        .limit(1)
+        .maybeSingle()
+        .then(({ data }) => data?.user_id || '00000000-0000-0000-0000-000000000000')
+      Promise.resolve(userIdPromise).then(async (userId) => {
+        try {
+          const { sendWorkshopInviteToFormLead } = await import('@/lib/whatsapp-form-automation')
+          const automationResult = await sendWorkshopInviteToFormLead(
+            phoneClean,
+            leadName,
+            'nutri',
+            userId
+          )
+          if (automationResult.success) {
+            console.log('✅ Mensagem WhatsApp automática enviada para:', phoneClean)
+          } else {
+            console.warn('⚠️ Falha ao enviar mensagem automática:', automationResult.error)
+          }
+        } catch (automationError: any) {
+          console.error('⚠️ Erro ao executar automação WhatsApp:', automationError)
         }
-      } catch (automationError: any) {
-        console.error('⚠️ Erro ao executar automação WhatsApp:', automationError)
-      }
+      }).catch(() => {})
+      // Não aguardar a automação — resposta da API volta imediatamente
     } else if (sanitizedData.telefone && isCarolAutomationDisabled()) {
       console.log('[Workshop Inscrição] Automação desligada - mensagem WhatsApp não enviada.')
     }

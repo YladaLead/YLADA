@@ -379,6 +379,7 @@ PRIMEIRA MENSAGEM (IMPORTANTE):
   12. **CRUCIAL: Se você souber o nome da pessoa (fornecido no contexto), SEMPRE use o nome dela na saudação inicial!**
   
   13. **MUITO IMPORTANTE: TUDO isso deve estar em UMA ÚNICA mensagem. NUNCA divida em múltiplas mensagens. Mantenha tudo unificado.**
+  14. **NÃO REPITA: As opções (Opção 1, Opção 2 com dia e hora) devem aparecer UMA ÚNICA VEZ na mensagem. Não repita a mesma data/horário (ex.: Quinta-feira 29/01/2026 09:00). O texto de abertura (Oi, tudo bem? Seja bem-vinda! Eu sou a Carol...) também deve aparecer UMA ÚNICA VEZ.**
 
 COPY E DECISÃO (REMARKETING E FOLLOW-UP) — use SEMPRE que for remarketing ou follow-up (participou e ficou de pensar, não participou, não respondeu, objeções pós-aula):
 
@@ -641,6 +642,7 @@ export async function generateCarolResponse(
         contextText += `- NÃO espere a pessoa perguntar sobre horários - você já apresenta as opções na primeira mensagem!\n`
         contextText += `- NUNCA inclua links do Zoom nas opções. Apenas mostre dias e horários.\n`
         contextText += `- Foque na DOR (agenda ociosa) e no BENEFÍCIO (organizar, atrair e preencher atendimentos)\n`
+        contextText += `- NÃO REPITA: as opções (Opção 1, Opção 2 com dia e hora) devem aparecer UMA ÚNICA VEZ. Não repita "Quinta-feira", data ou horário. O texto de abertura (Oi, tudo bem? Seja bem-vinda! Eu sou a Carol...) também deve aparecer UMA ÚNICA VEZ.\n`
         shouldSendOptions = true
       } else {
         contextText += `\nIMPORTANTE: Quando a pessoa perguntar sobre horários, dias, agendamento ou quiser agendar, você DEVE usar EXATAMENTE este formato de opções (SEM links, SEM URLs, apenas dias e horários):\n\n${formattedSessionsText}\n\nNUNCA inclua links do Zoom nas opções. Apenas mostre dias e horários. Quando a pessoa escolher uma opção, você enviará o link específico com a imagem.\n`
@@ -1804,6 +1806,41 @@ Nos vemos em breve! 😊
       carolInstruction = typeof carolInstructionFromContext === 'string' ? carolInstructionFromContext : undefined
     }
 
+    // Primeira mensagem: enviar saudação em mensagem separada (evita bloco único e repetição)
+    if (isFirstMessage && workshopSessions.length > 0) {
+      const isUUIDEarly = instanceId.includes('-') && instanceId.length === 36
+      const { data: instanceEarly } = await supabaseAdmin
+        .from('z_api_instances')
+        .select('id, instance_id, token')
+        .eq(isUUIDEarly ? 'id' : 'instance_id', instanceId)
+        .single()
+      if (instanceEarly?.token) {
+        const greetingOnly = leadName && leadName !== 'querido(a)'
+          ? `Oi ${leadName}, tudo bem? 😊\n\nSeja muito bem-vinda!\n\nEu sou a Carol, da equipe Ylada Nutri.`
+          : `Oi, tudo bem? 😊\n\nSeja muito bem-vinda!\n\nEu sou a Carol, da equipe Ylada Nutri.`
+        const sendGreeting = await sendWhatsAppMessage(
+          phone,
+          greetingOnly,
+          instanceEarly.instance_id,
+          instanceEarly.token
+        )
+        if (sendGreeting.success) {
+          await supabaseAdmin.from('whatsapp_messages').insert({
+            conversation_id: conversationId,
+            instance_id: instanceEarly.id,
+            z_api_message_id: sendGreeting.messageId || null,
+            sender_type: 'bot',
+            sender_name: 'Carol - Secretária',
+            message: greetingOnly,
+            message_type: 'text',
+            status: 'sent',
+            is_bot_response: true,
+          })
+          carolInstruction = `A saudação (Oi, tudo bem? Seja bem-vinda! Eu sou a Carol...) já foi enviada em outra mensagem. Sua resposta deve ser APENAS a segunda parte: comece com "Obrigada por se inscrever na Aula Prática ao Vivo – Agenda Cheia para Nutricionistas." e o parágrafo sobre a aula, depois "As próximas aulas ao vivo vão acontecer nos seguintes dias e horários:", depois as duas opções (use o formato fornecido no contexto UMA ÚNICA VEZ cada), depois "Qual desses horários funciona melhor pra você? 😊". NÃO inclua Oi, tudo bem? nem Seja bem-vinda! nem Eu sou a Carol.`
+        }
+      }
+    }
+
     const carolResponse =
       desagendarResponse ??
       (await generateCarolResponse(message, conversationHistory, {
@@ -1988,16 +2025,20 @@ Nos vemos em breve! 😊
       }
     }
 
-    // 11. Atualizar última mensagem da conversa e limpar instrução da Carol (já usada)
+    // 11. Atualizar última mensagem da conversa, tags (se primeira mensagem) e limpar instrução da Carol (já usada)
     const updatePayload: { last_message_at: string; last_message_from: string; context?: Record<string, unknown> } = {
       last_message_at: new Date().toISOString(),
       last_message_from: 'bot',
     }
-    if (carolInstruction) {
-      const prevCtx = (context || {}) as Record<string, unknown>
-      const { carol_instruction: _, ...rest } = prevCtx
-      updatePayload.context = rest
+    const prevCtx = (context || {}) as Record<string, unknown>
+    const { carol_instruction: _, ...rest } = prevCtx
+    let nextContext: Record<string, unknown> = rest
+    // Primeira mensagem (ex.: clicou no botão WhatsApp): marcar veio_aula_pratica e primeiro_contato; NÃO recebeu_link_workshop (link só após escolher opção)
+    if (isFirstMessage) {
+      const prevTags = Array.isArray(prevCtx.tags) ? prevCtx.tags : []
+      nextContext = { ...nextContext, tags: [...new Set([...prevTags, 'veio_aula_pratica', 'primeiro_contato'])] }
     }
+    updatePayload.context = nextContext
     await supabaseAdmin
       .from('whatsapp_conversations')
       .update(updatePayload)
@@ -2222,7 +2263,8 @@ Qualquer dúvida, é só me chamar! 💚
             // Atualizar tags
             const prevContext = (existingConv.context || {}) as any
             const prevTags = Array.isArray(prevContext.tags) ? prevContext.tags : []
-            const newTags = [...new Set([...prevTags, 'veio_aula_pratica', 'recebeu_link_workshop', 'primeiro_contato'])]
+            // Só veio_aula_pratica e primeiro_contato; recebeu_link_workshop só quando enviar link do Zoom (após escolher opção)
+            const newTags = [...new Set([...prevTags, 'veio_aula_pratica', 'primeiro_contato'])]
 
             await supabaseAdmin
               .from('whatsapp_conversations')
@@ -2243,7 +2285,7 @@ Qualquer dúvida, é só me chamar! 💚
                 area: 'nutri',
                 name: lead.nome,
                 context: {
-                  tags: ['veio_aula_pratica', 'recebeu_link_workshop', 'primeiro_contato'],
+                  tags: ['veio_aula_pratica', 'primeiro_contato'],
                   source: 'welcome_automation',
                 },
               })

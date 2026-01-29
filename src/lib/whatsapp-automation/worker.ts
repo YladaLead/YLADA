@@ -204,7 +204,7 @@ export async function processScheduledMessages(limit: number = 50): Promise<{
                   name: message.message_data?.lead_name || null,
                   context: {
                     tags: message.message_type === 'welcome' 
-                      ? ['veio_aula_pratica', 'recebeu_link_workshop', 'primeiro_contato']
+                      ? ['veio_aula_pratica', 'primeiro_contato']
                       : [],
                     source: 'automation',
                   },
