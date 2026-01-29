@@ -76,6 +76,7 @@ function WorkshopContent() {
   const [selectedForLembrete, setSelectedForLembrete] = useState<Set<string>>(new Set())
   const [sendingLembrete, setSendingLembrete] = useState(false)
   const [lembreteResult, setLembreteResult] = useState<{ sent: number; errors?: string[] } | null>(null)
+  const [reenviandoRemarketing, setReenviandoRemarketing] = useState<Set<string>>(new Set())
 
   const upcoming = useMemo(
     () => sessions.filter((s) => s.is_active).sort((a, b) => new Date(a.starts_at).getTime() - new Date(b.starts_at).getTime()),
@@ -354,16 +355,58 @@ function WorkshopContent() {
       const json = await res.json().catch(() => ({}))
       if (!res.ok) throw new Error(json.error || 'Erro ao marcar participação')
       setSuccess(json.message || 'Participação atualizada!')
-      // Recarregar participantes
+      if (participated && json.linkSent === false && json.messageForManual) {
+        setTimeout(() => {
+          if (window.confirm('A mensagem automática não foi enviada. Clique em OK para copiar o texto e enviar manualmente no WhatsApp.')) {
+            navigator.clipboard.writeText(json.messageForManual).then(() => alert('Texto copiado! Cole no WhatsApp e envie.'))
+          }
+        }, 500)
+      }
+      if (!participated && json.remarketingSent === false && json.remarketingError) {
+        setError(`Remarketing não enviado: ${json.remarketingError}. Use "Reenviar remarketing" no card da pessoa para tentar de novo.`)
+      }
       if (selectedSessionForParticipants) {
         await loadParticipants(selectedSessionForParticipants)
       }
-      // Recarregar sessões para atualizar contagem
       await loadAll()
     } catch (e: any) {
       setError(e.message || 'Erro ao marcar participação')
     } finally {
       setSaving(false)
+    }
+  }
+
+  const reenviarRemarketing = async (conversationId: string) => {
+    try {
+      setReenviandoRemarketing((prev) => new Set(prev).add(conversationId))
+      setError(null)
+      const res = await fetch('/api/admin/whatsapp/workshop/participants/reenviar-remarketing', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ conversationId, force: true }),
+      })
+      const json = await res.json().catch(() => ({}))
+      if (!res.ok) {
+        const msg = json.error || 'Erro ao reenviar remarketing'
+        setError(msg)
+        alert(msg)
+        return
+      }
+      setSuccess(json.message || 'Remarketing reenviado!')
+      if (selectedSessionForParticipants) {
+        await loadParticipants(selectedSessionForParticipants)
+      }
+    } catch (e: any) {
+      const msg = e.message || 'Erro ao reenviar remarketing'
+      setError(msg)
+      alert(msg)
+    } finally {
+      setReenviandoRemarketing((prev) => {
+        const next = new Set(prev)
+        next.delete(conversationId)
+        return next
+      })
     }
   }
 
@@ -1262,7 +1305,7 @@ function WorkshopContent() {
                         {participants.map((participant) => (
                           <div
                             key={participant.conversationId}
-                            className={`border-2 rounded-lg p-4 transition-all ${
+                            className={`border-2 rounded-xl p-4 transition-all ${
                               participant.hasParticipated
                                 ? 'bg-green-50 border-green-300 shadow-sm'
                                 : participant.hasNotParticipated
@@ -1270,7 +1313,8 @@ function WorkshopContent() {
                                 : 'border-gray-200 bg-white hover:bg-gray-50'
                             }`}
                           >
-                            <div className="flex items-start justify-between gap-3">
+                            {/* Linha 1: checkbox + nome + status */}
+                            <div className="flex flex-wrap items-center gap-2 mb-3">
                               <label className="flex items-center gap-2 shrink-0 cursor-pointer" title="Selecionar para enviar lembrete">
                                 <input
                                   type="checkbox"
@@ -1280,70 +1324,82 @@ function WorkshopContent() {
                                 />
                                 <span className="text-xs text-gray-500">Lembrete</span>
                               </label>
-                              <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-2 mb-2">
-                                  <p className={`font-bold text-lg ${
-                                    participant.hasParticipated
-                                      ? 'text-green-800'
-                                      : participant.hasNotParticipated
-                                      ? 'text-red-800'
-                                      : 'text-gray-900'
-                                  }`}>
-                                    {participant.name || 'Sem nome'}
-                                  </p>
-                                  {participant.hasParticipated && (
-                                    <span className="text-sm px-3 py-1 bg-green-600 text-white rounded-full font-semibold shadow-sm">
-                                      ✅ Participou
-                                    </span>
-                                  )}
-                                  {participant.hasNotParticipated && (
-                                    <span className="text-sm px-3 py-1 bg-red-600 text-white rounded-full font-semibold shadow-sm">
-                                      ❌ Não participou
-                                    </span>
-                                  )}
-                                </div>
-                                <p className="text-sm text-gray-600 mb-2">{formatPhone(participant.phone)}</p>
-                                <Link
-                                  href={`/admin/whatsapp?conversation=${participant.conversationId}`}
-                                  className="text-xs text-blue-600 hover:underline inline-block"
-                                >
-                                  Ver conversa →
-                                </Link>
-                              </div>
-                              <div className="flex flex-wrap gap-2 ml-4 items-center">
+                              <p className={`font-bold text-lg min-w-0 truncate ${
+                                participant.hasParticipated
+                                  ? 'text-green-800'
+                                  : participant.hasNotParticipated
+                                  ? 'text-red-800'
+                                  : 'text-gray-900'
+                              }`}>
+                                {participant.name || 'Sem nome'}
+                              </p>
+                              {participant.hasParticipated && (
+                                <span className="text-xs px-2 py-1 bg-green-600 text-white rounded-full font-semibold shrink-0">
+                                  ✅ Participou
+                                </span>
+                              )}
+                              {participant.hasNotParticipated && (
+                                <span className="text-xs px-2 py-1 bg-red-600 text-white rounded-full font-semibold shrink-0">
+                                  ❌ Não participou
+                                </span>
+                              )}
+                            </div>
+                            {/* Linha 2: telefone + link */}
+                            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mb-4">
+                              <p className="text-sm text-gray-600">{formatPhone(participant.phone)}</p>
+                              <Link
+                                href={`/admin/whatsapp?conversation=${participant.conversationId}`}
+                                className="text-sm text-blue-600 hover:underline"
+                              >
+                                Ver conversa →
+                              </Link>
+                            </div>
+                            {/* Linha 3: botões de ação — duas linhas para não amontoar */}
+                            <div className="pt-3 border-t border-gray-200 space-y-3">
+                              <div className="grid grid-cols-2 gap-2">
                                 <button
                                   onClick={() => markParticipated(participant.conversationId, true)}
                                   disabled={saving || participant.hasParticipated}
-                                  className={`px-4 py-2 text-sm rounded-lg font-semibold transition-all ${
+                                  className={`w-full px-3 py-2.5 text-sm rounded-lg font-semibold transition-all touch-manipulation ${
                                     participant.hasParticipated
-                                      ? 'bg-green-600 text-white shadow-lg cursor-not-allowed ring-2 ring-green-400'
-                                      : 'bg-green-100 text-green-700 hover:bg-green-200 border-2 border-green-300'
+                                      ? 'bg-green-600 text-white cursor-not-allowed'
+                                      : 'bg-green-100 text-green-700 hover:bg-green-200 border border-green-300'
                                   } disabled:opacity-50`}
-                                  title="Marcar como participou (1h01 após o horário da aula)"
+                                  title="Marcar como participou"
                                 >
                                   ✅ Participou
                                 </button>
                                 <button
                                   onClick={() => markParticipated(participant.conversationId, false)}
                                   disabled={saving || participant.hasNotParticipated}
-                                  className={`px-4 py-2 text-sm rounded-lg font-semibold transition-all ${
+                                  className={`w-full px-3 py-2.5 text-sm rounded-lg font-semibold transition-all touch-manipulation ${
                                     participant.hasNotParticipated
-                                      ? 'bg-red-600 text-white shadow-lg cursor-not-allowed ring-2 ring-red-400'
-                                      : 'bg-red-100 text-red-700 hover:bg-red-200 border-2 border-red-300'
+                                      ? 'bg-red-600 text-white cursor-not-allowed'
+                                      : 'bg-red-100 text-red-700 hover:bg-red-200 border border-red-300'
                                   } disabled:opacity-50`}
                                   title="Marcar como não participou"
                                 >
                                   ❌ Não participou
                                 </button>
-                                <button
-                                  onClick={() => removerAgendamento(participant.conversationId)}
-                                  disabled={saving}
-                                  className="px-4 py-2 text-sm rounded-lg font-semibold bg-amber-100 text-amber-800 hover:bg-amber-200 border-2 border-amber-300 disabled:opacity-50"
-                                  title="Remover do agendamento desta aula (desagendar)"
-                                >
-                                  🚫 Remover agendamento
-                                </button>
                               </div>
+                              <button
+                                onClick={() => removerAgendamento(participant.conversationId)}
+                                disabled={saving}
+                                className="w-full px-3 py-2.5 text-sm rounded-lg font-semibold bg-amber-100 text-amber-800 hover:bg-amber-200 border border-amber-300 disabled:opacity-50 touch-manipulation"
+                                title="Remover do agendamento"
+                              >
+                                🚫 Remover agendamento
+                              </button>
+                              {participant.hasNotParticipated && (
+                                <button
+                                  onClick={() => reenviarRemarketing(participant.conversationId)}
+                                  disabled={saving || reenviandoRemarketing.has(participant.conversationId)}
+                                  className="w-full px-3 py-2.5 text-sm rounded-lg font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-300 disabled:opacity-50 touch-manipulation"
+                                  title="Reenviar mensagem de remarketing (reagendar)"
+                                >
+                                  {reenviandoRemarketing.has(participant.conversationId) ? 'Enviando…' : '📩 Reenviar remarketing'}
+                                </button>
+                              )}
                             </div>
                           </div>
                         ))}

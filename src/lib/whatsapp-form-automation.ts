@@ -208,6 +208,30 @@ As próximas aulas ao vivo vão acontecer nos seguintes dias e horários:
 
 ${optionsText}💬 Qual você prefere? 💚`
 
+    // 5.5 Evitar reenviar opções se já enviamos (ex.: pessoa preencheu o form e depois clicou no botão e disparou de novo)
+    const { data: convBeforeSend } = await supabaseAdmin
+      .from('whatsapp_conversations')
+      .select('id')
+      .eq('phone', phoneNormalized)
+      .eq('instance_id', instance.id)
+      .maybeSingle()
+
+    if (convBeforeSend) {
+      const { data: botMessages } = await supabaseAdmin
+        .from('whatsapp_messages')
+        .select('message')
+        .eq('conversation_id', convBeforeSend.id)
+        .eq('sender_type', 'bot')
+      const alreadySentOptions = (botMessages || []).some((m: { message?: string | null }) => {
+        const msg = String(m.message ?? '')
+        return msg.includes('Opções de Aula') || msg.includes('Qual você prefere')
+      })
+      if (alreadySentOptions) {
+        console.log('[Form Automation] ⚠️ Esta conversa já recebeu as opções de aula. Não reenviar.')
+        return { success: false, error: 'Opções de aula já foram enviadas para esta conversa' }
+      }
+    }
+
     // 6. Enviar mensagem de recepção com opções
     const result = await client.sendTextMessage({
       phone: phoneNormalized,

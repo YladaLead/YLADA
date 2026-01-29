@@ -133,24 +133,21 @@ function WhatsAppChatContent() {
     return () => { cancelled = true }
   }, [])
 
-  // Carregar conversas
+  // Carregar conversas (polling a cada 12s para não sobrecarregar rede/servidor)
   useEffect(() => {
     loadConversations()
-    // Atualizar a cada 3 segundos (mais frequente para evitar "10 min pra trás")
-    const interval = setInterval(loadConversations, 3000)
+    const interval = setInterval(loadConversations, 12000)
     return () => clearInterval(interval)
   }, [areaFilter, listTab, searchTerm])
 
-  // Carregar mensagens quando selecionar conversa
+  // Carregar mensagens quando selecionar conversa (polling a cada 8s para não pesar)
   useEffect(() => {
     if (selectedConversation) {
       setContactMenuOpen(false)
       setCarolActionsOpen(false)
-      // Ao trocar de conversa, voltar a auto-scrollar para o final
       shouldAutoScrollRef.current = true
       loadMessages(selectedConversation.id)
-      // Atualizar mensagens a cada 2 segundos (quase em tempo real)
-      const interval = setInterval(() => loadMessages(selectedConversation.id), 2000)
+      const interval = setInterval(() => loadMessages(selectedConversation.id), 8000)
       return () => clearInterval(interval)
     }
   }, [selectedConversation])
@@ -323,7 +320,7 @@ function WhatsAppChatContent() {
       }
 
       const response = await fetch(
-        `/api/whatsapp/conversations/${conversationId}/messages?limit=5000`,
+        `/api/whatsapp/conversations/${conversationId}/messages?limit=500`,
         { credentials: 'include' }
       )
 
@@ -337,7 +334,7 @@ function WhatsAppChatContent() {
 
       const data = await response.json()
       const nextMessages: Message[] = data.messages || []
-      // Evitar re-render/auto-scroll quando não mudou nada (polling a cada 3s)
+      // Evitar re-render/auto-scroll quando não mudou nada
       setMessages((prev) => {
         const prevLastId = prev.length ? prev[prev.length - 1].id : null
         const nextLastId = nextMessages.length ? nextMessages[nextMessages.length - 1].id : null
@@ -678,43 +675,48 @@ function WhatsAppChatContent() {
     })
 
   return (
-    <div className="h-screen bg-gray-50 flex flex-col overflow-hidden">
-      {/* Header Mobile-First */}
-      <div className="bg-white border-b border-gray-200 flex-shrink-0 z-10">
-        <div className="px-4 py-3">
-          <div className="flex items-center justify-between mb-2">
+    <div className="min-h-screen min-h-[100dvh] h-screen bg-gray-50 flex flex-col overflow-hidden">
+      {/* Header Mobile-First — touch targets 44px+ no mobile */}
+      <div className="bg-white border-b border-gray-200 flex-shrink-0 z-10 pt-[env(safe-area-inset-top,0px)]">
+        <div className="px-3 sm:px-4 py-2 sm:py-3">
+          <div className="flex items-center justify-between gap-2 mb-2">
             <Link
               href="/admin"
-              className="text-gray-600 hover:text-gray-900 text-sm"
+              className="min-h-[44px] min-w-[44px] flex items-center justify-center -m-2 p-2 text-gray-600 hover:text-gray-900 active:bg-gray-100 rounded-lg text-sm touch-manipulation"
+              aria-label="Voltar ao admin"
             >
               ← Voltar
             </Link>
-            <div className="text-center flex-1">
-              <h1 className="text-lg font-bold text-gray-900">WhatsApp</h1>
+            <div className="text-center flex-1 min-w-0">
+              <h1 className="text-lg font-bold text-gray-900 truncate">WhatsApp</h1>
               <p className="text-xs text-gray-500">Nutri</p>
             </div>
-            <Link
-              href="/admin/whatsapp/automation"
-              className="text-green-600 hover:text-green-700 text-sm font-medium"
-            >
-              ⚙️
-            </Link>
-            <Link
-              href="/admin/whatsapp/workshop"
-              className="text-blue-600 hover:text-blue-700 text-sm font-medium ml-3"
-              title="Agenda do Workshop"
-              aria-label="Agenda do Workshop"
-            >
-              📅
-            </Link>
-            <Link
-              href="/admin/whatsapp/atualizar-fases"
-              className="text-teal-600 hover:text-teal-700 text-sm font-medium ml-3"
-              title="Atualizar fases manualmente"
-              aria-label="Atualizar fases"
-            >
-              🏷️
-            </Link>
+            <div className="flex items-center gap-1 shrink-0">
+              <Link
+                href="/admin/whatsapp/automation"
+                className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg text-green-600 hover:text-green-700 hover:bg-green-50 active:bg-green-100 text-lg"
+                title="Automação"
+                aria-label="Automação"
+              >
+                ⚙️
+              </Link>
+              <Link
+                href="/admin/whatsapp/workshop"
+                className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg text-blue-600 hover:text-blue-700 hover:bg-blue-50 active:bg-blue-100 text-lg"
+                title="Agenda do Workshop"
+                aria-label="Agenda Workshop"
+              >
+                📅
+              </Link>
+              <Link
+                href="/admin/whatsapp/atualizar-fases"
+                className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg text-teal-600 hover:text-teal-700 hover:bg-teal-50 active:bg-teal-100 text-lg"
+                title="Atualizar fases"
+                aria-label="Atualizar fases"
+              >
+                🏷️
+              </Link>
+            </div>
           </div>
           <div className="flex items-center justify-between text-xs text-gray-500">
             <span>{conversations.length} conversas</span>
@@ -772,7 +774,7 @@ function WhatsAppChatContent() {
                 className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
               />
             </div>
-            <div className="px-2 py-2 flex gap-2 overflow-x-auto">
+            <div className="px-2 py-2 flex gap-2 overflow-x-auto touch-pan-x">
               {[
                 { id: 'all', label: 'Todas' },
                 { id: 'unread', label: 'Não lidas' },
@@ -784,10 +786,10 @@ function WhatsAppChatContent() {
                   key={t.id}
                   type="button"
                   onClick={() => setListTab(t.id as any)}
-                  className={`px-3 py-1.5 rounded-full text-sm whitespace-nowrap ${
+                  className={`min-h-[44px] px-4 py-2 rounded-full text-sm whitespace-nowrap touch-manipulation ${
                     listTab === (t.id as any)
                       ? 'bg-green-600 text-white'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200 active:bg-gray-300'
                   }`}
                 >
                   {t.label}
@@ -808,10 +810,10 @@ function WhatsAppChatContent() {
                     key={t.id ?? 'all'}
                     type="button"
                     onClick={() => setTagFilter(t.id)}
-                    className={`px-2.5 py-1 rounded-full text-xs whitespace-nowrap ${
+                    className={`min-h-[40px] px-3 py-2 rounded-full text-xs whitespace-nowrap touch-manipulation ${
                       tagFilter === t.id
                         ? 'bg-teal-600 text-white'
-                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200 active:bg-gray-300'
                     }`}
                   >
                     {t.label}
@@ -863,7 +865,7 @@ function WhatsAppChatContent() {
                   userClearedSelectionRef.current = false // Resetar flag quando usuário seleciona uma conversa
                   setSelectedConversation(conv)
                 }}
-                className={`w-full px-3 py-3 border-b border-gray-100 hover:bg-gray-50 text-left ${
+                className={`w-full px-3 py-3 min-h-[72px] border-b border-gray-100 hover:bg-gray-50 active:bg-gray-100 text-left touch-manipulation ${
                   selectedConversation?.id === conv.id ? 'bg-green-50 border-l-4 border-l-green-500' : ''
                 }`}
               >
@@ -1023,10 +1025,10 @@ function WhatsAppChatContent() {
         >
           {selectedConversation ? (
             <>
-              {/* Header da Conversa - Fixo */}
-              <div className="flex-shrink-0 bg-white border-b border-gray-200 px-4 sm:px-6 py-3 sm:py-4">
-                <div className="flex items-center justify-between gap-3">
-                  <div className="flex items-center gap-3 min-w-0">
+              {/* Header da Conversa - Fixo (touch-friendly no mobile) */}
+              <div className="flex-shrink-0 bg-white border-b border-gray-200 px-3 sm:px-6 py-3 sm:py-4">
+                <div className="flex items-center justify-between gap-2 sm:gap-3">
+                  <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
                     <div className="shrink-0">
                       {getAvatarUrl(selectedConversation) ? (
                         // eslint-disable-next-line @next/next/no-img-element
@@ -1082,14 +1084,14 @@ function WhatsAppChatContent() {
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2 shrink-0">
+                  <div className="flex items-center gap-1 sm:gap-2 shrink-0">
                     <button
                       type="button"
                       onClick={() => {
                         loadConversations()
                         if (selectedConversation) loadMessages(selectedConversation.id)
                       }}
-                      className="h-10 w-10 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 text-gray-700"
+                      className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 active:bg-gray-300 text-gray-700 touch-manipulation"
                       title="Atualizar conversas e mensagens"
                       aria-label="Atualizar"
                     >
@@ -1132,7 +1134,7 @@ function WhatsAppChatContent() {
                             }
                           }}
                           disabled={sending}
-                          className="px-3 py-1.5 text-xs font-medium bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition-colors disabled:opacity-50"
+                          className="min-h-[44px] px-3 py-2 sm:py-1.5 text-xs font-medium bg-purple-100 text-purple-700 rounded-xl hover:bg-purple-200 active:bg-purple-300 transition-colors disabled:opacity-50 touch-manipulation"
                           title="Enviar opção de sessão e deixar Carol continuar"
                         >
                           📅 Enviar Opção
@@ -1166,7 +1168,7 @@ function WhatsAppChatContent() {
                               alert(err.message || 'Erro ao desativar Carol')
                             }
                           }}
-                          className="px-3 py-1.5 text-xs font-medium bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors"
+                          className="min-h-[44px] px-3 py-2 sm:py-1.5 text-xs font-medium bg-red-100 text-red-700 rounded-xl hover:bg-red-200 active:bg-red-300 transition-colors touch-manipulation"
                           title="Desativar Carol - Ela não responderá mais automaticamente"
                         >
                           🚫 Desativar Carol
@@ -1181,7 +1183,7 @@ function WhatsAppChatContent() {
                           setContactMenuOpen(false)
                           setSendOptionsOpen((v) => !v)
                         }}
-                        className="h-10 w-10 flex items-center justify-center rounded-full bg-blue-50 hover:bg-blue-100 text-blue-700 disabled:opacity-50 disabled:pointer-events-none"
+                        className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-full bg-blue-50 hover:bg-blue-100 active:bg-blue-200 text-blue-700 disabled:opacity-50 disabled:pointer-events-none touch-manipulation"
                         title="Opções de envio"
                         aria-label="Opções de envio"
                         aria-expanded={sendOptionsOpen}
@@ -1189,7 +1191,7 @@ function WhatsAppChatContent() {
                         {sendingWorkshopInvite ? '…' : '📩'}
                       </button>
                       {sendOptionsOpen && (
-                        <div className="absolute right-0 mt-2 w-64 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden z-20">
+                        <div className="absolute right-0 mt-2 w-64 min-w-[200px] bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden z-20">
                           <div className="px-3 py-2 text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-100">
                             Enviar para esta conversa
                           </div>
@@ -1227,7 +1229,7 @@ function WhatsAppChatContent() {
                     <button
                       type="button"
                       onClick={() => window.open(`/api/whatsapp/conversations/${selectedConversation.id}/export`, '_blank')}
-                      className="h-10 w-10 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 text-gray-700"
+                      className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 active:bg-gray-300 text-gray-700 touch-manipulation"
                       title="Exportar conversa"
                       aria-label="Exportar conversa"
                     >
@@ -1240,14 +1242,14 @@ function WhatsAppChatContent() {
                           setSendOptionsOpen(false)
                           setContactMenuOpen((v) => !v)
                         }}
-                        className="h-10 w-10 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 text-gray-700"
+                        className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 active:bg-gray-300 text-gray-700 touch-manipulation"
                         title="Mais opções"
                         aria-label="Mais opções"
                       >
                         ⋮
                       </button>
                       {contactMenuOpen && (
-                        <div className="absolute right-0 mt-2 w-56 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden z-20">
+                        <div className="absolute right-0 mt-2 w-56 min-w-[180px] bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden z-20">
                           <button
                             type="button"
                             onClick={async () => {
@@ -1498,7 +1500,7 @@ function WhatsAppChatContent() {
                         userClearedSelectionRef.current = true // Marcar que o usuário explicitamente limpou a seleção
                         setSelectedConversation(null)
                       }}
-                      className="md:hidden shrink-0 px-3 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200"
+                      className="md:hidden shrink-0 min-h-[44px] px-4 py-3 text-sm font-medium text-gray-700 bg-gray-100 rounded-xl hover:bg-gray-200 active:bg-gray-300 touch-manipulation"
                       aria-label="Voltar para lista de conversas"
                       title="Conversas"
                     >
@@ -1636,7 +1638,7 @@ function WhatsAppChatContent() {
                       el.scrollTop = el.scrollHeight
                       setShowScrollToBottom(false)
                     }}
-                    className="sticky bottom-4 ml-auto mr-0 h-10 w-10 rounded-full bg-white shadow-md border border-gray-200 flex items-center justify-center text-gray-700 hover:bg-gray-50"
+                    className="sticky bottom-4 ml-auto mr-0 min-h-[48px] min-w-[48px] sm:h-10 sm:w-10 rounded-full bg-white shadow-md border border-gray-200 flex items-center justify-center text-gray-700 hover:bg-gray-50 active:bg-gray-100 touch-manipulation"
                     title="Voltar ao fim"
                     aria-label="Voltar ao fim"
                   >
@@ -1645,9 +1647,9 @@ function WhatsAppChatContent() {
                 )}
               </div>
 
-              {/* Input de Mensagem - Fixo no rodapé */}
-              <div className="flex-shrink-0 bg-white border-t border-gray-200 px-4 sm:px-6 py-3 sm:py-4">
-                <div className="flex gap-2 items-center">
+              {/* Input de Mensagem - Fixo no rodapé (safe area + touch no mobile) */}
+              <div className="flex-shrink-0 bg-white border-t border-gray-200 px-3 sm:px-6 py-3 sm:py-4 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+                <div className="flex gap-2 sm:gap-3 items-center">
                   <input
                     ref={fileInputRef}
                     type="file"
@@ -1688,7 +1690,7 @@ function WhatsAppChatContent() {
                   <button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
-                    className="h-10 w-10 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 text-gray-700"
+                    className="min-h-[48px] min-w-[48px] sm:h-10 sm:w-10 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 active:bg-gray-300 text-gray-700 touch-manipulation shrink-0"
                     aria-label="Anexar arquivo"
                     title="Anexar"
                     disabled={uploading || sending}
@@ -1701,7 +1703,7 @@ function WhatsAppChatContent() {
                     onChange={(e) => setNewMessage(e.target.value)}
                     onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
                     placeholder="Digite sua mensagem..."
-                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                    className="flex-1 min-w-0 min-h-[48px] sm:min-h-0 px-4 py-3 sm:py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 text-base touch-manipulation"
                     disabled={sending || uploading}
                   />
                   {/* Menu "O que a Carol faça?" — ações pré-montadas (só quando Carol ativa) */}
@@ -1711,13 +1713,15 @@ function WhatsAppChatContent() {
                         type="button"
                         onClick={() => setCarolActionsOpen((o) => !o)}
                         disabled={sending || uploading}
-                        className="flex items-center gap-1 px-3 py-2 rounded-lg bg-purple-100 text-purple-800 hover:bg-purple-200 disabled:opacity-50 text-sm font-medium"
+                        className="min-h-[48px] sm:min-h-0 flex items-center gap-1 px-3 py-2.5 sm:py-2 rounded-xl bg-purple-100 text-purple-800 hover:bg-purple-200 active:bg-purple-300 disabled:opacity-50 text-sm font-medium touch-manipulation shrink-0"
                         title="Clique e escolha o que a Carol deve fazer (textos pré-montados)"
                       >
-                        O que a Carol faça? <span className="text-xs">▼</span>
+                        <span className="hidden sm:inline">O que a Carol faça?</span>
+                        <span className="sm:hidden">Carol</span>
+                        <span className="text-xs">▼</span>
                       </button>
                       {carolActionsOpen && (
-                        <div className="absolute bottom-full left-0 mb-1 w-72 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden z-30">
+                        <div className="absolute bottom-full left-0 right-0 sm:right-auto sm:w-72 mb-1 mx-0 sm:mx-0 max-h-[70vh] overflow-y-auto bg-white border border-gray-200 rounded-xl shadow-lg z-30">
                           <div className="p-2 border-b border-gray-100 bg-gray-50 text-xs text-gray-600 font-medium">
                             Texto fixo = menu. IA = só “responder à última mensagem”.
                           </div>
@@ -1798,7 +1802,7 @@ function WhatsAppChatContent() {
                                   setSending(false)
                                 }
                               }}
-                              className="w-full text-left px-3 py-2 text-sm hover:bg-purple-50 text-gray-800"
+                              className="w-full text-left px-4 py-3 sm:py-2 min-h-[48px] sm:min-h-0 text-sm hover:bg-purple-50 active:bg-purple-100 text-gray-800 touch-manipulation flex items-center"
                               title={'title' in item ? (item as { title?: string }).title : undefined}
                             >
                               {item.label}
@@ -1919,18 +1923,19 @@ function WhatsAppChatContent() {
 
       {/* Modal de Ativação Carol */}
       {carolModalOpen && selectedConversation && carolDiagnostic && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] flex flex-col">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-end sm:items-center justify-center z-50 p-0 sm:p-4">
+          <div className="bg-white rounded-t-2xl sm:rounded-lg shadow-xl max-w-2xl w-full max-h-[90dvh] flex flex-col w-full">
             {/* Header */}
-            <div className="flex items-center justify-between p-6 border-b border-gray-200">
-              <h2 className="text-xl font-bold text-gray-900">🤖 Ativar Carol nesta Conversa</h2>
+            <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-200 shrink-0">
+              <h2 className="text-lg sm:text-xl font-bold text-gray-900 truncate pr-2">🤖 Ativar Carol nesta Conversa</h2>
               <button
                 type="button"
                 onClick={() => {
                   setCarolModalOpen(false)
                   setCarolDiagnostic(null)
                 }}
-                className="text-gray-400 hover:text-gray-600 text-2xl"
+                className="min-h-[44px] min-w-[44px] flex items-center justify-center text-gray-400 hover:text-gray-600 active:bg-gray-100 rounded-lg text-2xl touch-manipulation"
+                aria-label="Fechar"
               >
                 ×
               </button>

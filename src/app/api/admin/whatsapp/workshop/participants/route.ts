@@ -161,68 +161,74 @@ export async function POST(request: NextRequest) {
       throw updateError
     }
 
-    // 🚀 Disparar flow automaticamente quando tag "participou_aula" é adicionada (desligado quando isCarolAutomationDisabled)
+    // 🚀 Disparar link pós-participou na mesma requisição (await evita que serverless mate o setTimeout)
+    let linkSent = false
+    let linkError: string | undefined
+    let messageForManual: string | undefined
     if (isAddingParticipatedTag && !isCarolAutomationDisabled()) {
-      console.log('[Workshop Participants] 🎉 Tag participou_aula adicionada - disparando flow automaticamente', {
-        conversationId,
-        phone: updated?.phone,
-        name: updated?.name
-      })
-      setTimeout(async () => {
-        try {
-          const result = await sendRegistrationLinkAfterClass(conversationId)
-          if (result.success) {
-            console.log('[Workshop Participants] ✅ Flow disparado com sucesso para', conversationId)
-          } else {
-            console.error('[Workshop Participants] ❌ Erro ao disparar flow:', result.error)
-            if (result.error?.includes('não encontrada') || result.error?.includes('não participou')) {
-              setTimeout(async () => {
-                const retryResult = await sendRegistrationLinkAfterClass(conversationId)
-                if (retryResult.success) {
-                  console.log('[Workshop Participants] ✅ Flow disparado na segunda tentativa para', conversationId)
-                } else {
-                  console.error('[Workshop Participants] ❌ Flow falhou na segunda tentativa:', retryResult.error)
-                }
-              }, 2000)
-            }
-          }
-        } catch (error: any) {
-          console.error('[Workshop Participants] ❌ Erro ao disparar flow:', error)
+      try {
+        const result = await sendRegistrationLinkAfterClass(conversationId)
+        linkSent = result.success
+        linkError = result.error
+        messageForManual = result.messageForManual
+        if (result.success) {
+          console.log('[Workshop Participants] ✅ Link pós-participou enviado para', conversationId)
+        } else {
+          console.warn('[Workshop Participants] ⚠️ Link não enviado:', result.error)
         }
-      }, 1000)
+      } catch (error: any) {
+        linkError = error.message || 'Erro ao enviar mensagem'
+        console.error('[Workshop Participants] ❌ Erro ao disparar flow:', error)
+      }
     } else if (isAddingParticipatedTag && isCarolAutomationDisabled()) {
-      console.log('[Workshop Participants] Automação desligada - link pós-participou não enviado.')
+      linkError = 'Automação desligada. Ligue CAROL_AUTOMATION_DISABLED=false e envie manualmente.'
+      messageForManual = `Olá [NOME]! 💚
+
+Excelente! Parabéns por ter participado! 🎉
+
+Espero que tenha gostado e tenho certeza que isso realmente pode fazer diferença na sua vida.
+
+Agora me conta: o que você mais gostou? E como você prefere começar?
+
+Você prefere começar com o plano mensal para validar e verificar, ou você já está determinado a mudar sua vida e prefere o plano anual?
+
+🔗 ${process.env.NUTRI_REGISTRATION_URL || 'https://www.ylada.com/pt/nutri#oferta'}
+
+O que você acha? 😊`
     }
 
-    // 🚀 Disparar remarketing quando marca como "não participou" (desligado quando isCarolAutomationDisabled)
+    // 🚀 Disparar remarketing quando marca como "não participou" (await para garantir envio em serverless)
+    let remarketingSent = false
+    let remarketingError: string | undefined
     if (!participated && !isCarolAutomationDisabled()) {
       console.log('[Workshop Participants] 📱 Marcado como "não participou" - disparando remarketing automaticamente', {
         conversationId,
         phone: updated?.phone
       })
-      setTimeout(async () => {
-        try {
-          await new Promise(resolve => setTimeout(resolve, 1000))
-          const result = await sendRemarketingToNonParticipant(conversationId)
-          if (result.success) {
-            console.log('[Workshop Participants] ✅ Remarketing enviado com sucesso para', conversationId)
-          } else {
-            console.warn('[Workshop Participants] ⚠️ Remarketing não enviado:', result.error)
-            if (result.error?.includes('não está marcada')) {
-              setTimeout(async () => {
-                const retryResult = await sendRemarketingToNonParticipant(conversationId)
-                if (retryResult.success) {
-                  console.log('[Workshop Participants] ✅ Remarketing enviado na segunda tentativa para', conversationId)
-                } else {
-                  console.error('[Workshop Participants] ❌ Remarketing falhou na segunda tentativa:', retryResult.error)
-                }
-              }, 2000)
+      try {
+        const result = await sendRemarketingToNonParticipant(conversationId)
+        remarketingSent = result.success
+        remarketingError = result.error
+        if (result.success) {
+          console.log('[Workshop Participants] ✅ Remarketing enviado com sucesso para', conversationId)
+        } else {
+          console.warn('[Workshop Participants] ⚠️ Remarketing não enviado:', result.error)
+          if (result.error?.includes('não está marcada')) {
+            const retryResult = await sendRemarketingToNonParticipant(conversationId)
+            if (retryResult.success) {
+              remarketingSent = true
+              remarketingError = undefined
+              console.log('[Workshop Participants] ✅ Remarketing enviado na segunda tentativa para', conversationId)
+            } else {
+              remarketingError = retryResult.error
+              console.error('[Workshop Participants] ❌ Remarketing falhou na segunda tentativa:', retryResult.error)
             }
           }
-        } catch (error: any) {
-          console.error('[Workshop Participants] ❌ Erro ao disparar remarketing:', error)
         }
-      }, 1000)
+      } catch (error: any) {
+        remarketingError = error.message || 'Erro ao enviar remarketing'
+        console.error('[Workshop Participants] ❌ Erro ao disparar remarketing:', error)
+      }
     } else if (!participated && isCarolAutomationDisabled()) {
       console.log('[Workshop Participants] Automação desligada - remarketing não enviado.')
     }
@@ -230,9 +236,14 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       message: participated
-        ? 'Participante marcado como participou'
-        : 'Participante marcado como não participou',
+        ? (linkSent ? 'Participante marcado como participou e mensagem enviada!' : 'Participante marcado como participou.')
+        : (remarketingSent ? 'Participante marcado como não participou e remarketing enviado!' : 'Participante marcado como não participou'),
       conversation: updated,
+      linkSent: participated ? linkSent : undefined,
+      linkError: participated ? linkError : undefined,
+      messageForManual: participated ? messageForManual : undefined,
+      remarketingSent: !participated ? remarketingSent : undefined,
+      remarketingError: !participated ? remarketingError : undefined,
     })
   } catch (error: any) {
     console.error('[Workshop Participants] Erro ao marcar participação:', error)

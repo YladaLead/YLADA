@@ -2292,11 +2292,13 @@ Qualquer dúvida, é só me chamar! 💚
 /**
  * Envia mensagem de remarketing para uma pessoa específica que não participou
  * Disparado automaticamente quando admin marca como "não participou"
+ * @param options.force - Se true (ex.: botão "Reenviar remarketing"), ignora regra de 2h e horário permitido
  */
-export async function sendRemarketingToNonParticipant(conversationId: string): Promise<{
-  success: boolean
-  error?: string
-}> {
+export async function sendRemarketingToNonParticipant(
+  conversationId: string,
+  options?: { force?: boolean }
+): Promise<{ success: boolean; error?: string }> {
+  const force = options?.force === true
   try {
     const area = 'nutri'
 
@@ -2348,27 +2350,29 @@ export async function sendRemarketingToNonParticipant(conversationId: string): P
       }
     }
 
-    // Verificar se já recebeu remarketing recentemente (evitar spam)
-    if (context.last_remarketing_at) {
+    // Verificar se já recebeu remarketing recentemente (evitar spam) — ignorar quando force (reenvio manual)
+    if (!force && context.last_remarketing_at) {
       const lastRemarketing = new Date(context.last_remarketing_at)
       const now = new Date()
       const hoursSinceLastRemarketing = (now.getTime() - lastRemarketing.getTime()) / (1000 * 60 * 60)
       
       if (hoursSinceLastRemarketing < 2) {
-        return { success: false, error: 'Remarketing já foi enviado recentemente' }
+        return { success: false, error: 'Remarketing já foi enviado recentemente (use "Reenviar remarketing" para forçar)' }
       }
     }
 
-    // Verificar se está em horário permitido para enviar mensagem automática
-    const timeCheck = isAllowedTimeToSendMessage()
-    if (!timeCheck.allowed) {
-      console.log('[Carol Remarketing] ⏰ Fora do horário permitido:', {
-        reason: timeCheck.reason,
-        nextAllowedTime: timeCheck.nextAllowedTime?.toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })
-      })
-      return { 
-        success: false, 
-        error: `Mensagem automática não enviada: ${timeCheck.reason}. Próximo horário permitido: ${timeCheck.nextAllowedTime?.toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })}` 
+    // Verificar se está em horário permitido — ignorar quando force (reenvio manual pelo admin)
+    if (!force) {
+      const timeCheck = isAllowedTimeToSendMessage()
+      if (!timeCheck.allowed) {
+        console.log('[Carol Remarketing] ⏰ Fora do horário permitido:', {
+          reason: timeCheck.reason,
+          nextAllowedTime: timeCheck.nextAllowedTime?.toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })
+        })
+        return { 
+          success: false, 
+          error: `Mensagem automática não enviada: ${timeCheck.reason}. Próximo horário permitido: ${timeCheck.nextAllowedTime?.toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })}` 
+        }
       }
     }
 
@@ -2429,7 +2433,8 @@ Você ainda tem interesse em aprender a ter sua agenda cheia? Gostaria que eu te
 
       return { success: true }
     } else {
-      return { success: false, error: 'Erro ao enviar mensagem' }
+      const errMsg = (result as { error?: string }).error || 'Erro ao enviar mensagem'
+      return { success: false, error: errMsg }
     }
   } catch (error: any) {
     console.error('[Carol] Erro ao enviar remarketing:', error)
@@ -3532,6 +3537,8 @@ O que está te travando exatamente? O momento é AGORA. Vamos conversar? 💚
 export async function sendRegistrationLinkAfterClass(conversationId: string): Promise<{
   success: boolean
   error?: string
+  /** Quando o envio falha, texto para o admin enviar manualmente */
+  messageForManual?: string
 }> {
   try {
     const area = 'nutri'
@@ -3553,13 +3560,15 @@ export async function sendRegistrationLinkAfterClass(conversationId: string): Pr
 
     // Verificar se já participou
     if (!tags.includes('participou_aula')) {
-      return { success: false, error: 'Pessoa ainda não participou da aula' }
+      return { success: false, error: 'Pessoa ainda não participou da aula', messageForManual: undefined }
     }
 
     // Verificar se já recebeu link de cadastro
     if (context.registration_link_sent === true) {
-      return { success: false, error: 'Link de cadastro já foi enviado' }
+      return { success: false, error: 'Link de cadastro já foi enviado', messageForManual: undefined }
     }
+
+    const registrationUrl = process.env.NUTRI_REGISTRATION_URL || 'https://www.ylada.com/pt/nutri#oferta'
 
     // Verificar se está em horário permitido para enviar mensagem automática
     const timeCheck = isAllowedTimeToSendMessage()
@@ -3568,9 +3577,23 @@ export async function sendRegistrationLinkAfterClass(conversationId: string): Pr
         reason: timeCheck.reason,
         nextAllowedTime: timeCheck.nextAllowedTime?.toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })
       })
+      const msgForManual = `Olá [NOME]! 💚
+
+Excelente! Parabéns por ter participado! 🎉
+
+Espero que tenha gostado e tenho certeza que isso realmente pode fazer diferença na sua vida.
+
+Agora me conta: o que você mais gostou? E como você prefere começar?
+
+Você prefere começar com o plano mensal para validar e verificar, ou você já está determinado a mudar sua vida e prefere o plano anual?
+
+🔗 ${registrationUrl}
+
+O que você acha? 😊`
       return { 
         success: false, 
-        error: `Mensagem automática não enviada: ${timeCheck.reason}. Próximo horário permitido: ${timeCheck.nextAllowedTime?.toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })}` 
+        error: `Mensagem automática não enviada: ${timeCheck.reason}. Use o texto abaixo para enviar manualmente.`,
+        messageForManual: msgForManual
       }
     }
 
@@ -3579,7 +3602,11 @@ export async function sendRegistrationLinkAfterClass(conversationId: string): Pr
 
     if (!instance) {
       console.error('[Carol] ❌ Instância Z-API não encontrada para área:', area)
-      return { success: false, error: 'Instância Z-API não encontrada. Verifique se há uma instância Z-API cadastrada no sistema.' }
+      return {
+        success: false,
+        error: 'Instância Z-API não encontrada. Verifique se há uma instância Z-API cadastrada no sistema.',
+        messageForManual: undefined,
+      }
     }
 
     const client = createZApiClient(instance.instance_id, instance.token)
@@ -3637,11 +3664,6 @@ export async function sendRegistrationLinkAfterClass(conversationId: string): Pr
       // Continuar com o nome do WhatsApp se houver erro
     }
 
-    // Link de cadastro (configurável via variável de ambiente ou banco)
-    // Aponta para página de vendas na seção de oferta (#oferta)
-    // A pessoa vê toda a argumentação e depois escolhe o plano no checkout
-    const registrationUrl = process.env.NUTRI_REGISTRATION_URL || 'https://www.ylada.com/pt/nutri#oferta'
-
     // Mensagem imediata após participar da aula
     const message = `Olá ${leadName}! 💚
 
@@ -3692,11 +3714,11 @@ O que você acha? 😊
 
       return { success: true }
     } else {
-      return { success: false, error: 'Erro ao enviar mensagem' }
+      return { success: false, error: 'Erro ao enviar mensagem', messageForManual: message }
     }
   } catch (error: any) {
     console.error('[Carol] Erro ao enviar link de cadastro:', error)
-    return { success: false, error: error.message }
+    return { success: false, error: error.message, messageForManual: undefined }
   }
 }
 
