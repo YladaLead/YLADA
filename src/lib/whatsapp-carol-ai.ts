@@ -1136,6 +1136,8 @@ export async function processIncomingMessageWithCarol(
     // a4: Não reenviar boas-vindas/opções para "Ok" e mensagens curtas/neutras
     const shortNeutralWords = ['ok', 'certo', 'beleza', 'tudo bem', 'tudo bom', 'sim', 'não', 'nao', 'ah', 'tá', 'ta', 'pronto', 'entendi', 'obrigada', 'obrigado', 'valeu', 'blz', 'legal']
     const msgNorm = message.trim().toLowerCase().replace(/\s+/g, ' ')
+    const deniesSignup = /(n[aã]o)\s+(me\s+)?(inscrevi|inscreveu|cadastrei|cadastrei|fiz\s+inscri[cç][aã]o|me\s+cadastrei)/i.test(msgNorm) ||
+      /n(ã|a)o\s+me\s+inscrevi|n(ã|a)o\s+fiz\s+inscri(c|ç)(a|ã)o/i.test(msgNorm)
     // "1" e "2" são escolha de opção, não resposta neutra — não responder "Qualquer dúvida, é só me chamar!"
     const isChoiceOnly = (workshopSessions.length >= 1 && (msgNorm === '1' || msgNorm === '2'))
     const isShortNeutralReply = !isChoiceOnly && (
@@ -1147,7 +1149,7 @@ export async function processIncomingMessageWithCarol(
     // antes do form enviar (60s), o form não manda; então Carol DEVE enviar boas-vindas + opções.
     const isMessageFromButton = /acabei\s+de\s+me\s+inscrever|me\s+inscrev(i|er)|gostaria\s+de\s+agendar|inscrev(er|i).*aula|ylada\s+nutri.*agendar/i.test(msgNorm)
 
-    const isFirstMessage = rawIsFirstMessage && !formAlreadySentWelcome && !isShortNeutralReply
+    const isFirstMessage = rawIsFirstMessage && !formAlreadySentWelcome && !isShortNeutralReply && !deniesSignup
     
     console.log('[Carol AI] 🔍 Detecção de primeira mensagem:', {
       conversationId,
@@ -1811,7 +1813,10 @@ Nos vemos em breve! 😊
     // Se for primeira mensagem, preferir fluxo curto (sem IA): pergunta 1/2/3 (nível).
     // Depois que ela responder 1/2/3, enviamos os horários (1/2).
     let cannedFirstMessageBody: string | null = null
-    if (isFirstMessage) {
+    if (rawIsFirstMessage && !formAlreadySentWelcome && !isShortNeutralReply && deniesSignup) {
+      cannedFirstMessageBody =
+        `Entendi, obrigada por avisar 😊\n\nPode ser que seu número tenha sido usado por engano.\n\nVocê tem interesse em participar da aula prática para aprender a preencher sua agenda com mais constância?\n\nSe sim, eu te explico rapidinho e te mando o link oficial pra se inscrever.`
+    } else if (isFirstMessage) {
       const introTemplate = await getFlowTemplate(area || 'nutri', 'welcome_form_intro_question')
       cannedFirstMessageBody = introTemplate
         ? applyTemplate(introTemplate, { nome: leadName })
@@ -2145,6 +2150,13 @@ Finalize com: "Responde 1 ou 2 😊".`
         ...nextContext,
         tags: [...new Set([...prevTags, 'veio_aula_pratica', 'primeiro_contato'])],
         ...(shouldSetIntroStageQualNivel ? { workshop_intro_stage: 'qual_nivel' } : {}),
+      }
+    } else if (rawIsFirstMessage && deniesSignup) {
+      // Pessoa negou inscrição na primeira mensagem: não iniciar fluxo do workshop.
+      const prevTags = Array.isArray(prevCtx.tags) ? prevCtx.tags : []
+      nextContext = {
+        ...nextContext,
+        tags: [...new Set([...prevTags, 'primeiro_contato', 'negou_inscricao'])],
       }
     }
     updatePayload.context = nextContext
