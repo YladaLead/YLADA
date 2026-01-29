@@ -5,7 +5,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { requireApiAuth } from '@/lib/api-auth'
-import { isCarolAutomationDisabled } from '@/config/whatsapp-automation'
+import { isCarolAutomationDisabled, isWhatsAppAutoWelcomeEnabled } from '@/config/whatsapp-automation'
 import { supabaseAdmin } from '@/lib/supabase'
 import { scheduleWelcomeMessages } from '@/lib/whatsapp-automation/welcome'
 import { processScheduledMessages } from '@/lib/whatsapp-automation/worker'
@@ -29,10 +29,16 @@ export async function POST(request: NextRequest) {
       reprocess_nao_participou: { processed: 0, sent: 0, errors: 0 },
     }
 
-    // 1. Agendar boas-vindas para leads novos
-    console.log('[Process All] 1️⃣ Agendando boas-vindas...')
-    const welcomeResult = await scheduleWelcomeMessages()
-    results.welcome = welcomeResult
+    // 1. Agendar boas-vindas para leads novos (PROATIVO) — por padrão DESLIGADO.
+    // Objetivo: deixar a Carol apenas responder quando a pessoa chama; disparos de boas-vindas serão manuais.
+    if (isWhatsAppAutoWelcomeEnabled()) {
+      console.log('[Process All] 1️⃣ Agendando boas-vindas...')
+      const welcomeResult = await scheduleWelcomeMessages()
+      results.welcome = welcomeResult
+    } else {
+      console.log('[Process All] 1️⃣ Boas-vindas automáticas desativadas (WHATSAPP_AUTO_WELCOME!=true).')
+      results.welcome = { scheduled: 0, skipped: 0, errors: 0 }
+    }
 
     // 2. Processar mensagens pendentes
     console.log('[Process All] 2️⃣ Processando mensagens pendentes...')

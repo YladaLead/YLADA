@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
-import { isCarolAutomationDisabled } from '@/config/whatsapp-automation'
+import { isCarolAutomationDisabled, isWhatsAppAutoInviteEnabled } from '@/config/whatsapp-automation'
 
 /**
  * Extrai dados do cliente das respostas do formulário
@@ -221,8 +221,9 @@ export async function POST(
             leadCreated = true
             console.log(`✅ Lead criado automaticamente em ${leadsTable}:`, leadId)
 
-            // 🚀 AUTOMAÇÃO: Enviar mensagem WhatsApp automaticamente (desligada quando isCarolAutomationDisabled)
-            if (userPerfil === 'nutri' && extractedData.phone && !isCarolAutomationDisabled()) {
+            // 🚫 DISPARO PROATIVO (AUTO-INVITE) — opcional e por padrão DESLIGADO.
+            // Se quiser reativar no futuro: WHATSAPP_AUTO_INVITE=true no .env
+            if (userPerfil === 'nutri' && extractedData.phone && !isCarolAutomationDisabled() && isWhatsAppAutoInviteEnabled()) {
               try {
                 const { sendWorkshopInviteToFormLead } = await import('@/lib/whatsapp-form-automation')
                 const phoneClean = extractedData.phone.replace(/\D/g, '')

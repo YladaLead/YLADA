@@ -2,6 +2,26 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireApiAuth } from '@/lib/api-auth'
 import { supabaseAdmin } from '@/lib/supabase'
 
+function digits(input: string): string {
+  return String(input || '').replace(/\D/g, '')
+}
+
+function phoneCandidates(raw: string): string[] {
+  const d = digits(raw)
+  const out = new Set<string>()
+  if (!d) return []
+  out.add(d)
+  // Padrão BR: se vier sem DDI e tiver 10/11 dígitos, adicionar 55
+  if ((d.length === 10 || d.length === 11) && !d.startsWith('55')) {
+    out.add(`55${d}`)
+  }
+  // Se vier com 55, também guardar versão sem 55 para mapear registros antigos
+  if (d.startsWith('55') && (d.length === 12 || d.length === 13)) {
+    out.add(d.slice(2))
+  }
+  return Array.from(out)
+}
+
 /**
  * GET /api/admin/whatsapp/cadastros-workshop
  * Lista todos os cadastros do workshop com informações de conversas e tags
@@ -69,31 +89,74 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Buscar conversas relacionadas por telefone
-    const phones = registrations.map(r => r.telefone?.replace(/\D/g, '')).filter(Boolean)
-    
-    let conversationsMap: Record<string, any> = {}
-    if (phones.length > 0) {
+    // Buscar conversas relacionadas por telefone (considerar variações com/sem 55)
+    const allPhoneCandidates = new Set<string>()
+    for (const r of registrations) {
+      const tel = r.telefone || r.phone || ''
+      for (const cand of phoneCandidates(tel)) allPhoneCandidates.add(cand)
+    }
+
+    let conversationsByPhone: Record<string, any> = {}
+    if (allPhoneCandidates.size > 0) {
       const { data: conversations } = await supabaseAdmin
         .from('whatsapp_conversations')
         .select('id, phone, context')
-        .in('phone', phones)
+        .in('phone', Array.from(allPhoneCandidates))
         .eq('area', 'nutri')
 
       if (conversations) {
         conversations.forEach(conv => {
-          const phoneClean = conv.phone.replace(/\D/g, '')
-          conversationsMap[phoneClean] = conv
+          const phoneClean = digits(conv.phone)
+          // Se existirem duplicadas, manter a mais recente (ordem do select pode variar).
+          // Para este endpoint, basta "uma" conversa por telefone.
+          conversationsByPhone[phoneClean] = conv
         })
+      }
+    }
+
+    // Buscar se já existe mensagem da Carol (boas-vindas/opções) por conversa
+    const conversationIds = Array.from(
+      new Set(
+        Object.values(conversationsByPhone)
+          .map((c: any) => c?.id)
+          .filter(Boolean)
+      )
+    )
+
+    const welcomeByConversationId: Record<string, { has: boolean; sentAt: string | null }> = {}
+    if (conversationIds.length > 0) {
+      const { data: botMsgs } = await supabaseAdmin
+        .from('whatsapp_messages')
+        .select('conversation_id, created_at')
+        .in('conversation_id', conversationIds)
+        .eq('sender_type', 'bot')
+        .eq('sender_name', 'Carol - Secretária')
+        .order('created_at', { ascending: true })
+
+      for (const m of botMsgs || []) {
+        const convId = (m as any).conversation_id as string
+        if (!convId) continue
+        if (!welcomeByConversationId[convId]) {
+          welcomeByConversationId[convId] = { has: true, sentAt: (m as any).created_at || null }
+        }
       }
     }
 
     // Enriquecer registrations com dados de conversas
     const enrichedRegistrations = registrations.map(reg => {
-      const phoneClean = reg.telefone?.replace(/\D/g, '') || ''
-      const conversation = conversationsMap[phoneClean]
+      const regPhone = reg.telefone || reg.phone || ''
+      const candidates = phoneCandidates(regPhone)
+      const matched = candidates
+        .map((c) => conversationsByPhone[digits(c)])
+        .find(Boolean)
+      const conversation = matched || null
       const context = conversation?.context || {}
       const tags = Array.isArray(context.tags) ? context.tags : []
+      const hasWelcome = conversation?.id ? !!welcomeByConversationId[conversation.id]?.has : false
+      const sentAt =
+        (conversation?.context && typeof conversation.context === 'object' && !Array.isArray(conversation.context) && (conversation.context as any).manual_welcome_sent_at)
+          ? String((conversation.context as any).manual_welcome_sent_at)
+          : (conversation?.id ? (welcomeByConversationId[conversation.id]?.sentAt || null) : null)
 
       return {
         id: reg.id,
@@ -105,7 +168,10 @@ export async function GET(request: NextRequest) {
         created_at: reg.created_at || reg.createdAt || new Date().toISOString(),
         conversation_id: conversation?.id || null,
         conversation_tags: tags,
-        has_conversation: !!conversation
+        has_conversation: !!conversation,
+        has_welcome_message: hasWelcome,
+        welcome_sent_at: sentAt,
+        needs_manual_whatsapp: !hasWelcome
       }
     })
 

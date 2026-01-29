@@ -920,8 +920,8 @@ function WhatsAppChatContent() {
                         </span>
                       )}
                     </div>
-                    <div className="mt-1 flex items-center justify-between">
-                      <div className="flex items-center gap-2 flex-wrap">
+                    <div className="mt-1 flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2 flex-wrap min-w-0">
                         {conv.z_api_instances?.status === 'connected' ? (
                           <span className="inline-flex items-center gap-1 text-[11px] text-green-700">
                             <span className="h-2 w-2 bg-green-500 rounded-full" />
@@ -938,23 +938,63 @@ function WhatsAppChatContent() {
                             Grupo
                           </span>
                         )}
-                        {/* Exibir tags */}
-                        {getTags(conv).map((tag) => {
-                          const tagInfo = getTagInfo(tag)
-                          return (
-                            <span
-                              key={tag}
-                              className={`text-[10px] px-1.5 py-0.5 rounded ${tagInfo.color}`}
-                              title={tag}
-                            >
-                              {tagInfo.icon} {tagInfo.label}
-                            </span>
-                          )
-                        })}
+                        {/* Tags (mobile-first): não empilha; usa scroll + "+N" */}
+                        <div className="flex items-center gap-1 max-w-full overflow-x-auto touch-pan-x whitespace-nowrap sm:whitespace-normal sm:flex-wrap sm:overflow-visible">
+                          {(() => {
+                            const tags = getTags(conv)
+                            const mobileVisible = tags.slice(0, 2)
+                            const hiddenCount = tags.length - mobileVisible.length
+                            return (
+                              <>
+                                {/* Mobile: limita + mostra "+N" */}
+                                <span className="flex items-center gap-1 sm:hidden">
+                                  {mobileVisible.map((tag) => {
+                                    const tagInfo = getTagInfo(tag)
+                                    return (
+                                      <span
+                                        key={tag}
+                                        className={`inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded ${tagInfo.color} whitespace-nowrap`}
+                                        title={tag}
+                                      >
+                                        <span aria-hidden="true">{tagInfo.icon}</span>
+                                        <span className="max-w-[10rem] truncate">{tagInfo.label}</span>
+                                      </span>
+                                    )
+                                  })}
+                                  {hiddenCount > 0 && (
+                                    <span
+                                      className="inline-flex items-center text-[10px] px-1.5 py-0.5 rounded bg-gray-100 text-gray-600 whitespace-nowrap"
+                                      title={`${hiddenCount} tag(s) a mais`}
+                                    >
+                                      +{hiddenCount}
+                                    </span>
+                                  )}
+                                </span>
+
+                                {/* Desktop: mostra todas */}
+                                <span className="hidden sm:flex sm:items-center sm:gap-1 sm:flex-wrap">
+                                  {tags.map((tag) => {
+                                    const tagInfo = getTagInfo(tag)
+                                    return (
+                                      <span
+                                        key={tag}
+                                        className={`inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded ${tagInfo.color}`}
+                                        title={tag}
+                                      >
+                                        <span aria-hidden="true">{tagInfo.icon}</span>
+                                        <span className="max-w-[14rem] truncate">{tagInfo.label}</span>
+                                      </span>
+                                    )
+                                  })}
+                                </span>
+                              </>
+                            )
+                          })()}
+                        </div>
                       </div>
 
                       {/* Ações rápidas */}
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 shrink-0">
                         <button
                           type="button"
                           onClick={(e) => {
@@ -1059,17 +1099,18 @@ function WhatsAppChatContent() {
                       <p className="text-sm text-gray-500 truncate" title={getDisplayPhone(selectedConversation)}>
                         {getDisplayPhone(selectedConversation)}
                       </p>
-                      <div className="mt-1 flex items-center gap-2 flex-wrap">
-                        {/* Tags */}
+                      <div className="mt-1 flex items-center gap-2 flex-nowrap overflow-x-auto touch-pan-x whitespace-nowrap sm:flex-wrap sm:overflow-visible sm:whitespace-normal">
+                        {/* Tags (mobile-first): faixa rolável, sem empilhar */}
                         {getTags(selectedConversation).map((tag) => {
                           const tagInfo = getTagInfo(tag)
                           return (
                             <span
                               key={tag}
-                              className={`text-[10px] px-1.5 py-0.5 rounded ${tagInfo.color}`}
+                              className={`inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded ${tagInfo.color} whitespace-nowrap`}
                               title={tag}
                             >
-                              {tagInfo.icon} {tagInfo.label}
+                              <span aria-hidden="true">{tagInfo.icon}</span>
+                              <span className="max-w-[12rem] truncate">{tagInfo.label}</span>
                             </span>
                           )
                         })}
@@ -1147,7 +1188,8 @@ function WhatsAppChatContent() {
                           className="min-h-[44px] px-3 py-2 sm:py-1.5 text-xs font-medium bg-purple-100 text-purple-700 rounded-xl hover:bg-purple-200 active:bg-purple-300 transition-colors disabled:opacity-50 touch-manipulation"
                           title="Enviar opção de sessão e deixar Carol continuar"
                         >
-                          📅 Enviar Opção
+                          <span className="sm:hidden" aria-hidden="true">📅</span>
+                          <span className="hidden sm:inline">📅 Enviar Opção</span>
                         </button>
                         <button
                           type="button"
@@ -1181,7 +1223,8 @@ function WhatsAppChatContent() {
                           className="min-h-[44px] px-3 py-2 sm:py-1.5 text-xs font-medium bg-red-100 text-red-700 rounded-xl hover:bg-red-200 active:bg-red-300 transition-colors touch-manipulation"
                           title="Desativar Carol - Ela não responderá mais automaticamente"
                         >
-                          🚫 Desativar Carol
+                          <span className="sm:hidden" aria-hidden="true">🚫</span>
+                          <span className="hidden sm:inline">🚫 Desativar Carol</span>
                         </button>
                       </>
                     )}

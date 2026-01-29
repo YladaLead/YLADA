@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
 import { resend, FROM_EMAIL, FROM_NAME, isResendConfigured } from '@/lib/resend'
-import { isCarolAutomationDisabled } from '@/config/whatsapp-automation'
+import { isCarolAutomationDisabled, isWhatsAppAutoInviteEnabled } from '@/config/whatsapp-automation'
 
 /**
  * POST - Salvar inscrição no workshop
@@ -173,10 +173,13 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // 🚀 AUTOMAÇÃO: Enviar mensagem WhatsApp em background (não bloqueia a resposta da API).
-    // A função espera 60s antes de enviar, para dar tempo da pessoa clicar no botão WhatsApp primeiro.
-    // Se ela clicar, a mensagem dela chega e a Carol responde; aí a automação não envia (evita duplicata).
-    if (sanitizedData.telefone && !isCarolAutomationDisabled()) {
+    // 🚫 DISPARO PROATIVO (AUTO-INVITE) — agora é opcional e por padrão fica DESLIGADO.
+    // Ideia: deixar a Carol apenas responder quando a pessoa chama no WhatsApp.
+    // Se quiser reativar no futuro: WHATSAPP_AUTO_INVITE=true no .env
+    //
+    // (Quando ligado) Envia WhatsApp em background e espera 60s antes de enviar,
+    // para dar tempo da pessoa clicar no botão WhatsApp primeiro.
+    if (isWhatsAppAutoInviteEnabled() && sanitizedData.telefone && !isCarolAutomationDisabled()) {
       const phoneClean = sanitizedData.telefone.replace(/\D/g, '')
       const leadName = sanitizedData.nome
       const userIdPromise = supabaseAdmin
@@ -205,8 +208,8 @@ export async function POST(request: NextRequest) {
         }
       }).catch(() => {})
       // Não aguardar a automação — resposta da API volta imediatamente
-    } else if (sanitizedData.telefone && isCarolAutomationDisabled()) {
-      console.log('[Workshop Inscrição] Automação desligada - mensagem WhatsApp não enviada.')
+    } else if (sanitizedData.telefone && (isCarolAutomationDisabled() || !isWhatsAppAutoInviteEnabled())) {
+      console.log('[Workshop Inscrição] Disparo proativo desligado - WhatsApp não enviado automaticamente.')
     }
 
     // Enviar email de notificação para o admin
