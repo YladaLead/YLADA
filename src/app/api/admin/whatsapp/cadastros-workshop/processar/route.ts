@@ -2,7 +2,20 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireApiAuth } from '@/lib/api-auth'
 import { supabaseAdmin } from '@/lib/supabase'
 import { createZApiClient } from '@/lib/z-api'
-import { generateCarolResponse, formatSessionDateTime } from '@/lib/whatsapp-carol-ai'
+import { generateCarolResponse } from '@/lib/whatsapp-carol-ai'
+
+function digits(input: string): string {
+  return String(input || '').replace(/\D/g, '')
+}
+
+function normalizePhone(raw: string): string {
+  let d = digits(raw)
+  // remover um possível "0" inicial
+  if (d.startsWith('0')) d = d.slice(1)
+  // se for BR sem DDI (10/11), adiciona 55
+  if ((d.length === 10 || d.length === 11) && !d.startsWith('55')) d = `55${d}`
+  return d
+}
 
 /**
  * POST /api/admin/whatsapp/cadastros-workshop/processar
@@ -44,21 +57,32 @@ export async function POST(request: NextRequest) {
 
     const client = createZApiClient(instance.instance_id, instance.token)
 
-    // Buscar próximas 2 sessões
-    const { data: sessions } = await supabaseAdmin
+    // Buscar sessões futuras e montar 2 opções (próxima + manhã 9/10h quando existir)
+    const { data: allSessions } = await supabaseAdmin
       .from('whatsapp_workshop_sessions')
       .select('id, title, starts_at, zoom_link')
       .eq('area', 'nutri')
       .eq('is_active', true)
       .gte('starts_at', new Date().toISOString())
       .order('starts_at', { ascending: true })
-      .limit(2)
+      .limit(8)
 
-    const workshopSessions = (sessions || []).map(s => ({
+    const list = allSessions || []
+    const hourBR = (startsAt: string) =>
+      parseInt(new Date(startsAt).toLocaleString('en-US', { timeZone: 'America/Sao_Paulo', hour: 'numeric', hour12: false }), 10)
+    const isManha = (s: { starts_at: string }) => {
+      const h = hourBR(s.starts_at)
+      return h === 9 || h === 10
+    }
+    const first = list[0]
+    const soonestManha = list.find(isManha)
+    const second = soonestManha && soonestManha.id !== first?.id ? soonestManha : list[1]
+    const picked = first && second ? [first, second] : first ? [first] : []
+    const workshopSessions = picked.map((s: any) => ({
       id: s.id,
       title: s.title || 'Aula Prática ao Vivo',
       starts_at: s.starts_at,
-      zoom_link: s.zoom_link
+      zoom_link: s.zoom_link,
     }))
 
     // Buscar cadastros
@@ -87,35 +111,46 @@ export async function POST(request: NextRequest) {
     let processed = 0
     let conversationsCreated = 0
     let messagesSent = 0
+    let skippedAlreadySent = 0
     let errors = 0
     const details: string[] = []
 
     // Processar cada cadastro
     for (const reg of registrations) {
       try {
-        const phone = (reg.telefone || reg.phone || '').replace(/\D/g, '')
-        if (!phone || phone.length < 10) {
+        const phoneRaw = reg.telefone || reg.phone || ''
+        const phone = normalizePhone(phoneRaw)
+        if (!phone || digits(phone).length < 10) {
           errors++
           details.push(`❌ ${reg.nome || reg.name || 'Sem nome'}: Telefone inválido`)
           continue
         }
 
         const name = reg.nome || reg.name || 'Cliente'
-        const email = reg.email || reg.email_address || ''
+        // const email = reg.email || reg.email_address || ''
 
         // Buscar ou criar conversa
         let conversationId: string | null = null
         
+        // Preferir reaproveitar conversa existente (mesmo telefone) para não duplicar.
+        // Se houver conversa em outra instância, migramos a conversa para a instância conectada atual.
         const { data: existingConv } = await supabaseAdmin
           .from('whatsapp_conversations')
-          .select('id, context')
+          .select('id, context, instance_id')
           .eq('phone', phone)
           .eq('area', 'nutri')
-          .eq('instance_id', instance.id)
+          .order('created_at', { ascending: false })
+          .limit(1)
           .maybeSingle()
 
         if (existingConv) {
           conversationId = existingConv.id
+          if (existingConv.instance_id && existingConv.instance_id !== instance.id) {
+            await supabaseAdmin
+              .from('whatsapp_conversations')
+              .update({ instance_id: instance.id })
+              .eq('id', existingConv.id)
+          }
         } else {
           // Criar nova conversa
           const { data: newConv, error: createError } = await supabaseAdmin
@@ -128,7 +163,7 @@ export async function POST(request: NextRequest) {
               status: 'active',
               context: {
                 tags: ['veio_aula_pratica', 'primeiro_contato'],
-                source: 'workshop_registration'
+                source: 'admin_cadastros_workshop'
               }
             })
             .select('id')
@@ -155,7 +190,7 @@ export async function POST(request: NextRequest) {
         const tags = Array.isArray(context.tags) ? context.tags : []
         
         // Adicionar tags se não existirem
-        const newTags = [...new Set([...tags, 'veio_aula_pratica', 'primeiro_contato'])]
+        const newTags = [...new Set([...tags, 'veio_aula_pratica', 'primeiro_contato', 'manual_welcome_sent'])]
 
         // Verificar se já tem mensagem da Carol
         const { data: existingMessages } = await supabaseAdmin
@@ -168,6 +203,12 @@ export async function POST(request: NextRequest) {
 
         // Se não tem mensagem, enviar boas-vindas
         if (!existingMessages || existingMessages.length === 0) {
+          if (workshopSessions.length === 0) {
+            errors++
+            details.push(`❌ ${name}: Nenhuma sessão ativa encontrada (crie a agenda em /admin/whatsapp/workshop)`)
+            continue
+          }
+
           const message = await generateCarolResponse(
             'Olá, quero agendar uma aula',
             [],
@@ -205,14 +246,20 @@ export async function POST(request: NextRequest) {
             details.push(`❌ ${name}: Erro ao enviar mensagem - ${result.error}`)
           }
         } else {
-          details.push(`ℹ️ ${name}: Já tem mensagem da Carol`)
+          skippedAlreadySent++
+          details.push(`ℹ️ ${name}: Já recebeu mensagem (não reenviado)`)
         }
 
         // Atualizar tags e contexto
         await supabaseAdmin
           .from('whatsapp_conversations')
           .update({
-            context: { ...context, tags: newTags },
+            context: {
+              ...context,
+              tags: newTags,
+              manual_welcome_sent_at: (context as any)?.manual_welcome_sent_at || new Date().toISOString(),
+              manual_welcome_source: 'admin_cadastros_workshop',
+            },
             last_message_at: new Date().toISOString(),
             last_message_from: 'bot'
           })
@@ -235,6 +282,7 @@ export async function POST(request: NextRequest) {
       processed,
       conversationsCreated,
       messagesSent,
+      skippedAlreadySent,
       errors,
       details: details.slice(0, 100).join('\n')
     })

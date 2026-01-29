@@ -116,8 +116,7 @@ Pelo celular, a experiência fica limitada e você pode perder partes importante
 ⚠️ Após 10 minutos do início não será mais permitida a entrada.
 
 Nos vemos em breve! 😊
-
-🔗 ${session.zoom_link}`
+`
 
     const result2h = await scheduleMessage({
       conversationId,

@@ -1581,8 +1581,6 @@ Pelo celular, a experiência fica limitada e você pode perder partes importante
 ⚠️ Após 10 minutos do início não será mais permitida a entrada.
 
 Nos vemos em breve! 😊
-
-🔗 ${selectedSession.zoom_link}
 `
           }
           
@@ -2897,8 +2895,6 @@ Ideal participar pelo computador e ter caneta e papel à mão — a aula é bem 
 ⚠️ Após 10 minutos do início não será mais permitida a entrada.
 
 Nos vemos em breve! 😊
-
-🔗 ${session.zoom_link}
 `
           shouldSend = true
           if (!context[notificationKey]) context[notificationKey] = {}
