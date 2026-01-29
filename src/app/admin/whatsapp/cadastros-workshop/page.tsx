@@ -15,6 +15,9 @@ interface WorkshopRegistration {
   conversation_id?: string
   conversation_tags?: string[]
   has_conversation?: boolean
+  has_welcome_message?: boolean
+  welcome_sent_at?: string | null
+  needs_manual_whatsapp?: boolean
 }
 
 function CadastrosWorkshopPage() {
@@ -30,7 +33,7 @@ function CadastrosWorkshopContent() {
   const [loading, setLoading] = useState(true)
   const [processing, setProcessing] = useState(false)
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
-  const [filter, setFilter] = useState<'all' | 'no_conversation' | 'no_tags'>('all')
+  const [filter, setFilter] = useState<'all' | 'pending_welcome' | 'no_conversation' | 'no_tags'>('pending_welcome')
   const [searchTerm, setSearchTerm] = useState('')
   const [tagsModalOpen, setTagsModalOpen] = useState(false)
   const [selectedTags, setSelectedTags] = useState<string[]>([])
@@ -82,6 +85,9 @@ function CadastrosWorkshopContent() {
     let filtered = registrations
 
     // Filtro por status
+    if (filter === 'pending_welcome') {
+      filtered = filtered.filter(r => r.needs_manual_whatsapp)
+    }
     if (filter === 'no_conversation') {
       filtered = filtered.filter(r => !r.has_conversation)
     } else if (filter === 'no_tags') {
@@ -107,7 +113,7 @@ function CadastrosWorkshopContent() {
       return
     }
 
-    if (!confirm(`Processar ${selectedIds.size} cadastro(s)? Isso vai criar/atualizar conversas e enviar mensagens da Carol.`)) {
+    if (!confirm(`Disparar a 1ª mensagem do workshop para ${selectedIds.size} cadastro(s)?`)) {
       return
     }
 
@@ -124,7 +130,9 @@ function CadastrosWorkshopContent() {
 
       const data = await res.json()
       if (data.success) {
-        alert(`✅ Processamento concluído!\n\n📊 Estatísticas:\n- Processados: ${data.processed}\n- Conversas criadas: ${data.conversationsCreated}\n- Mensagens enviadas: ${data.messagesSent}\n- Erros: ${data.errors}\n\n📋 Detalhes:\n${data.details || 'Nenhum detalhe disponível'}`)
+        alert(
+          `✅ Disparo concluído!\n\n📊 Estatísticas:\n- Processados: ${data.processed}\n- Conversas criadas: ${data.conversationsCreated}\n- Mensagens enviadas: ${data.messagesSent}\n- Já tinham mensagem (pulados): ${data.skippedAlreadySent || 0}\n- Erros: ${data.errors}\n\n📋 Detalhes:\n${data.details || 'Nenhum detalhe disponível'}`
+        )
         await loadRegistrations()
         setSelectedIds(new Set())
       } else {
@@ -132,6 +140,25 @@ function CadastrosWorkshopContent() {
       }
     } catch (error: any) {
       alert(`Erro: ${error.message}`)
+    } finally {
+      setProcessing(false)
+    }
+  }
+
+  const handleSendOne = async (id: string) => {
+    setProcessing(true)
+    try {
+      const res = await fetch('/api/admin/whatsapp/cadastros-workshop/processar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ registrationIds: [id] }),
+      })
+      const data = await res.json()
+      if (!data.success) throw new Error(data.error || 'Erro ao disparar')
+      await loadRegistrations()
+    } catch (e: any) {
+      alert(e.message || 'Erro ao disparar')
     } finally {
       setProcessing(false)
     }
@@ -225,6 +252,7 @@ function CadastrosWorkshopContent() {
   }
 
   const filteredRegistrations = getFilteredRegistrations()
+  const pendingCount = registrations.filter(r => r.needs_manual_whatsapp).length
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -250,11 +278,36 @@ function CadastrosWorkshopContent() {
 
       {/* Conteúdo */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {pendingCount > 0 && (
+          <div className="mb-6 bg-amber-50 border border-amber-200 rounded-lg p-4">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <p className="font-semibold text-amber-900">⚠️ Pendentes de disparo manual</p>
+                <p className="text-sm text-amber-800">
+                  {pendingCount} cadastro(s) ainda não receberam a 1ª mensagem do WhatsApp.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setFilter('pending_welcome')}
+                className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700"
+              >
+                Ver pendentes
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Estatísticas */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
           <div className="bg-white rounded-lg shadow p-4">
             <div className="text-sm text-gray-600">Total de Cadastros</div>
             <div className="text-2xl font-bold text-gray-900">{registrations.length}</div>
+          </div>
+          <div className="bg-white rounded-lg shadow p-4 border-2 border-amber-300">
+            <div className="text-sm text-gray-600 font-semibold">⚠️ Pendentes (1ª msg)</div>
+            <div className="text-2xl font-bold text-amber-700">{pendingCount}</div>
+            <div className="text-xs text-gray-500 mt-1">Ainda não receberam a 1ª mensagem</div>
           </div>
           <div className="bg-white rounded-lg shadow p-4 border-2 border-orange-300">
             <div className="text-sm text-gray-600 font-semibold">⚠️ Sem Conversa no WhatsApp</div>
@@ -298,6 +351,7 @@ function CadastrosWorkshopContent() {
               className="px-4 py-2 border border-gray-300 rounded-lg"
             >
               <option value="all">Todos</option>
+              <option value="pending_welcome">⚠️ Pendentes (1ª mensagem)</option>
               <option value="no_conversation">⚠️ Sem conversa (não iniciou WhatsApp)</option>
               <option value="no_tags">Sem tags</option>
             </select>
@@ -324,7 +378,7 @@ function CadastrosWorkshopContent() {
                   disabled={processing}
                   className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50"
                 >
-                  {processing ? 'Processando...' : '🚀 Processar e Ativar'}
+                  {processing ? 'Enviando...' : '📤 Disparar 1ª mensagem'}
                 </button>
               </>
             )}
@@ -351,12 +405,14 @@ function CadastrosWorkshopContent() {
                       />
                     </th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nome</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Telefone</th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">CRN</th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Data Cadastro</th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Conversa</th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tags</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Ação</th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
@@ -371,6 +427,24 @@ function CadastrosWorkshopContent() {
                         />
                       </td>
                       <td className="px-4 py-3 text-sm font-medium text-gray-900">{reg.nome}</td>
+                      <td className="px-4 py-3">
+                        {reg.has_welcome_message ? (
+                          <div className="flex flex-col">
+                            <span className="inline-flex w-fit items-center px-2 py-1 rounded text-xs font-semibold bg-green-100 text-green-800">
+                              ✅ Já recebeu
+                            </span>
+                            {reg.welcome_sent_at && (
+                              <span className="text-xs text-gray-500 mt-1">
+                                {new Date(reg.welcome_sent_at).toLocaleString('pt-BR')}
+                              </span>
+                            )}
+                          </div>
+                        ) : (
+                          <span className="inline-flex items-center px-2 py-1 rounded text-xs font-semibold bg-amber-100 text-amber-800">
+                            ⚠️ Pendente
+                          </span>
+                        )}
+                      </td>
                       <td className="px-4 py-3 text-sm text-gray-600">{reg.email}</td>
                       <td className="px-4 py-3 text-sm text-gray-600">{reg.telefone}</td>
                       <td className="px-4 py-3 text-sm text-gray-600">{reg.crn || '-'}</td>
@@ -405,6 +479,21 @@ function CadastrosWorkshopContent() {
                           <span className="text-sm text-gray-400">Sem tags</span>
                         )}
                       </td>
+                      <td className="px-4 py-3">
+                        <button
+                          type="button"
+                          disabled={processing || reg.has_welcome_message}
+                          onClick={() => handleSendOne(reg.id)}
+                          className={`px-3 py-1.5 text-sm rounded-lg font-semibold ${
+                            reg.has_welcome_message
+                              ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                              : 'bg-emerald-600 text-white hover:bg-emerald-700'
+                          } disabled:opacity-50`}
+                          title={reg.has_welcome_message ? 'Já recebeu' : 'Disparar 1ª mensagem'}
+                        >
+                          {reg.has_welcome_message ? '—' : '📤 Disparar'}
+                        </button>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -419,7 +508,7 @@ function CadastrosWorkshopContent() {
           <ul className="text-sm text-blue-800 space-y-1 list-disc list-inside">
             <li><strong>Selecionar:</strong> Marque os cadastros que deseja processar</li>
             <li><strong>Adicionar Tags:</strong> Adicione tags manualmente antes de processar</li>
-            <li><strong>Processar e Ativar:</strong> Cria/atualiza conversas e envia mensagens da Carol automaticamente</li>
+            <li><strong>Disparar 1ª mensagem:</strong> Envia a primeira mensagem (boas-vindas + opções) e marca como enviado</li>
             <li><strong>Filtros:</strong> Use os filtros para encontrar cadastros específicos</li>
           </ul>
         </div>
