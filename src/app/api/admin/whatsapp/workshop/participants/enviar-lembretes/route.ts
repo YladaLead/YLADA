@@ -109,8 +109,6 @@ export async function POST(request: NextRequest) {
         message = `${firstName ? `Olá ${firstName}! ` : ''}Sua aula é hoje às ${time}! 
 
 Ideal participar pelo computador e ter caneta e papel à mão — a aula é bem prática.
-
-🔗 ${session.zoom_link}
 `
       } else if (tipo === '30min') {
         message = `${firstName ? `Olá ${firstName}! ` : ''}Em breve começaremos juntos! ⏰`

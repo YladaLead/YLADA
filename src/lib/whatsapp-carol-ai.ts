@@ -2960,8 +2960,8 @@ Nos vemos lá! 😊
         // IMPORTANTE: Se sessão é hoje e ainda não enviou nenhum lembrete, enviar o de 12h
         if (!context[notificationKey]?.sent_12h && 
             ((hoursDiff >= 12 && hoursDiff < 13) || 
-             (hoursDiff >= 2 && hoursDiff < 12) || 
-             (isToday && hoursDiff >= 0.5 && hoursDiff < 12 && !context[notificationKey]?.sent_2h) ||
+             (hoursDiff >= 2.5 && hoursDiff < 12) || 
+             (isToday && hoursDiff >= 2.5 && hoursDiff < 12 && !context[notificationKey]?.sent_2h) ||
              (isTomorrow && hoursDiff >= 12 && hoursDiff < 36))) {
           message = `${leadName ? `Olá ${leadName}! ` : ''}Sua aula é hoje às ${time}! 
 
