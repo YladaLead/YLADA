@@ -1037,19 +1037,23 @@ export async function processIncomingMessageWithCarol(
     const tags = Array.isArray(context.tags) ? context.tags : []
     const workshopSessionId = context.workshop_session_id
 
-    // 1b. Se a pessoa pedir para cancelar/desagendar e estiver agendada, desagendar e responder com mensagem curta
+    // 1b. Se a pessoa avisar que NÃO vai conseguir participar/entrar, NÃO reenviar link.
+    // Em vez disso, desmarcar e oferecer remarcação (evita loops de "link" quando a pessoa fala que não consegue ir).
+    const querReagendar =
+      /reagendar|remarcar|trocar\s+hor[aá]rio|mudar\s+hor[aá]rio|mudar\s+o\s+hor[aá]rio|adiar|outro\s+hor[aá]rio|outro\s+dia/i.test(message) ||
+      /n[aã]o\s+vou\s+conseguir\s+(participar|entrar|ir)|n[aã]o\s+consigo\s+(participar|entrar|ir)|n[aã]o\s+poderei\s+(participar|entrar|ir)|n[aã]o\s+vou\s+poder\s+(participar|entrar|ir)|n[aã]o\s+posso\s+(participar|entrar|ir)/i.test(message)
+
     const querCancelar =
-      /não\s+vou\s+poder|não\s+posso\s+mais|quero\s+cancelar|quero\s+desmarcar|desmarcar|desistir|não\s+quero\s+mais\s+participar|não\s+quero\s+participar|tirar\s+(me)?\s+da\s+(lista|aula)|remover\s+(me)?\s+do\s+agendamento|cancelar\s+(minha\s+)?(participação|aula|inscrição)/i.test(message) ||
-      /desmarcar\s+minha\s+aula|não\s+poderei\s+ir|não\s+vou\s+conseguir\s+ir/i.test(message)
+      /quero\s+cancelar|quero\s+desmarcar|desmarcar|desistir|n[aã]o\s+quero\s+mais\s+participar|n[aã]o\s+quero\s+participar|tirar\s+(me)?\s+da\s+(lista|aula)|remover\s+(me)?\s+do\s+agendamento|cancelar\s+(minha\s+)?(participação|aula|inscrição)/i.test(message)
     let desagendarResponse: string | null = null
-    if (workshopSessionId && querCancelar) {
-      const tagsFiltered = tags.filter(
-        (t: string) => t !== 'agendou_aula' && t !== 'recebeu_link_workshop'
-      )
+    let shouldOfferRescheduleOptions = false
+    if (workshopSessionId && (querCancelar || querReagendar)) {
+      const tagsFiltered = tags.filter((t: string) => t !== 'agendou_aula' && t !== 'recebeu_link_workshop')
+      const nextTags = querReagendar ? [...new Set([...tagsFiltered, 'adiou_aula'])] : tagsFiltered
       const { workshop_session_id, scheduled_date, ...restContext } = context as Record<string, unknown>
       const newContext = {
         ...restContext,
-        tags: tagsFiltered,
+        tags: nextTags,
         workshop_session_id: null,
         scheduled_date: null,
       }
@@ -1057,7 +1061,13 @@ export async function processIncomingMessageWithCarol(
         .from('whatsapp_conversations')
         .update({ context: newContext })
         .eq('id', conversationId)
-      desagendarResponse = 'Tudo bem! Desmarquei sua participação. Se quiser agendar em outro horário, é só me avisar. 😊'
+      if (querReagendar) {
+        // A lista real de opções é montada depois que buscamos as sessões.
+        shouldOfferRescheduleOptions = true
+        desagendarResponse = 'Sem problema 😊 Vou remarcar sua aula.'
+      } else {
+        desagendarResponse = 'Tudo bem! Desmarquei sua participação. Se quiser agendar em outro horário, é só me avisar. 😊'
+      }
     }
 
     // 2. Buscar sessões de workshop: SEMPRE as mesmas 2 opções que a pessoa viu (próxima + manhã 9h/10h quando existir).
@@ -1108,6 +1118,12 @@ export async function processIncomingMessageWithCarol(
         zoom_link: s.zoom_link ? s.zoom_link.substring(0, 50) + '...' : null
       }))
     })
+
+    // Se a pessoa pediu para reagendar (ou disse que não consegue participar), responder com opções e NÃO reenviar link.
+    if (desagendarResponse && shouldOfferRescheduleOptions && workshopSessions.length > 0) {
+      const optText = buildWorkshopOptionsText(workshopSessions, 'bold')
+      desagendarResponse = `${desagendarResponse}\n\nQual horário fica melhor pra você?\n\n${optText}\n\nMe responde com 1 ou 2 🙂`
+    }
 
     // 3. Verificar histórico para detectar primeira mensagem
     const { data: messageHistory } = await supabaseAdmin
