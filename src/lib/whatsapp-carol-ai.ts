@@ -11,6 +11,7 @@
 import { supabaseAdmin } from '@/lib/supabase'
 import { createZApiClient } from '@/lib/z-api'
 import OpenAI from 'openai'
+import { applyTemplate, getFlowTemplate } from '@/lib/whatsapp-flow-templates'
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -122,6 +123,25 @@ export function getFirstName(fullName: string | null | undefined): string {
   return primeira
 }
 
+function buildWorkshopOptionsText(
+  sessions: Array<{ starts_at: string }>,
+  mode: 'plain' | 'bold' = 'plain'
+): string {
+  if (!sessions || sessions.length === 0) return ''
+  const header = mode === 'bold' ? '🗓️ *Opções de Aula Disponíveis:*\n\n' : '🗓️ Opções de Aula Disponíveis:\n\n'
+  let out = header
+  sessions.forEach((session, index) => {
+    const { weekday, date, time } = formatSessionDateTime(session.starts_at)
+    if (mode === 'bold') {
+      out += `*Opção ${index + 1}:*\n${weekday}, ${date}\n🕒 ${time} (horário de Brasília)\n\n`
+    } else {
+      out += `Opção ${index + 1}:\n${weekday}, ${date}\n🕒 ${time} (horário de Brasília)\n\n`
+    }
+  })
+  out += mode === 'bold' ? '💬 *Qual você prefere?* 😊' : '💬 Qual você prefere? 😊'
+  return out.trim()
+}
+
 /**
  * Verifica se o texto é nome da empresa e NUNCA deve ser usado como nome da pessoa.
  * Evita que a Carol chame o lead de "Ylada" quando o payload/conversa traz o nome do negócio.
@@ -150,12 +170,38 @@ export async function getRegistrationName(
 ): Promise<string | null> {
   try {
     const phoneClean = phone.replace(/\D/g, '')
-    
+
+    // Gerar candidatos (com/sem 55; com/sem 9) e sufixos para bater com formatos variados no banco.
+    const cand = new Set<string>()
+    if (phoneClean) cand.add(phoneClean)
+    if (phoneClean.startsWith('0')) cand.add(phoneClean.slice(1))
+    if (!phoneClean.startsWith('55') && (phoneClean.length === 10 || phoneClean.length === 11)) cand.add(`55${phoneClean}`)
+    if (phoneClean.startsWith('55') && (phoneClean.length === 12 || phoneClean.length === 13)) cand.add(phoneClean.slice(2))
+    // com/sem 9 (celular BR)
+    if (phoneClean.startsWith('55') && phoneClean.length === 13) cand.add(phoneClean.slice(0, 4) + phoneClean.slice(5)) // 55DD9XXXXXXXX -> 55DDXXXXXXXX
+    if (phoneClean.startsWith('55') && phoneClean.length === 12) cand.add(phoneClean.slice(0, 4) + '9' + phoneClean.slice(4)) // 55DDXXXXXXXX -> 55DD9XXXXXXXX
+    if (!phoneClean.startsWith('55') && phoneClean.length === 11) cand.add(phoneClean.slice(0, 2) + phoneClean.slice(3)) // DD9XXXXXXXX -> DDXXXXXXXX
+    if (!phoneClean.startsWith('55') && phoneClean.length === 10) cand.add(phoneClean.slice(0, 2) + '9' + phoneClean.slice(2)) // DDXXXXXXXX -> DD9XXXXXXXX
+
+    const suffixes = new Set<string>()
+    for (const c of cand) {
+      const d = String(c || '').replace(/\D/g, '')
+      for (const len of [11, 10, 9, 8, 7, 6]) {
+        if (d.length >= len) suffixes.add(d.slice(-len))
+      }
+    }
+
+    const suffixList = Array.from(suffixes).filter(Boolean)
+    const workshopOr =
+      suffixList.length > 0
+        ? suffixList.map((s) => `telefone.ilike.%${s}%`).join(',')
+        : `telefone.ilike.%${phoneClean.slice(-8)}%`
+
     // 1. Tentar buscar de workshop_inscricoes primeiro (prioridade)
     const { data: workshopReg } = await supabaseAdmin
       .from('workshop_inscricoes')
       .select('nome')
-      .ilike('telefone', `%${phoneClean.slice(-8)}%`)
+      .or(workshopOr)
       .limit(1)
       .maybeSingle()
     
@@ -164,10 +210,14 @@ export async function getRegistrationName(
     }
     
     // 2. Fallback para contact_submissions (apenas se não encontrou em workshop_inscricoes)
+    const contactOr =
+      suffixList.length > 0
+        ? suffixList.map((s) => `phone.ilike.%${s}%,telefone.ilike.%${s}%`).join(',')
+        : `phone.ilike.%${phoneClean.slice(-8)}%,telefone.ilike.%${phoneClean.slice(-8)}%`
     const { data: contactReg } = await supabaseAdmin
       .from('contact_submissions')
       .select('name, nome')
-      .or(`phone.ilike.%${phoneClean.slice(-8)}%,telefone.ilike.%${phoneClean.slice(-8)}%`)
+      .or(contactOr)
       .limit(1)
       .maybeSingle()
     
@@ -1785,9 +1835,23 @@ Nos vemos em breve! 😊
     if (isMessageFromButton && !registrationName && !(context as any)?.lead_name) {
       rawName = ''
     }
-    let leadName = getFirstName(rawName) || 'querido(a)'
-    if (isBusinessName(leadName)) {
-      leadName = 'querido(a)'
+    // Se não temos nome confiável, não use "querido(a)" como nome — prefira saudação neutra.
+    let leadName = getFirstName(rawName) || ''
+    if (isBusinessName(leadName)) leadName = ''
+
+    // Se for primeira mensagem e temos sessões, preferir template curto (sem IA) para evitar textão.
+    let cannedFirstMessageBody: string | null = null
+    if (isFirstMessage && workshopSessions.length > 0) {
+      const optionsText = buildWorkshopOptionsText(workshopSessions, 'bold')
+      const bodyTemplate = await getFlowTemplate(area || 'nutri', 'welcome_form_body')
+      if (bodyTemplate) {
+        cannedFirstMessageBody = applyTemplate(bodyTemplate, { nome: leadName })
+          .replace(/\[OPÇÕES inseridas automaticamente\]/gi, optionsText)
+          .replace(/\{\{opcoes\}\}/gi, optionsText)
+      } else {
+        // Fallback curto (sem parágrafos longos)
+        cannedFirstMessageBody = `Obrigada por se inscrever na Aula Prática ao Vivo – Agenda Cheia para Nutricionistas.\n\n${optionsText}\n\nQual desses horários funciona melhor pra você? 😊`
+      }
     }
 
     // Mensagem do botão: se for primeira mensagem (ninguém enviou nada ainda), Carol envia boas-vindas + opções.
@@ -1838,9 +1902,12 @@ Nos vemos em breve! 😊
         .eq(isUUIDEarly ? 'id' : 'instance_id', instanceId)
         .single()
       if (instanceEarly?.token) {
-        const greetingOnly = leadName && leadName !== 'querido(a)'
-          ? `Oi ${leadName}! 😊\n\nSeja muito bem-vinda!\n\nEu sou a Carol, da equipe Ylada Nutri.`
-          : `Oi! 😊\n\nSeja muito bem-vinda!\n\nEu sou a Carol, da equipe Ylada Nutri.`
+        const greetingTemplate = await getFlowTemplate(area || 'nutri', 'welcome_form_greeting')
+        const greetingOnly = greetingTemplate
+          ? applyTemplate(greetingTemplate, { nome: leadName })
+          : (leadName
+              ? `Oi ${leadName}! 😊\n\nSeja muito bem-vinda!\n\nEu sou a Carol, da equipe Ylada Nutri.`
+              : `Oi! 😊\n\nSeja muito bem-vinda!\n\nEu sou a Carol, da equipe Ylada Nutri.`)
         const sendGreeting = await sendWhatsAppMessage(
           phone,
           greetingOnly,
@@ -1859,36 +1926,32 @@ Nos vemos em breve! 😊
             status: 'sent',
             is_bot_response: true,
           })
-          carolInstruction = `PROIBIDO repetir a saudação. Sua mensagem NÃO pode conter "Oi" / "tudo bem?" / "Seja muito bem-vinda!" / "Eu sou a Carol" — isso já foi enviado na mensagem anterior.
-
-Comece DIRETAMENTE com:
-1) "A próxima aula é prática e vai te ajudar a ter mais constância pra preencher sua agenda."
-2) Depois: "As próximas aulas acontecerão nos seguintes dias e horários:"
-3) Depois: as opções (formato do contexto, UMA VEZ cada)
-4) Finalize com: "Responde 1 ou 2 😊"
-
-Se você escrever Oi/boas-vindas/Eu sou a Carol, apague — sua primeira frase deve ser "A próxima aula é prática...".`
+          // Se temos corpo pronto (template/fallback curto), não precisamos da IA aqui.
+          // Ainda assim, mantém instrução para caso caia na IA por qualquer motivo.
+          carolInstruction = `PROIBIDO repetir a saudação. Sua mensagem NÃO pode conter "Oi" / "tudo bem?" / "Seja muito bem-vinda!" / "Eu sou a Carol" — isso já foi enviado na mensagem anterior.\n\nSua mensagem deve começar DIRETAMENTE com "Obrigada por se inscrever" e seguir com as opções.`
         }
       }
     }
 
     let carolResponse =
       desagendarResponse ??
-      (await generateCarolResponse(message, conversationHistory, {
-        tags,
-        workshopSessions,
-        leadName: leadName, // 🆕 Sempre passar o nome se disponível
-        hasScheduled,
-        scheduledDate,
-        participated: participated ? true : (tags.includes('nao_participou_aula') ? false : undefined),
-        isFirstMessage, // 🆕 Passar flag de primeira mensagem
-        carolInstruction,
-        adminSituacao: (context as any)?.admin_situacao, // remarketing pessoa por pessoa (persistente)
-      }))
+      (cannedFirstMessageBody && isFirstMessage
+        ? cannedFirstMessageBody
+        : (await generateCarolResponse(message, conversationHistory, {
+            tags,
+            workshopSessions,
+            leadName: leadName || undefined, // 🆕 Só passar se for nome real
+            hasScheduled,
+            scheduledDate,
+            participated: participated ? true : (tags.includes('nao_participou_aula') ? false : undefined),
+            isFirstMessage, // 🆕 Passar flag de primeira mensagem
+            carolInstruction,
+            adminSituacao: (context as any)?.admin_situacao, // remarketing pessoa por pessoa (persistente)
+          })))
 
     // Se enviamos saudação em mensagem separada, remover qualquer repetição de saudação na segunda parte
     if (isFirstMessage && carolInstruction?.includes('PROIBIDO repetir a saudação')) {
-      const startMarker = 'A próxima aula é prática'
+      const startMarker = 'Obrigada por se inscrever'
       const idx = carolResponse.indexOf(startMarker)
       if (idx > 0) {
         const before = carolResponse.slice(0, idx).toLowerCase()
