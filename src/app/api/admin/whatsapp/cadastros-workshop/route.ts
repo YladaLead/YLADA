@@ -11,6 +11,8 @@ function phoneCandidates(raw: string): string[] {
   const out = new Set<string>()
   if (!d) return []
   out.add(d)
+  // Remover 0 inicial (às vezes vem "0DD..." ou "0+55...")
+  if (d.startsWith('0')) out.add(d.slice(1))
   // Padrão BR: se vier sem DDI e tiver 10/11 dígitos, adicionar 55
   if ((d.length === 10 || d.length === 11) && !d.startsWith('55')) {
     out.add(`55${d}`)
@@ -18,6 +20,28 @@ function phoneCandidates(raw: string): string[] {
   // Se vier com 55, também guardar versão sem 55 para mapear registros antigos
   if (d.startsWith('55') && (d.length === 12 || d.length === 13)) {
     out.add(d.slice(2))
+  }
+  /**
+   * BR: variação com/sem o 9 (celular)
+   * - Com DDI: 55 + DDD(2) + 9 + 8 = 13
+   * - Sem DDI: DDD(2) + 9 + 8 = 11
+   * Alguns cadastros antigos vêm sem o 9 (12/10 dígitos). Gerar as duas formas.
+   */
+  if (d.startsWith('55') && d.length === 13) {
+    // 55DD9XXXXXXXX -> 55DDXXXXXXXX
+    out.add(d.slice(0, 4) + d.slice(5))
+  }
+  if (d.startsWith('55') && d.length === 12) {
+    // 55DDXXXXXXXX -> 55DD9XXXXXXXX
+    out.add(d.slice(0, 4) + '9' + d.slice(4))
+  }
+  if (!d.startsWith('55') && d.length === 11) {
+    // DD9XXXXXXXX -> DDXXXXXXXX
+    out.add(d.slice(0, 2) + d.slice(3))
+  }
+  if (!d.startsWith('55') && d.length === 10) {
+    // DDXXXXXXXX -> DD9XXXXXXXX
+    out.add(d.slice(0, 2) + '9' + d.slice(2))
   }
   return Array.from(out)
 }
@@ -96,20 +120,34 @@ export async function GET(request: NextRequest) {
       for (const cand of phoneCandidates(tel)) allPhoneCandidates.add(cand)
     }
 
-    let conversationsByPhone: Record<string, any> = {}
+    type ConversationRow = {
+      id: string
+      phone: string
+      context: any
+      created_at?: string | null
+      last_message_at?: string | null
+    }
+
+    let conversationsByPhone: Record<string, ConversationRow> = {}
     if (allPhoneCandidates.size > 0) {
       const { data: conversations } = await supabaseAdmin
         .from('whatsapp_conversations')
-        .select('id, phone, context')
+        .select('id, phone, context, created_at, last_message_at')
         .in('phone', Array.from(allPhoneCandidates))
         .eq('area', 'nutri')
 
       if (conversations) {
-        conversations.forEach(conv => {
+        const better = (a?: ConversationRow, b?: ConversationRow) => {
+          if (!a) return b
+          if (!b) return a
+          const aAt = new Date(a.last_message_at || a.created_at || 0).getTime()
+          const bAt = new Date(b.last_message_at || b.created_at || 0).getTime()
+          return bAt > aAt ? b : a
+        }
+        conversations.forEach((conv: any) => {
           const phoneClean = digits(conv.phone)
-          // Se existirem duplicadas, manter a mais recente (ordem do select pode variar).
-          // Para este endpoint, basta "uma" conversa por telefone.
-          conversationsByPhone[phoneClean] = conv
+          const row: ConversationRow = conv
+          conversationsByPhone[phoneClean] = better(conversationsByPhone[phoneClean], row)
         })
       }
     }
@@ -146,10 +184,22 @@ export async function GET(request: NextRequest) {
     const enrichedRegistrations = registrations.map(reg => {
       const regPhone = reg.telefone || reg.phone || ''
       const candidates = phoneCandidates(regPhone)
-      const matched = candidates
+      const matchedConvs = candidates
         .map((c) => conversationsByPhone[digits(c)])
-        .find(Boolean)
-      const conversation = matched || null
+        .filter(Boolean) as ConversationRow[]
+
+      // Se houver mais de uma conversa possível, preferir:
+      // 1) a que já tem mensagem da Carol (boas-vindas/opções)
+      // 2) a mais recente (last_message_at/created_at)
+      const score = (c: ConversationRow) => {
+        const hasWelcome = !!welcomeByConversationId[c.id]?.has
+        const recency = new Date(c.last_message_at || c.created_at || 0).getTime()
+        return (hasWelcome ? 1_000_000_000_000 : 0) + recency
+      }
+      const conversation =
+        matchedConvs.length > 0
+          ? matchedConvs.sort((a, b) => score(b) - score(a))[0]
+          : null
       const context = conversation?.context || {}
       const tags = Array.isArray(context.tags) ? context.tags : []
       const hasWelcome = conversation?.id ? !!welcomeByConversationId[conversation.id]?.has : false
