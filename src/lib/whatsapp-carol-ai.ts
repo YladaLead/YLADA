@@ -159,11 +159,33 @@ function isLikelyPersonName(name: string | null | undefined): boolean {
   return hasSpace || !isAllCaps
 }
 
-function buildIntroSecondMessageForStage(leadName?: string): string {
+async function buildFirstMessageOptionsBody(
+  area: string,
+  leadName: string,
+  sessions: Array<{ starts_at: string }>
+): Promise<string> {
   // Esta mensagem é enviada após a saudação curta já ter sido enviada em separado.
   // Portanto, NÃO começa com "Oi" nem repete "Sou a Carol".
-  const namePart = leadName ? `, ${leadName}` : ''
-  return `Parabéns por ter se inscrito na aula prática${namePart}.\n\nPara eu te direcionar melhor, você já começou a atender?\n\n1️⃣ ainda não comecei\n2️⃣ comecei, mas bem devagar\n3️⃣ já atendo com mais frequência\n\nMe responde só o número 🙂`
+  // Usa o template curto do fluxo (welcome_form_body), substituindo as opções e forçando CTA 1/2.
+  const { getFlowTemplate, applyTemplate } = await import('@/lib/whatsapp-flow-templates')
+  const baseTemplate =
+    (await getFlowTemplate(area || 'nutri', 'welcome_form_body')) ||
+    'A próxima aula é prática e vai te ajudar a ter mais constância pra preencher sua agenda.\n\nAs próximas aulas acontecerão nos seguintes dias e horários:\n\n[OPÇÕES inseridas automaticamente]\n\nResponde 1 ou 2 😊'
+
+  const optText = buildWorkshopOptionsText(sessions, 'bold')
+    .replace(/\n?💬[\s\S]*$/m, '')
+    .trim()
+
+  const body = applyTemplate(baseTemplate, { nome: leadName })
+    .replace(/\[OPÇÕES inseridas automaticamente\]/gi, `${optText}\n`)
+    .replace(/\{\{opcoes\}\}/gi, `${optText}\n`)
+    .trim()
+
+  // Garantir CTA consistente, mesmo se o template do admin tiver outro final.
+  if (!/responde\s*1\s*ou\s*2/i.test(body)) {
+    return `${body}\n\nResponde 1 ou 2 😊`
+  }
+  return body
 }
 
 /**
@@ -1036,6 +1058,7 @@ export async function processIncomingMessageWithCarol(
     const context = conversation.context || {}
     const tags = Array.isArray(context.tags) ? context.tags : []
     const workshopSessionId = context.workshop_session_id
+    const nowIso = new Date().toISOString()
 
     // 1b. Se a pessoa avisar que NÃO vai conseguir participar/entrar, NÃO reenviar link.
     // Em vez disso, desmarcar e oferecer remarcação (evita loops de "link" quando a pessoa fala que não consegue ir).
@@ -1068,6 +1091,16 @@ export async function processIncomingMessageWithCarol(
       } else {
         desagendarResponse = 'Tudo bem! Desmarquei sua participação. Se quiser agendar em outro horário, é só me avisar. 😊'
       }
+    }
+
+    // Se já marcou adiou_aula anteriormente e a pessoa voltou pedindo para reagendar, oferecer opções mesmo sem workshop_session_id.
+    const isAlreadyRescheduleFlow = tags.includes('adiou_aula')
+    const wantsRescheduleNow =
+      /reagendar|remarcar|trocar\s+hor[aá]rio|outro\s+hor[aá]rio|outro\s+dia|pode\s+reagendar|quero\s+reagendar/i.test(message) ||
+      /^(reagendar|remarcar)$/i.test(message.trim())
+    if (!workshopSessionId && isAlreadyRescheduleFlow && wantsRescheduleNow) {
+      shouldOfferRescheduleOptions = true
+      desagendarResponse = 'Sem problema 😊 Vamos reagendar.'
     }
 
     // 2. Buscar sessões de workshop: SEMPRE as mesmas 2 opções que a pessoa viu (próxima + manhã 9h/10h quando existir).
@@ -1123,6 +1156,44 @@ export async function processIncomingMessageWithCarol(
     if (desagendarResponse && shouldOfferRescheduleOptions && workshopSessions.length > 0) {
       const optText = buildWorkshopOptionsText(workshopSessions, 'bold')
       desagendarResponse = `${desagendarResponse}\n\nQual horário fica melhor pra você?\n\n${optText}\n\nMe responde com 1 ou 2 🙂`
+    }
+
+    // ✅ Prioridade máxima: se vai reagendar/cancelar, responder AGORA e não continuar para detecção de escolha/link.
+    if (desagendarResponse) {
+      const instanceToSend = await getZApiInstance(area || 'nutri')
+      if (instanceToSend?.token) {
+        await sendWhatsAppMessage(phone, desagendarResponse, instanceToSend.instance_id, instanceToSend.token)
+        await supabaseAdmin.from('whatsapp_messages').insert({
+          conversation_id: conversationId,
+          instance_id: instanceToSend.id,
+          z_api_message_id: null,
+          sender_type: 'bot',
+          sender_name: 'Carol - Secretária',
+          message: desagendarResponse,
+          message_type: 'text',
+          status: 'sent',
+          is_bot_response: true,
+        })
+      }
+
+      // Atualizar contexto com estado leve (router)
+      const nextTags = Array.isArray((context as any)?.tags) ? (context as any).tags : tags
+      await supabaseAdmin
+        .from('whatsapp_conversations')
+        .update({
+          last_message_at: nowIso,
+          last_message_from: 'bot',
+          context: {
+            ...(context as any),
+            tags: nextTags,
+            last_bot_intent: shouldOfferRescheduleOptions ? 'ask_reschedule_choice' : 'cancelled',
+            last_bot_template: shouldOfferRescheduleOptions ? 'reschedule_choice_v1' : 'cancelled_v1',
+            last_bot_at: nowIso,
+          },
+        })
+        .eq('id', conversationId)
+
+      return { success: true, response: desagendarResponse }
     }
 
     // 3. Verificar histórico para detectar primeira mensagem
@@ -1185,61 +1256,7 @@ export async function processIncomingMessageWithCarol(
     const hasScheduled = tags.includes('recebeu_link_workshop') || workshopSessionId
     const scheduledDate = context.scheduled_date || null
 
-    // 4.5 Fluxo curto (diagnóstico): se a 1ª mensagem foi a pergunta 1/2/3, NÃO tratar 1/2/3 como escolha de horário.
-    const introStage = (context as any)?.workshop_intro_stage as string | undefined
-    const msgNormStage = message.trim().toLowerCase().replace(/\s+/g, ' ')
-    const matchNivel = msgNormStage.match(/^\s*(1|2|3)\s*$/)
-    if (introStage === 'qual_nivel' && matchNivel) {
-      const nivel = matchNivel[1]
-      const prevTags = Array.isArray((context as any)?.tags) ? (context as any).tags : []
-      const tagNivel =
-        nivel === '1' ? 'nivel_nao_comecou' : nivel === '2' ? 'nivel_devagar' : 'nivel_frequente'
-      const nextTags = [...new Set([...prevTags, tagNivel, 'nivel_identificado'])]
-
-      await supabaseAdmin
-        .from('whatsapp_conversations')
-        .update({
-          context: {
-            ...(context as any),
-            tags: nextTags,
-            workshop_intro_stage: 'escolher_horario',
-            workshop_nivel: nivel,
-          },
-        })
-        .eq('id', conversationId)
-
-      const optText = buildWorkshopOptionsText(workshopSessions, 'bold')
-      const basePromo = 'Perfeito 😊 Isso é mais comum do que você imagina, e a aula vai te dar clareza para você ajustar isso de imediato.'
-      const reply =
-        nivel === '1'
-          ? `${basePromo}\n\nQual horário fica melhor pra você?\n\n${optText}\n\nMe responde com 1 ou 2 🙂`
-          : nivel === '2'
-            ? `Entendi 😊 Esse começo é o mais confuso mesmo. ${basePromo}\n\nQual horário fica melhor pra você?\n\n${optText}\n\nMe responde com 1 ou 2 🙂`
-            : `Perfeito 👍 ${basePromo}\n\nQual horário fica melhor pra você?\n\n${optText}\n\nMe responde com 1 ou 2 🙂`
-
-      // Enviar resposta curta e sair (não continua para detecção de escolha de opção aqui)
-      const instanceToSend = await getZApiInstance(area || 'nutri')
-      if (instanceToSend?.token) {
-        await sendWhatsAppMessage(phone, reply, instanceToSend.instance_id, instanceToSend.token)
-        await supabaseAdmin.from('whatsapp_messages').insert({
-          conversation_id: conversationId,
-          instance_id: instanceToSend.id,
-          z_api_message_id: null,
-          sender_type: 'bot',
-          sender_name: 'Carol - Secretária',
-          message: reply,
-          message_type: 'text',
-          status: 'sent',
-          is_bot_response: true,
-        })
-        await supabaseAdmin
-          .from('whatsapp_conversations')
-          .update({ last_message_at: new Date().toISOString(), last_message_from: 'bot' })
-          .eq('id', conversationId)
-      }
-
-      return { success: true, response: reply }
-    }
+    // (Desativado) Pergunta inicial 1/2/3 foi removida para reduzir ambiguidade e ir direto para horários 1/2.
 
     // 5. Verificar se a pessoa está escolhendo uma opção de aula
     // Detectar escolha: "1", "opção 1", "primeira", "segunda às 10:00", etc
@@ -1250,6 +1267,7 @@ export async function processIncomingMessageWithCarol(
 
       // Só tratar "1/2" como escolha quando a última mensagem do bot pediu escolha de horário.
       // Isso evita falsos positivos quando a pessoa responde "1" a outras perguntas (ex.: nível/diagnóstico).
+      const lastIntent = String((context as any)?.last_bot_intent ?? '')
       const { data: lastBotMsg } = await supabaseAdmin
         .from('whatsapp_messages')
         .select('message')
@@ -1260,6 +1278,7 @@ export async function processIncomingMessageWithCarol(
         .maybeSingle()
       const lastBotText = String((lastBotMsg as any)?.message ?? '').toLowerCase()
       const lastBotAskedForChoice =
+        lastIntent === 'ask_schedule_choice' ||
         /responde\s*1\s*ou\s*2|me\s+responde\s+com\s+1\s+ou\s+2|qual\s+(desses\s+)?hor[aá]rio/i.test(lastBotText)
       
       // Detectar por número: "1", "opção 1", "primeira", "segundo", "prefiro a primeira", etc
@@ -1565,6 +1584,7 @@ export async function processIncomingMessageWithCarol(
           const prevContext = context
           const prevTags = Array.isArray(prevContext.tags) ? prevContext.tags : []
           const newTags = [...new Set([...prevTags, 'recebeu_link_workshop', 'agendou_aula'])]
+      const nowIso = new Date().toISOString()
           
           // 🆕 Verificar tempo restante e enviar lembrete apropriado
           // Usar timezone de Brasília para cálculo correto
@@ -1629,6 +1649,10 @@ Nos vemos em breve! 😊
                 tags: newTags,
                 workshop_session_id: selectedSession.id,
                 scheduled_date: selectedSession.starts_at,
+            last_link_sent_at: nowIso,
+            last_bot_intent: 'sent_zoom_link',
+            last_bot_template: 'zoom_link_v1',
+            last_bot_at: nowIso,
               },
               last_message_at: new Date().toISOString(),
               last_message_from: 'bot',
@@ -1826,17 +1850,13 @@ Nos vemos em breve! 😊
     let leadName = getFirstName(rawName) || ''
     if (isBusinessName(leadName)) leadName = ''
 
-    // Se for primeira mensagem, preferir fluxo curto (sem IA): pergunta 1/2/3 (nível).
-    // Depois que ela responder 1/2/3, enviamos os horários (1/2).
+    // Se for primeira mensagem, enviar corpo curto com opções (sem IA).
     let cannedFirstMessageBody: string | null = null
     if (rawIsFirstMessage && !formAlreadySentWelcome && !isShortNeutralReply && deniesSignup) {
       cannedFirstMessageBody =
         `Entendi, obrigada por avisar 😊\n\nPode ser que seu número tenha sido usado por engano.\n\nVocê tem interesse em participar da aula prática para aprender a preencher sua agenda com mais constância?\n\nSe sim, eu te explico rapidinho e te mando o link oficial pra se inscrever.`
     } else if (isFirstMessage) {
-      const introTemplate = await getFlowTemplate(area || 'nutri', 'welcome_form_intro_question')
-      cannedFirstMessageBody = introTemplate
-        ? applyTemplate(introTemplate, { nome: leadName })
-        : buildIntroSecondMessageForStage(leadName || undefined)
+      cannedFirstMessageBody = await buildFirstMessageOptionsBody(area || 'nutri', leadName, workshopSessions)
     }
 
     // Mensagem do botão: se for primeira mensagem (ninguém enviou nada ainda), Carol envia boas-vindas + opções.
@@ -2156,16 +2176,9 @@ Finalize com: "Responde 1 ou 2 😊".`
     // Primeira mensagem (ex.: clicou no botão WhatsApp): marcar veio_aula_pratica e primeiro_contato; NÃO recebeu_link_workshop (link só após escolher opção)
     if (isFirstMessage) {
       const prevTags = Array.isArray(prevCtx.tags) ? prevCtx.tags : []
-      // Se a 1ª resposta do fluxo for a pergunta 1/2/3 (nível), marcar o estágio para não confundir "1" com escolha de horário.
-      const introQuestionText = typeof cannedFirstMessageBody === 'string' ? cannedFirstMessageBody : ''
-      const shouldSetIntroStageQualNivel =
-        introQuestionText.includes('Me responde só o número') ||
-        introQuestionText.includes('Para eu te direcionar melhor, você já começou a atender?')
-
       nextContext = {
         ...nextContext,
         tags: [...new Set([...prevTags, 'veio_aula_pratica', 'primeiro_contato'])],
-        ...(shouldSetIntroStageQualNivel ? { workshop_intro_stage: 'qual_nivel' } : {}),
       }
     } else if (rawIsFirstMessage && deniesSignup) {
       // Pessoa negou inscrição na primeira mensagem: não iniciar fluxo do workshop.
@@ -2174,6 +2187,21 @@ Finalize com: "Responde 1 ou 2 😊".`
         ...nextContext,
         tags: [...new Set([...prevTags, 'primeiro_contato', 'negou_inscricao'])],
       }
+    }
+
+    // Estado leve (router): registrar o que acabamos de mandar.
+    const lowerResp = String(carolResponse || '').toLowerCase()
+    const askedChoice = /responde\s*1\s*ou\s*2|me\s+responde\s+com\s+1\s+ou\s+2|qual\s+(desses\s+)?hor[aá]rio/i.test(lowerResp)
+    const isIdentity = /pode\s+ser\s+que\s+seu\s+n[uú]mero\s+tenha\s+sido\s+usado\s+por\s+engano|n[aã]o\s+me\s+inscrevi/i.test(lowerResp)
+    const nowIso2 = new Date().toISOString()
+    const nextIntent =
+      isIdentity ? 'identity_check' : askedChoice ? 'ask_schedule_choice' : (nextContext as any)?.last_bot_intent
+
+    nextContext = {
+      ...nextContext,
+      last_bot_intent: nextIntent,
+      last_bot_template: isIdentity ? 'identity_check_v1' : askedChoice ? 'schedule_choice_v1' : (nextContext as any)?.last_bot_template,
+      last_bot_at: nowIso2,
     }
     updatePayload.context = nextContext
     await supabaseAdmin
