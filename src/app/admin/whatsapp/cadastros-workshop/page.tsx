@@ -104,7 +104,13 @@ function CadastrosWorkshopContent() {
       )
     }
 
-    return filtered
+    // Ordenação: pendentes primeiro; depois mais recentes
+    return filtered.sort((a, b) => {
+      const ap = a.needs_manual_whatsapp ? 1 : 0
+      const bp = b.needs_manual_whatsapp ? 1 : 0
+      if (ap !== bp) return bp - ap
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    })
   }
 
   const handleProcessSelected = async () => {
