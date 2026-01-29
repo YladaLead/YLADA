@@ -2135,7 +2135,17 @@ Finalize com: "Responde 1 ou 2 😊".`
     // Primeira mensagem (ex.: clicou no botão WhatsApp): marcar veio_aula_pratica e primeiro_contato; NÃO recebeu_link_workshop (link só após escolher opção)
     if (isFirstMessage) {
       const prevTags = Array.isArray(prevCtx.tags) ? prevCtx.tags : []
-      nextContext = { ...nextContext, tags: [...new Set([...prevTags, 'veio_aula_pratica', 'primeiro_contato'])] }
+      // Se a 1ª resposta do fluxo for a pergunta 1/2/3 (nível), marcar o estágio para não confundir "1" com escolha de horário.
+      const introQuestionText = typeof cannedFirstMessageBody === 'string' ? cannedFirstMessageBody : ''
+      const shouldSetIntroStageQualNivel =
+        introQuestionText.includes('Me responde só o número') ||
+        introQuestionText.includes('Para eu te direcionar melhor, você já começou a atender?')
+
+      nextContext = {
+        ...nextContext,
+        tags: [...new Set([...prevTags, 'veio_aula_pratica', 'primeiro_contato'])],
+        ...(shouldSetIntroStageQualNivel ? { workshop_intro_stage: 'qual_nivel' } : {}),
+      }
     }
     updatePayload.context = nextContext
     await supabaseAdmin
