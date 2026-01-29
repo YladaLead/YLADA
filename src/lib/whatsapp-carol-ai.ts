@@ -1229,6 +1229,20 @@ export async function processIncomingMessageWithCarol(
     
     if (workshopSessions.length > 0) {
       const messageLower = message.toLowerCase().trim()
+
+      // Só tratar "1/2" como escolha quando a última mensagem do bot pediu escolha de horário.
+      // Isso evita falsos positivos quando a pessoa responde "1" a outras perguntas (ex.: nível/diagnóstico).
+      const { data: lastBotMsg } = await supabaseAdmin
+        .from('whatsapp_messages')
+        .select('message')
+        .eq('conversation_id', conversationId)
+        .eq('sender_type', 'bot')
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle()
+      const lastBotText = String((lastBotMsg as any)?.message ?? '').toLowerCase()
+      const lastBotAskedForChoice =
+        /responde\s*1\s*ou\s*2|me\s+responde\s+com\s+1\s+ou\s+2|qual\s+(desses\s+)?hor[aá]rio/i.test(lastBotText)
       
       // Detectar por número: "1", "opção 1", "primeira", "segundo", "prefiro a primeira", etc
       const numberMatch = messageLower.match(/(?:opção|opcao|op|escolho|prefiro|quero)\s*(?:a\s*)?(\d+)|^(\d+)$|(primeira|segunda|terceira|quarta|quinta)|(?:prefiro|escolho|quero)\s*(?:a\s*)?(primeira|segunda|terceira|quarta|quinta)/)
@@ -1238,25 +1252,39 @@ export async function processIncomingMessageWithCarol(
         if (numberMatch[1]) {
           optionIndex = parseInt(numberMatch[1]) - 1
         } else if (numberMatch[2]) {
-          optionIndex = parseInt(numberMatch[2]) - 1
+          // Se a mensagem é só "1" / "2", só aceitar como escolha quando a Carol acabou de pedir isso.
+          if (lastBotAskedForChoice) {
+            optionIndex = parseInt(numberMatch[2]) - 1
+          } else {
+            optionIndex = -1
+          }
         } else if (numberMatch[3]) {
-          const words: Record<string, number> = {
-            'primeira': 0,
-            'segunda': 1,
-            'terceira': 2,
-            'quarta': 3,
-            'quinta': 4
+          // Também só aceitar "primeira/segunda" como escolha se a última msg pediu escolha de horário.
+          if (lastBotAskedForChoice) {
+            const words: Record<string, number> = {
+              'primeira': 0,
+              'segunda': 1,
+              'terceira': 2,
+              'quarta': 3,
+              'quinta': 4
+            }
+            optionIndex = words[numberMatch[3]] || -1
+          } else {
+            optionIndex = -1
           }
-          optionIndex = words[numberMatch[3]] || -1
         } else if (numberMatch[4]) {
-          const words: Record<string, number> = {
-            'primeira': 0,
-            'segunda': 1,
-            'terceira': 2,
-            'quarta': 3,
-            'quinta': 4
+          if (lastBotAskedForChoice) {
+            const words: Record<string, number> = {
+              'primeira': 0,
+              'segunda': 1,
+              'terceira': 2,
+              'quarta': 3,
+              'quinta': 4
+            }
+            optionIndex = words[numberMatch[4]] || -1
+          } else {
+            optionIndex = -1
           }
-          optionIndex = words[numberMatch[4]] || -1
         }
         
         if (optionIndex >= 0) {
