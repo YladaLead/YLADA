@@ -44,6 +44,9 @@ export const OG_IMAGE_SLUG_MAP: Record<string, string> = {
   'avaliacao-emocional': 'avaliacao-emocional.jpg',
   'template-avaliacao-inicial': 'template-avaliacao-inicial.jpg',
   'avaliacao-inicial': 'template-avaliacao-inicial.jpg',
+  'avaliacao-emagrecimento-consciente': 'avaliacao-emagrecimento-consciente.jpg',
+  'quiz-emagrecimento-consciente': 'avaliacao-emagrecimento-consciente.jpg',
+  'inibidores-apetite': 'avaliacao-emagrecimento-consciente.jpg',
   
   // Diagnósticos
   'diagnostico-eletrolitos': 'diagnostico-eletrolitos.jpg',

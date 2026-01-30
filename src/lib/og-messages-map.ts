@@ -105,6 +105,18 @@ export const OG_MESSAGES_MAP: Record<string, { title: string; description: strin
     title: 'Faça sua avaliação inicial completa',
     description: 'Comece sua jornada de bem-estar com uma avaliação completa e personalizada'
   },
+  'avaliacao-emagrecimento-consciente': {
+    title: 'Emagrecimento consciente: está fazendo do jeito certo?',
+    description: 'Em 2 minutos, identifique sinais de baixa nutrição, risco de rebote e como ajustar com segurança (sem promessas milagrosas).'
+  },
+  'quiz-emagrecimento-consciente': {
+    title: 'Emagrecimento consciente: está fazendo do jeito certo?',
+    description: 'Em 2 minutos, identifique sinais de baixa nutrição, risco de rebote e como ajustar com segurança (sem promessas milagrosas).'
+  },
+  'inibidores-apetite': {
+    title: 'Emagrecimento consciente: está fazendo do jeito certo?',
+    description: 'Em 2 minutos, identifique sinais de baixa nutrição, risco de rebote e como ajustar com segurança (sem promessas milagrosas).'
+  },
   
   // Diagnósticos
   'diagnostico-eletrolitos': {
