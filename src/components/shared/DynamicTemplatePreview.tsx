@@ -244,7 +244,10 @@ const wellnessDiagnosticsMap: Record<string, DiagnosticosPorFerramenta> = {
   'descoberta-perfil-bem-estar': wellnessDiagnostics.quizBemEstarDiagnosticos,
   'template-diagnostico-parasitose': wellnessDiagnostics.diagnosticoParasitoseDiagnosticos,
   'diagnostico-parasitose': wellnessDiagnostics.diagnosticoParasitoseDiagnosticos,
-  'parasitose': wellnessDiagnostics.diagnosticoParasitoseDiagnosticos
+  'parasitose': wellnessDiagnostics.diagnosticoParasitoseDiagnosticos,
+  'avaliacao-emagrecimento-consciente': wellnessDiagnostics.avaliacaoEmagrecimentoConscienteDiagnosticos,
+  'quiz-emagrecimento-consciente': wellnessDiagnostics.avaliacaoEmagrecimentoConscienteDiagnosticos,
+  'inibidores-apetite': wellnessDiagnostics.avaliacaoEmagrecimentoConscienteDiagnosticos
 }
 
 const diagnosticsMapsByProfession: Record<'nutri' | 'wellness' | 'coach', Record<string, DiagnosticosPorFerramenta>> = {
@@ -325,6 +328,10 @@ const formatResultadoLabel = (resultadoId: string) => {
     'bemEstarBaixo': 'Bem-Estar Baixo',
     'bemEstarModerado': 'Bem-Estar Moderado',
     'bemEstarAlto': 'Bem-Estar Alto',
+    // Emagrecimento Consciente (inibidores de apetite)
+    'deficitNutricionalOculto': 'Déficit Nutricional Oculto',
+    'riscoEfeitoRebote': 'Risco de Efeito Rebote',
+    'conscienciaParcial': 'Emagrecimento com Consciência (Parcial)',
     // Parasitose
     'parasitoseBasica': 'Parasitose Básica',
     'parasitoseModerada': 'Parasitose Moderada',
@@ -739,6 +746,49 @@ export default function DynamicTemplatePreview({
         return 'intestinoSensivel'
       }
     }
+
+    // Lógica específica: Avaliação de Emagrecimento Consciente (inibidores de apetite)
+    // Perguntas (ordem esperada):
+    // 1=metodo, 2=tempo_uso, 3=velocidade, 4=padrao_alimentar, 5=sinais (multi_select), 6=energia, 7=percepcao_nutricao, 8=consciencia, 9=intencao
+    if (
+      fallbackDiagnosticsSlug.includes('avaliacao-emagrecimento-consciente') ||
+      fallbackDiagnosticsSlug.includes('quiz-emagrecimento-consciente') ||
+      fallbackDiagnosticsSlug.includes('inibidores-apetite')
+    ) {
+      const tempoUso = String(respostas[2] ?? '')
+      const velocidade = String(respostas[3] ?? '')
+      const padraoAlimentar = String(respostas[4] ?? '')
+      const sinaisRaw = respostas[5]
+      const energia = String(respostas[6] ?? '')
+      const percepcaoNutricao = String(respostas[7] ?? '')
+
+      const sinais = Array.isArray(sinaisRaw)
+        ? (sinaisRaw as any[]).map(String)
+        : typeof sinaisRaw === 'string'
+          ? [String(sinaisRaw)]
+          : []
+
+      const scoreSinais =
+        sinais.includes('nenhum') ? 0 : sinais.filter((s) => s && s !== 'nenhum').length
+
+      const tempoUsoMaiorOuIgual1Mes = tempoUso === '1a3m' || tempoUso === 'gt_3m'
+
+      const isDeficitNutricionalOculto =
+        scoreSinais >= 2 ||
+        padraoAlimentar === 'pula-refeicao' ||
+        percepcaoNutricao === 'nao' ||
+        tempoUsoMaiorOuIgual1Mes
+
+      if (isDeficitNutricionalOculto) return 'deficitNutricionalOculto'
+
+      const isRiscoRebote =
+        (velocidade === 'muito-rapido' || velocidade === 'oscilante') &&
+        (energia === 'pior' || energia === 'oscila')
+
+      if (isRiscoRebote) return 'riscoEfeitoRebote'
+
+      return 'conscienciaParcial'
+    }
     
     // Lógica genérica: usar primeiro diagnóstico disponível
     return diagnosticsInfo.entries[0]?.resultadoId || null
@@ -1053,6 +1103,12 @@ export default function DynamicTemplatePreview({
     // Labels para navegação
     const labels = ['Início', ...Array.from({ length: totalPerguntas }, (_, i) => String(i + 1)), 'Resultados']
 
+    const temRespostaNaEtapa = (etapa: number) => {
+      const v = respostas[etapa]
+      if (Array.isArray(v)) return v.length > 0
+      return Boolean(v)
+    }
+
     const handleNext = () => {
       setEtapaAtual(Math.min(totalEtapas, etapaAtual + 1))
     }
@@ -1316,10 +1372,48 @@ export default function DynamicTemplatePreview({
                   <div className="grid sm:grid-cols-2 gap-2">
                     {perguntaAtual.options && perguntaAtual.options.map((op: any, idx: number) => {
                       const opcaoLabel = op.label || op
-                      const opcaoId = op.id || op.value || idx
+                      const opcaoId = String(op.id ?? op.value ?? idx)
                       const respostaAtual = respostas[etapaAtual]
-                      const isSelected = respostaAtual === opcaoId
+
+                      const isMultiSelect = perguntaAtual.type === 'multi_select'
+                      const selectedArray = Array.isArray(respostaAtual) ? (respostaAtual as any[]).map(String) : []
+                      const isSelected = isMultiSelect ? selectedArray.includes(opcaoId) : String(respostaAtual ?? '') === opcaoId
                       
+                      // Multi-select (ex.: sinais)
+                      if (isMultiSelect) {
+                        return (
+                          <button
+                            key={idx}
+                            type="button"
+                            onClick={() => {
+                              const current = Array.isArray(respostaAtual) ? (respostaAtual as any[]).map(String) : []
+                              const selected = current.includes(opcaoId)
+
+                              // "Nenhum" é exclusivo
+                              let next: string[] = []
+                              if (opcaoId === 'nenhum') {
+                                next = selected ? [] : ['nenhum']
+                              } else {
+                                const withoutNenhum = current.filter((v) => v !== 'nenhum')
+                                next = selected
+                                  ? withoutNenhum.filter((v) => v !== opcaoId)
+                                  : [...withoutNenhum, opcaoId]
+                              }
+
+                              setRespostas({ ...respostas, [etapaAtual]: next })
+                            }}
+                            className={`flex items-center p-3 bg-white rounded-lg border text-left transition-colors ${
+                              isSelected ? corAtual.border + ' border-2' : corAtual.border
+                            } hover:opacity-80`}
+                          >
+                            <span className={`mr-3 inline-flex w-5 justify-center ${isSelected ? corAtual.textLight : 'text-gray-400'}`}>
+                              {isSelected ? '✓' : '•'}
+                            </span>
+                            <span className="text-gray-700">{opcaoLabel}</span>
+                          </button>
+                        )
+                      }
+
                       return (
                         <label
                           key={idx}
@@ -1427,14 +1521,14 @@ export default function DynamicTemplatePreview({
                 onClick={() => {
                   // Verificar se tem resposta antes de avançar
                   if (etapaAtual >= 1 && etapaAtual <= totalPerguntas) {
-                    if (!respostas[etapaAtual]) {
+                    if (!temRespostaNaEtapa(etapaAtual)) {
                       // Não avançar se não tiver resposta
                       return
                     }
                   }
                   handleNext()
                 }}
-                disabled={etapaAtual === totalEtapas || (etapaAtual >= 1 && etapaAtual <= totalPerguntas && !respostas[etapaAtual])}
+                disabled={etapaAtual === totalEtapas || (etapaAtual >= 1 && etapaAtual <= totalPerguntas && !temRespostaNaEtapa(etapaAtual))}
                 className="flex items-center px-6 py-3 text-white rounded-lg transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed font-medium text-lg"
                 style={{
                   background: 'linear-gradient(135deg, #34d399 0%, #10b981 50%, #059669 100%)'

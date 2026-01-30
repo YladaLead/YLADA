@@ -647,7 +647,9 @@ function WorkshopContent() {
                   <li>Segunda-feira às 10:00 (usa link das 9:00)</li>
                   <li>Terça a Sexta às 9:00 (link das 9:00)</li>
                   <li>Segunda a Sexta às 15:00 (link das 15:00)</li>
+                  <li>Segunda-feira às 20:00 (link específico)</li>
                   <li>Quarta-feira às 20:00 (link específico)</li>
+                  <li>Quinta-feira às 20:00 (link específico)</li>
                 </ul>
                 <p className="mt-2 text-xs">
                   Os links estão fixos no sistema. Você pode gerar sessões automaticamente clicando no botão acima.

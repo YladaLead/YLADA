@@ -26,6 +26,13 @@ export const WORKSHOP_SCHEDULE = {
     minute: 0,
     zoomLink: ZOOM_LINKS.LINK_9H,
   },
+  // Segunda-feira às 20:00 - link das 20:00
+  monday_20: {
+    weekday: 1, // Segunda-feira
+    hour: 20,
+    minute: 0,
+    zoomLink: ZOOM_LINKS.LINK_20H,
+  },
   // Terça a Sexta às 9:00 - link das 9:00
   tuesday_to_friday_9: {
     weekdays: [2, 3, 4, 5], // Terça a Sexta
@@ -43,6 +50,13 @@ export const WORKSHOP_SCHEDULE = {
   // Quarta-feira às 20:00 - link das 20:00
   wednesday_20: {
     weekday: 3, // Quarta-feira
+    hour: 20,
+    minute: 0,
+    zoomLink: ZOOM_LINKS.LINK_20H,
+  },
+  // Quinta-feira às 20:00 - link das 20:00
+  thursday_20: {
+    weekday: 4, // Quinta-feira
     hour: 20,
     minute: 0,
     zoomLink: ZOOM_LINKS.LINK_20H,
@@ -95,6 +109,18 @@ export async function generateWorkshopSessions(weeksAhead: number = 4): Promise<
         })
       }
 
+      // Segunda-feira às 20:00
+      const monday20Str = `${monday.getFullYear()}-${String(monday.getMonth() + 1).padStart(2, '0')}-${String(monday.getDate()).padStart(2, '0')}T20:00:00`
+      const monday20Date = new Date(monday20Str + '-03:00') // BRT é UTC-3
+
+      if (monday20Date > now && zoomLink20h) {
+        sessionsToCreate.push({
+          title: 'Aula prática exclusiva para nutricionistas',
+          starts_at: monday20Date.toISOString(),
+          zoom_link: zoomLink20h,
+        })
+      }
+
       // Terça a Sexta às 9:00
       for (const weekday of [2, 3, 4, 5]) { // Terça (2) a Sexta (5)
         const day = new Date(weekStart)
@@ -140,6 +166,21 @@ export async function generateWorkshopSessions(weeksAhead: number = 4): Promise<
         sessionsToCreate.push({
           title: 'Aula prática exclusiva para nutricionistas',
           starts_at: wednesdayDate.toISOString(),
+          zoom_link: zoomLink20h,
+        })
+      }
+
+      // Quinta-feira às 20:00
+      const thursday = new Date(weekStart)
+      const daysUntilThursday = (4 - thursday.getDay() + 7) % 7
+      thursday.setDate(thursday.getDate() + daysUntilThursday)
+      const thursdayStr = `${thursday.getFullYear()}-${String(thursday.getMonth() + 1).padStart(2, '0')}-${String(thursday.getDate()).padStart(2, '0')}T20:00:00`
+      const thursdayDate = new Date(thursdayStr + '-03:00') // BRT é UTC-3
+
+      if (thursdayDate > now && zoomLink20h) {
+        sessionsToCreate.push({
+          title: 'Aula prática exclusiva para nutricionistas',
+          starts_at: thursdayDate.toISOString(),
           zoom_link: zoomLink20h,
         })
       }

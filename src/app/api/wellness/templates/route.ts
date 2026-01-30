@@ -40,6 +40,7 @@ function formatTemplates(templates: any[]) {
       'quiz-interativo': '🎮',
       'quiz-detox': '🌿',
       'quiz-energetico': '⚡',
+      'avaliacao-emagrecimento-consciente': '⚖️',
       'guia-hidratacao': '💧',
       'checklist-alimentar': '✅',
       'checklist-detox': '🌿',

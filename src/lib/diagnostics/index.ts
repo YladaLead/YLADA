@@ -45,6 +45,7 @@ export { quizEnergiaFocoDiagnosticos } from './wellness/quiz-energia-foco'
 export { quizPreTreinoDiagnosticos } from './wellness/quiz-pre-treino'
 export { quizRotinaProdutivaDiagnosticos } from './wellness/quiz-rotina-produtiva'
 export { quizConstanciaDiagnosticos } from './wellness/quiz-constancia'
+export { avaliacaoEmagrecimentoConscienteDiagnosticos } from './wellness/avaliacao-emagrecimento-consciente'
 
 // Guias e Conteúdos
 export { miniEbookDiagnosticos } from './wellness/mini-ebook'
