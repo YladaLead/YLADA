@@ -117,12 +117,13 @@ export async function scheduleWelcomeMessages(): Promise<{
         }
 
         const phoneFormatted = phoneClean.startsWith('55') ? phoneClean : `55${phoneClean}`
+        const contactKey = phoneFormatted.replace(/\D/g, '')
 
         // Verificar se já tem conversa com mensagem do cliente
         const { data: conversation } = await supabaseAdmin
           .from('whatsapp_conversations')
           .select('id')
-          .eq('phone', phoneFormatted)
+          .eq('contact_key', contactKey)
           .eq('area', 'nutri')
           .maybeSingle()
 

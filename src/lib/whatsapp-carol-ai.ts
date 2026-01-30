@@ -1060,6 +1060,22 @@ export async function processIncomingMessageWithCarol(
     const workshopSessionId = context.workshop_session_id
     const nowIso = new Date().toISOString()
 
+    // 🛑 Auto-resposta do WhatsApp do lead (ex.: "Agradecemos sua mensagem...")
+    // Não deve disparar "primeira mensagem" / boas-vindas novamente.
+    const msgNormAuto = String(message || '').trim().toLowerCase().replace(/\s+/g, ' ')
+    const isAutoReplyMessage =
+      /(agradecemos\s+sua\s+mensagem|n[aã]o\s+estamos\s+dispon[ií]veis\s+no\s+momento|responderemos\s+assim\s+que\s+poss[ií]vel|responderemos\s+assim\s+que\s+for\s+poss[ií]vel)/i.test(
+        msgNormAuto
+      )
+    if (isAutoReplyMessage) {
+      console.log('[Carol AI] 🛑 Auto-resposta detectada; ignorando para evitar duplicação.', {
+        conversationId,
+        hasWorkshopSessionId: !!workshopSessionId,
+        tags,
+      })
+      return { success: true, response: '' }
+    }
+
     // 1b. Se a pessoa avisar que NÃO vai conseguir participar/entrar, NÃO reenviar link.
     // Em vez disso, desmarcar e oferecer remarcação (evita loops de "link" quando a pessoa fala que não consegue ir).
     const querReagendar =
@@ -2289,12 +2305,13 @@ export async function sendWelcomeToNonContactedLeads(): Promise<{
 
       const phoneClean = lead.telefone.replace(/\D/g, '')
       if (phoneClean.length < 10) continue
+      const contactKey = phoneClean.startsWith('55') ? phoneClean : `55${phoneClean}`
 
       // Verificar se tem conversa com mensagens do cliente
       const { data: conversation } = await supabaseAdmin
         .from('whatsapp_conversations')
         .select('id')
-        .eq('phone', phoneClean.startsWith('55') ? phoneClean : `55${phoneClean}`)
+        .eq('contact_key', contactKey)
         .eq('area', 'nutri')
         .maybeSingle()
 
@@ -2302,7 +2319,7 @@ export async function sendWelcomeToNonContactedLeads(): Promise<{
         // Não tem conversa, precisa receber boas-vindas
         leadsToContact.push({
           nome: lead.nome,
-          telefone: phoneClean.startsWith('55') ? phoneClean : `55${phoneClean}`,
+          telefone: contactKey,
         })
       } else {
         // Verificar se cliente já enviou mensagem
@@ -2318,7 +2335,7 @@ export async function sendWelcomeToNonContactedLeads(): Promise<{
           // Tem conversa mas cliente nunca enviou mensagem
           leadsToContact.push({
             nome: lead.nome,
-            telefone: phoneClean.startsWith('55') ? phoneClean : `55${phoneClean}`,
+            telefone: contactKey,
           })
         }
       }
@@ -2413,11 +2430,12 @@ Qualquer dúvida, é só me chamar! 💚
         )
 
         if (sendResult.success) {
+          const contactKey = String(lead.telefone || '').replace(/\D/g, '')
           // Criar ou atualizar conversa
           const { data: existingConv } = await supabaseAdmin
             .from('whatsapp_conversations')
-            .select('id')
-            .eq('phone', lead.telefone)
+            .select('id, context')
+            .eq('contact_key', contactKey)
             .eq('instance_id', instance.id)
             .maybeSingle()
 
@@ -2446,6 +2464,7 @@ Qualquer dúvida, é só me chamar! 💚
               .from('whatsapp_conversations')
               .insert({
                 phone: lead.telefone,
+                contact_key: contactKey,
                 instance_id: instance.id,
                 area: 'nutri',
                 name: lead.nome,
@@ -3804,18 +3823,15 @@ export async function sendRegistrationLinkAfterClass(conversationId: string): Pr
       const linkTemplate = await getFlowTemplate('nutri', 'link_after_participou')
       const msgForManual = linkTemplate
         ? applyTemplate(linkTemplate, { nome: '[NOME]', link: registrationUrl })
-        : `Olá [NOME]! 💚
+        : `Parabéns por ter participado da aula, [NOME]! 💚
 
-Parabéns por ter participado da aula — espero que tenha esclarecido os pontos que você precisava para realmente dar sua virada e começar a preencher sua agenda com mais segurança e estratégia.
+Eu tenho certeza que você tem potencial, só faltava a estrutura certa pra você executar de verdade e mudar sua história de uma vez por todas.
 
-Agora me conta: o que mais fez sentido pra você hoje?
-Você está disposto(a) a mudar sua situação e começar agora?
-
-Se sim, me diz: você prefere começar pelo plano *mensal* (pra validar com calma) ou já quer ir direto no *anual* (pra acelerar seus resultados)?
+Você já pode começar hoje no plano *mensal* ou no *anual* e ajustar sua agenda imediatamente pra iniciar a captação de clientes.
 
 🔗 ${registrationUrl}
 
-O que você acha? 😊`
+Qual você prefere, *mensal* ou *anual*?`
       return { 
         success: false, 
         error: `Mensagem automática não enviada: ${timeCheck.reason}. Use o texto abaixo para enviar manualmente.`,
@@ -3895,18 +3911,15 @@ O que você acha? 😊`
     const linkTemplate = await getFlowTemplate('nutri', 'link_after_participou')
     const message = linkTemplate
       ? applyTemplate(linkTemplate, { nome: leadName, link: registrationUrl })
-      : `Olá ${leadName}! 💚
+      : `Parabéns por ter participado da aula, ${leadName}! 💚
 
-Parabéns por ter participado da aula — espero que tenha esclarecido os pontos que você precisava para realmente dar sua virada e começar a preencher sua agenda com mais segurança e estratégia.
+Eu tenho certeza que você tem potencial, só faltava a estrutura certa pra você executar de verdade e mudar sua história de uma vez por todas.
 
-Agora me conta: o que mais fez sentido pra você hoje?
-Você está disposto(a) a mudar sua situação e começar agora?
-
-Se sim, me diz: você prefere começar pelo plano *mensal* (pra validar com calma) ou já quer ir direto no *anual* (pra acelerar seus resultados)?
+Você já pode começar hoje no plano *mensal* ou no *anual* e ajustar sua agenda imediatamente pra iniciar a captação de clientes.
 
 🔗 ${registrationUrl}
 
-O que você acha? 😊
+Qual você prefere, *mensal* ou *anual*?
 `
 
     const result = await client.sendTextMessage({

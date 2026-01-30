@@ -154,10 +154,11 @@ export async function POST(request: NextRequest) {
         
         // Preferir reaproveitar conversa existente (mesmo telefone) para não duplicar.
         // Se houver conversa em outra instância, migramos a conversa para a instância conectada atual.
+        const contactKey = digits(phone).startsWith('55') ? digits(phone) : `55${digits(phone)}`
         const { data: existingConv } = await supabaseAdmin
           .from('whatsapp_conversations')
           .select('id, context, instance_id')
-          .eq('phone', phone)
+          .eq('contact_key', contactKey)
           .eq('area', 'nutri')
           .order('created_at', { ascending: false })
           .limit(1)
@@ -178,6 +179,7 @@ export async function POST(request: NextRequest) {
             .insert({
               instance_id: instance.id,
               phone,
+              contact_key: contactKey,
               name,
               area: 'nutri',
               status: 'active',

@@ -66,11 +66,13 @@ async function identifyArea(phone: string, message: string, instanceId: string):
     return 'nutri'
   }
 
-  // 1. Buscar no banco de dados por telefone
+  const contactKey = String(phone || '').replace(/\D/g, '')
+
+  // 1. Buscar no banco de dados por telefone (chave canônica)
   const { data: conversation } = await supabase
     .from('whatsapp_conversations')
     .select('area')
-    .eq('phone', phone)
+    .eq('contact_key', contactKey)
     .order('created_at', { ascending: false })
     .limit(1)
     .single()
@@ -174,6 +176,7 @@ async function getInstanceForArea(area: string | null): Promise<{
 async function getOrCreateConversation(
   instanceId: string,
   phone: string,
+  contactKey: string,
   name: string | undefined,
   area: string | null,
   contextPatch?: Record<string, any> | null
@@ -202,9 +205,9 @@ async function getOrCreateConversation(
   // Buscar conversa existente
   const { data: existing } = await supabase
     .from('whatsapp_conversations')
-    .select('id, area, name, context')
+    .select('id, area, name, context, contact_key')
     .eq('instance_id', instance.id)
-    .eq('phone', phone)
+    .eq('contact_key', contactKey)
     .limit(1)
     .single()
 
@@ -213,6 +216,9 @@ async function getOrCreateConversation(
     const updateData: any = {}
     if (!existing.area && area) updateData.area = area
     if (name && (isPlaceholderName(existing.name) || (!existing.name && name))) updateData.name = name
+    // Garantir que phone/contact_key permaneçam consistentes
+    if (!existing.contact_key && contactKey) updateData.contact_key = contactKey
+    if (phone) updateData.phone = phone
 
     if (contextPatch && typeof contextPatch === 'object') {
       const prev = (existing.context && typeof existing.context === 'object' && !Array.isArray(existing.context))
@@ -233,6 +239,7 @@ async function getOrCreateConversation(
     .insert({
       instance_id: instance.id,
       phone,
+      contact_key: contactKey,
       name: name || null,
       area: area || null,
       status: 'active',
@@ -859,6 +866,11 @@ export async function POST(request: NextRequest) {
         length: cleanPhone.length
       })
     }
+
+    // contact_key: chave canônica para "memória por pessoa"
+    // - dígitos apenas
+    // - preferir com código do país (BR -> 55 quando aplicável)
+    const contactKey = String(phone || '').replace(/\D/g, '')
     
     // IMPORTANTE: Ignorar mensagens do número de notificação ANTES de processar
     // Este número é apenas para receber avisos, não deve criar conversas
@@ -874,7 +886,7 @@ export async function POST(request: NextRequest) {
         const { data: existingConversation } = await supabase
           .from('whatsapp_conversations')
           .select('id')
-          .eq('phone', phoneClean)
+          .eq('contact_key', phoneClean)
           .limit(1)
           .maybeSingle()
         
@@ -1067,6 +1079,7 @@ export async function POST(request: NextRequest) {
     const conversationId = await getOrCreateConversation(
       finalInstanceId,
       phone,
+      contactKey,
       nameForConv,
       area
       ,

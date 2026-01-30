@@ -74,12 +74,13 @@ export async function POST(request: NextRequest) {
     for (const reg of registrations) {
       const phone = (reg.telefone || reg.phone || '').replace(/\D/g, '')
       if (!phone) continue
+      const contactKey = (phone.startsWith('55') ? phone : `55${phone}`).replace(/\D/g, '')
 
       // Buscar conversa
       const { data: conversation } = await supabaseAdmin
         .from('whatsapp_conversations')
         .select('id, context')
-        .eq('phone', phone)
+        .eq('contact_key', contactKey)
         .eq('area', 'nutri')
         .eq('instance_id', instance.id)
         .maybeSingle()

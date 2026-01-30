@@ -30,7 +30,7 @@ const FLOW_KEYS: Array<{
     key: 'link_after_participou',
     label: 'Quando participou da aula (link oferta/cadastro)',
     description: 'Enviada quando o admin marca "Participou". Use {{nome}} e {{link}}. Se não preencher, usa o texto padrão do sistema.',
-    placeholder: 'Olá {{nome}}! 💚\n\nExcelente! Parabéns por ter participado! 🎉\n\n...\n\n🔗 {{link}}\n\nO que você acha? 😊',
+    placeholder: 'Parabéns por ter participado da aula, {{nome}}! 💚\n\nEu tenho certeza que você tem potencial, só faltava a estrutura certa pra você executar de verdade e mudar sua história de uma vez por todas.\n\nVocê já pode começar hoje no plano *mensal* ou no *anual* e ajustar sua agenda imediatamente pra iniciar a captação de clientes.\n\n🔗 {{link}}\n\nQual você prefere, *mensal* ou *anual*?',
     phase: 'Participou',
   },
   {
@@ -45,7 +45,7 @@ const FLOW_KEYS: Array<{
 const DEFAULT_TEMPLATES: Record<string, string> = {
   welcome_form_greeting: 'Oi {{nome}}, tudo bem? 😊\n\nSeja muito bem-vinda!\nEu sou a Carol, da equipe Ylada Nutri.',
   welcome_form_body: 'Obrigada por se inscrever na Aula Prática ao Vivo – Agenda Cheia para Nutricionistas.\n\nEssa aula é 100% prática e foi criada para ajudar nutricionistas que estão com agenda ociosa a organizar, atrair e preencher atendimentos de forma mais leve e estratégica.\n\nAs próximas aulas ao vivo vão acontecer nos seguintes dias e horários:\n\n[OPÇÕES inseridas automaticamente]\n\n💬 Qual você prefere? 💚',
-  link_after_participou: 'Olá {{nome}}! 💚\n\nExcelente! Parabéns por ter participado! 🎉\n\nEspero que tenha gostado e tenho certeza que isso realmente pode fazer diferença na sua vida.\n\nAgora me conta: o que você mais gostou? E como você prefere começar?\n\nVocê prefere começar com o plano mensal para validar e verificar, ou você já está determinado a mudar sua vida e prefere o plano anual?\n\n🔗 {{link}}\n\nO que você acha? 😊',
+  link_after_participou: 'Parabéns por ter participado da aula, {{nome}}! 💚\n\nEu tenho certeza que você tem potencial, só faltava a estrutura certa pra você executar de verdade e mudar sua história de uma vez por todas.\n\nVocê já pode começar hoje no plano *mensal* ou no *anual* e ajustar sua agenda imediatamente pra iniciar a captação de clientes.\n\n🔗 {{link}}\n\nQual você prefere, *mensal* ou *anual*?',
   remarketing_nao_participou: 'Vi que você não conseguiu entrar, acontece. Sem sistema a gente volta pro improviso. Quer que eu te encaixe em outro horário?',
 }
 

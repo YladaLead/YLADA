@@ -187,10 +187,11 @@ export async function processScheduledMessages(limit: number = 50): Promise<{
             })
           } else {
             // Criar conversa se não existe
+            const contactKey = String(phone || '').replace(/\D/g, '')
             const { data: existingConv } = await supabaseAdmin
               .from('whatsapp_conversations')
               .select('id')
-              .eq('phone', phone)
+              .eq('contact_key', contactKey)
               .eq('instance_id', instance.id)
               .maybeSingle()
 
@@ -199,6 +200,7 @@ export async function processScheduledMessages(limit: number = 50): Promise<{
                 .from('whatsapp_conversations')
                 .insert({
                   phone,
+                  contact_key: contactKey,
                   instance_id: instance.id,
                   area: 'nutri',
                   name: message.message_data?.lead_name || null,

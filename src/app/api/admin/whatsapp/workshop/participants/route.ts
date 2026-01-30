@@ -182,19 +182,15 @@ export async function POST(request: NextRequest) {
       }
     } else if (isAddingParticipatedTag && isCarolAutomationDisabled()) {
       linkError = 'Automação desligada. Ligue CAROL_AUTOMATION_DISABLED=false e envie manualmente.'
-      messageForManual = `Olá [NOME]! 💚
+      messageForManual = `Parabéns por ter participado da aula, [NOME]! 💚
 
-Excelente! Parabéns por ter participado! 🎉
+Eu tenho certeza que você tem potencial, só faltava a estrutura certa pra você executar de verdade e mudar sua história de uma vez por todas.
 
-Espero que tenha gostado e tenho certeza que isso realmente pode fazer diferença na sua vida.
-
-Agora me conta: o que você mais gostou? E como você prefere começar?
-
-Você prefere começar com o plano mensal para validar e verificar, ou você já está determinado a mudar sua vida e prefere o plano anual?
+Você já pode começar hoje no plano *mensal* ou no *anual* e ajustar sua agenda imediatamente pra iniciar a captação de clientes.
 
 🔗 ${process.env.NUTRI_REGISTRATION_URL || 'https://www.ylada.com/pt/nutri#oferta'}
 
-O que você acha? 😊`
+Qual você prefere, *mensal* ou *anual*?`
     }
 
     // 🚀 Disparar remarketing quando marca como "não participou" (await para garantir envio em serverless)

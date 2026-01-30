@@ -8,6 +8,15 @@ import { createZApiClient } from '@/lib/z-api'
 import { getFirstName } from '@/lib/whatsapp-carol-ai'
 import { getFlowTemplate, applyTemplate } from '@/lib/whatsapp-flow-templates'
 
+function toContactKey(phone: string): string {
+  let digits = String(phone || '').replace(/\D/g, '')
+  if (digits.startsWith('0')) digits = digits.slice(1)
+  if (!digits) return ''
+  // Se for BR sem código do país (10/11), prefixar 55
+  if (!digits.startsWith('55') && (digits.length === 10 || digits.length === 11)) digits = `55${digits}`
+  return digits
+}
+
 /**
  * Formata data/hora da sessão em PT-BR (horário de Brasília)
  * Mesmo critério da Carol para evitar horários diferentes entre form e Carol.
@@ -49,11 +58,10 @@ export async function sendWorkshopInviteToFormLead(
     console.log('[Form Automation] ⏳ Aguardando 60 segundos antes de enviar mensagem automática (prioridade: ela chamar primeiro)...')
     await new Promise(resolve => setTimeout(resolve, 60000))
     
-    // 📱 Normalizar telefone no mesmo padrão do webhook (BR = 55 + 10/11 dígitos) para evitar 2 conversas
-    let phoneNormalized = phone.replace(/\D/g, '')
-    if (phoneNormalized.length >= 10 && phoneNormalized.length <= 11 && !phoneNormalized.startsWith('55')) {
-      if (phoneNormalized.startsWith('0')) phoneNormalized = phoneNormalized.slice(1)
-      phoneNormalized = '55' + phoneNormalized
+    // 📱 Normalizar telefone para uma chave canônica (memória por pessoa)
+    const phoneNormalized = toContactKey(phone)
+    if (!phoneNormalized) {
+      return { success: false, error: 'Telefone inválido' }
     }
     
     // 🛡️ Verificar se já existe conversa ativa para evitar duplicação
@@ -98,7 +106,7 @@ export async function sendWorkshopInviteToFormLead(
     const { data: allConvsForPhone } = await supabaseAdmin
       .from('whatsapp_conversations')
       .select('id, context, last_message_at')
-      .eq('phone', phoneNormalized)
+      .eq('contact_key', phoneNormalized)
 
     if (allConvsForPhone && allConvsForPhone.length > 0) {
       for (const existingConv of allConvsForPhone) {
@@ -222,7 +230,7 @@ ${optionsText}💬 Qual você prefere? 💚`
     const { data: convsBeforeSend } = await supabaseAdmin
       .from('whatsapp_conversations')
       .select('id')
-      .eq('phone', phoneNormalized)
+      .eq('contact_key', phoneNormalized)
 
     if (convsBeforeSend && convsBeforeSend.length > 0) {
       const doisMinutosAtras = new Date(Date.now() - 2 * 60 * 1000).toISOString()
@@ -283,7 +291,7 @@ ${optionsText}💬 Qual você prefere? 💚`
     const { data: existingConv } = await supabaseAdmin
       .from('whatsapp_conversations')
       .select('id')
-      .eq('phone', phoneNormalized)
+      .eq('contact_key', phoneNormalized)
       .eq('instance_id', instance.id)
       .maybeSingle()
 
@@ -320,6 +328,7 @@ ${optionsText}💬 Qual você prefere? 💚`
         .from('whatsapp_conversations')
         .insert({
           phone: phoneNormalized,
+          contact_key: phoneNormalized,
           instance_id: instance.id,
           area,
           name: displayName || null,

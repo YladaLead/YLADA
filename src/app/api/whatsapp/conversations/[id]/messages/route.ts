@@ -61,14 +61,15 @@ export async function GET(
     const limitParam = searchParams.get('limit')
     const maxMessages = limitParam ? Math.min(Number(limitParam) || 5000, 10000) : 5000
 
-    // Buscar a conversa para obter o telefone (e carregar mensagens de duplicatas com mesmo telefone)
+    // Buscar a conversa para obter o telefone/contact_key (e carregar mensagens de duplicatas)
     const { data: conv } = await supabaseAdmin
       .from('whatsapp_conversations')
-      .select('id, phone, area')
+      .select('id, phone, contact_key, area')
       .eq('id', conversationId)
       .single()
 
-    if (!conv?.phone) {
+    const contactKey = (conv?.contact_key || conv?.phone || '').replace(/\D/g, '')
+    if (!contactKey) {
       const { data: messages, error } = await supabaseAdmin
         .from('whatsapp_messages')
         .select('*')
@@ -79,24 +80,13 @@ export async function GET(
       return NextResponse.json({ messages: messages || [] })
     }
 
-    // Buscar IDs de todas as conversas com o mesmo telefone (unificar histórico quando há duplicatas)
-    const { data: samePhoneConvs } = await supabaseAdmin
+    // Buscar IDs de todas as conversas com a mesma contact_key (memória por pessoa)
+    const { data: sameKeyConvs } = await supabaseAdmin
       .from('whatsapp_conversations')
       .select('id')
       .eq('area', conv.area || 'nutri')
-      .eq('phone', conv.phone)
-    let conversationIds = (samePhoneConvs || []).map((c: { id: string }) => c.id)
-    // Incluir variante BR 12 dígitos se a conversa tiver 13 (evitar histórico dividido)
-    const phoneDigits = (conv.phone || '').replace(/\D/g, '')
-    if (phoneDigits.startsWith('55') && phoneDigits.length === 13) {
-      const phone12 = phoneDigits.slice(0, 4) + phoneDigits.slice(5)
-      const { data: convs12 } = await supabaseAdmin
-        .from('whatsapp_conversations')
-        .select('id')
-        .eq('area', conv.area || 'nutri')
-        .eq('phone', phone12)
-      if (convs12?.length) conversationIds = [...new Set([...conversationIds, ...convs12.map((c: { id: string }) => c.id)])]
-    }
+      .eq('contact_key', contactKey)
+    let conversationIds = (sameKeyConvs || []).map((c: { id: string }) => c.id)
     if (!conversationIds.length) conversationIds = [conversationId]
 
     // Buscar mensagens de todas as conversas com o mesmo telefone (histórico completo mesmo com duplicatas)
