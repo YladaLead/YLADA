@@ -9,6 +9,7 @@ import { createClient } from '@supabase/supabase-js'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { sendWhatsAppMessage } from '@/lib/z-api'
+import { normalizePhoneBr } from '@/lib/phone-br'
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -80,21 +81,62 @@ export async function GET(
       return NextResponse.json({ messages: messages || [] })
     }
 
-    // Buscar IDs de todas as conversas com a mesma contact_key (memória por pessoa)
+    // Buscar IDs de conversas "da mesma pessoa".
+    // Importante: após a migração de contact_key, duplicatas podem ter contact_key = NULL
+    // para permitir índice único. Nesse caso, precisamos incluir também por variantes de phone.
+    const area = conv?.area || 'nutri'
+    const rawPhone = String(conv?.phone || '')
+    const rawDigits = rawPhone.replace(/\D/g, '')
+    const canonical = rawDigits ? normalizePhoneBr(rawDigits) : ''
+    const phone13 =
+      rawDigits.startsWith('55') && rawDigits.length === 13
+        ? rawDigits
+        : canonical && canonical.startsWith('55') && canonical.length === 13
+          ? canonical
+          : rawDigits && (rawDigits.length === 10 || rawDigits.length === 11)
+            ? `55${rawDigits.startsWith('0') ? rawDigits.slice(1) : rawDigits}`
+            : ''
+    const phone12 =
+      phone13 && phone13.startsWith('55') && phone13.length === 13
+        ? phone13.slice(0, 4) + phone13.slice(5)
+        : canonical && canonical.startsWith('55') && canonical.length === 12
+          ? canonical
+          : ''
+    const phoneVariants = Array.from(
+      new Set([rawPhone, rawDigits, canonical, phone13, phone12].filter(Boolean))
+    )
+
+    const ids = new Set<string>()
+
+    // 1) Por contact_key (se existir) — caminho ideal
     const { data: sameKeyConvs } = await supabaseAdmin
       .from('whatsapp_conversations')
       .select('id')
-      .eq('area', conv.area || 'nutri')
+      .eq('area', area)
       .eq('contact_key', contactKey)
-    let conversationIds = (sameKeyConvs || []).map((c: { id: string }) => c.id)
+    ;(sameKeyConvs || []).forEach((c: { id: string }) => ids.add(c.id))
+
+    // 2) Por variantes de phone — inclui duplicatas com contact_key NULL
+    if (phoneVariants.length > 0) {
+      const { data: samePhoneConvs } = await supabaseAdmin
+        .from('whatsapp_conversations')
+        .select('id')
+        .eq('area', area)
+        .in('phone', phoneVariants)
+      ;(samePhoneConvs || []).forEach((c: { id: string }) => ids.add(c.id))
+    }
+
+    let conversationIds = Array.from(ids)
     if (!conversationIds.length) conversationIds = [conversationId]
 
-    // Buscar mensagens de todas as conversas com o mesmo telefone (histórico completo mesmo com duplicatas)
+    // Buscar mensagens de todas as conversas da mesma pessoa.
+    // Para evitar "gaps" quando há muitas mensagens, pegamos as mais recentes dentro do limite
+    // e retornamos em ordem crescente para a UI.
     const { data: messages, error } = await supabaseAdmin
       .from('whatsapp_messages')
       .select('*')
       .in('conversation_id', conversationIds.length ? conversationIds : [conversationId])
-      .order('created_at', { ascending: true })
+      .order('created_at', { ascending: false })
       .limit(maxMessages)
 
     if (error) {
@@ -115,7 +157,8 @@ export async function GET(
       .update({ unread_count: 0 })
       .eq('id', conversationId)
 
-    return NextResponse.json({ messages: messages || [] })
+    const ordered = (messages || []).slice().reverse()
+    return NextResponse.json({ messages: ordered })
   } catch (error: any) {
     console.error('[WhatsApp Messages] Erro:', error)
     return NextResponse.json(
