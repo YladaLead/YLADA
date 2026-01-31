@@ -72,17 +72,40 @@ export async function GET(request: NextRequest) {
 
     const maps = await buildInscricoesMaps()
 
+    // Última mensagem real (para evitar "—" quando last_message_at não foi atualizado)
+    const ids = (conversations || []).map((c: any) => c.id).filter(Boolean)
+    const lastByConversation = new Map<string, string>()
+    if (ids.length > 0) {
+      const { data: lastMessages, error: lastErr } = await supabaseAdmin
+        .from('whatsapp_messages')
+        .select('conversation_id,created_at')
+        .in('conversation_id', ids)
+        .order('created_at', { ascending: false })
+        .limit(Math.max(500, ids.length * 3))
+      if (lastErr) {
+        console.error('[WhatsApp v2 Conversations] Erro ao buscar last_message_at por mensagens:', lastErr)
+      } else {
+        for (const m of lastMessages || []) {
+          if (!lastByConversation.has(m.conversation_id)) {
+            lastByConversation.set(m.conversation_id, m.created_at)
+          }
+        }
+      }
+    }
+
     let result = (conversations || []).map((c: any) => {
       const ctx = c.context && typeof c.context === 'object' ? c.context : null
       const tags = getTags(ctx)
       const fase = deriveFase({ context: ctx })
       const fromInscricao = findInscricao(c.phone, ctx || {}, maps)
+      const lastFromMessages = lastByConversation.get(c.id) || null
+      const last = c.last_message_at || lastFromMessages
       return {
         id: c.id,
         phone: c.phone,
         name: c.name ?? null,
         customer_name: c.customer_name ?? null,
-        last_message_at: c.last_message_at ?? null,
+        last_message_at: last,
         created_at: c.created_at,
         fase,
         tags,
@@ -95,6 +118,13 @@ export async function GET(request: NextRequest) {
     if (faseFilter) {
       result = result.filter((c: any) => c.fase === faseFilter)
     }
+
+    // Reordenar pelo last_message_at calculado (fallback: created_at)
+    result.sort((a: any, b: any) => {
+      const da = a.last_message_at ? new Date(a.last_message_at).getTime() : new Date(a.created_at).getTime()
+      const db = b.last_message_at ? new Date(b.last_message_at).getTime() : new Date(b.created_at).getTime()
+      return db - da
+    })
 
     return NextResponse.json({ conversations: result })
   } catch (error: any) {
