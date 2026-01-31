@@ -856,15 +856,6 @@ function WorkshopContent() {
                                             {session.is_active ? '🔒' : '✅'}
                                           </button>
                                         </div>
-                                        <a
-                                          href={session.zoom_link}
-                                          target="_blank"
-                                          rel="noreferrer"
-                                          className="text-xs text-blue-600 hover:underline break-all"
-                                          onClick={(e) => e.stopPropagation()}
-                                        >
-                                          {session.zoom_link.substring(0, 30)}...
-                                        </a>
                                         <div className="text-xs text-gray-500 mt-1">
                                           {formatPtBR(session.starts_at)}
                                         </div>
@@ -951,7 +942,6 @@ function WorkshopContent() {
                                   <th className="border border-gray-200 px-4 py-3 text-left text-xs font-medium text-gray-700">Data/Hora</th>
                                   <th className="border border-gray-200 px-4 py-3 text-left text-xs font-medium text-gray-700">Status</th>
                                   <th className="border border-gray-200 px-4 py-3 text-left text-xs font-medium text-gray-700">Participantes</th>
-                                  <th className="border border-gray-200 px-4 py-3 text-left text-xs font-medium text-gray-700">Link Zoom</th>
                                   <th className="border border-gray-200 px-4 py-3 text-center text-xs font-medium text-gray-700">Ações</th>
                                 </tr>
                               </thead>
@@ -971,26 +961,14 @@ function WorkshopContent() {
                                 </span>
                               </td>
                               <td className="border border-gray-200 px-4 py-3">
-                                {session.confirmed_participants !== undefined && session.confirmed_participants > 0 ? (
-                                  <button
-                                    onClick={() => loadParticipants(session)}
-                                    className="text-sm text-blue-600 hover:underline font-medium"
-                                  >
-                                    ✅ {session.confirmed_participants} confirmado{session.confirmed_participants !== 1 ? 's' : ''} - Clique para ver
-                                  </button>
-                                ) : (
-                                  <span className="text-sm text-gray-500">Sem participantes</span>
-                                )}
-                              </td>
-                              <td className="border border-gray-200 px-4 py-3">
-                                <a
-                                  href={session.zoom_link}
-                                  target="_blank"
-                                  rel="noreferrer"
-                                  className="text-xs text-blue-600 hover:underline break-all"
+                                <button
+                                  onClick={() => loadParticipants(session)}
+                                  className="text-sm text-blue-600 hover:underline font-medium"
                                 >
-                                  {session.zoom_link.substring(0, 40)}...
-                                </a>
+                                  {session.confirmed_participants !== undefined && session.confirmed_participants > 0
+                                    ? `✅ ${session.confirmed_participants} confirmado${session.confirmed_participants !== 1 ? 's' : ''} - Clique para ver`
+                                    : 'Ver detalhes (sem confirmados)'}
+                                </button>
                               </td>
                               <td className="border border-gray-200 px-4 py-3">
                                 <div className="flex items-center justify-center gap-2">
@@ -1007,7 +985,7 @@ function WorkshopContent() {
                                     {session.is_active ? '🔒' : '✅'}
                                   </button>
                                   <button
-                                    onClick={() => deleteSession(session.id)}
+                                    onClick={() => deleteSession(session)}
                                     disabled={saving}
                                     className="text-xs px-2 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200 disabled:opacity-50"
                                     title="Deletar"
@@ -1118,6 +1096,31 @@ function WorkshopContent() {
                       <p className="text-sm text-gray-500 mt-1">
                         {formatPtBR(selectedSessionForParticipants.starts_at)}
                       </p>
+                      <div className="mt-2 flex flex-wrap items-center gap-2">
+                        <a
+                          href={selectedSessionForParticipants.zoom_link}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="text-xs text-blue-600 hover:underline break-all"
+                        >
+                          Abrir link do Zoom
+                        </a>
+                        <button
+                          type="button"
+                          className="text-xs px-2 py-1 rounded bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-200"
+                          onClick={async () => {
+                            const link = selectedSessionForParticipants.zoom_link
+                            try {
+                              await navigator.clipboard.writeText(link)
+                              alert('Link do Zoom copiado!')
+                            } catch {
+                              window.prompt('Copie o link do Zoom:', link)
+                            }
+                          }}
+                        >
+                          Copiar link
+                        </button>
+                      </div>
                     </div>
                     <button
                       onClick={() => {
