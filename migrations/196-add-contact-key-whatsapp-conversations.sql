@@ -25,6 +25,27 @@ WHERE contact_key IS NULL OR length(trim(contact_key)) = 0;
 CREATE INDEX IF NOT EXISTS idx_whatsapp_conversations_contact_key
   ON whatsapp_conversations(contact_key);
 
+-- 3.5) Resolver duplicados existentes antes do índice único
+-- Mantém apenas 1 linha por (instance_id, contact_key) e remove a chave das duplicadas
+-- para permitir a criação do índice único sem quebrar.
+WITH ranked AS (
+  SELECT
+    id,
+    instance_id,
+    contact_key,
+    ROW_NUMBER() OVER (
+      PARTITION BY instance_id, contact_key
+      ORDER BY COALESCE(last_message_at, created_at) DESC, id DESC
+    ) AS rn
+  FROM whatsapp_conversations
+  WHERE contact_key IS NOT NULL AND length(trim(contact_key)) > 0
+)
+UPDATE whatsapp_conversations wc
+SET contact_key = NULL
+FROM ranked r
+WHERE wc.id = r.id
+  AND r.rn > 1;
+
 -- 4) Unicidade por instância + pessoa (evita 2 conversas para o mesmo contato)
 -- (Partial index para não travar linhas antigas sem chave válida.)
 CREATE UNIQUE INDEX IF NOT EXISTS uniq_whatsapp_conversations_instance_contact_key
