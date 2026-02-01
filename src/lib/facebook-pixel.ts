@@ -336,7 +336,7 @@ export const trackNutriCheckoutMonthly = () => {
       trackCustomEvent('NutriCheckout_Monthly', {
         content_category: 'NUTRI',
         content_name: 'Checkout Plano Mensal',
-        value: 297,
+        value: 197,
         currency: 'BRL',
         page_location: '/pt/nutri/checkout?plan=monthly',
       });
@@ -369,7 +369,7 @@ export const trackNutriCheckoutAnnual = () => {
       trackCustomEvent('NutriCheckout_Annual', {
         content_category: 'NUTRI',
         content_name: 'Checkout Plano Anual',
-        value: 2364,
+        value: 1164,
         currency: 'BRL',
         page_location: '/pt/nutri/checkout?plan=annual',
       });

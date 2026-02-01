@@ -29,7 +29,10 @@ export function middleware(request: NextRequest) {
     pathname === '/favicon.ico'
   ) {
     console.log('Middleware - Rota excluída (sem redirecionamento):', pathname)
-    return NextResponse.next()
+    const res = NextResponse.next()
+    // Ajuda layouts protegidos a detectarem a rota real (evita depender de referer).
+    res.headers.set('x-pathname', pathname)
+    return res
   }
   
   // Redirecionar /pt/w para /pt/wellness (atalho)
@@ -73,7 +76,10 @@ export function middleware(request: NextRequest) {
   }
   
   console.log('Middleware - Permitindo:', pathname)
-  return NextResponse.next()
+  const res = NextResponse.next()
+  // Ajuda layouts protegidos a detectarem a rota real (evita depender de referer).
+  res.headers.set('x-pathname', pathname)
+  return res
 }
 
 export const config = {

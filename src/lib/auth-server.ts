@@ -2,6 +2,7 @@ import { cookies, headers } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
 import { redirect } from 'next/navigation'
 import { hasActiveSubscription, canBypassSubscription } from '@/lib/subscription-helpers'
+import { supabaseAdmin } from '@/lib/supabase'
 
 type Area = 'wellness' | 'nutri' | 'coach' | 'nutra'
 
@@ -11,6 +12,18 @@ interface AuthValidationResult {
   profile: any
   hasSubscription: boolean
   canBypass: boolean
+}
+
+function isNetworkError(err: any): boolean {
+  const msg = (err?.message || '').toString().toLowerCase()
+  return (
+    msg.includes('fetch failed') ||
+    msg.includes('econnreset') ||
+    msg.includes('etimedout') ||
+    msg.includes('enotfound') ||
+    msg.includes('network') ||
+    err?.status === 0
+  )
 }
 
 /**
@@ -194,20 +207,61 @@ export async function validateProtectedAccess(
     }
 
     // 3. Buscar perfil
-    const { data: profile, error: profileError } = await supabase
-      .from('user_profiles')
-      .select('id, user_id, perfil, is_admin, is_support, nome_completo, email, diagnostico_completo')
-      .eq('user_id', user.id)
-      .maybeSingle()
+    let profile: any = null
+    let profileError: any = null
 
-    if (profileError) {
-      console.error(`❌ ProtectedLayout [${area}]: Erro ao buscar perfil:`, profileError)
-      redirect(`/pt/${area}/login`)
+    try {
+      const res = await supabase
+        .from('user_profiles')
+        .select('id, user_id, perfil, is_admin, is_support, nome_completo, email, diagnostico_completo')
+        .eq('user_id', user.id)
+        .maybeSingle()
+
+      profile = res.data
+      profileError = res.error
+    } catch (e: any) {
+      profileError = e
     }
 
+    // Fallback: em caso de instabilidade, tentar via service role (menos dependência de auth).
+    if ((profileError || !profile) && supabaseAdmin) {
+      try {
+        const adminRes = await supabaseAdmin
+          .from('user_profiles')
+          .select('id, user_id, perfil, is_admin, is_support, nome_completo, email, diagnostico_completo')
+          .eq('user_id', user.id)
+          .maybeSingle()
+
+        if (!adminRes.error && adminRes.data) {
+          profile = adminRes.data
+          profileError = null
+        } else if (adminRes.error) {
+          profileError = profileError || adminRes.error
+        }
+      } catch (e: any) {
+        profileError = profileError || e
+      }
+    }
+
+    // Último fallback: em DEV, não “deslogar” por falha de rede.
     if (!profile) {
-      console.log(`❌ ProtectedLayout [${area}]: Perfil não encontrado, redirecionando para login`)
-      redirect(`/pt/${area}/login`)
+      if (process.env.NODE_ENV !== 'production' && isNetworkError(profileError)) {
+        console.warn(`⚠️ ProtectedLayout [${area}]: Falha de rede ao buscar perfil. Permitindo fallback em DEV.`)
+        profile = {
+          id: null,
+          user_id: user.id,
+          perfil: area,
+          is_admin: false,
+          is_support: true,
+          nome_completo: user?.user_metadata?.full_name || null,
+          email: user?.email || null,
+          diagnostico_completo: true,
+        }
+        profileError = null
+      } else {
+        console.error(`❌ ProtectedLayout [${area}]: Erro ao buscar perfil:`, profileError)
+        redirect(`/pt/${area}/login`)
+      }
     }
 
     // 4. Verificar se perfil corresponde (admin/suporte pode bypassar)
@@ -223,6 +277,11 @@ export async function validateProtectedAccess(
     let canBypass = false
 
     if (shouldRequireSubscription) {
+      // DEV: não bloquear navegação por assinatura (evita loop quando Supabase oscila).
+      if (process.env.NODE_ENV !== 'production') {
+        hasSubscription = true
+        canBypass = true
+      } else {
       canBypass = await canBypassSubscription(user.id)
       
       if (!canBypass) {
@@ -256,6 +315,7 @@ export async function validateProtectedAccess(
       } else {
         hasSubscription = true // Admin/suporte tem "assinatura" virtual
       }
+      }
     } else {
       // Se não requer assinatura, considerar como tendo
       hasSubscription = true
@@ -284,7 +344,17 @@ export async function validateProtectedAccess(
     }
     
     console.error(`❌ ProtectedLayout [${area}]: Erro na validação:`, error)
-    // Em caso de erro real, redirecionar para login
+    // Em DEV, não redirecionar para login por falha de rede (evita loop).
+    if (process.env.NODE_ENV !== 'production' && isNetworkError(error)) {
+      console.warn(`⚠️ ProtectedLayout [${area}]: Falha de rede em DEV. Permitindo acesso com fallback.`)
+      return {
+        session: null,
+        user: null,
+        profile: null,
+        hasSubscription: true,
+        canBypass: true,
+      }
+    }
     redirect(`/pt/${area}/login`)
   }
 }

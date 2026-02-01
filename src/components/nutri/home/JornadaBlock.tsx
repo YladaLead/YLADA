@@ -40,7 +40,7 @@ export default function JornadaBlock() {
     <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200">
       <div className="text-center mb-6">
         <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
-          Sua Jornada de 30 Dias
+          Sua Trilha Empresarial
         </h2>
         <p className="text-gray-700 text-sm sm:text-base">
           Você não precisa fazer tudo. Só o próximo passo certo.
@@ -73,7 +73,7 @@ export default function JornadaBlock() {
               </PrimaryButton>
             ) : completedDays === totalDays ? (
               <div>
-                <p className="text-gray-700 mb-4">🎉 Parabéns! Você completou a Jornada!</p>
+                <p className="text-gray-700 mb-4">🎉 Parabéns! Você concluiu a Trilha!</p>
                 <PrimaryButton
                   href="/pt/nutri/metodo/jornada/concluida"
                   fullWidth
@@ -88,7 +88,7 @@ export default function JornadaBlock() {
                 fullWidth
                 className="text-lg py-4"
               >
-                Iniciar Dia 1 da Jornada →
+                Iniciar Dia 1 da Trilha →
               </PrimaryButton>
             )}
           </div>

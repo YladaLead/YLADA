@@ -82,28 +82,19 @@ export default function NutriSidebar({ isMobileOpen = false, onMobileClose }: Nu
 
   // Mapeamento de títulos para chaves do sistema de fases
   const titleToKey: Record<string, SidebarItemKey> = {
-    'Home': 'home',
-    'Jornada 30 Dias': 'jornada',
-    'Sobre o Método': 'pilares',
+    'Trilha Empresarial': 'jornada',
     'Captar': 'ferramentas',
-    'Gestão de Clientes': 'gsal',
-    'Materiais de Apoio': 'biblioteca',
-    'Minhas Anotações': 'anotacoes',
     'Perfil Nutri-Empresária': 'perfil',
     'Configurações': 'configuracoes'
   }
 
-  // Filtrar itens baseado na fase atual (mostrar bloqueados também, mas com indicador)
+  // Itens do menu (V1): sem bloqueio por fase.
+  // A liberação progressiva fazia sentido para onboarding antigo, mas agora queremos
+  // o core sempre acessível (Captar / Jornada / Perfil / Configurações).
   const menuItems = useMemo(() => {
     // Todos os itens do menu (estrutura completa)
     // Ordem reorganizada: áreas mais usadas no topo
     const allMenuItems: MenuSection[] = [
-      {
-        title: 'Home',
-        icon: '🏠',
-        href: '/pt/nutri/home',
-        color: 'gray'
-      },
       {
         title: 'Captar',
         icon: '🧲',
@@ -112,48 +103,15 @@ export default function NutriSidebar({ isMobileOpen = false, onMobileClose }: Nu
         items: [
           { title: 'Quiz e Calculadoras', icon: '🧮', href: '/pt/nutri/ferramentas/templates' },
           { title: 'Criar Quiz Personalizado', icon: '✨', href: '/pt/nutri/quiz-personalizado' },
-        ]
-      },
-      {
-        title: 'Gestão de Clientes',
-        icon: '📊',
-        color: 'green',
-        href: '/pt/nutri/gsal',
-        items: [
-          { title: 'Painel GSAL', icon: '📊', href: '/pt/nutri/gsal', tooltip: 'GSAL: Gerar, Servir, Acompanhar, Lucrar' },
           { title: 'Leads', icon: '🎯', href: '/pt/nutri/leads', badge: novosLeadsCount > 0 ? novosLeadsCount : undefined },
-          { title: 'Clientes', icon: '👤', href: '/pt/nutri/clientes' },
-          { title: 'Kanban', icon: '🗂️', href: '/pt/nutri/clientes/kanban' },
-          { title: 'Agenda', icon: '📅', href: '/pt/nutri/agenda' },
-          { title: 'Acompanhamento', icon: '📊', href: '/pt/nutri/acompanhamento' },
-          { title: 'Formulários', icon: '📝', href: '/pt/nutri/formularios' },
-          { title: 'Rotina Mínima', icon: '⚡', href: '/pt/nutri/metodo/painel/diario' },
           { title: 'Métricas', icon: '📈', href: '/pt/nutri/relatorios-gestao' },
         ]
       },
       {
-        title: 'Jornada 30 Dias',
+        title: 'Trilha Empresarial',
         icon: '📘',
         href: '/pt/nutri/metodo/jornada',
         color: 'blue'
-      },
-      {
-        title: 'Sobre o Método',
-        icon: '📚',
-        href: '/pt/nutri/metodo/pilares',
-        color: 'purple'
-      },
-      {
-        title: 'Materiais de Apoio',
-        icon: '🎒',
-        href: '/pt/nutri/metodo/biblioteca',
-        color: 'yellow'
-      },
-      {
-        title: 'Minhas Anotações',
-        icon: '📝',
-        href: '/pt/nutri/anotacoes',
-        color: 'purple'
       },
       {
         title: 'Perfil Nutri-Empresária',
@@ -169,17 +127,8 @@ export default function NutriSidebar({ isMobileOpen = false, onMobileClose }: Nu
       }
     ]
 
-    // Mostrar todos os itens, mas marcar quais estão bloqueados
-    // Isso permite mostrar progressão e gerar desejo, não frustração
-    return allMenuItems.map(item => {
-      const itemKey = titleToKey[item.title]
-      if (!itemKey) {
-        // Se não tem mapeamento, sempre disponível (fallback)
-        return { ...item, isBlocked: false }
-      }
-      const available = isItemAvailable(itemKey, currentDay)
-      return { ...item, isBlocked: !available }
-    })
+    // V1: sempre disponível (sem cadeado).
+    return allMenuItems.map(item => ({ ...item, isBlocked: false }))
   }, [currentDay, novosLeadsCount])
 
   const isActive = (href: string) => {
@@ -283,7 +232,7 @@ export default function NutriSidebar({ isMobileOpen = false, onMobileClose }: Nu
         {progress && currentDay && (
           <div className="px-3 py-2 border-b border-gray-100 bg-blue-50/50">
             <p className="text-xs text-gray-600 font-medium">
-              {currentDay > 30 ? 'Jornada Completa! 🏆' : getPhaseMessage(currentPhase)}
+              {currentDay > 30 ? 'Trilha Concluída! 🏆' : getPhaseMessage(currentPhase)}
             </p>
             {currentDay > 0 && currentDay <= 30 && (
               <p className="text-xs text-gray-500 mt-0.5">
@@ -441,7 +390,8 @@ export default function NutriSidebar({ isMobileOpen = false, onMobileClose }: Nu
             // Item simples (sem subitens)
             const itemKey = titleToKey[item.title] || ''
             const itemMicrocopy = getItemMicrocopy(itemKey)
-            const isBlocked = itemKey && !isItemAvailable(itemKey, currentDay)
+            // V1: sem bloqueio por fase também para itens simples (Perfil/Configurações/etc.)
+            const isBlocked = false
             
             return (
               <div key={item.title} className="relative group">

@@ -4,10 +4,11 @@ import { requireApiAuth } from '@/lib/api-auth'
 
 export async function GET(request: NextRequest) {
   try {
-    const user = await requireApiAuth(request)
-    if (!user) {
-      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
+    const authResult = await requireApiAuth(request)
+    if (authResult instanceof NextResponse) {
+      return authResult
     }
+    const { user } = authResult
 
     // Verificar se supabaseAdmin está configurado
     if (!supabaseAdmin) {

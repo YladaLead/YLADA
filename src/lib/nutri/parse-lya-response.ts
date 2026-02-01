@@ -95,7 +95,7 @@ export function parseLyaResponse(response: string): ParsedLyaResponse {
   if (!result.onde_aplicar && result.acoes_recomendadas.length > 0) {
     const primeiraAcao = result.acoes_recomendadas[0].toLowerCase()
     if (primeiraAcao.includes('dia 1') || primeiraAcao.includes('jornada')) {
-      result.onde_aplicar = 'Jornada 30 Dias → Dia 1'
+      result.onde_aplicar = 'Trilha Empresarial → Dia 1'
     } else if (primeiraAcao.includes('quiz')) {
       result.onde_aplicar = 'Ferramentas → Criar Quiz'
     } else {
@@ -125,8 +125,8 @@ export function parseLyaResponse(response: string): ParsedLyaResponse {
 export function getFallbackLyaResponse(): ParsedLyaResponse {
   return {
     foco_prioritario: 'Iniciar sua organização profissional com método.',
-    acoes_recomendadas: ['Iniciar o Dia 1 da Jornada'],
-    onde_aplicar: 'Jornada 30 Dias → Dia 1',
+    acoes_recomendadas: ['Iniciar o Dia 1 da Trilha'],
+    onde_aplicar: 'Trilha Empresarial → Dia 1',
     metrica_sucesso: 'Dia 1 concluído até hoje.',
     isValid: true
   }

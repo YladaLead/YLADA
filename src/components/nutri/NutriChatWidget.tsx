@@ -174,7 +174,7 @@ export default function NutriChatWidget({ chatbotId, defaultOpen = false }: Nutr
           // Se der erro na LYA, mostrar mensagem mais amigável
           const mensagemErro: Mensagem = {
             id: (Date.now() + 1).toString(),
-            texto: `Ops! Tive um problema ao processar sua pergunta sobre a jornada. 😅\n\n**Erro:** ${error.message || 'Erro desconhecido'}\n\n**Mas não se preocupe!** Você pode:\n\n🔄 **Tentar novamente** — Às vezes é só um problema momentâneo\n📘 **Acessar diretamente** — Vá em "Jornada 30 Dias" no menu para ver seu progresso\n💬 **Falar com nossa equipe** — Entre em contato pelo WhatsApp se precisar de ajuda\n\nDesculpe pelo inconveniente! 😊`,
+            texto: `Ops! Tive um problema ao processar sua pergunta sobre a trilha. 😅\n\n**Erro:** ${error.message || 'Erro desconhecido'}\n\n**Mas não se preocupe!** Você pode:\n\n🔄 **Tentar novamente** — Às vezes é só um problema momentâneo\n📘 **Acessar diretamente** — Vá em "Trilha Empresarial" no menu para ver seu progresso\n💬 **Falar com nossa equipe** — Entre em contato pelo WhatsApp se precisar de ajuda\n\nDesculpe pelo inconveniente! 😊`,
             tipo: 'sistema',
             timestamp: new Date()
           }

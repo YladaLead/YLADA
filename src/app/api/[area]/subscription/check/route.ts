@@ -10,13 +10,16 @@ import { hasActiveSubscription, canBypassSubscription } from '@/lib/subscription
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { area: string } }
+  { params }: { params: Promise<{ area: string }> }
 ) {
+  let areaForLog: string | undefined
   try {
-    const area = params.area as 'wellness' | 'nutri' | 'coach' | 'nutra'
+    const { area } = await params
+    areaForLog = area
+    const normalizedArea = area as 'wellness' | 'nutri' | 'coach' | 'nutra'
     
     // Validar área
-    if (!['wellness', 'nutri', 'coach', 'nutra'].includes(area)) {
+    if (!['wellness', 'nutri', 'coach', 'nutra'].includes(normalizedArea)) {
       return NextResponse.json(
         { error: 'Área inválida. Use: wellness, nutri, coach ou nutra' },
         { status: 400 }
@@ -24,7 +27,7 @@ export async function GET(
     }
 
     // Verificar autenticação
-    const authResult = await requireApiAuth(request, [area, 'admin'])
+    const authResult = await requireApiAuth(request, [normalizedArea, 'admin'])
     if (authResult instanceof NextResponse) {
       return authResult
     }
@@ -41,14 +44,14 @@ export async function GET(
     }
 
     // Verificar assinatura ativa
-    const hasSubscription = await hasActiveSubscription(user.id, area)
+    const hasSubscription = await hasActiveSubscription(user.id, normalizedArea)
 
     return NextResponse.json({
       hasActiveSubscription: hasSubscription,
       bypassed: false,
     })
   } catch (error: any) {
-    console.error(`❌ Erro ao verificar assinatura para ${params.area}:`, error)
+    console.error(`❌ Erro ao verificar assinatura para ${areaForLog || 'unknown'}:`, error)
     return NextResponse.json(
       { error: error.message || 'Erro ao verificar assinatura' },
       { status: 500 }

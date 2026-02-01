@@ -15,7 +15,6 @@ export function createClient() {
 
   // createBrowserClient do @supabase/ssr gerencia cookies automaticamente
   // Ele usa localStorage para persistir a sessão e sincroniza com cookies
-  const isProduction = process.env.NODE_ENV === 'production'
   const isSecure = typeof window !== 'undefined' && window.location.protocol === 'https:'
   
   return createBrowserClient(supabaseUrl, supabaseAnonKey, {
@@ -44,24 +43,23 @@ export function createClient() {
           cookiesToSet.forEach(({ name, value, options }) => {
             // Configurações padrão para produção
             const path = options?.path || '/'
-            const maxAge = options?.maxAge || (60 * 60 * 24 * 7) // 7 dias padrão
-            // MELHORIA: Usar 'lax' por padrão, mas 'none' para cookies críticos em cross-site
-            // Isso melhora compatibilidade com mobile e iframes
-            let sameSite = options?.sameSite || 'lax'
-            
-            // Se o cookie é crítico (sb-access-token, sb-refresh-token) e estamos em HTTPS,
-            // usar 'none' para garantir funcionamento em todos os contextos
-            if (isSecure && (name.includes('access-token') || name.includes('refresh-token'))) {
-              // Verificar se precisa de 'none' (cross-site)
-              // Por padrão, manter 'lax' que é mais seguro, mas permitir override
-              sameSite = options?.sameSite || 'lax'
-            }
+            // 🚨 CORREÇÃO: respeitar maxAge=0 (logout/clear cookie)
+            // Usar nullish coalescing para não sobrescrever 0.
+            const maxAge = options?.maxAge ?? (60 * 60 * 24 * 7) // 7 dias padrão
+            // Usar 'lax' por padrão (mais compatível e seguro).
+            // Não forçar "none" em HTTP porque exigiria Secure e seria bloqueado.
+            const sameSite = options?.sameSite ?? 'lax'
             
             // Secure apenas em HTTPS (não forçar em HTTP local)
-            const secure = options?.secure !== undefined ? options.secure : isSecure
+            const secure = options?.secure ?? isSecure
             
             // Construir string do cookie
-            let cookieString = `${name}=${encodeURIComponent(value)}; path=${path}; max-age=${maxAge}; SameSite=${sameSite}`
+            let cookieString = `${name}=${encodeURIComponent(value)}; path=${path}; Max-Age=${maxAge}; SameSite=${sameSite}`
+            
+            // Se houver expires, incluir também (alguns browsers / libs preferem).
+            if (options?.expires instanceof Date) {
+              cookieString += `; Expires=${options.expires.toUTCString()}`
+            }
             
             // Adicionar Secure apenas se necessário (HTTPS)
             if (secure) {
@@ -84,7 +82,7 @@ export function createClient() {
               }
               
               // Log apenas em desenvolvimento para debug
-              if (!isProduction && name.startsWith('sb-')) {
+              if (process.env.NODE_ENV !== 'production' && name.startsWith('sb-')) {
                 console.log('🍪 Cookie setado:', { name, path, secure, sameSite, wasSet })
               }
             } catch (cookieErr) {

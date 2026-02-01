@@ -44,8 +44,8 @@ export const SIDEBAR_MICROCOPY: SidebarMicrocopy = {
       tooltip: 'Seu ponto de partida diário na YLADA.'
     },
     jornada: {
-      label: 'Jornada 30 Dias',
-      tooltip: 'Seu caminho guiado para se tornar uma Nutri-Empresária.'
+      label: 'Trilha Empresarial',
+      tooltip: 'Sua capacitação empresarial, passo a passo (30 dias).'
     },
     pilares: {
       label: 'Sobre o Método',

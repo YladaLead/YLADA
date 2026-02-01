@@ -88,7 +88,7 @@ export async function POST(request: NextRequest) {
           "Executar o Dia 1 da Jornada com atenção e sem pular etapas",
           "Completar a tarefa principal do Dia 1"
         ],
-        onde: "Jornada 30 Dias → Dia 1",
+        onde: "Trilha Empresarial → Dia 1",
         metrica: "Dia 1 concluído até hoje. Isso já te coloca à frente da maioria das nutricionistas."
       },
       2: {
@@ -97,7 +97,7 @@ export async function POST(request: NextRequest) {
           "Executar o Dia 2 da Jornada com consistência",
           "Focar em consistência, não perfeição"
         ],
-        onde: "Jornada 30 Dias → Dia 2",
+        onde: "Trilha Empresarial → Dia 2",
         metrica: "Dia 2 concluído. Você está construindo algo diferente."
       },
       3: {
@@ -106,7 +106,7 @@ export async function POST(request: NextRequest) {
           "Continuar seguindo a Jornada",
           "Respeitar as etapas sem pular"
         ],
-        onde: "Jornada 30 Dias → Dia 3",
+        onde: "Trilha Empresarial → Dia 3",
         metrica: "Dia 3 concluído. Os resultados não vêm de pular etapas — vêm de respeitá-las."
       }
     }
@@ -226,7 +226,7 @@ ANÁLISE DA LYA — HOJE
 ☐ Completar a tarefa principal do Dia 1]
 
 3) ONDE APLICAR
-[Nome do módulo, área ou fluxo COM LINK CLICÁVEL EM MARKDOWN. Exemplo: "[Jornada 30 Dias → Dia 1](${baseUrl}/pt/nutri/metodo/jornada/dia/1)" ou "[Ferramentas → Criar Quiz](${baseUrl}/pt/nutri/ferramentas)"]
+[Nome do módulo, área ou fluxo COM LINK CLICÁVEL EM MARKDOWN. Exemplo: "[Trilha Empresarial → Dia 1](${baseUrl}/pt/nutri/metodo/jornada/dia/1)" ou "[Ferramentas → Criar Quiz](${baseUrl}/pt/nutri/ferramentas)"]
 
 4) MÉTRICA DE SUCESSO
 [Como validar em 24-72h. Exemplo: "Dia 1 concluído até hoje." ou "Quiz criado e publicado até hoje."]
@@ -389,7 +389,7 @@ Não adicione texto antes ou depois desses blocos.`
     } else {
       // Preencher apenas campos faltantes
       if (!parsed.onde_aplicar) {
-        parsed.onde_aplicar = 'Jornada 30 Dias → Dia 1'
+        parsed.onde_aplicar = 'Trilha Empresarial → Dia 1'
         console.log('🔧 [LYA] Preenchendo "onde_aplicar" com fallback')
       }
       if (!parsed.metrica_sucesso) {

@@ -363,12 +363,12 @@ export const NUTRI_ORIENTACAO_MAP: Record<string, OrientacaoItem> = {
   
   'jornada-30-dias': {
     id: 'jornada-30-dias',
-    titulo: 'Jornada 30 Dias',
-    descricao: 'Acesse a Jornada de Transformação de 30 dias',
+    titulo: 'Trilha Empresarial',
+    descricao: 'Acesse a Trilha Empresarial (30 dias)',
     caminho: '/pt/nutri/metodo/jornada',
     passo_a_passo: [
       '1. Acesse o menu lateral',
-      '2. Clique em "Jornada 30 Dias"',
+      '2. Clique em "Trilha Empresarial"',
       '3. Veja seu progresso atual',
       '4. Acesse o conteúdo do dia',
       '5. Complete as atividades propostas',
@@ -376,7 +376,7 @@ export const NUTRI_ORIENTACAO_MAP: Record<string, OrientacaoItem> = {
     ],
     icone: '📘',
     categoria: 'formacao',
-    atalho: 'Menu > Jornada 30 Dias',
+    atalho: 'Menu > Trilha Empresarial',
     nivel_dificuldade: 'facil',
     palavras_chave: [
       'jornada', 'jornada 30 dias', '30 dias', 'transformação',
@@ -888,10 +888,10 @@ export const NUTRI_ORIENTACAO_MAP: Record<string, OrientacaoItem> = {
   'ver-dia-jornada': {
     id: 'ver-dia-jornada',
     titulo: 'Ver Dia Específico da Jornada',
-    descricao: 'Acesse o conteúdo de um dia específico da Jornada 30 Dias',
+    descricao: 'Acesse o conteúdo de um dia específico da Trilha Empresarial',
     caminho: '/pt/nutri/metodo/jornada',
     passo_a_passo: [
-      '1. Acesse "Jornada 30 Dias"',
+      '1. Acesse "Trilha Empresarial"',
       '2. Veja o calendário com todos os dias',
       '3. Clique no dia que deseja acessar',
       '4. Leia o conteúdo do dia',
@@ -900,7 +900,7 @@ export const NUTRI_ORIENTACAO_MAP: Record<string, OrientacaoItem> = {
     ],
     icone: '📅',
     categoria: 'formacao',
-    atalho: 'Menu > Jornada 30 Dias > Dia X',
+    atalho: 'Menu > Trilha Empresarial > Dia X',
     nivel_dificuldade: 'facil',
     palavras_chave: [
       'dia jornada', 'dia específico', 'conteúdo do dia',

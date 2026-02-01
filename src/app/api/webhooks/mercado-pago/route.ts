@@ -18,10 +18,12 @@ function determineFeatures(
   // Apenas para área Nutri com productType
   if (area === 'nutri' && productType) {
     if (productType === 'platform_monthly') {
-      return ['gestao', 'ferramentas'] // Mensal: apenas gestão e ferramentas
+      // V1: pacote único (Captação + Trilha + LYA)
+      return ['ferramentas', 'cursos']
     }
     if (productType === 'platform_annual') {
-      return ['completo'] // Anual: acesso completo
+      // V1: pacote único (Captação + Trilha + LYA)
+      return ['ferramentas', 'cursos']
     }
     if (productType === 'formation_only') {
       return ['cursos'] // Formação standalone: apenas cursos

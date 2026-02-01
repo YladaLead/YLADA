@@ -14,7 +14,7 @@ function MetodoLayoutContent({ children }: { children: ReactNode }) {
   const pathname = usePathname()
   const searchParams = useSearchParams()
   
-  // Jornada 30 Dias deve ser acessível para todos (parte do onboarding)
+  // Trilha Empresarial (rota /metodo/jornada) deve ser acessível para todos (parte do onboarding)
   const isJornada = pathname?.includes('/metodo/jornada')
   
   // 🚨 CORREÇÃO: Se veio da jornada (tem parâmetro fromDay), permitir acesso sem assinatura

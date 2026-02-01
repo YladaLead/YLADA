@@ -5,16 +5,7 @@ import { useSearchParams } from 'next/navigation'
 import RequireDiagnostico from '@/components/auth/RequireDiagnostico'
 import NutriSidebar from '@/components/nutri/NutriSidebar'
 import { useAuth } from '@/contexts/AuthContext'
-import JornadaBlock from '@/components/nutri/home/JornadaBlock'
-import PilaresBlock from '@/components/nutri/home/PilaresBlock'
-import FerramentasBlock from '@/components/nutri/home/FerramentasBlock'
-import GSALBlock from '@/components/nutri/home/GSALBlock'
-import BibliotecaBlock from '@/components/nutri/home/BibliotecaBlock'
-import AnotacoesBlock from '@/components/nutri/home/AnotacoesBlock'
-import VideoPlayerYLADA from '@/components/formacao/VideoPlayerYLADA'
 import LyaChatWidget from '@/components/nutri/LyaChatWidget'
-import LyaAnaliseHoje from '@/components/nutri/LyaAnaliseHoje'
-import WelcomeCard from '@/components/nutri/home/WelcomeCard'
 import { useJornadaProgress } from '@/hooks/useJornadaProgress'
 
 export default function NutriHome() {
@@ -54,7 +45,6 @@ function NutriHomeContent() {
   
   // Determinar se está nos primeiros dias (mostrar WelcomeCard simplificado)
   const currentDay = progress?.current_day || null
-  const isFirstDays = currentDay === null || currentDay <= 1
   
   // Extrair nome do usuário para saudação personalizada
   // Usar o nome exatamente como configurado pelo usuário (sem adicionar títulos automaticamente)
@@ -111,11 +101,6 @@ function NutriHomeContent() {
     return null
   }
 
-  // Obter URL do vídeo de forma segura
-  const videoUrl = typeof window !== 'undefined' 
-    ? (process.env.NEXT_PUBLIC_VIDEO_BOAS_VINDAS || '')
-    : (process.env.NEXT_PUBLIC_VIDEO_BOAS_VINDAS || '')
-
   return (
     <div className="min-h-screen bg-gray-50 flex">
       <NutriSidebar 
@@ -140,66 +125,22 @@ function NutriHomeContent() {
         </div>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-6 py-4 sm:py-6 lg:py-8">
-          {/* 🚨 REVELAÇÃO PROGRESSIVA: Conteúdo aparece quando faz sentido */}
-          
-          {/* Sempre visível: WelcomeCard e LyaAnaliseHoje */}
-          <WelcomeCard currentDay={currentDay} userName={userName} />
-          <div className="mb-8">
-            <LyaAnaliseHoje />
+          {/* HOME IA-FIRST: conteúdo principal = chat com a LYA */}
+          <div className="mb-4">
+            <h2 className="text-xl font-semibold text-gray-900">
+              Mentora LYA
+            </h2>
+            <p className="text-sm text-gray-600 mt-1">
+              Me diga seu objetivo de hoje e eu te direciono para o próximo passo certo.
+            </p>
           </div>
 
-          {/* 
-            🎯 JORNADA COMPLETA (Dia > 30): 
-            Home LIMPA - apenas WelcomeCard + LyaAnaliseHoje
-            Tudo já está acessível pelo sidebar
-          */}
-          
-          {/* Dias 2-30: Blocos progressivos (NÃO aparece se > 30) */}
-          {currentDay && currentDay >= 2 && currentDay <= 30 && (
-            <>
-              {/* Dia 8+: Jornada Block aparece */}
-              {currentDay >= 8 && (
-                <div className="mb-8">
-                  <JornadaBlock />
-                </div>
-              )}
-
-              {/* Dia 8-14: Ferramentas Block (filtrado por relevância) */}
-              {currentDay >= 8 && currentDay <= 14 && (
-                <div className="mb-8">
-                  <FerramentasBlock />
-                </div>
-              )}
-
-              {/* Dia 15-30: GSAL Block */}
-              {currentDay >= 15 && (
-                <div className="mb-8">
-                  <GSALBlock />
-                </div>
-              )}
-
-              {/* Dia 21-30: Pilares e Biblioteca */}
-              {currentDay >= 21 && (
-                <>
-                  <div className="mb-8">
-                    <PilaresBlock />
-                  </div>
-                  <div className="mb-8">
-                    <BibliotecaBlock />
-                  </div>
-                </>
-              )}
-
-              {/* Anotações dias 2-30 */}
-              <div className="mb-8">
-                <AnotacoesBlock />
-              </div>
-            </>
-          )}
+          <div className="h-[70vh] sm:h-[72vh] lg:h-[75vh]">
+            <LyaChatWidget embedded defaultOpen className="h-full" />
+          </div>
         </div>
 
-        {/* Chat Widget Flutuante - Mentora LYA (apenas após completar Dia 1) */}
-        {dia1Completo && <LyaChatWidget />}
+        {/* Em Home IA-first o chat já está embutido */}
       </div>
     </div>
   )

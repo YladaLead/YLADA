@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
     // Verificar se OpenAI está configurado
     if (!process.env.OPENAI_API_KEY) {
       return NextResponse.json({
-        message: 'Olá! Sou a Ana, atendente da YLADA Nutri. 😊\n\nEstou aqui para te ajudar a entender como nossa plataforma pode transformar seu negócio como nutricionista.\n\n**O que você gostaria de saber?**\n\n• 📊 Como funciona a plataforma\n• 💰 Planos e preços\n• 🎯 Ferramentas de captação\n• 📈 Gestão profissional\n• 🎓 Formação Empresarial Nutri\n• ✅ Garantia e suporte\n\nPergunte-me qualquer coisa! Estou aqui para te ajudar a crescer! 🚀'
+        message: 'Olá! Sou a Ana, atendente da YLADA Nutri. 😊\n\nEstou aqui para te ajudar a entender como nossa plataforma pode transformar seu negócio como nutricionista.\n\n**O que você gostaria de saber?**\n\n• 📊 Como funciona a plataforma\n• 💰 Planos e preços\n• 🎯 Captação (templates, quizzes e links)\n• 📈 Leads e métricas\n• 🎓 Trilha Empresarial (30 dias)\n• ✅ Garantia e suporte\n\nPergunte-me qualquer coisa! Estou aqui para te ajudar a crescer! 🚀'
       })
     }
 
@@ -41,10 +41,10 @@ export async function POST(request: NextRequest) {
     const systemPrompt = `Você é a Ana, uma atendente vendedora especializada e empática da YLADA Nutri. Seu objetivo é ajudar nutricionistas a entenderem como a plataforma pode transformar seus negócios e convertê-las em clientes.
 
 CONTEXTO DA PLATAFORMA:
-- YLADA Nutri é uma plataforma completa para nutricionistas
-- Oferece: Ferramentas de Captação, Gestão Profissional, Comunidade, Mentoria Semanal e Formação Empresarial Nutri
-- Plano anual: R$ 2.364 (12× de R$ 197) por 1 ano completo
-- Plano mensal: R$ 297/mês
+- YLADA Nutri é uma plataforma para nutricionistas com foco em captação e direção empresarial
+- Oferece: Trilha Empresarial (30 dias), Mentora LYA, Ferramentas de Captação (templates/quizzes/links), Leads e Métricas
+- Plano anual: R$ 1.164 (12× de R$ 97) por 1 ano completo
+- Plano mensal: R$ 197/mês
 
 SEU ESTILO:
 - Empática, calorosa e profissional
@@ -61,10 +61,10 @@ OBJETIVO:
 - Conduzir para o checkout (/pt/nutri/checkout)
 
 INFORMAÇÕES IMPORTANTES:
-- Plano anual: R$ 2.364 (12× de R$ 197) - inclui Formação Empresarial Nutri
-- Plano mensal: R$ 297/mês
+- Plano anual: R$ 1.164 (12× de R$ 97) - pacote V1 (Trilha + LYA + Captação)
+- Plano mensal: R$ 197/mês - pacote V1 (Trilha + LYA + Captação)
 - Garantia: 7 dias incondicional
-- Formação Empresarial Nutri: incluída no plano anual
+- Trilha Empresarial (30 dias): incluída em ambos os planos
 - Link para checkout: /pt/nutri/checkout
 
 RESPONDA DE FORMA:
@@ -170,7 +170,7 @@ IMPORTANTE: Seja honesta, empática e focada em ajudar a nutricionista a tomar a
     
     // Fallback amigável
     return NextResponse.json({
-      message: 'Olá! Sou a Ana, atendente da YLADA Nutri. 😊\n\nEstou aqui para te ajudar a entender como nossa plataforma pode transformar seu negócio como nutricionista.\n\n**O que você gostaria de saber?**\n\n• 📊 Como funciona a plataforma\n• 💰 Planos e preços\n• 🎯 Ferramentas de captação\n• 📈 Gestão profissional\n• 🎓 Formação Empresarial Nutri\n• ✅ Garantia e suporte\n\nPergunte-me qualquer coisa! Estou aqui para te ajudar a crescer! 🚀',
+      message: 'Olá! Sou a Ana, atendente da YLADA Nutri. 😊\n\nEstou aqui para te ajudar a entender como nossa plataforma pode transformar seu negócio como nutricionista.\n\n**O que você gostaria de saber?**\n\n• 📊 Como funciona a plataforma\n• 💰 Planos e preços\n• 🎯 Captação (templates, quizzes e links)\n• 📈 Leads e métricas\n• 🎓 Trilha Empresarial (30 dias)\n• ✅ Garantia e suporte\n\nPergunte-me qualquer coisa! Estou aqui para te ajudar a crescer! 🚀',
       error: error.message
     })
   }

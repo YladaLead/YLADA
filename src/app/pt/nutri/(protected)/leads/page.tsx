@@ -120,7 +120,8 @@ function NutriLeadsContent() {
       })
 
       if (!response.ok) {
-        throw new Error('Erro ao carregar leads')
+        const err = await response.json().catch(() => ({}))
+        throw new Error(err.error || 'Erro ao carregar leads')
       }
 
       const data = await response.json()

@@ -91,28 +91,78 @@ export async function requireApiAuth(
       }
     )
     
-    // ✅ CORREÇÃO: Usar getUser() ao invés de getSession() para segurança
-    // getUser() valida com o servidor Supabase Auth, enquanto getSession() apenas lê dos cookies
+    const isDev = process.env.NODE_ENV !== 'production'
+
+    // ✅ Preferir getUser() por segurança (valida com Supabase Auth).
+    // 🚨 Em localhost/ambiente instável (internet móvel), getUser() pode falhar por rede.
+    // Então: em DEV, priorizar getSession() (cookie) para não depender de rede.
     let user = null
     let session = null
     let sessionError = null
-    
-    // Primeiro tentar getUser() (mais seguro, valida com servidor)
-    const { data: { user: fetchedUser }, error: userError } = await supabase.auth.getUser()
-    
-    if (!userError && fetchedUser) {
-      user = fetchedUser
-      
-      // Se getUser() funcionou, buscar sessão para ter o access_token
-      const { data: { session: fetchedSession } } = await supabase.auth.getSession()
-      session = fetchedSession
-      
-      if (process.env.NODE_ENV === 'development') {
-        console.log('✅ API Auth - Usuário autenticado via getUser()')
+    let userError: any = null
+
+    // DEV: se temos cookies, tentar sessão primeiro (sem rede).
+    if (isDev && requestCookies) {
+      try {
+        const { data: { session: cookieSession }, error: cookieSessionError } = await supabase.auth.getSession()
+        if (!cookieSessionError && cookieSession?.user) {
+          session = cookieSession
+          user = cookieSession.user
+          sessionError = null
+          console.log('✅ API Auth (DEV) - Usuário autenticado via getSession() (cookie)')
+        }
+      } catch (e: any) {
+        // Se falhar aqui, seguimos o fluxo normal
+        sessionError = e
       }
-    } else {
+    }
+
+    // Se não conseguiu via cookie, tentar getUser() (valida com servidor)
+    if (!user) {
+      const res = await supabase.auth.getUser()
+      userError = res.error
+      const fetchedUser = res.data?.user
+
+      if (!userError && fetchedUser) {
+        user = fetchedUser
+
+        // Se getUser() funcionou, buscar sessão para ter o access_token
+        const { data: { session: fetchedSession } } = await supabase.auth.getSession()
+        session = fetchedSession
+
+        if (process.env.NODE_ENV === 'development') {
+          console.log('✅ API Auth - Usuário autenticado via getUser()')
+        }
+      } else {
+        // 🚨 Fallback: se falhou por erro de rede mas temos cookies,
+        // tentar getSession() (não depende de rede) para evitar erro intermitente.
+        const userErrMsg = (userError as any)?.message || ''
+        const isNetworkError =
+          userErrMsg.toLowerCase().includes('fetch failed') ||
+          userErrMsg.toLowerCase().includes('econnreset') ||
+          userErrMsg.toLowerCase().includes('network') ||
+          (userError as any)?.status === 0
+
+        if (isNetworkError && requestCookies) {
+          try {
+            const { data: { session: cookieSession }, error: cookieSessionError } = await supabase.auth.getSession()
+            if (!cookieSessionError && cookieSession?.user) {
+              session = cookieSession
+              user = cookieSession.user
+              sessionError = null
+              if (process.env.NODE_ENV === 'development') {
+                console.log('✅ API Auth - Fallback getSession() (rede instável) - usuário autenticado via cookie')
+              }
+            } else {
+              sessionError = cookieSessionError || userError
+            }
+          } catch (e: any) {
+            sessionError = e
+          }
+        }
+
       // FALLBACK: Se getUser() falhou, tentar usar access token do header
-      if (accessToken) {
+      if (!user && accessToken) {
         try {
           // Validar o access token diretamente
           const { data: { user: tokenUser }, error: tokenError } = await supabase.auth.getUser(accessToken)
@@ -142,8 +192,10 @@ export async function requireApiAuth(
             console.warn('⚠️ Access token também falhou:', tokenErr)
           }
         }
-      } else {
-        sessionError = userError
+      } else if (!user) {
+        // Se já autenticou via cookieSession fallback, não manter userError de rede.
+        sessionError = sessionError || userError
+      }
       }
     }
     
@@ -161,9 +213,19 @@ export async function requireApiAuth(
     }
     
     if (sessionError || !user) {
+      // Se foi erro de rede, retornar 503 (não 401) para não “parecer logout”.
+      const msg = sessionError?.message || ''
+      const isNetworkError =
+        msg.toLowerCase().includes('fetch failed') ||
+        msg.toLowerCase().includes('econnreset') ||
+        msg.toLowerCase().includes('network') ||
+        sessionError?.status === 0
+
       return NextResponse.json(
         { 
-          error: 'Você precisa fazer login para continuar.',
+          error: isNetworkError
+            ? 'Falha de conexão com o servidor de autenticação. Tente novamente em instantes.'
+            : 'Você precisa fazer login para continuar.',
           technical: process.env.NODE_ENV === 'development' ? {
             sessionError: sessionError?.message,
             errorCode: sessionError?.status,
@@ -172,8 +234,14 @@ export async function requireApiAuth(
             hasAccessToken: !!accessToken
           } : undefined
         },
-        { status: 401 }
+        { status: isNetworkError ? 503 : 401 }
       )
+    }
+
+    // Se a rota não exige verificação de perfil (allowedProfiles ausente),
+    // não buscar/criar perfil aqui (evita erro em rede instável).
+    if (!allowedProfiles || allowedProfiles.length === 0) {
+      return { user, profile: null }
     }
 
     // Buscar perfil do usuário
@@ -201,18 +269,17 @@ export async function requireApiAuth(
 
       if (inferredProfile) {
         console.log(`📝 Criando perfil automaticamente para usuário ${userId} com perfil: ${inferredProfile}`)
-        
-        // Buscar email do usuário usando supabaseAdmin
-        const { data: authUser } = await supabaseAdmin.auth.admin.getUserById(userId)
-        const email = authUser?.user?.email || user.email || ''
-        
+
+        const email = user.email || ''
+        const fullName = user.user_metadata?.full_name || user.user_metadata?.name || ''
+
         // Criar perfil básico usando supabaseAdmin
         const { data: newProfile, error: createError } = await supabaseAdmin
           .from('user_profiles')
           .insert({
             user_id: userId,
             perfil: inferredProfile,
-            nome_completo: authUser?.user?.user_metadata?.full_name || '',
+            nome_completo: fullName,
             email: email
           })
           .select()
@@ -220,12 +287,20 @@ export async function requireApiAuth(
 
         if (createError) {
           console.error('❌ Erro ao criar perfil automaticamente:', createError)
+          const msg = (createError as any)?.message || ''
+          const isNetworkError =
+            msg.toLowerCase().includes('fetch failed') ||
+            msg.toLowerCase().includes('econnreset') ||
+            msg.toLowerCase().includes('network')
+
           return NextResponse.json(
             { 
-              error: 'Erro ao criar perfil. Tente fazer logout e login novamente.',
+              error: isNetworkError
+                ? 'Falha de conexão com o banco. Tente novamente em instantes.'
+                : 'Erro ao criar perfil. Tente fazer logout e login novamente.',
               technical: process.env.NODE_ENV === 'development' ? createError.message : undefined
             },
-            { status: 500 }
+            { status: isNetworkError ? 503 : 500 }
           )
         }
 

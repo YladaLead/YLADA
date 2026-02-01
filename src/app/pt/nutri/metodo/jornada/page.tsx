@@ -50,14 +50,14 @@ function JornadaPageContent() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
               </svg>
             </button>
-            <h1 className="text-lg font-semibold text-gray-900">Jornada 30 Dias</h1>
+            <h1 className="text-lg font-semibold text-gray-900">Trilha Empresarial</h1>
             <div className="w-10"></div>
           </div>
 
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-6 py-4 sm:py-6 lg:py-8">
             <Section
-              title="📘 Jornada de Transformação YLADA"
-              subtitle="Lote sua agenda e transforme sua rotina em 30 dias aplicando o Método YLADA – O que a faculdade não ensinou."
+              title="📘 Trilha Empresarial YLADA"
+              subtitle="Capacitação empresarial em 30 dias: lote sua agenda e transforme sua rotina aplicando o Método YLADA – o que a faculdade não ensinou."
             >
               <JornadaSection />
             </Section>

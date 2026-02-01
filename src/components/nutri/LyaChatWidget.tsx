@@ -10,9 +10,15 @@ interface Message {
   created_at?: string
 }
 
-export default function LyaChatWidget() {
+interface LyaChatWidgetProps {
+  defaultOpen?: boolean
+  embedded?: boolean
+  className?: string
+}
+
+export default function LyaChatWidget({ defaultOpen = false, embedded = false, className }: LyaChatWidgetProps) {
   const { user } = useAuth()
-  const [isOpen, setIsOpen] = useState(false)
+  const [isOpen, setIsOpen] = useState<boolean>(embedded || defaultOpen)
   const [isMinimized, setIsMinimized] = useState(false)
   const [messages, setMessages] = useState<Message[]>([])
   const [inputMessage, setInputMessage] = useState('')
@@ -323,7 +329,7 @@ export default function LyaChatWidget() {
     })
   }
 
-  if (!isOpen) {
+  if (!isOpen && !embedded) {
     return (
       <button
         onClick={() => setIsOpen(true)}
@@ -345,6 +351,11 @@ export default function LyaChatWidget() {
       e.preventDefault()
       e.stopPropagation()
     }
+    // Em modo embutido, não "fecha" (no máximo minimiza)
+    if (embedded) {
+      setIsMinimized(true)
+      return
+    }
     // Fechar de forma síncrona - garantir que todos os estados são atualizados
     setIsMinimized(false)
     setMessages([])
@@ -362,13 +373,17 @@ export default function LyaChatWidget() {
 
   return (
     <div 
-      className={`fixed bottom-6 right-6 w-96 bg-white rounded-lg shadow-2xl z-50 flex flex-col transition-all ${isMinimized ? 'h-16' : 'h-[600px]'}`}
-      style={{ pointerEvents: 'auto', zIndex: 9999 }}
+      className={
+        embedded
+          ? `w-full bg-white rounded-2xl border border-gray-200 shadow-sm flex flex-col transition-all ${isMinimized ? 'h-16' : 'h-full'} ${className || ''}`
+          : `fixed bottom-6 right-6 w-96 bg-white rounded-lg shadow-2xl z-50 flex flex-col transition-all ${isMinimized ? 'h-16' : 'h-[600px]'} ${className || ''}`
+      }
+      style={embedded ? { pointerEvents: 'auto' } : { pointerEvents: 'auto', zIndex: 9999 }}
       onClick={(e) => e.stopPropagation()}
       onMouseDown={(e) => e.stopPropagation()}
     >
       {/* Header */}
-      <div className="bg-blue-600 text-white p-4 rounded-t-lg flex items-center justify-between" style={{ pointerEvents: 'auto' }}>
+      <div className={`bg-blue-600 text-white p-4 flex items-center justify-between ${embedded ? 'rounded-t-2xl' : 'rounded-t-lg'}`} style={{ pointerEvents: 'auto' }}>
         <div className="flex items-center space-x-2">
           <div className="w-3 h-3 bg-green-400 rounded-full"></div>
           <span className="font-semibold">LYA - Mentora Empresarial</span>
@@ -389,21 +404,23 @@ export default function LyaChatWidget() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={isMinimized ? "M5 15l7-7 7 7" : "M19 9l-7 7-7-7"} />
             </svg>
           </button>
-          <button
-            onClick={handleClose}
-            onMouseDown={(e) => {
-              e.preventDefault()
-              e.stopPropagation()
-            }}
-            className="hover:bg-blue-700 rounded p-1 transition-colors"
-            aria-label="Fechar"
-            type="button"
-            style={{ pointerEvents: 'auto', cursor: 'pointer', zIndex: 1000 }}
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
+          {!embedded && (
+            <button
+              onClick={handleClose}
+              onMouseDown={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+              }}
+              className="hover:bg-blue-700 rounded p-1 transition-colors"
+              aria-label="Fechar"
+              type="button"
+              style={{ pointerEvents: 'auto', cursor: 'pointer', zIndex: 1000 }}
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          )}
         </div>
       </div>
 

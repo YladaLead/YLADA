@@ -17,7 +17,7 @@ export default function WelcomeCard({ currentDay, userName }: WelcomeCardProps) 
   const phase = getLyaPhase(currentDay)
   const lyaConfig = getLyaConfig(phase)
   
-  // 🎉 JORNADA CONCLUÍDA: Layout simplificado pós-30 dias
+  // 🎉 TRILHA CONCLUÍDA: Layout simplificado pós-30 dias
   if (currentDay && currentDay > 30) {
     // Usar nome exatamente como configurado (sem adicionar título automaticamente)
     const displayName = userName || 'Nutricionista'
@@ -60,32 +60,32 @@ export default function WelcomeCard({ currentDay, userName }: WelcomeCardProps) 
         {/* Atalhos rápidos */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <Link
-            href="/pt/nutri/c/clientes"
+            href="/pt/nutri/metodo/jornada"
             className="bg-white rounded-xl p-4 border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all text-center"
           >
-            <span className="text-2xl mb-2 block">👥</span>
-            <span className="text-sm font-medium text-gray-700">Clientes</span>
+            <span className="text-2xl mb-2 block">📘</span>
+            <span className="text-sm font-medium text-gray-700">Trilha</span>
           </Link>
           <Link
-            href="/pt/nutri/ferramentas"
+            href="/pt/nutri/ferramentas/templates"
             className="bg-white rounded-xl p-4 border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all text-center"
           >
-            <span className="text-2xl mb-2 block">🛠️</span>
-            <span className="text-sm font-medium text-gray-700">Ferramentas</span>
+            <span className="text-2xl mb-2 block">🧲</span>
+            <span className="text-sm font-medium text-gray-700">Captar</span>
           </Link>
           <Link
-            href="/pt/nutri/formularios"
+            href="/pt/nutri/leads"
             className="bg-white rounded-xl p-4 border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all text-center"
           >
-            <span className="text-2xl mb-2 block">📋</span>
-            <span className="text-sm font-medium text-gray-700">Formulários</span>
+            <span className="text-2xl mb-2 block">🎯</span>
+            <span className="text-sm font-medium text-gray-700">Leads</span>
           </Link>
           <Link
-            href="/pt/nutri/biblioteca"
+            href="/pt/nutri/relatorios-gestao"
             className="bg-white rounded-xl p-4 border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all text-center"
           >
-            <span className="text-2xl mb-2 block">📚</span>
-            <span className="text-sm font-medium text-gray-700">Biblioteca</span>
+            <span className="text-2xl mb-2 block">📈</span>
+            <span className="text-sm font-medium text-gray-700">Métricas</span>
           </Link>
         </div>
       </div>
@@ -106,7 +106,7 @@ export default function WelcomeCard({ currentDay, userName }: WelcomeCardProps) 
     if (currentDay === 1) {
       return {
         title: 'Seu plano de ação para hoje',
-        description: 'Complete o Dia 1 da sua Jornada Nutri-Empresária. Isso organiza sua base profissional e evita confusão lá na frente.',
+        description: 'Complete o Dia 1 da sua Trilha Empresarial. Isso organiza sua base profissional e evita confusão lá na frente.',
         action: 'Executar Dia 1 com a LYA',
         href: '/pt/nutri/metodo/jornada/dia/1'
       }
@@ -115,7 +115,7 @@ export default function WelcomeCard({ currentDay, userName }: WelcomeCardProps) 
     // Dias 2-30
     return {
       title: 'Seu plano de ação para hoje',
-      description: `Continue seguindo a Jornada. Você está no Dia ${currentDay} de 30. Mantenha o foco e a consistência.`,
+      description: `Continue seguindo a Trilha. Você está no Dia ${currentDay} de 30. Mantenha o foco e a consistência.`,
       action: `Continuar Dia ${currentDay}`,
       href: `/pt/nutri/metodo/jornada/dia/${currentDay}`
     }

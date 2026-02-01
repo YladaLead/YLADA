@@ -85,7 +85,7 @@ export default function PDF01ManualTecnicoPlataforma() {
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-blue-600 mt-1">•</span>
-                <span><strong>Jornada 30 Dias:</strong> o caminho principal da sua transformação.</span>
+                <span><strong>Trilha Empresarial:</strong> o caminho principal da sua capacitação empresarial (30 dias).</span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-blue-600 mt-1">•</span>
@@ -108,7 +108,7 @@ export default function PDF01ManualTecnicoPlataforma() {
                 <span><strong>Chat com a LYA:</strong> sua mentora estratégica.</span>
               </li>
             </ul>
-            <p className="text-blue-700 font-semibold mt-4">👉 Tudo começa e se organiza a partir da Jornada.</p>
+            <p className="text-blue-700 font-semibold mt-4">👉 Tudo começa e se organiza a partir da Trilha.</p>
           </div>
 
           {/* Slide 4 */}
@@ -161,11 +161,11 @@ export default function PDF01ManualTecnicoPlataforma() {
 
           {/* Slide 6 */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Jornada de Transformação — 30 Dias</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">Trilha Empresarial — 30 Dias</h2>
             <ul className="space-y-2 text-gray-700">
               <li className="flex items-start gap-2">
                 <span className="text-blue-600 mt-1">•</span>
-                <span>A Jornada é dividida em dias, com foco específico.</span>
+                <span>A Trilha é dividida em dias, com foco específico.</span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-blue-600 mt-1">•</span>

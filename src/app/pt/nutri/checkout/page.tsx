@@ -282,7 +282,7 @@ export default function NutriCheckoutPage() {
                       Plano Mensal Flexível
                     </h3>
                     <div className="text-3xl font-bold text-blue-600 mb-1">
-                      R$ 297,00
+                      R$ 197,00
                     </div>
                     <div className="text-sm text-gray-600">/mês</div>
                     <p className="text-sm text-gray-600 mt-4">
@@ -300,9 +300,9 @@ export default function NutriCheckoutPage() {
                       Plano Anual Fidelidade
                     </h3>
                     <div className="text-3xl font-bold text-blue-600 mb-1">
-                      12× de R$ 197
+                      12× de R$ 97
                     </div>
-                    <div className="text-sm text-gray-600 mb-2">Total: R$ 2.364,00/ano</div>
+                    <div className="text-sm text-gray-600 mb-2">Total: R$ 1.164,00/ano</div>
                     <p className="text-sm text-gray-600 mt-4">
                       Compromisso anual com economia clara
                     </p>

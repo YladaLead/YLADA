@@ -395,7 +395,7 @@ export default function NutriLandingPage() {
                   </li>
                   <li className="flex items-start">
                     <span className="text-[#2563EB] mr-3 text-xl font-bold">•</span>
-                    <span><strong>Ferramentas profissionais</strong> (captação, gestão, acompanhamento)</span>
+                    <span><strong>Ferramentas profissionais</strong> (captação e conversão de leads)</span>
                   </li>
                   <li className="flex items-start">
                     <span className="text-[#2563EB] mr-3 text-xl font-bold">•</span>
@@ -453,15 +453,15 @@ export default function NutriLandingPage() {
                 {[
                   {
                     title: '1. Captação Previsível',
-                    desc: 'Você para de depender de indicação ou sorte. Aprende a criar sistemas de captação que funcionam de forma consistente. Ferramentas como quizzes, formulários e fluxos inteligentes que geram leads qualificados automaticamente.'
+                    desc: 'Você para de depender de indicação ou sorte. Aprende a criar sistemas de captação que funcionam de forma consistente — com quizzes, calculadoras e links que geram leads automaticamente.'
                   },
                   {
-                    title: '2. Gestão Profissional da Cliente',
-                    desc: 'Você organiza todo o ciclo da sua cliente, desde o primeiro contato até o acompanhamento contínuo. Não perde informações, não esquece follow-ups, não trabalha na base do improviso. Tudo fica organizado em um sistema que você controla.'
+                    title: '2. Conversão de Leads (sem CRM completo)',
+                    desc: 'Você organiza o que realmente importa no V1: de onde o lead veio, em que etapa ele está e quantos viraram atendimentos. Sem “gestão de clientes” pesada — apenas controle claro de leads e conversão.'
                   },
                   {
                     title: '3. Estratégia Empresarial Aplicada',
-                    desc: 'Você para de "tentar" e começa a "executar com método". Aprende os 5 Pilares do Método YLADA, segue a Jornada de Transformação de 30 dias, aplica o sistema GSAL (Gerar, Servir, Acompanhar, Lucrar). Tudo com clareza e passo a passo.'
+                    desc: 'Você para de "tentar" e começa a "executar com método". Aprende os 5 Pilares do Método YLADA e segue a Trilha Empresarial (30 dias) com clareza do próximo passo.'
                   },
                   {
                     title: '4. Formação da Mentalidade Nutri-Empresária',
@@ -510,7 +510,7 @@ export default function NutriLandingPage() {
                 </p>
                 
                 <p className="text-lg mb-6 leading-relaxed">
-                  Ela entende seu momento atual, seus objetivos, suas travas. Ela analisa seus dados reais (ferramentas criadas, leads captados, progresso na jornada) e te guia pelo próximo passo certo.
+                  Ela entende seu momento atual, seus objetivos, suas travas. Ela analisa seus dados reais (ferramentas criadas, leads captados, progresso na trilha) e te guia pelo próximo passo certo.
                 </p>
                 
                 <p className="text-lg mb-6 leading-relaxed">
@@ -671,15 +671,15 @@ export default function NutriLandingPage() {
                 {[
                   {
                     title: 'Captação Automática',
-                    desc: 'Você para de depender de indicação. Crie quizzes, formulários e fluxos inteligentes que geram leads qualificados automaticamente. Não precisa postar e torcer. Cria sistemas que funcionam.'
+                    desc: 'Você para de depender de indicação. Crie quizzes, calculadoras e links que geram leads qualificados automaticamente. Não precisa postar e torcer. Você cria sistemas que funcionam.'
                   },
                   {
                     title: 'Organização Total',
-                    desc: 'Você para de trabalhar na base do improviso. Organize todo o ciclo da cliente em um sistema integrado. Desde o primeiro contato até o acompanhamento contínuo. Tudo organizado, tudo controlado.'
+                    desc: 'Você para de trabalhar na base do improviso. Organize sua rotina e sua captação com clareza: o que fazer hoje, quais ferramentas publicar, quantos leads entraram e o que converter em atendimento.'
                   },
                   {
                     title: 'Clareza Empresarial',
-                    desc: 'Você para de tentar e começa a executar com método. Siga os 5 Pilares do Método YLADA, complete a Jornada de Transformação de 30 dias, aplique o sistema GSAL. Tudo com clareza e passo a passo.'
+                    desc: 'Você para de tentar e começa a executar com método. Siga os 5 Pilares do Método YLADA e complete a Trilha Empresarial (30 dias) com clareza e passo a passo.'
                   },
                   {
                     title: 'Comunidade',
@@ -687,7 +687,7 @@ export default function NutriLandingPage() {
                   },
                   {
                     title: 'Suporte Humano',
-                    desc: 'Você não está sozinha nessa jornada. Além da LYA (mentora estratégica digital), você tem acesso a suporte humano quando precisar. Não é apenas tecnologia. É suporte real.'
+                    desc: 'Você não está sozinha nesse caminho. Além da LYA (mentora estratégica digital), você tem acesso a suporte humano quando precisar. Não é apenas tecnologia. É suporte real.'
                   }
                 ].map((item, index) => (
                   <div key={index} className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow border border-gray-200">
@@ -822,7 +822,10 @@ export default function NutriLandingPage() {
                   
                   <div className="bg-gradient-to-br from-[#2563EB] to-[#3B82F6] rounded-xl p-6 mb-6 text-center text-white">
                     <p className="text-3xl sm:text-4xl font-bold">
-                      12× de R$ 197
+                      12× de R$ 97
+                    </p>
+                    <p className="text-sm text-white/90 mt-2">
+                      Total: R$ 1.164/ano
                     </p>
                   </div>
                   
@@ -837,7 +840,7 @@ export default function NutriLandingPage() {
                     </li>
                     <li className="flex items-start">
                       <span className="text-[#29CC6A] mr-3 text-xl">✓</span>
-                      <span>Foco total na jornada, sem distrações</span>
+                      <span>Foco total na trilha, sem distrações</span>
                     </li>
                     <li className="flex items-start">
                       <span className="text-[#29CC6A] mr-3 text-xl">✓</span>
@@ -902,7 +905,7 @@ export default function NutriLandingPage() {
                   
                   <div className="bg-gray-100 rounded-xl p-6 mb-6 text-center">
                     <p className="text-3xl sm:text-4xl font-bold text-[#1A1A1A]">
-                      R$ 297 / mês
+                      R$ 197 / mês
                     </p>
                   </div>
                   
@@ -1079,7 +1082,7 @@ export default function NutriLandingPage() {
                 {[
                   {
                     pergunta: 'Posso cancelar a qualquer momento?',
-                    resposta: 'Depende do plano escolhido. Plano Anual Fidelidade: É um compromisso anual. Você paga 12 parcelas de R$ 197, com pagamento anual obrigatório. Não há cancelamento durante o período anual. Plano Mensal Flexível: Sim, você pode cancelar a qualquer momento. Sem fidelização. Você mantém acesso até o final do período pago. A diferença de preço reflete a diferença de compromisso. O plano anual oferece economia para quem está pronta para se comprometer com a transformação completa.'
+                    resposta: 'Depende do plano escolhido. Plano Anual: é um compromisso de 12 meses (12× de R$ 97, total R$ 1.164/ano). Não há cancelamento durante o período anual. Plano Mensal: sim, você pode cancelar a qualquer momento. Sem fidelização. Você mantém acesso até o final do período pago. A diferença de preço reflete a diferença de compromisso.'
                   },
                   {
                     pergunta: 'Como funciona o suporte?',
@@ -1087,7 +1090,7 @@ export default function NutriLandingPage() {
                   },
                   {
                     pergunta: 'Qual a diferença entre os planos?',
-                    resposta: 'A entrega é idêntica nos dois planos. Ambos incluem acesso completo à LYA e toda a mentoria estratégica. A diferença está no nível de compromisso: Plano Anual Fidelidade (12x R$ 197): Para quem está pronta para se comprometer com a transformação completa. Pagamento anual obrigatório. Economia clara. Plano Mensal Flexível (R$ 297/mês): Para quem prefere flexibilidade. Sem fidelização. Pode cancelar quando quiser. Preço maior por optar por flexibilidade. Você não paga mais por menos recursos. Você paga menos quando se compromete mais.'
+                    resposta: 'A entrega do V1 é a mesma nos dois planos: Trilha Empresarial, Mentora LYA e o sistema de captação (templates/quiz/leads/métricas). A diferença está no seu nível de compromisso: Plano Anual (12× de R$ 97): para quem quer economia e decisão de 12 meses. Plano Mensal (R$ 197/mês): para quem prefere flexibilidade e pode cancelar quando quiser.'
                   },
                   {
                     pergunta: 'Para quem é o YLADA Nutri?',

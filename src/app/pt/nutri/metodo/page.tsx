@@ -64,7 +64,7 @@ export default function MetodoYLADAPage() {
             Os 5 Pilares do Método
           </h2>
           <p className="text-center text-gray-600 mb-8 max-w-2xl mx-auto">
-            Cada pilar é uma seção fundamental do método. Explore-os por conta própria ou siga a Jornada de 30 Dias, que organiza tudo passo a passo.
+            Cada pilar é uma seção fundamental do método. Explore-os por conta própria ou siga a Trilha Empresarial, que organiza tudo passo a passo.
           </p>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -98,13 +98,13 @@ export default function MetodoYLADAPage() {
               Pronto para sua transformação?
             </h2>
             <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
-              Inicie sua Jornada de 30 Dias e transforme sua prática em negócio de sucesso, passo a passo, dia a dia.
+              Inicie sua Trilha Empresarial e transforme sua prática em negócio de sucesso, passo a passo, dia a dia (30 dias).
             </p>
             <Link
               href="/pt/nutri/metodo/jornada"
               className="inline-block bg-white text-blue-600 text-xl font-bold px-10 py-5 rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:scale-105"
             >
-              🚀 Iniciar Jornada de 30 Dias
+              🚀 Iniciar Trilha Empresarial
             </Link>
             <p className="text-sm text-blue-200 mt-4">
               Sua transformação começa agora
