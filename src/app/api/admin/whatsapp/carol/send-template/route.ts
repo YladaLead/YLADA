@@ -18,24 +18,21 @@ import { supabaseAdmin } from '@/lib/supabase'
 const TEMPLATES: Record<string, { body: string; stage: string; tagsToAdd?: string[] }> = {
   pergunta_interesse_nao_respondeu: {
     body: `Oi, [NOME] 😊 tudo bem?
-Só confirmando rapidinho: você ainda tem interesse em agendar a aula prática de agenda cheia?`,
+Só pra eu saber: você ainda quer agendar a aula prática de agenda cheia?`,
     stage: 'ASK_INTEREST_NO_RESPONSE',
     tagsToAdd: ['remarketing_enviado'],
   },
   pergunta_interesse_nao_participou: {
-    body: `Oi, [NOME] 😊 tudo bem?
-Vi que você não conseguiu participar da aula, acontece!
-Você ainda tem interesse em agendar uma nova data?`,
+    body: `Oi, [NOME] 😊
+Vi que você não conseguiu entrar na aula — acontece.
+Quer que eu te encaixe em uma nova data?`,
     stage: 'ASK_INTEREST_NO_SHOW',
     tagsToAdd: ['nao_participou_aula', 'remarketing_enviado'],
   },
   followup_ficou_pensar: {
     body: `Oi, [NOME] 😊
-Eu vi o seu interesse em se desenvolver de verdade, e isso pode começar agora.
-
-A partir do momento que você faz a sua inscrição, você já tem acesso imediato à LYA e ganha a segurança que precisava pra saber exatamente o que fazer, passo a passo, pra preencher sua agenda com mais constância.
-
-Vamos começar agora?`,
+Pra eu te ajudar sem enrolar: o que te deixou em dúvida — agenda, investimento ou se faz sentido pro seu momento?
+Eu te respondo rapidinho.`,
     stage: 'FOLLOWUP_DECIDING',
   },
   ultima_chance: {

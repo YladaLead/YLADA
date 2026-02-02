@@ -30,14 +30,16 @@ const FLOW_KEYS: Array<{
     key: 'link_after_participou',
     label: 'Quando participou da aula (link oferta/cadastro)',
     description: 'Enviada quando o admin marca "Participou". Use {{nome}} e {{link}}. Se não preencher, usa o texto padrão do sistema.',
-    placeholder: 'Parabéns por ter participado da aula, {{nome}}! 💚\n\nEu tenho certeza que você tem potencial, só faltava a estrutura certa pra você executar de verdade e mudar sua história de uma vez por todas.\n\nVocê já pode começar hoje no plano *mensal* ou no *anual* e ajustar sua agenda imediatamente pra iniciar a captação de clientes.\n\n🔗 {{link}}\n\nQual você prefere, *mensal* ou *anual*?',
+    placeholder:
+      'Oi {{nome}}! 💚\n\nQue bom que você participou da aula.\nPra eu te orientar certinho: qual foi o ponto que mais fez sentido pra você hoje?\n\n🔗 {{link}}\n\nVocê prefere começar no *mensal* ou no *anual*?',
     phase: 'Participou',
   },
   {
     key: 'remarketing_nao_participou',
     label: 'Abertura remarketing (não participou)',
     description: 'Texto de referência para a Carol quando a pessoa não participou (pode ser passado ao contexto da IA em atualização futura). Use {{nome}} se quiser.',
-    placeholder: 'Vi que você não conseguiu entrar, acontece. Sem sistema a gente volta pro improviso. Quer que eu te encaixe em outro horário?',
+    placeholder:
+      'Oi {{nome}}! 💚\n\nVi que você não conseguiu entrar na aula — acontece.\nQuer que eu te encaixe na próxima turma? Qual período costuma ser melhor pra você: manhã, tarde ou noite?',
     phase: 'Não participou',
   },
 ]
@@ -45,8 +47,10 @@ const FLOW_KEYS: Array<{
 const DEFAULT_TEMPLATES: Record<string, string> = {
   welcome_form_greeting: 'Oi {{nome}}, tudo bem? 😊\n\nSeja muito bem-vinda!\nEu sou a Carol, da equipe Ylada Nutri.',
   welcome_form_body: 'Obrigada por se inscrever na Aula Prática ao Vivo – Agenda Cheia para Nutricionistas.\n\nEssa aula é 100% prática e foi criada para ajudar nutricionistas que estão com agenda ociosa a organizar, atrair e preencher atendimentos de forma mais leve e estratégica.\n\nAs próximas aulas ao vivo vão acontecer nos seguintes dias e horários:\n\n[OPÇÕES inseridas automaticamente]\n\n💬 Qual você prefere? 💚',
-  link_after_participou: 'Parabéns por ter participado da aula, {{nome}}! 💚\n\nEu tenho certeza que você tem potencial, só faltava a estrutura certa pra você executar de verdade e mudar sua história de uma vez por todas.\n\nVocê já pode começar hoje no plano *mensal* ou no *anual* e ajustar sua agenda imediatamente pra iniciar a captação de clientes.\n\n🔗 {{link}}\n\nQual você prefere, *mensal* ou *anual*?',
-  remarketing_nao_participou: 'Vi que você não conseguiu entrar, acontece. Sem sistema a gente volta pro improviso. Quer que eu te encaixe em outro horário?',
+  link_after_participou:
+    'Oi {{nome}}! 💚\n\nQue bom que você participou da aula.\nPra eu te orientar certinho: qual foi o ponto que mais fez sentido pra você hoje?\n\n🔗 {{link}}\n\nVocê prefere começar no *mensal* ou no *anual*?',
+  remarketing_nao_participou:
+    'Oi {{nome}}! 💚\n\nVi que você não conseguiu entrar na aula — acontece.\nQuer que eu te encaixe na próxima turma? Qual período costuma ser melhor pra você: manhã, tarde ou noite?',
 }
 
 function FluxoContent() {
