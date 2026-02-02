@@ -63,7 +63,10 @@ export async function processScheduledMessages(limit: number = 50): Promise<{
             ? (conv.context as any)
             : {}
           const tags = Array.isArray(ctx.tags) ? ctx.tags : []
-          const manualMode = ctx.manual_mode === true || tags.includes('manual_mode')
+          const manualMode =
+            ctx.manual_mode === true ||
+            tags.includes('manual_mode') ||
+            tags.includes('atendimento_manual')
           if (manualMode) {
             await supabaseAdmin
               .from('whatsapp_scheduled_messages')

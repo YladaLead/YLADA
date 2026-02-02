@@ -1168,7 +1168,10 @@ export async function POST(request: NextRequest) {
             ? (convForManual.context as any)
             : {}
           const tags = Array.isArray(ctx.tags) ? ctx.tags : []
-          const manualMode = ctx.manual_mode === true || tags.includes('manual_mode')
+          const manualMode =
+            ctx.manual_mode === true ||
+            tags.includes('manual_mode') ||
+            tags.includes('atendimento_manual')
           if (manualMode) {
             console.log('[Z-API Webhook] 🛑 Modo manual ativo para conversa — pulando Carol e automações', {
               conversationId,

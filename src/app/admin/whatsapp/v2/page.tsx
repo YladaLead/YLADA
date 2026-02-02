@@ -100,7 +100,7 @@ function V2AdminContent() {
     const ctx = (c.context || {}) as any
     const manual = ctx?.manual_mode === true
     const tags = Array.isArray(c.tags) ? c.tags : []
-    return manual || tags.includes('manual_mode')
+    return manual || tags.includes('manual_mode') || tags.includes('atendimento_manual')
   }
 
   const toggleSelectAll = (checked: boolean) => {

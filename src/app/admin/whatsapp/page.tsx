@@ -2446,6 +2446,7 @@ function WhatsAppChatContent() {
                     {[
                       { tag: 'retorno', label: 'Retorno', icon: '🔄' },
                       { tag: 'urgencia', label: 'Urgência', icon: '⚡' },
+                      { tag: 'atendimento_manual', label: 'Manual (pausar Carol)', icon: '🛑' },
                     ].map(({ tag, label, icon }) => (
                       <button
                         key={tag}

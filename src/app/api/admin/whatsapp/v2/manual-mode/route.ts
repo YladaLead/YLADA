@@ -55,8 +55,8 @@ export async function POST(request: NextRequest) {
       const prev = normalizeContext(r.context)
       const prevTags = getTags(prev)
       const nextTags = enabled
-        ? Array.from(new Set([...prevTags, 'manual_mode']))
-        : prevTags.filter((t) => t !== 'manual_mode')
+        ? Array.from(new Set([...prevTags, 'manual_mode', 'atendimento_manual']))
+        : prevTags.filter((t) => t !== 'manual_mode' && t !== 'atendimento_manual')
 
       const next = {
         ...prev,
@@ -75,15 +75,30 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: true, updated: 0 })
     }
 
-    const { error: upsertError } = await supabaseAdmin
-      .from('whatsapp_conversations')
-      .upsert(payload, { onConflict: 'id' })
-
-    if (upsertError) throw upsertError
+    // ⚠️ Importante: NÃO usar upsert aqui.
+    // Em algumas configurações o upsert tenta inserir primeiro, e isso falha por colunas NOT NULL (ex.: instance_id).
+    // Aqui nós só queremos atualizar conversas EXISTENTES.
+    let updated = 0
+    const errors: Array<{ id: string; error: string }> = []
+    for (const row of payload) {
+      const { error: updateError } = await supabaseAdmin
+        .from('whatsapp_conversations')
+        .update({
+          context: row.context,
+          updated_at: now,
+        })
+        .eq('id', row.id)
+      if (updateError) {
+        errors.push({ id: row.id, error: updateError.message })
+      } else {
+        updated++
+      }
+    }
 
     return NextResponse.json({
       success: true,
-      updated: payload.length,
+      updated,
+      errors: errors.length ? errors : undefined,
       enabled,
     })
   } catch (error: any) {
