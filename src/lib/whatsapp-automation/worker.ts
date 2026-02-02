@@ -52,6 +52,32 @@ export async function processScheduledMessages(limit: number = 50): Promise<{
           continue
         }
 
+        // 🛑 MODO MANUAL (por conversa): não enviar mensagens automáticas se a conversa estiver em manual.
+        if (message.conversation_id) {
+          const { data: conv } = await supabaseAdmin
+            .from('whatsapp_conversations')
+            .select('context')
+            .eq('id', message.conversation_id)
+            .maybeSingle()
+          const ctx = (conv?.context && typeof conv.context === 'object' && !Array.isArray(conv.context))
+            ? (conv.context as any)
+            : {}
+          const tags = Array.isArray(ctx.tags) ? ctx.tags : []
+          const manualMode = ctx.manual_mode === true || tags.includes('manual_mode')
+          if (manualMode) {
+            await supabaseAdmin
+              .from('whatsapp_scheduled_messages')
+              .update({
+                status: 'cancelled',
+                cancelled_at: new Date().toISOString(),
+                cancelled_reason: 'manual_mode',
+              })
+              .eq('id', message.id)
+            cancelled++
+            continue
+          }
+        }
+
         // Buscar instância Z-API
         const area = message.conversation_id 
           ? await getAreaFromConversation(message.conversation_id)

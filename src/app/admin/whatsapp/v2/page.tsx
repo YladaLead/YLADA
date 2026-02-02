@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useMemo, useState, useEffect } from 'react'
 import AdminProtectedRoute from '@/components/auth/AdminProtectedRoute'
 import Link from 'next/link'
 
@@ -41,6 +41,8 @@ function V2AdminContent() {
   const [faseFilter, setFaseFilter] = useState<Fase | ''>('')
   const [area] = useState('nutri')
   const [actingId, setActingId] = useState<string | null>(null)
+  const [bulkActing, setBulkActing] = useState(false)
+  const [selectedIds, setSelectedIds] = useState<Record<string, boolean>>({})
   const [workerRunning, setWorkerRunning] = useState(false)
   const [workerResult, setWorkerResult] = useState<{
     success?: boolean
@@ -67,6 +69,7 @@ function V2AdminContent() {
       }
       const data = await res.json()
       setConversations(data.conversations || [])
+      setSelectedIds({})
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : 'Erro ao carregar'
       setConversations([])
@@ -79,6 +82,66 @@ function V2AdminContent() {
   useEffect(() => {
     loadConversations()
   }, [faseFilter, area])
+
+  const selectedCount = useMemo(
+    () => Object.values(selectedIds).filter(Boolean).length,
+    [selectedIds]
+  )
+  const allSelected = useMemo(() => {
+    if (!conversations.length) return false
+    return conversations.every((c) => selectedIds[c.id])
+  }, [conversations, selectedIds])
+  const someSelected = useMemo(() => {
+    if (!conversations.length) return false
+    return conversations.some((c) => selectedIds[c.id]) && !allSelected
+  }, [conversations, selectedIds, allSelected])
+
+  const isManualMode = (c: ConversationWithFase) => {
+    const ctx = (c.context || {}) as any
+    const manual = ctx?.manual_mode === true
+    const tags = Array.isArray(c.tags) ? c.tags : []
+    return manual || tags.includes('manual_mode')
+  }
+
+  const toggleSelectAll = (checked: boolean) => {
+    if (!checked) {
+      setSelectedIds({})
+      return
+    }
+    const next: Record<string, boolean> = {}
+    for (const c of conversations) next[c.id] = true
+    setSelectedIds(next)
+  }
+
+  const toggleSelectOne = (id: string, checked: boolean) => {
+    setSelectedIds((prev) => {
+      const next = { ...prev }
+      if (checked) next[id] = true
+      else delete next[id]
+      return next
+    })
+  }
+
+  const bulkSetManualMode = async (enabled: boolean) => {
+    try {
+      const ids = Object.keys(selectedIds).filter((id) => selectedIds[id])
+      if (ids.length === 0) return
+      setBulkActing(true)
+      const res = await fetch('/api/admin/whatsapp/v2/manual-mode', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ ids, enabled }),
+      })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok || !data.success) throw new Error(data.error || `Erro ${res.status}`)
+      await loadConversations()
+    } catch (e: unknown) {
+      alert(e instanceof Error ? e.message : 'Erro ao atualizar modo manual')
+    } finally {
+      setBulkActing(false)
+    }
+  }
 
   /** Nome do cliente: prioriza display_name (inscrições), customer_name, context.lead_name; evita "Ylada Nutri" e numeração. */
   const nome = (c: ConversationWithFase) => {
@@ -250,6 +313,32 @@ function V2AdminContent() {
           <p className="mb-4 text-sm text-gray-600">
             Use o filtro por fase; marque &quot;Participou&quot; ou &quot;Não participou&quot; nas conversas agendadas; dispare link (participou) ou remarketing (não participou) quando precisar; use &quot;Rodar worker&quot; para enviar boas-vindas, pré-aula e follow-ups.
           </p>
+          
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+            <div className="text-sm text-gray-600">
+              Selecionadas: <span className="font-semibold text-gray-900">{selectedCount}</span>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                onClick={() => bulkSetManualMode(true)}
+                disabled={bulkActing || selectedCount === 0}
+                className="rounded bg-gray-900 px-3 py-2 text-xs font-medium text-white hover:bg-gray-800 disabled:opacity-50"
+                title="Pausa respostas automáticas da Carol para as selecionadas"
+              >
+                {bulkActing ? 'Aplicando…' : 'Colocar em manual'}
+              </button>
+              <button
+                type="button"
+                onClick={() => bulkSetManualMode(false)}
+                disabled={bulkActing || selectedCount === 0}
+                className="rounded border border-gray-300 bg-white px-3 py-2 text-xs font-medium text-gray-800 hover:bg-gray-50 disabled:opacity-50"
+                title="Reativa respostas automáticas da Carol para as selecionadas"
+              >
+                {bulkActing ? 'Aplicando…' : 'Reativar automação'}
+              </button>
+            </div>
+          </div>
 
           {workerResult && (
             <div
@@ -302,6 +391,17 @@ function V2AdminContent() {
                 <table className="min-w-full text-left text-sm">
                   <thead className="border-b bg-gray-50 text-gray-600">
                     <tr>
+                      <th className="px-4 py-2 font-medium">
+                        <input
+                          type="checkbox"
+                          checked={allSelected}
+                          ref={(el) => {
+                            if (el) el.indeterminate = someSelected
+                          }}
+                          onChange={(e) => toggleSelectAll(e.target.checked)}
+                          aria-label="Selecionar todas as conversas da lista"
+                        />
+                      </th>
                       <th className="px-4 py-2 font-medium">Nome</th>
                       <th className="px-4 py-2 font-medium">Telefone</th>
                       <th className="px-4 py-2 font-medium">Fase</th>
@@ -312,7 +412,7 @@ function V2AdminContent() {
                   <tbody>
                     {conversations.length === 0 ? (
                       <tr>
-                        <td colSpan={5} className="px-4 py-6 text-center text-gray-500">
+                        <td colSpan={6} className="px-4 py-6 text-center text-gray-500">
                           Nenhuma conversa encontrada.
                         </td>
                       </tr>
@@ -322,14 +422,29 @@ function V2AdminContent() {
                           key={c.id}
                           className="border-b border-gray-100 hover:bg-gray-50/50"
                         >
+                          <td className="px-4 py-2">
+                            <input
+                              type="checkbox"
+                              checked={!!selectedIds[c.id]}
+                              onChange={(e) => toggleSelectOne(c.id, e.target.checked)}
+                              aria-label={`Selecionar conversa ${nome(c)}`}
+                            />
+                          </td>
                           <td className="px-4 py-2 font-medium text-gray-900">
                             {nome(c)}
                           </td>
                           <td className="px-4 py-2 text-gray-600 font-mono text-xs">{formatPhone(c.display_phone || c.phone)}</td>
                           <td className="px-4 py-2">
-                            <span className="rounded bg-gray-100 px-2 py-0.5 text-gray-700">
-                              {FASE_LABELS[c.fase] || c.fase}
-                            </span>
+                            <div className="flex items-center gap-2">
+                              <span className="rounded bg-gray-100 px-2 py-0.5 text-gray-700">
+                                {FASE_LABELS[c.fase] || c.fase}
+                              </span>
+                              {isManualMode(c) && (
+                                <span className="rounded bg-black px-2 py-0.5 text-xs text-white">
+                                  Manual
+                                </span>
+                              )}
+                            </div>
                           </td>
                           <td className="px-4 py-2 text-gray-500">
                             {formatDate(c.last_message_at)}

@@ -1156,6 +1156,35 @@ export async function POST(request: NextRequest) {
     // (para evitar loops e respostas automáticas para nossas próprias mensagens)
     if (!finalIsFromUs) {
       try {
+        // 🛑 MODO MANUAL (por conversa): se ativado, não responder com a Carol nem rodar automações.
+        // Usado quando o time quer enviar áudio/mensagem manual sem a Carol "pegar" a conversa.
+        try {
+          const { data: convForManual } = await supabase
+            .from('whatsapp_conversations')
+            .select('context')
+            .eq('id', conversationId)
+            .single()
+          const ctx = (convForManual?.context && typeof convForManual.context === 'object' && !Array.isArray(convForManual.context))
+            ? (convForManual.context as any)
+            : {}
+          const tags = Array.isArray(ctx.tags) ? ctx.tags : []
+          const manualMode = ctx.manual_mode === true || tags.includes('manual_mode')
+          if (manualMode) {
+            console.log('[Z-API Webhook] 🛑 Modo manual ativo para conversa — pulando Carol e automações', {
+              conversationId,
+            })
+            // Ainda assim seguimos o fluxo (salvar msg, notificar admins, etc.)
+            throw Object.assign(new Error('MANUAL_MODE_SKIP'), { code: 'MANUAL_MODE_SKIP' })
+          }
+        } catch (manualErr: any) {
+          // Se for skip, sair do bloco de automação sem erro para o webhook
+          if (manualErr?.code === 'MANUAL_MODE_SKIP' || manualErr?.message === 'MANUAL_MODE_SKIP') {
+            // pular
+            throw manualErr
+          }
+          // Se falhou a checagem, não bloquear (segue normal)
+        }
+
         // Verificar se é primeira mensagem da conversa
         const { data: existingMessages } = await supabase
           .from('whatsapp_messages')
@@ -1360,10 +1389,14 @@ export async function POST(request: NextRequest) {
           console.log('[Z-API Webhook] ⏭️ Pulando automações antigas (Carol já processou esta mensagem)')
         }
       } catch (carolError: any) {
+        if (carolError?.code === 'MANUAL_MODE_SKIP' || carolError?.message === 'MANUAL_MODE_SKIP') {
+          console.log('[Z-API Webhook] ⏭️ Pulando Carol/automações por modo manual', { conversationId })
+        } else {
         console.error('[Z-API Webhook] ❌ Erro ao processar com Carol:', {
           error: carolError.message,
           stack: carolError.stack
         })
+        }
         // Não falhar o webhook se Carol falhar
       }
     } else {
