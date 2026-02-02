@@ -2557,6 +2557,16 @@ export async function sendRemarketingToNonParticipant(
     const context = conversation.context || {}
     const tags = Array.isArray(context.tags) ? context.tags : []
 
+    // Se já recebeu remarketing (tag persistente), não reenviar automaticamente.
+    // Para reenviar manualmente, use options.force=true.
+    if (!force && tags.includes('remarketing_enviado')) {
+      console.log('[Carol Remarketing] ⏭️ Pulando (remarketing já enviado):', {
+        conversationId,
+        phone: conversation.phone,
+      })
+      return { success: false, error: 'Remarketing já foi enviado (use "Reenviar remarketing" para forçar)' }
+    }
+
     // Verificar se realmente não participou
     // Se não tem a tag, tentar buscar novamente (pode ser problema de timing)
     if (!tags.includes('nao_participou_aula')) {
@@ -2665,8 +2675,9 @@ Se sim, eu te encaixo no próximo horário. Qual período fica melhor pra você:
       })
 
       // Atualizar contexto
-      const newTags = [...new Set([...tags, 'recebeu_segundo_link'])]
+      const newTags = [...new Set([...tags, 'recebeu_segundo_link', 'remarketing_enviado'])]
       context.last_remarketing_at = new Date().toISOString()
+      context.remarketing_sent_at = new Date().toISOString()
       context.tags = newTags
 
       await supabaseAdmin

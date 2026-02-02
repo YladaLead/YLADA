@@ -1261,6 +1261,7 @@ export async function POST(request: NextRequest) {
           shouldAllowResponse && // 🆕 Usar lógica melhorada
           !alreadyProcessed // 🆕 Não processar se já respondeu recentemente
         
+        let carolProcessedThisMessage = false
         if (shouldProcessCarol) {
           // 🆕 Enriquecer conversa com nome do cadastro (workshop_inscricoes/contact_submissions)
           // Quando a pessoa preenche o workshop e clica no botão WhatsApp, a primeira resposta da Carol
@@ -1305,6 +1306,9 @@ export async function POST(request: NextRequest) {
           )
 
           if (carolResult.success) {
+            // Mesmo que a Carol decida "não responder" (ex.: auto-resposta detectada),
+            // consideramos a mensagem processada por ela para não disparar automações antigas em paralelo.
+            carolProcessedThisMessage = true
             console.log('[Z-API Webhook] ✅ Carol respondeu automaticamente:', {
               responsePreview: carolResult.response?.substring(0, 100)
             })
@@ -1327,27 +1331,33 @@ export async function POST(request: NextRequest) {
           }
         }
 
-        // Também processar automações antigas (se houver regras configuradas)
-        try {
-          const { processAutomations } = await import('@/lib/whatsapp-automation')
-          const automationResult = await processAutomations(
-            conversationId,
-            phone,
-            message,
-            area,
-            finalInstanceId,
-            isFirstMessage
-          )
-          
-          if (automationResult.messagesSent > 0) {
-            console.log('[Z-API Webhook] 🤖 Automações processadas:', {
-              messagesSent: automationResult.messagesSent,
-              rulesExecuted: automationResult.rulesExecuted
-            })
+        // ⚠️ IMPORTANTÍSSIMO: não rodar automações antigas em paralelo com a Carol.
+        // Isso é a principal fonte de "vários tipos de mensagens" e respostas que ignoram contexto.
+        // Só rode automações se a Carol NÃO processou esta mensagem.
+        if (!carolProcessedThisMessage) {
+          try {
+            const { processAutomations } = await import('@/lib/whatsapp-automation')
+            const automationResult = await processAutomations(
+              conversationId,
+              phone,
+              message,
+              area,
+              finalInstanceId,
+              isFirstMessage
+            )
+            
+            if (automationResult.messagesSent > 0) {
+              console.log('[Z-API Webhook] 🤖 Automações processadas:', {
+                messagesSent: automationResult.messagesSent,
+                rulesExecuted: automationResult.rulesExecuted
+              })
+            }
+          } catch (automationError: any) {
+            // Ignorar erros de automações antigas
+            console.warn('[Z-API Webhook] ⚠️ Erro em automações antigas:', automationError.message)
           }
-        } catch (automationError: any) {
-          // Ignorar erros de automações antigas
-          console.warn('[Z-API Webhook] ⚠️ Erro em automações antigas:', automationError.message)
+        } else {
+          console.log('[Z-API Webhook] ⏭️ Pulando automações antigas (Carol já processou esta mensagem)')
         }
       } catch (carolError: any) {
         console.error('[Z-API Webhook] ❌ Erro ao processar com Carol:', {

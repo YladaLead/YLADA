@@ -188,6 +188,15 @@ function NutriDiagnosticoContent() {
     )
   }
 
+  const handleVoltar = () => {
+    // Preferir "voltar" quando existe histórico; caso contrário, ir para a home da área nutri.
+    if (typeof window !== 'undefined' && window.history.length > 1) {
+      router.back()
+      return
+    }
+    router.push('/pt/nutri/home')
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
@@ -296,6 +305,17 @@ function NutriDiagnosticoContent() {
         <NutriSidebar />
         <div className="flex-1 lg:ml-56 flex items-center justify-center">
           <div className="text-center">
+            <button
+              type="button"
+              onClick={handleVoltar}
+              className="mx-auto mb-6 flex items-center gap-2 text-gray-600 hover:text-blue-600 transition-colors px-4 py-2 rounded-lg hover:bg-gray-50"
+              aria-label="Voltar"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+              </svg>
+              <span className="font-medium">Voltar</span>
+            </button>
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
             <p className="text-gray-600">Carregando seu perfil Nutri-Empresária...</p>
           </div>
@@ -311,6 +331,18 @@ function NutriDiagnosticoContent() {
       <div className="flex-1 lg:ml-56">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="bg-white rounded-xl shadow-lg p-8">
+            <button
+              type="button"
+              onClick={handleVoltar}
+              className="mb-6 flex items-center gap-2 text-gray-600 hover:text-blue-600 transition-colors px-4 py-2 rounded-lg hover:bg-gray-50"
+              aria-label="Voltar"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+              </svg>
+              <span className="hidden sm:inline font-medium">Voltar</span>
+              <span className="sm:hidden font-medium">Voltar</span>
+            </button>
             <h1 className="text-3xl font-bold text-gray-900 mb-2">
               Perfil Nutri-Empresária
             </h1>
