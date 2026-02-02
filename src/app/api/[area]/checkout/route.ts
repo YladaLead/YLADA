@@ -46,9 +46,9 @@ export async function POST(
     }
 
     // Validar productType apenas para área Nutri
-    if (area === 'nutri' && productType && !['platform_monthly', 'platform_annual', 'formation_only'].includes(productType)) {
+    if (area === 'nutri' && productType && !['platform_monthly', 'platform_monthly_12x', 'platform_annual', 'formation_only'].includes(productType)) {
       return NextResponse.json(
-        { error: 'Tipo de produto inválido. Use "platform_monthly", "platform_annual" ou "formation_only"' },
+        { error: 'Tipo de produto inválido. Use "platform_monthly", "platform_monthly_12x", "platform_annual" ou "formation_only"' },
         { status: 400 }
       )
     }

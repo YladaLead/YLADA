@@ -35,9 +35,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Validar productType (opcional, mas se fornecido deve ser válido)
-    if (productType && !['platform_monthly', 'platform_annual', 'formation_only'].includes(productType)) {
+    if (productType && !['platform_monthly', 'platform_monthly_12x', 'platform_annual', 'formation_only'].includes(productType)) {
       return NextResponse.json(
-        { error: 'Tipo de produto inválido. Use "platform_monthly", "platform_annual" ou "formation_only"' },
+        { error: 'Tipo de produto inválido. Use "platform_monthly", "platform_monthly_12x", "platform_annual" ou "formation_only"' },
         { status: 400 }
       )
     }

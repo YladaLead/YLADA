@@ -9,7 +9,7 @@ import { createMercadoPagoClient } from './mercado-pago'
 export interface CreateSubscriptionRequest {
   area: 'wellness' | 'nutri' | 'coach' | 'nutra'
   planType: 'monthly' | 'annual'
-  productType?: 'platform_monthly' | 'platform_annual' | 'formation_only' // Apenas para área Nutri
+  productType?: 'platform_monthly' | 'platform_monthly_12x' | 'platform_annual' | 'formation_only' // Apenas para área Nutri
   userId: string
   userEmail: string
   amount: number // Valor em reais (ex: 59.90)

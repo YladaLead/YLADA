@@ -21,6 +21,10 @@ function determineFeatures(
       // V1: pacote único (Captação + Trilha + LYA)
       return ['ferramentas', 'cursos']
     }
+    if (productType === 'platform_monthly_12x') {
+      // Mesmo acesso do mensal, mas pago via Preference parcelado
+      return ['ferramentas', 'cursos']
+    }
     if (productType === 'platform_annual') {
       // V1: pacote único (Captação + Trilha + LYA)
       return ['ferramentas', 'cursos']

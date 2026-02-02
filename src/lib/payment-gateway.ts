@@ -13,7 +13,7 @@ import Stripe from 'stripe'
 export interface CheckoutRequest {
   area: 'wellness' | 'nutri' | 'coach' | 'nutra'
   planType: 'monthly' | 'annual'
-  productType?: 'platform_monthly' | 'platform_annual' | 'formation_only' // Apenas para área Nutri
+  productType?: 'platform_monthly' | 'platform_monthly_12x' | 'platform_annual' | 'formation_only' // Apenas para área Nutri
   userId: string
   userEmail: string
   countryCode?: string
@@ -83,7 +83,7 @@ function getPrice(
   area: string, 
   planType: 'monthly' | 'annual', 
   countryCode: string,
-  productType?: 'platform_monthly' | 'platform_annual' | 'formation_only'
+  productType?: 'platform_monthly' | 'platform_monthly_12x' | 'platform_annual' | 'formation_only'
 ): number {
   // Preços em BRL para Brasil
   if (countryCode === 'BR') {
@@ -94,6 +94,9 @@ function getPrice(
       }
       if (productType === 'platform_monthly') {
         return 197.00 // R$ 197/mês (recorrente)
+      }
+      if (productType === 'platform_monthly_12x') {
+        return 197.00 // R$ 197 (pagamento único parcelável em até 12x)
       }
       if (productType === 'platform_annual') {
         return 1164.00 // R$ 1.164 (12× de R$ 97)
@@ -267,6 +270,11 @@ async function createMercadoPagoCheckout(
       const methodDescription = paymentMethod ? paymentMethod.toUpperCase() : 'TODOS (PIX/Boleto/Cartão)'
       console.log(`💳 Criando pagamento manual (Preference) para plano mensal - ${methodDescription}`)
       
+      // Caso especial: "mensal parcelado" (terceiro produto)
+      // É pagamento único (Preference), mas com parcelas habilitadas.
+      const isMonthlyInstallmentsProduct = request.area === 'nutri' && request.productType === 'platform_monthly_12x'
+      const monthlyMaxInstallments = isMonthlyInstallmentsProduct ? 12 : 1
+      
       const preferenceRequest: CreatePreferenceRequest = {
         area: request.area,
         planType: request.planType,
@@ -276,11 +284,13 @@ async function createMercadoPagoCheckout(
         amount,
         description: request.productType === 'formation_only'
           ? `YLADA ${request.area.toUpperCase()} - Formação Empresarial Nutri`
+          : request.productType === 'platform_monthly_12x'
+            ? `YLADA ${request.area.toUpperCase()} - Plano Mensal (Parcelado)`
           : `YLADA ${request.area.toUpperCase()} - Plano Mensal`,
         successUrl,
         failureUrl,
         pendingUrl,
-        maxInstallments: 1, // Plano mensal: sem parcelamento (apenas à vista)
+        maxInstallments: monthlyMaxInstallments, // Mensal padrão: 1x; "mensal parcelado": até 12x
         payerFirstName: request.payerFirstName,
         payerLastName: request.payerLastName,
       }

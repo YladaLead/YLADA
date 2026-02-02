@@ -12,6 +12,9 @@ export default function NutriCheckoutPage() {
   const { user, userProfile, loading: authLoading } = useAuth()
   const [planType, setPlanType] = useState<'monthly' | 'annual'>('monthly')
   const [planLocked, setPlanLocked] = useState(false)
+  const [productTypeOverride, setProductTypeOverride] = useState<
+    'platform_monthly' | 'platform_monthly_12x' | 'platform_annual' | 'formation_only' | null
+  >(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [canceled, setCanceled] = useState(false)
@@ -53,6 +56,7 @@ export default function NutriCheckoutPage() {
       const params = new URLSearchParams(window.location.search)
       const plan = params.get('plan')
       const canceledParam = params.get('canceled')
+      const productTypeParam = params.get('productType')
       
       if (plan === 'annual') {
         setPlanType('annual')
@@ -67,6 +71,15 @@ export default function NutriCheckoutPage() {
       } else {
         // Se não tiver parâmetro, assumir mensal e rastrear
         trackNutriCheckoutMonthly()
+      }
+
+      // Suportar link direto para "terceiro produto" (mensal parcelado em até 12x)
+      // Exemplo: /pt/nutri/checkout?plan=monthly&productType=platform_monthly_12x
+      if (
+        productTypeParam &&
+        ['platform_monthly', 'platform_monthly_12x', 'platform_annual', 'formation_only'].includes(productTypeParam)
+      ) {
+        setProductTypeOverride(productTypeParam as any)
       }
       
       if (canceledParam === 'true') {
@@ -127,10 +140,12 @@ export default function NutriCheckoutPage() {
         signal: controller.signal,
         body: JSON.stringify({ 
           planType,
-          productType: planType === 'annual' ? 'platform_annual' : 'platform_monthly',
+          productType: productTypeOverride || (planType === 'annual' ? 'platform_annual' : 'platform_monthly'),
           language: 'pt', // Idioma português para Brasil
           email: userEmail, // E-mail (obrigatório mesmo se autenticado)
-          paymentMethod: 'auto'
+          // Mensal padrão: assinatura automática (Preapproval)
+          // Mensal parcelado (terceiro produto): pagamento único (Preference) com parcelas
+          paymentMethod: planType === 'monthly' && productTypeOverride === 'platform_monthly_12x' ? undefined : 'auto'
         }),
       })
 
