@@ -717,6 +717,8 @@ export async function generateCarolResponse(
     }
     if (context.participated === true) {
       contextText += `\n⚠️ Esta pessoa PARTICIPOU da aula (confirmado por tag/contexto). NUNCA diga que ela "não conseguiu participar". Use tom de follow-up (participou e ficou de pensar, etc.).\n`
+      contextText += `🚫 PROIBIDO: enviar "primeira mensagem"/recepção (ex.: "Seja muito bem-vinda", "Eu sou a Carol", explicação da aula, opções de horários).\n`
+      contextText += `✅ Objetivo aqui: follow-up pós-aula e FECHAMENTO. Responda curto, humano e avance com 1 pergunta simples (ex.: mensal ou anual; qual o próximo passo; o que está travando).\n`
     }
     if (context.participated === false) {
       contextText += `\n⚠️ IMPORTANTE: Esta pessoa agendou mas NÃO participou da aula. Faça remarketing oferecendo novas opções.\n`
@@ -1266,7 +1268,17 @@ export async function processIncomingMessageWithCarol(
     // antes do form enviar (60s), o form não manda; então Carol DEVE enviar boas-vindas + opções.
     const isMessageFromButton = /acabei\s+de\s+me\s+inscrever|me\s+inscrev(i|er)|gostaria\s+de\s+agendar|inscrev(er|i).*aula|ylada\s+nutri.*agendar/i.test(msgNorm)
 
-    const isFirstMessage = rawIsFirstMessage && !formAlreadySentWelcome && !isShortNeutralReply && !deniesSignup
+    // 4. Verificar se participou ou não
+    // 🚫 Regra definitiva: quem já PARTICIPOU nunca deve cair em "primeira mensagem"/boas-vindas.
+    const participated = tags.includes('participou_aula') || tags.includes('participou')
+    const suppressWelcomeFlow = participated
+
+    const isFirstMessage =
+      rawIsFirstMessage &&
+      !suppressWelcomeFlow &&
+      !formAlreadySentWelcome &&
+      !isShortNeutralReply &&
+      !deniesSignup
     
     console.log('[Carol AI] 🔍 Detecção de primeira mensagem:', {
       conversationId,
@@ -1276,13 +1288,12 @@ export async function processIncomingMessageWithCarol(
       formAlreadySentWelcome,
       isShortNeutralReply,
       isMessageFromButton,
+      suppressWelcomeFlow,
       isFirstMessage,
       hasWorkshopTag: tags.includes('veio_aula_pratica') || tags.includes('recebeu_link_workshop'),
       workshopSessionId
     })
     
-    // 4. Verificar se participou ou não
-    const participated = tags.includes('participou_aula')
     const hasScheduled = tags.includes('recebeu_link_workshop') || workshopSessionId
     const scheduledDate = context.scheduled_date || null
 
@@ -1882,7 +1893,7 @@ Nos vemos em breve! 😊
 
     // Se for primeira mensagem, enviar corpo curto com opções (sem IA).
     let cannedFirstMessageBody: string | null = null
-    if (rawIsFirstMessage && !formAlreadySentWelcome && !isShortNeutralReply && deniesSignup) {
+    if (!suppressWelcomeFlow && rawIsFirstMessage && !formAlreadySentWelcome && !isShortNeutralReply && deniesSignup) {
       cannedFirstMessageBody =
         `Entendi, obrigada por avisar 😊\n\nPode ser que seu número tenha sido usado por engano.\n\nVocê tem interesse em participar da aula prática para aprender a preencher sua agenda com mais constância?\n\nSe sim, eu te explico rapidinho e te mando o link oficial pra se inscrever.`
     } else if (isFirstMessage) {
@@ -1921,7 +1932,11 @@ Nos vemos em breve! 😊
         msgLower.includes('manhã') || msgLower.includes('manha') || msgLower.includes('de manhã') || msgLower.includes('de manha')
       const isPeriodReply = prefersNight || prefersAfternoon || prefersMorning
 
-      if (isRemarketingNaoParticipou && isPositiveInterestReply && workshopSessions.length > 0) {
+      if (participated) {
+        // Pós-aula (participou): quando a pessoa só confirma/entende, não encerrar a conversa.
+        // Puxar para fechamento com 1 pergunta simples, sem "script" de primeira conversa.
+        carolInstruction = `Esta pessoa JÁ PARTICIPOU da aula (tag Participou). Você DEVE responder em 1–2 frases, SEM saudação e SEM boas-vindas.\n\nObjetivo: avançar para fechamento. Faça 1 pergunta simples para decidir o próximo passo (ex.: "Você prefere começar no mensal ou no anual?").`
+      } else if (isRemarketingNaoParticipou && isPositiveInterestReply && workshopSessions.length > 0) {
         carolInstruction = `A pessoa acabou de responder que TEM INTERESSE ao remarketing ("Você ainda tem interesse em participar?"). Ela disse algo como "Tenho sim".
 
 Você DEVE responder de forma curta e objetiva, SEM saudação e SEM boas-vindas. PROIBIDO escrever "Oi", "tudo bem", "Seja bem-vinda" ou "Eu sou a Carol". NÃO faça explicação longa.
