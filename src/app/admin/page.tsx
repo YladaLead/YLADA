@@ -60,6 +60,21 @@ function AdminDashboardContent() {
   const [filtroArea, setFiltroArea] = useState<'todos' | 'nutri' | 'coach' | 'nutra' | 'wellness'>('todos')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [linkCopied, setLinkCopied] = useState(false)
+
+  const linkParcelamentoNutri =
+    (typeof window !== 'undefined' ? window.location.origin : '') +
+    '/pt/nutri/checkout?plan=monthly&productType=platform_monthly_12x'
+
+  const copyLinkParcelamento = async () => {
+    try {
+      await navigator.clipboard.writeText(linkParcelamentoNutri)
+      setLinkCopied(true)
+      setTimeout(() => setLinkCopied(false), 2000)
+    } catch {
+      alert('Não foi possível copiar. Copie manualmente: ' + linkParcelamentoNutri)
+    }
+  }
 
   // Buscar dados da API
   useEffect(() => {
@@ -365,6 +380,26 @@ function AdminDashboardContent() {
                 </button>
               ))}
             </div>
+          </div>
+        </div>
+
+        {/* Links úteis Nutri */}
+        <div className="mb-6 bg-white rounded-xl p-4 shadow-sm border border-gray-200">
+          <h3 className="font-semibold text-gray-900 mb-3">🔗 Links úteis Nutri</h3>
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="flex-1 min-w-0">
+              <p className="text-xs text-gray-600 mb-1">Checkout R$ 197 parcelado (até 12x)</p>
+              <code className="block text-sm text-gray-800 bg-gray-100 px-3 py-2 rounded-lg truncate">
+                {linkParcelamentoNutri || '/pt/nutri/checkout?plan=monthly&productType=platform_monthly_12x'}
+              </code>
+            </div>
+            <button
+              type="button"
+              onClick={copyLinkParcelamento}
+              className="shrink-0 px-4 py-2 rounded-lg text-sm font-medium bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+            >
+              {linkCopied ? '✓ Copiado' : 'Copiar link'}
+            </button>
           </div>
         </div>
 
