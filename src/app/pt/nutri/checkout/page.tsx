@@ -281,58 +281,32 @@ export default function NutriCheckoutPage() {
             </div>
           )}
 
-          {/* Plano Selecionado (apenas exibição, sem opção de mudança) */}
-          <div className="mb-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4 text-center">
-              Plano Selecionado
-            </h2>
-            <div className="max-w-md mx-auto">
-              {planType === 'monthly' ? (
-                <div className="p-6 rounded-lg border-2 border-blue-500 bg-blue-50 shadow-md relative">
-                  <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-blue-600 text-white text-xs font-bold px-3 py-1 rounded-full">
-                    PLANO ESCOLHIDO
-                  </div>
-                  <div className="text-center">
-                    <h3 className="text-xl font-bold text-gray-900 mb-2">
-                      Plano Mensal Flexível
-                    </h3>
-                    <div className="text-3xl font-bold text-blue-600 mb-1">
-                      R$ 197,00
-                    </div>
-                    <div className="text-sm text-gray-600">/mês</div>
-                    <p className="text-sm text-gray-600 mt-4">
-                      Liberdade para cancelar quando quiser
-                    </p>
-                  </div>
+          {/* Plano Anual — único plano, visual limpo */}
+          <div className="mb-6">
+            <div className="max-w-md mx-auto p-6 rounded-xl border border-blue-200 bg-blue-50/50">
+              <div className="text-center">
+                <h3 className="text-lg font-semibold text-gray-800 mb-1">
+                  Plano Anual
+                </h3>
+                <div className="text-3xl font-bold text-blue-600 mb-1">
+                  12× de R$ 97
                 </div>
-              ) : (
-                <div className="p-6 rounded-lg border-2 border-blue-500 bg-blue-50 shadow-md relative">
-                  <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-blue-600 text-white text-xs font-bold px-3 py-1 rounded-full">
-                    PLANO ESCOLHIDO
-                  </div>
-                  <div className="text-center">
-                    <h3 className="text-xl font-bold text-gray-900 mb-2">
-                      Plano Anual Fidelidade
-                    </h3>
-                    <div className="text-3xl font-bold text-blue-600 mb-1">
-                      12× de R$ 97
-                    </div>
-                    <div className="text-sm text-gray-600 mb-2">Total: R$ 1.164,00/ano</div>
-                    <p className="text-sm text-gray-600 mt-4">
-                      Compromisso anual com economia clara
-                    </p>
-                  </div>
-                </div>
-              )}
+                <p className="text-sm text-gray-600 mb-1">Total: R$ 1.164,00/ano</p>
+                <p className="text-sm text-gray-600">
+                  Mentoria LYA, links inteligentes e rotina que gera agenda previsível
+                </p>
+              </div>
             </div>
-            <div className="text-center mt-4">
-              <Link 
-                href="/pt/nutri#oferta"
-                className="text-sm text-blue-600 hover:text-blue-700 underline"
-              >
-                Quer mudar de plano? Voltar para escolha
-              </Link>
-            </div>
+          </div>
+
+          {/* Argumento de fechamento — antes do e-mail */}
+          <div className="mb-6 p-4 rounded-lg bg-gray-50 border border-gray-200">
+            <p className="text-sm text-gray-700 text-center">
+              Você está a um passo de sair do improviso e ter clareza do que fazer todos os dias.
+              <span className="block mt-2 font-medium text-gray-800">
+                Garantia de 7 dias: se não for pra você, devolvemos 100%.
+              </span>
+            </p>
           </div>
 
           {/* Campo de E-mail (se não estiver logado ou ainda carregando) */}
