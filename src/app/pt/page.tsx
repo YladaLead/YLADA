@@ -64,12 +64,13 @@ export default function HomePage() {
         <section className="container mx-auto px-6 lg:px-8 py-16 sm:py-20 lg:py-24">
           <div className="text-center max-w-4xl mx-auto">
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 leading-tight max-w-4xl mx-auto">
-              <span className="whitespace-nowrap">Conectando pessoas ao</span>{' '}
-              <span className="whitespace-nowrap">bem-estar, através de</span>{' '}
-              <span className="whitespace-nowrap">inteligência digital.</span>
+              Transformamos conversa em contatos qualificados.
             </h1>
-            <p className="text-lg sm:text-xl lg:text-2xl text-gray-600 mb-8 max-w-3xl mx-auto leading-relaxed">
-              O Ylada ajuda profissionais da saúde, bem-estar e performance a criar experiências inteligentes, gerar conexões reais e transformar atendimentos em relacionamentos.
+            <p className="text-lg sm:text-xl lg:text-2xl text-gray-600 mb-4 max-w-3xl mx-auto leading-relaxed">
+              O YLADA é um motor de diagnóstico, links inteligentes e inteligência artificial que cria, provoca e direciona conversas estratégicas — aumentando a autoridade, a credibilidade e a performance de profissionais e times de campo.
+            </p>
+            <p className="text-base sm:text-lg text-gray-500 mb-8 max-w-2xl mx-auto">
+              Antes da venda. Durante a conversa. Depois do contato.
             </p>
             <Link 
               href="#solucoes"
@@ -89,10 +90,13 @@ export default function HomePage() {
                 Quem somos
               </h2>
               <p className="text-lg text-gray-600 leading-relaxed">
-                O YLADA nasceu da ideia de que cada profissional pode ter seu próprio sistema inteligente de relacionamento.
+                O YLADA nasceu da ideia de que toda conversa pode gerar resultado quando existe direção, diagnóstico e inteligência por trás.
               </p>
               <p className="text-lg text-gray-600 leading-relaxed mt-4">
-                Criamos ferramentas, automações e inteligência orientada por dados para que nutricionistas, coaches, consultores e distribuidores se conectem com clientes e equipes de forma simples, humana e personalizada.
+                Criamos um sistema inteligente que ajuda profissionais e times de campo a atrair, qualificar e se conectar com pessoas realmente interessadas, transformando interações em oportunidades concretas.
+              </p>
+              <p className="text-lg text-gray-600 leading-relaxed mt-4">
+                Mais do que tecnologia, o YLADA organiza a conversa, orienta a rotina, fortalece a autoridade de quem está no campo e aumenta a confiança em cada interação.
               </p>
             </div>
           </div>
@@ -106,52 +110,85 @@ export default function HomePage() {
             </h2>
             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-10 max-w-6xl mx-auto">
               <div className="text-center">
-                <div className="text-5xl mb-4">🧠</div>
-                <h3 className="text-xl font-bold text-gray-900 mb-3">Inteligência de Leads</h3>
+                <div className="text-5xl mb-4">🎯</div>
+                <h3 className="text-xl font-bold text-gray-900 mb-3">Atração e Diagnóstico</h3>
                 <p className="text-gray-600 text-sm leading-relaxed">
-                  Crie ferramentas e quizzes inteligentes que atraem pessoas interessadas.
+                  Crie links, quizzes e avaliações inteligentes que provocam curiosidade qualificada, geram valor imediato e filtram curiosos de pessoas realmente interessadas, antes mesmo da conversa começar.
                 </p>
               </div>
               
               <div className="text-center">
                 <div className="text-5xl mb-4">💬</div>
-                <h3 className="text-xl font-bold text-gray-900 mb-3">Comunicação Integrada</h3>
+                <h3 className="text-xl font-bold text-gray-900 mb-3">Conversa Guiada e Inteligente</h3>
                 <p className="text-gray-600 text-sm leading-relaxed">
-                  Automatize o relacionamento e mantenha o contato ativo.
+                  Utilize comunicação integrada e inteligência artificial para orientar o diálogo, ajustar a abordagem ao contexto e manter o contato ativo com clareza, naturalidade e estratégia.
                 </p>
               </div>
               
               <div className="text-center">
                 <div className="text-5xl mb-4">📊</div>
-                <h3 className="text-xl font-bold text-gray-900 mb-3">Acompanhamento e Resultados</h3>
+                <h3 className="text-xl font-bold text-gray-900 mb-3">Performance e Autoridade de Campo</h3>
                 <p className="text-gray-600 text-sm leading-relaxed">
-                  Veja em tempo real quem está interagindo com seus links e avaliações.
+                  Acompanhe interações, decisões e resultados em tempo real para melhorar conversão, previsibilidade e posicionamento profissional — individualmente ou em time.
                 </p>
               </div>
               
               <div className="text-center">
                 <div className="text-5xl mb-4">🌍</div>
-                <h3 className="text-xl font-bold text-gray-900 mb-3">Expansão Global</h3>
+                <h3 className="text-xl font-bold text-gray-900 mb-3">Escala Multimercado</h3>
                 <p className="text-gray-600 text-sm leading-relaxed">
-                  Suporte em 3 idiomas: português, espanhol e inglês.
+                  Aplique o mesmo motor de geração de contatos e conversas em diferentes áreas, países e modelos de negócio, sem perder personalização.
                 </p>
               </div>
             </div>
           </div>
         </section>
 
-        {/* (4) Seção "Para quem é o Ylada" */}
-        <section id="solucoes" className="bg-gray-50 py-16 sm:py-20 lg:py-24">
+        {/* (4) Seção "O diferencial da inteligência YLADA" */}
+        <section className="bg-gray-50 py-16 sm:py-20 lg:py-24">
+          <div className="container mx-auto px-6 lg:px-8">
+            <div className="max-w-3xl mx-auto text-center mb-10">
+              <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-6">
+                O diferencial da inteligência YLADA
+              </h2>
+              <p className="text-xl text-gray-800 font-semibold mb-6 leading-relaxed">
+                Inteligência artificial que provoca conversa, não bloqueia relacionamento.
+              </p>
+              <p className="text-lg text-gray-600 leading-relaxed text-left">
+                A inteligência artificial do YLADA não foi criada para substituir o profissional nem engessar o atendimento com respostas automáticas. Ela atua como um copiloto estratégico, ajustando rotina, abordagem e próximos passos de acordo com o contexto real de cada interação.
+              </p>
+            </div>
+            <div className="max-w-2xl mx-auto space-y-3 mb-10">
+              <p className="text-gray-700 leading-relaxed">Por meio de diagnósticos inteligentes e direcionamento contínuo, o YLADA:</p>
+              <ul className="text-gray-600 space-y-2 list-none">
+                <li className="flex items-start gap-2"><span className="text-blue-600 mt-1">•</span> provoca o início da conversa certa</li>
+                <li className="flex items-start gap-2"><span className="text-blue-600 mt-1">•</span> direciona o foco para pessoas realmente interessadas</li>
+                <li className="flex items-start gap-2"><span className="text-blue-600 mt-1">•</span> orienta o que falar, quando falar e como conduzir</li>
+                <li className="flex items-start gap-2"><span className="text-blue-600 mt-1">•</span> fortalece a autoridade e a credibilidade do profissional</li>
+                <li className="flex items-start gap-2"><span className="text-blue-600 mt-1">•</span> eleva o desempenho e a confiança do time de campo</li>
+              </ul>
+              <p className="text-gray-600 leading-relaxed pt-2">
+                O resultado é menos curiosos, mais qualidade de contato e conversas que evoluem naturalmente para relacionamento e decisão.
+              </p>
+            </div>
+            <p className="text-center text-lg font-semibold text-gray-800 max-w-xl mx-auto">
+              Não é sobre responder mensagens.<br />É sobre provocar conversas certas.
+            </p>
+          </div>
+        </section>
+
+        {/* (5) Seção "Para quem é o YLADA" */}
+        <section id="solucoes" className="py-16 sm:py-20 lg:py-24">
           <div className="container mx-auto px-6 lg:px-8">
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 text-center mb-12">
-              Para quem é o Ylada
+              Para quem é o YLADA
             </h2>
             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8 max-w-6xl mx-auto">
               <div className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-all duration-300 border border-gray-200 hover:border-blue-300">
-                <div className="text-4xl mb-4 text-center">🥗</div>
-                <h3 className="text-lg font-bold text-gray-900 mb-3 text-center">Nutricionistas</h3>
+                <div className="text-4xl mb-4 text-center">👤</div>
+                <h3 className="text-lg font-bold text-gray-900 mb-3 text-center">Profissionais que dependem de conversa para gerar clientes</h3>
                 <p className="text-gray-600 text-sm text-center leading-relaxed">
-                  Que desejam gerar avaliações inteligentes e captar pacientes certos.
+                  Nutricionistas, consultores, coaches, especialistas e profissionais liberais.
                 </p>
                 <div className="mt-4 text-center">
                   <Link href="/pt/nutri" className="text-blue-600 text-sm font-medium hover:text-blue-700">
@@ -161,10 +198,10 @@ export default function HomePage() {
               </div>
               
               <div className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-all duration-300 border border-gray-200 hover:border-blue-300">
-                <div className="text-4xl mb-4 text-center">💊</div>
-                <h3 className="text-lg font-bold text-gray-900 mb-3 text-center">Consultores Nutracêuticos</h3>
+                <div className="text-4xl mb-4 text-center">👥</div>
+                <h3 className="text-lg font-bold text-gray-900 mb-3 text-center">Times de campo e vendas descentralizadas</h3>
                 <p className="text-gray-600 text-sm text-center leading-relaxed">
-                  Que querem mostrar produtos com base em diagnósticos e resultados.
+                  Equipes que precisam gerar contatos mais qualificados e aumentar performance sem pressão excessiva.
                 </p>
                 <div className="mt-4 text-center">
                   <Link href="/pt/wellness" className="text-blue-600 text-sm font-medium hover:text-blue-700">
@@ -174,10 +211,10 @@ export default function HomePage() {
               </div>
               
               <div className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-all duration-300 border border-gray-200 hover:border-blue-300">
-                <div className="text-4xl mb-4 text-center">🌿</div>
-                <h3 className="text-lg font-bold text-gray-900 mb-3 text-center">Coaches de Bem-Estar</h3>
+                <div className="text-4xl mb-4 text-center">🤝</div>
+                <h3 className="text-lg font-bold text-gray-900 mb-3 text-center">Negócios baseados em relacionamento</h3>
                 <p className="text-gray-600 text-sm text-center leading-relaxed">
-                  Que buscam inspirar pessoas com ferramentas e desafios interativos.
+                  Projetos e empresas que crescem a partir de confiança, diálogo e autoridade.
                 </p>
                 <div className="mt-4 text-center">
                   <Link href="/pt/c" className="text-blue-600 text-sm font-medium hover:text-blue-700">
@@ -187,10 +224,10 @@ export default function HomePage() {
               </div>
               
               <div className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-all duration-300 border border-gray-200 hover:border-blue-300">
-                <div className="text-4xl mb-4 text-center">🧘</div>
-                <h3 className="text-lg font-bold text-gray-900 mb-3 text-center">Distribuidores de Bem-Estar</h3>
+                <div className="text-4xl mb-4 text-center">📈</div>
+                <h3 className="text-lg font-bold text-gray-900 mb-3 text-center">Organizações que desejam escalar geração de contatos</h3>
                 <p className="text-gray-600 text-sm text-center leading-relaxed">
-                  Que desejam expandir sua rede de forma organizada e digital.
+                  Com inteligência, clareza de dados e processos bem definidos.
                 </p>
                 <div className="mt-4 text-center">
                   <Link href="/pt/wellness" className="text-blue-600 text-sm font-medium hover:text-blue-700">
@@ -202,38 +239,37 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* (5) Seção "Filosofia Ylada" */}
-        <section className="py-16 sm:py-20 lg:py-24">
+        {/* (6) Seção "Filosofia YLADA" */}
+        <section className="bg-gray-50 py-16 sm:py-20 lg:py-24">
           <div className="container mx-auto px-6 lg:px-8">
             <div className="max-w-4xl mx-auto text-center">
               <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-8 lg:mb-10">
-                Filosofia Ylada
+                Filosofia YLADA
               </h2>
               <div className="space-y-6 lg:space-y-7">
                 <p className="text-lg lg:text-xl text-gray-600 leading-relaxed lg:leading-relaxed">
-                  YLADA significa <span className="font-semibold text-gray-900 whitespace-nowrap">Your Leading Advanced Data Assistant</span> — a filosofia que une inteligência, experiência humana e propósito.
+                  YLADA significa <span className="font-semibold text-gray-900 whitespace-nowrap">Your Leading Advanced Data Assistant</span>.
                 </p>
                 <p className="text-lg lg:text-xl text-gray-600 leading-relaxed lg:leading-relaxed max-w-3xl mx-auto">
-                  Acreditamos que tecnologia só faz sentido quando aproxima pessoas.
+                  Acreditamos que tecnologia só faz sentido quando melhora a conversa, fortalece o relacionamento e orienta decisões melhores no campo.
                 </p>
                 <p className="text-lg lg:text-xl text-gray-600 leading-relaxed lg:leading-relaxed max-w-3xl mx-auto">
-                  Por isso, criamos ferramentas que transformam atendimento em relacionamento, dados em clareza e conexões em resultados reais.
+                  Por isso, criamos soluções que transformam dados em clareza, interações em oportunidades e conversas em resultados reais, com inteligência, humanidade e propósito.
                 </p>
               </div>
             </div>
           </div>
         </section>
 
-        {/* (6) Seção "Entre em contato" */}
-        <section className="bg-gray-50 py-16 sm:py-20 lg:py-24">
+        {/* (7) Seção CTA final — Fale com a gente (com formulário de coleta) */}
+        <section className="py-16 sm:py-20 lg:py-24">
           <div className="container mx-auto px-6 lg:px-8">
             <div className="max-w-2xl mx-auto">
               <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 text-center mb-4">
-                Entre em contato
+                Fale com a gente
               </h2>
               <p className="text-lg text-gray-600 text-center mb-8">
-                Quer conhecer mais sobre o Ylada?
-                Preencha o formulário e entraremos em contato quando novas funcionalidades forem lançadas.
+                Quer entender como o YLADA pode ajudar você ou seu time a gerar contatos mais qualificados, mais autoridade e mais previsibilidade?
               </p>
               
               <form onSubmit={handleSubmit} className="bg-white rounded-xl p-6 sm:p-8 shadow-sm border border-gray-200">
@@ -372,7 +408,7 @@ export default function HomePage() {
               <YLADALogo size="lg" className="bg-transparent" />
             </div>
             <p className="text-gray-600 text-sm mb-4 text-center">
-              YLADA — Your Leading Advanced Data Assistant
+              YLADA: Your Leading Advanced Data Assistant
             </p>
             <div className="flex flex-wrap items-center justify-center gap-4 mb-4 text-sm text-gray-500">
               <Link href="/pt/politica-de-privacidade" className="hover:text-gray-700">Política de Privacidade</Link>
