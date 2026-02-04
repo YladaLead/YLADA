@@ -1561,6 +1561,19 @@ export async function processIncomingMessageWithCarol(
       }
     }
 
+    // Se a pessoa só confirmou interesse ("sim quero", "gostaria") no remarketing, enviar link da próxima sessão direto
+    const isRemarketingNaoParticipou = tags.includes('nao_participou_aula') || tags.includes('remarketing_enviado')
+    const isPositiveInterestReply =
+      /^(sim|quero|tenho\s+interesse|tenho\s+sim|gostaria|quero\s+sim|com\s+certeza|pode\s+ser|pode\s+encaixar|claro|por\s+favor|tem\s+interesse)$/i.test(msgNorm.trim()) ||
+      /^(sim\s+quero|quero\s+sim|gostaria\s+sim|sim\s+gostaria)$/i.test(msgNorm.trim())
+    if (!selectedSession && workshopSessions.length > 0 && isRemarketingNaoParticipou && isPositiveInterestReply) {
+      selectedSession = workshopSessions[0]
+      console.log('[Carol AI] ✅ Confirmação de interesse no remarketing: enviando link da próxima sessão direto', {
+        sessionId: selectedSession.id,
+        message: msgNorm.substring(0, 50),
+      })
+    }
+
     // Se detectou escolha, enviar imagem + link e retornar
     // Enviar link quando: tem tag de workshop OU o form já gravou workshop_options_ids (opções enviadas).
     // Assim, mesmo sem tag recebeu_link_workshop (ex.: admin removeu), se a pessoa escolhe opção 1/2, envia o link.
@@ -2750,13 +2763,24 @@ Se sim, eu te encaixo no próximo horário. Qual período fica melhor pra você:
 }
 
 /**
- * Dispara remarketing para quem agendou mas não participou
+ * Dispara remarketing para quem agendou mas não participou.
+ *
+ * REGRAS DE EXCLUSÃO (não envia para):
+ * - Quem tem tag participou_aula (já participou da aula)
+ * - Quem tem tag remarketing_enviado (já recebeu este disparo antes)
+ * - Quem já recebeu remarketing HOJE (mesmo dia calendário Brasília) — evita duplicado no mesmo dia
+ *
+ * Envia apenas para os demais, uma vez por pessoa por dia.
  */
 export async function sendRemarketingToNonParticipants(): Promise<{
   sent: number
   errors: number
   aborted?: boolean
 }> {
+  const tz = 'America/Sao_Paulo'
+  const now = new Date()
+  const todayStr = now.toLocaleDateString('en-CA', { timeZone: tz }) // YYYY-MM-DD
+
   try {
     // 1. Buscar conversas com tag "nao_participou_aula" ou "adiou_aula"
     const { data: conversations } = await supabaseAdmin
@@ -2769,14 +2793,14 @@ export async function sendRemarketingToNonParticipants(): Promise<{
       return { sent: 0, errors: 0 }
     }
 
-    // 2. Filtrar quem não participou
+    // 2. Filtrar: não participou E não participou_aula (excluir quem já participou)
     const nonParticipants = conversations.filter((conv) => {
       const context = conv.context || {}
       const tags = Array.isArray(context.tags) ? context.tags : []
       return (
-        tags.includes('nao_participou_aula') ||
-        tags.includes('adiou_aula')
-      ) && !tags.includes('participou_aula')
+        (tags.includes('nao_participou_aula') || tags.includes('adiou_aula')) &&
+        !tags.includes('participou_aula')
+      )
     })
 
     if (nonParticipants.length === 0) {
@@ -2836,25 +2860,25 @@ export async function sendRemarketingToNonParticipants(): Promise<{
           return { sent, errors, aborted: true }
         }
         const context = conv.context || {}
-        
-        // Verificar se já recebeu remarketing recentemente (evitar spam)
-        // Se já enviou há menos de 2 horas, pular
-        if (context.last_remarketing_at) {
-          const lastRemarketing = new Date(context.last_remarketing_at)
-          const now = new Date()
-          const hoursSinceLastRemarketing = (now.getTime() - lastRemarketing.getTime()) / (1000 * 60 * 60)
-          
-          if (hoursSinceLastRemarketing < 2) {
-            console.log(`[Carol Remarketing] ⏭️ Pulando ${conv.phone} - já recebeu remarketing há ${hoursSinceLastRemarketing.toFixed(2)}h`)
-            continue
-          }
-        }
-        
-        // Verificar se já tem tag "remarketing_enviado" (evitar duplicação)
         const tags = Array.isArray(context.tags) ? context.tags : []
+
+        // Excluir quem já participou (rechecagem defensiva)
+        if (tags.includes('participou_aula')) {
+          console.log(`[Carol Remarketing] ⏭️ Pulando ${conv.phone} - já participou da aula`)
+          continue
+        }
+        // Excluir quem já tem tag remarketing_enviado (evitar duplicação)
         if (tags.includes('remarketing_enviado')) {
           console.log(`[Carol Remarketing] ⏭️ Pulando ${conv.phone} - já tem tag remarketing_enviado`)
           continue
+        }
+        // Excluir quem já recebeu remarketing HOJE (mesmo dia calendário) — 1 disparo por pessoa por dia
+        if (context.last_remarketing_at) {
+          const lastDateStr = new Date(context.last_remarketing_at).toLocaleDateString('en-CA', { timeZone: tz })
+          if (lastDateStr === todayStr) {
+            console.log(`[Carol Remarketing] ⏭️ Pulando ${conv.phone} - já recebeu remarketing hoje`)
+            continue
+          }
         }
 
         // Carol usa apenas primeiro nome. Nunca chamar de "Ylada"/nome do negócio.
@@ -2935,6 +2959,13 @@ Se sim, eu te encaixo no próximo horário. Qual período fica melhor pra você:
  * - Quem tem etiqueta não participou / adiou (exceto já agendado para hoje 20h)
  * - Quem a gente já contatou mas nunca respondeu (não chegou a responder a primeira vez)
  * Mensagem: "Hoje temos aula às 20h. Gostaria de participar?"
+ *
+ * REGRAS DE EXCLUSÃO (não envia para):
+ * - Quem tem tag participou_aula
+ * - Quem já está agendado para hoje 20h
+ * - Quem já recebeu ESTE disparo HOJE (remarketing_hoje_20h_enviado_at = hoje) — 1 por pessoa por dia
+ *
+ * Envia apenas para os demais, uma vez por pessoa por dia.
  */
 export async function sendRemarketingAulaHoje20h(): Promise<{
   sent: number
@@ -3058,9 +3089,18 @@ export async function sendRemarketingAulaHoje20h(): Promise<{
         const context = conv.context || {}
         const tags = Array.isArray(context.tags) ? context.tags : []
 
-        if (context.remarketing_hoje_20h_enviado_at) {
+        // Excluir quem já participou (rechecagem defensiva)
+        if (tags.includes('participou_aula')) {
           skipped++
           continue
+        }
+        // Excluir só quem já recebeu ESTE disparo HOJE (mesmo dia) — permite reenviar em outro dia
+        if (context.remarketing_hoje_20h_enviado_at) {
+          const enviadoDateStr = new Date(context.remarketing_hoje_20h_enviado_at).toLocaleDateString('en-CA', { timeZone: tz })
+          if (enviadoDateStr === todayStr) {
+            skipped++
+            continue
+          }
         }
 
         const registrationName = await getRegistrationName(conv.phone, 'nutri')
