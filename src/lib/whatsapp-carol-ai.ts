@@ -2931,7 +2931,9 @@ Se sim, eu te encaixo no próximo horário. Qual período fica melhor pra você:
 }
 
 /**
- * Disparo "Remarque aula hoje 20h": quem não participou, exceto quem já está agendado para hoje às 20h.
+ * Disparo "Remarque aula hoje 20h":
+ * - Quem tem etiqueta não participou / adiou (exceto já agendado para hoje 20h)
+ * - Quem a gente já contatou mas nunca respondeu (não chegou a responder a primeira vez)
  * Mensagem: "Hoje temos aula às 20h. Gostaria de participar?"
  */
 export async function sendRemarketingAulaHoje20h(): Promise<{
@@ -2966,7 +2968,7 @@ export async function sendRemarketingAulaHoje20h(): Promise<{
       }
     }
 
-    // 2. Conversas que não participaram (mesmo critério do remarketing)
+    // 2. Conversas ativas nutri
     const { data: conversations } = await supabaseAdmin
       .from('whatsapp_conversations')
       .select('id, phone, name, context')
@@ -2977,16 +2979,36 @@ export async function sendRemarketingAulaHoje20h(): Promise<{
       return { sent: 0, errors: 0, skipped: 0 }
     }
 
+    // Quem já respondeu alguma vez (tem mensagem do cliente)
+    const { data: msgsCustomer } = await supabaseAdmin
+      .from('whatsapp_messages')
+      .select('conversation_id')
+      .eq('sender_type', 'customer')
+    const repliedIds = new Set((msgsCustomer || []).map((r: { conversation_id: string }) => r.conversation_id))
+
+    // Quem a gente já contatou (tem mensagem bot/agent)
+    const { data: msgsBot } = await supabaseAdmin
+      .from('whatsapp_messages')
+      .select('conversation_id')
+      .in('sender_type', ['bot', 'agent'])
+    const contactedIds = new Set((msgsBot || []).map((r: { conversation_id: string }) => r.conversation_id))
+
+    // Incluir: (1) quem tem etiqueta não participou/adiou OU (2) quem a gente contatou mas nunca respondeu
     const nonParticipants = conversations.filter((conv) => {
       const context = conv.context || {}
       const tags = Array.isArray(context.tags) ? context.tags : []
-      const didNotParticipate =
-        (tags.includes('nao_participou_aula') || tags.includes('adiou_aula')) && !tags.includes('participou_aula')
-      if (!didNotParticipate) return false
-      // Excluir quem já está agendado para hoje 20h
+      const participou = tags.includes('participou_aula')
       const sessionId = context.workshop_session_id
-      if (sessionId && sessionIdsHoje20h.includes(sessionId)) return false
-      return true
+      const jaAgendadoHoje20h = sessionId && sessionIdsHoje20h.includes(sessionId)
+
+      if (participou || jaAgendadoHoje20h) return false
+
+      const didNotParticipate =
+        (tags.includes('nao_participou_aula') || tags.includes('adiou_aula')) && !participou
+      const weContacted = contactedIds.has(conv.id)
+      const neverReplied = weContacted && !repliedIds.has(conv.id)
+
+      return didNotParticipate || neverReplied
     })
 
     if (nonParticipants.length === 0) {
