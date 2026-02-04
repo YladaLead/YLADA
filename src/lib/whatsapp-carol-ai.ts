@@ -737,6 +737,9 @@ export async function generateCarolResponse(
     
     if (context.tags && context.tags.length > 0) {
       contextText += `\nTags da conversa: ${context.tags.join(', ')}\n`
+      if (context.tags.includes('veio_tirar_duvida')) {
+        contextText += `\n⚠️ Esta pessoa veio pelo botão "Tirar dúvida" (assistiu o vídeo). NÃO existe mais aula prática. Seu foco é APENAS: tirar as dúvidas dela e VENDER o sistema (planos, checkout, sair do improviso). NÃO mencione nem ofereça aula ao vivo, opções de horário ou agendamento de aula.\n`
+      }
       if (context.tags.includes('participou_aula')) {
         contextText += `\n⚠️ Tag "Participou" presente: esta pessoa PARTICIPOU da aula. NUNCA use "não conseguiu participar da aula anterior". Adapte o tom (ex.: participou e ficou de pensar – fazer follow-up, não remarketing de quem faltou).\n`
       }
@@ -1297,6 +1300,11 @@ export async function processIncomingMessageWithCarol(
     // antes do form enviar (60s), o form não manda; então Carol DEVE enviar boas-vindas + opções.
     const isMessageFromButton = /acabei\s+de\s+me\s+inscrever|me\s+inscrev(i|er)|gostaria\s+de\s+agendar|inscrev(er|i).*aula|ylada\s+nutri.*agendar/i.test(msgNorm)
 
+    // a6: Veio da página do vídeo ou da página de vendas para TIRAR DÚVIDA — não disparar fluxo de aula; apenas responder.
+    const isFromVideoOrLandingDuvida = rawIsFirstMessage && (
+      /assisti\s+o\s+v[ií]deo|vi\s+o\s+v[ií]deo|tirar\s+d[uú]vida|gostaria\s+de\s+tirar\s+d[uú]vidas?|estou\s+na\s+p[aá]gina\s+(da\s+)?(ylada\s+)?nutri|p[aá]gina\s+de\s+vendas/i.test(msgNorm)
+    )
+
     // 4. Verificar se participou ou não
     // 🚫 Regra definitiva: quem já PARTICIPOU nunca deve cair em "primeira mensagem"/boas-vindas.
     const participated = tags.includes('participou_aula') || tags.includes('participou')
@@ -1307,8 +1315,9 @@ export async function processIncomingMessageWithCarol(
       !suppressWelcomeFlow &&
       !formAlreadySentWelcome &&
       !isShortNeutralReply &&
-      !deniesSignup
-    
+      !deniesSignup &&
+      !isFromVideoOrLandingDuvida
+
     console.log('[Carol AI] 🔍 Detecção de primeira mensagem:', {
       conversationId,
       totalMessages: messageHistory?.length || 0,
@@ -1317,6 +1326,7 @@ export async function processIncomingMessageWithCarol(
       formAlreadySentWelcome,
       isShortNeutralReply,
       isMessageFromButton,
+      isFromVideoOrLandingDuvida,
       suppressWelcomeFlow,
       isFirstMessage,
       hasWorkshopTag: tags.includes('veio_aula_pratica') || tags.includes('recebeu_link_workshop'),
@@ -1558,6 +1568,34 @@ export async function processIncomingMessageWithCarol(
         
         // Nota: preferência por período (manhã/tarde/noite) NÃO deve auto-selecionar sessão nem enviar link.
         // Isso é tratado na resposta da Carol (enviar opções e pedir "1 ou 2"), para evitar enviar link cedo demais.
+      }
+
+      // Se a última mensagem do bot foi o convite "Hoje temos aula às 20h. Gostaria de participar?" e a pessoa respondeu "quero"/"sim", enviar link da aula de hoje à noite (não reenviar recepção)
+      const lastBotWasHoje20hInvite = /hoje\s+temos\s+aula|gostaria\s+de\s+participar/i.test(lastBotText)
+      const isPositiveInterest =
+        /^(sim|quero|tenho\s+interesse|tenho\s+sim|gostaria|quero\s+sim|com\s+certeza|pode\s+ser|pode\s+encaixar|claro|por\s+favor|tem\s+interesse)$/i.test(msgNorm.trim()) ||
+        /^(sim\s+quero|quero\s+sim|gostaria\s+sim|sim\s+gostaria)$/i.test(msgNorm.trim())
+      if (!selectedSession && list.length > 0 && lastBotWasHoje20hInvite && isPositiveInterest) {
+        const tzBR = 'America/Sao_Paulo'
+        const todayStrBR = new Date().toLocaleDateString('en-CA', { timeZone: tzBR })
+        const sessionHoje20h = list.find((s: { starts_at: string }) => {
+          const d = new Date(s.starts_at)
+          const sessionDateStr = d.toLocaleDateString('en-CA', { timeZone: tzBR })
+          const sessionHour = parseInt(d.toLocaleString('pt-BR', { hour: '2-digit', hour12: false, timeZone: tzBR }), 10)
+          return sessionDateStr === todayStrBR && sessionHour === 20
+        })
+        if (sessionHoje20h) {
+          selectedSession = {
+            id: sessionHoje20h.id,
+            title: sessionHoje20h.title,
+            starts_at: sessionHoje20h.starts_at,
+            zoom_link: sessionHoje20h.zoom_link,
+          }
+          console.log('[Carol AI] ✅ Resposta ao convite "Hoje 20h": enviando link da aula de hoje à noite', {
+            sessionId: selectedSession.id,
+            message: msgNorm.substring(0, 40),
+          })
+        }
       }
     }
 
@@ -1946,7 +1984,10 @@ Nos vemos em breve! 😊
     // Se já tinha mensagem nossa (form enviou), só resumo curto para não repetir.
     const carolInstructionFromContext = (context as any)?.carol_instruction
     let carolInstruction: string | undefined
-    if (isMessageFromButton && !isFirstMessage) {
+    if (isFromVideoOrLandingDuvida) {
+      // Veio da página do vídeo/página de vendas pelo botão "Tirar dúvida". Não há mais aula prática; foco só em tirar dúvidas e vender.
+      carolInstruction = `Esta pessoa assistiu o vídeo e clicou em "Tirar dúvida". NÃO existe mais aula prática — NÃO mencione, NÃO ofereça e NÃO envie opções de aula. Seu objetivo aqui é APENAS: (1) tirar as dúvidas que ela tiver e (2) vender o sistema (planos mensal/anual, sair do improviso). Responda de forma curta e acolhedora na primeira mensagem (ex.: "Oi! Que bom você ter assistido. No que posso te ajudar?"). Nas mensagens seguintes: responda às dúvidas e conduza para a venda (próximo passo, planos, checkout).`
+    } else if (isMessageFromButton && !isFirstMessage) {
       const fmtOpt = (s: { starts_at: string }) => {
         const d = new Date(s.starts_at)
         const w = d.toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo', weekday: 'long' })
@@ -2188,6 +2229,44 @@ Finalize com: "Responde 1 ou 2 😊".`
       is_bot_response: true,
     })
 
+    // 9.1. Se veio por "Tirar dúvida" (vídeo/página de vendas), notificar o responsável
+    if (isFromVideoOrLandingDuvida) {
+      try {
+        const notificationPhone = process.env.Z_API_NOTIFICATION_PHONE
+        if (notificationPhone) {
+          const { data: convData } = await supabaseAdmin
+            .from('whatsapp_conversations')
+            .select('name, phone')
+            .eq('id', conversationId)
+            .single()
+          const displayName = convData?.name || 'Sem nome'
+          const displayPhone = convData?.phone || phone
+          const notificationMessage = `💬 *Alguém clicou em Tirar dúvida* (página de vendas Nutri)\n\nA Carol já acolheu e perguntou no que pode ajudar.\n\n👤 *Nome:* ${displayName}\n📱 *Telefone:* ${displayPhone}\n\n_Se quiser assumir a conversa, entre no WhatsApp dessa pessoa._`
+          const { data: notificationInstance } = await supabaseAdmin
+            .from('z_api_instances')
+            .select('instance_id, token')
+            .eq('status', 'connected')
+            .limit(1)
+            .maybeSingle()
+          if (notificationInstance) {
+            const notificationClient = createZApiClient({
+              instanceId: notificationInstance.instance_id,
+              token: notificationInstance.token,
+            })
+            await notificationClient.sendTextMessage({
+              phone: notificationPhone,
+              message: notificationMessage,
+            })
+            console.log('[Carol AI] ✅ Notificação "Tirar dúvida" enviada para responsável:', notificationPhone)
+          } else {
+            console.warn('[Carol AI] ⚠️ Instância Z-API não encontrada para notificação Tirar dúvida')
+          }
+        }
+      } catch (notificationError: any) {
+        console.error('[Carol AI] ❌ Erro ao enviar notificação Tirar dúvida:', notificationError)
+      }
+    }
+
     // 10. Detectar se precisa de atendimento humano e enviar notificação
     const needsHumanSupport = detectNeedsHumanSupport(carolResponse, message, conversationHistory)
     if (needsHumanSupport.detected) {
@@ -2266,6 +2345,13 @@ Finalize com: "Responde 1 ou 2 😊".`
       nextContext = {
         ...nextContext,
         tags: [...new Set([...prevTags, 'veio_aula_pratica', 'primeiro_contato'])],
+      }
+    } else if (rawIsFirstMessage && isFromVideoOrLandingDuvida) {
+      // Veio para tirar dúvida (vídeo/página de vendas) — não fluxo de aula; só primeiro_contato e origem para relatório.
+      const prevTags = Array.isArray(prevCtx.tags) ? prevCtx.tags : []
+      nextContext = {
+        ...nextContext,
+        tags: [...new Set([...prevTags, 'primeiro_contato', 'veio_tirar_duvida'])],
       }
     } else if (rawIsFirstMessage && deniesSignup) {
       // Pessoa negou inscrição na primeira mensagem: não iniciar fluxo do workshop.

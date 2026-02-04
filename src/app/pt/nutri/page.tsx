@@ -176,7 +176,7 @@ export default function NutriLandingPage() {
                   href="/pt/nutri/checkout?plan=annual"
                   className="w-full sm:flex-1 sm:max-w-xs inline-flex justify-center items-center px-8 py-4 rounded-xl text-lg font-bold bg-gradient-to-r from-[#2563EB] to-[#3B82F6] text-white hover:from-[#3B82F6] hover:to-[#1D4ED8] transition-all shadow-xl"
                 >
-                  Aderir ao sistema
+                  Sair do improviso
                 </Link>
               </div>
             </div>
@@ -733,7 +733,7 @@ export default function NutriLandingPage() {
                     className="w-full bg-gradient-to-r from-[#2563EB] to-[#3B82F6] text-white px-6 py-4 rounded-xl text-lg font-bold hover:from-[#3B82F6] hover:to-[#1D4ED8] transition-all shadow-xl cursor-pointer active:scale-95"
                     style={{ touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent', pointerEvents: 'auto', position: 'relative', zIndex: 100, userSelect: 'none', WebkitUserSelect: 'none', minHeight: '48px' }}
                   >
-                    👉 Quero sair do improviso e aderir ao sistema
+                    👉 Quero sair do improviso
                   </button>
                 </div>
               </div>
@@ -786,7 +786,7 @@ export default function NutriLandingPage() {
                 href="#oferta"
                 className="inline-block bg-white text-[#2563EB] px-10 py-5 rounded-xl text-xl font-bold hover:bg-gray-100 transition-all shadow-2xl"
               >
-                Quero sair do improviso e aderir ao sistema
+                Quero sair do improviso
               </Link>
             </div>
           </div>

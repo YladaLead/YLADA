@@ -138,7 +138,7 @@ export default function NutriVideoPage() {
               href={checkoutUrl}
               className="w-full sm:w-auto inline-flex justify-center items-center px-8 py-4 rounded-xl text-lg font-bold bg-gradient-to-r from-[#2563EB] to-[#3B82F6] text-white hover:from-[#3B82F6] hover:to-[#1D4ED8] transition-all shadow-xl hover:shadow-2xl"
             >
-              Aderir ao sistema
+              Sair do improviso
             </Link>
           </div>
         </section>
