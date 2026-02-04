@@ -94,28 +94,28 @@ export default function HomePageES() {
                 <div className="text-5xl mb-4">🎯</div>
                 <h3 className="text-xl font-bold text-gray-900 mb-3">Atracción y Diagnóstico</h3>
                 <p className="text-gray-600 text-sm leading-relaxed">
-                  Crea enlaces, quizzes y evaluaciones inteligentes que provocan curiosidad cualificada, generan valor inmediato y filtran curiosos de personas realmente interesadas — antes de que empiece la conversación.
+                  Cree enlaces, quizzes y evaluaciones inteligentes que provocan la conversación correcta, entregan valor inmediato y filtran curiosos de personas realmente interesadas — antes del primer contacto.
                 </p>
               </div>
               <div className="text-center">
                 <div className="text-5xl mb-4">💬</div>
                 <h3 className="text-xl font-bold text-gray-900 mb-3">Conversación Guiada e Inteligente</h3>
                 <p className="text-gray-600 text-sm leading-relaxed">
-                  Utiliza comunicación integrada e inteligencia artificial para orientar el diálogo, ajustar el enfoque al contexto y mantener el contacto activo con claridad, naturalidad y estrategia.
+                  Conduzca el diálogo con claridad y estrategia. La inteligencia artificial de YLADA orienta qué decir, cuándo decir y cómo conducir, ajustando el enfoque al contexto real de cada interacción.
                 </p>
               </div>
               <div className="text-center">
                 <div className="text-5xl mb-4">📊</div>
                 <h3 className="text-xl font-bold text-gray-900 mb-3">Rendimiento y Autoridad de Campo</h3>
                 <p className="text-gray-600 text-sm leading-relaxed">
-                  Acompaña interacciones, decisiones y resultados en tiempo real para mejorar conversión, previsibilidad y posicionamiento profesional, individual o en equipo.
+                  Acompañe decisiones, interacciones y resultados para aumentar conversión, previsibilidad y credibilidad profesional, fortaleciendo la confianza individual y del equipo en el campo.
                 </p>
               </div>
               <div className="text-center">
                 <div className="text-5xl mb-4">🌍</div>
                 <h3 className="text-xl font-bold text-gray-900 mb-3">Escala Multimercado</h3>
                 <p className="text-gray-600 text-sm leading-relaxed">
-                  Aplica el mismo motor de generación de contactos y conversaciones en diferentes áreas, países y modelos de negocio, sin perder personalización.
+                  Use el mismo motor de generación de contactos y conversaciones en diferentes áreas, países y modelos de negocio — sin perder personalización ni control.
                 </p>
               </div>
             </div>

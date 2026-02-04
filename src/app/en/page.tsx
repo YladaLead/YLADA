@@ -94,28 +94,28 @@ export default function HomePageEN() {
                 <div className="text-5xl mb-4">🎯</div>
                 <h3 className="text-xl font-bold text-gray-900 mb-3">Attraction and Diagnosis</h3>
                 <p className="text-gray-600 text-sm leading-relaxed">
-                  Create links, quizzes, and smart assessments that spark qualified curiosity, deliver immediate value, and filter the curious from the genuinely interested, before the conversation even starts.
+                  Create links, quizzes, and smart assessments that spark the right conversation, deliver immediate value, and filter the curious from the genuinely interested — before the first contact.
                 </p>
               </div>
               <div className="text-center">
                 <div className="text-5xl mb-4">💬</div>
                 <h3 className="text-xl font-bold text-gray-900 mb-3">Guided and Intelligent Conversation</h3>
                 <p className="text-gray-600 text-sm leading-relaxed">
-                  Use integrated communication and artificial intelligence to guide the dialogue, adapt the approach to context, and keep the contact active with clarity, naturalness, and strategy.
+                  Lead the dialogue with clarity and strategy. YLADA’s AI guides what to say, when to say it, and how to lead, adjusting the approach to the real context of each interaction.
                 </p>
               </div>
               <div className="text-center">
                 <div className="text-5xl mb-4">📊</div>
                 <h3 className="text-xl font-bold text-gray-900 mb-3">Field Performance and Authority</h3>
                 <p className="text-gray-600 text-sm leading-relaxed">
-                  Track interactions, decisions, and results in real time to improve conversion, predictability, and professional positioning — individually or as a team.
+                  Track decisions, interactions, and results to increase conversion, predictability, and professional credibility, strengthening individual and team confidence in the field.
                 </p>
               </div>
               <div className="text-center">
                 <div className="text-5xl mb-4">🌍</div>
                 <h3 className="text-xl font-bold text-gray-900 mb-3">Multi-Market Scale</h3>
                 <p className="text-gray-600 text-sm leading-relaxed">
-                  Apply the same engine for generating contacts and conversations across different areas, countries, and business models, without losing personalization.
+                  Use the same engine for generating contacts and conversations across different areas, countries, and business models — without losing personalization or control.
                 </p>
               </div>
             </div>

@@ -155,7 +155,7 @@ export default function HomePage() {
                 <div className="text-5xl mb-4">🎯</div>
                 <h3 className="text-xl font-bold text-gray-900 mb-3">Atração e Diagnóstico</h3>
                 <p className="text-gray-600 text-sm leading-relaxed">
-                  Crie links, quizzes e avaliações inteligentes que provocam curiosidade qualificada, geram valor imediato e filtram curiosos de pessoas realmente interessadas, antes mesmo da conversa começar.
+                  Crie links, quizzes e avaliações inteligentes que provocam a conversa certa, entregam valor imediato e filtram curiosos de pessoas realmente interessadas — antes mesmo do primeiro contato.
                 </p>
               </div>
               
@@ -163,7 +163,7 @@ export default function HomePage() {
                 <div className="text-5xl mb-4">💬</div>
                 <h3 className="text-xl font-bold text-gray-900 mb-3">Conversa Guiada e Inteligente</h3>
                 <p className="text-gray-600 text-sm leading-relaxed">
-                  Utilize comunicação integrada e inteligência artificial para orientar o diálogo, ajustar a abordagem ao contexto e manter o contato ativo com clareza, naturalidade e estratégia.
+                  Conduza o diálogo com clareza e estratégia. A inteligência artificial do YLADA orienta o que falar, quando falar e como conduzir, ajustando a abordagem ao contexto real de cada interação.
                 </p>
               </div>
               
@@ -171,7 +171,7 @@ export default function HomePage() {
                 <div className="text-5xl mb-4">📊</div>
                 <h3 className="text-xl font-bold text-gray-900 mb-3">Performance e Autoridade de Campo</h3>
                 <p className="text-gray-600 text-sm leading-relaxed">
-                  Acompanhe interações, decisões e resultados em tempo real para melhorar conversão, previsibilidade e posicionamento profissional, individualmente ou em time.
+                  Acompanhe decisões, interações e resultados para aumentar conversão, previsibilidade e credibilidade profissional, fortalecendo a confiança individual e do time no campo.
                 </p>
               </div>
               
@@ -179,7 +179,7 @@ export default function HomePage() {
                 <div className="text-5xl mb-4">🌍</div>
                 <h3 className="text-xl font-bold text-gray-900 mb-3">Escala Multimercado</h3>
                 <p className="text-gray-600 text-sm leading-relaxed">
-                  Aplique o mesmo motor de geração de contatos e conversas em diferentes áreas, países e modelos de negócio, sem perder personalização.
+                  Use o mesmo motor de geração de contatos e conversas em diferentes áreas, países e modelos de negócio — sem perder personalização nem controle.
                 </p>
               </div>
             </div>

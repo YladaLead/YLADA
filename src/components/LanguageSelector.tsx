@@ -35,7 +35,8 @@ export default function LanguageSelector({ className = '' }: LanguageSelectorPro
     if (pathWithoutLang === '/us' || pathWithoutLang.startsWith('/us/')) {
       pathWithoutLang = pathWithoutLang === '/us' ? '/' : pathWithoutLang.slice(4) || '/'
     }
-    const newPath = `/${langCode}${pathWithoutLang}`.replace(/\/+/g, '/')
+    // Na raiz (/), ir para /pt, /en ou /es sem barra trailing
+    const newPath = pathWithoutLang === '/' ? `/${langCode}` : `/${langCode}${pathWithoutLang}`.replace(/\/+/g, '/')
     window.location.href = newPath
   }
 
@@ -51,28 +52,28 @@ export default function LanguageSelector({ className = '' }: LanguageSelectorPro
 
       {isOpen && (
         <>
-          {/* Overlay para fechar ao clicar fora */}
+          {/* Overlay para fechar ao clicar fora — acima do header (z-50) */}
           <div 
-            className="fixed inset-0 z-10" 
+            className="fixed inset-0 z-[100]" 
             onClick={() => setIsOpen(false)}
           />
           
-          {/* Dropdown */}
-          <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 z-20">
+          {/* Dropdown — acima do overlay para ser clicável */}
+          <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 z-[110]">
             <div className="py-1">
               {languages.map((lang) => (
                 <button
                   key={lang}
                   onClick={() => handleLanguageChange(lang)}
                   className={`w-full px-4 py-2 text-left text-sm transition-colors flex items-center justify-between text-gray-700 hover:bg-gray-50 ${
-                    currentLang === lang ? 'bg-blue-50 text-blue-600' : ''
+                    displayLang === lang ? 'bg-blue-50 text-blue-600' : ''
                   }`}
                 >
                   <div className="flex items-center space-x-3">
                     <span className="text-lg">{languageFlags[lang]}</span>
                     <span>{languageNames[lang]}</span>
                   </div>
-                  {currentLang === lang && (
+                  {displayLang === lang && (
                     <span className="text-xs text-blue-600 font-medium">✓</span>
                   )}
                 </button>
