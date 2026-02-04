@@ -1,5 +1,7 @@
 /**
  * DIAGNÓSTICOS: Calculadora Proteína - ÁREA COACH
+ * Diagnóstico baseado na comparação entre ingestão informada e recomendação.
+ * Sempre direciona ao especialista (dono da plataforma).
  */
 
 import { DiagnosticosPorFerramenta } from '../types'
@@ -7,22 +9,22 @@ import { DiagnosticosPorFerramenta } from '../types'
 export const calculadoraProteinaDiagnosticos: DiagnosticosPorFerramenta = {
   coach: {
     baixaProteina: {
-      diagnostico: '📋 ANÁLISE: Sua ingestão proteica estimada está abaixo do recomendado, o que pode impactar energia, saciedade, recuperação muscular e manutenção de massa magra.',
-      causaRaiz: '🔍 CONTEXTO MAIS COMUM: Em ações educativas, observamos que muitas mulheres consomem menos proteína do que imaginam, principalmente por falta de planejamento ou rotina alimentar irregular — algo comum fora do Brasil.',
-      acaoImediata: '⚡ ORIENTAÇÃO GERAL: Aumentar a presença de fontes proteicas nas refeições principais costuma ser o primeiro ajuste recomendado.',
-      proximoPasso: '🎯 PRÓXIMO PASSO (educativo): Essa verificação mostra apenas um recorte. Uma análise de bem-estar mais ampla ajuda a entender quanto, quando e como ajustar proteína de forma adequada à sua rotina.'
+      diagnostico: '📋 ANÁLISE: Sua ingestão informada está abaixo do adequado para você. A recomendação para você aparece no resultado (g/dia e g por kg). Em geral usa-se entre 1,2 e 2,2 g de proteína por kg de peso, conforme objetivo e atividade.',
+      causaRaiz: '🔍 CONTEXTO MAIS COMUM: Muitas pessoas consomem menos proteína do que imaginam, por falta de planejamento ou rotina irregular. Uma análise com o especialista da plataforma ajuda a definir quanto, quando e como ajustar de forma adequada.',
+      acaoImediata: '⚡ ORIENTAÇÃO GERAL: Aumente fontes proteicas nas refeições principais. Para um plano personalizado, consulte o especialista da plataforma.',
+      proximoPasso: '🎯 PRÓXIMO PASSO: Para confirmar sua necessidade exata e um plano adequado à sua rotina, consulte o especialista da plataforma.'
     },
     proteinaNormal: {
-      diagnostico: '📋 ANÁLISE: Sua ingestão proteica estimada está dentro de uma faixa adequada para seu nível de atividade e objetivo informado.',
-      causaRaiz: '🔍 CONTEXTO MAIS COMUM: Mesmo quando a quantidade está adequada, ajustes de distribuição ao longo do dia podem melhorar aproveitamento nutricional.',
-      acaoImediata: '⚡ ORIENTAÇÃO GERAL: Manter o consumo atual e observar como a proteína está distribuída entre as refeições.',
-      proximoPasso: '🎯 PRÓXIMO PASSO (educativo): Uma análise mais detalhada pode identificar oportunidades simples de otimização nutricional.'
+      diagnostico: '📋 ANÁLISE: Sua ingestão informada está adequada em relação à recomendação para você (g/dia e g por kg no resultado). A faixa de 1,2 a 2,2 g/kg é a referência usual, variando com objetivo e atividade.',
+      causaRaiz: '🔍 CONTEXTO MAIS COMUM: Boa quantidade em relação à meta. Ajustes de distribuição ao longo do dia podem melhorar ainda mais o aproveitamento. O especialista pode identificar oportunidades simples.',
+      acaoImediata: '⚡ ORIENTAÇÃO GERAL: Mantenha o consumo atual e a distribuição entre refeições. Para acompanhamento, consulte o especialista da plataforma.',
+      proximoPasso: '🎯 PRÓXIMO PASSO: Para acompanhamento e otimizações, consulte o especialista da plataforma.'
     },
     altaProteina: {
-      diagnostico: '📋 ANÁLISE: Sua ingestão proteica estimada está acima da faixa normalmente necessária para a maioria das pessoas.',
-      causaRaiz: '🔍 CONTEXTO MAIS COMUM: Consumir proteína em excesso nem sempre gera benefícios adicionais e pode indicar desequilíbrio na distribuição de outros nutrientes.',
-      acaoImediata: '⚡ ORIENTAÇÃO GERAL: Ajustar a ingestão para uma faixa mais eficiente costuma trazer melhor equilíbrio nutricional.',
-      proximoPasso: '🎯 PRÓXIMO PASSO (educativo): Uma análise de bem-estar ajuda a entender se sua ingestão está adequada ou pode ser otimizada.'
+      diagnostico: '📋 ANÁLISE: Sua ingestão informada está acima do recomendado para você. O adequado para você está no resultado (g/dia e g por kg). Acima de 2,2 g/kg costuma não trazer ganho adicional; um especialista pode confirmar sua meta ideal.',
+      causaRaiz: '🔍 CONTEXTO MAIS COMUM: Excesso de proteína nem sempre gera benefício extra e pode desequilibrar outros nutrientes. O especialista da plataforma pode ajustar sua meta de forma personalizada.',
+      acaoImediata: '⚡ ORIENTAÇÃO GERAL: Redistribua para outros nutrientes e mantenha proteína no nível adequado (conforme resultado). Para ajuste fino, consulte o especialista da plataforma.',
+      proximoPasso: '🎯 PRÓXIMO PASSO: Para otimizar sua meta de proteína e o plano como um todo, consulte o especialista da plataforma.'
     }
   }
 }

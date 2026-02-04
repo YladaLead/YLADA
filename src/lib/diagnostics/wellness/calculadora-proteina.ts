@@ -1,7 +1,7 @@
 /**
  * DIAGNÓSTICOS: Calculadora de Proteína - ÁREA WELLNESS
- * 
- * Copiado de Nutri - pode ser personalizado depois
+ * Diagnóstico baseado na comparação entre ingestão informada e recomendação (g/dia e g/kg).
+ * Sempre direciona ao especialista (nutricionista/plataforma).
  */
 
 import { DiagnosticosPorFerramenta } from '../types'
@@ -9,31 +9,31 @@ import { DiagnosticosPorFerramenta } from '../types'
 export const calculadoraProteinaDiagnosticos: DiagnosticosPorFerramenta = {
   wellness: {
     baixaProteina: {
-      diagnostico: '📋 DIAGNÓSTICO: Sua ingestão proteica está abaixo do recomendado, o que pode afetar massa muscular, recuperação e saciedade. Durante perda de peso, proteína adequada é essencial para preservar massa muscular e otimizar resultados',
-      causaRaiz: '🔍 CAUSA RAIZ: Consumo insuficiente de alimentos proteicos ou planejamento inadequado das refeições. Estudos indicam que 70% das pessoas que treinam consomem menos proteína do que precisam para otimizar resultados. Durante perda de peso, a proteína é ainda mais crítica para evitar perda de massa muscular. Uma avaliação nutricional identifica exatamente qual é sua necessidade real e como alcançá-la',
-      acaoImediata: '⚡ AÇÃO IMEDIATA: Aumente proteínas em todas as refeições principais, especialmente se seu objetivo é perda de peso. Busque avaliação nutricional para um plano personalizado que distribua proteína ao longo do dia de forma estratégica, preservando massa muscular',
-      plano7Dias: '📅 PLANO 7 DIAS: Protocolo proteico inicial com 1.2-1.6g/kg de peso corporal (ou 2.0-2.2g/kg se objetivo for perda de peso), distribuído em 4-5 refeições, ajustado conforme sua resposta individual e objetivos',
-      suplementacao: '💊 SUPLEMENTAÇÃO: A necessidade só é definida após avaliação completa. Whey protein pode ser considerado, especialmente durante perda de peso para garantir ingestão adequada sem excesso de calorias, mas sempre de acordo com a individualidade biológica e em doses adequadas',
-      alimentacao: '🍎 ALIMENTAÇÃO: Aumente carnes magras, ovos, leguminosas e laticínios de forma estratégica. Durante perda de peso, priorize proteínas magras para maximizar saciedade e preservar massa muscular. Um plano personalizado ajusta quantidades e combinações ideais para você',
-      proximoPasso: '🎯 PRÓXIMO PASSO: Seu corpo precisa de proteína adequada para resultados — especialmente durante perda de peso para preservar massa muscular. Descubra em minutos como otimizar sua ingestão proteica com um plano personalizado.'
+      diagnostico: '📋 DIAGNÓSTICO: Sua ingestão informada está abaixo do adequado para você. Em geral recomenda-se entre 1,2 e 2,2 g de proteína por kg de peso, conforme objetivo e atividade. O adequado para você aparece no resultado acima (g/dia e g por kg).',
+      causaRaiz: '🔍 CAUSA RAIZ: Consumo insuficiente de alimentos proteicos ou planejamento inadequado das refeições. Estudos indicam que muitas pessoas consomem menos proteína do que precisam para otimizar resultados. Uma avaliação com nutricionista ou especialista identifica sua necessidade real e como alcançá-la de forma segura.',
+      acaoImediata: '⚡ AÇÃO IMEDIATA: Aumente proteínas nas refeições principais de forma gradual. Carnes magras, ovos, leguminosas e laticínios são boas fontes. Para um plano personalizado, consulte um nutricionista ou especialista.',
+      plano7Dias: '📅 PLANO 7 DIAS: Aumente progressivamente a presença de proteína em 4-5 refeições. Um especialista pode definir as quantidades ideais para você (em geral 1,2 a 2,2 g/kg conforme objetivo).',
+      suplementacao: '💊 SUPLEMENTAÇÃO: Só faz sentido após avaliação completa. Um nutricionista ou especialista define se e quanto suplementar, de forma segura.',
+      alimentacao: '🍎 ALIMENTAÇÃO: Priorize proteína em todas as refeições principais. Um plano personalizado com nutricionista ou especialista ajusta quantidades e fontes ao seu perfil.',
+      proximoPasso: '🎯 PRÓXIMO PASSO: Para confirmar sua necessidade exata e um plano personalizado, consulte um nutricionista ou especialista da plataforma.'
     },
     proteinaNormal: {
-      diagnostico: '📋 DIAGNÓSTICO: Sua ingestão proteica está adequada, mantenha o padrão e considere otimizações estratégicas. Se seu objetivo é perda de peso, esse nível ajuda a preservar massa muscular',
-      causaRaiz: '🔍 CAUSA RAIZ: Boa distribuição proteica ao longo do dia estabelecida. Pesquisas mostram que otimizações de timing podem aumentar síntese proteica em até 25%. Durante perda de peso, manter proteína adequada é fundamental para resultados sustentáveis. Uma análise nutricional identifica oportunidades específicas para você',
-      acaoImediata: '⚡ AÇÃO IMEDIATA: Mantenha consumo atual e otimize timing das refeições proteicas. Se seu objetivo é perda de peso, continue priorizando proteínas magras. Considere avaliação para identificar oportunidades de melhoria na distribuição',
-      plano7Dias: '📅 PLANO 7 DIAS: Manutenção com distribuição equilibrada, ajustada conforme seu perfil metabólico e objetivos pessoais (perda de peso, ganho de massa ou manutenção)',
-      suplementacao: '💊 SUPLEMENTAÇÃO: Uma avaliação preventiva identifica se você se beneficia de suporte adicional. Multivitamínico e ômega-3 costumam ser considerados, mas apenas após análise do seu caso e objetivos',
-      alimentacao: '🍎 ALIMENTAÇÃO: Mantenha padrão atual com foco em qualidade proteica. Se seu objetivo é perda de peso, continue priorizando proteínas magras. Um plano otimizado considera combinações específicas para maximizar absorção conforme seu perfil',
-      proximoPasso: '🎯 PRÓXIMO PASSO: Parabéns! Seu consumo proteico está adequado. Descubra como estratégias avançadas de timing podem potencializar ainda mais seus resultados, especialmente durante perda de peso.'
+      diagnostico: '📋 DIAGNÓSTICO: Sua ingestão informada está adequada em relação à recomendação para você (conforme g/dia e g por kg no resultado). Em geral a faixa de 1,2 a 2,2 g por kg de peso é usada como referência, variando com objetivo e atividade.',
+      causaRaiz: '🔍 CAUSA RAIZ: Boa distribuição proteica em relação à sua meta. Pesquisas mostram que otimizações de timing podem potencializar resultados. Uma avaliação com especialista identifica oportunidades específicas para você.',
+      acaoImediata: '⚡ AÇÃO IMEDIATA: Mantenha o consumo atual e a distribuição ao longo do dia. Para acompanhamento e ajustes finos, consulte um nutricionista ou especialista.',
+      plano7Dias: '📅 PLANO 7 DIAS: Manutenção com distribuição equilibrada. Um especialista pode refinar quantidades e horários conforme seu perfil.',
+      suplementacao: '💊 SUPLEMENTAÇÃO: Uma avaliação identifica se você se beneficia de suporte adicional. Consulte um nutricionista ou especialista para decisões seguras.',
+      alimentacao: '🍎 ALIMENTAÇÃO: Mantenha o padrão atual com foco em qualidade. Um plano com especialista pode otimizar combinações e horários.',
+      proximoPasso: '🎯 PRÓXIMO PASSO: Parabéns! Sua ingestão está adequada. Para acompanhamento e otimizações, consulte um nutricionista ou especialista da plataforma.'
     },
     altaProteina: {
-      diagnostico: '📋 DIAGNÓSTICO: Sua ingestão proteica está elevada, o que pode ser otimizada para máximo benefício com menor sobrecarga',
-      causaRaiz: '🔍 CAUSA RAIZ: Ingestão proteica acima do necessário pode não trazer benefícios adicionais. Estudos mostram que acima de 2.2g/kg há pouco ganho adicional. Uma avaliação nutricional identifica se está dentro da faixa ideal ou pode ser ajustada',
-      acaoImediata: '⚡ AÇÃO IMEDIATA: Mantenha proteína em nível adequado (1.6-2.0g/kg) e redistribua calorias para outros nutrientes essenciais. Considere avaliação para otimização do plano',
-      plano7Dias: '📅 PLANO 7 DIAS: Otimização com redistribuição nutricional balanceada, ajustada conforme seu perfil metabólico e objetivos',
-      suplementacao: '💊 SUPLEMENTAÇÃO: Uma avaliação identifica se você realmente precisa de suplementação adicional. O protocolo é personalizado conforme seu caso',
-      alimentacao: '🍎 ALIMENTAÇÃO: Otimize distribuição proteica e diversifique outros nutrientes. Um plano personalizado ajusta quantidades e combinações ideais para você',
-      proximoPasso: '🎯 PRÓXIMO PASSO: Esse é o primeiro passo. O próximo é descobrir como otimizar sua nutrição de forma completa e equilibrada com apoio personalizado.'
+      diagnostico: '📋 DIAGNÓSTICO: Sua ingestão informada está acima do recomendado para você. O adequado para você aparece no resultado (g/dia e g por kg). Em geral acima de 2,2 g/kg há pouco ganho adicional; o ideal é confirmar com um especialista.',
+      causaRaiz: '🔍 CAUSA RAIZ: Ingestão acima do necessário costuma não trazer benefício extra e pode desequilibrar outros nutrientes. Estudos mostram que a faixa de 1,2 a 2,2 g/kg atende a maioria. Um nutricionista ou especialista confirma sua meta ideal.',
+      acaoImediata: '⚡ AÇÃO IMEDIATA: Redistribua calorias para outros nutrientes (fibras, gorduras boas, carboidratos de qualidade). Para ajuste personalizado da meta de proteína, consulte um nutricionista ou especialista.',
+      plano7Dias: '📅 PLANO 7 DIAS: Otimização com redistribuição balanceada. Um especialista ajusta as quantidades ao seu perfil e objetivos.',
+      suplementacao: '💊 SUPLEMENTAÇÃO: Uma avaliação identifica se há necessidade de suplementação. O protocolo deve ser personalizado por um especialista.',
+      alimentacao: '🍎 ALIMENTAÇÃO: Mantenha proteína em nível adequado (conforme resultado) e diversifique outros nutrientes. Um plano personalizado com especialista define as quantidades ideais.',
+      proximoPasso: '🎯 PRÓXIMO PASSO: Para otimizar sua meta de proteína e o restante da alimentação, consulte um nutricionista ou especialista da plataforma.'
     }
   }
 }
