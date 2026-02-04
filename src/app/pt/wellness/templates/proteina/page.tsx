@@ -20,7 +20,6 @@ interface ResultadoProteina {
   interpretacao: string
   cor: 'green' | 'blue' | 'orange'
   recomendacoes: string[]
-  ingestaoInformada?: number
   diagnostico?: typeof calculadoraProteinaDiagnosticos.wellness.baixaProteina | typeof calculadoraProteinaDiagnosticosCoach.coach.baixaProteina
 }
 
@@ -38,7 +37,6 @@ export default function CalculadoraProteina({ config }: TemplateBaseProps) {
   const [altura, setAltura] = useState('')
   const [atividade, setAtividade] = useState('')
   const [objetivo, setObjetivo] = useState('')
-  const [ingestaoAtual, setIngestaoAtual] = useState('')
   const [resultado, setResultado] = useState<ResultadoProteina | null>(null)
   
   // Estados para captura de lead (Coach)
@@ -137,66 +135,45 @@ export default function CalculadoraProteina({ config }: TemplateBaseProps) {
     const proteinaPorKg = Math.round(fator * 10) / 10
     const porRefeicao = Math.round(proteinaDiaria / 5) // 5 refeições
 
-    // Ingestão informada (opcional): para diagnóstico real
-    const ingestaoStr = ingestaoAtual.trim().toLowerCase()
-    const ingestaoNum =
-      ingestaoStr === '' || ingestaoStr === 'nao sei' || ingestaoStr === 'não sei'
-        ? null
-        : parseFloat(ingestaoAtual)
-    const ingestaoValida = ingestaoNum != null && !Number.isNaN(ingestaoNum) && ingestaoNum >= 0
-
     const diagnosticos = isCoach ? calculadoraProteinaDiagnosticosCoach : calculadoraProteinaDiagnosticos
     const area = isCoach ? 'coach' : 'wellness'
 
-    // Diagnóstico baseado em ingestão vs recomendação (80% e 120%)
-    let diagnosticoSelecionado = undefined
-    if (ingestaoValida && ingestaoNum != null) {
-      const ratio = ingestaoNum / proteinaDiaria
-      if (ratio < 0.8) {
-        diagnosticoSelecionado = diagnosticos[area].baixaProteina
-      } else if (ratio <= 1.2) {
-        diagnosticoSelecionado = diagnosticos[area].proteinaNormal
-      } else {
-        diagnosticoSelecionado = diagnosticos[area].altaProteina
-      }
-    }
+    // Diagnóstico por objetivo: mostra quanto precisa e orienta (perder / ganhar / manter)
+    const diagnosticoSelecionado =
+      objetivo === 'perder'
+        ? diagnosticos[area].baixaProteina
+        : objetivo === 'ganhar'
+          ? diagnosticos[area].altaProteina
+          : diagnosticos[area].proteinaNormal
 
     let interpretacao = ''
     let cor: 'green' | 'blue' | 'orange' = 'green'
     let recomendacoes: string[] = []
 
-    if (ingestaoValida && ingestaoNum != null) {
-      const ratio = ingestaoNum / proteinaDiaria
-      if (ratio < 0.8) {
-        interpretacao = `Sua ingestão informada (${Math.round(ingestaoNum)}g) está abaixo do adequado para você. O recomendado é cerca de ${proteinaDiaria}g/dia (${proteinaPorKg}g por kg de peso).`
-        cor = 'orange'
-        recomendacoes = [
-          'Aumentar ingestão de proteína de forma gradual até atingir a meta recomendada',
-          'Incluir proteína em todas as refeições principais (carnes magras, ovos, leguminosas)',
-          'Consulte um nutricionista ou especialista para um plano personalizado e seguro'
-        ]
-      } else if (ratio <= 1.2) {
-        interpretacao = `Sua ingestão informada (${Math.round(ingestaoNum)}g) está adequada para você. A recomendação é cerca de ${proteinaDiaria}g/dia (${proteinaPorKg}g por kg de peso).`
-        cor = 'green'
-        recomendacoes = [
-          'Manter o consumo atual e distribuir proteína ao longo do dia',
-          'Para acompanhamento e ajustes finos, consulte um nutricionista ou especialista'
-        ]
-      } else {
-        interpretacao = `Sua ingestão informada (${Math.round(ingestaoNum)}g) está acima do recomendado para você. O adequado é cerca de ${proteinaDiaria}g/dia (${proteinaPorKg}g por kg de peso).`
-        cor = 'blue'
-        recomendacoes = [
-          'O excesso de proteína nem sempre traz benefício adicional',
-          'Considere redistribuir calorias para outros nutrientes',
-          'Um nutricionista ou especialista pode ajustar sua meta de forma personalizada'
-        ]
-      }
-    } else {
-      interpretacao = `Para você, a ingestão adequada é aproximadamente ${proteinaDiaria}g/dia (cerca de ${proteinaPorKg}g por kg de peso). Em geral recomenda-se entre 1,2 e 2,2 g de proteína por kg, conforme objetivo e atividade.`
+    const ctaEspecialista = isCoach ? 'Consulte o especialista da plataforma' : 'Consulte um especialista'
+    if (objetivo === 'perder') {
+      interpretacao = `Para perder peso com saúde você precisa de aproximadamente ${proteinaDiaria}g de proteína por dia (${proteinaPorKg}g por kg de peso). A proteína ajuda a preservar massa muscular e manter saciedade.`
+      cor = 'orange'
+      recomendacoes = [
+        'Priorize proteínas magras (frango, peixes, ovos, leguminosas) em todas as refeições',
+        'Distribua em 4 a 5 refeições para manter saciedade',
+        `${ctaEspecialista} para um plano personalizado de perda de peso`
+      ]
+    } else if (objetivo === 'ganhar') {
+      interpretacao = `Para ganhar massa muscular você precisa de aproximadamente ${proteinaDiaria}g de proteína por dia (${proteinaPorKg}g por kg de peso). Distribua ao longo do dia para otimizar síntese muscular.`
       cor = 'green'
       recomendacoes = [
-        'Distribua a proteína em 4 a 5 refeições ao longo do dia',
-        'Para um diagnóstico da sua ingestão atual e um plano personalizado, consulte um nutricionista ou especialista'
+        'Inclua proteína em todas as refeições, com ênfase pós-treino',
+        'Fontes variadas: carnes, ovos, laticínios, leguminosas',
+        `${ctaEspecialista} para um plano personalizado de ganho de massa`
+      ]
+    } else {
+      interpretacao = `Para manter seu peso e saúde você precisa de aproximadamente ${proteinaDiaria}g de proteína por dia (${proteinaPorKg}g por kg de peso). Mantenha a distribuição ao longo do dia.`
+      cor = 'green'
+      recomendacoes = [
+        'Distribua a proteína em 4 a 5 refeições',
+        'Mantenha variedade de fontes (carnes magras, ovos, leguminosas)',
+        `${ctaEspecialista} para acompanhamento`
       ]
     }
 
@@ -204,11 +181,10 @@ export default function CalculadoraProteina({ config }: TemplateBaseProps) {
       proteinaDiaria,
       proteinaPorKg,
       porRefeicao,
-      ingestaoInformada: ingestaoValida && ingestaoNum != null ? Math.round(ingestaoNum) : undefined,
       interpretacao,
       cor,
       recomendacoes,
-      diagnostico: diagnosticoSelecionado ?? undefined
+      diagnostico: diagnosticoSelecionado
     })
     setEtapa('resultado')
   }
@@ -220,7 +196,6 @@ export default function CalculadoraProteina({ config }: TemplateBaseProps) {
     setAltura('')
     setAtividade('')
     setObjetivo('')
-    setIngestaoAtual('')
     setResultado(null)
     setEtapa('formulario')
   }
@@ -232,7 +207,6 @@ export default function CalculadoraProteina({ config }: TemplateBaseProps) {
     setAltura('')
     setAtividade('')
     setObjetivo('')
-    setIngestaoAtual('')
     setResultado(null)
     setEtapa('landing')
   }
@@ -290,7 +264,7 @@ export default function CalculadoraProteina({ config }: TemplateBaseProps) {
           <div className="bg-white rounded-2xl shadow-lg p-8 border-2 border-orange-200">
             <div className="mb-6">
               <h2 className="text-2xl font-bold text-gray-900 mb-2">Calcule sua proteína diária</h2>
-              <p className="text-gray-600">Preencha os dados para descobrir qual é a ingestão adequada para você. Se souber, informe também quanto de proteína você consome por dia para receber um diagnóstico comparado à recomendação e ser direcionado ao especialista.</p>
+              <p className="text-gray-600">Preencha os dados para descobrir quanto de proteína você precisa por dia e receber orientações conforme seu objetivo (perder peso, ganhar massa ou manter).</p>
             </div>
 
             <div className="space-y-6">
@@ -395,23 +369,6 @@ export default function CalculadoraProteina({ config }: TemplateBaseProps) {
                 </select>
               </div>
 
-              {/* Ingestão atual (opcional) - para diagnóstico */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Aproximadamente quantos gramas de proteína você consome por dia? <span className="text-gray-500 font-normal">(opcional)</span>
-                </label>
-                <input
-                  type="number"
-                  value={ingestaoAtual}
-                  onChange={(e) => setIngestaoAtual(e.target.value)}
-                  min="0"
-                  max="500"
-                  step="1"
-                  placeholder="Ex.: 80 — deixe em branco se não souber"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent text-lg"
-                />
-                <p className="mt-1 text-sm text-gray-500">Com essa informação podemos comparar sua ingestão com o adequado para você e direcionar ao especialista.</p>
-              </div>
             </div>
 
             <button
@@ -442,7 +399,7 @@ export default function CalculadoraProteina({ config }: TemplateBaseProps) {
                 <strong>{resultado.proteinaDiaria} g/dia</strong> (cerca de <strong>{resultado.proteinaPorKg} g por kg de peso</strong>).
               </p>
               <p className="text-sm text-gray-600 mt-2">
-                Em geral recomenda-se entre 1,2 e 2,2 g de proteína por kg de peso, conforme objetivo e atividade. Um nutricionista ou especialista pode confirmar sua necessidade exata.
+                A referência geral é 1,2 a 2,2 g por kg de peso; para ganho de massa ou atividade intensa a necessidade pode ser maior (ex.: até ~2,5 g/kg). O valor calculado acima é o adequado para o seu perfil. Para um plano personalizado e acompanhamento seguro, busque orientação de um especialista.
               </p>
             </div>
 
@@ -472,20 +429,7 @@ export default function CalculadoraProteina({ config }: TemplateBaseProps) {
               </div>
             </div>
 
-            {/* Quando não informou ingestão: CTA para especialista */}
-            {!resultado.diagnostico && (
-              <div className="bg-amber-50 rounded-2xl shadow-lg p-6 border-2 border-amber-200">
-                <h3 className="font-semibold text-gray-900 mb-2 flex items-center">
-                  <span className="text-xl mr-2">🎯</span>
-                  Próximo passo
-                </h3>
-                <p className="text-gray-800">
-                  Para um <strong>diagnóstico da sua ingestão atual</strong> e um plano personalizado, consulte um nutricionista ou especialista. Ele pode verificar se você está atingindo a meta adequada e ajustar conforme sua rotina.
-                </p>
-              </div>
-            )}
-
-            {/* Diagnóstico Completo (quando informou ingestão) */}
+            {/* Diagnóstico Completo (por objetivo) */}
             {resultado.diagnostico && (
               <div className="bg-white rounded-2xl shadow-lg p-8 border-2 border-orange-200">
                 <div className="bg-gradient-to-r from-orange-50 to-red-50 rounded-xl p-6 border-2 border-orange-200 mb-6">

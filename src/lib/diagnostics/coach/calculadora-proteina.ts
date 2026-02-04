@@ -1,7 +1,7 @@
 /**
  * DIAGNÓSTICOS: Calculadora Proteína - ÁREA COACH
- * Diagnóstico baseado na comparação entre ingestão informada e recomendação.
- * Sempre direciona ao especialista (dono da plataforma).
+ * Diagnóstico por objetivo: mostra quanto a pessoa precisa (conforme resultado) e orienta.
+ * baixaProteina = perder peso | proteinaNormal = manter | altaProteina = ganhar massa
  */
 
 import { DiagnosticosPorFerramenta } from '../types'
@@ -9,22 +9,22 @@ import { DiagnosticosPorFerramenta } from '../types'
 export const calculadoraProteinaDiagnosticos: DiagnosticosPorFerramenta = {
   coach: {
     baixaProteina: {
-      diagnostico: '📋 ANÁLISE: Sua ingestão informada está abaixo do adequado para você. A recomendação para você aparece no resultado (g/dia e g por kg). Em geral usa-se entre 1,2 e 2,2 g de proteína por kg de peso, conforme objetivo e atividade.',
-      causaRaiz: '🔍 CONTEXTO MAIS COMUM: Muitas pessoas consomem menos proteína do que imaginam, por falta de planejamento ou rotina irregular. Uma análise com o especialista da plataforma ajuda a definir quanto, quando e como ajustar de forma adequada.',
-      acaoImediata: '⚡ ORIENTAÇÃO GERAL: Aumente fontes proteicas nas refeições principais. Para um plano personalizado, consulte o especialista da plataforma.',
-      proximoPasso: '🎯 PRÓXIMO PASSO: Para confirmar sua necessidade exata e um plano adequado à sua rotina, consulte o especialista da plataforma.'
+      diagnostico: '📋 ANÁLISE (perda de peso): A quantidade de proteína que você precisa por dia aparece no resultado acima (g/dia e g por kg). Para perder peso com saúde, essa meta ajuda a preservar massa muscular e saciedade. A referência geral é 1,2 a 2,2 g/kg; para perda de peso costuma-se usar até ~2,2 g/kg.',
+      causaRaiz: '🔍 CONTEXTO: Na perda de peso, garantir proteína adequada evita perda de massa muscular e melhora saciedade. A meta do resultado foi calculada para o seu perfil. O especialista da plataforma pode montar um plano personalizado.',
+      acaoImediata: '⚡ ORIENTAÇÃO: Priorize proteínas magras em todas as refeições e distribua a meta em 4 a 5 refeições. Para um plano completo, consulte o especialista da plataforma.',
+      proximoPasso: '🎯 PRÓXIMO PASSO: Para um plano de perda de peso personalizado, consulte o especialista da plataforma.'
     },
     proteinaNormal: {
-      diagnostico: '📋 ANÁLISE: Sua ingestão informada está adequada em relação à recomendação para você (g/dia e g por kg no resultado). A faixa de 1,2 a 2,2 g/kg é a referência usual, variando com objetivo e atividade.',
-      causaRaiz: '🔍 CONTEXTO MAIS COMUM: Boa quantidade em relação à meta. Ajustes de distribuição ao longo do dia podem melhorar ainda mais o aproveitamento. O especialista pode identificar oportunidades simples.',
-      acaoImediata: '⚡ ORIENTAÇÃO GERAL: Mantenha o consumo atual e a distribuição entre refeições. Para acompanhamento, consulte o especialista da plataforma.',
+      diagnostico: '📋 ANÁLISE (manutenção): A quantidade de proteína que você precisa por dia aparece no resultado acima (g/dia e g por kg). Para manter peso e saúde, essa meta ajuda a preservar massa muscular. A referência geral é 1,2 a 2,2 g/kg.',
+      causaRaiz: '🔍 CONTEXTO: Manter a ingestão adequada de proteína contribui para massa muscular e bem-estar. A meta do resultado foi calculada para o seu perfil. O especialista pode refinar distribuição e horários.',
+      acaoImediata: '⚡ ORIENTAÇÃO: Distribua a meta em 4 a 5 refeições com fontes variadas. Para acompanhamento, consulte o especialista da plataforma.',
       proximoPasso: '🎯 PRÓXIMO PASSO: Para acompanhamento e otimizações, consulte o especialista da plataforma.'
     },
     altaProteina: {
-      diagnostico: '📋 ANÁLISE: Sua ingestão informada está acima do recomendado para você. O adequado para você está no resultado (g/dia e g por kg). Acima de 2,2 g/kg costuma não trazer ganho adicional; um especialista pode confirmar sua meta ideal.',
-      causaRaiz: '🔍 CONTEXTO MAIS COMUM: Excesso de proteína nem sempre gera benefício extra e pode desequilibrar outros nutrientes. O especialista da plataforma pode ajustar sua meta de forma personalizada.',
-      acaoImediata: '⚡ ORIENTAÇÃO GERAL: Redistribua para outros nutrientes e mantenha proteína no nível adequado (conforme resultado). Para ajuste fino, consulte o especialista da plataforma.',
-      proximoPasso: '🎯 PRÓXIMO PASSO: Para otimizar sua meta de proteína e o plano como um todo, consulte o especialista da plataforma.'
+      diagnostico: '📋 ANÁLISE (ganho de massa): A quantidade de proteína que você precisa por dia aparece no resultado acima (g/dia e g por kg). Para ganhar massa muscular, essa meta favorece síntese e recuperação. A referência geral é 1,2 a 2,2 g/kg; para ganho de massa pode ser maior (ex.: até ~2,5 g/kg).',
+      causaRaiz: '🔍 CONTEXTO: Ganho de massa exige proteína em quantidade e distribuição adequadas. A meta do resultado foi calculada para o seu objetivo e atividade. O especialista da plataforma pode montar um plano completo.',
+      acaoImediata: '⚡ ORIENTAÇÃO: Inclua proteína em todas as refeições, com ênfase pós-treino. Para um plano personalizado de ganho de massa, consulte o especialista da plataforma.',
+      proximoPasso: '🎯 PRÓXIMO PASSO: Para um plano de ganho de massa personalizado, consulte o especialista da plataforma.'
     }
   }
 }
