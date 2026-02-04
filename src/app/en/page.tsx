@@ -92,7 +92,7 @@ export default function HomePageEN() {
             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-10 max-w-6xl mx-auto">
               <div className="text-center">
                 <div className="text-5xl mb-4">🎯</div>
-                <h3 className="text-xl font-bold text-gray-900 mb-3">Attraction and Diagnosis</h3>
+                <h3 className="text-xl font-bold text-gray-900 mb-3">Capture and Diagnosis</h3>
                 <p className="text-gray-600 text-sm leading-relaxed">
                   Create links, quizzes, and smart assessments that spark the right conversation, deliver immediate value, and filter the curious from the genuinely interested — before the first contact.
                 </p>

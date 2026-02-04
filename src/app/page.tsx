@@ -153,7 +153,7 @@ export default function HomePage() {
             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8 max-w-6xl mx-auto">
               <div className="text-center">
                 <div className="text-5xl mb-4">🎯</div>
-                <h3 className="text-xl font-bold text-gray-900 mb-3">Atração e Diagnóstico</h3>
+                <h3 className="text-xl font-bold text-gray-900 mb-3">Captação e Diagnóstico</h3>
                 <p className="text-gray-600 text-sm leading-relaxed">
                   Crie links, quizzes e avaliações inteligentes que provocam a conversa certa, entregam valor imediato e filtram curiosos de pessoas realmente interessadas — antes mesmo do primeiro contato.
                 </p>
