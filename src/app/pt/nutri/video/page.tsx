@@ -123,16 +123,8 @@ export default function NutriVideoPage() {
           </div>
         </section>
 
-        {/* Red line + CTAs */}
-        <section className="pt-2 pb-16">
-          <div
-            className="h-1 rounded-full mb-8"
-            style={{ backgroundColor: '#DC2626' }}
-            aria-hidden
-          />
-          <p className="text-center text-gray-600 mb-6">
-            Escolha o próximo passo:
-          </p>
+        {/* Dois botões — tudo visível imediatamente */}
+        <section className="pt-8 pb-10">
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <a
               href={whatsappUrl}
@@ -148,6 +140,28 @@ export default function NutriVideoPage() {
             >
               Aderir ao sistema
             </Link>
+          </div>
+        </section>
+
+        {/* Argumentação — direta e objetiva */}
+        <section className="pb-16 pt-2">
+          <div className="space-y-6 text-gray-700 max-w-2xl mx-auto">
+            <p className="text-center font-medium text-gray-800">
+              Com o sistema você tem agenda previsível, clareza do que fazer todos os dias e segurança profissional. Não é ferramenta — é tranquilidade.
+            </p>
+            <div className="grid sm:grid-cols-2 gap-4 text-sm">
+              <div className="p-4 rounded-lg bg-gray-50 border border-gray-200">
+                <p className="font-semibold text-gray-800 mb-2">Continuar improvisando</p>
+                <p className="text-gray-600">Agenda instável, insegurança, sem clareza do que fazer amanhã.</p>
+              </div>
+              <div className="p-4 rounded-lg bg-blue-50 border border-blue-200">
+                <p className="font-semibold text-[#2563EB] mb-2">Adotar um método profissional</p>
+                <p className="text-gray-600">Clareza diária, base sólida, organização que vira hábito, previsibilidade de clientes.</p>
+              </div>
+            </div>
+            <p className="text-center text-sm text-gray-600">
+              Garantia de 7 dias: se não for pra você, devolvemos 100%.
+            </p>
           </div>
         </section>
       </main>

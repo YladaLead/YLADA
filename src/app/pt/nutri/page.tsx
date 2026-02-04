@@ -1,15 +1,21 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import LyaSalesWidget from '@/components/nutri/LyaSalesWidget'
 import { landingPageVideos } from '@/lib/landing-pages-assets'
 import { trackNutriSalesView } from '@/lib/facebook-pixel'
 
+const WHATSAPP_NUTRI = '5519997230912'
+const WHATSAPP_MSG = 'Olá! Estou na página da YLADA Nutri e gostaria de tirar dúvidas.'
+
 export default function NutriLandingPage() {
   const [faqOpen, setFaqOpen] = useState<number | null>(null)
   const [lyaWidgetOpen, setLyaWidgetOpen] = useState(false)
+  const videoRef = useRef<HTMLVideoElement>(null)
+  const [videoProgress, setVideoProgress] = useState(0)
+  const [videoPlaying, setVideoPlaying] = useState(false)
 
   // Rastrear visualização da página de vendas
   useEffect(() => {
@@ -25,11 +31,27 @@ export default function NutriLandingPage() {
   }
 
   const handleCheckout = (planType: 'annual' | 'monthly') => {
-    // Redirecionar para página de checkout dedicada (mais confiável no mobile)
-    // A página de checkout coleta e-mail e processa o pagamento
     const checkoutUrl = `/pt/nutri/checkout?plan=${planType}`
-    console.log('🛒 Redirecionando para checkout:', checkoutUrl)
     window.location.href = checkoutUrl
+  }
+
+  const onVideoTimeUpdate = () => {
+    const video = videoRef.current
+    if (!video || !video.duration || Number.isNaN(video.duration)) return
+    const pct = (video.currentTime / video.duration) * 100
+    setVideoProgress(Math.min(100, pct))
+  }
+
+  const toggleVideoPlay = () => {
+    const video = videoRef.current
+    if (!video) return
+    if (video.paused) {
+      video.play()
+      setVideoPlaying(true)
+    } else {
+      video.pause()
+      setVideoPlaying(false)
+    }
   }
 
   return (
@@ -57,182 +79,155 @@ export default function NutriLandingPage() {
       </header>
 
       <main>
-        {/* BLOCO 1 — HERO (DOBRA INICIAL | RUPTURA + IDENTIDADE) */}
+        {/* BLOCO 1 — HERO (CANSADAS DE IMPROVISAR | SAIR DO IMPROVISO) */}
         <section className="bg-gradient-to-br from-[#2563EB] to-[#3B82F6] text-white pt-12 sm:pt-16 lg:pt-20 pb-16 sm:pb-20 lg:pb-24">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="max-w-4xl mx-auto text-center">
               <p className="text-lg sm:text-xl text-white/80 mb-4 font-medium">
-                Pare de se sentir sozinha tentando descobrir como fazer seu negócio funcionar.
+                Para nutricionistas cansadas de tentar sozinhas e improvisar a própria agenda.
               </p>
               
               <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-black mb-6 sm:mb-8 leading-tight">
-                Você não precisa ser só Nutricionista.
+                O sistema de captação
                 <br />
                 <span className="bg-gradient-to-r from-yellow-300 to-orange-300 bg-clip-text text-transparent">
-                  Você precisa se tornar uma Nutri-Empresária.
+                  com orientação que destrava.
                 </span>
               </h1>
               
               <p className="text-lg sm:text-xl lg:text-2xl text-white/90 leading-relaxed mb-8 sm:mb-12 max-w-3xl mx-auto">
-                O sistema que guia nutricionistas a construir uma carreira organizada, lucrativa e segura — sem depender de indicação, sorte ou tentativa e erro.
+                Estrutura de apoio para você sair do improviso. Sem indecisão, sem depender de sorte ou indicação.
               </p>
               
               <Link
-                href="#como-funciona"
+                href="#video"
                 className="inline-block bg-white text-[#2563EB] px-8 sm:px-12 py-4 sm:py-5 rounded-xl text-lg sm:text-xl font-bold hover:bg-gray-100 transition-all shadow-2xl hover:shadow-3xl transform hover:-translate-y-1"
               >
-                Quero parar de me sentir perdida e começar a crescer agora
+                Quero sair do improviso
               </Link>
             </div>
           </div>
         </section>
 
-        {/* BLOCO 2 — ESPELHO EMOCIONAL PROFUNDO (DOR REAL) */}
-        <section className="py-16 sm:py-20 lg:py-24 bg-white">
+        {/* VÍDEO NO TOPO — Veja se faz sentido / ou continue improvisando */}
+        <section id="video" className="py-10 sm:py-14 bg-white">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="max-w-4xl mx-auto">
-              <h2 className="text-3xl sm:text-4xl font-bold text-center mb-12 text-[#1A1A1A]">
-                Você já se sentiu assim?
+              <h2 className="text-2xl sm:text-3xl font-bold text-center mb-2 text-[#1A1A1A]">
+                Veja se esse sistema faz sentido para você
               </h2>
-              
-              <div className="space-y-6 text-lg sm:text-xl text-gray-700 leading-relaxed mb-8">
-                <p className="font-semibold text-[#2563EB]">
-                  Você já acordou de manhã pensando: "Será que hoje alguém vai me procurar?"
-                </p>
-                
-                <p className="font-semibold text-[#2563EB]">
-                  Você já se sentiu uma fraude quando alguém perguntou quanto você cobra e você não soube responder?
-                </p>
-                
-                <p className="font-semibold text-[#2563EB]">
-                  Você já chorou de frustração depois de mais um mês sem conseguir organizar seu negócio?
-                </p>
-              </div>
-              
-              <div className="space-y-6 text-lg sm:text-xl text-gray-700 leading-relaxed">
-                <p>
-                  Você olha para sua agenda e vê mais dias vazios do que preenchidos. Ou então, quando consegue uma consulta, fica na dúvida: <strong>"Quanto devo cobrar? Será que estou pedindo demais?"</strong>
-                </p>
-                
-                <p>
-                  Você passa horas criando conteúdo para Instagram, posta com frequência, mas parece que ninguém vê. Os likes até aparecem, mas as mensagens de <strong>"quanto custa uma consulta?"</strong> não chegam.
-                </p>
-                
-                <p>
-                  Você já perdeu a conta de quantas vezes começou a organizar seus processos. Comprou planilhas, baixou apps, tentou criar rotinas. Mas sempre volta ao mesmo lugar: <strong>desorganizada, sem clareza, sentindo que está "recomeçando" mais uma vez.</strong>
-                </p>
-                
-                <p>
-                  Você se sente sozinha. Não tem com quem dividir as dúvidas empresariais. As colegas da faculdade também estão tentando descobrir como fazer dar certo. Os grupos de WhatsApp são mais desabafos do que soluções.
-                </p>
-                
-                <p>
-                  Você sabe que é uma excelente profissional. Sabe que tem conhecimento técnico. Mas algo não encaixa quando o assunto é <strong>transformar esse conhecimento em um negócio que funcione de verdade.</strong>
-                </p>
-              </div>
-              
-              <div className="mt-12 text-center">
-                <p className="text-xl sm:text-2xl font-bold text-[#1A1A1A]">
-                  Se você se reconheceu em pelo menos uma dessas situações, continue lendo.
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* BLOCO 3 — QUEBRA DE CULPA (ALÍVIO) */}
-        <section className="py-16 sm:py-20 lg:py-24 bg-[#F5F7FA]">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="max-w-4xl mx-auto">
-              <h2 className="text-3xl sm:text-4xl font-bold text-center mb-8 text-[#1A1A1A]">
-                O problema não é você. O problema é que ninguém te ensinou a ser empresária.
-              </h2>
-              
-              <div className="bg-white rounded-xl shadow-lg p-8 sm:p-10 mb-8">
-                <p className="text-lg sm:text-xl text-gray-700 mb-6 leading-relaxed font-semibold">
-                  Respire fundo. Você não está quebrada. Você não é incompetente. Você simplesmente não aprendeu a parte que ninguém te ensinou.
-                </p>
-                
-                <p className="text-lg sm:text-xl text-gray-700 mb-6 leading-relaxed">
-                  Você passou anos estudando nutrição. Aprendeu bioquímica, fisiologia, patologia. Aprendeu a fazer anamnese, calcular dietas, interpretar exames.
-                </p>
-                
-                <p className="text-lg sm:text-xl text-gray-700 mb-6 font-semibold">
-                  Mas ninguém te ensinou como:
-                </p>
-                
-                <ul className="space-y-3 text-lg text-gray-700 mb-6">
-                  <li className="flex items-start">
-                    <span className="text-[#2563EB] mr-3 text-xl font-bold">•</span>
-                    <span>Captar clientes de forma previsível</span>
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-[#2563EB] mr-3 text-xl font-bold">•</span>
-                    <span>Organizar seu negócio para crescer</span>
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-[#2563EB] mr-3 text-xl font-bold">•</span>
-                    <span>Cobrar o valor que você realmente vale</span>
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-[#2563EB] mr-3 text-xl font-bold">•</span>
-                    <span>Criar processos que funcionem sem você precisar estar presente o tempo todo</span>
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-[#2563EB] mr-3 text-xl font-bold">•</span>
-                    <span>Transformar conhecimento técnico em um negócio lucrativo</span>
-                  </li>
-                </ul>
-                
-                <p className="text-lg sm:text-xl text-gray-700 font-semibold mb-6">
-                  Isso não é culpa sua. Isso é uma lacuna do sistema.
-                </p>
-                
-                <p className="text-lg sm:text-xl text-gray-700 leading-relaxed mb-4">
-                  Você não está sozinha nessa. Muitas nutricionistas talentosas passam pela mesma frustração. A diferença entre quem consegue construir uma carreira sólida e quem fica presa no ciclo de "tentativa e erro" não é talento. <strong>É método.</strong>
-                </p>
-                
-                <p className="text-lg sm:text-xl text-gray-700 leading-relaxed font-semibold">
-                  E agora você tem a chance de aprender. Não precisa mais tentar sozinha.
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* SEÇÃO VÍDEO — ENTENDENDO O CAMINHO */}
-        <section id="como-funciona" className="py-16 sm:py-20 lg:py-24 bg-[#F5F7FA]">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="max-w-4xl mx-auto">
-              <h2 className="text-3xl sm:text-4xl font-bold text-center mb-4 text-[#1A1A1A]">
-                Assista e entenda como funciona o caminho da Nutri-Empresária
-              </h2>
-              <p className="text-lg sm:text-xl text-center text-gray-700 mb-8 max-w-2xl mx-auto">
-                Em poucos minutos, você vai entender o método, o papel da LYA e como essa transformação acontece na prática.
+              <p className="text-lg text-center text-gray-600 mb-6">
+                — ou se continuar improvisando é o que parece mais confortável agora.
               </p>
-              
-              <div className="bg-white rounded-xl shadow-2xl overflow-hidden mb-6">
-                <div className="aspect-video bg-gray-900 relative">
-                  <video 
+              <div className="bg-white rounded-xl shadow-2xl overflow-hidden mb-4">
+                <div
+                  className="aspect-video bg-gray-900 relative cursor-pointer group"
+                  onClick={toggleVideoPlay}
+                  onKeyDown={(e) => e.key === ' ' && (e.preventDefault(), toggleVideoPlay())}
+                  role="button"
+                  tabIndex={0}
+                  aria-label={videoPlaying ? 'Pausar vídeo' : 'Reproduzir vídeo'}
+                >
+                  <video
+                    ref={videoRef}
                     className="w-full h-full object-cover"
-                    controls
                     loop
                     playsInline
                     preload="metadata"
                     poster={landingPageVideos.nutriHeroPoster}
-                    onError={(e) => {
-                      console.error('❌ Erro ao carregar vídeo:', e)
-                    }}
+                    onTimeUpdate={onVideoTimeUpdate}
+                    onLoadedMetadata={onVideoTimeUpdate}
+                    onPlay={() => setVideoPlaying(true)}
+                    onPause={() => setVideoPlaying(false)}
+                    onEnded={() => setVideoPlaying(false)}
+                    onError={(e) => console.error('Erro ao carregar vídeo:', e)}
                   >
                     <source src={landingPageVideos.nutriHero} type="video/mp4" />
                     Seu navegador não suporta vídeo HTML5.
                   </video>
+                  {!videoPlaying && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/30 group-hover:bg-black/40" aria-hidden>
+                      <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-white/90 flex items-center justify-center shadow-xl">
+                        <svg className="w-10 h-10 sm:w-12 sm:h-12 text-[#2563EB] ml-1" fill="currentColor" viewBox="0 0 24 24" aria-hidden>
+                          <path d="M8 5v14l11-7L8 5z" />
+                        </svg>
+                      </div>
+                    </div>
+                  )}
+                </div>
+                <div className="h-1.5 w-full bg-gray-200">
+                  <div className="h-full bg-[#2563EB] transition-[width] duration-150 ease-out" style={{ width: `${videoProgress}%` }} />
                 </div>
               </div>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-4 pb-2">
+                <a
+                  href={`https://wa.me/${WHATSAPP_NUTRI}?text=${encodeURIComponent(WHATSAPP_MSG)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full sm:w-auto inline-flex justify-center items-center px-8 py-4 rounded-xl text-lg font-semibold border-2 border-[#2563EB] text-[#2563EB] hover:bg-[#2563EB] hover:text-white transition-all shadow-md"
+                >
+                  Tirar dúvida
+                </a>
+                <Link
+                  href="/pt/nutri/checkout?plan=annual"
+                  className="w-full sm:w-auto inline-flex justify-center items-center px-8 py-4 rounded-xl text-lg font-bold bg-gradient-to-r from-[#2563EB] to-[#3B82F6] text-white hover:from-[#3B82F6] hover:to-[#1D4ED8] transition-all shadow-xl"
+                >
+                  Aderir ao sistema
+                </Link>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* BLOCO 2 — DOR (ENXUTO | FRASES DURAS) */}
+        <section className="py-14 sm:py-18 lg:py-20 bg-white">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="max-w-4xl mx-auto">
+              <h2 className="text-3xl sm:text-4xl font-bold text-center mb-10 text-[#1A1A1A]">
+                Você já se sentiu assim?
+              </h2>
               
-              <p className="text-center text-lg text-gray-600">
-                Continue lendo para ver se esse caminho faz sentido para você.
-              </p>
+              <div className="space-y-5 text-lg sm:text-xl text-gray-700 leading-relaxed">
+                <p className="font-semibold text-[#2563EB]">
+                  "Será que hoje alguém vai me procurar?" — agenda vazia, dúvida na cobrança, sensação de recomeçar de novo.
+                </p>
+                <p>
+                  Conteúdo que não gera conversa não gera agenda. Você posta, os likes vêm, as mensagens de <strong>"quanto custa?"</strong> não chegam.
+                </p>
+                <p>
+                  Planilhas, apps, rotinas — você já tentou. E volta ao mesmo lugar: <strong>improviso, solidão, sem clareza do que fazer amanhã.</strong>
+                </p>
+              </div>
+              
+              <div className="mt-10 text-center">
+                <p className="text-xl font-bold text-[#1A1A1A]">
+                  Se você se reconheceu, continue.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* BLOCO 3 — O PROBLEMA NÃO É VOCÊ (ENXUTO | CONTRASTE TÉCNICO × EMPRESARIAL) */}
+        <section className="py-16 sm:py-20 lg:py-24 bg-[#F5F7FA]">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="max-w-4xl mx-auto">
+              <h2 className="text-3xl sm:text-4xl font-bold text-center mb-8 text-[#1A1A1A]">
+                O problema não é você. É falta de sistema.
+              </h2>
+              
+              <div className="bg-white rounded-xl shadow-lg p-8 sm:p-10 mb-8">
+                <p className="text-lg sm:text-xl text-gray-700 mb-6 leading-relaxed font-semibold">
+                  Respire fundo. Você não está quebrada. O que falta é uma metodologia clara de captação e uma estrutura de apoio que destrave — não mais indecisão, não mais “o que faço amanhã?”.
+                </p>
+                
+                <p className="text-lg text-gray-700 mb-4">
+                  A faculdade te ensinou a ser nutricionista técnica. Não te ensinou a captar clientes, organizar o negócio nem cobrar com clareza.
+                </p>
+                <p className="text-lg text-gray-700 font-semibold">
+                  A diferença entre quem cresce e quem fica no improviso não é talento. <strong>É sistema.</strong>
+                </p>
+              </div>
             </div>
           </div>
         </section>
@@ -303,19 +298,18 @@ export default function NutriLandingPage() {
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="max-w-4xl mx-auto">
               <h2 className="text-3xl sm:text-4xl font-bold text-center mb-12 text-[#1A1A1A]">
-                Nasce a Nutri-Empresária
+                O que muda com o sistema
               </h2>
               
               <div className="bg-white rounded-xl shadow-lg p-8 sm:p-10 mb-8">
                 <p className="text-xl sm:text-2xl font-bold text-gray-800 mb-6">
-                  A Nutri-Empresária é a nutricionista que entende que seu negócio precisa de método, não apenas de talento.
+                  Quem adota um sistema de captação para de depender de sorte e de “dar um jeito”.
                 </p>
                 
                 <div className="space-y-4 text-lg text-gray-700 mb-8">
-                  <p>Ela não depende de sorte, indicação ou "viralizar" no Instagram. <strong>Ela constrói sistemas que funcionam.</strong></p>
-                  <p>Ela não trabalha na base da tentativa e erro. <strong>Ela segue um caminho claro, passo a passo.</strong></p>
-                  <p>Ela não fica presa na rotina de "atender e esperar". <strong>Ela cria processos de captação, gestão e acompanhamento que funcionam de forma previsível.</strong></p>
-                  <p>Ela não se sente sozinha. <strong>Ela tem clareza, método e suporte.</strong></p>
+                  <p>Sem sistema: sorte, indicação, improviso, indecisão. <strong>Com sistema: metodologia clara, orientação que destrava, agenda que enche.</strong></p>
+                  <p>Sem sistema: “o que faço amanhã?”, “quando posto?”, “por que não entram contatos?”. <strong>Com sistema: rotina definida, links que geram conversa, estrutura de apoio.</strong></p>
+                  <p>Sem sistema: você trava. <strong>Com sistema: você segue.</strong></p>
                 </div>
               </div>
               
@@ -350,17 +344,17 @@ export default function NutriLandingPage() {
                     </ul>
                   </div>
                 </div>
+                <p className="text-center text-lg font-semibold text-gray-800 mt-6">
+                  O divisor de águas não é conhecimento. É sistema.
+                </p>
               </div>
               
               <div className="bg-gradient-to-r from-[#2563EB] to-[#3B82F6] rounded-xl p-8 text-center text-white">
                 <p className="text-xl sm:text-2xl font-bold mb-4">
-                  A Nutri-Empresária não é um título que você ganha.
-                </p>
-                <p className="text-xl sm:text-2xl font-bold mb-4">
-                  É uma identidade que você constrói.
+                  O divisor de águas não é conhecimento. É sistema.
                 </p>
                 <p className="text-lg mt-6">
-                  É isso que você quer ser?
+                  Você quer encher agenda com método e parar de travar?
                 </p>
               </div>
             </div>
@@ -377,33 +371,28 @@ export default function NutriLandingPage() {
               
               <div className="bg-white rounded-xl shadow-lg p-8 sm:p-10 mb-8 border-2 border-[#2563EB]">
                 <p className="text-xl sm:text-2xl font-bold text-gray-800 mb-6">
-                  O YLADA Nutri não é apenas uma plataforma. É um sistema completo de transformação profissional.
+                  É o sistema de captação com orientação que destrava.
                 </p>
                 
                 <p className="text-lg text-gray-700 mb-6 leading-relaxed">
-                  É o método que guia nutricionistas a se tornarem Nutri-Empresárias organizadas, confiantes e lucrativas.
+                  Estrutura de apoio para nutricionistas que querem encher agenda, parar de agendar ansiosa e ter metodologia clara — sem travar, sem indecisão.
                 </p>
                 
-                <p className="text-lg text-gray-700 mb-6 leading-relaxed">
-                  Não é um curso que você assiste e esquece. Não é uma ferramenta que você usa e não sabe por quê. É um sistema integrado que conecta:
+                <p className="text-lg text-gray-700 mb-4">
+                  Não é curso. Não é ferramenta. É sistema:
                 </p>
-                
-                <ul className="space-y-3 text-lg text-gray-700 mb-6">
+                <ul className="space-y-2 text-lg text-gray-700 mb-6">
                   <li className="flex items-start">
                     <span className="text-[#2563EB] mr-3 text-xl font-bold">•</span>
-                    <span><strong>Formação empresarial</strong> (método, mentalidade, estratégia)</span>
+                    <span>Sistema de captação previsível</span>
                   </li>
                   <li className="flex items-start">
                     <span className="text-[#2563EB] mr-3 text-xl font-bold">•</span>
-                    <span><strong>Ferramentas profissionais</strong> (captação e conversão de leads)</span>
+                    <span>Trilha empresarial clara</span>
                   </li>
                   <li className="flex items-start">
                     <span className="text-[#2563EB] mr-3 text-xl font-bold">•</span>
-                    <span><strong>Mentoria estratégica</strong> (LYA, sua mentora digital)</span>
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-[#2563EB] mr-3 text-xl font-bold">•</span>
-                    <span><strong>Comunidade e suporte</strong> (você não está sozinha)</span>
+                    <span>LYA como mentora que impede abandono</span>
                   </li>
                 </ul>
               </div>
@@ -412,19 +401,19 @@ export default function NutriLandingPage() {
                 <div className="bg-[#E9F1FF] rounded-xl p-8 border-2 border-[#2563EB]">
                   <h3 className="text-2xl font-bold mb-6 text-[#2563EB]">Para Quem É</h3>
                   <ul className="space-y-2 text-gray-700">
-                    <li>• Querem construir uma carreira organizada e lucrativa</li>
-                    <li>• Estão cansadas de depender de sorte ou indicação</li>
-                    <li>• Desejam ter clareza sobre como crescer profissionalmente</li>
-                    <li>• Buscam um método, não apenas ferramentas</li>
-                    <li>• Querem transformar conhecimento técnico em negócio que funciona</li>
+                    <li>• Quer encher agenda e parar de agendar ansiosa</li>
+                    <li>• Quer se livrar de indecisão e ter metodologia clara de captação</li>
+                    <li>• Está cansada de depender de sorte ou indicação</li>
+                    <li>• Quer estrutura de apoio e orientação que destrava</li>
+                    <li>• Quer parar de travar e ter rotina que gera agenda</li>
                   </ul>
                 </div>
                 
                 <div className="bg-[#FFF4E6] rounded-xl p-8 border-2 border-[#FF9800]">
                   <h3 className="text-2xl font-bold mb-6 text-[#FF9800]">Para Quem NÃO É</h3>
                   <ul className="space-y-2 text-gray-700">
-                    <li>• Estão procurando apenas "ferramentas gratuitas"</li>
-                    <li>• Não estão dispostas a investir em transformação profissional</li>
+                    <li>• Não é para quem ainda quer "ver se dá"</li>
+                    <li>• Não quer assumir um sistema de captação agora</li>
                     <li>• Esperam resultados sem seguir um método</li>
                     <li>• Querem soluções mágicas sem trabalho</li>
                     <li>• Não estão abertas a mudar mentalidade e processos</li>
@@ -453,23 +442,15 @@ export default function NutriLandingPage() {
                 {[
                   {
                     title: '1. Captação Previsível',
-                    desc: 'Você para de depender de indicação ou sorte. Aprende a criar sistemas de captação que funcionam de forma consistente — com quizzes, calculadoras e links que geram leads automaticamente.'
+                    desc: 'Você para de depender de indicação ou sorte. Sistema de captação que funciona de forma consistente.'
                   },
                   {
-                    title: '2. Conversão de Leads (sem CRM completo)',
-                    desc: 'Você organiza o que realmente importa no V1: de onde o lead veio, em que etapa ele está e quantos viraram atendimentos. Sem “gestão de clientes” pesada — apenas controle claro de leads e conversão.'
+                    title: '2. Trilha empresarial clara',
+                    desc: 'Próximo passo definido. Você executa com método, não na base do improviso. Sem “gestão de clientes” pesada — apenas controle claro de leads e conversão.'
                   },
                   {
-                    title: '3. Estratégia Empresarial Aplicada',
-                    desc: 'Você para de "tentar" e começa a "executar com método". Aprende os 5 Pilares do Método YLADA e segue a Trilha Empresarial (30 dias) com clareza do próximo passo.'
-                  },
-                  {
-                    title: '4. Formação da Mentalidade Nutri-Empresária',
-                    desc: 'Você muda não apenas o que faz, mas como pensa sobre seu negócio. Desenvolve mentalidade empresarial, clareza estratégica, confiança para tomar decisões. Para de se sentir "só uma nutricionista" e se torna uma profissional que constrói um negócio.'
-                  },
-                  {
-                    title: '5. Mentoria, Suporte e Acompanhamento',
-                    desc: 'Você não está sozinha. Tem a LYA como mentora estratégica digital, que guia suas decisões e te ajuda a focar no que realmente importa. Tem acesso a comunidade, materiais, suporte. Cresce com suporte, não na base da tentativa e erro.'
+                    title: '3. LYA como mentoria estratégica',
+                    desc: 'Orientações que impedem abandono e travas. Você não fica sozinha.'
                   }
                 ].map((item, index) => (
                   <div key={index} className="bg-white rounded-xl shadow-lg p-8 border-l-4 border-[#2563EB]">
@@ -481,14 +462,6 @@ export default function NutriLandingPage() {
                 ))}
               </div>
               
-              <div className="mt-12 text-center bg-white rounded-xl shadow-lg p-8">
-                <p className="text-lg sm:text-xl text-gray-700 mb-4">
-                  Cada ponto responde à pergunta: <strong>"O que isso muda na minha vida?"</strong>
-                </p>
-                <p className="text-lg sm:text-xl font-bold text-[#2563EB]">
-                  A resposta é sempre: clareza, organização, crescimento e segurança.
-                </p>
-              </div>
             </div>
           </div>
         </section>
@@ -505,59 +478,17 @@ export default function NutriLandingPage() {
               </p>
               
               <div className="bg-gradient-to-br from-[#2563EB] to-[#3B82F6] rounded-xl shadow-lg p-8 sm:p-10 mb-8 text-white">
-                <p className="text-xl sm:text-2xl font-bold mb-6">
-                  LYA não é "uma IA". LYA é sua mentora estratégica digital.
+                <p className="text-xl sm:text-2xl font-bold mb-4">
+                  A LYA existe para impedir que você volte ao improviso.
                 </p>
-                
-                <p className="text-lg mb-6 leading-relaxed">
-                  Ela entende seu momento atual, seus objetivos, suas travas. Ela analisa seus dados reais (ferramentas criadas, leads captados, progresso na trilha) e te guia pelo próximo passo certo.
-                </p>
-                
-                <p className="text-lg mb-6 leading-relaxed">
-                  LYA não te dá uma lista infinita de opções. Ela te diz: <strong>"Agora, o foco é isso. A ação é essa. Onde aplicar é aqui."</strong>
+                <p className="text-lg mb-0 leading-relaxed">
+                  Ela não te dá lista infinita de opções. Ela te diz: <strong>o foco agora, a ação, onde aplicar.</strong> Mentoria estratégica que funciona.
                 </p>
               </div>
               
-              <div className="grid md:grid-cols-2 gap-8 mb-8">
-                <div className="bg-[#E9F1FF] rounded-xl p-8">
-                  <h3 className="text-xl font-bold mb-4 text-[#2563EB]">O Papel Dela na Jornada</h3>
-                  <ul className="space-y-3 text-gray-700">
-                    <li className="flex items-start">
-                      <span className="text-[#2563EB] mr-3 text-xl">✓</span>
-                      <span><strong>Tomar decisões estratégicas</strong> (não apenas operacionais)</span>
-                    </li>
-                    <li className="flex items-start">
-                      <span className="text-[#2563EB] mr-3 text-xl">✓</span>
-                      <span><strong>Manter foco</strong> (não se perder em excesso de informação)</span>
-                    </li>
-                    <li className="flex items-start">
-                      <span className="text-[#2563EB] mr-3 text-xl">✓</span>
-                      <span><strong>Seguir o método</strong> (não voltar para a tentativa e erro)</span>
-                    </li>
-                    <li className="flex items-start">
-                      <span className="text-[#2563EB] mr-3 text-xl">✓</span>
-                      <span><strong>Crescer de forma organizada</strong> (passo a passo, com clareza)</span>
-                    </li>
-                  </ul>
-                </div>
-                
-                <div className="bg-[#E9F1FF] rounded-xl p-8">
-                  <h3 className="text-xl font-bold mb-4 text-[#2563EB]">Como Ela Guia</h3>
-                  <p className="text-gray-700 mb-4">
-                    LYA analisa seu perfil estratégico, progresso real, objetivos e travas, e responde sempre com:
-                  </p>
-                  <ul className="space-y-2 text-gray-700">
-                    <li>• <strong>Foco prioritário</strong> (uma única coisa para focar agora)</li>
-                    <li>• <strong>Ação recomendada</strong> (1 a 3 ações concretas)</li>
-                    <li>• <strong>Onde aplicar</strong> (módulo, fluxo, ferramenta específica)</li>
-                    <li>• <strong>Métrica de sucesso</strong> (como validar em 24-72h)</li>
-                  </ul>
-                </div>
-              </div>
-              
-              <div className="text-center bg-white rounded-xl shadow-lg p-8 border-2 border-[#2563EB]">
-                <p className="text-xl sm:text-2xl font-bold text-[#2563EB]">
-                  LYA não é tecnologia. LYA é mentoria estratégica que funciona.
+              <div className="text-center bg-white rounded-xl shadow-lg p-6 border-2 border-[#2563EB]">
+                <p className="text-xl font-bold text-[#2563EB]">
+                  LYA não executa por você. Ela impede que você trave.
                 </p>
               </div>
             </div>
@@ -594,19 +525,7 @@ export default function NutriLandingPage() {
                     </li>
                     <li className="flex items-start">
                       <span className="text-[#FF4F4F] mr-3 text-xl font-bold">✗</span>
-                      <span>Tinha agenda inconsistente (muito vazia ou muito cheia, sem controle)</span>
-                    </li>
-                    <li className="flex items-start">
-                      <span className="text-[#FF4F4F] mr-3 text-xl font-bold">✗</span>
-                      <span>Tentava organizar processos, mas sempre voltava à desorganização</span>
-                    </li>
-                    <li className="flex items-start">
-                      <span className="text-[#FF4F4F] mr-3 text-xl font-bold">✗</span>
-                      <span>Trabalhava na base do improviso e tentativa e erro</span>
-                    </li>
-                    <li className="flex items-start">
-                      <span className="text-[#FF4F4F] mr-3 text-xl font-bold">✗</span>
-                      <span>Sabia que era boa profissional, mas não conseguia transformar isso em negócio que funciona</span>
+                      <span>Trabalhava na base do improviso</span>
                     </li>
                   </ul>
                 </div>
@@ -616,35 +535,19 @@ export default function NutriLandingPage() {
                   <ul className="space-y-3 text-lg text-gray-700">
                     <li className="flex items-start">
                       <span className="text-[#29CC6A] mr-3 text-xl font-bold">✓</span>
-                      <span>Acorda tranquila, sabendo que tem sistema de captação funcionando</span>
+                      <span>Acorda tranquila, com sistema de captação funcionando</span>
                     </li>
                     <li className="flex items-start">
                       <span className="text-[#29CC6A] mr-3 text-xl font-bold">✓</span>
-                      <span>Se sente confiante para cobrar o valor que realmente vale</span>
+                      <span>Se sente confiante para cobrar</span>
                     </li>
                     <li className="flex items-start">
                       <span className="text-[#29CC6A] mr-3 text-xl font-bold">✓</span>
-                      <span>Tem mentoria e comunidade que apoiam seu crescimento</span>
+                      <span>Tem mentoria e estrutura — não está sozinha</span>
                     </li>
                     <li className="flex items-start">
                       <span className="text-[#29CC6A] mr-3 text-xl font-bold">✓</span>
-                      <span>Dorme realizada, vendo seu negócio crescer de forma organizada</span>
-                    </li>
-                    <li className="flex items-start">
-                      <span className="text-[#29CC6A] mr-3 text-xl font-bold">✓</span>
-                      <span>Tem agenda organizada e controle sobre seu negócio</span>
-                    </li>
-                    <li className="flex items-start">
-                      <span className="text-[#29CC6A] mr-3 text-xl font-bold">✓</span>
-                      <span>Segue processos definidos que funcionam sem você precisar improvisar</span>
-                    </li>
-                    <li className="flex items-start">
-                      <span className="text-[#29CC6A] mr-3 text-xl font-bold">✓</span>
-                      <span>Trabalha com método, não na base da tentativa e erro</span>
-                    </li>
-                    <li className="flex items-start">
-                      <span className="text-[#29CC6A] mr-3 text-xl font-bold">✓</span>
-                      <span>Transforma conhecimento técnico em negócio organizado e lucrativo</span>
+                      <span>Trabalha com método, não na base do improviso</span>
                     </li>
                   </ul>
                 </div>
@@ -671,7 +574,7 @@ export default function NutriLandingPage() {
                 {[
                   {
                     title: 'Captação Automática',
-                    desc: 'Você para de depender de indicação. Crie quizzes, calculadoras e links que geram leads qualificados automaticamente. Não precisa postar e torcer. Você cria sistemas que funcionam.'
+                    desc: 'Você para de depender de indicação. Sistemas de captação que funcionam. Não precisa postar e torcer.'
                   },
                   {
                     title: 'Organização Total',
@@ -791,205 +694,99 @@ export default function NutriLandingPage() {
           </div>
         </section>
 
-        {/* BLOCO 13 — OFERTA (ESCOLHA SEU COMPROMISSO) */}
+        {/* BLOCO 12b — QUANTO CUSTA CONTINUAR ASSIM? */}
+        <section className="py-12 sm:py-16 bg-[#F5F7FA]">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="max-w-3xl mx-auto text-center">
+              <h2 className="text-2xl sm:text-3xl font-bold text-[#1A1A1A] mb-6">
+                Quanto custa continuar assim?
+              </h2>
+              <p className="text-lg text-gray-700 mb-4">
+                Agenda vazia → insegurança constante → dependência de terceiros.
+              </p>
+              <p className="text-xl font-bold text-[#2563EB]">
+                Nada muda se você continuar adiando.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* BLOCO 13 — OFERTA (SÓ PLANO ANUAL | DECISÃO) */}
         <section id="oferta" className="py-16 sm:py-20 lg:py-24 bg-gradient-to-br from-[#2563EB] to-[#3B82F6] relative z-0" style={{ position: 'relative', zIndex: 1 }}>
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="max-w-5xl mx-auto">
+            <div className="max-w-2xl mx-auto">
               <h2 className="text-3xl sm:text-4xl font-bold text-center mb-6 text-white">
-                Escolha seu nível de compromisso com sua transformação
+                Isso não é uma assinatura.
               </h2>
-              
-              <p className="text-xl text-center text-white/90 mb-12 max-w-3xl mx-auto">
-                <strong>A entrega é a mesma. O que muda é o seu nível de compromisso.</strong>
-                <br />
-                <br />
-                LYA é mentoria estratégica, não curso. É direcionamento diário, clareza de foco e execução prática. É transformar você em uma Nutri-Empresária organizada, confiante e lucrativa.
-                <br />
-                <br />
-                <strong>Você não paga mais por menos recursos. Você paga menos quando se compromete mais.</strong>
+              <p className="text-xl sm:text-2xl font-bold text-center text-white/95 mb-4">
+                É uma decisão de sair do improviso.
+              </p>
+              <p className="text-lg text-center text-white/90 mb-10">
+                LYA é orientação que destrava: direcionamento diário e metodologia clara de captação. Estrutura de apoio para você encher agenda e parar de agendar ansiosa.
               </p>
               
-              <div className="grid md:grid-cols-2 gap-8 mb-8 relative z-10">
-                {/* PLANO ANUAL FIDELIDADE */}
-                <div className="bg-white rounded-2xl p-8 shadow-2xl border-4 border-yellow-400 relative" style={{ pointerEvents: 'auto' }}>
-                  <div className="text-center mb-6">
-                    <span className="inline-block bg-yellow-400 text-[#1A1A1A] px-4 py-2 rounded-full text-sm font-semibold mb-4">
-                      ✨ Mais escolhido
-                    </span>
-                    <h3 className="text-2xl font-bold mb-2 text-[#1A1A1A]">Plano Anual Fidelidade</h3>
-                    <p className="text-gray-600 mb-4">Para quem decidiu se comprometer com a própria evolução profissional</p>
-                  </div>
-                  
-                  <div className="bg-gradient-to-br from-[#2563EB] to-[#3B82F6] rounded-xl p-6 mb-6 text-center text-white">
-                    <p className="text-3xl sm:text-4xl font-bold">
-                      12× de R$ 97
-                    </p>
-                    <p className="text-sm text-white/90 mt-2">
-                      Total: R$ 1.164/ano
-                    </p>
-                  </div>
-                  
-                  <ul className="space-y-3 mb-6 text-gray-700">
-                    <li className="flex items-start">
-                      <span className="text-[#29CC6A] mr-3 text-xl">✓</span>
-                      <span>Você se compromete com sua transformação</span>
-                    </li>
-                    <li className="flex items-start">
-                      <span className="text-[#29CC6A] mr-3 text-xl">✓</span>
-                      <span>Economia clara ao optar pelo compromisso anual</span>
-                    </li>
-                    <li className="flex items-start">
-                      <span className="text-[#29CC6A] mr-3 text-xl">✓</span>
-                      <span>Foco total na trilha, sem distrações</span>
-                    </li>
-                    <li className="flex items-start">
-                      <span className="text-[#29CC6A] mr-3 text-xl">✓</span>
-                      <span>Decisão que reflete seriedade com seu crescimento</span>
-                    </li>
-                  </ul>
-                  
-                  <div className="bg-[#E9F1FF] rounded-lg p-4 mb-6 text-center">
-                    <p className="text-sm text-gray-700">
-                      <span className="text-xl mr-2">🛡️</span>
-                      <strong>7 dias de garantia incondicional</strong>
-                      <br />
-                      <span className="text-xs">Entre, use a plataforma e sinta a experiência.</span>
-                    </p>
-                  </div>
-                  
-                  <div className="relative" style={{ zIndex: 100, pointerEvents: 'auto' }}>
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.preventDefault()
-                        e.stopPropagation()
-                        console.log('🔘 Botão Anual clicado (onClick)')
-                        handleCheckout('annual')
-                      }}
-                      onTouchStart={(e) => {
-                        e.stopPropagation()
-                        console.log('👆 Touch start - Anual')
-                      }}
-                      onTouchEnd={(e) => {
-                        e.preventDefault()
-                        e.stopPropagation()
-                        console.log('👆 Touch end - Anual')
-                        handleCheckout('annual')
-                      }}
-                      onMouseDown={(e) => {
-                        e.stopPropagation()
-                      }}
-                      className="w-full bg-gradient-to-r from-[#2563EB] to-[#3B82F6] text-white px-6 py-4 rounded-xl text-lg font-bold hover:from-[#3B82F6] hover:to-[#1D4ED8] transition-all shadow-xl cursor-pointer active:scale-95"
-                      style={{ 
-                        touchAction: 'manipulation', 
-                        WebkitTapHighlightColor: 'transparent',
-                        pointerEvents: 'auto',
-                        position: 'relative',
-                        zIndex: 100,
-                        userSelect: 'none',
-                        WebkitUserSelect: 'none',
-                        minHeight: '48px'
-                      }}
-                    >
-                      👉 Escolher Plano Anual
-                    </button>
-                  </div>
+              <div className="bg-white rounded-2xl p-8 shadow-2xl border-4 border-yellow-400 relative" style={{ pointerEvents: 'auto' }}>
+                <div className="text-center mb-6">
+                  <h3 className="text-2xl font-bold mb-2 text-[#1A1A1A]">Plano Anual</h3>
+                  <p className="text-gray-600 mb-1">Acesso válido por 12 meses</p>
+                  <p className="text-sm text-gray-500">Compromisso com economia clara</p>
                 </div>
-                
-                {/* PLANO MENSAL FLEXÍVEL */}
-                <div className="bg-white rounded-2xl p-8 shadow-2xl border-4 border-gray-300 relative" style={{ pointerEvents: 'auto' }}>
-                  <div className="text-center mb-6">
-                    <h3 className="text-2xl font-bold mb-2 text-[#1A1A1A]">Plano Mensal Flexível</h3>
-                    <p className="text-gray-600 mb-4">Para quem prefere começar com mais liberdade</p>
-                  </div>
-                  
-                  <div className="bg-gray-100 rounded-xl p-6 mb-6 text-center">
-                    <p className="text-3xl sm:text-4xl font-bold text-[#1A1A1A]">
-                      R$ 197 / mês
-                    </p>
-                  </div>
-                  
-                  <ul className="space-y-3 mb-6 text-gray-700">
-                    <li className="flex items-start">
-                      <span className="text-[#29CC6A] mr-3 text-xl">✓</span>
-                      <span>Liberdade para cancelar quando quiser</span>
-                    </li>
-                    <li className="flex items-start">
-                      <span className="text-[#29CC6A] mr-3 text-xl">✓</span>
-                      <span>Mesmo acesso à mentoria e ao método</span>
-                    </li>
-                    <li className="flex items-start">
-                      <span className="text-[#29CC6A] mr-3 text-xl">✓</span>
-                      <span>Ideal para quem quer iniciar sem compromisso anual</span>
-                    </li>
-                  </ul>
-                  
-                  <div className="bg-[#E9F1FF] rounded-lg p-4 mb-6 text-center">
-                    <p className="text-sm text-gray-700">
-                      <span className="text-xl mr-2">🛡️</span>
-                      <strong>7 dias de garantia incondicional</strong>
-                    </p>
-                  </div>
-                  
-                  <div className="relative" style={{ zIndex: 100, pointerEvents: 'auto' }}>
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.preventDefault()
-                        e.stopPropagation()
-                        console.log('🔘 Botão Mensal clicado (onClick)')
-                        handleCheckout('monthly')
-                      }}
-                      onTouchStart={(e) => {
-                        e.stopPropagation()
-                        console.log('👆 Touch start - Mensal')
-                      }}
-                      onTouchEnd={(e) => {
-                        e.preventDefault()
-                        e.stopPropagation()
-                        console.log('👆 Touch end - Mensal')
-                        handleCheckout('monthly')
-                      }}
-                      onMouseDown={(e) => {
-                        e.stopPropagation()
-                      }}
-                      className="w-full bg-gray-600 text-white px-6 py-4 rounded-xl text-lg font-bold hover:bg-gray-700 transition-all shadow-xl cursor-pointer active:scale-95"
-                      style={{ 
-                        touchAction: 'manipulation', 
-                        WebkitTapHighlightColor: 'transparent',
-                        pointerEvents: 'auto',
-                        position: 'relative',
-                        zIndex: 100,
-                        userSelect: 'none',
-                        WebkitUserSelect: 'none',
-                        minHeight: '48px'
-                      }}
-                    >
-                      👉 Escolher Plano Mensal
-                    </button>
-                  </div>
+                <div className="bg-gradient-to-br from-[#2563EB] to-[#3B82F6] rounded-xl p-6 mb-6 text-center text-white">
+                  <p className="text-3xl sm:text-4xl font-bold">12× de R$ 97</p>
+                  <p className="text-sm text-white/90 mt-2">Total: R$ 1.164 — 1 ano de acesso</p>
+                </div>
+                <p className="text-center text-gray-700 mb-4 font-semibold">
+                  Isso não é uma assinatura. É uma decisão de sair do improviso.
+                </p>
+                <ul className="space-y-3 mb-6 text-gray-700">
+                  <li className="flex items-start">
+                    <span className="text-[#29CC6A] mr-3 text-xl">✓</span>
+                    <span>Sistema de captação com orientação LYA (você não trava)</span>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-[#29CC6A] mr-3 text-xl">✓</span>
+                    <span>Links inteligentes e rotina que gera agenda</span>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-[#29CC6A] mr-3 text-xl">✓</span>
+                    <span>Metodologia clara para encher agenda e parar de agendar ansiosa</span>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-[#29CC6A] mr-3 text-xl">✓</span>
+                    <span>7 dias de garantia incondicional</span>
+                  </li>
+                </ul>
+                <div className="relative" style={{ zIndex: 100, pointerEvents: 'auto' }}>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.preventDefault()
+                      e.stopPropagation()
+                      handleCheckout('annual')
+                    }}
+                    onTouchStart={(e) => e.stopPropagation()}
+                    onTouchEnd={(e) => {
+                      e.preventDefault()
+                      e.stopPropagation()
+                      handleCheckout('annual')
+                    }}
+                    onMouseDown={(e) => e.stopPropagation()}
+                    className="w-full bg-gradient-to-r from-[#2563EB] to-[#3B82F6] text-white px-6 py-4 rounded-xl text-lg font-bold hover:from-[#3B82F6] hover:to-[#1D4ED8] transition-all shadow-xl cursor-pointer active:scale-95"
+                    style={{ touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent', pointerEvents: 'auto', position: 'relative', zIndex: 100, userSelect: 'none', WebkitUserSelect: 'none', minHeight: '48px' }}
+                  >
+                    👉 Quero sair do improviso e aderir ao sistema
+                  </button>
                 </div>
               </div>
               
-              {/* Informações técnicas discretas */}
-              <div className="mt-8 text-center">
-                <p className="text-sm text-white/80 mb-2">
-                  ℹ️ <strong>Informações importantes</strong>
-                </p>
-                <p className="text-xs text-white/70 max-w-2xl mx-auto">
-                  O plano anual possui fidelidade de 12 meses. Ambos os planos contam com garantia incondicional de 7 dias. Detalhes completos no checkout.
-                </p>
-              </div>
+              <p className="text-center text-sm text-white/80 mt-6">
+                Plano anual com fidelidade de 12 meses. Garantia de 7 dias. Detalhes no checkout.
+              </p>
               
               <div className="bg-white/10 backdrop-blur-sm rounded-xl p-8 text-center text-white mt-8">
-                <p className="text-xl font-bold mb-4">
-                  Mentoria estratégica, não curso.
-                </p>
+                <p className="text-xl font-bold mb-4">Mentoria estratégica, não curso.</p>
                 <p className="text-lg mb-4">
-                  LYA não é uma lista de vídeos para assistir. Não é uma plataforma para explorar sozinha. É mentoria estratégica contínua. É direcionamento diário. É clareza sobre o próximo passo certo.
-                </p>
-                <p className="text-lg font-bold">
-                  A entrega é idêntica nos dois planos. A diferença está no seu nível de compromisso com sua própria transformação.
+                  LYA não executa por você. Ela impede que você trave. É direcionamento diário e clareza sobre o próximo passo certo.
                 </p>
               </div>
             </div>
@@ -1005,7 +802,7 @@ export default function NutriLandingPage() {
                 Garantia Incondicional de 7 Dias
               </h2>
               <p className="text-lg sm:text-xl text-gray-600 mb-6">
-                Válida para ambos os planos
+                Válida para o plano anual
               </p>
               <p className="text-xl mb-4 text-gray-700">
                 Se você não sentir que está no caminho certo, devolvemos 100% do seu investimento. Sem burocracia, sem letras miúdas, sem julgamento.
@@ -1031,40 +828,37 @@ export default function NutriLandingPage() {
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="max-w-4xl mx-auto text-center">
               <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-6">
-                Você não precisa continuar tentando sozinha.
+                Você não precisa mais agendar ansiosa.
               </h2>
               <p className="text-xl mb-4 text-white/90">
                 Você não precisa mais:
               </p>
               <ul className="text-lg mb-6 space-y-2 text-white/80">
                 <li>• Depender de sorte ou indicação</li>
+                <li>• Travar na indecisão (“o que faço amanhã?”)</li>
                 <li>• Trabalhar na base do improviso</li>
-                <li>• Se sentir sozinha nessa jornada</li>
-                <li>• Perder tempo com tentativas que não funcionam</li>
+                <li>• Perder tempo sem metodologia clara de captação</li>
               </ul>
               <p className="text-xl sm:text-2xl font-bold mb-8 text-white">
-                Você pode escolher ter método, clareza e suporte.
+                Você pode ter sistema, orientação que destrava e agenda que enche.
               </p>
               <p className="text-xl mb-4 text-white/90">
-                Cada dia que você adia é mais um dia longe da carreira que você quer ter.
+                Nada muda se você continuar adiando.
               </p>
               <p className="text-lg mb-4 text-white/80">
-                Você não precisa mais acordar ansiosa. Você não precisa mais se sentir sozinha. Você não precisa mais tentar descobrir sozinha.
-              </p>
-              <p className="text-lg mb-8 text-white/80">
-                Você não está sozinha. Existe um caminho. Existe um método. Existe suporte.
+                A estrutura de apoio está pronta. A metodologia está clara. O próximo passo é seu.
               </p>
               <p className="text-xl font-bold mb-8">
-                A transformação começa quando você decide que chegou a hora.
+                Decida sair do improviso e aderir ao sistema.
               </p>
               <Link
                 href="#oferta"
                 className="inline-block bg-white text-[#2563EB] px-10 py-5 rounded-xl text-xl sm:text-2xl font-bold hover:bg-gray-100 transition-all shadow-2xl"
               >
-                Quero me tornar uma Nutri-Empresária agora
+                Quero sair do improviso e aderir ao sistema
               </Link>
               <p className="text-lg mt-8 text-white/80">
-                A decisão é sua. O método está pronto. Os resultados esperam por você.
+                A decisão é sua. O sistema está pronto. Encha agenda com método.
               </p>
             </div>
           </div>
@@ -1081,20 +875,16 @@ export default function NutriLandingPage() {
               <div className="space-y-4">
                 {[
                   {
-                    pergunta: 'Posso cancelar a qualquer momento?',
-                    resposta: 'Depende do plano escolhido. Plano Anual: é um compromisso de 12 meses (12× de R$ 97, total R$ 1.164/ano). Não há cancelamento durante o período anual. Plano Mensal: sim, você pode cancelar a qualquer momento. Sem fidelização. Você mantém acesso até o final do período pago. A diferença de preço reflete a diferença de compromisso.'
+                    pergunta: 'Posso cancelar durante o ano?',
+                    resposta: 'O plano anual é um compromisso de 12 meses (12× de R$ 97, total R$ 1.164/ano). Não há cancelamento durante o período anual. A decisão de 12 meses reflete o compromisso com sua transformação. Você tem 7 dias de garantia incondicional para testar: se não for pra você, devolvemos 100%.'
                   },
                   {
                     pergunta: 'Como funciona o suporte?',
                     resposta: 'Você tem acesso a: LYA (mentora estratégica digital) — disponível 24/7 para orientações estratégicas. Suporte técnico — para dúvidas sobre uso da plataforma. Comunidade — para trocar experiências com outras Nutri-Empresárias.'
                   },
                   {
-                    pergunta: 'Qual a diferença entre os planos?',
-                    resposta: 'A entrega do V1 é a mesma nos dois planos: Trilha Empresarial, Mentora LYA e o sistema de captação (templates/quiz/leads/métricas). A diferença está no seu nível de compromisso: Plano Anual (12× de R$ 97): para quem quer economia e decisão de 12 meses. Plano Mensal (R$ 197/mês): para quem prefere flexibilidade e pode cancelar quando quiser.'
-                  },
-                  {
                     pergunta: 'Para quem é o YLADA Nutri?',
-                    resposta: 'O YLADA Nutri é para nutricionistas que: Querem construir uma carreira organizada e lucrativa. Estão cansadas de depender de sorte ou indicação. Desejam ter clareza sobre como crescer profissionalmente. Buscam um método, não apenas ferramentas. Estão prontas para investir em transformação profissional. Se você se identificou, o YLADA é para você.'
+                    resposta: 'O YLADA Nutri é para nutricionistas que querem encher agenda e parar de agendar ansiosa. Que querem se livrar de indecisão e ter metodologia clara de captação. Que estão cansadas de depender de sorte ou indicação e querem estrutura de apoio e orientação que destrava. Se você quer parar de travar e ter rotina que gera agenda, o YLADA é para você.'
                   },
                   {
                     pergunta: 'Quanto tempo leva para ver resultados?',
