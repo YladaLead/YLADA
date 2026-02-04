@@ -990,7 +990,7 @@ export default function DynamicTemplatePreview({
     if (slug.includes('quiz-interativo') || slug.includes('interativo')) {
       return {
         titulo: '🔍 Descubra Seu Tipo de Metabolismo em 60 Segundos',
-        descricao: 'Entenda por que seu corpo reage de um jeito único à alimentação, energia e suplementos — e descubra o melhor caminho para ter mais resultados.',
+        descricao: 'Entenda por que seu corpo reage de um jeito único à alimentação, energia e suplementos, e descubra o melhor caminho para ter mais resultados.',
         mensagem: '🚀 Leva menos de 1 minuto e pode mudar a forma como você cuida do seu corpo.',
         beneficios: [
           'Seu tipo de metabolismo específico',
@@ -1003,7 +1003,7 @@ export default function DynamicTemplatePreview({
     if (slug.includes('quiz-bem-estar') || slug.includes('bem-estar')) {
       return {
         titulo: '🧘‍♀️ Qual é seu perfil predominante?',
-        descricao: 'Estético, Equilibrado ou Saúde/Performance — descubra em 1 minuto.',
+        descricao: 'Estético, Equilibrado ou Saúde/Performance: descubra em 1 minuto.',
         mensagem: '🚀 Uma avaliação que pode transformar sua relação com o bem-estar.',
         beneficios: [
           'Seu perfil predominante (Estético, Equilibrado ou Saúde/Performance)',

@@ -11,7 +11,7 @@ const WHATSAPP_NUTRI = '5519997230912'
 const WHATSAPP_MSG = 'Olá! Estou na página da YLADA Nutri e gostaria de tirar dúvidas.'
 
 export default function NutriLandingPage() {
-  const [faqOpen, setFaqOpen] = useState<number | null>(null)
+  const [faqOpen, setFaqOpen] = useState<number | null>(0)
   const [lyaWidgetOpen, setLyaWidgetOpen] = useState(false)
   const videoRef = useRef<HTMLVideoElement>(null)
   const [videoProgress, setVideoProgress] = useState(0)
@@ -20,6 +20,14 @@ export default function NutriLandingPage() {
   // Rastrear visualização da página de vendas
   useEffect(() => {
     trackNutriSalesView()
+  }, [])
+
+  // Se o anúncio trouxer com #video, rolar direto para o vídeo
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    if (window.location.hash !== '#video') return
+    const el = document.getElementById('video')
+    if (el) setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100)
   }, [])
 
   const toggleFaq = (index: number) => {
@@ -79,45 +87,41 @@ export default function NutriLandingPage() {
       </header>
 
       <main>
-        {/* BLOCO 1 — HERO (CANSADAS DE IMPROVISAR | SAIR DO IMPROVISO) */}
-        <section className="bg-gradient-to-br from-[#2563EB] to-[#3B82F6] text-white pt-12 sm:pt-16 lg:pt-20 pb-16 sm:pb-20 lg:pb-24">
+        {/* BLOCO 1 — HERO (compacto: anúncio pode usar #video para cair no vídeo) */}
+        <section className="bg-gradient-to-br from-[#2563EB] to-[#3B82F6] text-white pt-8 sm:pt-10 pb-10 sm:pb-12">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="max-w-4xl mx-auto text-center">
-              <p className="text-lg sm:text-xl text-white/80 mb-4 font-medium">
+            <div className="max-w-3xl mx-auto text-center">
+              <p className="text-base sm:text-lg text-white/85 mb-2 font-medium">
                 Para nutricionistas cansadas de tentar sozinhas e improvisar a própria agenda.
               </p>
-              
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-black mb-6 sm:mb-8 leading-tight">
-                O sistema de captação
-                <br />
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black mb-4 leading-tight">
+                O sistema de captação{' '}
                 <span className="bg-gradient-to-r from-yellow-300 to-orange-300 bg-clip-text text-transparent">
                   com orientação que destrava.
                 </span>
               </h1>
-              
-              <p className="text-lg sm:text-xl lg:text-2xl text-white/90 leading-relaxed mb-8 sm:mb-12 max-w-3xl mx-auto">
-                Estrutura de apoio para você sair do improviso. Sem indecisão, sem depender de sorte ou indicação.
+              <p className="text-base text-white/90 mb-6 max-w-xl mx-auto">
+                Estrutura de apoio para você sair do improviso, sem indecisão.
               </p>
-              
               <Link
                 href="#video"
-                className="inline-block bg-white text-[#2563EB] px-8 sm:px-12 py-4 sm:py-5 rounded-xl text-lg sm:text-xl font-bold hover:bg-gray-100 transition-all shadow-2xl hover:shadow-3xl transform hover:-translate-y-1"
+                className="inline-block bg-white text-[#2563EB] px-6 sm:px-8 py-3.5 sm:py-4 rounded-xl text-base sm:text-lg font-bold hover:bg-gray-100 transition-all shadow-xl"
               >
                 Quero sair do improviso
               </Link>
+              <p className="text-xs text-white/70 mt-2 font-normal">
+                Veja se esse sistema faz sentido para você
+              </p>
             </div>
           </div>
         </section>
 
-        {/* VÍDEO NO TOPO — Veja se faz sentido / ou continue improvisando */}
-        <section id="video" className="py-10 sm:py-14 bg-white">
+        {/* VÍDEO — Use /pt/nutri#video no anúncio para desembocar direto aqui */}
+        <section id="video" className="pt-2 sm:pt-4 pb-10 sm:pb-14 bg-white scroll-mt-4">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="max-w-4xl mx-auto">
-              <h2 className="text-2xl sm:text-3xl font-bold text-center mb-2 text-[#1A1A1A]">
-                Veja se esse sistema faz sentido para você
-              </h2>
-              <p className="text-lg text-center text-gray-600 mb-6">
-                — ou se continuar improvisando é o que parece mais confortável agora.
+              <p className="text-base sm:text-lg text-center text-gray-600 mb-3">
+                Entenda como organizar sua agenda e ter tração de verdade. Assista ao vídeo.
               </p>
               <div className="bg-white rounded-xl shadow-2xl overflow-hidden mb-4">
                 <div
@@ -164,13 +168,13 @@ export default function NutriLandingPage() {
                   href={`https://wa.me/${WHATSAPP_NUTRI}?text=${encodeURIComponent(WHATSAPP_MSG)}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-full sm:w-auto inline-flex justify-center items-center px-8 py-4 rounded-xl text-lg font-semibold border-2 border-[#2563EB] text-[#2563EB] hover:bg-[#2563EB] hover:text-white transition-all shadow-md"
+                  className="w-full sm:w-auto inline-flex justify-center items-center px-5 py-3 rounded-lg text-base font-medium border border-gray-300 text-gray-700 hover:bg-gray-50 transition-all"
                 >
                   Tirar dúvida
                 </a>
                 <Link
                   href="/pt/nutri/checkout?plan=annual"
-                  className="w-full sm:w-auto inline-flex justify-center items-center px-8 py-4 rounded-xl text-lg font-bold bg-gradient-to-r from-[#2563EB] to-[#3B82F6] text-white hover:from-[#3B82F6] hover:to-[#1D4ED8] transition-all shadow-xl"
+                  className="w-full sm:flex-1 sm:max-w-xs inline-flex justify-center items-center px-8 py-4 rounded-xl text-lg font-bold bg-gradient-to-r from-[#2563EB] to-[#3B82F6] text-white hover:from-[#3B82F6] hover:to-[#1D4ED8] transition-all shadow-xl"
                 >
                   Aderir ao sistema
                 </Link>
@@ -187,17 +191,14 @@ export default function NutriLandingPage() {
                 Você já se sentiu assim?
               </h2>
               
-              <div className="space-y-5 text-lg sm:text-xl text-gray-700 leading-relaxed">
-                <p className="font-semibold text-[#2563EB]">
-                  "Será que hoje alguém vai me procurar?" — agenda vazia, dúvida na cobrança, sensação de recomeçar de novo.
-                </p>
-                <p>
-                  Conteúdo que não gera conversa não gera agenda. Você posta, os likes vêm, as mensagens de <strong>"quanto custa?"</strong> não chegam.
-                </p>
-                <p>
-                  Planilhas, apps, rotinas — você já tentou. E volta ao mesmo lugar: <strong>improviso, solidão, sem clareza do que fazer amanhã.</strong>
-                </p>
-              </div>
+              <ul className="space-y-3 text-lg sm:text-xl text-gray-700">
+                <li className="font-semibold text-[#2563EB]">• Agenda vazia</li>
+                <li className="font-semibold text-[#2563EB]">• Dúvida na cobrança</li>
+                <li className="font-semibold text-[#2563EB]">• Sensação de recomeçar de novo</li>
+              </ul>
+              <p className="mt-6 text-lg text-gray-700 leading-relaxed">
+                Conteúdo que não gera conversa não gera agenda. Você posta, os likes vêm, <strong>"quanto custa?"</strong> não chega. Planilhas, apps, rotinas: você já tentou. E volta ao mesmo lugar: <strong>improviso, solidão, sem clareza do que fazer amanhã.</strong>
+              </p>
               
               <div className="mt-10 text-center">
                 <p className="text-xl font-bold text-[#1A1A1A]">
@@ -218,7 +219,7 @@ export default function NutriLandingPage() {
               
               <div className="bg-white rounded-xl shadow-lg p-8 sm:p-10 mb-8">
                 <p className="text-lg sm:text-xl text-gray-700 mb-6 leading-relaxed font-semibold">
-                  Respire fundo. Você não está quebrada. O que falta é uma metodologia clara de captação e uma estrutura de apoio que destrave — não mais indecisão, não mais “o que faço amanhã?”.
+                  Respire fundo. Você não está quebrada. O que falta é uma metodologia clara de captação e uma estrutura de apoio que destrave. Não mais indecisão, não mais “o que faço amanhã?”.
                 </p>
                 
                 <p className="text-lg text-gray-700 mb-4">
@@ -242,52 +243,35 @@ export default function NutriLandingPage() {
               
               <div className="grid md:grid-cols-2 gap-8 mb-12">
                 <div className="bg-[#E9F1FF] rounded-xl p-8 border-2 border-[#2563EB]">
-                  <h3 className="text-2xl font-bold mb-6 text-[#2563EB]">O Que a Faculdade Ensinou</h3>
-                  <p className="text-lg text-gray-700 mb-4">
-                    A faculdade te preparou para ser uma excelente nutricionista clínica. Você aprendeu:
-                  </p>
-                  <ul className="space-y-2 text-gray-700">
-                    <li>• Como avaliar um paciente</li>
-                    <li>• Como calcular necessidades nutricionais</li>
-                    <li>• Como prescrever dietas personalizadas</li>
-                    <li>• Como interpretar exames laboratoriais</li>
-                    <li>• Como acompanhar evolução clínica</li>
+                  <h3 className="text-2xl font-bold mb-4 text-[#2563EB]">O Que a Faculdade Ensinou</h3>
+                  <p className="text-gray-700 mb-4">Você aprendeu:</p>
+                  <ul className="space-y-3 text-gray-700">
+                    <li>• Avaliar paciente e necessidades nutricionais</li>
+                    <li>• Prescrever dietas e interpretar exames</li>
+                    <li>• Acompanhar evolução clínica</li>
                   </ul>
-                  <p className="text-lg font-semibold text-gray-700 mt-6">
-                    Isso é fundamental. E você domina.
-                  </p>
+                  <p className="text-lg font-semibold text-gray-700 mt-6">Isso é fundamental. E você domina.</p>
                 </div>
                 
                 <div className="bg-[#FFF4E6] rounded-xl p-8 border-2 border-[#FF9800]">
-                  <h3 className="text-2xl font-bold mb-6 text-[#FF9800]">O Que a Faculdade Não Ensinou</h3>
-                  <p className="text-lg text-gray-700 mb-4">
-                    Mas a faculdade não te preparou para:
-                  </p>
-                  <ul className="space-y-2 text-gray-700">
-                    <li>• Construir um negócio do zero</li>
-                    <li>• Captar clientes de forma consistente</li>
-                    <li>• Organizar processos empresariais</li>
-                    <li>• Definir estratégias de precificação</li>
+                  <h3 className="text-2xl font-bold mb-4 text-[#FF9800]">O Que a Faculdade Não Ensinou</h3>
+                  <p className="text-gray-700 mb-4">Não te preparou para:</p>
+                  <ul className="space-y-3 text-gray-700">
+                    <li>• Construir negócio e captar clientes</li>
+                    <li>• Organizar processos e precificar</li>
                     <li>• Criar sistemas que funcionem sem você</li>
-                    <li>• Transformar conhecimento em receita recorrente</li>
+                    <li>• Transformar conhecimento em receita</li>
                   </ul>
-                  <p className="text-lg font-semibold text-gray-700 mt-6">
-                    Isso não é culpa da faculdade. Ela cumpre seu papel: formar profissionais técnicos.
-                  </p>
+                  <p className="text-lg font-semibold text-gray-700 mt-6">Ela cumpre seu papel: formar técnicos.</p>
                 </div>
               </div>
               
-              <div className="bg-[#2563EB] rounded-xl p-8 text-center text-white">
-                <p className="text-xl sm:text-2xl font-bold mb-4">
-                  O mercado exige que você seja duas coisas ao mesmo tempo:
+              <div className="bg-[#2563EB] rounded-xl py-6 px-6 text-center text-white max-w-2xl mx-auto">
+                <p className="text-xl font-bold mb-2">
+                  O mercado exige que você seja duas coisas:
                 </p>
-                <div className="space-y-2 text-lg">
-                  <p>1. <strong>Nutricionista técnica</strong> (isso você já é)</p>
-                  <p>2. <strong>Empresária estratégica</strong> (isso ninguém te ensinou)</p>
-                </div>
-                <p className="text-xl sm:text-2xl font-bold mt-6">
-                  É aqui que nasce a necessidade da Nutri-Empresária.
-                </p>
+                <p className="text-lg">1. <strong>Nutricionista técnica</strong> (isso você já é). 2. <strong>Empresária estratégica</strong> (isso ninguém te ensinou)</p>
+                <p className="text-xl font-bold mt-4">É aqui que nasce a Nutri-Empresária.</p>
               </div>
             </div>
           </div>
@@ -307,40 +291,43 @@ export default function NutriLandingPage() {
                 </p>
                 
                 <div className="space-y-4 text-lg text-gray-700 mb-8">
-                  <p>Sem sistema: sorte, indicação, improviso, indecisão. <strong>Com sistema: metodologia clara, orientação que destrava, agenda que enche.</strong></p>
-                  <p>Sem sistema: “o que faço amanhã?”, “quando posto?”, “por que não entram contatos?”. <strong>Com sistema: rotina definida, links que geram conversa, estrutura de apoio.</strong></p>
-                  <p>Sem sistema: você trava. <strong>Com sistema: você segue.</strong></p>
+                  <div className="flex flex-wrap gap-2 items-baseline">
+                    <span className="font-bold text-[#FF4F4F]">Sem sistema:</span> sorte, indicação, improviso.
+                    <span className="font-bold text-[#29CC6A]">Com sistema:</span> metodologia clara, agenda que enche.
+                  </div>
+                  <div className="flex flex-wrap gap-2 items-baseline">
+                    <span className="font-bold text-[#FF4F4F]">Sem sistema:</span> “o que faço amanhã?”, indecisão.
+                    <span className="font-bold text-[#29CC6A]">Com sistema:</span> rotina definida, estrutura de apoio.
+                  </div>
+                  <div className="flex flex-wrap gap-2 items-baseline pt-2">
+                    <span className="font-bold text-[#FF4F4F]">Sem sistema:</span> você trava.
+                    <span className="font-bold text-[#29CC6A]">Com sistema:</span> você segue.
+                  </div>
                 </div>
               </div>
               
               {/* Tabela Comparativa */}
-              <div className="bg-white rounded-xl shadow-lg p-8 mb-8 overflow-x-auto">
+              <div className="bg-white rounded-xl shadow-lg p-8 mb-6 overflow-x-auto">
                 <h3 className="text-2xl font-bold mb-6 text-center text-[#1A1A1A]">
                   Nutri Tradicional × Nutri-Empresária
                 </h3>
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div>
+                <div className="grid md:grid-cols-2 gap-8">
+                  <div className="bg-[#FF4F4F]/5 rounded-lg p-6 border-2 border-[#FF4F4F]/30">
                     <h4 className="text-xl font-bold mb-4 text-[#FF4F4F]">Nutri Tradicional</h4>
-                    <ul className="space-y-2 text-gray-700">
-                      <li>• Depende de indicação</li>
-                      <li>• Agenda inconsistente</li>
+                    <ul className="space-y-3 text-gray-700">
+                      <li>• Indicação, agenda inconsistente</li>
                       <li>• Insegurança para cobrar</li>
-                      <li>• Trabalha na base do "improviso"</li>
-                      <li>• Sensação de estar sempre "recomeçando"</li>
-                      <li>• Solidão profissional</li>
-                      <li>• Conhecimento técnico apenas</li>
+                      <li>• Improviso, recomeçando</li>
+                      <li>• Solidão, só técnico</li>
                     </ul>
                   </div>
-                  <div>
+                  <div className="bg-[#29CC6A]/10 rounded-lg p-6 border-2 border-[#29CC6A]/50">
                     <h4 className="text-xl font-bold mb-4 text-[#29CC6A]">Nutri-Empresária</h4>
-                    <ul className="space-y-2 text-gray-700">
-                      <li>• Cria sistemas de captação</li>
-                      <li>• Agenda organizada e previsível</li>
-                      <li>• Clareza de valor e precificação</li>
-                      <li>• Segue processos definidos</li>
-                      <li>• Crescimento contínuo e organizado</li>
-                      <li>• Suporte e mentoria estratégica</li>
-                      <li>• Conhecimento técnico + mentalidade empresarial</li>
+                    <ul className="space-y-3 text-gray-700">
+                      <li>• Sistemas de captação</li>
+                      <li>• Agenda previsível, clareza de preço</li>
+                      <li>• Processos definidos, crescimento</li>
+                      <li>• Mentoria + mentalidade empresarial</li>
                     </ul>
                   </div>
                 </div>
@@ -349,13 +336,11 @@ export default function NutriLandingPage() {
                 </p>
               </div>
               
-              <div className="bg-gradient-to-r from-[#2563EB] to-[#3B82F6] rounded-xl p-8 text-center text-white">
-                <p className="text-xl sm:text-2xl font-bold mb-4">
+              <div className="bg-gradient-to-r from-[#2563EB] to-[#3B82F6] rounded-xl py-5 px-6 text-center text-white max-w-2xl mx-auto">
+                <p className="text-xl font-bold">
                   O divisor de águas não é conhecimento. É sistema.
                 </p>
-                <p className="text-lg mt-6">
-                  Você quer encher agenda com método e parar de travar?
-                </p>
+                <p className="text-base mt-2 opacity-95">Você quer encher agenda com método e parar de travar?</p>
               </div>
             </div>
           </div>
@@ -375,7 +360,7 @@ export default function NutriLandingPage() {
                 </p>
                 
                 <p className="text-lg text-gray-700 mb-6 leading-relaxed">
-                  Estrutura de apoio para nutricionistas que querem encher agenda, parar de agendar ansiosa e ter metodologia clara — sem travar, sem indecisão.
+                  Estrutura de apoio para nutricionistas que querem encher agenda, parar de agendar ansiosa e ter metodologia clara, sem travar e sem indecisão.
                 </p>
                 
                 <p className="text-lg text-gray-700 mb-4">
@@ -446,7 +431,7 @@ export default function NutriLandingPage() {
                   },
                   {
                     title: '2. Trilha empresarial clara',
-                    desc: 'Próximo passo definido. Você executa com método, não na base do improviso. Sem “gestão de clientes” pesada — apenas controle claro de leads e conversão.'
+                    desc: 'Próximo passo definido. Você executa com método, não na base do improviso. Sem “gestão de clientes” pesada; apenas controle claro de leads e conversão.'
                   },
                   {
                     title: '3. LYA como mentoria estratégica',
@@ -543,7 +528,7 @@ export default function NutriLandingPage() {
                     </li>
                     <li className="flex items-start">
                       <span className="text-[#29CC6A] mr-3 text-xl font-bold">✓</span>
-                      <span>Tem mentoria e estrutura — não está sozinha</span>
+                      <span>Tem mentoria e estrutura, não está sozinha</span>
                     </li>
                     <li className="flex items-start">
                       <span className="text-[#29CC6A] mr-3 text-xl font-bold">✓</span>
@@ -574,28 +559,34 @@ export default function NutriLandingPage() {
                 {[
                   {
                     title: 'Captação Automática',
-                    desc: 'Você para de depender de indicação. Sistemas de captação que funcionam. Não precisa postar e torcer.'
+                    paraDe: 'depender de indicação',
+                    resultado: 'Captação que funciona sem postar e torcer.'
                   },
                   {
                     title: 'Organização Total',
-                    desc: 'Você para de trabalhar na base do improviso. Organize sua rotina e sua captação com clareza: o que fazer hoje, quais ferramentas publicar, quantos leads entraram e o que converter em atendimento.'
+                    paraDe: 'trabalhar no improviso',
+                    resultado: 'Rotina e captação claras: o que fazer hoje, o que converter.'
                   },
                   {
                     title: 'Clareza Empresarial',
-                    desc: 'Você para de tentar e começa a executar com método. Siga os 5 Pilares do Método YLADA e complete a Trilha Empresarial (30 dias) com clareza e passo a passo.'
+                    paraDe: 'tentar sem método',
+                    resultado: 'Trilha Empresarial (30 dias) com passo a passo.'
                   },
                   {
                     title: 'Comunidade',
-                    desc: 'Você para de se sentir sozinha. Faça parte de uma comunidade de Nutri-Empresárias que estão crescendo juntas. Compartilhe experiências, aprenda com outras, tenha suporte.'
+                    paraDe: 'se sentir sozinha',
+                    resultado: 'Nutri-Empresárias crescendo juntas e com suporte.'
                   },
                   {
                     title: 'Suporte Humano',
-                    desc: 'Você não está sozinha nesse caminho. Além da LYA (mentora estratégica digital), você tem acesso a suporte humano quando precisar. Não é apenas tecnologia. É suporte real.'
+                    paraDe: 'ficar só na tecnologia',
+                    resultado: 'LYA + suporte humano quando precisar.'
                   }
                 ].map((item, index) => (
                   <div key={index} className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow border border-gray-200">
                     <h3 className="text-xl font-bold mb-3 text-[#1A1A1A]">{item.title}</h3>
-                    <p className="text-gray-600 leading-relaxed">{item.desc}</p>
+                    <p className="text-gray-700 font-medium">Você para de {item.paraDe}.</p>
+                    <p className="text-gray-600 text-sm mt-1"><strong>Resultado prático:</strong> {item.resultado}</p>
                   </div>
                 ))}
               </div>
@@ -640,53 +631,21 @@ export default function NutriLandingPage() {
                 </div>
               </div>
               
-              <div className="space-y-8">
-                <div className="bg-[#FFF4E6] rounded-xl p-8 border-2 border-[#FF9800]">
-                  <h3 className="text-2xl font-bold mb-4 text-[#FF9800]">Custo de Errar</h3>
-                  <p className="text-lg text-gray-700 mb-4">
-                    Cada mês que você passa sem um método claro é um mês de:
+              <div className="space-y-6">
+                <div className="bg-[#FFF4E6] rounded-xl p-6 border-2 border-[#FF9800]">
+                  <h3 className="text-xl font-bold mb-3 text-[#FF9800]">Custo de errar e de ficar sem apoio</h3>
+                  <p className="text-gray-700 mb-3">
+                    Cada mês sem método = oportunidades perdidas, frustração, tempo desperdiçado, receita que não entra. Você já tentou organizar processos, criar captação, definir preço, seguir rotinas. E voltou ao mesmo lugar. Cada tentativa custa tempo, energia e confiança.
                   </p>
-                  <ul className="space-y-2 text-gray-700">
-                    <li>• Oportunidades perdidas (clientes que poderiam ter chegado até você)</li>
-                    <li>• Frustração acumulada (tentativas que não dão certo)</li>
-                    <li>• Tempo desperdiçado (criando processos que não funcionam)</li>
-                    <li>• Receita que deixa de entrar (por falta de organização e captação)</li>
-                  </ul>
-                  <p className="text-lg font-semibold text-gray-700 mt-4">
-                    O custo de errar não é apenas financeiro. É emocional também.
+                  <p className="text-lg font-semibold text-gray-700">
+                    O custo não é só financeiro. É emocional.
                   </p>
                 </div>
                 
-                <div className="bg-[#FFE6E6] rounded-xl p-8 border-2 border-[#FF4F4F]">
-                  <h3 className="text-2xl font-bold mb-4 text-[#FF4F4F]">Custo de Continuar Sozinha</h3>
-                  <p className="text-lg text-gray-700 mb-4">
-                    Você já tentou:
-                  </p>
-                  <ul className="space-y-2 text-gray-700">
-                    <li>• Organizar processos (e voltou à desorganização)</li>
-                    <li>• Criar sistemas de captação (e não funcionou)</li>
-                    <li>• Definir precificação (e ficou na dúvida)</li>
-                    <li>• Seguir rotinas (e desistiu)</li>
-                  </ul>
-                  <p className="text-lg font-semibold text-gray-700 mt-4">
-                    Cada tentativa custa tempo, energia e confiança.
-                  </p>
-                </div>
-                
-                <div className="bg-[#E9F1FF] rounded-xl p-8 border-2 border-[#2563EB]">
-                  <h3 className="text-2xl font-bold mb-4 text-[#2563EB]">Investir no YLADA não é um gasto. É uma decisão estratégica.</h3>
-                  <p className="text-lg text-gray-700 mb-4">
-                    É escolher ter:
-                  </p>
-                  <ul className="space-y-2 text-gray-700">
-                    <li>• Método em vez de tentativa e erro</li>
-                    <li>• Organização em vez de caos</li>
-                    <li>• Clareza em vez de dúvida</li>
-                    <li>• Suporte em vez de solidão</li>
-                    <li>• Crescimento em vez de estagnação</li>
-                  </ul>
-                  <p className="text-lg font-semibold text-gray-700 mt-4">
-                    O investimento se paga quando você para de perder oportunidades e começa a criar resultados.
+                <div className="bg-[#E9F1FF] rounded-xl p-6 border-2 border-[#2563EB]">
+                  <h3 className="text-xl font-bold mb-3 text-[#2563EB]">Investir no YLADA é decisão estratégica</h3>
+                  <p className="text-gray-700 mb-3">
+                    Método em vez de tentativa e erro. Organização, clareza, suporte, crescimento. O investimento se paga quando você para de perder oportunidades e começa a criar resultados.
                   </p>
                 </div>
               </div>
@@ -694,18 +653,18 @@ export default function NutriLandingPage() {
           </div>
         </section>
 
-        {/* BLOCO 12b — QUANTO CUSTA CONTINUAR ASSIM? */}
+        {/* BLOCO 12b — O QUE CUSTA NÃO DECIDIR */}
         <section className="py-12 sm:py-16 bg-[#F5F7FA]">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="max-w-3xl mx-auto text-center">
               <h2 className="text-2xl sm:text-3xl font-bold text-[#1A1A1A] mb-6">
-                Quanto custa continuar assim?
+                O que custa não decidir?
               </h2>
               <p className="text-lg text-gray-700 mb-4">
-                Agenda vazia → insegurança constante → dependência de terceiros.
+                Agenda vazia, insegurança constante, dependência de terceiros.
               </p>
               <p className="text-xl font-bold text-[#2563EB]">
-                Nada muda se você continuar adiando.
+                O próximo passo é seu.
               </p>
             </div>
           </div>
@@ -733,7 +692,7 @@ export default function NutriLandingPage() {
                 </div>
                 <div className="bg-gradient-to-br from-[#2563EB] to-[#3B82F6] rounded-xl p-6 mb-6 text-center text-white">
                   <p className="text-3xl sm:text-4xl font-bold">12× de R$ 97</p>
-                  <p className="text-sm text-white/90 mt-2">Total: R$ 1.164 — 1 ano de acesso</p>
+                  <p className="text-sm text-white/90 mt-2">Total: R$ 1.164 (1 ano de acesso)</p>
                 </div>
                 <p className="text-center text-gray-700 mb-4 font-semibold">
                   Isso não é uma assinatura. É uma decisão de sair do improviso.
@@ -797,28 +756,17 @@ export default function NutriLandingPage() {
         <section className="py-16 sm:py-20 lg:py-24 bg-[#E9F1FF]">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="max-w-4xl mx-auto text-center">
-              <div className="text-6xl mb-6">🛡️</div>
-              <h2 className="text-3xl sm:text-4xl font-bold mb-4 text-[#1A1A1A]">
+              <div className="text-6xl mb-4">🛡️</div>
+              <h2 className="text-3xl sm:text-4xl font-bold mb-2 text-[#1A1A1A]">
                 Garantia Incondicional de 7 Dias
               </h2>
-              <p className="text-lg sm:text-xl text-gray-600 mb-6">
-                Válida para o plano anual
-              </p>
-              <p className="text-xl mb-4 text-gray-700">
-                Se você não sentir que está no caminho certo, devolvemos 100% do seu investimento. Sem burocracia, sem letras miúdas, sem julgamento.
-              </p>
-              <p className="text-lg text-gray-600 mb-4">
-                Por quê? Porque acreditamos no método. E porque queremos que você tenha certeza de que está fazendo a escolha certa para sua carreira.
-              </p>
-              <p className="text-lg text-gray-600 mb-6">
-                Como funciona: Entre em contato com nosso suporte dentro de 7 dias após a compra. Devolvemos todo o valor, sem questionamentos.
-              </p>
-              <p className="text-xl font-bold text-[#2563EB] mb-4">
+              <p className="text-xl sm:text-2xl font-bold text-[#2563EB] mb-6 py-4 px-6 bg-white/60 rounded-xl inline-block">
                 Teste sem medo. Se não funcionar, você não perde nada.
               </p>
-              <p className="text-lg text-gray-600">
-                Simples assim.
+              <p className="text-lg text-gray-700 mb-4">
+                Devolvemos 100% do investimento. Sem burocracia, sem julgamento. Entre em contato com o suporte em até 7 dias.
               </p>
+              <p className="text-lg text-gray-600">Simples assim.</p>
             </div>
           </div>
         </section>
@@ -826,40 +774,20 @@ export default function NutriLandingPage() {
         {/* BLOCO 15 — CTA FINAL (DECISÃO) */}
         <section className="py-16 sm:py-20 lg:py-24 bg-gradient-to-br from-[#2563EB] to-[#3B82F6] text-white">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="max-w-4xl mx-auto text-center">
-              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-6">
+            <div className="max-w-3xl mx-auto text-center">
+              <h2 className="text-3xl sm:text-4xl font-bold mb-4">
                 Você não precisa mais agendar ansiosa.
               </h2>
-              <p className="text-xl mb-4 text-white/90">
-                Você não precisa mais:
+              <p className="text-xl font-bold mb-6 text-white">
+                Sistema, orientação que destrava e agenda que enche. O próximo passo é seu.
               </p>
-              <ul className="text-lg mb-6 space-y-2 text-white/80">
-                <li>• Depender de sorte ou indicação</li>
-                <li>• Travar na indecisão (“o que faço amanhã?”)</li>
-                <li>• Trabalhar na base do improviso</li>
-                <li>• Perder tempo sem metodologia clara de captação</li>
-              </ul>
-              <p className="text-xl sm:text-2xl font-bold mb-8 text-white">
-                Você pode ter sistema, orientação que destrava e agenda que enche.
-              </p>
-              <p className="text-xl mb-4 text-white/90">
-                Nada muda se você continuar adiando.
-              </p>
-              <p className="text-lg mb-4 text-white/80">
-                A estrutura de apoio está pronta. A metodologia está clara. O próximo passo é seu.
-              </p>
-              <p className="text-xl font-bold mb-8">
-                Decida sair do improviso e aderir ao sistema.
-              </p>
+              <p className="text-lg font-semibold mb-8">Decida sair do improviso.</p>
               <Link
                 href="#oferta"
-                className="inline-block bg-white text-[#2563EB] px-10 py-5 rounded-xl text-xl sm:text-2xl font-bold hover:bg-gray-100 transition-all shadow-2xl"
+                className="inline-block bg-white text-[#2563EB] px-10 py-5 rounded-xl text-xl font-bold hover:bg-gray-100 transition-all shadow-2xl"
               >
                 Quero sair do improviso e aderir ao sistema
               </Link>
-              <p className="text-lg mt-8 text-white/80">
-                A decisão é sua. O sistema está pronto. Encha agenda com método.
-              </p>
             </div>
           </div>
         </section>
@@ -880,7 +808,7 @@ export default function NutriLandingPage() {
                   },
                   {
                     pergunta: 'Como funciona o suporte?',
-                    resposta: 'Você tem acesso a: LYA (mentora estratégica digital) — disponível 24/7 para orientações estratégicas. Suporte técnico — para dúvidas sobre uso da plataforma. Comunidade — para trocar experiências com outras Nutri-Empresárias.'
+                    resposta: 'Você tem acesso a: LYA (mentora estratégica digital), disponível 24/7 para orientações estratégicas. Suporte técnico, para dúvidas sobre uso da plataforma. Comunidade, para trocar experiências com outras Nutri-Empresárias.'
                   },
                   {
                     pergunta: 'Para quem é o YLADA Nutri?',
@@ -961,7 +889,7 @@ export default function NutriLandingPage() {
               />
             </div>
             <p className="text-gray-600 text-sm mb-2 text-center">
-              YLADA Nutricionista — Your Leading Advanced Data Assistant
+              YLADA Nutricionista: Your Leading Advanced Data Assistant
             </p>
             <p className="text-gray-500 text-xs text-center mb-2">
               © {new Date().getFullYear()} YLADA. Todos os direitos reservados.

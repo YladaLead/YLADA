@@ -63,8 +63,31 @@ export function middleware(request: NextRequest) {
   // 
   // Páginas administrativas (formularios, clientes, leads, etc.) NÃO devem ser redirecionadas
   // Elas devem permanecer em /pt/coach/ para manter a consistência
+
+  // /us = inglês (EUA): redirecionar para /en para evitar /pt/us e 404
+  if (pathname === '/us' || pathname === '/us/') {
+    const url = request.nextUrl.clone()
+    url.pathname = '/en'
+    return NextResponse.redirect(url)
+  }
+  if (pathname.startsWith('/us/')) {
+    const url = request.nextUrl.clone()
+    url.pathname = '/en' + pathname.slice(4)
+    return NextResponse.redirect(url)
+  }
+  // /pt/us ou /pt/us/... (URL antiga): redirecionar para /en
+  if (pathname === '/pt/us' || pathname === '/pt/us/') {
+    const url = request.nextUrl.clone()
+    url.pathname = '/en'
+    return NextResponse.redirect(url)
+  }
+  if (pathname.startsWith('/pt/us/')) {
+    const url = request.nextUrl.clone()
+    url.pathname = '/en' + pathname.slice(6)
+    return NextResponse.redirect(url)
+  }
   
-  // Verificar se já tem idioma na URL
+  // Verificar se já tem idioma na URL (pt, en, es)
   const hasLanguage = pathname.startsWith('/pt') || pathname.startsWith('/en') || pathname.startsWith('/es')
   
   // Se não tem idioma, redirecionar para português

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { usePathname } from 'next/navigation'
 import { useTranslations } from '../hooks/useTranslations'
 import { Language, languageNames, languageFlags } from '../lib/i18n'
 
@@ -8,24 +9,34 @@ interface LanguageSelectorProps {
   className?: string
 }
 
+const LOCALE_PREFIX = /^\/(pt|en|es)(\/|$)/
+
 export default function LanguageSelector({ className = '' }: LanguageSelectorProps) {
   const [isOpen, setIsOpen] = useState(false)
+  const pathname = usePathname() ?? ''
   const { t, currentLang, changeLanguage } = useTranslations()
+
+  // Idioma exibido = o que está na URL (prioridade) ou o do hook (localStorage)
+  const langFromUrl = pathname.match(LOCALE_PREFIX)?.[1] as Language | undefined
+  const displayLang: Language = langFromUrl ?? currentLang
 
   const languages: Language[] = ['pt', 'en', 'es']
 
   const handleLanguageChange = (langCode: Language) => {
     changeLanguage(langCode)
     setIsOpen(false)
-    
-    // Navegar para a rota do idioma selecionado (apenas no cliente)
-    if (typeof window !== 'undefined') {
-      const currentPath = window.location.pathname
-      const pathWithoutLang = currentPath.replace(/^\/[a-z]{2}/, '') || '/'
-      const newPath = `/${langCode}${pathWithoutLang}`
-      
-      window.location.href = newPath
+
+    if (typeof window === 'undefined') return
+
+    const currentPath = window.location.pathname
+    // Remover apenas o prefixo de idioma válido (pt, en, es)
+    let pathWithoutLang = (currentPath.replace(LOCALE_PREFIX, (_match, _lang, slash) => (slash === '/' ? '/' : '')) || '').trim() || '/'
+    // /us não existe como rota em nenhum idioma; usar home
+    if (pathWithoutLang === '/us' || pathWithoutLang.startsWith('/us/')) {
+      pathWithoutLang = pathWithoutLang === '/us' ? '/' : pathWithoutLang.slice(4) || '/'
     }
+    const newPath = `/${langCode}${pathWithoutLang}`.replace(/\/+/g, '/')
+    window.location.href = newPath
   }
 
   return (
