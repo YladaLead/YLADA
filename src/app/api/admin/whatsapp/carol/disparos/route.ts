@@ -1,7 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireApiAuth } from '@/lib/api-auth'
 import { isCarolAutomationDisabled } from '@/config/whatsapp-automation'
-import { sendWelcomeToNonContactedLeads, sendRemarketingToNonParticipants, sendWorkshopReminders } from '@/lib/whatsapp-carol-ai'
+import {
+  sendWelcomeToNonContactedLeads,
+  sendRemarketingToNonParticipants,
+  sendRemarketingAulaHoje20h,
+  sendWorkshopReminders,
+  clearDisparoAbort,
+} from '@/lib/whatsapp-carol-ai'
 
 /**
  * POST /api/admin/whatsapp/carol/disparos
@@ -18,24 +24,36 @@ export async function POST(request: NextRequest) {
     const { tipo } = body // 'welcome', 'remarketing' ou 'reminders'
 
     if (tipo === 'welcome') {
-      // Disparar boas-vindas para quem preencheu mas não chamou
+      await clearDisparoAbort('welcome')
       const result = await sendWelcomeToNonContactedLeads()
+      await clearDisparoAbort('welcome')
       return NextResponse.json({
         success: true,
         tipo: 'welcome',
         ...result,
       })
     } else if (tipo === 'remarketing') {
-      // Disparar remarketing para quem não participou
+      await clearDisparoAbort('remarketing')
       const result = await sendRemarketingToNonParticipants()
+      await clearDisparoAbort('remarketing')
       return NextResponse.json({
         success: true,
         tipo: 'remarketing',
         ...result,
       })
+    } else if (tipo === 'remarketing_hoje_20h') {
+      await clearDisparoAbort('remarketing_hoje_20h')
+      const result = await sendRemarketingAulaHoje20h()
+      await clearDisparoAbort('remarketing_hoje_20h')
+      return NextResponse.json({
+        success: true,
+        tipo: 'remarketing_hoje_20h',
+        ...result,
+      })
     } else if (tipo === 'reminders') {
-      // Disparar lembretes de reunião
+      await clearDisparoAbort('reminders')
       const result = await sendWorkshopReminders()
+      await clearDisparoAbort('reminders')
       return NextResponse.json({
         success: true,
         tipo: 'reminders',
@@ -43,7 +61,7 @@ export async function POST(request: NextRequest) {
       })
     } else {
       return NextResponse.json(
-        { error: 'Tipo inválido. Use "welcome", "remarketing" ou "reminders"' },
+        { error: 'Tipo inválido. Use "welcome", "remarketing", "remarketing_hoje_20h" ou "reminders"' },
         { status: 400 }
       )
     }

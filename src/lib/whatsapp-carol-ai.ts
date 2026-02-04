@@ -20,6 +20,35 @@ const openai = new OpenAI({
 const WHATSAPP_NUMBER = '5519997230912' // Número principal
 
 /**
+ * Verifica se o admin pediu para parar o disparo em massa (botão "Parar disparo").
+ * Usado no loop de remarketing, welcome e reminders.
+ */
+export async function checkDisparoAbort(tipo: 'remarketing' | 'welcome' | 'reminders' | 'remarketing_hoje_20h'): Promise<boolean> {
+  const { data } = await supabaseAdmin
+    .from('whatsapp_disparo_abort')
+    .select('requested_at')
+    .eq('tipo', tipo)
+    .maybeSingle()
+  return !!data?.requested_at
+}
+
+/**
+ * Limpa o sinal de abort para um tipo (chamado no início e no fim do disparo).
+ */
+export async function clearDisparoAbort(tipo: 'remarketing' | 'welcome' | 'reminders' | 'remarketing_hoje_20h'): Promise<void> {
+  await supabaseAdmin.from('whatsapp_disparo_abort').delete().eq('tipo', tipo)
+}
+
+/**
+ * Sinaliza que o admin pediu para parar o disparo (botão "Parar disparo").
+ */
+export async function requestDisparoAbort(tipo: 'remarketing' | 'welcome' | 'reminders' | 'remarketing_hoje_20h'): Promise<void> {
+  await supabaseAdmin
+    .from('whatsapp_disparo_abort')
+    .upsert({ tipo, requested_at: new Date().toISOString() }, { onConflict: 'tipo' })
+}
+
+/**
  * Verifica se está em horário permitido para enviar mensagens automáticas
  * Regras:
  * - Segunda a sexta: 8h00 às 19h00 (horário de Brasília)
@@ -2267,6 +2296,7 @@ Finalize com: "Responde 1 ou 2 😊".`
 export async function sendWelcomeToNonContactedLeads(): Promise<{
   sent: number
   errors: number
+  aborted?: boolean
 }> {
   try {
     // 0. Verificar se está em horário permitido
@@ -2428,6 +2458,10 @@ export async function sendWelcomeToNonContactedLeads(): Promise<{
 
     for (const lead of leadsToContact) {
       try {
+        if (await checkDisparoAbort('welcome')) {
+          console.log('[Carol Welcome] ⏹️ Parar disparo solicitado pelo admin')
+          return { sent, errors, aborted: true }
+        }
         // Formatar opções de aula
         let optionsText = ''
         if (sessions && sessions.length > 0) {
@@ -2721,6 +2755,7 @@ Se sim, eu te encaixo no próximo horário. Qual período fica melhor pra você:
 export async function sendRemarketingToNonParticipants(): Promise<{
   sent: number
   errors: number
+  aborted?: boolean
 }> {
   try {
     // 1. Buscar conversas com tag "nao_participou_aula" ou "adiou_aula"
@@ -2796,6 +2831,10 @@ export async function sendRemarketingToNonParticipants(): Promise<{
 
     for (const conv of nonParticipants) {
       try {
+        if (await checkDisparoAbort('remarketing')) {
+          console.log('[Carol Remarketing] ⏹️ Parar disparo solicitado pelo admin')
+          return { sent, errors, aborted: true }
+        }
         const context = conv.context || {}
         
         // Verificar se já recebeu remarketing recentemente (evitar spam)
@@ -2873,6 +2912,8 @@ Se sim, eu te encaixo no próximo horário. Qual período fica melhor pra você:
           })
 
           sent++
+          // Delay entre envios para evitar limite do WhatsApp (~2,5 s)
+          await new Promise((r) => setTimeout(r, 2500))
         } else {
           errors++
         }
@@ -2886,6 +2927,170 @@ Se sim, eu te encaixo no próximo horário. Qual período fica melhor pra você:
   } catch (error: any) {
     console.error('[Carol] Erro ao processar remarketing:', error)
     return { sent: 0, errors: 0 }
+  }
+}
+
+/**
+ * Disparo "Remarque aula hoje 20h": quem não participou, exceto quem já está agendado para hoje às 20h.
+ * Mensagem: "Hoje temos aula às 20h. Gostaria de participar?"
+ */
+export async function sendRemarketingAulaHoje20h(): Promise<{
+  sent: number
+  errors: number
+  skipped: number
+  aborted?: boolean
+}> {
+  try {
+    const now = new Date()
+    const tz = 'America/Sao_Paulo'
+    const todayStr = now.toLocaleDateString('en-CA', { timeZone: tz }) // YYYY-MM-DD
+
+    // 1. Sessão(s) de hoje às 20h (Brasília): buscar sessões ativas e filtrar em JS por data/hora Brasília
+    const from = new Date(now.getTime() - 12 * 60 * 60 * 1000).toISOString()
+    const to = new Date(now.getTime() + 36 * 60 * 60 * 1000).toISOString()
+    const { data: sessionsAll } = await supabaseAdmin
+      .from('whatsapp_workshop_sessions')
+      .select('id, starts_at')
+      .eq('area', 'nutri')
+      .eq('is_active', true)
+      .gte('starts_at', from)
+      .lte('starts_at', to)
+
+    const sessionIdsHoje20h: string[] = []
+    if (sessionsAll?.length) {
+      for (const s of sessionsAll) {
+        const d = new Date(s.starts_at)
+        const sessionDateStr = d.toLocaleDateString('en-CA', { timeZone: tz })
+        const sessionHour = d.toLocaleString('pt-BR', { hour: '2-digit', hour12: false, timeZone: tz })
+        if (sessionDateStr === todayStr && sessionHour === '20') sessionIdsHoje20h.push(s.id)
+      }
+    }
+
+    // 2. Conversas que não participaram (mesmo critério do remarketing)
+    const { data: conversations } = await supabaseAdmin
+      .from('whatsapp_conversations')
+      .select('id, phone, name, context')
+      .eq('area', 'nutri')
+      .eq('status', 'active')
+
+    if (!conversations) {
+      return { sent: 0, errors: 0, skipped: 0 }
+    }
+
+    const nonParticipants = conversations.filter((conv) => {
+      const context = conv.context || {}
+      const tags = Array.isArray(context.tags) ? context.tags : []
+      const didNotParticipate =
+        (tags.includes('nao_participou_aula') || tags.includes('adiou_aula')) && !tags.includes('participou_aula')
+      if (!didNotParticipate) return false
+      // Excluir quem já está agendado para hoje 20h
+      const sessionId = context.workshop_session_id
+      if (sessionId && sessionIdsHoje20h.includes(sessionId)) return false
+      return true
+    })
+
+    if (nonParticipants.length === 0) {
+      return { sent: 0, errors: 0, skipped: 0 }
+    }
+
+    // 3. Instância Z-API (mesmo que remarketing)
+    let { data: instance } = await supabaseAdmin
+      .from('z_api_instances')
+      .select('id, instance_id, token')
+      .eq('area', 'nutri')
+      .eq('status', 'connected')
+      .limit(1)
+      .maybeSingle()
+    if (!instance) {
+      const { data: instanceByArea } = await supabaseAdmin
+        .from('z_api_instances')
+        .select('id, instance_id, token')
+        .eq('area', 'nutri')
+        .limit(1)
+        .maybeSingle()
+      if (instanceByArea) instance = instanceByArea
+    }
+    if (!instance) {
+      const { data: instanceFallback } = await supabaseAdmin
+        .from('z_api_instances')
+        .select('id, instance_id, token')
+        .eq('status', 'connected')
+        .limit(1)
+        .maybeSingle()
+      if (instanceFallback) instance = instanceFallback
+    }
+    if (!instance) {
+      return { sent: 0, errors: nonParticipants.length, skipped: 0 }
+    }
+
+    let sent = 0
+    let errors = 0
+    let skipped = 0
+
+    for (const conv of nonParticipants) {
+      try {
+        if (await checkDisparoAbort('remarketing_hoje_20h')) {
+          console.log('[Carol Remarque Hoje 20h] ⏹️ Parar disparo solicitado pelo admin')
+          return { sent, errors, skipped, aborted: true }
+        }
+        const context = conv.context || {}
+        const tags = Array.isArray(context.tags) ? context.tags : []
+
+        if (context.remarketing_hoje_20h_enviado_at) {
+          skipped++
+          continue
+        }
+
+        const registrationName = await getRegistrationName(conv.phone, 'nutri')
+        let leadName = getFirstName(registrationName || (context as any)?.lead_name || conv.name) || 'querido(a)'
+        if (isBusinessName(leadName)) leadName = 'querido(a)'
+
+        const message = `Oi ${leadName}! 💚\n\nHoje temos aula às 20h. Gostaria de participar? Se sim, responda que eu te encaixo. 😊`
+
+        const sendResult = await sendWhatsAppMessage(
+          conv.phone,
+          message,
+          instance.instance_id,
+          instance.token
+        )
+
+        if (sendResult.success) {
+          await supabaseAdmin
+            .from('whatsapp_conversations')
+            .update({
+              context: {
+                ...context,
+                remarketing_hoje_20h_enviado_at: new Date().toISOString(),
+              },
+            })
+            .eq('id', conv.id)
+          await supabaseAdmin.from('whatsapp_messages').insert({
+            conversation_id: conv.id,
+            instance_id: instance.id,
+            z_api_message_id: sendResult.messageId || null,
+            sender_type: 'bot',
+            sender_name: 'Carol - Secretária',
+            message,
+            message_type: 'text',
+            status: 'sent',
+            is_bot_response: true,
+          })
+          sent++
+          // Delay entre envios para evitar limite do WhatsApp (~2,5 s)
+          await new Promise((r) => setTimeout(r, 2500))
+        } else {
+          errors++
+        }
+      } catch (error: any) {
+        console.error(`[Carol Remarque Hoje 20h] Erro para ${conv.phone}:`, error)
+        errors++
+      }
+    }
+
+    return { sent, errors, skipped }
+  } catch (error: any) {
+    console.error('[Carol] Erro ao processar remarque hoje 20h:', error)
+    return { sent: 0, errors: 0, skipped: 0 }
   }
 }
 
@@ -4015,6 +4220,7 @@ export async function sendWorkshopReminders(): Promise<{
   sent: number
   errors: number
   skipped: number
+  aborted?: boolean
 }> {
   try {
     const now = new Date()
@@ -4143,6 +4349,10 @@ export async function sendWorkshopReminders(): Promise<{
       // Enviar lembrete para cada participante
       for (const participant of participants) {
         try {
+          if (await checkDisparoAbort('reminders')) {
+            console.log('[Carol Reminders] ⏹️ Parar disparo solicitado pelo admin')
+            return { sent, errors, skipped, aborted: true }
+          }
           const context = participant.context || {}
           const reminderKey = `reminder_${session.id}`
           

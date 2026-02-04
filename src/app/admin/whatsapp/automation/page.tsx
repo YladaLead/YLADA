@@ -4,8 +4,11 @@ import { useState, useEffect } from 'react'
 import AdminProtectedRoute from '@/components/auth/AdminProtectedRoute'
 import Link from 'next/link'
 
+type DisparoType = 'remarketing' | 'reminders' | 'remarketing_hoje_20h' | null
+
 function AutomationContent() {
   const [loading, setLoading] = useState(false)
+  const [loadingType, setLoadingType] = useState<DisparoType>(null)
   const [processing, setProcessing] = useState(false)
   const [result, setResult] = useState<any>(null)
   const [testLoading, setTestLoading] = useState(false)
@@ -124,6 +127,7 @@ function AutomationContent() {
   // Disparar Remarketing
   const handleRemarketing = async () => {
     setLoading(true)
+    setLoadingType('remarketing')
     setResult(null)
 
     try {
@@ -141,6 +145,7 @@ function AutomationContent() {
           type: 'remarketing',
           sent: data.sent,
           errors: data.errors,
+          aborted: data.aborted,
         })
       } else {
         alert(`Erro: ${data.error}`)
@@ -149,12 +154,60 @@ function AutomationContent() {
       alert(`Erro ao disparar remarketing: ${error.message}`)
     } finally {
       setLoading(false)
+      setLoadingType(null)
+    }
+  }
+
+  const handlePararDisparo = async () => {
+    if (!loadingType) return
+    try {
+      await fetch('/api/admin/whatsapp/carol/disparos/abort', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ tipo: loadingType }),
+      })
+    } catch {
+      // silencioso
+    }
+  }
+
+  // Remarque aula hoje 20h (não participou, exceto já agendados para hoje 20h)
+  const handleRemarketingHoje20h = async () => {
+    setLoading(true)
+    setLoadingType('remarketing_hoje_20h')
+    setResult(null)
+    try {
+      const response = await fetch('/api/admin/whatsapp/carol/disparos', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ tipo: 'remarketing_hoje_20h' }),
+      })
+      const data = await response.json()
+      if (data.success) {
+        setResult({
+          type: 'remarketing_hoje_20h',
+          sent: data.sent,
+          errors: data.errors,
+          skipped: data.skipped,
+          aborted: data.aborted,
+        })
+      } else {
+        alert(`Erro: ${data.error}`)
+      }
+    } catch (error: any) {
+      alert(`Erro ao disparar: ${error.message}`)
+    } finally {
+      setLoading(false)
+      setLoadingType(null)
     }
   }
 
   // Disparar Lembretes
   const handleReminders = async () => {
     setLoading(true)
+    setLoadingType('reminders')
     setResult(null)
 
     try {
@@ -173,6 +226,7 @@ function AutomationContent() {
           sent: data.sent,
           errors: data.errors,
           skipped: data.skipped,
+          aborted: data.aborted,
         })
       } else {
         alert(`Erro: ${data.error}`)
@@ -181,6 +235,7 @@ function AutomationContent() {
       alert(`Erro ao disparar lembretes: ${error.message}`)
     } finally {
       setLoading(false)
+      setLoadingType(null)
     }
   }
 
@@ -372,19 +427,56 @@ function AutomationContent() {
               </button>
             </div>
 
+            {/* Remarque aula hoje 20h */}
+            <div className="bg-white rounded-lg shadow p-6">
+              <h2 className="text-xl font-semibold mb-4">📅 Remarque: aula hoje 20h</h2>
+              <p className="text-gray-600 mb-4 text-sm">
+                Quem não participou, exceto quem já está agendado para hoje às 20h. Mensagem: &quot;Hoje temos aula às 20h. Gostaria de participar?&quot;
+              </p>
+              <div className="flex gap-2">
+                <button
+                  onClick={handleRemarketingHoje20h}
+                  disabled={loading}
+                  className="flex-1 bg-teal-600 text-white px-4 py-2 rounded hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {loading && loadingType === 'remarketing_hoje_20h' ? 'Disparando...' : 'Disparar remarque hoje 20h'}
+                </button>
+                {loading && loadingType === 'remarketing_hoje_20h' && (
+                  <button
+                    type="button"
+                    onClick={handlePararDisparo}
+                    className="px-4 py-2 rounded border-2 border-red-500 text-red-600 hover:bg-red-50 font-medium shrink-0"
+                  >
+                    Parar disparo
+                  </button>
+                )}
+              </div>
+            </div>
+
             {/* Disparar Remarketing */}
             <div className="bg-white rounded-lg shadow p-6">
               <h2 className="text-xl font-semibold mb-4">🔄 Remarketing</h2>
               <p className="text-gray-600 mb-4 text-sm">
                 Envia mensagem para pessoas que agendaram mas não participaram da aula.
               </p>
-              <button
-                onClick={handleRemarketing}
-                disabled={loading}
-                className="w-full bg-orange-600 text-white px-4 py-2 rounded hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {loading ? 'Disparando...' : 'Disparar Remarketing'}
-              </button>
+              <div className="flex gap-2">
+                <button
+                  onClick={handleRemarketing}
+                  disabled={loading}
+                  className="flex-1 bg-orange-600 text-white px-4 py-2 rounded hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {loading && loadingType === 'remarketing' ? 'Disparando...' : 'Disparar Remarketing'}
+                </button>
+                {loading && loadingType === 'remarketing' && (
+                  <button
+                    type="button"
+                    onClick={handlePararDisparo}
+                    className="px-4 py-2 rounded border-2 border-red-500 text-red-600 hover:bg-red-50 font-medium shrink-0"
+                  >
+                    Parar disparo
+                  </button>
+                )}
+              </div>
             </div>
 
             {/* Disparar Lembretes */}
@@ -393,13 +485,24 @@ function AutomationContent() {
               <p className="text-gray-600 mb-4 text-sm">
                 Envia lembretes para participantes agendados (12h antes da reunião).
               </p>
-              <button
-                onClick={handleReminders}
-                disabled={loading}
-                className="w-full bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {loading ? 'Disparando...' : 'Disparar Lembretes'}
-              </button>
+              <div className="flex gap-2">
+                <button
+                  onClick={handleReminders}
+                  disabled={loading}
+                  className="flex-1 bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {loading && loadingType === 'reminders' ? 'Disparando...' : 'Disparar Lembretes'}
+                </button>
+                {loading && loadingType === 'reminders' && (
+                  <button
+                    type="button"
+                    onClick={handlePararDisparo}
+                    className="px-4 py-2 rounded border-2 border-red-500 text-red-600 hover:bg-red-50 font-medium shrink-0"
+                  >
+                    Parar disparo
+                  </button>
+                )}
+              </div>
             </div>
           </div>
 
@@ -611,8 +714,22 @@ function AutomationContent() {
                 </div>
               )}
 
+              {result.type === 'remarketing_hoje_20h' && (
+                <div className="space-y-2">
+                  {result.aborted && (
+                    <p className="font-semibold text-amber-700">⏹️ Disparo interrompido.</p>
+                  )}
+                  <p><strong>Enviadas:</strong> {result.sent}</p>
+                  <p><strong>Erros:</strong> {result.errors}</p>
+                  <p><strong>Puladas:</strong> {result.skipped ?? 0}</p>
+                </div>
+              )}
+
               {result.type === 'remarketing' && (
                 <div className="space-y-2">
+                  {result.aborted && (
+                    <p className="font-semibold text-amber-700">⏹️ Disparo interrompido.</p>
+                  )}
                   <p><strong>Enviadas:</strong> {result.sent}</p>
                   <p><strong>Erros:</strong> {result.errors}</p>
                 </div>
@@ -620,6 +737,9 @@ function AutomationContent() {
 
               {result.type === 'reminders' && (
                 <div className="space-y-2">
+                  {result.aborted && (
+                    <p className="font-semibold text-amber-700">⏹️ Disparo interrompido.</p>
+                  )}
                   <p><strong>Enviadas:</strong> {result.sent}</p>
                   <p><strong>Erros:</strong> {result.errors}</p>
                   <p><strong>Ignoradas:</strong> {result.skipped || 0}</p>
