@@ -35,3 +35,7 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 MINHAS-CHAVES-STRIPE-PRIVADO.txt
+
+# Vídeo Nutri hero (hospedado no Supabase; arquivo local pode ser grande)
+/public/videos/nutri-hero.mp4
+/public/videos/nutri-hero1.mp4

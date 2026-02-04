@@ -56,14 +56,10 @@ export const landingPageVideos = {
     return getLandingPageAssetUrl('wellness-hero-poster.png')
   },
   get nutriHero() {
-    // Usar vídeo local temporariamente até o upload para Supabase funcionar
-    // TODO: Voltar para Supabase Storage após aumentar limite de upload
-    return '/videos/nutri-hero.mp4'
+    return getLandingPageAssetUrl('nutri-hero.mp4')
   },
   get nutriHeroPoster() {
-    // Usar imagem local como poster do vídeo
-    // Coloque a imagem em public/videos/nutri-hero-poster.jpg ou .png
-    return '/videos/nutri-hero-poster.jpg'
+    return getLandingPageAssetUrl('nutri-hero-poster.jpg')
   },
 }
 
