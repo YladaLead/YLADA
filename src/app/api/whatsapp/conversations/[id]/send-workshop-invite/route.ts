@@ -136,9 +136,9 @@ export async function POST(
 
     const client = createZApiClient(instance.instance_id, instance.token)
 
-    // Mensagem do ENVIO MANUAL (admin): deve ser diferente da automação (Carol não usa "Perfeito! Você vai adorar!" aqui).
+    // Mesmo texto do envio automático (Carol) para manter consistência e melhor promoção
     const { weekday, date, time } = formatSessionPtBR(session.starts_at)
-    const infoText = `Segue o agendamento da aula:\n\n🗓️ ${session.title}\n\n📅 ${weekday}, ${date}\n🕒 ${time} (horário de Brasília)\n\n🔗 ${session.zoom_link}\n\n✅ Se precisar reagendar, responda REAGENDAR.`
+    const infoText = `✅ *Perfeito! Você vai adorar essa aula!* 🎉\n\n🗓️ ${weekday}, ${date}\n🕒 ${time} (horário de Brasília)\n\n🔗 ${session.zoom_link}\n\n💡 *Dica importante:* A sala do Zoom será aberta 10 minutos antes do horário da aula. Chegue com antecedência para garantir sua vaga! 😊\n\nQualquer dúvida, é só me chamar! 💚`
 
     // 1) Enviar flyer (se configurado)
     if (flyerUrl) {
