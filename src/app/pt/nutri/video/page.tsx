@@ -4,6 +4,7 @@ import { useRef, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { landingPageVideos } from '@/lib/landing-pages-assets'
+import { cn } from '@/lib/utils'
 
 const WHATSAPP_NUTRI = '5519997230912'
 const WHATSAPP_MSG = 'Olá! Assisti o vídeo da YLADA Nutri e gostaria de tirar dúvidas.'
@@ -11,11 +12,16 @@ const WHATSAPP_MSG = 'Olá! Assisti o vídeo da YLADA Nutri e gostaria de tirar 
 const NUTRI_VIDEO_SRC = landingPageVideos.nutriHero
 const NUTRI_POSTER_SRC = landingPageVideos.nutriHeroPoster
 
+/** Em mobile: conteúdo abaixo do vídeo só aparece após 18:30 do vídeo (campanha de anúncio). */
+const UNLOCK_AFTER_SECONDS = 18 * 60 + 30 // 18:30
+
 export default function NutriVideoPage() {
   const videoRef = useRef<HTMLVideoElement>(null)
   const [progress, setProgress] = useState(0)
   const [isPlaying, setIsPlaying] = useState(false)
   const [videoError, setVideoError] = useState(false)
+  const [contentUnlocked, setContentUnlocked] = useState(false)
+  const [videoEnded, setVideoEnded] = useState(false)
   const whatsappUrl = `https://wa.me/${WHATSAPP_NUTRI}?text=${encodeURIComponent(WHATSAPP_MSG)}`
   const checkoutUrl = '/pt/nutri/checkout?plan=annual'
 
@@ -24,6 +30,7 @@ export default function NutriVideoPage() {
     if (!video || !video.duration || Number.isNaN(video.duration)) return
     const pct = (video.currentTime / video.duration) * 100
     setProgress(Math.min(100, pct))
+    if (video.currentTime >= UNLOCK_AFTER_SECONDS) setContentUnlocked(true)
   }
 
   const togglePlay = () => {
@@ -40,8 +47,13 @@ export default function NutriVideoPage() {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Header */}
-      <header className="sticky top-0 z-50 border-b border-gray-200 bg-white shadow-sm h-16 sm:h-20 flex items-center">
+      {/* Header — na página de anúncio só aparece após 18:30 (logo + Entrar) */}
+      <header
+        className={cn(
+          'sticky top-0 z-50 border-b border-gray-200 bg-white shadow-sm h-16 sm:h-20 flex items-center',
+          contentUnlocked ? 'flex' : 'hidden'
+        )}
+      >
         <div className="container mx-auto px-6 lg:px-8 py-3 flex items-center justify-between">
           <Link href="/pt/nutri">
             <Image
@@ -62,19 +74,21 @@ export default function NutriVideoPage() {
         </div>
       </header>
 
-      <main className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl">
-        {/* Hero */}
-        <section className="pt-10 sm:pt-14 pb-8 text-center">
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#1A1A1A] mb-3 leading-tight">
-            Como gerar contatos todos os dias sem depender de sorte
+      <main
+        className={cn(
+          'container mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl',
+          !contentUnlocked && 'pt-4'
+        )}
+      >
+        {/* Hero — título sempre visível para quem cai na página (foco no tema) */}
+        <section className="pt-6 sm:pt-10 pb-6 text-center">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#1A1A1A] leading-tight">
+            Como ter pacientes novos chegando todos os dias
           </h1>
-          <p className="text-lg sm:text-xl text-gray-600">
-            Para nutricionistas cansadas de agenda ociosa
-          </p>
         </section>
 
-        {/* Vídeo + barra de progresso (sem controles nativos = sem tempo na tela) */}
-        <section className="pb-6">
+        {/* Vídeo + barra de progresso — no mobile é a primeira coisa visível (landing de anúncio) */}
+        <section className="pt-6 md:pt-0 pb-6">
           <div className="bg-white rounded-xl shadow-2xl overflow-hidden">
             <div
               className="aspect-video bg-gray-900 relative cursor-pointer group"
@@ -88,7 +102,6 @@ export default function NutriVideoPage() {
                 key={NUTRI_VIDEO_SRC}
                 ref={videoRef}
                 className="w-full h-full object-cover"
-                loop
                 playsInline
                 preload="auto"
                 poster={NUTRI_POSTER_SRC}
@@ -98,7 +111,10 @@ export default function NutriVideoPage() {
                 onLoadedData={() => setVideoError(false)}
                 onPlay={() => setIsPlaying(true)}
                 onPause={() => setIsPlaying(false)}
-                onEnded={() => setIsPlaying(false)}
+                onEnded={() => {
+                  setIsPlaying(false)
+                  setVideoEnded(true)
+                }}
                 onError={() => {
                   setVideoError(true)
                   console.error('Erro ao carregar vídeo. URL:', NUTRI_VIDEO_SRC)
@@ -137,8 +153,13 @@ export default function NutriVideoPage() {
           </div>
         </section>
 
-        {/* Dois botões — tudo visível imediatamente */}
-        <section className="pt-8 pb-10">
+        {/* Tirar dúvida aparece após 18:30; Aderir ao sistema só quando o vídeo termina */}
+        <section
+          className={cn(
+            'pt-8 pb-6',
+            contentUnlocked ? 'block' : 'hidden'
+          )}
+        >
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <a
               href={whatsappUrl}
@@ -148,36 +169,25 @@ export default function NutriVideoPage() {
             >
               Tirar dúvida
             </a>
-            <Link
-              href={checkoutUrl}
-              className="w-full sm:w-auto inline-flex justify-center items-center px-8 py-4 rounded-xl text-lg font-bold bg-gradient-to-r from-[#2563EB] to-[#3B82F6] text-white hover:from-[#3B82F6] hover:to-[#1D4ED8] transition-all shadow-xl hover:shadow-2xl"
-            >
-              Sair do improviso
-            </Link>
+            {videoEnded && (
+              <Link
+                href={checkoutUrl}
+                className="w-full sm:w-auto inline-flex justify-center items-center px-8 py-4 rounded-xl text-lg font-bold bg-gradient-to-r from-[#2563EB] to-[#3B82F6] text-white hover:from-[#3B82F6] hover:to-[#1D4ED8] transition-all shadow-xl hover:shadow-2xl"
+              >
+                Aderir ao sistema
+              </Link>
+            )}
           </div>
         </section>
 
-        {/* Argumentação — direta e objetiva */}
-        <section className="pb-16 pt-2">
-          <div className="space-y-6 text-gray-700 max-w-2xl mx-auto">
-            <p className="text-center font-medium text-gray-800">
-              Com o sistema você tem agenda previsível, clareza do que fazer todos os dias e segurança profissional. Não é ferramenta — é tranquilidade.
-            </p>
-            <div className="grid sm:grid-cols-2 gap-4 text-sm">
-              <div className="p-4 rounded-lg bg-gray-50 border border-gray-200">
-                <p className="font-semibold text-gray-800 mb-2">Continuar improvisando</p>
-                <p className="text-gray-600">Agenda instável, insegurança, sem clareza do que fazer amanhã.</p>
-              </div>
-              <div className="p-4 rounded-lg bg-blue-50 border border-blue-200">
-                <p className="font-semibold text-[#2563EB] mb-2">Adotar um método profissional</p>
-                <p className="text-gray-600">Clareza diária, base sólida, organização que vira hábito, previsibilidade de clientes.</p>
-              </div>
-            </div>
-            <p className="text-center text-sm text-gray-600">
+        {/* Só no final do vídeo — CTA + garantia enxuta */}
+        {videoEnded && (
+          <section className="pb-16 pt-2 text-center">
+            <p className="text-sm text-gray-600 max-w-xl mx-auto">
               Garantia de 7 dias: se não for pra você, devolvemos 100%.
             </p>
-          </div>
-        </section>
+          </section>
+        )}
       </main>
     </div>
   )
