@@ -3,18 +3,18 @@
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import LyaSalesWidget from '@/components/nutri/LyaSalesWidget'
 import { landingPageVideos } from '@/lib/landing-pages-assets'
 import { trackNutriSalesView } from '@/lib/facebook-pixel'
 import { videoProgressPercentForRetention } from '@/lib/video-progress-retention'
 
-const WHATSAPP_NUTRI = '5519997230912'
-const WHATSAPP_MSG = 'Olá! Estou na página da YLADA Nutri e gostaria de tirar dúvidas.'
+/** WhatsApp da Paula — Tirar dúvidas e Fale Conosco redirecionam para ela */
+const WHATSAPP_PAULA = '5551996251801'
+const WHATSAPP_MSG_DUVIDA = 'Olá! Estou na página da YLADA Nutri e gostaria de tirar dúvidas.'
+const WHATSAPP_MSG_FALE_CONOSCO = 'Olá! Estou na página da YLADA Nutri e gostaria de falar com a Paula.'
 
 /** Página de vendas idêntica à Nutri, exclusiva para a Paula — todos os links de checkout incluem ref=paula para atribuição. */
 export default function VendasPaulaPage() {
   const [faqOpen, setFaqOpen] = useState<number | null>(0)
-  const [lyaWidgetOpen, setLyaWidgetOpen] = useState(false)
   const videoRef = useRef<HTMLVideoElement>(null)
   const [videoProgress, setVideoProgress] = useState(0)
   const [videoPlaying, setVideoPlaying] = useState(false)
@@ -32,10 +32,6 @@ export default function VendasPaulaPage() {
 
   const toggleFaq = (index: number) => {
     setFaqOpen(faqOpen === index ? null : index)
-  }
-
-  const openLyaWidget = () => {
-    setLyaWidgetOpen(true)
   }
 
   const handleCheckout = (planType: 'annual' | 'monthly') => {
@@ -158,7 +154,7 @@ export default function VendasPaulaPage() {
               </div>
               <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center pt-3 sm:pt-4">
                 <a
-                  href={`https://wa.me/${WHATSAPP_NUTRI}?text=${encodeURIComponent(WHATSAPP_MSG)}`}
+                  href={`https://wa.me/${WHATSAPP_PAULA}?text=${encodeURIComponent(WHATSAPP_MSG_DUVIDA)}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-full sm:w-auto inline-flex justify-center items-center px-5 py-3 rounded-lg text-base font-medium border border-gray-300 text-gray-700 hover:bg-gray-50 transition-all"
@@ -686,16 +682,16 @@ export default function VendasPaulaPage() {
         </section>
       </main>
 
-      <button
-        onClick={openLyaWidget}
+      <a
+        href={`https://wa.me/${WHATSAPP_PAULA}?text=${encodeURIComponent(WHATSAPP_MSG_FALE_CONOSCO)}`}
+        target="_blank"
+        rel="noopener noreferrer"
         className="fixed bottom-6 right-6 z-40 bg-gradient-to-r from-[#2563EB] to-[#3B82F6] text-white px-4 sm:px-6 py-3 sm:py-4 rounded-full shadow-2xl hover:from-[#3B82F6] hover:to-[#1D4ED8] transition-all flex items-center gap-2 sm:gap-3 font-semibold text-sm sm:text-base pointer-events-auto"
         style={{ bottom: '80px', zIndex: 40 }}
       >
         <span className="text-xl sm:text-2xl">💬</span>
         <span>Fale Conosco</span>
-      </button>
-
-      <LyaSalesWidget isOpen={lyaWidgetOpen} onOpenChange={setLyaWidgetOpen} hideButton={true} />
+      </a>
 
       <footer className="border-t border-gray-200 bg-white mt-16">
         <div className="container mx-auto px-4 py-8">
