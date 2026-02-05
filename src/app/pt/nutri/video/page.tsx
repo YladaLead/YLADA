@@ -8,10 +8,14 @@ import { landingPageVideos } from '@/lib/landing-pages-assets'
 const WHATSAPP_NUTRI = '5519997230912'
 const WHATSAPP_MSG = 'Olá! Assisti o vídeo da YLADA Nutri e gostaria de tirar dúvidas.'
 
+const NUTRI_VIDEO_SRC = landingPageVideos.nutriHero
+const NUTRI_POSTER_SRC = landingPageVideos.nutriHeroPoster
+
 export default function NutriVideoPage() {
   const videoRef = useRef<HTMLVideoElement>(null)
   const [progress, setProgress] = useState(0)
   const [isPlaying, setIsPlaying] = useState(false)
+  const [videoError, setVideoError] = useState(false)
   const whatsappUrl = `https://wa.me/${WHATSAPP_NUTRI}?text=${encodeURIComponent(WHATSAPP_MSG)}`
   const checkoutUrl = '/pt/nutri/checkout?plan=annual'
 
@@ -81,24 +85,34 @@ export default function NutriVideoPage() {
               aria-label={isPlaying ? 'Pausar vídeo' : 'Reproduzir vídeo'}
             >
               <video
+                key={NUTRI_VIDEO_SRC}
                 ref={videoRef}
                 className="w-full h-full object-cover"
                 loop
                 playsInline
-                preload="metadata"
-                poster={landingPageVideos.nutriHeroPoster}
+                preload="auto"
+                poster={NUTRI_POSTER_SRC}
+                src={NUTRI_VIDEO_SRC}
                 onTimeUpdate={onTimeUpdate}
                 onLoadedMetadata={onTimeUpdate}
+                onLoadedData={() => setVideoError(false)}
                 onPlay={() => setIsPlaying(true)}
                 onPause={() => setIsPlaying(false)}
                 onEnded={() => setIsPlaying(false)}
-                onError={(e) => {
-                  console.error('Erro ao carregar vídeo:', e)
+                onError={() => {
+                  setVideoError(true)
+                  console.error('Erro ao carregar vídeo. URL:', NUTRI_VIDEO_SRC)
                 }}
               >
-                <source src={landingPageVideos.nutriHero} type="video/mp4" />
                 Seu navegador não suporta vídeo HTML5.
               </video>
+              {videoError && (
+                <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-900 text-white p-4 text-center text-sm">
+                  <p className="font-semibold mb-2">Vídeo indisponível</p>
+                  <p className="opacity-90">Recarregue a página ou tente em outro navegador.</p>
+                  <p className="mt-2 opacity-70 text-xs">Se o problema continuar, o formato do arquivo pode não ser compatível (use MP4 com codec H.264).</p>
+                </div>
+              )}
               {/* Botão play central quando pausado — sem tempo, sem controles nativos */}
               {!isPlaying && (
                 <div
