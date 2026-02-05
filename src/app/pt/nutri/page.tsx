@@ -87,43 +87,37 @@ export default function NutriLandingPage() {
       </header>
 
       <main>
-        {/* BLOCO 1 — HERO (compacto: anúncio pode usar #video para cair no vídeo) */}
-        <section className="bg-gradient-to-br from-[#2563EB] to-[#3B82F6] text-white pt-8 sm:pt-10 pb-10 sm:pb-12">
+        {/* BLOCO 1 — HERO (só headline; CTA fica abaixo do vídeo) */}
+        <section className="bg-gradient-to-br from-[#2563EB] to-[#3B82F6] text-white pt-8 sm:pt-10 pb-8 sm:pb-10">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="max-w-3xl mx-auto text-center">
               <p className="text-base sm:text-lg text-white/85 mb-2 font-medium">
                 Para nutricionistas cansadas de tentar sozinhas e improvisar a própria agenda.
               </p>
-              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black mb-4 leading-tight">
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black leading-tight">
                 O sistema de captação{' '}
                 <span className="bg-gradient-to-r from-yellow-300 to-orange-300 bg-clip-text text-transparent">
                   com orientação que destrava.
                 </span>
               </h1>
-              <p className="text-base text-white/90 mb-6 max-w-xl mx-auto">
-                Estrutura de apoio para você sair do improviso, sem indecisão.
-              </p>
-              <Link
+              <a
                 href="#video"
-                className="inline-block bg-white text-[#2563EB] px-6 sm:px-8 py-3.5 sm:py-4 rounded-xl text-base sm:text-lg font-bold hover:bg-gray-100 transition-all shadow-xl"
+                className="inline-block mt-4 text-white/90 text-sm sm:text-base underline underline-offset-2 hover:text-white transition-colors"
               >
-                Quero sair do improviso
-              </Link>
-              <p className="text-xs text-white/70 mt-2 font-normal">
-                Veja se esse sistema faz sentido para você
-              </p>
+                Assista ao vídeo ↓
+              </a>
             </div>
           </div>
         </section>
 
         {/* VÍDEO — Use /pt/nutri#video no anúncio para desembocar direto aqui */}
-        <section id="video" className="pt-2 sm:pt-4 pb-10 sm:pb-14 bg-white scroll-mt-4">
+        <section id="video" className="pt-6 sm:pt-8 pb-6 sm:pb-8 bg-white scroll-mt-4">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="max-w-4xl mx-auto">
-              <p className="text-base sm:text-lg text-center text-gray-600 mb-3">
-                Entenda como organizar sua agenda e ter tração de verdade. Assista ao vídeo.
+              <p className="text-base sm:text-lg text-center text-gray-700 font-medium mb-3 sm:mb-4">
+                Entenda como organizar sua agenda e ter clientes e pacientes chegando todos os dias.
               </p>
-              <div className="bg-white rounded-xl shadow-2xl overflow-hidden mb-4">
+              <div className="bg-white rounded-xl shadow-2xl overflow-hidden mb-3">
                 <div
                   className="aspect-video bg-gray-900 relative cursor-pointer group"
                   onClick={toggleVideoPlay}
@@ -163,7 +157,7 @@ export default function NutriLandingPage() {
                   <div className="h-full bg-[#2563EB] transition-[width] duration-150 ease-out" style={{ width: `${videoProgress}%` }} />
                 </div>
               </div>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-4 pb-2">
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center pt-3 sm:pt-4">
                 <a
                   href={`https://wa.me/${WHATSAPP_NUTRI}?text=${encodeURIComponent(WHATSAPP_MSG)}`}
                   target="_blank"
@@ -184,7 +178,7 @@ export default function NutriLandingPage() {
         </section>
 
         {/* BLOCO 2 — DOR (ENXUTO | FRASES DURAS) */}
-        <section className="py-14 sm:py-18 lg:py-20 bg-white">
+        <section className="pt-8 sm:pt-10 pb-12 sm:pb-14 lg:pb-16 bg-white">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="max-w-4xl mx-auto">
               <h2 className="text-3xl sm:text-4xl font-bold text-center mb-10 text-[#1A1A1A]">
