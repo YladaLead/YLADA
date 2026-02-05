@@ -1,6 +1,7 @@
 'use client'
 
 import { useRef, useState } from 'react'
+import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import { landingPageVideos } from '@/lib/landing-pages-assets'
@@ -17,14 +18,17 @@ const NUTRI_POSTER_SRC = landingPageVideos.nutriHeroPoster
 const UNLOCK_AFTER_SECONDS = 18 * 60 + 30 // 18:30
 
 export default function NutriVideoPage() {
+  const searchParams = useSearchParams()
+  const previewUnlock = searchParams.get('preview') === '1'
   const videoRef = useRef<HTMLVideoElement>(null)
   const [progress, setProgress] = useState(0)
   const [isPlaying, setIsPlaying] = useState(false)
   const [videoError, setVideoError] = useState(false)
-  const [contentUnlocked, setContentUnlocked] = useState(false)
+  const [contentUnlocked, setContentUnlocked] = useState(previewUnlock)
   const [videoEnded, setVideoEnded] = useState(false)
   const whatsappUrl = `https://wa.me/${WHATSAPP_NUTRI}?text=${encodeURIComponent(WHATSAPP_MSG)}`
   const checkoutUrl = '/pt/nutri/checkout?plan=annual'
+  const vendasUrl = '/pt/nutri'
 
   const onTimeUpdate = () => {
     const video = videoRef.current
@@ -157,39 +161,46 @@ export default function NutriVideoPage() {
           </div>
         </section>
 
-        {/* Tirar dúvida aparece após 18:30; Aderir ao sistema só quando o vídeo termina */}
-        <section
-          className={cn(
-            'pt-8 pb-6',
-            contentUnlocked ? 'block' : 'hidden'
-          )}
-        >
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <a
-              href={whatsappUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="w-full sm:w-auto inline-flex justify-center items-center px-8 py-4 rounded-xl text-lg font-semibold border-2 border-[#2563EB] text-[#2563EB] hover:bg-[#2563EB] hover:text-white transition-all shadow-md hover:shadow-lg"
-            >
-              Tirar dúvida
-            </a>
-            {videoEnded && (
-              <Link
-                href={checkoutUrl}
-                className="w-full sm:w-auto inline-flex justify-center items-center px-8 py-4 rounded-xl text-lg font-bold bg-gradient-to-r from-[#2563EB] to-[#3B82F6] text-white hover:from-[#3B82F6] hover:to-[#1D4ED8] transition-all shadow-xl hover:shadow-2xl"
-              >
-                Aderir ao sistema
-              </Link>
-            )}
-          </div>
-        </section>
+        {/* Após 18:30: Tirar dúvida + Quero começar + argumentos de venda */}
+        {contentUnlocked && (
+          <>
+            <section className="pt-8 pb-6">
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center flex-wrap">
+                <a
+                  href={whatsappUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full sm:w-auto inline-flex justify-center items-center px-6 sm:px-8 py-3 sm:py-4 rounded-xl text-base sm:text-lg font-semibold border-2 border-[#2563EB] text-[#2563EB] hover:bg-[#2563EB] hover:text-white transition-all shadow-md hover:shadow-lg"
+                >
+                  Tirar dúvida
+                </a>
+                <Link
+                  href={vendasUrl}
+                  className="w-full sm:w-auto inline-flex justify-center items-center px-6 sm:px-8 py-3 sm:py-4 rounded-xl text-base sm:text-lg font-semibold border-2 border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400 transition-all shadow-md"
+                >
+                  Saber mais
+                </Link>
+                <Link
+                  href={checkoutUrl}
+                  className="w-full sm:w-auto inline-flex justify-center items-center px-6 sm:px-8 py-3 sm:py-4 rounded-xl text-base sm:text-lg font-bold bg-gradient-to-r from-[#2563EB] to-[#3B82F6] text-white hover:from-[#3B82F6] hover:to-[#1D4ED8] transition-all shadow-xl hover:shadow-2xl"
+                >
+                  Quero começar
+                </Link>
+              </div>
+            </section>
+          </>
+        )}
 
-        {/* Só no final do vídeo — CTA + garantia enxuta */}
+        {/* Reforço no final do vídeo */}
         {videoEnded && (
-          <section className="pb-16 pt-2 text-center">
-            <p className="text-sm text-gray-600 max-w-xl mx-auto">
-              Garantia de 7 dias: se não for pra você, devolvemos 100%.
-            </p>
+          <section className="pb-16 pt-2 text-center border-t border-gray-200">
+            <p className="text-lg font-semibold text-[#1A1A1A] mb-2">Pronto para sair do improviso?</p>
+            <Link
+              href={checkoutUrl}
+              className="inline-flex items-center px-8 py-4 rounded-xl text-lg font-bold bg-gradient-to-r from-[#2563EB] to-[#3B82F6] text-white hover:from-[#3B82F6] hover:to-[#1D4ED8] transition-all shadow-xl"
+            >
+              Aderir ao sistema
+            </Link>
           </section>
         )}
       </main>
