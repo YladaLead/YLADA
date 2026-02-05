@@ -6,6 +6,7 @@ import Image from 'next/image'
 import LyaSalesWidget from '@/components/nutri/LyaSalesWidget'
 import { landingPageVideos } from '@/lib/landing-pages-assets'
 import { trackNutriSalesView } from '@/lib/facebook-pixel'
+import { videoProgressPercentForRetention } from '@/lib/video-progress-retention'
 
 const WHATSAPP_NUTRI = '5519997230912'
 const WHATSAPP_MSG = 'Olá! Estou na página da YLADA Nutri e gostaria de tirar dúvidas.'
@@ -46,9 +47,12 @@ export default function NutriLandingPage() {
   const onVideoTimeUpdate = () => {
     const video = videoRef.current
     if (!video || !video.duration || Number.isNaN(video.duration)) return
-    const pct = (video.currentTime / video.duration) * 100
-    setVideoProgress(Math.min(100, pct))
+    const realPct = (video.currentTime / video.duration) * 100
+    setVideoProgress(Math.min(100, realPct))
   }
+
+  // Barra avança rápido no começo e devagar no final (retenção)
+  const displayVideoProgress = videoProgressPercentForRetention(videoProgress)
 
   const toggleVideoPlay = () => {
     const video = videoRef.current
@@ -154,7 +158,7 @@ export default function NutriLandingPage() {
                   )}
                 </div>
                 <div className="h-1.5 w-full bg-gray-200">
-                  <div className="h-full bg-[#2563EB] transition-[width] duration-150 ease-out" style={{ width: `${videoProgress}%` }} />
+                  <div className="h-full bg-[#2563EB] transition-[width] duration-150 ease-out" style={{ width: `${displayVideoProgress}%` }} />
                 </div>
               </div>
               <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center pt-3 sm:pt-4">

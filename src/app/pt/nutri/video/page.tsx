@@ -5,6 +5,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { landingPageVideos } from '@/lib/landing-pages-assets'
 import { cn } from '@/lib/utils'
+import { videoProgressPercentForRetention } from '@/lib/video-progress-retention'
 
 const WHATSAPP_NUTRI = '5519997230912'
 const WHATSAPP_MSG = 'Olá! Assisti o vídeo da YLADA Nutri e gostaria de tirar dúvidas.'
@@ -28,10 +29,13 @@ export default function NutriVideoPage() {
   const onTimeUpdate = () => {
     const video = videoRef.current
     if (!video || !video.duration || Number.isNaN(video.duration)) return
-    const pct = (video.currentTime / video.duration) * 100
-    setProgress(Math.min(100, pct))
+    const realPct = (video.currentTime / video.duration) * 100
+    setProgress(Math.min(100, realPct))
     if (video.currentTime >= UNLOCK_AFTER_SECONDS) setContentUnlocked(true)
   }
+
+  // Barra avança rápido no começo e devagar no final (retenção)
+  const displayProgress = videoProgressPercentForRetention(progress)
 
   const togglePlay = () => {
     const video = videoRef.current
@@ -147,7 +151,7 @@ export default function NutriVideoPage() {
             <div className="h-1.5 w-full bg-gray-200">
               <div
                 className="h-full bg-[#2563EB] transition-[width] duration-150 ease-out"
-                style={{ width: `${progress}%` }}
+                style={{ width: `${displayProgress}%` }}
               />
             </div>
           </div>
