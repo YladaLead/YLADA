@@ -56,10 +56,11 @@ export const landingPageVideos = {
     return getLandingPageAssetUrl('wellness-hero-poster.png')
   },
   get nutriHero() {
-    return getLandingPageAssetUrl('nutri-hero.mp4')
+    // Local: vídeo em public/videos/nutri-hero.mp4 (funciona sem upload ao Supabase)
+    return '/videos/nutri-hero.mp4'
   },
   get nutriHeroPoster() {
-    return getLandingPageAssetUrl('nutri-hero-poster.jpg')
+    return '/videos/nutri-hero-poster.jpg'
   },
 }
 
