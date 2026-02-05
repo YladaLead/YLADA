@@ -278,6 +278,40 @@ async function handlePaymentEvent(data: any, isTest: boolean = false) {
     const fullData = paymentDataFull || data
 
     try {
+      // Aula paga (R$ 37): apenas confirmar inscrição e enviar email, sem criar usuário/assinatura
+      const extRef = fullData.external_reference || ''
+      if (extRef.includes('aula_paga_')) {
+        const emailAulaPaga = extRef.split('aula_paga_')[1]?.trim() || fullData.payer?.email || fullData.payer_email
+        if (emailAulaPaga && fullData.status === 'approved') {
+          const { error: updateError } = await supabaseAdmin
+            .from('workshop_inscricoes')
+            .update({ status: 'confirmado', updated_at: new Date().toISOString() })
+            .eq('email', emailAulaPaga)
+            .eq('workshop_type', 'aula_paga')
+            .eq('status', 'inscrito')
+          if (!updateError) {
+            console.log('✅ Inscrição aula paga confirmada:', emailAulaPaga)
+            const { resend, FROM_EMAIL, FROM_NAME, isResendConfigured } = await import('@/lib/resend')
+            if (isResendConfigured() && resend) {
+              const emailHtml = `
+                <h1>Aula YLADA – Inscrição confirmada</h1>
+                <p>Sua inscrição na aula (público certo, posicionamento e agenda) foi confirmada.</p>
+                <p><strong>Próxima aula:</strong> Quarta-feira, 11 de fevereiro às 19h30.</p>
+                <p>Você receberá o link de acesso por WhatsApp e por e-mail antes do evento.</p>
+                <p>Equipe YLADA</p>
+              `
+              await resend.emails.send({
+                from: `${FROM_NAME} <${FROM_EMAIL}>`,
+                to: emailAulaPaga,
+                subject: 'Aula YLADA – Inscrição confirmada (R$ 37)',
+                html: emailHtml,
+              }).catch((err) => console.error('Erro ao enviar email aula paga:', err))
+            }
+          }
+        }
+        return
+      }
+
       // Obter metadata do pagamento (usar dados completos obtidos via API)
     const metadata = fullData.metadata || {}
     let userId = metadata.user_id
@@ -332,6 +366,7 @@ async function handlePaymentEvent(data: any, isTest: boolean = false) {
     const planType = metadata.plan_type || (fullData.external_reference?.split('_')[1]) || 'monthly'
     const productType = metadata.product_type || metadata.productType // Suportar ambos os formatos
     const paymentMethod = fullData.payment_method_id || 'unknown'
+    const refVendedor = metadata.ref_vendedor && String(metadata.ref_vendedor).trim() ? String(metadata.ref_vendedor).trim() : null
     
     // Determinar features baseado em productType (apenas Nutri)
     const features = determineFeatures(area, planType, productType)
@@ -604,7 +639,7 @@ async function handlePaymentEvent(data: any, isTest: boolean = false) {
           user_id: userId,
           area: area,
           plan_type: planType,
-          features: features, // Adicionar features determinadas
+          features: features,
           stripe_account: null,
           stripe_subscription_id: subscriptionId,
           stripe_customer_id: fullData.payer?.id?.toString() || 'mp_customer',
@@ -616,7 +651,8 @@ async function handlePaymentEvent(data: any, isTest: boolean = false) {
           current_period_end: expiresAt.toISOString(),
           cancel_at_period_end: false,
           reminder_sent: reminderSent,
-          welcome_email_sent: false, // Nova assinatura precisa de email
+          welcome_email_sent: false,
+          ref_vendedor: refVendedor,
           updated_at: new Date().toISOString(),
         })
         .select()
@@ -1035,17 +1071,18 @@ async function handleSubscriptionEvent(data: any, isTest: boolean = false) {
         user_id: userId,
         area: area,
         plan_type: planType,
-        features: features, // Adicionar features determinadas
-        stripe_account: null, // Mercado Pago não usa stripe_account
-        stripe_subscription_id: subscriptionIdDb, // Usar como ID único
+        features: features,
+        stripe_account: null,
+        stripe_subscription_id: subscriptionIdDb,
         stripe_customer_id: data.payer_id?.toString() || 'mp_customer',
-        stripe_price_id: 'mp_recurring', // Placeholder para assinatura recorrente
-        amount: Math.round(amount * 100), // Converter para centavos
+        stripe_price_id: 'mp_recurring',
+        amount: Math.round(amount * 100),
         currency: currency.toLowerCase(),
         status: mappedStatus,
         current_period_start: now.toISOString(),
         current_period_end: periodEnd.toISOString(),
         cancel_at_period_end: status === 'cancelled',
+        ref_vendedor: refVendedor,
         updated_at: new Date().toISOString(),
       }, {
         onConflict: 'stripe_subscription_id',

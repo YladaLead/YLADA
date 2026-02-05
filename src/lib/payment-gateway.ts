@@ -19,7 +19,8 @@ export interface CheckoutRequest {
   countryCode?: string
   language?: 'pt' | 'en' | 'es'
   paymentMethod?: 'auto' | 'pix' | 'boleto' // 'auto' = cartão automático, 'pix'/'boleto' = manual
-  // Campos opcionais para melhorar qualidade da integração
+  /** Atribuição de venda (ex: 'paula') — gravado no pagamento e na assinatura */
+  refVendedor?: string
   payerFirstName?: string
   payerLastName?: string
 }
@@ -231,7 +232,7 @@ async function createMercadoPagoCheckout(
       const subscriptionRequest: CreateSubscriptionRequest = {
         area: request.area,
         planType: request.planType,
-        productType: request.productType, // Passar productType para subscription
+        productType: request.productType,
         userId: request.userId,
         userEmail: request.userEmail,
         amount,
@@ -241,6 +242,7 @@ async function createMercadoPagoCheckout(
         successUrl,
         failureUrl,
         pendingUrl,
+        refVendedor: request.refVendedor,
       }
 
       try {
@@ -278,7 +280,7 @@ async function createMercadoPagoCheckout(
       const preferenceRequest: CreatePreferenceRequest = {
         area: request.area,
         planType: request.planType,
-        productType: request.productType, // Passar productType para preference
+        productType: request.productType,
         userId: request.userId,
         userEmail: request.userEmail,
         amount,
@@ -290,9 +292,10 @@ async function createMercadoPagoCheckout(
         successUrl,
         failureUrl,
         pendingUrl,
-        maxInstallments: monthlyMaxInstallments, // Mensal padrão: 1x; "mensal parcelado": até 12x
+        maxInstallments: monthlyMaxInstallments,
         payerFirstName: request.payerFirstName,
         payerLastName: request.payerLastName,
+        refVendedor: request.refVendedor,
       }
 
       try {
@@ -325,7 +328,7 @@ async function createMercadoPagoCheckout(
     const preferenceRequest: CreatePreferenceRequest = {
       area: request.area,
       planType: request.planType,
-      productType: request.productType, // Passar productType para preference
+      productType: request.productType,
       userId: request.userId,
       userEmail: request.userEmail,
       amount,
@@ -335,9 +338,10 @@ async function createMercadoPagoCheckout(
       successUrl,
       failureUrl,
       pendingUrl,
-      maxInstallments: 12, // Plano anual/formação: permite parcelamento até 12x
+      maxInstallments: 12,
       payerFirstName: request.payerFirstName,
       payerLastName: request.payerLastName,
+      refVendedor: request.refVendedor,
     }
 
     try {

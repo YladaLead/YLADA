@@ -117,6 +117,7 @@ export async function POST(request: NextRequest) {
       countryCode,
       language: language || 'pt',
       paymentMethod: paymentMethod, // 'auto' ou 'pix' para plano mensal
+      refVendedor: refVendedor && String(refVendedor).trim() ? String(refVendedor).trim() : undefined,
     }, request)
 
     const checkoutDuration = Date.now() - checkoutStartTime

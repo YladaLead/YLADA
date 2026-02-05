@@ -22,6 +22,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const areaFiltro = searchParams.get('area') || 'todos'
     const statusFiltro = searchParams.get('status') || 'todos'
+    const refVendedorFiltro = searchParams.get('ref_vendedor') || 'todos' // 'todos' | 'paula' | etc.
     
     // Novos filtros de período
     const periodoInicio = searchParams.get('periodo_inicio') // YYYY-MM-DD
@@ -79,7 +80,8 @@ export async function GET(request: NextRequest) {
         created_at,
         is_migrated,
         migrated_from,
-        requires_manual_renewal
+        requires_manual_renewal,
+        ref_vendedor
       `)
       .order('created_at', { ascending: false })
 
@@ -91,6 +93,11 @@ export async function GET(request: NextRequest) {
     // Aplicar filtro de status
     if (statusFiltro !== 'todos') {
       subscriptionsQuery = subscriptionsQuery.eq('status', statusFiltro)
+    }
+
+    // Aplicar filtro de vendedor (ex: apenas vendas da Paula)
+    if (refVendedorFiltro !== 'todos' && refVendedorFiltro.trim()) {
+      subscriptionsQuery = subscriptionsQuery.eq('ref_vendedor', refVendedorFiltro.trim())
     }
 
     // Aplicar filtros de período (APENAS se especificamente solicitado)
@@ -505,7 +512,8 @@ export async function GET(request: NextRequest) {
         // Campos para identificar novas vs renovações
         is_nova: isNova,
         is_renovacao: !isNova && !!lastPaymentDate,
-        data_ultimo_pagamento: dataUltimoPagamento
+        data_ultimo_pagamento: dataUltimoPagamento,
+        ref_vendedor: sub.ref_vendedor || null
       }
     })
 

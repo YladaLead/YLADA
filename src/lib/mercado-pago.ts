@@ -8,7 +8,7 @@ import { MercadoPagoConfig, Preference, Payment } from 'mercadopago'
 export interface CreatePreferenceRequest {
   area: 'wellness' | 'nutri' | 'coach' | 'nutra'
   planType: 'monthly' | 'annual'
-  productType?: 'platform_monthly' | 'platform_monthly_12x' | 'platform_annual' | 'formation_only' // Apenas para área Nutri
+  productType?: 'platform_monthly' | 'platform_monthly_12x' | 'platform_annual' | 'formation_only' | 'aula_paga' // Apenas para área Nutri
   userId: string
   userEmail: string
   amount: number // Valor em reais (ex: 59.90)
@@ -22,9 +22,10 @@ export interface CreatePreferenceRequest {
     failure?: string
     pending?: string
   }
-  // Campos opcionais para melhorar qualidade da integração
   payerFirstName?: string
   payerLastName?: string
+  /** Atribuição de venda (ex: 'paula') — enviado no metadata para o webhook gravar */
+  refVendedor?: string
 }
 
 export interface CreatePreferenceResponse {
@@ -140,7 +141,8 @@ export async function createPreference(
       user_id: request.userId,
       area: request.area,
       plan_type: request.planType,
-      product_type: request.productType || undefined, // Adicionar productType no metadata (apenas Nutri)
+      product_type: request.productType || undefined,
+      ref_vendedor: request.refVendedor || undefined, // Atribuição de venda (ex: paula)
     },
     back_urls: {
       success: request.successUrl,

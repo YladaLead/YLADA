@@ -50,6 +50,9 @@ export default function NutriCheckoutPage() {
     })
   }, [user, authLoading, loading, email])
 
+  // ref=paula (ou outro) para atribuir venda ao vendedor
+  const [refVendedor, setRefVendedor] = useState<string | null>(null)
+
   // Detectar parâmetros da URL usando window.location (mais confiável)
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -57,6 +60,10 @@ export default function NutriCheckoutPage() {
       const plan = params.get('plan')
       const canceledParam = params.get('canceled')
       const productTypeParam = params.get('productType')
+      const ref = params.get('ref')
+      if (ref && ref.trim()) {
+        setRefVendedor(ref.trim())
+      }
       
       if (plan === 'annual') {
         setPlanType('annual')
@@ -145,7 +152,8 @@ export default function NutriCheckoutPage() {
           email: userEmail, // E-mail (obrigatório mesmo se autenticado)
           // Mensal padrão: assinatura automática (Preapproval)
           // Mensal parcelado (terceiro produto): pagamento único (Preference) com parcelas
-          paymentMethod: planType === 'monthly' && productTypeOverride === 'platform_monthly_12x' ? undefined : 'auto'
+          paymentMethod: planType === 'monthly' && productTypeOverride === 'platform_monthly_12x' ? undefined : 'auto',
+          refVendedor: (refVendedor ?? (typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('ref') : null)) || undefined, // Atribuição de venda (ex: paula)
         }),
       })
 

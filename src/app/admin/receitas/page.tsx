@@ -28,6 +28,7 @@ interface Receita {
   is_nova?: boolean // Se é nova assinatura
   is_renovacao?: boolean // Se é renovação
   data_ultimo_pagamento?: string | null // Data do último pagamento
+  ref_vendedor?: string | null // Atribuição de venda (ex: paula)
 }
 
 interface Totais {
@@ -63,6 +64,7 @@ export default function AdminReceitas() {
   // =====================================================
   const [filtroArea, setFiltroArea] = useState<'todos' | 'nutri' | 'coach' | 'nutra' | 'wellness'>('todos')
   const [filtroStatus, setFiltroStatus] = useState<'todos' | 'active' | 'canceled' | 'past_due' | 'unpaid'>('todos')
+  const [filtroVendedor, setFiltroVendedor] = useState<'todos' | 'paula'>('todos')
   
   // =====================================================
   // FILTRO DE PERÍODO (UNIFICADO E SIMPLIFICADO)
@@ -285,7 +287,7 @@ export default function AdminReceitas() {
     }
 
     carregarDados()
-  }, [filtroArea, filtroStatus, periodoTipo, periodoRapido, mesSelecionado, trimestreSelecionado, diaSelecionado, dataInicio, dataFim])
+  }, [filtroArea, filtroStatus, filtroVendedor, periodoTipo, periodoRapido, mesSelecionado, trimestreSelecionado, diaSelecionado, dataInicio, dataFim])
 
   // =====================================================
   // ESTADOS PARA MODAIS DE DETALHES
@@ -557,6 +559,36 @@ export default function AdminReceitas() {
                      status === 'unpaid' ? 'Não Pagas' : status}
                   </button>
                 ))}
+              </div>
+            </div>
+
+            {/* Filtro Vendedor - vendas atribuídas (ex: Paula) */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                <span className="text-lg">👤</span>
+                Vendedor
+              </label>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  onClick={() => setFiltroVendedor('todos')}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    filtroVendedor === 'todos'
+                      ? 'bg-teal-600 text-white shadow-md'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
+                  Todos
+                </button>
+                <button
+                  onClick={() => setFiltroVendedor('paula')}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    filtroVendedor === 'paula'
+                      ? 'bg-teal-600 text-white shadow-md'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
+                  Paula
+                </button>
               </div>
             </div>
 
@@ -1142,6 +1174,7 @@ export default function AdminReceitas() {
                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Valor</th>
                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Categoria</th>
                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Vendedor</th>
                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Próximo Vencimento</th>
                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Histórico</th>
                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
@@ -1150,7 +1183,7 @@ export default function AdminReceitas() {
                       <tbody className="bg-white divide-y divide-gray-200">
                         {receitasFiltradas.length === 0 ? (
                           <tr>
-                            <td colSpan={9} className="px-6 py-12 text-center text-gray-500">
+                            <td colSpan={10} className="px-6 py-12 text-center text-gray-500">
                               Nenhuma assinatura encontrada
                             </td>
                           </tr>
@@ -1191,6 +1224,9 @@ export default function AdminReceitas() {
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap">
                                 {getStatusBadge(receita.status, receita.is_migrated)}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <span className="text-sm text-gray-700">{receita.ref_vendedor ? String(receita.ref_vendedor) : '—'}</span>
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap">
                                 <div className="text-sm text-gray-900">
