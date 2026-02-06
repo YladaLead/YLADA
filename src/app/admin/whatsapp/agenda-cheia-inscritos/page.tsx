@@ -12,6 +12,7 @@ interface Inscricao {
   status: string
   created_at: string
   updated_at?: string
+  participacao_aula?: string | null
 }
 
 function AgendaCheiaInscritosContent() {
@@ -23,6 +24,7 @@ function AgendaCheiaInscritosContent() {
   const [lastResult, setLastResult] = useState<{ enviados: number; total: number } | null>(null)
   const [sendingEmail, setSendingEmail] = useState(false)
   const [lastEmailResult, setLastEmailResult] = useState<{ enviados: number; total: number } | null>(null)
+  const [updatingId, setUpdatingId] = useState<string | null>(null)
 
   const load = async () => {
     try {
@@ -64,6 +66,30 @@ function AgendaCheiaInscritosContent() {
     const p = String(telefone).replace(/\D/g, '')
     const num = p.length >= 10 && p.length <= 11 ? '55' + p : p
     window.open(`https://wa.me/${num}`, '_blank')
+  }
+
+  const marcarParticipacao = async (id: string, participacao: 'participou' | 'nao_participou') => {
+    try {
+      setUpdatingId(id)
+      const res = await fetch('/api/admin/nutri/agenda-cheia-inscritos/participacao', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ id, participacao }),
+      })
+      const data = await res.json()
+      if (data.success) {
+        setInscricoes((prev) =>
+          prev.map((i) => (i.id === id ? { ...i, participacao_aula: participacao } : i))
+        )
+      } else {
+        alert(data.error || 'Erro ao atualizar')
+      }
+    } catch (e: any) {
+      alert(e?.message || 'Erro ao atualizar')
+    } finally {
+      setUpdatingId(null)
+    }
   }
 
   const sendLembrete = async () => {
@@ -227,6 +253,7 @@ function AgendaCheiaInscritosContent() {
                         <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
                         <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Telefone</th>
                         <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Participação</th>
                         <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Data</th>
                         <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Ação</th>
                       </tr>
@@ -256,6 +283,41 @@ function AgendaCheiaInscritosContent() {
                               {i.status}
                             </span>
                           </td>
+                          <td className="px-4 py-3">
+                            <span className="text-xs text-gray-500 mr-2">
+                              {i.participacao_aula === 'participou'
+                                ? '✅ Participou'
+                                : i.participacao_aula === 'nao_participou'
+                                  ? '❌ Não participou'
+                                  : '—'}
+                            </span>
+                            <div className="flex flex-wrap gap-1 mt-1">
+                              <button
+                                type="button"
+                                disabled={updatingId === i.id}
+                                onClick={() => marcarParticipacao(i.id, 'participou')}
+                                className={`px-2 py-1 text-xs font-medium rounded ${
+                                  i.participacao_aula === 'participou'
+                                    ? 'bg-green-600 text-white'
+                                    : 'bg-gray-200 text-gray-700 hover:bg-green-100'
+                                } disabled:opacity-50`}
+                              >
+                                Participou
+                              </button>
+                              <button
+                                type="button"
+                                disabled={updatingId === i.id}
+                                onClick={() => marcarParticipacao(i.id, 'nao_participou')}
+                                className={`px-2 py-1 text-xs font-medium rounded ${
+                                  i.participacao_aula === 'nao_participou'
+                                    ? 'bg-red-600 text-white'
+                                    : 'bg-gray-200 text-gray-700 hover:bg-red-100'
+                                } disabled:opacity-50`}
+                              >
+                                Não participou
+                              </button>
+                            </div>
+                          </td>
                           <td className="px-4 py-3 text-sm text-gray-600">
                             {new Date(i.created_at).toLocaleString('pt-BR')}
                           </td>
@@ -283,6 +345,7 @@ function AgendaCheiaInscritosContent() {
             </summary>
             <ul className="mt-2 text-sm text-blue-800 space-y-1 list-disc list-inside">
               <li><strong>Aula:</strong> 11 de fevereiro às 19h30. Link da sala Zoom está no texto padrão dos lembretes.</li>
+              <li><strong>Participação:</strong> marque quem participou e quem não participou. Quem participou: envie link de adesão. Quem não participou: remarketing (verifique o que aconteceu).</li>
               <li><strong>Enviar lembrete WhatsApp:</strong> envia em massa com data/hora e link do Zoom (pode editar o texto).</li>
               <li><strong>Enviar lembrete por e-mail:</strong> envia e-mail com link do Zoom para os selecionados.</li>
               <li><strong>Abrir WhatsApp:</strong> abre conversa com o número do inscrito.</li>

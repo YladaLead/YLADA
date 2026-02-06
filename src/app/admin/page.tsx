@@ -175,6 +175,15 @@ function AdminDashboardContent() {
       destaque: true
     },
     {
+      id: 'whatsapp-agenda-cheia-inscritos',
+      title: 'Inscritos Aula Paga (Agenda Cheia)',
+      description: 'Inscritos na aula R$ 37: marcar participação, lembretes e link Zoom',
+      icon: '🎫',
+      link: '/admin/whatsapp/agenda-cheia-inscritos',
+      color: 'bg-amber-600',
+      destaque: true
+    },
+    {
       id: 'usuarios',
       title: 'Usuários',
       description: 'Gerenciar nutricionistas, coaches, nutras e wellness',

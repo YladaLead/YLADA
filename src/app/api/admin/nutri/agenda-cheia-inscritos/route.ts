@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
 
     const { data: inscricoes, error } = await supabaseAdmin
       .from('workshop_inscricoes')
-      .select('id, nome, email, telefone, status, created_at, updated_at')
+      .select('id, nome, email, telefone, status, created_at, updated_at, participacao_aula')
       .eq('workshop_type', 'aula_paga')
       .order('created_at', { ascending: false })
 
