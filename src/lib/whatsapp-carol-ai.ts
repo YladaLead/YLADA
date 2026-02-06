@@ -2412,18 +2412,20 @@ export async function sendWelcomeToNonContactedLeads(): Promise<{
     // Buscar de workshop_inscricoes OU de leads com source = workshop_agenda_instavel_landing_page
     const seteDiasAtras = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
     
-    // Tentar buscar de workshop_inscricoes primeiro
+    // Tentar buscar de workshop_inscricoes primeiro (apenas aula gratuita — não misturar com aula_paga)
     let workshopLeads: Array<{ nome: string; email: string; telefone: string; created_at: string }> = []
     
     const { data: inscricoes } = await supabaseAdmin
       .from('workshop_inscricoes')
-      .select('nome, email, telefone, created_at')
+      .select('nome, email, telefone, created_at, workshop_type')
       .eq('status', 'inscrito')
       .gte('created_at', seteDiasAtras)
       .order('created_at', { ascending: false })
     
-    if (inscricoes && inscricoes.length > 0) {
-      workshopLeads = inscricoes.map((i: any) => ({
+    const inscricoesAulaGratuita = (inscricoes || []).filter((i: any) => i.workshop_type !== 'aula_paga')
+    
+    if (inscricoesAulaGratuita.length > 0) {
+      workshopLeads = inscricoesAulaGratuita.map((i: any) => ({
         nome: i.nome,
         email: i.email || '',
         telefone: i.telefone,

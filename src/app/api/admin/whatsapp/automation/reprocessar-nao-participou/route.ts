@@ -1,21 +1,22 @@
 /**
  * POST /api/admin/whatsapp/automation/reprocessar-nao-participou
- * Desligado quando isCarolAutomationDisabled (PASSO-A-PASSO-DESLIGAR-AUTOMACAO.md).
+ * Envia remarketing para todas as conversas com tag "nao_participou_aula".
+ * body.force = true: reenvia mesmo para quem já recebeu (ex.: turma de ontem à noite).
  */
 
 import { NextRequest, NextResponse } from 'next/server'
 import { requireApiAuth } from '@/lib/api-auth'
-import { isCarolAutomationDisabled } from '@/config/whatsapp-automation'
 import { supabaseAdmin } from '@/lib/supabase'
 import { sendRemarketingToNonParticipant } from '@/lib/whatsapp-carol-ai'
 
 export async function POST(request: NextRequest) {
   const authResult = await requireApiAuth(request, ['admin'])
   if (authResult instanceof NextResponse) return authResult
-  if (isCarolAutomationDisabled()) {
-    return NextResponse.json({ disabled: true, message: 'Automação temporariamente desligada' }, { status: 503 })
-  }
+
   try {
+    const body = await request.json().catch(() => ({}))
+    const force = body.force === true // reenviar mesmo para quem já recebeu
+
     // Buscar todas conversas com tag "nao_participou_aula"
     const { data: conversations, error } = await supabaseAdmin
       .from('whatsapp_conversations')
@@ -50,19 +51,19 @@ export async function POST(request: NextRequest) {
     let sent = 0
     let errors = 0
 
-    // Reprocessar cada um
+    // Reprocessar cada um (force = true reenvia mesmo quem já recebeu)
     for (const conv of naoParticipantes) {
       try {
         processed++
-        const result = await sendRemarketingToNonParticipant(conv.id)
+        const result = await sendRemarketingToNonParticipant(conv.id, { force })
         if (result.success) {
           sent++
         } else {
           errors++
           console.error(`[Reprocessar Não Participou] Erro para ${conv.phone}:`, result.error)
         }
-        // Delay entre processamentos
-        await new Promise(resolve => setTimeout(resolve, 1000))
+        // Delay entre processamentos para não sobrecarregar o WhatsApp
+        await new Promise(resolve => setTimeout(resolve, 1500))
       } catch (error: any) {
         errors++
         console.error(`[Reprocessar Não Participou] Erro para ${conv.phone}:`, error)

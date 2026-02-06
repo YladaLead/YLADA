@@ -5,12 +5,13 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useAuth } from '@/contexts/AuthContext'
-import { trackNutriCheckoutMonthly, trackNutriCheckoutAnnual } from '@/lib/facebook-pixel'
+import { trackNutriCheckoutAnnual } from '@/lib/facebook-pixel'
 
 export default function NutriCheckoutPage() {
   const router = useRouter()
   const { user, userProfile, loading: authLoading } = useAuth()
-  const [planType, setPlanType] = useState<'monthly' | 'annual'>('monthly')
+  // Área Nutri: único plano vendido é o anual (sem mensal e sem trial de 3 dias)
+  const [planType, setPlanType] = useState<'monthly' | 'annual'>('annual')
   const [planLocked, setPlanLocked] = useState(false)
   const [productTypeOverride, setProductTypeOverride] = useState<
     'platform_monthly' | 'platform_monthly_12x' | 'platform_annual' | 'formation_only' | null
@@ -67,17 +68,17 @@ export default function NutriCheckoutPage() {
       
       if (plan === 'annual') {
         setPlanType('annual')
-        setPlanLocked(true) // Bloquear alteração após definir pela URL
-        // Rastrear evento de checkout anual
+        setPlanLocked(true)
         trackNutriCheckoutAnnual()
-      } else if (plan === 'monthly') {
-        setPlanType('monthly')
-        setPlanLocked(true) // Bloquear alteração após definir pela URL
-        // Rastrear evento de checkout mensal
-        trackNutriCheckoutMonthly()
       } else {
-        // Se não tiver parâmetro, assumir mensal e rastrear
-        trackNutriCheckoutMonthly()
+        // Nutri vende apenas plano anual; ?plan=monthly ou sem plan → forçar anual
+        setPlanType('annual')
+        if (plan === 'monthly' && typeof window !== 'undefined') {
+          const url = new URL(window.location.href)
+          url.searchParams.set('plan', 'annual')
+          window.history.replaceState({}, '', url.pathname + '?' + url.searchParams.toString())
+        }
+        trackNutriCheckoutAnnual()
       }
 
       // Suportar link direto para "terceiro produto" (mensal parcelado em até 12x)

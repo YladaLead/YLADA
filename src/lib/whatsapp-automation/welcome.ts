@@ -39,16 +39,19 @@ export async function scheduleWelcomeMessages(): Promise<{
     
     let workshopLeads: Array<{ nome: string; telefone: string; created_at: string }> = []
     
-    // Tentar buscar de workshop_inscricoes primeiro
+    // Tentar buscar de workshop_inscricoes primeiro (apenas aula gratuita — não misturar com aula_paga)
     const { data: inscricoes } = await supabaseAdmin
       .from('workshop_inscricoes')
-      .select('nome, telefone, created_at')
+      .select('nome, telefone, created_at, workshop_type')
       .eq('status', 'inscrito')
       .gte('created_at', seteDiasAtras)
       .order('created_at', { ascending: false })
+    const inscricoesAulaGratuita = (inscricoes || []).filter(
+      (i: any) => i.workshop_type !== 'aula_paga'
+    )
     
-    if (inscricoes && inscricoes.length > 0) {
-      workshopLeads = inscricoes
+    if (inscricoesAulaGratuita && inscricoesAulaGratuita.length > 0) {
+      workshopLeads = inscricoesAulaGratuita
         .filter((i: any) => i.telefone)
         .map((i: any) => ({
           nome: i.nome || 'Cliente',

@@ -12,7 +12,8 @@ function NutriCadastroContent() {
 
   useEffect(() => {
     // Pegar parâmetro de plano se existir
-    const plan = searchParams.get('plan') || 'monthly'
+    // Nutri vende apenas plano anual (sem trial de 3 dias)
+    const plan = searchParams.get('plan') || 'annual'
     
     // Redirecionar para checkout mantendo parâmetros
     const checkoutUrl = `/pt/nutri/checkout?plan=${plan}`

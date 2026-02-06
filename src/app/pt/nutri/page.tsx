@@ -39,9 +39,9 @@ export default function NutriLandingPage() {
     setLyaWidgetOpen(true)
   }
 
-  const handleCheckout = (planType: 'annual' | 'monthly') => {
-    const checkoutUrl = `/pt/nutri/checkout?plan=${planType}`
-    window.location.href = checkoutUrl
+  // Área Nutri: único plano vendido é o anual (sem mensal e sem trial de 3 dias)
+  const handleCheckout = () => {
+    window.location.href = '/pt/nutri/checkout?plan=annual'
   }
 
   const onVideoTimeUpdate = () => {
@@ -719,13 +719,13 @@ export default function NutriLandingPage() {
                     onClick={(e) => {
                       e.preventDefault()
                       e.stopPropagation()
-                      handleCheckout('annual')
+                      handleCheckout()
                     }}
                     onTouchStart={(e) => e.stopPropagation()}
                     onTouchEnd={(e) => {
                       e.preventDefault()
                       e.stopPropagation()
-                      handleCheckout('annual')
+                      handleCheckout()
                     }}
                     onMouseDown={(e) => e.stopPropagation()}
                     className="w-full bg-gradient-to-r from-[#2563EB] to-[#3B82F6] text-white px-6 py-4 rounded-xl text-lg font-bold hover:from-[#3B82F6] hover:to-[#1D4ED8] transition-all shadow-xl cursor-pointer active:scale-95"

@@ -38,3 +38,5 @@ MINHAS-CHAVES-STRIPE-PRIVADO.txt
 
 # Cópia de backup do vídeo Nutri (opcional)
 /public/videos/nutri-hero1.mp4
+# Vídeo hero Nutri (muito grande para o GitHub; subir via storage/CDN)
+/public/videos/nutri-hero.mov

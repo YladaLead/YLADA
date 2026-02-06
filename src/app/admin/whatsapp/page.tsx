@@ -718,6 +718,14 @@ function WhatsAppChatContent() {
                 🧾
               </Link>
               <Link
+                href="/admin/whatsapp/agenda-cheia-inscritos"
+                className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg text-emerald-700 hover:text-emerald-800 hover:bg-emerald-50 active:bg-emerald-100 text-lg"
+                title="Inscritos aula paga (Agenda Cheia – lembretes)"
+                aria-label="Inscritos Agenda Cheia"
+              >
+                📌
+              </Link>
+              <Link
                 href="/admin/whatsapp/fluxo"
                 className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg text-purple-600 hover:text-purple-700 hover:bg-purple-50 active:bg-purple-100 text-lg"
                 title="Fluxo e textos (editar mensagens do fluxo)"

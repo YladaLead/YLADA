@@ -114,7 +114,8 @@ export async function POST(request: NextRequest) {
       .in('id', registrationIds)
 
     if (workshopRegs && workshopRegs.length > 0) {
-      registrations = workshopRegs
+      // Não processar inscritos da aula paga (fluxo separado em agenda-cheia-inscritos)
+      registrations = workshopRegs.filter((r: any) => r.workshop_type !== 'aula_paga')
     } else {
       // Fallback para contact_submissions
       const { data: contactRegs } = await supabaseAdmin

@@ -646,11 +646,11 @@ function AutomationContent() {
                   setLoading(true)
                   setResult(null)
                   try {
-                    // Buscar todas conversas com tag nao_participou_aula
                     const response = await fetch('/api/admin/whatsapp/automation/reprocessar-nao-participou', {
                       method: 'POST',
                       headers: { 'Content-Type': 'application/json' },
                       credentials: 'include',
+                      body: JSON.stringify({ force: false }),
                     })
                     const data = await response.json()
                     if (data.success) {
@@ -673,6 +673,43 @@ function AutomationContent() {
                 className="bg-orange-600 text-white px-4 py-2 rounded hover:bg-orange-700 disabled:opacity-50"
               >
                 {loading ? 'Processando...' : '🔄 Reprocessar Não Participou'}
+              </button>
+              <button
+                onClick={async () => {
+                  if (!confirm('Reenviar remarketing para TODOS que estão etiquetados "Não participou" (incluindo quem já recebeu)? Útil para turma de ontem à noite. Continuar?')) {
+                    return
+                  }
+                  setLoading(true)
+                  setResult(null)
+                  try {
+                    const response = await fetch('/api/admin/whatsapp/automation/reprocessar-nao-participou', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      credentials: 'include',
+                      body: JSON.stringify({ force: true }),
+                    })
+                    const data = await response.json()
+                    if (data.success) {
+                      setResult({
+                        type: 'reprocessar',
+                        processed: data.processed,
+                        sent: data.sent,
+                        errors: data.errors,
+                      })
+                    } else {
+                      alert(`Erro: ${data.error}`)
+                    }
+                  } catch (error: any) {
+                    alert(`Erro: ${error.message}`)
+                  } finally {
+                    setLoading(false)
+                  }
+                }}
+                disabled={loading}
+                className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 disabled:opacity-50"
+                title="Reenvia mesmo para quem já recebeu (ex.: turma de ontem)"
+              >
+                {loading ? 'Processando...' : '📩 Reenviar para TODOS (forçar)'}
               </button>
             </div>
           </div>

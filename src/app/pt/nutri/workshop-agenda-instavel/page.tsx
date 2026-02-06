@@ -225,10 +225,10 @@ export default function WorkshopAgendaInstavelPage() {
         <section className="bg-gradient-to-br from-blue-500 via-blue-600 to-blue-700 text-white pt-8 sm:pt-12 lg:pt-16 pb-12 sm:pb-16 lg:pb-20">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="max-w-6xl mx-auto">
-              {/* Grid: DOR + FORMULÁRIO lado a lado desde o início */}
+              {/* Grid: no mobile a informação (data/hora) vem primeiro, depois o cadastro */}
               <div className="grid lg:grid-cols-2 gap-6 lg:gap-8 items-start">
-                {/* Lado Esquerdo: DOR DIRETA */}
-                <div className="w-full order-2 lg:order-1">
+                {/* Lado Esquerdo: data/hora + DOR — no mobile aparece primeiro */}
+                <div className="w-full order-1 lg:order-1">
                   <div className="flex flex-wrap gap-2 mb-3">
                     <div className="inline-block bg-amber-400 text-blue-800 px-3 py-1.5 rounded-full text-xs font-bold shadow-md">
                       🎓 AULA PRÁTICA AO VIVO
@@ -245,6 +245,10 @@ export default function WorkshopAgendaInstavelPage() {
                   <p className="text-lg sm:text-xl text-white mb-6 leading-relaxed font-semibold drop-shadow-sm">
                     Você vai descobrir o que está travando sua agenda e sair com um plano simples de ajustes para começar a gerar procura
                     com mais constância.
+                  </p>
+
+                  <p className="text-white font-bold text-base sm:text-lg mb-4 drop-shadow-sm">
+                    📅 Dia 11 de fevereiro às 19h30
                   </p>
 
                   {/* Bloco de Identificação - AGENDA INSTÁVEL */}
@@ -289,8 +293,8 @@ export default function WorkshopAgendaInstavelPage() {
                   </div>
                 </div>
 
-                {/* Formulário à Direita - VISÍVEL DESDE O INÍCIO */}
-                <div className="bg-white rounded-2xl shadow-2xl p-5 sm:p-6 lg:p-8 border-4 border-amber-400 w-full order-1 lg:order-2 lg:sticky lg:top-24">
+                {/* Formulário à Direita — no mobile aparece depois da informação da aula */}
+                <div className="bg-white rounded-2xl shadow-2xl p-5 sm:p-6 lg:p-8 border-4 border-amber-400 w-full order-2 lg:order-2 lg:sticky lg:top-24">
                   <div className="text-center mb-5">
                     <div className="flex flex-wrap gap-2 justify-center mb-3">
                       <div className="inline-block bg-amber-400 text-blue-800 px-3 sm:px-4 py-1 rounded-full text-xs font-bold shadow-md">
@@ -307,7 +311,7 @@ export default function WorkshopAgendaInstavelPage() {
                       Cadastre-se e receba por WhatsApp:
                     </p>
                     <div className="text-gray-700 font-bold text-sm sm:text-base mb-4 space-y-1">
-                      <p>📅 Data e horário da próxima aula</p>
+                      <p>📅 Dia 11 de fevereiro às 19h30</p>
                     </div>
                     <div className="mt-3">
                       <span className="inline-block bg-blue-50 text-blue-800 border border-blue-200 px-3 py-1 rounded-full text-xs sm:text-sm font-black">

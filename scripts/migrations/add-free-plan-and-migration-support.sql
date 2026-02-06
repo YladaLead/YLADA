@@ -7,13 +7,13 @@
 -- 1. ATUALIZAR TABELA subscriptions
 -- =====================================================
 
--- Adicionar suporte a plano gratuito no plan_type
+-- Adicionar suporte a plano gratuito no plan_type (inclui 'trial' se já existir na base)
 ALTER TABLE subscriptions 
 DROP CONSTRAINT IF EXISTS subscriptions_plan_type_check;
 
 ALTER TABLE subscriptions
 ADD CONSTRAINT subscriptions_plan_type_check 
-CHECK (plan_type IN ('monthly', 'annual', 'free'));
+CHECK (plan_type IN ('monthly', 'annual', 'free', 'trial'));
 
 -- Adicionar campos para migração
 ALTER TABLE subscriptions

@@ -48,6 +48,7 @@ function AdminSubscriptionsContent() {
   const [usuariosEncontrados, setUsuariosEncontrados] = useState<any[]>([])
   const [buscandoUsuario, setBuscandoUsuario] = useState(false)
   const [usuarioSelecionado, setUsuarioSelecionado] = useState<any>(null)
+  const [loadingManual, setLoadingManual] = useState(false)
 
 
   // Buscar lista de assinaturas
@@ -239,7 +240,60 @@ function AdminSubscriptionsContent() {
     }
   }
 
-
+  // Incluir no plano mensal (Wellness) — assinatura manual
+  const handleIncluirPlanoMensalWellness = async (e: React.FormEvent) => {
+    e.preventDefault()
+    const currentUserId = freePlanForm.user_id?.trim() || usuarioSelecionado?.id || usuarioSelecionado?.user_id || ''
+    const currentEmail = freePlanForm.email?.trim() || ''
+    if (!currentUserId && !currentEmail) {
+      setError('Selecione um usuário na busca acima ou preencha email e nome (opção "Criar para pessoa NÃO cadastrada")')
+      return
+    }
+    if (!currentUserId && (!currentEmail || !freePlanForm.name?.trim())) {
+      setError('Para criar novo usuário e incluir no plano mensal, preencha email e nome')
+      return
+    }
+    setLoadingManual(true)
+    setError(null)
+    setSuccess(null)
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) {
+        setError('Não autenticado')
+        return
+      }
+      const body: { area: string; plan_type: string; user_id?: string; email?: string; name?: string } = {
+        area: 'wellness',
+        plan_type: 'monthly',
+      }
+      if (currentUserId) body.user_id = currentUserId
+      else {
+        body.email = currentEmail
+        body.name = freePlanForm.name?.trim() || ''
+      }
+      const response = await fetch('/api/admin/subscriptions/manual', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify(body),
+      })
+      const data = await response.json()
+      if (!response.ok) {
+        setError(data.error || 'Erro ao incluir no plano mensal')
+        return
+      }
+      setSuccess(data.message || 'Incluída no plano mensal Wellness com sucesso.')
+      setUsuarioSelecionado(null)
+      setBuscaUsuario('')
+      setFreePlanForm({ ...freePlanForm, user_id: '', email: '', name: '' })
+    } catch (err: any) {
+      setError(err.message || 'Erro ao incluir no plano mensal')
+    } finally {
+      setLoadingManual(false)
+    }
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">

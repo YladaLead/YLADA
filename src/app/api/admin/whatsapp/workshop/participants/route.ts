@@ -192,11 +192,11 @@ Pra eu te orientar certinho: qual foi o ponto que mais fez sentido pra você hoj
 Você prefere começar no *mensal* ou no *anual*?`
     }
 
-    // 🚀 Disparar remarketing quando marca como "não participou" (await para garantir envio em serverless)
+    // 🚀 Disparar remarketing quando marca como "não participou" (ação explícita do admin — envia mesmo com automação desligada)
     let remarketingSent = false
     let remarketingError: string | undefined
-    if (!participated && !isCarolAutomationDisabled()) {
-      console.log('[Workshop Participants] 📱 Marcado como "não participou" - disparando remarketing automaticamente', {
+    if (!participated) {
+      console.log('[Workshop Participants] 📱 Marcado como "não participou" - disparando remarketing', {
         conversationId,
         phone: updated?.phone
       })
@@ -224,8 +224,6 @@ Você prefere começar no *mensal* ou no *anual*?`
         remarketingError = error.message || 'Erro ao enviar remarketing'
         console.error('[Workshop Participants] ❌ Erro ao disparar remarketing:', error)
       }
-    } else if (!participated && isCarolAutomationDisabled()) {
-      console.log('[Workshop Participants] Automação desligada - remarketing não enviado.')
     }
 
     return NextResponse.json({

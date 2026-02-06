@@ -63,11 +63,9 @@ export async function GET(request: NextRequest) {
     // =====================================================
     // BUSCAR ASSINATURAS COM DADOS DE USUÁRIOS E ÚLTIMO PAGAMENTO
     // =====================================================
-    // Primeiro buscar assinaturas com o último pagamento
-    // Usar subquery para pegar a data do último pagamento de cada subscription
-    let subscriptionsQuery = supabaseAdmin
-      .from('subscriptions')
-      .select(`
+    // Colunas opcionais (podem não existir se migrations não foram aplicadas):
+    // is_migrated, migrated_from, requires_manual_renewal, ref_vendedor
+    const selectCompleto = `
         id,
         user_id,
         area,
@@ -82,37 +80,39 @@ export async function GET(request: NextRequest) {
         migrated_from,
         requires_manual_renewal,
         ref_vendedor
-      `)
-      .order('created_at', { ascending: false })
+      `
+    const selectBase = `
+        id,
+        user_id,
+        area,
+        plan_type,
+        amount,
+        currency,
+        status,
+        current_period_start,
+        current_period_end,
+        created_at
+      `
 
-    // Aplicar filtro de área
-    if (areaFiltro !== 'todos') {
-      subscriptionsQuery = subscriptionsQuery.eq('area', areaFiltro)
-    }
-
-    // Aplicar filtro de status
-    if (statusFiltro !== 'todos') {
-      subscriptionsQuery = subscriptionsQuery.eq('status', statusFiltro)
-    }
-
-    // Aplicar filtro de vendedor (ex: apenas vendas da Paula)
-    if (refVendedorFiltro !== 'todos' && refVendedorFiltro.trim()) {
-      subscriptionsQuery = subscriptionsQuery.eq('ref_vendedor', refVendedorFiltro.trim())
+    const runQuery = async (selectCols: string, useRefVendedorFiltro: boolean) => {
+      let q = supabaseAdmin
+        .from('subscriptions')
+        .select(selectCols)
+        .order('created_at', { ascending: false })
+      if (areaFiltro !== 'todos') q = q.eq('area', areaFiltro)
+      if (statusFiltro !== 'todos') q = q.eq('status', statusFiltro)
+      if (useRefVendedorFiltro && refVendedorFiltro !== 'todos' && refVendedorFiltro.trim()) {
+        q = q.eq('ref_vendedor', refVendedorFiltro.trim())
+      }
+      return await q
     }
 
     // Aplicar filtros de período (APENAS se especificamente solicitado)
     // IMPORTANTE: Se não houver filtro de período, retornar TODAS as assinaturas ativas
-    // 
-    // LÓGICA CORRIGIDA:
-    // - Para MENSAL e ANUAL: considerar assinaturas CRIADAS no período (created_at)
-    // - Isso representa quando o dinheiro ENTROU NA CONTA (data de criação/pagamento)
-    // - Não usar current_period_start/end, pois isso representa quando vence, não quando foi pago
     let periodoInicioDate: Date | null = null
     let periodoFimDate: Date | null = null
     
     if (periodoInicio && periodoFim) {
-      // Criar datas no início e fim do dia no timezone local
-      // Isso garante que comparações funcionem corretamente
       const [anoInicio, mesInicio, diaInicio] = periodoInicio.split('-').map(Number)
       const [anoFim, mesFim, diaFim] = periodoFim.split('-').map(Number)
       periodoInicioDate = new Date(anoInicio, mesInicio - 1, diaInicio, 0, 0, 0, 0)
@@ -134,11 +134,29 @@ export async function GET(request: NextRequest) {
       periodoInicioDate = new Date(parseInt(ano), mesInicio, 1)
       periodoFimDate = new Date(parseInt(ano), mesFim + 1, 0, 23, 59, 59)
     }
-    
-    // Se não houver filtro de período, não aplicar nenhum filtro de data
-    // Isso garante que todas as assinaturas ativas sejam retornadas
 
-    const { data: allSubscriptions, error: subscriptionsError } = await subscriptionsQuery
+    let allSubscriptions: any[] | null = null
+    let subscriptionsError: any = null
+    let useOptionalColumns = true
+
+    const result = await runQuery(selectCompleto, true)
+    subscriptionsError = result.error
+    allSubscriptions = result.data
+
+    // Se falhou (ex: coluna inexistente), tentar só com colunas base
+    const isColumnError = subscriptionsError?.message && (
+      /column .* does not exist/i.test(subscriptionsError.message) ||
+      /Could not find the column/i.test(subscriptionsError.message)
+    )
+    if (subscriptionsError && isColumnError) {
+      if (process.env.NODE_ENV === 'development') {
+        console.warn('⚠️ Colunas opcionais não encontradas em subscriptions, usando query base:', subscriptionsError.message)
+      }
+      const fallback = await runQuery(selectBase, false)
+      subscriptionsError = fallback.error
+      allSubscriptions = fallback.data
+      useOptionalColumns = false
+    }
 
     if (subscriptionsError) {
       console.error('Erro ao buscar assinaturas:', subscriptionsError)

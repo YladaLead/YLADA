@@ -62,14 +62,14 @@ export async function GET(request: NextRequest) {
     let registrations: any[] = []
     let error: any = null
 
-    // Tentar buscar de workshop_inscricoes
+    // Tentar buscar de workshop_inscricoes (apenas aula gratuita — inscritos aula paga ficam em /admin/nutri/agenda-cheia-inscritos)
     const { data: workshopRegs, error: workshopError } = await supabaseAdmin
       .from('workshop_inscricoes')
       .select('*')
       .order('created_at', { ascending: false })
 
     if (workshopRegs && !workshopError) {
-      registrations = workshopRegs
+      registrations = workshopRegs.filter((r: any) => r.workshop_type !== 'aula_paga')
     } else {
       // Fallback para contact_submissions
       // Tentar buscar com filtro de source primeiro

@@ -203,7 +203,9 @@ export default function AdminReceitas() {
             throw new Error('Acesso negado. Você não tem permissão para acessar esta página.')
           } else {
             const errorData = await response.json().catch(() => ({}))
-            throw new Error(errorData.error || `Erro ao carregar receitas (${response.status})`)
+            const msg = errorData.error || `Erro ao carregar receitas (${response.status})`
+            const detail = errorData.details ? ` ${errorData.details}` : ''
+            throw new Error(msg + detail)
           }
         }
 

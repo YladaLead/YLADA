@@ -6,7 +6,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireApiAuth } from '@/lib/api-auth'
 import { sendRemarketingToNonParticipant } from '@/lib/whatsapp-carol-ai'
-import { isCarolAutomationDisabled } from '@/config/whatsapp-automation'
 
 export async function POST(request: NextRequest) {
   try {
@@ -15,13 +14,7 @@ export async function POST(request: NextRequest) {
       return authResult
     }
 
-    if (isCarolAutomationDisabled()) {
-      return NextResponse.json(
-        { success: false, error: 'Automação está desligada. Ligue CAROL_AUTOMATION_DISABLED=false.' },
-        { status: 503 }
-      )
-    }
-
+    // Reenviar remarketing é ação explícita do admin — sempre permitida (usa force para ignorar horário/2h)
     const body = await request.json()
     const { conversationId, force } = body
 
