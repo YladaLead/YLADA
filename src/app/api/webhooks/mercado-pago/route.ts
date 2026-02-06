@@ -292,18 +292,21 @@ async function handlePaymentEvent(data: any, isTest: boolean = false) {
           if (!updateError) {
             console.log('✅ Inscrição aula paga confirmada:', emailAulaPaga)
             const { resend, FROM_EMAIL, FROM_NAME, isResendConfigured } = await import('@/lib/resend')
+            const { AULA_PAGA_ZOOM_LINK, AULA_PAGA_DATA_HORARIO_LONGO } = await import('@/lib/aula-paga-config')
             if (isResendConfigured() && resend) {
               const emailHtml = `
                 <h1>Aula YLADA – Inscrição confirmada</h1>
                 <p>Sua inscrição na aula (público certo, posicionamento e agenda) foi confirmada.</p>
-                <p><strong>Próxima aula:</strong> Quarta-feira, 11 de fevereiro às 19h30.</p>
-                <p>Você receberá o link de acesso por WhatsApp e por e-mail antes do evento.</p>
+                <p><strong>Data e horário:</strong> ${AULA_PAGA_DATA_HORARIO_LONGO}</p>
+                <p><strong>Link da sala Zoom (guarde este e-mail):</strong></p>
+                <p><a href="${AULA_PAGA_ZOOM_LINK}">${AULA_PAGA_ZOOM_LINK}</a></p>
+                <p>Você também receberá lembretes por WhatsApp e e-mail antes do evento.</p>
                 <p>Equipe YLADA</p>
               `
               await resend.emails.send({
                 from: `${FROM_NAME} <${FROM_EMAIL}>`,
                 to: emailAulaPaga,
-                subject: 'Aula YLADA – Inscrição confirmada (R$ 37)',
+                subject: 'Aula YLADA – Inscrição confirmada (R$ 37) – Link da sala',
                 html: emailHtml,
               }).catch((err) => console.error('Erro ao enviar email aula paga:', err))
             }

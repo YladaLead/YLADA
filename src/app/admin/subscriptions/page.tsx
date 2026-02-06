@@ -341,7 +341,27 @@ function AdminSubscriptionsContent() {
           </div>
         )}
 
-        <div className="max-w-2xl">
+        <div className="max-w-2xl space-y-6">
+          {/* Incluir no plano mensal (Wellness) */}
+          <div className="bg-white rounded-lg shadow p-6 w-full border-l-4 border-blue-500">
+            <h2 className="text-xl font-bold mb-2">📅 Incluir no plano mensal (Wellness)</h2>
+            <p className="text-sm text-gray-600 mb-4">
+              Use quando o pagamento foi aprovado no Mercado Pago mas a assinatura não foi reconhecida. Busque o usuário abaixo (ou preencha email e nome para criar novo) e clique no botão.
+            </p>
+            <form onSubmit={handleIncluirPlanoMensalWellness} className="space-y-3">
+              <p className="text-xs text-gray-500">
+                Usuário: use a busca e seleção do formulário &quot;Criar Plano Gratuito&quot; abaixo, ou preencha email e nome na opção &quot;Criar para pessoa NÃO cadastrada&quot;.
+              </p>
+              <button
+                type="submit"
+                disabled={loadingManual || (!freePlanForm.user_id && !freePlanForm.email)}
+                className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {loadingManual ? 'Incluindo...' : 'Incluir no plano mensal Wellness'}
+              </button>
+            </form>
+          </div>
+
           {/* Criar Plano Gratuito */}
           <div className="bg-white rounded-lg shadow p-6 w-full">
             <h2 className="text-xl font-bold mb-4">🎁 Criar Plano Gratuito</h2>

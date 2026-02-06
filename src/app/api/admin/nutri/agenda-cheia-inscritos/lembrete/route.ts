@@ -3,6 +3,7 @@ import { requireApiAuth } from '@/lib/api-auth'
 import { supabaseAdmin } from '@/lib/supabase'
 import { getZApiInstance } from '@/lib/whatsapp-carol-ai'
 import { sendWhatsAppMessage } from '@/lib/whatsapp-carol-ai'
+import { AULA_PAGA_ZOOM_LINK, AULA_PAGA_DATA_HORARIO_LONGO } from '@/lib/aula-paga-config'
 
 function normalizePhone(t: string): string {
   const d = String(t || '').replace(/\D/g, '')
@@ -11,7 +12,12 @@ function normalizePhone(t: string): string {
   return d ? '55' + d : ''
 }
 
-const DEFAULT_LEMBRETE = `Olá! Lembrete: nossa aula da YLADA Nutri é na *quarta-feira, 11 de fevereiro às 19h30*. Em breve você receberá o link de acesso por aqui. Qualquer dúvida, responda nesta conversa.`
+const DEFAULT_LEMBRETE = `Olá! Lembrete: nossa aula da YLADA Nutri é *${AULA_PAGA_DATA_HORARIO_LONGO}*.
+
+🔗 Link da sala Zoom:
+${AULA_PAGA_ZOOM_LINK}
+
+Guarde este link e entre com alguns minutos de antecedência. Qualquer dúvida, responda aqui. 💚`
 
 /**
  * POST /api/admin/nutri/agenda-cheia-inscritos/lembrete

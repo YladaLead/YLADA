@@ -4,6 +4,7 @@
   "description": "Transforme suas ideias em links inteligentes em 60 segundos com IA",
   "start_url": "/",
   "display": "standalone",
+  "orientation": "any",
   "background_color": "#ffffff",
   "theme_color": "#3B82F6",
   "icons": [

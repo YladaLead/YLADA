@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useState } from 'react'
+import { useRef, useState, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -21,8 +21,10 @@ export default function NutriVideoContent() {
   const searchParams = useSearchParams()
   const previewUnlock = searchParams.get('preview') === '1'
   const videoRef = useRef<HTMLVideoElement>(null)
+  const videoContainerRef = useRef<HTMLDivElement>(null)
   const [progress, setProgress] = useState(0)
   const [isPlaying, setIsPlaying] = useState(false)
+  const [isFullscreen, setIsFullscreen] = useState(false)
   const [videoError, setVideoError] = useState(false)
   const [contentUnlocked, setContentUnlocked] = useState(previewUnlock)
   const [videoEnded, setVideoEnded] = useState(false)
@@ -52,6 +54,36 @@ export default function NutriVideoContent() {
     }
   }
 
+  const toggleFullscreen = async (e: React.MouseEvent) => {
+    e.stopPropagation()
+    const container = videoContainerRef.current
+    if (!container) return
+    try {
+      if (!document.fullscreenElement) {
+        await container.requestFullscreen()
+        setIsFullscreen(true)
+      } else {
+        await document.exitFullscreen()
+        setIsFullscreen(false)
+      }
+    } catch {
+      const video = videoRef.current
+      if (video && !document.fullscreenElement) {
+        await video.requestFullscreen()
+        setIsFullscreen(true)
+      } else {
+        await document.exitFullscreen()
+        setIsFullscreen(false)
+      }
+    }
+  }
+
+  useEffect(() => {
+    const onFullscreenChange = () => setIsFullscreen(!!document.fullscreenElement)
+    document.addEventListener('fullscreenchange', onFullscreenChange)
+    return () => document.removeEventListener('fullscreenchange', onFullscreenChange)
+  }, [])
+
   return (
     <div className="min-h-screen bg-white">
       <header
@@ -60,7 +92,7 @@ export default function NutriVideoContent() {
           contentUnlocked ? 'flex' : 'hidden'
         )}
       >
-        <div className="container mx-auto px-6 lg:px-8 py-3 flex items-center justify-between">
+        <div className="container mx-auto px-6 lg:px-8 py-3 flex items-center">
           <Link href="/pt/nutri">
             <Image
               src="/images/logo/nutri-horizontal.png"
@@ -70,12 +102,6 @@ export default function NutriVideoContent() {
               className="h-8 sm:h-10 w-auto"
               priority
             />
-          </Link>
-          <Link
-            href="/pt/nutri/login"
-            className="inline-flex items-center px-4 sm:px-6 py-2 sm:py-2.5 bg-[#2563EB] text-white text-sm sm:text-base font-semibold rounded-lg hover:bg-[#1D4ED8] transition-all shadow-md hover:shadow-lg"
-          >
-            Entrar
           </Link>
         </div>
       </header>
@@ -95,6 +121,7 @@ export default function NutriVideoContent() {
         <section className="pt-6 md:pt-0 pb-6">
           <div className="bg-white rounded-xl shadow-2xl overflow-hidden">
             <div
+              ref={videoContainerRef}
               className="aspect-video bg-gray-900 relative cursor-pointer group"
               onClick={togglePlay}
               onKeyDown={(e) => e.key === ' ' && (e.preventDefault(), togglePlay())}
@@ -145,6 +172,19 @@ export default function NutriVideoContent() {
                   </div>
                 </div>
               )}
+              <button
+                type="button"
+                onClick={toggleFullscreen}
+                className="absolute bottom-3 right-3 p-2 rounded-lg bg-black/50 hover:bg-black/70 text-white transition-colors z-10"
+                aria-label={isFullscreen ? 'Sair da tela cheia' : 'Assistir em tela cheia'}
+                title={isFullscreen ? 'Sair da tela cheia' : 'Assistir em tela cheia (pode virar o celular)'}
+              >
+                {isFullscreen ? (
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z"/></svg>
+                ) : (
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>
+                )}
+              </button>
             </div>
             <div className="h-1.5 w-full bg-gray-200">
               <div

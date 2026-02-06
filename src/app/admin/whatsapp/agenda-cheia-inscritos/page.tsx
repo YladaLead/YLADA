@@ -21,6 +21,8 @@ function AgendaCheiaInscritosContent() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [customMessage, setCustomMessage] = useState('')
   const [lastResult, setLastResult] = useState<{ enviados: number; total: number } | null>(null)
+  const [sendingEmail, setSendingEmail] = useState(false)
+  const [lastEmailResult, setLastEmailResult] = useState<{ enviados: number; total: number } | null>(null)
 
   const load = async () => {
     try {
@@ -96,6 +98,33 @@ function AgendaCheiaInscritosContent() {
     }
   }
 
+  const sendLembreteEmail = async () => {
+    if (selectedIds.size === 0) {
+      alert('Selecione pelo menos um inscrito.')
+      return
+    }
+    try {
+      setSendingEmail(true)
+      setLastEmailResult(null)
+      const res = await fetch('/api/admin/nutri/agenda-cheia-inscritos/lembrete-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ ids: Array.from(selectedIds) }),
+      })
+      const data = await res.json()
+      if (data.success) {
+        setLastEmailResult({ enviados: data.enviados, total: data.total })
+      } else {
+        alert(data.error || 'Erro ao enviar e-mails')
+      }
+    } catch (e: any) {
+      alert(e?.message || 'Erro ao enviar')
+    } finally {
+      setSendingEmail(false)
+    }
+  }
+
   return (
     <AdminProtectedRoute>
       <div className="min-h-screen bg-gray-50 p-4 md:p-6">
@@ -118,7 +147,12 @@ function AgendaCheiaInscritosContent() {
 
           {lastResult && (
             <div className="mb-4 p-3 bg-green-100 border border-green-300 rounded-lg text-green-800 font-medium">
-              Lembrete enviado para {lastResult.enviados} de {lastResult.total} inscrito(s).
+              Lembrete WhatsApp enviado para {lastResult.enviados} de {lastResult.total} inscrito(s).
+            </div>
+          )}
+          {lastEmailResult && (
+            <div className="mb-4 p-3 bg-blue-100 border border-blue-300 rounded-lg text-blue-800 font-medium">
+              Lembrete por e-mail enviado para {lastEmailResult.enviados} de {lastEmailResult.total} inscrito(s).
             </div>
           )}
 
@@ -150,6 +184,14 @@ function AgendaCheiaInscritosContent() {
                       >
                         {sending ? 'Enviando...' : 'Enviar lembrete por WhatsApp'}
                       </button>
+                      <button
+                        type="button"
+                        disabled={sendingEmail}
+                        onClick={sendLembreteEmail}
+                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 text-sm font-semibold"
+                      >
+                        {sendingEmail ? 'Enviando...' : 'Enviar lembrete por e-mail'}
+                      </button>
                     </>
                   )}
                 </div>
@@ -157,12 +199,12 @@ function AgendaCheiaInscritosContent() {
                 {selectedIds.size > 0 && (
                   <div className="px-4 py-3 bg-amber-50 border-b border-amber-200">
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Mensagem do lembrete (opcional; se vazio, usa o texto padrão):
+                      Mensagem do lembrete WhatsApp (opcional; se vazio, usa texto padrão com data 11/02 19h30 e link Zoom):
                     </label>
                     <textarea
                       value={customMessage}
                       onChange={(e) => setCustomMessage(e.target.value)}
-                      placeholder="Ex: Olá! Lembrete: nossa aula é quarta às 20h. Em breve você receberá o link."
+                      placeholder="Se vazio: lembrete com data/hora e link da sala Zoom."
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
                       rows={2}
                     />
@@ -240,8 +282,10 @@ function AgendaCheiaInscritosContent() {
               ℹ️ Como usar
             </summary>
             <ul className="mt-2 text-sm text-blue-800 space-y-1 list-disc list-inside">
-              <li><strong>Abrir WhatsApp:</strong> abre conversa com o número do inscrito para você enviar o link ou tirar dúvidas.</li>
-              <li><strong>Enviar lembrete:</strong> envia mensagem em massa por WhatsApp (quarta 20h, link em breve). Você pode editar o texto antes.</li>
+              <li><strong>Aula:</strong> 11 de fevereiro às 19h30. Link da sala Zoom está no texto padrão dos lembretes.</li>
+              <li><strong>Enviar lembrete WhatsApp:</strong> envia em massa com data/hora e link do Zoom (pode editar o texto).</li>
+              <li><strong>Enviar lembrete por e-mail:</strong> envia e-mail com link do Zoom para os selecionados.</li>
+              <li><strong>Abrir WhatsApp:</strong> abre conversa com o número do inscrito.</li>
             </ul>
           </details>
         </div>

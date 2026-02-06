@@ -5,11 +5,11 @@ import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 
+import { AULA_PAGA_ZOOM_LINK, AULA_PAGA_DATA_HORARIO_LONGO } from '@/lib/aula-paga-config'
+
 const WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_NUTRI_WHATSAPP_NUMBER || process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '5519997230912'
 const WHATSAPP_MSG = 'Acabei de me inscrever na aula da YLADA Nutri e quero receber informações adicionais e o link da aula.'
 const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER.replace(/\D/g, '')}?text=${encodeURIComponent(WHATSAPP_MSG)}`
-
-const PROXIMA_AULA = 'Quarta-feira, 11 de fevereiro às 19h30'
 
 function AgendaCheiaSucessoContent() {
   const searchParams = useSearchParams()
@@ -40,12 +40,20 @@ function AgendaCheiaSucessoContent() {
           <p className="text-gray-700 text-lg mb-4">
             {isPending
               ? 'Seu pagamento está sendo processado. Em breve você receberá a confirmação por e-mail e o link da aula por WhatsApp.'
-              : <>Sua inscrição na aula foi confirmada. <strong>Próxima aula: {PROXIMA_AULA}</strong>. Você receberá o link de acesso por e-mail e por WhatsApp antes do evento.</>}
+              : <>Sua inscrição na aula foi confirmada. <strong>Próxima aula: {AULA_PAGA_DATA_HORARIO_LONGO}</strong>.</>}
           </p>
           {!isPending && (
-            <p className="text-gray-600 text-base mb-6">
-              Clique no botão abaixo para receber informações adicionais e o link da aula no WhatsApp (mesmo canal da aula):
-            </p>
+            <>
+              <div className="mb-4 p-4 bg-gray-50 rounded-xl text-left">
+                <p className="text-sm font-semibold text-gray-700 mb-2">🔗 Link da sala Zoom (guarde ou clique para entrar no dia):</p>
+                <a href={AULA_PAGA_ZOOM_LINK} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline break-all text-sm">
+                  {AULA_PAGA_ZOOM_LINK}
+                </a>
+              </div>
+              <p className="text-gray-600 text-base mb-6">
+                Você também receberá lembretes por e-mail e WhatsApp. Clique abaixo se quiser falar com a gente:
+              </p>
+            </>
           )}
           {!isPending && (
             <a

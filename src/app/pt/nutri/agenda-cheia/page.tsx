@@ -95,11 +95,11 @@ export default function AgendaCheiaPage() {
                   </div>
 
                   <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black mb-4 leading-tight text-white drop-shadow-sm">
-                    Como gerar contatos todos os dias e parar de ter agenda ociosa
+                    Como ter novos pacientes chegando todos os dias e parar de ter agenda ociosa
                   </h1>
 
                   <p className="text-lg text-white/95 mb-4 leading-relaxed font-semibold drop-shadow-sm">
-                    Não é sobre atender bem. É sobre ter <strong className="font-black">conversas previsíveis com as pessoas certas</strong>. Valor gera conversa. Conversa gera agenda.
+                    É sobre ter <strong className="font-black">conversas previsíveis com as pessoas certas</strong>. Valor gera conversa. Conversa gera agenda.
                   </p>
 
                   <div className="bg-white rounded-xl p-5 mb-4 border-2 border-blue-200 shadow-xl">
@@ -107,11 +107,9 @@ export default function AgendaCheiaPage() {
                       Nesta aula você leva:
                     </h2>
                     <ul className="space-y-2 text-gray-800 text-sm sm:text-base font-medium">
-                      <li>• Tipo de público: para quem falar</li>
-                      <li>• Como se posicionar com cada público</li>
-                      <li>• O mercado e como funciona</li>
-                      <li>• Como deixar claro o que você faz</li>
-                      <li>• Como organizar a rotina até a agenda</li>
+                      <li>• Entenda como se posicionar pra que as pessoas se interessem pelo seu conteúdo</li>
+                      <li>• Entenda os tipos de públicos e qual é o seu potencial</li>
+                      <li>• Entenda níveis de comunicação e como se comportar na rotina</li>
                     </ul>
                   </div>
 

@@ -15,8 +15,10 @@ export default function NutriLandingPage() {
   const [faqOpen, setFaqOpen] = useState<number | null>(0)
   const [lyaWidgetOpen, setLyaWidgetOpen] = useState(false)
   const videoRef = useRef<HTMLVideoElement>(null)
+  const videoContainerRef = useRef<HTMLDivElement>(null)
   const [videoProgress, setVideoProgress] = useState(0)
   const [videoPlaying, setVideoPlaying] = useState(false)
+  const [isFullscreen, setIsFullscreen] = useState(false)
 
   // Rastrear visualização da página de vendas
   useEffect(() => {
@@ -65,6 +67,39 @@ export default function NutriLandingPage() {
       setVideoPlaying(false)
     }
   }
+
+  const toggleFullscreen = async (e: React.MouseEvent) => {
+    e.stopPropagation()
+    const container = videoContainerRef.current
+    if (!container) return
+    try {
+      if (!document.fullscreenElement) {
+        await container.requestFullscreen()
+        setIsFullscreen(true)
+      } else {
+        await document.exitFullscreen()
+        setIsFullscreen(false)
+      }
+    } catch {
+      // Fallback: alguns navegadores não suportam fullscreen no container
+      const video = videoRef.current
+      if (video && !document.fullscreenElement) {
+        await video.requestFullscreen()
+        setIsFullscreen(true)
+      } else {
+        await document.exitFullscreen()
+        setIsFullscreen(false)
+      }
+    }
+  }
+
+  useEffect(() => {
+    const onFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement)
+    }
+    document.addEventListener('fullscreenchange', onFullscreenChange)
+    return () => document.removeEventListener('fullscreenchange', onFullscreenChange)
+  }, [])
 
   return (
     <div className="min-h-screen bg-white relative">
@@ -123,6 +158,7 @@ export default function NutriLandingPage() {
               </p>
               <div className="bg-white rounded-xl shadow-2xl overflow-hidden mb-3">
                 <div
+                  ref={videoContainerRef}
                   className="aspect-video bg-gray-900 relative cursor-pointer group"
                   onClick={toggleVideoPlay}
                   onKeyDown={(e) => e.key === ' ' && (e.preventDefault(), toggleVideoPlay())}
@@ -156,6 +192,19 @@ export default function NutriLandingPage() {
                       </div>
                     </div>
                   )}
+                  <button
+                    type="button"
+                    onClick={toggleFullscreen}
+                    className="absolute bottom-3 right-3 p-2 rounded-lg bg-black/50 hover:bg-black/70 text-white transition-colors z-10"
+                    aria-label={isFullscreen ? 'Sair da tela cheia' : 'Assistir em tela cheia'}
+                    title={isFullscreen ? 'Sair da tela cheia' : 'Assistir em tela cheia (pode virar o celular)'}
+                  >
+                    {isFullscreen ? (
+                      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z"/></svg>
+                    ) : (
+                      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>
+                    )}
+                  </button>
                 </div>
                 <div className="h-1.5 w-full bg-gray-200">
                   <div className="h-full bg-[#2563EB] transition-[width] duration-150 ease-out" style={{ width: `${displayVideoProgress}%` }} />
