@@ -235,6 +235,33 @@ function isBusinessName(name: string | null | undefined): boolean {
 }
 
 /**
+ * Verifica se o texto NUNCA deve ser usado como nome da pessoa.
+ * Inclui: nomes da equipe (Nutri, Inge), notas internas (remarketing, "lá no..."),
+ * display_name/editado pela nutri que não é nome de cadastro.
+ * O nome da pessoa deve vir EXCLUSIVAMENTE do cadastro (workshop_inscricoes/contact_submissions).
+ */
+function isInvalidOrInternalName(name: string | null | undefined): boolean {
+  if (!name || typeof name !== 'string') return true
+  const s = name.trim()
+  if (!s) return true
+  const lower = s.toLowerCase()
+  if (isBusinessName(s)) return true
+  // Nomes/termos que são da equipe ou contexto, NUNCA nome do lead
+  const invalidTerms = [
+    'nutri',           // "Nutri" sozinho ou em frase
+    'inge',            // Nome de pessoa da equipe (ex.: "Lá no remarketing Inge")
+    'remarketing',     // Nota interna
+    'ylada',
+    'equipe', 'secretária', 'secretaria', 'atendimento',
+    'lá',               // "Lá" como primeiro nome (ex.: "Lá no remarketing Inge")
+  ]
+  const firstWord = lower.split(/\s+/)[0] || lower
+  if (invalidTerms.includes(firstWord) || invalidTerms.some((t) => lower.includes(t))) return true
+  if (s.length <= 2 && !/^[a-zà-ú]+$/i.test(s)) return true
+  return false
+}
+
+/**
  * Busca nome do cadastro (workshop_inscricoes ou contact_submissions)
  * Prioriza workshop_inscricoes sobre contact_submissions
  * Retorna null se não encontrar (não retorna nome do WhatsApp)
@@ -1108,6 +1135,26 @@ export async function processIncomingMessageWithCarol(
     const workshopSessionId = context.workshop_session_id
     const nowIso = new Date().toISOString()
 
+    // 🎓 Inscrito na AULA PAGA (Agenda Cheia): não enviar opções da aula gratuita (Opção 1/2, dias/horários).
+    // Mesmo telefone pode ter aula gratuita em outro momento; aqui priorizamos não confundir quem pagou.
+    const phoneDigits = String(phone || '').replace(/\D/g, '')
+    const phoneNorm = phoneDigits.length <= 11 ? '55' + phoneDigits : phoneDigits
+    let isInscritoAulaPaga = false
+    const { data: aulaPagaRows } = await supabaseAdmin
+      .from('workshop_inscricoes')
+      .select('id, telefone')
+      .eq('workshop_type', 'aula_paga')
+    if (aulaPagaRows?.length) {
+      const norm = (t: string) => {
+        const d = String(t || '').replace(/\D/g, '')
+        return d.length <= 11 ? '55' + d : d
+      }
+      isInscritoAulaPaga = aulaPagaRows.some((r: any) => norm(r.telefone) === phoneNorm)
+    }
+    if (isInscritoAulaPaga) {
+      console.log('[Carol AI] 🎓 Contato é inscrito da AULA PAGA (Agenda Cheia). Não enviar opções da aula gratuita.')
+    }
+
     // 🛑 Auto-resposta do WhatsApp do lead (ex.: "Agradecemos sua mensagem...")
     // Não deve disparar "primeira mensagem" / boas-vindas novamente.
     const msgNormAuto = String(message || '').trim().toLowerCase().replace(/\s+/g, ' ')
@@ -1167,43 +1214,44 @@ export async function processIncomingMessageWithCarol(
       desagendarResponse = 'Sem problema 😊 Vamos reagendar.'
     }
 
-    // 2. Buscar sessões de workshop: SEMPRE as mesmas 2 opções que a pessoa viu (próxima + manhã 9h/10h quando existir).
-    // Não usar só workshop_session_id para montar a lista — senão "Opção 2" falha (só há 1 sessão na lista).
+    // 2. Buscar sessões de workshop (aula GRATUITA): 2 opções próxima + manhã. NÃO usar para inscritos da aula PAGA.
     let workshopSessions: Array<{ id: string; title: string; starts_at: string; zoom_link: string }> = []
     const now = new Date()
     const minDateIso = now.toISOString()
 
-    console.log('[Carol AI] 🔍 Buscando sessões futuras (sempre 2 opções: próxima + manhã):', {
-      now: minDateIso,
-      area,
-      conversationId,
-      workshopSessionId: workshopSessionId ?? '(nenhum)'
-    })
+    if (!isInscritoAulaPaga) {
+      console.log('[Carol AI] 🔍 Buscando sessões futuras (sempre 2 opções: próxima + manhã):', {
+        now: minDateIso,
+        area,
+        conversationId,
+        workshopSessionId: workshopSessionId ?? '(nenhum)'
+      })
 
-    const { data: allSessions, error: sessionsError } = await supabaseAdmin
-      .from('whatsapp_workshop_sessions')
-      .select('id, title, starts_at, zoom_link')
-      .eq('area', area)
-      .eq('is_active', true)
-      .gte('starts_at', minDateIso)
-      .order('starts_at', { ascending: true })
-      .limit(8)
+      const { data: allSessions, error: sessionsError } = await supabaseAdmin
+        .from('whatsapp_workshop_sessions')
+        .select('id, title, starts_at, zoom_link')
+        .eq('area', area)
+        .eq('is_active', true)
+        .gte('starts_at', minDateIso)
+        .order('starts_at', { ascending: true })
+        .limit(8)
 
-    if (sessionsError) {
-      console.error('[Carol AI] ❌ Erro ao buscar sessões:', sessionsError)
+      if (sessionsError) {
+        console.error('[Carol AI] ❌ Erro ao buscar sessões:', sessionsError)
+      }
+
+      const list = allSessions || []
+      const hourBR = (startsAt: string) =>
+        parseInt(new Date(startsAt).toLocaleString('en-US', { timeZone: 'America/Sao_Paulo', hour: 'numeric', hour12: false }), 10)
+      const isManha = (s: { starts_at: string }) => {
+        const h = hourBR(s.starts_at)
+        return h === 9 || h === 10
+      }
+      const first = list[0]
+      const soonestManha = list.find(isManha)
+      const second = soonestManha && soonestManha.id !== first?.id ? soonestManha : list[1]
+      workshopSessions = first && second ? [first, second] : first ? [first] : []
     }
-
-    const list = allSessions || []
-    const hourBR = (startsAt: string) =>
-      parseInt(new Date(startsAt).toLocaleString('en-US', { timeZone: 'America/Sao_Paulo', hour: 'numeric', hour12: false }), 10)
-    const isManha = (s: { starts_at: string }) => {
-      const h = hourBR(s.starts_at)
-      return h === 9 || h === 10
-    }
-    const first = list[0]
-    const soonestManha = list.find(isManha)
-    const second = soonestManha && soonestManha.id !== first?.id ? soonestManha : list[1]
-    workshopSessions = first && second ? [first, second] : first ? [first] : []
 
     console.log('[Carol AI] 📅 Sessões para opções (Opção 1/2):', {
       count: workshopSessions.length,
@@ -1335,6 +1383,38 @@ export async function processIncomingMessageWithCarol(
     
     const hasScheduled = tags.includes('recebeu_link_workshop') || workshopSessionId
     const scheduledDate = context.scheduled_date || null
+
+    // 🎓 Inscrito AULA PAGA: responder com data/link da aula paga apenas (nunca Opção 1/2 da aula gratuita).
+    const pediuLink = /link|qual\s+(o\s+)?link|onde\s+entr(o|ar)|como\s+entr(o|ar)|zoom|sala\s+da\s+aula/i.test(msgNorm)
+    if (isInscritoAulaPaga && (rawIsFirstMessage || pediuLink)) {
+      const { AULA_PAGA_ZOOM_LINK, AULA_PAGA_DATA_HORARIO_LONGO } = await import('@/lib/aula-paga-config')
+      const msgAulaPaga = `Olá! Sua aula da YLADA Nutri (que você se inscreveu) é *${AULA_PAGA_DATA_HORARIO_LONGO}*.\n\n🔗 Link da sala Zoom:\n${AULA_PAGA_ZOOM_LINK}\n\nGuarde este link e entre com alguns minutos de antecedência. Qualquer dúvida, responda aqui. 💚`
+      const instanceToSend = await getZApiInstance(area || 'nutri')
+      if (instanceToSend?.token) {
+        await sendWhatsAppMessage(phone, msgAulaPaga, instanceToSend.instance_id, instanceToSend.token)
+        await supabaseAdmin.from('whatsapp_messages').insert({
+          conversation_id: conversationId,
+          instance_id: instanceToSend.id,
+          z_api_message_id: null,
+          sender_type: 'bot',
+          sender_name: 'Carol - Secretária',
+          message: msgAulaPaga,
+          message_type: 'text',
+        })
+        const prevCtx = (context || {}) as Record<string, unknown>
+        const prevTags = Array.isArray(prevCtx.tags) ? prevCtx.tags : []
+        const nextTags = rawIsFirstMessage ? [...new Set([...prevTags, 'inscrito_aula_paga', 'primeiro_contato'])] : prevTags
+        await supabaseAdmin
+          .from('whatsapp_conversations')
+          .update({
+            last_message_at: new Date().toISOString(),
+            last_message_from: 'bot',
+            context: { ...prevCtx, tags: nextTags },
+          })
+          .eq('id', conversationId)
+      }
+      return { success: true, response: msgAulaPaga }
+    }
 
     // (Desativado) Pergunta inicial 1/2/3 foi removida para reduzir ambiguidade e ir direto para horários 1/2.
 
@@ -1984,7 +2064,10 @@ Nos vemos em breve! 😊
     // Se já tinha mensagem nossa (form enviou), só resumo curto para não repetir.
     const carolInstructionFromContext = (context as any)?.carol_instruction
     let carolInstruction: string | undefined
-    if (isFromVideoOrLandingDuvida) {
+    // 🎓 Inscrito AULA PAGA: nunca oferecer opções da aula gratuita (Opção 1/2, dias/horários).
+    if (isInscritoAulaPaga) {
+      carolInstruction = `Esta pessoa é inscrita da AULA PAGA (Agenda Cheia – R$ 37). A aula é dia 11 de fevereiro às 19h30 (pontual). NÃO mencione "Opção 1/2", "próximas aulas" nem horários da aula gratuita. Se pedir link ou quando é a aula, informe: 11 de fevereiro às 19h30 e envie o link da sala Zoom (o mesmo que ela já recebeu por e-mail). Responda de forma curta e acolhedora.`
+    } else if (isFromVideoOrLandingDuvida) {
       // Veio da página do vídeo/página de vendas pelo botão "Tirar dúvida". Não há mais aula prática; foco só em tirar dúvidas e vender.
       carolInstruction = `Esta pessoa assistiu o vídeo e clicou em "Tirar dúvida". NÃO existe mais aula prática — NÃO mencione, NÃO ofereça e NÃO envie opções de aula. Seu objetivo aqui é APENAS: (1) tirar as dúvidas que ela tiver e (2) vender o sistema (planos mensal/anual, sair do improviso). Responda de forma curta e acolhedora na primeira mensagem (ex.: "Oi! Que bom você ter assistido. No que posso te ajudar?"). Nas mensagens seguintes: responda às dúvidas e conduza para a venda (próximo passo, planos, checkout).`
     } else if (isMessageFromButton && !isFirstMessage) {
