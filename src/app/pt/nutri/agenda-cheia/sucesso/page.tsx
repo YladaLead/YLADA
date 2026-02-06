@@ -1,16 +1,19 @@
 'use client'
 
-import { Suspense, useState, useEffect } from 'react'
+import { Suspense, useState, useEffect, useRef } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 
 import { AULA_PAGA_DATA_HORARIO_LONGO } from '@/lib/aula-paga-config'
+import { trackPurchase } from '@/lib/facebook-pixel'
 
 const WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_NUTRI_WHATSAPP_NUMBER || process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '5519997230912'
 const WHATSAPP_MSG = 'Acabei de me inscrever na aula da YLADA Nutri e quero receber informações adicionais e o link da aula.'
 const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER.replace(/\D/g, '')}?text=${encodeURIComponent(WHATSAPP_MSG)}`
 const STORAGE_KEY = 'aula_paga_zoom_verified'
+
+const AULA_PAGA_VALOR = 37
 
 function AgendaCheiaSucessoContent() {
   const searchParams = useSearchParams()
@@ -19,6 +22,29 @@ function AgendaCheiaSucessoContent() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [zoomLink, setZoomLink] = useState<string | null>(null)
+  const purchaseTracked = useRef(false)
+
+  // Disparar evento Purchase do Meta Pixel quando pagamento aprovado (para otimizar anúncios para "Comprar")
+  useEffect(() => {
+    if (purchaseTracked.current) return
+    const gateway = searchParams.get('gateway')
+    const collectionStatus = searchParams.get('collection_status')
+    const isApproved = collectionStatus === 'approved' || (!isPending && gateway === 'mercadopago')
+    if (isApproved) {
+      purchaseTracked.current = true
+      const t = setTimeout(() => {
+        trackPurchase({
+          content_name: 'Aula Agenda Cheia Nutri',
+          content_ids: ['aula-paga-agenda-cheia'],
+          value: AULA_PAGA_VALOR,
+          currency: 'BRL',
+          num_items: 1,
+          content_category: 'Aula Paga',
+        })
+      }, 1000)
+      return () => clearTimeout(t)
+    }
+  }, [searchParams, isPending])
 
   // Se já verificou nesta sessão, mostrar o link de novo
   useEffect(() => {

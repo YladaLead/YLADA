@@ -294,19 +294,56 @@ async function handlePaymentEvent(data: any, isTest: boolean = false) {
             const { resend, FROM_EMAIL, FROM_NAME, isResendConfigured } = await import('@/lib/resend')
             const { AULA_PAGA_ZOOM_LINK, AULA_PAGA_DATA_HORARIO_LONGO } = await import('@/lib/aula-paga-config')
             if (isResendConfigured() && resend) {
+              const baseUrl = process.env.NEXT_PUBLIC_APP_URL_PRODUCTION || process.env.NEXT_PUBLIC_APP_URL || 'https://www.ylada.com'
+              const logoUrl = `${baseUrl.replace(/\/$/, '')}/images/logo/nutri-horizontal.png`
+              const whatsappSuporte = '5519996049800'
+              const whatsappLink = `https://wa.me/${whatsappSuporte}`
               const emailHtml = `
-                <h1>Aula YLADA – Inscrição confirmada</h1>
-                <p>Sua inscrição na aula (público certo, posicionamento e agenda) foi confirmada.</p>
-                <p><strong>Data e horário:</strong> ${AULA_PAGA_DATA_HORARIO_LONGO}</p>
-                <p><strong>Link da sala Zoom (guarde este e-mail):</strong></p>
-                <p><a href="${AULA_PAGA_ZOOM_LINK}">${AULA_PAGA_ZOOM_LINK}</a></p>
-                <p>Você também receberá lembretes por WhatsApp e e-mail antes do evento.</p>
-                <p>Equipe YLADA</p>
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
+<body style="margin:0; padding:0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f5f5f5;">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color: #f5f5f5; padding: 24px 16px;">
+    <tr><td align="center">
+      <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width: 520px; background: #ffffff; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); overflow: hidden;">
+        <tr>
+          <td style="background: linear-gradient(135deg, #0d9488 0%, #0f766e 100%); padding: 28px 32px; text-align: center;">
+            <img src="${logoUrl}" alt="NUTRI by YLADA" width="140" height="42" style="display: block; margin: 0 auto 16px; max-height: 42px; width: auto;" />
+            <p style="margin: 0; color: rgba(255,255,255,0.95); font-size: 14px; letter-spacing: 0.5px;">Inscrição confirmada – Aula Agenda Cheia Nutri</p>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding: 32px;">
+            <h1 style="margin: 0 0 16px; font-size: 22px; color: #0f172a; font-weight: 700;">Sua inscrição na aula foi confirmada</h1>
+            <p style="margin: 0 0 20px; font-size: 16px; line-height: 1.6; color: #334155;">Sua inscrição na aula (público certo, posicionamento e agenda) foi confirmada.</p>
+            <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background: #f0fdfa; border: 1px solid #99f6e4; border-radius: 8px; margin: 24px 0;">
+              <tr><td style="padding: 20px;">
+                <p style="margin: 0 0 8px; font-size: 13px; color: #0f766e; font-weight: 600;">Data e horário</p>
+                <p style="margin: 0; font-size: 16px; color: #134e4a;">${AULA_PAGA_DATA_HORARIO_LONGO}</p>
+              </td></tr>
+            </table>
+            <p style="margin: 0 0 8px; font-size: 14px; color: #64748b; font-weight: 600;">Link da sala Zoom (guarde este e-mail)</p>
+            <p style="margin: 0 0 16px;"><a href="${AULA_PAGA_ZOOM_LINK}" style="display: inline-block; padding: 12px 24px; background: #0d9488; color: #ffffff; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 15px;">Entrar na sala Zoom</a></p>
+            <p style="margin: 0 0 24px; font-size: 13px; color: #64748b; word-break: break-all;">${AULA_PAGA_ZOOM_LINK}</p>
+            <p style="margin: 0 0 24px; font-size: 15px; line-height: 1.5; color: #475569;">Você também receberá lembretes por WhatsApp e e-mail antes do evento.</p>
+            <p style="margin: 0; font-size: 14px; color: #64748b;">Em caso de dúvida, fale conosco pelo WhatsApp: <a href="${whatsappLink}" style="color: #0d9488; font-weight: 600; text-decoration: none;">(19) 99604-9800</a></p>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding: 20px 32px; background: #f8fafc; border-top: 1px solid #e2e8f0; font-size: 13px; color: #64748b;">
+            Equipe YLADA Nutri
+          </td>
+        </tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>
               `
               await resend.emails.send({
                 from: `${FROM_NAME} <${FROM_EMAIL}>`,
                 to: emailAulaPaga,
-                subject: 'Aula YLADA – Inscrição confirmada (R$ 37) – Link da sala',
+                subject: 'Inscrição confirmada – Aula Agenda Cheia Nutri (R$ 37) – Link da sala',
                 html: emailHtml,
               }).catch((err) => console.error('Erro ao enviar email aula paga:', err))
             }

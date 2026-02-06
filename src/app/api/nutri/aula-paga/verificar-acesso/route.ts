@@ -46,10 +46,11 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Busca tolerante: ilike para não depender de maiúsculas/minúsculas no banco
     const { data: row, error } = await supabaseAdmin
       .from('workshop_inscricoes')
       .select('id, email, status')
-      .eq('email', email)
+      .ilike('email', email)
       .eq('workshop_type', 'aula_paga')
       .maybeSingle()
 
@@ -61,10 +62,17 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    if (!row || row.status !== 'confirmado') {
+    if (!row) {
       return NextResponse.json({
         ok: false,
-        error: 'E-mail não encontrado ou inscrição ainda não confirmada (pagamento em processamento). Use o e-mail da compra.',
+        error: 'E-mail não encontrado. Use o mesmo e-mail usado na inscrição e no pagamento.',
+      })
+    }
+
+    if (row.status !== 'confirmado') {
+      return NextResponse.json({
+        ok: false,
+        error: 'Pagamento ainda em processamento. Aguarde 1 ou 2 minutos e tente novamente.',
       })
     }
 
