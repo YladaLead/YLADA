@@ -747,19 +747,20 @@ export async function generateCarolResponse(
   if (context) {
     // Situação desta pessoa (remarketing pessoa por pessoa – definida pelo admin, persiste)
     if (context.adminSituacao && context.adminSituacao.trim()) {
-      contextText += `\n\n📋 SITUAÇÃO DESTA PESSOA (definida por você para remarketing):\n${context.adminSituacao.trim()}\n\nUse isso para dar continuidade. Esta situação SOBREESCREVE qualquer regra genérica de remarketing: se aqui disser que a pessoa PARTICIPOU (ex.: "participou da aula", "ficou de pensar"), NUNCA diga que ela "não conseguiu participar da aula anterior". Só use essa frase quando a situação disser explicitamente que NÃO participou.\n`
+      contextText += `\n\n📋 SITUAÇÃO DESTA PESSOA (definida por você para remarketing):\n${context.adminSituacao.trim()}\n\nUse isso para dar continuidade. Esta situação SOBREESCREVE qualquer regra genérica de remarketing: se aqui disser que a pessoa PARTICIPOU (ex.: "participou da aula", "ficou de pensar"), NUNCA diga que ela "não conseguiu participar da aula anterior". Só use essa frase quando a situação disser explicitamente que NÃO participou.\n\n⚠️ Este campo é NOTA INTERNA. NUNCA use nenhuma palavra dele (ex.: Nutri, Inge, remarketing, nomes de equipe) como nome da pessoa. O nome da pessoa é EXCLUSIVAMENTE o indicado no campo "NOME DA PESSOA" abaixo (vem do cadastro).\n`
     }
     // Instrução contextual para esta resposta (ex.: não repetir bloco em "Entendi", mensagem do botão, etc.)
     if (context.carolInstruction && context.carolInstruction.trim()) {
       contextText += `\n\n🚨 PRIORIDADE MÁXIMA - INSTRUÇÃO PARA ESTA RESPOSTA:\n${context.carolInstruction.trim()}\n\nEsta instrução SOBREESCREVE qualquer outra regra. Siga EXATAMENTE. Não repita opções, boas-vindas ou explicações se a instrução disser para responder curto.\n`
     }
-    // 🆕 Nome da pessoa (sempre APENAS primeiro nome – ex.: Maria Silva → Maria)
+    // 🆕 Nome da pessoa (sempre APENAS primeiro nome – ex.: Maria Silva → Maria). Fonte: cadastro (inscrição/contato).
     if (context.leadName) {
       const firstName = getFirstName(context.leadName)
-      contextText += `\n⚠️ NOME DA PESSOA (use apenas este primeiro nome): ${firstName}\n`
-      contextText += `IMPORTANTE: Chame a pessoa APENAS pelo primeiro nome!\n`
-      contextText += `Exemplo: "Oi ${firstName}, tudo bem? 😊" ou "Seja muito bem-vinda, ${firstName}!"\n`
-      contextText += `NUNCA use nome completo nem "Ylada Nutri"/"da Nutri"/"Nutri" como nome da pessoa.\n`
+      contextText += `\n⚠️ NOME DA PESSOA (cadastro – use APENAS este primeiro nome): ${firstName}\n`
+      contextText += `IMPORTANTE: Trate a pessoa SOMENTE por este nome. Exemplo: "Oi ${firstName}, tudo bem? 😊"\n`
+      contextText += `NUNCA use como nome: Nutri, Inge, Ylada, palavras do campo "SITUAÇÃO" ou qualquer texto que não seja este nome do cadastro.\n`
+    } else {
+      contextText += `\n⚠️ Nome da pessoa não disponível no cadastro. Use saudação SEM nome (ex.: "Oi, tudo bem? 😊"). NUNCA invente ou use como nome: Nutri, Inge, Ylada ou qualquer palavra do campo SITUAÇÃO.\n`
     }
     
     if (context.tags && context.tags.length > 0) {
@@ -1796,9 +1797,10 @@ export async function processIncomingMessageWithCarol(
           const timeDiff = sessionBrasilia.getTime() - nowBrasilia.getTime()
           const hoursDiff = timeDiff / (1000 * 60 * 60)
           
-          // Buscar nome do cadastro para usar no lembrete (apenas primeiro nome)
+          // Buscar nome do cadastro para usar no lembrete (apenas primeiro nome; nunca nota interna)
           const registrationNameForReminder = await getRegistrationName(phone, area)
-          const leadNameForReminder = getFirstName(registrationNameForReminder || conversation.name) || 'querido(a)'
+          const safeConvNameReminder = conversation.name && !isInvalidOrInternalName(conversation.name) ? conversation.name : ''
+          const leadNameForReminder = getFirstName(registrationNameForReminder || safeConvNameReminder) || 'querido(a)'
           
           // Se está entre 12h e 13h antes, já enviar lembrete de 12h
           // Se está entre 2h e 2h30 antes, já enviar lembrete de 2h
@@ -2027,17 +2029,23 @@ Nos vemos em breve! 😊
       isFirstMessage
     })
 
-    // 🆕 Priorizar nome do cadastro; evitar usar nomes do WhatsApp quando não confiáveis
+    // 🆕 Nome da pessoa: APENAS do cadastro (workshop_inscricoes/contact_submissions) ou lead_name já salvo.
+    // NUNCA usar como nome: "Nutri", "Inge", "Lá no remarketing...", display_name/editado pela nutri (nota interna).
     const conv = conversation as { name?: string | null; customer_name?: string | null }
     const waName = (context as any)?.wa_name as string | undefined
+    const displayName = (context as any)?.display_name as string | undefined
+    const convNameOk = conversation.name && !isInvalidOrInternalName(conversation.name)
+    const customerNameOk = conv?.customer_name && !isInvalidOrInternalName(conv.customer_name)
+    const displayNameOk = displayName && !isInvalidOrInternalName(displayName)
     let rawName =
       registrationName ||
       (context as any)?.lead_name ||
       (isLikelyPersonName(waName) ? waName : '') ||
-      conversation.name ||
-      conv?.customer_name ||
+      (convNameOk ? conversation.name : '') ||
+      (customerNameOk ? conv?.customer_name : '') ||
+      (displayNameOk ? displayName : '') ||
       ''
-    if (isBusinessName(rawName)) {
+    if (isBusinessName(rawName) || isInvalidOrInternalName(rawName)) {
       rawName = registrationName || (context as any)?.lead_name || ''
     }
     // Caso comum: pessoa clica no botão do WhatsApp com texto "Acabei de me inscrever..."
@@ -2049,7 +2057,7 @@ Nos vemos em breve! 😊
     }
     // Se não temos nome confiável, não use "querido(a)" como nome — prefira saudação neutra.
     let leadName = getFirstName(rawName) || ''
-    if (isBusinessName(leadName)) leadName = ''
+    if (isBusinessName(leadName) || isInvalidOrInternalName(leadName)) leadName = ''
 
     // Se for primeira mensagem, enviar corpo curto com opções (sem IA).
     let cannedFirstMessageBody: string | null = null
@@ -2869,8 +2877,9 @@ export async function sendRemarketingToNonParticipant(
 
     // Buscar nome do cadastro (Carol usa apenas primeiro nome). Nunca chamar de "Ylada"/nome do negócio.
     const registrationName = await getRegistrationName(conversation.phone, 'nutri')
-    let leadName = getFirstName(registrationName || (conversation.context as any)?.lead_name || conversation.name) || 'querido(a)'
-    if (isBusinessName(leadName)) leadName = 'querido(a)'
+    const safeConvName = conversation.name && !isInvalidOrInternalName(conversation.name) ? conversation.name : ''
+    let leadName = getFirstName(registrationName || (conversation.context as any)?.lead_name || safeConvName) || 'querido(a)'
+    if (isBusinessName(leadName) || isInvalidOrInternalName(leadName)) leadName = 'querido(a)'
 
     // Primeira mensagem de remarketing: persuasiva, com benefício. NÃO envia datas/link.
     // Quando a pessoa responder positivamente no chat, a Carol envia as opções (via processIncomingMessageWithCarol).
@@ -3054,8 +3063,9 @@ export async function sendRemarketingToNonParticipants(): Promise<{
 
         // Carol usa apenas primeiro nome. Nunca chamar de "Ylada"/nome do negócio.
         const registrationName = await getRegistrationName(conv.phone, 'nutri')
-        let leadName = getFirstName(registrationName || (context as any)?.lead_name || conv.name) || 'querido(a)'
-        if (isBusinessName(leadName)) leadName = 'querido(a)'
+        const safeConvName = conv.name && !isInvalidOrInternalName(conv.name) ? conv.name : ''
+        let leadName = getFirstName(registrationName || (context as any)?.lead_name || safeConvName) || 'querido(a)'
+        if (isBusinessName(leadName) || isInvalidOrInternalName(leadName)) leadName = 'querido(a)'
         const { getFlowTemplate, applyTemplate } = await import('@/lib/whatsapp-flow-templates')
         const remarketingTemplate = await getFlowTemplate('nutri', 'remarketing_nao_participou')
         const remarketingMessage = remarketingTemplate
@@ -3275,8 +3285,9 @@ export async function sendRemarketingAulaHoje20h(): Promise<{
         }
 
         const registrationName = await getRegistrationName(conv.phone, 'nutri')
-        let leadName = getFirstName(registrationName || (context as any)?.lead_name || conv.name) || 'querido(a)'
-        if (isBusinessName(leadName)) leadName = 'querido(a)'
+        const safeConvName = conv.name && !isInvalidOrInternalName(conv.name) ? conv.name : ''
+        let leadName = getFirstName(registrationName || (context as any)?.lead_name || safeConvName) || 'querido(a)'
+        if (isBusinessName(leadName) || isInvalidOrInternalName(leadName)) leadName = 'querido(a)'
 
         const message = `Oi ${leadName}! 💚\n\nHoje temos aula às 20h. Gostaria de participar? Se sim, responda que eu te encaixo. 😊`
 
@@ -3457,9 +3468,10 @@ export async function sendPreClassNotifications(): Promise<{
         const { weekday, date, time } = formatSessionDateTime(session.starts_at)
         const client = createZApiClient(instance.instance_id, instance.token)
 
-        // Carol usa apenas primeiro nome
+        // Carol usa apenas primeiro nome (só do cadastro ou nome válido da conversa – nunca Nutri/Inge/nota)
         const registrationName = await getRegistrationName(conv.phone, 'nutri')
-        const leadName = getFirstName(registrationName || conv.name) || 'querido(a)'
+        const safeConvName = conv.name && !isInvalidOrInternalName(conv.name) ? conv.name : ''
+        const leadName = getFirstName(registrationName || safeConvName) || 'querido(a)'
 
         // Verificar qual notificação enviar baseado no tempo restante
         let message: string | null = null
@@ -4067,9 +4079,11 @@ export async function sendSalesFollowUpAfterClass(): Promise<{
         const context = conv.context || {}
         const sessionId = context.workshop_session_id
         
-        // Carol usa apenas primeiro nome nas mensagens
+        // Carol usa apenas primeiro nome (só do cadastro ou nome válido – nunca Nutri/Inge/nota)
         const registrationName = await getRegistrationName(conv.phone, 'nutri')
-        let leadName = getFirstName(registrationName || conv.name) || 'querido(a)'
+        const safeConvName = conv.name && !isInvalidOrInternalName(conv.name) ? conv.name : ''
+        let leadName = getFirstName(registrationName || safeConvName) || 'querido(a)'
+        if (isBusinessName(leadName) || isInvalidOrInternalName(leadName)) leadName = 'querido(a)'
         
         // Atualizar lead_name no context se encontrou nome do cadastro (guardamos nome completo)
         if (registrationName && registrationName !== (context as any)?.lead_name) {
@@ -4331,8 +4345,9 @@ Qual você prefere, *mensal* ou *anual*?`
 
     const client = createZApiClient(instance.instance_id, instance.token)
     
-    // Buscar nome do cadastro; Carol usa apenas primeiro nome
-    let leadName = getFirstName(conversation.name) || 'querido(a)'
+    // Buscar nome do cadastro; Carol usa apenas primeiro nome (nunca usar conversation.name se for nota interna)
+    const safeConvName = conversation.name && !isInvalidOrInternalName(conversation.name) ? conversation.name : ''
+    let leadName = getFirstName(safeConvName) || 'querido(a)'
     let registrationName: string | null = null
     
     try {
@@ -4594,8 +4609,9 @@ export async function sendWorkshopReminders(): Promise<{
             continue
           }
 
-          // Formatar mensagem de lembrete
-          const leadName = participant.name || 'Olá'
+          // Formatar mensagem de lembrete (nunca usar nome de nota interna: Nutri, Inge, etc.)
+          const safePartName = participant.name && !isInvalidOrInternalName(participant.name) ? getFirstName(participant.name) : ''
+          const leadName = safePartName || 'Olá'
           const reminderMessage = `${leadName}! 👋
 
 Lembrete: Sua aula está agendada para:
@@ -4714,9 +4730,10 @@ export async function redirectToSupportAfterPayment(
 
     const client = createZApiClient(instance.instance_id, instance.token)
     
-    // Carol usa apenas primeiro nome
+    // Carol usa apenas primeiro nome (só cadastro ou nome válido – nunca Nutri/Inge/nota)
     const registrationName = await getRegistrationName(conversation.phone, 'nutri')
-    const leadName = getFirstName(registrationName || conversation.name) || 'querido(a)'
+    const safeConvName = conversation.name && !isInvalidOrInternalName(conversation.name) ? conversation.name : ''
+    const leadName = getFirstName(registrationName || safeConvName) || 'querido(a)'
 
     // Criar link do WhatsApp do suporte
     const supportWhatsAppLink = `https://wa.me/${supportPhone.replace(/\D/g, '')}`
