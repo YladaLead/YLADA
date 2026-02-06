@@ -1,5 +1,6 @@
 'use client'
 
+import { Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -10,7 +11,7 @@ const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER.replace(/\D/g, '')}?text=${
 
 const PROXIMA_AULA = 'Quarta-feira, 11 de fevereiro às 19h30'
 
-export default function AgendaCheiaSucessoPage() {
+function AgendaCheiaSucessoContent() {
   const searchParams = useSearchParams()
   const isPending = searchParams.get('status') === 'pending'
 
@@ -65,5 +66,17 @@ export default function AgendaCheiaSucessoPage() {
         </div>
       </main>
     </div>
+  )
+}
+
+export default function AgendaCheiaSucessoPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white flex items-center justify-center">
+        <div className="animate-pulse text-gray-500">Carregando...</div>
+      </div>
+    }>
+      <AgendaCheiaSucessoContent />
+    </Suspense>
   )
 }
