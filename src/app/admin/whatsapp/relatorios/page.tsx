@@ -194,10 +194,10 @@ function WhatsAppRelatoriosContent() {
                 <span>Exportar CSV</span>
               </button>
               <Link
-                href="/admin/whatsapp"
+                href="/admin"
                 className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
               >
-                ← Voltar
+                ← Voltar ao admin
               </Link>
             </div>
           </div>

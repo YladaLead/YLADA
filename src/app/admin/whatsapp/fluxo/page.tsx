@@ -206,10 +206,10 @@ function FluxoContent() {
             {saving ? 'Salvando...' : 'Salvar todos os textos'}
           </button>
           <Link
-            href="/admin/whatsapp"
+            href="/admin"
             className="px-6 py-2.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 font-medium"
           >
-            Voltar
+            Voltar ao admin
           </Link>
         </div>
       </div>

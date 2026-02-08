@@ -99,10 +99,10 @@ function AgendadasContent() {
               <p className="text-sm text-gray-500 mt-1">Filtre por data, hora ou sessão</p>
             </div>
             <Link
-              href="/admin/whatsapp"
+              href="/admin"
               className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
             >
-              ← Voltar
+              ← Voltar ao admin
             </Link>
           </div>
         </div>

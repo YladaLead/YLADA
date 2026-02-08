@@ -355,10 +355,10 @@ function AutomationContent() {
           {/* Header */}
           <div className="mb-6">
             <Link 
-              href="/admin/whatsapp" 
+              href="/admin" 
               className="text-blue-600 hover:text-blue-800 mb-4 inline-block"
             >
-              ← Voltar para WhatsApp
+              ← Voltar ao admin
             </Link>
             <h1 className="text-3xl font-bold text-gray-900">🤖 Automação WhatsApp</h1>
             <p className="text-gray-600 mt-2">

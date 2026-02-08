@@ -125,8 +125,8 @@ function AtualizarFasesContent() {
     <div className="min-h-screen bg-gray-50">
       <div className="bg-white border-b border-gray-200 px-4 py-3">
         <div className="max-w-4xl mx-auto flex items-center justify-between gap-4">
-          <Link href="/admin/whatsapp" className="text-gray-600 hover:text-gray-900 text-sm">
-            ← WhatsApp
+          <Link href="/admin" className="text-gray-600 hover:text-gray-900 text-sm">
+            ← Voltar ao admin
           </Link>
           <h1 className="text-lg font-bold text-gray-900">Atualizar fases manualmente</h1>
           <div className="w-16" />
