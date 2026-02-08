@@ -369,6 +369,56 @@ export async function GET(request: NextRequest) {
             }
           })
         }
+
+        // Fallback: templates built-in (têm página no app mas podem não existir em templates_nutrition)
+        // Ex.: diagnóstico de parasitose — página em wellness/templates/parasitosis-diagnosis
+        const builtInTemplates: Record<string, { title: string; description: string; emoji: string }> = {
+          'template-diagnostico-parasitose': {
+            title: 'Diagnóstico de Parasitose',
+            description: 'Identifique sinais de parasitose e receba orientações iniciais personalizadas',
+            emoji: '🦠'
+          },
+          'diagnostico-parasitose': {
+            title: 'Diagnóstico de Parasitose',
+            description: 'Identifique sinais de parasitose e receba orientações iniciais personalizadas',
+            emoji: '🦠'
+          },
+          parasitose: {
+            title: 'Diagnóstico de Parasitose',
+            description: 'Identifique sinais de parasitose e receba orientações iniciais personalizadas',
+            emoji: '🦠'
+          }
+        }
+        const builtIn = builtInTemplates[toolSlug]
+        if (builtIn) {
+          const subscriptionOk = await ensureActiveSubscription(userProfile.user_id)
+          if (!subscriptionOk) {
+            return NextResponse.json(
+              { error: 'link_indisponivel', message: 'Assinatura expirada ou não ativa' },
+              { status: 403 }
+            )
+          }
+          console.log('✅ [Wellness API] Ferramenta virtual (built-in):', { tool_slug: toolSlug })
+          return NextResponse.json({
+            tool: {
+              id: `builtin-${toolSlug}`,
+              title: builtIn.title,
+              slug: toolSlug,
+              template_slug: toolSlug,
+              description: builtIn.description,
+              emoji: builtIn.emoji,
+              custom_colors: { principal: '#10B981', secundaria: '#059669' },
+              cta_type: 'whatsapp',
+              whatsapp_number: userProfile.whatsapp || null,
+              cta_button_text: 'Conversar com Especialista',
+              profession: 'wellness',
+              status: 'active',
+              content: {},
+              user_profiles: userProfile,
+              is_template_base: true
+            }
+          })
+        }
         
         // Se chegou aqui, realmente não encontrou a ferramenta
         console.warn('⚠️ [Wellness API] Ferramenta não encontrada após todas as tentativas:', {
