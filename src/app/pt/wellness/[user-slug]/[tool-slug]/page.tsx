@@ -56,6 +56,7 @@ const TemplateIntoleranceAssessment = dynamic(() => import('@/app/pt/wellness/te
 const TemplateMetabolicProfileAssessment = dynamic(() => import('@/app/pt/wellness/templates/metabolic-profile-assessment/page'), { ssr: false })
 const TemplateElectrolyteDiagnosis = dynamic(() => import('@/app/pt/wellness/templates/electrolyte-diagnosis/page'), { ssr: false })
 const TemplateIntestinalSymptomsDiagnosis = dynamic(() => import('@/app/pt/wellness/templates/intestinal-symptoms-diagnosis/page'), { ssr: false })
+const TemplateParasitosisDiagnosis = dynamic(() => import('@/app/pt/wellness/templates/parasitosis-diagnosis/page'), { ssr: false })
 const TemplateReadyToLoseWeight = dynamic(() => import('@/app/pt/wellness/templates/ready-to-lose-weight/page'), { ssr: false })
 const TemplateHungerType = dynamic(() => import('@/app/pt/wellness/templates/hunger-type/page'), { ssr: false })
 const TemplateHealthyEatingQuiz = dynamic(() => import('@/app/pt/wellness/templates/healthy-eating-quiz/page'), { ssr: false })
@@ -429,6 +430,10 @@ export default function FerramentaPersonalizadaPage() {
       case 'sintomas-intestinais':
       case 'sintomas intestinais':
         return <TemplateIntestinalSymptomsDiagnosis config={config} />
+      case 'template-diagnostico-parasitose':
+      case 'diagnostico-parasitose':
+      case 'parasitose':
+        return <TemplateParasitosisDiagnosis config={config} />
       case 'pronto-emagrecer':
       case 'quiz-pronto-emagrecer':
       case 'pronto para emagrecer':

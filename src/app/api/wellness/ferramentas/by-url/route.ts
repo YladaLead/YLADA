@@ -280,7 +280,31 @@ export async function GET(request: NextRequest) {
           }
         }
         
-        // Se ainda não encontrou, tentar buscar por variações do slug
+        // Aliases: slug da URL -> slug possível no banco (ex.: template em inglês)
+        const slugAliases: Record<string, string[]> = {
+          'template-diagnostico-parasitose': ['parasitosis-diagnosis'],
+          'diagnostico-parasitose': ['parasitosis-diagnosis'],
+          parasitose: ['parasitosis-diagnosis'],
+        }
+        const slugsToTry = [toolSlug, ...(slugAliases[toolSlug] || [])]
+
+        // Se ainda não encontrou, tentar slugs alternativos e depois variações
+        if (!templateBase) {
+          for (const slug of slugsToTry) {
+            if (slug === toolSlug) continue // já tentamos toolSlug acima
+            const { data: templateAlias, error: errorAlias } = await supabaseAdmin
+              .from('templates_nutrition')
+              .select('*')
+              .eq('slug', slug)
+              .eq('is_active', true)
+              .or('profession.is.null,profession.eq.wellness')
+              .maybeSingle()
+            if (!errorAlias && templateAlias) {
+              templateBase = templateAlias
+              break
+            }
+          }
+        }
         if (!templateBase) {
           const slugNormalizado = toolSlug.toLowerCase().replace(/[^a-z0-9-]/g, '-')
           const { data: templateNormalizado, error: errorNormalizado } = await supabaseAdmin
