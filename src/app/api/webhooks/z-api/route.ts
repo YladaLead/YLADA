@@ -1224,10 +1224,10 @@ export async function POST(request: NextRequest) {
           .order('created_at', { ascending: false })
           .limit(1)
         
-        // Buscar última mensagem do cliente (antes desta que acabou de chegar)
+        // Buscar última mensagem do cliente (inclui a que acabamos de salvar)
         const { data: lastCustomerMessage } = await supabase
           .from('whatsapp_messages')
-          .select('id, created_at')
+          .select('id, created_at, message')
           .eq('conversation_id', conversationId)
           .eq('sender_type', 'customer')
           .order('created_at', { ascending: false })
@@ -1249,11 +1249,23 @@ export async function POST(request: NextRequest) {
         // 1. Não há mensagem recente da Carol (mais de 5 minutos), OU
         // 2. A última mensagem do cliente é mais recente que a última mensagem da Carol
         //    (ou seja, o cliente está fazendo uma pergunta após receber a mensagem da Carol)
+        // 3. A última mensagem do cliente É a que estamos processando (mesmo texto, criada há poucos segundos) → sempre permitir
         let shouldAllowResponse = true
         
-        if (hasRecentCarolMessage && lastCarolMessage && lastCustomerMessage) {
-          const lastCarolTime = new Date(lastCarolMessage.created_at).getTime()
-          const lastCustomerTime = new Date(lastCustomerMessage.created_at).getTime()
+        const lastCustMsg = lastCustomerMessage?.[0] ?? lastCustomerMessage
+        const isCurrentMessageWeJustSaved =
+          lastCustMsg?.message != null &&
+          String(lastCustMsg.message).trim() === String(message || '').trim() &&
+          lastCustMsg.created_at &&
+          Date.now() - new Date(lastCustMsg.created_at).getTime() < 25000 // 25s
+        
+        if (isCurrentMessageWeJustSaved) {
+          shouldAllowResponse = true
+          console.log('[Z-API Webhook] ✅ Permitindo Carol: mensagem atual é a que acabamos de salvar (cliente pediu resposta)')
+        } else if (hasRecentCarolMessage && lastCarolMessage?.length && lastCustMsg) {
+          const lastCarolRow = Array.isArray(lastCarolMessage) ? lastCarolMessage[0] : lastCarolMessage
+          const lastCarolTime = new Date((lastCarolRow as any)?.created_at ?? 0).getTime()
+          const lastCustomerTime = new Date((lastCustMsg as any)?.created_at ?? 0).getTime()
           
           // Se a última mensagem da Carol é mais recente que a última do cliente,
           // significa que a Carol acabou de enviar e o cliente ainda não respondeu

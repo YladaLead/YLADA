@@ -1917,11 +1917,12 @@ Nos vemos em breve! 😊
     }
 
     // 5. Buscar histórico de mensagens (aumentado para 30 para melhor contexto)
+    // Incluir mensagens com status usado na prática: sent, delivered, read (não 'active' — tabela usa sent/delivered)
     const { data: messages } = await supabaseAdmin
       .from('whatsapp_messages')
       .select('sender_type, message, created_at')
       .eq('conversation_id', conversationId)
-      .eq('status', 'active') // Apenas mensagens não deletadas
+      .in('status', ['sent', 'delivered', 'read', 'active'])
       .order('created_at', { ascending: true })
       .limit(30) // Aumentado de 20 para 30 mensagens
 
