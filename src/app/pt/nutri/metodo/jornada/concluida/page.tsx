@@ -18,7 +18,7 @@ export default function JornadaConcluidaPage() {
           </h1>
           
           <p className="text-xl text-gray-700 mb-8">
-            Parabéns! Você completou os 30 dias estruturados da Jornada YLADA.
+            Parabéns! Você completou todas as etapas da Trilha Empresarial YLADA.
           </p>
 
           <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 mb-8 border-l-4 border-blue-500">
@@ -26,7 +26,7 @@ export default function JornadaConcluidaPage() {
               <strong>Sua base está construída.</strong>
             </p>
             <p className="text-gray-700">
-              Você agora tem mentalidade, rotina e clareza para atuar como uma verdadeira Nutri-Empresária.
+              Você agora tem mentalidade, rotina e clareza para atuar como profissional.
             </p>
           </div>
 

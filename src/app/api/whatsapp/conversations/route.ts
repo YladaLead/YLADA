@@ -157,7 +157,14 @@ export async function GET(request: NextRequest) {
       const mergeContext = (winner: any, other: any) => {
         const w = winner.context && typeof winner.context === 'object' ? winner.context : {}
         const o = other.context && typeof other.context === 'object' ? other.context : {}
-        return { ...w, ...o }
+        const merged = { ...w, ...o }
+        // Tags: usar as da conversa principal (winner) para a tag não "voltar" quando há duplicata.
+        // Ex.: usuário remove "manual_welcome_sent" na conversa que está vendo; a outra linha (mesmo telefone)
+        // pode ainda ter a tag; sem isso o merge colocaria a tag de volta na tela.
+        if (Array.isArray(w.tags)) {
+          merged.tags = w.tags
+        }
+        return merged
       }
 
       if (!phoneMap.has(phoneKey)) {

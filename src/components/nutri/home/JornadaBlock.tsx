@@ -56,7 +56,7 @@ export default function JornadaBlock() {
         <>
           <ProgressBar
             percentage={progressPercentage}
-            label={`Dia ${completedDays} de ${totalDays}`}
+            label={`Etapa ${completedDays} de ${totalDays}`}
             showPercentage={true}
             color="blue"
             className="mb-6"
@@ -69,7 +69,7 @@ export default function JornadaBlock() {
                 fullWidth
                 className="text-lg py-4"
               >
-                Continuar de onde parei → Dia {currentDay}
+                Continuar de onde parei → Etapa {currentDay}
               </PrimaryButton>
             ) : completedDays === totalDays ? (
               <div>
@@ -88,7 +88,7 @@ export default function JornadaBlock() {
                 fullWidth
                 className="text-lg py-4"
               >
-                Iniciar Dia 1 da Trilha →
+                Iniciar Etapa 1 da Trilha →
               </PrimaryButton>
             )}
           </div>

@@ -45,7 +45,7 @@ export const SIDEBAR_MICROCOPY: SidebarMicrocopy = {
     },
     jornada: {
       label: 'Trilha Empresarial',
-      tooltip: 'Sua capacitação empresarial, passo a passo (30 dias).'
+      tooltip: 'Sua capacitação empresarial, passo a passo por etapas.'
     },
     pilares: {
       label: 'Sobre o Método',
@@ -99,7 +99,7 @@ export const SIDEBAR_MICROCOPY: SidebarMicrocopy = {
       return `Fase atual: ${phases[phase as keyof typeof phases] || 'Fundamentos'}`
     },
     progress: (day: number, total: number = 30) => {
-      return `Progresso: Dia ${day} de ${total}`
+      return `Progresso: Etapa ${day} de ${total}`
     },
     nextFocus: (phase: number) => {
       const focuses = {

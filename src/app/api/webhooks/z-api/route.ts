@@ -1111,6 +1111,16 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // 2.9. Verificar se é primeira mensagem do cliente ANTES de salvar
+    // (depois de salvar sempre haverá ≥1 mensagem do cliente; usar isso para automações)
+    const { data: existingCustomerMessages } = await supabase
+      .from('whatsapp_messages')
+      .select('id')
+      .eq('conversation_id', conversationId)
+      .eq('sender_type', 'customer')
+      .limit(1)
+    const isFirstMessageBeforeSave = !existingCustomerMessages || existingCustomerMessages.length === 0
+
     // 3. Salvar mensagem (usar payload normalizado)
     const normalizedPayload: ZApiWebhookPayload = {
       phone,
@@ -1199,15 +1209,8 @@ export async function POST(request: NextRequest) {
           // Se falhou a checagem, não bloquear (segue normal)
         }
 
-        // Verificar se é primeira mensagem da conversa
-        const { data: existingMessages } = await supabase
-          .from('whatsapp_messages')
-          .select('id')
-          .eq('conversation_id', conversationId)
-          .eq('sender_type', 'customer')
-          .limit(1)
-        
-        const isFirstMessage = !existingMessages || existingMessages.length === 0
+        // Usar flag de primeira mensagem calculada ANTES de salvar (isFirstMessageBeforeSave)
+        const isFirstMessage = isFirstMessageBeforeSave
 
         // 🔒 VERIFICAR SE JÁ EXISTE MENSAGEM DA CAROL RECENTE (evitar duplicação)
         // Mas permitir resposta se a última mensagem é do cliente (perguntas legítimas)
@@ -1395,9 +1398,20 @@ export async function POST(request: NextRequest) {
         }
 
         // ⚠️ IMPORTANTÍSSIMO: não rodar automações antigas em paralelo com a Carol.
-        // Isso é a principal fonte de "vários tipos de mensagens" e respostas que ignoram contexto.
-        // Só rode automações se a Carol NÃO processou esta mensagem.
-        if (!carolProcessedThisMessage) {
+        // Primeira mensagem e escolha 1/2 são EXCLUSIVAS da Carol — a automação antiga não deve rodar
+        // (evita duplicar ou enviar outro conteúdo quando foi reconfigurada).
+        const msgTrim = String(message || '').trim().toLowerCase()
+        const isChoice1or2 = msgTrim === '1' || msgTrim === '2' || /^(opção|opcao)\s*[12]$/i.test(msgTrim)
+        const reservedForCarol = isFirstMessageBeforeSave || isChoice1or2
+
+        if (reservedForCarol) {
+          console.log('[Z-API Webhook] ⏭️ Primeira mensagem ou escolha 1/2: só Carol responde (automação antiga não roda)', {
+            isFirstMessage: isFirstMessageBeforeSave,
+            isChoice1or2,
+          })
+        }
+
+        if (!carolProcessedThisMessage && !reservedForCarol) {
           try {
             const { processAutomations } = await import('@/lib/whatsapp-automation')
             const automationResult = await processAutomations(
@@ -1419,7 +1433,7 @@ export async function POST(request: NextRequest) {
             // Ignorar erros de automações antigas
             console.warn('[Z-API Webhook] ⚠️ Erro em automações antigas:', automationError.message)
           }
-        } else {
+        } else if (carolProcessedThisMessage) {
           console.log('[Z-API Webhook] ⏭️ Pulando automações antigas (Carol já processou esta mensagem)')
         }
         } // fim do else (Carol não está desligada globalmente)

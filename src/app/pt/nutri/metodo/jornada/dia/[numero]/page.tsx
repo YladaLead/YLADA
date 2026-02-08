@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { useParams, useRouter } from 'next/navigation'
+import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import FormacaoHeader from '@/components/formacao/FormacaoHeader'
 import AcaoPraticaCard from '@/components/formacao/AcaoPraticaCard'
@@ -15,9 +15,15 @@ import { useAuth } from '@/hooks/useAuth'
 import { useJornadaProgress } from '@/hooks/useJornadaProgress'
 import type { JourneyDay } from '@/types/formacao'
 
+const JORNADA_BASE = '/pt/nutri/metodo/jornada'
+
 export default function JornadaDiaPage() {
   const params = useParams()
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const fromMed = searchParams.get('from') === 'med'
+  const backHref = fromMed ? '/pt/med/formacao' : JORNADA_BASE
+  const backLabel = fromMed ? '← Voltar ao YLADA Medicina' : '← Voltar para Trilha'
   const { user } = useAuth()
   const { progress, loading: progressLoading, canAccessDay } = useJornadaProgress()
   const dayNumber = parseInt(params.numero as string)
@@ -354,12 +360,12 @@ export default function JornadaDiaPage() {
         <FormacaoHeader />
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="bg-red-50 border-2 border-red-200 rounded-xl p-6">
-            <p className="text-red-800">{erro || 'Dia não encontrado'}</p>
+            <p className="text-red-800">{erro || 'Etapa não encontrada'}</p>
             <Link
-              href="/pt/nutri/metodo/jornada"
+              href={backHref}
               className="mt-4 inline-block text-blue-600 hover:text-blue-700"
             >
-              ← Voltar para Jornada
+              {backLabel}
             </Link>
           </div>
         </div>
@@ -376,9 +382,10 @@ export default function JornadaDiaPage() {
         </div>
         <BlockedDayModal
           isOpen={true}
-          onClose={() => router.push('/pt/nutri/metodo/jornada')}
+          onClose={() => router.push(backHref)}
           blockedDay={dayNumber}
           currentDay={progress?.current_day || 1}
+          basePath={fromMed ? '/pt/med/formacao/jornada' : JORNADA_BASE}
         />
       </>
     )
@@ -392,14 +399,14 @@ export default function JornadaDiaPage() {
         {/* Breadcrumb */}
         <div className="mb-6">
           <Link
-            href="/pt/nutri/metodo/jornada"
+            href={backHref}
             className="text-blue-600 hover:text-blue-700 text-sm"
           >
-            ← Voltar para Jornada
+            {backLabel}
           </Link>
         </div>
 
-        {/* Header do Dia */}
+        {/* Header da Etapa */}
         <div className="bg-white rounded-xl p-6 mb-6 shadow-md border border-gray-200">
           <div className="flex items-center gap-3 mb-4">
             <div className="bg-blue-600 text-white rounded-full w-12 h-12 flex items-center justify-center text-xl font-bold">
@@ -407,7 +414,7 @@ export default function JornadaDiaPage() {
             </div>
             <div>
               <h1 className="text-3xl font-bold text-gray-900">{day.title}</h1>
-              <p className="text-sm text-gray-500">Semana {day.week_number} • Dia {day.day_number}</p>
+              <p className="text-sm text-gray-500">Bloco {day.week_number} • Etapa {day.day_number}</p>
             </div>
           </div>
         </div>
@@ -589,7 +596,7 @@ export default function JornadaDiaPage() {
           </div>
         )}
 
-        {/* Botão Concluir Dia */}
+        {/* Botão Concluir Etapa */}
         <div className="bg-white rounded-xl p-6 shadow-md border border-gray-200">
           <button
             onClick={concluirDia}
@@ -605,10 +612,10 @@ export default function JornadaDiaPage() {
             `}
           >
             {day.is_completed
-              ? '✓ Dia Concluído'
+              ? '✓ Etapa Concluída'
               : concluindo
               ? 'Concluindo...'
-              : 'Concluir Dia'
+              : 'Concluir Etapa'
             }
           </button>
           {day.is_completed && (
@@ -622,26 +629,26 @@ export default function JornadaDiaPage() {
         <div className="flex items-center justify-between mt-6">
           {dayNumber > 1 && (
             <Link
-              href={`/pt/nutri/metodo/jornada/dia/${dayNumber - 1}`}
+              href={fromMed ? `/pt/med/formacao/jornada/dia/${dayNumber - 1}` : `${JORNADA_BASE}/dia/${dayNumber - 1}`}
               className="text-blue-600 hover:text-blue-700 font-medium"
             >
-              ← Dia Anterior
+              ← Etapa Anterior
             </Link>
           )}
           {dayNumber < 30 && !day.is_completed && (
             <button
               onClick={() => {
                 const nextDay = dayNumber + 1
-                // Verificar se pode acessar o próximo dia
+                const nextHref = fromMed ? `/pt/med/formacao/jornada/dia/${nextDay}` : `${JORNADA_BASE}/dia/${nextDay}`
                 if (canAccessDay(nextDay)) {
-                  router.push(`/pt/nutri/metodo/jornada/dia/${nextDay}`)
+                  router.push(nextHref)
                 } else {
                   setShowBlockedModal(true)
                 }
               }}
               className="text-blue-600 hover:text-blue-700 font-medium ml-auto"
             >
-              Próximo Dia →
+              Próxima Etapa →
             </button>
           )}
         </div>
@@ -654,18 +661,19 @@ export default function JornadaDiaPage() {
         isOpen={showBlockedModal}
         onClose={() => {
           setShowBlockedModal(false)
-          router.push('/pt/nutri/metodo/jornada')
+          router.push(backHref)
         }}
         blockedDay={dayNumber}
         currentDay={progress?.current_day || 1}
+        basePath={fromMed ? '/pt/med/formacao/jornada' : JORNADA_BASE}
       />
 
-      {/* Modal de Dia Concluído */}
       <DiaConcluidoModal
         isOpen={showConcluidoModal}
         onClose={() => setShowConcluidoModal(false)}
         dayNumber={dayNumber}
         nextDay={dayNumber < 30 ? dayNumber + 1 : null}
+        basePath={fromMed ? '/pt/med/formacao/jornada' : JORNADA_BASE}
       />
     </div>
   )

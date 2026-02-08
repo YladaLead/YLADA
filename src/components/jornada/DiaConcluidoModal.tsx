@@ -8,25 +8,30 @@ interface DiaConcluidoModalProps {
   onClose: () => void
   dayNumber: number
   nextDay: number | null
+  /** Base path da trilha (ex.: /pt/med/formacao/jornada). Se não passado, usa Nutri. */
+  basePath?: string
 }
+
+const DEFAULT_JORNADA_PATH = '/pt/nutri/metodo/jornada'
 
 export default function DiaConcluidoModal({
   isOpen,
   onClose,
   dayNumber,
-  nextDay
+  nextDay,
+  basePath = DEFAULT_JORNADA_PATH
 }: DiaConcluidoModalProps) {
   const router = useRouter()
+  const base = basePath || DEFAULT_JORNADA_PATH
 
   if (!isOpen) return null
 
   const handleContinuar = () => {
     onClose()
     if (nextDay) {
-      router.push(`/pt/nutri/metodo/jornada/dia/${nextDay}`)
+      router.push(`${base}/dia/${nextDay}`)
     } else {
-      // Último dia concluído
-      router.push('/pt/nutri/metodo/jornada/concluida')
+      router.push(`${base}/concluida`)
     }
   }
 
@@ -61,12 +66,12 @@ export default function DiaConcluidoModal({
           {/* Mensagem */}
           <div className="text-center mb-6">
             <p className="text-lg text-gray-700 mb-2">
-              Você concluiu o <strong className="text-purple-600">Dia {dayNumber}</strong>!
+              Você concluiu a <strong className="text-purple-600">Etapa {dayNumber}</strong>!
             </p>
             <p className="text-gray-600 leading-relaxed">
               {nextDay 
                 ? `Continue avançando. Você está construindo algo diferente.`
-                : `Você completou toda a jornada! Uma conquista incrível.`
+                : `Você completou toda a trilha! Uma conquista incrível.`
               }
             </p>
           </div>
@@ -84,7 +89,7 @@ export default function DiaConcluidoModal({
             fullWidth
             className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-semibold py-3 text-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all"
           >
-            {nextDay ? `Continuar para o Dia ${nextDay}` : 'Ver Conclusão'}
+            {nextDay ? `Continuar para a Etapa ${nextDay}` : 'Ver Conclusão'}
           </PrimaryButton>
         </div>
       </div>

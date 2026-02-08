@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation'
 import { hasActiveSubscription, canBypassSubscription } from '@/lib/subscription-helpers'
 import { supabaseAdmin } from '@/lib/supabase'
 
-type Area = 'wellness' | 'nutri' | 'coach' | 'nutra'
+type Area = 'wellness' | 'nutri' | 'coach' | 'nutra' | 'med' | 'psi' | 'psicanalise' | 'odonto'
 
 interface AuthValidationResult {
   session: any

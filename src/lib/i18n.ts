@@ -105,4 +105,7 @@ export interface Translations {
     };
     cta: string;
   };
+
+  // Página institucional (/pt) — mobile-first, i18n-ready
+  institutional?: import('./translations/institutional-types').InstitutionalTranslations;
 }

@@ -236,7 +236,7 @@ export default function NutriSidebar({ isMobileOpen = false, onMobileClose }: Nu
             </p>
             {currentDay > 0 && currentDay <= 30 && (
               <p className="text-xs text-gray-500 mt-0.5">
-                Dia {currentDay} de 30
+                Etapa {currentDay}
               </p>
             )}
             {currentDay > 30 && (

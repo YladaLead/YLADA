@@ -9,30 +9,37 @@ interface BlockedDayModalProps {
   onClose: () => void
   blockedDay: number
   currentDay: number | null
+  /** Base path da trilha (ex.: /pt/med/formacao/jornada). Se não passado, usa Nutri. */
+  basePath?: string
 }
+
+const DEFAULT_JORNADA_PATH = '/pt/nutri/metodo/jornada'
 
 export default function BlockedDayModal({
   isOpen,
   onClose,
   blockedDay,
-  currentDay
+  currentDay,
+  basePath = DEFAULT_JORNADA_PATH
 }: BlockedDayModalProps) {
   const router = useRouter()
+  const base = basePath || DEFAULT_JORNADA_PATH
 
   if (!isOpen) return null
 
   const handleContinue = () => {
     onClose()
     if (currentDay) {
-      router.push(`/pt/nutri/metodo/jornada/dia/${currentDay}`)
+      router.push(`${base}/dia/${currentDay}`)
     } else {
-      router.push('/pt/nutri/metodo/jornada/dia/1')
+      router.push(`${base}/dia/1`)
     }
   }
 
   const handleViewJourney = () => {
     onClose()
-    router.push('/pt/nutri/metodo/jornada')
+    const listPath = base.replace(/\/dia\/\d+$/, '').replace(/\/jornada$/, '') || base
+    router.push(listPath)
   }
 
   return (
@@ -55,7 +62,7 @@ export default function BlockedDayModal({
           <div className="mb-4">
             <div className="flex items-center justify-between mb-2">
               <h2 className="text-2xl font-bold text-gray-900">
-                Dia ainda não disponível
+                Etapa ainda não disponível
               </h2>
               <button
                 onClick={onClose}
@@ -71,10 +78,10 @@ export default function BlockedDayModal({
           {/* Content */}
           <div className="mb-6">
             <p className="text-gray-700 leading-relaxed mb-4">
-              Para desbloquear este dia, conclua primeiro o <strong>Dia {currentDay || 1}</strong>.
+              Para desbloquear esta etapa, conclua primeiro a <strong>Etapa {currentDay || 1}</strong>.
             </p>
             <p className="text-gray-600 leading-relaxed">
-              A Jornada YLADA segue uma sequência que garante a sua transformação profissional.
+              A Trilha Empresarial segue uma sequência que garante a sua transformação profissional.
             </p>
             <p className="text-gray-600 leading-relaxed mt-2">
               Continue de onde parou para avançar.
@@ -95,7 +102,7 @@ export default function BlockedDayModal({
               fullWidth
               className="flex-1"
             >
-              ⚪ Ver Jornada Completa
+              ⚪ Ver Trilha Completa
             </SecondaryButton>
           </div>
         </div>

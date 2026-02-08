@@ -83,5 +83,94 @@ export const ptTranslations: Translations = {
       }
     },
     cta: 'Começar Agora'
+  },
+
+  institutional: {
+    hero: {
+      title: 'Transformamos conversa em contatos qualificados.',
+      subtitle: 'O YLADA é um motor de diagnóstico, links inteligentes e inteligência artificial que cria, provoca e direciona conversas estratégicas — aumentando a autoridade, a credibilidade e a performance de profissionais e times de campo.',
+      subtitle2: 'Antes da venda. Durante a conversa. Depois do contato.',
+      cta: 'Explorar soluções'
+    },
+    whoWeAre: {
+      title: 'Quem somos',
+      p1: 'O YLADA nasceu da ideia de que toda conversa pode gerar resultado quando existe direção, diagnóstico e inteligência por trás.',
+      p2: 'Criamos um sistema inteligente que ajuda profissionais e times de campo a atrair, qualificar e se conectar com pessoas realmente interessadas, transformando interações em oportunidades concretas.',
+      p3: 'Mais do que tecnologia, o YLADA organiza a conversa, orienta a rotina, fortalece a autoridade de quem está no campo e aumenta a confiança em cada interação.'
+    },
+    howItWorks: {
+      title: 'Como funciona',
+      item1: { title: 'Captação e Diagnóstico', description: 'Crie links, quizzes e avaliações inteligentes que provocam a conversa certa, entregam valor imediato e filtram curiosos de pessoas realmente interessadas — antes mesmo do primeiro contato.' },
+      item2: { title: 'Conversa Guiada e Inteligente', description: 'Conduza o diálogo com clareza e estratégia. A inteligência artificial do YLADA orienta o que falar, quando falar e como conduzir, ajustando a abordagem ao contexto real de cada interação.' },
+      item3: { title: 'Performance e Autoridade de Campo', description: 'Acompanhe decisões, interações e resultados para aumentar conversão, previsibilidade e credibilidade profissional, fortalecendo a confiança individual e do time no campo.' },
+      item4: { title: 'Escala Multimercado', description: 'Use o mesmo motor de geração de contatos e conversas em diferentes áreas, países e modelos de negócio — sem perder personalização nem controle.' }
+    },
+    differential: {
+      title: 'O diferencial da inteligência YLADA',
+      subtitle: 'Inteligência artificial que provoca conversa, não bloqueia relacionamento.',
+      intro: 'A inteligência artificial do YLADA não foi criada para substituir o profissional nem engessar o atendimento com respostas automáticas. Ela atua como um copiloto estratégico, ajustando rotina, abordagem e próximos passos de acordo com o contexto real de cada interação.',
+      list: [
+        'provoca o início da conversa certa',
+        'direciona o foco para pessoas realmente interessadas',
+        'orienta o que falar, quando falar e como conduzir',
+        'fortalece a autoridade e a credibilidade do profissional',
+        'eleva o desempenho e a confiança do time de campo'
+      ],
+      outro: 'O resultado é menos curiosos, mais qualidade de contato e conversas que evoluem naturalmente para relacionamento e decisão.',
+      tagline: 'Não é sobre responder mensagens. É sobre provocar conversas certas.'
+    },
+    areas: {
+      title: 'Escolha sua área',
+      subtitle: 'Acesse a solução YLADA para sua atuação. Áreas disponíveis ou em breve.',
+      list: {
+        nutri: { title: 'Nutri', description: 'Nutricionistas: ferramentas inteligentes, consultas em resultados mensuráveis.' },
+        wellness: { title: 'Wellness', description: 'Times de campo e vendas: contatos qualificados e performance.' },
+        med: { title: 'Medicina', description: 'Médicos e especialistas: diagnóstico, links e autoridade no campo.' },
+        psi: { title: 'Psicologia', description: 'Psicólogos: ferramentas de captação e conversas que convertem.' },
+        psicanalise: { title: 'Psicanálise', description: 'Psicanalistas: links e conteúdo que geram contato qualificado.' },
+        odonto: { title: 'Odontologia', description: 'Cirurgiões-dentistas: captação e relacionamento com pacientes.' },
+        nutra: { title: 'Nutra', description: 'Vendedores de suplementos e suplementos em geral: leads e conversão.' },
+        coach: { title: 'Coach', description: 'Coaches: ferramentas que engajam e transformam clientes.' }
+      }
+    },
+    badges: {
+      ready: 'Disponível',
+      comingSoon: 'Em breve'
+    },
+    philosophy: {
+      title: 'Filosofia YLADA',
+      p1: 'YLADA significa Your Leading Advanced Data Assistant.',
+      p2: 'Acreditamos que tecnologia só faz sentido quando melhora a conversa, fortalece o relacionamento e orienta decisões melhores no campo.',
+      p3: 'Por isso, criamos soluções que transformam dados em clareza, interações em oportunidades e conversas em resultados reais, com inteligência, humanidade e propósito.'
+    },
+    contact: {
+      title: 'Fale com a gente',
+      subtitle: 'Quer entender como o YLADA pode ajudar você ou seu time a gerar contatos mais qualificados, mais autoridade e mais previsibilidade?',
+      labelName: 'Nome',
+      labelProfession: 'Profissão',
+      labelCountry: 'País',
+      labelEmail: 'E-mail',
+      labelPhone: 'Telefone',
+      phoneHint: 'Selecione o país pela bandeira e digite apenas o número (sem DDD/área)',
+      submit: 'Enviar',
+      submitting: 'Enviando...',
+      successTitle: 'Obrigado pelo interesse!',
+      successMessage: 'Entraremos em contato em breve.',
+      successButton: 'OK'
+    },
+    construction: {
+      title: 'Em construção',
+      message: 'Estamos preparando esta área. Em breve você poderá acessar.',
+      back: 'Voltar à página inicial'
+    },
+    footer: {
+      tagline: 'YLADA: Your Leading Advanced Data Assistant',
+      privacy: 'Política de Privacidade',
+      terms: 'Termos de Uso',
+      cookies: 'Cookies',
+      refund: 'Reembolso',
+      languages: 'Idiomas: PT / ES / EN',
+      copyright: '© {year} YLADA. Todos os direitos reservados.'
+    }
   }
 };

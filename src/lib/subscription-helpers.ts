@@ -6,7 +6,7 @@ import { supabaseAdmin } from '@/lib/supabase'
  */
 export async function hasActiveSubscription(
   userId: string,
-  area: 'wellness' | 'nutri' | 'coach' | 'nutra'
+  area: 'wellness' | 'nutri' | 'coach' | 'nutra' | 'med'
 ): Promise<boolean> {
   try {
     const { data, error } = await supabaseAdmin
@@ -35,7 +35,7 @@ export async function hasActiveSubscription(
  */
 export async function hasFreePlan(
   userId: string,
-  area: 'wellness' | 'nutri' | 'coach' | 'nutra'
+  area: 'wellness' | 'nutri' | 'coach' | 'nutra' | 'med'
 ): Promise<boolean> {
   try {
     const { data, error } = await supabaseAdmin
@@ -65,7 +65,7 @@ export async function hasFreePlan(
  */
 export async function requiresManualRenewal(
   userId: string,
-  area: 'wellness' | 'nutri' | 'coach' | 'nutra'
+  area: 'wellness' | 'nutri' | 'coach' | 'nutra' | 'med'
 ): Promise<boolean> {
   try {
     const { data, error } = await supabaseAdmin
@@ -94,7 +94,7 @@ export async function requiresManualRenewal(
  */
 export async function getActiveSubscription(
   userId: string,
-  area: 'wellness' | 'nutri' | 'coach' | 'nutra'
+  area: 'wellness' | 'nutri' | 'coach' | 'nutra' | 'med'
 ) {
   try {
     const { data, error } = await supabaseAdmin

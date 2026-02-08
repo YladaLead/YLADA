@@ -6,7 +6,12 @@ import DayCard from '@/components/jornada/DayCard'
 import { useJornadaProgress } from '@/hooks/useJornadaProgress'
 import type { JourneyDay, JourneyStats } from '@/types/formacao'
 
-export default function JornadaSection() {
+interface JornadaSectionProps {
+  /** Quando definido (ex.: /pt/med/formacao/jornada), links das etapas e conclusão usam este path em vez de Nutri. */
+  basePath?: string
+}
+
+export default function JornadaSection({ basePath }: JornadaSectionProps = {}) {
   const [days, setDays] = useState<(JourneyDay & { progress: any; is_completed: boolean; is_locked: boolean })[]>([])
   const [stats, setStats] = useState<JourneyStats | null>(null)
   const [carregando, setCarregando] = useState(true)
@@ -81,7 +86,7 @@ export default function JornadaSection() {
     return (
       <div className="text-center py-12">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-        <p className="text-gray-600">Carregando sua jornada...</p>
+        <p className="text-gray-600">Carregando sua trilha...</p>
       </div>
     )
   }
@@ -92,9 +97,9 @@ export default function JornadaSection() {
       return (
         <div className="bg-yellow-50 border-2 border-yellow-200 rounded-xl p-8 text-center">
           <div className="text-6xl mb-4">📋</div>
-          <h3 className="text-xl font-bold text-gray-900 mb-2">Jornada em Preparação</h3>
+          <h3 className="text-xl font-bold text-gray-900 mb-2">Trilha em Preparação</h3>
           <p className="text-gray-700 mb-4">
-            A estrutura da Jornada de 30 Dias está sendo configurada. Em breve você poderá iniciar sua transformação!
+            A estrutura da Trilha Empresarial está sendo configurada. Em breve você poderá iniciar sua transformação!
           </p>
           <p className="text-sm text-gray-600">
             Enquanto isso, explore o Método YLADA para conhecer a filosofia por trás de tudo.
@@ -123,9 +128,9 @@ export default function JornadaSection() {
       {stats && (
         <div className="bg-white rounded-xl p-6 shadow-md border border-gray-200">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-2xl font-bold text-gray-900">Sua Jornada YLADA</h2>
+            <h2 className="text-2xl font-bold text-gray-900">Sua Trilha Empresarial</h2>
             <span className="text-lg font-semibold text-blue-600">
-              {stats.completed_days} de {stats.total_days} dias
+              {stats.completed_days} de {stats.total_days} etapas
             </span>
           </div>
           <div className="w-full bg-gray-200 rounded-full h-4 mb-2">
@@ -139,59 +144,55 @@ export default function JornadaSection() {
           </p>
           {stats.current_day && (
             <p className="text-sm text-blue-600 text-center mt-2 font-medium">
-              Próximo: Dia {stats.current_day}
+              Próximo: Etapa {stats.current_day}
             </p>
           )}
         </div>
       )}
 
-      {/* Semanas */}
+      {/* Blocos (antes "semanas") — fluxo por etapas, sem vínculo a dias/calendário */}
       <div className="space-y-6">
         {semanas.map((semana) => {
-          const diasSemana = days.filter(d => d.week_number === semana)
-          const semanaStats = stats?.week_progress.find(w => w.week === semana)
-          // REMOVIDO: isWeekLocked - não bloqueia mais semanas
+          const etapasBloco = days.filter(d => d.week_number === semana)
+          const blocoStats = stats?.week_progress.find(w => w.week === semana)
 
           return (
             <div key={semana} className="bg-white rounded-xl p-6 shadow-md border border-gray-200">
-              {/* Cabeçalho da Semana */}
               <div className="flex items-center justify-between mb-4">
                 <div>
                   <h3 className="text-xl font-bold text-gray-900">
-                    Semana {semana}
+                    Bloco {semana}
                     {semana === 1 && ' — Base YLADA (Identidade & Mentalidade)'}
-                    {semana === 2 && ' — Captação YLADA (Leads Diários)'}
-                    {semana === 3 && ' — Domínio da Rotina YLADA (Estrutura & Consistência)'}
+                    {semana === 2 && ' — Captação YLADA (Leads)'}
+                    {semana === 3 && ' — Domínio da Rotina (Estrutura & Consistência)'}
                     {semana === 4 && ' — Crescimento & GSAL (Domínio da Profissão)'}
                   </h3>
-                  {semanaStats && (
+                  {blocoStats && (
                     <p className="text-sm text-gray-600 mt-1">
-                      {semanaStats.completed} de {semanaStats.total} dias concluídos
+                      {blocoStats.completed} de {blocoStats.total} etapas concluídas
                     </p>
                   )}
                 </div>
-                {semanaStats && (
+                {blocoStats && (
                   <div className="text-right">
-                    <div className="text-2xl font-bold text-blue-600">{semanaStats.percentage}%</div>
+                    <div className="text-2xl font-bold text-blue-600">{blocoStats.percentage}%</div>
                     <div className="text-xs text-gray-500">Progresso</div>
                   </div>
                 )}
               </div>
 
-              {/* Barra de Progresso da Semana */}
-              {semanaStats && (
+              {blocoStats && (
                 <div className="w-full bg-gray-200 rounded-full h-2 mb-4">
                   <div
                     className="bg-gradient-to-r from-blue-500 to-indigo-500 h-2 rounded-full transition-all duration-500"
-                    style={{ width: `${semanaStats.percentage}%` }}
+                    style={{ width: `${blocoStats.percentage}%` }}
                   ></div>
                 </div>
               )}
 
-              {/* Dias da Semana */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 gap-3">
-                {diasSemana.length > 0 ? (
-                  diasSemana
+                {etapasBloco.length > 0 ? (
+                  etapasBloco
                     .sort((a, b) => a.day_number - b.day_number)
                     .map((day) => (
                       <DayCard
@@ -200,17 +201,18 @@ export default function JornadaSection() {
                           day_number: day.day_number,
                           title: day.title,
                           is_completed: day.is_completed,
-                          is_locked: false // SEM bloqueio - todos os dias acessíveis
+                          is_locked: false
                         }}
                         progress={progress}
                         currentDay={stats?.current_day || null}
+                        basePath={basePath}
                       />
                     ))
                 ) : (
                   <div className="col-span-full text-center py-8 text-gray-500 text-sm">
-                    {days.length === 0 
-                      ? '⚠️ Execute as migrations no Supabase para carregar os 30 dias da jornada.'
-                      : `Nenhum dia encontrado para a Semana ${semana}.`
+                    {days.length === 0
+                      ? '⚠️ Execute as migrations no Supabase para carregar as etapas da trilha.'
+                      : `Nenhuma etapa neste bloco.`
                     }
                   </div>
                 )}
@@ -226,16 +228,16 @@ export default function JornadaSection() {
           <p className="text-lg text-gray-800 font-medium text-center">
             {stats.progress_percentage === 100 ? (
               <>
-                🎉 Parabéns! Você completou toda a Jornada YLADA!
+                🎉 Parabéns! Você completou toda a Trilha Empresarial!
                 <Link
-                  href="/pt/nutri/metodo/jornada/concluida"
+                  href={basePath ? `${basePath}/concluida` : '/pt/nutri/metodo/jornada/concluida'}
                   className="block mt-4 text-blue-600 hover:text-blue-700 font-bold"
                 >
                   Ver Certificado de Conclusão →
                 </Link>
               </>
             ) : (
-              `Continue assim! Você já completou ${stats.completed_days} ${stats.completed_days === 1 ? 'dia' : 'dias'}. Sua transformação está acontecendo!`
+              `Continue assim! Você já completou ${stats.completed_days} ${stats.completed_days === 1 ? 'etapa' : 'etapas'}. Sua transformação está acontecendo!`
             )}
           </p>
         </div>

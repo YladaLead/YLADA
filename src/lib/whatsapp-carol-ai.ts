@@ -1353,11 +1353,13 @@ export async function processIncomingMessageWithCarol(
     const participated = tags.includes('participou_aula') || tags.includes('participou')
     const suppressWelcomeFlow = participated
 
+    // Na primeira mensagem da conversa, NÃO bloquear por isShortNeutralReply: a Z-API pode enviar
+    // só buttonId (texto curto) no clique do botão "Acabei de me inscrever..."; a Carol deve responder.
     const isFirstMessage =
       rawIsFirstMessage &&
       !suppressWelcomeFlow &&
       !formAlreadySentWelcome &&
-      !isShortNeutralReply &&
+      (!isShortNeutralReply || rawIsFirstMessage) &&
       !deniesSignup &&
       !isFromVideoOrLandingDuvida
 

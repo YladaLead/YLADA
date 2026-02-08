@@ -17,7 +17,7 @@ export default function WelcomeCard({ currentDay, userName }: WelcomeCardProps) 
   const phase = getLyaPhase(currentDay)
   const lyaConfig = getLyaConfig(phase)
   
-  // 🎉 TRILHA CONCLUÍDA: Layout simplificado pós-30 dias
+  // 🎉 TRILHA CONCLUÍDA: Layout simplificado após todas as etapas
   if (currentDay && currentDay > 30) {
     // Usar nome exatamente como configurado (sem adicionar título automaticamente)
     const displayName = userName || 'Nutricionista'
@@ -92,31 +92,30 @@ export default function WelcomeCard({ currentDay, userName }: WelcomeCardProps) 
     )
   }
   
-  // Determinar mensagem baseada no dia (jornada em andamento)
+  // Mensagem baseada na etapa atual (trilha em andamento)
   const getMessage = () => {
     if (!currentDay || currentDay === 0) {
       return {
-        title: 'Seu plano de ação para hoje',
-        description: 'Hoje, vamos estruturar sua base profissional. Leva cerca de 20 minutos.',
-        action: 'Iniciar Dia 1',
+        title: 'Seu próximo passo na trilha',
+        description: 'Estruture sua base profissional. Leva cerca de 20 minutos.',
+        action: 'Iniciar Etapa 1',
         href: '/pt/nutri/metodo/jornada/dia/1'
       }
     }
     
     if (currentDay === 1) {
       return {
-        title: 'Seu plano de ação para hoje',
-        description: 'Complete o Dia 1 da sua Trilha Empresarial. Isso organiza sua base profissional e evita confusão lá na frente.',
-        action: 'Executar Dia 1 com a LYA',
+        title: 'Seu próximo passo na trilha',
+        description: 'Complete a Etapa 1 da sua Trilha Empresarial. Isso organiza sua base profissional e evita confusão lá na frente.',
+        action: 'Executar Etapa 1 com a LYA',
         href: '/pt/nutri/metodo/jornada/dia/1'
       }
     }
     
-    // Dias 2-30
     return {
-      title: 'Seu plano de ação para hoje',
-      description: `Continue seguindo a Trilha. Você está no Dia ${currentDay} de 30. Mantenha o foco e a consistência.`,
-      action: `Continuar Dia ${currentDay}`,
+      title: 'Seu próximo passo na trilha',
+      description: `Continue seguindo a Trilha. Você está na Etapa ${currentDay}. Mantenha o foco e a consistência.`,
+      action: `Continuar Etapa ${currentDay}`,
       href: `/pt/nutri/metodo/jornada/dia/${currentDay}`
     }
   }
@@ -171,7 +170,7 @@ export default function WelcomeCard({ currentDay, userName }: WelcomeCardProps) 
           {/* Informação adicional (opcional) */}
           {currentDay && currentDay <= 7 && (
             <p className="text-sm text-blue-100 mt-4 opacity-90">
-              Fase atual: {lyaConfig.name} • Dia {currentDay} de 30
+              Fase atual: {lyaConfig.name} • Etapa {currentDay}
             </p>
           )}
         </div>

@@ -98,7 +98,7 @@ export default function MetodoYLADAPage() {
               Pronto para sua transformação?
             </h2>
             <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
-              Inicie sua Trilha Empresarial e transforme sua prática em negócio de sucesso, passo a passo, dia a dia (30 dias).
+              Inicie sua Trilha Empresarial e transforme sua prática em negócio de sucesso, passo a passo por etapas.
             </p>
             <Link
               href="/pt/nutri/metodo/jornada"

@@ -57,7 +57,7 @@ function JornadaPageContent() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-6 py-4 sm:py-6 lg:py-8">
             <Section
               title="📘 Trilha Empresarial YLADA"
-              subtitle="Capacitação empresarial em 30 dias: lote sua agenda e transforme sua rotina aplicando o Método YLADA – o que a faculdade não ensinou."
+              subtitle="Capacitação empresarial em fluxo: transforme sua rotina aplicando o Método YLADA – o que a faculdade não ensinou."
             >
               <JornadaSection />
             </Section>

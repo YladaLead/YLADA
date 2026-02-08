@@ -16,14 +16,21 @@ interface DayCardProps {
   progress: JornadaProgress | null
   currentDay: number | null
   onDayClick?: (dayNumber: number) => void
+  /** Quando definido (ex.: /pt/med/formacao/jornada), link da etapa usa este path. */
+  basePath?: string
 }
+
+const DEFAULT_JORNADA_PATH = '/pt/nutri/metodo/jornada'
 
 export default function DayCard({
   day,
   progress,
   currentDay,
-  onDayClick
+  onDayClick,
+  basePath = DEFAULT_JORNADA_PATH
 }: DayCardProps) {
+  const jornadaBase = basePath || DEFAULT_JORNADA_PATH
+  const etapaHref = `${jornadaBase}/dia/${day.day_number}`
   const [showModal, setShowModal] = useState(false)
   const { canAccessDay, isDayLocked, userEmail } = useJornadaProgress()
 
@@ -44,7 +51,7 @@ export default function DayCard({
   return (
     <>
       <Link
-        href={canAccess ? `/pt/nutri/metodo/jornada/dia/${day.day_number}` : '#'}
+        href={canAccess ? etapaHref : '#'}
         onClick={handleClick}
         className={`
           relative p-4 rounded-lg border-2 transition-all
@@ -57,7 +64,7 @@ export default function DayCard({
             : 'bg-white border-gray-200 hover:border-blue-300 hover:shadow-md'
           }
         `}
-        title={isLocked ? 'Conclua primeiro o dia anterior' : undefined}
+        title={isLocked ? 'Conclua primeiro a etapa anterior' : undefined}
       >
         {day.is_completed && (
           <div className="absolute top-2 right-2">
@@ -77,6 +84,7 @@ export default function DayCard({
           </div>
         )}
         <div className="text-center">
+          <div className="text-[10px] font-medium text-gray-500 uppercase tracking-wide mb-0.5">Etapa</div>
           <div className={`text-2xl font-bold mb-1 ${
             day.is_completed ? 'text-green-700' :
             isLocked ? 'text-gray-400' :
@@ -101,6 +109,7 @@ export default function DayCard({
         onClose={() => setShowModal(false)}
         blockedDay={day.day_number}
         currentDay={currentDay}
+        basePath={jornadaBase}
       />
     </>
   )
