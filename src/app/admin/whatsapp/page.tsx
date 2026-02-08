@@ -1869,7 +1869,9 @@ function WhatsAppChatContent() {
                               disabled={sending}
                               onClick={async () => {
                                 setCarolActionsOpen(false)
-                                if (!selectedConversation) return
+                                const conv = selectedConversation
+                                if (!conv) return
+                                const conversationId = conv.id
                                 try {
                                   setSending(true)
                                   if ('isReprocess' in item && item.isReprocess) {
@@ -1877,12 +1879,17 @@ function WhatsAppChatContent() {
                                       method: 'POST',
                                       headers: { 'Content-Type': 'application/json' },
                                       credentials: 'include',
-                                      body: JSON.stringify({ conversationId: selectedConversation.id }),
+                                      body: JSON.stringify({ conversationId }),
                                     })
                                     const data = await res.json()
                                     if (data.success) {
-                                      await loadMessages(selectedConversation.id)
-                                      await loadConversations()
+                                      try {
+                                        await loadMessages(conversationId)
+                                        await loadConversations()
+                                      } catch (refreshErr: any) {
+                                        console.error('[WhatsApp Admin] Erro ao atualizar lista após enviar:', refreshErr)
+                                        alert('✅ Mensagem enviada, mas a lista não atualizou. Atualize a página (F5) se precisar.')
+                                      }
                                       alert(item.id === 'boas_vindas' ? '✅ Boas-vindas enviadas! A Carol enviou a mensagem com as opções de horário.' : '✅ Carol respondeu à última mensagem do cliente.')
                                     } else {
                                       alert(data.error || 'Erro ao reprocessar com Carol')
@@ -1893,14 +1900,19 @@ function WhatsAppChatContent() {
                                       headers: { 'Content-Type': 'application/json' },
                                       credentials: 'include',
                                       body: JSON.stringify({
-                                        conversationId: selectedConversation.id,
+                                        conversationId,
                                         templateId: item.templateId,
                                       }),
                                     })
                                     const data = await res.json()
                                     if (data.success) {
-                                      await loadMessages(selectedConversation.id)
-                                      await loadConversations()
+                                      try {
+                                        await loadMessages(conversationId)
+                                        await loadConversations()
+                                      } catch (refreshErr: any) {
+                                        console.error('[WhatsApp Admin] Erro ao atualizar lista após enviar:', refreshErr)
+                                        alert('✅ Mensagem enviada, mas a lista não atualizou. Atualize a página (F5) se precisar.')
+                                      }
                                       alert('✅ Mensagem enviada (texto fixo).')
                                     } else {
                                       alert(data.error || 'Erro ao enviar')
@@ -1911,21 +1923,27 @@ function WhatsAppChatContent() {
                                       headers: { 'Content-Type': 'application/json' },
                                       credentials: 'include',
                                       body: JSON.stringify({
-                                        conversationId: selectedConversation.id,
+                                        conversationId,
                                         message: item.simulateMsg,
                                       }),
                                     })
                                     const data = await res.json()
                                     if (data.success) {
-                                      await loadMessages(selectedConversation.id)
-                                      await loadConversations()
+                                      try {
+                                        await loadMessages(conversationId)
+                                        await loadConversations()
+                                      } catch (refreshErr: any) {
+                                        console.error('[WhatsApp Admin] Erro ao atualizar lista após enviar:', refreshErr)
+                                        alert('✅ Mensagem enviada, mas a lista não atualizou. Atualize a página (F5) se precisar.')
+                                      }
                                       alert(data.response || '✅ Ação enviada.')
                                     } else {
                                       alert(data.error || 'Erro ao enviar')
                                     }
                                   }
                                 } catch (err: any) {
-                                  alert(err?.message || 'Erro ao enviar')
+                                  const msg = err?.message ?? String(err)
+                                  alert(msg === 'list is not defined' ? 'Erro ao atualizar a tela. Atualize a página (F5) e tente de novo.' : msg || 'Erro ao enviar')
                                 } finally {
                                   setSending(false)
                                 }
