@@ -18,16 +18,7 @@ export default function AdminPixelTestPage() {
     done.current = true
     const t = setTimeout(() => {
       try {
-        // 1) Purchase aula paga (R$ 37)
-        trackPurchase({
-          content_name: 'Aula Agenda Cheia Nutri',
-          content_ids: ['aula-paga-agenda-cheia'],
-          value: 37,
-          currency: 'BRL',
-          num_items: 1,
-          content_category: 'Aula Paga',
-        })
-        // 2) Purchase anuidade (R$ 1164)
+        // Purchase anuidade (R$ 1164)
         trackPurchase({
           content_name: 'Assinatura YLADA NUTRI',
           content_ids: ['plano-anual-nutri'],
@@ -50,7 +41,7 @@ export default function AdminPixelTestPage() {
       <div className="max-w-md mx-auto bg-white rounded-xl shadow p-6">
         <h1 className="text-xl font-bold text-gray-900 mb-2">Teste de eventos Pixel (Meta)</h1>
         <p className="text-sm text-gray-600 mb-4">
-          Esta página dispara uma vez, ao carregar, os eventos <strong>Purchase</strong> (Comprar) para aula paga R$ 37 e para anuidade R$ 1.164, para ativar o evento na Meta.
+          Esta página dispara uma vez, ao carregar, os eventos <strong>Purchase</strong> (Comprar) para anuidade R$ 1.164, para ativar o evento na Meta.
         </p>
         {sent && (
           <p className="text-green-700 font-medium">

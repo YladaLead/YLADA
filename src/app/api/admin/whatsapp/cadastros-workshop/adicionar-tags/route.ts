@@ -40,8 +40,7 @@ export async function POST(request: NextRequest) {
       .in('id', registrationIds)
 
     if (workshopRegs && workshopRegs.length > 0) {
-      // Só adicionar tags em cadastros da aula gratuita (não misturar com aula_paga)
-      registrations = workshopRegs.filter((r: any) => r.workshop_type !== 'aula_paga')
+      registrations = workshopRegs
     } else {
       const { data: contactRegs } = await supabaseAdmin
         .from('contact_submissions')

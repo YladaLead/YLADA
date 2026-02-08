@@ -64,8 +64,7 @@ export async function POST(request: NextRequest) {
       .select('*')
       .in('id', registrationIds)
     if (workshopRegs && workshopRegs.length > 0) {
-      // Não marcar enviado para aula paga (cadastros workshop = só aula gratuita)
-      registrations = workshopRegs.filter((r: any) => r.workshop_type !== 'aula_paga')
+      registrations = workshopRegs
     } else {
       const { data: contactRegs } = await supabaseAdmin
         .from('contact_submissions')

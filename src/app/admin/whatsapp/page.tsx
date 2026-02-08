@@ -232,10 +232,14 @@ function WhatsAppChatContent() {
         const reject = (s: string) => !s || /^[\d\s\-\+\(\)]{8,}$/.test(s)
         return (n && !reject(n)) || (d && !reject(d)) || (cust && !reject(cust))
       }
-      const mergeContext = (a: Conversation, b: Conversation) => ({
-        ...((a.context as any) || {}),
-        ...((b.context as any) || {}),
-      })
+      const mergeContext = (winner: Conversation, other: Conversation) => {
+        const w = (winner.context as any) || {}
+        const o = (other.context as any) || {}
+        const merged = { ...w, ...o }
+        // Tags: usar as da conversa principal para a tag não "voltar" (ex.: manual_welcome_sent)
+        if (Array.isArray(w.tags)) merged.tags = w.tags
+        return merged
+      }
       conversationsList.forEach((conv: Conversation) => {
         let digits = (conv.phone || '').replace(/\D/g, '')
         if (digits.startsWith('55') && digits.length === 12) digits = normalizePhoneBr(digits)
@@ -716,14 +720,6 @@ function WhatsAppChatContent() {
                 aria-label="Cadastros do workshop"
               >
                 🧾
-              </Link>
-              <Link
-                href="/admin/whatsapp/agenda-cheia-inscritos"
-                className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg text-emerald-700 hover:text-emerald-800 hover:bg-emerald-50 active:bg-emerald-100 text-lg"
-                title="Inscritos aula paga (Agenda Cheia – lembretes)"
-                aria-label="Inscritos Agenda Cheia"
-              >
-                📌
               </Link>
               <Link
                 href="/admin/whatsapp/fluxo"
