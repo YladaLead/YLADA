@@ -912,14 +912,16 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Verificar se é clique em botão (Z-API envia buttonId quando botão é clicado)
+    // Verificar se é clique em botão (Z-API envia buttonId/buttonText quando botão é clicado)
     const buttonId = body?.buttonId || body?.button_id || body?.button?.id || body?.data?.buttonId || null
     const buttonText = body?.buttonText || body?.button_text || body?.button?.text || body?.data?.buttonText || null
-    
+    // Priorizar texto do botão quando for mensagem longa (ex.: "Acabei de me inscrever...") para a Carol detectar e enviar boas-vindas
+    const buttonTextAsMessage = (typeof buttonText === 'string' && buttonText.trim().length > 20) ? buttonText.trim() : null
+
     // Extrair message - Z-API pode enviar em múltiplos formatos (e às vezes envia eventos sem mensagem)
-    // Se for clique em botão, usar o buttonId como mensagem para detecção
+    // Se for clique em botão com texto longo, usar o texto (para Carol reconhecer "Acabei de me inscrever..."); senão buttonId
     let message = pickFirstNonEmptyString(
-      // Se for clique em botão, priorizar buttonId
+      buttonTextAsMessage,
       buttonId ? buttonId : null,
       
       // Formato Z-API comum
@@ -1156,6 +1158,15 @@ export async function POST(request: NextRequest) {
     // (para evitar loops e respostas automáticas para nossas próprias mensagens)
     if (!finalIsFromUs) {
       try {
+        // 🛑 Kill-switch global: se Carol está desligada, não processar (evita tentativa e log de erro)
+        const { isCarolAutomationDisabled } = await import('@/config/whatsapp-automation')
+        if (isCarolAutomationDisabled()) {
+          console.log('[Z-API Webhook] ⏭️ Carol desligada globalmente (CAROL_AUTOMATION_DISABLED) — automação não disparada', {
+            conversationId,
+            phone: phone?.slice(-4)
+          })
+          // Não lançar erro; seguir para notificações etc.
+        } else {
         // 🛑 MODO MANUAL (por conversa): se ativado, não responder com a Carol nem rodar automações.
         // Usado quando o time quer enviar áudio/mensagem manual sem a Carol "pegar" a conversa.
         try {
@@ -1292,6 +1303,14 @@ export async function POST(request: NextRequest) {
           (!notificationPhone || phone.replace(/\D/g, '') !== notificationPhone.replace(/\D/g, '')) &&
           shouldAllowResponse && // 🆕 Usar lógica melhorada
           !alreadyProcessed // 🆕 Não processar se já respondeu recentemente
+
+        console.log('[Z-API Webhook] 🤖 Decisão Carol:', {
+          shouldProcessCarol,
+          shouldAllowResponse,
+          alreadyProcessed,
+          hasRecentCarolMessage: !!hasRecentCarolMessage,
+          isNotificationPhone: !!notificationPhone && phone.replace(/\D/g, '') === notificationPhone.replace(/\D/g, ''),
+        })
         
         let carolProcessedThisMessage = false
         if (shouldProcessCarol) {
@@ -1391,6 +1410,7 @@ export async function POST(request: NextRequest) {
         } else {
           console.log('[Z-API Webhook] ⏭️ Pulando automações antigas (Carol já processou esta mensagem)')
         }
+        } // fim do else (Carol não está desligada globalmente)
       } catch (carolError: any) {
         if (carolError?.code === 'MANUAL_MODE_SKIP' || carolError?.message === 'MANUAL_MODE_SKIP') {
           console.log('[Z-API Webhook] ⏭️ Pulando Carol/automações por modo manual', { conversationId })

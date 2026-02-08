@@ -95,6 +95,7 @@ function WhatsAppChatContent() {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const userClearedSelectionRef = useRef(false) // Flag para indicar que o usuário explicitamente limpou a seleção
   const hasInitializedFromUrlRef = useRef(false) // Flag para indicar se já inicializou a partir da URL
+  const latestConversationsRef = useRef<Conversation[]>([]) // Lista mais recente para uso no callback de setSelectedConversation (evita "list is not defined")
 
   // Verificar parâmetro da URL na primeira carga
   useEffect(() => {
@@ -271,6 +272,7 @@ function WhatsAppChatContent() {
       })
       
       conversationsList = Array.from(phoneMap.values())
+      latestConversationsRef.current = conversationsList
       console.log('✅ Conversas carregadas e agrupadas:', {
         antes: data.conversations?.length || 0,
         depois: conversationsList.length
@@ -278,35 +280,25 @@ function WhatsAppChatContent() {
       setConversations(conversationsList)
 
       // Manter conversa selecionada (evita "voltar" para outra conversa)
-      // IMPORTANTE: usar update funcional para evitar closures antigas do setInterval
+      // Usar ref para ler a lista atual (evita closure obsoleta e "list is not defined")
       setSelectedConversation((prev) => {
-        const list: Conversation[] = conversationsList || []
+        const list = latestConversationsRef.current || []
         if (list.length === 0) return null
-        
-        // Se o usuário explicitamente limpou a seleção (clicou em "← Conversas"),
-        // não selecionar automaticamente nenhuma conversa
+
         if (userClearedSelectionRef.current) {
           return null
         }
-        
+
         if (!prev) {
-          // Apenas selecionar automaticamente na primeira carga (quando não há flag de limpeza)
           return list[0]
         }
-        
-        // Buscar conversa selecionada na lista atualizada
+
         const stillExists = list.find((c) => c.id === prev.id)
-        
         if (stillExists) {
-          // Conversa ainda existe na lista - manter selecionada
           return stillExists
-        } else {
-          // Conversa não existe mais na lista (foi removida/arquivada)
-          // NÃO voltar para list[0] automaticamente - manter prev para não mudar de conversa
-          // Isso evita que o sistema "pule" para outra conversa quando você está lendo uma
-          console.log('[WhatsApp Admin] ⚠️ Conversa selecionada não encontrada na lista atualizada, mantendo seleção:', prev.id)
-          return prev
         }
+        console.log('[WhatsApp Admin] ⚠️ Conversa selecionada não encontrada na lista atualizada, mantendo seleção:', prev.id)
+        return prev
       })
     } catch (error) {
       console.error('Erro ao carregar conversas:', error)

@@ -1093,6 +1093,13 @@ export async function processIncomingMessageWithCarol(
       return { success: false, error: 'OpenAI API Key não configurada' }
     }
 
+    // Mensagem vazia não deve travar; retornar erro claro
+    const msgTrim = typeof message === 'string' ? message.trim() : ''
+    if (!msgTrim) {
+      console.warn('[Carol AI] ⚠️ Mensagem vazia recebida, ignorando')
+      return { success: false, error: 'Mensagem vazia' }
+    }
+
     // 1. Buscar contexto da conversa
     // Usar maybeSingle() para evitar erro se não encontrar (pode ser problema de timing)
     let conversation: any = null
@@ -2427,8 +2434,9 @@ Finalize com: "Responde 1 ou 2 😊".`
 
     return { success: true, response: carolResponse }
   } catch (error: any) {
-    console.error('[Carol AI] Erro ao processar mensagem:', error)
-    return { success: false, error: error.message }
+    const errMsg = error?.message ?? (typeof error === 'string' ? error : String(error))
+    console.error('[Carol AI] ❌ Erro ao processar mensagem:', errMsg, error)
+    return { success: false, error: errMsg }
   }
 }
 
