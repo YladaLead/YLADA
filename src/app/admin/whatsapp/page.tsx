@@ -89,6 +89,7 @@ function WhatsAppChatContent() {
   const [carolActionsOpen, setCarolActionsOpen] = useState(false)
   const [showScrollToBottom, setShowScrollToBottom] = useState(false)
   const [carolStatus, setCarolStatus] = useState<{ disabled: boolean; message?: string } | null>(null)
+  const [carolStatusToggling, setCarolStatusToggling] = useState(false)
   const messagesContainerRef = useRef<HTMLDivElement>(null)
   const carolActionsRef = useRef<HTMLDivElement>(null)
   const shouldAutoScrollRef = useRef(true)
@@ -280,25 +281,21 @@ function WhatsAppChatContent() {
       setConversations(conversationsList)
 
       // Manter conversa selecionada (evita "voltar" para outra conversa)
-      // Usar ref para ler a lista atual (evita closure obsoleta e "list is not defined")
+      // Usar ref para ler a lista (nunca usar variável "list" solta para evitar ReferenceError em produção)
+      const currentList = latestConversationsRef.current ?? []
       setSelectedConversation((prev) => {
-        const list = latestConversationsRef.current || []
-        if (list.length === 0) return null
-
-        if (userClearedSelectionRef.current) {
-          return null
+        try {
+          if (!Array.isArray(currentList) || currentList.length === 0) return null
+          if (userClearedSelectionRef.current) return null
+          if (!prev) return currentList[0]
+          const stillExists = currentList.find((c) => c.id === prev.id)
+          if (stillExists) return stillExists
+          console.log('[WhatsApp Admin] ⚠️ Conversa selecionada não encontrada na lista atualizada, mantendo seleção:', prev.id)
+          return prev
+        } catch (e) {
+          console.error('[WhatsApp Admin] Erro ao atualizar conversa selecionada:', e)
+          return prev ?? null
         }
-
-        if (!prev) {
-          return list[0]
-        }
-
-        const stillExists = list.find((c) => c.id === prev.id)
-        if (stillExists) {
-          return stillExists
-        }
-        console.log('[WhatsApp Admin] ⚠️ Conversa selecionada não encontrada na lista atualizada, mantendo seleção:', prev.id)
-        return prev
       })
     } catch (error) {
       console.error('Erro ao carregar conversas:', error)
@@ -742,7 +739,7 @@ function WhatsAppChatContent() {
         </div>
       </div>
 
-      {/* Status Carol: ligada / desligada — instruções para ligar (item 6) */}
+      {/* Status Carol: ligada / desligada — controle pelo admin (sem .env nem Vercel) */}
       {carolStatus && (
         <div
           className={`flex-shrink-0 px-4 py-2 text-sm ${
@@ -754,16 +751,44 @@ function WhatsAppChatContent() {
           <div className="flex items-center justify-between gap-2 flex-wrap">
             <span className="font-medium">
               {carolStatus.disabled ? (
-                <>🤖 Carol: <strong>desligada</strong> — reprocessar e disparos retornam 503 até você ligar.</>
+                <>🤖 Carol: <strong>desligada</strong></>
               ) : (
                 <>🤖 Carol: <strong>ligada</strong></>
               )}
             </span>
-            {carolStatus.disabled && (
-              <span className="text-xs">
-                Para ligar: Vercel → Settings → Environment Variables → <code className="bg-amber-100 px-1 rounded">CAROL_AUTOMATION_DISABLED=false</code> → Redeploy.
-              </span>
-            )}
+            <button
+              type="button"
+              disabled={carolStatusToggling}
+              onClick={async () => {
+                setCarolStatusToggling(true)
+                try {
+                  const res = await fetch('/api/admin/whatsapp/carol/status', {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ disabled: !carolStatus.disabled }),
+                  })
+                  const data = await res.json()
+                  if (data.success) {
+                    setCarolStatus({ disabled: data.disabled, message: data.message })
+                  } else {
+                    alert(data.error || 'Erro ao alterar')
+                  }
+                } catch (e: any) {
+                  alert(e?.message || 'Erro ao alterar')
+                } finally {
+                  setCarolStatusToggling(false)
+                }
+              }}
+              className={`min-h-[36px] px-3 py-1.5 text-xs font-medium rounded-lg touch-manipulation ${
+                carolStatus.disabled
+                  ? 'bg-green-600 text-white hover:bg-green-700 active:bg-green-800 disabled:opacity-50'
+                  : 'bg-amber-600 text-white hover:bg-amber-700 active:bg-amber-800 disabled:opacity-50'
+              }`}
+              title={carolStatus.disabled ? 'Ligar Carol (respostas automáticas)' : 'Desligar Carol'}
+            >
+              {carolStatusToggling ? '…' : carolStatus.disabled ? 'Ligar Carol' : 'Desligar Carol'}
+            </button>
           </div>
         </div>
       )}
@@ -1135,6 +1160,12 @@ function WhatsAppChatContent() {
                           </span>
                         )}
                       </div>
+                      {/* Aviso: Carol pausada nesta conversa (você desativou no admin) */}
+                      {(getTags(selectedConversation).includes('atendimento_manual') || getTags(selectedConversation).includes('manual_mode') || (selectedConversation.context as any)?.manual_mode === true) && (
+                        <div className="mt-2 px-3 py-2 rounded-lg bg-amber-50 border border-amber-200 text-amber-800 text-xs">
+                          <strong>🤖 Carol está pausada nesta conversa.</strong> Ela não vai responder automaticamente até você ativar de novo. Menu <strong>⋮</strong> (três pontinhos) → <strong>Ativar Carol</strong>.
+                        </div>
+                      )}
                     </div>
                   </div>
 

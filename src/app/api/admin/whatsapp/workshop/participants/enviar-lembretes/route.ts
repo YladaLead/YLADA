@@ -9,7 +9,7 @@ import { requireApiAuth } from '@/lib/api-auth'
 import { supabaseAdmin } from '@/lib/supabase'
 import { createZApiClient } from '@/lib/z-api'
 import { formatSessionDateTime, getRegistrationName } from '@/lib/whatsapp-carol-ai'
-import { isCarolAutomationDisabled } from '@/config/whatsapp-automation'
+import { getCarolAutomationDisabled } from '@/lib/carol-admin-settings'
 
 function getFirstName(name: string | null | undefined): string {
   if (!name || typeof name !== 'string') return ''
@@ -24,9 +24,9 @@ export async function POST(request: NextRequest) {
     const authResult = await requireApiAuth(request, ['admin'])
     if (authResult instanceof NextResponse) return authResult
 
-    if (isCarolAutomationDisabled()) {
+    if (await getCarolAutomationDisabled()) {
       return NextResponse.json(
-        { success: false, error: 'Automação Carol desligada. Ligue em Vercel (CAROL_AUTOMATION_DISABLED=false) e faça redeploy.' },
+        { success: false, error: 'Carol desligada. Ligue em /admin/whatsapp (botão no topo).' },
         { status: 503 }
       )
     }

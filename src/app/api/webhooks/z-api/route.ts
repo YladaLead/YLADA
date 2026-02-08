@@ -1159,8 +1159,8 @@ export async function POST(request: NextRequest) {
     if (!finalIsFromUs) {
       try {
         // 🛑 Kill-switch global: se Carol está desligada, não processar (evita tentativa e log de erro)
-        const { isCarolAutomationDisabled } = await import('@/config/whatsapp-automation')
-        if (isCarolAutomationDisabled()) {
+        const { getCarolAutomationDisabled } = await import('@/lib/carol-admin-settings')
+        if (await getCarolAutomationDisabled()) {
           console.log('[Z-API Webhook] ⏭️ Carol desligada globalmente (CAROL_AUTOMATION_DISABLED) — automação não disparada', {
             conversationId,
             phone: phone?.slice(-4)

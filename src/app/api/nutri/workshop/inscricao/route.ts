@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
 import { resend, FROM_EMAIL, FROM_NAME, isResendConfigured } from '@/lib/resend'
-import { isCarolAutomationDisabled, isWhatsAppAutoInviteEnabled } from '@/config/whatsapp-automation'
+import { getCarolAutomationDisabled } from '@/lib/carol-admin-settings'
+import { isWhatsAppAutoInviteEnabled } from '@/config/whatsapp-automation'
 
 /**
  * POST - Salvar inscrição no workshop
@@ -179,7 +180,8 @@ export async function POST(request: NextRequest) {
     //
     // (Quando ligado) Envia WhatsApp em background e espera 60s antes de enviar,
     // para dar tempo da pessoa clicar no botão WhatsApp primeiro.
-    if (isWhatsAppAutoInviteEnabled() && sanitizedData.telefone && !isCarolAutomationDisabled()) {
+    const carolDisabled = await getCarolAutomationDisabled()
+    if (isWhatsAppAutoInviteEnabled() && sanitizedData.telefone && !carolDisabled) {
       const phoneClean = sanitizedData.telefone.replace(/\D/g, '')
       const leadName = sanitizedData.nome
       const userIdPromise = supabaseAdmin
@@ -208,7 +210,7 @@ export async function POST(request: NextRequest) {
         }
       }).catch(() => {})
       // Não aguardar a automação — resposta da API volta imediatamente
-    } else if (sanitizedData.telefone && (isCarolAutomationDisabled() || !isWhatsAppAutoInviteEnabled())) {
+    } else if (sanitizedData.telefone && (carolDisabled || !isWhatsAppAutoInviteEnabled())) {
       console.log('[Workshop Inscrição] Disparo proativo desligado - WhatsApp não enviado automaticamente.')
     }
 

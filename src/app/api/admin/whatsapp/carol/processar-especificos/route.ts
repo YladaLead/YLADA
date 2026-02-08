@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireApiAuth } from '@/lib/api-auth'
-import { isCarolAutomationDisabled } from '@/config/whatsapp-automation'
+import { getCarolAutomationDisabled } from '@/lib/carol-admin-settings'
 import { supabaseAdmin } from '@/lib/supabase'
 import { createZApiClient } from '@/lib/z-api'
 import { generateCarolResponse, formatSessionDateTime } from '@/lib/whatsapp-carol-ai'
@@ -12,7 +12,7 @@ import { generateCarolResponse, formatSessionDateTime } from '@/lib/whatsapp-car
 export async function POST(request: NextRequest) {
   const authResult = await requireApiAuth(request, ['admin'])
   if (authResult instanceof NextResponse) return authResult
-  if (isCarolAutomationDisabled()) {
+  if (await getCarolAutomationDisabled()) {
     return NextResponse.json({ disabled: true, message: 'Automação temporariamente desligada' }, { status: 503 })
   }
   try {

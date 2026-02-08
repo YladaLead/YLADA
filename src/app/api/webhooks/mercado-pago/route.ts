@@ -3,7 +3,7 @@ import { supabaseAdmin } from '@/lib/supabase'
 import { verifyPayment } from '@/lib/mercado-pago'
 import { createAccessToken } from '@/lib/email-tokens'
 import { sendWelcomeEmail } from '@/lib/email-templates'
-import { isCarolAutomationDisabled } from '@/config/whatsapp-automation'
+import { getCarolAutomationDisabled } from '@/lib/carol-admin-settings'
 import { redirectToSupportAfterPayment } from '@/lib/whatsapp-carol-ai'
 
 /**
@@ -719,7 +719,8 @@ async function handlePaymentEvent(data: any, isTest: boolean = false) {
         }
         
         // Se encontrou conversa e automação ligada, direcionar para suporte via WhatsApp
-        if (conversationId && !isCarolAutomationDisabled()) {
+        const carolDisabled = await getCarolAutomationDisabled()
+        if (conversationId && !carolDisabled) {
           const redirectResult = await redirectToSupportAfterPayment(conversationId, {
             amount,
             plan: `${area}_${planType}`,
@@ -729,7 +730,7 @@ async function handlePaymentEvent(data: any, isTest: boolean = false) {
           } else {
             console.warn('⚠️ Erro ao direcionar para suporte:', redirectResult.error)
           }
-        } else if (conversationId && isCarolAutomationDisabled()) {
+        } else if (conversationId && carolDisabled) {
           console.log('ℹ️ Automação desligada - direcionamento WhatsApp pós-pagamento não enviado')
         } else {
           console.log('ℹ️ Conversa não encontrada para direcionar ao suporte')

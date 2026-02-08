@@ -13,7 +13,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
-import { isCarolAutomationDisabled } from '@/config/whatsapp-automation'
+import { getCarolAutomationDisabled } from '@/lib/carol-admin-settings'
 import { sendRegistrationLinkAfterClass } from '@/lib/whatsapp-carol-ai'
 import { buildInscricoesMaps, findInscricaoByName } from '@/lib/whatsapp-conversation-enrichment'
 import { normalizePhoneBr } from '@/lib/phone-br'
@@ -138,10 +138,11 @@ export async function PATCH(
       }
       updateData.context = nextContext
       
-      // Detectar se tag "participou_aula" foi adicionada (desligado quando isCarolAutomationDisabled)
+      // Detectar se tag "participou_aula" foi adicionada (desligado quando Carol desligada pelo admin)
       const hadParticipatedTag = prevTags.includes('participou_aula')
       const hasParticipatedTag = nextTags.includes('participou_aula')
-      if (!hadParticipatedTag && hasParticipatedTag && !isCarolAutomationDisabled()) {
+      const carolDisabled = await getCarolAutomationDisabled()
+      if (!hadParticipatedTag && hasParticipatedTag && !carolDisabled) {
         console.log('[WhatsApp Conversation] 🎉 Tag participou_aula adicionada - enviando link de cadastro')
         try {
           sendRegistrationLinkAfterClass(conversationId).catch((error: any) => {

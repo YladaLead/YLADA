@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireApiAuth } from '@/lib/api-auth'
 import { supabaseAdmin } from '@/lib/supabase'
 import { sendRegistrationLinkAfterClass, sendRemarketingToNonParticipant, getRegistrationName } from '@/lib/whatsapp-carol-ai'
-import { isCarolAutomationDisabled } from '@/config/whatsapp-automation'
+import { getCarolAutomationDisabled } from '@/lib/carol-admin-settings'
 
 /**
  * GET /api/admin/whatsapp/workshop/participants
@@ -165,7 +165,8 @@ export async function POST(request: NextRequest) {
     let linkSent = false
     let linkError: string | undefined
     let messageForManual: string | undefined
-    if (isAddingParticipatedTag && !isCarolAutomationDisabled()) {
+    const carolDisabled = await getCarolAutomationDisabled()
+    if (isAddingParticipatedTag && !carolDisabled) {
       try {
         const result = await sendRegistrationLinkAfterClass(conversationId)
         linkSent = result.success
@@ -180,8 +181,8 @@ export async function POST(request: NextRequest) {
         linkError = error.message || 'Erro ao enviar mensagem'
         console.error('[Workshop Participants] ❌ Erro ao disparar flow:', error)
       }
-    } else if (isAddingParticipatedTag && isCarolAutomationDisabled()) {
-      linkError = 'Automação desligada. Ligue CAROL_AUTOMATION_DISABLED=false e envie manualmente.'
+    } else if (isAddingParticipatedTag && carolDisabled) {
+      linkError = 'Carol desligada no admin. Ligue em /admin/whatsapp e envie manualmente.'
       messageForManual = `Oi [NOME]! 💚
 
 Que bom que você participou da aula.

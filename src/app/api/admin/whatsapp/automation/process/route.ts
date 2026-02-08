@@ -5,7 +5,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { requireApiAuth } from '@/lib/api-auth'
-import { isCarolAutomationDisabled } from '@/config/whatsapp-automation'
+import { getCarolAutomationDisabled } from '@/lib/carol-admin-settings'
 import { processScheduledMessages } from '@/lib/whatsapp-automation/worker'
 
 export async function POST(request: NextRequest) {
@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
   if (authResult instanceof NextResponse) {
     return authResult
   }
-  if (isCarolAutomationDisabled()) {
+  if (await getCarolAutomationDisabled()) {
     return NextResponse.json({ disabled: true, message: 'Automação temporariamente desligada' }, { status: 200 })
   }
   try {
