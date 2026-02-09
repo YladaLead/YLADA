@@ -4103,7 +4103,7 @@ Você tinha um sonho, um objetivo. Algo que te moveu a buscar essa mudança.
 
 Pensa comigo: quanto custa NÃO mudar? Quanto custa continuar adiando esse sonho?
 
-O investimento é de apenas R$ 197 por mês. Menos de R$ 7 por dia.
+O investimento é de apenas R$ 97 por mês. Menos de R$ 3,50 por dia.
 
 Pensa no que você vai ganhar: um estado de espírito completamente diferente, a transformação que você busca, a realização desse sonho que te moveu até aqui.
 
@@ -4129,7 +4129,7 @@ Sabe, o momento perfeito não existe. O momento certo é AGORA.
 
 Você veio até aqui porque tinha um sonho. Pensa: quanto custa NÃO realizar esse sonho? Quanto custa continuar adiando?
 
-O investimento é de apenas R$ 197 por mês. Menos de R$ 7 por dia para transformar sua vida.
+O investimento é de apenas R$ 97 por mês. Menos de R$ 3,50 por dia para transformar sua vida.
 
 Pensa no estado de espírito que você vai adquirir, na transformação que você busca, na realização desse sonho.
 
@@ -4153,7 +4153,7 @@ Você tinha um sonho, um objetivo. Algo que te moveu.
 
 Pensa: quanto custa NÃO mudar? Quanto custa continuar adiando esse sonho que te trouxe até aqui?
 
-O investimento é de apenas R$ 197 por mês. Menos de R$ 7 por dia.
+O investimento é de apenas R$ 97 por mês. Menos de R$ 3,50 por dia.
 
 Pensa no que você vai ganhar: um estado de espírito completamente diferente, a transformação que você busca, a realização desse sonho.
 

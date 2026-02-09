@@ -475,7 +475,7 @@ export default function WorkshopAgendaInstavelPage() {
                 </div>
               </div>
               <p className="mt-6 text-sm sm:text-base text-gray-600 text-center font-semibold">
-                No final, se fizer sentido, você conhece o <strong className="text-gray-900">Método YLADA</strong> (R$197/mês) para estabilizar sua agenda com estrutura e acompanhamento.
+                No final, se fizer sentido, você conhece o <strong className="text-gray-900">Método YLADA</strong> (R$97/mês) para estabilizar sua agenda com estrutura e acompanhamento.
               </p>
             </div>
           </div>

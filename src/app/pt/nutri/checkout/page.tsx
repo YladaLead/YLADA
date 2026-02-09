@@ -10,7 +10,7 @@ import { trackNutriCheckoutAnnual } from '@/lib/facebook-pixel'
 export default function NutriCheckoutPage() {
   const router = useRouter()
   const { user, userProfile, loading: authLoading } = useAuth()
-  // Área Nutri: único plano vendido é o anual (sem mensal e sem trial de 3 dias)
+  // Área Nutri: oferta mensal R$ 97 e anual 12× de R$ 59 (R$ 708)
   const [planType, setPlanType] = useState<'monthly' | 'annual'>('annual')
   const [planLocked, setPlanLocked] = useState(false)
   const [productTypeOverride, setProductTypeOverride] = useState<
@@ -70,14 +70,11 @@ export default function NutriCheckoutPage() {
         setPlanType('annual')
         setPlanLocked(true)
         trackNutriCheckoutAnnual()
+      } else if (plan === 'monthly') {
+        setPlanType('monthly')
+        setPlanLocked(true)
       } else {
-        // Nutri vende apenas plano anual; ?plan=monthly ou sem plan → forçar anual
         setPlanType('annual')
-        if (plan === 'monthly' && typeof window !== 'undefined') {
-          const url = new URL(window.location.href)
-          url.searchParams.set('plan', 'annual')
-          window.history.replaceState({}, '', url.pathname + '?' + url.searchParams.toString())
-        }
         trackNutriCheckoutAnnual()
       }
 
@@ -290,22 +287,40 @@ export default function NutriCheckoutPage() {
             </div>
           )}
 
-          {/* Plano Anual — único plano, visual limpo */}
-          <div className="mb-6">
-            <div className="max-w-md mx-auto p-6 rounded-xl border border-blue-200 bg-blue-50/50">
-              <div className="text-center">
-                <h3 className="text-lg font-semibold text-gray-800 mb-1">
-                  Plano Anual
-                </h3>
-                <div className="text-3xl font-bold text-blue-600 mb-1">
-                  12× de R$ 97
-                </div>
-                <p className="text-sm text-gray-600 mb-1">Total: R$ 1.164,00/ano</p>
-                <p className="text-sm text-gray-600">
-                  Mentoria LYA, links inteligentes e rotina que gera agenda previsível
-                </p>
-              </div>
+          {/* Escolha do plano: Mensal R$ 97 ou Anual 12× R$ 59 */}
+          <div className="mb-6 space-y-3">
+            <p className="text-sm font-medium text-gray-700 text-center">Escolha seu plano</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={() => setPlanType('monthly')}
+                className={`p-4 rounded-xl border-2 text-left transition-all ${
+                  planType === 'monthly'
+                    ? 'border-blue-600 bg-blue-50'
+                    : 'border-gray-200 bg-white hover:border-gray-300'
+                }`}
+              >
+                <h3 className="font-semibold text-gray-800">Plano Mensal</h3>
+                <p className="text-2xl font-bold text-blue-600 mt-1">R$ 97<span className="text-base font-normal text-gray-600">/mês</span></p>
+                <p className="text-xs text-gray-600 mt-1">Cobrança mês a mês. Cancele quando quiser.</p>
+              </button>
+              <button
+                type="button"
+                onClick={() => setPlanType('annual')}
+                className={`p-4 rounded-xl border-2 text-left transition-all ${
+                  planType === 'annual'
+                    ? 'border-blue-600 bg-blue-50'
+                    : 'border-gray-200 bg-white hover:border-gray-300'
+                }`}
+              >
+                <h3 className="font-semibold text-gray-800">Plano Anual</h3>
+                <p className="text-2xl font-bold text-blue-600 mt-1">12× de R$ 59</p>
+                <p className="text-xs text-gray-600 mt-1">Total: R$ 708,00/ano. Economia promocional.</p>
+              </button>
             </div>
+            <p className="text-sm text-gray-600 text-center">
+              Mentoria LYA, links inteligentes e rotina que gera agenda previsível
+            </p>
           </div>
 
           {/* Argumento de fechamento — antes do e-mail */}

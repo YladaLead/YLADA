@@ -66,10 +66,10 @@ function NutriPagamentoSucessoContent() {
       // Rastrear evento Purchase no Facebook Pixel
       // Tentar extrair valor do plano da URL ou usar valor padrão
       const planParam = searchParams.get('plan')
-      let purchaseValue = 197 // Valor padrão (mensal)
+      let purchaseValue = 97 // Valor padrão (mensal)
       
       if (planParam === 'annual') {
-        purchaseValue = 1164 // Plano anual
+        purchaseValue = 708 // Plano anual (12× de R$ 59)
       }
       
       // Aguardar alguns segundos para o webhook processar

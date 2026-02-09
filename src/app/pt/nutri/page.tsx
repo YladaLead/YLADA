@@ -41,9 +41,9 @@ export default function NutriLandingPage() {
     setLyaWidgetOpen(true)
   }
 
-  // Área Nutri: único plano vendido é o anual (sem mensal e sem trial de 3 dias)
-  const handleCheckout = () => {
-    window.location.href = '/pt/nutri/checkout?plan=annual'
+  // Área Nutri: mensal R$ 97 ou anual 12× de R$ 59 (R$ 708)
+  const handleCheckout = (plan: 'monthly' | 'annual' = 'annual') => {
+    window.location.href = `/pt/nutri/checkout?plan=${plan}`
   }
 
   const onVideoTimeUpdate = () => {
@@ -220,7 +220,7 @@ export default function NutriLandingPage() {
                   Tirar dúvida
                 </a>
                 <Link
-                  href="/pt/nutri/checkout?plan=annual"
+                  href="/pt/nutri/checkout"
                   className="w-full sm:flex-1 sm:max-w-xs inline-flex justify-center items-center px-8 py-4 rounded-xl text-lg font-bold bg-gradient-to-r from-[#2563EB] to-[#3B82F6] text-white hover:from-[#3B82F6] hover:to-[#1D4ED8] transition-all shadow-xl"
                 >
                   Sair do improviso
@@ -733,13 +733,38 @@ export default function NutriLandingPage() {
               
               <div className="bg-white rounded-2xl p-8 shadow-2xl border-4 border-yellow-400 relative" style={{ pointerEvents: 'auto' }}>
                 <div className="text-center mb-6">
-                  <h3 className="text-2xl font-bold mb-2 text-[#1A1A1A]">Plano Anual</h3>
-                  <p className="text-gray-600 mb-1">Acesso válido por 12 meses</p>
-                  <p className="text-sm text-gray-500">Compromisso com economia clara</p>
+                  <h3 className="text-2xl font-bold mb-2 text-[#1A1A1A]">Escolha seu plano</h3>
+                  <p className="text-gray-600 mb-1">Mensal ou anual. Você decide.</p>
                 </div>
-                <div className="bg-gradient-to-br from-[#2563EB] to-[#3B82F6] rounded-xl p-6 mb-6 text-center text-white">
-                  <p className="text-3xl sm:text-4xl font-bold">12× de R$ 97</p>
-                  <p className="text-sm text-white/90 mt-2">Total: R$ 1.164 (1 ano de acesso)</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+                  <div className="bg-gray-50 rounded-xl p-4 border-2 border-gray-200 text-center">
+                    <p className="font-semibold text-gray-800">Plano Mensal</p>
+                    <p className="text-2xl font-bold text-[#2563EB] mt-1">R$ 97<span className="text-sm font-normal text-gray-600">/mês</span></p>
+                    <p className="text-xs text-gray-600 mt-1">Cobrança mês a mês</p>
+                    <button
+                      type="button"
+                      onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleCheckout('monthly') }}
+                      onTouchStart={(e) => e.stopPropagation()}
+                      onMouseDown={(e) => e.stopPropagation()}
+                      className="mt-3 w-full py-2.5 rounded-lg bg-[#2563EB] text-white font-semibold text-sm hover:bg-[#1D4ED8] transition-colors"
+                    >
+                      Escolher mensal
+                    </button>
+                  </div>
+                  <div className="bg-gradient-to-br from-[#2563EB] to-[#3B82F6] rounded-xl p-4 text-center text-white border-2 border-[#2563EB]">
+                    <p className="font-semibold">Plano Anual</p>
+                    <p className="text-2xl font-bold mt-1">12× de R$ 59</p>
+                    <p className="text-sm text-white/90 mt-1">Total: R$ 708 (1 ano)</p>
+                    <button
+                      type="button"
+                      onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleCheckout('annual') }}
+                      onTouchStart={(e) => e.stopPropagation()}
+                      onMouseDown={(e) => e.stopPropagation()}
+                      className="mt-3 w-full py-2.5 rounded-lg bg-white text-[#2563EB] font-semibold text-sm hover:bg-white/90 transition-colors"
+                    >
+                      👉 Quero sair do improviso
+                    </button>
+                  </div>
                 </div>
                 <p className="text-center text-gray-700 mb-4 font-semibold">
                   Isso não é uma assinatura. É uma decisão de sair do improviso.
@@ -763,30 +788,22 @@ export default function NutriLandingPage() {
                   </li>
                 </ul>
                 <div className="relative" style={{ zIndex: 100, pointerEvents: 'auto' }}>
-                  <button
-                    type="button"
+                  <a
+                    href="/pt/nutri/checkout"
                     onClick={(e) => {
                       e.preventDefault()
-                      e.stopPropagation()
-                      handleCheckout()
+                      handleCheckout('annual')
                     }}
-                    onTouchStart={(e) => e.stopPropagation()}
-                    onTouchEnd={(e) => {
-                      e.preventDefault()
-                      e.stopPropagation()
-                      handleCheckout()
-                    }}
-                    onMouseDown={(e) => e.stopPropagation()}
-                    className="w-full bg-gradient-to-r from-[#2563EB] to-[#3B82F6] text-white px-6 py-4 rounded-xl text-lg font-bold hover:from-[#3B82F6] hover:to-[#1D4ED8] transition-all shadow-xl cursor-pointer active:scale-95"
-                    style={{ touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent', pointerEvents: 'auto', position: 'relative', zIndex: 100, userSelect: 'none', WebkitUserSelect: 'none', minHeight: '48px' }}
+                    className="block w-full text-center bg-gradient-to-r from-[#2563EB] to-[#3B82F6] text-white px-6 py-4 rounded-xl text-lg font-bold hover:from-[#3B82F6] hover:to-[#1D4ED8] transition-all shadow-xl cursor-pointer"
+                    style={{ pointerEvents: 'auto' }}
                   >
-                    👉 Quero sair do improviso
-                  </button>
+                    Ver planos no checkout
+                  </a>
                 </div>
               </div>
               
               <p className="text-center text-sm text-white/80 mt-6">
-                Plano anual com fidelidade de 12 meses. Garantia de 7 dias. Detalhes no checkout.
+                Plano mensal R$ 97/mês ou anual 12× de R$ 59 (R$ 708/ano). Garantia de 7 dias.
               </p>
               
               <div className="bg-white/10 backdrop-blur-sm rounded-xl p-8 text-center text-white mt-8">
@@ -851,7 +868,7 @@ export default function NutriLandingPage() {
                 {[
                   {
                     pergunta: 'Posso cancelar durante o ano?',
-                    resposta: 'O plano anual é um compromisso de 12 meses (12× de R$ 97, total R$ 1.164/ano). Não há cancelamento durante o período anual. A decisão de 12 meses reflete o compromisso com sua transformação. Você tem 7 dias de garantia incondicional para testar: se não for pra você, devolvemos 100%.'
+                    resposta: 'O plano anual é um compromisso de 12 meses (12× de R$ 59, total R$ 708/ano). Não há cancelamento durante o período anual. O plano mensal é R$ 97/mês e pode ser cancelado quando quiser. Você tem 7 dias de garantia incondicional para testar: se não for pra você, devolvemos 100%.'
                   },
                   {
                     pergunta: 'Como funciona o suporte?',

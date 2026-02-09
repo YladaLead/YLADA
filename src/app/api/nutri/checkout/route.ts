@@ -21,16 +21,16 @@ export async function POST(request: NextRequest) {
     })
     
     const { planType, productType, language, paymentMethod, email, refVendedor } = body 
-    // Área Nutri: único plano vendido é o anual (sem mensal e sem trial de 3 dias)
-    // planType: 'annual' (monthly não disponível em Nutri)
-    // productType: 'platform_annual' | 'formation_only' (apenas para área Nutri)
+    // Área Nutri: plano mensal R$ 97 ou anual 12× de R$ 59 (R$ 708)
+    // planType: 'monthly' | 'annual'
+    // productType: 'platform_monthly' | 'platform_annual' | etc.
     // language: 'pt' | 'en' | 'es'
     // paymentMethod: 'auto' | 'pix'
     // email: string (obrigatório se não autenticado)
 
-    if (!planType || planType !== 'annual') {
+    if (!planType || !['monthly', 'annual'].includes(planType)) {
       return NextResponse.json(
-        { error: 'Na área Nutri apenas o plano anual está disponível. Não há plano mensal nem trial gratuito.' },
+        { error: 'Plano inválido. Escolha mensal ou anual.' },
         { status: 400 }
       )
     }

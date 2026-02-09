@@ -64,7 +64,8 @@ export default function AdminReceitas() {
   // =====================================================
   const [filtroArea, setFiltroArea] = useState<'todos' | 'nutri' | 'coach' | 'nutra' | 'wellness'>('todos')
   const [filtroStatus, setFiltroStatus] = useState<'todos' | 'active' | 'canceled' | 'past_due' | 'unpaid'>('todos')
-  const [filtroVendedor, setFiltroVendedor] = useState<'todos' | 'paula'>('todos')
+  const [filtroVendedor, setFiltroVendedor] = useState<string>('todos') // 'todos' ou ref (ex: paula, maria)
+  const [listaVendedores, setListaVendedores] = useState<string[]>([]) // ref_vendedor distintos da API
   
   // =====================================================
   // FILTRO DE PERÍODO (UNIFICADO E SIMPLIFICADO)
@@ -96,6 +97,22 @@ export default function AdminReceitas() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
+  // Carregar lista de vendedores (ref_vendedor distintos) para o dropdown
+  useEffect(() => {
+    const carregarVendedores = async () => {
+      try {
+        const res = await fetch('/api/admin/receitas/vendedores', { credentials: 'include' })
+        if (res.ok) {
+          const data = await res.json()
+          setListaVendedores(data.vendedores || [])
+        }
+      } catch {
+        // Ignorar; dropdown ficará vazio além de "Todos"
+      }
+    }
+    carregarVendedores()
+  }, [])
+
   // Buscar dados da API
   useEffect(() => {
     const carregarDados = async () => {
@@ -109,6 +126,9 @@ export default function AdminReceitas() {
         }
         if (filtroStatus !== 'todos') {
           params.append('status', filtroStatus)
+        }
+        if (filtroVendedor !== 'todos' && filtroVendedor.trim()) {
+          params.append('ref_vendedor', filtroVendedor.trim())
         }
 
         // Adicionar filtros de período avançado (apenas se não for "todos")
@@ -564,7 +584,7 @@ export default function AdminReceitas() {
               </div>
             </div>
 
-            {/* Filtro Vendedor - vendas atribuídas (ex: Paula) */}
+            {/* Filtro Vendedor - vendas atribuídas (ex: Paula); lista dinâmica da API */}
             <div>
               <label className="block text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
                 <span className="text-lg">👤</span>
@@ -581,16 +601,22 @@ export default function AdminReceitas() {
                 >
                   Todos
                 </button>
-                <button
-                  onClick={() => setFiltroVendedor('paula')}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                    filtroVendedor === 'paula'
-                      ? 'bg-teal-600 text-white shadow-md'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
-                >
-                  Paula
-                </button>
+                {listaVendedores.map((ref) => {
+                  const label = ref.charAt(0).toUpperCase() + ref.slice(1).toLowerCase()
+                  return (
+                    <button
+                      key={ref}
+                      onClick={() => setFiltroVendedor(ref)}
+                      className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                        filtroVendedor === ref
+                          ? 'bg-teal-600 text-white shadow-md'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      }`}
+                    >
+                      {label}
+                    </button>
+                  )
+                })}
               </div>
             </div>
 

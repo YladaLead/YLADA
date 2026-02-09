@@ -479,10 +479,10 @@ async function handlePaymentEvent(data: any, isTest: boolean = false) {
       console.warn('⚠️ E-mail do pagador não encontrado ou inválido no webhook')
     }
 
-    // 🚀 CORREÇÃO: Verificar se usuário já tem subscription ativa para ESTENDER em vez de criar nova
+    // 🚀 CORREÇÃO: Verificar se usuário já tem subscription ativa para ESTENDER em vez de criar nova (inclui ref_vendedor para comissão em renovação)
     const { data: existingSubscription } = await supabaseAdmin
       .from('subscriptions')
-      .select('id, current_period_end, welcome_email_sent, status')
+      .select('id, current_period_end, welcome_email_sent, status, ref_vendedor')
       .eq('user_id', userId)
       .eq('area', area)
       .eq('status', 'active')
@@ -637,8 +637,8 @@ async function handlePaymentEvent(data: any, isTest: boolean = false) {
     }
 
     // Criar registro de pagamento
-    // Usar campos Stripe temporariamente até atualizar o schema
-    const { error: paymentError } = await supabaseAdmin
+    const amountCents = Math.round(amount * 100)
+    const { data: paymentRow, error: paymentError } = await supabaseAdmin
       .from('payments')
       .insert({
         subscription_id: subscription.id,
@@ -647,16 +647,44 @@ async function handlePaymentEvent(data: any, isTest: boolean = false) {
         stripe_payment_intent_id: paymentId, // Usar como ID único
         stripe_invoice_id: fullData.order?.id?.toString() || null,
         stripe_charge_id: null,
-        amount: Math.round(amount * 100),
+        amount: amountCents,
         currency: currency.toLowerCase(),
         status: 'succeeded',
         receipt_url: fullData.external_resource_url || null,
         payment_method: fullData.payment_method_id || 'unknown',
       })
+      .select('id')
+      .single()
 
     if (paymentError) {
       console.error('❌ Erro ao salvar pagamento:', paymentError)
       throw paymentError
+    }
+
+    // Comissão do vendedor: 20% em todo pagamento (inicial e recorrente)
+    const refVendedorComissao = subscription.ref_vendedor && String(subscription.ref_vendedor).trim() ? String(subscription.ref_vendedor).trim() : null
+    if (refVendedorComissao && amountCents > 0) {
+      const commissionPct = 20
+      const commissionAmountCents = Math.round(amountCents * (commissionPct / 100))
+      if (commissionAmountCents > 0) {
+        const { error: comissaoError } = await supabaseAdmin
+          .from('vendedor_comissoes')
+          .insert({
+            ref_vendedor: refVendedorComissao,
+            subscription_id: subscription.id,
+            payment_id: paymentRow?.id || null,
+            amount_cents: amountCents,
+            commission_pct: commissionPct,
+            commission_amount_cents: commissionAmountCents,
+            status: 'pending',
+          })
+        if (comissaoError) {
+          console.error('❌ Erro ao registrar comissão do vendedor:', comissaoError)
+          // Não falhar o webhook; comissão pode ser lançada manualmente
+        } else {
+          console.log('✅ Comissão 20% registrada para vendedor:', refVendedorComissao, 'valor:', commissionAmountCents, 'centavos')
+        }
+      }
     }
 
     // 🆕 NOVO: Direcionar para suporte via WhatsApp (apenas para área nutri)
@@ -945,12 +973,13 @@ async function handleSubscriptionEvent(data: any, isTest: boolean = false) {
   console.log('🔄 Processando assinatura recorrente (Preapproval):', subscriptionId, 'isTest:', isTest)
 
   try {
-    // Obter metadata da assinatura
+    // Obter metadata da assinatura (inclui ref_vendedor para comissão Paula/outros)
     const metadata = data.metadata || {}
     const userId = metadata.user_id
     const area = metadata.area || 'wellness'
     const planType = metadata.plan_type || 'monthly'
     const productType = metadata.product_type || metadata.productType // Suportar ambos os formatos
+    const refVendedor = metadata.ref_vendedor && String(metadata.ref_vendedor).trim() ? String(metadata.ref_vendedor).trim() : null
 
     if (!userId) {
       console.error('❌ User ID não encontrado no metadata da assinatura')

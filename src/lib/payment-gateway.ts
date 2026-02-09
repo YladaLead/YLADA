@@ -91,16 +91,16 @@ function getPrice(
     // Área Nutri com productType específico
     if (area === 'nutri' && productType) {
       if (productType === 'formation_only') {
-        return 1164.00 // R$ 1.164 (12× de R$ 97)
+        return 708.00 // R$ 708 (12× de R$ 59) — promocional
       }
       if (productType === 'platform_monthly') {
-        return 197.00 // R$ 197/mês (recorrente)
+        return 97.00 // R$ 97/mês (recorrente)
       }
       if (productType === 'platform_monthly_12x') {
-        return 197.00 // R$ 197 (pagamento único parcelável em até 12x)
+        return 708.00 // R$ 708 (pagamento único parcelável em até 12× de R$ 59)
       }
       if (productType === 'platform_annual') {
-        return 1164.00 // R$ 1.164 (12× de R$ 97)
+        return 708.00 // R$ 708/ano (12× de R$ 59) — promocional
       }
     }
     
@@ -110,8 +110,8 @@ function getPrice(
         annual: 718.80, // R$ 718,80 (12x de R$ 59,90) - Parcelado pelo vendedor
       },
       nutri: {
-        monthly: 197.00, // R$ 197/mês
-        annual: 1164.00, // R$ 1.164/ano (12× de R$ 97)
+        monthly: 97.00, // R$ 97/mês
+        annual: 708.00, // R$ 708/ano (12× de R$ 59) — promocional
       },
       coach: {
         monthly: 97.00,
