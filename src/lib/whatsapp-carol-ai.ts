@@ -2269,10 +2269,10 @@ Finalize com: "Responde 1 ou 2 😊".`
       return { success: false, error: sendResult.error || 'Erro ao enviar mensagem via Z-API' }
     }
 
-    // 9. Salvar mensagem no banco
+    // 9. Salvar mensagem no banco (instance_id é UUID de z_api_instances.id)
     await supabaseAdmin.from('whatsapp_messages').insert({
       conversation_id: conversationId,
-      instance_id: instanceId,
+      instance_id: instance.id,
       z_api_message_id: sendResult.messageId || null,
       sender_type: 'bot',
       sender_name: 'Carol - Secretária',
