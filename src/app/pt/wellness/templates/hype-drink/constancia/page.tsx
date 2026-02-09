@@ -5,7 +5,6 @@ import { TemplateBaseProps } from '@/types/wellness'
 import WellnessHeader from '@/components/wellness/WellnessHeader'
 import WellnessLanding from '@/components/wellness/WellnessLanding'
 import HypeDrinkCTA from '@/components/wellness/HypeDrinkCTA'
-import WellnessActionButtons from '@/components/wellness/WellnessActionButtons'
 import { quizConstanciaDiagnosticos } from '@/lib/diagnostics'
 
 interface Pergunta {
@@ -249,10 +248,6 @@ export default function QuizConstancia({ config = defaultConfig }: { config?: Te
               />
             </div>
 
-            <WellnessActionButtons
-              onRecalculate={recomecar}
-              onBack={() => setEtapa('quiz')}
-            />
           </div>
         </div>
       </div>

@@ -5,7 +5,6 @@ import { TemplateBaseProps } from '@/types/wellness'
 import WellnessHeader from '@/components/wellness/WellnessHeader'
 import WellnessLanding from '@/components/wellness/WellnessLanding'
 import HypeDrinkCTA from '@/components/wellness/HypeDrinkCTA'
-import WellnessActionButtons from '@/components/wellness/WellnessActionButtons'
 import { getTemplateBenefits } from '@/lib/template-benefits'
 import { quizEnergiaFocoDiagnosticos } from '@/lib/diagnostics'
 
@@ -298,10 +297,6 @@ export default function QuizEnergiaFoco({ config = defaultConfig }: { config?: T
               />
             </div>
 
-            <WellnessActionButtons
-              onRecalculate={recomecar}
-              onBack={() => setEtapa('quiz')}
-            />
           </div>
         </div>
       </div>

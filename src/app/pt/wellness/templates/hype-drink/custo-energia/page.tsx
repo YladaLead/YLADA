@@ -5,7 +5,6 @@ import { TemplateBaseProps } from '@/types/wellness'
 import WellnessHeader from '@/components/wellness/WellnessHeader'
 import WellnessLanding from '@/components/wellness/WellnessLanding'
 import HypeDrinkCTA from '@/components/wellness/HypeDrinkCTA'
-import WellnessActionButtons from '@/components/wellness/WellnessActionButtons'
 import { calcCustoEnergiaDiagnosticos } from '@/lib/diagnostics'
 
 interface ResultadoCusto {
@@ -207,10 +206,6 @@ export default function CalculadoraCustoEnergia({ config = defaultConfig }: { co
               />
             </div>
 
-            <WellnessActionButtons
-              onRecalculate={recomecar}
-              onBack={() => setEtapa('formulario')}
-            />
           </div>
         </div>
       </div>
