@@ -139,7 +139,7 @@ export default function FerramentaPersonalizadaPage() {
         },
         cta_type: 'whatsapp',
         whatsapp_number: whatsapp,
-        cta_button_text: 'Falar com Especialista',
+        cta_button_text: 'Quero saber mais sobre o Hype Drink',
         template_slug: toolSlug,
         user_profiles: {
           user_slug: userSlug,
@@ -159,7 +159,7 @@ export default function FerramentaPersonalizadaPage() {
           secundaria: '#f59e0b'
         },
         cta_type: 'whatsapp',
-        cta_button_text: 'Falar com Especialista',
+        cta_button_text: 'Quero saber mais sobre o Hype Drink',
         template_slug: toolSlug,
         user_profiles: {
           user_slug: userSlug,

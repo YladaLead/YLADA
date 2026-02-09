@@ -408,64 +408,64 @@ export const mensagensWhatsAppPorFerramenta: Record<string, MensagemWhatsApp> = 
   
   'energia-foco': {
     mensagem: 'Olá! Descubra seu perfil de energia e foco e aprenda como ter mais energia estável ao longo do dia, sem os picos e quedas do café excessivo.',
-    botaoTexto: 'Descobrir Meu Perfil de Energia'
+    botaoTexto: 'Quero saber mais sobre o Hype Drink'
   },
   'quiz-energia-foco': {
     mensagem: 'Olá! Descubra seu perfil de energia e foco e aprenda como ter mais energia estável ao longo do dia, sem os picos e quedas do café excessivo.',
-    botaoTexto: 'Descobrir Meu Perfil de Energia'
+    botaoTexto: 'Quero saber mais sobre o Hype Drink'
   },
   
   'pre-treino': {
     mensagem: 'Olá! Descubra qual é o pré-treino ideal para você e conheça uma alternativa leve e natural que não causa ansiedade ou taquicardia.',
-    botaoTexto: 'Descobrir Meu Pré-Treino Ideal'
+    botaoTexto: 'Quero saber mais sobre o Hype Drink'
   },
   'quiz-pre-treino': {
     mensagem: 'Olá! Descubra qual é o pré-treino ideal para você e conheça uma alternativa leve e natural que não causa ansiedade ou taquicardia.',
-    botaoTexto: 'Descobrir Meu Pré-Treino Ideal'
+    botaoTexto: 'Quero saber mais sobre o Hype Drink'
   },
   
   'rotina-produtiva': {
     mensagem: 'Olá! Descubra o que está sabotando sua produtividade e aprenda como manter energia e foco constantes ao longo do dia.',
-    botaoTexto: 'Descobrir Como Ser Mais Produtivo'
+    botaoTexto: 'Quero saber mais sobre o Hype Drink'
   },
   'quiz-rotina-produtiva': {
     mensagem: 'Olá! Descubra o que está sabotando sua produtividade e aprenda como manter energia e foco constantes ao longo do dia.',
-    botaoTexto: 'Descobrir Como Ser Mais Produtivo'
+    botaoTexto: 'Quero saber mais sobre o Hype Drink'
   },
   
   'constancia': {
     mensagem: 'Olá! Descubra o que está impedindo você de manter uma rotina constante e aprenda estratégias práticas para facilitar seus hábitos diários.',
-    botaoTexto: 'Descobrir Como Manter Rotina'
+    botaoTexto: 'Quero saber mais sobre o Hype Drink'
   },
   'quiz-constancia': {
     mensagem: 'Olá! Descubra o que está impedindo você de manter uma rotina constante e aprenda estratégias práticas para facilitar seus hábitos diários.',
-    botaoTexto: 'Descobrir Como Manter Rotina'
+    botaoTexto: 'Quero saber mais sobre o Hype Drink'
   },
   
   'consumo-cafeina': {
     mensagem: 'Olá! Descubra se seu consumo de cafeína está acima do recomendado e conheça alternativas mais equilibradas que não causam ansiedade ou dependência.',
-    botaoTexto: 'Calcular Meu Consumo de Cafeína'
+    botaoTexto: 'Quero saber mais sobre o Hype Drink'
   },
   'calc-consumo-cafeina': {
     mensagem: 'Olá! Descubra se seu consumo de cafeína está acima do recomendado e conheça alternativas mais equilibradas que não causam ansiedade ou dependência.',
-    botaoTexto: 'Calcular Meu Consumo de Cafeína'
+    botaoTexto: 'Quero saber mais sobre o Hype Drink'
   },
   'calculadora-consumo-cafeina': {
     mensagem: 'Olá! Descubra se seu consumo de cafeína está acima do recomendado e conheça alternativas mais equilibradas que não causam ansiedade ou dependência.',
-    botaoTexto: 'Calcular Meu Consumo de Cafeína'
+    botaoTexto: 'Quero saber mais sobre o Hype Drink'
   },
   
   'custo-energia': {
     mensagem: 'Olá! Descubra quanto a falta de energia está custando para sua produtividade e aprenda como recuperar essas horas e aumentar sua performance.',
-    botaoTexto: 'Calcular Meu Custo de Energia'
+    botaoTexto: 'Quero saber mais sobre o Hype Drink'
   },
   'calc-custo-energia': {
     mensagem: 'Olá! Descubra quanto a falta de energia está custando para sua produtividade e aprenda como recuperar essas horas e aumentar sua performance.',
-    botaoTexto: 'Calcular Meu Custo de Energia'
+    botaoTexto: 'Quero saber mais sobre o Hype Drink'
   },
   'calculadora-custo-energia': {
     mensagem: 'Olá! Descubra quanto a falta de energia está custando para sua produtividade e aprenda como recuperar essas horas e aumentar sua performance.',
-    botaoTexto: 'Calcular Meu Custo de Energia'
+    botaoTexto: 'Quero saber mais sobre o Hype Drink'
   },
   
   // ============================================
