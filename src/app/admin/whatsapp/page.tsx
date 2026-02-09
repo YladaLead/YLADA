@@ -625,6 +625,10 @@ function WhatsAppChatContent() {
       // Extras
       'retorno': { label: 'Retorno', color: 'bg-cyan-100 text-cyan-700', icon: '🔄' },
       'urgencia': { label: 'Urgência', color: 'bg-red-200 text-red-800', icon: '⚡' },
+      'manual_welcome_sent': { label: 'Boas-vindas enviadas', color: 'bg-slate-100 text-slate-700', icon: '✉️' },
+      'agendou_aula': { label: 'Agendou aula', color: 'bg-teal-100 text-teal-700', icon: '📅' },
+      'atendimento_manual': { label: 'Carol pausada (manual)', color: 'bg-amber-100 text-amber-700', icon: '🛑' },
+      'manual_mode': { label: 'Carol pausada (manual)', color: 'bg-amber-100 text-amber-700', icon: '🛑' },
       
       // Tags antigas (compatibilidade)
       'form_lead': { label: 'Form', color: 'bg-blue-100 text-blue-700', icon: '📝' },
@@ -2305,6 +2309,9 @@ function WhatsAppChatContent() {
 
             {/* Conteúdo */}
             <div className="flex-1 overflow-y-auto p-6">
+              <p className="text-xs text-gray-500 mb-4 p-3 bg-gray-50 rounded-lg border border-gray-100">
+                <strong>Dica:</strong> &quot;Boas-vindas enviadas&quot; (✉️) só indica que a 1ª mensagem já foi enviada. Para <em>pausar a Carol</em> nesta conversa, use a tag &quot;Manual (pausar Carol)&quot; na seção Extras.
+              </p>
               {/* Tags Selecionadas */}
               {selectedTags.length > 0 && (
                 <div className="mb-6">
