@@ -682,6 +682,7 @@ function WhatsAppChatContent() {
               href="/admin"
               className="min-h-[44px] min-w-[44px] flex items-center justify-center -m-2 p-2 text-gray-600 hover:text-gray-900 active:bg-gray-100 rounded-lg text-sm touch-manipulation"
               aria-label="Voltar ao admin"
+              title="Voltar ao painel admin"
             >
               ← Voltar
             </Link>
@@ -693,23 +694,23 @@ function WhatsAppChatContent() {
               <Link
                 href="/admin/whatsapp/automation"
                 className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg text-green-600 hover:text-green-700 hover:bg-green-50 active:bg-green-100 text-lg"
-                title="Automação"
-                aria-label="Automação"
+                title="Configurações de automação — ligar/desligar Carol, horários permitidos"
+                aria-label="Configurações de automação"
               >
                 ⚙️
               </Link>
               <Link
                 href="/admin/whatsapp/workshop"
                 className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg text-blue-600 hover:text-blue-700 hover:bg-blue-50 active:bg-blue-100 text-lg"
-                title="Agenda do Workshop"
-                aria-label="Agenda Workshop"
+                title="Agenda do workshop — ver e criar sessões de aula (datas/horários)"
+                aria-label="Agenda do workshop"
               >
                 📅
               </Link>
               <Link
                 href="/admin/whatsapp/cadastros-workshop"
                 className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg text-amber-700 hover:text-amber-800 hover:bg-amber-50 active:bg-amber-100 text-lg"
-                title="Cadastros do workshop (disparo manual)"
+                title="Cadastros do workshop — lista de inscritos e disparo manual de boas-vindas"
                 aria-label="Cadastros do workshop"
               >
                 🧾
@@ -717,7 +718,7 @@ function WhatsAppChatContent() {
               <Link
                 href="/admin/whatsapp/fluxo"
                 className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg text-purple-600 hover:text-purple-700 hover:bg-purple-50 active:bg-purple-100 text-lg"
-                title="Fluxo e textos (editar mensagens do fluxo)"
+                title="Fluxo e textos — editar as mensagens que a Carol envia no fluxo"
                 aria-label="Fluxo e textos"
               >
                 📋
@@ -725,7 +726,7 @@ function WhatsAppChatContent() {
               <Link
                 href="/admin/whatsapp/atualizar-fases"
                 className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg text-teal-600 hover:text-teal-700 hover:bg-teal-50 active:bg-teal-100 text-lg"
-                title="Atualizar fases"
+                title="Atualizar fases — marcar participou/não participou em lote"
                 aria-label="Atualizar fases"
               >
                 🏷️
@@ -733,9 +734,9 @@ function WhatsAppChatContent() {
             </div>
           </div>
           <div className="flex items-center justify-between text-xs text-gray-500">
-            <span>{conversations.length} conversas</span>
+            <span title="Total de conversas na lista">{conversations.length} conversas</span>
             {unreadTotal > 0 && (
-              <span className="bg-green-500 text-white px-2 py-1 rounded-full">
+              <span className="bg-green-500 text-white px-2 py-1 rounded-full" title="Conversas com mensagens ainda não lidas">
                 {unreadTotal} não lidas
               </span>
             )}
@@ -789,7 +790,7 @@ function WhatsAppChatContent() {
                   ? 'bg-green-600 text-white hover:bg-green-700 active:bg-green-800 disabled:opacity-50'
                   : 'bg-amber-600 text-white hover:bg-amber-700 active:bg-amber-800 disabled:opacity-50'
               }`}
-              title={carolStatus.disabled ? 'Ligar Carol (respostas automáticas)' : 'Desligar Carol'}
+              title={carolStatus.disabled ? 'Ligar Carol — reativa respostas automáticas em todas as conversas' : 'Desligar Carol — para respostas automáticas em todas as conversas (só você atende)'}
             >
               {carolStatusToggling ? '…' : carolStatus.disabled ? 'Ligar Carol' : 'Desligar Carol'}
             </button>
@@ -1181,7 +1182,7 @@ function WhatsAppChatContent() {
                         if (selectedConversation) loadMessages(selectedConversation.id)
                       }}
                       className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 active:bg-gray-300 text-gray-700 touch-manipulation"
-                      title="Atualizar conversas e mensagens"
+                      title="Atualizar — atualiza a lista de conversas e as mensagens desta conversa"
                       aria-label="Atualizar"
                     >
                       🔄
@@ -1225,7 +1226,8 @@ function WhatsAppChatContent() {
                           }}
                           disabled={sending}
                           className="min-h-[44px] px-3 py-2 sm:py-1.5 text-xs font-medium bg-purple-100 text-purple-700 rounded-xl hover:bg-purple-200 active:bg-purple-300 transition-colors disabled:opacity-50 touch-manipulation"
-                          title="Enviar opção de sessão e deixar Carol continuar"
+                          title="Enviar opção de sessão — envia as opções de data/hora para o cliente escolher; a Carol continua respondendo"
+                          aria-label="Enviar opção de sessão"
                         >
                           <span className="sm:hidden" aria-hidden="true">📅</span>
                           <span className="hidden sm:inline">📅 Enviar Opção</span>
@@ -1260,7 +1262,8 @@ function WhatsAppChatContent() {
                             }
                           }}
                           className="min-h-[44px] px-3 py-2 sm:py-1.5 text-xs font-medium bg-red-100 text-red-700 rounded-xl hover:bg-red-200 active:bg-red-300 transition-colors touch-manipulation"
-                          title="Desativar Carol - Ela não responderá mais automaticamente"
+                          title="Desativar Carol só nesta conversa — ela para de responder automaticamente só aqui; nas outras conversas continua ativa"
+                          aria-label="Desativar Carol nesta conversa"
                         >
                           <span className="sm:hidden" aria-hidden="true">🚫</span>
                           <span className="hidden sm:inline">🚫 Desativar Carol</span>
@@ -1276,7 +1279,7 @@ function WhatsAppChatContent() {
                           setSendOptionsOpen((v) => !v)
                         }}
                         className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-full bg-blue-50 hover:bg-blue-100 active:bg-blue-200 text-blue-700 disabled:opacity-50 disabled:pointer-events-none touch-manipulation"
-                        title="Opções de envio"
+                        title="Opções de envio — flyer + link da aula, ou definir sessão e enviar link agora"
                         aria-label="Opções de envio"
                         aria-expanded={sendOptionsOpen}
                       >
@@ -1361,7 +1364,7 @@ function WhatsAppChatContent() {
                       type="button"
                       onClick={() => window.open(`/api/whatsapp/conversations/${selectedConversation.id}/export`, '_blank')}
                       className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 active:bg-gray-300 text-gray-700 touch-manipulation"
-                      title="Exportar conversa"
+                      title="Exportar conversa — baixar o histórico desta conversa (abre em nova aba)"
                       aria-label="Exportar conversa"
                     >
                       ⬇️
@@ -1374,7 +1377,7 @@ function WhatsAppChatContent() {
                           setContactMenuOpen((v) => !v)
                         }}
                         className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 active:bg-gray-300 text-gray-700 touch-manipulation"
-                        title="Mais opções"
+                        title="Mais opções — etiquetas (tags), editar nome, ativar/desativar Carol nesta conversa, Carol responder à última mensagem"
                         aria-label="Mais opções"
                       >
                         ⋮
