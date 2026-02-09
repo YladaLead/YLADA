@@ -110,25 +110,8 @@ export async function POST(request: NextRequest) {
 
     // Detectar se é teste ou produção baseado no live_mode do webhook
     const isTest = body.live_mode === false || body.live_mode === 'false'
-    
-    // Em produção, ignorar webhooks de teste se NODE_ENV for production
-    // Isso evita processar pagamentos de teste como se fossem reais
-    if (process.env.NODE_ENV === 'production' && isTest) {
-      console.log('⚠️ Webhook de TESTE recebido em PRODUÇÃO - Ignorando para evitar conflitos')
-      console.log('📋 Dados do webhook de teste:', {
-        type: body.type,
-        action: body.action,
-        live_mode: body.live_mode,
-        requestId,
-      })
-      // Retornar sucesso mas não processar (para não bloquear webhook)
-      return NextResponse.json({ 
-        received: true, 
-        message: 'Webhook de teste ignorado em produção',
-        note: 'Configure URL de teste diferente ou deixe vazio no Mercado Pago Dashboard'
-      })
-    }
-    
+
+    // Processar tanto pagamentos de teste quanto de produção para melhor experiência do usuário
     console.log('📥 Webhook Mercado Pago recebido:', {
       type: body.type,
       action: body.action,
@@ -465,7 +448,7 @@ async function handlePaymentEvent(data: any, isTest: boolean = false) {
             email: payerEmail,
             updated_at: new Date().toISOString()
           })
-          .eq('id', userId)
+          .eq('user_id', userId)
         
         if (emailError) {
           console.warn('⚠️ Erro ao atualizar e-mail do usuário:', emailError)
@@ -826,7 +809,7 @@ async function handlePaymentEvent(data: any, isTest: boolean = false) {
         const { data: userProfile, error: profileError } = await supabaseAdmin
           .from('user_profiles')
           .select('nome_completo')
-          .eq('id', userId)
+          .eq('user_id', userId)
           .single()
         
         if (profileError) {
@@ -1033,7 +1016,7 @@ async function handleSubscriptionEvent(data: any, isTest: boolean = false) {
             email: payerEmail,
             updated_at: new Date().toISOString()
           })
-          .eq('id', userId)
+          .eq('user_id', userId)
         
         if (emailError) {
           console.warn('⚠️ Erro ao atualizar e-mail do usuário:', emailError)
@@ -1106,7 +1089,7 @@ async function handleSubscriptionEvent(data: any, isTest: boolean = false) {
         const { data: userProfile } = await supabaseAdmin
           .from('user_profiles')
           .select('nome_completo')
-          .eq('id', userId)
+          .eq('user_id', userId)
           .single()
 
         // Enviar e-mail
