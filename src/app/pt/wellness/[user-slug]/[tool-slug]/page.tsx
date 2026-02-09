@@ -358,13 +358,6 @@ export default function FerramentaPersonalizadaPage() {
       )
     }
 
-    // Debug: verificar country_code antes de passar para o config
-    console.log('🔍 Config sendo criado (Wellness):', {
-      whatsapp_number: tool.whatsapp_number,
-      country_code: countryCode,
-      user_profiles: tool.user_profiles
-    })
-    
     const config = {
       title: tool.title,
       description: tool.description,

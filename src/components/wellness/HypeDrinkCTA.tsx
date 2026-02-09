@@ -158,11 +158,11 @@ export default function HypeDrinkCTA({
     )
   }
 
-  // Fallback se não tiver nenhuma opção
+  // Fallback se não tiver nenhuma opção (WhatsApp/URL vêm do perfil ou da ferramenta)
   return (
     <div className={`${className} p-4 bg-yellow-50 border border-yellow-200 rounded-lg`}>
       <p className="text-yellow-800 text-sm">
-        ⚠️ Configure uma URL externa ou WhatsApp nas configurações da ferramenta
+        ⚠️ Configure o WhatsApp ou uma URL externa no seu perfil (Meus Links → Perfil) para que o botão de contato apareça aqui.
       </p>
     </div>
   )
