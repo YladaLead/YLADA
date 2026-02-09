@@ -217,10 +217,10 @@ export async function POST(
       return NextResponse.json({ error: 'Mensagem é obrigatória' }, { status: 400 })
     }
 
-    // Buscar conversa
+    // Buscar conversa (phone e contact_key para envio e para retornar sentTo)
     const { data: conversation, error: convError } = await supabaseAdmin
       .from('whatsapp_conversations')
-      .select('*')
+      .select('id, phone, contact_key, instance_id, area')
       .eq('id', conversationId)
       .single()
 
@@ -370,9 +370,14 @@ export async function POST(
       console.log('[WhatsApp Messages] ℹ️ Z_API_NOTIFICATION_PHONE não configurado')
     }
 
+    // Retornar o número para o qual a mensagem foi enviada (permite conferir no WhatsApp do contato)
+    const sentTo = conversation.phone || conversation.contact_key || ''
+    console.log('[WhatsApp Messages] ✅ Enviado para:', sentTo)
+
     return NextResponse.json({
       success: true,
       message: savedMessage,
+      sentTo,
     })
   } catch (error: any) {
     console.error('[WhatsApp Messages] Erro:', error)

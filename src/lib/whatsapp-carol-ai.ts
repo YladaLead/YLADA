@@ -771,7 +771,7 @@ export async function generateCarolResponse(
     if (context.tags && context.tags.length > 0) {
       contextText += `\nTags da conversa: ${context.tags.join(', ')}\n`
       if (context.tags.includes('veio_tirar_duvida')) {
-        contextText += `\n⚠️ Esta pessoa veio pelo botão "Tirar dúvida" (assistiu o vídeo). NÃO existe mais aula prática. Seu foco é APENAS: tirar as dúvidas dela e VENDER o sistema (planos, checkout, sair do improviso). NÃO mencione nem ofereça aula ao vivo, opções de horário ou agendamento de aula.\n`
+        contextText += `\n(Origem: clicou em "Tirar dúvida" ou veio da página de vendas. Use o mesmo fluxo: aula prática + opções quando fizer sentido; responda com autonomia às dúvidas e objeções.)\n`
       }
       if (context.tags.includes('participou_aula')) {
         contextText += `\n⚠️ Tag "Participou" presente: esta pessoa PARTICIPOU da aula. NUNCA use "não conseguiu participar da aula anterior". Adapte o tom (ex.: participou e ficou de pensar – fazer follow-up, não remarketing de quem faltou).\n`
@@ -1303,15 +1303,17 @@ export async function processIncomingMessageWithCarol(
       return { success: true, response: desagendarResponse }
     }
 
-    // 3. Verificar histórico para detectar primeira mensagem
+    // 3. Verificar histórico para detectar primeira mensagem (incluir message para detectar fluxo workshop na escolha 1/2)
     const { data: messageHistory } = await supabaseAdmin
       .from('whatsapp_messages')
-      .select('id, sender_type, created_at')
+      .select('id, sender_type, created_at, message')
       .eq('conversation_id', conversationId)
       .order('created_at', { ascending: true })
     
     const customerMessages = messageHistory?.filter(m => m.sender_type === 'customer') || []
     const rawIsFirstMessage = customerMessages.length === 1
+    const firstCustomerMessageText = customerMessages[0] ? String((customerMessages[0] as any)?.message ?? '').trim().toLowerCase().replace(/\s+/g, ' ') : ''
+    const firstMessageIsWorkshop = !!firstCustomerMessageText && /acabei\s+de\s+me\s+inscrever|me\s+inscrev(i|er)|gostaria\s+de\s+agendar|inscrev(er|i).*aula|ylada\s+nutri.*agendar/i.test(firstCustomerMessageText)
 
     // a3: Se o form já enviou boas-vindas com opções, não reenviar bloco de "primeira mensagem"
     let formAlreadySentWelcome = false
@@ -1343,7 +1345,7 @@ export async function processIncomingMessageWithCarol(
     // antes do form enviar (60s), o form não manda; então Carol DEVE enviar boas-vindas + opções.
     const isMessageFromButton = /acabei\s+de\s+me\s+inscrever|me\s+inscrev(i|er)|gostaria\s+de\s+agendar|inscrev(er|i).*aula|ylada\s+nutri.*agendar/i.test(msgNorm)
 
-    // a6: Veio da página do vídeo ou da página de vendas para TIRAR DÚVIDA — não disparar fluxo de aula; apenas responder.
+    // a6: Origem "tirar dúvida" / página de vendas — só para tag e relatório; fluxo é o mesmo (aula gratuita + autonomia).
     const isFromVideoOrLandingDuvida = rawIsFirstMessage && (
       /assisti\s+o\s+v[ií]deo|vi\s+o\s+v[ií]deo|tirar\s+d[uú]vida|gostaria\s+de\s+tirar\s+d[uú]vidas?|estou\s+na\s+p[aá]gina\s+(da\s+)?(ylada\s+)?nutri|p[aá]gina\s+de\s+vendas/i.test(msgNorm)
     )
@@ -1360,8 +1362,7 @@ export async function processIncomingMessageWithCarol(
       !suppressWelcomeFlow &&
       !formAlreadySentWelcome &&
       (!isShortNeutralReply || rawIsFirstMessage) &&
-      !deniesSignup &&
-      !isFromVideoOrLandingDuvida
+      !deniesSignup
 
     console.log('[Carol AI] 🔍 Detecção de primeira mensagem:', {
       conversationId,
@@ -1405,6 +1406,22 @@ export async function processIncomingMessageWithCarol(
       const lastBotAskedForChoice =
         lastIntent === 'ask_schedule_choice' ||
         /responde\s*1\s*ou\s*2|me\s+responde\s+com\s+1\s+ou\s+2|qual\s+(desses\s+)?hor[aá]rio/i.test(lastBotText)
+      // Aceitar "1"/"2" mesmo sem lastBotAskedForChoice quando a primeira mensagem foi do fluxo workshop (ex.: Carol não respondeu a tempo)
+      const hasWorkshopOptionsFromFormEarly = Array.isArray(context.workshop_options_ids) && (context.workshop_options_ids as string[]).length > 0
+      const inWorkshopFlowByTagOrFirstMsg = firstMessageIsWorkshop || tags.includes('veio_aula_pratica') || tags.includes('recebeu_link_workshop') || hasWorkshopOptionsFromFormEarly
+      const acceptPlain1or2WithoutLastBot = inWorkshopFlowByTagOrFirstMsg && workshopSessions.length >= 1
+      if ((messageLower === '1' || messageLower === '2') && workshopSessions.length > 0) {
+        console.log('[Carol AI] 🔢 Escolha 1/2:', {
+          conversationId,
+          message: messageLower,
+          lastBotAskedForChoice,
+          firstMessageIsWorkshop,
+          firstCustomerMessagePreview: firstCustomerMessageText.substring(0, 60),
+          inWorkshopFlowByTagOrFirstMsg,
+          acceptPlain1or2WithoutLastBot,
+          workshopSessionsCount: workshopSessions.length,
+        })
+      }
       
       // Detectar por número: "1", "opção 1", "primeira", "segundo", "prefiro a primeira", etc
       const numberMatch = messageLower.match(/(?:opção|opcao|op|escolho|prefiro|quero)\s*(?:a\s*)?(\d+)|^(\d+)$|(primeira|segunda|terceira|quarta|quinta)|(?:prefiro|escolho|quero)\s*(?:a\s*)?(primeira|segunda|terceira|quarta|quinta)/)
@@ -1414,8 +1431,8 @@ export async function processIncomingMessageWithCarol(
         if (numberMatch[1]) {
           optionIndex = parseInt(numberMatch[1]) - 1
         } else if (numberMatch[2]) {
-          // Se a mensagem é só "1" / "2", só aceitar como escolha quando a Carol acabou de pedir isso.
-          if (lastBotAskedForChoice) {
+          // Mensagem é só "1" ou "2": aceitar quando a Carol pediu escolha OU quando o fluxo é workshop (primeira msg foi inscrição)
+          if (lastBotAskedForChoice || acceptPlain1or2WithoutLastBot) {
             optionIndex = parseInt(numberMatch[2]) - 1
           } else {
             optionIndex = -1
@@ -1457,6 +1474,8 @@ export async function processIncomingMessageWithCarol(
           if (!sessionToUse && optionIndex < workshopSessions.length) sessionToUse = workshopSessions[optionIndex]
           // Fallback: mensagem é só "1" ou "2" — usar diretamente a sessão pela ordem
           if (!sessionToUse && optionIndex < list.length) sessionToUse = list[optionIndex]
+          // Se a pessoa respondeu "2" mas só temos 1 sessão, usar a primeira (evita não responder)
+          if (!sessionToUse && workshopSessions.length > 0) sessionToUse = workshopSessions[0]
           if (sessionToUse) {
             const { weekday, date, time } = formatSessionDateTime(sessionToUse.starts_at)
             console.log('[Carol AI] ✅ Sessão detectada por número/ordem:', {
@@ -1658,10 +1677,9 @@ export async function processIncomingMessageWithCarol(
     }
 
     // Se detectou escolha, enviar imagem + link e retornar
-    // Enviar link quando: tem tag de workshop OU o form já gravou workshop_options_ids (opções enviadas).
-    // Assim, mesmo sem tag recebeu_link_workshop (ex.: admin removeu), se a pessoa escolhe opção 1/2, envia o link.
+    // Enviar link quando: tem tag de workshop OU o form já gravou workshop_options_ids OU a primeira mensagem foi de inscrição (fluxo workshop mesmo sem tag).
     const hasWorkshopOptionsFromForm = Array.isArray(context.workshop_options_ids) && context.workshop_options_ids.length > 0
-    const isInWorkshopFlow = tags.includes('veio_aula_pratica') || tags.includes('recebeu_link_workshop') || hasWorkshopOptionsFromForm
+    const isInWorkshopFlow = tags.includes('veio_aula_pratica') || tags.includes('recebeu_link_workshop') || hasWorkshopOptionsFromForm || (!!selectedSession && firstMessageIsWorkshop)
     if (selectedSession && isInWorkshopFlow) {
       console.log('[Carol AI] ✅ Escolha detectada (conversa no fluxo workshop):', {
         sessionId: selectedSession.id,
@@ -2037,10 +2055,7 @@ Nos vemos em breve! 😊
     // Se já tinha mensagem nossa (form enviou), só resumo curto para não repetir.
     const carolInstructionFromContext = (context as any)?.carol_instruction
     let carolInstruction: string | undefined
-    if (isFromVideoOrLandingDuvida) {
-      // Veio da página do vídeo/página de vendas pelo botão "Tirar dúvida". Não há mais aula prática; foco só em tirar dúvidas e vender.
-      carolInstruction = `Esta pessoa assistiu o vídeo e clicou em "Tirar dúvida". NÃO existe mais aula prática — NÃO mencione, NÃO ofereça e NÃO envie opções de aula. Seu objetivo aqui é APENAS: (1) tirar as dúvidas que ela tiver e (2) vender o sistema (planos mensal/anual, sair do improviso). Responda de forma curta e acolhedora na primeira mensagem (ex.: "Oi! Que bom você ter assistido. No que posso te ajudar?"). Nas mensagens seguintes: responda às dúvidas e conduza para a venda (próximo passo, planos, checkout).`
-    } else if (isMessageFromButton && !isFirstMessage) {
+    if (isMessageFromButton && !isFirstMessage) {
       const fmtOpt = (s: { starts_at: string }) => {
         const d = new Date(s.starts_at)
         const w = d.toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo', weekday: 'long' })
@@ -2294,7 +2309,7 @@ Finalize com: "Responde 1 ou 2 😊".`
             .single()
           const displayName = convData?.name || 'Sem nome'
           const displayPhone = convData?.phone || phone
-          const notificationMessage = `💬 *Alguém clicou em Tirar dúvida* (página de vendas Nutri)\n\nA Carol já acolheu e perguntou no que pode ajudar.\n\n👤 *Nome:* ${displayName}\n📱 *Telefone:* ${displayPhone}\n\n_Se quiser assumir a conversa, entre no WhatsApp dessa pessoa._`
+          const notificationMessage = `💬 *Alguém clicou em Tirar dúvida* (página de vendas Nutri)\n\nA Carol enviou as boas-vindas e opções de aula (mesmo fluxo automático).\n\n👤 *Nome:* ${displayName}\n📱 *Telefone:* ${displayPhone}\n\n_Se quiser assumir a conversa, entre no WhatsApp dessa pessoa._`
           const { data: notificationInstance } = await supabaseAdmin
             .from('z_api_instances')
             .select('instance_id, token')

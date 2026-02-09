@@ -80,6 +80,7 @@ export async function POST(request: NextRequest) {
         success: true,
         response: result.response,
         message: 'Carol respondeu à última mensagem do cliente.',
+        sentTo: conversation.phone || undefined,
       })
     }
 

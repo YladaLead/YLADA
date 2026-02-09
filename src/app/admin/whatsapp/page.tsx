@@ -372,6 +372,12 @@ function WhatsAppChatContent() {
       setNewMessage('')
       await loadMessages(selectedConversation.id)
       await loadConversations() // Atualizar lista de conversas
+
+      // Mostrar para qual número foi enviado (conferir se bate com o WhatsApp do contato)
+      const sentTo = data.sentTo ? formatPhone(data.sentTo) : formatPhone(selectedConversation.phone)
+      if (sentTo && sentTo !== 'Sem telefone') {
+        alert(`Enviado para ${sentTo}`)
+      }
     } catch (error: any) {
       console.error('❌ Erro ao enviar mensagem:', error)
       alert(`Erro ao enviar mensagem: ${error.message || 'Tente novamente.'}`)
@@ -1897,7 +1903,9 @@ function WhatsAppChatContent() {
                                         console.error('[WhatsApp Admin] Erro ao atualizar lista após enviar:', refreshErr)
                                         alert('✅ Mensagem enviada, mas a lista não atualizou. Atualize a página (F5) se precisar.')
                                       }
-                                      alert(item.id === 'boas_vindas' ? '✅ Boas-vindas enviadas! A Carol enviou a mensagem com as opções de horário.' : '✅ Carol respondeu à última mensagem do cliente.')
+                                      const sentToFormatted = data.sentTo ? formatPhone(data.sentTo) : ''
+                                      const sentToText = sentToFormatted && sentToFormatted !== 'Sem telefone' ? `\n\nEnviado para: ${sentToFormatted}` : ''
+                                      alert((item.id === 'boas_vindas' ? '✅ Boas-vindas enviadas! A Carol enviou a mensagem com as opções de horário.' : '✅ Carol respondeu à última mensagem do cliente.') + sentToText)
                                     } else {
                                       alert(data.error || 'Erro ao reprocessar com Carol')
                                     }

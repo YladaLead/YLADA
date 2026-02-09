@@ -27,6 +27,7 @@ export async function GET(request: NextRequest) {
 }
 import { createClient } from '@supabase/supabase-js'
 import { sendWhatsAppMessage } from '@/lib/z-api'
+import { normalizePhoneBr } from '@/lib/phone-br'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -216,7 +217,7 @@ async function getOrCreateConversation(
     const updateData: any = {}
     if (!existing.area && area) updateData.area = area
     if (name && (isPlaceholderName(existing.name) || (!existing.name && name))) updateData.name = name
-    // Garantir que phone/contact_key permaneçam consistentes
+    // Garantir que phone/contact_key permaneçam consistentes (canônico 13 dígitos BR)
     if (!existing.contact_key && contactKey) updateData.contact_key = contactKey
     if (phone) updateData.phone = phone
 
@@ -231,6 +232,25 @@ async function getOrCreateConversation(
       await supabase.from('whatsapp_conversations').update(updateData).eq('id', existing.id)
     }
     return existing.id
+  }
+
+  // Fallback: BR pode ter sido salvo em formato antigo (12 dígitos). Buscar e unificar.
+  if (contactKey.length === 13 && contactKey.startsWith('55')) {
+    const contactKey12 = contactKey.slice(0, 4) + contactKey.slice(5)
+    const { data: existing12 } = await supabase
+      .from('whatsapp_conversations')
+      .select('id, contact_key')
+      .eq('instance_id', instance.id)
+      .eq('contact_key', contactKey12)
+      .limit(1)
+      .maybeSingle()
+    if (existing12?.id) {
+      await supabase
+        .from('whatsapp_conversations')
+        .update({ contact_key: contactKey, phone })
+        .eq('id', existing12.id)
+      return existing12.id
+    }
   }
 
   // Criar nova conversa
@@ -859,17 +879,17 @@ export async function POST(request: NextRequest) {
       }
       
       phone = cleanPhone
-      console.log('[Z-API Webhook] 📱 Número final formatado:', {
+      // Unificar formato BR: 12 dígitos (55+DDD+8) → 13 (55+DDD+9+8) para evitar duplicar conversa
+      phone = normalizePhoneBr(phone)
+      console.log('[Z-API Webhook] 📱 Número final formatado (normalizado BR):', {
         original: body.phone || body.from || body.sender,
         formatted: phone,
         hasCountryCode,
-        length: cleanPhone.length
+        length: phone.length
       })
     }
 
-    // contact_key: chave canônica para "memória por pessoa"
-    // - dígitos apenas
-    // - preferir com código do país (BR -> 55 quando aplicável)
+    // contact_key: chave canônica para "memória por pessoa" (sempre dígitos; BR já em 13 dígitos)
     const contactKey = String(phone || '').replace(/\D/g, '')
     
     // IMPORTANTE: Ignorar mensagens do número de notificação ANTES de processar
@@ -956,6 +976,11 @@ export async function POST(request: NextRequest) {
       body?.messages?.[0]?.body,
       body?.messages?.[0]?.content,
       body?.messages?.[0]?.caption,
+
+      // Fallbacks adicionais (Z-API pode variar por versão/evento)
+      body?.data?.caption,
+      body?.caption,
+      typeof body?.content?.text === 'string' ? body.content.text : null,
     )
     
     if (buttonId) {
@@ -1003,20 +1028,21 @@ export async function POST(request: NextRequest) {
     })
 
     // Validar payload
-    // Se não tem message, provavelmente é evento de status/presença/ack.
+    // Se não tem message, provavelmente é evento de status/presença/ack ou o texto veio em outro campo.
     // Retornar 200 evita retries da Z-API e mantém logs limpos.
     if (!message) {
-      console.log('[Z-API Webhook] ⏭️ Evento sem mensagem (ignorando)', {
+      const payloadPreview = JSON.stringify(rawBody).substring(0, 1200)
+      console.warn('[Z-API Webhook] ⏭️ Evento sem mensagem (ignorando) — conversa NÃO será criada. Verifique se o webhook da Z-API está em "Ao receber mensagem" e o payload:', {
         eventType,
         phone: phone || null,
         hasChatId: !!body?.chatId,
-        hasConnectedPhone: !!body?.connectedPhone,
         keys: Object.keys(rawBody),
+        payloadPreview,
       })
       return NextResponse.json({
         received: true,
         ignored: true,
-        reason: 'Evento sem mensagem (status/presença/ack)',
+        reason: 'Evento sem mensagem (status/presença/ack ou texto em formato não mapeado). Ver logs do servidor (payloadPreview) para ajustar extração.',
       })
     }
 
