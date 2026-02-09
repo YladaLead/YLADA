@@ -57,11 +57,11 @@ export const landingPageVideos = {
   },
   get nutriHero() {
     // Local: public/videos/nutri-hero.mp4 — aumente a versão ao trocar o vídeo para evitar cache antigo
-    const version = 3
+    const version = 4
     return `/videos/nutri-hero.mp4?v=${version}`
   },
   get nutriHeroPoster() {
-    const version = 3
+    const version = 4
     return `/videos/nutri-hero-poster.jpg?v=${version}`
   },
 }
