@@ -143,11 +143,12 @@ export default function NutriCheckoutPage() {
         },
         credentials: 'include',
         signal: controller.signal,
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           planType,
           productType: productTypeOverride || (planType === 'annual' ? 'platform_annual' : 'platform_monthly'),
           language: 'pt', // Idioma português para Brasil
           email: userEmail, // E-mail (obrigatório mesmo se autenticado)
+          countryCode: 'BR', // Checkout Nutri é focado em Brasil/LATAM; evita bloqueio quando geo retorna US (VPN/proxy)
           // Mensal padrão: assinatura automática (Preapproval)
           // Mensal parcelado (terceiro produto): pagamento único (Preference) com parcelas
           paymentMethod: planType === 'monthly' && productTypeOverride === 'platform_monthly_12x' ? undefined : 'auto',

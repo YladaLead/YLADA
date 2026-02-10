@@ -20,8 +20,9 @@ export async function POST(request: NextRequest) {
       hasEmail: !!body.email 
     })
     
-    const { planType, productType, language, paymentMethod, email, refVendedor } = body 
+    const { planType, productType, language, paymentMethod, email, refVendedor, countryCode: bodyCountryCode } = body
     // Área Nutri: plano mensal R$ 97 ou anual 12× de R$ 59 (R$ 708)
+    // countryCode: opcional; se enviado pelo cliente (ex: BR), evita erro de geo incorreto (IP US)
     // planType: 'monthly' | 'annual'
     // productType: 'platform_monthly' | 'platform_annual' | etc.
     // language: 'pt' | 'en' | 'es'
@@ -80,9 +81,11 @@ export async function POST(request: NextRequest) {
       console.log('✅ Usuário autenticado:', userId)
     }
 
-    // Detectar país
-    const countryCode = detectCountryCode(request)
-    console.log(`🌍 País detectado: ${countryCode}`)
+    // País: prioridade ao enviado pelo cliente (ex: BR no checkout pt); senão detecção por headers + Accept-Language
+    const countryCode = (bodyCountryCode && typeof bodyCountryCode === 'string' && bodyCountryCode.length === 2)
+      ? bodyCountryCode.toUpperCase()
+      : detectCountryCode(request)
+    console.log(`🌍 País: ${countryCode}${bodyCountryCode ? ' (enviado pelo cliente)' : ' (detectado)'}`)
 
     // Determinar productType se não fornecido
     const finalProductType = productType || (planType === 'annual' ? 'platform_annual' : 'platform_monthly')
