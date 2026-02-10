@@ -124,7 +124,7 @@ export default function JornadaSection({ basePath }: JornadaSectionProps = {}) {
 
   return (
     <div className="space-y-8">
-      {/* Barra de Progresso Geral */}
+      {/* Barra de Progresso Geral — quando 100% concluído não mostra "Próximo etapa" */}
       {stats && (
         <div className="bg-white rounded-xl p-6 shadow-md border border-gray-200">
           <div className="flex items-center justify-between mb-4">
@@ -142,7 +142,8 @@ export default function JornadaSection({ basePath }: JornadaSectionProps = {}) {
           <p className="text-sm text-gray-600 text-center">
             {stats.progress_percentage}% concluído
           </p>
-          {stats.current_day && (
+          {/* Só mostra "Próximo: Etapa X" se ainda houver etapa pendente (não mostrar Etapa 31 quando são 30 etapas) */}
+          {stats.current_day != null && stats.completed_days < stats.total_days && stats.current_day <= stats.total_days && (
             <p className="text-sm text-blue-600 text-center mt-2 font-medium">
               Próximo: Etapa {stats.current_day}
             </p>
