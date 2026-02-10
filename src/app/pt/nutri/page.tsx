@@ -12,7 +12,7 @@ const WHATSAPP_NUTRI = '5519997230912'
 const WHATSAPP_MSG = 'Olá! Estou na página da YLADA Nutri e gostaria de tirar dúvidas.'
 
 export default function NutriLandingPage() {
-  const [faqOpen, setFaqOpen] = useState<number | null>(0)
+  const [faqOpen, setFaqOpen] = useState<number | null>(null)
   const [lyaWidgetOpen, setLyaWidgetOpen] = useState(false)
   const videoRef = useRef<HTMLVideoElement>(null)
   const videoContainerRef = useRef<HTMLDivElement>(null)
@@ -138,29 +138,29 @@ export default function NutriLandingPage() {
                 <span className="bg-gradient-to-r from-yellow-300 to-orange-300 bg-clip-text text-transparent">
                   destrava sua agenda
                 </span>
-                — sem improviso e sem ansiedade.
+                , sem improviso e sem ansiedade.
               </h1>
               <a
                 href="#video"
                 className="inline-flex items-center justify-center mt-5 px-6 py-3 rounded-xl bg-white text-[#2563EB] font-bold text-base hover:bg-white/95 transition-colors shadow-lg"
               >
-                Quero sair do improviso
+                Quero parar de improvisar
               </a>
             </div>
           </div>
         </section>
 
         {/* VÍDEO — Use /pt/nutri#video no anúncio para desembocar direto aqui */}
-        <section id="video" className="pt-6 sm:pt-8 pb-6 sm:pb-8 bg-white scroll-mt-4">
+        <section id="video" className="pt-8 sm:pt-10 pb-8 sm:pb-10 bg-white scroll-mt-4">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="max-w-4xl mx-auto">
-              <p className="text-base sm:text-lg text-center text-gray-700 font-medium mb-2">
+              <p className="text-base sm:text-lg text-center text-gray-700 font-medium mb-1">
                 ⚠️ Assista antes de decidir.
               </p>
-              <p className="text-sm sm:text-base text-center text-gray-600 mb-3 sm:mb-4">
+              <p className="text-sm sm:text-base text-center text-gray-600 mb-5 sm:mb-6">
                 Esse vídeo explica por que você trava e como sair disso sem improviso.
               </p>
-              <div className="bg-white rounded-xl shadow-2xl overflow-hidden mb-3">
+              <div className="bg-white rounded-2xl shadow-lg overflow-hidden mb-5 ring-1 ring-black/5">
                 <div
                   ref={videoContainerRef}
                   className="aspect-video bg-gray-900 relative cursor-pointer group"
@@ -214,18 +214,18 @@ export default function NutriLandingPage() {
                   <div className="h-full bg-[#2563EB] transition-[width] duration-150 ease-out" style={{ width: `${displayVideoProgress}%` }} />
                 </div>
               </div>
-              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center pt-3 sm:pt-4">
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-stretch sm:items-center pt-4 sm:pt-5">
                 <a
                   href={`https://wa.me/${WHATSAPP_NUTRI}?text=${encodeURIComponent(WHATSAPP_MSG)}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-full sm:w-auto inline-flex justify-center items-center px-5 py-3 rounded-lg text-base font-medium border border-gray-300 text-gray-700 hover:bg-gray-50 transition-all"
+                  className="sm:min-w-[140px] order-2 sm:order-1 inline-flex justify-center items-center px-6 py-3.5 rounded-xl text-base font-medium border-2 border-gray-200 text-gray-700 hover:bg-gray-50 hover:border-gray-300 transition-all"
                 >
                   Tirar dúvida
                 </a>
                 <Link
                   href="/pt/nutri/checkout"
-                  className="w-full sm:flex-1 sm:max-w-xs inline-flex justify-center items-center px-8 py-4 rounded-xl text-lg font-bold bg-gradient-to-r from-[#2563EB] to-[#3B82F6] text-white hover:from-[#3B82F6] hover:to-[#1D4ED8] transition-all shadow-xl"
+                  className="sm:min-w-[220px] order-1 sm:order-2 inline-flex justify-center items-center px-8 py-4 rounded-xl text-lg font-bold bg-gradient-to-r from-[#2563EB] to-[#3B82F6] text-white hover:from-[#3B82F6] hover:to-[#1D4ED8] transition-all shadow-lg hover:shadow-xl"
                 >
                   Quero sair do improviso
                 </Link>
@@ -234,22 +234,26 @@ export default function NutriLandingPage() {
           </div>
         </section>
 
-        {/* BLOCO 2 — DOR (curto, punch) */}
-        <section className="pt-8 sm:pt-10 pb-10 sm:pb-12 bg-white">
+        {/* BLOCO 2 — DOR (curto, punch) — alinhamento central consistente */}
+        <section className="py-10 sm:py-14 bg-white">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="max-w-4xl mx-auto">
-              <h2 className="text-3xl sm:text-4xl font-bold text-center mb-6 text-[#1A1A1A]">
+            <div className="max-w-2xl mx-auto text-center">
+              <h2 className="text-3xl sm:text-4xl font-bold mb-8 text-[#1A1A1A]">
                 Você já se sentiu assim?
               </h2>
-              <ul className="space-y-2 text-lg sm:text-xl text-gray-700 text-center sm:text-left">
+              <ul className="space-y-3 text-lg sm:text-xl text-gray-700 inline-block text-left">
                 <li className="font-semibold text-[#2563EB]">• Agenda vazia</li>
                 <li className="font-semibold text-[#2563EB]">• Dúvida na cobrança</li>
                 <li className="font-semibold text-[#2563EB]">• Sensação de recomeçar de novo</li>
               </ul>
-              <p className="mt-4 text-lg text-gray-700">
-                Você já tentou. E volta ao mesmo lugar: <strong>improviso, solidão, sem clareza do que fazer amanhã.</strong>
-              </p>
-              <p className="mt-6 text-center text-xl font-bold text-[#1A1A1A]">
+              <div className="mt-8 space-y-2 text-lg sm:text-xl text-gray-700">
+                <p className="font-semibold">Você já tentou.</p>
+                <p>Organizou.</p>
+                <p>Recomeçou.</p>
+                <p className="pt-2">E voltou ao mesmo lugar:</p>
+                <p className="font-bold text-[#1A1A1A] text-[#2563EB]">improviso, solidão, sem clareza do que fazer amanhã.</p>
+              </div>
+              <p className="mt-8 text-xl font-bold text-[#1A1A1A]">
                 Se você se reconheceu, continue.
               </p>
             </div>
@@ -257,10 +261,10 @@ export default function NutriLandingPage() {
         </section>
 
         {/* DECISÃO LOGO APÓS VÍDEO + DOR — captura quem já decidiu cedo */}
-        <section className="py-8 sm:py-10 bg-[#E9F1FF] border-y border-[#2563EB]/20">
+        <section className="py-10 sm:py-12 bg-gradient-to-b from-[#E9F1FF] to-[#D6E6FF]/80">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="max-w-2xl mx-auto text-center">
-              <p className="text-lg sm:text-xl font-bold text-[#1A1A1A] mb-4">
+            <div className="max-w-2xl mx-auto text-center rounded-2xl bg-white/60 backdrop-blur-sm py-8 px-6 sm:px-10 shadow-sm border border-[#2563EB]/10">
+              <p className="text-lg sm:text-xl font-bold text-[#1A1A1A] mb-3">
                 Se isso já fez sentido pra você, não precisa continuar rolando agora.
               </p>
               <p className="text-base text-gray-700 mb-6">
@@ -268,9 +272,9 @@ export default function NutriLandingPage() {
               </p>
               <Link
                 href="/pt/nutri/checkout"
-                className="inline-flex items-center justify-center px-8 py-4 rounded-xl text-lg font-bold bg-gradient-to-r from-[#2563EB] to-[#3B82F6] text-white hover:from-[#3B82F6] hover:to-[#1D4ED8] transition-all shadow-xl"
+                className="inline-flex items-center justify-center px-8 py-4 rounded-xl text-lg font-bold bg-gradient-to-r from-[#2563EB] to-[#3B82F6] text-white hover:from-[#3B82F6] hover:to-[#1D4ED8] transition-all shadow-lg hover:shadow-xl"
               >
-                Quero sair do improviso
+                Quero aplicar isso na minha agenda
               </Link>
             </div>
           </div>
@@ -283,7 +287,7 @@ export default function NutriLandingPage() {
               <h2 className="text-3xl sm:text-4xl font-bold text-center mb-6 text-[#1A1A1A]">
                 O problema não é você. É falta de sistema.
               </h2>
-              <div className="bg-white rounded-xl shadow-lg p-8 sm:p-10">
+              <div className="bg-white rounded-2xl shadow-md p-8 sm:p-10 ring-1 ring-black/5">
                 <p className="text-lg sm:text-xl text-gray-700 mb-4 leading-relaxed font-semibold">
                   Respire fundo. Você não está quebrada.
                 </p>
@@ -299,52 +303,54 @@ export default function NutriLandingPage() {
           </div>
         </section>
 
-        {/* BLOCO 5 — NASCE A NUTRI-EMPRESÁRIA (MOVIMENTO) */}
-        <section className="py-16 sm:py-20 lg:py-24 bg-[#F5F7FA]">
+        {/* BLOCO 5 — O que muda com o sistema (2 colunas no desktop) */}
+        <section className="py-14 sm:py-20 lg:py-24 bg-[#F5F7FA]">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="max-w-4xl mx-auto">
-              <h2 className="text-3xl sm:text-4xl font-bold text-center mb-12 text-[#1A1A1A]">
+            <div className="max-w-4xl mx-auto space-y-8">
+              <h2 className="text-3xl sm:text-4xl font-bold text-center text-[#1A1A1A]">
                 O que muda com o sistema
               </h2>
               
-              <div className="bg-white rounded-xl shadow-lg p-8 sm:p-10 mb-8">
-                <p className="text-xl sm:text-2xl font-bold text-gray-800 mb-6">
+              <div className="bg-white rounded-2xl shadow-md p-6 sm:p-8 lg:p-10 ring-1 ring-black/5 overflow-hidden">
+                <p className="text-lg sm:text-xl font-bold text-gray-800 mb-6 lg:mb-8 text-center leading-snug">
                   Quem adota um sistema de captação para de depender de sorte e de “dar um jeito”.
                 </p>
-                
-                <div className="space-y-4 text-lg text-gray-700 mb-8">
-                  <div className="flex flex-wrap gap-2 items-baseline">
-                    <span className="font-bold text-[#FF4F4F]">Sem sistema:</span> sorte, indicação, improviso.
-                    <span className="font-bold text-[#29CC6A]">Com sistema:</span> metodologia clara, agenda que enche.
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-10 text-base sm:text-lg text-gray-700">
+                  <div className="space-y-4 lg:space-y-5 lg:pr-6 lg:border-r border-gray-200">
+                    <p className="font-bold text-[#FF4F4F] text-lg">Sem sistema:</p>
+                    <ul className="space-y-3 list-none pl-0">
+                      <li>sorte, indicação, improviso.</li>
+                      <li>“o que faço amanhã?”, indecisão.</li>
+                      <li>você trava.</li>
+                    </ul>
                   </div>
-                  <div className="flex flex-wrap gap-2 items-baseline">
-                    <span className="font-bold text-[#FF4F4F]">Sem sistema:</span> “o que faço amanhã?”, indecisão.
-                    <span className="font-bold text-[#29CC6A]">Com sistema:</span> rotina definida, estrutura de apoio.
-                  </div>
-                  <div className="flex flex-wrap gap-2 items-baseline pt-2">
-                    <span className="font-bold text-[#FF4F4F]">Sem sistema:</span> você trava.
-                    <span className="font-bold text-[#29CC6A]">Com sistema:</span> você segue.
+                  <div className="space-y-4 lg:space-y-5">
+                    <p className="font-bold text-[#29CC6A] text-lg">Com sistema:</p>
+                    <ul className="space-y-3 list-none pl-0">
+                      <li>metodologia clara, agenda que enche.</li>
+                      <li>rotina definida, estrutura de apoio.</li>
+                      <li>você segue.</li>
+                    </ul>
                   </div>
                 </div>
               </div>
               
-              {/* 3 contrastes: decisão, não aula */}
-              <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
-                <h3 className="text-xl font-bold mb-4 text-center text-[#1A1A1A]">
+              <div className="bg-white rounded-2xl shadow-md p-6 sm:p-8 lg:p-10 ring-1 ring-black/5 text-center overflow-hidden">
+                <h3 className="text-xl font-bold mb-6 text-[#1A1A1A]">
                   Nutri Tradicional × Nutri-Empresária
                 </h3>
-                <ul className="space-y-2 text-lg text-gray-700 max-w-xl mx-auto">
-                  <li><span className="font-bold text-[#FF4F4F]">Improviso</span> × <span className="font-bold text-[#29CC6A]">Método</span></li>
-                  <li><span className="font-bold text-[#FF4F4F]">Sorte</span> × <span className="font-bold text-[#29CC6A]">Sistema</span></li>
-                  <li><span className="font-bold text-[#FF4F4F]">Solidão</span> × <span className="font-bold text-[#29CC6A]">Orientação</span></li>
-                </ul>
-                <p className="text-center text-lg font-semibold text-gray-800 mt-4">
+                <div className="flex flex-col sm:flex-row sm:flex-wrap sm:justify-center gap-3 sm:gap-6 lg:gap-8 text-lg text-gray-700 mb-6">
+                  <span><span className="font-bold text-[#FF4F4F]">Improviso</span> × <span className="font-bold text-[#29CC6A]">Método</span></span>
+                  <span><span className="font-bold text-[#FF4F4F]">Sorte</span> × <span className="font-bold text-[#29CC6A]">Sistema</span></span>
+                  <span><span className="font-bold text-[#FF4F4F]">Solidão</span> × <span className="font-bold text-[#29CC6A]">Orientação</span></span>
+                </div>
+                <p className="text-base sm:text-lg font-semibold text-gray-800 min-w-0 break-words px-1">
                   O divisor de águas não é conhecimento. É sistema.
                 </p>
               </div>
               
-              <div className="bg-gradient-to-r from-[#2563EB] to-[#3B82F6] rounded-xl py-5 px-6 text-center text-white max-w-2xl mx-auto">
-                <p className="text-xl font-bold">Você quer encher agenda com método e parar de travar?</p>
+              <div className="bg-gradient-to-r from-[#2563EB] to-[#3B82F6] rounded-2xl py-6 px-6 text-center text-white shadow-lg">
+                <p className="text-lg sm:text-xl font-bold leading-snug">Você quer encher agenda com método e parar de travar?</p>
               </div>
             </div>
           </div>
@@ -358,8 +364,8 @@ export default function NutriLandingPage() {
                 O que é o YLADA Nutri?
               </h2>
               
-              <div className="bg-white rounded-xl shadow-lg p-8 sm:p-10 mb-8 border-2 border-[#2563EB]">
-                <p className="text-xl sm:text-2xl font-bold text-gray-800 mb-6">
+              <div className="bg-white rounded-2xl shadow-md p-8 sm:p-10 mb-8 border-2 border-[#2563EB]/30 ring-1 ring-[#2563EB]/20">
+                <p className="text-xl sm:text-2xl font-bold text-gray-800 mb-6 leading-snug">
                   É o sistema de captação com orientação que destrava.
                 </p>
                 
@@ -395,7 +401,7 @@ export default function NutriLandingPage() {
                   href="/pt/nutri/checkout"
                   className="inline-flex items-center justify-center px-8 py-4 rounded-xl text-lg font-bold bg-gradient-to-r from-[#2563EB] to-[#3B82F6] text-white hover:from-[#3B82F6] hover:to-[#1D4ED8] transition-all shadow-xl"
                 >
-                  Quero sair do improviso
+                  Quero um método claro
                 </Link>
                 <p className="text-sm text-gray-600 mt-3">Quem não está pronta continua lendo.</p>
               </div>
@@ -658,6 +664,20 @@ export default function NutriLandingPage() {
           </div>
         </section>
 
+        {/* ATERRISSAGEM MENTAL — síntese emocional antes da oferta */}
+        <section className="py-10 sm:py-14 bg-white border-t border-gray-100">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="max-w-2xl mx-auto text-center">
+              <p className="text-lg sm:text-xl text-gray-700 leading-relaxed mb-4">
+                Até aqui, você não precisa acreditar em nada.
+              </p>
+              <p className="text-lg sm:text-xl font-semibold text-[#1A1A1A]">
+                Só responder uma pergunta: faz sentido pra você ter método em vez de improviso?
+              </p>
+            </div>
+          </div>
+        </section>
+
         {/* BLOCO 13 — OFERTA (SÓ PLANO ANUAL | DECISÃO) */}
         <section id="oferta" className="py-16 sm:py-20 lg:py-24 bg-gradient-to-br from-[#2563EB] to-[#3B82F6] relative z-0" style={{ position: 'relative', zIndex: 1 }}>
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -703,7 +723,7 @@ export default function NutriLandingPage() {
                       onMouseDown={(e) => e.stopPropagation()}
                       className="mt-3 w-full py-2.5 rounded-lg bg-white text-[#2563EB] font-semibold text-sm hover:bg-white/90 transition-colors"
                     >
-                      👉 Quero sair do improviso
+                      Começar agora
                     </button>
                   </div>
                 </div>
@@ -738,7 +758,7 @@ export default function NutriLandingPage() {
                     className="block w-full text-center bg-gradient-to-r from-[#2563EB] to-[#3B82F6] text-white px-6 py-4 rounded-xl text-lg font-bold hover:from-[#3B82F6] hover:to-[#1D4ED8] transition-all shadow-xl cursor-pointer"
                     style={{ pointerEvents: 'auto' }}
                   >
-                    Ver planos no checkout
+                    Começar com o YLADA agora
                   </a>
                 </div>
               </div>
@@ -791,7 +811,7 @@ export default function NutriLandingPage() {
                 href="#oferta"
                 className="inline-block bg-white text-[#2563EB] px-10 py-5 rounded-xl text-xl font-bold hover:bg-gray-100 transition-all shadow-2xl"
               >
-                Quero sair do improviso
+                Começar com o YLADA agora
               </Link>
             </div>
           </div>
@@ -808,12 +828,8 @@ export default function NutriLandingPage() {
               <div className="space-y-4">
                 {[
                   {
-                    pergunta: 'Posso cancelar durante o ano?',
-                    resposta: 'Plano anual: compromisso de 12 meses (12× de R$ 59). Plano mensal (R$ 97/mês): pode cancelar quando quiser. Você tem 7 dias de garantia: se não for pra você, devolvemos 100%.'
-                  },
-                  {
                     pergunta: 'Como funciona o suporte?',
-                    resposta: 'Noel (orientação 24/7), suporte técnico e comunidade com outras Nutri-Empresárias.'
+                    resposta: 'Orientação 24h por dia, 7 dias por semana, e suporte técnico via WhatsApp.'
                   },
                   {
                     pergunta: 'Para quem é o YLADA Nutri?',
@@ -834,6 +850,10 @@ export default function NutriLandingPage() {
                   {
                     pergunta: 'E se eu não tiver tempo?',
                     resposta: 'O YLADA foi feito para economizar seu tempo, não para consumir. Foco no que importa.'
+                  },
+                  {
+                    pergunta: 'Posso cancelar durante o ano?',
+                    resposta: 'Plano anual: compromisso de 12 meses (12× de R$ 59). Plano mensal (R$ 97/mês): pode cancelar quando quiser. Você tem 7 dias de garantia: se não for pra você, devolvemos 100%.'
                   }
                 ].map((item, index) => (
                   <div key={index} className="bg-white rounded-xl shadow-lg overflow-hidden">
