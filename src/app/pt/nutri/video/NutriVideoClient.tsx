@@ -3,7 +3,6 @@
 import { useRef, useState, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
-import Image from 'next/image'
 import { landingPageVideos } from '@/lib/landing-pages-assets'
 import { cn } from '@/lib/utils'
 import { videoProgressPercentForRetention } from '@/lib/video-progress-retention'
@@ -120,43 +119,19 @@ export default function NutriVideoContent() {
 
   return (
     <div className="min-h-screen bg-white">
-      <header className="sticky top-0 z-50 border-b border-gray-200 bg-white/95 backdrop-blur-sm shadow-sm h-14 sm:h-16 flex items-center">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
-          <Link href="/pt/nutri" className="flex items-center gap-2">
-            <Image
-              src="/images/logo/nutri-horizontal.png"
-              alt="YLADA Nutri"
-              width={133}
-              height={40}
-              className="h-8 sm:h-9 w-auto"
-              priority
-            />
-          </Link>
-          <Link
-            href="/pt/nutri/login"
-            className="text-sm font-semibold text-[#2563EB] hover:text-[#1D4ED8] transition-colors"
-          >
-            Entrar
-          </Link>
-        </div>
-      </header>
-
       <main
         className={cn(
           'container mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl',
-          !contentUnlocked && 'pt-2'
+          !contentUnlocked && 'pt-6'
         )}
       >
         <section className="pt-6 sm:pt-8 pb-4 sm:pb-6 text-center">
           <p className="text-xs sm:text-sm font-medium text-[#2563EB] uppercase tracking-wider mb-2">
-            Vídeo exclusivo
+            Vídeo exclusivo para nutricionistas
           </p>
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#1A1A1A] leading-tight max-w-2xl mx-auto">
-            Como ter pacientes novos chegando todos os dias
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-[#1A1A1A] leading-tight max-w-2xl mx-auto">
+            Assista e compare: o que você faz hoje x o que eu proponho.
           </h1>
-          <p className="mt-3 text-sm sm:text-base text-gray-600 max-w-xl mx-auto">
-            Assista até o final e descubra os próximos passos.
-          </p>
         </section>
 
         <section className="pt-6 md:pt-0 pb-6">

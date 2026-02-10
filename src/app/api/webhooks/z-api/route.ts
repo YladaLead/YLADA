@@ -1340,10 +1340,24 @@ export async function POST(request: NextRequest) {
           alreadyProcessed = carolResponseAfter && carolResponseAfter.length > 0
         }
         
-        const shouldProcessCarol = 
+        let shouldProcessCarol = 
           (!notificationPhone || phone.replace(/\D/g, '') !== notificationPhone.replace(/\D/g, '')) &&
           shouldAllowResponse && // 🆕 Usar lógica melhorada
           !alreadyProcessed // 🆕 Não processar se já respondeu recentemente
+
+        // Conversa "tirar dúvida do vídeo": Carol já enviou a única mensagem; a partir daí é atendimento humano.
+        try {
+          const { data: convCarol } = await supabase
+            .from('whatsapp_conversations')
+            .select('context')
+            .eq('id', conversationId)
+            .single()
+          const ctxTags = Array.isArray(convCarol?.context?.tags) ? convCarol.context.tags : []
+          if (ctxTags.includes('tirar_duvida_video')) {
+            shouldProcessCarol = false
+            console.log('[Z-API Webhook] ⏭️ Pulando Carol: conversa é tirar dúvida do vídeo (atendimento humano)')
+          }
+        } catch (_) { /* ignorar */ }
 
         console.log('[Z-API Webhook] 🤖 Decisão Carol:', {
           shouldProcessCarol,

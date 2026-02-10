@@ -1197,6 +1197,12 @@ export async function processIncomingMessageWithCarol(
     const workshopSessionId = context.workshop_session_id
     const nowIso = new Date().toISOString()
 
+    // 🛑 Conversa "tirar dúvida do vídeo": Carol já enviou a única mensagem automática; a partir daí é atendimento humano.
+    if (tags.includes('tirar_duvida_video')) {
+      console.log('[Carol AI] ⏭️ Conversa é tirar dúvida do vídeo (atendimento humano); Carol não responde.')
+      return { success: true, response: '' }
+    }
+
     // 🛑 Auto-resposta do WhatsApp do lead (ex.: "Agradecemos sua mensagem...")
     // Não deve disparar "primeira mensagem" / boas-vindas novamente.
     const msgNormAuto = String(message || '').trim().toLowerCase().replace(/\s+/g, ' ')
@@ -1415,6 +1421,8 @@ export async function processIncomingMessageWithCarol(
     const isFromVideoOrLandingDuvida = rawIsFirstMessage && (
       /assisti\s+o\s+v[ií]deo|vi\s+o\s+v[ií]deo|tirar\s+d[uú]vida|gostaria\s+de\s+tirar\s+d[uú]vidas?|estou\s+na\s+p[aá]gina\s+(da\s+)?(ylada\s+)?nutri|p[aá]gina\s+de\s+vendas/i.test(msgNorm)
     )
+    // Fluxo "tirar dúvida do vídeo": Carol envia só 1 mensagem automática, notifica outro número e não responde mais (humano assume).
+    const isTirarDuvidaVideoFlow = rawIsFirstMessage && isFromVideoOrLandingDuvida
 
     // 4. Verificar se participou ou não
     // 🚫 Regra definitiva: quem já PARTICIPOU nunca deve cair em "primeira mensagem"/boas-vindas.
@@ -2110,7 +2118,10 @@ Nos vemos em breve! 😊
 
     // Se for primeira mensagem, enviar corpo curto com opções (sem IA).
     let cannedFirstMessageBody: string | null = null
-    if (!suppressWelcomeFlow && rawIsFirstMessage && !formAlreadySentWelcome && !isShortNeutralReply && deniesSignup) {
+    if (isTirarDuvidaVideoFlow) {
+      // Fluxo "tirar dúvida do vídeo": só uma mensagem automática; depois humano assume. Carol não envia opções de aula.
+      cannedFirstMessageBody = 'Que bom que você assistiu o vídeo! Como posso te ajudar?'
+    } else if (!suppressWelcomeFlow && rawIsFirstMessage && !formAlreadySentWelcome && !isShortNeutralReply && deniesSignup) {
       cannedFirstMessageBody =
         `Entendi, obrigada por avisar 😊\n\nPode ser que seu número tenha sido usado por engano.\n\nVocê tem interesse em participar da aula prática para aprender a preencher sua agenda com mais constância?\n\nSe sim, eu te explico rapidinho e te mando o link oficial pra se inscrever.`
     } else if (isFirstMessage) {
@@ -2189,7 +2200,8 @@ Finalize com: "Responde 1 ou 2 😊".`
     }
 
     // Primeira mensagem: enviar saudação em mensagem separada (evita bloco único e repetição)
-    if (isFirstMessage && workshopSessions.length > 0) {
+    // Não enviar saudação longa quando for fluxo "tirar dúvida do vídeo" (só uma mensagem automática).
+    if (isFirstMessage && workshopSessions.length > 0 && !isTirarDuvidaVideoFlow) {
       const isUUIDEarly = instanceId.includes('-') && instanceId.length === 36
       const { data: instanceEarly } = await supabaseAdmin
         .from('z_api_instances')
@@ -2364,7 +2376,58 @@ Finalize com: "Responde 1 ou 2 😊".`
       is_bot_response: true,
     })
 
-    // 9.1. Se veio por "Tirar dúvida" (vídeo/página de vendas), notificar o responsável
+    // 9.0. Fluxo "tirar dúvida do vídeo": só uma mensagem automática; notificar com atenção e não responder mais (humano assume).
+    if (isTirarDuvidaVideoFlow) {
+      try {
+        const notificationPhone = process.env.Z_API_NOTIFICATION_PHONE
+        if (notificationPhone) {
+          const { data: convData } = await supabaseAdmin
+            .from('whatsapp_conversations')
+            .select('name, phone')
+            .eq('id', conversationId)
+            .single()
+          const displayName = convData?.name || 'Sem nome'
+          const displayPhone = convData?.phone || phone
+          const notificationMessage = `⚠️ *ATENÇÃO: Alguém querendo tirar dúvida*\n\nAssistiu o vídeo da página e clicou em "Tirar dúvidas". A Carol enviou só a mensagem automática; *a partir daqui você assume.*\n\n👤 *Nome:* ${displayName}\n📱 *Telefone:* ${displayPhone}\n\n_Entre no WhatsApp dessa pessoa para atender._`
+          const { data: notificationInstance } = await supabaseAdmin
+            .from('z_api_instances')
+            .select('instance_id, token')
+            .eq('status', 'connected')
+            .limit(1)
+            .maybeSingle()
+          if (notificationInstance) {
+            const notificationClient = createZApiClient({
+              instanceId: notificationInstance.instance_id,
+              token: notificationInstance.token,
+            })
+            await notificationClient.sendTextMessage({
+              phone: notificationPhone,
+              message: notificationMessage,
+            })
+            console.log('[Carol AI] ✅ Notificação "tirar dúvida do vídeo" enviada para responsável:', notificationPhone)
+          }
+        }
+        const prevCtx = (context || {}) as Record<string, unknown>
+        const prevTags = Array.isArray(prevCtx.tags) ? prevCtx.tags : []
+        await supabaseAdmin
+          .from('whatsapp_conversations')
+          .update({
+            last_message_at: new Date().toISOString(),
+            last_message_from: 'bot',
+            context: {
+              ...prevCtx,
+              tags: [...new Set([...prevTags, 'primeiro_contato', 'veio_tirar_duvida', 'tirar_duvida_video'])],
+            },
+          })
+          .eq('id', conversationId)
+        console.log('[Carol AI] ✅ Fluxo tirar dúvida do vídeo: tag tirar_duvida_video aplicada; Carol não responderá mais nesta conversa.')
+      } catch (err: any) {
+        console.error('[Carol AI] ❌ Erro no fluxo tirar dúvida do vídeo:', err?.message || err)
+      }
+      return { success: true, response: carolResponse }
+    }
+
+    // 9.1. Se veio por "Tirar dúvida" (vídeo/página de vendas) mas NÃO é fluxo exclusivo vídeo, notificar o responsável
     if (isFromVideoOrLandingDuvida) {
       try {
         const notificationPhone = process.env.Z_API_NOTIFICATION_PHONE
