@@ -32,8 +32,8 @@ export async function POST(
     const { user } = authResult
 
     const body = await request.json()
-    const { planType, productType, language, paymentMethod } = body 
-    // planType: 'monthly' | 'annual'
+    const { planType, productType, language, paymentMethod, countryCode: bodyCountryCode } = body
+    // countryCode: opcional; evita bloqueio quando geo retorna US (VPN/proxy)
     // productType: 'platform_monthly' | 'platform_annual' | 'formation_only' (apenas para área Nutri)
     // language: 'pt' | 'en' | 'es'
     // paymentMethod: 'auto' | 'pix'
@@ -53,9 +53,11 @@ export async function POST(
       )
     }
 
-    // Detectar país
-    const countryCode = detectCountryCode(request)
-    console.log(`🌍 País detectado: ${countryCode}`)
+    // País: prioridade ao enviado pelo cliente; senão detecção por headers + Accept-Language
+    const countryCode = (bodyCountryCode && typeof bodyCountryCode === 'string' && bodyCountryCode.length === 2)
+      ? bodyCountryCode.toUpperCase()
+      : detectCountryCode(request)
+    console.log(`🌍 País: ${countryCode}${bodyCountryCode ? ' (enviado pelo cliente)' : ' (detectado)'}`)
 
     // Criar checkout usando gateway abstraction (detecta automaticamente Mercado Pago ou Stripe)
     const checkout = await createCheckout({

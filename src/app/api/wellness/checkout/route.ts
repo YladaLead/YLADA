@@ -17,7 +17,8 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     console.log('📋 Body recebido:', { planType: body.planType, hasEmail: !!body.email })
     
-    const { planType, language, paymentMethod, email } = body // 'monthly' | 'annual', 'pt' | 'en' | 'es', 'auto' | 'pix', email
+    const { planType, language, paymentMethod, email, countryCode: bodyCountryCode } = body
+    // countryCode: opcional; se enviado pelo cliente (ex: BR), evita bloqueio quando geo retorna US (VPN/proxy)
 
     if (!planType || !['monthly', 'annual'].includes(planType)) {
       return NextResponse.json(
@@ -63,9 +64,11 @@ export async function POST(request: NextRequest) {
       console.log('✅ Usuário autenticado:', userId)
     }
 
-    // Detectar país
-    const countryCode = detectCountryCode(request)
-    console.log(`🌍 País detectado: ${countryCode}`)
+    // País: prioridade ao enviado pelo cliente; senão detecção por headers + Accept-Language
+    const countryCode = (bodyCountryCode && typeof bodyCountryCode === 'string' && bodyCountryCode.length === 2)
+      ? bodyCountryCode.toUpperCase()
+      : detectCountryCode(request)
+    console.log(`🌍 País: ${countryCode}${bodyCountryCode ? ' (enviado pelo cliente)' : ' (detectado)'}`)
 
     console.log('📋 Dados do checkout:', {
       area: 'wellness',

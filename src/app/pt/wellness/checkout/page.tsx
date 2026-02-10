@@ -115,10 +115,11 @@ export default function WellnessCheckoutPage() {
         },
         credentials: 'include',
         signal: controller.signal,
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           planType,
-          language: 'pt', // Idioma português para Brasil
-          email: userEmail, // E-mail (obrigatório mesmo se autenticado)
+          language: 'pt',
+          email: userEmail,
+          countryCode: userProfile?.countryCode || 'BR', // Evita bloqueio quando geo retorna US (VPN/proxy)
           // Plano mensal sempre usa assinatura automática (cartão)
           // Plano anual sempre usa assinatura recorrente (cartão)
         }),
