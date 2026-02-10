@@ -5,9 +5,23 @@ import dynamic from 'next/dynamic'
 import { Sparkles } from 'lucide-react'
 import NutriNavBar from '@/components/nutri/NutriNavBar'
 import ScriptsNutriModal from '@/components/nutri/ScriptsNutriModal'
+import { getScriptsNutriPorSlug, getScriptsNutriPorTipo } from '@/lib/nutri-system/scripts-nutri'
 import { buildNutriToolUrl } from '@/lib/url-utils'
 import { useToast } from '@/hooks/useToast'
 import { ToastContainer } from '@/components/ui/Toast'
+
+/** Mensagem sugerida para enviar junto (link ou QR) - mesmo formato do link (paridade com Wellness) */
+function obterMensagemSugeridaNutri(template: TemplateCard | undefined, link: string): string {
+  if (!template) return link
+  const slug = template.slug || template.id
+  const config = getScriptsNutriPorSlug(slug)
+  if (config) {
+    const { listaQuente } = getScriptsNutriPorTipo(config)
+    const primeiroComLink = listaQuente?.find(s => s.texto.includes('[LINK]'))
+    if (primeiroComLink) return primeiroComLink.texto.replace(/\[LINK\]/g, link)
+  }
+  return `Olá! Segue meu link da ferramenta "${template.nome}":\n\n${link}`
+}
 
 type TemplateContent = {
   questions?: unknown[]
@@ -316,15 +330,16 @@ export default function TemplatesNutri() {
         linkElement.click()
         document.body.removeChild(linkElement)
         
-        // Copiar o link também
-        await navigator.clipboard.writeText(link)
+        // Copiar mensagem sugerida (mesmo formato do link) para enviar junto no WhatsApp
+        const templateDownload = templates.find(t => t.id === templateId)
+        const mensagemSugerida = obterMensagemSugeridaNutri(templateDownload, link)
+        await navigator.clipboard.writeText(mensagemSugerida)
         
         setQrCopiado(templateId)
         setTimeout(() => setQrCopiado(null), 2000)
         
-        const template = templates.find(t => t.id === templateId)
         showSuccess('QR Code gerado!', {
-          message: template ? `QR Code da ferramenta "${template.nome}" foi baixado. O link também foi copiado.` : 'QR Code foi baixado. O link também foi copiado.',
+          message: templateDownload ? `QR Code da ferramenta "${templateDownload.nome}" foi baixado. Mensagem para enviar junto foi copiada (cole no WhatsApp).` : 'QR Code foi baixado. Mensagem com link foi copiada.',
           link: link,
           icon: 'qr',
           duration: 5000,
@@ -361,17 +376,16 @@ export default function TemplatesNutri() {
             setQrCopiado(templateId)
             setTimeout(() => setQrCopiado(null), 2000)
             
-            const template = templates.find(t => t.id === templateId)
+            const templateImg = templates.find(t => t.id === templateId)
             showSuccess('QR Code copiado!', {
-              message: template ? `QR Code da ferramenta "${template.nome}" copiado para a área de transferência.` : 'QR Code copiado para a área de transferência.',
+              message: templateImg ? `QR Code da ferramenta "${templateImg.nome}" copiado. Use o botão "Scripts" para copiar uma mensagem para enviar junto no WhatsApp.` : 'QR Code copiado. Use Scripts para mensagem.',
               link: link,
               icon: 'qr',
-              duration: 5000,
+              duration: 6000,
             })
             resolve()
           } catch (clipboardError) {
             console.warn('Erro ao copiar para clipboard, fazendo download:', clipboardError)
-            // Se falhar ao copiar, fazer download
             const url = URL.createObjectURL(blob)
             const linkElement = document.createElement('a')
             linkElement.href = url
@@ -381,15 +395,15 @@ export default function TemplatesNutri() {
             document.body.removeChild(linkElement)
             URL.revokeObjectURL(url)
             
-            // Copiar o link também
-            await navigator.clipboard.writeText(link)
+            const templateFallback = templates.find(t => t.id === templateId)
+            const mensagemSugerida = obterMensagemSugeridaNutri(templateFallback, link)
+            await navigator.clipboard.writeText(mensagemSugerida)
             
             setQrCopiado(templateId)
             setTimeout(() => setQrCopiado(null), 2000)
             
-            const template = templates.find(t => t.id === templateId)
             showSuccess('QR Code gerado!', {
-              message: template ? `QR Code da ferramenta "${template.nome}" foi baixado. O link também foi copiado.` : 'QR Code foi baixado. O link também foi copiado.',
+              message: templateFallback ? `QR Code da ferramenta "${templateFallback.nome}" foi baixado. Mensagem para enviar junto foi copiada (cole no WhatsApp).` : 'QR Code foi baixado. Mensagem com link foi copiada.',
               link: link,
               icon: 'qr',
               duration: 5000,
@@ -401,10 +415,11 @@ export default function TemplatesNutri() {
     } catch (error) {
       console.error('Erro ao copiar QR code:', error)
       try {
-        // Fallback: copiar o link se QR code não funcionar
-        await navigator.clipboard.writeText(link)
-        showSuccess('Link copiado', {
-          message: 'QR code não suportado, mas o link foi copiado para a área de transferência.',
+        const templateErro = templates.find(t => t.id === templateId)
+        const mensagemSugerida = obterMensagemSugeridaNutri(templateErro, link)
+        await navigator.clipboard.writeText(mensagemSugerida)
+        showSuccess('Link e mensagem copiados', {
+          message: templateErro ? `Erro ao gerar QR, mas a mensagem para enviar da ferramenta "${templateErro.nome}" foi copiada. Cole no WhatsApp.` : 'Mensagem com link foi copiada.',
           link: link,
           icon: 'link',
           duration: 5000,

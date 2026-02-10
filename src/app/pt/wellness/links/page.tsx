@@ -15,8 +15,24 @@ import dynamic from 'next/dynamic'
 import QRCode from '@/components/QRCode'
 import FluxoDiagnostico from '@/components/wellness-system/FluxoDiagnostico'
 import ScriptsModal from '@/components/wellness/ScriptsModal'
+import { getScriptsPorSlug, getScriptsPorTipo } from '@/lib/wellness-system/scripts-por-ferramenta'
 import { useToast } from '@/hooks/useToast'
 import { ToastContainer } from '@/components/ui/Toast'
+
+/** Obtém mensagem sugerida para enviar junto (link ou QR) - mesmo formato do link */
+function obterMensagemSugeridaParaCompartilhar(item: ItemUnificado): string {
+  const link = item.link || ''
+  const slug = item.metadata?.template?.slug || item.metadata?.fluxo?.id || item.id
+  const config = getScriptsPorSlug(String(slug))
+  if (config) {
+    const { listaQuente } = getScriptsPorTipo(config)
+    const primeiroComLink = listaQuente?.find(s => s.texto.includes('[LINK]'))
+    if (primeiroComLink) {
+      return primeiroComLink.texto.replace(/\[LINK\]/g, link)
+    }
+  }
+  return `Olá! Segue meu link da ferramenta "${item.nome}":\n\n${link}`
+}
 
 // Lazy load dos previews
 const DynamicTemplatePreview = dynamic(() => import('@/components/shared/DynamicTemplatePreview'), { ssr: false })
@@ -742,15 +758,16 @@ function LinksUnificadosPageContent() {
         linkElement.click()
         document.body.removeChild(linkElement)
         
-        // Copiar o link também
-        await navigator.clipboard.writeText(link)
+        // Copiar mensagem sugerida (mesmo formato do link) para enviar junto no WhatsApp
+        const itemDownload = itensUnificados.find(i => i.id === id)
+        const mensagemSugerida = itemDownload ? obterMensagemSugeridaParaCompartilhar(itemDownload) : link
+        await navigator.clipboard.writeText(mensagemSugerida)
         
         setQrCopiado(id)
         setTimeout(() => setQrCopiado(null), 2000)
         
-        const item = itensUnificados.find(i => i.id === id)
         showSuccess('QR Code gerado!', {
-          message: item ? `QR Code da ferramenta "${item.nome}" foi baixado. O link também foi copiado.` : 'QR Code foi baixado. O link também foi copiado.',
+          message: itemDownload ? `QR Code da ferramenta "${itemDownload.nome}" foi baixado. Mensagem para enviar junto foi copiada (cole no WhatsApp).` : 'QR Code foi baixado. Mensagem com link foi copiada.',
           link: link,
           icon: 'qr',
           duration: 5000,
@@ -788,12 +805,12 @@ function LinksUnificadosPageContent() {
             setQrCopiado(id)
             setTimeout(() => setQrCopiado(null), 2000)
             
-            const item = itensUnificados.find(i => i.id === id)
+            const itemImg = itensUnificados.find(i => i.id === id)
             showSuccess('QR Code copiado!', {
-              message: item ? `QR Code da ferramenta "${item.nome}" copiado para a área de transferência.` : 'QR Code copiado para a área de transferência.',
+              message: itemImg ? `QR Code da ferramenta "${itemImg.nome}" copiado. Use o botão "Scripts" para copiar uma mensagem para enviar junto no WhatsApp.` : 'QR Code copiado para a área de transferência. Use Scripts para mensagem.',
               link: link,
               icon: 'qr',
-              duration: 5000,
+              duration: 6000,
             })
             resolve()
           } catch (clipboardError) {
@@ -808,19 +825,21 @@ function LinksUnificadosPageContent() {
             document.body.removeChild(linkElement)
             URL.revokeObjectURL(url)
             
-            // Copiar o link também
+            // Copiar mensagem sugerida (mesmo formato do link) para enviar junto
             try {
-              await navigator.clipboard.writeText(link)
+              const itemFallback = itensUnificados.find(i => i.id === id)
+              const mensagemSugerida = itemFallback ? obterMensagemSugeridaParaCompartilhar(itemFallback) : link
+              await navigator.clipboard.writeText(mensagemSugerida)
             } catch (e) {
-              console.warn('Erro ao copiar link:', e)
+              console.warn('Erro ao copiar mensagem:', e)
             }
             
             setQrCopiado(id)
             setTimeout(() => setQrCopiado(null), 2000)
             
-            const item = itensUnificados.find(i => i.id === id)
+            const itemFallback2 = itensUnificados.find(i => i.id === id)
             showSuccess('QR Code gerado!', {
-              message: item ? `QR Code da ferramenta "${item.nome}" foi baixado. O link também foi copiado.` : 'QR Code foi baixado. O link também foi copiado.',
+              message: itemFallback2 ? `QR Code da ferramenta "${itemFallback2.nome}" foi baixado. Mensagem para enviar junto foi copiada (cole no WhatsApp).` : 'QR Code foi baixado. Mensagem com link foi copiada.',
               link: link,
               icon: 'qr',
               duration: 5000,
@@ -832,10 +851,12 @@ function LinksUnificadosPageContent() {
     } catch (error) {
       console.error('Erro ao copiar QR code:', error)
       try {
-        // Fallback: copiar o link se QR code não funcionar
-        await navigator.clipboard.writeText(link)
-        showSuccess('Link copiado', {
-          message: 'Erro ao gerar QR code, mas o link foi copiado para a área de transferência.',
+        // Fallback: copiar mensagem sugerida (mesmo formato do link) para paridade com link
+        const itemErro = itensUnificados.find(i => i.id === id)
+        const mensagemSugerida = itemErro ? obterMensagemSugeridaParaCompartilhar(itemErro) : link
+        await navigator.clipboard.writeText(mensagemSugerida)
+        showSuccess('Link e mensagem copiados', {
+          message: itemErro ? `Erro ao gerar QR, mas a mensagem para enviar da ferramenta "${itemErro.nome}" foi copiada. Cole no WhatsApp.` : 'Mensagem com link foi copiada.',
           link: link,
           icon: 'link',
           duration: 5000,

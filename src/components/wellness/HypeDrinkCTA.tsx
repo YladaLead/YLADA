@@ -23,28 +23,31 @@ export default function HypeDrinkCTA({
   const temUrlExterna = config?.cta_type === 'url_externa' && config?.external_url
   const temWhatsApp = config?.whatsapp_number
 
-  // Obter mensagem WhatsApp: específica da ferramenta > personalizada > padrão
+  // Obter mensagem WhatsApp: personalizada (com diagnóstico) > específica da ferramenta > padrão
+  // Priorizar mensagemPersonalizada para que link e QR entreguem a mensagem com resultado/diagnóstico (paridade com WellnessCTAButton)
   let mensagemWhatsApp = ''
   let botaoTexto = config?.cta_button_text || 'Quero saber mais sobre o Hype Drink'
   
-  // Tentar obter mensagem específica da ferramenta pelo slug (prioridade)
-  const toolSlug = config?.template_slug || config?.slug
-  if (toolSlug) {
-    const mensagemFerramenta = obterMensagemWhatsApp(toolSlug)
-    if (mensagemFerramenta) {
-      mensagemWhatsApp = mensagemFerramenta.mensagem
-      botaoTexto = mensagemFerramenta.botaoTexto || botaoTexto
+  if (mensagemPersonalizada) {
+    mensagemWhatsApp = mensagemPersonalizada
+  } else {
+    const toolSlug = config?.template_slug || config?.slug
+    if (toolSlug) {
+      const mensagemFerramenta = obterMensagemWhatsApp(toolSlug)
+      if (mensagemFerramenta) {
+        mensagemWhatsApp = mensagemFerramenta.mensagem
+        botaoTexto = mensagemFerramenta.botaoTexto || botaoTexto
+      }
     }
-  }
-  
-  // Se não encontrou mensagem específica, usar personalizada ou padrão
-  if (!mensagemWhatsApp) {
-    if (mensagemPersonalizada) {
-      mensagemWhatsApp = mensagemPersonalizada
-    } else {
+    if (!mensagemWhatsApp) {
       mensagemWhatsApp = mensagemPadraoWhatsApp.mensagem
       botaoTexto = mensagemPadraoWhatsApp.botaoTexto || botaoTexto
     }
+  }
+  
+  // Incluir resultado/diagnóstico na mensagem quando disponível (mesmo formato do link - paridade com WellnessCTAButton)
+  if (resultado && mensagemWhatsApp && !mensagemWhatsApp.includes(resultado)) {
+    mensagemWhatsApp = `${mensagemWhatsApp}\n\n📊 Meu resultado: ${resultado}`
   }
 
   // Formatar número WhatsApp
