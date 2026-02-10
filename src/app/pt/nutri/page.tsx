@@ -126,24 +126,25 @@ export default function NutriLandingPage() {
       </header>
 
       <main>
-        {/* BLOCO 1 — HERO (só headline; CTA fica abaixo do vídeo) */}
+        {/* BLOCO 1 — HERO: dor + headline + CTA direto */}
         <section className="bg-gradient-to-br from-[#2563EB] to-[#3B82F6] text-white pt-8 sm:pt-10 pb-8 sm:pb-10">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="max-w-3xl mx-auto text-center">
-              <p className="text-base sm:text-lg text-white/85 mb-2 font-medium">
-                Para nutricionistas cansadas de tentar sozinhas e improvisar a própria agenda.
+              <p className="text-base sm:text-lg text-white/95 mb-3 font-semibold">
+                Nutri, sua agenda não está vazia por falta de competência.
               </p>
               <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black leading-tight">
-                O sistema de captação{' '}
+                O sistema de captação com orientação que{' '}
                 <span className="bg-gradient-to-r from-yellow-300 to-orange-300 bg-clip-text text-transparent">
-                  com orientação que destrava.
+                  destrava sua agenda
                 </span>
+                — sem improviso e sem ansiedade.
               </h1>
               <a
                 href="#video"
-                className="inline-block mt-4 text-white/90 text-sm sm:text-base underline underline-offset-2 hover:text-white transition-colors"
+                className="inline-flex items-center justify-center mt-5 px-6 py-3 rounded-xl bg-white text-[#2563EB] font-bold text-base hover:bg-white/95 transition-colors shadow-lg"
               >
-                Assista ao vídeo ↓
+                Quero sair do improviso
               </a>
             </div>
           </div>
@@ -153,8 +154,11 @@ export default function NutriLandingPage() {
         <section id="video" className="pt-6 sm:pt-8 pb-6 sm:pb-8 bg-white scroll-mt-4">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="max-w-4xl mx-auto">
-              <p className="text-base sm:text-lg text-center text-gray-700 font-medium mb-3 sm:mb-4">
-                Entenda como organizar sua agenda e ter clientes e pacientes chegando todos os dias.
+              <p className="text-base sm:text-lg text-center text-gray-700 font-medium mb-2">
+                ⚠️ Assista antes de decidir.
+              </p>
+              <p className="text-sm sm:text-base text-center text-gray-600 mb-3 sm:mb-4">
+                Esse vídeo explica por que você trava e como sair disso sem improviso.
               </p>
               <div className="bg-white rounded-xl shadow-2xl overflow-hidden mb-3">
                 <div
@@ -223,102 +227,73 @@ export default function NutriLandingPage() {
                   href="/pt/nutri/checkout"
                   className="w-full sm:flex-1 sm:max-w-xs inline-flex justify-center items-center px-8 py-4 rounded-xl text-lg font-bold bg-gradient-to-r from-[#2563EB] to-[#3B82F6] text-white hover:from-[#3B82F6] hover:to-[#1D4ED8] transition-all shadow-xl"
                 >
-                  Sair do improviso
+                  Quero sair do improviso
                 </Link>
               </div>
             </div>
           </div>
         </section>
 
-        {/* BLOCO 2 — DOR (ENXUTO | FRASES DURAS) */}
-        <section className="pt-8 sm:pt-10 pb-12 sm:pb-14 lg:pb-16 bg-white">
+        {/* BLOCO 2 — DOR (curto, punch) */}
+        <section className="pt-8 sm:pt-10 pb-10 sm:pb-12 bg-white">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="max-w-4xl mx-auto">
-              <h2 className="text-3xl sm:text-4xl font-bold text-center mb-10 text-[#1A1A1A]">
+              <h2 className="text-3xl sm:text-4xl font-bold text-center mb-6 text-[#1A1A1A]">
                 Você já se sentiu assim?
               </h2>
-              
-              <ul className="space-y-3 text-lg sm:text-xl text-gray-700">
+              <ul className="space-y-2 text-lg sm:text-xl text-gray-700 text-center sm:text-left">
                 <li className="font-semibold text-[#2563EB]">• Agenda vazia</li>
                 <li className="font-semibold text-[#2563EB]">• Dúvida na cobrança</li>
                 <li className="font-semibold text-[#2563EB]">• Sensação de recomeçar de novo</li>
               </ul>
-              <p className="mt-6 text-lg text-gray-700 leading-relaxed">
-                Conteúdo que não gera conversa não gera agenda. Você posta, os likes vêm, <strong>"quanto custa?"</strong> não chega. Planilhas, apps, rotinas: você já tentou. E volta ao mesmo lugar: <strong>improviso, solidão, sem clareza do que fazer amanhã.</strong>
+              <p className="mt-4 text-lg text-gray-700">
+                Você já tentou. E volta ao mesmo lugar: <strong>improviso, solidão, sem clareza do que fazer amanhã.</strong>
               </p>
-              
-              <div className="mt-10 text-center">
-                <p className="text-xl font-bold text-[#1A1A1A]">
-                  Se você se reconheceu, continue.
-                </p>
-              </div>
+              <p className="mt-6 text-center text-xl font-bold text-[#1A1A1A]">
+                Se você se reconheceu, continue.
+              </p>
             </div>
           </div>
         </section>
 
-        {/* BLOCO 3 — O PROBLEMA NÃO É VOCÊ (ENXUTO | CONTRASTE TÉCNICO × EMPRESARIAL) */}
-        <section className="py-16 sm:py-20 lg:py-24 bg-[#F5F7FA]">
+        {/* DECISÃO LOGO APÓS VÍDEO + DOR — captura quem já decidiu cedo */}
+        <section className="py-8 sm:py-10 bg-[#E9F1FF] border-y border-[#2563EB]/20">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="max-w-2xl mx-auto text-center">
+              <p className="text-lg sm:text-xl font-bold text-[#1A1A1A] mb-4">
+                Se isso já fez sentido pra você, não precisa continuar rolando agora.
+              </p>
+              <p className="text-base text-gray-700 mb-6">
+                Você pode começar hoje.
+              </p>
+              <Link
+                href="/pt/nutri/checkout"
+                className="inline-flex items-center justify-center px-8 py-4 rounded-xl text-lg font-bold bg-gradient-to-r from-[#2563EB] to-[#3B82F6] text-white hover:from-[#3B82F6] hover:to-[#1D4ED8] transition-all shadow-xl"
+              >
+                Quero sair do improviso
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        {/* BLOCO 3 — O problema não é você + faculdade (um bloco emocional único) */}
+        <section className="py-12 sm:py-16 bg-[#F5F7FA]">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="max-w-4xl mx-auto">
-              <h2 className="text-3xl sm:text-4xl font-bold text-center mb-8 text-[#1A1A1A]">
+              <h2 className="text-3xl sm:text-4xl font-bold text-center mb-6 text-[#1A1A1A]">
                 O problema não é você. É falta de sistema.
               </h2>
-              
-              <div className="bg-white rounded-xl shadow-lg p-8 sm:p-10 mb-8">
-                <p className="text-lg sm:text-xl text-gray-700 mb-6 leading-relaxed font-semibold">
-                  Respire fundo. Você não está quebrada. O que falta é uma metodologia clara de captação e uma estrutura de apoio que destrave. Não mais indecisão, não mais “o que faço amanhã?”.
+              <div className="bg-white rounded-xl shadow-lg p-8 sm:p-10">
+                <p className="text-lg sm:text-xl text-gray-700 mb-4 leading-relaxed font-semibold">
+                  Respire fundo. Você não está quebrada.
                 </p>
                 
                 <p className="text-lg text-gray-700 mb-4">
                   A faculdade te ensinou a ser nutricionista técnica. Não te ensinou a captar clientes, organizar o negócio nem cobrar com clareza.
                 </p>
                 <p className="text-lg text-gray-700 font-semibold">
-                  A diferença entre quem cresce e quem fica no improviso não é talento. <strong>É sistema.</strong>
+                  O que falta é metodologia clara e estrutura que destrave. A diferença entre quem cresce e quem fica no improviso não é talento. <strong>É sistema.</strong>
                 </p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* BLOCO 4 — O INIMIGO INVISÍVEL (FACULDADE + MERCADO) */}
-        <section className="py-16 sm:py-20 lg:py-24 bg-white">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="max-w-4xl mx-auto">
-              <h2 className="text-3xl sm:text-4xl font-bold text-center mb-12 text-[#1A1A1A]">
-                O que a faculdade te ensinou, e o que ela não te ensinou
-              </h2>
-              
-              <div className="grid md:grid-cols-2 gap-8 mb-12">
-                <div className="bg-[#E9F1FF] rounded-xl p-8 border-2 border-[#2563EB]">
-                  <h3 className="text-2xl font-bold mb-4 text-[#2563EB]">O Que a Faculdade Ensinou</h3>
-                  <p className="text-gray-700 mb-4">Você aprendeu:</p>
-                  <ul className="space-y-3 text-gray-700">
-                    <li>• Avaliar paciente e necessidades nutricionais</li>
-                    <li>• Prescrever dietas e interpretar exames</li>
-                    <li>• Acompanhar evolução clínica</li>
-                  </ul>
-                  <p className="text-lg font-semibold text-gray-700 mt-6">Isso é fundamental. E você domina.</p>
-                </div>
-                
-                <div className="bg-[#FFF4E6] rounded-xl p-8 border-2 border-[#FF9800]">
-                  <h3 className="text-2xl font-bold mb-4 text-[#FF9800]">O Que a Faculdade Não Ensinou</h3>
-                  <p className="text-gray-700 mb-4">Não te preparou para:</p>
-                  <ul className="space-y-3 text-gray-700">
-                    <li>• Construir negócio e captar clientes</li>
-                    <li>• Organizar processos e precificar</li>
-                    <li>• Criar sistemas que funcionem sem você</li>
-                    <li>• Transformar conhecimento em receita</li>
-                  </ul>
-                  <p className="text-lg font-semibold text-gray-700 mt-6">Ela cumpre seu papel: formar técnicos.</p>
-                </div>
-              </div>
-              
-              <div className="bg-[#2563EB] rounded-xl py-6 px-6 text-center text-white max-w-2xl mx-auto">
-                <p className="text-xl font-bold mb-2">
-                  O mercado exige que você seja duas coisas:
-                </p>
-                <p className="text-lg">1. <strong>Nutricionista técnica</strong> (isso você já é). 2. <strong>Empresária estratégica</strong> (isso ninguém te ensinou)</p>
-                <p className="text-xl font-bold mt-4">É aqui que nasce a Nutri-Empresária.</p>
               </div>
             </div>
           </div>
@@ -353,41 +328,23 @@ export default function NutriLandingPage() {
                 </div>
               </div>
               
-              {/* Tabela Comparativa */}
-              <div className="bg-white rounded-xl shadow-lg p-8 mb-6 overflow-x-auto">
-                <h3 className="text-2xl font-bold mb-6 text-center text-[#1A1A1A]">
+              {/* 3 contrastes: decisão, não aula */}
+              <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
+                <h3 className="text-xl font-bold mb-4 text-center text-[#1A1A1A]">
                   Nutri Tradicional × Nutri-Empresária
                 </h3>
-                <div className="grid md:grid-cols-2 gap-8">
-                  <div className="bg-[#FF4F4F]/5 rounded-lg p-6 border-2 border-[#FF4F4F]/30">
-                    <h4 className="text-xl font-bold mb-4 text-[#FF4F4F]">Nutri Tradicional</h4>
-                    <ul className="space-y-3 text-gray-700">
-                      <li>• Indicação, agenda inconsistente</li>
-                      <li>• Insegurança para cobrar</li>
-                      <li>• Improviso, recomeçando</li>
-                      <li>• Solidão, só técnico</li>
-                    </ul>
-                  </div>
-                  <div className="bg-[#29CC6A]/10 rounded-lg p-6 border-2 border-[#29CC6A]/50">
-                    <h4 className="text-xl font-bold mb-4 text-[#29CC6A]">Nutri-Empresária</h4>
-                    <ul className="space-y-3 text-gray-700">
-                      <li>• Sistemas de captação</li>
-                      <li>• Agenda previsível, clareza de preço</li>
-                      <li>• Processos definidos, crescimento</li>
-                      <li>• Mentoria + mentalidade empresarial</li>
-                    </ul>
-                  </div>
-                </div>
-                <p className="text-center text-lg font-semibold text-gray-800 mt-6">
+                <ul className="space-y-2 text-lg text-gray-700 max-w-xl mx-auto">
+                  <li><span className="font-bold text-[#FF4F4F]">Improviso</span> × <span className="font-bold text-[#29CC6A]">Método</span></li>
+                  <li><span className="font-bold text-[#FF4F4F]">Sorte</span> × <span className="font-bold text-[#29CC6A]">Sistema</span></li>
+                  <li><span className="font-bold text-[#FF4F4F]">Solidão</span> × <span className="font-bold text-[#29CC6A]">Orientação</span></li>
+                </ul>
+                <p className="text-center text-lg font-semibold text-gray-800 mt-4">
                   O divisor de águas não é conhecimento. É sistema.
                 </p>
               </div>
               
               <div className="bg-gradient-to-r from-[#2563EB] to-[#3B82F6] rounded-xl py-5 px-6 text-center text-white max-w-2xl mx-auto">
-                <p className="text-xl font-bold">
-                  O divisor de águas não é conhecimento. É sistema.
-                </p>
-                <p className="text-base mt-2 opacity-95">Você quer encher agenda com método e parar de travar?</p>
+                <p className="text-xl font-bold">Você quer encher agenda com método e parar de travar?</p>
               </div>
             </div>
           </div>
@@ -428,35 +385,19 @@ export default function NutriLandingPage() {
                   </li>
                 </ul>
               </div>
-              
-              <div className="grid md:grid-cols-2 gap-8">
-                <div className="bg-[#E9F1FF] rounded-xl p-8 border-2 border-[#2563EB]">
-                  <h3 className="text-2xl font-bold mb-6 text-[#2563EB]">Para Quem É</h3>
-                  <ul className="space-y-2 text-gray-700">
-                    <li>• Quer encher agenda e parar de agendar ansiosa</li>
-                    <li>• Quer se livrar de indecisão e ter metodologia clara de captação</li>
-                    <li>• Está cansada de depender de sorte ou indicação</li>
-                    <li>• Quer estrutura de apoio e orientação que destrava</li>
-                    <li>• Quer parar de travar e ter rotina que gera agenda</li>
-                  </ul>
-                </div>
-                
-                <div className="bg-[#FFF4E6] rounded-xl p-8 border-2 border-[#FF9800]">
-                  <h3 className="text-2xl font-bold mb-6 text-[#FF9800]">Para Quem NÃO É</h3>
-                  <ul className="space-y-2 text-gray-700">
-                    <li>• Não é para quem ainda quer "ver se dá"</li>
-                    <li>• Não quer assumir um sistema de captação agora</li>
-                    <li>• Esperam resultados sem seguir um método</li>
-                    <li>• Querem soluções mágicas sem trabalho</li>
-                    <li>• Não estão abertas a mudar mentalidade e processos</li>
-                  </ul>
-                </div>
-              </div>
-              
+
+              {/* CTA antecipado: quem está pronta compra aqui */}
               <div className="mt-8 text-center">
-                <p className="text-xl sm:text-2xl font-bold text-[#1A1A1A]">
-                  Se você está pronta para se tornar uma Nutri-Empresária, o YLADA é para você.
+                <p className="text-xl font-bold text-[#1A1A1A] mb-4">
+                  Se isso já fez sentido pra você, você pode começar agora.
                 </p>
+                <Link
+                  href="/pt/nutri/checkout"
+                  className="inline-flex items-center justify-center px-8 py-4 rounded-xl text-lg font-bold bg-gradient-to-r from-[#2563EB] to-[#3B82F6] text-white hover:from-[#3B82F6] hover:to-[#1D4ED8] transition-all shadow-xl"
+                >
+                  Quero sair do improviso
+                </Link>
+                <p className="text-sm text-gray-600 mt-3">Quem não está pronta continua lendo.</p>
               </div>
             </div>
           </div>
@@ -868,35 +809,31 @@ export default function NutriLandingPage() {
                 {[
                   {
                     pergunta: 'Posso cancelar durante o ano?',
-                    resposta: 'O plano anual é um compromisso de 12 meses (12× de R$ 59, total R$ 708/ano). Não há cancelamento durante o período anual. O plano mensal é R$ 97/mês e pode ser cancelado quando quiser. Você tem 7 dias de garantia incondicional para testar: se não for pra você, devolvemos 100%.'
+                    resposta: 'Plano anual: compromisso de 12 meses (12× de R$ 59). Plano mensal (R$ 97/mês): pode cancelar quando quiser. Você tem 7 dias de garantia: se não for pra você, devolvemos 100%.'
                   },
                   {
                     pergunta: 'Como funciona o suporte?',
-                    resposta: 'Você tem acesso a: Noel (mentor estratégico digital), disponível 24/7 para orientações estratégicas. Suporte técnico, para dúvidas sobre uso da plataforma. Comunidade, para trocar experiências com outras Nutri-Empresárias.'
+                    resposta: 'Noel (orientação 24/7), suporte técnico e comunidade com outras Nutri-Empresárias.'
                   },
                   {
                     pergunta: 'Para quem é o YLADA Nutri?',
-                    resposta: 'O YLADA Nutri é para nutricionistas que querem encher agenda e parar de agendar ansiosa. Que querem se livrar de indecisão e ter metodologia clara de captação. Que estão cansadas de depender de sorte ou indicação e querem estrutura de apoio e orientação que destrava. Se você quer parar de travar e ter rotina que gera agenda, o YLADA é para você.'
+                    resposta: 'Para nutricionistas que querem encher agenda, parar de agendar ansiosa e ter orientação que destrava.'
                   },
                   {
                     pergunta: 'Quanto tempo leva para ver resultados?',
-                    resposta: 'Os primeiros resultados aparecem nas primeiras semanas, quando você começa a organizar seus processos e criar suas primeiras ferramentas de captação. A transformação completa acontece ao longo de 3 a 6 meses, quando você aplica o método com consistência e desenvolve a mentalidade de Nutri-Empresária. O importante não é velocidade. É consistência e método.'
+                    resposta: 'Primeiros resultados em semanas. O importante é consistência.'
                   },
                   {
                     pergunta: 'Preciso ter conhecimento técnico avançado?',
-                    resposta: 'Não. O YLADA Nutri não ensina nutrição clínica (isso você já sabe). Ele ensina como transformar seu conhecimento técnico em um negócio que funciona. Você não precisa de conhecimento avançado em tecnologia, marketing ou gestão. O método te guia passo a passo.'
+                    resposta: 'Não. O método te guia passo a passo.'
                   },
                   {
-                    pergunta: 'E se eu não usar todas as ferramentas?',
-                    resposta: 'Tudo bem. O YLADA não é sobre usar tudo. É sobre usar o que você precisa, quando precisa. O Noel te ajuda a focar no que é prioritário para o seu momento atual. Você não precisa usar todas as ferramentas. Precisa usar as ferramentas certas, no momento certo. O método te guia. Você não precisa descobrir sozinha.'
+                    pergunta: 'E se eu não usar tudo? Vou desperdiçar meu dinheiro?',
+                    resposta: 'Não precisa usar tudo. Use o que fizer sentido pro seu momento. E você tem 7 dias de garantia para testar sem risco.'
                   },
                   {
-                    pergunta: 'E se eu não conseguir usar tudo? Vou ter desperdiçado meu dinheiro?',
-                    resposta: 'Você não precisa usar tudo. O YLADA não é sobre usar todas as ferramentas. É sobre usar as ferramentas certas, no momento certo. O Noel te ajuda a focar no que é prioritário para o seu momento atual. Você não precisa descobrir sozinha. E com a garantia de 7 dias, você pode testar sem risco.'
-                  },
-                  {
-                    pergunta: 'E se eu não tiver tempo para isso?',
-                    resposta: 'O YLADA foi feito para economizar seu tempo, não para consumir. A ideia é você trabalhar menos e ganhar mais. O Noel te guia para focar no que realmente importa, sem perder tempo com o que não faz diferença agora. O método foi pensado para nutricionistas que já têm uma rotina corrida.'
+                    pergunta: 'E se eu não tiver tempo?',
+                    resposta: 'O YLADA foi feito para economizar seu tempo, não para consumir. Foco no que importa.'
                   }
                 ].map((item, index) => (
                   <div key={index} className="bg-white rounded-xl shadow-lg overflow-hidden">

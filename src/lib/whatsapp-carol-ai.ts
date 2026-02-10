@@ -1215,9 +1215,17 @@ export async function processIncomingMessageWithCarol(
 
     // 1b. Se a pessoa avisar que NÃO vai conseguir participar/entrar, NÃO reenviar link.
     // Em vez disso, desmarcar e oferecer remarcação (evita loops de "link" quando a pessoa fala que não consegue ir).
+    const msgForReagendar = String(message || '').trim().toLowerCase()
     const querReagendar =
       /reagendar|remarcar|trocar\s+hor[aá]rio|mudar\s+hor[aá]rio|mudar\s+o\s+hor[aá]rio|adiar|outro\s+hor[aá]rio|outro\s+dia/i.test(message) ||
-      /n[aã]o\s+vou\s+conseguir\s+(participar|entrar|ir)|n[aã]o\s+consigo\s+(participar|entrar|ir)|n[aã]o\s+poderei\s+(participar|entrar|ir)|n[aã]o\s+vou\s+poder\s+(participar|entrar|ir)|n[aã]o\s+posso\s+(participar|entrar|ir)/i.test(message)
+      /n[aã]o\s+vou\s+conseguir\s+(participar|entrar|ir)|n[aã]o\s+consigo\s+(participar|entrar|ir)|n[aã]o\s+poderei\s+(participar|entrar|ir)|n[aã]o\s+vou\s+poder\s+(participar|entrar|ir)|n[aã]o\s+posso\s+(participar|entrar|ir)/i.test(message) ||
+      // Justificativa para o horário que tinha agendado: "esse horário não dá", "nesse horário vou estar em fisioterapia", etc.
+      (!!workshopSessionId && (
+        /(esse|nesse|neste)\s+hor[aá]rio\s+(n[aã]o\s+)?(d[aá]|posso|consigo|vou)/i.test(msgForReagendar) ||
+        /(esse|nesse|neste)\s+hor[aá]rio\s+.{0,30}(fisioterapia|m[eé]dico|consulta|compromisso|reuni[aã]o|trabalho)/i.test(msgForReagendar) ||
+        /(n[aã]o\s+)?(d[aá]|posso|consigo)\s+.{0,20}(nesse|esse)\s+hor[aá]rio/i.test(msgForReagendar) ||
+        /(vou\s+estar|tenho)\s+.{0,25}(fisioterapia|m[eé]dico|consulta|compromisso|reuni[aã]o)/i.test(msgForReagendar)
+      ))
 
     const querCancelar =
       /quero\s+cancelar|quero\s+desmarcar|desmarcar|desistir|n[aã]o\s+quero\s+mais\s+participar|n[aã]o\s+quero\s+participar|tirar\s+(me)?\s+da\s+(lista|aula)|remover\s+(me)?\s+do\s+agendamento|cancelar\s+(minha\s+)?(participação|aula|inscrição)/i.test(message)
@@ -1309,9 +1317,17 @@ export async function processIncomingMessageWithCarol(
     })
 
     // Se a pessoa pediu para reagendar (ou disse que não consegue participar), responder com opções e NÃO reenviar link.
+    // IMPORTANTE: excluir o horário que a pessoa acabou de recusar (workshop_session_id) para não repetir ex.: "terça 15h" quando ela disse que não pode nesse horário
     if (desagendarResponse && shouldOfferRescheduleOptions && workshopSessions.length > 0) {
-      const optText = buildWorkshopOptionsText(workshopSessions, 'bold')
-      desagendarResponse = `${desagendarResponse}\n\nQual horário fica melhor pra você?\n\n${optText}\n\nMe responde com 1 ou 2 🙂`
+      const sessionsForReschedule = workshopSessionId
+        ? workshopSessions.filter((s) => s.id !== workshopSessionId)
+        : workshopSessions
+      if (sessionsForReschedule.length > 0) {
+        const optText = buildWorkshopOptionsText(sessionsForReschedule, 'bold')
+        desagendarResponse = `${desagendarResponse}\n\nQual horário fica melhor pra você?\n\n${optText}\n\nMe responde com 1 ou 2 🙂`
+      } else {
+        desagendarResponse = `${desagendarResponse}\n\nEstou verificando outras datas disponíveis. Em instantes te mando as opções! 😊`
+      }
     }
 
     // ✅ Prioridade máxima: se vai reagendar/cancelar, responder AGORA e não continuar para detecção de escolha/link.
