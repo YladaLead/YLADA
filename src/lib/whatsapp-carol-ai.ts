@@ -334,6 +334,55 @@ export async function getRegistrationName(
   }
 }
 
+/** Nomes comuns masculinos (primeiro nome) para saudação "bem-vindo" vs "bem-vinda" */
+const MALE_FIRST_NAMES = new Set([
+  'adriano', 'alexandre', 'anderson', 'andre', 'antonio', 'bruno', 'carlos', 'daniel', 'danilo',
+  'eduardo', 'fabio', 'felipe', 'fernando', 'gabriel', 'guilherme', 'gustavo', 'henrique', 'joao',
+  'jose', 'julio', 'leonardo', 'lucas', 'luiz', 'marcelo', 'marcio', 'marco', 'marcos', 'mateus',
+  'mauricio', 'michel', 'miguel', 'paulo', 'pedro', 'rafael', 'renato', 'ricardo', 'roberto',
+  'rodrigo', 'thiago', 'vinicius', 'wagner', 'william', 'wilson',
+])
+/** Nomes comuns femininos (primeiro nome) */
+const FEMALE_FIRST_NAMES = new Set([
+  'adriana', 'alessandra', 'amanda', 'ana', 'andreia', 'beatriz', 'bruna', 'camila', 'carla',
+  'carolina', 'celia', 'claudia', 'cristina', 'daniela', 'eliane', 'fabiana', 'fernanda', 'gabriela',
+  'glaucia', 'helena', 'ingrid', 'juliana', 'larissa', 'leticia', 'luciana', 'marcia', 'maria',
+  'mariana', 'michelle', 'patricia', 'paula', 'rafaela', 'renata', 'sandra', 'simone', 'tatiana',
+  'vanessa', 'vivian',
+])
+
+/**
+ * Retorna 'm' se o primeiro nome for tipicamente masculino, 'f' se feminino, null se indefinido.
+ * Usado para saudação "Seja muito bem-vindo" vs "Seja muito bem-vinda".
+ */
+function guessGenderFromFirstName(firstName: string | null | undefined): 'm' | 'f' | null {
+  if (!firstName || typeof firstName !== 'string') return null
+  const first = firstName.trim().toLowerCase().split(/\s+/)[0] || ''
+  if (!first) return null
+  if (MALE_FIRST_NAMES.has(first)) return 'm'
+  if (FEMALE_FIRST_NAMES.has(first)) return 'f'
+  return null
+}
+
+/**
+ * Ajusta a saudação "bem-vinda" / "bem-vindo" conforme o gênero do nome (quando conhecido).
+ */
+function applyWelcomeGender(greeting: string, firstName: string | null | undefined): string {
+  const gender = guessGenderFromFirstName(firstName)
+  if (gender === 'm') {
+    return greeting
+      .replace(/\bSeja\s+muito\s+bem-vinda!?/gi, 'Seja muito bem-vindo!')
+      .replace(/\bseja\s+muito\s+bem-vinda!?/gi, 'Seja muito bem-vindo!')
+  }
+  if (gender === 'f') {
+    return greeting
+      .replace(/\bSeja\s+muito\s+bem-vindo!?/gi, 'Seja muito bem-vinda!')
+      .replace(/\bseja\s+muito\s+bem-vindo!?/gi, 'Seja muito bem-vinda!')
+  }
+  // Indefinido: usar forma inclusiva
+  return greeting.replace(/\bSeja\s+muito\s+bem-vind[oa]!?/gi, 'Seja muito bem-vindo(a)!')
+}
+
 /**
  * Função helper centralizada para buscar instância Z-API
  * Tenta múltiplas estratégias para encontrar uma instância válida
@@ -2133,11 +2182,12 @@ Finalize com: "Responde 1 ou 2 😊".`
         .single()
       if (instanceEarly?.token) {
         const greetingTemplate = await getFlowTemplate(area || 'nutri', 'welcome_form_greeting')
-        const greetingOnly = greetingTemplate
+        let greetingOnly = greetingTemplate
           ? applyTemplate(greetingTemplate, { nome: leadName })
           : (leadName
               ? `Oi, ${leadName}, tudo bem? 😊\n\nSeja muito bem-vinda!\n\nEu sou a Carol, da equipe Ylada Nutri.`
               : `Oi, tudo bem? 😊\n\nSeja muito bem-vinda!\n\nEu sou a Carol, da equipe Ylada Nutri.`)
+        greetingOnly = applyWelcomeGender(greetingOnly, leadName)
         const sendGreeting = await sendWhatsAppMessage(
           phone,
           greetingOnly,
@@ -2158,7 +2208,7 @@ Finalize com: "Responde 1 ou 2 😊".`
           })
           // Se temos corpo pronto (template/fallback curto), não precisamos da IA aqui.
           // Ainda assim, mantém instrução para caso caia na IA por qualquer motivo.
-          carolInstruction = `PROIBIDO repetir a saudação. Sua mensagem NÃO pode conter "Oi" / "tudo bem?" / "Seja muito bem-vinda!" / "Eu sou a Carol" — isso já foi enviado na mensagem anterior.\n\nSua mensagem deve começar DIRETAMENTE com "Obrigada por se inscrever" e seguir com as opções.`
+          carolInstruction = `PROIBIDO repetir a saudação. Sua mensagem NÃO pode conter "Oi" / "tudo bem?" / "Seja muito bem-vindo(a)!" / "Eu sou a Carol" — isso já foi enviado na mensagem anterior.\n\nSua mensagem deve começar DIRETAMENTE com "Obrigada por se inscrever" e seguir com as opções.`
         }
       }
     }
@@ -2185,7 +2235,7 @@ Finalize com: "Responde 1 ou 2 😊".`
       const idx = carolResponse.indexOf(startMarker)
       if (idx > 0) {
         const before = carolResponse.slice(0, idx).toLowerCase()
-        if (before.includes('oi') && (before.includes('tudo bem') || before.includes('bem-vinda') || before.includes('eu sou a carol'))) {
+        if (before.includes('oi') && (before.includes('tudo bem') || before.includes('bem-vinda') || before.includes('bem-vindo') || before.includes('eu sou a carol'))) {
           carolResponse = carolResponse.slice(idx).trim()
           console.log('[Carol AI] 🧹 Saudação repetida removida da segunda mensagem')
         }
