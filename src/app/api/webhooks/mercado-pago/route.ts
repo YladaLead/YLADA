@@ -192,9 +192,12 @@ export async function POST(request: NextRequest) {
 }
 
 /**
- * Processa evento de pagamento
+ * Processa evento de pagamento.
+ * @param data - Payload do webhook (geralmente { id }) ou dados completos
+ * @param isTest - Se é ambiente de teste do MP
+ * @param preFetchedFullData - Dados completos já buscados da API (usado pelo sync manual admin)
  */
-async function handlePaymentEvent(data: any, isTest: boolean = false) {
+async function handlePaymentEvent(data: any, isTest: boolean = false, preFetchedFullData?: any) {
   if (!data || !data.id) {
     console.error('❌ handlePaymentEvent: data inválida ou sem ID')
     console.log('📋 Data recebida:', JSON.stringify(data, null, 2))
@@ -214,49 +217,51 @@ async function handlePaymentEvent(data: any, isTest: boolean = false) {
     hasExternalReference: !!data.external_reference,
   })
 
-    // IMPORTANTE: O webhook do Mercado Pago envia apenas { id: '...' } no data
-    // Precisamos buscar os dados completos do pagamento via API
-    let paymentDataFull: any = null
-    
-    try {
-      // Se for teste do Mercado Pago (payment.id = "123456"), pular verificação
-      if (paymentId === '123456' || paymentId === 123456) {
-        console.log('🧪 Teste do Mercado Pago detectado, processando sem verificação')
-        // Continuar processamento mesmo sendo teste
-        paymentDataFull = data // Usar dados do webhook diretamente
-      } else {
-        // Buscar dados completos do pagamento via API do Mercado Pago
-        console.log('🔍 Buscando dados completos do pagamento via API...')
-        const { Payment } = await import('mercadopago')
-        const { createMercadoPagoClient } = await import('@/lib/mercado-pago')
-        const client = createMercadoPagoClient(isTest)
-        const payment = new Payment(client)
-        
-        try {
-          paymentDataFull = await payment.get({ id: paymentId })
-          console.log('✅ Dados completos do pagamento obtidos:', {
-            hasMetadata: !!paymentDataFull.metadata,
-            hasExternalReference: !!paymentDataFull.external_reference,
-            hasPayer: !!paymentDataFull.payer,
-            status: paymentDataFull.status,
-          })
-        } catch (apiError: any) {
-          console.error('❌ Erro ao buscar dados completos do pagamento:', apiError)
-          // Tentar usar dados do webhook como fallback
+    // Usar dados já buscados (sync manual) ou buscar via API
+    let paymentDataFull: any = preFetchedFullData && preFetchedFullData.status === 'approved'
+      ? preFetchedFullData
+      : null
+
+    if (!paymentDataFull) {
+      try {
+        // Se for teste do Mercado Pago (payment.id = "123456"), pular verificação
+        if (paymentId === '123456' || paymentId === 123456) {
+          console.log('🧪 Teste do Mercado Pago detectado, processando sem verificação')
           paymentDataFull = data
+        } else {
+          // Buscar dados completos do pagamento via API do Mercado Pago
+          console.log('🔍 Buscando dados completos do pagamento via API...')
+          const { Payment } = await import('mercadopago')
+          const { createMercadoPagoClient } = await import('@/lib/mercado-pago')
+          const client = createMercadoPagoClient(isTest)
+          const payment = new Payment(client)
+
+          try {
+            paymentDataFull = await payment.get({ id: paymentId })
+            console.log('✅ Dados completos do pagamento obtidos:', {
+              hasMetadata: !!paymentDataFull.metadata,
+              hasExternalReference: !!paymentDataFull.external_reference,
+              hasPayer: !!paymentDataFull.payer,
+              status: paymentDataFull.status,
+            })
+          } catch (apiError: any) {
+            console.error('❌ Erro ao buscar dados completos do pagamento:', apiError)
+            paymentDataFull = data
+          }
+
+          if (!paymentDataFull.status || paymentDataFull.status !== 'approved') {
+            console.log('⚠️ Pagamento não aprovado:', paymentDataFull.status)
+            return
+          }
         }
-        
-        // Verificar status do pagamento
-        if (!paymentDataFull.status || paymentDataFull.status !== 'approved') {
-          console.log('⚠️ Pagamento não aprovado:', paymentDataFull.status)
-          return
-        }
+      } catch (error: any) {
+        console.error('❌ Erro ao processar pagamento:', error)
+        return
       }
-    } catch (error: any) {
-      console.error('❌ Erro ao processar pagamento:', error)
-      return
+    } else {
+      console.log('✅ Usando dados do pagamento já fornecidos (sync manual)')
     }
-    
+
     // Usar dados completos do pagamento em vez de apenas data do webhook
     const fullData = paymentDataFull || data
 
@@ -330,6 +335,17 @@ async function handlePaymentEvent(data: any, isTest: boolean = false) {
     }
     
     console.log('✅ User ID encontrado/criado:', userId)
+
+    // Idempotência: não processar o mesmo pagamento duas vezes
+    const { data: existingPayment } = await supabaseAdmin
+      .from('payments')
+      .select('id, subscription_id')
+      .eq('stripe_payment_intent_id', String(paymentId))
+      .maybeSingle()
+    if (existingPayment) {
+      console.log('✅ Pagamento já processado (idempotência), ignorando:', paymentId)
+      return
+    }
     
     let area = metadata.area || (fullData.external_reference?.split('_')[0]) || ''
     let planType = metadata.plan_type || (fullData.external_reference?.split('_')[1]) || ''
@@ -1233,6 +1249,37 @@ async function handleSubscriptionEvent(data: any, isTest: boolean = false) {
   } catch (error: any) {
     console.error('❌ Erro ao processar assinatura recorrente:', error)
     throw error
+  }
+}
+
+/**
+ * Sincroniza um pagamento pelo ID do Mercado Pago (uso admin quando o webhook não notificou).
+ * Busca o pagamento na API do MP e processa como se o webhook tivesse sido recebido.
+ */
+export async function syncPaymentByIdFromMercadoPago(
+  paymentId: string | number,
+  isTest: boolean = false
+): Promise<{ success: boolean; message?: string; error?: string }> {
+  try {
+    const { Payment } = await import('mercadopago')
+    const { createMercadoPagoClient } = await import('@/lib/mercado-pago')
+    const client = createMercadoPagoClient(isTest)
+    const payment = new Payment(client)
+    const fullData = await payment.get({ id: String(paymentId) })
+    if (!fullData || fullData.status !== 'approved') {
+      return {
+        success: false,
+        error: `Pagamento não aprovado. Status: ${fullData?.status ?? 'n/a'}`,
+      }
+    }
+    await handlePaymentEvent({ id: fullData.id }, isTest, fullData)
+    return { success: true, message: 'Pagamento sincronizado com sucesso.' }
+  } catch (e: any) {
+    console.error('syncPaymentByIdFromMercadoPago:', e)
+    return {
+      success: false,
+      error: e?.message || 'Erro ao sincronizar pagamento',
+    }
   }
 }
 
