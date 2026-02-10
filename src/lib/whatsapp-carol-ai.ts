@@ -1313,7 +1313,9 @@ export async function processIncomingMessageWithCarol(
     const customerMessages = messageHistory?.filter(m => m.sender_type === 'customer') || []
     const rawIsFirstMessage = customerMessages.length === 1
     const firstCustomerMessageText = customerMessages[0] ? String((customerMessages[0] as any)?.message ?? '').trim().toLowerCase().replace(/\s+/g, ' ') : ''
-    const firstMessageIsWorkshop = !!firstCustomerMessageText && /acabei\s+de\s+me\s+inscrever|me\s+inscrev(i|er)|gostaria\s+de\s+agendar|inscrev(er|i).*aula|ylada\s+nutri.*agendar/i.test(firstCustomerMessageText)
+    // Inclui "acabei de me inscrever", "fiz o cadastro", "acabei de fazer o cadastro", "recebi o cadastro", "me cadastrei", etc.
+    const workshopFirstMessagePattern = /acabei\s+de\s+me\s+inscrever|me\s+inscrev(i|er)|gostaria\s+de\s+agendar|inscrev(er|i).*aula|ylada\s+nutri.*agendar|(acabei\s+de\s+)?(fazer|fiz)\s+(o\s+)?cadastro|recebi\s+(o\s+)?cadastro|(me\s+)?cadastr(ei|ar)|fiz\s+(o\s+)?cadastro/i
+    const firstMessageIsWorkshop = !!firstCustomerMessageText && workshopFirstMessagePattern.test(firstCustomerMessageText)
 
     // a3: Se o form já enviou boas-vindas com opções, não reenviar bloco de "primeira mensagem"
     let formAlreadySentWelcome = false
@@ -1341,9 +1343,8 @@ export async function processIncomingMessageWithCarol(
       (msgNorm.length <= 4 && !msgNorm.endsWith('?'))
     )
 
-    // a5: Mensagem do botão ("Acabei de me inscrever... gostaria de agendar") — se a pessoa clicou
-    // antes do form enviar (60s), o form não manda; então Carol DEVE enviar boas-vindas + opções.
-    const isMessageFromButton = /acabei\s+de\s+me\s+inscrever|me\s+inscrev(i|er)|gostaria\s+de\s+agendar|inscrev(er|i).*aula|ylada\s+nutri.*agendar/i.test(msgNorm)
+    // a5: Mensagem do botão ou texto equivalente ("Acabei de me inscrever", "fiz o cadastro", "acabei de fazer o cadastro", etc.)
+    const isMessageFromButton = workshopFirstMessagePattern.test(msgNorm)
 
     // a6: Origem "tirar dúvida" / página de vendas — só para tag e relatório; fluxo é o mesmo (aula gratuita + autonomia).
     const isFromVideoOrLandingDuvida = rawIsFirstMessage && (
@@ -1470,10 +1471,10 @@ export async function processIncomingMessageWithCarol(
           // Priorizar a ordem exata que a pessoa viu: workshop_options_ids foi gravado pelo form ao enviar "Opção 1/2"
           const optionIds = Array.isArray(context.workshop_options_ids) ? (context.workshop_options_ids as string[]) : null
           const chosenId = (optionIds && optionIds[optionIndex] != null) ? optionIds[optionIndex] : workshopSessions[optionIndex]?.id
-          let sessionToUse = chosenId ? list.find((s: { id: string }) => s.id === chosenId) : null
+          let sessionToUse = chosenId ? workshopSessions.find((s: { id: string }) => s.id === chosenId) : null
           if (!sessionToUse && optionIndex < workshopSessions.length) sessionToUse = workshopSessions[optionIndex]
           // Fallback: mensagem é só "1" ou "2" — usar diretamente a sessão pela ordem
-          if (!sessionToUse && optionIndex < list.length) sessionToUse = list[optionIndex]
+          if (!sessionToUse && optionIndex < workshopSessions.length) sessionToUse = workshopSessions[optionIndex]
           // Se a pessoa respondeu "2" mas só temos 1 sessão, usar a primeira (evita não responder)
           if (!sessionToUse && workshopSessions.length > 0) sessionToUse = workshopSessions[0]
           if (sessionToUse) {
@@ -1639,10 +1640,10 @@ export async function processIncomingMessageWithCarol(
       const isPositiveInterest =
         /^(sim|quero|tenho\s+interesse|tenho\s+sim|gostaria|quero\s+sim|com\s+certeza|pode\s+ser|pode\s+encaixar|claro|por\s+favor|tem\s+interesse)$/i.test(msgNorm.trim()) ||
         /^(sim\s+quero|quero\s+sim|gostaria\s+sim|sim\s+gostaria)$/i.test(msgNorm.trim())
-      if (!selectedSession && list.length > 0 && lastBotWasHoje20hInvite && isPositiveInterest) {
+      if (!selectedSession && workshopSessions.length > 0 && lastBotWasHoje20hInvite && isPositiveInterest) {
         const tzBR = 'America/Sao_Paulo'
         const todayStrBR = new Date().toLocaleDateString('en-CA', { timeZone: tzBR })
-        const sessionHoje20h = list.find((s: { starts_at: string }) => {
+        const sessionHoje20h = workshopSessions.find((s: { starts_at: string }) => {
           const d = new Date(s.starts_at)
           const sessionDateStr = d.toLocaleDateString('en-CA', { timeZone: tzBR })
           const sessionHour = parseInt(d.toLocaleString('pt-BR', { hour: '2-digit', hour12: false, timeZone: tzBR }), 10)
