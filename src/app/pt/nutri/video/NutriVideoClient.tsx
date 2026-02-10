@@ -56,7 +56,27 @@ export default function NutriVideoContent() {
 
   const toggleFullscreen = async (e: React.MouseEvent) => {
     e.stopPropagation()
+    const video = videoRef.current
     const container = videoContainerRef.current
+
+    // iOS Safari: fullscreen só funciona no elemento <video> via webkitEnterFullscreen
+    const videoEl = video as HTMLVideoElement & { webkitEnterFullscreen?: () => void; webkitExitFullscreen?: () => void }
+    if (videoEl?.webkitEnterFullscreen && !document.fullscreenElement) {
+      try {
+        videoEl.webkitEnterFullscreen()
+        setIsFullscreen(true)
+      } catch {
+        // fallback: tentar requestFullscreen no container
+        if (container) {
+          try {
+            await container.requestFullscreen()
+            setIsFullscreen(true)
+          } catch {}
+        }
+      }
+      return
+    }
+
     if (!container) return
     try {
       if (!document.fullscreenElement) {
@@ -67,41 +87,56 @@ export default function NutriVideoContent() {
         setIsFullscreen(false)
       }
     } catch {
-      const video = videoRef.current
       if (video && !document.fullscreenElement) {
-        await video.requestFullscreen()
-        setIsFullscreen(true)
+        try {
+          await video.requestFullscreen()
+          setIsFullscreen(true)
+        } catch {}
       } else {
-        await document.exitFullscreen()
-        setIsFullscreen(false)
+        try {
+          await document.exitFullscreen()
+          setIsFullscreen(false)
+        } catch {}
       }
     }
   }
 
   useEffect(() => {
+    const video = videoRef.current
     const onFullscreenChange = () => setIsFullscreen(!!document.fullscreenElement)
     document.addEventListener('fullscreenchange', onFullscreenChange)
+
+    // iOS: ao sair do fullscreen nativo do vídeo (usuário toca em "Concluído")
+    const onWebKitEndFullscreen = () => setIsFullscreen(false)
+    if (video) {
+      video.addEventListener('webkitendfullscreen', onWebKitEndFullscreen)
+      return () => {
+        document.removeEventListener('fullscreenchange', onFullscreenChange)
+        video.removeEventListener('webkitendfullscreen', onWebKitEndFullscreen)
+      }
+    }
     return () => document.removeEventListener('fullscreenchange', onFullscreenChange)
   }, [])
 
   return (
     <div className="min-h-screen bg-white">
-      <header
-        className={cn(
-          'sticky top-0 z-50 border-b border-gray-200 bg-white shadow-sm h-16 sm:h-20 flex items-center',
-          contentUnlocked ? 'flex' : 'hidden'
-        )}
-      >
-        <div className="container mx-auto px-6 lg:px-8 py-3 flex items-center">
-          <Link href="/pt/nutri">
+      <header className="sticky top-0 z-50 border-b border-gray-200 bg-white/95 backdrop-blur-sm shadow-sm h-14 sm:h-16 flex items-center">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
+          <Link href="/pt/nutri" className="flex items-center gap-2">
             <Image
               src="/images/logo/nutri-horizontal.png"
               alt="YLADA Nutri"
               width={133}
               height={40}
-              className="h-8 sm:h-10 w-auto"
+              className="h-8 sm:h-9 w-auto"
               priority
             />
+          </Link>
+          <Link
+            href="/pt/nutri/login"
+            className="text-sm font-semibold text-[#2563EB] hover:text-[#1D4ED8] transition-colors"
+          >
+            Entrar
           </Link>
         </div>
       </header>
@@ -109,13 +144,19 @@ export default function NutriVideoContent() {
       <main
         className={cn(
           'container mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl',
-          !contentUnlocked && 'pt-4'
+          !contentUnlocked && 'pt-2'
         )}
       >
-        <section className="pt-6 sm:pt-10 pb-6 text-center">
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#1A1A1A] leading-tight">
+        <section className="pt-6 sm:pt-8 pb-4 sm:pb-6 text-center">
+          <p className="text-xs sm:text-sm font-medium text-[#2563EB] uppercase tracking-wider mb-2">
+            Vídeo exclusivo
+          </p>
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#1A1A1A] leading-tight max-w-2xl mx-auto">
             Como ter pacientes novos chegando todos os dias
           </h1>
+          <p className="mt-3 text-sm sm:text-base text-gray-600 max-w-xl mx-auto">
+            Assista até o final e descubra os próximos passos.
+          </p>
         </section>
 
         <section className="pt-6 md:pt-0 pb-6">
@@ -175,14 +216,14 @@ export default function NutriVideoContent() {
               <button
                 type="button"
                 onClick={toggleFullscreen}
-                className="absolute bottom-3 right-3 p-2 rounded-lg bg-black/50 hover:bg-black/70 text-white transition-colors z-10"
-                aria-label={isFullscreen ? 'Sair da tela cheia' : 'Assistir em tela cheia'}
-                title={isFullscreen ? 'Sair da tela cheia' : 'Assistir em tela cheia (pode virar o celular)'}
+                className="absolute bottom-3 right-3 p-3 sm:p-2 rounded-xl bg-black/50 hover:bg-black/70 active:bg-black/80 text-white transition-colors z-10 touch-manipulation min-w-[44px] min-h-[44px] sm:min-w-0 sm:min-h-0 flex items-center justify-center"
+                aria-label={isFullscreen ? 'Sair da tela cheia' : 'Assistir em tela cheia (vire o celular para ver maior)'}
+                title={isFullscreen ? 'Sair da tela cheia' : 'Tela cheia — toque e vire o celular para assistir deitado'}
               >
                 {isFullscreen ? (
-                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z"/></svg>
+                  <svg className="w-6 h-6 sm:w-5 sm:h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z"/></svg>
                 ) : (
-                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>
+                  <svg className="w-6 h-6 sm:w-5 sm:h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>
                 )}
               </button>
             </div>
