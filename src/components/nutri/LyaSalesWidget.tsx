@@ -128,7 +128,7 @@ export default function LyaSalesWidget({
     if (isOpen && messages.length === 0) {
       setMessages([{
         sender_type: 'lya',
-        message: 'Olá! Sou a **LYA**, mentora empresarial da YLADA Nutri. 😊\n\nMuitas nutricionistas me procuram porque enfrentam:\n\n• **Agenda vazia** - Dependem só de indicação e não conseguem gerar clientes de forma previsível\n• **Rotina desorganizada** - Atendem bem, mas vivem apagando incêndio e não conseguem planejar\n• **Falta de visão empreendedora** - Insegurança para cobrar, dificuldade para se posicionar como empresária\n\n**Hoje, o que mais pesa pra você na sua rotina como nutricionista?**\n\nIsso vai me ajudar a mostrar como a plataforma resolve exatamente essa dificuldade. 💪',
+        message: 'Olá! Sou o **Noel**, mentor empresarial da YLADA Nutri. 😊\n\nMuitas nutricionistas me procuram porque enfrentam:\n\n• **Agenda vazia** - Dependem só de indicação e não conseguem gerar clientes de forma previsível\n• **Rotina desorganizada** - Atendem bem, mas vivem apagando incêndio e não conseguem planejar\n• **Falta de visão empreendedora** - Insegurança para cobrar, dificuldade para se posicionar como empresária\n\n**Hoje, o que mais pesa pra você na sua rotina como nutricionista?**\n\nIsso vai me ajudar a mostrar como a plataforma resolve exatamente essa dificuldade. 💪',
         created_at: new Date().toISOString()
       }])
     }
@@ -224,7 +224,7 @@ export default function LyaSalesWidget({
       <button
         onClick={() => setIsOpen(true)}
         className="fixed bottom-6 right-6 bg-gradient-to-r from-[#0B57FF] to-[#2572FF] hover:from-[#2572FF] hover:to-[#0B57FF] text-white rounded-full p-4 shadow-2xl z-50 transition-all animate-pulse"
-        aria-label="Falar com LYA sobre a plataforma"
+        aria-label="Falar com o Noel sobre a plataforma"
       >
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
@@ -240,7 +240,7 @@ export default function LyaSalesWidget({
       <div className="bg-gradient-to-r from-[#0B57FF] to-[#2572FF] text-white p-4 rounded-t-lg flex items-center justify-between">
         <div className="flex items-center space-x-2">
           <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
-          <span className="font-semibold">LYA - Tire suas dúvidas</span>
+          <span className="font-semibold">Noel - Tire suas dúvidas</span>
         </div>
         <div className="flex items-center space-x-2">
           <button

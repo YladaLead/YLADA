@@ -319,7 +319,7 @@ export default function NutriCheckoutPage() {
               </button>
             </div>
             <p className="text-sm text-gray-600 text-center">
-              Mentoria LYA, links inteligentes e rotina que gera agenda previsível
+              Mentoria Noel, links inteligentes e rotina que gera agenda previsível
             </p>
           </div>
 

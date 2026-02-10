@@ -26,7 +26,7 @@ const RETENTION_STRATEGY: Record<CancelReason, RetentionOffer> = {
   },
   'didnt_understand': {
     type: 'guided_tour',
-    message: 'Talvez a gente não tenha te mostrado o melhor caminho ainda. Quer que a LYA te guie em 5 minutos agora?',
+    message: 'Talvez a gente não tenha te mostrado o melhor caminho ainda. Quer que o Noel te guie em 5 minutos agora?',
     actionButton: 'Quero ajuda agora'
   },
   'no_value': {

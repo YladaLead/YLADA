@@ -107,7 +107,7 @@ export async function POST(request: NextRequest) {
       case 'guided_tour':
         // Marcar que aceitou tour (implementação do tour fica no frontend)
         actionTaken = 'tour_accepted'
-        message = 'Perfeito! Vamos começar o tour guiado. A LYA vai te ajudar agora.'
+        message = 'Perfeito! Vamos começar o tour guiado. O Noel vai te ajudar agora.'
         break
 
       case 'show_feature':

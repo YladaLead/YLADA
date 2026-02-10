@@ -69,7 +69,7 @@ export default function PDF01ManualTecnicoPlataforma() {
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-blue-600 mt-1">•</span>
-                <span>A estratégia e as decisões são conduzidas pela LYA Mentora, dentro da plataforma.</span>
+                <span>A estratégia e as decisões são conduzidas pelo Noel Mentor, dentro da plataforma.</span>
               </li>
             </ul>
             <p className="text-blue-700 font-semibold mt-4">👉 Use este material como apoio rápido, sempre que precisar.</p>
@@ -105,7 +105,7 @@ export default function PDF01ManualTecnicoPlataforma() {
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-blue-600 mt-1">•</span>
-                <span><strong>Chat com a LYA:</strong> sua mentora estratégica.</span>
+                <span><strong>Chat com o Noel:</strong> seu mentor estratégico.</span>
               </li>
             </ul>
             <p className="text-blue-700 font-semibold mt-4">👉 Tudo começa e se organiza a partir da Trilha.</p>
@@ -117,7 +117,7 @@ export default function PDF01ManualTecnicoPlataforma() {
             <ul className="space-y-2 text-gray-700">
               <li className="flex items-start gap-2">
                 <span className="text-blue-600 mt-1">•</span>
-                <span>Bloco da LYA: mostra seu foco do dia e a ação prioritária.</span>
+                <span>Bloco do Noel: mostra seu foco do dia e a ação prioritária.</span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-blue-600 mt-1">•</span>
@@ -141,7 +141,7 @@ export default function PDF01ManualTecnicoPlataforma() {
             <ul className="space-y-2 text-gray-700">
               <li className="flex items-start gap-2">
                 <span className="text-blue-600 mt-1">•</span>
-                <span>Leia com atenção a análise da LYA.</span>
+                <span>Leia com atenção a análise do Noel.</span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-blue-600 mt-1">•</span>
@@ -201,7 +201,7 @@ export default function PDF01ManualTecnicoPlataforma() {
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-blue-600 mt-1">•</span>
-                <span>A LYA acompanha seu progresso automaticamente.</span>
+                <span>O Noel acompanha seu progresso automaticamente.</span>
               </li>
             </ul>
             <p className="text-blue-700 font-semibold mt-4">👉 Seu crescimento acontece na continuidade.</p>
@@ -221,7 +221,7 @@ export default function PDF01ManualTecnicoPlataforma() {
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-blue-600 mt-1">•</span>
-                <span>Use quando a Jornada ou a LYA indicar.</span>
+                <span>Use quando a Jornada ou o Noel indicar.</span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-blue-600 mt-1">•</span>
@@ -281,11 +281,11 @@ export default function PDF01ManualTecnicoPlataforma() {
 
           {/* Slide 11 */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Chat com a LYA Mentora</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">Chat com o Noel Mentor</h2>
             <ul className="space-y-2 text-gray-700">
               <li className="flex items-start gap-2">
                 <span className="text-blue-600 mt-1">•</span>
-                <span>A LYA está disponível durante toda a sua jornada.</span>
+                <span>O Noel está disponível durante toda a sua jornada.</span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-blue-600 mt-1">•</span>
@@ -293,14 +293,14 @@ export default function PDF01ManualTecnicoPlataforma() {
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-blue-600 mt-1">•</span>
-                <span>A LYA sempre prioriza o dia da Jornada em que você está.</span>
+                <span>O Noel sempre prioriza o dia da Jornada em que você está.</span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-blue-600 mt-1">•</span>
                 <span>Confie na condução.</span>
               </li>
             </ul>
-            <p className="text-blue-700 font-semibold mt-4">👉 A LYA orienta. Você executa.</p>
+            <p className="text-blue-700 font-semibold mt-4">👉 O Noel orienta. Você executa.</p>
           </div>
 
           {/* Conclusão */}
@@ -310,7 +310,7 @@ export default function PDF01ManualTecnicoPlataforma() {
               Use quando sentir necessidade de relembrar como navegar na plataforma.
             </p>
             <p className="text-blue-700 font-semibold text-center mt-4">
-              💙 A LYA está aqui para te guiar em cada etapa.
+              💙 O Noel está aqui para te guiar em cada etapa.
             </p>
           </div>
 

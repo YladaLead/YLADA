@@ -128,7 +128,7 @@ function NutriHomeContent() {
           {/* HOME IA-FIRST: conteúdo principal = chat com a LYA */}
           <div className="mb-4">
             <h2 className="text-xl font-semibold text-gray-900">
-              Mentora LYA
+              Noel
             </h2>
             <p className="text-sm text-gray-600 mt-1">
               Me diga seu objetivo de hoje e eu te direciono para o próximo passo certo.

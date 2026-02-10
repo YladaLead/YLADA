@@ -134,7 +134,7 @@ export default function NutriChatWidget({ chatbotId, defaultOpen = false }: Nutr
           if (!response.ok) {
             const errorData = await response.json().catch(() => ({}))
             console.error('❌ [LYA] Erro na resposta:', errorData)
-            const errorMessage = errorData.details || errorData.message || errorData.error || 'Erro ao buscar resposta da LYA'
+            const errorMessage = errorData.details || errorData.message || errorData.error || 'Erro ao buscar resposta do Noel'
             throw new Error(errorMessage)
           }
 
@@ -156,7 +156,7 @@ export default function NutriChatWidget({ chatbotId, defaultOpen = false }: Nutr
           
           if (!respostaLya || respostaLya.trim() === '') {
             console.error('❌ [LYA] Resposta vazia')
-            throw new Error('A LYA não retornou uma resposta válida')
+            throw new Error('O Noel não retornou uma resposta válida')
           }
 
           console.log('✅ [LYA] Resposta válida recebida, tamanho:', respostaLya.length)
@@ -363,7 +363,7 @@ export default function NutriChatWidget({ chatbotId, defaultOpen = false }: Nutr
             <div className="flex items-center gap-3 flex-1">
               <span className="text-2xl">🎓</span>
               <div className="flex-1">
-                <h3 className="font-bold text-lg">LYA</h3>
+                <h3 className="font-bold text-lg">Noel</h3>
                 <p className="text-xs opacity-90">Assistente de Formação</p>
               </div>
             </div>

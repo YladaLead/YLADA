@@ -346,7 +346,7 @@ export default function VendasPaulaPage() {
                   </li>
                   <li className="flex items-start">
                     <span className="text-[#2563EB] mr-3 text-xl font-bold">•</span>
-                    <span>LYA como mentora que impede abandono</span>
+                    <span>Noel como mentor que impede abandono</span>
                   </li>
                 </ul>
               </div>
@@ -391,7 +391,7 @@ export default function VendasPaulaPage() {
                 {[
                   { title: '1. Captação Previsível', desc: 'Você para de depender de indicação ou sorte. Sistema de captação que funciona de forma consistente.' },
                   { title: '2. Trilha empresarial clara', desc: 'Próximo passo definido. Você executa com método, não na base do improviso. Sem "gestão de clientes" pesada; apenas controle claro de leads e conversão.' },
-                  { title: '3. LYA como mentoria estratégica', desc: 'Orientações que impedem abandono e travas. Você não fica sozinha.' }
+                  { title: '3. Noel como mentoria estratégica', desc: 'Orientações que impedem abandono e travas. Você não fica sozinha.' }
                 ].map((item, index) => (
                   <div key={index} className="bg-white rounded-xl shadow-lg p-8 border-l-4 border-[#2563EB]">
                     <h3 className="text-xl sm:text-2xl font-bold mb-4 text-[#1A1A1A]">{item.title}</h3>
@@ -409,14 +409,14 @@ export default function VendasPaulaPage() {
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="max-w-4xl mx-auto">
               <h2 className="text-3xl sm:text-4xl font-bold text-center mb-4 text-[#1A1A1A]">
-                LYA: Sua Mentora Estratégica
+                Noel: Seu Mentor Estratégico
               </h2>
               <p className="text-xl text-center text-gray-600 mb-12">
                 Direcionamento diário, clareza de foco e execução prática
               </p>
               <div className="bg-gradient-to-br from-[#2563EB] to-[#3B82F6] rounded-xl shadow-lg p-8 sm:p-10 mb-8 text-white">
                 <p className="text-xl sm:text-2xl font-bold mb-4">
-                  A LYA existe para impedir que você volte ao improviso.
+                  O Noel existe para impedir que você volte ao improviso.
                 </p>
                 <p className="text-lg mb-0 leading-relaxed">
                   Ela não te dá lista infinita de opções. Ela te diz: <strong>o foco agora, a ação, onde aplicar.</strong> Mentoria estratégica que funciona.
@@ -424,7 +424,7 @@ export default function VendasPaulaPage() {
               </div>
               <div className="text-center bg-white rounded-xl shadow-lg p-6 border-2 border-[#2563EB]">
                 <p className="text-xl font-bold text-[#2563EB]">
-                  LYA não executa por você. Ela impede que você trave.
+                  O Noel não executa por você. Ele impede que você trave.
                 </p>
               </div>
             </div>
@@ -479,7 +479,7 @@ export default function VendasPaulaPage() {
                   { title: 'Organização Total', paraDe: 'trabalhar no improviso', resultado: 'Rotina e captação claras: o que fazer hoje, o que converter.' },
                   { title: 'Clareza Empresarial', paraDe: 'tentar sem método', resultado: 'Trilha Empresarial (30 dias) com passo a passo.' },
                   { title: 'Comunidade', paraDe: 'se sentir sozinha', resultado: 'Nutri-Empresárias crescendo juntas e com suporte.' },
-                  { title: 'Suporte Humano', paraDe: 'ficar só na tecnologia', resultado: 'LYA + suporte humano quando precisar.' }
+                  { title: 'Suporte Humano', paraDe: 'ficar só na tecnologia', resultado: 'Noel + suporte humano quando precisar.' }
                 ].map((item, index) => (
                   <div key={index} className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow border border-gray-200">
                     <h3 className="text-xl font-bold mb-3 text-[#1A1A1A]">{item.title}</h3>
@@ -556,7 +556,7 @@ export default function VendasPaulaPage() {
                 É uma decisão de sair do improviso.
               </p>
               <p className="text-lg text-center text-white/90 mb-10">
-                LYA é orientação que destrava: direcionamento diário e metodologia clara de captação. Estrutura de apoio para você encher agenda e parar de agendar ansiosa.
+                Noel é orientação que destrava: direcionamento diário e metodologia clara de captação. Estrutura de apoio para você encher agenda e parar de agendar ansiosa.
               </p>
               <div className="bg-white rounded-2xl p-8 shadow-2xl border-4 border-yellow-400 relative" style={{ pointerEvents: 'auto' }}>
                 <div className="text-center mb-6">
@@ -572,7 +572,7 @@ export default function VendasPaulaPage() {
                   Isso não é uma assinatura. É uma decisão de sair do improviso.
                 </p>
                 <ul className="space-y-3 mb-6 text-gray-700">
-                  <li className="flex items-start"><span className="text-[#29CC6A] mr-3 text-xl">✓</span><span>Sistema de captação com orientação LYA (você não trava)</span></li>
+                  <li className="flex items-start"><span className="text-[#29CC6A] mr-3 text-xl">✓</span><span>Sistema de captação com orientação Noel (você não trava)</span></li>
                   <li className="flex items-start"><span className="text-[#29CC6A] mr-3 text-xl">✓</span><span>Links inteligentes e rotina que gera agenda</span></li>
                   <li className="flex items-start"><span className="text-[#29CC6A] mr-3 text-xl">✓</span><span>Metodologia clara para encher agenda e parar de agendar ansiosa</span></li>
                   <li className="flex items-start"><span className="text-[#29CC6A] mr-3 text-xl">✓</span><span>7 dias de garantia incondicional</span></li>
@@ -597,7 +597,7 @@ export default function VendasPaulaPage() {
               <div className="bg-white/10 backdrop-blur-sm rounded-xl p-8 text-center text-white mt-8">
                 <p className="text-xl font-bold mb-4">Mentoria estratégica, não curso.</p>
                 <p className="text-lg mb-4">
-                  LYA não executa por você. Ela impede que você trave. É direcionamento diário e clareza sobre o próximo passo certo.
+                  O Noel não executa por você. Ele impede que você trave. É direcionamento diário e clareza sobre o próximo passo certo.
                 </p>
               </div>
             </div>
@@ -651,13 +651,13 @@ export default function VendasPaulaPage() {
               <div className="space-y-4">
                 {[
                   { pergunta: 'Posso cancelar durante o ano?', resposta: 'O plano anual é um compromisso de 12 meses (12× de R$ 97, total R$ 1.164/ano). Não há cancelamento durante o período anual. A decisão de 12 meses reflete o compromisso com sua transformação. Você tem 7 dias de garantia incondicional para testar: se não for pra você, devolvemos 100%.' },
-                  { pergunta: 'Como funciona o suporte?', resposta: 'Você tem acesso a: LYA (mentora estratégica digital), disponível 24/7 para orientações estratégicas. Suporte técnico, para dúvidas sobre uso da plataforma. Comunidade, para trocar experiências com outras Nutri-Empresárias.' },
+                  { pergunta: 'Como funciona o suporte?', resposta: 'Você tem acesso a: Noel (mentor estratégico digital), disponível 24/7 para orientações estratégicas. Suporte técnico, para dúvidas sobre uso da plataforma. Comunidade, para trocar experiências com outras Nutri-Empresárias.' },
                   { pergunta: 'Para quem é o YLADA Nutri?', resposta: 'O YLADA Nutri é para nutricionistas que querem encher agenda e parar de agendar ansiosa. Que querem se livrar de indecisão e ter metodologia clara de captação. Que estão cansadas de depender de sorte ou indicação e querem estrutura de apoio e orientação que destrava. Se você quer parar de travar e ter rotina que gera agenda, o YLADA é para você.' },
                   { pergunta: 'Quanto tempo leva para ver resultados?', resposta: 'Os primeiros resultados aparecem nas primeiras semanas, quando você começa a organizar seus processos e criar suas primeiras ferramentas de captação. A transformação completa acontece ao longo de 3 a 6 meses, quando você aplica o método com consistência e desenvolve a mentalidade de Nutri-Empresária. O importante não é velocidade. É consistência e método.' },
                   { pergunta: 'Preciso ter conhecimento técnico avançado?', resposta: 'Não. O YLADA Nutri não ensina nutrição clínica (isso você já sabe). Ele ensina como transformar seu conhecimento técnico em um negócio que funciona. Você não precisa de conhecimento avançado em tecnologia, marketing ou gestão. O método te guia passo a passo.' },
-                  { pergunta: 'E se eu não usar todas as ferramentas?', resposta: 'Tudo bem. O YLADA não é sobre usar tudo. É sobre usar o que você precisa, quando precisa. A LYA te ajuda a focar no que é prioritário para o seu momento atual. Você não precisa usar todas as ferramentas. Precisa usar as ferramentas certas, no momento certo. O método te guia. Você não precisa descobrir sozinha.' },
-                  { pergunta: 'E se eu não conseguir usar tudo? Vou ter desperdiçado meu dinheiro?', resposta: 'Você não precisa usar tudo. O YLADA não é sobre usar todas as ferramentas. É sobre usar as ferramentas certas, no momento certo. A LYA te ajuda a focar no que é prioritário para o seu momento atual. Você não precisa descobrir sozinha. E com a garantia de 7 dias, você pode testar sem risco.' },
-                  { pergunta: 'E se eu não tiver tempo para isso?', resposta: 'O YLADA foi feito para economizar seu tempo, não para consumir. A ideia é você trabalhar menos e ganhar mais. A LYA te guia para focar no que realmente importa, sem perder tempo com o que não faz diferença agora. O método foi pensado para nutricionistas que já têm uma rotina corrida.' }
+                  { pergunta: 'E se eu não usar todas as ferramentas?', resposta: 'Tudo bem. O YLADA não é sobre usar tudo. É sobre usar o que você precisa, quando precisa. O Noel te ajuda a focar no que é prioritário para o seu momento atual. Você não precisa usar todas as ferramentas. Precisa usar as ferramentas certas, no momento certo. O método te guia. Você não precisa descobrir sozinha.' },
+                  { pergunta: 'E se eu não conseguir usar tudo? Vou ter desperdiçado meu dinheiro?', resposta: 'Você não precisa usar tudo. O YLADA não é sobre usar todas as ferramentas. É sobre usar as ferramentas certas, no momento certo. O Noel te ajuda a focar no que é prioritário para o seu momento atual. Você não precisa descobrir sozinha. E com a garantia de 7 dias, você pode testar sem risco.' },
+                  { pergunta: 'E se eu não tiver tempo para isso?', resposta: 'O YLADA foi feito para economizar seu tempo, não para consumir. A ideia é você trabalhar menos e ganhar mais. O Noel te guia para focar no que realmente importa, sem perder tempo com o que não faz diferença agora. O método foi pensado para nutricionistas que já têm uma rotina corrida.' }
                 ].map((item, index) => (
                   <div key={index} className="bg-white rounded-xl shadow-lg overflow-hidden">
                     <button

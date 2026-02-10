@@ -63,7 +63,7 @@ export default function LyaChatWidget({ defaultOpen = false, embedded = false, c
     if (isOpen && messages.length === 0) {
       setMessages([{
         sender_type: 'lya',
-        message: 'Olá! Sou a LYA, sua mentora empresarial. Estou aqui para te ajudar com organização, posicionamento e crescimento do seu negócio.\n\nComo posso te ajudar hoje?',
+        message: 'Olá! Sou o Noel, seu mentor empresarial. Estou aqui para te ajudar com organização, posicionamento e crescimento do seu negócio.\n\nComo posso te ajudar hoje?',
         created_at: new Date().toISOString()
       }])
     }
@@ -104,7 +104,7 @@ export default function LyaChatWidget({ defaultOpen = false, embedded = false, c
       if (!response.ok) {
         // Se for erro de configuração, mostrar mensagem mais amigável
         if (data.error?.includes('não configurado') || data.error?.includes('não está configurado')) {
-          throw new Error('A LYA ainda não está configurada. Entre em contato com o suporte para ativar.')
+          throw new Error('O Noel ainda não está configurado. Entre em contato com o suporte para ativar.')
         }
         throw new Error(data.error || data.message || data.details || 'Erro ao enviar mensagem')
       }
@@ -334,14 +334,14 @@ export default function LyaChatWidget({ defaultOpen = false, embedded = false, c
       <button
         onClick={() => setIsOpen(true)}
         className="fixed bottom-6 right-6 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-lg z-50 transition-all group flex items-center gap-2 px-4 py-3"
-        aria-label="Abrir chat com Mentora LYA"
-        title="Falar com a Mentora LYA"
+        aria-label="Abrir chat com o Noel"
+        title="Falar com o Noel"
         data-lya-widget="true"
       >
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
         </svg>
-        <span className="hidden sm:block font-semibold text-sm whitespace-nowrap">Mentora LYA</span>
+        <span className="hidden sm:block font-semibold text-sm whitespace-nowrap">Noel</span>
       </button>
     )
   }
@@ -386,7 +386,7 @@ export default function LyaChatWidget({ defaultOpen = false, embedded = false, c
       <div className={`bg-blue-600 text-white p-4 flex items-center justify-between ${embedded ? 'rounded-t-2xl' : 'rounded-t-lg'}`} style={{ pointerEvents: 'auto' }}>
         <div className="flex items-center space-x-2">
           <div className="w-3 h-3 bg-green-400 rounded-full"></div>
-          <span className="font-semibold">LYA - Mentora Empresarial</span>
+          <span className="font-semibold">Noel - Mentor Empresarial</span>
         </div>
         <div className="flex items-center space-x-2" style={{ pointerEvents: 'auto' }}>
           <button
@@ -499,7 +499,7 @@ export default function LyaChatWidget({ defaultOpen = false, embedded = false, c
             
             {/* Disclaimer */}
             <div className="mt-2 text-xs text-gray-500 text-center">
-              💡 LYA é mentora de negócios. Análises clínicas são sua responsabilidade.
+              💡 O Noel é mentor de negócios. Análises clínicas são sua responsabilidade.
             </div>
           </div>
         </>

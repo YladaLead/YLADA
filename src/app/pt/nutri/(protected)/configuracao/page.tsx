@@ -1094,7 +1094,7 @@ function NutriConfiguracaoContent() {
         />
       )}
       
-      {/* Widget da LYA para ajudar com personalização */}
+      {/* Widget do Noel para ajudar com personalização */}
       <LyaChatWidget />
     </div>
   )

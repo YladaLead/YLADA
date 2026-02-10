@@ -347,7 +347,7 @@ function NutriDiagnosticoContent() {
               Perfil Nutri-Empresária
             </h1>
             <p className="text-gray-600 mb-8">
-              A LYA precisa conhecer você para te orientar da melhor forma possível. Você pode editar essas informações a qualquer momento.
+              O Noel precisa conhecer você para te orientar da melhor forma possível. Você pode editar essas informações a qualquer momento.
             </p>
 
             {error && (
@@ -640,7 +640,7 @@ function NutriDiagnosticoContent() {
                 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Existe algo importante sobre você, seu momento ou seu negócio que não perguntamos aqui e que a LYA deveria saber para te orientar melhor?
+                    Existe algo importante sobre você, seu momento ou seu negócio que não perguntamos aqui e que o Noel deveria saber para te orientar melhor?
                     <span className="text-gray-400 ml-1">(opcional)</span>
                   </label>
                   <textarea

@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
 
 CONTEXTO DA PLATAFORMA:
 - YLADA Nutri é uma plataforma para nutricionistas com foco em captação e direção empresarial
-- Oferece: Trilha Empresarial (30 dias), Mentora LYA, Ferramentas de Captação (templates/quizzes/links), Leads e Métricas
+- Oferece: Trilha Empresarial (30 dias), Mentor Noel, Ferramentas de Captação (templates/quizzes/links), Leads e Métricas
 - Plano anual: R$ 708 (12× de R$ 59) por 1 ano completo — promocional
 - Plano mensal: R$ 97/mês
 
@@ -61,8 +61,8 @@ OBJETIVO:
 - Conduzir para o checkout (/pt/nutri/checkout)
 
 INFORMAÇÕES IMPORTANTES:
-- Plano anual: R$ 708 (12× de R$ 59) - pacote V1 (Trilha + LYA + Captação) — promocional
-- Plano mensal: R$ 97/mês - pacote V1 (Trilha + LYA + Captação)
+- Plano anual: R$ 708 (12× de R$ 59) - pacote V1 (Trilha + Noel + Captação) — promocional
+- Plano mensal: R$ 97/mês - pacote V1 (Trilha + Noel + Captação)
 - Garantia: 7 dias incondicional
 - Trilha Empresarial (30 dias): incluída em ambos os planos
 - Link para checkout: /pt/nutri/checkout

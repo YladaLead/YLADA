@@ -30,16 +30,16 @@ export default function WelcomeCard({ currentDay, userName }: WelcomeCardProps) 
             Olá, {displayName} 👋
           </h1>
           <p className="text-gray-600 mt-1">
-            A LYA está aqui para você 💜
+            O Noel está aqui para você 💜
           </p>
         </div>
 
-        {/* Card da LYA - compacto */}
+        {/* Card do Noel - compacto */}
         <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-xl p-5 border border-purple-200 mb-6">
           <div className="flex items-center gap-4">
             <div className="text-3xl">👩‍💼</div>
             <div className="flex-1">
-              <h3 className="font-semibold text-gray-900">LYA - Sua Mentora</h3>
+              <h3 className="font-semibold text-gray-900">Noel - Seu Mentor</h3>
               <p className="text-sm text-gray-600 mb-3">Estou aqui para qualquer dúvida ou desafio! Use o botão azul no canto inferior direito para conversar.</p>
               <button
                 onClick={() => {
@@ -51,7 +51,7 @@ export default function WelcomeCard({ currentDay, userName }: WelcomeCardProps) 
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
                 </svg>
-                Mentora Lya
+                Noel
               </button>
             </div>
           </div>
@@ -107,7 +107,7 @@ export default function WelcomeCard({ currentDay, userName }: WelcomeCardProps) 
       return {
         title: 'Seu próximo passo na trilha',
         description: 'Complete a Etapa 1 da sua Trilha Empresarial. Isso organiza sua base profissional e evita confusão lá na frente.',
-        action: 'Executar Etapa 1 com a LYA',
+        action: 'Executar Etapa 1 com o Noel',
         href: '/pt/nutri/metodo/jornada/dia/1'
       }
     }
@@ -142,10 +142,10 @@ export default function WelcomeCard({ currentDay, userName }: WelcomeCardProps) 
             </span> 👋
           </p>
           
-          {/* Badge da LYA */}
+          {/* Badge do Noel */}
           <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-full px-4 py-2 mb-6">
             <span className="text-xl">👩‍💼</span>
-            <span className="font-semibold text-sm">LYA - Sua Mentora</span>
+            <span className="font-semibold text-sm">Noel - Seu Mentor</span>
           </div>
           
           {/* Título */}

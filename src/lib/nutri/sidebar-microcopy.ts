@@ -49,7 +49,7 @@ export const SIDEBAR_MICROCOPY: SidebarMicrocopy = {
     },
     pilares: {
       label: 'Sobre o Método',
-      tooltip: 'A filosofia por trás de tudo. A LYA aplica com você.'
+      tooltip: 'A filosofia por trás de tudo. O Noel aplica com você.'
     },
     ferramentas: {
       label: 'Captar',
@@ -61,7 +61,7 @@ export const SIDEBAR_MICROCOPY: SidebarMicrocopy = {
     },
     biblioteca: {
       label: 'Materiais de Apoio',
-      tooltip: 'PDFs e recursos extras. Use quando precisar, a LYA te orienta.'
+      tooltip: 'PDFs e recursos extras. Use quando precisar, o Noel te orienta.'
     },
     anotacoes: {
       label: 'Minhas Anotações',
@@ -80,7 +80,7 @@ export const SIDEBAR_MICROCOPY: SidebarMicrocopy = {
   blocked: {
     label: '🔒 Em breve',
     tooltip: 'Disponível após concluir sua fase atual.',
-    tooltipContextual: 'A LYA libera isso quando fizer sentido para o seu momento.'
+    tooltipContextual: 'O Noel libera isso quando fizer sentido para o seu momento.'
   },
 
   phase: {

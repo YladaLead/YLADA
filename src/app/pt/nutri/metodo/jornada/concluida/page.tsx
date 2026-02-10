@@ -30,20 +30,20 @@ export default function JornadaConcluidaPage() {
             </p>
           </div>
 
-          {/* Destaque da LYA */}
+          {/* Destaque do Noel */}
           <div className="bg-gradient-to-r from-purple-100 to-indigo-100 rounded-xl p-6 mb-8 border border-purple-200">
             <div className="text-4xl mb-3">👩‍💼💜</div>
             <h2 className="text-xl font-bold text-gray-900 mb-2">
-              Você e a LYA: parceiras de jornada
+              Você e o Noel: parceiros de jornada
             </h2>
             <p className="text-gray-700 mb-4">
-              A partir de agora, vocês crescem juntas. A LYA é sua mentora, 
-              sua parceira estratégica e está aqui para cada dúvida, 
-              cada desafio e cada conquista. Juntas, vocês são imbatíveis.
+              A partir de agora, vocês crescem juntos. O Noel é seu mentor, 
+              seu parceiro estratégico e está aqui para cada dúvida, 
+              cada desafio e cada conquista. Juntos, vocês são imbatíveis.
             </p>
             <p className="text-base text-purple-700 font-semibold italic">
               "Conte comigo. Estou aqui para te ajudar a conquistar os melhores resultados. 
-              Vamos crescer juntas!" — LYA
+              Vamos crescer juntos!" — Noel
             </p>
           </div>
 
@@ -101,7 +101,7 @@ export default function JornadaConcluidaPage() {
             href="/pt/nutri/home"
             className="block w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-8 py-4 rounded-xl font-bold text-lg hover:from-blue-700 hover:to-indigo-700 transition-all shadow-lg hover:shadow-xl"
           >
-            👩‍💼 Conversar com a LYA
+            👩‍💼 Conversar com o Noel
           </Link>
         </div>
       </div>
