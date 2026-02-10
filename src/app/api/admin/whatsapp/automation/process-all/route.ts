@@ -13,9 +13,14 @@ import { processScheduledMessages } from '@/lib/whatsapp-automation/worker'
 import { sendRemarketingToNonParticipant, sendRegistrationLinkAfterClass, sendPreClassNotifications } from '@/lib/whatsapp-carol-ai'
 
 export async function POST(request: NextRequest) {
-  const authResult = await requireApiAuth(request, ['admin'])
-  if (authResult instanceof NextResponse) {
-    return authResult
+  // Permitir chamada pelo cron (Vercel Cron envia Authorization: Bearer CRON_SECRET)
+  const authHeader = request.headers.get('authorization')
+  const isCron = !!process.env.CRON_SECRET && authHeader === `Bearer ${process.env.CRON_SECRET}`
+  if (!isCron) {
+    const authResult = await requireApiAuth(request, ['admin'])
+    if (authResult instanceof NextResponse) {
+      return authResult
+    }
   }
   if (await getCarolAutomationDisabled()) {
     return NextResponse.json({ disabled: true, message: 'Automação temporariamente desligada' }, { status: 200 })

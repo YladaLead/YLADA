@@ -1,6 +1,10 @@
 {
   "version": 2,
-  "env": {
-    "NEXT_PUBLIC_BASE_DOMAIN": "ylada.com"
-  }
+  "env": { "NEXT_PUBLIC_BASE_DOMAIN": "ylada.com" },
+  "crons": [
+    {
+      "path": "/api/cron/whatsapp-carol",
+      "schedule": "*/10 * * * *"
+    }
+  ]
 }

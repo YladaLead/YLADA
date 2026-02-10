@@ -3482,6 +3482,7 @@ export async function sendPreClassNotifications(): Promise<{
       return { sent: 0, errors: 0 }
     }
 
+    console.log('[Carol Pre-Class] 📋 Total de conversas com sessão agendada:', conversations.length)
     let sent = 0
     let errors = 0
 
@@ -3581,12 +3582,11 @@ Ideal participar pelo computador e ter caneta e papel à mão — a aula é bem 
           if (!context[notificationKey]) context[notificationKey] = {}
           context[notificationKey].sent_12h = true
         }
-        // 2 horas antes (entre 2h e 2h30) OU se passou mas ainda não enviou e sessão é hoje
-        // Melhorado: Se sessão é hoje e ainda não enviou, enviar mesmo se passou a janela de 2h
+        // 2 horas antes: janela ampla (1h30 a 2h30) para múltiplas execuções do cron pegarem todos
         // "Disparo agora": isToday && hoursDiff > 0 && hoursDiff < 2 — envia até os últimos minutos antes da aula
         else if (!context[notificationKey]?.sent_2h && 
-                 ((hoursDiff >= 2 && hoursDiff < 2.5) || 
-                  (hoursDiff >= 0.5 && hoursDiff < 2) ||
+                 ((hoursDiff >= 1.5 && hoursDiff < 2.5) || 
+                  (hoursDiff >= 0.5 && hoursDiff < 1.5) ||
                   (isToday && hoursDiff > 0 && hoursDiff < 2))) {
           const { weekday, date, time } = formatSessionDateTime(session.starts_at)
           message = `${leadName ? `Olá ${leadName}! ` : ''}Só um aviso: começaremos pontualmente na ${weekday}, ${date} às ${time} (horário de Brasília).
@@ -3650,6 +3650,8 @@ Se puder, entra pelo computador e já deixa caneta e papel por perto (a aula é 
               .eq('id', conv.id)
 
             sent++
+            // Pequena pausa entre envios para evitar rate limit e dar tempo ao Z-API (todos recebem sistematicamente)
+            await new Promise((r) => setTimeout(r, 1500))
           } else {
             errors++
           }
@@ -3660,6 +3662,7 @@ Se puder, entra pelo computador e já deixa caneta e papel por perto (a aula é 
       }
     }
 
+    console.log('[Carol Pre-Class] ✅ Fim:', { sent, errors, total: conversations.length })
     return { sent, errors }
   } catch (error: any) {
     console.error('[Carol] Erro ao processar notificações pré-aula:', error)
