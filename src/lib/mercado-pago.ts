@@ -57,6 +57,29 @@ export function createMercadoPagoClient(isTest: boolean = true): MercadoPagoConf
   })
 }
 
+/** Limite do Mercado Pago para external_reference (chars). */
+const EXTERNAL_REFERENCE_MAX_LENGTH = 256
+
+/**
+ * Monta external_reference no formato area_planType_userId.
+ * Garante tamanho <= 256 caracteres (limite da API do MP).
+ */
+export function buildExternalReference(
+  area: string,
+  planType: string,
+  userId: string
+): string {
+  const ref = `${area}_${planType}_${userId}`
+  if (ref.length <= EXTERNAL_REFERENCE_MAX_LENGTH) return ref
+  // Truncar userId mantendo área e plano (ex: wellness_annual_ + início do userId)
+  const prefix = `${area}_${planType}_`
+  const maxUserIdLen = EXTERNAL_REFERENCE_MAX_LENGTH - prefix.length
+  const truncatedUserId = userId.length > maxUserIdLen
+    ? userId.slice(0, maxUserIdLen)
+    : userId
+  return prefix + truncatedUserId
+}
+
 /**
  * Cria preferência de pagamento no Mercado Pago
  */
@@ -166,14 +189,18 @@ export async function createPreference(
       default_installments: 1, // Parcela padrão (1x = à vista)
     },
     statement_descriptor: 'YLADA', // Nome que aparece na fatura
-    external_reference: `${request.area}_${request.planType}_${request.userId}`, // Referência externa
+    // Referência externa: area_planType_userId (máx 256 chars - limite MP). Obrigatória para o webhook identificar o pagamento.
+    external_reference: buildExternalReference(request.area, request.planType, request.userId),
     // Personalização do checkout (opções limitadas no Checkout Pro)
     // Nota: Personalização visual é limitada no checkout hospedado do Mercado Pago
     // Para mais controle visual, seria necessário usar Checkout Transparente (mais complexo)
   }
 
   try {
+    const extRef = preferenceData.external_reference
     console.log('📤 Enviando preferência para Mercado Pago:', {
+      external_reference: extRef,
+      external_reference_length: extRef?.length ?? 0,
       valorOriginal: request.amount,
       unitPrice: unitPrice,
       currency: 'BRL',

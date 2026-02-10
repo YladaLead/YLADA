@@ -286,12 +286,32 @@ async function handlePaymentEvent(data: any, isTest: boolean = false) {
       }
     }
     
+    // Obter e-mail do pagador cedo (usado em vários fallbacks)
+    const payerEmailEarly = fullData.payer?.email || fullData.payer_email || null
+
     // Se ainda não tiver, tentar usar o e-mail do pagador como temp_email
-    if (!userId) {
-      const payerEmail = fullData.payer?.email || fullData.payer_email || null
-      if (payerEmail && payerEmail.includes('@')) {
-        userId = `temp_${payerEmail}`
-        console.log('✅ User ID criado a partir do e-mail do pagador:', userId)
+    if (!userId && payerEmailEarly && payerEmailEarly.includes('@')) {
+      userId = `temp_${payerEmailEarly}`
+      console.log('✅ User ID criado a partir do e-mail do pagador:', userId)
+    }
+
+    // Fallback: se userId veio da referência mas não é UUID nem temp_ (ex: link MP com ref "wellness...f0674781"),
+    // buscar usuário existente por e-mail do pagador para associar o pagamento ao usuário correto
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(String(userId || ''))
+    if (userId && !userId.startsWith('temp_') && !isUuid && payerEmailEarly && payerEmailEarly.includes('@')) {
+      const { data: profileByEmail } = await supabaseAdmin
+        .from('user_profiles')
+        .select('user_id')
+        .ilike('email', payerEmailEarly)
+        .limit(1)
+        .maybeSingle()
+      if (profileByEmail?.user_id) {
+        console.log('✅ Usuário encontrado por e-mail (referência inválida):', profileByEmail.user_id)
+        userId = profileByEmail.user_id
+      } else {
+        // Não existe perfil com esse e-mail; tratar como temp_ para criar conta no fluxo abaixo
+        userId = `temp_${payerEmailEarly}`
+        console.log('✅ User ID inválido na referência; usando temp_ e-mail:', userId)
       }
     }
     
@@ -311,8 +331,22 @@ async function handlePaymentEvent(data: any, isTest: boolean = false) {
     
     console.log('✅ User ID encontrado/criado:', userId)
     
-    const area = metadata.area || (fullData.external_reference?.split('_')[0]) || 'wellness'
-    const planType = metadata.plan_type || (fullData.external_reference?.split('_')[1]) || 'monthly'
+    let area = metadata.area || (fullData.external_reference?.split('_')[0]) || ''
+    let planType = metadata.plan_type || (fullData.external_reference?.split('_')[1]) || ''
+    // Fallback: inferir área e plano pela descrição (ex: "YLADA WELLNESS - Plano Anual") quando referência vem truncada/errada
+    const desc = (fullData.description || fullData.additional_info?.items?.[0]?.title || '').toUpperCase()
+    if (!area || !['wellness', 'nutri', 'coach', 'nutra'].includes(area)) {
+      if (desc.includes('WELLNESS')) area = 'wellness'
+      else if (desc.includes('NUTRI')) area = 'nutri'
+      else if (desc.includes('COACH')) area = 'coach'
+      else if (desc.includes('NUTRA')) area = 'nutra'
+      else area = area || 'wellness'
+    }
+    if (!planType || !['monthly', 'annual'].includes(planType)) {
+      if (desc.includes('ANUAL') || desc.includes('PLANO ANUAL')) planType = 'annual'
+      else if (desc.includes('MENSAL') || desc.includes('PLANO MENSAL')) planType = 'monthly'
+      else planType = planType || 'monthly'
+    }
     const productType = metadata.product_type || metadata.productType // Suportar ambos os formatos
     const paymentMethod = fullData.payment_method_id || 'unknown'
     const refVendedor = metadata.ref_vendedor && String(metadata.ref_vendedor).trim() ? String(metadata.ref_vendedor).trim() : null
@@ -956,17 +990,98 @@ async function handleSubscriptionEvent(data: any, isTest: boolean = false) {
   console.log('🔄 Processando assinatura recorrente (Preapproval):', subscriptionId, 'isTest:', isTest)
 
   try {
-    // Obter metadata da assinatura (inclui ref_vendedor para comissão Paula/outros)
     const metadata = data.metadata || {}
-    const userId = metadata.user_id
-    const area = metadata.area || 'wellness'
-    const planType = metadata.plan_type || 'monthly'
-    const productType = metadata.product_type || metadata.productType // Suportar ambos os formatos
+    let userId = metadata.user_id
+    let area = metadata.area || (data.external_reference?.split('_')[0]) || ''
+    let planType = metadata.plan_type || (data.external_reference?.split('_')[1]) || ''
+    const productType = metadata.product_type || metadata.productType
     const refVendedor = metadata.ref_vendedor && String(metadata.ref_vendedor).trim() ? String(metadata.ref_vendedor).trim() : null
 
+    // Fallback: extrair userId do external_reference (formato area_planType_userId)
+    if (!userId && data.external_reference) {
+      const parts = data.external_reference.split('_')
+      if (parts.length >= 3) userId = parts.slice(2).join('_')
+    }
+
+    const payerEmailSub = data.payer_email || data.payer?.email || data.payer?.identification?.email || null
+
+    // Fallback: usuário por e-mail quando metadata/referência não trazem user_id
+    if (!userId && payerEmailSub && payerEmailSub.includes('@')) {
+      const { data: profileByEmail } = await supabaseAdmin
+        .from('user_profiles')
+        .select('user_id')
+        .ilike('email', payerEmailSub)
+        .limit(1)
+        .maybeSingle()
+      if (profileByEmail?.user_id) {
+        userId = profileByEmail.user_id
+        console.log('✅ [Subscription] User ID obtido por e-mail:', userId)
+      } else {
+        userId = `temp_${payerEmailSub}`
+        console.log('✅ [Subscription] User ID temp_ a partir do e-mail:', userId)
+      }
+    }
+
+    // Fallback: área e plano pela descrição (reason)
+    const reasonUpper = (data.reason || '').toUpperCase()
+    if (!area || !['wellness', 'nutri', 'coach', 'nutra'].includes(area)) {
+      if (reasonUpper.includes('WELLNESS')) area = 'wellness'
+      else if (reasonUpper.includes('NUTRI')) area = 'nutri'
+      else if (reasonUpper.includes('COACH')) area = 'coach'
+      else if (reasonUpper.includes('NUTRA')) area = 'nutra'
+      else area = area || 'wellness'
+    }
+    if (!planType || !['monthly', 'annual'].includes(planType)) {
+      if (reasonUpper.includes('ANUAL')) planType = 'annual'
+      else if (reasonUpper.includes('MENSAL')) planType = 'monthly'
+      else planType = planType || 'monthly'
+    }
+
     if (!userId) {
-      console.error('❌ User ID não encontrado no metadata da assinatura')
+      console.error('❌ User ID não encontrado no metadata nem por e-mail (assinatura)')
       return
+    }
+
+    // Resolver temp_ para UUID: buscar ou criar usuário por e-mail (assinatura com checkout sem login)
+    if (userId.startsWith('temp_') && payerEmailSub?.includes('@')) {
+      const emailParaCriar = userId.replace('temp_', '')
+      const { data: profileByEmail } = await supabaseAdmin
+        .from('user_profiles')
+        .select('user_id')
+        .ilike('email', emailParaCriar)
+        .limit(1)
+        .maybeSingle()
+      if (profileByEmail?.user_id) {
+        userId = profileByEmail.user_id
+        console.log('✅ [Subscription] temp_ resolvido para usuário existente:', userId)
+      } else {
+        try {
+          const randomPassword = Math.random().toString(36).slice(-12) + Math.random().toString(36).slice(-12) + 'A1!'
+          const { data: newUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
+            email: emailParaCriar,
+            password: randomPassword,
+            email_confirm: true,
+            user_metadata: { perfil: area, name: data.payer?.first_name || data.payer?.name || '' },
+          })
+          if (!createError && newUser?.user) {
+            userId = newUser.user.id
+            await new Promise((r) => setTimeout(r, 800))
+            const { data: profile } = await supabaseAdmin.from('user_profiles').select('id').eq('user_id', userId).single()
+            if (!profile) {
+              await supabaseAdmin.from('user_profiles').insert({
+                user_id: userId,
+                email: emailParaCriar,
+                nome_completo: data.payer?.first_name || data.payer?.name || '',
+                perfil: area,
+              })
+            }
+            console.log('✅ [Subscription] Usuário criado a partir de temp_:', userId)
+          }
+        } catch (e: any) {
+          console.error('❌ [Subscription] Erro ao criar usuário para temp_:', e?.message)
+          return
+        }
+      }
     }
     
     // Determinar features baseado em productType (apenas Nutri)
@@ -990,14 +1105,9 @@ async function handleSubscriptionEvent(data: any, isTest: boolean = false) {
     const amount = data.auto_recurring?.transaction_amount || 0
     const currency = data.auto_recurring?.currency_id || 'BRL'
     
-    // Obter e-mail do pagador (importante para suporte)
-    // Tentar múltiplas fontes de e-mail do webhook
-    const payerEmail = data.payer_email || 
-                      data.payer?.email || 
-                      data.payer?.identification?.email ||
-                      data.collector?.email ||
-                      null
-    
+    // E-mail do pagador (já obtido acima como payerEmailSub; garantir variável única para o resto do fluxo)
+    const payerEmail = payerEmailSub || data.collector?.email || null
+
     console.log('📧 [Subscription] Tentando capturar e-mail do pagador:', {
       'data.payer_email': data.payer_email,
       'data.payer?.email': data.payer?.email,
