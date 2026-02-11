@@ -263,9 +263,9 @@ WHERE profession = 'wellness'
   AND type = 'quiz'
   AND (LOWER(name) LIKE '%perfil de bem-estar%' OR LOWER(name) LIKE '%wellness profile%' OR LOWER(name) LIKE '%descubra seu perfil%');
 
--- Quiz Nutrition Assessment
+-- Quiz Perfil Nutricional (Avaliação Nutricional)
 UPDATE templates_nutrition
-SET slug = 'quiz-nutrition-assessment'
+SET slug = 'quiz-perfil-nutricional'
 WHERE profession = 'wellness'
   AND language = 'pt'
   AND is_active = true

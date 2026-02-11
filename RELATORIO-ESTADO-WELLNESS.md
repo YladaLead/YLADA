@@ -197,12 +197,10 @@
     - Template: ✅ `wellness-profile/page.tsx`
     - Status: **PRECISA DE PREVIEW**
 
-26. ⚠️ **Quiz Nutrition Assessment** (`quiz-nutrition-assessment`)
-    - Preview: ❌ Não encontrado
-    - Diagnóstico: ⚠️ Verificar se existe
-    - Routing: ✅ Integrado
-    - Template: ✅ `nutrition-assessment/page.tsx`
-    - Status: **PRECISA DE PREVIEW**
+26. **Quiz Perfil Nutricional** (`quiz-perfil-nutricional`) — antigo "Quiz Nutrition Assessment"; slug `quiz-nutrition-assessment` é apenas alias para links antigos
+    - Preview: conforme diagnóstico
+    - Routing: ✅ Integrado (alias quiz-nutrition-assessment → quiz-perfil-nutricional)
+    - Status: **CANÔNICO**
 
 27. ⚠️ **Quiz Ganhos (antigo)** (`quiz-ganhos`)
     - Preview: ❌ Não encontrado

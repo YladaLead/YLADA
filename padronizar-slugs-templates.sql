@@ -209,9 +209,9 @@ WHERE (LOWER(name) LIKE '%bem-estar%' AND LOWER(name) NOT LIKE '%perfil%' AND LO
   AND type = 'quiz'
   AND slug IS NULL;
 
--- Avaliação Nutricional
+-- Avaliação Nutricional (Quiz Perfil Nutricional)
 UPDATE templates_nutrition
-SET slug = 'quiz-nutrition-assessment'
+SET slug = 'quiz-perfil-nutricional'
 WHERE (LOWER(name) LIKE '%avaliação nutricional%' OR LOWER(name) LIKE '%avaliacao nutricional%' OR LOWER(name) LIKE '%nutrition assessment%')
   AND type = 'quiz';
 

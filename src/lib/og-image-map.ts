@@ -25,7 +25,7 @@ export const OG_IMAGE_SLUG_MAP: Record<string, string> = {
   'quiz-proposito': 'quiz-proposito.jpg',
   'quiz-alimentacao': 'quiz-alimentacao.jpg',
   'quiz-wellness-profile': 'quiz-wellness-profile.jpg',
-  'quiz-nutrition-assessment': 'quiz-nutrition-assessment.jpg',
+  'quiz-perfil-nutricional': 'quiz-nutrition-assessment.jpg', // mesmo arquivo (slug antigo); nome canônico é quiz-perfil-nutricional
   'quiz-personalizado': 'quiz-personalizado.jpg',
   
   // Desafios

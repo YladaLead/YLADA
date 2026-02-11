@@ -93,12 +93,18 @@ export async function GET(request: NextRequest) {
       )
     }
     
-    // Agora buscar a ferramenta pelo user_id
+    // Aliases: slug da URL -> slugs possíveis no banco (ex.: quiz-nutrition-assessment = Quiz Avaliação Nutricional = quiz-perfil-nutricional)
+    const slugAliasesForUserTemplates: Record<string, string[]> = {
+      'quiz-nutrition-assessment': ['quiz-perfil-nutricional'],
+    }
+    const slugsToTryUser = [toolSlug, ...(slugAliasesForUserTemplates[toolSlug] || [])]
+
+    // Buscar a ferramenta pelo user_id (slug ou alias)
     const { data, error } = await supabaseAdmin
       .from('user_templates')
       .select('*')
       .eq('user_id', userProfile.user_id)
-      .eq('slug', toolSlug)
+      .in('slug', slugsToTryUser)
       .eq('profession', 'wellness')
       .eq('status', 'active')
       .maybeSingle()
@@ -193,12 +199,13 @@ export async function GET(request: NextRequest) {
           })
         }
         
-        // Se não for fluxo, tentar buscar por template_slug (fallback)
+        // Se não for fluxo, tentar buscar por template_slug (fallback), incluindo aliases
+        const slugsForTemplateSlug = [toolSlug, ...(slugAliasesForUserTemplates[toolSlug] || [])]
         const { data: toolByTemplateSlug, error: errorByTemplateSlug } = await supabaseAdmin
           .from('user_templates')
           .select('*')
           .eq('user_id', userProfile.user_id)
-          .eq('template_slug', toolSlug)
+          .in('template_slug', slugsForTemplateSlug)
           .eq('profession', 'wellness')
           .eq('status', 'active')
           .maybeSingle()
@@ -280,11 +287,12 @@ export async function GET(request: NextRequest) {
           }
         }
         
-        // Aliases: slug da URL -> slug possível no banco (ex.: template em inglês)
+        // Aliases: slug da URL -> slug possível no banco (ex.: template em inglês; quiz-nutrition-assessment = quiz-perfil-nutricional)
         const slugAliases: Record<string, string[]> = {
           'template-diagnostico-parasitose': ['parasitosis-diagnosis'],
           'diagnostico-parasitose': ['parasitosis-diagnosis'],
           parasitose: ['parasitosis-diagnosis'],
+          'quiz-nutrition-assessment': ['quiz-perfil-nutricional'],
         }
         const slugsToTry = [toolSlug, ...(slugAliases[toolSlug] || [])]
 

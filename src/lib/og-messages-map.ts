@@ -47,7 +47,7 @@ export const OG_MESSAGES_MAP: Record<string, { title: string; description: strin
     title: 'Descubra seu perfil de bem-estar',
     description: 'Conheça seu perfil completo de bem-estar e receba recomendações personalizadas para sua saúde'
   },
-  'quiz-nutrition-assessment': {
+  'quiz-perfil-nutricional': {
     title: 'Avalie sua nutrição completa',
     description: 'Faça uma avaliação nutricional completa e descubra o que seu corpo realmente precisa'
   },

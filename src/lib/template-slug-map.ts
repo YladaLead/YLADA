@@ -73,6 +73,10 @@ export const TEMPLATE_SLUG_MAP: Record<string, string> = {
   'quiz-alimentacao-saudavel': 'quiz-alimentacao',
   'alimentacao-saudavel': 'quiz-alimentacao',
   
+  // Quiz Perfil Nutricional (Avaliação Nutricional) — slug em inglês é apenas alias para links antigos
+  'quiz-perfil-nutricional': 'quiz-perfil-nutricional',
+  'quiz-nutrition-assessment': 'quiz-perfil-nutricional',
+  
   // Quiz Fome Emocional / Tipo de Fome
   'quiz-fome-emocional': 'tipo-fome',
   'avaliacao-fome-emocional': 'tipo-fome',
@@ -157,7 +161,6 @@ export const CANONICAL_TEMPLATE_SLUGS = [
   'quiz-alimentacao-saudavel',
   'quiz-alimentacao-nutri',
   'quiz-wellness-profile',
-  'quiz-nutrition-assessment',
   'quiz-tipo-fome',
   'quiz-pedindo-detox',
   'quiz-sono-energia',
