@@ -13,8 +13,8 @@ const WHATSAPP_MSG = 'Olá! Assisti o vídeo da YLADA Nutri e gostaria de tirar 
 const NUTRI_VIDEO_SRC = landingPageVideos.nutriHero
 const NUTRI_POSTER_SRC = landingPageVideos.nutriHeroPoster
 
-/** Em mobile: conteúdo abaixo do vídeo só aparece após 18:30 do vídeo (campanha de anúncio). */
-const UNLOCK_AFTER_SECONDS = 18 * 60 + 30 // 18:30
+/** Em mobile: conteúdo abaixo do vídeo só aparece após 17:20 do vídeo (campanha de anúncio). */
+const UNLOCK_AFTER_SECONDS = 17 * 60 + 20 // 17:20
 
 export default function NutriVideoContent() {
   const searchParams = useSearchParams()
