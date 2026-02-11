@@ -566,7 +566,7 @@ export default function VendasPaulaPage() {
                 </div>
                 <div className="bg-gradient-to-br from-[#2563EB] to-[#3B82F6] rounded-xl p-6 mb-6 text-center text-white">
                   <p className="text-3xl sm:text-4xl font-bold">12× de R$ 97</p>
-                  <p className="text-sm text-white/90 mt-2">Total: R$ 1.164 (1 ano de acesso)</p>
+                  <p className="text-sm text-white/90 mt-2">Total: R$ 1.259 (1 ano de acesso)</p>
                 </div>
                 <p className="text-center text-gray-700 mb-4 font-semibold">
                   Isso não é uma assinatura. É uma decisão de sair do improviso.
@@ -650,7 +650,7 @@ export default function VendasPaulaPage() {
               </h2>
               <div className="space-y-4">
                 {[
-                  { pergunta: 'Posso cancelar durante o ano?', resposta: 'O plano anual é um compromisso de 12 meses (12× de R$ 97, total R$ 1.164/ano). Não há cancelamento durante o período anual. A decisão de 12 meses reflete o compromisso com sua transformação. Você tem 7 dias de garantia incondicional para testar: se não for pra você, devolvemos 100%.' },
+                  { pergunta: 'Posso cancelar durante o ano?', resposta: 'O plano anual é um compromisso de 12 meses (12× de R$ 97, total R$ 1.259/ano). Não há cancelamento durante o período anual. A decisão de 12 meses reflete o compromisso com sua transformação. Você tem 7 dias de garantia incondicional para testar: se não for pra você, devolvemos 100%.' },
                   { pergunta: 'Como funciona o suporte?', resposta: 'Você tem acesso a: Noel (mentor estratégico digital), disponível 24/7 para orientações estratégicas. Suporte técnico, para dúvidas sobre uso da plataforma. Comunidade, para trocar experiências com outras Nutri-Empresárias.' },
                   { pergunta: 'Para quem é o YLADA Nutri?', resposta: 'O YLADA Nutri é para nutricionistas que querem encher agenda e parar de agendar ansiosa. Que querem se livrar de indecisão e ter metodologia clara de captação. Que estão cansadas de depender de sorte ou indicação e querem estrutura de apoio e orientação que destrava. Se você quer parar de travar e ter rotina que gera agenda, o YLADA é para você.' },
                   { pergunta: 'Quanto tempo leva para ver resultados?', resposta: 'Os primeiros resultados aparecem nas primeiras semanas, quando você começa a organizar seus processos e criar suas primeiras ferramentas de captação. A transformação completa acontece ao longo de 3 a 6 meses, quando você aplica o método com consistência e desenvolve a mentalidade de Nutri-Empresária. O importante não é velocidade. É consistência e método.' },
