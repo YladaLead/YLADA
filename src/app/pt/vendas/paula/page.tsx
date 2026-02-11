@@ -560,13 +560,38 @@ export default function VendasPaulaPage() {
               </p>
               <div className="bg-white rounded-2xl p-8 shadow-2xl border-4 border-yellow-400 relative" style={{ pointerEvents: 'auto' }}>
                 <div className="text-center mb-6">
-                  <h3 className="text-2xl font-bold mb-2 text-[#1A1A1A]">Plano Anual</h3>
-                  <p className="text-gray-600 mb-1">Acesso válido por 12 meses</p>
-                  <p className="text-sm text-gray-500">Compromisso com economia clara</p>
+                  <h3 className="text-2xl font-bold mb-2 text-[#1A1A1A]">Escolha seu plano</h3>
+                  <p className="text-gray-600 mb-1">Mensal ou anual. Você decide.</p>
                 </div>
-                <div className="bg-gradient-to-br from-[#2563EB] to-[#3B82F6] rounded-xl p-6 mb-6 text-center text-white">
-                  <p className="text-3xl sm:text-4xl font-bold">12× de R$ 97</p>
-                  <p className="text-sm text-white/90 mt-2">Total: R$ 1.259 (1 ano de acesso)</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+                  <div className="bg-gray-50 rounded-xl p-4 border-2 border-gray-200 text-center">
+                    <p className="font-semibold text-gray-800">Plano Mensal</p>
+                    <p className="text-2xl font-bold text-[#2563EB] mt-1">R$ 97<span className="text-sm font-normal text-gray-600">/mês</span></p>
+                    <p className="text-xs text-gray-600 mt-1">Cobrança mês a mês</p>
+                    <button
+                      type="button"
+                      onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleCheckout('monthly') }}
+                      onTouchStart={(e) => e.stopPropagation()}
+                      onMouseDown={(e) => e.stopPropagation()}
+                      className="mt-3 w-full py-2.5 rounded-lg bg-[#2563EB] text-white font-semibold text-sm hover:bg-[#1D4ED8] transition-colors"
+                    >
+                      Escolher mensal
+                    </button>
+                  </div>
+                  <div className="bg-gradient-to-br from-[#2563EB] to-[#3B82F6] rounded-xl p-4 text-center text-white border-2 border-[#2563EB]">
+                    <p className="font-semibold">Plano Anual</p>
+                    <p className="text-2xl font-bold mt-1">12× de R$ 59</p>
+                    <p className="text-sm text-white/90 mt-1">Total: R$ 708 (1 ano)</p>
+                    <button
+                      type="button"
+                      onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleCheckout('annual') }}
+                      onTouchStart={(e) => e.stopPropagation()}
+                      onMouseDown={(e) => e.stopPropagation()}
+                      className="mt-3 w-full py-2.5 rounded-lg bg-white text-[#2563EB] font-semibold text-sm hover:bg-white/90 transition-colors"
+                    >
+                      Começar agora
+                    </button>
+                  </div>
                 </div>
                 <p className="text-center text-gray-700 mb-4 font-semibold">
                   Isso não é uma assinatura. É uma decisão de sair do improviso.
@@ -582,22 +607,21 @@ export default function VendasPaulaPage() {
                     type="button"
                     onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleCheckout('annual') }}
                     onTouchStart={(e) => e.stopPropagation()}
-                    onTouchEnd={(e) => { e.preventDefault(); e.stopPropagation(); handleCheckout('annual') }}
                     onMouseDown={(e) => e.stopPropagation()}
-                    className="w-full bg-gradient-to-r from-[#2563EB] to-[#3B82F6] text-white px-6 py-4 rounded-xl text-lg font-bold hover:from-[#3B82F6] hover:to-[#1D4ED8] transition-all shadow-xl cursor-pointer active:scale-95"
-                    style={{ touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent', pointerEvents: 'auto', position: 'relative', zIndex: 100, userSelect: 'none', WebkitUserSelect: 'none', minHeight: '48px' }}
+                    className="w-full bg-gradient-to-r from-[#2563EB] to-[#3B82F6] text-white px-6 py-4 rounded-xl text-lg font-bold hover:from-[#3B82F6] hover:to-[#1D4ED8] transition-all shadow-xl cursor-pointer"
+                    style={{ pointerEvents: 'auto' }}
                   >
-                    👉 Quero sair do improviso
+                    Começar com o YLADA agora
                   </button>
                 </div>
               </div>
               <p className="text-center text-sm text-white/80 mt-6">
-                Plano anual com fidelidade de 12 meses. Garantia de 7 dias. Detalhes no checkout.
+                Plano mensal R$ 97/mês ou anual 12× de R$ 59 (R$ 708/ano). Garantia de 7 dias.
               </p>
               <div className="bg-white/10 backdrop-blur-sm rounded-xl p-8 text-center text-white mt-8">
                 <p className="text-xl font-bold mb-4">Mentoria estratégica, não curso.</p>
                 <p className="text-lg mb-4">
-                  O Noel não executa por você. Ele impede que você trave. É direcionamento diário e clareza sobre o próximo passo certo.
+                  O Noel impede que você trave. É direcionamento diário e clareza sobre o próximo passo certo.
                 </p>
               </div>
             </div>
@@ -636,7 +660,7 @@ export default function VendasPaulaPage() {
                 href="#oferta"
                 className="inline-block bg-white text-[#2563EB] px-10 py-5 rounded-xl text-xl font-bold hover:bg-gray-100 transition-all shadow-2xl"
               >
-                Quero sair do improviso
+                Começar com o YLADA agora
               </Link>
             </div>
           </div>
@@ -650,14 +674,13 @@ export default function VendasPaulaPage() {
               </h2>
               <div className="space-y-4">
                 {[
-                  { pergunta: 'Posso cancelar durante o ano?', resposta: 'O plano anual é um compromisso de 12 meses (12× de R$ 97, total R$ 1.259/ano). Não há cancelamento durante o período anual. A decisão de 12 meses reflete o compromisso com sua transformação. Você tem 7 dias de garantia incondicional para testar: se não for pra você, devolvemos 100%.' },
-                  { pergunta: 'Como funciona o suporte?', resposta: 'Você tem acesso a: Noel (mentor estratégico digital), disponível 24/7 para orientações estratégicas. Suporte técnico, para dúvidas sobre uso da plataforma. Comunidade, para trocar experiências com outras Nutri-Empresárias.' },
-                  { pergunta: 'Para quem é o YLADA Nutri?', resposta: 'O YLADA Nutri é para nutricionistas que querem encher agenda e parar de agendar ansiosa. Que querem se livrar de indecisão e ter metodologia clara de captação. Que estão cansadas de depender de sorte ou indicação e querem estrutura de apoio e orientação que destrava. Se você quer parar de travar e ter rotina que gera agenda, o YLADA é para você.' },
-                  { pergunta: 'Quanto tempo leva para ver resultados?', resposta: 'Os primeiros resultados aparecem nas primeiras semanas, quando você começa a organizar seus processos e criar suas primeiras ferramentas de captação. A transformação completa acontece ao longo de 3 a 6 meses, quando você aplica o método com consistência e desenvolve a mentalidade de Nutri-Empresária. O importante não é velocidade. É consistência e método.' },
-                  { pergunta: 'Preciso ter conhecimento técnico avançado?', resposta: 'Não. O YLADA Nutri não ensina nutrição clínica (isso você já sabe). Ele ensina como transformar seu conhecimento técnico em um negócio que funciona. Você não precisa de conhecimento avançado em tecnologia, marketing ou gestão. O método te guia passo a passo.' },
-                  { pergunta: 'E se eu não usar todas as ferramentas?', resposta: 'Tudo bem. O YLADA não é sobre usar tudo. É sobre usar o que você precisa, quando precisa. O Noel te ajuda a focar no que é prioritário para o seu momento atual. Você não precisa usar todas as ferramentas. Precisa usar as ferramentas certas, no momento certo. O método te guia. Você não precisa descobrir sozinha.' },
-                  { pergunta: 'E se eu não conseguir usar tudo? Vou ter desperdiçado meu dinheiro?', resposta: 'Você não precisa usar tudo. O YLADA não é sobre usar todas as ferramentas. É sobre usar as ferramentas certas, no momento certo. O Noel te ajuda a focar no que é prioritário para o seu momento atual. Você não precisa descobrir sozinha. E com a garantia de 7 dias, você pode testar sem risco.' },
-                  { pergunta: 'E se eu não tiver tempo para isso?', resposta: 'O YLADA foi feito para economizar seu tempo, não para consumir. A ideia é você trabalhar menos e ganhar mais. O Noel te guia para focar no que realmente importa, sem perder tempo com o que não faz diferença agora. O método foi pensado para nutricionistas que já têm uma rotina corrida.' }
+                  { pergunta: 'Como funciona o suporte?', resposta: 'Orientação 24h por dia, 7 dias por semana, e suporte técnico via WhatsApp.' },
+                  { pergunta: 'Para quem é o YLADA Nutri?', resposta: 'Para nutricionistas que querem encher agenda, parar de agendar ansiosa e ter orientação que destrava.' },
+                  { pergunta: 'Quanto tempo leva para ver resultados?', resposta: 'Primeiros resultados em semanas. O importante é consistência.' },
+                  { pergunta: 'Preciso ter conhecimento técnico avançado?', resposta: 'Não. O método te guia passo a passo.' },
+                  { pergunta: 'E se eu não usar tudo? Vou desperdiçar meu dinheiro?', resposta: 'Não precisa usar tudo. Use o que fizer sentido pro seu momento. E você tem 7 dias de garantia para testar sem risco.' },
+                  { pergunta: 'E se eu não tiver tempo?', resposta: 'O YLADA foi feito para economizar seu tempo, não para consumir. Foco no que importa.' },
+                  { pergunta: 'Posso cancelar durante o ano?', resposta: 'Plano anual: compromisso de 12 meses (12× de R$ 59). Plano mensal (R$ 97/mês): pode cancelar quando quiser. Você tem 7 dias de garantia: se não for pra você, devolvemos 100%.' }
                 ].map((item, index) => (
                   <div key={index} className="bg-white rounded-xl shadow-lg overflow-hidden">
                     <button
