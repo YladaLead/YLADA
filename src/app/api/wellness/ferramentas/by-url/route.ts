@@ -93,9 +93,10 @@ export async function GET(request: NextRequest) {
       )
     }
     
-    // Aliases: slug da URL -> slugs possíveis no banco (ex.: quiz-nutrition-assessment = Quiz Avaliação Nutricional = quiz-perfil-nutricional)
+    // Aliases: slug da URL -> slugs possíveis no banco (bidirecional: perfil nutricional pode estar com qualquer um dos dois)
     const slugAliasesForUserTemplates: Record<string, string[]> = {
       'quiz-nutrition-assessment': ['quiz-perfil-nutricional'],
+      'quiz-perfil-nutricional': ['quiz-nutrition-assessment'],
     }
     const slugsToTryUser = [toolSlug, ...(slugAliasesForUserTemplates[toolSlug] || [])]
 
@@ -287,12 +288,13 @@ export async function GET(request: NextRequest) {
           }
         }
         
-        // Aliases: slug da URL -> slug possível no banco (ex.: template em inglês; quiz-nutrition-assessment = quiz-perfil-nutricional)
+        // Aliases: slug da URL -> slugs possíveis no banco (bidirecional para perfil nutricional: banco pode ter qualquer um dos dois)
         const slugAliases: Record<string, string[]> = {
           'template-diagnostico-parasitose': ['parasitosis-diagnosis'],
           'diagnostico-parasitose': ['parasitosis-diagnosis'],
           parasitose: ['parasitosis-diagnosis'],
           'quiz-nutrition-assessment': ['quiz-perfil-nutricional'],
+          'quiz-perfil-nutricional': ['quiz-nutrition-assessment'],
         }
         const slugsToTry = [toolSlug, ...(slugAliases[toolSlug] || [])]
 
