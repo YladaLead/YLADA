@@ -130,7 +130,7 @@ export default function NutriVideoContent() {
             Vídeo exclusivo para nutricionistas
           </p>
           <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-[#1A1A1A] leading-tight max-w-2xl mx-auto">
-            Assista e compare: o que você faz hoje x o que eu proponho.
+            Assista e compare: o que você faz hoje versus o que nós propomos.
           </h1>
         </section>
 
