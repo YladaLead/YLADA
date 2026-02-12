@@ -4531,10 +4531,28 @@ Você já pode começar hoje no plano *mensal* ou no *anual* e ajustar sua agend
 Qual você prefere, *mensal* ou *anual*?
 `
 
-    const result = await client.sendTextMessage({
-      phone: conversation.phone,
-      message,
-    })
+    // Imagem que acompanha a mensagem: configurada no admin ou, por padrão, o logo Nutri by YLADA
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL_PRODUCTION || process.env.NEXT_PUBLIC_APP_URL || 'https://www.ylada.com'
+    const defaultNutriImageUrl = `${baseUrl}/images/logo/nutri-horizontal.png`
+
+    const { data: workshopSettings } = await supabaseAdmin
+      .from('whatsapp_workshop_settings')
+      .select('oferta_image_url')
+      .eq('area', area)
+      .maybeSingle()
+
+    const ofertaImageUrl = (workshopSettings?.oferta_image_url?.trim() || defaultNutriImageUrl)
+
+    const result = ofertaImageUrl
+      ? await client.sendImageMessage({
+          phone: conversation.phone,
+          image: ofertaImageUrl,
+          caption: message,
+        })
+      : await client.sendTextMessage({
+          phone: conversation.phone,
+          message,
+        })
 
     if (result.success) {
       // Salvar mensagem
@@ -4545,7 +4563,8 @@ Qual você prefere, *mensal* ou *anual*?
         sender_type: 'bot',
         sender_name: 'Carol - Secretária',
         message,
-        message_type: 'text',
+        message_type: ofertaImageUrl ? 'image' : 'text',
+        ...(ofertaImageUrl && { media_url: ofertaImageUrl }),
         status: 'sent',
         is_bot_response: true,
       })

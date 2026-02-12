@@ -9,6 +9,7 @@ type WorkshopSettings = {
   area: string
   flyer_url: string | null
   flyer_caption: string | null
+  oferta_image_url: string | null
 }
 
 type WorkshopSession = {
@@ -56,6 +57,7 @@ function WorkshopContent() {
 
   const [flyerUrl, setFlyerUrl] = useState('')
   const [flyerCaption, setFlyerCaption] = useState('')
+  const [ofertaImageUrl, setOfertaImageUrl] = useState('')
 
   const [newTitle, setNewTitle] = useState('Aula prática exclusiva para nutricionistas')
   const [newStartsAt, setNewStartsAt] = useState('')
@@ -201,6 +203,7 @@ function WorkshopContent() {
 
       setFlyerUrl(settingsJson.settings?.flyer_url || '')
       setFlyerCaption(settingsJson.settings?.flyer_caption || '')
+      setOfertaImageUrl(settingsJson.settings?.oferta_image_url || '')
     } catch (e: any) {
       setError(e.message || 'Erro ao carregar dados')
     } finally {
@@ -237,6 +240,7 @@ function WorkshopContent() {
         body: JSON.stringify({
           flyer_url: flyerUrl || null,
           flyer_caption: flyerCaption || null,
+          oferta_image_url: ofertaImageUrl || null,
         }),
       })
       const json = await res.json().catch(() => ({}))
@@ -1070,6 +1074,49 @@ function WorkshopContent() {
                   <div className="text-sm text-gray-700 mb-2">Preview</div>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={flyerUrl} alt="Flyer" className="max-h-80 rounded-lg border border-gray-200" />
+                </div>
+              )}
+
+              <h3 className="font-medium text-gray-900 mt-6 mb-2">Imagem da mensagem de parabéns (oferta)</h3>
+              <p className="text-sm text-gray-600 mb-2">
+                Quando alguém é marcado como &quot;participou da aula&quot;, a Carol envia o texto de parabéns + link. Se você preencher uma imagem aqui, ela será enviada junto (imagem + texto como legenda), deixando a mensagem mais atrativa.
+              </p>
+              <div className="flex gap-2">
+                <input
+                  value={ofertaImageUrl}
+                  onChange={(e) => setOfertaImageUrl(e.target.value)}
+                  placeholder="https://... (URL da imagem da oferta)"
+                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg"
+                />
+                <label className="px-3 py-2 bg-gray-100 rounded-lg border border-gray-200 cursor-pointer text-sm">
+                  Upload
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0]
+                      if (!file) return
+                      try {
+                        setSaving(true)
+                        const url = await uploadFlyer(file)
+                        setOfertaImageUrl(url)
+                        setSuccess('Imagem enviada. Clique em "Salvar" para aplicar.')
+                      } catch (err: any) {
+                        setError(err.message || 'Erro ao subir imagem')
+                      } finally {
+                        setSaving(false)
+                        e.target.value = ''
+                      }
+                    }}
+                  />
+                </label>
+              </div>
+              {ofertaImageUrl && (
+                <div className="mt-3">
+                  <div className="text-sm text-gray-700 mb-1">Preview</div>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={ofertaImageUrl} alt="Imagem da oferta" className="max-h-48 rounded-lg border border-gray-200" />
                 </div>
               )}
 
