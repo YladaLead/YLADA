@@ -2880,10 +2880,11 @@ Qualquer dúvida, é só me chamar! 💚
  * Envia mensagem de remarketing para uma pessoa específica que não participou
  * Disparado automaticamente quando admin marca como "não participou"
  * @param options.force - Se true (ex.: botão "Reenviar remarketing"), ignora regra de 2h e horário permitido
+ * @param options.ignoreTime - Ordem do admin (clique em Participou/Não participou): envia sempre, independente de horário
  */
 export async function sendRemarketingToNonParticipant(
   conversationId: string,
-  options?: { force?: boolean }
+  options?: { force?: boolean; ignoreTime?: boolean }
 ): Promise<{ success: boolean; error?: string }> {
   const force = options?.force === true
   try {
@@ -2958,8 +2959,9 @@ export async function sendRemarketingToNonParticipant(
       }
     }
 
-    // Verificar se está em horário permitido — ignorar quando force (reenvio manual pelo admin)
-    if (!force) {
+    // Horário: ignorar quando for ordem do admin (ignoreTime) ou reenvio manual (force)
+    const ignoreTime = options?.ignoreTime === true
+    if (!force && !ignoreTime) {
       const timeCheck = isAllowedTimeToSendMessage()
       if (!timeCheck.allowed) {
         console.log('[Carol Remarketing] ⏰ Fora do horário permitido:', {
@@ -4376,8 +4378,12 @@ O que está te travando exatamente? O momento é AGORA. Vamos conversar? 💚
  * Envia link de cadastro imediatamente após pessoa participar da aula
  * Ativado quando admin adiciona tag "participou_aula"
  * Inclui argumentação e provoca manifestação de interesse/objeções
+ * @param options.ignoreTime - Ordem do admin (clique em Participou/Não participou): envia sempre, independente de horário
  */
-export async function sendRegistrationLinkAfterClass(conversationId: string): Promise<{
+export async function sendRegistrationLinkAfterClass(
+  conversationId: string,
+  options?: { ignoreTime?: boolean }
+): Promise<{
   success: boolean
   error?: string
   /** Quando o envio falha, texto para o admin enviar manualmente */
@@ -4413,9 +4419,10 @@ export async function sendRegistrationLinkAfterClass(conversationId: string): Pr
 
     const registrationUrl = process.env.NUTRI_REGISTRATION_URL || 'https://www.ylada.com/pt/nutri#oferta'
 
-    // Verificar se está em horário permitido para enviar mensagem automática
+    // Horário: só aplica restrição 8h–19h quando NÃO for ordem do admin (clique no botão)
+    const ignoreTime = options?.ignoreTime === true
     const timeCheck = isAllowedTimeToSendMessage()
-    if (!timeCheck.allowed) {
+    if (!ignoreTime && !timeCheck.allowed) {
       console.log('[Carol Registration Link] ⏰ Fora do horário permitido:', {
         reason: timeCheck.reason,
         nextAllowedTime: timeCheck.nextAllowedTime?.toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })

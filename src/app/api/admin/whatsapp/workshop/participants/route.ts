@@ -161,14 +161,14 @@ export async function POST(request: NextRequest) {
       throw updateError
     }
 
-    // 🚀 Disparar link pós-participou na mesma requisição (await evita que serverless mate o setTimeout)
+    // 🚀 Disparar link pós-participou: ordem do admin (clique no botão) — sempre envia, independente de horário
     let linkSent = false
     let linkError: string | undefined
     let messageForManual: string | undefined
     const carolDisabled = await getCarolAutomationDisabled()
     if (isAddingParticipatedTag && !carolDisabled) {
       try {
-        const result = await sendRegistrationLinkAfterClass(conversationId)
+        const result = await sendRegistrationLinkAfterClass(conversationId, { ignoreTime: true })
         linkSent = result.success
         linkError = result.error
         messageForManual = result.messageForManual
@@ -193,7 +193,7 @@ Pra eu te orientar certinho: qual foi o ponto que mais fez sentido pra você hoj
 Você prefere começar no *mensal* ou no *anual*?`
     }
 
-    // 🚀 Disparar remarketing quando marca como "não participou" (ação explícita do admin — envia mesmo com automação desligada)
+    // 🚀 Disparar remarketing: ordem do admin (clique no botão) — sempre envia, independente de horário
     let remarketingSent = false
     let remarketingError: string | undefined
     if (!participated) {
@@ -202,7 +202,7 @@ Você prefere começar no *mensal* ou no *anual*?`
         phone: updated?.phone
       })
       try {
-        const result = await sendRemarketingToNonParticipant(conversationId)
+        const result = await sendRemarketingToNonParticipant(conversationId, { ignoreTime: true })
         remarketingSent = result.success
         remarketingError = result.error
         if (result.success) {
@@ -210,7 +210,7 @@ Você prefere começar no *mensal* ou no *anual*?`
         } else {
           console.warn('[Workshop Participants] ⚠️ Remarketing não enviado:', result.error)
           if (result.error?.includes('não está marcada')) {
-            const retryResult = await sendRemarketingToNonParticipant(conversationId)
+            const retryResult = await sendRemarketingToNonParticipant(conversationId, { ignoreTime: true })
             if (retryResult.success) {
               remarketingSent = true
               remarketingError = undefined
