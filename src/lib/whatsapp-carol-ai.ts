@@ -4912,19 +4912,19 @@ Estamos aqui para te apoiar em cada passo! 💚
         is_bot_response: true,
       })
 
-      // Atualizar contexto e tags
+      // Atualizar contexto e tags (cliente_nutri = conta como Cliente nos relatórios WhatsApp)
       context.redirected_to_support = true
       context.redirected_to_support_at = new Date().toISOString()
       context.payment_confirmed = true
       context.payment_info = paymentInfo || {}
 
-      const newTags = [...new Set([...tags, 'pagamento_confirmado', 'direcionado_suporte'])]
+      const newTags = [...new Set([...tags, 'pagamento_confirmado', 'direcionado_suporte', 'cliente_nutri'])]
+      context.tags = newTags
 
       await supabaseAdmin
         .from('whatsapp_conversations')
         .update({
           context,
-          tags: newTags,
           last_message_at: new Date().toISOString(),
           last_message_from: 'bot',
         })

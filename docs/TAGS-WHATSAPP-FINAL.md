@@ -69,7 +69,8 @@
 ### **FASE 5: CONVERSÃO** (Verde/Cinza)
 12. **`cliente_nutri`** 🎉
     - Convertido em cliente nutri
-    - **Manual** - quando fechar plano/assinatura
+    - **Automática** quando o webhook do Mercado Pago confirma pagamento e encontra a conversa (área nutri)
+    - **Manual** quando fechar plano/assinatura ou quando a inscrição foi acrescentada manualmente (adicionar para aparecer nos relatórios como Cliente)
     - Cor: Verde escuro
 
 13. **`perdeu`** 😔

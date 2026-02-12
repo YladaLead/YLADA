@@ -44,6 +44,27 @@ Visualização completa do funil:
 
 ---
 
+## 🏷️ COMO O FUNIL USA AS TAGS (para a Carol e relatórios)
+
+Os relatórios e a Carol usam **as mesmas tags** nas conversas. Para o funil bater certo:
+
+| Fase no relatório | Tag no sistema | Quando adicionar |
+|-------------------|----------------|------------------|
+| **Captação** | `veio_aula_pratica` | Inscrição na aula prática / cadastro workshop |
+| **Convite** | `recebeu_link_workshop` | Envio do link do workshop |
+| **Participação** | `participou_aula` ou `nao_participou_aula` | Após a data da aula |
+| **Interessado** | `interessado` | Quando a pessoa demonstrar interesse |
+| **Negociando** | `negociando` | Quando estiver negociando |
+| **Cliente** | `cliente_nutri` | **Pagamento confirmado** (webhook ou manual) |
+
+**Importante:** Quem **já pagou** precisa ter a tag **`cliente_nutri`** na conversa para:
+- Aparecer como **Cliente** no funil dos relatórios.
+- A Carol tratar como cliente (não enviar cobrança/remarketing).
+
+Se a inscrição foi acrescentada manualmente ou o webhook não encontrou a conversa na hora do pagamento, adicione a tag `cliente_nutri` manualmente na conversa (Admin WhatsApp → conversa → tags) ou use o script `scripts/corrigir-tag-cliente-nutri-cintia-paula.sql` para nomes específicos.
+
+---
+
 ## 🔍 FILTROS DISPONÍVEIS
 
 ### **Período:**
