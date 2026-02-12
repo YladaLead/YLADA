@@ -245,17 +245,8 @@ export default function NutriLandingPage() {
                 <li className="font-semibold text-[#2563EB]">• Agenda vazia</li>
                 <li className="font-semibold text-[#2563EB]">• Dúvida na cobrança</li>
                 <li className="font-semibold text-[#2563EB]">• Sensação de recomeçar de novo</li>
+                <li className="font-semibold text-[#2563EB]">• Sem clareza do que fazer</li>
               </ul>
-              <div className="mt-8 space-y-2 text-lg sm:text-xl text-gray-700">
-                <p className="font-semibold">Você já tentou.</p>
-                <p>Organizou.</p>
-                <p>Recomeçou.</p>
-                <p className="pt-2">E voltou ao mesmo lugar:</p>
-                <p className="font-bold text-[#1A1A1A] text-[#2563EB]">improviso, solidão, sem clareza do que fazer amanhã.</p>
-              </div>
-              <p className="mt-8 text-xl font-bold text-[#1A1A1A]">
-                Se você se reconheceu, continue.
-              </p>
             </div>
           </div>
         </section>
@@ -303,58 +294,6 @@ export default function NutriLandingPage() {
           </div>
         </section>
 
-        {/* BLOCO 5 — O que muda com o sistema (2 colunas no desktop) */}
-        <section className="py-14 sm:py-20 lg:py-24 bg-[#F5F7FA]">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="max-w-4xl mx-auto space-y-8">
-              <h2 className="text-3xl sm:text-4xl font-bold text-center text-[#1A1A1A]">
-                O que muda com o sistema
-              </h2>
-              
-              <div className="bg-white rounded-2xl shadow-md p-6 sm:p-8 lg:p-10 ring-1 ring-black/5 overflow-hidden">
-                <p className="text-lg sm:text-xl font-bold text-gray-800 mb-6 lg:mb-8 text-center leading-snug">
-                  Quem adota um sistema de captação para de depender de sorte e de “dar um jeito”.
-                </p>
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-10 text-base sm:text-lg text-gray-700">
-                  <div className="space-y-4 lg:space-y-5 lg:pr-6 lg:border-r border-gray-200">
-                    <p className="font-bold text-[#FF4F4F] text-lg">Sem sistema:</p>
-                    <ul className="space-y-3 list-none pl-0">
-                      <li>sorte, indicação, improviso.</li>
-                      <li>“o que faço amanhã?”, indecisão.</li>
-                      <li>você trava.</li>
-                    </ul>
-                  </div>
-                  <div className="space-y-4 lg:space-y-5">
-                    <p className="font-bold text-[#29CC6A] text-lg">Com sistema:</p>
-                    <ul className="space-y-3 list-none pl-0">
-                      <li>metodologia clara, agenda que enche.</li>
-                      <li>rotina definida, estrutura de apoio.</li>
-                      <li>você segue.</li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="bg-white rounded-2xl shadow-md p-6 sm:p-8 lg:p-10 ring-1 ring-black/5 text-center overflow-hidden">
-                <h3 className="text-xl font-bold mb-6 text-[#1A1A1A]">
-                  Nutri Tradicional × Nutri-Empresária
-                </h3>
-                <div className="flex flex-col sm:flex-row sm:flex-wrap sm:justify-center gap-3 sm:gap-6 lg:gap-8 text-lg text-gray-700 mb-6">
-                  <span><span className="font-bold text-[#FF4F4F]">Improviso</span> × <span className="font-bold text-[#29CC6A]">Método</span></span>
-                  <span><span className="font-bold text-[#FF4F4F]">Sorte</span> × <span className="font-bold text-[#29CC6A]">Sistema</span></span>
-                  <span><span className="font-bold text-[#FF4F4F]">Solidão</span> × <span className="font-bold text-[#29CC6A]">Orientação</span></span>
-                </div>
-                <p className="text-base sm:text-lg font-semibold text-gray-800 min-w-0 break-words px-1">
-                  O divisor de águas não é conhecimento. É sistema.
-                </p>
-              </div>
-              
-              <div className="bg-gradient-to-r from-[#2563EB] to-[#3B82F6] rounded-2xl py-6 px-6 text-center text-white shadow-lg">
-                <p className="text-lg sm:text-xl font-bold leading-snug">Você quer encher agenda com método e parar de travar?</p>
-              </div>
-            </div>
-          </div>
-        </section>
 
         {/* BLOCO 6 — APRESENTAÇÃO DO YLADA NUTRI (SOLUÇÃO) */}
         <section className="py-16 sm:py-20 lg:py-24 bg-white">
@@ -770,7 +709,7 @@ export default function NutriLandingPage() {
               <div className="bg-white/10 backdrop-blur-sm rounded-xl p-8 text-center text-white mt-8">
                 <p className="text-xl font-bold mb-4">Mentoria estratégica, não curso.</p>
                 <p className="text-lg mb-4">
-                  O Noel não executa por você. Ele impede que você trave. É direcionamento diário e clareza sobre o próximo passo certo.
+                  O Noel impede que você trave. É direcionamento diário e clareza sobre o próximo passo certo.
                 </p>
               </div>
             </div>
