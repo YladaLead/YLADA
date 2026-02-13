@@ -191,8 +191,15 @@ export async function generateWorkshopSessions(weeksAhead: number = 4): Promise<
       index === self.findIndex((s) => s.starts_at === session.starts_at)
     )
 
-    // Verificar quais já existem no banco
-    const existingDates = new Set<string>()
+    // Normalizar data/hora ao minuto (UTC) para comparação consistente e evitar duplicatas
+    const toMinuteKey = (iso: string) => {
+      const d = new Date(iso)
+      d.setSeconds(0, 0)
+      return d.getTime()
+    }
+
+    // Verificar quais já existem no banco (por área + mesmo minuto)
+    const existingMinutes = new Set<number>()
     if (uniqueSessions.length > 0) {
       const minDate = uniqueSessions[0].starts_at
       const maxDate = uniqueSessions[uniqueSessions.length - 1].starts_at
@@ -206,18 +213,15 @@ export async function generateWorkshopSessions(weeksAhead: number = 4): Promise<
 
       if (existing) {
         existing.forEach((s) => {
-          const date = new Date(s.starts_at)
-          date.setSeconds(0, 0)
-          existingDates.add(date.toISOString())
+          existingMinutes.add(toMinuteKey(s.starts_at))
         })
       }
     }
 
-    // Criar apenas as que não existem
+    // Criar apenas as que não existem (mesmo minuto = duplicata)
     const toCreate = uniqueSessions.filter((session) => {
-      const date = new Date(session.starts_at)
-      date.setSeconds(0, 0)
-      return !existingDates.has(date.toISOString())
+      const key = toMinuteKey(session.starts_at)
+      return !existingMinutes.has(key)
     })
 
     if (toCreate.length === 0) {
