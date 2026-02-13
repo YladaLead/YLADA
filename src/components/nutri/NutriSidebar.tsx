@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useMemo } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
@@ -33,7 +33,6 @@ export default function NutriSidebar({ isMobileOpen = false, onMobileClose }: Nu
   const pathname = usePathname()
   const [hoveredSection, setHoveredSection] = useState<string | null>(null)
   const [expandedSections, setExpandedSections] = useState<string[]>([])
-  const [novosLeadsCount, setNovosLeadsCount] = useState<number>(0)
   const { progress } = useJornadaProgress()
   
   // Verificar se completou Dia 1 (current_day >= 2)
@@ -42,34 +41,6 @@ export default function NutriSidebar({ isMobileOpen = false, onMobileClose }: Nu
   // Determinar fase atual baseado no progresso
   const currentDay = progress?.current_day || null
   const currentPhase = getCurrentPhase(currentDay)
-
-  // Carregar contador de novos leads
-  useEffect(() => {
-    const carregarNovosLeads = async () => {
-      try {
-        const response = await fetch('/api/leads', {
-          credentials: 'include'
-        })
-        if (response.ok) {
-          const data = await response.json()
-          if (data.success && data.data.leads) {
-            const novosLeads = data.data.leads.filter((l: any) => {
-              const status = l.additional_data?.status || 'novo'
-              return status === 'novo'
-            })
-            setNovosLeadsCount(novosLeads.length)
-          }
-        }
-      } catch (error) {
-        // Ignorar erros silenciosamente
-      }
-    }
-    
-    carregarNovosLeads()
-    // Atualizar a cada 30 segundos
-    const interval = setInterval(carregarNovosLeads, 30000)
-    return () => clearInterval(interval)
-  }, [])
 
   const toggleSection = (section: string) => {
     const sectionId = section.toLowerCase().replace(/\s+/g, '-')
@@ -103,8 +74,6 @@ export default function NutriSidebar({ isMobileOpen = false, onMobileClose }: Nu
         items: [
           { title: 'Quiz e Calculadoras', icon: '🧮', href: '/pt/nutri/ferramentas/templates' },
           { title: 'Criar Quiz Personalizado', icon: '✨', href: '/pt/nutri/quiz-personalizado' },
-          { title: 'Leads', icon: '🎯', href: '/pt/nutri/leads', badge: novosLeadsCount > 0 ? novosLeadsCount : undefined },
-          { title: 'Métricas', icon: '📈', href: '/pt/nutri/relatorios-gestao' },
         ]
       },
       {
@@ -129,7 +98,7 @@ export default function NutriSidebar({ isMobileOpen = false, onMobileClose }: Nu
 
     // V1: sempre disponível (sem cadeado).
     return allMenuItems.map(item => ({ ...item, isBlocked: false }))
-  }, [currentDay, novosLeadsCount])
+  }, [currentDay])
 
   const isActive = (href: string) => {
     if (href === '/pt/nutri/home' || href === '/pt/nutri/dashboard') {

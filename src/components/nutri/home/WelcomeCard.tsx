@@ -58,7 +58,7 @@ export default function WelcomeCard({ currentDay, userName }: WelcomeCardProps) 
         </div>
 
         {/* Atalhos rápidos */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 gap-3">
           <Link
             href="/pt/nutri/metodo/jornada"
             className="bg-white rounded-xl p-4 border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all text-center"
@@ -72,20 +72,6 @@ export default function WelcomeCard({ currentDay, userName }: WelcomeCardProps) 
           >
             <span className="text-2xl mb-2 block">🧲</span>
             <span className="text-sm font-medium text-gray-700">Captar</span>
-          </Link>
-          <Link
-            href="/pt/nutri/leads"
-            className="bg-white rounded-xl p-4 border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all text-center"
-          >
-            <span className="text-2xl mb-2 block">🎯</span>
-            <span className="text-sm font-medium text-gray-700">Leads</span>
-          </Link>
-          <Link
-            href="/pt/nutri/relatorios-gestao"
-            className="bg-white rounded-xl p-4 border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all text-center"
-          >
-            <span className="text-2xl mb-2 block">📈</span>
-            <span className="text-sm font-medium text-gray-700">Métricas</span>
           </Link>
         </div>
       </div>
