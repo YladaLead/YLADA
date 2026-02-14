@@ -288,18 +288,26 @@ export default function NutriCheckoutPage() {
             </div>
           )}
 
+          {/* Headline emocional — decisão, não só "escolha plano" */}
+          <div className="mb-6 text-center">
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-900">
+              Você está a um passo de sair do improviso.
+            </h1>
+            <p className="text-sm text-gray-600 mt-1">Escolha como você quer começar.</p>
+          </div>
+
           {/* Escolha do plano: Mensal R$ 97 ou Anual 12× R$ 59 */}
           <div className="mb-6 space-y-3">
-            <p className="text-sm font-medium text-gray-700 text-center">Escolha seu plano</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <button
                 type="button"
-                onClick={() => setPlanType('monthly')}
-                className={`p-4 rounded-xl border-2 text-left transition-all ${
+                onClick={() => !planLocked && setPlanType('monthly')}
+                disabled={planLocked}
+                className={`p-4 rounded-xl border-2 text-left transition-all relative ${
                   planType === 'monthly'
                     ? 'border-blue-600 bg-blue-50'
                     : 'border-gray-200 bg-white hover:border-gray-300'
-                }`}
+                } ${planLocked ? 'opacity-90' : ''}`}
               >
                 <h3 className="font-semibold text-gray-800">Plano Mensal</h3>
                 <p className="text-2xl font-bold text-blue-600 mt-1">R$ 97<span className="text-base font-normal text-gray-600">/mês</span></p>
@@ -307,30 +315,40 @@ export default function NutriCheckoutPage() {
               </button>
               <button
                 type="button"
-                onClick={() => setPlanType('annual')}
-                className={`p-4 rounded-xl border-2 text-left transition-all ${
+                onClick={() => !planLocked && setPlanType('annual')}
+                disabled={planLocked}
+                className={`p-4 rounded-xl border-2 text-left transition-all relative ${
                   planType === 'annual'
-                    ? 'border-blue-600 bg-blue-50'
+                    ? 'border-blue-600 bg-blue-50 ring-2 ring-blue-200'
                     : 'border-gray-200 bg-white hover:border-gray-300'
-                }`}
+                } ${planLocked ? 'opacity-90' : ''}`}
               >
+                <span className="absolute -top-2 right-3 bg-green-600 text-white text-xs font-bold px-2 py-0.5 rounded-full shadow-sm">
+                  MAIS ESCOLHIDO
+                </span>
                 <h3 className="font-semibold text-gray-800">Plano Anual</h3>
                 <p className="text-2xl font-bold text-blue-600 mt-1">12× de R$ 59</p>
-                <p className="text-xs text-gray-600 mt-1">Total: R$ 708,00/ano. Economia promocional.</p>
+                <p className="text-xs text-green-700 font-medium mt-1">Economia de R$ 456 no ano</p>
+                <p className="text-xs text-gray-600 mt-0.5">Total: R$ 708/ano</p>
               </button>
             </div>
+            {planType === 'annual' && (
+              <p className="text-sm text-center text-gray-600 italic">
+                Essa é a escolha de quem decidiu levar a sério.
+              </p>
+            )}
             <p className="text-sm text-gray-600 text-center">
               Mentoria Noel, links inteligentes e rotina que gera agenda previsível
             </p>
           </div>
 
-          {/* Argumento de fechamento — antes do e-mail */}
-          <div className="mb-6 p-4 rounded-lg bg-gray-50 border border-gray-200">
+          {/* Reforço emocional — urgência sem ser agressivo */}
+          <div className="mb-6 p-4 rounded-xl bg-gray-50 border border-gray-200">
             <p className="text-sm text-gray-700 text-center">
-              Você está a um passo de sair do improviso e ter clareza do que fazer todos os dias.
-              <span className="block mt-2 font-medium text-gray-800">
-                Garantia de 7 dias: se não for pra você, devolvemos 100%.
-              </span>
+              Se você continuar dependendo de indicação, nada muda.
+            </p>
+            <p className="text-sm font-medium text-gray-800 text-center mt-1">
+              Se decidir estruturar sua divulgação, em 30 dias sua agenda pode estar diferente.
             </p>
           </div>
 
@@ -358,12 +376,11 @@ export default function NutriCheckoutPage() {
             </div>
           )}
 
-          {/* Botão de Checkout */}
+          {/* Botão de Checkout — emocional, decisivo */}
           <button
             onClick={(e) => {
               e.preventDefault()
               console.log('🔘 Botão clicado - Estado:', { loading, authLoading, hasUser: !!user, hasEmail: !!email, emailValue: email || user?.email })
-              // Permitir checkout se tiver e-mail, mesmo que authLoading seja true
               const hasEmail = email || user?.email
               if (!loading && hasEmail) {
                 handleCheckout()
@@ -372,29 +389,22 @@ export default function NutriCheckoutPage() {
               }
             }}
             disabled={loading || (!user && !email)}
-            className="w-full bg-blue-600 text-white py-4 rounded-lg font-semibold text-lg hover:bg-blue-700 transition-colors disabled:bg-blue-400 disabled:cursor-not-allowed"
+            className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white py-4 rounded-xl font-bold text-lg hover:from-blue-700 hover:to-blue-800 transition-all shadow-lg disabled:from-blue-400 disabled:to-blue-400 disabled:cursor-not-allowed"
           >
-            {loading ? 'Processando...' : '💙 Continuar para Pagamento'}
+            {loading ? 'Processando...' : '👉 Quero começar agora'}
           </button>
 
-          {/* Informações de Segurança */}
-          <div className="mt-6 text-center">
-            <p className="text-xs text-gray-500">
-              🔒 Pagamento seguro processado pelo Mercado Pago
-            </p>
-            <p className="text-xs text-gray-500 mt-2">
-              Ao continuar, você será redirecionado para a página de pagamento segura
-            </p>
-            <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
-              <p className="text-xs text-blue-800 font-medium mb-1">
-                💡 Dica: PIX e Boleto disponíveis
-              </p>
-              <p className="text-xs text-blue-700">
-                No checkout do Mercado Pago, você verá as opções: <strong>Cartão, PIX e Boleto</strong> na tela inicial. 
-                Se não aparecer, clique em "Voltar" para ver todas as opções.
-              </p>
-            </div>
-          </div>
+          {/* Microconfiança — tira medo invisível */}
+          <ul className="mt-4 flex flex-wrap justify-center gap-x-6 gap-y-1 text-sm text-gray-600">
+            <li className="flex items-center gap-1.5">✔ Cancelamento simples</li>
+            <li className="flex items-center gap-1.5">✔ Garantia 7 dias</li>
+            <li className="flex items-center gap-1.5">✔ Acesso imediato após pagamento</li>
+          </ul>
+
+          {/* Segurança — discreto, não dominante */}
+          <p className="mt-4 text-center text-xs text-gray-500">
+            Pagamento seguro pelo Mercado Pago (Cartão, PIX e Boleto). Você será redirecionado para a página de pagamento.
+          </p>
         </div>
       </main>
     </div>
