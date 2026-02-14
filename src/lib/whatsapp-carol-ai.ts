@@ -4709,6 +4709,99 @@ Qual você prefere, *mensal* ou *anual*?
 const REGISTRATION_URL = () => process.env.NUTRI_REGISTRATION_URL || 'https://www.ylada.com/pt/nutri#oferta'
 
 /**
+ * Disparo único (temporário): mensagem de remate "valor novo" para quem já participou e não pagou.
+ * Uma mensagem por pessoa; marca recebeu_remate_valor_novo para não reenviar.
+ * Copy: concentramos na operação que enche agenda → redução 97 mensal e 59 anual; serve para quem ouviu preço antigo ou novo.
+ */
+export async function sendRemateValorNovoParticipou(): Promise<{ sent: number; errors: number }> {
+  const area = 'nutri'
+  const instance = await getZApiInstance(area)
+  if (!instance) {
+    console.warn('[Carol Remate Valor Novo] Instância Z-API não encontrada')
+    return { sent: 0, errors: 0 }
+  }
+  const timeCheck = isAllowedTimeToSendMessage()
+  if (!timeCheck.allowed) {
+    return { sent: 0, errors: 0 }
+  }
+  const url = REGISTRATION_URL()
+  const { data: conversations } = await supabaseAdmin
+    .from('whatsapp_conversations')
+    .select('id, phone, name, context')
+    .eq('area', area)
+    .eq('status', 'active')
+  if (!conversations?.length) return { sent: 0, errors: 0 }
+
+  const eligible = conversations.filter((conv) => {
+    const context = conv.context || {}
+    const tags = Array.isArray(context.tags) ? context.tags : []
+    if (!tags.includes('participou_aula') || context.registration_link_sent !== true) return false
+    if (tags.includes('cliente_nutri')) return false
+    if (context.recebeu_remate_valor_novo === true) return false
+    return true
+  })
+
+  let sent = 0
+  let errors = 0
+  for (const conv of eligible) {
+    const context = conv.context || {}
+    const tags = Array.isArray(context.tags) ? context.tags : []
+    const registrationName = await getRegistrationName(conv.phone, area)
+    const safeName = conv.name && !isInvalidOrInternalName(conv.name) ? conv.name : ''
+    let leadName = getFirstName(registrationName || (context as any)?.lead_name || safeName) || 'querido(a)'
+    if (isBusinessName(leadName) || isInvalidOrInternalName(leadName)) leadName = 'querido(a)'
+
+    const message = `Oi ${leadName}! 💚
+
+Concentramos toda a operação nas ações que realmente enchem agenda. Com isso conseguimos uma redução do plano: *R$ 97/mês no mensal* e *R$ 59/mês no anual*.
+
+Quem participou da aula e ainda não fechou: o link pra garantir essa condição é este: ${url}
+
+Qualquer dúvida, é só responder aqui. 😊`
+
+    try {
+      const result = await sendWhatsAppMessage(conv.phone, message, instance.instance_id, instance.token)
+      if (result.success) {
+        await supabaseAdmin.from('whatsapp_messages').insert({
+          conversation_id: conv.id,
+          instance_id: instance.id,
+          z_api_message_id: result.messageId || null,
+          sender_type: 'bot',
+          sender_name: 'Carol - Secretária',
+          message,
+          message_type: 'text',
+          status: 'sent',
+          is_bot_response: true,
+        })
+        await supabaseAdmin
+          .from('whatsapp_conversations')
+          .update({
+            context: {
+              ...context,
+              recebeu_remate_valor_novo: true,
+              recebeu_remate_valor_novo_at: new Date().toISOString(),
+            },
+            last_message_at: new Date().toISOString(),
+            last_message_from: 'bot',
+          })
+          .eq('id', conv.id)
+        sent++
+        await bulkSendDelay(sent)
+      } else {
+        errors++
+      }
+    } catch (e: any) {
+      errors++
+      console.warn('[Carol Remate Valor Novo] Erro para', conv.phone, e?.message || e)
+    }
+  }
+  if (sent > 0 || errors > 0) {
+    console.log('[Carol Remate Valor Novo]', { sent, errors, total: eligible.length })
+  }
+  return { sent, errors }
+}
+
+/**
  * Remate fixo para quem PARTICIPOU da aula gratuita.
  * Envia 2ª msg (lembrete com dor) e 3ª msg (outro argumento) conforme o tempo desde a 1ª.
  * Respeita tags: não envia para cliente_nutri, respondeu_fechamento, nao_quer_mais, quer_falar_humano.

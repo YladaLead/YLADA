@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import AdminProtectedRoute from '@/components/auth/AdminProtectedRoute'
 import Link from 'next/link'
 
-type DisparoType = 'remarketing' | 'reminders' | 'remarketing_hoje_20h' | null
+type DisparoType = 'remarketing' | 'reminders' | 'remarketing_hoje_20h' | 'remate_valor_novo' | null
 
 function AutomationContent() {
   const [loading, setLoading] = useState(false)
@@ -169,6 +169,36 @@ function AutomationContent() {
       })
     } catch {
       // silencioso
+    }
+  }
+
+  // Remate valor novo (temporário): uma mensagem para quem já participou e não pagou
+  const handleRemateValorNovo = async () => {
+    if (!confirm('Enviar UMA mensagem de remate (valor 97/59, operação enche agenda) para todos que já participaram e não são clientes? Quem já recebeu não recebe de novo. Continuar?')) return
+    setLoading(true)
+    setLoadingType('remate_valor_novo')
+    setResult(null)
+    try {
+      const response = await fetch('/api/admin/whatsapp/automation/remate-valor-novo-participou', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+      })
+      const data = await response.json()
+      if (data.success) {
+        setResult({
+          type: 'remate_valor_novo',
+          sent: data.sent,
+          errors: data.errors,
+        })
+      } else {
+        alert(data.disabled ? 'Automação desligada.' : `Erro: ${data.error}`)
+      }
+    } catch (error: any) {
+      alert(`Erro: ${error.message}`)
+    } finally {
+      setLoading(false)
+      setLoadingType(null)
     }
   }
 
@@ -393,6 +423,21 @@ function AutomationContent() {
                 Processar automaticamente ao abrir esta página
               </label>
             </div>
+          </div>
+
+          {/* Botão temporário: Remate valor novo (quem já participou) */}
+          <div className="bg-amber-50 border border-amber-200 rounded-lg p-6 mb-6">
+            <h2 className="text-xl font-bold text-amber-900 mb-1">📢 Remate valor novo (temporário)</h2>
+            <p className="text-amber-800 text-sm mb-3">
+              Uma mensagem por pessoa para quem já participou da aula e não é cliente. Comunica redução (97 mensal, 59 anual) e foco em encher agenda. Quem já recebeu não recebe de novo.
+            </p>
+            <button
+              onClick={handleRemateValorNovo}
+              disabled={loading}
+              className="w-full bg-amber-600 text-white px-4 py-3 rounded-lg hover:bg-amber-700 disabled:opacity-50 disabled:cursor-not-allowed font-semibold"
+            >
+              {loading && loadingType === 'remate_valor_novo' ? 'Enviando...' : 'Enviar remate valor novo (quem já participou)'}
+            </button>
           </div>
 
           {/* Cards Principais */}
@@ -806,6 +851,13 @@ function AutomationContent() {
               {result.type === 'reprocessar' && (
                 <div className="space-y-2">
                   <p><strong>Processadas:</strong> {result.processed}</p>
+                  <p><strong>Enviadas:</strong> {result.sent}</p>
+                  <p><strong>Erros:</strong> {result.errors}</p>
+                </div>
+              )}
+
+              {result.type === 'remate_valor_novo' && (
+                <div className="space-y-2">
                   <p><strong>Enviadas:</strong> {result.sent}</p>
                   <p><strong>Erros:</strong> {result.errors}</p>
                 </div>
