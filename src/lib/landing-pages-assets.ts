@@ -61,7 +61,7 @@ export const landingPageVideos = {
     return `/videos/nutri-hero.mp4?v=${version}`
   },
   get nutriHeroPoster() {
-    const version = 5
+    const version = 6
     return `/videos/nutri-hero-poster.jpg?v=${version}`
   },
 }
