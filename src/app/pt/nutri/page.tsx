@@ -150,7 +150,24 @@ export default function NutriLandingPage() {
           </div>
         </section>
 
-        {/* VÍDEO — Use /pt/nutri#video no anúncio para desembocar direto aqui */}
+        {/* 1️⃣ DOR — Você já se sentiu assim? (antes do vídeo) */}
+        <section className="py-10 sm:py-14 bg-white">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="max-w-2xl mx-auto text-center">
+              <h2 className="text-3xl sm:text-4xl font-bold mb-8 text-[#1A1A1A]">
+                Você já se sentiu assim?
+              </h2>
+              <ul className="space-y-3 text-lg sm:text-xl text-gray-700 inline-block text-left">
+                <li className="font-semibold text-[#2563EB]">• Agenda vazia</li>
+                <li className="font-semibold text-[#2563EB]">• Dúvida na cobrança</li>
+                <li className="font-semibold text-[#2563EB]">• Sensação de recomeçar de novo</li>
+                <li className="font-semibold text-[#2563EB]">• Sem clareza do que fazer</li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        {/* 2️⃣ VÍDEO — Use /pt/nutri#video no anúncio para desembocar direto aqui */}
         <section id="video" className="pt-8 sm:pt-10 pb-8 sm:pb-10 bg-white scroll-mt-4">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="max-w-4xl mx-auto">
@@ -234,24 +251,7 @@ export default function NutriLandingPage() {
           </div>
         </section>
 
-        {/* BLOCO 2 — DOR (curto, punch) — alinhamento central consistente */}
-        <section className="py-10 sm:py-14 bg-white">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="max-w-2xl mx-auto text-center">
-              <h2 className="text-3xl sm:text-4xl font-bold mb-8 text-[#1A1A1A]">
-                Você já se sentiu assim?
-              </h2>
-              <ul className="space-y-3 text-lg sm:text-xl text-gray-700 inline-block text-left">
-                <li className="font-semibold text-[#2563EB]">• Agenda vazia</li>
-                <li className="font-semibold text-[#2563EB]">• Dúvida na cobrança</li>
-                <li className="font-semibold text-[#2563EB]">• Sensação de recomeçar de novo</li>
-                <li className="font-semibold text-[#2563EB]">• Sem clareza do que fazer</li>
-              </ul>
-            </div>
-          </div>
-        </section>
-
-        {/* DECISÃO LOGO APÓS VÍDEO + DOR — captura quem já decidiu cedo */}
+        {/* DECISÃO LOGO APÓS VÍDEO — captura quem já decidiu cedo */}
         <section className="py-10 sm:py-12 bg-gradient-to-b from-[#E9F1FF] to-[#D6E6FF]/80">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="max-w-2xl mx-auto text-center rounded-2xl bg-white/60 backdrop-blur-sm py-8 px-6 sm:px-10 shadow-sm border border-[#2563EB]/10">
@@ -271,7 +271,7 @@ export default function NutriLandingPage() {
           </div>
         </section>
 
-        {/* BLOCO 3 — O problema não é você + faculdade (um bloco emocional único) */}
+        {/* 3️⃣ O problema não é você + faculdade (um bloco emocional único) */}
         <section className="py-12 sm:py-16 bg-[#F5F7FA]">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="max-w-4xl mx-auto">
@@ -295,7 +295,7 @@ export default function NutriLandingPage() {
         </section>
 
 
-        {/* BLOCO 6 — APRESENTAÇÃO DO YLADA NUTRI (SOLUÇÃO) */}
+        {/* 4️⃣ O que é o sistema — YLADA Nutri */}
         <section className="py-16 sm:py-20 lg:py-24 bg-white">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="max-w-4xl mx-auto">
@@ -348,7 +348,7 @@ export default function NutriLandingPage() {
           </div>
         </section>
 
-        {/* BLOCO 7 — O MÉTODO YLADA (COMO FUNCIONA) */}
+        {/* 5️⃣ Método — O Método YLADA */}
         <section className="py-16 sm:py-20 lg:py-24 bg-[#F5F7FA]">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="max-w-4xl mx-auto">
@@ -413,7 +413,7 @@ export default function NutriLandingPage() {
           </div>
         </section>
 
-        {/* BLOCO 9 — TRANSFORMAÇÃO (ANTES × DEPOIS) */}
+        {/* 6️⃣ Transformação (antes × depois) */}
         <section className="py-16 sm:py-20 lg:py-24 bg-[#F5F7FA]">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="max-w-6xl mx-auto">
@@ -617,7 +617,7 @@ export default function NutriLandingPage() {
           </div>
         </section>
 
-        {/* BLOCO 13 — OFERTA (SÓ PLANO ANUAL | DECISÃO) */}
+        {/* 7️⃣ Plano — Oferta */}
         <section id="oferta" className="py-16 sm:py-20 lg:py-24 bg-gradient-to-br from-[#2563EB] to-[#3B82F6] relative z-0" style={{ position: 'relative', zIndex: 1 }}>
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="max-w-2xl mx-auto">
@@ -716,7 +716,7 @@ export default function NutriLandingPage() {
           </div>
         </section>
 
-        {/* BLOCO 14 — GARANTIA */}
+        {/* 8️⃣ Garantia */}
         <section className="py-16 sm:py-20 lg:py-24 bg-[#E9F1FF]">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="max-w-4xl mx-auto text-center">
@@ -735,7 +735,7 @@ export default function NutriLandingPage() {
           </div>
         </section>
 
-        {/* BLOCO 15 — CTA FINAL (DECISÃO) */}
+        {/* 9️⃣ CTA final */}
         <section className="py-16 sm:py-20 lg:py-24 bg-gradient-to-br from-[#2563EB] to-[#3B82F6] text-white">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="max-w-3xl mx-auto text-center">

@@ -1,42 +1,29 @@
 'use client'
 
 import { useRef, useState, useEffect } from 'react'
-import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import { landingPageVideos } from '@/lib/landing-pages-assets'
-import { cn } from '@/lib/utils'
 import { videoProgressPercentForRetention } from '@/lib/video-progress-retention'
-
-const WHATSAPP_NUTRI = '5519997230912'
-const WHATSAPP_MSG = 'Olá! Assisti o vídeo da YLADA Nutri e gostaria de tirar dúvidas.'
 
 const NUTRI_VIDEO_SRC = landingPageVideos.nutriHero
 const NUTRI_POSTER_SRC = landingPageVideos.nutriHeroPoster
 
-/** Em mobile: conteúdo abaixo do vídeo só aparece após 17:20 do vídeo (campanha de anúncio). */
-const UNLOCK_AFTER_SECONDS = 17 * 60 + 20 // 17:20
+const checkoutUrl = '/pt/nutri/checkout?plan=annual'
 
 export default function NutriVideoContent() {
-  const searchParams = useSearchParams()
-  const previewUnlock = searchParams.get('preview') === '1'
   const videoRef = useRef<HTMLVideoElement>(null)
   const videoContainerRef = useRef<HTMLDivElement>(null)
   const [progress, setProgress] = useState(0)
   const [isPlaying, setIsPlaying] = useState(false)
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [videoError, setVideoError] = useState(false)
-  const [contentUnlocked, setContentUnlocked] = useState(previewUnlock)
-  const [videoEnded, setVideoEnded] = useState(false)
-  const whatsappUrl = `https://wa.me/${WHATSAPP_NUTRI}?text=${encodeURIComponent(WHATSAPP_MSG)}`
-  const checkoutUrl = '/pt/nutri/checkout?plan=annual'
-  const vendasUrl = '/pt/nutri'
 
   const onTimeUpdate = () => {
     const video = videoRef.current
     if (!video || !video.duration || Number.isNaN(video.duration)) return
     const realPct = (video.currentTime / video.duration) * 100
     setProgress(Math.min(100, realPct))
-    if (video.currentTime >= UNLOCK_AFTER_SECONDS) setContentUnlocked(true)
   }
 
   const displayProgress = videoProgressPercentForRetention(progress)
@@ -58,14 +45,12 @@ export default function NutriVideoContent() {
     const video = videoRef.current
     const container = videoContainerRef.current
 
-    // iOS Safari: fullscreen só funciona no elemento <video> via webkitEnterFullscreen
-    const videoEl = video as HTMLVideoElement & { webkitEnterFullscreen?: () => void; webkitExitFullscreen?: () => void }
+    const videoEl = video as HTMLVideoElement & { webkitEnterFullscreen?: () => void }
     if (videoEl?.webkitEnterFullscreen && !document.fullscreenElement) {
       try {
         videoEl.webkitEnterFullscreen()
         setIsFullscreen(true)
       } catch {
-        // fallback: tentar requestFullscreen no container
         if (container) {
           try {
             await container.requestFullscreen()
@@ -104,8 +89,6 @@ export default function NutriVideoContent() {
     const video = videoRef.current
     const onFullscreenChange = () => setIsFullscreen(!!document.fullscreenElement)
     document.addEventListener('fullscreenchange', onFullscreenChange)
-
-    // iOS: ao sair do fullscreen nativo do vídeo (usuário toca em "Concluído")
     const onWebKitEndFullscreen = () => setIsFullscreen(false)
     if (video) {
       video.addEventListener('webkitendfullscreen', onWebKitEndFullscreen)
@@ -118,23 +101,38 @@ export default function NutriVideoContent() {
   }, [])
 
   return (
-    <div className="min-h-screen bg-white">
-      <main
-        className={cn(
-          'container mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl',
-          !contentUnlocked && 'pt-6'
-        )}
-      >
-        <section className="pt-6 sm:pt-8 pb-4 sm:pb-6 text-center">
-          <p className="text-xs sm:text-sm font-medium text-[#2563EB] uppercase tracking-wider mb-2">
-            Vídeo exclusivo para nutricionistas
-          </p>
-          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-[#1A1A1A] leading-tight max-w-2xl mx-auto">
-            Assista e compare: o que você faz hoje versus o que nós propomos.
+    <div className="min-h-screen bg-white flex flex-col">
+      <header className="sticky top-0 z-50 border-b border-gray-100 bg-white/95 backdrop-blur shrink-0">
+        <div className="container mx-auto px-4 h-14 flex items-center justify-center">
+          <Image
+            src="/images/logo/nutri-horizontal.png"
+            alt="YLADA Nutri"
+            width={140}
+            height={42}
+            className="h-9 w-auto"
+          />
+        </div>
+      </header>
+
+      <main className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-3xl flex-1">
+        {/* 1. Headline + subheadline — gera tensão */}
+        <section className="pt-6 sm:pt-8 pb-4 text-center">
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 leading-tight max-w-2xl mx-auto">
+            Se sua agenda depende de indicação, você está em risco.
           </h1>
+          <p className="text-base sm:text-lg text-gray-600 mt-3 max-w-xl mx-auto">
+            Assista esse vídeo antes de decidir continuar no improviso.
+          </p>
+          <Link
+            href={checkoutUrl}
+            className="mt-5 inline-flex items-center justify-center px-6 py-3.5 rounded-xl text-base sm:text-lg font-bold bg-gradient-to-r from-[#2563EB] to-[#3B82F6] text-white hover:from-[#3B82F6] hover:to-[#1D4ED8] transition-all shadow-lg"
+          >
+            👉 Quero parar de depender de indicação
+          </Link>
         </section>
 
-        <section className="pt-6 md:pt-0 pb-6">
+        {/* 2. Vídeo — elemento dominante */}
+        <section className="pb-4">
           <div className="bg-white rounded-xl shadow-2xl overflow-hidden">
             <div
               ref={videoContainerRef}
@@ -158,10 +156,6 @@ export default function NutriVideoContent() {
                 onLoadedData={() => setVideoError(false)}
                 onPlay={() => setIsPlaying(true)}
                 onPause={() => setIsPlaying(false)}
-                onEnded={() => {
-                  setIsPlaying(false)
-                  setVideoEnded(true)
-                }}
                 onError={() => {
                   setVideoError(true)
                   console.error('Erro ao carregar vídeo. URL:', NUTRI_VIDEO_SRC)
@@ -173,7 +167,6 @@ export default function NutriVideoContent() {
                 <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-900 text-white p-4 text-center text-sm">
                   <p className="font-semibold mb-2">Vídeo indisponível</p>
                   <p className="opacity-90">Recarregue a página ou tente em outro navegador.</p>
-                  <p className="mt-2 opacity-70 text-xs">Se o problema continuar, o formato do arquivo pode não ser compatível (use MP4 com codec H.264).</p>
                 </div>
               )}
               {!isPlaying && (
@@ -191,9 +184,8 @@ export default function NutriVideoContent() {
               <button
                 type="button"
                 onClick={toggleFullscreen}
-                className="absolute bottom-3 right-3 p-3 sm:p-2 rounded-xl bg-black/50 hover:bg-black/70 active:bg-black/80 text-white transition-colors z-10 touch-manipulation min-w-[44px] min-h-[44px] sm:min-w-0 sm:min-h-0 flex items-center justify-center"
-                aria-label={isFullscreen ? 'Sair da tela cheia' : 'Assistir em tela cheia (vire o celular para ver maior)'}
-                title={isFullscreen ? 'Sair da tela cheia' : 'Tela cheia — toque e vire o celular para assistir deitado'}
+                className="absolute bottom-3 right-3 p-3 sm:p-2 rounded-xl bg-black/50 hover:bg-black/70 text-white transition-colors z-10 touch-manipulation min-w-[44px] min-h-[44px] sm:min-w-0 sm:min-h-0 flex items-center justify-center"
+                aria-label={isFullscreen ? 'Sair da tela cheia' : 'Tela cheia'}
               >
                 {isFullscreen ? (
                   <svg className="w-6 h-6 sm:w-5 sm:h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z"/></svg>
@@ -211,47 +203,30 @@ export default function NutriVideoContent() {
           </div>
         </section>
 
-        {contentUnlocked && (
-          <>
-            <section className="pt-8 pb-6">
-              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center flex-wrap">
-                <a
-                  href={whatsappUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-full sm:w-auto inline-flex justify-center items-center px-6 sm:px-8 py-3 sm:py-4 rounded-xl text-base sm:text-lg font-semibold border-2 border-[#2563EB] text-[#2563EB] hover:bg-[#2563EB] hover:text-white transition-all shadow-md hover:shadow-lg"
-                >
-                  Tirar dúvida
-                </a>
-                <Link
-                  href={vendasUrl}
-                  className="w-full sm:w-auto inline-flex justify-center items-center px-6 sm:px-8 py-3 sm:py-4 rounded-xl text-base sm:text-lg font-semibold border-2 border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400 transition-all shadow-md"
-                >
-                  Saber mais
-                </Link>
-                <Link
-                  href={checkoutUrl}
-                  className="w-full sm:w-auto inline-flex justify-center items-center px-6 sm:px-8 py-3 sm:py-4 rounded-xl text-base sm:text-lg font-bold bg-gradient-to-r from-[#2563EB] to-[#3B82F6] text-white hover:from-[#3B82F6] hover:to-[#1D4ED8] transition-all shadow-xl hover:shadow-2xl"
-                >
-                  Quero começar
-                </Link>
-              </div>
-            </section>
-          </>
-        )}
-
-        {videoEnded && (
-          <section className="pb-16 pt-2 text-center border-t border-gray-200">
-            <p className="text-lg font-semibold text-[#1A1A1A] mb-2">Pronto para sair do improviso?</p>
-            <Link
-              href={checkoutUrl}
-              className="inline-flex items-center px-8 py-4 rounded-xl text-lg font-bold bg-gradient-to-r from-[#2563EB] to-[#3B82F6] text-white hover:from-[#3B82F6] hover:to-[#1D4ED8] transition-all shadow-xl"
-            >
-              Aderir ao sistema
-            </Link>
-          </section>
-        )}
+        {/* 3. Botão depois do vídeo — acompanha estado emocional */}
+        <section className="pb-8 text-center">
+          <Link
+            href={checkoutUrl}
+            className="inline-flex items-center justify-center px-6 py-3.5 rounded-xl text-base sm:text-lg font-bold bg-gradient-to-r from-[#2563EB] to-[#3B82F6] text-white hover:from-[#3B82F6] hover:to-[#1D4ED8] transition-all shadow-lg"
+          >
+            👉 Quero aplicar isso na minha agenda
+          </Link>
+        </section>
       </main>
+
+      {/* Rodapé minimalista — sem menu, sem navegação */}
+      <footer className="border-t border-gray-100 py-6 px-4 text-center text-sm text-gray-500 shrink-0">
+        <div className="container mx-auto max-w-3xl flex flex-col sm:flex-row flex-wrap items-center justify-center gap-x-4 gap-y-1">
+          <Link href="/pt/termos-de-uso" className="hover:text-gray-700">
+            Termos de uso
+          </Link>
+          <Link href="/pt/politica-de-privacidade" className="hover:text-gray-700">
+            Política de privacidade
+          </Link>
+          <span className="hidden sm:inline">·</span>
+          <span>© {new Date().getFullYear()} YLADA</span>
+        </div>
+      </footer>
     </div>
   )
 }
