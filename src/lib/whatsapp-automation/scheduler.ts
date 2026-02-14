@@ -13,6 +13,8 @@ export type MessageType =
   | 'pre_class_2h'
   | 'pre_class_30min'
   | 'reminder_12h'
+  /** Lembrete de fechamento para dia X (ex.: pessoa disse "meu cartão vira dia 17" → envio automático no dia 17) */
+  | 'fechamento_lembrete_data'
 
 export type ScheduledMessageStatus = 'pending' | 'sent' | 'cancelled' | 'failed'
 

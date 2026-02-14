@@ -59,7 +59,27 @@ export async function POST(request: NextRequest) {
       .ilike('email', normalizedEmail)
       .maybeSingle()
 
+    // Se o erro for HTML ou de rede (Supabase inacessível, URL errada, projeto pausado),
+    // retornar resposta segura para não bloquear o login (frontend continua com signIn)
+    const errorMsg = (profileError?.message || '').toString()
+    const looksLikeHtml = errorMsg.trimStart().startsWith('<') || /<!DOCTYPE/i.test(errorMsg)
+    const isNetworkOrConfig =
+      profileError?.code === 'PGRST301' ||
+      /fetch failed|econnreset|etimedout|enotfound|network/i.test(errorMsg)
+
     if (profileError && profileError.code !== 'PGRST116') {
+      if (looksLikeHtml || isNetworkOrConfig) {
+        console.warn(
+          'check-profile: Supabase inacessível ou resposta inesperada, permitindo login com fallback:',
+          errorMsg.slice(0, 80)
+        )
+        const defaultResponse: CheckProfileResponse = {
+          exists: false,
+          hasProfile: false,
+          canCreate: true,
+        }
+        return NextResponse.json(defaultResponse)
+      }
       console.error('Erro ao buscar perfil:', profileError)
       return NextResponse.json(
         { error: 'Erro ao verificar perfil' },
@@ -90,7 +110,17 @@ export async function POST(request: NextRequest) {
     setCachedProfile(normalizedEmail, defaultResponse)
     return NextResponse.json(defaultResponse)
   } catch (error: any) {
-    console.error('Erro ao verificar perfil:', error)
+    const msg = (error?.message || String(error)).slice(0, 200)
+    const looksLikeHtml = /<\s*!?\s*DOCTYPE|<\s*html/i.test(msg)
+    console.error('Erro ao verificar perfil:', looksLikeHtml ? msg : error)
+    // Se a exceção for HTML/resposta inesperada, não bloquear login
+    if (looksLikeHtml || /fetch failed|econnreset|etimedout/i.test(msg)) {
+      return NextResponse.json({
+        exists: false,
+        hasProfile: false,
+        canCreate: true,
+      })
+    }
     return NextResponse.json(
       { error: 'Erro interno ao verificar perfil' },
       { status: 500 }

@@ -104,19 +104,24 @@ export default function LoginForm({
       let checkData = { exists: false, hasProfile: false, canCreate: true }
       
       try {
+        const controller = new AbortController()
+        const timeoutId = setTimeout(() => controller.abort(), 8000)
         const checkResponse = await fetch('/api/auth/check-profile', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email })
+          body: JSON.stringify({ email }),
+          signal: controller.signal,
         })
-        
+        clearTimeout(timeoutId)
         if (checkResponse.ok) {
-          checkData = await checkResponse.json()
+          const json = await checkResponse.json()
+          if (json && typeof json.exists === 'boolean') {
+            checkData = json
+          }
         }
-        // Se falhar, continuar mesmo assim (não bloquear login)
+        // Se falhar (500, timeout, rede), continuar com checkData padrão (não bloquear login)
       } catch (err) {
-        // Ignorar erro e continuar com login
-        console.warn('⚠️ Erro ao verificar perfil, continuando mesmo assim')
+        console.warn('⚠️ Erro ao verificar perfil, continuando com login:', err instanceof Error ? err.message : '')
       }
 
       if (isSignUp) {

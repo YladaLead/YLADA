@@ -19,6 +19,25 @@ const openai = new OpenAI({
 
 const WHATSAPP_NUMBER = '5519997230912' // Número principal
 
+/** Delay entre cada envio em disparos em massa (ms). Reduz risco de API/WhatsApp descartar e garante que todos recebam. */
+const BULK_SEND_DELAY_MS = 3000
+/** A cada N envios bem-sucedidos, pausa entre blocos para não sobrecarregar. */
+const BULK_SEND_BLOCK_SIZE = 15
+/** Pausa entre blocos (ms). Ex.: 60s após cada 15 envios. */
+const BULK_SEND_PAUSE_BETWEEN_BLOCKS_MS = 60000
+
+/**
+ * Aplica delay pós-envio e pausa entre blocos em disparos em massa.
+ * Chamar após cada envio bem-sucedido, passando o total de enviados até então.
+ */
+async function bulkSendDelay(sentSoFar: number): Promise<void> {
+  await new Promise((r) => setTimeout(r, BULK_SEND_DELAY_MS))
+  if (sentSoFar > 0 && sentSoFar % BULK_SEND_BLOCK_SIZE === 0) {
+    console.log(`[Carol] 📦 Bloco de ${BULK_SEND_BLOCK_SIZE} envios concluído; pausa de ${BULK_SEND_PAUSE_BETWEEN_BLOCKS_MS / 1000}s antes do próximo`)
+    await new Promise((r) => setTimeout(r, BULK_SEND_PAUSE_BETWEEN_BLOCKS_MS))
+  }
+}
+
 /**
  * Verifica se o admin pediu para parar o disparo em massa (botão "Parar disparo").
  * Usado no loop de remarketing, welcome e reminders.
@@ -683,7 +702,11 @@ Se precisar de alternativas (ex.: conversa longa já em curso):
 
 5. **"NÃO TENHO DINHEIRO AGORA":** "Entendo. Você prefere começar no mensal (mês a mês) ou quer ver o anual parcelado no cartão (até 12x)?"
 
-6. **"JÁ TENHO MUITAS COISAS":** "Entendo. Se eu te ajudar a simplificar o próximo passo, o que seria mais útil agora: agendar a próxima aula ou ver os planos?"
+6. **QUANDO A PESSOA DISSER QUE PODE FECHAR EM UM DIA ESPECÍFICO** (ex.: "meu cartão vira dia 17", "só posso dia 15", "no dia 20"):
+   - Confirme que vai entrar em contato nesse dia para fechar. Ex.: "Beleza! Então te chamo no dia 17 pra gente fechar, combinado? 😊" (use o dia que ela mencionou).
+   - Seja curta e acolhedora. O sistema vai agendar automaticamente um lembrete para enviar só pra ela naquele dia.
+
+7. **"JÁ TENHO MUITAS COISAS":** "Entendo. Se eu te ajudar a simplificar o próximo passo, o que seria mais útil agora: agendar a próxima aula ou ver os planos?"
 
 IMPORTANTE AO TRABALHAR OBJEÇÕES:
 - Em remarketing e follow-up: priorize mensagem curta e humana (2–3 frases) e 1 pergunta final.
@@ -1091,6 +1114,68 @@ function detectNeedsHumanSupport(
   }
   
   return { detected: false, reason: '' }
+}
+
+/**
+ * Extrai o dia do mês quando a pessoa menciona uma data para fechar (ex.: "meu cartão vira dia 17", "só posso dia 15").
+ * Retorna o dia (1-31) ou null se não encontrar. Evita "às 17" (hora) — só considera "dia N".
+ */
+function parseFechamentoLembreteDay(userMessage: string): number | null {
+  const msg = String(userMessage || '').trim()
+  // "dia 17", "no dia 15", "cartão vira dia 17", "só posso dia 20" — não pegar "às 17" (hora)
+  const match = msg.match(/\bdia\s*(\d{1,2})\b/i)
+  if (!match) return null
+  const day = parseInt(match[1], 10)
+  if (day < 1 || day > 31) return null
+  return day
+}
+
+/**
+ * Agenda envio de lembrete de fechamento para um dia específico (ex.: dia 17 às 10h BRT).
+ * Só para essa conversa; o worker envia na data agendada.
+ */
+async function scheduleFechamentoLembreteForDate(params: {
+  conversationId: string
+  phone: string
+  day: number
+  leadName: string
+  area?: string
+}): Promise<{ success: boolean; scheduledFor?: string; error?: string }> {
+  try {
+    const tz = 'America/Sao_Paulo'
+    const now = new Date()
+    const nowBr = new Date(now.toLocaleString('en-US', { timeZone: tz }))
+    let year = nowBr.getFullYear()
+    let month = nowBr.getMonth()
+    if (day > 28) {
+      const lastDayOfMonth = new Date(year, month + 1, 0).getDate()
+      if (day > lastDayOfMonth) return { success: false, error: `Dia ${day} inválido para este mês` }
+    }
+    let target = new Date(year, month, params.day)
+    if (target <= nowBr) {
+      month += 1
+      if (month > 11) {
+        month = 0
+        year += 1
+      }
+      target = new Date(year, month, params.day)
+    }
+    target.setHours(10, 0, 0, 0)
+    const registrationUrl = process.env.NUTRI_REGISTRATION_URL || 'https://www.ylada.com/pt/nutri#oferta'
+    const firstName = getFirstName(params.leadName) || 'querido(a)'
+    const messageText = `Oi ${firstName}! Hoje é o dia que você comentou. 😊 Vamos fechar? Aqui está o link: ${registrationUrl}\n\nQualquer dúvida, é só responder aqui. 💚`
+    const { scheduleMessage } = await import('@/lib/whatsapp-automation/scheduler')
+    const result = await scheduleMessage({
+      conversationId: params.conversationId,
+      messageType: 'fechamento_lembrete_data',
+      scheduledFor: target,
+      messageData: { message: messageText, lead_name: params.leadName },
+    })
+    if (!result.success) return { success: false, error: result.error }
+    return { success: true, scheduledFor: target.toISOString() }
+  } catch (e: any) {
+    return { success: false, error: e?.message || String(e) }
+  }
 }
 
 /**
@@ -2376,6 +2461,37 @@ Finalize com: "Responde 1 ou 2 😊".`
       is_bot_response: true,
     })
 
+    // 9.0.1 Lembrete de fechamento no dia X: quando a pessoa diz "meu cartão vira dia 17" (ou similar), agendar envio só pra ela nesse dia
+    if (tags.includes('participou_aula') && !(context as any)?.fechamento_lembrete_agendado_em) {
+      const day = parseFechamentoLembreteDay(message)
+      if (day !== null) {
+        try {
+          const scheduleResult = await scheduleFechamentoLembreteForDate({
+            conversationId,
+            phone,
+            day,
+            leadName: (context as any)?.lead_name || conversation?.name || leadName || 'querido(a)',
+            area,
+          })
+          if (scheduleResult.success && scheduleResult.scheduledFor) {
+            await supabaseAdmin
+              .from('whatsapp_conversations')
+              .update({
+                context: {
+                  ...context,
+                  fechamento_lembrete_agendado_em: scheduleResult.scheduledFor,
+                  fechamento_lembrete_dia: day,
+                },
+              })
+              .eq('id', conversationId)
+            console.log('[Carol AI] ✅ Lembrete de fechamento agendado para dia', day, 'conversa', conversationId)
+          }
+        } catch (scheduleErr: any) {
+          console.warn('[Carol AI] ⚠️ Erro ao agendar lembrete de fechamento:', scheduleErr?.message || scheduleErr)
+        }
+      }
+    }
+
     // 9.0. Fluxo "tirar dúvida do vídeo": só uma mensagem automática; notificar com atenção e não responder mais (humano assume).
     if (isTirarDuvidaVideoFlow) {
       try {
@@ -3225,8 +3341,7 @@ Se sim, eu te encaixo no próximo horário. Qual período fica melhor pra você:
           })
 
           sent++
-          // Delay entre envios para evitar limite do WhatsApp (~2,5 s)
-          await new Promise((r) => setTimeout(r, 2500))
+          await bulkSendDelay(sent)
         } else {
           errors++
         }
@@ -3428,8 +3543,7 @@ export async function sendRemarketingAulaHoje20h(): Promise<{
             is_bot_response: true,
           })
           sent++
-          // Delay entre envios para evitar limite do WhatsApp (~2,5 s)
-          await new Promise((r) => setTimeout(r, 2500))
+          await bulkSendDelay(sent)
         } else {
           errors++
         }
@@ -3715,8 +3829,7 @@ Se puder, entra pelo computador e já deixa caneta e papel por perto (a aula é 
               .eq('id', conv.id)
 
             sent++
-            // Pequena pausa entre envios para evitar rate limit e dar tempo ao Z-API (todos recebem sistematicamente)
-            await new Promise((r) => setTimeout(r, 1500))
+            await bulkSendDelay(sent)
           } else {
             errors++
           }
@@ -3892,6 +4005,7 @@ Se precisar de ajuda ou tiver dúvidas, estou aqui! 💚
               .eq('id', conv.id)
 
             sent++
+            await bulkSendDelay(sent)
           } else {
             errors++
           }
@@ -4078,13 +4192,10 @@ Caso contrário, tudo bem também. 😊
               .eq('id', conv.id)
 
             sent++
+            await bulkSendDelay(sent)
           } else {
             errors++
           }
-
-          // Delay entre mensagens para não sobrecarregar o WhatsApp
-          // Intervalo de 2-3 segundos é mais seguro para evitar bloqueios
-          await new Promise(resolve => setTimeout(resolve, 2500))
         }
       } catch (error: any) {
         console.error(`[Carol] Erro ao enviar follow-up para ${conv.phone}:`, error)
@@ -4357,6 +4468,7 @@ O que está te travando exatamente? O momento é AGORA. Vamos conversar? 💚
               .eq('id', conv.id)
 
             sent++
+            await bulkSendDelay(sent)
           } else {
             errors++
           }
@@ -4793,14 +4905,11 @@ Nos vemos em breve! 😊
 
             sent++
             console.log(`[Carol Reminders] ✅ Lembrete enviado para ${participant.phone} - Sessão: ${date} ${time}`)
+            await bulkSendDelay(sent)
           } else {
             errors++
             console.error(`[Carol Reminders] ❌ Erro ao enviar para ${participant.phone}:`, result.error)
           }
-
-          // Delay entre mensagens para não sobrecarregar o WhatsApp
-          // Intervalo de 2-3 segundos é mais seguro para evitar bloqueios
-          await new Promise(resolve => setTimeout(resolve, 2500))
         } catch (err: any) {
           errors++
           console.error(`[Carol Reminders] ❌ Erro ao processar participante:`, err)
