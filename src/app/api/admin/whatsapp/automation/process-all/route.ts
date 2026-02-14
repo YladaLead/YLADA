@@ -10,7 +10,13 @@ import { isWhatsAppAutoWelcomeEnabled } from '@/config/whatsapp-automation'
 import { supabaseAdmin } from '@/lib/supabase'
 import { scheduleWelcomeMessages } from '@/lib/whatsapp-automation/welcome'
 import { processScheduledMessages } from '@/lib/whatsapp-automation/worker'
-import { sendRemarketingToNonParticipant, sendRegistrationLinkAfterClass, sendPreClassNotifications } from '@/lib/whatsapp-carol-ai'
+import {
+  sendRemarketingToNonParticipant,
+  sendRegistrationLinkAfterClass,
+  sendPreClassNotifications,
+  runRemateFechamentoParticipou,
+  runRemateNaoParticipou,
+} from '@/lib/whatsapp-carol-ai'
 
 export async function POST(request: NextRequest) {
   // Permitir chamada pelo cron (Vercel Cron envia Authorization: Bearer CRON_SECRET)
@@ -33,6 +39,8 @@ export async function POST(request: NextRequest) {
       followup: { processed: 0, sent: 0, errors: 0 },
       reprocess_participou: { processed: 0, sent: 0, errors: 0 },
       reprocess_nao_participou: { processed: 0, sent: 0, errors: 0 },
+      remate_participou: { sent2: 0, sent3: 0, errors: 0 },
+      remate_nao_participou: { sent2: 0, sent3: 0, errors: 0 },
     }
 
     // 1. Agendar boas-vindas para leads novos (PROATIVO) — por padrão DESLIGADO.
@@ -153,6 +161,26 @@ export async function POST(request: NextRequest) {
           console.error(`[Process All] Erro ao reprocessar não participou ${conv.phone}:`, error)
         }
       }
+    }
+
+    // 7. Remate fixo: quem participou — 2ª e 3ª mensagem de fechamento (lembrete com dor + último argumento)
+    console.log('[Process All] 7️⃣ Remate quem participou (2ª e 3ª msg)...')
+    try {
+      const remateParticipou = await runRemateFechamentoParticipou()
+      results.remate_participou = remateParticipou
+    } catch (err: any) {
+      console.error('[Process All] Erro remate participou:', err)
+      results.remate_participou = { sent2: 0, sent3: 0, errors: 1 }
+    }
+
+    // 8. Remate fixo: quem não participou — 2ª e 3ª mensagem (reforço + último convite)
+    console.log('[Process All] 8️⃣ Remate quem não participou (2ª e 3ª msg)...')
+    try {
+      const remateNaoParticipou = await runRemateNaoParticipou()
+      results.remate_nao_participou = remateNaoParticipou
+    } catch (err: any) {
+      console.error('[Process All] Erro remate não participou:', err)
+      results.remate_nao_participou = { sent2: 0, sent3: 0, errors: 1 }
     }
 
     return NextResponse.json({

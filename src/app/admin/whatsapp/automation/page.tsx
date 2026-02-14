@@ -833,6 +833,14 @@ function AutomationContent() {
                     <h3 className="font-semibold mb-2">🔄 Reprocessar Não Participou:</h3>
                     <p>Processadas: {result.reprocess_nao_participou?.processed || 0} | Enviadas: {result.reprocess_nao_participou?.sent || 0} | Erros: {result.reprocess_nao_participou?.errors || 0}</p>
                   </div>
+                  <div>
+                    <h3 className="font-semibold mb-2">🎯 Remate quem participou (2ª e 3ª msg):</h3>
+                    <p>2ª enviadas: {result.remate_participou?.sent2 || 0} | 3ª enviadas: {result.remate_participou?.sent3 || 0} | Erros: {result.remate_participou?.errors || 0}</p>
+                  </div>
+                  <div>
+                    <h3 className="font-semibold mb-2">🎯 Remate quem não participou (2ª e 3ª msg):</h3>
+                    <p>2ª enviadas: {result.remate_nao_participou?.sent2 || 0} | 3ª enviadas: {result.remate_nao_participou?.sent3 || 0} | Erros: {result.remate_nao_participou?.errors || 0}</p>
+                  </div>
                 </div>
               )}
 
@@ -863,6 +871,12 @@ function AutomationContent() {
               </li>
               <li>
                 <strong>Lembretes:</strong> Envia lembretes 12h antes da reunião.
+              </li>
+              <li>
+                <strong>Remate participou:</strong> Envia 2ª msg (lembrete com dor) e 3ª msg (último argumento) para quem já recebeu o link pós-aula, em horários definidos.
+              </li>
+              <li>
+                <strong>Remate não participou:</strong> Envia 2ª msg (reforço + horários) e 3ª msg (último convite) para quem já recebeu o remarketing.
               </li>
               <li>
                 <strong>Notificações Pré-Aula:</strong> São agendadas automaticamente quando alguém 

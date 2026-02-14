@@ -4681,14 +4681,16 @@ Qual você prefere, *mensal* ou *anual*?
         is_bot_response: true,
       })
 
-      // Atualizar contexto
+      // Atualizar contexto (remate fixo: 1ª mensagem de fechamento)
       context.registration_link_sent = true
       context.registration_link_sent_at = new Date().toISOString()
+      const tags = Array.isArray(context.tags) ? context.tags : []
+      const newTags = [...new Set([...tags, 'recebeu_1a_msg_fechamento'])]
 
       await supabaseAdmin
         .from('whatsapp_conversations')
         .update({
-          context,
+          context: { ...context, tags: newTags },
           last_message_at: new Date().toISOString(),
           last_message_from: 'bot',
         })
@@ -4704,12 +4706,276 @@ Qual você prefere, *mensal* ou *anual*?
   }
 }
 
+const REGISTRATION_URL = () => process.env.NUTRI_REGISTRATION_URL || 'https://www.ylada.com/pt/nutri#oferta'
+
+/**
+ * Remate fixo para quem PARTICIPOU da aula gratuita.
+ * Envia 2ª msg (lembrete com dor) e 3ª msg (outro argumento) conforme o tempo desde a 1ª.
+ * Respeita tags: não envia para cliente_nutri, respondeu_fechamento, nao_quer_mais, quer_falar_humano.
+ */
+export async function runRemateFechamentoParticipou(): Promise<{ sent2: number; sent3: number; errors: number }> {
+  const area = 'nutri'
+  const now = new Date()
+  const tenHoursMs = 10 * 60 * 60 * 1000
+  const twoDaysMs = 2 * 24 * 60 * 60 * 1000
+
+  const instance = await getZApiInstance(area)
+  if (!instance) {
+    console.warn('[Carol Remate Participou] Instância Z-API não encontrada')
+    return { sent2: 0, sent3: 0, errors: 0 }
+  }
+
+  const timeCheck = isAllowedTimeToSendMessage()
+  if (!timeCheck.allowed) {
+    return { sent2: 0, sent3: 0, errors: 0 }
+  }
+
+  const { data: conversations } = await supabaseAdmin
+    .from('whatsapp_conversations')
+    .select('id, phone, name, context')
+    .eq('area', area)
+    .eq('status', 'active')
+
+  if (!conversations?.length) return { sent2: 0, sent3: 0, errors: 0 }
+
+  const url = REGISTRATION_URL()
+  let sent2 = 0
+  let sent3 = 0
+  let errors = 0
+
+  for (const conv of conversations) {
+    const context = conv.context || {}
+    const tags = Array.isArray(context.tags) ? context.tags : []
+    if (!tags.includes('participou_aula') || context.registration_link_sent !== true) continue
+    if (tags.includes('cliente_nutri') || tags.includes('respondeu_fechamento') || tags.includes('nao_quer_mais') || tags.includes('quer_falar_humano')) continue
+
+    const registrationSentAt = context.registration_link_sent_at ? new Date(context.registration_link_sent_at as string).getTime() : 0
+    const lembreteSentAt = context.recebeu_lembrete_fechamento_at ? new Date(context.recebeu_lembrete_fechamento_at as string).getTime() : 0
+
+    const registrationName = await getRegistrationName(conv.phone, area)
+    const safeName = conv.name && !isInvalidOrInternalName(conv.name) ? conv.name : ''
+    let leadName = getFirstName(registrationName || (context as any)?.lead_name || safeName) || 'querido(a)'
+    if (isBusinessName(leadName) || isInvalidOrInternalName(leadName)) leadName = 'querido(a)'
+
+    let message: string | null = null
+    let etapa: '2' | '3' | null = null
+
+    if (!tags.includes('recebeu_lembrete_fechamento') && registrationSentAt && now.getTime() - registrationSentAt >= tenHoursMs) {
+      etapa = '2'
+      message = `Oi ${leadName}! 💚
+
+Passando aqui pra lembrar: você já viu o caminho na aula. O que custa *não* dar o próximo passo é continuar adiando o que você quer.
+
+Se na aula te passaram outro valor: a condição atual é *R$ 97/mês*. O link pra começar é: ${url}
+
+O que está te travando? Responde aqui que a gente desata. 😊`
+    } else if (
+      tags.includes('recebeu_lembrete_fechamento') &&
+      !tags.includes('recebeu_3a_msg_fechamento') &&
+      lembreteSentAt &&
+      now.getTime() - lembreteSentAt >= twoDaysMs
+    ) {
+      etapa = '3'
+      message = `Oi ${leadName}!
+
+Última mensagem sobre isso: cada dia que passa é um dia a mais na mesma. O investimento é R$ 97/mês e o link segue aqui: ${url}
+
+Se ainda tiver dúvida, responde aqui. Caso contrário, tudo bem também. 💚`
+    }
+
+    if (!message || !etapa) continue
+
+    try {
+      const result = await sendWhatsAppMessage(conv.phone, message, instance.instance_id, instance.token)
+      if (result.success) {
+        await supabaseAdmin.from('whatsapp_messages').insert({
+          conversation_id: conv.id,
+          instance_id: instance.id,
+          z_api_message_id: result.messageId || null,
+          sender_type: 'bot',
+          sender_name: 'Carol - Secretária',
+          message,
+          message_type: 'text',
+          status: 'sent',
+          is_bot_response: true,
+        })
+        const newTags = [...new Set([...tags, etapa === '2' ? 'recebeu_lembrete_fechamento' : 'recebeu_3a_msg_fechamento'])]
+        const nextContext: Record<string, unknown> = {
+          ...context,
+          tags: newTags,
+          ...(etapa === '2' ? { recebeu_lembrete_fechamento_at: new Date().toISOString() } : {}),
+        }
+        await supabaseAdmin
+          .from('whatsapp_conversations')
+          .update({
+            context: nextContext,
+            last_message_at: new Date().toISOString(),
+            last_message_from: 'bot',
+          })
+          .eq('id', conv.id)
+        if (etapa === '2') sent2++
+        else sent3++
+        await bulkSendDelay(sent2 + sent3)
+      } else {
+        errors++
+      }
+    } catch (e: any) {
+      errors++
+      console.warn('[Carol Remate Participou] Erro para', conv.phone, e?.message || e)
+    }
+  }
+
+  if (sent2 + sent3 > 0) {
+    console.log('[Carol Remate Participou]', { sent2, sent3, errors })
+  }
+  return { sent2, sent3, errors }
+}
+
+/**
+ * Remate fixo para quem NÃO PARTICIPOU da aula gratuita.
+ * Envia 2ª msg (reforço + oferta de horário) e 3ª msg (último convite) conforme o tempo desde o remarketing.
+ */
+export async function runRemateNaoParticipou(): Promise<{ sent2: number; sent3: number; errors: number }> {
+  const area = 'nutri'
+  const now = new Date()
+  const oneDayMs = 24 * 60 * 60 * 1000
+  const twoDaysMs = 2 * 24 * 60 * 60 * 1000
+
+  const instance = await getZApiInstance(area)
+  if (!instance) {
+    console.warn('[Carol Remate Não Participou] Instância Z-API não encontrada')
+    return { sent2: 0, sent3: 0, errors: 0 }
+  }
+
+  const timeCheck = isAllowedTimeToSendMessage()
+  if (!timeCheck.allowed) return { sent2: 0, sent3: 0, errors: 0 }
+
+  const { data: sessions } = await supabaseAdmin
+    .from('whatsapp_workshop_sessions')
+    .select('id, title, starts_at, zoom_link')
+    .eq('area', area)
+    .eq('is_active', true)
+    .gte('starts_at', now.toISOString())
+    .order('starts_at', { ascending: true })
+    .limit(3)
+
+  const { data: conversations } = await supabaseAdmin
+    .from('whatsapp_conversations')
+    .select('id, phone, name, context')
+    .eq('area', area)
+    .eq('status', 'active')
+
+  if (!conversations?.length) return { sent2: 0, sent3: 0, errors: 0 }
+
+  const tz = 'America/Sao_Paulo'
+  let sent2 = 0
+  let sent3 = 0
+  let errors = 0
+
+  for (const conv of conversations) {
+    const context = conv.context || {}
+    const tags = Array.isArray(context.tags) ? context.tags : []
+    if (!tags.includes('nao_participou_aula') || tags.includes('participou_aula')) continue
+    if (tags.includes('recebeu_3a_remate_nao_participou')) continue
+
+    const lastRemarketingAt = context.last_remarketing_at ? new Date(context.last_remarketing_at as string).getTime() : 0
+    const segundaSentAt = context.recebeu_2a_remate_nao_participou_at ? new Date(context.recebeu_2a_remate_nao_participou_at as string).getTime() : 0
+
+    const registrationName = await getRegistrationName(conv.phone, area)
+    const safeName = conv.name && !isInvalidOrInternalName(conv.name) ? conv.name : ''
+    let leadName = getFirstName(registrationName || (context as any)?.lead_name || safeName) || 'querido(a)'
+    if (isBusinessName(leadName) || isInvalidOrInternalName(leadName)) leadName = 'querido(a)'
+
+    let message: string | null = null
+    let etapa: '2' | '3' | null = null
+
+    if (!tags.includes('recebeu_2a_remate_nao_participou') && lastRemarketingAt && now.getTime() - lastRemarketingAt >= oneDayMs) {
+      etapa = '2'
+      let optionsText = ''
+      if (sessions?.length) {
+        sessions.forEach((s: { starts_at: string; title?: string; zoom_link?: string }, i: number) => {
+          const d = new Date(s.starts_at)
+          const weekday = d.toLocaleDateString('pt-BR', { timeZone: tz, weekday: 'long' })
+          const date = d.toLocaleDateString('pt-BR', { timeZone: tz })
+          const time = d.toLocaleTimeString('pt-BR', { timeZone: tz, hour: '2-digit', minute: '2-digit' })
+          optionsText += `\n🗓️ Opção ${i + 1}: ${weekday}, ${date} às ${time}\n${s.zoom_link || ''}\n`
+        })
+      }
+      message = `Oi ${leadName}! 💚
+
+Passando pra reforçar: a aula é gratuita e te mostra um caminho prático pra organizar a agenda. Ainda tem interesse?
+
+Se sim, escolha um horário:${optionsText || '\nMe responde que eu te mando as opções disponíveis.'}
+
+Qual período te encaixa melhor: manhã, tarde ou noite? 😊`
+    } else if (
+      tags.includes('recebeu_2a_remate_nao_participou') &&
+      !tags.includes('recebeu_3a_remate_nao_participou') &&
+      segundaSentAt &&
+      now.getTime() - segundaSentAt >= twoDaysMs
+    ) {
+      etapa = '3'
+      message = `Oi ${leadName}!
+
+Última mensagem sobre a aula gratuita: se um dia fizer sentido participar, é só me chamar que eu te encaixo em um horário.
+
+Qualquer dúvida, estou aqui. 💚`
+    }
+
+    if (!message || !etapa) continue
+
+    try {
+      const result = await sendWhatsAppMessage(conv.phone, message, instance.instance_id, instance.token)
+      if (result.success) {
+        await supabaseAdmin.from('whatsapp_messages').insert({
+          conversation_id: conv.id,
+          instance_id: instance.id,
+          z_api_message_id: result.messageId || null,
+          sender_type: 'bot',
+          sender_name: 'Carol - Secretária',
+          message,
+          message_type: 'text',
+          status: 'sent',
+          is_bot_response: true,
+        })
+        const newTags = [...new Set([...tags, etapa === '2' ? 'recebeu_2a_remate_nao_participou' : 'recebeu_3a_remate_nao_participou'])]
+        const nextContext: Record<string, unknown> = {
+          ...context,
+          tags: newTags,
+          ...(etapa === '2' ? { recebeu_2a_remate_nao_participou_at: new Date().toISOString() } : {}),
+        }
+        await supabaseAdmin
+          .from('whatsapp_conversations')
+          .update({
+            context: nextContext,
+            last_message_at: new Date().toISOString(),
+            last_message_from: 'bot',
+          })
+          .eq('id', conv.id)
+        if (etapa === '2') sent2++
+        else sent3++
+        await bulkSendDelay(sent2 + sent3)
+      } else {
+        errors++
+      }
+    } catch (e: any) {
+      errors++
+      console.warn('[Carol Remate Não Participou] Erro para', conv.phone, e?.message || e)
+    }
+  }
+
+  if (sent2 + sent3 > 0) {
+    console.log('[Carol Remate Não Participou]', { sent2, sent3, errors })
+  }
+  return { sent2, sent3, errors }
+}
+
 /**
  * Envia lembretes de reunião para participantes agendados
  * Regras:
  * - Padrão: 12h antes da reunião
  * - Exceção: Segunda às 10h → lembrete no domingo às 17h
- * - Respeita horário permitido (8h-19h seg-sex, até 13h sábado)
+ * Respeita horário permitido (8h-19h seg-sex, até 13h sábado)
  */
 export async function sendWorkshopReminders(): Promise<{
   sent: number
