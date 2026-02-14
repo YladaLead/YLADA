@@ -5,6 +5,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { landingPageVideos } from '@/lib/landing-pages-assets'
 import { videoProgressPercentForRetention } from '@/lib/video-progress-retention'
+import { trackNutriVideoCTAClick } from '@/lib/facebook-pixel'
 
 const NUTRI_VIDEO_SRC = landingPageVideos.nutriHero
 const NUTRI_POSTER_SRC = landingPageVideos.nutriHeroPoster
@@ -126,6 +127,7 @@ export default function NutriVideoContent() {
           <Link
             href={checkoutUrl}
             className="mt-5 inline-flex items-center justify-center px-6 py-3.5 rounded-xl text-base sm:text-lg font-bold bg-gradient-to-r from-[#2563EB] to-[#3B82F6] text-white hover:from-[#3B82F6] hover:to-[#1D4ED8] transition-all shadow-lg"
+            onClick={() => trackNutriVideoCTAClick({ button_position: 'top', content_name: 'Quero parar de depender de indicação' })}
           >
             👉 Quero parar de depender de indicação
           </Link>
@@ -208,6 +210,7 @@ export default function NutriVideoContent() {
           <Link
             href={checkoutUrl}
             className="inline-flex items-center justify-center px-6 py-3.5 rounded-xl text-base sm:text-lg font-bold bg-gradient-to-r from-[#2563EB] to-[#3B82F6] text-white hover:from-[#3B82F6] hover:to-[#1D4ED8] transition-all shadow-lg"
+            onClick={() => trackNutriVideoCTAClick({ button_position: 'bottom', content_name: 'Quero aplicar isso na minha agenda' })}
           >
             👉 Quero aplicar isso na minha agenda
           </Link>

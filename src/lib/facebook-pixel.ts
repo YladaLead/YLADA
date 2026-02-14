@@ -452,3 +452,33 @@ export const trackNutriWorkshopLead = () => {
   }
 };
 
+/**
+ * NutriVideoCTAClick - Clique no botão CTA da página /pt/nutri/video
+ * Use no Meta Events Manager para criar públicos e otimizar campanhas.
+ */
+export const trackNutriVideoCTAClick = (params?: {
+  button_position?: 'top' | 'bottom';
+  content_name?: string;
+}) => {
+  if (!isPixelLoaded()) {
+    console.warn('[Facebook Pixel] Pixel não carregado para NutriVideoCTAClick');
+    return;
+  }
+  const contentName = params?.content_name || (params?.button_position === 'bottom'
+    ? 'Quero aplicar isso na minha agenda'
+    : 'Quero parar de depender de indicação');
+  trackCustomEvent('NutriVideoCTAClick', {
+    content_category: 'NUTRI',
+    content_name: contentName,
+    page_location: '/pt/nutri/video',
+    button_position: params?.button_position || 'unknown',
+  });
+  trackLead({
+    content_name: contentName,
+    content_category: 'NUTRI',
+    lead_type: 'nutri_video_cta',
+    value: 0,
+    currency: 'BRL',
+  });
+};
+
