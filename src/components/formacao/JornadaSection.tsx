@@ -7,7 +7,7 @@ import { useJornadaProgress } from '@/hooks/useJornadaProgress'
 import type { JourneyDay, JourneyStats } from '@/types/formacao'
 
 interface JornadaSectionProps {
-  /** Quando definido (ex.: /pt/med/formacao/jornada), links das etapas e conclusão usam este path em vez de Nutri. */
+  /** Quando definido (ex.: /pt/med/trilha/jornada), links das etapas e conclusão usam este path em vez de Nutri. */
   basePath?: string
 }
 
@@ -25,7 +25,7 @@ export default function JornadaSection({ basePath }: JornadaSectionProps = {}) {
         setErro(null)
 
         // Detectar qual rota usar baseado na URL atual
-        const isFormacaoRoute = typeof window !== 'undefined' && window.location.pathname.includes('/formacao')
+        const isFormacaoRoute = typeof window !== 'undefined' && (window.location.pathname.includes('/formacao') || window.location.pathname.includes('/trilha'))
         const apiRoute = isFormacaoRoute ? '/api/nutri/formacao/jornada' : '/api/nutri/metodo/jornada'
         
         const res = await fetch(apiRoute, {

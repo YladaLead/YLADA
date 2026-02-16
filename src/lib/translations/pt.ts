@@ -125,6 +125,7 @@ export const ptTranslations: Translations = {
       list: {
         nutri: { title: 'Nutri', description: 'Nutricionistas: ferramentas inteligentes, consultas em resultados mensuráveis.' },
         wellness: { title: 'Wellness', description: 'Times de campo e vendas: contatos qualificados e performance.' },
+        ylada: { title: 'YLADA', description: 'Motor de conversas: links inteligentes, trilha empresarial e Noel para qualquer profissional ou vendedor.' },
         med: { title: 'Medicina', description: 'Médicos e especialistas: diagnóstico, links e autoridade no campo.' },
         psi: { title: 'Psicologia', description: 'Psicólogos: ferramentas de captação e conversas que convertem.' },
         psicanalise: { title: 'Psicanálise', description: 'Psicanalistas: links e conteúdo que geram contato qualificado.' },

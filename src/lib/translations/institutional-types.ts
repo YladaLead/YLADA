@@ -7,6 +7,7 @@ export interface InstitutionalAreaTranslation {
 export interface InstitutionalAreas {
   nutri: InstitutionalAreaTranslation
   wellness: InstitutionalAreaTranslation
+  ylada: InstitutionalAreaTranslation
   med: InstitutionalAreaTranslation
   psi: InstitutionalAreaTranslation
   psicanalise: InstitutionalAreaTranslation

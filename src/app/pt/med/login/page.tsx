@@ -1,10 +1,8 @@
-import LoginForm from '@/components/auth/LoginForm'
+import { redirect } from 'next/navigation'
 
-export default function MedLoginPage() {
-  return (
-    <LoginForm
-      perfil="med"
-      redirectPath="/pt/med/home"
-    />
-  )
+/**
+ * Login da área Med redireciona para a matriz central YLADA.
+ */
+export default function MedLoginRedirectPage() {
+  redirect('/pt/login')
 }

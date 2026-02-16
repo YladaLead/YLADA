@@ -125,6 +125,7 @@ export const enTranslations: Translations = {
       list: {
         nutri: { title: 'Nutri', description: 'Nutritionists: smart tools, consultations into measurable results.' },
         wellness: { title: 'Wellness', description: 'Field and sales teams: qualified contacts and performance.' },
+        ylada: { title: 'YLADA', description: 'Conversation engine: smart links, business track and Noel for any professional or seller.' },
         med: { title: 'Medicine', description: 'Physicians and specialists: diagnosis, links and field authority.' },
         psi: { title: 'Psychology', description: 'Psychologists: capture tools and conversations that convert.' },
         psicanalise: { title: 'Psychoanalysis', description: 'Psychoanalysts: links and content that generate qualified contact.' },

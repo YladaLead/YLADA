@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation'
 import { hasActiveSubscription, canBypassSubscription } from '@/lib/subscription-helpers'
 import { supabaseAdmin } from '@/lib/supabase'
 
-type Area = 'wellness' | 'nutri' | 'coach' | 'nutra' | 'med' | 'psi' | 'psicanalise' | 'odonto'
+type Area = 'wellness' | 'nutri' | 'coach' | 'nutra' | 'ylada' | 'psi' | 'psicanalise' | 'odonto'
 
 interface AuthValidationResult {
   session: any
@@ -69,9 +69,9 @@ export async function validateProtectedAccess(
             const refererUrl = new URL(referer)
             pathnameFromHeader = refererUrl.pathname
           } catch (e) {
-            // Se referer não for URL válida, tentar regex
-            const areaPattern = `\/pt\/${area}\/(.+)`
-            const match = referer.match(new RegExp(areaPattern))
+            // Se referer não for URL válida, tentar regex (ylada usa /pt/..., outras áreas /pt/{area}/...)
+            const areaPattern = area === 'ylada' ? /\/pt\/(.+)/ : new RegExp(`\\/pt\\/${area}\\/(.+)`)
+            const match = referer.match(areaPattern)
             if (match && match[1]) {
               pathnameFromHeader = '/' + match[1].split('?')[0]
             }
@@ -79,10 +79,10 @@ export async function validateProtectedAccess(
         }
       }
       
-      // 3. Extrair apenas a parte após /pt/{area}/
+      // 3. Extrair apenas a parte após /pt/ (ylada) ou /pt/{area}/ (demais áreas)
       if (pathnameFromHeader) {
-        const areaPattern = `\/pt\/${area}\/(.+)`
-        const match = pathnameFromHeader.match(new RegExp(areaPattern))
+        const areaPattern = area === 'ylada' ? /\/pt\/(.+)/ : new RegExp(`\\/pt\\/${area}\\/(.+)`)
+        const match = pathnameFromHeader.match(areaPattern)
         if (match && match[1]) {
           actualPath = '/' + match[1].split('?')[0] // Remover query params
         } else if (pathnameFromHeader.startsWith('/')) {
@@ -203,7 +203,7 @@ export async function validateProtectedAccess(
         hasSession: !!session,
         hasAccessToken: !!session?.access_token
       })
-      redirect(`/pt/${area}/login`)
+      redirect(area === 'ylada' ? '/pt/login' : `/pt/${area}/login`)
     }
 
     // 3. Buscar perfil
@@ -260,16 +260,17 @@ export async function validateProtectedAccess(
         profileError = null
       } else {
         console.error(`❌ ProtectedLayout [${area}]: Erro ao buscar perfil:`, profileError)
-        redirect(`/pt/${area}/login`)
+        redirect(area === 'ylada' ? '/pt/login' : `/pt/${area}/login`)
       }
     }
 
     // 4. Verificar se perfil corresponde (admin/suporte pode bypassar)
     const canBypassProfile = (allowAdmin && profile.is_admin) || (allowSupport && profile.is_support)
-    
-    if (profile.perfil !== area && !canBypassProfile) {
+    const profileMatchesArea = profile.perfil === area || (area === 'ylada' && profile.perfil === 'med')
+
+    if (!profileMatchesArea && !canBypassProfile) {
       console.log(`❌ ProtectedLayout [${area}]: Perfil incorreto (${profile.perfil}), redirecionando para login`)
-      redirect(`/pt/${area}/login`)
+      redirect(area === 'ylada' ? '/pt/login' : `/pt/${area}/login`)
     }
 
     // 5. Verificar assinatura (se necessário)
@@ -288,29 +289,12 @@ export async function validateProtectedAccess(
         hasSubscription = await hasActiveSubscription(user.id, area)
         
         if (!hasSubscription) {
-          // 🚨 PRIORIDADE 1: EXCEÇÃO ESPECIAL PARA ÁREA NUTRI SEM DIAGNÓSTICO
-          // Se usuário não tem diagnóstico, SEMPRE permitir acesso sem assinatura
-          // (usuário precisa completar diagnóstico antes de assinar)
-          // O RequireDiagnostico (client-side) vai cuidar de redirecionar para onboarding se necessário
-          if (area === 'nutri' && !profile.diagnostico_completo) {
-            console.log(`ℹ️ ProtectedLayout [${area}]: Usuário sem diagnóstico - permitindo acesso sem assinatura`)
-            hasSubscription = true // Virtualmente "tem assinatura" - permite acesso para completar diagnóstico
-          }
-          // 🚨 PRIORIDADE 2: Verificar se é rota excluída (onboarding/diagnóstico)
-          // Se for rota excluída, SEMPRE permitir acesso sem assinatura
-          else if (isExcludedRoute) {
-            console.log(`ℹ️ ProtectedLayout [${area}]: Rota excluída (onboarding/diagnóstico) - permitindo acesso sem assinatura`)
-            hasSubscription = true // Virtualmente "tem assinatura" para essas rotas
-          } else {
-            // Usuário tem diagnóstico ou não é área nutri - exige assinatura normalmente
-            console.log(`❌ ProtectedLayout [${area}]: Sem assinatura e não é exceção, redirecionando para checkout`, {
-              area,
-              hasDiagnostico: profile.diagnostico_completo,
-              isExcludedRoute,
-              actualPath
-            })
-            redirect(`/pt/${area}/checkout`)
-          }
+          // Sem assinatura: redirecionar para planos. Nenhuma exceção (onboarding/diagnóstico deixam de ser livres).
+          console.log(`❌ ProtectedLayout [${area}]: Sem assinatura ativa, redirecionando para checkout`, {
+            area,
+            actualPath
+          })
+          redirect(area === 'ylada' ? '/pt/checkout' : `/pt/${area}/checkout`)
         }
       } else {
         hasSubscription = true // Admin/suporte tem "assinatura" virtual
@@ -355,7 +339,7 @@ export async function validateProtectedAccess(
         canBypass: true,
       }
     }
-    redirect(`/pt/${area}/login`)
+    redirect(area === 'ylada' ? '/pt/login' : `/pt/${area}/login`)
   }
 }
 

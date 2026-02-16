@@ -12,6 +12,7 @@ export function middleware(request: NextRequest) {
     pathname === '/' || // Página raiz - não redirecionar
     pathname === '/migrado' || // Página de acesso migrado - não redirecionar
     pathname.startsWith('/p/') || // IMPORTANTE: Links curtos (/p/code) - não redirecionar
+    pathname.startsWith('/l/') || // Links inteligentes YLADA (/l/[slug]) - público, sem /pt
     pathname.startsWith('/f/') || // IMPORTANTE: Formulários públicos (/f/formId) - não redirecionar
     pathname.startsWith('/templates-environment') ||
     pathname.startsWith('/template/') ||

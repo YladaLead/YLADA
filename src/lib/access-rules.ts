@@ -123,8 +123,9 @@ const SUBSCRIPTION_REQUIRED_PAGES: (string | RegExp)[] = [
   // Evolução
   /\/evolucao/,
   
-  // Fluxos
+  // Fluxos (Wellness) e Links (matriz YLADA)
   /\/fluxos/,
+  /\/links/,
   
   // Tutoriais
   /\/tutoriais/,

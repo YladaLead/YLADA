@@ -9,7 +9,7 @@ import { useLastVisitedPage } from '@/hooks/useLastVisitedPage'
 const supabase = createClient()
 
 interface LoginFormProps {
-  perfil: 'nutri' | 'wellness' | 'coach' | 'nutra' | 'admin' | 'med'
+  perfil: 'nutri' | 'wellness' | 'coach' | 'nutra' | 'admin' | 'ylada'
   redirectPath: string
   logoColor?: 'azul-claro' | 'verde' | 'laranja' | 'roxo'
   logoPath?: string
@@ -83,7 +83,7 @@ export default function LoginForm({
     coach: 'Coach',
     nutra: 'Consultor Nutra',
     admin: 'Administrador',
-    med: 'Medicina'
+    ylada: 'YLADA',
   }
 
   const perfilAreaLabels: Record<string, string> = {
@@ -91,7 +91,7 @@ export default function LoginForm({
     wellness: 'Wellness',
     coach: 'Coach',
     nutra: 'Nutra',
-    med: 'Medicina'
+    ylada: 'YLADA',
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -491,7 +491,7 @@ export default function LoginForm({
     ? '/images/logo/nutri-horizontal.png'
     : perfil === 'coach'
     ? '/images/logo/coach-horizontal.png'
-    : perfil === 'med'
+    : perfil === 'ylada'
     ? '/images/logo/ylada/horizontal/azul-claro/ylada-horizontal-azul-claro.png'
     : perfil === 'nutra' || logoColor === 'laranja'
     ? '/images/logo/ylada/horizontal/laranja/ylada-horizontal-laranja-14.png'
@@ -505,7 +505,7 @@ export default function LoginForm({
           <div className="flex justify-center mb-6 sm:mb-8">
             <Image
               src={logoSrc}
-              alt={perfil === 'wellness' ? 'WELLNESS - Your Leading Data System' : perfil === 'nutri' ? 'Nutri by YLADA' : perfil === 'coach' ? 'Coach by YLADA' : perfil === 'med' ? 'Medicina by YLADA' : 'YLADA Logo'}
+              alt={perfil === 'wellness' ? 'WELLNESS - Your Leading Data System' : perfil === 'nutri' ? 'Nutri by YLADA' : perfil === 'coach' ? 'Coach by YLADA' : perfil === 'ylada' ? 'YLADA' : 'YLADA Logo'}
               width={perfil === 'wellness' ? 572 : 280}
               height={perfil === 'wellness' ? 150 : 84}
               className="bg-transparent object-contain h-16 sm:h-20 w-auto"
@@ -629,7 +629,7 @@ export default function LoginForm({
         {!isSignUp && (
           <div className="mt-4 text-center">
             <a
-              href={`/pt/${perfil === 'wellness' ? 'wellness' : perfil === 'nutri' ? 'nutri' : perfil === 'coach' ? 'coach' : perfil === 'med' ? 'med' : 'wellness'}/recuperar-senha`}
+              href={perfil === 'ylada' ? '/pt/recuperar-senha' : `/pt/${perfil === 'wellness' ? 'wellness' : perfil === 'nutri' ? 'nutri' : perfil === 'coach' ? 'coach' : 'wellness'}/recuperar-senha`}
               className="text-sm text-gray-600 hover:text-gray-900 transition-colors duration-200 font-medium underline"
             >
               Esqueci minha senha

@@ -22,7 +22,7 @@ export default function JornadaDiaPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const fromMed = searchParams.get('from') === 'med'
-  const backHref = fromMed ? '/pt/med/formacao' : JORNADA_BASE
+  const backHref = fromMed ? '/pt/med/trilha' : JORNADA_BASE
   const backLabel = fromMed ? '← Voltar ao YLADA Medicina' : '← Voltar para Trilha'
   const { user } = useAuth()
   const { progress, loading: progressLoading, canAccessDay } = useJornadaProgress()
@@ -385,7 +385,7 @@ export default function JornadaDiaPage() {
           onClose={() => router.push(backHref)}
           blockedDay={dayNumber}
           currentDay={progress?.current_day || 1}
-          basePath={fromMed ? '/pt/med/formacao/jornada' : JORNADA_BASE}
+          basePath={fromMed ? '/pt/med/trilha/jornada' : JORNADA_BASE}
         />
       </>
     )
@@ -629,7 +629,7 @@ export default function JornadaDiaPage() {
         <div className="flex items-center justify-between mt-6">
           {dayNumber > 1 && (
             <Link
-              href={fromMed ? `/pt/med/formacao/jornada/dia/${dayNumber - 1}` : `${JORNADA_BASE}/dia/${dayNumber - 1}`}
+              href={fromMed ? `/pt/med/trilha/jornada/dia/${dayNumber - 1}` : `${JORNADA_BASE}/dia/${dayNumber - 1}`}
               className="text-blue-600 hover:text-blue-700 font-medium"
             >
               ← Etapa Anterior
@@ -639,7 +639,7 @@ export default function JornadaDiaPage() {
             <button
               onClick={() => {
                 const nextDay = dayNumber + 1
-                const nextHref = fromMed ? `/pt/med/formacao/jornada/dia/${nextDay}` : `${JORNADA_BASE}/dia/${nextDay}`
+                const nextHref = fromMed ? `/pt/med/trilha/jornada/dia/${nextDay}` : `${JORNADA_BASE}/dia/${nextDay}`
                 if (canAccessDay(nextDay)) {
                   router.push(nextHref)
                 } else {
@@ -665,7 +665,7 @@ export default function JornadaDiaPage() {
         }}
         blockedDay={dayNumber}
         currentDay={progress?.current_day || 1}
-        basePath={fromMed ? '/pt/med/formacao/jornada' : JORNADA_BASE}
+        basePath={fromMed ? '/pt/med/trilha/jornada' : JORNADA_BASE}
       />
 
       <DiaConcluidoModal
@@ -673,7 +673,7 @@ export default function JornadaDiaPage() {
         onClose={() => setShowConcluidoModal(false)}
         dayNumber={dayNumber}
         nextDay={dayNumber < 30 ? dayNumber + 1 : null}
-        basePath={fromMed ? '/pt/med/formacao/jornada' : JORNADA_BASE}
+        basePath={fromMed ? '/pt/med/trilha/jornada' : JORNADA_BASE}
       />
     </div>
   )

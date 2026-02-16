@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
 import { requireApiAuth, getAuthenticatedUserId } from '@/lib/api-auth'
+import { hasAnyFeature } from '@/lib/feature-helpers'
 import { translateError } from '@/lib/error-messages'
 import { 
   validateTemplateBeforeCreate,
@@ -17,6 +18,17 @@ export async function GET(request: NextRequest) {
       return authResult // Retorna erro de autenticação
     }
     const { user, profile: authProfile } = authResult
+
+    // 🔒 Exigir assinatura com feature ferramentas (admin pode bypassar)
+    if (!authProfile?.is_admin && !authProfile?.is_support) {
+      const temAcesso = await hasAnyFeature(user.id, 'nutri', ['ferramentas', 'completo'])
+      if (!temAcesso) {
+        return NextResponse.json(
+          { error: 'Acesso restrito. Assine um plano com ferramentas para usar esta área.' },
+          { status: 403 }
+        )
+      }
+    }
 
     const { searchParams } = new URL(request.url)
     const toolId = searchParams.get('id')
@@ -171,7 +183,17 @@ export async function POST(request: NextRequest) {
     if (authResult instanceof NextResponse) {
       return authResult // Retorna erro de autenticação
     }
-    const { user } = authResult
+    const { user, profile: authProfile } = authResult
+
+    if (!authProfile?.is_admin && !authProfile?.is_support) {
+      const temAcesso = await hasAnyFeature(user.id, 'nutri', ['ferramentas', 'completo'])
+      if (!temAcesso) {
+        return NextResponse.json(
+          { error: 'Acesso restrito. Assine um plano com ferramentas para usar esta área.' },
+          { status: 403 }
+        )
+      }
+    }
 
     const body = await request.json()
     const {
@@ -552,7 +574,17 @@ export async function PUT(request: NextRequest) {
     if (authResult instanceof NextResponse) {
       return authResult
     }
-    const { user } = authResult
+    const { user, profile: authProfile } = authResult
+
+    if (!authProfile?.is_admin && !authProfile?.is_support) {
+      const temAcesso = await hasAnyFeature(user.id, 'nutri', ['ferramentas', 'completo'])
+      if (!temAcesso) {
+        return NextResponse.json(
+          { error: 'Acesso restrito. Assine um plano com ferramentas para usar esta área.' },
+          { status: 403 }
+        )
+      }
+    }
 
     const body = await request.json()
     const {
@@ -801,7 +833,17 @@ export async function DELETE(request: NextRequest) {
     if (authResult instanceof NextResponse) {
       return authResult
     }
-    const { user } = authResult
+    const { user, profile: authProfile } = authResult
+
+    if (!authProfile?.is_admin && !authProfile?.is_support) {
+      const temAcesso = await hasAnyFeature(user.id, 'nutri', ['ferramentas', 'completo'])
+      if (!temAcesso) {
+        return NextResponse.json(
+          { error: 'Acesso restrito. Assine um plano com ferramentas para usar esta área.' },
+          { status: 403 }
+        )
+      }
+    }
 
     const { searchParams } = new URL(request.url)
     const id = searchParams.get('id')
