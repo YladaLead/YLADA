@@ -1,6 +1,8 @@
 import type { Metadata } from 'next'
 import type { ReactNode } from 'react'
+import { headers } from 'next/headers'
 import ConditionalWidget from '@/components/nutri/ConditionalWidget'
+import { validateProtectedAccess, isNutriPublicPath } from '@/lib/auth-server'
 
 const baseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXT_PUBLIC_APP_URL_PRODUCTION || 'https://www.ylada.com'
 
@@ -60,7 +62,23 @@ export const metadata: Metadata = {
   },
 }
 
-export default function NutriLayout({ children }: { children: ReactNode }) {
+/**
+ * Layout raiz Nutri: em rotas não públicas exige login + assinatura ativa.
+ * Sem mensalidade em dia → redirect para /pt/nutri/checkout.
+ */
+export default async function NutriLayout({ children }: { children: ReactNode }) {
+  const headersList = await headers()
+  const pathname = headersList.get('x-pathname') || headersList.get('x-invoke-path') || ''
+  const isPublic = pathname ? isNutriPublicPath(pathname) : false
+  if (!isPublic) {
+    await validateProtectedAccess('nutri', {
+      requireSubscription: true,
+      allowAdmin: true,
+      allowSupport: true,
+      excludeRoutesFromSubscription: [],
+      currentPath: pathname,
+    })
+  }
   return (
     <>
       {children}

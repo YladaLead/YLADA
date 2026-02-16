@@ -1,6 +1,8 @@
 import type { Metadata } from 'next'
 import type { ReactNode } from 'react'
+import { headers } from 'next/headers'
 import { getFullOGImageUrl } from '@/lib/og-image-map'
+import { validateProtectedAccess, isWellnessPublicPath } from '@/lib/auth-server'
 
 const baseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXT_PUBLIC_APP_URL_PRODUCTION || 'https://www.ylada.com'
 
@@ -40,7 +42,27 @@ export const metadata: Metadata = {
   },
 }
 
-export default function WellnessLayout({ children }: { children: ReactNode }) {
+/**
+ * Layout raiz Wellness: em rotas não públicas exige login + assinatura ativa.
+ * Sem mensalidade em dia → redirect para /pt/wellness/checkout.
+ */
+export default async function WellnessLayout({ children }: { children: ReactNode }) {
+  const headersList = await headers()
+  const pathname = headersList.get('x-pathname') || headersList.get('x-invoke-path') || ''
+
+  // Exigir login + assinatura em qualquer rota wellness que não seja explicitamente pública.
+  // Sem pathname (header não setado) tratamos como protegida por segurança.
+  const isPublic = pathname ? isWellnessPublicPath(pathname) : false
+  if (!isPublic) {
+    await validateProtectedAccess('wellness', {
+      requireSubscription: true,
+      allowAdmin: true,
+      allowSupport: true,
+      excludeRoutesFromSubscription: [],
+      currentPath: pathname,
+    })
+  }
+
   return <>{children}</>
 }
 

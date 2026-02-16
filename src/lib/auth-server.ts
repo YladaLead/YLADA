@@ -344,6 +344,111 @@ export async function validateProtectedAccess(
 }
 
 /**
+ * Rotas da área wellness que NÃO exigem assinatura (acesso público ou pós-login sem assinatura).
+ * Qualquer outra rota /pt/wellness/* exige login + assinatura ativa.
+ */
+const WELLNESS_PUBLIC_PREFIXES: (string | RegExp)[] = [
+  '/pt/wellness/login',
+  '/pt/wellness/checkout',
+  '/pt/wellness/pagamento-sucesso',
+  '/pt/wellness/trial',
+  '/pt/wellness/recuperar-senha',
+  '/pt/wellness/recuperar-acesso',
+  '/pt/wellness/reset-password',
+  '/pt/wellness/bem-vindo',
+  '/pt/wellness/acesso',
+  '/pt/wellness/testar-email',
+  /^\/pt\/wellness\/templates(\/|$)/,
+  /^\/pt\/wellness\/portal\/[^/]+$/, // portal/[slug] público
+  // Links públicos por user-slug: /pt/wellness/[user-slug]/[tool-slug], quiz, portal, hom
+  /^\/pt\/wellness\/[^/]+\/(hom|quiz|portal|formulario)(\/|$)/,
+  /^\/pt\/wellness\/[^/]+\/[^/]+\/.+/, // 3+ segmentos após wellness = link público
+]
+
+/** Segmentos que são rotas da aplicação (área logada), não user-slug. */
+const WELLNESS_APP_SEGMENTS = new Set([
+  'dashboard', 'home', 'system', 'ferramentas', 'cursos', 'portals', 'modulos', 'treinos', 'links',
+  'configuracao', 'tutoriais', 'plano', 'comunidade', 'suporte', 'conta', 'biblioteca', 'fluxos',
+  'perfil', 'evolucao', 'clientes', 'workshop', 'noel', 'filosofia-lada', 'quizzes', 'acesso',
+  'bem-vindo', 'trial', 'pagamento-sucesso', 'reset-password', 'recuperar-senha', 'recuperar-acesso',
+  'testar-email', 'templates', 'portal', 'login', 'checkout',
+])
+
+/**
+ * Retorna true se o pathname é uma rota pública da área wellness (não exige assinatura).
+ */
+export function isWellnessPublicPath(pathname: string): boolean {
+  return isAreaPublicPath(pathname, 'wellness', WELLNESS_PUBLIC_PREFIXES, WELLNESS_APP_SEGMENTS)
+}
+
+/** Rotas Nutri que NÃO exigem assinatura. */
+const NUTRI_PUBLIC_PREFIXES: (string | RegExp)[] = [
+  '/pt/nutri/login',
+  '/pt/nutri/checkout',
+  '/pt/nutri/cadastro',
+  '/pt/nutri/pagamento-sucesso',
+  '/pt/nutri/recuperar-senha',
+  '/pt/nutri/reset-password',
+  /^\/pt\/nutri\/portal\/[^/]+$/, // portal público
+  /^\/pt\/nutri\/[^/]+\/(quiz|formulario)(\/|$)/,
+  /^\/pt\/nutri\/[^/]+\/[^/]+\/.+/,
+]
+
+const NUTRI_APP_SEGMENTS = new Set([
+  'dashboard', 'home', 'ferramentas', 'metodo', 'formacao', 'clientes', 'leads', 'formularios',
+  'diagnostico', 'onboarding', 'agenda', 'anotacoes', 'configuracao', 'portals', 'cursos',
+  'acompanhamento', 'quizzes', 'relatorios-gestao', 'gsal', 'suporte', 'workshop', 'video',
+  'quiz-personalizado', 'descobrir', 'pagamento-sucesso', 'recuperar-senha', 'reset-password',
+  'login', 'checkout', 'cadastro', 'portals', 'portal', 'configuracoes', 'relatorios',
+])
+
+export function isNutriPublicPath(pathname: string): boolean {
+  return isAreaPublicPath(pathname, 'nutri', NUTRI_PUBLIC_PREFIXES, NUTRI_APP_SEGMENTS)
+}
+
+/** Rotas Coach que NÃO exigem assinatura. */
+const COACH_PUBLIC_PREFIXES: (string | RegExp)[] = [
+  '/pt/coach/login',
+  '/pt/coach/checkout',
+  '/pt/coach/pagamento-sucesso',
+  '/pt/coach/recuperar-senha',
+  '/pt/coach/reset-password',
+  /^\/pt\/coach\/portal\/[^/]+$/,
+  /^\/pt\/coach\/[^/]+\/(quiz|formulario)(\/|$)/,
+  /^\/pt\/coach\/[^/]+\/[^/]+\/.+/,
+]
+
+const COACH_APP_SEGMENTS = new Set([
+  'dashboard', 'home', 'ferramentas', 'clientes', 'formularios', 'configuracao', 'portals',
+  'cursos', 'acompanhamento', 'quizzes', 'leads', 'agenda', 'relatorios-gestao', 'protocolos',
+  'login', 'checkout', 'pagamento-sucesso', 'recuperar-senha', 'reset-password', 'portal',
+  'c', 'configuracoes', 'relatorios', 'suporte', 'quiz-personalizado',
+])
+
+export function isCoachPublicPath(pathname: string): boolean {
+  return isAreaPublicPath(pathname, 'coach', COACH_PUBLIC_PREFIXES, COACH_APP_SEGMENTS)
+}
+
+function isAreaPublicPath(
+  pathname: string,
+  area: 'wellness' | 'nutri' | 'coach',
+  publicPrefixes: (string | RegExp)[],
+  appSegments: Set<string>
+): boolean {
+  const path = pathname.replace(/\/$/, '') || '/'
+  const areaPath = `/pt/${area}`
+  if (path === areaPath) return true
+  for (const p of publicPrefixes) {
+    if (typeof p === 'string') {
+      if (path === p || path.startsWith(p + '/')) return true
+    } else if (p.test(path)) return true
+  }
+  const match = path.match(new RegExp(`^/pt/${area}/([^/]+)(?:/|$)`))
+  if (match && match[1] && !appSegments.has(match[1])) return true
+  return false
+}
+
+/**
  * Helper simplificado para apenas verificar sessão (sem assinatura)
  * Útil para páginas que requerem apenas autenticação
  */
