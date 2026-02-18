@@ -4859,7 +4859,7 @@ export async function runRemateFechamentoParticipou(): Promise<{ sent2: number; 
 
 Passando aqui pra lembrar: você já viu o caminho na aula. O que custa *não* dar o próximo passo é continuar adiando o que você quer.
 
-Se na aula te passaram outro valor: a condição atual é *R$ 97/mês*. O link pra começar é: ${url}
+O que mais nos travava era a *aquisição de pacientes*, então estamos com uma condução especial focada só nisso. O investimento é *R$ 97/mês* e o link pra começar é: ${url}
 
 O que está te travando? Responde aqui que a gente desata. 😊`
     } else if (
