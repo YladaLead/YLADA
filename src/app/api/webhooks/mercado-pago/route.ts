@@ -230,27 +230,32 @@ async function handlePaymentEvent(data: any, isTest: boolean = false, preFetched
           paymentDataFull = data
         } else {
           // Buscar dados completos do pagamento via API do Mercado Pago
-          console.log('🔍 Buscando dados completos do pagamento via API...')
           const { Payment } = await import('mercadopago')
           const { createMercadoPagoClient } = await import('@/lib/mercado-pago')
-          const client = createMercadoPagoClient(isTest)
-          const payment = new Payment(client)
 
-          try {
-            paymentDataFull = await payment.get({ id: paymentId })
-            console.log('✅ Dados completos do pagamento obtidos:', {
-              hasMetadata: !!paymentDataFull.metadata,
-              hasExternalReference: !!paymentDataFull.external_reference,
-              hasPayer: !!paymentDataFull.payer,
-              status: paymentDataFull.status,
-            })
-          } catch (apiError: any) {
-            console.error('❌ Erro ao buscar dados completos do pagamento:', apiError)
-            paymentDataFull = data
+          for (const tryTest of [isTest, !isTest]) {
+            try {
+              console.log('🔍 Buscando dados completos do pagamento via API...', { isTest: tryTest })
+              const client = createMercadoPagoClient(tryTest)
+              const payment = new Payment(client)
+              paymentDataFull = await payment.get({ id: paymentId })
+              if (paymentDataFull?.status === 'approved') {
+                console.log('✅ Dados completos do pagamento obtidos:', {
+                  hasMetadata: !!paymentDataFull.metadata,
+                  hasExternalReference: !!paymentDataFull.external_reference,
+                  hasPayer: !!paymentDataFull.payer,
+                  status: paymentDataFull.status,
+                })
+                break
+              }
+            } catch (apiError: any) {
+              console.warn(`⚠️ Falha ao buscar pagamento (isTest=${tryTest}):`, apiError?.message || apiError)
+              paymentDataFull = null
+            }
           }
 
-          if (!paymentDataFull.status || paymentDataFull.status !== 'approved') {
-            console.log('⚠️ Pagamento não aprovado:', paymentDataFull.status)
+          if (!paymentDataFull || paymentDataFull.status !== 'approved') {
+            console.error('❌ Não foi possível obter dados aprovados do pagamento (tentou ambos os tokens).', paymentId)
             return
           }
         }
@@ -291,23 +296,43 @@ async function handlePaymentEvent(data: any, isTest: boolean = false, preFetched
       }
     }
     
-    // Obter e-mail do pagador cedo (usado em vários fallbacks)
-    const payerEmailEarly = fullData.payer?.email || fullData.payer_email || null
+    // Obter e-mail do pagador cedo (usado em vários fallbacks) — várias fontes para transferência bancária / fluxos sem payer preenchido
+    const earlyEmailSources = [
+      fullData.payer?.email,
+      fullData.payer_email,
+      fullData.payer?.identification?.email,
+      fullData.additional_info?.payer?.email,
+      fullData.additional_info?.payer?.email_address,
+      fullData.collector?.email,
+    ]
+    const payerEmailEarly = earlyEmailSources.find((e) => e && typeof e === 'string' && e.includes('@')) || null
+    // Fallback: extrair e-mail do external_reference quando formato é area_planType_temp_email@...
+    let payerEmailFromRef: string | null = null
+    if (!payerEmailEarly && fullData.external_reference && typeof fullData.external_reference === 'string') {
+      const ref = fullData.external_reference
+      const afterLastUnderscore = ref.slice(ref.lastIndexOf('_') + 1)
+      if (afterLastUnderscore.includes('@')) payerEmailFromRef = afterLastUnderscore
+      else if (ref.includes('temp_')) {
+        const afterTemp = ref.replace(/^[^_]*_[^_]*_temp_/i, '')
+        if (afterTemp.includes('@')) payerEmailFromRef = afterTemp
+      }
+    }
+    const payerEmailEarlyFinal = payerEmailEarly || payerEmailFromRef
 
     // Se ainda não tiver, tentar usar o e-mail do pagador como temp_email
-    if (!userId && payerEmailEarly && payerEmailEarly.includes('@')) {
-      userId = `temp_${payerEmailEarly}`
+    if (!userId && payerEmailEarlyFinal && payerEmailEarlyFinal.includes('@')) {
+      userId = `temp_${payerEmailEarlyFinal}`
       console.log('✅ User ID criado a partir do e-mail do pagador:', userId)
     }
 
     // Fallback: se userId veio da referência mas não é UUID nem temp_ (ex: link MP com ref "wellness...f0674781"),
     // buscar usuário existente por e-mail do pagador para associar o pagamento ao usuário correto
     const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(String(userId || ''))
-    if (userId && !userId.startsWith('temp_') && !isUuid && payerEmailEarly && payerEmailEarly.includes('@')) {
+    if (userId && !userId.startsWith('temp_') && !isUuid && payerEmailEarlyFinal && payerEmailEarlyFinal.includes('@')) {
       const { data: profileByEmail } = await supabaseAdmin
         .from('user_profiles')
         .select('user_id')
-        .ilike('email', payerEmailEarly)
+        .ilike('email', payerEmailEarlyFinal)
         .limit(1)
         .maybeSingle()
       if (profileByEmail?.user_id) {
@@ -315,7 +340,7 @@ async function handlePaymentEvent(data: any, isTest: boolean = false, preFetched
         userId = profileByEmail.user_id
       } else {
         // Não existe perfil com esse e-mail; tratar como temp_ para criar conta no fluxo abaixo
-        userId = `temp_${payerEmailEarly}`
+        userId = `temp_${payerEmailEarlyFinal}`
         console.log('✅ User ID inválido na referência; usando temp_ e-mail:', userId)
       }
     }
@@ -327,6 +352,8 @@ async function handlePaymentEvent(data: any, isTest: boolean = false, preFetched
         external_reference: fullData.external_reference,
         payer: fullData.payer,
         payer_email: fullData.payer_email,
+        additional_info_payer: fullData.additional_info?.payer,
+        payerEmailEarlyFinal: payerEmailEarlyFinal ?? undefined,
         'fullData completo (primeiros 1000 chars)': JSON.stringify(fullData).substring(0, 1000),
       })
       // NÃO retornar - continuar processamento para não bloquear webhook
@@ -375,20 +402,35 @@ async function handlePaymentEvent(data: any, isTest: boolean = false, preFetched
     const amount = fullData.transaction_amount || 0
     const currency = fullData.currency_id || 'BRL'
     
-    // Obter e-mail do pagador (importante para suporte)
-    // Tentar múltiplas fontes de e-mail do webhook
-    let payerEmail = fullData.payer?.email || 
-                     fullData.payer_email || 
-                     fullData.payer?.identification?.email ||
-                     fullData.collector?.email ||
-                     fullData.external_reference?.split('email:')[1] ||
-                     null
+    // Obter e-mail do pagador (importante para suporte e para transferência bancária)
+    // Tentar múltiplas fontes: payer, additional_info (usado em alguns fluxos/transferência), collector, external_reference
+    const payerEmailSources = [
+      fullData.payer?.email,
+      fullData.payer_email,
+      fullData.payer?.identification?.email,
+      fullData.collector?.email,
+      fullData.additional_info?.payer?.email,
+      fullData.additional_info?.payer?.email_address,
+      (typeof fullData.payer === 'object' && fullData.payer !== null && (fullData.payer as any).email_address),
+      fullData.external_reference?.split('email:')[1],
+      // external_reference pode ser "wellness_monthly_temp_email@domain.com" — extrair e-mail se terminar com @
+      (() => {
+        const ref = fullData.external_reference
+        if (!ref || typeof ref !== 'string') return null
+        const idx = ref.indexOf('@')
+        if (idx === -1) return null
+        const possibleEmail = ref.includes('temp_') ? ref.replace(/^[^_]*_[^_]*_temp_/i, '') : ref.slice(ref.lastIndexOf('_') + 1)
+        return possibleEmail.includes('@') ? possibleEmail : null
+      })(),
+    ]
+    let payerEmail = payerEmailSources.find((e) => e && typeof e === 'string' && e.includes('@')) || null
     
     console.log('📧 Tentando capturar e-mail do pagador:', {
       'fullData.payer?.email': fullData.payer?.email,
       'fullData.payer_email': fullData.payer_email,
       'fullData.payer?.identification?.email': fullData.payer?.identification?.email,
       'fullData.collector?.email': fullData.collector?.email,
+      'fullData.additional_info?.payer': fullData.additional_info?.payer ? 'present' : undefined,
       'payerEmail final': payerEmail,
       'payer completo': fullData.payer,
     })
