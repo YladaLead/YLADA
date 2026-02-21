@@ -6,11 +6,13 @@ import { validateProtectedAccess, isNutriPublicPath } from '@/lib/auth-server'
 
 const baseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXT_PUBLIC_APP_URL_PRODUCTION || 'https://www.ylada.com'
 
-// URL absoluta da imagem OG para a landing page do nutri
-// IMPORTANTE: A imagem default.jpg deve conter o logo Nutri (nutri-horizontal.PNG)
-// Dimensões recomendadas: 1200x630px (mínimo: 200x200px para Facebook)
-const ogImageUrl = `${baseUrl}/images/og/nutri/default.jpg`
+// URL absoluta da imagem OG: capa do vídeo para o link parecer "vídeo para assistir" ao compartilhar
+const ogImageUrl = `${baseUrl}/videos/nutri-hero-poster.jpg`
 const nutriPageUrl = `${baseUrl}/pt/nutri`
+
+// Título e descrição para a prévia do link (WhatsApp, redes) — vídeo para assistir, foco em atrair pacientes certos
+const ogTitle = 'Links que atraem os pacientes certos | YLADA Nutri'
+const ogDescription = 'Assista: como usar links que atraem os pacientes certos e preencher a agenda. Sistema para nutricionistas.'
 
 export const metadata: Metadata = {
   manifest: '/manifest-nutri.json',
@@ -18,42 +20,33 @@ export const metadata: Metadata = {
     icon: '/images/logo/nutri-quadrado.png',
     apple: '/images/logo/nutri-quadrado.png',
   },
-  // Título e descrição específicos para nutricionistas
   title: 'YLADA Nutri - Você precisa se tornar uma Nutri-Empresária',
   description: 'O sistema que guia nutricionistas a construir uma carreira organizada, lucrativa e segura — sem depender de indicação, sorte ou tentativa e erro.',
-  // URL canônica correta para a página Nutri
   alternates: {
     canonical: nutriPageUrl,
   },
-  // Metadados Open Graph específicos para nutricionistas
-  // IMPORTANTE: Define explicitamente todos os campos para garantir sobrescrita completa do layout raiz
   openGraph: {
-    title: 'YLADA Nutri - Você precisa se tornar uma Nutri-Empresária',
-    description: 'O sistema que guia nutricionistas a construir uma carreira organizada, lucrativa e segura — sem depender de indicação, sorte ou tentativa e erro.',
-    // URL correta - aponta para /pt/nutri, não para a raiz
+    title: ogTitle,
+    description: ogDescription,
     url: nutriPageUrl,
-    siteName: 'NUTRI - Your Leading Data System',
+    siteName: 'YLADA Nutri',
     type: 'website',
     locale: 'pt_BR',
-    // Array de imagens - DEVE usar a imagem OG do Nutri, não o logo genérico
-    // URL CORRETA: /images/og/nutri/default.jpg (com logo Nutri)
-    // NÃO usar: /images/logo/ylada/horizontal/azul-claro/ylada-horizontal-azul-claro-30.png
     images: [
       {
-        url: ogImageUrl, // https://www.ylada.com/images/og/nutri/default.jpg
-        width: 1200,
-        height: 630,
-        alt: 'YLADA Nutri - Sistema para Nutri-Empresárias',
+        url: ogImageUrl,
+        width: 1280,
+        height: 720,
+        alt: 'Assista o vídeo - Sistema de Conversas Ativas para Nutricionistas',
         type: 'image/jpeg',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'YLADA Nutri - Você precisa se tornar uma Nutri-Empresária',
-    description: 'O sistema que guia nutricionistas a construir uma carreira organizada, lucrativa e segura — sem depender de indicação, sorte ou tentativa e erro.',
-    // Usar a imagem OG do Nutri, não o logo genérico
-    images: [ogImageUrl], // /images/og/nutri/default.jpg com logo Nutri
+    title: ogTitle,
+    description: ogDescription,
+    images: [ogImageUrl],
   },
   // Sobrescrever metadados do layout raiz
   robots: {
