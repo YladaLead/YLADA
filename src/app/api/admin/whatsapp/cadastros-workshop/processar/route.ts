@@ -223,16 +223,11 @@ export async function POST(request: NextRequest) {
           .eq('sender_name', 'Carol - Secretária')
           .limit(1)
 
-        // Se não tem mensagem, enviar boas-vindas com opções (1/2) — sem pergunta 1/2/3 (nível).
+        // Se não tem mensagem, enviar boas-vindas (nutri: uma data fixa — próxima quarta 20h, sem opções 1/2)
         if (!existingMessages || existingMessages.length === 0) {
-          // Montar opções (1/2) no fuso de Brasília (sem link do Zoom)
-          let optionsText = ''
-          workshopSessions.forEach((sess, index) => {
-            const { weekday, date, time } = formatSessionPtBR(sess.starts_at)
-            optionsText += `*Opção ${index + 1}:*\n${weekday}, ${date}\n🕒 ${time} (horário de Brasília)\n\n`
-          })
+          const optionsTextNutri =
+            'A próxima aula será na **próxima quarta-feira às 20h** (horário de Brasília). Te mando o link por aqui antes da aula. Qualquer dúvida, é só me chamar! 😊'
 
-          // Templates editáveis (mesmos do fluxo pós-form): greeting + body
           const greetingTemplate = await getFlowTemplate('nutri', 'welcome_form_greeting')
           const bodyTemplate = await getFlowTemplate('nutri', 'welcome_form_body')
 
@@ -242,9 +237,9 @@ export async function POST(request: NextRequest) {
 
           const body = bodyTemplate
             ? applyTemplate(bodyTemplate, { nome: displayName })
-              .replace(/\[OPÇÕES inseridas automaticamente\]/gi, optionsText.trim())
-              .replace(/\{\{opcoes\}\}/gi, optionsText.trim())
-            : `Pra eu te encaixar na aula prática exclusiva para nutricionistas, escolhe um horário:\n\n${optionsText.trim()}\n\nMe responde só *1* ou *2* 😊`
+              .replace(/\[OPÇÕES inseridas automaticamente\]/gi, optionsTextNutri)
+              .replace(/\{\{opcoes\}\}/gi, optionsTextNutri)
+            : `Pra eu te encaixar na aula prática exclusiva para nutricionistas:\n\n${optionsTextNutri}`
 
           const message = `${String(greeting || '').trim()}\n\n${String(body || '').trim()}`.trim()
 

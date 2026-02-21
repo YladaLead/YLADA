@@ -19,12 +19,12 @@ const openai = new OpenAI({
 
 const WHATSAPP_NUMBER = '5519997230912' // Número principal
 
-/** Delay entre cada envio em disparos em massa (ms). Reduz risco de API/WhatsApp descartar e garante que todos recebam. */
-const BULK_SEND_DELAY_MS = 3000
+/** Delay entre cada envio em disparos em massa (ms). Evita mensagens chegando uma em cima da outra e reduz risco de API/WhatsApp. */
+const BULK_SEND_DELAY_MS = 6000
 /** A cada N envios bem-sucedidos, pausa entre blocos para não sobrecarregar. */
-const BULK_SEND_BLOCK_SIZE = 15
-/** Pausa entre blocos (ms). Ex.: 60s após cada 15 envios. */
-const BULK_SEND_PAUSE_BETWEEN_BLOCKS_MS = 60000
+const BULK_SEND_BLOCK_SIZE = 10
+/** Pausa entre blocos (ms). Ex.: 45s após cada 10 envios. */
+const BULK_SEND_PAUSE_BETWEEN_BLOCKS_MS = 45000
 
 /**
  * Aplica delay pós-envio e pausa entre blocos em disparos em massa.
@@ -207,6 +207,10 @@ function isLikelyPersonName(name: string | null | undefined): boolean {
   return hasSpace || !isAllCaps
 }
 
+/** Texto fixo da próxima aula para área nutri: uma data só (próxima quarta 20h), para quem ainda não participou. */
+const NUTRI_PROXIMA_AULA_FIXA =
+  'A próxima aula será na **próxima quarta-feira às 20h** (horário de Brasília). Te mando o link por aqui antes da aula. Qualquer dúvida, é só me chamar! 😊'
+
 async function buildFirstMessageOptionsBody(
   area: string,
   leadName: string,
@@ -214,24 +218,27 @@ async function buildFirstMessageOptionsBody(
 ): Promise<string> {
   // Esta mensagem é enviada após a saudação curta já ter sido enviada em separado.
   // Portanto, NÃO começa com "Oi" nem repete "Sou a Carol".
-  // Usa o template curto do fluxo (welcome_form_body), substituindo as opções e forçando CTA 1/2.
+  // Nutri: uma data fixa (próxima quarta 20h) para quem ainda não participou — sem opções 1/2.
   const { getFlowTemplate, applyTemplate } = await import('@/lib/whatsapp-flow-templates')
   const baseTemplate =
     (await getFlowTemplate(area || 'nutri', 'welcome_form_body')) ||
-    'A próxima aula é prática e vai te ajudar a ter mais constância pra preencher sua agenda.\n\nAs próximas aulas acontecerão nos seguintes dias e horários:\n\n[OPÇÕES inseridas automaticamente]\n\nResponde 1 ou 2 😊'
+    'A próxima aula é prática e vai te ajudar a ter mais constância pra preencher sua agenda.\n\n[OPÇÕES inseridas automaticamente]'
 
-  const optText = buildWorkshopOptionsText(sessions, 'bold')
-    .replace(/\n?💬[\s\S]*$/m, '')
-    .trim()
+  const isNutriSingleDate = (area || '') === 'nutri'
+  const optText = isNutriSingleDate
+    ? NUTRI_PROXIMA_AULA_FIXA
+    : buildWorkshopOptionsText(sessions, 'bold')
+        .replace(/\n?💬[\s\S]*$/m, '')
+        .trim()
 
-  const body = applyTemplate(baseTemplate, { nome: leadName })
+  let body = applyTemplate(baseTemplate, { nome: leadName })
     .replace(/\[OPÇÕES inseridas automaticamente\]/gi, `${optText}\n`)
     .replace(/\{\{opcoes\}\}/gi, `${optText}\n`)
     .trim()
 
-  // Garantir CTA consistente, mesmo se o template do admin tiver outro final.
-  if (!/responde\s*1\s*ou\s*2/i.test(body)) {
-    return `${body}\n\nResponde 1 ou 2 😊`
+  // Nutri: não pedir "Responde 1 ou 2" (só uma data). Outras áreas mantêm CTA 1/2.
+  if (!isNutriSingleDate && !/responde\s*1\s*ou\s*2/i.test(body)) {
+    body = `${body}\n\nResponde 1 ou 2 😊`
   }
   return body
 }
@@ -1822,15 +1829,26 @@ export async function processIncomingMessageWithCarol(
       }
     }
 
-    // Se a pessoa só confirmou interesse ("sim quero", "gostaria") no remarketing, enviar link da próxima sessão direto
+    // Se a pessoa confirmou interesse ("sim", "quero", "ok", etc.): enviar link da próxima sessão
+    // 1) Remarketing (não participou) ou 2) Fluxo nutri com uma data só (próxima quarta 20h) — quem ainda não recebeu link
     const isRemarketingNaoParticipou = tags.includes('nao_participou_aula') || tags.includes('remarketing_enviado')
     const isPositiveInterestReply =
-      /^(sim|quero|tenho\s+interesse|tenho\s+sim|gostaria|quero\s+sim|com\s+certeza|pode\s+ser|pode\s+encaixar|claro|por\s+favor|tem\s+interesse)$/i.test(msgNorm.trim()) ||
+      /^(sim|quero|tenho\s+interesse|tenho\s+sim|gostaria|quero\s+sim|com\s+certeza|pode\s+ser|pode\s+encaixar|claro|por\s+favor|tem\s+interesse|ok|beleza|tudo\s+bem)$/i.test(msgNorm.trim()) ||
       /^(sim\s+quero|quero\s+sim|gostaria\s+sim|sim\s+gostaria)$/i.test(msgNorm.trim())
-    if (!selectedSession && workshopSessions.length > 0 && isRemarketingNaoParticipou && isPositiveInterestReply) {
+    const naoRecebeuLinkAinda = !tags.includes('recebeu_link_workshop') && !workshopSessionId
+    const noFluxoWorkshopAindaSemLink =
+      (tags.includes('veio_aula_pratica') || firstMessageIsWorkshop) && naoRecebeuLinkAinda
+    if (
+      !selectedSession &&
+      workshopSessions.length > 0 &&
+      isPositiveInterestReply &&
+      (isRemarketingNaoParticipou || noFluxoWorkshopAindaSemLink)
+    ) {
       selectedSession = workshopSessions[0]
-      console.log('[Carol AI] ✅ Confirmação de interesse no remarketing: enviando link da próxima sessão direto', {
+      console.log('[Carol AI] ✅ Confirmação de interesse: enviando link da próxima sessão', {
         sessionId: selectedSession.id,
+        remarketing: isRemarketingNaoParticipou,
+        fluxoNutriUmaData: noFluxoWorkshopAindaSemLink,
         message: msgNorm.substring(0, 50),
       })
     }
@@ -2218,21 +2236,26 @@ Nos vemos em breve! 😊
     const carolInstructionFromContext = (context as any)?.carol_instruction
     let carolInstruction: string | undefined
     if (isMessageFromButton && !isFirstMessage) {
-      const fmtOpt = (s: { starts_at: string }) => {
-        const d = new Date(s.starts_at)
-        const w = d.toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo', weekday: 'long' })
-        const t = d.toLocaleTimeString('pt-BR', { timeZone: 'America/Sao_Paulo', hour: '2-digit', minute: '2-digit' })
-        return `${w.charAt(0).toUpperCase() + w.slice(1)} ${t}`
+      const isNutriSingleDate = (area || '') === 'nutri'
+      if (isNutriSingleDate) {
+        carolInstruction = `A pessoa acabou de clicar no botão do workshop ("Acabei de me inscrever... gostaria de agendar"). NÃO repita boas-vindas. Diga em 1–2 frases que a próxima aula é na próxima quarta-feira às 20h e que você vai mandar o link por aqui antes da aula. Exemplo: "Oi! A próxima aula é na próxima quarta às 20h. Te mando o link por aqui antes da aula. Qualquer dúvida, é só me chamar! 😊"`
+      } else {
+        const fmtOpt = (s: { starts_at: string }) => {
+          const d = new Date(s.starts_at)
+          const w = d.toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo', weekday: 'long' })
+          const t = d.toLocaleTimeString('pt-BR', { timeZone: 'America/Sao_Paulo', hour: '2-digit', minute: '2-digit' })
+          return `${w.charAt(0).toUpperCase() + w.slice(1)} ${t}`
+        }
+        const optionRecap =
+          workshopSessions.length >= 2
+            ? `Opção 1 ${fmtOpt(workshopSessions[0])}, Opção 2 ${fmtOpt(workshopSessions[1])}`
+            : workshopSessions.length === 1
+              ? `Opção 1 ${fmtOpt(workshopSessions[0])}`
+              : ''
+        carolInstruction = optionRecap
+          ? `A pessoa acabou de clicar no botão do workshop ("Acabei de me inscrever... gostaria de agendar"). NÃO repita boas-vindas nem a lista completa de opções. Seja educada: faça um resumo curto das opções que já foram enviadas e pergunte qual horário funciona melhor. Responda usando exatamente este formato: "Oi! Como te enviei em cima: ${optionRecap}. Qual desses horários funciona melhor para você? 😊"`
+          : 'A pessoa acabou de clicar no botão do workshop ("Acabei de me inscrever... gostaria de agendar"). NÃO repita boas-vindas nem a lista de opções. Responda em 1–2 frases, de forma educada: as opções foram enviadas acima (ou estão chegando) e pergunte qual horário funciona melhor. Exemplo: "Oi! As opções já foram enviadas na mensagem acima. Qual delas funciona melhor para você? 😊"'
       }
-      const optionRecap =
-        workshopSessions.length >= 2
-          ? `Opção 1 ${fmtOpt(workshopSessions[0])}, Opção 2 ${fmtOpt(workshopSessions[1])}`
-          : workshopSessions.length === 1
-            ? `Opção 1 ${fmtOpt(workshopSessions[0])}`
-            : ''
-      carolInstruction = optionRecap
-        ? `A pessoa acabou de clicar no botão do workshop ("Acabei de me inscrever... gostaria de agendar"). NÃO repita boas-vindas nem a lista completa de opções. Seja educada: faça um resumo curto das opções que já foram enviadas e pergunte qual horário funciona melhor. Responda usando exatamente este formato: "Oi! Como te enviei em cima: ${optionRecap}. Qual desses horários funciona melhor para você? 😊"`
-        : 'A pessoa acabou de clicar no botão do workshop ("Acabei de me inscrever... gostaria de agendar"). NÃO repita boas-vindas nem a lista de opções. Responda em 1–2 frases, de forma educada: as opções foram enviadas acima (ou estão chegando) e pergunte qual horário funciona melhor. Exemplo: "Oi! As opções já foram enviadas na mensagem acima. Qual delas funciona melhor para você? 😊"'
     } else if (isShortNeutralReply && (formAlreadySentWelcome || workshopSessions.length > 0)) {
       // Exceção: remarketing "não participou" — pessoa respondeu que TEM INTERESSE ("Sim", "Quero") → enviar opções de aula, NÃO "Qualquer dúvida..."
       const isRemarketingNaoParticipou = tags.includes('nao_participou_aula') || tags.includes('remarketing_enviado')
@@ -2250,7 +2273,12 @@ Nos vemos em breve! 😊
         // Puxar para fechamento com 1 pergunta simples, sem "script" de primeira conversa.
         carolInstruction = `Esta pessoa JÁ PARTICIPOU da aula (tag Participou). Você DEVE responder em 1–2 frases, SEM saudação e SEM boas-vindas.\n\nObjetivo: avançar para fechamento. Faça 1 pergunta simples para decidir o próximo passo (ex.: "Você prefere começar no mensal ou no anual?").`
       } else if (isRemarketingNaoParticipou && isPositiveInterestReply && workshopSessions.length > 0) {
-        carolInstruction = `A pessoa acabou de responder que TEM INTERESSE ao remarketing ("Você ainda tem interesse em participar?"). Ela disse algo como "Tenho sim".
+        const isNutriSingleDate = (area || '') === 'nutri'
+        carolInstruction = isNutriSingleDate
+          ? `A pessoa acabou de responder que TEM INTERESSE ao remarketing. Ela disse algo como "Tenho sim".
+
+Você DEVE responder de forma curta e objetiva, SEM saudação e SEM boas-vindas. Diga que a próxima aula é na próxima quarta-feira às 20h e que você vai mandar o link por aqui antes da aula. Exemplo: "A próxima aula é na próxima quarta às 20h. Te mando o link por aqui antes da aula. Qualquer dúvida, é só me chamar! 😊"`
+          : `A pessoa acabou de responder que TEM INTERESSE ao remarketing ("Você ainda tem interesse em participar?"). Ela disse algo como "Tenho sim".
 
 Você DEVE responder de forma curta e objetiva, SEM saudação e SEM boas-vindas. PROIBIDO escrever "Oi", "tudo bem", "Seja bem-vinda" ou "Eu sou a Carol". NÃO faça explicação longa.
 

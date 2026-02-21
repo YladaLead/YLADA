@@ -204,26 +204,36 @@ export async function sendWorkshopInviteToFormLead(
       message1Greeting = greetingLines.join('\n\n')
     }
 
-    // Mensagem 2: texto da aula + opções (template editável ou padrão)
-    let optionsText = ''
-    sessions.forEach((sess, index) => {
-      const { weekday, date, time } = formatSessionPtBR(sess.starts_at)
-      optionsText += `*Opção ${index + 1}:*\n${weekday}, ${date}\n🕒 ${time} (horário de Brasília)\n\n`
-    })
+    // Mensagem 2: texto da aula + data (nutri: uma data fixa — próxima quarta 20h; outras áreas: opções 1/2)
+    const isNutriSingleDate = area === 'nutri'
+    let optionsText: string
+    if (isNutriSingleDate) {
+      optionsText =
+        'A próxima aula será na **próxima quarta-feira às 20h** (horário de Brasília). Te mando o link por aqui antes da aula. Qualquer dúvida, é só me chamar! 😊'
+    } else {
+      optionsText = ''
+      sessions.forEach((sess, index) => {
+        const { weekday, date, time } = formatSessionPtBR(sess.starts_at)
+        optionsText += `*Opção ${index + 1}:*\n${weekday}, ${date}\n🕒 ${time} (horário de Brasília)\n\n`
+      })
+      optionsText = optionsText.trim()
+    }
     let message2Body: string
     const bodyTemplate = await getFlowTemplate(area, 'welcome_form_body')
     if (bodyTemplate) {
       message2Body = applyTemplate(bodyTemplate, { nome: displayName })
-        .replace(/\[OPÇÕES inseridas automaticamente\]/gi, optionsText.trim())
-        .replace(/\{\{opcoes\}\}/gi, optionsText.trim())
+        .replace(/\[OPÇÕES inseridas automaticamente\]/gi, optionsText)
+        .replace(/\{\{opcoes\}\}/gi, optionsText)
     } else {
-      message2Body = `Obrigada por se inscrever na Aula Prática ao Vivo – Agenda Cheia para Nutricionistas.
+      message2Body = isNutriSingleDate
+        ? `Obrigada por se inscrever na Aula Prática ao Vivo – Agenda Cheia para Nutricionistas.\n\nEssa aula é 100% prática e foi criada para ajudar nutricionistas que estão com agenda ociosa a organizar, atrair e preencher atendimentos de forma mais leve e estratégica.\n\n${optionsText}`
+        : `Obrigada por se inscrever na Aula Prática ao Vivo – Agenda Cheia para Nutricionistas.
 
 Essa aula é 100% prática e foi criada para ajudar nutricionistas que estão com agenda ociosa a organizar, atrair e preencher atendimentos de forma mais leve e estratégica.
 
 As próximas aulas ao vivo vão acontecer nos seguintes dias e horários:
 
-${optionsText}💬 Qual você prefere? 💚`
+${optionsText}\n\n💬 Qual você prefere? 💚`
     }
 
     // 5.5 Evitar reenviar opções se já enviamos ou se a pessoa já nos chamou (recheck após 60s — evita corrida)
