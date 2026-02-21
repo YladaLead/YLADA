@@ -89,9 +89,6 @@ export default function NutriLandingPage() {
                 <p className="text-sm text-white/90 mt-4">
                   Sem depender de indicação, reels ou sorte.
                 </p>
-                <a href="#planos" className="text-xs text-white/80 mt-3 underline hover:text-white transition-colors">
-                  Ver planos
-                </a>
               </div>
             </div>
           </div>
