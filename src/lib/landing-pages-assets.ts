@@ -56,11 +56,17 @@ export const landingPageVideos = {
     return getLandingPageAssetUrl('wellness-hero-poster.png')
   },
   get nutriHero() {
-    // Local: public/videos/nutri-hero.mp4 — aumente a versão ao trocar o vídeo para evitar cache antigo
+    // Vídeo está no .gitignore (muito grande); em produção usar Supabase. Dev: fallback local se não houver Supabase.
+    if (supabase) {
+      return getLandingPageAssetUrl('nutri-hero.mp4')
+    }
     const version = 6
     return `/videos/nutri-hero.mp4?v=${version}`
   },
   get nutriHeroPoster() {
+    if (supabase) {
+      return getLandingPageAssetUrl('nutri-hero-poster.jpg')
+    }
     const version = 7
     return `/videos/nutri-hero-poster.jpg?v=${version}`
   },
