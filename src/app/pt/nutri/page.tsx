@@ -4,17 +4,33 @@ import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import LyaSalesWidget from '@/components/nutri/LyaSalesWidget'
-import { trackNutriSalesView } from '@/lib/facebook-pixel'
+import { trackNutriSalesView, trackInitiateCheckout, trackNutriCheckoutMonthly, trackNutriCheckoutAnnual } from '@/lib/facebook-pixel'
 import { landingPageVideos } from '@/lib/landing-pages-assets'
 
 export default function NutriLandingPage() {
   const [faqOpen, setFaqOpen] = useState<number | null>(null)
   const [lyaWidgetOpen, setLyaWidgetOpen] = useState(false)
   const videoRef = useRef<HTMLVideoElement>(null)
+  const videoContainerRef = useRef<HTMLDivElement>(null)
   const [videoPlaying, setVideoPlaying] = useState(false)
+  const [isFullscreen, setIsFullscreen] = useState(false)
 
   useEffect(() => {
     trackNutriSalesView()
+  }, [])
+
+  useEffect(() => {
+    const onFullscreenChange = () => setIsFullscreen(!!document.fullscreenElement)
+    document.addEventListener('fullscreenchange', onFullscreenChange)
+    const video = videoRef.current
+    const onWebKitEndFullscreen = () => setIsFullscreen(false)
+    if (video) {
+      video.addEventListener('webkitendfullscreen', onWebKitEndFullscreen)
+    }
+    return () => {
+      document.removeEventListener('fullscreenchange', onFullscreenChange)
+      if (video) video.removeEventListener('webkitendfullscreen', onWebKitEndFullscreen)
+    }
   }, [])
 
   const toggleFaq = (index: number) => {
@@ -26,7 +42,19 @@ export default function NutriLandingPage() {
   }
 
   const handleCheckout = (plan: 'monthly' | 'annual' = 'annual') => {
+    if (plan === 'monthly') trackNutriCheckoutMonthly()
+    else trackNutriCheckoutAnnual()
     window.location.href = `/pt/nutri/checkout?plan=${plan}`
+  }
+
+  const handleMainCtaClick = () => {
+    trackInitiateCheckout({
+      content_name: 'CTA Quero aplicar o método Nutri',
+      content_category: 'NUTRI',
+      value: 708,
+      currency: 'BRL',
+    })
+    trackNutriCheckoutAnnual()
   }
 
   const toggleVideo = () => {
@@ -38,6 +66,45 @@ export default function NutriLandingPage() {
     } else {
       video.pause()
       setVideoPlaying(false)
+    }
+  }
+
+  const toggleFullscreen = async (e: React.MouseEvent) => {
+    e.stopPropagation()
+    const video = videoRef.current
+    const container = videoContainerRef.current
+    // iOS: vídeo em tela cheia permite assistir deitado (landscape)
+    const videoEl = video as HTMLVideoElement & { webkitEnterFullscreen?: () => void }
+    if (videoEl?.webkitEnterFullscreen && !document.fullscreenElement) {
+      try {
+        videoEl.webkitEnterFullscreen()
+        setIsFullscreen(true)
+      } catch {
+        if (container) {
+          try {
+            await container.requestFullscreen()
+            setIsFullscreen(true)
+          } catch {}
+        }
+      }
+      return
+    }
+    if (!container) return
+    try {
+      if (!document.fullscreenElement) {
+        await container.requestFullscreen()
+        setIsFullscreen(true)
+      } else {
+        await document.exitFullscreen()
+        setIsFullscreen(false)
+      }
+    } catch {
+      try {
+        if (document.fullscreenElement) {
+          await document.exitFullscreen()
+          setIsFullscreen(false)
+        }
+      } catch {}
     }
   }
 
@@ -82,6 +149,7 @@ export default function NutriLandingPage() {
               <div className="flex flex-col items-center">
                 <Link
                   href="/pt/nutri/checkout"
+                  onClick={handleMainCtaClick}
                   className="inline-flex items-center justify-center w-full sm:w-auto max-w-md px-8 py-4 rounded-xl bg-white text-[#2563EB] font-bold text-lg hover:bg-white/95 transition-all shadow-2xl shadow-black/25 hover:shadow-[0_20px_40px_-12px_rgba(0,0,0,0.35)]"
                 >
                   👉 Quero aplicar o método na minha agenda
@@ -102,6 +170,7 @@ export default function NutriLandingPage() {
                 👉 Assista e entenda por que sua agenda oscila.
               </p>
               <div
+                ref={videoContainerRef}
                 role="button"
                 tabIndex={0}
                 onClick={toggleVideo}
@@ -127,10 +196,23 @@ export default function NutriLandingPage() {
                     </span>
                   </div>
                 )}
+                <button
+                  type="button"
+                  onClick={toggleFullscreen}
+                  className="absolute bottom-3 right-3 p-3 sm:p-2 rounded-xl bg-black/50 hover:bg-black/70 text-white transition-colors z-10 touch-manipulation min-w-[44px] min-h-[44px] sm:min-w-0 sm:min-h-0 flex items-center justify-center"
+                  aria-label={isFullscreen ? 'Sair da tela cheia' : 'Tela cheia (assistir ampliado / deitado)'}
+                >
+                  {isFullscreen ? (
+                    <svg className="w-6 h-6 sm:w-5 sm:h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z"/></svg>
+                  ) : (
+                    <svg className="w-6 h-6 sm:w-5 sm:h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>
+                  )}
+                </button>
               </div>
               <div className="flex flex-wrap justify-center gap-3 mt-6">
                 <Link
                   href="/pt/nutri/checkout"
+                  onClick={handleMainCtaClick}
                   className="inline-flex items-center justify-center px-8 py-3 rounded-xl bg-[#2563EB] text-white font-semibold hover:bg-[#1D4ED8] transition-colors"
                 >
                   Quero aplicar o método
@@ -413,6 +495,7 @@ export default function NutriLandingPage() {
               </p>
               <Link
                 href="/pt/nutri/checkout"
+                onClick={handleMainCtaClick}
                 className="inline-flex items-center justify-center px-8 py-4 rounded-xl text-lg font-bold bg-gradient-to-r from-[#2563EB] to-[#3B82F6] text-white hover:from-[#1D4ED8] hover:to-[#2563EB] transition-all shadow-lg"
               >
                 👉 Quero aplicar o método na minha agenda
