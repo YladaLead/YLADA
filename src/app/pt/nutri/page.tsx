@@ -74,37 +74,25 @@ export default function NutriLandingPage() {
                 Sistema de Conversas Ativas para Nutricionistas
               </h1>
               <p className="text-lg sm:text-xl text-white/95 mb-3">
-                Pare de depender de indicação, reels e sorte para encher sua agenda.
+                Se sua agenda oscila todo mês, o problema não é falta de pacientes. É falta de sistema.
               </p>
               <p className="text-base sm:text-lg font-medium italic text-white/90 mb-6">
                 Venda não nasce do post. Nasce da conversa.
               </p>
-              <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
+              <div className="flex flex-col items-center">
                 <Link
                   href="/pt/nutri/checkout"
-                  className="inline-flex items-center justify-center w-full sm:w-auto px-8 py-4 rounded-xl bg-white text-[#2563EB] font-bold text-lg hover:bg-white/95 transition-all shadow-2xl shadow-black/25 hover:shadow-[0_20px_40px_-12px_rgba(0,0,0,0.35)]"
+                  className="inline-flex items-center justify-center w-full sm:w-auto max-w-md px-8 py-4 rounded-xl bg-white text-[#2563EB] font-bold text-lg hover:bg-white/95 transition-all shadow-2xl shadow-black/25 hover:shadow-[0_20px_40px_-12px_rgba(0,0,0,0.35)]"
                 >
-                  👉 Começar com o YLADA agora
+                  👉 Quero aplicar o método na minha agenda
                 </Link>
-                <a
-                  href="#video"
-                  className="inline-flex items-center justify-center w-full sm:w-auto px-6 py-3 rounded-xl border-2 border-white/80 text-white text-sm font-medium hover:bg-white/10 transition-colors"
-                >
-                  Ver vídeo
-                </a>
-                <a
-                  href="#planos"
-                  className="inline-flex items-center justify-center w-full sm:w-auto px-6 py-3 rounded-xl border-2 border-white/60 text-white/95 text-sm font-medium hover:bg-white/10 transition-colors"
-                >
+                <p className="text-sm text-white/90 mt-4">
+                  Sem depender de indicação, reels ou sorte.
+                </p>
+                <a href="#planos" className="text-xs text-white/80 mt-3 underline hover:text-white transition-colors">
                   Ver planos
                 </a>
               </div>
-              <p className="text-sm text-white/85 mt-4">
-                Já aplicado por nutricionistas que querem agenda previsível.
-              </p>
-              <p className="text-xs text-white/75 mt-1">
-                Sem fidelidade no plano mensal.
-              </p>
             </div>
           </div>
         </section>
@@ -113,8 +101,8 @@ export default function NutriLandingPage() {
         <section id="video" className="py-10 sm:py-14 bg-white scroll-mt-4">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="max-w-3xl mx-auto">
-              <p className="text-center text-gray-600 mb-4 text-sm sm:text-base">
-                Assista e entenda por que método faz a diferença.
+              <p className="text-center text-gray-700 mb-4 text-sm sm:text-base font-medium">
+                👉 Assista e entenda por que sua agenda oscila.
               </p>
               <div
                 role="button"
@@ -175,7 +163,7 @@ export default function NutriLandingPage() {
           </div>
         </section>
 
-        {/* 4️⃣ Você já se sentiu assim? — âncora emocional + punchline em destaque */}
+        {/* 4️⃣ Você já se sentiu assim? — âncora emocional; punchline sozinha, maior, soco */}
         <section className="py-10 sm:py-12 bg-white">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="max-w-xl mx-auto text-center">
@@ -185,13 +173,13 @@ export default function NutriLandingPage() {
               <h2 className="text-xl font-bold text-[#1A1A1A] mb-4">
                 Você já se sentiu assim?
               </h2>
-              <ul className="space-y-2 text-gray-700 text-left inline-block mb-6">
+              <ul className="space-y-2 text-gray-700 text-left inline-block mb-10">
                 <li>• Agenda vazia</li>
                 <li>• Dúvida na cobrança</li>
                 <li>• Sensação constante de recomeçar</li>
                 <li>• Falta de clareza do próximo passo</li>
               </ul>
-              <p className="text-2xl sm:text-3xl font-bold text-[#1A1A1A] text-center leading-tight">
+              <p className="text-3xl sm:text-4xl font-black text-[#1A1A1A] text-center leading-tight py-6 px-2">
                 O problema não é você. É falta de método.
               </p>
             </div>
@@ -208,7 +196,7 @@ export default function NutriLandingPage() {
               <p className="text-lg text-gray-700 mb-6 text-center">
                 YLADA Nutri é a aplicação prática do Sistema de Conversas Ativas.
               </p>
-              <p className="text-gray-700 font-medium mb-3 text-left">Você terá:</p>
+              <p className="text-gray-700 font-medium mb-3 text-left">Dentro do YLADA Nutri você recebe:</p>
               <ul className="space-y-3 text-gray-700 mb-6 text-left">
                 <li className="flex items-start gap-3">
                   <span className="shrink-0 w-8 h-8 rounded-lg bg-[#2563EB]/10 flex items-center justify-center">
@@ -252,6 +240,9 @@ export default function NutriLandingPage() {
         <section className="py-10 sm:py-14 bg-white">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="max-w-4xl mx-auto">
+              <p className="text-center text-gray-700 font-medium mb-2">
+                👉 Você não precisa de mais conteúdo. Você precisa de estrutura.
+              </p>
               <h2 className="text-xl font-bold text-[#1A1A1A] mb-6 text-center">
                 Método resumido
               </h2>
@@ -312,8 +303,8 @@ export default function NutriLandingPage() {
               <h2 className="text-2xl sm:text-3xl font-bold text-center text-white mb-2">
                 Escolha seu plano
               </h2>
-              <p className="text-center text-white/90 mb-8">
-                Aqui é onde a decisão acontece.
+              <p className="text-center text-white/95 mb-8 text-lg">
+                Se você já entendeu que precisa de método, aqui é onde decide aplicar.
               </p>
 
               <div className="grid sm:grid-cols-2 gap-6">
@@ -323,7 +314,7 @@ export default function NutriLandingPage() {
                   <p className="text-3xl font-bold text-[#2563EB]">R$ 97<span className="text-base font-normal text-gray-600">/mês</span></p>
                   <p className="text-sm text-gray-600 mt-2">Sem fidelidade</p>
                   <p className="text-sm text-gray-600 mt-0.5">Pode cancelar quando quiser</p>
-                  <p className="text-xs text-gray-500 mt-2 italic">Para quem quer testar primeiro.</p>
+                  <p className="text-sm text-gray-700 mt-2 font-medium">Ideal para testar o método sem compromisso.</p>
                   <p className="text-sm text-gray-600 mt-3 flex items-center justify-center gap-1.5">
                     <span>🛡️</span> Garantia 7 dias
                   </p>
@@ -344,7 +335,7 @@ export default function NutriLandingPage() {
                   <p className="text-sm text-gray-600 mt-1">Total R$ 708</p>
                   <p className="text-sm font-semibold text-emerald-600 mt-1">Economia de R$ 456 no ano</p>
                   <p className="text-xs font-medium text-gray-600 mt-1">Menos de R$ 2 por dia para ter agenda previsível.</p>
-                  <p className="text-sm text-gray-700 mt-2">Compromisso com crescimento real</p>
+                  <p className="text-sm text-gray-700 mt-2 font-medium">Para nutricionistas que decidiram parar de viver de instabilidade.</p>
                   <p className="text-sm text-gray-600 mt-3 flex items-center justify-center gap-1.5">
                     <span>🛡️</span> Garantia 7 dias
                   </p>
@@ -388,10 +379,11 @@ export default function NutriLandingPage() {
               </h2>
               <div className="space-y-3">
                 {[
-                  { pergunta: 'Para quem é?', resposta: 'Nutricionistas que querem encher agenda com método, não improviso.' },
-                  { pergunta: 'Posso cancelar?', resposta: 'Mensal: sim, quando quiser. Anual: compromisso de 12 meses.' },
-                  { pergunta: 'Como é o suporte?', resposta: 'Noel (orientação) + suporte humano quando precisar.' },
-                  { pergunta: 'E se não gostar?', resposta: '7 dias de garantia. Devolvemos 100%, sem burocracia.' },
+                  { pergunta: 'Para quem é?', resposta: 'Para nutricionistas que querem encher agenda com método, não com indicação ou sorte. Se você quer captação previsível e clareza no próximo passo, é pra você.' },
+                  { pergunta: 'Posso cancelar?', resposta: 'Você tem 7 dias de garantia para testar: tanto no plano mensal quanto no anual. Se não fizer sentido, devolvemos 100%. No mensal, depois da garantia você cancela quando quiser. No anual, o compromisso é de 12 meses — mas os 7 primeiros dias são sem risco.' },
+                  { pergunta: 'Como é o suporte?', resposta: 'O Noel te orienta no dia a dia (o que fazer, onde focar). Quando precisar de pessoa real, tem suporte humano. Você não fica sozinha.' },
+                  { pergunta: 'E se não gostar?', resposta: 'Em até 7 dias você pede reembolso e devolvemos 100%. Sem burocracia, sem julgamento. O risco é nosso.' },
+                  { pergunta: 'Quando começo a usar?', resposta: 'Assim que concluir o pagamento você já acessa. Não tem fila: começa hoje.' },
                 ].map((item, index) => (
                   <div key={index} className="bg-white rounded-xl shadow-sm overflow-hidden">
                     <button
@@ -402,7 +394,7 @@ export default function NutriLandingPage() {
                       <span className="text-[#2563EB] text-xl flex-shrink-0 transition-transform duration-300">{faqOpen === index ? '−' : '+'}</span>
                     </button>
                     <div
-                      className={`overflow-hidden transition-all duration-300 ease-out ${faqOpen === index ? 'max-h-40 opacity-100' : 'max-h-0 opacity-0'}`}
+                      className={`overflow-hidden transition-all duration-300 ease-out ${faqOpen === index ? 'max-h-56 opacity-100' : 'max-h-0 opacity-0'}`}
                     >
                       <div className="px-5 py-4 bg-gray-50 border-t border-gray-100">
                         <p className="text-gray-700 text-sm">{item.resposta}</p>
@@ -415,25 +407,19 @@ export default function NutriLandingPage() {
           </div>
         </section>
 
-        {/* CTA final — urgência psicológica */}
+        {/* CTA final — uma direção, limpo e direto */}
         <section className="py-10 sm:py-12 bg-white border-t border-gray-100">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="max-w-xl mx-auto text-center">
-              <p className="text-base text-gray-700 mb-2">
-                Você não precisa continuar rolando.
-              </p>
-              <p className="text-sm text-gray-600 mb-4">
-                Decidir continuar como está também é uma decisão.
+              <p className="text-lg font-semibold text-gray-800 mb-6">
+                Continuar como está também é uma decisão.
               </p>
               <Link
                 href="/pt/nutri/checkout"
                 className="inline-flex items-center justify-center px-8 py-4 rounded-xl text-lg font-bold bg-gradient-to-r from-[#2563EB] to-[#3B82F6] text-white hover:from-[#1D4ED8] hover:to-[#2563EB] transition-all shadow-lg"
               >
-                👉 Começar com o YLADA agora
+                👉 Quero aplicar o método na minha agenda
               </Link>
-              <p className="text-xs text-gray-500 mt-2">
-                Você pode cancelar quando quiser.
-              </p>
             </div>
           </div>
         </section>
