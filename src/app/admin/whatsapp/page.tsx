@@ -628,6 +628,13 @@ function WhatsAppChatContent() {
       'cliente_nutri': { label: 'Cliente Nutri', color: 'bg-green-200 text-green-800', icon: '🎉' },
       'perdeu': { label: 'Perdeu', color: 'bg-gray-200 text-gray-700', icon: '😔' },
       
+      // Remate (quem já recebeu 2ª ou 3ª msg — não repete)
+      'recebeu_lembrete_fechamento': { label: '2ª remate participou', color: 'bg-emerald-100 text-emerald-800', icon: '📩' },
+      'recebeu_3a_msg_fechamento': { label: '3ª remate participou', color: 'bg-emerald-200 text-emerald-900', icon: '📩📩' },
+      'recebeu_2a_remate_nao_participou': { label: '2ª remate não participou', color: 'bg-amber-100 text-amber-800', icon: '📩' },
+      'recebeu_3a_remate_nao_participou': { label: '3ª remate não participou', color: 'bg-amber-200 text-amber-900', icon: '📩📩' },
+      'recebeu_remate_valor_novo': { label: 'Remate valor novo', color: 'bg-slate-200 text-slate-800', icon: '💰' },
+      
       // Extras
       'retorno': { label: 'Retorno', color: 'bg-cyan-100 text-cyan-700', icon: '🔄' },
       'urgencia': { label: 'Urgência', color: 'bg-red-200 text-red-800', icon: '⚡' },

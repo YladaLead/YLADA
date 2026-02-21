@@ -32,6 +32,10 @@ export async function GET(request: NextRequest) {
     fimDia.setHours(23, 59, 59, 999)
     const fimDiaISO = fimDia.toISOString()
 
+    // Início e fim do mês (para conversas este mês)
+    const inicioMes = new Date(hoje.getFullYear(), hoje.getMonth(), 1, 0, 0, 0, 0).toISOString()
+    const fimMes = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0, 23, 59, 59, 999).toISOString()
+
     // Buscar leads do dia
     const { data: leadsHoje, error: leadsError } = await supabaseAdmin
       .from('leads')
@@ -67,12 +71,91 @@ export async function GET(request: NextRequest) {
       console.error('Erro ao buscar atendimentos agendados:', atendimentosError)
     }
 
+    // Leads criados este mês (fallback quando link_events não existir)
+    const { data: leadsEsteMes, error: leadsMesError } = await supabaseAdmin
+      .from('leads')
+      .select('id')
+      .eq('user_id', authenticatedUserId)
+      .gte('created_at', inicioMes)
+      .lte('created_at', fimMes)
+
+    if (leadsMesError) {
+      console.error('Erro ao buscar leads do mês:', leadsMesError)
+    }
+
+    // Conversas este mês: priorizar contagem unificada (whatsapp_click + lead_capture em link_events)
+    let conversasEsteMes = leadsEsteMes?.length ?? 0
+    const { data: linkEventsMes, error: linkEventsMesError } = await supabaseAdmin
+      .from('link_events')
+      .select('id')
+      .eq('user_id', authenticatedUserId)
+      .eq('area', 'nutri')
+      .in('event_type', ['whatsapp_click', 'lead_capture'])
+      .gte('created_at', inicioMes)
+      .lte('created_at', fimMes)
+
+    if (!linkEventsMesError && linkEventsMes) {
+      conversasEsteMes = linkEventsMes.length
+    }
+
+    // Conversas esta semana (para Noel e meta semanal: X/meta)
+    const diasDesdeSegunda = (hoje.getDay() + 6) % 7
+    const inicioSemana = new Date(hoje)
+    inicioSemana.setDate(hoje.getDate() - diasDesdeSegunda)
+    inicioSemana.setHours(0, 0, 0, 0)
+    const fimSemana = new Date(inicioSemana)
+    fimSemana.setDate(inicioSemana.getDate() + 6)
+    fimSemana.setHours(23, 59, 59, 999)
+    const inicioSemanaISO = inicioSemana.toISOString()
+    const fimSemanaISO = fimSemana.toISOString()
+
+    let conversasEstaSemana = 0
+    const { data: linkEventsSemana, error: linkEventsSemanaError } = await supabaseAdmin
+      .from('link_events')
+      .select('id')
+      .eq('user_id', authenticatedUserId)
+      .eq('area', 'nutri')
+      .in('event_type', ['whatsapp_click', 'lead_capture'])
+      .gte('created_at', inicioSemanaISO)
+      .lte('created_at', fimSemanaISO)
+
+    if (!linkEventsSemanaError && linkEventsSemana) {
+      conversasEstaSemana = linkEventsSemana.length
+    } else {
+      // Fallback: leads criados na semana (quando link_events não existir ou falhar)
+      const { data: leadsEstaSemana } = await supabaseAdmin
+        .from('leads')
+        .select('id')
+        .eq('user_id', authenticatedUserId)
+        .gte('created_at', inicioSemanaISO)
+        .lte('created_at', fimSemanaISO)
+      conversasEstaSemana = leadsEstaSemana?.length ?? 0
+    }
+
+    // Meta semanal configurável (user_profiles.meta_conversas_semana); default 5
+    let metaSemanal = 5
+    try {
+      const { data: profile } = await supabaseAdmin
+        .from('user_profiles')
+        .select('meta_conversas_semana')
+        .eq('user_id', authenticatedUserId)
+        .maybeSingle()
+      if (profile?.meta_conversas_semana != null && profile.meta_conversas_semana >= 1 && profile.meta_conversas_semana <= 50) {
+        metaSemanal = profile.meta_conversas_semana
+      }
+    } catch {
+      // Coluna pode não existir ainda (migration não aplicada)
+    }
+
     return NextResponse.json({
       success: true,
       data: {
         leadsHoje: leadsHoje?.length || 0,
         conversasAtivas: conversasAtivas?.length || 0,
-        atendimentosAgendados: atendimentosAgendados?.length || 0
+        atendimentosAgendados: atendimentosAgendados?.length || 0,
+        conversasEsteMes,
+        conversasEstaSemana,
+        metaSemanal
       }
     })
 

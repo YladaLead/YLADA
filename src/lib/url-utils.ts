@@ -40,11 +40,11 @@ export function buildWellnessToolUrlFallback(toolId: string): string {
 }
 
 /**
- * Constrói URL completa para uma ferramenta nutri
+ * Constrói URL completa para uma ferramenta nutri (mesmo padrão da área Captar)
  */
-export function buildNutriToolUrl(userSlug: string, toolSlug: string): string {
-  const baseUrl = getAppUrl()
-  return `${baseUrl}/pt/nutri/${userSlug}/${toolSlug}`
+export function buildNutriToolUrl(userSlug: string, toolSlug: string, baseUrl?: string): string {
+  const base = baseUrl ?? getAppUrl()
+  return `${base.replace(/\/$/, '')}/pt/nutri/${userSlug}/${toolSlug}`
 }
 
 /**
@@ -69,6 +69,14 @@ export function buildCoachToolUrl(userSlug: string, toolSlug: string): string {
 export function buildCoachToolUrlFallback(toolId: string): string {
   const baseUrl = getAppUrl()
   return `${baseUrl}/pt/c/ferramenta/${toolId}`
+}
+
+/**
+ * Constrói URL completa para um quiz nutri (mesmo padrão da área Captar / rota [user-slug]/quiz/[slug])
+ */
+export function buildNutriQuizUrl(userSlug: string, quizSlug: string, baseUrl?: string): string {
+  const base = baseUrl ?? getAppUrl()
+  return `${base.replace(/\/$/, '')}/pt/nutri/${userSlug}/quiz/${quizSlug}`
 }
 
 /**

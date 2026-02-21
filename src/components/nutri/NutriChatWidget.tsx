@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react'
 import { useAuthenticatedFetch } from '@/hooks/useAuthenticatedFetch'
 import OrientacaoTecnica from '@/components/wellness/OrientacaoTecnica'
 import FormatarMensagem from '@/components/wellness/FormatarMensagem'
-import { getChatbotConfig } from '@/lib/nutri-chatbots'
+import { getChatbotConfig, NOEL_MENU_PRIMEIRA_MSG } from '@/lib/nutri-chatbots'
 import type { OrientacaoResposta } from '@/types/orientation'
 
 interface Mensagem {
@@ -31,10 +31,15 @@ export default function NutriChatWidget({ chatbotId, defaultOpen = false }: Nutr
   const [enviando, setEnviando] = useState(false)
   const authenticatedFetch = useAuthenticatedFetch()
   const mensagensEndRef = useRef<HTMLDivElement>(null)
+  const statsPrimeiraMsgRef = useRef(false)
 
-  // Inicializar mensagem quando abrir o chat (LYA sempre inicia direto)
+  // Inicializar mensagem quando abrir o chat: menu 1–4 e, se tiver stats, "Você está X/Y"
   useEffect(() => {
-    if (aberto && mensagens.length === 0) {
+    if (!aberto) {
+      statsPrimeiraMsgRef.current = false
+      return
+    }
+    if (mensagens.length === 0) {
       setMensagens([{
         id: '1',
         texto: chatbotConfig.mensagemInicial,
@@ -43,6 +48,28 @@ export default function NutriChatWidget({ chatbotId, defaultOpen = false }: Nutr
       }])
     }
   }, [aberto, chatbotConfig.mensagemInicial, mensagens.length])
+
+  // Carregar meta semanal e conversas esta semana para enriquecer a primeira mensagem (uma vez por abertura)
+  useEffect(() => {
+    if (!aberto || mensagens.length !== 1 || mensagens[0]?.tipo !== 'sistema' || statsPrimeiraMsgRef.current) return
+    statsPrimeiraMsgRef.current = true
+    let cancelled = false
+    authenticatedFetch('/api/nutri/painel/stats', { credentials: 'include' })
+      .then(res => res.ok ? res.json() : null)
+      .then(json => {
+        if (cancelled || !json?.data) return
+        const { conversasEstaSemana, metaSemanal } = json.data
+        if (typeof conversasEstaSemana !== 'number' || typeof metaSemanal !== 'number') return
+        if (conversasEstaSemana >= metaSemanal) return
+        setMensagens(prev => {
+          if (prev.length !== 1 || prev[0].id !== '1') return prev
+          const linha = `Você está **${conversasEstaSemana}/${metaSemanal}** esta semana. Vamos ativar a primeira?\n\n`
+          return [{ ...prev[0], texto: linha + NOEL_MENU_PRIMEIRA_MSG + '\n\nDigite o número, o nome da opção ou me conte em uma frase.' }]
+        })
+      })
+      .catch(() => {})
+    return () => { cancelled = true }
+  }, [aberto, mensagens.length, mensagens[0]?.tipo, authenticatedFetch])
 
 
   // Detectar se a pergunta é sobre jornada/formacao (conceitual) ou funcionalidades técnicas

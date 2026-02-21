@@ -14,6 +14,10 @@ export interface ChatbotConfig {
   foco: string[]
 }
 
+/** Menu acionável da primeira mensagem do Noel (Sistema de Conversas Ativas) */
+export const NOEL_MENU_PRIMEIRA_MSG =
+  '1) Ativar conversa  2) Ajustar link  3) Responder leads  4) Fechar consulta'
+
 export const NUTRI_CHATBOTS: Record<string, ChatbotConfig> = {
   'formacao': {
     id: 'formacao',
@@ -23,7 +27,7 @@ export const NUTRI_CHATBOTS: Record<string, ChatbotConfig> = {
     corHex: '#2563EB',
     descricao: 'Especialista em Formação Empresarial Nutri',
     foco: ['jornada', 'pilares', 'biblioteca', 'formação', 'anotações', 'certificados'],
-    mensagemInicial: `Olá! Eu sou a **LYA** 🎓\n\nQue bom ter você aqui! Estou aqui para te ajudar na sua jornada como Nutri-Empresária. 💪\n\nMe pergunte qualquer coisa sobre sua formação ou gestão, e eu te guio passo a passo! 😊`
+    mensagemInicial: `Olá! Sou o **Noel**, seu treinador do Sistema de Conversas Ativas. 💪\n\n**O que você quer fazer agora?**\n\n${NOEL_MENU_PRIMEIRA_MSG}\n\nDigite o número, o nome da opção ou me conte em uma frase.`
   },
   'gsal': {
     id: 'gsal',

@@ -114,17 +114,19 @@ export default function FerramentaPersonalizadaNutriPage() {
         })
       }
 
-      // Incrementar contador de visualizações
+      // Registrar view (contagem unificada — link_events)
       if (data.tool?.id) {
         try {
-          await fetch('/api/nutri/ferramentas/track-view', {
+          await fetch('/api/link-events', {
             method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ tool_id: data.tool.id }),
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              event_type: 'view',
+              link_source: 'user_template',
+              link_id: data.tool.id,
+              area: 'nutri',
+            }),
           })
-          // Silencioso - não interrompe se falhar
         } catch (err) {
           console.error('Erro ao registrar visualização:', err)
         }

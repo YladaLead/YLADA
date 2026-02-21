@@ -422,6 +422,9 @@ function AutomationContent() {
                 />
                 Processar automaticamente ao abrir esta página
               </label>
+              <p className="text-purple-200 text-xs mt-2">
+                Se parar no meio: pode clicar de novo em Processar TUDO. Quem já recebeu cada mensagem fica com tag (ex.: 2ª remate participou, 3ª remate não participou) e <strong>não recebe de novo</strong>. Para ver onde cada pessoa parou, abra a lista de conversas no admin WhatsApp e confira as tags de cada uma.
+              </p>
             </div>
           </div>
 

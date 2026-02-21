@@ -6,7 +6,7 @@
 
 import { useState } from 'react'
 import { ToolConfig } from '@/types/wellness'
-import { useParams } from 'next/navigation'
+import { useParams, usePathname } from 'next/navigation'
 import PhoneInputWithCountry from '@/components/PhoneInputWithCountry'
 import { obterMensagemWhatsApp, mensagemPadraoWhatsApp } from '@/lib/wellness-system/mensagens-whatsapp-por-ferramenta'
 
@@ -18,6 +18,8 @@ interface WellnessCTAButtonProps {
   className?: string
   template_id?: string // ID do template para rastrear conversões
   lead_id?: string // ID do lead (opcional)
+  /** Se não informado, detecta pela URL: /pt/wellness/ e /pt/nutri/ → coleta desativada */
+  area?: 'nutri' | 'wellness' | 'coach'
 }
 
 export default function WellnessCTAButton({
@@ -27,17 +29,22 @@ export default function WellnessCTAButton({
   nomeCliente,
   className = '',
   template_id,
-  lead_id
+  lead_id,
+  area: areaProp
 }: WellnessCTAButtonProps) {
   // Se não tem config, não renderiza nada
   if (!config) return null
 
-  // Tentar obter slug da URL se não tiver template_id
   const params = useParams()
+  const pathname = usePathname()
   const toolSlug = params?.['tool-slug'] as string | undefined
   const userSlug = params?.['user-slug'] as string | undefined
 
-  // Estado para campos de coleta de dados
+  // Área: prop tem prioridade; senão detectar pela URL. Nutri e Wellness: não exibir coleta de nome/telefone (por enquanto).
+  const isWellnessArea = areaProp === 'wellness' || (pathname != null && pathname.includes('/pt/wellness/'))
+  const isNutriArea = areaProp === 'nutri' || (pathname != null && pathname.includes('/pt/nutri/'))
+  const ocultarColetaNutriWellness = isWellnessArea || isNutriArea
+
   const [dadosColeta, setDadosColeta] = useState({
     nome: '',
     email: '',
@@ -46,11 +53,12 @@ export default function WellnessCTAButton({
   const [telefoneCountryCode, setTelefoneCountryCode] = useState('BR')
   const [dadosEnviados, setDadosEnviados] = useState(false)
 
-  // Verificar se precisa coletar dados
-  // ⚠️ COLETA DE DADOS DESABILITADA NA ÁREA WELLNESS
-  // O formulário de coleta de dados foi removido conforme solicitado
-  const precisaColetarDados = false // Sempre false na área Wellness
   const camposColeta = config.leader_data_collection?.campos_coleta || {}
+  // Nutri e Wellness: formulário de nome/telefone desativado. Demais áreas respeitam config do link.
+  const precisaColetarDados =
+    !ocultarColetaNutriWellness &&
+    !!config.leader_data_collection?.coletar_dados &&
+    (camposColeta.nome || camposColeta.telefone || camposColeta.email)
   
   // Função para enviar dados coletados
   const enviarDadosColetados = async () => {
@@ -285,7 +293,7 @@ export default function WellnessCTAButton({
     
     // Obter mensagem: customizada > específica da ferramenta > padrão
     let mensagem = ''
-    let botaoTexto = config.cta_button_text || 'Falar no WhatsApp'
+    let botaoTexto = config.cta_button_text || 'Quero falar no WhatsApp'
     
     if (config.custom_whatsapp_message) {
       // Mensagem customizada configurada pelo usuário tem prioridade
@@ -416,7 +424,7 @@ export default function WellnessCTAButton({
                   textShadow: '0 1px 2px rgba(0,0,0,0.2)'
                 }}
               >
-                📱 {botaoTexto || 'Falar no WhatsApp'}
+                📱 {botaoTexto || 'Quero falar no WhatsApp'}
               </a>
             )}
             <a
@@ -562,7 +570,7 @@ export default function WellnessCTAButton({
                 }}
               >
                 <span className="mr-2">✨</span>
-                {config.cta_button_text || 'Enviar Dados e Saiba Mais'}
+                {config.cta_button_text || 'Enviar e falar no WhatsApp'}
                 <span className="ml-2">→</span>
               </button>
             ) : (
@@ -578,7 +586,7 @@ export default function WellnessCTAButton({
                 }}
               >
                 <span className="mr-2">✨</span>
-                {config.cta_button_text || 'Saiba Mais'}
+                {config.cta_button_text || 'Quero falar no WhatsApp'}
                 <span className="ml-2">→</span>
               </a>
             )}
@@ -617,7 +625,7 @@ export default function WellnessCTAButton({
             onClick={rastrearConversao}
             className="inline-flex items-center px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all transform hover:scale-105 font-semibold shadow-lg"
           >
-            📱 Falar no WhatsApp
+            📱 Chamar no WhatsApp
           </a>
           <a
             href={`https://wa.me/5511999999999?text=${encodeURIComponent(mensagemSimples)}`}

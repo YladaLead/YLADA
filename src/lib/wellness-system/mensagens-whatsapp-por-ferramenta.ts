@@ -510,6 +510,6 @@ export function obterMensagemWhatsApp(slug: string | null | undefined): Mensagem
  */
 export const mensagemPadraoWhatsApp: MensagemWhatsApp = {
   mensagem: 'Olá! Gostaria de saber mais sobre como posso melhorar minha saúde e bem-estar.',
-  botaoTexto: 'Saiba Mais'
+  botaoTexto: 'Quero falar no WhatsApp'
 }
 

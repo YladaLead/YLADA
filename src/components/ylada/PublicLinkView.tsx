@@ -57,6 +57,7 @@ export default function PublicLinkView({ payload }: { payload: Payload }) {
   if (type === 'diagnostico') {
     return (
       <DiagnosticoQuiz
+        slug={slug}
         config={config}
         ctaText={ctaText}
         whatsappUrl={whatsappUrl}
@@ -69,6 +70,7 @@ export default function PublicLinkView({ payload }: { payload: Payload }) {
   if (type === 'calculator') {
     return (
       <CalculatorBlock
+        slug={slug}
         config={config}
         ctaText={ctaText}
         whatsappUrl={whatsappUrl}
@@ -93,12 +95,14 @@ type DiagnosticoConfig = {
 }
 
 function DiagnosticoQuiz({
+  slug,
   config,
   ctaText,
   whatsappUrl,
   onCtaClick,
   title,
 }: {
+  slug: string
   config: Record<string, unknown>
   ctaText: string
   whatsappUrl: string
@@ -117,11 +121,24 @@ function DiagnosticoQuiz({
   const currentQuestion = questions[currentIndex]
   const isComplete = currentIndex >= questions.length && questions.length > 0
 
+  const startSent = useRef(false)
+  const completeSent = useRef(false)
+
   const handleAnswer = (optionIndex: number) => {
     if (!currentQuestion) return
+    if (!startSent.current) {
+      startSent.current = true
+      trackEvent(slug, 'start')
+    }
     const next = { ...answers, [currentQuestion.id]: optionIndex }
     setAnswers(next)
-    if (currentIndex + 1 >= questions.length) setStep('result')
+    if (currentIndex + 1 >= questions.length) {
+      setStep('result')
+      if (!completeSent.current) {
+        completeSent.current = true
+        trackEvent(slug, 'complete')
+      }
+    }
   }
 
   // Score: soma dos índices (0,1,2,3...) das respostas. Results têm minScore (0, 3, 6).
@@ -195,12 +212,14 @@ type CalculatorConfig = {
 }
 
 function CalculatorBlock({
+  slug,
   config,
   ctaText,
   whatsappUrl,
   onCtaClick,
   title,
 }: {
+  slug: string
   config: Record<string, unknown>
   ctaText: string
   whatsappUrl: string
@@ -223,6 +242,8 @@ function CalculatorBlock({
     return init
   })
   const [showResult, setShowResult] = useState(false)
+  const calculatorStartSent = useRef(false)
+  const calculatorCompleteSent = useRef(false)
 
   // Avaliar fórmula simples: (f1 - f2) * f3 * 4
   let resultNum = 0
@@ -240,6 +261,14 @@ function CalculatorBlock({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
+    if (!calculatorStartSent.current) {
+      calculatorStartSent.current = true
+      trackEvent(slug, 'start')
+    }
+    if (!calculatorCompleteSent.current) {
+      calculatorCompleteSent.current = true
+      trackEvent(slug, 'complete')
+    }
     setShowResult(true)
   }
 

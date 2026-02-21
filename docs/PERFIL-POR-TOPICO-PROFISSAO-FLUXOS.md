@@ -99,16 +99,22 @@ Próximos passos sugeridos: “Montar funil no link inteligente”, “Aumentar 
 
 ---
 
-## 8. O que já foi implementado (base)
+## 8. Ajustes aplicados (whitelist, versionamento, mapTo, sinais, dor por tipo)
 
-- **Doc**: este arquivo.
-- **Config**: `src/config/ylada-profile-flows.ts` — `ProfileType`, `ProfessionCode`, fluxos liberal/vendas (steps + fields), `getProfileFlow()`, `getProfessionsForSegment()`, labels.
-- **Migration**: `migrations/210-ylada-profile-type-profession.sql` — colunas `profile_type`, `profession` em `ylada_noel_profile`.
-- **API**: GET/PUT `/api/ylada/profile` aceitam e retornam `profile_type` e `profession`.
-- **Resumo Noel**: `buildProfileResumo` inclui "Tipo: X. Profissão: Y." quando preenchido.
-- **Tipos**: `YladaProfileFormData` e helpers em `src/types/ylada-profile.ts` com `profile_type` e `profession`.
-- **Formulário**: em Perfil empresarial, na seção Contexto foram adicionados os campos opcionais "Tipo de perfil" e "Profissão / tópico"; o restante do formulário permanece único (fluxo por etapas pode ser implementado depois usando `getProfileFlow()`).
+- **Ajuste 1 — Profession sempre pertence ao segment**: `PROFESSION_BY_SEGMENT` é a whitelist (ex.: ylada → medico | estetica | vendedor | outro; odonto → odonto; nutra → nutricionista | vendedor_suplementos). `validateProfessionForSegment(segment, profession)` na API rejeita combinações inválidas.
+- **Ajuste 2 — Versionamento do flow**: Colunas `flow_id` (TEXT) e `flow_version` (INTEGER) em `ylada_noel_profile` (migration 211). Cada flow na config tem `flow_id` (ex.: liberal_v1, vendas_v1) e `flow_version: 1`. Ao salvar, o front envia o flow atual; o resumo do Noel inclui "Flow: flow_id vN".
+- **Ajuste 3 — Campo com source/path (mapTo)**: Em `ylada-profile-flows.ts`, cada campo é `ProfileFieldDef`: `key`, `source` ('column' | 'area_specific'), `path` (para area_specific), `required`, `type`, `options`, `dependsOn`. `getFieldPersistTarget(field)` devolve onde persistir. Dois fluxos completos: liberal.medico e vendas.vendedor_suplementos.
+- **Upgrade A — Sinais estruturados**: `buildProfileSignals(profile)` em `ylada-profile-resumo.ts` retorna `{ foco?, ticket_medio?, canal_principal?, gargalo? }`. O resumo em texto inclui "[Sinais] Foco: X. Canal principal: Y. Gargalo: Z." para o Noel e futura UI de próximo passo.
+- **Upgrade B — Dor por tipo**: `DOR_PRINCIPAL_OPTIONS_LIBERAL` e `DOR_PRINCIPAL_OPTIONS_VENDAS` em `src/types/ylada-profile.ts`; `getDorPrincipalOptions(profileType)` retorna a lista correta; o formulário usa no select de dor principal.
 
-Próximos passos sugeridos: (1) Renderizar o formulário por etapas (wizard/accordion) usando `getProfileFlow(profileType, profession)` quando tipo/profissão estiverem definidos; (2) Ajustar opções de `dor_principal` por tipo (ex.: vendas com sem_leads, nao_converte, ticket_baixo); (3) Noel: instruções adicionais no system prompt por `profile_type` quando desejado.
+## 9. O que está implementado
+
+- **Config**: `src/config/ylada-profile-flows.ts` — whitelist, `ProfileFieldDef`, fluxos com flow_id/flow_version, `validateProfessionForSegment`, `getProfileFlow`, `getProfessionsForSegment`, `getFieldPersistTarget`.
+- **Migrations**: 210 (profile_type, profession), 211 (flow_id, flow_version).
+- **API**: PUT valida profession contra segment; aceita e persiste flow_id, flow_version.
+- **Resumo Noel**: `buildProfileResumo` com tipo, profissão, flow, e bloco [Sinais]; `buildProfileSignals(profile)` exportado.
+- **Formulário**: Tipo e profissão (whitelist); dor principal por tipo; ao salvar, flow_id/flow_version preenchidos a partir do flow config.
+
+Próximos passos sugeridos: (1) Wizard/accordion por etapas usando `getProfileFlow()` e `ProfileFieldDef`; (2) Noel: usar sinais no prompt ou em lógica de próximo passo.
 
 Basta colar este contexto no novo chat e seguir a conversa a partir daí.

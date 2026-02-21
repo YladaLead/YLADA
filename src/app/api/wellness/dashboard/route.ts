@@ -105,17 +105,34 @@ export async function GET(request: NextRequest) {
         }
       })
 
-    // Calcular estatísticas no backend (evitar reduce no frontend)
+    // Calcular estatísticas: priorizar link_events (contagem unificada)
     const activeTools = tools.filter((t: any) => t.status === 'active')
-    const totalLeads = tools.reduce((acc: number, t: any) => acc + (t.leads_count || 0), 0)
-    const totalViews = tools.reduce((acc: number, t: any) => acc + (t.views || 0), 0)
-    const totalConversoes = tools.reduce((acc: number, t: any) => acc + (t.conversions_count || 0), 0)
-    
+    let totalLeads = tools.reduce((acc: number, t: any) => acc + (t.leads_count || 0), 0)
+    let totalConversoes = tools.reduce((acc: number, t: any) => acc + (t.conversions_count || 0), 0)
+
+    const { data: linkEventsRows } = await supabaseAdmin
+      .from('link_events')
+      .select('event_type')
+      .eq('user_id', authenticatedUserId)
+      .eq('area', 'wellness')
+      .eq('link_source', 'user_template')
+
+    if (linkEventsRows && linkEventsRows.length > 0) {
+      let leadCapture = 0
+      let whatsappClick = 0
+      for (const row of linkEventsRows) {
+        if (row.event_type === 'lead_capture') leadCapture++
+        else if (row.event_type === 'whatsapp_click') whatsappClick++
+      }
+      totalLeads = leadCapture
+      totalConversoes = whatsappClick
+    }
+
     const stats = {
       ferramentasAtivas: activeTools.length,
       leadsGerados: totalLeads,
-      conversoes: totalConversoes, // Conversões reais (quando botão CTA é clicado)
-      clientesAtivos: totalConversoes // Mesmo valor (conversões = clientes que clicaram no CTA)
+      conversoes: totalConversoes,
+      clientesAtivos: totalConversoes
     }
 
     // Montar resposta completa

@@ -70,6 +70,8 @@ export async function POST(request: NextRequest) {
     const body = await request.json().catch(() => ({}))
     const text = typeof body.text === 'string' ? body.text.trim() : ''
     const segmentHint = typeof body.segment === 'string' ? body.segment.trim() : null
+    const profileType = typeof body.profile_type === 'string' ? body.profile_type.trim() : null
+    const profession = typeof body.profession === 'string' ? body.profession.trim() : null
 
     if (!text) {
       return NextResponse.json({ success: false, error: 'text é obrigatório' }, { status: 400 })
@@ -79,9 +81,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'Serviço de interpretação não configurado' }, { status: 503 })
     }
 
-    const userMessage = segmentHint
-      ? `Segmento de contexto (opcional): ${segmentHint}\n\nTexto do usuário:\n${text}`
-      : `Texto do usuário:\n${text}`
+    const profileContext: string[] = []
+    if (segmentHint) profileContext.push(`Segmento: ${segmentHint}`)
+    if (profileType) profileContext.push(`Tipo de atuação do profissional: ${profileType}`)
+    if (profession) profileContext.push(`Área/profissão: ${profession}`)
+    const contextBlock = profileContext.length
+      ? `Contexto do perfil empresarial (use para priorizar o template mais adequado):\n${profileContext.join('\n')}\n\n`
+      : ''
+
+    const userMessage = `${contextBlock}Texto do usuário:\n${text}`
 
     const completion = await openai.chat.completions.create({
       model: 'gpt-4o-mini',

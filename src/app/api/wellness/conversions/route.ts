@@ -2,6 +2,19 @@ import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
 import { withRateLimit } from '@/lib/rate-limit'
 
+async function inferAreaFromUserId(userId: string): Promise<string> {
+  if (!supabaseAdmin) return 'wellness'
+  const { data } = await supabaseAdmin
+    .from('user_profiles')
+    .select('perfil, profession')
+    .eq('user_id', userId)
+    .maybeSingle()
+  const p = (data?.perfil || data?.profession || '').toLowerCase()
+  if (p === 'nutri') return 'nutri'
+  if (p === 'coach') return 'coach'
+  return 'wellness'
+}
+
 // POST - Rastrear conversão (quando usuário clica no botão CTA)
 // PÚBLICO mas com validações rigorosas
 export async function POST(request: NextRequest) {
@@ -38,10 +51,10 @@ export async function POST(request: NextRequest) {
         templateId = link.id
       }
 
-      // Buscar o template para validar
+      // Buscar o template para validar e obter user_id (para link_events)
       const { data: template, error: templateError } = await supabaseAdmin
         .from('user_templates')
-        .select('id, conversions_count')
+        .select('id, user_id, conversions_count')
         .eq('id', templateId)
         .single()
 
@@ -70,6 +83,18 @@ export async function POST(request: NextRequest) {
           { status: 500 }
         )
       }
+
+      // Gravar whatsapp_click em link_events (contagem unificada)
+      const area = (body.area || '').trim().toLowerCase() || (await inferAreaFromUserId(template.user_id))
+      await supabaseAdmin.from('link_events').insert({
+        event_type: 'whatsapp_click',
+        link_source: 'user_template',
+        link_id: templateId,
+        user_id: template.user_id,
+        area: area || 'wellness',
+      }).then(() => {}, (err: any) => {
+        if (err?.code !== '42P01') console.error('[conversions] link_events insert:', err)
+      })
 
       // Se temos lead_id, também podemos marcar o lead como convertido (opcional)
       if (lead_id) {

@@ -1,13 +1,20 @@
 /**
  * POST /api/ylada/links/events — registra evento de visitante (view, cta_click, etc.).
- * Pública (sem auth). Usa service role para inserir em ylada_link_events.
+ * Pública (sem auth). Insere em ylada_link_events e espelha em link_events (contagem unificada).
  * Body: { slug, event_type, utm_json?, device? }
- * @see docs/PROGRAMACAO-SENSATA-PROXIMOS-PASSOS.md
+ * @see docs/PASSO-A-PASSO-CONTAGEM-LINKS.md (Fase 4)
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
 
 const ALLOWED_TYPES = ['view', 'start', 'complete', 'cta_click'] as const
+
+/** Mapeia evento YLADA → evento unificado (só view e whatsapp_click entram em link_events) */
+function toUnifiedEventType(eventType: string): 'view' | 'whatsapp_click' | null {
+  if (eventType === 'view') return 'view'
+  if (eventType === 'cta_click') return 'whatsapp_click'
+  return null
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -28,7 +35,7 @@ export async function POST(request: NextRequest) {
 
     const { data: link, error: linkError } = await supabaseAdmin
       .from('ylada_links')
-      .select('id')
+      .select('id, user_id')
       .eq('slug', slug)
       .eq('status', 'active')
       .maybeSingle()
@@ -50,6 +57,21 @@ export async function POST(request: NextRequest) {
     if (insertError) {
       console.error('[ylada/links/events]', insertError)
       return NextResponse.json({ success: false, error: insertError.message }, { status: 500 })
+    }
+
+    // Fase 4: espelhar view e cta_click na tabela unificada link_events
+    const unifiedType = toUnifiedEventType(eventType)
+    if (unifiedType) {
+      await supabaseAdmin.from('link_events').insert({
+        event_type: unifiedType,
+        link_source: 'ylada_link',
+        link_id: link.id,
+        user_id: link.user_id,
+        area: 'ylada',
+      }).then(() => {}, (err: unknown) => {
+        const e = err as { code?: string }
+        if (e?.code !== '42P01') console.error('[ylada/links/events] link_events insert:', err)
+      })
     }
 
     return NextResponse.json({ success: true })

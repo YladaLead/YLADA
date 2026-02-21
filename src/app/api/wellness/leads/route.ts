@@ -97,6 +97,35 @@ export async function POST(request: NextRequest) {
 
     console.log('🔍 user_id encontrado:', userId)
 
+    // Resolver link_id (template) por user_id + tool_slug quando não temos template_id
+    let linkId: string | null = template_id || null
+    if (!linkId && userId && tool_slug) {
+      const { data: bySlug } = await supabaseAdmin
+        .from('user_templates')
+        .select('id')
+        .eq('user_id', userId)
+        .eq('slug', tool_slug)
+        .limit(1)
+        .maybeSingle()
+      if (bySlug?.id) {
+        linkId = bySlug.id
+      } else {
+        const { data: byTemplateSlug } = await supabaseAdmin
+          .from('user_templates')
+          .select('id')
+          .eq('user_id', userId)
+          .eq('template_slug', tool_slug)
+          .limit(1)
+          .maybeSingle()
+        if (byTemplateSlug?.id) linkId = byTemplateSlug.id
+      }
+    }
+
+    // Determinar source e area (contagem unificada)
+    const isNutri = tool_slug?.includes('calculadora') || tool_slug?.includes('nutri')
+    const area = isNutri ? 'nutri' : 'wellness'
+    const source = isNutri ? 'nutri_template' : 'wellness_template'
+
     // Sanitizar dados
     const sanitizedData = {
       name: name.trim().substring(0, 255),
@@ -110,22 +139,19 @@ export async function POST(request: NextRequest) {
                '127.0.0.1'
     const userAgent = request.headers.get('user-agent') || ''
 
-    // Determinar source baseado na URL ou tool_slug
-    // Se tool_slug contém 'calculadora-agua' ou está em /pt/nutri/, é nutri
-    const isNutri = tool_slug?.includes('calculadora') || tool_slug?.includes('nutri')
-    const source = isNutri ? 'nutri_template' : 'wellness_template'
-
     console.log('🔍 Inserindo lead com:', {
       user_id: userId,
       name: sanitizedData.name,
       phone: sanitizedData.phone,
       phone_country_code: sanitizedData.phone_country_code,
       source,
+      area,
+      link_id: linkId,
       tool_slug,
       template_id
     })
 
-    // Inserir lead na tabela leads
+    // Inserir lead na tabela leads (com link_source, link_id, area para contagem unificada)
     const { data: newLead, error: leadError } = await supabaseAdmin
       .from('leads')
       .insert({
@@ -143,7 +169,10 @@ export async function POST(request: NextRequest) {
         ip_address: ip,
         user_agent: userAgent.substring(0, 500),
         source: source,
-        template_id: template_id || null,
+        template_id: template_id || linkId || null,
+        link_source: 'user_template',
+        link_id: linkId || undefined,
+        area,
         created_at: new Date().toISOString()
       })
       .select()
@@ -177,6 +206,33 @@ export async function POST(request: NextRequest) {
     }
 
     console.log('🔍 Lead salvo com sucesso! ID:', newLead.id)
+
+    // Contagem unificada: gravar lead_capture em link_events
+    if (linkId) {
+      await supabaseAdmin.from('link_events').insert({
+        event_type: 'lead_capture',
+        link_source: 'user_template',
+        link_id: linkId,
+        user_id: userId,
+        area,
+        lead_id: newLead.id,
+      }).then(() => {}, (err: unknown) => {
+        const e = err as { code?: string }
+        if (e?.code !== '42P01') console.error('[wellness/leads] link_events insert:', err)
+      })
+
+      // Incrementar leads_count do template
+      const { data: t } = await supabaseAdmin
+        .from('user_templates')
+        .select('leads_count')
+        .eq('id', linkId)
+        .single()
+      const newCount = (t?.leads_count ?? 0) + 1
+      await supabaseAdmin
+        .from('user_templates')
+        .update({ leads_count: newCount, updated_at: new Date().toISOString() })
+        .eq('id', linkId)
+    }
 
     // Enviar notificação por email (não bloqueia a resposta)
     notifyNewLead({

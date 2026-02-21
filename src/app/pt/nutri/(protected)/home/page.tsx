@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
 import RequireDiagnostico from '@/components/auth/RequireDiagnostico'
 import NutriSidebar from '@/components/nutri/NutriSidebar'
+import ConversasAtivasBlock from '@/components/nutri/ConversasAtivasBlock'
 import { useAuth } from '@/contexts/AuthContext'
 import LyaChatWidget from '@/components/nutri/LyaChatWidget'
 import { useJornadaProgress } from '@/hooks/useJornadaProgress'
@@ -125,17 +126,20 @@ function NutriHomeContent() {
         </div>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-6 py-4 sm:py-6 lg:py-8">
-          {/* HOME IA-FIRST: conteúdo principal = chat com a LYA */}
+          {/* Bloco principal: Sistema de Conversas Ativas */}
+          <ConversasAtivasBlock />
+
+          {/* Noel — assistente do método */}
           <div className="mb-4">
             <h2 className="text-xl font-semibold text-gray-900">
-              Noel
+              Noel — Assistente do Sistema de Conversas Ativas
             </h2>
             <p className="text-sm text-gray-600 mt-1">
-              Me diga seu objetivo de hoje e eu te direciono para o próximo passo certo.
+              Me diga seu objetivo de hoje e eu te direciono para o próximo passo certo: links, scripts ou rotina.
             </p>
           </div>
 
-          <div className="h-[70vh] sm:h-[72vh] lg:h-[75vh]">
+          <div className="h-[60vh] sm:h-[62vh] lg:h-[65vh]">
             <LyaChatWidget embedded defaultOpen className="h-full" />
           </div>
         </div>

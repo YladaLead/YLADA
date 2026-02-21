@@ -174,44 +174,77 @@ function LinksUnificadosPageContent() {
   // Estado para armazenar estatísticas das ferramentas
   const [estatisticasFerramentas, setEstatisticasFerramentas] = useState<Record<string, { views: number; leads: number; conversions: number }>>({}) // slug -> estatísticas
 
-  // Carregar ferramentas criadas pelo usuário
+  // Carregar ferramentas criadas pelo usuário e estatísticas unificadas (link_events)
   useEffect(() => {
     const carregarFerramentasUsuario = async () => {
       if (!profile?.userSlug) return
-      
+
       try {
         const response = await fetch('/api/wellness/ferramentas?profession=wellness', {
           credentials: 'include'
         })
-        
-        if (response.ok) {
-          const data = await response.json()
-          const tools = data.tools || []
-          
-          // Criar mapa: template_slug -> tool_slug
-          const mapa: Record<string, string> = {}
-          // Criar mapa de estatísticas: slug -> estatísticas
-          const statsMap: Record<string, { views: number; leads: number; conversions: number }> = {}
-          
-          tools.forEach((tool: any) => {
-            if (tool.template_slug && tool.slug) {
-              mapa[tool.template_slug] = tool.slug
+
+        if (!response.ok) return
+        const data = await response.json()
+        const tools = data.tools || []
+
+        const mapa: Record<string, string> = {}
+        const statsMap: Record<string, { views: number; leads: number; conversions: number }> = {}
+
+        tools.forEach((tool: any) => {
+          if (tool.template_slug && tool.slug) mapa[tool.template_slug] = tool.slug
+          if (tool.slug) {
+            statsMap[tool.slug] = {
+              views: tool.views || 0,
+              leads: tool.leads_count || 0,
+              conversions: tool.conversions_count || 0
             }
-            // Armazenar estatísticas pelo slug da ferramenta
-            if (tool.slug) {
-              statsMap[tool.slug] = {
-                views: tool.views || 0,
-                leads: tool.leads_count || 0,
-                conversions: tool.conversions_count || 0
-              }
+          }
+        })
+        setFerramentasUsuario(mapa)
+
+        // Contagem unificada: priorizar link_events (area wellness)
+        const linkIds = tools.map((t: any) => t.id).filter(Boolean)
+        if (linkIds.length > 0) {
+          try {
+            const statsRes = await fetch(
+              `/api/link-events/stats?area=wellness&link_source=user_template&link_ids=${linkIds.join(',')}`,
+              { credentials: 'include' }
+            )
+            if (statsRes.ok) {
+              const statsData = await statsRes.json()
+              const byLink = (statsData.data?.by_link || []) as Array<{
+                link_id: string
+                view: number
+                whatsapp_click: number
+                lead_capture: number
+              }>
+              const byLinkMap: Record<string, { view: number; whatsapp_click: number; lead_capture: number }> = {}
+              byLink.forEach((x: any) => {
+                byLinkMap[x.link_id] = {
+                  view: x.view ?? 0,
+                  whatsapp_click: x.whatsapp_click ?? 0,
+                  lead_capture: x.lead_capture ?? 0
+                }
+              })
+              tools.forEach((tool: any) => {
+                if (!tool.slug) return
+                const c = byLinkMap[tool.id]
+                if (c) {
+                  statsMap[tool.slug] = {
+                    views: c.view,
+                    leads: c.lead_capture,
+                    conversions: c.whatsapp_click
+                  }
+                }
+              })
             }
-          })
-          
-          setFerramentasUsuario(mapa)
-          setEstatisticasFerramentas(statsMap)
-          console.log('✅ Ferramentas do usuário carregadas:', mapa)
-          console.log('✅ Estatísticas carregadas:', statsMap)
+          } catch (_) {
+            // manter fallback dos dados do tool
+          }
         }
+
+        setEstatisticasFerramentas(statsMap)
       } catch (error) {
         console.error('Erro ao carregar ferramentas do usuário:', error)
       }

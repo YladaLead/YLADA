@@ -36,6 +36,7 @@ export default function PainelDiarioPage() {
               ...prev,
               leadsHoje: indicadoresData.data.leadsHoje,
               conversasAtivas: indicadoresData.data.conversasAtivas,
+              conversasEsteMes: indicadoresData.data.conversasEsteMes,
               atendimentosAgendados: indicadoresData.data.atendimentosAgendados
             }))
           }
@@ -70,10 +71,10 @@ export default function PainelDiarioPage() {
         {/* Header */}
         <div className="bg-white rounded-xl p-6 mb-6 shadow-md border border-gray-200">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            📊 Painel Diário YLADA
+            📊 Painel Diário — Sistema de Conversas Ativas
           </h1>
           <p className="text-gray-600">
-            Acompanhe seus indicadores essenciais e progresso diário
+            Acompanhe conversas do mês, meta semanal e indicadores essenciais
           </p>
         </div>
 
@@ -133,10 +134,16 @@ export default function PainelDiarioPage() {
               </div>
             </div>
 
-            {/* Indicadores Essenciais */}
+            {/* Indicadores Essenciais — Sistema de Conversas Ativas */}
             <div className="bg-white rounded-xl p-6 shadow-md border border-gray-200">
               <h3 className="font-bold text-gray-900 mb-4">⚡ Indicadores Essenciais</h3>
               <div className="space-y-3">
+                <div className="flex justify-between">
+                  <span className="text-sm text-gray-600">Conversas este mês</span>
+                  <span className="text-sm font-semibold text-blue-600">
+                    {stats?.conversasEsteMes ?? stats?.conversasAtivas ?? 0}
+                  </span>
+                </div>
                 <div className="flex justify-between">
                   <span className="text-sm text-gray-600">Leads Hoje</span>
                   <span className="text-sm font-semibold text-green-600">

@@ -220,17 +220,19 @@ export default function FerramentaPersonalizadaPage() {
         user_profiles: data.tool?.user_profiles
       })
 
-      // Incrementar contador de visualizações
+      // Registrar view (contagem unificada — link_events)
       if (data.tool?.id) {
         try {
-          await fetch('/api/wellness/ferramentas/track-view', {
+          await fetch('/api/link-events', {
             method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ tool_id: data.tool.id }),
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              event_type: 'view',
+              link_source: 'user_template',
+              link_id: data.tool.id,
+              area: 'wellness',
+            }),
           })
-          // Silencioso - não interrompe se falhar
         } catch (err) {
           console.error('Erro ao registrar visualização:', err)
         }

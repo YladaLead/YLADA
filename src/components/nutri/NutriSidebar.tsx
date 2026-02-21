@@ -53,6 +53,7 @@ export default function NutriSidebar({ isMobileOpen = false, onMobileClose }: Nu
 
   // Mapeamento de títulos para chaves do sistema de fases
   const titleToKey: Record<string, SidebarItemKey> = {
+    'Sistema de Conversas Ativas': 'ferramentas',
     'Trilha Empresarial': 'jornada',
     'Captar': 'ferramentas',
     'Perfil Nutri-Empresária': 'perfil',
@@ -66,6 +67,12 @@ export default function NutriSidebar({ isMobileOpen = false, onMobileClose }: Nu
     // Todos os itens do menu (estrutura completa)
     // Ordem reorganizada: áreas mais usadas no topo
     const allMenuItems: MenuSection[] = [
+      {
+        title: 'Sistema de Conversas Ativas',
+        icon: '🔥',
+        href: '/pt/nutri/home',
+        color: 'blue'
+      },
       {
         title: 'Captar',
         icon: '🧲',
@@ -220,18 +227,18 @@ export default function NutriSidebar({ isMobileOpen = false, onMobileClose }: Nu
         <div className="px-3 py-2 border-b border-gray-200">
           <button
             onClick={() => {
-              // Disparar evento customizado para abrir o chat
               window.dispatchEvent(new CustomEvent('open-lya-chat'))
               onMobileClose?.()
             }}
             className="w-full flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm bg-blue-600 hover:bg-blue-700 text-white font-medium transition-all shadow-sm"
-            title="Falar com o Noel"
+            title="Falar com o Noel — Assistente do Sistema de Conversas Ativas"
           >
             <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
             </svg>
             <span className="flex-1 text-left">Noel</span>
           </button>
+          <p className="text-xs text-gray-500 mt-1 px-1">Assistente do Sistema de Conversas Ativas</p>
         </div>
 
         {/* Menu Principal */}

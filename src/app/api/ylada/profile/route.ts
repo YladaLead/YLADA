@@ -8,6 +8,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireApiAuth } from '@/lib/api-auth'
 import { supabaseAdmin } from '@/lib/supabase'
 import { buildProfileResumo, type YladaNoelProfileRow } from '@/lib/ylada-profile-resumo'
+import { validateProfessionForSegment } from '@/config/ylada-profile-flows'
 
 const VALID_SEGMENTS = ['ylada', 'med', 'psi', 'psicanalise', 'odonto', 'nutra', 'coach', 'seller'] as const
 
@@ -15,6 +16,8 @@ type ProfilePayload = {
   segment: string
   profile_type?: string | null
   profession?: string | null
+  flow_id?: string | null
+  flow_version?: number | null
   category?: string | null
   sub_category?: string | null
   tempo_atuacao_anos?: number | null
@@ -40,7 +43,7 @@ function sanitizePayload(body: Record<string, unknown>, userId: string): { segme
     return null
   }
   const allowed: (keyof ProfilePayload)[] = [
-    'segment', 'profile_type', 'profession', 'category', 'sub_category', 'tempo_atuacao_anos', 'dor_principal', 'prioridade_atual', 'fase_negocio',
+    'segment', 'profile_type', 'profession', 'flow_id', 'flow_version', 'category', 'sub_category', 'tempo_atuacao_anos', 'dor_principal', 'prioridade_atual', 'fase_negocio',
     'metas_principais', 'objetivos_curto_prazo', 'modelo_atuacao', 'capacidade_semana', 'ticket_medio',
     'modelo_pagamento', 'canais_principais', 'rotina_atual_resumo', 'frequencia_postagem',
     'observacoes', 'area_specific',
@@ -73,8 +76,13 @@ function sanitizePayload(body: Record<string, unknown>, userId: string): { segme
       row[key] = typeof v === 'object' && v !== null ? v : {}
       continue
     }
-    if (key === 'profile_type' || key === 'profession') {
+    if (key === 'profile_type' || key === 'profession' || key === 'flow_id') {
       row[key] = typeof v === 'string' && v.trim() ? v.trim() : null
+      continue
+    }
+    if (key === 'flow_version') {
+      row[key] = typeof v === 'number' ? v : v != null ? parseInt(String(v), 10) : null
+      if (row[key] != null && Number.isNaN(row[key])) row[key] = null
       continue
     }
     if (typeof v === 'string') row[key] = v
@@ -138,6 +146,13 @@ export async function PUT(request: NextRequest) {
     if (!parsed) {
       return NextResponse.json(
         { success: false, error: 'Body deve conter segment válido (ylada, psi, psicanalise, odonto, nutra, coach, seller).' },
+        { status: 400 }
+      )
+    }
+    const profession = parsed.row.profession as string | undefined
+    if (profession && !validateProfessionForSegment(parsed.segment, profession)) {
+      return NextResponse.json(
+        { success: false, error: `Profissão "${profession}" não é permitida para o segmento ${parsed.segment}.` },
         { status: 400 }
       )
     }
