@@ -392,7 +392,8 @@ async function handlePaymentEvent(data: any, isTest: boolean = false, preFetched
     }
     const productType = metadata.product_type || metadata.productType // Suportar ambos os formatos
     const paymentMethod = fullData.payment_method_id || 'unknown'
-    const refVendedor = metadata.ref_vendedor && String(metadata.ref_vendedor).trim() ? String(metadata.ref_vendedor).trim() : null
+    // Sem ref na URL = matriz (ida); com ref=paula (etc) = esse vendedor
+    const refVendedor = metadata.ref_vendedor && String(metadata.ref_vendedor).trim() ? String(metadata.ref_vendedor).trim() : 'ida'
     
     // Determinar features baseado em productType (apenas Nutri)
     const features = determineFeatures(area, planType, productType)
@@ -736,9 +737,10 @@ async function handlePaymentEvent(data: any, isTest: boolean = false, preFetched
       throw paymentError
     }
 
-    // Comissão do vendedor: 20% em todo pagamento (inicial e recorrente)
+    // Comissão do vendedor: 20% apenas para vendedores (não para ida/matriz)
     const refVendedorComissao = subscription.ref_vendedor && String(subscription.ref_vendedor).trim() ? String(subscription.ref_vendedor).trim() : null
-    if (refVendedorComissao && amountCents > 0) {
+    const isVendedorComissao = refVendedorComissao && refVendedorComissao !== 'ida'
+    if (isVendedorComissao && amountCents > 0) {
       const commissionPct = 20
       const commissionAmountCents = Math.round(amountCents * (commissionPct / 100))
       if (commissionAmountCents > 0) {
@@ -1053,7 +1055,8 @@ async function handleSubscriptionEvent(data: any, isTest: boolean = false) {
     let area = metadata.area || (data.external_reference?.split('_')[0]) || ''
     let planType = metadata.plan_type || (data.external_reference?.split('_')[1]) || ''
     const productType = metadata.product_type || metadata.productType
-    const refVendedor = metadata.ref_vendedor && String(metadata.ref_vendedor).trim() ? String(metadata.ref_vendedor).trim() : null
+    // Sem ref na URL = matriz (ida); com ref=paula (etc) = esse vendedor
+    const refVendedor = metadata.ref_vendedor && String(metadata.ref_vendedor).trim() ? String(metadata.ref_vendedor).trim() : 'ida'
 
     // Fallback: extrair userId do external_reference (formato area_planType_userId)
     if (!userId && data.external_reference) {
