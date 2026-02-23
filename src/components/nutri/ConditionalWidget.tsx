@@ -13,7 +13,12 @@ export default function ConditionalWidget() {
   } | null>(null)
 
   // Verificar se é página pública de ferramenta (Nutri, Coach ou Wellness)
-  const isPublicToolPage = pathname?.match(/^\/pt\/(nutri|coach|wellness)\/[^\/]+\/[^\/]+$/)
+  // Excluir rotas internas que têm 2 segmentos mas não são user-slug/tool-slug (ex: /pt/nutri/metodo/jornada)
+  const reservedSegments = ['metodo', 'formacao', 'ferramentas', 'configuracao', 'diagnostico', 'checkout', 'login', 'home', 'onboarding', 'recuperar-senha', 'reset-password', 'pagamento-sucesso', 'suporte', 'cursos', 'leads', 'clientes', 'quiz-personalizado', 'descobrir', 'oferta']
+  const pathSegments = pathname?.split('/').filter(Boolean) || []
+  const secondSegment = pathSegments[2] // ex: "metodo" em /pt/nutri/metodo/jornada
+  const isReservedPath = secondSegment && reservedSegments.includes(secondSegment)
+  const isPublicToolPage = !isReservedPath && pathname?.match(/^\/pt\/(nutri|coach|wellness)\/[^\/]+\/[^\/]+$/)
   const areaMatch = pathname?.match(/^\/pt\/(nutri|coach|wellness)\//)
   const area = areaMatch ? areaMatch[1] : null
 

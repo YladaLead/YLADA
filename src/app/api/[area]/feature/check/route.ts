@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireApiAuth } from '@/lib/api-auth'
 import { hasFeatureAccess, hasAnyFeature, type Feature } from '@/lib/feature-helpers'
-import { canBypassSubscription } from '@/lib/subscription-helpers'
+import { canBypassSubscription, hasActiveSubscription } from '@/lib/subscription-helpers'
 
 /**
  * GET /api/[area]/feature/check?feature=gestao
@@ -60,12 +60,24 @@ export async function GET(
     let hasAccess = false
 
     if (featuresParam) {
-      // Verificar múltiplas features (qualquer uma)
       const features = featuresParam.split(',').map(f => f.trim()) as Feature[]
       hasAccess = await hasAnyFeature(user.id, area, features)
     } else if (featureParam) {
-      // Verificar feature única
       hasAccess = await hasFeatureAccess(user.id, area, featureParam as Feature)
+    }
+
+    // Nutri: se ainda negado, conceder acesso a ferramentas/cursos/completo quando houver assinatura ativa
+    // (evita bloqueio por features vazias, migração ou dados antigos)
+    if (!hasAccess && area === 'nutri') {
+      const hasActive = await hasActiveSubscription(user.id, 'nutri')
+      const requestedFeatures = featuresParam
+        ? (featuresParam.split(',').map(f => f.trim()) as Feature[])
+        : (featureParam ? [featureParam.trim() as Feature] : [])
+      const nutriPlatformFeatures: Feature[] = ['ferramentas', 'cursos', 'completo']
+      const requestedNutriAccess = requestedFeatures.some(f => nutriPlatformFeatures.includes(f))
+      if (hasActive && requestedNutriAccess) {
+        hasAccess = true
+      }
     }
 
     return NextResponse.json({

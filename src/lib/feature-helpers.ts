@@ -9,15 +9,17 @@ export type Area = 'nutri' | 'coach' | 'nutra' | 'wellness'
 
 /**
  * Verifica se usuário tem acesso a uma feature específica
- * 
+ *
+ * Padrão Nutri: assinatura ativa = acesso a ferramentas e cursos (Captar, Trilha, etc.).
+ *
  * @param userId - ID do usuário
  * @param area - Área (nutri, coach, nutra, wellness)
  * @param feature - Feature a verificar (gestao, ferramentas, cursos, completo)
  * @returns true se usuário tem acesso, false caso contrário
- * 
+ *
  * Regras:
  * - Feature "completo" dá acesso a tudo
- * - Feature específica dá acesso apenas àquela funcionalidade
+ * - Nutri com assinatura ativa e features vazias = ferramentas + cursos (padronizado)
  * - Se não tiver assinatura ativa, retorna false
  */
 export async function hasFeatureAccess(
