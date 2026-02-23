@@ -24,6 +24,42 @@ curl -X POST https://www.ylada.com/api/admin/emergency-reset-password \
 4. Clique nos três pontinhos (⋯) no usuário → **Reset password** (ou **Update user**).
 5. Defina a senha: **Nutri123** e salve.
 
+### Se deu “e-mail ou senha incorreto” (Diana)
+
+Pode ser que o **e-mail cadastrado** seja diferente do que ela está usando (typo, outro e-mail, etc.). Faça o seguinte:
+
+1. **Conferir o e-mail certo no Supabase**  
+   - Authentication → Users → use a busca e procure por “diapitt” ou “diana”.  
+   - Ou em **Table Editor** → `user_profiles` ou `subscriptions`: filtre por nome/email e veja com qual e-mail a Diana está cadastrada.
+
+2. **Se encontrar outro e-mail (ex.: dianapitt@gmail.com):**  
+   - Anote o e-mail correto.  
+   - Use a **Opção A** (API) ou **Opção B** (Dashboard) com esse e-mail e senha **Nutri123**.  
+   - Envie para a Diana a mensagem da seção 2 **trocando para o e-mail correto** e mantendo a senha Nutri123.
+
+3. **Se o e-mail for mesmo diapitt@gmail.com** e mesmo assim não entrar:  
+   - No Dashboard: Authentication → Users → localize **diapitt@gmail.com** → **Reset password** e defina de novo **Nutri123** (às vezes o reset anterior não aplicou).  
+   - Ou chame de novo a API (Opção A) com `email: "diapitt@gmail.com"` e `newPassword: "Nutri123"`.
+
+4. **Alternativa: “Esqueci minha senha”**  
+   - Peça para ela acessar **https://www.ylada.com/pt/nutri/recuperar-senha**, colocar o **e-mail que ela usa** (o que está cadastrado) e seguir o fluxo. Assim ela define uma senha nova por link no e-mail.
+
+### Se ela entrou mas vê “Acesso Restrito” (plano com ferramentas/completo)
+
+Isso significa que o **login está ok**, mas a **assinatura** dela não tem as *features* corretas (ferramentas/completo). O sistema exige que a linha em `subscriptions` tenha `features` com `ferramentas` e/ou `cursos` ou `completo`.
+
+**O que fazer:**
+
+1. **Rodar o script de correção no Supabase (SQL Editor):**  
+   Abra e execute o arquivo **`scripts/corrigir-assinatura-nutri-diana-diapitt.sql`**. Ele atualiza a assinatura ativa da Diana (diapitt@gmail.com) para `features = ['ferramentas', 'cursos']`.
+
+2. **Ou corrigir manualmente no Supabase:**  
+   - Table Editor → `subscriptions`  
+   - Filtre por `user_id` = (id do usuário diapitt@gmail.com em auth.users) e `area` = `nutri`  
+   - Na assinatura ativa (`status` = active, `current_period_end` no futuro), edite a coluna **`features`** e coloque: `["ferramentas", "cursos"]` (tipo jsonb).
+
+3. Depois peça para ela **recarregar a página** ou **sair e entrar de novo** na plataforma.
+
 ---
 
 ## 2. Mensagem para enviar à cliente
