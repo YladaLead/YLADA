@@ -3,8 +3,26 @@
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
-import { hasFeatureAccess, hasAnyFeature, type Feature, type Area } from '@/lib/feature-helpers'
+import type { Feature, Area } from '@/lib/feature-helpers'
 import Link from 'next/link'
+
+/** Chama a API no servidor para verificar feature (evita usar supabaseAdmin no browser, que é null). */
+async function checkFeatureAccess(area: Area, feature: Feature | Feature[]): Promise<boolean> {
+  try {
+    const params = new URLSearchParams()
+    if (Array.isArray(feature)) {
+      params.set('features', feature.join(','))
+    } else {
+      params.set('feature', feature)
+    }
+    const res = await fetch(`/api/${area}/feature/check?${params.toString()}`, { credentials: 'include' })
+    const data = await res.json()
+    return res.ok && data.hasAccess === true
+  } catch (e) {
+    console.error('❌ Erro ao verificar feature:', e)
+    return false
+  }
+}
 
 interface RequireFeatureProps {
   children: React.ReactNode
@@ -79,23 +97,8 @@ export default function RequireFeature({
           }, 3000)
         })
 
-        // Verificar acesso
-        const accessPromise = (async () => {
-          try {
-            let access = false
-            if (Array.isArray(feature)) {
-              // Verificar se tem qualquer uma das features
-              access = await hasAnyFeature(user.id, area, feature)
-            } else {
-              // Verificar feature específica
-              access = await hasFeatureAccess(user.id, area, feature)
-            }
-            return access
-          } catch (error) {
-            console.error('❌ Erro ao verificar feature:', error)
-            return false
-          }
-        })()
+        // Verificar acesso via API (servidor) — não usar feature-helpers no client (supabaseAdmin é null no browser)
+        const accessPromise = checkFeatureAccess(area, feature)
 
         // Race entre timeout e verificação
         const access = await Promise.race([accessPromise, timeoutPromise])

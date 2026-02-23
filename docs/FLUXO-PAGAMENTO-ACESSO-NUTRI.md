@@ -71,6 +71,7 @@ Revisão do processo para garantir que **quem paga entre na plataforma com acess
 | Arquivo | Alteração |
 |--------|-----------|
 | `src/app/api/webhooks/mercado-pago/route.ts` | `determineFeatures`: Nutri sem `productType` ou com `platform_*` retorna `['ferramentas', 'cursos']`. Fallback defensivo: para Nutri, se `features` vier vazio antes de gravar, forçar `['ferramentas', 'cursos']` (tanto no fluxo de payment quanto no de subscription). |
+| `src/components/auth/RequireFeature.tsx` | **Cliente:** deixou de usar `hasFeatureAccess`/`hasAnyFeature` (que usam `supabaseAdmin`, null no browser) e passou a chamar a API `GET /api/[area]/feature/check`. Corrige o erro "Cannot read properties of null (reading 'from')" e libera **Captar** (ferramentas/templates) e **Trilha** (metodo/jornada) para quem tem assinatura com as features corretas. |
 
 ---
 
