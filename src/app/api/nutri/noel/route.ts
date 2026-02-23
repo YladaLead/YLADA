@@ -64,10 +64,15 @@ export async function POST(request: NextRequest) {
 
     // Pós-processamento 1: quando o backend enviou link pronto, garantir que ele apareça na resposta (modelo às vezes ignora e escreve só o nome)
     const linkSugerido = ctx.contexto.link_sugerido_onde_aplicar
+    let urlDoLink = ''
+    let nomeDoLink = ''
     if (linkSugerido) {
       const displayNameMatch = linkSugerido.match(/^\[([^\]]+)\]\(([^)]+)\)$/)
+      if (displayNameMatch) {
+        nomeDoLink = displayNameMatch[1]
+        urlDoLink = displayNameMatch[2]
+      }
       const displayName = displayNameMatch ? displayNameMatch[1] : null
-      const urlDoLink = displayNameMatch ? displayNameMatch[2] : ''
       const ehQuiz = urlDoLink.includes('/quiz/') || urlDoLink.includes('/quiz-')
       if (displayName) {
         if (!responseText.includes(linkSugerido)) {
@@ -88,11 +93,17 @@ export async function POST(request: NextRequest) {
           responseText = responseText
             .replace(new RegExp(`: ${escapeRegex(displayName)}(?=[.!\\s]|$)`, 'g'), `: ${linkSugerido}`)
             .replace(new RegExp(`aqui: ${escapeRegex(displayName)}(?![\\]\\(])`, 'gi'), `aqui: ${linkSugerido}`)
-          // Linha que contém só o nome → link clicável
+          // Linha que contém só o nome (case-insensitive) → link clicável
           responseText = responseText.split('\n').map(line => {
-            if (line.trim() === displayName) return linkSugerido
+            const t = line.trim()
+            if (t.toLowerCase() === displayName.toLowerCase()) return linkSugerido
             return line
           }).join('\n')
+          // Nome sozinho no fim da frase (ex.: "... utilize o Quiz.") → link
+          responseText = responseText.replace(
+            new RegExp(`(\\s|^)${escapeRegex(displayName)}(?=[.!,]?\\s*$)`, 'gi'),
+            (match, pre) => pre + linkSugerido
+          )
         }
         if (ehQuiz) {
           responseText = responseText
@@ -104,6 +115,11 @@ export async function POST(request: NextRequest) {
             return line
           }).join('\n')
         }
+      }
+      // Garantia final: se a URL ou o markdown ainda não estão na resposta, anexar "Seu link: [Nome](URL)" no final (zero confiança no modelo)
+      const jaTemLink = responseText.includes(urlDoLink) || responseText.includes(linkSugerido)
+      if (urlDoLink && !jaTemLink) {
+        responseText = responseText.trimEnd() + '\n\nSeu link: ' + linkSugerido
       }
     }
 
@@ -125,9 +141,15 @@ export async function POST(request: NextRequest) {
       nomesDeLinks.forEach(substituirSugestaoLink)
     }
 
+    const linkPrincipal =
+      linkSugerido && nomeDoLink && urlDoLink
+        ? { nome: nomeDoLink, url: urlDoLink, markdown: linkSugerido }
+        : undefined
+
     return NextResponse.json({
       response: responseText,
-      modelUsed: completion.model || MODEL_NOEL
+      modelUsed: completion.model || MODEL_NOEL,
+      ...(linkPrincipal && { linkPrincipal })
     })
   } catch (e: any) {
     console.error('[Noel Nutri] Erro:', e?.message || e)

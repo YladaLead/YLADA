@@ -64,6 +64,10 @@ export const landingPageVideos = {
     const version = 8
     return `/videos/nutri-hero-poster.jpg?v=${version}`
   },
+  /** Vídeo tutorial "Como escolher seu slug" (Configurações Nutri). Defina NEXT_PUBLIC_NUTRI_SLUG_VIDEO_URL (YouTube, Vimeo ou URL direta do vídeo). */
+  get nutriSlugTutorial(): string {
+    return (typeof process !== 'undefined' && process.env.NEXT_PUBLIC_NUTRI_SLUG_VIDEO_URL) || ''
+  },
 }
 
 // Log das URLs para debug (sempre, para identificar problemas em produção)

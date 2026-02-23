@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useAuth } from '@/contexts/AuthContext'
-import { trackNutriCheckoutAnnual } from '@/lib/facebook-pixel'
+import { trackNutriCheckoutAnnual, trackNutriCheckoutMonthly } from '@/lib/facebook-pixel'
 
 export default function NutriCheckoutPage() {
   const router = useRouter()
@@ -73,6 +73,7 @@ export default function NutriCheckoutPage() {
       } else if (plan === 'monthly') {
         setPlanType('monthly')
         setPlanLocked(true)
+        trackNutriCheckoutMonthly()
       } else {
         setPlanType('annual')
         trackNutriCheckoutAnnual()

@@ -4,15 +4,43 @@ import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
 import Image from 'next/image'
 import { useEffect, useState } from 'react'
+import PhoneInputWithCountry from '@/components/PhoneInputWithCountry'
 
 export default function NutriOnboardingPage() {
   const { user, loading } = useAuth()
   const router = useRouter()
   const [checking, setChecking] = useState(true)
+  const [nomeCompleto, setNomeCompleto] = useState('')
+  const [telefone, setTelefone] = useState('')
+  const [countryCode, setCountryCode] = useState('BR')
+  const [salvando, setSalvando] = useState(false)
+  const [erro, setErro] = useState<string | null>(null)
 
-  // 🚨 CORREÇÃO: Verificar se já tem diagnóstico apenas uma vez
-  // Se tiver diagnóstico, redirecionar para home
-  // Se não tiver, permanecer na página de onboarding (não redirecionar)
+  // Carregar perfil para preencher nome/telefone se já existirem
+  useEffect(() => {
+    if (!user) return
+    const carregar = async () => {
+      try {
+        const res = await fetch('/api/nutri/profile', { credentials: 'include' })
+        if (res.ok) {
+          const data = await res.json()
+          const p = data.profile
+          if (p?.nome) setNomeCompleto(p.nome)
+          else if (user.user_metadata?.full_name) setNomeCompleto(user.user_metadata.full_name)
+          else if (user.user_metadata?.name) setNomeCompleto(user.user_metadata.name)
+          else if (user.email) setNomeCompleto(user.email.split('@')[0] || '')
+          if (p?.whatsapp) setTelefone(p.whatsapp)
+          if (p?.countryCode) setCountryCode(p.countryCode || 'BR')
+        }
+      } catch {
+        if (user.user_metadata?.full_name) setNomeCompleto(user.user_metadata.full_name)
+        else if (user.email) setNomeCompleto(user.email.split('@')[0] || '')
+      }
+    }
+    carregar()
+  }, [user])
+
+  // Verificar se já tem diagnóstico: redirecionar para home
   useEffect(() => {
     const verificarDiagnostico = async () => {
       if (loading || !user) {
@@ -27,19 +55,13 @@ export default function NutriOnboardingPage() {
 
         if (response.ok) {
           const data = await response.json()
-          // Se já tem diagnóstico, redirecionar para home
           if (data.hasDiagnostico) {
-            console.log('✅ Usuário já tem diagnóstico - redirecionando para home')
             router.replace('/pt/nutri/home')
             return
-          } else {
-            // Se não tem diagnóstico, permanecer na página de onboarding
-            console.log('✅ Usuário sem diagnóstico - permanecendo na página de onboarding')
           }
         }
       } catch (error) {
         console.error('Erro ao verificar diagnóstico:', error)
-        // Em caso de erro, permanecer na página (não redirecionar)
       } finally {
         setChecking(false)
       }
@@ -48,38 +70,48 @@ export default function NutriOnboardingPage() {
     verificarDiagnostico()
   }, [user, loading, router])
 
-  const handleComecar = (e?: React.MouseEvent) => {
+  const telefoneLimpo = telefone.replace(/\D/g, '')
+  const nomePreenchido = nomeCompleto.trim().length >= 2
+  const telefonePreenchido = telefoneLimpo.length >= 10
+  const podeContinuar = nomePreenchido && telefonePreenchido && !salvando
+
+  const handleComecar = async (e?: React.MouseEvent) => {
     if (e) {
       e.preventDefault()
       e.stopPropagation()
     }
-    
-    console.log('🚀 Iniciando diagnóstico - navegando para /pt/nutri/diagnostico')
-    
-    // 🚨 CORREÇÃO: Marcar no sessionStorage que veio do onboarding
-    // Isso garante que a página de diagnóstico saiba que não deve redirecionar de volta
-    if (typeof window !== 'undefined') {
-      try {
+    if (!podeContinuar) return
+
+    setErro(null)
+    setSalvando(true)
+    try {
+      const response = await fetch('/api/nutri/profile', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          nome: nomeCompleto.trim(),
+          whatsapp: telefoneLimpo,
+          countryCode
+        })
+      })
+      const data = await response.json().catch(() => ({}))
+      if (!response.ok) {
+        setErro(data.error || 'Não foi possível salvar. Tente de novo.')
+        setSalvando(false)
+        return
+      }
+
+      if (typeof window !== 'undefined') {
         sessionStorage.setItem('nutri_veio_do_onboarding', 'true')
         sessionStorage.setItem('nutri_veio_do_onboarding_timestamp', Date.now().toString())
-        console.log('✅ Flag de onboarding salva no sessionStorage')
-      } catch (err) {
-        console.error('Erro ao salvar no sessionStorage:', err)
-      }
-      
-      // Usar window.location.href como método principal (mais confiável)
-      // Isso força uma navegação completa mesmo se router.push falhar
-      console.log('🔄 Navegando para /pt/nutri/diagnostico usando window.location.href...')
-      try {
         window.location.href = '/pt/nutri/diagnostico'
-      } catch (err) {
-        console.error('Erro ao navegar:', err)
-        // Fallback: tentar router.push
+      } else {
         router.push('/pt/nutri/diagnostico')
       }
-    } else {
-      // Fallback para SSR (não deve acontecer, mas por segurança)
-      router.push('/pt/nutri/diagnostico')
+    } catch (err) {
+      setErro('Algo deu errado. Tente novamente.')
+      setSalvando(false)
     }
   }
 
@@ -137,17 +169,65 @@ export default function NutriOnboardingPage() {
           {/* Separador */}
           <div className="border-t border-gray-200 my-8"></div>
 
+          {/* Frase amigável + coleta de nome e telefone */}
+          <div className="mb-6">
+            <p className="text-center text-gray-700 text-lg leading-relaxed mb-6">
+              Para que a gente possa te orientar da melhor forma e manter um contato próximo, preencha os dados abaixo.
+            </p>
+
+            <div className="space-y-4">
+              <div>
+                <label htmlFor="onboarding-nome" className="block text-sm font-medium text-gray-700 mb-1">
+                  Nome completo <span className="text-red-500">*</span>
+                </label>
+                <input
+                  id="onboarding-nome"
+                  type="text"
+                  value={nomeCompleto}
+                  onChange={(e) => setNomeCompleto(e.target.value)}
+                  placeholder="Ex.: Maria Silva"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 placeholder-gray-400"
+                />
+              </div>
+              <div>
+                <label htmlFor="onboarding-telefone" className="block text-sm font-medium text-gray-700 mb-1">
+                  Telefone / WhatsApp <span className="text-red-500">*</span>
+                </label>
+                <PhoneInputWithCountry
+                  value={telefone}
+                  onChange={(phone, code) => {
+                    setTelefone(phone)
+                    setCountryCode(code || 'BR')
+                  }}
+                  defaultCountryCode={countryCode}
+                  className="w-full rounded-xl focus-within:ring-2 focus-within:ring-blue-500"
+                  placeholder="11 99999-9999"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Assim podemos te avisar sobre novidades e suporte quando precisar
+                </p>
+              </div>
+            </div>
+
+            {erro && (
+              <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-lg">
+                <p className="text-sm text-red-700">{erro}</p>
+              </div>
+            )}
+          </div>
+
           {/* Próximo Passo */}
           <div className="text-center">
-            <p className="text-gray-600 mb-6 text-lg">
-              Para começar, preciso conhecer você melhor. Vamos fazer seu <strong className="text-gray-900">Diagnóstico Estratégico</strong>?
+            <p className="text-gray-600 mb-4 text-lg">
+              Agora sim: vamos fazer seu <strong className="text-gray-900">Diagnóstico Estratégico</strong>?
             </p>
             
             <button
               onClick={handleComecar}
-              className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-blue-700 text-white px-10 py-4 rounded-xl text-lg font-bold hover:from-blue-700 hover:to-blue-800 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+              disabled={!podeContinuar}
+              className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-blue-700 text-white px-10 py-4 rounded-xl text-lg font-bold hover:from-blue-700 hover:to-blue-800 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 disabled:opacity-50 disabled:pointer-events-none disabled:transform-none"
             >
-              👉 Começar meu Diagnóstico Estratégico
+              {salvando ? 'Salvando...' : '👉 Começar meu Diagnóstico Estratégico'}
             </button>
             
             <p className="text-sm text-gray-500 mt-4">
@@ -159,7 +239,7 @@ export default function NutriOnboardingPage() {
         {/* Informação adicional */}
         <div className="mt-6 text-center">
           <p className="text-sm text-gray-500">
-            Você pode editar essas informações a qualquer momento depois
+            Você pode editar essas informações a qualquer momento em Configurações
           </p>
         </div>
       </div>

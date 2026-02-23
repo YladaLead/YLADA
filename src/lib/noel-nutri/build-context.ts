@@ -115,6 +115,134 @@ export interface NoelNutriContextResult {
   contexto: ContextoNoelDefinitivo
 }
 
+/** Resultado da função compartilhada de links (usado pelo build-context e pelo GET /api/nutri/noel/links). */
+export interface NoelNutriLinksResult {
+  links: LinkAtivo[]
+  linkPrincipal: { nome: string; url: string; markdown: string } | null
+}
+
+/**
+ * Retorna apenas a lista de links ativos e o link principal (primeiro da ordenação).
+ * Usado por buildNoelNutriContext e por GET /api/nutri/noel/links.
+ */
+export async function getNoelNutriLinks(
+  userId: string,
+  userMessage?: string
+): Promise<NoelNutriLinksResult> {
+  if (!supabaseAdmin) return { links: [], linkPrincipal: null }
+
+  const baseUrl = getBaseUrl()
+
+  let catalogNomeBySlug: Record<string, string> = {}
+  try {
+    const { data: catalogTemplates } = await supabaseAdmin
+      .from('templates_nutrition')
+      .select('slug, name')
+      .eq('is_active', true)
+      .eq('language', 'pt')
+      .limit(100)
+    ;(catalogTemplates || []).forEach((row: { slug?: string; name?: string }) => {
+      if (row.slug && row.name) catalogNomeBySlug[row.slug] = row.name.trim()
+    })
+  } catch {
+    catalogNomeBySlug = {}
+  }
+
+  const [profileSlugResult, toolsResult, quizzesResult] = await Promise.all([
+    supabaseAdmin.from('user_profiles').select('user_slug').eq('user_id', userId).maybeSingle(),
+    supabaseAdmin
+      .from('user_templates')
+      .select('id, title, slug, template_slug')
+      .eq('user_id', userId)
+      .eq('profession', 'nutri')
+      .eq('status', 'active')
+      .order('created_at', { ascending: false })
+      .limit(15),
+    supabaseAdmin
+      .from('quizzes')
+      .select('id, titulo, slug')
+      .eq('user_id', userId)
+      .eq('profession', 'nutri')
+      .eq('status', 'active')
+      .order('created_at', { ascending: false })
+      .limit(10)
+  ])
+
+  const userSlug = profileSlugResult.data?.user_slug ?? null
+  const links: LinkAtivo[] = []
+
+  if (userSlug) {
+    ;(toolsResult.data || []).forEach((t: { title?: string; slug?: string; template_slug?: string }) => {
+      if (t.slug) {
+        const tituloReal = (t.title || '').trim()
+        const slugBase = t.slug.replace(/-\d+$/, '')
+        const nomeDoCatalogo = catalogNomeBySlug[t.slug] || catalogNomeBySlug[slugBase]
+        const nomeAmigavel =
+          tituloReal ||
+          nomeDoCatalogo ||
+          (t.template_slug && NOME_AMIGAVEL_POR_TEMPLATE[t.template_slug]) ||
+          'Ferramenta'
+        const tags = (t.template_slug && TAGS_POR_TEMPLATE[t.template_slug]) || []
+        links.push({
+          nome: nomeAmigavel,
+          tipo: (t.template_slug && (t.template_slug.startsWith('quiz-') ? 'quiz' : t.template_slug.startsWith('calc-') ? 'calculadora' : 'ferramenta')) || 'ferramenta',
+          url: buildNutriToolUrl(userSlug, t.slug, baseUrl),
+          tags: tags.length ? tags : undefined
+        })
+      }
+    })
+    ;(quizzesResult.data || []).forEach((q: { titulo?: string; slug?: string }) => {
+      if (q.slug) {
+        const slugBase = q.slug.replace(/-\d+$/, '')
+        const nomeAmigavel = (NOME_AMIGAVEL_POR_TEMPLATE[slugBase] || (q.titulo || 'Quiz').trim()) as string
+        const tituloNorm = (q.titulo || '').toLowerCase().normalize('NFD').replace(/\p{M}/gu, '')
+        const tagsQuiz: string[] = []
+        if (/emagrec|agua|hidrat|proteina|intestino|caloria|imc/.test(tituloNorm)) {
+          if (/agua|hidrat/.test(tituloNorm)) tagsQuiz.push('agua', 'hidratacao')
+          if (/emagrec/.test(tituloNorm)) tagsQuiz.push('emagrecimento')
+          if (/proteina/.test(tituloNorm)) tagsQuiz.push('proteina')
+          if (/intestino/.test(tituloNorm)) tagsQuiz.push('intestino')
+          if (/caloria/.test(tituloNorm)) tagsQuiz.push('calorias')
+          if (/imc/.test(tituloNorm)) tagsQuiz.push('imc')
+        }
+        if (tagsQuiz.length === 0) tagsQuiz.push('emagrecimento')
+        links.push({
+          nome: nomeAmigavel,
+          tipo: 'quiz',
+          url: buildNutriQuizUrl(userSlug, q.slug, baseUrl),
+          tags: tagsQuiz
+        })
+      }
+    })
+  }
+
+  const ordemTipo: Record<string, number> = { quiz: 0, calculadora: 1, ferramenta: 2 }
+  if (userMessage && userMessage.trim()) {
+    const msgNorm = userMessage.toLowerCase().normalize('NFD').replace(/\p{M}/gu, '')
+    const palavras = ['emagrecimento', 'emagrecer', 'agua', 'água', 'hidratacao', 'hidratação', 'proteina', 'proteína', 'intestino', 'caloria', 'imc']
+    const palavrasNaPergunta = palavras.filter(p => msgNorm.includes(p))
+    if (palavrasNaPergunta.length > 0) {
+      links.sort((a, b) => {
+        const aMatch = (a.tags || []).some(tag => palavrasNaPergunta.some(p => tag.includes(p) || p.includes(tag)))
+        const bMatch = (b.tags || []).some(tag => palavrasNaPergunta.some(p => tag.includes(p) || p.includes(tag)))
+        if (aMatch !== bMatch) return aMatch ? -1 : 1
+        return (ordemTipo[a.tipo] ?? 2) - (ordemTipo[b.tipo] ?? 2)
+      })
+    } else {
+      links.sort((a, b) => (ordemTipo[a.tipo] ?? 2) - (ordemTipo[b.tipo] ?? 2))
+    }
+  } else {
+    links.sort((a, b) => (ordemTipo[a.tipo] ?? 2) - (ordemTipo[b.tipo] ?? 2))
+  }
+
+  const primeiro = links.length > 0 ? links[0] : null
+  const linkPrincipal = primeiro
+    ? { nome: primeiro.nome, url: primeiro.url, markdown: `[${primeiro.nome}](${primeiro.url})` }
+    : null
+
+  return { links, linkPrincipal }
+}
+
 function getInicioFimSemana(): { inicio: string; fim: string } {
   const hoje = new Date()
   hoje.setHours(0, 0, 0, 0)
@@ -188,34 +316,16 @@ export async function buildNoelNutriContext(
   if (!supabaseAdmin) return null
 
   const { inicio: inicioSemana, fim: fimSemana } = getInicioFimSemana()
-  const baseUrl = getBaseUrl()
   const lookup_de_link = userMessage ? isLookupDeLink(userMessage) : false
 
-  // Catálogo (templates_nutrition) = mesma fonte de nomes que a tela Captar usa
-  let catalogNomeBySlug: Record<string, string> = {}
-  try {
-    const { data: catalogTemplates } = await supabaseAdmin
-      .from('templates_nutrition')
-      .select('slug, name')
-      .eq('is_active', true)
-      .eq('language', 'pt')
-      .limit(100)
-    ;(catalogTemplates || []).forEach((row: { slug?: string; name?: string }) => {
-      if (row.slug && row.name) catalogNomeBySlug[row.slug] = row.name.trim()
-    })
-  } catch {
-    catalogNomeBySlug = {}
-  }
-
   const [
+    linksResult,
     jornadaResult,
     profileResult,
     linkEventsSemanaResult,
-    profileSlugResult,
-    toolsResult,
-    quizzesResult,
     clientsPendentesResult
   ] = await Promise.all([
+    getNoelNutriLinks(userId, userMessage),
     supabaseAdmin
       .from('journey_progress')
       .select('day_number')
@@ -232,23 +342,6 @@ export async function buildNoelNutriContext(
       .in('event_type', ['whatsapp_click', 'lead_capture'])
       .gte('created_at', inicioSemana)
       .lte('created_at', fimSemana),
-    supabaseAdmin.from('user_profiles').select('user_slug').eq('user_id', userId).maybeSingle(),
-    supabaseAdmin
-      .from('user_templates')
-      .select('id, title, slug, template_slug')
-      .eq('user_id', userId)
-      .eq('profession', 'nutri')
-      .eq('status', 'active')
-      .order('created_at', { ascending: false })
-      .limit(15),
-    supabaseAdmin
-      .from('quizzes')
-      .select('id, titulo, slug')
-      .eq('user_id', userId)
-      .eq('profession', 'nutri')
-      .eq('status', 'active')
-      .order('created_at', { ascending: false })
-      .limit(10),
     supabaseAdmin
       .from('clients')
       .select('id')
@@ -257,77 +350,7 @@ export async function buildNoelNutriContext(
       .limit(1)
   ])
 
-  const userSlug = profileSlugResult.data?.user_slug ?? null
-  const links_ativos: LinkAtivo[] = []
-
-  if (userSlug) {
-    // Nomes = mesma fonte que a área Captar (title > catálogo templates_nutrition > fallback)
-    // URLs pelo mesmo padrão da área Captar / Wellness (url-utils)
-    ;(toolsResult.data || []).forEach((t: { title?: string; slug?: string; template_slug?: string }) => {
-      if (t.slug) {
-        const tituloReal = (t.title || '').trim()
-        const slugBase = t.slug.replace(/-\d+$/, '')
-        const nomeDoCatalogo = catalogNomeBySlug[t.slug] || catalogNomeBySlug[slugBase]
-        const nomeAmigavel =
-          tituloReal ||
-          nomeDoCatalogo ||
-          (t.template_slug && NOME_AMIGAVEL_POR_TEMPLATE[t.template_slug]) ||
-          'Ferramenta'
-        const tags = (t.template_slug && TAGS_POR_TEMPLATE[t.template_slug]) || []
-        links_ativos.push({
-          nome: nomeAmigavel,
-          tipo: (t.template_slug && (t.template_slug.startsWith('quiz-') ? 'quiz' : t.template_slug.startsWith('calc-') ? 'calculadora' : 'ferramenta')) || 'ferramenta',
-          url: buildNutriToolUrl(userSlug, t.slug, baseUrl),
-          tags: tags.length ? tags : undefined
-        })
-      }
-    })
-    ;(quizzesResult.data || []).forEach((q: { titulo?: string; slug?: string }) => {
-      if (q.slug) {
-        const slugBase = q.slug.replace(/-\d+$/, '')
-        const nomeAmigavel = (NOME_AMIGAVEL_POR_TEMPLATE[slugBase] || (q.titulo || 'Quiz').trim()) as string
-        const tituloNorm = (q.titulo || '').toLowerCase().normalize('NFD').replace(/\p{M}/gu, '')
-        const tagsQuiz: string[] = []
-        if (/emagrec|agua|hidrat|proteina|intestino|caloria|imc/.test(tituloNorm)) {
-          if (/agua|hidrat/.test(tituloNorm)) tagsQuiz.push('agua', 'hidratacao')
-          if (/emagrec/.test(tituloNorm)) tagsQuiz.push('emagrecimento')
-          if (/proteina/.test(tituloNorm)) tagsQuiz.push('proteina')
-          if (/intestino/.test(tituloNorm)) tagsQuiz.push('intestino')
-          if (/caloria/.test(tituloNorm)) tagsQuiz.push('calorias')
-          if (/imc/.test(tituloNorm)) tagsQuiz.push('imc')
-        }
-        if (tagsQuiz.length === 0) tagsQuiz.push('emagrecimento')
-        links_ativos.push({
-          nome: nomeAmigavel,
-          tipo: 'quiz',
-          url: buildNutriQuizUrl(userSlug, q.slug, baseUrl),
-          tags: tagsQuiz
-        })
-      }
-    })
-  }
-
-  // Só links da área de captar (ferramentas + quizzes). Não adicionar Painel do dia, Jornada etc.
-
-  // Ordenação: 1) por match de tags na pergunta (captação + userMessage), 2) por tipo (quiz > calculadora > …)
-  const ordemTipo: Record<string, number> = { quiz: 0, calculadora: 1, ferramenta: 2 }
-  if (userMessage && userMessage.trim()) {
-    const msgNorm = userMessage.toLowerCase().normalize('NFD').replace(/\p{M}/gu, '')
-    const palavras = ['emagrecimento', 'emagrecer', 'agua', 'água', 'hidratacao', 'hidratação', 'proteina', 'proteína', 'intestino', 'caloria', 'imc']
-    const palavrasNaPergunta = palavras.filter(p => msgNorm.includes(p))
-    if (palavrasNaPergunta.length > 0) {
-      links_ativos.sort((a, b) => {
-        const aMatch = (a.tags || []).some(tag => palavrasNaPergunta.some(p => tag.includes(p) || p.includes(tag)))
-        const bMatch = (b.tags || []).some(tag => palavrasNaPergunta.some(p => tag.includes(p) || p.includes(tag)))
-        if (aMatch !== bMatch) return aMatch ? -1 : 1
-        return (ordemTipo[a.tipo] ?? 2) - (ordemTipo[b.tipo] ?? 2)
-      })
-    } else {
-      links_ativos.sort((a, b) => (ordemTipo[a.tipo] ?? 2) - (ordemTipo[b.tipo] ?? 2))
-    }
-  } else {
-    links_ativos.sort((a, b) => (ordemTipo[a.tipo] ?? 2) - (ordemTipo[b.tipo] ?? 2))
-  }
+  const links_ativos = linksResult.links
 
   const jornadaIniciada = jornadaResult.data?.day_number != null
   const meta_semanal = Math.min(50, Math.max(1, profileResult.data?.meta_conversas_semana ?? 5))

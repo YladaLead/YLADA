@@ -13,6 +13,7 @@ import BrandingPreview from '@/components/nutri/BrandingPreview'
 import LyaChatWidget from '@/components/nutri/LyaChatWidget'
 import CancelRetentionModal from '@/components/nutri/CancelRetentionModal'
 import { supabase } from '@/lib/supabase'
+import { landingPageVideos } from '@/lib/landing-pages-assets'
 
 function NutriConfiguracaoContent() {
   const { user, userProfile } = useAuth()
@@ -163,21 +164,34 @@ function NutriConfiguracaoContent() {
         console.log('📋 carregarPerfil: Dados recebidos:', data)
         
         if (data.profile) {
+          const nome = data.profile.nome || user?.user_metadata?.full_name || user?.user_metadata?.name || user?.email?.split('@')[0] || ''
+          const email = data.profile.email || user?.email || ''
+          const slugSalvo = data.profile.userSlug || data.profile.user_slug || ''
+          // Sugerir slug automaticamente a partir do nome (ou email) quando ainda não tiver slug
+          const sugerirSlug = (texto: string) =>
+            texto
+              .toLowerCase()
+              .normalize('NFD')
+              .replace(/[\u0300-\u036f]/g, '')
+              .replace(/[^a-z0-9]/g, '')
+              .substring(0, 30)
+          const slugInicial = slugSalvo || (nome ? sugerirSlug(nome) : email ? sugerirSlug(email.split('@')[0] || '') : '')
+
           const novoPerfil = {
-            nome: data.profile.nome || user?.user_metadata?.full_name || user?.user_metadata?.name || user?.email?.split('@')[0] || '',
-            email: data.profile.email || user?.email || '',
+            nome,
+            email,
             telefone: data.profile.telefone || data.profile.whatsapp || '',
             whatsapp: data.profile.whatsapp || data.profile.telefone || '',
             countryCode: data.profile.countryCode || 'BR',
             bio: data.profile.bio || '',
-            userSlug: data.profile.userSlug || data.profile.user_slug || '',
+            userSlug: slugInicial,
             // Campos de branding
             logoUrl: data.profile.logoUrl || '',
             brandColor: data.profile.brandColor || '#3B82F6',
             brandName: data.profile.brandName || '',
             professionalCredential: data.profile.professionalCredential || ''
           }
-          
+
           console.log('✅ carregarPerfil: Definindo perfil:', novoPerfil)
           setPerfil(novoPerfil)
         } else {
@@ -190,19 +204,24 @@ function NutriConfiguracaoContent() {
           error: errorData
         })
         // Se erro ao carregar perfil, usar dados do usuário logado
+        const nomeFallback = user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split('@')[0] || ''
+        const slugSugerido = nomeFallback ? tratarSlug(nomeFallback) : (user.email ? tratarSlug(user.email.split('@')[0] || '') : '')
         setPerfil(prev => ({
           ...prev,
-          nome: prev.nome || user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split('@')[0] || '',
-          email: prev.email || user.email || ''
+          nome: prev.nome || nomeFallback,
+          email: prev.email || user.email || '',
+          userSlug: prev.userSlug || slugSugerido
         }))
       }
     } catch (error) {
       console.error('❌ carregarPerfil: Erro ao carregar perfil Nutri:', error)
-      // Em caso de erro, usar dados do usuário logado
+      const nomeFallback = user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split('@')[0] || ''
+      const slugSugerido = nomeFallback ? tratarSlug(nomeFallback) : (user.email ? tratarSlug(user.email.split('@')[0] || '') : '')
       setPerfil(prev => ({
         ...prev,
-        nome: prev.nome || user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split('@')[0] || '',
-        email: prev.email || user.email || ''
+        nome: prev.nome || nomeFallback,
+        email: prev.email || user.email || '',
+        userSlug: prev.userSlug || slugSugerido
       }))
     } finally {
       setCarregando(false)
@@ -571,15 +590,58 @@ function NutriConfiguracaoContent() {
                   </p>
                 </div>
               )}
-              <p className="text-xs text-gray-500 mt-1">
-                Este slug será usado nas suas URLs: ylada.app/nutri/<strong>{perfil.userSlug || 'seuslug'}</strong>/[nome-ferramenta]
+              <p className="text-sm text-gray-600 mt-2">
+                O slug é o <strong>nome único da sua página</strong> que aparece nos links que você compartilha com clientes. Exemplo: se você escolher <strong>marianutri</strong>, seus links ficarão assim:
               </p>
-              <p className="text-xs text-gray-400 mt-1">
-                • Será normalizado automaticamente enquanto você digita<br/>
-                • <strong>Apenas um nome único</strong> - sem hífens, sem espaços<br/>
-                • Apenas letras minúsculas e números (ex: joaosilva, aracy, maria123)<br/>
-                • Será usado para criar seus links personalizados
+              <p className="text-sm text-gray-700 mt-1 font-mono bg-gray-50 px-3 py-2 rounded-lg border border-gray-200">
+                ylada.app/pt/nutri/<strong className="text-blue-600">{perfil.userSlug || 'seuslug'}</strong>/[ferramenta]
               </p>
+              <ul className="text-xs text-gray-500 mt-2 space-y-1 list-disc list-inside">
+                <li>Use <strong>apenas letras minúsculas e números</strong> (ex: joaosilva, aracy, maria123)</li>
+                <li><strong>Sem hífens nem espaços</strong> — um nome só, fácil de lembrar e de falar</li>
+                <li>Será normalizado automaticamente enquanto você digita (acentos e espaços são ajustados)</li>
+                <li>Escolha um nome que ainda não esteja em uso (o sistema avisa se estiver indisponível)</li>
+              </ul>
+              {/* Vídeo tutorial: exibido apenas quando NEXT_PUBLIC_NUTRI_SLUG_VIDEO_URL estiver definido */}
+              {(() => {
+                const slugVideoUrl = landingPageVideos.nutriSlugTutorial
+                if (!slugVideoUrl) return null
+                const isYoutube = /youtube\.com|youtu\.be/i.test(slugVideoUrl)
+                const isVimeo = /vimeo\.com/i.test(slugVideoUrl)
+                const embedUrl = isYoutube
+                  ? (() => {
+                      const m = slugVideoUrl.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\s]+)/)
+                      return m ? `https://www.youtube.com/embed/${m[1]}` : slugVideoUrl
+                    })()
+                  : isVimeo
+                    ? `https://player.vimeo.com/video/${slugVideoUrl.match(/vimeo\.com\/(?:video\/)?(\d+)/)?.[1] || ''}`
+                    : ''
+                return (
+                  <div className="mt-4 p-4 bg-blue-50/50 rounded-xl border border-blue-100">
+                    <p className="text-sm font-medium text-gray-800 mb-2">📹 Vídeo: como escolher seu slug</p>
+                    <div className="aspect-video rounded-lg overflow-hidden bg-gray-900">
+                      {isYoutube || isVimeo ? (
+                        <iframe
+                          src={embedUrl}
+                          title="Como escolher seu slug"
+                          className="w-full h-full"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                          allowFullScreen
+                        />
+                      ) : (
+                        <video
+                          src={slugVideoUrl}
+                          controls
+                          className="w-full h-full"
+                          playsInline
+                        >
+                          Seu navegador não suporta vídeo.
+                        </video>
+                      )}
+                    </div>
+                  </div>
+                )
+              })()}
             </div>
           </div>
         </div>

@@ -319,69 +319,61 @@ export const trackNutriSalesView = () => {
   setTimeout(tryTrack, 100);
 };
 
-// NutriCheckout_Monthly - Início de checkout mensal
+// NutriCheckout_Monthly - Início de checkout mensal (R$ 97/mês)
 export const trackNutriCheckoutMonthly = () => {
-  console.log('[Facebook Pixel] Tentando rastrear NutriCheckout_Monthly...');
-  
-  // Aguardar Pixel carregar antes de disparar
-  let attempts = 0;
-  const maxAttempts = 10; // 5 segundos no total
-  
+  const value = 97;
   const tryTrack = () => {
-    attempts++;
-    console.log(`[Facebook Pixel] Tentativa ${attempts} de rastrear NutriCheckout_Monthly...`);
-    
     if (isPixelLoaded()) {
-      console.log('[Facebook Pixel] ✅ Pixel carregado! Disparando NutriCheckout_Monthly...');
+      trackInitiateCheckout({
+        content_name: 'Checkout Plano Mensal Nutri',
+        content_category: 'NUTRI',
+        value,
+        currency: 'BRL',
+      });
       trackCustomEvent('NutriCheckout_Monthly', {
         content_category: 'NUTRI',
         content_name: 'Checkout Plano Mensal',
-        value: 197,
+        value,
         currency: 'BRL',
         page_location: '/pt/nutri/checkout?plan=monthly',
       });
-    } else if (attempts < maxAttempts) {
-      // Tentar novamente após 500ms se Pixel ainda não carregou
-      setTimeout(tryTrack, 500);
-    } else {
-      console.error('[Facebook Pixel] ❌ Pixel não carregou após 5 segundos. Verifique se o componente FacebookPixel está no layout.');
+      return;
+    }
+    if (typeof window !== 'undefined' && (window as any).__nutriCheckoutMonthlyAttempts < 10) {
+      (window as any).__nutriCheckoutMonthlyAttempts = ((window as any).__nutriCheckoutMonthlyAttempts || 0) + 1;
+      setTimeout(tryTrack, 300);
     }
   };
-  
-  // Aguardar um pouco para o Pixel ter tempo de carregar
+  if (typeof window !== 'undefined') (window as any).__nutriCheckoutMonthlyAttempts = 0;
   setTimeout(tryTrack, 100);
 };
 
-// NutriCheckout_Annual - Início de checkout anual
+// NutriCheckout_Annual - Início de checkout anual (R$ 708)
 export const trackNutriCheckoutAnnual = () => {
-  console.log('[Facebook Pixel] Tentando rastrear NutriCheckout_Annual...');
-  
-  // Aguardar Pixel carregar antes de disparar
-  let attempts = 0;
-  const maxAttempts = 10; // 5 segundos no total
-  
+  const value = 708;
   const tryTrack = () => {
-    attempts++;
-    console.log(`[Facebook Pixel] Tentativa ${attempts} de rastrear NutriCheckout_Annual...`);
-    
     if (isPixelLoaded()) {
-      console.log('[Facebook Pixel] ✅ Pixel carregado! Disparando NutriCheckout_Annual...');
+      trackInitiateCheckout({
+        content_name: 'Checkout Plano Anual Nutri',
+        content_category: 'NUTRI',
+        value,
+        currency: 'BRL',
+      });
       trackCustomEvent('NutriCheckout_Annual', {
         content_category: 'NUTRI',
         content_name: 'Checkout Plano Anual',
-        value: 1164,
+        value,
         currency: 'BRL',
         page_location: '/pt/nutri/checkout?plan=annual',
       });
-    } else if (attempts < maxAttempts) {
-      // Tentar novamente após 500ms se Pixel ainda não carregou
-      setTimeout(tryTrack, 500);
-    } else {
-      console.error('[Facebook Pixel] ❌ Pixel não carregou após 5 segundos. Verifique se o componente FacebookPixel está no layout.');
+      return;
+    }
+    if (typeof window !== 'undefined' && (window as any).__nutriCheckoutAnnualAttempts < 10) {
+      (window as any).__nutriCheckoutAnnualAttempts = ((window as any).__nutriCheckoutAnnualAttempts || 0) + 1;
+      setTimeout(tryTrack, 300);
     }
   };
-  
-  // Aguardar um pouco para o Pixel ter tempo de carregar
+  if (typeof window !== 'undefined') (window as any).__nutriCheckoutAnnualAttempts = 0;
   setTimeout(tryTrack, 100);
 };
 

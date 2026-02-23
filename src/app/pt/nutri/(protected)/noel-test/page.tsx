@@ -31,6 +31,7 @@ interface ResultadoTeste {
   pergunta: string
   resposta?: string
   erro?: string
+  linkPrincipal?: { nome: string; url: string; markdown: string } | null
 }
 
 function NoelTestContent() {
@@ -44,6 +45,7 @@ function NoelTestContent() {
   const [rodandoTodos, setRodandoTodos] = useState(false)
   const [progresso, setProgresso] = useState({ atual: 0, total: 0 })
   const [resultadosTodos, setResultadosTodos] = useState<ResultadoTeste[]>([])
+  const [linkPrincipal, setLinkPrincipal] = useState<{ nome: string; url: string; markdown: string } | null>(null)
 
   const enviar = async () => {
     const msg = pergunta.trim()
@@ -69,6 +71,7 @@ function NoelTestContent() {
       const text = data.response || data.message || ''
       setResposta(text)
       setModelUsed(data.modelUsed || '')
+      setLinkPrincipal(data.linkPrincipal ?? null)
       setHistorico(prev => [...prev, { role: 'user', content: msg }, { role: 'assistant', content: text }])
       setPergunta('')
     } catch (e: any) {
@@ -82,6 +85,7 @@ function NoelTestContent() {
     setRodandoTodos(true)
     setProgresso({ atual: 0, total: PERGUNTAS_TESTE.length })
     setResultadosTodos([])
+    setLinkPrincipal(null)
     const resultados: ResultadoTeste[] = []
     for (let i = 0; i < PERGUNTAS_TESTE.length; i++) {
       setProgresso({ atual: i + 1, total: PERGUNTAS_TESTE.length })
@@ -94,7 +98,12 @@ function NoelTestContent() {
         })
         const data = await res.json().catch(() => ({}))
         if (res.ok) {
-          resultados.push({ categoria, pergunta: p, resposta: data.response || data.message || '' })
+          resultados.push({
+            categoria,
+            pergunta: p,
+            resposta: data.response || data.message || '',
+            linkPrincipal: data.linkPrincipal ?? null
+          })
         } else {
           resultados.push({ categoria, pergunta: p, erro: data.error || data.message || `Erro ${res.status}` })
         }
@@ -150,6 +159,28 @@ function NoelTestContent() {
           </button>
         </div>
         {erro && <p className="text-red-600 text-sm mt-2">{erro}</p>}
+        {linkPrincipal && (
+          <div className="mt-4 p-4 bg-emerald-50 border border-emerald-200 rounded-xl shadow-sm">
+            <p className="text-xs font-medium text-emerald-800 mb-2">Seu link (perfil logado)</p>
+            <a
+              href={linkPrincipal.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-600 hover:text-blue-800 underline font-medium break-all block mb-2"
+            >
+              {linkPrincipal.nome}
+            </a>
+            <button
+              type="button"
+              onClick={() => {
+                navigator.clipboard.writeText(linkPrincipal.url)
+              }}
+              className="text-xs px-2 py-1 bg-emerald-600 text-white rounded"
+            >
+              Copiar URL
+            </button>
+          </div>
+        )}
         {resposta && (
           <div className="mt-4 p-4 bg-white border border-gray-200 rounded-xl shadow-sm">
             <p className="text-xs text-gray-500 mb-2">Resposta {modelUsed && `(${modelUsed})`}</p>
@@ -181,7 +212,29 @@ function NoelTestContent() {
                   {r.erro ? (
                     <p className="text-sm text-red-600">{r.erro}</p>
                   ) : (
-                    <NoelRespostaView texto={r.resposta ?? ''} />
+                    <>
+                      {r.linkPrincipal && (
+                        <div className="mb-3 p-3 bg-emerald-50 border border-emerald-200 rounded-lg">
+                          <p className="text-xs font-medium text-emerald-800 mb-1">Seu link (perfil logado)</p>
+                          <a
+                            href={r.linkPrincipal.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-600 hover:text-blue-800 underline font-medium break-all"
+                          >
+                            {r.linkPrincipal.nome}
+                          </a>
+                          <button
+                            type="button"
+                            onClick={() => navigator.clipboard.writeText(r.linkPrincipal!.url)}
+                            className="ml-2 text-xs px-2 py-0.5 bg-emerald-600 text-white rounded"
+                          >
+                            Copiar
+                          </button>
+                        </div>
+                      )}
+                      <NoelRespostaView texto={r.resposta ?? ''} />
+                    </>
                   )}
                 </div>
               ))}

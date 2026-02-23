@@ -397,6 +397,19 @@ export default function NutriSidebar({ isMobileOpen = false, onMobileClose }: Nu
               </div>
             )
           })}
+
+          {/* Botão Suporte — WhatsApp */}
+          <a
+            href="https://wa.me/5519996049800?text=Olá! Preciso de suporte na YLADA Nutri."
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={onMobileClose}
+            className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition-colors mt-2 border-t border-gray-100 pt-3"
+            title="Falar com suporte no WhatsApp"
+          >
+            <span className="text-lg flex-shrink-0">💬</span>
+            <span className="flex-1 truncate">Suporte</span>
+          </a>
         </nav>
       </aside>
     </>
