@@ -7,39 +7,35 @@ import { getCarolAutomationDisabled } from '@/lib/carol-admin-settings'
 import { redirectToSupportAfterPayment } from '@/lib/whatsapp-carol-ai'
 
 /**
- * Determina features baseado em área, planType e productType
- * Apenas para área Nutri com productType específico
+ * Determina features baseado em área, planType e productType.
+ * Garantia: Nutri sempre recebe acesso a ferramentas + cursos quando productType
+ * não vem no metadata (ex.: MP não repassa metadata da Preference no Payment).
  */
 function determineFeatures(
   area: string,
   planType: string,
   productType?: string
 ): string[] {
-  // Apenas para área Nutri com productType
-  if (area === 'nutri' && productType) {
-    if (productType === 'platform_monthly') {
-      // V1: pacote único (Captação + Trilha + LYA)
-      return ['ferramentas', 'cursos']
-    }
-    if (productType === 'platform_monthly_12x') {
-      // Mesmo acesso do mensal, mas pago via Preference parcelado
-      return ['ferramentas', 'cursos']
-    }
-    if (productType === 'platform_annual') {
-      // V1: pacote único (Captação + Trilha + LYA)
-      return ['ferramentas', 'cursos']
-    }
+  // Área Nutri: pacote plataforma = ferramentas + cursos; formation_only = só cursos
+  if (area === 'nutri') {
     if (productType === 'formation_only') {
-      return ['cursos'] // Formação standalone: apenas cursos
+      return ['cursos']
+    }
+    // Qualquer outro caso Nutri (platform_*, ou productType ausente): acesso completo à plataforma
+    if (
+      productType === 'platform_monthly' ||
+      productType === 'platform_monthly_12x' ||
+      productType === 'platform_annual' ||
+      !productType
+    ) {
+      return ['ferramentas', 'cursos']
     }
   }
-  
-  // Para outras áreas ou sem productType, manter comportamento padrão
-  // Anual = completo, Mensal = gestão + ferramentas
+
+  // Outras áreas: Anual = completo, Mensal = gestão + ferramentas
   if (planType === 'annual') {
     return ['completo']
   }
-  
   return ['gestao', 'ferramentas']
 }
 
@@ -396,7 +392,12 @@ async function handlePaymentEvent(data: any, isTest: boolean = false, preFetched
     const refVendedor = metadata.ref_vendedor && String(metadata.ref_vendedor).trim() ? String(metadata.ref_vendedor).trim() : 'ida'
     
     // Determinar features baseado em productType (apenas Nutri)
-    const features = determineFeatures(area, planType, productType)
+    let features = determineFeatures(area, planType, productType)
+    // Garantir que Nutri sempre tenha acesso à plataforma (evita "Acesso Restrito" quando metadata falta)
+    if (area === 'nutri' && (!features || features.length === 0)) {
+      features = ['ferramentas', 'cursos']
+      console.log('🛡️ Features Nutri garantidas (fallback):', features)
+    }
     console.log('🎯 Features determinadas:', { area, planType, productType, features })
 
     // Obter informações do pagamento
@@ -1146,7 +1147,11 @@ async function handleSubscriptionEvent(data: any, isTest: boolean = false) {
     }
     
     // Determinar features baseado em productType (apenas Nutri)
-    const features = determineFeatures(area, planType, productType)
+    let features = determineFeatures(area, planType, productType)
+    if (area === 'nutri' && (!features || features.length === 0)) {
+      features = ['ferramentas', 'cursos']
+      console.log('🛡️ Features Nutri garantidas (Subscription fallback):', features)
+    }
     console.log('🎯 Features determinadas (Subscription):', { area, planType, productType, features })
 
     // Status da assinatura
