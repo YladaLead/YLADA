@@ -43,13 +43,18 @@ export async function hasFeatureAccess(
       return false
     }
 
-    // Se não tem assinatura, retornar false
-    if (!subscription || !subscription.features) {
+    if (!subscription) {
       console.log(`ℹ️ hasFeatureAccess: Usuário ${userId} não tem assinatura ativa para área ${area}`)
       return false
     }
 
-    const features = subscription.features as string[]
+    // Fallback Nutri: assinatura ativa sem features preenchidas = acesso completo à plataforma (ferramentas + cursos)
+    let features = (subscription.features as string[] | null) || []
+    if (area === 'nutri' && features.length === 0) {
+      console.log(`ℹ️ hasFeatureAccess: Nutri com assinatura ativa e features vazias — concedendo ferramentas + cursos`)
+      features = ['ferramentas', 'cursos']
+    }
+
     console.log(`ℹ️ hasFeatureAccess: Usuário ${userId} tem features:`, features, `(verificando: ${feature})`)
 
     // Se tem "completo", tem acesso a tudo
