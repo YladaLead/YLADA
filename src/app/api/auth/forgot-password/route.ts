@@ -24,40 +24,58 @@ export async function POST(request: NextRequest) {
     }
 
     // Buscar usuário pelo email
+    // IMPORTANTE: NÃO usar listUsers() - ele retorna só os primeiros 50 usuários e quem
+    // não está nessa primeira página nunca recebe o e-mail. Buscar por user_profiles (tem
+    // email indexado) e depois getUserById.
     console.log('🔍 Buscando usuário para reset de senha:', email)
-    const { data: authUsers, error: listError } = await supabaseAdmin.auth.admin.listUsers()
-    
-    if (listError) {
-      console.error('❌ Erro ao buscar usuários:', listError)
-      // Por segurança, sempre retornar sucesso
-      return NextResponse.json({
-        success: true,
-        message: 'Se o email estiver cadastrado, você receberá um link para redefinir sua senha.'
-      })
-    }
+    const normalizedEmail = email.trim().toLowerCase()
 
-    const user = authUsers?.users?.find(u => 
-      u.email?.toLowerCase() === email.toLowerCase()
-    )
-
-    if (!user) {
-      console.log('⚠️ Usuário não encontrado para:', email)
-      // Por segurança, sempre retornar sucesso (não revelar se email existe)
-      return NextResponse.json({
-        success: true,
-        message: 'Se o email estiver cadastrado, você receberá um link para redefinir sua senha.'
-      })
-    }
-
-    // Buscar perfil do usuário para determinar área
-    const { data: profile } = await supabaseAdmin
+    // limit(1) + pegar primeiro: evita falha quando há duplicatas no mesmo email (maybeSingle falharia)
+    const { data: profiles, error: profileError } = await supabaseAdmin
       .from('user_profiles')
-      .select('perfil, nome_completo')
-      .eq('user_id', user.id)
-      .maybeSingle()
+      .select('user_id, perfil, nome_completo')
+      .ilike('email', normalizedEmail)
+      .order('updated_at', { ascending: false })
+      .limit(1)
 
-    const area = (profile?.perfil || 'wellness') as 'wellness' | 'nutri' | 'coach' | 'nutra'
-    const userName = profile?.nome_completo || undefined
+    if (profileError) {
+      console.error('❌ Erro ao buscar perfil por email:', profileError)
+      return NextResponse.json({
+        success: true,
+        message: 'Se o email estiver cadastrado, você receberá um link para redefinir sua senha.'
+      })
+    }
+
+    const profile = profiles?.[0] ?? null
+    if (!profile) {
+      console.log('⚠️ Nenhum perfil encontrado para:', email)
+      return NextResponse.json({
+        success: true,
+        message: 'Se o email estiver cadastrado, você receberá um link para redefinir sua senha.'
+      })
+    }
+
+    const { data: authUserData, error: userError } = await supabaseAdmin.auth.admin.getUserById(profile.user_id)
+    const user = authUserData?.user
+
+    if (userError || !user) {
+      console.error('❌ Erro ao buscar usuário auth por id:', userError || 'user null')
+      return NextResponse.json({
+        success: true,
+        message: 'Se o email estiver cadastrado, você receberá um link para redefinir sua senha.'
+      })
+    }
+
+    if (!user.email || user.email.toLowerCase() !== normalizedEmail) {
+      console.log('⚠️ Email do auth não confere para user_id:', profile.user_id)
+      return NextResponse.json({
+        success: true,
+        message: 'Se o email estiver cadastrado, você receberá um link para redefinir sua senha.'
+      })
+    }
+
+    const area = (profile.perfil || 'wellness') as 'wellness' | 'nutri' | 'coach' | 'nutra'
+    const userName = profile.nome_completo || undefined
 
     // Gerar link de reset usando Supabase Admin
     const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 
@@ -79,7 +97,7 @@ export async function POST(request: NextRequest) {
     
     const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
       type: 'recovery',
-      email: email,
+      email: user.email,
       options: {
         redirectTo: `${baseUrl}${resetPath}`,
       },
@@ -188,7 +206,7 @@ export async function POST(request: NextRequest) {
     // Enviar email customizado usando Resend
     try {
       console.log('📧 Enviando email customizado de reset de senha via Resend:', {
-        email,
+        email: user.email,
         area,
         hasResetLink: !!resetLink,
         resetLinkPreview: resetLink ? resetLink.substring(0, 100) + '...' : null
@@ -207,14 +225,14 @@ export async function POST(request: NextRequest) {
 
       // Enviar email via Resend
       await sendPasswordResetEmail({
-        email,
+        email: user.email,
         userName,
         area,
         resetLink: resetLink!,
         baseUrl,
       })
 
-      console.log('✅ Email customizado de reset enviado com sucesso via Resend para:', email)
+      console.log('✅ Email customizado de reset enviado com sucesso via Resend para:', user.email)
 
       return NextResponse.json({
         success: true,

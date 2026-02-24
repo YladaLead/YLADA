@@ -21,37 +21,52 @@ export async function POST(request: NextRequest) {
     }
 
     // Buscar usuário pelo e-mail
+    // Usar user_profiles (email indexado) + getUserById para não depender de listUsers()
+    // (listUsers retorna só os primeiros 50 usuários).
     console.log('🔍 Buscando usuário pelo e-mail:', email)
-    const { data: authUser, error: listError } = await supabaseAdmin.auth.admin.listUsers()
-    
-    if (listError) {
-      console.error('❌ Erro ao listar usuários:', listError)
-      return NextResponse.json(
-        { error: 'Erro ao buscar usuário' },
-        { status: 500 }
-      )
-    }
+    const normalizedEmail = email.trim().toLowerCase()
 
-    // Buscar usuário (case-insensitive)
-    const user = authUser?.users?.find(u => 
-      u.email?.toLowerCase() === email.toLowerCase()
-    )
+    // limit(1) para não falhar quando há duplicatas no mesmo email
+    const { data: profiles, error: profileError } = await supabaseAdmin
+      .from('user_profiles')
+      .select('user_id, nome_completo')
+      .ilike('email', normalizedEmail)
+      .order('updated_at', { ascending: false })
+      .limit(1)
 
-    console.log('🔍 Resultado da busca:', {
-      totalUsers: authUser?.users?.length || 0,
-      found: !!user,
-      userId: user?.id,
-      userEmail: user?.email,
-    })
-
-    if (!user) {
-      console.warn('⚠️ Usuário não encontrado para o e-mail:', email)
-      // Não revelar se o e-mail existe ou não (segurança)
+    if (profileError) {
+      console.error('❌ Erro ao buscar perfil por email:', profileError)
       return NextResponse.json({
         success: true,
         message: 'Se o e-mail estiver cadastrado, você receberá um link de acesso em breve.',
       })
     }
+
+    const profile = profiles?.[0] ?? null
+    if (!profile) {
+      console.warn('⚠️ Nenhum perfil encontrado para o e-mail:', email)
+      return NextResponse.json({
+        success: true,
+        message: 'Se o e-mail estiver cadastrado, você receberá um link de acesso em breve.',
+      })
+    }
+
+    const { data: authUserData, error: userError } = await supabaseAdmin.auth.admin.getUserById(profile.user_id)
+    const user = authUserData?.user
+
+    if (userError || !user || !user.email || user.email.toLowerCase() !== normalizedEmail) {
+      console.warn('❌ Usuário auth não encontrado ou email não confere:', profile.user_id, userError)
+      return NextResponse.json({
+        success: true,
+        message: 'Se o e-mail estiver cadastrado, você receberá um link de acesso em breve.',
+      })
+    }
+
+    console.log('🔍 Resultado da busca:', {
+      found: true,
+      userId: user.id,
+      userEmail: user.email,
+    })
 
     // Verificar se o usuário tem assinatura ativa
     const { data: subscription } = await supabaseAdmin
@@ -77,17 +92,10 @@ export async function POST(request: NextRequest) {
     // Criar token de acesso
     const accessToken = await createAccessToken(user.id, 30)
 
-    // Obter nome do usuário (se disponível)
-    const { data: userProfile } = await supabaseAdmin
-      .from('user_profiles')
-      .select('nome_completo')
-      .eq('user_id', user.id)
-      .maybeSingle()
-
     // Enviar e-mail
     try {
       console.log('📧 Tentando enviar e-mail de recuperação:', {
-        email,
+        email: user.email,
         userId: user.id,
         area: subscription.area,
         hasToken: !!accessToken,
@@ -95,14 +103,14 @@ export async function POST(request: NextRequest) {
       })
       
       await sendRecoveryEmail({
-        email,
-        userName: userProfile?.nome_completo || undefined,
+        email: user.email,
+        userName: profile.nome_completo || undefined,
         area: subscription.area as 'wellness' | 'nutri' | 'coach' | 'nutra',
         accessToken,
         baseUrl,
       })
 
-      console.log('✅ E-mail de recuperação enviado com sucesso para:', email)
+      console.log('✅ E-mail de recuperação enviado com sucesso para:', user.email)
 
       return NextResponse.json({
         success: true,
@@ -110,7 +118,7 @@ export async function POST(request: NextRequest) {
       })
     } catch (emailError: any) {
       console.error('❌ Erro ao enviar e-mail de recuperação:', {
-        email,
+        email: user.email,
         error: emailError.message,
         stack: emailError.stack,
         details: emailError,

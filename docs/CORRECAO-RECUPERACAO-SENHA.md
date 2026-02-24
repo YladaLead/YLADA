@@ -19,6 +19,12 @@
 - A rota `/auth/v1/verify` estava tentando verificar o token antes de redirecionar, consumindo-o prematuramente
 - O token só pode ser usado uma vez, então isso impedia o reset de senha
 
+### 5. **listUsers() retorna só os primeiros 50 usuários** (fev/2025)
+- A rota de recuperação de senha usava `supabaseAdmin.auth.admin.listUsers()` para encontrar o usuário pelo e-mail.
+- O Supabase retorna apenas a primeira página (50 usuários) por padrão. Quem não está nessa primeira página nunca era encontrado.
+- Resultado: a API respondia "sucesso" mas nenhum e-mail era enviado para a maioria dos usuários (Nutri, Wellness e Coach).
+- Não era problema de área nem de Resend: era a busca do usuário que falhava silenciosamente.
+
 ## ✅ Correções Implementadas
 
 ### 1. **Extração e construção correta do link** (`/api/auth/forgot-password/route.ts`)
@@ -100,30 +106,39 @@ if (verifyError.message?.includes('expired') || verifyError.message?.includes('e
 }
 ```
 
+### 5. **Busca de usuário por e-mail sem depender de listUsers()** (fev/2025)
+- Em vez de `listUsers()` (limitado a 50 usuários), a rota agora: (1) busca o perfil por e-mail na tabela `user_profiles` (coluna `email` indexada); (2) obtém o usuário de autenticação com `getUserById(profile.user_id)`.
+- Assim qualquer usuário cadastrado (Nutri, Wellness, Coach) passa a receber o e-mail de redefinição de senha.
+- A mesma correção foi aplicada em `/api/email/send-access-link` (link de acesso por e-mail).
+
 ## 📋 Arquivos Modificados
 
 1. ✅ `/src/app/api/auth/forgot-password/route.ts`
    - Extração correta do token do `action_link`
    - Construção de link direto para aplicação
+   - **Busca de usuário por `user_profiles` + `getUserById` (não mais `listUsers`)**
 
-2. ✅ `/src/app/auth/v1/verify/route.ts`
+2. ✅ `/src/app/api/email/send-access-link/route.ts`
+   - **Busca de usuário por `user_profiles` + `getUserById` (não mais `listUsers`)**
+
+3. ✅ `/src/app/auth/v1/verify/route.ts`
    - Removida verificação prematura do token
    - Apenas redireciona com token na URL
 
-3. ✅ `/src/app/pt/wellness/reset-password/page.tsx`
+4. ✅ `/src/app/pt/wellness/reset-password/page.tsx`
    - Decodificação do token
    - Mensagens de erro melhoradas
    - Logs detalhados
 
-4. ✅ `/src/app/pt/nutri/reset-password/page.tsx`
+5. ✅ `/src/app/pt/nutri/reset-password/page.tsx`
    - Decodificação do token
    - Mensagens de erro melhoradas
 
-5. ✅ `/src/app/pt/coach/reset-password/page.tsx`
+6. ✅ `/src/app/pt/coach/reset-password/page.tsx`
    - Decodificação do token
    - Mensagens de erro melhoradas
 
-6. ✅ `/src/app/admin/reset-password/page.tsx`
+7. ✅ `/src/app/admin/reset-password/page.tsx`
    - Decodificação do token
    - Mensagens de erro melhoradas
 
