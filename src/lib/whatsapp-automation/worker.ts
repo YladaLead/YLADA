@@ -7,7 +7,7 @@
 import { supabaseAdmin } from '@/lib/supabase'
 import { createZApiClient } from '@/lib/z-api'
 import { getPendingMessages, markAsSent, markAsFailed, ScheduledMessage } from './scheduler'
-import { sendWhatsAppMessage, isAllowedTimeToSendMessage } from '../whatsapp-carol-ai'
+import { sendWhatsAppMessage, isAllowedTimeToSendMessage, bulkSendDelay } from '../whatsapp-carol-ai'
 
 /**
  * Processa mensagens agendadas pendentes
@@ -262,8 +262,8 @@ export async function processScheduledMessages(limit: number = 50): Promise<{
 
           sent++
 
-          // Delay entre mensagens
-          await new Promise(resolve => setTimeout(resolve, 2000))
+          // Delay entre mensagens (mesmo padrão dos remates/remarketing para não derrubar número na Meta)
+          await bulkSendDelay(sent)
         } else {
           // Falhou ao enviar
           await markAsFailed(message.id, sendResult.error || 'Erro ao enviar mensagem')

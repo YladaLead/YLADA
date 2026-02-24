@@ -16,7 +16,13 @@ import {
   sendPreClassNotifications,
   runRemateFechamentoParticipou,
   runRemateNaoParticipou,
+  bulkSendDelay,
 } from '@/lib/whatsapp-carol-ai'
+
+/** Pausa entre etapas do Processar TUDO (ms). Evita rajada única que a Meta detecta. */
+const DELAY_BETWEEN_STEPS_MS = 60000
+/** Delay inicial antes de começar envios (ms). */
+const INITIAL_DELAY_MS = 10000
 
 export async function POST(request: NextRequest) {
   // Permitir chamada pelo cron (Vercel Cron envia Authorization: Bearer CRON_SECRET)
@@ -31,6 +37,8 @@ export async function POST(request: NextRequest) {
   if (await getCarolAutomationDisabled()) {
     return NextResponse.json({ disabled: true, message: 'Automação temporariamente desligada' }, { status: 200 })
   }
+  // Delay inicial para não começar tudo na mesma hora (reduz risco Meta)
+  await new Promise((r) => setTimeout(r, INITIAL_DELAY_MS))
   try {
     const results: any = {
       welcome: { scheduled: 0, skipped: 0, errors: 0 },
@@ -126,16 +134,19 @@ export async function POST(request: NextRequest) {
           const result = await sendRegistrationLinkAfterClass(conv.id)
           if (result.success) {
             results.reprocess_participou.sent++
+            await bulkSendDelay(results.reprocess_participou.sent)
           } else {
             results.reprocess_participou.errors++
           }
-          await new Promise(resolve => setTimeout(resolve, 1000))
         } catch (error: any) {
           results.reprocess_participou.errors++
           console.error(`[Process All] Erro ao reprocessar participou ${conv.phone}:`, error)
         }
       }
     }
+
+    // Pausa entre etapas para não mandar tudo em rajada (Meta)
+    await new Promise((r) => setTimeout(r, DELAY_BETWEEN_STEPS_MS))
 
     // 6. Reprocessar quem tem tag "nao_participou_aula" mas não recebeu remarketing
     console.log('[Process All] 6️⃣ Reprocessando quem não participou...')
@@ -152,16 +163,19 @@ export async function POST(request: NextRequest) {
           const result = await sendRemarketingToNonParticipant(conv.id)
           if (result.success) {
             results.reprocess_nao_participou.sent++
+            await bulkSendDelay(results.reprocess_nao_participou.sent)
           } else {
             results.reprocess_nao_participou.errors++
           }
-          await new Promise(resolve => setTimeout(resolve, 1000))
         } catch (error: any) {
           results.reprocess_nao_participou.errors++
           console.error(`[Process All] Erro ao reprocessar não participou ${conv.phone}:`, error)
         }
       }
     }
+
+    // Pausa entre etapas (Meta)
+    await new Promise((r) => setTimeout(r, DELAY_BETWEEN_STEPS_MS))
 
     // 7. Remate fixo: quem participou — 2ª e 3ª mensagem de fechamento (lembrete com dor + último argumento)
     console.log('[Process All] 7️⃣ Remate quem participou (2ª e 3ª msg)...')
@@ -172,6 +186,9 @@ export async function POST(request: NextRequest) {
       console.error('[Process All] Erro remate participou:', err)
       results.remate_participou = { sent2: 0, sent3: 0, errors: 1 }
     }
+
+    // Pausa entre etapas (Meta)
+    await new Promise((r) => setTimeout(r, DELAY_BETWEEN_STEPS_MS))
 
     // 8. Remate fixo: quem não participou — 2ª e 3ª mensagem (reforço + último convite)
     console.log('[Process All] 8️⃣ Remate quem não participou (2ª e 3ª msg)...')

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
 import { requireApiAuth } from '@/lib/api-auth'
 import { translateError } from '@/lib/error-messages'
+import { generateAvailableUserSlug } from '@/lib/user-slug-generator'
 
 // GET - Buscar perfil do usuário
 export async function GET(request: NextRequest) {
@@ -125,6 +126,23 @@ export async function GET(request: NextRequest) {
         brandColor: profile?.brand_color || '',
         brandName: profile?.brand_name || '',
         professionalCredential: profile?.professional_credential || ''
+      }
+    }
+
+    // Primeira vez: se não tem user_slug mas tem nome, gerar e salvar automaticamente (padrão = já deixar slug salvo)
+    if (!responseData.profile.userSlug?.trim() && responseData.profile.nome?.trim()) {
+      try {
+        const slugGerado = await generateAvailableUserSlug(responseData.profile.nome.trim())
+        if (slugGerado) {
+          await supabaseAdmin
+            .from('user_profiles')
+            .update({ user_slug: slugGerado, updated_at: new Date().toISOString() })
+            .eq('user_id', user.id)
+          responseData.profile.userSlug = slugGerado
+          console.log('✅ GET /api/nutri/profile: user_slug gerado e salvo automaticamente:', slugGerado)
+        }
+      } catch (e) {
+        console.warn('⚠️ Falha ao gerar/salvar user_slug automaticamente:', e)
       }
     }
 
@@ -281,12 +299,21 @@ export async function PUT(request: NextRequest) {
       profileData.bio = bio || null
     }
     
-    // Sempre salvar userSlug se fornecido (mesmo que seja string vazia, será null)
+    // Sempre salvar userSlug se fornecido; senão, na primeira vez (ex.: onboarding) gerar a partir do nome
     if (userSlug !== undefined && userSlug !== null) {
       profileData.user_slug = userSlug || null
       console.log('🔗 User slug que será salvo:', userSlug)
-    } else {
-      console.log('🔗 User slug não fornecido, mantendo valor atual')
+    } else if (nome?.trim()) {
+      // Primeira vez: gerar e salvar slug automaticamente para não exigir que a pessoa salve depois
+      try {
+        const slugGerado = await generateAvailableUserSlug(nome.trim())
+        if (slugGerado) {
+          profileData.user_slug = slugGerado
+          console.log('🔗 User slug gerado automaticamente (primeira vez):', slugGerado)
+        }
+      } catch (e) {
+        console.warn('⚠️ Falha ao gerar user_slug no PUT:', e)
+      }
     }
     
     // Sempre salvar countryCode se fornecido (mesmo que seja string vazia, será null)

@@ -19,18 +19,19 @@ const openai = new OpenAI({
 
 const WHATSAPP_NUMBER = '5519997230912' // Número principal
 
-/** Delay entre cada envio em disparos em massa (ms). Evita mensagens chegando uma em cima da outra e reduz risco de API/WhatsApp. */
-const BULK_SEND_DELAY_MS = 6000
+/** Delay entre cada envio em disparos em massa (ms). Evita mensagens chegando uma em cima da outra e reduz risco de a Meta/WhatsApp derrubar o número. */
+const BULK_SEND_DELAY_MS = 15000
 /** A cada N envios bem-sucedidos, pausa entre blocos para não sobrecarregar. */
-const BULK_SEND_BLOCK_SIZE = 10
-/** Pausa entre blocos (ms). Ex.: 45s após cada 10 envios. */
-const BULK_SEND_PAUSE_BETWEEN_BLOCKS_MS = 45000
+const BULK_SEND_BLOCK_SIZE = 5
+/** Pausa entre blocos (ms). Pausa maior reduz chance de bloqueio pela Meta. */
+const BULK_SEND_PAUSE_BETWEEN_BLOCKS_MS = 90000
 
 /**
  * Aplica delay pós-envio e pausa entre blocos em disparos em massa.
  * Chamar após cada envio bem-sucedido, passando o total de enviados até então.
+ * Exportado para uso em process-all e worker (evitar rajada que a Meta detecta).
  */
-async function bulkSendDelay(sentSoFar: number): Promise<void> {
+export async function bulkSendDelay(sentSoFar: number): Promise<void> {
   await new Promise((r) => setTimeout(r, BULK_SEND_DELAY_MS))
   if (sentSoFar > 0 && sentSoFar % BULK_SEND_BLOCK_SIZE === 0) {
     console.log(`[Carol] 📦 Bloco de ${BULK_SEND_BLOCK_SIZE} envios concluído; pausa de ${BULK_SEND_PAUSE_BETWEEN_BLOCKS_MS / 1000}s antes do próximo`)
