@@ -109,15 +109,16 @@ export async function GET(request: NextRequest) {
       }
     })
 
-    // Processar dados e calcular dias restantes
+    // Processar dados e calcular dias restantes e duração total (para identificar 30 vs 3 dias)
     const trials = subscriptions.map((sub: any) => {
       const profile = profileMap.get(sub.user_id)
+      const periodStart = new Date(sub.current_period_start)
       const periodEnd = new Date(sub.current_period_end)
       const now = new Date()
       const diasRestantes = Math.ceil((periodEnd.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
+      const diasDuracao = Math.round((periodEnd.getTime() - periodStart.getTime()) / (1000 * 60 * 60 * 24))
       const isActive = sub.status === 'active' && periodEnd > now
 
-      // Buscar trial_group e nome do presidente do mapa
       const trialGroup = trialGroupMap.get(sub.user_id) || 'geral'
       const nomePresidente = presidenteMap.get(sub.user_id) || null
 
@@ -129,6 +130,7 @@ export async function GET(request: NextRequest) {
         whatsapp: profile?.whatsapp || 'N/A',
         status: isActive ? 'active' : 'expired',
         dias_restantes: isActive ? Math.max(0, diasRestantes) : 0,
+        dias_duracao: diasDuracao,
         data_inicio: sub.current_period_start,
         data_fim: sub.current_period_end,
         data_criacao: sub.created_at,

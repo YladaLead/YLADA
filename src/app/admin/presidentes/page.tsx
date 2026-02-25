@@ -49,6 +49,17 @@ function AdminPresidentesContent() {
     user_id: '' as string | null,
   })
 
+  // Gerar link de convite (suporte: escolhe presidente que autorizou + dados do contato)
+  const [formConvite, setFormConvite] = useState({
+    presidente_id: '',
+    email: '',
+    nome_completo: '',
+    whatsapp: '',
+  })
+  const [loadingConvite, setLoadingConvite] = useState(false)
+  const [inviteUrlGerado, setInviteUrlGerado] = useState<string | null>(null)
+  const [nomePresidenteConvite, setNomePresidenteConvite] = useState<string | null>(null)
+
   // Buscar lista de presidentes
   const carregarPresidentes = async () => {
     try {
@@ -241,6 +252,47 @@ function AdminPresidentesContent() {
     handleVincular(presidenteId, user.id)
   }
 
+  const handleGerarConvite = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setLoadingConvite(true)
+    setError(null)
+    setSuccess(null)
+    setInviteUrlGerado(null)
+    setNomePresidenteConvite(null)
+    try {
+      const res = await fetch('/api/admin/presidentes/gerar-convite', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          presidente_id: formConvite.presidente_id,
+          email: formConvite.email.trim(),
+          nome_completo: formConvite.nome_completo.trim() || undefined,
+          whatsapp: formConvite.whatsapp.trim() || undefined,
+        }),
+      })
+      const data = await res.json()
+      if (res.ok && data.success) {
+        setInviteUrlGerado(data.invite_url)
+        setNomePresidenteConvite(data.nome_presidente || null)
+        setSuccess(data.message || 'Link gerado. Envie ao contato.')
+      } else {
+        setError(data.error || 'Erro ao gerar link')
+      }
+    } catch (err: any) {
+      setError('Erro ao gerar link. Tente novamente.')
+      console.error('Erro:', err)
+    } finally {
+      setLoadingConvite(false)
+    }
+  }
+
+  const copiarLinkConvite = () => {
+    if (!inviteUrlGerado) return
+    navigator.clipboard.writeText(inviteUrlGerado)
+    setSuccess('Link copiado! Cole na mensagem para o contato.')
+  }
+
   const presidentesAtivos = presidentes.filter(p => p.status === 'ativo')
   const presidentesInativos = presidentes.filter(p => p.status === 'inativo')
 
@@ -410,6 +462,104 @@ function AdminPresidentesContent() {
               {loading ? 'Adicionando...' : 'Adicionar Presidente'}
             </button>
           </form>
+        </div>
+
+        {/* Gerar link de convite (suporte: presidente que autorizou + contato) */}
+        <div className="bg-white rounded-lg shadow-md p-6 mb-6 border-2 border-purple-100">
+          <h2 className="text-xl font-semibold text-gray-900 mb-1">
+            🔗 Gerar link de convite (suporte)
+          </h2>
+          <p className="text-sm text-gray-600 mb-4">
+            O presidente deu OK e o contato foi enviado para você. Selecione o presidente que liberou e preencha os dados do contato; o link gerado será do trial em nome desse presidente.
+          </p>
+          <form onSubmit={handleGerarConvite} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Presidente que autorizou *
+              </label>
+              <select
+                value={formConvite.presidente_id}
+                onChange={(e) => setFormConvite({ ...formConvite, presidente_id: e.target.value })}
+                required
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              >
+                <option value="">Selecione o presidente</option>
+                {presidentesAtivos.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.nome_completo}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                E-mail do contato *
+              </label>
+              <input
+                type="email"
+                value={formConvite.email}
+                onChange={(e) => setFormConvite({ ...formConvite, email: e.target.value })}
+                required
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                placeholder="email@exemplo.com"
+              />
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Nome do contato (opcional)
+                </label>
+                <input
+                  type="text"
+                  value={formConvite.nome_completo}
+                  onChange={(e) => setFormConvite({ ...formConvite, nome_completo: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  placeholder="Nome completo"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  WhatsApp (opcional)
+                </label>
+                <input
+                  type="text"
+                  value={formConvite.whatsapp}
+                  onChange={(e) => setFormConvite({ ...formConvite, whatsapp: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  placeholder="(11) 99999-9999"
+                />
+              </div>
+            </div>
+            <button
+              type="submit"
+              disabled={loadingConvite || presidentesAtivos.length === 0}
+              className="bg-purple-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-purple-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {loadingConvite ? 'Gerando...' : 'Gerar link'}
+            </button>
+          </form>
+          {inviteUrlGerado && (
+            <div className="mt-4 p-4 bg-purple-50 border border-purple-200 rounded-lg">
+              <p className="text-sm font-medium text-purple-900 mb-1">
+                Link gerado{nomePresidenteConvite ? ` para ${nomePresidenteConvite}` : ''} — envie ao contato:
+              </p>
+              <div className="flex flex-wrap items-center gap-2">
+                <input
+                  type="text"
+                  readOnly
+                  value={inviteUrlGerado}
+                  className="flex-1 min-w-0 px-3 py-2 bg-white border border-purple-200 rounded text-sm"
+                />
+                <button
+                  type="button"
+                  onClick={copiarLinkConvite}
+                  className="px-4 py-2 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700"
+                >
+                  Copiar link
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Lista de presidentes */}

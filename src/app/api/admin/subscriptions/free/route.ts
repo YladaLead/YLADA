@@ -221,10 +221,16 @@ export async function POST(request: NextRequest) {
     // Calcular datas
     const now = new Date()
     const periodStart = now.toISOString()
-    
-    // Se expires_in_days não for fornecido, usar 365 dias (1 ano)
-    const days = expires_in_days || 365
-    
+
+    // Wellness: trial é sempre 3 dias. Ninguém pode receber 30 ou mais por engano.
+    const isWellness = area === 'wellness'
+    const defaultDays = isWellness ? 3 : 365
+    let days = expires_in_days ?? defaultDays
+    if (isWellness && days > 3) {
+      days = 3
+      console.log('⚠️ Wellness: trial limitado a 3 dias (valor solicitado foi ajustado).')
+    }
+
     // 🛡️ VALIDAÇÃO: Verificar que expires_in_days é razoável
     if (days > 400) {
       return NextResponse.json(

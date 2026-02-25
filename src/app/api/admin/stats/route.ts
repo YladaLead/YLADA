@@ -30,94 +30,103 @@ export async function GET(request: NextRequest) {
       )
     }
 
+    // Valores padrão (usados se alguma query falhar)
+    let usuariosTotal: number = 0
+    let usuariosAtivos: number = 0
+    let cursosTotal: number = 0
+    let cursosAtivos: number = 0
+    let leadsTotal: number = 0
+    let subscriptions: Array<{ amount: number; plan_type?: string }> = []
+
     // =====================================================
     // 1. TOTAL DE USUÁRIOS
     // =====================================================
-    let usuariosQuery = supabaseAdmin
-      .from('user_profiles')
-      .select('id, user_id, perfil', { count: 'exact', head: false })
+    try {
+      let usuariosQuery = supabaseAdmin
+        .from('user_profiles')
+        .select('user_id, perfil', { count: 'exact', head: false })
 
-    // Aplicar filtro de área se não for 'todos'
-    if (areaFiltro !== 'todos') {
-      usuariosQuery = usuariosQuery.eq('perfil', areaFiltro)
-    }
+      if (areaFiltro !== 'todos') {
+        usuariosQuery = usuariosQuery.eq('perfil', areaFiltro)
+      }
 
-    const { count: usuariosTotal, error: usuariosError } = await usuariosQuery
-
-    if (usuariosError) {
-      console.error('Erro ao buscar usuários:', usuariosError)
+      const res = await usuariosQuery
+      if (!res.error) usuariosTotal = res.count ?? 0
+      else console.error('Erro ao buscar usuários:', res.error)
+    } catch (e) {
+      console.error('Erro ao buscar usuários:', e)
     }
 
     // =====================================================
     // 2. USUÁRIOS ATIVOS (com assinatura ativa)
     // =====================================================
-    let usuariosAtivosQuery = supabaseAdmin
-      .from('subscriptions')
-      .select('user_id', { count: 'exact', head: false })
-      .eq('status', 'active')
-      .gt('current_period_end', new Date().toISOString())
+    try {
+      let usuariosAtivosQuery = supabaseAdmin
+        .from('subscriptions')
+        .select('user_id', { count: 'exact', head: false })
+        .eq('status', 'active')
+        .gt('current_period_end', new Date().toISOString())
 
-    // Aplicar filtro de área se não for 'todos'
-    if (areaFiltro !== 'todos') {
-      usuariosAtivosQuery = usuariosAtivosQuery.eq('area', areaFiltro)
-    }
+      if (areaFiltro !== 'todos') {
+        usuariosAtivosQuery = usuariosAtivosQuery.eq('area', areaFiltro)
+      }
 
-    const { count: usuariosAtivos, error: usuariosAtivosError } = await usuariosAtivosQuery
-
-    if (usuariosAtivosError) {
-      console.error('Erro ao buscar usuários ativos:', usuariosAtivosError)
+      const res = await usuariosAtivosQuery
+      if (!res.error) usuariosAtivos = res.count ?? 0
+      else console.error('Erro ao buscar usuários ativos:', res.error)
+    } catch (e) {
+      console.error('Erro ao buscar usuários ativos:', e)
     }
 
     // =====================================================
     // 3. TOTAL DE CURSOS (módulos)
     // =====================================================
-    // Por enquanto, só temos wellness_curso_modulos
-    // No futuro, teremos módulos para outras áreas também
-    const { count: cursosTotal, error: cursosError } = await supabaseAdmin
-      .from('wellness_curso_modulos')
-      .select('id', { count: 'exact', head: true })
+    try {
+      const { count: cTotal, error: cursosError } = await supabaseAdmin
+        .from('wellness_curso_modulos')
+        .select('id', { count: 'exact', head: true })
 
-    if (cursosError) {
-      console.error('Erro ao buscar cursos:', cursosError)
+      if (!cursosError) {
+        cursosTotal = cTotal ?? 0
+        cursosAtivos = cursosTotal
+      } else console.error('Erro ao buscar cursos:', cursosError)
+    } catch (e) {
+      console.error('Erro ao buscar cursos:', e)
     }
-
-    // Contar módulos ativos (que têm pelo menos um tópico com material)
-    // Por enquanto, vamos considerar todos como ativos
-    const cursosAtivos = cursosTotal || 0
 
     // =====================================================
     // 4. TOTAL DE LEADS
     // =====================================================
-    let leadsQuery = supabaseAdmin
-      .from('leads')
-      .select('id', { count: 'exact', head: true })
+    try {
+      const { count: lTotal, error: leadsError } = await supabaseAdmin
+        .from('leads')
+        .select('id', { count: 'exact', head: true })
 
-    // Se tivermos filtro de área, precisaríamos fazer join com user_templates
-    // Por enquanto, vamos buscar todos
-    const { count: leadsTotal, error: leadsError } = await leadsQuery
-
-    if (leadsError) {
-      console.error('Erro ao buscar leads:', leadsError)
+      if (!leadsError) leadsTotal = lTotal ?? 0
+      else console.error('Erro ao buscar leads:', leadsError)
+    } catch (e) {
+      console.error('Erro ao buscar leads:', e)
     }
 
     // =====================================================
     // 5. RECEITA MENSAL
     // =====================================================
-    let receitaQuery = supabaseAdmin
-      .from('subscriptions')
-      .select('amount, currency, plan_type')
-      .eq('status', 'active')
-      .gt('current_period_end', new Date().toISOString())
+    try {
+      let receitaQuery = supabaseAdmin
+        .from('subscriptions')
+        .select('amount, currency, plan_type')
+        .eq('status', 'active')
+        .gt('current_period_end', new Date().toISOString())
 
-    // Aplicar filtro de área se não for 'todos'
-    if (areaFiltro !== 'todos') {
-      receitaQuery = receitaQuery.eq('area', areaFiltro)
-    }
+      if (areaFiltro !== 'todos') {
+        receitaQuery = receitaQuery.eq('area', areaFiltro)
+      }
 
-    const { data: subscriptions, error: receitaError } = await receitaQuery
-
-    if (receitaError) {
-      console.error('Erro ao buscar receita:', receitaError)
+      const { data: subs, error: receitaError } = await receitaQuery
+      if (!receitaError && subs) subscriptions = subs
+      else if (receitaError) console.error('Erro ao buscar receita:', receitaError)
+    } catch (e) {
+      console.error('Erro ao buscar receita:', e)
     }
 
     // Calcular receita mensal
@@ -157,24 +166,26 @@ export async function GET(request: NextRequest) {
       wellness: { total: 0, ativos: 0 }
     }
 
-    // Buscar total de usuários por área
-    for (const area of ['nutri', 'coach', 'nutra', 'wellness']) {
-      const { count: total } = await supabaseAdmin
-        .from('user_profiles')
-        .select('id', { count: 'exact', head: true })
-        .eq('perfil', area)
+    try {
+      for (const area of ['nutri', 'coach', 'nutra', 'wellness']) {
+        const { count: total } = await supabaseAdmin
+          .from('user_profiles')
+          .select('user_id', { count: 'exact', head: true })
+          .eq('perfil', area)
 
-      usuariosPorArea[area].total = total || 0
+        usuariosPorArea[area].total = total || 0
 
-      // Buscar usuários ativos por área
-      const { count: ativos } = await supabaseAdmin
-        .from('subscriptions')
-        .select('user_id', { count: 'exact', head: true })
-        .eq('area', area)
-        .eq('status', 'active')
-        .gt('current_period_end', new Date().toISOString())
+        const { count: ativos } = await supabaseAdmin
+          .from('subscriptions')
+          .select('user_id', { count: 'exact', head: true })
+          .eq('area', area)
+          .eq('status', 'active')
+          .gt('current_period_end', new Date().toISOString())
 
-      usuariosPorArea[area].ativos = ativos || 0
+        usuariosPorArea[area].ativos = ativos || 0
+      }
+    } catch (e) {
+      console.error('Erro ao buscar usuários por área:', e)
     }
 
     // =====================================================
@@ -187,8 +198,8 @@ export async function GET(request: NextRequest) {
       wellness: { mensal: 0, anual: 0 }
     }
 
-    // Buscar receita por área
-    for (const area of ['nutri', 'coach', 'nutra', 'wellness']) {
+    try {
+      for (const area of ['nutri', 'coach', 'nutra', 'wellness']) {
       const { data: areaSubscriptions } = await supabaseAdmin
         .from('subscriptions')
         .select('amount, plan_type, currency')
@@ -225,6 +236,10 @@ export async function GET(request: NextRequest) {
         }
       }
     }
+    } catch (e) {
+      console.error('Erro ao buscar receitas por área:', e)
+    }
+
 
     // =====================================================
     // 8. ATIVIDADE RECENTE
@@ -236,57 +251,56 @@ export async function GET(request: NextRequest) {
       timestamp: string
     }> = []
 
-    // Últimos leads (últimas 5)
-    const { data: ultimosLeads } = await supabaseAdmin
-      .from('leads')
-      .select('id, name, created_at, template_id')
-      .order('created_at', { ascending: false })
-      .limit(5)
+    try {
+      const { data: ultimosLeads } = await supabaseAdmin
+        .from('leads')
+        .select('id, name, created_at, template_id')
+        .order('created_at', { ascending: false })
+        .limit(5)
 
-    if (ultimosLeads) {
-      // Buscar informações dos templates para identificar área
-      for (const lead of ultimosLeads) {
-        if (lead.template_id) {
-          const { data: template } = await supabaseAdmin
-            .from('user_templates')
-            .select('title, profession')
-            .eq('id', lead.template_id)
-            .maybeSingle()
+      if (ultimosLeads) {
+        for (const lead of ultimosLeads) {
+          if (lead.template_id) {
+            const { data: template } = await supabaseAdmin
+              .from('user_templates')
+              .select('title, profession')
+              .eq('id', lead.template_id)
+              .maybeSingle()
 
-          atividadesRecentes.push({
-            tipo: 'lead',
-            descricao: `Novo lead: ${lead.name}`,
-            area: template?.profession || 'unknown',
-            timestamp: lead.created_at
-          })
+            atividadesRecentes.push({
+              tipo: 'lead',
+              descricao: `Novo lead: ${lead.name}`,
+              area: template?.profession || 'unknown',
+              timestamp: lead.created_at
+            })
+          }
         }
       }
-    }
 
-    // Últimos módulos criados (últimos 3)
-    const { data: ultimosModulos } = await supabaseAdmin
-      .from('wellness_curso_modulos')
-      .select('id, titulo, created_at')
-      .order('created_at', { ascending: false })
-      .limit(3)
+      const { data: ultimosModulos } = await supabaseAdmin
+        .from('wellness_curso_modulos')
+        .select('id, titulo, created_at')
+        .order('created_at', { ascending: false })
+        .limit(3)
 
-    if (ultimosModulos) {
-      ultimosModulos.forEach(modulo => {
-        atividadesRecentes.push({
-          tipo: 'curso',
-          descricao: `Novo módulo criado: ${modulo.titulo}`,
-          area: 'wellness',
-          timestamp: modulo.created_at
+      if (ultimosModulos) {
+        ultimosModulos.forEach(modulo => {
+          atividadesRecentes.push({
+            tipo: 'curso',
+            descricao: `Novo módulo criado: ${modulo.titulo}`,
+            area: 'wellness',
+            timestamp: modulo.created_at
+          })
         })
-      })
+      }
+
+      atividadesRecentes.sort((a, b) =>
+        new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+      )
+    } catch (e) {
+      console.error('Erro ao buscar atividades recentes:', e)
     }
 
-    // Ordenar por timestamp (mais recente primeiro)
-    atividadesRecentes.sort((a, b) => 
-      new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-    )
-
-    // Limitar a 5 atividades mais recentes
     const atividadesRecentesLimitadas = atividadesRecentes.slice(0, 5)
 
     // =====================================================

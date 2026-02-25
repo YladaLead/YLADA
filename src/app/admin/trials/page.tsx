@@ -12,6 +12,7 @@ interface Trial {
   whatsapp: string
   status: 'active' | 'expired'
   dias_restantes: number
+  dias_duracao?: number
   data_inicio: string
   data_fim: string
   data_criacao: string
@@ -43,6 +44,7 @@ function AdminTrialsContent() {
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'expired'>('all')
   const [groupFilter, setGroupFilter] = useState<'all' | 'geral' | 'presidentes'>('all')
   const [searchTerm, setSearchTerm] = useState('')
+  const [fixingId, setFixingId] = useState<string | null>(null)
 
   // Carregar trials
   const carregarTrials = async () => {
@@ -106,6 +108,28 @@ function AdminTrialsContent() {
   const copiarWhatsApp = (whatsapp: string) => {
     navigator.clipboard.writeText(whatsapp)
     alert('WhatsApp copiado!')
+  }
+
+  // Corrigir trial para 3 dias (quem recebeu 30 por engano)
+  const corrigirPara3Dias = async (trialId: string) => {
+    if (!confirm('Ajustar este trial para exatamente 3 dias a partir da data de início?')) return
+    setFixingId(trialId)
+    try {
+      const res = await fetch(`/api/admin/trials/${trialId}/fix-duration`, {
+        method: 'PATCH',
+        credentials: 'include',
+      })
+      const data = await res.json()
+      if (res.ok && data.success) {
+        await carregarTrials()
+      } else {
+        alert(data.error || 'Erro ao corrigir')
+      }
+    } catch (e) {
+      alert('Erro ao corrigir. Tente novamente.')
+    } finally {
+      setFixingId(null)
+    }
   }
 
   return (
@@ -313,7 +337,10 @@ function AdminTrialsContent() {
                       Status
                     </th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Dias Restantes
+                      Duração
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Dias Rest.
                     </th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Ambiente
@@ -326,6 +353,9 @@ function AdminTrialsContent() {
                     </th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Expira em
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Ação
                     </th>
                   </tr>
                 </thead>
@@ -371,6 +401,13 @@ function AdminTrialsContent() {
                         </span>
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap">
+                        <span className={`text-sm font-medium ${
+                          (trial.dias_duracao ?? 0) > 3 ? 'text-amber-700 bg-amber-100 px-2 py-0.5 rounded' : 'text-gray-700'
+                        }`} title={(trial.dias_duracao ?? 0) > 3 ? 'Deveria ser 3 dias. Use "Corrigir para 3 dias".' : ''}>
+                          {trial.dias_duracao != null ? `${trial.dias_duracao} dias` : '-'}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap">
                         <div className={`text-sm font-medium ${
                           trial.status === 'active'
                             ? trial.dias_restantes <= 1
@@ -406,6 +443,20 @@ function AdminTrialsContent() {
                         <div className="text-sm text-gray-900">
                           {formatarData(trial.data_fim)}
                         </div>
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        {(trial.dias_duracao ?? 0) > 3 ? (
+                          <button
+                            type="button"
+                            onClick={() => corrigirPara3Dias(trial.id)}
+                            disabled={fixingId === trial.id}
+                            className="text-xs px-2 py-1 bg-amber-100 text-amber-800 rounded hover:bg-amber-200 disabled:opacity-50"
+                          >
+                            {fixingId === trial.id ? 'Corrigindo…' : 'Corrigir para 3 dias'}
+                          </button>
+                        ) : (
+                          <span className="text-xs text-gray-400">—</span>
+                        )}
                       </td>
                     </tr>
                   ))}
