@@ -113,3 +113,38 @@ export async function PUT(
     return NextResponse.json({ success: false, error: 'Erro ao atualizar link' }, { status: 500 })
   }
 }
+
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const auth = await requireApiAuth(request, [...ALLOWED_ROLES])
+    if (auth instanceof NextResponse) return auth
+    const { user } = auth
+    const { id } = await params
+    if (!id) {
+      return NextResponse.json({ success: false, error: 'id é obrigatório' }, { status: 400 })
+    }
+
+    if (!supabaseAdmin) {
+      return NextResponse.json({ success: false, error: 'Backend não configurado' }, { status: 503 })
+    }
+
+    const { error } = await supabaseAdmin
+      .from('ylada_links')
+      .delete()
+      .eq('id', id)
+      .eq('user_id', user.id)
+
+    if (error) {
+      console.error('[ylada/links/[id]] DELETE', error)
+      return NextResponse.json({ success: false, error: error.message }, { status: 500 })
+    }
+
+    return NextResponse.json({ success: true })
+  } catch (e) {
+    console.error('[ylada/links/[id]] DELETE', e)
+    return NextResponse.json({ success: false, error: 'Erro ao excluir link' }, { status: 500 })
+  }
+}

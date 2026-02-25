@@ -286,26 +286,50 @@ export async function requireApiAuth(
           .single()
 
         if (createError) {
-          console.error('❌ Erro ao criar perfil automaticamente:', createError)
-          const msg = (createError as any)?.message || ''
-          const isNetworkError =
-            msg.toLowerCase().includes('fetch failed') ||
-            msg.toLowerCase().includes('econnreset') ||
-            msg.toLowerCase().includes('network')
+          const code = (createError as any)?.code
+          // Duplicate key (23505): perfil já existe (ex.: RLS escondeu na primeira busca). Buscar com admin e seguir.
+          if (code === '23505' && supabaseAdmin) {
+            const { data: existingProfile } = await supabaseAdmin
+              .from('user_profiles')
+              .select('*')
+              .eq('user_id', userId)
+              .maybeSingle()
+            if (existingProfile) {
+              profile = existingProfile
+              console.log('✅ Perfil já existia (duplicate key), usando registro encontrado com admin:', profile.id)
+            } else {
+              console.error('❌ Erro ao criar perfil (duplicate key mas não encontrou registro):', createError)
+              return NextResponse.json(
+                { error: 'Erro ao criar perfil. Tente fazer logout e login novamente.', technical: process.env.NODE_ENV === 'development' ? (createError as any)?.message : undefined },
+                { status: 500 }
+              )
+            }
+          } else {
+            console.error('❌ Erro ao criar perfil automaticamente:', createError)
+            const msg = (createError as any)?.message || ''
+            const isNetworkError =
+              msg.toLowerCase().includes('fetch failed') ||
+              msg.toLowerCase().includes('econnreset') ||
+              msg.toLowerCase().includes('network')
 
-          return NextResponse.json(
-            { 
-              error: isNetworkError
-                ? 'Falha de conexão com o banco. Tente novamente em instantes.'
-                : 'Erro ao criar perfil. Tente fazer logout e login novamente.',
-              technical: process.env.NODE_ENV === 'development' ? createError.message : undefined
-            },
-            { status: isNetworkError ? 503 : 500 }
-          )
+            const isDev = process.env.NODE_ENV === 'development'
+            const devHint = isDev ? ` Detalhe: ${msg}` : ''
+            const checkViolation = code === '23514' || msg.toLowerCase().includes('check constraint')
+            const errorText = isNetworkError
+              ? 'Falha de conexão com o banco. Tente novamente em instantes.'
+              : checkViolation
+                ? `Perfil "${inferredProfile}" não permitido na tabela user_profiles. Confirme que a migration 220 foi aplicada (CHECK deve incluir ylada).${devHint}`
+                : `Erro ao criar perfil. Tente fazer logout e login novamente.${devHint}`
+
+            return NextResponse.json(
+              { error: errorText, technical: isDev ? (createError as any)?.message : undefined },
+              { status: isNetworkError ? 503 : 500 }
+            )
+          }
+        } else {
+          profile = newProfile
+          console.log('✅ Perfil criado automaticamente:', profile)
         }
-
-        profile = newProfile
-        console.log('✅ Perfil criado automaticamente:', profile)
       } else {
         return NextResponse.json(
           { error: 'Perfil não encontrado e não foi possível criar automaticamente.' },

@@ -43,21 +43,25 @@ export interface InterpretResponse {
   confidence: number
 }
 
-const SYSTEM_PROMPT = `Você é um assistente que analisa o que o PROFISSIONAL quer fazer com um LINK. O link é uma FERRAMENTA que o profissional vai compartilhar com seus possíveis clientes ou pacientes (não é sobre a dor do profissional, é sobre a ferramenta que ele quer usar para engajar o público dele).
+/** Objetivos do link: norte para sugerir quiz vs calculadora e texto. */
+export const LINK_OBJECTIVES = ['captar', 'educar', 'reter', 'propagar', 'indicar'] as const
+export type LinkObjective = (typeof LINK_OBJECTIVES)[number]
 
-O texto descreve: para que o profissional quer usar o link? Ex: "quero um quiz para qualificar quem quer agendar", "quero mostrar quanto a pessoa está deixando de ganhar", "ferramenta para engajar no Instagram".
+const SYSTEM_PROMPT = `Você é um assistente que analisa o que o PROFISSIONAL quer fazer com um LINK. O link é conteúdo que o profissional compartilha para POSSÍVEIS PACIENTES ou CLIENTES acessarem. O foco é no que a PESSOA QUE ACESSA recebe: conteúdo da especialidade do profissional que atrai, desperta curiosidade e agrega valor (ex.: quiz, calculadora, avaliação). Não é sobre o negócio/agenda do profissional — é sobre o conteúdo que atrai quem vai clicar.
+
+O texto descreve: que tipo de link o profissional quer? Ex: "quiz sobre minha especialidade que atrai pacientes", "conteúdo que desperta curiosidade em quem acessa", "ferramenta que dá um resultado útil para o visitante", "link que agrega valor e no final a pessoa pode falar comigo".
 
 Contexto do perfil (para preencher quando der para inferir do texto):
 - segment: um de: ylada, psi, psicanalise, odonto, nutra, coach, seller
-- category: mercado/área (ex: estetica, nutricao, odontologia, automoveis, imoveis)
+- category: mercado/área (ex: estetica, nutricao, odontologia, medicina, automoveis, imoveis)
 - sub_category: opcional (ex: cabelo, seminovos, high_ticket)
 - dor_principal: uma de: agenda_vazia, nao_converte, sem_indicacao, conteudo_nao_funciona, precificacao_ruim, falta_de_clareza
 
-Templates (ferramentas que o profissional pode usar COM o público dele):
-- diagnostico_agenda (id: a0000001-0001-4000-8000-000000000001): quiz que o visitante (possível cliente) responde sobre agenda/atendimentos; ideal quando o profissional quer qualificar quem tem interesse em agendar ou preencher agenda.
-- calculadora_perda (id: a0000002-0002-4000-8000-000000000002): calculadora "quanto você está deixando de faturar" que o visitante preenche; ideal quando o profissional quer mostrar valor ou impacto (perda financeira, oportunidade) para engajar o possível cliente.
+Templates (conteúdo que o VISITANTE — possível paciente/cliente — acessa):
+- diagnostico_agenda (id: a0000001-0001-4000-8000-000000000001): quiz em que o visitante responde perguntas e recebe um resultado; ideal quando o profissional quer um link com tema da especialidade que atrai e engaja possíveis pacientes (conteúdo para quem acessa, não sobre a agenda do profissional).
+- calculadora_perda (id: a0000002-0002-4000-8000-000000000002): calculadora em que o visitante preenche dados e vê um resultado/insight (ex.: potencial, impacto); ideal quando o profissional quer uma ferramenta que agrega valor para quem acessa e gera curiosidade, com CTA para contato.
 
-Escolha o template conforme o USO que o profissional quer dar ao link (ferramenta para engajar clientes/pacientes), não pela dor do profissional.
+Escolha o template conforme o tipo de CONTEÚDO para o visitante (quiz que atrai, calculadora que engaja), não pela dor do profissional.
 
 Resposta obrigatória no formato exato:
 {"profileSuggest":{"segment":"...","category":"...","sub_category":"...","dor_principal":"..."},"recommendedTemplateId":"uuid-do-template-ou-null","recommendedTemplateName":"nome_do_template","confidence":0.0 a 1.0}`
@@ -72,6 +76,9 @@ export async function POST(request: NextRequest) {
     const segmentHint = typeof body.segment === 'string' ? body.segment.trim() : null
     const profileType = typeof body.profile_type === 'string' ? body.profile_type.trim() : null
     const profession = typeof body.profession === 'string' ? body.profession.trim() : null
+    const objective = typeof body.objective === 'string' && LINK_OBJECTIVES.includes(body.objective as LinkObjective) ? body.objective as LinkObjective : null
+    const variation = body.variation === true
+    const previousTemplateId = typeof body.previous_template_id === 'string' ? body.previous_template_id : null
 
     if (!text) {
       return NextResponse.json({ success: false, error: 'text é obrigatório' }, { status: 400 })
@@ -85,8 +92,10 @@ export async function POST(request: NextRequest) {
     if (segmentHint) profileContext.push(`Segmento: ${segmentHint}`)
     if (profileType) profileContext.push(`Tipo de atuação do profissional: ${profileType}`)
     if (profession) profileContext.push(`Área/profissão: ${profession}`)
+    if (objective) profileContext.push(`Objetivo principal do link: ${objective} (use para priorizar quiz ou calculadora e o tom da sugestão)`)
+    if (variation) profileContext.push('O usuário pediu OUTRA IDEIA: sugira a opção alternativa (se antes era quiz, sugira calculadora; se era calculadora, sugira quiz), desde que faça sentido para o texto.')
     const contextBlock = profileContext.length
-      ? `Contexto do perfil empresarial (use para priorizar o template mais adequado):\n${profileContext.join('\n')}\n\n`
+      ? `Contexto:\n${profileContext.join('\n')}\n\n`
       : ''
 
     const userMessage = `${contextBlock}Texto do usuário:\n${text}`
@@ -131,6 +140,15 @@ export async function POST(request: NextRequest) {
     if (parsed.recommendedTemplateId && !templateIds.includes(parsed.recommendedTemplateId)) {
       parsed.recommendedTemplateId = null
       parsed.recommendedTemplateName = undefined
+    }
+
+    // "Quero outra ideia": forçar o outro template se veio o mesmo
+    if (variation && previousTemplateId && templateIds.includes(previousTemplateId)) {
+      const otherId = templateIds.find((id) => id !== previousTemplateId)
+      if (otherId) {
+        parsed.recommendedTemplateId = otherId
+        parsed.recommendedTemplateName = otherId === TEMPLATE_IDS.diagnostico_agenda ? 'diagnostico_agenda' : 'calculadora_perda'
+      }
     }
 
     // Processo reverso: resumo do diagnóstico (conteúdo oficial do template) para o profissional apenas validar

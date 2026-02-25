@@ -100,6 +100,19 @@ export async function GET(request: NextRequest) {
       })
     }
 
+    let presidentesUserIds = new Set<string>()
+    try {
+      const { data: presLinks } = await supabaseAdmin
+        .from('presidentes_autorizados')
+        .select('user_id')
+        .eq('status', 'ativo')
+      ;(presLinks || []).forEach((p: { user_id?: string }) => {
+        if (p.user_id) presidentesUserIds.add(p.user_id)
+      })
+    } catch {
+      // Coluna user_id pode não existir (migration 222 não rodada)
+    }
+
     const now = new Date()
 
     // Montar lista de usuários com dados completos
@@ -170,7 +183,8 @@ export async function GET(request: NextRequest) {
         assinaturaSituacao,
         assinaturaDiasVencida,
         statusAssinatura: subscriptionForStatus?.status || null, // active | canceled | past_due (para admin editar)
-        nome_presidente: profile.nome_presidente || null
+        nome_presidente: profile.nome_presidente || null,
+        is_presidente: presidentesUserIds.has(profile.user_id),
       }
     }).filter(u => u !== null) // Remover nulls do filtro de status
 

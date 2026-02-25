@@ -14,6 +14,7 @@ export default function TrialInvitePage() {
     email: string
     nome_completo?: string
     whatsapp?: string
+    nome_presidente?: string
   } | null>(null)
   const [step, setStep] = useState<'validate' | 'create-account' | 'success'>('validate')
   const [password, setPassword] = useState('')
@@ -43,6 +44,7 @@ export default function TrialInvitePage() {
             email: data.email,
             nome_completo: data.nome_completo,
             whatsapp: data.whatsapp,
+            nome_presidente: data.nome_presidente,
           })
           setStep('create-account')
         } else {
@@ -154,6 +156,11 @@ export default function TrialInvitePage() {
             <p className="text-gray-600">
               Você foi convidado para testar gratuitamente por 3 dias
             </p>
+            {inviteData.nome_presidente && (
+              <p className="mt-2 text-sm font-medium text-green-800 bg-green-50 border border-green-200 rounded-lg px-3 py-2">
+                Convidado por: <span className="font-semibold">{inviteData.nome_presidente}</span>
+              </p>
+            )}
           </div>
 
           <form onSubmit={handleCreateAccount} className="space-y-4">
@@ -245,8 +252,11 @@ export default function TrialInvitePage() {
           <h1 className="text-2xl font-bold text-gray-900 mb-4">
             Conta criada com sucesso!
           </h1>
+          <p className="text-gray-600 mb-2">
+            Seu trial de 3 dias foi ativado.
+          </p>
           <p className="text-gray-600 mb-6">
-            Seu trial de 3 dias foi ativado. Redirecionando...
+            Você será redirecionado para a página inicial já com login feito.
           </p>
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600 mx-auto"></div>
         </div>

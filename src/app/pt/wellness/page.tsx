@@ -156,7 +156,7 @@ export default function WellnessPage() {
               {/* CTA emocional no Hero */}
               <div className="text-center">
                 <Link
-                  href="/pt/wellness/checkout?plan=annual"
+                  href="/pt/wellness/trial"
                   className="inline-block w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition-colors text-base sm:text-lg"
                 >
                   👉 Quero parar de me sentir travado e começar a conversar com mais pessoas
@@ -234,7 +234,7 @@ export default function WellnessPage() {
 
               <div className="text-center">
                 <Link
-                  href="/pt/wellness/checkout?plan=annual"
+                  href="/pt/wellness/trial"
                   className="inline-block w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition-colors text-base sm:text-lg text-center"
                 >
                   👉 Quero parar de me sentir travado e começar a conversar com mais pessoas
@@ -661,7 +661,7 @@ export default function WellnessPage() {
                   </li>
                 </ul>
                 <Link
-                  href="/pt/wellness/checkout?plan=annual"
+                  href="/pt/wellness/trial"
                   className="block w-full text-center px-6 py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition-colors"
                 >
                   👉 Quero parar de me sentir travado e começar a conversar com mais pessoas
@@ -696,7 +696,7 @@ export default function WellnessPage() {
                   </li>
                 </ul>
                 <Link
-                  href="/pt/wellness/checkout?plan=monthly"
+                  href="/pt/wellness/trial"
                   className="block w-full text-center px-6 py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition-colors"
                 >
                   👉 Quero parar de me sentir travado e começar a conversar com mais pessoas
@@ -756,7 +756,7 @@ export default function WellnessPage() {
                 Você não precisa mais acordar ansioso. Você não precisa mais se sentir sozinho. Você não precisa mais tentar descobrir tudo sozinho.
               </p>
               <Link
-                href="/pt/wellness/checkout?plan=annual"
+                href="/pt/wellness/trial"
                 className="inline-flex items-center px-10 py-5 bg-white text-green-600 text-xl font-bold rounded-xl hover:bg-green-50 transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:-translate-y-1"
               >
                 👉 Quero parar de me sentir travado e começar a conversar com mais pessoas

@@ -2,9 +2,18 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireApiAuth } from '@/lib/api-auth'
 import { supabaseAdmin } from '@/lib/supabase'
 
+const ALLOWED_AREAS = ['nutri', 'hom'] as const
+type WorkshopArea = (typeof ALLOWED_AREAS)[number]
+
+function getArea(searchParams: URLSearchParams, body?: { area?: string }): WorkshopArea {
+  const area = (body?.area ?? searchParams.get('area') ?? 'nutri').toLowerCase().trim()
+  if (ALLOWED_AREAS.includes(area as WorkshopArea)) return area as WorkshopArea
+  return 'nutri'
+}
+
 /**
  * GET/POST /api/admin/whatsapp/workshop-sessions
- * CRUD de sessões do workshop (Nutri).
+ * CRUD de sessões do workshop. ?area=nutri|hom (default nutri).
  */
 
 export async function GET(request: NextRequest) {
@@ -12,13 +21,14 @@ export async function GET(request: NextRequest) {
   if (authResult instanceof NextResponse) return authResult
 
   const { searchParams } = new URL(request.url)
+  const area = getArea(searchParams)
   const onlyActive = searchParams.get('onlyActive') === 'true'
   const onlyConfirmed = searchParams.get('onlyConfirmed') === 'true' // Filtrar apenas com participantes confirmados
 
   let q = supabaseAdmin
     .from('whatsapp_workshop_sessions')
     .select('*')
-    .eq('area', 'nutri')
+    .eq('area', area)
     .order('starts_at', { ascending: true })
 
   if (onlyActive) q = q.eq('is_active', true)
@@ -31,11 +41,11 @@ export async function GET(request: NextRequest) {
   const participantsCount: Record<string, number> = {}
 
   if (sessionIds.length > 0) {
-    // Buscar conversas que têm workshop_session_id
+    // Buscar conversas que têm workshop_session_id (mesma área das sessões)
     const { data: conversations } = await supabaseAdmin
       .from('whatsapp_conversations')
       .select('context')
-      .eq('area', 'nutri')
+      .eq('area', area)
       .eq('status', 'active')
 
     // Contar participantes por sessão
@@ -67,7 +77,9 @@ export async function POST(request: NextRequest) {
   if (authResult instanceof NextResponse) return authResult
 
   const body = await request.json().catch(() => ({}))
-  const title = typeof body.title === 'string' && body.title.trim() ? body.title.trim() : 'Aula prática exclusiva para nutricionistas'
+  const area = getArea(new URL(request.url).searchParams, body)
+  const defaultTitle = area === 'hom' ? 'HOM – Bebidas funcionais Herbalife' : 'Aula prática exclusiva para nutricionistas'
+  const title = typeof body.title === 'string' && body.title.trim() ? body.title.trim() : defaultTitle
   const starts_at = typeof body.starts_at === 'string' ? body.starts_at : null
   const zoom_link = typeof body.zoom_link === 'string' ? body.zoom_link.trim() : ''
   const is_active = body.is_active !== false
@@ -79,7 +91,7 @@ export async function POST(request: NextRequest) {
   const { data, error } = await supabaseAdmin
     .from('whatsapp_workshop_sessions')
     .insert({
-      area: 'nutri',
+      area,
       title,
       starts_at,
       zoom_link,

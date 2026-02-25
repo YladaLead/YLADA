@@ -63,7 +63,9 @@ export function getOptionsForProfileField(
     case 'fase_negocio':
       return [...FASE_NEGOCIO_OPTIONS]
     case 'modelo_pagamento':
-      return [...MODELO_PAGAMENTO_OPTIONS]
+      return profileType && String(profileType).toLowerCase() === 'vendas'
+        ? [...MODELO_PAGAMENTO_OPTIONS_VENDAS]
+        : [...MODELO_PAGAMENTO_OPTIONS]
     case 'modelo_atuacao':
       return [...MODELO_ATUACAO_OPTIONS]
     case 'canais_principais':
@@ -110,6 +112,7 @@ export const FASE_NEGOCIO_OPTIONS = [
   { value: 'escalando', label: 'Escalando' },
 ] as const
 
+/** Formas de pagamento para quem atende (consultório, clínica). */
 export const MODELO_PAGAMENTO_OPTIONS = [
   { value: 'particular', label: 'Particular' },
   { value: 'convenio', label: 'Convênio' },
@@ -117,6 +120,15 @@ export const MODELO_PAGAMENTO_OPTIONS = [
   { value: 'recorrencia', label: 'Recorrência' },
   { value: 'avulso', label: 'Avulso' },
   { value: 'comissao', label: 'Comissão' },
+  { value: 'outro', label: 'Outro' },
+] as const
+
+/** Formas de pagamento para quem vende (produto/serviço) — sem convênio/particular. */
+export const MODELO_PAGAMENTO_OPTIONS_VENDAS = [
+  { value: 'avulso', label: 'Avulso' },
+  { value: 'comissao', label: 'Comissão' },
+  { value: 'recorrencia', label: 'Recorrência' },
+  { value: 'plano', label: 'Plano' },
   { value: 'outro', label: 'Outro' },
 ] as const
 

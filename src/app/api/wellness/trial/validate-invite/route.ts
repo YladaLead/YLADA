@@ -37,6 +37,7 @@ export async function POST(request: NextRequest) {
       email: inviteData.email,
       nome_completo: inviteData.nome_completo,
       whatsapp: inviteData.whatsapp,
+      nome_presidente: inviteData.nome_presidente,
     })
   } catch (error: any) {
     console.error('❌ Erro ao validar convite de trial:', error)

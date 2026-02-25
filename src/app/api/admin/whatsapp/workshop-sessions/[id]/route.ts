@@ -22,7 +22,6 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
     .from('whatsapp_workshop_sessions')
     .update(update)
     .eq('id', params.id)
-    .eq('area', 'nutri')
     .select('*')
     .single()
 
@@ -38,7 +37,6 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
     .from('whatsapp_workshop_sessions')
     .delete()
     .eq('id', params.id)
-    .eq('area', 'nutri')
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json({ success: true })

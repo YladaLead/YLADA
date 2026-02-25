@@ -26,6 +26,7 @@ interface Usuario {
   statusAssinatura?: 'active' | 'canceled' | 'past_due' | null
   assinaturaDiasVencida: number | null
   nome_presidente: string | null
+  is_presidente?: boolean
 }
 
 interface Stats {
@@ -50,6 +51,7 @@ export default function AdminUsuarios() {
   const [mostrarDeletarUsuario, setMostrarDeletarUsuario] = useState(false)
   const [usuarioSelecionado, setUsuarioSelecionado] = useState<Usuario | null>(null)
   const [salvando, setSalvando] = useState(false)
+  const [definindoPresidente, setDefinindoPresidente] = useState<string | null>(null)
   const [mostrarSenhaProvisoria, setMostrarSenhaProvisoria] = useState(false)
   const [senhaProvisoriaGerada, setSenhaProvisoriaGerada] = useState<{
     password: string
@@ -74,6 +76,31 @@ export default function AdminUsuarios() {
   })
 
   // Carregar lista de presidentes autorizados
+  const definirComoPresidente = async (userId: string) => {
+    setDefinindoPresidente(userId)
+    setError(null)
+    setSuccess(null)
+    try {
+      const res = await fetch('/api/admin/presidentes/definir-usuario', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ user_id: userId }),
+      })
+      const data = await res.json()
+      if (res.ok && data.success) {
+        setSuccess(data.message || 'Usuário definido como presidente.')
+        carregarUsuarios()
+      } else {
+        setError(data.error || 'Erro ao definir presidente.')
+      }
+    } catch (err: any) {
+      setError('Erro ao definir presidente. Tente novamente.')
+    } finally {
+      setDefinindoPresidente(null)
+    }
+  }
+
   const carregarPresidentes = async () => {
     try {
       const response = await fetch('/api/admin/presidentes/autorizar', {
@@ -598,6 +625,7 @@ export default function AdminUsuarios() {
                     <tr>
                       <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Usuário</th>
                       <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Área</th>
+                      <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">É presidente</th>
                       <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Presidente</th>
                       <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                       <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Assinatura</th>
@@ -633,6 +661,22 @@ export default function AdminUsuarios() {
                               {getAreaLabel(usuario.area)}
                             </span>
                           </div>
+                        </td>
+                        <td className="px-3 py-4 whitespace-nowrap">
+                          {usuario.is_presidente ? (
+                            <span className="text-xs font-medium text-green-700">Sim</span>
+                          ) : usuario.area === 'wellness' ? (
+                            <button
+                              type="button"
+                              onClick={() => definirComoPresidente(usuario.id)}
+                              disabled={definindoPresidente === usuario.id}
+                              className="text-xs text-green-600 hover:text-green-800 font-medium disabled:opacity-50"
+                            >
+                              {definindoPresidente === usuario.id ? 'Salvando…' : 'Definir como presidente'}
+                            </button>
+                          ) : (
+                            <span className="text-xs text-gray-400">—</span>
+                          )}
                         </td>
                         <td className="px-3 py-4 min-w-[150px]">
                           <div className="text-sm text-gray-900 truncate" title={usuario.nome_presidente || ''}>

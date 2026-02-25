@@ -46,6 +46,23 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Nome do presidente (para exibir na página do trial e documentar quem enviou)
+    let nomePresidente: string | null = null
+    const { data: presidente } = await supabaseAdmin
+      .from('presidentes_autorizados')
+      .select('nome_completo')
+      .eq('user_id', user.id)
+      .eq('status', 'ativo')
+      .maybeSingle()
+    if (presidente?.nome_completo) nomePresidente = presidente.nome_completo
+
+    // Base URL do link: em dev usar a origem da requisição para o link abrir no localhost
+    const baseUrl =
+      (typeof request.url === 'string' ? new URL(request.url).origin : null) ||
+      (request as any).nextUrl?.origin ||
+      process.env.NEXT_PUBLIC_APP_URL ||
+      'https://www.ylada.com'
+
     // Criar convite
     const { token, invite_url } = await createTrialInvite({
       email: email.toLowerCase().trim(),
@@ -53,7 +70,9 @@ export async function POST(request: NextRequest) {
       whatsapp,
       created_by_user_id: user.id,
       created_by_email: user.email,
-      expires_in_days: 7, // Link expira em 7 dias
+      nome_presidente: nomePresidente ?? undefined,
+      expires_in_days: 7,
+      baseUrl,
     })
 
     return NextResponse.json({

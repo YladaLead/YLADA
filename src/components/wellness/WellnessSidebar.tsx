@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -52,7 +52,7 @@ export default function WellnessSidebar({ isMobileOpen = false, onMobileClose }:
     )
   }
 
-  const primaryMenuItems: MenuSection[] = [
+  const primaryMenuItems: MenuSection[] = useMemo(() => [
     {
       title: 'Home',
       icon: '🏠',
@@ -83,8 +83,10 @@ export default function WellnessSidebar({ isMobileOpen = false, onMobileClose }:
       href: '/pt/wellness/configuracao',
       color: 'gray'
     }
-    // Itens removidos (podem ser adicionados no futuro se necessário):
-    // - Minha Conta (removido - apenas Configurações como item principal)
+  ], [])
+
+  // Itens removidos (podem ser adicionados no futuro se necessário):
+  // - Minha Conta (removido - apenas Configurações como item principal)
     // - Perfil (movido para item principal - "Meu Perfil e Metas")
     // - Metas (unificado com Perfil - o NOEL usa o perfil como base de referência)
     // - Vendas (foco atual é geração de contato, não registro de vendas)
@@ -95,7 +97,6 @@ export default function WellnessSidebar({ isMobileOpen = false, onMobileClose }:
     // - Biblioteca
     // - Comunidade
     // - Treinos & Plano
-  ]
 
   const secondaryMenuItems: MenuSection[] = [
     {
@@ -507,8 +508,24 @@ export default function WellnessSidebar({ isMobileOpen = false, onMobileClose }:
             )
           })}
 
+          {/* Convite para equipe — destaque (após Configurações / antes de Sair) */}
+          <div className="pt-3 mt-3 border-t border-gray-200">
+            <Link
+              href="/pt/wellness/convite-equipe"
+              onClick={onMobileClose}
+              className={`flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm font-medium transition-all border-2 ${
+                pathname === '/pt/wellness/convite-equipe'
+                  ? 'bg-green-600 text-white border-green-600'
+                  : 'bg-green-50 text-green-800 border-green-200 hover:bg-green-100 hover:border-green-300'
+              }`}
+            >
+              <span className="text-lg">👥</span>
+              <span>Convite para equipe</span>
+            </Link>
+          </div>
+
           {/* Logout */}
-          <div className="pt-4 mt-4 border-t border-gray-200">
+          <div className="pt-3 mt-3 border-t border-gray-200">
             <button
               onClick={handleLogout}
               className="w-full flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-gray-700 hover:bg-red-50 hover:text-red-600 transition-all"

@@ -105,8 +105,15 @@ export async function POST(request: NextRequest) {
 
     if (createError || !newUser.user) {
       console.error('❌ Erro ao criar usuário:', createError)
+      const msg = createError?.message || ''
+      const userMessage =
+        msg.toLowerCase().includes('already') || msg.toLowerCase().includes('já existe')
+          ? 'Este email já possui uma conta. Faça login ou use outro email.'
+          : msg && process.env.NODE_ENV !== 'production'
+            ? msg
+            : 'Erro ao criar conta. Tente novamente.'
       return NextResponse.json(
-        { error: 'Erro ao criar conta. Tente novamente.' },
+        { error: userMessage },
         { status: 500 }
       )
     }
@@ -126,8 +133,14 @@ export async function POST(request: NextRequest) {
 
     if (profileError) {
       console.error('❌ Erro ao criar perfil:', profileError)
-      // Continuar mesmo assim - pode ser que trigger já criou
+      // Continuar mesmo assim - trigger pode ter criado ou perfil opcional
     }
+
+    // Garantir que redirect use a mesma origem em dev (magic link)
+    const baseUrlForRedirect =
+      (typeof request.url === 'string' ? new URL(request.url).origin : null) ||
+      process.env.NEXT_PUBLIC_APP_URL ||
+      'https://www.ylada.com'
 
     // Criar trial de 3 dias
     const { subscription_id, expires_at } = await createTrialSubscription(
@@ -136,9 +149,8 @@ export async function POST(request: NextRequest) {
       token
     )
 
-    // Gerar magic link para login automático
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.ylada.com'
-    const redirectTo = `${baseUrl}/auth/callback?next=${encodeURIComponent('/pt/wellness/home')}`
+    // Gerar magic link para login automático (redireciona para a home já logado)
+    const redirectTo = `${baseUrlForRedirect}/auth/callback?next=${encodeURIComponent('/pt/wellness/home')}`
 
     const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
       type: 'magiclink',
@@ -151,10 +163,6 @@ export async function POST(request: NextRequest) {
     let loginUrl = null
     if (!linkError && linkData?.properties?.action_link) {
       loginUrl = linkData.properties.action_link
-      // Corrigir localhost se necessário
-      if (loginUrl.includes('localhost')) {
-        loginUrl = loginUrl.replace(/https?:\/\/[^\/]+/, baseUrl)
-      }
     }
 
     return NextResponse.json({

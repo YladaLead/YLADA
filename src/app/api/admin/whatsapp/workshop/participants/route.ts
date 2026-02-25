@@ -22,11 +22,24 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'session_id é obrigatório' }, { status: 400 })
     }
 
-    // Buscar conversas que têm workshop_session_id = sessionId
+    // Obter área da sessão (nutri ou hom) para filtrar conversas
+    const { data: session, error: sessionError } = await supabaseAdmin
+      .from('whatsapp_workshop_sessions')
+      .select('area')
+      .eq('id', sessionId)
+      .single()
+
+    if (sessionError || !session) {
+      return NextResponse.json({ error: 'Sessão não encontrada' }, { status: 404 })
+    }
+
+    const area = (session as { area: string }).area || 'nutri'
+
+    // Buscar conversas que têm workshop_session_id = sessionId (mesma área da sessão)
     const { data: conversations, error } = await supabaseAdmin
       .from('whatsapp_conversations')
       .select('id, phone, name, customer_name, context, created_at, last_message_at')
-      .eq('area', 'nutri')
+      .eq('area', area)
       .eq('status', 'active')
       .contains('context', { workshop_session_id: sessionId })
 
@@ -50,7 +63,7 @@ export async function GET(request: NextRequest) {
           null
 
         if (!displayName && conv.phone) {
-          const regName = await getRegistrationName(conv.phone, 'nutri')
+          const regName = await getRegistrationName(conv.phone, area as 'nutri' | 'hom')
           displayName = regName || null
         }
 

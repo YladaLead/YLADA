@@ -23,10 +23,10 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Buscar sessão
+    // Buscar sessão (e área: nutri ou hom)
     const { data: session, error: sessionError } = await supabaseAdmin
       .from('whatsapp_workshop_sessions')
-      .select('id, starts_at')
+      .select('id, starts_at, area')
       .eq('id', sessionId)
       .single()
 
@@ -37,12 +37,14 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Buscar conversa pelo telefone
+    const area = (session as { area?: string }).area || 'nutri'
+
+    // Buscar conversa pelo telefone (mesma área da sessão)
     const phoneClean = phone.replace(/\D/g, '')
     const { data: conversation, error: convError } = await supabaseAdmin
       .from('whatsapp_conversations')
       .select('id, phone, name, context')
-      .eq('area', 'nutri')
+      .eq('area', area)
       .eq('status', 'active')
       .or(`phone.eq.${phoneClean},phone.like.%${phoneClean.slice(-8)}%`)
       .limit(1)

@@ -1,7 +1,25 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import YladaAreaShell from '@/components/ylada/YladaAreaShell'
+
+/** Objetivos do link: norte para a sugestão (quiz vs calculadora e texto). */
+const LINK_OBJECTIVES = [
+  { value: 'captar', label: 'Captar', description: 'Trazer pessoas novas (possíveis pacientes ou clientes)' },
+  { value: 'educar', label: 'Educar', description: 'Informar e explicar tema da sua especialidade' },
+  { value: 'reter', label: 'Reter', description: 'Manter engajamento de quem já é paciente ou cliente' },
+  { value: 'propagar', label: 'Propagar', description: 'Fazer a pessoa compartilhar com outras' },
+  { value: 'indicar', label: 'Indicar', description: 'Gerar indicações (quem responde indica alguém)' },
+] as const
+
+type LinkObjectiveValue = (typeof LINK_OBJECTIVES)[number]['value']
+
+/** Tamanho: menos (rápido) / padrão / mais (completo). */
+const TAMANHO_OPTIONS = [
+  { value: 'menos', label: 'Menos (mais rápido)' },
+  { value: 'padrao', label: 'Padrão' },
+  { value: 'mais', label: 'Mais (mais completo)' },
+] as const
 
 type Template = { id: string; name: string; type: string; version: number; suggested_prompts?: string[] }
 type LinkStats = { view: number; start: number; complete: number; cta_click: number }
@@ -24,10 +42,10 @@ const TEMPLATE_TYPE_BY_PROFILE: Record<string, string[]> = {
   vendas: ['calculator'],
 }
 
-/** Nomes amigáveis para exibir no select (em vez do name técnico do banco). */
+/** Nomes amigáveis para exibir no select — foco no que o visitante (possível paciente) vê. */
 const TEMPLATE_DISPLAY_NAMES: Record<string, string> = {
-  diagnostico_agenda: 'Quiz: qualificar quem quer agendar',
-  calculadora_perda: 'Calculadora: quanto a pessoa está deixando de faturar',
+  diagnostico_agenda: 'Quiz: tema da sua especialidade para atrair possíveis pacientes',
+  calculadora_perda: 'Calculadora: resultado/insight para quem acessa (atrai e engaja)',
 }
 
 function getTemplateDisplayName(t: Template): string {
@@ -63,10 +81,56 @@ function buildSuggestionsByProfile(
   return { forProfile, others }
 }
 
-/** Títulos das sugestões conforme perfil (para ficar claro para o profissional). */
+/** Títulos das sugestões: o que você (profissional) quer mostrar para seus pacientes. */
 const SUGGESTION_TITLE_BY_PROFILE: Record<string, string> = {
-  liberal: 'Para quem atende clientes (consultório, clínica)',
-  vendas: 'Para quem vende produtos ou serviços',
+  liberal: 'Ideias de conteúdo para você usar com seus pacientes',
+  vendas: 'Ideias de conteúdo para você usar com seus clientes',
+}
+
+/** Rótulos amigáveis de perfil/categoria para exibir ao usuário (sem jargão técnico). */
+const PROFILE_LABELS: Record<string, string> = {
+  medicina: 'médico',
+  medico: 'médico',
+  nutricao: 'nutricionista',
+  nutricionista: 'nutricionista',
+  odontologia: 'dentista',
+  odonto: 'dentista',
+  psicologia: 'psicólogo',
+  psi: 'psicólogo',
+  coaching: 'coach',
+  coach: 'coach',
+  nutra: 'vendas (Nutra)',
+  vendas: 'vendas',
+  liberal: 'atendimento (consultório/clínica)',
+}
+
+function getFriendlyProfileLabel(profileSuggest: Record<string, string>): string {
+  const cat = (profileSuggest?.category ?? '').toLowerCase().trim()
+  const prof = (profileSuggest?.profession ?? '').toLowerCase().trim()
+  if (PROFILE_LABELS[cat]) return PROFILE_LABELS[cat]
+  if (PROFILE_LABELS[prof]) return PROFILE_LABELS[prof]
+  if (cat) return cat
+  if (prof) return prof
+  return 'seu perfil'
+}
+
+/** Frase "por quê" da sugestão conforme objetivo e tipo (quiz/calculadora). */
+function getSuggestionReason(objective: LinkObjectiveValue, isQuiz: boolean): string {
+  const o = objective || 'captar'
+  if (isQuiz) {
+    if (o === 'captar') return 'Para captar pessoas que ainda não te conhecem: seu paciente responde algumas perguntas sobre um tema da sua especialidade, vê um resultado e pode falar com você no WhatsApp.'
+    if (o === 'educar') return 'Para educar quem já te acompanha: um quiz que informa e gera curiosidade, e no final direciona para você.'
+    if (o === 'reter') return 'Para reter e engajar quem já é seu paciente ou cliente: conteúdo que mantém o vínculo e abre espaço para conversa.'
+    if (o === 'propagar') return 'Para que a pessoa queira compartilhar: resultado que gera identificação e incentiva divulgar para outras.'
+    if (o === 'indicar') return 'Para gerar indicações: o visitante responde, vê o resultado e pode indicar alguém ou falar com você.'
+  } else {
+    if (o === 'captar') return 'Para captar: a pessoa preenche dados, vê um resultado ou insight (ex.: potencial) e pode falar com você no WhatsApp.'
+    if (o === 'educar') return 'Para educar: uma calculadora que mostra um resultado útil e informa, gerando curiosidade para conversar com você.'
+    if (o === 'reter') return 'Para reter: ferramenta que engaja quem já é seu paciente ou cliente e mantém o contato.'
+    if (o === 'propagar') return 'Para propagar: resultado que a pessoa pode compartilhar ou comentar com outras.'
+    if (o === 'indicar') return 'Para indicar: resultado que motiva a pessoa a indicar alguém ou falar com você.'
+  }
+  return 'O conteúdo atrai e desperta curiosidade; no final seu paciente pode falar com você no WhatsApp.'
 }
 
 export default function MatrixLinksPage() {
@@ -90,6 +154,11 @@ export default function MatrixLinksPage() {
   const [editCtaWhatsapp, setEditCtaWhatsapp] = useState('')
   const [savingEdit, setSavingEdit] = useState(false)
   const [profile, setProfile] = useState<{ profile_type?: string | null; profession?: string | null } | null>(null)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [linkObjective, setLinkObjective] = useState<LinkObjectiveValue>('captar')
+  const [tamanho, setTamanho] = useState<'menos' | 'padrao' | 'mais'>('padrao')
+  const createLinkSectionRef = useRef<HTMLDivElement>(null)
+  const suggestionBoxRef = useRef<HTMLDivElement>(null)
 
   const segment = 'ylada'
 
@@ -105,7 +174,17 @@ export default function MatrixLinksPage() {
       const tJson = await tRes.json()
       const lJson = await lRes.json()
       const pJson = await pRes.json()
-      if (tJson?.success && Array.isArray(tJson.data)) setTemplates(tJson.data)
+      if (tJson?.success && Array.isArray(tJson.data)) {
+        setTemplates(tJson.data)
+      } else {
+        setTemplates([])
+        const err = tJson?.error || (tRes.ok ? '' : 'Resposta inválida')
+        if (err) {
+          const isProfileError = /criar perfil|perfil não encontrado|não permitido na tabela/i.test(err)
+          const text = isProfileError ? err : `Templates: ${err}. Verifique se as migrations (ylada_link_templates) foram aplicadas no banco.`
+          setMessage({ type: 'error', text: tJson?.technical ? `${text} ${tJson.technical}` : text })
+        }
+      }
       if (lJson?.success && Array.isArray(lJson.data)) setLinks(lJson.data)
       if (pJson?.success && pJson.data?.profile) {
         const p = pJson.data.profile as Record<string, unknown>
@@ -116,8 +195,8 @@ export default function MatrixLinksPage() {
       } else {
         setProfile(null)
       }
-    } catch {
-      setMessage({ type: 'error', text: 'Não foi possível carregar.' })
+    } catch (e) {
+      setMessage({ type: 'error', text: 'Não foi possível carregar. Verifique sua conexão e tente recarregar a página.' })
     } finally {
       setLoading(false)
     }
@@ -244,13 +323,40 @@ export default function MatrixLinksPage() {
     }
   }
 
-  const handleInterpret = async () => {
+  const handleDeleteLink = async (link: LinkRow) => {
+    if (!confirm(`Excluir o link "${link.title || link.slug}"? Esta ação não pode ser desfeita.`)) return
+    setDeletingId(link.id)
+    setMessage(null)
+    try {
+      const res = await fetch(`/api/ylada/links/${link.id}`, {
+        method: 'DELETE',
+        credentials: 'include',
+      })
+      const json = await res.json()
+      if (json?.success) {
+        setLinks((prev) => prev.filter((l) => l.id !== link.id))
+        setMessage({ type: 'success', text: 'Link excluído.' })
+      } else {
+        setMessage({ type: 'error', text: json?.error || 'Erro ao excluir.' })
+      }
+    } catch {
+      setMessage({ type: 'error', text: 'Erro ao excluir. Tente novamente.' })
+    } finally {
+      setDeletingId(null)
+    }
+  }
+
+  const handleInterpret = async (variation = false) => {
     if (!interpretText.trim()) {
-      setMessage({ type: 'error', text: 'Digite um texto para interpretar.' })
+      setMessage({ type: 'error', text: 'Digite ou escolha uma opção acima para continuar.' })
+      return
+    }
+    if (templates.length === 0) {
+      setMessage({ type: 'error', text: 'Não há templates disponíveis. É preciso popular a tabela de templates no banco (migrations) antes de usar a sugestão.' })
       return
     }
     setInterpreting(true)
-    setInterpretResult(null)
+    if (!variation) setInterpretResult(null)
     setMessage(null)
     try {
       const res = await fetch('/api/ylada/interpret', {
@@ -261,6 +367,9 @@ export default function MatrixLinksPage() {
           text: interpretText.trim(),
           profile_type: profile?.profile_type ?? undefined,
           profession: profile?.profession ?? undefined,
+          objective: linkObjective,
+          variation,
+          previous_template_id: variation && interpretResult?.recommendedTemplateId ? interpretResult.recommendedTemplateId : undefined,
         }),
       })
       const json = await res.json()
@@ -269,11 +378,13 @@ export default function MatrixLinksPage() {
         if (json.data.recommendedTemplateId) {
           setSelectedTemplateId(json.data.recommendedTemplateId)
         }
+        setTimeout(() => suggestionBoxRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 100)
       } else {
-        setMessage({ type: 'error', text: json?.error || 'Erro ao interpretar.' })
+        const errMsg = json?.error || (res.status === 503 ? 'Serviço temporariamente indisponível.' : 'Erro ao processar.')
+        setMessage({ type: 'error', text: errMsg })
       }
-    } catch {
-      setMessage({ type: 'error', text: 'Erro ao interpretar. Tente novamente.' })
+    } catch (e) {
+      setMessage({ type: 'error', text: 'Erro de conexão. Verifique a internet e tente novamente.' })
     } finally {
       setInterpreting(false)
     }
@@ -285,10 +396,10 @@ export default function MatrixLinksPage() {
         <div>
           <h1 className="text-xl font-bold text-gray-900 mb-2">Links inteligentes</h1>
           <p className="text-gray-600 mb-2">
-            Crie ferramentas (quiz, calculadora) para compartilhar com seus possíveis clientes ou pacientes — eles preenchem, veem um resultado e podem falar com você no WhatsApp.
+            Aqui você cria links para <strong>compartilhar com seus pacientes ou possíveis pacientes</strong>. Quando <strong>eles</strong> acessam, veem um quiz ou uma calculadora — conteúdo que atrai e desperta curiosidade. No final, podem falar com você no WhatsApp.
           </p>
           <p className="text-xs text-gray-500 mt-1">
-            O conteúdo do quiz e da calculadora é <strong>oficial da plataforma</strong> (definido pelos templates). Você só gera o link para compartilhar.
+            Você escolhe o tipo de ferramenta; a plataforma entrega o link pronto. Basta você gerar e <strong>enviar para as pessoas que você quer atingir</strong>.
           </p>
         </div>
 
@@ -301,11 +412,29 @@ export default function MatrixLinksPage() {
         )}
 
         <section className="bg-white rounded-lg border border-gray-200 p-4">
-          <h2 className="text-sm font-semibold text-gray-700 mb-2">Para que você quer usar este link?</h2>
+          <h2 className="text-sm font-semibold text-gray-700 mb-2">Para que você quer usar este link com seus pacientes?</h2>
           <p className="text-xs text-gray-500 mb-3">
-            {profile?.profile_type
-              ? 'Clique numa sugestão da sua área ou descreva com suas palavras. O link será um quiz ou uma calculadora pronta da plataforma.'
-              : 'Escolha uma sugestão abaixo ou descreva como quer engajar. O template já define o conteúdo oficial (quiz ou calculadora).'}
+            Qual é o <strong>objetivo principal</strong> deste link? Isso nos ajuda a sugerir a melhor opção (quiz ou calculadora) para você.
+          </p>
+          <div className="flex flex-wrap gap-2 mb-3">
+            {LINK_OBJECTIVES.map((obj) => (
+              <button
+                key={obj.value}
+                type="button"
+                onClick={() => setLinkObjective(obj.value)}
+                className={`rounded-full px-3 py-1.5 text-xs font-medium border transition-colors ${
+                  linkObjective === obj.value
+                    ? 'bg-blue-600 text-white border-blue-600'
+                    : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100'
+                }`}
+                title={obj.description}
+              >
+                {obj.label}
+              </button>
+            ))}
+          </div>
+          <p className="text-xs text-gray-500 mb-2">
+            Em uma frase: que tipo de conteúdo você quer que <strong>seu paciente</strong> veja quando acessar o link? Clique numa sugestão abaixo ou escreva.
           </p>
           {templates.length > 0 && (() => {
             const { forProfile, others } = buildSuggestionsByProfile(templates, profile?.profile_type)
@@ -355,53 +484,99 @@ export default function MatrixLinksPage() {
           })()}
           <div className="flex flex-col gap-2 mb-4">
             <textarea
-              placeholder="Ex: Quero um quiz para qualificar quem tem interesse em agendar comigo"
+              placeholder="Ex: Quiz sobre um tema da minha especialidade que atrai possíveis pacientes"
               value={interpretText}
               onChange={(e) => setInterpretText(e.target.value)}
               className="min-h-[80px] w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
               rows={3}
             />
-            <button
-              type="button"
-              onClick={handleInterpret}
-              disabled={interpreting}
-              className="self-start rounded-lg bg-gray-700 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800 disabled:opacity-50"
-            >
-              {interpreting ? 'Interpretando...' : 'Interpretar'}
-            </button>
-          </div>
-          {interpretResult && (
-            <div className="mb-4 p-3 rounded-lg bg-gray-50 border border-gray-200 text-sm space-y-2">
-              <p className="font-medium text-gray-700">Sugestão (processo reverso — apenas valide):</p>
-              <p className="text-gray-600">
-                Perfil: {Object.entries(interpretResult.profileSuggest)
-                  .filter(([, v]) => v)
-                  .map(([k, v]) => `${k}=${v}`)
-                  .join(', ') || '—'}
-              </p>
-              <p className="text-gray-600">
-                Template: {interpretResult.recommendedTemplateName || interpretResult.recommendedTemplateId || '—'} (confiança: {(interpretResult.confidence * 100).toFixed(0)}%)
-              </p>
-              {interpretResult.diagnosticSummary && (
-                <>
-                  <p className="font-medium text-gray-700 mt-2">Diagnóstico (conteúdo oficial deste link):</p>
-                  <p className="text-gray-600 italic">{interpretResult.diagnosticSummary}</p>
-                  <p className="text-xs text-gray-500 mt-1">Se estiver de acordo, use &quot;Gerar link&quot; abaixo para criar o link e compartilhar.</p>
-                </>
+            <div className="flex flex-col gap-2">
+              <button
+                type="button"
+                onClick={() => handleInterpret()}
+                disabled={interpreting || templates.length === 0}
+                className="self-start rounded-lg bg-gray-700 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800 disabled:opacity-50"
+                title={templates.length === 0 ? 'Carregue os templates primeiro (migrations no banco).' : undefined}
+              >
+                {interpreting ? 'Avançando...' : 'Avançar'}
+              </button>
+              {templates.length === 0 && (
+                <p className="text-xs text-amber-700 bg-amber-50 rounded px-2 py-1 self-start">
+                  Para a sugestão funcionar, é preciso ter templates no banco (migrations 207, 208, 218).
+                </p>
               )}
             </div>
-          )}
+          </div>
+          {interpretResult && (() => {
+            const isQuiz = interpretResult.recommendedTemplateName === 'diagnostico_agenda'
+            const toolLabel = isQuiz ? 'quiz' : 'calculadora'
+            const reason = getSuggestionReason(linkObjective, isQuiz)
+            return (
+              <div ref={suggestionBoxRef} className="mb-4 p-4 rounded-lg bg-blue-50 border border-blue-100 text-sm space-y-3">
+                <p className="font-semibold text-gray-900">É isso que vamos criar para você</p>
+                <p className="text-gray-700">
+                  Sugerimos um <strong>{toolLabel}</strong> para você usar com seus pacientes. Com base no seu perfil ({getFriendlyProfileLabel(interpretResult.profileSuggest)}) e no objetivo <strong>{LINK_OBJECTIVES.find((o) => o.value === linkObjective)?.label ?? linkObjective}</strong>.
+                </p>
+                <p className="text-gray-700 italic">&ldquo;{reason}&rdquo;</p>
+                {interpretResult.diagnosticSummary && (
+                  <p className="text-gray-700">
+                    <span className="font-medium text-gray-800">O que seu paciente vai ver ao acessar o link:</span>{' '}
+                    {interpretResult.diagnosticSummary}
+                  </p>
+                )}
+                <div className="flex flex-wrap items-center gap-2 pt-1">
+                  <span className="text-xs font-medium text-gray-600">Tamanho:</span>
+                  {TAMANHO_OPTIONS.map((t) => (
+                    <button
+                      key={t.value}
+                      type="button"
+                      onClick={() => setTamanho(t.value)}
+                      className={`rounded-full px-2.5 py-1 text-xs font-medium border transition-colors ${
+                        tamanho === t.value ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'
+                      }`}
+                    >
+                      {t.label}
+                    </button>
+                  ))}
+                </div>
+                <div className="flex flex-wrap gap-2 pt-2 border-t border-blue-100">
+                  <button
+                    type="button"
+                    onClick={() => createLinkSectionRef.current?.scrollIntoView({ behavior: 'smooth' })}
+                    className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+                  >
+                    Gostei, gerar link
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleInterpret(true)}
+                    disabled={interpreting}
+                    className="rounded-lg bg-white px-4 py-2 text-sm font-medium text-gray-700 border border-gray-300 hover:bg-gray-50 disabled:opacity-50"
+                  >
+                    {interpreting ? 'Buscando...' : 'Quero outra ideia'}
+                  </button>
+                </div>
+              </div>
+            )
+          })()}
         </section>
 
-        <section className="bg-white rounded-lg border border-gray-200 p-4">
+        <section ref={createLinkSectionRef} className="bg-white rounded-lg border border-gray-200 p-4">
           <h2 className="text-sm font-semibold text-gray-700 mb-3">Criar novo link</h2>
+          {interpretResult && (
+            <p className="text-sm text-blue-700 bg-blue-50 border border-blue-100 rounded-lg px-3 py-2 mb-3">
+              Sugestão da etapa anterior: <strong>{interpretResult.recommendedTemplateName === 'diagnostico_agenda' ? 'Quiz' : 'Calculadora'}</strong>. O tipo já está selecionado abaixo. Clique em <strong>Gerar link</strong> para criar.
+            </p>
+          )}
           <p className="text-xs text-gray-500 mb-3">
-            Escolha o tipo de ferramenta que você quer compartilhar: um <strong>quiz</strong> para qualificar quem quer agendar ou uma <strong>calculadora</strong> de potencial. Depois é só gerar o link e enviar para seus clientes ou pacientes.
+            Escolha se você quer um <strong>quiz</strong> ou uma <strong>calculadora</strong>. O conteúdo será exibido <strong>para quem você enviar o link</strong> (seus possíveis pacientes ou clientes). Depois é só gerar o link e enviar para eles.
           </p>
           {loading ? (
             <p className="text-gray-500 text-sm">Carregando...</p>
           ) : templates.length === 0 ? (
-            <p className="text-gray-500 text-sm">Nenhum template disponível.</p>
+            <p className="text-gray-500 text-sm">
+              Nenhum template disponível. A tabela <code className="text-xs bg-gray-100 px-1 rounded">ylada_link_templates</code> precisa estar populada (rode as migrations 208 e 218 no Supabase).
+            </p>
           ) : (
             <div className="flex flex-wrap items-center gap-3">
               <select
@@ -409,7 +584,7 @@ export default function MatrixLinksPage() {
                 value={selectedTemplateId}
                 onChange={(e) => setSelectedTemplateId(e.target.value)}
               >
-                <option value="">Qual tipo de ferramenta?</option>
+                <option value="">Qual tipo de link você quer enviar para seus pacientes?</option>
                 {(() => {
                   const preferredTypes = profile?.profile_type ? TEMPLATE_TYPE_BY_PROFILE[profile.profile_type] : null
                   const sorted = preferredTypes?.length
@@ -441,7 +616,7 @@ export default function MatrixLinksPage() {
         <section className="bg-white rounded-lg border border-gray-200 p-4">
           <h2 className="text-sm font-semibold text-gray-700 mb-3">Seus links</h2>
           {links.length === 0 ? (
-            <p className="text-gray-500 text-sm">Você ainda não criou nenhum link. Use o bloco acima para criar.</p>
+            <p className="text-gray-500 text-sm">Você ainda não criou nenhum link. Crie acima e depois envie o link para seus pacientes ou possíveis pacientes.</p>
           ) : (
             <ul className="space-y-4">
               {links.map((link) => {
@@ -520,6 +695,15 @@ export default function MatrixLinksPage() {
                             Arquivar
                           </button>
                         )}
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteLink(link)}
+                          disabled={deletingId === link.id}
+                          className="rounded px-2 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50 disabled:opacity-50"
+                          title="Excluir link (para testes)"
+                        >
+                          {deletingId === link.id ? 'Excluindo...' : 'Excluir'}
+                        </button>
                       </div>
                     </div>
                   </li>
@@ -540,13 +724,13 @@ export default function MatrixLinksPage() {
               <h3 className="text-sm font-semibold text-gray-900 mb-4">Editar link</h3>
               <div className="space-y-4">
                 <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">Título (exibido na ferramenta)</label>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">Título (o que seu paciente vê ao abrir o link)</label>
                   <input
                     type="text"
                     value={editTitle}
                     onChange={(e) => setEditTitle(e.target.value)}
                     className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-                    placeholder="Ex: Diagnóstico da sua agenda"
+                    placeholder="Ex: Avaliação sobre um tema da sua especialidade"
                   />
                 </div>
                 <div>

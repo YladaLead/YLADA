@@ -30,13 +30,24 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { nome_completo, email, observacoes } = body
+    let { nome_completo, email, observacoes, user_id: userId } = body
 
     if (!nome_completo || nome_completo.length < 3) {
       return NextResponse.json(
         { error: 'Nome completo é obrigatório (mínimo 3 caracteres)' },
         { status: 400 }
       )
+    }
+
+    const emailNorm = email?.trim()?.toLowerCase()
+    if (emailNorm && !userId) {
+      const { data: profile } = await supabaseAdmin
+        .from('user_profiles')
+        .select('user_id')
+        .eq('email', emailNorm)
+        .eq('perfil', 'wellness')
+        .maybeSingle()
+      if (profile?.user_id) userId = profile.user_id
     }
 
     // Verificar se já existe
@@ -49,16 +60,28 @@ export async function POST(request: NextRequest) {
     if (existing) {
       // Se existe mas está inativo, reativar
       if (existing.status === 'inativo') {
+        let linkUserId = userId
+        if (emailNorm && linkUserId == null) {
+          const { data: profile } = await supabaseAdmin
+            .from('user_profiles')
+            .select('user_id')
+            .eq('email', emailNorm)
+            .eq('perfil', 'wellness')
+            .maybeSingle()
+          if (profile?.user_id) linkUserId = profile.user_id
+        }
+        const updatePayload: Record<string, unknown> = {
+          status: 'ativo',
+          email: email || null,
+          observacoes: observacoes || null,
+          autorizado_por_user_id: user.id,
+          autorizado_por_email: user.email,
+          updated_at: new Date().toISOString(),
+        }
+        if (linkUserId !== undefined) updatePayload.user_id = linkUserId ?? null
         const { error: updateError } = await supabaseAdmin
           .from('presidentes_autorizados')
-          .update({
-            status: 'ativo',
-            email: email || null,
-            observacoes: observacoes || null,
-            autorizado_por_user_id: user.id,
-            autorizado_por_email: user.email,
-            updated_at: new Date().toISOString(),
-          })
+          .update(updatePayload)
           .eq('id', existing.id)
 
         if (updateError) {
@@ -92,6 +115,7 @@ export async function POST(request: NextRequest) {
         status: 'ativo',
         autorizado_por_user_id: user.id,
         autorizado_por_email: user.email,
+        user_id: userId || null,
       })
       .select()
       .single()
@@ -135,10 +159,100 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    const { data: presidentes, error } = await supabaseAdmin
+    let presidentes: any[] = []
+    let error: any = null
+
+    const { data: full, error: errFull } = await supabaseAdmin
       .from('presidentes_autorizados')
       .select('*')
       .order('nome_completo', { ascending: true })
+
+    if (errFull) {
+      const msg = (errFull.message || '').toLowerCase()
+      if (msg.includes('user_id') || msg.includes('schema cache') || errFull.code === '42703') {
+        const { data: fallback, error: errFallback } = await supabaseAdmin
+          .from('presidentes_autorizados')
+          .select('id, nome_completo, email, status, observacoes, autorizado_por_email, created_at, updated_at')
+          .order('nome_completo', { ascending: true })
+        if (!errFallback && fallback) {
+          presidentes = fallback.map((p: any) => ({ ...p, user_id: null }))
+        }
+      } else {
+        throw errFull
+      }
+    } else {
+      presidentes = full || []
+    }
+
+    return NextResponse.json({
+      success: true,
+      presidentes,
+      total: presidentes.length,
+    })
+  } catch (error: any) {
+    console.error('❌ Erro ao listar presidentes:', error)
+    return NextResponse.json(
+      { error: error.message || 'Erro ao listar presidentes' },
+      { status: 500 }
+    )
+  }
+}
+
+/**
+ * PATCH /api/admin/presidentes/autorizar
+ * Atualiza presidente (vincular/desvincular conta de usuário)
+ * Body:
+ * {
+ *   id: string (UUID do presidente)
+ *   user_id?: string | null (UUID do auth.users — null para desvincular)
+ * }
+ */
+export async function PATCH(request: NextRequest) {
+  try {
+    const authResult = await requireApiAuth(request, ['admin'])
+    if (authResult instanceof NextResponse) {
+      return authResult
+    }
+    const { profile } = authResult
+
+    if (!profile?.is_admin) {
+      return NextResponse.json(
+        { error: 'Apenas administradores podem atualizar presidentes' },
+        { status: 403 }
+      )
+    }
+
+    const body = await request.json()
+    const {
+      id,
+      user_id: userId,
+      autoriza_equipe_automatico: autorizaEquipe,
+      data_autorizacao_equipe_automatico: dataAutorizacaoEquipe,
+    } = body
+
+    if (!id) {
+      return NextResponse.json(
+        { error: 'ID do presidente é obrigatório' },
+        { status: 400 }
+      )
+    }
+
+    const updatePayload: Record<string, unknown> = {
+      updated_at: new Date().toISOString(),
+    }
+    if (userId !== undefined) updatePayload.user_id = userId ?? null
+    if (autorizaEquipe !== undefined) updatePayload.autoriza_equipe_automatico = !!autorizaEquipe
+    if (dataAutorizacaoEquipe !== undefined) updatePayload.data_autorizacao_equipe_automatico = dataAutorizacaoEquipe || null
+    if (autorizaEquipe === true && (dataAutorizacaoEquipe === undefined || dataAutorizacaoEquipe === null)) {
+      updatePayload.data_autorizacao_equipe_automatico = new Date().toISOString()
+    }
+
+    const { data, error } = await supabaseAdmin
+      .from('presidentes_autorizados')
+      .update(updatePayload)
+      .eq('id', id)
+      .select()
+      .single()
 
     if (error) {
       throw error
@@ -146,13 +260,13 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      presidentes: presidentes || [],
-      total: presidentes?.length || 0,
+      message: userId ? 'Conta vinculada ao presidente com sucesso.' : 'Conta desvinculada com sucesso.',
+      presidente: data,
     })
   } catch (error: any) {
-    console.error('❌ Erro ao listar presidentes:', error)
+    console.error('❌ Erro ao atualizar presidente:', error)
     return NextResponse.json(
-      { error: error.message || 'Erro ao listar presidentes' },
+      { error: error.message || 'Erro ao atualizar presidente' },
       { status: 500 }
     )
   }

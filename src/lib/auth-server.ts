@@ -121,10 +121,10 @@ export async function validateProtectedAccess(
   const shouldRequireSubscription = requireSubscription && !isExcludedRoute
 
   try {
-    // Validar variáveis de ambiente
+    // Validar variáveis de ambiente (redirecionar em vez de throw para evitar 500)
     if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
       console.error(`❌ ProtectedLayout [${area}]: Variáveis de ambiente do Supabase não configuradas`)
-      throw new Error('Supabase não configurado')
+      redirect(area === 'ylada' ? '/pt/login' : `/pt/${area}/login`)
     }
 
     // 1. Criar cliente Supabase server-side

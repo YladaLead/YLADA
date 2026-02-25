@@ -10,6 +10,7 @@ export function generateTrialToken(): string {
 
 /**
  * Cria um link de convite para trial de 3 dias
+ * baseUrl: em dev use a origem da requisição (ex: http://localhost:3000) para o link abrir no localhost
  */
 export async function createTrialInvite(data: {
   email: string
@@ -17,7 +18,9 @@ export async function createTrialInvite(data: {
   whatsapp?: string
   created_by_user_id?: string
   created_by_email?: string
-  expires_in_days?: number // Padrão: 7 dias para usar o link
+  nome_presidente?: string
+  expires_in_days?: number
+  baseUrl?: string
 }): Promise<{ token: string; invite_url: string }> {
   const token = generateTrialToken()
   const expiresAt = new Date()
@@ -32,6 +35,7 @@ export async function createTrialInvite(data: {
       whatsapp: data.whatsapp,
       created_by_user_id: data.created_by_user_id,
       created_by_email: data.created_by_email,
+      nome_presidente: data.nome_presidente ?? null,
       expires_at: expiresAt.toISOString(),
       status: 'pending',
     })
@@ -41,8 +45,8 @@ export async function createTrialInvite(data: {
     throw new Error('Erro ao criar convite de trial')
   }
 
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.ylada.com'
-  const invite_url = `${baseUrl}/pt/wellness/trial/${token}`
+  const baseUrl = data.baseUrl || process.env.NEXT_PUBLIC_APP_URL || 'https://www.ylada.com'
+  const invite_url = `${baseUrl.replace(/\/$/, '')}/pt/wellness/trial/${token}`
 
   console.log('✅ Convite de trial criado:', {
     email: data.email,
@@ -66,7 +70,7 @@ export async function validateAndUseTrialInvite(
 } | null> {
   const { data, error } = await supabaseAdmin
     .from('trial_invites')
-    .select('email, nome_completo, whatsapp, created_by_user_id, status, used_at, expires_at')
+    .select('email, nome_completo, whatsapp, created_by_user_id, nome_presidente, status, used_at, expires_at')
     .eq('token', token)
     .single()
 
@@ -112,6 +116,7 @@ export async function validateAndUseTrialInvite(
     nome_completo: data.nome_completo || undefined,
     whatsapp: data.whatsapp || undefined,
     created_by_user_id: data.created_by_user_id || undefined,
+    nome_presidente: data.nome_presidente || undefined,
   }
 }
 

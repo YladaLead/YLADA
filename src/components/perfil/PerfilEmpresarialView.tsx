@@ -145,7 +145,13 @@ export default function PerfilEmpresarialView({ areaCodigo, areaLabel }: PerfilE
       if (form.profile_type && flow) {
         toSave = { ...form, flow_id: flow.flow_id, flow_version: flow.flow_version }
       }
+      // Para vendas, convênio/particular não fazem sentido — limpar se estiver preenchido
+      if (toSave.profile_type === 'vendas' && (toSave.modelo_pagamento === 'particular' || toSave.modelo_pagamento === 'convenio')) {
+        toSave = { ...toSave, modelo_pagamento: '' }
+      }
       const payload = formDataToPayload(toSave)
+      // Sempre enviar o segmento da área atual (evita constraint violation se o form tiver valor incorreto)
+      payload.segment = areaCodigo
       const res = await fetch('/api/ylada/profile', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
@@ -776,7 +782,7 @@ export default function PerfilEmpresarialView({ areaCodigo, areaLabel }: PerfilE
                 onChange={(e) => update({ modelo_pagamento: e.target.value })}
               >
                 <option value="">Selecione</option>
-                {MODELO_PAGAMENTO_OPTIONS.map((o) => (
+                {getOptionsForProfileField('modelo_pagamento', form.profile_type || null).map((o) => (
                   <option key={o.value} value={o.value}>{o.label}</option>
                 ))}
               </select>

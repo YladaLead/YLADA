@@ -9,6 +9,7 @@ import { requireApiAuth } from '@/lib/api-auth'
 import { supabaseAdmin } from '@/lib/supabase'
 import { buildProfileResumo, type YladaNoelProfileRow } from '@/lib/ylada-profile-resumo'
 import { validateProfessionForSegment } from '@/config/ylada-profile-flows'
+import { getPerfilSimuladoByKey, SIMULATE_COOKIE_NAME } from '@/data/perfis-simulados'
 
 const VALID_SEGMENTS = ['ylada', 'med', 'psi', 'psicanalise', 'odonto', 'nutra', 'coach', 'seller'] as const
 
@@ -38,10 +39,13 @@ type ProfilePayload = {
 }
 
 function sanitizePayload(body: Record<string, unknown>, userId: string): { segment: string; row: Record<string, unknown> } | null {
-  const segment = typeof body.segment === 'string' ? body.segment.trim().toLowerCase() : ''
+  let segment = typeof body.segment === 'string' ? body.segment.trim().toLowerCase() : ''
+  // Garantir segmento válido (evita constraint ylada_noel_profile_segment_check)
   if (!segment || !VALID_SEGMENTS.includes(segment as (typeof VALID_SEGMENTS)[number])) {
-    return null
+    if (segment === 'vendas' || segment === 'liberal') segment = 'ylada'
+    else return null
   }
+  if (!segment) return null
   const allowed: (keyof ProfilePayload)[] = [
     'segment', 'profile_type', 'profession', 'flow_id', 'flow_version', 'category', 'sub_category', 'tempo_atuacao_anos', 'dor_principal', 'prioridade_atual', 'fase_negocio',
     'metas_principais', 'objetivos_curto_prazo', 'modelo_atuacao', 'capacidade_semana', 'ticket_medio',
@@ -105,6 +109,19 @@ export async function GET(request: NextRequest) {
       )
     }
 
+    // Perfil simulado para testes: cookie ylada_simulate_profile
+    const simulateKey = request.cookies.get(SIMULATE_COOKIE_NAME)?.value?.trim()
+    if (simulateKey) {
+      const fixture = getPerfilSimuladoByKey(simulateKey)
+      if (fixture && fixture.segment === segment) {
+        const resumo = buildProfileResumo(fixture)
+        return NextResponse.json({
+          success: true,
+          data: { profile: fixture, resumo, _simulated: true },
+        })
+      }
+    }
+
     if (!supabaseAdmin) {
       return NextResponse.json({ success: false, error: 'Backend não configurado' }, { status: 503 })
     }
@@ -140,6 +157,16 @@ export async function PUT(request: NextRequest) {
     const auth = await requireApiAuth(request)
     if (auth instanceof NextResponse) return auth
     const { user } = auth
+
+    // Em modo simulação não persiste — evita sobrescrever perfil real
+    const simulateKey = request.cookies.get(SIMULATE_COOKIE_NAME)?.value?.trim()
+    if (simulateKey) {
+      const fixture = getPerfilSimuladoByKey(simulateKey)
+      if (fixture) {
+        const resumo = buildProfileResumo(fixture)
+        return NextResponse.json({ success: true, data: { profile: fixture, resumo, _simulated: true } })
+      }
+    }
 
     const body = await request.json().catch(() => ({}))
     const parsed = sanitizePayload(body as Record<string, unknown>, user.id)

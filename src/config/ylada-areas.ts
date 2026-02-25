@@ -37,6 +37,7 @@ export const YLADA_MENU_ITEMS = [
   { key: 'leads', label: 'Leads', path: 'leads', icon: '👥' },
   { key: 'trilha', label: 'Trilha empresarial', path: 'trilha', icon: '📚' },
   { key: 'perfil-empresarial', label: 'Perfil empresarial', path: 'perfil-empresarial', icon: '👤' },
+  { key: 'perfis-simulados', label: 'Perfis para testes', path: 'perfis-simulados', icon: '🧪' },
   { key: 'configuracao', label: 'Configuração', path: 'configuracao', icon: '⚙️' },
 ] as const
 

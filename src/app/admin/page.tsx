@@ -130,6 +130,15 @@ function AdminDashboardContent() {
       destaque: true
     },
     {
+      id: 'whatsapp-hom',
+      title: 'HOM – Apresentações',
+      description: 'Bebidas funcionais Herbalife • Agenda e controle (área reservada)',
+      icon: '🥤',
+      link: '/admin/whatsapp/hom',
+      color: 'bg-teal-600',
+      destaque: true
+    },
+    {
       id: 'whatsapp-relatorios',
       title: 'Relatórios WhatsApp',
       description: 'Índices e diagnósticos por tags',
