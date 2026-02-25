@@ -21,6 +21,7 @@ interface Resultado {
   score: number
   perfil: string
   descricao: string
+  dica?: string
   cor: string
   recomendacoes: string[]
   diagnostico: DiagnosticoCompleto | null
@@ -168,11 +169,14 @@ export default function QuizPropositoEquilibrio({ config }: TemplateBaseProps) {
     }
 
     const diagnostico = propositoEquilibrioDiagnosticos.wellness[diagnosticoId as keyof typeof propositoEquilibrioDiagnosticos.wellness]
+    const perfilFinal = diagnostico?.titulo ?? perfil
+    const dica = diagnostico?.dica
 
     setResultado({
       score: pontuacaoTotal,
-      perfil,
+      perfil: perfilFinal,
       descricao,
+      dica,
       cor,
       recomendacoes,
       diagnostico
@@ -293,7 +297,7 @@ export default function QuizPropositoEquilibrio({ config }: TemplateBaseProps) {
 
               <div className="bg-gray-50 rounded-xl p-6 mb-6">
                 <p className="text-gray-800 text-lg leading-relaxed">
-                  {resultado.descricao}
+                  {resultado.dica ?? resultado.descricao}
                 </p>
               </div>
 

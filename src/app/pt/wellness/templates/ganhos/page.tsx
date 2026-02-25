@@ -21,9 +21,10 @@ interface Resultado {
   score: number
   perfil: string
   descricao: string
+  dica?: string
   cor: string
   recomendacoes: string[]
-  diagnostico?: any // Diagnóstico completo do arquivo de diagnósticos
+  diagnostico?: any
 }
 
 export default function QuizGanhos({ config }: TemplateBaseProps) {
@@ -115,11 +116,9 @@ export default function QuizGanhos({ config }: TemplateBaseProps) {
     let cor = ''
     let recomendacoes: string[] = []
 
-    // Obter diagnóstico completo baseado no score
-    let resultadoId = ''
+    // Mesmos diagnósticos do preview: 3 faixas (alto / moderado / bom)
+    let resultadoId: 'altoPotencial' | 'potencialModerado' | 'bomPotencial' = 'bomPotencial'
     if (score >= 9) {
-      perfil = 'Prosperidade Exponencial'
-      descricao = 'Você tem múltiplas fontes de renda e está prosperando! Seu estilo de vida permite ganhar mais.'
       cor = 'green'
       resultadoId = 'altoPotencial'
       recomendacoes = [
@@ -129,8 +128,6 @@ export default function QuizGanhos({ config }: TemplateBaseProps) {
         'Expandir negócios existentes'
       ]
     } else if (score >= 6) {
-      perfil = 'Crescimento Acelerado'
-      descricao = 'Você está no caminho certo! Com dedicação e estratégia, pode ganhar muito mais.'
       cor = 'blue'
       resultadoId = 'potencialModerado'
       recomendacoes = [
@@ -139,34 +136,23 @@ export default function QuizGanhos({ config }: TemplateBaseProps) {
         'Buscar mentoria de quem já prosperou',
         'Criar plano de ação mensal'
       ]
-    } else if (score >= 3) {
-      perfil = 'Potencial Não Aproveitado'
-      descricao = 'Você tem potencial, mas seu estilo de vida atual está limitando seus ganhos.'
+    } else {
       cor = 'orange'
-      resultadoId = 'potencialModerado'
+      resultadoId = 'bomPotencial'
       recomendacoes = [
         'Criar fonte de renda adicional',
         'Desenvolver habilidades de alto valor',
         'Montar um negócio próprio',
         'Investir em educação financeira'
       ]
-    } else {
-      perfil = 'Oportunidade de Transformação'
-      descricao = 'Você pode multiplicar sua renda! Mas precisa mudar hábitos e criar novas oportunidades.'
-      cor = 'red'
-      resultadoId = 'bomPotencial'
-      recomendacoes = [
-        'Urgente: Criar fonte de renda extra',
-        'Desenvolver mindset de prosperidade',
-        'Investir em capacitação profissional',
-        'Buscar mentoria urgente para prosperar'
-      ]
     }
 
-    // Buscar diagnóstico completo
-    const diagnostico = ganhosProsperidadeDiagnosticos.wellness?.[resultadoId as keyof typeof ganhosProsperidadeDiagnosticos.wellness]
+    const diagnostico = ganhosProsperidadeDiagnosticos.wellness?.[resultadoId]
+    perfil = diagnostico?.titulo ?? perfil
+    descricao = diagnostico?.diagnostico ?? descricao
+    const dica = diagnostico?.dica
 
-    setResultado({ score, perfil, descricao, cor, recomendacoes, diagnostico })
+    setResultado({ score, perfil, descricao, dica, cor, recomendacoes, diagnostico })
     setEtapa('resultado')
   }
 
@@ -262,7 +248,11 @@ export default function QuizGanhos({ config }: TemplateBaseProps) {
                 <div className={`inline-block px-8 py-4 rounded-full text-white font-bold text-2xl mb-4 ${cores[resultado.cor]}`}>
                   {resultado.perfil}
                 </div>
-                <p className="text-gray-800 text-xl">{resultado.descricao}</p>
+                {resultado.dica ? (
+                  <p className="text-gray-800 text-lg">{resultado.dica}</p>
+                ) : (
+                  <p className="text-gray-800 text-xl">{resultado.descricao}</p>
+                )}
                 <p className="text-sm text-gray-600 mt-2">Score: {resultado.score}/12</p>
               </div>
 

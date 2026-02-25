@@ -21,9 +21,10 @@ interface Resultado {
   score: number
   perfil: string
   descricao: string
+  dica?: string
   cor: string
   recomendacoes: string[]
-  diagnostico?: any // Diagnóstico completo do arquivo de diagnósticos
+  diagnostico?: any
 }
 
 export default function QuizPotencial({ config }: TemplateBaseProps) {
@@ -115,11 +116,9 @@ export default function QuizPotencial({ config }: TemplateBaseProps) {
     let cor = ''
     let recomendacoes: string[] = []
 
-    // Obter diagnóstico completo baseado no score
-    let resultadoId = ''
+    // Mesmos diagnósticos do preview: 3 faixas (alto / moderado / bom)
+    let resultadoId: 'altoPotencial' | 'potencialModerado' | 'bomPotencial' = 'bomPotencial'
     if (score >= 9) {
-      perfil = 'Potencial Extraído'
-      descricao = 'Você está extraindo o máximo do seu potencial! Continue investindo em seu crescimento.'
       cor = 'green'
       resultadoId = 'altoPotencial'
       recomendacoes = [
@@ -129,8 +128,6 @@ export default function QuizPotencial({ config }: TemplateBaseProps) {
         'Mentorear e multiplicar conhecimento'
       ]
     } else if (score >= 6) {
-      perfil = 'Potencial em Crescimento'
-      descricao = 'Você está no caminho certo! Com mais foco, pode acelerar seu desenvolvimento.'
       cor = 'blue'
       resultadoId = 'potencialModerado'
       recomendacoes = [
@@ -139,34 +136,23 @@ export default function QuizPotencial({ config }: TemplateBaseProps) {
         'Buscar mentoria de alto nível',
         'Criar plano de crescimento trimestral'
       ]
-    } else if (score >= 3) {
-      perfil = 'Potencial Subutilizado'
-      descricao = 'Você tem muito potencial, mas está usando apenas uma parte dele. Hora de acelerar!'
+    } else {
       cor = 'orange'
-      resultadoId = 'potencialModerado'
+      resultadoId = 'bomPotencial'
       recomendacoes = [
         'Urgente: Começar investir em desenvolvimento',
         'Definir metas claras e mensuráveis',
         'Buscar mentoria profissional',
         'Criar disciplina de crescimento diário'
       ]
-    } else {
-      perfil = 'Potencial Adormecido'
-      descricao = 'Você tem potencial incrível, mas está dormindo! É hora de despertar e crescer.'
-      cor = 'red'
-      resultadoId = 'bomPotencial'
-      recomendacoes = [
-        'URGENTE: Despertar seu potencial',
-        'Definir metas ambiciosas imediatamente',
-        'Investir em educação e treinamento',
-        'Buscar mentoria para guiar seu crescimento'
-      ]
     }
 
-    // Buscar diagnóstico completo
-    const diagnostico = potencialCrescimentoDiagnosticos.wellness?.[resultadoId as keyof typeof potencialCrescimentoDiagnosticos.wellness]
+    const diagnostico = potencialCrescimentoDiagnosticos.wellness?.[resultadoId]
+    perfil = diagnostico?.titulo ?? perfil
+    descricao = diagnostico?.diagnostico ?? descricao
+    const dica = diagnostico?.dica
 
-    setResultado({ score, perfil, descricao, cor, recomendacoes, diagnostico })
+    setResultado({ score, perfil, descricao, dica, cor, recomendacoes, diagnostico })
     setEtapa('resultado')
   }
 
@@ -262,7 +248,11 @@ export default function QuizPotencial({ config }: TemplateBaseProps) {
                 <div className={`inline-block px-8 py-4 rounded-full text-white font-bold text-2xl mb-4 ${cores[resultado.cor]}`}>
                   {resultado.perfil}
                 </div>
-                <p className="text-gray-800 text-xl">{resultado.descricao}</p>
+                {resultado.dica ? (
+                  <p className="text-gray-800 text-lg">{resultado.dica}</p>
+                ) : (
+                  <p className="text-gray-800 text-xl">{resultado.descricao}</p>
+                )}
                 <p className="text-sm text-gray-600 mt-2">Score: {resultado.score}/12</p>
               </div>
 

@@ -5,6 +5,10 @@
  */
 
 export interface DiagnosticoCompleto {
+  /** Título exibido no preview e no resultado (ex: "Alto Potencial para Crescimento") */
+  titulo?: string
+  /** Dica curta no resultado, em vez da frase longa */
+  dica?: string
   diagnostico: string
   causaRaiz: string
   acaoImediata: string

@@ -205,7 +205,7 @@ export default function QuizPropositoEquilibrioPreview({ etapa, onEtapaChange }:
             {/* Resultado 1: Alto Potencial */}
             <div className="bg-green-50 rounded-lg p-6 border-2 border-green-200">
               <div className="flex items-center justify-between mb-4">
-                <h5 className="text-lg font-bold text-green-900">🎯 Alto Potencial para Propósito e Equilíbrio</h5>
+                <h5 className="text-lg font-bold text-green-900">🎯 {diagnosticos.altoPotencial.titulo ?? 'Alto Potencial para Propósito e Equilíbrio'}</h5>
                 <span className="bg-green-600 text-white px-3 py-1 rounded-full text-sm font-semibold">12-15 pontos</span>
               </div>
               <div className="bg-white rounded-lg p-4 space-y-4">
@@ -236,7 +236,7 @@ export default function QuizPropositoEquilibrioPreview({ etapa, onEtapaChange }:
             {/* Resultado 2: Potencial Moderado */}
             <div className="bg-yellow-50 rounded-lg p-6 border-2 border-yellow-200">
               <div className="flex items-center justify-between mb-4">
-                <h5 className="text-lg font-bold text-yellow-900">🎯 Potencial Moderado para Alinhamento</h5>
+                <h5 className="text-lg font-bold text-yellow-900">🎯 {diagnosticos.potencialModerado.titulo ?? 'Potencial Moderado para Alinhamento'}</h5>
                 <span className="bg-yellow-600 text-white px-3 py-1 rounded-full text-sm font-semibold">8-11 pontos</span>
               </div>
               <div className="bg-white rounded-lg p-4 space-y-4">
@@ -267,7 +267,7 @@ export default function QuizPropositoEquilibrioPreview({ etapa, onEtapaChange }:
             {/* Resultado 3: Bom Potencial */}
             <div className="bg-blue-50 rounded-lg p-6 border-2 border-blue-200">
               <div className="flex items-center justify-between mb-4">
-                <h5 className="text-lg font-bold text-blue-900">🎯 Bom Potencial para Expansão</h5>
+                <h5 className="text-lg font-bold text-blue-900">🎯 {diagnosticos.bomPotencial.titulo ?? 'Bom Potencial para Expansão'}</h5>
                 <span className="bg-blue-600 text-white px-3 py-1 rounded-full text-sm font-semibold">0-7 pontos</span>
               </div>
               <div className="bg-white rounded-lg p-4 space-y-4">
