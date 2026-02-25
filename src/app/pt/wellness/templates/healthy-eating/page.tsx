@@ -275,7 +275,7 @@ export default function QuizAlimentacao({ config }: TemplateBaseProps) {
             {config && (
               <WellnessCTAButton
                 config={config}
-                resultadoTexto={`${resultado.perfil} (${resultado.score}/12 pontos)`}
+                resultadoTexto={resultado.perfil}
               />
             )}
 

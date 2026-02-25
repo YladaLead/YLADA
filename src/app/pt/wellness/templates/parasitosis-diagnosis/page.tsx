@@ -351,7 +351,7 @@ export default function DiagnosticoParasitose({ config }: TemplateBaseProps) {
             {config && (
               <WellnessCTAButton
                 config={config}
-                resultadoTexto={`Perfil: ${resultado.perfil} (${resultado.score}/15 pontos)`}
+                resultadoTexto={`Perfil: ${resultado.perfil}`}
               />
             )}
 

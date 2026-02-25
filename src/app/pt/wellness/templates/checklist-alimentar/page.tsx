@@ -463,7 +463,7 @@ export default function ChecklistAlimentar({ config }: TemplateBaseProps) {
             {config && (
               <WellnessCTAButton
                 config={config}
-                resultadoTexto={`Perfil: ${resultado.perfil} (${resultado.score} pontos)`}
+                resultadoTexto={`Perfil: ${resultado.perfil}`}
               />
             )}
 

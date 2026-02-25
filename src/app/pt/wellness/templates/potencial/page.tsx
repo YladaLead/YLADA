@@ -329,7 +329,7 @@ export default function QuizPotencial({ config }: TemplateBaseProps) {
             {config && (
               <WellnessCTAButton
                 config={config}
-                resultadoTexto={`${resultado.perfil} (${resultado.score}/12 pontos)`}
+                resultadoTexto={resultado.perfil}
               />
             )}
 
