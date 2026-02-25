@@ -4,6 +4,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase-client'
+import { toLocalDateStringISO } from '@/lib/date-utils'
 
 const supabase = createClient()
 
@@ -185,12 +186,8 @@ export default function AdminUsuarios() {
     }
     setUsuarioSelecionado(usuario)
     
-    // Converter data para formato YYYY-MM-DD para input type="date"
-    let dataFormatada = ''
-    if (usuario.assinaturaVencimento) {
-      const date = new Date(usuario.assinaturaVencimento)
-      dataFormatada = date.toISOString().split('T')[0]
-    }
+    // Data de vencimento no fuso local (YYYY-MM-DD) para bater com o "Vence: DD/MM" da lista — ver lib/date-utils.ts
+    const dataFormatada = toLocalDateStringISO(usuario.assinaturaVencimento)
     
     setFormAssinatura({
       current_period_end: dataFormatada,

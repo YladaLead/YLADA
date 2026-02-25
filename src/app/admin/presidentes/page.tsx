@@ -371,99 +371,6 @@ function AdminPresidentesContent() {
           </div>
         )}
 
-        {/* Formulário para adicionar */}
-        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">
-            ➕ Adicionar Presidente Autorizado
-          </h2>
-          <p className="text-sm text-gray-600 mb-4">
-            Adicione presidentes manualmente. O nome será usado no dropdown da página de trial.
-            <strong className="text-gray-900"> Use nomes padronizados!</strong>
-          </p>
-          <form onSubmit={handleAdicionar} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Nome Completo do Presidente * (padronizado)
-              </label>
-              <input
-                type="text"
-                value={formData.nome_completo}
-                onChange={(e) => setFormData({ ...formData, nome_completo: e.target.value })}
-                required
-                minLength={3}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                placeholder="Ex: Claudinei Leite"
-              />
-              <p className="text-xs text-gray-500 mt-1">
-                ⚠️ Use o nome exato que aparecerá no dropdown (ex: "Andre e Deise Faula")
-              </p>
-            </div>
-
-            <div className="relative">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                E-mail do presidente
-              </label>
-              <input
-                type="email"
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                onFocus={() => setMostrarSugestoesEmail(true)}
-                onBlur={() => setTimeout(() => setMostrarSugestoesEmail(false), 200)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                placeholder="Comece a digitar para ver e-mails existentes"
-              />
-              {sugestoesEmailCadastro.length > 0 && (
-                <ul
-                  className="absolute z-10 mt-1 w-full max-h-48 overflow-y-auto bg-white border border-gray-200 rounded-lg shadow-lg py-1"
-                  onMouseDown={(e) => e.preventDefault()}
-                >
-                  {sugestoesEmailCadastro.map((u) => (
-                    <li key={u.id}>
-                      <button
-                        type="button"
-                        onMouseDown={() => {
-                          setFormData((prev) => ({ ...prev, email: u.email, user_id: u.id }))
-                          setMostrarSugestoesEmail(false)
-                        }}
-                        className="w-full text-left px-4 py-2 text-sm hover:bg-green-50 text-gray-900"
-                      >
-                        <span className="font-medium">{u.email}</span>
-                        {u.nome && u.nome !== u.email && (
-                          <span className="text-gray-500 ml-2">— {u.nome}</span>
-                        )}
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              )}
-              <p className="text-xs text-gray-500 mt-1">
-                Este é o e-mail da conta do presidente. Cadastrando por aqui, ele já fica vinculado; ao logar, terá acesso à área &quot;Convite para equipe&quot;. Use o autocomplete para achar e-mails existentes.
-              </p>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Observações (opcional)
-              </label>
-              <textarea
-                value={formData.observacoes}
-                onChange={(e) => setFormData({ ...formData, observacoes: e.target.value })}
-                rows={3}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                placeholder="Observações sobre este presidente..."
-              />
-            </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="bg-green-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-green-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {loading ? 'Adicionando...' : 'Adicionar Presidente'}
-            </button>
-          </form>
-        </div>
-
         {/* Gerar link de convite (suporte: presidente que autorizou + contato) */}
         <div className="bg-white rounded-lg shadow-md p-6 mb-6 border-2 border-purple-100">
           <h2 className="text-xl font-semibold text-gray-900 mb-1">
@@ -560,6 +467,99 @@ function AdminPresidentesContent() {
               </div>
             </div>
           )}
+        </div>
+
+        {/* Formulário para adicionar */}
+        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">
+            ➕ Adicionar Presidente Autorizado
+          </h2>
+          <p className="text-sm text-gray-600 mb-4">
+            Adicione presidentes manualmente. O nome será usado no dropdown da página de trial.
+            <strong className="text-gray-900"> Use nomes padronizados!</strong>
+          </p>
+          <form onSubmit={handleAdicionar} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Nome Completo do Presidente * (padronizado)
+              </label>
+              <input
+                type="text"
+                value={formData.nome_completo}
+                onChange={(e) => setFormData({ ...formData, nome_completo: e.target.value })}
+                required
+                minLength={3}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                placeholder="Ex: Claudinei Leite"
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                ⚠️ Use o nome exato que aparecerá no dropdown (ex: "Andre e Deise Faula")
+              </p>
+            </div>
+
+            <div className="relative">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                E-mail do presidente
+              </label>
+              <input
+                type="email"
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                onFocus={() => setMostrarSugestoesEmail(true)}
+                onBlur={() => setTimeout(() => setMostrarSugestoesEmail(false), 200)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                placeholder="Comece a digitar para ver e-mails existentes"
+              />
+              {sugestoesEmailCadastro.length > 0 && (
+                <ul
+                  className="absolute z-10 mt-1 w-full max-h-48 overflow-y-auto bg-white border border-gray-200 rounded-lg shadow-lg py-1"
+                  onMouseDown={(e) => e.preventDefault()}
+                >
+                  {sugestoesEmailCadastro.map((u) => (
+                    <li key={u.id}>
+                      <button
+                        type="button"
+                        onMouseDown={() => {
+                          setFormData((prev) => ({ ...prev, email: u.email, user_id: u.id }))
+                          setMostrarSugestoesEmail(false)
+                        }}
+                        className="w-full text-left px-4 py-2 text-sm hover:bg-green-50 text-gray-900"
+                      >
+                        <span className="font-medium">{u.email}</span>
+                        {u.nome && u.nome !== u.email && (
+                          <span className="text-gray-500 ml-2">— {u.nome}</span>
+                        )}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+              <p className="text-xs text-gray-500 mt-1">
+                Este é o e-mail da conta do presidente. Cadastrando por aqui, ele já fica vinculado; ao logar, terá acesso à área &quot;Convite para equipe&quot;. Use o autocomplete para achar e-mails existentes.
+              </p>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Observações (opcional)
+              </label>
+              <textarea
+                value={formData.observacoes}
+                onChange={(e) => setFormData({ ...formData, observacoes: e.target.value })}
+                rows={3}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                placeholder="Observações sobre este presidente..."
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="bg-green-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-green-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {loading ? 'Adicionando...' : 'Adicionar Presidente'}
+            </button>
+          </form>
         </div>
 
         {/* Lista de presidentes */}
