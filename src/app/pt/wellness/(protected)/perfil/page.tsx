@@ -26,6 +26,20 @@ interface PerfilCompleto {
   tem_lista_contatos?: string
   onboarding_completo?: boolean
   onboarding_completado_at?: string
+  // Perfil estratégico / MLM
+  tipo_trabalho?: string
+  foco_trabalho?: string
+  ganhos_prioritarios?: string
+  nivel_herbalife?: string
+  carga_horaria_diaria?: string
+  dias_por_semana?: string
+  meta_3_meses?: string
+  meta_1_ano?: string
+  observacoes_adicionais?: string
+  pessoas_na_carteira?: number
+  contatos_novos_semana?: number
+  meta_crescimento_equipe?: number
+  bloqueio_principal?: string
 }
 
 // Funções para formatar valores
@@ -127,6 +141,84 @@ function formatarRitmo(ritmo?: string): string {
   return map[ritmo] || ritmo
 }
 
+// Labels neutros (MLM puro) para perfil estratégico
+function formatarNivelAtual(nivel?: string): string {
+  if (!nivel) return 'Não informado'
+  const map: Record<string, string> = {
+    'novo_distribuidor': 'Iniciante',
+    'supervisor': 'Em crescimento',
+    'equipe_mundial': 'Com equipe',
+    'equipe_expansao_global': 'Liderança em expansão',
+    'equipe_milionarios': 'Liderança consolidada',
+    'equipe_presidentes': 'Topo de carreira'
+  }
+  return map[nivel] || nivel
+}
+
+function formatarTipoTrabalho(tipo?: string): string {
+  if (!tipo) return 'Não informado'
+  const map: Record<string, string> = {
+    'bebidas_funcionais': 'Vendas com foco em volume e recorrência',
+    'produtos_fechados': 'Vendas com foco em valor por venda',
+    'cliente_que_indica': 'Foco em equipe e indicação'
+  }
+  return map[tipo] || tipo
+}
+
+function formatarFocoTrabalho(foco?: string): string {
+  if (!foco) return 'Não informado'
+  const map: Record<string, string> = {
+    'renda_extra': 'Renda extra',
+    'plano_carreira': 'Plano de carreira / crescimento em rede',
+    'ambos': 'Os dois'
+  }
+  return map[foco] || foco
+}
+
+function formatarGanhosPrioritarios(ganhos?: string): string {
+  if (!ganhos) return 'Não informado'
+  const map: Record<string, string> = {
+    'vendas': 'Ganhos com vendas',
+    'equipe': 'Ganhos em comissões de equipe',
+    'ambos': 'Os dois'
+  }
+  return map[ganhos] || ganhos
+}
+
+function formatarCargaHoraria(carga?: string): string {
+  if (!carga) return 'Não informado'
+  const map: Record<string, string> = {
+    '1_hora': '1 hora por dia',
+    '1_a_2_horas': '1 a 2 horas por dia',
+    '2_a_4_horas': '2 a 4 horas por dia',
+    'mais_4_horas': 'Mais de 4 horas por dia'
+  }
+  return map[carga] || carga
+}
+
+function formatarDiasPorSemana(dias?: string): string {
+  if (!dias) return 'Não informado'
+  const map: Record<string, string> = {
+    '1_a_2_dias': '1–2 dias por semana',
+    '3_a_4_dias': '3–4 dias por semana',
+    '5_a_6_dias': '5–6 dias por semana',
+    'todos_dias': 'Todos os dias'
+  }
+  return map[dias] || dias
+}
+
+function formatarBloqueio(bloqueio?: string): string {
+  if (!bloqueio) return 'Não informado'
+  const map: Record<string, string> = {
+    'medo': 'Medo de abordar / rejeição',
+    'organizacao': 'Organização / rotina',
+    'constancia': 'Constância / disciplina',
+    'abordagem': 'Não sei como abordar',
+    'outro': 'Outro'
+  }
+  return map[bloqueio] || bloqueio
+}
+
 // Layout server-side já valida autenticação, perfil e assinatura
 export default function WellnessPerfilPage() {
   return <WellnessPerfilContent />
@@ -211,14 +303,132 @@ function WellnessPerfilContent() {
         {/* Header */}
         <div className="mb-6">
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
-            📋 Relatório Completo do Seu Perfil
+            📋 Seu perfil de crescimento
           </h1>
           <p className="text-gray-600">
-            Todas as respostas que você forneceu durante o onboarding
+            Resumo das informações que você preencheu para o mentor personalizar suas orientações
           </p>
         </div>
 
-        {/* Seção 1: Objetivos e Metas */}
+        {/* Seção: Perfil de crescimento (estratégico + MLM) */}
+        {(perfil.tipo_trabalho || perfil.nivel_herbalife || perfil.meta_financeira != null || perfil.pessoas_na_carteira != null || perfil.contatos_novos_semana != null || perfil.meta_crescimento_equipe != null || perfil.bloqueio_principal) && (
+          <div className="bg-white rounded-xl p-5 sm:p-6 border border-gray-200 shadow-sm mb-6">
+            <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+              <span>🎯</span>
+              <span>Perfil de crescimento</span>
+            </h2>
+            <div className="space-y-3">
+              {perfil.tipo_trabalho && (
+                <div className="flex justify-between items-start py-2 border-b border-gray-100">
+                  <span className="text-sm text-gray-600">Como você trabalha</span>
+                  <span className="text-sm font-semibold text-gray-900 text-right">
+                    {formatarTipoTrabalho(perfil.tipo_trabalho)}
+                  </span>
+                </div>
+              )}
+              {perfil.foco_trabalho && (
+                <div className="flex justify-between items-start py-2 border-b border-gray-100">
+                  <span className="text-sm text-gray-600">Foco de trabalho</span>
+                  <span className="text-sm font-semibold text-gray-900 text-right">
+                    {formatarFocoTrabalho(perfil.foco_trabalho)}
+                  </span>
+                </div>
+              )}
+              {perfil.ganhos_prioritarios && (
+                <div className="flex justify-between items-start py-2 border-b border-gray-100">
+                  <span className="text-sm text-gray-600">Ganhos prioritários</span>
+                  <span className="text-sm font-semibold text-gray-900 text-right">
+                    {formatarGanhosPrioritarios(perfil.ganhos_prioritarios)}
+                  </span>
+                </div>
+              )}
+              {perfil.nivel_herbalife && (
+                <div className="flex justify-between items-start py-2 border-b border-gray-100">
+                  <span className="text-sm text-gray-600">Nível atual</span>
+                  <span className="text-sm font-semibold text-gray-900 text-right">
+                    {formatarNivelAtual(perfil.nivel_herbalife)}
+                  </span>
+                </div>
+              )}
+              {perfil.carga_horaria_diaria && (
+                <div className="flex justify-between items-start py-2 border-b border-gray-100">
+                  <span className="text-sm text-gray-600">Tempo por dia</span>
+                  <span className="text-sm font-semibold text-gray-900 text-right">
+                    {formatarCargaHoraria(perfil.carga_horaria_diaria)}
+                  </span>
+                </div>
+              )}
+              {perfil.dias_por_semana && (
+                <div className="flex justify-between items-start py-2 border-b border-gray-100">
+                  <span className="text-sm text-gray-600">Dias por semana</span>
+                  <span className="text-sm font-semibold text-gray-900 text-right">
+                    {formatarDiasPorSemana(perfil.dias_por_semana)}
+                  </span>
+                </div>
+              )}
+              {(perfil.meta_financeira != null && perfil.meta_financeira !== 0) && (
+                <div className="flex justify-between items-start py-2 border-b border-gray-100">
+                  <span className="text-sm text-gray-600">Meta de renda mensal</span>
+                  <span className="text-sm font-semibold text-green-600">
+                    R$ {Number(perfil.meta_financeira).toLocaleString('pt-BR')}
+                  </span>
+                </div>
+              )}
+              {(perfil.pessoas_na_carteira != null && perfil.pessoas_na_carteira !== 0) && (
+                <div className="flex justify-between items-start py-2 border-b border-gray-100">
+                  <span className="text-sm text-gray-600">Pessoas na carteira</span>
+                  <span className="text-sm font-semibold text-gray-900">{perfil.pessoas_na_carteira}</span>
+                </div>
+              )}
+              {(perfil.contatos_novos_semana != null && perfil.contatos_novos_semana !== 0) && (
+                <div className="flex justify-between items-start py-2 border-b border-gray-100">
+                  <span className="text-sm text-gray-600">Contatos novos por semana</span>
+                  <span className="text-sm font-semibold text-gray-900">{perfil.contatos_novos_semana}</span>
+                </div>
+              )}
+              {(perfil.meta_crescimento_equipe != null && perfil.meta_crescimento_equipe !== 0) && (
+                <div className="flex justify-between items-start py-2 border-b border-gray-100">
+                  <span className="text-sm text-gray-600">Meta de crescimento em equipe</span>
+                  <span className="text-sm font-semibold text-gray-900">{perfil.meta_crescimento_equipe}</span>
+                </div>
+              )}
+              {perfil.bloqueio_principal && (
+                <div className="flex justify-between items-start py-2 border-b border-gray-100">
+                  <span className="text-sm text-gray-600">Principal bloqueio</span>
+                  <span className="text-sm font-semibold text-gray-900 text-right">
+                    {formatarBloqueio(perfil.bloqueio_principal)}
+                  </span>
+                </div>
+              )}
+              {perfil.meta_3_meses && (
+                <div className="flex justify-between items-start py-2 border-b border-gray-100">
+                  <span className="text-sm text-gray-600">Meta para 3 meses</span>
+                  <span className="text-sm font-semibold text-gray-900 text-right max-w-[60%]">
+                    {perfil.meta_3_meses}
+                  </span>
+                </div>
+              )}
+              {perfil.meta_1_ano && (
+                <div className="flex justify-between items-start py-2 border-b border-gray-100">
+                  <span className="text-sm text-gray-600">Meta para 1 ano</span>
+                  <span className="text-sm font-semibold text-gray-900 text-right max-w-[60%]">
+                    {perfil.meta_1_ano}
+                  </span>
+                </div>
+              )}
+              {perfil.observacoes_adicionais && (
+                <div className="flex justify-between items-start py-2">
+                  <span className="text-sm text-gray-600">Observações</span>
+                  <span className="text-sm font-semibold text-gray-900 text-right max-w-[60%] whitespace-pre-line">
+                    {perfil.observacoes_adicionais}
+                  </span>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Seção 1: Objetivos e Metas (legado) */}
         <div className="bg-white rounded-xl p-5 sm:p-6 border border-gray-200 shadow-sm mb-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
             <span>🎯</span>

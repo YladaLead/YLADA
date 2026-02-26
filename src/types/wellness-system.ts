@@ -112,6 +112,14 @@ export type NivelHerbalife =
   | 'equipe_milionarios'
   | 'equipe_presidentes'
 
+/** Bloqueio principal para o mentor (MLM puro, sem citar ferramenta). */
+export type BloqueioPrincipal =
+  | 'medo'
+  | 'organizacao'
+  | 'constancia'
+  | 'abordagem'
+  | 'outro'
+
 export type CargaHorariaDiaria =
   | '1_hora'
   | '1_a_2_horas'
@@ -196,6 +204,14 @@ export interface WellnessConsultantProfile {
   
   // 9. Observações Adicionais
   observacoes_adicionais?: string // Informações extras importantes para o NOEL (máx 500 caracteres)
+  
+  // =====================================================
+  // CAMPOS MLM PURO (carteira, contatos, equipe, bloqueio)
+  // =====================================================
+  pessoas_na_carteira?: number
+  contatos_novos_semana?: number
+  meta_crescimento_equipe?: number
+  bloqueio_principal?: BloqueioPrincipal | string
   
   // Dados antigos (compatibilidade)
   experiencia_vendas?: string

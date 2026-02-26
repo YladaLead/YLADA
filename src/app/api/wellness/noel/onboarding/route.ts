@@ -251,6 +251,12 @@ export async function POST(request: NextRequest) {
       observacoes_adicionais,
       anotacoes_bebidas_funcionais,
       
+      // MLM puro: carteira, contatos, equipe, bloqueio
+      pessoas_na_carteira,
+      contatos_novos_semana,
+      meta_crescimento_equipe,
+      bloqueio_principal,
+      
       // Dados antigos (compatibilidade)
       tem_lista_contatos,
     } = body
@@ -506,6 +512,23 @@ export async function POST(request: NextRequest) {
     if (anotacoes_bebidas_funcionais !== undefined && anotacoes_bebidas_funcionais !== null && anotacoes_bebidas_funcionais.trim() !== '') {
       // Limitar a 1000 caracteres
       profileData.anotacoes_bebidas_funcionais = anotacoes_bebidas_funcionais.trim().substring(0, 1000)
+    }
+    
+    // MLM puro: carteira, contatos, equipe, bloqueio
+    const numPessoas = typeof pessoas_na_carteira === 'number' ? pessoas_na_carteira : parseInt(String(pessoas_na_carteira ?? ''), 10)
+    if (pessoas_na_carteira !== undefined && pessoas_na_carteira !== null && !Number.isNaN(numPessoas)) {
+      profileData.pessoas_na_carteira = numPessoas
+    }
+    const numContatos = typeof contatos_novos_semana === 'number' ? contatos_novos_semana : parseInt(String(contatos_novos_semana ?? ''), 10)
+    if (contatos_novos_semana !== undefined && contatos_novos_semana !== null && !Number.isNaN(numContatos)) {
+      profileData.contatos_novos_semana = numContatos
+    }
+    const numMetaEquipe = typeof meta_crescimento_equipe === 'number' ? meta_crescimento_equipe : parseInt(String(meta_crescimento_equipe ?? ''), 10)
+    if (meta_crescimento_equipe !== undefined && meta_crescimento_equipe !== null && !Number.isNaN(numMetaEquipe)) {
+      profileData.meta_crescimento_equipe = numMetaEquipe
+    }
+    if (bloqueio_principal !== undefined && bloqueio_principal !== null && String(bloqueio_principal).trim() !== '') {
+      profileData.bloqueio_principal = String(bloqueio_principal).trim()
     }
     
     // profile_type não é salvo em wellness_noel_profile, apenas em user_profiles (veja abaixo)

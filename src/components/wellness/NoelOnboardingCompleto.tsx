@@ -42,7 +42,11 @@ export default function NoelOnboardingCompleto({
     meta_1_ano: initialData?.meta_1_ano,
     observacoes_adicionais: initialData?.observacoes_adicionais,
     anotacoes_bebidas_funcionais: (initialData as any)?.anotacoes_bebidas_funcionais || '',
-    
+    // MLM puro: carteira, contatos, equipe, bloqueio
+    pessoas_na_carteira: initialData?.pessoas_na_carteira,
+    contatos_novos_semana: initialData?.contatos_novos_semana,
+    meta_crescimento_equipe: initialData?.meta_crescimento_equipe,
+    bloqueio_principal: initialData?.bloqueio_principal,
     // Campos antigos (compatibilidade)
     cidade: initialData?.cidade || '',
     idade: initialData?.idade,
@@ -88,6 +92,10 @@ export default function NoelOnboardingCompleto({
       fillIfEmpty('meta_3_meses', initialData.meta_3_meses)
       fillIfEmpty('meta_1_ano', initialData.meta_1_ano)
       fillIfEmpty('observacoes_adicionais', initialData.observacoes_adicionais)
+      fillIfEmpty('pessoas_na_carteira', initialData.pessoas_na_carteira)
+      fillIfEmpty('contatos_novos_semana', initialData.contatos_novos_semana)
+      fillIfEmpty('meta_crescimento_equipe', initialData.meta_crescimento_equipe)
+      fillIfEmpty('bloqueio_principal', initialData.bloqueio_principal)
       fillIfEmpty('cidade', initialData.cidade)
       fillIfEmpty('idade', initialData.idade)
 
@@ -204,10 +212,10 @@ export default function NoelOnboardingCompleto({
           {!hideNavigation && !isSinglePage && (
             <div className="text-center mb-8">
               <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                🎯 Perfil Estratégico do Distribuidor
+                🎯 Seu perfil de crescimento
               </h2>
               <p className="text-gray-600">
-                Configure seu perfil para o NOEL personalizar sua experiência
+                Responda para o mentor personalizar metas, rotina e próximos passos
               </p>
               <div className="mt-4 flex justify-center gap-2">
                 {[1, 2, 3].map((s) => (
@@ -220,9 +228,9 @@ export default function NoelOnboardingCompleto({
                 ))}
               </div>
               <div className="mt-2 text-sm text-gray-500">
-                {section === 1 && 'Perguntas Essenciais (1-4)'}
-                {section === 2 && 'Tempo e Metas (5-7)'}
-                {section === 3 && 'Metas Temporais (8-9)'}
+                {section === 1 && 'Perguntas essenciais (1-4)'}
+                {section === 2 && 'Tempo, metas e carteira (5-11)'}
+                {section === 3 && 'Metas temporais e observações (12-14)'}
               </div>
             </div>
           )}
@@ -242,13 +250,13 @@ export default function NoelOnboardingCompleto({
                   1️⃣ Como você trabalha? <span className="text-red-500">*</span>
                 </label>
                 <p className="text-xs text-gray-500 mb-3">
-                  Define o fluxo principal que o NOEL vai ativar para te ajudar no plano Herbalife
+                  Define o foco principal para o mentor te ajudar (vendas, equipe ou ambos)
                 </p>
                 <div className="space-y-2">
                   {[
-                    { value: 'bebidas_funcionais', label: 'Servindo bebidas', icon: '🥤', desc: 'EVS trabalho local delivery' },
-                    { value: 'produtos_fechados', label: 'Trabalhando com produtos fechados', icon: '📦', desc: 'Venda de produtos prontos, foco em valor maior por venda, menos volume' },
-                    { value: 'cliente_que_indica', label: 'Desenvolvendo clientes que indicam', icon: '👥', desc: 'Foco em criar clientes afiliados que recomendam e ganham com o negócio' }
+                    { value: 'bebidas_funcionais', label: 'Vendas com foco em volume e recorrência', icon: '📈', desc: 'Muitos contatos, carteira ativa, conversas diárias' },
+                    { value: 'produtos_fechados', label: 'Vendas com foco em valor por venda', icon: '💰', desc: 'Ticket maior por pedido, menos volume, mais margem' },
+                    { value: 'cliente_que_indica', label: 'Foco em equipe e indicação', icon: '👥', desc: 'Desenvolver pessoas que recomendam e crescem com o negócio' }
                   ].map((option) => (
                     <button
                       key={option.value}
@@ -273,15 +281,14 @@ export default function NoelOnboardingCompleto({
                   ))}
                 </div>
                 
-                {/* Campo de observações para bebidas funcionais */}
+                {/* Campo de observações para quem foca em volume/recorrência */}
                 {data.tipo_trabalho === 'bebidas_funcionais' && (
                   <div className="mt-4 bg-blue-50 rounded-lg p-4 border border-blue-200">
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       💬 Observações
                     </label>
                     <p className="text-xs text-gray-600 mb-3">
-                      Coloque aqui algumas informações que o NOEL pode usar como referência para te responder melhor. 
-                      Ex: como você trabalha, rotina, desafios, o que funciona bem, etc.
+                      Informações que o mentor pode usar para te orientar melhor: rotina, desafios, o que funciona bem.
                     </p>
                     <textarea
                       value={(data as any).anotacoes_bebidas_funcionais || ''}
@@ -289,7 +296,7 @@ export default function NoelOnboardingCompleto({
                         const value = e.target.value.substring(0, 1000)
                         setData(prev => ({ ...prev, anotacoes_bebidas_funcionais: value } as any))
                       }}
-                      placeholder="Ex: Trabalho com delivery, preparo bebidas pela manhã e entrego no almoço. Meu maior desafio é manter a rotina quando tenho muitos pedidos..."
+                      placeholder="Ex: Atendo muitos contatos por dia, minha maior dificuldade é manter a rotina de follow-up..."
                       rows={5}
                       maxLength={1000}
                       className="w-full px-4 py-3 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
@@ -312,7 +319,7 @@ export default function NoelOnboardingCompleto({
                 <div className="space-y-2">
                   {[
                     { value: 'renda_extra', label: 'Renda extra', icon: '💰', desc: 'Metas mais simples, sem pressão' },
-                    { value: 'plano_carreira', label: 'Plano de carreira Herbalife', icon: '👑', desc: 'Alta ambição, estrutura pesada' },
+                    { value: 'plano_carreira', label: 'Plano de carreira / crescimento em rede', icon: '👑', desc: 'Alta ambição, construção de equipe' },
                     { value: 'ambos', label: 'Os dois', icon: '🚀', desc: 'Resultado rápido + crescimento futuro' }
                   ].map((option) => (
                     <button
@@ -377,22 +384,22 @@ export default function NoelOnboardingCompleto({
                 </div>
               </div>
 
-              {/* Pergunta 4: Nível Herbalife */}
+              {/* Pergunta 4: Nível atual (neutro para MLM) */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-3">
-                  4️⃣ Qual é o seu nível atual na Herbalife? <span className="text-red-500">*</span>
+                  4️⃣ Qual é o seu nível atual? <span className="text-red-500">*</span>
                 </label>
                 <p className="text-xs text-gray-500 mb-3">
-                  Hierarquia oficial Herbalife
+                  Onde você está hoje no seu negócio em rede
                 </p>
                 <div className="space-y-2">
                   {[
-                    { value: 'novo_distribuidor', label: 'Novo Distribuidor', icon: '🆕' },
-                    { value: 'supervisor', label: 'Supervisor', icon: '⭐' },
-                    { value: 'equipe_mundial', label: 'Equipe Mundial', icon: '🌍' },
-                    { value: 'equipe_expansao_global', label: 'Equipe de Expansão Global (GET)', icon: '🚀' },
-                    { value: 'equipe_milionarios', label: 'Equipe de Milionários', icon: '💎' },
-                    { value: 'equipe_presidentes', label: 'Equipe de Presidentes', icon: '👑' }
+                    { value: 'novo_distribuidor', label: 'Iniciante', icon: '🆕' },
+                    { value: 'supervisor', label: 'Em crescimento', icon: '⭐' },
+                    { value: 'equipe_mundial', label: 'Com equipe', icon: '🌍' },
+                    { value: 'equipe_expansao_global', label: 'Liderança em expansão', icon: '🚀' },
+                    { value: 'equipe_milionarios', label: 'Liderança consolidada', icon: '💎' },
+                    { value: 'equipe_presidentes', label: 'Topo de carreira', icon: '👑' }
                   ].map((option) => (
                     <button
                       key={option.value}
@@ -422,8 +429,8 @@ export default function NoelOnboardingCompleto({
             <div className="space-y-6">
               {isSinglePage && (
                 <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-                  <p className="text-sm font-semibold text-gray-900">Seção 2 — Tempo e metas</p>
-                  <p className="text-xs text-gray-600 mt-1">Responda as perguntas obrigatórias (5–7).</p>
+                  <p className="text-sm font-semibold text-gray-900">Seção 2 — Tempo, metas e carteira</p>
+                  <p className="text-xs text-gray-600 mt-1">Obrigatórias: 5–7. Opcionais: 8–11 (carteira, contatos, equipe, bloqueio).</p>
                 </div>
               )}
               {/* Pergunta 5: Carga horária */}
@@ -549,22 +556,104 @@ export default function NoelOnboardingCompleto({
                   />
                 </div>
               </div>
+
+              {/* Pergunta 8: Pessoas na carteira */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  8️⃣ Quantas pessoas já estão na sua carteira (clientes/contatos ativos)?
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  value={data.pessoas_na_carteira ?? ''}
+                  onChange={(e) => setData(prev => ({ ...prev, pessoas_na_carteira: e.target.value === '' ? undefined : parseInt(e.target.value, 10) }))}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  placeholder="Ex: 10"
+                />
+              </div>
+
+              {/* Pergunta 9: Contatos novos por semana */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  9️⃣ Quantos contatos novos você fala por semana (em média)?
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  value={data.contatos_novos_semana ?? ''}
+                  onChange={(e) => setData(prev => ({ ...prev, contatos_novos_semana: e.target.value === '' ? undefined : parseInt(e.target.value, 10) }))}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  placeholder="Ex: 5"
+                />
+              </div>
+
+              {/* Pergunta 10: Meta de crescimento em equipe */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  🔟 Meta de novos parceiros na equipe (quantos quer conquistar)?
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  value={data.meta_crescimento_equipe ?? ''}
+                  onChange={(e) => setData(prev => ({ ...prev, meta_crescimento_equipe: e.target.value === '' ? undefined : parseInt(e.target.value, 10) }))}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  placeholder="Ex: 3"
+                />
+              </div>
+
+              {/* Pergunta 11: Principal bloqueio */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-3">
+                  1️⃣1️⃣ Qual seu principal bloqueio hoje?
+                </label>
+                <p className="text-xs text-gray-500 mb-2">
+                  O mentor usa isso para te dar o próximo passo certo
+                </p>
+                <div className="space-y-2">
+                  {[
+                    { value: 'medo', label: 'Medo de abordar / rejeição', icon: '😰' },
+                    { value: 'organizacao', label: 'Organização / rotina', icon: '📋' },
+                    { value: 'constancia', label: 'Constância / disciplina', icon: '🔄' },
+                    { value: 'abordagem', label: 'Não sei como abordar', icon: '💬' },
+                    { value: 'outro', label: 'Outro', icon: '✏️' }
+                  ].map((option) => (
+                    <button
+                      key={option.value}
+                      onClick={() => setData(prev => ({ ...prev, bloqueio_principal: option.value }))}
+                      className={`w-full p-3 rounded-lg border-2 text-left transition-all ${
+                        data.bloqueio_principal === option.value
+                          ? 'border-green-600 bg-green-50'
+                          : 'border-gray-200 hover:border-gray-300'
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <span className="text-xl">{option.icon}</span>
+                        <span className="font-medium text-gray-900">{option.label}</span>
+                        {data.bloqueio_principal === option.value && (
+                          <span className="ml-auto text-green-600">✓</span>
+                        )}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
           )}
 
-          {/* SEÇÃO 3: PERGUNTAS 8-9 */}
+          {/* SEÇÃO 3: PERGUNTAS 12-14 (metas temporais + observações) */}
           {(isSinglePage || section === 3) && (
             <div className="space-y-6">
               {isSinglePage && (
                 <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-                  <p className="text-sm font-semibold text-gray-900">Seção 3 — Metas temporais</p>
-                  <p className="text-xs text-gray-600 mt-1">Opcional, mas recomendado (8–9).</p>
+                  <p className="text-sm font-semibold text-gray-900">Seção 3 — Metas temporais e observações</p>
+                  <p className="text-xs text-gray-600 mt-1">Opcional, mas recomendado.</p>
                 </div>
               )}
-              {/* Pergunta 8: Meta 3 meses */}
+              {/* Meta 3 meses */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-3">
-                  8️⃣ Qual sua meta para os próximos 3 meses?
+                  Qual sua meta para os próximos 3 meses?
                 </label>
                 <p className="text-xs text-gray-500 mb-3">
                   Plano tático imediato (opcional mas recomendado)
@@ -608,15 +697,15 @@ export default function NoelOnboardingCompleto({
               {/* Pergunta 9: Meta 1 ano */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-3">
-                  9️⃣ Qual sua meta para 1 ano?
+                  Qual sua meta para 1 ano?
                 </label>
                 <p className="text-xs text-gray-500 mb-3">
-                  Plano estratégico — ligado ao Plano Presidente (opcional mas recomendado)
+                  Plano estratégico (opcional mas recomendado)
                 </p>
                 <div className="space-y-2 mb-4">
                   {[
-                    { value: 'viver_negocio', label: 'Viver do negócio Herbalife', icon: '🏠' },
-                    { value: 'subir_nivel', label: 'Subir para Supervisor / Mundial / GET / Milionários / Presidentes', icon: '📈' },
+                    { value: 'viver_negocio', label: 'Viver do negócio', icon: '🏠' },
+                    { value: 'subir_nivel', label: 'Subir de nível na carreira', icon: '📈' },
                     { value: 'crescer_equipe', label: 'Crescer a equipe para X pessoas', icon: '👥' },
                     { value: 'atingir_renda', label: 'Atingir renda mensal de X', icon: '💰' },
                     { value: 'base_duplicacao', label: 'Construir uma base sólida de duplicação', icon: '🔄' }

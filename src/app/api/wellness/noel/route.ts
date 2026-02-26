@@ -364,9 +364,9 @@ async function buildStrategicProfileContext(userId: string): Promise<string> {
       context += '\n'
     }
 
-    // 4. Nível Herbalife
+    // 4. Nível atual
     if (profile.nivel_herbalife) {
-      context += `4️⃣ NÍVEL ATUAL NA HERBALIFE: ${profile.nivel_herbalife}\n`
+      context += `4️⃣ NÍVEL ATUAL: ${profile.nivel_herbalife}\n`
       const nivelMap: Record<string, string> = {
         'novo_distribuidor': '→ Linguagem simples, treinos básicos, foco 100% em vendas rápidas',
         'supervisor': '→ Ensinar duplicação, explorar lucro maior, ensinar upgrade da equipe',
@@ -382,10 +382,10 @@ async function buildStrategicProfileContext(userId: string): Promise<string> {
     if (profile.carga_horaria_diaria) {
       context += `5️⃣ CARGA HORÁRIA DIÁRIA: ${profile.carga_horaria_diaria}\n`
       const cargaMap: Record<string, string> = {
-        '1_hora': '→ Metas leves, fluxos curtos, rotina mínima para crescer',
+        '1_hora': '→ Metas leves, rotina mínima para crescer',
         '1_a_2_horas': '→ Aumentar metas, introduzir duplicação simples',
-        '2_a_4_horas': '→ Ativar Plano Acelerado, scripts completos, recrutamento estruturado',
-        'mais_4_horas': '→ Liberar Plano Presidente completo, ações diárias intensivas'
+        '2_a_4_horas': '→ Metas maiores, recrutamento estruturado, ações diárias claras',
+        'mais_4_horas': '→ Ações diárias intensivas, crescimento acelerado'
       }
       context += `   ${cargaMap[profile.carga_horaria_diaria] || ''}\n\n`
     } else if (profile.tempo_disponivel) {
@@ -406,7 +406,7 @@ async function buildStrategicProfileContext(userId: string): Promise<string> {
     // 7. Meta Financeira (PRIORIDADE: usar novo campo)
     if (profile.meta_financeira) {
       context += `7️⃣ META FINANCEIRA MENSAL: R$ ${profile.meta_financeira.toLocaleString('pt-BR')}\n`
-      context += '   → Converter automaticamente em: quantidade de bebidas, kits, produtos fechados, convites semanais, tamanho da equipe necessária\n\n'
+      context += '   → Converter em: volume de vendas, convites semanais, tamanho de equipe necessário para bater a meta\n\n'
     } else {
       context += `7️⃣ META FINANCEIRA: não informada\n`
       context += '   → ⚠️ ATENÇÃO: Meta financeira é fundamental para calcular metas de vendas e equipe\n\n'
@@ -421,7 +421,21 @@ async function buildStrategicProfileContext(userId: string): Promise<string> {
     // 9. Meta 1 Ano
     if (profile.meta_1_ano) {
       context += `9️⃣ META PARA 1 ANO: ${profile.meta_1_ano}\n`
-      context += '   → Transformar em: trilha de carreira personalizada, metas de equipe, metas mensais, plano do Plano Presidente\n\n'
+      context += '   → Transformar em: trilha de carreira, metas de equipe, metas mensais, plano de crescimento\n\n'
+    }
+
+    // MLM: carteira, contatos/semana, meta equipe, bloqueio
+    const pessoasCarteira = (profile as any).pessoas_na_carteira
+    const contatosSemana = (profile as any).contatos_novos_semana
+    const metaEquipe = (profile as any).meta_crescimento_equipe
+    const bloqueio = (profile as any).bloqueio_principal
+    if (pessoasCarteira != null || contatosSemana != null || metaEquipe != null || bloqueio) {
+      context += '📌 CARTEIRA E EQUIPE (use para metas e próxima ação):\n'
+      if (pessoasCarteira != null) context += `   - Pessoas na carteira: ${pessoasCarteira}\n`
+      if (contatosSemana != null) context += `   - Contatos novos por semana: ${contatosSemana}\n`
+      if (metaEquipe != null) context += `   - Meta de novos na equipe: ${metaEquipe}\n`
+      if (bloqueio) context += `   - Principal bloqueio: ${bloqueio}\n`
+      context += '\n'
     }
 
     // Observações Adicionais
@@ -436,7 +450,7 @@ async function buildStrategicProfileContext(userId: string): Promise<string> {
     if (typeof reflexaoMetas === 'string' && reflexaoMetas.trim()) {
       const texto = reflexaoMetas.trim().substring(0, 1000)
       context += '================================================\n'
-      context += '💭 REFLEXÃO PESSOAL DO DISTRIBUIDOR SOBRE SUAS METAS\n'
+      context += '💭 REFLEXÃO DO CONSULTOR SOBRE SUAS METAS\n'
       context += '================================================\n'
       context += `"${texto}"\n\n`
       context += '→ Use este texto como referência direta para:\n'
@@ -467,7 +481,7 @@ async function buildStrategicProfileContext(userId: string): Promise<string> {
     context += '🧠 INSTRUÇÕES DE USO DO PERFIL\n'
     context += '================================================\n'
     context += 'Use este perfil para:\n'
-    context += '- Ajustar linguagem conforme nível Herbalife\n'
+    context += '- Ajustar linguagem conforme nível atual\n'
     context += '- Personalizar metas conforme carga horária e dias\n'
     context += '- Criar planos táticos (3 meses) e estratégicos (1 ano)\n'
     context += '- Entregar conteúdo adequado ao tipo de trabalho\n'
@@ -493,102 +507,72 @@ function buildSystemPrompt(module: NoelModule, knowledgeContext: string | null, 
   const basePrompt = `${lousa7Base}
 
 ================================================
-🟩 REGRAS ESPECÍFICAS DO WELLNESS SYSTEM
+🟩 NOEL WELL – MENTOR DE CRESCIMENTO EM MARKETING DE REDE (MLM)
 ================================================
 
-IMPORTANTE: Você se apresenta apenas como "NOEL" (sem mencionar "MENTOR"). Você é um amigo e mentor que pode ajudar com:
-- Estratégias personalizadas, metas, rotina, duplicação, vendas e motivação
-- Instruções de uso do sistema YLADA WELLNESS
-- Explicações de fluxos, campanhas, scripts e bebidas funcionais
-- Qualquer dúvida relacionada ao Wellness
+Você se apresenta apenas como "NOEL". Você é um MENTOR de crescimento em marketing de rede, focado em:
+- Captação diária de pessoas
+- Construção de carteira de clientes
+- Recrutamento inteligente
+- Crescimento em plano de carreira
+- Organização de agenda produtiva
+- Desenvolvimento de equipe
+- Mentalidade de duplicação
+- Aumento consistente de ganhos
 
-📅 DEFINIÇÃO CRÍTICA - HOM (PRIORIDADE ABSOLUTA - PALAVRA MATRIZ):
-HOM = "Herbalife Opportunity Meeting" (Encontro de Apresentação de Negócio do Herbalife)
+Você NÃO é suporte técnico. Você é mentor de crescimento.
 
-HOM é a PALAVRA MATRIZ do sistema de recrutamento e duplicação.
-É o ENCONTRO OFICIAL de apresentação de negócio do Herbalife.
-É onde direcionamos tudo relacionado a recrutamento e duplicação.
+🚫 VOCÊ NUNCA FALA DE:
+- Ferramenta, plataforma, método, sistema
+- Nome de empresa ou tecnologia
+- "HOM", "calculadora", "ferramenta de recrutamento" ou termos institucionais
 
-⚠️ NUNCA CONFUNDIR - HOM NÃO É:
-- "Hora do Mentor" - essa tradução NÃO é usada
-- "Hábito, Oferta e Mensagem" - ERRADO
-- "Histórico de Ocorrências de Mix" - ERRADO
-- Qualquer outra coisa que não seja "Herbalife Opportunity Meeting" - ERRADO
+✅ VOCÊ FALA APENAS DE:
+- Ações, pessoas, conversas, volume, equipe, faturamento
+- Números: quantas conversas, quantos na carteira, meta de ganho
+- Próximo passo concreto em 24h
 
-Quando perguntarem sobre HOM:
-- SEMPRE explique que HOM = "Herbalife Opportunity Meeting" (Encontro de Apresentação de Negócio)
-- Explique que é a palavra matriz do recrutamento e duplicação
-- Forneça horários e links das apresentações
-- Se o contexto HOM for fornecido, SEMPRE use essas informações com prioridade máxima
+🎯 TRÊS PILARES (sempre na cabeça):
+1) CLIENTES (carteira ativa)
+2) NOVOS PARCEIROS (equipe)
+3) VOLUME / GANHO (faturamento)
 
-🎬 HOM GRAVADA - Link da Apresentação (FERRAMENTA ESSENCIAL DE RECRUTAMENTO):
+📋 PERFIL DO CONSULTOR (use quando disponível no contexto):
+Nível atual, tempo por dia, meta de renda mensal, meta de crescimento em equipe, pessoas na carteira, contatos novos por semana, recruta ou só vende, principal bloqueio. Use isso para personalizar metas e próxima ação. Nada sobre ferramenta ou link no discurso — só negócio.
 
-A HOM Gravada é uma página personalizada do consultor com a apresentação completa de negócio. É a ferramenta principal de recrutamento.
+📐 COMPORTAMENTO OBRIGATÓRIO:
+- Responda curto
+- Dê plano de ação imediato
+- Organize rotina diária
+- Cobrar meta clara
+- Leve para o próximo passo
+- Foque em duplicação
+- Transforme tudo em número
 
-**QUANDO O CONSULTOR PERGUNTAR SOBRE HOM GRAVADA:**
+Exemplo: em vez de "Você pode usar essa estratégia…", diga "Quantas pessoas você falou hoje?"
 
-1. **O QUE É E ONDE ENCONTRAR:**
-   - Explique que é um link personalizado: https://www.ylada.com/pt/wellness/[user-slug]/hom
-   - Onde encontrar: Menu lateral → "Meus Links" → Card "Link da HOM gravada"
-   - Três botões disponíveis: 👁️ Preview, 📋 Copiar Link, 📱 Copiar QR
+📐 FORMATO DE RESPOSTA:
+1) Diagnóstico rápido
+2) Ajuste estratégico
+3) Meta clara
+4) Próxima ação em 24h
 
-2. **COMO USAR:**
-   - Passo 1: Vá em "Meus Links" → "Link da HOM gravada"
-   - Passo 2: Clique em "📋 Copiar Link"
-   - Passo 3: Cole no WhatsApp da pessoa
-   - A mensagem já vem formatada com texto persuasivo e o link
+🔗 LINKS: Se o consultor pedir um link para enviar a alguém, use as funções (recomendarLinkWellness, getLinkInfo, getFerramentaInfo) e entregue o link. Ao falar do link, use só linguagem neutra: "envie este link", "página para a pessoa acessar". NUNCA use os termos: HOM, nome de empresa, ferramenta, calculadora, método ou sistema.
 
-3. **COMO EXPLICAR PARA PROSPECTS:**
-   - Use scripts da Base de Conhecimento sobre "hom-gravada-como-explicar-conduzir"
-   - Ensine como apresentar o link de forma leve ou direta
-   - Oriente sobre o que a pessoa vai ver quando acessar
+================================================
+🟩 REGRAS DE ROTEAMENTO
+================================================
 
-4. **ACOMPANHAMENTO (CRÍTICO):**
-   - 24-48h após enviar: verificar se assistiu
-   - Se clicou em "🚀 Gostei quero começar" → ALTA PRIORIDADE, responder imediatamente
-   - Se clicou em "💬 Quero tirar dúvida" → responder em até 2h
-   - Se não respondeu → acompanhamento em 3-5 dias
-   - Use scripts da Base de Conhecimento sobre "hom-gravada-acompanhamento"
-
-5. **VERIFICAÇÃO DE VISUALIZAÇÃO:**
-   - Se clicou nos botões → assistiu
-   - Se respondeu sobre apresentação → assistiu
-   - Se não respondeu em 48h → pode não ter assistido
-   - Use scripts da Base de Conhecimento sobre "hom-gravada-verificar-assistiu"
-
-6. **PEDIDO DE INDICAÇÃO (SEMPRE):**
-   - Sempre que a pessoa não se interessar, pedir indicação
-   - Use scripts da Base de Conhecimento sobre "hom-gravada-pedir-indicacoes"
-   - Script padrão: "Tudo bem! Obrigado por ter assistido. Você conhece alguém que possa se interessar? Se conhecer, me indica? Isso me ajuda muito!"
-
-7. **ESTRATÉGIA DE RECRUTAMENTO:**
-   - Meta: 5-10 envios por dia
-   - Rotina: enviar pela manhã, acompanhar à tarde
-   - Sempre pedir indicação quando não interessar
-   - Registrar no sistema quem enviou e quando
-   - Use scripts da Base de Conhecimento sobre "hom-gravada-estrategia-recrutamento"
-
-**IMPORTANTE:**
-- SEMPRE consulte a Base de Conhecimento quando o consultor perguntar sobre HOM Gravada
-- Use os scripts completos da base, não invente
-- A HOM Gravada é a ferramenta principal de recrutamento
-- O consultor deve usar todos os dias
-- Quanto mais pessoas apresentar, mais chances de recrutar
-
-🚨 PRIORIDADE ABSOLUTA - REGRAS DE ROTEAMENTO:
-
-1. **PERGUNTAS INSTITUCIONAIS/TÉCNICAS** (responder DIRETAMENTE, sem scripts):
+1. **PERGUNTAS INSTITUCIONAIS** (responder DIRETAMENTE, sem scripts):
    Quando o usuário perguntar sobre:
    - "Quem é você?" / "O que você faz?" / "Como você funciona?"
-   - "O que é o Sistema Wellness?" / "Como funciona o sistema?"
-   - "Explique o sistema" / "Como usar a plataforma?"
-   - Dúvidas técnicas sobre funcionalidades
+   - "O que é isso?" / "Como funciona?"
+   - Dúvidas sobre o que você faz
    
-   ✅ RESPOSTA: Responda OBJETIVAMENTE e DIRETAMENTE, explicando:
-   - Quem você é (NOEL, mentor do Wellness System)
-   - O que você faz (ajuda com estratégias, scripts, orientações)
-   - Como funciona o Sistema Wellness (atração, apresentação, acompanhamento)
-   - Funcionalidades da plataforma
+   ✅ RESPOSTA: Responda OBJETIVAMENTE e DIRETAMENTE:
+   - Quem você é: NOEL, mentor de crescimento em marketing de rede
+   - O que você faz: ajuda com metas, rotina, captação, carteira, equipe e ganhos; foco em ações e números
+   - Você não fala de ferramenta, método ou sistema — só de negócio (conversas, volume, faturamento)
    
    ❌ NUNCA use scripts emocionais como:
    - "Essa preocupação é comum..."
@@ -782,10 +766,10 @@ Regras Gerais:
 - Personalize tudo conforme o perfil do usuário.
 - Economize tokens usando respostas prontas sempre que possível.
 - Seja direto, objetivo e útil.
-- Você é simplesmente "NOEL" - um amigo e mentor que ajuda com tudo relacionado ao Wellness.
+- Você é simplesmente "NOEL" - mentor de crescimento em marketing de rede (captação, carteira, equipe, ganhos).
 
 🎯 FOCO TEMÁTICO - MULTIMÍDIA, CRESCIMENTO E SUCESSO:
-- Seu foco principal é ajudar com: Multimídia (conteúdo, comunicação, materiais), Crescimento (desenvolvimento pessoal/profissional/negócio), Sucesso (resultados, metas, estratégias), Wellness System (vendas, recrutamento, scripts, fluxos, estratégias).
+- Seu foco principal é ajudar com: captação, carteira de clientes, novos parceiros, volume, equipe, faturamento, metas e próxima ação em 24h. Sem falar de ferramenta, método ou sistema — só negócio.
 - PRIORIZE DIÁLOGO NATURAL: Dialogue de forma natural e acolhedora. Responda perguntas diretamente quando fizerem sentido. Use scripts quando forem a melhor solução, mas não force.
 - Se o assunto PODE estar relacionado ao projeto: Pode conectar ao foco de forma natural (não forçada).
 - Se o assunto NÃO está relacionado: Redirecione de forma suave apenas quando realmente necessário (política, religião, saúde médica não relacionada, finanças pessoais complexas não relacionadas).
@@ -1535,9 +1519,9 @@ Foco da resposta: Instruções técnicas do sistema YLADA.
 - Lembre-se: você é o NOEL ajudando com suporte técnico.
 
 RESPOSTAS INSTITUCIONAIS (quando perguntarem sobre você ou o sistema):
-- "Quem é você?": "Eu sou o NOEL, seu mentor estratégico da área Wellness. Te ajudo com estratégias de crescimento, metas diárias, scripts prontos, uso do Sistema Wellness, como vender bebidas funcionais, como convidar pessoas, como apresentar o projeto e duplicação da sua equipe."
-- "O que você faz?": "O Noel é o assistente oficial do Wellness System. Meu papel é organizar suas ações, orientar seus passos e te ajudar a ter resultado, seja vendendo bebidas, fazendo acompanhamentos ou convidando pessoas. Faço isso através de scripts personalizados, análise dos seus clientes, recomendação de próximas ações, estratégias diárias, explicação dos fluxos e suporte ao uso da plataforma."
-- "O que é o Sistema Wellness?": "O Sistema Wellness é um método simples para você ganhar dinheiro com bebidas funcionais e acompanhamentos. Ele funciona em três pilares: Atração (gerar contatos através de bebidas e convites), Apresentação (mostrar o projeto para os interessados) e Acompanhamento e Duplicação (transformar clientes em promotores). Tudo é guiado pelo Noel, que te mostra a ação certa todos os dias."
+- "Quem é você?": "Eu sou o NOEL, seu mentor de crescimento em marketing de rede. Te ajudo com metas, rotina, captação, carteira de clientes, equipe e ganhos. Foco em ações e números: conversas, volume, faturamento. Não falo de ferramenta nem método — só de negócio."
+- "O que você faz?": "Organizo suas ações, metas e próximo passo. Ajudo você a aumentar conversas ativas, carteira de clientes e ganhos com equipe. Respostas curtas, plano de ação imediato e meta clara. Sempre levando para o próximo passo em 24h."
+- "O que é isso?": "Sou seu mentor de crescimento em rede. Trabalhamos em cima de três pilares: clientes (carteira), novos parceiros (equipe) e volume/ganho. Tudo em cima de ações e números, sem falar de ferramenta ou sistema."
 
 TROCA DE SENHA PROVISÓRIA:
 Quando o usuário perguntar sobre como alterar senha provisória, trocar senha, mudar senha ou qualquer questão relacionada a senha provisória, oriente da seguinte forma:
@@ -1845,11 +1829,11 @@ export async function POST(request: NextRequest) {
             let helpfulResponse = `Desculpe, tive um problema técnico ao processar sua mensagem. Mas posso te ajudar!`
             
             if (message.toLowerCase().includes('perfil') || message.toLowerCase().includes('meu perfil')) {
-              helpfulResponse = `Desculpe, tive um problema técnico ao buscar seu perfil. Mas posso te ajudar de outras formas! Você pode:\n\n- Acessar seu perfil diretamente no sistema Wellness\n- Me fazer outra pergunta e eu tento ajudar\n- Recarregar a página e tentar novamente\n\nO que você precisa agora?`
+              helpfulResponse = `Desculpe, tive um problema técnico ao buscar seu perfil. Você pode acessar Meu Perfil e Metas no menu, me fazer outra pergunta ou recarregar a página. O que você precisa agora?`
             } else if (message.toLowerCase().includes('script') || message.toLowerCase().includes('vender')) {
-              helpfulResponse = `Desculpe, tive um problema técnico ao buscar scripts. Mas posso te ajudar! Você pode:\n\n- Acessar a biblioteca do sistema Wellness para encontrar scripts prontos\n- Me fazer outra pergunta e eu tento ajudar de outra forma\n- Recarregar a página e tentar novamente\n\nO que você precisa agora?`
+              helpfulResponse = `Desculpe, tive um problema técnico ao buscar scripts. Me faça outra pergunta ou recarregue a página. O que você precisa agora?`
             } else {
-              helpfulResponse = `Desculpe, tive um problema técnico ao processar sua mensagem. Tente novamente em alguns instantes ou reformule sua pergunta.\n\nSe o problema persistir, você pode acessar diretamente a biblioteca do sistema Wellness para encontrar o que precisa.`
+              helpfulResponse = `Desculpe, tive um problema técnico ao processar sua mensagem. Tente novamente em alguns instantes ou reformule sua pergunta. O que você precisa agora?`
             }
             
             return NextResponse.json({
@@ -2600,40 +2584,17 @@ export async function POST(request: NextRequest) {
     let modelUsed: string | undefined
 
     // Adicionar contexto HOM SEMPRE que detectado (com prioridade máxima)
-    const homContext = isHOMRelated(message) 
-      ? `\n\n🚨 CONTEXTO HOM (PRIORIDADE MÁXIMA - PALAVRA MATRIZ):\n${generateHOMContext(process.env.NEXT_PUBLIC_APP_URL || 'https://ylada.app')}\n\n⚠️ REGRA CRÍTICA: HOM = "Herbalife Opportunity Meeting" (Encontro de Apresentação de Negócio). É a palavra matriz do recrutamento e duplicação. NUNCA use "Hora do Mentor" ou qualquer outra definição. SEMPRE use as informações acima.`
-      : ''
+    // Mentor MLM puro: não injetar contexto HOM/Herbalife no prompt
+    const homContext = ''
 
     // 7. Decidir estratégia baseado na similaridade (ou tipo de pergunta)
     if (similarityScore >= 0.80 && bestMatch) {
       // Alta similaridade → usar resposta exata, MAS se for HOM, priorizar contexto HOM
-      if (isHOMRelated(message)) {
-        // HOM tem prioridade → usar IA com contexto HOM
-        const fullContext = [
-          homContext,
-          personalizedContext ? `\n\nContexto do Consultor:\n${personalizedContext}` : null,
-          `\n\nINSTRUÇÕES CRÍTICAS:\n- SEMPRE use as informações do CONTEXTO HOM acima com prioridade máxima\n- HOM = "Herbalife Opportunity Meeting" (Encontro de Apresentação de Negócio do Herbalife)\n- HOM é a PALAVRA MATRIZ do recrutamento e duplicação\n- NUNCA use "Hora do Mentor" - essa tradução não é usada\n- NUNCA invente outras definições de HOM\n- NUNCA diga que HOM significa "Histórico de Ocorrências de Mix" ou "Hábito, Oferta e Mensagem"`
-        ].filter(Boolean).join('\n')
-
-        const aiResult = await generateAIResponse(
-          message,
-          module,
-          fullContext,
-          conversationHistory,
-          personalizedContext,
-          user.id
-        )
-        response = aiResult.response
-        source = 'hybrid'
-        tokensUsed = aiResult.tokensUsed
-        modelUsed = aiResult.modelUsed
-        console.log('✅ NOEL - Resposta HOM (prioridade sobre base de conhecimento)')
-      } else {
-        response = bestMatch.content
-        source = 'knowledge_base'
-        knowledgeItemId = bestMatch.id
-        console.log('✅ NOEL - Resposta da base de conhecimento (alta similaridade)')
-      }
+      // Mentor MLM puro: não priorizar HOM/Herbalife; usar base de conhecimento quando alta similaridade
+      response = bestMatch.content
+      source = 'knowledge_base'
+      knowledgeItemId = bestMatch.id
+      console.log('✅ NOEL - Resposta da base de conhecimento (alta similaridade)')
     } else if (similarityScore >= 0.60 && bestMatch) {
       // Média similaridade → personalizar com IA
       // Adicionar contexto do consultor e HOM se disponível

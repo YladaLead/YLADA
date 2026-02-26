@@ -159,7 +159,7 @@ export default function ContaPerfilPage() {
         })
 
         if (!pvResponse.ok) {
-          throw new Error('Erro ao salvar meta de PV')
+          throw new Error('Erro ao salvar meta de faturamento pessoal')
         }
       }
 
@@ -267,6 +267,19 @@ export default function ContaPerfilPage() {
       }
       if (profile.observacoes_adicionais) {
         dataToSave.observacoes_adicionais = profile.observacoes_adicionais
+      }
+      // MLM puro: carteira, contatos, equipe, bloqueio
+      if (profile.pessoas_na_carteira !== undefined && profile.pessoas_na_carteira !== null) {
+        dataToSave.pessoas_na_carteira = profile.pessoas_na_carteira
+      }
+      if (profile.contatos_novos_semana !== undefined && profile.contatos_novos_semana !== null) {
+        dataToSave.contatos_novos_semana = profile.contatos_novos_semana
+      }
+      if (profile.meta_crescimento_equipe !== undefined && profile.meta_crescimento_equipe !== null) {
+        dataToSave.meta_crescimento_equipe = profile.meta_crescimento_equipe
+      }
+      if (profile.bloqueio_principal) {
+        dataToSave.bloqueio_principal = profile.bloqueio_principal
       }
       
       if (profileType) {
@@ -379,8 +392,8 @@ export default function ContaPerfilPage() {
               <div className="mb-6">
                 <h1 className="text-3xl font-bold text-gray-900 mb-2">👤 Meu Perfil e Metas</h1>
                 <p className="text-gray-600">
-                  Edite suas informações e metas para personalizar as recomendações do NOEL. 
-                  O NOEL usa seu perfil como base de referência para te orientar e te ajudar a bater seus objetivos.
+                  Edite suas informações e metas para o mentor personalizar suas recomendações. 
+                  Seu perfil é a base para orientação em captação, carteira e ganhos.
                 </p>
               </div>
 
@@ -408,12 +421,12 @@ export default function ContaPerfilPage() {
                 </div>
               )}
 
-              {/* EDITOR COMPLETO DE PERFIL ESTRATÉGICO - MESMO FORMULÁRIO DO ONBOARDING INICIAL */}
+              {/* EDITOR COMPLETO - MESMO FORMULÁRIO DO ONBOARDING INICIAL */}
               <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
                 <div className="mb-6">
-                  <h2 className="text-xl font-semibold text-gray-900 mb-2">📋 Perfil Estratégico do Distribuidor</h2>
+                  <h2 className="text-xl font-semibold text-gray-900 mb-2">📋 Seu perfil de crescimento</h2>
                   <p className="text-sm text-gray-600">
-                    Edite suas informações para personalizar as recomendações do NOEL. Este é o mesmo formulário do onboarding inicial.
+                    Edite suas informações para o mentor personalizar metas, rotina e próximos passos. Este é o mesmo formulário da primeira vez que você entrou.
                   </p>
                 </div>
                 
@@ -462,19 +475,44 @@ export default function ContaPerfilPage() {
                 <div className="mb-6">
                   <h2 className="text-xl font-semibold text-gray-900 mb-2">🎯 Minhas Metas</h2>
                   <p className="text-sm text-gray-600">
-                    Defina suas metas para que o NOEL possa te orientar e te ajudar a alcançá-las. 
-                    O NOEL usa essas informações para te estimular e te dar direcionamentos personalizados.
+                    Defina suas metas para o mentor te orientar e te ajudar a alcançá-las. 
+                    Essas informações são usadas para direcionamentos personalizados em volume, equipe e faturamento.
                   </p>
                 </div>
 
                 <div className="space-y-6">
-                  {/* META DE PV PESSOAL */}
+                  {/* PRAZO - PRIMEIRO, PARA DEFINIR O PERÍODO DAS METAS */}
                   <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">💰 Meta de PV Mensal (Pessoal)</h3>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">⏱️ Prazo para atingir as metas</h3>
+                    <p className="text-sm text-gray-600 mb-3">
+                      Defina em quantos meses você quer atingir as metas abaixo. Assim você preenche tudo com base nesse período.
+                    </p>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Prazo (em meses)
+                      </label>
+                      <input
+                        type="number"
+                        min="1"
+                        max="60"
+                        value={metasConstrucao.prazo_meses || 12}
+                        onChange={(e) => setMetasConstrucao(prev => ({ 
+                          ...prev, 
+                          prazo_meses: e.target.value ? parseInt(e.target.value) : 12 
+                        }))}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                        placeholder="Ex: 12"
+                      />
+                    </div>
+                  </div>
+
+                  {/* META DE FATURAMENTO PESSOAL */}
+                  <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">💰 Meta de faturamento pessoal</h3>
                     <div className="space-y-4">
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Meta de PV Mensal
+                          Meta de faturamento pessoal
                         </label>
                         <input
                           type="number"
@@ -504,20 +542,20 @@ export default function ContaPerfilPage() {
                             ></div>
                           </div>
                           <p className="text-xs text-gray-500 mt-2">
-                            {metasPV.pv_total.toLocaleString('pt-BR')} PV de {metasPV.meta_pv.toLocaleString('pt-BR')} PV
+                            {metasPV.pv_total.toLocaleString('pt-BR')} de {metasPV.meta_pv.toLocaleString('pt-BR')} (volume)
                           </p>
                         </div>
                       )}
                     </div>
                   </div>
 
-                  {/* META DE PV DE EQUIPE */}
+                  {/* META DE EQUIPE */}
                   <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">👥 Meta de PV de Equipe</h3>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">👥 Meta de equipe</h3>
                     <div className="space-y-4">
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Meta de PV de Equipe
+                          Meta de equipe
                         </label>
                         <input
                           type="number"
@@ -535,7 +573,7 @@ export default function ContaPerfilPage() {
                       {metasConstrucao.pv_equipe_atual > 0 && (
                         <div className="bg-white rounded-lg p-4">
                           <div className="flex justify-between items-center mb-2">
-                            <span className="text-sm text-gray-600">PV de Equipe Atual</span>
+                            <span className="text-sm text-gray-600">Equipe atual</span>
                             <span className="text-sm font-semibold text-gray-900">
                               {calcularProgresso(metasConstrucao.pv_equipe_atual, metasConstrucao.meta_pv_equipe)}%
                             </span>
@@ -547,20 +585,20 @@ export default function ContaPerfilPage() {
                             ></div>
                           </div>
                           <p className="text-xs text-gray-500 mt-2">
-                            {metasConstrucao.pv_equipe_atual.toLocaleString('pt-BR')} PV de {metasConstrucao.meta_pv_equipe.toLocaleString('pt-BR')} PV
+                            {metasConstrucao.pv_equipe_atual.toLocaleString('pt-BR')} de {metasConstrucao.meta_pv_equipe.toLocaleString('pt-BR')} (volume equipe)
                           </p>
                         </div>
                       )}
                     </div>
                   </div>
 
-                  {/* META DE RECRUTAMENTO */}
+                  {/* NOVOS NA EQUIPE POR PERÍODO */}
                   <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">🚀 Meta de Recrutamento</h3>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">🚀 Novos na equipe por período</h3>
                     <div className="space-y-4">
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Meta de Pessoas a Recrutar
+                          Novos na equipe no período
                         </label>
                         <input
                           type="number"
@@ -578,7 +616,7 @@ export default function ContaPerfilPage() {
                       {metasConstrucao.recrutamento_atual > 0 && (
                         <div className="bg-white rounded-lg p-4">
                           <div className="flex justify-between items-center mb-2">
-                            <span className="text-sm text-gray-600">Pessoas Recrutadas</span>
+                            <span className="text-sm text-gray-600">Novos na equipe (atual)</span>
                             <span className="text-sm font-semibold text-gray-900">
                               {calcularProgresso(metasConstrucao.recrutamento_atual, metasConstrucao.meta_recrutamento)}%
                             </span>
@@ -597,13 +635,13 @@ export default function ContaPerfilPage() {
                     </div>
                   </div>
 
-                  {/* META DE ROYALTIES */}
+                  {/* GANHOS COM EQUIPE */}
                   <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">👑 Meta de Royalties</h3>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">👑 Ganhos com equipe</h3>
                     <div className="space-y-4">
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Meta de Royalties (R$)
+                          Meta de ganhos com equipe (R$)
                         </label>
                         <div className="relative">
                           <span className="absolute left-3 top-3 text-gray-500">R$</span>
@@ -625,7 +663,7 @@ export default function ContaPerfilPage() {
                       {metasConstrucao.royalties_atual > 0 && (
                         <div className="bg-white rounded-lg p-4">
                           <div className="flex justify-between items-center mb-2">
-                            <span className="text-sm text-gray-600">Royalties Atuais</span>
+                            <span className="text-sm text-gray-600">Ganhos com equipe (atual)</span>
                             <span className="text-sm font-semibold text-gray-900">
                               {calcularProgresso(metasConstrucao.royalties_atual, metasConstrucao.meta_royalties)}%
                             </span>
@@ -646,15 +684,15 @@ export default function ContaPerfilPage() {
 
                   {/* NÍVEL DE CARREIRA ALVO */}
                   <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">🏆 Nível de Carreira Alvo</h3>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">🏆 Nível de carreira alvo</h3>
                     <div className="space-y-2">
                       {[
-                        { value: 'consultor_ativo', label: 'Consultor Ativo', desc: '250-500 PV mensais' },
-                        { value: 'consultor_1000pv', label: 'Consultor 1000 PV', desc: '1000 PV pessoais' },
-                        { value: 'equipe_mundial', label: 'Equipe Mundial', desc: '2500 PV por 4 meses' },
-                        { value: 'get', label: 'GET', desc: '16.000 PV de equipe (~R$ 1.000 royalties)' },
-                        { value: 'milionario', label: 'Milionário', desc: '64.000 PV de equipe (~R$ 4.000 royalties)' },
-                        { value: 'presidente', label: 'Presidente', desc: '160.000 PV de equipe (~R$ 10.000 royalties)' }
+                        { value: 'consultor_ativo', label: 'Iniciante', desc: 'Volume pessoal em crescimento' },
+                        { value: 'consultor_1000pv', label: 'Em crescimento', desc: 'Consolidando volume pessoal' },
+                        { value: 'equipe_mundial', label: 'Com equipe', desc: 'Construindo base de equipe' },
+                        { value: 'get', label: 'Liderança em expansão', desc: 'Equipe em crescimento, ganhos com rede' },
+                        { value: 'milionario', label: 'Liderança consolidada', desc: 'Equipe grande, ganhos com rede altos' },
+                        { value: 'presidente', label: 'Topo de carreira', desc: 'Máximo nível de liderança e ganhos com equipe' }
                       ].map((option) => (
                         <button
                           key={option.value}
@@ -672,34 +710,12 @@ export default function ContaPerfilPage() {
                     </div>
                   </div>
 
-                  {/* PRAZO */}
-                  <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">⏱️ Prazo para Atingir Metas</h3>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Prazo (em meses)
-                      </label>
-                      <input
-                        type="number"
-                        min="1"
-                        max="60"
-                        value={metasConstrucao.prazo_meses || 12}
-                        onChange={(e) => setMetasConstrucao(prev => ({ 
-                          ...prev, 
-                          prazo_meses: e.target.value ? parseInt(e.target.value) : 12 
-                        }))}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                        placeholder="Ex: 12"
-                      />
-                    </div>
-                  </div>
-
                   {/* REFLEXÃO SOBRE METAS */}
                   <div className="bg-gradient-to-br from-purple-50 to-blue-50 rounded-lg p-4 border border-purple-200">
                     <h3 className="text-lg font-semibold text-gray-900 mb-2">💭 Sua Reflexão sobre as Metas</h3>
                     <p className="text-sm text-gray-600 mb-4">
                       Escreva aqui o que te motiva, seus sonhos, desafios ou qualquer coisa importante sobre suas metas. 
-                      O NOEL vai usar isso para te orientar de forma mais personalizada e te ajudar a alcançar seus objetivos.
+                      O mentor usa isso para te orientar de forma mais personalizada e te ajudar a alcançar seus objetivos.
                     </p>
                     <textarea
                       value={metasConstrucao.reflexao_metas || ''}
