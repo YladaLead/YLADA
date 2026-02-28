@@ -261,6 +261,14 @@ function AdminDashboardContent() {
       color: 'bg-purple-500'
     },
     {
+      id: 'ylada-links',
+      title: 'Links inteligentes (YLADA)',
+      description: 'Ver todos os links e quem está emitindo cada um (dono/presidente)',
+      icon: '🔗',
+      link: '/admin/ylada/links',
+      color: 'bg-indigo-500'
+    },
+    {
       id: 'analytics',
       title: 'Analytics',
       description: 'Relatórios detalhados',

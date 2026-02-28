@@ -1,6 +1,6 @@
 /**
- * GET /api/ylada/links/[id] — obtém um link do usuário (para edição).
- * PUT /api/ylada/links/[id] — atualiza título, CTA WhatsApp e status.
+ * GET /api/ylada/links/by-id/[id] — obtém um link do usuário (para edição).
+ * PUT /api/ylada/links/by-id/[id] — atualiza título, CTA WhatsApp e status.
  * @see docs/PROGRAMACAO-ESTRUTURAL-YLADA.md
  */
 import { NextRequest, NextResponse } from 'next/server'
@@ -40,7 +40,7 @@ export async function GET(
 
     return NextResponse.json({ success: true, data: link })
   } catch (e) {
-    console.error('[ylada/links/[id]] GET', e)
+    console.error('[ylada/links/by-id/[id]] GET', e)
     return NextResponse.json({ success: false, error: 'Erro ao buscar link' }, { status: 500 })
   }
 }
@@ -103,13 +103,13 @@ export async function PUT(
       .single()
 
     if (updateError) {
-      console.error('[ylada/links/[id]] PUT', updateError)
+      console.error('[ylada/links/by-id/[id]] PUT', updateError)
       return NextResponse.json({ success: false, error: updateError.message }, { status: 500 })
     }
 
     return NextResponse.json({ success: true, data: updated })
   } catch (e) {
-    console.error('[ylada/links/[id]] PUT', e)
+    console.error('[ylada/links/by-id/[id]] PUT', e)
     return NextResponse.json({ success: false, error: 'Erro ao atualizar link' }, { status: 500 })
   }
 }
@@ -138,13 +138,13 @@ export async function DELETE(
       .eq('user_id', user.id)
 
     if (error) {
-      console.error('[ylada/links/[id]] DELETE', error)
+      console.error('[ylada/links/by-id/[id]] DELETE', error)
       return NextResponse.json({ success: false, error: error.message }, { status: 500 })
     }
 
     return NextResponse.json({ success: true })
   } catch (e) {
-    console.error('[ylada/links/[id]] DELETE', e)
+    console.error('[ylada/links/by-id/[id]] DELETE', e)
     return NextResponse.json({ success: false, error: 'Erro ao excluir link' }, { status: 500 })
   }
 }

@@ -17,6 +17,7 @@ export default function TrialInvitePage() {
     nome_presidente?: string
   } | null>(null)
   const [step, setStep] = useState<'validate' | 'create-account' | 'success'>('validate')
+  const [confirmouPresidente, setConfirmouPresidente] = useState(false)
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [creating, setCreating] = useState(false)
@@ -146,6 +147,10 @@ export default function TrialInvitePage() {
   }
 
   if (step === 'create-account' && inviteData) {
+    const nomePresidente = inviteData.nome_presidente?.trim()
+    const exigeConfirmacaoPresidente = !!nomePresidente
+    const podeEnviar = !exigeConfirmacaoPresidente || confirmouPresidente
+
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 to-emerald-50 p-4">
         <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-8">
@@ -156,12 +161,30 @@ export default function TrialInvitePage() {
             <p className="text-gray-600">
               Você foi convidado para testar gratuitamente por 3 dias
             </p>
-            {inviteData.nome_presidente && (
-              <p className="mt-2 text-sm font-medium text-green-800 bg-green-50 border border-green-200 rounded-lg px-3 py-2">
-                Convidado por: <span className="font-semibold">{inviteData.nome_presidente}</span>
-              </p>
-            )}
           </div>
+
+          {/* Área: convite é deste presidente — confirmação obrigatória */}
+          {nomePresidente && (
+            <div className="mb-6 p-4 bg-green-50 border-2 border-green-200 rounded-xl">
+              <p className="text-sm font-semibold text-green-900 mb-1">
+                Este convite é do presidente:
+              </p>
+              <p className="text-lg font-bold text-green-800 mb-3">
+                {nomePresidente}
+              </p>
+              <label className="flex items-start gap-3 cursor-pointer group">
+                <input
+                  type="checkbox"
+                  checked={confirmouPresidente}
+                  onChange={(e) => setConfirmouPresidente(e.target.checked)}
+                  className="mt-1 h-5 w-5 rounded border-green-300 text-green-600 focus:ring-green-500"
+                />
+                <span className="text-sm text-gray-700 group-hover:text-gray-900">
+                  Confirmo que sou da equipe do presidente <strong>{nomePresidente}</strong> e que este convite é para mim.
+                </span>
+              </label>
+            </div>
+          )}
 
           <form onSubmit={handleCreateAccount} className="space-y-4">
             <div>
@@ -226,9 +249,15 @@ export default function TrialInvitePage() {
               </div>
             )}
 
+            {exigeConfirmacaoPresidente && !confirmouPresidente && (
+              <p className="text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
+                Marque a confirmação acima para continuar.
+              </p>
+            )}
+
             <button
               type="submit"
-              disabled={creating}
+              disabled={creating || !podeEnviar}
               className="w-full bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {creating ? 'Criando conta...' : 'Criar conta e começar trial'}

@@ -1,13 +1,14 @@
 /**
- * POST /api/ylada/links/events — registra evento de visitante (view, cta_click, etc.).
- * Pública (sem auth). Insere em ylada_link_events e espelha em link_events (contagem unificada).
- * Body: { slug, event_type, utm_json?, device? }
- * @see docs/PASSO-A-PASSO-CONTAGEM-LINKS.md (Fase 4)
+ * POST /api/ylada/links/events — registra evento de visitante (view, start, complete, result_view, cta_click).
+ * Pública (sem auth). Insere em ylada_link_events; view e cta_click espelham em link_events.
+ * Body: { slug, event_type, utm_json?, device?, metrics_id? }
+ * - result_view + metrics_id: atualiza ylada_diagnosis_metrics.diagnosis_shown_at (quando o resultado foi exibido).
+ * - cta_click + metrics_id: atualiza clicked_whatsapp, clicked_at, time_to_click_ms, diagnosis_read_time_ms (tempo de leitura até o clique).
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
 
-const ALLOWED_TYPES = ['view', 'start', 'complete', 'cta_click'] as const
+const ALLOWED_TYPES = ['view', 'start', 'complete', 'result_view', 'cta_click'] as const
 
 /** Mapeia evento YLADA → evento unificado (só view e whatsapp_click entram em link_events) */
 function toUnifiedEventType(eventType: string): 'view' | 'whatsapp_click' | null {
@@ -25,6 +26,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json().catch(() => ({}))
     const slug = typeof body.slug === 'string' ? body.slug.trim() : ''
     const eventType = typeof body.event_type === 'string' ? body.event_type.trim().toLowerCase() : ''
+    const metricsId = typeof body.metrics_id === 'string' ? body.metrics_id.trim() || null : null
 
     if (!slug) {
       return NextResponse.json({ success: false, error: 'slug é obrigatório' }, { status: 400 })
@@ -57,6 +59,53 @@ export async function POST(request: NextRequest) {
     if (insertError) {
       console.error('[ylada/links/events]', insertError)
       return NextResponse.json({ success: false, error: insertError.message }, { status: 500 })
+    }
+
+    if (eventType === 'result_view' && metricsId) {
+      await supabaseAdmin
+        .from('ylada_diagnosis_metrics')
+        .update({ diagnosis_shown_at: new Date().toISOString() })
+        .eq('id', metricsId)
+        .eq('link_id', link.id)
+        .is('diagnosis_shown_at', null)
+        .then(({ error: updateErr }) => {
+          if (updateErr) console.error('[ylada/links/events] diagnosis_metrics result_view:', updateErr)
+        })
+    }
+
+    // Só atualiza métricas no primeiro clique (evita duplicidade)
+    if (eventType === 'cta_click' && metricsId) {
+      const { data: metric } = await supabaseAdmin
+        .from('ylada_diagnosis_metrics')
+        .select('created_at, diagnosis_shown_at, clicked_whatsapp')
+        .eq('id', metricsId)
+        .eq('link_id', link.id)
+        .maybeSingle()
+      if (metric && metric.clicked_whatsapp === false) {
+        const now = new Date()
+        const nowIso = now.toISOString()
+        const timeToClickMs = metric.created_at
+          ? Math.max(0, Math.round(now.getTime() - new Date(metric.created_at).getTime()))
+          : null
+        const diagnosisShownAt = metric.diagnosis_shown_at
+        const diagnosisReadTimeMs = diagnosisShownAt
+          ? Math.max(0, Math.round(now.getTime() - new Date(diagnosisShownAt).getTime()))
+          : null
+        await supabaseAdmin
+          .from('ylada_diagnosis_metrics')
+          .update({
+            clicked_whatsapp: true,
+            clicked_at: nowIso,
+            time_to_click_ms: timeToClickMs,
+            diagnosis_read_time_ms: diagnosisReadTimeMs,
+          })
+          .eq('id', metricsId)
+          .eq('link_id', link.id)
+          .eq('clicked_whatsapp', false)
+          .then(({ error: updateErr }) => {
+            if (updateErr) console.error('[ylada/links/events] diagnosis_metrics update:', updateErr)
+          })
+      }
     }
 
     // Fase 4: espelhar view e cta_click na tabela unificada link_events

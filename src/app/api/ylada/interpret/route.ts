@@ -1,15 +1,13 @@
 /**
- * POST /api/ylada/interpret — texto livre → perfil sugerido + template recomendado + confidence.
- * Body: { text, segment? }
- * Retorna: { profileSuggest, recommendedTemplateId, confidence }
- * @see docs/MATRIZ-CENTRAL-CRONOGRAMA.md (1.6)
- * @see docs/PROGRAMACAO-SENSATA-PROXIMOS-PASSOS.md
- * @see docs/PROCESSO-REVERSO-LINKS-INTELIGENTES.md
+ * POST /api/ylada/interpret — Interpretação Estrutural + Estratégias (Etapa 1 + 3).
+ * Transforma texto livre em estrutura e retorna 2 estratégias (qualidade + volume) via getStrategies.
+ * @see docs/CHECKLIST-LINKS-INTELIGENTES-ETAPAS.md (Etapa 3)
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { requireApiAuth } from '@/lib/api-auth'
 import { YLADA_SEGMENT_CODES } from '@/config/ylada-areas'
 import { supabaseAdmin } from '@/lib/supabase'
+import { getStrategies, interpretStrategyContext } from '@/lib/ylada'
 import OpenAI from 'openai'
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
@@ -29,16 +27,30 @@ const DOR_VALUES = [
   'falta_de_clareza',
 ] as const
 
+/** Saída da Etapa 1 — interpretação pura (sem decisão de fluxo). */
+export interface InterpretacaoEstrutural {
+  objetivo: 'captar' | 'educar' | 'reter' | 'propagar' | 'indicar'
+  tema: string
+  tipo_publico: 'pacientes' | 'clientes' | 'leads' | 'indicados' | string
+  area_profissional: string
+  contexto_detectado: string[]
+}
+
 export interface InterpretResponse {
+  /** Etapa 1: saída estrutural. */
+  interpretacao?: InterpretacaoEstrutural | null
+  /** Etapa 3: 2 IDs do catálogo [qualidade, volume] para os cards de estratégia. */
+  strategies?: [string, string]
   profileSuggest: {
     segment?: string
     category?: string
     sub_category?: string
     dor_principal?: string
   }
+  /** Tema (espelho de interpretacao.tema para compatibilidade). */
+  o_que_captar?: string | null
   recommendedTemplateId: string | null
   recommendedTemplateName?: string
-  /** Resumo do que o link entrega (conteúdo oficial do template) — profissional só valida. */
   diagnosticSummary?: string | null
   confidence: number
 }
@@ -47,24 +59,17 @@ export interface InterpretResponse {
 export const LINK_OBJECTIVES = ['captar', 'educar', 'reter', 'propagar', 'indicar'] as const
 export type LinkObjective = (typeof LINK_OBJECTIVES)[number]
 
-const SYSTEM_PROMPT = `Você é um assistente que analisa o que o PROFISSIONAL quer fazer com um LINK. O link é conteúdo que o profissional compartilha para POSSÍVEIS PACIENTES ou CLIENTES acessarem. O foco é no que a PESSOA QUE ACESSA recebe: conteúdo da especialidade do profissional que atrai, desperta curiosidade e agrega valor (ex.: quiz, calculadora, avaliação). Não é sobre o negócio/agenda do profissional — é sobre o conteúdo que atrai quem vai clicar.
+/** ETAPA 1 — Interpretação Estrutural. Só extrai e classifica; NÃO sugere fluxo nem template. */
+const SYSTEM_PROMPT_ETAPA1 = `Você é um assistente que transforma o que o PROFISSIONAL escreveu em ESTRUTURA CLARA. Você NÃO sugere fluxo, quiz ou calculadora. Apenas interpreta e classifica.
 
-O texto descreve: que tipo de link o profissional quer? Ex: "quiz sobre minha especialidade que atrai pacientes", "conteúdo que desperta curiosidade em quem acessa", "ferramenta que dá um resultado útil para o visitante", "link que agrega valor e no final a pessoa pode falar comigo".
+Entrada: texto livre (ex.: "Quero captar pessoas para perder peso"). Tarefas: 1) OBJETIVO: um de captar, educar, reter, propagar, indicar. 2) TEMA: 2 a 5 palavras (ex.: perda de peso, emagrecimento). 3) TIPO_PUBLICO: pacientes, clientes, leads, indicados. 4) AREA_PROFISSIONAL: medico, nutricionista, psicologo, dentista, coach, vendedor, estetica. 5) CONTEXTO_DETECTADO: array 2 a 5 palavras (ex.: saude, emagrecimento).
 
-Contexto do perfil (para preencher quando der para inferir do texto):
-- segment: um de: ylada, psi, psicanalise, odonto, nutra, coach, seller
-- category: mercado/área (ex: estetica, nutricao, odontologia, medicina, automoveis, imoveis)
-- sub_category: opcional (ex: cabelo, seminovos, high_ticket)
-- dor_principal: uma de: agenda_vazia, nao_converte, sem_indicacao, conteudo_nao_funciona, precificacao_ruim, falta_de_clareza
+IMPORTANTE: Se no Contexto for informado "Tipo de atuação" ou "Área/profissão" do profissional, USE ESSES VALORES para preencher tipo_publico e area_profissional na resposta (ex.: medico → area_profissional "medico", liberal → tipo_publico "pacientes" quando fizer sentido). Só mude se o texto do usuário indicar outra área ou público de forma explícita.
 
-Templates (conteúdo que o VISITANTE — possível paciente/cliente — acessa):
-- diagnostico_agenda (id: a0000001-0001-4000-8000-000000000001): quiz em que o visitante responde perguntas e recebe um resultado; ideal quando o profissional quer um link com tema da especialidade que atrai e engaja possíveis pacientes (conteúdo para quem acessa, não sobre a agenda do profissional).
-- calculadora_perda (id: a0000002-0002-4000-8000-000000000002): calculadora em que o visitante preenche dados e vê um resultado/insight (ex.: potencial, impacto); ideal quando o profissional quer uma ferramenta que agrega valor para quem acessa e gera curiosidade, com CTA para contato.
+Resposta em JSON exato: {"objetivo":"...","tema":"...","tipo_publico":"...","area_profissional":"...","contexto_detectado":[...],"confidence":0.0 a 1.0}
 
-Escolha o template conforme o tipo de CONTEÚDO para o visitante (quiz que atrai, calculadora que engaja), não pela dor do profissional.
 
-Resposta obrigatória no formato exato:
-{"profileSuggest":{"segment":"...","category":"...","sub_category":"...","dor_principal":"..."},"recommendedTemplateId":"uuid-do-template-ou-null","recommendedTemplateName":"nome_do_template","confidence":0.0 a 1.0}`
+`
 
 export async function POST(request: NextRequest) {
   try {
@@ -103,7 +108,7 @@ export async function POST(request: NextRequest) {
     const completion = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
       messages: [
-        { role: 'system', content: SYSTEM_PROMPT },
+        { role: 'system', content: SYSTEM_PROMPT_ETAPA1 },
         { role: 'user', content: userMessage },
       ],
       max_tokens: 512,
@@ -114,11 +119,18 @@ export async function POST(request: NextRequest) {
     const parsed = parseInterpretResponse(raw)
 
     if (!parsed) {
+      const fallbackStrategies = getStrategies({
+        objetivo: 'captar',
+        area_profissional: 'geral',
+      })
       console.warn('[ylada/interpret] Resposta da IA não é JSON válido:', raw.slice(0, 200))
       return NextResponse.json({
         success: true,
         data: {
+          interpretacao: null,
+          strategies: [fallbackStrategies.qualityFlowId, fallbackStrategies.volumeFlowId],
           profileSuggest: {},
+          o_que_captar: null,
           recommendedTemplateId: null,
           recommendedTemplateName: null,
           diagnosticSummary: null,
@@ -151,6 +163,26 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Etapa 3: decidir 2 estratégias (qualidade + volume) a partir da interpretação
+    const strategiesResult = getStrategies({
+      objetivo: parsed.interpretacao?.objetivo ?? 'captar',
+      area_profissional: parsed.interpretacao?.area_profissional ?? 'geral',
+      tema: parsed.interpretacao?.tema,
+      tipo_publico: parsed.interpretacao?.tipo_publico,
+    })
+    const strategies: [string, string] = [
+      strategiesResult.qualityFlowId,
+      strategiesResult.volumeFlowId,
+    ]
+    const strategyCards = strategiesResult.strategyCards ?? []
+    const interpretacaoForContext = parsed.interpretacao
+    const decision = interpretStrategyContext({
+      objective: interpretacaoForContext?.objetivo ?? 'captar',
+      theme_raw: interpretacaoForContext?.tema ?? '',
+      area_profissional: interpretacaoForContext?.area_profissional,
+    })
+    const safe_theme = decision.safety_mode ? decision.safe_theme : undefined
+
     // Processo reverso: resumo do diagnóstico (conteúdo oficial do template) para o profissional apenas validar
     let diagnosticSummary: string | null = null
     if (parsed.recommendedTemplateId && supabaseAdmin) {
@@ -163,7 +195,7 @@ export async function POST(request: NextRequest) {
         diagnosticSummary = buildDiagnosticSummary(template.type, template.schema_json as Record<string, unknown>)
       }
     }
-    const response = { ...parsed, diagnosticSummary }
+    const response = { ...parsed, strategies, strategyCards, safe_theme, diagnosticSummary }
 
     return NextResponse.json({ success: true, data: response })
   } catch (e) {
@@ -195,21 +227,52 @@ function buildDiagnosticSummary(type: string, schema: Record<string, unknown>): 
   return `Ferramenta: "${title}". Conteúdo oficial da plataforma.`
 }
 
+/** Fallback: escolhe template por regra a partir da interpretação (Etapa 1). Etapa 3 fará a decisão de verdade. */
+function fallbackTemplateFromInterpretacao(interpretacao: InterpretacaoEstrutural | null): { id: string; name: string } {
+  const tema = (interpretacao?.tema ?? '').toLowerCase()
+  const contexto = (interpretacao?.contexto_detectado ?? []).join(' ').toLowerCase()
+  const texto = `${tema} ${contexto}`
+  if (/faturamento|potencial de receita|potencial financeiro|capacidade de atendimentos/.test(texto)) {
+    return { id: TEMPLATE_IDS.calculadora_perda, name: 'calculadora_perda' }
+  }
+  return { id: TEMPLATE_IDS.diagnostico_agenda, name: 'diagnostico_agenda' }
+}
+
 function parseInterpretResponse(raw: string): InterpretResponse | null {
   try {
     const cleaned = raw.replace(/^```json\s*/i, '').replace(/```\s*$/i, '').trim()
     const obj = JSON.parse(cleaned) as Record<string, unknown>
-    const profileSuggest = (obj.profileSuggest as Record<string, unknown>) ?? {}
     const confidence = typeof obj.confidence === 'number' ? Math.max(0, Math.min(1, obj.confidence)) : 0
+
+    const objetivo = typeof obj.objetivo === 'string' && LINK_OBJECTIVES.includes(obj.objetivo as LinkObjective)
+      ? obj.objetivo as LinkObjective
+      : 'captar'
+    const tema = typeof obj.tema === 'string' ? obj.tema.trim() || 'interesse do profissional' : 'interesse do profissional'
+    const tipoPublico = typeof obj.tipo_publico === 'string' ? obj.tipo_publico.trim() || 'pacientes' : 'pacientes'
+    const areaProfissional = typeof obj.area_profissional === 'string' ? obj.area_profissional.trim() || 'geral' : 'geral'
+    const contextoDetectado = Array.isArray(obj.contexto_detectado)
+      ? obj.contexto_detectado.filter((x): x is string => typeof x === 'string').slice(0, 6)
+      : []
+
+    const interpretacao: InterpretacaoEstrutural = {
+      objetivo,
+      tema,
+      tipo_publico: tipoPublico,
+      area_profissional: areaProfissional,
+      contexto_detectado: contextoDetectado,
+    }
+
+    const fallback = fallbackTemplateFromInterpretacao(interpretacao)
     return {
+      interpretacao,
       profileSuggest: {
-        segment: typeof profileSuggest.segment === 'string' ? profileSuggest.segment : undefined,
-        category: typeof profileSuggest.category === 'string' ? profileSuggest.category : undefined,
-        sub_category: typeof profileSuggest.sub_category === 'string' ? profileSuggest.sub_category : undefined,
-        dor_principal: typeof profileSuggest.dor_principal === 'string' ? profileSuggest.dor_principal : undefined,
+        segment: 'ylada',
+        category: areaProfissional,
+        sub_category: contextoDetectado[0],
       },
-      recommendedTemplateId: typeof obj.recommendedTemplateId === 'string' ? obj.recommendedTemplateId : null,
-      recommendedTemplateName: typeof obj.recommendedTemplateName === 'string' ? obj.recommendedTemplateName : undefined,
+      o_que_captar: tema,
+      recommendedTemplateId: fallback.id,
+      recommendedTemplateName: fallback.name,
       confidence,
     }
   } catch {

@@ -28,21 +28,27 @@ export default async function PublicLinkPage({ params }: PageProps) {
 
   if (error || !link) notFound()
 
-  const templateId = link.template_id
-  const { data: template } = await supabaseAdmin
-    .from('ylada_link_templates')
-    .select('type')
-    .eq('id', templateId)
-    .maybeSingle()
+  const config = (link.config_json as Record<string, unknown>) ?? {}
+  const meta = config.meta as Record<string, unknown> | undefined
+  const isFlowLink = !!(meta?.flow_id || meta?.architecture)
 
-  const type = template?.type
-  if (!type || !['diagnostico', 'calculator'].includes(type)) notFound()
+  let type: 'diagnostico' | 'calculator' = 'diagnostico'
+  if (!isFlowLink) {
+    const { data: template } = await supabaseAdmin
+      .from('ylada_link_templates')
+      .select('type')
+      .eq('id', link.template_id)
+      .maybeSingle()
+    const t = template?.type
+    if (!t || !['diagnostico', 'calculator'].includes(t)) notFound()
+    type = t as 'diagnostico' | 'calculator'
+  }
 
   const payload = {
     slug: link.slug,
     type,
-    title: (link.config_json as Record<string, unknown>)?.title ?? link.title ?? 'Link',
-    config: (link.config_json as Record<string, unknown>) ?? {},
+    title: (config.page as Record<string, unknown>)?.title as string ?? (config.title as string) ?? link.title ?? 'Link',
+    config,
     ctaWhatsapp: link.cta_whatsapp ?? null,
   }
 
