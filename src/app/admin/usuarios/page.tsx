@@ -27,6 +27,7 @@ interface Usuario {
   statusAssinatura?: 'active' | 'canceled' | 'past_due' | null
   assinaturaDiasVencida: number | null
   nome_presidente: string | null
+  nome_presidente_canonico?: string | null
   is_presidente?: boolean
 }
 
@@ -39,6 +40,7 @@ interface Stats {
 export default function AdminUsuarios() {
   const [filtroArea, setFiltroArea] = useState<'todos' | 'nutri' | 'coach' | 'nutra' | 'wellness'>('todos')
   const [filtroStatus, setFiltroStatus] = useState<'todos' | 'ativo' | 'inativo'>('todos')
+  const [filtroPresidente, setFiltroPresidente] = useState<string>('todos')
   const [busca, setBusca] = useState('')
   const [usuarios, setUsuarios] = useState<Usuario[]>([])
   const [stats, setStats] = useState<Stats>({ total: 0, ativos: 0, inativos: 0 })
@@ -104,17 +106,23 @@ export default function AdminUsuarios() {
 
   const carregarPresidentes = async () => {
     try {
-      const response = await fetch('/api/admin/presidentes/autorizar', {
+      const response = await fetch('/api/admin/presidentes/autorizar?canonical=1', {
         credentials: 'include'
       })
       if (response.ok) {
         const data = await response.json()
-        if (data.success && data.presidentes) {
-          // Filtrar apenas presidentes ativos
-          const ativos = data.presidentes
-            .filter((p: any) => p.status === 'ativo')
-            .map((p: any) => ({ nome_completo: p.nome_completo }))
-          setPresidentesAutorizados(ativos)
+        if (data.success) {
+          // Usar lista canônica (um nome por casal/equipe) quando disponível; senão lista completa ativa
+          if (data.canonicalList && data.canonicalList.length > 0) {
+            setPresidentesAutorizados(
+              data.canonicalList.map((nome: string) => ({ nome_completo: nome }))
+            )
+          } else if (data.presidentes) {
+            const ativos = data.presidentes
+              .filter((p: any) => p.status === 'ativo')
+              .map((p: any) => ({ nome_completo: p.nome_completo }))
+            setPresidentesAutorizados(ativos)
+          }
         }
       }
     } catch (err) {
@@ -131,6 +139,7 @@ export default function AdminUsuarios() {
       const params = new URLSearchParams()
       if (filtroArea !== 'todos') params.append('area', filtroArea)
       if (filtroStatus !== 'todos') params.append('status', filtroStatus)
+      if (filtroPresidente !== 'todos') params.append('presidente', filtroPresidente)
       if (busca) params.append('busca', busca)
 
       const url = `/api/admin/usuarios?${params.toString()}`
@@ -165,15 +174,15 @@ export default function AdminUsuarios() {
     }, busca ? 500 : 0)
 
     return () => clearTimeout(timeoutId)
-  }, [filtroArea, filtroStatus, busca])
+  }, [filtroArea, filtroStatus, filtroPresidente, busca])
 
-  // Abrir modal de editar usuário
+  // Abrir modal de editar usuário (usa nome canônico no dropdown quando existir)
   const abrirEditarUsuario = (usuario: Usuario) => {
     setUsuarioSelecionado(usuario)
     setFormUsuario({
       area: usuario.area,
       nome_completo: usuario.nome,
-      nome_presidente: usuario.nome_presidente || null
+      nome_presidente: (usuario.nome_presidente_canonico ?? usuario.nome_presidente) || null
     })
     setMostrarEditarUsuario(true)
   }
@@ -536,7 +545,7 @@ export default function AdminUsuarios() {
 
         {/* Filtros */}
         <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200 mb-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Buscar</label>
               <input
@@ -573,6 +582,22 @@ export default function AdminUsuarios() {
                 <option value="todos">Todos</option>
                 <option value="ativo">Ativos</option>
                 <option value="inativo">Inativos</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Presidente</label>
+              <select
+                value={filtroPresidente}
+                onChange={(e) => setFiltroPresidente(e.target.value)}
+                disabled={loading}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50"
+              >
+                <option value="todos">Todos</option>
+                {presidentesAutorizados.map((p) => (
+                  <option key={p.nome_completo} value={p.nome_completo}>
+                    {p.nome_completo}
+                  </option>
+                ))}
               </select>
             </div>
           </div>
@@ -676,8 +701,8 @@ export default function AdminUsuarios() {
                           )}
                         </td>
                         <td className="px-3 py-4 min-w-[150px]">
-                          <div className="text-sm text-gray-900 truncate" title={usuario.nome_presidente || ''}>
-                            {usuario.nome_presidente || <span className="text-gray-400 italic">Não definido</span>}
+                          <div className="text-sm text-gray-900 truncate" title={usuario.nome_presidente_canonico || usuario.nome_presidente || ''}>
+                            {usuario.nome_presidente_canonico || usuario.nome_presidente || <span className="text-gray-400 italic">Não definido</span>}
                           </div>
                         </td>
                         <td className="px-3 py-4 whitespace-nowrap">

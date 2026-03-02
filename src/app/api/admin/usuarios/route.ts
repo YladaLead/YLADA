@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
 import { requireApiAuth } from '@/lib/api-auth'
+import { getNamesForCanonical, getCanonicalName } from '@/lib/presidente-canonicos'
 
 /**
  * GET /api/admin/usuarios
@@ -10,6 +11,7 @@ import { requireApiAuth } from '@/lib/api-auth'
  * Query params:
  * - area?: 'todos' | 'wellness' | 'nutri' | 'coach' | 'nutra' - Filtrar por área
  * - status?: 'todos' | 'ativo' | 'inativo' - Filtrar por status
+ * - presidente?: string - Filtrar por nome do presidente (equipe do presidente)
  * - busca?: string - Buscar por nome ou email
  */
 export async function GET(request: NextRequest) {
@@ -23,6 +25,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const areaFiltro = searchParams.get('area') || 'todos'
     const statusFiltro = searchParams.get('status') || 'todos'
+    const presidenteFiltro = searchParams.get('presidente') || ''
     const busca = searchParams.get('busca') || ''
 
     // Buscar todos os perfis de usuários
@@ -33,6 +36,14 @@ export async function GET(request: NextRequest) {
     // Aplicar filtro de área
     if (areaFiltro !== 'todos') {
       profilesQuery = profilesQuery.eq('perfil', areaFiltro)
+    }
+
+    // Aplicar filtro por presidente (equipe do presidente); aceita nome canônico e expande variantes
+    if (presidenteFiltro) {
+      const nomesPresidente = getNamesForCanonical(presidenteFiltro)
+      if (nomesPresidente.length > 0) {
+        profilesQuery = profilesQuery.in('nome_presidente', nomesPresidente)
+      }
     }
 
     // Aplicar busca por nome ou email
@@ -184,6 +195,7 @@ export async function GET(request: NextRequest) {
         assinaturaDiasVencida,
         statusAssinatura: subscriptionForStatus?.status || null, // active | canceled | past_due (para admin editar)
         nome_presidente: profile.nome_presidente || null,
+        nome_presidente_canonico: getCanonicalName(profile.nome_presidente) || null,
         is_presidente: presidentesUserIds.has(profile.user_id),
       }
     }).filter(u => u !== null) // Remover nulls do filtro de status

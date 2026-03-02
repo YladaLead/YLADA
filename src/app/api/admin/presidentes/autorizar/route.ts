@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireApiAuth } from '@/lib/api-auth'
 import { supabaseAdmin } from '@/lib/supabase'
+import { getUniqueCanonicalList } from '@/lib/presidente-canonicos'
 
 /**
  * POST /api/admin/presidentes/autorizar
@@ -184,11 +185,24 @@ export async function GET(request: NextRequest) {
       presidentes = full || []
     }
 
-    return NextResponse.json({
+    const canonicalList: string[] | undefined =
+      request.nextUrl.searchParams.get('canonical') === '1'
+        ? getUniqueCanonicalList(
+            presidentes
+              .filter((p: any) => p.status === 'ativo')
+              .map((p: any) => (p.nome_completo || '').trim())
+              .filter(Boolean)
+          )
+        : undefined
+
+    const body: { success: boolean; presidentes: any[]; total: number; canonicalList?: string[] } = {
       success: true,
       presidentes,
       total: presidentes.length,
-    })
+    }
+    if (canonicalList !== undefined) body.canonicalList = canonicalList
+
+    return NextResponse.json(body)
   } catch (error: any) {
     console.error('❌ Erro ao listar presidentes:', error)
     return NextResponse.json(
