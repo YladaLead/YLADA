@@ -97,6 +97,15 @@ export async function GET(request: NextRequest) {
     const slugAliasesForUserTemplates: Record<string, string[]> = {
       'quiz-nutrition-assessment': ['quiz-perfil-nutricional'],
       'quiz-perfil-nutricional': ['quiz-nutrition-assessment'],
+      // Quiz Bem-Estar: link pode ser quiz-bem-estar mas no banco está como quiz-wellness-profile
+      'quiz-bem-estar': ['quiz-wellness-profile'],
+      'quiz-wellness-profile': ['quiz-bem-estar'],
+      // Calculadora de Água / Hidratação: várias formas de acessar o mesmo template
+      'calculadora-agua': ['calc-hidratacao', 'calc-agua', 'agua'],
+      'calc-agua': ['calc-hidratacao', 'calculadora-agua', 'agua'],
+      'agua': ['calc-hidratacao', 'calculadora-agua', 'calc-agua'],
+      'calc-hidratacao': ['calculadora-agua', 'calc-agua', 'agua'],
+      'calculadora-hidratacao': ['calc-hidratacao', 'calculadora-agua'],
     }
     const slugsToTryUser = [toolSlug, ...(slugAliasesForUserTemplates[toolSlug] || [])]
 
@@ -295,6 +304,15 @@ export async function GET(request: NextRequest) {
           parasitose: ['parasitosis-diagnosis'],
           'quiz-nutrition-assessment': ['quiz-perfil-nutricional'],
           'quiz-perfil-nutricional': ['quiz-nutrition-assessment'],
+          // Quiz Bem-Estar: template base pode estar como quiz-wellness-profile
+          'quiz-bem-estar': ['quiz-wellness-profile'],
+          'quiz-wellness-profile': ['quiz-bem-estar'],
+          // Calculadora de Água / Hidratação
+          'calculadora-agua': ['calc-hidratacao', 'calc-agua', 'agua'],
+          'calc-agua': ['calc-hidratacao', 'calculadora-agua', 'agua'],
+          agua: ['calc-hidratacao', 'calculadora-agua', 'calc-agua'],
+          'calc-hidratacao': ['calculadora-agua', 'calc-agua', 'agua'],
+          'calculadora-hidratacao': ['calc-hidratacao', 'calculadora-agua'],
         }
         const slugsToTry = [toolSlug, ...(slugAliases[toolSlug] || [])]
 

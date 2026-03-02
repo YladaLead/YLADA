@@ -239,8 +239,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
           fallbackTitle
         })
       } else {
-        // Para outros casos, usar imagem padrão
-        inferredImage = `${baseUrl}/images/wellness-hero-com-logo.png`
+        // Quiz Bem-Estar: sempre usar a imagem correta quando a URL for .../quiz-bem-estar
+        const isQuizBemEstar = slugLower === 'quiz-bem-estar' || slugLower.includes('quiz-bem-estar')
+        if (isQuizBemEstar) {
+          inferredImage = `${baseUrl}/images/og/wellness/quiz-wellness-profile.jpg`
+        } else {
+          const normalizedFromUrl = normalizeTemplateSlug(toolSlug)
+          const ogImageForSlug = getFullOGImageUrl(normalizedFromUrl, baseUrl, area)
+          const usaImagemEspecifica = ogImageForSlug && !ogImageForSlug.includes('default.jpg')
+          inferredImage = usaImagemEspecifica ? ogImageForSlug : `${baseUrl}/images/wellness-hero-com-logo.png`
+        }
         fallbackTitle = 'Ferramenta de Bem-Estar'
         fallbackDescription = 'Acesse ferramentas personalizadas para melhorar seu bem-estar e qualidade de vida.'
       }
@@ -365,8 +373,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
           hasFluxo: !!tool.content?.fluxo
         })
       } else {
-        // Para outras ferramentas: usar imagem específica do template (mesma lógica do Nutri)
-        ogImageUrl = getFullOGImageUrl(normalizedSlug, baseUrl, area)
+        // Usar o slug da URL para a imagem OG, para a prévia bater com o endereço compartilhado
+        // (ex.: /quiz-bem-estar deve mostrar quiz-wellness-profile.jpg, não fallback)
+        const slugParaImagem = normalizeTemplateSlug(toolSlug)
+        ogImageUrl = getFullOGImageUrl(slugParaImagem, baseUrl, area)
       }
       
       // Garantir que a URL seja absoluta

@@ -396,6 +396,7 @@ export default function FerramentaPersonalizadaPage() {
         return <TemplateProposito config={config} />
       case 'quiz-alimentacao':
         return <TemplateAlimentacao config={config} />
+      case 'quiz-bem-estar':
       case 'quiz-wellness-profile':
         return <TemplateWellnessProfile config={config} />
       case 'template-desafio-7dias':

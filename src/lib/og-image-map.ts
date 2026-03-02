@@ -25,6 +25,7 @@ export const OG_IMAGE_SLUG_MAP: Record<string, string> = {
   'quiz-proposito': 'quiz-proposito.jpg',
   'quiz-alimentacao': 'quiz-alimentacao.jpg',
   'quiz-wellness-profile': 'quiz-wellness-profile.jpg',
+  'quiz-bem-estar': 'quiz-wellness-profile.jpg', // mesmo quiz, mesmo preview
   'quiz-perfil-nutricional': 'quiz-nutrition-assessment.jpg', // mesmo arquivo (slug antigo); nome canônico é quiz-perfil-nutricional
   'quiz-personalizado': 'quiz-personalizado.jpg',
   
@@ -145,10 +146,18 @@ export function getOGImageUrl(
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
   
+  // Quiz Bem-Estar: garantir que sempre use a imagem correta (evitar default.jpg)
+  const isQuizBemEstar = normalized === 'quiz-bem-estar' ||
+    normalizedWithoutAccents === 'quiz-bem-estar' ||
+    (typeof templateSlug === 'string' && templateSlug.toLowerCase().includes('quiz-bem-estar'))
+  const fileNameForBemEstar = area === 'wellness' ? 'quiz-wellness-profile.jpg' : OG_IMAGE_SLUG_MAP.default
+
   // Tentar primeiro com acentos, depois sem acentos
-  const fileName = OG_IMAGE_SLUG_MAP[normalized] || 
-                   OG_IMAGE_SLUG_MAP[normalizedWithoutAccents] || 
-                   OG_IMAGE_SLUG_MAP.default
+  const fileName = isQuizBemEstar
+    ? fileNameForBemEstar
+    : (OG_IMAGE_SLUG_MAP[normalized] ||
+       OG_IMAGE_SLUG_MAP[normalizedWithoutAccents] ||
+       OG_IMAGE_SLUG_MAP.default)
   
   // Construir caminho completo com área
   const imagePath = `/images/og/${area}/${fileName}`
