@@ -30,6 +30,11 @@ function isIntencaoCriarLink(message: string): boolean {
     'qualificar quem quer agendar', 'quanto está deixando de faturar', 'mostrar valor',
     'para engajar', 'para captar', 'para meus clientes', 'para meus pacientes',
     'despertar curiosidade', 'link que atrai',
+    // Frases mais naturais (Bloco 1)
+    'quero captar', 'captar pacientes', 'captar clientes', 'quero atrair',
+    'emagrecimento', 'para emagrecimento', 'pacientes para emagrecer',
+    'intestino', 'energia', 'ansiedade', 'bem-estar', 'suplementação',
+    'me ajuda a criar', 'me dá um', 'me faz um', 'cria um', 'cria uma',
   ]
   return termos.some((t) => m.includes(t))
 }
@@ -121,18 +126,26 @@ export async function POST(request: NextRequest) {
           })
           const interpretJson = await interpretRes.json().catch(() => ({}))
           const data = interpretJson?.data
-          const templateId = data?.recommendedTemplateId
+          const flowId = data?.flow_id
+          const interpretacao = data?.interpretacao
+          const questions = Array.isArray(data?.questions) ? data.questions : []
           const confidence = typeof data?.confidence === 'number' ? data.confidence : 0
-          if (templateId && confidence >= 0.5) {
+
+          if (flowId && interpretacao && confidence >= 0.5) {
             const genRes = await fetch(`${baseUrl}/api/ylada/links/generate`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json', cookie },
-              body: JSON.stringify({ template_id: templateId, segment: validSegment }),
+              body: JSON.stringify({
+                flow_id: flowId,
+                interpretacao,
+                questions: questions.length > 0 ? questions : undefined,
+                segment: validSegment,
+              }),
             })
             const genJson = await genRes.json().catch(() => ({}))
             if (genJson?.success && genJson?.data?.url) {
               const title = genJson.data.title || genJson.data.slug || 'Link'
-              linkGeradoBlock = `\n[LINK GERADO AGORA PARA ESTE PEDIDO]\nO sistema acabou de criar um link para o profissional. Inclua na sua resposta o link em markdown exatamente assim: [${title}](${genJson.data.url})\nDiga que você criou esse link para ele e que ele pode copiar e compartilhar. Se for quiz, diga que o visitante responde e vê um diagnóstico; se for calculadora, que preenche e vê o resultado.`
+              linkGeradoBlock = `\n[LINK GERADO AGORA PARA ESTE PEDIDO]\nO sistema acabou de criar um link para o profissional. Inclua na sua resposta o link em markdown exatamente assim: [${title}](${genJson.data.url})\nAntes de mostrar o link, descreva brevemente o que você criou (ex.: "Criei o Quiz Pronto para Emagrecer para você" ou "Criei uma calculadora de projeção"). Diga que o visitante preenche, recebe um diagnóstico personalizado e um botão para falar no WhatsApp.`
             }
           }
         } catch (e) {

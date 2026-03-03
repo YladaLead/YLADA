@@ -7,8 +7,8 @@
 import type { DiagnosisDecisionOutput } from './diagnosis-types'
 import { DiagnosisValidationError } from './diagnosis-types'
 
-const MIN_SUMMARY_LEN = 180
-const MAX_SUMMARY_LEN = 350
+const MIN_SUMMARY_LEN = 50
+const MAX_SUMMARY_LEN = 280
 const MIN_CONSEQUENCE_LEN_FOR_VERB = 25
 const MIN_GROWTH_LEN_FOR_VERB = 25
 
@@ -31,7 +31,7 @@ const GROWTH_MARKERS = [
   'aumentar', 'melhorar', 'elevar', 'ampliar', 'crescer', 'destravar',
   'ajustar', 'calibrar', 'ganho', 'potencial', 'progresso', 'segurança',
   'consistência', 'previsível', 'leve', 'coerente', 'direcionado',
-  'boa notícia', 'dá para', 'possível', 'chance',
+  'boa notícia', 'dá para', 'possível', 'chance', 'vale', 'evoluir',
 ]
 
 /** Verbos de ganho: growth_potential pode ter keyword OU comprimento + um destes. */

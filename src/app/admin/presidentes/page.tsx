@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import AdminProtectedRoute from '@/components/auth/AdminProtectedRoute'
 
@@ -24,6 +24,18 @@ interface UsuarioWellness {
   nome: string
   email: string
   area: string
+}
+
+interface TrialInvite {
+  id: string
+  email: string
+  nome_completo: string | null
+  status: string
+  expires_at: string
+  created_at: string
+  used_at: string | null
+  nome_presidente: string | null
+  presidente_id: string | null
 }
 
 function AdminPresidentesContent() {
@@ -60,6 +72,11 @@ function AdminPresidentesContent() {
   const [inviteUrlGerado, setInviteUrlGerado] = useState<string | null>(null)
   const [nomePresidenteConvite, setNomePresidenteConvite] = useState<string | null>(null)
 
+  // Convites enviados pelos presidentes (área wellness)
+  const [convites, setConvites] = useState<TrialInvite[]>([])
+  const [loadingConvites, setLoadingConvites] = useState(false)
+  const [filtroConvites, setFiltroConvites] = useState<'all' | 'pending' | 'used' | 'expired'>('all')
+
   // Buscar lista de presidentes
   const carregarPresidentes = async () => {
     try {
@@ -94,10 +111,50 @@ function AdminPresidentesContent() {
     }
   }
 
+  const carregarConvites = useCallback(async () => {
+    try {
+      setLoadingConvites(true)
+      const params = new URLSearchParams()
+      if (filtroConvites !== 'all') params.set('status', filtroConvites)
+      const response = await fetch(`/api/admin/trial-invites/list?${params}`, { credentials: 'include' })
+      if (response.ok) {
+        const data = await response.json()
+        setConvites(data.invites || [])
+      }
+    } catch (err) {
+      console.error('Erro ao carregar convites:', err)
+    } finally {
+      setLoadingConvites(false)
+    }
+  }, [filtroConvites])
+
+  const usarConviteNoForm = (inv: TrialInvite) => {
+    if (inv.presidente_id) {
+      setFormConvite((prev) => ({
+        ...prev,
+        presidente_id: inv.presidente_id!,
+        email: inv.email,
+        nome_completo: inv.nome_completo || '',
+      }))
+      setSuccess('Presidente e contato preenchidos. Ajuste se necessário e gere o link.')
+    } else {
+      setFormConvite((prev) => ({
+        ...prev,
+        email: inv.email,
+        nome_completo: inv.nome_completo || '',
+      }))
+      setSuccess('Contato preenchido. Selecione o presidente que autorizou.')
+    }
+  }
+
   useEffect(() => {
     carregarPresidentes()
     carregarUsuariosWellness()
   }, [])
+
+  useEffect(() => {
+    carregarConvites()
+  }, [carregarConvites])
 
   // Ao digitar o e-mail do presidente, vincular à conta automaticamente se existir usuário com esse e-mail
   useEffect(() => {
@@ -370,6 +427,99 @@ function AdminPresidentesContent() {
             {success}
           </div>
         )}
+
+        {/* Convites enviados pelos presidentes (área wellness) — com presidente prefixado */}
+        <div className="bg-white rounded-lg shadow-md p-6 mb-6 border-2 border-blue-100">
+          <h2 className="text-xl font-semibold text-gray-900 mb-1">
+            📋 Convites enviados pelos presidentes (Wellness)
+          </h2>
+          <p className="text-sm text-gray-600 mb-4">
+            Convites gerados na área &quot;Convite para equipe&quot; aparecem aqui com o presidente já associado.
+          </p>
+          <div className="flex gap-2 mb-4">
+            <select
+              value={filtroConvites}
+              onChange={(e) => setFiltroConvites(e.target.value as 'all' | 'pending' | 'used' | 'expired')}
+              className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm"
+            >
+              <option value="all">Todos</option>
+              <option value="pending">Pendentes</option>
+              <option value="used">Usados</option>
+              <option value="expired">Expirados</option>
+            </select>
+            <button
+              type="button"
+              onClick={() => carregarConvites()}
+              className="px-3 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 rounded-lg"
+            >
+              Atualizar
+            </button>
+          </div>
+          {loadingConvites ? (
+            <div className="py-8 text-center text-gray-500">Carregando convites...</div>
+          ) : convites.length === 0 ? (
+            <div className="py-8 text-center text-gray-500">Nenhum convite encontrado.</div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead>
+                  <tr>
+                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Presidente</th>
+                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">E-mail</th>
+                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Nome</th>
+                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Data</th>
+                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Ação</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200">
+                  {convites.map((inv) => (
+                    <tr key={inv.id} className="hover:bg-gray-50">
+                      <td className="px-4 py-2 text-sm">
+                        <span className="font-medium text-gray-900">
+                          {inv.nome_presidente || '—'}
+                        </span>
+                      </td>
+                      <td className="px-4 py-2 text-sm text-gray-700">{inv.email}</td>
+                      <td className="px-4 py-2 text-sm text-gray-600">{inv.nome_completo || '—'}</td>
+                      <td className="px-4 py-2">
+                        <span
+                          className={`text-xs px-2 py-1 rounded-full ${
+                            inv.status === 'used'
+                              ? 'bg-gray-100 text-gray-700'
+                              : inv.status === 'expired'
+                                ? 'bg-amber-100 text-amber-800'
+                                : 'bg-green-100 text-green-800'
+                          }`}
+                        >
+                          {inv.status === 'pending' ? 'Pendente' : inv.status === 'used' ? 'Usado' : 'Expirado'}
+                        </span>
+                      </td>
+                      <td className="px-4 py-2 text-xs text-gray-500">
+                        {new Date(inv.created_at).toLocaleDateString('pt-BR', {
+                          day: '2-digit',
+                          month: '2-digit',
+                          year: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })}
+                      </td>
+                      <td className="px-4 py-2">
+                        <button
+                          type="button"
+                          onClick={() => usarConviteNoForm(inv)}
+                          className="text-xs text-blue-600 hover:text-blue-800 font-medium"
+                        >
+                          Usar no form
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
 
         {/* Gerar link de convite (suporte: presidente que autorizou + contato) */}
         <div className="bg-white rounded-lg shadow-md p-6 mb-6 border-2 border-purple-100">

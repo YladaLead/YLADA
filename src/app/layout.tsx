@@ -82,7 +82,7 @@ export default function RootLayout({
         <meta httpEquiv="Pragma" content="no-cache" />
         <meta httpEquiv="Expires" content="0" />
       </head>
-      <body className={inter.className}>
+      <body className={inter.className} style={{ margin: 0, minHeight: '100vh', background: '#ffffff' }}>
         <FacebookPixel pixelId={pixelId} />
         <PWAInitializer />
         <AuthProviderWrapper>

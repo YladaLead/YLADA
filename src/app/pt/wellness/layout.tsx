@@ -51,8 +51,8 @@ export default async function WellnessLayout({ children }: { children: ReactNode
   const pathname = headersList.get('x-pathname') || headersList.get('x-invoke-path') || ''
 
   // Exigir login + assinatura em qualquer rota wellness que não seja explicitamente pública.
-  // Sem pathname (header não setado) tratamos como protegida por segurança.
-  const isPublic = pathname ? isWellnessPublicPath(pathname) : false
+  // Sem pathname (header não setado) deixamos carregar para não bloquear login/landing (evita loop de redirect).
+  const isPublic = !pathname || isWellnessPublicPath(pathname)
   if (!isPublic) {
     await validateProtectedAccess('wellness', {
       requireSubscription: true,

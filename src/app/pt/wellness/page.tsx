@@ -1,6 +1,62 @@
 'use client'
 
+import '../../globals.css'
 import { useState, useEffect } from 'react'
+
+// Estilos críticos injetados para garantir que a página apareça mesmo se o CSS do bundle atrasar ou falhar
+const CRITICAL_CSS = `
+  * { box-sizing: border-box; }
+  html { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+  body { margin: 0; min-height: 100vh; background: #fff; color: #171717; font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.5; }
+  .container { width: 100%; max-width: 1280px; margin-left: auto; margin-right: auto; padding-left: 1rem; padding-right: 1rem; }
+  @media (min-width: 640px) { .container { padding-left: 1.5rem; padding-right: 1.5rem; } }
+  @media (min-width: 1024px) { .container { padding-left: 2rem; padding-right: 2rem; } }
+  .min-h-screen { min-height: 100vh; }
+  .flex { display: flex; }
+  .items-center { align-items: center; }
+  .justify-between { justify-content: space-between; }
+  .gap-3 { gap: 0.75rem; }
+  .gap-4 { gap: 1rem; }
+  .sticky { position: sticky; }
+  .top-0 { top: 0; }
+  .z-50 { z-index: 50; }
+  .border-b { border-bottom-width: 1px; }
+  .border-gray-200 { border-color: rgb(229 231 235); }
+  .bg-white { background-color: #fff; }
+  .shadow-sm { box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05); }
+  .h-16 { height: 4rem; }
+  .py-3 { padding-top: 0.75rem; padding-bottom: 0.75rem; }
+  .px-6 { padding-left: 1.5rem; padding-right: 1.5rem; }
+  .px-4 { padding-left: 1rem; padding-right: 1rem; }
+  .px-3 { padding-left: 0.75rem; padding-right: 0.75rem; }
+  .py-2 { padding-top: 0.5rem; padding-bottom: 0.5rem; }
+  .rounded-lg { border-radius: 0.5rem; }
+  .font-semibold { font-weight: 600; }
+  .text-green-600 { color: rgb(22 163 74); }
+  .bg-green-600 { background-color: rgb(22 163 74); }
+  .text-white { color: #fff; }
+  .text-center { text-align: center; }
+  .mx-auto { margin-left: auto; margin-right: auto; }
+  .max-w-5xl { max-width: 64rem; }
+  .max-w-4xl { max-width: 56rem; }
+  .py-12 { padding-top: 3rem; padding-bottom: 3rem; }
+  .mb-2 { margin-bottom: 0.5rem; }
+  .mb-4 { margin-bottom: 1rem; }
+  .mb-6 { margin-bottom: 1.5rem; }
+  .text-lg { font-size: 1.125rem; line-height: 1.75rem; }
+  .text-xl { font-size: 1.25rem; line-height: 1.75rem; }
+  .text-2xl { font-size: 1.5rem; line-height: 2rem; }
+  .text-3xl { font-size: 1.875rem; line-height: 2.25rem; }
+  .text-4xl { font-size: 2.25rem; line-height: 2.5rem; }
+  .font-bold { font-weight: 700; }
+  .text-gray-900 { color: rgb(17 24 39); }
+  .text-gray-700 { color: rgb(55 65 81); }
+  .text-gray-600 { color: rgb(75 85 99); }
+  .leading-tight { line-height: 1.25; }
+  .bg-gradient-to-br.from-purple-50.via-green-50.to-emerald-50 { background: linear-gradient(to bottom right, #faf5ff, #f0fdf4, #ecfdf5); }
+  a { color: rgb(37 99 235); }
+  a:hover { text-decoration: underline; }
+`
 import Link from 'next/link'
 import Image from 'next/image'
 import LanguageSelector from '../../../components/LanguageSelector'
@@ -69,6 +125,21 @@ export default function WellnessPage() {
       }
     }
   }, [])
+
+  // Garantir estilos críticos (fallback se o bundle CSS não carregar)
+  useEffect(() => {
+    const id = 'wellness-critical-css'
+    if (document.getElementById(id)) return
+    const style = document.createElement('style')
+    style.id = id
+    style.textContent = CRITICAL_CSS
+    document.head.appendChild(style)
+    return () => {
+      const el = document.getElementById(id)
+      if (el) el.remove()
+    }
+  }, [])
+
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
@@ -106,8 +177,8 @@ export default function WellnessPage() {
       <main>
         {/* 🟣 HERO (Abertura) */}
         <section className="bg-gradient-to-br from-purple-50 via-green-50 to-emerald-50 py-12 sm:py-16 lg:py-20">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center max-w-3xl mx-auto">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-5xl">
+            <div className="text-center max-w-4xl mx-auto">
               {/* Gancho emocional */}
               <div className="mb-4 sm:mb-6">
                 <p className="text-lg sm:text-xl text-gray-700 mb-2 font-semibold">
@@ -709,7 +780,7 @@ export default function WellnessPage() {
         {/* 🛡 Garantia */}
         <section className="py-16 sm:py-20 lg:py-24 bg-white">
           <div className="container mx-auto px-6 lg:px-8">
-            <div className="max-w-3xl mx-auto text-center">
+            <div className="max-w-4xl mx-auto text-center">
               <div className="bg-gradient-to-r from-blue-50 to-green-50 rounded-xl p-8 border-2 border-green-200">
                 <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-6">
                   Teste sem medo. Se não funcionar, você não perde nada.
@@ -731,7 +802,7 @@ export default function WellnessPage() {
         {/* 🔥 CTA FINAL */}
         <section className="bg-gradient-to-br from-green-600 to-emerald-700 py-16 sm:py-20 lg:py-24 text-white">
           <div className="container mx-auto px-6 lg:px-8">
-            <div className="max-w-3xl mx-auto text-center">
+            <div className="max-w-4xl mx-auto text-center">
               <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-6">
                 Você não precisa mais se sentir travado.
               </h2>

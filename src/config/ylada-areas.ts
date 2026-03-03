@@ -30,17 +30,42 @@ export const YLADA_AREAS: YladaAreaConfig[] = [
 /**
  * Menu: Noel; Links inteligentes; Leads; Trilha empresarial; Perfil empresarial; Configuração.
  * path 'trilha' alinha com a rota /pt/trilha.
+ * Agrupado para sidebar organizada: principal, resultados, lab, sistema.
  */
-export const YLADA_MENU_ITEMS = [
-  { key: 'home', label: 'Noel', path: 'home', icon: '💬' },
-  { key: 'links', label: 'Links inteligentes', path: 'links', icon: '🔗' },
-  { key: 'leads', label: 'Leads', path: 'leads', icon: '👥' },
-  { key: 'trilha', label: 'Trilha empresarial', path: 'trilha', icon: '📚' },
-  { key: 'perfil-empresarial', label: 'Perfil empresarial', path: 'perfil-empresarial', icon: '👤' },
-  { key: 'perfis-simulados', label: 'Perfis para testes', path: 'perfis-simulados', icon: '🧪' },
-  { key: 'ylada-lab', label: 'YLADA Lab', path: 'ylada-lab', icon: '🔬' },
-  { key: 'configuracao', label: 'Configuração', path: 'configuracao', icon: '⚙️' },
+export const YLADA_MENU_GROUPS = [
+  {
+    label: 'Principal',
+    items: [
+      { key: 'home', label: 'Noel', path: 'home', icon: '💬' },
+      { key: 'links', label: 'Links', path: 'links', icon: '🔗' },
+      { key: 'perfil-empresarial', label: 'Perfil', path: 'perfil-empresarial', icon: '👤' },
+    ],
+  },
+  {
+    label: 'Resultados',
+    items: [
+      { key: 'leads', label: 'Leads', path: 'leads', icon: '👥' },
+    ],
+  },
+  {
+    label: 'Lab',
+    items: [
+      { key: 'perfis-simulados', label: 'Perfis para testes', path: 'perfis-simulados', icon: '🧪' },
+      { key: 'ylada-lab', label: 'YLADA Lab', path: 'ylada-lab', icon: '🔬' },
+    ],
+  },
+  {
+    label: 'Sistema',
+    items: [
+      { key: 'planejamento', label: 'Planejamento', path: 'planejamento', icon: '📋' },
+      { key: 'trilha', label: 'Trilha empresarial', path: 'trilha', icon: '📚' },
+      { key: 'configuracao', label: 'Configuração', path: 'configuracao', icon: '⚙️' },
+    ],
+  },
 ] as const
+
+/** Lista plana (retrocompatibilidade). */
+export const YLADA_MENU_ITEMS = YLADA_MENU_GROUPS.flatMap((g) => g.items)
 
 export function getYladaAreaPathPrefix(areaCodigo: string): string {
   return YLADA_AREAS.find((a) => a.codigo === areaCodigo)?.pathPrefix ?? `/pt/${areaCodigo}`

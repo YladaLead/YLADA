@@ -46,6 +46,84 @@ const QUADRO_OPCOES_FIXAS: { id: string; nome: string; templateSlug: string; isF
 
 type PorPagina = 1 | 2 | 4 | 5
 
+// Proporção A4 no preview (tamanho reduzido para a tela)
+const A4_WIDTH_PX = 340
+const A4_HEIGHT_PX = Math.round(A4_WIDTH_PX * (297 / 210)) // ~481
+
+// Scripts para abordagem de estabelecimentos (quadro parceria)
+const QUADRO_SCRIPTS: { titulo: string; texto: string }[] = [
+  {
+    titulo: 'Posicionamento do estabelecimento',
+    texto: `Eu venho conversando com alguns estabelecimentos aqui da região que têm um perfil diferenciado…
+Lugares que realmente se preocupam com a experiência do cliente, não só com o serviço.
+
+Criamos uma ferramenta gratuita de avaliação rápida de saúde que fica disponível por QR code.
+Enquanto a pessoa espera, ela pode fazer uma análise personalizada.
+
+Isso reforça a imagem do espaço como um ambiente que cuida das pessoas de forma completa.
+
+Achei que tem muito a ver com o perfil daqui.`,
+  },
+  {
+    titulo: 'Experiência do cliente',
+    texto: `Hoje as pessoas valorizam muito lugares que entregam algo a mais.
+Pequenos detalhes fazem diferença na percepção do cliente.
+
+Estamos colocando um quadro com acesso gratuito a diagnósticos rápidos de saúde.
+É algo simples, mas mostra que o estabelecimento se preocupa com bem-estar.
+
+Não tem custo, não interfere na rotina, e agrega valor à experiência de quem está aqui.`,
+  },
+  {
+    titulo: 'Diferenciação de mercado',
+    texto: `Eu tenho observado que os estabelecimentos que mais crescem são aqueles que criam diferenciais além do serviço principal.
+
+Esse quadro é uma forma de oferecer algo útil e inteligente para os clientes, sem custo nenhum.
+
+Enquanto aguardam, eles podem fazer uma avaliação rápida de saúde.
+
+Isso posiciona o local como moderno e atento ao cuidado com as pessoas.`,
+  },
+  {
+    titulo: 'Conexão com o propósito do negócio',
+    texto: `(Excelente para salão, estética, academia)
+
+Quem vem aqui já busca melhorar algo em si mesmo.
+Seja aparência, autoestima ou qualidade de vida.
+
+Esse quadro complementa isso.
+Ele oferece uma avaliação gratuita de saúde, rápida e personalizada.
+
+É uma extensão natural do cuidado que vocês já oferecem.`,
+  },
+  {
+    titulo: 'Tom mais institucional',
+    texto: `Estamos estruturando uma rede de estabelecimentos que apoiam iniciativas de saúde preventiva.
+
+Não é venda, não tem custo e não gera responsabilidade para o local.
+
+É apenas um recurso gratuito disponível para os clientes.
+
+Lugares que valorizam bem-estar costumam se identificar bastante com a proposta.`,
+  },
+  {
+    titulo: 'Valorização do dono',
+    texto: `Eu não estou oferecendo isso para qualquer lugar.
+
+Tenho buscado estabelecimentos que têm uma boa imagem e um público alinhado com cuidado e qualidade.
+
+Achei que faz sentido apresentar primeiro aqui.`,
+  },
+  {
+    titulo: 'Segurança (remove objeção)',
+    texto: `Não envolve venda aqui dentro, não gera custo e não muda a rotina de vocês.
+
+É apenas uma ferramenta informativa disponível por QR code.
+
+Se fizer sentido para você, deixamos aqui como um benefício extra para os clientes.`,
+  },
+]
+
 // Imagem à esquerda e QR à direita no mesmo tamanho (quadrado), bem alinhados ao texto no meio
 const TAMANHO_LADO_PX_4 = 56
 const TAMANHO_LADO_PX_5 = 48
@@ -110,62 +188,64 @@ function QuadroConteudo({
           Ferramenta informativa e preventiva. Não substitui avaliação médica.
         </p>
       </div>
-      <div className={`flex-1 min-h-0 flex flex-col justify-start p-3 overflow-hidden ${compacto && selecionados.length > 0 ? 'gap-1 print:gap-1' : 'space-y-2'}`}>
+      <div className={`flex-1 min-h-0 flex flex-col p-3 overflow-hidden ${compacto && selecionados.length > 0 ? 'gap-1 print:gap-1' : 'space-y-2'}`}>
         {selecionados.length === 0 ? (
-          <div className="text-center py-6 text-gray-400 text-xs">
+          <div className="text-center py-6 text-gray-400 text-xs flex-1">
             <p>Escolha as ferramentas e clique em Salvar como PDF.</p>
           </div>
         ) : (
-          selecionados.map((item) => {
-            const imagemOg = getOGImageUrl(item.templateSlug, 'wellness')
-            return (
-              <div
-                key={item.id}
-                className={`border border-gray-200 rounded-lg flex flex-row items-center gap-2 print:break-inside-avoid flex-1 min-h-0 ${compacto ? 'min-h-[3rem]' : ''} ${s.card}`}
-              >
-                <div
-                  className={`flex-shrink-0 flex items-center justify-center bg-gray-50 rounded-lg overflow-hidden border border-gray-100 ${compacto ? s.img : ''}`}
-                  style={tamanhoLadoPx != null ? { width: tamanhoLadoPx, height: tamanhoLadoPx } : undefined}
-                >
-                  <img
-                    src={imagemOg}
-                    alt={item.nome}
-                    className={`rounded-lg object-cover object-center border-0 ${compacto ? 'w-full h-full' : s.img}`}
-                    style={!compacto ? undefined : { width: '100%', height: '100%' }}
-                    onError={(e) => {
-                      const target = e.currentTarget
-                      if (!target.dataset.fallback) {
-                        target.dataset.fallback = '1'
-                        target.src = getOGImageUrl('default', 'wellness')
-                      }
-                    }}
-                  />
-                </div>
-                <div className="flex-1 min-w-0 flex flex-col justify-center py-0.5 min-h-0">
-                  <h3 className={`font-semibold text-gray-900 leading-tight ${s.titulo}`}>{item.nome}</h3>
-                  <ul className={`list-disc list-inside text-gray-700 leading-tight mt-0.5 space-y-0 ${s.lista}`}>
-                    {[
-                      ...(item.beneficios || []).slice(0, compacto ? 2 : 3),
-                      'Acesso rápido pelo QR code',
-                    ].map((b, i) => (
-                      <li key={i}>{b}</li>
-                    ))}
-                  </ul>
-                </div>
-                <div
-                  className="flex-shrink-0 flex items-center justify-center"
-                  style={tamanhoLadoPx != null ? { width: tamanhoLadoPx, height: tamanhoLadoPx } : undefined}
-                >
-                  <QRCode url={item.link} size={s.qr} useDataUrl className={porPagina === 1 ? 'print:w-[88px] print:h-[88px]' : ''} />
-                </div>
-              </div>
-            )
-          })
-        )}
-        {selecionados.length > 0 && (
-          <div className={`flex-shrink-0 mt-2 pt-2 border-t border-gray-100 flex items-center justify-center bg-white ${headerCompact ? 'py-1' : 'py-2'}`}>
-            <img src="/images/logo/wellness-horizontal.png" alt="WELLNESS by Ylada" className={`object-contain object-center ${headerCompact ? 'h-4 print:h-4' : 'h-6 print:h-6'}`} />
-          </div>
+          <>
+            <div className="flex flex-col gap-1">
+              {selecionados.map((item) => {
+                const imagemOg = getOGImageUrl(item.templateSlug, 'wellness')
+                return (
+                  <div
+                    key={item.id}
+                    className={`border border-gray-200 rounded-lg flex flex-row items-center gap-2 print:break-inside-avoid flex-shrink-0 ${compacto ? 'min-h-[3rem]' : ''} ${s.card}`}
+                  >
+                    <div
+                      className={`flex-shrink-0 flex items-center justify-center bg-gray-50 rounded-lg overflow-hidden border border-gray-100 ${compacto ? s.img : ''}`}
+                      style={tamanhoLadoPx != null ? { width: tamanhoLadoPx, height: tamanhoLadoPx } : undefined}
+                    >
+                      <img
+                        src={imagemOg}
+                        alt={item.nome}
+                        className={`rounded-lg object-cover object-center border-0 ${compacto ? 'w-full h-full' : s.img}`}
+                        style={!compacto ? undefined : { width: '100%', height: '100%' }}
+                        onError={(e) => {
+                          const target = e.currentTarget
+                          if (!target.dataset.fallback) {
+                            target.dataset.fallback = '1'
+                            target.src = getOGImageUrl('default', 'wellness')
+                          }
+                        }}
+                      />
+                    </div>
+                    <div className="flex-1 min-w-0 flex flex-col justify-center py-0.5 min-h-0">
+                      <h3 className={`font-semibold text-gray-900 leading-tight ${s.titulo}`}>{item.nome}</h3>
+                      <ul className={`list-disc list-inside text-gray-700 leading-tight mt-0.5 space-y-0 ${s.lista}`}>
+                        {[
+                          ...(item.beneficios || []).slice(0, compacto ? 2 : 3),
+                          'Acesso rápido pelo QR code',
+                        ].map((b, i) => (
+                          <li key={i}>{b}</li>
+                        ))}
+                      </ul>
+                    </div>
+                    <div
+                      className="flex-shrink-0 flex items-center justify-center"
+                      style={tamanhoLadoPx != null ? { width: tamanhoLadoPx, height: tamanhoLadoPx } : undefined}
+                    >
+                      <QRCode url={item.link} size={s.qr} useDataUrl className={porPagina === 1 ? 'print:w-[88px] print:h-[88px]' : ''} />
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+            <div className={`flex-shrink-0 mt-2 pt-2 border-t border-gray-100 flex items-center justify-center bg-white ${headerCompact ? 'py-1' : 'py-2'}`}>
+              <img src="/images/logo/wellness-horizontal.png" alt="WELLNESS by Ylada" className={`object-contain object-center ${headerCompact ? 'h-4 print:h-4' : 'h-6 print:h-6'}`} />
+            </div>
+          </>
         )}
       </div>
     </div>
@@ -178,8 +258,22 @@ function QuadroImpressaoContent() {
   const [loadingFerramentas, setLoadingFerramentas] = useState(true)
   const [selecionados, setSelecionados] = useState<ItemQuadro[]>([])
   const [exportando, setExportando] = useState(false)
+  const [scriptsAberto, setScriptsAberto] = useState(false)
+  const [copiadoId, setCopiadoId] = useState<number | null>(null)
   const previewPdfRef = useRef<HTMLDivElement>(null)
   const porPagina: PorPagina = 5
+
+  const copiarScript = async (idx: number) => {
+    const script = QUADRO_SCRIPTS[idx]
+    const textoCompleto = `🧠 SCRIPT ${idx + 1} — ${script.titulo.toUpperCase()}\n\n${script.texto}`
+    try {
+      await navigator.clipboard.writeText(textoCompleto)
+      setCopiadoId(idx)
+      setTimeout(() => setCopiadoId(null), 2000)
+    } catch {
+      // fallback
+    }
+  }
 
   useEffect(() => {
     if (!profile?.userSlug) return
@@ -266,29 +360,40 @@ function QuadroImpressaoContent() {
   }
 
   const salvarPdf = async () => {
-    if (!previewPdfRef.current || selecionados.length === 0) return
+    const el = previewPdfRef.current
+    if (!el || selecionados.length === 0) return
+    el.scrollIntoView({ behavior: 'instant', block: 'center' })
+    await new Promise((r) => setTimeout(r, 100))
     setExportando(true)
     try {
-      const html2pdf = (await import('html2pdf.js')).default
-      // Usar o MESMO bloco do preview (visível na tela) para o PDF ficar idêntico
-      await new Promise((r) => setTimeout(r, 300))
-      await html2pdf()
-        .set({
-          margin: 10,
-          filename: 'quadro-parceria.pdf',
-          image: { type: 'jpeg', quality: 0.98 },
-          html2canvas: {
-            scale: 2,
-            useCORS: true,
-            allowTaint: true,
-            logging: false,
-            ignoreElements: (el: Element) => (el.classList?.contains('preview-only-label') ?? false),
-          },
-          jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-          pagebreak: { mode: ['css', 'legacy'], after: '.quadro-pdf-pagina-break' },
+      await new Promise((r) => setTimeout(r, 500))
+      const html2canvas = (await import('html2canvas')).default
+      const { jsPDF } = await import('jspdf')
+      const paginas = el.querySelectorAll('.quadro-pdf-pagina')
+      if (paginas.length === 0) return
+      const margin = 5
+      const pageW = 210 - 2 * margin
+      const pageH = 297 - 2 * margin
+      const doc = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' })
+      for (let i = 0; i < paginas.length; i++) {
+        const card = paginas[i].querySelector('.bg-white.rounded-lg') ?? (paginas[i] as HTMLElement).children[1]
+        if (!card || !(card instanceof HTMLElement)) continue
+        const canvas = await html2canvas(card, {
+          scale: 2,
+          useCORS: true,
+          allowTaint: true,
+          logging: false,
         })
-        .from(previewPdfRef.current)
-        .save()
+        const data = canvas.toDataURL('image/jpeg', 0.98)
+        const r = canvas.width / canvas.height
+        const w = r >= pageW / pageH ? pageW : pageH * r
+        const h = r >= pageW / pageH ? pageW / r : pageH
+        const x = margin + (pageW - w) / 2
+        const y = margin + (pageH - h) / 2
+        if (i > 0) doc.addPage()
+        doc.addImage(data, 'JPEG', x, y, w, h)
+      }
+      doc.save('quadro-parceria.pdf')
     } catch (e) {
       console.error(e)
     } finally {
@@ -376,6 +481,14 @@ function QuadroImpressaoContent() {
                 <p className="text-xs text-gray-500 mt-2">
                   Escolha as ferramentas e depois baixe o PDF.
                 </p>
+                <button
+                  type="button"
+                  onClick={() => setScriptsAberto(true)}
+                  className="mt-3 inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg hover:bg-emerald-100 transition-colors"
+                >
+                  <span aria-hidden>🧠</span>
+                  Scripts
+                </button>
               </div>
             </div>
 
@@ -392,7 +505,7 @@ function QuadroImpressaoContent() {
                     disabled={bloqueado}
                     className={`text-left p-3 rounded-xl border-2 transition-all ${jaSelecionado ? 'border-emerald-500 bg-emerald-50' : 'border-gray-200 bg-white hover:border-emerald-300'} ${bloqueado ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'}`}
                   >
-                    <span className="font-medium text-gray-900 block truncate text-sm">{item.nome}</span>
+                    <span className="font-medium text-gray-900 block text-sm break-words leading-snug">{item.nome}</span>
                     <span className="text-xs text-gray-500 mt-0.5 block">{jaSelecionado ? '✓ No quadro' : bloqueado ? `Máx. ${MAX_FERRAMENTAS}` : 'Adicionar'}</span>
                   </button>
                 )
@@ -426,10 +539,14 @@ function QuadroImpressaoContent() {
                         >
                           <p className="preview-only-label text-xs font-medium text-gray-500 mb-1.5">Folha {idx + 1} de {chunks.length}</p>
                           <div
-                            className="bg-white rounded-lg shadow-md border border-gray-300 overflow-hidden mx-auto"
-                            style={{ width: '100%', maxWidth: '340px', aspectRatio: '210/297' }}
+                            className="bg-white rounded-lg shadow-md border border-gray-300 overflow-hidden mx-auto flex flex-col"
+                            style={{
+                              width: A4_WIDTH_PX,
+                              height: A4_HEIGHT_PX,
+                              minHeight: A4_HEIGHT_PX,
+                            }}
                           >
-                            <QuadroConteudo selecionados={chunk} porPagina={porPagina} className="h-full w-full rounded-none border-0 shadow-none" />
+                            <QuadroConteudo selecionados={chunk} porPagina={porPagina} className="h-full w-full rounded-none border-0 shadow-none flex-1 min-h-0" />
                           </div>
                         </div>
                       ))}
@@ -445,6 +562,43 @@ function QuadroImpressaoContent() {
             </p>
           </div>
         </div>
+
+        {/* Overlay durante geração do PDF (esconde o flash e mostra feedback) */}
+        {exportando && (
+          <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/60" aria-live="polite">
+            <div className="bg-white rounded-xl px-8 py-6 shadow-xl flex items-center gap-4">
+              <span className="animate-spin inline-block w-8 h-8 border-2 border-emerald-600 border-t-transparent rounded-full" />
+              <span className="text-lg font-medium text-gray-800">Gerando PDF…</span>
+            </div>
+          </div>
+        )}
+
+        {/* Modal Scripts */}
+        {scriptsAberto && (
+          <div className="print:hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50" onClick={() => setScriptsAberto(false)}>
+            <div className="bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-[85vh] overflow-hidden flex flex-col" onClick={(e) => e.stopPropagation()}>
+              <div className="flex-shrink-0 flex items-center justify-between px-5 py-4 border-b border-gray-200 bg-emerald-50">
+                <h3 className="text-lg font-semibold text-emerald-900">🧠 Scripts para abordagem</h3>
+                <button type="button" onClick={() => setScriptsAberto(false)} className="p-2 text-gray-500 hover:text-gray-700 rounded-lg hover:bg-emerald-100" aria-label="Fechar">×</button>
+              </div>
+              <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                {QUADRO_SCRIPTS.map((script, idx) => (
+                  <div key={idx} className="border border-gray-200 rounded-xl p-4 bg-gray-50/80">
+                    <p className="text-xs font-semibold text-emerald-800 mb-2">SCRIPT {idx + 1} — {script.titulo.toUpperCase()}</p>
+                    <p className="text-sm text-gray-700 whitespace-pre-line leading-relaxed">{script.texto}</p>
+                    <button
+                      type="button"
+                      onClick={() => copiarScript(idx)}
+                      className="mt-3 inline-flex items-center gap-2 px-3 py-2 text-xs font-medium rounded-lg bg-white border border-emerald-300 text-emerald-800 hover:bg-emerald-50 transition-colors"
+                    >
+                      {copiadoId === idx ? '✓ Copiado!' : '📋 Copiar'}
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Cópia do quadro só para impressão (Ctrl+P) */}
         <div id="quadro-impressao" data-por-pagina={porPagina} className="hidden print:block print:max-w-none w-full">

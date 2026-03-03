@@ -20,89 +20,89 @@ export interface ArchitectureTemplates {
 
 const RISK: ArchitectureTemplates = {
   title: [
-    'Seu padrão indica {LEVEL} risco em {THEME}',
-    'Sinais apontam {LEVEL} risco ligado a {THEME}',
+    'Seu resultado em {THEME}',
+    'O que apareceu em {THEME}',
   ],
   explanation:
-    'Isso costuma acontecer quando sinais importantes se acumulam e ninguém ajusta a estratégia certa no que realmente influencia {THEME}.',
+    'Pelos sinais que você relatou, algo está pesando em {THEME} e vale atenção.',
   consequence:
-    'Se isso continuar, é comum o problema ficar estável (ou piorar) mesmo com esforço isolado.',
+    'Se nada mudar, tende a continuar igual ou piorar.',
   possibility:
-    'A boa notícia: com ajustes direcionados e um plano coerente, dá para destravar progresso com segurança.',
+    'Vale conversar com quem entende pra ver o próximo passo.',
   cta_helper: 'Quer que eu olhe seu caso e te diga o primeiro passo?',
   cta_button: ['Quero analisar meu caso', 'Quero meu próximo passo'],
-  cta_imperative: 'Analise seu caso',
+  cta_imperative: 'Fale comigo sobre isso',
   whatsapp_prefill:
-    'Oi {NAME}, fiz o diagnóstico de {THEME} e apareceu risco {LEVEL}. Quero entender o que mais está pesando no meu caso e qual o primeiro passo.',
+    'Oi {NAME}, fiz a análise de {THEME} e apareceu risco {LEVEL}. Quero entender o próximo passo pro meu caso.',
 }
 
 const BLOCKER: ArchitectureTemplates = {
   title: [
-    'Seu principal bloqueio em {THEME} é: {BLOCKER}',
-    'O que mais te trava em {THEME} hoje é: {BLOCKER}',
+    'O que mais te trava em {THEME}',
+    'Seu resultado em {THEME}',
   ],
   explanation:
-    'Isso não é falta de vontade. É um padrão de rotina/decisão que cria atrito e quebra constância.',
+    'Não é falta de vontade — é algo no dia a dia que trava e quebra a constância.',
   consequence:
-    'Se esse bloqueio continuar, você tende a repetir o ciclo: tentativa forte → quebra → frustração.',
-  possibility: 'A boa notícia: dá para ajustar com um passo simples e bem direcionado.',
-  cta_helper: 'Quer que eu te diga como ajustar esse bloqueio no seu contexto?',
-  cta_button: ['Quero destravar isso', 'Quero ajustar meu bloqueio'],
-  cta_imperative: 'Destrave esse bloqueio',
+    'Se continuar assim, o ciclo tende a se repetir.',
+  possibility: 'Dá pra ajustar com um passo simples. Vale conversar.',
+  cta_helper: 'Quer que eu te diga como ajustar isso no seu caso?',
+  cta_button: ['Quero destravar isso', 'Quero ajustar'],
+  cta_imperative: 'Fale comigo sobre isso',
   whatsapp_prefill:
-    'Oi {NAME}, meu diagnóstico em {THEME} apontou bloqueio {BLOCKER}. Quero uma orientação prática para ajustar isso no meu caso.',
+    'Oi {NAME}, minha análise em {THEME} apontou {BLOCKER}. Quero uma orientação prática pro meu caso.',
 }
 
 const PROJECTION: ArchitectureTemplates = {
   title: [
-    'Sua projeção realista para {THEME}',
-    'Cenário provável de {THEME} com base no que você informou',
+    'Sua projeção para {THEME}',
+    'Cenário provável em {THEME}',
   ],
   explanation:
-    'Projeção funciona quando a meta respeita seu ponto de partida e a constância possível na sua rotina.',
+    'Com base no que você informou, essa é uma projeção realista.',
   consequence:
-    'Se a meta estiver acima do realista, o mais comum é desistir cedo — por plano mal calibrado.',
+    'Se a meta estiver fora do realista, tende a desistir cedo.',
   possibility:
-    'A boa notícia: calibrando alvo e caminho, você aumenta muito a chance de consistência.',
-  cta_helper: 'Quer que eu monte seu próximo passo com base nessa projeção?',
-  cta_button: ['Quero calibrar minha meta', 'Quero um plano com base nisso'],
-  cta_imperative: 'Calibre sua meta',
+    'Vale calibrar com quem acompanha. Dá pra evoluir.',
+  cta_helper: 'Quer que eu monte seu próximo passo com base nisso?',
+  cta_button: ['Quero calibrar', 'Quero um plano'],
+  cta_imperative: 'Fale comigo sobre isso',
   whatsapp_prefill:
-    'Oi {NAME}, vi minha projeção para {THEME}. Quero calibrar minha meta e entender o próximo passo mais realista.',
+    'Oi {NAME}, vi minha projeção para {THEME}. Quero calibrar e entender o próximo passo.',
 }
 
 const PROFILE: ArchitectureTemplates = {
   title: [
-    'Seu perfil em {THEME} é: {PROFILE}',
-    'Seu estilo dominante em {THEME} é: {PROFILE}',
+    'Seu perfil em {THEME}: {PROFILE}',
+    'Seu estilo em {THEME}: {PROFILE}',
   ],
   explanation:
-    'Seu resultado mostra forças e armadilhas típicas. O segredo é usar a força certa sem cair na armadilha do seu perfil.',
+    'Seu jeito de lidar com isso tem pontos fortes e alguns que atrapalham.',
   consequence:
-    'Se você insistir num caminho que não combina com seu perfil, o resultado tende a ser inconsistente.',
+    'Se o caminho não combinar com seu perfil, tende a ficar inconsistente.',
   possibility:
-    'A boa notícia: quando a estratégia combina com seu perfil, tudo fica mais leve e previsível.',
-  cta_helper: 'Quer que eu te diga o caminho ideal para o seu perfil?',
-  cta_button: ['Quero o caminho do meu perfil', 'Quero aplicar isso agora'],
-  cta_imperative: 'Veja o caminho do seu perfil',
+    'Quando combina, fica mais leve. Vale conversar pra alinhar.',
+  cta_helper: 'Quer que eu te diga o caminho ideal pro seu perfil?',
+  cta_button: ['Quero o caminho do meu perfil', 'Quero aplicar'],
+  cta_imperative: 'Fale comigo sobre isso',
   whatsapp_prefill:
-    'Oi {NAME}, meu perfil em {THEME} deu {PROFILE}. Quero o caminho ideal para eu aplicar isso na prática.',
+    'Oi {NAME}, meu perfil em {THEME} deu {PROFILE}. Quero o caminho ideal pro meu caso.',
 }
 
 const READINESS: ArchitectureTemplates = {
   title: [
-    'Seu nível de prontidão para {THEME}: {SCORE}/100',
-    'Checklist de prontidão para {THEME}: {SCORE}/100',
+    'Seu nível em {THEME}: {SCORE}/100',
+    'Resultado do checklist: {SCORE}/100',
   ],
   explanation:
-    'Prontidão não é motivação. É estrutura. Quando alguns pontos falham, o resultado fica instável mesmo com esforço.',
-  consequence: 'Se você ignorar os pontos críticos, você corrige efeito e não a causa.',
-  possibility: 'A boa notícia: ajustando poucos pontos-chave, você melhora muito o resultado.',
-  cta_helper: 'Quer que eu revise seus pontos críticos e te diga por onde começar?',
-  cta_button: ['Quero revisar meus pontos', 'Quero meu plano de ajuste'],
-  cta_imperative: 'Revise seus pontos críticos',
+    'Alguns pontos pesam mais. Quando falham, o resultado fica instável.',
+  consequence: 'Ignorar os críticos corrige efeito, não causa.',
+  possibility: 'Ajustando poucos pontos, melhora bastante. Vale conversar.',
+  cta_helper: 'Quer que eu te diga por onde começar?',
+  cta_button: ['Quero revisar', 'Quero meu plano'],
+  cta_imperative: 'Fale comigo sobre isso',
   whatsapp_prefill:
-    'Oi {NAME}, meu checklist de {THEME} deu {SCORE}/100 e surgiram pontos críticos. Você pode me orientar por onde começar?',
+    'Oi {NAME}, meu checklist de {THEME} deu {SCORE}/100. Você pode me orientar por onde começar?',
 }
 
 export const DIAGNOSIS_TEMPLATES: Record<DiagnosisArchitecture, ArchitectureTemplates> = {

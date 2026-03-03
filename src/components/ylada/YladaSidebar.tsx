@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { YLADA_MENU_ITEMS, getYladaAreaPathPrefix } from '@/config/ylada-areas'
+import { YLADA_MENU_GROUPS, getYladaAreaPathPrefix } from '@/config/ylada-areas'
 import { useAuth } from '@/hooks/useAuth'
 
 interface YladaSidebarProps {
@@ -30,26 +30,35 @@ export default function YladaSidebar({
           YLADA · {areaLabel}
         </Link>
       </div>
-      <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
-        {YLADA_MENU_ITEMS.map((item) => {
-          const href = `${prefix}/${item.path}`
-          const isActive = pathname === href || pathname?.startsWith(href + '/')
-          return (
-            <Link
-              key={item.key}
-              href={href}
-              onClick={onMobileClose}
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-                isActive
-                  ? 'bg-blue-50 text-blue-700'
-                  : 'text-gray-700 hover:bg-gray-100'
-              }`}
-            >
-              <span aria-hidden>{item.icon}</span>
-              {item.label}
-            </Link>
-          )
-        })}
+      <nav className="flex-1 p-3 space-y-4 overflow-y-auto">
+        {YLADA_MENU_GROUPS.map((group) => (
+          <div key={group.label}>
+            <p className="px-3 mb-1.5 text-xs font-medium text-gray-500 uppercase tracking-wider">
+              {group.label}
+            </p>
+            <div className="space-y-0.5">
+              {group.items.map((item) => {
+                const href = `${prefix}/${item.path}`
+                const isActive = pathname === href || pathname?.startsWith(href + '/')
+                return (
+                  <Link
+                    key={item.key}
+                    href={href}
+                    onClick={onMobileClose}
+                    className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      isActive
+                        ? 'bg-blue-50 text-blue-700'
+                        : 'text-gray-700 hover:bg-gray-100'
+                    }`}
+                  >
+                    <span aria-hidden>{item.icon}</span>
+                    {item.label}
+                  </Link>
+                )
+              })}
+            </div>
+          </div>
+        ))}
         <div className="pt-3 mt-3 border-t border-gray-200 space-y-1">
           {isAdmin && (
             <>

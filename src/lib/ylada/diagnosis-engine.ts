@@ -20,11 +20,11 @@ import {
 import { validateDiagnosisDecision } from './diagnosis-validation'
 
 const BLOCKER_LABELS: Record<BlockerType, string> = {
-  rotina: 'Rotina desorganizada',
-  emocional: 'Bloqueio emocional',
-  processo: 'Processo pouco claro',
-  habitos: 'Hábitos inconsistentes',
-  expectativa: 'Expectativa descalibrada',
+  rotina: 'Rotina bagunçada',
+  emocional: 'Emoção pesando',
+  processo: 'Falta de clareza no passo a passo',
+  habitos: 'Constância quebrada',
+  expectativa: 'Meta fora do realista',
 }
 
 // --- D0: normalização de visitor_answers (sinônimos) ---
@@ -278,20 +278,20 @@ function getMainBlocker(
   switch (arch) {
     case 'RISK_DIAGNOSIS':
       return payload.level === 'alto'
-        ? 'Risco alto ignorado'
+        ? 'Algo importante pede atenção'
         : payload.level === 'medio'
-          ? 'Risco médio acumulado'
-          : 'Risco recorrente não tratado'
+          ? 'Vale dar uma olhada'
+          : 'Sinais que se repetem'
     case 'BLOCKER_DIAGNOSIS':
-      return payload.blocker_type ? BLOCKER_LABELS[payload.blocker_type] : 'Padrão que quebra constância'
+      return payload.blocker_type ? BLOCKER_LABELS[payload.blocker_type] : 'Algo trava sua constância'
     case 'PROFILE_TYPE':
-      return payload.profile_type ? `Estratégia desalinhada ao perfil ${payload.profile_type}` : 'Estratégia desalinhada ao perfil'
+      return payload.profile_type ? `Seu jeito é ${payload.profile_type}` : 'Seu jeito de lidar com isso'
     case 'READINESS_CHECKLIST':
-      return (payload.score ?? 0) < 50 ? 'Pontos críticos em aberto' : 'Gaps de prontidão'
+      return (payload.score ?? 0) < 50 ? 'Alguns pontos pedem atenção' : 'Dá pra melhorar alguns pontos'
     case 'PROJECTION_CALCULATOR':
-      return payload.warning ? 'Meta descalibrada' : 'Projeção a calibrar'
+      return payload.warning ? 'Meta ou prazo fora do realista' : 'Projeção com base no que você informou'
     default:
-      return 'Padrão a ajustar'
+      return 'Algo a ajustar'
   }
 }
 
@@ -359,13 +359,13 @@ function getSafeFallback(
   const out: DiagnosisDecisionOutput = {
     profile_title: titulo,
     profile_summary:
-      'Seu resultado indica um padrão que merece atenção. Sinais se acumulam quando a estratégia não é ajustada no que realmente influencia o resultado. A boa notícia: com direção clara, dá para destravar progresso.',
+      'Pelos sinais que você relatou, algo vale atenção. Vale conversar com quem entende pra ver o próximo passo.',
     main_blocker: blocker,
     consequence:
-      'Se isso continuar, é comum o problema ficar estável ou piorar mesmo com esforço isolado. O risco invisível é manter a mesma abordagem.',
+      'Se nada mudar, tende a continuar igual ou piorar.',
     growth_potential:
-      'A boa notícia: com ajustes direcionados e um plano coerente, dá para destravar progresso e melhorar o resultado.',
-    cta_text: 'Analise seu caso',
+      'Vale conversar pra entender o próximo passo.',
+    cta_text: 'Fale comigo sobre isso',
     whatsapp_prefill: `Oi ${nome}, fiz a análise sobre ${theme}${obj}. Meu resultado apontou: ${blocker}. Quero entender o próximo passo para o meu caso.`,
   }
   validateDiagnosisDecision(out)
@@ -447,10 +447,10 @@ export function generateDiagnosis(input: DiagnosisInput): DiagnosisGenerationRes
   const profile_title = pickTitle(arch, slots)
   const explanation = fillSlots(t.explanation, slots)
   let profile_summary = explanation.trim()
-  if (profile_summary.length < 180) {
-    profile_summary = (profile_summary + ' Se você mantiver isso, o resultado tende a ficar instável.').trim()
+  if (profile_summary.length < 60) {
+    profile_summary = (profile_summary + ' Vale conversar com quem entende pra ver o próximo passo.').trim()
   }
-  profile_summary = truncateAtLastSentenceOrSpace(profile_summary, 350)
+  profile_summary = truncateAtLastSentenceOrSpace(profile_summary, 280)
   const main_blocker = getMainBlocker(arch, {
     level,
     blocker_type: blocker_type ?? undefined,

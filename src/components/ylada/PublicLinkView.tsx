@@ -257,14 +257,12 @@ function ConfigDrivenLinkView({
       return (
         <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
           <div className="max-w-md w-full bg-white rounded-2xl shadow-lg border border-gray-100 p-6 sm:p-8">
-            <h1 className="text-xl font-bold text-gray-900 mb-2">{pageTitle}</h1>
-            <div className="mb-6">
-              <h2 className="text-lg font-semibold text-gray-900">{diagnosis.profile_title}</h2>
-              <p className="text-gray-600 mt-2 whitespace-pre-line">{diagnosis.profile_summary}</p>
-              <p className="text-sm font-medium text-gray-700 mt-3">{diagnosis.main_blocker}</p>
-              <p className="text-gray-600 text-sm mt-1">{diagnosis.consequence}</p>
-              <p className="text-gray-600 text-sm mt-2">{diagnosis.growth_potential}</p>
-            </div>
+            <h1 className="text-xl font-bold text-gray-900 mb-3">{diagnosis.profile_title}</h1>
+            <p className="text-gray-600 text-sm leading-relaxed mb-2">{diagnosis.profile_summary}</p>
+            <p className="text-gray-700 font-medium text-sm mb-3">{diagnosis.main_blocker}</p>
+            <p className="text-gray-500 text-sm mb-6">
+              {diagnosis.consequence} {diagnosis.growth_potential}
+            </p>
             {whatsappUrl ? (
               <button
                 type="button"

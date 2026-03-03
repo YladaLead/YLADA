@@ -26,7 +26,12 @@ export const FERRAMENTAS_BY_TEMA: Record<string, FerramentaConcreta[]> = {
       name: 'Quiz Pronto para Emagrecer?',
       flow_id: FLOW_IDS.diagnostico_risco,
       description: 'Avalia se a pessoa está pronta física e emocionalmente para emagrecer.',
-      question_labels: ['Como você se sente em relação ao peso hoje?', 'O que já tentou antes?', 'O que mais atrapalha?', 'Qual seu principal objetivo?'],
+      question_labels: [
+        'Quais sinais ou sintomas você sente? (ex.: cansaço, inchaço, compulsão)',
+        'O que já tentou antes? (ex.: dietas, exercícios, remédios)',
+        'Como isso impacta seu dia a dia? (pouco / moderado / muito)',
+        'Quantas vezes você já tentou mudar? (número aproximado)',
+      ],
       cta_default: 'Quero uma avaliação completa',
       tipo: 'quiz',
     },

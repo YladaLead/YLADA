@@ -9,6 +9,7 @@ import { createHash } from 'crypto'
 import { supabaseAdmin } from '@/lib/supabase'
 import { generateDiagnosis } from '@/lib/ylada'
 import type { DiagnosisInput, DiagnosisArchitecture, LinkObjective, AreaProfissional } from '@/lib/ylada'
+import { normalizeVisitorAnswers } from '@/lib/ylada/diagnosis-normalize'
 import type { StrategicProfile } from '@/lib/ylada/strategic-profile'
 import { getAdaptiveDiagnosisIntro, getAdvancedCta } from '@/lib/ylada/adaptive-diagnosis'
 
@@ -119,6 +120,12 @@ export async function POST(
     const flow_id = typeof metaRaw.flow_id === 'string' ? metaRaw.flow_id : null
     const objectiveMeta = typeof metaRaw.objective === 'string' ? metaRaw.objective : null
 
+    // Bloco 2: normalizar q1,q2... para chaves esperadas pelo motor
+    const normalizedAnswers = normalizeVisitorAnswers(
+      visitor_answers,
+      architecture as DiagnosisArchitecture
+    )
+
     const input: DiagnosisInput = {
       meta: {
         objective,
@@ -127,7 +134,7 @@ export async function POST(
         architecture: architecture as DiagnosisArchitecture,
       },
       professional: {},
-      visitor_answers,
+      visitor_answers: normalizedAnswers,
     }
 
     const { diagnosis, fallbackUsed, level } = generateDiagnosis(input)
