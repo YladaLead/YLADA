@@ -66,16 +66,16 @@ export default function WellnessSidebar({ isMobileOpen = false, onMobileClose }:
       color: 'green'
     },
     {
-      title: 'Quadro para impressão',
-      icon: '🖨️',
-      href: '/pt/wellness/quadro-impressao',
-      color: 'green'
-    },
-    {
       title: 'NOEL',
       icon: '🙋🏻‍♂️',
       href: '/pt/wellness/noel',
       color: 'blue'
+    },
+    {
+      title: 'Quadro parceria',
+      icon: '🖨️',
+      href: '/pt/wellness/quadro-impressao',
+      color: 'green'
     },
     {
       title: 'Meu Perfil e Metas',

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
 import WellnessNavBar from '@/components/wellness/WellnessNavBar'
 import ProtectedRoute from '@/components/auth/ProtectedRoute'
 import { useWellnessProfile } from '@/hooks/useWellnessProfile'
@@ -70,17 +70,17 @@ const ESTILOS_POR_PAGINA: Record<PorPagina, { card: string; img: string; qr: num
     card: 'px-2 py-1.5 gap-2 print:px-2 print:py-1.5 print:gap-2',
     img: 'min-w-[56px] min-h-[56px]',
     qr: TAMANHO_LADO_PX_4,
-    titulo: 'text-[8px] print:text-[8px]',
-    texto: 'text-[6px] print:text-[6px]',
-    lista: 'text-[6px] print:text-[6px]',
+    titulo: 'text-[9px] print:text-[9px]',
+    texto: 'text-[7px] print:text-[7px]',
+    lista: 'text-[7px] print:text-[7px]',
   },
   5: {
     card: 'px-1.5 py-1 gap-1.5 print:px-1.5 print:py-1 print:gap-1.5',
     img: 'min-w-[48px] min-h-[48px]',
     qr: TAMANHO_LADO_PX_5,
-    titulo: 'text-[7px] print:text-[7px]',
-    texto: 'text-[5px] print:text-[5px]',
-    lista: 'text-[5px] print:text-[5px]',
+    titulo: 'text-[8px] print:text-[8px]',
+    texto: 'text-[6px] print:text-[6px]',
+    lista: 'text-[6px] print:text-[6px]',
   },
 }
 
@@ -110,10 +110,10 @@ function QuadroConteudo({
           Ferramenta informativa e preventiva. Não substitui avaliação médica.
         </p>
       </div>
-      <div className={`flex-1 min-h-0 p-3 space-y-2 overflow-auto ${compacto ? 'space-y-1' : ''}`}>
+      <div className={`flex-1 min-h-0 flex flex-col justify-start p-3 overflow-hidden ${compacto && selecionados.length > 0 ? 'gap-1 print:gap-1' : 'space-y-2'}`}>
         {selecionados.length === 0 ? (
           <div className="text-center py-6 text-gray-400 text-xs">
-            <p>Escolha as ferramentas e clique em Imprimir.</p>
+            <p>Escolha as ferramentas e clique em Salvar como PDF.</p>
           </div>
         ) : (
           selecionados.map((item) => {
@@ -121,7 +121,7 @@ function QuadroConteudo({
             return (
               <div
                 key={item.id}
-                className={`border border-gray-200 rounded-lg flex flex-row items-center gap-2 print:break-inside-avoid ${s.card}`}
+                className={`border border-gray-200 rounded-lg flex flex-row items-center gap-2 print:break-inside-avoid flex-shrink-0 ${compacto ? 'min-h-[3rem]' : ''} ${s.card}`}
               >
                 <div
                   className={`flex-shrink-0 flex items-center justify-center bg-gray-50 rounded-lg overflow-hidden border border-gray-100 ${compacto ? s.img : ''}`}
@@ -162,9 +162,11 @@ function QuadroConteudo({
             )
           })
         )}
-      </div>
-      <div className={`flex-shrink-0 px-4 py-2 border-t border-gray-100 flex items-center justify-center bg-white ${headerCompact ? 'py-1' : ''}`}>
-        <img src="/images/logo/wellness-horizontal.png" alt="WELLNESS by Ylada" className={`object-contain object-center ${headerCompact ? 'h-4 print:h-4' : 'h-6 print:h-6'}`} />
+        {selecionados.length > 0 && (
+          <div className={`flex-shrink-0 mt-2 pt-2 border-t border-gray-100 flex items-center justify-center bg-white ${headerCompact ? 'py-1' : 'py-2'}`}>
+            <img src="/images/logo/wellness-horizontal.png" alt="WELLNESS by Ylada" className={`object-contain object-center ${headerCompact ? 'h-4 print:h-4' : 'h-6 print:h-6'}`} />
+          </div>
+        )}
       </div>
     </div>
   )
@@ -175,6 +177,8 @@ function QuadroImpressaoContent() {
   const [ferramentas, setFerramentas] = useState<any[]>([])
   const [loadingFerramentas, setLoadingFerramentas] = useState(true)
   const [selecionados, setSelecionados] = useState<ItemQuadro[]>([])
+  const [exportando, setExportando] = useState(false)
+  const quadroRef = useRef<HTMLDivElement>(null)
   const porPagina: PorPagina = 5
 
   useEffect(() => {
@@ -193,6 +197,13 @@ function QuadroImpressaoContent() {
     }
     carregar()
   }, [profile?.userSlug])
+
+  // Título curto na aba/impressão: evita "Fale com 10..." nos cabeçalhos do navegador ao imprimir
+  useEffect(() => {
+    const prev = document.title
+    document.title = 'Quadro parceria'
+    return () => { document.title = prev }
+  }, [])
 
   // Mapa template_slug -> slug da ferramenta do usuário (se criou com slug customizado)
   const slugPorTemplate = useMemo(() => {
@@ -254,14 +265,44 @@ function QuadroImpressaoContent() {
     setSelecionados((prev) => prev.filter((s) => s.id !== id))
   }
 
-  const imprimir = () => {
-    window.print()
+  const salvarPdf = async () => {
+    if (!quadroRef.current || selecionados.length === 0) return
+    setExportando(true)
+    try {
+      const html2pdf = (await import('html2pdf.js')).default
+      quadroRef.current.classList.add('quadro-pdf-export')
+      // Tempo para QR codes e imagens renderizarem antes da captura
+      await new Promise((r) => setTimeout(r, 500))
+      await html2pdf()
+        .set({
+          margin: 10,
+          filename: 'quadro-parceria.pdf',
+          image: { type: 'jpeg', quality: 0.98 },
+          html2canvas: {
+            scale: 2,
+            useCORS: true,
+            allowTaint: true,
+            logging: false,
+            windowWidth: quadroRef.current.scrollWidth,
+            windowHeight: quadroRef.current.scrollHeight,
+          },
+          jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+          pagebreak: { mode: ['css', 'legacy'] },
+        })
+        .from(quadroRef.current)
+        .save()
+    } catch (e) {
+      console.error(e)
+    } finally {
+      quadroRef.current?.classList.remove('quadro-pdf-export')
+      setExportando(false)
+    }
   }
 
   if (loadingProfile || loadingFerramentas) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-green-50">
-        <WellnessNavBar showTitle title="Quadro para impressão" />
+        <WellnessNavBar showTitle title="Quadro parceria" />
         <main className="container mx-auto px-4 py-12 flex justify-center items-center min-h-[60vh]">
           <div className="animate-spin rounded-full h-12 w-12 border-2 border-emerald-600 border-t-transparent" />
         </main>
@@ -272,7 +313,7 @@ function QuadroImpressaoContent() {
   if (!profile?.userSlug) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-green-50">
-        <WellnessNavBar showTitle title="Quadro para impressão" />
+        <WellnessNavBar showTitle title="Quadro parceria" />
         <main className="container mx-auto px-4 py-12 max-w-lg mx-auto text-center">
           <p className="text-gray-600 mb-4">
             Configure seu perfil em <strong>Configurações</strong> para gerar seus links e montar o quadro.
@@ -291,7 +332,7 @@ function QuadroImpressaoContent() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-green-50 print:bg-white">
       <div className="print:hidden">
-        <WellnessNavBar showTitle title="Quadro para impressão" />
+        <WellnessNavBar showTitle title="Quadro parceria" />
       </div>
 
       <main className="container mx-auto px-4 sm:px-6 py-8 print:py-0 print:px-0 max-w-6xl">
@@ -300,9 +341,9 @@ function QuadroImpressaoContent() {
           <div className="lg:max-w-md flex-shrink-0">
             <div className="bg-white rounded-2xl shadow-lg border border-emerald-100 overflow-hidden mb-6">
               <div className="bg-gradient-to-r from-emerald-600 to-teal-600 px-6 py-4">
-                <h1 className="text-xl font-bold text-white">Quadro da Saúde</h1>
+                <h1 className="text-xl font-bold text-white">Quadro parceria</h1>
                 <p className="text-emerald-100 text-sm mt-1">
-                  Escolha as ferramentas. O quadro será montado com QR e benefícios para imprimir ou salvar em PDF.
+                  Escolha as ferramentas. O quadro será montado com QR e benefícios para salvar em PDF.
                 </p>
               </div>
               <div className="p-5">
@@ -322,12 +363,22 @@ function QuadroImpressaoContent() {
                 )}
                 <button
                   type="button"
-                  onClick={imprimir}
-                  disabled={selecionados.length === 0}
+                  onClick={salvarPdf}
+                  disabled={selecionados.length === 0 || exportando}
                   className="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed font-medium w-full justify-center"
                 >
-                  🖨️ Imprimir / Salvar como PDF
+                  {exportando ? (
+                    <>
+                      <span className="animate-spin inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full" />
+                      Gerando PDF…
+                    </>
+                  ) : (
+                    <>📄 Salvar como PDF</>
+                  )}
                 </button>
+                <p className="text-xs text-gray-500 mt-2">
+                  O arquivo <strong>quadro-parceria.pdf</strong> será baixado direto no seu dispositivo.
+                </p>
               </div>
             </div>
 
@@ -355,12 +406,12 @@ function QuadroImpressaoContent() {
 
           {/* Coluna direita: pré-visualização igual ao que será impresso (página por página) */}
           <div className="flex-1 min-w-0 flex flex-col">
-            <p className="text-sm font-semibold text-gray-700 mb-2">Pré-visualização — é assim que vai imprimir</p>
+            <p className="text-sm font-semibold text-gray-700 mb-2">Pré-visualização — é assim que vai ficar no PDF</p>
             <div className="bg-gray-200 rounded-xl p-4 border border-gray-300 overflow-auto flex-1 min-h-0" style={{ maxHeight: 'min(70vh, 720px)' }}>
               {selecionados.length === 0 ? (
                 <div className="bg-white rounded-lg shadow-inner p-8 text-center text-gray-500 text-sm">
                   <p>Escolha as ferramentas ao lado.</p>
-                  <p className="mt-2">Aqui aparecerá cada folha exatamente como sairá na impressora.</p>
+                  <p className="mt-2">Aqui aparecerá cada folha exatamente como sairá no PDF.</p>
                 </div>
               ) : (
                 (() => {
@@ -385,14 +436,14 @@ function QuadroImpressaoContent() {
             </div>
             <p className="text-xs text-gray-500 mt-2">
               {selecionados.length > 0
-                ? `${Math.ceil(selecionados.length / porPagina)} folha(s) na impressora.`
+                ? `${Math.ceil(selecionados.length / porPagina)} folha(s) no PDF.`
                 : 'Selecione as ferramentas para ver a pré-visualização.'}
             </p>
           </div>
         </div>
 
-        {/* Área do quadro para impressão: uma página = cabeçalho + N cards (1/2/4) + rodapé; várias páginas se houver mais ferramentas */}
-        <div id="quadro-impressao" data-por-pagina={porPagina} className="hidden print:block print:max-w-none w-full">
+        {/* Área do quadro (usada para gerar o PDF; oculta na tela, visível só ao exportar) */}
+        <div id="quadro-impressao" ref={quadroRef} data-por-pagina={porPagina} className="hidden print:block print:max-w-none w-full">
           {(() => {
             const n = porPagina
             const chunks: ItemQuadro[][] = []
@@ -410,29 +461,72 @@ function QuadroImpressaoContent() {
       </main>
 
       <style dangerouslySetInnerHTML={{ __html: `
+        /* Durante a exportação: no viewport para o html2canvas capturar (atrás da UI) */
+        #quadro-impressao.quadro-pdf-export {
+          display: block !important;
+          visibility: visible !important;
+          position: fixed !important;
+          left: 0 !important;
+          top: 0 !important;
+          width: 210mm !important;
+          min-height: 297mm !important;
+          z-index: -1 !important;
+          opacity: 0.02 !important;
+          background: white !important;
+          pointer-events: none !important;
+        }
+        #quadro-impressao.quadro-pdf-export .quadro-pagina-impressao {
+          page-break-after: always;
+        }
+        #quadro-impressao.quadro-pdf-export .quadro-pagina-impressao:last-child {
+          page-break-after: auto;
+        }
         @media print {
           @page { size: A4; margin: 10mm; }
+          html, body {
+            margin: 0 !important;
+            padding: 0 !important;
+            width: 100%;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+          }
           body * { visibility: hidden; }
           #quadro-impressao, #quadro-impressao * { visibility: visible; }
           #quadro-impressao {
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 100%;
+            position: absolute !important;
+            left: 0 !important;
+            top: 0 !important;
+            width: 100% !important;
+            padding: 0 !important;
+            margin: 0 !important;
             box-sizing: border-box;
           }
+          /* Cada página com altura fixa A4 (297mm - 20mm margem) = igual ao preview */
           #quadro-impressao .quadro-pagina-impressao {
             page-break-after: always;
             width: 100%;
-            max-width: 100%;
+            height: 277mm;
+            min-height: 277mm;
+            max-height: 277mm;
             padding: 0;
+            margin: 0;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
           }
           #quadro-impressao .quadro-pagina-impressao:last-child {
             page-break-after: auto;
           }
           #quadro-impressao .quadro-pagina-conteudo {
-            max-width: 100%;
             width: 100%;
+            height: 100%;
+            min-height: 0;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            border: none;
+            border-radius: 0;
+            box-shadow: none;
           }
         }
       `}} />
