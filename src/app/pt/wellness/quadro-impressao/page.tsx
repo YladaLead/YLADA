@@ -121,7 +121,7 @@ function QuadroConteudo({
             return (
               <div
                 key={item.id}
-                className={`border border-gray-200 rounded-lg flex flex-row items-center gap-2 print:break-inside-avoid flex-shrink-0 ${compacto ? 'min-h-[3rem]' : ''} ${s.card}`}
+                className={`border border-gray-200 rounded-lg flex flex-row items-center gap-2 print:break-inside-avoid flex-1 min-h-0 ${compacto ? 'min-h-[3rem]' : ''} ${s.card}`}
               >
                 <div
                   className={`flex-shrink-0 flex items-center justify-center bg-gray-50 rounded-lg overflow-hidden border border-gray-100 ${compacto ? s.img : ''}`}
@@ -285,7 +285,7 @@ function QuadroImpressaoContent() {
             ignoreElements: (el: Element) => (el.classList?.contains('preview-only-label') ?? false),
           },
           jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-          pagebreak: { mode: ['css', 'legacy'] },
+          pagebreak: { mode: ['css', 'legacy'], after: '.quadro-pdf-pagina-break' },
         })
         .from(previewPdfRef.current)
         .save()
@@ -420,7 +420,10 @@ function QuadroImpressaoContent() {
                   return (
                     <div ref={previewPdfRef} className="space-y-6">
                       {chunks.map((chunk, idx) => (
-                        <div key={idx} className="mb-6 last:mb-0">
+                        <div
+                          key={idx}
+                          className={`mb-6 last:mb-0 quadro-pdf-pagina ${idx < chunks.length - 1 ? 'quadro-pdf-pagina-break' : ''}`}
+                        >
                           <p className="preview-only-label text-xs font-medium text-gray-500 mb-1.5">Folha {idx + 1} de {chunks.length}</p>
                           <div
                             className="bg-white rounded-lg shadow-md border border-gray-300 overflow-hidden mx-auto"
@@ -462,6 +465,9 @@ function QuadroImpressaoContent() {
       </main>
 
       <style dangerouslySetInnerHTML={{ __html: `
+        /* Quebra de página no PDF: cada folha vira uma página */
+        .quadro-pdf-pagina-break { page-break-after: always; }
+        .quadro-pdf-pagina:last-child { page-break-after: auto; }
         /* Durante a exportação: no viewport para o html2canvas capturar (atrás da UI) */
         #quadro-impressao.quadro-pdf-export {
           display: block !important;
