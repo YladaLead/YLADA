@@ -1,8 +1,23 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import YladaAreaShell from '@/components/ylada/YladaAreaShell'
 import { getFlowById } from '@/config/ylada-flow-catalog'
+import { getTemasForProfession, getTemaLabel, TEMA_OUTRO_VALUE } from '@/config/ylada-temas'
+import { getFerramentasForTema, type FerramentaConcreta } from '@/config/ylada-temas-ferramentas'
+import { PERFIS_SIMULADOS, SIMULATE_COOKIE_NAME } from '@/data/perfis-simulados'
+
+const COOKIE_MAX_AGE = 60 * 60 * 24 // 24h
+
+function setSimulateCookie(key: string) {
+  if (typeof document === 'undefined') return
+  document.cookie = `${SIMULATE_COOKIE_NAME}=${encodeURIComponent(key)}; path=/; max-age=${COOKIE_MAX_AGE}; SameSite=Lax`
+}
+
+function clearSimulateCookie() {
+  if (typeof document === 'undefined') return
+  document.cookie = `${SIMULATE_COOKIE_NAME}=; path=/; max-age=0`
+}
 
 /** Objetivos do link: norte para a sugestão (quiz vs calculadora e texto). */
 const LINK_OBJECTIVES = [
@@ -122,13 +137,31 @@ export default function MatrixLinksPage() {
   const [editTitle, setEditTitle] = useState('')
   const [editCtaWhatsapp, setEditCtaWhatsapp] = useState('')
   const [savingEdit, setSavingEdit] = useState(false)
-  const [profile, setProfile] = useState<{ profile_type?: string | null; profession?: string | null } | null>(null)
+  const [profile, setProfile] = useState<{ profile_type?: string | null; profession?: string | null; area_specific?: Record<string, unknown> | null } | null>(null)
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [linkObjective, setLinkObjective] = useState<LinkObjectiveValue>('captar')
   /** Fluxo escolhido nos cards; null = ainda nos 2 cards. */
   const [selectedFlowId, setSelectedFlowId] = useState<string | null>(null)
-  /** 'cards' = 2 cards, 'detail' = Tela 3, 'preview' = Tela 4. */
-  const [strategyView, setStrategyView] = useState<'cards' | 'detail' | 'preview'>('cards')
+  /** Fluxo por texto: 'cards' = 2 cards (simplificado: sem detail/preview). */
+  const [strategyView, setStrategyView] = useState<'cards'>('cards')
+  /** Direção Estratégica (profile-first): carregada ao abrir a página. */
+  const [strategyData, setStrategyData] = useState<{
+    professional_diagnosis: { blocker: string; focus: string; summary_lines: string[] }
+    strategic_focus: string
+    profile_incomplete?: boolean
+    simulated_profile_key?: string
+    simulated_profile_label?: string
+    strategies: Array<{ type: string; flow_id: string; title: string; reason: string; theme: string; questions: Array<{ key: string; label: string; type: string }>; cta_suggestion: string }>
+  } | null>(null)
+  const [strategyLoading, setStrategyLoading] = useState(true)
+  /** true = usuário quer definir objetivo por texto (fluxo antigo). */
+  const [showTextFlow, setShowTextFlow] = useState(false)
+  /** URL do último link criado (para destaque no feedback). */
+  const [lastCreatedUrl, setLastCreatedUrl] = useState<string | null>(null)
+  /** Tema escolhido (tema primeiro): value ou TEMA_OUTRO_VALUE. null = ainda não escolheu. */
+  const [selectedTema, setSelectedTema] = useState<string | null>(null)
+  /** Texto livre quando tema = "Outro". */
+  const [temaOutroText, setTemaOutroText] = useState('')
   const linksListRef = useRef<HTMLDivElement>(null)
   const suggestionBoxRef = useRef<HTMLDivElement>(null)
 
@@ -163,6 +196,7 @@ export default function MatrixLinksPage() {
         setProfile({
           profile_type: typeof p.profile_type === 'string' ? p.profile_type : null,
           profession: typeof p.profession === 'string' ? p.profession : null,
+          area_specific: typeof p.area_specific === 'object' && p.area_specific !== null ? (p.area_specific as Record<string, unknown>) : null,
         })
       } else {
         setProfile(null)
@@ -178,6 +212,39 @@ export default function MatrixLinksPage() {
     loadTemplatesAndLinks()
   }, [])
 
+  const fetchStrategy = useCallback(() => {
+    setStrategyLoading(true)
+    fetch('/api/ylada/strategy', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ segment }),
+    })
+      .then((r) => r.json())
+      .then((json) => {
+        if (json?.success && json?.data) {
+          setStrategyData(json.data)
+        } else {
+          setStrategyData(null)
+        }
+      })
+      .catch(() => setStrategyData(null))
+      .finally(() => setStrategyLoading(false))
+  }, [segment])
+
+  useEffect(() => {
+    fetchStrategy()
+  }, [fetchStrategy])
+
+  const handleSimulateProfile = (key: string) => {
+    if (key === '') {
+      clearSimulateCookie()
+    } else {
+      setSimulateCookie(key)
+    }
+    fetchStrategy()
+  }
+
   // Sincronizar perfil quando a página ganha foco (ex.: usuário ativou perfil simulado em outra aba ou em Perfis para testes)
   useEffect(() => {
     const refetchProfile = () => {
@@ -189,6 +256,7 @@ export default function MatrixLinksPage() {
             setProfile({
               profile_type: typeof p.profile_type === 'string' ? p.profile_type : null,
               profession: typeof p.profession === 'string' ? p.profession : null,
+              area_specific: typeof p.area_specific === 'object' && p.area_specific !== null ? (p.area_specific as Record<string, unknown>) : null,
             })
           } else {
             setProfile(null)
@@ -361,36 +429,41 @@ export default function MatrixLinksPage() {
     setMessage(null)
   }
 
-  /** Tela 3 → volta aos 2 cards. */
-  const handleBackToCards = () => {
+  /** Volta para Direção Estratégica (sai do fluxo por texto). */
+  const handleBackToStrategy = () => {
+    setInterpretResult(null)
     setSelectedFlowId(null)
     setStrategyView('cards')
+    setShowTextFlow(false)
+    setSelectedTema(null)
+    setTemaOutroText('')
+    setMessage(null)
   }
 
-  /** Tela 4 → Confirmar e gerar link: envia interpretacao + flow_id quando disponível (Etapa 7). */
-  const handleConfirmAndGenerate = async () => {
+  /** Criar link a partir de um card do fluxo por texto (com questions + cta do flow). */
+  const handleCreateFromInterpretCard = async (card: { flow_id: string; title?: string; subtitle?: string; description?: string }) => {
+    if (!interpretResult?.interpretacao) return
     setCreating(true)
     setMessage(null)
     try {
-      const hasFlow = !!selectedFlowId && !!interpretResult?.interpretacao && !!interpretResult?.strategies
-      const body = hasFlow
-        ? {
-            flow_id: selectedFlowId,
-            interpretacao: {
-              objetivo: interpretResult.interpretacao?.objetivo ?? linkObjective,
-              tema: interpretResult.interpretacao?.tema ?? interpretResult.o_que_captar ?? '',
-              tipo_publico: interpretResult.interpretacao?.tipo_publico,
-              area_profissional: interpretResult.interpretacao?.area_profissional,
-            },
-          }
-        : { template_id: interpretResult?.recommendedTemplateId || templates[0]?.id }
-
-      if (!body.flow_id && !(body as { template_id?: string }).template_id) {
-        setMessage({ type: 'error', text: 'Nenhum template disponível. Configure os templates no banco (migrations).' })
-        setCreating(false)
-        return
+      const flow = getFlowById(card.flow_id)
+      const tema = interpretResult.safe_theme ?? interpretResult.interpretacao?.tema ?? interpretResult.o_que_captar ?? 'seu tema'
+      const questions = (flow?.question_labels ?? []).map((label, i) => ({
+        id: `q${i + 1}`,
+        label,
+        type: 'text' as const,
+      }))
+      const body = {
+        flow_id: card.flow_id,
+        interpretacao: {
+          objetivo: (interpretResult.interpretacao?.objetivo ?? linkObjective) as 'captar' | 'educar' | 'reter' | 'propagar' | 'indicar',
+          tema,
+          tipo_publico: interpretResult.interpretacao?.tipo_publico ?? 'pacientes',
+          area_profissional: interpretResult.interpretacao?.area_profissional ?? 'geral',
+        },
+        questions,
+        cta_suggestion: flow?.cta_default ?? 'Quero analisar meu caso',
       }
-
       const res = await fetch('/api/ylada/links/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -405,10 +478,60 @@ export default function MatrixLinksPage() {
           { ...json.data, url, template_name: null, template_type: null, stats: { view: 0, start: 0, complete: 0, cta_click: 0 } },
           ...prev,
         ])
-        setMessage({ type: 'success', text: `Link criado com sucesso. URL: ${url} — role até "Seus links" para ver.` })
-        setStrategyView('cards')
-        setSelectedFlowId(null)
+        setLastCreatedUrl(url)
+        setMessage({ type: 'success', text: 'Link criado! Copie a URL abaixo.' })
         setInterpretResult(null)
+        setShowTextFlow(false)
+        setTimeout(() => linksListRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 300)
+      } else {
+        setMessage({ type: 'error', text: json?.error || 'Erro ao criar link.' })
+      }
+    } catch {
+      setMessage({ type: 'error', text: 'Erro ao criar link. Tente novamente.' })
+    } finally {
+      setCreating(false)
+    }
+  }
+
+  /** Criar link a partir de uma ferramenta concreta (tema + catálogo). */
+  const handleCreateFromFerramenta = async (ferramenta: FerramentaConcreta, temaLabel: string) => {
+    setCreating(true)
+    setMessage(null)
+    try {
+      const flow = getFlowById(ferramenta.flow_id)
+      const questions = (ferramenta.question_labels ?? flow?.question_labels ?? []).map((label, i) => ({
+        id: `q${i + 1}`,
+        label,
+        type: 'text' as const,
+      }))
+      const body = {
+        flow_id: ferramenta.flow_id,
+        title: `${ferramenta.name} — ${temaLabel}`,
+        interpretacao: {
+          objetivo: 'captar' as const,
+          tema: temaLabel,
+          tipo_publico: 'pacientes',
+          area_profissional: 'geral',
+        },
+        questions,
+        cta_suggestion: ferramenta.cta_default ?? flow?.cta_default ?? 'Quero analisar meu caso',
+      }
+      const res = await fetch('/api/ylada/links/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(body),
+      })
+      const json = await res.json()
+      if (json?.success && json?.data) {
+        const base = typeof window !== 'undefined' ? window.location.origin : ''
+        const url = json.data.url || `${base}/l/${json.data.slug}`
+        setLinks((prev) => [
+          { ...json.data, url, template_name: null, template_type: null, stats: { view: 0, start: 0, complete: 0, cta_click: 0 } },
+          ...prev,
+        ])
+        setLastCreatedUrl(url)
+        setMessage({ type: 'success', text: 'Link criado! Copie a URL abaixo.' })
         setTimeout(() => linksListRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 300)
       } else {
         setMessage({ type: 'error', text: json?.error || 'Erro ao criar link.' })
@@ -433,19 +556,232 @@ export default function MatrixLinksPage() {
           </p>
         </div>
 
+        {/* Teste rápido: perfis simulados + Lab */}
+        <section className="rounded-lg border border-slate-200 bg-slate-50/50 p-4">
+          <h2 className="text-xs font-semibold text-slate-600 uppercase tracking-wider mb-3">Teste rápido</h2>
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="flex items-center gap-2">
+              <label htmlFor="simulate-profile" className="text-sm text-gray-700">Testar como:</label>
+              <select
+                id="simulate-profile"
+                value={strategyData?.simulated_profile_key ?? ''}
+                onChange={(e) => handleSimulateProfile(e.target.value)}
+                className="rounded-md border border-gray-300 px-2 py-1.5 text-sm text-gray-900 bg-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+              >
+                <option value="">Seu perfil real</option>
+                {PERFIS_SIMULADOS.map((p) => (
+                  <option key={p.key} value={p.key}>{p.label}</option>
+                ))}
+              </select>
+            </div>
+            <span className="text-slate-400">|</span>
+            <a href="/pt/perfis-simulados" className="text-sm text-blue-600 hover:underline">
+              Perfis para testes
+            </a>
+            <a href="/pt/ylada-lab" className="text-sm text-blue-600 hover:underline">
+              YLADA Lab
+            </a>
+          </div>
+          {strategyData?.simulated_profile_label && (
+            <p className="text-xs text-slate-600 mt-2">
+              Simulando: <strong>{strategyData.simulated_profile_label}</strong> — a Direção Estratégica abaixo usa este perfil.
+            </p>
+          )}
+        </section>
+
         {message && (
           <div
-            className={`p-3 rounded-lg text-sm ${message.type === 'success' ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'}`}
+            className={`p-3 rounded-lg text-sm ${message.type === 'success' ? 'bg-green-50 text-green-800 border border-green-200' : 'bg-red-50 text-red-800 border border-red-200'}`}
           >
-            {message.text}
+            <div className="flex flex-wrap items-center gap-2">
+              <span>{message.text}</span>
+              {message.type === 'success' && lastCreatedUrl && (
+                <button
+                  type="button"
+                  onClick={() => { copyUrl(lastCreatedUrl); setLastCreatedUrl(null) }}
+                  className="shrink-0 rounded-md bg-green-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-green-700"
+                >
+                  Copiar URL
+                </button>
+              )}
+            </div>
           </div>
         )}
 
-        {/* Tela 1 — Intenção | Tela 2 — 2 cards de estratégias */}
+        {/* Tema primeiro, depois ferramenta | ou fluxo por texto */}
         <section className="bg-white rounded-lg border border-gray-200 p-4">
-          {!interpretResult?.strategies ? (
+          {!showTextFlow ? (
+            /* --- Tema primeiro: Qual tema? → 2 cards --- */
+            strategyLoading ? (
+              <p className="text-sm text-gray-500">Carregando sua direção estratégica...</p>
+            ) : strategyData ? (
+              <div ref={suggestionBoxRef}>
+                {strategyData.profile_incomplete && (
+                  <div className="mb-4 p-3 rounded-lg bg-amber-50/80 border border-amber-200/80 text-sm text-amber-800 flex items-start gap-2">
+                    <span className="text-amber-600" aria-hidden>💡</span>
+                    <div>
+                      <p className="font-medium">Complete seu perfil</p>
+                      <p className="text-xs text-amber-700 mt-0.5">Recomendações personalizadas em <a href="/pt/perfil-empresarial" className="underline hover:no-underline">Perfil empresarial</a></p>
+                    </div>
+                  </div>
+                )}
+                {!selectedTema ? (
+                  /* Step 1: Qual tema você quer trabalhar agora? */
+                  <>
+                    <h2 className="text-sm font-semibold text-gray-800 mb-2">Qual tema você quer trabalhar agora?</h2>
+                    <p className="text-xs text-gray-500 mb-3">Escolha o tema do link. Depois você escolhe o tipo de ferramenta (quiz ou calculadora).</p>
+                    <div className="flex flex-wrap gap-2 mb-4">
+                      {(() => {
+                        const temasFromProfile = profile?.area_specific?.temas_atuacao
+                        const useTemasFromProfile = Array.isArray(temasFromProfile) && temasFromProfile.length > 0
+                        const temasPerfil = useTemasFromProfile
+                          ? (temasFromProfile as string[]).map((v) => ({ value: v, label: getTemaLabel(v) }))
+                          : getTemasForProfession(profile?.profession ?? null)
+                        return (
+                          <>
+                            {temasPerfil.map((t) => (
+                              <button
+                                key={t.value}
+                                type="button"
+                                onClick={() => setSelectedTema(t.value)}
+                                className="rounded-full px-3 py-1.5 text-xs font-medium bg-gray-100 text-gray-800 border border-gray-200 hover:bg-gray-200 hover:border-gray-300 transition-colors"
+                              >
+                                {t.label}
+                              </button>
+                            ))}
+                            <button
+                              type="button"
+                              onClick={() => setSelectedTema(TEMA_OUTRO_VALUE)}
+                              className="rounded-full px-3 py-1.5 text-xs font-medium bg-gray-100 text-gray-800 border border-gray-200 hover:bg-gray-200 hover:border-gray-300 transition-colors"
+                            >
+                              Outro tema
+                            </button>
+                          </>
+                        )
+                      })()}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setShowTextFlow(true)}
+                      className="text-sm text-gray-500 hover:text-gray-700 underline"
+                    >
+                      Quero definir por texto (objetivo em uma frase)
+                    </button>
+                  </>
+                ) : selectedTema === TEMA_OUTRO_VALUE ? (
+                  /* Step 1b: Outro — digite o tema */
+                  <>
+                    <h2 className="text-sm font-semibold text-gray-800 mb-2">Qual tema?</h2>
+                    <input
+                      type="text"
+                      placeholder="Ex.: emagrecimento, vitamina B12, ansiedade..."
+                      value={temaOutroText}
+                      onChange={(e) => setTemaOutroText(e.target.value)}
+                      className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm mb-3"
+                    />
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        onClick={() => { setSelectedTema(null); setTemaOutroText('') }}
+                        className="text-sm text-gray-600 underline hover:text-gray-800"
+                      >
+                        Voltar
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (temaOutroText.trim()) {
+                            setSelectedTema(temaOutroText.trim())
+                            setTemaOutroText('')
+                          }
+                        }}
+                        disabled={!temaOutroText.trim()}
+                        className="rounded-lg bg-slate-800 px-4 py-2 text-sm font-medium text-white hover:bg-slate-900 disabled:opacity-50"
+                      >
+                        Avançar
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  /* Step 2: Para [tema], listagem de ferramentas concretas */
+                  <>
+                    <div className="rounded-lg bg-slate-50 border border-slate-200 p-4 mb-4">
+                      <h2 className="text-sm font-semibold text-slate-800 mb-2">Direção Estratégica</h2>
+                      <div className="space-y-1.5 mb-2">
+                        {strategyData.professional_diagnosis.summary_lines.map((line, i) => (
+                          <p key={i} className="text-sm text-slate-700">{line}</p>
+                        ))}
+                      </div>
+                      <p className="text-sm font-medium text-slate-800">
+                        Foco desta semana: {strategyData.strategic_focus}
+                      </p>
+                    </div>
+                    <p className="text-sm text-gray-700 mb-3">
+                      Para <strong>{selectedTema === '_outro' ? 'Outro tema' : getTemaLabel(selectedTema)}</strong>, escolha uma ferramenta para criar:
+                    </p>
+                    <div className="grid gap-3 mb-4 grid-cols-1 sm:grid-cols-2">
+                      {getFerramentasForTema(selectedTema).map((f) => (
+                        <div key={f.id} className="rounded-xl border border-gray-200 p-4 bg-white shadow-sm hover:shadow-md hover:border-gray-300 transition-all">
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className="text-lg" aria-hidden>{f.tipo === 'quiz' ? '📋' : '🧮'}</span>
+                            <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${f.tipo === 'quiz' ? 'bg-blue-100 text-blue-800' : 'bg-emerald-100 text-emerald-800'}`}>
+                              {f.tipo === 'quiz' ? 'Quiz' : 'Calculadora'}
+                            </span>
+                          </div>
+                          <h3 className="text-sm font-semibold text-gray-900 mb-1">{f.name}</h3>
+                          <p className="text-xs text-gray-600 mb-3">{f.description}</p>
+                          <button
+                            type="button"
+                            onClick={() => handleCreateFromFerramenta(f, selectedTema === '_outro' ? 'Outro tema' : getTemaLabel(selectedTema))}
+                            disabled={creating}
+                            className="w-full rounded-lg bg-slate-800 px-3 py-2.5 text-sm font-medium text-white hover:bg-slate-900 disabled:opacity-50 transition-colors"
+                          >
+                            {creating ? 'Gerando...' : 'Criar essa ferramenta'}
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="flex flex-wrap gap-3">
+                      <button
+                        type="button"
+                        onClick={() => setSelectedTema(null)}
+                        className="text-sm text-gray-600 underline hover:text-gray-800"
+                      >
+                        Escolher outro tema
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setShowTextFlow(true)}
+                        className="text-sm text-gray-500 hover:text-gray-700 underline"
+                      >
+                        Definir por texto
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
+            ) : (
+              <div>
+                <p className="text-sm text-gray-500 mb-2">Não foi possível carregar a direção estratégica.</p>
+                <button
+                  type="button"
+                  onClick={() => setShowTextFlow(true)}
+                  className="text-sm text-blue-600 underline hover:text-blue-800"
+                >
+                  Definir objetivo manualmente
+                </button>
+              </div>
+            )
+          ) : !interpretResult?.strategies ? (
             <>
-              {/* Tela 1: Qual é o objetivo deste link? */}
+              {/* Tela 1: Qual é o objetivo deste link? (fluxo por texto) */}
+              <button
+                type="button"
+                onClick={() => setShowTextFlow(false)}
+                className="text-sm text-gray-600 underline hover:text-gray-800 mb-2"
+              >
+                ← Voltar para Direção Estratégica
+              </button>
               <h2 className="text-sm font-semibold text-gray-700 mb-2">Qual é o objetivo deste link?</h2>
               <div className="flex flex-wrap gap-2 mb-3">
                 {LINK_OBJECTIVES.map((obj) => (
@@ -486,124 +822,12 @@ export default function MatrixLinksPage() {
                 {interpreting ? 'Avançando...' : 'Avançar'}
               </button>
             </>
-          ) : strategyView === 'preview' && selectedFlowId ? (
-            <>
-              {/* Tela 4: Preview antes de gerar */}
-              <div ref={suggestionBoxRef}>
-                <p className="text-sm font-semibold text-gray-900 mb-3">Prévia do seu link</p>
-                {(() => {
-                  const flow = getFlowById(selectedFlowId)
-                  const tema = interpretResult.safe_theme ?? interpretResult.interpretacao?.tema ?? interpretResult.o_que_captar ?? 'seu tema'
-                  if (!flow) return null
-                  return (
-                    <div className="space-y-4 text-sm text-gray-700">
-                      <div>
-                        <p className="text-xs font-medium text-gray-500 mb-0.5">Título</p>
-                        <p className="font-medium text-gray-900">{flow.display_name} — {tema}</p>
-                      </div>
-                      <div>
-                        <p className="text-xs font-medium text-gray-500 mb-0.5">Subtítulo</p>
-                        <p>{flow.impact_line}</p>
-                      </div>
-                      <div>
-                        <p className="text-xs font-medium text-gray-500 mb-0.5">Perguntas que serão feitas</p>
-                        <ul className="list-disc list-inside space-y-0.5">{flow.question_labels.map((l, i) => <li key={i}>{l}</li>)}</ul>
-                      </div>
-                      <div>
-                        <p className="text-xs font-medium text-gray-500 mb-0.5">O que a pessoa recebe</p>
-                        <p>{flow.result_preview}</p>
-                      </div>
-                      <div>
-                        <p className="text-xs font-medium text-gray-500 mb-0.5">Como isso vira conversa (CTA)</p>
-                        <p>{flow.cta_default}</p>
-                      </div>
-                      <div className="flex flex-wrap gap-2 pt-2">
-                        <button
-                          type="button"
-                          onClick={() => setStrategyView('detail')}
-                          className="text-sm text-gray-600 underline hover:text-gray-800"
-                        >
-                          Voltar
-                        </button>
-                        <button
-                          type="button"
-                          onClick={handleConfirmAndGenerate}
-                          disabled={creating}
-                          className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
-                        >
-                          {creating ? 'Gerando...' : 'Confirmar e gerar link'}
-                        </button>
-                      </div>
-                    </div>
-                  )
-                })()}
-              </div>
-            </>
-          ) : strategyView === 'detail' && selectedFlowId ? (
-            <>
-              {/* Tela 3: Detalhe do fluxo escolhido */}
-              <div ref={suggestionBoxRef}>
-                {(() => {
-                  const flow = getFlowById(selectedFlowId)
-                  if (!flow) return null
-                  const isQuality = flow.type === 'qualidade'
-                  return (
-                    <>
-                      <div className="flex items-center gap-2 mb-3">
-                        <span
-                          className={`rounded-full px-2 py-0.5 text-xs font-medium ${
-                            isQuality ? 'bg-blue-100 text-blue-800' : 'bg-emerald-100 text-emerald-800'
-                          }`}
-                        >
-                          {isQuality ? 'Qualidade' : 'Volume'}
-                        </span>
-                        <h2 className="text-sm font-semibold text-gray-900">{flow.display_name}</h2>
-                      </div>
-                      <div className="space-y-3 text-sm text-gray-700 mb-4">
-                        <div>
-                          <p className="text-xs font-medium text-gray-500 mb-0.5">O que este link faz</p>
-                          <p>{flow.description}</p>
-                        </div>
-                        <div>
-                          <p className="text-xs font-medium text-gray-500 mb-0.5">Perguntas que serão feitas</p>
-                          <ul className="list-disc list-inside space-y-0.5">{flow.question_labels.map((l, i) => <li key={i}>{l}</li>)}</ul>
-                        </div>
-                        <div>
-                          <p className="text-xs font-medium text-gray-500 mb-0.5">O que a pessoa recebe</p>
-                          <p>{flow.result_preview}</p>
-                        </div>
-                        <div>
-                          <p className="text-xs font-medium text-gray-500 mb-0.5">Como isso vira conversa (CTA)</p>
-                          <p>{flow.cta_default}</p>
-                        </div>
-                      </div>
-                      <div className="flex flex-wrap gap-2">
-                        <button
-                          type="button"
-                          onClick={() => setStrategyView('preview')}
-                          className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
-                        >
-                          Gerar esse link
-                        </button>
-                        <button
-                          type="button"
-                          onClick={handleBackToCards}
-                          className="text-sm text-gray-600 underline hover:text-gray-800"
-                        >
-                          Ver outra estratégia
-                        </button>
-                      </div>
-                    </>
-                  )
-                })()}
-              </div>
-            </>
           ) : (
             <>
-              {/* Tela 2: Entendemos seu objetivo + 1 ou 2 cards (strategyCards) */}
+              {/* Tela 2: Entendemos seu objetivo + 1 ou 2 cards (gerar direto) */}
               <div ref={suggestionBoxRef}>
                 <p className="text-sm font-semibold text-gray-900 mb-1">Entendemos seu objetivo.</p>
-                <p className="text-sm text-gray-700 mb-2">
+                <p className="text-sm text-gray-700 mb-3">
                   Você quer <strong>{OBJETIVO_PHRASE[interpretResult.interpretacao?.objetivo ?? 'captar']}</strong> pessoas sobre <strong>{interpretResult.interpretacao?.tema ?? interpretResult.o_que_captar ?? 'seu tema'}</strong>.
                 </p>
                 {(() => {
@@ -623,31 +847,21 @@ export default function MatrixLinksPage() {
                   return (
                     <>
                       {singleCard ? (
-                        <div className="mb-4">
-                          <p className="text-sm font-medium text-gray-900 mb-1">
-                            Para o seu objetivo, esta é a estratégia mais eficaz.
-                          </p>
-                          <p className="text-sm text-gray-600 mb-1">
-                            Ela foca em agenda, processo e conversão — sem transformar o link em avaliação clínica.
-                          </p>
-                          <p className="text-xs text-gray-500">
-                            Recomendação automática baseada no seu objetivo e no tema informado.
-                          </p>
-                        </div>
+                        <p className="text-sm text-gray-600 mb-4">Para o seu objetivo, esta é a estratégia mais eficaz.</p>
                       ) : (
-                        <p className="text-sm text-gray-700 mb-4">
-                          Identificamos duas estratégias. Escolha uma:
-                        </p>
+                        <p className="text-sm text-gray-700 mb-4">Escolha uma ferramenta:</p>
                       )}
                       <div className={`grid gap-4 mb-4 ${singleCard ? 'grid-cols-1 max-w-md' : 'grid-cols-1 sm:grid-cols-2'}`}>
                         {cards.map((card) => {
                           const isSingle = card.slot === 'single'
+                          const flow = getFlowById(card.flow_id)
                           return (
                             <div
                               key={card.flow_id}
-                              className="rounded-lg border border-gray-200 p-4 bg-gray-50/50 hover:border-gray-300 transition-colors"
+                              className="rounded-xl border border-gray-200 p-4 bg-white shadow-sm hover:shadow-md hover:border-gray-300 transition-all"
                             >
                               <div className="flex items-center gap-2 mb-2">
+                                <span className="text-lg" aria-hidden>{flow?.type === 'qualidade' ? '💬' : '📊'}</span>
                                 <span
                                   className={`rounded-full px-2 py-0.5 text-xs font-medium ${
                                     isSingle ? 'bg-emerald-100 text-emerald-800' : card.slot === 'qualidade' ? 'bg-blue-100 text-blue-800' : 'bg-emerald-100 text-emerald-800'
@@ -657,15 +871,16 @@ export default function MatrixLinksPage() {
                                 </span>
                               </div>
                               <h3 className="text-sm font-semibold text-gray-900 mb-1">{card.title}</h3>
-                              {(card.description ?? (getFlowById(card.flow_id)?.impact_line)) && (
-                                <p className="text-xs text-gray-600 mb-3">{card.description ?? getFlowById(card.flow_id)?.impact_line}</p>
+                              {(card.description ?? flow?.impact_line) && (
+                                <p className="text-xs text-gray-600 mb-3">{card.description ?? flow?.impact_line}</p>
                               )}
                               <button
                                 type="button"
-                                onClick={() => { setSelectedFlowId(card.flow_id); setStrategyView('detail') }}
-                                className="rounded-lg bg-gray-700 px-3 py-2 text-xs font-medium text-white hover:bg-gray-800"
+                                onClick={() => handleCreateFromInterpretCard(card)}
+                                disabled={creating}
+                                className="w-full rounded-lg bg-slate-800 px-3 py-2.5 text-sm font-medium text-white hover:bg-slate-900 disabled:opacity-50 transition-colors"
                               >
-                                {isSingle ? 'Usar esta estratégia' : 'Ver como funciona'}
+                                {creating ? 'Gerando...' : 'Criar essa ferramenta'}
                               </button>
                             </div>
                           )
@@ -674,22 +889,32 @@ export default function MatrixLinksPage() {
                     </>
                   )
                 })()}
-                <button
-                  type="button"
-                  onClick={handleBackToIntention}
-                  className="text-sm text-gray-600 underline hover:text-gray-800"
-                >
-                  Alterar objetivo/tema
-                </button>
+                <div className="flex flex-wrap gap-3">
+                  <button
+                    type="button"
+                    onClick={handleBackToIntention}
+                    className="text-sm text-gray-600 underline hover:text-gray-800"
+                  >
+                    Alterar objetivo/tema
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleBackToStrategy}
+                    className="text-sm text-gray-600 underline hover:text-gray-800"
+                  >
+                    Voltar para Direção Estratégica
+                  </button>
+                </div>
               </div>
             </>
           )}
         </section>
 
         <section ref={linksListRef} className="bg-white rounded-lg border border-gray-200 p-4">
-          <h2 className="text-sm font-semibold text-gray-700 mb-3">Seus links</h2>
+          <h2 className="text-sm font-semibold text-gray-700 mb-1">Banco de quizzes e calculadoras criados</h2>
+          <p className="text-xs text-gray-500 mb-3">Todas as ferramentas que você criou ficam armazenadas aqui. Copie a URL e compartilhe.</p>
           {links.length === 0 ? (
-            <p className="text-gray-500 text-sm">Você ainda não criou nenhum link. Defina o objetivo acima, escolha uma estratégia e confirme para gerar o link.</p>
+            <p className="text-gray-500 text-sm">Sua primeira ferramenta está a um clique acima. Escolha um tema e uma ferramenta para criar.</p>
           ) : (
             <ul className="space-y-4">
               {links.map((link) => {

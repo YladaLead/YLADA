@@ -38,6 +38,8 @@ export async function POST(request: NextRequest) {
     const body = await request.json().catch(() => ({}))
     const flowId = typeof body.flow_id === 'string' ? body.flow_id.trim() : ''
     const interpretacao = body.interpretacao && typeof body.interpretacao === 'object' ? body.interpretacao as Record<string, unknown> : null
+    /** Perguntas customizadas do interpret unificado; se ausente, usa question_labels do catálogo. */
+    const questionsOverride = Array.isArray(body.questions) ? body.questions as Array<{ id: string; label: string; type?: string }> : null
     const templateIdLegacy = typeof body.template_id === 'string' ? body.template_id.trim() : ''
 
     const segment = typeof body.segment === 'string' ? body.segment.trim() || null : null
@@ -45,6 +47,7 @@ export async function POST(request: NextRequest) {
     const subCategory = typeof body.sub_category === 'string' ? body.sub_category.trim() || null : null
     const titleOverride = typeof body.title === 'string' ? body.title.trim() || null : null
     const ctaWhatsapp = typeof body.cta_whatsapp === 'string' ? body.cta_whatsapp.trim() || null : null
+    const ctaSuggestion = typeof body.cta_suggestion === 'string' ? body.cta_suggestion.trim() || null : null
 
     let templateId = templateIdLegacy
     let configJson: Record<string, unknown>
@@ -109,7 +112,7 @@ export async function POST(request: NextRequest) {
       const pageTitle = titleOverride ?? `${flow.display_name} — ${themeDisplay}`
       configJson = {
         title: pageTitle,
-        ctaText: ctaWhatsapp ?? (schema.ctaDefault as string) ?? flow.cta_default,
+        ctaText: ctaSuggestion ?? flow.cta_default ?? (schema.ctaDefault as string) ?? 'Quero analisar meu caso',
         meta: {
           version: 1,
           objective,
@@ -132,7 +135,9 @@ export async function POST(request: NextRequest) {
           brand: { professional_name: '', whatsapp_number: '' },
         },
         form: {
-          fields: flow.question_labels.map((label, i) => ({ id: `q${i + 1}`, label, type: 'text' })),
+          fields: (questionsOverride && questionsOverride.length > 0)
+            ? questionsOverride.map((q) => ({ id: q.id, label: q.label, type: (q.type as string) || 'text' }))
+            : flow.question_labels.map((label, i) => ({ id: `q${i + 1}`, label, type: 'text' })),
           submit_label: 'Ver resultado',
         },
         result: {

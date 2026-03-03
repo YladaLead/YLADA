@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { YLADA_MENU_ITEMS, getYladaAreaPathPrefix } from '@/config/ylada-areas'
+import { useAuth } from '@/hooks/useAuth'
 
 interface YladaSidebarProps {
   areaCodigo: string
@@ -19,6 +20,8 @@ export default function YladaSidebar({
 }: YladaSidebarProps) {
   const pathname = usePathname()
   const prefix = getYladaAreaPathPrefix(areaCodigo)
+  const { signOut, userProfile } = useAuth()
+  const isAdmin = userProfile?.is_admin === true
 
   const content = (
     <aside className="flex flex-col h-full bg-white border-r border-gray-200 w-56">
@@ -27,7 +30,7 @@ export default function YladaSidebar({
           YLADA · {areaLabel}
         </Link>
       </div>
-      <nav className="flex-1 p-3 space-y-1">
+      <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
         {YLADA_MENU_ITEMS.map((item) => {
           const href = `${prefix}/${item.path}`
           const isActive = pathname === href || pathname?.startsWith(href + '/')
@@ -47,6 +50,36 @@ export default function YladaSidebar({
             </Link>
           )
         })}
+        <div className="pt-3 mt-3 border-t border-gray-200 space-y-1">
+          {isAdmin && (
+            <>
+              <Link
+                href="/pt/wellness"
+                onClick={onMobileClose}
+                className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100"
+              >
+                <span aria-hidden>🌿</span>
+                Wellness
+              </Link>
+              <Link
+                href="/admin"
+                onClick={onMobileClose}
+                className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100"
+              >
+                <span aria-hidden>⚙️</span>
+                Admin
+              </Link>
+            </>
+          )}
+          <button
+            type="button"
+            onClick={() => { signOut(); onMobileClose?.() }}
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-700 hover:bg-red-50 hover:text-red-600 transition-colors"
+          >
+            <span aria-hidden>🚪</span>
+            Sair
+          </button>
+        </div>
       </nav>
     </aside>
   )

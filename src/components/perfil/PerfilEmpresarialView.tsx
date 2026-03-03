@@ -33,6 +33,7 @@ import {
   type ProfileFieldDef,
   PROFILE_TYPE_BY_PROFESSION,
 } from '@/config/ylada-profile-flows'
+import { getTemasForProfession } from '@/config/ylada-temas'
 
 interface PerfilEmpresarialViewProps {
   areaCodigo: string
@@ -512,6 +513,31 @@ export default function PerfilEmpresarialView({ areaCodigo, areaLabel }: PerfilE
                       )
                     })}
                   </div>
+                  {isLastStep && areaCodigo === 'ylada' && (
+                    <div className="mt-6 pt-4 border-t border-gray-200">
+                      <h3 className="text-sm font-medium text-gray-700 mb-2">Quais temas você atende? <span className="text-gray-400 font-normal">(opcional)</span></h3>
+                      <p className="text-xs text-gray-500 mb-3">Esses temas aparecem primeiro ao criar links. Se não escolher, usamos os padrão da sua profissão.</p>
+                      <div className="flex flex-wrap gap-2">
+                        {getTemasForProfession(form.profession || null).map((t) => {
+                          const temasArr = Array.isArray(form.area_specific?.temas_atuacao) ? form.area_specific.temas_atuacao as string[] : []
+                          const checked = temasArr.includes(t.value)
+                          return (
+                            <label key={t.value} className="inline-flex items-center gap-1.5 text-sm">
+                              <input
+                                type="checkbox"
+                                checked={checked}
+                                onChange={() => {
+                                  const next = checked ? temasArr.filter((x) => x !== t.value) : [...temasArr, t.value]
+                                  updateAreaSpec('temas_atuacao', next.length ? next : null)
+                                }}
+                              />
+                              {t.label}
+                            </label>
+                          )
+                        })}
+                      </div>
+                    </div>
+                  )}
                   {stepCopy.reinforcement && (
                     <p className="text-xs text-indigo-600 mt-4">{stepCopy.reinforcement}</p>
                   )}

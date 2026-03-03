@@ -1,408 +1,241 @@
 'use client'
 
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import YladaAreaShell from '@/components/ylada/YladaAreaShell'
-import {
-  deriveStrategicProfile,
-  getStrategicIntro,
-  getAdaptiveDiagnosisIntro,
-  getAdvancedCta,
-} from '@/lib/ylada'
-import type { StrategicProfile } from '@/lib/ylada'
-import type { ProfileDataInput } from '@/lib/ylada/strategic-profile'
-import {
-  LAB_PROFILE_TYPES,
-  LAB_DOMINANT_PAINS,
-  LAB_URGENCY_LEVELS,
-  LAB_SELF_STAGES,
-  LAB_PROFILE_QUESTIONS,
-  LAB_PAIN_TO_PROFILE_DOR,
-  LAB_URGENCY_TO_OBJETIVO,
-  LAB_STAGE_TO_FASE,
-} from '@/config/ylada-lab'
+import { getTemasForProfession, getTemaLabel } from '@/config/ylada-temas'
+import { getFerramentasForTema } from '@/config/ylada-temas-ferramentas'
+import { PERFIS_SIMULADOS, SIMULATE_COOKIE_NAME } from '@/data/perfis-simulados'
 
-type LabState = {
-  profileType: string
-  dominantPain: string
-  urgencyLevel: string
-  selfStage: string
-  answers: Record<string, string>
-  overridesEnabled: boolean
-  overrides: {
-    dominantPain?: string
-    urgencyLevel?: string
-    maturityStage?: string
-  }
+const COOKIE_MAX_AGE = 60 * 60 * 24 // 24h
+
+function setSimulateCookie(key: string) {
+  if (typeof document === 'undefined') return
+  document.cookie = `${SIMULATE_COOKIE_NAME}=${encodeURIComponent(key)}; path=/; max-age=${COOKIE_MAX_AGE}; SameSite=Lax`
 }
 
-const INITIAL_STATE: LabState = {
-  profileType: '',
-  dominantPain: '',
-  urgencyLevel: '',
-  selfStage: '',
-  answers: {},
-  overridesEnabled: false,
-  overrides: {},
+function clearSimulateCookie() {
+  if (typeof document === 'undefined') return
+  document.cookie = `${SIMULATE_COOKIE_NAME}=; path=/; max-age=0`
 }
 
-function buildSyntheticProfile(state: LabState): ProfileDataInput {
-  const pt = state.profileType
-  const professionByType: Record<string, { profile_type: string; profession: string }> = {
-    profissional_liberal: { profile_type: 'liberal', profession: 'medico' },
-    vendedor: { profile_type: 'vendas', profession: 'vendedor_suplementos' },
-    wellness: { profile_type: 'vendas', profession: 'wellness' },
-    nutricionista: { profile_type: 'liberal', profession: 'nutricionista' },
-    clinica: { profile_type: 'liberal', profession: 'clinica' },
-    outro: { profile_type: 'liberal', profession: 'outro' },
-  }
-  const { profile_type, profession } = professionByType[pt] ?? { profile_type: 'liberal', profession: 'outro' }
-  const dor = state.dominantPain ? (LAB_PAIN_TO_PROFILE_DOR[state.dominantPain] ?? 'agenda_vazia') : 'agenda_vazia'
-  const fase = state.selfStage ? (LAB_STAGE_TO_FASE[state.selfStage] ?? 'em_crescimento') : 'em_crescimento'
-  const capacidadeByStage: Record<string, number> = { iniciante: 5, intermediario: 15, avancado: 25 }
-  const tempoByStage: Record<string, number> = { iniciante: 1, intermediario: 4, avancado: 8 }
-  const capacidade = state.selfStage ? capacidadeByStage[state.selfStage] ?? 15 : 15
-  const tempo = state.selfStage ? tempoByStage[state.selfStage] ?? 4 : 4
-
-  return {
-    profile_type,
-    profession,
-    dor_principal: dor,
-    fase_negocio: fase,
-    capacidade_semana: capacidade,
-    tempo_atuacao_anos: tempo,
-  }
-}
-
-function applyOverrides(
-  profile: StrategicProfile,
-  state: LabState
-): StrategicProfile {
-  if (!state.overridesEnabled || !state.overrides) return profile
-  return {
-    ...profile,
-    ...(state.overrides.dominantPain && {
-      dominantPain: state.overrides.dominantPain as StrategicProfile['dominantPain'],
-    }),
-    ...(state.overrides.urgencyLevel && {
-      urgencyLevel: state.overrides.urgencyLevel as StrategicProfile['urgencyLevel'],
-    }),
-    ...(state.overrides.maturityStage && {
-      maturityStage: state.overrides.maturityStage as StrategicProfile['maturityStage'],
-    }),
-  }
-}
+type LabStep = 'perfil' | 'tema' | 'cards'
 
 export default function YladaLabPage() {
-  const [state, setState] = useState<LabState>(INITIAL_STATE)
-  const [result, setResult] = useState<{
-    strategicProfile: StrategicProfile
-    intro: { title: string; subtitle: string; micro: string }
-    diagnosisOpening: string
-    cta: string
+  const [step, setStep] = useState<LabStep>('perfil')
+  const [selectedProfileKey, setSelectedProfileKey] = useState('')
+  const [selectedTema, setSelectedTema] = useState('')
+  const [strategyData, setStrategyData] = useState<{
+    professional_diagnosis: { summary_lines: string[]; focus: string }
+    strategic_focus: string
+    strategies: Array<{ flow_id: string; type: string; title: string; reason: string; theme: string; cta_suggestion: string }>
+    simulated_profile_label?: string
   } | null>(null)
-  const [showJson, setShowJson] = useState(false)
-  const [generateError, setGenerateError] = useState<string | null>(null)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
-    if (generateError) setGenerateError(null)
-  }, [state.profileType, state.dominantPain, state.urgencyLevel, state.selfStage])
+  const profile = selectedProfileKey ? PERFIS_SIMULADOS.find((p) => p.key === selectedProfileKey) : null
+  const profileData = profile?.profile
+  const temasFromProfile = Array.isArray(profileData?.area_specific?.temas_atuacao) && (profileData!.area_specific!.temas_atuacao as string[]).length > 0
+    ? (profileData!.area_specific!.temas_atuacao as string[]).map((v) => ({ value: v, label: getTemaLabel(v) }))
+    : getTemasForProfession(profileData?.profession ?? null)
 
-  const questions = useMemo(
-    () => (state.profileType ? LAB_PROFILE_QUESTIONS[state.profileType] ?? LAB_PROFILE_QUESTIONS.outro : []),
-    [state.profileType]
-  )
-
-  const canGenerate = Boolean(
-    String(state.profileType ?? '').trim() &&
-    String(state.dominantPain ?? '').trim() &&
-    String(state.urgencyLevel ?? '').trim() &&
-    String(state.selfStage ?? '').trim()
-  )
-
-  const handleGenerate = () => {
-    if (!canGenerate) {
-      setGenerateError('Selecione perfil base, principal dor, urgência e estágio.')
+  const handleOkPerfil = useCallback(() => {
+    if (!selectedProfileKey) {
+      setError('Selecione um perfil.')
       return
     }
-    setGenerateError(null)
-    const syntheticProfile = buildSyntheticProfile(state)
-    const objetivo = state.urgencyLevel ? LAB_URGENCY_TO_OBJETIVO[state.urgencyLevel] ?? 'captar' : 'captar'
-    const areaProf = state.profileType === 'vendedor' || state.profileType === 'wellness' ? 'vendas' : 'profissional_liberal'
-    const derived = deriveStrategicProfile(syntheticProfile, {
-      objetivo,
-      tema: 'lab',
-      area_profissional: areaProf,
+    setError(null)
+    setSimulateCookie(selectedProfileKey)
+    setLoading(true)
+    fetch('/api/ylada/strategy', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ segment: 'ylada' }),
     })
-    const finalProfile = applyOverrides(derived, state)
+      .then((r) => r.json())
+      .then((json) => {
+        if (json?.success && json?.data) {
+          setStrategyData(json.data)
+          setStep('tema')
+        } else {
+          setError(json?.error || 'Erro ao carregar estratégia.')
+        }
+      })
+      .catch(() => setError('Erro de conexão.'))
+      .finally(() => setLoading(false))
+  }, [selectedProfileKey])
 
-    const intro = getStrategicIntro({
-      strategySlot: 'single',
-      objective: objetivo,
-      area_profissional: areaProf,
-      strategic_profile: finalProfile,
-    })
-    const diagnosisOpening = getAdaptiveDiagnosisIntro(finalProfile, undefined)
-    const cta = getAdvancedCta(finalProfile, 'Fale comigo no WhatsApp')
+  const handleOkTema = useCallback(() => {
+    if (!selectedTema) {
+      setError('Selecione um tema.')
+      return
+    }
+    setError(null)
+    setStep('cards')
+  }, [selectedTema])
 
-    setResult({
-      strategicProfile: finalProfile,
-      intro,
-      diagnosisOpening,
-      cta,
-    })
-  }
-
-  const setAnswer = (id: string, value: string) => {
-    setState((s) => ({ ...s, answers: { ...s.answers, [id]: value } }))
-  }
+  const handleReset = useCallback(() => {
+    clearSimulateCookie()
+    setStep('perfil')
+    setSelectedProfileKey('')
+    setSelectedTema('')
+    setStrategyData(null)
+    setError(null)
+  }, [])
 
   return (
     <YladaAreaShell areaCodigo="ylada" areaLabel="YLADA">
-      <div className="max-w-2xl mx-auto space-y-8">
+      <div className="max-w-xl mx-auto space-y-6">
         <header>
-          <h1 className="text-2xl font-bold text-gray-900 tracking-tight">
-            YLADA Lab
-          </h1>
-          <p className="text-gray-600 text-sm mt-1">
-            Sandbox estratégico. Escolha perfil, refinadores e perguntas; gere o diagnóstico sem salvar. Sem banco.
+          <h1 className="text-xl font-bold text-gray-900">YLADA Lab</h1>
+          <p className="text-sm text-gray-500 mt-0.5">
+            Teste o fluxo tema → ferramenta. Selecione, confirme OK e veja como o sistema reage.
           </p>
         </header>
 
-        {/* Bloco 1 — Escolha de Perfil */}
-        <section className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-          <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">
-            1. Escolha de perfil base
-          </h2>
+        {error && (
+          <div className="rounded-lg bg-red-50 border border-red-200 p-3 text-sm text-red-800">
+            {error}
+          </div>
+        )}
+
+        {/* Step 1: Perfil */}
+        <section className={`rounded-xl border-2 p-4 ${step === 'perfil' ? 'border-blue-300 bg-blue-50/30' : 'border-gray-200 bg-white'}`}>
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-sm font-semibold text-gray-700">1. Perfil simulado</h2>
+            {step !== 'perfil' && (
+              <span className="text-xs text-green-600 font-medium">✓ OK</span>
+            )}
+          </div>
           <select
-            value={state.profileType}
-            onChange={(e) => setState((s) => ({ ...s, profileType: e.target.value, answers: {} }))}
-            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+            value={selectedProfileKey}
+            onChange={(e) => setSelectedProfileKey(e.target.value)}
+            disabled={step !== 'perfil'}
+            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 bg-white disabled:bg-gray-50 disabled:text-gray-600"
           >
             <option value="">Selecione o perfil</option>
-            {LAB_PROFILE_TYPES.map((p) => (
-              <option key={p.value} value={p.value}>
-                {p.label}
-              </option>
+            {PERFIS_SIMULADOS.map((p) => (
+              <option key={p.key} value={p.key}>{p.label}</option>
             ))}
           </select>
-        </section>
-
-        {/* Bloco 2 — Refinadores estratégicos */}
-        <section className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-          <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">
-            2. Refinadores estratégicos
-          </h2>
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Principal dor hoje</label>
-              <select
-                value={state.dominantPain}
-                onChange={(e) => setState((s) => ({ ...s, dominantPain: e.target.value }))}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-              >
-                <option value="">Selecione</option>
-                {LAB_DOMINANT_PAINS.map((p) => (
-                  <option key={p.value} value={p.value}>{p.label}</option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Urgência</label>
-              <select
-                value={state.urgencyLevel}
-                onChange={(e) => setState((s) => ({ ...s, urgencyLevel: e.target.value }))}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-              >
-                <option value="">Selecione</option>
-                {LAB_URGENCY_LEVELS.map((p) => (
-                  <option key={p.value} value={p.value}>{p.label}</option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Você se considera</label>
-              <select
-                value={state.selfStage}
-                onChange={(e) => setState((s) => ({ ...s, selfStage: e.target.value }))}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-              >
-                <option value="">Selecione</option>
-                {LAB_SELF_STAGES.map((p) => (
-                  <option key={p.value} value={p.value}>{p.label}</option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          {/* Toggle Overrides */}
-          <div className="mt-4 pt-4 border-t border-gray-200">
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={state.overridesEnabled}
-                onChange={(e) => setState((s) => ({ ...s, overridesEnabled: e.target.checked }))}
-                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-              />
-              <span className="text-sm font-medium text-gray-700">
-                Forçar valores estratégicos (modo teste)
-              </span>
-            </label>
-            {state.overridesEnabled && (
-              <div className="mt-3 grid gap-3 sm:grid-cols-3">
-                <div>
-                  <label className="block text-xs font-medium text-gray-500 mb-1">Forçar dominantPain</label>
-                  <select
-                    value={state.overrides?.dominantPain ?? ''}
-                    onChange={(e) =>
-                      setState((s) => ({
-                        ...s,
-                        overrides: { ...s.overrides, dominantPain: e.target.value || undefined },
-                      }))
-                    }
-                    className="w-full rounded border border-gray-300 px-2 py-1.5 text-sm"
-                  >
-                    <option value="">—</option>
-                    <option value="agenda">agenda</option>
-                    <option value="posicionamento">posicionamento</option>
-                    <option value="conversao">conversao</option>
-                    <option value="autoridade">autoridade</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-gray-500 mb-1">Forçar urgencyLevel</label>
-                  <select
-                    value={state.overrides?.urgencyLevel ?? ''}
-                    onChange={(e) =>
-                      setState((s) => ({
-                        ...s,
-                        overrides: { ...s.overrides, urgencyLevel: e.target.value || undefined },
-                      }))
-                    }
-                    className="w-full rounded border border-gray-300 px-2 py-1.5 text-sm"
-                  >
-                    <option value="">—</option>
-                    <option value="alta">alta</option>
-                    <option value="media">media</option>
-                    <option value="baixa">baixa</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-gray-500 mb-1">Forçar maturityStage</label>
-                  <select
-                    value={state.overrides?.maturityStage ?? ''}
-                    onChange={(e) =>
-                      setState((s) => ({
-                        ...s,
-                        overrides: { ...s.overrides, maturityStage: e.target.value || undefined },
-                      }))
-                    }
-                    className="w-full rounded border border-gray-300 px-2 py-1.5 text-sm"
-                  >
-                    <option value="">—</option>
-                    <option value="iniciante">iniciante</option>
-                    <option value="instavel">instavel</option>
-                    <option value="crescendo">crescendo</option>
-                    <option value="consolidado">consolidado</option>
-                  </select>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Botão para avançar — sempre clicável; ao clicar sem preencher, mostra o que falta */}
-          <div className="mt-5 pt-4 border-t border-gray-200">
+          {step === 'perfil' && (
             <button
               type="button"
-              onClick={handleGenerate}
-              className="w-full rounded-lg bg-blue-600 px-4 py-3 text-sm font-medium text-white hover:bg-blue-700"
+              onClick={handleOkPerfil}
+              disabled={loading || !selectedProfileKey}
+              className="mt-3 w-full rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
             >
-              Gerar Diagnóstico
+              {loading ? 'Carregando...' : 'OK'}
             </button>
-            {generateError && (
-              <p className="mt-2 text-sm text-amber-700 text-center" role="alert">
-                {generateError}
-              </p>
-            )}
-            {!canGenerate && !generateError && (
-              <p className="mt-2 text-xs text-gray-500 text-center">
-                Preencha perfil e os 3 refinadores para ver o resultado.
-              </p>
-            )}
-          </div>
+          )}
         </section>
 
-        {/* Bloco 3 — Perguntas estratégicas adaptadas */}
-        {questions.length > 0 && (
-          <section className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-            <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">
-              3. Perguntas estratégicas adaptadas
-            </h2>
-            <div className="space-y-3">
-              {questions.map((q) => (
-                <div key={q.id}>
-                  <label className="block text-sm text-gray-700 mb-1">{q.text}</label>
-                  <input
-                    type="text"
-                    value={state.answers[q.id] ?? ''}
-                    onChange={(e) => setAnswer(q.id, e.target.value)}
-                    placeholder="Sua resposta (simulação)"
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                  />
+        {/* Step 2: Tema */}
+        {step !== 'perfil' && (
+          <section className={`rounded-xl border-2 p-4 ${step === 'tema' ? 'border-blue-300 bg-blue-50/30' : 'border-gray-200 bg-white'}`}>
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-sm font-semibold text-gray-700">2. Tema</h2>
+              {step === 'cards' && (
+                <span className="text-xs text-green-600 font-medium">✓ OK</span>
+              )}
+            </div>
+            <p className="text-xs text-gray-500 mb-2">
+              {strategyData?.simulated_profile_label && (
+                <>Simulando: <strong>{strategyData.simulated_profile_label}</strong></>
+              )}
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {temasFromProfile.map((t) => (
+                <button
+                  key={t.value}
+                  type="button"
+                  onClick={() => step === 'tema' && setSelectedTema(t.value)}
+                  disabled={step !== 'tema'}
+                  className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
+                    selectedTema === t.value
+                      ? 'bg-blue-600 text-white'
+                      : step === 'tema'
+                        ? 'bg-gray-100 text-gray-800 hover:bg-gray-200'
+                        : 'bg-gray-50 text-gray-600'
+                  }`}
+                >
+                  {t.label}
+                </button>
+              ))}
+              {step === 'tema' && (
+                <button
+                  type="button"
+                  onClick={() => setSelectedTema('_outro')}
+                  className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
+                    selectedTema === '_outro' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
+                  }`}
+                >
+                  Outro tema
+                </button>
+              )}
+            </div>
+            {step === 'tema' && (
+              <button
+                type="button"
+                onClick={handleOkTema}
+                disabled={!selectedTema}
+                className="mt-3 w-full rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+              >
+                OK
+              </button>
+            )}
+          </section>
+        )}
+
+        {/* Step 3: Ferramentas concretas */}
+        {step === 'cards' && strategyData && (
+          <section className="rounded-xl border-2 border-emerald-200 bg-emerald-50/30 p-4">
+            <h2 className="text-sm font-semibold text-gray-700 mb-3">3. Ferramentas para &quot;{selectedTema === '_outro' ? 'Outro tema' : getTemaLabel(selectedTema)}&quot;</h2>
+            <div className="rounded-lg bg-slate-50 border border-slate-200 p-3 mb-4">
+              <p className="text-xs font-medium text-slate-600 mb-1">Direção Estratégica</p>
+              {strategyData.professional_diagnosis.summary_lines.map((line, i) => (
+                <p key={i} className="text-sm text-slate-700">{line}</p>
+              ))}
+              <p className="text-sm font-medium text-slate-800 mt-1">Foco: {strategyData.strategic_focus}</p>
+            </div>
+            <div className="grid gap-3 sm:grid-cols-2">
+              {getFerramentasForTema(selectedTema).map((f) => (
+                <div key={f.id} className="rounded-lg border border-gray-200 p-3 bg-white">
+                  <span className={`inline-block rounded px-2 py-0.5 text-xs font-medium mb-2 ${f.tipo === 'quiz' ? 'bg-blue-100 text-blue-800' : 'bg-emerald-100 text-emerald-800'}`}>
+                    {f.tipo === 'quiz' ? 'Quiz' : 'Calculadora'}
+                  </span>
+                  <p className="text-sm font-semibold text-gray-900">{f.name}</p>
+                  <p className="text-xs text-gray-600 mt-1">{f.description}</p>
                 </div>
               ))}
             </div>
-            <div className="mt-4">
+            <div className="mt-4 flex gap-2">
+              <a
+                href="/pt/links"
+                className="flex-1 rounded-lg bg-slate-800 px-4 py-2.5 text-sm font-medium text-white text-center hover:bg-slate-900"
+              >
+                Testar em Links
+              </a>
               <button
                 type="button"
-                onClick={handleGenerate}
-                className="rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-700"
+                onClick={handleReset}
+                className="rounded-lg border border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
               >
-                Gerar Diagnóstico
+                Reiniciar
               </button>
             </div>
           </section>
         )}
 
-        {/* Bloco 4 — Resultado estratégico */}
-        {result && (
-          <section className="rounded-xl border-2 border-emerald-200 bg-emerald-50/50 p-5 shadow-sm">
-            <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wider mb-4">
-              4. Resultado estratégico
-            </h2>
-            <div className="space-y-4 text-gray-900">
-              <div>
-                <h3 className="text-xs font-semibold text-gray-500 uppercase mb-1">Strategic Intro</h3>
-                <p className="font-medium">{result.intro.title}</p>
-                <p className="text-sm text-gray-700">{result.intro.subtitle}</p>
-                <p className="text-xs text-gray-500">{result.intro.micro}</p>
-              </div>
-              <div>
-                <h3 className="text-xs font-semibold text-gray-500 uppercase mb-1">Diagnóstico (abertura)</h3>
-                <p className="text-sm">{result.diagnosisOpening}</p>
-              </div>
-              <div>
-                <h3 className="text-xs font-semibold text-gray-500 uppercase mb-1">First Move / CTA</h3>
-                <p className="text-sm font-medium">{result.cta}</p>
-              </div>
-            </div>
-
-            <div className="mt-4 pt-4 border-t border-gray-200">
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={showJson}
-                  onChange={(e) => setShowJson(e.target.checked)}
-                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                />
-                <span className="text-sm font-medium text-gray-700">Mostrar JSON estratégico</span>
-              </label>
-              {showJson && (
-                <pre className="mt-2 rounded-lg bg-gray-900 p-4 text-xs text-gray-100 overflow-auto">
-                  {JSON.stringify(result.strategicProfile, null, 2)}
-                </pre>
-              )}
-            </div>
-          </section>
+        {step !== 'perfil' && step !== 'cards' && (
+          <button
+            type="button"
+            onClick={handleReset}
+            className="text-sm text-gray-500 hover:text-gray-700 underline"
+          >
+            Reiniciar teste
+          </button>
         )}
       </div>
     </YladaAreaShell>

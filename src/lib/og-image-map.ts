@@ -48,6 +48,8 @@ export const OG_IMAGE_SLUG_MAP: Record<string, string> = {
   'avaliacao-emagrecimento-consciente': 'avaliacao-emagrecimento-consciente.jpg',
   'quiz-emagrecimento-consciente': 'avaliacao-emagrecimento-consciente.jpg',
   'inibidores-apetite': 'avaliacao-emagrecimento-consciente.jpg',
+  'avaliacao-sono-energia': 'avaliacao-sono-energia.jpg',
+  'quiz-sono-energia': 'avaliacao-sono-energia.jpg',
   
   // Diagnósticos
   'diagnostico-eletrolitos': 'diagnostico-eletrolitos.jpg',
@@ -110,6 +112,7 @@ export const OG_IMAGE_SLUG_MAP: Record<string, string> = {
   'custo-energia': 'hype-custo-energia.jpeg',
   'calc-custo-energia': 'hype-custo-energia.jpeg',
   'calculadora-custo-energia': 'hype-custo-energia.jpeg',
+  'energia-tarde': 'energia-tarde.jpg',
   
   // Fallback padrão
   'default': 'default.jpg',

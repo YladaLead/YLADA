@@ -38,7 +38,7 @@ const medico: YladaNoelProfileRow = {
   rotina_atual_resumo: 'Atendo 3–4 dias por semana, pouco tempo para divulgar',
   frequencia_postagem: null,
   observacoes: 'Perfil simulado para testes.',
-  area_specific: { especialidades: ['clínica_geral'] },
+  area_specific: { especialidades: ['clínica_geral'], temas_atuacao: ['emagrecimento', 'intestino', 'alimentacao'] },
 }
 
 /** Vendedor de suplementos (Nutra) — funil, comissão, recorrência. */
@@ -64,7 +64,7 @@ const vendedorNutra: YladaNoelProfileRow = {
   rotina_atual_resumo: 'Vendo por WhatsApp e redes, quero ferramentas para qualificar',
   frequencia_postagem: null,
   observacoes: 'Perfil simulado para testes.',
-  area_specific: { canal_principal_vendas: 'whatsapp' },
+  area_specific: { canal_principal_vendas: 'whatsapp', temas_atuacao: ['b12_vitaminas', 'energia', 'emagrecimento'] },
 }
 
 /** Nutricionista liberal — atendimento, agenda, paciente. */
@@ -90,7 +90,7 @@ const nutri: YladaNoelProfileRow = {
   rotina_atual_resumo: 'Atendo presencial e online, quero ferramentas para captar',
   frequencia_postagem: null,
   observacoes: 'Perfil simulado para testes.',
-  area_specific: { area_nutri: 'emagrecimento' },
+  area_specific: { area_nutri: 'emagrecimento', temas_atuacao: ['emagrecimento', 'intestino', 'energia'] },
 }
 
 /** Coach — serviço, programa, entrega. */
@@ -116,7 +116,7 @@ const coach: YladaNoelProfileRow = {
   rotina_atual_resumo: 'Trabalho com programas online, pouca divulgação estruturada',
   frequencia_postagem: null,
   observacoes: 'Perfil simulado para testes.',
-  area_specific: { modelo_entrega_coach: 'programa_online' },
+  area_specific: { modelo_entrega_coach: 'programa_online', temas_atuacao: ['carreira', 'produtividade', 'autoconhecimento'] },
 }
 
 /** Dentista (odontologia) — consultório, agenda, convênio/particular. */
@@ -142,7 +142,7 @@ const odonto: YladaNoelProfileRow = {
   rotina_atual_resumo: 'Clínica própria, quero ferramentas para captar e qualificar',
   frequencia_postagem: null,
   observacoes: 'Perfil simulado para testes.',
-  area_specific: {},
+  area_specific: { temas_atuacao: ['saude_bucal', 'clareamento', 'implantes'] },
 }
 
 /** Psicólogo — atendimento clínico, agenda, particular/convênio. */
@@ -168,7 +168,7 @@ const psi: YladaNoelProfileRow = {
   rotina_atual_resumo: 'Atendo presencial e online, quero link para quem busca terapia',
   frequencia_postagem: null,
   observacoes: 'Perfil simulado para testes.',
-  area_specific: {},
+  area_specific: { temas_atuacao: ['ansiedade', 'sono', 'autoconhecimento'] },
 }
 
 export const PERFIS_SIMULADOS: PerfilSimuladoMeta[] = [
