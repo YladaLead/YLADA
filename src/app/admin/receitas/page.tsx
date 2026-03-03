@@ -29,6 +29,7 @@ interface Receita {
   is_renovacao?: boolean // Se é renovação
   data_ultimo_pagamento?: string | null // Data do último pagamento
   ref_vendedor?: string | null // Atribuição de venda (ex: paula)
+  nome_presidente?: string | null // Presidente do usuário (equipe wellness)
 }
 
 interface Totais {
@@ -478,6 +479,30 @@ export default function AdminReceitas() {
     return `${symbol} ${valor.toFixed(2).replace('.', ',')}`
   }
 
+  const exportarPlanilhaReceitas = () => {
+    const headers = ['Usuário', 'Email', 'Área', 'Presidente', 'Vendedor', 'Tipo', 'Valor', 'Categoria', 'Status', 'Próximo Vencimento']
+    const rows = receitasFiltradas.map((r) => [
+      r.usuario,
+      r.email,
+      r.area,
+      r.nome_presidente || '',
+      r.ref_vendedor || '',
+      r.tipo === 'mensal' ? 'Mensal' : r.tipo === 'anual' ? 'Anual' : 'Gratuito',
+      String(r.valor),
+      r.categoria || '',
+      r.status,
+      r.proxVencimento ? new Date(r.proxVencimento).toLocaleDateString('pt-BR') : '',
+    ])
+    const csv = [headers.join(';'), ...rows.map((row) => row.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(';'))].join('\n')
+    const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `receitas-${new Date().toISOString().slice(0, 10)}.csv`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -502,6 +527,14 @@ export default function AdminReceitas() {
             </div>
             <div className="flex items-center space-x-3">
             <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={exportarPlanilhaReceitas}
+                disabled={loading || receitasFiltradas.length === 0}
+                className="bg-teal-600 text-white text-sm px-4 py-2 rounded-lg hover:bg-teal-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                📥 Exportar planilha (CSV)
+              </button>
               <Link
                 href="/admin/subscriptions"
                 className="bg-green-600 text-white text-sm px-4 py-2 rounded-lg hover:bg-green-700 transition-colors font-medium"
@@ -1192,8 +1225,11 @@ export default function AdminReceitas() {
 
                 {/* Tabela de Assinaturas */}
                 <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                  <div className="overflow-x-auto">
-                    <table className="min-w-full divide-y divide-gray-200">
+                  <div
+                    className="overflow-x-auto w-full max-w-full touch-pan-x"
+                    style={{ WebkitOverflowScrolling: 'touch' }}
+                  >
+                    <table className="min-w-full divide-y divide-gray-200" style={{ minWidth: '900px' }}>
                       <thead className="bg-gray-50">
                         <tr>
                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Usuário</th>
@@ -1203,6 +1239,7 @@ export default function AdminReceitas() {
                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Categoria</th>
                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Vendedor</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Presidente</th>
                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Próximo Vencimento</th>
                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Histórico</th>
                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
@@ -1211,7 +1248,7 @@ export default function AdminReceitas() {
                       <tbody className="bg-white divide-y divide-gray-200">
                         {receitasFiltradas.length === 0 ? (
                           <tr>
-                            <td colSpan={10} className="px-6 py-12 text-center text-gray-500">
+                            <td colSpan={11} className="px-6 py-12 text-center text-gray-500">
                               Nenhuma assinatura encontrada
                             </td>
                           </tr>
@@ -1255,6 +1292,11 @@ export default function AdminReceitas() {
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap">
                                 <span className="text-sm text-gray-700">{receita.ref_vendedor ? String(receita.ref_vendedor) : '—'}</span>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <span className="text-sm text-gray-700" title={receita.nome_presidente || ''}>
+                                  {receita.nome_presidente ? String(receita.nome_presidente) : '—'}
+                                </span>
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap">
                                 <div className="text-sm text-gray-900">

@@ -70,11 +70,11 @@ export async function GET(request: NextRequest) {
       })
     }
 
-    // Buscar perfis dos usuários
+    // Buscar perfis dos usuários (inclui nome_presidente como fallback)
     const userIds = subscriptions.map((s: any) => s.user_id)
     const { data: profiles, error: profilesError } = await supabaseAdmin
       .from('user_profiles')
-      .select('user_id, email, nome_completo, whatsapp')
+      .select('user_id, email, nome_completo, whatsapp, nome_presidente')
       .in('user_id', userIds)
 
     if (profilesError) {
@@ -88,12 +88,25 @@ export async function GET(request: NextRequest) {
       profileMap.set(profile.user_id, profile)
     })
 
-    // Buscar trial_invites para obter trial_group e nome do presidente
+    // Buscar trial_invites para obter trial_group e nome do presidente (quem gerou o link)
     const { data: invites } = await supabaseAdmin
       .from('trial_invites')
-      .select('used_by_user_id, trial_group, nome_presidente')
+      .select('used_by_user_id, trial_group, nome_presidente, created_by_user_id')
       .in('used_by_user_id', userIds)
       .eq('status', 'used')
+
+    // Se algum invite tem created_by_user_id mas não nome_presidente, buscar em presidentes_autorizados
+    const createdByIds = [...new Set((invites || []).map((i: any) => i.created_by_user_id).filter(Boolean))]
+    let createdByToNome: Record<string, string> = {}
+    if (createdByIds.length > 0) {
+      const { data: pres } = await supabaseAdmin
+        .from('presidentes_autorizados')
+        .select('user_id, nome_completo')
+        .in('user_id', createdByIds)
+      ;(pres || []).forEach((p: any) => {
+        if (p.user_id) createdByToNome[p.user_id] = p.nome_completo || ''
+      })
+    }
 
     // Criar mapas
     const trialGroupMap = new Map<string, string>()
@@ -103,9 +116,17 @@ export async function GET(request: NextRequest) {
         if (invite.trial_group) {
           trialGroupMap.set(invite.used_by_user_id, invite.trial_group)
         }
-        if (invite.nome_presidente) {
-          presidenteMap.set(invite.used_by_user_id, invite.nome_presidente)
+        const nomePres = invite.nome_presidente || (invite.created_by_user_id ? createdByToNome[invite.created_by_user_id] : null)
+        if (nomePres) {
+          presidenteMap.set(invite.used_by_user_id, nomePres)
         }
+      }
+    })
+
+    // Fallback: user_profiles.nome_presidente (vinculado na criação da conta quando usou link do presidente)
+    profiles?.forEach((p: any) => {
+      if (!presidenteMap.has(p.user_id) && p.nome_presidente) {
+        presidenteMap.set(p.user_id, p.nome_presidente)
       }
     })
 

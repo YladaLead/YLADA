@@ -495,6 +495,29 @@ export default function AdminUsuarios() {
     }
   }
 
+  const exportarPlanilhaUsuarios = () => {
+    const headers = ['Nome', 'Email', 'Área', 'Presidente', 'Status', 'Assinatura', 'Leads', 'Links', 'Cliques']
+    const rows = usuarios.map((u) => [
+      u.nome,
+      u.email,
+      u.area,
+      u.nome_presidente_canonico || u.nome_presidente || '',
+      u.status,
+      getAssinaturaTipoLabel(u.assinatura),
+      String(u.leadsGerados),
+      String(u.linksEnviados ?? 0),
+      String(u.cliquesLinks ?? 0),
+    ])
+    const csv = [headers.join(';'), ...rows.map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(';'))].join('\n')
+    const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `usuarios-${new Date().toISOString().slice(0, 10)}.csv`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -545,7 +568,7 @@ export default function AdminUsuarios() {
 
         {/* Filtros */}
         <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200 mb-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Buscar</label>
               <input
@@ -600,6 +623,16 @@ export default function AdminUsuarios() {
                 ))}
               </select>
             </div>
+            <div className="flex items-end">
+              <button
+                type="button"
+                onClick={exportarPlanilhaUsuarios}
+                disabled={loading || usuarios.length === 0}
+                className="px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                📥 Exportar planilha (CSV)
+              </button>
+            </div>
           </div>
         </div>
 
@@ -641,8 +674,11 @@ export default function AdminUsuarios() {
                 <p className="text-gray-500">Nenhum usuário encontrado</p>
               </div>
             ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full min-w-[1000px] divide-y divide-gray-200">
+              <div
+                className="overflow-x-auto w-full max-w-full touch-pan-x"
+                style={{ WebkitOverflowScrolling: 'touch' }}
+              >
+                <table className="w-full min-w-[800px] divide-y divide-gray-200">
                   <thead className="bg-gray-50">
                     <tr>
                       <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Usuário</th>

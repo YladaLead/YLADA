@@ -460,8 +460,11 @@ function AdminPresidentesContent() {
           ) : convites.length === 0 ? (
             <div className="py-8 text-center text-gray-500">Nenhum convite encontrado.</div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
+            <div
+              className="overflow-x-auto w-full max-w-full touch-pan-x"
+              style={{ WebkitOverflowScrolling: 'touch' }}
+            >
+              <table className="min-w-full divide-y divide-gray-200" style={{ minWidth: '500px' }}>
                 <thead>
                   <tr>
                     <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Presidente</th>

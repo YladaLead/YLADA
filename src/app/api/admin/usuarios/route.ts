@@ -95,7 +95,7 @@ export async function GET(request: NextRequest) {
       })
     }
 
-    // Buscar templates (cursos/ferramentas) por usuário
+    // Buscar templates (cursos/ferramentas) por usuário — user_templates (legado)
     const { data: templates } = await supabaseAdmin
       .from('user_templates')
       .select('user_id, views')
@@ -105,10 +105,45 @@ export async function GET(request: NextRequest) {
     const templatesPorUsuario: Record<string, number> = {}
     const cliquesPorUsuario: Record<string, number> = {}
     if (templates) {
-      templates.forEach(template => {
+      templates.forEach((template: { user_id: string; views?: number }) => {
         templatesPorUsuario[template.user_id] = (templatesPorUsuario[template.user_id] || 0) + 1
         cliquesPorUsuario[template.user_id] = (cliquesPorUsuario[template.user_id] || 0) + (template.views || 0)
       })
+    }
+
+    // Incluir ylada_links (links inteligentes integrados à conta) — Links + Cliques
+    try {
+      const { data: yladaLinks } = await supabaseAdmin
+        .from('ylada_links')
+        .select('id, user_id')
+        .in('user_id', userIds)
+
+      if (yladaLinks && yladaLinks.length > 0) {
+        yladaLinks.forEach((link: { id: string; user_id: string }) => {
+          templatesPorUsuario[link.user_id] = (templatesPorUsuario[link.user_id] || 0) + 1
+        })
+
+        // Buscar eventos (views) dos ylada_links para somar cliques
+        const linkIds = yladaLinks.map((l: { id: string }) => l.id)
+        const linkIdToUserId = new Map(yladaLinks.map((l: { id: string; user_id: string }) => [l.id, l.user_id]))
+
+        const { data: yladaEvents } = await supabaseAdmin
+          .from('ylada_link_events')
+          .select('link_id')
+          .in('link_id', linkIds)
+          .eq('event_type', 'view')
+
+        if (yladaEvents) {
+          yladaEvents.forEach((ev: { link_id: string }) => {
+            const uid = linkIdToUserId.get(ev.link_id)
+            if (uid) {
+              cliquesPorUsuario[uid] = (cliquesPorUsuario[uid] || 0) + 1
+            }
+          })
+        }
+      }
+    } catch (err) {
+      console.warn('Erro ao buscar ylada_links (pode não existir):', err)
     }
 
     let presidentesUserIds = new Set<string>()

@@ -39,10 +39,10 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Buscar e validar dados do convite
+    // Buscar e validar dados do convite (inclui nome_presidente para vincular quem gerou o link)
     const { data: invite, error: inviteError } = await supabaseAdmin
       .from('trial_invites')
-      .select('email, nome_completo, whatsapp, status, used_at, expires_at')
+      .select('email, nome_completo, whatsapp, status, used_at, expires_at, nome_presidente')
       .eq('token', token)
       .single()
 
@@ -120,7 +120,7 @@ export async function POST(request: NextRequest) {
 
     const userId = newUser.user.id
 
-    // Criar perfil
+    // Criar perfil (inclui nome_presidente = quem gerou o link, fixado desde a criação)
     const { error: profileError } = await supabaseAdmin
       .from('user_profiles')
       .insert({
@@ -129,6 +129,7 @@ export async function POST(request: NextRequest) {
         nome_completo: invite.nome_completo || invite.email.split('@')[0],
         whatsapp: invite.whatsapp,
         perfil: 'wellness',
+        nome_presidente: invite.nome_presidente || null, // Quem gerou o link (presidente)
       })
 
     if (profileError) {

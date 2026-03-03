@@ -43,8 +43,12 @@ function AdminTrialsContent() {
   // Filtros
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'expired'>('all')
   const [groupFilter, setGroupFilter] = useState<'all' | 'geral' | 'presidentes'>('all')
+  const [presidenteFilter, setPresidenteFilter] = useState<string>('all')
   const [searchTerm, setSearchTerm] = useState('')
   const [fixingId, setFixingId] = useState<string | null>(null)
+
+  // Lista de presidentes únicos (para o filtro)
+  const presidentesUnicos = [...new Set(trials.map((t) => t.nome_presidente).filter(Boolean))].sort() as string[]
 
   // Carregar trials
   const carregarTrials = async () => {
@@ -82,15 +86,22 @@ function AdminTrialsContent() {
     carregarTrials()
   }, [statusFilter, groupFilter])
 
-  // Filtrar por busca
+  // Filtrar por busca e presidente
   const filteredTrials = trials.filter((trial) => {
-    if (!searchTerm) return true
-    const term = searchTerm.toLowerCase()
-    return (
-      trial.nome_completo.toLowerCase().includes(term) ||
-      trial.email.toLowerCase().includes(term) ||
-      trial.whatsapp.includes(term)
-    )
+    if (searchTerm) {
+      const term = searchTerm.toLowerCase()
+      if (
+        !trial.nome_completo.toLowerCase().includes(term) &&
+        !trial.email.toLowerCase().includes(term) &&
+        !trial.whatsapp.includes(term)
+      ) {
+        return false
+      }
+    }
+    if (presidenteFilter !== 'all' && trial.nome_presidente !== presidenteFilter) {
+      return false
+    }
+    return true
   })
 
   // Formatar data
@@ -256,7 +267,7 @@ function AdminTrialsContent() {
 
         {/* Filtros */}
         <div className="bg-white rounded-lg shadow-md p-4 mb-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Status
@@ -289,6 +300,24 @@ function AdminTrialsContent() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
+                Presidente
+              </label>
+              <select
+                value={presidenteFilter}
+                onChange={(e) => setPresidenteFilter(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+              >
+                <option value="all">Todos</option>
+                {presidentesUnicos.map((nome) => (
+                  <option key={nome} value={nome}>
+                    {nome}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
                 Buscar
               </label>
               <input
@@ -308,7 +337,7 @@ function AdminTrialsContent() {
           </div>
         )}
 
-        {/* Tabela */}
+        {/* Tabela — scroll horizontal suave em mobile e desktop */}
         <div className="bg-white rounded-lg shadow-md overflow-hidden">
           {loading ? (
             <div className="text-center py-8">
@@ -320,18 +349,24 @@ function AdminTrialsContent() {
               Nenhum trial encontrado.
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
+            <div
+              className="overflow-x-auto overflow-y-visible w-full max-w-full touch-pan-x"
+              style={{
+                WebkitOverflowScrolling: 'touch',
+                scrollbarGutter: 'stable',
+              }}
+            >
+              <table className="min-w-full divide-y divide-gray-200" style={{ minWidth: '600px' }}>
                 <thead className="bg-gray-50">
                   <tr>
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Nome
                     </th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Email
+                      E-mail
                     </th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      WhatsApp
+                      Telefone
                     </th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Status
@@ -340,19 +375,7 @@ function AdminTrialsContent() {
                       Duração
                     </th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Dias Rest.
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Ambiente
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Presidente
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Data Criação
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Expira em
                     </th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Ação
@@ -408,40 +431,8 @@ function AdminTrialsContent() {
                         </span>
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap">
-                        <div className={`text-sm font-medium ${
-                          trial.status === 'active'
-                            ? trial.dias_restantes <= 1
-                              ? 'text-red-600'
-                              : trial.dias_restantes <= 2
-                              ? 'text-orange-600'
-                              : 'text-gray-900'
-                            : 'text-gray-500'
-                        }`}>
-                          {trial.status === 'active' ? `${trial.dias_restantes} dias` : '-'}
-                        </div>
-                      </td>
-                      <td className="px-4 py-3 whitespace-nowrap">
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                          trial.trial_group === 'presidentes'
-                            ? 'bg-purple-100 text-purple-800'
-                            : 'bg-blue-100 text-blue-800'
-                        }`}>
-                          {trial.trial_group === 'presidentes' ? '🏆 Presidentes' : '🌐 Geral'}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">
-                          {trial.nome_presidente || '-'}
-                        </div>
-                      </td>
-                      <td className="px-4 py-3 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">
-                          {formatarData(trial.data_criacao)}
-                        </div>
-                      </td>
-                      <td className="px-4 py-3 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">
-                          {formatarData(trial.data_fim)}
+                        <div className="text-sm text-gray-900 truncate max-w-[140px]" title={trial.nome_presidente || ''}>
+                          {trial.nome_presidente || '—'}
                         </div>
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap">

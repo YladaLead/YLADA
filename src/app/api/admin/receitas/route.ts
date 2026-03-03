@@ -402,7 +402,7 @@ export async function GET(request: NextRequest) {
     if (userIds.length > 0) {
       const result = await supabaseAdmin
         .from('user_profiles')
-        .select('user_id, nome_completo, email, is_admin, is_support')
+        .select('user_id, nome_completo, email, is_admin, is_support, nome_presidente')
         .in('user_id', userIds)
       userProfiles = result.data
       profilesError = result.error
@@ -531,7 +531,8 @@ export async function GET(request: NextRequest) {
         is_nova: isNova,
         is_renovacao: !isNova && !!lastPaymentDate,
         data_ultimo_pagamento: dataUltimoPagamento,
-        ref_vendedor: sub.ref_vendedor || null
+        ref_vendedor: sub.ref_vendedor || null,
+        nome_presidente: userProfile.nome_presidente || null
       }
     })
 
