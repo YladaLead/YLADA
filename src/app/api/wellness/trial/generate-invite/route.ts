@@ -10,8 +10,8 @@ import { supabaseAdmin } from '@/lib/supabase'
  * Body:
  * {
  *   email: string (obrigatório)
- *   nome_completo?: string
- *   whatsapp?: string
+ *   nome_completo: string (obrigatório, mínimo 3 caracteres)
+ *   whatsapp: string (obrigatório, mínimo 10 dígitos)
  * }
  */
 export async function POST(request: NextRequest) {
@@ -29,6 +29,21 @@ export async function POST(request: NextRequest) {
     if (!email || !email.includes('@')) {
       return NextResponse.json(
         { error: 'Email é obrigatório e deve ser válido' },
+        { status: 400 }
+      )
+    }
+
+    if (!nome_completo || nome_completo.trim().length < 3) {
+      return NextResponse.json(
+        { error: 'Nome completo é obrigatório (mínimo 3 caracteres)' },
+        { status: 400 }
+      )
+    }
+
+    const whatsappDigits = (whatsapp || '').replace(/\D/g, '')
+    if (!whatsappDigits || whatsappDigits.length < 10) {
+      return NextResponse.json(
+        { error: 'Telefone/WhatsApp é obrigatório (mínimo 10 dígitos)' },
         { status: 400 }
       )
     }
@@ -66,8 +81,8 @@ export async function POST(request: NextRequest) {
     // Criar convite
     const { token, invite_url } = await createTrialInvite({
       email: email.toLowerCase().trim(),
-      nome_completo,
-      whatsapp,
+      nome_completo: nome_completo.trim(),
+      whatsapp: whatsapp?.trim() || '',
       created_by_user_id: user.id,
       created_by_email: user.email,
       nome_presidente: nomePresidente ?? undefined,

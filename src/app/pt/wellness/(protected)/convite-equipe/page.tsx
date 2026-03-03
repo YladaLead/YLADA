@@ -79,6 +79,15 @@ function ConviteEquipeContent() {
       setError('Informe um e-mail válido.')
       return
     }
+    if (!nomeCompleto.trim() || nomeCompleto.trim().length < 3) {
+      setError('Informe o nome completo (mínimo 3 caracteres).')
+      return
+    }
+    const tel = whatsapp.replace(/\D/g, '')
+    if (!tel || tel.length < 10) {
+      setError('Informe o telefone/WhatsApp (mínimo 10 dígitos).')
+      return
+    }
     setGenerating(true)
     try {
       const res = await fetch('/api/wellness/trial/generate-invite', {
@@ -87,8 +96,8 @@ function ConviteEquipeContent() {
         credentials: 'include',
         body: JSON.stringify({
           email: email.trim().toLowerCase(),
-          nome_completo: nomeCompleto.trim() || undefined,
-          whatsapp: whatsapp.trim() || undefined,
+          nome_completo: nomeCompleto.trim(),
+          whatsapp: whatsapp.trim(),
         }),
       })
       const data = await res.json()
@@ -182,21 +191,24 @@ function ConviteEquipeContent() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Nome (opcional)</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Nome da pessoa *</label>
               <input
                 type="text"
                 value={nomeCompleto}
                 onChange={(e) => setNomeCompleto(e.target.value)}
+                required
+                minLength={3}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                placeholder="Nome da pessoa"
+                placeholder="Nome completo da pessoa"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">WhatsApp (opcional)</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Telefone / WhatsApp *</label>
               <input
                 type="text"
                 value={whatsapp}
                 onChange={(e) => setWhatsapp(e.target.value)}
+                required
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                 placeholder="(11) 99999-9999"
               />
