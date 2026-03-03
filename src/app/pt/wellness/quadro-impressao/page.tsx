@@ -156,7 +156,7 @@ function QuadroConteudo({
                   className="flex-shrink-0 flex items-center justify-center"
                   style={tamanhoLadoPx != null ? { width: tamanhoLadoPx, height: tamanhoLadoPx } : undefined}
                 >
-                  <QRCode url={item.link} size={s.qr} className={porPagina === 1 ? 'print:w-[88px] print:h-[88px]' : ''} />
+                  <QRCode url={item.link} size={s.qr} useDataUrl className={porPagina === 1 ? 'print:w-[88px] print:h-[88px]' : ''} />
                 </div>
               </div>
             )
@@ -178,7 +178,7 @@ function QuadroImpressaoContent() {
   const [loadingFerramentas, setLoadingFerramentas] = useState(true)
   const [selecionados, setSelecionados] = useState<ItemQuadro[]>([])
   const [exportando, setExportando] = useState(false)
-  const quadroRef = useRef<HTMLDivElement>(null)
+  const previewPdfRef = useRef<HTMLDivElement>(null)
   const porPagina: PorPagina = 5
 
   useEffect(() => {
@@ -266,13 +266,12 @@ function QuadroImpressaoContent() {
   }
 
   const salvarPdf = async () => {
-    if (!quadroRef.current || selecionados.length === 0) return
+    if (!previewPdfRef.current || selecionados.length === 0) return
     setExportando(true)
     try {
       const html2pdf = (await import('html2pdf.js')).default
-      quadroRef.current.classList.add('quadro-pdf-export')
-      // Tempo para QR codes e imagens renderizarem antes da captura
-      await new Promise((r) => setTimeout(r, 500))
+      // Usar o MESMO bloco do preview (visível na tela) para o PDF ficar idêntico
+      await new Promise((r) => setTimeout(r, 300))
       await html2pdf()
         .set({
           margin: 10,
@@ -283,18 +282,16 @@ function QuadroImpressaoContent() {
             useCORS: true,
             allowTaint: true,
             logging: false,
-            windowWidth: quadroRef.current.scrollWidth,
-            windowHeight: quadroRef.current.scrollHeight,
+            ignoreElements: (el: Element) => (el.classList?.contains('preview-only-label') ?? false),
           },
           jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
           pagebreak: { mode: ['css', 'legacy'] },
         })
-        .from(quadroRef.current)
+        .from(previewPdfRef.current)
         .save()
     } catch (e) {
       console.error(e)
     } finally {
-      quadroRef.current?.classList.remove('quadro-pdf-export')
       setExportando(false)
     }
   }
@@ -377,7 +374,7 @@ function QuadroImpressaoContent() {
                   )}
                 </button>
                 <p className="text-xs text-gray-500 mt-2">
-                  O arquivo <strong>quadro-parceria.pdf</strong> será baixado direto no seu dispositivo.
+                  Escolha as ferramentas e depois baixe o PDF.
                 </p>
               </div>
             </div>
@@ -420,17 +417,21 @@ function QuadroImpressaoContent() {
                   for (let i = 0; i < selecionados.length; i += n) {
                     chunks.push(selecionados.slice(i, i + n))
                   }
-                  return chunks.map((chunk, idx) => (
-                    <div key={idx} className="mb-6 last:mb-0">
-                      <p className="text-xs font-medium text-gray-500 mb-1.5">Folha {idx + 1} de {chunks.length}</p>
-                      <div
-                        className="bg-white rounded-lg shadow-md border border-gray-300 overflow-hidden mx-auto"
-                        style={{ width: '100%', maxWidth: '340px', aspectRatio: '210/297' }}
-                      >
-                        <QuadroConteudo selecionados={chunk} porPagina={porPagina} className="h-full w-full rounded-none border-0 shadow-none" />
-                      </div>
+                  return (
+                    <div ref={previewPdfRef} className="space-y-6">
+                      {chunks.map((chunk, idx) => (
+                        <div key={idx} className="mb-6 last:mb-0">
+                          <p className="preview-only-label text-xs font-medium text-gray-500 mb-1.5">Folha {idx + 1} de {chunks.length}</p>
+                          <div
+                            className="bg-white rounded-lg shadow-md border border-gray-300 overflow-hidden mx-auto"
+                            style={{ width: '100%', maxWidth: '340px', aspectRatio: '210/297' }}
+                          >
+                            <QuadroConteudo selecionados={chunk} porPagina={porPagina} className="h-full w-full rounded-none border-0 shadow-none" />
+                          </div>
+                        </div>
+                      ))}
                     </div>
-                  ))
+                  )
                 })()
               )}
             </div>
@@ -442,8 +443,8 @@ function QuadroImpressaoContent() {
           </div>
         </div>
 
-        {/* Área do quadro (usada para gerar o PDF; oculta na tela, visível só ao exportar) */}
-        <div id="quadro-impressao" ref={quadroRef} data-por-pagina={porPagina} className="hidden print:block print:max-w-none w-full">
+        {/* Cópia do quadro só para impressão (Ctrl+P) */}
+        <div id="quadro-impressao" data-por-pagina={porPagina} className="hidden print:block print:max-w-none w-full">
           {(() => {
             const n = porPagina
             const chunks: ItemQuadro[][] = []

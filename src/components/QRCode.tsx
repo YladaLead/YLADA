@@ -1,19 +1,41 @@
 'use client'
 
-import { useState, memo } from 'react'
+import { useState, useEffect, memo } from 'react'
 
 interface QRCodeProps {
   url: string
   size?: number
   className?: string
+  /** Quando true, gera o QR no cliente (data URL). Use no Quadro parceria para o PDF não sair em branco. */
+  useDataUrl?: boolean
 }
 
 // 🚀 OTIMIZAÇÃO: React.memo para evitar re-renders desnecessários
-function QRCode({ url, size = 200, className = '' }: QRCodeProps) {
+function QRCode({ url, size = 200, className = '', useDataUrl = false }: QRCodeProps) {
   const [error, setError] = useState(false)
+  const [dataUrl, setDataUrl] = useState<string | null>(null)
 
-  // Usar API pública para gerar QR Code
-  const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(url)}`
+  // Gerar QR como data URL no cliente (evita canvas tainted no html2pdf)
+  useEffect(() => {
+    if (!useDataUrl || !url) return
+    let cancelled = false
+    import('qrcode').then((QRCodeLib) => {
+      QRCodeLib.toDataURL(url, { width: size, margin: 1, errorCorrectionLevel: 'M' })
+        .then((url) => {
+          if (!cancelled) setDataUrl(url)
+        })
+        .catch(() => {
+          if (!cancelled) setError(true)
+        })
+    }).catch(() => {
+      if (!cancelled) setError(true)
+    })
+    return () => { cancelled = true }
+  }, [url, size, useDataUrl])
+
+  const qrCodeUrl = !useDataUrl
+    ? `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(url)}`
+    : dataUrl
 
   if (error) {
     return (
@@ -23,10 +45,16 @@ function QRCode({ url, size = 200, className = '' }: QRCodeProps) {
     )
   }
 
+  if (useDataUrl && !dataUrl) {
+    return (
+      <div className={`flex items-center justify-center bg-gray-100 rounded animate-pulse ${className}`} style={{ width: size, height: size }} />
+    )
+  }
+
   return (
     <div className={`inline-block ${className}`}>
       <img
-        src={qrCodeUrl}
+        src={qrCodeUrl!}
         alt="QR Code"
         className="rounded-lg border-2 border-gray-200"
         style={{ width: size, height: size }}
