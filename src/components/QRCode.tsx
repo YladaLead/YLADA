@@ -8,19 +8,22 @@ interface QRCodeProps {
   className?: string
   /** Quando true, gera o QR no cliente (data URL). Use no Quadro parceria para o PDF não sair em branco. */
   useDataUrl?: boolean
+  /** Para impressão: gera em resolução maior (ex: 4 = 4x pixels). Melhora escaneabilidade do QR no PDF impresso. */
+  resolutionMultiplier?: number
 }
 
 // 🚀 OTIMIZAÇÃO: React.memo para evitar re-renders desnecessários
-function QRCode({ url, size = 200, className = '', useDataUrl = false }: QRCodeProps) {
+function QRCode({ url, size = 200, className = '', useDataUrl = false, resolutionMultiplier = 1 }: QRCodeProps) {
   const [error, setError] = useState(false)
   const [dataUrl, setDataUrl] = useState<string | null>(null)
+  const generateSize = Math.round(size * resolutionMultiplier)
 
   // Gerar QR como data URL no cliente (evita canvas tainted no html2pdf)
   useEffect(() => {
     if (!useDataUrl || !url) return
     let cancelled = false
     import('qrcode').then((QRCodeLib) => {
-      QRCodeLib.toDataURL(url, { width: size, margin: 1, errorCorrectionLevel: 'M' })
+      QRCodeLib.toDataURL(url, { width: generateSize, margin: 1, errorCorrectionLevel: 'H' })
         .then((url) => {
           if (!cancelled) setDataUrl(url)
         })
@@ -31,7 +34,7 @@ function QRCode({ url, size = 200, className = '', useDataUrl = false }: QRCodeP
       if (!cancelled) setError(true)
     })
     return () => { cancelled = true }
-  }, [url, size, useDataUrl])
+  }, [url, generateSize, useDataUrl])
 
   const qrCodeUrl = !useDataUrl
     ? `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(url)}`

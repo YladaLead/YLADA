@@ -236,7 +236,7 @@ function QuadroConteudo({
                       className="flex-shrink-0 flex items-center justify-center"
                       style={tamanhoLadoPx != null ? { width: tamanhoLadoPx, height: tamanhoLadoPx } : undefined}
                     >
-                      <QRCode url={item.link} size={s.qr} useDataUrl className={porPagina === 1 ? 'print:w-[88px] print:h-[88px]' : ''} />
+                      <QRCode url={item.link} size={s.qr} useDataUrl resolutionMultiplier={4} className={porPagina === 1 ? 'print:w-[88px] print:h-[88px]' : ''} />
                     </div>
                   </div>
                 )
@@ -379,19 +379,20 @@ function QuadroImpressaoContent() {
         const card = paginas[i].querySelector('.bg-white.rounded-lg') ?? (paginas[i] as HTMLElement).children[1]
         if (!card || !(card instanceof HTMLElement)) continue
         const canvas = await html2canvas(card, {
-          scale: 2,
+          scale: 3,
           useCORS: true,
           allowTaint: true,
           logging: false,
         })
-        const data = canvas.toDataURL('image/jpeg', 0.98)
+        // PNG preserva nitidez dos QR codes (JPEG borra bordas preto/branco)
+        const data = canvas.toDataURL('image/png')
         const r = canvas.width / canvas.height
         const w = r >= pageW / pageH ? pageW : pageH * r
         const h = r >= pageW / pageH ? pageW / r : pageH
         const x = margin + (pageW - w) / 2
         const y = margin + (pageH - h) / 2
         if (i > 0) doc.addPage()
-        doc.addImage(data, 'JPEG', x, y, w, h)
+        doc.addImage(data, 'PNG', x, y, w, h)
       }
       doc.save('quadro-parceria.pdf')
     } catch (e) {
