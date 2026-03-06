@@ -14,9 +14,88 @@ import { supabaseAdmin } from '@/lib/supabase'
 import { buildProfileResumo, type YladaNoelProfileRow } from '@/lib/ylada-profile-resumo'
 import { getNoelYladaLinks, formatLinksAtivosParaNoel } from '@/lib/noel-ylada-links'
 import { getPerfilSimuladoByKey, SIMULATE_COOKIE_NAME } from '@/data/perfis-simulados'
+import { getFlowById } from '@/config/ylada-flow-catalog'
+import { formatDisplayTitle } from '@/lib/ylada/strategic-intro'
 import OpenAI from 'openai'
 
+type FormField = { id?: string; label?: string; type?: string; options?: string[] }
+
+/** Monta o bloco completo para o Noel: descrição resumida + conteúdo real do quiz (fonte única = config do link). */
+function buildLinkBlock(
+  title: string,
+  flowId: string,
+  url: string,
+  config: Record<string, unknown> | null
+): { descResumida: string; conteudoReal: string } {
+  const form = config?.form as { fields?: FormField[] } | undefined
+  const fields = Array.isArray(form?.fields) ? form.fields : []
+  const firstWithOptions = fields.find((f) => Array.isArray(f.options) && f.options.length > 0)
+  const isCalculadora = flowId === 'calculadora_projecao'
+  const flow = getFlowById(flowId)
+
+  let descResumida: string
+  let conteudoReal = ''
+
+  if (isCalculadora) {
+    descResumida = `Criei a calculadora "${title}". Você vai atrair quem gosta de ver números e cenários possíveis.`
+  } else if (firstWithOptions) {
+    const themePart = title.includes(' — ') ? title.split(' — ').slice(1).join(' — ').trim() : title
+    const quizName = themePart || title
+    descResumida = `Criei o quiz "${quizName}". Você vai atrair pessoas que buscam isso.`
+    conteudoReal = fields
+      .map((f, i) => {
+        const options = Array.isArray(f.options) && f.options.length > 0 ? f.options! : []
+        const optsBlock = options
+          .map((opt, j) => `${String.fromCharCode(65 + j)}) ${opt}`)
+          .join('\n')
+        return optsBlock ? `${i + 1}. ${f.label ?? ''}\n${optsBlock}` : `${i + 1}. ${f.label ?? ''}`
+      })
+      .join('\n\n')
+  } else {
+    const themePart = title.includes(' — ') ? title.split(' — ').slice(1).join(' — ').trim() : title
+    const linkName = themePart || title
+    descResumida = `Criei o quiz "${linkName}". Você vai atrair pessoas que buscam isso.`
+  }
+
+  return { descResumida, conteudoReal }
+}
+
+/** Monta o bloco de instruções para o Noel — fonte única: config do link. */
+function buildNoelLinkBlock(
+  title: string,
+  url: string,
+  descResumida: string,
+  conteudoReal: string,
+  modo: 'novo' | 'ajustado'
+): string {
+  const tituloBloco = modo === 'novo' ? 'LINK GERADO AGORA PARA ESTE PEDIDO' : 'LINK AJUSTADO E GERADO'
+  const intro = modo === 'novo'
+    ? 'O sistema acabou de criar um link para o profissional.'
+    : 'O sistema criou um novo link com as alterações pedidas.'
+
+  let block = `\n[${tituloBloco}]\n${intro}\n\nFONTE ÚNICA (o link usa exatamente isto):\n${conteudoReal || '(calculadora ou link sem opções)'}\n\nREGRAS: NÃO invente perguntas. Use APENAS as perguntas acima (fonte única). NÃO diga "O link será ajustado" nem "Aqui está o link". NÃO use "Raio-X" em nenhum lugar (nem Saúde, nem Estratégia) — use "quiz", "diagnóstico", "seu quiz". Na descrição do link: "Acesse seu quiz" ou "Clique para acessar seu quiz".\n\nLINK ÚNICO: Use APENAS o link abaixo. NÃO inclua link anterior da conversa. O link correto é: ${url}\n\nFORMATO DA RESPOSTA (use ### para cada título de seção):\n\n### AQUI ESTÃO AS PERGUNTAS\nUse o título da seção em LETRAS MAIÚSCULAS: ### AQUI ESTÃO AS PERGUNTAS\nDeixe DUAS linhas em branco entre o título da seção e a primeira pergunta.\n\n1. TÍTULO: Comece com o título do quiz em negrito (use exatamente como fornecido, primeira letra maiúscula): **${title}**\n2. ESTRUTURA: Para cada pergunta:\n   - Linha 1: número + pergunta em **negrito** (ex.: **1. Qual é o seu maior desafio?**)\n   - Linha 2 em branco (quebra)\n   - Linhas seguintes: cada opção (A, B, C, D) em sua própria linha, SEMPRE abaixo da pergunta — NUNCA coloque A) na mesma linha da pergunta\n   - Duas linhas em branco entre cada bloco de pergunta (após o D), antes da próxima\n3. Exemplo correto:\n### AQUI ESTÃO AS PERGUNTAS\n\n\n**${title}**\n\n**1. Qual é o seu maior desafio?**\nA) Opção A\nB) Opção B\nC) Opção C\nD) Opção D\n\n\n**2. Outra pergunta?**\nA) Opção A\nB) Opção B\nC) Opção C\nD) Opção D\n\n### Chamada para Ação\nUse exatamente: ${descResumida}\nNÃO explique mecânica (perguntas, opções, visitante escolhe). Mantenha curto e estimulante.\n\n### Link Inteligente\nLink: [Acesse seu quiz](${url})\n\n### Onde Promover\nInstagram: posts e stories. WhatsApp: compartilhe com contatos. É por aí que seu público está.\n\n### Próximo passo\nNÃO pergunte "Está bom assim ou quer ajustar?" de forma genérica. Em vez disso, direcione: "Quer que eu deixe o CTA mais direto para WhatsApp ou mais educativo? Assim que você decidir, ajusto em segundos." Ou ofereça outra micro decisão concreta. Reforce o objetivo (captar, agenda cheia).`
+
+  if (modo === 'ajustado') {
+    block += '\nSe for ajuste: pode dizer brevemente "Pronto" ou "Concluído" antes do link.'
+  }
+
+  return block
+}
+
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
+
+/** Detecta se a mensagem indica pedido de ajuste no link anterior (perguntas, conteúdo). */
+function isIntencaoAjustarLink(message: string): boolean {
+  const m = message.toLowerCase().trim()
+  const termos = [
+    'não gostei', 'nao gostei', 'troca', 'trocar', 'acrescenta', 'acrescentar', 'adiciona', 'adicionar',
+    'muda', 'mudar', 'ajusta', 'ajustar', 'altera', 'alterar', 'modifica', 'modificar',
+    'essa pergunta', 'a pergunta', 'as perguntas', 'inclui', 'incluir', 'coloca', 'colocar',
+    'tira', 'remover', 'tirar', 'substitui', 'substituir', 'em vez de', 'no lugar de',
+    'quinta pergunta', 'quarta pergunta', 'mais uma pergunta', 'outra pergunta', 'uma pergunta a mais',
+  ]
+  return termos.some((t) => m.includes(t))
+}
 
 /** Detecta se a mensagem indica pedido de link / quiz / calculadora / ferramenta para engajar. */
 function isIntencaoCriarLink(message: string): boolean {
@@ -39,6 +118,95 @@ function isIntencaoCriarLink(message: string): boolean {
   return termos.some((t) => m.includes(t))
 }
 
+/** Regras de comportamento estratégico: Noel conduz, não apenas explica. */
+const NOEL_CONDUTOR_RULES = `
+[COMPORTAMENTO ESTRATÉGICO — OBRIGATÓRIO]
+Você não é um explicador. Você é um condutor. O objetivo é conversão (agenda cheia, captação, previsibilidade).
+
+1. PERGUNTA ESTRATÉGICA: Antes de entregar solução completa, faça pelo menos 1 pergunta que direcione decisão (quando fizer sentido). Ex.: "Quer que eu deixe esse quiz mais voltado para dor ou para educação?" — NÃO use em perguntas simples (ex.: "qual o melhor horário?").
+
+2. MICRO DECISÃO: Sempre termine com um próximo passo claro. Nunca encerre em "está bom assim?" genérico. Ofereça escolha concreta: "Quer ajustar o CTA para WhatsApp ou deixar mais educativo?" ou "Prefere que eu sugira um segundo link ou focamos em promover este primeiro?"
+
+3. REFORÇO DO OBJETIVO: Lembre o objetivo do profissional (agenda cheia, captar pacientes, previsibilidade) quando entregar links ou estratégias. Ex.: "Esse quiz vai qualificar quem está pronto para agendar. Quer que eu deixe o CTA mais direto ou mais educativo?"
+`
+
+/** Princípio 20/80 de conversão — detectar na conversa e orientar com o script certo. */
+const NOEL_PRINCIPIO_20_80 = `
+[PRINCÍPIO 20/80 — OBRIGATÓRIO EM ESTRATÉGIAS DE COMUNICAÇÃO]
+O profissional precisa DETECTAR NA CONVERSA que está rolando se a pessoa é já interessada ou apenas curiosa. Você (Noel) ajuda nessa detecção e entrega o tipo certo de orientação/script.
+
+GRUPO 20% — Pessoa JÁ INTERESSADA (detectada na conversa)
+- Sinais: demonstra interesse em resolver, pergunta sobre processo, preço, como funciona, quer saber mais.
+- Missão: o profissional deve ter CLAREZA e LEVAR AUTORIDADE.
+- O que você faz: dê uma nota de que ele precisa assumir autoridade e entregue um SCRIPT DE AUTORIDADE — mensagem/envio que demonstra método, organização, experiência. Ex.: explicar o que normalmente acontece, mostrar um diagnóstico, apresentar o próximo passo com segurança.
+- Objetivo: fazer a pessoa pensar "Essa pessoa entende do assunto."
+
+GRUPO 80% — Pessoa CURIOSA (detectada na conversa)
+- Sinais: reagiu a um post, perguntou algo superficial, ainda não está buscando solução ativamente.
+- Missão: propagação — falar de indicação, família, rede de pessoas.
+- O que você faz: entregue um SCRIPT DE PROPAGAÇÃO — mensagem leve, convite para quiz/link, foco em "conhece alguém que...", "compartilha com quem pode se interessar", indicação, família.
+- Objetivo: fazer a pessoa pensar "Nunca tinha pensado nisso" e espalhar.
+
+REGRAS DE RESPOSTA: Sempre que o profissional trouxer uma conversa ou situação de contato:
+1) Ajude a DETECTAR se a pessoa parece 20% (interessada) ou 80% (curiosa) com base no que ele descreveu.
+2) Explique rapidamente por quê.
+3) Entregue o script certo: AUTORIDADE (20%) ou PROPAGAÇÃO (80%).
+
+LEMBRETE: 80% do crescimento vem da propagação (links, indicações, família). 20% das conversões vêm da autoridade na hora certa.
+`
+
+/** Método de condução de conversa de venda — 4 etapas obrigatórias. */
+const NOEL_METODO_CONDUCAO_VENDA = `
+[MÉTODO DE CONDUÇÃO DE VENDA — OBRIGATÓRIO EM CONVERSAS COM LEADS/CLIENTES]
+Regra central: Venda não começa oferecendo solução. Venda começa entendendo o problema.
+
+Sempre que orientar conversas com leads ou pacientes, verifique e incentive esta estrutura em 4 etapas:
+
+ETAPA 1 — DIAGNÓSTICO
+Antes de oferecer qualquer solução, o profissional deve entender a situação da pessoa.
+
+Perguntas que o Noel deve incentivar:
+- "O que mais tem te incomodado nessa situação?"
+- "Qual tem sido a maior dificuldade nisso?"
+- "O que você gostaria que fosse diferente?"
+
+Regra: NUNCA começar oferecendo solução. Primeiro entender o problema.
+
+ETAPA 2 — REPETIR A DOR
+Depois que a pessoa fala o problema, o profissional deve repetir o diagnóstico.
+
+Exemplo: "Então pelo que você me disse, o que mais está te incomodando é [dor da pessoa], correto?"
+
+Objetivo: reforçar o problema, gerar sensação de compreensão, aumentar a disposição de resolver.
+
+ETAPA 3 — PERGUNTAS DE CONFIRMAÇÃO (3 SIMS)
+Depois de repetir o diagnóstico, perguntas que levem a respostas positivas.
+
+Exemplos:
+- "Você gostaria de resolver isso?"
+- "Isso faria diferença para você?"
+- "Se existisse uma forma de melhorar isso, você gostaria de conhecer?"
+
+Objetivo: gerar pelo menos três confirmações positivas.
+
+ETAPA 4 — MOSTRAR O CAMINHO
+Somente depois disso o profissional deve conduzir para uma apresentação ou reunião.
+
+Exemplo: "Com base no que você me falou, acredito que posso te ajudar com isso. O ideal seria te mostrar como funciona. Podemos marcar um horário rápido para eu te explicar?"
+
+Objetivo: mostrar valor, não pressionar. Convidar para reunião ou apresentação da solução.
+
+PAPEL DO NOEL: Ao orientar sobre conversas com leads ou clientes, sempre verificar:
+1) Se o diagnóstico foi feito
+2) Se a dor foi repetida
+3) Se houve perguntas de confirmação
+4) Se a conversa foi conduzida para apresentação ou reunião
+
+Incentivar sempre essa estrutura. Se o profissional pulou uma etapa, orientar a voltar.
+
+SUGESTÃO DE SCRIPTS: O Noel deve sugerir scripts concretos embasados nesse método — frases prontas para diagnóstico, repetição da dor, perguntas de confirmação e convite para reunião, adaptados ao contexto que o profissional descrever.
+`
+
 const SEGMENT_CONTEXT: Record<string, string> = {
   ylada: 'Você é o Noel, mentor da YLADA (motor de conversas). Oriente qualquer profissional ou vendedor sobre rotina, links inteligentes, trilha empresarial e geração de conversas qualificadas no WhatsApp. Tom direto e prático.',
   psi: 'Você é o Noel, mentor da YLADA para a área de Psicologia. Oriente o profissional sobre rotina, links inteligentes e formação empresarial. Tom direto e prático.',
@@ -55,11 +223,12 @@ export async function POST(request: NextRequest) {
     const { user } = auth
 
     const body = await request.json()
-    const { message, conversationHistory = [], segment, area = 'ylada' } = body as {
+    const { message, conversationHistory = [], segment, area = 'ylada', lastLinkContext } = body as {
       message?: string
       conversationHistory?: { role: 'user' | 'assistant'; content: string }[]
       segment?: string
       area?: string
+      lastLinkContext?: { flow_id: string; interpretacao: Record<string, unknown>; questions: Array<{ id: string; label: string; type?: string; options?: string[] }>; url?: string; title?: string; link_id?: string }
     }
 
     if (!message || typeof message !== 'string' || !message.trim()) {
@@ -105,9 +274,62 @@ export async function POST(request: NextRequest) {
     const linksAtivos = await getNoelYladaLinks(user.id, baseUrl)
     const linksAtivosBlock = formatLinksAtivosParaNoel(linksAtivos)
 
-    // Se o profissional pediu link/quiz/calculadora: verificar perfil; se tiver, interpret + generate
+    // Se o profissional pediu ajuste no link anterior: interpret com contexto + generate novo link
     let linkGeradoBlock = ''
-    if (isIntencaoCriarLink(message)) {
+    let lastLinkContextOut: typeof lastLinkContext = undefined
+
+    if (lastLinkContext?.flow_id && lastLinkContext?.interpretacao && isIntencaoAjustarLink(message)) {
+      try {
+        const cookie = request.headers.get('cookie') || ''
+        const interpretRes = await fetch(`${baseUrl}/api/ylada/interpret`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', cookie },
+          body: JSON.stringify({
+            text: message.trim(),
+            segment: validSegment,
+            profile_type: profileRow?.profile_type ?? undefined,
+            profession: profileRow?.profession ?? undefined,
+            previousLinkContext: {
+              flow_id: lastLinkContext.flow_id,
+              theme: lastLinkContext.interpretacao?.tema ?? '',
+              questions: lastLinkContext.questions ?? [],
+            },
+          }),
+        })
+        const interpretJson = await interpretRes.json().catch(() => ({}))
+        const data = interpretJson?.data
+        const flowId = data?.flow_id
+        const interpretacao = data?.interpretacao
+        const questions = Array.isArray(data?.questions) ? data.questions : lastLinkContext.questions
+        const confidence = typeof data?.confidence === 'number' ? data.confidence : 0.8
+
+        if (flowId && interpretacao && confidence >= 0.5) {
+          const genRes = await fetch(`${baseUrl}/api/ylada/links/generate`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', cookie },
+            body: JSON.stringify({
+              flow_id: flowId,
+              interpretacao,
+              questions: questions.length > 0 ? questions : undefined,
+              segment: validSegment,
+            }),
+          })
+          const genJson = await genRes.json().catch(() => ({}))
+          if (genJson?.success && genJson?.data?.url) {
+            const titleRaw = genJson.data.title || genJson.data.slug || 'Link'
+            const title = formatDisplayTitle(titleRaw)
+            lastLinkContextOut = { flow_id: flowId, interpretacao, questions, url: genJson.data.url, title, link_id: genJson.data.id }
+            const { descResumida, conteudoReal } = buildLinkBlock(title, flowId, genJson.data.url, genJson.data.config ?? null)
+            linkGeradoBlock = buildNoelLinkBlock(title, genJson.data.url, descResumida, conteudoReal, 'ajustado')
+          }
+        }
+      } catch (e) {
+        console.warn('[/api/ylada/noel] ajuste interpret/generate:', e)
+      }
+    }
+
+    // Se o profissional pediu link/quiz/calculadora: verificar perfil; se tiver, interpret + generate
+    if (!linkGeradoBlock && isIntencaoCriarLink(message)) {
       const temPerfil = profileRow && (profileRow.profile_type || profileRow.profession)
       if (!temPerfil) {
         linkGeradoBlock = '\n[AVISO: SEM PERFIL]\nO profissional pediu um link/quiz/calculadora mas ainda não preencheu o perfil empresarial (tipo de atuação e área). NÃO gere link. Responda de forma amigável que ele precisa completar o perfil em "Perfil empresarial" primeiro (menu ao lado) para você poder recomendar o link mais adequado ao tipo de atuação dele. Diga que em um minuto ele preenche e aí você consegue criar o link certo.'
@@ -144,8 +366,11 @@ export async function POST(request: NextRequest) {
             })
             const genJson = await genRes.json().catch(() => ({}))
             if (genJson?.success && genJson?.data?.url) {
-              const title = genJson.data.title || genJson.data.slug || 'Link'
-              linkGeradoBlock = `\n[LINK GERADO AGORA PARA ESTE PEDIDO]\nO sistema acabou de criar um link para o profissional. Inclua na sua resposta o link em markdown exatamente assim: [${title}](${genJson.data.url})\nAntes de mostrar o link, descreva brevemente o que você criou (ex.: "Criei o Quiz Pronto para Emagrecer para você" ou "Criei uma calculadora de projeção"). Diga que o visitante preenche, recebe um diagnóstico personalizado e um botão para falar no WhatsApp.`
+              const titleRaw = genJson.data.title || genJson.data.slug || 'Link'
+              const title = formatDisplayTitle(titleRaw)
+              lastLinkContextOut = { flow_id: flowId, interpretacao, questions, url: genJson.data.url, title, link_id: genJson.data.id }
+              const { descResumida, conteudoReal } = buildLinkBlock(title, flowId, genJson.data.url, genJson.data.config ?? null)
+              linkGeradoBlock = buildNoelLinkBlock(title, genJson.data.url, descResumida, conteudoReal, 'novo')
             }
           }
         } catch (e) {
@@ -156,7 +381,7 @@ export async function POST(request: NextRequest) {
 
     const baseSystem = SEGMENT_CONTEXT[validSegment] ||
       'Você é o Noel, mentor da YLADA. Oriente o profissional sobre rotina, links inteligentes e formação empresarial. Tom direto e prático.'
-    const parts: string[] = [baseSystem]
+    const parts: string[] = [baseSystem, NOEL_CONDUTOR_RULES, NOEL_PRINCIPIO_20_80, NOEL_METODO_CONDUCAO_VENDA]
     if (profileResumo) {
       parts.push('\n[PERFIL DO PROFISSIONAL]\n' + profileResumo)
     } else {
@@ -193,6 +418,7 @@ export async function POST(request: NextRequest) {
       response: responseText,
       segment: validSegment,
       area: validSegment,
+      lastLinkContext: lastLinkContextOut ?? null,
     })
   } catch (error: unknown) {
     console.error('[/api/ylada/noel]', error)
