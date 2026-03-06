@@ -38,11 +38,39 @@ function trackEvent(slug: string, eventType: string, options?: { metrics_id?: st
   }
 }
 
-/** Config no formato Pacote 3 (flow_id): meta, page, form, result. */
-function isFlowConfig(config: Record<string, unknown>): boolean {
-  const meta = config.meta as Record<string, unknown> | undefined
-  const form = config.form as Record<string, unknown> | undefined
-  return !!(meta?.flow_id || meta?.architecture) && Array.isArray(form?.fields) && (form.fields as unknown[]).length > 0
+const DIAGNOSIS_PLACEHOLDER = 'O diagnóstico será gerado com base no seu perfil.'
+
+/** Tem resultados estáticos utilizáveis (não placeholder). */
+function hasStaticResults(config: Record<string, unknown>): boolean {
+  const results = config.results as Array<{ description?: string }> | undefined
+  if (!Array.isArray(results) || results.length === 0) return false
+  return results.some((r) => r.description && r.description.trim() !== '' && r.description !== DIAGNOSIS_PLACEHOLDER)
+}
+
+/** Normaliza config da biblioteca (questions/results) para formato flow (meta/form). */
+function normalizeBibliotecaConfig(config: Record<string, unknown>): Record<string, unknown> {
+  if (config.meta && config.form) return config
+  const questions = config.questions as Array<{ id?: string; text?: string; type?: string; options?: string[] }> | undefined
+  if (!Array.isArray(questions) || questions.length === 0) return config
+  const title = (config.title as string) || 'Link'
+  const formFields = questions.map((q, i) => ({
+    id: q.id ?? `q${i + 1}`,
+    label: q.text ?? q.id ?? `Pergunta ${i + 1}`,
+    type: (q.type as string) || 'single',
+    options: q.options,
+  }))
+  return {
+    ...config,
+    meta: config.meta ?? {
+      architecture: 'RISK_DIAGNOSIS',
+      theme_raw: title,
+      theme_display: title,
+      objective: 'captar',
+      area_profissional: 'wellness',
+    },
+    form: config.form ?? { fields: formFields, submit_label: 'Ver resultado' },
+    result: config.result ?? { headline: 'Seu resultado', summary_bullets: [], cta: { text: (config.ctaText as string) ?? 'Falar no WhatsApp' } },
+  }
 }
 
 export default function PublicLinkView({ payload }: { payload: Payload }) {
@@ -69,27 +97,27 @@ export default function PublicLinkView({ payload }: { payload: Payload }) {
     }
   }
 
-  if (isFlowConfig(config)) {
+  if (type === 'diagnostico') {
+    if (hasStaticResults(config)) {
+      return (
+        <DiagnosticoQuiz
+          slug={slug}
+          config={config}
+          ctaText={ctaText}
+          whatsappUrl={whatsappUrl}
+          onCtaClick={handleCtaClick}
+          title={formatDisplayTitle(title)}
+        />
+      )
+    }
+    const normalizedConfig = normalizeBibliotecaConfig(config)
     return (
       <ConfigDrivenLinkView
         slug={slug}
-        config={config}
+        config={normalizedConfig}
         ctaText={ctaText}
         whatsappUrl={whatsappUrl}
         onCtaClick={handleCtaClick}
-      />
-    )
-  }
-
-  if (type === 'diagnostico') {
-    return (
-      <DiagnosticoQuiz
-        slug={slug}
-        config={config}
-        ctaText={ctaText}
-        whatsappUrl={whatsappUrl}
-        onCtaClick={handleCtaClick}
-        title={formatDisplayTitle(title)}
       />
     )
   }

@@ -81,11 +81,38 @@ export async function POST(request: NextRequest) {
         .maybeSingle()
       if (!btErr && bibliotecaTemplate && (bibliotecaTemplate.type === 'calculator' || bibliotecaTemplate.type === 'diagnostico')) {
         const schema = (bibliotecaTemplate.schema_json as Record<string, unknown>) || {}
+        const title = titleOverride ?? (schema.title as string) ?? bibliotecaTemplate.name
         templateId = bibliotecaTemplate.id
         configJson = {
-          title: titleOverride ?? (schema.title as string) ?? bibliotecaTemplate.name,
+          title,
           ctaText: ctaSuggestion ?? (schema.ctaDefault as string) ?? 'Falar no WhatsApp',
           ...schema,
+        }
+        // Diagnóstico da biblioteca: adicionar meta + form para fluxo unificado (API de diagnóstico)
+        if (bibliotecaTemplate.type === 'diagnostico') {
+          const questions = Array.isArray(schema.questions) ? schema.questions as Array<{ id?: string; text?: string; type?: string; options?: string[] }> : []
+          const formFields = questions.map((q, i) => ({
+            id: q.id ?? `q${i + 1}`,
+            label: q.text ?? q.id ?? `Pergunta ${i + 1}`,
+            type: (q.type as string) || 'single',
+            options: q.options,
+          }))
+          configJson = {
+            ...configJson,
+            meta: {
+              version: 1,
+              objective: 'captar',
+              theme_raw: title,
+              theme_display: title,
+              architecture: 'RISK_DIAGNOSIS',
+              area_profissional: 'wellness',
+            },
+            form: {
+              fields: formFields,
+              submit_label: 'Ver resultado',
+            },
+            result: configJson.result ?? { headline: 'Seu resultado', summary_bullets: [], cta: { text: configJson.ctaText ?? 'Falar no WhatsApp' } },
+          }
         }
       }
     }

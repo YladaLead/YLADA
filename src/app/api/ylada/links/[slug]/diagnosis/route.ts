@@ -40,6 +40,14 @@ function hashIp(ip: string): string {
   return createHash('sha256').update(ip).digest('hex').slice(0, 32)
 }
 
+/** Hash determinístico das respostas para cache (chaves ordenadas). */
+function hashAnswers(answers: Record<string, unknown>): string {
+  const keys = Object.keys(answers).filter((k) => !k.startsWith('_')).sort()
+  const obj: Record<string, unknown> = {}
+  for (const k of keys) obj[k] = answers[k]
+  return createHash('sha256').update(JSON.stringify(obj)).digest('hex').slice(0, 32)
+}
+
 export async function POST(
   request: NextRequest,
   context: { params: Promise<{ slug: string }> }
@@ -90,7 +98,19 @@ export async function POST(
     }
 
     const config = (link.config_json as Record<string, unknown>) ?? {}
-    const metaRaw = config.meta as Record<string, unknown> | undefined
+    let metaRaw = config.meta as Record<string, unknown> | undefined
+
+    // Suporte a links da biblioteca (questions + results sem meta): inferir meta
+    if (!metaRaw && Array.isArray(config.questions) && Array.isArray(config.results)) {
+      const title = (config.title as string) || 'seu perfil'
+      metaRaw = {
+        architecture: 'RISK_DIAGNOSIS',
+        theme_raw: title,
+        theme_display: title,
+        objective: 'captar',
+        area_profissional: 'wellness',
+      }
+    }
     if (!metaRaw) {
       return NextResponse.json({ success: false, error: 'Config do link sem meta' }, { status: 400 })
     }
@@ -98,6 +118,46 @@ export async function POST(
     const architecture = metaRaw.architecture as string | undefined
     if (!architecture || !ARCHITECTURES.includes(architecture as DiagnosisArchitecture)) {
       return NextResponse.json({ success: false, error: 'Arquitetura de diagnóstico não suportada' }, { status: 400 })
+    }
+
+    // Cache: verificar se já existe diagnóstico para esta combinação de respostas
+    const answers_hash = hashAnswers(visitor_answers)
+    const { data: cached } = await supabaseAdmin
+      .from('ylada_diagnosis_cache')
+      .select('diagnosis_json')
+      .eq('link_id', link.id)
+      .eq('answers_hash', answers_hash)
+      .maybeSingle()
+
+    if (cached?.diagnosis_json) {
+      const cachedDiag = cached.diagnosis_json as Record<string, unknown>
+      const ip = getClientIp(request)
+      const ip_hash = ip ? hashIp(ip) : null
+      const user_agent = request.headers.get('user-agent')?.slice(0, 500) ?? null
+      const { data: metricsRow, error: metricsErr } = await supabaseAdmin
+        .from('ylada_diagnosis_metrics')
+        .insert({
+          link_id: link.id,
+          flow_id: typeof metaRaw.flow_id === 'string' ? metaRaw.flow_id : null,
+          architecture,
+          level: null,
+          main_blocker: (cachedDiag.main_blocker as string) ?? '',
+          fallback_used: false,
+          theme: typeof metaRaw.theme_raw === 'string' ? metaRaw.theme_raw : null,
+          objective: typeof metaRaw.objective === 'string' ? metaRaw.objective : 'captar',
+          cta_variant: cachedDiag.cta_text ?? null,
+          intro_variant: null,
+          user_agent,
+          ip_hash,
+        })
+        .select('id')
+        .single()
+      if (!metricsErr && metricsRow) {
+        return NextResponse.json({
+          diagnosis: cachedDiag,
+          metrics_id: metricsRow.id,
+        })
+      }
     }
 
     const themeRaw = typeof metaRaw.theme_raw === 'string'
@@ -191,19 +251,33 @@ export async function POST(
       return NextResponse.json({ success: false, error: insertError.message }, { status: 500 })
     }
 
+    // Memorização: gravar diagnóstico no cache para reutilização futura
+    const diagnosisPayload = {
+      profile_title: diagnosis.profile_title,
+      profile_summary: profileSummary,
+      main_blocker: diagnosis.main_blocker,
+      causa_provavel: diagnosis.causa_provavel,
+      preocupacoes: diagnosis.preocupacoes,
+      espelho_comportamental: diagnosis.espelho_comportamental,
+      consequence: diagnosis.consequence,
+      growth_potential: diagnosis.growth_potential,
+      cta_text: ctaText,
+      whatsapp_prefill: diagnosis.whatsapp_prefill,
+      ...(diagnosis.frase_identificacao && { frase_identificacao: diagnosis.frase_identificacao }),
+      ...(diagnosis.dica_rapida && { dica_rapida: diagnosis.dica_rapida }),
+      ...(diagnosis.specific_actions?.length && { specific_actions: diagnosis.specific_actions }),
+    }
+    await supabaseAdmin
+      .from('ylada_diagnosis_cache')
+      .upsert(
+        { link_id: link.id, answers_hash, diagnosis_json: diagnosisPayload },
+        { onConflict: 'link_id,answers_hash' }
+      )
+      .then(() => {})
+      .catch((err) => console.warn('[ylada/links/[slug]/diagnosis] cache insert', err))
+
     return NextResponse.json({
-      diagnosis: {
-        profile_title: diagnosis.profile_title,
-        profile_summary: profileSummary,
-        main_blocker: diagnosis.main_blocker,
-        causa_provavel: diagnosis.causa_provavel,
-        preocupacoes: diagnosis.preocupacoes,
-        espelho_comportamental: diagnosis.espelho_comportamental,
-        consequence: diagnosis.consequence,
-        growth_potential: diagnosis.growth_potential,
-        cta_text: ctaText,
-        whatsapp_prefill: diagnosis.whatsapp_prefill,
-      },
+      diagnosis: diagnosisPayload,
       metrics_id: row.id,
     })
   } catch (e) {
