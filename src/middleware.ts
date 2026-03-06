@@ -30,10 +30,11 @@ export function middleware(request: NextRequest) {
     pathname === '/favicon.ico'
   ) {
     console.log('Middleware - Rota excluída (sem redirecionamento):', pathname)
-    const res = NextResponse.next()
-    // Ajuda layouts protegidos a detectarem a rota real (evita depender de referer).
-    res.headers.set('x-pathname', pathname)
-    return res
+    const requestHeaders = new Headers(request.headers)
+    requestHeaders.set('x-pathname', pathname)
+    return NextResponse.next({
+      request: { headers: requestHeaders },
+    })
   }
   
   // Redirecionar /pt/w para /pt/wellness (atalho)
@@ -100,10 +101,11 @@ export function middleware(request: NextRequest) {
   }
   
   console.log('Middleware - Permitindo:', pathname)
-  const res = NextResponse.next()
-  // Ajuda layouts protegidos a detectarem a rota real (evita depender de referer).
-  res.headers.set('x-pathname', pathname)
-  return res
+  const requestHeaders = new Headers(request.headers)
+  requestHeaders.set('x-pathname', pathname)
+  return NextResponse.next({
+    request: { headers: requestHeaders },
+  })
 }
 
 export const config = {

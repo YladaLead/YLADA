@@ -19,7 +19,8 @@ export const metadata: Metadata = {
 export default async function CoachLayout({ children }: { children: ReactNode }) {
   const headersList = await headers()
   const pathname = headersList.get('x-pathname') || headersList.get('x-invoke-path') || ''
-  const isPublic = pathname ? isCoachPublicPath(pathname) : false
+  // Sem pathname deixamos carregar para evitar loop de redirect (ex.: mobile/Safari via WhatsApp).
+  const isPublic = !pathname || isCoachPublicPath(pathname)
   if (!isPublic) {
     await validateProtectedAccess('coach', {
       requireSubscription: true,

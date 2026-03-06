@@ -62,7 +62,8 @@ export const metadata: Metadata = {
 export default async function NutriLayout({ children }: { children: ReactNode }) {
   const headersList = await headers()
   const pathname = headersList.get('x-pathname') || headersList.get('x-invoke-path') || ''
-  const isPublic = pathname ? isNutriPublicPath(pathname) : false
+  // Sem pathname (header não setado) deixamos carregar para não bloquear (evita loop de redirect no mobile/Safari).
+  const isPublic = !pathname || isNutriPublicPath(pathname)
   if (!isPublic) {
     await validateProtectedAccess('nutri', {
       requireSubscription: true,
