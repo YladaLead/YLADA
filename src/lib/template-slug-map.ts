@@ -82,6 +82,9 @@ export const TEMPLATE_SLUG_MAP: Record<string, string> = {
   'avaliacao-fome-emocional': 'tipo-fome',
   'avaliação-fome-emocional': 'tipo-fome',
   'fome-emocional': 'tipo-fome',
+
+  // Sono e Energia (Quadro parceria)
+  'quiz-sono-energia': 'avaliacao-sono-energia',
   
   // Planilhas
   'planilha-meal-planner': 'planilha-meal-planner',

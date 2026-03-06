@@ -100,6 +100,9 @@ export async function GET(request: NextRequest) {
       // Quiz Bem-Estar: link pode ser quiz-bem-estar mas no banco está como quiz-wellness-profile
       'quiz-bem-estar': ['quiz-wellness-profile'],
       'quiz-wellness-profile': ['quiz-bem-estar'],
+      // Sono e Energia: Quadro parceria usa avaliacao-sono-energia, banco pode ter quiz-sono-energia
+      'avaliacao-sono-energia': ['quiz-sono-energia'],
+      'quiz-sono-energia': ['avaliacao-sono-energia'],
       // Calculadora de Água / Hidratação: várias formas de acessar o mesmo template
       'calculadora-agua': ['calc-hidratacao', 'calc-agua', 'agua'],
       'calc-agua': ['calc-hidratacao', 'calculadora-agua', 'agua'],
@@ -307,6 +310,9 @@ export async function GET(request: NextRequest) {
           // Quiz Bem-Estar: template base pode estar como quiz-wellness-profile
           'quiz-bem-estar': ['quiz-wellness-profile'],
           'quiz-wellness-profile': ['quiz-bem-estar'],
+          // Sono e Energia: Quadro parceria usa avaliacao-sono-energia, banco pode ter quiz-sono-energia
+          'avaliacao-sono-energia': ['quiz-sono-energia'],
+          'quiz-sono-energia': ['avaliacao-sono-energia'],
           // Calculadora de Água / Hidratação
           'calculadora-agua': ['calc-hidratacao', 'calc-agua', 'agua'],
           'calc-agua': ['calc-hidratacao', 'calculadora-agua', 'agua'],

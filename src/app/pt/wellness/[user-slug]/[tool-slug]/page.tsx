@@ -497,6 +497,31 @@ export default function FerramentaPersonalizadaPage() {
       case 'avaliacao-inicial':
       case 'avaliação-inicial':
         return <TemplateInitialAssessment config={config} />
+      // Sono e Energia (Quadro parceria) — usa DynamicTemplatePreview com content da API
+      case 'avaliacao-sono-energia':
+      case 'quiz-sono-energia':
+        return (
+          <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+            <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+              <DynamicTemplatePreview
+                template={{
+                  id: tool.id,
+                  nome: tool.title,
+                  name: tool.title,
+                  slug: tool.template_slug,
+                  type: tool.content?.template_type || 'quiz',
+                  content: tool.content || {},
+                  description: tool.description,
+                  whatsapp_number: tool.whatsapp_number,
+                  country_code: tool.user_profiles?.country_code
+                }}
+                profession="wellness"
+                onClose={() => router.push('/pt/wellness/ferramentas')}
+                isPreview={false}
+              />
+            </main>
+          </div>
+        )
       // Templates Hype Drink
       case 'energia-foco':
         return <TemplateHypeEnergiaFoco config={config} />
