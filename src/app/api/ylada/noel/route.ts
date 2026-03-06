@@ -212,7 +212,12 @@ SUGESTÃO DE SCRIPTS: O Noel deve sugerir scripts concretos embasados nesse mét
 /** Contato frio — Uber, fila, desconhecidos. Nunca começar com link de apresentação. */
 const NOEL_CONTATO_FRIO = `
 [CONTATO FRIO — OBRIGATÓRIO EM RECRUTAMENTO/OPORTUNIDADE COM DESCONHECIDOS]
-Quando o profissional quer recrutar ou falar de oportunidade com alguém que NÃO conhece o negócio (Uber, fila, evento, etc.):
+
+DETECÇÃO: Quando o profissional mencionar Uber, fila, evento, pessoa que não conhece, desconhecido, recrutar alguém — SEMPRE tratar como CONTATO FRIO.
+
+NUNCA assumir que a pessoa já consome os produtos ou conhece o negócio. No Uber, na fila, com desconhecidos: a pessoa NÃO sabe quem você é, NÃO sabe que você usa produtos, NÃO sabe do negócio.
+
+Quando o profissional pedir "script para mandar link de recrutamento" ou "como mandar link" em contexto de contato frio: NÃO dar o link da HOM/apresentação. Dar PRIMEIRO o script de DIAGNÓSTICO. O link vem DEPOIS, só quando houver interesse.
 
 REGRA: NUNCA começar mandando link de apresentação ou recrutamento.
 
@@ -410,6 +415,18 @@ export async function POST(request: NextRequest) {
     const baseSystem = SEGMENT_CONTEXT[validSegment] ||
       'Você é o Noel, mentor da YLADA. Oriente o profissional sobre rotina, links inteligentes e formação empresarial. Tom direto e prático.'
     const parts: string[] = [baseSystem, NOEL_CONDUTOR_RULES, NOEL_PRINCIPIO_20_80, NOEL_METODO_CONDUCAO_VENDA, NOEL_CONTATO_FRIO]
+
+    // Detecção de contato frio: Uber, recrutar, link de recrutamento — injeta alerta para forçar diagnóstico primeiro
+    const m = message.toLowerCase().trim()
+    const isContatoFrio =
+      m.includes('uber') ||
+      (m.includes('recrutar') && (m.includes('link') || m.includes('conversa') || m.includes('conduzir'))) ||
+      (m.includes('link de recrutamento') || m.includes('link de apresentação'))
+    if (isContatoFrio) {
+      parts.push(
+        '\n[ALERTA — CONTATO FRIO DETECTADO]\nA mensagem do profissional indica Uber, recrutamento com desconhecido ou pedido de link de recrutamento. NÃO dar link da HOM/apresentação. Entregar APENAS script de DIAGNÓSTICO investigativo (várias perguntas). Explicar que o link vem DEPOIS, quando a pessoa demonstrar interesse. A pessoa NÃO conhece o negócio, NÃO consome produtos.'
+      )
+    }
     if (profileResumo) {
       parts.push('\n[PERFIL DO PROFISSIONAL]\n' + profileResumo)
     } else {
