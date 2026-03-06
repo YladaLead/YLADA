@@ -8,8 +8,11 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireApiAuth } from '@/lib/api-auth'
 import { supabaseAdmin } from '@/lib/supabase'
 import { getFlowById, VALID_FLOW_IDS } from '@/config/ylada-flow-catalog'
+import { getQuizEmagrecimento } from '@/config/ylada-quiz-emagrecimento'
 import { interpretStrategyContext } from '@/lib/ylada/strategic-interpreter'
+import { sanitizeThemeForPatient } from '@/lib/ylada/strategic-intro'
 import { deriveStrategicProfile } from '@/lib/ylada/strategic-profile'
+import { getDiagnosisSegmentFromProfile } from '@/lib/ylada/diagnosis-segment'
 import { randomBytes } from 'crypto'
 
 function generateSlug(): string {
@@ -46,8 +49,21 @@ export async function POST(request: NextRequest) {
     const category = typeof body.category === 'string' ? body.category.trim() || null : null
     const subCategory = typeof body.sub_category === 'string' ? body.sub_category.trim() || null : null
     const titleOverride = typeof body.title === 'string' ? body.title.trim() || null : null
-    const ctaWhatsapp = typeof body.cta_whatsapp === 'string' ? body.cta_whatsapp.trim() || null : null
+    let ctaWhatsapp = typeof body.cta_whatsapp === 'string' ? body.cta_whatsapp.trim() || null : null
     const ctaSuggestion = typeof body.cta_suggestion === 'string' ? body.cta_suggestion.trim() || null : null
+
+    // Bloco 6.1: se cta_whatsapp não informado, buscar do perfil do usuário
+    if (!ctaWhatsapp && supabaseAdmin) {
+      const { data: profile } = await supabaseAdmin
+        .from('user_profiles')
+        .select('whatsapp')
+        .eq('user_id', user.id)
+        .maybeSingle()
+      const wp = (profile as { whatsapp?: string | null } | null)?.whatsapp
+      if (typeof wp === 'string' && wp.trim().length >= 10) {
+        ctaWhatsapp = wp.trim()
+      }
+    }
 
     let templateId = templateIdLegacy
     let configJson: Record<string, unknown>
@@ -85,9 +101,10 @@ export async function POST(request: NextRequest) {
         theme_raw: themeRaw,
         area_profissional,
       })
-      const themeDisplay = strategyDecision.safety_mode && strategyDecision.safe_theme
+      const themeDisplayRaw = strategyDecision.safety_mode && strategyDecision.safe_theme
         ? strategyDecision.safe_theme
         : themeRaw || 'seu tema'
+      const themeDisplay = sanitizeThemeForPatient(themeDisplayRaw)
 
       // Perfil estratégico derivado (para intro + CTA adaptativa); não altera motor
       const profileSegment = segment ?? 'ylada'
@@ -106,10 +123,39 @@ export async function POST(request: NextRequest) {
         }
       )
 
+      const profession = (profileRow as { profession?: string } | null)?.profession
+      const segment_code = getDiagnosisSegmentFromProfile(profession, profileSegment, themeRaw)
+
       // Não espalhar schema do template: o link é orientado ao visitante/paciente (form + motor),
       // não ao quiz gerencial (questions/results) que pode estar no template.
       const schema = (templateByType.schema_json as Record<string, unknown>) || {}
-      const pageTitle = titleOverride ?? `${flow.display_name} — ${themeDisplay}`
+      const isPatientFlow = flow.architecture === 'RISK_DIAGNOSIS' || flow.architecture === 'BLOCKER_DIAGNOSIS'
+      const pageTitle = titleOverride ?? (isPatientFlow ? themeDisplay : `${flow.display_name} — ${themeDisplay}`)
+
+      // Perguntas: priorizar override (ajuste do Noel) > fallback emagrecimento > flow
+      const quizFallback = getQuizEmagrecimento(themeRaw, flowId)
+      const hasOverrideWithOptions =
+        questionsOverride &&
+        questionsOverride.length > 0 &&
+        questionsOverride.some((q) => Array.isArray((q as { options?: string[] }).options) && (q as { options: string[] }).options!.length > 0)
+      const formFields = hasOverrideWithOptions
+        ? questionsOverride!.map((q) => ({
+            id: (q as { id?: string }).id ?? `q${questionsOverride!.indexOf(q) + 1}`,
+            label: q.label,
+            type: (q.type as string) || 'single',
+            options: Array.isArray((q as { options?: string[] }).options) ? (q as { options: string[] }).options : undefined,
+          }))
+        : quizFallback && quizFallback.length > 0
+          ? quizFallback.map((q) => ({ id: q.id, label: q.label, type: q.type as string, options: q.options }))
+          : (questionsOverride && questionsOverride.length > 0)
+            ? questionsOverride.map((q) => ({
+                id: q.id,
+                label: q.label,
+                type: (q.type as string) || 'text',
+                options: Array.isArray((q as { options?: string[] }).options) ? (q as { options: string[] }).options : undefined,
+              }))
+            : flow.question_labels.map((label, i) => ({ id: `q${i + 1}`, label, type: 'text' }))
+
       configJson = {
         title: pageTitle,
         ctaText: ctaSuggestion ?? flow.cta_default ?? (schema.ctaDefault as string) ?? 'Quero analisar meu caso',
@@ -128,6 +174,7 @@ export async function POST(request: NextRequest) {
           flow_id: flowId,
           architecture: flow.architecture,
           type: flow.type,
+          segment_code,
         },
         page: {
           title: pageTitle,
@@ -135,9 +182,7 @@ export async function POST(request: NextRequest) {
           brand: { professional_name: '', whatsapp_number: '' },
         },
         form: {
-          fields: (questionsOverride && questionsOverride.length > 0)
-            ? questionsOverride.map((q) => ({ id: q.id, label: q.label, type: (q.type as string) || 'text' }))
-            : flow.question_labels.map((label, i) => ({ id: `q${i + 1}`, label, type: 'text' })),
+          fields: formFields,
           submit_label: 'Ver resultado',
         },
         result: {

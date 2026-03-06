@@ -183,7 +183,7 @@ export function getStrategies(input: StrategiesInput): StrategiesOutput {
             slot: 'single',
             architecture: 'BLOCKER_DIAGNOSIS',
             flow_id: firstAllowedFlowId,
-            title: 'Raio-X de Estratégia',
+            title: 'Diagnóstico de Bloqueios',
             subtitle: 'Recomendado',
             description:
               'Foco em agenda, posicionamento e conversão — para transformar interesse em consultas.',

@@ -294,7 +294,7 @@ export const FERRAMENTAS_BY_TEMA: Record<string, FerramentaConcreta[]> = {
   outro: [
     {
       id: 'quiz-raio-x',
-      name: 'Raio-X de Saúde',
+      name: 'Diagnóstico de Saúde',
       flow_id: FLOW_IDS.diagnostico_risco,
       description: 'Avalia sinais, histórico e impacto no dia a dia.',
       cta_default: 'Quero analisar meu caso',
@@ -302,7 +302,7 @@ export const FERRAMENTAS_BY_TEMA: Record<string, FerramentaConcreta[]> = {
     },
     {
       id: 'quiz-raio-x-estrategia',
-      name: 'Raio-X de Estratégia',
+      name: 'Diagnóstico de Bloqueios',
       flow_id: FLOW_IDS.diagnostico_bloqueio,
       description: 'Identifica o principal bloqueio e primeiro passo para destravar.',
       cta_default: 'Quero destravar isso',

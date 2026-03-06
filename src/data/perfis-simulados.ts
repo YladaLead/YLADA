@@ -145,6 +145,58 @@ const odonto: YladaNoelProfileRow = {
   area_specific: { temas_atuacao: ['saude_bucal', 'clareamento', 'implantes'] },
 }
 
+/** Esteticista — clínica, pele, skincare, autocuidado. */
+const estetica: YladaNoelProfileRow = {
+  segment: 'ylada',
+  profile_type: 'liberal',
+  profession: 'estetica',
+  flow_id: 'liberal_v1',
+  flow_version: 1,
+  category: 'estetica',
+  sub_category: null,
+  tempo_atuacao_anos: 4,
+  dor_principal: 'agenda_vazia',
+  prioridade_atual: 'Captar clientes e divulgar tratamentos',
+  fase_negocio: 'em_crescimento',
+  metas_principais: 'Preencher agenda e qualificar leads',
+  objetivos_curto_prazo: 'Link com diagnóstico de pele ou autocuidado para engajar',
+  modelo_atuacao: ['consultorio'],
+  capacidade_semana: 25,
+  ticket_medio: 180,
+  modelo_pagamento: 'particular',
+  canais_principais: ['instagram', 'whatsapp'],
+  rotina_atual_resumo: 'Clínica de estética, quero ferramentas para captar e qualificar',
+  frequencia_postagem: null,
+  observacoes: 'Perfil simulado para testes.',
+  area_specific: { temas_atuacao: ['pele', 'skincare', 'autocuidado', 'retenção'] },
+}
+
+/** Personal trainer — treino, condicionamento, consistência. */
+const personalTrainer: YladaNoelProfileRow = {
+  segment: 'ylada',
+  profile_type: 'liberal',
+  profession: 'personal_trainer',
+  flow_id: 'liberal_v1',
+  flow_version: 1,
+  category: 'fitness',
+  sub_category: null,
+  tempo_atuacao_anos: 3,
+  dor_principal: 'agenda_vazia',
+  prioridade_atual: 'Captar alunos e manter consistência dos clientes',
+  fase_negocio: 'em_crescimento',
+  metas_principais: 'Aumentar número de alunos e engajamento',
+  objetivos_curto_prazo: 'Link com diagnóstico de treino ou energia para captar',
+  modelo_atuacao: ['consultorio', 'online'],
+  capacidade_semana: 20,
+  ticket_medio: 150,
+  modelo_pagamento: 'particular',
+  canais_principais: ['instagram', 'whatsapp'],
+  rotina_atual_resumo: 'Treino presencial e online, quero ferramentas para qualificar',
+  frequencia_postagem: null,
+  observacoes: 'Perfil simulado para testes.',
+  area_specific: { temas_atuacao: ['treino', 'energia', 'condicionamento', 'consistência'] },
+}
+
 /** Psicólogo — atendimento clínico, agenda, particular/convênio. */
 const psi: YladaNoelProfileRow = {
   segment: 'ylada',
@@ -177,6 +229,8 @@ export const PERFIS_SIMULADOS: PerfilSimuladoMeta[] = [
   { key: 'nutri', label: 'Nutricionista (liberal)', description: 'Atendimento, agenda vazia, quiz/calculadora para captar.', profile: nutri },
   { key: 'coach', label: 'Coach', description: 'Programa online, recorrência, autoridade e indicação.', profile: coach },
   { key: 'odonto', label: 'Dentista (odontologia)', description: 'Clínica, agenda vazia, qualificar quem quer agendar.', profile: odonto },
+  { key: 'estetica', label: 'Esteticista', description: 'Clínica de estética, pele, skincare, autocuidado. Dor: agenda vazia.', profile: estetica },
+  { key: 'personal_trainer', label: 'Personal trainer', description: 'Treino, condicionamento, consistência. Dor: agenda vazia.', profile: personalTrainer },
   { key: 'psi', label: 'Psicólogo', description: 'Atendimento clínico, particular, mais indicações e visibilidade.', profile: psi },
 ]
 

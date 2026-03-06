@@ -79,20 +79,24 @@ export async function PUT(
     const status = typeof body.status === 'string' && ALLOWED_STATUSES.includes(body.status as (typeof ALLOWED_STATUSES)[number])
       ? body.status
       : undefined
+    const configOverride = body.config_json && typeof body.config_json === 'object' ? body.config_json as Record<string, unknown> : undefined
 
     const updates: Record<string, unknown> = {}
     if (title !== undefined) updates.title = title
     if (ctaWhatsapp !== undefined) updates.cta_whatsapp = ctaWhatsapp
     if (status !== undefined) updates.status = status
 
+    let configJson = (existing.config_json as Record<string, unknown>) || {}
+    if (title !== undefined) configJson = { ...configJson, title }
+    if (ctaWhatsapp !== undefined) configJson = { ...configJson, ctaText: ctaWhatsapp }
+    if (configOverride) {
+      configJson = { ...configJson, ...configOverride }
+    }
+    updates.config_json = configJson
+
     if (Object.keys(updates).length === 0) {
       return NextResponse.json({ success: true, data: existing })
     }
-
-    const configJson = (existing.config_json as Record<string, unknown>) || {}
-    if (title !== undefined) configJson.title = title
-    if (ctaWhatsapp !== undefined) configJson.ctaText = ctaWhatsapp
-    updates.config_json = configJson
 
     const { data: updated, error: updateError } = await supabaseAdmin
       .from('ylada_links')

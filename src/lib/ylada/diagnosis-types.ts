@@ -26,6 +26,8 @@ export interface DiagnosisInput {
     theme: { raw: string }
     area_profissional: AreaProfissional
     architecture: DiagnosisArchitecture
+    /** segment_code para variantes por segmento (dentistry, aesthetics, nutrition, fitness, wellness). */
+    segment_code?: string
   }
   professional: { name?: string; whatsapp?: string }
   visitor_answers: Record<string, unknown>
@@ -34,10 +36,26 @@ export interface DiagnosisInput {
 /** Contrato fixo de saída: motor de decisão. Apenas 1 bloqueio; CTA imperativo; nunca solução completa. */
 export interface DiagnosisDecisionOutput {
   profile_title: string
+  /** Leitura personalizada (identificação). */
   profile_summary: string
+  /** Diagnóstico: desafios/problemas identificados. */
   main_blocker: string
+  /** Causa provável (não certeza). Linguagem: "provavelmente", "tende a". */
+  causa_provavel?: string
+  /** Preocupações: pontos de atenção para ter em mente. */
+  preocupacoes?: string
+  /** Espelho comportamental opcional: "Isso não é X. É Y." Remove culpa. */
+  espelho_comportamental?: string
   consequence: string
+  /** Providências: ações a serem tomadas. */
   growth_potential: string
+  /** 2–3 ações específicas, sempre direcionando ao profissional. */
+  specific_actions?: string[]
+  /** Dica rápida educativa (micro-conteúdo embutido). */
+  dica_rapida?: string
+  /** Frase de identificação emocional: "Se você se identificou com esse resultado...". */
+  frase_identificacao?: string
+  /** Direcionamento: CTA discreto ao especialista. */
   cta_text: string
   whatsapp_prefill: string
 }

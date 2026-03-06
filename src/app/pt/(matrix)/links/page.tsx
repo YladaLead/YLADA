@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef, useCallback } from 'react'
+import Link from 'next/link'
 import YladaAreaShell from '@/components/ylada/YladaAreaShell'
 import { getFlowById } from '@/config/ylada-flow-catalog'
 import { getTemasForProfession, getTemaLabel, TEMA_OUTRO_VALUE } from '@/config/ylada-temas'
@@ -952,12 +953,18 @@ export default function MatrixLinksPage() {
                         </div>
                       </div>
                       <div className="flex flex-wrap items-center gap-1 shrink-0">
+                        <Link
+                          href={`/pt/links/editar/${link.id}`}
+                          className="rounded px-2 py-1.5 text-xs font-medium text-sky-600 hover:bg-sky-50"
+                        >
+                          Editar quiz
+                        </Link>
                         <button
                           type="button"
                           onClick={() => openEditModal(link)}
                           className="rounded px-2 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-100"
                         >
-                          Editar
+                          Título/WhatsApp
                         </button>
                         <button
                           type="button"

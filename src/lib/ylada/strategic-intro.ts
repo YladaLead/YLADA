@@ -21,13 +21,111 @@ export interface StrategicIntroContext {
   area_profissional?: string
   /** Perfil estratégico derivado (meta.strategic_profile); adapta subtítulo por dor dominante. */
   strategic_profile?: StrategicProfile | null
+  /** Tema do link (ex.: emagrecimento); quando presente, intro é voltada ao visitante/paciente. */
+  theme_raw?: string
+  /** Título da página (ex.: "Diagnóstico de Saúde — emagrecimento"). */
+  page_title?: string
+  /** Número de perguntas do quiz (para "Responda N perguntas"); quando ausente, usa "poucos minutos". */
+  questions_count?: number
+}
+
+/**
+ * Remove termos de objetivo profissional (captação, atração de pacientes) do tema.
+ * O paciente não deve ver "atração de pacientes" no resultado — só o tema dele (ex.: cáries, saúde bucal).
+ */
+export function sanitizeThemeForPatient(theme: string): string {
+  if (!theme) return ''
+  let t = theme.trim()
+  const toRemove = [
+    /\s+e\s+atra[çc][ãa]o\s+de\s+pacientes/gi,
+    /\s+e\s+atra[çc][ãa]o\s+de\s+clientes/gi,
+    /\s+e\s+capta[çc][ãa]o\s+(de\s+)?(pacientes|clientes)?/gi,
+    /\s+e\s+captar\s+(pacientes|clientes)/gi,
+    /\s*,\s*atra[çc][ãa]o\s+de\s+pacientes/gi,
+    /\s*,\s*atra[çc][ãa]o\s+de\s+clientes/gi,
+    /\s*,\s*capta[çc][ãa]o/gi,
+  ]
+  for (const re of toRemove) {
+    t = t.replace(re, '')
+  }
+  return t.replace(/\s+e\s*$/, '').replace(/\s*,\s*$/, '').trim() || theme.trim()
+}
+
+/** Formata o título da página para exibição: vírgula → " e ", primeira letra maiúscula. */
+export function formatDisplayTitle(raw: string): string {
+  if (!raw) return ''
+  const t = raw.trim()
+  const normalized = t.replace(/\s*,\s*/g, ' e ')
+  return normalized.charAt(0).toUpperCase() + normalized.slice(1).toLowerCase()
+}
+
+/** Capitaliza a primeira letra para coerência visual (ex.: "saúde intestinal" → "Saúde intestinal"). */
+function capitalizeFirst(s: string): string {
+  if (!s) return ''
+  return s.charAt(0).toUpperCase() + s.slice(1)
+}
+
+/** Formata o tema para exibição — primeira letra maiúscula, coerente em toda a interface. */
+function formatThemeLabel(theme: string): string {
+  if (!theme) return ''
+  const t = theme.toLowerCase().trim()
+  let label: string
+  if (/emagrecimento|perda de peso|perda de peso, emagrecimento/.test(t)) label = 'jornada de emagrecimento'
+  else if (/intestino|intestinal/.test(t)) label = 'saúde intestinal'
+  else if (/energia/.test(t)) label = 'energia'
+  else if (/ansiedade/.test(t)) label = 'ansiedade'
+  else if (/bem-estar/.test(t)) label = 'bem-estar'
+  else if (/saúde|saude/.test(t)) label = 'saúde'
+  else if (/peso/.test(t)) label = 'peso'
+  else if (/alimentação|alimentacao/.test(t)) label = 'alimentação'
+  else label = theme.trim()
+  return capitalizeFirst(label)
+}
+
+/** Subtítulo persuasivo com gatilhos mentais (curiosidade, baixo esforço, benefício personalizado). */
+function getPatientQuizSubtitle(theme: string, questionsCount?: number): string {
+  const n = typeof questionsCount === 'number' && questionsCount > 0 ? questionsCount : 0
+  const introQuiz = n > 0 ? `Responda ${n} pergunta${n > 1 ? 's' : ''} e receba` : 'Em poucos minutos, você recebe'
+  if (/intestino|intestinal/.test(theme)) {
+    return `Descubra o que seu intestino está tentando te dizer. ${introQuiz} um diagnóstico personalizado com o próximo passo.`
+  }
+  if (/emagrecimento|peso|perda/.test(theme)) {
+    return `Descubra o que está impedindo seu resultado. ${introQuiz} um diagnóstico personalizado com o próximo passo.`
+  }
+  if (/energia/.test(theme)) {
+    return n > 0
+      ? `Descubra o que está drenando sua energia. ${introQuiz} um diagnóstico personalizado em menos de 2 minutos.`
+      : 'Descubra o que está drenando sua energia. Diagnóstico personalizado em menos de 2 minutos.'
+  }
+  if (/ansiedade/.test(theme)) {
+    return 'Entenda melhor o que está acontecendo. Diagnóstico personalizado e próximos passos em poucos minutos.'
+  }
+  return `Descubra em minutos o que está acontecendo com você. ${introQuiz} um diagnóstico personalizado com o próximo passo.`
 }
 
 /**
  * Retorna título, subtítulo e micro para o bloco de intro antes da primeira pergunta.
  * Regras adaptativas por contexto; linguagem estratégica, nunca clínica.
+ * Para links de paciente (emagrecimento, saúde): intro voltada ao visitante.
  */
 export function getStrategicIntro(context: StrategicIntroContext): StrategicIntroContent {
+  const theme = (context.theme_raw ?? '').toString().trim().toLowerCase()
+  const pageTitle = (context.page_title ?? '').toString().trim()
+  const isPatientQuiz = /emagrecimento|perda de peso|intestino|energia|ansiedade|bem-estar|saúde|peso|alimentação/.test(theme)
+
+  if (isPatientQuiz) {
+    const themeLabel = formatThemeLabel(theme)
+    const hasTechnicalName = /raio-?x|diagnóstico de bloqueios|diagnóstico de saúde|diagnostico de bloqueios|diagnostico de saude/i.test(pageTitle)
+    const sanitizedPageTitle = pageTitle && !hasTechnicalName ? formatDisplayTitle(pageTitle) : ''
+    const title = sanitizedPageTitle || (themeLabel ? `Quiz: Como está sua ${themeLabel}?` : 'Quiz: Como está sua saúde?')
+    const subtitle = getPatientQuizSubtitle(theme, context.questions_count)
+    return {
+      title,
+      subtitle,
+      micro: 'Leva menos de 2 minutos.',
+    }
+  }
+
   const objective = (context.objective ?? 'captar').toString().trim().toLowerCase()
   const area = (context.area_profissional ?? '').toString().trim().toLowerCase()
   const isSingle =

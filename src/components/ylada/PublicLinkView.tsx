@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { getStrategicIntro } from '@/lib/ylada/strategic-intro'
+import { formatDisplayTitle, getStrategicIntro } from '@/lib/ylada/strategic-intro'
 
 type Payload = {
   slug: string
@@ -89,7 +89,7 @@ export default function PublicLinkView({ payload }: { payload: Payload }) {
         ctaText={ctaText}
         whatsappUrl={whatsappUrl}
         onCtaClick={handleCtaClick}
-        title={title}
+        title={formatDisplayTitle(title)}
       />
     )
   }
@@ -102,20 +102,20 @@ export default function PublicLinkView({ payload }: { payload: Payload }) {
         ctaText={ctaText}
         whatsappUrl={whatsappUrl}
         onCtaClick={handleCtaClick}
-        title={title}
+        title={formatDisplayTitle(title)}
       />
     )
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-gray-50">
-      <p className="text-gray-600">Tipo de link não suportado.</p>
+    <div className="min-h-screen flex items-center justify-center p-4 bg-sky-50/50">
+      <p className="text-sky-800">Tipo de link não suportado.</p>
     </div>
   )
 }
 
 // --- Config-driven (flow_id) form + result (Etapa 8) ---
-type FormField = { id: string; label: string; type?: string }
+type FormField = { id: string; label: string; type?: string; options?: string[] }
 type ResultConfig = { headline?: string; summary_bullets?: string[]; cta?: { text?: string } }
 
 const DIAGNOSIS_ARCHITECTURES = [
@@ -130,6 +130,9 @@ type DiagnosisResultState = {
   profile_title: string
   profile_summary: string
   main_blocker: string
+  causa_provavel?: string
+  preocupacoes?: string
+  espelho_comportamental?: string
   consequence: string
   growth_potential: string
   cta_text: string
@@ -156,11 +159,18 @@ function ConfigDrivenLinkView({
   const fields = (formConfig.fields as FormField[]) || []
   const submitLabel = (formConfig.submit_label as string) || 'Ver resultado'
 
-  const pageTitle = (page.title as string) ?? (config.title as string) ?? 'Link'
+  const pageTitleRaw = (page.title as string) ?? (config.title as string) ?? 'Link'
+  const hasTechnicalName = /diagnóstico de bloqueios|diagnóstico de saúde|raio-x/i.test(pageTitleRaw)
+  const pageTitle =
+    hasTechnicalName && pageTitleRaw.includes(' — ')
+      ? pageTitleRaw.split(' — ').slice(1).join(' — ').trim() || pageTitleRaw
+      : pageTitleRaw
+  const displayTitle = formatDisplayTitle(pageTitle)
   const subtitle = (page.subtitle as string) || ''
 
   const [values, setValues] = useState<Record<string, string>>({})
   const [step, setStep] = useState<'intro' | 'form' | 'result'>('intro')
+  const [formStep, setFormStep] = useState(0)
   const [diagnosis, setDiagnosis] = useState<DiagnosisResultState | null>(null)
   const [metricsId, setMetricsId] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
@@ -225,25 +235,40 @@ function ConfigDrivenLinkView({
   const summaryBullets = Array.isArray(resultConfig.summary_bullets) ? resultConfig.summary_bullets : []
   const resultCtaText = resultConfig.cta?.text || ctaText
 
-  // StrategicIntro: bloco antes da primeira pergunta (continuidade narrativa); usa perfil estratégico se existir
+  // StrategicIntro: bloco antes da primeira pergunta; para quiz paciente (emagrecimento etc.) usa intro voltada ao visitante
+  const themeFromMeta = typeof meta.theme_raw === 'string' ? meta.theme_raw : (meta.theme as { raw?: string })?.raw
+  const themeFromTitle = pageTitleRaw.includes(' — ') ? pageTitleRaw.split(' — ').slice(1).join(' — ').trim() : ''
   const introContent = getStrategicIntro({
     safety_mode: meta.safety_mode === true,
     objective: typeof meta.objective === 'string' ? meta.objective : undefined,
     area_profissional: typeof meta.area_profissional === 'string' ? meta.area_profissional : undefined,
     strategic_profile: meta.strategic_profile && typeof meta.strategic_profile === 'object' ? (meta.strategic_profile as { maturityStage?: string; dominantPain?: string; urgencyLevel?: string; mindset?: string }) : undefined,
+    theme_raw: themeFromMeta || themeFromTitle || undefined,
+    page_title: pageTitleRaw || undefined,
+    questions_count: fields.length > 0 ? fields.length : undefined,
   })
 
   if (step === 'intro') {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-        <div className="max-w-md w-full bg-white rounded-2xl shadow-lg border border-gray-100 p-6 sm:p-8">
-          <h1 className="text-xl font-bold text-gray-900 mb-2">{introContent.title}</h1>
-          <p className="text-sm text-gray-600 mb-2">{introContent.subtitle}</p>
-          <p className="text-xs text-gray-500 mb-6">{introContent.micro}</p>
+      <div className="min-h-screen bg-gradient-to-b from-sky-50 via-sky-50/90 to-blue-50 flex items-center justify-center p-4 sm:p-6">
+        <div className="max-w-md w-full bg-white rounded-2xl shadow-xl shadow-sky-100/50 border border-sky-100/60 p-6 sm:p-8">
+          <div className="mb-4">
+            <span className="inline-block text-xs font-semibold text-sky-600 bg-sky-50 px-3 py-1.5 rounded-full border border-sky-100">
+              Diagnóstico personalizado
+            </span>
+          </div>
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 leading-tight">{introContent.title}</h1>
+          <p className="text-sm text-gray-600 leading-relaxed mb-4">{introContent.subtitle}</p>
+          <p className="text-xs font-medium text-sky-600 mb-6 flex items-center gap-1.5">
+            <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            {introContent.micro}
+          </p>
           <button
             type="button"
             onClick={() => setStep('form')}
-            className="w-full py-3 px-4 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors"
+            className="w-full py-4 px-4 bg-sky-600 hover:bg-sky-700 text-white font-semibold rounded-xl shadow-lg shadow-sky-500/25 transition-colors hover:shadow-sky-500/30"
           >
             Começar
           </button>
@@ -254,35 +279,145 @@ function ConfigDrivenLinkView({
 
   if (step === 'result') {
     if (diagnosis && metricsId) {
+      const formattedProfileTitle = formatDisplayTitle(diagnosis.profile_title)
       return (
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-          <div className="max-w-md w-full bg-white rounded-2xl shadow-lg border border-gray-100 p-6 sm:p-8">
-            <h1 className="text-xl font-bold text-gray-900 mb-3">{diagnosis.profile_title}</h1>
-            <p className="text-gray-600 text-sm leading-relaxed mb-2">{diagnosis.profile_summary}</p>
-            <p className="text-gray-700 font-medium text-sm mb-3">{diagnosis.main_blocker}</p>
-            <p className="text-gray-500 text-sm mb-6">
-              {diagnosis.consequence} {diagnosis.growth_potential}
+        <div className="min-h-screen bg-gradient-to-b from-sky-50 via-sky-50/90 to-blue-50 flex items-center justify-center p-4 sm:p-6">
+          <div className="max-w-md w-full bg-white rounded-2xl shadow-xl shadow-sky-100/50 border border-sky-100/60 p-6 sm:p-8">
+            <div className="mb-4">
+              <span className="inline-block text-xs font-semibold text-sky-600 bg-sky-50 px-3 py-1.5 rounded-full border border-sky-100">
+                Seu resultado
+              </span>
+            </div>
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3 leading-tight">
+              {formattedProfileTitle}
+            </h1>
+
+            {/* 1. Leitura personalizada */}
+            <p className="text-gray-600 text-sm leading-relaxed mb-5">{diagnosis.profile_summary}</p>
+
+            {/* 2. Diagnóstico — ponto chave */}
+            <div className="relative mb-5 overflow-hidden rounded-2xl bg-gradient-to-br from-sky-50 to-white border border-sky-100/80 shadow-sm">
+              <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-gradient-to-b from-sky-400 to-sky-600 rounded-l-2xl" />
+              <div className="pl-5 pr-5 py-5 sm:pl-6 sm:pr-6 sm:py-6">
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-sky-600 mb-2">
+                  Diagnóstico
+                </p>
+                <p className="text-lg sm:text-xl font-bold text-gray-900 leading-snug mb-2">
+                  {diagnosis.main_blocker}
+                </p>
+                {diagnosis.espelho_comportamental && (
+                  <p className="text-sm text-sky-700 font-medium italic">
+                    {diagnosis.espelho_comportamental}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            {/* 2b. Frase de identificação emocional */}
+            {diagnosis.frase_identificacao && (
+              <p className="text-gray-600 text-sm leading-relaxed mb-4 italic">
+                {diagnosis.frase_identificacao}
+              </p>
+            )}
+
+            {/* 3. Causa provável */}
+            {diagnosis.causa_provavel && (
+              <div className="mb-4">
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-sky-600 mb-1">
+                  Causa provável
+                </p>
+                <p className="text-gray-600 text-sm leading-relaxed">
+                  {diagnosis.causa_provavel}
+                </p>
+              </div>
+            )}
+
+            {/* 4. Preocupações */}
+            {diagnosis.preocupacoes && (
+              <div className="mb-4">
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-sky-600 mb-1">
+                  Preocupações
+                </p>
+                <p className="text-gray-600 text-sm leading-relaxed">
+                  {diagnosis.preocupacoes}
+                </p>
+              </div>
+            )}
+
+            {/* 5. Consequência */}
+            <div className="mb-4">
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-sky-600 mb-1">
+                Consequência
+              </p>
+              <p className="text-gray-600 text-sm leading-relaxed">
+                {diagnosis.consequence}
+              </p>
+            </div>
+
+            {/* 5b. Dica rápida (micro-conteúdo educativo) */}
+            {diagnosis.dica_rapida && (
+              <div className="mb-4 p-4 rounded-xl bg-sky-50/60 border border-sky-100">
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-sky-600 mb-1">
+                  Dica rápida
+                </p>
+                <p className="text-gray-700 text-sm leading-relaxed">
+                  {diagnosis.dica_rapida}
+                </p>
+              </div>
+            )}
+
+            {/* 6. Providências — 2–3 ações específicas ou texto único */}
+            <div className="mb-6">
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-sky-600 mb-2">
+                Próximos passos
+              </p>
+              {diagnosis.specific_actions && diagnosis.specific_actions.length > 0 ? (
+                <ul className="space-y-2">
+                  {diagnosis.specific_actions.map((action, idx) => (
+                    <li key={idx} className="flex items-start gap-2 text-sky-700 text-sm font-medium leading-relaxed">
+                      <span className="flex-shrink-0 w-5 h-5 rounded-full bg-sky-100 text-sky-600 flex items-center justify-center text-xs font-semibold">
+                        {idx + 1}
+                      </span>
+                      {action}
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-sky-700 text-sm font-medium leading-relaxed">
+                  {diagnosis.growth_potential}
+                </p>
+              )}
+            </div>
+
+            {/* 7. Direcionamento — CTA discreto ao especialista */}
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-sky-600 mb-2">
+              Próximo passo
             </p>
             {whatsappUrl ? (
               <button
                 type="button"
                 onClick={() => onCtaClick(metricsId, diagnosis.whatsapp_prefill)}
-                className="w-full py-3 px-4 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors"
+                className="w-full py-4 px-4 bg-sky-600 hover:bg-sky-700 text-white font-semibold rounded-xl shadow-lg shadow-sky-500/25 transition-colors"
               >
                 {diagnosis.cta_text}
               </button>
             ) : (
-              <span className="text-gray-500 text-sm">Botão WhatsApp não configurado.</span>
+              <span className="text-gray-500 text-sm">O profissional ainda não disponibilizou o contato por aqui.</span>
             )}
+
+            {/* Rodapé — validação jurídica */}
+            <p className="mt-5 pt-4 border-t border-gray-100 text-[10px] text-gray-400 text-center">
+              Este diagnóstico tem caráter informativo e educativo.
+            </p>
           </div>
         </div>
       )
     }
 
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-        <div className="max-w-md w-full bg-white rounded-2xl shadow-lg border border-gray-100 p-6 sm:p-8">
-          <h1 className="text-xl font-bold text-gray-900 mb-2">{pageTitle}</h1>
+      <div className="min-h-screen bg-gradient-to-b from-sky-50 via-sky-50/90 to-blue-50 flex items-center justify-center p-4 sm:p-6">
+        <div className="max-w-md w-full bg-white rounded-2xl shadow-xl border border-gray-100/80 p-6 sm:p-8">
+          <h1 className="text-xl font-bold text-gray-900 mb-2">{displayTitle}</h1>
           <div className="mb-6">
             <h2 className="text-lg font-semibold text-gray-900">{headline}</h2>
             {summaryBullets.length > 0 && (
@@ -297,12 +432,112 @@ function ConfigDrivenLinkView({
             <button
               type="button"
               onClick={() => onCtaClick()}
-              className="w-full py-3 px-4 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors"
+              className="w-full py-4 px-4 bg-sky-600 hover:bg-sky-700 text-white font-semibold rounded-xl shadow-lg shadow-sky-500/25 transition-colors"
             >
               {resultCtaText}
             </button>
           ) : (
-            <span className="text-gray-500 text-sm">Botão WhatsApp não configurado.</span>
+            <span className="text-gray-500 text-sm">O profissional ainda não disponibilizou o contato por aqui.</span>
+          )}
+        </div>
+      </div>
+    )
+  }
+
+  const hasQuizFields = fields.some((f) => Array.isArray(f.options) && f.options.length > 0)
+  const quizFields = hasQuizFields ? fields.filter((f) => Array.isArray(f.options) && f.options.length > 0) : []
+  const textFields = hasQuizFields ? fields.filter((f) => !Array.isArray(f.options) || f.options.length === 0) : fields
+  const isQuizMode = quizFields.length > 0
+  const currentField = isQuizMode ? quizFields[formStep] : null
+  const isLastQuizStep = isQuizMode && formStep >= quizFields.length - 1
+  const allQuizAnswered = isQuizMode && quizFields.every((f) => (values[f.id] ?? '') !== '')
+
+  const handleOptionSelect = (fieldId: string, value: string) => {
+    if (!startSent.current) {
+      startSent.current = true
+      trackEvent(slug, 'start')
+    }
+    setValues((prev) => ({ ...prev, [fieldId]: value }))
+    if (isLastQuizStep) return
+    setTimeout(() => setFormStep((s) => s + 1), 150)
+  }
+
+  if (isQuizMode && currentField) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-sky-50 via-sky-50/90 to-blue-50 flex items-center justify-center p-4 sm:p-6">
+        <div className="max-w-md w-full bg-white rounded-2xl shadow-xl border border-gray-100/80 p-6 sm:p-8 animate-in fade-in duration-300">
+          <p className="text-xs font-medium text-gray-500 mb-4">{displayTitle}</p>
+          <div className="mb-6">
+            <div className="flex items-center justify-between text-xs font-medium text-gray-500 mb-2">
+              <div className="w-14 text-left">
+                {formStep > 0 ? (
+                  <button
+                    type="button"
+                    onClick={() => setFormStep((s) => s - 1)}
+                    className="text-sky-600 hover:text-sky-700 hover:underline"
+                  >
+                    ← Voltar
+                  </button>
+                ) : null}
+              </div>
+              <span className="flex-1 text-center">Pergunta {formStep + 1} de {quizFields.length}</span>
+              <div className="w-14" />
+            </div>
+            <div className="h-1.5 bg-sky-100 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-sky-500 rounded-full transition-all duration-300"
+                style={{ width: `${((formStep + 1) / quizFields.length) * 100}%` }}
+              />
+            </div>
+          </div>
+          <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-6 leading-snug">
+            {currentField.label}
+          </h2>
+          <div className="space-y-3">
+            {currentField.options?.map((opt, i) => {
+              const isSelected = (values[currentField.id] ?? '') === String(i)
+              return (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => handleOptionSelect(currentField.id, String(i))}
+                  className={`w-full text-left py-4 px-4 rounded-xl border-2 transition-all duration-200 ${
+                    isSelected
+                      ? 'border-sky-500 bg-sky-50 text-sky-900'
+                      : 'border-gray-100 hover:border-sky-200 hover:bg-gray-50/80 text-gray-700'
+                  }`}
+                >
+                  <span className="flex items-center gap-3">
+                    <span
+                      className={`flex-shrink-0 w-5 h-5 rounded-full border-2 flex items-center justify-center text-xs font-medium ${
+                        isSelected ? 'border-sky-500 bg-sky-500 text-white' : 'border-gray-300'
+                      }`}
+                    >
+                      {isSelected ? '✓' : String.fromCharCode(65 + i)}
+                    </span>
+                    {opt}
+                  </span>
+                </button>
+              )
+            })}
+          </div>
+          {isLastQuizStep && (
+            <form
+              onSubmit={(e) => {
+                e.preventDefault()
+                if (!allQuizAnswered || loading) return
+                handleSubmit(e)
+              }}
+              className="mt-8"
+            >
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full py-4 px-4 bg-sky-600 hover:bg-sky-700 disabled:opacity-60 text-white font-semibold rounded-xl shadow-lg shadow-sky-500/25 transition-all duration-200"
+              >
+                {loading ? 'Gerando resultado...' : submitLabel}
+              </button>
+            </form>
           )}
         </div>
       </div>
@@ -310,9 +545,9 @@ function ConfigDrivenLinkView({
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-sky-50 via-sky-50/90 to-blue-50 flex items-center justify-center p-4">
       <div className="max-w-md w-full bg-white rounded-2xl shadow-lg border border-gray-100 p-6 sm:p-8">
-        <h1 className="text-xl font-bold text-gray-900 mb-2">{pageTitle}</h1>
+        <h1 className="text-xl font-bold text-gray-900 mb-2">{displayTitle}</h1>
         {subtitle && <p className="text-sm text-gray-600 mb-4">{subtitle}</p>}
         {error && (
           <p className="text-sm text-red-600 mb-4" role="alert">
@@ -320,7 +555,7 @@ function ConfigDrivenLinkView({
           </p>
         )}
         <form onSubmit={handleSubmit} className="space-y-4">
-          {fields.map((f) => (
+          {textFields.map((f) => (
             <div key={f.id}>
               <label className="block text-sm font-medium text-gray-700 mb-1">{f.label}</label>
               {f.type === 'number' ? (
@@ -328,14 +563,14 @@ function ConfigDrivenLinkView({
                   type="number"
                   value={values[f.id] ?? ''}
                   onChange={(e) => setValues((prev) => ({ ...prev, [f.id]: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
                 />
               ) : (
                 <input
                   type="text"
                   value={values[f.id] ?? ''}
                   onChange={(e) => setValues((prev) => ({ ...prev, [f.id]: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
                   placeholder={f.label}
                 />
               )}
@@ -344,7 +579,7 @@ function ConfigDrivenLinkView({
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 px-4 bg-green-600 hover:bg-green-700 disabled:opacity-60 text-white font-medium rounded-lg transition-colors"
+            className="w-full py-3 px-4 bg-sky-600 hover:bg-sky-700 disabled:opacity-60 text-white font-medium rounded-lg transition-colors"
           >
             {loading ? 'Gerando resultado...' : submitLabel}
           </button>
@@ -415,7 +650,7 @@ function DiagnosticoQuiz({
 
   if (step === 'result' && isComplete) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-gradient-to-br from-sky-50 via-sky-50/90 to-blue-50 flex items-center justify-center p-4">
         <div className="max-w-md w-full bg-white rounded-2xl shadow-lg border border-gray-100 p-6 sm:p-8">
           <h1 className="text-xl font-bold text-gray-900 mb-2">{title}</h1>
           <p className="text-sm text-gray-600 mb-4">{resultIntro}</p>
@@ -427,12 +662,12 @@ function DiagnosticoQuiz({
             <button
               type="button"
               onClick={onCtaClick}
-              className="w-full py-3 px-4 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors"
+              className="w-full py-3 px-4 bg-sky-600 hover:bg-sky-700 text-white font-medium rounded-lg transition-colors"
             >
               {ctaText}
             </button>
           ) : (
-            <span className="text-gray-500 text-sm">Botão WhatsApp não configurado.</span>
+            <span className="text-gray-500 text-sm">O profissional ainda não disponibilizou o contato por aqui.</span>
           )}
         </div>
       </div>
@@ -440,7 +675,7 @@ function DiagnosticoQuiz({
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-sky-50 via-sky-50/90 to-blue-50 flex items-center justify-center p-4">
       <div className="max-w-md w-full bg-white rounded-2xl shadow-lg border border-gray-100 p-6 sm:p-8">
         <h1 className="text-xl font-bold text-gray-900 mb-2">{title}</h1>
         <p className="text-sm text-gray-500 mb-4">
@@ -455,7 +690,7 @@ function DiagnosticoQuiz({
                   key={i}
                   type="button"
                   onClick={() => handleAnswer(i)}
-                  className="w-full text-left py-3 px-4 rounded-lg border border-gray-200 hover:border-green-500 hover:bg-green-50 text-gray-800 transition-colors"
+                  className="w-full text-left py-3 px-4 rounded-lg border border-gray-200 hover:border-sky-500 hover:bg-sky-50 text-gray-800 transition-colors"
                 >
                   {opt}
                 </button>
@@ -540,7 +775,7 @@ function CalculatorBlock({
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-sky-50 via-sky-50/90 to-blue-50 flex items-center justify-center p-4">
       <div className="max-w-md w-full bg-white rounded-2xl shadow-lg border border-gray-100 p-6 sm:p-8">
         <h1 className="text-xl font-bold text-gray-900 mb-2">{title}</h1>
         {!showResult ? (
@@ -554,13 +789,13 @@ function CalculatorBlock({
                   max={f.max}
                   value={values[f.id] ?? ''}
                   onChange={(e) => setValues((prev) => ({ ...prev, [f.id]: Number(e.target.value) || 0 }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
                 />
               </div>
             ))}
             <button
               type="submit"
-              className="w-full py-3 px-4 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors"
+              className="w-full py-3 px-4 bg-sky-600 hover:bg-sky-700 text-white font-medium rounded-lg transition-colors"
             >
               Calcular
             </button>
@@ -578,12 +813,12 @@ function CalculatorBlock({
               <button
                 type="button"
                 onClick={onCtaClick}
-                className="w-full py-3 px-4 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors"
+                className="w-full py-3 px-4 bg-sky-600 hover:bg-sky-700 text-white font-medium rounded-lg transition-colors"
               >
                 {ctaText}
               </button>
             ) : (
-              <span className="text-gray-500 text-sm">Botão WhatsApp não configurado.</span>
+              <span className="text-gray-500 text-sm">O profissional ainda não disponibilizou o contato por aqui.</span>
             )}
           </>
         )}

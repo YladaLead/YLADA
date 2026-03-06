@@ -16,15 +16,18 @@ import {
   DIAGNOSIS_TEMPLATES,
   fillSlots,
   pickTitle,
+  getRiskLevelVariants,
+  getBlockerVariants,
+  RISK_VARIANTS_EXTRA,
 } from './diagnosis-templates'
 import { validateDiagnosisDecision } from './diagnosis-validation'
 
 const BLOCKER_LABELS: Record<BlockerType, string> = {
-  rotina: 'Rotina bagunçada',
-  emocional: 'Emoção pesando',
-  processo: 'Falta de clareza no passo a passo',
-  habitos: 'Constância quebrada',
-  expectativa: 'Meta fora do realista',
+  rotina: 'Falta de organização na rotina',
+  emocional: 'Emoção interferindo nas decisões',
+  processo: 'Falta de clareza no próximo passo',
+  habitos: 'Dificuldade em manter consistência',
+  expectativa: 'Expectativas desalinhadas',
 }
 
 // --- D0: normalização de visitor_answers (sinônimos) ---
@@ -56,6 +59,15 @@ function getNum(answers: Record<string, unknown>, key: string, def: number): num
 
 // --- D1: RISK_DIAGNOSIS → level + evidence ---
 function calcRiskLevel(answers: Record<string, unknown>): { level: RiskLevel; evidence: string[] } {
+  // Score genérico (quiz intestino, energia, etc.): usa nível pré-calculado
+  const genericLevel = answers.generic_level as RiskLevel | undefined
+  if (genericLevel === 'baixo' || genericLevel === 'medio' || genericLevel === 'alto') {
+    return {
+      level: genericLevel,
+      evidence: ['Suas respostas indicam um padrão que merece atenção.'],
+    }
+  }
+
   const symptoms = getArr(answers, 'symptoms', 'sintomas')
   const history = getArr(answers, 'history_flags', 'historico', 'history')
   const impactRaw = answers.impact_level ?? answers.impact
@@ -264,6 +276,22 @@ function calcProjection(answers: Record<string, unknown>): {
   }
 }
 
+/** Templates main_blocker para RISK_DIAGNOSIS: Indícios → Sinais → Desequilíbrio. */
+const RISK_MAIN_BLOCKER: Record<RiskLevel, { withTheme: string; fallback: string }> = {
+  baixo: {
+    withTheme: 'Indícios em {THEME} que merecem atenção',
+    fallback: 'Indícios que merecem atenção',
+  },
+  medio: {
+    withTheme: 'Sinais em {THEME} que se repetem',
+    fallback: 'Sinais que se repetem',
+  },
+  alto: {
+    withTheme: 'Desequilíbrio em {THEME} que pede ação',
+    fallback: 'Desequilíbrio que pede ação',
+  },
+}
+
 // --- Bloqueio único visível (uma string por arquitetura) ---
 function getMainBlocker(
   arch: DiagnosisInput['meta']['architecture'],
@@ -273,21 +301,30 @@ function getMainBlocker(
     profile_type?: string
     score?: number
     warning?: boolean
+    theme?: string
   }
 ): string {
   switch (arch) {
-    case 'RISK_DIAGNOSIS':
-      return payload.level === 'alto'
-        ? 'Algo importante pede atenção'
-        : payload.level === 'medio'
-          ? 'Vale dar uma olhada'
-          : 'Sinais que se repetem'
+    case 'RISK_DIAGNOSIS': {
+      const level = payload.level ?? 'medio'
+      const theme = (payload.theme ?? '').trim()
+      const t = RISK_MAIN_BLOCKER[level]
+      const useTheme = theme.length > 2 && !/^seu\s+objetivo$/i.test(theme)
+      return useTheme ? t.withTheme.replace('{THEME}', theme) : t.fallback
+    }
     case 'BLOCKER_DIAGNOSIS':
       return payload.blocker_type ? BLOCKER_LABELS[payload.blocker_type] : 'Algo trava sua constância'
     case 'PROFILE_TYPE':
       return payload.profile_type ? `Seu jeito é ${payload.profile_type}` : 'Seu jeito de lidar com isso'
-    case 'READINESS_CHECKLIST':
-      return (payload.score ?? 0) < 50 ? 'Alguns pontos pedem atenção' : 'Dá pra melhorar alguns pontos'
+    case 'READINESS_CHECKLIST': {
+      const score = payload.score ?? 0
+      const theme = (payload.theme ?? '').trim()
+      const useTheme = theme.length > 2 && !/^seu\s+objetivo$/i.test(theme)
+      if (score < 50) {
+        return useTheme ? `Alguns pontos em ${theme} pedem atenção` : 'Alguns pontos pedem atenção'
+      }
+      return useTheme ? `Dá pra melhorar alguns pontos em ${theme}` : 'Dá pra melhorar alguns pontos'
+    }
     case 'PROJECTION_CALCULATOR':
       return payload.warning ? 'Meta ou prazo fora do realista' : 'Projeção com base no que você informou'
     default:
@@ -361,10 +398,14 @@ function getSafeFallback(
     profile_summary:
       'Pelos sinais que você relatou, algo vale atenção. Vale conversar com quem entende pra ver o próximo passo.',
     main_blocker: blocker,
+    causa_provavel:
+      'A causa provável: quando o padrão atual se repete sem intervenção, tende a continuar igual ou evoluir.',
+    preocupacoes:
+      'Se nada mudar, o ciclo tende a se repetir e a frustração pode aumentar.',
     consequence:
       'Se nada mudar, tende a continuar igual ou piorar.',
     growth_potential:
-      'Vale conversar pra entender o próximo passo.',
+      'Vale conversar com quem entende pra calibrar o próximo passo e as providências a tomar.',
     cta_text: 'Fale comigo sobre isso',
     whatsapp_prefill: `Oi ${nome}, fiz a análise sobre ${theme}${obj}. Meu resultado apontou: ${blocker}. Quero entender o próximo passo para o meu caso.`,
   }
@@ -445,8 +486,57 @@ export function generateDiagnosis(input: DiagnosisInput): DiagnosisGenerationRes
   const arch = meta.architecture
   const t = DIAGNOSIS_TEMPLATES[arch]
   const profile_title = pickTitle(arch, slots)
-  const explanation = fillSlots(t.explanation, slots)
+
+  // RISK_DIAGNOSIS: usa variação por nível (leve/moderado/alto)
+  let explanation: string
+  let consequence: string
+  let growth_potential: string
+  let cta_text: string
+  if (arch === 'RISK_DIAGNOSIS' && level) {
+    const variants = getRiskLevelVariants(level)
+    explanation = fillSlots(variants.explanation, slots)
+    consequence = fillSlots(variants.consequence, slots)
+    growth_potential = fillSlots(variants.possibility, slots)
+    cta_text = variants.cta_imperative
+  } else {
+    explanation = fillSlots(t.explanation, slots)
+    consequence = fillSlots(t.consequence, slots)
+    growth_potential = fillSlots(t.possibility, slots)
+    cta_text = t.cta_imperative
+  }
+
   let profile_summary = explanation.trim()
+  let causa_provavel: string | undefined
+  let preocupacoes: string | undefined
+  let espelho_comportamental: string | undefined
+  let specific_actions: string[] | undefined
+  let dica_rapida: string | undefined
+  let frase_identificacao: string | undefined
+
+  if (arch === 'BLOCKER_DIAGNOSIS' && blocker_type) {
+    const variants = getBlockerVariants(theme, (meta as { segment_code?: string }).segment_code)
+    const v = variants[blocker_type]
+    profile_summary = v.leitura
+    causa_provavel = v.causa_provavel
+    preocupacoes = v.preocupacoes
+    espelho_comportamental = v.espelho
+    growth_potential = v.providencias
+    specific_actions = v.specific_actions
+    dica_rapida = v.dica_rapida
+    frase_identificacao = v.frase_identificacao
+  } else if (arch === 'RISK_DIAGNOSIS' && level) {
+    const r = RISK_VARIANTS_EXTRA[level]
+    causa_provavel = r.causa_provavel
+    preocupacoes = r.preocupacoes
+    growth_potential = r.providencias
+    specific_actions = r.specific_actions
+    dica_rapida = r.dica_rapida
+    frase_identificacao = r.frase_identificacao
+  } else {
+    causa_provavel = t.causa_provavel ? fillSlots(t.causa_provavel, slots) : undefined
+    preocupacoes = t.preocupacoes ? fillSlots(t.preocupacoes, slots) : undefined
+  }
+
   if (profile_summary.length < 60) {
     profile_summary = (profile_summary + ' Vale conversar com quem entende pra ver o próximo passo.').trim()
   }
@@ -457,10 +547,8 @@ export function generateDiagnosis(input: DiagnosisInput): DiagnosisGenerationRes
     profile_type,
     score,
     warning,
+    theme,
   })
-  const consequence = fillSlots(t.consequence, slots)
-  const growth_potential = fillSlots(t.possibility, slots)
-  const cta_text = t.cta_imperative
   const whatsapp_prefill = fillSlots(t.whatsapp_prefill, {
     ...slots,
     NAME: name || 'aí',
@@ -470,12 +558,24 @@ export function generateDiagnosis(input: DiagnosisInput): DiagnosisGenerationRes
     SCORE: score ?? '',
   })
 
+  const filledSlots = { ...slots, NAME: name || 'aí' }
+  const filledSpecificActions =
+    specific_actions?.map((a) => fillSlots(a, filledSlots)).filter(Boolean) ?? undefined
+  const filledDicaRapida = dica_rapida ? fillSlots(dica_rapida, filledSlots) : undefined
+  const filledFraseIdentificacao = frase_identificacao ? fillSlots(frase_identificacao, filledSlots) : undefined
+
   const result: DiagnosisDecisionOutput = {
     profile_title,
     profile_summary,
     main_blocker,
+    ...(causa_provavel && { causa_provavel }),
+    ...(preocupacoes && { preocupacoes }),
+    ...(espelho_comportamental && { espelho_comportamental }),
     consequence,
     growth_potential,
+    ...(filledSpecificActions && filledSpecificActions.length > 0 && { specific_actions: filledSpecificActions }),
+    ...(filledDicaRapida && { dica_rapida: filledDicaRapida }),
+    ...(filledFraseIdentificacao && { frase_identificacao: filledFraseIdentificacao }),
     cta_text,
     whatsapp_prefill,
   }

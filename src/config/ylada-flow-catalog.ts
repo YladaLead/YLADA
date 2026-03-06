@@ -16,7 +16,7 @@ export interface FlowCatalogItem {
   architecture: DiagnosisArchitecture
   /** Qualidade = lead mais qualificado; Volume = maior volume de leads. */
   type: FlowType
-  /** Nome exibido nos cards (ex.: "Raio-X de Saúde"). */
+  /** Nome exibido nos cards (ex.: "Diagnóstico de Saúde"). */
   display_name: string
   /** Uma linha de impacto (ex.: "Atrai pessoas mais conscientes e preparadas para agir."). */
   impact_line: string
@@ -49,7 +49,7 @@ export const YLADA_FLOW_CATALOG: FlowCatalogItem[] = [
     id: FLOW_IDS.diagnostico_risco,
     architecture: 'RISK_DIAGNOSIS',
     type: 'qualidade',
-    display_name: 'Raio-X de Saúde',
+    display_name: 'Diagnóstico de Saúde',
     impact_line: 'Atrai pessoas mais conscientes e preparadas para agir.',
     description:
       'O visitante responde sobre sinais, histórico e impacto. O link devolve um nível de risco (baixo/médio/alto) com explicação e próximo passo. Ideal para temas com consequência ou urgência.',
@@ -62,7 +62,7 @@ export const YLADA_FLOW_CATALOG: FlowCatalogItem[] = [
     id: FLOW_IDS.diagnostico_bloqueio,
     architecture: 'BLOCKER_DIAGNOSIS',
     type: 'volume',
-    display_name: 'Raio-X de Estratégia',
+    display_name: 'Diagnóstico de Bloqueios',
     impact_line: 'Desperta curiosidade e gera maior volume de leads.',
     description:
       'Identifica o principal bloqueio (rotina, emocional, processo, hábitos ou expectativa) a partir das respostas. O visitante recebe um diagnóstico direto e um primeiro passo para destravar.',

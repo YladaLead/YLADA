@@ -12,6 +12,7 @@ import type { DiagnosisInput, DiagnosisArchitecture, LinkObjective, AreaProfissi
 import { normalizeVisitorAnswers } from '@/lib/ylada/diagnosis-normalize'
 import type { StrategicProfile } from '@/lib/ylada/strategic-profile'
 import { getAdaptiveDiagnosisIntro, getAdvancedCta } from '@/lib/ylada/adaptive-diagnosis'
+import { sanitizeThemeForPatient } from '@/lib/ylada/strategic-intro'
 
 const ARCHITECTURES: DiagnosisArchitecture[] = [
   'RISK_DIAGNOSIS',
@@ -107,7 +108,8 @@ export async function POST(
     // Camada 0: em safety_mode usar tema genérico (theme_display) nos textos, nunca nome de medicamento
     const safetyMode = metaRaw.safety_mode === true
     const themeDisplay = typeof metaRaw.theme_display === 'string' ? metaRaw.theme_display : null
-    const themeForSlots = safetyMode && themeDisplay ? themeDisplay : themeRaw
+    const themeBase = safetyMode && themeDisplay ? themeDisplay : themeRaw
+    const themeForSlots = sanitizeThemeForPatient(themeBase)
 
     const objective = OBJECTIVES.includes((metaRaw.objective as LinkObjective) ?? '')
       ? (metaRaw.objective as LinkObjective)
@@ -123,15 +125,18 @@ export async function POST(
     // Bloco 2: normalizar q1,q2... para chaves esperadas pelo motor
     const normalizedAnswers = normalizeVisitorAnswers(
       visitor_answers,
-      architecture as DiagnosisArchitecture
+      architecture as DiagnosisArchitecture,
+      { themeRaw: themeRaw ?? '' }
     )
 
+    const segment_code = typeof metaRaw.segment_code === 'string' ? metaRaw.segment_code : undefined
     const input: DiagnosisInput = {
       meta: {
         objective,
         theme: { raw: themeForSlots },
         area_profissional,
         architecture: architecture as DiagnosisArchitecture,
+        ...(segment_code && { segment_code }),
       },
       professional: {},
       visitor_answers: normalizedAnswers,
@@ -143,8 +148,12 @@ export async function POST(
     const copyPolicy = metaRaw.copy_policy && typeof metaRaw.copy_policy === 'object' ? metaRaw.copy_policy as { append_disclaimer?: boolean } : undefined
     const appendDisclaimer = safetyMode && copyPolicy?.append_disclaimer
 
-    // Tom adaptativo: abertura por strategic_profile + level (sem alterar motor)
-    const strategicProfile = metaRaw.strategic_profile && typeof metaRaw.strategic_profile === 'object' ? (metaRaw.strategic_profile as StrategicProfile) : null
+    // Tom adaptativo: só para links B2B (agenda, captação). Links para pacientes (emagrecimento, intestino) não usam texto de "agenda"
+    const themeForAdaptive = typeof metaRaw.theme_raw === 'string' ? metaRaw.theme_raw : ''
+    const isProfessionalTheme = /agenda|captação|posicionamento|conversão|indicados/.test(themeForAdaptive.toLowerCase())
+    const strategicProfile = isProfessionalTheme && metaRaw.strategic_profile && typeof metaRaw.strategic_profile === 'object'
+      ? (metaRaw.strategic_profile as StrategicProfile)
+      : null
     const introVariant = strategicProfile ? getAdaptiveDiagnosisIntro(strategicProfile, level) : null
     const baseSummary = introVariant
       ? `${introVariant}\n\n${diagnosis.profile_summary}`
@@ -187,6 +196,9 @@ export async function POST(
         profile_title: diagnosis.profile_title,
         profile_summary: profileSummary,
         main_blocker: diagnosis.main_blocker,
+        causa_provavel: diagnosis.causa_provavel,
+        preocupacoes: diagnosis.preocupacoes,
+        espelho_comportamental: diagnosis.espelho_comportamental,
         consequence: diagnosis.consequence,
         growth_potential: diagnosis.growth_potential,
         cta_text: ctaText,

@@ -47,6 +47,7 @@ export interface InterpretQuestion {
   id: string
   label: string
   type?: string
+  options?: string[]
 }
 
 /** Resposta unificada do interpret. */
@@ -86,7 +87,7 @@ Sua tarefa: em UMA resposta JSON, inferir TUDO que o profissional precisa para g
 1. flow_id: um de diagnostico_risco, diagnostico_bloqueio, calculadora_projecao, perfil_comportamental, checklist_prontidao
 2. flow_id_secondary: outro flow_id para mostrar como alternativa (para o segundo card)
 3. theme: 2 a 5 palavras do tema (ex.: perda de peso, emagrecimento)
-4. questions: array de 3 a 6 perguntas para o formulário. Cada item: { "id": "q1", "label": "Texto da pergunta", "type": "text" }
+4. questions: array de 3 a 6 perguntas. Para QUIZ (diagnostico_risco, diagnostico_bloqueio, checklist_prontidao, perfil_comportamental): cada item deve ter { "id": "q1", "label": "Texto da pergunta", "type": "single", "options": ["Opção A", "Opção B", "Opção C", "Opção D"] } com exatamente 4 opções cada. Para CALCULADORA (calculadora_projecao): use { "id": "q1", "label": "Texto", "type": "number" } sem options.
 5. architecture: RISK_DIAGNOSIS, BLOCKER_DIAGNOSIS, PROJECTION_CALCULATOR, PROFILE_TYPE ou READINESS_CHECKLIST (deve bater com flow_id)
 6. cta_suggestion: texto do botão CTA (ex.: "Quero analisar meu caso", "Quero destravar isso")
 7. interpretacao: { objetivo, tema, tipo_publico, area_profissional, contexto_detectado }
@@ -100,9 +101,14 @@ Sua tarefa: em UMA resposta JSON, inferir TUDO que o profissional precisa para g
 Regras:
 - Se o tema envolver medicamentos, prescrição, caneta, injeção, semaglutida, ozempic etc → use flow_id diagnostico_bloqueio e architecture BLOCKER_DIAGNOSIS (evitar RISK_DIAGNOSIS)
 - Para captar + saúde: diagnostico_risco ou diagnostico_bloqueio
-- Para captar + profissional liberal: checklist_prontidao ou perfil_comportamental
-- Para captar + vendas: checklist_prontidao ou calculadora_projecao
+- Para captar + profissional liberal: diagnostico_bloqueio ou perfil_comportamental (evitar checklist_prontidao quando o link é para compartilhar)
+- Para captar + vendas: diagnostico_bloqueio ou calculadora_projecao (evitar checklist_prontidao quando o link é para compartilhar)
+- IMPORTANTE — Link para compartilhar: Quando o profissional pede link para "captar", "atrair clientes", "qualificar" — o link é para COMPARTILHAR com pacientes/clientes. As perguntas DEVEM ser do ponto de vista do PACIENTE/CLIENTE (ex.: "O que mais atrapalha você?", "Qual seu maior desafio hoje?", "Você consegue manter rotina?"). NUNCA use perguntas sobre a estratégia do profissional (ex.: "Você definiu seu público-alvo?", "Você tem estratégia de marketing?", "Você usa redes sociais para atrair?") — essas são para o profissional se autoavaliar, não para compartilhar.
+- Tema (theme): Use APENAS o tema do ponto de vista do paciente (ex.: "cáries e saúde bucal", "perda de peso"). NUNCA inclua no tema termos como "atração de pacientes", "captação", "captar clientes" — o paciente não deve ver isso no resultado.
+- Use checklist_prontidao APENAS quando o profissional deixar explícito que quer um link para ELE MESMO avaliar sua estratégia (ex.: "quero um quiz para eu ver como estou", "link para eu avaliar minha prontidão").
 - Perguntas devem ser específicas ao tema e à área do profissional
+- Para diagnostico_bloqueio (BLOCKER_DIAGNOSIS): as perguntas DEVEM seguir esta ordem para o diagnóstico funcionar — q1: rotina/organização do dia a dia, q2: aspectos emocionais (motivação, estresse, ansiedade), q3: clareza do processo (saber o que fazer, próximo passo), q4: hábitos/constância, q5: expectativas/metas (se houver 5ª pergunta). Cada pergunta com 4 opções (A pior → D melhor).
+- QUIZ = sempre com 4 opções. CALCULADORA = campos numéricos sem opções.
 - CTA em 1ª pessoa, consultivo (ex.: "Quero analisar meu caso", nunca "Falar com especialista")
 
 Resposta APENAS em JSON válido, sem markdown.`
@@ -121,6 +127,9 @@ export async function POST(request: NextRequest) {
     const objective = typeof body.objective === 'string' && LINK_OBJECTIVES.includes(body.objective as LinkObjective) ? body.objective as LinkObjective : null
     const variation = body.variation === true
     const modeProfileFirst = body.mode === 'profile_first'
+    const previousLinkContext = body.previousLinkContext && typeof body.previousLinkContext === 'object'
+      ? body.previousLinkContext as { flow_id?: string; theme?: string; questions?: Array<{ id?: string; label?: string }> }
+      : null
 
     if (!modeProfileFirst && !text) {
       return NextResponse.json({ success: false, error: 'text é obrigatório (ou use mode: "profile_first")' }, { status: 400 })
@@ -234,7 +243,31 @@ export async function POST(request: NextRequest) {
     if (variation) overrides.push('O usuário pediu OUTRA IDEIA: sugira a opção alternativa (ex.: se antes era quiz, sugira calculadora).')
     if (overrides.length) profileContext += `Contexto adicional:\n${overrides.join('\n')}\n\n`
 
-    const userMessage = `${profileContext}Texto do profissional:\n${text}`
+    let userMessage = `${profileContext}Texto do profissional:\n${text}`
+    if (previousLinkContext?.flow_id) {
+      const prevQuestions = Array.isArray(previousLinkContext.questions)
+        ? previousLinkContext.questions
+            .map((q, i) => {
+              const opts = Array.isArray((q as { options?: string[] }).options) ? (q as { options: string[] }).options : []
+              return opts.length > 0
+                ? `${i + 1}. ${q.label ?? q.id ?? ''} (opções: ${opts.join(' | ')})`
+                : `${i + 1}. ${q.label ?? q.id ?? ''}`
+            })
+            .join('\n')
+        : ''
+      userMessage = `${profileContext}CONTEXTO DE AJUSTE: O profissional está pedindo alteração no link que acabou de criar.
+Link anterior: tema="${previousLinkContext.theme ?? ''}", flow_id=${previousLinkContext.flow_id}
+Perguntas anteriores:
+${prevQuestions || '(nenhuma)'}
+
+Pedido de ajuste do profissional:
+${text}
+
+REGRAS: Retorne o JSON com flow_id (mantenha o mesmo), theme, e questions AJUSTADAS conforme o pedido.
+- Se pedir ADICIONAR ou INCLUIR uma pergunta (mesmo sem especificar qual): sugira uma pergunta relevante ao tema e ADICIONE ao array questions. O array DEVE ter 5 itens.
+- Se pedir trocar/remover: faça a alteração. Mantenha o que não foi pedido para mudar.
+- Para QUIZ: cada pergunta deve ter options com exatamente 4 opções (A, B, C, D).`
+    }
 
     const completion = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
@@ -271,6 +304,31 @@ export async function POST(request: NextRequest) {
     })
 
     let finalFlowId = flowId
+
+    // Priorizar diagnostico_risco ou diagnostico_bloqueio para temas de saúde/paciente (emagrecimento, intestino, etc.)
+    // Evitar checklist_prontidao que gera score X/100 e perguntas genéricas
+    const themeLower = (parsed.theme ?? parsed.interpretacao?.tema ?? text).toString().toLowerCase()
+    const isPatientHealthTheme = /emagrecimento|perda de peso|intestino|energia|bem-estar|ansiedade|sono|suplementação|pele|clareamento|implantes|alimentação|saúde|peso|dieta|b12/.test(themeLower)
+    if (isPatientHealthTheme && (finalFlowId === 'checklist_prontidao' || flowId === 'checklist_prontidao')) {
+      const riskFlow = VALID_FLOW_IDS.find((id) => getFlowById(id)?.architecture === 'RISK_DIAGNOSIS')
+      const blockerFlow = VALID_FLOW_IDS.find((id) => getFlowById(id)?.architecture === 'BLOCKER_DIAGNOSIS')
+      finalFlowId = riskFlow ?? blockerFlow ?? 'diagnostico_risco'
+    }
+
+    // Link para compartilhar (atrair clientes, captar): checklist_prontidao gera perguntas sobre a estratégia do profissional.
+    // Redirecionar para diagnostico_bloqueio (perguntas do ponto de vista do paciente).
+    const isShareIntentTheme = /atrair clientes|captar clientes|captar pacientes|captação|link para atrair|qualificar quem quer/.test(themeLower)
+    const objetivoCaptar = (parsed.interpretacao?.objetivo ?? 'captar') === 'captar'
+    let questionsFinal = Array.isArray(parsed.questions) ? parsed.questions : []
+    if (isShareIntentTheme && objetivoCaptar && (finalFlowId === 'checklist_prontidao' || flowId === 'checklist_prontidao')) {
+      const blockerFlow = VALID_FLOW_IDS.find((id) => getFlowById(id)?.architecture === 'BLOCKER_DIAGNOSIS')
+      if (blockerFlow) {
+        finalFlowId = blockerFlow
+        // Descartar perguntas de autoavaliação do profissional; o generate usará as do fluxo (paciente)
+        questionsFinal = []
+      }
+    }
+
     if (strategyDecision.safety_mode && strategyDecision.allowed_architectures.length === 1) {
       const blockerFlow = VALID_FLOW_IDS.find((id) => getFlowById(id)?.architecture === 'BLOCKER_DIAGNOSIS')
       if (blockerFlow) finalFlowId = blockerFlow
@@ -312,7 +370,7 @@ export async function POST(request: NextRequest) {
       flow_id: finalFlowId,
       flow_id_secondary: flowIdSecondary,
       theme: parsed.theme ?? parsed.interpretacao?.tema ?? '',
-      questions: Array.isArray(parsed.questions) ? parsed.questions : [],
+      questions: questionsFinal.length > 0 ? questionsFinal : (Array.isArray(parsed.questions) ? parsed.questions : []),
       architecture: parsed.architecture ?? flow1?.architecture ?? 'BLOCKER_DIAGNOSIS',
       cta_suggestion: parsed.cta_suggestion ?? flow1?.cta_default ?? 'Quero analisar meu caso',
       interpretacao: parsed.interpretacao ?? buildDefaultInterpretacao(text),
@@ -364,10 +422,14 @@ function parseUnifiedResponse(raw: string): Partial<InterpretResponse> | null {
     const questions: InterpretQuestion[] = Array.isArray(obj.questions)
       ? (obj.questions as unknown[]).map((q, i) => {
           const item = q as Record<string, unknown>
+          const opts = Array.isArray(item.options)
+            ? (item.options as unknown[]).filter((x): x is string => typeof x === 'string').slice(0, 6)
+            : undefined
           return {
             id: typeof item.id === 'string' ? item.id : `q${i + 1}`,
             label: typeof item.label === 'string' ? item.label : 'Pergunta',
-            type: typeof item.type === 'string' ? item.type : 'text',
+            type: typeof item.type === 'string' ? item.type : opts?.length ? 'single' : 'text',
+            options: opts && opts.length > 0 ? opts : undefined,
           }
         })
       : []
@@ -418,7 +480,7 @@ function buildFallbackResponse(text: string): InterpretResponse {
     profileSuggest: {},
     strategies: [flowId, 'checklist_prontidao'],
     strategyCards: [
-      { slot: 'qualidade', flow_id: flowId, title: flow?.display_name ?? 'Raio-X', subtitle: 'Volume', description: flow?.impact_line },
+      { slot: 'qualidade', flow_id: flowId, title: flow?.display_name ?? 'Diagnóstico', subtitle: 'Volume', description: flow?.impact_line },
       { slot: 'volume', flow_id: 'checklist_prontidao', title: 'Checklist de Prontidão', subtitle: 'Qualidade', description: 'Leads que já se veem prontos.' },
     ],
     o_que_captar: null,
