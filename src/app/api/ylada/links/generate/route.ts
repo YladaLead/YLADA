@@ -9,6 +9,7 @@ import { requireApiAuth } from '@/lib/api-auth'
 import { supabaseAdmin } from '@/lib/supabase'
 import { getFlowById, VALID_FLOW_IDS } from '@/config/ylada-flow-catalog'
 import { getQuizEmagrecimento } from '@/config/ylada-quiz-emagrecimento'
+import { getQuizByTema } from '@/config/ylada-quiz-temas'
 import { interpretStrategyContext } from '@/lib/ylada/strategic-interpreter'
 import { sanitizeThemeForPatient } from '@/lib/ylada/strategic-intro'
 import { deriveStrategicProfile } from '@/lib/ylada/strategic-profile'
@@ -44,6 +45,8 @@ export async function POST(request: NextRequest) {
     /** Perguntas customizadas do interpret unificado; se ausente, usa question_labels do catálogo. */
     const questionsOverride = Array.isArray(body.questions) ? body.questions as Array<{ id: string; label: string; type?: string }> : null
     const templateIdLegacy = typeof body.template_id === 'string' ? body.template_id.trim() : ''
+    /** Template da biblioteca (conteúdo copiado da Nutri); quando presente, usa schema.questions para formFields. */
+    const bibliotecaTemplateId = typeof body.biblioteca_template_id === 'string' ? body.biblioteca_template_id.trim() : null
 
     const segment = typeof body.segment === 'string' ? body.segment.trim() || null : null
     const category = typeof body.category === 'string' ? body.category.trim() || null : null
@@ -68,7 +71,26 @@ export async function POST(request: NextRequest) {
     let templateId = templateIdLegacy
     let configJson: Record<string, unknown>
 
-    if (flowId && VALID_FLOW_IDS.includes(flowId) && interpretacao) {
+    // Bloco 3 e 4: calculadora ou diagnostico da biblioteca — usa template direto (schema completo)
+    if (bibliotecaTemplateId) {
+      const { data: bibliotecaTemplate, error: btErr } = await supabaseAdmin
+        .from('ylada_link_templates')
+        .select('id, name, type, schema_json')
+        .eq('id', bibliotecaTemplateId)
+        .eq('active', true)
+        .maybeSingle()
+      if (!btErr && bibliotecaTemplate && (bibliotecaTemplate.type === 'calculator' || bibliotecaTemplate.type === 'diagnostico')) {
+        const schema = (bibliotecaTemplate.schema_json as Record<string, unknown>) || {}
+        templateId = bibliotecaTemplate.id
+        configJson = {
+          title: titleOverride ?? (schema.title as string) ?? bibliotecaTemplate.name,
+          ctaText: ctaSuggestion ?? (schema.ctaDefault as string) ?? 'Falar no WhatsApp',
+          ...schema,
+        }
+      }
+    }
+
+    if (!configJson && flowId && VALID_FLOW_IDS.includes(flowId) && interpretacao) {
       // --- Fluxo por flow_id + interpretacao (Etapa 6) ---
       const flow = getFlowById(flowId)
       if (!flow) {
@@ -132,20 +154,44 @@ export async function POST(request: NextRequest) {
       const isPatientFlow = flow.architecture === 'RISK_DIAGNOSIS' || flow.architecture === 'BLOCKER_DIAGNOSIS'
       const pageTitle = titleOverride ?? (isPatientFlow ? themeDisplay : `${flow.display_name} — ${themeDisplay}`)
 
-      // Perguntas: priorizar override (ajuste do Noel) > fallback emagrecimento > flow
-      const quizFallback = getQuizEmagrecimento(themeRaw, flowId)
+      // Perguntas: priorizar override > template biblioteca > emagrecimento > quiz por tema > flow
+      let formFields: Array<{ id: string; label: string; type: string; options?: string[] }>
       const hasOverrideWithOptions =
         questionsOverride &&
         questionsOverride.length > 0 &&
         questionsOverride.some((q) => Array.isArray((q as { options?: string[] }).options) && (q as { options: string[] }).options!.length > 0)
-      const formFields = hasOverrideWithOptions
-        ? questionsOverride!.map((q) => ({
-            id: (q as { id?: string }).id ?? `q${questionsOverride!.indexOf(q) + 1}`,
-            label: q.label,
+
+      if (hasOverrideWithOptions) {
+        formFields = questionsOverride!.map((q) => ({
+          id: (q as { id?: string }).id ?? `q${questionsOverride!.indexOf(q) + 1}`,
+          label: q.label,
+          type: (q.type as string) || 'single',
+          options: Array.isArray((q as { options?: string[] }).options) ? (q as { options: string[] }).options : undefined,
+        }))
+      } else if (bibliotecaTemplateId) {
+        const { data: bibliotecaTemplate } = await supabaseAdmin
+          .from('ylada_link_templates')
+          .select('schema_json')
+          .eq('id', bibliotecaTemplateId)
+          .eq('active', true)
+          .maybeSingle()
+        const schemaQuestions = (bibliotecaTemplate?.schema_json as { questions?: Array<{ id?: string; text?: string; type?: string; options?: string[] }> })?.questions
+        if (Array.isArray(schemaQuestions) && schemaQuestions.length > 0) {
+          formFields = schemaQuestions.map((q, i) => ({
+            id: q.id ?? `q${i + 1}`,
+            label: q.text ?? q.id ?? `Pergunta ${i + 1}`,
             type: (q.type as string) || 'single',
-            options: Array.isArray((q as { options?: string[] }).options) ? (q as { options: string[] }).options : undefined,
+            options: q.options,
           }))
-        : quizFallback && quizFallback.length > 0
+        } else {
+          const quizFallback = getQuizEmagrecimento(themeRaw, flowId) ?? getQuizByTema(themeRaw, flowId)
+          formFields = quizFallback && quizFallback.length > 0
+            ? quizFallback.map((q) => ({ id: q.id, label: q.label, type: q.type as string, options: q.options }))
+            : flow.question_labels.map((label, i) => ({ id: `q${i + 1}`, label, type: 'text' }))
+        }
+      } else {
+        const quizFallback = getQuizEmagrecimento(themeRaw, flowId) ?? getQuizByTema(themeRaw, flowId)
+        formFields = quizFallback && quizFallback.length > 0
           ? quizFallback.map((q) => ({ id: q.id, label: q.label, type: q.type as string, options: q.options }))
           : (questionsOverride && questionsOverride.length > 0)
             ? questionsOverride.map((q) => ({
@@ -155,6 +201,7 @@ export async function POST(request: NextRequest) {
                 options: Array.isArray((q as { options?: string[] }).options) ? (q as { options: string[] }).options : undefined,
               }))
             : flow.question_labels.map((label, i) => ({ id: `q${i + 1}`, label, type: 'text' }))
+      }
 
       configJson = {
         title: pageTitle,
@@ -192,7 +239,7 @@ export async function POST(request: NextRequest) {
         },
         architecture_payload: {},
       }
-    } else {
+    } else if (!configJson) {
       // --- Modo legado: template_id obrigatório ---
       if (!templateId) {
         return NextResponse.json({ success: false, error: 'template_id ou (flow_id + interpretacao) é obrigatório' }, { status: 400 })

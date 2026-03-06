@@ -1545,7 +1545,15 @@ export default function DynamicTemplatePreview({
 
   // Renderizar CALCULADORA
   if (templateType === 'calculator' && content.fields) {
-    const campos = content.fields || []
+    let campos = content.fields || []
+    const slugCalc = (template.slug || template.id || '').toLowerCase()
+    // Calculadora de proteína: não usa idade (fórmula = peso × objetivo × atividade)
+    if (slugCalc.includes('proteina') || slugCalc.includes('proteína')) {
+      campos = campos.filter((f: any) => {
+        const id = String(f?.id || f?.name || '').toLowerCase()
+        return id !== 'idade' && !id.includes('idade')
+      })
+    }
     const slugCalculadora = (template.slug || template.id || '').toLowerCase()
     const fieldKey = (field: any, index: number) => field?.id || field?.name || `field-${index}`
     const mockRespostas = useMemo(

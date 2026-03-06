@@ -704,8 +704,18 @@ function DiagnosticoQuiz({
 }
 
 // --- Calculator ---
+type CalculatorFieldOption = { value: number; label: string }
+type CalculatorField = {
+  id: string
+  label: string
+  type: string
+  min?: number
+  max?: number
+  default?: number
+  options?: CalculatorFieldOption[]
+}
 type CalculatorConfig = {
-  fields?: Array<{ id: string; label: string; type: string; min?: number; max?: number; default?: number }>
+  fields?: CalculatorField[]
   formula?: string
   resultLabel?: string
   resultPrefix?: string
@@ -729,17 +739,22 @@ function CalculatorBlock({
   title: string
 }) {
   const cfg = config as CalculatorConfig
-  const fields = Array.isArray(cfg.fields) ? cfg.fields : []
+  // Campos podem estar em config.fields (calculadora) ou config.form.fields (diagnóstico)
+  const fields = (Array.isArray(cfg.fields) ? cfg.fields : (config.form as { fields?: CalculatorField[] })?.fields) ?? []
   const formula = (cfg.formula as string) || ''
   const resultLabel = (cfg.resultLabel as string) || 'Resultado:'
   const resultPrefix = (cfg.resultPrefix as string) ?? ''
   const resultSuffix = (cfg.resultSuffix as string) ?? ''
   const resultIntro = (cfg.resultIntro as string) || 'Com base no que você informou:'
 
-  const [values, setValues] = useState<Record<string, number>>(() => {
-    const init: Record<string, number> = {}
+  const [values, setValues] = useState<Record<string, number | undefined>>(() => {
+    const init: Record<string, number | undefined> = {}
     fields.forEach((f) => {
-      init[f.id] = typeof f.default === 'number' ? f.default : 0
+      if ((f.type as string)?.toLowerCase() === 'select' && Array.isArray(f.options) && f.options.length > 0) {
+        init[f.id] = (f.options[0] as CalculatorFieldOption).value
+      } else {
+        init[f.id] = typeof f.default === 'number' ? f.default : undefined
+      }
     })
     return init
   })
@@ -747,7 +762,12 @@ function CalculatorBlock({
   const calculatorStartSent = useRef(false)
   const calculatorCompleteSent = useRef(false)
 
-  // Avaliar fórmula simples: (f1 - f2) * f3 * 4
+  const numberFields = fields.filter((f) => (f.type as string)?.toLowerCase() !== 'select')
+  const allNumberFieldsFilled = numberFields.every((f) => {
+    const v = values[f.id]
+    return v !== undefined && v !== null && !Number.isNaN(v)
+  })
+
   let resultNum = 0
   try {
     let expr = formula
@@ -783,19 +803,37 @@ function CalculatorBlock({
             {fields.map((f) => (
               <div key={f.id}>
                 <label className="block text-sm font-medium text-gray-700 mb-1">{f.label}</label>
-                <input
-                  type="number"
-                  min={f.min}
-                  max={f.max}
-                  value={values[f.id] ?? ''}
-                  onChange={(e) => setValues((prev) => ({ ...prev, [f.id]: Number(e.target.value) || 0 }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
-                />
+                {(f.type as string)?.toLowerCase() === 'select' && Array.isArray(f.options) && f.options.length > 0 ? (
+                  <select
+                    value={String(values[f.id] ?? (f.options[0] as CalculatorFieldOption).value ?? '')}
+                    onChange={(e) => setValues((prev) => ({ ...prev, [f.id]: Number(e.target.value) }))}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
+                  >
+                    {f.options.map((opt) => (
+                      <option key={String(opt.value)} value={opt.value}>
+                        {opt.label}
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  <input
+                    type="number"
+                    min={f.min}
+                    max={f.max}
+                    value={values[f.id] ?? ''}
+                    onChange={(e) => {
+                      const v = e.target.value
+                      setValues((prev) => ({ ...prev, [f.id]: v === '' ? undefined : Number(v) }))
+                    }}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
+                  />
+                )}
               </div>
             ))}
             <button
               type="submit"
-              className="w-full py-3 px-4 bg-sky-600 hover:bg-sky-700 text-white font-medium rounded-lg transition-colors"
+              disabled={!allNumberFieldsFilled}
+              className="w-full py-3 px-4 bg-sky-600 hover:bg-sky-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-colors"
             >
               Calcular
             </button>
