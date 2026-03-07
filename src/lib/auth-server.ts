@@ -289,12 +289,15 @@ export async function validateProtectedAccess(
         hasSubscription = await hasActiveSubscription(user.id, area)
         
         if (!hasSubscription) {
-          // Sem assinatura: redirecionar para planos. Nenhuma exceção (onboarding/diagnóstico deixam de ser livres).
-          console.log(`❌ ProtectedLayout [${area}]: Sem assinatura ativa, redirecionando para checkout`, {
+          // Sem assinatura: redirecionar para renovação (página amigável para ex-trial) ou checkout
+          // Wellness: usa /renovar para mensagem clara; outras áreas vão direto ao checkout
+          const renewPath = area === 'wellness' ? `/pt/wellness/renovar` : (area === 'ylada' ? '/pt/checkout' : `/pt/${area}/checkout`)
+          console.log(`❌ ProtectedLayout [${area}]: Sem assinatura ativa, redirecionando para renovação/checkout`, {
             area,
-            actualPath
+            actualPath,
+            renewPath
           })
-          redirect(area === 'ylada' ? '/pt/checkout' : `/pt/${area}/checkout`)
+          redirect(renewPath)
         }
       } else {
         hasSubscription = true // Admin/suporte tem "assinatura" virtual
@@ -350,6 +353,7 @@ export async function validateProtectedAccess(
 const WELLNESS_PUBLIC_PREFIXES: (string | RegExp)[] = [
   '/pt/wellness/login',
   '/pt/wellness/checkout',
+  '/pt/wellness/renovar',
   '/pt/wellness/pagamento-sucesso',
   '/pt/wellness/trial',
   '/pt/wellness/recuperar-senha',
@@ -371,7 +375,7 @@ const WELLNESS_APP_SEGMENTS = new Set([
   'configuracao', 'tutoriais', 'plano', 'comunidade', 'suporte', 'conta', 'biblioteca', 'fluxos',
   'perfil', 'evolucao', 'clientes', 'workshop', 'noel', 'filosofia-lada', 'quizzes', 'acesso',
   'bem-vindo', 'trial', 'pagamento-sucesso', 'reset-password', 'recuperar-senha', 'recuperar-acesso',
-  'testar-email', 'templates', 'portal', 'login', 'checkout',
+  'testar-email', 'templates', 'portal', 'login', 'checkout', 'renovar',
 ])
 
 /**

@@ -6,7 +6,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { useAuth } from '@/contexts/AuthContext'
 import { getCachedSubscription, setCachedSubscription } from '@/lib/subscription-cache'
-import { getAccessRule, getCheckoutPath, getHomePath, getAreaFromPath } from '@/lib/access-rules'
+import { getAccessRule, getRenewOrCheckoutPath, getHomePath, getAreaFromPath } from '@/lib/access-rules'
 
 interface RequireSubscriptionProps {
   children: React.ReactNode
@@ -421,7 +421,7 @@ export default function RequireSubscription({
       // Decidir para onde redirecionar:
       // 1. Se tem redirectIfNoSubscription na regra, usar isso
       // 2. Se não, redirecionar para checkout (melhor para conversão)
-      const redirectPath = accessRule?.redirectIfNoSubscription || getCheckoutPath(detectedArea)
+      const redirectPath = accessRule?.redirectIfNoSubscription || getRenewOrCheckoutPath(detectedArea)
       
       console.log('🔄 RequireSubscription: Usuário sem assinatura, redirecionando para:', redirectPath)
       setHasRedirected(true)

@@ -78,6 +78,9 @@ function RecuperarAcessoContent() {
           <p className="text-gray-600 mb-8 text-center">
             Digite seu e-mail para receber um link de acesso à sua Home
           </p>
+          <p className="text-sm text-amber-800 bg-amber-50 border border-amber-200 rounded-lg px-4 py-3 mb-6 text-center">
+            <strong>Fez o trial de 3 dias e quer renovar?</strong> Use o mesmo e-mail cadastrado. Após receber o link, faça sua assinatura no checkout.
+          </p>
 
           {/* Mensagem de Sucesso */}
           {success && (
@@ -136,11 +139,19 @@ function RecuperarAcessoContent() {
             >
               ← Voltar para o login
             </Link>
-            <div className="text-xs text-gray-500">
-              Não tem uma conta?{' '}
-              <Link href="/pt/wellness/checkout" className="text-green-600 hover:text-green-700">
-                Assine agora
-              </Link>
+            <div className="text-xs text-gray-500 space-y-1">
+              <p>
+                Não tem uma conta?{' '}
+                <Link href="/pt/wellness/checkout" className="text-green-600 hover:text-green-700">
+                  Assine agora
+                </Link>
+              </p>
+              <p>
+                Trial expirado?{' '}
+                <Link href="/pt/wellness/renovar" className="text-green-600 hover:text-green-700">
+                  Renovar assinatura
+                </Link>
+              </p>
             </div>
           </div>
 

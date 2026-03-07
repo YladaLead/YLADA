@@ -32,8 +32,9 @@ const PUBLIC_PAGES: (string | RegExp)[] = [
   // Páginas de login
   /\/login$/,
   
-  // Páginas de checkout (precisa estar logado, mas não precisa ter assinatura)
+  // Páginas de checkout e renovação (precisa estar logado, mas não precisa ter assinatura)
   /\/checkout$/,
+  /\/renovar$/,
   
   // Páginas de pagamento
   /\/pagamento-sucesso$/,
@@ -231,6 +232,15 @@ export function getCheckoutPath(area: Area | null): string {
 }
 
 /**
+ * Obtém o caminho de redirecionamento quando usuário não tem assinatura.
+ * Wellness: página de renovação (amigável para ex-trial). Outras áreas: checkout.
+ */
+export function getRenewOrCheckoutPath(area: Area | null): string {
+  if (area === 'wellness') return '/pt/wellness/renovar'
+  return getCheckoutPath(area)
+}
+
+/**
  * Obtém o caminho de redirecionamento para home baseado na área
  */
 export function getHomePath(area: Area | null): string {
@@ -272,7 +282,7 @@ export function getAccessRule(pathname: string): AccessRule {
     requiresAuth: true,
     requiresSubscription: requiresSub,
     redirectIfNotAuth: getLoginPath(area),
-    redirectIfNoSubscription: requiresSub ? getCheckoutPath(area) : undefined,
+    redirectIfNoSubscription: requiresSub ? getRenewOrCheckoutPath(area) : undefined,
   }
 }
 
