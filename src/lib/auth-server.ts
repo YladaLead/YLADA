@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation'
 import { hasActiveSubscription, canBypassSubscription } from '@/lib/subscription-helpers'
 import { supabaseAdmin } from '@/lib/supabase'
 
-type Area = 'wellness' | 'nutri' | 'coach' | 'nutra' | 'ylada' | 'psi' | 'psicanalise' | 'odonto'
+type Area = 'wellness' | 'nutri' | 'coach' | 'nutra' | 'ylada' | 'med' | 'psi' | 'psicanalise' | 'odonto' | 'perfumaria'
 
 interface AuthValidationResult {
   session: any
@@ -266,7 +266,7 @@ export async function validateProtectedAccess(
 
     // 4. Verificar se perfil corresponde (admin/suporte pode bypassar)
     const canBypassProfile = (allowAdmin && profile.is_admin) || (allowSupport && profile.is_support)
-    const matrixAreas = ['psi', 'psicanalise', 'odonto', 'nutra', 'coach'] as const
+    const matrixAreas = ['med', 'psi', 'psicanalise', 'odonto', 'nutra', 'coach', 'perfumaria'] as const
     const isMatrixArea = (a: string): a is (typeof matrixAreas)[number] => matrixAreas.includes(a as any)
     const profileMatchesArea =
       profile.perfil === area ||
@@ -370,9 +370,10 @@ const WELLNESS_PUBLIC_PREFIXES: (string | RegExp)[] = [
   '/pt/wellness/testar-email',
   /^\/pt\/wellness\/templates(\/|$)/,
   /^\/pt\/wellness\/portal\/[^/]+$/, // portal/[slug] público
-  // Links públicos por user-slug: /pt/wellness/[user-slug]/[tool-slug], quiz, portal, hom
+  // Links públicos por user-slug: /pt/wellness/[user-slug]/[tool-slug]
+  /^\/pt\/wellness\/[^/]+\/[^/]+$/, // 2 segmentos: user-slug + tool-slug (ferramentas, fluxos)
   /^\/pt\/wellness\/[^/]+\/(hom|quiz|portal|formulario)(\/|$)/,
-  /^\/pt\/wellness\/[^/]+\/[^/]+\/.+/, // 3+ segmentos após wellness = link público
+  /^\/pt\/wellness\/[^/]+\/[^/]+\/.+/, // 3+ segmentos: fluxos, quiz/[slug], etc.
 ]
 
 /** Segmentos que são rotas da aplicação (área logada), não user-slug. */

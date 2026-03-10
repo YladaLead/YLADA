@@ -24,10 +24,10 @@ type LinkData = {
 function useAreaFromPath() {
   const pathname = usePathname()
   if (!pathname) return { areaCodigo: 'ylada' as const, areaLabel: 'YLADA' }
-  const m = pathname.match(/^\/pt\/(psi|odonto|nutra|coach|psicanalise)\//)
+  const m = pathname.match(/^\/pt\/(med|psi|odonto|nutra|coach|psicanalise|perfumaria)\//)
   const area = m?.[1] ?? 'ylada'
-  const labels: Record<string, string> = { psi: 'Psicologia', odonto: 'Odontologia', nutra: 'Nutra', coach: 'Coach', psicanalise: 'Psicanálise' }
-  return { areaCodigo: area as 'ylada' | 'psi' | 'odonto' | 'nutra' | 'coach' | 'psicanalise', areaLabel: labels[area] ?? 'YLADA' }
+  const labels: Record<string, string> = { med: 'Médicos', psi: 'Psicologia', odonto: 'Odontologia', nutra: 'Nutra', coach: 'Coach', psicanalise: 'Psicanálise', perfumaria: 'Perfumaria' }
+  return { areaCodigo: area as 'ylada' | 'med' | 'psi' | 'odonto' | 'nutra' | 'coach' | 'psicanalise' | 'perfumaria', areaLabel: labels[area] ?? 'YLADA' }
 }
 
 export default function EditarLinkPage({ params }: { params: Promise<{ id: string }> }) {
@@ -90,7 +90,7 @@ export default function EditarLinkPage({ params }: { params: Promise<{ id: strin
         // Disparar geração de diagnóstico via IA (memoriza para não chamar de novo)
         const arch = (config.meta as Record<string, unknown>)?.architecture as string | undefined
         if (arch === 'RISK_DIAGNOSIS' || arch === 'BLOCKER_DIAGNOSIS') {
-          fetch(`/api/ylada/links/${link.id}/generate-diagnosis?force=true`, {
+          fetch(`/api/ylada/links/by-id/${link.id}/generate-diagnosis?force=true`, {
             method: 'POST',
             credentials: 'include',
           }).catch(() => {})

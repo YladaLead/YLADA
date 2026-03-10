@@ -1,5 +1,5 @@
 /**
- * POST /api/ylada/links/[id]/generate-diagnosis — gera conteúdo de diagnóstico via IA e memoriza.
+ * POST /api/ylada/links/by-id/[id]/generate-diagnosis — gera conteúdo de diagnóstico via IA e memoriza.
  * Chamado quando o profissional edita o link (perguntas, tema).
  * Se já existir conteúdo memorizado, pode forçar regeneração com ?force=true.
  */
@@ -79,7 +79,7 @@ export async function POST(
       message: `Diagnóstico memorizado para ${result.archetypesCount} arquétipo(s).`,
     })
   } catch (e) {
-    console.error('[ylada/links/[id]/generate-diagnosis]', e)
+    console.error('[ylada/links/by-id/[id]/generate-diagnosis]', e)
     return NextResponse.json({
       success: false,
       error: e instanceof Error ? e.message : 'Erro ao gerar diagnóstico',
