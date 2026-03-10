@@ -11,6 +11,6 @@ export default async function AssinarPage({
   searchParams: Promise<{ plan?: string }>
 }) {
   const params = await searchParams
-  const plan = params?.plan === 'annual' ? 'annual' : 'monthly'
+  const plan = params?.plan === 'monthly' ? 'monthly' : 'annual'
   redirect(`/pt/wellness/checkout?plan=${plan}&from=renovar`)
 }

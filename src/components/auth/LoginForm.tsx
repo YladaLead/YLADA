@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase-client'
 import Image from 'next/image'
 import { useLastVisitedPage } from '@/hooks/useLastVisitedPage'
@@ -33,6 +34,43 @@ export default function LoginForm({
   const [isSignUp, setIsSignUp] = useState(initialSignUpMode)
   const [name, setName] = useState('')
   const [showPassword, setShowPassword] = useState(false)
+  const [hadTrialEmail, setHadTrialEmail] = useState(false)
+  const [checkingTrialEmail, setCheckingTrialEmail] = useState(false)
+
+  // Verificar se email fez trial (apenas Wellness) - debounced
+  const checkEmailTrial = useCallback(async (emailToCheck: string) => {
+    if (perfil !== 'wellness' || !emailToCheck?.includes('@')) {
+      setHadTrialEmail(false)
+      return
+    }
+    setCheckingTrialEmail(true)
+    try {
+      const res = await fetch('/api/wellness/check-email-trial', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: emailToCheck.trim().toLowerCase() }),
+      })
+      if (res.ok) {
+        const data = await res.json()
+        setHadTrialEmail(!!data.hadTrial)
+      } else {
+        setHadTrialEmail(false)
+      }
+    } catch {
+      setHadTrialEmail(false)
+    } finally {
+      setCheckingTrialEmail(false)
+    }
+  }, [perfil])
+
+  useEffect(() => {
+    if (!email?.includes('@')) {
+      setHadTrialEmail(false)
+      return
+    }
+    const timer = setTimeout(() => checkEmailTrial(email), 600)
+    return () => clearTimeout(timer)
+  }, [email, checkEmailTrial])
 
   // Verificar parâmetros da URL para mensagens de sucesso
   // E LIMPAR localStorage se houver /checkout salvo (evitar redirecionamento indesejado)
@@ -555,6 +593,22 @@ export default function LoginForm({
               className="w-full px-4 py-3 border border-gray-300 rounded-lg transition-all focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-gray-900 placeholder-gray-400"
               placeholder="seu@email.com"
             />
+            {perfil === 'wellness' && hadTrialEmail && !isSignUp && (
+              <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-lg">
+                <p className="text-sm font-medium text-green-800 mb-2">
+                  Esse e-mail fez o trial de 3 dias.
+                </p>
+                <p className="text-sm text-green-700 mb-2">
+                  Para continuar com acesso, assine aqui — não precisa fazer login antes.
+                </p>
+                <Link
+                  href="/pt/wellness/assinar"
+                  className="inline-flex items-center justify-center w-full sm:w-auto px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-semibold rounded-lg transition-colors"
+                >
+                  Assinar Agora
+                </Link>
+              </div>
+            )}
           </div>
 
           <div>

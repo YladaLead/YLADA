@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -9,7 +9,7 @@ import { useAuth } from '@/contexts/AuthContext'
 export default function WellnessCheckoutPage() {
   const router = useRouter()
   const { user, userProfile, loading: authLoading } = useAuth()
-  const [planType, setPlanType] = useState<'monthly' | 'annual'>('monthly')
+  const [planType, setPlanType] = useState<'monthly' | 'annual'>('annual')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [canceled, setCanceled] = useState(false)
@@ -47,6 +47,44 @@ export default function WellnessCheckoutPage() {
 
   // Ex-trial: veio da página de renovar (fluxo pós-trial)
   const [fromRenovar, setFromRenovar] = useState(false)
+  // Ex-trial: email digitado já fez trial (detectado via API)
+  const [hadTrialEmail, setHadTrialEmail] = useState(false)
+
+  // Verificar se email fez trial - debounced
+  const checkEmailTrial = useCallback(async (emailToCheck: string) => {
+    if (!emailToCheck?.includes('@')) {
+      setHadTrialEmail(false)
+      return
+    }
+    try {
+      const res = await fetch('/api/wellness/check-email-trial', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: emailToCheck.trim().toLowerCase() }),
+      })
+      if (res.ok) {
+        const data = await res.json()
+        setHadTrialEmail(!!data.hadTrial)
+      } else {
+        setHadTrialEmail(false)
+      }
+    } catch {
+      setHadTrialEmail(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    const emailToCheck = email || user?.email || ''
+    if (!emailToCheck?.includes('@')) {
+      setHadTrialEmail(false)
+      return
+    }
+    const timer = setTimeout(() => checkEmailTrial(emailToCheck), 600)
+    return () => clearTimeout(timer)
+  }, [email, user?.email, checkEmailTrial])
+
+  // Mostrar mensagem ex-trial quando veio de renovar OU email fez trial
+  const showExTrialMessage = fromRenovar || hadTrialEmail
 
   // Detectar parâmetros da URL usando window.location (mais confiável)
   useEffect(() => {
@@ -273,35 +311,10 @@ export default function WellnessCheckoutPage() {
             </div>
           )}
 
-          {/* Seleção de Plano */}
+          {/* Seleção de Plano - Anual primeiro (recomendado e selecionado por padrão) */}
           <div className="mb-8">
             <div className="grid sm:grid-cols-2 gap-4">
-              {/* Plano Mensal */}
-              <button
-                onClick={() => setPlanType('monthly')}
-                className={`p-6 rounded-lg border-2 transition-all relative ${
-                  planType === 'monthly'
-                    ? 'border-green-500 bg-green-50 shadow-md'
-                    : 'border-gray-200 bg-white hover:border-green-300 hover:bg-green-50/30'
-                }`}
-              >
-                <div className="text-center">
-                  {planType === 'monthly' && (
-                    <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-green-600 text-white text-xs font-bold px-3 py-1 rounded-full">
-                      SELECIONADO
-                    </div>
-                  )}
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">
-                    Mensal
-                  </h3>
-                  <div className="text-3xl font-bold text-green-600 mb-1">
-                    R$ 97,00
-                  </div>
-                  <div className="text-sm text-gray-600">/mês</div>
-                </div>
-              </button>
-
-              {/* Plano Anual */}
+              {/* Plano Anual - Primeiro e selecionado por padrão */}
               <button
                 onClick={() => setPlanType('annual')}
                 className={`p-6 rounded-lg border-2 transition-all relative ${
@@ -331,12 +344,37 @@ export default function WellnessCheckoutPage() {
                   </div>
                 </div>
               </button>
+
+              {/* Plano Mensal */}
+              <button
+                onClick={() => setPlanType('monthly')}
+                className={`p-6 rounded-lg border-2 transition-all relative ${
+                  planType === 'monthly'
+                    ? 'border-green-500 bg-green-50 shadow-md'
+                    : 'border-gray-200 bg-white hover:border-green-300 hover:bg-green-50/30'
+                }`}
+              >
+                <div className="text-center">
+                  {planType === 'monthly' && (
+                    <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-green-600 text-white text-xs font-bold px-3 py-1 rounded-full">
+                      SELECIONADO
+                    </div>
+                  )}
+                  <h3 className="text-xl font-bold text-gray-900 mb-2">
+                    Mensal
+                  </h3>
+                  <div className="text-3xl font-bold text-green-600 mb-1">
+                    R$ 97,00
+                  </div>
+                  <div className="text-sm text-gray-600">/mês</div>
+                </div>
+              </button>
             </div>
           </div>
 
 
-          {/* Mensagem para ex-trial (veio da página de renovar) */}
-          {fromRenovar && (
+          {/* Mensagem para ex-trial (veio da renovar ou email detectado como ex-trial) */}
+          {showExTrialMessage && (
             <div className="mb-6 bg-green-50 border-2 border-green-200 rounded-lg p-4">
               <p className="text-sm font-medium text-green-800">
                 🎁 Fez o trial de 3 dias? Use o <strong>mesmo e-mail</strong> que você usou no teste para continuar sua assinatura.
@@ -362,7 +400,7 @@ export default function WellnessCheckoutPage() {
               <p className="text-xs text-gray-500 mt-2">
                 {user 
                   ? 'Seu e-mail será usado para o pagamento. Você pode alterar se necessário.'
-                  : fromRenovar
+                  : showExTrialMessage
                     ? 'Use o mesmo e-mail do seu trial. Após o pagamento, você terá acesso imediato.'
                     : 'Seu e-mail será usado para criar sua conta automaticamente após o pagamento.'
                 }
