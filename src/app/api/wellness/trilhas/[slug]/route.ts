@@ -10,7 +10,7 @@ export async function GET(
   { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
-    const authResult = await requireApiAuth(request, ['wellness', 'admin'])
+    const authResult = await requireApiAuth(request, ['wellness', 'coach-bem-estar', 'admin'])
     if (authResult instanceof NextResponse) {
       return authResult
     }

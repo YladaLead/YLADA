@@ -12,7 +12,7 @@ import { normalizeTemplateSlug } from '@/lib/template-slug-map'
 export async function GET(request: NextRequest) {
   try {
     // 🔒 Verificar autenticação e perfil wellness
-    const authResult = await requireApiAuth(request, ['wellness', 'admin'])
+    const authResult = await requireApiAuth(request, ['wellness', 'coach-bem-estar', 'admin'])
     if (authResult instanceof NextResponse) {
       return authResult // Retorna erro de autenticação
     }
@@ -166,7 +166,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     // 🔒 Verificar autenticação e perfil wellness
-    const authResult = await requireApiAuth(request, ['wellness', 'admin'])
+    const authResult = await requireApiAuth(request, ['wellness', 'coach-bem-estar', 'admin'])
     if (authResult instanceof NextResponse) {
       return authResult // Retorna erro de autenticação
     }
@@ -494,7 +494,7 @@ export async function POST(request: NextRequest) {
 export async function PUT(request: NextRequest) {
   try {
     // 🔒 Verificar autenticação e perfil wellness
-    const authResult = await requireApiAuth(request, ['wellness', 'admin'])
+    const authResult = await requireApiAuth(request, ['wellness', 'coach-bem-estar', 'admin'])
     if (authResult instanceof NextResponse) {
       return authResult
     }
@@ -743,7 +743,7 @@ export async function PUT(request: NextRequest) {
 export async function DELETE(request: NextRequest) {
   try {
     // 🔒 Verificar autenticação e perfil wellness
-    const authResult = await requireApiAuth(request, ['wellness', 'admin'])
+    const authResult = await requireApiAuth(request, ['wellness', 'coach-bem-estar', 'admin'])
     if (authResult instanceof NextResponse) {
       return authResult
     }

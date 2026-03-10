@@ -10,7 +10,7 @@ import { requireApiAuth } from '@/lib/api-auth'
 export async function POST(request: NextRequest) {
   try {
     // Verificar autenticação (qualquer perfil pode ativar sua própria autorização)
-    const authResult = await requireApiAuth(request, ['wellness', 'nutri', 'coach', 'nutra', 'admin'])
+    const authResult = await requireApiAuth(request, ['wellness', 'coach-bem-estar', 'nutri', 'coach', 'nutra', 'admin'])
     if (authResult instanceof NextResponse) {
       return authResult
     }

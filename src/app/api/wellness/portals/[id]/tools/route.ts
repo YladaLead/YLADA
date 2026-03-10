@@ -9,7 +9,7 @@ export async function GET(
 ) {
   try {
     // 🔒 Verificar autenticação
-    const authResult = await requireApiAuth(request, ['wellness', 'admin'])
+    const authResult = await requireApiAuth(request, ['wellness', 'coach-bem-estar', 'admin'])
     if (authResult instanceof NextResponse) {
       return authResult
     }
@@ -95,7 +95,7 @@ export async function POST(
 ) {
   try {
     // 🔒 Verificar autenticação
-    const authResult = await requireApiAuth(request, ['wellness', 'admin'])
+    const authResult = await requireApiAuth(request, ['wellness', 'coach-bem-estar', 'admin'])
     if (authResult instanceof NextResponse) {
       return authResult
     }
@@ -236,7 +236,7 @@ export async function DELETE(
 ) {
   try {
     // 🔒 Verificar autenticação
-    const authResult = await requireApiAuth(request, ['wellness', 'admin'])
+    const authResult = await requireApiAuth(request, ['wellness', 'coach-bem-estar', 'admin'])
     if (authResult instanceof NextResponse) {
       return authResult
     }

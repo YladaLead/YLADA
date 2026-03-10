@@ -1,5 +1,5 @@
-import EmConstrucaoInstitutional from '@/components/EmConstrucaoInstitutional'
+import { redirect } from 'next/navigation'
 
 export default function PsicanaliseLandingPage() {
-  return <EmConstrucaoInstitutional />
+  redirect('/pt/psicanalise/home')
 }

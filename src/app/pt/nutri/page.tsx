@@ -141,10 +141,13 @@ export default function NutriLandingPage() {
                 Sistema de Conversas Ativas para Nutricionistas
               </h1>
               <p className="text-lg sm:text-xl text-white/95 mb-3">
-                Se sua agenda oscila todo mês, o problema não é falta de pacientes. É falta de sistema.
+                Se sua agenda oscila todo mês, o problema não é falta de pacientes.
+              </p>
+              <p className="text-lg sm:text-xl text-white/95 mb-3">
+                É falta de um sistema que atraia pessoas realmente interessadas em melhorar a alimentação — e não apenas curiosos.
               </p>
               <p className="text-base sm:text-lg font-medium italic text-white/90 mb-6">
-                Venda não nasce do post. Nasce da conversa.
+                Venda não nasce do post. Nasce da conversa certa.
               </p>
               <div className="flex flex-col items-center">
                 <Link
@@ -233,7 +236,7 @@ export default function NutriLandingPage() {
                 Nutri, sua agenda não estava vazia por falta de competência.
               </p>
               <p className="text-lg sm:text-xl text-gray-700 leading-relaxed mt-2">
-                Estava vazia por falta de sistema.
+                Estava vazia por falta de um sistema que provoque conversas com as pessoas certas.
               </p>
               <p className="text-lg sm:text-xl font-semibold text-[#1A1A1A] mt-4">
                 Agora você já entendeu isso. O próximo passo é aplicar.
@@ -253,6 +256,8 @@ export default function NutriLandingPage() {
                 Você já se sentiu assim?
               </h2>
               <ul className="space-y-2 text-gray-700 text-left inline-block mb-10">
+                <li>• Curiosos pedindo dicas e sumindo</li>
+                <li>• Conversas que não evoluem</li>
                 <li>• Agenda vazia</li>
                 <li>• Dúvida na cobrança</li>
                 <li>• Sensação constante de recomeçar</li>
@@ -272,8 +277,11 @@ export default function NutriLandingPage() {
               <h2 className="text-2xl sm:text-3xl font-bold text-[#1A1A1A] mb-4 text-center">
                 O que você recebe
               </h2>
-              <p className="text-lg text-gray-700 mb-6 text-center">
+              <p className="text-lg text-gray-700 mb-4 text-center">
                 YLADA Nutri é a aplicação prática do Sistema de Conversas Ativas.
+              </p>
+              <p className="text-gray-800 font-semibold mb-6 text-center">
+                Tudo começa provocando a conversa certa.
               </p>
               <p className="text-gray-700 font-medium mb-3 text-left">Dentro do YLADA Nutri você recebe:</p>
               <ul className="space-y-3 text-gray-700 mb-6 text-left">
@@ -357,6 +365,7 @@ export default function NutriLandingPage() {
                 <div className="bg-white rounded-xl p-6 border-2 border-red-300 shadow-md">
                   <h3 className="text-2xl font-bold text-red-700 mb-4">Antes</h3>
                   <ul className="space-y-2 text-gray-700">
+                    <li className="flex items-center gap-2"><span className="text-red-500 font-bold">✗</span> Curiosos consumindo tempo</li>
                     <li className="flex items-center gap-2"><span className="text-red-500 font-bold">✗</span> Ansiedade</li>
                     <li className="flex items-center gap-2"><span className="text-red-500 font-bold">✗</span> Agenda vazia</li>
                     <li className="flex items-center gap-2"><span className="text-red-500 font-bold">✗</span> Insegurança</li>
@@ -365,6 +374,7 @@ export default function NutriLandingPage() {
                 <div className="bg-white rounded-xl p-6 border-2 border-emerald-400 shadow-md">
                   <h3 className="text-2xl font-bold text-[#29CC6A] mb-4">Depois</h3>
                   <ul className="space-y-2 text-gray-700">
+                    <li className="flex items-center gap-2"><span className="text-[#29CC6A] font-bold">✓</span> Conversas com interessados</li>
                     <li className="flex items-center gap-2"><span className="text-[#29CC6A] font-bold">✓</span> Conversas abertas</li>
                     <li className="flex items-center gap-2"><span className="text-[#29CC6A] font-bold">✓</span> Segurança na cobrança</li>
                     <li className="flex items-center gap-2"><span className="text-[#29CC6A] font-bold">✓</span> Método claro</li>
@@ -459,6 +469,7 @@ export default function NutriLandingPage() {
               <div className="space-y-3">
                 {[
                   { pergunta: 'Para quem é?', resposta: 'Para nutricionistas que querem encher agenda com método, não com indicação ou sorte. Se você quer captação previsível e clareza no próximo passo, é pra você.' },
+                  { pergunta: 'Isso funciona para quem recebe muitos curiosos no Instagram?', resposta: 'Sim. O sistema foi criado justamente para transformar curiosidade em conversas qualificadas. As avaliações e links inteligentes filtram quem realmente quer melhorar a alimentação e iniciam a conversa com contexto.' },
                   { pergunta: 'Posso cancelar?', resposta: 'Você tem 7 dias de garantia para testar: tanto no plano mensal quanto no anual. Se não fizer sentido, devolvemos 100%. No mensal, depois da garantia você cancela quando quiser. No anual, o compromisso é de 12 meses — mas os 7 primeiros dias são sem risco.' },
                   { pergunta: 'Como é o suporte?', resposta: 'O Noel te orienta no dia a dia (o que fazer, onde focar). Quando precisar de pessoa real, tem suporte humano. Você não fica sozinha.' },
                   { pergunta: 'E se não gostar?', resposta: 'Em até 7 dias você pede reembolso e devolvemos 100%. Sem burocracia, sem julgamento. O risco é nosso.' },

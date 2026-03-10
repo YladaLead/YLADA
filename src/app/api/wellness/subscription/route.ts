@@ -9,7 +9,7 @@ import { getActiveSubscription } from '@/lib/subscription-helpers'
 export async function GET(request: NextRequest) {
   try {
     // Verificar autenticação
-    const authResult = await requireApiAuth(request, ['wellness', 'admin'])
+    const authResult = await requireApiAuth(request, ['wellness', 'coach-bem-estar', 'admin'])
     if (authResult instanceof NextResponse) {
       return authResult
     }

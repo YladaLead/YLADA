@@ -6,7 +6,7 @@ import { gerarLembretes, lembretesGerais, configuracaoLembretes, TipoAcao } from
 // GET - Buscar lembretes baseados em ações do distribuidor
 export async function GET(request: NextRequest) {
   try {
-    const authResult = await requireApiAuth(request, ['wellness', 'admin'])
+    const authResult = await requireApiAuth(request, ['wellness', 'coach-bem-estar', 'admin'])
     
     if (authResult instanceof NextResponse) {
       return authResult

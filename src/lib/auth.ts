@@ -76,7 +76,7 @@ export async function requireAuth(redirectTo?: string) {
 }
 
 // Helper para verificar perfil específico
-export async function requireProfile(perfil: 'nutri' | 'wellness' | 'coach' | 'nutra' | 'admin') {
+export async function requireProfile(perfil: 'nutri' | 'wellness' | 'coach' | 'nutra' | 'admin' | 'coach-bem-estar') {
   const profile = await getUserProfile()
   
   if (!profile || profile.perfil !== perfil) {

@@ -5,7 +5,7 @@ import { useAuth } from '@/contexts/AuthContext'
 
 interface ProtectedRouteProps {
   children: React.ReactNode
-  perfil?: 'nutri' | 'wellness' | 'coach' | 'nutra' | 'admin'
+  perfil?: 'nutri' | 'wellness' | 'coach' | 'nutra' | 'admin' | 'coach-bem-estar'
   redirectTo?: string
   allowAdmin?: boolean // Se true, admin pode acessar qualquer área
   allowSupport?: boolean // Se true, suporte pode acessar qualquer área

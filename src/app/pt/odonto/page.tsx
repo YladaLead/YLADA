@@ -1,5 +1,5 @@
-import EmConstrucaoInstitutional from '@/components/EmConstrucaoInstitutional'
+import { redirect } from 'next/navigation'
 
 export default function OdontoLandingPage() {
-  return <EmConstrucaoInstitutional />
+  redirect('/pt/odonto/home')
 }

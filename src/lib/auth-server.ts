@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation'
 import { hasActiveSubscription, canBypassSubscription } from '@/lib/subscription-helpers'
 import { supabaseAdmin } from '@/lib/supabase'
 
-type Area = 'wellness' | 'nutri' | 'coach' | 'nutra' | 'ylada' | 'med' | 'psi' | 'psicanalise' | 'odonto' | 'seller' | 'perfumaria' | 'estetica' | 'fitness'
+type Area = 'wellness' | 'nutri' | 'coach' | 'nutra' | 'ylada' | 'med' | 'psi' | 'psicanalise' | 'odonto' | 'seller' | 'perfumaria' | 'estetica' | 'fitness' | 'coach-bem-estar'
 
 interface AuthValidationResult {
   session: any
@@ -271,6 +271,8 @@ export async function validateProtectedAccess(
     const profileMatchesArea =
       profile.perfil === area ||
       (area === 'ylada' && profile.perfil === 'med') ||
+      (area === 'coach-bem-estar' && (profile.perfil === 'coach-bem-estar' || profile.perfil === 'wellness')) || // Wellness também acessa (redireciona para plataforma)
+      (area === 'wellness' && profile.perfil === 'coach-bem-estar') || // Coach-bem-estar usa plataforma wellness
       (isMatrixArea(area) && (profile.perfil === 'ylada' || profile.perfil === 'med' || profile.perfil === area))
 
     if (!profileMatchesArea && !canBypassProfile) {
@@ -291,12 +293,16 @@ export async function validateProtectedAccess(
       canBypass = await canBypassSubscription(user.id)
       
       if (!canBypass) {
-        hasSubscription = await hasActiveSubscription(user.id, area)
+        // Coach-bem-estar usa assinatura wellness (mesma plataforma)
+        const subscriptionArea = area === 'coach-bem-estar' ? 'wellness' : area
+        hasSubscription = await hasActiveSubscription(user.id, subscriptionArea as any)
         
         if (!hasSubscription) {
           // Sem assinatura: redirecionar para renovação (página amigável para ex-trial) ou checkout
-          // Wellness: usa /renovar para mensagem clara; outras áreas vão direto ao checkout
-          const renewPath = area === 'wellness' ? `/pt/wellness/renovar` : (area === 'ylada' ? '/pt/checkout' : `/pt/${area}/checkout`)
+          // Wellness e coach-bem-estar: usa /wellness/renovar (compartilham plataforma)
+          const renewPath = area === 'wellness' || area === 'coach-bem-estar'
+            ? `/pt/wellness/renovar`
+            : (area === 'ylada' ? '/pt/checkout' : `/pt/${area}/checkout`)
           console.log(`❌ ProtectedLayout [${area}]: Sem assinatura ativa, redirecionando para renovação/checkout`, {
             area,
             actualPath,

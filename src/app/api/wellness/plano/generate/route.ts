@@ -13,7 +13,7 @@ import type { GeneratePlanoRequest } from '@/types/wellness-noel'
 export async function POST(request: NextRequest) {
   try {
     // Autenticação
-    const authResult = await requireApiAuth(request, ['wellness', 'admin'])
+    const authResult = await requireApiAuth(request, ['wellness', 'coach-bem-estar', 'admin'])
     if (authResult instanceof NextResponse) {
       return authResult
     }

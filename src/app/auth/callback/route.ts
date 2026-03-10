@@ -113,6 +113,8 @@ export async function GET(request: NextRequest) {
         redirectPath = '/pt/coach/home'
       } else if (userProfile.perfil === 'nutra') {
         redirectPath = '/pt/nutra/home'
+      } else if (userProfile.perfil === 'coach-bem-estar') {
+        redirectPath = '/pt/coach-bem-estar/home'
       } else {
         redirectPath = '/pt/wellness/home'
       }

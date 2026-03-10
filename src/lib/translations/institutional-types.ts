@@ -6,14 +6,17 @@ export interface InstitutionalAreaTranslation {
 
 export interface InstitutionalAreas {
   nutri: InstitutionalAreaTranslation
-  wellness: InstitutionalAreaTranslation
-  ylada: InstitutionalAreaTranslation
+  'coach-bem-estar': InstitutionalAreaTranslation
   med: InstitutionalAreaTranslation
+  estetica: InstitutionalAreaTranslation
+  fitness: InstitutionalAreaTranslation
+  perfumaria: InstitutionalAreaTranslation
+  nutra: InstitutionalAreaTranslation
+  'profissional-liberal': InstitutionalAreaTranslation
+  'vendedores-geral': InstitutionalAreaTranslation
   psi: InstitutionalAreaTranslation
   psicanalise: InstitutionalAreaTranslation
   odonto: InstitutionalAreaTranslation
-  nutra: InstitutionalAreaTranslation
-  coach: InstitutionalAreaTranslation
 }
 
 export interface InstitutionalTranslations {
@@ -53,6 +56,10 @@ export interface InstitutionalTranslations {
     ready: string
     comingSoon: string
   }
+  areaCta: {
+    explore: string
+    request: string
+  }
   philosophy: {
     title: string
     p1: string
@@ -78,6 +85,19 @@ export interface InstitutionalTranslations {
     title: string
     message: string
     back: string
+  }
+  areaRequest: {
+    title: string
+    subtitle: string
+    labelName: string
+    labelProfession: string
+    labelCountry: string
+    labelEmail: string
+    submit: string
+    submitting: string
+    successTitle: string
+    successMessage: string
+    successButton: string
   }
   footer: {
     tagline: string

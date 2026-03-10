@@ -10,7 +10,7 @@ const TEXTO_AUTORIZACAO_PADRAO = `Autorizo que membros da minha equipe possam re
  */
 export async function POST(request: NextRequest) {
   try {
-    const authResult = await requireApiAuth(request, ['wellness', 'admin'])
+    const authResult = await requireApiAuth(request, ['wellness', 'coach-bem-estar', 'admin'])
     if (authResult instanceof NextResponse) {
       return authResult
     }

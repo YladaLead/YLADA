@@ -6,7 +6,7 @@ import { translateError } from '@/lib/error-messages'
 // GET - Buscar perfil do usuário
 export async function GET(request: NextRequest) {
   try {
-    const authResult = await requireApiAuth(request, ['wellness', 'admin'])
+    const authResult = await requireApiAuth(request, ['wellness', 'coach-bem-estar', 'admin'])
     if (authResult instanceof NextResponse) {
       return authResult
     }
@@ -148,7 +148,7 @@ export async function GET(request: NextRequest) {
 // PUT - Atualizar perfil do usuário
 export async function PUT(request: NextRequest) {
   try {
-    const authResult = await requireApiAuth(request, ['wellness', 'admin'])
+    const authResult = await requireApiAuth(request, ['wellness', 'coach-bem-estar', 'admin'])
     if (authResult instanceof NextResponse) {
       return authResult
     }
@@ -230,8 +230,8 @@ export async function PUT(request: NextRequest) {
       .maybeSingle()
 
     // VALIDAÇÃO: Não permitir mudança de perfil após criado
-    // EXCEÇÃO: Admin e Suporte podem ter múltiplos perfis
-    if (currentProfile && currentProfile.perfil && currentProfile.perfil !== 'wellness') {
+    // EXCEÇÃO: Admin e Suporte podem ter múltiplos perfis. Wellness e coach-bem-estar usam mesma plataforma.
+    if (currentProfile && currentProfile.perfil && !['wellness', 'coach-bem-estar'].includes(currentProfile.perfil)) {
       if (!currentProfile.is_admin && !currentProfile.is_support) {
         return NextResponse.json(
           { 
@@ -252,7 +252,7 @@ export async function PUT(request: NextRequest) {
     const profileData: any = {
       nome_completo: nome,
       email: email || user.email, // Sincronizar email também
-      perfil: 'wellness', // Garantir que o perfil está definido
+      perfil: currentProfile?.perfil === 'coach-bem-estar' ? 'coach-bem-estar' : 'wellness', // Preservar perfil coach-bem-estar
       profession: 'wellness', // Sincronizar profession baseado no perfil
       updated_at: new Date().toISOString() // Forçar atualização do timestamp
     }

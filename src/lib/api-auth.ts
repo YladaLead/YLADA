@@ -9,7 +9,7 @@ import { supabaseAdmin } from '@/lib/supabase'
  */
 export async function requireApiAuth(
   request: NextRequest,
-  allowedProfiles?: ('nutri' | 'wellness' | 'coach' | 'nutra' | 'admin' | 'ylada' | 'psi' | 'psicanalise' | 'odonto')[]
+  allowedProfiles?: ('nutri' | 'wellness' | 'coach' | 'nutra' | 'admin' | 'ylada' | 'psi' | 'psicanalise' | 'odonto' | 'fitness' | 'estetica' | 'med' | 'perfumaria' | 'seller' | 'coach-bem-estar')[]
 ): Promise<{ user: any; profile: any } | NextResponse> {
   try {
     // NOVO: Tentar ler access token do header Authorization (fallback quando cookies falharem)
@@ -254,13 +254,18 @@ export async function requireApiAuth(
 
     // Se perfil não existe, criar automaticamente com o perfil inferido da rota
     if (!profile || profileError?.code === 'PGRST116') {
-      // Tentar inferir o perfil da URL ou usar o primeiro allowedProfile
+      // Tentar inferir o perfil da URL, Referer ou usar o primeiro allowedProfile
       let inferredProfile: string | null = null
-      if (allowedProfiles && allowedProfiles.length > 0) {
-        inferredProfile = allowedProfiles[0] // Usar o primeiro perfil permitido
+      const referer = request.headers.get('referer') || ''
+      const url = request.url.toLowerCase()
+      // Referer tem prioridade para novos usuários (ex: vindo de /pt/coach-bem-estar/login)
+      if (referer.includes('/coach-bem-estar/')) {
+        inferredProfile = 'coach-bem-estar'
+      } else if (url.includes('/coach-bem-estar/')) {
+        inferredProfile = 'coach-bem-estar'
+      } else if (allowedProfiles && allowedProfiles.length > 0) {
+        inferredProfile = allowedProfiles[0]
       } else {
-        // Tentar inferir da URL
-        const url = request.url.toLowerCase()
         if (url.includes('/wellness/')) inferredProfile = 'wellness'
         else if (url.includes('/nutri/')) inferredProfile = 'nutri'
         else if (url.includes('/c/')) inferredProfile = 'coach'

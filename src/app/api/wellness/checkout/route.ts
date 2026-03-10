@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
     let userEmail: string
     let userId: string | null = null
     
-    const authResult = await requireApiAuth(request, ['wellness', 'admin'])
+    const authResult = await requireApiAuth(request, ['wellness', 'coach-bem-estar', 'admin'])
     if (authResult instanceof NextResponse) {
       // Não autenticado - usar e-mail fornecido
       console.log('ℹ️ Checkout sem autenticação - usando e-mail fornecido')

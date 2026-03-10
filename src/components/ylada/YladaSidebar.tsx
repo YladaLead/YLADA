@@ -23,6 +23,18 @@ export default function YladaSidebar({
   const { signOut, userProfile } = useAuth()
   const isAdmin = userProfile?.is_admin === true
 
+  /** Usuário comum: Noel, Links, Biblioteca, Perfil, Leads, Trilha, Configuração. Admin: + Lab + Planejamento + Wellness + Admin. */
+  const visibleGroups = YLADA_MENU_GROUPS.filter((group) => {
+    if (group.label === 'Lab') return isAdmin
+    if (group.label === 'Sistema' && !isAdmin) return true // filtramos itens abaixo
+    return true
+  }).map((group) => {
+    if (group.label === 'Sistema' && !isAdmin) {
+      return { ...group, items: group.items.filter((i) => i.key !== 'planejamento') }
+    }
+    return group
+  })
+
   const content = (
     <aside className="flex flex-col h-full bg-white border-r border-gray-200 w-56">
       <div className="p-4 border-b border-gray-200">
@@ -31,7 +43,7 @@ export default function YladaSidebar({
         </Link>
       </div>
       <nav className="flex-1 p-3 space-y-4 overflow-y-auto">
-        {YLADA_MENU_GROUPS.map((group) => (
+        {visibleGroups.map((group) => (
           <div key={group.label}>
             <p className="px-3 mb-1.5 text-xs font-medium text-gray-500 uppercase tracking-wider">
               {group.label}

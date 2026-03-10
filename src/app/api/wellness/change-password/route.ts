@@ -5,7 +5,7 @@ import { supabaseAdmin } from '@/lib/supabase'
 // POST - Trocar senha do usuário wellness
 export async function POST(request: NextRequest) {
   try {
-    const authResult = await requireApiAuth(request, ['wellness', 'admin'])
+    const authResult = await requireApiAuth(request, ['wellness', 'coach-bem-estar', 'admin'])
     if (authResult instanceof NextResponse) {
       return authResult
     }

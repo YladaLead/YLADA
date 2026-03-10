@@ -10,7 +10,7 @@ import { useLastVisitedPage } from '@/hooks/useLastVisitedPage'
 const supabase = createClient()
 
 interface LoginFormProps {
-  perfil: 'nutri' | 'wellness' | 'coach' | 'nutra' | 'admin' | 'ylada' | 'med' | 'seller' | 'perfumaria' | 'estetica' | 'fitness'
+  perfil: 'nutri' | 'wellness' | 'coach' | 'nutra' | 'admin' | 'ylada' | 'med' | 'seller' | 'perfumaria' | 'estetica' | 'fitness' | 'coach-bem-estar'
   redirectPath: string
   logoColor?: 'azul-claro' | 'verde' | 'laranja' | 'roxo'
   logoPath?: string
@@ -39,7 +39,7 @@ export default function LoginForm({
 
   // Verificar se email fez trial (apenas Wellness) - debounced
   const checkEmailTrial = useCallback(async (emailToCheck: string) => {
-    if (perfil !== 'wellness' || !emailToCheck?.includes('@')) {
+    if ((perfil !== 'wellness' && perfil !== 'coach-bem-estar') || !emailToCheck?.includes('@')) {
       setHadTrialEmail(false)
       return
     }
@@ -127,6 +127,7 @@ export default function LoginForm({
     perfumaria: 'Perfumaria',
     estetica: 'Estética',
     fitness: 'Fitness',
+    'coach-bem-estar': 'Coach de bem-estar',
   }
 
   const perfilAreaLabels: Record<string, string> = {
@@ -140,6 +141,7 @@ export default function LoginForm({
     perfumaria: 'Perfumaria',
     estetica: 'Estética',
     fitness: 'Fitness',
+    'coach-bem-estar': 'Coach de bem-estar',
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -533,7 +535,7 @@ export default function LoginForm({
     }
   }
 
-  const logoSrc = logoPath || (perfil === 'wellness' 
+  const logoSrc = logoPath || (perfil === 'wellness' || perfil === 'coach-bem-estar' 
     ? '/images/logo/wellness-horizontal.png'
     : perfil === 'nutri'
     ? '/images/logo/nutri-horizontal.png'
@@ -553,9 +555,9 @@ export default function LoginForm({
           <div className="flex justify-center mb-6 sm:mb-8">
             <Image
               src={logoSrc}
-              alt={perfil === 'wellness' ? 'WELLNESS - Your Leading Data System' : perfil === 'nutri' ? 'Nutri by YLADA' : perfil === 'coach' ? 'Coach by YLADA' : perfil === 'ylada' ? 'YLADA' : 'YLADA Logo'}
-              width={perfil === 'wellness' ? 572 : 280}
-              height={perfil === 'wellness' ? 150 : 84}
+              alt={perfil === 'wellness' || perfil === 'coach-bem-estar' ? 'YLADA - Coach de bem-estar' : perfil === 'nutri' ? 'Nutri by YLADA' : perfil === 'coach' ? 'Coach by YLADA' : perfil === 'ylada' ? 'YLADA' : 'YLADA Logo'}
+              width={perfil === 'wellness' || perfil === 'coach-bem-estar' ? 572 : 280}
+              height={perfil === 'wellness' || perfil === 'coach-bem-estar' ? 150 : 84}
               className="bg-transparent object-contain h-16 sm:h-20 w-auto"
               priority
             />
@@ -603,7 +605,7 @@ export default function LoginForm({
               className="w-full px-4 py-3 border border-gray-300 rounded-lg transition-all focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-gray-900 placeholder-gray-400"
               placeholder="seu@email.com"
             />
-            {perfil === 'wellness' && hadTrialEmail && !isSignUp && (
+            {(perfil === 'wellness' || perfil === 'coach-bem-estar') && hadTrialEmail && !isSignUp && (
               <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-lg">
                 <p className="text-sm font-medium text-green-800 mb-2">
                   Esse e-mail fez o trial de 3 dias.
@@ -676,7 +678,7 @@ export default function LoginForm({
             type="submit"
             disabled={loading}
             className={`w-full py-3.5 rounded-lg font-semibold text-white transition-all duration-200 ${
-              perfil === 'wellness'
+              (perfil === 'wellness' || perfil === 'coach-bem-estar')
                 ? 'bg-green-600 hover:bg-green-700 active:bg-green-800'
                 : perfil === 'coach'
                 ? 'bg-purple-600 hover:bg-purple-700 active:bg-purple-800'
@@ -693,7 +695,7 @@ export default function LoginForm({
         {!isSignUp && (
           <div className="mt-4 text-center">
             <a
-              href={perfil === 'ylada' ? '/pt/recuperar-senha' : `/pt/${perfil === 'wellness' ? 'wellness' : perfil === 'nutri' ? 'nutri' : perfil === 'coach' ? 'coach' : 'wellness'}/recuperar-senha`}
+              href={perfil === 'ylada' ? '/pt/recuperar-senha' : `/pt/${perfil === 'wellness' || perfil === 'coach-bem-estar' ? 'wellness' : perfil === 'nutri' ? 'nutri' : perfil === 'coach' ? 'coach' : 'wellness'}/recuperar-senha`}
               className="text-sm text-gray-600 hover:text-gray-900 transition-colors duration-200 font-medium underline"
             >
               Esqueci minha senha

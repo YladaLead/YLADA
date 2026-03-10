@@ -88,9 +88,9 @@ export const ptTranslations: Translations = {
   institutional: {
     hero: {
       title: 'Transformamos conversa em contatos qualificados.',
-      subtitle: 'O YLADA é um motor de diagnóstico, links inteligentes e inteligência artificial que cria, provoca e direciona conversas estratégicas — aumentando a autoridade, a credibilidade e a performance de profissionais e times de campo.',
+      subtitle: 'A plataforma YLADA é um motor de diagnóstico, links inteligentes e inteligência artificial que cria, provoca e direciona conversas estratégicas — aumentando a autoridade, a credibilidade e a performance de profissionais e times de campo.',
       subtitle2: 'Antes da venda. Durante a conversa. Depois do contato.',
-      cta: 'Explorar soluções'
+      cta: 'Acessar'
     },
     whoWeAre: {
       title: 'Quem somos',
@@ -121,22 +121,29 @@ export const ptTranslations: Translations = {
     },
     areas: {
       title: 'Escolha sua área',
-      subtitle: 'Acesse a solução YLADA para sua atuação. Áreas disponíveis ou em breve.',
+      subtitle: 'Acesse a plataforma YLADA para sua atuação. Áreas disponíveis ou em breve.',
       list: {
-        nutri: { title: 'Nutri', description: 'Nutricionistas: ferramentas inteligentes, consultas em resultados mensuráveis.' },
-        wellness: { title: 'Wellness', description: 'Times de campo e vendas: contatos qualificados e performance.' },
-        ylada: { title: 'YLADA', description: 'Motor de conversas: links inteligentes, trilha empresarial e Noel para qualquer profissional ou vendedor.' },
-        med: { title: 'Medicina', description: 'Médicos e especialistas: diagnóstico, links e autoridade no campo.' },
+        nutri: { title: 'Nutri', description: 'Nutricionistas: ferramentas inteligentes e resultados mensuráveis.' },
+        'coach-bem-estar': { title: 'Coach de bem-estar', description: 'Coaches de bem-estar: captação de clientes, links inteligentes e ferramentas para seus atendimentos e sessões.' },
+        med: { title: 'Médicos', description: 'Médicos e especialistas: diagnóstico, links e autoridade no campo.' },
+        estetica: { title: 'Estética', description: 'Profissionais de estética: captação de clientes e links inteligentes.' },
+        fitness: { title: 'Fitness', description: 'Personal trainers e coaches: captação e formação empresarial.' },
+        perfumaria: { title: 'Perfumaria', description: 'Vendedores de fragrâncias: quizzes de perfil olfativo e leads.' },
+        nutra: { title: 'Nutra', description: 'Vendedores de suplementos: leads e conversão.' },
+        'profissional-liberal': { title: 'Profissional liberal', description: 'Advogados, contadores, consultores: captação e diagnósticos para sua área.' },
+        'vendedores-geral': { title: 'Vendedores em geral', description: 'Vendedores de qualquer segmento: funil, links inteligentes e conversas qualificadas.' },
         psi: { title: 'Psicologia', description: 'Psicólogos: ferramentas de captação e conversas que convertem.' },
         psicanalise: { title: 'Psicanálise', description: 'Psicanalistas: links e conteúdo que geram contato qualificado.' },
-        odonto: { title: 'Odontologia', description: 'Cirurgiões-dentistas: captação e relacionamento com pacientes.' },
-        nutra: { title: 'Nutra', description: 'Vendedores de suplementos e suplementos em geral: leads e conversão.' },
-        coach: { title: 'Coach', description: 'Coaches: ferramentas que engajam e transformam clientes.' }
+        odonto: { title: 'Odontologia', description: 'Cirurgiões-dentistas: captação e relacionamento com pacientes.' }
       }
     },
     badges: {
       ready: 'Disponível',
       comingSoon: 'Em breve'
+    },
+    areaCta: {
+      explore: 'Explorar',
+      request: 'Solicitar acesso'
     },
     philosophy: {
       title: 'Filosofia YLADA',
@@ -146,7 +153,7 @@ export const ptTranslations: Translations = {
     },
     contact: {
       title: 'Fale com a gente',
-      subtitle: 'Quer entender como o YLADA pode ajudar você ou seu time a gerar contatos mais qualificados, mais autoridade e mais previsibilidade?',
+      subtitle: 'Quer entender como a plataforma YLADA pode ajudar você ou seu time a gerar contatos mais qualificados, mais autoridade e mais previsibilidade?',
       labelName: 'Nome',
       labelProfession: 'Profissão',
       labelCountry: 'País',
@@ -163,6 +170,19 @@ export const ptTranslations: Translations = {
       title: 'Em construção',
       message: 'Estamos preparando esta área. Em breve você poderá acessar.',
       back: 'Voltar à página inicial'
+    },
+    areaRequest: {
+      title: 'Solicitar acesso',
+      subtitle: 'Preencha o formulário e entraremos em contato quando esta área estiver disponível.',
+      labelName: 'Nome',
+      labelProfession: 'Profissão ou segmento',
+      labelCountry: 'País',
+      labelEmail: 'E-mail',
+      submit: 'Enviar solicitação',
+      submitting: 'Enviando...',
+      successTitle: 'Solicitação registrada!',
+      successMessage: 'Entraremos em contato quando a área estiver disponível.',
+      successButton: 'OK'
     },
     footer: {
       tagline: 'YLADA: Your Leading Advanced Data Assistant',

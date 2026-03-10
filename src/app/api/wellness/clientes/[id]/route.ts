@@ -11,7 +11,7 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const authResult = await requireApiAuth(request, ['wellness'])
+    const authResult = await requireApiAuth(request, ['wellness', 'coach-bem-estar'])
     if (authResult instanceof NextResponse) {
       return authResult
     }
@@ -79,7 +79,7 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   try {
-    const authResult = await requireApiAuth(request, ['wellness'])
+    const authResult = await requireApiAuth(request, ['wellness', 'coach-bem-estar'])
     if (authResult instanceof NextResponse) {
       return authResult
     }
@@ -152,7 +152,7 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    const authResult = await requireApiAuth(request, ['wellness'])
+    const authResult = await requireApiAuth(request, ['wellness', 'coach-bem-estar'])
     if (authResult instanceof NextResponse) {
       return authResult
     }

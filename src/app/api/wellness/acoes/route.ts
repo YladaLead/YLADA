@@ -5,7 +5,7 @@ import { supabaseAdmin } from '@/lib/supabase'
 // POST - Registrar uma ação do distribuidor
 export async function POST(request: NextRequest) {
   try {
-    const authResult = await requireApiAuth(request, ['wellness', 'admin'])
+    const authResult = await requireApiAuth(request, ['wellness', 'coach-bem-estar', 'admin'])
     
     if (authResult instanceof NextResponse) {
       return authResult
@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
 // GET - Buscar ações recentes e gerar lembretes
 export async function GET(request: NextRequest) {
   try {
-    const authResult = await requireApiAuth(request, ['wellness', 'admin'])
+    const authResult = await requireApiAuth(request, ['wellness', 'coach-bem-estar', 'admin'])
     
     if (authResult instanceof NextResponse) {
       return authResult
