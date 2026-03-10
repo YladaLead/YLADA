@@ -5,7 +5,7 @@ import { redirect } from 'next/navigation'
  * Ex: www.ylada.com/pt/wellness/assinar
  * Ex: www.ylada.com/pt/wellness/assinar?plan=annual
  */
-export default function AssinarPage({
+export default async function AssinarPage({
   searchParams,
 }: {
   searchParams: Promise<{ plan?: string }>
