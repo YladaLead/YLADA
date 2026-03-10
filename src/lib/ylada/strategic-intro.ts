@@ -78,6 +78,8 @@ function formatThemeLabel(theme: string): string {
   else if (/saúde|saude/.test(t)) label = 'saúde'
   else if (/peso/.test(t)) label = 'peso'
   else if (/alimentação|alimentacao/.test(t)) label = 'alimentação'
+  else if (/pele|skincare|estética|celulite|flacidez|manchas/.test(t)) label = 'sua pele'
+  else if (/perfume|fragrância|fragrancia|olfativo|perfumaria/.test(t)) label = 'perfil olfativo'
   else label = theme.trim()
   return capitalizeFirst(label)
 }
@@ -100,6 +102,16 @@ function getPatientQuizSubtitle(theme: string, questionsCount?: number): string 
   if (/ansiedade/.test(theme)) {
     return 'Entenda melhor o que está acontecendo. Diagnóstico personalizado e próximos passos em poucos minutos.'
   }
+  if (/pele|skincare|estética|celulite|flacidez|manchas|hidratação da pele|idade real da pele/.test(theme)) {
+    return n > 0
+      ? `Descubra o que sua pele está pedindo. ${introQuiz} um diagnóstico personalizado com orientações específicas.`
+      : 'Descubra o que sua pele está pedindo. Diagnóstico personalizado com orientações específicas em poucos minutos.'
+  }
+  if (/perfume|fragrância|fragrancia|olfativo|perfumaria|perfil olfativo/.test(theme)) {
+    return n > 0
+      ? `Descubra qual fragrância combina com você. ${introQuiz} seu perfil olfativo personalizado.`
+      : 'Descubra qual fragrância combina com você. Seu perfil olfativo em poucos minutos.'
+  }
   return `Descubra em minutos o que está acontecendo com você. ${introQuiz} um diagnóstico personalizado com o próximo passo.`
 }
 
@@ -111,13 +123,16 @@ function getPatientQuizSubtitle(theme: string, questionsCount?: number): string 
 export function getStrategicIntro(context: StrategicIntroContext): StrategicIntroContent {
   const theme = (context.theme_raw ?? '').toString().trim().toLowerCase()
   const pageTitle = (context.page_title ?? '').toString().trim()
-  const isPatientQuiz = /emagrecimento|perda de peso|intestino|energia|ansiedade|bem-estar|saúde|peso|alimentação/.test(theme)
+  const isPatientQuiz = /emagrecimento|perda de peso|intestino|energia|ansiedade|bem-estar|saúde|peso|alimentação|pele|skincare|estética|celulite|flacidez|manchas|hidratação da pele|idade real da pele|perfume|fragrância|fragrancia|olfativo|perfumaria|perfil olfativo/.test(theme)
 
   if (isPatientQuiz) {
     const themeLabel = formatThemeLabel(theme)
     const hasTechnicalName = /raio-?x|diagnóstico de bloqueios|diagnóstico de saúde|diagnostico de bloqueios|diagnostico de saude/i.test(pageTitle)
     const sanitizedPageTitle = pageTitle && !hasTechnicalName ? formatDisplayTitle(pageTitle) : ''
-    const title = sanitizedPageTitle || (themeLabel ? `Quiz: Como está sua ${themeLabel}?` : 'Quiz: Como está sua saúde?')
+    const isPerfumaria = /perfume|fragrância|fragrancia|olfativo|perfumaria/.test(theme)
+    const title =
+      sanitizedPageTitle ||
+      (isPerfumaria ? 'Descubra seu perfil olfativo' : themeLabel ? `Quiz: Como está sua ${themeLabel}?` : 'Quiz: Como está sua saúde?')
     const subtitle = getPatientQuizSubtitle(theme, context.questions_count)
     return {
       title,

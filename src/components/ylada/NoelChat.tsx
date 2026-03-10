@@ -234,6 +234,14 @@ export default function NoelChat({ area = 'med', className = '' }: NoelChatProps
   const clearChat = () => {
     setMessages([WELCOME])
     setLastLinkContext(null)
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.removeItem(`${STORAGE_KEY_PREFIX}${area}`)
+        localStorage.removeItem(`${LAST_LINK_KEY_PREFIX}${area}`)
+      } catch {
+        // ignore
+      }
+    }
   }
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -297,6 +305,20 @@ export default function NoelChat({ area = 'med', className = '' }: NoelChatProps
 
   return (
     <div className={`flex flex-col rounded-2xl border border-sky-100 bg-white shadow-lg overflow-hidden ${className}`}>
+      <div className="flex items-center justify-between px-4 py-2 border-b border-sky-100 bg-sky-50/50">
+        <span className="text-sm font-medium text-sky-800">Noel</span>
+        <button
+          type="button"
+          onClick={clearChat}
+          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-sky-600 hover:text-sky-800 hover:bg-sky-100 rounded-lg transition-colors"
+          title="Limpar conversa e começar do zero"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+          </svg>
+          Limpar conversa
+        </button>
+      </div>
       <div className="flex-1 overflow-y-auto min-h-[320px] max-h-[60vh] p-4 sm:p-5 space-y-4 bg-gradient-to-b from-sky-50/50 to-white">
         {messages.map((msg) => (
           <div
@@ -412,15 +434,6 @@ export default function NoelChat({ area = 'med', className = '' }: NoelChatProps
             Enviar
           </button>
         </div>
-        {messages.length > 1 && (
-          <button
-            type="button"
-            onClick={clearChat}
-            className="mt-2 text-xs text-sky-600 hover:text-sky-800"
-          >
-            Limpar conversa
-          </button>
-        )}
       </div>
     </div>
   )

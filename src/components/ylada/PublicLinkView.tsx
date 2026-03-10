@@ -152,6 +152,7 @@ const DIAGNOSIS_ARCHITECTURES = [
   'PROJECTION_CALCULATOR',
   'PROFILE_TYPE',
   'READINESS_CHECKLIST',
+  'PERFUME_PROFILE',
 ] as const
 
 type DiagnosisResultState = {

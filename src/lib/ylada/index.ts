@@ -4,7 +4,7 @@
  * @see docs/CHECKLIST-LINKS-INTELIGENTES-ETAPAS.md
  */
 
-export { generateDiagnosis } from './diagnosis-engine'
+export { generateDiagnosis, getDiagnosisDecision } from './diagnosis-engine'
 export { validateDiagnosisDecision } from './diagnosis-validation'
 export {
   fillSlots,
@@ -46,3 +46,14 @@ export { deriveStrategicProfile, getAdaptedCta, getAdaptedDiagnosisOpening } fro
 export type { StrategicProfile, MaturityStage, DominantPain, UrgencyLevel, StrategicMindset } from './strategic-profile'
 export { getAdaptiveDiagnosisIntro, getAdvancedCta } from './adaptive-diagnosis'
 export type { DiagnosisBaseLevel } from './adaptive-diagnosis'
+
+export {
+  YLADA_PILARES,
+  TEMAS_ESTRATEGICOS,
+  TEMAS_POR_PILAR,
+  TEMAS_ESPECIAIS,
+  TEMA_TO_PILAR,
+  getPilarFromTema,
+  getTemasEstrategicosPorPilar,
+} from '@/config/ylada-pilares-temas'
+export type { PilarCode } from '@/config/ylada-pilares-temas'

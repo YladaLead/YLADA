@@ -43,6 +43,45 @@ Apenas para agrupamento (menu, filtros, posicionamento). Não afetam o motor.
 | `beauty` | Estética e imagem |
 | `performance` | Performance física |
 
+### 2.2. Pilares universais e temas estratégicos
+
+**5 pilares** = arquitetura interna do motor (quase todos os diagnósticos giram em torno deles):
+
+| pilar | Label |
+|-------|-------|
+| `energia` | Energia |
+| `metabolismo` | Metabolismo |
+| `digestao` | Digestão |
+| `mente` | Mente |
+| `habitos` | Hábitos |
+
+**Top 12 temas** = filtros da biblioteca e sugestões do Noel:
+
+Energia · Intestino · Metabolismo · Inchaço/retenção · Alimentação · Hidratação · Peso/gordura · Estresse · Sono · Foco/concentração · Rotina saudável · Vitalidade geral
+
+Config: `src/config/ylada-pilares-temas.ts`
+
+### 2.3. Modelo de dados da biblioteca
+
+Tabela `ylada_biblioteca_itens` (migration 232):
+
+| Coluna | Tipo | Descrição |
+|--------|------|-----------|
+| id | UUID | PK |
+| tipo | quiz \| calculadora \| link | Tipo do item |
+| segment_codes | TEXT[] | Segmentos para os quais é relevante (um item pode aparecer em vários) |
+| tema | TEXT | Tema do Top 12 |
+| pilar | TEXT | Pilar universal (opcional) |
+| titulo | TEXT | Título de exibição |
+| description | TEXT | Descrição (opcional) |
+| source_type | ylada_template \| wellness_fluxo \| nutri_quiz \| custom | Origem do conteúdo |
+| source_id | TEXT | ID do recurso de origem |
+| flow_id | TEXT | ID do fluxo do catálogo |
+| architecture | TEXT | Arquitetura do motor |
+| meta | JSONB | Metadados extras |
+| sort_order | INTEGER | Ordem de exibição |
+| active | BOOLEAN | Ativo |
+
 ---
 
 ## 3. Segmentos oficiais (diagnóstico)
@@ -56,8 +95,9 @@ Dentro do guarda-chuva **Bem-estar e qualidade de vida**, os segmentos para vari
 | `dentistry` | Odontologia | Cuidados bucais, cáries, escovação, gengiva |
 | `aesthetics` | Estética | Pele, autocuidado, skincare, retenção, autoestima corporal |
 | `fitness` | Fitness | Treino, atividade física, consistência, disposição |
+| `perfumaria` | Perfumaria | Fragrâncias, perfil olfativo, indicações de perfume — usa arquitetura `PERFUME_PROFILE` (archetypes) |
 
-**Fallback:** Quando o segmento não tiver variantes específicas, usa `BLOCKER_VARIANTS` (genérico).
+**Fallback:** Quando o segmento não tiver variantes específicas, usa `BLOCKER_VARIANTS` (genérico). **Perfumaria** usa arquitetura própria `PERFUME_PROFILE` com 8 archetypes (Elegância Natural, Presença Magnética, etc.) e `perfume_usage` (trabalho, dia a dia, encontros, eventos).
 
 ---
 
@@ -95,9 +135,10 @@ O **profession** (ou área principal) vem do fluxo de perfil. O **segment_code**
 | gastroenterologista | `nutrition` |
 | **Outros** | |
 | `vendedor_servicos`, `vendedor_produtos`, `vendedor` | `wellness` |
+| `vendedor_perfumes`, `perfumista` | `perfumaria` |
 | `outro` | `wellness` |
 
-**Regra:** Médicos gerais e de saúde mental → `wellness`. Médicos ligados a metabolismo/digestão → `nutrition`.
+**Regra:** Médicos gerais e de saúde mental → `wellness`. Médicos ligados a metabolismo/digestão → `nutrition`. Vendedores de perfumes → `perfumaria`.
 
 ### 4.2. Fallback por tema
 
@@ -106,6 +147,7 @@ Se `segment_code` não vier do perfil, o motor pode inferir pelo `theme_raw`:
 - "pele", "skincare", "estética", "retenção" → `aesthetics`
 - "emagrecimento", "intestino", "metabolismo" → `nutrition`
 - "treino", "disposição", "fitness" → `fitness`
+- "perfume", "fragrância", "olfativo", "perfumaria", "perfil olfativo" → `perfumaria`
 
 ---
 
@@ -282,6 +324,7 @@ Catálogo completo para geração de links inteligentes:
 | **aesthetics** | pele, skincare, autocuidado, retenção, rejuvenescimento, manchas, flacidez |
 | **dentistry** | cáries, gengiva, escovação, sensibilidade, saúde bucal |
 | **fitness** | treino, energia, consistência, condicionamento, disposição |
+| **perfumaria** | perfil olfativo, fragrância, perfume assinatura, duração do perfume |
 | **wellness** | energia, estresse, sono, rotina, qualidade de vida, equilíbrio emocional |
 
 **Para médicos e psicólogos:** Usar temas neutros de saúde (estresse, qualidade de vida, energia, sono, rotina, equilíbrio emocional). Evitar linguagem de marketing; priorizar educação e triagem.

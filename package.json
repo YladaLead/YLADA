@@ -6,6 +6,7 @@
   "scripts": {
     "predev": "bash scripts/sync-env-local.sh || true",
     "dev": "next dev",
+    "dev:webpack": "next dev --webpack",
     "dev:mobile": "next dev -H 0.0.0.0",
     "build": "next build",
     "start": "next start",
@@ -19,7 +20,10 @@
     "extract-nutri-poster": "tsx scripts/extract-nutri-video-poster.ts",
     "test-video-url": "tsx scripts/test-video-url.ts",
     "test:fase": "tsx src/lib/carol-v2/fase.casos.ts",
-    "organizar-contatos-meta": "node scripts/organizar-contatos-meta-ads.js"
+    "organizar-contatos-meta": "node scripts/organizar-contatos-meta-ads.js",
+    "migrate:235": "npx tsx scripts/run-migration.ts 235-ylada-templates-biblioteca-nutri-bloco2.sql",
+    "migrate:236": "npx tsx scripts/run-migration.ts 236-ylada-templates-calculadoras-biblioteca-nutri.sql",
+    "archetypes:gerar": "npx tsx scripts/gerar-archetypes-diagnostico.ts"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
@@ -72,6 +76,7 @@
     "dotenv": "^17.2.3",
     "eslint": "^9",
     "eslint-config-next": "^15.5.9",
+    "pg": "^8.20.0",
     "postcss": "^8.4.49",
     "puppeteer": "^24.25.0",
     "sharp": "^0.34.4",

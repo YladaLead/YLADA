@@ -7,12 +7,14 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createHash } from 'crypto'
 import { supabaseAdmin } from '@/lib/supabase'
-import { generateDiagnosis } from '@/lib/ylada'
+import { generateDiagnosis, getDiagnosisDecision } from '@/lib/ylada'
 import type { DiagnosisInput, DiagnosisArchitecture, LinkObjective, AreaProfissional } from '@/lib/ylada'
-import { normalizeVisitorAnswers } from '@/lib/ylada/diagnosis-normalize'
+import { getArchetypeCode, fillArchetypeSlots } from '@/lib/ylada/diagnosis-archetypes'
+import { normalizeVisitorAnswers, type FormFieldForNormalize } from '@/lib/ylada/diagnosis-normalize'
 import type { StrategicProfile } from '@/lib/ylada/strategic-profile'
 import { getAdaptiveDiagnosisIntro, getAdvancedCta } from '@/lib/ylada/adaptive-diagnosis'
 import { sanitizeThemeForPatient } from '@/lib/ylada/strategic-intro'
+import { inferArchitectureFromTitle } from '@/config/ylada-segments'
 
 const ARCHITECTURES: DiagnosisArchitecture[] = [
   'RISK_DIAGNOSIS',
@@ -20,6 +22,7 @@ const ARCHITECTURES: DiagnosisArchitecture[] = [
   'PROJECTION_CALCULATOR',
   'PROFILE_TYPE',
   'READINESS_CHECKLIST',
+  'PERFUME_PROFILE',
 ]
 const OBJECTIVES: LinkObjective[] = ['captar', 'educar', 'reter', 'propagar', 'indicar']
 const AREAS: AreaProfissional[] = ['saude', 'profissional_liberal', 'vendas', 'wellness', 'geral']
@@ -46,6 +49,26 @@ function hashAnswers(answers: Record<string, unknown>): string {
   const obj: Record<string, unknown> = {}
   for (const k of keys) obj[k] = answers[k]
   return createHash('sha256').update(JSON.stringify(obj)).digest('hex').slice(0, 32)
+}
+
+/** Extrai formFields do config (form.fields ou questions) para mapear índice→texto. */
+function extractFormFieldsFromConfig(config: Record<string, unknown>): FormFieldForNormalize[] | undefined {
+  const form = config.form as Record<string, unknown> | undefined
+  const fields = form?.fields as Array<{ id?: string; options?: string[] }> | undefined
+  if (Array.isArray(fields) && fields.length > 0) {
+    return fields.map((f, i) => ({
+      id: (f.id as string) ?? `q${i + 1}`,
+      options: Array.isArray(f.options) ? f.options : undefined,
+    }))
+  }
+  const questions = config.questions as Array<{ id?: string; options?: string[] }> | undefined
+  if (Array.isArray(questions) && questions.length > 0) {
+    return questions.map((q, i) => ({
+      id: (q.id as string) ?? `q${i + 1}`,
+      options: Array.isArray(q.options) ? q.options : undefined,
+    }))
+  }
+  return undefined
 }
 
 export async function POST(
@@ -100,33 +123,46 @@ export async function POST(
     const config = (link.config_json as Record<string, unknown>) ?? {}
     let metaRaw = config.meta as Record<string, unknown> | undefined
 
-    // Suporte a links da biblioteca (questions + results sem meta): inferir meta
+    // Suporte a links da biblioteca (questions + results sem meta): inferir meta via registry
     if (!metaRaw && Array.isArray(config.questions) && Array.isArray(config.results)) {
       const title = (config.title as string) || 'seu perfil'
+      const inferred = inferArchitectureFromTitle(title)
       metaRaw = {
-        architecture: 'RISK_DIAGNOSIS',
+        architecture: inferred.architecture,
         theme_raw: title,
         theme_display: title,
         objective: 'captar',
         area_profissional: 'wellness',
+        ...(inferred.segment_code && { segment_code: inferred.segment_code }),
       }
     }
     if (!metaRaw) {
       return NextResponse.json({ success: false, error: 'Config do link sem meta' }, { status: 400 })
     }
 
-    const architecture = metaRaw.architecture as string | undefined
+    let architecture = metaRaw.architecture as string | undefined
+    // Fallback: links criados com meta vazio (248) usaram RISK_DIAGNOSIS — corrigir via registry
+    if (architecture === 'RISK_DIAGNOSIS') {
+      const title = (config.title as string) || (metaRaw.theme_raw as string) || ''
+      const inferred = inferArchitectureFromTitle(title)
+      if (inferred.architecture === 'PERFUME_PROFILE') {
+        architecture = 'PERFUME_PROFILE'
+        metaRaw = { ...metaRaw, architecture: 'PERFUME_PROFILE', segment_code: inferred.segment_code ?? 'perfumaria' }
+      }
+    }
     if (!architecture || !ARCHITECTURES.includes(architecture as DiagnosisArchitecture)) {
       return NextResponse.json({ success: false, error: 'Arquitetura de diagnóstico não suportada' }, { status: 400 })
     }
 
-    // Cache: verificar se já existe diagnóstico para esta combinação de respostas
+    // Cache: v5 — whatsapp_prefill com perfume_usage (PERFUME_PROFILE)
     const answers_hash = hashAnswers(visitor_answers)
+    const TEMPLATE_VERSION = 5
     const { data: cached } = await supabaseAdmin
       .from('ylada_diagnosis_cache')
       .select('diagnosis_json')
       .eq('link_id', link.id)
       .eq('answers_hash', answers_hash)
+      .eq('template_version', TEMPLATE_VERSION)
       .maybeSingle()
 
     if (cached?.diagnosis_json) {
@@ -134,6 +170,9 @@ export async function POST(
       const ip = getClientIp(request)
       const ip_hash = ip ? hashIp(ip) : null
       const user_agent = request.headers.get('user-agent')?.slice(0, 500) ?? null
+      const cachedPerfumeUsage = architecture === 'PERFUME_PROFILE'
+        ? (cachedDiag.perfume_usage as string | undefined)
+        : undefined
       const { data: metricsRow, error: metricsErr } = await supabaseAdmin
         .from('ylada_diagnosis_metrics')
         .insert({
@@ -149,6 +188,7 @@ export async function POST(
           intro_variant: null,
           user_agent,
           ip_hash,
+          ...(cachedPerfumeUsage && { perfume_usage: cachedPerfumeUsage }),
         })
         .select('id')
         .single()
@@ -182,11 +222,14 @@ export async function POST(
     const flow_id = typeof metaRaw.flow_id === 'string' ? metaRaw.flow_id : null
     const objectiveMeta = typeof metaRaw.objective === 'string' ? metaRaw.objective : null
 
+    // FormFields: para PERFUME_PROFILE mapear índice→texto (form envia "0", motor espera "Floral")
+    const formFields = extractFormFieldsFromConfig(config)
+
     // Bloco 2: normalizar q1,q2... para chaves esperadas pelo motor
     const normalizedAnswers = normalizeVisitorAnswers(
       visitor_answers,
       architecture as DiagnosisArchitecture,
-      { themeRaw: themeRaw ?? '' }
+      { themeRaw: themeRaw ?? '', formFields }
     )
 
     const segment_code = typeof metaRaw.segment_code === 'string' ? metaRaw.segment_code : undefined
@@ -202,7 +245,72 @@ export async function POST(
       visitor_answers: normalizedAnswers,
     }
 
-    const { diagnosis, fallbackUsed, level } = generateDiagnosis(input)
+    let diagnosis: Awaited<ReturnType<typeof generateDiagnosis>>['diagnosis']
+    let fallbackUsed: boolean
+    let level: Awaited<ReturnType<typeof generateDiagnosis>>['level']
+
+    const arch = architecture as DiagnosisArchitecture
+    if (arch === 'RISK_DIAGNOSIS' || arch === 'BLOCKER_DIAGNOSIS') {
+      const decision = getDiagnosisDecision(input)
+      const archetypeCode = getArchetypeCode(decision.level, decision.blocker_type)
+      const segmentForArchetype = segment_code ?? 'geral'
+      const { data: archetype } = await supabaseAdmin
+        .from('ylada_diagnosis_archetypes')
+        .select('content_json')
+        .eq('archetype_code', archetypeCode)
+        .eq('segment_code', segmentForArchetype)
+        .maybeSingle()
+
+      if (archetype?.content_json) {
+        const themeDisplay = themeForSlots || 'seu perfil'
+        diagnosis = fillArchetypeSlots(archetype.content_json as Record<string, unknown>, {
+          THEME: themeDisplay,
+          NAME: '',
+        })
+        fallbackUsed = false
+        level = decision.level
+      } else {
+        const result = generateDiagnosis(input)
+        diagnosis = result.diagnosis
+        fallbackUsed = result.fallbackUsed
+        level = result.level
+      }
+    } else if (arch === 'PERFUME_PROFILE') {
+      const result = generateDiagnosis(input)
+      let diag = result.diagnosis
+      const perfumeProfileCode = result.perfume_profile_code
+      const perfumeUsage = result.perfume_usage
+      const segmentForArchetype = segment_code ?? 'perfumaria'
+
+      if (perfumeProfileCode) {
+        const { data: archetype } = await supabaseAdmin
+          .from('ylada_diagnosis_archetypes')
+          .select('content_json')
+          .eq('archetype_code', perfumeProfileCode)
+          .eq('segment_code', segmentForArchetype)
+          .maybeSingle()
+
+        if (archetype?.content_json) {
+          const profileLabel = perfumeProfileCode.replace(/_/g, ' ')
+          diag = fillArchetypeSlots(archetype.content_json as Record<string, unknown>, {
+            THEME: themeForSlots || 'fragrância',
+            NAME: '',
+            PROFILE: profileLabel,
+          })
+          fallbackUsed = false
+        }
+      }
+      diagnosis = diag
+      level = result.level
+      if (perfumeUsage) {
+        ;(diagnosis as Record<string, unknown>).perfume_usage = perfumeUsage
+      }
+    } else {
+      const result = generateDiagnosis(input)
+      diagnosis = result.diagnosis
+      fallbackUsed = result.fallbackUsed
+      level = result.level
+    }
 
     // Camada 0: disclaimer quando safety_mode (não parecer orientação médica)
     const copyPolicy = metaRaw.copy_policy && typeof metaRaw.copy_policy === 'object' ? metaRaw.copy_policy as { append_disclaimer?: boolean } : undefined
@@ -226,6 +334,9 @@ export async function POST(
     const ip = getClientIp(request)
     const ip_hash = ip ? hashIp(ip) : null
     const user_agent = request.headers.get('user-agent')?.slice(0, 500) ?? null
+    const perfumeUsageForMetrics = architecture === 'PERFUME_PROFILE'
+      ? ((diagnosis as Record<string, unknown>).perfume_usage as string | undefined)
+      : undefined
 
     const { data: row, error: insertError } = await supabaseAdmin
       .from('ylada_diagnosis_metrics')
@@ -242,6 +353,7 @@ export async function POST(
         intro_variant: introVariant ?? null,
         user_agent: user_agent,
         ip_hash: ip_hash,
+        ...(perfumeUsageForMetrics && { perfume_usage: perfumeUsageForMetrics }),
       })
       .select('id')
       .single()
@@ -249,6 +361,14 @@ export async function POST(
     if (insertError) {
       console.error('[ylada/links/[slug]/diagnosis] insert metrics', insertError)
       return NextResponse.json({ success: false, error: insertError.message }, { status: 500 })
+    }
+
+    // PERFUME_PROFILE: enriquecer whatsapp_prefill com perfume_usage para o vendedor qualificar o lead
+    let whatsappPrefill = diagnosis.whatsapp_prefill
+    const perfumeUsage = (diagnosis as Record<string, unknown>).perfume_usage as string | undefined
+    if (architecture === 'PERFUME_PROFILE' && perfumeUsage && whatsappPrefill) {
+      const usageLabel = perfumeUsage.replace(/_/g, ' ')
+      whatsappPrefill = `${whatsappPrefill}\n\nUso principal: ${usageLabel}`
     }
 
     // Memorização: gravar diagnóstico no cache para reutilização futura
@@ -262,15 +382,18 @@ export async function POST(
       consequence: diagnosis.consequence,
       growth_potential: diagnosis.growth_potential,
       cta_text: ctaText,
-      whatsapp_prefill: diagnosis.whatsapp_prefill,
+      whatsapp_prefill: whatsappPrefill,
       ...(diagnosis.frase_identificacao && { frase_identificacao: diagnosis.frase_identificacao }),
       ...(diagnosis.dica_rapida && { dica_rapida: diagnosis.dica_rapida }),
       ...(diagnosis.specific_actions?.length && { specific_actions: diagnosis.specific_actions }),
+      ...((diagnosis as Record<string, unknown>).perfume_usage && {
+        perfume_usage: (diagnosis as Record<string, unknown>).perfume_usage,
+      }),
     }
     await supabaseAdmin
       .from('ylada_diagnosis_cache')
       .upsert(
-        { link_id: link.id, answers_hash, diagnosis_json: diagnosisPayload },
+        { link_id: link.id, answers_hash, diagnosis_json: diagnosisPayload, template_version: TEMPLATE_VERSION },
         { onConflict: 'link_id,answers_hash' }
       )
       .then(() => {})

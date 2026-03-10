@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import Link from 'next/link'
 import YladaAreaShell from '@/components/ylada/YladaAreaShell'
+import { getYladaAreaPathPrefix } from '@/config/ylada-areas'
 import { getFlowById } from '@/config/ylada-flow-catalog'
 import { getTemasForProfession, getTemaLabel, TEMA_OUTRO_VALUE } from '@/config/ylada-temas'
 import { getFerramentasForTema, type FerramentaConcreta } from '@/config/ylada-temas-ferramentas'
@@ -41,7 +42,7 @@ const OBJETIVO_PHRASE: Record<LinkObjectiveValue, string> = {
 }
 
 type Template = { id: string; name: string; type: string; version: number; suggested_prompts?: string[] }
-type LinkStats = { view: number; start: number; complete: number; cta_click: number }
+type LinkStats = { view: number; start: number; complete: number; cta_click: number; diagnosis_count?: number }
 type LinkRow = {
   id: string
   slug: string
@@ -113,7 +114,13 @@ function getSuggestionPurposePhrase(objective: LinkObjectiveValue): string {
   }
 }
 
-export default function MatrixLinksPage() {
+interface LinksPageContentProps {
+  areaCodigo?: string
+  areaLabel?: string
+}
+
+function LinksPageContent({ areaCodigo = 'ylada', areaLabel = 'YLADA' }: LinksPageContentProps) {
+  const prefix = getYladaAreaPathPrefix(areaCodigo)
   const [templates, setTemplates] = useState<Template[]>([])
   const [links, setLinks] = useState<LinkRow[]>([])
   const [loading, setLoading] = useState(true)
@@ -476,7 +483,7 @@ export default function MatrixLinksPage() {
         const base = typeof window !== 'undefined' ? window.location.origin : ''
         const url = json.data.url || `${base}/l/${json.data.slug}`
         setLinks((prev) => [
-          { ...json.data, url, template_name: null, template_type: null, stats: { view: 0, start: 0, complete: 0, cta_click: 0 } },
+          { ...json.data, url, template_name: null, template_type: null, stats: { view: 0, start: 0, complete: 0, cta_click: 0, diagnosis_count: 0 } },
           ...prev,
         ])
         setLastCreatedUrl(url)
@@ -528,7 +535,7 @@ export default function MatrixLinksPage() {
         const base = typeof window !== 'undefined' ? window.location.origin : ''
         const url = json.data.url || `${base}/l/${json.data.slug}`
         setLinks((prev) => [
-          { ...json.data, url, template_name: null, template_type: null, stats: { view: 0, start: 0, complete: 0, cta_click: 0 } },
+          { ...json.data, url, template_name: null, template_type: null, stats: { view: 0, start: 0, complete: 0, cta_click: 0, diagnosis_count: 0 } },
           ...prev,
         ])
         setLastCreatedUrl(url)
@@ -545,7 +552,7 @@ export default function MatrixLinksPage() {
   }
 
   return (
-    <YladaAreaShell areaCodigo="ylada" areaLabel="YLADA">
+    <YladaAreaShell areaCodigo={areaCodigo} areaLabel={areaLabel}>
       <div className="max-w-2xl space-y-6">
         <div>
           <h1 className="text-xl font-bold text-gray-900 mb-2">Links inteligentes</h1>
@@ -576,10 +583,10 @@ export default function MatrixLinksPage() {
               </select>
             </div>
             <span className="text-slate-400">|</span>
-            <a href="/pt/perfis-simulados" className="text-sm text-blue-600 hover:underline">
+            <a href={`${prefix}/perfis-simulados`} className="text-sm text-blue-600 hover:underline">
               Perfis para testes
             </a>
-            <a href="/pt/ylada-lab" className="text-sm text-blue-600 hover:underline">
+            <a href={`${prefix}/ylada-lab`} className="text-sm text-blue-600 hover:underline">
               YLADA Lab
             </a>
           </div>
@@ -622,7 +629,7 @@ export default function MatrixLinksPage() {
                     <span className="text-amber-600" aria-hidden>💡</span>
                     <div>
                       <p className="font-medium">Complete seu perfil</p>
-                      <p className="text-xs text-amber-700 mt-0.5">Recomendações personalizadas em <a href="/pt/perfil-empresarial" className="underline hover:no-underline">Perfil empresarial</a></p>
+                      <p className="text-xs text-amber-700 mt-0.5">Recomendações personalizadas em <a href={`${prefix}/perfil-empresarial`} className="underline hover:no-underline">Perfil empresarial</a></p>
                     </div>
                   </div>
                 )}
@@ -919,7 +926,7 @@ export default function MatrixLinksPage() {
           ) : (
             <ul className="space-y-4">
               {links.map((link) => {
-                const stats = link.stats ?? { view: 0, start: 0, complete: 0, cta_click: 0 }
+                const stats = link.stats ?? { view: 0, start: 0, complete: 0, cta_click: 0, diagnosis_count: 0 }
                 const isActive = link.status === 'active'
                 return (
                   <li key={link.id} className="py-3 border-b border-gray-100 last:border-0 last:pb-0">
@@ -948,13 +955,16 @@ export default function MatrixLinksPage() {
                         <p className="text-xs text-gray-400 truncate">{link.url}</p>
                         <div className="flex flex-wrap gap-3 mt-2 text-xs text-gray-500">
                           <span title="Visualizações">{stats.view} views</span>
+                          {(stats.diagnosis_count ?? 0) > 0 && (
+                            <span title="Diagnósticos realizados">{stats.diagnosis_count} diagnósticos</span>
+                          )}
                           <span title="Conclusões">{stats.complete} conclusões</span>
                           <span title="Cliques no WhatsApp">{stats.cta_click} cliques WhatsApp</span>
                         </div>
                       </div>
                       <div className="flex flex-wrap items-center gap-1 shrink-0">
                         <Link
-                          href={`/pt/links/editar/${link.id}`}
+                          href={`${prefix}/links/editar/${link.id}`}
                           className="rounded px-2 py-1.5 text-xs font-medium text-sky-600 hover:bg-sky-50"
                         >
                           Editar quiz
@@ -1073,4 +1083,9 @@ export default function MatrixLinksPage() {
       </div>
     </YladaAreaShell>
   )
+}
+
+export { LinksPageContent }
+export default function MatrixLinksPage() {
+  return <LinksPageContent areaCodigo="ylada" areaLabel="YLADA" />
 }

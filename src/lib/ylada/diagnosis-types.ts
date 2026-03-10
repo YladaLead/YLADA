@@ -13,12 +13,27 @@ export type DiagnosisArchitecture =
   | 'PROJECTION_CALCULATOR'
   | 'PROFILE_TYPE'
   | 'READINESS_CHECKLIST'
+  | 'PERFUME_PROFILE'
 
 export type RiskLevel = 'baixo' | 'medio' | 'alto'
 
 export type BlockerType = 'rotina' | 'emocional' | 'processo' | 'habitos' | 'expectativa'
 
 export type ProfileTypeName = 'consistente' | '8ou80' | 'ansioso' | 'analitico' | 'improvisador'
+
+/** Perfis de fragrância para PERFUME_PROFILE (segment perfumaria). */
+export type PerfumeProfileCode =
+  | 'elegancia_natural'
+  | 'presença_magnetica'
+  | 'leveza_floral'
+  | 'sofisticacao_classica'
+  | 'energia_vibrante'
+  | 'seducao_sutil'
+  | 'intensidade_noturna'
+  | 'charme_discreto'
+
+/** Uso principal do perfume (PERFUME_USAGE) — para recomendações. */
+export type PerfumeUsage = 'dia_a_dia' | 'trabalho' | 'encontros' | 'eventos'
 
 export interface DiagnosisInput {
   meta: {
@@ -66,6 +81,12 @@ export interface DiagnosisGenerationResult {
   fallbackUsed: boolean
   /** Nível de risco (RISK_DIAGNOSIS); undefined para outras arquiteturas. */
   level?: RiskLevel
+  /** Tipo de bloqueio (BLOCKER_DIAGNOSIS); para lookup de archetype. */
+  blocker_type?: BlockerType
+  /** Perfil de fragrância (PERFUME_PROFILE); para lookup de archetype. */
+  perfume_profile_code?: PerfumeProfileCode
+  /** Uso principal do perfume (PERFUME_PROFILE); para recomendações. */
+  perfume_usage?: PerfumeUsage
 }
 
 export class DiagnosisValidationError extends Error {

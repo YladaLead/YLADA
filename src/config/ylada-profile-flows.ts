@@ -17,6 +17,7 @@ export type ProfessionCode =
   | 'nutricionista'
   | 'vendedor_suplementos'
   | 'vendedor_cosmeticos'
+  | 'vendedor_perfumes'
   | 'vendedor_servicos'
   | 'vendedor_produtos'
   | 'vendedor'
@@ -64,6 +65,7 @@ export const PROFESSION_BY_SEGMENT: Record<string, ProfessionCode[]> = {
     'outro',
     'vendedor_suplementos',
     'vendedor_cosmeticos',
+    'vendedor_perfumes',
     'vendedor_servicos',
     'vendedor_produtos',
   ],
@@ -95,6 +97,7 @@ export const PROFILE_TYPE_BY_PROFESSION: Record<ProfessionCode, ProfileType> = {
   nutricionista: 'liberal',
   vendedor_suplementos: 'vendas',
   vendedor_cosmeticos: 'vendas',
+  vendedor_perfumes: 'vendas',
   vendedor_servicos: 'vendas',
   vendedor_produtos: 'vendas',
   vendedor: 'vendas',
@@ -122,6 +125,7 @@ export const PROFESSION_LABELS: Record<ProfessionCode, string> = {
   nutricionista: 'Nutrição',
   vendedor_suplementos: 'Suplementos / Nutra',
   vendedor_cosmeticos: 'Cosméticos / Estética',
+  vendedor_perfumes: 'Perfumes / Fragrâncias',
   vendedor_servicos: 'Serviços',
   vendedor_produtos: 'Produtos físicos',
   vendedor: 'Vendedor(a)',
@@ -180,6 +184,10 @@ export const PROFESSION_HEADER: Partial<Record<ProfessionCode, ProfessionHeaderC
     title: 'Perfil estratégico para vendas (cosméticos)',
     subtitle: 'Vamos entender seu modelo de vendas.',
   },
+  vendedor_perfumes: {
+    title: 'Perfil estratégico para vendas (perfumaria)',
+    subtitle: 'Vamos entender seu modelo de vendas de fragrâncias.',
+  },
   vendedor_servicos: {
     title: 'Perfil estratégico para vendas (serviços)',
     subtitle: 'Vamos entender seu modelo de atuação.',
@@ -208,6 +216,7 @@ export const PROFESSION_IDENTITY: Partial<Record<ProfessionCode, ProfessionIdent
   nutricionista: { youAre: 'Nutrição', objective: 'Estruturar sua prática profissional.' },
   vendedor_suplementos: { youAre: 'Vendas (Nutra)', objective: 'Estruturar seu funil e suas vendas.' },
   vendedor_cosmeticos: { youAre: 'Vendas (cosméticos)', objective: 'Estruturar seu modelo de vendas.' },
+  vendedor_perfumes: { youAre: 'Vendas (perfumaria)', objective: 'Estruturar seu modelo de vendas de fragrâncias.' },
   vendedor_servicos: { youAre: 'Vendas (serviços)', objective: 'Estruturar seu modelo de atuação.' },
   vendedor_produtos: { youAre: 'Vendas', objective: 'Estruturar seu modelo de vendas.' },
   vendedor: { youAre: 'Vendedor(a)', objective: 'Estruturar seu modelo de atuação.' },
@@ -331,6 +340,10 @@ export const STEP_COPY_BY_PROFESSION: Record<string, Partial<Record<ProfessionCo
     vendedor_cosmeticos: {
       title: 'Como funciona seu modelo de vendas?',
       description: 'O que você vende ou oferece.',
+    },
+    vendedor_perfumes: {
+      title: 'Como funciona seu modelo de vendas de perfumes?',
+      description: 'O que você vende (perfumes, fragrâncias, etc.).',
     },
     vendedor_servicos: {
       title: 'Como funciona seu modelo de atuação?',
@@ -480,6 +493,11 @@ export const FIELD_LABELS_BY_PROFESSION: Partial<Record<ProfessionCode, Record<s
   vendedor_cosmeticos: {
     categoria: 'Tipo de produto ou serviço',
     oferta: 'Você vende produto, serviço ou os dois?',
+    canal_principal_vendas: 'Seu principal canal de vendas',
+  },
+  vendedor_perfumes: {
+    categoria: 'Tipo de produto (perfumes, fragrâncias)',
+    oferta: 'Você vende perfumes importados, nacionais ou ambos?',
     canal_principal_vendas: 'Seu principal canal de vendas',
   },
   vendedor_servicos: {

@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
 
     let query = supabaseAdmin
       .from('ylada_biblioteca_itens')
-      .select('id, tipo, segment_codes, tema, pilar, titulo, description, template_id, flow_id, architecture, meta, sort_order')
+      .select('id, tipo, segment_codes, tema, pilar, titulo, description, dor_principal, objetivo_principal, template_id, flow_id, architecture, meta, sort_order')
       .eq('active', true)
       .order('sort_order', { ascending: true })
       .order('titulo', { ascending: true })

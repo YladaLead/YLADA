@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { YLADA_MENU_GROUPS, getYladaAreaPathPrefix } from '@/config/ylada-areas'
+import { YLADA_MENU_GROUPS, getYladaAreaPathPrefix, getYladaLeadsPath } from '@/config/ylada-areas'
 import { useAuth } from '@/hooks/useAuth'
 
 interface YladaSidebarProps {
@@ -38,7 +38,8 @@ export default function YladaSidebar({
             </p>
             <div className="space-y-0.5">
               {group.items.map((item) => {
-                const href = `${prefix}/${item.path}`
+                const path = item.key === 'leads' ? getYladaLeadsPath(areaCodigo) : item.path
+                const href = `${prefix}/${path}`
                 const isActive = pathname === href || pathname?.startsWith(href + '/')
                 return (
                   <Link

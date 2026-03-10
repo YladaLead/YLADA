@@ -2,7 +2,9 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import YladaAreaShell from '@/components/ylada/YladaAreaShell'
+import { getYladaAreaPathPrefix } from '@/config/ylada-areas'
 
 type FormField = { id: string; label: string; type?: string; options?: string[] }
 type LinkData = {
@@ -17,7 +19,19 @@ type LinkData = {
   cta_whatsapp?: string | null
 }
 
+/** Deriva areaCodigo e areaLabel do pathname (ex: /pt/psi/links/editar/123 → psi). */
+function useAreaFromPath() {
+  const pathname = usePathname()
+  if (!pathname) return { areaCodigo: 'ylada' as const, areaLabel: 'YLADA' }
+  const m = pathname.match(/^\/pt\/(psi|odonto|nutra|coach|psicanalise)\//)
+  const area = m?.[1] ?? 'ylada'
+  const labels: Record<string, string> = { psi: 'Psicologia', odonto: 'Odontologia', nutra: 'Nutra', coach: 'Coach', psicanalise: 'Psicanálise' }
+  return { areaCodigo: area as 'ylada' | 'psi' | 'odonto' | 'nutra' | 'coach' | 'psicanalise', areaLabel: labels[area] ?? 'YLADA' }
+}
+
 export default function EditarLinkPage({ params }: { params: Promise<{ id: string }> }) {
+  const { areaCodigo, areaLabel } = useAreaFromPath()
+  const linksPath = `${getYladaAreaPathPrefix(areaCodigo)}/links`
   const [id, setId] = useState<string | null>(null)
   const [link, setLink] = useState<LinkData | null>(null)
   const [loading, setLoading] = useState(true)
@@ -140,14 +154,14 @@ export default function EditarLinkPage({ params }: { params: Promise<{ id: strin
 
   if (loading || !link) {
     return (
-      <YladaAreaShell areaCodigo="ylada" areaLabel="YLADA">
+      <YladaAreaShell areaCodigo={areaCodigo} areaLabel={areaLabel}>
         <div className="max-w-xl mx-auto py-8">
           {loading ? (
             <p className="text-sm text-gray-500">Carregando...</p>
           ) : (
             <div>
               <p className="text-sm text-red-600 mb-4">{message?.text}</p>
-              <Link href="/pt/links" className="text-sm text-sky-600 hover:underline">
+              <Link href={linksPath} className="text-sm text-sky-600 hover:underline">
                 ← Voltar aos links
               </Link>
             </div>
@@ -161,10 +175,10 @@ export default function EditarLinkPage({ params }: { params: Promise<{ id: strin
   const previewUrl = `${baseUrl}/l/${link.slug}`
 
   return (
-    <YladaAreaShell areaCodigo="ylada" areaLabel="YLADA">
+    <YladaAreaShell areaCodigo={areaCodigo} areaLabel={areaLabel}>
       <div className="max-w-xl mx-auto space-y-6">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <Link href="/pt/links" className="text-sm text-sky-600 hover:underline flex items-center gap-1">
+          <Link href={linksPath} className="text-sm text-sky-600 hover:underline flex items-center gap-1">
             <span>←</span> Voltar aos links
           </Link>
           <a

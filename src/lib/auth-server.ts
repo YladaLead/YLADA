@@ -266,7 +266,12 @@ export async function validateProtectedAccess(
 
     // 4. Verificar se perfil corresponde (admin/suporte pode bypassar)
     const canBypassProfile = (allowAdmin && profile.is_admin) || (allowSupport && profile.is_support)
-    const profileMatchesArea = profile.perfil === area || (area === 'ylada' && profile.perfil === 'med')
+    const matrixAreas = ['psi', 'psicanalise', 'odonto', 'nutra', 'coach'] as const
+    const isMatrixArea = (a: string): a is (typeof matrixAreas)[number] => matrixAreas.includes(a as any)
+    const profileMatchesArea =
+      profile.perfil === area ||
+      (area === 'ylada' && profile.perfil === 'med') ||
+      (isMatrixArea(area) && (profile.perfil === 'ylada' || profile.perfil === 'med'))
 
     if (!profileMatchesArea && !canBypassProfile) {
       console.log(`❌ ProtectedLayout [${area}]: Perfil incorreto (${profile.perfil}), redirecionando para login`)
@@ -424,7 +429,8 @@ const COACH_PUBLIC_PREFIXES: (string | RegExp)[] = [
 
 const COACH_APP_SEGMENTS = new Set([
   'dashboard', 'home', 'ferramentas', 'clientes', 'formularios', 'configuracao', 'portals',
-  'cursos', 'acompanhamento', 'quizzes', 'leads', 'agenda', 'relatorios-gestao', 'protocolos',
+  'cursos', 'acompanhamento', 'quizzes', 'leads', 'ylada-leads', 'links', 'biblioteca',
+  'agenda', 'relatorios-gestao', 'protocolos',
   'login', 'checkout', 'pagamento-sucesso', 'recuperar-senha', 'reset-password', 'portal',
   'c', 'configuracoes', 'relatorios', 'suporte', 'quiz-personalizado',
 ])

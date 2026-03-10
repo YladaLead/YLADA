@@ -82,17 +82,46 @@ function calcGenericScoreAndLevel(answers: Record<string, unknown>): { score: nu
   return { score: sum, level }
 }
 
+/** FormField para mapear índice de opção → texto (ex.: q2="0" → "Floral"). */
+export type FormFieldForNormalize = { id: string; options?: string[] }
+
+/** Converte valor de opção (índice "0","1",...) no texto da opção quando formFields disponível. */
+function mapOptionToText(
+  value: unknown,
+  formFields: FormFieldForNormalize[] | undefined,
+  fieldId: string
+): string {
+  const str = String(value ?? '').trim()
+  if (!formFields?.length) return str
+  const field = formFields.find((f) => f.id === fieldId || f.id.toLowerCase() === fieldId.toLowerCase())
+  const opts = Array.isArray(field?.options) ? field.options : []
+  if (opts.length === 0) return str
+  const idx = parseInt(str, 10)
+  if (!Number.isNaN(idx) && idx >= 0 && idx < opts.length) {
+    return String(opts[idx] ?? str).trim().toLowerCase()
+  }
+  return str.toLowerCase()
+}
+
 /** Mapeia q1..qn para as chaves esperadas pelo motor, por arquitetura. */
 export function normalizeVisitorAnswers(
   answers: Record<string, unknown>,
   architecture: DiagnosisArchitecture,
-  options?: { themeRaw?: string }
+  options?: { themeRaw?: string; formFields?: FormFieldForNormalize[] }
 ): Record<string, unknown> {
-  const q1 = answers.q1 ?? answers.Q1
-  const q2 = answers.q2 ?? answers.Q2
-  const q3 = answers.q3 ?? answers.Q3
-  const q4 = answers.q4 ?? answers.Q4
-  const q5 = answers.q5 ?? answers.Q5
+  const formFields = options?.formFields
+  const q1Raw = answers.q1 ?? answers.Q1
+  const q2Raw = answers.q2 ?? answers.Q2
+  const q3Raw = answers.q3 ?? answers.Q3
+  const q4Raw = answers.q4 ?? answers.Q4
+  const q5Raw = answers.q5 ?? answers.Q5
+
+  // PERFUME_PROFILE: mapear índice → texto antes de usar (motor espera "Floral", não "0")
+  const q1 = architecture === 'PERFUME_PROFILE' ? mapOptionToText(q1Raw, formFields, 'q1') : q1Raw
+  const q2 = architecture === 'PERFUME_PROFILE' ? mapOptionToText(q2Raw, formFields, 'q2') : q2Raw
+  const q3 = architecture === 'PERFUME_PROFILE' ? mapOptionToText(q3Raw, formFields, 'q3') : q3Raw
+  const q4 = architecture === 'PERFUME_PROFILE' ? mapOptionToText(q4Raw, formFields, 'q4') : q4Raw
+  const q5 = architecture === 'PERFUME_PROFILE' ? mapOptionToText(q5Raw, formFields, 'q5') : q5Raw
 
   // Se já tem as chaves esperadas, não sobrescrever
   const out = { ...answers }
@@ -206,6 +235,15 @@ export function normalizeVisitorAnswers(
       if (out.emotion_level === undefined) out.emotion_level = inferScore(q3, 5)
       if (out.decision_speed === undefined) out.decision_speed = inferScore(q4, 5)
       if (out.follow_through === undefined) out.follow_through = inferScore(q5 ?? q1, 5)
+      break
+    }
+    case 'PERFUME_PROFILE': {
+      // q1..q5 já mapeados de índice→texto quando formFields disponível
+      if (out.personalidade === undefined) out.personalidade = typeof q1 === 'string' ? q1 : String(q1 ?? '').toLowerCase()
+      if (out.fragrancia_preferida === undefined) out.fragrancia_preferida = typeof q2 === 'string' ? q2 : String(q2 ?? '').toLowerCase()
+      if (out.ambiente_uso === undefined) out.ambiente_uso = typeof q3 === 'string' ? q3 : String(q3 ?? '').toLowerCase()
+      if (out.estilo === undefined) out.estilo = typeof q4 === 'string' ? q4 : String(q4 ?? '').toLowerCase()
+      if (out.intensidade === undefined) out.intensidade = typeof q5 === 'string' ? q5 : String(q5 ?? '').toLowerCase()
       break
     }
     case 'READINESS_CHECKLIST': {

@@ -72,6 +72,11 @@ export function getYladaAreaPathPrefix(areaCodigo: string): string {
   return YLADA_AREAS.find((a) => a.codigo === areaCodigo)?.pathPrefix ?? `/pt/${areaCodigo}`
 }
 
+/** Path do menu Leads por área. Coach usa 'ylada-leads' pois /pt/coach/leads é o leads do Coach. */
+export function getYladaLeadsPath(areaCodigo: string): string {
+  return areaCodigo === 'coach' ? 'ylada-leads' : 'leads'
+}
+
 /** Retorna path prefix pelo segment_code (uso em Smart Links e APIs). */
 export function getYladaSegmentPathPrefix(segmentCode: YladaSegmentCode): string {
   return YLADA_AREAS.find((a) => a.segment_code === segmentCode)?.pathPrefix ?? `/pt/${segmentCode}`

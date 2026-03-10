@@ -10,6 +10,8 @@ import type {
   RiskLevel,
   BlockerType,
   ProfileTypeName,
+  PerfumeProfileCode,
+  PerfumeUsage,
 } from './diagnosis-types'
 import { DiagnosisValidationError } from './diagnosis-types'
 import {
@@ -17,9 +19,10 @@ import {
   fillSlots,
   pickTitle,
   getRiskLevelVariants,
+  getRiskVariantsExtra,
   getBlockerVariants,
-  RISK_VARIANTS_EXTRA,
 } from './diagnosis-templates'
+import { isAestheticsContext } from './diagnosis-templates'
 import { validateDiagnosisDecision } from './diagnosis-validation'
 
 const BLOCKER_LABELS: Record<BlockerType, string> = {
@@ -164,6 +167,89 @@ function calcBlocker(answers: Record<string, unknown>): { blocker_type: BlockerT
 // --- D3: PROFILE_TYPE → profile_type + evidence ---
 const PROFILE_ORDER: ProfileTypeName[] = ['consistente', 'analitico', 'ansioso', '8ou80', 'improvisador']
 
+// --- D3b: PERFUME_PROFILE → profile_code + perfume_usage ---
+const PERFUME_PROFILE_ORDER: PerfumeProfileCode[] = [
+  'elegancia_natural',
+  'presença_magnetica',
+  'leveza_floral',
+  'sofisticacao_classica',
+  'energia_vibrante',
+  'seducao_sutil',
+  'intensidade_noturna',
+  'charme_discreto',
+]
+
+const PERFUME_USAGE_MAP: Record<string, PerfumeUsage> = {
+  trabalho: 'trabalho',
+  'dia a dia': 'dia_a_dia',
+  dia_a_dia: 'dia_a_dia',
+  encontros: 'encontros',
+  eventos: 'eventos',
+  'eventos especiais': 'eventos',
+  'noite/saídas': 'eventos',
+  social: 'eventos',
+  lazer: 'dia_a_dia',
+  'o dia todo': 'dia_a_dia',
+  manhã: 'dia_a_dia',
+  tarde: 'dia_a_dia',
+  noite: 'eventos',
+}
+
+function calcPerfumeProfile(answers: Record<string, unknown>): {
+  profile_code: PerfumeProfileCode
+  perfume_usage: PerfumeUsage
+  evidence: string[]
+} {
+  const personalidade = getStr(answers, 'personalidade', 'personalidade_estilo', 'q1').toLowerCase()
+  const fragrancia = getStr(answers, 'fragrancia_preferida', 'familia_olfativa', 'q2').toLowerCase()
+  const ambiente = getStr(answers, 'ambiente_uso', 'perfume_usage', 'ocasiao', 'q3').toLowerCase()
+  const estilo = getStr(answers, 'estilo', 'presença', 'q4').toLowerCase()
+  const intensidade = getStr(answers, 'intensidade', 'q5').toLowerCase()
+
+  const points: Record<PerfumeProfileCode, number> = {
+    elegancia_natural: 0,
+    presença_magnetica: 0,
+    leveza_floral: 0,
+    sofisticacao_classica: 0,
+    energia_vibrante: 0,
+    seducao_sutil: 0,
+    intensidade_noturna: 0,
+    charme_discreto: 0,
+  }
+
+  if (/elegante|clássico|natural|discreto/.test(personalidade + estilo)) points.elegancia_natural += 2
+  if (/intens|ousad|marcante|magnétic/.test(personalidade + estilo)) points.presença_magnetica += 2
+  if (/floral|leve|alegre|suave/.test(fragrancia + personalidade)) points.leveza_floral += 2
+  if (/clássico|sofisticad|elegante/.test(estilo + personalidade)) points.sofisticacao_classica += 2
+  if (/cítric|fresco|energia|vibrante/.test(fragrancia + personalidade)) points.energia_vibrante += 2
+  if (/romântic|sensual|seduç/.test(personalidade + estilo)) points.seducao_sutil += 2
+  if (/noite|eventos|intens|marcante/.test(ambiente + intensidade)) points.intensidade_noturna += 2
+  if (/discreto|natural|suave|charme/.test(estilo + personalidade)) points.charme_discreto += 2
+
+  let chosen: PerfumeProfileCode = 'elegancia_natural'
+  let maxP = -1
+  for (const p of PERFUME_PROFILE_ORDER) {
+    if (points[p] > maxP) {
+      maxP = points[p]
+      chosen = p
+    }
+  }
+
+  let perfume_usage: PerfumeUsage = 'dia_a_dia'
+  const amb = ambiente.trim()
+  for (const [kw, usage] of Object.entries(PERFUME_USAGE_MAP)) {
+    if (amb.includes(kw) || amb === kw) {
+      perfume_usage = usage
+      break
+    }
+  }
+
+  const evidence: string[] = []
+  evidence.push(`Seu perfil de fragrância: ${chosen.replace(/_/g, ' ')}.`)
+  evidence.push(`Uso principal: ${perfume_usage.replace(/_/g, ' ')}.`)
+  return { profile_code: chosen, perfume_usage, evidence: evidence.slice(0, 3) }
+}
+
 function calcProfile(answers: Record<string, unknown>): { profile_type: ProfileTypeName; evidence: string[] } {
   const consistency = getNum(answers, 'consistency', 5)
   const planning = getStr(answers, 'planning_style', 'planning')
@@ -292,6 +378,13 @@ const RISK_MAIN_BLOCKER: Record<RiskLevel, { withTheme: string; fallback: string
   },
 }
 
+/** main_blocker específico para contexto estético (pele, skincare). */
+const RISK_MAIN_BLOCKER_AESTHETICS: Record<RiskLevel, string> = {
+  baixo: 'Sinais leves na sua pele que merecem atenção',
+  medio: 'Sua pele está pedindo mais atenção',
+  alto: 'Sua pele precisa de cuidados mais estruturados',
+}
+
 // --- Bloqueio único visível (uma string por arquitetura) ---
 function getMainBlocker(
   arch: DiagnosisInput['meta']['architecture'],
@@ -308,6 +401,7 @@ function getMainBlocker(
     case 'RISK_DIAGNOSIS': {
       const level = payload.level ?? 'medio'
       const theme = (payload.theme ?? '').trim()
+      if (isAestheticsContext(theme)) return RISK_MAIN_BLOCKER_AESTHETICS[level]
       const t = RISK_MAIN_BLOCKER[level]
       const useTheme = theme.length > 2 && !/^seu\s+objetivo$/i.test(theme)
       return useTheme ? t.withTheme.replace('{THEME}', theme) : t.fallback
@@ -327,6 +421,10 @@ function getMainBlocker(
     }
     case 'PROJECTION_CALCULATOR':
       return payload.warning ? 'Meta ou prazo fora do realista' : 'Projeção com base no que você informou'
+    case 'PERFUME_PROFILE':
+      return payload.profile_type
+        ? `Seu perfil: ${payload.profile_type.replace(/_/g, ' ')}`
+        : 'Seu perfil de fragrância'
     default:
       return 'Algo a ajustar'
   }
@@ -365,6 +463,8 @@ function getNextStep(
       return payload.warning
         ? 'Recomendamos recalibrar meta ou prazo para aumentar a chance de consistência.'
         : 'O próximo passo é montar um plano com base nessa projeção.'
+    case 'PERFUME_PROFILE':
+      return 'O próximo passo é receber sugestões de fragrâncias que combinem com seu perfil.'
     default:
       return 'O próximo passo será definido na conversa com o profissional.'
   }
@@ -413,6 +513,27 @@ function getSafeFallback(
   return out
 }
 
+/** Retorna apenas a decisão (level ou blocker) para lookup de archetype. */
+export function getDiagnosisDecision(input: DiagnosisInput): {
+  level?: RiskLevel
+  blocker_type?: BlockerType
+  architecture: DiagnosisInput['meta']['architecture']
+} {
+  const { meta, visitor_answers } = input
+  switch (meta.architecture) {
+    case 'RISK_DIAGNOSIS': {
+      const r = calcRiskLevel(visitor_answers)
+      return { level: r.level, architecture: meta.architecture }
+    }
+    case 'BLOCKER_DIAGNOSIS': {
+      const b = calcBlocker(visitor_answers)
+      return { blocker_type: b.blocker_type, architecture: meta.architecture }
+    }
+    default:
+      return { architecture: meta.architecture }
+  }
+}
+
 // --- main ---
 export function generateDiagnosis(input: DiagnosisInput): DiagnosisGenerationResult {
   const { meta, professional, visitor_answers } = input
@@ -433,6 +554,8 @@ export function generateDiagnosis(input: DiagnosisInput): DiagnosisGenerationRes
   let score: number | undefined
   let profile_type: string | undefined
   let blocker_type: string | undefined
+  let perfume_profile_code: PerfumeProfileCode | undefined
+  let perfume_usage: PerfumeUsage | undefined
   let projection: { min?: number; max?: number; unit?: string } | undefined
   let evidence_bullets: string[] = []
   let next_step = ''
@@ -481,11 +604,24 @@ export function generateDiagnosis(input: DiagnosisInput): DiagnosisGenerationRes
       next_step = getNextStep(meta.architecture, { warning: proj.warning })
       break
     }
+    case 'PERFUME_PROFILE': {
+      const p = calcPerfumeProfile(visitor_answers)
+      perfume_profile_code = p.profile_code
+      perfume_usage = p.perfume_usage
+      profile_type = p.profile_code
+      evidence_bullets = p.evidence
+      slots.PROFILE = p.profile_code.replace(/_/g, ' ')
+      next_step = getNextStep(meta.architecture, { profile_type: p.profile_code })
+      break
+    }
   }
 
   const arch = meta.architecture
   const t = DIAGNOSIS_TEMPLATES[arch]
-  const profile_title = pickTitle(arch, slots)
+  const titleSlots = isAestheticsContext(theme)
+    ? { ...slots, THEME: 'sua pele' }
+    : slots
+  const profile_title = pickTitle(arch, titleSlots)
 
   // RISK_DIAGNOSIS: usa variação por nível (leve/moderado/alto)
   let explanation: string
@@ -493,7 +629,7 @@ export function generateDiagnosis(input: DiagnosisInput): DiagnosisGenerationRes
   let growth_potential: string
   let cta_text: string
   if (arch === 'RISK_DIAGNOSIS' && level) {
-    const variants = getRiskLevelVariants(level)
+    const variants = getRiskLevelVariants(level, theme)
     explanation = fillSlots(variants.explanation, slots)
     consequence = fillSlots(variants.consequence, slots)
     growth_potential = fillSlots(variants.possibility, slots)
@@ -524,8 +660,13 @@ export function generateDiagnosis(input: DiagnosisInput): DiagnosisGenerationRes
     specific_actions = v.specific_actions
     dica_rapida = v.dica_rapida
     frase_identificacao = v.frase_identificacao
+  } else if (arch === 'PERFUME_PROFILE' && profile_type) {
+    profile_summary = fillSlots(t.explanation, slots)
+    causa_provavel = t.causa_provavel ? fillSlots(t.causa_provavel, slots) : undefined
+    growth_potential = t.possibility ? fillSlots(t.possibility, slots) : undefined
+    cta_text = t.cta_imperative
   } else if (arch === 'RISK_DIAGNOSIS' && level) {
-    const r = RISK_VARIANTS_EXTRA[level]
+    const r = getRiskVariantsExtra(level, theme)
     causa_provavel = r.causa_provavel
     preocupacoes = r.preocupacoes
     growth_potential = r.providencias
@@ -581,7 +722,14 @@ export function generateDiagnosis(input: DiagnosisInput): DiagnosisGenerationRes
   }
   try {
     validateDiagnosisDecision(result)
-    return { diagnosis: result, fallbackUsed: false, level }
+    return {
+      diagnosis: result,
+      fallbackUsed: false,
+      level,
+      blocker_type: blocker_type ?? undefined,
+      perfume_profile_code,
+      perfume_usage,
+    }
   } catch (err) {
     if (err instanceof DiagnosisValidationError) {
       console.warn('[generateDiagnosis] Validação falhou, aplicando fallback seguro:', err.field, err.message)
@@ -590,7 +738,14 @@ export function generateDiagnosis(input: DiagnosisInput): DiagnosisGenerationRes
         profile_title,
         objective: meta.objective,
       })
-      return { diagnosis: fallback, fallbackUsed: true, level }
+      return {
+        diagnosis: fallback,
+        fallbackUsed: true,
+        level,
+        blocker_type: blocker_type ?? undefined,
+        perfume_profile_code,
+        perfume_usage,
+      }
     }
     throw err
   }

@@ -1,7 +1,7 @@
 // Service Worker com suporte offline completo
 // YLADA PWA - Cache offline para área Wellness
 
-const CACHE_VERSION = 'v2'
+const CACHE_VERSION = 'v3'
 const STATIC_CACHE = `ylada-static-${CACHE_VERSION}`
 const DYNAMIC_CACHE = `ylada-dynamic-${CACHE_VERSION}`
 const API_CACHE = `ylada-api-${CACHE_VERSION}`

@@ -6,7 +6,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireApiAuth } from '@/lib/api-auth'
 import { supabaseAdmin } from '@/lib/supabase'
 
-type EventCounts = { view: number; start: number; complete: number; cta_click: number }
+type EventCounts = { view: number; start: number; complete: number; cta_click: number; diagnosis_count?: number }
 
 function buildStatsMap(
   rows: Array<{ link_id: string; event_type: string; cnt: number | string }> | null
@@ -75,6 +75,19 @@ export async function GET(request: NextRequest) {
           }
         } catch {
           // Função pode não existir se migration 212 não foi aplicada; stats ficam zerados
+        }
+        // Contagem de diagnósticos (ylada_diagnosis_metrics) — estimula uso
+        const { data: diagCounts } = await supabaseAdmin
+          .from('ylada_diagnosis_metrics')
+          .select('link_id')
+          .in('link_id', linkIds)
+        const diagCountMap: Record<string, number> = {}
+        for (const r of diagCounts ?? []) {
+          diagCountMap[r.link_id] = (diagCountMap[r.link_id] ?? 0) + 1
+        }
+        for (const id of linkIds) {
+          if (!statsMap[id]) statsMap[id] = { view: 0, start: 0, complete: 0, cta_click: 0 }
+          statsMap[id].diagnosis_count = diagCountMap[id] ?? 0
         }
       }
     }

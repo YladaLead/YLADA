@@ -171,6 +171,32 @@ const estetica: YladaNoelProfileRow = {
   area_specific: { temas_atuacao: ['pele', 'skincare', 'autocuidado', 'retenção'] },
 }
 
+/** Vendedor de perfumes — fragrâncias, perfumaria, indicações. */
+const vendedorPerfumes: YladaNoelProfileRow = {
+  segment: 'ylada',
+  profile_type: 'vendas',
+  profession: 'vendedor_perfumes',
+  flow_id: 'vendas_v1',
+  flow_version: 1,
+  category: 'perfumaria',
+  sub_category: null,
+  tempo_atuacao_anos: 3,
+  dor_principal: 'nao_converte',
+  prioridade_atual: 'Qualificar leads e indicar perfumes certos para cada perfil',
+  fase_negocio: 'em_crescimento',
+  metas_principais: 'Usar quiz de perfil olfativo para captar e recomendar fragrâncias',
+  objetivos_curto_prazo: 'Link com diagnóstico de perfil de fragrância para engajar no Instagram',
+  modelo_atuacao: ['loja', 'online'],
+  capacidade_semana: 20,
+  ticket_medio: 250,
+  modelo_pagamento: 'venda_direta',
+  canais_principais: ['instagram', 'whatsapp'],
+  rotina_atual_resumo: 'Vendo perfumes por loja e redes, quero ferramentas para qualificar e indicar',
+  frequencia_postagem: null,
+  observacoes: 'Perfil simulado para testes de perfumaria.',
+  area_specific: { temas_atuacao: ['perfil_olfativo', 'familia_olfativa', 'ocasiao_uso'] },
+}
+
 /** Personal trainer — treino, condicionamento, consistência. */
 const personalTrainer: YladaNoelProfileRow = {
   segment: 'ylada',
@@ -226,6 +252,7 @@ const psi: YladaNoelProfileRow = {
 export const PERFIS_SIMULADOS: PerfilSimuladoMeta[] = [
   { key: 'medico', label: 'Médico (liberal)', description: 'Consultório, agenda, convênio/particular. Dor: agenda instável.', profile: medico },
   { key: 'vendedor_nutra', label: 'Vendedor Nutra', description: 'Vendas de suplementos, comissão, funil. Dor: não converte.', profile: vendedorNutra },
+  { key: 'vendedor_perfumes', label: 'Vendedor de perfumes', description: 'Perfumaria, fragrâncias, quiz de perfil olfativo para captar e indicar.', profile: vendedorPerfumes },
   { key: 'nutri', label: 'Nutricionista (liberal)', description: 'Atendimento, agenda vazia, quiz/calculadora para captar.', profile: nutri },
   { key: 'coach', label: 'Coach', description: 'Programa online, recorrência, autoridade e indicação.', profile: coach },
   { key: 'odonto', label: 'Dentista (odontologia)', description: 'Clínica, agenda vazia, qualificar quem quer agendar.', profile: odonto },

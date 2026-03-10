@@ -47,6 +47,87 @@ export const RISK_LEVEL_VARIANTS: Record<RiskLevel, RiskLevelVariants> = {
   },
 }
 
+/** Variantes RISK para contexto estético (pele, skincare). */
+export const RISK_LEVEL_VARIANTS_AESTHETICS: Record<RiskLevel, RiskLevelVariants> = {
+  baixo: {
+    explanation:
+      'Com base nas suas respostas, há sinais leves na sua pele que merecem atenção. Vale organizar a rotina de cuidados para evitar que evoluam.',
+    consequence:
+      'Se ignorar esses sinais, a pele tende a refletir mais o desgaste do dia a dia.',
+    possibility:
+      'Vale uma avaliação orientada para organizar os cuidados principais e manter o equilíbrio da pele.',
+    cta_imperative: 'Clique para entender melhor seu caso',
+  },
+  medio: {
+    explanation:
+      'Com base nas suas respostas, sua rotina de cuidados com a pele pode estar contribuindo para o que você está percebendo. Proteção solar, hidratação e consistência fazem diferença.',
+    consequence:
+      'Se continuar assim, os sinais tendem a se acentuar com o tempo.',
+    possibility:
+      'Vale uma avaliação orientada para organizar os pontos principais dos cuidados com a pele e evitar que evolua.',
+    cta_imperative: 'Clique para eu te explicar os próximos passos',
+  },
+  alto: {
+    explanation:
+      'Pelos sinais que você relatou, sua pele está pedindo mais atenção. Proteção solar, hidratação e uma rotina mínima podem fazer diferença significativa.',
+    consequence:
+      'Se nada mudar, tende a continuar igual ou piorar. Quanto antes ajustar os cuidados, melhor.',
+    possibility:
+      'Vale uma avaliação direcionada para definir o primeiro passo com segurança nos cuidados com a pele.',
+    cta_imperative: 'Clique para entender qual ajuste faz sentido no seu caso',
+  },
+}
+
+/** Causa provável, preocupações, providências, ações, dica e frase emocional para RISK_DIAGNOSIS em estética. */
+export const RISK_VARIANTS_EXTRA_AESTHETICS: Record<
+  RiskLevel,
+  {
+    causa_provavel: string
+    preocupacoes: string
+    providencias: string
+    specific_actions: string[]
+    dica_rapida: string
+    frase_identificacao: string
+  }
+> = {
+  baixo: {
+    causa_provavel: 'A causa provável: sinais leves na pele, quando ignorados, tendem a se acumular. Proteção solar e hidratação são a base.',
+    preocupacoes: 'Deixar de organizar a rotina de cuidados agora pode permitir que os sinais evoluam.',
+    providencias: 'Organizar um único ponto da rotina (proteção solar ou hidratação) já pode mudar a tendência. Vale conversar com quem entende de pele pra calibrar o próximo passo.',
+    specific_actions: [
+      'Incluir protetor solar na rotina diária (mesmo em dias nublados).',
+      'Definir um horário fixo para hidratar a pele (manhã ou noite).',
+      'Converse com {NAME} pra calibrar o próximo passo nos cuidados com a pele.',
+    ],
+    dica_rapida: 'Proteção solar e hidratação são a base. Pequenos ajustes na rotina já podem mudar a tendência da sua pele.',
+    frase_identificacao: 'Se você se identificou com esse resultado, provavelmente já percebeu que alguns sinais na pele merecem atenção antes que evoluam.',
+  },
+  medio: {
+    causa_provavel: 'A causa provável: rotina de cuidados irregular e falta de proteção ou hidratação contribuem para o que você está percebendo na pele.',
+    preocupacoes: 'Se continuar assim, os sinais tendem a se acentuar. A pele reflete o que fazemos (ou deixamos de fazer) no dia a dia.',
+    providencias: 'Ajustar proteção solar e hidratação já pode mudar a tendência. Vale conversar com quem entende de pele pra organizar uma rotina adequada.',
+    specific_actions: [
+      'Priorizar protetor solar diário e hidratante na rotina.',
+      'Definir uma sequência fixa: limpeza → hidratação → proteção.',
+      'Converse com {NAME} pra organizar os cuidados com a sua pele.',
+    ],
+    dica_rapida: 'Rotina irregular costuma ser a base. Proteção solar + hidratação em horários fixos já podem mudar o ritmo da sua pele.',
+    frase_identificacao: 'Se você se identificou com esse resultado, provavelmente já percebeu que a rotina de cuidados com a pele tem pesado no que você está vendo.',
+  },
+  alto: {
+    causa_provavel: 'A causa provável: pelos sinais relatados, a rotina atual de cuidados tende a ser insuficiente. Proteção solar, hidratação e consistência precisam de atenção.',
+    preocupacoes: 'Quanto mais tempo sem ajustar os cuidados, maior a tendência de os sinais evoluírem.',
+    providencias: 'Definir o primeiro passo com orientação profissional já pode destravar. Vale conversar com quem entende de pele pra agir com segurança.',
+    specific_actions: [
+      'Definir o primeiro passo com orientação profissional (avaliação da pele).',
+      'Organizar uma rotina mínima: proteção solar + hidratação em horários fixos.',
+      'Converse com {NAME} pra agir com segurança nos cuidados com a pele.',
+    ],
+    dica_rapida: 'Pelos sinais relatados, sua pele está pedindo mais estrutura. Quanto antes definir o primeiro passo com orientação, melhor a tendência de melhora.',
+    frase_identificacao: 'Se você se identificou com esse resultado, provavelmente já percebeu que sua pele está pedindo mais atenção e cuidados estruturados.',
+  },
+}
+
 /** Causa provável, preocupações, providências, ações, dica e frase emocional para RISK_DIAGNOSIS. */
 export const RISK_VARIANTS_EXTRA: Record<
   RiskLevel,
@@ -582,6 +663,92 @@ export const BLOCKER_VARIANTS_FITNESS: Record<
   },
 }
 
+/** Variantes BLOCKER para contexto perfumaria (fragrâncias, perfume, preferências olfativas). */
+export const BLOCKER_VARIANTS_PERFUMARIA: Record<
+  BlockerType,
+  {
+    leitura: string
+    causa_provavel: string
+    preocupacoes: string
+    espelho: string
+    providencias: string
+    specific_actions: string[]
+    dica_rapida: string
+    frase_identificacao: string
+  }
+> = {
+  rotina: {
+    leitura: 'Pelas suas respostas, sua relação com fragrâncias está mais no improviso do que em escolhas conscientes.',
+    causa_provavel: 'A causa provável está na falta de clareza: quando não existe um critério mínimo (família olfativa, ocasião, tipo de pele), cada compra vira uma decisão isolada.',
+    preocupacoes: 'Sem um mínimo de direção, a confusão tende a aumentar e fica difícil encontrar o perfume certo.',
+    espelho: 'Isso não é falta de gosto. É falta de critério.',
+    providencias: 'Definir um único critério (ex.: família olfativa preferida ou ocasião principal) já pode mudar o jogo. Vale conversar com quem entende pra orientar sua escolha.',
+    specific_actions: [
+      'Identificar uma família olfativa que você gosta (floral, amadeirado, cítrico, etc.).',
+      'Definir a ocasião principal de uso (dia a dia, trabalho, noite).',
+      'Converse com {NAME} pra orientar sua escolha.',
+    ],
+    dica_rapida: 'Sem critério mínimo, cada compra vira decisão isolada. Definir família olfativa ou ocasião principal já pode destravar.',
+    frase_identificacao: 'Se você se identificou com esse resultado, provavelmente já percebeu que falta clareza na hora de escolher fragrâncias.',
+  },
+  emocional: {
+    leitura: 'Pelas suas respostas, emoções como impulso ou indecisão estão pesando na escolha de fragrâncias.',
+    causa_provavel: 'A causa provável está nas emoções: quando a compra vira impulso ou a dúvida paralisa, fica difícil acertar.',
+    preocupacoes: 'Comprar por impulso ou evitar por indecisão tende a manter o ciclo de insatisfação.',
+    espelho: 'Isso não é falta de critério. É falta de orientação.',
+    providencias: 'Testar fragrâncias com calma e anotar o que gostou já pode mudar o jogo. Vale conversar com quem entende pra montar um perfil olfativo.',
+    specific_actions: [
+      'Testar 2–3 fragrâncias com calma antes de decidir.',
+      'Anotar o que você gostou em cada uma (notas, sensação).',
+      'Converse com {NAME} pra montar seu perfil olfativo.',
+    ],
+    dica_rapida: 'Comprar por impulso ou evitar por indecisão tende a manter a insatisfação. Testar com calma e anotar preferências já pode mudar o jogo.',
+    frase_identificacao: 'Se você se identificou com esse resultado, provavelmente já percebeu que emoções como impulso ou indecisão têm pesado na escolha de fragrâncias.',
+  },
+  processo: {
+    leitura: 'Pelas suas respostas, falta clareza no passo a passo para escolher a fragrância certa.',
+    causa_provavel: 'A causa provável está na falta de método: sem saber por onde começar (família olfativa, tipo de pele, ocasião), cada tentativa vira tiro no escuro.',
+    preocupacoes: 'Improvisar na escolha tende a gerar frustração e acúmulo de perfumes que não combinam.',
+    espelho: 'Isso não é falta de empenho. É falta de método.',
+    providencias: 'Seguir um passo simples (ex.: identificar sua família olfativa preferida) já pode destravar. Vale conversar com quem entende pra estruturar o caminho.',
+    specific_actions: [
+      'Identificar sua família olfativa preferida (floral, amadeirado, cítrico, oriental, etc.).',
+      'Considerar seu tipo de pele (oleosa fixa mais, seca pode precisar de mais reaplicação).',
+      'Converse com {NAME} pra estruturar o caminho.',
+    ],
+    dica_rapida: 'Sem método, cada tentativa vira tiro no escuro. Identificar família olfativa preferida já pode destravar.',
+    frase_identificacao: 'Se você se identificou com esse resultado, provavelmente já percebeu que falta clareza no passo a passo para escolher fragrâncias.',
+  },
+  habitos: {
+    leitura: 'Pelas suas respostas, a constância na escolha de fragrâncias está sendo quebrada por pequenos desvios.',
+    causa_provavel: 'A causa provável está na falta de âncora: quando não existe um critério mínimo, qualquer novidade ou opinião alheia vira motivo para mudar de direção.',
+    preocupacoes: 'Pequenos desvios, quando ignorados, tendem a gerar acúmulo de fragrâncias que não combinam com você.',
+    espelho: 'Isso não é falta de consistência. É falta de critério fixo.',
+    providencias: 'Definir um perfil olfativo base (ex.: "gosto de florais suaves") já pode sustentar melhor as escolhas. Vale conversar com quem entende pra ajustar ao seu contexto.',
+    specific_actions: [
+      'Definir um perfil olfativo base (família e intensidade preferidas).',
+      'Usar esse critério como filtro antes de comprar.',
+      'Converse com {NAME} pra ajustar ao seu contexto.',
+    ],
+    dica_rapida: 'Sem critério fixo, qualquer novidade vira motivo para mudar. Definir perfil olfativo base já pode sustentar as escolhas.',
+    frase_identificacao: 'Se você se identificou com esse resultado, provavelmente já percebeu que pequenos desvios têm quebrado sua constância na escolha de fragrâncias.',
+  },
+  expectativa: {
+    leitura: 'Pelas suas respostas, a expectativa em relação à fragrância pode estar fora do que é realista.',
+    causa_provavel: 'A causa provável está na calibragem: quando se espera duração excessiva ou efeito que a fragrância não oferece, a frustração tende a aparecer.',
+    preocupacoes: 'Expectativas fora do realista tendem a gerar insatisfação mesmo com boas escolhas.',
+    espelho: 'Isso não é falta de critério. É falta de calibragem.',
+    providencias: 'Entender o que cada tipo de fragrância oferece (duração, projeção, ocasião) já pode calibrar. Vale conversar com quem entende pra ajustar expectativas.',
+    specific_actions: [
+      'Pesquisar duração e projeção típicas do tipo de fragrância que você busca.',
+      'Ajustar expectativas conforme seu tipo de pele e clima.',
+      'Converse com {NAME} pra calibrar expectativas.',
+    ],
+    dica_rapida: 'Expectativas fora do realista tendem a gerar insatisfação. Entender o que cada fragrância oferece já pode calibrar.',
+    frase_identificacao: 'Se você se identificou com esse resultado, provavelmente já percebeu que a expectativa em relação à fragrância pode estar fora do realista.',
+  },
+}
+
 const PROJECTION: ArchitectureTemplates = {
   title: [
     'Sua projeção para {THEME}',
@@ -646,12 +813,27 @@ const READINESS: ArchitectureTemplates = {
     'Oi {NAME}, meu checklist de {THEME} deu {SCORE}/100. Você pode me orientar por onde começar?',
 }
 
+const PERFUME_PROFILE: ArchitectureTemplates = {
+  title: ['Seu perfil de fragrância: {PROFILE}', 'Seu estilo olfativo: {PROFILE}'],
+  explanation: 'Sua combinação de respostas revelou um perfil de fragrância.',
+  causa_provavel: 'Fragrâncias que combinam com seu perfil tendem a fixar melhor e transmitir sua energia.',
+  preocupacoes: 'Perfumes fora do seu perfil podem não transmitir quem você é.',
+  consequence: 'Quando o perfume combina com seu perfil, a presença fica mais autêntica.',
+  possibility: 'Vale conversar com quem entende pra indicar fragrâncias que combinem com você.',
+  cta_helper: 'Quer que eu te mostre fragrâncias que combinam com seu perfil?',
+  cta_button: ['Quero ver sugestões', 'Quero indicações'],
+  cta_imperative: 'Quero descobrir meu perfume ideal',
+  whatsapp_prefill:
+    'Oi {NAME}, descobri meu perfil de fragrância: {PROFILE}. Quero receber sugestões de perfumes que combinem comigo.',
+}
+
 export const DIAGNOSIS_TEMPLATES: Record<DiagnosisArchitecture, ArchitectureTemplates> = {
   RISK_DIAGNOSIS: RISK,
   BLOCKER_DIAGNOSIS: BLOCKER,
   PROJECTION_CALCULATOR: PROJECTION,
   PROFILE_TYPE: PROFILE,
   READINESS_CHECKLIST: READINESS,
+  PERFUME_PROFILE,
 }
 
 const SLOT_REGEX = /\{([A-Z_]+)\}/g
@@ -685,9 +867,9 @@ export function isDentalContext(themeRaw: string): boolean {
 }
 
 /** Detecta contexto estético pelo tema (pele, skincare, etc.). */
-function isAestheticsContext(themeRaw: string): boolean {
+export function isAestheticsContext(themeRaw: string): boolean {
   const t = (themeRaw || '').toLowerCase()
-  return /pele|skincare|estética|retenção|rejuvenescimento|manchas|flacidez|autocuidado|cosmético/.test(t)
+  return /pele|skincare|estética|estetica|retenção|rejuvenescimento|manchas|flacidez|autocuidado|cosmético|celulite|idade real/.test(t)
 }
 
 /** Detecta contexto nutricional pelo tema (emagrecimento, intestino, metabolismo, etc.). */
@@ -702,7 +884,13 @@ function isFitnessContext(themeRaw: string): boolean {
   return /treino|fitness|condicionamento|disposição|atividade física|consistência/.test(t)
 }
 
-/** Retorna variantes BLOCKER por contexto: dentistry, aesthetics, nutrition, fitness ou genérico. */
+/** Detecta contexto perfumaria pelo tema (perfume, fragrância, olfativo, etc.). */
+function isPerfumariaContext(themeRaw: string): boolean {
+  const t = (themeRaw || '').toLowerCase()
+  return /perfume|fragrância|fragrancia|olfativo|perfumaria|família olfativa|ocasião de uso/.test(t)
+}
+
+/** Retorna variantes BLOCKER por contexto: dentistry, aesthetics, nutrition, fitness, perfumaria ou genérico. */
 export function getBlockerVariants(
   themeRaw: string,
   segmentCode?: string
@@ -711,11 +899,20 @@ export function getBlockerVariants(
   if (segmentCode === 'aesthetics' || isAestheticsContext(themeRaw)) return BLOCKER_VARIANTS_AESTHETICS
   if (segmentCode === 'nutrition' || isNutritionContext(themeRaw)) return BLOCKER_VARIANTS_NUTRITION
   if (segmentCode === 'fitness' || isFitnessContext(themeRaw)) return BLOCKER_VARIANTS_FITNESS
+  if (segmentCode === 'perfumaria' || isPerfumariaContext(themeRaw)) return BLOCKER_VARIANTS_PERFUMARIA
   return BLOCKER_VARIANTS
 }
 
 /** Retorna templates por nível para RISK_DIAGNOSIS. Fallback para RISK base se level ausente. */
-export function getRiskLevelVariants(level: RiskLevel | undefined): RiskLevelVariants {
+export function getRiskLevelVariants(level: RiskLevel | undefined, themeRaw?: string): RiskLevelVariants {
+  if (level && isAestheticsContext(themeRaw ?? '')) return RISK_LEVEL_VARIANTS_AESTHETICS[level]
   if (level && RISK_LEVEL_VARIANTS[level]) return RISK_LEVEL_VARIANTS[level]
   return RISK_LEVEL_VARIANTS.medio
+}
+
+/** Retorna variantes extra (causa, preocupações, etc.) para RISK_DIAGNOSIS. */
+export function getRiskVariantsExtra(level: RiskLevel | undefined, themeRaw?: string): typeof RISK_VARIANTS_EXTRA[RiskLevel] {
+  if (level && isAestheticsContext(themeRaw ?? '')) return RISK_VARIANTS_EXTRA_AESTHETICS[level]
+  if (level && RISK_VARIANTS_EXTRA[level]) return RISK_VARIANTS_EXTRA[level]
+  return RISK_VARIANTS_EXTRA.medio
 }

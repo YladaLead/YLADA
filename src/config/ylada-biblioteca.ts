@@ -7,6 +7,7 @@
  */
 
 import { TEMAS_ESTRATEGICOS, type PilarCode } from './ylada-pilares-temas'
+import { getAllTemasBiblioteca, getTemaLabel as getTemaLabelFromSegmentos, getTemasPorSegmento } from './ylada-segmentos-dores-objetivos'
 
 export type BibliotecaTipo = 'quiz' | 'calculadora' | 'link'
 
@@ -18,6 +19,7 @@ export type BibliotecaSegmentCode =
   | 'dentistry'
   | 'aesthetics'
   | 'fitness'
+  | 'perfumaria'
 
 /** Segmentos para filtro da biblioteca (alinhado com diagnosis-segment). */
 export const BIBLIOTECA_SEGMENTOS: { value: BibliotecaSegmentCode; label: string }[] = [
@@ -28,6 +30,7 @@ export const BIBLIOTECA_SEGMENTOS: { value: BibliotecaSegmentCode; label: string
   { value: 'dentistry', label: 'Odontologia' },
   { value: 'aesthetics', label: 'Estética' },
   { value: 'fitness', label: 'Fitness' },
+  { value: 'perfumaria', label: 'Perfumaria e fragrâncias' },
 ]
 
 /** Top 12 temas estratégicos — filtro universal da biblioteca (não depende de segmento). */
@@ -35,6 +38,23 @@ export const BIBLIOTECA_TEMAS = TEMAS_ESTRATEGICOS.map((t) => ({
   value: t.value,
   label: t.label,
 }))
+
+/** Lista completa de temas (Top 12 + todos os segmentos). Sempre fixa — profissional vê todas as opções. */
+export const BIBLIOTECA_TEMAS_COMPLETOS = getAllTemasBiblioteca(BIBLIOTECA_TEMAS)
+
+/** Retorna temas para filtro da biblioteca. Com segmento: só temas desse segmento. Sem segmento: todos. */
+export function getTemasParaBiblioteca(segmentCode?: BibliotecaSegmentCode | ''): { value: string; label: string }[] {
+  if (segmentCode) {
+    const temas = getTemasPorSegmento(segmentCode)
+    if (temas.length > 0) return temas
+  }
+  return BIBLIOTECA_TEMAS_COMPLETOS
+}
+
+/** Retorna label legível de um tema (Top 12 + segmentos). */
+export function getTemaLabel(temaValue: string): string {
+  return getTemaLabelFromSegmentos(temaValue, BIBLIOTECA_TEMAS)
+}
 
 /** @deprecated Use BIBLIOTECA_TEMAS. Mantido para compatibilidade. */
 export const BIBLIOTECA_TEMAS_POR_SEGMENTO: Record<BibliotecaSegmentCode, string[]> = {
@@ -45,12 +65,15 @@ export const BIBLIOTECA_TEMAS_POR_SEGMENTO: Record<BibliotecaSegmentCode, string
   dentistry: BIBLIOTECA_TEMAS.map((t) => t.value),
   aesthetics: BIBLIOTECA_TEMAS.map((t) => t.value),
   fitness: BIBLIOTECA_TEMAS.map((t) => t.value),
+  perfumaria: BIBLIOTECA_TEMAS.map((t) => t.value),
 }
 
 /** Mapeamento profession → segmento da biblioteca (para "(seu perfil)"). */
 const PROFESSION_TO_BIBLIOTECA: Record<string, BibliotecaSegmentCode> = {
   vendedor_suplementos: 'nutrition_vendedor',
   vendedor_cosmeticos: 'aesthetics',
+  vendedor_perfumes: 'perfumaria',
+  perfumista: 'perfumaria',
   medico: 'medicine',
   cardiologista: 'medicine',
   endocrinologista: 'medicine',
@@ -100,10 +123,14 @@ export interface BibliotecaItem {
   tipo: BibliotecaTipo
   /** Segmentos para os quais o item é relevante (um item pode aparecer em vários). */
   segment_codes: BibliotecaSegmentCode[]
-  /** Tema (Top 12: energia, intestino, metabolismo, etc.). */
+  /** Tema (Top 12 ou específico do segmento: energia, intestino, pele, etc.). */
   tema: string
   titulo: string
   description?: string
+  /** Dor principal que o item aborda (ex: Dificuldade de emagrecer). */
+  dor_principal?: string | null
+  /** Objetivo principal que o item ajuda a alcançar (ex: Emagrecer com saúde). */
+  objetivo_principal?: string | null
   /** Origem do conteúdo. */
   source_type: BibliotecaSourceType
   /** ID do recurso de origem (UUID ou string). */

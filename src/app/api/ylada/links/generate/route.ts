@@ -14,6 +14,7 @@ import { interpretStrategyContext } from '@/lib/ylada/strategic-interpreter'
 import { sanitizeThemeForPatient } from '@/lib/ylada/strategic-intro'
 import { deriveStrategicProfile } from '@/lib/ylada/strategic-profile'
 import { getDiagnosisSegmentFromProfile } from '@/lib/ylada/diagnosis-segment'
+import { inferArchitectureFromTitle, DEFAULT_ARCHITECTURE } from '@/config/ylada-segments'
 import { randomBytes } from 'crypto'
 
 function generateSlug(): string {
@@ -27,6 +28,7 @@ const TEMPLATE_TYPE_BY_ARCHITECTURE: Record<string, string> = {
   BLOCKER_DIAGNOSIS: 'diagnostico',
   PROFILE_TYPE: 'diagnostico',
   READINESS_CHECKLIST: 'diagnostico',
+  PERFUME_PROFILE: 'diagnostico',
 }
 
 export async function POST(request: NextRequest) {
@@ -97,6 +99,27 @@ export async function POST(request: NextRequest) {
             type: (q.type as string) || 'single',
             options: q.options,
           }))
+          // Buscar meta do item da biblioteca (architecture, segment_code para PERFUME_PROFILE)
+          let itemMeta: Record<string, unknown> = {}
+          const { data: bibliotecaItem } = await supabaseAdmin
+            .from('ylada_biblioteca_itens')
+            .select('meta')
+            .eq('template_id', bibliotecaTemplateId)
+            .eq('active', true)
+            .limit(1)
+            .maybeSingle()
+          if (bibliotecaItem?.meta && typeof bibliotecaItem.meta === 'object') {
+            itemMeta = bibliotecaItem.meta as Record<string, unknown>
+          }
+          // Fallback: meta vazio → inferir do título (registry de segmentos)
+          let architecture = itemMeta.architecture as string | undefined
+          let segmentCode = typeof itemMeta.segment_code === 'string' ? itemMeta.segment_code : undefined
+          if (!architecture || !segmentCode) {
+            const inferred = inferArchitectureFromTitle(title)
+            if (!architecture) architecture = inferred.architecture
+            if (!segmentCode && inferred.segment_code) segmentCode = inferred.segment_code
+          }
+          if (!architecture) architecture = DEFAULT_ARCHITECTURE
           configJson = {
             ...configJson,
             meta: {
@@ -104,8 +127,9 @@ export async function POST(request: NextRequest) {
               objective: 'captar',
               theme_raw: title,
               theme_display: title,
-              architecture: 'RISK_DIAGNOSIS',
+              architecture,
               area_profissional: 'wellness',
+              ...(segmentCode && { segment_code: segmentCode }),
             },
             form: {
               fields: formFields,
