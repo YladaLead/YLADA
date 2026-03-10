@@ -32,6 +32,7 @@ function trackEvent(slug: string, eventType: string, options?: { metrics_id?: st
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
+      keepalive: true,
     }).catch(() => {})
   } catch {
     // ignore
@@ -308,6 +309,7 @@ function ConfigDrivenLinkView({
 
   if (step === 'result') {
     if (diagnosis && metricsId) {
+      const isPerfumery = meta.architecture === 'PERFUME_PROFILE' || meta.segment_code === 'perfumaria'
       const formattedProfileTitle = formatDisplayTitle(diagnosis.profile_title)
       return (
         <div className="min-h-screen bg-gradient-to-b from-sky-50 via-sky-50/90 to-blue-50 flex items-center justify-center p-4 sm:p-6">
@@ -349,11 +351,11 @@ function ConfigDrivenLinkView({
               </p>
             )}
 
-            {/* 3. Causa provável */}
+            {/* 3. Causa provável / O que isso significa (perfumaria) */}
             {diagnosis.causa_provavel && (
               <div className="mb-4">
                 <p className="text-[10px] font-semibold uppercase tracking-wider text-sky-600 mb-1">
-                  Causa provável
+                  {isPerfumery ? 'O que isso significa' : 'Causa provável'}
                 </p>
                 <p className="text-gray-600 text-sm leading-relaxed">
                   {diagnosis.causa_provavel}
@@ -373,10 +375,10 @@ function ConfigDrivenLinkView({
               </div>
             )}
 
-            {/* 5. Consequência */}
+            {/* 5. Consequência / Benefício (perfumaria) */}
             <div className="mb-4">
               <p className="text-[10px] font-semibold uppercase tracking-wider text-sky-600 mb-1">
-                Consequência
+                {isPerfumery ? 'Benefício' : 'Consequência'}
               </p>
               <p className="text-gray-600 text-sm leading-relaxed">
                 {diagnosis.consequence}
@@ -425,7 +427,13 @@ function ConfigDrivenLinkView({
             {whatsappUrl ? (
               <button
                 type="button"
-                onClick={() => onCtaClick(metricsId, diagnosis.whatsapp_prefill)}
+                onClick={() =>
+                  onCtaClick(
+                    metricsId,
+                    diagnosis.whatsapp_prefill?.trim() ||
+                      `Oi, fiz a análise e gostaria de conversar sobre o resultado.`
+                  )
+                }
                 className="w-full py-4 px-4 bg-sky-600 hover:bg-sky-700 text-white font-semibold rounded-xl shadow-lg shadow-sky-500/25 transition-colors"
               >
                 {diagnosis.cta_text}
@@ -434,9 +442,11 @@ function ConfigDrivenLinkView({
               <span className="text-gray-500 text-sm">O profissional ainda não disponibilizou o contato por aqui.</span>
             )}
 
-            {/* Rodapé — validação jurídica */}
+            {/* Rodapé — validação jurídica (saúde) / leve (perfumaria) */}
             <p className="mt-5 pt-4 border-t border-gray-100 text-[10px] text-gray-400 text-center">
-              Este diagnóstico tem caráter informativo e educativo.
+              {isPerfumery
+                ? 'Resultado baseado no seu perfil. As sugestões são personalizadas.'
+                : 'Este diagnóstico tem caráter informativo e educativo.'}
             </p>
           </div>
         </div>

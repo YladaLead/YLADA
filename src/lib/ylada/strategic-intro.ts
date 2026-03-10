@@ -36,6 +36,8 @@ export interface StrategicIntroContext {
 export function sanitizeThemeForPatient(theme: string): string {
   if (!theme) return ''
   let t = theme.trim()
+  // Remove prefixo "Diagnóstico de " para evitar redundância (ex.: "Indícios em Diagnóstico de X" → "Indícios em X")
+  t = t.replace(/^diagnóstico\s+de\s+/i, '').trim() || t
   const toRemove = [
     /\s+e\s+atra[çc][ãa]o\s+de\s+pacientes/gi,
     /\s+e\s+atra[çc][ãa]o\s+de\s+clientes/gi,

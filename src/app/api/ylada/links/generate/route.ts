@@ -7,11 +7,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireApiAuth } from '@/lib/api-auth'
 import { supabaseAdmin } from '@/lib/supabase'
+import OpenAI from 'openai'
+import { generateDiagnosisForLink } from '@/lib/ylada/generate-diagnosis-for-link'
 import { getFlowById, VALID_FLOW_IDS } from '@/config/ylada-flow-catalog'
 import { getQuizEmagrecimento } from '@/config/ylada-quiz-emagrecimento'
 import { getQuizByTema } from '@/config/ylada-quiz-temas'
 import { interpretStrategyContext } from '@/lib/ylada/strategic-interpreter'
-import { sanitizeThemeForPatient } from '@/lib/ylada/strategic-intro'
+import { sanitizeThemeForPatient, formatDisplayTitle } from '@/lib/ylada/strategic-intro'
 import { deriveStrategicProfile } from '@/lib/ylada/strategic-profile'
 import { getDiagnosisSegmentFromProfile } from '@/lib/ylada/diagnosis-segment'
 import { inferArchitectureFromTitle, DEFAULT_ARCHITECTURE } from '@/config/ylada-segments'
@@ -321,7 +323,13 @@ export async function POST(request: NextRequest) {
       slug = generateSlug()
     }
 
-    const titleFinal = (configJson.title as string) ?? 'Link'
+    const titleRaw = (configJson.title as string) ?? 'Link'
+    const titleFinal = formatDisplayTitle(titleRaw)
+    configJson.title = titleFinal
+    const pageConfig = configJson.page as Record<string, unknown> | undefined
+    if (pageConfig && typeof pageConfig.title === 'string') {
+      pageConfig.title = titleFinal
+    }
     const { data: link, error: insertError } = await supabaseAdmin
       .from('ylada_links')
       .insert({
@@ -342,6 +350,16 @@ export async function POST(request: NextRequest) {
     if (insertError) {
       console.error('[ylada/links/generate]', insertError)
       return NextResponse.json({ success: false, error: insertError.message }, { status: 500 })
+    }
+
+    // Gerar diagnóstico via IA para links RISK_DIAGNOSIS / BLOCKER_DIAGNOSIS
+    const arch = (link.config_json as Record<string, unknown>)?.meta?.architecture as string | undefined
+    if ((arch === 'RISK_DIAGNOSIS' || arch === 'BLOCKER_DIAGNOSIS') && supabaseAdmin && process.env.OPENAI_API_KEY) {
+      generateDiagnosisForLink(
+        { linkId: link.id, config: link.config_json as Record<string, unknown>, force: false },
+        supabaseAdmin,
+        new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
+      ).catch((err) => console.warn('[ylada/links/generate] diagnosis generation:', err))
     }
 
     const host = request.headers.get('host') || ''

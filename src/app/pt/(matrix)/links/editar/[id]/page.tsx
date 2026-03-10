@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { formatDisplayTitle } from '@/lib/ylada/strategic-intro'
 import { usePathname } from 'next/navigation'
 import YladaAreaShell from '@/components/ylada/YladaAreaShell'
 import { getYladaAreaPathPrefix } from '@/config/ylada-areas'
@@ -55,7 +56,7 @@ export default function EditarLinkPage({ params }: { params: Promise<{ id: strin
           const d = json.data as LinkData
           setLink(d)
           const pageTitle = d.config_json?.page?.title ?? d.config_json?.title ?? d.title ?? ''
-          setEditTitle(pageTitle)
+          setEditTitle(formatDisplayTitle(pageTitle))
           setEditFields(d.config_json?.form?.fields ?? [])
         } else {
           setMessage({ type: 'error', text: json?.error || 'Link não encontrado' })
@@ -86,6 +87,14 @@ export default function EditarLinkPage({ params }: { params: Promise<{ id: strin
         setMessage({ type: 'success', text: 'Salvo!' })
         setLink((prev) => (prev ? { ...prev, config_json: config } : null))
         setEditingFieldIndex(null)
+        // Disparar geração de diagnóstico via IA (memoriza para não chamar de novo)
+        const arch = (config.meta as Record<string, unknown>)?.architecture as string | undefined
+        if (arch === 'RISK_DIAGNOSIS' || arch === 'BLOCKER_DIAGNOSIS') {
+          fetch(`/api/ylada/links/${link.id}/generate-diagnosis?force=true`, {
+            method: 'POST',
+            credentials: 'include',
+          }).catch(() => {})
+        }
       } else {
         setMessage({ type: 'error', text: json?.error || 'Erro ao salvar' })
       }
@@ -256,9 +265,10 @@ export default function EditarLinkPage({ params }: { params: Promise<{ id: strin
               }`}
             >
               <div className="flex items-start gap-2">
+                {editingFieldIndex !== i && (
                 <button
                   type="button"
-                  onClick={() => setEditingFieldIndex(editingFieldIndex === i ? null : i)}
+                  onClick={() => setEditingFieldIndex(i)}
                   className="flex-1 text-left p-5 sm:p-6 min-w-0"
                 >
                 <span className="text-[10px] font-semibold uppercase tracking-wider text-sky-600">
@@ -281,6 +291,7 @@ export default function EditarLinkPage({ params }: { params: Promise<{ id: strin
                   </div>
                 )}
                 </button>
+                )}
                 {editFields.length > 1 && (
                   <button
                     type="button"
@@ -296,8 +307,12 @@ export default function EditarLinkPage({ params }: { params: Promise<{ id: strin
               </div>
               {editingFieldIndex === i && (
                 <div className="border-t border-gray-100 p-5 sm:p-6 bg-sky-50/30 space-y-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-[10px] font-semibold uppercase tracking-wider text-sky-600">Pergunta {i + 1}</span>
+                    <button type="button" onClick={() => setEditingFieldIndex(null)} className="text-xs text-gray-500 hover:text-gray-700">Fechar</button>
+                  </div>
                   <div>
-                    <label className="block text-xs font-medium text-gray-700 mb-1">Pergunta</label>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">Texto da pergunta</label>
                     <input
                       type="text"
                       value={field.label}
@@ -347,13 +362,6 @@ export default function EditarLinkPage({ params }: { params: Promise<{ id: strin
                       </div>
                     </div>
                   )}
-                  <button
-                    type="button"
-                    onClick={() => setEditingFieldIndex(null)}
-                    className="text-sm text-gray-600 hover:text-gray-800"
-                  >
-                    Fechar
-                  </button>
                 </div>
               )}
             </div>

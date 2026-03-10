@@ -253,27 +253,47 @@ export async function POST(
     if (arch === 'RISK_DIAGNOSIS' || arch === 'BLOCKER_DIAGNOSIS') {
       const decision = getDiagnosisDecision(input)
       const archetypeCode = getArchetypeCode(decision.level, decision.blocker_type)
-      const segmentForArchetype = segment_code ?? 'geral'
-      const { data: archetype } = await supabaseAdmin
-        .from('ylada_diagnosis_archetypes')
+      const themeDisplay = themeForSlots || 'seu perfil'
+
+      // 1) Prioridade: conteúdo memorizado por link (gerado por IA quando profissional editou)
+      const { data: linkContent } = await supabaseAdmin
+        .from('ylada_link_diagnosis_content')
         .select('content_json')
+        .eq('link_id', link.id)
+        .eq('architecture', arch)
         .eq('archetype_code', archetypeCode)
-        .eq('segment_code', segmentForArchetype)
         .maybeSingle()
 
-      if (archetype?.content_json) {
-        const themeDisplay = themeForSlots || 'seu perfil'
-        diagnosis = fillArchetypeSlots(archetype.content_json as Record<string, unknown>, {
+      if (linkContent?.content_json) {
+        diagnosis = fillArchetypeSlots(linkContent.content_json as Record<string, unknown>, {
           THEME: themeDisplay,
           NAME: '',
         })
         fallbackUsed = false
         level = decision.level
       } else {
-        const result = generateDiagnosis(input)
-        diagnosis = result.diagnosis
-        fallbackUsed = result.fallbackUsed
-        level = result.level
+        // 2) Fallback: archetypes globais da biblioteca
+        const segmentForArchetype = segment_code ?? 'geral'
+        const { data: archetype } = await supabaseAdmin
+          .from('ylada_diagnosis_archetypes')
+          .select('content_json')
+          .eq('archetype_code', archetypeCode)
+          .eq('segment_code', segmentForArchetype)
+          .maybeSingle()
+
+        if (archetype?.content_json) {
+          diagnosis = fillArchetypeSlots(archetype.content_json as Record<string, unknown>, {
+            THEME: themeDisplay,
+            NAME: '',
+          })
+          fallbackUsed = false
+          level = decision.level
+        } else {
+          const result = generateDiagnosis(input)
+          diagnosis = result.diagnosis
+          fallbackUsed = result.fallbackUsed
+          level = result.level
+        }
       }
     } else if (arch === 'PERFUME_PROFILE') {
       const result = generateDiagnosis(input)

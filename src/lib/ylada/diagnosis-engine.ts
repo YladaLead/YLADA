@@ -385,6 +385,13 @@ const RISK_MAIN_BLOCKER_AESTHETICS: Record<RiskLevel, string> = {
   alto: 'Sua pele precisa de cuidados mais estruturados',
 }
 
+/** Remove prefixo "Diagnóstico de " do tema para evitar redundância no main_blocker. */
+function sanitizeThemeForMainBlocker(theme: string): string {
+  const t = theme.trim()
+  const prefix = /^diagnóstico\s+de\s+/i
+  return prefix.test(t) ? t.replace(prefix, '').trim() : t
+}
+
 // --- Bloqueio único visível (uma string por arquitetura) ---
 function getMainBlocker(
   arch: DiagnosisInput['meta']['architecture'],
@@ -400,7 +407,8 @@ function getMainBlocker(
   switch (arch) {
     case 'RISK_DIAGNOSIS': {
       const level = payload.level ?? 'medio'
-      const theme = (payload.theme ?? '').trim()
+      const themeRaw = (payload.theme ?? '').trim()
+      const theme = sanitizeThemeForMainBlocker(themeRaw)
       if (isAestheticsContext(theme)) return RISK_MAIN_BLOCKER_AESTHETICS[level]
       const t = RISK_MAIN_BLOCKER[level]
       const useTheme = theme.length > 2 && !/^seu\s+objetivo$/i.test(theme)
@@ -412,7 +420,7 @@ function getMainBlocker(
       return payload.profile_type ? `Seu jeito é ${payload.profile_type}` : 'Seu jeito de lidar com isso'
     case 'READINESS_CHECKLIST': {
       const score = payload.score ?? 0
-      const theme = (payload.theme ?? '').trim()
+      const theme = sanitizeThemeForMainBlocker((payload.theme ?? '').trim())
       const useTheme = theme.length > 2 && !/^seu\s+objetivo$/i.test(theme)
       if (score < 50) {
         return useTheme ? `Alguns pontos em ${theme} pedem atenção` : 'Alguns pontos pedem atenção'
@@ -542,7 +550,7 @@ export function generateDiagnosis(input: DiagnosisInput): DiagnosisGenerationRes
 
   const slots: Record<string, string | number | undefined> = {
     THEME: theme,
-    NAME: name || 'aí',
+    NAME: name || 'quem te enviou',
     LEVEL: '',
     BLOCKER: '',
     PROFILE: '',
@@ -692,14 +700,14 @@ export function generateDiagnosis(input: DiagnosisInput): DiagnosisGenerationRes
   })
   const whatsapp_prefill = fillSlots(t.whatsapp_prefill, {
     ...slots,
-    NAME: name || 'aí',
+    NAME: name || 'quem te enviou',
     LEVEL: level ?? '',
     BLOCKER: blocker_type ?? main_blocker,
     PROFILE: profile_type ?? '',
     SCORE: score ?? '',
   })
 
-  const filledSlots = { ...slots, NAME: name || 'aí' }
+  const filledSlots = { ...slots, NAME: name || 'quem te enviou' }
   const filledSpecificActions =
     specific_actions?.map((a) => fillSlots(a, filledSlots)).filter(Boolean) ?? undefined
   const filledDicaRapida = dica_rapida ? fillSlots(dica_rapida, filledSlots) : undefined

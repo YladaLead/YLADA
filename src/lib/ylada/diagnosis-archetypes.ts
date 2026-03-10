@@ -37,7 +37,7 @@ export function fillArchetypeSlots(
   slots: { THEME?: string; NAME?: string }
 ): DiagnosisDecisionOutput {
   const theme = (slots.THEME ?? '').trim() || 'seu perfil'
-  const name = (slots.NAME ?? '').trim() || 'aí'
+  const name = (slots.NAME ?? '').trim() || 'quem te enviou'
   const filled = { ...slots, THEME: theme, NAME: name }
 
   const fill = (v: unknown): string => {
@@ -48,6 +48,16 @@ export function fillArchetypeSlots(
   const actions = Array.isArray(content.specific_actions)
     ? content.specific_actions.map((a) => fill(a)).filter(Boolean)
     : undefined
+
+  let whatsappPrefill = fill(content.whatsapp_prefill)
+  // Sanitizar: IA às vezes gera "Oi aí" — no WhatsApp a pessoa fala COM o profissional, não "com quem te enviou"
+  if (whatsappPrefill && /oi\s+aí\b/i.test(whatsappPrefill)) {
+    whatsappPrefill = whatsappPrefill.replace(/oi\s+aí\b/gi, 'Oi')
+  }
+  // No WhatsApp: "Oi quem te enviou" não faz sentido — a pessoa já está falando com o profissional
+  if (whatsappPrefill && /oi\s+quem te enviou\b/i.test(whatsappPrefill)) {
+    whatsappPrefill = whatsappPrefill.replace(/oi\s+quem te enviou\b/gi, 'Oi')
+  }
 
   return {
     profile_title: fill(content.profile_title),
@@ -62,6 +72,6 @@ export function fillArchetypeSlots(
     ...(content.dica_rapida && { dica_rapida: fill(content.dica_rapida) }),
     ...(content.frase_identificacao && { frase_identificacao: fill(content.frase_identificacao) }),
     cta_text: fill(content.cta_text),
-    whatsapp_prefill: fill(content.whatsapp_prefill),
+    whatsapp_prefill: whatsappPrefill,
   }
 }
