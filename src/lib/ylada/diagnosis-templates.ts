@@ -230,7 +230,7 @@ const BLOCKER: ArchitectureTemplates = {
   cta_button: ['Quero destravar isso', 'Quero ajustar'],
   cta_imperative: 'Fale comigo sobre isso',
   whatsapp_prefill:
-    'Oi {NAME}, minha análise em {THEME} apontou {BLOCKER}. Quero uma orientação prática pro meu caso.',
+    'Oi {NAME}, fiz a análise de {THEME} e o resultado apontou {BLOCKER}. Gostaria de conversar sobre o próximo passo.',
 }
 
 /** Variantes por blocker_type: causa, preocupações, providências, ações, dica e frase emocional. */

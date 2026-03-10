@@ -11,7 +11,7 @@ import { buildProfileResumo, type YladaNoelProfileRow } from '@/lib/ylada-profil
 import { validateProfessionForSegment } from '@/config/ylada-profile-flows'
 import { getPerfilSimuladoByKey, SIMULATE_COOKIE_NAME } from '@/data/perfis-simulados'
 
-const VALID_SEGMENTS = ['ylada', 'med', 'psi', 'psicanalise', 'odonto', 'nutra', 'coach', 'seller'] as const
+const VALID_SEGMENTS = ['ylada', 'med', 'psi', 'psicanalise', 'odonto', 'nutra', 'coach', 'seller', 'perfumaria', 'estetica', 'fitness'] as const
 
 type ProfilePayload = {
   segment: string

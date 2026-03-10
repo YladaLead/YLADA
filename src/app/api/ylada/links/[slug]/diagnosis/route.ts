@@ -383,8 +383,17 @@ export async function POST(
       return NextResponse.json({ success: false, error: insertError.message }, { status: 500 })
     }
 
-    // PERFUME_PROFILE: enriquecer whatsapp_prefill com perfume_usage para o vendedor qualificar o lead
+    // Mensagem WhatsApp: incluir resultado do diagnóstico quando for genérica (texto contínuo, natural)
     let whatsappPrefill = diagnosis.whatsapp_prefill
+    const msgContainsResult =
+      diagnosis.main_blocker &&
+      whatsappPrefill?.toLowerCase().includes((diagnosis.main_blocker || '').toLowerCase().slice(0, 15))
+    const isGeneric = whatsappPrefill && diagnosis.main_blocker && !msgContainsResult
+    if (isGeneric && diagnosis.main_blocker && architecture !== 'PERFUME_PROFILE') {
+      const theme = themeForSlots?.trim() || 'a análise'
+      whatsappPrefill = `Oi, fiz a análise de ${theme} e o resultado apontou ${diagnosis.main_blocker}. Gostaria de conversar sobre o próximo passo.`
+    }
+    // PERFUME_PROFILE: enriquecer whatsapp_prefill com perfume_usage para o vendedor qualificar o lead
     const perfumeUsage = (diagnosis as Record<string, unknown>).perfume_usage as string | undefined
     if (architecture === 'PERFUME_PROFILE' && perfumeUsage && whatsappPrefill) {
       const usageLabel = perfumeUsage.replace(/_/g, ' ')

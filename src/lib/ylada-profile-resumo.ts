@@ -5,13 +5,16 @@
 
 const SEGMENT_LABELS: Record<string, string> = {
   ylada: 'YLADA',
-  med: 'Medicina',
+  med: 'Médicos',
   psi: 'Psicologia',
   psicanalise: 'Psicanálise',
   odonto: 'Odontologia',
   nutra: 'Nutra',
   coach: 'Coach',
   seller: 'Vendedor',
+  perfumaria: 'Perfumaria',
+  estetica: 'Estética',
+  fitness: 'Fitness',
 }
 
 export interface YladaNoelProfileRow {

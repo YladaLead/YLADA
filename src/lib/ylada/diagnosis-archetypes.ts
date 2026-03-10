@@ -31,7 +31,7 @@ export function getArchetypeCode(
   return 'moderado'
 }
 
-/** Preenche slots {THEME}, {NAME} no conteúdo do archetype. */
+/** Preenche slots {THEME}, {NAME}, {BLOCKER} no conteúdo do archetype. */
 export function fillArchetypeSlots(
   content: Record<string, unknown>,
   slots: { THEME?: string; NAME?: string }
@@ -45,11 +45,19 @@ export function fillArchetypeSlots(
     return fillSlots(v, filled)
   }
 
+  const mainBlockerFilled = fill(content.main_blocker)
+  const filledWithBlocker = { ...filled, BLOCKER: mainBlockerFilled }
+
+  const fillWithBlocker = (v: unknown): string => {
+    if (typeof v !== 'string') return ''
+    return fillSlots(v, filledWithBlocker)
+  }
+
   const actions = Array.isArray(content.specific_actions)
     ? content.specific_actions.map((a) => fill(a)).filter(Boolean)
     : undefined
 
-  let whatsappPrefill = fill(content.whatsapp_prefill)
+  let whatsappPrefill = fillWithBlocker(content.whatsapp_prefill)
   // Sanitizar: IA às vezes gera "Oi aí" — no WhatsApp a pessoa fala COM o profissional, não "com quem te enviou"
   if (whatsappPrefill && /oi\s+aí\b/i.test(whatsappPrefill)) {
     whatsappPrefill = whatsappPrefill.replace(/oi\s+aí\b/gi, 'Oi')

@@ -10,7 +10,7 @@ import { useLastVisitedPage } from '@/hooks/useLastVisitedPage'
 const supabase = createClient()
 
 interface LoginFormProps {
-  perfil: 'nutri' | 'wellness' | 'coach' | 'nutra' | 'admin' | 'ylada'
+  perfil: 'nutri' | 'wellness' | 'coach' | 'nutra' | 'admin' | 'ylada' | 'med' | 'seller' | 'perfumaria' | 'estetica' | 'fitness'
   redirectPath: string
   logoColor?: 'azul-claro' | 'verde' | 'laranja' | 'roxo'
   logoPath?: string
@@ -122,6 +122,11 @@ export default function LoginForm({
     nutra: 'Consultor Nutra',
     admin: 'Administrador',
     ylada: 'YLADA',
+    med: 'Médicos',
+    seller: 'Vendedores',
+    perfumaria: 'Perfumaria',
+    estetica: 'Estética',
+    fitness: 'Fitness',
   }
 
   const perfilAreaLabels: Record<string, string> = {
@@ -130,6 +135,11 @@ export default function LoginForm({
     coach: 'Coach',
     nutra: 'Nutra',
     ylada: 'YLADA',
+    med: 'Médicos',
+    seller: 'Vendedores',
+    perfumaria: 'Perfumaria',
+    estetica: 'Estética',
+    fitness: 'Fitness',
   }
 
   const handleSubmit = async (e: React.FormEvent) => {

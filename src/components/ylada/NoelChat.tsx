@@ -55,7 +55,7 @@ function LinkWithCopy({ href, children }: { href?: string; children: React.React
   )
 }
 
-export type NoelArea = 'med' | 'psi' | 'psicanalise' | 'odonto' | 'nutra' | 'coach'
+export type NoelArea = 'med' | 'psi' | 'psicanalise' | 'odonto' | 'nutra' | 'coach' | 'seller' | 'perfumaria' | 'estetica' | 'fitness'
 
 interface Message {
   id: string
@@ -292,6 +292,35 @@ export default function NoelChat({ area = 'med', className = '' }: NoelChatProps
     return trimmed
   }
 
+  /** Retorna true apenas quando a mensagem contém um script identificável (não perguntas genéricas). */
+  function messageHasScript(content: string): boolean {
+    const trimmed = content.trim()
+    if (!trimmed) return false
+
+    // Exclui mensagem de boas-vindas e apresentação do Noel (ex: "Olá! Sou o Noel, seu mentor. Como posso te ajudar?")
+    if (/Sou o Noel|Como posso te ajudar|seu mentor/i.test(trimmed) && trimmed.length < 120) return false
+
+    // 1. Bloco de código
+    const codeBlockMatch = trimmed.match(/```(?:[\w]*)\n?([\s\S]*?)```/)
+    if (codeBlockMatch && codeBlockMatch[1].trim().length > 20) return true
+
+    // 2. Após "Script:" ou "Chamada para Ação"
+    const scriptHeaderMatch = trimmed.match(
+      /(?:📝|💬)?\s*(?:Script\s*(?:sugerido|pronto)?\s*:?\s*|Chamada para Ação\s*:?\s*)\n+([\s\S]*?)(?=\n###|\n---|\n📝|\n💬|\n🔗|\n💡|$)/i
+    )
+    if (scriptHeaderMatch && scriptHeaderMatch[1].trim().length > 15) return true
+
+    // 3. Seção ### Chamada para Ação
+    const ctaMatch = trimmed.match(/###\s*Chamada para Ação\s*\n+([\s\S]*?)(?=\n###|$)/i)
+    if (ctaMatch && ctaMatch[1].trim().length > 15) return true
+
+    // 4. Bloco de mensagem (Oi/Olá...)
+    const msgBlockMatch = trimmed.match(/(?:^|\n)((?:Oi|Olá|Olá\s+\[?nome\]?)[\s\S]*?)(?=\n\n(?:###|📝|🔗|💡|$)|\n---|$)/i)
+    if (msgBlockMatch && msgBlockMatch[1].trim().length > 30) return true
+
+    return false
+  }
+
   const [copiedScriptId, setCopiedScriptId] = useState<string | null>(null)
   const copyScript = useCallback((msg: Message) => {
     const script = extractScriptFromMessage(msg.content)
@@ -302,6 +331,24 @@ export default function NoelChat({ area = 'med', className = '' }: NoelChatProps
   }, [])
 
   const lastAssistantMsg = [...messages].reverse().find((m) => m.role === 'assistant')
+
+  /** A mensagem contém o quiz completo (tema, perguntas, respostas, link)? Só mostramos Editar/Concordo quando o usuário já viu. */
+  function messageContainsQuizContent(content: string): boolean {
+    const t = content.trim()
+    if (!t) return false
+    // O Noel formata com ### AQUI ESTÃO AS PERGUNTAS e link quando entrega o quiz
+    const hasSecaoPerguntas = /###\s*(?:AQUI ESTÃO AS PERGUNTAS|Chamada para Ação|Link Inteligente)/i.test(t)
+    const hasLink = /\[.*?\]\(https?:\/\/[^)]+\)/.test(t) || /https?:\/\/[^\s)]+/.test(t)
+    // Estrutura de quiz: perguntas numeradas com opções A) B) C) D)
+    const hasEstruturaQuiz = (/\*\*\d+\.\s+/.test(t) || /\d+\.\s+.*\n/.test(t)) && /[A-D]\)\s+/.test(t)
+    return hasLink && (hasSecaoPerguntas || hasEstruturaQuiz)
+  }
+
+  const showEditarConcordoButtons =
+    lastLinkContext?.link_id &&
+    !loading &&
+    lastAssistantMsg &&
+    messageContainsQuizContent(lastAssistantMsg.content)
 
   return (
     <div className={`flex flex-col rounded-2xl border border-sky-100 bg-white shadow-lg overflow-hidden ${className}`}>
@@ -348,7 +395,7 @@ export default function NoelChat({ area = 'med', className = '' }: NoelChatProps
                       {msg.content}
                     </ReactMarkdown>
                   </div>
-                  {lastAssistantMsg?.id === msg.id && (
+                  {lastAssistantMsg?.id === msg.id && messageHasScript(msg.content) && (
                     <button
                       type="button"
                       onClick={() => copyScript(msg)}
@@ -387,7 +434,7 @@ export default function NoelChat({ area = 'med', className = '' }: NoelChatProps
             </div>
           </div>
         )}
-        {lastLinkContext?.link_id && !loading && (
+        {showEditarConcordoButtons && (
           <div className="flex flex-wrap gap-2 pt-2">
             <Link
               href={`/pt/links/editar/${lastLinkContext.link_id}`}

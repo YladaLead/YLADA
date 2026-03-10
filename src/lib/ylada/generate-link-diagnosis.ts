@@ -71,7 +71,7 @@ main_blocker: Frase acima conforme o nível.
 **frase_identificacao**: Frase DIRETA que conecta o diagnóstico à situação. NUNCA use "Se você se identificou com esse resultado" — a pessoa ainda não viu o resultado completo. Use: "Sua rotina e hábitos têm pesado no seu dia a dia." ou "Os sinais que você relatou indicam que vale organizar." Ou OMITA se não fizer sentido.
 
 cta_text: "Clique para entender melhor seu caso"
-whatsapp_prefill: "Oi {NAME}, fiz a análise de {THEME} e gostaria de conversar sobre o resultado." NUNCA escreva "Oi aí" — use SEMPRE {NAME}.
+whatsapp_prefill: "Oi {NAME}, fiz a análise de {THEME} e o resultado apontou {BLOCKER}. Gostaria de conversar sobre o próximo passo." Use {BLOCKER} com o main_blocker. Texto contínuo, linguagem natural em português. NUNCA use "Oi aí" — use SEMPRE {NAME}.
 
 ## REGRAS ESSENCIAIS
 
@@ -104,6 +104,9 @@ Placeholders: {THEME} (tema) e {NAME} (ex: "quem te enviou").
 Mesmas regras: causa_provavel (mecanismo), preocupacoes e consequence (diferentes entre si), dica_rapida (prática, concreta), frase_identificacao (NUNCA "Se você se identificou com esse resultado" — use frase direta ou omita).
 
 specific_actions: 2-3 ações práticas e específicas ao tema. NÃO genéricas. O último: "Converse com {NAME} pra calibrar o próximo passo."
+
+cta_text: "Clique para entender melhor seu caso"
+whatsapp_prefill: "Oi {NAME}, fiz a análise de {THEME} e o resultado apontou {BLOCKER}. Gostaria de conversar sobre o próximo passo." Use {BLOCKER} com o main_blocker. Texto contínuo, linguagem natural em português.
 
 ## REGRAS
 

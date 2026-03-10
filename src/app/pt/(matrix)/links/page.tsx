@@ -173,7 +173,7 @@ function LinksPageContent({ areaCodigo = 'ylada', areaLabel = 'YLADA' }: LinksPa
   const linksListRef = useRef<HTMLDivElement>(null)
   const suggestionBoxRef = useRef<HTMLDivElement>(null)
 
-  const segment = 'ylada'
+  const segment = areaCodigo && areaCodigo !== 'ylada' ? areaCodigo : 'ylada'
 
   const loadTemplatesAndLinks = async () => {
     setLoading(true)

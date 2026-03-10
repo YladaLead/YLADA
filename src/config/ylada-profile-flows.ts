@@ -76,6 +76,8 @@ export const PROFESSION_BY_SEGMENT: Record<string, ProfessionCode[]> = {
   psicanalise: ['psicanalise'],
   coach: ['coach'],
   seller: ['vendedor'],
+  estetica: ['estetica'],
+  fitness: ['coach'],
 }
 
 /** Valida se a profissão é permitida para o segment. */

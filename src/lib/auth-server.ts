@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation'
 import { hasActiveSubscription, canBypassSubscription } from '@/lib/subscription-helpers'
 import { supabaseAdmin } from '@/lib/supabase'
 
-type Area = 'wellness' | 'nutri' | 'coach' | 'nutra' | 'ylada' | 'med' | 'psi' | 'psicanalise' | 'odonto' | 'perfumaria'
+type Area = 'wellness' | 'nutri' | 'coach' | 'nutra' | 'ylada' | 'med' | 'psi' | 'psicanalise' | 'odonto' | 'seller' | 'perfumaria' | 'estetica' | 'fitness'
 
 interface AuthValidationResult {
   session: any
@@ -266,12 +266,12 @@ export async function validateProtectedAccess(
 
     // 4. Verificar se perfil corresponde (admin/suporte pode bypassar)
     const canBypassProfile = (allowAdmin && profile.is_admin) || (allowSupport && profile.is_support)
-    const matrixAreas = ['med', 'psi', 'psicanalise', 'odonto', 'nutra', 'coach', 'perfumaria'] as const
+    const matrixAreas = ['med', 'psi', 'psicanalise', 'odonto', 'nutra', 'coach', 'seller', 'perfumaria', 'estetica', 'fitness'] as const
     const isMatrixArea = (a: string): a is (typeof matrixAreas)[number] => matrixAreas.includes(a as any)
     const profileMatchesArea =
       profile.perfil === area ||
       (area === 'ylada' && profile.perfil === 'med') ||
-      (isMatrixArea(area) && (profile.perfil === 'ylada' || profile.perfil === 'med'))
+      (isMatrixArea(area) && (profile.perfil === 'ylada' || profile.perfil === 'med' || profile.perfil === area))
 
     if (!profileMatchesArea && !canBypassProfile) {
       console.log(`❌ ProtectedLayout [${area}]: Perfil incorreto (${profile.perfil}), redirecionando para login`)
