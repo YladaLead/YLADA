@@ -45,12 +45,16 @@ export default function WellnessCheckoutPage() {
     })
   }, [user, authLoading, loading, email])
 
+  // Ex-trial: veio da página de renovar (fluxo pós-trial)
+  const [fromRenovar, setFromRenovar] = useState(false)
+
   // Detectar parâmetros da URL usando window.location (mais confiável)
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search)
       const plan = params.get('plan')
       const canceledParam = params.get('canceled')
+      const from = params.get('from')
       
       if (plan === 'annual') {
         setPlanType('annual')
@@ -60,6 +64,10 @@ export default function WellnessCheckoutPage() {
       
       if (canceledParam === 'true') {
         setCanceled(true)
+      }
+      
+      if (from === 'renovar') {
+        setFromRenovar(true)
       }
     }
   }, [])
@@ -327,6 +335,15 @@ export default function WellnessCheckoutPage() {
           </div>
 
 
+          {/* Mensagem para ex-trial (veio da página de renovar) */}
+          {fromRenovar && (
+            <div className="mb-6 bg-green-50 border-2 border-green-200 rounded-lg p-4">
+              <p className="text-sm font-medium text-green-800">
+                🎁 Fez o trial de 3 dias? Use o <strong>mesmo e-mail</strong> que você usou no teste para continuar sua assinatura.
+              </p>
+            </div>
+          )}
+
           {/* Campo de E-mail (se não estiver logado ou ainda carregando) */}
           {(!user || authLoading) && (
             <div className="mb-6">
@@ -345,7 +362,9 @@ export default function WellnessCheckoutPage() {
               <p className="text-xs text-gray-500 mt-2">
                 {user 
                   ? 'Seu e-mail será usado para o pagamento. Você pode alterar se necessário.'
-                  : 'Seu e-mail será usado para criar sua conta automaticamente após o pagamento.'
+                  : fromRenovar
+                    ? 'Use o mesmo e-mail do seu trial. Após o pagamento, você terá acesso imediato.'
+                    : 'Seu e-mail será usado para criar sua conta automaticamente após o pagamento.'
                 }
               </p>
             </div>

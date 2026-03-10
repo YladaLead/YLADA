@@ -358,6 +358,7 @@ export async function validateProtectedAccess(
 const WELLNESS_PUBLIC_PREFIXES: (string | RegExp)[] = [
   '/pt/wellness/login',
   '/pt/wellness/checkout',
+  '/pt/wellness/assinar',
   '/pt/wellness/renovar',
   '/pt/wellness/pagamento-sucesso',
   '/pt/wellness/trial',
@@ -380,7 +381,7 @@ const WELLNESS_APP_SEGMENTS = new Set([
   'configuracao', 'tutoriais', 'plano', 'comunidade', 'suporte', 'conta', 'biblioteca', 'fluxos',
   'perfil', 'evolucao', 'clientes', 'workshop', 'noel', 'filosofia-lada', 'quizzes', 'acesso',
   'bem-vindo', 'trial', 'pagamento-sucesso', 'reset-password', 'recuperar-senha', 'recuperar-acesso',
-  'testar-email', 'templates', 'portal', 'login', 'checkout', 'renovar',
+  'testar-email', 'templates', 'portal', 'login', 'checkout', 'assinar', 'renovar',
 ])
 
 /**

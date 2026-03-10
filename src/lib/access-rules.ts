@@ -32,8 +32,9 @@ const PUBLIC_PAGES: (string | RegExp)[] = [
   // Páginas de login
   /\/login$/,
   
-  // Páginas de checkout e renovação (precisa estar logado, mas não precisa ter assinatura)
+  // Páginas de checkout, assinar e renovação (precisa estar logado, mas não precisa ter assinatura)
   /\/checkout$/,
+  /\/assinar$/,
   /\/renovar$/,
   
   // Páginas de pagamento
