@@ -25,7 +25,7 @@ const tamanhosQuadrado = {
   xl: 35   // 36% do original
 }
 
-export default function YLADALogo({ 
+export function YLADALogo({ 
   size = 'md', 
   className = '',
   variant = 'horizontal',
@@ -83,3 +83,5 @@ export default function YLADALogo({
     </div>
   )
 }
+
+export default YLADALogo
