@@ -23,7 +23,7 @@ function QRCode({ url, size = 200, className = '', useDataUrl = false, resolutio
     if (!useDataUrl || !url) return
     let cancelled = false
     import('qrcode').then((QRCodeLib) => {
-      QRCodeLib.toDataURL(url, { width: generateSize, margin: 1, errorCorrectionLevel: 'H' })
+      QRCodeLib.toDataURL(url, { width: generateSize, margin: 4, errorCorrectionLevel: 'H' })
         .then((url) => {
           if (!cancelled) setDataUrl(url)
         })
@@ -59,7 +59,7 @@ function QRCode({ url, size = 200, className = '', useDataUrl = false, resolutio
       <img
         src={qrCodeUrl!}
         alt="QR Code"
-        className="rounded-lg border-2 border-gray-200"
+        className="rounded-lg border border-gray-100"
         style={{ width: size, height: size }}
         onError={() => setError(true)}
       />

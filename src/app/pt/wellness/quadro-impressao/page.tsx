@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo, useRef } from 'react'
 import WellnessNavBar from '@/components/wellness/WellnessNavBar'
 import ProtectedRoute from '@/components/auth/ProtectedRoute'
 import { useWellnessProfile } from '@/hooks/useWellnessProfile'
-import { buildWellnessToolUrl } from '@/lib/url-utils'
+import { buildWellnessToolUrl, buildShortUrl } from '@/lib/url-utils'
 import QRCode from '@/components/QRCode'
 import { getTemplateBenefits } from '@/lib/template-benefits'
 import { getOGImageUrl } from '@/lib/og-image-map'
@@ -125,8 +125,9 @@ Se fizer sentido para você, deixamos aqui como um benefício extra para os clie
 ]
 
 // Imagem à esquerda e QR à direita no mesmo tamanho (quadrado), bem alinhados ao texto no meio
-const TAMANHO_LADO_PX_4 = 56
-const TAMANHO_LADO_PX_5 = 48
+// Tamanhos maiores para garantir escaneabilidade impressa (mín. ~2cm recomendado)
+const TAMANHO_LADO_PX_4 = 64
+const TAMANHO_LADO_PX_5 = 56
 const ESTILOS_POR_PAGINA: Record<PorPagina, { card: string; img: string; qr: number; titulo: string; texto: string; lista: string }> = {
   1: {
     card: 'p-3 gap-3',
@@ -146,7 +147,7 @@ const ESTILOS_POR_PAGINA: Record<PorPagina, { card: string; img: string; qr: num
   },
   4: {
     card: 'px-2 py-1.5 gap-2 print:px-2 print:py-1.5 print:gap-2',
-    img: 'min-w-[56px] min-h-[56px]',
+    img: 'min-w-[64px] min-h-[64px]',
     qr: TAMANHO_LADO_PX_4,
     titulo: 'text-[9px] print:text-[9px]',
     texto: 'text-[7px] print:text-[7px]',
@@ -154,7 +155,7 @@ const ESTILOS_POR_PAGINA: Record<PorPagina, { card: string; img: string; qr: num
   },
   5: {
     card: 'px-1.5 py-1 gap-1.5 print:px-1.5 print:py-1 print:gap-1.5',
-    img: 'min-w-[48px] min-h-[48px]',
+    img: 'min-w-[56px] min-h-[56px]',
     qr: TAMANHO_LADO_PX_5,
     titulo: 'text-[8px] print:text-[8px]',
     texto: 'text-[6px] print:text-[6px]',
@@ -236,7 +237,7 @@ function QuadroConteudo({
                       className="flex-shrink-0 flex items-center justify-center"
                       style={tamanhoLadoPx != null ? { width: tamanhoLadoPx, height: tamanhoLadoPx } : undefined}
                     >
-                      <QRCode url={item.link} size={s.qr} useDataUrl resolutionMultiplier={4} className={porPagina === 1 ? 'print:w-[88px] print:h-[88px]' : ''} />
+                      <QRCode url={item.link} size={s.qr} useDataUrl resolutionMultiplier={6} className={porPagina === 1 ? 'print:w-[88px] print:h-[88px]' : ''} />
                     </div>
                   </div>
                 )
@@ -309,12 +310,24 @@ function QuadroImpressaoContent() {
     return mapa
   }, [ferramentas])
 
+  // Mapa template_slug -> short_code (quando a ferramenta tem link curto)
+  // Links curtos geram QR codes mais simples → escaneiam melhor impressos
+  const shortCodePorTemplate = useMemo(() => {
+    const mapa: Record<string, string> = {}
+    ferramentas.forEach((t: any) => {
+      const ts = t.template_slug || t.slug
+      if (ts && t.short_code) mapa[ts] = t.short_code
+    })
+    return mapa
+  }, [ferramentas])
+
   const itensDisponiveis: ItemQuadro[] = useMemo(() => {
     if (!profile?.userSlug) return []
 
     return QUADRO_OPCOES_FIXAS.map((op) => {
+      const shortCode = shortCodePorTemplate[op.templateSlug]
       const slugParaUrl = slugPorTemplate[op.templateSlug] ?? (op.isFluxo ? gerarSlugFluxo(op.nome) : op.templateSlug)
-      const link = buildWellnessToolUrl(profile.userSlug, slugParaUrl)
+      const link = shortCode ? buildShortUrl(shortCode) : buildWellnessToolUrl(profile.userSlug, slugParaUrl)
 
       let beneficios: string[]
       if (op.isFluxo) {
@@ -345,7 +358,7 @@ function QuadroImpressaoContent() {
         beneficios,
       }
     })
-  }, [profile?.userSlug, slugPorTemplate])
+  }, [profile?.userSlug, slugPorTemplate, shortCodePorTemplate])
 
   const MAX_FERRAMENTAS = 12
 
@@ -379,7 +392,7 @@ function QuadroImpressaoContent() {
         const card = paginas[i].querySelector('.bg-white.rounded-lg') ?? (paginas[i] as HTMLElement).children[1]
         if (!card || !(card instanceof HTMLElement)) continue
         const canvas = await html2canvas(card, {
-          scale: 3,
+          scale: 4,
           useCORS: true,
           allowTaint: true,
           logging: false,
@@ -481,6 +494,9 @@ function QuadroImpressaoContent() {
                 </button>
                 <p className="text-xs text-gray-500 mt-2">
                   Escolha as ferramentas e depois baixe o PDF.
+                </p>
+                <p className="text-xs text-emerald-600/80 mt-1">
+                  💡 Ferramentas com link curto configurado geram QR codes que escaneiam melhor impressos.
                 </p>
                 <button
                   type="button"
