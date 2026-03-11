@@ -100,6 +100,9 @@ export async function GET(request: NextRequest) {
       // Quiz Bem-Estar: link pode ser quiz-bem-estar mas no banco está como quiz-wellness-profile
       'quiz-bem-estar': ['quiz-wellness-profile'],
       'quiz-wellness-profile': ['quiz-bem-estar'],
+      // Tipo de Fome / Qual é o seu tipo de fome: link pode ser quiz-tipo-fome mas no banco está como tipo-fome
+      'quiz-tipo-fome': ['tipo-fome', 'qual-e-o-seu-tipo-de-fome', 'quiz-fome-emocional'],
+      'tipo-fome': ['quiz-tipo-fome', 'qual-e-o-seu-tipo-de-fome', 'quiz-fome-emocional'],
       // Sono e Energia: Quadro parceria usa avaliacao-sono-energia, banco pode ter quiz-sono-energia
       'avaliacao-sono-energia': ['quiz-sono-energia'],
       'quiz-sono-energia': ['avaliacao-sono-energia'],
@@ -310,6 +313,9 @@ export async function GET(request: NextRequest) {
           // Quiz Bem-Estar: template base pode estar como quiz-wellness-profile
           'quiz-bem-estar': ['quiz-wellness-profile'],
           'quiz-wellness-profile': ['quiz-bem-estar'],
+          // Tipo de Fome: template base pode estar como tipo-fome
+          'quiz-tipo-fome': ['tipo-fome', 'qual-e-o-seu-tipo-de-fome', 'quiz-fome-emocional', 'avaliacao-fome-emocional'],
+          'tipo-fome': ['quiz-tipo-fome', 'qual-e-o-seu-tipo-de-fome', 'quiz-fome-emocional'],
           // Sono e Energia: Quadro parceria usa avaliacao-sono-energia, banco pode ter quiz-sono-energia
           'avaliacao-sono-energia': ['quiz-sono-energia'],
           'quiz-sono-energia': ['avaliacao-sono-energia'],
@@ -421,6 +427,21 @@ export async function GET(request: NextRequest) {
             title: 'Diagnóstico de Parasitose',
             description: 'Identifique sinais de parasitose e receba orientações iniciais personalizadas',
             emoji: '🦠'
+          },
+          'quiz-tipo-fome': {
+            title: 'Qual é o seu Tipo de Fome?',
+            description: 'Identifique Fome Física, por Hábito ou Emocional',
+            emoji: '🍽️'
+          },
+          'tipo-fome': {
+            title: 'Qual é o seu Tipo de Fome?',
+            description: 'Identifique Fome Física, por Hábito ou Emocional',
+            emoji: '🍽️'
+          },
+          'quiz-fome-emocional': {
+            title: 'Qual é o seu Tipo de Fome?',
+            description: 'Identifique Fome Física, por Hábito ou Emocional',
+            emoji: '🍽️'
           }
         }
         const builtIn = builtInTemplates[toolSlug]

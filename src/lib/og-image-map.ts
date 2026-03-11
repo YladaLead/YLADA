@@ -64,6 +64,7 @@ export const OG_IMAGE_SLUG_MAP: Record<string, string> = {
   // Outros Quizzes
   'pronto-emagrecer': 'pronto-emagrecer.jpg',
   'tipo-fome': 'tipo-fome.jpg',
+  'quiz-tipo-fome': 'tipo-fome.jpg', // mesmo quiz, mesma imagem
   'sindrome-metabolica': 'sindrome-metabolica.jpg',
   'quiz-detox': 'cardapio-detox.jpg', // ✅ Quiz Detox - usando cardapio-detox temporariamente até criar imagem específica
   'retencao-liquidos': 'retencao-liquidos.png',

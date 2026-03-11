@@ -78,6 +78,7 @@ export const TEMPLATE_SLUG_MAP: Record<string, string> = {
   'quiz-nutrition-assessment': 'quiz-perfil-nutricional',
   
   // Quiz Fome Emocional / Tipo de Fome
+  'quiz-tipo-fome': 'tipo-fome',
   'quiz-fome-emocional': 'tipo-fome',
   'avaliacao-fome-emocional': 'tipo-fome',
   'avaliação-fome-emocional': 'tipo-fome',
