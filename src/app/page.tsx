@@ -2,10 +2,11 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import YLADALogo from '@/components/YLADALogo'
+import YladaHubHeader from '@/components/landing/YladaHubHeader'
 import LanguageSelector from '@/components/LanguageSelector'
 import Link from 'next/link'
 import PhoneInputWithCountry from '@/components/PhoneInputWithCountry'
+import { YLADA_LANDING_AREAS } from '@/config/ylada-landing-areas'
 
 export default function HomePage() {
   const router = useRouter()
@@ -93,34 +94,56 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Header */}
-      <header className="sticky top-0 z-50 border-b border-gray-200 bg-white shadow-sm h-16 sm:h-20 flex items-center">
-        <div className="container mx-auto px-4 py-0.5 flex items-center justify-between">
-          <YLADALogo size="md" responsive={true} className="bg-transparent" />
-          <LanguageSelector />
-        </div>
-      </header>
+      <YladaHubHeader ctaLabel="Explorar soluções" ctaHref="#onde-aplicar" />
 
       <main>
-        {/* (1) Hero Section - Abertura elegante */}
+        {/* (1) Hero — Hub central */}
         <section className="container mx-auto px-4 py-12 sm:py-16 lg:py-20">
           <div className="text-center max-w-4xl mx-auto">
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 leading-tight">
-              Transformamos conversa em contatos qualificados.
+              YLADA
             </h1>
-            <p className="text-lg sm:text-xl lg:text-2xl text-gray-600 mb-4 max-w-3xl mx-auto leading-relaxed">
-              O YLADA é um motor de diagnóstico, links inteligentes e inteligência artificial que cria, provoca e direciona conversas estratégicas, aumentando a autoridade, a credibilidade e a performance de profissionais e times de campo.
+            <p className="text-xl sm:text-2xl text-gray-700 font-medium mb-4">
+              A forma leve e inteligente de atrair clientes realmente interessados.
+            </p>
+            <p className="text-lg sm:text-xl text-gray-600 mb-6 max-w-3xl mx-auto leading-relaxed">
+              O YLADA é uma plataforma baseada no Método YLADA que ajuda profissionais a atrair clientes interessados antes da conversa — gerando valor, construindo autoridade e filtrando curiosos.
             </p>
             <p className="text-base sm:text-lg text-gray-500 mb-8 max-w-2xl mx-auto">
               Antes da venda. Durante a conversa. Depois do contato.
             </p>
             <Link 
-              href="#solucoes"
+              href="#onde-aplicar"
               className="inline-flex items-center px-6 py-3 bg-blue-600 text-white text-base font-medium rounded-lg hover:bg-blue-700 transition-all duration-300 shadow-md hover:shadow-lg"
             >
-              Explorar soluções
+              Onde aplicar o Método YLADA
               <span className="ml-2">→</span>
             </Link>
+          </div>
+        </section>
+
+        {/* (1b) Onde você quer aplicar o Método YLADA? */}
+        <section id="onde-aplicar" className="bg-gray-50 py-12 sm:py-16 lg:py-20 scroll-mt-20">
+          <div className="container mx-auto px-4">
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 text-center mb-4">
+              Onde você quer aplicar o Método YLADA?
+            </h2>
+            <p className="text-lg text-gray-600 text-center mb-12 max-w-2xl mx-auto">
+              Escolha sua área e veja como o método funciona na prática.
+            </p>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
+              {YLADA_LANDING_AREAS.map((area) => (
+                <Link
+                  key={area.codigo}
+                  href={area.href}
+                  className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-all duration-300 border border-gray-200 hover:border-blue-300 text-center"
+                >
+                  <h3 className="text-lg font-bold text-gray-900 mb-2">{area.label}</h3>
+                  <p className="text-gray-600 text-sm mb-4">{area.descricao}</p>
+                  <span className="text-blue-600 text-sm font-medium">Explorar →</span>
+                </Link>
+              ))}
+            </div>
           </div>
         </section>
 
@@ -219,64 +242,28 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* (5) Seção "Para quem é o YLADA" */}
-        <section id="solucoes" className="py-12 sm:py-16 lg:py-20">
+        {/* (5) Seção "Para quem é o YLADA" — mesmas áreas, igual peso */}
+        <section id="solucoes" className="py-12 sm:py-16 lg:py-20 scroll-mt-20">
           <div className="container mx-auto px-4">
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 text-center mb-12">
               Para quem é o YLADA
             </h2>
             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
-              <div className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-all duration-300 border border-gray-200 hover:border-blue-300">
-                <div className="text-4xl mb-4 text-center">👤</div>
-                <h3 className="text-lg font-bold text-gray-900 mb-3 text-center">Profissionais que dependem de conversa para gerar clientes</h3>
-                <p className="text-gray-600 text-sm text-center leading-relaxed">
-                  Nutricionistas, consultores, coaches, especialistas e profissionais liberais.
-                </p>
-                <div className="mt-4 text-center">
-                  <Link href="/pt/nutri" className="text-blue-600 text-sm font-medium hover:text-blue-700">
-                    Explorar →
-                  </Link>
-                </div>
-              </div>
-              
-              <div className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-all duration-300 border border-gray-200 hover:border-blue-300">
-                <div className="text-4xl mb-4 text-center">👥</div>
-                <h3 className="text-lg font-bold text-gray-900 mb-3 text-center">Times de campo e vendas descentralizadas</h3>
-                <p className="text-gray-600 text-sm text-center leading-relaxed">
-                  Equipes que precisam gerar contatos mais qualificados e aumentar performance sem pressão excessiva.
-                </p>
-                <div className="mt-4 text-center">
-                  <Link href="/pt/wellness" className="text-blue-600 text-sm font-medium hover:text-blue-700">
-                    Explorar →
-                  </Link>
-                </div>
-              </div>
-              
-              <div className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-all duration-300 border border-gray-200 hover:border-blue-300">
-                <div className="text-4xl mb-4 text-center">🤝</div>
-                <h3 className="text-lg font-bold text-gray-900 mb-3 text-center">Negócios baseados em relacionamento</h3>
-                <p className="text-gray-600 text-sm text-center leading-relaxed">
-                  Projetos e empresas que crescem a partir de confiança, diálogo e autoridade.
-                </p>
-                <div className="mt-4 text-center">
-                  <Link href="/pt/c" className="text-blue-600 text-sm font-medium hover:text-blue-700">
-                    Explorar →
-                  </Link>
-                </div>
-              </div>
-              
-              <div className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-all duration-300 border border-gray-200 hover:border-blue-300">
-                <div className="text-4xl mb-4 text-center">📈</div>
-                <h3 className="text-lg font-bold text-gray-900 mb-3 text-center">Organizações que desejam escalar geração de contatos</h3>
-                <p className="text-gray-600 text-sm text-center leading-relaxed">
-                  Com inteligência, clareza de dados e processos bem definidos.
-                </p>
-                <div className="mt-4 text-center">
-                  <Link href="/pt/wellness" className="text-blue-600 text-sm font-medium hover:text-blue-700">
-                    Explorar →
-                  </Link>
-                </div>
-              </div>
+              {YLADA_LANDING_AREAS.map((area) => (
+                <Link
+                  key={area.codigo}
+                  href={area.href}
+                  className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-all duration-300 border border-gray-200 hover:border-blue-300"
+                >
+                  <h3 className="text-lg font-bold text-gray-900 mb-3 text-center">{area.label}</h3>
+                  <p className="text-gray-600 text-sm text-center leading-relaxed">
+                    {area.descricao}
+                  </p>
+                  <div className="mt-4 text-center">
+                    <span className="text-blue-600 text-sm font-medium">Explorar →</span>
+                  </div>
+                </Link>
+              ))}
             </div>
           </div>
         </section>
@@ -288,6 +275,11 @@ export default function HomePage() {
               <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-8 lg:mb-10">
                 Filosofia YLADA
               </h2>
+              <p className="mb-6">
+                <Link href="/pt/metodo-ylada" className="text-blue-600 font-semibold hover:text-blue-700 hover:underline">
+                  Conheça o Método YLADA →
+                </Link>
+              </p>
               <div className="space-y-6 lg:space-y-7">
                 <p className="text-lg lg:text-xl text-gray-600 leading-relaxed">
                   YLADA significa <span className="font-semibold text-gray-900 whitespace-nowrap">Your Leading Advanced Data Assistant</span>.

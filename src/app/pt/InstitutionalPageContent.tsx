@@ -98,7 +98,18 @@ export default function InstitutionalPageContent() {
           <Link href="/pt" className="flex-shrink-0 touch-manipulation" aria-label="YLADA início">
             <YLADALogo size="md" responsive className="bg-transparent" />
           </Link>
-          <LanguageSelector />
+          <div className="flex items-center gap-4">
+            <Link href="/pt/metodo-ylada" className="text-gray-600 hover:text-gray-900 text-sm font-medium hidden sm:inline">
+              Método YLADA
+            </Link>
+            <Link
+              href="#areas"
+              className="inline-flex items-center px-4 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 transition-all"
+            >
+              {inst.areaCta?.explore ?? 'Explorar'}
+            </Link>
+            <LanguageSelector />
+          </div>
         </div>
       </header>
 

@@ -112,7 +112,7 @@ export default function NutriLandingPage() {
     <div className="min-h-screen bg-white relative">
       {/* Header */}
       <header className="sticky top-0 z-50 border-b border-gray-200 bg-white shadow-sm h-16 sm:h-20 flex items-center">
-        <div className="container mx-auto px-6 lg:px-8 py-3 flex items-center justify-between">
+          <div className="container mx-auto px-6 lg:px-8 py-3 flex items-center justify-between">
           <Link href="/pt">
             <Image
               src="/images/logo/nutri-horizontal.png"
@@ -123,12 +123,17 @@ export default function NutriLandingPage() {
               priority
             />
           </Link>
-          <Link
-            href="/pt/nutri/login"
-            className="inline-flex items-center px-4 sm:px-6 py-2 sm:py-2.5 bg-[#2563EB] text-white text-sm sm:text-base font-semibold rounded-lg hover:bg-[#1D4ED8] transition-all shadow-md hover:shadow-lg"
-          >
-            Entrar
-          </Link>
+          <div className="flex items-center gap-4">
+            <Link href="/pt/metodo-ylada" className="text-gray-600 hover:text-gray-900 text-sm font-medium hidden sm:inline">
+              Método YLADA
+            </Link>
+            <Link
+              href="/pt/nutri/login"
+              className="inline-flex items-center px-4 sm:px-6 py-2 sm:py-2.5 bg-[#2563EB] text-white text-sm sm:text-base font-semibold rounded-lg hover:bg-[#1D4ED8] transition-all shadow-md hover:shadow-lg"
+            >
+              Entrar
+            </Link>
+          </div>
         </div>
       </header>
 
