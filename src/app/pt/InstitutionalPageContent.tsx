@@ -5,14 +5,28 @@ import { useRouter, usePathname } from 'next/navigation'
 import YLADALogo from '@/components/YLADALogo'
 import LanguageSelector from '@/components/LanguageSelector'
 import Link from 'next/link'
-import PhoneInputWithCountry from '@/components/PhoneInputWithCountry'
 import { useTranslations } from '@/hooks/useTranslations'
 import { useAuth } from '@/contexts/AuthContext'
-import { INSTITUTIONAL_AREAS } from '@/config/institutional-areas'
+const AREAS_HOME = [
+  { label: 'Nutricionistas', href: '/pt/nutri' },
+  { label: 'Psicólogos', href: '/pt/psi' },
+  { label: 'Estética', href: '/pt/estetica' },
+  { label: 'Odontologia', href: '/pt/odonto' },
+  { label: 'Fitness', href: '/pt/fitness' },
+  { label: 'Bem-estar', href: '/pt/coach-bem-estar' },
+  { label: 'Coaches', href: '/pt/coach' },
+]
+
+const EXEMPLOS_DIAGNOSTICOS = [
+  { titulo: 'Descubra por que você não consegue emagrecer', href: '/pt/diagnostico' },
+  { titulo: 'Seu marketing atrai curiosos ou clientes?', href: '/pt/diagnostico' },
+  { titulo: 'Seu intestino está funcionando bem?', href: '/pt/diagnostico' },
+  { titulo: 'Seu nível de energia está ideal?', href: '/pt/diagnostico' },
+]
 
 export default function InstitutionalPageContent() {
   const { t } = useTranslations('pt')
-  const inst = t.institutional
+  const inst = t?.institutional
   const { user, loading } = useAuth()
   const router = useRouter()
   const pathname = usePathname()
@@ -32,39 +46,6 @@ export default function InstitutionalPageContent() {
     const id = setTimeout(() => setAuthTimeout(true), 2000)
     return () => clearTimeout(id)
   }, [])
-
-  const [formData, setFormData] = useState({
-    nome: '',
-    profissao: '',
-    pais: '',
-    email: '',
-    telefone: '',
-    countryCode: 'BR',
-  })
-  const [submitting, setSubmitting] = useState(false)
-  const [showSuccessModal, setShowSuccessModal] = useState(false)
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!inst) return
-    setSubmitting(true)
-    try {
-      const response = await fetch('/api/contact', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      })
-      const data = await response.json()
-      if (!response.ok) throw new Error(data.error || 'Erro ao enviar formulário')
-      setFormData({ nome: '', profissao: '', pais: '', email: '', telefone: '', countryCode: 'BR' })
-      setShowSuccessModal(true)
-    } catch (error: unknown) {
-      console.error('Erro ao enviar formulário:', error)
-      alert('Erro ao enviar formulário. Por favor, tente novamente.')
-    } finally {
-      setSubmitting(false)
-    }
-  }
 
   if (!inst) {
     return (
@@ -98,256 +79,292 @@ export default function InstitutionalPageContent() {
           <Link href="/pt" className="flex-shrink-0 touch-manipulation" aria-label="YLADA início">
             <YLADALogo size="md" responsive className="bg-transparent" />
           </Link>
-          <div className="flex items-center gap-4">
-            <Link href="/pt/metodo-ylada" className="text-gray-600 hover:text-gray-900 text-sm font-medium hidden sm:inline">
-              Método YLADA
+          <nav className="flex items-center gap-3 sm:gap-6">
+            <Link href="/pt/metodo-ylada" className="text-gray-600 hover:text-gray-900 text-sm font-medium hidden md:inline">
+              Método
+            </Link>
+            <Link href="/pt/diagnostico" className="text-gray-600 hover:text-gray-900 text-sm font-medium hidden md:inline">
+              Diagnóstico
+            </Link>
+            <Link href="/pt/profissionais" className="text-gray-600 hover:text-gray-900 text-sm font-medium hidden lg:inline">
+              Profissionais
+            </Link>
+            <Link href="/pt/como-funciona" className="text-gray-600 hover:text-gray-900 text-sm font-medium hidden lg:inline">
+              Como funciona
+            </Link>
+            <Link href="/pt/precos" className="text-gray-600 hover:text-gray-900 text-sm font-medium hidden lg:inline">
+              Preços
+            </Link>
+            <Link href="/pt/login" className="text-gray-600 hover:text-gray-900 text-sm font-medium">
+              Entrar
             </Link>
             <Link
-              href="#areas"
+              href="/pt/escolha-perfil"
               className="inline-flex items-center px-4 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 transition-all"
             >
-              {inst.areaCta?.explore ?? 'Explorar'}
+              Começar agora
             </Link>
             <LanguageSelector />
-          </div>
+          </nav>
         </div>
       </header>
 
       <main className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <section className="py-10 sm:py-14 lg:py-20">
+        {/* 1. Hero */}
+        <section className="py-12 sm:py-16 lg:py-24">
           <div className="text-center max-w-4xl mx-auto">
             <h1 className="text-2xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-4 sm:mb-6 leading-tight">
-              {inst.hero.title}
+              E se seus clientes entendessem o valor do seu trabalho antes mesmo de falar com você?
             </h1>
-            <p className="text-base sm:text-lg lg:text-xl text-gray-600 mb-3 sm:mb-4 max-w-3xl mx-auto leading-relaxed">
-              {inst.hero.subtitle}
+            <p className="text-base sm:text-lg lg:text-xl text-gray-600 mb-6 sm:mb-8 max-w-3xl mx-auto leading-relaxed">
+              A maioria dos profissionais precisa explicar demais o que faz. O método YLADA usa diagnósticos para que o próprio cliente descubra o problema antes da conversa.
             </p>
-            <p className="text-sm sm:text-base text-gray-500 mb-6 sm:mb-8 max-w-2xl mx-auto">
-              {inst.hero.subtitle2}
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link
+                href="/pt/diagnostico"
+                className="inline-flex items-center justify-center min-h-[48px] px-8 py-3 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition-all shadow-lg"
+              >
+                Testar diagnóstico
+              </Link>
+              <Link
+                href="/pt/metodo-ylada"
+                className="inline-flex items-center justify-center min-h-[48px] px-8 py-3 border-2 border-gray-300 text-gray-700 font-semibold rounded-xl hover:bg-gray-50 transition-all"
+              >
+                Entender o método
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        {/* 2. O problema atual */}
+        <section className="bg-gray-50 py-12 sm:py-16 lg:py-20 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8">
+          <div className="max-w-3xl mx-auto">
+            <h2 className="text-xl sm:text-3xl font-bold text-gray-900 mb-6 sm:mb-8 text-center">
+              O marketing tradicional atrai curiosos
+            </h2>
+            <ul className="space-y-3 text-gray-700 mb-6">
+              <li className="flex items-start gap-3">
+                <span className="text-red-500 mt-1">•</span>
+                <span>Pessoas pedindo preço</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="text-red-500 mt-1">•</span>
+                <span>Conversas que não avançam</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="text-red-500 mt-1">•</span>
+                <span>Clientes que não entendem o valor do serviço</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="text-red-500 mt-1">•</span>
+                <span>Profissionais que precisam convencer o tempo todo</span>
+              </li>
+            </ul>
+            <p className="text-lg font-semibold text-gray-900 text-center">
+              O problema não é seu conhecimento. É a forma como o cliente chega até você.
             </p>
+          </div>
+        </section>
+
+        {/* 3. A nova abordagem */}
+        <section className="py-12 sm:py-16 lg:py-20">
+          <div className="max-w-3xl mx-auto text-center">
+            <h2 className="text-xl sm:text-3xl font-bold text-gray-900 mb-6">
+              E se o cliente descobrisse o problema antes da conversa?
+            </h2>
+            <p className="text-lg text-gray-600 mb-6 leading-relaxed">
+              Quando o cliente responde um diagnóstico, ele começa a entender sua própria situação. Isso muda completamente a qualidade da conversa.
+            </p>
+            <ul className="space-y-2 text-gray-700 font-medium">
+              <li className="flex items-center justify-center gap-2">
+                <span className="text-green-600">✓</span> Mais clareza
+              </li>
+              <li className="flex items-center justify-center gap-2">
+                <span className="text-green-600">✓</span> Mais autoridade
+              </li>
+              <li className="flex items-center justify-center gap-2">
+                <span className="text-green-600">✓</span> Mais clientes preparados para contratar
+              </li>
+            </ul>
+          </div>
+        </section>
+
+        {/* 4. O método YLADA */}
+        <section className="bg-gray-50 py-12 sm:py-16 lg:py-20 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8">
+          <div className="max-w-4xl mx-auto">
+            <h2 className="text-xl sm:text-3xl font-bold text-gray-900 mb-8 text-center">
+              O método YLADA
+            </h2>
+            <div className="grid sm:grid-cols-2 gap-6 mb-10">
+              {[
+                { num: 1, titulo: 'Diagnóstico', desc: 'O cliente descobre algo sobre sua situação.' },
+                { num: 2, titulo: 'Clareza', desc: 'Ele entende melhor o problema.' },
+                { num: 3, titulo: 'Conversa estratégica', desc: 'O profissional entra na conversa com muito mais autoridade.' },
+                { num: 4, titulo: 'Decisão', desc: 'A contratação acontece com menos esforço.' },
+              ].map((item) => (
+                <div key={item.num} className="bg-white rounded-xl p-6 border border-gray-200">
+                  <div className="w-10 h-10 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center mb-3">
+                    {item.num}
+                  </div>
+                  <h3 className="text-lg font-bold text-gray-900 mb-2">{item.titulo}</h3>
+                  <p className="text-gray-600 text-sm">{item.desc}</p>
+                </div>
+              ))}
+            </div>
+            <div className="text-center">
+              <Link
+                href="/pt/metodo-ylada"
+                className="inline-flex items-center justify-center px-8 py-3 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition-all"
+              >
+                Conhecer o método YLADA
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        {/* 5. Como funciona na prática */}
+        <section className="py-12 sm:py-16 lg:py-20">
+          <h2 className="text-xl sm:text-3xl font-bold text-gray-900 text-center mb-8">
+            Como profissionais usam o YLADA
+          </h2>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-5xl mx-auto">
+            {[
+              { passo: 1, titulo: 'Criar um diagnóstico' },
+              { passo: 2, titulo: 'Compartilhar o link' },
+              { passo: 3, titulo: 'Receber respostas e contatos' },
+              { passo: 4, titulo: 'Converter clientes com mais facilidade' },
+            ].map((item) => (
+              <div key={item.passo} className="text-center">
+                <div className="w-12 h-12 rounded-full bg-blue-100 text-blue-600 font-bold flex items-center justify-center mx-auto mb-3">
+                  {item.passo}
+                </div>
+                <h3 className="font-semibold text-gray-900">{item.titulo}</h3>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* 6. Exemplos de diagnósticos */}
+        <section className="bg-gray-50 py-12 sm:py-16 lg:py-20 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8">
+          <div className="max-w-4xl mx-auto">
+            <h2 className="text-xl sm:text-3xl font-bold text-gray-900 text-center mb-4">
+              Exemplos de diagnósticos
+            </h2>
+            <div className="grid sm:grid-cols-2 gap-4 mb-6">
+              {EXEMPLOS_DIAGNOSTICOS.map((ex) => (
+                <Link
+                  key={ex.titulo}
+                  href={ex.href}
+                  className="block bg-white rounded-xl p-5 border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all"
+                >
+                  <p className="font-medium text-gray-900">{ex.titulo}</p>
+                  <span className="text-blue-600 text-sm mt-2 inline-block">Testar →</span>
+                </Link>
+              ))}
+            </div>
+            <p className="text-center text-gray-600 text-sm">
+              Esses são exemplos de diagnósticos que profissionais podem criar com YLADA.
+            </p>
+          </div>
+        </section>
+
+        {/* 7. Para quais profissionais */}
+        <section className="py-12 sm:py-16 lg:py-20">
+          <h2 className="text-xl sm:text-3xl font-bold text-gray-900 text-center mb-4">
+            Para quais profissionais
+          </h2>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 max-w-4xl mx-auto mb-8">
+            {AREAS_HOME.map((area) => (
+              <Link
+                key={area.href}
+                href={area.href}
+                className="block bg-gray-50 rounded-xl p-5 border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all text-center font-medium text-gray-900"
+              >
+                {area.label}
+              </Link>
+            ))}
+          </div>
+          <div className="text-center">
             <Link
-              href="/pt/login"
-              className="inline-flex items-center justify-center min-h-[44px] px-6 py-3 bg-blue-600 text-white text-base font-medium rounded-lg hover:bg-blue-700 active:bg-blue-800 transition-colors shadow-md touch-manipulation"
+              href="/pt/profissionais"
+              className="inline-flex items-center justify-center px-6 py-3 border-2 border-gray-300 text-gray-700 font-medium rounded-xl hover:bg-gray-50 transition-all"
             >
-              {inst.hero.cta}
-              <span className="ml-2" aria-hidden>→</span>
+              Ver todas as áreas
             </Link>
           </div>
         </section>
 
-        <section className="bg-gray-50 py-10 sm:py-14 lg:py-20 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8">
-          <div className="max-w-3xl mx-auto text-center">
-            <h2 className="text-xl sm:text-3xl font-bold text-gray-900 mb-4 sm:mb-6">
-              {inst.whoWeAre.title}
+        {/* 8. CTA final */}
+        <section className="bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600 py-16 sm:py-20 rounded-2xl">
+          <div className="max-w-3xl mx-auto text-center text-white">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-6 leading-tight">
+              Transforme seu conhecimento em diagnósticos que atraem clientes
             </h2>
-            <p className="text-base sm:text-lg text-gray-600 leading-relaxed">{inst.whoWeAre.p1}</p>
-            <p className="text-base sm:text-lg text-gray-600 leading-relaxed mt-4">{inst.whoWeAre.p2}</p>
-            <p className="text-base sm:text-lg text-gray-600 leading-relaxed mt-4">{inst.whoWeAre.p3}</p>
-          </div>
-        </section>
-
-        <section className="py-10 sm:py-14 lg:py-20">
-          <h2 className="text-xl sm:text-3xl font-bold text-gray-900 text-center mb-8 sm:mb-12">
-            {inst.howItWorks.title}
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 max-w-6xl mx-auto">
-            {[
-              { emoji: '🎯', ...inst.howItWorks.item1 },
-              { emoji: '💬', ...inst.howItWorks.item2 },
-              { emoji: '📊', ...inst.howItWorks.item3 },
-              { emoji: '🌍', ...inst.howItWorks.item4 },
-            ].map((item, i) => (
-              <div key={i} className="text-center">
-                <div className="text-4xl sm:text-5xl mb-3 sm:mb-4" aria-hidden>{item.emoji}</div>
-                <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2 sm:mb-3">{item.title}</h3>
-                <p className="text-gray-600 text-sm sm:text-base leading-relaxed">{item.description}</p>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        <section className="bg-gray-50 py-10 sm:py-14 lg:py-20 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8">
-          <div className="max-w-3xl mx-auto text-center mb-8 sm:mb-10">
-            <h2 className="text-xl sm:text-3xl font-bold text-gray-900 mb-4 sm:mb-6">
-              {inst.differential.title}
-            </h2>
-            <p className="text-lg sm:text-xl text-gray-800 font-semibold mb-4 sm:mb-6 leading-relaxed">
-              {inst.differential.subtitle}
+            <p className="text-lg text-blue-100 mb-10 leading-relaxed">
+              Com o YLADA você pode criar diagnósticos estratégicos que ajudam seus clientes a entender melhor seus próprios problemas — antes mesmo da primeira conversa.
             </p>
-            <p className="text-base sm:text-lg text-gray-600 leading-relaxed text-left">
-              {inst.differential.intro}
-            </p>
-          </div>
-          <ul className="max-w-2xl mx-auto space-y-2 sm:space-y-3 mb-8 sm:mb-10 list-none">
-            {inst.differential.list.map((item, i) => (
-              <li key={i} className="flex items-start gap-2 text-gray-600">
-                <span className="text-blue-600 mt-1 flex-shrink-0">•</span>
-                <span>{item}</span>
-              </li>
-            ))}
-            <p className="text-gray-600 leading-relaxed pt-2">{inst.differential.outro}</p>
-          </ul>
-          <p className="text-center text-base sm:text-lg font-semibold text-gray-800 max-w-xl mx-auto">
-            {inst.differential.tagline}
-          </p>
-        </section>
-
-        <section id="areas" className="py-10 sm:py-14 lg:py-20 scroll-mt-16">
-          <h2 className="text-xl sm:text-3xl font-bold text-gray-900 text-center mb-3 sm:mb-4">
-            {inst.areas.title}
-          </h2>
-          <p className="text-base sm:text-lg text-gray-600 text-center mb-8 sm:mb-12 max-w-2xl mx-auto">
-            {inst.areas.subtitle}
-          </p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 max-w-6xl mx-auto">
-            {[...INSTITUTIONAL_AREAS]
-              .sort((a, b) => (a.status === 'construction' ? 1 : 0) - (b.status === 'construction' ? 1 : 0))
-              .map((area) => {
-              const label = inst.areas.list[area.translationKey]
-              if (!label) return null
-              const isReady = area.status === 'ready'
-              return (
-                <Link
-                  key={area.id}
-                  href={area.path}
-                  className="block bg-white rounded-xl p-5 sm:p-6 shadow-sm hover:shadow-md transition-all duration-300 border border-gray-200 hover:border-blue-300 min-h-[44px] touch-manipulation focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                >
-                  <div className="flex flex-col h-full">
-                    <div className="flex items-center justify-between gap-2 mb-2 sm:mb-3">
-                      <h3 className="text-base sm:text-lg font-bold text-gray-900 leading-tight">
-                        {label.title}
-                      </h3>
-                      <span
-                        className={`flex-shrink-0 text-xs font-medium px-2 py-1 rounded-full ${
-                          isReady ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800'
-                        }`}
-                      >
-                        {isReady ? inst.badges.ready : inst.badges.comingSoon}
-                      </span>
-                    </div>
-                    <p className="text-sm text-gray-600 leading-relaxed flex-grow">{label.description}</p>
-                    <span className="text-blue-600 text-sm font-medium mt-3 inline-flex items-center">
-                      {isReady ? (inst.areaCta?.explore ?? 'Explorar') : (inst.areaCta?.request ?? 'Solicitar acesso')}{' '}
-                      <span className="ml-1" aria-hidden>→</span>
-                    </span>
-                  </div>
-                </Link>
-              )
-            })}
-          </div>
-        </section>
-
-        <section className="bg-gray-50 py-10 sm:py-14 lg:py-20 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8">
-          <div className="max-w-4xl mx-auto text-center space-y-4 sm:space-y-6">
-            <h2 className="text-xl sm:text-3xl lg:text-4xl font-bold text-gray-900">
-              {inst.philosophy.title}
-            </h2>
-            <p className="text-base sm:text-lg lg:text-xl text-gray-600 leading-relaxed">{inst.philosophy.p1}</p>
-            <p className="text-base sm:text-lg lg:text-xl text-gray-600 leading-relaxed max-w-3xl mx-auto">{inst.philosophy.p2}</p>
-            <p className="text-base sm:text-lg lg:text-xl text-gray-600 leading-relaxed max-w-3xl mx-auto">{inst.philosophy.p3}</p>
-          </div>
-        </section>
-
-        <section className="py-10 sm:py-14 lg:py-20">
-          <div className="max-w-2xl mx-auto">
-            <h2 className="text-xl sm:text-3xl font-bold text-gray-900 text-center mb-3 sm:mb-4">
-              {inst.contact.title}
-            </h2>
-            <p className="text-base sm:text-lg text-gray-600 text-center mb-6 sm:mb-8">
-              {inst.contact.subtitle}
-            </p>
-            <form onSubmit={handleSubmit} className="bg-white rounded-xl p-5 sm:p-8 shadow-sm border border-gray-200">
-              <div className="space-y-4">
-                {[
-                  { id: 'nome', label: inst.contact.labelName, value: formData.nome, key: 'nome' as const },
-                  { id: 'profissao', label: inst.contact.labelProfession, value: formData.profissao, key: 'profissao' as const },
-                  { id: 'pais', label: inst.contact.labelCountry, value: formData.pais, key: 'pais' as const },
-                  { id: 'email', label: inst.contact.labelEmail, value: formData.email, key: 'email' as const },
-                ].map(({ id, label, value, key }) => (
-                  <div key={id}>
-                    <label htmlFor={id} className="block text-sm font-medium text-gray-700 mb-1.5">{label}</label>
-                    <input
-                      type={key === 'email' ? 'email' : 'text'}
-                      id={id}
-                      value={value}
-                      onChange={(e) => setFormData((prev) => ({ ...prev, [key]: e.target.value }))}
-                      className="w-full min-h-[44px] px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      required
-                    />
-                  </div>
-                ))}
-                <div>
-                  <label htmlFor="telefone" className="block text-sm font-medium text-gray-700 mb-1.5">
-                    {inst.contact.labelPhone}
-                  </label>
-                  <PhoneInputWithCountry
-                    value={formData.telefone}
-                    onChange={(phone, countryCode) => setFormData((prev) => ({ ...prev, telefone: phone, countryCode }))}
-                    defaultCountryCode={formData.countryCode}
-                    className="w-full"
-                    placeholder="11 99999-9999"
-                  />
-                  <p className="text-xs text-gray-500 mt-1">{inst.contact.phoneHint}</p>
-                </div>
-                <button
-                  type="submit"
-                  disabled={submitting}
-                  className="w-full min-h-[48px] bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 active:bg-blue-800 transition-colors shadow-md disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation"
-                >
-                  {submitting ? inst.contact.submitting : inst.contact.submit}
-                </button>
-              </div>
-            </form>
-          </div>
-        </section>
-
-        {showSuccessModal && (
-          <div
-            className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
-            onClick={() => setShowSuccessModal(false)}
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="success-title"
-          >
-            <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6 sm:p-8" onClick={(e) => e.stopPropagation()}>
-              <div className="text-center">
-                <div className="mx-auto flex items-center justify-center h-14 w-14 rounded-full bg-green-100 mb-4">
-                  <svg className="h-8 w-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                </div>
-                <h3 id="success-title" className="text-lg sm:text-xl font-semibold text-gray-900 mb-2">
-                  {inst.contact.successTitle}
-                </h3>
-                <p className="text-gray-600 mb-6">{inst.contact.successMessage}</p>
-                <button
-                  type="button"
-                  onClick={() => setShowSuccessModal(false)}
-                  className="w-full min-h-[44px] bg-blue-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-blue-700 touch-manipulation"
-                >
-                  {inst.contact.successButton}
-                </button>
-              </div>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link
+                href="/pt/diagnostico"
+                className="inline-flex items-center justify-center px-8 py-4 bg-white text-blue-600 font-semibold rounded-xl hover:bg-blue-50 transition-all shadow-lg"
+              >
+                Testar diagnóstico
+              </Link>
+              <Link
+                href="/pt/escolha-perfil"
+                className="inline-flex items-center justify-center px-8 py-4 border-2 border-white text-white font-semibold rounded-xl hover:bg-white/10 transition-all"
+              >
+                Começar com YLADA
+              </Link>
             </div>
           </div>
-        )}
+        </section>
       </main>
 
+      {/* 9. Rodapé */}
       <footer className="border-t border-gray-200 bg-white mt-10 sm:mt-16">
-        <div className="w-full max-w-7xl mx-auto px-4 py-6 sm:py-8">
+        <div className="w-full max-w-7xl mx-auto px-4 py-8 sm:py-10">
           <div className="flex flex-col items-center justify-center text-center">
-            <div className="mb-4">
+            <div className="mb-6">
               <YLADALogo size="lg" className="bg-transparent" />
             </div>
+            <nav className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 mb-6 text-sm">
+              <Link href="/pt/metodo-ylada" className="text-gray-600 hover:text-gray-900">
+                Método
+              </Link>
+              <Link href="/pt/diagnostico" className="text-gray-600 hover:text-gray-900">
+                Diagnóstico
+              </Link>
+              <Link href="/pt/como-funciona" className="text-gray-600 hover:text-gray-900">
+                Como funciona
+              </Link>
+              <Link href="/pt/precos" className="text-gray-600 hover:text-gray-900">
+                Preços
+              </Link>
+              <Link href="/pt/profissionais" className="text-gray-600 hover:text-gray-900">
+                Profissionais
+              </Link>
+              <Link href="/pt/login" className="text-gray-600 hover:text-gray-900">
+                Login
+              </Link>
+            </nav>
             <p className="text-gray-600 text-sm mb-4">{inst.footer.tagline}</p>
             <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 mb-4 text-sm text-gray-500">
-              <Link href="/pt/politica-de-privacidade" className="hover:text-gray-700 touch-manipulation">{inst.footer.privacy}</Link>
+              <Link href="/pt/politica-de-privacidade" className="hover:text-gray-700">
+                {inst.footer.privacy}
+              </Link>
               <span aria-hidden>•</span>
-              <Link href="/pt/termos-de-uso" className="hover:text-gray-700 touch-manipulation">{inst.footer.terms}</Link>
+              <Link href="/pt/termos-de-uso" className="hover:text-gray-700">
+                {inst.footer.terms}
+              </Link>
               <span aria-hidden>•</span>
-              <Link href="/pt/politica-de-cookies" className="hover:text-gray-700 touch-manipulation">{inst.footer.cookies}</Link>
+              <Link href="/pt/politica-de-cookies" className="hover:text-gray-700">
+                {inst.footer.cookies}
+              </Link>
               <span aria-hidden>•</span>
-              <Link href="/pt/politica-de-reembolso" className="hover:text-gray-700 touch-manipulation">{inst.footer.refund}</Link>
+              <Link href="/pt/politica-de-reembolso" className="hover:text-gray-700">
+                {inst.footer.refund}
+              </Link>
               <span className="text-gray-400">{inst.footer.languages}</span>
             </div>
             <p className="text-gray-500 text-xs">

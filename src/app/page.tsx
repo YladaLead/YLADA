@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import YladaHubHeader from '@/components/landing/YladaHubHeader'
+import YLADALogo from '@/components/YLADALogo'
 import LanguageSelector from '@/components/LanguageSelector'
 import Link from 'next/link'
 import PhoneInputWithCountry from '@/components/PhoneInputWithCountry'

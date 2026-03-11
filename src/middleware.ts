@@ -7,9 +7,16 @@ export function middleware(request: NextRequest) {
   // Debug: log da rota
   console.log('Middleware - Rota:', pathname)
   
+  // Raiz: redirecionar para /pt (página institucional)
+  if (pathname === '/' || pathname === '') {
+    console.log('Middleware - Raiz, redirecionando para /pt')
+    const url = request.nextUrl.clone()
+    url.pathname = '/pt'
+    return NextResponse.redirect(url)
+  }
+
   // Rotas que NUNCA devem ser redirecionadas (verificar PRIMEIRO)
   if (
-    pathname === '/' || // Página raiz - não redirecionar
     pathname === '/migrado' || // Página de acesso migrado - não redirecionar
     pathname.startsWith('/p/') || // IMPORTANTE: Links curtos (/p/code) - não redirecionar
     pathname.startsWith('/l/') || // Links inteligentes YLADA (/l/[slug]) - público, sem /pt
