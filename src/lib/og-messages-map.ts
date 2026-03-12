@@ -117,7 +117,15 @@ export const OG_MESSAGES_MAP: Record<string, { title: string; description: strin
     title: 'Emagrecimento consciente: está fazendo do jeito certo?',
     description: 'Em 2 minutos, identifique sinais de baixa nutrição, risco de rebote e como ajustar com segurança (sem promessas milagrosas).'
   },
-  
+  'avaliacao-sono-energia': {
+    title: 'Avaliação do Sono e Energia',
+    description: 'Avalie se o sono está restaurando sua energia diária e receba orientações personalizadas'
+  },
+  'quiz-sono-energia': {
+    title: 'Avaliação do Sono e Energia',
+    description: 'Avalie se o sono está restaurando sua energia diária e receba orientações personalizadas'
+  },
+
   // Diagnósticos
   'diagnostico-eletrolitos': {
     title: 'Diagnostique seus níveis de eletrólitos',

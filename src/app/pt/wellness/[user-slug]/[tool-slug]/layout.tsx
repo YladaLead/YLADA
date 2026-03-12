@@ -240,17 +240,19 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         })
       } else {
         // Quiz Bem-Estar: sempre usar a imagem correta quando a URL for .../quiz-bem-estar
+        const normalizedFromUrl = normalizeTemplateSlug(toolSlug)
         const isQuizBemEstar = slugLower === 'quiz-bem-estar' || slugLower.includes('quiz-bem-estar')
         if (isQuizBemEstar) {
           inferredImage = `${baseUrl}/images/og/wellness/quiz-wellness-profile.jpg`
         } else {
-          const normalizedFromUrl = normalizeTemplateSlug(toolSlug)
           const ogImageForSlug = getFullOGImageUrl(normalizedFromUrl, baseUrl, area)
           const usaImagemEspecifica = ogImageForSlug && !ogImageForSlug.includes('default.jpg')
           inferredImage = usaImagemEspecifica ? ogImageForSlug : `${baseUrl}/images/wellness-hero-com-logo.png`
         }
-        fallbackTitle = 'Ferramenta de Bem-Estar'
-        fallbackDescription = 'Acesse ferramentas personalizadas para melhorar seu bem-estar e qualidade de vida.'
+        // Usar mensagens OG por slug quando existirem (ex.: avaliacao-sono-energia → imagem e texto de sono)
+        const ogMessages = getOGMessages(normalizedFromUrl)
+        fallbackTitle = ogMessages.title || 'Ferramenta de Bem-Estar'
+        fallbackDescription = ogMessages.description || 'Acesse ferramentas personalizadas para melhorar seu bem-estar e qualidade de vida.'
       }
       
       // Garantir que a URL seja absoluta

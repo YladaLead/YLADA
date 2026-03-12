@@ -1135,6 +1135,9 @@ export default function DynamicTemplatePreview({
       if (slug.includes('quiz-energetico') || slug.includes('quiz-energético') || slug.includes('energetico') || slug.includes('energético')) {
         return '⚡ Preview do Quiz Energético - "Descubra seu Nível de Energia"'
       }
+      if (slug.includes('avaliacao-sono-energia') || slug.includes('quiz-sono-energia') || (slug.includes('sono') && slug.includes('energia'))) {
+        return '😴 Preview da Avaliação do Sono e Energia - "Avalie se o sono está restaurando sua energia"'
+      }
       if (slug.includes('quiz-emocional') || slug.includes('avaliacao-emocional') || slug.includes('avaliação-emocional') || (slug.includes('emocional') && slug.includes('avaliacao'))) {
         return '💖 Preview da Avaliação Emocional - "Avaliação de Forma Emocional"'
       }
@@ -1213,10 +1216,13 @@ export default function DynamicTemplatePreview({
     // getIntroContent já está definido no escopo mais amplo (linha ~830)
     // Não precisa redefinir aqui - a função já está disponível
 
+    // Quando é link para cliente (isPreview=false), mostrar nome da ferramenta sem "Preview"
+    const tituloQuiz = isPreview ? getPreviewTitle() : (nome || template.name || 'Avaliação')
+
     return (
       <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
         <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-          {getPreviewTitle()}
+          {tituloQuiz}
         </h3>
         
         <div className="relative">

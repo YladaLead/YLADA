@@ -497,9 +497,22 @@ export default function FerramentaPersonalizadaPage() {
       case 'avaliacao-inicial':
       case 'avaliação-inicial':
         return <TemplateInitialAssessment config={config} />
-      // Sono e Energia (Quadro parceria) — usa DynamicTemplatePreview com content da API
+      // Sono e Energia (Quadro parceria) — usa DynamicTemplatePreview; se content vazio (link built-in), injeta perguntas padrão
       case 'avaliacao-sono-energia':
-      case 'quiz-sono-energia':
+      case 'quiz-sono-energia': {
+        const contentSonoEnergia =
+          tool.content?.questions?.length || tool.content?.items?.length
+            ? tool.content
+            : {
+                template_type: 'quiz' as const,
+                questions: [
+                  { question: 'Como você avalia a qualidade do seu sono?', options: ['Muito ruim, acordo cansado(a)', 'Ruim, tenho dificuldade para dormir', 'Regular, poderia ser melhor', 'Boa, durmo bem na maioria das noites'] },
+                  { question: 'Você sente que precisa de ajuda para melhorar seu sono?', options: ['Sim, preciso muito de orientação', 'Sim, seria útil ter um acompanhamento', 'Talvez, se for algo prático', 'Não, consigo resolver sozinho(a)'] },
+                  { question: 'Como a qualidade do sono impacta seu dia?', options: ['Muito, afeta energia e concentração', 'Moderado, às vezes me atrapalha', 'Pouco, mas gostaria de melhorar', 'Quase não impacta'] },
+                  { question: 'Você valoriza ter um plano personalizado para dormir melhor?', options: ['Muito, é essencial para meu bem-estar', 'Bastante, acredito que faria diferença', 'Moderadamente, se for algo eficaz', 'Pouco, prefiro seguir padrões gerais'] },
+                  { question: 'Qual seu principal objetivo em relação ao sono?', options: ['Entender melhor o que está acontecendo', 'Saber por onde começar', 'Falar com alguém que entende', 'Só quero me informar'] },
+                ],
+              }
         return (
           <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
             <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -509,8 +522,8 @@ export default function FerramentaPersonalizadaPage() {
                   nome: tool.title,
                   name: tool.title,
                   slug: tool.template_slug,
-                  type: tool.content?.template_type || 'quiz',
-                  content: tool.content || {},
+                  type: contentSonoEnergia.template_type || 'quiz',
+                  content: contentSonoEnergia,
                   description: tool.description,
                   whatsapp_number: tool.whatsapp_number,
                   country_code: tool.user_profiles?.country_code
@@ -522,6 +535,7 @@ export default function FerramentaPersonalizadaPage() {
             </main>
           </div>
         )
+      }
       // Templates Hype Drink
       case 'energia-foco':
         return <TemplateHypeEnergiaFoco config={config} />
