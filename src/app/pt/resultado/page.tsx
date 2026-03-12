@@ -15,10 +15,23 @@ import {
 
 const STORAGE_KEY = 'ylada_diagnosticos_feitos'
 
+/** Contexto por área profissional (0–6) para personalizar o resultado. */
+const AREA_CONTEXTO: Record<string, { label: string; paragrafo: string }> = {
+  '0': { label: 'médica', paragrafo: 'Na área médica, muitas conversas começam quando o paciente ainda não entende completamente o próprio problema. Isso faz com que grande parte do atendimento inicial seja usada para explicar a situação antes mesmo de iniciar a solução.' },
+  '1': { label: 'de psicologia', paragrafo: 'Na psicologia, muitas pessoas procuram ajuda sem compreender exatamente o que estão sentindo. Isso faz com que a primeira conversa precise começar organizando pensamentos e emoções.' },
+  '2': { label: 'de estética', paragrafo: 'Na estética, muitas clientes chegam buscando procedimentos sem compreender completamente as necessidades da pele ou do corpo.' },
+  '3': { label: 'de nutrição', paragrafo: 'Na nutrição, muitas pessoas chegam buscando soluções rápidas sem entender os hábitos que estão influenciando o resultado.' },
+  '4': { label: 'de fitness', paragrafo: 'No fitness, muitas pessoas entram em contato sem clareza sobre objetivos e limitações. Isso faz com que a conversa precise começar alinhando expectativas.' },
+  '5': { label: 'de consultoria e vendas', paragrafo: 'Em consultoria e vendas, muitos contatos chegam sem entender bem o próprio momento ou necessidade. Isso faz com que a conversa comece explicando o contexto.' },
+  '6': { label: 'profissional', paragrafo: 'Em muitas áreas, as conversas começam quando a pessoa ainda não entende completamente a própria situação. Isso faz com que parte do tempo seja usada para explicar o contexto antes da solução.' },
+}
+
 function ResultadoContent() {
   const searchParams = useSearchParams()
   const diagnosticoSlug = searchParams.get('diagnostico') || 'comunicacao'
   const perfilParam = searchParams.get('perfil') || 'curiosos'
+  const areaParam = searchParams.get('area') ?? '0'
+  const areaContexto = AREA_CONTEXTO[areaParam] ?? AREA_CONTEXTO['6']
   const [linkCopiado, setLinkCopiado] = useState(false)
   const [diagnosticosFeitos, setDiagnosticosFeitos] = useState<Record<string, { perfil: string }>>({})
 
@@ -87,6 +100,23 @@ function ResultadoContent() {
 
   const relacionados = DIAGNOSTICOS_RELACIONADOS[diagnosticoSlug] || DIAGNOSTICOS_RELACIONADOS.comunicacao
 
+  // Nível de clareza do cliente (percepção de métrica): derivado do perfil
+  const nivelClareza = perfilFinal.pct >= 50 ? 'Baixo' : perfilFinal.pct >= 25 ? 'Médio' : 'Alto'
+  const BarraClareza = ({ nivel, preenchido, ativo }: { nivel: string; preenchido: number; ativo: boolean }) => (
+    <div className={`flex items-center gap-2 ${ativo ? 'text-blue-600 font-medium' : 'text-gray-500'}`}>
+      <span className="w-14 shrink-0">{nivel}</span>
+      <div className="flex gap-0.5">
+        {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+          <span
+            key={i}
+            className={`inline-block w-2 h-3 rounded-sm ${i <= preenchido ? (ativo ? 'bg-blue-500' : 'bg-gray-300') : 'bg-gray-200'}`}
+            aria-hidden
+          />
+        ))}
+      </div>
+    </div>
+  )
+
   return (
     <div className="min-h-screen bg-white">
       <header className="sticky top-0 z-50 border-b border-gray-200 bg-white shadow-sm">
@@ -101,7 +131,65 @@ function ResultadoContent() {
       </header>
 
       <main className="w-full max-w-2xl mx-auto px-4 sm:px-6 py-10 sm:py-16">
-        {/* 1️⃣ Perfil identificado */}
+        {/* 0. Indicador de análise — com área profissional quando disponível */}
+        <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-3 text-center">
+          Interpretação baseada nas respostas e na sua área profissional
+        </p>
+
+        {/* 0a. Parágrafo contextual da área (diagnóstico personalizado por profissão) */}
+        <div className="mb-8 p-5 rounded-xl bg-slate-50 border border-slate-200">
+          <h2 className="text-base font-bold text-gray-900 mb-2">
+            Análise para profissionais da área {areaContexto.label}
+          </h2>
+          <p className="text-gray-700 leading-relaxed text-sm sm:text-base">
+            {areaContexto.paragrafo}
+          </p>
+        </div>
+
+        {/* 0b. Leitura do perfil — sensação de IA que analisou o comportamento */}
+        <div className="bg-gradient-to-br from-slate-50 to-blue-50/30 rounded-xl p-6 sm:p-8 border border-slate-200 mb-8">
+          <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+            <span aria-hidden>🧠</span>
+            Leitura do seu perfil
+          </h2>
+          <p className="text-gray-700 leading-relaxed mb-4">
+            Com base nas respostas, seu perfil indica que você tende a se desenvolver mais quando:
+          </p>
+          <ul className="space-y-2 text-gray-700 mb-4">
+            <li className="flex items-start gap-3">
+              <span className="text-blue-600 font-bold shrink-0">•</span>
+              entende claramente o contexto antes da conversa
+            </li>
+            <li className="flex items-start gap-3">
+              <span className="text-blue-600 font-bold shrink-0">•</span>
+              consegue explicar bem o valor do seu trabalho
+            </li>
+            <li className="flex items-start gap-3">
+              <span className="text-blue-600 font-bold shrink-0">•</span>
+              trabalha com clientes que já chegam com alguma consciência do problema
+            </li>
+          </ul>
+          <p className="text-xs text-gray-500 italic">
+            Esse diagnóstico foi gerado a partir das suas respostas no fluxo de análise.
+          </p>
+        </div>
+
+        {/* 0c. Indicador visual — nível de clareza (percepção de métrica) */}
+        <div className="mb-10 p-4 rounded-lg bg-gray-50 border border-gray-100">
+          <p className="text-sm font-semibold text-gray-800 mb-3">
+            Clareza do cliente antes da conversa
+          </p>
+          <div className="space-y-2.5 text-sm">
+            <BarraClareza nivel="Baixa" preenchido={2} ativo={nivelClareza === 'Baixo'} />
+            <BarraClareza nivel="Média" preenchido={5} ativo={nivelClareza === 'Médio'} />
+            <BarraClareza nivel="Alta" preenchido={8} ativo={nivelClareza === 'Alto'} />
+          </div>
+          <p className="text-sm font-medium text-gray-900 mt-3">
+            Nível atual: <span className="text-blue-600">{nivelClareza}</span>
+          </p>
+        </div>
+
+        {/* 1️⃣ Diagnóstico principal */}
         <div className="text-center mb-10">
           <p className="text-sm font-medium text-blue-600 uppercase tracking-wider mb-2">Seu perfil</p>
           <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-4 leading-tight">
@@ -127,13 +215,55 @@ function ResultadoContent() {
           </ul>
         </div>
 
-        {/* 3️⃣ Insight (virada mental — bloco destacado) */}
+        {/* 3️⃣ Insight (explicação do problema) */}
         <div className="bg-blue-50 rounded-xl p-6 sm:p-8 border-l-4 border-blue-600 mb-10">
           <p className="text-lg sm:text-xl text-gray-900 font-semibold mb-3">
             O problema normalmente não é sua competência.
           </p>
           <p className="text-gray-800 leading-relaxed">
             O problema é que a pessoa chega até você sem entender o próprio problema. Assim, a conversa começa sem contexto.
+          </p>
+        </div>
+
+        {/* 3b. O que isso significa na prática */}
+        <div className="mb-10">
+          <h2 className="text-xl font-bold text-gray-900 mb-4">
+            O que isso significa na prática
+          </h2>
+          <p className="text-gray-700 leading-relaxed mb-4">
+            Hoje, muitas pessoas entram em contato com você sem entender exatamente o que precisam.
+            Isso faz com que grande parte das conversas comece com explicações básicas.
+          </p>
+          <p className="text-gray-700 leading-relaxed mb-4">
+            Quando o cliente entende melhor a própria situação antes da conversa:
+          </p>
+          <ul className="space-y-2 text-gray-700">
+            <li className="flex items-start gap-3">
+              <span className="text-blue-600 font-bold shrink-0">•</span>
+              a conversa fica mais objetiva
+            </li>
+            <li className="flex items-start gap-3">
+              <span className="text-blue-600 font-bold shrink-0">•</span>
+              o valor do seu trabalho fica mais claro
+            </li>
+            <li className="flex items-start gap-3">
+              <span className="text-blue-600 font-bold shrink-0">•</span>
+              a decisão acontece com mais segurança
+            </li>
+          </ul>
+        </div>
+
+        {/* 3c. Micro bloco de personalização */}
+        <div className="bg-gray-50 rounded-xl p-6 border border-gray-200 mb-10">
+          <p className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">
+            Esse diagnóstico indica que:
+          </p>
+          <p className="text-gray-800 leading-relaxed mb-3">
+            Você provavelmente já tem conhecimento e competência na sua área.
+            O ponto que pode estar limitando suas conversas é como o cliente chega até você.
+          </p>
+          <p className="text-gray-800 leading-relaxed mb-0">
+            Quando o cliente chega mais preparado, sua comunicação se torna mais fácil e produtiva.
           </p>
         </div>
 
@@ -171,29 +301,90 @@ function ResultadoContent() {
           </p>
         </div>
 
-        {/* 5️⃣ Mostrar que isso foi um exemplo (YLADA) */}
-        <div className="bg-gray-50 rounded-xl p-6 border border-gray-200 mb-10">
-          <p className="text-gray-800 font-medium mb-4">
-            Este foi apenas um exemplo de diagnóstico.
+        {/* Separador visual — Parte 1: diagnóstico | Parte 2: ferramenta */}
+        <div className="flex items-center gap-4 my-10">
+          <span className="flex-1 h-px bg-gray-200" aria-hidden />
+          <span className="text-sm font-medium text-gray-500 uppercase tracking-wider">
+            Exemplo demonstrativo
+          </span>
+          <span className="flex-1 h-px bg-gray-200" aria-hidden />
+        </div>
+
+        {/* Bloco estratégico — Como profissionais usam (ponte mental: leitor → imaginar usando) */}
+        <div className="mb-10">
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4">
+            Como profissionais usam diagnósticos como este
+          </h2>
+          <p className="text-gray-700 leading-relaxed mb-6">
+            Profissionais mais estratégicos utilizam diagnósticos simples para iniciar conversas mais produtivas.
           </p>
-          <p className="text-gray-700 mb-4">
-            Com o YLADA, profissionais podem criar diagnósticos como este para:
-          </p>
-          <ul className="space-y-2 text-gray-700 mb-0">
-            <li className="flex items-start gap-2">
-              <span className="text-blue-600 mt-1">•</span>
-              atrair clientes mais preparados
+          <p className="text-sm font-semibold text-gray-800 mb-4">Veja alguns exemplos:</p>
+          <ul className="space-y-4 text-gray-700">
+            <li className="flex flex-col sm:flex-row sm:items-baseline gap-1 sm:gap-3">
+              <span className="font-semibold text-gray-900 shrink-0">Psicólogos</span>
+              <span>usam diagnósticos para ajudar o paciente a refletir antes da primeira sessão.</span>
             </li>
-            <li className="flex items-start gap-2">
-              <span className="text-blue-600 mt-1">•</span>
-              iniciar conversas mais produtivas
+            <li className="flex flex-col sm:flex-row sm:items-baseline gap-1 sm:gap-3">
+              <span className="font-semibold text-gray-900 shrink-0">Nutricionistas</span>
+              <span>utilizam diagnósticos para entender hábitos alimentares antes da consulta.</span>
             </li>
-            <li className="flex items-start gap-2">
-              <span className="text-blue-600 mt-1">•</span>
-              explicar seu trabalho com mais clareza
+            <li className="flex flex-col sm:flex-row sm:items-baseline gap-1 sm:gap-3">
+              <span className="font-semibold text-gray-900 shrink-0">Profissionais de estética</span>
+              <span>usam diagnósticos para identificar necessidades antes da avaliação.</span>
+            </li>
+            <li className="flex flex-col sm:flex-row sm:items-baseline gap-1 sm:gap-3">
+              <span className="font-semibold text-gray-900 shrink-0">Consultores e vendedores</span>
+              <span>utilizam diagnósticos para entender melhor o momento do cliente antes da conversa.</span>
             </li>
           </ul>
         </div>
+
+        {/* Frase de ativação mental — visualizar o benefício */}
+        <p className="text-center text-lg font-medium text-gray-900 mb-10 leading-relaxed">
+          Agora imagine seus clientes chegando até você já entendendo melhor a própria situação.
+        </p>
+
+        {/* 5️⃣ Bloco de descoberta — insight profissional */}
+        <div className="bg-blue-50 rounded-xl p-6 sm:p-8 border-l-4 border-blue-600 mb-10 shadow-sm">
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+            <span aria-hidden>💡</span>
+            Imagine usar diagnósticos como este no seu trabalho
+          </h2>
+          <p className="text-gray-800 mb-6">
+            Com o YLADA você pode usar diagnósticos como este para:
+          </p>
+          <ul className="space-y-3 text-gray-800 mb-6">
+            <li className="flex items-start gap-3">
+              <span className="text-blue-600 font-bold shrink-0">•</span>
+              atrair clientes realmente interessados
+            </li>
+            <li className="flex items-start gap-3">
+              <span className="text-blue-600 font-bold shrink-0">•</span>
+              evitar conversas com curiosos
+            </li>
+            <li className="flex items-start gap-3">
+              <span className="text-blue-600 font-bold shrink-0">•</span>
+              iniciar atendimentos com mais clareza
+            </li>
+            <li className="flex items-start gap-3">
+              <span className="text-blue-600 font-bold shrink-0">•</span>
+              mostrar seu valor antes mesmo da conversa
+            </li>
+          </ul>
+          <div className="pt-4 border-t border-blue-200">
+            <p className="text-sm font-semibold text-gray-900">
+              Diagnóstico gerado pelo método YLADA
+            </p>
+            <p className="text-xs text-gray-600 mt-0.5">
+              Inteligência aplicada à comunicação profissional
+            </p>
+          </div>
+        </div>
+
+        {/* Frase de transição — antes do botão */}
+        <p className="text-center text-gray-700 font-medium mb-6">
+          Profissionais mais estratégicos já estão usando diagnósticos para iniciar conversas melhores.
+        </p>
 
         {/* 6️⃣ CTA principal */}
         <div className="mb-10">
@@ -201,13 +392,16 @@ function ResultadoContent() {
             href="/pt?source=diagnostico"
             className="block w-full text-center px-8 py-5 bg-blue-600 text-white font-bold text-lg rounded-xl hover:bg-blue-700 transition-all shadow-lg"
           >
-            👉 Criar meus diagnósticos com YLADA
+            Quero usar diagnósticos no meu trabalho
           </Link>
           <p className="text-center text-sm text-gray-500 mt-3">
             Leva menos de 5 minutos para criar o primeiro.
           </p>
           <p className="text-center text-sm text-gray-500 mt-1">
             Não é necessário conhecimento técnico.
+          </p>
+          <p className="text-center text-xs font-medium text-gray-600 mt-4">
+            YLADA — Inteligência aplicada à comunicação profissional
           </p>
         </div>
 

@@ -73,7 +73,7 @@ export default function DiagnosticoQuiz({ slug, variantOverride }: DiagnosticoQu
   const PERGUNTAS_AQUECIMENTO = [PERGUNTA_AREA, PERGUNTA_TIPO]
   const PERGUNTAS_MAIN = config.perguntas
   const PERGUNTAS = slug === 'comunicacao'
-    ? config.perguntas
+    ? [...PERGUNTAS_AQUECIMENTO, ...config.perguntas]
     : [...PERGUNTAS_AQUECIMENTO, ...PERGUNTAS_MAIN]
 
   const perguntaAtual = PERGUNTAS[etapaAtual]

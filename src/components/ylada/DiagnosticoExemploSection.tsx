@@ -6,6 +6,24 @@ import {
   type DiagnosticoExemploArea,
 } from '@/config/ylada-diagnostico-exemplos'
 
+/** URL do vídeo do fluxo completo (YouTube, Vimeo ou MP4). Configure em NEXT_PUBLIC_YLADA_VIDEO_FLUXO_URL */
+const VIDEO_FLUXO_URL =
+  typeof process !== 'undefined' ? process.env.NEXT_PUBLIC_YLADA_VIDEO_FLUXO_URL || '' : ''
+
+function getYoutubeEmbedUrl(url: string): string | null {
+  const m = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]+)/)
+  return m ? `https://www.youtube.com/embed/${m[1]}` : null
+}
+
+function getVimeoEmbedUrl(url: string): string | null {
+  const m = url.match(/vimeo\.com\/(?:video\/)?(\d+)/)
+  return m ? `https://player.vimeo.com/video/${m[1]}` : null
+}
+
+function isDirectVideo(url: string): boolean {
+  return /\.(mp4|webm|ogg)(\?|$)/i.test(url) || url.startsWith('/videos/')
+}
+
 interface DiagnosticoExemploSectionProps {
   area: DiagnosticoExemploArea
   ctaHref?: string
@@ -91,18 +109,68 @@ export function DiagnosticoExemploSection({
               </div>
             </div>
 
-            {/* Coluna direita: Vídeo */}
+            {/* Coluna direita: Vídeo do fluxo completo */}
             <div className="space-y-4">
               <p className="text-sm font-medium text-gray-600">Vídeo do fluxo completo</p>
-              <div className="aspect-video bg-gray-200 rounded-xl flex items-center justify-center border-2 border-dashed border-gray-300">
-                <div className="text-center p-6">
-                  <p className="text-gray-500 text-sm mb-2">Área para vídeo</p>
-                  <p className="text-gray-400 text-xs max-w-[220px] mx-auto">
-                    Vídeo curto (30–40s): criar avaliação → enviar link → {config.labelPaciente}{' '}
-                    responde → diagnóstico aparece → conversa começa
-                  </p>
+              {VIDEO_FLUXO_URL ? (
+                <div className="aspect-video rounded-xl overflow-hidden bg-gray-900 border border-gray-200">
+                  {(() => {
+                    const yt = getYoutubeEmbedUrl(VIDEO_FLUXO_URL)
+                    const vimeo = getVimeoEmbedUrl(VIDEO_FLUXO_URL)
+                    if (yt) {
+                      return (
+                        <iframe
+                          src={yt}
+                          title="Vídeo do fluxo completo"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                          allowFullScreen
+                          className="w-full h-full"
+                        />
+                      )
+                    }
+                    if (vimeo) {
+                      return (
+                        <iframe
+                          src={vimeo}
+                          title="Vídeo do fluxo completo"
+                          allow="fullscreen; picture-in-picture"
+                          allowFullScreen
+                          className="w-full h-full"
+                        />
+                      )
+                    }
+                    if (isDirectVideo(VIDEO_FLUXO_URL)) {
+                      return (
+                        <video
+                          src={VIDEO_FLUXO_URL}
+                          controls
+                          playsInline
+                          className="w-full h-full object-contain"
+                        >
+                          Seu navegador não suporta vídeo.
+                        </video>
+                      )
+                    }
+                    return (
+                      <iframe
+                        src={VIDEO_FLUXO_URL}
+                        title="Vídeo do fluxo completo"
+                        allowFullScreen
+                        className="w-full h-full"
+                      />
+                    )
+                  })()}
                 </div>
-              </div>
+              ) : (
+                <div className="aspect-video bg-gray-200 rounded-xl flex items-center justify-center border-2 border-dashed border-gray-300">
+                  <div className="text-center p-6">
+                    <p className="text-gray-500 text-sm mb-2">Área para vídeo</p>
+                    <p className="text-gray-400 text-xs max-w-[260px] mx-auto">
+                      Configure <code className="bg-gray-300 px-1 rounded text-[10px]">NEXT_PUBLIC_YLADA_VIDEO_FLUXO_URL</code> no .env com o link (YouTube, Vimeo ou MP4).
+                    </p>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
