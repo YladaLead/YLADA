@@ -57,7 +57,7 @@ export const DIAGNOSTICOS: Record<string, DiagnosticoConfig> = {
     descricaoStart: 'Em menos de 1 minuto você descobre se sua comunicação está atraindo curiosos, pessoas em processo ou clientes preparados.',
     bulletsStart: ['curiosos', 'pessoas em processo', 'clientes realmente preparados'],
     perguntas: [
-      { id: 'problema', texto: 'Quando alguém entra em contato com você normalmente:', opcoes: [{ valor: 2, label: 'pergunta o preço logo no início' }, { valor: 1, label: 'pede mais informações mas não decide' }, { valor: 0, label: 'já chega entendendo o valor' }, { valor: 1, label: 'varia bastante' }] },
+      { id: 'problema', texto: 'Quando alguém entra em contato com você normalmente:', opcoes: [{ valor: 2, label: 'pergunta o preço logo no início' }, { valor: 1, label: 'pede mais informações mas não decide' }, { valor: 0, label: 'já chega entendendo o valor' }, { valor: 1, label: 'depende muito da pessoa' }] },
       { id: 'area', texto: 'Qual dessas áreas descreve melhor seu trabalho?', opcoes: [{ valor: 0, label: 'Saúde / medicina' }, { valor: 1, label: 'Psicologia / terapias' }, { valor: 2, label: 'Estética / beleza' }, { valor: 3, label: 'Nutrição' }, { valor: 4, label: 'Fitness' }, { valor: 5, label: 'Consultoria / coaching' }, { valor: 6, label: 'Outro' }] },
       { id: 'tipo', texto: 'Você atua como:', opcoes: [{ valor: 0, label: 'Profissional liberal (presto serviços)' }, { valor: 1, label: 'Vendedor (vendo produtos/represento empresas)' }] },
       { id: 'q1', texto: 'Seus clientes costumam pedir preço antes de entender seu serviço?', opcoes: [{ valor: 2, label: 'Sim' }, { valor: 1, label: 'Às vezes' }, { valor: 0, label: 'Não' }] },

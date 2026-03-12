@@ -20,7 +20,7 @@ const PERGUNTA_HERO_OPCOES = [
   { value: 2, label: 'pergunta o preço logo no início' },
   { value: 1, label: 'pede mais informações mas não decide' },
   { value: 0, label: 'já chega entendendo o valor' },
-  { value: 1, label: 'varia bastante' },
+  { value: 1, label: 'depende muito da pessoa' },
 ]
 
 const EXEMPLOS_DIAGNOSTICOS = [

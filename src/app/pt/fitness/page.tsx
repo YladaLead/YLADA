@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useAuth } from '@/contexts/AuthContext'
 import { UseCasesSection } from '@/components/ylada/UseCasesSection'
 import { HeroBeforeAfter } from '@/components/ylada/HeroBeforeAfter'
+import { DiagnosticoExemploSection } from '@/components/ylada/DiagnosticoExemploSection'
 import { PricingBlockCompact } from '@/components/ylada/PricingBlockCompact'
 import { useRouter } from 'next/navigation'
 
@@ -63,13 +64,18 @@ export default function FitnessLandingPage() {
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="max-w-2xl mx-auto text-center">
               <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 leading-tight mb-4">
-                YLADA para Fitness
+                Pare de responder curiosos.
+                <br />
+                Comece conversas com contexto.
               </h1>
-              <p className="text-lg sm:text-xl text-gray-700 mb-4">
-                Atrair alunos que já entendem o valor do treino.
+              <p className="text-base sm:text-lg text-gray-600 mb-4">
+                O YLADA permite que alunos respondam uma avaliação rápida antes do primeiro contato, gerando um diagnóstico inicial e conversas muito mais qualificadas.
               </p>
-              <p className="text-base sm:text-lg text-gray-600 mb-6">
-                O aluno responde uma avaliação rápida antes do contato. Assim você entende objetivos, nível e o momento ideal para começar antes mesmo da primeira conversa.
+              <p className="text-lg sm:text-xl text-gray-700 font-medium mb-6">
+                Transforme curiosos em alunos preparados para treino.
+              </p>
+              <p className="text-sm sm:text-base text-gray-600 italic mb-6 border-l-4 border-blue-500 pl-4 py-2 bg-blue-50/50 rounded-r-lg text-left max-w-md mx-auto">
+                Servir antes de vender. Entender antes de orientar. Conversar antes da consulta.
               </p>
               <div className="flex flex-col items-center gap-1 mb-8 text-sm text-gray-600">
                 <span>Aluno responde avaliação</span>
@@ -101,15 +107,15 @@ export default function FitnessLandingPage() {
               <ul className="space-y-4 text-gray-700">
                 <li className="flex items-start gap-3">
                   <span className="text-red-500 font-bold shrink-0">•</span>
-                  <span>Curiosos pedindo informação sem intenção real de treinar</span>
+                  <span>Alunos pedindo orientação gratuita</span>
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="text-red-500 font-bold shrink-0">•</span>
-                  <span>Conversas que começam e não evoluem para matrícula</span>
+                  <span>Conversas que não viram consulta</span>
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="text-red-500 font-bold shrink-0">•</span>
-                  <span>Dificuldade de mostrar o valor do treino personalizado</span>
+                  <span>Falta de clareza no primeiro contato</span>
                 </li>
               </ul>
               <p className="text-center text-gray-600 mt-8 font-medium">
@@ -163,100 +169,7 @@ export default function FitnessLandingPage() {
           </div>
         </section>
 
-        <section className="py-12 sm:py-16 bg-gray-50">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="max-w-4xl mx-auto">
-              <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4 text-center">
-                Veja como um diagnóstico pode iniciar uma conversa real
-              </h2>
-              <p className="text-gray-700 text-center mb-8 max-w-2xl mx-auto">
-                Veja como uma avaliação simples pode gerar uma conversa mais qualificada com o aluno.
-              </p>
-              <div className="grid lg:grid-cols-2 gap-8 items-start">
-                <div className="space-y-4">
-                  <p className="text-sm font-medium text-gray-600">Avaliação respondida</p>
-                  <p className="text-xs text-gray-400 font-mono">ylada.app/avaliacao/treino</p>
-                  <div className="bg-white rounded-2xl p-5 shadow-lg border border-gray-100 max-w-sm">
-                    <p className="text-xs text-gray-500 mb-2">Avaliação: &quot;Você está pronto para começar a treinar?&quot;</p>
-                    <div className="bg-blue-50 rounded-xl p-4 border-l-4 border-blue-500">
-                      <p className="font-semibold text-gray-900 mb-2">Resultado do diagnóstico</p>
-                      <p className="font-medium text-gray-800 mb-2">Perfil identificado: Interesse em treino personalizado</p>
-                      <p className="text-sm text-gray-600 mb-3">Possíveis sinais:</p>
-                      <ul className="text-sm text-gray-700 space-y-1">
-                        <li>• objetivo de ganhar massa ou emagrecer</li>
-                        <li>• disposição para mudar hábitos</li>
-                        <li>• interesse em acompanhamento</li>
-                      </ul>
-                    </div>
-                    <p className="text-xs text-gray-500 mt-3 italic">
-                      Esse resultado sugere que um treino personalizado pode ajudar.
-                    </p>
-                    <p className="text-xs text-gray-600 mt-2">
-                      Isso gera curiosidade e abre espaço para agendar uma avaliação.
-                    </p>
-                  </div>
-                  <div className="bg-[#dcf8c6] rounded-xl p-4 max-w-sm ml-4 border border-gray-200">
-                    <p className="text-sm text-gray-800">
-                      &quot;Gostaria de saber como funciona o treino. Posso agendar uma avaliação?&quot;
-                    </p>
-                    <p className="text-xs text-gray-500 mt-1">💬 Mensagem que o aluno envia depois</p>
-                  </div>
-                </div>
-                <div className="space-y-4">
-                  <p className="text-sm font-medium text-gray-600">Veja como a conversa começa</p>
-                  <div className="aspect-video bg-gray-200 rounded-xl flex items-center justify-center border-2 border-dashed border-gray-300">
-                    <div className="text-center p-6">
-                      <p className="text-gray-500 text-sm mb-2">Área para vídeo</p>
-                      <p className="text-gray-400 text-xs max-w-[200px] mx-auto">
-                        Vídeo curto mostrando: criar avaliação → enviar link → aluno responde → diagnóstico aparece → conversa começa
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <p className="text-gray-700 text-center mt-8 max-w-2xl mx-auto">
-                Quando o aluno responde uma avaliação, ele começa a refletir sobre seus objetivos. Isso gera interesse e abertura para agendar.
-              </p>
-              <div className="text-center mt-8">
-                <Link
-                  href="/pt/precos"
-                  className="inline-flex items-center justify-center px-8 py-4 rounded-xl bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-colors"
-                >
-                  Começar agora
-                </Link>
-                <p className="text-gray-500 text-sm mt-2">Acesso liberado após o pagamento</p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section className="py-12 sm:py-16 bg-white">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="max-w-2xl mx-auto">
-              <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-6 text-center">
-                Avaliações usadas por profissionais de fitness
-              </h2>
-              <p className="text-gray-700 mb-6 text-center">
-                Profissionais usam avaliações como:
-              </p>
-              <ul className="space-y-3 text-gray-700 mb-6">
-                {[
-                  'Você está pronto para começar a treinar?',
-                  'Seu corpo pode estar precisando de mais movimento?',
-                  'Qual seu objetivo principal com o treino?',
-                ].map((item) => (
-                  <li key={item} className="flex items-start gap-3">
-                    <span className="text-blue-600 font-bold shrink-0">•</span>
-                    <span>{item}</span>
-                  </li>
-                ))}
-              </ul>
-              <p className="text-gray-600 text-center text-sm">
-                Essas avaliações ajudam a atrair alunos que entendem o valor do treino.
-              </p>
-            </div>
-          </div>
-        </section>
+        <DiagnosticoExemploSection area="fitness" />
 
         <section className="py-12 sm:py-16 bg-gray-50">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -264,11 +177,12 @@ export default function FitnessLandingPage() {
               <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-8 text-center">
                 Quando a conversa começa com contexto, tudo muda
               </h2>
-              <ul className="space-y-4">
+              <ul className="space-y-4 mb-6">
                 {[
                   'Menos curiosos',
+                  'Alunos mais preparados',
                   'Conversas mais qualificadas',
-                  'Alunos que entendem o valor do treino',
+                  'Mais clareza no primeiro contato',
                   'Menos tempo explicando no WhatsApp',
                   'Mais autoridade profissional',
                 ].map((benefit) => (

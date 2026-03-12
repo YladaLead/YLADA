@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useAuth } from '@/contexts/AuthContext'
 import { UseCasesSection } from '@/components/ylada/UseCasesSection'
 import { HeroBeforeAfter } from '@/components/ylada/HeroBeforeAfter'
+import { DiagnosticoExemploSection } from '@/components/ylada/DiagnosticoExemploSection'
 import { PricingBlockCompact } from '@/components/ylada/PricingBlockCompact'
 import { useRouter } from 'next/navigation'
 
@@ -67,16 +68,18 @@ export default function PsiLandingPage() {
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="max-w-2xl mx-auto text-center">
               <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 leading-tight mb-4">
-                YLADA para Psicólogos
+                Pare de responder curiosos.
+                <br />
+                Comece conversas com contexto.
               </h1>
-              <p className="text-lg sm:text-xl text-gray-700 mb-2">
-                Transforme curiosos em conversas com contexto.
-              </p>
               <p className="text-base sm:text-lg text-gray-600 mb-4">
-                Entenda a situação e o momento do cliente antes mesmo do primeiro contato.
+                O YLADA permite que a pessoa responda uma avaliação rápida antes do primeiro contato, gerando um diagnóstico inicial e conversas muito mais qualificadas.
               </p>
-              <p className="text-base sm:text-lg text-gray-600 mb-6">
-                A pessoa responde uma avaliação rápida antes da conversa. Assim você entende interesses, necessidades e o momento da pessoa antes mesmo do primeiro contato.
+              <p className="text-lg sm:text-xl text-gray-700 font-medium mb-6">
+                Transforme curiosos em clientes preparados para conversa.
+              </p>
+              <p className="text-sm sm:text-base text-gray-600 italic mb-6 border-l-4 border-blue-500 pl-4 py-2 bg-blue-50/50 rounded-r-lg text-left max-w-md mx-auto">
+                Servir antes de vender. Entender antes de orientar. Conversar antes da consulta.
               </p>
               <div className="flex flex-col items-center gap-1 mb-8 text-sm text-gray-600">
                 <span>Cliente responde avaliação</span>
@@ -109,15 +112,15 @@ export default function PsiLandingPage() {
               <ul className="space-y-4 text-gray-700">
                 <li className="flex items-start gap-3">
                   <span className="text-red-500 font-bold shrink-0">•</span>
-                  <span>Curiosos pedindo informação sem intenção real de atendimento</span>
+                  <span>Pacientes pedindo orientação gratuita</span>
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="text-red-500 font-bold shrink-0">•</span>
-                  <span>Conversas que começam e desaparecem</span>
+                  <span>Conversas que não viram consulta</span>
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="text-red-500 font-bold shrink-0">•</span>
-                  <span>Dificuldade de conduzir o primeiro contato com clareza</span>
+                  <span>Falta de clareza no primeiro contato</span>
                 </li>
               </ul>
               <p className="text-center text-gray-600 mt-8 font-medium">
@@ -173,119 +176,9 @@ export default function PsiLandingPage() {
           </div>
         </section>
 
-        {/* 5️⃣ VEJA COMO FUNCIONA NA PRÁTICA — foco na experiência do cliente */}
-        <section className="py-12 sm:py-16 bg-gray-50">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="max-w-4xl mx-auto">
-              <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4 text-center">
-                Veja como um diagnóstico pode iniciar uma conversa real
-              </h2>
-              <p className="text-gray-700 text-center mb-8 max-w-2xl mx-auto">
-                Veja como uma avaliação simples pode gerar uma conversa mais qualificada com o cliente.
-              </p>
+        <DiagnosticoExemploSection area="psi" />
 
-              <div className="grid lg:grid-cols-2 gap-8 items-start">
-                {/* Coluna 1: Preview do diagnóstico (estilo WhatsApp) */}
-                <div className="space-y-4">
-                  <p className="text-sm font-medium text-gray-600">Avaliação respondida</p>
-                  <p className="text-xs text-gray-400 font-mono">ylada.app/avaliacao/ansiedade</p>
-                  <div className="bg-white rounded-2xl p-5 shadow-lg border border-gray-100 max-w-sm">
-                    <p className="text-xs text-gray-500 mb-2">Avaliação: &quot;Seu nível de ansiedade pode estar alto?&quot;</p>
-                    <div className="bg-blue-50 rounded-xl p-4 border-l-4 border-blue-500">
-                      <p className="font-semibold text-gray-900 mb-2">Resultado do diagnóstico</p>
-                      <p className="font-medium text-gray-800 mb-2">Perfil identificado: Sobrecarga emocional moderada</p>
-                      <p className="text-sm text-gray-600 mb-3">Possíveis sinais:</p>
-                      <ul className="text-sm text-gray-700 space-y-1">
-                        <li>• dificuldade para desacelerar</li>
-                        <li>• sensação de pressão constante</li>
-                        <li>• acúmulo de responsabilidades</li>
-                      </ul>
-                    </div>
-                    <p className="text-xs text-gray-500 mt-3 italic">
-                      Esse resultado sugere que conversar com um profissional pode ajudar a entender melhor esses sinais.
-                    </p>
-                    <p className="text-xs text-gray-600 mt-2">
-                      Isso gera curiosidade e abre espaço para iniciar uma conversa.
-                    </p>
-                  </div>
-                  {/* Mensagem que o cliente envia depois */}
-                  <div className="bg-[#dcf8c6] rounded-xl p-4 max-w-sm ml-4 border border-gray-200">
-                    <p className="text-sm text-gray-800">
-                      &quot;Achei interessante esse resultado. Como funciona o atendimento?&quot;
-                    </p>
-                    <p className="text-xs text-gray-500 mt-1">💬 Mensagem que o cliente envia depois</p>
-                  </div>
-                </div>
-
-                {/* Coluna 2: Área para vídeo */}
-                <div className="space-y-4">
-                  <p className="text-sm font-medium text-gray-600">Veja como a conversa começa</p>
-                  <div className="aspect-video bg-gray-200 rounded-xl flex items-center justify-center border-2 border-dashed border-gray-300">
-                    <div className="text-center p-6">
-                      <p className="text-gray-500 text-sm mb-2">Área para vídeo</p>
-                      <p className="text-gray-400 text-xs max-w-[200px] mx-auto">
-                        Vídeo curto (30–40s) mostrando: criar avaliação → enviar link → cliente responde → diagnóstico aparece → conversa começa
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <p className="text-gray-700 text-center mt-8 max-w-2xl mx-auto">
-                Quando a pessoa responde uma avaliação, ela começa a refletir sobre sua própria situação. Isso gera curiosidade, interesse e abertura para iniciar uma conversa com o profissional.
-              </p>
-              <p className="text-gray-800 font-medium text-center mt-4">
-                O objetivo não é convencer curiosos.
-                <br />
-                É iniciar conversas com pessoas que já refletiram sobre sua própria situação.
-              </p>
-              <p className="text-gray-600 text-sm text-center mt-2">
-                Os diagnósticos podem ser enviados de forma visual para iniciar conversas pelo WhatsApp.
-              </p>
-
-              <div className="text-center mt-8">
-                <Link
-                  href="/pt/precos"
-                  className="inline-flex items-center justify-center px-8 py-4 rounded-xl bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-colors"
-                >
-                  Começar agora
-                </Link>
-                <p className="text-gray-500 text-sm mt-2">Acesso liberado após o pagamento</p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* 6️⃣ EXEMPLOS DE AVALIAÇÕES */}
-        <section className="py-12 sm:py-16 bg-white">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="max-w-2xl mx-auto">
-              <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-6 text-center">
-                Avaliações usadas por psicólogos
-              </h2>
-              <p className="text-gray-700 mb-6 text-center">
-                Psicólogos usam avaliações como:
-              </p>
-              <ul className="space-y-3 text-gray-700 mb-6">
-                {[
-                  'Seu nível de ansiedade pode estar alto?',
-                  'Você pode estar acumulando estresse?',
-                  'Você está sobrecarregado emocionalmente?',
-                ].map((item) => (
-                  <li key={item} className="flex items-start gap-3">
-                    <span className="text-blue-600 font-bold shrink-0">•</span>
-                    <span>{item}</span>
-                  </li>
-                ))}
-              </ul>
-              <p className="text-gray-600 text-center text-sm">
-                Essas avaliações ajudam a iniciar conversas mais relevantes e profissionais.
-              </p>
-            </div>
-          </div>
-        </section>
-
-        {/* 7️⃣ BENEFÍCIOS */}
+        {/* 6️⃣ BENEFÍCIOS */}
         <section className="py-12 sm:py-16 bg-gray-50">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="max-w-2xl mx-auto">
@@ -295,6 +188,7 @@ export default function PsiLandingPage() {
               <ul className="space-y-4 mb-6">
                 {[
                   'Menos curiosos',
+                  'Clientes mais preparados',
                   'Conversas mais qualificadas',
                   'Mais clareza no primeiro contato',
                   'Menos tempo explicando no WhatsApp',
