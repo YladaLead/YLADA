@@ -3,7 +3,7 @@
 import { useEffect } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
-import HomePageContent from '@/components/landing/HomePageContent'
+import InstitutionalPageContent from '@/app/pt/InstitutionalPageContent'
 
 export default function PtHomePage() {
   const { user, loading } = useAuth()
@@ -34,5 +34,5 @@ export default function PtHomePage() {
     )
   }
 
-  return <HomePageContent />
+  return <InstitutionalPageContent />
 }

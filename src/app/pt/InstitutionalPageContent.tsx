@@ -7,12 +7,10 @@ import LanguageSelector from '@/components/LanguageSelector'
 import Link from 'next/link'
 import { useTranslations } from '@/hooks/useTranslations'
 import { useAuth } from '@/contexts/AuthContext'
-import { PERGUNTA_AREA } from '@/config/ylada-diagnosticos'
 import { YLADA_LANDING_AREAS } from '@/config/ylada-landing-areas'
 
 const EXEMPLOS_DIAGNOSTICOS = [
   { titulo: 'O que está travando o crescimento do seu negócio?', href: '/pt/diagnostico' },
-  { titulo: 'Seu investimento profissional está trazendo retorno real?', href: '/pt/diagnostico/investimento' },
   { titulo: 'Seu posicionamento transmite autoridade?', href: '/pt/diagnostico/autoridade' },
   { titulo: 'Por que sua agenda não enche como poderia?', href: '/pt/diagnostico/agenda' },
   { titulo: 'Seu conteúdo atrai clientes ou apenas engajamento?', href: '/pt/diagnostico/conteudo' },
@@ -104,39 +102,40 @@ export default function InstitutionalPageContent() {
       </header>
 
       <main className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* 1. Hero — Micro-compromisso: primeira pergunta já na Home */}
+        {/* 1. Hero — Proposta de geração de conversa */}
         <section className="py-12 sm:py-16 lg:py-24">
           <div className="text-center max-w-2xl mx-auto">
             <h1 className="text-2xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-4 sm:mb-6 leading-tight">
-              Descubra por que seu marketing ainda atrai curiosos em vez de clientes preparados
+              Seu marketing atrai curiosos ou clientes prontos para contratar?
             </h1>
             <p className="text-base sm:text-lg text-gray-600 mb-8 max-w-2xl mx-auto leading-relaxed">
-              Em menos de 1 minuto você descobre o que está travando o crescimento do seu negócio.
+              Descubra em poucos minutos se sua comunicação profissional está realmente atraindo as pessoas certas.
             </p>
-            <p className="text-lg font-semibold text-gray-900 mb-4">
-              {PERGUNTA_AREA.texto}
+            <p className="text-lg font-semibold text-gray-900 mb-4 text-left">
+              Você vai descobrir:
             </p>
-            <div className="space-y-3 mb-6">
-              {PERGUNTA_AREA.opcoes.map((opcao) => (
-                <Link
-                  key={opcao.valor}
-                  href={`/pt/diagnostico?area=${opcao.valor}`}
-                  className="block w-full text-left px-4 py-3 rounded-lg border-2 border-gray-200 bg-white hover:border-blue-500 hover:bg-blue-50 transition-all font-medium text-gray-800"
-                >
-                  <span className="inline-block w-4 h-4 rounded-full border-2 border-gray-300 mr-3 align-middle" aria-hidden />
-                  {opcao.label}
-                </Link>
-              ))}
+            <ul className="text-left space-y-2 mb-8 max-w-xl mx-auto">
+              <li className="flex items-center gap-2"><span className="text-green-600">✔</span> Se seu marketing atrai curiosos ou clientes preparados</li>
+              <li className="flex items-center gap-2"><span className="text-green-600">✔</span> Por que algumas conversas não avançam</li>
+              <li className="flex items-center gap-2"><span className="text-green-600">✔</span> Como profissionais usam diagnósticos para atrair clientes melhores</li>
+            </ul>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-4">
+              <Link
+                href="/pt/diagnostico"
+                className="inline-flex items-center justify-center px-8 py-4 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition-all"
+              >
+                Fazer diagnóstico
+              </Link>
+              <Link
+                href="/pt/metodo-ylada"
+                className="inline-flex items-center justify-center px-8 py-4 border-2 border-blue-600 text-blue-600 font-semibold rounded-xl hover:bg-blue-50 transition-all"
+              >
+                Entender o método
+              </Link>
             </div>
             <p className="text-sm text-gray-500">
-              Leva menos de 1 minuto • 7 perguntas rápidas
+              7 perguntas • menos de 1 minuto
             </p>
-            <Link
-              href="/pt/metodo-ylada"
-              className="inline-block mt-6 text-sm text-gray-600 hover:text-gray-900 font-medium"
-            >
-              Conhecer o método
-            </Link>
           </div>
         </section>
 
@@ -328,10 +327,10 @@ export default function InstitutionalPageContent() {
           </div>
         </section>
 
-        {/* 7. Áreas onde o YLADA pode ser aplicado */}
+        {/* 7. Para quais profissionais o YLADA foi criado */}
         <section className="py-12 sm:py-16 lg:py-20">
           <h2 className="text-xl sm:text-3xl font-bold text-gray-900 text-center mb-2">
-            Áreas onde o YLADA pode ser aplicado
+            Para quais profissionais o YLADA foi criado
           </h2>
           <p className="text-gray-600 text-center mb-8 max-w-2xl mx-auto">
             Profissionais e vendedores consultivos usam diagnósticos para atrair clientes mais preparados.
