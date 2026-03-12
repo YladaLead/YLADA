@@ -442,6 +442,17 @@ export async function GET(request: NextRequest) {
             title: 'Qual é o seu Tipo de Fome?',
             description: 'Identifique Fome Física, por Hábito ou Emocional',
             emoji: '🍽️'
+          },
+          // Sono e Energia: quadro parceria usa avaliacao-sono-energia
+          'avaliacao-sono-energia': {
+            title: 'Avaliação do Sono e Energia',
+            description: 'Avalie se o sono está restaurando sua energia diária',
+            emoji: '😴'
+          },
+          'quiz-sono-energia': {
+            title: 'Avaliação do Sono e Energia',
+            description: 'Avalie se o sono está restaurando sua energia diária',
+            emoji: '😴'
           }
         }
         const builtIn = builtInTemplates[toolSlug]
