@@ -1,500 +1,161 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import Image from 'next/image'
-import LyaSalesWidget from '@/components/nutri/LyaSalesWidget'
-import { trackNutriSalesView, trackInitiateCheckout, trackNutriCheckoutMonthly, trackNutriCheckoutAnnual } from '@/lib/facebook-pixel'
-import { landingPageVideos } from '@/lib/landing-pages-assets'
+import { useAuth } from '@/contexts/AuthContext'
+import { UseCasesSection } from '@/components/ylada/UseCasesSection'
+import { HeroBeforeAfter } from '@/components/ylada/HeroBeforeAfter'
+import { PricingBlockCompact } from '@/components/ylada/PricingBlockCompact'
+import { useRouter } from 'next/navigation'
 
+/**
+ * Landing YLADA para Nutricionistas — template oficial.
+ */
 export default function NutriLandingPage() {
+  const { user, loading } = useAuth()
+  const router = useRouter()
+  const [mounted, setMounted] = useState(false)
   const [faqOpen, setFaqOpen] = useState<number | null>(null)
-  const [lyaWidgetOpen, setLyaWidgetOpen] = useState(false)
-  const videoRef = useRef<HTMLVideoElement>(null)
-  const videoContainerRef = useRef<HTMLDivElement>(null)
-  const [videoPlaying, setVideoPlaying] = useState(false)
-  const [isFullscreen, setIsFullscreen] = useState(false)
 
   useEffect(() => {
-    trackNutriSalesView()
+    setMounted(true)
   }, [])
 
   useEffect(() => {
-    const onFullscreenChange = () => setIsFullscreen(!!document.fullscreenElement)
-    document.addEventListener('fullscreenchange', onFullscreenChange)
-    const video = videoRef.current
-    const onWebKitEndFullscreen = () => setIsFullscreen(false)
-    if (video) {
-      video.addEventListener('webkitendfullscreen', onWebKitEndFullscreen)
+    if (!mounted || loading) return
+    if (user) {
+      router.replace('/pt/nutri/home')
     }
-    return () => {
-      document.removeEventListener('fullscreenchange', onFullscreenChange)
-      if (video) video.removeEventListener('webkitendfullscreen', onWebKitEndFullscreen)
-    }
-  }, [])
+  }, [mounted, loading, user, router])
 
-  const toggleFaq = (index: number) => {
-    setFaqOpen(faqOpen === index ? null : index)
-  }
-
-  const openLyaWidget = () => {
-    setLyaWidgetOpen(true)
-  }
-
-  const handleCheckout = (plan: 'monthly' | 'annual' = 'annual') => {
-    if (plan === 'monthly') trackNutriCheckoutMonthly()
-    else trackNutriCheckoutAnnual()
-    window.location.href = `/pt/nutri/checkout?plan=${plan}`
-  }
-
-  const handleMainCtaClick = () => {
-    trackInitiateCheckout({
-      content_name: 'CTA Quero aplicar o método Nutri',
-      content_category: 'NUTRI',
-      value: 708,
-      currency: 'BRL',
-    })
-    trackNutriCheckoutAnnual()
-  }
-
-  const toggleVideo = () => {
-    const video = videoRef.current
-    if (!video) return
-    if (video.paused) {
-      video.play()
-      setVideoPlaying(true)
-    } else {
-      video.pause()
-      setVideoPlaying(false)
-    }
-  }
-
-  const toggleFullscreen = async (e: React.MouseEvent) => {
-    e.stopPropagation()
-    const video = videoRef.current
-    const container = videoContainerRef.current
-    // iOS: vídeo em tela cheia permite assistir deitado (landscape)
-    const videoEl = video as HTMLVideoElement & { webkitEnterFullscreen?: () => void }
-    if (videoEl?.webkitEnterFullscreen && !document.fullscreenElement) {
-      try {
-        videoEl.webkitEnterFullscreen()
-        setIsFullscreen(true)
-      } catch {
-        if (container) {
-          try {
-            await container.requestFullscreen()
-            setIsFullscreen(true)
-          } catch {}
-        }
-      }
-      return
-    }
-    if (!container) return
-    try {
-      if (!document.fullscreenElement) {
-        await container.requestFullscreen()
-        setIsFullscreen(true)
-      } else {
-        await document.exitFullscreen()
-        setIsFullscreen(false)
-      }
-    } catch {
-      try {
-        if (document.fullscreenElement) {
-          await document.exitFullscreen()
-          setIsFullscreen(false)
-        }
-      } catch {}
-    }
+  if (loading || (mounted && user)) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="animate-spin rounded-full h-10 w-10 border-2 border-blue-600 border-t-transparent" />
+      </div>
+    )
   }
 
   return (
-    <div className="min-h-screen bg-white relative">
-      {/* Header */}
-      <header className="sticky top-0 z-50 border-b border-gray-200 bg-white shadow-sm h-16 sm:h-20 flex items-center">
-          <div className="container mx-auto px-6 lg:px-8 py-3 flex items-center justify-between">
-          <Link href="/pt">
-            <Image
-              src="/images/logo/nutri-horizontal.png"
-              alt="YLADA Nutri"
-              width={133}
-              height={40}
-              className="h-8 sm:h-10 w-auto"
-              priority
-            />
-          </Link>
-          <div className="flex items-center gap-4">
-            <Link href="/pt/metodo-ylada" className="text-gray-600 hover:text-gray-900 text-sm font-medium hidden sm:inline">
-              Método YLADA
+    <div className="min-h-screen bg-white">
+      <header className="sticky top-0 z-50 border-b border-gray-200 bg-white shadow-sm h-14 sm:h-16 flex items-center">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-2 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Link href="/pt" className="flex items-center gap-2">
+              <span className="font-bold text-gray-900">YLADA</span>
+              <span className="text-gray-500 text-sm">· Nutrição</span>
             </Link>
-            <Link
-              href="/pt/nutri/login"
-              className="inline-flex items-center px-4 sm:px-6 py-2 sm:py-2.5 bg-[#2563EB] text-white text-sm sm:text-base font-semibold rounded-lg hover:bg-[#1D4ED8] transition-all shadow-md hover:shadow-lg"
-            >
-              Entrar
-            </Link>
+            <span className="hidden sm:inline text-xs text-gray-400 border-l border-gray-200 pl-3">
+              Parte da plataforma YLADA
+            </span>
           </div>
+          <Link
+            href="/pt/nutri/login"
+            className="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            Entrar
+          </Link>
         </div>
       </header>
 
       <main>
-        {/* 1️⃣ HERO — página oficial de vendas (Sistema + dor + conversa) */}
-        <section className="bg-gradient-to-br from-[#2563EB] to-[#3B82F6] text-white pt-10 sm:pt-14 pb-10 sm:pb-14">
+        <section className="py-12 sm:py-16 lg:py-20 bg-gradient-to-br from-blue-50 to-indigo-50">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="max-w-2xl mx-auto text-center">
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black leading-tight mb-3">
-                Sistema de Conversas Ativas para Nutricionistas
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 leading-tight mb-4">
+                YLADA para Nutricionistas
               </h1>
-              <p className="text-lg sm:text-xl text-white/95 mb-3">
-                Se sua agenda oscila todo mês, o problema não é falta de pacientes.
+              <p className="text-lg sm:text-xl text-gray-700 mb-4">
+                Explicar melhor o processo antes da primeira consulta.
               </p>
-              <p className="text-lg sm:text-xl text-white/95 mb-3">
-                É falta de um sistema que atraia pessoas realmente interessadas em melhorar a alimentação — e não apenas curiosos.
+              <p className="text-base sm:text-lg text-gray-600 mb-6">
+                O paciente responde uma avaliação rápida antes do contato. Assim você entende hábitos, objetivos e o momento da pessoa antes mesmo da primeira consulta.
               </p>
-              <p className="text-base sm:text-lg font-medium italic text-white/90 mb-6">
-                Venda não nasce do post. Nasce da conversa certa.
+              <div className="flex flex-col items-center gap-1 mb-8 text-sm text-gray-600">
+                <span>Paciente responde avaliação</span>
+                <span className="text-gray-400">↓</span>
+                <span>Sistema gera diagnóstico</span>
+                <span className="text-gray-400">↓</span>
+                <span>A conversa começa com contexto</span>
+              </div>
+              <Link
+                href="/pt/precos"
+                className="inline-flex items-center justify-center px-8 py-4 rounded-xl bg-blue-600 text-white font-semibold text-lg hover:bg-blue-700 transition-colors shadow-lg"
+              >
+                Começar agora
+                <span className="ml-2" aria-hidden>→</span>
+              </Link>
+              <p className="text-gray-500 text-sm mt-3">Acesso liberado após o pagamento</p>
+            </div>
+          </div>
+        </section>
+
+        <HeroBeforeAfter area="nutri" />
+
+        <section className="py-12 sm:py-16 bg-white">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="max-w-2xl mx-auto">
+              <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-6 text-center">
+                Nutricionistas enfrentam três dificuldades comuns no marketing online
+              </h2>
+              <ul className="space-y-4 text-gray-700">
+                <li className="flex items-start gap-3">
+                  <span className="text-red-500 font-bold shrink-0">•</span>
+                  <span>Pacientes pedindo dieta sem entender o processo da consulta</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="text-red-500 font-bold shrink-0">•</span>
+                  <span>Conversas que começam e não evoluem para agendamento</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="text-red-500 font-bold shrink-0">•</span>
+                  <span>Dificuldade de explicar o valor da avaliação nutricional</span>
+                </li>
+              </ul>
+              <p className="text-center text-gray-600 mt-8 font-medium">
+                Isso consome tempo, gera conversas improdutivas e reduz a qualidade das consultas.
               </p>
-              <div className="flex flex-col items-center">
-                <Link
-                  href="/pt/nutri/checkout"
-                  onClick={handleMainCtaClick}
-                  className="inline-flex items-center justify-center w-full sm:w-auto max-w-md px-8 py-4 rounded-xl bg-white text-[#2563EB] font-bold text-lg hover:bg-white/95 transition-all shadow-2xl shadow-black/25 hover:shadow-[0_20px_40px_-12px_rgba(0,0,0,0.35)]"
-                >
-                  👉 Quero aplicar o método na minha agenda
-                </Link>
-                <p className="text-sm text-white/90 mt-4">
-                  Sem depender de indicação, reels ou sorte.
+            </div>
+          </div>
+        </section>
+
+        <section className="py-12 sm:py-16 bg-gray-50">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="max-w-2xl mx-auto">
+              <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-6 text-center">
+                O YLADA ajuda você a explicar o processo antes da consulta
+              </h2>
+              <p className="text-lg text-gray-700 mb-6 text-center">
+                O paciente responde uma avaliação rápida antes do contato. Assim você entende hábitos, objetivos e pode orientar sobre o processo da consulta.
+              </p>
+              <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
+                <p className="text-gray-700 text-center">
+                  Explicar melhor o processo antes da primeira consulta.
                 </p>
               </div>
             </div>
           </div>
         </section>
 
-        {/* 2️⃣ VÍDEO — protagonista (trocar src quando tiver o vídeo fechador) */}
-        <section id="video" className="py-10 sm:py-14 bg-white scroll-mt-4">
+        <section className="py-12 sm:py-16 bg-white">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="max-w-3xl mx-auto">
-              <p className="text-center text-gray-700 mb-4 text-sm sm:text-base font-medium">
-                👉 Assista e entenda por que sua agenda oscila.
-              </p>
-              <div
-                ref={videoContainerRef}
-                role="button"
-                tabIndex={0}
-                onClick={toggleVideo}
-                onKeyDown={(e) => e.key === 'Enter' && toggleVideo()}
-                className="aspect-video max-h-[400px] bg-gray-900 rounded-2xl overflow-hidden cursor-pointer group relative border-2 border-gray-200 shadow-xl"
-              >
-                <video
-                  ref={videoRef}
-                  className="w-full h-full object-cover"
-                  poster={landingPageVideos.nutriHeroPoster}
-                  playsInline
-                  onPlay={() => setVideoPlaying(true)}
-                  onPause={() => setVideoPlaying(false)}
-                >
-                  <source src={landingPageVideos.nutriHero} type="video/mp4" />
-                </video>
-                {!videoPlaying && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-black/30 group-hover:bg-black/20 transition-colors">
-                    <span className="w-16 h-16 rounded-full bg-white/90 flex items-center justify-center text-blue-600 shadow-lg">
-                      <svg className="w-8 h-8 ml-1" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M8 5v14l11-7z" />
-                      </svg>
-                    </span>
-                  </div>
-                )}
-                <button
-                  type="button"
-                  onClick={toggleFullscreen}
-                  className="absolute bottom-3 right-3 p-3 sm:p-2 rounded-xl bg-black/50 hover:bg-black/70 text-white transition-colors z-10 touch-manipulation min-w-[44px] min-h-[44px] sm:min-w-0 sm:min-h-0 flex items-center justify-center"
-                  aria-label={isFullscreen ? 'Sair da tela cheia' : 'Tela cheia (assistir ampliado / deitado)'}
-                >
-                  {isFullscreen ? (
-                    <svg className="w-6 h-6 sm:w-5 sm:h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z"/></svg>
-                  ) : (
-                    <svg className="w-6 h-6 sm:w-5 sm:h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>
-                  )}
-                </button>
-              </div>
-              <div className="flex flex-wrap justify-center gap-3 mt-6">
-                <Link
-                  href="/pt/nutri/checkout"
-                  onClick={handleMainCtaClick}
-                  className="inline-flex items-center justify-center px-8 py-3 rounded-xl bg-[#2563EB] text-white font-semibold hover:bg-[#1D4ED8] transition-colors"
-                >
-                  Quero aplicar o método
-                </Link>
-                <a href="#planos" className="inline-flex items-center justify-center px-6 py-3 rounded-xl border-2 border-gray-200 text-gray-700 font-medium hover:bg-gray-50 transition-colors">
-                  Ver planos
-                </a>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* 3️⃣ Reforço curto da dor */}
-        <section className="py-8 sm:py-10 bg-[#F5F7FA]">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="max-w-2xl mx-auto text-center">
-              <p className="text-lg sm:text-xl text-gray-700 leading-relaxed">
-                Nutri, sua agenda não estava vazia por falta de competência.
-              </p>
-              <p className="text-lg sm:text-xl text-gray-700 leading-relaxed mt-2">
-                Estava vazia por falta de um sistema que provoque conversas com as pessoas certas.
-              </p>
-              <p className="text-lg sm:text-xl font-semibold text-[#1A1A1A] mt-4">
-                Agora você já entendeu isso. O próximo passo é aplicar.
-              </p>
-            </div>
-          </div>
-        </section>
-
-        {/* 4️⃣ Você já se sentiu assim? — âncora emocional; punchline sozinha, maior, soco */}
-        <section className="py-10 sm:py-12 bg-white">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="max-w-xl mx-auto text-center">
-              <p className="text-base sm:text-lg text-gray-600 mb-4">
-                Se você já viveu isso, você não está sozinha.
-              </p>
-              <h2 className="text-xl font-bold text-[#1A1A1A] mb-4">
-                Você já se sentiu assim?
+              <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-10 text-center">
+                Como funciona
               </h2>
-              <ul className="space-y-2 text-gray-700 text-left inline-block mb-10">
-                <li>• Curiosos pedindo dicas e sumindo</li>
-                <li>• Conversas que não evoluem</li>
-                <li>• Agenda vazia</li>
-                <li>• Dúvida na cobrança</li>
-                <li>• Sensação constante de recomeçar</li>
-                <li>• Falta de clareza do próximo passo</li>
-              </ul>
-              <p className="text-3xl sm:text-4xl font-black text-[#1A1A1A] text-center leading-tight py-6 px-2">
-                O problema não é você. É falta de método.
-              </p>
-            </div>
-          </div>
-        </section>
-
-        {/* 5️⃣ O que você recebe (objetivo) — título centralizado, lista à esquerda */}
-        <section className="py-10 sm:py-14 bg-[#F5F7FA]">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="max-w-2xl mx-auto">
-              <h2 className="text-2xl sm:text-3xl font-bold text-[#1A1A1A] mb-4 text-center">
-                O que você recebe
-              </h2>
-              <p className="text-lg text-gray-700 mb-4 text-center">
-                YLADA Nutri é a aplicação prática do Sistema de Conversas Ativas.
-              </p>
-              <p className="text-gray-800 font-semibold mb-6 text-center">
-                Tudo começa provocando a conversa certa.
-              </p>
-              <p className="text-gray-700 font-medium mb-3 text-left">Dentro do YLADA Nutri você recebe:</p>
-              <ul className="space-y-3 text-gray-700 mb-6 text-left">
-                <li className="flex items-start gap-3">
-                  <span className="shrink-0 w-8 h-8 rounded-lg bg-[#2563EB]/10 flex items-center justify-center">
-                    <svg className="w-4 h-4 text-[#2563EB]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
-                  </span>
-                  <span><span className="text-[#29CC6A] font-bold">✓</span> Sistema de captação com orientação Noel</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <span className="shrink-0 w-8 h-8 rounded-lg bg-[#2563EB]/10 flex items-center justify-center">
-                    <svg className="w-4 h-4 text-[#2563EB]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
-                  </span>
-                  <span><span className="text-[#29CC6A] font-bold">✓</span> Links inteligentes que provocam conversa</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <span className="shrink-0 w-8 h-8 rounded-lg bg-[#2563EB]/10 flex items-center justify-center">
-                    <svg className="w-4 h-4 text-[#2563EB]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                  </span>
-                  <span><span className="text-[#29CC6A] font-bold">✓</span> Trilha Empresarial de 30 dias</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <span className="shrink-0 w-8 h-8 rounded-lg bg-[#2563EB]/10 flex items-center justify-center">
-                    <svg className="w-4 h-4 text-[#2563EB]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" /></svg>
-                  </span>
-                  <span><span className="text-[#29CC6A] font-bold">✓</span> Direcionamento estratégico diário</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <span className="shrink-0 w-8 h-8 rounded-lg bg-[#2563EB]/10 flex items-center justify-center">
-                    <svg className="w-4 h-4 text-[#2563EB]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
-                  </span>
-                  <span><span className="text-[#29CC6A] font-bold">✓</span> Suporte humano quando necessário</span>
-                </li>
-              </ul>
-              <p className="text-center text-gray-600 font-medium">
-                Sem curso longo. Sem teoria solta. Sem improviso.
-              </p>
-            </div>
-          </div>
-        </section>
-
-        {/* 4️⃣ Bloco visual: Método resumido — 3 pilares com ícones, sombra e hover */}
-        <section className="py-10 sm:py-14 bg-white">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="max-w-4xl mx-auto">
-              <p className="text-center text-gray-700 font-medium mb-2">
-                👉 Você não precisa de mais conteúdo. Você precisa de estrutura.
-              </p>
-              <h2 className="text-xl font-bold text-[#1A1A1A] mb-6 text-center">
-                Método resumido
-              </h2>
-              <div className="grid sm:grid-cols-3 gap-4">
-                <div className="bg-gradient-to-br from-[#2563EB]/10 to-[#3B82F6]/10 rounded-xl p-6 border-2 border-[#2563EB]/30 text-center shadow-md hover:shadow-lg hover:border-[#2563EB]/50 hover:scale-[1.02] transition-all duration-200">
-                  <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-[#2563EB]/15 flex items-center justify-center">
-                    <svg className="w-6 h-6 text-[#2563EB]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
-                  </div>
-                  <p className="font-bold text-[#1A1A1A] text-lg">Captação previsível</p>
-                </div>
-                <div className="bg-gradient-to-br from-[#2563EB]/10 to-[#3B82F6]/10 rounded-xl p-6 border-2 border-[#2563EB]/30 text-center shadow-md hover:shadow-lg hover:border-[#2563EB]/50 hover:scale-[1.02] transition-all duration-200">
-                  <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-[#2563EB]/15 flex items-center justify-center">
-                    <svg className="w-6 h-6 text-[#2563EB]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
-                  </div>
-                  <p className="font-bold text-[#1A1A1A] text-lg">Clareza empresarial</p>
-                </div>
-                <div className="bg-gradient-to-br from-[#2563EB]/10 to-[#3B82F6]/10 rounded-xl p-6 border-2 border-[#2563EB]/30 text-center shadow-md hover:shadow-lg hover:border-[#2563EB]/50 hover:scale-[1.02] transition-all duration-200">
-                  <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-[#2563EB]/15 flex items-center justify-center">
-                    <svg className="w-6 h-6 text-[#2563EB]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
-                  </div>
-                  <p className="font-bold text-[#1A1A1A] text-lg">Orientação que impede abandono</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* 5️⃣ Transformação resumida — impacto visual (fundo distinto, títulos maiores, bordas marcadas) */}
-        <section className="py-10 sm:py-14 bg-gray-200/80">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="max-w-3xl mx-auto">
-              <div className="grid sm:grid-cols-2 gap-6">
-                <div className="bg-white rounded-xl p-6 border-2 border-red-300 shadow-md">
-                  <h3 className="text-2xl font-bold text-red-700 mb-4">Antes</h3>
-                  <ul className="space-y-2 text-gray-700">
-                    <li className="flex items-center gap-2"><span className="text-red-500 font-bold">✗</span> Curiosos consumindo tempo</li>
-                    <li className="flex items-center gap-2"><span className="text-red-500 font-bold">✗</span> Ansiedade</li>
-                    <li className="flex items-center gap-2"><span className="text-red-500 font-bold">✗</span> Agenda vazia</li>
-                    <li className="flex items-center gap-2"><span className="text-red-500 font-bold">✗</span> Insegurança</li>
-                  </ul>
-                </div>
-                <div className="bg-white rounded-xl p-6 border-2 border-emerald-400 shadow-md">
-                  <h3 className="text-2xl font-bold text-[#29CC6A] mb-4">Depois</h3>
-                  <ul className="space-y-2 text-gray-700">
-                    <li className="flex items-center gap-2"><span className="text-[#29CC6A] font-bold">✓</span> Conversas com interessados</li>
-                    <li className="flex items-center gap-2"><span className="text-[#29CC6A] font-bold">✓</span> Conversas abertas</li>
-                    <li className="flex items-center gap-2"><span className="text-[#29CC6A] font-bold">✓</span> Segurança na cobrança</li>
-                    <li className="flex items-center gap-2"><span className="text-[#29CC6A] font-bold">✓</span> Método claro</li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* 8️⃣ Planos — parte principal */}
-        <section id="planos" className="py-14 sm:py-20 bg-gradient-to-br from-[#2563EB] to-[#3B82F6] scroll-mt-4">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="max-w-3xl mx-auto">
-              <h2 className="text-2xl sm:text-3xl font-bold text-center text-white mb-2">
-                Escolha seu plano
-              </h2>
-              <p className="text-center text-white/95 mb-8 text-lg">
-                Se você já entendeu que precisa de método, aqui é onde decide aplicar.
-              </p>
-
-              <div className="grid sm:grid-cols-2 gap-6">
-                {/* Plano Mensal */}
-                <div className="bg-white rounded-2xl p-6 shadow-xl text-center">
-                  <h3 className="text-xl font-bold text-[#1A1A1A] mb-2">Plano Mensal</h3>
-                  <p className="text-3xl font-bold text-[#2563EB]">R$ 97<span className="text-base font-normal text-gray-600">/mês</span></p>
-                  <p className="text-sm text-gray-600 mt-2">Sem fidelidade</p>
-                  <p className="text-sm text-gray-600 mt-0.5">Pode cancelar quando quiser</p>
-                  <p className="text-sm text-gray-700 mt-2 font-medium">Ideal para testar o método sem compromisso.</p>
-                  <p className="text-sm text-gray-600 mt-3 flex items-center justify-center gap-1.5">
-                    <span>🛡️</span> Garantia 7 dias
-                  </p>
-                  <button
-                    type="button"
-                    onClick={() => handleCheckout('monthly')}
-                    className="mt-5 w-full py-3 rounded-xl bg-[#2563EB] text-white font-semibold hover:bg-[#1D4ED8] transition-colors"
-                  >
-                    Começar mensal
-                  </button>
-                </div>
-
-                {/* Plano Anual */}
-                <div className="bg-white rounded-2xl p-6 shadow-xl text-center border-2 border-yellow-400 relative">
-                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-yellow-400 text-gray-900 text-xs font-bold px-3 py-0.5 rounded-full">Recomendado</span>
-                  <h3 className="text-xl font-bold text-[#1A1A1A] mb-2">Plano Anual</h3>
-                  <p className="text-2xl font-bold text-[#2563EB]">12× de R$ 59</p>
-                  <p className="text-sm text-gray-600 mt-1">Total R$ 708</p>
-                  <p className="text-sm font-semibold text-emerald-600 mt-1">Economia de R$ 456 no ano</p>
-                  <p className="text-xs font-medium text-gray-600 mt-1">Menos de R$ 2 por dia para ter agenda previsível.</p>
-                  <p className="text-sm text-gray-700 mt-2 font-medium">Para nutricionistas que decidiram parar de viver de instabilidade.</p>
-                  <p className="text-sm text-gray-600 mt-3 flex items-center justify-center gap-1.5">
-                    <span>🛡️</span> Garantia 7 dias
-                  </p>
-                  <button
-                    type="button"
-                    onClick={() => handleCheckout('annual')}
-                    className="mt-5 w-full py-3 rounded-xl bg-gradient-to-r from-[#2563EB] to-[#3B82F6] text-white font-semibold hover:from-[#1D4ED8] hover:to-[#2563EB] transition-colors"
-                  >
-                    Começar anual
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* 7️⃣ Garantia — ícone maior, fundo azul com mais contraste */}
-        <section className="py-12 sm:py-16 bg-[#BFDBFE]">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="max-w-2xl mx-auto text-center">
-              <span className="text-6xl sm:text-7xl block mb-4">🛡️</span>
-              <h2 className="text-2xl sm:text-3xl font-bold text-[#1A1A1A] mb-3">
-                Garantia de 7 dias incondicional
-              </h2>
-              <p className="text-lg text-gray-700 mb-2">
-                Teste. Se não fizer sentido, devolvemos 100%.
-              </p>
-              <p className="text-gray-600">
-                Sem burocracia. Sem julgamento.
-              </p>
-            </div>
-          </div>
-        </section>
-
-        {/* 🔟 FAQ — enxuto */}
-        <section className="py-12 sm:py-16 bg-[#F5F7FA]">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="max-w-2xl mx-auto">
-              <h2 className="text-2xl font-bold text-center text-[#1A1A1A] mb-8">
-                Perguntas frequentes
-              </h2>
-              <div className="space-y-3">
+              <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {[
-                  { pergunta: 'Para quem é?', resposta: 'Para nutricionistas que querem encher agenda com método, não com indicação ou sorte. Se você quer captação previsível e clareza no próximo passo, é pra você.' },
-                  { pergunta: 'Isso funciona para quem recebe muitos curiosos no Instagram?', resposta: 'Sim. O sistema foi criado justamente para transformar curiosidade em conversas qualificadas. As avaliações e links inteligentes filtram quem realmente quer melhorar a alimentação e iniciam a conversa com contexto.' },
-                  { pergunta: 'Posso cancelar?', resposta: 'Você tem 7 dias de garantia para testar: tanto no plano mensal quanto no anual. Se não fizer sentido, devolvemos 100%. No mensal, depois da garantia você cancela quando quiser. No anual, o compromisso é de 12 meses — mas os 7 primeiros dias são sem risco.' },
-                  { pergunta: 'Como é o suporte?', resposta: 'O Noel te orienta no dia a dia (o que fazer, onde focar). Quando precisar de pessoa real, tem suporte humano. Você não fica sozinha.' },
-                  { pergunta: 'E se não gostar?', resposta: 'Em até 7 dias você pede reembolso e devolvemos 100%. Sem burocracia, sem julgamento. O risco é nosso.' },
-                  { pergunta: 'Quando começo a usar?', resposta: 'Assim que concluir o pagamento você já acessa. Não tem fila: começa hoje.' },
-                ].map((item, index) => (
-                  <div key={index} className="bg-white rounded-xl shadow-sm overflow-hidden">
-                    <button
-                      onClick={() => toggleFaq(index)}
-                      className="w-full px-5 py-4 text-left flex justify-between items-center hover:bg-gray-50 transition-colors"
-                    >
-                      <span className="font-semibold text-[#1A1A1A] pr-4">{item.pergunta}</span>
-                      <span className="text-[#2563EB] text-xl flex-shrink-0 transition-transform duration-300">{faqOpen === index ? '−' : '+'}</span>
-                    </button>
-                    <div
-                      className={`overflow-hidden transition-all duration-300 ease-out ${faqOpen === index ? 'max-h-56 opacity-100' : 'max-h-0 opacity-0'}`}
-                    >
-                      <div className="px-5 py-4 bg-gray-50 border-t border-gray-100">
-                        <p className="text-gray-700 text-sm">{item.resposta}</p>
-                      </div>
-                    </div>
+                  { step: '1', title: 'Escolha uma avaliação', desc: 'Quizzes e diagnósticos prontos para nutrição.' },
+                  { step: '2', title: 'Compartilhe o link', desc: 'Use em redes sociais, WhatsApp ou site.' },
+                  { step: '3', title: 'O paciente responde', desc: 'O sistema identifica hábitos, objetivos e o momento.' },
+                  { step: '4', title: 'Consulta com contexto', desc: 'Você atende pacientes que já entendem o valor da avaliação.' },
+                ].map((item) => (
+                  <div key={item.step} className="text-center p-4">
+                    <span className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-blue-100 text-blue-600 font-bold text-lg mb-3">
+                      {item.step}
+                    </span>
+                    <h3 className="font-semibold text-gray-900 mb-2">{item.title}</h3>
+                    <p className="text-sm text-gray-600">{item.desc}</p>
                   </div>
                 ))}
               </div>
@@ -502,41 +163,282 @@ export default function NutriLandingPage() {
           </div>
         </section>
 
-        {/* CTA final — uma direção, limpo e direto */}
-        <section className="py-10 sm:py-12 bg-white border-t border-gray-100">
+        <section className="py-12 sm:py-16 bg-gray-50">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="max-w-4xl mx-auto">
+              <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4 text-center">
+                Veja como um diagnóstico pode iniciar uma consulta real
+              </h2>
+              <p className="text-gray-700 text-center mb-8 max-w-2xl mx-auto">
+                Veja como uma avaliação simples pode gerar uma conversa mais qualificada com o paciente.
+              </p>
+              <div className="grid lg:grid-cols-2 gap-8 items-start">
+                <div className="space-y-4">
+                  <p className="text-sm font-medium text-gray-600">Avaliação respondida</p>
+                  <p className="text-xs text-gray-400 font-mono">ylada.app/avaliacao/alimentacao</p>
+                  <div className="bg-white rounded-2xl p-5 shadow-lg border border-gray-100 max-w-sm">
+                    <p className="text-xs text-gray-500 mb-2">Avaliação: &quot;Sua alimentação pode estar desequilibrada?&quot;</p>
+                    <div className="bg-blue-50 rounded-xl p-4 border-l-4 border-blue-500">
+                      <p className="font-semibold text-gray-900 mb-2">Resultado do diagnóstico</p>
+                      <p className="font-medium text-gray-800 mb-2">Perfil identificado: Interesse em melhorar hábitos</p>
+                      <p className="text-sm text-gray-600 mb-3">Possíveis sinais:</p>
+                      <ul className="text-sm text-gray-700 space-y-1">
+                        <li>• dificuldade com horários das refeições</li>
+                        <li>• interesse em emagrecimento saudável</li>
+                        <li>• disposição para mudar hábitos</li>
+                      </ul>
+                    </div>
+                    <p className="text-xs text-gray-500 mt-3 italic">
+                      Esse resultado sugere que uma avaliação nutricional pode ajudar.
+                    </p>
+                    <p className="text-xs text-gray-600 mt-2">
+                      Isso gera curiosidade e abre espaço para agendar uma consulta.
+                    </p>
+                  </div>
+                  <div className="bg-[#dcf8c6] rounded-xl p-4 max-w-sm ml-4 border border-gray-200">
+                    <p className="text-sm text-gray-800">
+                      &quot;Gostaria de entender melhor como funciona a consulta. Posso agendar?&quot;
+                    </p>
+                    <p className="text-xs text-gray-500 mt-1">💬 Mensagem que o paciente envia depois</p>
+                  </div>
+                </div>
+                <div className="space-y-4">
+                  <p className="text-sm font-medium text-gray-600">Veja como a conversa começa</p>
+                  <div className="aspect-video bg-gray-200 rounded-xl flex items-center justify-center border-2 border-dashed border-gray-300">
+                    <div className="text-center p-6">
+                      <p className="text-gray-500 text-sm mb-2">Área para vídeo</p>
+                      <p className="text-gray-400 text-xs max-w-[200px] mx-auto">
+                        Vídeo curto mostrando: criar avaliação → enviar link → paciente responde → diagnóstico aparece → consulta começa
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <p className="text-gray-700 text-center mt-8 max-w-2xl mx-auto">
+                Quando o paciente responde uma avaliação, ele começa a refletir sobre sua alimentação. Isso gera interesse e abertura para agendar uma consulta.
+              </p>
+              <div className="text-center mt-8">
+                <Link
+                  href="/pt/precos"
+                  className="inline-flex items-center justify-center px-8 py-4 rounded-xl bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-colors"
+                >
+                  Começar agora
+                </Link>
+                <p className="text-gray-500 text-sm mt-2">Acesso liberado após o pagamento</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="py-12 sm:py-16 bg-white">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="max-w-2xl mx-auto">
+              <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-6 text-center">
+                Avaliações usadas por nutricionistas
+              </h2>
+              <p className="text-gray-700 mb-6 text-center">
+                Nutricionistas usam avaliações como:
+              </p>
+              <ul className="space-y-3 text-gray-700 mb-6">
+                {[
+                  'Sua alimentação pode estar desequilibrada?',
+                  'Seus hábitos podem estar prejudicando sua saúde?',
+                  'Você está pronto para mudar sua relação com a comida?',
+                ].map((item) => (
+                  <li key={item} className="flex items-start gap-3">
+                    <span className="text-blue-600 font-bold shrink-0">•</span>
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+              <p className="text-gray-600 text-center text-sm">
+                Essas avaliações ajudam a explicar o processo antes da primeira consulta.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section className="py-12 sm:py-16 bg-gray-50">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="max-w-2xl mx-auto">
+              <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-8 text-center">
+                Quando a consulta começa com contexto, tudo muda
+              </h2>
+              <ul className="space-y-4">
+                {[
+                  'Menos curiosos',
+                  'Consultas mais qualificadas',
+                  'Pacientes que entendem o valor da avaliação',
+                  'Menos tempo explicando no WhatsApp',
+                  'Mais autoridade profissional',
+                ].map((benefit) => (
+                  <li key={benefit} className="flex items-center gap-3 text-gray-700">
+                    <span className="text-green-600 font-bold">✔</span>
+                    <span>{benefit}</span>
+                  </li>
+                ))}
+              </ul>
+              <p className="text-gray-800 font-semibold text-center mt-6">
+                Menos curiosos. Mais pacientes realmente interessados.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <UseCasesSection area="nutri" />
+
+        <section className="py-8 sm:py-12 bg-white">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="max-w-2xl mx-auto text-center">
+              <p className="text-gray-700 font-medium">
+                Profissionais usam o YLADA para iniciar conversas como:
+              </p>
+              <blockquote className="mt-3 text-gray-800 italic border-l-4 border-blue-500 pl-4 py-2 bg-blue-50/50 rounded-r-lg">
+                &quot;Vi que você respondeu a avaliação sobre alimentação. Quer agendar uma consulta para conversarmos sobre seu processo?&quot;
+              </blockquote>
+            </div>
+          </div>
+        </section>
+
+        <section className="py-8 sm:py-12 bg-white">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="max-w-2xl mx-auto">
+              <p className="text-center text-gray-700 font-medium mb-4">
+                Usado por profissionais que querem:
+              </p>
+              <ul className="flex flex-wrap justify-center gap-x-8 gap-y-2 text-gray-700">
+                <li className="flex items-center gap-2"><span className="text-green-600">✔</span> atrair pacientes mais preparados</li>
+                <li className="flex items-center gap-2"><span className="text-green-600">✔</span> iniciar conversas mais qualificadas</li>
+                <li className="flex items-center gap-2"><span className="text-green-600">✔</span> reduzir curiosos</li>
+                <li className="flex items-center gap-2"><span className="text-green-600">✔</span> ganhar mais clareza no primeiro contato</li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        <section className="py-8 sm:py-12 bg-gray-50">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="max-w-2xl mx-auto text-center">
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4">
+                Não é apenas um quiz. É uma conversa que começa antes do contato.
+              </h2>
+              <p className="text-gray-700 leading-relaxed">
+                O paciente responde algumas perguntas.
+              </p>
+              <p className="text-gray-700 leading-relaxed mt-2">
+                O YLADA interpreta as respostas e gera um diagnóstico inicial.
+              </p>
+              <p className="text-gray-700 leading-relaxed mt-2">
+                Isso ajuda o profissional a iniciar conversas mais claras com pessoas que já refletiram sobre sua própria situação.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section className="py-12 sm:py-16 bg-gray-50">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="max-w-lg mx-auto">
+              <p className="text-center text-gray-600 mb-2">
+                Acesso completo à plataforma.
+              </p>
+              <p className="text-center text-gray-600 mb-4">
+                Crie quantos diagnósticos quiser.
+              </p>
+              <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">
+                Comece a usar o YLADA
+              </h2>
+              <PricingBlockCompact ctaHref="/pt/nutri/oferta" />
+              <p className="text-center text-gray-500 text-sm mt-3">
+                Após o pagamento você já pode acessar a plataforma.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section className="py-14 sm:py-20 bg-blue-600">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="max-w-xl mx-auto text-center">
-              <p className="text-lg font-semibold text-gray-800 mb-6">
-                Continuar como está também é uma decisão.
+              <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4">
+                Comece a usar o YLADA hoje
+              </h2>
+              <p className="text-blue-100 mb-6">
+                Crie seu primeiro diagnóstico em minutos.
               </p>
               <Link
-                href="/pt/nutri/checkout"
-                onClick={handleMainCtaClick}
-                className="inline-flex items-center justify-center px-8 py-4 rounded-xl text-lg font-bold bg-gradient-to-r from-[#2563EB] to-[#3B82F6] text-white hover:from-[#1D4ED8] hover:to-[#2563EB] transition-all shadow-lg"
+                href="/pt/precos"
+                className="inline-flex items-center justify-center px-8 py-4 rounded-xl bg-white text-blue-600 font-semibold text-lg hover:bg-blue-50 transition-colors shadow-lg"
               >
-                👉 Quero aplicar o método na minha agenda
+                Começar agora
+                <span className="ml-2" aria-hidden>→</span>
               </Link>
+              <p className="text-blue-100 text-sm mt-3">Acesso liberado após o pagamento</p>
+            </div>
+          </div>
+        </section>
+
+        <section className="py-12 sm:py-16 bg-white">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="max-w-2xl mx-auto">
+              <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">
+                Dúvidas frequentes
+              </h2>
+              <div className="space-y-2">
+                {[
+                  { q: 'Preciso pagar para acessar?', a: 'Sim. Após o pagamento você recebe acesso imediato à plataforma e já pode começar a criar suas avaliações e links.' },
+                  { q: 'Preciso saber marketing?', a: 'Não. O YLADA já possui avaliações prontas. Você pode escolher uma avaliação e começar a usar em minutos.' },
+                  { q: 'Como o paciente recebe a avaliação?', a: 'Você pode compartilhar o link por WhatsApp, redes sociais ou no seu site.' },
+                  { q: 'O diagnóstico substitui consulta?', a: 'Não. A avaliação é apenas um primeiro filtro. Ela ajuda o paciente a refletir e iniciar uma conversa mais qualificada.' },
+                  { q: 'Posso cancelar quando quiser?', a: 'Sim. Você pode cancelar a assinatura a qualquer momento.' },
+                  { q: 'Preciso saber tecnologia para usar?', a: 'Não. O YLADA foi pensado para ser simples. Em poucos minutos você consegue criar sua primeira avaliação e compartilhar o link.' },
+                  { q: 'Onde posso usar os links?', a: 'Você pode compartilhar em Instagram, WhatsApp, redes sociais, site ou qualquer canal de comunicação com seus pacientes.' },
+                  { q: 'O paciente precisa instalar algo?', a: 'Não. O paciente apenas responde a avaliação pelo link enviado.' },
+                ].map((item, i) => (
+                  <div
+                    key={i}
+                    className="border border-gray-200 rounded-lg overflow-hidden"
+                  >
+                    <button
+                      type="button"
+                      onClick={() => setFaqOpen(faqOpen === i ? null : i)}
+                      className="w-full flex items-center justify-between px-4 py-3 text-left font-semibold text-gray-900 hover:bg-gray-50 transition-colors"
+                    >
+                      {item.q}
+                      <span className="text-gray-400 text-lg shrink-0 ml-2">
+                        {faqOpen === i ? '−' : '+'}
+                      </span>
+                    </button>
+                    {faqOpen === i && (
+                      <div className="px-4 pb-3 pt-0">
+                        <p className="text-gray-600 text-sm">{item.a}</p>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </section>
       </main>
 
-      <button
-        onClick={openLyaWidget}
-        className="fixed bottom-6 right-6 z-40 bg-gradient-to-r from-[#2563EB] to-[#3B82F6] text-white px-4 sm:px-6 py-3 sm:py-4 rounded-full shadow-2xl hover:from-[#3B82F6] hover:to-[#1D4ED8] transition-all flex items-center gap-2 sm:gap-3 font-semibold text-sm sm:text-base"
-      >
-        <span className="text-xl sm:text-2xl">💬</span>
-        <span>Fale Conosco</span>
-      </button>
-
-      <LyaSalesWidget isOpen={lyaWidgetOpen} onOpenChange={setLyaWidgetOpen} hideButton={true} />
-
-      <footer className="border-t border-gray-200 bg-white mt-12">
-        <div className="container mx-auto px-4 py-8">
-          <div className="flex flex-col items-center justify-center">
-            <Image src="/images/logo/nutri-horizontal.png" alt="YLADA Nutri" width={133} height={40} className="h-8 w-auto mb-4" />
-            <p className="text-gray-600 text-sm text-center">YLADA Nutricionista. © {new Date().getFullYear()} YLADA.</p>
-            <p className="text-gray-400 text-xs text-center mt-1">Portal Solutions Tech & Innovation LTDA — CNPJ 63.447.492/0001-88</p>
+      <footer className="border-t border-gray-200 bg-white py-10">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-4xl mx-auto">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-6 mb-6">
+              <div className="text-center sm:text-left">
+                <span className="font-bold text-gray-900 text-lg">YLADA</span>
+                <p className="text-gray-600 text-sm mt-1">Plataforma de diagnósticos para iniciar conversas com contexto.</p>
+              </div>
+              <nav className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-sm">
+                <Link href="/pt/metodo-ylada" className="text-gray-600 hover:text-gray-900">Método YLADA</Link>
+                <Link href="/pt/profissionais" className="text-gray-600 hover:text-gray-900">Profissionais</Link>
+                <Link href="/pt/precos" className="text-gray-600 hover:text-gray-900">Planos</Link>
+                <Link href="/pt/politica-de-privacidade" className="text-gray-600 hover:text-gray-900">Privacidade</Link>
+                <Link href="/pt/termos-de-uso" className="text-gray-600 hover:text-gray-900">Termos</Link>
+              </nav>
+            </div>
+            <p className="text-center sm:text-left text-gray-500 text-xs">
+              © {new Date().getFullYear()} YLADA
+            </p>
           </div>
         </div>
       </footer>

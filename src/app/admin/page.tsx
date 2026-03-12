@@ -269,6 +269,15 @@ function AdminDashboardContent() {
       color: 'bg-indigo-500'
     },
     {
+      id: 'diagnosticos-links',
+      title: 'Marketing – Biblioteca de diagnósticos',
+      description: '54 páginas indexáveis: links para campanhas, anúncios e SEO',
+      icon: '📣',
+      link: '/admin/diagnosticos-links',
+      color: 'bg-amber-500',
+      destaque: true
+    },
+    {
       id: 'analytics',
       title: 'Analytics',
       description: 'Relatórios detalhados',

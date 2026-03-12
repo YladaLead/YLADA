@@ -91,10 +91,14 @@ export default function NutriOfertaPage() {
                 Escolher mensal
               </button>
             </div>
-            <div className="bg-gradient-to-br from-[#2563EB] to-[#3B82F6] rounded-xl p-4 text-center text-white border-2 border-[#2563EB]">
-              <p className="font-semibold">Anual</p>
-              <p className="text-2xl font-bold mt-1">12× de R$ 59</p>
-              <p className="text-sm text-white/90 mt-1">R$ 708/ano</p>
+            <div className="relative bg-gradient-to-br from-[#2563EB] to-[#3B82F6] rounded-xl p-4 text-center text-white border-2 border-[#2563EB] shadow-lg">
+              <div className="absolute -top-2.5 left-1/2 -translate-x-1/2 bg-amber-400 text-amber-900 text-xs font-bold px-2.5 py-1 rounded-full whitespace-nowrap">
+                ⭐ Mais escolhido
+              </div>
+              <p className="font-semibold mt-1">Anual</p>
+              <p className="text-2xl font-bold mt-1">R$ 59<span className="text-sm font-normal text-white/90">/mês</span></p>
+              <p className="text-sm text-white/90">(cobrança anual)</p>
+              <p className="text-amber-200 text-sm font-semibold mt-1">Economize mais de 35% no plano anual</p>
               <button
                 type="button"
                 onClick={() => handleCheckout('annual')}

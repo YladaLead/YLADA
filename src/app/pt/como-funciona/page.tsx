@@ -4,10 +4,10 @@ import Link from 'next/link'
 import YLADALogo from '@/components/YLADALogo'
 
 const PASSOS = [
-  { num: 1, titulo: 'Criar um diagnóstico', desc: 'Use a plataforma para criar quizzes e avaliações que ajudam seus clientes a descobrir problemas.' },
+  { num: 1, titulo: 'Escolher um diagnóstico', desc: 'Escolha um diagnóstico da biblioteca do YLADA ou personalize um modelo existente para sua área.' },
   { num: 2, titulo: 'Compartilhar o link', desc: 'Envie o link por WhatsApp, redes sociais ou onde seus clientes estão.' },
-  { num: 3, titulo: 'Receber respostas e contatos', desc: 'As pessoas respondem e você recebe os contatos qualificados automaticamente.' },
-  { num: 4, titulo: 'Converter clientes com mais facilidade', desc: 'Quando a pessoa chega, ela já entende o valor. A conversa fica muito mais produtiva.' },
+  { num: 3, titulo: 'Receber respostas qualificadas', desc: 'As pessoas respondem e você recebe contatos mais preparados automaticamente.' },
+  { num: 4, titulo: 'Conversar com clientes mais preparados', desc: 'Quando a pessoa chega até você, ela já entende o próprio problema. A conversa fica muito mais objetiva.' },
 ]
 
 export default function ComoFuncionaPage() {
@@ -23,7 +23,7 @@ export default function ComoFuncionaPage() {
               Método
             </Link>
             <Link href="/pt/diagnostico" className="text-gray-600 hover:text-gray-900 text-sm font-medium">
-              Diagnóstico
+              Fazer diagnóstico
             </Link>
           </div>
         </div>
@@ -54,7 +54,7 @@ export default function ComoFuncionaPage() {
             href="/pt/diagnostico"
             className="inline-flex items-center justify-center px-8 py-4 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition-all"
           >
-            Testar diagnóstico
+            Fazer diagnóstico agora
           </Link>
         </div>
       </main>

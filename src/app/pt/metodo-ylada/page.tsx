@@ -26,8 +26,11 @@ export default function MetodoYLADALandingPage() {
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 mb-4 leading-tight">
                 Método YLADA
               </h1>
-              <p className="text-xl sm:text-2xl lg:text-3xl text-gray-700 font-medium mb-6">
+              <p className="text-xl sm:text-2xl lg:text-3xl text-gray-700 font-medium mb-4">
                 A forma leve e inteligente de atrair clientes realmente interessados.
+              </p>
+              <p className="text-base sm:text-lg text-gray-600 mb-6">
+                Um método que usa diagnósticos para fazer o cliente entender o próprio problema antes da conversa.
               </p>
               {/* Subtítulo de ruptura */}
               <p className="text-lg sm:text-xl text-gray-800 font-semibold mb-6 leading-relaxed">
@@ -91,6 +94,28 @@ export default function MetodoYLADALandingPage() {
               </p>
               <p className="text-lg text-gray-900 font-semibold mt-6">
                 O problema não é sua capacidade de explicar. O problema é quem chega para conversar com você.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* 2b Investimento sem posicionamento */}
+        <section className="py-12 sm:py-16 bg-gray-50">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="max-w-3xl mx-auto">
+              <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-6 text-center">
+                Investimento sem posicionamento raramente gera resultado
+              </h2>
+              <p className="text-lg text-gray-600 mb-4 leading-relaxed">
+                Profissionais investem constantemente em:
+              </p>
+              <ul className="space-y-2 text-gray-700 mb-6">
+                <li className="flex items-center gap-2"><span className="text-gray-400">•</span> formação</li>
+                <li className="flex items-center gap-2"><span className="text-gray-400">•</span> marketing</li>
+                <li className="flex items-center gap-2"><span className="text-gray-400">•</span> ferramentas</li>
+              </ul>
+              <p className="text-lg text-gray-800 font-medium leading-relaxed">
+                Mas quando o cliente chega sem entender o próprio problema, o valor do profissional não fica claro. Os diagnósticos mudam isso.
               </p>
             </div>
           </div>
@@ -189,22 +214,25 @@ export default function MetodoYLADALandingPage() {
                   <span><strong>Diagnósticos personalizados</strong> — que filtram e qualificam leads</span>
                 </li>
               </ul>
-              <p className="text-lg text-gray-700 leading-relaxed">
+              <p className="text-lg text-gray-700 leading-relaxed mb-4">
                 Essas ferramentas ajudam você a gerar valor automaticamente, atrair pessoas interessadas, filtrar curiosos e preparar conversas muito melhores.
+              </p>
+              <p className="text-lg text-gray-900 font-semibold leading-relaxed">
+                Ou seja: você não aplica o método manualmente. A tecnologia YLADA ajuda você a aplicar isso automaticamente.
               </p>
             </div>
           </div>
         </section>
 
-        {/* 5b Onde o Método YLADA já está sendo aplicado */}
+        {/* 5b Áreas onde o YLADA pode ser aplicado */}
         <section id="aplicacoes" className="py-16 sm:py-20 bg-white scroll-mt-20">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="max-w-4xl mx-auto">
-              <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4 text-center">
-                Onde o Método YLADA já está sendo aplicado
+              <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2 text-center">
+                Áreas onde o YLADA pode ser aplicado
               </h2>
               <p className="text-lg text-gray-600 mb-12 text-center">
-                Escolha sua área e veja como aplicar o método na prática.
+                Profissionais e vendedores consultivos usam diagnósticos para atrair clientes mais preparados.
               </p>
               <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {YLADA_LANDING_AREAS.map((area) => (
@@ -214,10 +242,70 @@ export default function MetodoYLADALandingPage() {
                     className="bg-gray-50 rounded-xl p-6 border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all text-center"
                   >
                     <h3 className="text-lg font-bold text-gray-900 mb-2">{area.label}</h3>
-                    <p className="text-gray-600 text-sm mb-4">{area.descricao}</p>
+                    <p className="text-gray-600 text-sm mb-4">{area.slogan}</p>
                     <span className="text-blue-600 text-sm font-medium">Conhecer →</span>
                   </Link>
                 ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* 5c O que acontece depois do diagnóstico + CTA */}
+        <section className="py-16 sm:py-20 bg-white">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="max-w-2xl mx-auto">
+              <p className="text-center text-gray-700 font-medium mb-6">
+                Mais de 80% dos profissionais descobrem no diagnóstico que o problema não é competência — é posicionamento.
+              </p>
+              <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 text-center mb-2">
+                O que acontece depois do diagnóstico
+              </h2>
+              <p className="text-gray-600 text-center mb-10">
+                Em poucos minutos você recebe um resultado claro e entende qual é o próximo passo.
+              </p>
+              <div className="space-y-6 mb-10">
+                <div className="flex gap-4">
+                  <span className="flex-shrink-0 w-8 h-8 rounded-full bg-blue-600 text-white font-bold text-sm flex items-center justify-center">1</span>
+                  <div>
+                    <h3 className="font-semibold text-gray-900 mb-1">Você descobre seu perfil</h3>
+                    <p className="text-gray-600 text-sm">O diagnóstico identifica como sua comunicação profissional está funcionando hoje.</p>
+                  </div>
+                </div>
+                <div className="flex gap-4">
+                  <span className="flex-shrink-0 w-8 h-8 rounded-full bg-blue-600 text-white font-bold text-sm flex items-center justify-center">2</span>
+                  <div>
+                    <h3 className="font-semibold text-gray-900 mb-1">Você entende o que está travando seus resultados</h3>
+                    <p className="text-gray-600 text-sm mb-2">O resultado mostra o que normalmente acontece com profissionais no mesmo perfil.</p>
+                    <ul className="text-gray-500 text-sm space-y-1">
+                      <li>• atraem muitos curiosos</li>
+                      <li>• explicam demais o que fazem</li>
+                      <li>• têm conversas que não avançam</li>
+                    </ul>
+                  </div>
+                </div>
+                <div className="flex gap-4">
+                  <span className="flex-shrink-0 w-8 h-8 rounded-full bg-blue-600 text-white font-bold text-sm flex items-center justify-center">3</span>
+                  <div>
+                    <h3 className="font-semibold text-gray-900 mb-1">Você vê como melhorar</h3>
+                    <p className="text-gray-600 text-sm">O diagnóstico mostra o caminho que profissionais usam para atrair clientes mais preparados.</p>
+                  </div>
+                </div>
+                <div className="flex gap-4">
+                  <span className="flex-shrink-0 w-8 h-8 rounded-full bg-blue-600 text-white font-bold text-sm flex items-center justify-center">4</span>
+                  <div>
+                    <h3 className="font-semibold text-gray-900 mb-1">Você pode aplicar isso no seu negócio</h3>
+                    <p className="text-gray-600 text-sm">Se fizer sentido para você, o YLADA permite criar seus próprios diagnósticos e aplicar esse método com seus clientes.</p>
+                  </div>
+                </div>
+              </div>
+              <div className="text-center">
+                <Link
+                  href="/pt/diagnostico"
+                  className="inline-flex items-center justify-center px-10 py-4 bg-blue-600 text-white font-bold text-lg rounded-xl hover:bg-blue-700 transition-all shadow-lg hover:shadow-xl"
+                >
+                  Fazer diagnóstico agora
+                </Link>
               </div>
             </div>
           </div>

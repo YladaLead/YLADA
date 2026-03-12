@@ -22,6 +22,12 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
           Dashboard
         </Link>
         <Link
+          href="/admin/diagnosticos-links"
+          className="text-sm font-semibold text-amber-700 hover:text-amber-800 bg-amber-50 px-3 py-1.5 rounded-lg hover:bg-amber-100 transition-colors"
+        >
+          📣 Marketing
+        </Link>
+        <Link
           href="/admin/presidentes"
           className="text-sm font-semibold text-purple-700 hover:text-purple-800 bg-purple-50 px-3 py-1.5 rounded-lg hover:bg-purple-100 transition-colors"
         >

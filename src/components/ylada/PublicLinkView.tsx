@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { formatDisplayTitle, getStrategicIntro } from '@/lib/ylada/strategic-intro'
+import DiagnosisDisclaimer from '@/components/ylada/DiagnosisDisclaimer'
 
 type Payload = {
   slug: string
@@ -442,12 +443,11 @@ function ConfigDrivenLinkView({
               <span className="text-gray-500 text-sm">O profissional ainda não disponibilizou o contato por aqui.</span>
             )}
 
-            {/* Rodapé — validação jurídica (saúde) / leve (perfumaria) */}
-            <p className="mt-5 pt-4 border-t border-gray-100 text-[10px] text-gray-400 text-center">
-              {isPerfumery
-                ? 'Resultado baseado no seu perfil. As sugestões são personalizadas.'
-                : 'Este diagnóstico tem caráter informativo e educativo.'}
-            </p>
+            {/* Disclaimer — orientação e responsabilidade */}
+            <DiagnosisDisclaimer
+              variant={isPerfumery ? 'wellness' : 'informative'}
+              className="mt-5 pt-4 border-t border-gray-100"
+            />
           </div>
         </div>
       )
@@ -478,6 +478,8 @@ function ConfigDrivenLinkView({
           ) : (
             <span className="text-gray-500 text-sm">O profissional ainda não disponibilizou o contato por aqui.</span>
           )}
+
+          <DiagnosisDisclaimer variant="informative" className="mt-5 pt-4" />
         </div>
       </div>
     )
@@ -708,6 +710,8 @@ function DiagnosticoQuiz({
           ) : (
             <span className="text-gray-500 text-sm">O profissional ainda não disponibilizou o contato por aqui.</span>
           )}
+
+          <DiagnosisDisclaimer variant="informative" className="mt-5 pt-4" />
         </div>
       </div>
     )
@@ -897,6 +901,8 @@ function CalculatorBlock({
             ) : (
               <span className="text-gray-500 text-sm">O profissional ainda não disponibilizou o contato por aqui.</span>
             )}
+
+            <DiagnosisDisclaimer variant="informative" className="mt-5 pt-4" />
           </>
         )}
       </div>

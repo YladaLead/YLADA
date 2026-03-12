@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
+import DiagnosisDisclaimer from '@/components/ylada/DiagnosisDisclaimer'
 
 interface Pergunta {
   id: string
@@ -414,6 +415,9 @@ export default function QuizPublicPage() {
                 )
               }
             })}
+
+            {/* Disclaimer — orientação e responsabilidade */}
+            <DiagnosisDisclaimer variant="wellness" className="mt-8" />
 
             {/* Botão de Ação */}
             <div className="text-center mt-8">
