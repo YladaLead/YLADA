@@ -72,8 +72,9 @@ export default function DiagnosticoQuiz({ slug, variantOverride }: DiagnosticoQu
 
   const PERGUNTAS_AQUECIMENTO = [PERGUNTA_AREA, PERGUNTA_TIPO]
   const PERGUNTAS_MAIN = config.perguntas
+  // Comunicacao já tem area e tipo dentro de config.perguntas — não duplicar
   const PERGUNTAS = slug === 'comunicacao'
-    ? [...PERGUNTAS_AQUECIMENTO, ...config.perguntas]
+    ? config.perguntas
     : [...PERGUNTAS_AQUECIMENTO, ...PERGUNTAS_MAIN]
 
   const perguntaAtual = PERGUNTAS[etapaAtual]
@@ -212,15 +213,20 @@ export default function DiagnosticoQuiz({ slug, variantOverride }: DiagnosticoQu
               )}
             </div>
 
-            {todasRespondidas && (
+            {/* Botão no final: sempre visível na última pergunta; habilitado quando todas respondidas */}
+            {(todasRespondidas || etapaAtual === totalPerguntas - 1) && (
               <div className="mt-8 text-center">
                 <button
                   type="button"
-                  onClick={handleVerDiagnostico}
-                  className="inline-flex items-center justify-center px-8 py-4 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition-all shadow-lg"
+                  onClick={todasRespondidas ? handleVerDiagnostico : undefined}
+                  disabled={!todasRespondidas}
+                  className="inline-flex items-center justify-center w-full max-w-sm mx-auto px-8 py-4 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-blue-600"
                 >
                   Ver diagnóstico
                 </button>
+                {!todasRespondidas && etapaAtual === totalPerguntas - 1 && (
+                  <p className="text-sm text-gray-500 mt-2">Responda à última pergunta para gerar seu diagnóstico.</p>
+                )}
               </div>
             )}
           </>

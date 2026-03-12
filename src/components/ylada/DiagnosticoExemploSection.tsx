@@ -6,9 +6,10 @@ import {
   type DiagnosticoExemploArea,
 } from '@/config/ylada-diagnostico-exemplos'
 
-/** URL do vídeo do fluxo completo (YouTube, Vimeo ou MP4). Configure em NEXT_PUBLIC_YLADA_VIDEO_FLUXO_URL */
+/** Vídeo do fluxo completo: por padrão usa arquivo em public/videos/ylada-fluxo-completo.mp4. Para YouTube/Vimeo, defina NEXT_PUBLIC_YLADA_VIDEO_FLUXO_URL. */
 const VIDEO_FLUXO_URL =
-  typeof process !== 'undefined' ? process.env.NEXT_PUBLIC_YLADA_VIDEO_FLUXO_URL || '' : ''
+  (typeof process !== 'undefined' && process.env.NEXT_PUBLIC_YLADA_VIDEO_FLUXO_URL) ||
+  '/videos/ylada-fluxo-completo.mp4'
 
 function getYoutubeEmbedUrl(url: string): string | null {
   const m = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]+)/)
@@ -164,9 +165,9 @@ export function DiagnosticoExemploSection({
               ) : (
                 <div className="aspect-video bg-gray-200 rounded-xl flex items-center justify-center border-2 border-dashed border-gray-300">
                   <div className="text-center p-6">
-                    <p className="text-gray-500 text-sm mb-2">Área para vídeo</p>
+                    <p className="text-gray-500 text-sm mb-2">Vídeo não encontrado</p>
                     <p className="text-gray-400 text-xs max-w-[260px] mx-auto">
-                      Configure <code className="bg-gray-300 px-1 rounded text-[10px]">NEXT_PUBLIC_YLADA_VIDEO_FLUXO_URL</code> no .env com o link (YouTube, Vimeo ou MP4).
+                      Coloque o arquivo em <code className="bg-gray-300 px-1 rounded text-[10px]">public/videos/ylada-fluxo-completo.mp4</code> ou defina NEXT_PUBLIC_YLADA_VIDEO_FLUXO_URL.
                     </p>
                   </div>
                 </div>

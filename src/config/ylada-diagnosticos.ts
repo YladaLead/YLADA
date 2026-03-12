@@ -58,7 +58,7 @@ export const DIAGNOSTICOS: Record<string, DiagnosticoConfig> = {
     bulletsStart: ['curiosos', 'pessoas em processo', 'clientes realmente preparados'],
     perguntas: [
       { id: 'problema', texto: 'Quando alguém entra em contato com você normalmente:', opcoes: [{ valor: 2, label: 'pergunta o preço logo no início' }, { valor: 1, label: 'pede mais informações mas não decide' }, { valor: 0, label: 'já chega entendendo o valor' }, { valor: 1, label: 'depende muito da pessoa' }] },
-      { id: 'area', texto: 'Qual dessas áreas descreve melhor seu trabalho?', opcoes: [{ valor: 0, label: 'Saúde / medicina' }, { valor: 1, label: 'Psicologia / terapias' }, { valor: 2, label: 'Estética / beleza' }, { valor: 3, label: 'Nutrição' }, { valor: 4, label: 'Fitness' }, { valor: 5, label: 'Consultoria / coaching' }, { valor: 6, label: 'Outro' }] },
+      { id: 'area', texto: 'Qual é sua profissão ou área de atuação?', opcoes: [{ valor: 0, label: 'Saúde / medicina' }, { valor: 1, label: 'Psicologia / terapias' }, { valor: 2, label: 'Estética / beleza' }, { valor: 3, label: 'Nutrição' }, { valor: 4, label: 'Fitness' }, { valor: 5, label: 'Consultoria / coaching' }, { valor: 6, label: 'Outro' }] },
       { id: 'tipo', texto: 'Você atua como:', opcoes: [{ valor: 0, label: 'Profissional liberal (presto serviços)' }, { valor: 1, label: 'Vendedor (vendo produtos/represento empresas)' }] },
       { id: 'q1', texto: 'Seus clientes costumam pedir preço antes de entender seu serviço?', opcoes: [{ valor: 2, label: 'Sim' }, { valor: 1, label: 'Às vezes' }, { valor: 0, label: 'Não' }] },
       { id: 'q2', texto: 'Como a maioria dos clientes chega até você?', opcoes: [{ valor: 2, label: 'Indicação' }, { valor: 1, label: 'Redes sociais' }, { valor: 1, label: 'Anúncios' }, { valor: 0, label: 'Boca a boca' }, { valor: 1, label: 'Varia bastante' }] },
@@ -460,7 +460,7 @@ export const DIAGNOSTICOS: Record<string, DiagnosticoConfig> = {
 /** Perguntas de aquecimento (área e tipo) — comuns a todos os diagnósticos */
 export const PERGUNTA_AREA: Pergunta = {
   id: 'area',
-  texto: 'Qual dessas áreas descreve melhor seu trabalho?',
+  texto: 'Qual é sua profissão ou área de atuação?',
   opcoes: [
     { valor: 0, label: 'Saúde / medicina' },
     { valor: 1, label: 'Psicologia / terapias' },
