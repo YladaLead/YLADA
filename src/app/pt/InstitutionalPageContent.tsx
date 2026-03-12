@@ -112,7 +112,7 @@ export default function InstitutionalPageContent() {
               href="/pt/diagnostico"
               className="inline-flex items-center justify-center px-4 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 transition-all"
             >
-              Fazer diagnóstico
+              Descobrir meu perfil
             </Link>
             <LanguageSelector />
           </nav>
@@ -126,8 +126,11 @@ export default function InstitutionalPageContent() {
             <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-4 leading-tight text-center">
               Seu marketing atrai curiosos ou clientes prontos para contratar?
             </h1>
-            <p className="text-base sm:text-lg text-gray-600 mb-6 text-center leading-relaxed">
+            <p className="text-base sm:text-lg text-gray-600 mb-4 text-center leading-relaxed">
               Descubra em menos de 1 minuto se sua comunicação profissional está realmente atraindo pessoas interessadas.
+            </p>
+            <p className="text-base text-gray-700 font-medium mb-6 text-center">
+              O YLADA usa diagnósticos inteligentes para iniciar conversas mais preparadas com clientes.
             </p>
 
             <div className="bg-white rounded-xl p-6 sm:p-8 border border-gray-200 shadow-sm">
@@ -179,7 +182,7 @@ export default function InstitutionalPageContent() {
                 disabled={respostaHeroIdx === null}
                 className="block w-full text-center px-6 py-4 bg-[#2563eb] text-white font-semibold rounded-xl hover:bg-[#1d4ed8] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Continuar diagnóstico
+                Descobrir meu perfil
               </button>
             </div>
 
@@ -227,6 +230,11 @@ export default function InstitutionalPageContent() {
             </p>
           </div>
         </section>
+
+        {/* Frase filosófica */}
+        <p className="text-center text-lg sm:text-xl font-semibold text-gray-800 py-6">
+          Boas conversas começam com boas perguntas.
+        </p>
 
         {/* 4️⃣ EXEMPLOS DE DIAGNÓSTICOS — Grid 2x2 */}
         <section className="py-12 sm:py-16 lg:py-20">
@@ -288,8 +296,8 @@ export default function InstitutionalPageContent() {
             {[
               { emoji: '🧠', titulo: 'Criar diagnóstico', desc: 'Transforme seu conhecimento em perguntas que revelam o problema do cliente.' },
               { emoji: '🔗', titulo: 'Compartilhar link', desc: 'Envie nas redes sociais, WhatsApp ou anúncios.' },
-              { emoji: '📊', titulo: 'Receber respostas', desc: 'Veja quem respondeu e entenda melhor cada situação.' },
-              { emoji: '🤝', titulo: 'Converter clientes', desc: 'O cliente já chega preparado, mais decidido e escolhe você com confiança.' },
+              { emoji: '📊', titulo: 'Receber respostas', desc: 'Veja quem respondeu e entenda melhor a situação de cada pessoa.' },
+              { emoji: '🤝', titulo: 'Iniciar uma conversa mais preparada', desc: 'O cliente chega com mais clareza e a conversa avança com mais facilidade.' },
             ].map((item) => (
               <div key={item.titulo} className="text-center bg-gray-50 rounded-xl p-6 border border-gray-100">
                 <div className="text-4xl mb-3" aria-hidden>{item.emoji}</div>
@@ -346,6 +354,9 @@ export default function InstitutionalPageContent() {
             <h2 className="text-xl sm:text-2xl font-bold text-gray-900 text-center mb-2">
               O que acontece depois do diagnóstico
             </h2>
+            <p className="text-gray-700 font-medium text-center mb-4">
+              O diagnóstico não é apenas um teste. Ele prepara a conversa.
+            </p>
             <p className="text-gray-600 text-center mb-8 text-sm">
               Resultado claro em poucos minutos.
             </p>
@@ -389,7 +400,7 @@ export default function InstitutionalPageContent() {
                 href="/pt/diagnostico"
                 className="inline-flex items-center justify-center px-8 py-4 bg-[#2563eb] text-white font-semibold rounded-xl hover:bg-[#1d4ed8] transition-all"
               >
-                Fazer diagnóstico agora
+                Descobrir meu perfil
               </Link>
             </div>
           </div>
@@ -405,7 +416,7 @@ export default function InstitutionalPageContent() {
               href="/pt/diagnostico"
               className="inline-flex items-center justify-center px-10 py-4 bg-white text-[#1e3a8a] font-semibold rounded-xl hover:bg-gray-100 transition-all shadow-lg"
             >
-              Fazer diagnóstico
+              Descobrir meu perfil
             </Link>
           </div>
         </section>

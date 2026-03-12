@@ -157,6 +157,38 @@ export default function MetodoYLADALandingPage() {
           </div>
         </section>
 
+        {/* 3b Bloco: papel do diagnóstico */}
+        <section className="py-12 sm:py-16 bg-white">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="max-w-3xl mx-auto">
+              <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-6 text-center">
+                Toda boa conversa começa com boas perguntas.
+              </h2>
+              <p className="text-lg text-gray-600 mb-4 leading-relaxed">
+                O Método YLADA usa diagnósticos para ajudar as pessoas a entender melhor a própria situação antes da conversa.
+              </p>
+              <p className="text-gray-700 mb-4">Quando alguém responde um diagnóstico:</p>
+              <ul className="space-y-2 text-gray-700 mb-4">
+                <li className="flex items-start gap-2">
+                  <span className="text-blue-600 mt-1">•</span>
+                  <span>ela reflete sobre o próprio problema</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-blue-600 mt-1">•</span>
+                  <span>ela entende melhor sua situação</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-blue-600 mt-1">•</span>
+                  <span>a conversa começa com muito mais contexto</span>
+                </li>
+              </ul>
+              <p className="text-lg text-gray-800 font-medium leading-relaxed">
+                Isso faz com que curiosos se afastem e interessados se aproximem naturalmente.
+              </p>
+            </div>
+          </div>
+        </section>
+
         {/* 4️⃣ Os 4 passos do método */}
         <section id="como-funciona" className="py-16 sm:py-20 bg-white scroll-mt-20">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -171,7 +203,7 @@ export default function MetodoYLADALandingPage() {
                 {[
                   { num: '1', titulo: 'Posicionamento', desc: 'Você constrói uma identidade profissional baseada em autoridade e clareza.', cor: 'from-blue-600 to-indigo-600' },
                   { num: '2', titulo: 'Atração', desc: 'Você gera valor que desperta curiosidade e interesse.', cor: 'from-indigo-600 to-purple-600' },
-                  { num: '3', titulo: 'Filtragem', desc: 'Curiosos e interessados começam a se separar naturalmente.', cor: 'from-purple-600 to-pink-600' },
+                  { num: '3', titulo: 'Diagnóstico', desc: 'A pessoa responde perguntas que ajudam a entender sua situação. Isso gera clareza e separa naturalmente curiosos de interessados.', cor: 'from-purple-600 to-pink-600' },
                   { num: '4', titulo: 'Conversa', desc: 'Quando a pessoa chega, ela já está interessada. Você apenas explica.', cor: 'from-pink-600 to-rose-600' },
                 ].map((step) => (
                   <div
@@ -341,6 +373,11 @@ export default function MetodoYLADALandingPage() {
           </div>
         </section>
 
+        {/* Princípio do método */}
+        <p className="text-center text-xl font-bold text-gray-900 py-8">
+          Diagnóstico antes da proposta.
+        </p>
+
         {/* 7️⃣ Frase de resumo + CTA final */}
         <section className="py-16 sm:py-24 bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -353,13 +390,13 @@ export default function MetodoYLADALandingPage() {
                 Se você quer trabalhar com mais leveza, construir autoridade, atrair pessoas realmente interessadas e ter conversas muito mais produtivas — então você precisa conhecer o Método YLADA.
               </p>
               <Link
-                href="/pt#onde-aplicar"
+                href="/pt/diagnostico"
                 className="inline-flex items-center justify-center px-10 py-5 bg-white text-blue-600 font-bold text-xl rounded-xl hover:bg-blue-50 transition-all shadow-xl hover:shadow-2xl"
               >
-                Escolher minha área
+                Descobrir meu perfil
               </Link>
               <p className="text-sm text-blue-200 mt-6">
-                Uma nova forma de fazer marketing profissional
+                Uma nova forma de iniciar conversas com clientes.
               </p>
             </div>
           </div>
