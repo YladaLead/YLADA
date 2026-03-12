@@ -102,40 +102,29 @@ export default function InstitutionalPageContent() {
       </header>
 
       <main className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* 1. Hero — Proposta de geração de conversa */}
+        {/* 1. Hero */}
         <section className="py-12 sm:py-16 lg:py-24">
-          <div className="text-center max-w-2xl mx-auto">
+          <div className="text-center max-w-3xl mx-auto">
             <h1 className="text-2xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-4 sm:mb-6 leading-tight">
-              Seu marketing atrai curiosos ou clientes prontos para contratar?
+              Transforme seu conhecimento em diagnósticos que atraem clientes
             </h1>
-            <p className="text-base sm:text-lg text-gray-600 mb-8 max-w-2xl mx-auto leading-relaxed">
-              Descubra em poucos minutos se sua comunicação profissional está realmente atraindo as pessoas certas.
+            <p className="text-base sm:text-lg text-gray-600 mb-10 max-w-2xl mx-auto leading-relaxed">
+              Com o YLADA você pode criar diagnósticos estratégicos que ajudam seus clientes a entender melhor seus próprios problemas — antes mesmo da primeira conversa.
             </p>
-            <p className="text-lg font-semibold text-gray-900 mb-4 text-left">
-              Você vai descobrir:
-            </p>
-            <ul className="text-left space-y-2 mb-8 max-w-xl mx-auto">
-              <li className="flex items-center gap-2"><span className="text-green-600">✔</span> Se seu marketing atrai curiosos ou clientes preparados</li>
-              <li className="flex items-center gap-2"><span className="text-green-600">✔</span> Por que algumas conversas não avançam</li>
-              <li className="flex items-center gap-2"><span className="text-green-600">✔</span> Como profissionais usam diagnósticos para atrair clientes melhores</li>
-            </ul>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-4">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
                 href="/pt/diagnostico"
-                className="inline-flex items-center justify-center px-8 py-4 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition-all"
+                className="inline-flex items-center justify-center px-8 py-4 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition-all shadow-lg"
               >
-                Fazer diagnóstico
+                Descobrir meu perfil de comunicação
               </Link>
               <Link
-                href="/pt/metodo-ylada"
+                href="/pt/escolha-perfil"
                 className="inline-flex items-center justify-center px-8 py-4 border-2 border-blue-600 text-blue-600 font-semibold rounded-xl hover:bg-blue-50 transition-all"
               >
-                Entender o método
+                Criar meus diagnósticos
               </Link>
             </div>
-            <p className="text-sm text-gray-500">
-              7 perguntas • menos de 1 minuto
-            </p>
           </div>
         </section>
 
@@ -169,29 +158,56 @@ export default function InstitutionalPageContent() {
           </div>
         </section>
 
-        {/* 2b. Narrativa investimento */}
-        <section className="py-8 sm:py-12">
-          <div className="max-w-2xl mx-auto text-center">
-            <p className="text-gray-700 mb-4">
-              Muitos profissionais investem constantemente em crescimento:
-            </p>
-            <ul className="flex flex-wrap justify-center gap-x-4 gap-y-1 text-gray-600 text-sm mb-4">
-              <li>cursos</li>
-              <li>equipamentos</li>
-              <li>ferramentas</li>
-              <li>marketing</li>
-            </ul>
-            <p className="text-gray-800 font-medium">
-              Mas um fator muitas vezes é ignorado:{' '}
-              <span className="text-blue-600">como os clientes entendem o próprio problema antes da conversa.</span>
-            </p>
-            <p className="text-gray-600 text-sm mt-2">
-              É exatamente isso que os diagnósticos ajudam a resolver.
+        {/* 3. Exemplos de diagnósticos */}
+        <section className="py-12 sm:py-16 lg:py-20">
+          <div className="max-w-4xl mx-auto">
+            <h2 className="text-xl sm:text-3xl font-bold text-gray-900 text-center mb-4">
+              Exemplos de diagnósticos
+            </h2>
+            <div className="grid sm:grid-cols-2 gap-4 mb-6">
+              {EXEMPLOS_DIAGNOSTICOS.map((ex) => (
+                <Link
+                  key={ex.titulo}
+                  href={ex.href}
+                  className="block bg-white rounded-xl p-5 border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all"
+                >
+                  <p className="font-medium text-gray-900">{ex.titulo}</p>
+                  <span className="text-blue-600 text-sm mt-2 inline-block">Fazer diagnóstico →</span>
+                </Link>
+              ))}
+            </div>
+            <p className="text-center text-gray-600 text-sm">
+              Esses são exemplos de diagnósticos que profissionais podem criar com YLADA.
             </p>
           </div>
         </section>
 
-        {/* 3. Como funciona */}
+        {/* 4. Benefícios do diagnóstico */}
+        <section className="bg-gray-50 py-12 sm:py-16 lg:py-20 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8">
+          <div className="max-w-2xl mx-auto text-center">
+            <p className="text-lg font-semibold text-gray-900 mb-6">Profissionais usam diagnósticos para:</p>
+            <ul className="space-y-2 text-gray-700">
+              <li className="flex items-center justify-center gap-2">
+                <span className="text-green-600">✔</span>
+                <span>atrair clientes melhores</span>
+              </li>
+              <li className="flex items-center justify-center gap-2">
+                <span className="text-green-600">✔</span>
+                <span>evitar conversas improdutivas</span>
+              </li>
+              <li className="flex items-center justify-center gap-2">
+                <span className="text-green-600">✔</span>
+                <span>explicar valor com mais facilidade</span>
+              </li>
+              <li className="flex items-center justify-center gap-2">
+                <span className="text-green-600">✔</span>
+                <span>transformar curiosidade em decisão</span>
+              </li>
+            </ul>
+          </div>
+        </section>
+
+        {/* 5. Como funciona */}
         <section className="py-12 sm:py-16 lg:py-20">
           <h2 className="text-xl sm:text-3xl font-bold text-gray-900 text-center mb-8">
             Como funciona
@@ -220,8 +236,40 @@ export default function InstitutionalPageContent() {
           </div>
         </section>
 
-        {/* 4. O que acontece depois do diagnóstico */}
-        <section className="py-12 sm:py-16 bg-white">
+        {/* 6. Áreas onde o YLADA pode ser aplicado */}
+        <section className="bg-gray-50 py-12 sm:py-16 lg:py-20 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8">
+          <div className="max-w-4xl mx-auto">
+            <h2 className="text-xl sm:text-3xl font-bold text-gray-900 text-center mb-2">
+              Áreas onde o YLADA pode ser aplicado
+            </h2>
+            <p className="text-gray-600 text-center mb-8 max-w-2xl mx-auto">
+              Profissionais e vendedores consultivos usam diagnósticos para atrair clientes mais preparados.
+            </p>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+              {YLADA_LANDING_AREAS.map((area) => (
+                <Link
+                  key={area.codigo}
+                  href={area.href}
+                  className="block bg-white rounded-xl p-5 border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all text-center"
+                >
+                  <span className="font-semibold text-gray-900 block mb-1">{area.label}</span>
+                  <span className="text-sm text-gray-600">{area.slogan}</span>
+                </Link>
+              ))}
+            </div>
+            <div className="text-center">
+              <Link
+                href="/pt/profissionais"
+                className="inline-flex items-center justify-center px-6 py-3 border-2 border-gray-300 text-gray-700 font-medium rounded-xl hover:bg-gray-50 transition-all"
+              >
+                Ver todas as áreas
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        {/* 7. O que acontece depois do diagnóstico */}
+        <section className="py-12 sm:py-16 lg:py-20">
           <div className="max-w-2xl mx-auto">
             <p className="text-center text-gray-700 font-medium mb-6">
               Mais de 80% dos profissionais descobrem no diagnóstico que o problema não é competência — é posicionamento.
@@ -275,85 +323,6 @@ export default function InstitutionalPageContent() {
                 Fazer diagnóstico agora
               </Link>
             </div>
-          </div>
-        </section>
-
-        {/* 6. Exemplos de diagnósticos */}
-        <section className="bg-gray-50 py-12 sm:py-16 lg:py-20 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8">
-          <div className="max-w-4xl mx-auto">
-            <h2 className="text-xl sm:text-3xl font-bold text-gray-900 text-center mb-4">
-              Exemplos de diagnósticos
-            </h2>
-            <div className="grid sm:grid-cols-2 gap-4 mb-6">
-              {EXEMPLOS_DIAGNOSTICOS.map((ex) => (
-                <Link
-                  key={ex.titulo}
-                  href={ex.href}
-                  className="block bg-white rounded-xl p-5 border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all"
-                >
-                  <p className="font-medium text-gray-900">{ex.titulo}</p>
-                  <span className="text-blue-600 text-sm mt-2 inline-block">Fazer diagnóstico →</span>
-                </Link>
-              ))}
-            </div>
-            <p className="text-center text-gray-600 text-sm">
-              Esses são exemplos de diagnósticos que profissionais podem criar com YLADA.
-            </p>
-          </div>
-        </section>
-
-        {/* 6b. Profissionais usam diagnósticos para */}
-        <section className="py-8 sm:py-12">
-          <div className="max-w-2xl mx-auto text-center">
-            <p className="text-sm font-semibold text-gray-800 mb-4">Profissionais usam diagnósticos para:</p>
-            <ul className="space-y-2 text-gray-700">
-              <li className="flex items-center justify-center gap-2">
-                <span className="text-green-600">✔</span>
-                <span>atrair clientes melhores</span>
-              </li>
-              <li className="flex items-center justify-center gap-2">
-                <span className="text-green-600">✔</span>
-                <span>evitar conversas improdutivas</span>
-              </li>
-              <li className="flex items-center justify-center gap-2">
-                <span className="text-green-600">✔</span>
-                <span>explicar valor com mais facilidade</span>
-              </li>
-              <li className="flex items-center justify-center gap-2">
-                <span className="text-green-600">✔</span>
-                <span>transformar curiosidade em decisão</span>
-              </li>
-            </ul>
-          </div>
-        </section>
-
-        {/* 7. Para quais profissionais o YLADA foi criado */}
-        <section className="py-12 sm:py-16 lg:py-20">
-          <h2 className="text-xl sm:text-3xl font-bold text-gray-900 text-center mb-2">
-            Para quais profissionais o YLADA foi criado
-          </h2>
-          <p className="text-gray-600 text-center mb-8 max-w-2xl mx-auto">
-            Profissionais e vendedores consultivos usam diagnósticos para atrair clientes mais preparados.
-          </p>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 max-w-4xl mx-auto mb-8">
-            {YLADA_LANDING_AREAS.map((area) => (
-              <Link
-                key={area.codigo}
-                href={area.href}
-                className="block bg-gray-50 rounded-xl p-5 border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all text-center"
-              >
-                <span className="font-semibold text-gray-900 block mb-1">{area.label}</span>
-                <span className="text-sm text-gray-600">{area.slogan}</span>
-              </Link>
-            ))}
-          </div>
-          <div className="text-center">
-            <Link
-              href="/pt/profissionais"
-              className="inline-flex items-center justify-center px-6 py-3 border-2 border-gray-300 text-gray-700 font-medium rounded-xl hover:bg-gray-50 transition-all"
-            >
-              Ver todas as áreas
-            </Link>
           </div>
         </section>
 
