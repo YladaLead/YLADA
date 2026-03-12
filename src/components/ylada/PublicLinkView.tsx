@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { formatDisplayTitle, getStrategicIntro } from '@/lib/ylada/strategic-intro'
 import DiagnosisDisclaimer from '@/components/ylada/DiagnosisDisclaimer'
+import PoweredByYlada from '@/components/ylada/PoweredByYlada'
 
 type Payload = {
   slug: string
@@ -448,6 +449,7 @@ function ConfigDrivenLinkView({
               variant={isPerfumery ? 'wellness' : 'informative'}
               className="mt-5 pt-4 border-t border-gray-100"
             />
+            <PoweredByYlada variant="compact" />
           </div>
         </div>
       )
@@ -480,6 +482,7 @@ function ConfigDrivenLinkView({
           )}
 
           <DiagnosisDisclaimer variant="informative" className="mt-5 pt-4" />
+          <PoweredByYlada variant="compact" />
         </div>
       </div>
     )
@@ -712,6 +715,7 @@ function DiagnosticoQuiz({
           )}
 
           <DiagnosisDisclaimer variant="informative" className="mt-5 pt-4" />
+          <PoweredByYlada variant="compact" />
         </div>
       </div>
     )
@@ -903,6 +907,7 @@ function CalculatorBlock({
             )}
 
             <DiagnosisDisclaimer variant="informative" className="mt-5 pt-4" />
+            <PoweredByYlada variant="compact" />
           </>
         )}
       </div>

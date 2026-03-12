@@ -4,7 +4,7 @@ import { Suspense, useState, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import YLADALogo from '@/components/YLADALogo'
-import DiagnosisDisclaimer from '@/components/ylada/DiagnosisDisclaimer'
+import PoweredByYlada from '@/components/ylada/PoweredByYlada'
 import {
   DIAGNOSTICOS,
   DIAGNOSTICOS_RELACIONADOS,
@@ -198,13 +198,16 @@ function ResultadoContent() {
         {/* 6️⃣ CTA principal */}
         <div className="mb-10">
           <Link
-            href="/pt/escolha-perfil"
+            href="/pt?source=diagnostico"
             className="block w-full text-center px-8 py-5 bg-blue-600 text-white font-bold text-lg rounded-xl hover:bg-blue-700 transition-all shadow-lg"
           >
-            Criar meus diagnósticos com YLADA
+            👉 Criar meus diagnósticos com YLADA
           </Link>
           <p className="text-center text-sm text-gray-500 mt-3">
-            Acesse a plataforma e comece a aplicar o Método YLADA na sua profissão.
+            Leva menos de 5 minutos para criar o primeiro.
+          </p>
+          <p className="text-center text-sm text-gray-500 mt-1">
+            Não é necessário conhecimento técnico.
           </p>
         </div>
 
@@ -334,30 +337,8 @@ function ResultadoContent() {
           </div>
         </div>
 
-        {/* 9. Disclaimer — orientação e responsabilidade */}
-        <DiagnosisDisclaimer variant="informative" className="mt-10" />
-
-        {/* 10. Powered by YLADA — crescimento orgânico (cada diagnóstico vira divulgação) */}
-        <div className="mt-8 pt-8 border-t border-gray-200 text-center">
-          <Link
-            href="/pt"
-            className="inline-block text-gray-500 hover:text-gray-700 text-sm transition-colors"
-          >
-            Diagnóstico gerado com YLADA
-          </Link>
-          <p className="text-gray-600 text-sm mt-4 mb-3">
-            Você é profissional da área?
-          </p>
-          <p className="text-gray-600 text-sm mb-4">
-            Crie diagnósticos como esse para iniciar conversas com mais contexto.
-          </p>
-          <Link
-            href="/pt/profissionais"
-            className="inline-flex items-center justify-center px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium rounded-lg text-sm transition-colors"
-          >
-            Conhecer o YLADA
-          </Link>
-        </div>
+        {/* 9. Powered by YLADA — crescimento orgânico */}
+        <PoweredByYlada variant="fullCaptacao" className="mt-10" />
       </main>
 
       <footer className="border-t border-gray-200 mt-16 py-6">

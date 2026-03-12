@@ -5,6 +5,8 @@ import { FluxoCliente, RespostaFluxo } from '@/types/wellness-system'
 import { getKitByTipo } from '@/lib/wellness-system/produtos'
 import WellnessCTAButton from '@/components/wellness/WellnessCTAButton'
 import { obterMensagemWhatsApp, mensagemPadraoWhatsApp } from '@/lib/wellness-system/mensagens-whatsapp-por-ferramenta'
+import DiagnosisDisclaimer from '@/components/ylada/DiagnosisDisclaimer'
+import PoweredByYlada from '@/components/ylada/PoweredByYlada'
 
 interface FluxoDiagnosticoProps {
   fluxo: FluxoCliente
@@ -263,6 +265,10 @@ export default function FluxoDiagnostico({
               </div>
             )}
           </div>
+
+          {/* Disclaimer e Powered by Ylada */}
+          <DiagnosisDisclaimer variant="wellness" className="mt-8" />
+          <PoweredByYlada variant="compact" className="mt-4" />
         </div>
       </div>
     )

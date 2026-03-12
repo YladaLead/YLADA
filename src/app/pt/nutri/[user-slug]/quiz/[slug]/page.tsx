@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import DiagnosisDisclaimer from '@/components/ylada/DiagnosisDisclaimer'
+import PoweredByYlada from '@/components/ylada/PoweredByYlada'
 
 interface Pergunta {
   id: string
@@ -462,6 +463,7 @@ export default function QuizPublicNutriPage() {
 
             {/* Disclaimer — orientação e responsabilidade */}
             <DiagnosisDisclaimer variant="wellness" className="mt-8" />
+            <PoweredByYlada variant="compact" className="mt-4" />
 
             {/* Botão de Ação */}
             <div className="text-center mt-8">
