@@ -27,17 +27,37 @@ export default function DiagnosticoQuiz({ slug, variantOverride }: DiagnosticoQu
   const areaFromHome = areaParam !== null ? parseInt(areaParam, 10) : null
   const hasAreaFromHome = areaFromHome !== null && !Number.isNaN(areaFromHome) && areaFromHome >= 0 && areaFromHome <= 6
 
+  const q1Param = searchParams.get('q1')
+  const q1FromHome = q1Param !== null ? parseInt(q1Param, 10) : null
+  const hasQ1FromHome = slug === 'comunicacao' && q1FromHome !== null && !Number.isNaN(q1FromHome) && q1FromHome >= 0 && q1FromHome <= 2
+
+  const fromHome = searchParams.get('fromHome') === '1'
+  const problemaParam = searchParams.get('problema')
+  const problemaFromHome = problemaParam !== null ? parseInt(problemaParam, 10) : null
+  const hasProblemaFromHome = slug === 'comunicacao' && problemaFromHome !== null && !Number.isNaN(problemaFromHome) && problemaFromHome >= 0 && problemaFromHome <= 2
+
   const [iniciado, setIniciado] = useState(false)
   const [respostas, setRespostas] = useState<Record<string, number>>({})
   const [etapaAtual, setEtapaAtual] = useState(0)
 
   useEffect(() => {
-    if (hasAreaFromHome && !iniciado) {
+    if (fromHome && hasProblemaFromHome && !iniciado) {
+      setRespostas({ problema: problemaFromHome })
+      setEtapaAtual(1)
+      setIniciado(true)
+    } else if (fromHome && !iniciado) {
+      setEtapaAtual(0)
+      setIniciado(true)
+    } else if (hasQ1FromHome && !fromHome && !iniciado) {
+      setRespostas({ problema: 1, area: 6, tipo: 0, q1: q1FromHome })
+      setEtapaAtual(4)
+      setIniciado(true)
+    } else if (hasAreaFromHome && !iniciado) {
       setRespostas({ area: areaFromHome })
       setEtapaAtual(1)
       setIniciado(true)
     }
-  }, [hasAreaFromHome, areaFromHome, iniciado])
+  }, [hasAreaFromHome, hasQ1FromHome, hasProblemaFromHome, fromHome, areaFromHome, q1FromHome, problemaFromHome, iniciado])
 
   if (!config) {
     return (
@@ -52,7 +72,9 @@ export default function DiagnosticoQuiz({ slug, variantOverride }: DiagnosticoQu
 
   const PERGUNTAS_AQUECIMENTO = [PERGUNTA_AREA, PERGUNTA_TIPO]
   const PERGUNTAS_MAIN = config.perguntas
-  const PERGUNTAS = [...PERGUNTAS_AQUECIMENTO, ...PERGUNTAS_MAIN]
+  const PERGUNTAS = slug === 'comunicacao'
+    ? config.perguntas
+    : [...PERGUNTAS_AQUECIMENTO, ...PERGUNTAS_MAIN]
 
   const perguntaAtual = PERGUNTAS[etapaAtual]
   const totalPerguntas = PERGUNTAS.length
@@ -66,7 +88,10 @@ export default function DiagnosticoQuiz({ slug, variantOverride }: DiagnosticoQu
   }
 
   const handleVerDiagnostico = () => {
-    const pontuacao = PERGUNTAS_MAIN.reduce((acc, p) => acc + (respostas[p.id] ?? 0), 0)
+    const perguntasScore = slug === 'comunicacao'
+      ? PERGUNTAS_MAIN.filter((p) => !['area', 'tipo'].includes(p.id))
+      : PERGUNTAS_MAIN
+    const pontuacao = perguntasScore.reduce((acc, p) => acc + (respostas[p.id] ?? 0), 0)
     const perfil = calcularPerfil(config, pontuacao)
     const area = respostas['area'] ?? 0
     const tipo = respostas['tipo'] ?? 0

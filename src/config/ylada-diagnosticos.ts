@@ -43,6 +43,10 @@ export interface DiagnosticoConfig {
   perguntas: Pergunta[]
   perfis: Record<string, PerfilResultado>
   comparacao: { label: string; pct: number }[]
+  /** Limiar para perfil "curiosos" (default 7 para max 10) */
+  limiarCuriosos?: number
+  /** Limiar para perfil "desenvolvimento" (default 4 para max 10) */
+  limiarDesenvolvimento?: number
 }
 
 export const DIAGNOSTICOS: Record<string, DiagnosticoConfig> = {
@@ -53,11 +57,13 @@ export const DIAGNOSTICOS: Record<string, DiagnosticoConfig> = {
     descricaoStart: 'Em menos de 1 minuto você descobre se sua comunicação está atraindo curiosos, pessoas em processo ou clientes preparados.',
     bulletsStart: ['curiosos', 'pessoas em processo', 'clientes realmente preparados'],
     perguntas: [
-      { id: 'q1', texto: 'Seus clientes costumam pedir apenas preço antes de entender seu serviço?', opcoes: [{ valor: 2, label: 'Sim' }, { valor: 1, label: 'Às vezes' }, { valor: 0, label: 'Não' }] },
-      { id: 'q2', texto: 'Você sente que precisa explicar várias vezes o que faz?', opcoes: [{ valor: 2, label: 'Sim' }, { valor: 1, label: 'Às vezes' }, { valor: 0, label: 'Não' }] },
-      { id: 'q3', texto: 'Seus conteúdos geram conversas ou apenas curtidas?', opcoes: [{ valor: 2, label: 'Apenas curtidas' }, { valor: 1, label: 'Ambos' }, { valor: 0, label: 'Conversas' }] },
-      { id: 'q4', texto: 'As pessoas chegam até você já entendendo o valor do seu trabalho?', opcoes: [{ valor: 2, label: 'Raramente' }, { valor: 1, label: 'Às vezes' }, { valor: 0, label: 'Frequentemente' }] },
-      { id: 'q5', texto: 'Quantas conversas profissionais normalmente viram clientes?', opcoes: [{ valor: 2, label: 'Poucas' }, { valor: 1, label: 'Algumas' }, { valor: 0, label: 'Muitas' }] },
+      { id: 'problema', texto: 'Quando alguém entra em contato com você normalmente:', opcoes: [{ valor: 2, label: 'pergunta o preço logo no início' }, { valor: 1, label: 'pede mais informações mas não decide' }, { valor: 0, label: 'já chega entendendo o valor' }, { valor: 1, label: 'varia bastante' }] },
+      { id: 'area', texto: 'Qual dessas áreas descreve melhor seu trabalho?', opcoes: [{ valor: 0, label: 'Saúde / medicina' }, { valor: 1, label: 'Psicologia / terapias' }, { valor: 2, label: 'Estética / beleza' }, { valor: 3, label: 'Nutrição' }, { valor: 4, label: 'Fitness' }, { valor: 5, label: 'Consultoria / coaching' }, { valor: 6, label: 'Outro' }] },
+      { id: 'tipo', texto: 'Você atua como:', opcoes: [{ valor: 0, label: 'Profissional liberal (presto serviços)' }, { valor: 1, label: 'Vendedor (vendo produtos/represento empresas)' }] },
+      { id: 'q1', texto: 'Seus clientes costumam pedir preço antes de entender seu serviço?', opcoes: [{ valor: 2, label: 'Sim' }, { valor: 1, label: 'Às vezes' }, { valor: 0, label: 'Não' }] },
+      { id: 'q2', texto: 'Como a maioria dos clientes chega até você?', opcoes: [{ valor: 2, label: 'Indicação' }, { valor: 1, label: 'Redes sociais' }, { valor: 1, label: 'Anúncios' }, { valor: 0, label: 'Boca a boca' }, { valor: 1, label: 'Varia bastante' }] },
+      { id: 'q3', texto: 'Você sente que precisa explicar demais seu trabalho?', opcoes: [{ valor: 2, label: 'Sim' }, { valor: 1, label: 'Às vezes' }, { valor: 0, label: 'Não' }] },
+      { id: 'q4', texto: 'Hoje seu marketing atrai mais:', opcoes: [{ valor: 2, label: 'Curiosos' }, { valor: 1, label: 'Pessoas em processo' }, { valor: 0, label: 'Clientes preparados' }] },
     ],
     perfis: {
       curiosos: {
@@ -111,6 +117,8 @@ export const DIAGNOSTICOS: Record<string, DiagnosticoConfig> = {
       { label: 'estão em desenvolvimento', pct: 30 },
       { label: 'atraem clientes preparados', pct: 10 },
     ],
+    limiarCuriosos: 8,
+    limiarDesenvolvimento: 5,
   },
 
   agenda: {
@@ -466,10 +474,10 @@ export const PERGUNTA_AREA: Pergunta = {
 
 export const PERGUNTA_TIPO: Pergunta = {
   id: 'tipo',
-  texto: 'Você atua como profissional liberal ou vendedor?',
+  texto: 'Você atua como:',
   opcoes: [
     { valor: 0, label: 'Profissional liberal (presto serviços)' },
-    { valor: 1, label: 'Vendedor (represento produtos/empresas)' },
+    { valor: 1, label: 'Vendedor (vendo produtos/represento empresas)' },
   ],
 }
 
@@ -518,10 +526,12 @@ export const DIAGNOSTICOS_MAPA: Array<{ slug: string; label: string }> = [
   { slug: 'investimento', label: 'Investimento' },
 ]
 
-/** Calcula o perfil a partir da pontuação (0–10, 5 perguntas × 0–2) */
+/** Calcula o perfil a partir da pontuação */
 export function calcularPerfil(config: DiagnosticoConfig, pontuacao: number): string {
   const ids = Object.keys(config.perfis)
-  if (pontuacao >= 7) return ids[0]
-  if (pontuacao >= 4) return ids[1]
+  const limiarCuriosos = config.limiarCuriosos ?? 7
+  const limiarDesenvolvimento = config.limiarDesenvolvimento ?? 4
+  if (pontuacao >= limiarCuriosos) return ids[0]
+  if (pontuacao >= limiarDesenvolvimento) return ids[1]
   return ids[2]
 }
