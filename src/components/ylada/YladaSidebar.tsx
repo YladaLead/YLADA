@@ -38,8 +38,9 @@ export default function YladaSidebar({
   const content = (
     <aside className="flex flex-col h-full bg-white border-r border-gray-200 w-56">
       <div className="p-4 border-b border-gray-200">
-        <Link href={`${prefix}/home`} className="font-semibold text-gray-900">
-          YLADA · {areaLabel}
+        <Link href={`${prefix}/home`} className="flex flex-col gap-0.5">
+          <span className="font-bold text-gray-900 text-lg tracking-tight">YLADA</span>
+          <span className="text-sm text-gray-500 font-medium">{areaLabel}</span>
         </Link>
       </div>
       <nav className="flex-1 p-3 space-y-4 overflow-y-auto">
@@ -73,6 +74,7 @@ export default function YladaSidebar({
           </div>
         ))}
         <div className="pt-3 mt-3 border-t border-gray-200 space-y-1">
+          <p className="px-3 mb-1.5 text-xs font-medium text-gray-500 uppercase tracking-wider">Conta</p>
           {isAdmin && (
             <>
               <Link

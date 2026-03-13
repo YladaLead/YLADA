@@ -1,7 +1,9 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Link from 'next/link'
 import YladaAreaShell from './YladaAreaShell'
+import { getYladaAreaPathPrefix } from '@/config/ylada-areas'
 
 type MetricRow = {
   id: string
@@ -17,6 +19,7 @@ type MetricRow = {
   created_at: string
 }
 
+/** Labels de "uso do perfume" — só exibidos no segmento perfumaria. */
 const PERFUME_USAGE_LABELS: Record<string, string> = {
   dia_a_dia: 'Dia a dia',
   trabalho: 'Trabalho',
@@ -44,24 +47,42 @@ interface LeadsPageContentProps {
   areaLabel: string
 }
 
+function formatRelativeDate(iso: string): string {
+  try {
+    const d = new Date(iso)
+    const now = new Date()
+    const diffMs = now.getTime() - d.getTime()
+    const diffDays = Math.floor(diffMs / (24 * 60 * 60 * 1000))
+    if (diffDays === 0) return 'Hoje'
+    if (diffDays === 1) return 'Ontem'
+    if (diffDays < 7) return `${diffDays} dias atrás`
+    return formatDate(iso)
+  } catch {
+    return iso
+  }
+}
+
 export default function LeadsPageContent({ areaCodigo, areaLabel }: LeadsPageContentProps) {
+  const prefix = getYladaAreaPathPrefix(areaCodigo)
+  const linksPath = `${prefix}/links`
+  const isPerfumaria = areaCodigo === 'perfumaria'
   const [metrics, setMetrics] = useState<MetricRow[]>([])
   const [loading, setLoading] = useState(true)
-  const [filterPerfumeUsage, setFilterPerfumeUsage] = useState<string>('')
   const [filterLinkId, setFilterLinkId] = useState<string>('')
+  const [filterPerfumeUsage, setFilterPerfumeUsage] = useState<string>('')
   const [links, setLinks] = useState<Array<{ id: string; slug: string; title: string | null }>>([])
 
   useEffect(() => {
     async function load() {
       setLoading(true)
       try {
+        const params: Record<string, string> = {}
+        if (filterLinkId) params.link_id = filterLinkId
+        if (isPerfumaria && filterPerfumeUsage) params.perfume_usage = filterPerfumeUsage
         const [linksRes, metricsRes] = await Promise.all([
           fetch('/api/ylada/links', { credentials: 'include' }),
           fetch(
-            `/api/ylada/links/metrics?${new URLSearchParams({
-              ...(filterLinkId && { link_id: filterLinkId }),
-              ...(filterPerfumeUsage && { perfume_usage: filterPerfumeUsage }),
-            }).toString()}`,
+            `/api/ylada/links/metrics?${new URLSearchParams(params).toString()}`,
             { credentials: 'include' }
           ),
         ])
@@ -80,25 +101,25 @@ export default function LeadsPageContent({ areaCodigo, areaLabel }: LeadsPageCon
       }
     }
     load()
-  }, [filterLinkId, filterPerfumeUsage])
+  }, [filterLinkId, isPerfumaria, filterPerfumeUsage])
 
   return (
     <YladaAreaShell areaCodigo={areaCodigo} areaLabel={areaLabel}>
       <div>
-        <h1 className="text-xl font-bold text-gray-900 mb-2">Leads</h1>
-        <p className="text-gray-600 mb-6">
-          Quem preencheu o fluxo e clicou no WhatsApp. Para perfumaria, use o filtro de uso principal.
+        <h1 className="text-xl font-bold text-gray-900 mb-1">Leads dos seus diagnósticos</h1>
+        <p className="text-gray-600 text-sm mb-6">
+          Pessoas que responderam seus diagnósticos e podem iniciar uma conversa com você.
         </p>
 
         <div className="flex flex-wrap gap-4 mb-6">
           <div>
-            <label className="block text-xs font-medium text-gray-500 mb-1">Link</label>
+            <label className="block text-xs font-medium text-gray-500 mb-1">Diagnóstico</label>
             <select
               value={filterLinkId}
               onChange={(e) => setFilterLinkId(e.target.value)}
               className="rounded-lg border border-gray-300 px-3 py-2 text-sm"
             >
-              <option value="">Todos os links</option>
+              <option value="">Todos os diagnósticos</option>
               {links.map((l) => (
                 <option key={l.id} value={l.id}>
                   {l.title || l.slug}
@@ -106,68 +127,107 @@ export default function LeadsPageContent({ areaCodigo, areaLabel }: LeadsPageCon
               ))}
             </select>
           </div>
-          <div>
-            <label className="block text-xs font-medium text-gray-500 mb-1">Uso do perfume</label>
-            <select
-              value={filterPerfumeUsage}
-              onChange={(e) => setFilterPerfumeUsage(e.target.value)}
-              className="rounded-lg border border-gray-300 px-3 py-2 text-sm"
-            >
-              <option value="">Todos</option>
-              {Object.entries(PERFUME_USAGE_LABELS).map(([value, label]) => (
-                <option key={value} value={value}>
-                  {label}
-                </option>
-              ))}
-            </select>
-          </div>
+          {isPerfumaria && (
+            <div>
+              <label className="block text-xs font-medium text-gray-500 mb-1">Uso do perfume</label>
+              <select
+                value={filterPerfumeUsage}
+                onChange={(e) => setFilterPerfumeUsage(e.target.value)}
+                className="rounded-lg border border-gray-300 px-3 py-2 text-sm"
+              >
+                <option value="">Todos</option>
+                {Object.entries(PERFUME_USAGE_LABELS).map(([value, label]) => (
+                  <option key={value} value={value}>
+                    {label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
         </div>
 
         {loading ? (
           <p className="text-gray-500">Carregando...</p>
         ) : metrics.length === 0 ? (
-          <div className="bg-gray-50 rounded-xl p-8 text-center text-gray-600">
-            Nenhum lead ainda. Compartilhe seus links para começar a captar.
+          <div className="bg-gray-50 rounded-xl p-8 text-center">
+            <p className="text-gray-700 font-medium mb-1">Nenhuma resposta ainda.</p>
+            <p className="text-gray-600 text-sm mb-4">
+              Compartilhe seus diagnósticos para começar a receber leads e iniciar conversas com clientes.
+            </p>
+            <Link
+              href={linksPath}
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-sky-600 text-white text-sm font-medium hover:bg-sky-700 transition-colors"
+            >
+              🔗 Ver meus diagnósticos
+            </Link>
           </div>
         ) : (
-          <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Data</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Link</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Resultado</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Uso perfume</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">WhatsApp</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200">
-                {metrics.map((m) => (
-                  <tr key={m.id} className="hover:bg-gray-50">
-                    <td className="px-4 py-3 text-sm text-gray-600">{formatDate(m.created_at)}</td>
-                    <td className="px-4 py-3 text-sm">
-                      <a href={`/l/${m.link_slug}`} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
-                        {m.link_title || m.link_slug}
-                      </a>
-                    </td>
-                    <td className="px-4 py-3 text-sm font-medium text-gray-900">{m.main_blocker}</td>
-                    <td className="px-4 py-3 text-sm text-gray-600">
-                      {m.perfume_usage ? PERFUME_USAGE_LABELS[m.perfume_usage] ?? m.perfume_usage : '—'}
-                    </td>
-                    <td className="px-4 py-3">
-                      {m.clicked_whatsapp ? (
-                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
-                          Cliqueu
-                        </span>
-                      ) : (
-                        <span className="text-gray-400 text-xs">—</span>
-                      )}
-                    </td>
+          <>
+            <p className="text-gray-600 text-sm mb-4">
+              Quando alguém responde seu diagnóstico, a pessoa aparece aqui para você iniciar uma conversa.
+            </p>
+            {/* Desktop: tabela */}
+            <div className="hidden md:block overflow-x-auto rounded-xl border border-gray-200 bg-white">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nome</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Diagnóstico</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Resultado</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Data</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Ação</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody className="divide-y divide-gray-200">
+                  {metrics.map((m) => (
+                    <tr key={m.id} className="hover:bg-gray-50">
+                      <td className="px-4 py-3 text-sm text-gray-600">Visitante</td>
+                      <td className="px-4 py-3 text-sm">
+                        <a href={`/l/${m.link_slug}`} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                          {m.link_title || m.link_slug}
+                        </a>
+                      </td>
+                      <td className="px-4 py-3 text-sm font-medium text-gray-900">{m.main_blocker}</td>
+                      <td className="px-4 py-3 text-sm text-gray-600">{formatRelativeDate(m.created_at)}</td>
+                      <td className="px-4 py-3">
+                        <Link
+                          href={`${prefix}/home`}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-sky-600 text-white text-sm font-medium hover:bg-sky-700 transition-colors"
+                        >
+                          💬 Conversar
+                        </Link>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            {/* Mobile: cartões */}
+            <div className="md:hidden space-y-3">
+              {metrics.map((m) => (
+                <div
+                  key={m.id}
+                  className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm"
+                >
+                  <p className="text-gray-900 font-medium mb-0.5">Visitante</p>
+                  <p className="text-gray-600 text-sm mb-1">
+                    <span className="text-gray-500">Diagnóstico:</span>{' '}
+                    {m.link_title || m.link_slug}
+                  </p>
+                  <p className="text-gray-600 text-sm mb-1">
+                    <span className="text-gray-500">Resultado:</span> {m.main_blocker}
+                  </p>
+                  <p className="text-gray-500 text-xs mb-3">{formatRelativeDate(m.created_at)}</p>
+                  <Link
+                    href={`${prefix}/home`}
+                    className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-sky-600 text-white text-sm font-medium hover:bg-sky-700 transition-colors w-full justify-center"
+                  >
+                    💬 Conversar
+                  </Link>
+                </div>
+              ))}
+            </div>
+          </>
         )}
       </div>
     </YladaAreaShell>

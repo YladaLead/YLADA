@@ -6,7 +6,9 @@ import { useRouter } from 'next/navigation'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { useAuthenticatedFetch } from '@/hooks/useAuthenticatedFetch'
-import { getYladaAreaPathPrefix } from '@/config/ylada-areas'
+import { getYladaAreaPathPrefix, getYladaLeadsPath } from '@/config/ylada-areas'
+import { getNoelUxContent, type NoelArea } from '@/config/noel-ux-content'
+import { buildNoelContextualWelcome, type NoelContextualAction } from '@/config/noel-contextual-welcome'
 
 function LinkWithCopy({ href, children }: { href?: string; children: React.ReactNode }) {
   const [copied, setCopied] = useState(false)
@@ -56,7 +58,7 @@ function LinkWithCopy({ href, children }: { href?: string; children: React.React
   )
 }
 
-export type NoelArea = 'med' | 'psi' | 'psicanalise' | 'odonto' | 'nutra' | 'coach' | 'seller' | 'perfumaria' | 'estetica' | 'fitness'
+export type { NoelArea }
 
 interface Message {
   id: string
@@ -120,11 +122,14 @@ function saveMessages(area: NoelArea, messages: Message[]) {
   }
 }
 
-const WELCOME: Message = {
-  id: 'welcome',
-  role: 'assistant',
-  content: 'Olá! Sou o Noel, seu mentor. Como posso te ajudar hoje?',
-  timestamp: new Date(),
+function getWelcomeMessage(area: NoelArea): Message {
+  const ux = getNoelUxContent(area)
+  return {
+    id: 'welcome',
+    role: 'assistant',
+    content: ux.welcomeMessage,
+    timestamp: new Date(),
+  }
 }
 
 interface NoelChatProps {
@@ -136,25 +141,58 @@ interface NoelChatProps {
 
 export default function NoelChat({ area = 'med', className = '', initialMessage }: NoelChatProps) {
   const router = useRouter()
+  const uxContent = getNoelUxContent(area)
   const [messages, setMessages] = useState<Message[]>(() => {
     const saved = loadMessages(area)
-    return saved.length > 0 ? saved : [WELCOME]
+    return saved.length > 0 ? saved : [getWelcomeMessage(area)]
   })
   const [lastLinkContext, setLastLinkContext] = useState<LastLinkContext | null>(() => loadLastLinkContext(area))
   const [input, setInput] = useState(initialMessage ?? '')
   const [loading, setLoading] = useState(false)
+  const [contextualActions, setContextualActions] = useState<NoelContextualAction[] | null>(null)
+  const [copiedActionLabel, setCopiedActionLabel] = useState<string | null>(null)
   const authenticatedFetch = useAuthenticatedFetch()
   const scrollEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
   const initializedRef = useRef(false)
+  const contextualLoadedRef = useRef(false)
 
   useEffect(() => {
     if (initializedRef.current) return
     initializedRef.current = true
     const saved = loadMessages(area)
     if (saved.length > 0) setMessages(saved)
-    else setMessages([WELCOME])
+    else setMessages([getWelcomeMessage(area)])
     setLastLinkContext(loadLastLinkContext(area))
+  }, [area])
+
+  // Mensagem contextual ao abrir (mentor ativo): busca dashboard + links e substitui o welcome
+  useEffect(() => {
+    const saved = loadMessages(area)
+    if (saved.length > 0 || contextualLoadedRef.current) return
+    let cancelled = false
+    Promise.all([
+      fetch('/api/ylada/dashboard', { credentials: 'include' }),
+      fetch('/api/ylada/links', { credentials: 'include' }),
+    ])
+      .then(async ([dRes, lRes]) => {
+        if (cancelled) return
+        const dJson = await dRes.json()
+        const lJson = await lRes.json()
+        const dashboard = dJson?.success ? dJson.data : null
+        const links = lJson?.success ? lJson.data ?? [] : []
+        const prefix = getYladaAreaPathPrefix(area)
+        const leadsPath = getYladaLeadsPath(area)
+        const ctx = buildNoelContextualWelcome(dashboard, links, prefix, leadsPath)
+        if (cancelled || contextualLoadedRef.current) return
+        contextualLoadedRef.current = true
+        setMessages([{ id: 'welcome', role: 'assistant', content: ctx.message, timestamp: new Date() }])
+        setContextualActions(ctx.actions)
+      })
+      .catch(() => {
+        if (!cancelled) setContextualActions([])
+      })
+    return () => { cancelled = true }
   }, [area])
 
   useEffect(() => {
@@ -239,7 +277,9 @@ export default function NoelChat({ area = 'med', className = '', initialMessage 
   }, [input, loading, messages, area, authenticatedFetch, lastLinkContext])
 
   const clearChat = () => {
-    setMessages([WELCOME])
+    contextualLoadedRef.current = false
+    setContextualActions(null)
+    setMessages([getWelcomeMessage(area)])
     setLastLinkContext(null)
     if (typeof window !== 'undefined') {
       try {
@@ -358,30 +398,92 @@ export default function NoelChat({ area = 'med', className = '', initialMessage 
     lastAssistantMsg &&
     messageContainsQuizContent(lastAssistantMsg.content)
 
+  const handleSuggestionClick = useCallback(
+    async (prompt: string) => {
+      const text = prompt.trim()
+      if (!text || loading) return
+      const userMsg: Message = {
+        id: `u-${Date.now()}`,
+        role: 'user',
+        content: text,
+        timestamp: new Date(),
+      }
+      setMessages((prev) => [...prev, userMsg])
+      setLoading(true)
+      try {
+        const conversationHistory = [...messages, userMsg]
+          .filter((m) => m.role === 'user' || m.role === 'assistant')
+          .slice(-12)
+          .map((m) => ({ role: m.role, content: m.content }))
+        const res = await authenticatedFetch('/api/ylada/noel', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            message: text,
+            conversationHistory,
+            area,
+            lastLinkContext: lastLinkContext ?? undefined,
+          }),
+        })
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}))
+          throw new Error(err.error || 'Erro ao processar mensagem.')
+        }
+        const data = (await res.json()) as { response?: string; lastLinkContext?: LastLinkContext | null }
+        if (data.lastLinkContext) {
+          setLastLinkContext(data.lastLinkContext)
+          saveLastLinkContext(area, data.lastLinkContext)
+        }
+        const assistantMsg: Message = {
+          id: `a-${Date.now()}`,
+          role: 'assistant',
+          content: data.response?.trim() || 'Desculpe, não consegui processar. Tente novamente.',
+          timestamp: new Date(),
+        }
+        setMessages((prev) => [...prev, assistantMsg])
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : 'Erro de conexão. Tente novamente.'
+        setMessages((prev) => [
+          ...prev,
+          { id: `e-${Date.now()}`, role: 'assistant', content: `❌ ${msg}`, timestamp: new Date() },
+        ])
+      } finally {
+        setLoading(false)
+        inputRef.current?.focus()
+      }
+    },
+    [area, authenticatedFetch, lastLinkContext, loading, messages]
+  )
+
+  const showSuggestions = messages.length === 1 && messages[0]?.role === 'assistant'
+
   return (
     <div className={`flex flex-col rounded-2xl border border-sky-100 bg-white shadow-lg overflow-hidden ${className}`}>
-      <div className="flex items-center justify-between px-4 py-2 border-b border-sky-100 bg-sky-50/50">
-        <span className="text-sm font-medium text-sky-800">Noel</span>
+      <div className="flex items-center justify-between px-4 py-2.5 border-b border-sky-200 bg-sky-100/80">
+        <span className="text-sm font-bold text-sky-800 flex items-center gap-2">
+          <span className="text-lg" aria-hidden>🧠</span>
+          Noel — Mentor estratégico
+        </span>
         <button
           type="button"
           onClick={clearChat}
-          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-sky-600 hover:text-sky-800 hover:bg-sky-100 rounded-lg transition-colors"
+          className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-sky-600 hover:text-sky-800 hover:bg-sky-100/80 rounded-lg transition-colors opacity-80 hover:opacity-100"
           title="Limpar conversa e começar do zero"
         >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
           </svg>
-          Limpar conversa
+          Limpar
         </button>
       </div>
-      <div className="flex-1 overflow-y-auto min-h-[320px] max-h-[60vh] p-4 sm:p-5 space-y-4 bg-gradient-to-b from-sky-50/50 to-white">
+      <div className="flex-1 overflow-y-auto min-h-[380px] max-h-[70vh] p-4 sm:p-5 space-y-5 bg-gradient-to-b from-sky-50/50 to-white">
         {messages.map((msg) => (
           <div
             key={msg.id}
             className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
           >
             <div
-              className={`max-w-[90%] sm:max-w-[85%] rounded-xl px-4 py-3 ${
+              className={`max-w-[92%] sm:max-w-[88%] rounded-xl px-4 py-3.5 ${
                 msg.role === 'user'
                   ? 'bg-sky-600 text-white shadow-md shadow-sky-500/20'
                   : hasLink(msg.content)
@@ -403,7 +505,7 @@ export default function NoelChat({ area = 'med', className = '', initialMessage 
                       {msg.content}
                     </ReactMarkdown>
                   </div>
-                  {lastAssistantMsg?.id === msg.id && messageHasScript(msg.content) && (
+                  {lastAssistantMsg?.id === msg.id && msg.id !== 'welcome' && messageHasScript(msg.content) && (
                     <button
                       type="button"
                       onClick={() => copyScript(msg)}
@@ -421,7 +523,7 @@ export default function NoelChat({ area = 'med', className = '', initialMessage 
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h2m8 0h2a2 2 0 012 2v2m0 8a2 2 0 01-2 2h-2m-4-4V6" />
                           </svg>
-                          Copiar script
+                          Copiar
                         </>
                       )}
                     </button>
@@ -431,6 +533,70 @@ export default function NoelChat({ area = 'med', className = '', initialMessage 
             </div>
           </div>
         ))}
+        {showSuggestions && (contextualActions?.length ? contextualActions : uxContent.suggestions).length > 0 && (
+          <div className="pt-2 pb-1">
+            <p className="text-xs font-medium text-gray-500 mb-2">Sugestões:</p>
+            <div className="flex flex-wrap gap-2">
+              {(contextualActions?.length ? contextualActions : uxContent.suggestions).map((s, i) => {
+                const action = contextualActions?.length ? (contextualActions[i] as NoelContextualAction) : null
+                if (action?.href) {
+                  return (
+                    <Link
+                      key={action.label}
+                      href={action.href}
+                      className="px-4 py-2.5 rounded-xl bg-sky-50 text-sky-700 text-sm font-medium hover:bg-sky-100 border border-sky-200 transition-colors inline-flex items-center"
+                    >
+                      {action.label}
+                    </Link>
+                  )
+                }
+                if (action?.whatsappShareUrl) {
+                  const waUrl = `https://wa.me/?text=${encodeURIComponent(action.whatsappShareUrl)}`
+                  return (
+                    <a
+                      key={action.label}
+                      href={waUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-4 py-2.5 rounded-xl bg-[#25D366]/10 text-[#128C7E] text-sm font-medium hover:bg-[#25D366]/20 border border-[#25D366]/30 transition-colors inline-flex items-center"
+                    >
+                      {action.label}
+                    </a>
+                  )
+                }
+                if (action?.copyUrl) {
+                  return (
+                    <button
+                      key={action.label}
+                      type="button"
+                      onClick={() => {
+                        navigator.clipboard.writeText(action.copyUrl!).then(() => {
+                          setCopiedActionLabel(action.label)
+                          setTimeout(() => setCopiedActionLabel(null), 2000)
+                        })
+                      }}
+                      className="px-4 py-2.5 rounded-xl bg-sky-50 text-sky-700 text-sm font-medium hover:bg-sky-100 border border-sky-200 transition-colors inline-flex items-center"
+                    >
+                      {copiedActionLabel === action.label ? '✅ Copiado!' : action.label}
+                    </button>
+                  )
+                }
+                const prompt = action?.prompt ?? (s as { label: string; prompt: string }).prompt
+                return (
+                  <button
+                    key={action?.label ?? (s as { label: string }).label}
+                    type="button"
+                    onClick={() => handleSuggestionClick(prompt)}
+                    disabled={loading}
+                    className="px-4 py-2.5 rounded-xl bg-sky-50 text-sky-700 text-sm font-medium hover:bg-sky-100 border border-sky-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {action?.label ?? (s as { label: string }).label}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+        )}
         {loading && (
           <div className="flex justify-start">
             <div className="rounded-xl px-4 py-3 bg-white border border-sky-100 shadow-sm">
@@ -482,24 +648,28 @@ export default function NoelChat({ area = 'med', className = '', initialMessage 
       </div>
 
       <div className="border-t border-sky-100 p-3 sm:p-4 bg-white">
-        <div className="flex gap-2 items-end">
-          <textarea
-            ref={inputRef}
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder="Digite sua mensagem..."
-            rows={1}
-            disabled={loading}
-            className="flex-1 min-h-[44px] max-h-32 px-3 py-2.5 text-sm border border-sky-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-400 resize-none disabled:opacity-60 placeholder:text-gray-400"
-          />
+        <div className="flex gap-3 items-end">
+          <div className="flex-1 flex flex-col gap-1">
+            <textarea
+              ref={inputRef}
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder={uxContent.placeholder}
+              rows={1}
+              disabled={loading}
+              className="min-h-[48px] max-h-32 px-4 py-3 text-sm border border-sky-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-400 resize-none disabled:opacity-60 placeholder:text-gray-400"
+            />
+            <span className="text-xs text-gray-400">{uxContent.placeholderExample}</span>
+          </div>
           <button
             type="button"
             onClick={sendMessage}
             disabled={!input.trim() || loading}
-            className="h-[44px] px-5 bg-sky-600 text-white rounded-xl hover:bg-sky-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium shrink-0 shadow-sm"
+            className="h-[48px] px-6 bg-sky-600 text-white rounded-xl hover:bg-sky-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-semibold shrink-0 shadow-md flex items-center gap-2"
           >
-            Enviar
+            {loading ? '⏳' : '➤'}
+            <span className="hidden sm:inline">Perguntar ao Noel</span>
           </button>
         </div>
       </div>

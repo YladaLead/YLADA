@@ -262,9 +262,9 @@ function AdminDashboardContent() {
     },
     {
       id: 'ylada-links',
-      title: 'Links inteligentes (YLADA)',
-      description: 'Ver todos os links e quem está emitindo cada um (dono/presidente)',
-      icon: '🔗',
+      title: 'Diagnósticos (YLADA)',
+      description: 'Ver todos os diagnósticos e quem está emitindo cada um (dono/presidente)',
+      icon: '🧪',
       link: '/admin/ylada/links',
       color: 'bg-indigo-500'
     },

@@ -334,7 +334,7 @@ export default function YladaConfiguracaoContent({ areaCodigo, areaLabel }: Ylad
       </div>
 
       <p className="text-sm text-gray-500">
-        Para editar seu <strong>perfil empresarial</strong> (informações para o Noel e links inteligentes), acesse{' '}
+        Para editar seu <strong>perfil empresarial</strong> (informações para o Noel e diagnósticos), acesse{' '}
         <Link href={`${prefix}/perfil-empresarial`} className="text-blue-600 hover:underline">
           Perfil
         </Link>

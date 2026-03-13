@@ -5,22 +5,9 @@ import Link from 'next/link'
 import YladaAreaShell from '@/components/ylada/YladaAreaShell'
 import { getYladaAreaPathPrefix } from '@/config/ylada-areas'
 import { getFlowById } from '@/config/ylada-flow-catalog'
-import { getTemasForProfession, getTemaLabel, TEMA_OUTRO_VALUE } from '@/config/ylada-temas'
+import { getTemasForProfession, getTemaLabel, TEMA_OUTRO_VALUE, TEMA_ICONS } from '@/config/ylada-temas'
 import { getFerramentasForTema, type FerramentaConcreta } from '@/config/ylada-temas-ferramentas'
-import { PERFIS_SIMULADOS, SIMULATE_COOKIE_NAME } from '@/data/perfis-simulados'
-
-const COOKIE_MAX_AGE = 60 * 60 * 24 // 24h
-
-function setSimulateCookie(key: string) {
-  if (typeof document === 'undefined') return
-  document.cookie = `${SIMULATE_COOKIE_NAME}=${encodeURIComponent(key)}; path=/; max-age=${COOKIE_MAX_AGE}; SameSite=Lax`
-}
-
-function clearSimulateCookie() {
-  if (typeof document === 'undefined') return
-  document.cookie = `${SIMULATE_COOKIE_NAME}=; path=/; max-age=0`
-}
-
+import { getSugestoesDiagnostico, getLabelSegmentoSugestoes } from '@/config/ylada-links-sugestoes'
 /** Objetivos do link: norte para a sugestão (quiz vs calculadora e texto). */
 const LINK_OBJECTIVES = [
   { value: 'captar', label: 'Captar', description: 'Trazer pessoas novas (possíveis pacientes ou clientes)' },
@@ -179,6 +166,7 @@ function LinksPageContent({ areaCodigo = 'ylada', areaLabel = 'YLADA' }: LinksPa
   const [temaOutroText, setTemaOutroText] = useState('')
   const linksListRef = useRef<HTMLDivElement>(null)
   const suggestionBoxRef = useRef<HTMLDivElement>(null)
+  const criadorRef = useRef<HTMLDivElement>(null)
 
   const segment = areaCodigo && areaCodigo !== 'ylada' ? areaCodigo : 'ylada'
 
@@ -250,15 +238,6 @@ function LinksPageContent({ areaCodigo = 'ylada', areaLabel = 'YLADA' }: LinksPa
   useEffect(() => {
     fetchStrategy()
   }, [fetchStrategy])
-
-  const handleSimulateProfile = (key: string) => {
-    if (key === '') {
-      clearSimulateCookie()
-    } else {
-      setSimulateCookie(key)
-    }
-    fetchStrategy()
-  }
 
   // Sincronizar perfil quando a página ganha foco (ex.: usuário ativou perfil simulado em outra aba ou em Perfis para testes)
   useEffect(() => {
@@ -494,7 +473,7 @@ function LinksPageContent({ areaCodigo = 'ylada', areaLabel = 'YLADA' }: LinksPa
           ...prev,
         ])
         setLastCreatedUrl(url)
-        setMessage({ type: 'success', text: 'Link criado! Copie a URL abaixo.' })
+        setMessage({ type: 'success', text: 'Seu diagnóstico foi criado.' })
         setInterpretResult(null)
         setShowTextFlow(false)
         setTimeout(() => linksListRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 300)
@@ -546,7 +525,61 @@ function LinksPageContent({ areaCodigo = 'ylada', areaLabel = 'YLADA' }: LinksPa
           ...prev,
         ])
         setLastCreatedUrl(url)
-        setMessage({ type: 'success', text: 'Link criado! Copie a URL abaixo.' })
+        setMessage({ type: 'success', text: 'Seu diagnóstico foi criado.' })
+        setTimeout(() => linksListRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 300)
+      } else {
+        setMessage({ type: 'error', text: json?.error || 'Erro ao criar link.' })
+      }
+    } catch {
+      setMessage({ type: 'error', text: 'Erro ao criar link. Tente novamente.' })
+    } finally {
+      setCreating(false)
+    }
+  }
+
+  const sugestoes = getSugestoesDiagnostico(areaCodigo)
+  const labelSegmento = getLabelSegmentoSugestoes(areaCodigo)
+
+  /** Criar link a partir de sugestão pronta. */
+  const handleCreateFromSuggested = async (sug: { title: string; flow_id: string; tema: string }) => {
+    setCreating(true)
+    setMessage(null)
+    try {
+      const flow = getFlowById(sug.flow_id)
+      const questions = (flow?.question_labels ?? []).map((label, i) => ({
+        id: `q${i + 1}`,
+        label,
+        type: 'text' as const,
+      }))
+      const body = {
+        flow_id: sug.flow_id,
+        title: sug.title,
+        segment: areaCodigo && areaCodigo !== 'ylada' ? areaCodigo : 'ylada',
+        interpretacao: {
+          objetivo: 'captar' as const,
+          tema: sug.tema,
+          tipo_publico: 'pacientes',
+          area_profissional: 'geral',
+        },
+        questions,
+        cta_suggestion: flow?.cta_default ?? 'Quero analisar meu caso',
+      }
+      const res = await fetch('/api/ylada/links/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(body),
+      })
+      const json = await res.json()
+      if (json?.success && json?.data) {
+        const base = typeof window !== 'undefined' ? window.location.origin : ''
+        const url = json.data.url || `${base}/l/${json.data.slug}`
+        setLinks((prev) => [
+          { ...json.data, url, template_name: null, template_type: null, stats: { view: 0, start: 0, complete: 0, cta_click: 0, diagnosis_count: 0 } },
+          ...prev,
+        ])
+        setLastCreatedUrl(url)
+        setMessage({ type: 'success', text: 'Seu diagnóstico foi criado.' })
         setTimeout(() => linksListRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 300)
       } else {
         setMessage({ type: 'error', text: json?.error || 'Erro ao criar link.' })
@@ -562,69 +595,162 @@ function LinksPageContent({ areaCodigo = 'ylada', areaLabel = 'YLADA' }: LinksPa
     <YladaAreaShell areaCodigo={areaCodigo} areaLabel={areaLabel}>
       <div className="max-w-2xl space-y-6">
         <div>
-          <h1 className="text-xl font-bold text-gray-900 mb-2">Links inteligentes</h1>
-          <p className="text-gray-600 mb-2">
-            Aqui você cria links para <strong>compartilhar com seus pacientes ou possíveis pacientes</strong>. Quando <strong>eles</strong> acessam, veem um quiz ou uma calculadora — conteúdo que atrai e desperta curiosidade. No final, podem falar com você no WhatsApp.
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-1">
+            Diagnósticos que iniciam conversas com clientes
+          </h1>
+          <p className="text-gray-600 text-sm mb-4">
+            Crie links que despertam curiosidade, atraem pessoas interessadas e iniciam conversas no WhatsApp.
           </p>
-          <p className="text-xs text-gray-500 mt-1">
-            Você escolhe o tipo de ferramenta; a plataforma entrega o link pronto. Basta você gerar e <strong>enviar para as pessoas que você quer atingir</strong>.
+          {/* Fluxo visual do Método YLADA */}
+          <div className="rounded-lg border border-sky-100 bg-sky-50/50 p-4 mb-4">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2 gap-1 text-sm text-gray-700">
+              <span className="flex items-center gap-1.5 shrink-0">
+                <span aria-hidden>🧪</span>
+                <span>Criar diagnóstico</span>
+              </span>
+              <span className="hidden sm:inline text-sky-400" aria-hidden>→</span>
+              <span className="sm:hidden text-sky-400 self-center" aria-hidden>↓</span>
+              <span className="flex items-center gap-1.5 shrink-0">
+                <span aria-hidden>👩</span>
+                <span>Pessoa responde</span>
+              </span>
+              <span className="hidden sm:inline text-sky-400" aria-hidden>→</span>
+              <span className="sm:hidden text-sky-400 self-center" aria-hidden>↓</span>
+              <span className="flex items-center gap-1.5 shrink-0">
+                <span aria-hidden>💡</span>
+                <span>Curiosidade</span>
+              </span>
+              <span className="hidden sm:inline text-sky-400" aria-hidden>→</span>
+              <span className="sm:hidden text-sky-400 self-center" aria-hidden>↓</span>
+              <span className="flex items-center gap-1.5 shrink-0">
+                <span aria-hidden>💬</span>
+                <span>Conversa com você</span>
+              </span>
+              <span className="hidden sm:inline text-sky-400" aria-hidden>→</span>
+              <span className="sm:hidden text-sky-400 self-center" aria-hidden>↓</span>
+              <span className="flex items-center gap-1.5 shrink-0">
+                <span aria-hidden>👥</span>
+                <span>Novo cliente</span>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Primeira vitória imediata — CTA central */}
+        <div className="rounded-xl border-2 border-amber-200 bg-amber-50/80 p-5">
+          <p className="text-sm font-semibold text-gray-900 mb-2">Crie seu primeiro diagnóstico agora</p>
+          <button
+            type="button"
+            onClick={() => {
+              setInterpretResult(null)
+              setInterpretText('')
+              setShowTextFlow(true)
+              setTimeout(() => criadorRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100)
+            }}
+            className="w-full sm:w-auto flex items-center justify-center gap-2 rounded-xl bg-amber-500 px-6 py-4 text-base font-bold text-white hover:bg-amber-600 transition-colors shadow-md hover:shadow-lg"
+          >
+            <span aria-hidden>⚡</span>
+            Criar diagnóstico em 30 segundos
+          </button>
+          <p className="text-xs text-gray-600 mt-3">
+            O Noel cria as perguntas automaticamente.
           </p>
         </div>
 
-        {/* Teste rápido: perfis simulados + Lab */}
-        <section className="rounded-lg border border-slate-200 bg-slate-50/50 p-4">
-          <h2 className="text-xs font-semibold text-slate-600 uppercase tracking-wider mb-3">Teste rápido</h2>
-          <div className="flex flex-wrap items-center gap-3">
-            <div className="flex items-center gap-2">
-              <label htmlFor="simulate-profile" className="text-sm text-gray-700">Testar como:</label>
-              <select
-                id="simulate-profile"
-                value={strategyData?.simulated_profile_key ?? ''}
-                onChange={(e) => handleSimulateProfile(e.target.value)}
-                className="rounded-md border border-gray-300 px-2 py-1.5 text-sm text-gray-900 bg-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-              >
-                <option value="">Seu perfil real</option>
-                {PERFIS_SIMULADOS.map((p) => (
-                  <option key={p.key} value={p.key}>{p.label}</option>
-                ))}
-              </select>
+        {/* Contador de impacto — progresso e motivação */}
+        {(() => {
+          const totalRespostas = links.reduce((s, l) => s + (l.stats?.diagnosis_count ?? l.stats?.complete ?? 0), 0)
+          const totalConversas = links.reduce((s, l) => s + (l.stats?.cta_click ?? 0), 0)
+          return (
+            <div className="rounded-lg border border-emerald-100 bg-emerald-50/60 px-4 py-4">
+              <p className="text-sm font-semibold text-gray-900 mb-3">📊 Impacto dos seus diagnósticos</p>
+              <div className="flex flex-wrap gap-6">
+                <div className="flex items-center gap-2">
+                  <span aria-hidden>👩</span>
+                  <span className="text-lg font-bold text-gray-900">
+                    {totalRespostas} {totalRespostas === 1 ? 'resposta recebida' : 'respostas recebidas'}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span aria-hidden>💬</span>
+                  <span className="text-lg font-bold text-gray-900">
+                    {totalConversas} {totalConversas === 1 ? 'conversa iniciada' : 'conversas iniciadas'}
+                  </span>
+                </div>
+              </div>
             </div>
-            <span className="text-slate-400">|</span>
-            <a href={`${prefix}/perfis-simulados`} className="text-sm text-blue-600 hover:underline">
-              Perfis para testes
-            </a>
-            <a href={`${prefix}/ylada-lab`} className="text-sm text-blue-600 hover:underline">
-              YLADA Lab
-            </a>
-          </div>
-          {strategyData?.simulated_profile_label && (
-            <p className="text-xs text-slate-600 mt-2">
-              Simulando: <strong>{strategyData.simulated_profile_label}</strong> — a Direção Estratégica abaixo usa este perfil.
-            </p>
-          )}
-        </section>
+          )
+        })()}
+
+        {/* Diagnósticos sugeridos */}
+        {sugestoes.length > 0 && (
+          <section className="rounded-lg border border-blue-100 bg-blue-50/50 p-4">
+            <h2 className="text-sm font-semibold text-gray-800 mb-3">
+              Diagnósticos sugeridos para {labelSegmento}
+            </h2>
+            <div className="space-y-2">
+              {sugestoes.map((sug, i) => (
+                <div
+                  key={i}
+                  className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 p-3 rounded-lg bg-white border border-gray-100 hover:border-blue-200 transition-colors"
+                >
+                  <p className="text-sm text-gray-800 flex-1">{sug.title}</p>
+                  <button
+                    type="button"
+                    onClick={() => handleCreateFromSuggested(sug)}
+                    disabled={creating}
+                    className="shrink-0 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50 transition-colors"
+                  >
+                    {creating ? 'Gerando...' : 'Criar diagnóstico'}
+                  </button>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* Dica do método YLADA */}
+        <p className="text-xs text-gray-500 italic">
+          Dica do método YLADA: Diagnósticos que despertam curiosidade geram mais respostas. Evite perguntas muito óbvias.
+        </p>
 
         {message && (
           <div
-            className={`p-3 rounded-lg text-sm ${message.type === 'success' ? 'bg-green-50 text-green-800 border border-green-200' : 'bg-red-50 text-red-800 border border-red-200'}`}
+            className={`p-4 rounded-lg text-sm ${message.type === 'success' ? 'bg-green-50 text-green-800 border border-green-200' : 'bg-red-50 text-red-800 border border-red-200'}`}
           >
-            <div className="flex flex-wrap items-center gap-2">
-              <span>{message.text}</span>
-              {message.type === 'success' && lastCreatedUrl && (
-                <button
-                  type="button"
-                  onClick={() => { copyUrl(lastCreatedUrl); setLastCreatedUrl(null) }}
-                  className="shrink-0 rounded-md bg-green-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-green-700"
-                >
-                  Copiar URL
-                </button>
-              )}
-            </div>
+            <p className="font-medium">{message.text}</p>
+            {message.type === 'success' && lastCreatedUrl && (
+              <>
+                <p className="mt-2 text-green-700">
+                  Agora compartilhe com seus clientes ou nas redes sociais para começar conversas.
+                </p>
+                <div className="flex flex-wrap items-center gap-2 mt-3">
+                  <a
+                    href={`https://wa.me/?text=${encodeURIComponent(lastCreatedUrl)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 rounded-lg bg-[#25D366] px-4 py-2 text-sm font-medium text-white hover:bg-[#20BD5A] transition-colors"
+                  >
+                    <span aria-hidden>📲</span>
+                    Compartilhar no WhatsApp
+                  </a>
+                  <button
+                    type="button"
+                    onClick={() => { copyUrl(lastCreatedUrl); setLastCreatedUrl(null) }}
+                    className="rounded-lg border border-green-600 bg-white px-4 py-2 text-sm font-medium text-green-800 hover:bg-green-50 transition-colors"
+                  >
+                    Copiar URL
+                  </button>
+                </div>
+              </>
+            )}
           </div>
         )}
 
-        {/* Tema primeiro, depois ferramenta | ou fluxo por texto */}
-        <section className="bg-white rounded-lg border border-gray-200 p-4">
+        {/* Criar novo diagnóstico */}
+        <section ref={criadorRef} className="bg-white rounded-lg border border-gray-200 p-4">
+          <h2 className="text-base font-semibold text-gray-900 mb-1">Criar novo diagnóstico</h2>
+          <p className="text-xs text-gray-500 mb-4">Escolha o tema que você quer trabalhar.</p>
           {!showTextFlow ? (
             /* --- Tema primeiro: Qual tema? → 2 cards --- */
             strategyLoading ? (
@@ -643,8 +769,6 @@ function LinksPageContent({ areaCodigo = 'ylada', areaLabel = 'YLADA' }: LinksPa
                 {!selectedTema ? (
                   /* Step 1: Qual tema você quer trabalhar agora? */
                   <>
-                    <h2 className="text-sm font-semibold text-gray-800 mb-2">Qual tema você quer trabalhar agora?</h2>
-                    <p className="text-xs text-gray-500 mb-3">Escolha o tema do link. Depois você escolhe o tipo de ferramenta (quiz ou calculadora).</p>
                     <div className="flex flex-wrap gap-2 mb-4">
                       {(() => {
                         const temasFromProfile = profile?.area_specific?.temas_atuacao
@@ -659,15 +783,16 @@ function LinksPageContent({ areaCodigo = 'ylada', areaLabel = 'YLADA' }: LinksPa
                                 key={t.value}
                                 type="button"
                                 onClick={() => setSelectedTema(t.value)}
-                                className="rounded-full px-3 py-1.5 text-xs font-medium bg-gray-100 text-gray-800 border border-gray-200 hover:bg-gray-200 hover:border-gray-300 transition-colors"
+                                className="rounded-full px-4 py-2.5 text-sm font-medium bg-gray-100 text-gray-800 border border-gray-200 hover:bg-gray-200 hover:border-gray-300 transition-colors flex items-center gap-1.5"
                               >
+                                {TEMA_ICONS[t.value] && <span aria-hidden>{TEMA_ICONS[t.value]}</span>}
                                 {t.label}
                               </button>
                             ))}
                             <button
                               type="button"
                               onClick={() => setSelectedTema(TEMA_OUTRO_VALUE)}
-                              className="rounded-full px-3 py-1.5 text-xs font-medium bg-gray-100 text-gray-800 border border-gray-200 hover:bg-gray-200 hover:border-gray-300 transition-colors"
+                              className="rounded-full px-4 py-2.5 text-sm font-medium bg-gray-100 text-gray-800 border border-gray-200 hover:bg-gray-200 hover:border-gray-300 transition-colors"
                             >
                               Outro tema
                             </button>
@@ -678,9 +803,9 @@ function LinksPageContent({ areaCodigo = 'ylada', areaLabel = 'YLADA' }: LinksPa
                     <button
                       type="button"
                       onClick={() => setShowTextFlow(true)}
-                      className="text-sm text-gray-500 hover:text-gray-700 underline"
+                      className="text-sm text-blue-600 hover:text-blue-800 underline"
                     >
-                      Quero definir por texto (objetivo em uma frase)
+                      Descrever o objetivo em uma frase
                     </button>
                   </>
                 ) : selectedTema === TEMA_OUTRO_VALUE ? (
@@ -797,7 +922,7 @@ function LinksPageContent({ areaCodigo = 'ylada', areaLabel = 'YLADA' }: LinksPa
               >
                 ← Voltar para Direção Estratégica
               </button>
-              <h2 className="text-sm font-semibold text-gray-700 mb-2">Qual é o objetivo deste link?</h2>
+              <h2 className="text-sm font-semibold text-gray-700 mb-2">Qual resultado você quer gerar com esse diagnóstico?</h2>
               <div className="flex flex-wrap gap-2 mb-3">
                 {LINK_OBJECTIVES.map((obj) => (
                   <button
@@ -819,7 +944,7 @@ function LinksPageContent({ areaCodigo = 'ylada', areaLabel = 'YLADA' }: LinksPa
                 Em uma frase, o que você quer alcançar?
               </p>
               <textarea
-                placeholder="Ex.: captar pessoas interessadas em perder peso"
+                placeholder="Ex.: Quero atrair clientes para limpeza de pele"
                 value={interpretText}
                 onChange={(e) => setInterpretText(e.target.value)}
                 className="min-h-[80px] w-full rounded-md border border-gray-300 px-3 py-2 text-sm mb-2"
@@ -926,10 +1051,33 @@ function LinksPageContent({ areaCodigo = 'ylada', areaLabel = 'YLADA' }: LinksPa
         </section>
 
         <section ref={linksListRef} className="bg-white rounded-lg border border-gray-200 p-4">
-          <h2 className="text-sm font-semibold text-gray-700 mb-1">Banco de quizzes e calculadoras criados</h2>
-          <p className="text-xs text-gray-500 mb-3">Todas as ferramentas que você criou ficam armazenadas aqui. Copie a URL e compartilhe.</p>
+          <h2 className="text-base font-semibold text-gray-900 mb-1">Seus diagnósticos criados</h2>
+          <p className="text-xs text-gray-500 mb-3">Todos os diagnósticos que você criar aparecerão aqui. Copie a URL e compartilhe com seus clientes.</p>
+          {(() => {
+            const linkMaisAtivo = links.length > 0
+              ? [...links].sort((a, b) => {
+                  const sa = a.stats?.diagnosis_count ?? a.stats?.complete ?? 0
+                  const sb = b.stats?.diagnosis_count ?? b.stats?.complete ?? 0
+                  return sb - sa
+                })[0]
+              : null
+            const respostasMaisAtivo = linkMaisAtivo ? (linkMaisAtivo.stats?.diagnosis_count ?? linkMaisAtivo.stats?.complete ?? 0) : 0
+            const conversasMaisAtivo = linkMaisAtivo ? (linkMaisAtivo.stats?.cta_click ?? 0) : 0
+            if (!linkMaisAtivo || (respostasMaisAtivo === 0 && conversasMaisAtivo === 0)) return null
+            return (
+              <div className="mb-4 p-4 rounded-lg border border-amber-100 bg-amber-50/80">
+                <p className="text-xs font-semibold text-amber-800 uppercase tracking-wide mb-2">Diagnóstico mais respondido</p>
+                <p className="text-sm font-medium text-gray-900 mb-1 truncate">{linkMaisAtivo.title || linkMaisAtivo.slug}</p>
+                <p className="text-xs text-gray-600">
+                  <span aria-hidden>👩</span> {respostasMaisAtivo} {respostasMaisAtivo === 1 ? 'resposta' : 'respostas'}
+                  <span className="mx-2 text-gray-300">·</span>
+                  <span aria-hidden>💬</span> {conversasMaisAtivo} {conversasMaisAtivo === 1 ? 'conversa' : 'conversas'}
+                </p>
+              </div>
+            )
+          })()}
           {links.length === 0 ? (
-            <p className="text-gray-500 text-sm">Sua primeira ferramenta está a um clique acima. Escolha um tema e uma ferramenta para criar.</p>
+            <p className="text-gray-500 text-sm">Sua primeira ferramenta está a um clique acima. Use um diagnóstico sugerido ou escolha um tema.</p>
           ) : (
             <ul className="space-y-4">
               {links.map((link) => {

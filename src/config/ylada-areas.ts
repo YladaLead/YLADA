@@ -33,25 +33,47 @@ export const YLADA_AREAS: YladaAreaConfig[] = [
 ]
 
 /**
- * Menu: Noel; Links inteligentes; Leads; Trilha empresarial; Perfil empresarial; Configuração.
- * path 'trilha' alinha com a rota /pt/trilha.
- * Agrupado para sidebar organizada: principal, resultados, lab, sistema.
+ * Menu organizado pelo fluxo de uso (jornada): Atrair → Conversar → Melhorar → Apoio → Conta.
+ * Lab e Sistema apenas para admin.
  */
 export const YLADA_MENU_GROUPS = [
   {
-    label: 'Principal',
+    label: 'HOJE',
     items: [
-      { key: 'home', label: 'Noel', path: 'home', icon: '💬' },
-      { key: 'crescimento', label: 'Sistema de crescimento', path: 'crescimento', icon: '📈' },
-      { key: 'links', label: 'Links', path: 'links', icon: '🔗' },
-      { key: 'biblioteca', label: 'Biblioteca', path: 'biblioteca', icon: '📚' },
-      { key: 'perfil-empresarial', label: 'Perfil', path: 'perfil-empresarial', icon: '👤' },
+      { key: 'painel', label: 'Painel', path: 'painel', icon: '📊' },
     ],
   },
   {
-    label: 'Resultados',
+    label: 'ATRAIR',
+    items: [
+      { key: 'links', label: 'Diagnósticos', path: 'links', icon: '🧪' },
+    ],
+  },
+  {
+    label: 'CONVERSAR',
     items: [
       { key: 'leads', label: 'Leads', path: 'leads', icon: '👥' },
+    ],
+  },
+  {
+    label: 'MELHORAR',
+    items: [
+      { key: 'home', label: 'Noel', path: 'home', icon: '💬' },
+      { key: 'crescimento', label: 'Crescimento', path: 'crescimento', icon: '📈' },
+    ],
+  },
+  {
+    label: 'APOIO',
+    items: [
+      { key: 'biblioteca', label: 'Biblioteca', path: 'biblioteca', icon: '📚' },
+      { key: 'metodo', label: 'Método YLADA', path: 'metodo', icon: '🚀' },
+    ],
+  },
+  {
+    label: 'CONTA',
+    items: [
+      { key: 'perfil-empresarial', label: 'Perfil', path: 'perfil-empresarial', icon: '👤' },
+      { key: 'configuracao', label: 'Configurações', path: 'configuracao', icon: '⚙️' },
     ],
   },
   {
@@ -65,8 +87,7 @@ export const YLADA_MENU_GROUPS = [
     label: 'Sistema',
     items: [
       { key: 'planejamento', label: 'Planejamento', path: 'planejamento', icon: '📋' },
-      { key: 'trilha', label: 'Trilha empresarial', path: 'trilha', icon: '📚' },
-      { key: 'configuracao', label: 'Configuração', path: 'configuracao', icon: '⚙️' },
+      { key: 'trilha', label: 'Academia YLADA', path: 'trilha', icon: '🎓' },
     ],
   },
 ] as const

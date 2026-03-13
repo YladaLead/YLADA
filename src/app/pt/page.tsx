@@ -14,7 +14,7 @@ export default function PtHomePage() {
   useEffect(() => {
     if (loading || !isInstitutionalPage) return
     if (user) {
-      router.replace('/pt/home')
+      router.replace('/pt/painel')
     }
   }, [loading, user, pathname, router, isInstitutionalPage])
 

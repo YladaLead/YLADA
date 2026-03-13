@@ -96,10 +96,19 @@ export function getTemasForProfession(profession: string | null | undefined): Te
   return TEMAS_BY_PROFESSION[key] ?? TEMAS_BY_PROFESSION.outro
 }
 
+/** Overrides para temas comuns (padronização PT, ex.: skincare → Rotina de skincare). */
+const TEMA_LABEL_OVERRIDES: Record<string, string> = {
+  skincare: 'Rotina de skincare',
+  autocuidado: 'Autocuidado',
+  retencao: 'Retenção de clientes',
+}
+
 /** Retorna label de um tema pelo value. */
 export function getTemaLabel(value: string): string {
+  const key = String(value || '').toLowerCase().trim()
+  if (TEMA_LABEL_OVERRIDES[key]) return TEMA_LABEL_OVERRIDES[key]
   for (const opts of Object.values(TEMAS_BY_PROFESSION)) {
-    const found = opts.find((o) => o.value === value)
+    const found = opts.find((o) => o.value === value || o.value.toLowerCase() === key)
     if (found) return found.label
   }
   return value || 'Outro tema'
@@ -107,3 +116,35 @@ export function getTemaLabel(value: string): string {
 
 /** Valor especial para "Outro" — usuário digita. */
 export const TEMA_OUTRO_VALUE = '_outro'
+
+/** Ícones por tema (para melhor escaneabilidade na UI). */
+export const TEMA_ICONS: Record<string, string> = {
+  pele: '💆‍♀️',
+  antienvelhecimento: '✨',
+  corporal: '🌿',
+  cabelos: '💇‍♀️',
+  emagrecimento: '⚖️',
+  intestino: '🫀',
+  alimentacao: '🥗',
+  energia: '⚡',
+  sono: '😴',
+  ansiedade: '🧘',
+  carreira: '💼',
+  produtividade: '📊',
+  bem_estar: '🌿',
+  saude_bucal: '🦷',
+  clareamento: '✨',
+  implantes: '🦷',
+  estetica_dental: '✨',
+  ortodontia: '🦷',
+  autoconhecimento: '🔍',
+  relacionamentos: '💬',
+  vendas: '💰',
+  suplementacao: '💊',
+  skincare: '✨',
+  autocuidado: '🌿',
+  retencao: '🔁',
+  b12_vitaminas: '💊',
+  performance: '🏃',
+  gestacao: '🤰',
+}

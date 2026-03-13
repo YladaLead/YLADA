@@ -32,7 +32,7 @@ export function PricingBlockCompact({
       </div>
       <ul className="space-y-2 text-gray-700 text-sm mb-6">
         <li className="flex items-center gap-2"><span className="text-green-600">✔</span> Criação de avaliações</li>
-        <li className="flex items-center gap-2"><span className="text-green-600">✔</span> Links inteligentes</li>
+        <li className="flex items-center gap-2"><span className="text-green-600">✔</span> Diagnósticos inteligentes</li>
         <li className="flex items-center gap-2"><span className="text-green-600">✔</span> Diagnósticos automáticos</li>
         <li className="flex items-center gap-2"><span className="text-green-600">✔</span> Sem limite de avaliações ou diagnósticos</li>
       </ul>

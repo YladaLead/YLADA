@@ -2,7 +2,10 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import YladaSidebar from './YladaSidebar'
+
+const YLADA_LOGO = '/images/logo/ylada/horizontal/azul-claro/ylada-horizontal-azul-claro-30.png'
 
 interface YladaAreaShellProps {
   areaCodigo: string
@@ -21,18 +24,31 @@ export default function YladaAreaShell({ areaCodigo, areaLabel, children }: Ylad
         onMobileClose={() => setMobileMenuOpen(false)}
       />
       <div className="flex-1 flex flex-col min-w-0">
-        <header className="sticky top-0 z-30 flex items-center gap-3 h-14 px-4 bg-white border-b border-gray-200 lg:px-6">
-          <button
-            type="button"
-            onClick={() => setMobileMenuOpen(true)}
-            className="lg:hidden p-2 rounded-lg text-gray-600 hover:bg-gray-100"
-            aria-label="Abrir menu"
-          >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-          </button>
-          <Link href="/pt" className="text-sm text-gray-500 hover:text-gray-700">
+        <header className="sticky top-0 z-30 flex items-center justify-between gap-3 h-14 px-4 bg-white border-b border-gray-200 lg:px-6">
+          <div className="flex items-center gap-3 min-w-0">
+            <button
+              type="button"
+              onClick={() => setMobileMenuOpen(true)}
+              className="lg:hidden p-2 rounded-lg text-gray-600 hover:bg-gray-100 shrink-0"
+              aria-label="Abrir menu"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+            <Link href={areaCodigo === 'ylada' ? '/pt' : `/pt/${areaCodigo}/home`} className="flex items-center gap-2 min-w-0">
+              <Image
+                src={YLADA_LOGO}
+                alt="YLADA"
+                width={90}
+                height={28}
+                className="h-7 w-auto object-contain"
+                priority
+              />
+              <span className="text-gray-500 text-sm font-medium hidden sm:inline">· {areaLabel}</span>
+            </Link>
+          </div>
+          <Link href="/pt" className="text-xs sm:text-sm text-gray-500 hover:text-gray-700 shrink-0">
             Voltar ao YLADA
           </Link>
         </header>

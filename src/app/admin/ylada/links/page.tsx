@@ -89,7 +89,7 @@ function AdminYladaLinksContent() {
               <Link href="/admin" className="text-sm text-gray-500 hover:text-gray-700 mb-1 inline-block">
                 ← Voltar ao painel
               </Link>
-              <h1 className="text-2xl font-bold text-gray-900">Links inteligentes (YLADA)</h1>
+              <h1 className="text-2xl font-bold text-gray-900">Diagnósticos (YLADA)</h1>
               <p className="text-sm text-gray-600 mt-1">
                 Lista de todos os links e <strong>quem está emitindo</strong> cada link (dono do link).
               </p>

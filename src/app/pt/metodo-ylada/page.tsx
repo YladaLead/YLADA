@@ -239,7 +239,7 @@ export default function MetodoYLADALandingPage() {
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="text-blue-600 font-bold">•</span>
-                  <span><strong>Links inteligentes</strong> — ferramentas que geram valor antes da conversa</span>
+                  <span><strong>Diagnósticos inteligentes</strong> — ferramentas que geram valor antes da conversa</span>
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="text-blue-600 font-bold">•</span>

@@ -112,7 +112,7 @@ export default function PerfisSimuladosPage() {
         </section>
 
         <p className="text-sm text-gray-500 border-t border-gray-200 pt-6">
-          Vá em <strong className="text-gray-700">Noel</strong> ou <strong className="text-gray-700">Links inteligentes</strong> para testar o comportamento com o perfil ativo. Ao desativar, volta a valer seu perfil real (se tiver).
+          Vá em <strong className="text-gray-700">Noel</strong> ou <strong className="text-gray-700">Diagnósticos</strong> para testar o comportamento com o perfil ativo. Ao desativar, volta a valer seu perfil real (se tiver).
         </p>
       </div>
     </YladaAreaShell>
