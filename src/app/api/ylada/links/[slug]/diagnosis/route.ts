@@ -71,6 +71,41 @@ function extractFormFieldsFromConfig(config: Record<string, unknown>): FormField
   return undefined
 }
 
+/** Labels 4D para resumo WhatsApp (situação → tentativa → causa → objetivo). */
+const RESUMO_4D_LABELS = ['dificuldade principal', 'já tentei', 'causa provável', 'objetivo']
+
+/** Converte índice de opção (0-3) em texto da opção. */
+function optionIndexToText(idx: unknown, options: string[] | undefined): string | null {
+  if (!Array.isArray(options) || options.length === 0) return null
+  const i = typeof idx === 'number' ? idx : parseInt(String(idx ?? ''), 10)
+  if (Number.isNaN(i) || i < 0 || i >= options.length) return null
+  return options[i]?.trim() || null
+}
+
+/** Monta resumo estruturado para WhatsApp a partir das respostas (Ficha Inteligente do Lead). */
+function buildWhatsAppResumoFromAnswers(
+  visitor_answers: Record<string, unknown>,
+  formFields: FormFieldForNormalize[] | undefined,
+  mainBlocker?: string
+): string | null {
+  if (!formFields || formFields.length === 0) return null
+  const bullets: string[] = []
+  for (let i = 0; i < Math.min(formFields.length, 4); i++) {
+    const f = formFields[i]
+    const val = visitor_answers[f.id]
+    const text = optionIndexToText(val, f.options)
+    if (text) {
+      const label = RESUMO_4D_LABELS[i] ?? `pergunta ${i + 1}`
+      bullets.push(`• ${label}: ${text}`)
+    }
+  }
+  if (bullets.length === 0 && mainBlocker) {
+    bullets.push(`• problema principal: ${mainBlocker}`)
+  }
+  if (bullets.length === 0) return null
+  return `Olá! Resumo rápido do meu caso:\n\n${bullets.join('\n')}\n\nPodemos conversar sobre isso?`
+}
+
 export async function POST(
   request: NextRequest,
   context: { params: Promise<{ slug: string }> }
@@ -383,15 +418,24 @@ export async function POST(
       return NextResponse.json({ success: false, error: insertError.message }, { status: 500 })
     }
 
-    // Mensagem WhatsApp: incluir resultado do diagnóstico quando for genérica (texto contínuo, natural)
+    // Mensagem WhatsApp: Ficha Inteligente do Lead — resumo estruturado para o profissional receber contexto no WhatsApp
     let whatsappPrefill = diagnosis.whatsapp_prefill
-    const msgContainsResult =
-      diagnosis.main_blocker &&
-      whatsappPrefill?.toLowerCase().includes((diagnosis.main_blocker || '').toLowerCase().slice(0, 15))
-    const isGeneric = whatsappPrefill && diagnosis.main_blocker && !msgContainsResult
-    if (isGeneric && diagnosis.main_blocker && architecture !== 'PERFUME_PROFILE') {
-      const theme = themeForSlots?.trim() || 'a análise'
-      whatsappPrefill = `Oi, fiz a análise de ${theme} e o resultado apontou ${diagnosis.main_blocker}. Gostaria de conversar sobre o próximo passo.`
+    const resumoFromAnswers = buildWhatsAppResumoFromAnswers(
+      visitor_answers,
+      formFields,
+      diagnosis.main_blocker
+    )
+    if (resumoFromAnswers && architecture !== 'PERFUME_PROFILE') {
+      whatsappPrefill = resumoFromAnswers
+    } else if (architecture !== 'PERFUME_PROFILE') {
+      const msgContainsResult =
+        diagnosis.main_blocker &&
+        whatsappPrefill?.toLowerCase().includes((diagnosis.main_blocker || '').toLowerCase().slice(0, 15))
+      const isGeneric = whatsappPrefill && diagnosis.main_blocker && !msgContainsResult
+      if (isGeneric && diagnosis.main_blocker) {
+        const theme = themeForSlots?.trim() || 'a análise'
+        whatsappPrefill = `Oi, fiz a análise de ${theme} e o resultado apontou ${diagnosis.main_blocker}. Gostaria de conversar sobre o próximo passo.`
+      }
     }
     // PERFUME_PROFILE: enriquecer whatsapp_prefill com perfume_usage para o vendedor qualificar o lead
     const perfumeUsage = (diagnosis as Record<string, unknown>).perfume_usage as string | undefined

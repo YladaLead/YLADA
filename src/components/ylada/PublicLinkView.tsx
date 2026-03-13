@@ -43,6 +43,26 @@ function trackEvent(slug: string, eventType: string, options?: { metrics_id?: st
 
 const DIAGNOSIS_PLACEHOLDER = 'O diagnóstico será gerado com base no seu perfil.'
 
+/**
+ * Personaliza main_blocker para linguagem mais "feita para mim" (aumenta curiosidade e clique).
+ * Transforma frases genéricas em linguagem que parece específica para o usuário.
+ */
+function personalizeMainBlocker(text: string): string {
+  if (!text?.trim()) return text
+  const t = text.trim()
+  const m1 = t.match(/^Bloqueio prático em (.+)$/i)
+  if (m1) return `Seu principal bloqueio pode estar na organização da rotina em relação a ${m1[1].toLowerCase()}`
+  const m2 = t.match(/^Bloqueio emocional em (.+)$/i)
+  if (m2) return `Seu resultado indica um possível bloqueio emocional em ${m2[1].toLowerCase()}`
+  const m3 = t.match(/^Indícios em (.+) que merecem atenção$/i)
+  if (m3) return `Seu resultado indica indícios em ${m3[1].toLowerCase()} que merecem atenção`
+  const m4 = t.match(/^Sinais em (.+) que se repetem$/i)
+  if (m4) return `Seu resultado indica sinais em ${m4[1].toLowerCase()} que se repetem`
+  const m5 = t.match(/^Desequilíbrio em (.+) que pede ação$/i)
+  if (m5) return `Seu resultado indica um desequilíbrio em ${m5[1].toLowerCase()} que pede ação`
+  return t
+}
+
 /** Tem resultados estáticos utilizáveis (não placeholder). */
 function hasStaticResults(config: Record<string, unknown>): boolean {
   const results = config.results as Array<{ description?: string }> | undefined
@@ -312,13 +332,18 @@ function ConfigDrivenLinkView({
   if (step === 'result') {
     if (diagnosis && metricsId) {
       const isPerfumery = meta.architecture === 'PERFUME_PROFILE' || meta.segment_code === 'perfumaria'
+      const areaProf = typeof meta.area_profissional === 'string' ? meta.area_profissional : ''
+      const segmentCode = typeof meta.segment_code === 'string' ? meta.segment_code : ''
+      const useEspecialista =
+        areaProf === 'vendas' || ['seller', 'perfumaria', 'nutra'].includes(segmentCode)
+      const pessoaLabel = useEspecialista ? 'especialista' : 'profissional'
       const formattedProfileTitle = formatDisplayTitle(diagnosis.profile_title)
       return (
         <div className="min-h-screen bg-gradient-to-b from-sky-50 via-sky-50/90 to-blue-50 flex items-center justify-center p-4 sm:p-6">
           <div className="max-w-md w-full bg-white rounded-2xl shadow-xl shadow-sky-100/50 border border-sky-100/60 p-6 sm:p-8">
             <div className="mb-4">
               <span className="inline-block text-xs font-semibold text-sky-600 bg-sky-50 px-3 py-1.5 rounded-full border border-sky-100">
-                Seu resultado
+                Seu resultado inicial
               </span>
             </div>
             <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3 leading-tight">
@@ -336,7 +361,7 @@ function ConfigDrivenLinkView({
                   Diagnóstico
                 </p>
                 <p className="text-lg sm:text-xl font-bold text-gray-900 leading-snug mb-2">
-                  {diagnosis.main_blocker}
+                  {personalizeMainBlocker(diagnosis.main_blocker)}
                 </p>
                 {diagnosis.espelho_comportamental && (
                   <p className="text-sm text-sky-700 font-medium italic">
@@ -387,6 +412,13 @@ function ConfigDrivenLinkView({
               </p>
             </div>
 
+            {/* 5a. Gatilho de esperança — cria ponte para conversa */}
+            <div className="mb-4 p-4 rounded-xl bg-green-50/80 border border-green-100">
+              <p className="text-gray-700 text-sm leading-relaxed">
+                A boa notícia é que muitas pessoas conseguem melhorar essa situação quando identificam o bloqueio certo e fazem pequenos ajustes na rotina.
+              </p>
+            </div>
+
             {/* 5b. Dica rápida (micro-conteúdo educativo) */}
             {diagnosis.dica_rapida && (
               <div className="mb-4 p-4 rounded-xl bg-sky-50/60 border border-sky-100">
@@ -422,10 +454,20 @@ function ConfigDrivenLinkView({
               )}
             </div>
 
-            {/* 7. Direcionamento — CTA discreto ao especialista */}
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-sky-600 mb-2">
-              Próximo passo
-            </p>
+            {/* 7. Ponte para conversa — gatilho de continuação (não conclusão) */}
+            <div className="mb-6 p-4 rounded-xl bg-sky-50/80 border border-sky-100">
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-sky-600 mb-2">
+                Pode existir mais de um fator no seu caso
+              </p>
+              <p className="text-gray-600 text-sm leading-relaxed mb-2">
+                Este resultado é apenas um primeiro indicativo baseado nas respostas que você forneceu. Um {pessoaLabel} pode analisar melhor sua rotina e explicar quais ajustes podem ajudar você a melhorar seus resultados.
+              </p>
+              <p className="text-gray-700 text-sm font-medium">
+                Se quiser entender melhor o que esse resultado significa no seu caso, você pode conversar com um {pessoaLabel}.
+              </p>
+            </div>
+
+            {/* 8. CTA — botão de ação */}
             {whatsappUrl ? (
               <button
                 type="button"
@@ -438,10 +480,10 @@ function ConfigDrivenLinkView({
                 }
                 className="w-full py-4 px-4 bg-sky-600 hover:bg-sky-700 text-white font-semibold rounded-xl shadow-lg shadow-sky-500/25 transition-colors"
               >
-                {diagnosis.cta_text}
+                {diagnosis.cta_text?.replace(/profissional/gi, pessoaLabel) ?? (useEspecialista ? 'Conversar com o especialista' : 'Clique para entender melhor seu caso')}
               </button>
             ) : (
-              <span className="text-gray-500 text-sm">O profissional ainda não disponibilizou o contato por aqui.</span>
+              <span className="text-gray-500 text-sm">O {pessoaLabel} ainda não disponibilizou o contato por aqui.</span>
             )}
 
             {/* Disclaimer — orientação e responsabilidade */}
@@ -454,6 +496,16 @@ function ConfigDrivenLinkView({
         </div>
       )
     }
+
+    const areaProfStatic = typeof meta.area_profissional === 'string' ? meta.area_profissional : ''
+    const segmentCodeStatic = typeof meta.segment_code === 'string' ? meta.segment_code : ''
+    const useEspecialistaStatic =
+      areaProfStatic === 'vendas' || ['seller', 'perfumaria', 'nutra'].includes(segmentCodeStatic)
+    const pessoaLabelStatic = useEspecialistaStatic ? 'especialista' : 'profissional'
+    const ctaDisplay =
+      (resultCtaText && resultCtaText.trim()
+        ? resultCtaText.replace(/profissional/gi, pessoaLabelStatic)
+        : null) ?? (useEspecialistaStatic ? 'Conversar com o especialista' : 'Clique para entender melhor seu caso')
 
     return (
       <div className="min-h-screen bg-gradient-to-b from-sky-50 via-sky-50/90 to-blue-50 flex items-center justify-center p-4 sm:p-6">
@@ -469,16 +521,27 @@ function ConfigDrivenLinkView({
               </ul>
             )}
           </div>
+          <div className="mb-6 p-4 rounded-xl bg-sky-50/80 border border-sky-100">
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-sky-600 mb-2">
+              Pode existir mais de um fator no seu caso
+            </p>
+            <p className="text-gray-600 text-sm leading-relaxed mb-2">
+              Este resultado é apenas um primeiro indicativo baseado nas respostas que você forneceu. Um {pessoaLabelStatic} pode analisar melhor sua rotina e explicar quais ajustes podem ajudar você a melhorar seus resultados.
+            </p>
+            <p className="text-gray-700 text-sm font-medium">
+              Se quiser entender melhor o que esse resultado significa no seu caso, você pode conversar com um {pessoaLabelStatic}.
+            </p>
+          </div>
           {whatsappUrl ? (
             <button
               type="button"
               onClick={() => onCtaClick()}
               className="w-full py-4 px-4 bg-sky-600 hover:bg-sky-700 text-white font-semibold rounded-xl shadow-lg shadow-sky-500/25 transition-colors"
             >
-              {resultCtaText}
+              {ctaDisplay}
             </button>
           ) : (
-            <span className="text-gray-500 text-sm">O profissional ainda não disponibilizou o contato por aqui.</span>
+            <span className="text-gray-500 text-sm">O {pessoaLabelStatic} ainda não disponibilizou o contato por aqui.</span>
           )}
 
           <DiagnosisDisclaimer variant="informative" className="mt-5 pt-4" />

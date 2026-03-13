@@ -107,12 +107,13 @@ Regras:
 - Tema (theme): Use APENAS o tema do ponto de vista do paciente (ex.: "cáries e saúde bucal", "perda de peso"). NUNCA inclua no tema termos como "atração de pacientes", "captação", "captar clientes" — o paciente não deve ver isso no resultado.
 - Use checklist_prontidao APENAS quando o profissional deixar explícito que quer um link para ELE MESMO avaliar sua estratégia (ex.: "quero um quiz para eu ver como estou", "link para eu avaliar minha prontidão").
 - Use o segmento/área do profissional: medico/nutricionista → perguntas clínicas (ex.: exames, medicamentos, acompanhamento); estetica → pele, tratamentos, procedimentos; dentista → saúde bucal; coach → objetivos, bloqueios. NUNCA use perguntas genéricas de coaching quando o perfil for médico ou de saúde.
-- ESTRUTURA 4D DO DIAGNÓSTICO (para diagnostico_risco e diagnostico_bloqueio): SEMPRE gere perguntas em 4 dimensões, nesta ordem:
-  1. Sintoma: o que a pessoa percebe/sente (ex.: "Qual dessas situações mais acontece com você?", "O que mais incomoda você hoje?")
-  2. Causa provável: o que pode estar causando (ex.: "Qual dessas situações parece mais relacionada ao seu caso?", "Você sabe o que pode estar causando isso?")
-  3. Tentativa anterior: o que já tentou (ex.: "Nos últimos 12 meses, você já tentou o quê?", "Você já tentou tratar isso antes?")
-  4. Objetivo desejado: o que quer melhorar (ex.: "O que você gostaria de melhorar agora?", "Qual é seu principal objetivo?")
-- EVITE perguntas genéricas sobre motivação, organização, disciplina ou expectativas abstratas. Priorize perguntas sobre problema real, histórico e objetivo.
+- ESTRUTURA 4D DO DIAGNÓSTICO (para diagnostico_risco e diagnostico_bloqueio): SEMPRE gere perguntas em 4 dimensões, nesta ordem (mini funil: identificação → qualificação → conversa):
+  1. Situação (identificação): a PRIMEIRA pergunta decide 70-80% da retenção. OBRIGATÓRIO: "Qual dessas situações mais parece com você hoje?" ou "Qual dessas situações acontece mais com você?" — situação real + identificação rápida. Opções curtas que a pessoa reconhece na hora (ex.: "tento emagrecer mas o peso volta", "metabolismo parece mais lento", "dificuldade em manter dieta").
+  2. Tentativa anterior (histórico): o que já tentou (ex.: "O que você já tentou para emagrecer?", "Nos últimos 12 meses, você já tentou o quê?") — mais fácil de responder logo após identificação.
+  3. Causa/bloqueio: o que mais dificulta (ex.: "O que mais dificulta seu emagrecimento hoje?", "Qual dessas situações parece mais relacionada ao seu caso?")
+  4. Objetivo: o que quer melhorar (ex.: "O que você gostaria de melhorar agora?", "Qual é seu principal objetivo?")
+- PROIBIDO na primeira pergunta (geram abandono): "Como você organiza sua rotina...", "Com que frequência...", "Como você avalia...", "Como você se sente em relação à motivação..." — exigem reflexão, parecem questionário psicológico, não criam identificação.
+- PROIBIDO em qualquer pergunta: motivação, organização, disciplina, expectativas abstratas — são perguntas de coaching, não de diagnóstico. Foque em: situação real, tentativa, objetivo.
 - Opções: curtas, situações reais, que gerem identificação (ex.: "emagrecer ficou mais difícil" vs "pouco motivado").
 - QUIZ = sempre com 4 opções. CALCULADORA = campos numéricos sem opções.
 - CTA em 1ª pessoa, consultivo (ex.: "Quero analisar meu caso", nunca "Falar com especialista")

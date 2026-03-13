@@ -310,6 +310,24 @@ Incentivar sempre essa estrutura. Se o profissional pulou uma etapa, orientar a 
 SUGESTÃO DE SCRIPTS: O Noel deve sugerir scripts concretos embasados nesse método — frases prontas para diagnóstico investigativo, repetição da dor, perguntas de confirmação e convite com valor, adaptados ao contexto que o profissional descrever.
 `
 
+/** Primeira mensagem após diagnóstico — dobra a qualidade da conversa. */
+const NOEL_PRIMEIRA_MENSAGEM_APOS_DIAGNOSTICO = `
+[PRIMEIRA MENSAGEM APÓS DIAGNÓSTICO — QUANDO O CLIENTE/LEAD JÁ RESPONDEU UM QUIZ]
+Quando alguém responde um diagnóstico e o profissional vai iniciar a conversa no WhatsApp, NUNCA começar com mensagem genérica ("Vi que você respondeu meu diagnóstico. Como posso te ajudar?"). Isso gera pouca resposta.
+
+FÓRMULA OBRIGATÓRIA: Reconhecimento → Empatia → Pergunta simples
+
+1. Reconhecimento: "Vi que no diagnóstico você mencionou que [resposta específica da pessoa]"
+2. Empatia: "Isso é algo que muitas pessoas [passam/ enfrentam] [contexto, ex.: depois dos 40]"
+3. Pergunta simples: "Posso te perguntar uma coisa rápida? [pergunta que aprofunda o problema]"
+
+Exemplo (emagrecimento): "Vi que no diagnóstico você comentou que sente que seu metabolismo está mais lento e já tentou dieta antes. Isso é muito comum depois dos 40. Posso te perguntar uma coisa rápida? Você sente que a maior dificuldade hoje é manter a dieta ou sentir muita fome?"
+
+Exemplo (estética): "Vi que no diagnóstico você mencionou que manchas na pele te incomodam e já tentou cosméticos. Isso é algo que muitas pessoas enfrentam. Posso te perguntar: o que mais te incomoda hoje — as manchas em si ou o que pode estar causando?"
+
+O Noel deve sugerir essa estrutura quando o profissional perguntar como falar com lead, como iniciar conversa, primeira mensagem para cliente, ou quando mencionar que alguém respondeu o diagnóstico.
+`
+
 /** Contato frio — Uber, fila, desconhecidos. Nunca começar com link de apresentação. */
 const NOEL_CONTATO_FRIO = `
 [CONTATO FRIO — OBRIGATÓRIO EM RECRUTAMENTO/OPORTUNIDADE COM DESCONHECIDOS]
@@ -624,7 +642,15 @@ export async function POST(request: NextRequest) {
 
     const baseSystem = SEGMENT_CONTEXT[validSegment] ||
       'Você é o Noel, mentor da YLADA. Oriente o profissional sobre rotina, links inteligentes e formação empresarial. Tom direto e prático.'
-    const parts: string[] = [baseSystem, NOEL_MODO_EXECUTOR_LINK, NOEL_CONDUTOR_RULES, NOEL_PRINCIPIO_20_80, NOEL_METODO_CONDUCAO_VENDA, NOEL_CONTATO_FRIO]
+    const parts: string[] = [
+      baseSystem,
+      NOEL_MODO_EXECUTOR_LINK,
+      NOEL_CONDUTOR_RULES,
+      NOEL_PRINCIPIO_20_80,
+      NOEL_METODO_CONDUCAO_VENDA,
+      NOEL_PRIMEIRA_MENSAGEM_APOS_DIAGNOSTICO,
+      NOEL_CONTATO_FRIO,
+    ]
 
     // Detecção de contato frio: Uber, recrutar, link de recrutamento — injeta alerta para forçar diagnóstico primeiro
     const m = message.toLowerCase().trim()

@@ -39,15 +39,15 @@ Placeholders obrigatórios: {THEME} (tema do quiz) e {NAME} (ex: "quem te enviou
 ## ESTRUTURA POR NÍVEL
 
 **leve** — Indícios iniciais. Tom educativo, suave, encorajador.
-- main_blocker: "Indícios em {THEME} que merecem atenção"
+- main_blocker: "Seu resultado indica indícios em {THEME} que merecem atenção" (linguagem personalizada, não genérica)
 - profile_summary: Conectar as respostas ao tema de forma leve. Ex: "Com base nas suas respostas, há sinais leves que merecem atenção. Vale organizar para evitar que evoluam."
 
 **moderado** — Sinais que se repetem. Tom direcionador, sem alarmar.
-- main_blocker: "Sinais em {THEME} que se repetem"
+- main_blocker: "Seu resultado indica sinais em {THEME} que se repetem" (linguagem personalizada)
 - profile_summary: Mostrar que o padrão identificado é relevante. Ex: "Pelos seus relatos, alguns sinais aparecem com frequência. Organizar agora pode ajudar a evitar que o quadro avance."
 
 **urgente** — Desequilíbrio que pede ação. Tom firme mas acolhedor.
-- main_blocker: "Desequilíbrio em {THEME} que pede ação"
+- main_blocker: "Seu resultado indica um desequilíbrio em {THEME} que pede ação" (linguagem personalizada)
 - profile_summary: Reconhecer a situação sem culpar. Ex: "As respostas indicam que o quadro merece atenção. Vale buscar o profissional para calibrar o próximo passo."
 
 ## CAMPOS (para cada nível)
@@ -70,7 +70,7 @@ main_blocker: Frase acima conforme o nível.
 
 **frase_identificacao**: Frase DIRETA que conecta o diagnóstico à situação. NUNCA use "Se você se identificou com esse resultado" — a pessoa ainda não viu o resultado completo. Use: "Sua rotina e hábitos têm pesado no seu dia a dia." ou "Os sinais que você relatou indicam que vale organizar." Ou OMITA se não fizer sentido.
 
-cta_text: "Clique para entender melhor seu caso"
+cta_text: "Conversar com o profissional"
 whatsapp_prefill: "Oi {NAME}, fiz a análise de {THEME} e o resultado apontou {BLOCKER}. Gostaria de conversar sobre o próximo passo." Use {BLOCKER} com o main_blocker. Texto contínuo, linguagem natural em português. NUNCA use "Oi aí" — use SEMPRE {NAME}.
 
 ## REGRAS ESSENCIAIS
@@ -90,12 +90,12 @@ Placeholders: {THEME} (tema) e {NAME} (ex: "quem te enviou").
 ## ESTRUTURA POR TIPO
 
 **bloqueio_pratico** — Rotina, processo, hábitos, organização.
-- main_blocker: "Bloqueio prático em {THEME}" ou variação que conecte ao tema
+- main_blocker: "Seu resultado indica um possível bloqueio na organização da rotina em relação a {THEME}" ou variação personalizada (NUNCA "Bloqueio prático em X" — use linguagem "feita para mim")
 - profile_summary: Conectar respostas a dificuldades de rotina/organização
 - Foco: próximo passo claro, ações concretas, organização
 
 **bloqueio_emocional** — Aspectos emocionais, expectativas, autoconhecimento.
-- main_blocker: "Bloqueio emocional em {THEME}" ou variação
+- main_blocker: "Seu resultado indica um possível bloqueio emocional em {THEME}" ou variação personalizada (NUNCA "Bloqueio emocional em X" — use linguagem "feita para mim")
 - profile_summary: Conectar respostas a padrões emocionais ou expectativas
 - Foco: autoconhecimento, calibração de expectativas, direcionar ao profissional
 
@@ -105,7 +105,7 @@ Mesmas regras: causa_provavel (mecanismo), preocupacoes e consequence (diferente
 
 specific_actions: 2-3 ações práticas e específicas ao tema. NÃO genéricas. O último: "Converse com {NAME} pra calibrar o próximo passo."
 
-cta_text: "Clique para entender melhor seu caso"
+cta_text: "Conversar com o profissional"
 whatsapp_prefill: "Oi {NAME}, fiz a análise de {THEME} e o resultado apontou {BLOCKER}. Gostaria de conversar sobre o próximo passo." Use {BLOCKER} com o main_blocker. Texto contínuo, linguagem natural em português.
 
 ## REGRAS
@@ -171,7 +171,7 @@ INSTRUÇÃO: Gere conteúdo específico para ESTE tema e ESTAS perguntas. Cada s
         specific_actions: Array.isArray(r.specific_actions) ? r.specific_actions as string[] : [],
         dica_rapida: r.dica_rapida as string | undefined,
         frase_identificacao: r.frase_identificacao as string | undefined,
-        cta_text: (r.cta_text as string) ?? 'Clique para entender melhor seu caso',
+        cta_text: (r.cta_text as string) ?? 'Conversar com o profissional',
         whatsapp_prefill:
           (r.whatsapp_prefill as string)?.trim() ||
           `Oi, fiz a análise de ${theme} e gostaria de conversar sobre o resultado.`,
