@@ -16,6 +16,15 @@ import { getNoelYladaLinks, formatLinksAtivosParaNoel } from '@/lib/noel-ylada-l
 import { getPerfilSimuladoByKey, SIMULATE_COOKIE_NAME } from '@/data/perfis-simulados'
 import { getFlowById } from '@/config/ylada-flow-catalog'
 import { formatDisplayTitle } from '@/lib/ylada/strategic-intro'
+import { getStrategicProfilesForMessage, formatStrategicProfileForPrompt } from '@/lib/noel-wellness/strategic-profile-matcher'
+import { getNoelLibraryContext } from '@/lib/noel-wellness/noel-library-context'
+import { getDiagnosisInsightsContext, FALLBACK_DIAGNOSTIC_ID_INSIGHTS } from '@/lib/noel-wellness/diagnosis-insights-context'
+import {
+  NOEL_STRATEGIC_PROTOCOL,
+  NOEL_STRATEGIC_RULE,
+  NOEL_DETECTED_PROFILE_INSTRUCTION,
+  NOEL_LAYER4_PRIORITY_RULE,
+} from '@/lib/noel-wellness/prompt-layers'
 import OpenAI from 'openai'
 
 type FormField = { id?: string; label?: string; type?: string; options?: string[] }
@@ -114,16 +123,58 @@ function isIntencaoCriarLink(message: string): boolean {
     'emagrecimento', 'para emagrecimento', 'pacientes para emagrecer',
     'intestino', 'energia', 'ansiedade', 'bem-estar', 'suplementação',
     'me ajuda a criar', 'me dá um', 'me faz um', 'cria um', 'cria uma',
+    // Pedido explícito de link / fluxo gerado (Bloco 2)
+    'criar esse fluxo', 'esse fluxo para mim', 'cria esse fluxo', 'criar o fluxo',
+    'meu link', 'e meu link', 'quero o link', 'gera o link', 'gerar o link', 'cria o link',
+    'me dá o link', 'me entrega o link', 'cadê o link', 'onde está o link', 'entregar o link',
+    'criar o link', 'link desse', 'link desse diagnóstico', 'link desse quiz', 'link do diagnóstico',
+    'pode criar esse', 'pode gerar o link', 'gera esse link',
   ]
   return termos.some((t) => m.includes(t))
 }
+
+/** Primeira conversa: no máximo 1 troca anterior e mensagem vaga (oi, como funciona, quero captar, etc.). */
+function isPrimeiraConversaOuVaga(
+  message: string,
+  conversationHistory: { role: string; content: string }[]
+): boolean {
+  const hist = Array.isArray(conversationHistory) ? conversationHistory : []
+  const userMessages = hist.filter((e) => e.role === 'user').length
+  const isPrimeiraOuPoucasTrocas = userMessages <= 1
+  const msg = message.toLowerCase().trim()
+  const vagas = [
+    'oi', 'olá', 'ola', 'o que eu faço', 'o que faço aqui', 'como funciona', 'por onde começo',
+    'quero começar', 'me ajuda', 'o que é isso', 'como é que funciona', 'quero captar clientes',
+    'quero captar pacientes', 'quero atrair', 'começar a captar', 'não sei por onde começar',
+  ]
+  const pareceVaga = vagas.some((v) => msg.includes(v)) || (msg.length <= 35 && !msg.includes('diagnóstico') && !msg.includes('quiz') && !msg.includes('intestino') && !msg.includes('emagrecimento'))
+  return isPrimeiraOuPoucasTrocas && pareceVaga
+}
+
+/** Texto default para interpret na primeira conversa (gerar diagnóstico base por segmento). */
+function getDefaultInterpretTextPrimeiraConversa(segment: string): string {
+  if (segment === 'med') return 'quero um diagnóstico para captar pacientes'
+  return 'quero um diagnóstico para captar clientes'
+}
+
+/** Modo Executor: gerar primeiro, ajustar depois. A conversa é o editor. Nunca travar em perguntas. */
+const NOEL_MODO_EXECUTOR_LINK = `
+[MODO EXECUTOR — LINK/QUIZ/DIAGNÓSTICO — OBRIGATÓRIO]
+Regra de ouro: GERAR PRIMEIRO, PERGUNTAR DEPOIS. Nunca travar o usuário em perguntas antes de gerar.
+
+Quando o profissional pedir criar quiz, diagnóstico ou link (ex.: "quero um link para captar pacientes", "cria um diagnóstico", "gerar link"):
+1. EXECUÇÃO PRIMEIRO: Se o sistema entregou um bloco [LINK GERADO AGORA] ou [LINK AJUSTADO E GERADO], você DEVE mostrar o quiz completo e o link clicável na resposta. Não pergunte "posso criar um quiz para você?" nem "gostaria de definir algumas perguntas primeiro?" — quando o sistema gerou, entregue. A sensação desejada: pediu → já ficou pronto.
+2. NUNCA diga que não pode criar links. Quem cria é o sistema; você só exibe o link quando ele vem no bloco. Se não veio link nesta resposta, oriente a preencher o perfil ou a pedir de novo com o tema claro.
+3. RESULTADO EXECUTÁVEL: Inclua sempre o link clicável e as perguntas do quiz (conforme o bloco). Depois ofereça ajustes: "Se quiser, posso ajustar perguntas, mudar o foco ou criar outro diagnóstico."
+4. CONVERSA = EDITOR: Se o usuário pedir ajuste (ex.: "troca a pergunta 2", "foca em sintomas"), o sistema pode gerar novo link; você entrega o link atualizado e confirma o que mudou. A conversa vira editor natural — não configurar sistema, e sim criar algo conversando.
+`
 
 /** Regras de comportamento estratégico: Noel conduz, não apenas explica. */
 const NOEL_CONDUTOR_RULES = `
 [COMPORTAMENTO ESTRATÉGICO — OBRIGATÓRIO]
 Você não é um explicador. Você é um condutor. O objetivo é conversão (agenda cheia, captação, previsibilidade).
 
-1. PERGUNTA ESTRATÉGICA: Antes de entregar solução completa, faça pelo menos 1 pergunta que direcione decisão (quando fizer sentido). Ex.: "Quer que eu deixe esse quiz mais voltado para dor ou para educação?" — NÃO use em perguntas simples (ex.: "qual o melhor horário?").
+1. PERGUNTA ESTRATÉGICA: Antes de entregar solução completa, faça pelo menos 1 pergunta que direcione decisão (quando fizer sentido). Ex.: "Quer que eu deixe esse quiz mais voltado para dor ou para educação?" — NÃO use em perguntas simples (ex.: "qual o melhor horário?"). EXCEÇÃO: quando o profissional pediu link/quiz/diagnóstico, priorize ENTREGAR o link gerado pelo sistema; depois ofereça ajustes.
 
 2. MICRO DECISÃO: Sempre termine com um próximo passo claro. Nunca encerre em "está bom assim?" genérico. Ofereça escolha concreta: "Quer ajustar o CTA para WhatsApp ou deixar mais educativo?" ou "Prefere que eu sugira um segundo link ou focamos em promover este primeiro?"
 
@@ -370,7 +421,7 @@ export async function POST(request: NextRequest) {
     if (!linkGeradoBlock && isIntencaoCriarLink(message)) {
       const temPerfil = profileRow && (profileRow.profile_type || profileRow.profession)
       if (!temPerfil) {
-        linkGeradoBlock = '\n[AVISO: SEM PERFIL]\nO profissional pediu um link/quiz/calculadora mas ainda não preencheu o perfil empresarial (tipo de atuação e área). NÃO gere link. Responda de forma amigável que ele precisa completar o perfil em "Perfil empresarial" primeiro (menu ao lado) para você poder recomendar o link mais adequado ao tipo de atuação dele. Diga que em um minuto ele preenche e aí você consegue criar o link certo.'
+        linkGeradoBlock = '\n[AVISO: SEM PERFIL]\nO perfil do profissional está incompleto (falta tipo de atuação e/ou área). NÃO gere link. Explique de forma amigável: (1) que o perfil está incompleto e ele precisa preencher em "Perfil empresarial" (menu ao lado); (2) que você sempre se baseia no perfil dele para recomendar o link mais adequado — por isso é essencial que ele complete o perfil primeiro. Depois que preencher, ele pode pedir o link de novo que aí você entrega.'
       } else {
         try {
           const cookie = request.headers.get('cookie') || ''
@@ -417,9 +468,71 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Primeira conversa guiada: mensagem vaga + perfil existe → gerar diagnóstico base automaticamente (demonstrar valor)
+    const primeiraConversaOuVaga = isPrimeiraConversaOuVaga(message, conversationHistory)
+    if (!linkGeradoBlock && primeiraConversaOuVaga && profileRow && (profileRow.profile_type || profileRow.profession)) {
+      try {
+        const cookie = request.headers.get('cookie') || ''
+        const defaultText = getDefaultInterpretTextPrimeiraConversa(validSegment)
+        const interpretRes = await fetch(`${baseUrl}/api/ylada/interpret`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', cookie },
+          body: JSON.stringify({
+            text: defaultText,
+            segment: validSegment,
+            profile_type: profileRow?.profile_type ?? undefined,
+            profession: profileRow?.profession ?? undefined,
+          }),
+        })
+        const interpretJson = await interpretRes.json().catch(() => ({}))
+        const data = interpretJson?.data
+        const flowId = data?.flow_id
+        const interpretacao = data?.interpretacao
+        const questions = Array.isArray(data?.questions) ? data.questions : []
+        const confidence = typeof data?.confidence === 'number' ? data.confidence : 0
+        if (flowId && interpretacao && confidence >= 0.5) {
+          const genRes = await fetch(`${baseUrl}/api/ylada/links/generate`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', cookie },
+            body: JSON.stringify({
+              flow_id: flowId,
+              interpretacao,
+              questions: questions.length > 0 ? questions : undefined,
+              segment: validSegment,
+            }),
+          })
+          const genJson = await genRes.json().catch(() => ({}))
+          if (genJson?.success && genJson?.data?.url) {
+            const titleRaw = genJson.data.title || genJson.data.slug || 'Link'
+            const title = formatDisplayTitle(titleRaw)
+            lastLinkContextOut = { flow_id: flowId, interpretacao, questions, url: genJson.data.url, title, link_id: genJson.data.id }
+            const { descResumida, conteudoReal } = buildLinkBlock(title, flowId, genJson.data.url, genJson.data.config ?? null)
+            linkGeradoBlock = buildNoelLinkBlock(title, genJson.data.url, descResumida, conteudoReal, 'novo')
+          }
+        }
+      } catch (e) {
+        console.warn('[/api/ylada/noel] primeira conversa interpret/generate:', e)
+      }
+    }
+
+    // Biblioteca do Noel: perfis estratégicos + estratégias + conversas + insights (mesma lógica do wellness/noel)
+    let detectedStrategicProfileText = ''
+    let noelLibraryContext = ''
+    let diagnosisInsightsText: string | null = null
+    try {
+      const detectedProfiles = getStrategicProfilesForMessage(message)
+      const detectedProfileCodes = detectedProfiles.map((p) => p.profile_code)
+      if (detectedProfiles.length) detectedStrategicProfileText = formatStrategicProfileForPrompt(detectedProfiles)
+      noelLibraryContext = await getNoelLibraryContext(message, detectedProfileCodes.length ? detectedProfileCodes : undefined)
+      const messageMentionsDiagnosis = /diagnóstico|diagnostico|meu resultado|resultado do diagnóstico|diagnóstico deu|deu curiosos|deu clientes|em desenvolvimento/i.test(message)
+      if (messageMentionsDiagnosis) diagnosisInsightsText = await getDiagnosisInsightsContext(FALLBACK_DIAGNOSTIC_ID_INSIGHTS)
+    } catch (e) {
+      console.warn('[/api/ylada/noel] biblioteca Noel (perfis/estratégias/insights):', e)
+    }
+
     const baseSystem = SEGMENT_CONTEXT[validSegment] ||
       'Você é o Noel, mentor da YLADA. Oriente o profissional sobre rotina, links inteligentes e formação empresarial. Tom direto e prático.'
-    const parts: string[] = [baseSystem, NOEL_CONDUTOR_RULES, NOEL_PRINCIPIO_20_80, NOEL_METODO_CONDUCAO_VENDA, NOEL_CONTATO_FRIO]
+    const parts: string[] = [baseSystem, NOEL_MODO_EXECUTOR_LINK, NOEL_CONDUTOR_RULES, NOEL_PRINCIPIO_20_80, NOEL_METODO_CONDUCAO_VENDA, NOEL_CONTATO_FRIO]
 
     // Detecção de contato frio: Uber, recrutar, link de recrutamento — injeta alerta para forçar diagnóstico primeiro
     const m = message.toLowerCase().trim()
@@ -432,16 +545,57 @@ export async function POST(request: NextRequest) {
         '\n[ALERTA — CONTATO FRIO DETECTADO]\nA mensagem do profissional indica Uber, recrutamento com desconhecido ou pedido de link de recrutamento. NÃO dar link da HOM/apresentação. Entregar APENAS script de DIAGNÓSTICO investigativo (várias perguntas). Explicar que o link vem DEPOIS, quando a pessoa demonstrar interesse. A pessoa NÃO conhece o negócio, NÃO consome produtos.'
       )
     }
+    const falaDeComunicacao = /\bcomunica[cç][ãa]o\b|diagn[oó]stico\s+(de\s+)?comunica|para\s+minha\s+comunica/i.test(message)
+    if (falaDeComunicacao) {
+      parts.push(
+        '\n[FOCO EM COMUNICAÇÃO]\nO profissional mencionou COMUNICAÇÃO ou diagnóstico para comunicação. Mantenha o tema em: como o profissional se comunica com clientes/leads, qualificação (curiosos vs clientes preparados), marketing e conversas. NÃO mude para emagrecimento, saúde, produto ou outro tema a menos que ele peça explicitamente. Se ele pedir um diagnóstico, sugira perguntas sobre comunicação/abordagem/qualificação, não sobre peso ou hábitos alimentares.'
+      )
+    }
     if (profileResumo) {
       parts.push('\n[PERFIL DO PROFISSIONAL]\n' + profileResumo)
+      parts.push(
+        '\n[USE O PERFIL]\nBaseie sempre sua resposta no perfil acima. Use a linguagem e o contexto da profissão/segmento: médico → pacientes, consultório, agenda; nutri/estética/fitness → clientes; psicologia/psicanálise → pacientes ou clientes conforme o perfil; vendedor/perfumaria → clientes, leads. Sugestões de diagnóstico, captação e comunicação devem ser direcionadas ao tipo de atuação dele.'
+      )
     } else {
       parts.push('\nO profissional ainda não preencheu o perfil empresarial. Oriente de forma útil e, se fizer sentido, sugira completar o perfil em "Perfil empresarial" para orientações mais personalizadas.')
     }
     if (snapshotText) {
       parts.push('\n[RESUMO ESTRATÉGICO DA TRILHA — situação atual e próximos passos]\n' + snapshotText)
     }
+    if (detectedStrategicProfileText) {
+      parts.push('\n[PERFIL ESTRATÉGICO IDENTIFICADO]\n' + detectedStrategicProfileText + '\n' + NOEL_DETECTED_PROFILE_INSTRUCTION)
+    }
+    if (noelLibraryContext.trim()) {
+      parts.push('\n' + NOEL_STRATEGIC_PROTOCOL + noelLibraryContext + '\n' + NOEL_STRATEGIC_RULE)
+    }
+    if (diagnosisInsightsText) {
+      parts.push('\n' + diagnosisInsightsText + '\nUse esses insights para enriquecer sua resposta. Mantenha o foco em comunicação e qualificação (curiosos vs clientes).')
+    }
+    if (detectedStrategicProfileText || noelLibraryContext.trim() || diagnosisInsightsText) {
+      parts.push('\n' + NOEL_LAYER4_PRIORITY_RULE)
+    }
     if (linksAtivosBlock) parts.push(linksAtivosBlock)
     if (linkGeradoBlock) parts.push(linkGeradoBlock)
+    if (linkGeradoBlock) {
+      parts.push(
+        '\n[INCENTIVO MÚLTIPLOS DIAGNÓSTICOS]\nApós entregar o link, pode incentivar experimentação: "Muitos profissionais também testam variações de diagnóstico para ver qual gera mais interesse. Posso criar outra versão focada em: sintomas, hábitos, objetivos ou resultados desejados." Isso incentiva criação de múltiplos diagnósticos e compartilhamento.'
+      )
+    }
+    if (primeiraConversaOuVaga && linkGeradoBlock) {
+      parts.push(
+        '\n[PRIMEIRA CONVERSA GUIADA — COM LINK]\nO profissional está começando ou mandou mensagem vaga. Você já tem um link gerado. Entregue como demonstração de valor: (1) Ação prática: "Criei um diagnóstico para você testar agora." (2) Mostre o quiz e o link clicável conforme o bloco acima. (3) Onde usar: Instagram, WhatsApp, bio do perfil. (4) Convite para ajustar: "Se quiser, posso ajustar as perguntas, mudar o tema ou criar outro diagnóstico." No final, reforce: "Diagnósticos são uma das formas mais eficazes de iniciar conversas qualificadas com clientes." Objetivo: o usuário sentir "já tenho algo para usar" em segundos.'
+      )
+    }
+    if (primeiraConversaOuVaga && !linkGeradoBlock) {
+      parts.push(
+        '\n[PRIMEIRA CONVERSA OU MENSAGEM VAGA — SEM LINK]\nO profissional está começando ou não sabe por onde começar. NÃO apenas explique o sistema — mostre o caminho prático. Se o perfil estiver incompleto: diga para preencher em "Perfil empresarial" (menu ao lado) e que em um minuto você cria um diagnóstico para ele testar. Se o perfil já existir: diga que pode criar um diagnóstico agora e sugira que ele peça com o tema, ex.: "Quero um diagnóstico para captar clientes" (ou "captar pacientes" se for médico), e aí você gera o link. Objetivo: demonstrar valor, não só explicar.'
+      )
+    }
+    if (isIntencaoCriarLink(message) && !linkGeradoBlock) {
+      parts.push(
+        '\n[PEDIDO DE LINK SEM GERAÇÃO]\nO profissional pediu link/quiz/fluxo mas o sistema não gerou o link nesta resposta. Diga que para gerar o link ele pode pedir com o tema explícito, por exemplo: "Quero um link de diagnóstico de emagrecimento" ou "Cria um quiz para minha comunicação" ou "Quero um link para qualificar leads". Na próxima mensagem com tema claro o sistema gerará o link.'
+      )
+    }
     const systemContent = parts.join('')
 
     const messages: OpenAI.Chat.ChatCompletionMessageParam[] = [

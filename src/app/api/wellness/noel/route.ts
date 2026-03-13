@@ -29,6 +29,12 @@ import {
 } from '@/lib/noel-wellness/history-analyzer'
 import { NOEL_FEW_SHOTS } from '@/lib/noel-wellness/few-shots'
 import { NOEL_SYSTEM_PROMPT_LOUSA7, NOEL_SYSTEM_PROMPT_WITH_SECURITY } from '@/lib/noel-wellness/system-prompt-lousa7'
+import { buildLayeredPromptPrefix, buildContextLayer } from '@/lib/noel-wellness/prompt-layers'
+import { classifyIntentForContext, selectKnowledgeContext } from '@/lib/noel-wellness/context-orchestrator'
+import { getNoelLibraryContext } from '@/lib/noel-wellness/noel-library-context'
+import { getStrategicProfilesForMessage, formatStrategicProfileForPrompt } from '@/lib/noel-wellness/strategic-profile-matcher'
+import { getDiagnosisInsightsContext, FALLBACK_DIAGNOSTIC_ID_INSIGHTS } from '@/lib/noel-wellness/diagnosis-insights-context'
+import { validateNoelResponse, NOEL_FALLBACK_RESPONSE } from '@/lib/noel-wellness/noel-guardrails'
 import { generateHOMContext, isHOMRelated } from '@/lib/noel-wellness/hom-integration'
 import { detectMaliciousIntent } from '@/lib/noel-wellness/security-detector'
 import { checkRateLimit } from '@/lib/noel-wellness/rate-limiter'
@@ -145,6 +151,8 @@ async function tryAgentBuilder(message: string): Promise<{ success: boolean; res
 interface NoelRequest {
   message: string
   conversationHistory?: Array<{ role: 'user' | 'assistant'; content: string }>
+  /** Opcional: UUID do diagnóstico quando o profissional está em contexto de resultado de diagnóstico (Noel Analista). */
+  diagnosticId?: string
   userId?: string
   threadId?: string // ID do thread do Assistants API
 }
@@ -170,7 +178,15 @@ async function generateAIResponse(
   knowledgeContext: string | null,
   conversationHistory: Array<{ role: 'user' | 'assistant'; content: string }> = [],
   consultantContext?: string,
-  userId?: string
+  userId?: string,
+  /** Contexto da biblioteca Noel (estratégias + conversas). Prioridade sobre knowledgeContext. */
+  noelLibraryContext?: string | null,
+  /** Contexto da base de conhecimento (embedding). Usado junto ou após noelLibraryContext. */
+  knowledgeBaseContext?: string | null,
+  /** Perfil estratégico identificado a partir da mensagem (biblioteca de perfis). Personaliza a orientação. */
+  detectedStrategicProfileText?: string | null,
+  /** Insights coletivos (Noel Analista) — diagnosis_insights. */
+  diagnosisInsightsText?: string | null
 ): Promise<{ response: string; tokensUsed: number; modelUsed: string }> {
   // Determinar modelo baseado no módulo
   // Usando ChatGPT 4.1 (gpt-4-turbo ou gpt-4.1 conforme disponível)
@@ -182,9 +198,13 @@ async function generateAIResponse(
   
   // Construir contexto do perfil estratégico
   const strategicProfileContext = userId ? await buildStrategicProfileContext(userId) : undefined
-  
-  // Construir system prompt baseado no módulo (com contexto do consultor e perfil estratégico)
-  const systemPrompt = buildSystemPrompt(module, knowledgeContext, consultantContext, strategicProfileContext)
+
+  // Prioridade: biblioteca Noel → knowledge_base. Se não passados noelLibraryContext/knowledgeBaseContext, usa knowledgeContext legado como base.
+  const libraryCtx = noelLibraryContext ?? null
+  const baseCtx = knowledgeBaseContext ?? (knowledgeContext ?? null)
+
+  // Construir system prompt baseado no módulo (com contexto do consultor, perfil estratégico e insights)
+  const systemPrompt = buildSystemPrompt(module, libraryCtx, baseCtx, consultantContext, strategicProfileContext, message, detectedStrategicProfileText ?? null, diagnosisInsightsText ?? null)
   
   // Construir mensagens
   const messages: OpenAI.Chat.ChatCompletionMessageParam[] = [
@@ -206,9 +226,15 @@ async function generateAIResponse(
     max_tokens: 1000,
   })
   
-  const response = completion.choices[0]?.message?.content || 'Desculpe, não consegui gerar uma resposta.'
+  let response = completion.choices[0]?.message?.content || 'Desculpe, não consegui gerar uma resposta.'
   const tokensUsed = completion.usage?.total_tokens || 0
-  
+
+  // Guardrails: validar resposta antes de enviar (Response Pipeline)
+  const guardrail = validateNoelResponse(response)
+  if (!guardrail.valid) {
+    response = NOEL_FALLBACK_RESPONSE
+  }
+
   return {
     response,
     tokensUsed,
@@ -500,11 +526,22 @@ async function buildStrategicProfileContext(userId: string): Promise<string> {
 /**
  * Constrói o system prompt baseado no módulo
  */
-function buildSystemPrompt(module: NoelModule, knowledgeContext: string | null, consultantContext?: string, strategicProfileContext?: string): string {
-  // Base do prompt com Lousa 7 integrada + Segurança
+function buildSystemPrompt(
+  module: NoelModule,
+  noelLibraryContext: string | null,
+  knowledgeBaseContext: string | null,
+  consultantContext?: string,
+  strategicProfileContext?: string,
+  userMessage?: string,
+  detectedStrategicProfileText?: string | null,
+  diagnosisInsightsText?: string | null
+): string {
+  // Arquitetura em camadas: Layer 1 (Identidade) + Layer 2 (Filosofia) no início
+  const layeredPrefix = buildLayeredPromptPrefix()
+  // Layer 3 = Lousa 7 + Segurança + NOEL WELL (comportamento/regras)
   const lousa7Base = NOEL_SYSTEM_PROMPT_WITH_SECURITY
-  
-  const basePrompt = `${lousa7Base}
+
+  const basePrompt = `${layeredPrefix}${lousa7Base}
 
 ================================================
 🟩 NOEL WELL – MENTOR DE CRESCIMENTO EM MARKETING DE REDE (MLM)
@@ -551,11 +588,120 @@ Nível atual, tempo por dia, meta de renda mensal, meta de crescimento em equipe
 
 Exemplo: em vez de "Você pode usar essa estratégia…", diga "Quantas pessoas você falou hoje?"
 
-📐 FORMATO DE RESPOSTA:
+================================================
+🟩 PRINCÍPIO DE RESPOSTA DO NOEL
+================================================
+
+Toda resposta do Noel deve ser uma "resposta boa".
+
+Uma resposta boa é aquela que:
+• ajuda o profissional a entender melhor a situação
+• orienta um próximo passo claro
+• provoca uma conversa produtiva
+• conecta a ação com resultados reais
+
+Noel evita respostas genéricas.
+
+Sempre que possível, Noel transforma respostas em:
+ação + conversa + resultado.
+
+================================================
+🟩 ESTILO DE CONVERSA DO NOEL
+================================================
+
+Noel responde como um mentor estratégico.
+
+Ele deve:
+• falar de forma clara e humana
+• ser direto
+• trazer exemplos práticos
+• sugerir ações simples
+• sempre orientar a próxima conversa
+
+Noel não responde como suporte técnico.
+Noel responde como alguém que ajuda o profissional a avançar no campo.
+
+Respostas devem ser curtas, claras e acionáveis.
+
+================================================
+🟩 FORMATO DE RESPOSTA
+================================================
+
 1) Diagnóstico rápido
 2) Ajuste estratégico
 3) Meta clara
 4) Próxima ação em 24h
+
+================================================
+🟩 TEMPLATE DE RESPOSTA (use quando quiser respostas claras e consistentes)
+================================================
+
+Sempre que fizer sentido, estruture a resposta neste formato. Isso mantém clareza e previsibilidade:
+
+**Diagnóstico rápido:**
+[análise em 1–2 frases]
+
+**Ajuste sugerido:**
+[orientação prática]
+
+**Próxima ação:**
+[ação concreta em 24h]
+
+Use linguagem natural; não preencha literalmente como formulário. O template é um guia para não esquecer: análise + orientação + ação.
+
+================================================
+🟩 DIAGNÓSTICO COMO INÍCIO DE CONVERSA
+================================================
+
+Noel entende que diagnósticos não são apenas ferramentas.
+
+Diagnósticos são formas de iniciar conversas inteligentes.
+
+Quando recomendar um quiz ou diagnóstico, Noel pode explicar brevemente:
+• o que a pessoa vai perceber
+• que tipo de conversa isso pode gerar
+• quando usar esse link
+
+Isso conecta produto + filosofia.
+
+================================================
+🟩 PERGUNTAS DO NOEL
+================================================
+
+Sempre que possível, Noel pode fazer uma pergunta curta para entender melhor o contexto.
+
+Exemplos:
+• Que tipo de cliente você gostaria de atrair mais?
+• Como costuma começar suas conversas hoje?
+• O que normalmente acontece quando alguém pergunta preço?
+
+Perguntas ajudam Noel a orientar melhor o profissional.
+
+Isso melhora muito a conversa.
+
+================================================
+🟩 EXEMPLO DE RESPOSTA BOA
+================================================
+
+Usuário: "Como gerar mais clientes?"
+
+Noel:
+
+Antes de pensar em clientes, vale entender como suas conversas começam hoje.
+
+Muitos profissionais atraem curiosos porque começam explicando demais.
+
+Uma forma melhor é iniciar com um diagnóstico simples que faça a pessoa refletir.
+
+Por exemplo, você poderia perguntar:
+
+"Hoje suas conversas com clientes começam com curiosidade ou com interesse real?"
+
+Esse tipo de pergunta ajuda a pessoa perceber a própria situação.
+
+A partir disso a conversa fica muito mais produtiva.
+
+================================================
 
 🔗 LINKS: Se o consultor pedir um link para enviar a alguém, use as funções (recomendarLinkWellness, getLinkInfo, getFerramentaInfo) e entregue o link. Ao falar do link, use só linguagem neutra: "envie este link", "página para a pessoa acessar". NUNCA use os termos: HOM, nome de empresa, ferramenta, calculadora, método ou sistema.
 
@@ -1416,10 +1562,6 @@ Situação: "Por onde começar"
 **PRIORIDADE:**
 1. Ação imediata → 2. Cliente → 3. Venda → 4. Ferramentas
 
-${knowledgeContext ? `\nContexto da Base de Conhecimento:\n${knowledgeContext}\n\nUse este contexto como base, mas personalize e expanda conforme necessário.` : ''}
-${consultantContext ? `\n\nContexto do Consultor (use para personalizar):\n${consultantContext}\n\nAdapte sua resposta considerando o estágio da carreira, desafios identificados e histórico do consultor.` : ''}
-${strategicProfileContext ? `\n\n${strategicProfileContext}` : ''}
-
 ================================================
 🎯 REGRAS DE RESPOSTA PARA CÁLCULOS E PLANOS
 ================================================
@@ -1577,7 +1719,18 @@ Foco da resposta: Estratégia e planejamento geral.
 ${NOEL_FEW_SHOTS}`
   }
 
-  return `${basePrompt}${focusInstructions}`
+  // Layer 4 — Contexto / Tarefa atual (dinâmico). Inclui perfil estratégico, biblioteca Noel, insights coletivos e base de conhecimento.
+  const contextLayer = buildContextLayer({
+    consultantContext,
+    strategicProfileContext,
+    detectedStrategicProfileText: detectedStrategicProfileText ?? undefined,
+    noelLibraryContext: noelLibraryContext ?? undefined,
+    knowledgeBaseContext: knowledgeBaseContext ?? undefined,
+    diagnosisInsightsText: diagnosisInsightsText ?? undefined,
+    userMessage,
+  })
+
+  return `${basePrompt}${focusInstructions}${contextLayer}`
 }
 
 /**
@@ -1596,7 +1749,7 @@ export async function POST(request: NextRequest) {
     const { user, profile } = authResult
 
     const body: NoelRequest = await request.json()
-    const { message, conversationHistory = [], threadId: rawThreadId } = body
+    const { message, conversationHistory = [], threadId: rawThreadId, diagnosticId: bodyDiagnosticId } = body
     
     // Validar threadId: se for 'new' ou string vazia, usar undefined
     // A OpenAI espera undefined/null para criar novo thread, não a string 'new'
@@ -2506,6 +2659,7 @@ export async function POST(request: NextRequest) {
     // 2. Classificar intenção
     const classification = classifyIntention(message)
     const module = classification.module
+    const intentForContext = classifyIntentForContext(message).intent
 
     // 3. Analisar query para extrair informações
     const queryAnalysis = analyzeQuery(message, module)
@@ -2577,6 +2731,40 @@ export async function POST(request: NextRequest) {
       console.log('✅ NOEL - Pergunta institucional detectada, ignorando Base de Conhecimento')
     }
 
+    // 6b. Perfil estratégico primeiro (top 2) — depois a biblioteca usa o perfil para filtrar estratégias
+    let detectedStrategicProfileText: string | null = null
+    let detectedProfileCodes: string[] = []
+    try {
+      const detectedProfiles = getStrategicProfilesForMessage(message)
+      if (detectedProfiles.length) {
+        detectedStrategicProfileText = formatStrategicProfileForPrompt(detectedProfiles)
+        detectedProfileCodes = detectedProfiles.map((p) => p.profile_code)
+      }
+    } catch (profileErr) {
+      console.warn('⚠️ [Noel] getStrategicProfilesForMessage falhou (não crítico):', profileErr)
+    }
+
+    // 6c. Biblioteca Noel (estratégias + conversas) — filtrada por perfil quando há perfil detectado
+    let noelLibraryContext: string = ''
+    try {
+      noelLibraryContext = await getNoelLibraryContext(message, detectedProfileCodes.length ? detectedProfileCodes : undefined)
+    } catch (libErr) {
+      console.warn('⚠️ [Noel] getNoelLibraryContext falhou (não crítico):', libErr)
+    }
+
+    // 6d. Noel Analista: insights coletivos (diagnosis_insights) quando intent = diagnostico ou mensagem menciona diagnóstico
+    let diagnosisInsightsText: string | null = null
+    const messageMentionsDiagnosis = /diagnóstico|diagnostico|meu resultado|resultado do diagnóstico|diagnóstico deu|deu curiosos|deu clientes|em desenvolvimento/i.test(message)
+    const shouldUseInsights = intentForContext === 'diagnostico' || messageMentionsDiagnosis
+    if (shouldUseInsights) {
+      try {
+        const diagnosticIdForInsights = bodyDiagnosticId?.trim() || FALLBACK_DIAGNOSTIC_ID_INSIGHTS
+        diagnosisInsightsText = await getDiagnosisInsightsContext(diagnosticIdForInsights)
+      } catch (insightsErr) {
+        console.warn('⚠️ [Noel] getDiagnosisInsightsContext falhou (não crítico):', insightsErr)
+      }
+    }
+
     let response: string
     let source: 'knowledge_base' | 'ia_generated' | 'hybrid'
     let knowledgeItemId: string | undefined
@@ -2610,7 +2798,12 @@ export async function POST(request: NextRequest) {
         module, // Usa o módulo detectado para buscar conteúdo correto
         contextWithProfile,
         conversationHistory,
-        personalizedContext
+        personalizedContext,
+        undefined,
+        noelLibraryContext || null,
+        contextWithProfile,
+        detectedStrategicProfileText,
+        diagnosisInsightsText
       )
       response = aiResult.response
       source = 'hybrid'
@@ -2621,10 +2814,11 @@ export async function POST(request: NextRequest) {
     } else {
       // Baixa similaridade → mas ainda usar conteúdo encontrado se houver
       if (knowledgeResult.items.length > 0 && bestMatch) {
-        // Mesmo com similaridade baixa, se encontrou algo, usar como base
-        const knowledgeContext = knowledgeResult.items.slice(0, 3).map(item => 
-          `**${item.title}** (${item.category}):\n${item.content}`
-        ).join('\n\n---\n\n')
+        // Context Orchestration: só o conhecimento relevante para a intenção (enxuto)
+        const knowledgeContext = selectKnowledgeContext(knowledgeResult.items, intentForContext)
+          ?? knowledgeResult.items.slice(0, 3).map(item =>
+            `**${item.title}** (${item.category}):\n${item.content}`
+          ).join('\n\n---\n\n')
 
         const fullContext = [
           homContext, // HOM sempre primeiro (prioridade)
@@ -2639,7 +2833,11 @@ export async function POST(request: NextRequest) {
           fullContext,
           conversationHistory,
           personalizedContext,
-          user.id
+          user.id,
+          noelLibraryContext || null,
+          fullContext,
+          detectedStrategicProfileText,
+          diagnosisInsightsText
         )
         response = aiResult.response
         source = 'hybrid' // Mudar para hybrid mesmo com baixa similaridade se encontrou conteúdo
@@ -2661,7 +2859,11 @@ export async function POST(request: NextRequest) {
           fullContext,
           conversationHistory,
           personalizedContext,
-          user.id
+          user.id,
+          noelLibraryContext || null,
+          fullContext,
+          detectedStrategicProfileText,
+          diagnosisInsightsText
         )
         response = aiResult.response
         source = 'ia_generated'
@@ -2829,8 +3031,14 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Guardrails: garantir resposta válida mesmo quando veio da base (alta similaridade)
+    let finalResponse = response
+    if (!validateNoelResponse(response).valid) {
+      finalResponse = NOEL_FALLBACK_RESPONSE
+    }
+
     const result: NoelResponse = {
-      response,
+      response: finalResponse,
       module: 'mentor', // Sempre retorna 'mentor' para a interface (NOEL sempre se apresenta como mentor)
       source,
       knowledgeItemId,
