@@ -106,8 +106,14 @@ Regras:
 - IMPORTANTE — Link para compartilhar: Quando o profissional pede link para "captar", "atrair clientes", "qualificar" — o link é para COMPARTILHAR com pacientes/clientes. As perguntas DEVEM ser do ponto de vista do PACIENTE/CLIENTE (ex.: "O que mais atrapalha você?", "Qual seu maior desafio hoje?", "Você consegue manter rotina?"). NUNCA use perguntas sobre a estratégia do profissional (ex.: "Você definiu seu público-alvo?", "Você tem estratégia de marketing?", "Você usa redes sociais para atrair?") — essas são para o profissional se autoavaliar, não para compartilhar.
 - Tema (theme): Use APENAS o tema do ponto de vista do paciente (ex.: "cáries e saúde bucal", "perda de peso"). NUNCA inclua no tema termos como "atração de pacientes", "captação", "captar clientes" — o paciente não deve ver isso no resultado.
 - Use checklist_prontidao APENAS quando o profissional deixar explícito que quer um link para ELE MESMO avaliar sua estratégia (ex.: "quero um quiz para eu ver como estou", "link para eu avaliar minha prontidão").
-- Perguntas devem ser específicas ao tema e à área do profissional
-- Para diagnostico_bloqueio (BLOCKER_DIAGNOSIS): as perguntas DEVEM seguir esta ordem para o diagnóstico funcionar — q1: rotina/organização do dia a dia, q2: aspectos emocionais (motivação, estresse, ansiedade), q3: clareza do processo (saber o que fazer, próximo passo), q4: hábitos/constância, q5: expectativas/metas (se houver 5ª pergunta). Cada pergunta com 4 opções (A pior → D melhor).
+- Use o segmento/área do profissional: medico/nutricionista → perguntas clínicas (ex.: exames, medicamentos, acompanhamento); estetica → pele, tratamentos, procedimentos; dentista → saúde bucal; coach → objetivos, bloqueios. NUNCA use perguntas genéricas de coaching quando o perfil for médico ou de saúde.
+- ESTRUTURA 4D DO DIAGNÓSTICO (para diagnostico_risco e diagnostico_bloqueio): SEMPRE gere perguntas em 4 dimensões, nesta ordem:
+  1. Sintoma: o que a pessoa percebe/sente (ex.: "Qual dessas situações mais acontece com você?", "O que mais incomoda você hoje?")
+  2. Causa provável: o que pode estar causando (ex.: "Qual dessas situações parece mais relacionada ao seu caso?", "Você sabe o que pode estar causando isso?")
+  3. Tentativa anterior: o que já tentou (ex.: "Nos últimos 12 meses, você já tentou o quê?", "Você já tentou tratar isso antes?")
+  4. Objetivo desejado: o que quer melhorar (ex.: "O que você gostaria de melhorar agora?", "Qual é seu principal objetivo?")
+- EVITE perguntas genéricas sobre motivação, organização, disciplina ou expectativas abstratas. Priorize perguntas sobre problema real, histórico e objetivo.
+- Opções: curtas, situações reais, que gerem identificação (ex.: "emagrecer ficou mais difícil" vs "pouco motivado").
 - QUIZ = sempre com 4 opções. CALCULADORA = campos numéricos sem opções.
 - CTA em 1ª pessoa, consultivo (ex.: "Quero analisar meu caso", nunca "Falar com especialista")
 
