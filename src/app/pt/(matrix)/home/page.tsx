@@ -1,5 +1,6 @@
+import { Suspense } from 'react'
 import YladaAreaShell from '@/components/ylada/YladaAreaShell'
-import NoelChat from '@/components/ylada/NoelChat'
+import NoelChatWithParams from '@/components/ylada/NoelChatWithParams'
 
 export default function MatrixHomePage() {
   return (
@@ -9,7 +10,9 @@ export default function MatrixHomePage() {
         <p className="text-gray-600 mb-4">
           Seu mentor. Tire dúvidas, organize a rotina e use melhor seus links inteligentes.
         </p>
-        <NoelChat area="ylada" className="mt-2" />
+        <Suspense fallback={<div className="mt-4 h-32 rounded-lg bg-gray-100 animate-pulse" />}>
+          <NoelChatWithParams area="ylada" className="mt-2" />
+        </Suspense>
       </div>
     </YladaAreaShell>
   )

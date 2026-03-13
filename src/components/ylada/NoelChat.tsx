@@ -130,16 +130,18 @@ const WELCOME: Message = {
 interface NoelChatProps {
   area?: NoelArea
   className?: string
+  /** Mensagem inicial (ex.: de link ?msg=... para "Melhorar diagnóstico") */
+  initialMessage?: string
 }
 
-export default function NoelChat({ area = 'med', className = '' }: NoelChatProps) {
+export default function NoelChat({ area = 'med', className = '', initialMessage }: NoelChatProps) {
   const router = useRouter()
   const [messages, setMessages] = useState<Message[]>(() => {
     const saved = loadMessages(area)
     return saved.length > 0 ? saved : [WELCOME]
   })
   const [lastLinkContext, setLastLinkContext] = useState<LastLinkContext | null>(() => loadLastLinkContext(area))
-  const [input, setInput] = useState('')
+  const [input, setInput] = useState(initialMessage ?? '')
   const [loading, setLoading] = useState(false)
   const authenticatedFetch = useAuthenticatedFetch()
   const scrollEndRef = useRef<HTMLDivElement>(null)
@@ -154,6 +156,10 @@ export default function NoelChat({ area = 'med', className = '' }: NoelChatProps
     else setMessages([WELCOME])
     setLastLinkContext(loadLastLinkContext(area))
   }, [area])
+
+  useEffect(() => {
+    if (initialMessage?.trim()) setInput(initialMessage.trim())
+  }, [initialMessage])
 
   useEffect(() => {
     saveLastLinkContext(area, lastLinkContext)

@@ -11,6 +11,7 @@ interface LinkStats {
   complete: number
   cta_click: number
   diagnosis_count?: number
+  conversion_rate?: number | null
 }
 
 interface LinkItem {
@@ -109,7 +110,7 @@ export default function DiagnosticoClienteMetricas({ areaCodigo, areaLabel }: Di
         </div>
       ) : (
         <>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
               <p className="text-2xl font-bold text-gray-900">{links.length}</p>
               <p className="text-sm text-gray-600">Links ativos</p>
@@ -129,6 +130,14 @@ export default function DiagnosticoClienteMetricas({ areaCodigo, areaLabel }: Di
             <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
               <p className="text-2xl font-bold text-gray-900">{totals.diagnoses}</p>
               <p className="text-sm text-gray-600">Resultados gerados</p>
+            </div>
+            <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+              <p className="text-2xl font-bold text-gray-900">
+                {totals.diagnoses > 0
+                  ? `${((totals.ctaClicks / totals.diagnoses) * 100).toFixed(1)}%`
+                  : '—'}
+              </p>
+              <p className="text-sm text-gray-600">Taxa de conversão</p>
             </div>
           </div>
 
@@ -173,13 +182,38 @@ export default function DiagnosticoClienteMetricas({ areaCodigo, areaLabel }: Di
                       <strong>{link.stats.diagnosis_count}</strong> resultados
                     </span>
                   )}
+                  {typeof link.stats?.conversion_rate === 'number' && (
+                    <span
+                      title="Taxa de conversão (cliques WhatsApp / respostas)"
+                      className={
+                        link.stats.conversion_rate < 10
+                          ? 'text-amber-600 font-medium'
+                          : undefined
+                      }
+                    >
+                      <strong>{link.stats.conversion_rate}%</strong> conversão
+                    </span>
+                  )}
                 </div>
-                <Link
-                  href={`${prefix}/links/editar/${link.id}`}
-                  className="mt-3 inline-block text-sm text-gray-500 hover:underline"
-                >
-                  Editar link →
-                </Link>
+                <div className="mt-3 flex flex-wrap gap-3">
+                  <Link
+                    href={`${prefix}/links/editar/${link.id}`}
+                    className="text-sm text-gray-500 hover:underline"
+                  >
+                    Editar link →
+                  </Link>
+                  {(link.stats?.diagnosis_count ?? 0) >= 3 && (
+                    <Link
+                      href={`${prefix}/home?msg=${encodeURIComponent(
+                        `Quero melhorar o diagnóstico do link "${link.title || link.slug}". Ele está com ${link.stats?.conversion_rate ?? 0}% de conversão.`
+                      )}`}
+                      className="text-sm text-amber-600 font-medium hover:underline"
+                      title="Pedir ao Noel sugestões para melhorar a conversão"
+                    >
+                      Melhorar diagnóstico →
+                    </Link>
+                  )}
+                </div>
               </div>
             ))}
           </div>

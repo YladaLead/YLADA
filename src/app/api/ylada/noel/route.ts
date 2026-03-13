@@ -33,6 +33,10 @@ import { getNoelLibraryContextWithStrategies } from '@/lib/noel-wellness/noel-li
 import { saveConversationDiagnosis } from '@/lib/noel-wellness/noel-conversation-diagnosis'
 import { getDiagnosisInsightsContext, FALLBACK_DIAGNOSTIC_ID_INSIGHTS } from '@/lib/noel-wellness/diagnosis-insights-context'
 import {
+  getLinksWithLowConversion,
+  formatLinkPerformanceForNoel,
+} from '@/lib/noel-wellness/link-performance-context'
+import {
   getNoelMemory,
   formatNoelMemoryForPrompt,
   upsertNoelMemory,
@@ -446,6 +450,10 @@ export async function POST(request: NextRequest) {
     const linksAtivos = await getNoelYladaLinks(user.id, baseUrl)
     const linksAtivosBlock = formatLinksAtivosParaNoel(linksAtivos)
 
+    // Links com baixa conversão: Noel pode sugerir melhorias proativamente
+    const linksLowConversion = await getLinksWithLowConversion(user.id, baseUrl)
+    const linkPerformanceBlock = formatLinkPerformanceForNoel(linksLowConversion)
+
     // Se o profissional pediu ajuste no link anterior: interpret com contexto + generate novo link
     let linkGeradoBlock = ''
     let lastLinkContextOut: typeof lastLinkContext = undefined
@@ -731,6 +739,7 @@ export async function POST(request: NextRequest) {
       parts.push('\n' + NOEL_LAYER4_PRIORITY_RULE)
     }
     if (linksAtivosBlock) parts.push(linksAtivosBlock)
+    if (linkPerformanceBlock) parts.push(linkPerformanceBlock)
     if (linkGeradoBlock) parts.push(linkGeradoBlock)
     if (linkGeradoBlock) {
       parts.push(

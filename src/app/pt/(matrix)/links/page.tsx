@@ -42,7 +42,14 @@ const OBJETIVO_PHRASE: Record<LinkObjectiveValue, string> = {
 }
 
 type Template = { id: string; name: string; type: string; version: number; suggested_prompts?: string[] }
-type LinkStats = { view: number; start: number; complete: number; cta_click: number; diagnosis_count?: number }
+type LinkStats = {
+  view: number
+  start: number
+  complete: number
+  cta_click: number
+  diagnosis_count?: number
+  conversion_rate?: number | null
+}
 type LinkRow = {
   id: string
   slug: string
@@ -960,6 +967,16 @@ function LinksPageContent({ areaCodigo = 'ylada', areaLabel = 'YLADA' }: LinksPa
                           )}
                           <span title="Conclusões">{stats.complete} conclusões</span>
                           <span title="Cliques no WhatsApp">{stats.cta_click} cliques WhatsApp</span>
+                          {typeof stats.conversion_rate === 'number' && (
+                            <span
+                              title="Taxa de conversão"
+                              className={
+                                stats.conversion_rate < 10 ? 'text-amber-600 font-medium' : undefined
+                              }
+                            >
+                              {stats.conversion_rate}% conversão
+                            </span>
+                          )}
                         </div>
                       </div>
                       <div className="flex flex-wrap items-center gap-1 shrink-0">
@@ -969,6 +986,17 @@ function LinksPageContent({ areaCodigo = 'ylada', areaLabel = 'YLADA' }: LinksPa
                         >
                           Editar quiz
                         </Link>
+                        {(stats.diagnosis_count ?? 0) >= 3 && (
+                          <Link
+                            href={`${prefix}/home?msg=${encodeURIComponent(
+                              `Quero melhorar o diagnóstico do link "${link.title || link.slug}". Ele está com ${stats.conversion_rate ?? 0}% de conversão.`
+                            )}`}
+                            className="rounded px-2 py-1.5 text-xs font-medium text-amber-700 hover:bg-amber-50"
+                            title="Pedir ao Noel sugestões para melhorar a conversão"
+                          >
+                            Melhorar diagnóstico
+                          </Link>
+                        )}
                         <button
                           type="button"
                           onClick={() => openEditModal(link)}

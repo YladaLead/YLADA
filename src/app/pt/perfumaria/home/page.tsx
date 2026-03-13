@@ -1,5 +1,6 @@
+import { Suspense } from 'react'
 import YladaAreaShell from '@/components/ylada/YladaAreaShell'
-import NoelChat from '@/components/ylada/NoelChat'
+import NoelChatWithParams from '@/components/ylada/NoelChatWithParams'
 
 export default function PerfumariaHomePage() {
   return (
@@ -9,7 +10,9 @@ export default function PerfumariaHomePage() {
         <p className="text-gray-600 mb-4">
           Seu mentor para perfumaria. Tire dúvidas, organize a rotina e use melhor seus links inteligentes de fragrâncias.
         </p>
-        <NoelChat area="perfumaria" className="mt-2" />
+        <Suspense fallback={<div className="mt-4 h-32 rounded-lg bg-gray-100 animate-pulse" />}>
+          <NoelChatWithParams area="perfumaria" className="mt-2" />
+        </Suspense>
       </div>
     </YladaAreaShell>
   )

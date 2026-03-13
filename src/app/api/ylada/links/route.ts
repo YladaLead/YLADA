@@ -6,7 +6,14 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireApiAuth } from '@/lib/api-auth'
 import { supabaseAdmin } from '@/lib/supabase'
 
-type EventCounts = { view: number; start: number; complete: number; cta_click: number; diagnosis_count?: number }
+type EventCounts = {
+  view: number
+  start: number
+  complete: number
+  cta_click: number
+  diagnosis_count?: number
+  conversion_rate?: number | null
+}
 
 function buildStatsMap(
   rows: Array<{ link_id: string; event_type: string; cnt: number | string }> | null
@@ -88,6 +95,11 @@ export async function GET(request: NextRequest) {
         for (const id of linkIds) {
           if (!statsMap[id]) statsMap[id] = { view: 0, start: 0, complete: 0, cta_click: 0 }
           statsMap[id].diagnosis_count = diagCountMap[id] ?? 0
+          // Taxa de conversão: cliques WhatsApp / respostas (diagnósticos completos)
+          const diagCount = diagCountMap[id] ?? 0
+          const ctaClicks = statsMap[id].cta_click ?? 0
+          statsMap[id].conversion_rate =
+            diagCount > 0 ? Math.round((ctaClicks / diagCount) * 1000) / 10 : null
         }
       }
     }
