@@ -78,3 +78,4 @@ Objetivo estratégico: aumentar criação de diagnósticos, compartilhamento de 
 - **Blocos de prompt:** `NOEL_MODO_EXECUTOR_LINK`, `NOEL_CONDUTOR_RULES`, primeira conversa guiada (`isPrimeiraConversaOuVaga` + blocos COM LINK / SEM LINK), `[INCENTIVO MÚLTIPLOS DIAGNÓSTICOS]`, `buildNoelLinkBlock`
 - **Detecção de intenção:** `isIntencaoCriarLink`, `isIntencaoAjustarLink`
 - **Geração:** interpret + generate (pedido explícito ou primeira conversa vaga com perfil)
+- **Camada Perfil do profissional:** Mensagem → SITUAÇÃO (perfis estratégicos) → PERFIL do profissional → biblioteca (estratégias filtradas) → adaptação por segmento. Ver `src/config/noel-professional-profiles.ts` e `src/lib/noel-wellness/professional-profile-matcher.ts`.

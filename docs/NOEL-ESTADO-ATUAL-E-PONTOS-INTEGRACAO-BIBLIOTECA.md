@@ -189,3 +189,126 @@ Objetivo: o Noel reconhece em que fase o profissional está antes de orientar (i
 Fluxo: pergunta → Noel identifica perfil provável → carrega perfil → usa estratégias + conversas → orientação personalizada.
 
 **Próxima evolução:** biblioteca de perfis por profissão (ex.: perfil_nutricionista_iniciante, perfil_esteticista_em_crescimento) para o Noel parecer especialista por área.
+
+---
+
+## 10. Camada "Perfil do profissional" (implementada)
+
+Objetivo: além da **situação** (perfis estratégicos), identificar o **perfil do profissional** (arquetipo) para orientar estratégia e próximo movimento.
+
+**Fluxo explícito no código:**
+```
+Mensagem → SITUAÇÃO (perfis estratégicos) → PERFIL do profissional → busca biblioteca (situação + perfil) → adapta ao segmento
+```
+
+- **Config:** `src/config/noel-professional-profiles.ts`
+  - 8 perfis: iniciante, autoridade, agenda_vazia, muitos_curiosos, sobrecarregado, dependente_indicacao, sem_posicionamento, em_crescimento.
+  - Cada perfil: profile_code, profile_title, description, dominant_situation, next_move, library_topics.
+  - `SITUATION_TO_PROFESSIONAL_PROFILE`: mapeamento situação → perfil.
+  - `PROFESSIONAL_PROFILE_KEYWORDS`: palavras-chave para detectar perfil diretamente na mensagem.
+- **Matcher:** `src/lib/noel-wellness/professional-profile-matcher.ts`
+  - `getProfessionalProfilesForMessage(message, situationCodes)`: retorna perfis do profissional (prioridade: keywords na mensagem; fallback: mapeamento situação).
+  - `formatProfessionalProfileForPrompt(profiles)`: formata para o prompt.
+- **Biblioteca:** `getNoelLibraryContext(message, { situationCodes, professionalProfileCodes })` combina tópicos de situação e perfil do profissional para filtrar estratégias.
+- **Rota:** `src/app/api/ylada/noel/route.ts` — chama matcher de perfil do profissional após situação, passa ambos para a biblioteca e injeta bloco "[PERFIL DO PROFISSIONAL IDENTIFICADO]" no prompt.
+
+---
+
+## 11. Camada "Objetivo estratégico" (implementada)
+
+Objetivo: identificar **o que o profissional quer alcançar** para focar a resposta (gerar_contatos vs melhorar_conversão vs criar_posicionamento).
+
+**Fluxo completo:**
+```
+Mensagem → SITUAÇÃO → PERFIL → OBJETIVO → biblioteca → segmento
+```
+
+- **Config:** `src/config/noel-strategic-objectives.ts`
+  - 6 objetivos: gerar_contatos, vender_mais, melhorar_conversao, criar_posicionamento, iniciar_conversas, gerar_indicacoes.
+  - Cada objetivo: objective_code, objective_title, description, library_topics.
+  - `OBJECTIVE_KEYWORDS`: palavras-chave para detectar objetivo na mensagem.
+- **Matcher:** `src/lib/noel-wellness/objective-matcher.ts`
+  - `getStrategicObjectivesForMessage(message)`: retorna objetivos que correspondem à mensagem.
+  - `formatStrategicObjectiveForPrompt(objectives)`: formata para o prompt.
+- **Biblioteca:** `getNoelLibraryContext` aceita `objectiveCodes`; tópicos do objetivo priorizam estratégias.
+- **Rota:** injeta bloco "[OBJETIVO ESTRATÉGICO IDENTIFICADO]" e instrui o Noel a responder com foco no objetivo.
+
+---
+
+## 12. Estrutura da estratégia: problema → diagnóstico → orientação → próximo movimento
+
+Objetivo: transformar o Noel de "chat que responde" em "mentor que conduz". O fluxo correto é: **situação → diagnóstico → estratégia → próximo movimento**.
+
+- **Migration 266:** adiciona coluna `diagnostico` em `noel_strategy_library`.
+- **Migration 267:** preenche `diagnostico` nas 20 estratégias existentes (o que o Noel deve perguntar antes de orientar).
+- **Biblioteca:** `formatLibraryContext` exibe cada estratégia com: Problema, Diagnóstico (o que perguntar), Orientação, Próximo movimento.
+- **Prompt:** bloco "[FLUXO MENTOR — OBRIGATÓRIO]" instrui: "NÃO responda direto. Use: situação → diagnóstico (perguntar/investigar) → estratégia → próximo movimento."
+
+---
+
+## 13. Memória estratégica do Noel (implementada)
+
+Objetivo: acompanhar a jornada do profissional entre conversas. O Noel passa a lembrar: quem você é, onde está, o que já tentou, o que funcionou.
+
+**Fluxo:**
+```
+Mensagem → Memória (leitura) → SITUAÇÃO → PERFIL → OBJETIVO → biblioteca → Resposta → Memória (atualização)
+```
+
+- **Tabela:** `ylada_noel_memory` (migration 268)
+  - user_id, segment, professional_profile, main_goal, main_problem, current_strategy, funnel_stage, last_actions (JSONB).
+  - Um registro por (user_id, segment).
+- **Lib:** `src/lib/noel-wellness/noel-memory.ts`
+  - `getNoelMemory(userId, segment)`: busca memória.
+  - `formatNoelMemoryForPrompt(memory)`: formata para o prompt.
+  - `upsertNoelMemory(userId, segment, update)`: atualiza (merge) após cada conversa.
+  - `detectActionFromMessage(message)`: detecta ações na mensagem (criou link, compartilhou, etc.).
+- **Rota:** lê memória no início, injeta bloco "[MEMÓRIA ESTRATÉGICA]" no prompt, atualiza memória após resposta com perfil/objetivo/situação/estágio detectados e ações (incl. link_gerado quando o sistema gera link).
+
+---
+
+## 14. Camada Estágio do funil (implementada)
+
+Objetivo: identificar em que fase o cliente/lead está para escolher a estratégia certa. Ex.: "As pessoas perguntam preço" pode ser curiosidade (diagnóstico antes de preço) ou decisão (explicar valor).
+
+**Fluxo completo:**
+```
+Mensagem → SITUAÇÃO → PERFIL → OBJETIVO → ESTÁGIO DO FUNIL → biblioteca → segmento
+```
+
+- **Config:** `src/config/noel-funnel-stages.ts`
+  - 6 estágios: descoberta, curiosidade, diagnóstico, conversa, decisão, fidelização.
+  - Cada estágio: stage_code, stage_title, description, library_topics.
+  - `FUNNEL_STAGE_KEYWORDS`: palavras-chave para detectar estágio na mensagem.
+- **Matcher:** `src/lib/noel-wellness/funnel-stage-matcher.ts`
+  - `getFunnelStagesForMessage(message)`: retorna estágios que correspondem à mensagem.
+  - `formatFunnelStageForPrompt(stages)`: formata para o prompt.
+- **Biblioteca:** `getNoelLibraryContext` aceita `funnelStageCodes`; tópicos do estágio priorizam estratégias.
+- **Rota:** injeta bloco "[ESTÁGIO DO FUNIL IDENTIFICADO]" e instrui: "curiosidade → diagnóstico antes de preço; decisão → explicar valor e tratamento".
+- **Memória:** `funnel_stage` é salvo em `ylada_noel_memory` quando detectado.
+
+---
+
+## 15. Estrutura de resposta da estratégia (implementada)
+
+Objetivo: cada estratégia na biblioteca tem formato estruturado para a resposta do Noel: Diagnóstico → Explicação → Próximo movimento → Exemplo.
+
+- **Migration 269:** adiciona colunas `diagnostic_phrase`, `explicacao`, `proximo_movimento` em `noel_strategy_library`.
+- **Migration 270:** preenche as 20 estratégias com frases prontas.
+- **Formato no prompt:** `[topic]` + Diagnóstico + Explicação + Próximo movimento + Exemplo.
+- **Instrução:** bloco "[FLUXO MENTOR]" reforça: use Diagnóstico, Explicação, Próximo movimento, Exemplo na resposta.
+
+---
+
+## 16. Mapa Estratégico do Profissional (implementado)
+
+Objetivo: visualização da jornada do profissional (posicionamento → atração → diagnóstico → conversa → clientes → fidelização → indicações).
+
+- **Tabela:** `ylada_professional_strategy_map` (migration 271)
+- **Lib:** `src/lib/noel-wellness/noel-strategy-map.ts`
+  - `getStrategyMap(userId, segment, memory)`: busca/cria mapa, infere progresso de last_actions
+  - `syncStrategyMapFromMemory()`: atualiza mapa quando memória muda
+  - `formatStrategyMapForPrompt()`: formata para o Noel
+  - `formatStrategyMapForApi()`: formata para o frontend
+- **API:** `GET /api/ylada/noel/mapa?segment=ylada` — retorna stages, current_stage, profile, goal
+- **Rota Noel:** injeta bloco "[MAPA ESTRATÉGICO]" no prompt; sincroniza mapa após atualizar memória

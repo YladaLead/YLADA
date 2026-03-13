@@ -42,6 +42,7 @@ export const YLADA_MENU_GROUPS = [
     label: 'Principal',
     items: [
       { key: 'home', label: 'Noel', path: 'home', icon: '💬' },
+      { key: 'crescimento', label: 'Sistema de crescimento', path: 'crescimento', icon: '📈' },
       { key: 'links', label: 'Links', path: 'links', icon: '🔗' },
       { key: 'biblioteca', label: 'Biblioteca', path: 'biblioteca', icon: '📚' },
       { key: 'perfil-empresarial', label: 'Perfil', path: 'perfil-empresarial', icon: '👤' },

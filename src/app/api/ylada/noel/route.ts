@@ -17,8 +17,32 @@ import { getPerfilSimuladoByKey, SIMULATE_COOKIE_NAME } from '@/data/perfis-simu
 import { getFlowById } from '@/config/ylada-flow-catalog'
 import { formatDisplayTitle } from '@/lib/ylada/strategic-intro'
 import { getStrategicProfilesForMessage, formatStrategicProfileForPrompt } from '@/lib/noel-wellness/strategic-profile-matcher'
-import { getNoelLibraryContext } from '@/lib/noel-wellness/noel-library-context'
+import {
+  getProfessionalProfilesForMessage,
+  formatProfessionalProfileForPrompt,
+} from '@/lib/noel-wellness/professional-profile-matcher'
+import {
+  getStrategicObjectivesForMessage,
+  formatStrategicObjectiveForPrompt,
+} from '@/lib/noel-wellness/objective-matcher'
+import {
+  getFunnelStagesForMessage,
+  formatFunnelStageForPrompt,
+} from '@/lib/noel-wellness/funnel-stage-matcher'
+import { getNoelLibraryContextWithStrategies } from '@/lib/noel-wellness/noel-library-context'
+import { saveConversationDiagnosis } from '@/lib/noel-wellness/noel-conversation-diagnosis'
 import { getDiagnosisInsightsContext, FALLBACK_DIAGNOSTIC_ID_INSIGHTS } from '@/lib/noel-wellness/diagnosis-insights-context'
+import {
+  getNoelMemory,
+  formatNoelMemoryForPrompt,
+  upsertNoelMemory,
+  detectActionFromMessage,
+} from '@/lib/noel-wellness/noel-memory'
+import {
+  getStrategyMap,
+  formatStrategyMapForPrompt,
+  syncStrategyMapFromMemory,
+} from '@/lib/noel-wellness/noel-strategy-map'
 import {
   NOEL_STRATEGIC_PROTOCOL,
   NOEL_STRATEGIC_RULE,
@@ -359,6 +383,21 @@ export async function POST(request: NextRequest) {
       snapshotText = snap?.snapshot_text?.trim() ?? ''
     }
 
+    // Memória estratégica + Mapa Estratégico do Noel (jornada entre conversas)
+    let noelMemoryText = ''
+    let strategyMapText = ''
+    let noelMemory: Awaited<ReturnType<typeof getNoelMemory>> = null
+    if (supabaseAdmin) {
+      try {
+        noelMemory = await getNoelMemory(user.id, validSegment)
+        noelMemoryText = formatNoelMemoryForPrompt(noelMemory)
+        const strategyMap = await getStrategyMap(user.id, validSegment, noelMemory)
+        strategyMapText = formatStrategyMapForPrompt(strategyMap)
+      } catch (e) {
+        console.warn('[/api/ylada/noel] memória/mapa:', e)
+      }
+    }
+
     const baseUrl = typeof request.url === 'string' ? new URL(request.url).origin : (process.env.NEXT_PUBLIC_APP_URL || 'https://ylada.app')
     const linksAtivos = await getNoelYladaLinks(user.id, baseUrl)
     const linksAtivosBlock = formatLinksAtivosParaNoel(linksAtivos)
@@ -515,15 +554,42 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Biblioteca do Noel: perfis estratégicos + estratégias + conversas + insights (mesma lógica do wellness/noel)
+    // Biblioteca do Noel: situação → perfil → objetivo → estratégias + conversas + insights
+    // Fluxo: Mensagem → SITUAÇÃO → PERFIL → OBJETIVO → biblioteca → segmento
     let detectedStrategicProfileText = ''
+    let detectedProfessionalProfileText = ''
+    let detectedObjectiveText = ''
+    let detectedFunnelStageText = ''
     let noelLibraryContext = ''
+    let noelStrategies: Awaited<ReturnType<typeof getNoelLibraryContextWithStrategies>>['strategies'] = []
     let diagnosisInsightsText: string | null = null
+    let situationCodes: string[] = []
+    let professionalProfileCodes: string[] = []
+    let objectiveCodes: string[] = []
+    let funnelStageCodes: string[] = []
     try {
       const detectedProfiles = getStrategicProfilesForMessage(message)
-      const detectedProfileCodes = detectedProfiles.map((p) => p.profile_code)
+      situationCodes = detectedProfiles.map((p) => p.profile_code)
+      const professionalProfiles = getProfessionalProfilesForMessage(message, situationCodes)
+      professionalProfileCodes = professionalProfiles.map((p) => p.profile_code)
+      const objectives = getStrategicObjectivesForMessage(message)
+      objectiveCodes = objectives.map((o) => o.objective_code)
+      const funnelStages = getFunnelStagesForMessage(message)
+      funnelStageCodes = funnelStages.map((s) => s.stage_code)
+
       if (detectedProfiles.length) detectedStrategicProfileText = formatStrategicProfileForPrompt(detectedProfiles)
-      noelLibraryContext = await getNoelLibraryContext(message, detectedProfileCodes.length ? detectedProfileCodes : undefined)
+      if (professionalProfiles.length) detectedProfessionalProfileText = formatProfessionalProfileForPrompt(professionalProfiles)
+      if (objectives.length) detectedObjectiveText = formatStrategicObjectiveForPrompt(objectives)
+      if (funnelStages.length) detectedFunnelStageText = formatFunnelStageForPrompt(funnelStages)
+
+      const libResult = await getNoelLibraryContextWithStrategies(message, {
+        situationCodes: situationCodes.length ? situationCodes : undefined,
+        professionalProfileCodes: professionalProfileCodes.length ? professionalProfileCodes : undefined,
+        objectiveCodes: objectiveCodes.length ? objectiveCodes : undefined,
+        funnelStageCodes: funnelStageCodes.length ? funnelStageCodes : undefined,
+      })
+      noelLibraryContext = libResult.context
+      noelStrategies = libResult.strategies
       const messageMentionsDiagnosis = /diagnóstico|diagnostico|meu resultado|resultado do diagnóstico|diagnóstico deu|deu curiosos|deu clientes|em desenvolvimento/i.test(message)
       if (messageMentionsDiagnosis) diagnosisInsightsText = await getDiagnosisInsightsContext(FALLBACK_DIAGNOSTIC_ID_INSIGHTS)
     } catch (e) {
@@ -562,16 +628,54 @@ export async function POST(request: NextRequest) {
     if (snapshotText) {
       parts.push('\n[RESUMO ESTRATÉGICO DA TRILHA — situação atual e próximos passos]\n' + snapshotText)
     }
+    if (noelMemoryText) {
+      parts.push(
+        '\n[MEMÓRIA ESTRATÉGICA — o que você já sabe da jornada deste profissional]\n' +
+          noelMemoryText +
+          '\nUse essa memória para dar continuidade. Ex.: "Você já criou o diagnóstico… Agora o próximo passo é…" Responda como mentor que acompanha a evolução.'
+      )
+    }
+    if (strategyMapText) {
+      parts.push(
+        '\n[MAPA ESTRATÉGICO — progresso nas etapas]\n' +
+          strategyMapText +
+          '\nUse o mapa para orientar o próximo passo. Ex.: "Você já está em Atração e Diagnóstico. Agora vamos focar em Conversa — use o diagnóstico para iniciar conversas."'
+      )
+    }
     if (detectedStrategicProfileText) {
-      parts.push('\n[PERFIL ESTRATÉGICO IDENTIFICADO]\n' + detectedStrategicProfileText + '\n' + NOEL_DETECTED_PROFILE_INSTRUCTION)
+      parts.push('\n[PERFIL ESTRATÉGICO IDENTIFICADO — SITUAÇÃO]\n' + detectedStrategicProfileText + '\n' + NOEL_DETECTED_PROFILE_INSTRUCTION)
+    }
+    if (detectedProfessionalProfileText) {
+      parts.push(
+        '\n[PERFIL DO PROFISSIONAL IDENTIFICADO]\n' +
+          detectedProfessionalProfileText +
+          '\nUse esse perfil para orientar o próximo movimento e priorizar estratégias. O foco é direcionar ação, não só responder perguntas.'
+      )
+    }
+    if (detectedObjectiveText) {
+      parts.push(
+        '\n[OBJETIVO ESTRATÉGICO IDENTIFICADO]\n' +
+          detectedObjectiveText +
+          '\nResponda com FOCO nesse objetivo. Priorize estratégias e próximo movimento alinhados ao que o profissional quer alcançar.'
+      )
+    }
+    if (detectedFunnelStageText) {
+      parts.push(
+        '\n[ESTÁGIO DO FUNIL IDENTIFICADO]\n' +
+          detectedFunnelStageText +
+          '\nUse esse estágio para escolher a estratégia certa. Ex.: curiosidade → diagnóstico antes de preço; decisão → explicar valor e tratamento.'
+      )
     }
     if (noelLibraryContext.trim()) {
       parts.push('\n' + NOEL_STRATEGIC_PROTOCOL + noelLibraryContext + '\n' + NOEL_STRATEGIC_RULE)
+      parts.push(
+        '\n[FLUXO MENTOR — OBRIGATÓRIO]\nQuando houver estratégias na biblioteca, use a estrutura na sua resposta: 1) Diagnóstico ("Isso acontece quando..."); 2) Explicação (o porquê); 3) Próximo movimento (ação concreta); 4) Exemplo (frase pronta se houver). O Noel conduz, não só explica.'
+      )
     }
     if (diagnosisInsightsText) {
       parts.push('\n' + diagnosisInsightsText + '\nUse esses insights para enriquecer sua resposta. Mantenha o foco em comunicação e qualificação (curiosos vs clientes).')
     }
-    if (detectedStrategicProfileText || noelLibraryContext.trim() || diagnosisInsightsText) {
+    if (detectedStrategicProfileText || detectedProfessionalProfileText || detectedObjectiveText || detectedFunnelStageText || noelMemoryText || strategyMapText || noelLibraryContext.trim() || diagnosisInsightsText) {
       parts.push('\n' + NOEL_LAYER4_PRIORITY_RULE)
     }
     if (linksAtivosBlock) parts.push(linksAtivosBlock)
@@ -617,6 +721,38 @@ export async function POST(request: NextRequest) {
     const responseText =
       completion.choices[0]?.message?.content?.trim() ||
       'Desculpe, não consegui processar. Tente novamente.'
+
+    // Atualizar memória estratégica e mapa
+    try {
+      const actionFromMessage = detectActionFromMessage(message)
+      const actionFromLink = linkGeradoBlock ? 'link_gerado' : undefined
+      await upsertNoelMemory(user.id, validSegment, {
+        professional_profile: professionalProfileCodes[0] || undefined,
+        main_goal: objectiveCodes[0] || undefined,
+        main_problem: situationCodes[0] || undefined,
+        funnel_stage: funnelStageCodes[0] || undefined,
+        action_to_add: actionFromMessage || actionFromLink,
+      })
+      const updatedMemory = await getNoelMemory(user.id, validSegment)
+      await syncStrategyMapFromMemory(user.id, validSegment, updatedMemory)
+    } catch (memErr) {
+      console.warn('[/api/ylada/noel] upsertNoelMemory/syncStrategyMap:', memErr)
+    }
+
+    // Persistir diagnóstico da conversa (bloqueio + estratégia + exemplo) para histórico
+    if (noelStrategies.length > 0 || situationCodes.length > 0 || professionalProfileCodes.length > 0) {
+      saveConversationDiagnosis({
+        userId: user.id,
+        segment: validSegment,
+        userMessage: message.trim(),
+        assistantResponse: responseText,
+        situationCodes,
+        professionalProfileCodes,
+        objectiveCodes,
+        funnelStageCodes,
+        strategies: noelStrategies,
+      }).catch((e) => console.warn('[/api/ylada/noel] saveConversationDiagnosis:', e))
+    }
 
     return NextResponse.json({
       response: responseText,
