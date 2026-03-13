@@ -93,7 +93,7 @@ export default function SistemaCrescimentoContent({ areaCodigo, areaLabel }: Sis
       {needsOnboarding && (
         <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
           <p className="text-sm text-amber-800">
-            <strong>Primeiro passo:</strong> Faça o diagnóstico do seu negócio para personalizar as orientações do Noel e ver seu perfil estratégico.
+            <strong>Primeiro passo:</strong> Descubra o perfil estratégico do seu negócio para personalizar as orientações do Noel.
           </p>
           <Link
             href={`${prefix}/crescimento/diagnostico-profissional`}
@@ -108,7 +108,7 @@ export default function SistemaCrescimentoContent({ areaCodigo, areaLabel }: Sis
         {/* 1. Diagnóstico do profissional */}
         <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
           <div className="mb-3 flex items-center gap-2">
-            <span className="text-2xl" aria-hidden>👤</span>
+            <span className="text-3xl" aria-hidden>👤</span>
             <h2 className="font-semibold text-gray-900">{SISTEMA_CRESCIMENTO.diagnostico_profissional.titulo}</h2>
           </div>
           <p className="mb-3 text-sm text-gray-600">{SISTEMA_CRESCIMENTO.diagnostico_profissional.descricao}</p>
@@ -151,7 +151,7 @@ export default function SistemaCrescimentoContent({ areaCodigo, areaLabel }: Sis
         {/* 2. Diagnóstico do cliente */}
         <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
           <div className="mb-3 flex items-center gap-2">
-            <span className="text-2xl" aria-hidden>🔗</span>
+            <span className="text-3xl" aria-hidden>🔗</span>
             <h2 className="font-semibold text-gray-900">{SISTEMA_CRESCIMENTO.diagnostico_cliente.titulo}</h2>
           </div>
           <p className="mb-3 text-sm text-gray-600">{SISTEMA_CRESCIMENTO.diagnostico_cliente.descricao}</p>
@@ -178,7 +178,7 @@ export default function SistemaCrescimentoContent({ areaCodigo, areaLabel }: Sis
         {/* 3. Diagnóstico da conversa */}
         <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
           <div className="mb-3 flex items-center gap-2">
-            <span className="text-2xl" aria-hidden>💬</span>
+            <span className="text-3xl" aria-hidden>💬</span>
             <h2 className="font-semibold text-gray-900">{SISTEMA_CRESCIMENTO.diagnostico_conversa.titulo}</h2>
           </div>
           <p className="mb-3 text-sm text-gray-600">{SISTEMA_CRESCIMENTO.diagnostico_conversa.descricao}</p>
@@ -205,9 +205,10 @@ export default function SistemaCrescimentoContent({ areaCodigo, areaLabel }: Sis
         </div>
       </div>
 
-      <div className="rounded-xl border border-blue-100 bg-blue-50/50 p-4">
+      <div className="rounded-xl border border-blue-100 bg-blue-50/50 p-5">
+        <h3 className="text-sm font-semibold text-blue-900 mb-2">Como funciona o sistema YLADA</h3>
         <p className="text-sm text-blue-800">
-          <strong>Ciclo completo:</strong> {SISTEMA_CRESCIMENTO.ciclo_completo}
+          {SISTEMA_CRESCIMENTO.ciclo_completo}
         </p>
       </div>
     </div>

@@ -5,23 +5,23 @@
 
 export const SISTEMA_CRESCIMENTO = {
   titulo: 'Seu sistema de crescimento',
-  subtitulo: 'O YLADA analisa três coisas para ajudar seu negócio a crescer: seu negócio, seus clientes e suas conversas.',
+  subtitulo: 'O YLADA analisa seu negócio, seus clientes e suas conversas para ajudar você a crescer.',
 
   diagnostico_profissional: {
     titulo: 'Seu negócio',
     descricao: 'Perfil estratégico, bloqueio principal e próximo movimento.',
-    ciclo: 'Diagnóstico do profissional → Noel define estratégia',
+    ciclo: 'Diagnóstico do profissional → Estratégia',
   },
   diagnostico_cliente: {
     titulo: 'Seus clientes',
-    descricao: 'Diagnósticos e quizzes que você envia para atrair e qualificar.',
-    ciclo: 'Diagnóstico do cliente → gera interessados',
+    descricao: 'Diagnósticos que você compartilha para atrair pessoas interessadas e gerar leads.',
+    ciclo: 'Diagnóstico do cliente → Conversas',
   },
   diagnostico_conversa: {
     titulo: 'Suas conversas',
-    descricao: 'Insights do Noel sobre como você conduz as conversas.',
-    ciclo: 'Diagnóstico da conversa → melhora conversão',
+    descricao: 'O Noel analisa suas conversas e sugere melhorias para aumentar suas conversões.',
+    ciclo: 'Diagnóstico da conversa → Mais clientes',
   },
 
-  ciclo_completo: 'Diagnóstico do profissional → Noel define estratégia → Diagnóstico do cliente → gera interessados → Diagnóstico da conversa → melhora conversão',
+  ciclo_completo: 'Diagnóstico do profissional → Estratégia → Diagnóstico do cliente → Conversas → Mais clientes',
 } as const
