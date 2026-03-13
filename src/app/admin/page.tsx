@@ -429,6 +429,59 @@ function AdminDashboardContent() {
           </div>
         </div>
 
+        {/* Contas Demo para Vídeos */}
+        <div className="mb-6 bg-white rounded-xl p-4 shadow-sm border border-gray-200">
+          <h3 className="font-semibold text-gray-900 mb-3">🎬 Contas Demo para Vídeos</h3>
+          <p className="text-sm text-gray-600 mb-4">Credenciais para gravar demonstrações da plataforma (perfis já configurados).</p>
+          <div className="overflow-x-auto">
+            <table className="min-w-full text-sm">
+              <thead>
+                <tr className="border-b border-gray-200">
+                  <th className="text-left py-2 px-3 font-medium text-gray-700">Área</th>
+                  <th className="text-left py-2 px-3 font-medium text-gray-700">E-mail</th>
+                  <th className="text-left py-2 px-3 font-medium text-gray-700">Senha</th>
+                  <th className="text-left py-2 px-3 font-medium text-gray-700">Login</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr className="border-b border-gray-100">
+                  <td className="py-2 px-3 font-medium text-gray-900">Médico</td>
+                  <td className="py-2 px-3 font-mono text-gray-800">demo.med@ylada.app</td>
+                  <td className="py-2 px-3 font-mono text-gray-800">Demo@2025!</td>
+                  <td className="py-2 px-3">
+                    <a href="/pt/med/login" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                      /pt/med/login
+                    </a>
+                  </td>
+                </tr>
+                <tr className="border-b border-gray-100">
+                  <td className="py-2 px-3 font-medium text-gray-900">Psicólogo</td>
+                  <td className="py-2 px-3 font-mono text-gray-800">demo.psi@ylada.app</td>
+                  <td className="py-2 px-3 font-mono text-gray-800">Demo@2025!</td>
+                  <td className="py-2 px-3">
+                    <a href="/pt/psi/login" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                      /pt/psi/login
+                    </a>
+                  </td>
+                </tr>
+                <tr className="border-b border-gray-100">
+                  <td className="py-2 px-3 font-medium text-gray-900">Vendedor Nutra</td>
+                  <td className="py-2 px-3 font-mono text-gray-800">demo.vendedor@ylada.app</td>
+                  <td className="py-2 px-3 font-mono text-gray-800">Demo@2025!</td>
+                  <td className="py-2 px-3">
+                    <a href="/pt/nutra/login" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                      /pt/nutra/login
+                    </a>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p className="text-xs text-gray-500 mt-3">
+            Script para recriar: <code className="bg-gray-100 px-1 rounded">node scripts/criar-contas-demo-videos.js</code>
+          </p>
+        </div>
+
         {/* Loading State */}
         {loading && (
           <div className="mb-8 text-center py-8">
