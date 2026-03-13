@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { useAuthenticatedFetch } from '@/hooks/useAuthenticatedFetch'
+import { getYladaAreaPathPrefix } from '@/config/ylada-areas'
 
 function LinkWithCopy({ href, children }: { href?: string; children: React.ReactNode }) {
   const [copied, setCopied] = useState(false)
@@ -332,16 +333,17 @@ export default function NoelChat({ area = 'med', className = '' }: NoelChatProps
 
   const lastAssistantMsg = [...messages].reverse().find((m) => m.role === 'assistant')
 
-  /** A mensagem contém o quiz completo (tema, perguntas, respostas, link)? Só mostramos Editar/Concordo quando o usuário já viu. */
+  /** A mensagem contém quiz e/ou link? Mostramos Editar/Gerar quando o profissional recebeu o diagnóstico. */
   function messageContainsQuizContent(content: string): boolean {
     const t = content.trim()
     if (!t) return false
-    // O Noel formata com ### AQUI ESTÃO AS PERGUNTAS e link quando entrega o quiz
-    const hasSecaoPerguntas = /###\s*(?:AQUI ESTÃO AS PERGUNTAS|Chamada para Ação|Link Inteligente)/i.test(t)
     const hasLink = /\[.*?\]\(https?:\/\/[^)]+\)/.test(t) || /https?:\/\/[^\s)]+/.test(t)
-    // Estrutura de quiz: perguntas numeradas com opções A) B) C) D)
-    const hasEstruturaQuiz = (/\*\*\d+\.\s+/.test(t) || /\d+\.\s+.*\n/.test(t)) && /[A-D]\)\s+/.test(t)
-    return hasLink && (hasSecaoPerguntas || hasEstruturaQuiz)
+    if (!hasLink) return false
+    // Aceita: seção ###, estrutura de quiz (perguntas + A) B) C) D)), ou só link (formato natural)
+    const hasSecaoPerguntas = /###\s*(?:AQUI ESTÃO AS PERGUNTAS|Chamada para Ação|Link Inteligente)/i.test(t)
+    const hasEstruturaQuiz = (/\d+\.\s+/.test(t) || /\*\*\d+\.\s+/.test(t)) && /[A-D]\)\s+/.test(t)
+    const hasFormatoNatural = /aqui está o link|acesse seu quiz|preparei um diagnóstico/i.test(t)
+    return hasSecaoPerguntas || hasEstruturaQuiz || hasFormatoNatural
   }
 
   const showEditarConcordoButtons =
@@ -437,23 +439,36 @@ export default function NoelChat({ area = 'med', className = '' }: NoelChatProps
         {showEditarConcordoButtons && (
           <div className="flex flex-wrap gap-2 pt-2">
             <Link
-              href={`/pt/links/editar/${lastLinkContext.link_id}`}
+              href={`${getYladaAreaPathPrefix(area)}/links/editar/${lastLinkContext!.link_id}`}
               className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-sky-600 text-white text-sm font-medium hover:bg-sky-700 transition-colors touch-manipulation"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
               </svg>
-              Editar quiz
+              Editar perguntas
             </Link>
+            {lastLinkContext?.url && (
+              <a
+                href={lastLinkContext.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-sky-50 text-sky-700 text-sm font-medium border border-sky-200 hover:bg-sky-100 transition-colors touch-manipulation"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                </svg>
+                Abrir link
+              </a>
+            )}
             <button
               type="button"
-              onClick={() => router.push('/pt/links')}
+              onClick={() => router.push(`${getYladaAreaPathPrefix(area)}/links`)}
               className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-sky-50 text-sky-700 text-sm font-medium border border-sky-200 hover:bg-sky-100 transition-colors touch-manipulation"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
-              Concordo, ver meus links
+              Ver meus links
             </button>
           </div>
         )}

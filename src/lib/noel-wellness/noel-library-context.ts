@@ -223,7 +223,10 @@ function formatLibraryContext(
         return lines.join('\n')
       })
       .join('\n\n')
-    parts.push('Estratégias relevantes (use esta estrutura na resposta: Diagnóstico → Explicação → Próximo movimento → Exemplo):\n' + list)
+    parts.push(
+      'Estratégias relevantes (integre na conversa de forma natural, sem rótulos; deixe uma linha em branco entre cada ideia):\n' +
+        list
+    )
   }
 
   if (conversations.length > 0) {

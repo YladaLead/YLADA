@@ -106,7 +106,7 @@ function buildNoelLinkBlock(
     ? 'O sistema acabou de criar um link para o profissional.'
     : 'O sistema criou um novo link com as alterações pedidas.'
 
-  let block = `\n[${tituloBloco}]\n${intro}\n\nOBRIGATÓRIO: O profissional precisa VER o quiz (tema, perguntas, opções, link) na conversa antes de editar ou concordar. Inclua SEMPRE o quiz completo na sua resposta — NUNCA apenas uma pergunta sem mostrar o conteúdo. Mostre primeiro o quiz, depois ofereça ajustes se quiser.\n\nFONTE ÚNICA (o link usa exatamente isto):\n${conteudoReal || '(calculadora ou link sem opções)'}\n\nREGRAS: NÃO invente perguntas. Use APENAS as perguntas acima (fonte única). NÃO diga "O link será ajustado" nem "Aqui está o link". NÃO use "Raio-X" em nenhum lugar (nem Saúde, nem Estratégia) — use "quiz", "diagnóstico", "seu quiz". Na descrição do link: "Acesse seu quiz" ou "Clique para acessar seu quiz".\n\nLINK ÚNICO: Use APENAS o link abaixo. NÃO inclua link anterior da conversa. O link correto é: ${url}\n\nFORMATO DA RESPOSTA (use ### para cada título de seção):\n\n### AQUI ESTÃO AS PERGUNTAS\nUse o título da seção em LETRAS MAIÚSCULAS: ### AQUI ESTÃO AS PERGUNTAS\nDeixe DUAS linhas em branco entre o título da seção e a primeira pergunta.\n\n1. TÍTULO: Comece com o título do quiz em negrito (use exatamente como fornecido, primeira letra maiúscula): **${title}**\n2. ESTRUTURA: Para cada pergunta:\n   - Linha 1: número + pergunta em **negrito** (ex.: **1. Qual é o seu maior desafio?**)\n   - Linha 2 em branco (quebra)\n   - Linhas seguintes: cada opção (A, B, C, D) em sua própria linha, SEMPRE abaixo da pergunta — NUNCA coloque A) na mesma linha da pergunta\n   - Duas linhas em branco entre cada bloco de pergunta (após o D), antes da próxima\n3. Exemplo correto:\n### AQUI ESTÃO AS PERGUNTAS\n\n\n**${title}**\n\n**1. Qual é o seu maior desafio?**\nA) Opção A\nB) Opção B\nC) Opção C\nD) Opção D\n\n\n**2. Outra pergunta?**\nA) Opção A\nB) Opção B\nC) Opção C\nD) Opção D\n\n### Chamada para Ação\nUse exatamente: ${descResumida}\nNÃO explique mecânica (perguntas, opções, visitante escolhe). Mantenha curto e estimulante.\n\n### Link Inteligente\nLink: [Acesse seu quiz](${url})\n\n### Onde Promover\nInstagram: posts e stories. WhatsApp: compartilhe com contatos. É por aí que seu público está.\n\n### Próximo passo\nNÃO pergunte "Está bom assim ou quer ajustar?" de forma genérica. Em vez disso, direcione: "Quer que eu deixe o CTA mais direto para WhatsApp ou mais educativo? Assim que você decidir, ajusto em segundos." Ou ofereça outra micro decisão concreta. Reforce o objetivo (captar, agenda cheia).`
+  let block = `\n[${tituloBloco}]\n${intro}\n\nOBRIGATÓRIO: O profissional precisa VER o quiz (perguntas, opções) e o link real na conversa. Inclua SEMPRE o quiz completo e o link. Use tom natural e conversacional — evite rótulos técnicos.\n\nFONTE ÚNICA (o link usa exatamente isto):\n${conteudoReal || '(calculadora ou link sem opções)'}\n\nREGRAS: NÃO invente perguntas. Use APENAS as perguntas acima. NÃO use "Raio-X" — use "quiz", "diagnóstico". O link correto é: ${url}\n\nFORMATO DA RESPOSTA (exemplo ideal — natural, menos técnico):\n\nÓtima ideia. Vamos criar um diagnóstico para [tema que o profissional pediu].\n\nPreparei um diagnóstico curto com [N] perguntas para identificar quem realmente está considerando [objetivo/tema].\n\n[Mostre as perguntas com opções A, B, C, D — use a fonte única acima]\n\nAqui está o link: [Acesse seu quiz](${url})\n\nSe quiser, posso ajustar as perguntas para seu público.\n\nIMPORTANTE: Inclua o quiz completo (perguntas + opções) antes do link. O link deve ser em markdown: [Acesse seu quiz](${url}).`
 
   if (modo === 'ajustado') {
     block += '\nSe for ajuste: pode dizer brevemente "Pronto" ou "Concluído" antes do link.'
@@ -131,7 +131,10 @@ function isIntencaoAjustarLink(message: string): boolean {
 }
 
 /** Detecta se a mensagem indica pedido de link / quiz / calculadora / ferramenta para engajar. */
-function isIntencaoCriarLink(message: string): boolean {
+function isIntencaoCriarLink(
+  message: string,
+  conversationHistory?: Array<{ role: string; content: string }>
+): boolean {
   const m = message.toLowerCase().trim()
   const termos = [
     'quero um link', 'quero uma calculadora', 'quero um quiz', 'quero uma ferramenta',
@@ -153,8 +156,29 @@ function isIntencaoCriarLink(message: string): boolean {
     'me dá o link', 'me entrega o link', 'cadê o link', 'onde está o link', 'entregar o link',
     'criar o link', 'link desse', 'link desse diagnóstico', 'link desse quiz', 'link do diagnóstico',
     'pode criar esse', 'pode gerar o link', 'gera esse link',
+    // Medicamentos e temas específicos (GLP-1, emagrecimento medicamentoso)
+    'tizerpatide', 'tirzepatida', 'ozempic', 'wegovy', 'mounjaro', 'zepbound', 'semaglutida', 'liraglutida',
   ]
-  return termos.some((t) => m.includes(t))
+  if (termos.some((t) => m.includes(t))) return true
+
+  // Confirmação "sim" + tema: última mensagem do assistant perguntou se quer criar link
+  const lastAssistant = conversationHistory
+    ?.filter((h) => h.role === 'assistant')
+    .pop()
+    ?.content?.toLowerCase()
+    ?? ''
+  const perguntouCriar =
+    lastAssistant.includes('quer que eu crie') ||
+    lastAssistant.includes('quero criar') ||
+    lastAssistant.includes('criar um link') ||
+    lastAssistant.includes('criar um diagnóstico') ||
+    lastAssistant.includes('qual tema')
+  const pareceConfirmacao = /^sim[\s,]|^sim\s/i.test(m) || (m.startsWith('sim') && m.length > 4)
+  if (perguntouCriar && pareceConfirmacao) {
+    const rest = m.replace(/^sim[\s,]+/i, '').trim()
+    if (rest.length >= 3) return true
+  }
+  return false
 }
 
 /** Primeira conversa: no máximo 1 troca anterior e mensagem vaga (oi, como funciona, quero captar, etc.). */
@@ -457,7 +481,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Se o profissional pediu link/quiz/calculadora: verificar perfil; se tiver, interpret + generate
-    if (!linkGeradoBlock && isIntencaoCriarLink(message)) {
+    if (!linkGeradoBlock && isIntencaoCriarLink(message, conversationHistory)) {
       const temPerfil = profileRow && (profileRow.profile_type || profileRow.profession)
       if (!temPerfil) {
         linkGeradoBlock = '\n[AVISO: SEM PERFIL]\nO perfil do profissional está incompleto (falta tipo de atuação e/ou área). NÃO gere link. Explique de forma amigável: (1) que o perfil está incompleto e ele precisa preencher em "Perfil empresarial" (menu ao lado); (2) que você sempre se baseia no perfil dele para recomendar o link mais adequado — por isso é essencial que ele complete o perfil primeiro. Depois que preencher, ele pode pedir o link de novo que aí você entrega.'
@@ -669,7 +693,7 @@ export async function POST(request: NextRequest) {
     if (noelLibraryContext.trim()) {
       parts.push('\n' + NOEL_STRATEGIC_PROTOCOL + noelLibraryContext + '\n' + NOEL_STRATEGIC_RULE)
       parts.push(
-        '\n[FLUXO MENTOR — OBRIGATÓRIO]\nQuando houver estratégias na biblioteca, use a estrutura na sua resposta: 1) Diagnóstico ("Isso acontece quando..."); 2) Explicação (o porquê); 3) Próximo movimento (ação concreta); 4) Exemplo (frase pronta se houver). O Noel conduz, não só explica.'
+        '\n[FLUXO MENTOR — OBRIGATÓRIO]\nQuando houver estratégias na biblioteca, conduza como uma conversa natural. NÃO use rótulos como "Diagnóstico:", "Explicação:", "Próximo movimento:", "Exemplo:". Integre o conteúdo fluindo: (1) o diagnóstico ("Isso acontece quando..."); (2) o porquê; (3) a ação concreta; (4) exemplo se houver. Deixe UMA linha em branco entre cada ideia (entre diagnóstico e explicação, etc.). O Noel conversa, não recita tópicos.'
       )
     }
     if (diagnosisInsightsText) {
@@ -687,7 +711,7 @@ export async function POST(request: NextRequest) {
     }
     if (primeiraConversaOuVaga && linkGeradoBlock) {
       parts.push(
-        '\n[PRIMEIRA CONVERSA GUIADA — COM LINK]\nO profissional está começando ou mandou mensagem vaga. Você já tem um link gerado. Entregue como demonstração de valor: (1) Ação prática: "Criei um diagnóstico para você testar agora." (2) Mostre o quiz e o link clicável conforme o bloco acima. (3) Onde usar: Instagram, WhatsApp, bio do perfil. (4) Convite para ajustar: "Se quiser, posso ajustar as perguntas, mudar o tema ou criar outro diagnóstico." No final, reforce: "Diagnósticos são uma das formas mais eficazes de iniciar conversas qualificadas com clientes." Objetivo: o usuário sentir "já tenho algo para usar" em segundos.'
+        '\n[PRIMEIRA CONVERSA GUIADA — COM LINK]\nO profissional está começando. Use o formato natural do bloco acima: intro breve, quiz completo, link real, convite para ajustar. Ex.: "Ótima ideia. Preparei um diagnóstico com X perguntas. Aqui está o link: [link]. Se quiser, posso ajustar as perguntas." Objetivo: o usuário sentir "já tenho algo para usar" em segundos.'
       )
     }
     if (primeiraConversaOuVaga && !linkGeradoBlock) {
@@ -695,9 +719,9 @@ export async function POST(request: NextRequest) {
         '\n[PRIMEIRA CONVERSA OU MENSAGEM VAGA — SEM LINK]\nO profissional está começando ou não sabe por onde começar. NÃO apenas explique o sistema — mostre o caminho prático. Se o perfil estiver incompleto: diga para preencher em "Perfil empresarial" (menu ao lado) e que em um minuto você cria um diagnóstico para ele testar. Se o perfil já existir: diga que pode criar um diagnóstico agora e sugira que ele peça com o tema, ex.: "Quero um diagnóstico para captar clientes" (ou "captar pacientes" se for médico), e aí você gera o link. Objetivo: demonstrar valor, não só explicar.'
       )
     }
-    if (isIntencaoCriarLink(message) && !linkGeradoBlock) {
+    if (isIntencaoCriarLink(message, conversationHistory) && !linkGeradoBlock) {
       parts.push(
-        '\n[PEDIDO DE LINK SEM GERAÇÃO]\nO profissional pediu link/quiz/fluxo mas o sistema não gerou o link nesta resposta. Diga que para gerar o link ele pode pedir com o tema explícito, por exemplo: "Quero um link de diagnóstico de emagrecimento" ou "Cria um quiz para minha comunicação" ou "Quero um link para qualificar leads". Na próxima mensagem com tema claro o sistema gerará o link.'
+        '\n[PEDIDO DE LINK SEM GERAÇÃO]\nO profissional pediu link/quiz/fluxo mas o sistema não gerou o link nesta resposta. NUNCA invente um link ou diga "Clique aqui para acessar o diagnóstico" sem um URL real. O link só existe quando o sistema fornece. Oriente: "Para eu gerar o link, pode pedir com o tema explícito, por exemplo: Quero um link para emagrecimento ou Cria um quiz para tizerpatide." Na próxima mensagem com tema claro o sistema gerará o link e o quiz completo na conversa.'
       )
     }
     const systemContent = parts.join('')
