@@ -474,6 +474,46 @@ function AdminDashboardContent() {
                     </a>
                   </td>
                 </tr>
+                <tr className="border-b border-gray-100">
+                  <td className="py-2 px-3 font-medium text-gray-900">Nutricionista</td>
+                  <td className="py-2 px-3 font-mono text-gray-800">demo.nutri@ylada.app</td>
+                  <td className="py-2 px-3 font-mono text-gray-800">Demo@2025!</td>
+                  <td className="py-2 px-3">
+                    <a href="/pt/nutri/login" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                      /pt/nutri/login
+                    </a>
+                  </td>
+                </tr>
+                <tr className="border-b border-gray-100">
+                  <td className="py-2 px-3 font-medium text-gray-900">Coach</td>
+                  <td className="py-2 px-3 font-mono text-gray-800">demo.coach@ylada.app</td>
+                  <td className="py-2 px-3 font-mono text-gray-800">Demo@2025!</td>
+                  <td className="py-2 px-3">
+                    <a href="/pt/coach/login" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                      /pt/coach/login
+                    </a>
+                  </td>
+                </tr>
+                <tr className="border-b border-gray-100">
+                  <td className="py-2 px-3 font-medium text-gray-900">Esteticista</td>
+                  <td className="py-2 px-3 font-mono text-gray-800">demo.estetica@ylada.app</td>
+                  <td className="py-2 px-3 font-mono text-gray-800">Demo@2025!</td>
+                  <td className="py-2 px-3">
+                    <a href="/pt/estetica/login" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                      /pt/estetica/login
+                    </a>
+                  </td>
+                </tr>
+                <tr className="border-b border-gray-100">
+                  <td className="py-2 px-3 font-medium text-gray-900">Perfumaria</td>
+                  <td className="py-2 px-3 font-mono text-gray-800">demo.perfumaria@ylada.app</td>
+                  <td className="py-2 px-3 font-mono text-gray-800">Demo@2025!</td>
+                  <td className="py-2 px-3">
+                    <a href="/pt/perfumaria/login" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                      /pt/perfumaria/login
+                    </a>
+                  </td>
+                </tr>
               </tbody>
             </table>
           </div>

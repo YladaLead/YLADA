@@ -2,7 +2,7 @@
 
 /**
  * Script para criar contas demo para vídeos de demonstração da plataforma.
- * Cria: demo.med@ylada.app, demo.psi@ylada.app, demo.vendedor@ylada.app
+ * Cria: demo.med, demo.psi, demo.vendedor, demo.estetica, demo.perfumaria
  * Senha: Demo@2025!
  *
  * Execute: node scripts/criar-contas-demo-videos.js
@@ -109,6 +109,102 @@ const DEMO_ACCOUNTS = [
       canais_principais: ['whatsapp', 'instagram'],
       rotina_atual_resumo: 'Vendo por WhatsApp e redes, quero ferramentas para qualificar',
       area_specific: { canal_principal_vendas: 'whatsapp', temas_atuacao: ['b12_vitaminas', 'energia', 'emagrecimento'] }
+    }
+  },
+  {
+    email: 'demo.estetica@ylada.app',
+    nome: 'Demo Esteticista',
+    perfil: 'estetica',
+    noelProfile: {
+      segment: 'estetica',
+      profile_type: 'liberal',
+      profession: 'estetica',
+      category: 'estetica',
+      tempo_atuacao_anos: 4,
+      dor_principal: 'agenda_vazia',
+      prioridade_atual: 'Captar clientes e divulgar tratamentos',
+      fase_negocio: 'em_crescimento',
+      metas_principais: 'Preencher agenda e qualificar leads',
+      objetivos_curto_prazo: 'Link com diagnóstico de pele ou autocuidado para engajar',
+      modelo_atuacao: ['consultorio'],
+      capacidade_semana: 25,
+      ticket_medio: 180,
+      modelo_pagamento: 'particular',
+      canais_principais: ['instagram', 'whatsapp'],
+      rotina_atual_resumo: 'Clínica de estética, quero ferramentas para captar e qualificar',
+      area_specific: { temas_atuacao: ['pele', 'skincare', 'autocuidado', 'retencao'] }
+    }
+  },
+  {
+    email: 'demo.nutri@ylada.app',
+    nome: 'Dra. Demo Nutricionista',
+    perfil: 'nutri',
+    noelProfile: {
+      segment: 'ylada',
+      profile_type: 'liberal',
+      profession: 'nutricionista',
+      category: 'nutricao',
+      tempo_atuacao_anos: 5,
+      dor_principal: 'agenda_vazia',
+      prioridade_atual: 'Captar mais pacientes e usar quiz/calculadora',
+      fase_negocio: 'em_crescimento',
+      metas_principais: 'Preencher agenda e ter diagnóstico para entregar valor',
+      objetivos_curto_prazo: 'Link com diagnóstico para engajar no Instagram',
+      modelo_atuacao: ['consultorio', 'online'],
+      capacidade_semana: 20,
+      ticket_medio: 220,
+      modelo_pagamento: 'particular',
+      canais_principais: ['instagram', 'whatsapp'],
+      rotina_atual_resumo: 'Atendo presencial e online, quero ferramentas para captar',
+      area_specific: { area_nutri: 'emagrecimento', temas_atuacao: ['emagrecimento', 'intestino', 'energia'] }
+    }
+  },
+  {
+    email: 'demo.coach@ylada.app',
+    nome: 'Demo Coach',
+    perfil: 'coach',
+    noelProfile: {
+      segment: 'coach',
+      profile_type: 'liberal',
+      profession: 'coach',
+      category: 'coaching',
+      tempo_atuacao_anos: 4,
+      dor_principal: 'sem_indicacao',
+      prioridade_atual: 'Aumentar autoridade e captar leads qualificados',
+      fase_negocio: 'estabilizado',
+      metas_principais: 'Escalar com programas e link que qualifica',
+      objetivos_curto_prazo: 'Quiz para quem quer saber mais sobre o método',
+      modelo_atuacao: ['online'],
+      capacidade_semana: 12,
+      ticket_medio: 500,
+      modelo_pagamento: 'recorrencia',
+      canais_principais: ['instagram', 'indicacao'],
+      rotina_atual_resumo: 'Trabalho com programas online, pouca divulgação estruturada',
+      area_specific: { modelo_entrega_coach: 'programa_online', temas_atuacao: ['carreira', 'produtividade', 'autoconhecimento'] }
+    }
+  },
+  {
+    email: 'demo.perfumaria@ylada.app',
+    nome: 'Demo Vendedor Perfumaria',
+    perfil: 'perfumaria',
+    noelProfile: {
+      segment: 'perfumaria',
+      profile_type: 'vendas',
+      profession: 'vendedor_perfumes',
+      category: 'perfumaria',
+      tempo_atuacao_anos: 3,
+      dor_principal: 'nao_converte',
+      prioridade_atual: 'Qualificar leads e indicar perfumes certos para cada perfil',
+      fase_negocio: 'em_crescimento',
+      metas_principais: 'Usar quiz de perfil olfativo para captar e recomendar fragrâncias',
+      objetivos_curto_prazo: 'Link com diagnóstico de perfil de fragrância para engajar no Instagram',
+      modelo_atuacao: ['loja', 'online'],
+      capacidade_semana: 20,
+      ticket_medio: 250,
+      modelo_pagamento: 'avulso',
+      canais_principais: ['instagram', 'whatsapp'],
+      rotina_atual_resumo: 'Vendo perfumes por loja e redes, quero ferramentas para qualificar e indicar',
+      area_specific: { temas_atuacao: ['perfil_olfativo', 'familia_olfativa', 'ocasiao_uso'] }
     }
   }
 ]
@@ -232,9 +328,13 @@ async function main() {
 
   console.log('\n✅ Concluído!\n')
   console.log('📧 Contas criadas:')
-  console.log('   demo.med@ylada.app      → Médico (liberal)')
-  console.log('   demo.psi@ylada.app      → Psicólogo (liberal)')
-  console.log('   demo.vendedor@ylada.app → Vendedor Nutra')
+  console.log('   demo.med@ylada.app       → Médico (liberal)')
+  console.log('   demo.psi@ylada.app       → Psicólogo (liberal)')
+  console.log('   demo.vendedor@ylada.app   → Vendedor Nutra')
+  console.log('   demo.estetica@ylada.app   → Esteticista (liberal)')
+  console.log('   demo.perfumaria@ylada.app → Vendedor Perfumaria')
+  console.log('   demo.nutri@ylada.app      → Nutricionista')
+  console.log('   demo.coach@ylada.app      → Coach')
   console.log('\n🔐 Senha para todas: Demo@2025!\n')
 }
 
