@@ -5,6 +5,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireApiAuth } from '@/lib/api-auth'
 import { supabaseAdmin } from '@/lib/supabase'
+import { YLADA_API_ALLOWED_PROFILES } from '@/config/ylada-areas'
 
 type EventCounts = {
   view: number
@@ -35,7 +36,7 @@ function buildStatsMap(
 
 export async function GET(request: NextRequest) {
   try {
-    const auth = await requireApiAuth(request, ['ylada', 'psi', 'psicanalise', 'odonto', 'nutra', 'coach', 'nutri', 'wellness', 'admin'])
+    const auth = await requireApiAuth(request, [...YLADA_API_ALLOWED_PROFILES])
     if (auth instanceof NextResponse) return auth
     const { user } = auth
 

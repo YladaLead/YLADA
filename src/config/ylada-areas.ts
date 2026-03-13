@@ -90,3 +90,9 @@ export function getYladaSegmentPathPrefix(segmentCode: YladaSegmentCode): string
 
 /** Lista de segment_code válidos para validação (ex.: body.segment na API Noel). */
 export const YLADA_SEGMENT_CODES: YladaSegmentCode[] = ['ylada', 'med', 'psi', 'psicanalise', 'odonto', 'nutra', 'coach', 'seller', 'perfumaria', 'estetica', 'fitness']
+
+/** Perfis permitidos nas APIs YLADA (Links, Templates, Biblioteca, etc.). */
+export const YLADA_API_ALLOWED_PROFILES = [
+  'ylada', 'med', 'psi', 'psicanalise', 'odonto', 'nutra', 'coach', 'seller',
+  'perfumaria', 'estetica', 'fitness', 'nutri', 'wellness', 'admin'
+] as const

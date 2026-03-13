@@ -8,7 +8,7 @@
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { requireApiAuth } from '@/lib/api-auth'
-import { YLADA_SEGMENT_CODES } from '@/config/ylada-areas'
+import { YLADA_SEGMENT_CODES, YLADA_API_ALLOWED_PROFILES } from '@/config/ylada-areas'
 import { supabaseAdmin } from '@/lib/supabase'
 import { interpretStrategyContext } from '@/lib/ylada/strategic-interpreter'
 import { getFlowById, VALID_FLOW_IDS } from '@/config/ylada-flow-catalog'
@@ -122,7 +122,7 @@ Resposta APENAS em JSON válido, sem markdown.`
 
 export async function POST(request: NextRequest) {
   try {
-    const auth = await requireApiAuth(request, ['ylada', 'psi', 'psicanalise', 'odonto', 'nutra', 'coach', 'nutri', 'wellness', 'admin'])
+    const auth = await requireApiAuth(request, [...YLADA_API_ALLOWED_PROFILES])
     if (auth instanceof NextResponse) return auth
     const { user } = auth
 

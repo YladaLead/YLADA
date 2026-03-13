@@ -7,6 +7,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireApiAuth } from '@/lib/api-auth'
 import { supabaseAdmin } from '@/lib/supabase'
+import { YLADA_API_ALLOWED_PROFILES } from '@/config/ylada-areas'
 import OpenAI from 'openai'
 import { generateDiagnosisForLink } from '@/lib/ylada/generate-diagnosis-for-link'
 import { getFlowById, VALID_FLOW_IDS } from '@/config/ylada-flow-catalog'
@@ -35,7 +36,7 @@ const TEMPLATE_TYPE_BY_ARCHITECTURE: Record<string, string> = {
 
 export async function POST(request: NextRequest) {
   try {
-    const auth = await requireApiAuth(request, ['ylada', 'psi', 'psicanalise', 'odonto', 'nutra', 'coach', 'nutri', 'wellness', 'admin'])
+    const auth = await requireApiAuth(request, [...YLADA_API_ALLOWED_PROFILES])
     if (auth instanceof NextResponse) return auth
     const { user } = auth
 

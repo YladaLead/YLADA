@@ -9,6 +9,7 @@ import {
   getTemasParaBiblioteca,
   getTemaLabel,
   getBibliotecaSegmentFromProfile,
+  getBibliotecaSegmentFromArea,
   type BibliotecaTipo,
   type BibliotecaSegmentCode,
 } from '@/config/ylada-biblioteca'
@@ -65,8 +66,15 @@ export default function BibliotecaPageContent({ areaCodigo, areaLabel }: Bibliot
         setSegmentoSugerido(seg)
         setSegmentoFiltro(seg)
       }
+    } else {
+      // Sem cookie de simulação: usar segmento da área (ex: /pt/estetica/biblioteca → aesthetics)
+      const segFromArea = getBibliotecaSegmentFromArea(areaCodigo)
+      if (segFromArea) {
+        setSegmentoSugerido(segFromArea)
+        setSegmentoFiltro(segFromArea)
+      }
     }
-  }, [])
+  }, [areaCodigo])
 
   useEffect(() => {
     if (segmentoFiltro && temaFiltro) {

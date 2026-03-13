@@ -6,8 +6,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireApiAuth } from '@/lib/api-auth'
 import { supabaseAdmin } from '@/lib/supabase'
+import { YLADA_API_ALLOWED_PROFILES } from '@/config/ylada-areas'
 
-const ALLOWED_ROLES = ['ylada', 'psi', 'psicanalise', 'odonto', 'nutra', 'coach', 'nutri', 'wellness', 'admin'] as const
+const ALLOWED_ROLES = [...YLADA_API_ALLOWED_PROFILES] as const
 const ALLOWED_STATUSES = ['active', 'paused', 'archived'] as const
 
 export async function GET(

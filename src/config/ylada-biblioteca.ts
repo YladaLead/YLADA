@@ -94,6 +94,28 @@ const PROFESSION_TO_BIBLIOTECA: Record<string, BibliotecaSegmentCode> = {
   outro: 'nutrition',
 }
 
+/** Mapeamento areaCodigo (rota) → segmento da biblioteca. */
+const AREA_TO_BIBLIOTECA: Partial<Record<string, BibliotecaSegmentCode>> = {
+  estetica: 'aesthetics',
+  med: 'medicine',
+  psi: 'psychology',
+  psicanalise: 'psychology',
+  odonto: 'dentistry',
+  nutra: 'nutrition_vendedor',
+  coach: 'fitness',
+  perfumaria: 'perfumaria',
+  fitness: 'fitness',
+  nutri: 'nutrition',
+  seller: 'nutrition_vendedor',
+  ylada: 'nutrition',
+}
+
+/** Deriva segmento da biblioteca a partir da área (rota). */
+export function getBibliotecaSegmentFromArea(areaCodigo: string | null | undefined): BibliotecaSegmentCode | null {
+  const area = (areaCodigo || '').toLowerCase().trim()
+  return area && AREA_TO_BIBLIOTECA[area] ? AREA_TO_BIBLIOTECA[area]! : null
+}
+
 /** Deriva segmento da biblioteca a partir do perfil (profession). */
 export function getBibliotecaSegmentFromProfile(
   profession: string | null | undefined
