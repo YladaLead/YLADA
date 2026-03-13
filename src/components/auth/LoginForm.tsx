@@ -319,6 +319,10 @@ export default function LoginForm({
             // Admin/Suporte pode fazer login em qualquer área
             console.log('✅ Admin/Suporte - permitindo login em qualquer área')
             // Continuar com login
+          } else if (perfil === 'ylada' && !['wellness', 'coach-bem-estar'].includes(checkData.perfil)) {
+            // Login em /pt/login (ylada) aceita todas as áreas exceto Wellness (Herbalife)
+            console.log('✅ Login YLADA (matriz) - aceita perfil:', checkData.perfil)
+            // Continuar com login
           } else if (checkData.perfil !== perfil) {
             // Perfil não corresponde à área atual
             const areaLabel = perfilAreaLabels[checkData.perfil] || checkData.perfil
@@ -366,12 +370,14 @@ export default function LoginForm({
         })
 
         // Verificar se perfil existe, se não, criar automaticamente
+        let profileCheck: { id: string; perfil: string } | null = null
         try {
-          const { data: profileCheck, error: profileCheckError } = await supabase
+          const { data: profileResult, error: profileCheckError } = await supabase
             .from('user_profiles')
             .select('id, perfil')
             .eq('user_id', session.user.id)
             .maybeSingle()
+          profileCheck = profileResult
           
           if (!profileCheck && !profileCheckError) {
             // Perfil não existe - criar automaticamente
@@ -430,7 +436,38 @@ export default function LoginForm({
         // 🚀 NOVO: Para área Nutri, verificar diagnóstico antes de redirecionar
         let baseRedirectPath = redirectPath
         let temDiagnostico = false
-        if (perfil === 'nutri') {
+
+        // Login em /pt/login (ylada): redirecionar para área do usuário
+        if (perfil === 'ylada') {
+          const userPerfil = profileCheck?.perfil ?? checkData.perfil
+          const areaRedirects: Record<string, string> = {
+            med: '/pt/med/home',
+            psi: '/pt/psi/home',
+            nutra: '/pt/nutra/home',
+            estetica: '/pt/estetica/home',
+            perfumaria: '/pt/perfumaria/home',
+            coach: '/pt/coach/home',
+            nutri: '/pt/nutri/home',
+            odonto: '/pt/odonto/home',
+            fitness: '/pt/fitness/home',
+            seller: '/pt/seller/home',
+            psicanalise: '/pt/psicanalise/home',
+            ylada: '/pt/home'
+          }
+          if (userPerfil && areaRedirects[userPerfil]) {
+            baseRedirectPath = areaRedirects[userPerfil]
+            if (userPerfil === 'nutri') {
+              const { data: nutriProfile } = await supabase
+                .from('user_profiles')
+                .select('diagnostico_completo')
+                .eq('user_id', session.user.id)
+                .maybeSingle()
+              temDiagnostico = !!nutriProfile?.diagnostico_completo
+              if (!temDiagnostico) baseRedirectPath = '/pt/nutri/onboarding'
+            }
+            console.log('🔄 Login YLADA: redirecionando para', baseRedirectPath, '(perfil:', userPerfil, ')')
+          }
+        } else if (perfil === 'nutri') {
           try {
             const { data: nutriProfile } = await supabase
               .from('user_profiles')
