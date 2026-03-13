@@ -33,7 +33,7 @@ export const YLADA_AREAS: YladaAreaConfig[] = [
 ]
 
 /**
- * Menu organizado pelo fluxo de uso (jornada): Atrair → Conversar → Melhorar → Apoio → Conta.
+ * Menu organizado pelo fluxo do método YLADA: Hoje → Mentor → Atrair clientes → Conversas → Estratégia → Aprender → Conta.
  * Lab e Sistema apenas para admin.
  */
 export const YLADA_MENU_GROUPS = [
@@ -44,26 +44,31 @@ export const YLADA_MENU_GROUPS = [
     ],
   },
   {
-    label: 'ATRAIR',
+    label: 'MENTOR',
+    items: [
+      { key: 'home', label: 'Noel', path: 'home', icon: '💬' },
+    ],
+  },
+  {
+    label: 'ATRAIR CLIENTES',
     items: [
       { key: 'links', label: 'Diagnósticos', path: 'links', icon: '🧪' },
     ],
   },
   {
-    label: 'CONVERSAR',
+    label: 'CONVERSAS',
     items: [
       { key: 'leads', label: 'Leads', path: 'leads', icon: '👥' },
     ],
   },
   {
-    label: 'MELHORAR',
+    label: 'ESTRATÉGIA',
     items: [
-      { key: 'home', label: 'Noel', path: 'home', icon: '💬' },
       { key: 'crescimento', label: 'Crescimento', path: 'crescimento', icon: '📈' },
     ],
   },
   {
-    label: 'APOIO',
+    label: 'APRENDER',
     items: [
       { key: 'biblioteca', label: 'Biblioteca', path: 'biblioteca', icon: '📚' },
       { key: 'metodo', label: 'Método YLADA', path: 'metodo', icon: '🚀' },

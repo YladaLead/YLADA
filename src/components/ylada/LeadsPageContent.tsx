@@ -149,17 +149,31 @@ export default function LeadsPageContent({ areaCodigo, areaLabel }: LeadsPageCon
         {loading ? (
           <p className="text-gray-500">Carregando...</p>
         ) : metrics.length === 0 ? (
-          <div className="bg-gray-50 rounded-xl p-8 text-center">
-            <p className="text-gray-700 font-medium mb-1">Nenhuma resposta ainda.</p>
-            <p className="text-gray-600 text-sm mb-4">
-              Compartilhe seus diagnósticos para começar a receber leads e iniciar conversas com clientes.
+          <div className="rounded-xl border border-sky-100 bg-sky-50/60 p-8">
+            <h2 className="text-lg font-semibold text-gray-900 mb-2">Ainda não há leads</h2>
+            <p className="text-gray-700 text-sm mb-4">
+              Quando alguém responde seu diagnóstico, a pessoa aparece aqui para você iniciar uma conversa.
             </p>
-            <Link
-              href={linksPath}
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-sky-600 text-white text-sm font-medium hover:bg-sky-700 transition-colors"
-            >
-              🔗 Ver meus diagnósticos
-            </Link>
+            <p className="text-sm font-medium text-gray-800 mb-2">Para começar:</p>
+            <ol className="list-decimal list-inside text-sm text-gray-700 space-y-1.5 mb-6">
+              <li>Crie um diagnóstico</li>
+              <li>Compartilhe o link</li>
+              <li>Receba respostas e converse</li>
+            </ol>
+            <div className="flex flex-wrap gap-3">
+              <Link
+                href={linksPath}
+                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-sky-600 text-white text-sm font-medium hover:bg-sky-700 transition-colors"
+              >
+                🧪 Criar diagnóstico
+              </Link>
+              <Link
+                href={linksPath}
+                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-sky-300 bg-white text-sky-700 text-sm font-medium hover:bg-sky-50 transition-colors"
+              >
+                🔗 Ver diagnósticos para compartilhar
+              </Link>
+            </div>
           </div>
         ) : (
           <>

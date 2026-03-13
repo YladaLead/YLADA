@@ -1077,7 +1077,24 @@ function LinksPageContent({ areaCodigo = 'ylada', areaLabel = 'YLADA' }: LinksPa
             )
           })()}
           {links.length === 0 ? (
-            <p className="text-gray-500 text-sm">Sua primeira ferramenta está a um clique acima. Use um diagnóstico sugerido ou escolha um tema.</p>
+            <div className="rounded-xl border border-amber-100 bg-amber-50/60 p-6">
+              <h3 className="text-base font-semibold text-gray-900 mb-2">Crie seu primeiro diagnóstico</h3>
+              <p className="text-gray-700 text-sm mb-4">
+                Diagnósticos despertam curiosidade e iniciam conversas com possíveis clientes. Use um dos sugeridos acima ou escolha um tema para criar o seu.
+              </p>
+              <button
+                type="button"
+                onClick={() => {
+                  setInterpretResult(null)
+                  setInterpretText('')
+                  setShowTextFlow(true)
+                  setTimeout(() => criadorRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100)
+                }}
+                className="inline-flex items-center gap-2 rounded-xl bg-amber-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-amber-700 transition-colors"
+              >
+                ⚡ Criar diagnóstico agora
+              </button>
+            </div>
           ) : (
             <ul className="space-y-4">
               {links.map((link) => {
