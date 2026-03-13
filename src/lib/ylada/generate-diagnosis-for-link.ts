@@ -1,10 +1,16 @@
 /**
  * Gera e persiste conteúdo de diagnóstico para um link.
  * Usado por: POST /api/ylada/links/[id]/generate-diagnosis e bulk-generate-diagnosis.
+ * Consulta diagnosis_blocks (biblioteca inteligente) para enriquecer o prompt quando disponível.
  */
 import type { SupabaseClient } from '@supabase/supabase-js'
 import OpenAI from 'openai'
 import { generateLinkDiagnosisContent } from './generate-link-diagnosis'
+import {
+  getDiagnosisBlocksForSegment,
+  getDiagnosisBlocksByTags,
+  type DiagnosisBlocksByType,
+} from './diagnosis-blocks'
 
 const ARCHETYPES_RISK = ['leve', 'moderado', 'urgente'] as const
 const ARCHETYPES_BLOCKER = ['bloqueio_pratico', 'bloqueio_emocional'] as const
@@ -58,8 +64,46 @@ export async function generateDiagnosisForLink(
     options: f.options,
   }))
 
+  // Buscar blocos da biblioteca inteligente (por segmento e/ou por tags do tema)
+  let blocks: DiagnosisBlocksByType | undefined
+  try {
+    const segmentCode =
+      (typeof meta?.segment_code === 'string' ? meta.segment_code : null) ?? 'ylada'
+    const [bySegment, byTags] = await Promise.all([
+      getDiagnosisBlocksForSegment(segmentCode),
+      getDiagnosisBlocksByTags(
+        theme
+          .toLowerCase()
+          .replace(/[^\p{L}\p{N}\s]/gu, ' ')
+          .split(/\s+/)
+          .filter((w) => w.length >= 2)
+      ),
+    ])
+    // Mesclar: preferir blocos de tags (mais específicos), completar com segmento
+    blocks = {
+      theme: [...new Set([...byTags.theme, ...bySegment.theme])],
+      problem: [...new Set([...byTags.problem, ...bySegment.problem])],
+      audience: [...new Set([...byTags.audience, ...bySegment.audience])],
+      promise: [...new Set([...byTags.promise, ...bySegment.promise])],
+    }
+    if (
+      blocks.theme.length === 0 &&
+      blocks.problem.length === 0 &&
+      blocks.promise.length === 0
+    ) {
+      blocks = undefined
+    }
+  } catch (e) {
+    console.warn('[generate-diagnosis] diagnosis_blocks:', e)
+  }
+
   const { archetypes } = await generateLinkDiagnosisContent(
-    { theme, architecture: architecture as 'RISK_DIAGNOSIS' | 'BLOCKER_DIAGNOSIS', questions },
+    {
+      theme,
+      architecture: architecture as 'RISK_DIAGNOSIS' | 'BLOCKER_DIAGNOSIS',
+      questions,
+      blocks,
+    },
     openai
   )
 

@@ -1,8 +1,10 @@
 /**
  * Gera conteúdo de diagnóstico por link via IA.
  * Usado quando o profissional edita o link — memoriza para não chamar IA de novo.
+ * Quando blocos são fornecidos (biblioteca inteligente), enriquece o prompt com contexto.
  */
 import OpenAI from 'openai'
+import type { DiagnosisBlocksByType } from './diagnosis-blocks'
 
 const ARCHETYPE_CODES_RISK = ['leve', 'moderado', 'urgente'] as const
 const ARCHETYPE_CODES_BLOCKER = ['bloqueio_pratico', 'bloqueio_emocional'] as const
@@ -26,6 +28,8 @@ export type GenerateLinkDiagnosisInput = {
   theme: string
   architecture: 'RISK_DIAGNOSIS' | 'BLOCKER_DIAGNOSIS'
   questions: Array<{ id: string; label: string; options?: string[] }>
+  /** Blocos da biblioteca inteligente — enriquecem o prompt com temas, problemas e promessas sugeridos. */
+  blocks?: DiagnosisBlocksByType
 }
 
 export type GenerateLinkDiagnosisOutput = {
@@ -116,11 +120,24 @@ whatsapp_prefill: "Oi {NAME}, fiz a análise de {THEME} e o resultado apontou {B
 
 Retorne JSON: { "bloqueio_pratico": {...}, "bloqueio_emocional": {...} }`
 
+function formatBlocksContext(blocks: DiagnosisBlocksByType): string {
+  const parts: string[] = []
+  if (blocks.theme?.length) parts.push(`Temas relacionados: ${blocks.theme.join(', ')}`)
+  if (blocks.problem?.length) parts.push(`Problemas comuns: ${blocks.problem.join(', ')}`)
+  if (blocks.promise?.length) parts.push(`Promessas sugeridas: ${blocks.promise.join(', ')}`)
+  if (blocks.audience?.length) parts.push(`Públicos: ${blocks.audience.join(', ')}`)
+  if (parts.length === 0) return ''
+  return `## CONTEXTO DA BIBLIOTECA DE BLOCOS (use para inspirar linguagem e manter consistência)
+${parts.join('\n')}
+
+Use esses blocos para enriquecer o main_blocker e as frases, mantendo o tom personalizado e conectado ao tema.`
+}
+
 export async function generateLinkDiagnosisContent(
   input: GenerateLinkDiagnosisInput,
   openai: OpenAI
 ): Promise<GenerateLinkDiagnosisOutput> {
-  const { theme, architecture, questions } = input
+  const { theme, architecture, questions, blocks } = input
   const questionsText = questions
     .map((q) => `- ${q.label}${q.options?.length ? ` (opções: ${q.options.join(', ')})` : ''}`)
     .join('\n')
@@ -128,8 +145,10 @@ export async function generateLinkDiagnosisContent(
   const basePrompt = architecture === 'RISK_DIAGNOSIS' ? PROMPT_RISK : PROMPT_BLOCKER
   const codes = architecture === 'RISK_DIAGNOSIS' ? ARCHETYPE_CODES_RISK : ARCHETYPE_CODES_BLOCKER
 
-  const prompt = `${basePrompt}
+  const blocksSection = blocks ? `\n\n${formatBlocksContext(blocks)}\n` : ''
 
+  const prompt = `${basePrompt}
+${blocksSection}
 ---
 
 TEMA DO QUIZ: ${theme}
