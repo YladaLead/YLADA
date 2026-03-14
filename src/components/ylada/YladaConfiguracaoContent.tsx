@@ -157,150 +157,181 @@ export default function YladaConfiguracaoContent({ areaCodigo, areaLabel }: Ylad
     }
   }
 
+  const iniciais = (perfil.nome || perfil.email || '?').trim().slice(0, 2).toUpperCase()
+
   if (carregando) {
     return (
       <div className="flex items-center justify-center py-12">
-        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600" />
+        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-indigo-600" />
       </div>
     )
   }
 
   return (
-    <div className="space-y-6">
+    <div className="max-w-[720px] space-y-8">
       <div>
-        <h1 className="text-xl font-bold text-gray-900 mb-2">Configuração</h1>
-        <p className="text-gray-600">
-          Preferências e dados da sua conta em {areaLabel}.
+        <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-1">Configurações da conta</h1>
+        <p className="text-gray-600 text-sm sm:text-base">
+          Gerencie suas informações e preferências dentro do YLADA.
         </p>
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">Informações do perfil</h2>
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Nome completo</label>
-            <input
-              type="text"
-              value={perfil.nome}
-              onChange={(e) => setPerfil({ ...perfil, nome: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
-            <input
-              type="email"
-              value={perfil.email}
-              readOnly
-              className="w-full px-4 py-2 border border-gray-200 rounded-lg bg-gray-50 text-gray-600"
-              title="O email não pode ser alterado aqui"
-            />
-            <p className="text-xs text-gray-500 mt-1">O email é usado para login e não pode ser alterado nesta tela.</p>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Telefone / WhatsApp</label>
-            <PhoneInputWithCountry
-              value={perfil.whatsapp || perfil.telefone?.replace(/\D/g, '') || ''}
-              onChange={(phone, countryCode) => {
-                setPerfil({
-                  ...perfil,
-                  telefone: phone,
-                  whatsapp: phone.replace(/\D/g, ''),
-                  countryCode,
-                })
-              }}
-              defaultCountryCode={perfil.countryCode}
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Bio (opcional)</label>
-            <textarea
-              value={perfil.bio}
-              onChange={(e) => setPerfil({ ...perfil, bio: e.target.value })}
-              rows={3}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="Breve descrição profissional"
-            />
-          </div>
-          {erro && (
-            <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
-              {erro}
+      {/* Perfil profissional — informações usadas pelo Noel */}
+      <section className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <div className="px-6 sm:px-8 py-5 border-b border-gray-100">
+          <div className="flex items-center gap-4">
+            <div
+              className="flex-shrink-0 w-12 h-12 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-lg font-semibold"
+              aria-hidden
+            >
+              {iniciais}
             </div>
-          )}
-          {salvoComSucesso && (
-            <div className="p-3 bg-green-50 border border-green-200 rounded-lg text-sm text-green-700">
-              Perfil salvo com sucesso!
+            <div>
+              <h2 className="text-lg font-semibold text-gray-900">{perfil.nome || 'Seu nome'}</h2>
+              <p className="text-sm text-gray-500">{perfil.email}</p>
             </div>
-          )}
-          <button
-            onClick={salvarPerfil}
-            disabled={salvando}
-            className="px-6 py-2.5 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-          >
-            {salvando ? (
-              <>
-                <span className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" />
-                Salvando...
-              </>
-            ) : (
-              <>Salvar alterações</>
-            )}
-          </button>
+          </div>
         </div>
-      </div>
+        <div className="p-6 sm:p-8">
+          <p className="text-sm text-gray-600 mb-6">
+            Essas informações ajudam o Noel a personalizar diagnósticos e estratégias.
+          </p>
+          <div className="space-y-5">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">Nome completo</label>
+              <input
+                type="text"
+                value={perfil.nome}
+                onChange={(e) => setPerfil({ ...perfil, nome: e.target.value })}
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">Email</label>
+              <input
+                type="email"
+                value={perfil.email}
+                readOnly
+                className="w-full px-4 py-2.5 border border-gray-200 rounded-lg bg-gray-50 text-gray-600"
+                title="O email não pode ser alterado aqui"
+              />
+              <p className="text-xs text-gray-500 mt-1">Usado para login. Não pode ser alterado nesta tela.</p>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">Telefone / WhatsApp profissional</label>
+              <PhoneInputWithCountry
+                value={perfil.whatsapp || perfil.telefone?.replace(/\D/g, '') || ''}
+                onChange={(phone, countryCode) => {
+                  setPerfil({
+                    ...perfil,
+                    telefone: phone,
+                    whatsapp: phone.replace(/\D/g, ''),
+                    countryCode,
+                  })
+                }}
+                defaultCountryCode={perfil.countryCode}
+              />
+              <p className="text-xs text-gray-500 mt-1">Este número pode ser usado nos botões de contato dos diagnósticos.</p>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">Descrição profissional (opcional)</label>
+              <textarea
+                value={perfil.bio}
+                onChange={(e) => setPerfil({ ...perfil, bio: e.target.value })}
+                rows={3}
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                placeholder="Ex.: especialista em estética facial, pós-graduada em..."
+              />
+              <p className="text-xs text-gray-500 mt-1">Essa descrição pode aparecer em diagnósticos ou conversas com clientes.</p>
+            </div>
+            {erro && (
+              <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
+                {erro}
+              </div>
+            )}
+            {salvoComSucesso && (
+              <div className="p-3 bg-green-50 border border-green-200 rounded-lg text-sm text-green-700 flex items-center gap-2">
+                <span aria-hidden>✔</span>
+                Perfil atualizado com sucesso.
+              </div>
+            )}
+            <button
+              onClick={salvarPerfil}
+              disabled={salvando}
+              className="px-6 py-2.5 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            >
+              {salvando ? (
+                <>
+                  <span className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" />
+                  Salvando...
+                </>
+              ) : (
+                'Salvar perfil'
+              )}
+            </button>
+          </div>
+        </div>
+      </section>
 
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">Alterar senha</h2>
-        <div className="space-y-4">
+      {/* Segurança da conta */}
+      <section className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 sm:p-8">
+        <h2 className="text-lg font-semibold text-gray-900 mb-1">Segurança da conta</h2>
+        <p className="text-sm text-gray-600 mb-6">
+          Atualize sua senha para manter sua conta segura.
+        </p>
+        <div className="space-y-5">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Senha atual</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">Senha atual</label>
             <div className="relative">
               <input
                 type={showSenhaAtual ? 'text' : 'password'}
                 value={senhaAtual}
                 onChange={(e) => setSenhaAtual(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 pr-10"
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 pr-10"
               />
               <button
                 type="button"
                 onClick={() => setShowSenhaAtual(!showSenhaAtual)}
                 className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                aria-label={showSenhaAtual ? 'Ocultar senha' : 'Mostrar senha'}
               >
                 {showSenhaAtual ? '🙈' : '👁'}
               </button>
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Nova senha</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">Nova senha</label>
             <div className="relative">
               <input
                 type={showNovaSenha ? 'text' : 'password'}
                 value={novaSenha}
                 onChange={(e) => setNovaSenha(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 pr-10"
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 pr-10"
               />
               <button
                 type="button"
                 onClick={() => setShowNovaSenha(!showNovaSenha)}
                 className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                aria-label={showNovaSenha ? 'Ocultar senha' : 'Mostrar senha'}
               >
                 {showNovaSenha ? '🙈' : '👁'}
               </button>
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Confirmar nova senha</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">Confirmar nova senha</label>
             <div className="relative">
               <input
                 type={showConfirmarSenha ? 'text' : 'password'}
                 value={confirmarSenha}
                 onChange={(e) => setConfirmarSenha(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 pr-10"
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 pr-10"
               />
               <button
                 type="button"
                 onClick={() => setShowConfirmarSenha(!showConfirmarSenha)}
                 className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                aria-label={showConfirmarSenha ? 'Ocultar senha' : 'Mostrar senha'}
               >
                 {showConfirmarSenha ? '🙈' : '👁'}
               </button>
@@ -312,8 +343,9 @@ export default function YladaConfiguracaoContent({ areaCodigo, areaLabel }: Ylad
             </div>
           )}
           {sucessoSenha && (
-            <div className="p-3 bg-green-50 border border-green-200 rounded-lg text-sm text-green-700">
-              Senha alterada! Você será deslogado para fazer login com a nova senha.
+            <div className="p-3 bg-green-50 border border-green-200 rounded-lg text-sm text-green-700 flex items-center gap-2">
+              <span aria-hidden>✔</span>
+              Senha alterada. Você será deslogado para fazer login com a nova senha.
             </div>
           )}
           <button
@@ -327,19 +359,30 @@ export default function YladaConfiguracaoContent({ areaCodigo, areaLabel }: Ylad
                 Alterando...
               </>
             ) : (
-              <>Alterar senha</>
+              'Alterar senha'
             )}
           </button>
         </div>
-      </div>
+      </section>
 
-      <p className="text-sm text-gray-500">
-        Para editar seu <strong>perfil empresarial</strong> (informações para o Noel e diagnósticos), acesse{' '}
-        <Link href={`${prefix}/perfil-empresarial`} className="text-blue-600 hover:underline">
-          Perfil
-        </Link>
-        .
-      </p>
+      {/* Conta */}
+      <section className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 sm:p-8">
+        <h2 className="text-lg font-semibold text-gray-900 mb-1">Conta</h2>
+        <p className="text-sm text-gray-600 mb-4">
+          Para editar informações estratégicas usadas pelo Noel e pelos diagnósticos, acesse a área{' '}
+          <Link href={`${prefix}/perfil-empresarial`} className="text-indigo-600 hover:underline font-medium">
+            Perfil
+          </Link>
+          .
+        </p>
+        <button
+          type="button"
+          onClick={() => signOut()}
+          className="px-4 py-2 text-sm font-medium text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 hover:text-gray-900"
+        >
+          Sair da conta
+        </button>
+      </section>
     </div>
   )
 }

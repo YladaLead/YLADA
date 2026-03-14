@@ -113,7 +113,7 @@ export const PROFILE_TYPE_LABELS: Record<ProfileType, string> = {
 
 /** Rótulo da pergunta do segundo campo (área principal vs o que vende) conforme tipo. */
 export const PROFESSION_FIELD_LABEL_BY_TYPE: Record<ProfileType, string> = {
-  liberal: 'Qual é sua área principal?',
+  liberal: 'Qual é o seu principal tipo de atendimento?',
   vendas: 'O que você vende principalmente?',
 }
 
@@ -159,8 +159,8 @@ export const PROFESSION_HEADER: Partial<Record<ProfessionCode, ProfessionHeaderC
     subtitle: 'Contexto da sua prática e modelo de atuação.',
   },
   estetica: {
-    title: 'Perfil estratégico para profissionais de estética',
-    subtitle: 'Estrutura do seu atendimento.',
+    title: 'Configure seu perfil estratégico',
+    subtitle: 'Quanto melhor o Noel entender seu trabalho, melhores serão as estratégias que ele poderá sugerir.',
   },
   odonto: {
     title: 'Perfil estratégico para dentistas',
@@ -233,6 +233,8 @@ export type StepCopyEntry = {
   reinforcement?: string
   /** Texto após "Etapa X de Y — " no topo. */
   stepHeaderPart?: string
+  /** Rótulo do botão "Avançar" nesta etapa (ex.: "Continuar para estratégias da minha área"). */
+  nextStepButtonLabel?: string
 }
 
 /** Título e descrição do step por profissão (stepId -> profession -> copy). Fallback: step.title/description. */
@@ -245,10 +247,11 @@ export const STEP_COPY_BY_PROFESSION: Record<string, Partial<Record<ProfessionCo
       reinforcement: 'Isso ajudará o Noel a orientar você com foco real em posicionamento e agenda.',
     },
     estetica: {
-      stepHeaderPart: 'Estrutura do seu atendimento',
+      stepHeaderPart: 'Perfil profissional',
       title: 'Como está estruturado seu atendimento estético hoje?',
-      description: 'Vamos entender seu foco principal para que as estratégias sejam direcionadas ao seu tipo de serviço.',
-      reinforcement: 'Isso ajuda o Noel a trabalhar estratégias de agenda e recorrência específicas para o seu nicho.',
+      description: 'O Noel usa essas informações para criar estratégias de agenda, captação de clientes e recorrência adaptadas ao seu tipo de estética.',
+      reinforcement: 'Uma esteticista facial autônoma precisa de estratégias diferentes de uma clínica com equipe. O Noel ajusta as recomendações automaticamente.',
+      nextStepButtonLabel: 'Continuar para estratégias da minha área',
     },
     odonto: {
       stepHeaderPart: 'Estrutura do consultório',
@@ -396,11 +399,11 @@ export const FIELD_LABELS_BY_PROFESSION: Partial<Record<ProfessionCode, Record<s
     observacoes: 'Algo mais que o Noel deve saber?',
   },
   estetica: {
-    area_estetica: 'Qual é sua área principal na estética?',
-    estetica_tipo_atuacao: 'Você atua como',
-    category: 'Qual é sua área principal na estética?',
+    area_estetica: 'Qual é o seu principal tipo de atendimento na estética?',
+    estetica_tipo_atuacao: 'Como você trabalha hoje?',
+    category: 'Qual é o seu principal tipo de atendimento na estética?',
     sub_category: 'Subárea ou nicho (opcional)',
-    tempo_atuacao_anos: 'Há quantos anos você atua na área?',
+    tempo_atuacao_anos: 'Há quanto tempo você trabalha com estética?',
     dor_principal: 'O que mais está travando agora?',
     prioridade_atual: 'O que você quer destravar primeiro?',
     fase_negocio: 'Fase do seu negócio',

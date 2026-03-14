@@ -204,22 +204,23 @@ export const EQUIPE_OPERACIONAL_OPTIONS = [
   { value: 'equipe', label: 'Tenho equipe' },
 ] as const
 
-/** Estética: área principal. */
+/** Estética: área principal (tipo de atendimento). */
 export const AREA_ESTETICA_OPTIONS = [
-  { value: 'facial', label: 'Facial' },
-  { value: 'corporal', label: 'Corporal' },
-  { value: 'capilar', label: 'Capilar' },
-  { value: 'harmonizacao', label: 'Harmonização' },
-  { value: 'depilacao_laser', label: 'Depilação/Laser' },
+  { value: 'facial', label: 'Estética facial' },
+  { value: 'corporal', label: 'Estética corporal' },
+  { value: 'depilacao_laser', label: 'Depilação / laser' },
+  { value: 'harmonizacao', label: 'Harmonização facial' },
+  { value: 'capilar', label: 'Capilar / tricologia' },
+  { value: 'integrativa', label: 'Estética integrativa' },
   { value: 'outro', label: 'Outro' },
 ] as const
 
-/** Estética: você atua como. */
+/** Estética: como você trabalha hoje. */
 export const ESTETICA_TIPO_ATUACAO_OPTIONS = [
   { value: 'autonoma', label: 'Autônoma' },
-  { value: 'clinica_propria', label: 'Clínica própria' },
-  { value: 'dentro_salao', label: 'Dentro de salão' },
-  { value: 'equipe_colaboradora', label: 'Equipe/colaboradora' },
+  { value: 'clinica_propria', label: 'Dona de clínica' },
+  { value: 'dentro_salao', label: 'Profissional dentro de salão' },
+  { value: 'equipe_colaboradora', label: 'Profissional em equipe' },
 ] as const
 
 /** Odonto: você atende. */

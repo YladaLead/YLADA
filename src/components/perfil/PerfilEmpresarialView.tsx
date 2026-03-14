@@ -34,6 +34,26 @@ import {
   PROFILE_TYPE_BY_PROFESSION,
 } from '@/config/ylada-profile-flows'
 import { getTemasForProfession } from '@/config/ylada-temas'
+import { getStrategicProfileEstetica, type StrategicProfileEstetica } from '@/lib/strategic-profile-estetica'
+
+/** Micro-feedback do Noel ao selecionar opções no contexto estética. */
+const NOEL_FEEDBACK_ESTETICA: Record<string, Record<string, string>> = {
+  area_estetica: {
+    facial: 'Estética facial costuma ter alta recorrência de clientes. Depois vamos estruturar estratégias para fidelização.',
+    corporal: 'Estética corporal combina bem com pacotes e recorrência. O Noel vai sugerir diagnósticos alinhados.',
+    harmonizacao: 'Harmonização trabalha bem com posicionamento de autoridade e poucos clientes de alto ticket.',
+    depilacao_laser: 'Depilação e laser têm boa recorrência. Estratégias de lembrete e remarcação fazem diferença.',
+    capilar: 'Capilar e tricologia geram acompanhamento contínuo. O Noel pode ajudar com funis de avaliação.',
+    integrativa: 'Estética integrativa permite posicionamento amplo. Vamos direcionar estratégias ao seu mix de serviços.',
+    outro: 'Com "Outro", o Noel vai se basear no resto do perfil para sugerir as melhores estratégias.',
+  },
+  estetica_tipo_atuacao: {
+    autonoma: 'Profissionais autônomas geralmente dependem mais de indicação e agenda recorrente. O Noel vai priorizar isso.',
+    clinica_propria: 'Dona de clínica: estratégias de aquisição constante, posicionamento premium e funil de avaliação.',
+    dentro_salao: 'Profissional em salão: indicação e organização da agenda costumam ser os maiores ganhos.',
+    equipe_colaboradora: 'Em equipe: o Noel pode ajudar com fluxo de clientes e estratégias para o espaço.',
+  },
+}
 
 interface PerfilEmpresarialViewProps {
   areaCodigo: string
@@ -62,6 +82,9 @@ export default function PerfilEmpresarialView({ areaCodigo, areaLabel }: PerfilE
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
   /** Step do wizard: 0 = Área de atuação, 1..n = steps do flow. */
   const [stepIndex, setStepIndex] = useState(0)
+  /** Estética: após preencher contexto, mostrar "Noel analisando" e depois "Perfil identificado". */
+  const [strategicProfilePhase, setStrategicProfilePhase] = useState<'analyzing' | 'result' | null>(null)
+  const [detectedProfile, setDetectedProfile] = useState<StrategicProfileEstetica | null>(null)
 
   const flow: ProfileFlowConfig | null =
     form.profile_type && form.profession
@@ -102,6 +125,18 @@ export default function PerfilEmpresarialView({ areaCodigo, areaLabel }: PerfilE
   useEffect(() => {
     loadProfile()
   }, [loadProfile])
+
+  useEffect(() => {
+    if (strategicProfilePhase !== 'analyzing') return
+    const t = setTimeout(() => {
+      const area = form.area_specific?.area_estetica as string | undefined
+      const tipo = form.area_specific?.estetica_tipo_atuacao as string | undefined
+      const anos = form.tempo_atuacao_anos
+      setDetectedProfile(getStrategicProfileEstetica(area, tipo, anos))
+      setStrategicProfilePhase('result')
+    }, 2000)
+    return () => clearTimeout(t)
+  }, [strategicProfilePhase, form.area_specific?.area_estetica, form.area_specific?.estetica_tipo_atuacao, form.tempo_atuacao_anos])
 
   const update = (updates: Partial<YladaProfileFormData>) => setForm((prev) => ({ ...prev, ...updates }))
   const updateAreaSpec = (key: string, value: unknown) =>
@@ -202,7 +237,7 @@ export default function PerfilEmpresarialView({ areaCodigo, areaLabel }: PerfilE
   if (onlyIntro) {
     return (
       <YladaAreaShell areaCodigo={areaCodigo} areaLabel={areaLabel}>
-        <div className="max-w-2xl mx-auto space-y-6">
+        <div className="max-w-3xl mx-auto space-y-6">
           {/* Card de boas-vindas */}
           <div className="rounded-xl bg-gradient-to-br from-indigo-50 to-white border border-indigo-100 p-6 sm:p-8">
             <div className="flex items-start gap-4">
@@ -210,12 +245,20 @@ export default function PerfilEmpresarialView({ areaCodigo, areaLabel }: PerfilE
                 👤
               </div>
               <div>
-                <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-1">Perfil empresarial</h1>
-                <p className="text-gray-600 text-sm sm:text-base">
-                  Preencha seu perfil para o Noel personalizar as orientações, os diagnósticos e as sugestões para o seu tipo de negócio.
+                <p className="text-indigo-700 text-sm font-medium mb-2">
+                  Quanto melhor o Noel entender seu trabalho, melhores serão as estratégias que ele poderá sugerir.
                 </p>
-                <p className="text-gray-500 text-xs sm:text-sm mt-2">
-                  Comece escolhendo sua área de atuação abaixo — em poucos passos você termina.
+                <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-1">Configure seu perfil</h1>
+                <p className="text-gray-600 text-sm sm:text-base">
+                  Essas informações ajudam o Noel a gerar estratégias específicas para o seu tipo de atendimento, agenda e perfil de clientes.
+                </p>
+                <p className="text-gray-500 text-xs sm:text-sm mt-2 flex items-center gap-2">
+                  <span>Configuração do perfil</span>
+                  <span className="text-indigo-600">·</span>
+                  <span>Leva menos de 1 minuto</span>
+                </p>
+                <p className="text-xs text-gray-400 mt-3">
+                  Mais de 3.200 profissionais já configuraram seu perfil estratégico no YLADA.
                 </p>
               </div>
             </div>
@@ -230,11 +273,11 @@ export default function PerfilEmpresarialView({ areaCodigo, areaLabel }: PerfilE
           )}
 
           <section className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-            <div className="bg-gray-50 border-b border-gray-200 px-5 py-4">
-              <h2 className="text-sm font-semibold text-gray-800">Área de atuação</h2>
-              <p className="text-xs text-gray-500 mt-0.5">Isso ajuda o Noel a adaptar as perguntas e as estratégias ao seu negócio.</p>
+            <div className="bg-gray-50 border-b border-gray-200 px-6 sm:px-8 py-5">
+              <h2 className="text-base font-semibold text-gray-800">Área de atuação</h2>
+              <p className="text-sm text-gray-500 mt-1">O Noel usa essas informações para criar estratégias de agenda, captação e recorrência adaptadas ao seu tipo de atendimento.</p>
             </div>
-            <div className="p-5 sm:p-6 space-y-5">
+            <div className="p-6 sm:p-8 space-y-6">
               <label className="block">
                 <span className="text-sm font-medium text-gray-700">Você atua como</span>
                 <select
@@ -279,14 +322,14 @@ export default function PerfilEmpresarialView({ areaCodigo, areaLabel }: PerfilE
                 </label>
               )}
             </div>
-            <div className="px-5 sm:px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-end">
+            <div className="px-6 sm:px-8 py-5 bg-gray-50 border-t border-gray-200 flex justify-end">
               <button
                 type="button"
                 onClick={() => setStepIndex(1)}
                 disabled={!form.profile_type || !form.profession}
                 className="px-5 py-2.5 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
-                Avançar →
+                Continuar e definir minha área →
               </button>
             </div>
           </section>
@@ -311,33 +354,63 @@ export default function PerfilEmpresarialView({ areaCodigo, areaLabel }: PerfilE
         ? getStepCopyForProfession(currentStep.id, profession, { title: currentStep.title, description: currentStep.description })
         : null
 
+    const isEsteticaContextoStep = profession === 'estetica' && currentStep?.id === 'contexto'
+    const showStrategicProfileDiscovery =
+      profession === 'estetica' && stepIndex === 1 && (strategicProfilePhase === 'analyzing' || strategicProfilePhase === 'result')
+
     return (
       <YladaAreaShell areaCodigo={areaCodigo} areaLabel={areaLabel}>
-        <div className="max-w-2xl space-y-6">
+        <div className="max-w-3xl space-y-6">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-xl font-bold text-gray-900 mb-2">
+              <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">
                 {headerCopy?.title ?? 'Perfil empresarial'}
               </h1>
               {headerCopy?.subtitle && (
                 <p className="text-gray-600 text-sm mb-1">{headerCopy.subtitle}</p>
               )}
-              <p className="text-gray-500 text-sm">
-                Etapa {stepIndex + 1} de {totalWizardSteps}
-                {currentStepCopy?.stepHeaderPart ? ` — ${currentStepCopy.stepHeaderPart}` : ''}
+              <p className="text-gray-500 text-sm flex items-center gap-2 mt-1">
+                <span>Etapa {stepIndex + 1} de {totalWizardSteps}</span>
+                {currentStepCopy?.stepHeaderPart && (
+                  <>
+                    <span className="text-gray-300">—</span>
+                    <span>{currentStepCopy.stepHeaderPart}</span>
+                  </>
+                )}
+                {stepIndex === 1 && (
+                  <>
+                    <span className="text-indigo-600">·</span>
+                    <span className="text-indigo-600">Leva menos de 1 minuto</span>
+                  </>
+                )}
               </p>
-              {identityCopy && stepIndex > 0 && (
+              {totalWizardSteps > 1 && (
+                <div className="mt-2 flex gap-0.5" role="progressbar" aria-valuenow={stepIndex + 1} aria-valuemin={1} aria-valuemax={totalWizardSteps}>
+                  {Array.from({ length: totalWizardSteps }).map((_, i) => (
+                    <div
+                      key={i}
+                      className={`h-1 flex-1 rounded-full transition-colors ${i + 1 <= stepIndex + 1 ? 'bg-indigo-600' : 'bg-gray-200'}`}
+                    />
+                  ))}
+                </div>
+              )}
+              {identityCopy && stepIndex > 0 && !showStrategicProfileDiscovery && (
                 <p className="text-xs text-indigo-700 mt-2">
                   Você é: <strong>{identityCopy.youAre}</strong>
                   {' · '}
                   Objetivo: {identityCopy.objective}
                 </p>
               )}
+              {stepIndex === 1 && profession === 'estetica' && !showStrategicProfileDiscovery && (
+                <p className="text-xs text-gray-400 mt-2">
+                  Mais de 3.200 profissionais já configuraram seu perfil estratégico no YLADA.
+                </p>
+              )}
             </div>
-            {stepIndex > 0 && (
+            {stepIndex > 0 && !showStrategicProfileDiscovery && (
               <button
                 type="button"
-                onClick={() => setStepIndex(0)}
+                onClick={() => { setStrategicProfilePhase(null); setDetectedProfile(null); setStepIndex(0) }}
                 className="text-sm text-indigo-600 hover:underline"
               >
                 Alterar área de atuação
@@ -352,6 +425,48 @@ export default function PerfilEmpresarialView({ areaCodigo, areaLabel }: PerfilE
             </div>
           )}
 
+          {/* Estética: tela "Noel está analisando" ou "Perfil estratégico identificado" */}
+          {showStrategicProfileDiscovery && (
+            <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden p-8 sm:p-10">
+              {strategicProfilePhase === 'analyzing' && (
+                <div className="text-center py-8">
+                  <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-indigo-100 text-indigo-600 mb-4 animate-pulse" aria-hidden>
+                    💡
+                  </div>
+                  <p className="text-lg font-medium text-gray-900">O Noel está analisando seu perfil...</p>
+                  <p className="text-sm text-gray-500 mt-1">Em instantes você verá seu perfil estratégico.</p>
+                </div>
+              )}
+              {strategicProfilePhase === 'result' && detectedProfile && (
+                <div className="space-y-6">
+                  <div className="text-center sm:text-left">
+                    <p className="text-sm font-medium text-indigo-600 mb-1">Perfil estratégico identificado</p>
+                    <h2 className="text-xl sm:text-2xl font-bold text-gray-900">{detectedProfile.name}</h2>
+                  </div>
+                  <p className="text-gray-600 text-sm">
+                    Profissionais com esse perfil costumam crescer mais quando focam em:
+                  </p>
+                  <ul className="space-y-2">
+                    {detectedProfile.focus.map((item, i) => (
+                      <li key={i} className="flex items-center gap-2 text-sm text-gray-700">
+                        <span className="flex-shrink-0 w-5 h-5 rounded-full bg-green-100 text-green-600 flex items-center justify-center text-xs font-medium">✓</span>
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                  <button
+                    type="button"
+                    onClick={() => { setStrategicProfilePhase(null); setDetectedProfile(null); setStepIndex(2) }}
+                    className="w-full sm:w-auto px-6 py-3 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors"
+                  >
+                    Ver estratégias para meu perfil →
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+
+          {!showStrategicProfileDiscovery && (
           <form onSubmit={handleSubmit} className="space-y-6">
             {stepIndex === 0 ? (
               <section className="bg-white rounded-lg border border-gray-200 p-6">
@@ -408,15 +523,23 @@ export default function PerfilEmpresarialView({ areaCodigo, areaLabel }: PerfilE
                   { title: currentStep.title, description: currentStep.description }
                 )
                 return (
-                <section className="bg-white rounded-lg border border-gray-200 p-6">
-                  <h2 className="text-sm font-semibold text-gray-700 mb-1">{stepCopy.title}</h2>
+                <section className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 sm:p-8">
+                  <h2 className="text-base font-semibold text-gray-800 mb-1">{stepCopy.title}</h2>
                   {stepCopy.description && (
-                    <p className="text-xs text-gray-500 mb-2">{stepCopy.description}</p>
+                    <p className="text-sm text-gray-500 mb-3">{stepCopy.description}</p>
+                  )}
+                  {isEsteticaContextoStep && (
+                    <div className="mb-4 p-3 rounded-lg bg-amber-50 border border-amber-100">
+                      <p className="text-xs font-medium text-amber-800 mb-1">💡 Exemplo de como isso ajuda o Noel</p>
+                      <p className="text-xs text-amber-700">
+                        Uma esteticista facial autônoma precisa de estratégias diferentes de uma clínica com equipe. O Noel usa essas informações para ajustar recomendações automaticamente.
+                      </p>
+                    </div>
                   )}
                   {stepCopy.microcopy && (
                     <p className="text-xs text-indigo-600 mb-4">{stepCopy.microcopy}</p>
                   )}
-                  <div className="space-y-4">
+                  <div className="space-y-6">
                     {currentStep.fields.map((field) => {
                       const label = getFieldLabelForProfession(
                         field.key,
@@ -426,6 +549,40 @@ export default function PerfilEmpresarialView({ areaCodigo, areaLabel }: PerfilE
                       const placeholder = getFieldPlaceholderForProfession(field.key, profession)
                       const value = getFieldValue(form, field)
                       const options = field.options ?? getOptionsForProfileField(field.key, form.profile_type || null, form.profession || null)
+                      const isEsteticaCardField = isEsteticaContextoStep && (field.key === 'area_estetica' || field.key === 'estetica_tipo_atuacao')
+                      const noelFeedback = isEsteticaCardField && typeof value === 'string' && value
+                        ? NOEL_FEEDBACK_ESTETICA[field.key]?.[value]
+                        : null
+
+                      if (isEsteticaCardField && field.type === 'select') {
+                        const currentVal = typeof value === 'string' ? value : ''
+                        return (
+                          <div key={field.key} className="space-y-2">
+                            <span className="text-sm font-medium text-gray-700 block">{label}</span>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                              {options.map((o) => (
+                                <button
+                                  key={o.value}
+                                  type="button"
+                                  onClick={() => setFieldValue(field, o.value)}
+                                  className={`text-left px-4 py-3 rounded-lg border-2 text-sm font-medium transition-colors ${
+                                    currentVal === o.value
+                                      ? 'border-indigo-500 bg-indigo-50 text-indigo-800'
+                                      : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300 hover:bg-gray-50'
+                                  }`}
+                                >
+                                  {o.label}
+                                </button>
+                              ))}
+                            </div>
+                            {noelFeedback && (
+                              <p className="text-xs text-indigo-700 bg-indigo-50 rounded-lg px-3 py-2 mt-2 border border-indigo-100">
+                                💡 <strong>Noel:</strong> {noelFeedback}
+                              </p>
+                            )}
+                          </div>
+                        )
+                      }
 
                       if (field.type === 'multiselect') {
                         const arr = Array.isArray(value) ? value : []
@@ -577,14 +734,22 @@ export default function PerfilEmpresarialView({ areaCodigo, areaLabel }: PerfilE
                 {!isLastStep ? (
                   <button
                     type="button"
-                    onClick={() => setStepIndex((i) => i + 1)}
+                    onClick={() => {
+                      if (isEsteticaContextoStep) {
+                        setStrategicProfilePhase('analyzing')
+                      } else {
+                        setStepIndex((i) => i + 1)
+                      }
+                    }}
                     className="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-md hover:bg-indigo-700"
                   >
-                    {nextStepCopy
-                      ? (nextStepCopy.title.length > 28
-                          ? 'Avançar para próxima etapa'
-                          : `Avançar para ${nextStepCopy.title}`)
-                      : 'Avançar'}
+                    {currentStepCopy?.nextStepButtonLabel
+                      ? currentStepCopy.nextStepButtonLabel
+                      : nextStepCopy
+                        ? (nextStepCopy.title.length > 28
+                            ? 'Avançar para próxima etapa'
+                            : `Avançar para ${nextStepCopy.title}`)
+                        : 'Avançar'}
                   </button>
                 ) : (
                   <button
@@ -598,6 +763,7 @@ export default function PerfilEmpresarialView({ areaCodigo, areaLabel }: PerfilE
               </div>
             </div>
           </form>
+          )}
         </div>
       </YladaAreaShell>
     )
