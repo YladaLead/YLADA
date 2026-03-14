@@ -269,6 +269,15 @@ function AdminDashboardContent() {
       color: 'bg-indigo-500'
     },
     {
+      id: 'ylada-behavioral-data',
+      title: 'Dados Comportamentais & Intenção',
+      description: 'Eventos, respostas por pergunta, padrões de intenção. Base para valuation e inteligência de mercado.',
+      icon: '📈',
+      link: '/admin/ylada/behavioral-data',
+      color: 'bg-violet-500',
+      destaque: true
+    },
+    {
       id: 'diagnosticos-links',
       title: 'Marketing – Biblioteca de diagnósticos',
       description: '54 páginas indexáveis: links para campanhas, anúncios e SEO',
@@ -465,8 +474,18 @@ function AdminDashboardContent() {
                   </td>
                 </tr>
                 <tr className="border-b border-gray-100">
-                  <td className="py-2 px-3 font-medium text-gray-900">Vendedor Nutra</td>
+                  <td className="py-2 px-3 font-medium text-gray-900">Vendas em gerais</td>
                   <td className="py-2 px-3 font-mono text-gray-800">demo.vendedor@ylada.app</td>
+                  <td className="py-2 px-3 font-mono text-gray-800">Demo@2025!</td>
+                  <td className="py-2 px-3">
+                    <a href="/pt/seller/login" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                      /pt/seller/login
+                    </a>
+                  </td>
+                </tr>
+                <tr className="border-b border-gray-100">
+                  <td className="py-2 px-3 font-medium text-gray-900">Nutra</td>
+                  <td className="py-2 px-3 font-mono text-gray-800">demo.nutra@ylada.app</td>
                   <td className="py-2 px-3 font-mono text-gray-800">Demo@2025!</td>
                   <td className="py-2 px-3">
                     <a href="/pt/nutra/login" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">

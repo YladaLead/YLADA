@@ -17,6 +17,9 @@ import { getAdaptiveDiagnosisIntro, getAdvancedCta } from '@/lib/ylada/adaptive-
 import { sanitizeThemeForPatient } from '@/lib/ylada/strategic-intro'
 import { inferArchitectureFromTitle } from '@/config/ylada-segments'
 import { translateDiagnosis } from '@/lib/translate-diagnosis'
+import { hasYladaProPlan } from '@/lib/subscription-helpers'
+import { FREEMIUM_LIMITS } from '@/config/freemium-limits'
+import { storeDiagnosisAnswers } from '@/lib/ylada/diagnosis-answers-store'
 
 const ARCHITECTURES: DiagnosisArchitecture[] = [
   'RISK_DIAGNOSIS',
@@ -149,13 +152,49 @@ export async function POST(
 
     const { data: link, error: linkError } = await supabaseAdmin
       .from('ylada_links')
-      .select('id, config_json')
+      .select('id, user_id, config_json')
       .eq('slug', slug.trim())
       .eq('status', 'active')
       .maybeSingle()
 
     if (linkError || !link) {
       return NextResponse.json({ success: false, error: 'Link não encontrado ou inativo' }, { status: 404 })
+    }
+
+    // Freemium: verificar limite de contatos WhatsApp mensais antes de processar (bloquear antes do custo de IA)
+    const ownerId = link.user_id as string | undefined
+    if (ownerId) {
+      const isPro = await hasYladaProPlan(ownerId)
+      if (!isPro) {
+        const now = new Date()
+        const firstDayOfMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)).toISOString()
+        const { data: ownerLinks } = await supabaseAdmin
+          .from('ylada_links')
+          .select('id')
+          .eq('user_id', ownerId)
+        const linkIds = (ownerLinks ?? []).map((l) => l.id)
+        if (linkIds.length > 0) {
+          const { count } = await supabaseAdmin
+            .from('ylada_diagnosis_metrics')
+            .select('*', { count: 'exact', head: true })
+            .in('link_id', linkIds)
+            .eq('clicked_whatsapp', true)
+            .gte('created_at', firstDayOfMonth)
+          const used = count ?? 0
+          if (used >= FREEMIUM_LIMITS.FREE_LIMIT_WHATSAPP_CLICKS_PER_MONTH) {
+            return NextResponse.json(
+              {
+                success: false,
+                limit_reached: true,
+                limit_type: 'whatsapp_clicks_monthly',
+                message:
+                  'Este diagnóstico atingiu o limite de 10 contatos no WhatsApp deste mês. Para continuar recebendo pessoas que te contactam, o profissional precisa ativar o plano profissional.',
+              },
+              { status: 403 }
+            )
+          }
+        }
+      }
     }
 
     const config = (link.config_json as Record<string, unknown>) ?? {}
@@ -191,6 +230,8 @@ export async function POST(
     if (!architecture || !ARCHITECTURES.includes(architecture as DiagnosisArchitecture)) {
       return NextResponse.json({ success: false, error: 'Arquitetura de diagnóstico não suportada' }, { status: 400 })
     }
+
+    const formFields = extractFormFieldsFromConfig(config)
 
     // Cache: v5 — whatsapp_prefill com perfume_usage (PERFUME_PROFILE)
     const answers_hash = hashAnswers(visitor_answers)
@@ -231,6 +272,17 @@ export async function POST(
         .select('id')
         .single()
       if (!metricsErr && metricsRow) {
+        storeDiagnosisAnswers({
+          metricsId: metricsRow.id,
+          linkId: link.id,
+          userId: link.user_id as string,
+          visitorAnswers,
+          segment: typeof metaRaw.segment_code === 'string' ? metaRaw.segment_code : undefined,
+          architecture,
+          theme: typeof metaRaw.theme_raw === 'string' ? metaRaw.theme_raw : undefined,
+          objective: typeof metaRaw.objective === 'string' ? metaRaw.objective : 'captar',
+          formFields,
+        }).catch((e) => console.warn('[ylada/links/[slug]/diagnosis] storeDiagnosisAnswers:', e))
         let finalCached = cachedDiag
         if (locale === 'en' || locale === 'es') {
           finalCached = await translateDiagnosis(cachedDiag, locale)
@@ -263,9 +315,6 @@ export async function POST(
 
     const flow_id = typeof metaRaw.flow_id === 'string' ? metaRaw.flow_id : null
     const objectiveMeta = typeof metaRaw.objective === 'string' ? metaRaw.objective : null
-
-    // FormFields: para PERFUME_PROFILE mapear índice→texto (form envia "0", motor espera "Floral")
-    const formFields = extractFormFieldsFromConfig(config)
 
     // Bloco 2: normalizar q1,q2... para chaves esperadas pelo motor
     const normalizedAnswers = normalizeVisitorAnswers(
@@ -424,6 +473,18 @@ export async function POST(
       console.error('[ylada/links/[slug]/diagnosis] insert metrics', insertError)
       return NextResponse.json({ success: false, error: insertError.message }, { status: 500 })
     }
+
+    storeDiagnosisAnswers({
+      metricsId: row.id,
+      linkId: link.id,
+      userId: link.user_id as string,
+      visitorAnswers,
+      segment: segment_code,
+      architecture,
+      theme: themeRaw ?? undefined,
+      objective: objectiveMeta ?? objective,
+      formFields,
+    }).catch((e) => console.warn('[ylada/links/[slug]/diagnosis] storeDiagnosisAnswers:', e))
 
     // Mensagem WhatsApp: Ficha Inteligente do Lead — resumo estruturado para o profissional receber contexto no WhatsApp
     let whatsappPrefill = diagnosis.whatsapp_prefill

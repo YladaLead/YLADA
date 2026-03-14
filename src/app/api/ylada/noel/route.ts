@@ -32,6 +32,7 @@ import {
 import { getNoelLibraryContextWithStrategies } from '@/lib/noel-wellness/noel-library-context'
 import { saveConversationDiagnosis } from '@/lib/noel-wellness/noel-conversation-diagnosis'
 import { getDiagnosisInsightsContext, FALLBACK_DIAGNOSTIC_ID_INSIGHTS } from '@/lib/noel-wellness/diagnosis-insights-context'
+import { getIntentInsightsContext } from '@/lib/noel-wellness/intent-insights-context'
 import {
   getLinksWithLowConversion,
   formatLinkPerformanceForNoel,
@@ -54,6 +55,9 @@ import {
   NOEL_LAYER4_PRIORITY_RULE,
 } from '@/lib/noel-wellness/prompt-layers'
 import OpenAI from 'openai'
+import { hasYladaProPlan } from '@/lib/subscription-helpers'
+import { getNoelUsageCount, incrementNoelUsage } from '@/lib/noel-usage-helpers'
+import { FREEMIUM_LIMITS } from '@/config/freemium-limits'
 
 type FormField = { id?: string; label?: string; type?: string; options?: string[] }
 
@@ -397,6 +401,24 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Mensagem é obrigatória.' }, { status: 400 })
     }
 
+    // Freemium: verificar limite de análises avançadas antes de chamar IA
+    const isPro = await hasYladaProPlan(user.id)
+    if (!isPro) {
+      const used = await getNoelUsageCount(user.id)
+      if (used >= FREEMIUM_LIMITS.FREE_LIMIT_NOEL_ADVANCED_ANALYSES_PER_MONTH) {
+        return NextResponse.json(
+          {
+            error: 'limit_reached',
+            limit_type: 'noel_advanced',
+            message:
+              'Você já utilizou as 10 análises estratégicas disponíveis no plano gratuito este mês.\n\n**O que você ganha com o Pro:** análises ilimitadas do Noel, diagnósticos ilimitados e contatos ilimitados no WhatsApp. Sem limite mensal.',
+            upgrade_url: '/pt/precos',
+          },
+          { status: 403 }
+        )
+      }
+    }
+
     const segmentKey = (segment ?? area) as string
     const validSegment = YLADA_SEGMENT_CODES.includes(segmentKey as any) ? segmentKey : 'ylada'
 
@@ -622,6 +644,7 @@ export async function POST(request: NextRequest) {
     let noelLibraryContext = ''
     let noelStrategies: Awaited<ReturnType<typeof getNoelLibraryContextWithStrategies>>['strategies'] = []
     let diagnosisInsightsText: string | null = null
+    let intentInsightsText: string | null = null
     let situationCodes: string[] = []
     let professionalProfileCodes: string[] = []
     let objectiveCodes: string[] = []
@@ -650,7 +673,10 @@ export async function POST(request: NextRequest) {
       noelLibraryContext = libResult.context
       noelStrategies = libResult.strategies
       const messageMentionsDiagnosis = /diagnóstico|diagnostico|meu resultado|resultado do diagnóstico|diagnóstico deu|deu curiosos|deu clientes|em desenvolvimento/i.test(message)
-      if (messageMentionsDiagnosis) diagnosisInsightsText = await getDiagnosisInsightsContext(FALLBACK_DIAGNOSTIC_ID_INSIGHTS)
+      if (messageMentionsDiagnosis) {
+        diagnosisInsightsText = await getDiagnosisInsightsContext(FALLBACK_DIAGNOSTIC_ID_INSIGHTS)
+        intentInsightsText = await getIntentInsightsContext()
+      }
     } catch (e) {
       console.warn('[/api/ylada/noel] biblioteca Noel (perfis/estratégias/insights):', e)
     }
@@ -747,7 +773,10 @@ export async function POST(request: NextRequest) {
     if (diagnosisInsightsText) {
       parts.push('\n' + diagnosisInsightsText + '\nUse esses insights para enriquecer sua resposta. Mantenha o foco em comunicação e qualificação (curiosos vs clientes).')
     }
-    if (detectedStrategicProfileText || detectedProfessionalProfileText || detectedObjectiveText || detectedFunnelStageText || noelMemoryText || strategyMapText || noelLibraryContext.trim() || diagnosisInsightsText) {
+    if (intentInsightsText) {
+      parts.push('\n' + intentInsightsText + '\nUse esses dados de intenção reais da plataforma para sugerir perguntas que geram mais respostas e diagnósticos que convertem mais.')
+    }
+    if (detectedStrategicProfileText || detectedProfessionalProfileText || detectedObjectiveText || detectedFunnelStageText || noelMemoryText || strategyMapText || noelLibraryContext.trim() || diagnosisInsightsText || intentInsightsText) {
       parts.push('\n' + NOEL_LAYER4_PRIORITY_RULE)
     }
     if (linksAtivosBlock) parts.push(linksAtivosBlock)
@@ -794,6 +823,11 @@ export async function POST(request: NextRequest) {
     const responseText =
       completion.choices[0]?.message?.content?.trim() ||
       'Desculpe, não consegui processar. Tente novamente.'
+
+    // Freemium: incrementar uso após resposta bem-sucedida
+    if (!isPro) {
+      incrementNoelUsage(user.id).catch((e) => console.warn('[/api/ylada/noel] incrementNoelUsage:', e))
+    }
 
     // Atualizar memória estratégica e mapa
     try {

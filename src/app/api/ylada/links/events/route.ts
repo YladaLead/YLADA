@@ -105,6 +105,19 @@ export async function POST(request: NextRequest) {
           .then(({ error: updateErr }) => {
             if (updateErr) console.error('[ylada/links/events] diagnosis_metrics update:', updateErr)
           })
+        // Evento comportamental para analytics/valuation
+        supabaseAdmin
+          .from('ylada_behavioral_events')
+          .insert({
+            event_type: 'lead_contact_clicked',
+            user_id: link.user_id,
+            link_id: link.id,
+            metrics_id: metricsId,
+            payload: { time_to_click_ms: timeToClickMs, diagnosis_read_time_ms: diagnosisReadTimeMs },
+          })
+          .then(({ error: e }) => {
+            if (e) console.warn('[ylada/links/events] behavioral event:', e.message)
+          })
       }
     }
 
