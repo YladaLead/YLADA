@@ -86,13 +86,13 @@ export default function NutraOfertaPage() {
               </button>
             </div>
             <div className="relative bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl p-4 text-center text-white border-2 border-blue-600 shadow-lg">
-              <div className="absolute -top-2.5 left-1/2 -translate-x-1/2 bg-amber-400 text-amber-900 text-xs font-bold px-2.5 py-1 rounded-full whitespace-nowrap">
+              <div className="absolute -top-2.5 left-1/2 -translate-x-1/2 bg-white/95 text-blue-700 text-xs font-bold px-2.5 py-1 rounded-full whitespace-nowrap shadow-sm">
                 ⭐ Mais escolhido
               </div>
               <p className="font-semibold mt-1">Anual</p>
               <p className="text-2xl font-bold mt-1">R$ 59<span className="text-sm font-normal text-white/90">/mês</span></p>
               <p className="text-sm text-white/90">(cobrança anual)</p>
-              <p className="text-amber-200 text-sm font-semibold mt-1">Economize mais de 35% no plano anual</p>
+              <p className="text-blue-100 text-sm font-semibold mt-1">Economize mais de 35% no plano anual</p>
               <button
                 type="button"
                 onClick={() => handleCheckout('annual')}

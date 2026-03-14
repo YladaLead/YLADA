@@ -580,7 +580,7 @@ export default function LoginForm({
     ? '/images/logo/coach-horizontal.png'
     : perfil === 'ylada'
     ? '/images/logo/ylada/horizontal/azul-claro/ylada-horizontal-azul-claro.png'
-    : perfil === 'nutra' || logoColor === 'laranja'
+    : (perfil === 'nutra' && logoColor === 'laranja') || logoColor === 'laranja'
     ? '/images/logo/ylada/horizontal/laranja/ylada-horizontal-laranja-14.png'
     : '/images/logo/ylada/horizontal/azul-claro/ylada-horizontal-azul-claro.png')
 
@@ -719,7 +719,7 @@ export default function LoginForm({
                 ? 'bg-green-600 hover:bg-green-700 active:bg-green-800'
                 : perfil === 'coach'
                 ? 'bg-purple-600 hover:bg-purple-700 active:bg-purple-800'
-                : perfil === 'nutra' || logoColor === 'laranja'
+                : (perfil === 'nutra' && logoColor === 'laranja') || logoColor === 'laranja'
                 ? 'bg-orange-600 hover:bg-orange-700 active:bg-orange-800'
                 : 'bg-blue-600 hover:bg-blue-700 active:bg-blue-800'
             } ${loading ? 'opacity-50 cursor-not-allowed' : 'shadow-md hover:shadow-lg transform hover:-translate-y-0.5'}`}

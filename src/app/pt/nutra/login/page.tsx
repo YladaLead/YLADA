@@ -5,7 +5,7 @@ export default function NutraLoginPage() {
     <LoginForm 
       perfil="nutra" 
       redirectPath="/pt/nutra/home"
-      logoColor="laranja"
+      logoColor="azul-claro"
     />
   )
 }

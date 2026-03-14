@@ -92,7 +92,7 @@ export default function NutraCheckoutPage() {
         <div className="container mx-auto px-6 lg:px-8 py-3 flex items-center justify-between">
           <Link href="/pt/nutra">
             <Image
-              src="/images/logo/ylada/horizontal/laranja/ylada-horizontal-laranja-14.png"
+              src="/images/logo/ylada/horizontal/azul-claro/ylada-horizontal-azul-claro-30.png"
               alt="YLADA Nutra"
               width={280}
               height={84}
@@ -103,7 +103,7 @@ export default function NutraCheckoutPage() {
           </Link>
           <button
             onClick={() => router.push('/pt/nutra')}
-            className="flex items-center gap-2 text-gray-600 hover:text-orange-600 transition-colors px-4 py-2 rounded-lg hover:bg-gray-50"
+            className="flex items-center gap-2 text-gray-600 hover:text-blue-600 transition-colors px-4 py-2 rounded-lg hover:bg-gray-50"
             aria-label="Voltar"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -141,25 +141,25 @@ export default function NutraCheckoutPage() {
                 type="button"
                 onClick={() => setPlanType('monthly')}
                 className={`p-4 rounded-xl border-2 text-left transition-all ${
-                  planType === 'monthly' ? 'border-orange-600 bg-orange-50' : 'border-gray-200 bg-white hover:border-gray-300'
+                  planType === 'monthly' ? 'border-blue-600 bg-blue-50' : 'border-gray-200 bg-white hover:border-gray-300'
                 }`}
               >
                 <h3 className="font-semibold text-gray-800">Plano Mensal</h3>
-                <p className="text-2xl font-bold text-orange-600 mt-1">R$ 97<span className="text-base font-normal text-gray-600">/mês</span></p>
+                <p className="text-2xl font-bold text-blue-600 mt-1">R$ 97<span className="text-base font-normal text-gray-600">/mês</span></p>
                 <p className="text-xs text-gray-600 mt-1">Cobrança mês a mês. Cancele quando quiser.</p>
               </button>
               <button
                 type="button"
                 onClick={() => setPlanType('annual')}
                 className={`p-4 rounded-xl border-2 text-left transition-all relative ${
-                  planType === 'annual' ? 'border-orange-600 bg-orange-50 ring-2 ring-orange-200' : 'border-gray-200 bg-white hover:border-gray-300'
+                  planType === 'annual' ? 'border-blue-600 bg-blue-50 ring-2 ring-blue-200' : 'border-gray-200 bg-white hover:border-gray-300'
                 }`}
               >
                 <span className="absolute -top-2 right-3 bg-green-600 text-white text-xs font-bold px-2 py-0.5 rounded-full shadow-sm">
                   RECOMENDADO
                 </span>
                 <h3 className="font-semibold text-gray-800">Plano Anual</h3>
-                <p className="text-2xl font-bold text-orange-600 mt-1">12× de R$ 59</p>
+                <p className="text-2xl font-bold text-blue-600 mt-1">12× de R$ 59</p>
                 <p className="text-xs text-gray-600 mt-1">Total: R$ 708/ano</p>
               </button>
             </div>
@@ -177,7 +177,7 @@ export default function NutraCheckoutPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="seu@email.com"
                 required
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
               <p className="text-xs text-gray-500 mt-2">
                 {user ? 'Seu e-mail será usado para o pagamento.' : 'Seu e-mail será usado para criar sua conta após o pagamento.'}
@@ -191,7 +191,7 @@ export default function NutraCheckoutPage() {
               if (!loading && (email || user?.email)) handleCheckout()
             }}
             disabled={loading || (!user && !email)}
-            className="w-full bg-orange-600 text-white py-4 rounded-xl font-bold text-lg hover:bg-orange-700 transition-all shadow-lg disabled:bg-orange-400 disabled:cursor-not-allowed"
+            className="w-full bg-blue-600 text-white py-4 rounded-xl font-bold text-lg hover:bg-blue-700 transition-all shadow-lg disabled:bg-blue-400 disabled:cursor-not-allowed"
           >
             {loading ? 'Processando...' : 'Continuar para Pagamento'}
           </button>
