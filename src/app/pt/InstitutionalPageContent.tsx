@@ -306,6 +306,55 @@ export default function InstitutionalPageContent() {
           </div>
         </section>
 
+        {/* Por que diagnósticos funcionam tão bem — logo após o problema */}
+        <section className="py-12 sm:py-16 bg-white">
+          <div className="max-w-4xl mx-auto">
+            <h2 className="text-xl sm:text-3xl font-bold text-gray-900 text-center mb-4">
+              Por que diagnósticos funcionam tão bem
+            </h2>
+            <p className="text-gray-600 text-center mb-4 max-w-2xl mx-auto">
+              Diagnósticos funcionam porque ativam três mecanismos psicológicos naturais.
+            </p>
+            <p className="text-gray-800 font-semibold text-center mb-10 max-w-xl mx-auto">
+              Formulários coletam respostas. Diagnósticos criam consciência. O YLADA foi criado para criar consciência do cliente antes da conversa.
+            </p>
+            <div className="grid sm:grid-cols-3 gap-6 mb-10">
+              <div className="bg-gray-50 rounded-xl p-6 border border-gray-100 text-center">
+                <span className="text-3xl mb-3 block" aria-hidden>🧠</span>
+                <h3 className="font-bold text-gray-900 mb-2">Auto-diagnóstico</h3>
+                <p className="text-gray-600 text-sm leading-relaxed">Quando alguém responde perguntas sobre o próprio problema, começa a refletir. Em vez de alguém explicar, a pessoa descobre sozinha. Isso cria mais clareza e abertura para a conversa.</p>
+              </div>
+              <div className="bg-gray-50 rounded-xl p-6 border border-gray-100 text-center">
+                <span className="text-3xl mb-3 block" aria-hidden>🎯</span>
+                <h3 className="font-bold text-gray-900 mb-2">Compromisso interno</h3>
+                <p className="text-gray-600 text-sm leading-relaxed">Ao responder, a pessoa reconhece sua situação. Quando alguém reconhece um problema, tende a querer agir para resolvê-lo. A conversa começa com muito mais interesse.</p>
+              </div>
+              <div className="bg-gray-50 rounded-xl p-6 border border-gray-100 text-center">
+                <span className="text-3xl mb-3 block" aria-hidden>👤</span>
+                <h3 className="font-bold text-gray-900 mb-2">Identidade</h3>
+                <p className="text-gray-600 text-sm leading-relaxed">O diagnóstico revela um perfil. As pessoas gostam de entender como estão hoje e como podem evoluir. Isso gera curiosidade e engajamento.</p>
+              </div>
+            </div>
+            <p className="text-gray-700 font-medium text-center mb-6">
+              Em vez de curiosos, o profissional conversa com pessoas mais preparadas. E conversas preparadas levam a decisões mais rápidas.
+            </p>
+            <div className="flex flex-col items-center gap-2 py-4 px-6 bg-gray-50 rounded-xl border border-gray-100 max-w-sm mx-auto mb-6">
+              <span className="text-sm font-semibold text-gray-800">Perguntas</span>
+              <span className="text-gray-400">↓</span>
+              <span className="text-sm font-semibold text-gray-800">Reflexão</span>
+              <span className="text-gray-400">↓</span>
+              <span className="text-sm font-semibold text-gray-800">Consciência do problema</span>
+              <span className="text-gray-400">↓</span>
+              <span className="text-sm font-semibold text-gray-800">Clareza</span>
+              <span className="text-gray-400">↓</span>
+              <span className="text-sm font-bold text-gray-900">Conversa melhor</span>
+            </div>
+            <p className="text-xl font-bold text-gray-900 text-center">
+              Boas conversas começam com boas perguntas.
+            </p>
+          </div>
+        </section>
+
         {/* 3b A metáfora médica */}
         <section className="py-12 sm:py-16 lg:py-20 bg-white">
           <div className="max-w-3xl mx-auto">
@@ -320,7 +369,10 @@ export default function InstitutionalPageContent() {
             </p>
             <p className="text-lg font-semibold text-gray-900 text-center">
               Antes do tratamento vem o diagnóstico.<br />
-              Antes da venda vem a conversa.
+              Antes da conversa vem o diagnóstico.
+            </p>
+            <p className="text-gray-600 text-center mt-4 text-sm">
+              YLADA ajuda profissionais a criar consciência do cliente antes da conversa.
             </p>
           </div>
         </section>
@@ -395,6 +447,80 @@ export default function InstitutionalPageContent() {
               <span className="text-sm font-semibold text-gray-800">Diagnóstico</span>
               <span className="text-gray-400">↓</span>
               <span className="text-sm font-semibold text-gray-800">Conversa</span>
+              <span className="text-gray-400">↓</span>
+              <span className="text-sm font-bold text-gray-900">Cliente</span>
+            </div>
+          </div>
+        </section>
+
+        {/* O efeito do auto-diagnóstico — aprofundamento (consistência + identidade) */}
+        <section className="bg-gray-50 py-12 sm:py-16 lg:py-20 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8">
+          <div className="max-w-3xl mx-auto">
+            <h2 className="text-xl sm:text-3xl font-bold text-gray-900 text-center mb-4">
+              O que acontece na mente de quem responde
+            </h2>
+            <p className="text-gray-700 text-center mb-10 leading-relaxed">
+              Quando a pessoa responde perguntas sobre o próprio problema, ela começa a construir a conclusão sozinha. E quando reconhece o problema, tende a querer agir — a conversa não começa com convencimento, começa com coerência interna.
+            </p>
+
+            <div className="space-y-8 mb-10">
+              <div className="bg-white rounded-xl p-6 border border-gray-200">
+                <h3 className="font-bold text-gray-900 mb-2">🧠 Auto-descoberta</h3>
+                <p className="text-gray-600 text-sm mb-3">Perguntas como &quot;As pessoas pedem preço antes de entender o valor?&quot; fazem o cérebro refletir: &quot;Talvez isso esteja acontecendo comigo.&quot; A conclusão nasce dentro da cabeça da pessoa — muito mais forte do que alguém dizer.</p>
+                <div className="flex flex-col items-center gap-1 text-sm text-gray-500">
+                  <span>Pergunta</span>
+                  <span>↓</span>
+                  <span>Reflexão</span>
+                  <span>↓</span>
+                  <span>Percepção do problema</span>
+                </div>
+              </div>
+              <div className="bg-white rounded-xl p-6 border border-gray-200">
+                <h3 className="font-bold text-gray-900 mb-2">🎯 Consistência</h3>
+                <p className="text-gray-600 text-sm mb-3">Quando a pessoa responde e &quot;assume&quot; um problema (mesmo que só para si), o cérebro cria um impulso: &quot;Se isso é verdade, preciso resolver.&quot; A conversa começa com muito mais interesse — menos resistência, mais abertura, decisões mais rápidas.</p>
+                <div className="flex flex-col items-center gap-1 text-sm text-gray-500">
+                  <span>Reconhecimento do problema</span>
+                  <span>↓</span>
+                  <span>Desejo de consistência</span>
+                  <span>↓</span>
+                  <span>Busca por solução</span>
+                </div>
+              </div>
+              <div className="bg-white rounded-xl p-6 border border-gray-200">
+                <h3 className="font-bold text-gray-900 mb-2">👤 Identidade</h3>
+                <p className="text-gray-600 text-sm mb-3">O diagnóstico revela um perfil (&quot;Explica demais&quot;, &quot;Atrai curiosos&quot;, &quot;Conversa que converte&quot;). As pessoas gostam de descobrir algo sobre si mesmas — e quando descobrem, tendem a compartilhar. Isso gera curiosidade e engajamento natural.</p>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div className="p-3 rounded-lg bg-red-50 border border-red-100">
+                    <p className="font-semibold text-gray-800 mb-1">Sem diagnóstico</p>
+                    <p className="text-gray-600">Confusão → explicação → tentativa de convencer</p>
+                  </div>
+                  <div className="p-3 rounded-lg bg-green-50 border border-green-100">
+                    <p className="font-semibold text-gray-800 mb-1">Com diagnóstico</p>
+                    <p className="text-gray-600">Clareza → conversa → decisão</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <p className="text-gray-700 text-center mb-4">
+              Diagnósticos não apenas coletam respostas. Eles ajudam as pessoas a entender quem são e o que precisam mudar.
+            </p>
+            <p className="text-xl font-bold text-gray-900 text-center mb-4">
+              Quando o cliente entende o problema, a conversa muda.
+            </p>
+            <p className="text-gray-600 text-center mb-6 text-sm">
+              O YLADA não é só um formulário — é uma forma de criar consciência do cliente antes da conversa. Quando o cliente entende o problema, a venda deixa de ser convencimento.
+            </p>
+            <div className="flex flex-col items-center gap-2 py-4 px-6 bg-white rounded-xl border border-gray-100">
+              <span className="text-sm font-semibold text-gray-800">Perguntas</span>
+              <span className="text-gray-400">↓</span>
+              <span className="text-sm font-semibold text-gray-800">Auto-reflexão</span>
+              <span className="text-gray-400">↓</span>
+              <span className="text-sm font-semibold text-gray-800">Diagnóstico / Perfil</span>
+              <span className="text-gray-400">↓</span>
+              <span className="text-sm font-semibold text-gray-800">Clareza</span>
+              <span className="text-gray-400">↓</span>
+              <span className="text-sm font-semibold text-gray-800">Conversa melhor</span>
               <span className="text-gray-400">↓</span>
               <span className="text-sm font-bold text-gray-900">Cliente</span>
             </div>

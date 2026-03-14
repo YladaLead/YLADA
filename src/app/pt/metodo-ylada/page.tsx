@@ -29,8 +29,11 @@ export default function MetodoYLADALandingPage() {
                 Hoje o marketing tenta convencer.<br />
                 A filosofia YLADA cria conversas com quem já quer entender o que você faz.
               </p>
-              <p className="text-base sm:text-lg text-gray-600 mb-10 max-w-2xl mx-auto leading-relaxed">
+              <p className="text-base sm:text-lg text-gray-600 mb-4 max-w-2xl mx-auto leading-relaxed">
                 A nova lógica de comunicação que transforma marketing em conversas com pessoas realmente interessadas.
+              </p>
+              <p className="text-base font-semibold text-gray-800 mb-10">
+                Antes da conversa vem o diagnóstico. YLADA foi criado para criar consciência do cliente antes da conversa.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link
@@ -179,6 +182,54 @@ export default function MetodoYLADALandingPage() {
               <p className="text-lg text-gray-800 font-medium leading-relaxed">
                 Isso faz com que curiosos se afastem e interessados se aproximem naturalmente.
               </p>
+            </div>
+          </div>
+        </section>
+
+        {/* Por que diagnósticos funcionam — três mecanismos */}
+        <section className="py-14 sm:py-16 bg-gray-50">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="max-w-3xl mx-auto">
+              <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4 text-center">
+                Por que diagnósticos funcionam tão bem
+              </h2>
+              <p className="text-gray-700 text-center mb-4 leading-relaxed">
+                Diagnósticos ativam três mecanismos psicológicos naturais: auto-diagnóstico, compromisso interno e identidade.
+              </p>
+              <p className="text-gray-800 font-medium text-center mb-8">
+                Formulários coletam respostas. Diagnósticos criam consciência.
+              </p>
+              <div className="grid sm:grid-cols-3 gap-4 mb-8">
+                <div className="bg-white rounded-xl p-5 border border-gray-200 text-center">
+                  <span className="text-2xl mb-2 block" aria-hidden>🧠</span>
+                  <p className="font-bold text-gray-900 text-sm mb-2">Auto-diagnóstico</p>
+                  <p className="text-gray-600 text-xs">A pessoa descobre o problema sozinha. Mais clareza e abertura para a conversa.</p>
+                </div>
+                <div className="bg-white rounded-xl p-5 border border-gray-200 text-center">
+                  <span className="text-2xl mb-2 block" aria-hidden>🎯</span>
+                  <p className="font-bold text-gray-900 text-sm mb-2">Compromisso interno</p>
+                  <p className="text-gray-600 text-xs">Quem reconhece um problema tende a querer resolver. A conversa começa com mais interesse.</p>
+                </div>
+                <div className="bg-white rounded-xl p-5 border border-gray-200 text-center">
+                  <span className="text-2xl mb-2 block" aria-hidden>👤</span>
+                  <p className="font-bold text-gray-900 text-sm mb-2">Identidade</p>
+                  <p className="text-gray-600 text-xs">O perfil revelado gera curiosidade e engajamento. As pessoas gostam de entender como estão.</p>
+                </div>
+              </div>
+              <p className="text-lg font-bold text-gray-900 text-center mb-4">
+                Quando o cliente entende o problema, a conversa muda.
+              </p>
+              <div className="flex flex-col items-center gap-2 py-4 px-6 bg-white rounded-xl border border-gray-100 max-w-xs mx-auto">
+                <span className="text-sm font-semibold text-gray-800">Perguntas</span>
+                <span className="text-gray-400">↓</span>
+                <span className="text-sm font-semibold text-gray-800">Reflexão</span>
+                <span className="text-gray-400">↓</span>
+                <span className="text-sm font-semibold text-gray-800">Diagnóstico / Perfil</span>
+                <span className="text-gray-400">↓</span>
+                <span className="text-sm font-semibold text-gray-800">Clareza</span>
+                <span className="text-gray-400">↓</span>
+                <span className="text-sm font-bold text-gray-900">Cliente</span>
+              </div>
             </div>
           </div>
         </section>
