@@ -18,19 +18,23 @@ export const ptTranslations: Translations = {
   },
   
   profile: {
-    title: 'Escolha seu perfil profissional',
-    subtitle: 'Descubra como o YLADA funciona especificamente para sua área de atuação',
+    title: 'Escolha sua área para começar grátis',
+    subtitle: 'A YLADA adapta exemplos, diagnósticos e sugestões para o seu tipo de atendimento. Em poucos minutos você pode publicar um diagnóstico e começar a gerar conversas no WhatsApp.',
     nutri: {
-      title: 'Sou Nutricionista',
-      description: 'Crie ferramentas inteligentes para seus clientes e transforme consultas em resultados mensuráveis.'
+      title: 'Nutrição',
+      description: 'Crie diagnósticos que despertam interesse e levam pacientes a conversar com você.'
     },
     sales: {
-      title: 'Sou Consultor Nutra',
-      description: 'Acelere suas vendas com ferramentas que qualificam leads e aumentam conversões.'
+      title: 'Nutra / Suplementos',
+      description: 'Crie diagnósticos que geram curiosidade e iniciam conversas sobre produtos e resultados.'
     },
     coach: {
-      title: 'Sou Coach de Bem-estar',
-      description: 'Engaje seus clientes com ferramentas interativas que aceleram o processo de transformação.'
+      title: 'Coach de Bem-estar',
+      description: 'Crie diagnósticos que geram curiosidade e iniciam conversas sobre transformação.'
+    },
+    wellness: {
+      title: 'Consultor de Bem-Estar',
+      description: 'Transforme curiosidade em conversas com ferramentas de avaliação e engajamento.'
     }
   },
   
@@ -204,14 +208,21 @@ export const ptTranslations: Translations = {
       howItWorks: 'Como funciona',
       pricing: 'Preços',
       login: 'Entrar',
-      discoverProfile: 'Descobrir meu perfil'
+      discoverProfile: 'Descobrir meu perfil',
+      startFree: 'Começar grátis'
     },
     loading: 'Carregando...',
     redirecting: 'Redirecionando...',
     hero: {
-      title: 'Seu marketing atrai curiosos ou clientes prontos para contratar?',
-      tagline: 'Boas conversas começam com boas perguntas.',
-      subtitle: 'Descubra em menos de 1 minuto se sua comunicação profissional está realmente atraindo pessoas interessadas.',
+      title: 'Boas conversas começam com boas perguntas.',
+      tagline: 'Crie diagnósticos inteligentes, compartilhe o link e veja pessoas iniciarem conversa com você no WhatsApp.',
+      subtitle: 'Sem complicação. Sem precisar montar funil complexo.',
+      ctaPrimary: 'Começar grátis',
+      ctaSecondary: 'Ver como funciona',
+      flowStep1: 'Criar diagnóstico',
+      flowStep2: 'Compartilhar link',
+      flowStep3: 'Pessoa responde',
+      flowStep4: 'Inicia conversa no WhatsApp',
       yladaIntro: 'YLADA usa diagnósticos inteligentes para transformar curiosidade em conversas com clientes.',
       questionLabel: 'Quando alguém entra em contato com você normalmente:',
       question1: 'pergunta o preço logo no início',

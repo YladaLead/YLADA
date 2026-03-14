@@ -150,32 +150,31 @@ export function AreaLandingPage({ area, locale, appBasePath = '/pt' }: AreaLandi
               <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 leading-tight mb-4">
                 {isSalesArea ? (
                   locale === 'pt' ? (
-                    <>Melhore suas conversas com clientes.<br />Comece conversas com contexto.</>
+                    <>Gere conversas com potenciais clientes<br />sem precisar explicar tudo logo no início</>
                   ) : locale === 'en' ? (
-                    <>Improve your conversations with clients.<br />Start conversations with context.</>
+                    <>Generate conversations with potential clients<br />without having to explain everything upfront</>
                   ) : (
-                    <>Mejora tus conversaciones con clientes.<br />Comienza conversaciones con contexto.</>
+                    <>Genera conversaciones con clientes potenciales<br />sin tener que explicar todo al principio</>
                   )
                 ) : (
                   locale === 'pt' ? (
-                    <>Pare de responder curiosos.<br />Comece consultas com contexto.</>
+                    <>Crie diagnósticos que despertam interesse<br />sem precisar explicar tudo logo no início</>
                   ) : locale === 'en' ? (
-                    <>Stop answering curious people.<br />Start consultations with context.</>
+                    <>Create diagnostics that spark interest<br />without having to explain everything upfront</>
                   ) : (
-                    <>Deja de responder curiosos.<br />Comienza consultas con contexto.</>
+                    <>Crea diagnósticos que despiertan interés<br />sin tener que explicar todo al principio</>
                   )
                 )}
               </h1>
               <p className="text-base sm:text-lg text-gray-600 mb-4">
-                {isSalesArea ? (
-                  locale === 'pt' ? 'O YLADA permite que clientes respondam uma avaliação rápida antes do primeiro contato, gerando um perfil inicial e conversas muito mais qualificadas.'
-                  : locale === 'en' ? 'YLADA allows clients to complete a quick assessment before the first contact, generating an initial profile and much more qualified conversations.'
-                  : 'YLADA permite que los clientes respondan una evaluación rápida antes del primer contacto, generando un perfil inicial y conversaciones mucho más cualificadas.'
-                ) : (
-                  locale === 'pt' ? 'O YLADA permite que pacientes respondam uma avaliação rápida antes do primeiro contato, gerando um diagnóstico inicial e conversas muito mais qualificadas.'
-                  : locale === 'en' ? 'YLADA allows patients to complete a quick assessment before the first contact, generating an initial diagnosis and much more qualified conversations.'
-                  : 'YLADA permite que los pacientes respondan una evaluación rápida antes del primer contacto, generando un diagnóstico inicial y conversaciones mucho más cualificadas.'
-                )}
+                {locale === 'pt' && 'Crie um diagnóstico, compartilhe com seu público e transforme curiosidade em conversa no WhatsApp.'}
+                {locale === 'en' && 'Create a diagnosis, share with your audience and turn curiosity into WhatsApp conversations.'}
+                {locale === 'es' && 'Crea un diagnóstico, comparte con tu público y transforma la curiosidad en conversación por WhatsApp.'}
+              </p>
+              <p className="text-sm text-gray-500 italic mb-4">
+                {locale === 'pt' && 'A YLADA não foi feita para gerar apenas respostas. Foi feita para gerar conversas reais com potenciais clientes.'}
+                {locale === 'en' && 'YLADA was not made to just collect responses. It was made to generate real conversations with potential clients.'}
+                {locale === 'es' && 'YLADA no fue hecha para solo generar respuestas. Fue hecha para generar conversaciones reales con clientes potenciales.'}
               </p>
               <p className="text-lg sm:text-xl text-gray-700 font-medium mb-6">
                 {isSalesArea ? (
@@ -215,24 +214,34 @@ export function AreaLandingPage({ area, locale, appBasePath = '/pt' }: AreaLandi
                 </span>
                 <span className="text-gray-400">↓</span>
                 <span>
-                  {locale === 'pt' && 'A conversa começa com contexto'}
-                  {locale === 'en' && 'The conversation starts with context'}
-                  {locale === 'es' && 'La conversación comienza con contexto'}
+                  {locale === 'pt' && 'Inicia conversa no WhatsApp'}
+                  {locale === 'en' && 'Starts conversation on WhatsApp'}
+                  {locale === 'es' && 'Inicia conversación en WhatsApp'}
                 </span>
               </div>
-              <Link
-                href={`${checkoutBase}?plan=annual`}
-                className="inline-flex items-center justify-center px-8 py-4 rounded-xl bg-blue-600 text-white font-semibold text-lg hover:bg-blue-700 transition-colors shadow-lg"
-              >
-                {locale === 'pt' && 'Começar agora'}
-                {locale === 'en' && 'Get started'}
-                {locale === 'es' && 'Comenzar ahora'}
-                <span className="ml-2" aria-hidden>→</span>
-              </Link>
+              <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                <Link
+                  href={loginHref}
+                  className="inline-flex items-center justify-center px-8 py-4 rounded-xl bg-blue-600 text-white font-semibold text-lg hover:bg-blue-700 transition-colors shadow-lg"
+                >
+                  {locale === 'pt' && 'Criar meu diagnóstico grátis'}
+                  {locale === 'en' && 'Create my free diagnosis'}
+                  {locale === 'es' && 'Crear mi diagnóstico gratis'}
+                  <span className="ml-2" aria-hidden>→</span>
+                </Link>
+                <Link
+                  href={locale === 'pt' ? '/pt/precos' : `${appBasePath}/precos`}
+                  className="inline-flex items-center justify-center px-8 py-4 rounded-xl border-2 border-gray-200 text-gray-700 font-medium hover:bg-gray-50 transition-colors"
+                >
+                  {locale === 'pt' && 'Ver plano Pro'}
+                  {locale === 'en' && 'View Pro plan'}
+                  {locale === 'es' && 'Ver plan Pro'}
+                </Link>
+              </div>
               <p className="text-gray-500 text-sm mt-3">
-                {locale === 'pt' && 'Acesso liberado após o pagamento'}
-                {locale === 'en' && 'Access granted after payment'}
-                {locale === 'es' && 'Acceso liberado después del pago'}
+                {locale === 'pt' && 'Comece grátis com 1 diagnóstico ativo'}
+                {locale === 'en' && 'Start free with 1 active diagnosis'}
+                {locale === 'es' && 'Comienza gratis con 1 diagnóstico activo'}
               </p>
             </div>
           </div>

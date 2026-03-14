@@ -482,7 +482,8 @@ function LinksPageContent({ areaCodigo = 'ylada', areaLabel = 'YLADA' }: LinksPa
         setShowTextFlow(false)
         setTimeout(() => linksListRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 300)
       } else {
-        setMessage({ type: 'error', text: json?.error || 'Erro ao criar link.' })
+        const msg = json?.limit_reached ? json?.message : json?.error || 'Erro ao criar link.'
+        setMessage({ type: 'error', text: msg })
       }
     } catch {
       setMessage({ type: 'error', text: 'Erro ao criar link. Tente novamente.' })
@@ -532,7 +533,8 @@ function LinksPageContent({ areaCodigo = 'ylada', areaLabel = 'YLADA' }: LinksPa
         setMessage({ type: 'success', text: 'Seu diagnóstico foi criado.' })
         setTimeout(() => linksListRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 300)
       } else {
-        setMessage({ type: 'error', text: json?.error || 'Erro ao criar link.' })
+        const msg = json?.limit_reached ? json?.message : json?.error || 'Erro ao criar link.'
+        setMessage({ type: 'error', text: msg })
       }
     } catch {
       setMessage({ type: 'error', text: 'Erro ao criar link. Tente novamente.' })
@@ -586,7 +588,8 @@ function LinksPageContent({ areaCodigo = 'ylada', areaLabel = 'YLADA' }: LinksPa
         setMessage({ type: 'success', text: 'Seu diagnóstico foi criado.' })
         setTimeout(() => linksListRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 300)
       } else {
-        setMessage({ type: 'error', text: json?.error || 'Erro ao criar link.' })
+        const msg = json?.limit_reached ? json?.message : json?.error || 'Erro ao criar link.'
+        setMessage({ type: 'error', text: msg })
       }
     } catch {
       setMessage({ type: 'error', text: 'Erro ao criar link. Tente novamente.' })
@@ -715,14 +718,19 @@ function LinksPageContent({ areaCodigo = 'ylada', areaLabel = 'YLADA' }: LinksPa
 
         {/* Dica do método YLADA */}
         <p className="text-xs text-gray-500 italic">
-          Dica do método YLADA: Diagnósticos que despertam curiosidade geram mais respostas. Evite perguntas muito óbvias.
+          Dica do método YLADA: Diagnósticos que despertam curiosidade geram mais conversas no WhatsApp. Evite perguntas muito óbvias.
         </p>
 
         {message && (
           <div
             className={`p-4 rounded-lg text-sm ${message.type === 'success' ? 'bg-green-50 text-green-800 border border-green-200' : 'bg-red-50 text-red-800 border border-red-200'}`}
           >
-            <p className="font-medium">{message.text}</p>
+            <p className="font-medium whitespace-pre-wrap">{message.text}</p>
+            {message.type === 'error' && (message.text.includes('plano profissional') || message.text.includes('limite')) && (
+              <Link href="/pt/precos" className="mt-3 inline-block rounded-lg bg-sky-600 px-4 py-2 text-sm font-medium text-white hover:bg-sky-700">
+                Liberar mais conversas
+              </Link>
+            )}
             {message.type === 'success' && lastCreatedUrl && (
               <>
                 <p className="mt-2 text-green-700">

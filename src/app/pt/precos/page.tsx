@@ -126,8 +126,8 @@ function PrecosPageContent() {
             {[
               { emoji: '🧠', text: 'Criam diagnósticos' },
               { emoji: '🔗', text: 'Compartilham o link' },
-              { emoji: '📊', text: 'Pessoas respondem' },
-              { emoji: '🤝', text: 'Conversas começam mais preparadas' },
+              { emoji: '💬', text: 'Recebem conversas no WhatsApp' },
+              { emoji: '🤝', text: 'Conversas mais preparadas' },
             ].map((item) => (
               <div key={item.text} className="flex flex-col items-center text-center bg-gray-50 rounded-xl p-5 border border-gray-200">
                 <span className="text-2xl mb-2" aria-hidden>{item.emoji}</span>
@@ -181,22 +181,68 @@ function PrecosPageContent() {
           </div>
         </section>
 
-        {/* 5. Planos — com clareza e redução de risco */}
+        {/* 4b. Conexão experiência → produto — antes dos planos */}
+        <div className="mb-12 rounded-xl bg-blue-50 border border-blue-100 p-6 sm:p-8 text-center">
+          <p className="text-lg font-medium text-gray-900 mb-2">
+            {mostraBlocoResultado
+              ? 'Você acabou de experimentar um diagnóstico.'
+              : 'Imagine fazer um diagnóstico com seus clientes.'}
+          </p>
+          <p className="text-gray-700">
+            Agora imagine clientes passando pelo mesmo processo antes de conversar com você.
+          </p>
+          <p className="text-gray-600 text-sm mt-2 italic">
+            Isso conecta experiência ao produto.
+          </p>
+        </div>
+
+        {/* 5. Planos — Free em destaque, depois Pro */}
         <section id="planos" className="mb-16 scroll-mt-6">
-          <h2 className="text-xl sm:text-2xl font-bold text-gray-900 text-center mb-8">
-            Escolha seu plano
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900 text-center mb-2">
+            Comece grátis. Evolua quando quiser.
           </h2>
-          <div className="grid sm:grid-cols-2 gap-4 sm:gap-6 max-w-3xl mx-auto">
-            {/* Plano mensal */}
-            <div className="bg-white rounded-2xl border-2 border-gray-200 p-6 sm:p-8 flex flex-col">
-              <h3 className="text-xl font-bold text-gray-900 mb-1">Plano mensal</h3>
-              <p className="text-2xl font-bold text-gray-900 mb-2">R$ 97</p>
-              <p className="text-gray-600 text-sm mb-4">Para quem quer começar e testar.</p>
+          <p className="text-gray-600 text-center mb-8 max-w-xl mx-auto">
+            Crie seu primeiro diagnóstico, teste a YLADA e veja conversas começarem no WhatsApp.
+          </p>
+          <div className="grid sm:grid-cols-3 gap-4 sm:gap-6 max-w-4xl mx-auto">
+            {/* Plano Free — destaque */}
+            <div className="relative bg-gradient-to-b from-sky-50 to-white rounded-2xl border-2 border-sky-300 p-6 sm:p-8 flex flex-col shadow-lg">
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-sky-500 text-white text-xs font-bold px-3 py-1.5 rounded-full whitespace-nowrap">
+                Para experimentar
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-1 mt-2">Grátis</h3>
+              <p className="text-2xl font-bold text-gray-900 mb-2">R$ 0</p>
+              <p className="text-gray-600 text-sm mb-4">Comece grátis e teste com clientes reais.</p>
               <ul className="space-y-2 mb-6 flex-1">
                 {[
-                  'Acesso completo à plataforma',
-                  'Criação de avaliações',
-                  'Diagnósticos automáticos',
+                  '1 diagnóstico ativo',
+                  'até 10 contatos no WhatsApp por mês',
+                  'até 10 análises do Noel por mês',
+                ].map((item) => (
+                  <li key={item} className="flex items-center gap-2 text-gray-700 text-sm">
+                    <span className="text-green-600">✔</span>
+                    {item}
+                  </li>
+                ))}
+              </ul>
+              <Link
+                href="/pt/escolha-perfil"
+                className="block w-full text-center py-3.5 bg-sky-600 hover:bg-sky-700 text-white font-semibold rounded-xl transition-colors"
+              >
+                Começar grátis
+              </Link>
+            </div>
+
+            {/* Plano mensal Pro */}
+            <div className="bg-white rounded-2xl border-2 border-gray-200 p-6 sm:p-8 flex flex-col">
+              <h3 className="text-xl font-bold text-gray-900 mb-1">Pro mensal</h3>
+              <p className="text-2xl font-bold text-gray-900 mb-2">R$ 97</p>
+              <p className="text-gray-600 text-sm mb-4">Para profissionais que querem escalar a geração de contatos.</p>
+              <ul className="space-y-2 mb-6 flex-1">
+                {[
+                  'Vários diagnósticos ativos',
+                  'Contatos ilimitados no WhatsApp',
+                  'Noel sem limite',
                 ].map((item) => (
                   <li key={item} className="flex items-center gap-2 text-gray-700 text-sm">
                     <span className="text-green-600">✔</span>
@@ -208,7 +254,7 @@ function PrecosPageContent() {
                 href="/pt/nutri/checkout?plan=monthly"
                 className="block w-full text-center py-3.5 bg-gray-100 hover:bg-gray-200 text-gray-900 font-semibold rounded-xl transition-colors border border-gray-200"
               >
-                Começar agora
+                Assinar Pro
               </Link>
               <ul className="mt-4 space-y-1.5 text-xs text-gray-500">
                 <li className="flex items-center gap-2">✔ Cancelamento fácil</li>
@@ -222,15 +268,15 @@ function PrecosPageContent() {
               <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-amber-400 text-amber-900 text-xs font-bold px-3 py-1.5 rounded-full shadow-md whitespace-nowrap">
                 ⭐ Melhor custo-benefício
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-1 mt-2">Plano anual (recomendado)</h3>
+              <h3 className="text-xl font-bold text-gray-900 mb-1 mt-2">Pro anual (recomendado)</h3>
               <p className="text-2xl font-bold text-gray-900">R$ 59<span className="text-base font-normal text-gray-600">/mês</span></p>
-              <p className="text-gray-600 text-sm mb-4">Profissionais que querem usar diagnósticos continuamente.</p>
+              <p className="text-gray-600 text-sm mb-4">Para quem quer usar a YLADA como canal real de geração de clientes.</p>
               <p className="text-green-600 text-sm font-semibold mb-4">Economize mais de 35% no plano anual</p>
               <ul className="space-y-2 mb-6 flex-1">
                 {[
-                  'Acesso completo à plataforma',
-                  'Criação de avaliações',
-                  'Diagnósticos automáticos',
+                  'Vários diagnósticos ativos',
+                  'Contatos ilimitados no WhatsApp',
+                  'Noel sem limite',
                   'Economia significativa no ano',
                 ].map((item) => (
                   <li key={item} className="flex items-center gap-2 text-gray-700 text-sm">
@@ -243,7 +289,7 @@ function PrecosPageContent() {
                 href="/pt/nutri/checkout?plan=annual"
                 className="block w-full text-center py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-colors"
               >
-                Começar agora
+                Assinar Pro
               </Link>
               <ul className="mt-4 space-y-1.5 text-xs text-gray-500">
                 <li className="flex items-center gap-2">✔ Cancelamento fácil</li>
@@ -281,8 +327,8 @@ function PrecosPageContent() {
             {[
               { num: '1', text: 'Crie seu diagnóstico', sub: '(2 minutos)' },
               { num: '2', text: 'Compartilhe o link', sub: '(Instagram, WhatsApp, anúncios)' },
-              { num: '3', text: 'Pessoas respondem', sub: '(e entendem melhor o próprio problema)' },
-              { num: '4', text: 'Você inicia conversas mais preparadas', sub: '' },
+              { num: '3', text: 'Receba conversas no WhatsApp', sub: '(pessoas iniciam contato com você)' },
+              { num: '4', text: 'Conversas mais preparadas', sub: '' },
             ].map((item) => (
               <div key={item.num} className="flex items-start gap-4 bg-gray-50 rounded-xl p-5 border border-gray-200">
                 <span className="flex-shrink-0 w-10 h-10 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center text-lg">

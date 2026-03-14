@@ -110,12 +110,21 @@ export default function EscolhaPerfilPage() {
                   <span className="text-3xl">💚</span>
                 </div>
                 <h3 className="text-xl font-bold text-gray-900 mb-4">
-                  Consultor de Bem-Estar
+                  {t.profile.wellness?.title ?? 'Consultor de Bem-Estar'}
                 </h3>
                 <p className="text-gray-600 text-sm leading-relaxed">
-                  Transforme vidas com ferramentas profissionais de avaliação, engajamento e coaching em bem-estar.
+                  {t.profile.wellness?.description ?? 'Transforme curiosidade em conversas com ferramentas de avaliação e engajamento.'}
                 </p>
               </div>
+            </Link>
+          </div>
+
+          <div className="text-center mb-12">
+            <Link 
+              href="/pt/profissionais"
+              className="inline-flex items-center px-6 py-3 text-blue-600 hover:text-blue-700 font-medium border border-blue-200 rounded-xl hover:bg-blue-50 transition-colors"
+            >
+              Ver todas as áreas (Nutri, Estética, Fitness, Psi, Odonto, Médicos, etc.)
             </Link>
           </div>
 

@@ -124,10 +124,10 @@ export default function InstitutionalPageContent() {
               {home?.nav?.login ?? 'Entrar'}
             </Link>
             <Link
-              href={getLocalizedPath('/pt/diagnostico', locale)}
+              href={getLocalizedPath('/pt/escolha-perfil', locale)}
               className="inline-flex items-center justify-center px-4 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 transition-all"
             >
-              {home?.nav?.discoverProfile ?? 'Descobrir meu perfil'}
+              {home?.nav?.startFree ?? home?.nav?.discoverProfile ?? 'Começar grátis'}
             </Link>
             <LanguageSelector />
           </nav>
@@ -135,81 +135,112 @@ export default function InstitutionalPageContent() {
       </header>
 
       <main className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* 2️⃣ HERO — Pergunta alinhada com título (curiosos vs clientes preparados) */}
-        <section className="py-12 sm:py-16 lg:py-20 bg-[#f8fafc] border-b border-gray-200">
-          <div className="max-w-2xl mx-auto">
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-4 leading-tight text-center">
-              {home?.hero?.title ?? 'Seu marketing atrai curiosos ou clientes prontos para contratar?'}
+        {/* 1️⃣ HERO — Identidade do produto */}
+        <section className="py-12 sm:py-16 lg:py-20 bg-gradient-to-b from-sky-50 to-white border-b border-gray-100">
+          <div className="max-w-3xl mx-auto text-center">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-4 leading-tight">
+              Boas conversas começam com boas perguntas.
             </h1>
-            <p className="text-lg sm:text-xl text-gray-800 font-semibold mb-3 text-center">
-              {home?.hero?.tagline ?? 'Boas conversas começam com boas perguntas.'}
-            </p>
-            <p className="text-base sm:text-lg text-gray-600 mb-4 text-center leading-relaxed">
-              {home?.hero?.subtitle ?? 'Descubra em menos de 1 minuto se sua comunicação profissional está realmente atraindo pessoas interessadas.'}
-            </p>
-            <p className="text-base text-gray-700 font-medium mb-6 text-center">
-              {home?.hero?.yladaIntro ?? 'YLADA usa diagnósticos inteligentes para transformar curiosidade em conversas com clientes.'}
+            <p className="text-lg sm:text-xl text-gray-700 mb-8 leading-relaxed">
+              Crie diagnósticos inteligentes, compartilhe o link e veja pessoas iniciarem conversa com você no WhatsApp.
             </p>
 
-            <div className="bg-white rounded-xl p-6 sm:p-8 border border-gray-200 shadow-sm">
-              <div className="mb-6">
-                <p className="text-sm text-gray-500 mb-2">{home?.hero?.progress ?? 'Pergunta 1 de 7'}</p>
-                <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-[#2563eb] rounded-full transition-all duration-300"
-                    style={{ width: '14.3%' }}
-                  />
-                </div>
-              </div>
-              <p className="font-semibold text-gray-900 mb-4">{home?.hero?.questionLabel ?? 'Quando alguém entra em contato com você normalmente:'}</p>
+            {/* 2️⃣ PRÉ-ENGAJAMENTO — Micro interação antes do CTA */}
+            <div className="max-w-xl mx-auto mb-10">
+              <p className="text-sm font-medium text-gray-600 mb-4">Antes de começar, responda rápido:</p>
+              <p className="font-semibold text-gray-900 mb-4">Seu marketing hoje atrai mais:</p>
               <div className="space-y-2 mb-6">
-                {([home?.hero?.question1, home?.hero?.question2, home?.hero?.question3, home?.hero?.question4] as (string | undefined)[]).map((label, idx) => (
+                {[
+                  { label: 'Curiosos perguntando preço', value: 0 },
+                  { label: 'Conversas que não avançam', value: 1 },
+                  { label: 'Clientes realmente preparados', value: 2 },
+                  { label: 'Não tenho certeza', value: 3 },
+                ].map((opt) => (
                   <label
-                    key={idx}
-                    className={`flex items-center gap-3 p-4 rounded-lg cursor-pointer transition-all border-2 ${
-                      respostaHeroIdx === idx
-                        ? 'border-[#2563eb] bg-blue-50'
+                    key={opt.value}
+                    className={`flex items-center gap-3 p-4 rounded-xl cursor-pointer transition-all border-2 ${
+                      respostaHeroIdx === opt.value
+                        ? 'border-blue-500 bg-blue-50'
                         : 'border-gray-200 bg-white hover:border-gray-300'
                     }`}
                   >
                     <input
                       type="radio"
-                      name="hero"
-                      value={idx}
-                      checked={respostaHeroIdx === idx}
-                      onChange={() => setRespostaHeroIdx(idx)}
+                      name="preengage"
+                      value={opt.value}
+                      checked={respostaHeroIdx === opt.value}
+                      onChange={() => setRespostaHeroIdx(opt.value)}
                       className="sr-only"
                     />
                     <span className="flex-shrink-0 w-4 h-4 rounded-full border-2 border-gray-400 flex items-center justify-center">
-                      {respostaHeroIdx === idx && (
-                        <span className="w-2 h-2 rounded-full bg-[#2563eb]" />
+                      {respostaHeroIdx === opt.value && (
+                        <span className="w-2 h-2 rounded-full bg-blue-600" />
                       )}
                     </span>
-                    <span className="text-gray-800">{label ?? ['pergunta o preço logo no início', 'pede mais informações mas não decide', 'já chega entendendo o valor', 'depende muito da pessoa'][idx]}</span>
+                    <span className="text-gray-800">{opt.label}</span>
                   </label>
                 ))}
               </div>
-              <button
-                type="button"
-                onClick={() => {
-                  if (respostaHeroIdx !== null) {
-                    const problemaValue = PERGUNTA_HERO_VALUES[respostaHeroIdx] ?? 1
-                    router.push(`/pt/diagnostico?fromHome=1&problema=${problemaValue}`)
-                  }
-                }}
-                disabled={respostaHeroIdx === null}
-                className="block w-full text-center px-6 py-4 bg-[#2563eb] text-white font-semibold rounded-xl hover:bg-[#1d4ed8] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {home?.hero?.cta ?? 'Descobrir meu perfil'}
-              </button>
+              <p className="text-base font-medium text-gray-700 mb-4">
+                Descubra seu perfil profissional em menos de 1 minuto.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (respostaHeroIdx !== null) {
+                      const problemaValue = PERGUNTA_HERO_VALUES[respostaHeroIdx] ?? 1
+                      router.push(`/pt/diagnostico?fromHome=1&problema=${problemaValue}`)
+                    }
+                  }}
+                  disabled={respostaHeroIdx === null}
+                  className="inline-flex items-center justify-center px-8 py-4 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
+                >
+                  Fazer diagnóstico grátis
+                </button>
+                <Link
+                  href={getLocalizedPath('/pt/escolha-perfil', locale)}
+                  className="inline-flex items-center justify-center px-8 py-4 bg-white text-gray-700 font-medium rounded-xl border-2 border-gray-200 hover:border-gray-300 transition-all"
+                >
+                  Criar meu diagnóstico
+                </Link>
+              </div>
             </div>
 
-            <p className="text-gray-500 text-sm mt-4 text-center">
-              {home?.hero?.quickInfo ?? '7 perguntas rápidas • menos de 1 minuto'}
-            </p>
-            <p className="text-gray-600 text-sm font-medium mt-1 text-center">
-              {home?.hero?.proof ?? '+3.000 profissionais já testaram'}
-            </p>
+            {/* Por que diagnósticos funcionam — credibilidade */}
+            <div className="bg-white/90 rounded-2xl p-6 sm:p-8 border border-gray-100 shadow-sm text-left max-w-2xl mx-auto">
+              <h2 className="text-lg font-bold text-gray-900 mb-4 text-center">Por que diagnósticos funcionam tão bem</h2>
+              <p className="text-sm text-gray-600 mb-4 text-center">Diagnósticos ativam três mecanismos psicológicos.</p>
+              <div className="grid sm:grid-cols-3 gap-4 mb-4">
+                <div className="text-center p-3 rounded-xl bg-gray-50">
+                  <span className="text-2xl block mb-2" aria-hidden>🧠</span>
+                  <p className="font-semibold text-gray-900 text-sm">Auto-diagnóstico</p>
+                  <p className="text-xs text-gray-600">A pessoa entende o próprio problema.</p>
+                </div>
+                <div className="text-center p-3 rounded-xl bg-gray-50">
+                  <span className="text-2xl block mb-2" aria-hidden>🎯</span>
+                  <p className="font-semibold text-gray-900 text-sm">Compromisso</p>
+                  <p className="text-xs text-gray-600">Ela reconhece a situação.</p>
+                </div>
+                <div className="text-center p-3 rounded-xl bg-gray-50">
+                  <span className="text-2xl block mb-2" aria-hidden>👤</span>
+                  <p className="font-semibold text-gray-900 text-sm">Identidade</p>
+                  <p className="text-xs text-gray-600">Descobre seu perfil.</p>
+                </div>
+              </div>
+              <p className="text-sm font-medium text-gray-800 text-center">Resultado: conversas muito mais preparadas.</p>
+            </div>
+
+            {/* Fluxo visual */}
+            <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-4 py-6 px-4 mt-8 bg-white/60 rounded-xl border border-gray-100">
+              <span className="text-sm font-semibold text-gray-800">Criar diagnóstico</span>
+              <span className="text-gray-400">→</span>
+              <span className="text-sm font-semibold text-gray-800">Compartilhar link</span>
+              <span className="text-gray-400">→</span>
+              <span className="text-sm font-semibold text-gray-800">Pessoa responde</span>
+              <span className="text-gray-400">→</span>
+              <span className="text-sm font-semibold text-green-700">Inicia conversa no WhatsApp</span>
+            </div>
           </div>
         </section>
 
@@ -599,8 +630,8 @@ export default function InstitutionalPageContent() {
             {[
               { emoji: '🧠', titulo: 'Criar diagnóstico', desc: 'Transforme seu conhecimento em perguntas que revelam o problema do cliente.' },
               { emoji: '🔗', titulo: 'Compartilhar link', desc: 'Envie nas redes sociais, WhatsApp ou anúncios.' },
-              { emoji: '📊', titulo: 'Receber respostas', desc: 'Veja quem respondeu e entenda melhor a situação de cada pessoa.' },
-              { emoji: '🤝', titulo: 'Iniciar uma conversa mais preparada', desc: 'O cliente chega com mais clareza e a conversa avança com mais facilidade.' },
+              { emoji: '💬', titulo: 'Receber conversas no WhatsApp', desc: 'Pessoas respondem e iniciam conversa com você. O valor está nas conversas iniciadas.' },
+              { emoji: '🤝', titulo: 'Conversa mais preparada', desc: 'O cliente chega com mais clareza e a conversa avança com mais facilidade.' },
             ].map((item) => (
               <div key={item.titulo} className="text-center bg-gray-50 rounded-xl p-6 border border-gray-100">
                 <div className="text-4xl mb-3" aria-hidden>{item.emoji}</div>
@@ -750,17 +781,38 @@ export default function InstitutionalPageContent() {
           </div>
         </section>
 
+        {/* 8b COMECE GRÁTIS — Plano Free em destaque */}
+        <section className="bg-sky-50 py-12 sm:py-16 border-y border-sky-100">
+          <div className="max-w-2xl mx-auto text-center">
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">
+              Comece grátis com 1 diagnóstico ativo
+            </h2>
+            <p className="text-gray-600 mb-4">Comece grátis e teste com clientes reais.</p>
+            <ul className="space-y-2 text-gray-700 mb-6 text-left max-w-sm mx-auto">
+              <li className="flex items-center gap-2"><span className="text-green-600">✔</span> 1 diagnóstico ativo</li>
+              <li className="flex items-center gap-2"><span className="text-green-600">✔</span> até 10 contatos no WhatsApp por mês</li>
+              <li className="flex items-center gap-2"><span className="text-green-600">✔</span> até 10 análises do Noel por mês</li>
+            </ul>
+            <Link
+              href={getLocalizedPath('/pt/escolha-perfil', locale)}
+              className="inline-flex items-center justify-center px-8 py-4 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition-all"
+            >
+              Criar meu primeiro diagnóstico grátis
+            </Link>
+          </div>
+        </section>
+
         {/* 9️⃣ CTA FINAL — Estilo profissional */}
         <section className="bg-[#1e3a8a] py-16 sm:py-20 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl mx-auto text-center">
             <h2 className="text-2xl sm:text-3xl font-bold text-white mb-8 leading-tight">
-              {home?.cta?.verify ?? 'Verifique agora se você atrai curiosos ou clientes preparados.'}
+              Crie, compartilhe e gere conversas no WhatsApp
             </h2>
             <Link
-              href={getLocalizedPath('/pt/diagnostico', locale)}
+              href={getLocalizedPath('/pt/escolha-perfil', locale)}
               className="inline-flex items-center justify-center px-10 py-4 bg-white text-[#1e3a8a] font-semibold rounded-xl hover:bg-gray-100 transition-all shadow-lg"
             >
-              {home?.cta?.discover ?? 'Descobrir meu perfil'}
+              Criar meu primeiro diagnóstico grátis
             </Link>
           </div>
         </section>

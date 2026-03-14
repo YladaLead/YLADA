@@ -21,6 +21,8 @@ import { inferArchitectureFromTitle, DEFAULT_ARCHITECTURE } from '@/config/ylada
 import { randomBytes } from 'crypto'
 import { translateQuestions } from '@/lib/translate-questions'
 import { getCountryByCode } from '@/components/CountrySelector'
+import { hasYladaProPlan } from '@/lib/subscription-helpers'
+import { FREEMIUM_LIMITS } from '@/config/freemium-limits'
 
 function generateSlug(): string {
   return randomBytes(6).toString('base64url').toLowerCase().replace(/[^a-z0-9]/g, '') || 'link'
@@ -327,6 +329,28 @@ export async function POST(request: NextRequest) {
         title: titleOverride ?? schema.title ?? template.name,
         ctaText: ctaWhatsapp ?? schema.ctaDefault ?? 'Falar no WhatsApp',
         ...schema,
+      }
+    }
+
+    // Freemium: usuário Free só pode ter 1 link ativo
+    const isPro = await hasYladaProPlan(user.id)
+    if (!isPro) {
+      const { count } = await supabaseAdmin
+        .from('ylada_links')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user.id)
+        .eq('status', 'active')
+      if ((count ?? 0) >= FREEMIUM_LIMITS.FREE_LIMIT_ACTIVE_LINKS) {
+        return NextResponse.json(
+          {
+            success: false,
+            limit_reached: true,
+            limit_type: 'active_links',
+            message:
+              'Seu plano gratuito permite 1 diagnóstico ativo por vez.\n\nCom o plano Pro você ganha: vários diagnósticos ativos, contatos ilimitados no WhatsApp por mês e análises ilimitadas do Noel. Ative o plano profissional para ampliar sua operação.',
+          },
+          { status: 403 }
+        )
       }
     }
 

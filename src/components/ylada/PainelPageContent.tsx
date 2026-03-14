@@ -17,6 +17,14 @@ type DashboardData = {
     respostas: number
     conversas: number
   } | null
+  respostas_mes?: number
+  freemium?: {
+    is_pro: boolean
+    whatsapp_clicks_mes?: number
+    limite_whatsapp_clicks?: number
+    noel_analises_mes?: number
+    limite_noel_analises?: number
+  }
 }
 
 interface PainelPageContentProps {
@@ -73,6 +81,46 @@ export default function PainelPageContent({
           </div>
         ) : (
           <>
+            {/* Freemium: aviso progressivo para usuários Free */}
+            {data?.freemium && !data.freemium.is_pro && (
+              <section className="rounded-xl border border-sky-200 bg-sky-50/80 p-5">
+                <p className="text-sm font-medium text-gray-900 mb-1">
+                  {data.freemium.whatsapp_clicks_mes ?? 0}/{data.freemium.limite_whatsapp_clicks ?? 10} contatos no WhatsApp este mês
+                </p>
+                {typeof data.freemium.noel_analises_mes === 'number' && (
+                  <p className="text-sm text-gray-700 mb-2">
+                    {data.freemium.noel_analises_mes}/{data.freemium.limite_noel_analises ?? 10} análises do Noel
+                  </p>
+                )}
+                <p className="text-xs text-gray-600 mb-2">
+                  Cada contato é uma pessoa que clicou no botão e te contactou no WhatsApp.
+                </p>
+                {(data.freemium.whatsapp_clicks_mes ?? 0) >= (data.freemium.limite_whatsapp_clicks ?? 10) ? (
+                  <p className="text-sm text-gray-700 mb-3">
+                    Seu diagnóstico atingiu o limite gratuito. Com o Pro: contatos ilimitados no WhatsApp, vários diagnósticos e Noel sem limite.
+                  </p>
+                ) : (data.freemium.whatsapp_clicks_mes ?? 0) >= 7 ? (
+                  <p className="text-sm text-gray-700 mb-3">
+                    Seu diagnóstico está gerando contatos. Faltam {(data.freemium.limite_whatsapp_clicks ?? 10) - (data.freemium.whatsapp_clicks_mes ?? 0)} para o limite gratuito.
+                  </p>
+                ) : (data.freemium.whatsapp_clicks_mes ?? 0) >= 5 ? (
+                  <p className="text-sm text-gray-700 mb-3">
+                    {(data.freemium.whatsapp_clicks_mes ?? 0)} pessoas já te contactaram no WhatsApp este mês.
+                  </p>
+                ) : (
+                  <p className="text-sm text-gray-700 mb-3">
+                    Seu diagnóstico está gerando resultado.
+                  </p>
+                )}
+                <Link
+                  href="/pt/precos"
+                  className="inline-flex items-center gap-1.5 rounded-lg bg-sky-600 px-4 py-2 text-sm font-medium text-white hover:bg-sky-700"
+                >
+                  Ver planos
+                </Link>
+              </section>
+            )}
+
             {/* Atividade de hoje */}
             <section className="rounded-xl border border-sky-100 bg-sky-50/60 p-5">
               <h2 className="text-sm font-semibold text-gray-800 mb-4">Atividade de hoje</h2>

@@ -336,7 +336,7 @@ function ConfigDrivenLinkView({
   const subtitle = (page.subtitle as string) || ''
 
   const [values, setValues] = useState<Record<string, string>>({})
-  const [step, setStep] = useState<'intro' | 'form' | 'result'>('intro')
+  const [step, setStep] = useState<'intro' | 'form' | 'result' | 'limit_reached'>('intro')
   const [formStep, setFormStep] = useState(0)
   const [diagnosis, setDiagnosis] = useState<DiagnosisResultState | null>(null)
   const [metricsId, setMetricsId] = useState<string | null>(null)
@@ -382,7 +382,12 @@ function ConfigDrivenLinkView({
         })
         const data = await res.json().catch(() => ({}))
         if (!res.ok) {
-          setError(data.error || 'Erro ao gerar resultado.')
+          if (data.limit_reached) {
+            setStep('limit_reached')
+            setLoading(false)
+            return
+          }
+          setError(data.error || data.message || 'Erro ao gerar resultado.')
           setLoading(false)
           return
         }
@@ -417,6 +422,61 @@ function ConfigDrivenLinkView({
     page_title: pageTitleRaw || undefined,
     questions_count: fields.length > 0 ? fields.length : undefined,
   })
+
+  // Tela de limite atingido (freemium) — tom de crescimento + promoção do Pro
+  if (step === 'limit_reached') {
+    const limitTitle = locale === 'en'
+      ? 'This diagnosis already generated 10 WhatsApp conversations this month'
+      : locale === 'es'
+      ? 'Este diagnóstico ya generó 10 conversaciones por WhatsApp este mes'
+      : 'Este diagnóstico já gerou 10 conversas no WhatsApp este mês'
+    const limitBody = locale === 'en'
+      ? 'This diagnosis already generated 10 WhatsApp conversations this month. Want to create diagnostics like this to generate conversations with your clients?'
+      : locale === 'es'
+      ? 'Este diagnóstico ya generó 10 conversaciones por WhatsApp este mes. ¿Quieres crear diagnósticos así para generar conversaciones con tus clientes?'
+      : 'Este diagnóstico já gerou 10 conversas no WhatsApp este mês. Quer criar diagnósticos como esse para gerar conversas com seus clientes?'
+    const proBenefit = locale === 'en'
+      ? 'With the Pro plan: unlimited WhatsApp contacts per month, multiple diagnostics, and full Noel analyses.'
+      : locale === 'es'
+      ? 'Con el plan Pro: contactos ilimitados por WhatsApp al mes, múltiples diagnósticos y análisis completos del Noel.'
+      : 'Com o plano Pro: contatos ilimitados no WhatsApp por mês, vários diagnósticos e análises completas do Noel.'
+    const verPlanos = locale === 'en' ? 'View plans' : locale === 'es' ? 'Ver planes' : 'Ver planos'
+    const criarMeu = locale === 'en' ? 'Create my free diagnosis' : locale === 'es' ? 'Crear mi diagnóstico gratis' : 'Criar meu diagnóstico grátis'
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-sky-50 via-sky-50/90 to-blue-50 flex items-center justify-center p-4 sm:p-6">
+        <div className="max-w-md w-full bg-white rounded-2xl shadow-xl shadow-sky-100/50 border border-sky-100/60 p-6 sm:p-8">
+          <div className="mb-4">
+            <span className="inline-block text-xs font-semibold text-sky-600 bg-sky-50 px-3 py-1.5 rounded-full border border-sky-100">
+              {locale === 'en' ? 'Result' : locale === 'es' ? 'Resultado' : 'Resultado'}
+            </span>
+          </div>
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3 leading-tight">{limitTitle}</h1>
+          <p className="text-gray-600 text-sm leading-relaxed mb-3">{limitBody}</p>
+          <div className="mb-6 p-4 rounded-xl bg-sky-50 border border-sky-100">
+            <p className="text-sm font-medium text-sky-900 mb-1">
+              {locale === 'en' ? 'What you get with Pro' : locale === 'es' ? 'Qué obtienes con Pro' : 'O que você ganha com o Pro'}
+            </p>
+            <p className="text-sm text-sky-800 leading-relaxed">{proBenefit}</p>
+          </div>
+          <div className="space-y-3 mb-6">
+            <a
+              href="/pt/precos"
+              className="block w-full py-3 px-4 bg-sky-600 hover:bg-sky-700 text-white font-semibold rounded-xl text-center transition-colors"
+            >
+              {verPlanos}
+            </a>
+            <a
+              href="/pt/precos"
+              className="block w-full py-2 px-4 text-sky-600 hover:text-sky-700 text-sm font-medium text-center"
+            >
+              {criarMeu}
+            </a>
+          </div>
+          <p className="text-center text-xs text-gray-500">Criado com YLADA</p>
+        </div>
+      </div>
+    )
+  }
 
   if (step === 'intro') {
     return (

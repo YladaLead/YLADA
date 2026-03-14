@@ -249,8 +249,29 @@ export default function NoelChat({ area = 'med', className = '', initialMessage,
       })
 
       if (!res.ok) {
-        const err = await res.json().catch(() => ({}))
-        throw new Error(err.error || 'Erro ao processar mensagem.')
+        const err = (await res.json().catch(() => ({}))) as {
+          error?: string
+          message?: string
+          limit_type?: string
+          upgrade_url?: string
+        }
+        if (err.limit_type === 'noel_advanced' || err.error === 'limit_reached') {
+          const upgradeMsg = err.message || 'Você atingiu o limite de análises do plano gratuito. Ative o plano profissional para continuar.'
+          const upgradeUrl = err.upgrade_url || '/pt/precos'
+          setMessages((prev) => [
+            ...prev,
+            {
+              id: `e-${Date.now()}`,
+              role: 'assistant',
+              content: `${upgradeMsg}\n\n[Ativar plano profissional](${upgradeUrl})`,
+              timestamp: new Date(),
+            },
+          ])
+          setLoading(false)
+          inputRef.current?.focus()
+          return
+        }
+        throw new Error(err.error || err.message || 'Erro ao processar mensagem.')
       }
 
       const data = (await res.json()) as { response?: string; lastLinkContext?: LastLinkContext | null }
@@ -432,8 +453,29 @@ export default function NoelChat({ area = 'med', className = '', initialMessage,
           }),
         })
         if (!res.ok) {
-          const err = await res.json().catch(() => ({}))
-          throw new Error(err.error || 'Erro ao processar mensagem.')
+          const err = (await res.json().catch(() => ({}))) as {
+            error?: string
+            message?: string
+            limit_type?: string
+            upgrade_url?: string
+          }
+          if (err.limit_type === 'noel_advanced' || err.error === 'limit_reached') {
+            const upgradeMsg = err.message || 'Você atingiu o limite de análises do plano gratuito. Ative o plano profissional para continuar.'
+            const upgradeUrl = err.upgrade_url || '/pt/precos'
+            setMessages((prev) => [
+              ...prev,
+              {
+                id: `e-${Date.now()}`,
+                role: 'assistant',
+                content: `${upgradeMsg}\n\n[Ativar plano profissional](${upgradeUrl})`,
+                timestamp: new Date(),
+              },
+            ])
+            setLoading(false)
+            inputRef.current?.focus()
+            return
+          }
+          throw new Error(err.error || err.message || 'Erro ao processar mensagem.')
         }
         const data = (await res.json()) as { response?: string; lastLinkContext?: LastLinkContext | null }
         if (data.lastLinkContext) {
