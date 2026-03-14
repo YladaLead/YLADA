@@ -45,7 +45,7 @@ export function DiagnosticoExemploSection({
   const config = DIAGNOSTICO_EXEMPLOS[area]
 
   const tituloPrincipal =
-    area === 'seller'
+    area === 'seller' || area === 'coach'
       ? 'Veja como uma avaliação pode gerar uma conversa'
       : 'Veja como uma avaliação pode gerar uma consulta'
 

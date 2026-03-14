@@ -6,7 +6,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import { UseCasesSection } from '@/components/ylada/UseCasesSection'
 import { HeroBeforeAfter } from '@/components/ylada/HeroBeforeAfter'
 import { DiagnosticoExemploSection } from '@/components/ylada/DiagnosticoExemploSection'
-import { PricingBlockCompact } from '@/components/ylada/PricingBlockCompact'
+import { PricingSectionLanding } from '@/components/ylada/PricingSectionLanding'
 import { useRouter } from 'next/navigation'
 
 /**
@@ -251,20 +251,8 @@ export default function NutriLandingPage() {
 
         <section className="py-12 sm:py-16 bg-gray-50">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="max-w-lg mx-auto">
-              <p className="text-center text-gray-600 mb-2">
-                Acesso completo à plataforma.
-              </p>
-              <p className="text-center text-gray-600 mb-4">
-                Crie quantos diagnósticos quiser.
-              </p>
-              <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">
-                Comece a usar o YLADA
-              </h2>
-              <PricingBlockCompact ctaHref="/pt/nutri/oferta" />
-              <p className="text-center text-gray-500 text-sm mt-3">
-                Após o pagamento você já pode acessar a plataforma.
-              </p>
+            <div className="max-w-3xl mx-auto">
+              <PricingSectionLanding checkoutBasePath="/pt/nutri/checkout" />
             </div>
           </div>
         </section>
@@ -279,7 +267,7 @@ export default function NutriLandingPage() {
                 Crie seu primeiro diagnóstico em minutos.
               </p>
               <Link
-                href="/pt/precos"
+                href="/pt/nutri/checkout?plan=annual"
                 className="inline-flex items-center justify-center px-8 py-4 rounded-xl bg-white text-blue-600 font-semibold text-lg hover:bg-blue-50 transition-colors shadow-lg"
               >
                 Começar agora

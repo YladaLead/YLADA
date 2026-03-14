@@ -12,6 +12,7 @@ import {
   type DiagnosticoConfig,
   type PerfilResultado,
 } from '@/config/ylada-diagnosticos'
+import { YLADA_AREAS } from '@/config/ylada-areas'
 
 const STORAGE_KEY = 'ylada_diagnosticos_feitos'
 
@@ -42,6 +43,17 @@ const SEGMENT_TO_AREA: Record<string, string> = {
   outro: '6',
 }
 
+/** Área (0–6) → segment_code para a página de preços (onde tem o valor). */
+const AREA_TO_SEGMENT: Record<string, string> = {
+  '0': 'med',
+  '1': 'psi',
+  '2': 'estetica',
+  '3': 'nutri',
+  '4': 'fitness',
+  '5': 'coach',
+  '6': '',
+}
+
 function ResultadoContent() {
   const searchParams = useSearchParams()
   const diagnosticoSlug = searchParams.get('diagnostico') || 'comunicacao'
@@ -53,6 +65,15 @@ function ResultadoContent() {
   const areaContexto = AREA_CONTEXTO[areaParam] ?? AREA_CONTEXTO['6']
   const [linkCopiado, setLinkCopiado] = useState(false)
   const [diagnosticosFeitos, setDiagnosticosFeitos] = useState<Record<string, { perfil: string }>>({})
+  /** Quando a pessoa chega sem área na URL, ela escolhe a profissão aqui (segment code, ex: 'odonto'); usamos para o CTA. */
+  const [areaEscolhida, setAreaEscolhida] = useState<string | null>(null)
+  const areaParaCta = areaParam ?? areaEscolhida ?? '6'
+  const segmentParaPrecos =
+    areaParaCta === 'outro' || areaParaCta === '6'
+      ? ''
+      : areaParaCta in AREA_TO_SEGMENT
+        ? AREA_TO_SEGMENT[areaParaCta]
+        : areaParaCta
 
   useEffect(() => {
     if (typeof window === 'undefined') return
@@ -81,6 +102,10 @@ function ResultadoContent() {
   const config = DIAGNOSTICOS[diagnosticoSlug] as DiagnosticoConfig | undefined
   const perfil = config?.perfis[perfilParam] as PerfilResultado | undefined
   const perfilFinal = perfil || (DIAGNOSTICOS.comunicacao.perfis[perfilParam] as PerfilResultado) || (DIAGNOSTICOS.comunicacao.perfis.curiosos as PerfilResultado)
+
+  const paramsQueroUsar = new URLSearchParams({ source: 'diagnostico', perfil_titulo: perfilFinal.titulo })
+  if (segmentParaPrecos) paramsQueroUsar.set('segment', segmentParaPrecos)
+  const hrefQueroUsar = `/pt/precos?${paramsQueroUsar.toString()}`
 
   const baseHref = diagnosticoSlug === 'comunicacao' ? '/pt/diagnostico' : `/pt/diagnostico/${diagnosticoSlug}`
   const baseUrl =
@@ -253,8 +278,32 @@ function ResultadoContent() {
               iniciar conversas com mais clareza
             </li>
           </ul>
+          {!areaParam && areaEscolhida === null ? (
+            <div className="mb-6">
+              <p className="text-gray-800 font-medium mb-3">Qual é sua profissão ou área de atuação?</p>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                {YLADA_AREAS.filter((a) => a.codigo !== 'ylada').map((area) => (
+                  <button
+                    key={area.codigo}
+                    type="button"
+                    onClick={() => setAreaEscolhida(area.codigo)}
+                    className="px-4 py-3 text-left rounded-lg border-2 border-gray-200 bg-white hover:border-blue-500 hover:bg-blue-50 transition-all font-medium text-gray-800 text-sm"
+                  >
+                    {area.label}
+                  </button>
+                ))}
+                <button
+                  type="button"
+                  onClick={() => setAreaEscolhida('outro')}
+                  className="px-4 py-3 text-left rounded-lg border-2 border-gray-200 bg-white hover:border-blue-500 hover:bg-blue-50 transition-all font-medium text-gray-800 text-sm col-span-2 sm:col-span-1"
+                >
+                  Outro
+                </button>
+              </div>
+            </div>
+          ) : null}
           <Link
-            href="/pt?source=diagnostico"
+            href={hrefQueroUsar}
             className="block w-full text-center px-6 py-4 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition-all"
           >
             Quero usar diagnósticos no meu trabalho

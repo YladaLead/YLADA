@@ -12,6 +12,7 @@ export type DiagnosticoExemploArea =
   | 'fitness'
   | 'perfumaria'
   | 'seller'
+  | 'coach'
 
 export interface DiagnosticoExemploConfig {
   avaliacao: string
@@ -133,5 +134,18 @@ export const DIAGNOSTICO_EXEMPLOS: Record<DiagnosticoExemploArea, DiagnosticoExe
     labelPaciente: 'cliente',
     tituloSecaoCards: 'Avaliações usadas por vendedores',
     tituloSecaoCardsDesc: 'Vendedores usam avaliações como:',
+  },
+  coach: {
+    avaliacao: 'Você está pronto para uma transformação?',
+    perfil: 'Momento de mudança',
+    explicacao: 'Possíveis sinais de disposição para mudar hábitos e buscar autoconhecimento.',
+    sinais: ['disposição para mudar hábitos', 'interesse em autoconhecimento', 'busca por equilíbrio'],
+    mensagem: 'Achei interessante esse resultado. Como funciona o processo?',
+    sugestao: 'Esse resultado sugere que um processo de coaching pode ajudar.',
+    fraseAgendamento: 'Isso gera curiosidade e abre espaço para iniciar uma conversa.',
+    cards: ['Transformação', 'Bem-estar', 'Equilíbrio'],
+    labelPaciente: 'cliente',
+    tituloSecaoCards: 'Avaliações usadas por coaches',
+    tituloSecaoCardsDesc: 'Coaches usam avaliações como:',
   },
 }
