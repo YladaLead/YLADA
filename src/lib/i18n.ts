@@ -2,6 +2,15 @@ export type Language = 'pt' | 'en' | 'es';
 
 export const languages: Language[] = ['pt', 'en', 'es'];
 
+/** Locales que têm página institucional + landings traduzidas (Wellness fica só PT) */
+export const INSTITUTIONAL_LOCALES: Language[] = ['pt', 'en', 'es'];
+
+/** Extrai locale da URL (ex: /en/nutri → 'en') */
+export function getLocaleFromPathname(pathname: string): Language {
+  const match = pathname.match(/^\/(pt|en|es)(\/|$)/)
+  return (match?.[1] as Language) ?? 'pt'
+}
+
 export const languageNames = {
   pt: 'Português',
   en: 'English', 

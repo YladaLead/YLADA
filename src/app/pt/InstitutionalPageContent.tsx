@@ -14,7 +14,8 @@ import LanguageSelector from '@/components/LanguageSelector'
 import Link from 'next/link'
 import { useTranslations } from '@/hooks/useTranslations'
 import { useAuth } from '@/contexts/AuthContext'
-import { YLADA_LANDING_AREAS } from '@/config/ylada-landing-areas'
+import { getYladaLandingAreas } from '@/config/ylada-landing-areas'
+import { getLocaleFromPathname, type Language } from '@/lib/i18n'
 
 const PERGUNTA_HERO_OPCOES = [
   { value: 2, label: 'pergunta o preço logo no início' },
@@ -30,15 +31,30 @@ const EXEMPLOS_DIAGNOSTICOS = [
   { titulo: 'Seu conteúdo atrai clientes ou apenas engajamento?', href: '/pt/diagnostico/conteudo' },
 ]
 
+/** Rotas com landing em pt/en/es. Outras usam /pt (painel não traduzido). */
+const LOCALIZED_BASE = new Set(['nutri', 'estetica', 'fitness', 'psi', 'odonto', 'med', 'nutra', 'perfumaria', 'coach-bem-estar', 'seller'])
+
+function getLocalizedPath(path: string, locale: Language): string {
+  const normalized = path.startsWith('/') ? path : `/${path}`
+  const withoutLocale = normalized.replace(/^\/(pt|en|es)\//, '/').replace(/^\/(pt|en|es)$/, '/') || '/'
+  const segment = withoutLocale.replace(/^\//, '').split('/')[0]?.split('?')[0] ?? ''
+  if (LOCALIZED_BASE.has(segment) && (locale === 'en' || locale === 'es')) {
+    const qs = path.includes('?') ? path.slice(path.indexOf('?')) : ''
+    return `/${locale}${withoutLocale}${qs}`.replace(/\/+/g, '/')
+  }
+  return normalized
+}
+
 export default function InstitutionalPageContent() {
-  const { t } = useTranslations('pt')
+  const pathname = usePathname() ?? ''
+  const locale = getLocaleFromPathname(pathname)
+  const { t } = useTranslations(locale)
   const inst = t?.institutional
   const { user, loading } = useAuth()
   const router = useRouter()
-  const pathname = usePathname()
 
   const searchParams = useSearchParams()
-  const isInstitutionalPage = pathname === '/pt' || pathname === '/pt/'
+  const isInstitutionalPage = pathname === '/pt' || pathname === '/pt/' || pathname === '/en' || pathname === '/en/' || pathname === '/es' || pathname === '/es/'
   const forceLanding = searchParams?.get('landing') === '1'
 
   useEffect(() => {
@@ -86,33 +102,33 @@ export default function InstitutionalPageContent() {
       {/* 1️⃣ HEADER — 72px, fundo branco */}
       <header className="sticky top-0 z-50 border-b border-gray-200 bg-white shadow-sm h-[72px] flex items-center safe-area-inset-top">
         <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-full">
-          <Link href="/pt" className="flex-shrink-0 touch-manipulation" aria-label="YLADA início">
+          <Link href={`/${locale}`} className="flex-shrink-0 touch-manipulation" aria-label="YLADA início">
             <YLADALogo size="md" responsive className="bg-transparent" />
           </Link>
           <nav className="flex items-center gap-3 sm:gap-6">
-            <Link href="/pt/diagnostico" className="text-gray-600 hover:text-gray-900 text-sm font-medium hidden md:inline">
+            <Link href={getLocalizedPath('/pt/diagnostico', locale)} className="text-gray-600 hover:text-gray-900 text-sm font-medium hidden md:inline">
               Fazer diagnóstico
             </Link>
-            <Link href="/pt/metodo-ylada" className="text-gray-600 hover:text-gray-900 text-sm font-medium hidden md:inline">
+            <Link href={getLocalizedPath('/pt/metodo-ylada', locale)} className="text-gray-600 hover:text-gray-900 text-sm font-medium hidden md:inline">
               Filosofia
             </Link>
-            <Link href="/pt/sobre" className="text-gray-600 hover:text-gray-900 text-sm font-medium hidden md:inline">
+            <Link href={getLocalizedPath('/pt/sobre', locale)} className="text-gray-600 hover:text-gray-900 text-sm font-medium hidden md:inline">
               Sobre
             </Link>
-            <Link href="/pt/profissionais" className="text-gray-600 hover:text-gray-900 text-sm font-medium hidden lg:inline">
+            <Link href={getLocalizedPath('/pt/profissionais', locale)} className="text-gray-600 hover:text-gray-900 text-sm font-medium hidden lg:inline">
               Profissionais
             </Link>
-            <Link href="/pt/como-funciona" className="text-gray-600 hover:text-gray-900 text-sm font-medium hidden lg:inline">
+            <Link href={getLocalizedPath('/pt/como-funciona', locale)} className="text-gray-600 hover:text-gray-900 text-sm font-medium hidden lg:inline">
               Como funciona
             </Link>
-            <Link href="/pt/precos" className="text-gray-600 hover:text-gray-900 text-sm font-medium hidden lg:inline">
+            <Link href={getLocalizedPath('/pt/precos', locale)} className="text-gray-600 hover:text-gray-900 text-sm font-medium hidden lg:inline">
               Preços
             </Link>
-            <Link href="/pt/login" className="text-gray-600 hover:text-gray-900 text-sm font-medium">
+            <Link href={getLocalizedPath('/pt/login', locale)} className="text-gray-600 hover:text-gray-900 text-sm font-medium">
               Entrar
             </Link>
             <Link
-              href="/pt/diagnostico"
+              href={getLocalizedPath('/pt/diagnostico', locale)}
               className="inline-flex items-center justify-center px-4 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 transition-all"
             >
               Descobrir meu perfil
@@ -537,7 +553,7 @@ export default function InstitutionalPageContent() {
               {EXEMPLOS_DIAGNOSTICOS.map((ex) => (
                 <Link
                   key={ex.titulo}
-                  href={ex.href}
+                  href={getLocalizedPath(ex.href, locale)}
                   className="block bg-white rounded-xl p-5 border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all"
                 >
                   <p className="font-medium text-gray-900">{ex.titulo}</p>
@@ -599,7 +615,7 @@ export default function InstitutionalPageContent() {
           </div>
           <div className="text-center mt-8">
             <Link
-              href="/pt/metodo-ylada"
+              href={getLocalizedPath('/pt/metodo-ylada', locale)}
               className="text-blue-600 hover:text-blue-700 font-medium text-sm"
             >
               Conhecer a filosofia YLADA →
@@ -644,7 +660,7 @@ export default function InstitutionalPageContent() {
               Profissionais e vendedores consultivos usam diagnósticos para atrair clientes mais preparados.
             </p>
             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-              {YLADA_LANDING_AREAS.map((area) => (
+              {getYladaLandingAreas(locale).map((area) => (
                 <Link
                   key={area.codigo}
                   href={area.href}
@@ -657,7 +673,7 @@ export default function InstitutionalPageContent() {
             </div>
             <div className="text-center">
               <Link
-                href="/pt/profissionais"
+                href={getLocalizedPath('/pt/profissionais', locale)}
                 className="inline-flex items-center justify-center px-6 py-3 border-2 border-gray-300 text-gray-700 font-medium rounded-xl hover:bg-gray-50 transition-all"
               >
                 Ver todas as áreas
@@ -729,7 +745,7 @@ export default function InstitutionalPageContent() {
             </div>
             <div className="text-center">
               <Link
-                href="/pt/diagnostico"
+                href={getLocalizedPath('/pt/diagnostico', locale)}
                 className="inline-flex items-center justify-center px-8 py-4 bg-[#2563eb] text-white font-semibold rounded-xl hover:bg-[#1d4ed8] transition-all"
               >
                 Descobrir meu perfil
@@ -745,7 +761,7 @@ export default function InstitutionalPageContent() {
               Verifique agora se você atrai curiosos ou clientes preparados.
             </h2>
             <Link
-              href="/pt/diagnostico"
+              href={getLocalizedPath('/pt/diagnostico', locale)}
               className="inline-flex items-center justify-center px-10 py-4 bg-white text-[#1e3a8a] font-semibold rounded-xl hover:bg-gray-100 transition-all shadow-lg"
             >
               Descobrir meu perfil
@@ -762,49 +778,49 @@ export default function InstitutionalPageContent() {
               <YLADALogo size="lg" className="bg-transparent" />
             </div>
             <nav className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 mb-6 text-sm">
-              <Link href="/pt/diagnostico" className="text-gray-600 hover:text-gray-900">
+              <Link href={getLocalizedPath('/pt/diagnostico', locale)} className="text-gray-600 hover:text-gray-900">
                 Fazer diagnóstico
               </Link>
-              <Link href="/pt/diagnosticos" className="text-gray-600 hover:text-gray-900">
+              <Link href={getLocalizedPath('/pt/diagnosticos', locale)} className="text-gray-600 hover:text-gray-900">
                 Biblioteca de diagnósticos
               </Link>
-              <Link href="/pt/metodo-ylada" className="text-gray-600 hover:text-gray-900">
+              <Link href={getLocalizedPath('/pt/metodo-ylada', locale)} className="text-gray-600 hover:text-gray-900">
                 Filosofia
               </Link>
-              <Link href="/pt/sobre" className="text-gray-600 hover:text-gray-900">
+              <Link href={getLocalizedPath('/pt/sobre', locale)} className="text-gray-600 hover:text-gray-900">
                 Sobre
               </Link>
-              <Link href="/pt/profissionais" className="text-gray-600 hover:text-gray-900">
+              <Link href={getLocalizedPath('/pt/profissionais', locale)} className="text-gray-600 hover:text-gray-900">
                 Profissionais
               </Link>
-              <Link href="/pt/como-funciona" className="text-gray-600 hover:text-gray-900">
+              <Link href={getLocalizedPath('/pt/como-funciona', locale)} className="text-gray-600 hover:text-gray-900">
                 Como funciona
               </Link>
-              <Link href="/pt/precos" className="text-gray-600 hover:text-gray-900">
+              <Link href={getLocalizedPath('/pt/precos', locale)} className="text-gray-600 hover:text-gray-900">
                 Preços
               </Link>
-              <Link href="/pt/login" className="text-gray-600 hover:text-gray-900">
+              <Link href={getLocalizedPath('/pt/login', locale)} className="text-gray-600 hover:text-gray-900">
                 Entrar
               </Link>
-              <Link href="/pt/escolha-perfil" className="text-blue-600 hover:text-blue-700 font-medium">
+              <Link href={getLocalizedPath('/pt/escolha-perfil', locale)} className="text-blue-600 hover:text-blue-700 font-medium">
                 Criar diagnóstico
               </Link>
             </nav>
             <p className="text-gray-600 text-sm mb-4">{inst.footer.tagline}</p>
             <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 mb-4 text-sm text-gray-500">
-              <Link href="/pt/politica-de-privacidade" className="hover:text-gray-700">
+              <Link href={getLocalizedPath('/pt/politica-de-privacidade', locale)} className="hover:text-gray-700">
                 {inst.footer.privacy}
               </Link>
               <span aria-hidden>•</span>
-              <Link href="/pt/termos-de-uso" className="hover:text-gray-700">
+              <Link href={getLocalizedPath('/pt/termos-de-uso', locale)} className="hover:text-gray-700">
                 {inst.footer.terms}
               </Link>
               <span aria-hidden>•</span>
-              <Link href="/pt/politica-de-cookies" className="hover:text-gray-700">
+              <Link href={getLocalizedPath('/pt/politica-de-cookies', locale)} className="hover:text-gray-700">
                 {inst.footer.cookies}
               </Link>
               <span aria-hidden>•</span>
-              <Link href="/pt/politica-de-reembolso" className="hover:text-gray-700">
+              <Link href={getLocalizedPath('/pt/politica-de-reembolso', locale)} className="hover:text-gray-700">
                 {inst.footer.refund}
               </Link>
               <span className="text-gray-400">{inst.footer.languages}</span>

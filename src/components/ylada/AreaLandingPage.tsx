@@ -1,0 +1,422 @@
+'use client'
+
+/**
+ * Landing compartilhada para áreas (nutri, estetica, fitness, etc.).
+ * Recebe locale e area. Links de login/checkout sempre vão para /pt (painel não traduzido).
+ */
+import { useState, useEffect } from 'react'
+import Link from 'next/link'
+import { useAuth } from '@/contexts/AuthContext'
+import { UseCasesSection } from '@/components/ylada/UseCasesSection'
+import { HeroBeforeAfter } from '@/components/ylada/HeroBeforeAfter'
+import { DiagnosticoExemploSection } from '@/components/ylada/DiagnosticoExemploSection'
+import { PricingSectionLanding } from '@/components/ylada/PricingSectionLanding'
+import { useRouter } from 'next/navigation'
+import type { Language } from '@/lib/i18n'
+
+const AREA_LABELS: Record<string, Record<Language, string>> = {
+  nutri: { pt: 'Nutrição', en: 'Nutrition', es: 'Nutrición' },
+  estetica: { pt: 'Estética', en: 'Aesthetics', es: 'Estética' },
+  fitness: { pt: 'Fitness', en: 'Fitness', es: 'Fitness' },
+  psi: { pt: 'Psicologia', en: 'Psychology', es: 'Psicología' },
+  odonto: { pt: 'Odontologia', en: 'Dentistry', es: 'Odontología' },
+  med: { pt: 'Medicina', en: 'Medicine', es: 'Medicina' },
+  nutra: { pt: 'Nutra', en: 'Nutra', es: 'Nutra' },
+  perfumaria: { pt: 'Perfumaria', en: 'Perfumery', es: 'Perfumería' },
+  'coach-bem-estar': { pt: 'Coach de bem-estar', en: 'Wellness Coach', es: 'Coach de bienestar' },
+  seller: { pt: 'Vendedores', en: 'Sales', es: 'Vendedores' },
+}
+
+const COMMON = {
+  pt: {
+    platformPart: 'Parte da plataforma YLADA',
+    enter: 'Entrar',
+    backHome: 'YLADA',
+  },
+  en: {
+    platformPart: 'Part of the YLADA platform',
+    enter: 'Log in',
+    backHome: 'YLADA',
+  },
+  es: {
+    platformPart: 'Parte de la plataforma YLADA',
+    enter: 'Entrar',
+    backHome: 'YLADA',
+  },
+}
+
+export type AreaLandingArea = 'nutri' | 'estetica' | 'fitness' | 'psi' | 'odonto' | 'med' | 'nutra' | 'perfumaria' | 'coach-bem-estar' | 'seller'
+
+/** Mapeia área institucional para área dos componentes (HeroBeforeAfter, UseCasesSection) */
+const AREA_TO_COMPONENT: Record<string, 'med' | 'psi' | 'odonto' | 'nutri' | 'estetica' | 'fitness' | 'coach' | 'seller' | 'perfumaria'> = {
+  nutri: 'nutri',
+  estetica: 'estetica',
+  fitness: 'fitness',
+  psi: 'psi',
+  odonto: 'odonto',
+  med: 'med',
+  nutra: 'seller',
+  perfumaria: 'perfumaria',
+  'coach-bem-estar': 'coach',
+  seller: 'seller',
+}
+
+interface AreaLandingPageProps {
+  area: AreaLandingArea
+  locale: Language
+  /** Path base do app (sempre /pt - painel não traduzido) */
+  appBasePath?: string
+}
+
+export function AreaLandingPage({ area, locale, appBasePath = '/pt' }: AreaLandingPageProps) {
+  const componentArea = AREA_TO_COMPONENT[area] ?? 'nutri'
+  const { user, loading } = useAuth()
+  const router = useRouter()
+  const [mounted, setMounted] = useState(false)
+  const [faqOpen, setFaqOpen] = useState<number | null>(null)
+
+  const homeHref = `/${locale}`
+  const loginHref = `${appBasePath}/${area}/login`
+  const homeRedirect = `${appBasePath}/${area}/home`
+  const checkoutBase = `${appBasePath}/${area}/checkout`
+  const ofertaHref = `${appBasePath}/${area}/oferta`
+
+  const c = COMMON[locale]
+  const label = AREA_LABELS[area]?.[locale] ?? AREA_LABELS[area]?.pt ?? area
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  useEffect(() => {
+    if (!mounted || loading) return
+    if (user) {
+      router.replace(homeRedirect)
+    }
+  }, [mounted, loading, user, router, homeRedirect])
+
+  if (loading || (mounted && user)) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="animate-spin rounded-full h-10 w-10 border-2 border-blue-600 border-t-transparent" />
+      </div>
+    )
+  }
+
+  return (
+    <div className="min-h-screen bg-white">
+      <header className="sticky top-0 z-50 border-b border-gray-200 bg-white shadow-sm h-14 sm:h-16 flex items-center">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-2 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Link href={homeHref} className="flex items-center gap-2">
+              <span className="font-bold text-gray-900">YLADA</span>
+              <span className="text-gray-500 text-sm">· {label}</span>
+            </Link>
+            <span className="hidden sm:inline text-xs text-gray-400 border-l border-gray-200 pl-3">
+              {c.platformPart}
+            </span>
+          </div>
+          <Link
+            href={loginHref}
+            className="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            {c.enter}
+          </Link>
+        </div>
+      </header>
+
+      <main>
+        <section className="py-12 sm:py-16 lg:py-20 bg-gradient-to-br from-blue-50 to-indigo-50">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="max-w-2xl mx-auto text-center">
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 leading-tight mb-4">
+                {locale === 'pt' && (
+                  <>
+                    Pare de responder curiosos.
+                    <br />
+                    Comece consultas com contexto.
+                  </>
+                )}
+                {locale === 'en' && (
+                  <>
+                    Stop answering curious people.
+                    <br />
+                    Start consultations with context.
+                  </>
+                )}
+                {locale === 'es' && (
+                  <>
+                    Deja de responder curiosos.
+                    <br />
+                    Comienza consultas con contexto.
+                  </>
+                )}
+              </h1>
+              <p className="text-base sm:text-lg text-gray-600 mb-4">
+                {locale === 'pt' && 'O YLADA permite que pacientes respondam uma avaliação rápida antes do primeiro contato, gerando um diagnóstico inicial e conversas muito mais qualificadas.'}
+                {locale === 'en' && 'YLADA allows patients to complete a quick assessment before the first contact, generating an initial diagnosis and much more qualified conversations.'}
+                {locale === 'es' && 'YLADA permite que los pacientes respondan una evaluación rápida antes del primer contacto, generando un diagnóstico inicial y conversaciones mucho más cualificadas.'}
+              </p>
+              <p className="text-lg sm:text-xl text-gray-700 font-medium mb-6">
+                {locale === 'pt' && 'Transforme curiosos em pacientes preparados para consulta.'}
+                {locale === 'en' && 'Turn curious people into patients prepared for consultation.'}
+                {locale === 'es' && 'Transforma curiosos en pacientes preparados para consulta.'}
+              </p>
+              <p className="text-sm sm:text-base text-gray-600 italic mb-6 border-l-4 border-blue-500 pl-4 py-2 bg-blue-50/50 rounded-r-lg text-left max-w-md mx-auto">
+                {locale === 'pt' && 'Servir antes de vender. Entender antes de orientar. Conversar antes da consulta.'}
+                {locale === 'en' && 'Serve before selling. Understand before guiding. Talk before the consultation.'}
+                {locale === 'es' && 'Servir antes de vender. Entender antes de orientar. Conversar antes de la consulta.'}
+              </p>
+              <div className="flex flex-col items-center gap-1 mb-8 text-sm text-gray-600">
+                <span>
+                  {locale === 'pt' && 'Paciente responde avaliação'}
+                  {locale === 'en' && 'Patient completes assessment'}
+                  {locale === 'es' && 'El paciente responde la evaluación'}
+                </span>
+                <span className="text-gray-400">↓</span>
+                <span>
+                  {locale === 'pt' && 'Sistema gera diagnóstico'}
+                  {locale === 'en' && 'System generates diagnosis'}
+                  {locale === 'es' && 'El sistema genera diagnóstico'}
+                </span>
+                <span className="text-gray-400">↓</span>
+                <span>
+                  {locale === 'pt' && 'A conversa começa com contexto'}
+                  {locale === 'en' && 'The conversation starts with context'}
+                  {locale === 'es' && 'La conversación comienza con contexto'}
+                </span>
+              </div>
+              <Link
+                href={locale === 'pt' ? `/${locale}/precos` : `${appBasePath}/precos`}
+                className="inline-flex items-center justify-center px-8 py-4 rounded-xl bg-blue-600 text-white font-semibold text-lg hover:bg-blue-700 transition-colors shadow-lg"
+              >
+                {locale === 'pt' && 'Começar agora'}
+                {locale === 'en' && 'Get started'}
+                {locale === 'es' && 'Comenzar ahora'}
+                <span className="ml-2" aria-hidden>→</span>
+              </Link>
+              <p className="text-gray-500 text-sm mt-3">
+                {locale === 'pt' && 'Acesso liberado após o pagamento'}
+                {locale === 'en' && 'Access granted after payment'}
+                {locale === 'es' && 'Acceso liberado después del pago'}
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <HeroBeforeAfter area={componentArea} />
+
+        <section className="py-12 sm:py-16 bg-white">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="max-w-2xl mx-auto">
+              <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-6 text-center">
+                {locale === 'pt' && 'Nutricionistas enfrentam três dificuldades comuns no marketing online'}
+                {locale === 'en' && 'Nutritionists face three common challenges in online marketing'}
+                {locale === 'es' && 'Los nutricionistas enfrentan tres dificultades comunes en el marketing online'}
+              </h2>
+              <ul className="space-y-4 text-gray-700">
+                <li className="flex items-start gap-3">
+                  <span className="text-red-500 font-bold shrink-0">•</span>
+                  <span>
+                    {locale === 'pt' && 'Pacientes pedindo orientação gratuita'}
+                    {locale === 'en' && 'Patients asking for free guidance'}
+                    {locale === 'es' && 'Pacientes pidiendo orientación gratuita'}
+                  </span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="text-red-500 font-bold shrink-0">•</span>
+                  <span>
+                    {locale === 'pt' && 'Conversas que não viram consulta'}
+                    {locale === 'en' && 'Conversations that don\'t turn into consultations'}
+                    {locale === 'es' && 'Conversaciones que no se convierten en consulta'}
+                  </span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="text-red-500 font-bold shrink-0">•</span>
+                  <span>
+                    {locale === 'pt' && 'Falta de clareza no primeiro contato'}
+                    {locale === 'en' && 'Lack of clarity in the first contact'}
+                    {locale === 'es' && 'Falta de claridad en el primer contacto'}
+                  </span>
+                </li>
+              </ul>
+              <p className="text-center text-gray-600 mt-8 font-medium">
+                {locale === 'pt' && 'Isso consome tempo, gera conversas improdutivas e reduz a qualidade das consultas.'}
+                {locale === 'en' && 'This consumes time, generates unproductive conversations and reduces the quality of consultations.'}
+                {locale === 'es' && 'Esto consume tiempo, genera conversaciones improductivas y reduce la calidad de las consultas.'}
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section className="py-12 sm:py-16 bg-gray-50">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="max-w-2xl mx-auto">
+              <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-6 text-center">
+                {locale === 'pt' && 'O YLADA ajuda você a explicar o processo antes da consulta'}
+                {locale === 'en' && 'YLADA helps you explain the process before the consultation'}
+                {locale === 'es' && 'YLADA te ayuda a explicar el proceso antes de la consulta'}
+              </h2>
+              <p className="text-lg text-gray-700 mb-6 text-center">
+                {locale === 'pt' && 'O paciente responde uma avaliação rápida antes do contato. Assim você entende hábitos, objetivos e pode orientar sobre o processo da consulta.'}
+                {locale === 'en' && 'The patient completes a quick assessment before contact. This way you understand habits, goals and can guide them about the consultation process.'}
+                {locale === 'es' && 'El paciente responde una evaluación rápida antes del contacto. Así entiendes hábitos, objetivos y puedes orientar sobre el proceso de la consulta.'}
+              </p>
+              <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
+                <p className="text-gray-700 text-center">
+                  {locale === 'pt' && 'Explicar melhor o processo antes da primeira consulta.'}
+                  {locale === 'en' && 'Better explain the process before the first consultation.'}
+                  {locale === 'es' && 'Explicar mejor el proceso antes de la primera consulta.'}
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="py-12 sm:py-16 bg-white">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="max-w-3xl mx-auto">
+              <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-10 text-center">
+                {locale === 'pt' && 'Como funciona'}
+                {locale === 'en' && 'How it works'}
+                {locale === 'es' && 'Cómo funciona'}
+              </h2>
+              <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                {[
+                  { step: '1', titlePt: 'Escolha uma avaliação', titleEn: 'Choose an assessment', titleEs: 'Elige una evaluación', descPt: 'Quizzes e diagnósticos prontos para nutrição.', descEn: 'Ready-made quizzes and diagnostics for nutrition.', descEs: 'Cuestionarios y diagnósticos listos para nutrición.' },
+                  { step: '2', titlePt: 'Compartilhe o link', titleEn: 'Share the link', titleEs: 'Comparte el enlace', descPt: 'Use em redes sociais, WhatsApp ou site.', descEn: 'Use on social media, WhatsApp or website.', descEs: 'Usa en redes sociales, WhatsApp o sitio web.' },
+                  { step: '3', titlePt: 'O paciente responde', titleEn: 'The patient responds', titleEs: 'El paciente responde', descPt: 'O sistema identifica hábitos, objetivos e o momento.', descEn: 'The system identifies habits, goals and timing.', descEs: 'El sistema identifica hábitos, objetivos y el momento.' },
+                  { step: '4', titlePt: 'Consulta com contexto', titleEn: 'Consultation with context', titleEs: 'Consulta con contexto', descPt: 'Você atende pacientes que já entendem o valor da avaliação.', descEn: 'You serve patients who already understand the value of the assessment.', descEs: 'Atiendes pacientes que ya entienden el valor de la evaluación.' },
+                ].map((item) => (
+                  <div key={item.step} className="text-center p-4">
+                    <span className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-blue-100 text-blue-600 font-bold text-lg mb-3">
+                      {item.step}
+                    </span>
+                    <h3 className="font-semibold text-gray-900 mb-2">
+                      {locale === 'pt' ? item.titlePt : locale === 'en' ? item.titleEn : item.titleEs}
+                    </h3>
+                    <p className="text-sm text-gray-600">
+                      {locale === 'pt' ? item.descPt : locale === 'en' ? item.descEn : item.descEs}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <DiagnosticoExemploSection area={componentArea} ctaHref={ofertaHref} />
+
+        <section className="py-12 sm:py-16 bg-gray-50">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="max-w-2xl mx-auto">
+              <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-8 text-center">
+                {locale === 'pt' && 'Quando a consulta começa com contexto, tudo muda'}
+                {locale === 'en' && 'When the consultation starts with context, everything changes'}
+                {locale === 'es' && 'Cuando la consulta comienza con contexto, todo cambia'}
+              </h2>
+              <ul className="space-y-4 mb-6">
+                {[
+                  { pt: 'Menos curiosos', en: 'Fewer curious people', es: 'Menos curiosos' },
+                  { pt: 'Pacientes mais preparados', en: 'More prepared patients', es: 'Pacientes más preparados' },
+                  { pt: 'Consultas mais qualificadas', en: 'More qualified consultations', es: 'Consultas más cualificadas' },
+                  { pt: 'Mais clareza no primeiro contato', en: 'More clarity in the first contact', es: 'Más claridad en el primer contacto' },
+                  { pt: 'Menos tempo explicando no WhatsApp', en: 'Less time explaining on WhatsApp', es: 'Menos tiempo explicando en WhatsApp' },
+                  { pt: 'Mais autoridade profissional', en: 'More professional authority', es: 'Más autoridad profesional' },
+                ].map((b) => (
+                  <li key={b.pt} className="flex items-center gap-3 text-gray-700">
+                    <span className="text-green-600 font-bold">✔</span>
+                    <span>{locale === 'pt' ? b.pt : locale === 'en' ? b.en : b.es}</span>
+                  </li>
+                ))}
+              </ul>
+              <p className="text-gray-800 font-semibold text-center mt-6">
+                {locale === 'pt' && 'Menos curiosos. Mais pacientes realmente interessados.'}
+                {locale === 'en' && 'Fewer curious people. More truly interested patients.'}
+                {locale === 'es' && 'Menos curiosos. Más pacientes realmente interesados.'}
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <UseCasesSection area={componentArea} />
+
+        <section className="py-12 sm:py-16 bg-gray-50">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="max-w-3xl mx-auto">
+              <PricingSectionLanding checkoutBasePath={checkoutBase} />
+            </div>
+          </div>
+        </section>
+
+        <section className="py-14 sm:py-20 bg-blue-600">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="max-w-xl mx-auto text-center">
+              <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4">
+                {locale === 'pt' && 'Comece a usar o YLADA hoje'}
+                {locale === 'en' && 'Start using YLADA today'}
+                {locale === 'es' && 'Empieza a usar YLADA hoy'}
+              </h2>
+              <p className="text-blue-100 mb-6">
+                {locale === 'pt' && 'Crie seu primeiro diagnóstico em minutos.'}
+                {locale === 'en' && 'Create your first diagnosis in minutes.'}
+                {locale === 'es' && 'Crea tu primer diagnóstico en minutos.'}
+              </p>
+              <Link
+                href={`${checkoutBase}?plan=annual`}
+                className="inline-flex items-center justify-center px-8 py-4 rounded-xl bg-white text-blue-600 font-semibold text-lg hover:bg-blue-50 transition-colors shadow-lg"
+              >
+                {locale === 'pt' && 'Começar agora'}
+                {locale === 'en' && 'Get started'}
+                {locale === 'es' && 'Comenzar ahora'}
+                <span className="ml-2" aria-hidden>→</span>
+              </Link>
+              <p className="text-blue-100 text-sm mt-3">
+                {locale === 'pt' && 'Acesso liberado após o pagamento'}
+                {locale === 'en' && 'Access granted after payment'}
+                {locale === 'es' && 'Acceso liberado después del pago'}
+              </p>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <footer className="border-t border-gray-200 bg-white py-10">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-4xl mx-auto">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-6 mb-6">
+              <div className="text-center sm:text-left">
+                <span className="font-bold text-gray-900 text-lg">YLADA</span>
+                <p className="text-gray-600 text-sm mt-1">
+                  {locale === 'pt' && 'Plataforma de diagnósticos para iniciar conversas com contexto.'}
+                  {locale === 'en' && 'Diagnostics platform to start conversations with context.'}
+                  {locale === 'es' && 'Plataforma de diagnósticos para iniciar conversas con contexto.'}
+                </p>
+              </div>
+              <nav className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-sm">
+                <Link href={locale === 'pt' ? '/pt/metodo-ylada' : `${appBasePath}/metodo-ylada`} className="text-gray-600 hover:text-gray-900">
+                  {locale === 'pt' ? 'Método YLADA' : locale === 'en' ? 'YLADA Method' : 'Método YLADA'}
+                </Link>
+                <Link href={locale === 'pt' ? '/pt/profissionais' : `${appBasePath}/profissionais`} className="text-gray-600 hover:text-gray-900">
+                  {locale === 'pt' ? 'Profissionais' : locale === 'en' ? 'Professionals' : 'Profesionales'}
+                </Link>
+                <Link href={locale === 'pt' ? '/pt/precos' : `${appBasePath}/precos`} className="text-gray-600 hover:text-gray-900">
+                  {locale === 'pt' ? 'Planos' : locale === 'en' ? 'Plans' : 'Planes'}
+                </Link>
+                <Link href={locale === 'pt' ? '/pt/politica-de-privacidade' : `${appBasePath}/politica-de-privacidade`} className="text-gray-600 hover:text-gray-900">
+                  {locale === 'pt' ? 'Privacidade' : locale === 'en' ? 'Privacy' : 'Privacidad'}
+                </Link>
+                <Link href={locale === 'pt' ? '/pt/termos-de-uso' : `${appBasePath}/termos-de-uso`} className="text-gray-600 hover:text-gray-900">
+                  {locale === 'pt' ? 'Termos' : locale === 'en' ? 'Terms' : 'Términos'}
+                </Link>
+              </nav>
+            </div>
+            <p className="text-center sm:text-left text-gray-500 text-xs">
+              © {new Date().getFullYear()} YLADA
+            </p>
+          </div>
+        </div>
+      </footer>
+    </div>
+  )
+}

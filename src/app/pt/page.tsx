@@ -1,9 +1,17 @@
 'use client'
 
-import { useEffect } from 'react'
+import { Suspense, useEffect } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
 import InstitutionalPageContent from '@/app/pt/InstitutionalPageContent'
+
+function PtHomeFallback() {
+  return (
+    <div className="min-h-screen flex items-center justify-center p-4 bg-white">
+      <p className="text-gray-500">Carregando...</p>
+    </div>
+  )
+}
 
 export default function PtHomePage() {
   const { user, loading } = useAuth()
@@ -34,5 +42,9 @@ export default function PtHomePage() {
     )
   }
 
-  return <InstitutionalPageContent />
+  return (
+    <Suspense fallback={<PtHomeFallback />}>
+      <InstitutionalPageContent />
+    </Suspense>
+  )
 }

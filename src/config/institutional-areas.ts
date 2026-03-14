@@ -36,3 +36,25 @@ export const INSTITUTIONAL_AREAS: InstitutionalArea[] = [
   { id: 'profissional-liberal', path: '/pt/solicitar-acesso?area=profissional-liberal', status: 'construction', translationKey: 'profissional-liberal' },
   { id: 'vendedores-geral', path: '/pt/solicitar-acesso?area=vendedores-geral', status: 'construction', translationKey: 'vendedores-geral' },
 ]
+
+/** Mapeamento área → path base (sem locale). Landings em /area, login em /area/login. */
+const AREA_BASE_PATHS: Record<string, string> = {
+  nutri: '/nutri',
+  psi: '/psi',
+  psicanalise: '/psicanalise/login',
+  odonto: '/odonto',
+  med: '/med',
+  'coach-bem-estar': '/coach-bem-estar',
+  estetica: '/estetica',
+  fitness: '/fitness',
+  nutra: '/nutra',
+  perfumaria: '/perfumaria',
+  'profissional-liberal': '/solicitar-acesso?area=profissional-liberal',
+  'vendedores-geral': '/solicitar-acesso?area=vendedores-geral',
+}
+
+/** Retorna path da área com locale (ex: getAreaPath('nutri', 'es') → '/es/nutri') */
+export function getAreaPath(areaId: string, locale: string): string {
+  const base = AREA_BASE_PATHS[areaId] ?? `/${areaId}`
+  return `/${locale}${base}`
+}
