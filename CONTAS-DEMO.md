@@ -4,6 +4,13 @@ Contas fictícias criadas especificamente para gravação de vídeos de divulga�
 
 ## 📋 Credenciais de Acesso
 
+### 💆 Conta Demo Estética (perfil já preenchido)
+- **Email:** `demo.estetica@ylada.app`
+- **Senha:** `Demo@2025!`
+- **URL após login:** `/pt/estetica/home` (ou acesse **Perfil** no menu para ver o perfil empresarial completo)
+- **Perfil:** Demo Esteticista — perfil Noel já preenchido (clínica, pele, skincare, autocuidado, agenda, captação).
+- Para criar ou atualizar esta conta com perfil preenchido: `node scripts/criar-contas-demo-videos.js`
+
 ### 🥗 Conta Demo Nutri
 - **Email:** `demo.nutri@ylada.com`
 - **Senha:** `DemoYlada2024!` (você pode alterar nas configurações)

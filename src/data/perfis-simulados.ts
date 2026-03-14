@@ -145,9 +145,9 @@ const odonto: YladaNoelProfileRow = {
   area_specific: { temas_atuacao: ['saude_bucal', 'clareamento', 'implantes'] },
 }
 
-/** Esteticista — clínica, pele, skincare, autocuidado. */
+/** Esteticista — clínica, pele, skincare, autocuidado. (segment estetica para área Estética.) */
 const estetica: YladaNoelProfileRow = {
-  segment: 'ylada',
+  segment: 'estetica',
   profile_type: 'liberal',
   profession: 'estetica',
   flow_id: 'liberal_v1',

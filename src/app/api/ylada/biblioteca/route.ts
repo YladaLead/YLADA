@@ -35,7 +35,8 @@ export async function GET(request: NextRequest) {
       query = query.eq('tema', tema)
     }
     if (segmento) {
-      query = query.contains('segment_codes', [segmento])
+      // Overlap: retorna itens cujo segment_codes tem pelo menos um valor em comum (ex: ['aesthetics'])
+      query = query.overlaps('segment_codes', [segmento])
     }
 
     const { data, error } = await query

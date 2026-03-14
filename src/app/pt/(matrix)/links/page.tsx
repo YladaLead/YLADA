@@ -8,6 +8,8 @@ import { getFlowById } from '@/config/ylada-flow-catalog'
 import { getTemasForProfession, getTemaLabel, TEMA_OUTRO_VALUE, TEMA_ICONS } from '@/config/ylada-temas'
 import { getFerramentasForTema, type FerramentaConcreta } from '@/config/ylada-temas-ferramentas'
 import { getSugestoesDiagnostico, getLabelSegmentoSugestoes } from '@/config/ylada-links-sugestoes'
+import { useAuth } from '@/hooks/useAuth'
+import { CompartilharDiagnosticoContent } from '@/components/ylada/CompartilharDiagnosticoContent'
 /** Objetivos do link: norte para a sugestão (quiz vs calculadora e texto). */
 const LINK_OBJECTIVES = [
   { value: 'captar', label: 'Captar', description: 'Trazer pessoas novas (possíveis pacientes ou clientes)' },
@@ -139,6 +141,8 @@ function LinksPageContent({ areaCodigo = 'ylada', areaLabel = 'YLADA' }: LinksPa
   const [editTitle, setEditTitle] = useState('')
   const [editCtaWhatsapp, setEditCtaWhatsapp] = useState('')
   const [savingEdit, setSavingEdit] = useState(false)
+  const [divulgarLink, setDivulgarLink] = useState<LinkRow | null>(null)
+  const { userProfile } = useAuth()
   const [profile, setProfile] = useState<{ profile_type?: string | null; profession?: string | null; area_specific?: Record<string, unknown> | null } | null>(null)
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [linkObjective, setLinkObjective] = useState<LinkObjectiveValue>('captar')
@@ -749,8 +753,18 @@ function LinksPageContent({ areaCodigo = 'ylada', areaLabel = 'YLADA' }: LinksPa
 
         {/* Criar novo diagnóstico */}
         <section ref={criadorRef} className="bg-white rounded-lg border border-gray-200 p-4">
-          <h2 className="text-base font-semibold text-gray-900 mb-1">Criar novo diagnóstico</h2>
-          <p className="text-xs text-gray-500 mb-4">Escolha o tema que você quer trabalhar.</p>
+          <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
+            <div>
+              <h2 className="text-base font-semibold text-gray-900 mb-1">Criar novo diagnóstico</h2>
+              <p className="text-xs text-gray-500">Escolha o tema que você quer trabalhar.</p>
+            </div>
+            <Link
+              href={`${prefix}/links/novo`}
+              className="shrink-0 rounded-xl bg-sky-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-sky-700 transition-colors"
+            >
+              🧠 Criar em 1 clique com o Noel
+            </Link>
+          </div>
           {!showTextFlow ? (
             /* --- Tema primeiro: Qual tema? → 2 cards --- */
             strategyLoading ? (
@@ -1176,6 +1190,13 @@ function LinksPageContent({ areaCodigo = 'ylada', areaLabel = 'YLADA' }: LinksPa
                         >
                           Copiar URL
                         </button>
+                        <button
+                          type="button"
+                          onClick={() => setDivulgarLink(link)}
+                          className="rounded px-2 py-1.5 text-xs font-medium text-indigo-600 hover:bg-indigo-50"
+                        >
+                          Divulgar
+                        </button>
                         {isActive && (
                           <button
                             type="button"
@@ -1220,6 +1241,33 @@ function LinksPageContent({ areaCodigo = 'ylada', areaLabel = 'YLADA' }: LinksPa
             </ul>
           )}
         </section>
+
+        {divulgarLink && (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50"
+            aria-modal="true"
+            role="dialog"
+            onClick={() => setDivulgarLink(null)}
+          >
+            <div className="bg-white rounded-xl shadow-lg border border-gray-200 w-full max-w-lg max-h-[90vh] overflow-y-auto p-5" onClick={(e) => e.stopPropagation()}>
+              <h3 className="text-sm font-semibold text-gray-900 mb-1">Divulgar</h3>
+              <p className="text-xs text-gray-600 mb-4">{divulgarLink.title || divulgarLink.slug}</p>
+              <CompartilharDiagnosticoContent
+                titulo={divulgarLink.title || divulgarLink.slug}
+                url={divulgarLink.url}
+                nomeProfissional={userProfile?.nome_completo ?? 'Profissional'}
+                contador={divulgarLink.stats?.diagnosis_count ?? divulgarLink.stats?.complete}
+              />
+              <button
+                type="button"
+                onClick={() => setDivulgarLink(null)}
+                className="mt-4 w-full py-2 text-sm text-gray-500 hover:text-gray-700"
+              >
+                Fechar
+              </button>
+            </div>
+          </div>
+        )}
 
         {editingLink && (
           <div

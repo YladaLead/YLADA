@@ -25,7 +25,7 @@ export default function NutraNavBar({ showTitle = false, title }: NutraNavBarPro
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <div className="flex items-center space-x-4">
-            <Link href="/pt/nutra/dashboard">
+            <Link href="/pt/nutra/home">
               <Image
                 src="/images/logo/ylada/horizontal/laranja/ylada-horizontal-laranja-14.png"
                 alt="YLADA Nutra"
@@ -46,10 +46,10 @@ export default function NutraNavBar({ showTitle = false, title }: NutraNavBarPro
           {/* Navegação */}
           <nav className="flex items-center space-x-6">
             <Link
-              href="/pt/nutra/dashboard"
+              href="/pt/nutra/home"
               className="text-gray-700 hover:text-orange-600 font-medium transition-colors"
             >
-              Dashboard
+              Início
             </Link>
             <Link
               href="/pt/nutra/configuracao"

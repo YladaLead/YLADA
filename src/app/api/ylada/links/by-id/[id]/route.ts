@@ -39,7 +39,48 @@ export async function GET(
       return NextResponse.json({ success: false, error: 'Link não encontrado' }, { status: 404 })
     }
 
-    return NextResponse.json({ success: true, data: link })
+    // Stats para "Diagnóstico em movimento" (respostas, views, etc.)
+    let stats: { view: number; start: number; complete: number; cta_click: number; diagnosis_count: number; conversion_rate: number | null } = {
+      view: 0,
+      start: 0,
+      complete: 0,
+      cta_click: 0,
+      diagnosis_count: 0,
+      conversion_rate: null,
+    }
+    try {
+      const statsRes = await supabaseAdmin.rpc('get_ylada_link_stats', { link_ids: [id] })
+      if (Array.isArray(statsRes.data) && statsRes.data.length > 0) {
+        for (const r of statsRes.data as Array<{ link_id: string; event_type: string; cnt: number | string }>) {
+          const n = typeof r.cnt === 'number' ? r.cnt : parseInt(String(r.cnt), 10) || 0
+          if (r.event_type === 'view') stats.view = n
+          else if (r.event_type === 'start') stats.start = n
+          else if (r.event_type === 'complete') stats.complete = n
+          else if (r.event_type === 'cta_click') stats.cta_click = n
+        }
+      }
+      const { count: diagCount } = await supabaseAdmin
+        .from('ylada_diagnosis_metrics')
+        .select('id', { count: 'exact', head: true })
+        .eq('link_id', id)
+      stats.diagnosis_count = diagCount ?? 0
+      stats.conversion_rate =
+        stats.diagnosis_count > 0 && stats.cta_click > 0
+          ? Math.round((stats.cta_click / stats.diagnosis_count) * 1000) / 10
+          : null
+    } catch {
+      // RPC ou tabela podem não existir; stats ficam zerados
+    }
+
+    const host = request.headers.get('host') || ''
+    const protocol = request.headers.get('x-forwarded-proto') || 'http'
+    const baseUrl = host ? `${protocol}://${host}` : ''
+    const url = baseUrl ? `${baseUrl}/l/${link.slug}` : `/l/${link.slug}`
+
+    return NextResponse.json({
+      success: true,
+      data: { ...link, url, stats },
+    })
   } catch (e) {
     console.error('[ylada/links/by-id/[id]] GET', e)
     return NextResponse.json({ success: false, error: 'Erro ao buscar link' }, { status: 500 })

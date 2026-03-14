@@ -1,10 +1,36 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
+import { useRouter } from 'next/navigation'
+import { useAuth } from '@/contexts/AuthContext'
 import LanguageSelector from '../../../components/LanguageSelector'
 
 export default function NutraLandingPage() {
+  const { user, loading } = useAuth()
+  const router = useRouter()
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  useEffect(() => {
+    if (!mounted || loading) return
+    if (user) {
+      router.replace('/pt/nutra/home')
+    }
+  }, [mounted, loading, user, router])
+
+  if (loading || (mounted && user)) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="animate-spin rounded-full h-10 w-10 border-2 border-orange-600 border-t-transparent" />
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}

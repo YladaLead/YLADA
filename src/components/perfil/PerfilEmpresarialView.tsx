@@ -198,50 +198,65 @@ export default function PerfilEmpresarialView({ areaCodigo, areaLabel }: PerfilE
     )
   }
 
-  // —— Só intro: sem tipo/profissão ——
+  // —— Só intro: sem tipo/profissão (perfil vazio — precisa preencher) ——
   if (onlyIntro) {
     return (
       <YladaAreaShell areaCodigo={areaCodigo} areaLabel={areaLabel}>
-        <div className="max-w-2xl space-y-6">
-          <div>
-            <h1 className="text-xl font-bold text-gray-900 mb-2">Perfil empresarial</h1>
-            <p className="text-gray-600 mb-4">
-              Para personalizar as perguntas e as orientações do Noel, comece pela sua área de atuação.
-            </p>
+        <div className="max-w-2xl mx-auto space-y-6">
+          {/* Card de boas-vindas */}
+          <div className="rounded-xl bg-gradient-to-br from-indigo-50 to-white border border-indigo-100 p-6 sm:p-8">
+            <div className="flex items-start gap-4">
+              <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-indigo-100 flex items-center justify-center text-2xl" aria-hidden>
+                👤
+              </div>
+              <div>
+                <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-1">Perfil empresarial</h1>
+                <p className="text-gray-600 text-sm sm:text-base">
+                  Preencha seu perfil para o Noel personalizar as orientações, os diagnósticos e as sugestões para o seu tipo de negócio.
+                </p>
+                <p className="text-gray-500 text-xs sm:text-sm mt-2">
+                  Comece escolhendo sua área de atuação abaixo — em poucos passos você termina.
+                </p>
+              </div>
+            </div>
           </div>
+
           {message && (
             <div
-              className={`p-3 rounded-lg text-sm ${message.type === 'success' ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'}`}
+              className={`p-3 rounded-lg text-sm ${message.type === 'success' ? 'bg-green-50 text-green-800 border border-green-200' : 'bg-red-50 text-red-800 border border-red-200'}`}
             >
               {message.text}
             </div>
           )}
-          <section className="bg-white rounded-lg border border-gray-200 p-6">
-            <h2 className="text-sm font-semibold text-gray-700 mb-1">Área de atuação</h2>
-            <p className="text-xs text-gray-500 mb-4">Isso ajuda o Noel a adaptar as perguntas e as estratégias ao seu tipo de negócio.</p>
-            <div className="space-y-4">
+
+          <section className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+            <div className="bg-gray-50 border-b border-gray-200 px-5 py-4">
+              <h2 className="text-sm font-semibold text-gray-800">Área de atuação</h2>
+              <p className="text-xs text-gray-500 mt-0.5">Isso ajuda o Noel a adaptar as perguntas e as estratégias ao seu negócio.</p>
+            </div>
+            <div className="p-5 sm:p-6 space-y-5">
               <label className="block">
-                <span className="text-sm text-gray-600">Você atua como</span>
+                <span className="text-sm font-medium text-gray-700">Você atua como</span>
                 <select
-                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+                  className="mt-2 block w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                   value={form.profile_type}
                   onChange={(e) => update({ profile_type: e.target.value, profession: '' })}
                 >
-                  <option value="">Selecione</option>
+                  <option value="">Selecione...</option>
                   {(Object.entries(PROFILE_TYPE_LABELS) as [ProfileType, string][]).map(([value, label]) => (
                     <option key={value} value={value}>{label}</option>
                   ))}
                 </select>
               </label>
               <label className="block">
-                <span className="text-sm text-gray-600">{professionFieldLabel}</span>
+                <span className="text-sm font-medium text-gray-700">{professionFieldLabel}</span>
                 <select
-                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+                  className="mt-2 block w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 disabled:bg-gray-50 disabled:text-gray-400"
                   value={form.profession}
                   onChange={(e) => update({ profession: e.target.value })}
                   disabled={!form.profile_type}
                 >
-                  <option value="">Selecione</option>
+                  <option value="">Selecione...</option>
                   {professionsSorted.map(({ value, label }) => (
                     <option key={value} value={value}>{label}</option>
                   ))}
@@ -249,10 +264,10 @@ export default function PerfilEmpresarialView({ areaCodigo, areaLabel }: PerfilE
               </label>
               {form.profession === 'outro' && (
                 <label className="block">
-                  <span className="text-sm text-gray-600">Descreva sua atuação</span>
+                  <span className="text-sm font-medium text-gray-700">Descreva sua atuação</span>
                   <input
                     type="text"
-                    className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+                    className="mt-2 block w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                     placeholder={
                       form.profile_type === 'vendas'
                         ? 'Ex.: outro tipo de produto ou serviço que você vende...'
@@ -264,14 +279,14 @@ export default function PerfilEmpresarialView({ areaCodigo, areaLabel }: PerfilE
                 </label>
               )}
             </div>
-            <div className="mt-6 flex justify-end">
+            <div className="px-5 sm:px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-end">
               <button
                 type="button"
                 onClick={() => setStepIndex(1)}
                 disabled={!form.profile_type || !form.profession}
-                className="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-md hover:bg-indigo-700 disabled:opacity-50"
+                className="px-5 py-2.5 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
-                Avançar
+                Avançar →
               </button>
             </div>
           </section>

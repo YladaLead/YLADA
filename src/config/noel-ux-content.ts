@@ -3,7 +3,7 @@
  * Usado em NoelChat para orientar o usuário e aumentar engajamento.
  */
 
-export type NoelArea = 'ylada' | 'med' | 'psi' | 'psicanalise' | 'odonto' | 'nutra' | 'coach' | 'seller' | 'perfumaria' | 'estetica' | 'fitness'
+export type NoelArea = 'ylada' | 'med' | 'psi' | 'psicanalise' | 'odonto' | 'nutra' | 'nutri' | 'coach' | 'seller' | 'perfumaria' | 'estetica' | 'fitness'
 
 export interface NoelUxContent {
   welcomeMessage: string
@@ -131,6 +131,21 @@ O que você gostaria de fazer agora?`,
     suggestions: DEFAULT_SUGGESTIONS,
     placeholder: 'Pergunte algo ao Noel...',
     placeholderExample: 'Ex: Como vender mais produtos',
+  },
+  nutri: {
+    welcomeMessage: `Olá! Eu sou o Noel.
+
+Posso te ajudar a:
+
+• Criar diagnósticos que atraem pacientes
+• Melhorar seus diagnósticos
+• Gerar ideias de conteúdo
+• Organizar sua estratégia de crescimento
+
+O que você gostaria de fazer agora?`,
+    suggestions: DEFAULT_SUGGESTIONS,
+    placeholder: 'Pergunte algo ao Noel...',
+    placeholderExample: 'Ex: Como atrair mais pacientes para consulta',
   },
   coach: {
     welcomeMessage: `Olá! Eu sou o Noel.

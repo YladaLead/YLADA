@@ -6,8 +6,11 @@ import { formatDisplayTitle } from '@/lib/ylada/strategic-intro'
 import { usePathname } from 'next/navigation'
 import YladaAreaShell from '@/components/ylada/YladaAreaShell'
 import { getYladaAreaPathPrefix } from '@/config/ylada-areas'
+import { useAuth } from '@/hooks/useAuth'
+import { CompartilharDiagnosticoContent } from '@/components/ylada/CompartilharDiagnosticoContent'
 
 type FormField = { id: string; label: string; type?: string; options?: string[] }
+type LinkStats = { view: number; start: number; complete: number; cta_click: number; diagnosis_count?: number; conversion_rate?: number | null }
 type LinkData = {
   id: string
   slug: string
@@ -18,16 +21,18 @@ type LinkData = {
     form?: { fields?: FormField[]; submit_label?: string }
   }
   cta_whatsapp?: string | null
+  url?: string
+  stats?: LinkStats
 }
 
 /** Deriva areaCodigo e areaLabel do pathname (ex: /pt/psi/links/editar/123 → psi). */
 function useAreaFromPath() {
   const pathname = usePathname()
   if (!pathname) return { areaCodigo: 'ylada' as const, areaLabel: 'YLADA' }
-  const m = pathname.match(/^\/pt\/(med|psi|odonto|nutra|coach|psicanalise|perfumaria|seller|estetica|fitness)\//)
+  const m = pathname.match(/^\/pt\/(med|psi|odonto|nutra|nutri|coach|psicanalise|perfumaria|seller|estetica|fitness)\//)
   const area = m?.[1] ?? 'ylada'
-  const labels: Record<string, string> = { med: 'Médicos', psi: 'Psicologia', odonto: 'Odontologia', nutra: 'Nutra', coach: 'Coach', psicanalise: 'Psicanálise', perfumaria: 'Perfumaria', seller: 'Vendedores', estetica: 'Estética', fitness: 'Fitness' }
-  return { areaCodigo: area as 'ylada' | 'med' | 'psi' | 'odonto' | 'nutra' | 'coach' | 'psicanalise' | 'perfumaria' | 'seller' | 'estetica' | 'fitness', areaLabel: labels[area] ?? 'YLADA' }
+  const labels: Record<string, string> = { med: 'Médicos', psi: 'Psicologia', odonto: 'Odontologia', nutra: 'Nutra', nutri: 'Nutri', coach: 'Coach', psicanalise: 'Psicanálise', perfumaria: 'Perfumaria', seller: 'Vendedores', estetica: 'Estética', fitness: 'Fitness' }
+  return { areaCodigo: area as 'ylada' | 'med' | 'psi' | 'odonto' | 'nutra' | 'nutri' | 'coach' | 'psicanalise' | 'perfumaria' | 'seller' | 'estetica' | 'fitness', areaLabel: labels[area] ?? 'YLADA' }
 }
 
 export default function EditarLinkPage({ params }: { params: Promise<{ id: string }> }) {
@@ -41,6 +46,8 @@ export default function EditarLinkPage({ params }: { params: Promise<{ id: strin
   const [editTitle, setEditTitle] = useState('')
   const [editFields, setEditFields] = useState<FormField[]>([])
   const [editingFieldIndex, setEditingFieldIndex] = useState<number | null>(null)
+  const [showCompartilhar, setShowCompartilhar] = useState(false)
+  const { userProfile } = useAuth()
 
   useEffect(() => {
     params.then((p) => setId(p.id))
@@ -181,7 +188,10 @@ export default function EditarLinkPage({ params }: { params: Promise<{ id: strin
   }
 
   const baseUrl = typeof window !== 'undefined' ? window.location.origin : ''
-  const previewUrl = `${baseUrl}/l/${link.slug}`
+  const previewUrl = link.url ?? `${baseUrl}/l/${link.slug}`
+  const tituloLink = link.title ?? link.config_json?.title ?? link.config_json?.page?.title ?? 'Diagnóstico'
+  const respostas = link.stats?.diagnosis_count ?? link.stats?.complete ?? 0
+  const metaSugerida = 20
 
   return (
     <YladaAreaShell areaCodigo={areaCodigo} areaLabel={areaLabel}>
@@ -198,6 +208,29 @@ export default function EditarLinkPage({ params }: { params: Promise<{ id: strin
           >
             Ver como visitante →
           </a>
+        </div>
+
+        {/* Diagnóstico em movimento — prova social + compartilhar (mesmo link) */}
+        <div className="rounded-2xl border-2 border-emerald-100 bg-gradient-to-br from-emerald-50/90 to-white p-5 shadow-sm">
+          <h2 className="text-base font-semibold text-gray-900 mb-1 flex items-center gap-2">
+            <span aria-hidden>📊</span> Resultados
+          </h2>
+          <p className="text-2xl font-bold text-emerald-800 mb-0.5">
+            {respostas} {respostas === 1 ? 'pessoa já respondeu' : 'pessoas já responderam'} esse diagnóstico
+          </p>
+          {metaSugerida > 0 && (
+            <p className="text-sm text-emerald-700 mb-4">
+              🎯 Meta sugerida: {metaSugerida} respostas
+            </p>
+          )}
+          <p className="text-sm text-gray-600 mb-4">Compartilhe o mesmo link para gerar mais respostas.</p>
+          <button
+            type="button"
+            onClick={() => setShowCompartilhar(true)}
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-6 py-3 text-sm font-semibold text-white hover:bg-emerald-700 shadow-sm"
+          >
+            Compartilhar diagnóstico
+          </button>
         </div>
 
         <h1 className="text-lg font-bold text-gray-900">Editar quiz</h1>
@@ -400,6 +433,24 @@ export default function EditarLinkPage({ params }: { params: Promise<{ id: strin
           </a>
         </div>
       </div>
+
+      {showCompartilhar && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50" aria-modal="true" role="dialog" onClick={() => setShowCompartilhar(false)}>
+          <div className="bg-white rounded-xl shadow-lg border border-gray-200 w-full max-w-lg max-h-[90vh] overflow-y-auto p-5" onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-sm font-semibold text-gray-900 mb-2">Compartilhar diagnóstico</h3>
+            <p className="text-xs text-gray-600 mb-4">{tituloLink}</p>
+            <CompartilharDiagnosticoContent
+              titulo={tituloLink}
+              url={previewUrl}
+              nomeProfissional={userProfile?.nome_completo ?? 'Profissional'}
+              contador={respostas}
+            />
+            <button type="button" onClick={() => setShowCompartilhar(false)} className="mt-4 w-full py-2 text-sm text-gray-500 hover:text-gray-700">
+              Fechar
+            </button>
+          </div>
+        </div>
+      )}
     </YladaAreaShell>
   )
 }
