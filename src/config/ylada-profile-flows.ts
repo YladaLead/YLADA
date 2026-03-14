@@ -14,6 +14,7 @@ export type ProfessionCode =
   | 'psi'
   | 'psicanalise'
   | 'coach'
+  | 'fitness'
   | 'nutricionista'
   | 'vendedor_suplementos'
   | 'vendedor_cosmeticos'
@@ -62,6 +63,7 @@ export const PROFESSION_BY_SEGMENT: Record<string, ProfessionCode[]> = {
     'psi',
     'nutricionista',
     'coach',
+    'fitness',
     'outro',
     'vendedor_suplementos',
     'vendedor_cosmeticos',
@@ -77,7 +79,7 @@ export const PROFESSION_BY_SEGMENT: Record<string, ProfessionCode[]> = {
   coach: ['coach'],
   seller: ['vendedor'],
   estetica: ['estetica'],
-  fitness: ['coach'],
+  fitness: ['fitness'],
 }
 
 /** Valida se a profissão é permitida para o segment. */
@@ -96,6 +98,7 @@ export const PROFILE_TYPE_BY_PROFESSION: Record<ProfessionCode, ProfileType> = {
   psi: 'liberal',
   psicanalise: 'liberal',
   coach: 'liberal',
+  fitness: 'liberal',
   nutricionista: 'liberal',
   vendedor_suplementos: 'vendas',
   vendedor_cosmeticos: 'vendas',
@@ -124,6 +127,7 @@ export const PROFESSION_LABELS: Record<ProfessionCode, string> = {
   psi: 'Psicologia',
   psicanalise: 'Psicanalista',
   coach: 'Coaching',
+  fitness: 'Fitness / Personal',
   nutricionista: 'Nutrição',
   vendedor_suplementos: 'Suplementos / Nutra',
   vendedor_cosmeticos: 'Cosméticos / Estética',
@@ -174,6 +178,10 @@ export const PROFESSION_HEADER: Partial<Record<ProfessionCode, ProfessionHeaderC
     title: 'Perfil estratégico para coaches',
     subtitle: 'Modelo de atuação.',
   },
+  fitness: {
+    title: 'Perfil estratégico para fitness',
+    subtitle: 'Modelo de atuação.',
+  },
   nutricionista: {
     title: 'Perfil estratégico para nutricionistas',
     subtitle: 'Estrutura do atendimento.',
@@ -215,6 +223,7 @@ export const PROFESSION_IDENTITY: Partial<Record<ProfessionCode, ProfessionIdent
   odonto: { youAre: 'Odontologia', objective: 'Estruturar sua prática com estratégia.' },
   psi: { youAre: 'Psicologia', objective: 'Estruturar sua prática clínica.' },
   coach: { youAre: 'Coaching', objective: 'Estruturar sua atuação com estratégia.' },
+  fitness: { youAre: 'Fitness / Personal', objective: 'Estruturar sua atuação com estratégia.' },
   nutricionista: { youAre: 'Nutrição', objective: 'Estruturar sua prática profissional.' },
   vendedor_suplementos: { youAre: 'Vendas (Nutra)', objective: 'Estruturar seu funil e suas vendas.' },
   vendedor_cosmeticos: { youAre: 'Vendas (cosméticos)', objective: 'Estruturar seu modelo de vendas.' },
@@ -268,6 +277,11 @@ export const STEP_COPY_BY_PROFESSION: Record<string, Partial<Record<ProfessionCo
       title: 'Como você estrutura seu trabalho como coach?',
       description: 'Isso ajuda o Noel a orientar você em posicionamento, oferta e autoridade.',
     },
+    fitness: {
+      stepHeaderPart: 'Modelo de atuação',
+      title: 'Como você estrutura seu trabalho em fitness?',
+      description: 'Isso ajuda o Noel a orientar você em captação de alunos e posicionamento.',
+    },
     nutricionista: {
       stepHeaderPart: 'Estrutura do atendimento',
       title: 'Como você atua hoje como nutricionista?',
@@ -293,6 +307,7 @@ export const STEP_COPY_BY_PROFESSION: Record<string, Partial<Record<ProfessionCo
     odonto: { stepHeaderPart: 'Especialidade' },
     psi: { stepHeaderPart: 'Abordagem e público' },
     coach: { stepHeaderPart: 'Nicho e modelo' },
+    fitness: { stepHeaderPart: 'Subárea' },
     nutricionista: { stepHeaderPart: 'Área e modalidade' },
     outro: { stepHeaderPart: 'Detalhes da atuação' },
   },
@@ -306,6 +321,7 @@ export const STEP_COPY_BY_PROFESSION: Record<string, Partial<Record<ProfessionCo
     odonto: { stepHeaderPart: 'Diagnóstico' },
     psi: { stepHeaderPart: 'Diagnóstico' },
     coach: { stepHeaderPart: 'Diagnóstico' },
+    fitness: { stepHeaderPart: 'Diagnóstico' },
     nutricionista: { stepHeaderPart: 'Diagnóstico' },
     outro: { stepHeaderPart: 'Diagnóstico' },
   },
@@ -315,6 +331,7 @@ export const STEP_COPY_BY_PROFESSION: Record<string, Partial<Record<ProfessionCo
     odonto: { stepHeaderPart: 'Metas e modelo' },
     psi: { stepHeaderPart: 'Metas e modelo' },
     coach: { stepHeaderPart: 'Metas e modelo' },
+    fitness: { stepHeaderPart: 'Metas e modelo' },
     nutricionista: { stepHeaderPart: 'Metas e modelo' },
     outro: { stepHeaderPart: 'Metas e modelo' },
   },
@@ -324,6 +341,7 @@ export const STEP_COPY_BY_PROFESSION: Record<string, Partial<Record<ProfessionCo
     odonto: { stepHeaderPart: 'Canais e rotina' },
     psi: { stepHeaderPart: 'Canais e rotina' },
     coach: { stepHeaderPart: 'Canais e rotina' },
+    fitness: { stepHeaderPart: 'Canais e rotina' },
     nutricionista: { stepHeaderPart: 'Canais e rotina' },
     outro: { stepHeaderPart: 'Canais e rotina' },
   },
@@ -333,6 +351,7 @@ export const STEP_COPY_BY_PROFESSION: Record<string, Partial<Record<ProfessionCo
     odonto: { stepHeaderPart: 'Observações' },
     psi: { stepHeaderPart: 'Observações' },
     coach: { stepHeaderPart: 'Observações' },
+    fitness: { stepHeaderPart: 'Observações' },
     nutricionista: { stepHeaderPart: 'Observações' },
     outro: { stepHeaderPart: 'Observações' },
   },
@@ -465,6 +484,22 @@ export const FIELD_LABELS_BY_PROFESSION: Partial<Record<ProfessionCode, Record<s
     capacidade_semana: 'Quantas sessões ou entregas por semana?',
     ticket_medio: 'Ticket médio (R$)',
     canais_principais: 'Onde seus clientes te encontram?',
+    rotina_atual_resumo: 'Como está sua rotina hoje?',
+    observacoes: 'Algo mais que o Noel deve saber?',
+  },
+  fitness: {
+    category: 'Nicho principal',
+    sub_category: 'Subárea (opcional)',
+    fitness_tipo_atuacao: 'Como você trabalha hoje?',
+    tempo_atuacao_anos: 'Há quantos anos você atua em fitness?',
+    dor_principal: 'O que mais está travando?',
+    prioridade_atual: 'O que você quer destravar primeiro?',
+    fase_negocio: 'Fase do seu negócio',
+    metas_principais: 'Metas principais',
+    objetivos_curto_prazo: 'Objetivos curto e médio prazo',
+    capacidade_semana: 'Quantos atendimentos ou turmas por semana?',
+    ticket_medio: 'Ticket médio (R$)',
+    canais_principais: 'Onde seus alunos te encontram?',
     rotina_atual_resumo: 'Como está sua rotina hoje?',
     observacoes: 'Algo mais que o Noel deve saber?',
   },
@@ -984,6 +1019,60 @@ const LIBERAL_NUTRICIONISTA_STEPS: ProfileFlowStep[] = [
   },
 ]
 
+/** Fitness: tipo de atuação (Personal/Academia/Online/Grupo), tempo. */
+const LIBERAL_FITNESS_STEPS: ProfileFlowStep[] = [
+  {
+    id: 'contexto',
+    title: 'Contexto',
+    description: 'Modelo de atuação.',
+    fields: [
+      { key: 'category', source: 'column', required: false, type: 'text' },
+      { key: 'fitness_tipo_atuacao', source: 'area_specific', path: 'fitness_tipo_atuacao', required: false, type: 'select' },
+      { key: 'tempo_atuacao_anos', source: 'column', required: false, type: 'number' },
+    ],
+  },
+  {
+    id: 'especialidade',
+    title: 'Subárea',
+    description: 'Subárea (opcional).',
+    fields: [{ key: 'sub_category', source: 'column', required: false, type: 'text' }],
+  },
+  {
+    id: 'diagnostico',
+    title: 'Diagnóstico',
+    fields: [
+      { key: 'dor_principal', source: 'column', required: false, type: 'select' },
+      { key: 'prioridade_atual', source: 'column', required: false, type: 'text' },
+      { key: 'fase_negocio', source: 'column', required: false, type: 'select' },
+    ],
+  },
+  {
+    id: 'metas_modelo',
+    title: 'Metas e modelo',
+    fields: [
+      { key: 'metas_principais', source: 'column', required: false, type: 'text' },
+      { key: 'objetivos_curto_prazo', source: 'column', required: false, type: 'text' },
+      { key: 'capacidade_semana', source: 'column', required: false, type: 'number' },
+      { key: 'ticket_medio', source: 'column', required: false, type: 'number' },
+      { key: 'modelo_pagamento', source: 'column', required: false, type: 'select' },
+    ],
+  },
+  {
+    id: 'canais_rotina',
+    title: 'Canais e rotina',
+    fields: [
+      { key: 'canais_principais', source: 'column', required: false, type: 'multiselect' },
+      { key: 'rotina_atual_resumo', source: 'column', required: false, type: 'textarea' },
+      { key: 'frequencia_postagem', source: 'column', required: false, type: 'text' },
+    ],
+  },
+  {
+    id: 'observacoes',
+    title: 'Observações',
+    fields: [{ key: 'observacoes', source: 'column', required: false, type: 'textarea' }],
+  },
+]
+
 /** Coach: nicho, modelo de entrega (Sessões individuais/Grupo/Programa), tempo. */
 const LIBERAL_COACH_STEPS: ProfileFlowStep[] = [
   {
@@ -1086,6 +1175,14 @@ const LIBERAL_FLOW_COACH: ProfileFlowConfig = {
   steps: LIBERAL_COACH_STEPS,
 }
 
+const LIBERAL_FLOW_FITNESS: ProfileFlowConfig = {
+  flow_id: 'liberal_v1',
+  flow_version: 1,
+  profile_type: 'liberal',
+  profession: 'fitness',
+  steps: LIBERAL_FITNESS_STEPS,
+}
+
 const LIBERAL_FLOW: ProfileFlowConfig = {
   flow_id: 'liberal_v1',
   flow_version: 1,
@@ -1107,6 +1204,7 @@ const FLOWS: ProfileFlowConfig[] = [
   LIBERAL_FLOW_PSI,
   LIBERAL_FLOW_NUTRICIONISTA,
   LIBERAL_FLOW_COACH,
+  LIBERAL_FLOW_FITNESS,
   LIBERAL_FLOW,
   VENDAS_FLOW,
 ]

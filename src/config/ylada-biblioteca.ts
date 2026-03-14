@@ -68,7 +68,13 @@ export const BIBLIOTECA_TEMAS_POR_SEGMENTO: Record<BibliotecaSegmentCode, string
   perfumaria: BIBLIOTECA_TEMAS.map((t) => t.value),
 }
 
-/** Mapeamento profession → segmento da biblioteca (para "(seu perfil)"). */
+/**
+ * Mapeamento profession → segmento da biblioteca (para "(seu perfil)").
+ *
+ * NOTA: Segmentos da biblioteca usam códigos em inglês (aesthetics, psychology, dentistry, fitness)
+ * enquanto as áreas/rotas usam códigos em português (estetica, psi, odonto, fitness).
+ * O mapeamento AREA_TO_BIBLIOTECA e PROFESSION_TO_BIBLIOTECA faz essa tradução.
+ */
 const PROFESSION_TO_BIBLIOTECA: Record<string, BibliotecaSegmentCode> = {
   vendedor_suplementos: 'nutrition_vendedor',
   vendedor_cosmeticos: 'aesthetics',
@@ -85,6 +91,7 @@ const PROFESSION_TO_BIBLIOTECA: Record<string, BibliotecaSegmentCode> = {
   odonto: 'dentistry',
   nutricionista: 'nutrition',
   estetica: 'aesthetics',
+  fitness: 'fitness',
   personal_trainer: 'fitness',
   coach_fitness: 'fitness',
   coach: 'fitness',
@@ -94,7 +101,11 @@ const PROFESSION_TO_BIBLIOTECA: Record<string, BibliotecaSegmentCode> = {
   outro: 'nutrition',
 }
 
-/** Mapeamento areaCodigo (rota) → segmento da biblioteca. */
+/**
+ * Mapeamento areaCodigo (rota) → segmento da biblioteca.
+ * areaCodigo = código da rota (estetica, psi, odonto, fitness, med, etc.)
+ * Biblioteca usa segmentos em inglês (aesthetics, psychology, dentistry, fitness, medicine).
+ */
 const AREA_TO_BIBLIOTECA: Partial<Record<string, BibliotecaSegmentCode>> = {
   estetica: 'aesthetics',
   med: 'medicine',

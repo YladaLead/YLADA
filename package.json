@@ -20,6 +20,7 @@
     "extract-nutri-poster": "tsx scripts/extract-nutri-video-poster.ts",
     "test-video-url": "tsx scripts/test-video-url.ts",
     "test:fase": "tsx src/lib/carol-v2/fase.casos.ts",
+    "test:strategic-profile": "tsx src/lib/strategic-profile-casos.ts",
     "organizar-contatos-meta": "node scripts/organizar-contatos-meta-ads.js",
     "migrate:235": "npx tsx scripts/run-migration.ts 235-ylada-templates-biblioteca-nutri-bloco2.sql",
     "migrate:236": "npx tsx scripts/run-migration.ts 236-ylada-templates-calculadoras-biblioteca-nutri.sql",

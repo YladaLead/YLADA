@@ -35,24 +35,116 @@ import {
 } from '@/config/ylada-profile-flows'
 import { getTemasForProfession } from '@/config/ylada-temas'
 import { getStrategicProfileEstetica, type StrategicProfileEstetica } from '@/lib/strategic-profile-estetica'
+import { getStrategicProfileOdonto } from '@/lib/strategic-profile-odonto'
+import { getStrategicProfilePsi } from '@/lib/strategic-profile-psi'
+import { getStrategicProfileFitness } from '@/lib/strategic-profile-fitness'
+import { getStrategicProfileCoach } from '@/lib/strategic-profile-coach'
+import { getStrategicProfileNutricionista } from '@/lib/strategic-profile-nutricionista'
+import { getStrategicProfileMedico } from '@/lib/strategic-profile-medico'
 
-/** Micro-feedback do Noel ao selecionar opções no contexto estética. */
-const NOEL_FEEDBACK_ESTETICA: Record<string, Record<string, string>> = {
-  area_estetica: {
-    facial: 'Estética facial costuma ter alta recorrência de clientes. Depois vamos estruturar estratégias para fidelização.',
-    corporal: 'Estética corporal combina bem com pacotes e recorrência. O Noel vai sugerir diagnósticos alinhados.',
-    harmonizacao: 'Harmonização trabalha bem com posicionamento de autoridade e poucos clientes de alto ticket.',
-    depilacao_laser: 'Depilação e laser têm boa recorrência. Estratégias de lembrete e remarcação fazem diferença.',
-    capilar: 'Capilar e tricologia geram acompanhamento contínuo. O Noel pode ajudar com funis de avaliação.',
-    integrativa: 'Estética integrativa permite posicionamento amplo. Vamos direcionar estratégias ao seu mix de serviços.',
-    outro: 'Com "Outro", o Noel vai se basear no resto do perfil para sugerir as melhores estratégias.',
+/** Perfil estratégico detectado (comum a todas as profissões). */
+type StrategicProfile = { name: string; focus: string[] }
+
+/** Micro-feedback do Noel ao selecionar opções no contexto (por profissão). */
+const NOEL_FEEDBACK_BY_PROFESSION: Record<string, Record<string, Record<string, string>>> = {
+  estetica: {
+    area_estetica: {
+      facial: 'Estética facial costuma ter alta recorrência de clientes. Depois vamos estruturar estratégias para fidelização.',
+      corporal: 'Estética corporal combina bem com pacotes e recorrência. O Noel vai sugerir diagnósticos alinhados.',
+      harmonizacao: 'Harmonização trabalha bem com posicionamento de autoridade e poucos clientes de alto ticket.',
+      depilacao_laser: 'Depilação e laser têm boa recorrência. Estratégias de lembrete e remarcação fazem diferença.',
+      capilar: 'Capilar e tricologia geram acompanhamento contínuo. O Noel pode ajudar com funis de avaliação.',
+      integrativa: 'Estética integrativa permite posicionamento amplo. Vamos direcionar estratégias ao seu mix de serviços.',
+      outro: 'Com "Outro", o Noel vai se basear no resto do perfil para sugerir as melhores estratégias.',
+    },
+    estetica_tipo_atuacao: {
+      autonoma: 'Profissionais autônomas geralmente dependem mais de indicação e agenda recorrente. O Noel vai priorizar isso.',
+      clinica_propria: 'Dona de clínica: estratégias de aquisição constante, posicionamento premium e funil de avaliação.',
+      dentro_salao: 'Profissional em salão: indicação e organização da agenda costumam ser os maiores ganhos.',
+      equipe_colaboradora: 'Em equipe: o Noel pode ajudar com fluxo de clientes e estratégias para o espaço.',
+    },
   },
-  estetica_tipo_atuacao: {
-    autonoma: 'Profissionais autônomas geralmente dependem mais de indicação e agenda recorrente. O Noel vai priorizar isso.',
-    clinica_propria: 'Dona de clínica: estratégias de aquisição constante, posicionamento premium e funil de avaliação.',
-    dentro_salao: 'Profissional em salão: indicação e organização da agenda costumam ser os maiores ganhos.',
-    equipe_colaboradora: 'Em equipe: o Noel pode ajudar com fluxo de clientes e estratégias para o espaço.',
+  odonto: {
+    odonto_voce_atende: {
+      particular: 'Consultório particular costuma ter ticket mais alto. O Noel vai sugerir diagnósticos para qualificar leads.',
+      convenio: 'Convênio exige volume. O Noel pode ajudar com funis de triagem e avaliações pré-consulta.',
+      misto: 'Modelo misto permite equilibrar volume e ticket. O Noel vai sugerir estratégias para ambos os perfis.',
+    },
   },
+  fitness: {
+    fitness_tipo_atuacao: {
+      personal: 'Personal trainer costuma ter boa recorrência com pacotes. O Noel vai sugerir diagnósticos para avaliação e acompanhamento.',
+      academia: 'Academia combina bem com turmas e avaliação física. O Noel pode ajudar com funis de captação.',
+      online: 'Treinos online permitem alcance amplo. O Noel vai sugerir estratégias para captação digital.',
+      grupo: 'Turmas e grupos geram recorrência. O Noel vai sugerir diagnósticos para qualificar leads.',
+      ambos: 'Modelo híbrido amplia possibilidades. O Noel vai sugerir estratégias para ambos os canais.',
+    },
+  },
+  psi: {
+    publico_psi: {
+      adultos: 'Atendimento de adultos é o mais comum. O Noel vai sugerir diagnósticos para ansiedade, estresse e autoconhecimento.',
+      criancas: 'Atendimento infantil pode usar avaliações para os pais. O Noel vai sugerir estratégias de triagem.',
+      casais: 'Terapia de casal beneficia-se de avaliações pré-sessão. O Noel pode ajudar com funis de qualificação.',
+      empresas: 'Atendimento corporativo combina bem com diagnósticos de bem-estar. O Noel vai direcionar estratégias.',
+    },
+    modalidade_atendimento: {
+      presencial: 'Atendimento presencial: indicação e divulgação local costumam ser os maiores canais. O Noel vai priorizar isso.',
+      online: 'Atendimento online permite alcance nacional. O Noel pode sugerir diagnósticos para captação digital.',
+      ambos: 'Modelo híbrido amplia possibilidades. O Noel vai sugerir estratégias para ambos os canais.',
+    },
+  },
+  medico: {
+    publico_principal: {
+      adultos: 'Atendimento de adultos é o mais comum. O Noel vai sugerir diagnósticos para triagem e qualificação.',
+      criancas: 'Atendimento infantil pode usar avaliações para os pais. O Noel vai sugerir estratégias de triagem.',
+      idosos: 'Público idoso costuma ter demandas específicas. O Noel pode ajudar com diagnósticos de saúde.',
+      feminino: 'Público feminino pode ter demandas específicas. O Noel vai direcionar estratégias.',
+      masculino: 'Público masculino pode ter padrões de busca diferentes. O Noel vai ajustar as recomendações.',
+      alta_renda: 'Pacientes de alta renda costumam valorizar qualificação. O Noel vai sugerir posicionamento premium.',
+      convenio: 'Convênio exige volume. O Noel pode ajudar com funis de triagem e organização da agenda.',
+      particular: 'Consultório particular costuma ter ticket mais alto. O Noel vai sugerir diagnósticos para qualificar leads.',
+    },
+    foco_principal: {
+      consulta_rotina: 'Consulta de rotina beneficia-se de recorrência. O Noel vai sugerir estratégias de retorno.',
+      tratamento_continuo: 'Tratamento contínuo gera acompanhamento. O Noel pode ajudar com qualificação e recorrência.',
+      procedimentos: 'Procedimentos costumam ter ticket mais alto. O Noel vai sugerir posicionamento de especialista.',
+      cirurgia: 'Cirurgia exige qualificação de demanda. O Noel vai direcionar estratégias de captação.',
+      acompanhamento_cronico: 'Acompanhamento crônico gera recorrência. O Noel vai sugerir estratégias de retorno.',
+    },
+  },
+  coach: {
+    modelo_entrega_coach: {
+      sessoes_individuais: 'Sessões individuais costumam ter ticket mais alto. O Noel vai sugerir diagnósticos para qualificar leads.',
+      grupo: 'Trabalho em grupo beneficia-se de captação para turmas. O Noel pode ajudar com funis de avaliação.',
+      programa_estruturado: 'Programas estruturados permitem posicionamento premium. O Noel vai sugerir estratégias de conversão.',
+    },
+  },
+  nutricionista: {
+    area_nutri: {
+      emagrecimento: 'Emagrecimento é uma das áreas mais procuradas. O Noel vai sugerir diagnósticos de metabolismo e alimentação.',
+      esportiva: 'Nutrição esportiva combina bem com avaliação de performance. O Noel pode ajudar com posicionamento.',
+      clinica: 'Nutrição clínica beneficia-se de diagnósticos de saúde. O Noel vai direcionar estratégias.',
+      infantil: 'Atendimento infantil pode usar avaliações para os pais. O Noel vai sugerir estratégias de triagem.',
+      outro: 'Com "Outro", o Noel vai se basear no resto do perfil para sugerir as melhores estratégias.',
+    },
+    modalidade_atendimento: {
+      presencial: 'Atendimento presencial: indicação e divulgação local costumam ser os maiores canais. O Noel vai priorizar isso.',
+      online: 'Atendimento online permite alcance nacional. O Noel pode sugerir diagnósticos para captação digital.',
+      ambos: 'Modelo híbrido amplia possibilidades. O Noel vai sugerir estratégias para ambos os canais.',
+    },
+  },
+}
+
+function getNoelFeedbackForField(
+  profession: string | undefined,
+  fieldKey: string,
+  value: string | number | string[] | ''
+): string | null {
+  const feedbackMap = profession ? NOEL_FEEDBACK_BY_PROFESSION[profession]?.[fieldKey] : null
+  if (!feedbackMap) return null
+  const val = Array.isArray(value) ? value[0] : value
+  if (typeof val !== 'string' || !val) return null
+  return feedbackMap[val] ?? null
 }
 
 interface PerfilEmpresarialViewProps {
@@ -82,9 +174,9 @@ export default function PerfilEmpresarialView({ areaCodigo, areaLabel }: PerfilE
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
   /** Step do wizard: 0 = Área de atuação, 1..n = steps do flow. */
   const [stepIndex, setStepIndex] = useState(0)
-  /** Estética: após preencher contexto, mostrar "Noel analisando" e depois "Perfil identificado". */
+  /** Após preencher contexto (estética, odonto, psi, fitness), mostrar "Noel analisando" e depois "Perfil identificado". */
   const [strategicProfilePhase, setStrategicProfilePhase] = useState<'analyzing' | 'result' | null>(null)
-  const [detectedProfile, setDetectedProfile] = useState<StrategicProfileEstetica | null>(null)
+  const [detectedProfile, setDetectedProfile] = useState<StrategicProfile | null>(null)
 
   const flow: ProfileFlowConfig | null =
     form.profile_type && form.profession
@@ -128,15 +220,40 @@ export default function PerfilEmpresarialView({ areaCodigo, areaLabel }: PerfilE
 
   useEffect(() => {
     if (strategicProfilePhase !== 'analyzing') return
+    const profession = form.profession as string | undefined
     const t = setTimeout(() => {
-      const area = form.area_specific?.area_estetica as string | undefined
-      const tipo = form.area_specific?.estetica_tipo_atuacao as string | undefined
-      const anos = form.tempo_atuacao_anos
-      setDetectedProfile(getStrategicProfileEstetica(area, tipo, anos))
+      let profile: StrategicProfile | null = null
+      if (profession === 'estetica') {
+        const area = form.area_specific?.area_estetica as string | undefined
+        const tipo = form.area_specific?.estetica_tipo_atuacao as string | undefined
+        profile = getStrategicProfileEstetica(area, tipo, form.tempo_atuacao_anos)
+      } else if (profession === 'odonto') {
+        const voceAtende = form.area_specific?.odonto_voce_atende as string | undefined
+        profile = getStrategicProfileOdonto(voceAtende, form.tempo_atuacao_anos)
+      } else if (profession === 'psi') {
+        const publico = form.area_specific?.publico_psi as string[] | string | undefined
+        const modalidade = form.area_specific?.modalidade_atendimento as string | undefined
+        profile = getStrategicProfilePsi(publico, modalidade, form.tempo_atuacao_anos)
+      } else if (profession === 'fitness') {
+        const tipo = form.area_specific?.fitness_tipo_atuacao as string | undefined
+        profile = getStrategicProfileFitness(tipo, form.tempo_atuacao_anos)
+      } else if (profession === 'coach') {
+        const modelo = form.area_specific?.modelo_entrega_coach as string | undefined
+        profile = getStrategicProfileCoach(modelo, form.tempo_atuacao_anos)
+      } else if (profession === 'nutricionista') {
+        const area = form.area_specific?.area_nutri as string | undefined
+        const modalidade = form.area_specific?.modalidade_atendimento as string | undefined
+        profile = getStrategicProfileNutricionista(area, modalidade, form.tempo_atuacao_anos)
+      } else if (profession === 'medico') {
+        const publico = form.area_specific?.publico_principal as string[] | string | undefined
+        const foco = form.area_specific?.foco_principal as string | undefined
+        profile = getStrategicProfileMedico(publico, foco, form.tempo_atuacao_anos)
+      }
+      if (profile) setDetectedProfile(profile)
       setStrategicProfilePhase('result')
     }, 2000)
     return () => clearTimeout(t)
-  }, [strategicProfilePhase, form.area_specific?.area_estetica, form.area_specific?.estetica_tipo_atuacao, form.tempo_atuacao_anos])
+  }, [strategicProfilePhase, form.profession, form.area_specific, form.tempo_atuacao_anos])
 
   const update = (updates: Partial<YladaProfileFormData>) => setForm((prev) => ({ ...prev, ...updates }))
   const updateAreaSpec = (key: string, value: unknown) =>
@@ -354,9 +471,15 @@ export default function PerfilEmpresarialView({ areaCodigo, areaLabel }: PerfilE
         ? getStepCopyForProfession(currentStep.id, profession, { title: currentStep.title, description: currentStep.description })
         : null
 
-    const isEsteticaContextoStep = profession === 'estetica' && currentStep?.id === 'contexto'
+    const isContextoStepWithFeedback =
+      ['estetica', 'odonto', 'psi', 'fitness', 'coach', 'nutricionista', 'medico'].includes(profession || '') && currentStep?.id === 'contexto'
+    const isEspecialidadeStepWithFeedback = (profession === 'psi' || profession === 'medico') && currentStep?.id === 'especialidade'
+    const isAtendimentoStepWithFeedback = isEspecialidadeStepWithFeedback
+    const isFieldWithNoelFeedback = (f: ProfileFieldDef) =>
+      !!NOEL_FEEDBACK_BY_PROFESSION[profession]?.[f.key]
+    const hasStrategicProfileDiscovery = ['estetica', 'odonto', 'psi', 'fitness', 'coach', 'nutricionista', 'medico'].includes(profession || '')
     const showStrategicProfileDiscovery =
-      profession === 'estetica' && stepIndex === 1 && (strategicProfilePhase === 'analyzing' || strategicProfilePhase === 'result')
+      hasStrategicProfileDiscovery && stepIndex === 1 && (strategicProfilePhase === 'analyzing' || strategicProfilePhase === 'result')
 
     return (
       <YladaAreaShell areaCodigo={areaCodigo} areaLabel={areaLabel}>
@@ -401,7 +524,7 @@ export default function PerfilEmpresarialView({ areaCodigo, areaLabel }: PerfilE
                   Objetivo: {identityCopy.objective}
                 </p>
               )}
-              {stepIndex === 1 && profession === 'estetica' && !showStrategicProfileDiscovery && (
+              {stepIndex === 1 && hasStrategicProfileDiscovery && !showStrategicProfileDiscovery && (
                 <p className="text-xs text-gray-400 mt-2">
                   Mais de 3.200 profissionais já configuraram seu perfil estratégico no YLADA.
                 </p>
@@ -528,11 +651,18 @@ export default function PerfilEmpresarialView({ areaCodigo, areaLabel }: PerfilE
                   {stepCopy.description && (
                     <p className="text-sm text-gray-500 mb-3">{stepCopy.description}</p>
                   )}
-                  {isEsteticaContextoStep && (
+                  {(isContextoStepWithFeedback || isAtendimentoStepWithFeedback) && (
                     <div className="mb-4 p-3 rounded-lg bg-amber-50 border border-amber-100">
                       <p className="text-xs font-medium text-amber-800 mb-1">💡 Exemplo de como isso ajuda o Noel</p>
                       <p className="text-xs text-amber-700">
-                        Uma esteticista facial autônoma precisa de estratégias diferentes de uma clínica com equipe. O Noel usa essas informações para ajustar recomendações automaticamente.
+                        {profession === 'estetica' && 'Uma esteticista facial autônoma precisa de estratégias diferentes de uma clínica com equipe. O Noel usa essas informações para ajustar recomendações automaticamente.'}
+                        {profession === 'odonto' && 'Um dentista particular precisa de estratégias diferentes de uma clínica com convênio. O Noel usa essas informações para ajustar recomendações automaticamente.'}
+                        {profession === 'psi' && 'Um psicólogo que atende adultos pode usar diagnósticos diferentes de quem atende casais. O Noel usa essas informações para ajustar recomendações automaticamente.'}
+                        {profession === 'fitness' && 'Um personal trainer precisa de estratégias diferentes de quem atua em academia. O Noel usa essas informações para ajustar recomendações automaticamente.'}
+                        {profession === 'coach' && 'Um coach de sessões individuais precisa de estratégias diferentes de quem trabalha com grupos. O Noel usa essas informações para ajustar recomendações automaticamente.'}
+                        {profession === 'nutricionista' && 'Uma nutricionista de emagrecimento precisa de estratégias diferentes de quem atende esportistas. O Noel usa essas informações para ajustar recomendações automaticamente.'}
+                        {profession === 'medico' && currentStep?.id === 'contexto' && 'Um médico particular precisa de estratégias diferentes de quem atende por convênio. O Noel usa essas informações para ajustar recomendações automaticamente.'}
+                        {profession === 'medico' && currentStep?.id === 'especialidade' && 'Um médico de procedimentos precisa de estratégias diferentes de quem faz consulta de rotina. O Noel usa essas informações para ajustar recomendações automaticamente.'}
                       </p>
                     </div>
                   )}
@@ -549,12 +679,10 @@ export default function PerfilEmpresarialView({ areaCodigo, areaLabel }: PerfilE
                       const placeholder = getFieldPlaceholderForProfession(field.key, profession)
                       const value = getFieldValue(form, field)
                       const options = field.options ?? getOptionsForProfileField(field.key, form.profile_type || null, form.profession || null)
-                      const isEsteticaCardField = isEsteticaContextoStep && (field.key === 'area_estetica' || field.key === 'estetica_tipo_atuacao')
-                      const noelFeedback = isEsteticaCardField && typeof value === 'string' && value
-                        ? NOEL_FEEDBACK_ESTETICA[field.key]?.[value]
-                        : null
+                      const isCardFieldWithFeedback = isFieldWithNoelFeedback(field) && field.type === 'select'
+                      const noelFeedback = getNoelFeedbackForField(profession, field.key, value)
 
-                      if (isEsteticaCardField && field.type === 'select') {
+                      if (isCardFieldWithFeedback) {
                         const currentVal = typeof value === 'string' ? value : ''
                         return (
                           <div key={field.key} className="space-y-2">
@@ -586,9 +714,12 @@ export default function PerfilEmpresarialView({ areaCodigo, areaLabel }: PerfilE
 
                       if (field.type === 'multiselect') {
                         const arr = Array.isArray(value) ? value : []
+                        const multiselectFeedback = isFieldWithNoelFeedback(field)
+                          ? getNoelFeedbackForField(profession, field.key, value)
+                          : null
                         return (
-                          <div key={field.key}>
-                            <span className="text-sm text-gray-600 block mb-2">{label}</span>
+                          <div key={field.key} className="space-y-2">
+                            <span className="text-sm text-gray-600 block">{label}</span>
                             <div className="flex flex-wrap gap-2">
                               {options.map((o) => (
                                 <label key={o.value} className="inline-flex items-center gap-1.5 text-sm">
@@ -601,6 +732,11 @@ export default function PerfilEmpresarialView({ areaCodigo, areaLabel }: PerfilE
                                 </label>
                               ))}
                             </div>
+                            {multiselectFeedback && (
+                              <p className="text-xs text-indigo-700 bg-indigo-50 rounded-lg px-3 py-2 mt-2 border border-indigo-100">
+                                💡 <strong>Noel:</strong> {multiselectFeedback}
+                              </p>
+                            )}
                           </div>
                         )
                       }
@@ -735,7 +871,7 @@ export default function PerfilEmpresarialView({ areaCodigo, areaLabel }: PerfilE
                   <button
                     type="button"
                     onClick={() => {
-                      if (isEsteticaContextoStep) {
+                      if (hasStrategicProfileDiscovery && currentStep?.id === 'contexto') {
                         setStrategicProfilePhase('analyzing')
                       } else {
                         setStepIndex((i) => i + 1)

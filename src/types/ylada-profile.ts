@@ -100,6 +100,8 @@ export function getOptionsForProfileField(
       return [...AREA_NUTRI_OPTIONS]
     case 'modelo_entrega_coach':
       return [...COACH_MODELO_ENTREGA_OPTIONS]
+    case 'fitness_tipo_atuacao':
+      return [...FITNESS_TIPO_ATUACAO_OPTIONS]
     default:
       return []
   }
@@ -261,6 +263,15 @@ export const COACH_MODELO_ENTREGA_OPTIONS = [
   { value: 'programa_estruturado', label: 'Programa estruturado' },
 ] as const
 
+/** Fitness: tipo de atuação. */
+export const FITNESS_TIPO_ATUACAO_OPTIONS = [
+  { value: 'personal', label: 'Personal trainer' },
+  { value: 'academia', label: 'Academia / Personal na academia' },
+  { value: 'online', label: 'Treinos online' },
+  { value: 'grupo', label: 'Grupo / Turma' },
+  { value: 'ambos', label: 'Presencial e online' },
+] as const
+
 export const ESPECIALIDADES_MED = [
   { value: 'clinica_geral', label: 'Clínica geral' },
   { value: 'psiquiatria', label: 'Psiquiatria' },
@@ -324,6 +335,7 @@ export const PROFILE_FIELD_LABELS: Record<string, string> = {
   modalidade_atendimento: 'Atendimento (presencial/online)',
   area_nutri: 'Área principal de atuação',
   modelo_entrega_coach: 'Modelo de entrega',
+  fitness_tipo_atuacao: 'Como você trabalha hoje?',
 }
 
 export interface YladaProfileFormData {

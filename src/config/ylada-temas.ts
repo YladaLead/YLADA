@@ -59,6 +59,13 @@ export const TEMAS_BY_PROFESSION: Record<string, TemaOption[]> = {
     { value: 'autoconhecimento', label: 'Autoconhecimento' },
     { value: 'vendas', label: 'Vendas e negócios' },
   ],
+  fitness: [
+    { value: 'treino', label: 'Treino e avaliação física' },
+    { value: 'energia', label: 'Energia e disposição' },
+    { value: 'emagrecimento', label: 'Emagrecimento' },
+    { value: 'performance', label: 'Performance esportiva' },
+    { value: 'bem_estar', label: 'Bem-estar' },
+  ],
   estetica: [
     { value: 'pele', label: 'Cuidados com a pele' },
     { value: 'antienvelhecimento', label: 'Antienvelhecimento' },

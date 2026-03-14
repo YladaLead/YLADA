@@ -11,6 +11,7 @@ import Image from 'next/image'
 import { useEffect, useState } from 'react'
 import PhoneInputWithCountry from '@/components/PhoneInputWithCountry'
 import { getYladaAreaPathPrefix } from '@/config/ylada-areas'
+import { getOnboardingCopyForArea } from '@/config/onboarding-by-area'
 
 export type OnboardingAreaCodigo =
   | 'ylada'
@@ -46,7 +47,7 @@ export function OnboardingPageContent({
   areaLabel,
   redirectIfDone,
   redirectAfterSave,
-  proofText = 'Mais de 1.200 profissionais já usaram este diagnóstico para entender melhor seu momento profissional.',
+  proofText,
 }: OnboardingPageContentProps) {
   const { user, loading } = useAuth()
   const router = useRouter()
@@ -59,6 +60,8 @@ export function OnboardingPageContent({
   const [erro, setErro] = useState<string | null>(null)
   const isNutri = areaCodigo === 'nutri'
   const prefix = getYladaAreaPathPrefix(areaCodigo)
+  const copy = getOnboardingCopyForArea(areaCodigo, areaLabel)
+  const displayProofText = proofText ?? copy.proofText
 
   const loadProfile = async () => {
     if (!user) return
@@ -236,7 +239,6 @@ export function OnboardingPageContent({
 
   /** Logo padrão YLADA (Ida) em todas as áreas. */
   const logoSrc = '/images/logo/ylada/horizontal/azul-claro/ylada-horizontal-azul-claro-30.png'
-  const welcomeTitle = `Bem-vindo(a) à YLADA ${areaLabel}`
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50 flex items-center justify-center px-4 py-12">
@@ -255,18 +257,18 @@ export function OnboardingPageContent({
         <div className="bg-white rounded-2xl shadow-2xl p-8 sm:p-12 border border-gray-100">
           <div className="text-center mb-8">
             <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4 leading-tight">
-              {welcomeTitle}
+              {copy.welcomeTitle}
             </h1>
             <p className="text-xl text-gray-700 leading-relaxed mb-6">
-              Aqui você não precisa fazer seu marketing sozinho(a).
+              {copy.valueSubtitle}
             </p>
             <p className="text-gray-600 leading-relaxed mb-2">
               A YLADA foi criada para ajudar profissionais a:
             </p>
             <ul className="text-gray-600 text-left list-disc list-inside max-w-md mx-auto space-y-1 mb-4">
-              <li>atrair clientes realmente interessados</li>
-              <li>entender melhor quem chega até você</li>
-              <li>transformar conversas em atendimentos</li>
+              <li>{copy.benefits[0]}</li>
+              <li>{copy.benefits[1]}</li>
+              <li>{copy.benefits[2]}</li>
             </ul>
             <p className="text-gray-600 leading-relaxed">
               Em poucos minutos vamos gerar um <strong className="text-gray-800">Diagnóstico Estratégico</strong> para entender melhor o seu momento.
@@ -293,7 +295,7 @@ export function OnboardingPageContent({
                   type="text"
                   value={nomeCompleto}
                   onChange={(e) => setNomeCompleto(e.target.value)}
-                  placeholder="Ex.: Dra. Ana Souza"
+                  placeholder={copy.nomePlaceholder}
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 placeholder-gray-400"
                 />
               </div>
@@ -327,7 +329,7 @@ export function OnboardingPageContent({
           <div className="text-center">
             <p className="text-sm font-semibold text-sky-600 mb-2">🧠 NOEL</p>
             <p className="text-gray-700 mb-2">
-              Agora vamos gerar seu <strong className="text-gray-900">Diagnóstico Estratégico</strong>.
+              {copy.ctaIntro}
             </p>
             <p className="text-gray-600 font-medium mb-4">
               {nomeCompleto.trim()
@@ -347,8 +349,8 @@ export function OnboardingPageContent({
 
             <p className="text-sm text-gray-500 mt-3">Leva menos de 2 minutos.</p>
 
-            {proofText && (
-              <p className="text-xs text-gray-400 mt-4">{proofText}</p>
+            {displayProofText && (
+              <p className="text-xs text-gray-400 mt-4">{displayProofText}</p>
             )}
           </div>
         </div>
