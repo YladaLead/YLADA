@@ -54,9 +54,8 @@ export const metadata = {
   },
 }
 
+// Viewport completo (com viewport-fit=cover para PWA) está no <head> abaixo
 export const viewport = {
-  width: 'device-width',
-  initialScale: 1,
   themeColor: '#3B82F6',
 }
 
@@ -71,8 +70,9 @@ export default function RootLayout({
   return (
     <html lang="pt">
       <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="apple-mobile-web-app-title" content="YLADA" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="msapplication-TileColor" content="#3B82F6" />
@@ -82,7 +82,7 @@ export default function RootLayout({
         <meta httpEquiv="Pragma" content="no-cache" />
         <meta httpEquiv="Expires" content="0" />
       </head>
-      <body className={inter.className} style={{ margin: 0, minHeight: '100vh', background: '#ffffff' }}>
+      <body className={inter.className} style={{ margin: 0, minHeight: '100dvh', minHeight: '100vh', background: '#ffffff', padding: 'env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)' }}>
         <FacebookPixel pixelId={pixelId} />
         <PWAInitializer />
         <AuthProviderWrapper>
