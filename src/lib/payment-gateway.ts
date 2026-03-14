@@ -106,20 +106,20 @@ function getPrice(
     
     const prices: Record<string, Record<string, number>> = {
       wellness: {
-        monthly: 97.00, // R$ 97,00/mês (não recorrente)
-        annual: 718.80, // R$ 718,80 (12x de R$ 59,90) - Parcelado pelo vendedor
+        monthly: 97.00, // R$ 97/mês
+        annual: 708.00, // R$ 708/ano (12× de R$ 59)
       },
       nutri: {
         monthly: 97.00, // R$ 97/mês
         annual: 708.00, // R$ 708/ano (12× de R$ 59) — promocional
       },
       coach: {
-        monthly: 97.00,
-        annual: 1164.00,
+        monthly: 97.00, // R$ 97/mês
+        annual: 708.00, // R$ 708/ano (12× de R$ 59)
       },
       nutra: {
-        monthly: 97.00,
-        annual: 1164.00,
+        monthly: 97.00, // R$ 97/mês
+        annual: 708.00, // R$ 708/ano (12× de R$ 59)
       },
     }
     return prices[area]?.[planType] || 0

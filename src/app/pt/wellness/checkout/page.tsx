@@ -234,13 +234,13 @@ export default function WellnessCheckoutPage() {
       description: 'Plano Mensal',
     },
     annual: {
-      price: 718.80, // Valor total (12x de R$ 59,90)
-      priceFormatted: 'R$ 718,80',
+      price: 708.00, // Valor total (12× de R$ 59)
+      priceFormatted: 'R$ 708,00',
       period: 'ano',
       description: 'Plano Anual',
-      monthlyEquivalent: 59.90, // 12x de R$ 59,90 (parcelado pelo vendedor)
-      totalParcelado: 718.80, // Total parcelado
-      savings: 445.20, // (97.00 * 12) - 718.80 = 1164.00 - 718.80 = 445.20
+      monthlyEquivalent: 59.00, // 12× de R$ 59
+      totalParcelado: 708.00,
+      savings: 456.00, // (97.00 * 12) - 708.00
     },
   }
 
@@ -336,11 +336,11 @@ export default function WellnessCheckoutPage() {
                     Anual
                   </h3>
                   <div className="text-3xl font-bold text-green-600 mb-1">
-                    R$ 59,90
+                    R$ 59
                   </div>
                   <div className="text-sm text-gray-600">/mês</div>
                   <div className="text-xs text-gray-500 mt-2">
-                    Total: R$ 718,80/ano (12x de R$ 59,90)
+                    Total: R$ 708/ano (12× de R$ 59)
                   </div>
                 </div>
               </button>
@@ -422,7 +422,7 @@ export default function WellnessCheckoutPage() {
                     💳 Parcelamento Disponível
                   </h3>
                   <p className="text-sm text-blue-800">
-                    Após preencher os dados do seu cartão na próxima página, você poderá escolher <strong>12x de R$ 59,90</strong>. O parcelamento aparecerá automaticamente após inserir o número do cartão.
+                    Após preencher os dados do seu cartão na próxima página, você poderá escolher <strong>12× de R$ 59</strong>. O parcelamento aparecerá automaticamente após inserir o número do cartão.
                   </p>
                 </div>
               </div>
