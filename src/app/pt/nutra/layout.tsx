@@ -11,13 +11,13 @@ export const metadata: Metadata = {
   },
 }
 
-const NUTRA_PUBLIC = new Set(['', '/', '/login'])
+const NUTRA_PUBLIC = new Set(['', '/', '/login', '/oferta', '/checkout'])
 
 function isNutraPublicPath(pathname: string): boolean {
   const path = pathname.replace(/\/$/, '') || '/'
   if (path === '/pt/nutra') return true
   const suffix = path.replace(/^\/pt\/nutra\/?/, '') || '/'
-  return NUTRA_PUBLIC.has(suffix) || suffix.startsWith('login')
+  return NUTRA_PUBLIC.has(suffix) || suffix.startsWith('login') || suffix.startsWith('oferta') || suffix.startsWith('checkout')
 }
 
 export default async function NutraLayout({ children }: { children: ReactNode }) {

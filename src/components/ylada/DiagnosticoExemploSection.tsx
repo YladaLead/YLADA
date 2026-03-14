@@ -39,7 +39,7 @@ interface DiagnosticoExemploSectionProps {
  */
 export function DiagnosticoExemploSection({
   area,
-  ctaHref = '/pt/precos',
+  ctaHref = '/pt/nutri/checkout?plan=annual',
   ctaLabel = 'Começar agora',
 }: DiagnosticoExemploSectionProps) {
   const config = DIAGNOSTICO_EXEMPLOS[area]

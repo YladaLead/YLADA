@@ -375,7 +375,10 @@ function ConfigDrivenLinkView({
         const res = await fetch(`/api/ylada/links/${encodeURIComponent(slug)}/diagnosis`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ visitor_answers: values }),
+          body: JSON.stringify({
+            visitor_answers: values,
+            ...(locale !== 'pt' && { locale }),
+          }),
         })
         const data = await res.json().catch(() => ({}))
         if (!res.ok) {

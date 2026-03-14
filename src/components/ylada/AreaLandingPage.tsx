@@ -71,6 +71,20 @@ interface AreaLandingPageProps {
 /** Áreas de vendas: nutra (suplementos/nutraceuticos) e seller (vendedores em geral). Comunicação com "clientes" e "conversas". */
 const SALES_AREAS: AreaLandingArea[] = ['nutra', 'seller']
 
+/** Mapeia área para checkout real. Áreas sem checkout próprio usam nutri. "Começar agora" vai direto ao checkout (escolher plano anual/mensal). */
+const AREA_TO_CHECKOUT: Record<AreaLandingArea, string> = {
+  nutri: '/pt/nutri/checkout',
+  estetica: '/pt/nutri/checkout',
+  fitness: '/pt/nutri/checkout',
+  psi: '/pt/nutri/checkout',
+  odonto: '/pt/nutri/checkout',
+  med: '/pt/nutri/checkout',
+  nutra: '/pt/nutra/checkout',
+  perfumaria: '/pt/nutri/checkout',
+  'coach-bem-estar': '/pt/wellness/checkout',
+  seller: '/pt/nutri/checkout',
+}
+
 export function AreaLandingPage({ area, locale, appBasePath = '/pt' }: AreaLandingPageProps) {
   const componentArea = AREA_TO_COMPONENT[area] ?? 'nutri'
   const isSalesArea = SALES_AREAS.includes(area)
@@ -82,8 +96,8 @@ export function AreaLandingPage({ area, locale, appBasePath = '/pt' }: AreaLandi
   const homeHref = `/${locale}`
   const loginHref = `${appBasePath}/${area}/login`
   const homeRedirect = `${appBasePath}/${area}/home`
-  const checkoutBase = `${appBasePath}/${area}/checkout`
-  const ofertaHref = `${appBasePath}/${area}/oferta`
+  /** Checkout direto (escolher plano anual/mensal) — sem passar por /pt/precos */
+  const checkoutBase = AREA_TO_CHECKOUT[area] ?? '/pt/nutri/checkout'
 
   const c = COMMON[locale]
   const label = AREA_LABELS[area]?.[locale] ?? AREA_LABELS[area]?.pt ?? area
@@ -136,11 +150,11 @@ export function AreaLandingPage({ area, locale, appBasePath = '/pt' }: AreaLandi
               <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 leading-tight mb-4">
                 {isSalesArea ? (
                   locale === 'pt' ? (
-                    <>Pare de mandar catálogo.<br />Comece conversas com clientes qualificados.</>
+                    <>Melhore suas conversas com clientes.<br />Comece conversas com contexto.</>
                   ) : locale === 'en' ? (
-                    <>Stop sending catalogs.<br />Start conversations with qualified clients.</>
+                    <>Improve your conversations with clients.<br />Start conversations with context.</>
                   ) : (
-                    <>Deja de enviar catálogos.<br />Comienza conversaciones con clientes cualificados.</>
+                    <>Mejora tus conversaciones con clientes.<br />Comienza conversaciones con contexto.</>
                   )
                 ) : (
                   locale === 'pt' ? (
@@ -207,7 +221,7 @@ export function AreaLandingPage({ area, locale, appBasePath = '/pt' }: AreaLandi
                 </span>
               </div>
               <Link
-                href={isSalesArea ? ofertaHref : (locale === 'pt' ? `/${locale}/precos` : `${appBasePath}/precos`)}
+                href={`${checkoutBase}?plan=annual`}
                 className="inline-flex items-center justify-center px-8 py-4 rounded-xl bg-blue-600 text-white font-semibold text-lg hover:bg-blue-700 transition-colors shadow-lg"
               >
                 {locale === 'pt' && 'Começar agora'}
@@ -376,7 +390,7 @@ export function AreaLandingPage({ area, locale, appBasePath = '/pt' }: AreaLandi
           </div>
         </section>
 
-        <DiagnosticoExemploSection area={area === 'nutra' ? 'nutra' : componentArea} ctaHref={ofertaHref} />
+        <DiagnosticoExemploSection area={area === 'nutra' ? 'nutra' : componentArea} ctaHref={`${checkoutBase}?plan=annual`} />
 
         <section className="py-12 sm:py-16 bg-gray-50">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">

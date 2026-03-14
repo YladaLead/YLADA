@@ -1,8 +1,9 @@
 /**
  * POST /api/ylada/links/[slug]/diagnosis — gera diagnóstico e grava métricas.
  * Público (sem auth). Sem rate limit por IP nesta fase (validação comportamental).
- * Body: { visitor_answers: Record<string, unknown> }
+ * Body: { visitor_answers: Record<string, unknown>, locale?: 'pt' | 'en' | 'es' }
  * Retorna: { diagnosis: DiagnosisDecisionOutput, metrics_id: string }
+ * Quando locale é 'en' ou 'es', o diagnóstico é traduzido antes de retornar.
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { createHash } from 'crypto'
@@ -15,6 +16,7 @@ import type { StrategicProfile } from '@/lib/ylada/strategic-profile'
 import { getAdaptiveDiagnosisIntro, getAdvancedCta } from '@/lib/ylada/adaptive-diagnosis'
 import { sanitizeThemeForPatient } from '@/lib/ylada/strategic-intro'
 import { inferArchitectureFromTitle } from '@/config/ylada-segments'
+import { translateDiagnosis } from '@/lib/translate-diagnosis'
 
 const ARCHITECTURES: DiagnosisArchitecture[] = [
   'RISK_DIAGNOSIS',
@@ -121,6 +123,7 @@ export async function POST(
     }
 
     const body = await request.json().catch(() => ({}))
+    const locale = (body.locale === 'en' || body.locale === 'es') ? body.locale as 'en' | 'es' : null
     let visitor_answers: Record<string, unknown> = body.visitor_answers && typeof body.visitor_answers === 'object'
       ? { ...body.visitor_answers }
       : {}
@@ -228,8 +231,12 @@ export async function POST(
         .select('id')
         .single()
       if (!metricsErr && metricsRow) {
+        let finalCached = cachedDiag
+        if (locale === 'en' || locale === 'es') {
+          finalCached = await translateDiagnosis(cachedDiag, locale)
+        }
         return NextResponse.json({
-          diagnosis: cachedDiag,
+          diagnosis: finalCached,
           metrics_id: metricsRow.id,
         })
       }
@@ -472,8 +479,13 @@ export async function POST(
       .then(() => {})
       .catch((err) => console.warn('[ylada/links/[slug]/diagnosis] cache insert', err))
 
+    let finalDiagnosis = diagnosisPayload
+    if (locale === 'en' || locale === 'es') {
+      finalDiagnosis = await translateDiagnosis(diagnosisPayload, locale)
+    }
+
     return NextResponse.json({
-      diagnosis: diagnosisPayload,
+      diagnosis: finalDiagnosis,
       metrics_id: row.id,
     })
   } catch (e) {

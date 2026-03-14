@@ -81,7 +81,7 @@ export default function CoachLandingPage() {
                 <span>A conversa começa com contexto</span>
               </div>
               <Link
-                href="/pt/precos"
+                href="/pt/coach/checkout?plan=annual"
                 className="inline-flex items-center justify-center px-8 py-4 rounded-xl bg-blue-600 text-white font-semibold text-lg hover:bg-blue-700 transition-colors shadow-lg"
               >
                 Começar agora
@@ -165,7 +165,7 @@ export default function CoachLandingPage() {
           </div>
         </section>
 
-        <DiagnosticoExemploSection area="coach" ctaHref="/pt/precos" />
+        <DiagnosticoExemploSection area="coach" ctaHref="/pt/coach/checkout?plan=annual" />
 
         <section className="py-12 sm:py-16 bg-gray-50">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">

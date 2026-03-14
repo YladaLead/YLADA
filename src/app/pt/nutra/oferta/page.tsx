@@ -30,13 +30,13 @@ export default function NutraOfertaPage() {
       </header>
 
       <main className="max-w-xl mx-auto px-4 py-10 sm:py-14">
-        {/* 1. Headline forte */}
+        {/* 1. Headline — filosofia YLADA: melhorar conversas, contexto */}
         <section className="text-center mb-10">
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3">
-            Pare de mandar catálogo.
+            Melhore suas conversas com clientes.
           </h1>
           <p className="text-lg sm:text-xl font-semibold text-blue-600">
-            Comece conversas com clientes qualificados.
+            Comece conversas com contexto.
           </p>
         </section>
 

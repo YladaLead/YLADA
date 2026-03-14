@@ -129,6 +129,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json().catch(() => ({}))
     const text = typeof body.text === 'string' ? body.text.trim() : ''
     const segmentHint = typeof body.segment === 'string' ? body.segment.trim() : 'ylada'
+    const locale = (body.locale === 'en' || body.locale === 'es') ? body.locale as 'en' | 'es' : null
     const profileType = typeof body.profile_type === 'string' ? body.profile_type.trim() : null
     const profession = typeof body.profession === 'string' ? body.profession.trim() : null
     const objective = typeof body.objective === 'string' && LINK_OBJECTIVES.includes(body.objective as LinkObjective) ? body.objective as LinkObjective : null
@@ -249,6 +250,12 @@ export async function POST(request: NextRequest) {
     if (objective) overrides.push(`Objetivo do link: ${objective}`)
     if (variation) overrides.push('O usuário pediu OUTRA IDEIA: sugira a opção alternativa (ex.: se antes era quiz, sugira calculadora).')
     if (overrides.length) profileContext += `Contexto adicional:\n${overrides.join('\n')}\n\n`
+
+    if (locale === 'en') {
+      profileContext += `CRITICAL: The professional's audience speaks ENGLISH. Generate ALL questions (labels and options) in ENGLISH. Do NOT use Portuguese.\n\n`
+    } else if (locale === 'es') {
+      profileContext += `CRITICAL: The professional's audience speaks SPANISH. Generate ALL questions (labels and options) in SPANISH. Do NOT use Portuguese.\n\n`
+    }
 
     let userMessage = `${profileContext}Texto do profissional:\n${text}`
     if (previousLinkContext?.flow_id) {

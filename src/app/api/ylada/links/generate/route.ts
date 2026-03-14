@@ -19,6 +19,8 @@ import { deriveStrategicProfile } from '@/lib/ylada/strategic-profile'
 import { getDiagnosisSegmentFromProfile } from '@/lib/ylada/diagnosis-segment'
 import { inferArchitectureFromTitle, DEFAULT_ARCHITECTURE } from '@/config/ylada-segments'
 import { randomBytes } from 'crypto'
+import { translateQuestions } from '@/lib/translate-questions'
+import { getCountryByCode } from '@/components/CountrySelector'
 
 function generateSlug(): string {
   return randomBytes(6).toString('base64url').toLowerCase().replace(/[^a-z0-9]/g, '') || 'link'
@@ -54,22 +56,30 @@ export async function POST(request: NextRequest) {
     const bibliotecaTemplateId = typeof body.biblioteca_template_id === 'string' ? body.biblioteca_template_id.trim() : null
 
     const segment = typeof body.segment === 'string' ? body.segment.trim() || null : null
+    const locale = (body.locale === 'en' || body.locale === 'es') ? body.locale as 'en' | 'es' : null
     const category = typeof body.category === 'string' ? body.category.trim() || null : null
     const subCategory = typeof body.sub_category === 'string' ? body.sub_category.trim() || null : null
     const titleOverride = typeof body.title === 'string' ? body.title.trim() || null : null
     let ctaWhatsapp = typeof body.cta_whatsapp === 'string' ? body.cta_whatsapp.trim() || null : null
     const ctaSuggestion = typeof body.cta_suggestion === 'string' ? body.cta_suggestion.trim() || null : null
 
-    // Bloco 6.1: se cta_whatsapp não informado, buscar do perfil do usuário
+    // Bloco 6.1: se cta_whatsapp não informado, buscar do perfil do usuário (com country_code para DDI correto)
     if (!ctaWhatsapp && supabaseAdmin) {
       const { data: profile } = await supabaseAdmin
         .from('user_profiles')
-        .select('whatsapp')
+        .select('whatsapp, country_code')
         .eq('user_id', user.id)
         .maybeSingle()
-      const wp = (profile as { whatsapp?: string | null } | null)?.whatsapp
+      const wp = (profile as { whatsapp?: string | null; country_code?: string | null } | null)?.whatsapp
+      const countryCode = (profile as { country_code?: string | null } | null)?.country_code || 'BR'
       if (typeof wp === 'string' && wp.trim().length >= 10) {
-        ctaWhatsapp = wp.trim()
+        let num = wp.trim().replace(/\D/g, '')
+        const country = getCountryByCode(countryCode)
+        const phoneCode = country?.phoneCode?.replace(/\D/g, '') || '55'
+        if (phoneCode && !num.startsWith(phoneCode)) {
+          num = phoneCode + num
+        }
+        ctaWhatsapp = num
       }
     }
 
@@ -245,16 +255,20 @@ export async function POST(request: NextRequest) {
         }
       } else {
         const quizFallback = getQuizEmagrecimento(themeRaw, flowId) ?? getQuizByTema(themeRaw, flowId)
+        const usedOverride = questionsOverride && questionsOverride.length > 0
         formFields = quizFallback && quizFallback.length > 0
           ? quizFallback.map((q) => ({ id: q.id, label: q.label, type: q.type as string, options: q.options }))
-          : (questionsOverride && questionsOverride.length > 0)
-            ? questionsOverride.map((q) => ({
+          : usedOverride
+            ? questionsOverride!.map((q) => ({
                 id: q.id,
                 label: q.label,
                 type: (q.type as string) || 'text',
                 options: Array.isArray((q as { options?: string[] }).options) ? (q as { options: string[] }).options : undefined,
               }))
             : flow.question_labels.map((label, i) => ({ id: `q${i + 1}`, label, type: 'text' }))
+        if (locale && formFields.length > 0 && !usedOverride) {
+          formFields = await translateQuestions(formFields, locale)
+        }
       }
 
       configJson = {
@@ -284,7 +298,7 @@ export async function POST(request: NextRequest) {
         },
         form: {
           fields: formFields,
-          submit_label: 'Ver resultado',
+          submit_label: locale === 'en' ? 'See result' : locale === 'es' ? 'Ver resultado' : 'Ver resultado',
         },
         result: {
           headline: flow.result_preview,

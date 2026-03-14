@@ -7,7 +7,7 @@ import Link from 'next/link'
  * Destaca o plano anual como "Mais escolhido" e inclui gatilho de economia.
  */
 export function PricingBlockCompact({
-  ctaHref = '/pt/precos',
+  ctaHref = '/pt/nutri/checkout?plan=annual',
   ctaLabel = 'Começar agora',
 }: {
   ctaHref?: string

@@ -475,6 +475,7 @@ export async function POST(request: NextRequest) {
               theme: lastLinkContext.interpretacao?.tema ?? '',
               questions: lastLinkContext.questions ?? [],
             },
+            ...(locale && { locale }),
           }),
         })
         const interpretJson = await interpretRes.json().catch(() => ({}))
@@ -493,6 +494,7 @@ export async function POST(request: NextRequest) {
               interpretacao,
               questions: questions.length > 0 ? questions : undefined,
               segment: validSegment,
+              ...(locale && { locale }),
             }),
           })
           const genJson = await genRes.json().catch(() => ({}))
@@ -525,6 +527,7 @@ export async function POST(request: NextRequest) {
               segment: validSegment,
               profile_type: profileRow?.profile_type ?? undefined,
               profession: profileRow?.profession ?? undefined,
+              ...(locale && { locale }),
             }),
           })
           const interpretJson = await interpretRes.json().catch(() => ({}))
@@ -543,6 +546,7 @@ export async function POST(request: NextRequest) {
                 interpretacao,
                 questions: questions.length > 0 ? questions : undefined,
                 segment: validSegment,
+                ...(locale && { locale }),
               }),
             })
             const genJson = await genRes.json().catch(() => ({}))
@@ -572,6 +576,7 @@ export async function POST(request: NextRequest) {
           body: JSON.stringify({
             text: defaultText,
             segment: validSegment,
+            ...(locale && { locale }),
             profile_type: profileRow?.profile_type ?? undefined,
             profession: profileRow?.profession ?? undefined,
           }),
@@ -591,6 +596,7 @@ export async function POST(request: NextRequest) {
               interpretacao,
               questions: questions.length > 0 ? questions : undefined,
               segment: validSegment,
+              ...(locale && { locale }),
             }),
           })
           const genJson = await genRes.json().catch(() => ({}))
