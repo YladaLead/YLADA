@@ -8,8 +8,8 @@ import FacebookPixel from '@/components/analytics/FacebookPixel'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata = {
-  title: 'YLADA - Transforme suas ideias em links inteligentes',
-  description: 'Transforme suas ideias em links inteligentes em 60 segundos com IA',
+  title: 'YLADA - Boas conversas começam com boas perguntas',
+  description: 'Boas conversas começam com boas perguntas. Conecte-se através de links inteligentes.',
   keywords: 'leads, IA, inteligência artificial, geração de leads, marketing, ylada',
   authors: [{ name: 'YLADA Team' }],
   manifest: '/manifest.json',
@@ -18,8 +18,8 @@ export const metadata = {
     apple: '/images/logo/ylada/quadrado/azul-claro/ylada-quadrado-azul-claro-31.png',
   },
   openGraph: {
-    title: 'YLADA - Transforme suas ideias em links inteligentes',
-    description: 'Transforme suas ideias em links inteligentes em 60 segundos com IA',
+    title: 'YLADA - Boas conversas começam com boas perguntas',
+    description: 'Boas conversas começam com boas perguntas. Conecte-se através de links inteligentes.',
     url: 'https://www.ylada.com',
     siteName: 'YLADA',
     images: [
@@ -27,7 +27,7 @@ export const metadata = {
         url: 'https://www.ylada.com/images/logo/ylada/horizontal/azul-claro/ylada-horizontal-azul-claro-30.png',
         width: 1080,
         height: 1080,
-        alt: 'YLADA - Transforme suas ideias em links inteligentes',
+        alt: 'YLADA - Boas conversas começam com boas perguntas',
         type: 'image/png',
       },
     ],
@@ -36,8 +36,8 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'YLADA - Transforme suas ideias em links inteligentes',
-    description: 'Transforme suas ideias em links inteligentes em 60 segundos com IA',
+    title: 'YLADA - Boas conversas começam com boas perguntas',
+    description: 'Boas conversas começam com boas perguntas. Conecte-se através de links inteligentes.',
     images: ['https://www.ylada.com/images/logo/ylada/horizontal/azul-claro/ylada-horizontal-azul-claro-30.png'],
     creator: '@ylada',
   },

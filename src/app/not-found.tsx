@@ -136,7 +136,7 @@ export default function NotFound() {
         </div>
         
         <p className="text-sm text-gray-500 mt-6">
-          © 2024 YLADA. Transformando ideias em links inteligentes.
+          © 2024 YLADA. Boas conversas começam com boas perguntas.
         </p>
       </div>
     </div>

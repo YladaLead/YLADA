@@ -1,7 +1,7 @@
 {
-  "name": "YLADA - Transforme suas ideias em links inteligentes",
+  "name": "YLADA - Boas conversas começam com boas perguntas",
   "short_name": "YLADA",
-  "description": "Transforme suas ideias em links inteligentes em 60 segundos com IA",
+  "description": "Boas conversas começam com boas perguntas. Conecte-se através de links inteligentes.",
   "start_url": "/",
   "display": "standalone",
   "orientation": "any",
