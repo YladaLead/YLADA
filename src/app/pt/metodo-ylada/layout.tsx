@@ -4,11 +4,11 @@ const baseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXT_PUBLIC_APP_U
 const pageUrl = `${baseUrl}/pt/metodo-ylada`
 
 export const metadata: Metadata = {
-  title: 'Método YLADA — A forma leve e inteligente de atrair clientes interessados',
-  description: 'Pare de tentar convencer curiosos. O Método YLADA ensina como gerar valor, construir autoridade e filtrar curiosos automaticamente. Uma nova forma de fazer marketing profissional.',
+  title: 'Filosofia YLADA — Transforme curiosidade em conversas com clientes',
+  description: 'A nova lógica de comunicação que transforma marketing em conversas com pessoas realmente interessadas. Diagnósticos inteligentes aplicados pelo Método YLADA.',
   openGraph: {
-    title: 'Método YLADA — A forma leve e inteligente de atrair clientes interessados',
-    description: 'Pare de tentar convencer curiosos. Comece a atrair interessados. O Método YLADA é uma nova forma de fazer marketing profissional.',
+    title: 'Filosofia YLADA — Transforme curiosidade em conversas com clientes',
+    description: 'Transforme curiosidade em conversas com clientes através de diagnósticos inteligentes. A filosofia aplicada pelo Método YLADA.',
     url: pageUrl,
     type: 'website',
   },

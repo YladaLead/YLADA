@@ -18,10 +18,16 @@ export default function MetodoYLADAContent({ areaCodigo, areaLabel }: MetodoYLAD
       {/* Header */}
       <div>
         <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
-          Método YLADA
+          Filosofia YLADA
         </h1>
+        <p className="text-lg font-semibold text-gray-800 mb-2">
+          Boas conversas começam com boas perguntas.
+        </p>
         <p className="text-gray-600">
-          A filosofia de comunicação que ajuda em marketing, CRM, atração e autoridade.
+          Transforme curiosidade em conversas com clientes através de diagnósticos inteligentes.
+        </p>
+        <p className="text-gray-700 font-medium mt-2">
+          A filosofia é aplicada através do Método YLADA.
         </p>
       </div>
 
@@ -41,7 +47,7 @@ export default function MetodoYLADAContent({ areaCodigo, areaLabel }: MetodoYLAD
             </ul>
           </div>
           <div className="p-4 rounded-lg bg-green-50 border border-green-100">
-            <p className="font-semibold text-gray-800 mb-2">Método YLADA</p>
+            <p className="font-semibold text-gray-800 mb-2">Filosofia YLADA</p>
             <ul className="text-sm text-gray-600 space-y-1">
               <li>• Criar diagnóstico</li>
               <li>• Atrair interessados</li>
@@ -55,10 +61,10 @@ export default function MetodoYLADAContent({ areaCodigo, areaLabel }: MetodoYLAD
         </p>
       </section>
 
-      {/* 2. Tripé do YLADA */}
+      {/* 2. O funcionamento da filosofia YLADA */}
       <section className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
         <h2 className="text-xl font-bold text-gray-900 mb-4">
-          O tripé do YLADA
+          O funcionamento da filosofia YLADA
         </h2>
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 py-4">
           <div className="text-center p-4 rounded-xl bg-blue-50 border border-blue-100 min-w-[140px]">
@@ -96,8 +102,8 @@ export default function MetodoYLADAContent({ areaCodigo, areaLabel }: MetodoYLAD
             </thead>
             <tbody className="divide-y divide-gray-100">
               <tr>
-                <td className="py-3 px-2 text-gray-600">💰 Paga para chamar atenção</td>
-                <td className="py-3 px-2 text-gray-600">🧠 Curiosidade natural</td>
+                <td className="py-3 px-2 text-gray-600">💰 Paga para aparecer</td>
+                <td className="py-3 px-2 text-gray-600">🧠 Pessoas querem descobrir o resultado</td>
               </tr>
               <tr>
                 <td className="py-3 px-2 text-gray-600">📉 Pessoas frias</td>
@@ -126,13 +132,35 @@ export default function MetodoYLADAContent({ areaCodigo, areaLabel }: MetodoYLAD
         </p>
       </section>
 
-      {/* 5. Papel do Noel */}
+      {/* 5. Os três motores do YLADA */}
+      <section className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
+        <h2 className="text-xl font-bold text-gray-900 mb-4">
+          Os três motores do YLADA
+        </h2>
+        <p className="text-gray-600 text-sm mb-4">Atração → Conversa → Relacionamento → Cliente</p>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div className="p-3 rounded-lg bg-blue-50 border border-blue-100">
+            <p className="font-bold text-blue-800 text-sm">Atração</p>
+            <p className="text-xs text-gray-600">Diagnósticos despertam curiosidade.</p>
+          </div>
+          <div className="p-3 rounded-lg bg-indigo-50 border border-indigo-100">
+            <p className="font-bold text-indigo-800 text-sm">Conversa</p>
+            <p className="text-xs text-gray-600">Resultados iniciam conversas naturais.</p>
+          </div>
+          <div className="p-3 rounded-lg bg-green-50 border border-green-100">
+            <p className="font-bold text-green-800 text-sm">Relacionamento</p>
+            <p className="text-xs text-gray-600">Histórico transforma contatos em clientes.</p>
+          </div>
+        </div>
+      </section>
+
+      {/* 6. Papel do Noel */}
       <section className="bg-sky-50 rounded-xl p-6 border border-sky-100">
         <h2 className="text-xl font-bold text-gray-900 mb-4">
           O papel do Noel
         </h2>
         <p className="text-gray-700 mb-4">
-          O Noel é o mentor do método. Ele ensina você a aplicar a filosofia:
+          O Noel é o mentor da filosofia YLADA e ajuda você a aplicá-la no dia a dia:
         </p>
         <ul className="space-y-2 text-gray-700">
           <li className="flex items-center gap-2">
@@ -160,7 +188,7 @@ export default function MetodoYLADAContent({ areaCodigo, areaLabel }: MetodoYLAD
         </Link>
       </section>
 
-      {/* 6. CTA final */}
+      {/* 7. CTA final */}
       <section className="bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl p-8 text-center text-white">
         <p className="text-xl font-bold mb-2">
           Agora vamos colocar isso em prática

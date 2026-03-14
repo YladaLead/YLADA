@@ -2,13 +2,13 @@
 
 /**
  * BLUEPRINT VISUAL – HOME YLADA
- * Ordem fixa: HEADER → HERO → PROBLEMA → EXEMPLOS → BENEFÍCIOS → COMO FUNCIONA → ÁREAS → O QUE ACONTECE → CTA FINAL → FOOTER
- * Regra: não misturar seções, não alterar ordem, não duplicar blocos.
- * Objetivo: levar o visitante a fazer o diagnóstico.
+ * Ordem: HEADER → HERO → PROBLEMA → METÁFORA MÉDICA → FUNIL DE DIAGNÓSTICO → PRINCÍPIO VISUAL → EXEMPLOS → BENEFÍCIOS → COMO FUNCIONA → ÁREAS → O QUE ACONTECE → CTA → FOOTER
+ * Objetivo: levar o visitante a fazer o diagnóstico. Posicionamento: plataforma de preparação de conversas (funil de diagnóstico).
  */
 
 import { useState, useEffect } from 'react'
 import { useRouter, usePathname, useSearchParams } from 'next/navigation'
+import Image from 'next/image'
 import YLADALogo from '@/components/YLADALogo'
 import LanguageSelector from '@/components/LanguageSelector'
 import Link from 'next/link'
@@ -94,7 +94,10 @@ export default function InstitutionalPageContent() {
               Fazer diagnóstico
             </Link>
             <Link href="/pt/metodo-ylada" className="text-gray-600 hover:text-gray-900 text-sm font-medium hidden md:inline">
-              Método
+              Filosofia
+            </Link>
+            <Link href="/pt/sobre" className="text-gray-600 hover:text-gray-900 text-sm font-medium hidden md:inline">
+              Sobre
             </Link>
             <Link href="/pt/profissionais" className="text-gray-600 hover:text-gray-900 text-sm font-medium hidden lg:inline">
               Profissionais
@@ -126,11 +129,14 @@ export default function InstitutionalPageContent() {
             <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-4 leading-tight text-center">
               Seu marketing atrai curiosos ou clientes prontos para contratar?
             </h1>
+            <p className="text-lg sm:text-xl text-gray-800 font-semibold mb-3 text-center">
+              Boas conversas começam com boas perguntas.
+            </p>
             <p className="text-base sm:text-lg text-gray-600 mb-4 text-center leading-relaxed">
               Descubra em menos de 1 minuto se sua comunicação profissional está realmente atraindo pessoas interessadas.
             </p>
             <p className="text-base text-gray-700 font-medium mb-6 text-center">
-              O YLADA usa diagnósticos inteligentes para iniciar conversas mais preparadas com clientes.
+              YLADA usa diagnósticos inteligentes para transformar curiosidade em conversas com clientes.
             </p>
 
             <div className="bg-white rounded-xl p-6 sm:p-8 border border-gray-200 shadow-sm">
@@ -195,6 +201,71 @@ export default function InstitutionalPageContent() {
           </div>
         </section>
 
+        {/* 2b Duolingo moment — entender o produto em 3 segundos */}
+        <section className="py-10 sm:py-14 bg-white border-b border-gray-100">
+          <div className="max-w-3xl mx-auto px-4">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 text-center mb-6 leading-tight">
+              Boas conversas começam com boas perguntas.
+            </h2>
+            <div className="bg-gray-900 text-white rounded-2xl p-8 sm:p-10 mb-8">
+              <p className="text-base sm:text-lg text-gray-300 text-center mb-3">
+                Explicar demais não cria clientes.
+              </p>
+              <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-white text-center leading-tight">
+                Boas conversas começam com boas perguntas.
+              </p>
+            </div>
+            <p className="text-gray-600 text-center mb-8 max-w-xl mx-auto leading-relaxed">
+              Antes de iniciar uma conversa, médicos fazem perguntas para entender o problema. Profissionais também podem fazer isso. YLADA transforma conhecimento em diagnósticos que iniciam conversas melhores.
+            </p>
+
+            {/* Comparação visual: tradicional vs YLADA */}
+            <div className="grid sm:grid-cols-2 gap-6 mb-8">
+              <div className="rounded-xl p-6 border-2 border-red-100 bg-red-50/50">
+                <p className="font-bold text-gray-900 mb-4 text-center text-sm uppercase tracking-wider text-red-800">Marketing tradicional</p>
+                <div className="flex flex-col items-center gap-1 text-gray-700">
+                  <span className="text-sm font-medium">Explicar</span>
+                  <span className="text-red-300">↓</span>
+                  <span className="text-sm font-medium">Convencer</span>
+                  <span className="text-red-300">↓</span>
+                  <span className="text-sm font-medium">Insistir</span>
+                </div>
+                <p className="text-center text-red-600 text-sm font-medium mt-4">Resultado:</p>
+                <ul className="text-center text-sm text-gray-600 mt-1 space-y-0.5">
+                  <li>❌ curiosos</li>
+                  <li>❌ conversas fracas</li>
+                </ul>
+              </div>
+              <div className="rounded-xl p-6 border-2 border-[#2563eb] bg-blue-50/50">
+                <p className="font-bold text-gray-900 mb-4 text-center text-sm uppercase tracking-wider text-[#2563eb]">YLADA</p>
+                <div className="flex flex-col items-center gap-1 text-gray-800">
+                  <span className="text-sm font-medium">Perguntar</span>
+                  <span className="text-blue-300">↓</span>
+                  <span className="text-sm font-medium">Diagnosticar</span>
+                  <span className="text-blue-300">↓</span>
+                  <span className="text-sm font-medium">Conversar</span>
+                </div>
+                <p className="text-center text-[#2563eb] text-sm font-medium mt-4">Resultado:</p>
+                <ul className="text-center text-sm text-gray-700 mt-1 space-y-0.5">
+                  <li>✔ clientes preparados</li>
+                  <li>✔ conversas melhores</li>
+                </ul>
+              </div>
+            </div>
+
+            {/* Diagrama central */}
+            <div className="flex flex-col items-center gap-2 py-6 px-6 bg-gray-50 rounded-xl border border-gray-100">
+              <span className="text-sm font-semibold text-gray-800">Pergunta</span>
+              <span className="text-gray-400">↓</span>
+              <span className="text-sm font-semibold text-gray-800">Diagnóstico</span>
+              <span className="text-gray-400">↓</span>
+              <span className="text-sm font-semibold text-gray-800">Conversa</span>
+              <span className="text-gray-400">↓</span>
+              <span className="text-sm font-bold text-gray-900">Cliente</span>
+            </div>
+          </div>
+        </section>
+
         {/* 3️⃣ PROBLEMA DO MERCADO — Fundo cinza claro */}
         <section className="bg-gray-50 py-12 sm:py-16 lg:py-20 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl mx-auto">
@@ -223,6 +294,10 @@ export default function InstitutionalPageContent() {
               O problema raramente é seu conhecimento.<br />
               É a forma como o cliente chega até você.
             </p>
+            <p className="text-gray-800 font-semibold text-center">
+              Explicar demais não cria clientes.<br />
+              Boas conversas começam com boas perguntas.
+            </p>
             <p className="text-gray-500 text-sm text-center mt-6">
               Muitos profissionais investem em cursos, marketing e ferramentas.
               Mas ignoram um fator essencial:
@@ -231,10 +306,100 @@ export default function InstitutionalPageContent() {
           </div>
         </section>
 
-        {/* Frase filosófica */}
-        <p className="text-center text-lg sm:text-xl font-semibold text-gray-800 py-6">
-          Boas conversas começam com boas perguntas.
-        </p>
+        {/* 3b A metáfora médica */}
+        <section className="py-12 sm:py-16 lg:py-20 bg-white">
+          <div className="max-w-3xl mx-auto">
+            <h2 className="text-xl sm:text-3xl font-bold text-gray-900 mb-6 text-center">
+              O marketing tradicional explica. O YLADA pergunta primeiro.
+            </h2>
+            <p className="text-gray-700 mb-6 leading-relaxed">
+              Antes de indicar um tratamento, médicos fazem perguntas. Eles precisam entender o problema primeiro.
+            </p>
+            <p className="text-gray-700 mb-6 leading-relaxed">
+              Profissionais também podem fazer isso. Em vez de explicar tudo logo no início, o cliente pode primeiro entender o próprio problema. É isso que o diagnóstico faz.
+            </p>
+            <p className="text-lg font-semibold text-gray-900 text-center">
+              Antes do tratamento vem o diagnóstico.<br />
+              Antes da venda vem a conversa.
+            </p>
+          </div>
+        </section>
+
+        {/* 3c O funil de diagnóstico YLADA */}
+        <section className="bg-gray-50 py-12 sm:py-16 lg:py-20 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8">
+          <div className="max-w-4xl mx-auto">
+            <h2 className="text-xl sm:text-3xl font-bold text-gray-900 text-center mb-2">
+              O funil de diagnóstico YLADA
+            </h2>
+            <p className="text-gray-600 text-center mb-8 text-sm sm:text-base">
+              Não é o funil tradicional de marketing. É um funil que prepara a conversa antes dela acontecer.
+            </p>
+            <div className="mb-10 flex justify-center">
+              <Image
+                src="/images/ylada/funil-tradicional-vs-funil-diagnostico-ylada.png"
+                alt="Comparação: Funil tradicional de marketing (Atenção, Interesse, Desejo, Ação) versus Funil de diagnóstico YLADA (Curiosidade, Perguntas, Clareza, Conversa, Cliente)"
+                width={800}
+                height={500}
+                className="w-full max-w-2xl h-auto rounded-xl border border-gray-200 shadow-sm"
+              />
+            </div>
+            <div className="grid md:grid-cols-2 gap-8">
+              <div className="bg-white rounded-xl p-6 border border-red-100">
+                <h3 className="font-bold text-gray-900 mb-3 text-center">Marketing tradicional</h3>
+                <div className="flex flex-col items-center gap-1 py-4">
+                  <span className="text-sm font-medium text-gray-700">Atenção</span>
+                  <span className="text-gray-400">↓</span>
+                  <span className="text-sm font-medium text-gray-700">Interesse</span>
+                  <span className="text-gray-400">↓</span>
+                  <span className="text-sm font-medium text-gray-700">Desejo</span>
+                  <span className="text-gray-400">↓</span>
+                  <span className="text-sm font-medium text-gray-700">Ação</span>
+                </div>
+                <p className="text-center text-red-600 text-sm font-medium mt-2">Resultado: curiosos e conversas fracas.</p>
+              </div>
+              <div className="bg-white rounded-xl p-6 border-2 border-[#2563eb] bg-blue-50/30">
+                <h3 className="font-bold text-gray-900 mb-3 text-center">Funil de diagnóstico</h3>
+                <div className="flex flex-col items-center gap-1 py-4">
+                  <span className="text-sm font-medium text-gray-800">Curiosidade</span>
+                  <span className="text-gray-400">↓</span>
+                  <span className="text-sm font-medium text-gray-800">Perguntas</span>
+                  <span className="text-gray-400">↓</span>
+                  <span className="text-sm font-medium text-gray-800">Clareza</span>
+                  <span className="text-gray-400">↓</span>
+                  <span className="text-sm font-medium text-gray-800">Conversa</span>
+                  <span className="text-gray-400">↓</span>
+                  <span className="text-sm font-bold text-gray-900">Cliente</span>
+                </div>
+                <p className="text-center text-[#2563eb] text-sm font-medium mt-2">Resultado: conversas mais preparadas.</p>
+              </div>
+            </div>
+            <p className="text-center text-gray-600 text-sm mt-6 max-w-xl mx-auto">
+              CRM organiza conversas depois que elas acontecem. YLADA prepara a conversa antes dela acontecer.
+            </p>
+          </div>
+        </section>
+
+        {/* Princípio visual — bloco forte da frase */}
+        <section className="py-10 sm:py-14 bg-white">
+          <div className="max-w-2xl mx-auto text-center">
+            <div className="bg-gray-900 text-white rounded-2xl p-8 sm:p-10 mb-6">
+              <p className="text-sm sm:text-base uppercase tracking-wider text-gray-300 mb-2">Explicar · Convencer · Insistir</p>
+              <p className="text-base sm:text-lg text-gray-400 mb-4">não funciona.</p>
+              <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-white leading-tight">
+                Boas conversas começam com boas perguntas.
+              </p>
+            </div>
+            <div className="flex flex-col items-center gap-2 py-4 px-4 bg-gray-50 rounded-xl border border-gray-100">
+              <span className="text-sm font-semibold text-gray-800">Pergunta</span>
+              <span className="text-gray-400">↓</span>
+              <span className="text-sm font-semibold text-gray-800">Diagnóstico</span>
+              <span className="text-gray-400">↓</span>
+              <span className="text-sm font-semibold text-gray-800">Conversa</span>
+              <span className="text-gray-400">↓</span>
+              <span className="text-sm font-bold text-gray-900">Cliente</span>
+            </div>
+          </div>
+        </section>
 
         {/* 4️⃣ EXEMPLOS DE DIAGNÓSTICOS — Grid 2x2 */}
         <section className="py-12 sm:py-16 lg:py-20">
@@ -311,8 +476,35 @@ export default function InstitutionalPageContent() {
               href="/pt/metodo-ylada"
               className="text-blue-600 hover:text-blue-700 font-medium text-sm"
             >
-              Conhecer o método YLADA →
+              Conhecer a filosofia YLADA →
             </Link>
+          </div>
+
+          {/* Os três motores do YLADA */}
+          <div className="mt-12 pt-12 border-t border-gray-200">
+            <h3 className="text-xl font-bold text-gray-900 text-center mb-6">
+              Os três motores do YLADA
+            </h3>
+            <div className="grid sm:grid-cols-3 gap-6 max-w-4xl mx-auto">
+              <div className="text-center bg-white rounded-xl p-6 border border-gray-200">
+                <span className="text-3xl mb-2 block" aria-hidden>🧠</span>
+                <h4 className="font-semibold text-gray-900 mb-2">Diagnóstico</h4>
+                <p className="text-sm text-gray-600">Diagnósticos despertam curiosidade e atraem pessoas interessadas.</p>
+              </div>
+              <div className="text-center bg-white rounded-xl p-6 border border-gray-200">
+                <span className="text-3xl mb-2 block" aria-hidden>💬</span>
+                <h4 className="font-semibold text-gray-900 mb-2">Conversa</h4>
+                <p className="text-sm text-gray-600">O cliente chega com mais clareza e a conversa começa melhor.</p>
+              </div>
+              <div className="text-center bg-white rounded-xl p-6 border border-gray-200">
+                <span className="text-3xl mb-2 block" aria-hidden>🚀</span>
+                <h4 className="font-semibold text-gray-900 mb-2">Estratégia</h4>
+                <p className="text-sm text-gray-600">O Noel ajuda você a melhorar seus diagnósticos e sua comunicação.</p>
+              </div>
+            </div>
+            <p className="text-center text-gray-500 text-sm mt-4">
+              Diagnóstico → Conversa → Estratégia → crescimento
+            </p>
           </div>
         </section>
 
@@ -357,9 +549,23 @@ export default function InstitutionalPageContent() {
             <p className="text-gray-700 font-medium text-center mb-4">
               O diagnóstico não é apenas um teste. Ele prepara a conversa.
             </p>
-            <p className="text-gray-600 text-center mb-8 text-sm">
+            <p className="text-gray-600 text-center mb-6 text-sm">
               Resultado claro em poucos minutos.
             </p>
+
+            {/* Diagrama visual do sistema */}
+            <div className="flex flex-col items-center gap-2 mb-10 py-6 px-4 bg-gray-50 rounded-xl border border-gray-100">
+              <span className="text-sm font-medium text-gray-700">Pessoa vê diagnóstico</span>
+              <span className="text-gray-400">↓</span>
+              <span className="text-sm font-medium text-gray-700">Pessoa responde perguntas</span>
+              <span className="text-gray-400">↓</span>
+              <span className="text-sm font-medium text-gray-700">Recebe resultado</span>
+              <span className="text-gray-400">↓</span>
+              <span className="text-sm font-medium text-gray-700">Conversa começa</span>
+              <span className="text-gray-400">↓</span>
+              <span className="text-sm font-semibold text-gray-900">Cliente</span>
+            </div>
+
             <div className="space-y-6 mb-10">
               <div className="flex gap-4">
                 <span className="flex-shrink-0 w-8 h-8 rounded-full bg-[#2563eb] text-white font-bold text-sm flex items-center justify-center">1</span>
@@ -437,7 +643,10 @@ export default function InstitutionalPageContent() {
                 Biblioteca de diagnósticos
               </Link>
               <Link href="/pt/metodo-ylada" className="text-gray-600 hover:text-gray-900">
-                Método
+                Filosofia
+              </Link>
+              <Link href="/pt/sobre" className="text-gray-600 hover:text-gray-900">
+                Sobre
               </Link>
               <Link href="/pt/profissionais" className="text-gray-600 hover:text-gray-900">
                 Profissionais

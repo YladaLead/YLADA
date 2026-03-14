@@ -20,7 +20,10 @@ export default function YladaHubHeader({ ctaLabel = 'Começar', ctaHref = '/pt',
         <div className="flex items-center gap-4">
           <nav className="flex items-center gap-4 sm:gap-6">
             <Link href="/pt/metodo-ylada" className="text-gray-600 hover:text-gray-900 text-sm font-medium hidden sm:inline">
-              Método YLADA
+              Filosofia
+            </Link>
+            <Link href="/pt/sobre" className="text-gray-600 hover:text-gray-900 text-sm font-medium hidden sm:inline">
+              Sobre
             </Link>
             <Link
               href={ctaHref}
