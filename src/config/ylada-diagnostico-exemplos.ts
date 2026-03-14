@@ -12,6 +12,7 @@ export type DiagnosticoExemploArea =
   | 'fitness'
   | 'perfumaria'
   | 'seller'
+  | 'nutra'
   | 'coach'
 
 export interface DiagnosticoExemploConfig {
@@ -134,6 +135,19 @@ export const DIAGNOSTICO_EXEMPLOS: Record<DiagnosticoExemploArea, DiagnosticoExe
     labelPaciente: 'cliente',
     tituloSecaoCards: 'Avaliações usadas por vendedores',
     tituloSecaoCardsDesc: 'Vendedores usam avaliações como:',
+  },
+  nutra: {
+    avaliacao: 'Qual suplemento ou nutraceutico pode atender sua necessidade?',
+    perfil: 'Interesse em solução personalizada',
+    explicacao: 'Perfil que indica momento e interesse para uma conversa qualificada sobre suplementos.',
+    sinais: ['necessidade de energia ou imunidade', 'objetivo de emagrecimento ou performance', 'interesse em conhecer opções'],
+    mensagem: 'Gostaria de saber mais sobre as opções. Podemos conversar?',
+    sugestao: 'Esse resultado sugere que uma conversa pode ajudar a encontrar a solução ideal.',
+    fraseAgendamento: 'Isso desperta interesse e facilita a conversa.',
+    cards: ['Suplementação', 'Objetivos', 'Perfil do cliente'],
+    labelPaciente: 'cliente',
+    tituloSecaoCards: 'Avaliações usadas por consultores de suplementos',
+    tituloSecaoCardsDesc: 'Consultores de suplementos e nutraceuticos usam avaliações como:',
   },
   coach: {
     avaliacao: 'Você está pronto para uma transformação?',

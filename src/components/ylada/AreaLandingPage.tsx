@@ -68,8 +68,12 @@ interface AreaLandingPageProps {
   appBasePath?: string
 }
 
+/** Áreas de vendas: nutra (suplementos/nutraceuticos) e seller (vendedores em geral). Comunicação com "clientes" e "conversas". */
+const SALES_AREAS: AreaLandingArea[] = ['nutra', 'seller']
+
 export function AreaLandingPage({ area, locale, appBasePath = '/pt' }: AreaLandingPageProps) {
   const componentArea = AREA_TO_COMPONENT[area] ?? 'nutri'
+  const isSalesArea = SALES_AREAS.includes(area)
   const { user, loading } = useAuth()
   const router = useRouter()
   const [mounted, setMounted] = useState(false)
@@ -130,48 +134,64 @@ export function AreaLandingPage({ area, locale, appBasePath = '/pt' }: AreaLandi
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="max-w-2xl mx-auto text-center">
               <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 leading-tight mb-4">
-                {locale === 'pt' && (
-                  <>
-                    Pare de responder curiosos.
-                    <br />
-                    Comece consultas com contexto.
-                  </>
-                )}
-                {locale === 'en' && (
-                  <>
-                    Stop answering curious people.
-                    <br />
-                    Start consultations with context.
-                  </>
-                )}
-                {locale === 'es' && (
-                  <>
-                    Deja de responder curiosos.
-                    <br />
-                    Comienza consultas con contexto.
-                  </>
+                {isSalesArea ? (
+                  locale === 'pt' ? (
+                    <>Pare de mandar catálogo.<br />Comece conversas com clientes qualificados.</>
+                  ) : locale === 'en' ? (
+                    <>Stop sending catalogs.<br />Start conversations with qualified clients.</>
+                  ) : (
+                    <>Deja de enviar catálogos.<br />Comienza conversaciones con clientes cualificados.</>
+                  )
+                ) : (
+                  locale === 'pt' ? (
+                    <>Pare de responder curiosos.<br />Comece consultas com contexto.</>
+                  ) : locale === 'en' ? (
+                    <>Stop answering curious people.<br />Start consultations with context.</>
+                  ) : (
+                    <>Deja de responder curiosos.<br />Comienza consultas con contexto.</>
+                  )
                 )}
               </h1>
               <p className="text-base sm:text-lg text-gray-600 mb-4">
-                {locale === 'pt' && 'O YLADA permite que pacientes respondam uma avaliação rápida antes do primeiro contato, gerando um diagnóstico inicial e conversas muito mais qualificadas.'}
-                {locale === 'en' && 'YLADA allows patients to complete a quick assessment before the first contact, generating an initial diagnosis and much more qualified conversations.'}
-                {locale === 'es' && 'YLADA permite que los pacientes respondan una evaluación rápida antes del primer contacto, generando un diagnóstico inicial y conversaciones mucho más cualificadas.'}
+                {isSalesArea ? (
+                  locale === 'pt' ? 'O YLADA permite que clientes respondam uma avaliação rápida antes do primeiro contato, gerando um perfil inicial e conversas muito mais qualificadas.'
+                  : locale === 'en' ? 'YLADA allows clients to complete a quick assessment before the first contact, generating an initial profile and much more qualified conversations.'
+                  : 'YLADA permite que los clientes respondan una evaluación rápida antes del primer contacto, generando un perfil inicial y conversaciones mucho más cualificadas.'
+                ) : (
+                  locale === 'pt' ? 'O YLADA permite que pacientes respondam uma avaliação rápida antes do primeiro contato, gerando um diagnóstico inicial e conversas muito mais qualificadas.'
+                  : locale === 'en' ? 'YLADA allows patients to complete a quick assessment before the first contact, generating an initial diagnosis and much more qualified conversations.'
+                  : 'YLADA permite que los pacientes respondan una evaluación rápida antes del primer contacto, generando un diagnóstico inicial y conversaciones mucho más cualificadas.'
+                )}
               </p>
               <p className="text-lg sm:text-xl text-gray-700 font-medium mb-6">
-                {locale === 'pt' && 'Transforme curiosos em pacientes preparados para consulta.'}
-                {locale === 'en' && 'Turn curious people into patients prepared for consultation.'}
-                {locale === 'es' && 'Transforma curiosos en pacientes preparados para consulta.'}
+                {isSalesArea ? (
+                  locale === 'pt' ? 'Transforme curiosos em clientes preparados para conversa.'
+                  : locale === 'en' ? 'Turn curious people into clients prepared for conversation.'
+                  : 'Transforma curiosos en clientes preparados para conversación.'
+                ) : (
+                  locale === 'pt' ? 'Transforme curiosos em pacientes preparados para consulta.'
+                  : locale === 'en' ? 'Turn curious people into patients prepared for consultation.'
+                  : 'Transforma curiosos en pacientes preparados para consulta.'
+                )}
               </p>
               <p className="text-sm sm:text-base text-gray-600 italic mb-6 border-l-4 border-blue-500 pl-4 py-2 bg-blue-50/50 rounded-r-lg text-left max-w-md mx-auto">
-                {locale === 'pt' && 'Servir antes de vender. Entender antes de orientar. Conversar antes da consulta.'}
-                {locale === 'en' && 'Serve before selling. Understand before guiding. Talk before the consultation.'}
-                {locale === 'es' && 'Servir antes de vender. Entender antes de orientar. Conversar antes de la consulta.'}
+                {isSalesArea ? (
+                  locale === 'pt' ? 'Servir antes de vender. Entender antes de orientar. Conversar antes da venda.'
+                  : locale === 'en' ? 'Serve before selling. Understand before guiding. Talk before the sale.'
+                  : 'Servir antes de vender. Entender antes de orientar. Conversar antes de la venta.'
+                ) : (
+                  locale === 'pt' ? 'Servir antes de vender. Entender antes de orientar. Conversar antes da consulta.'
+                  : locale === 'en' ? 'Serve before selling. Understand before guiding. Talk before the consultation.'
+                  : 'Servir antes de vender. Entender antes de orientar. Conversar antes de la consulta.'
+                )}
               </p>
               <div className="flex flex-col items-center gap-1 mb-8 text-sm text-gray-600">
                 <span>
-                  {locale === 'pt' && 'Paciente responde avaliação'}
-                  {locale === 'en' && 'Patient completes assessment'}
-                  {locale === 'es' && 'El paciente responde la evaluación'}
+                  {isSalesArea ? (
+                    locale === 'pt' ? 'Cliente responde avaliação' : locale === 'en' ? 'Client completes assessment' : 'El cliente responde la evaluación'
+                  ) : (
+                    locale === 'pt' ? 'Paciente responde avaliação' : locale === 'en' ? 'Patient completes assessment' : 'El paciente responde la evaluación'
+                  )}
                 </span>
                 <span className="text-gray-400">↓</span>
                 <span>
@@ -187,7 +207,7 @@ export function AreaLandingPage({ area, locale, appBasePath = '/pt' }: AreaLandi
                 </span>
               </div>
               <Link
-                href={locale === 'pt' ? `/${locale}/precos` : `${appBasePath}/precos`}
+                href={isSalesArea ? ofertaHref : (locale === 'pt' ? `/${locale}/precos` : `${appBasePath}/precos`)}
                 className="inline-flex items-center justify-center px-8 py-4 rounded-xl bg-blue-600 text-white font-semibold text-lg hover:bg-blue-700 transition-colors shadow-lg"
               >
                 {locale === 'pt' && 'Começar agora'}
@@ -204,31 +224,49 @@ export function AreaLandingPage({ area, locale, appBasePath = '/pt' }: AreaLandi
           </div>
         </section>
 
-        <HeroBeforeAfter area={componentArea} />
+        <HeroBeforeAfter area={componentArea} locale={locale} />
 
         <section className="py-12 sm:py-16 bg-white">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="max-w-2xl mx-auto">
               <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-6 text-center">
-                {locale === 'pt' && 'Nutricionistas enfrentam três dificuldades comuns no marketing online'}
-                {locale === 'en' && 'Nutritionists face three common challenges in online marketing'}
-                {locale === 'es' && 'Los nutricionistas enfrentan tres dificultades comunes en el marketing online'}
+                {isSalesArea ? (
+                  locale === 'pt' ? 'Consultores de suplementos e nutraceuticos enfrentam três dificuldades comuns'
+                  : locale === 'en' ? 'Supplement and nutraceutical consultants face three common challenges'
+                  : 'Consultores de suplementos y nutracéuticos enfrentan tres dificultades comunes'
+                ) : (
+                  locale === 'pt' ? 'Nutricionistas enfrentam três dificuldades comuns no marketing online'
+                  : locale === 'en' ? 'Nutritionists face three common challenges in online marketing'
+                  : 'Los nutricionistas enfrentan tres dificultades comunes en el marketing online'
+                )}
               </h2>
               <ul className="space-y-4 text-gray-700">
                 <li className="flex items-start gap-3">
                   <span className="text-red-500 font-bold shrink-0">•</span>
                   <span>
-                    {locale === 'pt' && 'Pacientes pedindo orientação gratuita'}
-                    {locale === 'en' && 'Patients asking for free guidance'}
-                    {locale === 'es' && 'Pacientes pidiendo orientación gratuita'}
+                    {isSalesArea ? (
+                      locale === 'pt' ? 'Clientes pedindo orientação sem demonstrar interesse real'
+                      : locale === 'en' ? 'Clients asking for guidance without showing real interest'
+                      : 'Clientes pidiendo orientación sin demostrar interés real'
+                    ) : (
+                      locale === 'pt' ? 'Pacientes pedindo orientação gratuita'
+                      : locale === 'en' ? 'Patients asking for free guidance'
+                      : 'Pacientes pidiendo orientación gratuita'
+                    )}
                   </span>
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="text-red-500 font-bold shrink-0">•</span>
                   <span>
-                    {locale === 'pt' && 'Conversas que não viram consulta'}
-                    {locale === 'en' && 'Conversations that don\'t turn into consultations'}
-                    {locale === 'es' && 'Conversaciones que no se convierten en consulta'}
+                    {isSalesArea ? (
+                      locale === 'pt' ? 'Conversas que não viram venda'
+                      : locale === 'en' ? 'Conversations that don\'t turn into sales'
+                      : 'Conversaciones que no se convierten en venta'
+                    ) : (
+                      locale === 'pt' ? 'Conversas que não viram consulta'
+                      : locale === 'en' ? 'Conversations that don\'t turn into consultations'
+                      : 'Conversaciones que no se convierten en consulta'
+                    )}
                   </span>
                 </li>
                 <li className="flex items-start gap-3">
@@ -241,9 +279,15 @@ export function AreaLandingPage({ area, locale, appBasePath = '/pt' }: AreaLandi
                 </li>
               </ul>
               <p className="text-center text-gray-600 mt-8 font-medium">
-                {locale === 'pt' && 'Isso consome tempo, gera conversas improdutivas e reduz a qualidade das consultas.'}
-                {locale === 'en' && 'This consumes time, generates unproductive conversations and reduces the quality of consultations.'}
-                {locale === 'es' && 'Esto consume tiempo, genera conversaciones improductivas y reduce la calidad de las consultas.'}
+                {isSalesArea ? (
+                  locale === 'pt' ? 'Isso consome tempo, gera conversas improdutivas e reduz a qualidade das vendas.'
+                  : locale === 'en' ? 'This consumes time, generates unproductive conversations and reduces the quality of sales.'
+                  : 'Esto consume tiempo, genera conversaciones improductivas y reduce la calidad de las ventas.'
+                ) : (
+                  locale === 'pt' ? 'Isso consome tempo, gera conversas improdutivas e reduz a qualidade das consultas.'
+                  : locale === 'en' ? 'This consumes time, generates unproductive conversations and reduces the quality of consultations.'
+                  : 'Esto consume tiempo, genera conversaciones improductivas y reduce la calidad de las consultas.'
+                )}
               </p>
             </div>
           </div>
@@ -253,20 +297,38 @@ export function AreaLandingPage({ area, locale, appBasePath = '/pt' }: AreaLandi
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="max-w-2xl mx-auto">
               <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-6 text-center">
-                {locale === 'pt' && 'O YLADA ajuda você a explicar o processo antes da consulta'}
-                {locale === 'en' && 'YLADA helps you explain the process before the consultation'}
-                {locale === 'es' && 'YLADA te ayuda a explicar el proceso antes de la consulta'}
+                {isSalesArea ? (
+                  locale === 'pt' ? 'O YLADA ajuda você a qualificar clientes antes da conversa'
+                  : locale === 'en' ? 'YLADA helps you qualify clients before the conversation'
+                  : 'YLADA te ayuda a cualificar clientes antes de la conversación'
+                ) : (
+                  locale === 'pt' ? 'O YLADA ajuda você a explicar o processo antes da consulta'
+                  : locale === 'en' ? 'YLADA helps you explain the process before the consultation'
+                  : 'YLADA te ayuda a explicar el proceso antes de la consulta'
+                )}
               </h2>
               <p className="text-lg text-gray-700 mb-6 text-center">
-                {locale === 'pt' && 'O paciente responde uma avaliação rápida antes do contato. Assim você entende hábitos, objetivos e pode orientar sobre o processo da consulta.'}
-                {locale === 'en' && 'The patient completes a quick assessment before contact. This way you understand habits, goals and can guide them about the consultation process.'}
-                {locale === 'es' && 'El paciente responde una evaluación rápida antes del contacto. Así entiendes hábitos, objetivos y puedes orientar sobre el proceso de la consulta.'}
+                {isSalesArea ? (
+                  locale === 'pt' ? 'O cliente responde uma avaliação rápida antes do contato. Assim você entende necessidades, objetivos e pode orientar sobre as melhores opções.'
+                  : locale === 'en' ? 'The client completes a quick assessment before contact. This way you understand needs, goals and can guide them about the best options.'
+                  : 'El cliente responde una evaluación rápida antes del contacto. Así entiendes necesidades, objetivos y puedes orientar sobre las mejores opciones.'
+                ) : (
+                  locale === 'pt' ? 'O paciente responde uma avaliação rápida antes do contato. Assim você entende hábitos, objetivos e pode orientar sobre o processo da consulta.'
+                  : locale === 'en' ? 'The patient completes a quick assessment before contact. This way you understand habits, goals and can guide them about the consultation process.'
+                  : 'El paciente responde una evaluación rápida antes del contacto. Así entiendes hábitos, objetivos y puedes orientar sobre el proceso de la consulta.'
+                )}
               </p>
               <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
                 <p className="text-gray-700 text-center">
-                  {locale === 'pt' && 'Explicar melhor o processo antes da primeira consulta.'}
-                  {locale === 'en' && 'Better explain the process before the first consultation.'}
-                  {locale === 'es' && 'Explicar mejor el proceso antes de la primera consulta.'}
+                  {isSalesArea ? (
+                    locale === 'pt' ? 'Iniciar conversas com clientes que já demonstraram interesse.'
+                    : locale === 'en' ? 'Start conversations with clients who have already shown interest.'
+                    : 'Iniciar conversaciones con clientes que ya demostraron interés.'
+                  ) : (
+                    locale === 'pt' ? 'Explicar melhor o processo antes da primeira consulta.'
+                    : locale === 'en' ? 'Better explain the process before the first consultation.'
+                    : 'Explicar mejor el proceso antes de la primera consulta.'
+                  )}
                 </p>
               </div>
             </div>
@@ -282,12 +344,21 @@ export function AreaLandingPage({ area, locale, appBasePath = '/pt' }: AreaLandi
                 {locale === 'es' && 'Cómo funciona'}
               </h2>
               <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                {[
-                  { step: '1', titlePt: 'Escolha uma avaliação', titleEn: 'Choose an assessment', titleEs: 'Elige una evaluación', descPt: 'Quizzes e diagnósticos prontos para nutrição.', descEn: 'Ready-made quizzes and diagnostics for nutrition.', descEs: 'Cuestionarios y diagnósticos listos para nutrición.' },
-                  { step: '2', titlePt: 'Compartilhe o link', titleEn: 'Share the link', titleEs: 'Comparte el enlace', descPt: 'Use em redes sociais, WhatsApp ou site.', descEn: 'Use on social media, WhatsApp or website.', descEs: 'Usa en redes sociales, WhatsApp o sitio web.' },
-                  { step: '3', titlePt: 'O paciente responde', titleEn: 'The patient responds', titleEs: 'El paciente responde', descPt: 'O sistema identifica hábitos, objetivos e o momento.', descEn: 'The system identifies habits, goals and timing.', descEs: 'El sistema identifica hábitos, objetivos y el momento.' },
-                  { step: '4', titlePt: 'Consulta com contexto', titleEn: 'Consultation with context', titleEs: 'Consulta con contexto', descPt: 'Você atende pacientes que já entendem o valor da avaliação.', descEn: 'You serve patients who already understand the value of the assessment.', descEs: 'Atiendes pacientes que ya entienden el valor de la evaluación.' },
-                ].map((item) => (
+                {(
+                  isSalesArea
+                    ? [
+                        { step: '1', titlePt: 'Escolha uma avaliação', titleEn: 'Choose an assessment', titleEs: 'Elige una evaluación', descPt: 'Quizzes e diagnósticos prontos para suplementos e nutraceuticos.', descEn: 'Ready-made quizzes and diagnostics for supplements and nutraceuticals.', descEs: 'Cuestionarios y diagnósticos listos para suplementos y nutracéuticos.' },
+                        { step: '2', titlePt: 'Compartilhe o link', titleEn: 'Share the link', titleEs: 'Comparte el enlace', descPt: 'Use em redes sociais, WhatsApp ou site.', descEn: 'Use on social media, WhatsApp or website.', descEs: 'Usa en redes sociales, WhatsApp o sitio web.' },
+                        { step: '3', titlePt: 'O cliente responde', titleEn: 'The client responds', titleEs: 'El cliente responde', descPt: 'O sistema identifica necessidades, objetivos e o momento.', descEn: 'The system identifies needs, goals and timing.', descEs: 'El sistema identifica necesidades, objetivos y el momento.' },
+                        { step: '4', titlePt: 'Conversa com contexto', titleEn: 'Conversation with context', titleEs: 'Conversación con contexto', descPt: 'Você atende clientes que já demonstraram interesse real.', descEn: 'You serve clients who have already shown real interest.', descEs: 'Atiendes clientes que ya demostraron interés real.' },
+                      ]
+                    : [
+                        { step: '1', titlePt: 'Escolha uma avaliação', titleEn: 'Choose an assessment', titleEs: 'Elige una evaluación', descPt: 'Quizzes e diagnósticos prontos para nutrição.', descEn: 'Ready-made quizzes and diagnostics for nutrition.', descEs: 'Cuestionarios y diagnósticos listos para nutrición.' },
+                        { step: '2', titlePt: 'Compartilhe o link', titleEn: 'Share the link', titleEs: 'Comparte el enlace', descPt: 'Use em redes sociais, WhatsApp ou site.', descEn: 'Use on social media, WhatsApp or website.', descEs: 'Usa en redes sociales, WhatsApp o sitio web.' },
+                        { step: '3', titlePt: 'O paciente responde', titleEn: 'The patient responds', titleEs: 'El paciente responde', descPt: 'O sistema identifica hábitos, objetivos e o momento.', descEn: 'The system identifies habits, goals and timing.', descEs: 'El sistema identifica hábitos, objetivos y el momento.' },
+                        { step: '4', titlePt: 'Consulta com contexto', titleEn: 'Consultation with context', titleEs: 'Consulta con contexto', descPt: 'Você atende pacientes que já entendem o valor da avaliação.', descEn: 'You serve patients who already understand the value of the assessment.', descEs: 'Atiendes pacientes que ya entienden el valor de la evaluación.' },
+                      ]
+                ).map((item) => (
                   <div key={item.step} className="text-center p-4">
                     <span className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-blue-100 text-blue-600 font-bold text-lg mb-3">
                       {item.step}
@@ -305,25 +376,41 @@ export function AreaLandingPage({ area, locale, appBasePath = '/pt' }: AreaLandi
           </div>
         </section>
 
-        <DiagnosticoExemploSection area={componentArea} ctaHref={ofertaHref} />
+        <DiagnosticoExemploSection area={area === 'nutra' ? 'nutra' : componentArea} ctaHref={ofertaHref} />
 
         <section className="py-12 sm:py-16 bg-gray-50">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="max-w-2xl mx-auto">
               <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-8 text-center">
-                {locale === 'pt' && 'Quando a consulta começa com contexto, tudo muda'}
-                {locale === 'en' && 'When the consultation starts with context, everything changes'}
-                {locale === 'es' && 'Cuando la consulta comienza con contexto, todo cambia'}
+                {isSalesArea ? (
+                  locale === 'pt' ? 'Quando a conversa começa com contexto, tudo muda'
+                  : locale === 'en' ? 'When the conversation starts with context, everything changes'
+                  : 'Cuando la conversación comienza con contexto, todo cambia'
+                ) : (
+                  locale === 'pt' ? 'Quando a consulta começa com contexto, tudo muda'
+                  : locale === 'en' ? 'When the consultation starts with context, everything changes'
+                  : 'Cuando la consulta comienza con contexto, todo cambia'
+                )}
               </h2>
               <ul className="space-y-4 mb-6">
-                {[
-                  { pt: 'Menos curiosos', en: 'Fewer curious people', es: 'Menos curiosos' },
-                  { pt: 'Pacientes mais preparados', en: 'More prepared patients', es: 'Pacientes más preparados' },
-                  { pt: 'Consultas mais qualificadas', en: 'More qualified consultations', es: 'Consultas más cualificadas' },
-                  { pt: 'Mais clareza no primeiro contato', en: 'More clarity in the first contact', es: 'Más claridad en el primer contacto' },
-                  { pt: 'Menos tempo explicando no WhatsApp', en: 'Less time explaining on WhatsApp', es: 'Menos tiempo explicando en WhatsApp' },
-                  { pt: 'Mais autoridade profissional', en: 'More professional authority', es: 'Más autoridad profesional' },
-                ].map((b) => (
+                {(isSalesArea
+                  ? [
+                      { pt: 'Menos curiosos', en: 'Fewer curious people', es: 'Menos curiosos' },
+                      { pt: 'Clientes mais preparados', en: 'More prepared clients', es: 'Clientes más preparados' },
+                      { pt: 'Conversas mais qualificadas', en: 'More qualified conversations', es: 'Conversaciones más cualificadas' },
+                      { pt: 'Mais clareza no primeiro contato', en: 'More clarity in the first contact', es: 'Más claridad en el primer contacto' },
+                      { pt: 'Menos tempo explicando no WhatsApp', en: 'Less time explaining on WhatsApp', es: 'Menos tiempo explicando en WhatsApp' },
+                      { pt: 'Mais autoridade profissional', en: 'More professional authority', es: 'Más autoridad profesional' },
+                    ]
+                  : [
+                      { pt: 'Menos curiosos', en: 'Fewer curious people', es: 'Menos curiosos' },
+                      { pt: 'Pacientes mais preparados', en: 'More prepared patients', es: 'Pacientes más preparados' },
+                      { pt: 'Consultas mais qualificadas', en: 'More qualified consultations', es: 'Consultas más cualificadas' },
+                      { pt: 'Mais clareza no primeiro contato', en: 'More clarity in the first contact', es: 'Más claridad en el primer contacto' },
+                      { pt: 'Menos tempo explicando no WhatsApp', en: 'Less time explaining on WhatsApp', es: 'Menos tiempo explicando en WhatsApp' },
+                      { pt: 'Mais autoridade profissional', en: 'More professional authority', es: 'Más autoridad profesional' },
+                    ]
+                ).map((b) => (
                   <li key={b.pt} className="flex items-center gap-3 text-gray-700">
                     <span className="text-green-600 font-bold">✔</span>
                     <span>{locale === 'pt' ? b.pt : locale === 'en' ? b.en : b.es}</span>
@@ -331,15 +418,21 @@ export function AreaLandingPage({ area, locale, appBasePath = '/pt' }: AreaLandi
                 ))}
               </ul>
               <p className="text-gray-800 font-semibold text-center mt-6">
-                {locale === 'pt' && 'Menos curiosos. Mais pacientes realmente interessados.'}
-                {locale === 'en' && 'Fewer curious people. More truly interested patients.'}
-                {locale === 'es' && 'Menos curiosos. Más pacientes realmente interesados.'}
+                {isSalesArea ? (
+                  locale === 'pt' ? 'Menos curiosos. Mais clientes realmente interessados.'
+                  : locale === 'en' ? 'Fewer curious people. More truly interested clients.'
+                  : 'Menos curiosos. Más clientes realmente interesados.'
+                ) : (
+                  locale === 'pt' ? 'Menos curiosos. Mais pacientes realmente interessados.'
+                  : locale === 'en' ? 'Fewer curious people. More truly interested patients.'
+                  : 'Menos curiosos. Más pacientes realmente interesados.'
+                )}
               </p>
             </div>
           </div>
         </section>
 
-        <UseCasesSection area={componentArea} />
+        <UseCasesSection area={area === 'nutra' ? 'nutra' : componentArea} locale={locale} />
 
         <section className="py-12 sm:py-16 bg-gray-50">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">

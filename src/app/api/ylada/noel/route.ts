@@ -384,12 +384,13 @@ export async function POST(request: NextRequest) {
     const { user } = auth
 
     const body = await request.json()
-    const { message, conversationHistory = [], segment, area = 'ylada', lastLinkContext } = body as {
+    const { message, conversationHistory = [], segment, area = 'ylada', lastLinkContext, locale } = body as {
       message?: string
       conversationHistory?: { role: 'user' | 'assistant'; content: string }[]
       segment?: string
       area?: string
       lastLinkContext?: { flow_id: string; interpretacao: Record<string, unknown>; questions: Array<{ id: string; label: string; type?: string; options?: string[] }>; url?: string; title?: string; link_id?: string }
+      locale?: 'pt' | 'en' | 'es'
     }
 
     if (!message || typeof message !== 'string' || !message.trim()) {
@@ -650,8 +651,13 @@ export async function POST(request: NextRequest) {
 
     const baseSystem = SEGMENT_CONTEXT[validSegment] ||
       'Você é o Noel, mentor da YLADA. Oriente o profissional sobre rotina, links inteligentes e formação empresarial. Tom direto e prático.'
+    const localeInstruction = locale === 'en'
+      ? '\n[IDIOMA]\nResponda SEMPRE em inglês. Todas as suas mensagens devem ser em inglês.'
+      : locale === 'es'
+        ? '\n[IDIOMA]\nResponda SEMPRE em espanhol. Todas as suas mensagens devem ser em espanhol.'
+        : ''
     const parts: string[] = [
-      baseSystem,
+      baseSystem + localeInstruction,
       NOEL_MODO_EXECUTOR_LINK,
       NOEL_CONDUTOR_RULES,
       NOEL_PRINCIPIO_20_80,

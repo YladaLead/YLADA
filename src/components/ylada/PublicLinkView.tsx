@@ -4,6 +4,113 @@ import { useEffect, useRef, useState } from 'react'
 import { formatDisplayTitle, getStrategicIntro } from '@/lib/ylada/strategic-intro'
 import DiagnosisDisclaimer from '@/components/ylada/DiagnosisDisclaimer'
 import PoweredByYlada from '@/components/ylada/PoweredByYlada'
+import type { Language } from '@/lib/i18n'
+
+const PUBLIC_LINK_UI: Record<Language, {
+  start: string
+  back: string
+  questionOf: string
+  seeResult: string
+  generating: string
+  calculate: string
+  personalizedDiagnosis: string
+  yourResult: string
+  diagnosis: string
+  probableCause: string
+  whatItMeans: string
+  concerns: string
+  consequence: string
+  benefit: string
+  quickTip: string
+  nextSteps: string
+  goodNews: string
+  moreFactors: string
+  resultDisclaimer: string
+  talkToPro: string
+  talkToSpecialist: string
+  understandCase: string
+  contactNotAvailable: string
+  speakWhatsApp: string
+}> = {
+  pt: {
+    start: 'Começar',
+    back: 'Voltar',
+    questionOf: 'Pergunta',
+    seeResult: 'Ver resultado',
+    generating: 'Gerando resultado...',
+    calculate: 'Calcular',
+    personalizedDiagnosis: 'Diagnóstico personalizado',
+    yourResult: 'Seu resultado inicial',
+    diagnosis: 'Diagnóstico',
+    probableCause: 'Causa provável',
+    whatItMeans: 'O que isso significa',
+    concerns: 'Preocupações',
+    consequence: 'Consequência',
+    benefit: 'Benefício',
+    quickTip: 'Dica rápida',
+    nextSteps: 'Próximos passos',
+    goodNews: 'A boa notícia é que muitas pessoas conseguem melhorar essa situação quando identificam o bloqueio certo e fazem pequenos ajustes na rotina.',
+    moreFactors: 'Pode existir mais de um fator no seu caso',
+    resultDisclaimer: 'Este resultado é apenas um primeiro indicativo baseado nas respostas que você forneceu. Um {pessoa} pode analisar melhor sua rotina e explicar quais ajustes podem ajudar você a melhorar seus resultados.',
+    talkToPro: 'Se quiser entender melhor o que esse resultado significa no seu caso, você pode conversar com um {pessoa}.',
+    talkToSpecialist: 'Conversar com o especialista',
+    understandCase: 'Clique para entender melhor seu caso',
+    contactNotAvailable: 'O {pessoa} ainda não disponibilizou o contato por aqui.',
+    speakWhatsApp: 'Falar no WhatsApp',
+  },
+  en: {
+    start: 'Start',
+    back: 'Back',
+    questionOf: 'Question',
+    seeResult: 'See result',
+    generating: 'Generating result...',
+    calculate: 'Calculate',
+    personalizedDiagnosis: 'Personalized diagnosis',
+    yourResult: 'Your initial result',
+    diagnosis: 'Diagnosis',
+    probableCause: 'Probable cause',
+    whatItMeans: 'What it means',
+    concerns: 'Concerns',
+    consequence: 'Consequence',
+    benefit: 'Benefit',
+    quickTip: 'Quick tip',
+    nextSteps: 'Next steps',
+    goodNews: 'The good news is that many people can improve this situation when they identify the right block and make small adjustments to their routine.',
+    moreFactors: 'There may be more than one factor in your case',
+    resultDisclaimer: 'This result is only an initial indication based on the answers you provided. A {pessoa} can better analyze your routine and explain which adjustments can help you improve your results.',
+    talkToPro: 'If you want to better understand what this result means in your case, you can talk to a {pessoa}.',
+    talkToSpecialist: 'Talk to the specialist',
+    understandCase: 'Click to better understand your case',
+    contactNotAvailable: 'The {pessoa} has not yet made contact available here.',
+    speakWhatsApp: 'Contact on WhatsApp',
+  },
+  es: {
+    start: 'Comenzar',
+    back: 'Volver',
+    questionOf: 'Pregunta',
+    seeResult: 'Ver resultado',
+    generating: 'Generando resultado...',
+    calculate: 'Calcular',
+    personalizedDiagnosis: 'Diagnóstico personalizado',
+    yourResult: 'Tu resultado inicial',
+    diagnosis: 'Diagnóstico',
+    probableCause: 'Causa probable',
+    whatItMeans: 'Qué significa',
+    concerns: 'Preocupaciones',
+    consequence: 'Consecuencia',
+    benefit: 'Beneficio',
+    quickTip: 'Consejo rápido',
+    nextSteps: 'Próximos pasos',
+    goodNews: 'La buena noticia es que muchas personas pueden mejorar esta situación cuando identifican el bloqueo correcto y hacen pequeños ajustes en su rutina.',
+    moreFactors: 'Puede haber más de un factor en tu caso',
+    resultDisclaimer: 'Este resultado es solo una indicación inicial basada en las respuestas que proporcionaste. Un {pessoa} puede analizar mejor tu rutina y explicar qué ajustes pueden ayudarte a mejorar tus resultados.',
+    talkToPro: 'Si quieres entender mejor qué significa este resultado en tu caso, puedes hablar con un {pessoa}.',
+    talkToSpecialist: 'Hablar con el especialista',
+    understandCase: 'Haz clic para entender mejor tu caso',
+    contactNotAvailable: 'El {pessoa} aún no ha puesto el contacto disponible aquí.',
+    speakWhatsApp: 'Contactar por WhatsApp',
+  },
+}
 
 type Payload = {
   slug: string
@@ -71,14 +178,15 @@ function hasStaticResults(config: Record<string, unknown>): boolean {
 }
 
 /** Normaliza config da biblioteca (questions/results) para formato flow (meta/form). */
-function normalizeBibliotecaConfig(config: Record<string, unknown>): Record<string, unknown> {
+function normalizeBibliotecaConfig(config: Record<string, unknown>, locale: Language = 'pt'): Record<string, unknown> {
   if (config.meta && config.form) return config
   const questions = config.questions as Array<{ id?: string; text?: string; type?: string; options?: string[] }> | undefined
   if (!Array.isArray(questions) || questions.length === 0) return config
   const title = (config.title as string) || 'Link'
+  const submitLabel = PUBLIC_LINK_UI[locale].seeResult
   const formFields = questions.map((q, i) => ({
     id: q.id ?? `q${i + 1}`,
-    label: q.text ?? q.id ?? `Pergunta ${i + 1}`,
+    label: q.text ?? q.id ?? (locale === 'en' ? `Question ${i + 1}` : locale === 'es' ? `Pregunta ${i + 1}` : `Pergunta ${i + 1}`),
     type: (q.type as string) || 'single',
     options: q.options,
   }))
@@ -91,13 +199,14 @@ function normalizeBibliotecaConfig(config: Record<string, unknown>): Record<stri
       objective: 'captar',
       area_profissional: 'wellness',
     },
-    form: config.form ?? { fields: formFields, submit_label: 'Ver resultado' },
+    form: config.form ?? { fields: formFields, submit_label: submitLabel },
     result: config.result ?? { headline: 'Seu resultado', summary_bullets: [], cta: { text: (config.ctaText as string) ?? 'Falar no WhatsApp' } },
   }
 }
 
-export default function PublicLinkView({ payload }: { payload: Payload }) {
+export default function PublicLinkView({ payload, locale = 'pt' }: { payload: Payload; locale?: Language }) {
   const { slug, type, title, config, ctaWhatsapp } = payload
+  const t = PUBLIC_LINK_UI[locale]
   const viewSent = useRef(false)
 
   useEffect(() => {
@@ -107,7 +216,7 @@ export default function PublicLinkView({ payload }: { payload: Payload }) {
   }, [slug])
 
   const resultCta = (config.result as Record<string, unknown>)?.cta as Record<string, unknown> | undefined
-  const ctaText = (resultCta?.text as string) || (config.ctaText as string) || (config.ctaDefault as string) || 'Falar no WhatsApp'
+  const ctaText = (resultCta?.text as string) || (config.ctaText as string) || (config.ctaDefault as string) || t.speakWhatsApp
   const whatsappUrl = buildWhatsAppUrl(ctaWhatsapp)
 
   const handleCtaClick = (metricsId?: string, whatsappPrefill?: string) => {
@@ -130,10 +239,11 @@ export default function PublicLinkView({ payload }: { payload: Payload }) {
           whatsappUrl={whatsappUrl}
           onCtaClick={handleCtaClick}
           title={formatDisplayTitle(title)}
+          locale={locale}
         />
       )
     }
-    const normalizedConfig = normalizeBibliotecaConfig(config)
+    const normalizedConfig = normalizeBibliotecaConfig(config, locale)
     return (
       <ConfigDrivenLinkView
         slug={slug}
@@ -141,6 +251,7 @@ export default function PublicLinkView({ payload }: { payload: Payload }) {
         ctaText={ctaText}
         whatsappUrl={whatsappUrl}
         onCtaClick={handleCtaClick}
+        locale={locale}
       />
     )
   }
@@ -154,6 +265,7 @@ export default function PublicLinkView({ payload }: { payload: Payload }) {
         whatsappUrl={whatsappUrl}
         onCtaClick={handleCtaClick}
         title={formatDisplayTitle(title)}
+        locale={locale}
       />
     )
   }
@@ -197,19 +309,22 @@ function ConfigDrivenLinkView({
   ctaText,
   whatsappUrl,
   onCtaClick,
+  locale = 'pt',
 }: {
   slug: string
   config: Record<string, unknown>
   ctaText: string
   whatsappUrl: string
   onCtaClick: (metricsId?: string, whatsappPrefill?: string) => void
+  locale?: Language
 }) {
+  const t = PUBLIC_LINK_UI[locale]
   const page = (config.page as Record<string, unknown>) || {}
   const formConfig = (config.form as Record<string, unknown>) || {}
   const resultConfig = (config.result as ResultConfig) || {}
   const meta = (config.meta as Record<string, unknown>) || {}
   const fields = (formConfig.fields as FormField[]) || []
-  const submitLabel = (formConfig.submit_label as string) || 'Ver resultado'
+  const submitLabel = (formConfig.submit_label as string) || t.seeResult
 
   const pageTitleRaw = (page.title as string) ?? (config.title as string) ?? 'Link'
   const hasTechnicalName = /diagnóstico de bloqueios|diagnóstico de saúde|raio-x/i.test(pageTitleRaw)
@@ -283,7 +398,7 @@ function ConfigDrivenLinkView({
     setStep('result')
   }
 
-  const headline = resultConfig.headline || 'Seu resultado'
+  const headline = resultConfig.headline || t.yourResult
   const summaryBullets = Array.isArray(resultConfig.summary_bullets) ? resultConfig.summary_bullets : []
   const resultCtaText = resultConfig.cta?.text || ctaText
 
@@ -306,7 +421,7 @@ function ConfigDrivenLinkView({
         <div className="max-w-md w-full bg-white rounded-2xl shadow-xl shadow-sky-100/50 border border-sky-100/60 p-6 sm:p-8">
           <div className="mb-4">
             <span className="inline-block text-xs font-semibold text-sky-600 bg-sky-50 px-3 py-1.5 rounded-full border border-sky-100">
-              Diagnóstico personalizado
+              {t.personalizedDiagnosis}
             </span>
           </div>
           <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 leading-tight">{introContent.title}</h1>
@@ -322,7 +437,7 @@ function ConfigDrivenLinkView({
             onClick={() => setStep('form')}
             className="w-full py-4 px-4 bg-sky-600 hover:bg-sky-700 text-white font-semibold rounded-xl shadow-lg shadow-sky-500/25 transition-colors hover:shadow-sky-500/30"
           >
-            Começar
+            {t.start}
           </button>
         </div>
       </div>
@@ -343,7 +458,7 @@ function ConfigDrivenLinkView({
           <div className="max-w-md w-full bg-white rounded-2xl shadow-xl shadow-sky-100/50 border border-sky-100/60 p-6 sm:p-8">
             <div className="mb-4">
               <span className="inline-block text-xs font-semibold text-sky-600 bg-sky-50 px-3 py-1.5 rounded-full border border-sky-100">
-                Seu resultado inicial
+                {t.yourResult}
               </span>
             </div>
             <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3 leading-tight">
@@ -358,7 +473,7 @@ function ConfigDrivenLinkView({
               <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-gradient-to-b from-sky-400 to-sky-600 rounded-l-2xl" />
               <div className="pl-5 pr-5 py-5 sm:pl-6 sm:pr-6 sm:py-6">
                 <p className="text-[10px] font-semibold uppercase tracking-wider text-sky-600 mb-2">
-                  Diagnóstico
+                  {t.diagnosis}
                 </p>
                 <p className="text-lg sm:text-xl font-bold text-gray-900 leading-snug mb-2">
                   {personalizeMainBlocker(diagnosis.main_blocker)}
@@ -382,7 +497,7 @@ function ConfigDrivenLinkView({
             {diagnosis.causa_provavel && (
               <div className="mb-4">
                 <p className="text-[10px] font-semibold uppercase tracking-wider text-sky-600 mb-1">
-                  {isPerfumery ? 'O que isso significa' : 'Causa provável'}
+                  {isPerfumery ? t.whatItMeans : t.probableCause}
                 </p>
                 <p className="text-gray-600 text-sm leading-relaxed">
                   {diagnosis.causa_provavel}
@@ -394,7 +509,7 @@ function ConfigDrivenLinkView({
             {diagnosis.preocupacoes && (
               <div className="mb-4">
                 <p className="text-[10px] font-semibold uppercase tracking-wider text-sky-600 mb-1">
-                  Preocupações
+                  {t.concerns}
                 </p>
                 <p className="text-gray-600 text-sm leading-relaxed">
                   {diagnosis.preocupacoes}
@@ -405,7 +520,7 @@ function ConfigDrivenLinkView({
             {/* 5. Consequência / Benefício (perfumaria) */}
             <div className="mb-4">
               <p className="text-[10px] font-semibold uppercase tracking-wider text-sky-600 mb-1">
-                {isPerfumery ? 'Benefício' : 'Consequência'}
+                {isPerfumery ? t.benefit : t.consequence}
               </p>
               <p className="text-gray-600 text-sm leading-relaxed">
                 {diagnosis.consequence}
@@ -415,7 +530,7 @@ function ConfigDrivenLinkView({
             {/* 5a. Gatilho de esperança — cria ponte para conversa */}
             <div className="mb-4 p-4 rounded-xl bg-green-50/80 border border-green-100">
               <p className="text-gray-700 text-sm leading-relaxed">
-                A boa notícia é que muitas pessoas conseguem melhorar essa situação quando identificam o bloqueio certo e fazem pequenos ajustes na rotina.
+                {t.goodNews}
               </p>
             </div>
 
@@ -423,7 +538,7 @@ function ConfigDrivenLinkView({
             {diagnosis.dica_rapida && (
               <div className="mb-4 p-4 rounded-xl bg-sky-50/60 border border-sky-100">
                 <p className="text-[10px] font-semibold uppercase tracking-wider text-sky-600 mb-1">
-                  Dica rápida
+                  {t.quickTip}
                 </p>
                 <p className="text-gray-700 text-sm leading-relaxed">
                   {diagnosis.dica_rapida}
@@ -434,7 +549,7 @@ function ConfigDrivenLinkView({
             {/* 6. Providências — 2–3 ações específicas ou texto único */}
             <div className="mb-6">
               <p className="text-[10px] font-semibold uppercase tracking-wider text-sky-600 mb-2">
-                Próximos passos
+                {t.nextSteps}
               </p>
               {diagnosis.specific_actions && diagnosis.specific_actions.length > 0 ? (
                 <ul className="space-y-2">
@@ -457,13 +572,13 @@ function ConfigDrivenLinkView({
             {/* 7. Ponte para conversa — gatilho de continuação (não conclusão) */}
             <div className="mb-6 p-4 rounded-xl bg-sky-50/80 border border-sky-100">
               <p className="text-[10px] font-semibold uppercase tracking-wider text-sky-600 mb-2">
-                Pode existir mais de um fator no seu caso
+                {t.moreFactors}
               </p>
               <p className="text-gray-600 text-sm leading-relaxed mb-2">
-                Este resultado é apenas um primeiro indicativo baseado nas respostas que você forneceu. Um {pessoaLabel} pode analisar melhor sua rotina e explicar quais ajustes podem ajudar você a melhorar seus resultados.
+                {t.resultDisclaimer.replace('{pessoa}', pessoaLabel)}
               </p>
               <p className="text-gray-700 text-sm font-medium">
-                Se quiser entender melhor o que esse resultado significa no seu caso, você pode conversar com um {pessoaLabel}.
+                {t.talkToPro.replace('{pessoa}', pessoaLabel)}
               </p>
             </div>
 
@@ -475,15 +590,15 @@ function ConfigDrivenLinkView({
                   onCtaClick(
                     metricsId,
                     diagnosis.whatsapp_prefill?.trim() ||
-                      `Oi, fiz a análise e gostaria de conversar sobre o resultado.`
+                      (locale === 'en' ? 'Hi, I did the assessment and would like to talk about the result.' : locale === 'es' ? 'Hola, hice la evaluación y me gustaría hablar sobre el resultado.' : 'Oi, fiz a análise e gostaria de conversar sobre o resultado.')
                   )
                 }
                 className="w-full py-4 px-4 bg-sky-600 hover:bg-sky-700 text-white font-semibold rounded-xl shadow-lg shadow-sky-500/25 transition-colors"
               >
-                {diagnosis.cta_text?.replace(/profissional/gi, pessoaLabel) ?? (useEspecialista ? 'Conversar com o especialista' : 'Clique para entender melhor seu caso')}
+                {diagnosis.cta_text?.replace(/profissional/gi, pessoaLabel) ?? (useEspecialista ? t.talkToSpecialist : t.understandCase)}
               </button>
             ) : (
-              <span className="text-gray-500 text-sm">O {pessoaLabel} ainda não disponibilizou o contato por aqui.</span>
+              <span className="text-gray-500 text-sm">{t.contactNotAvailable.replace('{pessoa}', pessoaLabel)}</span>
             )}
 
             {/* Disclaimer — orientação e responsabilidade */}
@@ -505,7 +620,7 @@ function ConfigDrivenLinkView({
     const ctaDisplay =
       (resultCtaText && resultCtaText.trim()
         ? resultCtaText.replace(/profissional/gi, pessoaLabelStatic)
-        : null) ?? (useEspecialistaStatic ? 'Conversar com o especialista' : 'Clique para entender melhor seu caso')
+        : null) ?? (useEspecialistaStatic ? t.talkToSpecialist : t.understandCase)
 
     return (
       <div className="min-h-screen bg-gradient-to-b from-sky-50 via-sky-50/90 to-blue-50 flex items-center justify-center p-4 sm:p-6">
@@ -523,13 +638,13 @@ function ConfigDrivenLinkView({
           </div>
           <div className="mb-6 p-4 rounded-xl bg-sky-50/80 border border-sky-100">
             <p className="text-[10px] font-semibold uppercase tracking-wider text-sky-600 mb-2">
-              Pode existir mais de um fator no seu caso
+              {t.moreFactors}
             </p>
             <p className="text-gray-600 text-sm leading-relaxed mb-2">
-              Este resultado é apenas um primeiro indicativo baseado nas respostas que você forneceu. Um {pessoaLabelStatic} pode analisar melhor sua rotina e explicar quais ajustes podem ajudar você a melhorar seus resultados.
+              {t.resultDisclaimer.replace('{pessoa}', pessoaLabelStatic)}
             </p>
             <p className="text-gray-700 text-sm font-medium">
-              Se quiser entender melhor o que esse resultado significa no seu caso, você pode conversar com um {pessoaLabelStatic}.
+              {t.talkToPro.replace('{pessoa}', pessoaLabelStatic)}
             </p>
           </div>
           {whatsappUrl ? (
@@ -541,7 +656,7 @@ function ConfigDrivenLinkView({
               {ctaDisplay}
             </button>
           ) : (
-            <span className="text-gray-500 text-sm">O {pessoaLabelStatic} ainda não disponibilizou o contato por aqui.</span>
+            <span className="text-gray-500 text-sm">{t.contactNotAvailable.replace('{pessoa}', pessoaLabelStatic)}</span>
           )}
 
           <DiagnosisDisclaimer variant="informative" className="mt-5 pt-4" />
@@ -583,11 +698,11 @@ function ConfigDrivenLinkView({
                     onClick={() => setFormStep((s) => s - 1)}
                     className="text-sky-600 hover:text-sky-700 hover:underline"
                   >
-                    ← Voltar
+                    ← {t.back}
                   </button>
                 ) : null}
               </div>
-              <span className="flex-1 text-center">Pergunta {formStep + 1} de {quizFields.length}</span>
+              <span className="flex-1 text-center">{t.questionOf} {formStep + 1} {locale === 'en' ? 'of' : 'de'} {quizFields.length}</span>
               <div className="w-14" />
             </div>
             <div className="h-1.5 bg-sky-100 rounded-full overflow-hidden">
@@ -642,7 +757,7 @@ function ConfigDrivenLinkView({
                 disabled={loading}
                 className="w-full py-4 px-4 bg-sky-600 hover:bg-sky-700 disabled:opacity-60 text-white font-semibold rounded-xl shadow-lg shadow-sky-500/25 transition-all duration-200"
               >
-                {loading ? 'Gerando resultado...' : submitLabel}
+                {loading ? t.generating : submitLabel}
               </button>
             </form>
           )}
@@ -688,7 +803,7 @@ function ConfigDrivenLinkView({
             disabled={loading}
             className="w-full py-3 px-4 bg-sky-600 hover:bg-sky-700 disabled:opacity-60 text-white font-medium rounded-lg transition-colors"
           >
-            {loading ? 'Gerando resultado...' : submitLabel}
+            {loading ? t.generating : submitLabel}
           </button>
         </form>
       </div>
@@ -710,6 +825,7 @@ function DiagnosticoQuiz({
   whatsappUrl,
   onCtaClick,
   title,
+  locale = 'pt',
 }: {
   slug: string
   config: Record<string, unknown>
@@ -717,11 +833,13 @@ function DiagnosticoQuiz({
   whatsappUrl: string
   onCtaClick: () => void
   title: string
+  locale?: Language
 }) {
+  const t = PUBLIC_LINK_UI[locale]
   const cfg = config as DiagnosticoConfig
   const questions = Array.isArray(cfg.questions) ? cfg.questions : []
   const results = Array.isArray(cfg.results) ? cfg.results : []
-  const resultIntro = (cfg.resultIntro as string) || 'Seu resultado:'
+  const resultIntro = (cfg.resultIntro as string) || (locale === 'en' ? 'Your result:' : locale === 'es' ? 'Tu resultado:' : 'Seu resultado:')
 
   const [answers, setAnswers] = useState<Record<string, number>>({})
   const [step, setStep] = useState<'quiz' | 'result'>('quiz')
@@ -774,7 +892,7 @@ function DiagnosticoQuiz({
               {ctaText}
             </button>
           ) : (
-            <span className="text-gray-500 text-sm">O profissional ainda não disponibilizou o contato por aqui.</span>
+            <span className="text-gray-500 text-sm">{t.contactNotAvailable.replace('{pessoa}', locale === 'en' ? 'professional' : locale === 'es' ? 'profesional' : 'profissional')}</span>
           )}
 
           <DiagnosisDisclaimer variant="informative" className="mt-5 pt-4" />
@@ -789,7 +907,7 @@ function DiagnosticoQuiz({
       <div className="max-w-md w-full bg-white rounded-2xl shadow-lg border border-gray-100 p-6 sm:p-8">
         <h1 className="text-xl font-bold text-gray-900 mb-2">{title}</h1>
         <p className="text-sm text-gray-500 mb-4">
-          Pergunta {currentIndex + 1} de {questions.length}
+          {t.questionOf} {currentIndex + 1} {locale === 'en' ? 'of' : 'de'} {questions.length}
         </p>
         {currentQuestion && (
           <>
@@ -840,6 +958,7 @@ function CalculatorBlock({
   whatsappUrl,
   onCtaClick,
   title,
+  locale = 'pt',
 }: {
   slug: string
   config: Record<string, unknown>
@@ -847,15 +966,17 @@ function CalculatorBlock({
   whatsappUrl: string
   onCtaClick: () => void
   title: string
+  locale?: Language
 }) {
+  const t = PUBLIC_LINK_UI[locale]
   const cfg = config as CalculatorConfig
   // Campos podem estar em config.fields (calculadora) ou config.form.fields (diagnóstico)
   const fields = (Array.isArray(cfg.fields) ? cfg.fields : (config.form as { fields?: CalculatorField[] })?.fields) ?? []
   const formula = (cfg.formula as string) || ''
-  const resultLabel = (cfg.resultLabel as string) || 'Resultado:'
+  const resultLabel = (cfg.resultLabel as string) || (locale === 'en' ? 'Result:' : locale === 'es' ? 'Resultado:' : 'Resultado:')
   const resultPrefix = (cfg.resultPrefix as string) ?? ''
   const resultSuffix = (cfg.resultSuffix as string) ?? ''
-  const resultIntro = (cfg.resultIntro as string) || 'Com base no que você informou:'
+  const resultIntro = (cfg.resultIntro as string) || (locale === 'en' ? 'Based on what you provided:' : locale === 'es' ? 'Según lo que proporcionaste:' : 'Com base no que você informou:')
 
   const [values, setValues] = useState<Record<string, number | undefined>>(() => {
     const init: Record<string, number | undefined> = {}
@@ -945,7 +1066,7 @@ function CalculatorBlock({
               disabled={!allNumberFieldsFilled}
               className="w-full py-3 px-4 bg-sky-600 hover:bg-sky-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-colors"
             >
-              Calcular
+              {t.calculate}
             </button>
           </form>
         ) : (
@@ -966,7 +1087,7 @@ function CalculatorBlock({
                 {ctaText}
               </button>
             ) : (
-              <span className="text-gray-500 text-sm">O profissional ainda não disponibilizou o contato por aqui.</span>
+              <span className="text-gray-500 text-sm">{t.contactNotAvailable.replace('{pessoa}', locale === 'en' ? 'professional' : locale === 'es' ? 'profesional' : 'profissional')}</span>
             )}
 
             <DiagnosisDisclaimer variant="informative" className="mt-5 pt-4" />

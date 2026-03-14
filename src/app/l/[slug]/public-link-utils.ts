@@ -1,0 +1,53 @@
+/**
+ * Lógica compartilhada para páginas públicas de links (/l/[slug], /en/l/[slug], /es/l/[slug]).
+ */
+import { notFound } from 'next/navigation'
+import { supabaseAdmin } from '@/lib/supabase'
+
+export type PublicLinkPayload = {
+  slug: string
+  type: 'diagnostico' | 'calculator'
+  title: string
+  config: Record<string, unknown>
+  ctaWhatsapp: string | null
+}
+
+export async function fetchPublicLinkPayload(slug: string): Promise<PublicLinkPayload> {
+  if (!supabaseAdmin) {
+    console.error('[public-link] Supabase admin não disponível')
+    notFound()
+  }
+
+  const { data: link, error } = await supabaseAdmin
+    .from('ylada_links')
+    .select('id, slug, title, config_json, cta_whatsapp, status, template_id')
+    .eq('slug', slug)
+    .eq('status', 'active')
+    .maybeSingle()
+
+  if (error || !link) notFound()
+
+  const config = (link.config_json as Record<string, unknown>) ?? {}
+  const meta = config.meta as Record<string, unknown> | undefined
+  const isFlowLink = !!(meta?.flow_id || meta?.architecture)
+
+  let type: 'diagnostico' | 'calculator' = 'diagnostico'
+  if (!isFlowLink) {
+    const { data: template } = await supabaseAdmin
+      .from('ylada_link_templates')
+      .select('type')
+      .eq('id', link.template_id)
+      .maybeSingle()
+    const t = template?.type
+    if (!t || !['diagnostico', 'calculator'].includes(t)) notFound()
+    type = t as 'diagnostico' | 'calculator'
+  }
+
+  return {
+    slug: link.slug,
+    type,
+    title: (config.page as Record<string, unknown>)?.title as string ?? (config.title as string) ?? link.title ?? 'Link',
+    config,
+    ctaWhatsapp: link.cta_whatsapp ?? null,
+  }
+}

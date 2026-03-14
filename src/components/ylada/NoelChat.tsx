@@ -2,13 +2,14 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { useAuthenticatedFetch } from '@/hooks/useAuthenticatedFetch'
 import { getYladaAreaPathPrefix, getYladaLeadsPath } from '@/config/ylada-areas'
 import { getNoelUxContent, type NoelArea } from '@/config/noel-ux-content'
 import { buildNoelContextualWelcome, type NoelContextualAction } from '@/config/noel-contextual-welcome'
+import { getLocaleFromPathname, type Language } from '@/lib/i18n'
 
 function LinkWithCopy({ href, children }: { href?: string; children: React.ReactNode }) {
   const [copied, setCopied] = useState(false)
@@ -137,10 +138,14 @@ interface NoelChatProps {
   className?: string
   /** Mensagem inicial (ex.: de link ?msg=... para "Melhorar diagnóstico") */
   initialMessage?: string
+  /** Idioma da resposta do Noel (default: detectado da URL) */
+  locale?: Language
 }
 
-export default function NoelChat({ area = 'med', className = '', initialMessage }: NoelChatProps) {
+export default function NoelChat({ area = 'med', className = '', initialMessage, locale: localeProp }: NoelChatProps) {
   const router = useRouter()
+  const pathname = usePathname()
+  const locale = localeProp ?? getLocaleFromPathname(pathname ?? '')
   const uxContent = getNoelUxContent(area)
   const [messages, setMessages] = useState<Message[]>(() => {
     const saved = loadMessages(area)
@@ -239,6 +244,7 @@ export default function NoelChat({ area = 'med', className = '', initialMessage 
           conversationHistory,
           area,
           lastLinkContext: lastLinkContext ?? undefined,
+          locale,
         }),
       })
 

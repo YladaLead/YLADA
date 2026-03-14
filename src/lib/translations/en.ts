@@ -193,5 +193,76 @@ export const enTranslations: Translations = {
       languages: 'Languages: PT / ES / EN',
       copyright: '© {year} YLADA. All rights reserved.'
     }
+  },
+
+  home: {
+    nav: {
+      doDiagnosis: 'Take diagnosis',
+      philosophy: 'Philosophy',
+      about: 'About',
+      professionals: 'Professionals',
+      howItWorks: 'How it works',
+      pricing: 'Pricing',
+      login: 'Log in',
+      discoverProfile: 'Discover my profile'
+    },
+    loading: 'Loading...',
+    redirecting: 'Redirecting...',
+    hero: {
+      title: 'Does your marketing attract curious people or clients ready to hire?',
+      tagline: 'Good conversations start with good questions.',
+      subtitle: 'Find out in less than 1 minute if your professional communication is really attracting interested people.',
+      yladaIntro: 'YLADA uses smart diagnostics to turn curiosity into client conversations.',
+      questionLabel: 'When someone contacts you, they usually:',
+      question1: 'ask about the price right at the start',
+      question2: 'ask for more information but don\'t decide',
+      question3: 'already arrive understanding the value',
+      question4: 'it depends a lot on the person',
+      cta: 'Discover my profile',
+      progress: 'Question 1 of 7',
+      quickInfo: '7 quick questions • less than 1 minute',
+      proof: '+3,000 professionals have already tested'
+    },
+    duolingo: {
+      title: 'Good conversations start with good questions.',
+      explainNot: 'Explaining too much doesn\'t create clients.',
+      tagline: 'Good conversations start with good questions.',
+      intro: 'Before starting a conversation, doctors ask questions to understand the problem. Professionals can do the same. YLADA turns knowledge into diagnostics that start better conversations.',
+      traditional: 'Traditional marketing',
+      ylada: 'YLADA',
+      explain: 'Explain',
+      convince: 'Convince',
+      insist: 'Insist',
+      ask: 'Ask',
+      diagnose: 'Diagnose',
+      converse: 'Converse',
+      resultCurious: 'Result:',
+      resultPrepared: 'Result:',
+      diagram: 'Question',
+      question: 'Question',
+      diagnosis: 'Diagnosis',
+      conversation: 'Conversation',
+      client: 'Client'
+    },
+    areas: {
+      title: 'Who YLADA was created for',
+      subtitle: 'Consultative professionals and sellers use diagnostics to attract clients who are more prepared.',
+      seeAll: 'See all areas'
+    },
+    cta: {
+      verify: 'Check now if you attract curious people or prepared clients.',
+      discover: 'Discover my profile'
+    },
+    footer: {
+      doDiagnosis: 'Take diagnosis',
+      library: 'Diagnostics library',
+      philosophy: 'Philosophy',
+      about: 'About',
+      professionals: 'Professionals',
+      howItWorks: 'How it works',
+      pricing: 'Pricing',
+      login: 'Log in',
+      createDiagnosis: 'Create diagnosis'
+    }
   }
 };

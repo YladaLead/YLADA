@@ -17,12 +17,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import { getYladaLandingAreas } from '@/config/ylada-landing-areas'
 import { getLocaleFromPathname, type Language } from '@/lib/i18n'
 
-const PERGUNTA_HERO_OPCOES = [
-  { value: 2, label: 'pergunta o preço logo no início' },
-  { value: 1, label: 'pede mais informações mas não decide' },
-  { value: 0, label: 'já chega entendendo o valor' },
-  { value: 1, label: 'depende muito da pessoa' },
-]
+const PERGUNTA_HERO_VALUES = [2, 1, 0, 1] as const
 
 const EXEMPLOS_DIAGNOSTICOS = [
   { titulo: 'O que está travando o crescimento do seu negócio?', href: '/pt/diagnostico' },
@@ -72,10 +67,11 @@ export default function InstitutionalPageContent() {
     return () => clearTimeout(id)
   }, [])
 
+  const home = t?.home
   if (!inst) {
     return (
       <div className="min-h-screen flex items-center justify-center p-4">
-        <p className="text-gray-500">Carregando...</p>
+        <p className="text-gray-500">{home?.loading ?? 'Carregando...'}</p>
       </div>
     )
   }
@@ -84,7 +80,7 @@ export default function InstitutionalPageContent() {
   if (showAuthLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center p-4">
-        <p className="text-gray-500">Carregando...</p>
+        <p className="text-gray-500">{home?.loading ?? 'Carregando...'}</p>
       </div>
     )
   }
@@ -92,7 +88,7 @@ export default function InstitutionalPageContent() {
   if (user && isInstitutionalPage && !forceLanding) {
     return (
       <div className="min-h-screen flex items-center justify-center p-4">
-        <p className="text-gray-500">Redirecionando...</p>
+        <p className="text-gray-500">{home?.redirecting ?? 'Redirecionando...'}</p>
       </div>
     )
   }
@@ -107,31 +103,31 @@ export default function InstitutionalPageContent() {
           </Link>
           <nav className="flex items-center gap-3 sm:gap-6">
             <Link href={getLocalizedPath('/pt/diagnostico', locale)} className="text-gray-600 hover:text-gray-900 text-sm font-medium hidden md:inline">
-              Fazer diagnóstico
+              {home?.nav?.doDiagnosis ?? 'Fazer diagnóstico'}
             </Link>
             <Link href={getLocalizedPath('/pt/metodo-ylada', locale)} className="text-gray-600 hover:text-gray-900 text-sm font-medium hidden md:inline">
-              Filosofia
+              {home?.nav?.philosophy ?? 'Filosofia'}
             </Link>
             <Link href={getLocalizedPath('/pt/sobre', locale)} className="text-gray-600 hover:text-gray-900 text-sm font-medium hidden md:inline">
-              Sobre
+              {home?.nav?.about ?? 'Sobre'}
             </Link>
             <Link href={getLocalizedPath('/pt/profissionais', locale)} className="text-gray-600 hover:text-gray-900 text-sm font-medium hidden lg:inline">
-              Profissionais
+              {home?.nav?.professionals ?? 'Profissionais'}
             </Link>
             <Link href={getLocalizedPath('/pt/como-funciona', locale)} className="text-gray-600 hover:text-gray-900 text-sm font-medium hidden lg:inline">
-              Como funciona
+              {home?.nav?.howItWorks ?? 'Como funciona'}
             </Link>
             <Link href={getLocalizedPath('/pt/precos', locale)} className="text-gray-600 hover:text-gray-900 text-sm font-medium hidden lg:inline">
-              Preços
+              {home?.nav?.pricing ?? 'Preços'}
             </Link>
             <Link href={getLocalizedPath('/pt/login', locale)} className="text-gray-600 hover:text-gray-900 text-sm font-medium">
-              Entrar
+              {home?.nav?.login ?? 'Entrar'}
             </Link>
             <Link
               href={getLocalizedPath('/pt/diagnostico', locale)}
               className="inline-flex items-center justify-center px-4 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 transition-all"
             >
-              Descobrir meu perfil
+              {home?.nav?.discoverProfile ?? 'Descobrir meu perfil'}
             </Link>
             <LanguageSelector />
           </nav>
@@ -143,21 +139,21 @@ export default function InstitutionalPageContent() {
         <section className="py-12 sm:py-16 lg:py-20 bg-[#f8fafc] border-b border-gray-200">
           <div className="max-w-2xl mx-auto">
             <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-4 leading-tight text-center">
-              Seu marketing atrai curiosos ou clientes prontos para contratar?
+              {home?.hero?.title ?? 'Seu marketing atrai curiosos ou clientes prontos para contratar?'}
             </h1>
             <p className="text-lg sm:text-xl text-gray-800 font-semibold mb-3 text-center">
-              Boas conversas começam com boas perguntas.
+              {home?.hero?.tagline ?? 'Boas conversas começam com boas perguntas.'}
             </p>
             <p className="text-base sm:text-lg text-gray-600 mb-4 text-center leading-relaxed">
-              Descubra em menos de 1 minuto se sua comunicação profissional está realmente atraindo pessoas interessadas.
+              {home?.hero?.subtitle ?? 'Descubra em menos de 1 minuto se sua comunicação profissional está realmente atraindo pessoas interessadas.'}
             </p>
             <p className="text-base text-gray-700 font-medium mb-6 text-center">
-              YLADA usa diagnósticos inteligentes para transformar curiosidade em conversas com clientes.
+              {home?.hero?.yladaIntro ?? 'YLADA usa diagnósticos inteligentes para transformar curiosidade em conversas com clientes.'}
             </p>
 
             <div className="bg-white rounded-xl p-6 sm:p-8 border border-gray-200 shadow-sm">
               <div className="mb-6">
-                <p className="text-sm text-gray-500 mb-2">Pergunta 1 de 7</p>
+                <p className="text-sm text-gray-500 mb-2">{home?.hero?.progress ?? 'Pergunta 1 de 7'}</p>
                 <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
                   <div
                     className="h-full bg-[#2563eb] rounded-full transition-all duration-300"
@@ -165,9 +161,9 @@ export default function InstitutionalPageContent() {
                   />
                 </div>
               </div>
-              <p className="font-semibold text-gray-900 mb-4">Quando alguém entra em contato com você normalmente:</p>
+              <p className="font-semibold text-gray-900 mb-4">{home?.hero?.questionLabel ?? 'Quando alguém entra em contato com você normalmente:'}</p>
               <div className="space-y-2 mb-6">
-                {PERGUNTA_HERO_OPCOES.map((op, idx) => (
+                {([home?.hero?.question1, home?.hero?.question2, home?.hero?.question3, home?.hero?.question4] as (string | undefined)[]).map((label, idx) => (
                   <label
                     key={idx}
                     className={`flex items-center gap-3 p-4 rounded-lg cursor-pointer transition-all border-2 ${
@@ -189,7 +185,7 @@ export default function InstitutionalPageContent() {
                         <span className="w-2 h-2 rounded-full bg-[#2563eb]" />
                       )}
                     </span>
-                    <span className="text-gray-800">{op.label}</span>
+                    <span className="text-gray-800">{label ?? ['pergunta o preço logo no início', 'pede mais informações mas não decide', 'já chega entendendo o valor', 'depende muito da pessoa'][idx]}</span>
                   </label>
                 ))}
               </div>
@@ -197,22 +193,22 @@ export default function InstitutionalPageContent() {
                 type="button"
                 onClick={() => {
                   if (respostaHeroIdx !== null) {
-                    const problemaValue = PERGUNTA_HERO_OPCOES[respostaHeroIdx].value
+                    const problemaValue = PERGUNTA_HERO_VALUES[respostaHeroIdx] ?? 1
                     router.push(`/pt/diagnostico?fromHome=1&problema=${problemaValue}`)
                   }
                 }}
                 disabled={respostaHeroIdx === null}
                 className="block w-full text-center px-6 py-4 bg-[#2563eb] text-white font-semibold rounded-xl hover:bg-[#1d4ed8] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Descobrir meu perfil
+                {home?.hero?.cta ?? 'Descobrir meu perfil'}
               </button>
             </div>
 
             <p className="text-gray-500 text-sm mt-4 text-center">
-              7 perguntas rápidas • menos de 1 minuto
+              {home?.hero?.quickInfo ?? '7 perguntas rápidas • menos de 1 minuto'}
             </p>
             <p className="text-gray-600 text-sm font-medium mt-1 text-center">
-              +3.000 profissionais já testaram
+              {home?.hero?.proof ?? '+3.000 profissionais já testaram'}
             </p>
           </div>
         </section>
@@ -221,14 +217,14 @@ export default function InstitutionalPageContent() {
         <section className="py-10 sm:py-14 bg-white border-b border-gray-100">
           <div className="max-w-3xl mx-auto px-4">
             <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 text-center mb-6 leading-tight">
-              Boas conversas começam com boas perguntas.
+              {home?.duolingo?.title ?? 'Boas conversas começam com boas perguntas.'}
             </h2>
             <div className="bg-gray-900 text-white rounded-2xl p-8 sm:p-10 mb-8">
               <p className="text-base sm:text-lg text-gray-300 text-center mb-3">
-                Explicar demais não cria clientes.
+                {home?.duolingo?.explainNot ?? 'Explicar demais não cria clientes.'}
               </p>
               <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-white text-center leading-tight">
-                Boas conversas começam com boas perguntas.
+                {home?.duolingo?.tagline ?? 'Boas conversas começam com boas perguntas.'}
               </p>
             </div>
             <p className="text-gray-600 text-center mb-8 max-w-xl mx-auto leading-relaxed">
@@ -654,10 +650,10 @@ export default function InstitutionalPageContent() {
         <section className="bg-gray-50 py-12 sm:py-16 lg:py-20 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8">
           <div className="max-w-4xl mx-auto">
             <h2 className="text-xl sm:text-3xl font-bold text-gray-900 text-center mb-2">
-              Para quais profissionais o YLADA foi criado
+              {home?.areas?.title ?? 'Para quais profissionais o YLADA foi criado'}
             </h2>
             <p className="text-gray-600 text-center mb-8 max-w-2xl mx-auto">
-              Profissionais e vendedores consultivos usam diagnósticos para atrair clientes mais preparados.
+              {home?.areas?.subtitle ?? 'Profissionais e vendedores consultivos usam diagnósticos para atrair clientes mais preparados.'}
             </p>
             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
               {getYladaLandingAreas(locale).map((area) => (
@@ -676,7 +672,7 @@ export default function InstitutionalPageContent() {
                 href={getLocalizedPath('/pt/profissionais', locale)}
                 className="inline-flex items-center justify-center px-6 py-3 border-2 border-gray-300 text-gray-700 font-medium rounded-xl hover:bg-gray-50 transition-all"
               >
-                Ver todas as áreas
+                {home?.areas?.seeAll ?? 'Ver todas as áreas'}
               </Link>
             </div>
           </div>
@@ -758,13 +754,13 @@ export default function InstitutionalPageContent() {
         <section className="bg-[#1e3a8a] py-16 sm:py-20 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl mx-auto text-center">
             <h2 className="text-2xl sm:text-3xl font-bold text-white mb-8 leading-tight">
-              Verifique agora se você atrai curiosos ou clientes preparados.
+              {home?.cta?.verify ?? 'Verifique agora se você atrai curiosos ou clientes preparados.'}
             </h2>
             <Link
               href={getLocalizedPath('/pt/diagnostico', locale)}
               className="inline-flex items-center justify-center px-10 py-4 bg-white text-[#1e3a8a] font-semibold rounded-xl hover:bg-gray-100 transition-all shadow-lg"
             >
-              Descobrir meu perfil
+              {home?.cta?.discover ?? 'Descobrir meu perfil'}
             </Link>
           </div>
         </section>
@@ -779,31 +775,31 @@ export default function InstitutionalPageContent() {
             </div>
             <nav className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 mb-6 text-sm">
               <Link href={getLocalizedPath('/pt/diagnostico', locale)} className="text-gray-600 hover:text-gray-900">
-                Fazer diagnóstico
+                {home?.footer?.doDiagnosis ?? 'Fazer diagnóstico'}
               </Link>
               <Link href={getLocalizedPath('/pt/diagnosticos', locale)} className="text-gray-600 hover:text-gray-900">
-                Biblioteca de diagnósticos
+                {home?.footer?.library ?? 'Biblioteca de diagnósticos'}
               </Link>
               <Link href={getLocalizedPath('/pt/metodo-ylada', locale)} className="text-gray-600 hover:text-gray-900">
-                Filosofia
+                {home?.footer?.philosophy ?? 'Filosofia'}
               </Link>
               <Link href={getLocalizedPath('/pt/sobre', locale)} className="text-gray-600 hover:text-gray-900">
-                Sobre
+                {home?.footer?.about ?? 'Sobre'}
               </Link>
               <Link href={getLocalizedPath('/pt/profissionais', locale)} className="text-gray-600 hover:text-gray-900">
-                Profissionais
+                {home?.footer?.professionals ?? 'Profissionais'}
               </Link>
               <Link href={getLocalizedPath('/pt/como-funciona', locale)} className="text-gray-600 hover:text-gray-900">
-                Como funciona
+                {home?.footer?.howItWorks ?? 'Como funciona'}
               </Link>
               <Link href={getLocalizedPath('/pt/precos', locale)} className="text-gray-600 hover:text-gray-900">
-                Preços
+                {home?.footer?.pricing ?? 'Preços'}
               </Link>
               <Link href={getLocalizedPath('/pt/login', locale)} className="text-gray-600 hover:text-gray-900">
-                Entrar
+                {home?.footer?.login ?? 'Entrar'}
               </Link>
               <Link href={getLocalizedPath('/pt/escolha-perfil', locale)} className="text-blue-600 hover:text-blue-700 font-medium">
-                Criar diagnóstico
+                {home?.footer?.createDiagnosis ?? 'Criar diagnóstico'}
               </Link>
             </nav>
             <p className="text-gray-600 text-sm mb-4">{inst.footer.tagline}</p>
