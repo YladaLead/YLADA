@@ -5,6 +5,7 @@ import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import YLADALogo from '@/components/YLADALogo'
 import PoweredByYlada from '@/components/ylada/PoweredByYlada'
+import CompartilheComAmigo from '@/components/shared/CompartilheComAmigo'
 import {
   DIAGNOSTICOS,
   DIAGNOSTICOS_RELACIONADOS,
@@ -356,6 +357,11 @@ function ResultadoContent() {
               LinkedIn
             </button>
           </div>
+        </div>
+
+        {/* Compartilhe com amigo — link para ylada.com */}
+        <div className="mb-10">
+          <CompartilheComAmigo variant="block" />
         </div>
 
         {/* 8️⃣ Diagnósticos relacionados — acesso a outros quizzes */}
