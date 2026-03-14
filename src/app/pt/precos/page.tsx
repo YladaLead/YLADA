@@ -1,5 +1,6 @@
 'use client'
 
+import { Suspense } from 'react'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import YLADALogo from '@/components/YLADALogo'
@@ -19,7 +20,28 @@ const EXEMPLOS_DIAGNOSTICOS = [
   'Qual fragrância combina com você',
 ]
 
-export default function PrecosPage() {
+function PrecosPageFallback() {
+  return (
+    <div className="min-h-screen bg-white">
+      <header className="sticky top-0 z-50 border-b border-gray-200 bg-white shadow-sm">
+        <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
+          <Link href="/pt" className="flex-shrink-0" aria-label="YLADA início">
+            <YLADALogo size="md" responsive className="bg-transparent" />
+          </Link>
+          <div className="flex gap-4">
+            <Link href="/pt/metodo-ylada" className="text-gray-600 hover:text-gray-900 text-sm font-medium">Método</Link>
+            <Link href="/pt/diagnostico" className="text-gray-600 hover:text-gray-900 text-sm font-medium">Fazer diagnóstico</Link>
+          </div>
+        </div>
+      </header>
+      <main className="w-full max-w-4xl mx-auto px-4 sm:px-6 py-12 sm:py-16 flex items-center justify-center min-h-[50vh]">
+        <p className="text-gray-500">Carregando...</p>
+      </main>
+    </div>
+  )
+}
+
+function PrecosPageContent() {
   const searchParams = useSearchParams()
   const fromDiagnostico = searchParams.get('source') === 'diagnostico'
   const perfilTitulo = searchParams.get('perfil_titulo') || ''
@@ -337,5 +359,13 @@ export default function PrecosPage() {
         </section>
       </main>
     </div>
+  )
+}
+
+export default function PrecosPage() {
+  return (
+    <Suspense fallback={<PrecosPageFallback />}>
+      <PrecosPageContent />
+    </Suspense>
   )
 }
