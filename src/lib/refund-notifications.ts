@@ -12,7 +12,7 @@ export interface RefundRequestNotificationData {
   userId: string
   userEmail: string
   userName: string
-  area: 'nutri' | 'wellness' | 'coach'
+  area: 'nutri' | 'wellness' | 'coach' | 'nutra'
   amount: number
   reason: string
   daysSincePurchase: number
@@ -31,10 +31,11 @@ async function getAdminEmail(): Promise<string | null> {
  * Gera HTML do email de notificação de reembolso
  */
 function generateRefundRequestEmail(data: RefundRequestNotificationData, baseUrl: string): string {
-  const areaLabel = {
+  const areaLabel: Record<RefundRequestNotificationData['area'], string> = {
     nutri: 'Nutri',
     wellness: 'Wellness',
-    coach: 'Coach'
+    coach: 'Coach',
+    nutra: 'Nutra'
   }
 
   const reasonLabels: Record<string, string> = {
@@ -200,10 +201,11 @@ export async function notifyAdminRefundRequest(
         }
 
         // Formatar mensagem
-        const areaLabel = {
+        const areaLabel: Record<RefundRequestNotificationData['area'], string> = {
           nutri: 'Nutri',
           wellness: 'Wellness',
-          coach: 'Coach'
+          coach: 'Coach',
+          nutra: 'Nutra'
         }
 
         const reasonLabels: Record<string, string> = {

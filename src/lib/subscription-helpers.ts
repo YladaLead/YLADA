@@ -4,9 +4,11 @@ import { supabaseAdmin } from '@/lib/supabase'
  * Verifica se usuário tem assinatura ativa para uma área específica
  * Inclui planos pagos (monthly, annual), gratuitos (free) e trials (trial)
  */
+export type SubscriptionArea = 'wellness' | 'nutri' | 'coach' | 'nutra' | 'med' | 'ylada'
+
 export async function hasActiveSubscription(
   userId: string,
-  area: 'wellness' | 'nutri' | 'coach' | 'nutra' | 'med'
+  area: SubscriptionArea
 ): Promise<boolean> {
   try {
     const { data, error } = await supabaseAdmin
@@ -35,7 +37,7 @@ export async function hasActiveSubscription(
  */
 export async function hasFreePlan(
   userId: string,
-  area: 'wellness' | 'nutri' | 'coach' | 'nutra' | 'med'
+  area: SubscriptionArea
 ): Promise<boolean> {
   try {
     const { data, error } = await supabaseAdmin
@@ -65,7 +67,7 @@ export async function hasFreePlan(
  */
 export async function requiresManualRenewal(
   userId: string,
-  area: 'wellness' | 'nutri' | 'coach' | 'nutra' | 'med'
+  area: SubscriptionArea
 ): Promise<boolean> {
   try {
     const { data, error } = await supabaseAdmin
@@ -94,7 +96,7 @@ export async function requiresManualRenewal(
  */
 export async function getActiveSubscription(
   userId: string,
-  area: 'wellness' | 'nutri' | 'coach' | 'nutra' | 'med'
+  area: SubscriptionArea
 ) {
   try {
     const { data, error } = await supabaseAdmin
@@ -121,6 +123,22 @@ export async function getActiveSubscription(
   } catch (error) {
     console.error('❌ Erro ao buscar assinatura:', error)
     return null
+  }
+}
+
+/**
+ * Verifica se usuário tem plano Pro (pago) na área YLADA.
+ * Pro = monthly ou annual. Free ou sem assinatura = false.
+ * @see docs/SPEC-FREEMIUM-YLADA.md
+ */
+export async function hasYladaProPlan(userId: string): Promise<boolean> {
+  try {
+    const sub = await getActiveSubscription(userId, 'ylada')
+    if (!sub) return false
+    const planType = sub.plan_type as string | undefined
+    return planType === 'monthly' || planType === 'annual'
+  } catch {
+    return false
   }
 }
 

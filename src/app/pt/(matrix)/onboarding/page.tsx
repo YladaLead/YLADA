@@ -5,7 +5,8 @@ export default function MatrixOnboardingPage() {
     <OnboardingPageContent
       areaCodigo="ylada"
       areaLabel="YLADA"
-      redirectAfterSave="/pt/home"
+      redirectIfDone="/pt/home"
+      redirectAfterSave="/pt/perfil-empresarial"
       proofText="Mais de 1.200 profissionais já usaram este diagnóstico para entender melhor seu momento profissional."
     />
   )

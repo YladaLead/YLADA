@@ -52,7 +52,8 @@ export default function YladaSidebar({
             <div className="space-y-0.5">
               {group.items.map((item) => {
                 const path = item.key === 'leads' ? getYladaLeadsPath(areaCodigo) : item.path
-                const href = `${prefix}/${path}`
+                const hash = 'hash' in item && item.hash ? `#${item.hash}` : ''
+                const href = `${prefix}/${path}${hash}`
                 const isActive = pathname === href || pathname?.startsWith(href + '/')
                 return (
                   <Link

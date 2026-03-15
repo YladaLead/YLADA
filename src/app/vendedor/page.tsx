@@ -22,7 +22,7 @@ export default function VendedorPage() {
           {/* Breadcrumb */}
           <div className="mb-8">
             <Link 
-              href="/escolha-perfil"
+              href="/pt"
               className="inline-flex items-center text-gray-400 hover:text-white transition-colors"
             >
               <span className="mr-2">←</span>

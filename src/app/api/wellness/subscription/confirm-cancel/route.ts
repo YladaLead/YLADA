@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireApiAuth } from '@/lib/api-auth'
 import { supabaseAdmin } from '@/lib/supabase'
-import { cancelMercadoPagoSubscription } from '@/lib/mercado-pago-helpers'
+import { cancelMercadoPagoSubscription, getMercadoPagoPreapprovalIdForCancel, refundMercadoPagoPayment } from '@/lib/mercado-pago-helpers'
 import { notifyAdminRefundRequest } from '@/lib/refund-notifications'
 
 /**
@@ -93,23 +93,20 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Tentar cancelar no Mercado Pago primeiro
+    // Tentar cancelar no Mercado Pago quando for assinatura MP (sempre notificar o MP para evitar cobranças futuras)
     let mercadoPagoCanceled = false
     let mercadoPagoError: string | null = null
 
-    // Verificar se tem ID do gateway (Mercado Pago ou Stripe)
-    // O sistema usa gateway_subscription_id para armazenar o ID do gateway
-    const gateway = (subscription as any).gateway || 'stripe'
-    const gatewaySubscriptionId = (subscription as any).gateway_subscription_id || 
-                                  (subscription as any).stripe_subscription_id ||
-                                  (subscription as any).mercado_pago_subscription_id ||
-                                  (subscription as any).mercado_pago_preapproval_id
+    const rawSubscriptionId = (subscription as any).gateway_subscription_id ||
+                              (subscription as any).stripe_subscription_id
+    const isMercadoPago = (subscription as any).gateway === 'mercadopago' ||
+                         (typeof rawSubscriptionId === 'string' && (rawSubscriptionId.startsWith('mp_') || rawSubscriptionId.startsWith('mp_sub_')))
+    const preapprovalId = getMercadoPagoPreapprovalIdForCancel(rawSubscriptionId)
 
-    // Se for Mercado Pago, tentar cancelar lá
-    if (gateway === 'mercadopago' && gatewaySubscriptionId) {
-      console.log(`🔄 Tentando cancelar no Mercado Pago: ${gatewaySubscriptionId}`)
-      const cancelResult = await cancelMercadoPagoSubscription(gatewaySubscriptionId)
-      
+    if (isMercadoPago && preapprovalId) {
+      console.log(`🔄 Tentando cancelar no Mercado Pago (preapproval_id): ${preapprovalId}`)
+      const cancelResult = await cancelMercadoPagoSubscription(preapprovalId)
+
       if (cancelResult.success) {
         mercadoPagoCanceled = true
         console.log('✅ Cancelado no Mercado Pago com sucesso')
@@ -118,9 +115,7 @@ export async function POST(request: NextRequest) {
         console.error('⚠️ Erro ao cancelar no Mercado Pago:', mercadoPagoError)
         // Continuar mesmo assim - cancelar no banco
       }
-    } else if (gateway === 'stripe' && gatewaySubscriptionId) {
-      // Para Stripe, o cancelamento já é feito via webhook quando status muda
-      // Mas podemos adicionar lógica aqui se necessário no futuro
+    } else if (rawSubscriptionId && !isMercadoPago) {
       console.log('ℹ️ Assinatura Stripe - cancelamento será processado via webhook')
     } else {
       console.log('ℹ️ Nenhum ID do gateway encontrado, cancelando apenas no banco')
@@ -155,16 +150,46 @@ export async function POST(request: NextRequest) {
       })
       .eq('id', cancelAttemptId)
 
-    // Se solicitou reembolso e está dentro da garantia
+    // Se solicitou reembolso e está dentro da garantia: tentar reembolso automático no MP
+    let refundRequested = false
+    let refundSuccess = false
+    let refundError: string | null = null
+
     if (requestRefund && dentroGarantia) {
-      // Registrar solicitação de reembolso
-      console.log('📝 Solicitação de reembolso criada:', {
+      // Buscar último pagamento da assinatura para reembolsar no Mercado Pago
+      const { data: lastPayment } = await supabaseAdmin
+        .from('payments')
+        .select('id, stripe_payment_intent_id, amount, status')
+        .eq('subscription_id', subscription.id)
+        .eq('status', 'succeeded')
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle()
+
+      const mpPaymentId = lastPayment?.stripe_payment_intent_id
+      if (mpPaymentId && isMercadoPago) {
+        refundRequested = true
+        const idempotencyKey = `refund_cancel_${cancelAttemptId}_${subscription.id}`
+        const refundResult = await refundMercadoPagoPayment(
+          String(mpPaymentId),
+          lastPayment?.amount,
+          idempotencyKey
+        )
+        refundSuccess = refundResult.success
+        if (!refundResult.success) refundError = refundResult.error || null
+        console.log(refundResult.success ? '✅ Reembolso solicitado no MP com sucesso' : '⚠️ Reembolso no MP falhou:', { mpPaymentId, error: refundError })
+      }
+
+      // Registrar e notificar admin (para auditoria)
+      console.log('📝 Solicitação de reembolso:', {
         subscriptionId: subscription.id,
         userId: user.id,
         amount: subscription.amount,
         reason,
         daysSincePurchase: diasDesdeCompra,
-        mercadoPagoCanceled
+        mercadoPagoCanceled,
+        refundRequested,
+        refundSuccess
       })
 
       // Buscar dados do usuário para notificação
@@ -207,13 +232,19 @@ export async function POST(request: NextRequest) {
 
     // Mensagem de sucesso
     let message = 'Assinatura cancelada com sucesso.'
-    
+
     if (requestRefund && dentroGarantia) {
-      message = 'Assinatura cancelada. Reembolso será processado em até 10 dias úteis.'
+      if (refundSuccess) {
+        message = 'Assinatura cancelada. Reembolso foi solicitado no cartão e deve aparecer em alguns dias úteis.'
+      } else if (refundRequested && refundError) {
+        message = 'Assinatura cancelada. Não foi possível processar o reembolso automaticamente; nossa equipe irá processar em até 10 dias úteis.'
+      } else {
+        message = 'Assinatura cancelada. Reembolso será processado em até 10 dias úteis.'
+      }
     }
 
     if (mercadoPagoError) {
-      message += ` (Nota: Houve um problema ao cancelar no Mercado Pago, mas a assinatura foi cancelada no sistema. Entre em contato com o suporte se necessário.)`
+      message += ' (Houve um problema ao cancelar no Mercado Pago, mas a assinatura foi cancelada no sistema. Entre em contato com o suporte se necessário.)'
     }
 
     return NextResponse.json({
@@ -221,6 +252,7 @@ export async function POST(request: NextRequest) {
       canceled: true,
       message,
       refundRequested: requestRefund && dentroGarantia,
+      refundSuccess: refundRequested ? refundSuccess : undefined,
       withinGuarantee: dentroGarantia,
       daysSincePurchase: diasDesdeCompra,
       mercadoPagoCanceled,

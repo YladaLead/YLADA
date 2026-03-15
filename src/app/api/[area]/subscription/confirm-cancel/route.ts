@@ -4,15 +4,59 @@ import { supabaseAdmin } from '@/lib/supabase'
 import { cancelMercadoPagoSubscription, getMercadoPagoPreapprovalIdForCancel, refundMercadoPagoPayment } from '@/lib/mercado-pago-helpers'
 import { notifyAdminRefundRequest } from '@/lib/refund-notifications'
 
+const VALID_AREAS = ['wellness', 'nutri', 'coach', 'nutra'] as const
+type Area = (typeof VALID_AREAS)[number]
+
+/** Busca nome/email do usuário por área (perfil específico ou user_profiles). */
+async function getUserProfileForArea(userId: string, area: Area): Promise<{ userName: string; userEmail: string }> {
+  let userName = 'Usuário'
+  let userEmail = ''
+  const tables: { area: Area; table: string; nameCol: string; emailCol: string }[] = [
+    { area: 'nutri', table: 'nutri_profiles', nameCol: 'nome', emailCol: 'email' },
+    { area: 'wellness', table: 'wellness_profiles', nameCol: 'nome', emailCol: 'email' },
+    { area: 'coach', table: 'user_profiles', nameCol: 'nome_completo', emailCol: 'email' },
+    { area: 'nutra', table: 'user_profiles', nameCol: 'nome_completo', emailCol: 'email' }
+  ]
+  const config = tables.find((c) => c.area === area)
+  if (config) {
+    try {
+      const { data } = await supabaseAdmin
+        .from(config.table as 'nutri_profiles' | 'wellness_profiles' | 'user_profiles')
+        .select(`${config.nameCol}, ${config.emailCol}`)
+        .eq('user_id', userId)
+        .single()
+      if (data) {
+        userName = (data as any)[config.nameCol] || userName
+        userEmail = (data as any)[config.emailCol] || userEmail
+      }
+    } catch (e) {
+      console.warn('[Refund Notification] Erro ao buscar perfil:', e)
+    }
+  }
+  return { userName, userEmail }
+}
+
 /**
- * POST /api/nutri/subscription/confirm-cancel
- * Cancela definitivamente a assinatura (após retenção ou direto)
- * Cancela no banco E no Mercado Pago automaticamente
+ * POST /api/[area]/subscription/confirm-cancel
+ * Cancela a assinatura no banco e no Mercado Pago; reembolso automático se dentro dos 7 dias.
+ * Áreas: wellness, nutri, coach, nutra (fluxo unificado de pagamentos).
  */
-export async function POST(request: NextRequest) {
+export async function POST(
+  request: NextRequest,
+  { params }: { params: Promise<{ area: string }> }
+) {
   try {
-    // Verificar autenticação
-    const authResult = await requireApiAuth(request, ['nutri', 'admin'])
+    const { area } = await params
+    const normalizedArea = area as Area
+
+    if (!VALID_AREAS.includes(normalizedArea)) {
+      return NextResponse.json(
+        { error: 'Área inválida. Use: wellness, nutri, coach ou nutra' },
+        { status: 400 }
+      )
+    }
+
+    const authResult = await requireApiAuth(request, [normalizedArea, 'admin'])
     if (authResult instanceof NextResponse) {
       return authResult
     }
@@ -28,7 +72,6 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Buscar tentativa de cancelamento
     const { data: cancelAttempt, error: fetchError } = await supabaseAdmin
       .from('cancel_attempts')
       .select('*, subscriptions(*)')
@@ -43,20 +86,17 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Buscar subscription separadamente se necessário
     let subscription: any
     if (cancelAttempt.subscriptions && typeof cancelAttempt.subscriptions === 'object') {
-      subscription = Array.isArray(cancelAttempt.subscriptions) 
-        ? cancelAttempt.subscriptions[0] 
+      subscription = Array.isArray(cancelAttempt.subscriptions)
+        ? cancelAttempt.subscriptions[0]
         : cancelAttempt.subscriptions
     } else {
-      // Se não veio no join, buscar separadamente
       const { data: subData, error: subError } = await supabaseAdmin
         .from('subscriptions')
         .select('*')
         .eq('id', cancelAttempt.subscription_id)
         .single()
-      
       if (subError || !subData) {
         return NextResponse.json(
           { error: 'Assinatura não encontrada' },
@@ -66,7 +106,13 @@ export async function POST(request: NextRequest) {
       subscription = subData
     }
 
-    // Verificar se já está cancelada
+    if (subscription.area !== normalizedArea) {
+      return NextResponse.json(
+        { error: 'Assinatura não pertence a esta área' },
+        { status: 400 }
+      )
+    }
+
     if (subscription.status === 'canceled') {
       return NextResponse.json({
         success: true,
@@ -75,16 +121,14 @@ export async function POST(request: NextRequest) {
       })
     }
 
-    // Calcular dias desde a compra
     const dataInicio = new Date(subscription.current_period_start || subscription.created_at)
     const hoje = new Date()
     const diasDesdeCompra = Math.floor((hoje.getTime() - dataInicio.getTime()) / (1000 * 60 * 60 * 24))
     const dentroGarantia = diasDesdeCompra <= 7
 
-    // Validar reembolso
     if (requestRefund && !dentroGarantia) {
       return NextResponse.json(
-        { 
+        {
           error: 'Prazo de garantia de 7 dias expirado',
           daysSincePurchase: diasDesdeCompra,
           withinGuarantee: false
@@ -93,27 +137,26 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Tentar cancelar no Mercado Pago quando for assinatura MP (sempre notificar o MP para evitar cobranças futuras)
     let mercadoPagoCanceled = false
     let mercadoPagoError: string | null = null
 
     const rawSubscriptionId = (subscription as any).gateway_subscription_id ||
-                              (subscription as any).stripe_subscription_id
-    const isMercadoPago = (subscription as any).gateway === 'mercadopago' ||
-                         (typeof rawSubscriptionId === 'string' && (rawSubscriptionId.startsWith('mp_') || rawSubscriptionId.startsWith('mp_sub_')))
+      (subscription as any).stripe_subscription_id
+    const isMercadoPago =
+      (subscription as any).gateway === 'mercadopago' ||
+      (typeof rawSubscriptionId === 'string' &&
+        (rawSubscriptionId.startsWith('mp_') || rawSubscriptionId.startsWith('mp_sub_')))
     const preapprovalId = getMercadoPagoPreapprovalIdForCancel(rawSubscriptionId)
 
     if (isMercadoPago && preapprovalId) {
-      console.log(`🔄 Tentando cancelar no Mercado Pago (preapproval_id): ${preapprovalId}`)
+      console.log(`🔄 [${normalizedArea}] Tentando cancelar no Mercado Pago (preapproval_id): ${preapprovalId}`)
       const cancelResult = await cancelMercadoPagoSubscription(preapprovalId)
-
       if (cancelResult.success) {
         mercadoPagoCanceled = true
         console.log('✅ Cancelado no Mercado Pago com sucesso')
       } else {
         mercadoPagoError = cancelResult.error || 'Erro desconhecido'
         console.error('⚠️ Erro ao cancelar no Mercado Pago:', mercadoPagoError)
-        // Continuar mesmo assim - cancelar no banco
       }
     } else if (rawSubscriptionId && !isMercadoPago) {
       console.log('ℹ️ Assinatura Stripe - cancelamento será processado via webhook')
@@ -121,7 +164,6 @@ export async function POST(request: NextRequest) {
       console.log('ℹ️ Nenhum ID do gateway encontrado, cancelando apenas no banco')
     }
 
-    // Cancelar no banco de dados (sempre, mesmo se Mercado Pago falhar)
     const { error: updateError } = await supabaseAdmin
       .from('subscriptions')
       .update({
@@ -139,7 +181,6 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Atualizar cancel_attempt
     await supabaseAdmin
       .from('cancel_attempts')
       .update({
@@ -150,13 +191,11 @@ export async function POST(request: NextRequest) {
       })
       .eq('id', cancelAttemptId)
 
-    // Se solicitou reembolso e está dentro da garantia: tentar reembolso automático no MP
     let refundRequested = false
     let refundSuccess = false
     let refundError: string | null = null
 
     if (requestRefund && dentroGarantia) {
-      // Buscar último pagamento da assinatura para reembolsar no Mercado Pago
       const { data: lastPayment } = await supabaseAdmin
         .from('payments')
         .select('id, stripe_payment_intent_id, amount, status')
@@ -177,11 +216,14 @@ export async function POST(request: NextRequest) {
         )
         refundSuccess = refundResult.success
         if (!refundResult.success) refundError = refundResult.error || null
-        console.log(refundResult.success ? '✅ Reembolso solicitado no MP com sucesso' : '⚠️ Reembolso no MP falhou:', { mpPaymentId, error: refundError })
+        console.log(
+          refundResult.success ? '✅ Reembolso solicitado no MP com sucesso' : '⚠️ Reembolso no MP falhou:',
+          { mpPaymentId, error: refundError }
+        )
       }
 
-      // Registrar e notificar admin (para auditoria, mesmo quando reembolso automático for feito)
       console.log('📝 Solicitação de reembolso:', {
+        area: normalizedArea,
         subscriptionId: subscription.id,
         userId: user.id,
         amount: subscription.amount,
@@ -192,33 +234,17 @@ export async function POST(request: NextRequest) {
         refundSuccess
       })
 
-      // Buscar dados do usuário para notificação
-      let userEmail = user.email || ''
-      let userName = user.user_metadata?.full_name || user.user_metadata?.name || 'Usuário'
+      const { userName, userEmail } = await getUserProfileForArea(user.id, normalizedArea)
+      const finalEmail = userEmail || user.email || ''
+      const finalName = userName !== 'Usuário' ? userName : user.user_metadata?.full_name || user.user_metadata?.name || 'Usuário'
 
-      try {
-        const { data: profile } = await supabaseAdmin
-          .from('nutri_profiles')
-          .select('nome, email')
-          .eq('user_id', user.id)
-          .single()
-
-        if (profile) {
-          userName = profile.nome || userName
-          userEmail = profile.email || userEmail
-        }
-      } catch (error) {
-        console.warn('[Refund Notification] Erro ao buscar perfil do usuário:', error)
-      }
-
-      // Enviar notificação por email e WhatsApp
       try {
         await notifyAdminRefundRequest({
           subscriptionId: subscription.id,
           userId: user.id,
-          userEmail,
-          userName,
-          area: 'nutri',
+          userEmail: finalEmail,
+          userName: finalName,
+          area: normalizedArea,
           amount: subscription.amount || 0,
           reason: reason || cancelAttempt.cancel_reason || 'other',
           daysSincePurchase: diasDesdeCompra,
@@ -226,25 +252,23 @@ export async function POST(request: NextRequest) {
         })
       } catch (notificationError) {
         console.error('[Refund Notification] Erro ao enviar notificação:', notificationError)
-        // Não falhar o cancelamento se a notificação falhar
       }
     }
 
-    // Mensagem de sucesso
     let message = 'Assinatura cancelada com sucesso.'
-
     if (requestRefund && dentroGarantia) {
       if (refundSuccess) {
         message = 'Assinatura cancelada. Reembolso foi solicitado no cartão e deve aparecer em alguns dias úteis.'
       } else if (refundRequested && refundError) {
-        message = 'Assinatura cancelada. Não foi possível processar o reembolso automaticamente; nossa equipe irá processar em até 10 dias úteis.'
+        message =
+          'Assinatura cancelada. Não foi possível processar o reembolso automaticamente; nossa equipe irá processar em até 10 dias úteis.'
       } else {
         message = 'Assinatura cancelada. Reembolso será processado em até 10 dias úteis.'
       }
     }
-
     if (mercadoPagoError) {
-      message += ' (Houve um problema ao cancelar no Mercado Pago, mas a assinatura foi cancelada no sistema. Entre em contato com o suporte se necessário.)'
+      message +=
+        ' (Houve um problema ao cancelar no Mercado Pago, mas a assinatura foi cancelada no sistema. Entre em contato com o suporte se necessário.)'
     }
 
     return NextResponse.json({
@@ -266,4 +290,3 @@ export async function POST(request: NextRequest) {
     )
   }
 }
-

@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import YladaSidebar from './YladaSidebar'
+import { useAuth } from '@/hooks/useAuth'
 
 const YLADA_LOGO = '/images/logo/ylada/horizontal/azul-claro/ylada-horizontal-azul-claro-30.png'
 
@@ -15,6 +16,9 @@ interface YladaAreaShellProps {
 
 export default function YladaAreaShell({ areaCodigo, areaLabel, children }: YladaAreaShellProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const { user, userProfile } = useAuth()
+  const userName = userProfile?.nome_completo || user?.user_metadata?.full_name || user?.user_metadata?.name || user?.email?.split('@')[0] || 'Usuário'
+
   return (
     <div className="min-h-screen bg-gray-50 flex">
       <YladaSidebar
@@ -48,9 +52,17 @@ export default function YladaAreaShell({ areaCodigo, areaLabel, children }: Ylad
               <span className="text-gray-500 text-sm font-medium hidden sm:inline">· {areaLabel}</span>
             </Link>
           </div>
-          <Link href="/pt" className="text-xs sm:text-sm text-gray-500 hover:text-gray-700 shrink-0">
-            Voltar ao YLADA
-          </Link>
+          <div className="flex items-center gap-3 shrink-0">
+            <Link href="/pt/perfil-empresarial" className="hidden sm:flex items-center gap-2 text-gray-600 hover:text-gray-900">
+              <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-semibold text-sm">
+                {userName.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2) || 'U'}
+              </div>
+              <span className="text-sm font-medium truncate max-w-[120px]">{userName.split(' ')[0]}</span>
+            </Link>
+            <Link href="/pt" className="text-xs sm:text-sm text-gray-500 hover:text-gray-700">
+              Voltar ao YLADA
+            </Link>
+          </div>
         </header>
         <main className="flex-1 p-4 lg:p-6">{children}</main>
       </div>

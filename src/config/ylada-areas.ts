@@ -79,6 +79,7 @@ export const YLADA_MENU_GROUPS = [
     label: 'CONTA',
     items: [
       { key: 'perfil-empresarial', label: 'Perfil', path: 'perfil-empresarial', icon: '👤' },
+      { key: 'assinatura', label: 'Assinatura', path: 'configuracao', icon: '📋', hash: 'assinatura' as const },
       { key: 'configuracao', label: 'Configurações', path: 'configuracao', icon: '⚙️' },
     ],
   },

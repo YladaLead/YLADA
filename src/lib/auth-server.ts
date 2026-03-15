@@ -280,6 +280,34 @@ export async function validateProtectedAccess(
       redirect(area === 'ylada' ? '/pt/login' : `/pt/${area}/login`)
     }
 
+    // 4b. Nutri e Coach: exigir perfil YLADA completo (nome+whatsapp+profile_type+profession).
+    // Wellness NÃO redireciona — mantém fluxo próprio.
+    if ((area === 'nutri' || area === 'coach') && !canBypassProfile && supabaseAdmin) {
+      try {
+        const { data: ynp } = await supabaseAdmin
+          .from('ylada_noel_profile')
+          .select('area_specific, profile_type, profession')
+          .eq('user_id', user.id)
+          .eq('segment', 'ylada')
+          .maybeSingle()
+        const as = (ynp?.area_specific || {}) as Record<string, unknown>
+        const temNome = as?.nome && String(as.nome).trim().length >= 2
+        const temWhatsapp = as?.whatsapp && String(as.whatsapp).replace(/\D/g, '').length >= 10
+        const temPerfilEmpresarial = ynp?.profile_type && ynp?.profession
+        if (!temNome || !temWhatsapp) {
+          console.log(`ℹ️ ProtectedLayout [${area}]: Perfil YLADA incompleto (nome/whatsapp), redirecionando para onboarding`)
+          redirect('/pt/onboarding')
+        }
+        if (!temPerfilEmpresarial) {
+          console.log(`ℹ️ ProtectedLayout [${area}]: Perfil YLADA sem profile_type/profession, redirecionando para perfil empresarial`)
+          redirect('/pt/perfil-empresarial')
+        }
+      } catch (e) {
+        console.warn(`⚠️ ProtectedLayout [${area}]: Erro ao verificar ylada_noel_profile:`, e)
+        redirect('/pt/onboarding')
+      }
+    }
+
     // 5. Verificar assinatura (se necessário)
     let hasSubscription = false
     let canBypass = false

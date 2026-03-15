@@ -226,7 +226,7 @@ function PrecosPageContent() {
                 ))}
               </ul>
               <Link
-                href="/pt/escolha-perfil"
+                href="/pt/cadastro"
                 className="block w-full text-center py-3.5 bg-sky-600 hover:bg-sky-700 text-white font-semibold rounded-xl transition-colors"
               >
                 Começar grátis

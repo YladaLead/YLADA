@@ -51,8 +51,9 @@ export default function AutoRedirect() {
     const accessRule = getAccessRule(pathname)
     const isPublic = accessRule.isPublic || isPublicPage(pathname)
     
-    // Páginas de login
-    const isLoginPage = pathname.includes('/login')
+    // Páginas de login e cadastro
+    const isLoginPage = pathname.includes('/login') || pathname === '/pt/cadastro'
+    const isYladaEntry = pathname === '/pt/login' || pathname?.endsWith('/cadastro')
     
     // 🚨 CORREÇÃO CRÍTICA: NÃO fazer nada em páginas protegidas
     // O server-side já cuida de redirecionamento e validação
@@ -68,23 +69,48 @@ export default function AutoRedirect() {
       // Deixar o server-side fazer a validação primeiro para evitar loops
       // O AutoRedirect só deve redirecionar após um delay para garantir que o server validou
       if (isLoginPage && !hasRedirectedRef.current) {
+        // 🚨 Todos entram pela YLADA: em /pt/login ou /pt/cadastro, sempre redirecionar para YLADA
+        if (isYladaEntry) {
+          const checkYladaProfile = async () => {
+            await new Promise(resolve => setTimeout(resolve, 500))
+            if (hasRedirectedRef.current) return
+            try {
+              const res = await fetch('/api/ylada/profile?segment=ylada', { credentials: 'include', signal: AbortSignal.timeout(2000) })
+              if (hasRedirectedRef.current) return
+              let redirectPath = '/pt/onboarding'
+              if (res.ok) {
+                const data = await res.json()
+                const p = data?.data?.profile
+                const as = (p?.area_specific || {}) as Record<string, unknown>
+                const temNome = as?.nome && String(as.nome).trim().length >= 2
+                const temWhatsapp = as?.whatsapp && String(as.whatsapp).replace(/\D/g, '').length >= 10
+                const temPerfilEmpresarial = p?.profile_type && p?.profession
+                if (temNome && temWhatsapp && temPerfilEmpresarial) redirectPath = '/pt/home'
+                else if (temNome && temWhatsapp) redirectPath = '/pt/perfil-empresarial'
+              }
+              console.log('✅ AutoRedirect (YLADA): redirecionando para', redirectPath)
+              hasRedirectedRef.current = true
+              router.replace(redirectPath)
+            } catch {
+              if (hasRedirectedRef.current) return
+              hasRedirectedRef.current = true
+              router.replace('/pt/onboarding')
+            }
+          }
+          checkYladaProfile()
+          return
+        }
+
         const perfil = userProfile?.perfil || getAreaFromPath(pathname) || 'wellness'
         
-        // 🚨 NOVA LÓGICA: Aguardar um pouco antes de redirecionar para dar tempo do server validar
-        // Isso evita race condition entre client e server
+        // Para outras páginas de login (wellness, nutri, etc.), manter lógica anterior
         const checkSubscription = async () => {
-          // Aguardar 1 segundo para dar tempo do server validar a sessão
           await new Promise(resolve => setTimeout(resolve, 1000))
-          
-          // Se já redirecionou ou não está mais na página de login, não fazer nada
-          if (hasRedirectedRef.current || !pathname.includes('/login')) {
-            return
-          }
+          if (hasRedirectedRef.current || !pathname.includes('/login')) return
           
           const timeoutId = setTimeout(() => {
-            console.log('⏱️ AutoRedirect: Timeout na verificação de assinatura, permitindo acesso à página de login')
             hasRedirectedRef.current = true
-          }, 2000) // Timeout total de 2s após o delay inicial
+          }, 2000)
           
           try {
             const area = perfil === 'nutri' ? 'nutri' : 
@@ -93,15 +119,11 @@ export default function AutoRedirect() {
             
             const response = await fetch(`/api/${area}/subscription/check`, {
               credentials: 'include',
-              signal: AbortSignal.timeout(1500) // Timeout de 1.5s na requisição
+              signal: AbortSignal.timeout(1500)
             })
             
             clearTimeout(timeoutId)
-            
-            // Se já redirecionou ou não está mais na página de login, não fazer nada
-            if (hasRedirectedRef.current || !pathname.includes('/login')) {
-              return
-            }
+            if (hasRedirectedRef.current || !pathname.includes('/login')) return
             
             if (response.ok) {
               const data = await response.json()
@@ -109,35 +131,20 @@ export default function AutoRedirect() {
               
               if (hasSubscription) {
                 let redirectPath = getHomePath(perfil)
-                
-                if (perfil === 'nutri' && userProfile) {
-                  if (!userProfile.diagnostico_completo) {
-                    redirectPath = '/pt/nutri/onboarding'
-                    console.log('ℹ️ AutoRedirect: Usuário Nutri sem diagnóstico, redirecionando para onboarding')
-                  } else {
-                    redirectPath = '/pt/nutri/home'
-                    console.log('✅ AutoRedirect: Usuário Nutri com diagnóstico, redirecionando para home')
-                  }
+                if (perfil === 'nutri' && userProfile && !userProfile.diagnostico_completo) {
+                  redirectPath = '/pt/nutri/onboarding'
                 }
-                
-                console.log('✅ AutoRedirect (UX): Usuário logado com assinatura em página de login, redirecionando para:', redirectPath)
+                console.log('✅ AutoRedirect (UX): redirecionando para:', redirectPath)
                 hasRedirectedRef.current = true
                 router.replace(redirectPath)
               } else {
-                console.log('ℹ️ AutoRedirect: Usuário logado sem assinatura, permitindo acesso à página de login')
                 hasRedirectedRef.current = true
               }
             } else {
-              console.log('ℹ️ AutoRedirect: Erro ao verificar assinatura, permitindo acesso à página de login')
               hasRedirectedRef.current = true
             }
-          } catch (error: any) {
+          } catch {
             clearTimeout(timeoutId)
-            if (error.name === 'TimeoutError' || error.name === 'AbortError') {
-              console.log('⏱️ AutoRedirect: Timeout na verificação de assinatura, permitindo acesso à página de login')
-            } else {
-              console.log('ℹ️ AutoRedirect: Erro ao verificar assinatura, permitindo acesso à página de login:', error.message)
-            }
             hasRedirectedRef.current = true
           }
         }

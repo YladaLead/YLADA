@@ -14,7 +14,8 @@ Cada vídeo mostra uma área específica. Ao entrar com o e-mail daquela área, 
 |------|-----------------|------|--------|------------------|
 | **Médico** | `demo.med@ylada.app` | `Demo@2025!` | med | `/pt/med/home` |
 | **Psicólogo** | `demo.psi@ylada.app` | `Demo@2025!` | psi | `/pt/psi/home` |
-| **Vendedor (Nutra)** | `demo.vendedor@ylada.app` | `Demo@2025!` | nutra | `/pt/nutra/home` |
+| **Vendas em gerais** | `demo.vendedor@ylada.app` | `Demo@2025!` | seller | `/pt/seller/home` |
+| **Nutra** | `demo.nutra@ylada.app` | `Demo@2025!` | nutra | `/pt/nutra/home` |
 | **Nutricionista** | `demo.nutri@ylada.app` | `Demo@2025!` | nutri | `/pt/nutri/home` |
 | **Coach** | `demo.coach@ylada.app` | `Demo@2025!` | coach | `/pt/coach/home` |
 
@@ -27,7 +28,7 @@ Um único e-mail (ex: `demo@ylada.app`) com vários perfis em `ylada_noel_profil
 Se quiser simplificar, use apenas **3 contas**:
 1. **Profissional liberal (medicina)** → `demo.med@ylada.app`
 2. **Profissional liberal (psicologia)** → `demo.psi@ylada.app`
-3. **Vendedor** → `demo.vendedor@ylada.app`
+3. **Vendas em gerais** → `demo.vendedor@ylada.app` | **Nutra** → `demo.nutra@ylada.app`
 
 ---
 
@@ -68,8 +69,17 @@ Para cada e-mail demo:
 - **modelo_pagamento:** particular
 - **area_specific:** temas (ansiedade, sono, autoconhecimento)
 
-### Vendedor Nutra
-- **segment:** nutra (ou ylada com profession vendedor_suplementos)
+### Vendas em gerais (seller)
+- **segment:** seller
+- **profile_type:** vendas
+- **profession:** vendedor
+- **dor_principal:** nao_converte
+- **fase_negocio:** iniciante
+- **modelo_pagamento:** comissao
+- **area_specific:** canal_principal_vendas (whatsapp), temas (vendas_gerais)
+
+### Nutra
+- **segment:** nutra
 - **profile_type:** vendas
 - **profession:** vendedor_suplementos
 - **dor_principal:** nao_converte

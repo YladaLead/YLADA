@@ -2,8 +2,8 @@ import LoginForm from '@/components/auth/LoginForm'
 
 export default function NutraLoginPage() {
   return (
-    <LoginForm 
-      perfil="nutra" 
+    <LoginForm
+      perfil="nutra"
       redirectPath="/pt/nutra/home"
       logoColor="azul-claro"
     />

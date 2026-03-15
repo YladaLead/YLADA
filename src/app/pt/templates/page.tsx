@@ -279,7 +279,7 @@ export default function TemplatesPage() {
               {t.templates.cta}
             </Link>
             <Link
-              href="/pt/escolha-perfil"
+              href="/pt/cadastro"
               className="bg-gray-100 text-gray-700 px-8 py-4 rounded-xl font-semibold hover:bg-gray-200 transition-colors"
             >
               Escolher por Profissão

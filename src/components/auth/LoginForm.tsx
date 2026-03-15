@@ -33,7 +33,9 @@ export default function LoginForm({
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
   const [isSignUp, setIsSignUp] = useState(initialSignUpMode)
   const [name, setName] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [hadTrialEmail, setHadTrialEmail] = useState(false)
   const [checkingTrialEmail, setCheckingTrialEmail] = useState(false)
 
@@ -182,6 +184,13 @@ export default function LoginForm({
           return
         }
 
+        // Validação: Confirmar senha
+        if (password !== confirmPassword) {
+          setError('As senhas não coincidem. Digite a mesma senha nos dois campos.')
+          setLoading(false)
+          return
+        }
+
         // CADASTRO: Verificar se email já existe
         if (checkData.exists) {
           if (checkData.hasProfile && checkData.perfil) {
@@ -216,9 +225,12 @@ export default function LoginForm({
         })
 
         if (signUpError) {
-          // Se erro de email já existe, informar melhor
+          // Se erro de email já existe, trocar para modo login para permitir entrar
           if (signUpError.message?.includes('already registered') || signUpError.message?.includes('already exists')) {
-            setError('Este email já está cadastrado. Faça login ou use outro email.')
+            setError('Este email já está cadastrado. Faça login abaixo.')
+            setIsSignUp(false)
+            setPassword('')
+            setConfirmPassword('')
           } else {
             throw signUpError
           }
@@ -235,6 +247,7 @@ export default function LoginForm({
             // Limpar formulário
             setEmail('')
             setPassword('')
+            setConfirmPassword('')
             setName('')
             return
           } else {
@@ -319,8 +332,8 @@ export default function LoginForm({
             // Admin/Suporte pode fazer login em qualquer área
             console.log('✅ Admin/Suporte - permitindo login em qualquer área')
             // Continuar com login
-          } else if (perfil === 'ylada' && !['wellness', 'coach-bem-estar'].includes(checkData.perfil)) {
-            // Login em /pt/login (ylada) aceita todas as áreas exceto Wellness (Herbalife)
+          } else if (perfil === 'ylada') {
+            // Login em /pt/login (ylada): aceita todos os perfis — todos entram pela plataforma YLADA
             console.log('✅ Login YLADA (matriz) - aceita perfil:', checkData.perfil)
             // Continuar com login
           } else if (checkData.perfil !== perfil) {
@@ -437,35 +450,32 @@ export default function LoginForm({
         let baseRedirectPath = redirectPath
         let temDiagnostico = false
 
-        // Login em /pt/login (ylada): redirecionar para área do usuário
+        // Login em /pt/login (ylada): todos vão para YLADA (matriz). Priorizar onboarding se perfil não preenchido.
+        // Se tem nome+whatsapp mas falta profile_type/profession → perfil-empresarial (ex.: usuárias Nutri migradas).
         if (perfil === 'ylada') {
-          const userPerfil = profileCheck?.perfil ?? checkData.perfil
-          const areaRedirects: Record<string, string> = {
-            med: '/pt/med/home',
-            psi: '/pt/psi/home',
-            nutra: '/pt/nutra/home',
-            estetica: '/pt/estetica/home',
-            perfumaria: '/pt/perfumaria/home',
-            coach: '/pt/coach/home',
-            nutri: '/pt/nutri/home',
-            odonto: '/pt/odonto/home',
-            fitness: '/pt/fitness/home',
-            seller: '/pt/seller/home',
-            psicanalise: '/pt/psicanalise/home',
-            ylada: '/pt/home'
-          }
-          if (userPerfil && areaRedirects[userPerfil]) {
-            baseRedirectPath = areaRedirects[userPerfil]
-            if (userPerfil === 'nutri') {
-              const { data: nutriProfile } = await supabase
-                .from('user_profiles')
-                .select('diagnostico_completo')
-                .eq('user_id', session.user.id)
-                .maybeSingle()
-              temDiagnostico = !!nutriProfile?.diagnostico_completo
-              if (!temDiagnostico) baseRedirectPath = '/pt/nutri/onboarding'
+          baseRedirectPath = '/pt/onboarding'
+          try {
+            const { data: yladaProfile } = await supabase
+              .from('ylada_noel_profile')
+              .select('area_specific, profile_type, profession')
+              .eq('user_id', session.user.id)
+              .eq('segment', 'ylada')
+              .maybeSingle()
+            const as = (yladaProfile?.area_specific || {}) as Record<string, unknown>
+            const temNome = as?.nome && String(as.nome).trim().length >= 2
+            const temWhatsapp = as?.whatsapp && String(as.whatsapp).replace(/\D/g, '').length >= 10
+            const temPerfilEmpresarial = yladaProfile?.profile_type && yladaProfile?.profession
+            if (!temNome || !temWhatsapp) {
+              console.log('🔄 Login YLADA: perfil incompleto (nome/whatsapp), redirecionando para onboarding')
+            } else if (!temPerfilEmpresarial) {
+              baseRedirectPath = '/pt/perfil-empresarial'
+              console.log('🔄 Login YLADA: nome+whatsapp ok, falta perfil empresarial, redirecionando para preencher')
+            } else {
+              baseRedirectPath = '/pt/home'
+              console.log('🔄 Login YLADA: perfil completo, redirecionando para home')
             }
-            console.log('🔄 Login YLADA: redirecionando para', baseRedirectPath, '(perfil:', userPerfil, ')')
+          } catch (e) {
+            console.warn('⚠️ Erro ao verificar perfil YLADA:', e)
           }
         } else if (perfil === 'nutri') {
           try {
@@ -699,6 +709,47 @@ export default function LoginForm({
             </div>
           </div>
 
+          {isSignUp && (
+            <div>
+              <label htmlFor="confirmPassword" className="block text-sm font-semibold text-gray-700 mb-2">
+                Confirmar senha
+              </label>
+              <div className="relative">
+                <input
+                  id="confirmPassword"
+                  type={showConfirmPassword ? "text" : "password"}
+                  value={confirmPassword}
+                  onChange={handleInputChange(setConfirmPassword)}
+                  required={isSignUp}
+                  minLength={6}
+                  className="w-full px-4 py-3 pr-10 border border-gray-300 rounded-lg transition-all focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-gray-900 placeholder-gray-400"
+                  placeholder="Repita a senha"
+                />
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    setShowConfirmPassword(!showConfirmPassword)
+                  }}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none z-10 cursor-pointer"
+                  aria-label={showConfirmPassword ? "Ocultar senha" : "Mostrar senha"}
+                >
+                  {showConfirmPassword ? (
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                    </svg>
+                  ) : (
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                  )}
+                </button>
+              </div>
+            </div>
+          )}
+
           {successMessage && (
             <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg text-sm">
               {successMessage}
@@ -747,6 +798,7 @@ export default function LoginForm({
             onClick={() => {
               setIsSignUp(!isSignUp)
               setError(null)
+              if (isSignUp) setConfirmPassword('')
             }}
             className="text-sm text-gray-600 hover:text-gray-900 transition-colors duration-200 font-medium"
           >

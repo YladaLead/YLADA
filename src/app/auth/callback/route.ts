@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
   // Se houver erro, redirecionar para login com mensagem
   if (error) {
     console.error('❌ Erro no callback do Supabase:', error, errorDescription)
-    const loginUrl = new URL('/pt/wellness/login', request.url)
+    const loginUrl = new URL('/pt/login', request.url)
     loginUrl.searchParams.set('error', error)
     if (errorDescription) {
       loginUrl.searchParams.set('error_description', errorDescription)
@@ -31,7 +31,7 @@ export async function GET(request: NextRequest) {
   // Se não houver código/token, redirecionar para login
   if (!code) {
     console.warn('⚠️ Callback sem código/token, redirecionando para login')
-    return NextResponse.redirect(new URL('/pt/wellness/login', request.url))
+    return NextResponse.redirect(new URL('/pt/login', request.url))
   }
 
   try {
@@ -64,7 +64,7 @@ export async function GET(request: NextRequest) {
 
     if (exchangeError || !data.session) {
       console.error('❌ Erro ao trocar código por sessão:', exchangeError)
-      const loginUrl = new URL('/pt/wellness/login', request.url)
+      const loginUrl = new URL('/pt/login', request.url)
       loginUrl.searchParams.set('error', 'auth_failed')
       return NextResponse.redirect(loginUrl)
     }
@@ -74,50 +74,25 @@ export async function GET(request: NextRequest) {
       email: data.session.user.email,
     })
 
-    // Verificar se o usuário tem perfil completo
-    // Se não tiver, redirecionar para completar cadastro
-    const { data: profile } = await supabaseAdmin
-      .from('user_profiles')
-      .select('nome_completo, whatsapp')
+    // Todos entram pela plataforma YLADA. Priorizar onboarding se perfil não preenchido.
+    // Se tem nome+whatsapp mas falta profile_type/profession → perfil-empresarial (ex.: Nutri/Coach migrados).
+    let redirectPath = '/pt/onboarding'
+
+    const { data: yladaProfile } = await supabaseAdmin
+      .from('ylada_noel_profile')
+      .select('area_specific, profile_type, profession')
       .eq('user_id', data.session.user.id)
+      .eq('segment', 'ylada')
       .maybeSingle()
 
-    // Determinar para onde redirecionar
-    // Verificar perfil do usuário para redirecionar corretamente
-    let redirectPath = '/pt/wellness/home' // Padrão Wellness
-
-    // Verificar perfil do usuário
-    const { data: userProfile } = await supabaseAdmin
-      .from('user_profiles')
-      .select('perfil')
-      .eq('user_id', data.session.user.id)
-      .maybeSingle()
-
-    // Se tiver perfil, redirecionar para área correta
-    if (userProfile?.perfil) {
-      if (userProfile.perfil === 'nutri') {
-        // Verificar se tem diagnóstico completo
-        const { data: nutriProfile } = await supabaseAdmin
-          .from('user_profiles')
-          .select('diagnostico_completo')
-          .eq('user_id', data.session.user.id)
-          .maybeSingle()
-        
-        // Se não tem diagnóstico, redirecionar para onboarding
-        if (!nutriProfile?.diagnostico_completo) {
-          redirectPath = '/pt/nutri/onboarding'
-        } else {
-          redirectPath = '/pt/nutri/home'
-        }
-      } else if (userProfile.perfil === 'coach') {
-        redirectPath = '/pt/coach/home'
-      } else if (userProfile.perfil === 'nutra') {
-        redirectPath = '/pt/nutra/home'
-      } else if (userProfile.perfil === 'coach-bem-estar') {
-        redirectPath = '/pt/coach-bem-estar/home'
-      } else {
-        redirectPath = '/pt/wellness/home'
-      }
+    const as = (yladaProfile?.area_specific || {}) as Record<string, unknown>
+    const temNome = as?.nome && String(as.nome).trim().length >= 2
+    const temWhatsapp = as?.whatsapp && String(as.whatsapp).replace(/\D/g, '').length >= 10
+    const temPerfilEmpresarial = yladaProfile?.profile_type && yladaProfile?.profession
+    if (temNome && temWhatsapp && temPerfilEmpresarial) {
+      redirectPath = '/pt/home'
+    } else if (temNome && temWhatsapp) {
+      redirectPath = '/pt/perfil-empresarial'
     }
 
     // Se tem 'next' na URL, usar ele (tem prioridade)
@@ -161,7 +136,7 @@ export async function GET(request: NextRequest) {
     return response
   } catch (error: any) {
     console.error('❌ Erro no callback:', error)
-    const loginUrl = new URL('/pt/wellness/login', request.url)
+    const loginUrl = new URL('/pt/login', request.url)
     loginUrl.searchParams.set('error', 'callback_error')
     return NextResponse.redirect(loginUrl)
   }

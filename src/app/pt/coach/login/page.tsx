@@ -1,6 +1,10 @@
-import LoginForm from '@/components/auth/LoginForm'
+import { redirect } from 'next/navigation'
 
+/**
+ * Coach: redireciona para YLADA (/pt/login).
+ * O sistema agora resolve pelo perfil; todos Nutri e Coach entram pela plataforma YLADA.
+ */
 export default function CoachLoginPage() {
-  return <LoginForm perfil="coach" redirectPath="/pt/coach/home" />
+  redirect('/pt/login')
 }
 

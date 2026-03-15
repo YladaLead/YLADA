@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 export default function ComecarPage() {
   const router = useRouter()
   useEffect(() => {
-    router.replace('/pt/escolha-perfil')
+    router.replace('/pt/cadastro')
   }, [router])
   return (
     <div className="min-h-screen flex items-center justify-center">

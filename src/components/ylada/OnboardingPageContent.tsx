@@ -126,11 +126,33 @@ export function OnboardingPageContent({
         } catch {
           // ignore
         }
+      } else if (AREA_SEGMENT_YLADA.includes(areaCodigo)) {
+        try {
+          const res = await fetch(`/api/ylada/profile?segment=${encodeURIComponent(areaCodigo)}`, { credentials: 'include' })
+          if (res.ok) {
+            const data = await res.json()
+            const p = data?.data?.profile
+            const as = (p?.area_specific || {}) as Record<string, unknown>
+            const temNome = as?.nome && String(as.nome).trim().length >= 2
+            const temWhatsapp = as?.whatsapp && String(as.whatsapp).replace(/\D/g, '').length >= 10
+            const temPerfilEmpresarial = p?.profile_type && p?.profession
+            if (temNome && temWhatsapp && temPerfilEmpresarial) {
+              router.replace(redirectIfDone)
+              return
+            }
+            if (temNome && temWhatsapp) {
+              router.replace('/pt/perfil-empresarial')
+              return
+            }
+          }
+        } catch {
+          // ignore
+        }
       }
       setChecking(false)
     }
     check()
-  }, [user, loading, router, redirectIfDone, isNutri])
+  }, [user, loading, router, redirectIfDone, isNutri, areaCodigo])
 
   const telefoneLimpo = telefone.replace(/\D/g, '')
   const nomePreenchido = nomeCompleto.trim().length >= 2
@@ -278,6 +300,11 @@ export function OnboardingPageContent({
           <div className="border-t border-gray-200 my-8" />
 
           <div className="mb-8">
+            <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 mb-6">
+              <p className="text-blue-800 text-sm leading-relaxed">
+                <strong>Por que o perfil é importante?</strong> É através dele que definimos suas áreas de atuação, os fluxos da biblioteca e as orientações personalizadas do Noel. Sem essas informações, não conseguimos entregar o melhor para você — por isso pedimos que preencha no primeiro acesso.
+              </p>
+            </div>
             <p className="text-center text-gray-700 text-lg leading-relaxed mb-2">
               Antes de começar, precisamos de duas informações rápidas.
             </p>

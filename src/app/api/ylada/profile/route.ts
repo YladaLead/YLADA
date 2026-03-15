@@ -199,6 +199,16 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ success: false, error: error.message }, { status: 500 })
     }
 
+    // Sincronizar nome para user_profiles para exibir na plataforma (header, etc.)
+    const areaSpec = parsed.row.area_specific as Record<string, unknown> | null | undefined
+    const nome = areaSpec?.nome && String(areaSpec.nome).trim()
+    if (nome && nome.length >= 2) {
+      await supabaseAdmin
+        .from('user_profiles')
+        .update({ nome_completo: nome, updated_at: new Date().toISOString() })
+        .eq('user_id', user.id)
+    }
+
     const resumo = buildProfileResumo(data as YladaNoelProfileRow)
     return NextResponse.json({ success: true, data: { profile: data, resumo } })
   } catch (e) {

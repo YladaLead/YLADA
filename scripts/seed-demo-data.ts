@@ -44,6 +44,18 @@ const DEMO_ACCOUNTS = {
       estado: 'RJ',
       is_demo: true
     }
+  },
+  nutra: {
+    email: 'demo.nutra@ylada.com',
+    password: 'DemoYlada2024!',
+    profile: {
+      perfil: 'nutra',
+      nome_completo: 'Demo Nutra YLADA',
+      telefone: '(11) 99999-9999',
+      cidade: 'São Paulo',
+      estado: 'SP',
+      is_demo: true
+    }
   }
 }
 
@@ -766,6 +778,16 @@ async function seedDemoData() {
         
         await createSampleQuizzes(coachUser.id, 'coach')
       }
+    }
+
+    console.log('\n=== CRIANDO CONTA DEMO NUTRA ===')
+    const nutraUser = await createDemoUser(DEMO_ACCOUNTS.nutra.email, DEMO_ACCOUNTS.nutra.password)
+    if (nutraUser) {
+      await createUserProfile(nutraUser.id, {
+        ...DEMO_ACCOUNTS.nutra.profile,
+        email: DEMO_ACCOUNTS.nutra.email
+      })
+      console.log('✅ Conta demo Nutra criada. Rode a migration 271 para assinatura ativa.')
     }
 
     console.log('\n🎉 DADOS DE DEMONSTRAÇÃO CRIADOS COM SUCESSO!')

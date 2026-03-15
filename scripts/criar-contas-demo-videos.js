@@ -2,7 +2,7 @@
 
 /**
  * Script para criar contas demo para vídeos de demonstração da plataforma.
- * Cria: demo.med, demo.psi, demo.vendedor, demo.estetica, demo.perfumaria
+ * Cria: demo.med, demo.psi, demo.vendedor (vendas em gerais), demo.nutra, demo.nutri, demo.coach, demo.estetica, demo.perfumaria
  * Senha: Demo@2025!
  *
  * Execute: node scripts/criar-contas-demo-videos.js
@@ -89,7 +89,31 @@ const DEMO_ACCOUNTS = [
   },
   {
     email: 'demo.vendedor@ylada.app',
-    nome: 'Demo Vendedor Nutra',
+    nome: 'Demo Vendedor (vendas em gerais)',
+    perfil: 'seller',
+    noelProfile: {
+      segment: 'seller',
+      profile_type: 'vendas',
+      profession: 'vendedor',
+      category: 'vendas',
+      tempo_atuacao_anos: 2,
+      dor_principal: 'nao_converte',
+      prioridade_atual: 'Fechar mais vendas e reconectar leads',
+      fase_negocio: 'iniciante',
+      metas_principais: 'Aumentar recorrência e ticket médio',
+      objetivos_curto_prazo: 'Usar calculadora e quiz para engajar leads',
+      modelo_atuacao: null,
+      capacidade_semana: 15,
+      ticket_medio: 180,
+      modelo_pagamento: 'comissao',
+      canais_principais: ['whatsapp', 'instagram'],
+      rotina_atual_resumo: 'Vendo por WhatsApp e redes, quero ferramentas para qualificar',
+      area_specific: { canal_principal_vendas: 'whatsapp', temas_atuacao: ['vendas_gerais'] }
+    }
+  },
+  {
+    email: 'demo.nutra@ylada.app',
+    nome: 'Demo Nutra',
     perfil: 'nutra',
     noelProfile: {
       segment: 'nutra',
@@ -330,7 +354,8 @@ async function main() {
   console.log('📧 Contas criadas:')
   console.log('   demo.med@ylada.app       → Médico (liberal)')
   console.log('   demo.psi@ylada.app       → Psicólogo (liberal)')
-  console.log('   demo.vendedor@ylada.app   → Vendedor Nutra')
+  console.log('   demo.vendedor@ylada.app   → Vendas em gerais (seller)')
+  console.log('   demo.nutra@ylada.app      → Nutra')
   console.log('   demo.estetica@ylada.app   → Esteticista (liberal)')
   console.log('   demo.perfumaria@ylada.app → Vendedor Perfumaria')
   console.log('   demo.nutri@ylada.app      → Nutricionista')

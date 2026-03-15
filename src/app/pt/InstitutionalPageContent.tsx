@@ -124,7 +124,7 @@ export default function InstitutionalPageContent() {
               {home?.nav?.login ?? 'Entrar'}
             </Link>
             <Link
-              href={getLocalizedPath('/pt/escolha-perfil', locale)}
+              href={getLocalizedPath('/pt/cadastro', locale)}
               className="inline-flex items-center justify-center px-4 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 transition-all"
             >
               {home?.nav?.startFree ?? home?.nav?.discoverProfile ?? 'Começar grátis'}
@@ -199,7 +199,7 @@ export default function InstitutionalPageContent() {
                   Fazer diagnóstico grátis
                 </button>
                 <Link
-                  href={getLocalizedPath('/pt/escolha-perfil', locale)}
+                  href={getLocalizedPath('/pt/cadastro', locale)}
                   className="inline-flex items-center justify-center px-8 py-4 bg-white text-gray-700 font-medium rounded-xl border-2 border-gray-200 hover:border-gray-300 transition-all"
                 >
                   Criar meu diagnóstico
@@ -794,7 +794,7 @@ export default function InstitutionalPageContent() {
               <li className="flex items-center gap-2"><span className="text-green-600">✔</span> até 10 análises do Noel por mês</li>
             </ul>
             <Link
-              href={getLocalizedPath('/pt/escolha-perfil', locale)}
+              href={getLocalizedPath('/pt/cadastro', locale)}
               className="inline-flex items-center justify-center px-8 py-4 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition-all"
             >
               Criar meu primeiro diagnóstico grátis
@@ -809,7 +809,7 @@ export default function InstitutionalPageContent() {
               Crie, compartilhe e gere conversas no WhatsApp
             </h2>
             <Link
-              href={getLocalizedPath('/pt/escolha-perfil', locale)}
+              href={getLocalizedPath('/pt/cadastro', locale)}
               className="inline-flex items-center justify-center px-10 py-4 bg-white text-[#1e3a8a] font-semibold rounded-xl hover:bg-gray-100 transition-all shadow-lg"
             >
               Criar meu primeiro diagnóstico grátis
@@ -850,7 +850,7 @@ export default function InstitutionalPageContent() {
               <Link href={getLocalizedPath('/pt/login', locale)} className="text-gray-600 hover:text-gray-900">
                 {home?.footer?.login ?? 'Entrar'}
               </Link>
-              <Link href={getLocalizedPath('/pt/escolha-perfil', locale)} className="text-blue-600 hover:text-blue-700 font-medium">
+              <Link href={getLocalizedPath('/pt/cadastro', locale)} className="text-blue-600 hover:text-blue-700 font-medium">
                 {home?.footer?.createDiagnosis ?? 'Criar diagnóstico'}
               </Link>
             </nav>
