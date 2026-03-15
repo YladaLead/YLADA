@@ -130,6 +130,7 @@ export async function POST(
           { error: 'Nenhuma assinatura ativa encontrada' },
           { status: 404 }
         )
+      }
       subData = subscription
     }
 
