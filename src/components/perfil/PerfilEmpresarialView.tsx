@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import { useRouter } from 'next/navigation'
 import YladaAreaShell from '@/components/ylada/YladaAreaShell'
 import {
   emptyFormData,
@@ -13,6 +14,7 @@ import {
   MODELO_PAGAMENTO_OPTIONS,
   MODELO_ATUACAO_OPTIONS,
   CANAIS_OPTIONS,
+  MODALIDADE_ATENDIMENTO_OPTIONS,
   ESPECIALIDADES_MED,
   type YladaProfileFormData,
 } from '@/types/ylada-profile'
@@ -44,6 +46,15 @@ import { getStrategicProfileMedico } from '@/lib/strategic-profile-medico'
 
 /** Perfil estratégico detectado (comum a todas as profissões). */
 type StrategicProfile = { name: string; focus: string[] }
+
+/** Canais simplificados para onboarding (Passo 3). */
+const ONBOARDING_CANAIS = [
+  { value: 'indicacao', label: 'Indicação' },
+  { value: 'instagram', label: 'Instagram' },
+  { value: 'whatsapp', label: 'WhatsApp' },
+  { value: 'google', label: 'Google' },
+  { value: 'outros', label: 'Outros' },
+] as const
 
 /** Micro-feedback do Noel ao selecionar opções no contexto (por profissão). */
 const NOEL_FEEDBACK_BY_PROFESSION: Record<string, Record<string, Record<string, string>>> = {
@@ -167,16 +178,21 @@ function getFieldValue(form: YladaProfileFormData, field: ProfileFieldDef): stri
 }
 
 export default function PerfilEmpresarialView({ areaCodigo, areaLabel }: PerfilEmpresarialViewProps) {
+  const router = useRouter()
   const segment = areaCodigo
   const [form, setForm] = useState<YladaProfileFormData>(() => emptyFormData(segment))
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
-  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
+  const [message, setMessage] = useState<{ type: 'success' | 'error' | 'info'; text: string } | null>(null)
   /** Step do wizard: 0 = Área de atuação, 1..n = steps do flow. */
   const [stepIndex, setStepIndex] = useState(0)
+  /** Onboarding: -1=não em onboarding, 0=promo (intro), 1=área, 2=modalidade, 3=canais, 4=sucesso. */
+  const [onboardingStep, setOnboardingStep] = useState<-1 | 0 | 1 | 2 | 3 | 4>(-1)
   /** Após preencher contexto (estética, odonto, psi, fitness), mostrar "Noel analisando" e depois "Perfil identificado". */
   const [strategicProfilePhase, setStrategicProfilePhase] = useState<'analyzing' | 'result' | null>(null)
   const [detectedProfile, setDetectedProfile] = useState<StrategicProfile | null>(null)
+  /** Após salvar perfil completo no wizard, mostrar tela de celebração antes de ir para home. */
+  const [showSuccessAfterWizardSave, setShowSuccessAfterWizardSave] = useState(false)
 
   const flow: ProfileFlowConfig | null =
     form.profile_type && form.profession
@@ -186,10 +202,12 @@ export default function PerfilEmpresarialView({ areaCodigo, areaLabel }: PerfilE
   const showWizard = flow !== null
   const totalWizardSteps = flow ? 1 + flow.steps.length : 1
   const onlyIntro = !form.profile_type || !form.profession
+  const showOnboardingFlow = onboardingStep >= 0
 
   const loadProfile = useCallback(async () => {
     setLoading(true)
     setMessage(null)
+    setShowSuccessAfterWizardSave(false)
     try {
       const res = await fetch(`/api/ylada/profile?segment=${encodeURIComponent(segment)}`, { credentials: 'include' })
       const json = await res.json()
@@ -197,17 +215,26 @@ export default function PerfilEmpresarialView({ areaCodigo, areaLabel }: PerfilE
         const next = profileToFormData(segment, json.data.profile as Record<string, unknown> | null)
         setForm(next)
         const hasTypeAndProfession = next.profile_type && next.profession
-        const nextFlow = hasTypeAndProfession
-          ? getProfileFlow(next.profile_type as ProfileType, next.profession as ProfessionCode)
-          : null
-        setStepIndex(nextFlow ? 1 : 0)
+        const hasModalidade = !!(next.area_specific?.modalidade_atendimento as string)?.trim()
+        const hasCanais = Array.isArray(next.canais_principais) && next.canais_principais.length > 0
+        if (!hasTypeAndProfession || !hasModalidade || !hasCanais) {
+          // Sempre começar na promo (passo 0); ao clicar "Começar", vai para o passo correto
+          setOnboardingStep(0)
+          setStepIndex(0)
+        } else {
+          setOnboardingStep(-1)
+          const nextFlow = getProfileFlow(next.profile_type as ProfileType, next.profession as ProfessionCode)
+          setStepIndex(nextFlow ? 1 : 0)
+        }
       } else {
         setForm(emptyFormData(segment))
+        setOnboardingStep(0)
         setStepIndex(0)
       }
     } catch {
       setForm(emptyFormData(segment))
       setMessage({ type: 'error', text: 'Não foi possível carregar o perfil.' })
+      setOnboardingStep(0)
       setStepIndex(0)
     } finally {
       setLoading(false)
@@ -291,6 +318,22 @@ export default function PerfilEmpresarialView({ areaCodigo, areaLabel }: PerfilE
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    const profession = form.profession as ProfessionCode | undefined
+    const hasFundamentalStep = flow?.steps.some((s) => ['diagnostico', 'dor_prioridade'].includes(s.id))
+    if (hasFundamentalStep) {
+      const dorVal = (form.dor_principal as string)?.trim?.() ?? ''
+      const priorVal = (form.prioridade_atual as string)?.trim?.() ?? ''
+      if (!dorVal) {
+        const label = getFieldLabelForProfession('dor_principal', profession)
+        setMessage({ type: 'info', text: `É fundamental preencher "${label}" para o Noel personalizar as orientações para você.` })
+        return
+      }
+      if (!priorVal) {
+        const label = getFieldLabelForProfession('prioridade_atual', profession)
+        setMessage({ type: 'info', text: `É fundamental preencher "${label}" para o Noel personalizar as orientações para você.` })
+        return
+      }
+    }
     setSaving(true)
     setMessage(null)
     try {
@@ -313,7 +356,7 @@ export default function PerfilEmpresarialView({ areaCodigo, areaLabel }: PerfilE
       })
       const json = await res.json()
       if (json?.success) {
-        setMessage({ type: 'success', text: 'Perfil salvo. O Noel usará essas informações para personalizar as orientações.' })
+        setShowSuccessAfterWizardSave(true)
       } else {
         setMessage({ type: 'error', text: json?.error || 'Erro ao salvar.' })
       }
@@ -350,49 +393,339 @@ export default function PerfilEmpresarialView({ areaCodigo, areaLabel }: PerfilE
     )
   }
 
-  // —— Só intro: sem tipo/profissão (perfil vazio — precisa preencher) ——
-  if (onlyIntro) {
+  // —— Onboarding simplificado 3 passos (barra de progresso + conclusão) ——
+  const saveOnboardingStep = async (payload: Record<string, unknown>) => {
+    setSaving(true)
+    setMessage(null)
+    try {
+      const res = await fetch('/api/ylada/profile', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ segment, ...payload }),
+      })
+      const json = await res.json()
+      if (json?.success) {
+        return true
+      }
+      setMessage({ type: 'error', text: json?.error || 'Erro ao salvar.' })
+      return false
+    } catch {
+      setMessage({ type: 'error', text: 'Erro ao salvar. Tente novamente.' })
+      return false
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  if (showOnboardingFlow) {
+    const totalSteps = 3
+    const progressPct = onboardingStep >= 1 && onboardingStep <= 3 ? (onboardingStep / totalSteps) * 100 : onboardingStep === 4 ? 100 : 0
+    const modalidadeValue = (form.area_specific?.modalidade_atendimento as string) || ''
+
     return (
       <YladaAreaShell areaCodigo={areaCodigo} areaLabel={areaLabel}>
         <div className="max-w-3xl mx-auto space-y-6">
-          {/* Card de boas-vindas */}
+          {/* Passo 0: Tela de promoção (só valor, sem perguntas) */}
+          {onboardingStep === 0 && (
+            <div className="rounded-xl bg-gradient-to-br from-indigo-50 to-white border border-indigo-100 p-8 sm:p-10 text-center">
+              <p className="text-indigo-600 text-sm font-medium mb-3">🧠 Noel</p>
+              <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4">
+                Pelas suas respostas, o Noel vai te conhecer para entregar as melhores orientações.
+              </h1>
+              <p className="text-gray-700 text-base leading-relaxed mb-2">
+                São poucas perguntas. As respostas vão direcionar você a superar os desafios que mais te travam hoje.
+              </p>
+              <p className="text-gray-600 text-sm mb-6">
+                Diagnósticos personalizados · Estratégias de captação · Sugestões para sua agenda
+              </p>
+              <p className="text-gray-500 text-sm mb-6">⏱ Leva menos de 2 minutos.</p>
+              <button
+                type="button"
+                onClick={() => {
+                  const hasType = !!form.profile_type && !!form.profession
+                  const hasMod = !!(form.area_specific?.modalidade_atendimento as string)?.trim()
+                  const hasCan = Array.isArray(form.canais_principais) && form.canais_principais.length > 0
+                  if (!hasType) setOnboardingStep(1)
+                  else if (!hasMod) setOnboardingStep(2)
+                  else if (!hasCan) setOnboardingStep(3)
+                  else setOnboardingStep(4)
+                }}
+                className="px-8 py-4 bg-indigo-600 text-white text-base font-semibold rounded-xl hover:bg-indigo-700 transition-colors"
+              >
+                Começar as perguntas →
+              </button>
+            </div>
+          )}
+
+          {/* Barra de progresso + título (passos 1-4) */}
+          {onboardingStep >= 1 && (
           <div className="rounded-xl bg-gradient-to-br from-indigo-50 to-white border border-indigo-100 p-6 sm:p-8">
-            <div className="flex items-start gap-4">
-              <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-indigo-100 flex items-center justify-center text-2xl" aria-hidden>
-                👤
-              </div>
-              <div>
-                <p className="text-indigo-700 text-sm font-medium mb-2">
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">Configure seu perfil estratégico</h1>
+            {onboardingStep <= 3 && (
+              <>
+                <p className="text-sm text-gray-500 mb-2">Passo {onboardingStep} de {totalSteps} — Configuração do perfil</p>
+                <div className="h-2 bg-gray-200 rounded-full overflow-hidden" role="progressbar" aria-valuenow={progressPct} aria-valuemin={0} aria-valuemax={100}>
+                  <div className="h-full bg-indigo-600 rounded-full transition-all duration-300" style={{ width: `${progressPct}%` }} />
+                </div>
+              </>
+            )}
+            {onboardingStep === 1 && (
+              <>
+                <p className="text-gray-700 text-base leading-relaxed mt-4 mb-1">
                   Quanto melhor o Noel entender seu trabalho, melhores serão as estratégias que ele poderá sugerir.
                 </p>
-                <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-1">Configure seu perfil</h1>
-                <p className="text-gray-600 text-sm sm:text-base">
-                  Essas informações ajudam o Noel a gerar estratégias específicas para o seu tipo de atendimento, agenda e perfil de clientes.
-                </p>
-                <p className="text-gray-500 text-xs sm:text-sm mt-2 flex items-center gap-2">
-                  <span>Configuração do perfil</span>
-                  <span className="text-indigo-600">·</span>
-                  <span>Leva menos de 1 minuto</span>
-                </p>
-                <p className="text-xs text-gray-400 mt-3">
-                  Mais de 3.200 profissionais já configuraram seu perfil estratégico no YLADA.
-                </p>
-              </div>
-            </div>
+                <p className="text-gray-500 text-sm flex items-center gap-1">⏱ Leva menos de 1 minuto.</p>
+              </>
+            )}
+            {onboardingStep === 4 && (
+              <p className="text-gray-700 text-base leading-relaxed mt-2">
+                Perfeito. Agora o Noel já entende seu trabalho.
+              </p>
+            )}
           </div>
+          )}
 
           {message && (
             <div
-              className={`p-3 rounded-lg text-sm ${message.type === 'success' ? 'bg-green-50 text-green-800 border border-green-200' : 'bg-red-50 text-red-800 border border-red-200'}`}
+              className={`p-3 rounded-lg text-sm ${
+                message.type === 'success'
+                  ? 'bg-green-50 text-green-800 border border-green-200'
+                  : message.type === 'info'
+                    ? 'bg-blue-50 text-blue-800 border border-blue-200'
+                    : 'bg-red-50 text-red-800 border border-red-200'
+              }`}
             >
               {message.text}
             </div>
           )}
 
+          {/* Passo 1: Área de atuação */}
+          {onboardingStep === 1 && (
+            <>
+              <div className="rounded-xl border border-gray-200 bg-white p-6 sm:p-8">
+                <p className="text-gray-700 text-sm font-medium mb-3">Essas informações ajudam o Noel a adaptar:</p>
+                <ul className="text-gray-600 text-sm space-y-1 mb-4">
+                  <li className="flex items-center gap-2"><span className="text-green-600">✓</span> diagnósticos da biblioteca</li>
+                  <li className="flex items-center gap-2"><span className="text-green-600">✓</span> estratégias de captação</li>
+                  <li className="flex items-center gap-2"><span className="text-green-600">✓</span> sugestões para agenda e clientes</li>
+                </ul>
+              </div>
+              <section className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+                <div className="p-6 sm:p-8 space-y-6">
+                  <label className="block">
+                    <span className="text-sm font-medium text-gray-700">Você atua como</span>
+                    <select
+                      className="mt-2 block w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                      value={form.profile_type}
+                      onChange={(e) => update({ profile_type: e.target.value, profession: '' })}
+                    >
+                      <option value="">Selecione...</option>
+                      {(Object.entries(PROFILE_TYPE_LABELS) as [ProfileType, string][]).map(([value, label]) => (
+                        <option key={value} value={value}>{label}</option>
+                      ))}
+                    </select>
+                  </label>
+                  <label className="block">
+                    <span className="text-sm font-medium text-gray-700">{professionFieldLabel}</span>
+                    <select
+                      className="mt-2 block w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 disabled:bg-gray-50 disabled:text-gray-400"
+                      value={form.profession}
+                      onChange={(e) => update({ profession: e.target.value })}
+                      disabled={!form.profile_type}
+                    >
+                      <option value="">Selecione...</option>
+                      {professionsSorted.map(({ value, label }) => (
+                        <option key={value} value={value}>{label}</option>
+                      ))}
+                    </select>
+                  </label>
+                  {form.profession === 'outro' && (
+                    <label className="block">
+                      <span className="text-sm font-medium text-gray-700">Descreva sua atuação</span>
+                      <input
+                        type="text"
+                        className="mt-2 block w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                        placeholder="Ex.: outra área de atendimento..."
+                        value={(form.area_specific?.atuacao_outra as string) ?? ''}
+                        onChange={(e) => updateAreaSpec('atuacao_outra', e.target.value)}
+                      />
+                    </label>
+                  )}
+                </div>
+                <div className="px-6 sm:px-8 py-5 bg-gray-50 border-t border-gray-200">
+                  <div className="flex flex-col items-end gap-2">
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        if (!form.profile_type) {
+                          setMessage({ type: 'info', text: 'É fundamental preencher a área de atuação para o Noel personalizar as orientações para você.' })
+                          return
+                        }
+                        if (!form.profession) {
+                          setMessage({ type: 'info', text: 'É fundamental preencher sua profissão/atuação para o Noel personalizar as orientações para você.' })
+                          return
+                        }
+                        const payload = formDataToPayload({ ...form, profile_type: form.profile_type, profession: form.profession })
+                        const ok = await saveOnboardingStep(payload)
+                        if (ok) setOnboardingStep(2)
+                      }}
+                      disabled={saving}
+                      className="px-5 py-2.5 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    >
+                      {saving ? 'Salvando...' : 'Continuar →'}
+                    </button>
+                    <p className="text-xs text-gray-500">Você poderá alterar essas informações depois.</p>
+                  </div>
+                </div>
+              </section>
+            </>
+          )}
+
+          {/* Passo 2: Modalidade de atendimento */}
+          {onboardingStep === 2 && (
+            <section className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+              <div className="p-6 sm:p-8">
+                <h2 className="text-lg font-semibold text-gray-900 mb-2">Como você costuma atender seus clientes?</h2>
+                <div className="space-y-3 mt-4">
+                  {MODALIDADE_ATENDIMENTO_OPTIONS.map((opt) => (
+                    <label key={opt.value} className="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-gray-50 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="modalidade"
+                        value={opt.value}
+                        checked={modalidadeValue === opt.value}
+                        onChange={() => updateAreaSpec('modalidade_atendimento', opt.value)}
+                        className="text-indigo-600 focus:ring-indigo-500"
+                      />
+                      <span className="text-gray-700">{opt.value === 'ambos' ? 'Presencial e online' : opt.label}</span>
+                    </label>
+                  ))}
+                </div>
+                <div className="mt-6 flex flex-col items-end gap-2">
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      if (!modalidadeValue) {
+                        setMessage({ type: 'info', text: 'É fundamental selecionar como você atende (presencial, online ou ambos) para o Noel personalizar as orientações.' })
+                        return
+                      }
+                      const payload = formDataToPayload(form)
+                      const ok = await saveOnboardingStep(payload)
+                      if (ok) setOnboardingStep(3)
+                    }}
+                    disabled={saving}
+                    className="px-5 py-2.5 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  >
+                    {saving ? 'Salvando...' : 'Continuar →'}
+                  </button>
+                  <p className="text-xs text-gray-500">Você poderá alterar essas informações depois.</p>
+                </div>
+              </div>
+            </section>
+          )}
+
+          {/* Passo 3: Canais */}
+          {onboardingStep === 3 && (
+            <section className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+              <div className="p-6 sm:p-8">
+                <h2 className="text-lg font-semibold text-gray-900 mb-2">Como seus clientes normalmente chegam até você?</h2>
+                <p className="text-sm text-gray-500 mb-4">Selecione todas as opções que se aplicam.</p>
+                <div className="space-y-3">
+                  {ONBOARDING_CANAIS.map((opt) => (
+                    <label key={opt.value} className="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-gray-50 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={form.canais_principais.includes(opt.value)}
+                        onChange={() => {
+                          const next = form.canais_principais.includes(opt.value)
+                            ? form.canais_principais.filter((x) => x !== opt.value)
+                            : [...form.canais_principais, opt.value]
+                          update({ canais_principais: next })
+                        }}
+                        className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                      />
+                      <span className="text-gray-700">{opt.label}</span>
+                    </label>
+                  ))}
+                </div>
+                <div className="mt-6 flex flex-col items-end gap-2">
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      if (!form.canais_principais?.length) {
+                        setMessage({ type: 'info', text: 'É fundamental selecionar pelo menos um canal para o Noel saber como seus clientes chegam até você.' })
+                        return
+                      }
+                      const payload = formDataToPayload(form)
+                      const ok = await saveOnboardingStep(payload)
+                      if (ok) setOnboardingStep(4)
+                    }}
+                    disabled={saving}
+                    className="px-5 py-2.5 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  >
+                    {saving ? 'Salvando...' : 'Continuar →'}
+                  </button>
+                  <p className="text-xs text-gray-500">Você poderá alterar essas informações depois.</p>
+                </div>
+              </div>
+            </section>
+          )}
+
+          {/* Passo 4: Sucesso */}
+          {onboardingStep === 4 && (
+            <div className="rounded-xl border border-green-200 bg-green-50 p-8 text-center">
+              <p className="text-gray-700 text-base mb-4">Agora o Noel já consegue sugerir estratégias para:</p>
+              <ul className="text-gray-700 text-sm space-y-2 mb-6">
+                <li className="flex items-center justify-center gap-2"><span className="text-green-600">✓</span> atrair clientes</li>
+                <li className="flex items-center justify-center gap-2"><span className="text-green-600">✓</span> iniciar conversas qualificadas</li>
+                <li className="flex items-center justify-center gap-2"><span className="text-green-600">✓</span> transformar curiosos em atendimentos</li>
+              </ul>
+              <button
+                type="button"
+                onClick={() => router.push('/pt/home')}
+                className="px-8 py-4 bg-indigo-600 text-white text-base font-semibold rounded-xl hover:bg-indigo-700 transition-colors"
+              >
+                🚀 Entrar na plataforma
+              </button>
+            </div>
+          )}
+
+          {onboardingStep >= 1 && onboardingStep <= 3 && (
+            <p className="text-center text-xs text-gray-400">
+              Mais de 3.000 profissionais já utilizam esse sistema para organizar sua comunicação com clientes.
+            </p>
+          )}
+        </div>
+      </YladaAreaShell>
+    )
+  }
+
+  // —— Só intro (sem onboarding flow): perfil já completo ou fluxo antigo ——
+  if (onlyIntro) {
+    return (
+      <YladaAreaShell areaCodigo={areaCodigo} areaLabel={areaLabel}>
+        <div className="max-w-3xl mx-auto space-y-6">
+          <div className="rounded-xl bg-gradient-to-br from-indigo-50 to-white border border-indigo-100 p-6 sm:p-8">
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">Configure seu perfil estratégico</h1>
+            <p className="text-gray-700 text-base">Quanto melhor o Noel entender seu trabalho, melhores serão as estratégias.</p>
+          </div>
+          {message && (
+            <div
+              className={`p-3 rounded-lg text-sm ${
+                message.type === 'success'
+                  ? 'bg-green-50 text-green-800 border border-green-200'
+                  : message.type === 'info'
+                    ? 'bg-blue-50 text-blue-800 border border-blue-200'
+                    : 'bg-red-50 text-red-800 border border-red-200'
+              }`}
+            >
+              {message.text}
+            </div>
+          )}
           <section className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
             <div className="bg-gray-50 border-b border-gray-200 px-6 sm:px-8 py-5">
               <h2 className="text-base font-semibold text-gray-800">Área de atuação</h2>
-              <p className="text-sm text-gray-500 mt-1">O Noel usa essas informações para criar estratégias de agenda, captação e recorrência adaptadas ao seu tipo de atendimento.</p>
             </div>
             <div className="p-6 sm:p-8 space-y-6">
               <label className="block">
@@ -428,23 +761,28 @@ export default function PerfilEmpresarialView({ areaCodigo, areaLabel }: PerfilE
                   <input
                     type="text"
                     className="mt-2 block w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                    placeholder={
-                      form.profile_type === 'vendas'
-                        ? 'Ex.: outro tipo de produto ou serviço que você vende...'
-                        : 'Ex.: outra área de atendimento ou especialidade...'
-                    }
+                    placeholder="Ex.: outra área..."
                     value={(form.area_specific?.atuacao_outra as string) ?? ''}
                     onChange={(e) => updateAreaSpec('atuacao_outra', e.target.value)}
                   />
                 </label>
               )}
             </div>
-            <div className="px-6 sm:px-8 py-5 bg-gray-50 border-t border-gray-200 flex justify-end">
+            <div className="px-6 sm:px-8 py-5 bg-gray-50 border-t border-gray-200">
               <button
                 type="button"
-                onClick={() => setStepIndex(1)}
-                disabled={!form.profile_type || !form.profession}
-                className="px-5 py-2.5 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                onClick={() => {
+                  if (!form.profile_type) {
+                    setMessage({ type: 'info', text: 'É fundamental preencher a área de atuação para o Noel personalizar as orientações para você.' })
+                    return
+                  }
+                  if (!form.profession) {
+                    setMessage({ type: 'info', text: 'É fundamental preencher sua profissão/atuação para o Noel personalizar as orientações para você.' })
+                    return
+                  }
+                  setStepIndex(1)
+                }}
+                className="px-5 py-2.5 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors"
               >
                 Continuar e definir minha área →
               </button>
@@ -480,6 +818,37 @@ export default function PerfilEmpresarialView({ areaCodigo, areaLabel }: PerfilE
     const hasStrategicProfileDiscovery = ['estetica', 'odonto', 'psi', 'fitness', 'coach', 'nutricionista', 'medico'].includes(profession || '')
     const showStrategicProfileDiscovery =
       hasStrategicProfileDiscovery && stepIndex === 1 && (strategicProfilePhase === 'analyzing' || strategicProfilePhase === 'result')
+
+    if (showSuccessAfterWizardSave) {
+      return (
+        <YladaAreaShell areaCodigo={areaCodigo} areaLabel={areaLabel}>
+          <div className="max-w-3xl mx-auto">
+            <div className="rounded-xl border border-green-200 bg-green-50 p-8 sm:p-10 text-center">
+              <p className="text-indigo-600 text-sm font-medium mb-2">🧠 Noel</p>
+              <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3">
+                Perfil salvo! Agora o Noel vai poder orientá-lo corretamente.
+              </h1>
+              <p className="text-gray-700 text-base mb-4">
+                Com essas informações, ele vai sugerir estratégias personalizadas para você alcançar suas metas.
+              </p>
+              <p className="text-gray-700 text-base mb-4">Agora o Noel já consegue sugerir estratégias para:</p>
+              <ul className="text-gray-700 text-sm space-y-2 mb-6">
+                <li className="flex items-center justify-center gap-2"><span className="text-green-600">✓</span> atrair clientes</li>
+                <li className="flex items-center justify-center gap-2"><span className="text-green-600">✓</span> iniciar conversas qualificadas</li>
+                <li className="flex items-center justify-center gap-2"><span className="text-green-600">✓</span> transformar curiosos em atendimentos</li>
+              </ul>
+              <button
+                type="button"
+                onClick={() => router.push('/pt/home')}
+                className="px-8 py-4 bg-indigo-600 text-white text-base font-semibold rounded-xl hover:bg-indigo-700 transition-colors"
+              >
+                Bora pra plataforma →
+              </button>
+            </div>
+          </div>
+        </YladaAreaShell>
+      )
+    }
 
     return (
       <YladaAreaShell areaCodigo={areaCodigo} areaLabel={areaLabel}>
@@ -542,7 +911,13 @@ export default function PerfilEmpresarialView({ areaCodigo, areaLabel }: PerfilE
           </div>
           {message && (
             <div
-              className={`p-3 rounded-lg text-sm ${message.type === 'success' ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'}`}
+              className={`p-3 rounded-lg text-sm ${
+                message.type === 'success'
+                  ? 'bg-green-50 text-green-800'
+                  : message.type === 'info'
+                    ? 'bg-blue-50 text-blue-800'
+                    : 'bg-red-50 text-red-800'
+              }`}
             >
               {message.text}
             </div>
@@ -874,6 +1249,22 @@ export default function PerfilEmpresarialView({ areaCodigo, areaLabel }: PerfilE
                       if (hasStrategicProfileDiscovery && currentStep?.id === 'contexto') {
                         setStrategicProfilePhase('analyzing')
                       } else {
+                        const stepWithFundamental = ['diagnostico', 'dor_prioridade'].includes(currentStep?.id || '')
+                        if (stepWithFundamental) {
+                          const dorVal = (form.dor_principal as string)?.trim?.() ?? ''
+                          const priorVal = (form.prioridade_atual as string)?.trim?.() ?? ''
+                          if (!dorVal) {
+                            const label = getFieldLabelForProfession('dor_principal', profession)
+                            setMessage({ type: 'info', text: `É fundamental preencher "${label}" para o Noel personalizar as orientações para você.` })
+                            return
+                          }
+                          if (!priorVal) {
+                            const label = getFieldLabelForProfession('prioridade_atual', profession)
+                            setMessage({ type: 'info', text: `É fundamental preencher "${label}" para o Noel personalizar as orientações para você.` })
+                            return
+                          }
+                        }
+                        setMessage(null)
                         setStepIndex((i) => i + 1)
                       }
                     }}
@@ -906,6 +1297,37 @@ export default function PerfilEmpresarialView({ areaCodigo, areaLabel }: PerfilE
   }
 
   // —— Fallback: formulário completo (tem tipo/profissão mas sem flow, ou compatibilidade) ——
+  if (showSuccessAfterWizardSave) {
+    return (
+      <YladaAreaShell areaCodigo={areaCodigo} areaLabel={areaLabel}>
+        <div className="max-w-3xl mx-auto">
+          <div className="rounded-xl border border-green-200 bg-green-50 p-8 sm:p-10 text-center">
+            <p className="text-indigo-600 text-sm font-medium mb-2">🧠 Noel</p>
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3">
+              Perfil salvo! Agora o Noel vai poder orientá-lo corretamente.
+            </h1>
+            <p className="text-gray-700 text-base mb-4">
+              Com essas informações, ele vai sugerir estratégias personalizadas para você alcançar suas metas.
+            </p>
+            <p className="text-gray-700 text-base mb-4">Agora o Noel já consegue sugerir estratégias para:</p>
+            <ul className="text-gray-700 text-sm space-y-2 mb-6">
+              <li className="flex items-center justify-center gap-2"><span className="text-green-600">✓</span> atrair clientes</li>
+              <li className="flex items-center justify-center gap-2"><span className="text-green-600">✓</span> iniciar conversas qualificadas</li>
+              <li className="flex items-center justify-center gap-2"><span className="text-green-600">✓</span> transformar curiosos em atendimentos</li>
+            </ul>
+            <button
+              type="button"
+              onClick={() => router.push('/pt/home')}
+              className="px-8 py-4 bg-indigo-600 text-white text-base font-semibold rounded-xl hover:bg-indigo-700 transition-colors"
+            >
+              Bora pra plataforma →
+            </button>
+          </div>
+        </div>
+      </YladaAreaShell>
+    )
+  }
+
   return (
     <YladaAreaShell areaCodigo={areaCodigo} areaLabel={areaLabel}>
       <div className="max-w-2xl space-y-6">
@@ -917,7 +1339,13 @@ export default function PerfilEmpresarialView({ areaCodigo, areaLabel }: PerfilE
         </div>
         {message && (
           <div
-            className={`p-3 rounded-lg text-sm ${message.type === 'success' ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'}`}
+            className={`p-3 rounded-lg text-sm ${
+              message.type === 'success'
+                ? 'bg-green-50 text-green-800'
+                : message.type === 'info'
+                  ? 'bg-blue-50 text-blue-800'
+                  : 'bg-red-50 text-red-800'
+            }`}
           >
             {message.text}
           </div>
