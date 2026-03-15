@@ -14,8 +14,8 @@ export const metadata = {
   authors: [{ name: 'YLADA Team' }],
   manifest: '/manifest.json',
   icons: {
-    icon: '/images/logo/ylada/quadrado/azul-claro/ylada-quadrado-azul-claro-31.png',
-    apple: '/images/logo/ylada/quadrado/azul-claro/ylada-quadrado-azul-claro-31.png',
+    icon: '/images/logo/ylada/quadrado/azul-claro/logo_ylada_azul_quadrado.png',
+    apple: '/images/logo/ylada/quadrado/azul-claro/logo_ylada_azul_quadrado.png',
   },
   openGraph: {
     title: 'YLADA - Boas conversas começam com boas perguntas',
@@ -77,6 +77,7 @@ export default function RootLayout({
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="msapplication-TileColor" content="#3B82F6" />
         <meta name="msapplication-tap-highlight" content="no" />
+        <link rel="apple-touch-icon" href="/images/logo/ylada/quadrado/azul-claro/logo_ylada_azul_quadrado.png" />
         {/* Forçar não usar cache */}
         <meta httpEquiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
         <meta httpEquiv="Pragma" content="no-cache" />

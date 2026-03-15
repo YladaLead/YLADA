@@ -9,14 +9,16 @@
   "theme_color": "#3B82F6",
   "icons": [
     {
-      "src": "/images/logo/ylada/quadrado/azul-claro/ylada-quadrado-azul-claro-31.png",
+      "src": "/images/logo/ylada/quadrado/azul-claro/logo_ylada_azul_quadrado.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
     },
     {
-      "src": "/images/logo/ylada/quadrado/azul-claro/ylada-quadrado-azul-claro-31.png",
+      "src": "/images/logo/ylada/quadrado/azul-claro/logo_ylada_azul_quadrado.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
     }
   ]
 }

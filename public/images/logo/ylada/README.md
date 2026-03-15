@@ -123,7 +123,7 @@ import { getLogoPorCor } from '/images/logo/ylada/logos-config'
 
 ### Tamanhos Recomendados
 - **Favicon**: 32x32px ou 64x64px
-- **Ícone App**: 128x128px ou 256x256px
+- **Ícone App / PWA (tela inicial do celular)**: 192x192px e 512x512px — **o logo deve ocupar ~80–90% do quadrado** (pouca margem branca) para não ficar “pequeno” no ícone
 - **Logo Header**: 64x64px a 128x128px
 - **Logo Grande**: 256x256px
 
