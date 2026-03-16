@@ -1,6 +1,7 @@
 /**
  * Camada de abstração para gateways de pagamento
- * Unifica Mercado Pago (BR) e Stripe (Internacional)
+ * Brasil → Mercado Pago (BRL)
+ * Internacional (en, es) → Stripe (USD)
  */
 
 import { PaymentGateway, detectCountryCode } from './payment-helpers'
@@ -41,35 +42,14 @@ export interface CheckoutResponse {
 }
 
 /**
- * Lista de países onde o Mercado Pago opera (América Latina)
+ * Países que usam Mercado Pago (apenas Brasil).
+ * Internacional (espanhol, inglês) → Stripe.
  */
-const MERCADO_PAGO_COUNTRIES = [
-  'BR', // Brasil
-  'AR', // Argentina
-  'CL', // Chile
-  'CO', // Colômbia
-  'MX', // México
-  'PE', // Peru
-  'UY', // Uruguai
-  'PY', // Paraguai
-  'BO', // Bolívia
-  'EC', // Equador
-  'VE', // Venezuela
-  'CR', // Costa Rica
-  'PA', // Panamá
-  'GT', // Guatemala
-  'HN', // Honduras
-  'NI', // Nicarágua
-  'SV', // El Salvador
-  'DO', // República Dominicana
-  'CU', // Cuba
-  'JM', // Jamaica
-  'TT', // Trinidad e Tobago
-  'BZ', // Belize
-]
+const MERCADO_PAGO_COUNTRIES = ['BR']
 
 /**
- * Verifica se o país tem suporte ao Mercado Pago
+ * Verifica se o país usa Mercado Pago (só Brasil).
+ * Demais países → Stripe (rotas internacionais en/es).
  */
 function isMercadoPagoSupported(countryCode: string): boolean {
   return MERCADO_PAGO_COUNTRIES.includes(countryCode.toUpperCase())
@@ -448,12 +428,12 @@ export async function createCheckout(
     countryCode = 'UNKNOWN'
   }
 
-  // Gateway por país: Brasil (e América Latina onde MP opera) → Mercado Pago; resto do mundo → Stripe
+  // Gateway: Brasil → Mercado Pago; internacional (en, es) → Stripe
   const useMercadoPago = isMercadoPagoSupported(countryCode)
   const gateway: PaymentGateway = useMercadoPago ? 'mercadopago' : 'stripe'
 
   if (!useMercadoPago) {
-    console.log(`🌍 Checkout fora do Brasil/LATAM (${countryCode}) → Stripe`)
+    console.log(`🌍 Checkout internacional (${countryCode}) → Stripe`)
   }
 
   // Obter URL base (prioridade: env > request origin > localhost)
