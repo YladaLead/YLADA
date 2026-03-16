@@ -210,9 +210,10 @@ export const enTranslations: Translations = {
     loading: 'Loading...',
     redirecting: 'Redirecting...',
     hero: {
-      title: 'Good conversations start with good questions.',
-      tagline: 'Create smart diagnostics, share the link, and watch people start a conversation with you on WhatsApp.',
-      subtitle: 'No hassle. No need to build a complex funnel.',
+      title: 'Does your marketing mostly attract people asking about price?',
+      subtitle: 'Most professionals have to explain, convince, and push to sell. Good conversations start with good questions.',
+      tagline: 'Create diagnostics, share the link, and watch people start a conversation with you on WhatsApp.',
+      ctaCuriososPreparados: 'Stop talking to the curious. Start talking to prepared clients.',
       ctaPrimary: 'Start free',
       ctaSecondary: 'See how it works',
       flowStep1: 'Create diagnosis',

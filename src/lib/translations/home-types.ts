@@ -17,6 +17,7 @@ export interface HomeTranslations {
     title: string
     tagline: string
     subtitle: string
+    ctaCuriososPreparados?: string
     ctaPrimary?: string
     ctaSecondary?: string
     flowStep1?: string

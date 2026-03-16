@@ -214,9 +214,10 @@ export const ptTranslations: Translations = {
     loading: 'Carregando...',
     redirecting: 'Redirecionando...',
     hero: {
-      title: 'Boas conversas começam com boas perguntas.',
-      tagline: 'Crie diagnósticos inteligentes, compartilhe o link e veja pessoas iniciarem conversa com você no WhatsApp.',
-      subtitle: 'Sem complicação. Sem precisar montar funil complexo.',
+      title: 'Seu marketing hoje atrai curiosos perguntando preço?',
+      subtitle: 'A maioria dos profissionais precisa explicar, convencer e insistir para vender. Boas conversas começam com boas perguntas.',
+      tagline: 'Crie diagnósticos, compartilhe o link e veja pessoas iniciarem conversa com você no WhatsApp.',
+      ctaCuriososPreparados: 'Pare de conversar com curiosos. Comece a conversar com clientes preparados.',
       ctaPrimary: 'Começar grátis',
       ctaSecondary: 'Ver como funciona',
       flowStep1: 'Criar diagnóstico',

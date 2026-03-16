@@ -1,14 +1,13 @@
 'use client'
 
 /**
- * BLUEPRINT VISUAL – HOME YLADA
- * Ordem: HEADER → HERO → PROBLEMA → METÁFORA MÉDICA → FUNIL DE DIAGNÓSTICO → PRINCÍPIO VISUAL → EXEMPLOS → BENEFÍCIOS → COMO FUNCIONA → ÁREAS → O QUE ACONTECE → CTA → FOOTER
- * Objetivo: levar o visitante a fazer o diagnóstico. Posicionamento: plataforma de preparação de conversas (funil de diagnóstico).
+ * BLUEPRINT VISUAL – HOME YLADA (estrutura de venda: Dor → Identificação → Nova lógica → Demonstração → Credibilidade → Aplicação → Teste)
+ * Ordem: HEADER → HERO (dor imediata) → AUTO DIAGNÓSTICO (quiz) → VÍDEO → PROBLEMA → VIRADA → NOVA LÓGICA → DEMONSTRAÇÃO (4 passos) → PSICOLOGIA → FUNIL YLADA → EXEMPLOS → BENEFÍCIOS → PARA QUEM É → O QUE ACONTECE → TESTE GRÁTIS → CTA → FOOTER
+ * Vídeo: NEXT_PUBLIC_YLADA_HOME_VIDEO_URL (60–90s). Frase central apenas no hero (subtítulo) e na virada de chave.
  */
 
 import { useState, useEffect } from 'react'
 import { useRouter, usePathname, useSearchParams } from 'next/navigation'
-import Image from 'next/image'
 import YLADALogo from '@/components/YLADALogo'
 import LanguageSelector from '@/components/LanguageSelector'
 import Link from 'next/link'
@@ -141,17 +140,23 @@ export default function InstitutionalPageContent() {
       </header>
 
       <main className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* 1️⃣ HERO — Identidade do produto */}
+        {/* 1️⃣ HERO — Dor imediata + proposta */}
         <section className="py-12 sm:py-16 lg:py-20 bg-gradient-to-b from-sky-50 to-white border-b border-gray-100">
           <div className="max-w-3xl mx-auto text-center">
             <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-4 leading-tight">
-              {home?.hero?.title ?? 'Boas conversas começam com boas perguntas.'}
+              {home?.hero?.title ?? 'Seu marketing hoje atrai curiosos perguntando preço?'}
             </h1>
-            <p className="text-lg sm:text-xl text-gray-700 mb-8 leading-relaxed">
-              {home?.hero?.tagline ?? 'Crie diagnósticos inteligentes, compartilhe o link e veja pessoas iniciarem conversa com você no WhatsApp.'}
+            <p className="text-lg sm:text-xl text-gray-700 mb-4 leading-relaxed">
+              {home?.hero?.subtitle ?? 'A maioria dos profissionais precisa explicar, convencer e insistir para vender. Boas conversas começam com boas perguntas.'}
+            </p>
+            <p className="text-base sm:text-lg text-gray-600 mb-2">
+              {home?.hero?.tagline ?? 'Crie diagnósticos, compartilhe o link e veja pessoas iniciarem conversa com você no WhatsApp.'}
+            </p>
+            <p className="text-lg font-semibold text-gray-900 mb-8">
+              {home?.hero?.ctaCuriososPreparados ?? 'Pare de conversar com curiosos. Comece a conversar com clientes preparados.'}
             </p>
 
-            {/* 2️⃣ PRÉ-ENGAJAMENTO — Micro interação antes do CTA */}
+            {/* 2️⃣ AUTO DIAGNÓSTICO — Quiz rápido (prende a pessoa) */}
             <div className="max-w-xl mx-auto mb-10">
               <p className="text-sm font-medium text-gray-600 mb-4">{home?.preEngagement?.beforeStart ?? 'Antes de começar, responda rápido:'}</p>
               <p className="font-semibold text-gray-900 mb-4">{home?.preEngagement?.questionPreEngage ?? 'Seu marketing hoje atrai mais:'}</p>
@@ -212,63 +217,93 @@ export default function InstitutionalPageContent() {
                 </Link>
               </div>
             </div>
+          </div>
+        </section>
 
-            {/* Por que diagnósticos funcionam — credibilidade */}
-            <div className="bg-white/90 rounded-2xl p-6 sm:p-8 border border-gray-100 shadow-sm text-left max-w-2xl mx-auto">
-              <h2 className="text-lg font-bold text-gray-900 mb-4 text-center">{home?.whyDiagnosticsBlock?.title ?? 'Por que diagnósticos funcionam tão bem'}</h2>
-              <p className="text-sm text-gray-600 mb-4 text-center">{home?.whyDiagnosticsBlock?.subtitle ?? 'Diagnósticos ativam três mecanismos psicológicos.'}</p>
-              <div className="grid sm:grid-cols-3 gap-4 mb-4">
-                <div className="text-center p-3 rounded-xl bg-gray-50">
-                  <span className="text-2xl block mb-2" aria-hidden>🧠</span>
-                  <p className="font-semibold text-gray-900 text-sm">{home?.whyDiagnosticsBlock?.autoDiagnosis ?? 'Auto-diagnóstico'}</p>
-                  <p className="text-xs text-gray-600">{home?.whyDiagnosticsBlock?.autoDesc ?? 'A pessoa entende o próprio problema.'}</p>
-                </div>
-                <div className="text-center p-3 rounded-xl bg-gray-50">
-                  <span className="text-2xl block mb-2" aria-hidden>🎯</span>
-                  <p className="font-semibold text-gray-900 text-sm">{home?.whyDiagnosticsBlock?.commitment ?? 'Compromisso'}</p>
-                  <p className="text-xs text-gray-600">{home?.whyDiagnosticsBlock?.commitmentDesc ?? 'Ela reconhece a situação.'}</p>
-                </div>
-                <div className="text-center p-3 rounded-xl bg-gray-50">
-                  <span className="text-2xl block mb-2" aria-hidden>👤</span>
-                  <p className="font-semibold text-gray-900 text-sm">{home?.whyDiagnosticsBlock?.identity ?? 'Identidade'}</p>
-                  <p className="text-xs text-gray-600">{home?.whyDiagnosticsBlock?.identityDesc ?? 'Descobre seu perfil.'}</p>
-                </div>
+        {/* 3️⃣ VÍDEO EXPLICATIVO — 60–90s: problema, nova lógica, como testar */}
+        <section className="py-10 sm:py-14 bg-white border-b border-gray-100">
+          <div className="max-w-3xl mx-auto px-4">
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-900 text-center mb-6">
+              O que é o YLADA em 90 segundos
+            </h2>
+            {typeof process !== 'undefined' && process.env?.NEXT_PUBLIC_YLADA_HOME_VIDEO_URL ? (
+              <div className="relative aspect-video rounded-2xl overflow-hidden bg-gray-900">
+                <iframe
+                  src={process.env.NEXT_PUBLIC_YLADA_HOME_VIDEO_URL}
+                  title="Vídeo explicativo YLADA"
+                  className="absolute inset-0 w-full h-full"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                />
               </div>
-              <p className="text-sm font-medium text-gray-800 text-center">{home?.whyDiagnosticsBlock?.result ?? 'Resultado: conversas muito mais preparadas.'}</p>
-            </div>
+            ) : (
+              <div className="aspect-video rounded-2xl bg-gray-100 border-2 border-dashed border-gray-300 flex flex-col items-center justify-center gap-3 p-8 text-center">
+                <span className="text-4xl" aria-hidden>🎥</span>
+                <p className="text-gray-600 font-medium">Vídeo explicativo em breve</p>
+                <p className="text-sm text-gray-500 max-w-md">
+                  Em 60–90 segundos: o problema que o YLADA resolve, a lógica de diagnóstico antes da conversa e como testar grátis.
+                </p>
+              </div>
+            )}
+          </div>
+        </section>
 
-            {/* Fluxo visual */}
-            <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-4 py-6 px-4 mt-8 bg-white/60 rounded-xl border border-gray-100">
-              <span className="text-sm font-semibold text-gray-800">{home?.hero?.flowStep1 ?? 'Criar diagnóstico'}</span>
-              <span className="text-gray-400">→</span>
-              <span className="text-sm font-semibold text-gray-800">{home?.hero?.flowStep2 ?? 'Compartilhar link'}</span>
-              <span className="text-gray-400">→</span>
-              <span className="text-sm font-semibold text-gray-800">{home?.hero?.flowStep3 ?? 'Pessoa responde'}</span>
-              <span className="text-gray-400">→</span>
-              <span className="text-sm font-semibold text-green-700">{home?.hero?.flowStep4 ?? 'Inicia conversa no WhatsApp'}</span>
+        {/* 4️⃣ IDENTIFICAÇÃO DO PROBLEMA — A maioria dos profissionais explica demais */}
+        <section className="bg-gray-50 py-12 sm:py-16 lg:py-20 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8">
+          <div className="max-w-3xl mx-auto">
+            <h2 className="text-xl sm:text-3xl font-bold text-gray-900 mb-6 sm:mb-8 text-center">
+              A maioria dos profissionais explica demais o que faz.
+            </h2>
+            <ul className="space-y-3 text-gray-700 mb-6">
+              <li className="flex items-start gap-3">
+                <span className="text-red-500 mt-1">•</span>
+                <span>Pessoas pedindo preço</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="text-red-500 mt-1">•</span>
+                <span>Conversas que não avançam</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="text-red-500 mt-1">•</span>
+                <span>Clientes que não entendem o valor</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="text-red-500 mt-1">•</span>
+                <span>Profissionais que precisam convencer o tempo todo</span>
+              </li>
+            </ul>
+            <p className="text-lg font-semibold text-gray-900 text-center mb-8">
+              O problema raramente é seu conhecimento.<br />
+              É a forma como o cliente chega até você.
+            </p>
+            <p className="text-gray-500 text-sm text-center">
+              Muitos profissionais investem em cursos, marketing e ferramentas.
+              Mas ignoram um fator essencial:
+              como o cliente entende o próprio problema antes da conversa.
+            </p>
+          </div>
+        </section>
+
+        {/* 3️⃣ A VIRADA DE CHAVE — frase forte uma vez só */}
+        <section className="py-10 sm:py-14 bg-white border-b border-gray-100">
+          <div className="max-w-2xl mx-auto text-center px-4">
+            <div className="bg-gray-900 text-white rounded-2xl p-8 sm:p-10">
+              <p className="text-base sm:text-lg text-gray-300 mb-3">
+                {home?.duolingo?.explainNot ?? 'Explicar demais não cria clientes.'}
+              </p>
+              <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-white leading-tight">
+                Boas conversas começam com boas perguntas.
+              </p>
             </div>
           </div>
         </section>
 
-        {/* 2b Duolingo moment — entender o produto em 3 segundos */}
-        <section className="py-10 sm:py-14 bg-white border-b border-gray-100">
+        {/* 4️⃣ A NOVA LÓGICA — Marketing tradicional vs YLADA */}
+        <section className="py-10 sm:py-14 bg-white">
           <div className="max-w-3xl mx-auto px-4">
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 text-center mb-6 leading-tight">
-              {home?.duolingo?.title ?? 'Boas conversas começam com boas perguntas.'}
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-900 text-center mb-6">
+              Marketing tradicional vs YLADA
             </h2>
-            <div className="bg-gray-900 text-white rounded-2xl p-8 sm:p-10 mb-8">
-              <p className="text-base sm:text-lg text-gray-300 text-center mb-3">
-                {home?.duolingo?.explainNot ?? 'Explicar demais não cria clientes.'}
-              </p>
-              <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-white text-center leading-tight">
-                {home?.duolingo?.tagline ?? 'Boas conversas começam com boas perguntas.'}
-              </p>
-            </div>
-            <p className="text-gray-600 text-center mb-8 max-w-xl mx-auto leading-relaxed">
-              Antes de iniciar uma conversa, médicos fazem perguntas para entender o problema. Profissionais também podem fazer isso. YLADA transforma conhecimento em diagnósticos que iniciam conversas melhores.
-            </p>
-
-            {/* Comparação visual: tradicional vs YLADA */}
             <div className="grid sm:grid-cols-2 gap-6 mb-8">
               <div className="rounded-xl p-6 border-2 border-red-100 bg-red-50/50">
                 <p className="font-bold text-gray-900 mb-4 text-center text-sm uppercase tracking-wider text-red-800">Marketing tradicional</p>
@@ -301,208 +336,39 @@ export default function InstitutionalPageContent() {
                 </ul>
               </div>
             </div>
-
-            {/* Diagrama central */}
-            <div className="flex flex-col items-center gap-2 py-6 px-6 bg-gray-50 rounded-xl border border-gray-100">
-              <span className="text-sm font-semibold text-gray-800">Pergunta</span>
-              <span className="text-gray-400">↓</span>
-              <span className="text-sm font-semibold text-gray-800">Diagnóstico</span>
-              <span className="text-gray-400">↓</span>
-              <span className="text-sm font-semibold text-gray-800">Conversa</span>
-              <span className="text-gray-400">↓</span>
-              <span className="text-sm font-bold text-gray-900">Cliente</span>
-            </div>
           </div>
         </section>
 
-        {/* 3️⃣ PROBLEMA DO MERCADO — Fundo cinza claro */}
-        <section className="bg-gray-50 py-12 sm:py-16 lg:py-20 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8">
-          <div className="max-w-3xl mx-auto">
-            <h2 className="text-xl sm:text-3xl font-bold text-gray-900 mb-6 sm:mb-8 text-center">
-              A maioria dos profissionais explica demais o que faz.
-            </h2>
-            <ul className="space-y-3 text-gray-700 mb-6">
-              <li className="flex items-start gap-3">
-                <span className="text-red-500 mt-1">•</span>
-                <span>Pessoas pedindo preço</span>
-              </li>
-              <li className="flex items-start gap-3">
-                <span className="text-red-500 mt-1">•</span>
-                <span>Conversas que não avançam</span>
-              </li>
-              <li className="flex items-start gap-3">
-                <span className="text-red-500 mt-1">•</span>
-                <span>Clientes que não entendem o valor</span>
-              </li>
-              <li className="flex items-start gap-3">
-                <span className="text-red-500 mt-1">•</span>
-                <span>Profissionais que precisam convencer o tempo todo</span>
-              </li>
-            </ul>
-            <p className="text-lg font-semibold text-gray-900 text-center mb-8">
-              O problema raramente é seu conhecimento.<br />
-              É a forma como o cliente chega até você.
-            </p>
-            <p className="text-gray-800 font-semibold text-center">
-              Explicar demais não cria clientes.<br />
-              Boas conversas começam com boas perguntas.
-            </p>
-            <p className="text-gray-500 text-sm text-center mt-6">
-              Muitos profissionais investem em cursos, marketing e ferramentas.
-              Mas ignoram um fator essencial:
-              como o cliente entende o próprio problema antes da conversa.
-            </p>
-          </div>
-        </section>
-
-        {/* Por que diagnósticos funcionam tão bem — logo após o problema */}
-        <section className="py-12 sm:py-16 bg-white">
-          <div className="max-w-4xl mx-auto">
-            <h2 className="text-xl sm:text-3xl font-bold text-gray-900 text-center mb-4">
-              Por que diagnósticos funcionam tão bem
-            </h2>
-            <p className="text-gray-600 text-center mb-4 max-w-2xl mx-auto">
-              Diagnósticos funcionam porque ativam três mecanismos psicológicos naturais.
-            </p>
-            <p className="text-gray-800 font-semibold text-center mb-10 max-w-xl mx-auto">
-              Formulários coletam respostas. Diagnósticos criam consciência. O YLADA foi criado para criar consciência do cliente antes da conversa.
-            </p>
-            <div className="grid sm:grid-cols-3 gap-6 mb-10">
-              <div className="bg-gray-50 rounded-xl p-6 border border-gray-100 text-center">
-                <span className="text-3xl mb-3 block" aria-hidden>🧠</span>
-                <h3 className="font-bold text-gray-900 mb-2">Auto-diagnóstico</h3>
-                <p className="text-gray-600 text-sm leading-relaxed">Quando alguém responde perguntas sobre o próprio problema, começa a refletir. Em vez de alguém explicar, a pessoa descobre sozinha. Isso cria mais clareza e abertura para a conversa.</p>
-              </div>
-              <div className="bg-gray-50 rounded-xl p-6 border border-gray-100 text-center">
-                <span className="text-3xl mb-3 block" aria-hidden>🎯</span>
-                <h3 className="font-bold text-gray-900 mb-2">Compromisso interno</h3>
-                <p className="text-gray-600 text-sm leading-relaxed">Ao responder, a pessoa reconhece sua situação. Quando alguém reconhece um problema, tende a querer agir para resolvê-lo. A conversa começa com muito mais interesse.</p>
-              </div>
-              <div className="bg-gray-50 rounded-xl p-6 border border-gray-100 text-center">
-                <span className="text-3xl mb-3 block" aria-hidden>👤</span>
-                <h3 className="font-bold text-gray-900 mb-2">Identidade</h3>
-                <p className="text-gray-600 text-sm leading-relaxed">O diagnóstico revela um perfil. As pessoas gostam de entender como estão hoje e como podem evoluir. Isso gera curiosidade e engajamento.</p>
-              </div>
-            </div>
-            <p className="text-gray-700 font-medium text-center mb-6">
-              Em vez de curiosos, o profissional conversa com pessoas mais preparadas. E conversas preparadas levam a decisões mais rápidas.
-            </p>
-            <div className="flex flex-col items-center gap-2 py-4 px-6 bg-gray-50 rounded-xl border border-gray-100 max-w-sm mx-auto mb-6">
-              <span className="text-sm font-semibold text-gray-800">Perguntas</span>
-              <span className="text-gray-400">↓</span>
-              <span className="text-sm font-semibold text-gray-800">Reflexão</span>
-              <span className="text-gray-400">↓</span>
-              <span className="text-sm font-semibold text-gray-800">Consciência do problema</span>
-              <span className="text-gray-400">↓</span>
-              <span className="text-sm font-semibold text-gray-800">Clareza</span>
-              <span className="text-gray-400">↓</span>
-              <span className="text-sm font-bold text-gray-900">Conversa melhor</span>
-            </div>
-            <p className="text-xl font-bold text-gray-900 text-center">
-              Boas conversas começam com boas perguntas.
-            </p>
-          </div>
-        </section>
-
-        {/* 3b A metáfora médica */}
+        {/* 6️⃣ DEMONSTRAÇÃO — 4 passos (reduz fricção) */}
         <section className="py-12 sm:py-16 lg:py-20 bg-white">
-          <div className="max-w-3xl mx-auto">
-            <h2 className="text-xl sm:text-3xl font-bold text-gray-900 mb-6 text-center">
-              O marketing tradicional explica. O YLADA pergunta primeiro.
-            </h2>
-            <p className="text-gray-700 mb-6 leading-relaxed">
-              Antes de indicar um tratamento, médicos fazem perguntas. Eles precisam entender o problema primeiro.
-            </p>
-            <p className="text-gray-700 mb-6 leading-relaxed">
-              Profissionais também podem fazer isso. Em vez de explicar tudo logo no início, o cliente pode primeiro entender o próprio problema. É isso que o diagnóstico faz.
-            </p>
-            <p className="text-lg font-semibold text-gray-900 text-center">
-              Antes do tratamento vem o diagnóstico.<br />
-              Antes da conversa vem o diagnóstico.
-            </p>
-            <p className="text-gray-600 text-center mt-4 text-sm">
-              YLADA ajuda profissionais a criar consciência do cliente antes da conversa.
-            </p>
-          </div>
-        </section>
-
-        {/* 3c O funil de diagnóstico YLADA */}
-        <section className="bg-gray-50 py-12 sm:py-16 lg:py-20 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8">
-          <div className="max-w-4xl mx-auto">
-            <h2 className="text-xl sm:text-3xl font-bold text-gray-900 text-center mb-2">
-              O funil de diagnóstico YLADA
-            </h2>
-            <p className="text-gray-600 text-center mb-8 text-sm sm:text-base">
-              Não é o funil tradicional de marketing. É um funil que prepara a conversa antes dela acontecer.
-            </p>
-            <div className="mb-10 flex justify-center">
-              <Image
-                src="/images/ylada/funil-tradicional-vs-funil-diagnostico-ylada.png"
-                alt="Comparação: Funil tradicional de marketing (Atenção, Interesse, Desejo, Ação) versus Funil de diagnóstico YLADA (Curiosidade, Perguntas, Clareza, Conversa, Cliente)"
-                width={800}
-                height={500}
-                className="w-full max-w-2xl h-auto rounded-xl border border-gray-200 shadow-sm"
-              />
-            </div>
-            <div className="grid md:grid-cols-2 gap-8">
-              <div className="bg-white rounded-xl p-6 border border-red-100">
-                <h3 className="font-bold text-gray-900 mb-3 text-center">Marketing tradicional</h3>
-                <div className="flex flex-col items-center gap-1 py-4">
-                  <span className="text-sm font-medium text-gray-700">Atenção</span>
-                  <span className="text-gray-400">↓</span>
-                  <span className="text-sm font-medium text-gray-700">Interesse</span>
-                  <span className="text-gray-400">↓</span>
-                  <span className="text-sm font-medium text-gray-700">Desejo</span>
-                  <span className="text-gray-400">↓</span>
-                  <span className="text-sm font-medium text-gray-700">Ação</span>
-                </div>
-                <p className="text-center text-red-600 text-sm font-medium mt-2">Resultado: curiosos e conversas fracas.</p>
+          <h2 className="text-xl sm:text-3xl font-bold text-gray-900 text-center mb-8">
+            Como funciona
+          </h2>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-5xl mx-auto px-4">
+            {[
+              { emoji: '🧠', titulo: 'Criar diagnóstico', desc: 'Transforme seu conhecimento em perguntas que revelam o problema do cliente.' },
+              { emoji: '🔗', titulo: 'Compartilhar link', desc: 'Envie nas redes sociais, WhatsApp ou anúncios.' },
+              { emoji: '💬', titulo: 'Pessoa responde', desc: 'Pessoas respondem e iniciam conversa com você no WhatsApp.' },
+              { emoji: '🤝', titulo: 'Inicia conversa no WhatsApp', desc: 'O cliente chega com mais clareza e a conversa avança com mais facilidade.' },
+            ].map((item) => (
+              <div key={item.titulo} className="text-center bg-gray-50 rounded-xl p-6 border border-gray-100">
+                <div className="text-4xl mb-3" aria-hidden>{item.emoji}</div>
+                <h3 className="font-semibold text-gray-900 mb-2">{item.titulo}</h3>
+                <p className="text-sm text-gray-600 leading-relaxed">{item.desc}</p>
               </div>
-              <div className="bg-white rounded-xl p-6 border-2 border-[#2563eb] bg-blue-50/30">
-                <h3 className="font-bold text-gray-900 mb-3 text-center">Funil de diagnóstico</h3>
-                <div className="flex flex-col items-center gap-1 py-4">
-                  <span className="text-sm font-medium text-gray-800">Curiosidade</span>
-                  <span className="text-gray-400">↓</span>
-                  <span className="text-sm font-medium text-gray-800">Perguntas</span>
-                  <span className="text-gray-400">↓</span>
-                  <span className="text-sm font-medium text-gray-800">Clareza</span>
-                  <span className="text-gray-400">↓</span>
-                  <span className="text-sm font-medium text-gray-800">Conversa</span>
-                  <span className="text-gray-400">↓</span>
-                  <span className="text-sm font-bold text-gray-900">Cliente</span>
-                </div>
-                <p className="text-center text-[#2563eb] text-sm font-medium mt-2">Resultado: conversas mais preparadas.</p>
-              </div>
-            </div>
-            <p className="text-center text-gray-600 text-sm mt-6 max-w-xl mx-auto">
-              CRM organiza conversas depois que elas acontecem. YLADA prepara a conversa antes dela acontecer.
-            </p>
+            ))}
+          </div>
+          <div className="text-center mt-8">
+            <Link
+              href={getLocalizedPath('/pt/metodo-ylada', locale)}
+              className="text-blue-600 hover:text-blue-700 font-medium text-sm"
+            >
+              Conhecer a filosofia YLADA →
+            </Link>
           </div>
         </section>
 
-        {/* Princípio visual — bloco forte da frase */}
-        <section className="py-10 sm:py-14 bg-white">
-          <div className="max-w-2xl mx-auto text-center">
-            <div className="bg-gray-900 text-white rounded-2xl p-8 sm:p-10 mb-6">
-              <p className="text-sm sm:text-base uppercase tracking-wider text-gray-300 mb-2">Explicar · Convencer · Insistir</p>
-              <p className="text-base sm:text-lg text-gray-400 mb-4">não funciona.</p>
-              <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-white leading-tight">
-                Boas conversas começam com boas perguntas.
-              </p>
-            </div>
-            <div className="flex flex-col items-center gap-2 py-4 px-4 bg-gray-50 rounded-xl border border-gray-100">
-              <span className="text-sm font-semibold text-gray-800">Pergunta</span>
-              <span className="text-gray-400">↓</span>
-              <span className="text-sm font-semibold text-gray-800">Diagnóstico</span>
-              <span className="text-gray-400">↓</span>
-              <span className="text-sm font-semibold text-gray-800">Conversa</span>
-              <span className="text-gray-400">↓</span>
-              <span className="text-sm font-bold text-gray-900">Cliente</span>
-            </div>
-          </div>
-        </section>
-
-        {/* O efeito do auto-diagnóstico — aprofundamento (consistência + identidade) */}
+        {/* 7️⃣ PSICOLOGIA DO DIAGNÓSTICO — uma vez só (auto-diagnóstico, compromisso, identidade) */}
         <section className="bg-gray-50 py-12 sm:py-16 lg:py-20 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl mx-auto">
             <h2 className="text-xl sm:text-3xl font-bold text-gray-900 text-center mb-4">
@@ -576,7 +442,30 @@ export default function InstitutionalPageContent() {
           </div>
         </section>
 
-        {/* 4️⃣ EXEMPLOS DE DIAGNÓSTICOS — Grid 2x2 */}
+        {/* 8️⃣ O FUNIL YLADA — Curiosidade → Perguntas → Clareza → Conversa → Cliente */}
+        <section className="py-10 sm:py-14 bg-white">
+          <div className="max-w-2xl mx-auto px-4 text-center">
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6">
+              O funil YLADA
+            </h2>
+            <p className="text-gray-600 text-sm mb-6">
+              Não é o funil tradicional. É um funil que prepara a conversa antes dela acontecer.
+            </p>
+            <div className="flex flex-col items-center gap-2 py-6 px-6 bg-gray-50 rounded-xl border border-gray-100 max-w-sm mx-auto">
+              <span className="text-sm font-semibold text-gray-800">Curiosidade</span>
+              <span className="text-gray-400">↓</span>
+              <span className="text-sm font-semibold text-gray-800">Perguntas</span>
+              <span className="text-gray-400">↓</span>
+              <span className="text-sm font-semibold text-gray-800">Clareza</span>
+              <span className="text-gray-400">↓</span>
+              <span className="text-sm font-semibold text-gray-800">Conversa</span>
+              <span className="text-gray-400">↓</span>
+              <span className="text-sm font-bold text-gray-900">Cliente</span>
+            </div>
+          </div>
+        </section>
+
+        {/* 9️⃣ EXEMPLOS DE DIAGNÓSTICOS — inspiração de uso real */}
         <section className="py-12 sm:py-16 lg:py-20">
           <div className="max-w-4xl mx-auto">
             <h2 className="text-xl sm:text-3xl font-bold text-gray-900 text-center mb-4">
@@ -600,7 +489,7 @@ export default function InstitutionalPageContent() {
           </div>
         </section>
 
-        {/* 5️⃣ BENEFÍCIOS DO DIAGNÓSTICO — Checklist central */}
+        {/* 9️⃣ BENEFÍCIOS — Profissionais usam diagnósticos para */}
         <section className="bg-gray-50 py-12 sm:py-16 lg:py-20 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8">
           <div className="max-w-2xl mx-auto text-center">
             <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6">
@@ -627,63 +516,7 @@ export default function InstitutionalPageContent() {
           </div>
         </section>
 
-        {/* 6️⃣ COMO FUNCIONA — 4 cards horizontais */}
-        <section className="py-12 sm:py-16 lg:py-20">
-          <h2 className="text-xl sm:text-3xl font-bold text-gray-900 text-center mb-8">
-            Como funciona
-          </h2>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-5xl mx-auto">
-            {[
-              { emoji: '🧠', titulo: 'Criar diagnóstico', desc: 'Transforme seu conhecimento em perguntas que revelam o problema do cliente.' },
-              { emoji: '🔗', titulo: 'Compartilhar link', desc: 'Envie nas redes sociais, WhatsApp ou anúncios.' },
-              { emoji: '💬', titulo: 'Receber conversas no WhatsApp', desc: 'Pessoas respondem e iniciam conversa com você. O valor está nas conversas iniciadas.' },
-              { emoji: '🤝', titulo: 'Conversa mais preparada', desc: 'O cliente chega com mais clareza e a conversa avança com mais facilidade.' },
-            ].map((item) => (
-              <div key={item.titulo} className="text-center bg-gray-50 rounded-xl p-6 border border-gray-100">
-                <div className="text-4xl mb-3" aria-hidden>{item.emoji}</div>
-                <h3 className="font-semibold text-gray-900 mb-2">{item.titulo}</h3>
-                <p className="text-sm text-gray-600 leading-relaxed">{item.desc}</p>
-              </div>
-            ))}
-          </div>
-          <div className="text-center mt-8">
-            <Link
-              href={getLocalizedPath('/pt/metodo-ylada', locale)}
-              className="text-blue-600 hover:text-blue-700 font-medium text-sm"
-            >
-              Conhecer a filosofia YLADA →
-            </Link>
-          </div>
-
-          {/* Os três motores do YLADA */}
-          <div className="mt-12 pt-12 border-t border-gray-200">
-            <h3 className="text-xl font-bold text-gray-900 text-center mb-6">
-              Os três motores do YLADA
-            </h3>
-            <div className="grid sm:grid-cols-3 gap-6 max-w-4xl mx-auto">
-              <div className="text-center bg-white rounded-xl p-6 border border-gray-200">
-                <span className="text-3xl mb-2 block" aria-hidden>🧠</span>
-                <h4 className="font-semibold text-gray-900 mb-2">Diagnóstico</h4>
-                <p className="text-sm text-gray-600">Diagnósticos despertam curiosidade e atraem pessoas interessadas.</p>
-              </div>
-              <div className="text-center bg-white rounded-xl p-6 border border-gray-200">
-                <span className="text-3xl mb-2 block" aria-hidden>💬</span>
-                <h4 className="font-semibold text-gray-900 mb-2">Conversa</h4>
-                <p className="text-sm text-gray-600">O cliente chega com mais clareza e a conversa começa melhor.</p>
-              </div>
-              <div className="text-center bg-white rounded-xl p-6 border border-gray-200">
-                <span className="text-3xl mb-2 block" aria-hidden>🚀</span>
-                <h4 className="font-semibold text-gray-900 mb-2">Estratégia</h4>
-                <p className="text-sm text-gray-600">O Noel ajuda você a melhorar seus diagnósticos e sua comunicação.</p>
-              </div>
-            </div>
-            <p className="text-center text-gray-500 text-sm mt-4">
-              Diagnóstico → Conversa → Estratégia → crescimento
-            </p>
-          </div>
-        </section>
-
-        {/* 7️⃣ ÁREAS — Grid 4x2 */}
+        {/* 10️⃣ PARA QUEM É — Áreas */}
         <section className="bg-gray-50 py-12 sm:py-16 lg:py-20 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8">
           <div className="max-w-4xl mx-auto">
             <h2 className="text-xl sm:text-3xl font-bold text-gray-900 text-center mb-2">
@@ -715,7 +548,7 @@ export default function InstitutionalPageContent() {
           </div>
         </section>
 
-        {/* 8️⃣ O QUE ACONTECE DEPOIS — Etapas numeradas (conciso) */}
+        {/* 11️⃣ O QUE ACONTECE DEPOIS — Etapas numeradas (conciso) */}
         <section className="py-12 sm:py-16 lg:py-20">
           <div className="max-w-2xl mx-auto">
             <h2 className="text-xl sm:text-2xl font-bold text-gray-900 text-center mb-2">
@@ -787,7 +620,7 @@ export default function InstitutionalPageContent() {
           </div>
         </section>
 
-        {/* 8b COMECE GRÁTIS — Plano Free em destaque */}
+        {/* 12️⃣ PLANO FREE — Comece grátis */}
         <section className="bg-sky-50 py-12 sm:py-16 border-y border-sky-100">
           <div className="max-w-2xl mx-auto text-center">
             <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">
@@ -808,7 +641,7 @@ export default function InstitutionalPageContent() {
           </div>
         </section>
 
-        {/* 9️⃣ CTA FINAL — Estilo profissional */}
+        {/* CTA FINAL — Estilo profissional */}
         <section className="bg-[#1e3a8a] py-16 sm:py-20 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl mx-auto text-center">
             <h2 className="text-2xl sm:text-3xl font-bold text-white mb-8 leading-tight">
