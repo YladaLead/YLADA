@@ -38,6 +38,8 @@ export async function validateProtectedAccess(
     allowSupport?: boolean
     excludeRoutesFromSubscription?: string[] // Rotas que não exigem assinatura
     currentPath?: string // Pathname atual (opcional)
+    /** Rotas onde qualquer perfil autenticado pode acessar (ex.: /pt/onboarding para usuárias antigas) */
+    allowAnyPerfilForPaths?: string[]
   } = {}
 ): Promise<AuthValidationResult> {
   const {
@@ -46,6 +48,7 @@ export async function validateProtectedAccess(
     allowSupport = true,
     excludeRoutesFromSubscription = [],
     currentPath = '',
+    allowAnyPerfilForPaths = [],
   } = options
   
   // Tentar obter pathname da requisição atual
@@ -275,9 +278,20 @@ export async function validateProtectedAccess(
       (area === 'wellness' && profile.perfil === 'coach-bem-estar') || // Coach-bem-estar usa plataforma wellness
       (isMatrixArea(area) && (profile.perfil === 'ylada' || profile.perfil === 'med' || profile.perfil === area))
 
-    if (!profileMatchesArea && !canBypassProfile) {
+    // Permitir acesso em rotas de “completar perfil” para qualquer perfil (evita loop para usuárias antigas)
+    const isAllowAnyPerfilPath =
+      allowAnyPerfilForPaths.length > 0 &&
+      actualPath &&
+      allowAnyPerfilForPaths.some(
+        (p) => actualPath.endsWith(p) || actualPath.includes(p)
+      )
+
+    if (!profileMatchesArea && !canBypassProfile && !isAllowAnyPerfilPath) {
       console.log(`❌ ProtectedLayout [${area}]: Perfil incorreto (${profile.perfil}), redirecionando para login`)
       redirect(area === 'ylada' ? '/pt/login' : `/pt/${area}/login`)
+    }
+    if (isAllowAnyPerfilPath) {
+      console.log(`ℹ️ ProtectedLayout [${area}]: Rota de onboarding/perfil — permitindo qualquer perfil: ${actualPath}`)
     }
 
     // 4b. Nutri e Coach: exigir perfil YLADA completo (nome+whatsapp+profile_type+profession).
