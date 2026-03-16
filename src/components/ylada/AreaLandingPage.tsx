@@ -96,8 +96,8 @@ export function AreaLandingPage({ area, locale, appBasePath = '/pt' }: AreaLandi
   const homeHref = `/${locale}`
   const loginHref = `${appBasePath}/${area}/login`
   const homeRedirect = `${appBasePath}/${area}/home`
-  /** Checkout direto (escolher plano anual/mensal) — sem passar por /pt/precos */
-  const checkoutBase = AREA_TO_CHECKOUT[area] ?? '/pt/nutri/checkout'
+  /** Checkout direto (escolher plano anual/mensal). Nutra: por locale (/pt, /en, /es); demais: /pt. */
+  const checkoutBase = area === 'nutra' ? `/${locale}/nutra/checkout` : (AREA_TO_CHECKOUT[area] ?? '/pt/nutri/checkout')
 
   const c = COMMON[locale]
   const label = AREA_LABELS[area]?.[locale] ?? AREA_LABELS[area]?.pt ?? area

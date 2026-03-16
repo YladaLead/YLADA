@@ -9,6 +9,7 @@ export interface HomeTranslations {
     pricing: string
     login: string
     discoverProfile: string
+    startFree?: string
   }
   loading: string
   redirecting: string
@@ -16,6 +17,12 @@ export interface HomeTranslations {
     title: string
     tagline: string
     subtitle: string
+    ctaPrimary?: string
+    ctaSecondary?: string
+    flowStep1?: string
+    flowStep2?: string
+    flowStep3?: string
+    flowStep4?: string
     yladaIntro: string
     questionLabel: string
     question1: string
@@ -26,6 +33,28 @@ export interface HomeTranslations {
     progress: string
     quickInfo: string
     proof: string
+  }
+  preEngagement?: {
+    beforeStart: string
+    questionPreEngage: string
+    optCurious: string
+    optStuck: string
+    optPrepared: string
+    optNotSure: string
+    discoverProfileMinute: string
+    ctaFreeDiagnosis: string
+    ctaCreateDiagnosis: string
+  }
+  whyDiagnosticsBlock?: {
+    title: string
+    subtitle: string
+    autoDiagnosis: string
+    commitment: string
+    identity: string
+    autoDesc: string
+    commitmentDesc: string
+    identityDesc: string
+    result: string
   }
   duolingo: {
     title: string

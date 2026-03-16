@@ -204,14 +204,21 @@ export const enTranslations: Translations = {
       howItWorks: 'How it works',
       pricing: 'Pricing',
       login: 'Log in',
-      discoverProfile: 'Discover my profile'
+      discoverProfile: 'Discover my profile',
+      startFree: 'Start free'
     },
     loading: 'Loading...',
     redirecting: 'Redirecting...',
     hero: {
-      title: 'Does your marketing attract curious people or clients ready to hire?',
-      tagline: 'Good conversations start with good questions.',
-      subtitle: 'Find out in less than 1 minute if your professional communication is really attracting interested people.',
+      title: 'Good conversations start with good questions.',
+      tagline: 'Create smart diagnostics, share the link, and watch people start a conversation with you on WhatsApp.',
+      subtitle: 'No hassle. No need to build a complex funnel.',
+      ctaPrimary: 'Start free',
+      ctaSecondary: 'See how it works',
+      flowStep1: 'Create diagnosis',
+      flowStep2: 'Share link',
+      flowStep3: 'Person responds',
+      flowStep4: 'Starts conversation on WhatsApp',
       yladaIntro: 'YLADA uses smart diagnostics to turn curiosity into client conversations.',
       questionLabel: 'When someone contacts you, they usually:',
       question1: 'ask about the price right at the start',
@@ -222,6 +229,28 @@ export const enTranslations: Translations = {
       progress: 'Question 1 of 7',
       quickInfo: '7 quick questions • less than 1 minute',
       proof: '+3,000 professionals have already tested'
+    },
+    preEngagement: {
+      beforeStart: 'Before you start, answer quickly:',
+      questionPreEngage: 'Today your marketing attracts more:',
+      optCurious: 'Curious people asking about price',
+      optStuck: 'Conversations that don\'t move forward',
+      optPrepared: 'Truly prepared clients',
+      optNotSure: 'Not sure',
+      discoverProfileMinute: 'Discover your professional profile in less than 1 minute.',
+      ctaFreeDiagnosis: 'Take free diagnosis',
+      ctaCreateDiagnosis: 'Create my diagnosis'
+    },
+    whyDiagnosticsBlock: {
+      title: 'Why diagnostics work so well',
+      subtitle: 'Diagnostics activate three psychological mechanisms.',
+      autoDiagnosis: 'Self-diagnosis',
+      commitment: 'Commitment',
+      identity: 'Identity',
+      autoDesc: 'The person understands their own problem.',
+      commitmentDesc: 'They acknowledge the situation.',
+      identityDesc: 'They discover their profile.',
+      result: 'Result: much more prepared conversations.'
     },
     duolingo: {
       title: 'Good conversations start with good questions.',

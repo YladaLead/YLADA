@@ -234,6 +234,28 @@ export const ptTranslations: Translations = {
       quickInfo: '7 perguntas rápidas • menos de 1 minuto',
       proof: '+3.000 profissionais já testaram'
     },
+    preEngagement: {
+      beforeStart: 'Antes de começar, responda rápido:',
+      questionPreEngage: 'Seu marketing hoje atrai mais:',
+      optCurious: 'Curiosos perguntando preço',
+      optStuck: 'Conversas que não avançam',
+      optPrepared: 'Clientes realmente preparados',
+      optNotSure: 'Não tenho certeza',
+      discoverProfileMinute: 'Descubra seu perfil profissional em menos de 1 minuto.',
+      ctaFreeDiagnosis: 'Fazer diagnóstico grátis',
+      ctaCreateDiagnosis: 'Criar meu diagnóstico'
+    },
+    whyDiagnosticsBlock: {
+      title: 'Por que diagnósticos funcionam tão bem',
+      subtitle: 'Diagnósticos ativam três mecanismos psicológicos.',
+      autoDiagnosis: 'Auto-diagnóstico',
+      commitment: 'Compromisso',
+      identity: 'Identidade',
+      autoDesc: 'A pessoa entende o próprio problema.',
+      commitmentDesc: 'Ela reconhece a situação.',
+      identityDesc: 'Descobre seu perfil.',
+      result: 'Resultado: conversas muito mais preparadas.'
+    },
     duolingo: {
       title: 'Boas conversas começam com boas perguntas.',
       explainNot: 'Explicar demais não cria clientes.',

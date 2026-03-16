@@ -204,14 +204,21 @@ export const esTranslations: Translations = {
       howItWorks: 'Cómo funciona',
       pricing: 'Precios',
       login: 'Entrar',
-      discoverProfile: 'Descubrir mi perfil'
+      discoverProfile: 'Descubrir mi perfil',
+      startFree: 'Empezar gratis'
     },
     loading: 'Cargando...',
     redirecting: 'Redirigiendo...',
     hero: {
-      title: '¿Tu marketing atrae curiosos o clientes listos para contratar?',
-      tagline: 'Las buenas conversaciones empiezan con buenas preguntas.',
-      subtitle: 'Descubre en menos de 1 minuto si tu comunicación profesional está realmente atrayendo a personas interesadas.',
+      title: 'Las buenas conversaciones empiezan con buenas preguntas.',
+      tagline: 'Crea diagnósticos inteligentes, comparte el enlace y verás a las personas iniciar conversación contigo en WhatsApp.',
+      subtitle: 'Sin complicaciones. Sin necesidad de armar un embudo complejo.',
+      ctaPrimary: 'Empezar gratis',
+      ctaSecondary: 'Ver cómo funciona',
+      flowStep1: 'Crear diagnóstico',
+      flowStep2: 'Compartir enlace',
+      flowStep3: 'La persona responde',
+      flowStep4: 'Inicia conversación en WhatsApp',
       yladaIntro: 'YLADA usa diagnósticos inteligentes para transformar curiosidad en conversaciones con clientes.',
       questionLabel: 'Cuando alguien entra en contacto contigo normalmente:',
       question1: 'pregunta el precio al inicio',
@@ -222,6 +229,28 @@ export const esTranslations: Translations = {
       progress: 'Pregunta 1 de 7',
       quickInfo: '7 preguntas rápidas • menos de 1 minuto',
       proof: '+3.000 profesionales ya han probado'
+    },
+    preEngagement: {
+      beforeStart: 'Antes de empezar, responde rápido:',
+      questionPreEngage: 'Tu marketing hoy atrae más:',
+      optCurious: 'Curiosos preguntando el precio',
+      optStuck: 'Conversaciones que no avanzan',
+      optPrepared: 'Clientes realmente preparados',
+      optNotSure: 'No estoy seguro',
+      discoverProfileMinute: 'Descubre tu perfil profesional en menos de 1 minuto.',
+      ctaFreeDiagnosis: 'Hacer diagnóstico gratis',
+      ctaCreateDiagnosis: 'Crear mi diagnóstico'
+    },
+    whyDiagnosticsBlock: {
+      title: 'Por qué los diagnósticos funcionan tan bien',
+      subtitle: 'Los diagnósticos activan tres mecanismos psicológicos.',
+      autoDiagnosis: 'Autodiagnóstico',
+      commitment: 'Compromiso',
+      identity: 'Identidad',
+      autoDesc: 'La persona entiende su propio problema.',
+      commitmentDesc: 'Reconoce la situación.',
+      identityDesc: 'Descubre su perfil.',
+      result: 'Resultado: conversaciones mucho más preparadas.'
     },
     duolingo: {
       title: 'Las buenas conversaciones empiezan con buenas preguntas.',

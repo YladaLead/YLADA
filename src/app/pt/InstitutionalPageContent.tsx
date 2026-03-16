@@ -16,6 +16,9 @@ import { useTranslations } from '@/hooks/useTranslations'
 import { useAuth } from '@/contexts/AuthContext'
 import { getYladaLandingAreas } from '@/config/ylada-landing-areas'
 import { getLocaleFromPathname, type Language } from '@/lib/i18n'
+import { ptTranslations } from '@/lib/translations/pt'
+import { enTranslations } from '@/lib/translations/en'
+import { esTranslations } from '@/lib/translations/es'
 
 const PERGUNTA_HERO_VALUES = [2, 1, 0, 1] as const
 
@@ -40,10 +43,13 @@ function getLocalizedPath(path: string, locale: Language): string {
   return normalized
 }
 
+const LOCALE_TRANSLATIONS = { pt: ptTranslations, en: enTranslations, es: esTranslations } as const
+
 export default function InstitutionalPageContent() {
   const pathname = usePathname() ?? ''
   const locale = getLocaleFromPathname(pathname)
-  const { t } = useTranslations(locale)
+  useTranslations(locale)
+  const t = LOCALE_TRANSLATIONS[locale] ?? ptTranslations
   const inst = t?.institutional
   const { user, loading } = useAuth()
   const router = useRouter()
@@ -139,22 +145,22 @@ export default function InstitutionalPageContent() {
         <section className="py-12 sm:py-16 lg:py-20 bg-gradient-to-b from-sky-50 to-white border-b border-gray-100">
           <div className="max-w-3xl mx-auto text-center">
             <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-4 leading-tight">
-              Boas conversas começam com boas perguntas.
+              {home?.hero?.title ?? 'Boas conversas começam com boas perguntas.'}
             </h1>
             <p className="text-lg sm:text-xl text-gray-700 mb-8 leading-relaxed">
-              Crie diagnósticos inteligentes, compartilhe o link e veja pessoas iniciarem conversa com você no WhatsApp.
+              {home?.hero?.tagline ?? 'Crie diagnósticos inteligentes, compartilhe o link e veja pessoas iniciarem conversa com você no WhatsApp.'}
             </p>
 
             {/* 2️⃣ PRÉ-ENGAJAMENTO — Micro interação antes do CTA */}
             <div className="max-w-xl mx-auto mb-10">
-              <p className="text-sm font-medium text-gray-600 mb-4">Antes de começar, responda rápido:</p>
-              <p className="font-semibold text-gray-900 mb-4">Seu marketing hoje atrai mais:</p>
+              <p className="text-sm font-medium text-gray-600 mb-4">{home?.preEngagement?.beforeStart ?? 'Antes de começar, responda rápido:'}</p>
+              <p className="font-semibold text-gray-900 mb-4">{home?.preEngagement?.questionPreEngage ?? 'Seu marketing hoje atrai mais:'}</p>
               <div className="space-y-2 mb-6">
                 {[
-                  { label: 'Curiosos perguntando preço', value: 0 },
-                  { label: 'Conversas que não avançam', value: 1 },
-                  { label: 'Clientes realmente preparados', value: 2 },
-                  { label: 'Não tenho certeza', value: 3 },
+                  { label: home?.preEngagement?.optCurious ?? 'Curiosos perguntando preço', value: 0 },
+                  { label: home?.preEngagement?.optStuck ?? 'Conversas que não avançam', value: 1 },
+                  { label: home?.preEngagement?.optPrepared ?? 'Clientes realmente preparados', value: 2 },
+                  { label: home?.preEngagement?.optNotSure ?? 'Não tenho certeza', value: 3 },
                 ].map((opt) => (
                   <label
                     key={opt.value}
@@ -182,7 +188,7 @@ export default function InstitutionalPageContent() {
                 ))}
               </div>
               <p className="text-base font-medium text-gray-700 mb-4">
-                Descubra seu perfil profissional em menos de 1 minuto.
+                {home?.preEngagement?.discoverProfileMinute ?? 'Descubra seu perfil profissional em menos de 1 minuto.'}
               </p>
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
                 <button
@@ -190,56 +196,56 @@ export default function InstitutionalPageContent() {
                   onClick={() => {
                     if (respostaHeroIdx !== null) {
                       const problemaValue = PERGUNTA_HERO_VALUES[respostaHeroIdx] ?? 1
-                      router.push(`/pt/diagnostico?fromHome=1&problema=${problemaValue}`)
+                      router.push(getLocalizedPath(`/pt/diagnostico?fromHome=1&problema=${problemaValue}`, locale))
                     }
                   }}
                   disabled={respostaHeroIdx === null}
                   className="inline-flex items-center justify-center px-8 py-4 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
                 >
-                  Fazer diagnóstico grátis
+                  {home?.preEngagement?.ctaFreeDiagnosis ?? 'Fazer diagnóstico grátis'}
                 </button>
                 <Link
                   href={getLocalizedPath('/pt/cadastro', locale)}
                   className="inline-flex items-center justify-center px-8 py-4 bg-white text-gray-700 font-medium rounded-xl border-2 border-gray-200 hover:border-gray-300 transition-all"
                 >
-                  Criar meu diagnóstico
+                  {home?.preEngagement?.ctaCreateDiagnosis ?? 'Criar meu diagnóstico'}
                 </Link>
               </div>
             </div>
 
             {/* Por que diagnósticos funcionam — credibilidade */}
             <div className="bg-white/90 rounded-2xl p-6 sm:p-8 border border-gray-100 shadow-sm text-left max-w-2xl mx-auto">
-              <h2 className="text-lg font-bold text-gray-900 mb-4 text-center">Por que diagnósticos funcionam tão bem</h2>
-              <p className="text-sm text-gray-600 mb-4 text-center">Diagnósticos ativam três mecanismos psicológicos.</p>
+              <h2 className="text-lg font-bold text-gray-900 mb-4 text-center">{home?.whyDiagnosticsBlock?.title ?? 'Por que diagnósticos funcionam tão bem'}</h2>
+              <p className="text-sm text-gray-600 mb-4 text-center">{home?.whyDiagnosticsBlock?.subtitle ?? 'Diagnósticos ativam três mecanismos psicológicos.'}</p>
               <div className="grid sm:grid-cols-3 gap-4 mb-4">
                 <div className="text-center p-3 rounded-xl bg-gray-50">
                   <span className="text-2xl block mb-2" aria-hidden>🧠</span>
-                  <p className="font-semibold text-gray-900 text-sm">Auto-diagnóstico</p>
-                  <p className="text-xs text-gray-600">A pessoa entende o próprio problema.</p>
+                  <p className="font-semibold text-gray-900 text-sm">{home?.whyDiagnosticsBlock?.autoDiagnosis ?? 'Auto-diagnóstico'}</p>
+                  <p className="text-xs text-gray-600">{home?.whyDiagnosticsBlock?.autoDesc ?? 'A pessoa entende o próprio problema.'}</p>
                 </div>
                 <div className="text-center p-3 rounded-xl bg-gray-50">
                   <span className="text-2xl block mb-2" aria-hidden>🎯</span>
-                  <p className="font-semibold text-gray-900 text-sm">Compromisso</p>
-                  <p className="text-xs text-gray-600">Ela reconhece a situação.</p>
+                  <p className="font-semibold text-gray-900 text-sm">{home?.whyDiagnosticsBlock?.commitment ?? 'Compromisso'}</p>
+                  <p className="text-xs text-gray-600">{home?.whyDiagnosticsBlock?.commitmentDesc ?? 'Ela reconhece a situação.'}</p>
                 </div>
                 <div className="text-center p-3 rounded-xl bg-gray-50">
                   <span className="text-2xl block mb-2" aria-hidden>👤</span>
-                  <p className="font-semibold text-gray-900 text-sm">Identidade</p>
-                  <p className="text-xs text-gray-600">Descobre seu perfil.</p>
+                  <p className="font-semibold text-gray-900 text-sm">{home?.whyDiagnosticsBlock?.identity ?? 'Identidade'}</p>
+                  <p className="text-xs text-gray-600">{home?.whyDiagnosticsBlock?.identityDesc ?? 'Descobre seu perfil.'}</p>
                 </div>
               </div>
-              <p className="text-sm font-medium text-gray-800 text-center">Resultado: conversas muito mais preparadas.</p>
+              <p className="text-sm font-medium text-gray-800 text-center">{home?.whyDiagnosticsBlock?.result ?? 'Resultado: conversas muito mais preparadas.'}</p>
             </div>
 
             {/* Fluxo visual */}
             <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-4 py-6 px-4 mt-8 bg-white/60 rounded-xl border border-gray-100">
-              <span className="text-sm font-semibold text-gray-800">Criar diagnóstico</span>
+              <span className="text-sm font-semibold text-gray-800">{home?.hero?.flowStep1 ?? 'Criar diagnóstico'}</span>
               <span className="text-gray-400">→</span>
-              <span className="text-sm font-semibold text-gray-800">Compartilhar link</span>
+              <span className="text-sm font-semibold text-gray-800">{home?.hero?.flowStep2 ?? 'Compartilhar link'}</span>
               <span className="text-gray-400">→</span>
-              <span className="text-sm font-semibold text-gray-800">Pessoa responde</span>
+              <span className="text-sm font-semibold text-gray-800">{home?.hero?.flowStep3 ?? 'Pessoa responde'}</span>
               <span className="text-gray-400">→</span>
-              <span className="text-sm font-semibold text-green-700">Inicia conversa no WhatsApp</span>
+              <span className="text-sm font-semibold text-green-700">{home?.hero?.flowStep4 ?? 'Inicia conversa no WhatsApp'}</span>
             </div>
           </div>
         </section>

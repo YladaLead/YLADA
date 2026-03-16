@@ -3,7 +3,7 @@
  * Unifica Mercado Pago (BR) e Stripe (Internacional)
  */
 
-import { PaymentGateway, detectPaymentGateway, detectCountryCode } from './payment-helpers'
+import { PaymentGateway, detectCountryCode } from './payment-helpers'
 import { createPreference, CreatePreferenceRequest } from './mercado-pago'
 import { createRecurringSubscription, CreateSubscriptionRequest } from './mercado-pago-subscriptions'
 import { getStripeInstance, getStripePriceId } from './stripe-helpers'
@@ -448,35 +448,12 @@ export async function createCheckout(
     countryCode = 'UNKNOWN'
   }
 
-  // ⚠️ BLOQUEAR: Apenas países onde Mercado Pago opera podem pagar
-  if (!isMercadoPagoSupported(countryCode)) {
-    // Enviar notificação por email quando alguém tentar pagar de país não suportado
-    try {
-      await notifyUnsupportedCountryPayment({
-        countryCode,
-        area: request.area,
-        planType: request.planType,
-        userEmail: request.userEmail,
-        userId: request.userId,
-      })
-    } catch (notifyError) {
-      console.error('Erro ao enviar notificação de país não suportado:', notifyError)
-      // Não falhar o checkout se a notificação falhar
-    }
-    
-    throw new Error(
-      `Pagamentos disponíveis apenas para países da América Latina. ` +
-      `Entre em contato conosco através do suporte para uma solução alternativa de pagamento.`
-    )
-  }
+  // Gateway por país: Brasil (e América Latina onde MP opera) → Mercado Pago; resto do mundo → Stripe
+  const useMercadoPago = isMercadoPagoSupported(countryCode)
+  const gateway: PaymentGateway = useMercadoPago ? 'mercadopago' : 'stripe'
 
-  // Detectar gateway baseado no país
-  // ⚠️ FORÇADO: Todos os países usam Mercado Pago (Stripe removido)
-  let gateway: PaymentGateway
-  if (httpRequest) {
-    gateway = detectPaymentGateway(httpRequest)
-  } else {
-    gateway = 'mercadopago' // Sempre Mercado Pago
+  if (!useMercadoPago) {
+    console.log(`🌍 Checkout fora do Brasil/LATAM (${countryCode}) → Stripe`)
   }
 
   // Obter URL base (prioridade: env > request origin > localhost)
