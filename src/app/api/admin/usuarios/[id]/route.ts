@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
 import { requireApiAuth } from '@/lib/api-auth'
 
+/** Perfis válidos (YLADA + Wellness) */
+const PERFIS_VALIDOS = ['wellness', 'nutri', 'coach', 'nutra', 'med', 'psi', 'psicanalise', 'odonto', 'estetica', 'fitness', 'perfumaria', 'ylada']
+
 /**
  * PUT /api/admin/usuarios/[id]
  * Atualiza dados do usuário (área, nome, etc)
@@ -9,9 +12,9 @@ import { requireApiAuth } from '@/lib/api-auth'
  * 
  * Body:
  * {
- *   area?: 'wellness' | 'nutri' | 'coach' | 'nutra',
+ *   area?: perfil válido (wellness, nutri, coach, nutra, med, psi, etc),
  *   nome_completo?: string,
- *   email?: string (não pode ser alterado, apenas para referência)
+ *   nome_presidente?: string | null
  * }
  */
 export async function PUT(
@@ -32,9 +35,9 @@ export async function PUT(
     const { area, nome_completo, nome_presidente } = body
 
     // Validar área se fornecida
-    if (area && !['wellness', 'nutri', 'coach', 'nutra'].includes(area)) {
+    if (area && !PERFIS_VALIDOS.includes(area)) {
       return NextResponse.json(
-        { error: 'Área inválida. Use: wellness, nutri, coach ou nutra' },
+        { error: `Área inválida. Use: ${PERFIS_VALIDOS.join(', ')}` },
         { status: 400 }
       )
     }

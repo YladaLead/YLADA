@@ -2,9 +2,10 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { createClient } from '@/lib/supabase-client'
 import { toLocalDateStringISO } from '@/lib/date-utils'
+import { getAdminUsuariosTranslations } from '@/lib/translations/admin-usuarios'
 
 const supabase = createClient()
 
@@ -12,7 +13,7 @@ interface Usuario {
   id: string
   nome: string
   email: string
-  area: 'nutri' | 'coach' | 'nutra' | 'wellness'
+  area: string
   status: 'ativo' | 'inativo'
   assinatura: 'mensal' | 'anual' | 'gratuita' | 'sem assinatura'
   assinaturaId: string | null
@@ -38,8 +39,41 @@ interface Stats {
 }
 
 export default function AdminUsuarios() {
+  // Admin sempre em português
+  const t = useMemo(() => getAdminUsuariosTranslations('pt'), [])
+
   const [filtroBloco, setFiltroBloco] = useState<'todos' | 'ylada' | 'wellness'>('todos')
-  const [filtroArea, setFiltroArea] = useState<'todos' | 'nutri' | 'coach' | 'nutra' | 'wellness'>('todos')
+  const [filtroArea, setFiltroArea] = useState<string>('todos')
+
+  // Áreas disponíveis conforme o bloco selecionado (YLADA vs Wellness)
+  const opcoesArea = useMemo(() => {
+    if (filtroBloco === 'wellness') {
+      return [{ value: 'todos' as const, label: t.filters.all }, { value: 'wellness' as const, label: t.areas.wellness }]
+    }
+    if (filtroBloco === 'ylada') {
+      return [
+        { value: 'todos' as const, label: t.filters.all },
+        { value: 'nutri' as const, label: t.areas.nutri },
+        { value: 'coach' as const, label: t.areas.coach },
+        { value: 'nutra' as const, label: t.areas.nutra },
+        { value: 'med' as const, label: t.areas.med },
+        { value: 'psi' as const, label: t.areas.psi },
+        { value: 'psicanalise' as const, label: t.areas.psicanalise },
+        { value: 'odonto' as const, label: t.areas.odonto },
+        { value: 'estetica' as const, label: t.areas.estetica },
+        { value: 'fitness' as const, label: t.areas.fitness },
+        { value: 'perfumaria' as const, label: t.areas.perfumaria },
+        { value: 'ylada' as const, label: t.areas.ylada },
+      ]
+    }
+    return [
+      { value: 'todos' as const, label: t.filters.all },
+      { value: 'nutri' as const, label: t.areas.nutri },
+      { value: 'coach' as const, label: t.areas.coach },
+      { value: 'nutra' as const, label: t.areas.nutra },
+      { value: 'wellness' as const, label: t.areas.wellness },
+    ]
+  }, [filtroBloco, t])
   const [filtroStatus, setFiltroStatus] = useState<'todos' | 'ativo' | 'inativo'>('todos')
   const [filtroAssinatura, setFiltroAssinatura] = useState<'todos' | 'gratuita' | 'mensal' | 'anual' | 'sem'>('todos')
   const [filtroPresidente, setFiltroPresidente] = useState<string>('todos')
@@ -64,9 +98,25 @@ export default function AdminUsuarios() {
   } | null>(null)
   
 
+  // Todas as áreas para edição de perfil (modal Editar Usuário)
+  const TODAS_AREAS_EDICAO: { value: string; label: string }[] = useMemo(() => [
+    { value: 'wellness', label: t.areas.wellness },
+    { value: 'nutri', label: t.areas.nutri },
+    { value: 'coach', label: t.areas.coach },
+    { value: 'nutra', label: t.areas.nutra },
+    { value: 'med', label: t.areas.med },
+    { value: 'psi', label: t.areas.psi },
+    { value: 'psicanalise', label: t.areas.psicanalise },
+    { value: 'odonto', label: t.areas.odonto },
+    { value: 'estetica', label: t.areas.estetica },
+    { value: 'fitness', label: t.areas.fitness },
+    { value: 'perfumaria', label: t.areas.perfumaria },
+    { value: 'ylada', label: t.areas.ylada },
+  ], [t])
+
   // Formulários
   const [formUsuario, setFormUsuario] = useState({
-    area: 'wellness' as 'wellness' | 'nutri' | 'coach' | 'nutra',
+    area: 'wellness' as string,
     nome_completo: '',
     nome_presidente: '' as string | null
   })
@@ -94,13 +144,13 @@ export default function AdminUsuarios() {
       })
       const data = await res.json()
       if (res.ok && data.success) {
-        setSuccess(data.message || 'Usuário definido como presidente.')
+        setSuccess(data.message || t.messages.presidentDefined)
         carregarUsuarios()
       } else {
-        setError(data.error || 'Erro ao definir presidente.')
+        setError(data.error || t.messages.errorDefinePresident)
       }
     } catch (err: any) {
-      setError('Erro ao definir presidente. Tente novamente.')
+      setError(t.messages.errorDefinePresident)
     } finally {
       setDefinindoPresidente(null)
     }
@@ -152,7 +202,7 @@ export default function AdminUsuarios() {
       })
 
       if (!response.ok) {
-        throw new Error('Erro ao carregar usuários')
+        throw new Error(t.messages.errorLoad)
       }
 
       const data = await response.json()
@@ -161,11 +211,11 @@ export default function AdminUsuarios() {
         setUsuarios(data.usuarios || [])
         setStats(data.stats || { total: 0, ativos: 0, inativos: 0 })
       } else {
-        throw new Error('Formato de dados inválido')
+        throw new Error(t.messages.errorLoad)
       }
     } catch (err: any) {
       console.error('Erro ao carregar usuários:', err)
-      setError(err.message || 'Erro ao carregar dados')
+      setError(err.message || t.messages.errorLoad)
     } finally {
       setLoading(false)
     }
@@ -194,7 +244,7 @@ export default function AdminUsuarios() {
   // Abrir modal de editar assinatura
   const abrirEditarAssinatura = (usuario: Usuario) => {
     if (!usuario.assinaturaId) {
-      setError('Usuário não tem assinatura ativa')
+      setError(t.messages.errorNoSubscription)
       return
     }
     setUsuarioSelecionado(usuario)
@@ -228,7 +278,7 @@ export default function AdminUsuarios() {
     try {
       const { data: { session } } = await supabase.auth.getSession()
       if (!session) {
-        setError('Não autenticado')
+        setError(t.messages.errorNotAuthenticated)
         return
       }
 
@@ -244,15 +294,15 @@ export default function AdminUsuarios() {
       const data = await response.json()
 
       if (!response.ok) {
-        setError(data.error || 'Erro ao atualizar usuário')
+        setError(data.error || t.messages.errorUpdate)
         return
       }
 
-      setSuccess('Usuário atualizado com sucesso!')
+      setSuccess(t.messages.userUpdated)
       setMostrarEditarUsuario(false)
       carregarUsuarios()
     } catch (err: any) {
-      setError(err.message || 'Erro ao atualizar usuário')
+      setError(err.message || t.messages.errorUpdate)
     } finally {
       setSalvando(false)
     }
@@ -269,7 +319,7 @@ export default function AdminUsuarios() {
     try {
       const { data: { session } } = await supabase.auth.getSession()
       if (!session) {
-        setError('Não autenticado')
+        setError(t.messages.errorNotAuthenticated)
         return
       }
 
@@ -295,15 +345,15 @@ export default function AdminUsuarios() {
       const data = await response.json()
 
       if (!response.ok) {
-        setError(data.error || 'Erro ao atualizar assinatura')
+        setError(data.error || t.messages.errorUpdate)
         return
       }
 
-      setSuccess('Assinatura atualizada com sucesso!')
+      setSuccess(t.messages.subscriptionUpdated)
       setMostrarEditarAssinatura(false)
       carregarUsuarios()
     } catch (err: any) {
-      setError(err.message || 'Erro ao atualizar assinatura')
+      setError(err.message || t.messages.errorUpdate)
     } finally {
       setSalvando(false)
     }
@@ -335,7 +385,7 @@ export default function AdminUsuarios() {
       const data = await response.json()
 
       if (response.ok && data.success) {
-        setSuccess(`Senha padrão definida com sucesso para ${email}`)
+        setSuccess(t.messages.userUpdated)
         setTimeout(() => setSuccess(null), 5000)
       } else {
         setError(data.error || 'Erro ao definir senha')
@@ -375,7 +425,7 @@ export default function AdminUsuarios() {
           expiresAt: data.expiresAtFormatted
         })
         setMostrarSenhaProvisoria(true)
-        setSuccess('Senha provisória gerada com sucesso!')
+        setSuccess(t.messages.tempPasswordGenerated)
       } else {
         setError(data.error || 'Erro ao gerar senha provisória')
       }
@@ -398,7 +448,7 @@ export default function AdminUsuarios() {
     try {
       const { data: { session } } = await supabase.auth.getSession()
       if (!session) {
-        setError('Não autenticado')
+        setError(t.messages.errorNotAuthenticated)
         return
       }
 
@@ -412,15 +462,15 @@ export default function AdminUsuarios() {
       const data = await response.json()
 
       if (!response.ok) {
-        setError(data.error || 'Erro ao deletar usuário')
+        setError(data.error || t.messages.errorDelete)
         return
       }
 
-      setSuccess('Usuário deletado com sucesso!')
+      setSuccess(t.messages.userDeleted)
       setMostrarDeletarUsuario(false)
       carregarUsuarios()
     } catch (err: any) {
-      setError(err.message || 'Erro ao deletar usuário')
+      setError(err.message || t.messages.errorDelete)
     } finally {
       setSalvando(false)
     }
@@ -466,9 +516,9 @@ export default function AdminUsuarios() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'ativo':
-        return <span className="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">Ativo</span>
+        return <span className="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">{t.table.statusActive}</span>
       case 'inativo':
-        return <span className="px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">Inativo</span>
+        return <span className="px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">{t.table.statusInactive}</span>
       default:
         return null
     }
@@ -477,30 +527,30 @@ export default function AdminUsuarios() {
   const getAssinaturaStatusBadge = (situacao: Usuario['assinaturaSituacao']) => {
     switch (situacao) {
       case 'ativa':
-        return <span className="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-green-100 text-green-800">Ativa</span>
+        return <span className="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-green-100 text-green-800">{t.subscriptionBadge.active}</span>
       case 'vencida':
-        return <span className="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-red-100 text-red-700">Vencida</span>
+        return <span className="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-red-100 text-red-700">{t.subscriptionBadge.expired}</span>
       case 'sem':
       default:
-        return <span className="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-gray-100 text-gray-600">Sem assinatura</span>
+        return <span className="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-gray-100 text-gray-600">{t.subscriptionBadge.none}</span>
     }
   }
 
   const getAssinaturaTipoLabel = (tipo: Usuario['assinatura']) => {
     switch (tipo) {
       case 'mensal':
-        return 'Mensal'
+        return t.subscriptionType.monthly
       case 'anual':
-        return 'Anual'
+        return t.subscriptionType.annual
       case 'gratuita':
-        return 'Gratuita'
+        return t.subscriptionType.free
       default:
-        return 'Sem assinatura'
+        return t.subscriptionType.none
     }
   }
 
   const exportarPlanilhaUsuarios = () => {
-    const headers = ['Nome', 'Email', 'Área', 'Presidente', 'Status', 'Assinatura', 'Leads', 'Links', 'Cliques']
+    const headers = [t.table.nameLabel, 'Email', t.table.area, t.table.president, t.table.status, t.table.subscription, t.table.enrollment, t.table.leads, t.table.linksLabel, t.table.clicksLabel]
     const rows = usuarios.map((u) => [
       u.nome,
       u.email,
@@ -508,6 +558,7 @@ export default function AdminUsuarios() {
       u.nome_presidente_canonico || u.nome_presidente || '',
       u.status,
       getAssinaturaTipoLabel(u.assinatura),
+      u.dataCadastro ? new Date(u.dataCadastro).toLocaleDateString('pt-BR') : '',
       String(u.leadsGerados),
       String(u.linksEnviados ?? 0),
       String(u.cliquesLinks ?? 0),
@@ -540,8 +591,7 @@ export default function AdminUsuarios() {
               </Link>
               <div className="h-12 w-px bg-gray-300"></div>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">Usuários</h1>
-                <p className="text-sm text-gray-600">Gerencie seus nutricionistas, coaches e consultores</p>
+                <h1 className="text-2xl font-bold text-gray-900">{t.page.title}</h1>
               </div>
             </div>
             <div className="flex items-center space-x-3">
@@ -549,7 +599,7 @@ export default function AdminUsuarios() {
                 href="/admin"
                 className="text-gray-600 hover:text-gray-900 text-sm px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors"
               >
-                ← Voltar
+                ← {t.page.back}
               </Link>
             </div>
           </div>
@@ -574,81 +624,88 @@ export default function AdminUsuarios() {
         <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200 mb-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Bloco</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">{t.filters.block}</label>
               <select
                 value={filtroBloco}
-                onChange={(e) => setFiltroBloco(e.target.value as any)}
+                onChange={(e) => {
+                  const novo = e.target.value as 'todos' | 'ylada' | 'wellness'
+                  setFiltroBloco(novo)
+                  if (novo === 'wellness' && filtroArea !== 'todos' && filtroArea !== 'wellness') {
+                    setFiltroArea('todos')
+                  } else if (novo === 'ylada' && filtroArea === 'wellness') {
+                    setFiltroArea('todos')
+                  }
+                }}
                 disabled={loading}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50"
               >
-                <option value="todos">Todos</option>
+                <option value="todos">{t.filters.all}</option>
                 <option value="ylada">YLADA</option>
-                <option value="wellness">Wellness</option>
+                <option value="wellness">{t.areas.wellness}</option>
               </select>
-              <p className="text-xs text-gray-500 mt-1">Princípios diferentes</p>
+              <p className="text-xs text-gray-500 mt-1">{t.filters.blockHint}</p>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Buscar</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">{t.filters.search}</label>
               <input
                 type="text"
                 value={busca}
                 onChange={(e) => setBusca(e.target.value)}
-                placeholder="Nome ou email..."
+                placeholder={t.filters.searchPlaceholder}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Área</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">{t.filters.area}</label>
               <select
-                value={filtroArea}
-                onChange={(e) => setFiltroArea(e.target.value as any)}
+                value={opcoesArea.some((o) => o.value === filtroArea) ? filtroArea : 'todos'}
+                onChange={(e) => setFiltroArea(e.target.value)}
                 disabled={loading}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50"
               >
-                <option value="todos">Todos</option>
-                <option value="nutri">Nutricionistas</option>
-                <option value="coach">Coaches</option>
-                <option value="nutra">Nutra</option>
-                <option value="wellness">Wellness</option>
+                {opcoesArea.map((o) => (
+                  <option key={o.value} value={o.value}>{o.label}</option>
+                ))}
               </select>
+              <p className="text-xs text-gray-500 mt-1">{t.filters.areaHint}</p>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Status</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">{t.filters.status}</label>
               <select
                 value={filtroStatus}
                 onChange={(e) => setFiltroStatus(e.target.value as any)}
                 disabled={loading}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50"
               >
-                <option value="todos">Todos</option>
-                <option value="ativo">Ativos</option>
-                <option value="inativo">Inativos</option>
+                <option value="todos">{t.filters.all}</option>
+                <option value="ativo">{t.filters.active}</option>
+                <option value="inativo">{t.filters.inactive}</option>
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Assinatura</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">{t.filters.subscription}</label>
               <select
                 value={filtroAssinatura}
                 onChange={(e) => setFiltroAssinatura(e.target.value as any)}
                 disabled={loading}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50"
               >
-                <option value="todos">Todos</option>
-                <option value="gratuita">Free</option>
-                <option value="mensal">Mensal</option>
-                <option value="anual">Anual</option>
-                <option value="sem">Sem assinatura</option>
+                <option value="todos">{t.filters.all}</option>
+                <option value="gratuita">{t.filters.free}</option>
+                <option value="mensal">{t.filters.monthly}</option>
+                <option value="anual">{t.filters.annual}</option>
+                <option value="sem">{t.filters.noSubscription}</option>
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Presidente</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">{t.filters.president}</label>
               <select
                 value={filtroPresidente}
                 onChange={(e) => setFiltroPresidente(e.target.value)}
                 disabled={loading}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50"
               >
-                <option value="todos">Todos</option>
+                <option value="todos">{t.filters.all}</option>
                 {presidentesAutorizados.map((p) => (
                   <option key={p.nome_completo} value={p.nome_completo}>
                     {p.nome_completo}
@@ -663,7 +720,7 @@ export default function AdminUsuarios() {
                 disabled={loading || usuarios.length === 0}
                 className="px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                📥 Exportar planilha (CSV)
+                📥 {t.export}
               </button>
             </div>
           </div>
@@ -673,7 +730,7 @@ export default function AdminUsuarios() {
         {loading && (
           <div className="mb-6 text-center py-8">
             <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-            <p className="mt-2 text-sm text-gray-600">Carregando usuários...</p>
+            <p className="mt-2 text-sm text-gray-600">{t.messages.loading}</p>
           </div>
         )}
 
@@ -681,19 +738,19 @@ export default function AdminUsuarios() {
         {!loading && (
           <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-6">
             <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
-              <p className="text-sm text-gray-600 mb-1">Total</p>
+              <p className="text-sm text-gray-600 mb-1">{t.stats.total}</p>
               <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
             </div>
             <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
-              <p className="text-sm text-gray-600 mb-1">Ativos</p>
+              <p className="text-sm text-gray-600 mb-1">{t.stats.active}</p>
               <p className="text-2xl font-bold text-green-600">{stats.ativos}</p>
             </div>
             <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
-              <p className="text-sm text-gray-600 mb-1">Inativos</p>
+              <p className="text-sm text-gray-600 mb-1">{t.stats.inactive}</p>
               <p className="text-2xl font-bold text-gray-600">{stats.inativos}</p>
             </div>
             <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
-              <p className="text-sm text-gray-600 mb-1">Mostrando</p>
+              <p className="text-sm text-gray-600 mb-1">{t.stats.showing}</p>
               <p className="text-2xl font-bold text-blue-600">{usuarios.length}</p>
             </div>
           </div>
@@ -704,7 +761,7 @@ export default function AdminUsuarios() {
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
             {usuarios.length === 0 ? (
               <div className="text-center py-12">
-                <p className="text-gray-500">Nenhum usuário encontrado</p>
+                <p className="text-gray-500">{t.messages.noUsers}</p>
               </div>
             ) : (
               <div
@@ -714,14 +771,15 @@ export default function AdminUsuarios() {
                 <table className="w-full min-w-[800px] divide-y divide-gray-200">
                   <thead className="bg-gray-50">
                     <tr>
-                      <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Usuário</th>
-                      <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Área</th>
-                      <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">É presidente</th>
-                      <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Presidente</th>
-                      <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                      <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Assinatura</th>
-                      <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Leads</th>
-                      <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
+                      <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t.table.user}</th>
+                      <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t.table.area}</th>
+                      <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t.table.isPresident}</th>
+                      <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t.table.president}</th>
+                      <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t.table.status}</th>
+                      <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t.table.subscription}</th>
+                      <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t.table.enrollment}</th>
+                      <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t.table.leads}</th>
+                      <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t.table.actions}</th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
@@ -755,7 +813,7 @@ export default function AdminUsuarios() {
                         </td>
                         <td className="px-3 py-4 whitespace-nowrap">
                           {usuario.is_presidente ? (
-                            <span className="text-xs font-medium text-green-700">Sim</span>
+                            <span className="text-xs font-medium text-green-700">{t.table.yes}</span>
                           ) : usuario.area === 'wellness' ? (
                             <button
                               type="button"
@@ -763,7 +821,7 @@ export default function AdminUsuarios() {
                               disabled={definindoPresidente === usuario.id}
                               className="text-xs text-green-600 hover:text-green-800 font-medium disabled:opacity-50"
                             >
-                              {definindoPresidente === usuario.id ? 'Salvando…' : 'Definir como presidente'}
+                              {definindoPresidente === usuario.id ? t.table.saving : t.table.defineAsPresident}
                             </button>
                           ) : (
                             <span className="text-xs text-gray-400">—</span>
@@ -771,7 +829,7 @@ export default function AdminUsuarios() {
                         </td>
                         <td className="px-3 py-4 min-w-[150px]">
                           <div className="text-sm text-gray-900 truncate" title={usuario.nome_presidente_canonico || usuario.nome_presidente || ''}>
-                            {usuario.nome_presidente_canonico || usuario.nome_presidente || <span className="text-gray-400 italic">Não definido</span>}
+                            {usuario.nome_presidente_canonico || usuario.nome_presidente || <span className="text-gray-400 italic">{t.table.notDefined}</span>}
                           </div>
                         </td>
                         <td className="px-3 py-4 whitespace-nowrap">
@@ -790,11 +848,11 @@ export default function AdminUsuarios() {
                           {usuario.assinaturaVencimento ? (
                             usuario.assinaturaSituacao === 'ativa' ? (
                               <div className="text-xs text-gray-500 mt-1">
-                                Vence: {new Date(usuario.assinaturaVencimento).toLocaleDateString('pt-BR')}
+                                {t.table.expires}: {new Date(usuario.assinaturaVencimento).toLocaleDateString('pt-BR')}
                               </div>
                             ) : (
                               <div className="text-xs text-red-600 mt-1">
-                                Venceu: {new Date(usuario.assinaturaVencimento).toLocaleDateString('pt-BR')}
+                                {t.table.expired}: {new Date(usuario.assinaturaVencimento).toLocaleDateString('pt-BR')}
                                 {typeof usuario.assinaturaDiasVencida === 'number' && (
                                   <span className="ml-1">
                                     ({usuario.assinaturaDiasVencida === 0 ? 'hoje' : `há ${usuario.assinaturaDiasVencida} dia${usuario.assinaturaDiasVencida === 1 ? '' : 's'}`})
@@ -804,20 +862,25 @@ export default function AdminUsuarios() {
                             )
                           ) : (
                             <div className="text-xs text-gray-500 mt-1">
-                              Nunca assinou
+                              {t.table.neverSubscribed}
                             </div>
                           )}
+                        </td>
+                        <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-600">
+                          {usuario.dataCadastro
+                            ? new Date(usuario.dataCadastro).toLocaleDateString('pt-BR')
+                            : <span className="text-gray-400">—</span>}
                         </td>
                         <td className="px-3 py-4 whitespace-nowrap min-w-[100px]">
                           <div className="text-[11px] text-gray-600 space-y-1">
                             <div>
-                              <span className="font-medium">Leads:</span> <span className="text-gray-900 font-semibold">{usuario.leadsGerados}</span>
+                              <span className="font-medium">{t.table.leadsLabel}:</span> <span className="text-gray-900 font-semibold">{usuario.leadsGerados}</span>
                             </div>
                             <div>
-                              <span className="font-medium">Links:</span> <span className="text-gray-900 font-semibold">{usuario.linksEnviados ?? 0}</span>
+                              <span className="font-medium">{t.table.linksLabel}:</span> <span className="text-gray-900 font-semibold">{usuario.linksEnviados ?? 0}</span>
                             </div>
                             <div>
-                              <span className="font-medium">Cliques:</span> <span className="text-gray-900 font-semibold">{usuario.cliquesLinks ?? 0}</span>
+                              <span className="font-medium">{t.table.clicksLabel}:</span> <span className="text-gray-900 font-semibold">{usuario.cliquesLinks ?? 0}</span>
                             </div>
                           </div>
                         </td>
@@ -827,21 +890,21 @@ export default function AdminUsuarios() {
                               onClick={() => abrirEditarUsuario(usuario)}
                               className="text-blue-600 hover:text-blue-900 whitespace-nowrap"
                             >
-                              Editar
+                              {t.table.edit}
                             </button>
                             {usuario.assinaturaId && (
                               <button
                                 onClick={() => abrirEditarAssinatura(usuario)}
                                 className="text-green-600 hover:text-green-900 whitespace-nowrap"
                               >
-                                Assinatura
+                                {t.table.subscriptionBtn}
                               </button>
                             )}
                             <button
                               onClick={() => abrirDeletarUsuario(usuario)}
                               className="text-red-600 hover:text-red-900 whitespace-nowrap"
                             >
-                              Deletar
+                              {t.table.delete}
                             </button>
                           </div>
                         </td>
@@ -859,10 +922,10 @@ export default function AdminUsuarios() {
       {mostrarEditarUsuario && usuarioSelecionado && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-            <h2 className="text-xl font-bold mb-4">Editar Usuário</h2>
+            <h2 className="text-xl font-bold mb-4">{t.modal.editUser}</h2>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Nome Completo</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t.modal.fullName}</label>
                 <input
                   type="text"
                   value={formUsuario.nome_completo}
@@ -871,26 +934,26 @@ export default function AdminUsuarios() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Área</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t.modal.area}</label>
                 <select
-                  value={formUsuario.area}
-                  onChange={(e) => setFormUsuario({ ...formUsuario, area: e.target.value as any })}
+                  value={TODAS_AREAS_EDICAO.some((a) => a.value === formUsuario.area) ? formUsuario.area : 'wellness'}
+                  onChange={(e) => setFormUsuario({ ...formUsuario, area: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                 >
-                  <option value="wellness">Wellness</option>
-                  <option value="nutri">Nutri</option>
-                  <option value="coach">Coach</option>
-                  <option value="nutra">Nutra</option>
+                  {TODAS_AREAS_EDICAO.map((a) => (
+                    <option key={a.value} value={a.value}>{a.label}</option>
+                  ))}
                 </select>
+                <p className="text-xs text-gray-500 mt-1">{t.modal.areaHint}</p>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Presidente</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t.modal.president}</label>
                 <select
                   value={formUsuario.nome_presidente || ''}
                   onChange={(e) => setFormUsuario({ ...formUsuario, nome_presidente: e.target.value || null })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                 >
-                  <option value="">Não definido</option>
+                  <option value="">{t.table.notDefined}</option>
                   {presidentesAutorizados.map((presidente) => (
                     <option key={presidente.nome_completo} value={presidente.nome_completo}>
                       {presidente.nome_completo}
@@ -898,13 +961,13 @@ export default function AdminUsuarios() {
                   ))}
                 </select>
                 <p className="mt-1 text-xs text-gray-500">
-                  Selecione o presidente ao qual este usuário pertence
+                  {t.modal.presidentHint}
                 </p>
               </div>
               <div className="mt-6 pt-4 border-t border-gray-200">
-                <h3 className="text-sm font-medium text-gray-700 mb-3">🔑 Senha Provisória</h3>
+                <h3 className="text-sm font-medium text-gray-700 mb-3">🔑 {t.modal.tempPassword}</h3>
                 <p className="text-xs text-gray-600 mb-3">
-                  Gere uma senha provisória que expira em 3 dias. Envie pelo canal de suporte.
+                  {t.modal.tempPasswordHint}
                 </p>
                 <button
                   onClick={() => usuarioSelecionado && gerarSenhaProvisoria(usuarioSelecionado.id, usuarioSelecionado.email)}
@@ -914,11 +977,11 @@ export default function AdminUsuarios() {
                   {salvando ? (
                     <>
                       <span className="animate-spin">⏳</span>
-                      Gerando...
+                      {t.modal.saving}
                     </>
                   ) : (
                     <>
-                      🔑 Gerar Senha Provisória
+                      🔑 {t.modal.generateTempPassword}
                     </>
                   )}
                 </button>
@@ -928,14 +991,14 @@ export default function AdminUsuarios() {
                   onClick={() => setMostrarEditarUsuario(false)}
                   className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
                 >
-                  Cancelar
+                  {t.modal.cancel}
                 </button>
                 <button
                   onClick={salvarEditarUsuario}
                   disabled={salvando}
                   className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
                 >
-                  {salvando ? 'Salvando...' : 'Salvar'}
+                  {salvando ? t.modal.saving : t.modal.save}
                 </button>
               </div>
             </div>
@@ -947,22 +1010,22 @@ export default function AdminUsuarios() {
       {mostrarEditarAssinatura && usuarioSelecionado && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-            <h2 className="text-xl font-bold mb-4">Editar Assinatura</h2>
+            <h2 className="text-xl font-bold mb-4">{t.modal.editSubscription}</h2>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Tipo de Plano</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t.modal.planType}</label>
                 <select
                   value={formAssinatura.plan_type}
                   onChange={(e) => setFormAssinatura({ ...formAssinatura, plan_type: e.target.value as any })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                 >
-                  <option value="monthly">Mensal</option>
-                  <option value="annual">Anual</option>
-                  <option value="free">Gratuito</option>
+                  <option value="monthly">{t.filters.monthly}</option>
+                  <option value="annual">{t.filters.annual}</option>
+                  <option value="free">{t.filters.free}</option>
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Data de Vencimento</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t.modal.expirationDate}</label>
                 <input
                   type="date"
                   value={formAssinatura.current_period_end}
@@ -971,31 +1034,31 @@ export default function AdminUsuarios() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Status da assinatura</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t.modal.subscriptionStatus}</label>
                 <select
                   value={formAssinatura.status}
                   onChange={(e) => setFormAssinatura({ ...formAssinatura, status: e.target.value as 'active' | 'canceled' | 'past_due' })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                 >
-                  <option value="active">Ativa</option>
-                  <option value="canceled">Cancelada (ex.: reembolso feito)</option>
-                  <option value="past_due">Past due (atraso)</option>
+                  <option value="active">{t.subscriptionBadge.active}</option>
+                  <option value="canceled">{t.subscriptionBadge.expired}</option>
+                  <option value="past_due">Past due</option>
                 </select>
-                <p className="text-xs text-gray-500 mt-1">Use &quot;Cancelada&quot; quando o reembolso foi feito no Mercado Pago e a pessoa deve sair do ativo.</p>
+                <p className="text-xs text-gray-500 mt-1">{t.modal.subscriptionStatusHint}</p>
               </div>
               <div className="flex justify-end space-x-3 mt-6">
                 <button
                   onClick={() => setMostrarEditarAssinatura(false)}
                   className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
                 >
-                  Cancelar
+                  {t.modal.cancel}
                 </button>
                 <button
                   onClick={salvarEditarAssinatura}
                   disabled={salvando}
                   className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
                 >
-                  {salvando ? 'Salvando...' : 'Salvar'}
+                  {salvando ? t.modal.saving : t.modal.save}
                 </button>
               </div>
             </div>
@@ -1007,25 +1070,25 @@ export default function AdminUsuarios() {
       {mostrarDeletarUsuario && usuarioSelecionado && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-            <h2 className="text-xl font-bold mb-4 text-red-600">Deletar Usuário</h2>
+            <h2 className="text-xl font-bold mb-4 text-red-600">{t.modal.deleteUser}</h2>
             <p className="mb-4 text-gray-700">
-              Tem certeza que deseja deletar <strong>{usuarioSelecionado.nome}</strong> ({usuarioSelecionado.email})?
+              {t.modal.deleteConfirm} <strong>{usuarioSelecionado.nome}</strong> ({usuarioSelecionado.email})?
               <br />
-              <span className="text-sm text-red-600">Esta ação não pode ser desfeita!</span>
+              <span className="text-sm text-red-600">{t.modal.deleteWarning}</span>
             </p>
             <div className="flex justify-end space-x-3">
               <button
                 onClick={() => setMostrarDeletarUsuario(false)}
                 className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
               >
-                Cancelar
+                {t.modal.cancel}
               </button>
               <button
                 onClick={confirmarDeletarUsuario}
                 disabled={salvando}
                 className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50"
               >
-                {salvando ? 'Deletando...' : 'Deletar'}
+                {salvando ? t.modal.saving : t.table.delete}
               </button>
             </div>
           </div>
@@ -1036,25 +1099,25 @@ export default function AdminUsuarios() {
       {mostrarSenhaProvisoria && senhaProvisoriaGerada && usuarioSelecionado && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-            <h2 className="text-xl font-bold mb-4">🔑 Senha Provisória Gerada</h2>
+            <h2 className="text-xl font-bold mb-4">🔑 {t.modal.tempPasswordTitle}</h2>
             <div className="space-y-4">
               <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
                 <p className="text-sm text-yellow-800 mb-2">
-                  <strong>⚠️ Importante:</strong> Esta senha expira em <strong>3 dias</strong>.
+                  <strong>⚠️ {t.modal.tempPasswordImportant}</strong>
                 </p>
                 <p className="text-sm text-yellow-700">
-                  Envie esta senha pelo canal de suporte (WhatsApp, chat, etc.).
+                  {t.modal.tempPasswordSend}
                 </p>
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Usuário</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">{t.table.user}</label>
                 <p className="text-sm text-gray-900 font-medium">{usuarioSelecionado.nome}</p>
                 <p className="text-sm text-gray-600">{usuarioSelecionado.email}</p>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Senha Provisória</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">{t.modal.tempPasswordLabel}</label>
                 <div className="flex items-center gap-2">
                   <input
                     type="text"
@@ -1068,24 +1131,24 @@ export default function AdminUsuarios() {
                       const input = document.getElementById('temporary-password-input') as HTMLInputElement
                       input?.select()
                       document.execCommand('copy')
-                      setSuccess('Senha copiada para a área de transferência!')
+                      setSuccess(t.messages.passwordCopied)
                       setTimeout(() => setSuccess(null), 3000)
                     }}
                     className="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm"
                   >
-                    📋 Copiar
+                    📋 {t.modal.copy}
                   </button>
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Expira em</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">{t.modal.expiresAt}</label>
                 <p className="text-sm text-gray-900">{senhaProvisoriaGerada.expiresAt}</p>
               </div>
 
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mt-4">
                 <p className="text-xs text-blue-800">
-                  <strong>💡 Dica:</strong> Após copiar, envie pelo canal de suporte com as instruções:
+                  <strong>💡 {t.modal.tempPasswordTip}</strong>
                 </p>
                 <p className="text-xs text-blue-700 mt-1">
                   "Olá! Sua senha provisória é: <strong>{senhaProvisoriaGerada.password}</strong><br/>
@@ -1102,7 +1165,7 @@ export default function AdminUsuarios() {
                 }}
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
               >
-                Fechar
+                {t.modal.close}
               </button>
             </div>
           </div>
