@@ -38,8 +38,10 @@ interface Stats {
 }
 
 export default function AdminUsuarios() {
+  const [filtroBloco, setFiltroBloco] = useState<'todos' | 'ylada' | 'wellness'>('todos')
   const [filtroArea, setFiltroArea] = useState<'todos' | 'nutri' | 'coach' | 'nutra' | 'wellness'>('todos')
   const [filtroStatus, setFiltroStatus] = useState<'todos' | 'ativo' | 'inativo'>('todos')
+  const [filtroAssinatura, setFiltroAssinatura] = useState<'todos' | 'gratuita' | 'mensal' | 'anual' | 'sem'>('todos')
   const [filtroPresidente, setFiltroPresidente] = useState<string>('todos')
   const [busca, setBusca] = useState('')
   const [usuarios, setUsuarios] = useState<Usuario[]>([])
@@ -137,8 +139,10 @@ export default function AdminUsuarios() {
       setError(null)
 
       const params = new URLSearchParams()
+      if (filtroBloco !== 'todos') params.append('bloco', filtroBloco)
       if (filtroArea !== 'todos') params.append('area', filtroArea)
       if (filtroStatus !== 'todos') params.append('status', filtroStatus)
+      if (filtroAssinatura !== 'todos') params.append('assinatura', filtroAssinatura)
       if (filtroPresidente !== 'todos') params.append('presidente', filtroPresidente)
       if (busca) params.append('busca', busca)
 
@@ -174,7 +178,7 @@ export default function AdminUsuarios() {
     }, busca ? 500 : 0)
 
     return () => clearTimeout(timeoutId)
-  }, [filtroArea, filtroStatus, filtroPresidente, busca])
+  }, [filtroBloco, filtroArea, filtroStatus, filtroAssinatura, filtroPresidente, busca])
 
   // Abrir modal de editar usuário (usa nome canônico no dropdown quando existir)
   const abrirEditarUsuario = (usuario: Usuario) => {
@@ -568,7 +572,21 @@ export default function AdminUsuarios() {
 
         {/* Filtros */}
         <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200 mb-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Bloco</label>
+              <select
+                value={filtroBloco}
+                onChange={(e) => setFiltroBloco(e.target.value as any)}
+                disabled={loading}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50"
+              >
+                <option value="todos">Todos</option>
+                <option value="ylada">YLADA</option>
+                <option value="wellness">Wellness</option>
+              </select>
+              <p className="text-xs text-gray-500 mt-1">Princípios diferentes</p>
+            </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Buscar</label>
               <input
@@ -605,6 +623,21 @@ export default function AdminUsuarios() {
                 <option value="todos">Todos</option>
                 <option value="ativo">Ativos</option>
                 <option value="inativo">Inativos</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Assinatura</label>
+              <select
+                value={filtroAssinatura}
+                onChange={(e) => setFiltroAssinatura(e.target.value as any)}
+                disabled={loading}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50"
+              >
+                <option value="todos">Todos</option>
+                <option value="gratuita">Free</option>
+                <option value="mensal">Mensal</option>
+                <option value="anual">Anual</option>
+                <option value="sem">Sem assinatura</option>
               </select>
             </div>
             <div>

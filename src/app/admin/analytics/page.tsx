@@ -68,6 +68,14 @@ interface TopUser {
   taxaConversao: number
 }
 
+interface UsersOverview {
+  ylada: { total: number; emTrial: number; pagantes: number; free: number; usando: number; receitaMensal: number; porArea: Record<string, number> }
+  herbalife: { total: number; emTrial: number; pagantes: number; free: number; usando: number; receitaMensal: number; porArea: Record<string, number> }
+  usuariosEmTrial: Array<{ userId: string; nome: string; email: string; area: string; diasRestantes: number; dataInicio: string; dataFim: string }>
+  usuariosFree: Array<{ userId: string; nome: string; email: string; area: string; dataCadastro: string }>
+  totalGeral: { total: number; emTrial: number; pagantes: number; free: number; usando: number; receitaMensal: number }
+}
+
 function AdminAnalyticsContent() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -79,10 +87,12 @@ function AdminAnalyticsContent() {
   const [funnel, setFunnel] = useState<Funnel | null>(null)
   const [topTemplates, setTopTemplates] = useState<TopTemplate[]>([])
   const [topUsers, setTopUsers] = useState<TopUser[]>([])
-  
+  const [usersOverview, setUsersOverview] = useState<UsersOverview | null>(null)
+
   // Filtros
   const [period, setPeriod] = useState<'7d' | '30d' | '3m' | '6m' | '1y' | 'all'>('30d')
-  const [funnelArea, setFunnelArea] = useState<'todos' | 'wellness' | 'nutri' | 'coach' | 'nutra'>('todos')
+  const [funnelArea, setFunnelArea] = useState<'todos' | 'ylada' | 'wellness'>('todos')
+  const [blocoFiltro, setBlocoFiltro] = useState<'todos' | 'ylada' | 'wellness'>('todos')
 
   // Carregar todos os dados
   useEffect(() => {
@@ -91,27 +101,38 @@ function AdminAnalyticsContent() {
         setLoading(true)
         setError(null)
 
-        // Carregar em paralelo
-        const [statsRes, growthRes, comparisonRes, funnelRes, templatesRes, usersRes] = await Promise.all([
+        // Carregar em paralelo (users-overview é opcional - não quebra o resto se falhar)
+        const [statsRes, growthRes, comparisonRes, funnelRes, templatesRes, usersRes, overviewRes] = await Promise.all([
           fetch('/api/admin/analytics/stats', { credentials: 'include' }),
           fetch(`/api/admin/analytics/growth?period=${period}`, { credentials: 'include' }),
           fetch('/api/admin/analytics/comparison', { credentials: 'include' }),
           fetch(`/api/admin/analytics/funnel?area=${funnelArea}`, { credentials: 'include' }),
           fetch('/api/admin/analytics/top-templates?metric=leads&limit=10', { credentials: 'include' }),
-          fetch('/api/admin/analytics/top-users?metric=leads&limit=10', { credentials: 'include' })
+          fetch('/api/admin/analytics/top-users?metric=leads&limit=10', { credentials: 'include' }),
+          fetch(`/api/admin/analytics/users-overview?bloco=${blocoFiltro}`, { credentials: 'include' })
         ])
 
-        if (!statsRes.ok || !growthRes.ok || !comparisonRes.ok || !funnelRes.ok || !templatesRes.ok || !usersRes.ok) {
-          throw new Error('Erro ao carregar dados')
+        // APIs principais devem funcionar
+        const failed = [
+          !statsRes.ok && 'stats',
+          !growthRes.ok && 'growth',
+          !comparisonRes.ok && 'comparison',
+          !funnelRes.ok && 'funnel',
+          !templatesRes.ok && 'top-templates',
+          !usersRes.ok && 'top-users'
+        ].filter(Boolean)
+        if (failed.length > 0) {
+          throw new Error(`Erro ao carregar dados (${failed.join(', ')})`)
         }
 
-        const [statsData, growthData, comparisonData, funnelData, templatesData, usersData] = await Promise.all([
+        const [statsData, growthData, comparisonData, funnelData, templatesData, usersData, overviewData] = await Promise.all([
           statsRes.json(),
           growthRes.json(),
           comparisonRes.json(),
           funnelRes.json(),
           templatesRes.json(),
-          usersRes.json()
+          usersRes.json(),
+          overviewRes.ok ? overviewRes.json() : Promise.resolve({ success: false })
         ])
 
         if (statsData.success) setStats(statsData.stats)
@@ -120,6 +141,7 @@ function AdminAnalyticsContent() {
         if (funnelData.success) setFunnel(funnelData.funnel)
         if (templatesData.success) setTopTemplates(templatesData.topTemplates || [])
         if (usersData.success) setTopUsers(usersData.topUsers || [])
+        if (overviewData?.success) setUsersOverview(overviewData)
 
       } catch (err: any) {
         console.error('Erro ao carregar analytics:', err)
@@ -130,7 +152,7 @@ function AdminAnalyticsContent() {
     }
 
     carregarDados()
-  }, [period, funnelArea])
+  }, [period, funnelArea, blocoFiltro])
 
   // Componente de gráfico de barras simples
   const SimpleBarChart = ({ data, labelKey, valueKey, title }: { data: any[], labelKey: string, valueKey: string, title: string }) => {
@@ -340,10 +362,28 @@ function AdminAnalyticsContent() {
 
         {/* Filtros */}
         <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200 mb-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Bloco</label>
+              <div className="flex gap-2">
+                {(['todos', 'ylada', 'wellness'] as const).map((b) => (
+                  <button
+                    key={b}
+                    onClick={() => setBlocoFiltro(b)}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      blocoFiltro === b
+                        ? 'bg-indigo-600 text-white'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                  >
+                    {b === 'todos' ? 'Todos' : b === 'ylada' ? 'YLADA' : 'Wellness'}
+                  </button>
+                ))}
+              </div>
+            </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Período de Crescimento</label>
-              <div className="flex gap-2">
+              <div className="flex gap-2 flex-wrap">
                 {(['7d', '30d', '3m', '6m', '1y', 'all'] as const).map((p) => (
                   <button
                     key={p}
@@ -361,8 +401,8 @@ function AdminAnalyticsContent() {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Área do Funil</label>
-              <div className="flex gap-2">
-                {(['todos', 'wellness', 'nutri', 'coach', 'nutra'] as const).map((a) => (
+              <div className="flex gap-2 flex-wrap">
+                {(['todos', 'ylada', 'wellness'] as const).map((a) => (
                   <button
                     key={a}
                     onClick={() => setFunnelArea(a)}
@@ -372,7 +412,7 @@ function AdminAnalyticsContent() {
                         : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                     }`}
                   >
-                    {a === 'todos' ? 'Todos' : a.charAt(0).toUpperCase() + a.slice(1)}
+                    {a === 'todos' ? 'Todos' : a === 'ylada' ? 'YLADA' : 'Wellness'}
                   </button>
                 ))}
               </div>
@@ -407,6 +447,120 @@ function AdminAnalyticsContent() {
                   <p className="text-sm font-medium text-gray-600 mb-1">Receita Mensal</p>
                   <p className="text-3xl font-bold text-purple-700">R$ {stats.receitaMensal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
                 </div>
+              </div>
+            )}
+
+            {/* Usuários - área central para ver Free, Pagantes, Mensal, Anual, Manual */}
+            <div className="mb-8">
+              <div className="bg-white rounded-xl border-2 border-indigo-200 p-6 shadow-sm">
+                <h2 className="text-xl font-bold text-gray-900 mb-2">👥 Usuários</h2>
+                <p className="text-gray-600 mb-4">
+                  Lista completa de usuários: quem está no Free, pagantes, mensal, anual, manual. Filtre por área e tipo de assinatura.
+                </p>
+                <div className="flex flex-wrap gap-3">
+                  <Link
+                    href="/admin/usuarios"
+                    className="inline-flex items-center gap-2 px-6 py-3 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors"
+                  >
+                    Ver Usuários →
+                  </Link>
+                  <Link
+                    href="/admin/trials"
+                    className="inline-flex items-center gap-2 px-4 py-2 text-amber-700 hover:text-amber-900 font-medium border border-amber-300 rounded-lg hover:bg-amber-50 transition-colors"
+                  >
+                    Trial 3 dias (Wellness)
+                  </Link>
+                </div>
+              </div>
+            </div>
+
+            {/* Cards YLADA vs Wellness - Perfil de Usuários */}
+            {usersOverview && (
+              <div className="mb-8">
+                <h2 className="text-lg font-bold text-gray-900 mb-4">📊 Perfil de Usuários por Bloco</h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
+                  <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-200">
+                    <p className="text-sm font-medium text-gray-600 mb-1">Total</p>
+                    <p className="text-2xl font-bold text-gray-900">{usersOverview.totalGeral.total.toLocaleString('pt-BR')}</p>
+                  </div>
+                  <div className="bg-white rounded-xl p-5 shadow-sm border border-emerald-200 bg-emerald-50/50">
+                    <p className="text-sm font-medium text-gray-600 mb-1">Pagantes</p>
+                    <p className="text-2xl font-bold text-emerald-700">{usersOverview.totalGeral.pagantes.toLocaleString('pt-BR')}</p>
+                  </div>
+                  <div className="bg-white rounded-xl p-5 shadow-sm border border-slate-200 bg-slate-50/50">
+                    <p className="text-sm font-medium text-gray-600 mb-1">Free</p>
+                    <p className="text-2xl font-bold text-slate-700">{usersOverview.totalGeral.free.toLocaleString('pt-BR')}</p>
+                  </div>
+                  <div className="bg-white rounded-xl p-5 shadow-sm border border-sky-200 bg-sky-50/50">
+                    <p className="text-sm font-medium text-gray-600 mb-1">Usando (30 dias)</p>
+                    <p className="text-2xl font-bold text-sky-700">{usersOverview.totalGeral.usando.toLocaleString('pt-BR')}</p>
+                  </div>
+                  <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-200">
+                    <p className="text-sm font-medium text-gray-600 mb-1">Receita Mensal</p>
+                    <p className="text-2xl font-bold text-gray-900">R$ {usersOverview.totalGeral.receitaMensal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                  </div>
+                </div>
+
+                {/* Lista de Usuários Free */}
+                {(usersOverview.usuariosFree?.length ?? 0) > 0 && (
+                  <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden mb-6">
+                    <div className="p-6 border-b border-gray-200 bg-slate-50/50">
+                      <h3 className="text-lg font-bold text-slate-900">Usuários Free</h3>
+                      <p className="text-sm text-slate-700 mt-1">{usersOverview.usuariosFree.length} usuário(s) no plano Free (com limites)</p>
+                    </div>
+                    <div className="overflow-x-auto max-h-80 overflow-y-auto">
+                      <table className="min-w-full divide-y divide-gray-200">
+                        <thead className="bg-gray-50 sticky top-0">
+                          <tr>
+                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nome</th>
+                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
+                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Área</th>
+                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Cadastro</th>
+                          </tr>
+                        </thead>
+                        <tbody className="bg-white divide-y divide-gray-200">
+                          {usersOverview.usuariosFree.map((u, idx) => (
+                            <tr key={idx} className="hover:bg-slate-50/50">
+                              <td className="px-4 py-3 text-sm font-medium text-gray-900">{u.nome}</td>
+                              <td className="px-4 py-3 text-sm text-gray-600">{u.email}</td>
+                              <td className="px-4 py-3 text-sm text-gray-600 capitalize">{u.area}</td>
+                              <td className="px-4 py-3 text-sm text-gray-600">
+                                {u.dataCadastro ? new Date(u.dataCadastro).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '-'}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
+
+                {/* Detalhe por bloco quando filtro = todos */}
+                {blocoFiltro === 'todos' && (
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                    <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+                      <h3 className="font-bold text-indigo-700 mb-3">YLADA</h3>
+                      <div className="space-y-2 text-sm">
+                        <p><span className="font-medium">Total:</span> {usersOverview.ylada.total} | <span className="font-medium">Pagantes:</span> {usersOverview.ylada.pagantes} | <span className="font-medium">Free:</span> {usersOverview.ylada.free} | <span className="font-medium">Usando:</span> {usersOverview.ylada.usando}</p>
+                        <p><span className="font-medium">Receita:</span> R$ {usersOverview.ylada.receitaMensal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                        {Object.keys(usersOverview.ylada.porArea).length > 0 && (
+                          <p className="text-gray-600">Por área: {Object.entries(usersOverview.ylada.porArea).map(([a, n]) => `${a}: ${n}`).join(', ')}</p>
+                        )}
+                      </div>
+                    </div>
+                    <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+                      <h3 className="font-bold text-green-700 mb-3">Wellness</h3>
+                      <div className="space-y-2 text-sm">
+                        <p><span className="font-medium">Total:</span> {usersOverview.herbalife.total} | <span className="font-medium">Pagantes:</span> {usersOverview.herbalife.pagantes} | <span className="font-medium">Free:</span> {usersOverview.herbalife.free} | <span className="font-medium">Usando:</span> {usersOverview.herbalife.usando}</p>
+                        <p><span className="font-medium">Receita:</span> R$ {usersOverview.herbalife.receitaMensal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                        {Object.keys(usersOverview.herbalife.porArea).length > 0 && (
+                          <p className="text-gray-600">Por área: {Object.entries(usersOverview.herbalife.porArea).map(([a, n]) => `${a}: ${n}`).join(', ')}</p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
               </div>
             )}
 

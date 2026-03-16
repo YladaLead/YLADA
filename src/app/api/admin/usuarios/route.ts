@@ -9,8 +9,10 @@ import { getNamesForCanonical, getCanonicalName } from '@/lib/presidente-canonic
  * Apenas admin pode acessar
  * 
  * Query params:
+ * - bloco?: 'todos' | 'ylada' | 'wellness' - Separar YLADA de Wellness (princípios diferentes)
  * - area?: 'todos' | 'wellness' | 'nutri' | 'coach' | 'nutra' - Filtrar por área
  * - status?: 'todos' | 'ativo' | 'inativo' - Filtrar por status
+ * - assinatura?: 'todos' | 'gratuita' | 'mensal' | 'anual' | 'sem' - Filtrar por tipo de assinatura
  * - presidente?: string - Filtrar por nome do presidente (equipe do presidente)
  * - busca?: string - Buscar por nome ou email
  */
@@ -23,17 +25,27 @@ export async function GET(request: NextRequest) {
     }
 
     const { searchParams } = new URL(request.url)
+    const blocoFiltro = searchParams.get('bloco') || 'todos'
     const areaFiltro = searchParams.get('area') || 'todos'
     const statusFiltro = searchParams.get('status') || 'todos'
+    const assinaturaFiltro = searchParams.get('assinatura') || 'todos'
     const presidenteFiltro = searchParams.get('presidente') || ''
     const busca = searchParams.get('busca') || ''
 
     // Buscar todos os perfis de usuários
+    const YLADA_AREAS = ['nutri', 'coach', 'nutra', 'med', 'psi', 'psicanalise', 'odonto', 'estetica', 'fitness', 'perfumaria', 'ylada']
     let profilesQuery = supabaseAdmin
       .from('user_profiles')
       .select('id, user_id, nome_completo, email, perfil, created_at, nome_presidente')
 
-    // Aplicar filtro de área
+    // Aplicar filtro de bloco (YLADA vs Wellness - princípios diferentes)
+    if (blocoFiltro === 'ylada') {
+      profilesQuery = profilesQuery.in('perfil', YLADA_AREAS)
+    } else if (blocoFiltro === 'wellness') {
+      profilesQuery = profilesQuery.eq('perfil', 'wellness')
+    }
+
+    // Aplicar filtro de área (refinamento dentro do bloco)
     if (areaFiltro !== 'todos') {
       profilesQuery = profilesQuery.eq('perfil', areaFiltro)
     }
@@ -182,7 +194,7 @@ export async function GET(request: NextRequest) {
         return null
       }
 
-      // Determinar tipo de assinatura
+      // Determinar tipo de assinatura (antes do filtro)
       let assinaturaTipo = 'sem assinatura'
       let assinaturaVencimento: string | null = null
       let assinaturaSituacao: 'ativa' | 'vencida' | 'sem' = 'sem'
@@ -209,6 +221,14 @@ export async function GET(request: NextRequest) {
         assinaturaDiasVencida = diffMs > 0 ? Math.floor(diffMs / (1000 * 60 * 60 * 24)) : 0
       } else {
         assinaturaSituacao = 'sem'
+      }
+
+      // Aplicar filtro de assinatura ('sem' no filtro = 'sem assinatura' no tipo)
+      if (assinaturaFiltro !== 'todos') {
+        const tipoMatch = assinaturaFiltro === 'sem'
+          ? assinaturaTipo === 'sem assinatura'
+          : assinaturaTipo === assinaturaFiltro
+        if (!tipoMatch) return null
       }
 
       return {

@@ -2,11 +2,14 @@ import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
 import { requireApiAuth } from '@/lib/api-auth'
 
+/** Áreas YLADA = nutri + coach + nutra */
+const YLADA_AREAS = ['nutri', 'coach', 'nutra']
+
 /**
  * GET /api/admin/analytics/funnel
  * Retorna dados do funil de conversão (Visualizações → Leads → Conversões)
  * Query params:
- * - area?: 'todos' | 'wellness' | 'nutri' | 'coach' | 'nutra' - Filtrar por área
+ * - area?: 'todos' | 'ylada' | 'wellness' - Filtrar por bloco
  */
 export async function GET(request: NextRequest) {
   try {
@@ -25,7 +28,7 @@ export async function GET(request: NextRequest) {
       .from('user_templates')
       .select('id, views, leads_count, conversions_count, user_id')
 
-    // Filtrar por área se necessário
+    // Filtrar por bloco: ylada = nutri+coach+nutra, wellness = wellness
     let templates = allTemplates
     if (areaFiltro !== 'todos') {
       const userIds = [...new Set((allTemplates || []).map(t => t.user_id).filter(Boolean))]
@@ -39,7 +42,12 @@ export async function GET(request: NextRequest) {
         profiles.forEach(p => profilesMap.set(p.user_id, p.perfil))
       }
 
-      templates = (allTemplates || []).filter(t => profilesMap.get(t.user_id) === areaFiltro)
+      const matchPerfil = (perfil: string | undefined) => {
+        if (areaFiltro === 'ylada') return perfil && YLADA_AREAS.includes(perfil)
+        if (areaFiltro === 'wellness') return perfil === 'wellness'
+        return false
+      }
+      templates = (allTemplates || []).filter(t => matchPerfil(profilesMap.get(t.user_id)))
     }
 
     // =====================================================
@@ -87,7 +95,7 @@ export async function GET(request: NextRequest) {
     }> = {}
 
     if (areaFiltro === 'todos') {
-      const areas = ['wellness', 'nutri', 'coach', 'nutra']
+      const areas = ['wellness', 'nutri', 'coach', 'nutra'] // breakdown detalhado
 
       // Buscar todos os templates novamente para o breakdown por área
       const { data: allTemplatesForBreakdown } = await supabaseAdmin

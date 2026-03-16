@@ -28,6 +28,12 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
           📣 Marketing
         </Link>
         <Link
+          href="/admin/usuarios"
+          className="text-sm font-semibold text-indigo-700 hover:text-indigo-800 bg-indigo-50 px-3 py-1.5 rounded-lg hover:bg-indigo-100 transition-colors"
+        >
+          👥 Usuários
+        </Link>
+        <Link
           href="/admin/presidentes"
           className="text-sm font-semibold text-purple-700 hover:text-purple-800 bg-purple-50 px-3 py-1.5 rounded-lg hover:bg-purple-100 transition-colors"
         >
