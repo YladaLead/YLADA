@@ -287,6 +287,73 @@ export const ptTranslations: Translations = {
       verify: 'Verifique agora se você atrai curiosos ou clientes preparados.',
       discover: 'Descobrir meu perfil'
     },
+    problem: {
+      title: 'A maioria dos profissionais explica demais o que faz.',
+      list1: 'Pessoas pedindo preço',
+      list2: 'Conversas que não avançam',
+      list3: 'Clientes que não entendem o valor',
+      list4: 'Profissionais que precisam convencer o tempo todo',
+      conclusion1: 'O problema raramente é seu conhecimento.',
+      conclusion2: 'É a forma como o cliente chega até você.',
+      footnote: 'Muitos profissionais investem em cursos, marketing e ferramentas. Mas ignoram um fator essencial: como o cliente entende o próprio problema antes da conversa.'
+    },
+    viradaTagline: 'Boas conversas começam com boas perguntas.',
+    video: {
+      title: 'O que é o YLADA em 90 segundos',
+      placeholderTitle: 'Vídeo explicativo em breve',
+      placeholderDesc: 'Em 60–90 segundos: o problema que o YLADA resolve, a lógica de diagnóstico antes da conversa e como testar grátis.'
+    },
+    howItWorks: {
+      title: 'Como funciona',
+      linkText: 'Conhecer a filosofia YLADA →',
+      steps: [
+        { title: 'Criar diagnóstico', desc: 'Transforme seu conhecimento em perguntas que revelam o problema do cliente.' },
+        { title: 'Compartilhar link', desc: 'Envie nas redes sociais, WhatsApp ou anúncios.' },
+        { title: 'Pessoa responde', desc: 'Pessoas respondem e iniciam conversa com você no WhatsApp.' },
+        { title: 'Inicia conversa no WhatsApp', desc: 'O cliente chega com mais clareza e a conversa avança com mais facilidade.' }
+      ]
+    },
+    whatHappens: {
+      title: 'O que acontece quando alguém responde um diagnóstico',
+      intro: 'Quando uma pessoa responde perguntas sobre o próprio problema, ela começa a entender a situação antes da conversa.',
+      step1: 'Perguntas',
+      step2: 'Reflexão',
+      step3: 'Clareza',
+      step4: 'Conversa',
+      step5: 'Cliente',
+      closing: 'Quando o cliente entende o problema, a conversa muda.'
+    },
+    examples: {
+      title: 'Exemplos de diagnósticos',
+      subtitle: 'Esses são exemplos de diagnósticos que profissionais podem criar com YLADA.',
+      testLink: 'Testar diagnóstico →'
+    },
+    examplesTitles: [
+      'O que está travando o crescimento do seu negócio?',
+      'Seu posicionamento transmite autoridade?',
+      'Por que sua agenda não enche como poderia?',
+      'Seu conteúdo atrai clientes ou apenas engajamento?'
+    ],
+    benefits: {
+      title: 'Profissionais usam diagnósticos para:',
+      item1: 'atrair clientes melhores',
+      item2: 'evitar conversas improdutivas',
+      item3: 'explicar valor com mais facilidade',
+      item4: 'transformar curiosidade em decisão'
+    },
+    freeTrial: {
+      title: 'Comece grátis com 1 diagnóstico ativo',
+      subtitle: 'Comece grátis e teste com clientes reais.',
+      item1: '1 diagnóstico ativo',
+      item2: 'até 10 contatos no WhatsApp por mês',
+      item3: 'até 10 análises do Noel por mês',
+      cta: 'Criar meu primeiro diagnóstico grátis'
+    },
+    ctaFinal: {
+      headline: 'Crie um diagnóstico, compartilhe o link e atraia clientes certos para seu WhatsApp.',
+      subheadline: 'Em vez de explicar e convencer, deixe o cliente chegar já entendendo o próprio problema.',
+      button: 'Criar meu primeiro diagnóstico grátis'
+    },
     footer: {
       doDiagnosis: 'Fazer diagnóstico',
       library: 'Biblioteca de diagnósticos',

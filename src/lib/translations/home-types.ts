@@ -87,6 +87,63 @@ export interface HomeTranslations {
     verify: string
     discover: string
   }
+  problem?: {
+    title: string
+    list1: string
+    list2: string
+    list3: string
+    list4: string
+    conclusion1: string
+    conclusion2: string
+    footnote: string
+  }
+  viradaTagline?: string
+  video?: {
+    title: string
+    placeholderTitle: string
+    placeholderDesc: string
+  }
+  howItWorks?: {
+    title: string
+    linkText: string
+    steps: Array<{ title: string; desc: string }>
+  }
+  whatHappens?: {
+    title: string
+    intro: string
+    step1: string
+    step2: string
+    step3: string
+    step4: string
+    step5: string
+    closing: string
+  }
+  examples?: {
+    title: string
+    subtitle: string
+    testLink: string
+  }
+  examplesTitles?: [string, string, string, string]
+  benefits?: {
+    title: string
+    item1: string
+    item2: string
+    item3: string
+    item4: string
+  }
+  freeTrial?: {
+    title: string
+    subtitle: string
+    item1: string
+    item2: string
+    item3: string
+    cta: string
+  }
+  ctaFinal?: {
+    headline: string
+    subheadline: string
+    button: string
+  }
   footer: {
     doDiagnosis: string
     library: string

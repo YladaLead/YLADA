@@ -283,6 +283,73 @@ export const enTranslations: Translations = {
       verify: 'Check now if you attract curious people or prepared clients.',
       discover: 'Discover my profile'
     },
+    problem: {
+      title: 'Most professionals over-explain what they do.',
+      list1: 'People asking about price',
+      list2: 'Conversations that don\'t move forward',
+      list3: 'Clients who don\'t understand the value',
+      list4: 'Professionals who have to convince all the time',
+      conclusion1: 'The problem is rarely your expertise.',
+      conclusion2: 'It\'s how the client reaches you.',
+      footnote: 'Many professionals invest in courses, marketing and tools. But they overlook one essential factor: how the client understands their own problem before the conversation.'
+    },
+    viradaTagline: 'Good conversations start with good questions.',
+    video: {
+      title: 'What is YLADA in 90 seconds',
+      placeholderTitle: 'Explainer video coming soon',
+      placeholderDesc: 'In 60–90 seconds: the problem YLADA solves, the diagnosis-before-conversation logic, and how to try it free.'
+    },
+    howItWorks: {
+      title: 'How it works',
+      linkText: 'Learn about YLADA philosophy →',
+      steps: [
+        { title: 'Create diagnosis', desc: 'Turn your expertise into questions that reveal the client\'s problem.' },
+        { title: 'Share link', desc: 'Share on social media, WhatsApp or ads.' },
+        { title: 'Person responds', desc: 'People respond and start a conversation with you on WhatsApp.' },
+        { title: 'Starts conversation on WhatsApp', desc: 'The client arrives with more clarity and the conversation moves forward more easily.' }
+      ]
+    },
+    whatHappens: {
+      title: 'What happens when someone responds to a diagnosis',
+      intro: 'When someone answers questions about their own problem, they begin to understand the situation before the conversation.',
+      step1: 'Questions',
+      step2: 'Reflection',
+      step3: 'Clarity',
+      step4: 'Conversation',
+      step5: 'Client',
+      closing: 'When the client understands the problem, the conversation changes.'
+    },
+    examples: {
+      title: 'Diagnosis examples',
+      subtitle: 'These are examples of diagnostics that professionals can create with YLADA.',
+      testLink: 'Try diagnosis →'
+    },
+    examplesTitles: [
+      'What\'s holding your business growth back?',
+      'Does your positioning convey authority?',
+      'Why doesn\'t your schedule fill up as it could?',
+      'Does your content attract clients or just engagement?'
+    ],
+    benefits: {
+      title: 'Professionals use diagnostics to:',
+      item1: 'attract better clients',
+      item2: 'avoid unproductive conversations',
+      item3: 'explain value more easily',
+      item4: 'turn curiosity into commitment'
+    },
+    freeTrial: {
+      title: 'Start free with 1 active diagnosis',
+      subtitle: 'Start free and test with real clients.',
+      item1: '1 active diagnosis',
+      item2: 'up to 10 WhatsApp contacts per month',
+      item3: 'up to 10 Noel analyses per month',
+      cta: 'Create my first free diagnosis'
+    },
+    ctaFinal: {
+      headline: 'Create a diagnosis, share the link and attract the right clients to your WhatsApp.',
+      subheadline: 'Instead of explaining and convincing, let the client arrive already understanding their own problem.',
+      button: 'Create my first free diagnosis'
+    },
     footer: {
       doDiagnosis: 'Take diagnosis',
       library: 'Diagnostics library',
