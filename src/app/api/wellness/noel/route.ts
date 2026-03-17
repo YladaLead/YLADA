@@ -40,6 +40,7 @@ import { detectMaliciousIntent } from '@/lib/noel-wellness/security-detector'
 import { checkRateLimit } from '@/lib/noel-wellness/rate-limiter'
 import { logSecurityFromFlags } from '@/lib/noel-wellness/security-logger'
 import { calcularMetasAutomaticas, formatarMetasParaNoel } from '@/lib/noel-wellness/goals-calculator'
+import { addExchange, getRecentMessages } from '@/lib/noel-wellness/noel-conversation-memory'
 import OpenAI from 'openai'
 
 const openai = new OpenAI({
@@ -1933,6 +1934,19 @@ export async function POST(request: NextRequest) {
           })
         }
         
+        // Memória de conversa: quando não há thread nem histórico do frontend, carregar do DB
+        let dbHistoryPrefix = ''
+        const semHistoricoFrontend = !conversationHistory || conversationHistory.length === 0
+        if (semHistoricoFrontend && !threadId) {
+          const dbHistory = await getRecentMessages(user.id, 8)
+          if (dbHistory.length > 0) {
+            const historicoTexto = dbHistory
+              .map((m) => `${m.role === 'user' ? 'Usuário' : 'Noel'}: ${m.content.substring(0, 300)}${m.content.length > 300 ? '...' : ''}`)
+              .join('\n')
+            dbHistoryPrefix = `[CONTEXTO RECENTE - últimas mensagens]\n${historicoTexto}\n\n`
+          }
+        }
+
         // Construir mensagem com contexto do perfil
         let contextMessage = message
         
@@ -1950,10 +1964,12 @@ export async function POST(request: NextRequest) {
           }
           
           if (profileInfo.length > 0) {
-            contextMessage = `[CONTEXTO DO PERFIL] ${profileInfo.join(' | ')}\n\n[MENSAGEM DO USUÁRIO] ${message}`
+            contextMessage = `${dbHistoryPrefix}[CONTEXTO DO PERFIL] ${profileInfo.join(' | ')}\n\n[MENSAGEM DO USUÁRIO] ${message}`
           }
         } else if (userProfile) {
-          contextMessage = `[CONTEXTO] Perfil do usuário: ${userProfile}. Intenção detectada: ${intention.module}. Módulo ativo: ${intention.module}.\n\n[MENSAGEM DO USUÁRIO] ${message}`
+          contextMessage = `${dbHistoryPrefix}[CONTEXTO] Perfil do usuário: ${userProfile}. Intenção detectada: ${intention.module}. Módulo ativo: ${intention.module}.\n\n[MENSAGEM DO USUÁRIO] ${message}`
+        } else if (dbHistoryPrefix) {
+          contextMessage = `${dbHistoryPrefix}[MENSAGEM DO USUÁRIO] ${message}`
         }
         
         const { processMessageWithAssistant } = await import('@/lib/noel-assistant-handler')
@@ -2065,6 +2081,11 @@ export async function POST(request: NextRequest) {
             }
           }
           
+          // Memória de conversa: persistir troca (janela deslizante 8 msgs)
+          addExchange(user.id, message, assistantResult.response).catch((err) => {
+            console.warn('[NOEL] addExchange erro:', err?.message)
+          })
+
           // Atualizar settings do usuário
           if (userProfile) {
             await supabaseAdmin

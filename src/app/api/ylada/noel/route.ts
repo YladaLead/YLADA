@@ -43,6 +43,7 @@ import {
   upsertNoelMemory,
   detectActionFromMessage,
 } from '@/lib/noel-wellness/noel-memory'
+import { addExchange, getRecentMessages } from '@/lib/noel-wellness/noel-conversation-memory'
 import {
   getStrategyMap,
   formatStrategyMapForPrompt,
@@ -804,9 +805,16 @@ export async function POST(request: NextRequest) {
     }
     const systemContent = parts.join('')
 
+    // Memória de conversa: quando frontend não envia histórico, carregar do DB (janela 8 msgs)
+    let historyToUse = conversationHistory
+    if (!historyToUse || historyToUse.length === 0) {
+      const dbHistory = await getRecentMessages(user.id, 8)
+      historyToUse = dbHistory
+    }
+
     const messages: OpenAI.Chat.ChatCompletionMessageParam[] = [
       { role: 'system', content: systemContent },
-      ...conversationHistory.slice(-12).map((m) => ({
+      ...historyToUse.slice(-12).map((m) => ({
         role: m.role as 'user' | 'assistant',
         content: m.content,
       })),
@@ -845,6 +853,11 @@ export async function POST(request: NextRequest) {
     } catch (memErr) {
       console.warn('[/api/ylada/noel] upsertNoelMemory/syncStrategyMap:', memErr)
     }
+
+    // Memória de conversa: persistir troca (janela deslizante 8 msgs)
+    addExchange(user.id, message.trim(), responseText).catch((e) =>
+      console.warn('[/api/ylada/noel] addExchange:', e)
+    )
 
     // Persistir diagnóstico da conversa (bloqueio + estratégia + exemplo) para histórico
     if (noelStrategies.length > 0 || situationCodes.length > 0 || professionalProfileCodes.length > 0) {
