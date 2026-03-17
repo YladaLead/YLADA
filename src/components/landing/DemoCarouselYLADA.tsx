@@ -127,7 +127,7 @@ const DEMO_SLIDES: DemoSlide[] = [
     visualType: 'chat',
     chatVariant: 'noel',
     chatTitle: 'Noel · YLADA',
-    chatSubtitle: 'assistente',
+    chatSubtitle: 'mentor',
     messages: [
       { from: 'client', text: 'Preciso atrair clientes, o que eu faço?', time: '14:20' },
     ],
@@ -142,13 +142,23 @@ const DEMO_SLIDES: DemoSlide[] = [
     visualType: 'chat',
     chatVariant: 'noel',
     chatTitle: 'Noel · YLADA',
-    chatSubtitle: 'assistente',
+    chatSubtitle: 'mentor',
     messages: [
       { from: 'client', text: 'Preciso atrair clientes, o que eu faço?', time: '14:20' },
       {
         from: 'pro',
-        text: 'Vamos começar com um diagnóstico simples pra atrair as pessoas certas. São poucas perguntas que fazem a pessoa refletir.',
+        text: 'Entendo. Você não precisa convencer — precisa atrair quem já está pronto.',
         time: '14:21',
+      },
+      {
+        from: 'pro',
+        text: 'Um diagnóstico faz isso: perguntas que fazem a pessoa refletir. Quando chega em você, já sabe do que precisa.',
+        time: '14:21',
+      },
+      {
+        from: 'pro',
+        text: 'Vou criar um pra você. Um pronto que atrai as pessoas certas.',
+        time: '14:22',
       },
     ],
   },
@@ -179,10 +189,10 @@ const DEMO_SLIDES: DemoSlide[] = [
   {
     tag: '7. Entrada',
     tagIcon: '👀',
-    title: 'As pessoas começam a entrar.',
+    title: 'O link que atrai clientes da sua área.',
     description:
-      'Por curiosidade, sem você convencer.',
-    pills: ['Entrada'],
+      'É o que o Noel criou pra você compartilhar. A pessoa vê e quer responder.',
+    pills: ['Atração'],
     visualType: 'link',
     linkTitle: 'Responda e entenda o que precisa mudar',
     linkHint: 'Começar agora',
@@ -576,7 +586,7 @@ function buildSlidesWithFlow(baseSlides: DemoSlide[], area: string | null): Demo
         ...s,
         messages: [
           { from: 'client' as const, text: flow.slide3Question, time: '14:20' },
-          s.messages[1],
+          ...s.messages.slice(1),
         ],
       }
     }
@@ -625,6 +635,7 @@ function buildSlidesWithFlow(baseSlides: DemoSlide[], area: string | null): Demo
 export default function DemoCarouselYLADA() {
   const [index, setIndex] = useState(0)
   const [isPlaying, setIsPlaying] = useState(false)
+  const [slideProgress, setSlideProgress] = useState(0)
   const [selectedArea, setSelectedArea] = useState<string | null>(null)
   const [showAreaSelector, setShowAreaSelector] = useState(false)
   const slides = useMemo(() => buildSlidesWithFlow(DEMO_SLIDES, selectedArea), [selectedArea])
@@ -633,17 +644,37 @@ export default function DemoCarouselYLADA() {
 
   const goPrev = useCallback(() => {
     setIndex((i) => (i === 0 ? total - 1 : i - 1))
+    setSlideProgress(0)
   }, [total])
 
   const goNext = useCallback(() => {
     setIndex((i) => (i === total - 1 ? 0 : i + 1))
+    setSlideProgress(0)
   }, [total])
 
   useEffect(() => {
     if (!isPlaying) return
-    const t = setInterval(() => setIndex((i) => (i + 1) % total), SLIDE_DURATION_MS)
+    const t = setInterval(() => {
+      setIndex((i) => (i + 1) % total)
+      setSlideProgress(0)
+    }, SLIDE_DURATION_MS)
     return () => clearInterval(t)
   }, [isPlaying, total])
+
+  useEffect(() => {
+    if (!isPlaying) {
+      setSlideProgress(0)
+      return
+    }
+    setSlideProgress(0)
+    const start = Date.now()
+    const tick = setInterval(() => {
+      const elapsed = Date.now() - start
+      const p = Math.min(1, elapsed / SLIDE_DURATION_MS)
+      setSlideProgress(p)
+    }, 50)
+    return () => clearInterval(tick)
+  }, [isPlaying, index])
 
   return (
     <section
@@ -683,7 +714,17 @@ export default function DemoCarouselYLADA() {
           </div>
 
           <div className="flex-shrink-0 order-1 lg:order-2 relative">
-            <SlideVisual slide={slide} />
+            <div className="relative">
+              <SlideVisual slide={slide} />
+              {isPlaying && (
+                <div className="absolute -bottom-6 left-0 right-0 mx-auto w-[calc(100%-1rem)] max-w-[280px] sm:max-w-[300px] h-2 bg-gray-800 rounded-full overflow-hidden border border-gray-600 shadow-lg">
+                  <div
+                    className="h-full bg-indigo-500 rounded-full transition-all duration-75 ease-linear"
+                    style={{ width: `${((index + slideProgress) / total) * 100}%` }}
+                  />
+                </div>
+              )}
+            </div>
             {!isPlaying ? (
                 <button
                   type="button"

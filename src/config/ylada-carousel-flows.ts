@@ -9,7 +9,7 @@ export interface AreaFlowContent {
   slide1ProblemHint: string
   /** Slide 3 - Pergunta no chat */
   slide3Question: string
-  /** Slide 5/6/7 - Link e share */
+  /** Slide 5/6/7 - Link e share (conteúdo que o cliente vê — atrativo por área) */
   linkTitle: string
   linkHint: string
   /** Slide 8 - Formulário */
@@ -32,8 +32,8 @@ const FLOW_NUTRI: AreaFlowContent = {
   slide1Problem: 'Você tenta emagrecer, mas nada funciona.',
   slide1ProblemHint: 'Tenta várias coisas, mas nada conecta',
   slide3Question: 'O que está me impedindo de emagrecer?',
-  linkTitle: 'Responda e entenda o que precisa mudar',
-  linkHint: '3 perguntas rápidas · Resultado na hora',
+  linkTitle: 'Descubra o que está impedindo seus resultados',
+  linkHint: '3 perguntas · Resultado na hora',
   formQuestion: 'Como está sua rotina alimentar?',
   formOptions: ['Falta de constância', 'Sente ansiedade', 'Não sei por onde começar', 'Já tentei tudo'],
   resultInsight: 'O problema não é dieta. É rotina.',
@@ -50,7 +50,7 @@ const FLOW_ESTETICA: AreaFlowContent = {
   slide1Problem: 'Você posta, mas não atrai clientes.',
   slide1ProblemHint: 'Tenta várias coisas, mas nada conecta',
   slide3Question: 'Por que não estou atraindo clientes?',
-  linkTitle: 'Descubra seu posicionamento',
+  linkTitle: 'Descubra o que sua pele precisa',
   linkHint: '3 perguntas · Resultado na hora',
   formQuestion: 'Você mostra seus resultados?',
   formOptions: ['Sim, mas pouco', 'Não sei como', 'Meu posicionamento não está claro', 'Clientes não entendem meu valor'],
@@ -68,7 +68,7 @@ const FLOW_PSI: AreaFlowContent = {
   slide1Problem: 'Conversas não evoluem.',
   slide1ProblemHint: 'Tenta várias coisas, mas nada conecta',
   slide3Question: 'Por que as pessoas não iniciam terapia?',
-  linkTitle: 'Entenda o que te impede',
+  linkTitle: 'Entenda o que você precisa agora',
   linkHint: '3 perguntas · Resultado na hora',
   formQuestion: 'Você sente dificuldade emocional?',
   formOptions: ['Sim, às vezes', 'Já tentei resolver sozinho', 'O que mais me incomoda hoje', 'Não sei por onde começar'],
@@ -86,7 +86,7 @@ const FLOW_ODONTO: AreaFlowContent = {
   slide1Problem: 'Pessoas perguntam preço e somem.',
   slide1ProblemHint: 'Tenta várias coisas, mas nada conecta',
   slide3Question: 'Como atrair pacientes mais preparados?',
-  linkTitle: 'Avalie o que precisa de atenção',
+  linkTitle: 'Descubra o que seu sorriso precisa',
   linkHint: '3 perguntas · Resultado na hora',
   formQuestion: 'Você sente dor ou desconforto?',
   formOptions: ['Sim, às vezes', 'Já avaliei esse problema', 'Isso afeta minha rotina', 'Quero prevenir'],
@@ -104,7 +104,7 @@ const FLOW_MED: AreaFlowContent = {
   slide1Problem: 'Pacientes perguntam e somem, ou não chegam.',
   slide1ProblemHint: 'Tenta várias coisas, mas nada conecta',
   slide3Question: 'Como atrair pacientes que já entendem o valor da consulta?',
-  linkTitle: 'Avalie o que merece atenção',
+  linkTitle: 'Avalie o que merece sua atenção',
   linkHint: '3 perguntas · Resultado na hora',
   formQuestion: 'Você sente algum sintoma recorrente?',
   formOptions: ['Sim, às vezes', 'Já procurei avaliação', 'Isso afeta minha qualidade de vida', 'Quero prevenir'],
@@ -122,7 +122,7 @@ const FLOW_FITNESS: AreaFlowContent = {
   slide1Problem: 'Você não consegue fechar alunos.',
   slide1ProblemHint: 'Tenta várias coisas, mas nada conecta',
   slide3Question: 'Por que as pessoas não começam treino?',
-  linkTitle: 'Descubra seu próximo passo',
+  linkTitle: 'Descubra como começar certo',
   linkHint: '3 perguntas · Resultado na hora',
   formQuestion: 'Você tem constância?',
   formOptions: ['Falta motivação', 'Já tentei antes', 'Não sei por onde começar', 'Preciso de um plano'],
@@ -158,7 +158,7 @@ const FLOW_SELLER: AreaFlowContent = {
   slide1Problem: 'Você tenta vender, mas as pessoas não se interessam.',
   slide1ProblemHint: 'Tenta várias coisas, mas nada conecta',
   slide3Question: 'Como atrair clientes mais qualificados?',
-  linkTitle: 'Descubra o que você precisa',
+  linkTitle: 'Descubra o que sua energia precisa',
   linkHint: '3 perguntas · Resultado na hora',
   formQuestion: 'Como está sua energia?',
   formOptions: ['Sinto cansaço', 'Quero mais resultados', 'Não estou satisfeito com meu corpo', 'Preciso de constância'],
