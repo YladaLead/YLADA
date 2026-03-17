@@ -145,16 +145,28 @@ export default function InstitutionalPageContent() {
         {/* 1️⃣ HERO — Impacto direto + experiência interativa obrigatória */}
         <section className="py-10 sm:py-14 lg:py-16 bg-gradient-to-b from-sky-50 to-white border-b border-gray-100">
           <div className="max-w-2xl mx-auto">
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-3 leading-tight text-center">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-4 leading-tight text-center">
               {home?.hero?.title ?? 'Seu WhatsApp está cheio de curiosos ou clientes prontos?'}
             </h1>
-            <p className="text-base sm:text-lg text-gray-600 mb-8 text-center font-medium">
-              {home?.hero?.subtitle ?? 'Responda em 30 segundos e descubra o que está mudando.'}
-            </p>
+            <div className="flex justify-center mb-8">
+              <button
+                type="button"
+                onClick={() => document.getElementById('quiz-diagnostico')?.scrollIntoView({ behavior: 'smooth', block: 'center' })}
+                className="inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition-all shadow-lg hover:shadow-xl text-base sm:text-lg"
+              >
+                {home?.hero?.subtitle ?? 'Descubra seu perfil de marketing em 30 segundos.'}
+              </button>
+            </div>
 
             {/* 2️⃣ QUIZ EM DESTAQUE — Fluxo visual óbvio: experiência interativa, não conteúdo institucional */}
-            <div className="max-w-xl mx-auto mb-8 p-6 sm:p-8 rounded-2xl bg-white border-2 border-gray-200 shadow-lg shadow-gray-200/50">
-              <p className="text-sm font-semibold text-gray-700 mb-3">{home?.preEngagement?.beforeStart ?? 'Responda agora — leva 30 segundos:'}</p>
+            <div id="quiz-diagnostico" className="max-w-xl mx-auto mb-8 rounded-2xl bg-white border-2 border-gray-200 shadow-lg shadow-gray-200/50 scroll-mt-8 overflow-hidden">
+              <div className="bg-blue-600 px-6 py-3 text-center">
+                <p className="text-white font-semibold text-sm sm:text-base">
+                  {home?.preEngagement?.diagnosticBadge ?? 'Selecione o que está acontecendo com você agora'}
+                </p>
+              </div>
+              <div className="p-6 sm:p-8">
+              <p className="text-sm font-semibold text-gray-700 mb-3">{home?.preEngagement?.beforeStart ?? 'Qual é o seu caso?'}</p>
               <p className="font-semibold text-gray-900 mb-4">{home?.preEngagement?.questionPreEngage ?? 'Seu marketing hoje atrai mais:'}</p>
               <div className="space-y-2 mb-6">
                 {[
@@ -189,7 +201,7 @@ export default function InstitutionalPageContent() {
                 ))}
               </div>
               <p className="text-sm font-semibold text-gray-800 mb-4">
-                {home?.preEngagement?.discoverProfileMinute ?? 'Descubra seu perfil profissional em menos de 1 minuto.'}
+                {home?.preEngagement?.discoverProfileMinute ?? 'Selecione uma opção e veja seu perfil em 1 minuto.'}
               </p>
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
                 <button
@@ -203,7 +215,9 @@ export default function InstitutionalPageContent() {
                   disabled={respostaHeroIdx === null}
                   className="inline-flex items-center justify-center px-8 py-4 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg text-base"
                 >
-                  {home?.preEngagement?.ctaFreeDiagnosis ?? 'Ver meu resultado agora'}
+                  {respostaHeroIdx !== null
+                    ? (home?.preEngagement?.ctaFreeDiagnosis ?? 'Fazer meu diagnóstico')
+                    : (home?.preEngagement?.ctaFreeDiagnosisDisabled ?? 'Selecione uma opção acima')}
                 </button>
                 <Link
                   href={getLocalizedPath('/pt/cadastro', locale)}
@@ -215,6 +229,7 @@ export default function InstitutionalPageContent() {
               <p className="text-xs text-gray-500 text-center mt-3">
                 {home?.hero?.proof ?? '+3.000 profissionais já testaram'}
               </p>
+              </div>
             </div>
           </div>
         </section>

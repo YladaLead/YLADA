@@ -36,6 +36,7 @@ export interface HomeTranslations {
     proof: string
   }
   preEngagement?: {
+    diagnosticBadge?: string
     beforeStart: string
     questionPreEngage: string
     optCurious: string
@@ -44,6 +45,7 @@ export interface HomeTranslations {
     optNotSure: string
     discoverProfileMinute: string
     ctaFreeDiagnosis: string
+    ctaFreeDiagnosisDisabled?: string
     ctaCreateDiagnosis: string
   }
   whyDiagnosticsBlock?: {

@@ -211,7 +211,7 @@ export const enTranslations: Translations = {
     redirecting: 'Redirecting...',
     hero: {
       title: 'Is your WhatsApp full of curious people or ready clients?',
-      subtitle: 'Answer in 30 seconds and discover what\'s changing.',
+      subtitle: 'Discover your marketing profile in 30 seconds.',
       tagline: 'Create diagnostics, share the link, and watch people start a conversation with you on WhatsApp.',
       ctaCuriososPreparados: 'Stop talking to the curious. Start talking to prepared clients.',
       ctaPrimary: 'Start free',
@@ -232,14 +232,16 @@ export const enTranslations: Translations = {
       proof: '+3,000 professionals have already tested'
     },
     preEngagement: {
-      beforeStart: 'Answer now — takes 30 seconds:',
+      diagnosticBadge: 'Select what\'s happening with you right now',
+      beforeStart: 'What\'s your case?',
       questionPreEngage: 'Today your marketing attracts more:',
       optCurious: 'Curious people asking about price',
       optStuck: 'Conversations that don\'t move forward',
       optPrepared: 'Truly prepared clients',
       optNotSure: 'Not sure',
-      discoverProfileMinute: 'Discover your professional profile in less than 1 minute.',
-      ctaFreeDiagnosis: 'See my result now',
+      discoverProfileMinute: 'Select an option and see your marketing profile in 1 minute.',
+      ctaFreeDiagnosis: 'Take my diagnosis',
+      ctaFreeDiagnosisDisabled: 'Select an option above',
       ctaCreateDiagnosis: 'Create my diagnosis'
     },
     whyDiagnosticsBlock: {

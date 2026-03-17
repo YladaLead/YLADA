@@ -215,7 +215,7 @@ export const ptTranslations: Translations = {
     redirecting: 'Redirecionando...',
     hero: {
       title: 'Seu WhatsApp está cheio de curiosos ou clientes prontos?',
-      subtitle: 'Responda em 30 segundos e descubra o que está mudando.',
+      subtitle: 'Descubra seu perfil de marketing em 30 segundos.',
       tagline: 'Crie diagnósticos, compartilhe o link e veja pessoas iniciarem conversa com você no WhatsApp.',
       ctaCuriososPreparados: 'Pare de conversar com curiosos. Comece a conversar com clientes preparados.',
       ctaPrimary: 'Começar grátis',
@@ -236,14 +236,16 @@ export const ptTranslations: Translations = {
       proof: '+3.000 profissionais já testaram'
     },
     preEngagement: {
-      beforeStart: 'Responda agora — leva 30 segundos:',
+      diagnosticBadge: 'Selecione o que está acontecendo com você agora',
+      beforeStart: 'Qual é o seu caso?',
       questionPreEngage: 'Seu marketing hoje atrai mais:',
       optCurious: 'Curiosos perguntando preço',
       optStuck: 'Conversas que não avançam',
       optPrepared: 'Clientes realmente preparados',
       optNotSure: 'Não tenho certeza',
-      discoverProfileMinute: 'Descubra seu perfil profissional em menos de 1 minuto.',
-      ctaFreeDiagnosis: 'Ver meu resultado agora',
+      discoverProfileMinute: 'Selecione uma opção e veja seu perfil de marketing em 1 minuto.',
+      ctaFreeDiagnosis: 'Fazer meu diagnóstico',
+      ctaFreeDiagnosisDisabled: 'Selecione uma opção acima',
       ctaCreateDiagnosis: 'Criar meu diagnóstico'
     },
     whyDiagnosticsBlock: {
