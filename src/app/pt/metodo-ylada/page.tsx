@@ -4,6 +4,8 @@ import Image from 'next/image'
 import Link from 'next/link'
 import YladaHubHeader from '@/components/landing/YladaHubHeader'
 import ManifestoYLADA from '@/components/landing/ManifestoYLADA'
+import DemoCarouselYLADA from '@/components/landing/DemoCarouselYLADA'
+import FluxoTrilhaPlataforma from '@/components/landing/FluxoTrilhaPlataforma'
 import { YLADA_LANDING_AREAS } from '@/config/ylada-landing-areas'
 
 export default function MetodoYLADALandingPage() {
@@ -43,10 +45,10 @@ export default function MetodoYLADALandingPage() {
                   Criar diagnóstico
                 </Link>
                 <Link
-                  href="#como-funciona"
+                  href="#como-funciona-na-pratica"
                   className="inline-flex items-center justify-center px-8 py-4 border-2 border-gray-300 text-gray-700 font-semibold rounded-xl hover:bg-gray-50 transition-all"
                 >
-                  Entender a filosofia
+                  Ver como funciona na prática
                 </Link>
               </div>
             </div>
@@ -54,6 +56,12 @@ export default function MetodoYLADALandingPage() {
         </section>
 
         <ManifestoYLADA showDiagram showTitle variant="card" />
+
+        {/* Carrossel: como funciona na prática (valor → WhatsApp) */}
+        <DemoCarouselYLADA />
+
+        {/* Trilha na plataforma: entra → board → Noel manda o link */}
+        <FluxoTrilhaPlataforma />
 
         {/* 2️⃣ A nova lógica de atrair clientes */}
         <section className="py-16 sm:py-20 bg-white">
