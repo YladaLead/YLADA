@@ -210,8 +210,8 @@ export const esTranslations: Translations = {
     loading: 'Cargando...',
     redirecting: 'Redirigiendo...',
     hero: {
-      title: '¿Tu marketing hoy atrae curiosos preguntando el precio?',
-      subtitle: 'La mayoría de los profesionales necesita explicar, convencer e insistir para vender. Las buenas conversaciones empiezan con buenas preguntas.',
+      title: '¿Tu WhatsApp está lleno de curiosos o clientes listos?',
+      subtitle: 'Responde en 30 segundos y descubre qué está cambiando.',
       tagline: 'Crea diagnósticos, comparte el enlace y verás a las personas iniciar conversación contigo en WhatsApp.',
       ctaCuriososPreparados: 'Deja de conversar con curiosos. Empieza a conversar con clientes preparados.',
       ctaPrimary: 'Empezar gratis',
@@ -232,14 +232,14 @@ export const esTranslations: Translations = {
       proof: '+3.000 profesionales ya han probado'
     },
     preEngagement: {
-      beforeStart: 'Antes de empezar, responde rápido:',
+      beforeStart: 'Responde ahora — toma 30 segundos:',
       questionPreEngage: 'Tu marketing hoy atrae más:',
       optCurious: 'Curiosos preguntando el precio',
       optStuck: 'Conversaciones que no avanzan',
       optPrepared: 'Clientes realmente preparados',
       optNotSure: 'No estoy seguro',
       discoverProfileMinute: 'Descubre tu perfil profesional en menos de 1 minuto.',
-      ctaFreeDiagnosis: 'Hacer diagnóstico gratis',
+      ctaFreeDiagnosis: 'Ver mi resultado ahora',
       ctaCreateDiagnosis: 'Crear mi diagnóstico'
     },
     whyDiagnosticsBlock: {

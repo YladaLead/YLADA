@@ -6,6 +6,7 @@
   "scripts": {
     "predev": "bash scripts/sync-env-local.sh || true",
     "dev": "next dev",
+    "dev:port": "next dev -p 3001 -H 0.0.0.0",
     "dev:webpack": "next dev --webpack",
     "dev:mobile": "next dev -H 0.0.0.0",
     "build": "next build",

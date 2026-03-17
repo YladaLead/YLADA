@@ -15,6 +15,7 @@ import Link from 'next/link'
 import { useTranslations } from '@/hooks/useTranslations'
 import { useAuth } from '@/contexts/AuthContext'
 import { getYladaLandingAreas } from '@/config/ylada-landing-areas'
+import DemoCarouselYLADA from '@/components/landing/DemoCarouselYLADA'
 import { getLocaleFromPathname, type Language } from '@/lib/i18n'
 import { ptTranslations } from '@/lib/translations/pt'
 import { enTranslations } from '@/lib/translations/en'
@@ -141,25 +142,19 @@ export default function InstitutionalPageContent() {
       </header>
 
       <main className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* 1️⃣ HERO — Dor imediata + proposta */}
-        <section className="py-12 sm:py-16 lg:py-20 bg-gradient-to-b from-sky-50 to-white border-b border-gray-100">
-          <div className="max-w-3xl mx-auto text-center">
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-4 leading-tight">
-              {home?.hero?.title ?? 'Seu marketing hoje atrai curiosos perguntando preço?'}
+        {/* 1️⃣ HERO — Impacto direto + experiência interativa obrigatória */}
+        <section className="py-10 sm:py-14 lg:py-16 bg-gradient-to-b from-sky-50 to-white border-b border-gray-100">
+          <div className="max-w-2xl mx-auto">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-3 leading-tight text-center">
+              {home?.hero?.title ?? 'Seu WhatsApp está cheio de curiosos ou clientes prontos?'}
             </h1>
-            <p className="text-lg sm:text-xl text-gray-700 mb-4 leading-relaxed">
-              {home?.hero?.subtitle ?? 'A maioria dos profissionais precisa explicar, convencer e insistir para vender. Boas conversas começam com boas perguntas.'}
-            </p>
-            <p className="text-base sm:text-lg text-gray-600 mb-2">
-              {home?.hero?.tagline ?? 'Crie diagnósticos, compartilhe o link e veja pessoas iniciarem conversa com você no WhatsApp.'}
-            </p>
-            <p className="text-lg font-semibold text-gray-900 mb-8">
-              {home?.hero?.ctaCuriososPreparados ?? 'Pare de conversar com curiosos. Comece a conversar com clientes preparados.'}
+            <p className="text-base sm:text-lg text-gray-600 mb-8 text-center font-medium">
+              {home?.hero?.subtitle ?? 'Responda em 30 segundos e descubra o que está mudando.'}
             </p>
 
-            {/* 2️⃣ AUTO DIAGNÓSTICO — Quiz rápido (prende a pessoa) */}
-            <div className="max-w-xl mx-auto mb-10">
-              <p className="text-sm font-medium text-gray-600 mb-4">{home?.preEngagement?.beforeStart ?? 'Antes de começar, responda rápido:'}</p>
+            {/* 2️⃣ QUIZ EM DESTAQUE — Fluxo visual óbvio: experiência interativa, não conteúdo institucional */}
+            <div className="max-w-xl mx-auto mb-8 p-6 sm:p-8 rounded-2xl bg-white border-2 border-gray-200 shadow-lg shadow-gray-200/50">
+              <p className="text-sm font-semibold text-gray-700 mb-3">{home?.preEngagement?.beforeStart ?? 'Responda agora — leva 30 segundos:'}</p>
               <p className="font-semibold text-gray-900 mb-4">{home?.preEngagement?.questionPreEngage ?? 'Seu marketing hoje atrai mais:'}</p>
               <div className="space-y-2 mb-6">
                 {[
@@ -193,7 +188,7 @@ export default function InstitutionalPageContent() {
                   </label>
                 ))}
               </div>
-              <p className="text-base font-medium text-gray-700 mb-4">
+              <p className="text-sm font-semibold text-gray-800 mb-4">
                 {home?.preEngagement?.discoverProfileMinute ?? 'Descubra seu perfil profissional em menos de 1 minuto.'}
               </p>
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
@@ -206,9 +201,9 @@ export default function InstitutionalPageContent() {
                     }
                   }}
                   disabled={respostaHeroIdx === null}
-                  className="inline-flex items-center justify-center px-8 py-4 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
+                  className="inline-flex items-center justify-center px-8 py-4 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg text-base"
                 >
-                  {home?.preEngagement?.ctaFreeDiagnosis ?? 'Fazer diagnóstico grátis'}
+                  {home?.preEngagement?.ctaFreeDiagnosis ?? 'Ver meu resultado agora'}
                 </button>
                 <Link
                   href={getLocalizedPath('/pt/cadastro', locale)}
@@ -217,37 +212,15 @@ export default function InstitutionalPageContent() {
                   {home?.preEngagement?.ctaCreateDiagnosis ?? 'Criar meu diagnóstico'}
                 </Link>
               </div>
+              <p className="text-xs text-gray-500 text-center mt-3">
+                {home?.hero?.proof ?? '+3.000 profissionais já testaram'}
+              </p>
             </div>
           </div>
         </section>
 
-        {/* 3️⃣ VÍDEO EXPLICATIVO — 60–90s: problema, nova lógica, como testar */}
-        <section className="py-10 sm:py-14 bg-white border-b border-gray-100">
-          <div className="max-w-3xl mx-auto px-4">
-            <h2 className="text-xl sm:text-2xl font-bold text-gray-900 text-center mb-6">
-              {home?.video?.title ?? 'O que é o YLADA em 90 segundos'}
-            </h2>
-            {typeof process !== 'undefined' && process.env?.NEXT_PUBLIC_YLADA_HOME_VIDEO_URL ? (
-              <div className="relative aspect-video rounded-2xl overflow-hidden bg-gray-900">
-                <iframe
-                  src={process.env.NEXT_PUBLIC_YLADA_HOME_VIDEO_URL}
-                  title="Vídeo explicativo YLADA"
-                  className="absolute inset-0 w-full h-full"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                />
-              </div>
-            ) : (
-              <div className="aspect-video rounded-2xl bg-gray-100 border-2 border-dashed border-gray-300 flex flex-col items-center justify-center gap-3 p-8 text-center">
-                <span className="text-4xl" aria-hidden>🎥</span>
-                <p className="text-gray-600 font-medium">{home?.video?.placeholderTitle ?? 'Vídeo explicativo em breve'}</p>
-                <p className="text-sm text-gray-500 max-w-md">
-                  {home?.video?.placeholderDesc ?? 'Em 60–90 segundos: o problema que o YLADA resolve, a lógica de diagnóstico antes da conversa e como testar grátis.'}
-                </p>
-              </div>
-            )}
-          </div>
-        </section>
+        {/* 3️⃣ FLUXO — Como funciona na prática (carrossel do método) */}
+        <DemoCarouselYLADA />
 
         {/* 4️⃣ IDENTIFICAÇÃO DO PROBLEMA */}
         <section className="bg-gray-50 py-12 sm:py-16 lg:py-20 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8">
