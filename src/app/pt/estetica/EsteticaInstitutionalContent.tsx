@@ -42,7 +42,7 @@ export default function EsteticaInstitutionalContent() {
   const [authTimeout, setAuthTimeout] = useState(false)
 
   useEffect(() => {
-    const id = setTimeout(() => setAuthTimeout(true), 2000)
+    const id = setTimeout(() => setAuthTimeout(true), 800)
     return () => clearTimeout(id)
   }, [])
 

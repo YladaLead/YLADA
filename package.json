@@ -25,7 +25,10 @@
     "organizar-contatos-meta": "node scripts/organizar-contatos-meta-ads.js",
     "migrate:235": "npx tsx scripts/run-migration.ts 235-ylada-templates-biblioteca-nutri-bloco2.sql",
     "migrate:236": "npx tsx scripts/run-migration.ts 236-ylada-templates-calculadoras-biblioteca-nutri.sql",
-    "archetypes:gerar": "npx tsx scripts/gerar-archetypes-diagnostico.ts"
+    "archetypes:gerar": "npx tsx scripts/gerar-archetypes-diagnostico.ts",
+    "agente:simulador": "npx tsx scripts/agents/ylada-simulador.ts",
+    "agente:auditor": "npx tsx scripts/agents/ylada-auditor-noel.ts",
+    "agente:otimizador": "npx tsx scripts/agents/ylada-otimizador-noel.ts"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
