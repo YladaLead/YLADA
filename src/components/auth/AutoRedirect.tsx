@@ -27,10 +27,16 @@ export default function AutoRedirect() {
   const pathname = usePathname()
   const hasRedirectedRef = useRef(false)
   const redirectTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const subscriptionCheckStartedRef = useRef(false)
+  const prevPathnameRef = useRef<string | null>(null)
 
   useEffect(() => {
-    // Resetar flag quando pathname mudar (nova navegação)
-    hasRedirectedRef.current = false
+    // Resetar flags apenas quando pathname mudar (evita múltiplas execuções do check)
+    if (prevPathnameRef.current !== pathname) {
+      prevPathnameRef.current = pathname
+      hasRedirectedRef.current = false
+      subscriptionCheckStartedRef.current = false
+    }
     
     // Limpar timeout anterior se existir
     if (redirectTimeoutRef.current) {
@@ -103,14 +109,18 @@ export default function AutoRedirect() {
 
         const perfil = userProfile?.perfil || getAreaFromPath(pathname) || 'wellness'
         
+        // Evitar múltiplas chamadas simultâneas (evita conflito com vários usuários e piscar)
+        if (subscriptionCheckStartedRef.current) return
+        subscriptionCheckStartedRef.current = true
+
         // Para outras páginas de login (wellness, nutri, etc.), manter lógica anterior
         const checkSubscription = async () => {
-          await new Promise(resolve => setTimeout(resolve, 1000))
+          await new Promise(resolve => setTimeout(resolve, 450))
           if (hasRedirectedRef.current || !pathname.includes('/login')) return
           
           const timeoutId = setTimeout(() => {
             hasRedirectedRef.current = true
-          }, 2000)
+          }, 3000)
           
           try {
             const area = perfil === 'nutri' ? 'nutri' : 
@@ -119,7 +129,7 @@ export default function AutoRedirect() {
             
             const response = await fetch(`/api/${area}/subscription/check`, {
               credentials: 'include',
-              signal: AbortSignal.timeout(1500)
+              signal: AbortSignal.timeout(5000)
             })
             
             clearTimeout(timeoutId)
