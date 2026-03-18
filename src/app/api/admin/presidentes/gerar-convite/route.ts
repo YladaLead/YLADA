@@ -65,13 +65,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    if (presidente.status !== 'ativo') {
-      return NextResponse.json(
-        { error: 'Este presidente está inativo. Ative-o antes de gerar convites.' },
-        { status: 400 }
-      )
-    }
-
+    // Admin/suporte pode gerar link em nome de qualquer presidente (ativo ou inativo)
     const baseUrl =
       (typeof request.url === 'string' ? new URL(request.url).origin : null) ||
       (request as any).nextUrl?.origin ||

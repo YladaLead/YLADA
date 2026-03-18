@@ -37,6 +37,12 @@ const CASAL_PRESIDENTE: Record<string, string[]> = {
   'Marcio e Ana Pasqua': [
     'Marcio e Ana Pasqua',
   ],
+  'Lilian e Alexandre': [
+    'Lilian e Alexandre',
+  ],
+  'Lucimar e Geraldo': [
+    'Lucimar e Geraldo',
+  ],
 }
 
 /** Todas as variantes mapeadas para o nome canônico (normalizado: trim + comparação case-insensitive na busca) */

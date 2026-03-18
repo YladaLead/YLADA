@@ -544,9 +544,10 @@ function AdminPresidentesContent() {
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
               >
                 <option value="">Selecione o presidente</option>
-                {presidentesAtivos.map((p) => (
+                {presidentes.map((p) => (
                   <option key={p.id} value={p.id}>
                     {p.nome_completo}
+                    {p.status === 'inativo' ? ' (inativo)' : ''}
                   </option>
                 ))}
               </select>
@@ -592,7 +593,7 @@ function AdminPresidentesContent() {
             </div>
             <button
               type="submit"
-              disabled={loadingConvite || presidentesAtivos.length === 0}
+              disabled={loadingConvite || presidentes.length === 0}
               className="bg-purple-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-purple-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loadingConvite ? 'Gerando...' : 'Gerar link'}
