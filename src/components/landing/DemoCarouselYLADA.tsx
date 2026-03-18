@@ -632,11 +632,16 @@ function buildSlidesWithFlow(baseSlides: DemoSlide[], area: string | null): Demo
   })
 }
 
-export default function DemoCarouselYLADA() {
+export interface DemoCarouselYLADAProps {
+  /** Na página de estética: já usa argumentos de estética e não pergunta área ao clicar em assistir. */
+  initialArea?: string | null
+}
+
+export default function DemoCarouselYLADA({ initialArea = null }: DemoCarouselYLADAProps) {
   const [index, setIndex] = useState(0)
   const [isPlaying, setIsPlaying] = useState(false)
   const [slideProgress, setSlideProgress] = useState(0)
-  const [selectedArea, setSelectedArea] = useState<string | null>(null)
+  const [selectedArea, setSelectedArea] = useState<string | null>(initialArea ?? null)
   const [showAreaSelector, setShowAreaSelector] = useState(false)
   const slides = useMemo(() => buildSlidesWithFlow(DEMO_SLIDES, selectedArea), [selectedArea])
   const total = slides.length
@@ -677,22 +682,34 @@ export default function DemoCarouselYLADA() {
   }, [isPlaying, index])
 
   return (
-    <section
-      id="como-funciona-na-pratica"
-      className="relative overflow-hidden bg-gradient-to-b from-slate-50 to-white py-16 sm:py-20"
-    >
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12 sm:mb-14">
-          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
-            Veja como atrair clientes sem precisar convencer
-          </h2>
-          <p className="text-lg text-gray-600 max-w-xl mx-auto">
-            De uma simples pergunta até pessoas te chamarem no WhatsApp.
-          </p>
+    <>
+      {/* Seção 1: só o título — sempre visível no topo */}
+      <section
+        id="como-funciona-na-pratica"
+        className="relative overflow-hidden bg-gradient-to-b from-slate-50 to-white pt-16 sm:pt-20 pb-8 sm:pb-10"
+      >
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center">
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
+              Veja como atrair clientes sem precisar convencer
+            </h2>
+            <p className="text-lg text-gray-600 max-w-xl mx-auto">
+              De uma simples pergunta até pessoas te chamarem no WhatsApp.
+            </p>
+          </div>
         </div>
+      </section>
 
+      {/* Seção 2: número da execução (1, 2, 3…), texto do slide e vídeo — no mobile fica em destaque; sticky quando tocando */}
+      <section
+        aria-label="Passo a passo do fluxo"
+        className={`relative overflow-hidden bg-gradient-to-b from-slate-50 to-white py-8 sm:py-12 pb-16 sm:pb-20 transition-shadow ${
+          isPlaying ? 'sticky top-0 z-30 shadow-lg' : ''
+        }`}
+      >
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col lg:flex-row items-center justify-center gap-8 lg:gap-12 max-w-5xl mx-auto relative">
-          <div className="flex-1 min-w-0 order-2 lg:order-1 max-w-md">
+          <div className="flex-1 min-w-0 w-full max-w-md order-1 lg:order-1">
             <span className="inline-flex items-center gap-1.5 rounded-full bg-indigo-100/80 text-indigo-700 px-2.5 py-0.5 text-xs font-medium mb-4">
               {slide.tagIcon && <span>{slide.tagIcon}</span>}
               {slide.tag}
@@ -713,7 +730,7 @@ export default function DemoCarouselYLADA() {
             </div>
           </div>
 
-          <div className="flex-shrink-0 order-1 lg:order-2 relative">
+          <div className="flex-shrink-0 relative order-2 lg:order-2">
             <div className="relative">
               <SlideVisual slide={slide} />
               {isPlaying && (
@@ -729,8 +746,13 @@ export default function DemoCarouselYLADA() {
                 <button
                   type="button"
                   onClick={() => {
-                    setSelectedArea((prev) => prev ?? 'nutri')
-                    setShowAreaSelector(true)
+                    if (initialArea) {
+                      setSelectedArea(initialArea)
+                      setIsPlaying(true)
+                    } else {
+                      setSelectedArea((prev) => prev ?? 'nutri')
+                      setShowAreaSelector(true)
+                    }
                   }}
                   className="absolute inset-0 flex items-center justify-center bg-black/25 rounded-[2.5rem] transition-opacity hover:bg-black/35"
                   aria-label="Assistir"
@@ -886,7 +908,8 @@ export default function DemoCarouselYLADA() {
           <p className="text-sm text-gray-500 mt-2">Comece gratuitamente</p>
         </div>
         </>
-      </div>
-    </section>
+        </div>
+      </section>
+    </>
   )
 }

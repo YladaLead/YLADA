@@ -32,6 +32,7 @@ export default function DiagnosticoQuiz({ slug, variantOverride }: DiagnosticoQu
   const hasQ1FromHome = slug === 'comunicacao' && q1FromHome !== null && !Number.isNaN(q1FromHome) && q1FromHome >= 0 && q1FromHome <= 2
 
   const fromHome = searchParams.get('fromHome') === '1'
+  const fromArea = searchParams.get('fromArea') // 'perfumaria' | 'odonto' quando area=6, para definir tipo
   const problemaParam = searchParams.get('problema')
   const problemaFromHome = problemaParam !== null ? parseInt(problemaParam, 10) : null
   const hasProblemaFromHome = slug === 'comunicacao' && problemaFromHome !== null && !Number.isNaN(problemaFromHome) && problemaFromHome >= 0 && problemaFromHome <= 2
@@ -41,7 +42,18 @@ export default function DiagnosticoQuiz({ slug, variantOverride }: DiagnosticoQu
   const [etapaAtual, setEtapaAtual] = useState(0)
 
   useEffect(() => {
-    if (fromHome && hasProblemaFromHome && !iniciado) {
+    // Fluxo por área (med=0, psi=1, estética=2, nutri=3, fitness=4, seller=5, odonto/perfumaria=6): não pergunta área nem tipo — vai direto às perguntas.
+    const areaSkipToContent = hasAreaFromHome && (areaFromHome === 0 || areaFromHome === 1 || areaFromHome === 2 || areaFromHome === 3 || areaFromHome === 4 || areaFromHome === 5 || areaFromHome === 6) && !iniciado
+    if (slug === 'comunicacao' && areaSkipToContent) {
+      const tipo = areaFromHome === 6 ? (fromArea === 'perfumaria' ? 1 : 0) : 0 // perfumaria = vendedor, odonto = liberal
+      setRespostas({
+        problema: fromHome && hasProblemaFromHome ? problemaFromHome! : 2,
+        area: areaFromHome,
+        tipo,
+      })
+      setEtapaAtual(3) // primeira pergunta de conteúdo (q1)
+      setIniciado(true)
+    } else if (fromHome && hasProblemaFromHome && !iniciado) {
       setRespostas({ problema: problemaFromHome })
       setEtapaAtual(1)
       setIniciado(true)
@@ -57,7 +69,7 @@ export default function DiagnosticoQuiz({ slug, variantOverride }: DiagnosticoQu
       setEtapaAtual(1)
       setIniciado(true)
     }
-  }, [hasAreaFromHome, hasQ1FromHome, hasProblemaFromHome, fromHome, areaFromHome, q1FromHome, problemaFromHome, iniciado])
+  }, [slug, hasAreaFromHome, hasQ1FromHome, hasProblemaFromHome, fromHome, fromArea, areaFromHome, q1FromHome, problemaFromHome, iniciado])
 
   if (!config) {
     return (
@@ -172,7 +184,11 @@ export default function DiagnosticoQuiz({ slug, variantOverride }: DiagnosticoQu
               </p>
             </div>
 
-            <div className="bg-gray-50 rounded-xl p-6 sm:p-8 border border-gray-200">
+            <div
+              className="bg-gray-50 rounded-xl p-6 sm:p-8 border border-gray-200"
+              data-quiz-pergunta={etapaAtual + 1}
+              data-quiz-total={totalPerguntas}
+            >
               <div className="mb-6">
                 <div className="flex justify-between text-sm text-gray-500 mb-2">
                   <span>Pergunta {etapaAtual + 1} de {totalPerguntas}</span>
@@ -185,17 +201,20 @@ export default function DiagnosticoQuiz({ slug, variantOverride }: DiagnosticoQu
                 </div>
               </div>
 
-              <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-6">
+              <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-6" id="quiz-pergunta-texto">
                 {perguntaAtual.texto}
               </h2>
 
-              <div className="space-y-3">
+              <div className="space-y-3" role="group" aria-label={`Pergunta ${etapaAtual + 1} de ${totalPerguntas}`}>
                 {perguntaAtual.opcoes.map((opcao, idx) => (
                   <button
                     key={opcao.label + String(idx)}
                     type="button"
                     onClick={() => handleResposta(opcao.valor ?? null)}
                     className="w-full text-left px-4 py-3 rounded-lg border-2 border-gray-200 bg-white hover:border-blue-500 hover:bg-blue-50 transition-all font-medium text-gray-800"
+                    data-cta="quiz-option"
+                    data-question-index={etapaAtual + 1}
+                    data-option-index={idx + 1}
                   >
                     {opcao.label}
                   </button>
@@ -213,19 +232,24 @@ export default function DiagnosticoQuiz({ slug, variantOverride }: DiagnosticoQu
               )}
             </div>
 
-            {/* Botão no final: sempre visível na última pergunta; habilitado quando todas respondidas */}
+            {/* Botão no final: sempre visível na última pergunta; habilitado quando todas respondidas. data-cta para automação. */}
             {(todasRespondidas || etapaAtual === totalPerguntas - 1) && (
-              <div className="mt-8 text-center">
+              <div className="mt-8 text-center" data-quiz-step="result-cta">
                 <button
                   type="button"
                   onClick={todasRespondidas ? handleVerDiagnostico : undefined}
                   disabled={!todasRespondidas}
                   className="inline-flex items-center justify-center w-full max-w-sm mx-auto px-8 py-4 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-blue-600"
+                  data-cta="ver-diagnostico"
+                  data-enabled={todasRespondidas ? 'true' : 'false'}
+                  aria-live="polite"
                 >
                   Ver diagnóstico
                 </button>
                 {!todasRespondidas && etapaAtual === totalPerguntas - 1 && (
-                  <p className="text-sm text-gray-500 mt-2">Responda à última pergunta para gerar seu diagnóstico.</p>
+                  <p className="text-sm text-gray-500 mt-2" data-hint="last-question">
+                    Responda à última pergunta para gerar seu diagnóstico.
+                  </p>
                 )}
               </div>
             )}

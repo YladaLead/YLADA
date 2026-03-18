@@ -64,6 +64,20 @@ export const landingPageVideos = {
     const version = 8
     return `/videos/nutri-hero-poster.jpg?v=${version}`
   },
+  /** Vídeo do fluxo completo (gerado a partir do carrossel) — usado na primeira página/landing e nas páginas de áreas (estética, nutri, etc.). */
+  get fluxoCompleto() {
+    return getLandingPageAssetUrl('wellness-hero.mp4')
+  },
+  get fluxoCompletoPoster() {
+    return getLandingPageAssetUrl('wellness-hero-poster.png')
+  },
+  /** Vídeo correto YLADA: "Não sei por onde começar" / "É aqui que a coisa acontece" (demonstração). Bucket: ylada-demonstracao-fluxo.mp4 ou env NEXT_PUBLIC_YLADA_VIDEO_FLUXO_URL. */
+  get yladaDemonstracaoFluxo() {
+    return getLandingPageAssetUrl('ylada-demonstracao-fluxo.mp4')
+  },
+  get yladaDemonstracaoFluxoPoster() {
+    return getLandingPageAssetUrl('ylada-demonstracao-fluxo-poster.png')
+  },
   /** Vídeo tutorial "Como escolher seu slug" (Configurações Nutri). Defina NEXT_PUBLIC_NUTRI_SLUG_VIDEO_URL (YouTube, Vimeo ou URL direta do vídeo). */
   get nutriSlugTutorial(): string {
     return (typeof process !== 'undefined' && process.env.NEXT_PUBLIC_NUTRI_SLUG_VIDEO_URL) || ''

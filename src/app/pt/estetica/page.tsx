@@ -1,10 +1,11 @@
 'use client'
 
-import { AreaLandingPage } from '@/components/ylada/AreaLandingPage'
+import EsteticaInstitutionalContent from './EsteticaInstitutionalContent'
 
 /**
- * Landing YLADA para Estética — template oficial.
+ * Página de estética: mesma estrutura e seções da home YLADA,
+ * com conteúdo 100% focado em estética (para tráfego pago /pt/estetica).
  */
 export default function EsteticaLandingPage() {
-  return <AreaLandingPage area="estetica" locale="pt" />
+  return <EsteticaInstitutionalContent />
 }

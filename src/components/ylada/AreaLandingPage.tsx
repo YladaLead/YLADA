@@ -71,6 +71,107 @@ interface AreaLandingPageProps {
 /** Áreas de vendas: nutra (suplementos/nutraceuticos) e seller (vendedores em geral). Comunicação com "clientes" e "conversas". */
 const SALES_AREAS: AreaLandingArea[] = ['nutra', 'seller']
 
+/** Área → índice 0–6 para o quiz de diagnóstico (comunicacao). Usado em /pt/diagnostico?area= */
+const AREA_TO_QUIZ_INDEX: Record<AreaLandingArea, number> = {
+  nutri: 3,
+  estetica: 2,
+  fitness: 4,
+  psi: 1,
+  odonto: 6,
+  med: 0,
+  nutra: 5,
+  perfumaria: 6,
+  'coach-bem-estar': 5,
+  seller: 5,
+}
+
+/** Textos da seção "três dificuldades" por área (headline PT/EN/ES). Respeita área para não mostrar "Nutricionistas" em estética. */
+const DIAGNOSTIC_SECTION_BY_AREA: Record<
+  AreaLandingArea,
+  { pt: string; en: string; es: string; bullet1: { pt: string; en: string; es: string }; bullet2: { pt: string; en: string; es: string }; closing: { pt: string; en: string; es: string } }
+> = {
+  nutri: {
+    pt: 'Nutricionistas enfrentam três dificuldades comuns no marketing online',
+    en: 'Nutritionists face three common challenges in online marketing',
+    es: 'Los nutricionistas enfrentan tres dificultades comunes en el marketing online',
+    bullet1: { pt: 'Pacientes pedindo orientação gratuita', en: 'Patients asking for free guidance', es: 'Pacientes pidiendo orientación gratuita' },
+    bullet2: { pt: 'Conversas que não viram consulta', en: 'Conversations that don\'t turn into consultations', es: 'Conversaciones que no se convierten en consulta' },
+    closing: { pt: 'Isso consome tempo, gera conversas improdutivas e reduz a qualidade das consultas.', en: 'This consumes time, generates unproductive conversations and reduces the quality of consultations.', es: 'Esto consume tiempo, genera conversaciones improductivas y reduce la calidad de las consultas.' },
+  },
+  estetica: {
+    pt: 'Profissionais de estética enfrentam três dificuldades comuns no marketing online',
+    en: 'Aesthetics professionals face three common challenges in online marketing',
+    es: 'Los profesionales de estética enfrentan tres dificultades comunes en el marketing online',
+    bullet1: { pt: 'Clientes pedindo orientação sem demonstrar interesse real', en: 'Clients asking for guidance without showing real interest', es: 'Clientes pidiendo orientación sin demostrar interés real' },
+    bullet2: { pt: 'Conversas que não viram agendamento', en: 'Conversations that don\'t turn into bookings', es: 'Conversaciones que no se convierten en cita' },
+    closing: { pt: 'Isso consome tempo, gera conversas improdutivas e reduz a qualidade dos agendamentos.', en: 'This consumes time, generates unproductive conversations and reduces the quality of bookings.', es: 'Esto consume tiempo, genera conversaciones improductivas y reduce la calidad de las citas.' },
+  },
+  fitness: {
+    pt: 'Profissionais de fitness enfrentam três dificuldades comuns no marketing online',
+    en: 'Fitness professionals face three common challenges in online marketing',
+    es: 'Los profesionales de fitness enfrentan tres dificultades comunes en el marketing online',
+    bullet1: { pt: 'Alunos pedindo orientação sem compromisso', en: 'Students asking for guidance without commitment', es: 'Alumnos pidiendo orientación sin compromiso' },
+    bullet2: { pt: 'Conversas que não viram matrícula ou consulta', en: 'Conversations that don\'t turn into enrollment or consultation', es: 'Conversaciones que no se convierten en matrícula o consulta' },
+    closing: { pt: 'Isso consome tempo, gera conversas improdutivas e reduz a qualidade das consultas.', en: 'This consumes time, generates unproductive conversations and reduces the quality of consultations.', es: 'Esto consume tiempo, genera conversaciones improductivas y reduce la calidad de las consultas.' },
+  },
+  psi: {
+    pt: 'Psicólogos e terapeutas enfrentam três dificuldades comuns no marketing online',
+    en: 'Psychologists and therapists face three common challenges in online marketing',
+    es: 'Los psicólogos y terapeutas enfrentan tres dificultades comunes en el marketing online',
+    bullet1: { pt: 'Pacientes pedindo orientação gratuita', en: 'Patients asking for free guidance', es: 'Pacientes pidiendo orientación gratuita' },
+    bullet2: { pt: 'Conversas que não viram consulta', en: 'Conversations that don\'t turn into consultations', es: 'Conversaciones que no se convierten en consulta' },
+    closing: { pt: 'Isso consome tempo, gera conversas improdutivas e reduz a qualidade das consultas.', en: 'This consumes time, generates unproductive conversations and reduces the quality of consultations.', es: 'Esto consume tiempo, genera conversaciones improductivas y reduce la calidad de las consultas.' },
+  },
+  odonto: {
+    pt: 'Dentistas enfrentam três dificuldades comuns no marketing online',
+    en: 'Dentists face three common challenges in online marketing',
+    es: 'Los dentistas enfrentan tres dificultades comunes en el marketing online',
+    bullet1: { pt: 'Pacientes pedindo orçamento sem demonstrar interesse real', en: 'Patients asking for quotes without showing real interest', es: 'Pacientes pidiendo presupuesto sin demostrar interés real' },
+    bullet2: { pt: 'Conversas que não viram agendamento', en: 'Conversations that don\'t turn into appointments', es: 'Conversaciones que no se convierten en cita' },
+    closing: { pt: 'Isso consome tempo, gera conversas improdutivas e reduz a qualidade dos agendamentos.', en: 'This consumes time, generates unproductive conversations and reduces the quality of appointments.', es: 'Esto consume tiempo, genera conversaciones improductivas y reduce la calidad de las citas.' },
+  },
+  med: {
+    pt: 'Médicos enfrentam três dificuldades comuns no marketing online',
+    en: 'Physicians face three common challenges in online marketing',
+    es: 'Los médicos enfrentan tres dificultades comunes en el marketing online',
+    bullet1: { pt: 'Pacientes pedindo orientação gratuita', en: 'Patients asking for free guidance', es: 'Pacientes pidiendo orientación gratuita' },
+    bullet2: { pt: 'Conversas que não viram consulta', en: 'Conversations that don\'t turn into consultations', es: 'Conversaciones que no se convierten en consulta' },
+    closing: { pt: 'Isso consome tempo, gera conversas improdutivas e reduz a qualidade das consultas.', en: 'This consumes time, generates unproductive conversations and reduces the quality of consultations.', es: 'Esto consume tiempo, genera conversaciones improductivas y reduce la calidad de las consultas.' },
+  },
+  nutra: {
+    pt: 'Consultores de suplementos e nutraceuticos enfrentam três dificuldades comuns',
+    en: 'Supplement and nutraceutical consultants face three common challenges',
+    es: 'Consultores de suplementos y nutracéuticos enfrentan tres dificultades comunes',
+    bullet1: { pt: 'Clientes pedindo orientação sem demonstrar interesse real', en: 'Clients asking for guidance without showing real interest', es: 'Clientes pidiendo orientación sin demostrar interés real' },
+    bullet2: { pt: 'Conversas que não viram venda', en: 'Conversations that don\'t turn into sales', es: 'Conversaciones que no se convierten en venta' },
+    closing: { pt: 'Isso consome tempo, gera conversas improdutivas e reduz a qualidade das vendas.', en: 'This consumes time, generates unproductive conversations and reduces the quality of sales.', es: 'Esto consume tiempo, genera conversaciones improductivas y reduce la calidad de las ventas.' },
+  },
+  perfumaria: {
+    pt: 'Profissionais de perfumaria enfrentam três dificuldades comuns no marketing online',
+    en: 'Perfumery professionals face three common challenges in online marketing',
+    es: 'Los profesionales de perfumería enfrentan tres dificultades comunes en el marketing online',
+    bullet1: { pt: 'Clientes pedendo indicação sem demonstrar interesse de compra', en: 'Clients asking for recommendations without showing purchase interest', es: 'Clientes pidiendo recomendación sin demostrar interés de compra' },
+    bullet2: { pt: 'Conversas que não viram venda', en: 'Conversations that don\'t turn into sales', es: 'Conversaciones que no se convierten en venta' },
+    closing: { pt: 'Isso consome tempo, gera conversas improdutivas e reduz a qualidade das vendas.', en: 'This consumes time, generates unproductive conversations and reduces the quality of sales.', es: 'Esto consume tiempo, genera conversaciones improductivas y reduce la calidad de las ventas.' },
+  },
+  'coach-bem-estar': {
+    pt: 'Coaches enfrentam três dificuldades comuns no marketing online',
+    en: 'Coaches face three common challenges in online marketing',
+    es: 'Los coaches enfrentan tres dificultades comunes en el marketing online',
+    bullet1: { pt: 'Clientes pedindo orientação sem demonstrar compromisso', en: 'Clients asking for guidance without showing commitment', es: 'Clientes pidiendo orientación sin demostrar compromiso' },
+    bullet2: { pt: 'Conversas que não viram sessão', en: 'Conversations that don\'t turn into sessions', es: 'Conversaciones que no se convierten en sesión' },
+    closing: { pt: 'Isso consome tempo, gera conversas improdutivas e reduz a qualidade das sessões.', en: 'This consumes time, generates unproductive conversations and reduces the quality of sessions.', es: 'Esto consume tiempo, genera conversaciones improductivas y reduce la calidad de las sesiones.' },
+  },
+  seller: {
+    pt: 'Consultores de suplementos e nutraceuticos enfrentam três dificuldades comuns',
+    en: 'Supplement and nutraceutical consultants face three common challenges',
+    es: 'Consultores de suplementos y nutracéuticos enfrentan tres dificultades comunes',
+    bullet1: { pt: 'Clientes pedindo orientação sem demonstrar interesse real', en: 'Clients asking for guidance without showing real interest', es: 'Clientes pidiendo orientación sin demostrar interés real' },
+    bullet2: { pt: 'Conversas que não viram venda', en: 'Conversations that don\'t turn into sales', es: 'Conversaciones que no se convierten en venta' },
+    closing: { pt: 'Isso consome tempo, gera conversas improdutivas e reduz a qualidade das vendas.', en: 'This consumes time, generates unproductive conversations and reduces the quality of sales.', es: 'Esto consume tiempo, genera conversaciones improductivas y reduce la calidad de las ventas.' },
+  },
+}
+
 /** Mapeia área para checkout real. Áreas sem checkout próprio usam nutri. "Começar agora" vai direto ao checkout (escolher plano anual/mensal). */
 const AREA_TO_CHECKOUT: Record<AreaLandingArea, string> = {
   nutri: '/pt/nutri/checkout',
@@ -221,13 +322,23 @@ export function AreaLandingPage({ area, locale, appBasePath = '/pt' }: AreaLandi
               </div>
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
                 <Link
-                  href={loginHref}
+                  href={locale === 'pt' ? `/pt/diagnostico?area=${AREA_TO_QUIZ_INDEX[area]}` : `${appBasePath}/diagnostico?area=${AREA_TO_QUIZ_INDEX[area]}`}
                   className="inline-flex items-center justify-center px-8 py-4 rounded-xl bg-blue-600 text-white font-semibold text-lg hover:bg-blue-700 transition-colors shadow-lg"
+                  data-cta="comecar-avaliacao"
+                  aria-label={locale === 'pt' ? 'Começar avaliação' : locale === 'en' ? 'Start assessment' : 'Comenzar evaluación'}
+                >
+                  {locale === 'pt' && 'Começar avaliação'}
+                  {locale === 'en' && 'Start assessment'}
+                  {locale === 'es' && 'Comenzar evaluación'}
+                  <span className="ml-2" aria-hidden>→</span>
+                </Link>
+                <Link
+                  href={loginHref}
+                  className="inline-flex items-center justify-center px-8 py-4 rounded-xl border-2 border-gray-200 text-gray-700 font-medium hover:bg-gray-50 transition-colors"
                 >
                   {locale === 'pt' && 'Criar meu diagnóstico grátis'}
                   {locale === 'en' && 'Create my free diagnosis'}
                   {locale === 'es' && 'Crear mi diagnóstico gratis'}
-                  <span className="ml-2" aria-hidden>→</span>
                 </Link>
                 <Link
                   href={locale === 'pt' ? '/pt/precos' : `${appBasePath}/precos`}
@@ -253,44 +364,16 @@ export function AreaLandingPage({ area, locale, appBasePath = '/pt' }: AreaLandi
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="max-w-2xl mx-auto">
               <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-6 text-center">
-                {isSalesArea ? (
-                  locale === 'pt' ? 'Consultores de suplementos e nutraceuticos enfrentam três dificuldades comuns'
-                  : locale === 'en' ? 'Supplement and nutraceutical consultants face three common challenges'
-                  : 'Consultores de suplementos y nutracéuticos enfrentan tres dificultades comunes'
-                ) : (
-                  locale === 'pt' ? 'Nutricionistas enfrentam três dificuldades comuns no marketing online'
-                  : locale === 'en' ? 'Nutritionists face three common challenges in online marketing'
-                  : 'Los nutricionistas enfrentan tres dificultades comunes en el marketing online'
-                )}
+                {locale === 'pt' ? DIAGNOSTIC_SECTION_BY_AREA[area].pt : locale === 'en' ? DIAGNOSTIC_SECTION_BY_AREA[area].en : DIAGNOSTIC_SECTION_BY_AREA[area].es}
               </h2>
               <ul className="space-y-4 text-gray-700">
                 <li className="flex items-start gap-3">
                   <span className="text-red-500 font-bold shrink-0">•</span>
-                  <span>
-                    {isSalesArea ? (
-                      locale === 'pt' ? 'Clientes pedindo orientação sem demonstrar interesse real'
-                      : locale === 'en' ? 'Clients asking for guidance without showing real interest'
-                      : 'Clientes pidiendo orientación sin demostrar interés real'
-                    ) : (
-                      locale === 'pt' ? 'Pacientes pedindo orientação gratuita'
-                      : locale === 'en' ? 'Patients asking for free guidance'
-                      : 'Pacientes pidiendo orientación gratuita'
-                    )}
-                  </span>
+                  <span>{locale === 'pt' ? DIAGNOSTIC_SECTION_BY_AREA[area].bullet1.pt : locale === 'en' ? DIAGNOSTIC_SECTION_BY_AREA[area].bullet1.en : DIAGNOSTIC_SECTION_BY_AREA[area].bullet1.es}</span>
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="text-red-500 font-bold shrink-0">•</span>
-                  <span>
-                    {isSalesArea ? (
-                      locale === 'pt' ? 'Conversas que não viram venda'
-                      : locale === 'en' ? 'Conversations that don\'t turn into sales'
-                      : 'Conversaciones que no se convierten en venta'
-                    ) : (
-                      locale === 'pt' ? 'Conversas que não viram consulta'
-                      : locale === 'en' ? 'Conversations that don\'t turn into consultations'
-                      : 'Conversaciones que no se convierten en consulta'
-                    )}
-                  </span>
+                  <span>{locale === 'pt' ? DIAGNOSTIC_SECTION_BY_AREA[area].bullet2.pt : locale === 'en' ? DIAGNOSTIC_SECTION_BY_AREA[area].bullet2.en : DIAGNOSTIC_SECTION_BY_AREA[area].bullet2.es}</span>
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="text-red-500 font-bold shrink-0">•</span>
@@ -302,15 +385,7 @@ export function AreaLandingPage({ area, locale, appBasePath = '/pt' }: AreaLandi
                 </li>
               </ul>
               <p className="text-center text-gray-600 mt-8 font-medium">
-                {isSalesArea ? (
-                  locale === 'pt' ? 'Isso consome tempo, gera conversas improdutivas e reduz a qualidade das vendas.'
-                  : locale === 'en' ? 'This consumes time, generates unproductive conversations and reduces the quality of sales.'
-                  : 'Esto consume tiempo, genera conversaciones improductivas y reduce la calidad de las ventas.'
-                ) : (
-                  locale === 'pt' ? 'Isso consome tempo, gera conversas improdutivas e reduz a qualidade das consultas.'
-                  : locale === 'en' ? 'This consumes time, generates unproductive conversations and reduces the quality of consultations.'
-                  : 'Esto consume tiempo, genera conversaciones improductivas y reduce la calidad de las consultas.'
-                )}
+                {locale === 'pt' ? DIAGNOSTIC_SECTION_BY_AREA[area].closing.pt : locale === 'en' ? DIAGNOSTIC_SECTION_BY_AREA[area].closing.en : DIAGNOSTIC_SECTION_BY_AREA[area].closing.es}
               </p>
             </div>
           </div>

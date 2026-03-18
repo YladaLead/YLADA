@@ -1,10 +1,11 @@
 'use client'
 
-import { AreaLandingPage } from '@/components/ylada/AreaLandingPage'
+import NutriInstitutionalContent from './NutriInstitutionalContent'
 
 /**
- * Landing YLADA para Nutricionistas — template oficial.
+ * Página de nutrição: mesma estrutura e seções da home e da estética,
+ * com conteúdo 100% focado em nutricionistas (dor agenda vazia, fluxo sem perguntar área, vídeo nutri).
  */
 export default function NutriLandingPage() {
-  return <AreaLandingPage area="nutri" locale="pt" />
+  return <NutriInstitutionalContent />
 }

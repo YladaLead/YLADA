@@ -5,11 +5,15 @@ import {
   DIAGNOSTICO_EXEMPLOS,
   type DiagnosticoExemploArea,
 } from '@/config/ylada-diagnostico-exemplos'
+import { landingPageVideos } from '@/lib/landing-pages-assets'
 
-/** Vídeo do fluxo completo: por padrão usa arquivo em public/videos/ylada-fluxo-completo.mp4. Para YouTube/Vimeo, defina NEXT_PUBLIC_YLADA_VIDEO_FLUXO_URL. */
-const VIDEO_FLUXO_URL =
-  (typeof process !== 'undefined' && process.env.NEXT_PUBLIC_YLADA_VIDEO_FLUXO_URL) ||
-  '/videos/ylada-fluxo-completo.mp4'
+/** Vídeo do fluxo completo: preferência pelo vídeo correto YLADA ("Não sei por onde começar" / "É aqui que a coisa acontece"). Prioridade: env > yladaDemonstracaoFluxo > fluxoCompleto > fallback local. */
+function getVideoFluxoUrl(): string {
+  if (typeof process !== 'undefined' && process.env.NEXT_PUBLIC_YLADA_VIDEO_FLUXO_URL) {
+    return process.env.NEXT_PUBLIC_YLADA_VIDEO_FLUXO_URL
+  }
+  return landingPageVideos.yladaDemonstracaoFluxo || landingPageVideos.fluxoCompleto || '/videos/ylada-fluxo-completo.mp4'
+}
 
 function getYoutubeEmbedUrl(url: string): string | null {
   const m = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]+)/)
@@ -110,14 +114,15 @@ export function DiagnosticoExemploSection({
               </div>
             </div>
 
-            {/* Coluna direita: Vídeo do fluxo completo */}
+            {/* Coluna direita: Vídeo do fluxo completo (mesmo vídeo da primeira página / carrossel) */}
             <div className="space-y-4">
               <p className="text-sm font-medium text-gray-600">Vídeo do fluxo completo</p>
-              {VIDEO_FLUXO_URL ? (
+              {getVideoFluxoUrl() ? (
                 <div className="aspect-video rounded-xl overflow-hidden bg-gray-900 border border-gray-200">
                   {(() => {
-                    const yt = getYoutubeEmbedUrl(VIDEO_FLUXO_URL)
-                    const vimeo = getVimeoEmbedUrl(VIDEO_FLUXO_URL)
+                    const videoUrl = getVideoFluxoUrl()
+                    const yt = getYoutubeEmbedUrl(videoUrl)
+                    const vimeo = getVimeoEmbedUrl(videoUrl)
                     if (yt) {
                       return (
                         <iframe
@@ -140,10 +145,10 @@ export function DiagnosticoExemploSection({
                         />
                       )
                     }
-                    if (isDirectVideo(VIDEO_FLUXO_URL)) {
+                    if (isDirectVideo(videoUrl)) {
                       return (
                         <video
-                          src={VIDEO_FLUXO_URL}
+                          src={videoUrl}
                           controls
                           playsInline
                           className="w-full h-full object-contain"
@@ -154,7 +159,7 @@ export function DiagnosticoExemploSection({
                     }
                     return (
                       <iframe
-                        src={VIDEO_FLUXO_URL}
+                        src={videoUrl}
                         title="Vídeo do fluxo completo"
                         allowFullScreen
                         className="w-full h-full"
@@ -167,7 +172,7 @@ export function DiagnosticoExemploSection({
                   <div className="text-center p-6">
                     <p className="text-gray-500 text-sm mb-2">Vídeo não encontrado</p>
                     <p className="text-gray-400 text-xs max-w-[260px] mx-auto">
-                      Coloque o arquivo em <code className="bg-gray-300 px-1 rounded text-[10px]">public/videos/ylada-fluxo-completo.mp4</code> ou defina NEXT_PUBLIC_YLADA_VIDEO_FLUXO_URL.
+                      Vídeo correto: bucket <code className="bg-gray-300 px-1 rounded text-[10px]">ylada-demonstracao-fluxo.mp4</code> (Não sei por onde começar / É aqui que a coisa acontece) ou defina NEXT_PUBLIC_YLADA_VIDEO_FLUXO_URL.
                     </p>
                   </div>
                 </div>
