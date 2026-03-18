@@ -6,7 +6,7 @@
 INSERT INTO presidentes_autorizados (nome_completo, status, created_at, updated_at)
 SELECT nome, 'ativo', NOW(), NOW()
 FROM (VALUES
-  ('Lilian e Alexandre'),
+  ('Lilian e Alexandre Lazari'),
   ('Lucimar e Geraldo')
 ) AS novos_presidentes(nome)
 WHERE NOT EXISTS (

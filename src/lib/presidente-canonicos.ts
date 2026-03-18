@@ -37,8 +37,11 @@ const CASAL_PRESIDENTE: Record<string, string[]> = {
   'Marcio e Ana Pasqua': [
     'Marcio e Ana Pasqua',
   ],
-  'Lilian e Alexandre': [
+  'Lilian e Alexandre Lazari': [
+    'Lilian e Alexandre Lazari',
     'Lilian e Alexandre',
+    'mídia EUA',
+    'Midia EUA',
   ],
   'Lucimar e Geraldo': [
     'Lucimar e Geraldo',

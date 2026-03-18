@@ -34,7 +34,7 @@ Use estes nomes exatos (já cadastrados):
 - `Carlota Batista`
 - `Gladis e Marino`
 - `Marcio e Ana Pasqua`
-- `Lilian e Alexandre`
+- `Lilian e Alexandre Lazari`
 - `Lucimar e Geraldo`
 
 ---
