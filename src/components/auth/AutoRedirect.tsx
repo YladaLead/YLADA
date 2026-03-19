@@ -93,12 +93,22 @@ export default function AutoRedirect() {
                 const temPerfilEmpresarial = p?.profile_type && p?.profession
                 if (temNome && temWhatsapp && temPerfilEmpresarial) redirectPath = '/pt/home'
                 else if (temNome && temWhatsapp) redirectPath = '/pt/perfil-empresarial'
+                // Usuárias da área Nutri (e outras áreas) que ainda não têm perfil ylada: ir direto para o board para evitar tela piscando/loop
+                else if (!p && userProfile?.perfil && userProfile.perfil !== 'ylada') {
+                  redirectPath = '/pt/home'
+                }
               }
               console.log('✅ AutoRedirect (YLADA): redirecionando para', redirectPath)
               hasRedirectedRef.current = true
               router.replace(redirectPath)
             } catch {
               if (hasRedirectedRef.current) return
+              // Em caso de erro/timeout: se tem perfil de área (nutri, coach, etc.), ir para board em vez de onboarding
+              if (userProfile?.perfil && userProfile.perfil !== 'ylada') {
+                hasRedirectedRef.current = true
+                router.replace('/pt/home')
+                return
+              }
               hasRedirectedRef.current = true
               router.replace('/pt/onboarding')
             }

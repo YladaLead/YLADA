@@ -601,24 +601,17 @@ export function useAuth() {
       }
     }
     
-    // Detectar área atual baseado na URL para redirecionar para login da mesma área
-    let redirectPath = '/pt' // padrão: página inicial
+    // Todas as áreas (Nutri, Coach, Nutra, etc.) são direcionadas ao login unificado YLADA
+    let redirectPath = '/pt/login'
     
     if (typeof window !== 'undefined') {
       const currentPath = window.location.pathname
-      
-      // Detectar área baseado no path
-      if (currentPath.includes('/nutri/')) {
-        redirectPath = '/pt/nutri/login'
-      } else if (currentPath.includes('/coach/')) {
-        redirectPath = '/pt/coach/login'
+      if (currentPath.includes('/admin/')) {
+        redirectPath = '/admin/login'
       } else if (currentPath.includes('/wellness/')) {
         redirectPath = '/pt/wellness/login'
-      } else if (currentPath.includes('/nutra/')) {
-        redirectPath = '/pt/nutra/login'
-      } else if (currentPath.includes('/admin/')) {
-        redirectPath = '/admin/login'
       }
+      // nutri, coach, nutra: já usa /pt/login (redirectPath padrão)
     }
     
     if (!supabase) {

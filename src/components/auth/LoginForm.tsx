@@ -452,6 +452,7 @@ export default function LoginForm({
 
         // Login em /pt/login (ylada): todos vão para YLADA (matriz). Priorizar onboarding se perfil não preenchido.
         // Se tem nome+whatsapp mas falta profile_type/profession → perfil-empresarial (ex.: usuárias Nutri migradas).
+        // Usuárias da área Nutri (e outras) que já estavam cadastradas: ir para o board (/pt/home) para evitar tela piscando.
         if (perfil === 'ylada') {
           baseRedirectPath = '/pt/onboarding'
           try {
@@ -466,7 +467,13 @@ export default function LoginForm({
             const temWhatsapp = as?.whatsapp && String(as.whatsapp).replace(/\D/g, '').length >= 10
             const temPerfilEmpresarial = yladaProfile?.profile_type && yladaProfile?.profession
             if (!temNome || !temWhatsapp) {
-              console.log('🔄 Login YLADA: perfil incompleto (nome/whatsapp), redirecionando para onboarding')
+              // Se não tem perfil ylada mas tem perfil de área (nutri, coach, etc.), ir para board
+              if (!yladaProfile && profileCheck?.perfil && profileCheck.perfil !== 'ylada') {
+                baseRedirectPath = '/pt/home'
+                console.log('🔄 Login YLADA: usuária de área (ex. Nutri) sem perfil ylada, redirecionando para board')
+              } else {
+                console.log('🔄 Login YLADA: perfil incompleto (nome/whatsapp), redirecionando para onboarding')
+              }
             } else if (!temPerfilEmpresarial) {
               baseRedirectPath = '/pt/perfil-empresarial'
               console.log('🔄 Login YLADA: nome+whatsapp ok, falta perfil empresarial, redirecionando para preencher')
@@ -476,6 +483,10 @@ export default function LoginForm({
             }
           } catch (e) {
             console.warn('⚠️ Erro ao verificar perfil YLADA:', e)
+            // Em erro: se tem perfil de área (nutri, coach), ir para board
+            if (profileCheck?.perfil && profileCheck.perfil !== 'ylada') {
+              baseRedirectPath = '/pt/home'
+            }
           }
         } else if (perfil === 'nutri') {
           try {
