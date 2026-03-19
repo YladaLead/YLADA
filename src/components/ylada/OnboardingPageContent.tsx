@@ -49,9 +49,11 @@ export function OnboardingPageContent({
   redirectAfterSave,
   proofText,
 }: OnboardingPageContentProps) {
-  const { user, loading } = useAuth()
+  const { user, session, loading } = useAuth()
   const router = useRouter()
   const [checking, setChecking] = useState(true)
+  /** Header Authorization quando há sessão — evita 401 quando cookies não são enviados (ex.: acesso direto por link). */
+  const authHeader = session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}
   const [nomeCompleto, setNomeCompleto] = useState('')
   const [telefone, setTelefone] = useState('')
   const [countryCode, setCountryCode] = useState('BR')
@@ -68,7 +70,7 @@ export function OnboardingPageContent({
     const fallbackName = user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split('@')[0] || ''
     try {
       if (isNutri) {
-        const res = await fetch('/api/nutri/profile', { credentials: 'include' })
+        const res = await fetch('/api/nutri/profile', { credentials: 'include', headers: { ...authHeader } })
         if (res.ok) {
           const data = await res.json()
           const p = data.profile
@@ -79,7 +81,7 @@ export function OnboardingPageContent({
           setNomeCompleto(fallbackName)
         }
       } else if (AREA_SEGMENT_YLADA.includes(areaCodigo)) {
-        const res = await fetch(`/api/ylada/profile?segment=${encodeURIComponent(areaCodigo)}`, { credentials: 'include' })
+        const res = await fetch(`/api/ylada/profile?segment=${encodeURIComponent(areaCodigo)}`, { credentials: 'include', headers: { ...authHeader } })
         if (res.ok) {
           const data = await res.json()
           const p = data?.data?.profile
@@ -115,7 +117,7 @@ export function OnboardingPageContent({
     const check = async () => {
       if (isNutri) {
         try {
-          const response = await fetch('/api/nutri/diagnostico', { credentials: 'include' })
+          const response = await fetch('/api/nutri/diagnostico', { credentials: 'include', headers: { ...authHeader } })
           if (response.ok) {
             const data = await response.json()
             if (data.hasDiagnostico) {
@@ -128,7 +130,7 @@ export function OnboardingPageContent({
         }
       } else if (AREA_SEGMENT_YLADA.includes(areaCodigo)) {
         try {
-          const res = await fetch(`/api/ylada/profile?segment=${encodeURIComponent(areaCodigo)}`, { credentials: 'include' })
+          const res = await fetch(`/api/ylada/profile?segment=${encodeURIComponent(areaCodigo)}`, { credentials: 'include', headers: { ...authHeader } })
           if (res.ok) {
             const data = await res.json()
             const p = data?.data?.profile
@@ -171,7 +173,7 @@ export function OnboardingPageContent({
       if (isNutri) {
         const response = await fetch('/api/nutri/profile', {
           method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Content-Type': 'application/json', ...authHeader },
           credentials: 'include',
           body: JSON.stringify({
             nome: nomeCompleto.trim(),
@@ -190,7 +192,7 @@ export function OnboardingPageContent({
           sessionStorage.setItem('nutri_veio_do_onboarding_timestamp', Date.now().toString())
         }
       } else {
-        const resGet = await fetch(`/api/ylada/profile?segment=${encodeURIComponent(areaCodigo)}`, { credentials: 'include' })
+        const resGet = await fetch(`/api/ylada/profile?segment=${encodeURIComponent(areaCodigo)}`, { credentials: 'include', headers: { ...authHeader } })
         let existingAreaSpecific: Record<string, unknown> = {}
         if (resGet.ok) {
           const dataGet = await resGet.json()
@@ -201,7 +203,7 @@ export function OnboardingPageContent({
         }
         const response = await fetch('/api/ylada/profile', {
           method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Content-Type': 'application/json', ...authHeader },
           credentials: 'include',
           body: JSON.stringify({
             segment: areaCodigo,

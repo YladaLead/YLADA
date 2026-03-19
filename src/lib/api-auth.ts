@@ -101,6 +101,29 @@ export async function requireApiAuth(
     let sessionError = null
     let userError: any = null
 
+    // Quando não há cookies (ex.: acesso direto por link, outro dispositivo), tentar Bearer primeiro.
+    if (accessToken && !requestCookies?.trim()) {
+      try {
+        const { data: { user: tokenUser }, error: tokenError } = await supabase.auth.getUser(accessToken)
+        if (!tokenError && tokenUser) {
+          user = tokenUser
+          session = {
+            user: tokenUser,
+            access_token: accessToken,
+            refresh_token: '',
+            expires_in: 3600,
+            expires_at: Math.floor(Date.now() / 1000) + 3600,
+            token_type: 'bearer'
+          } as any
+          if (process.env.NODE_ENV === 'development') {
+            console.log('✅ API Auth - Autenticado via Bearer (sem cookies)')
+          }
+        }
+      } catch (_) {
+        // Segue fluxo normal
+      }
+    }
+
     // DEV: se temos cookies, tentar sessão primeiro (sem rede).
     if (isDev && requestCookies) {
       try {
