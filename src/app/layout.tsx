@@ -13,8 +13,13 @@ export const metadata = {
   keywords: 'leads, IA, inteligência artificial, geração de leads, marketing, ylada',
   authors: [{ name: 'YLADA Team' }],
   manifest: '/manifest.json',
+  // Ícones em múltiplos tamanhos (Google recomenda 48x48 e 96x96 para resultados de busca)
   icons: {
-    icon: '/images/logo/ylada/quadrado/azul-claro/logo_ylada_azul_quadrado.png',
+    icon: [
+      { url: '/images/logo/ylada/quadrado/azul-claro/logo_ylada_azul_quadrado.png', sizes: '48x48', type: 'image/png' },
+      { url: '/images/logo/ylada/quadrado/azul-claro/logo_ylada_azul_quadrado.png', sizes: '96x96', type: 'image/png' },
+      { url: '/images/logo/ylada/quadrado/azul-claro/logo_ylada_azul_quadrado.png', sizes: '192x192', type: 'image/png' },
+    ],
     apple: '/images/logo/ylada/quadrado/azul-claro/logo_ylada_azul_quadrado.png',
   },
   openGraph: {
