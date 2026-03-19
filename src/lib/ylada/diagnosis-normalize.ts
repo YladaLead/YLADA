@@ -131,7 +131,7 @@ export function normalizeVisitorAnswers(
       const themeLower = (options?.themeRaw ?? '').toLowerCase()
       const isEmagrecimento = /emagrecimento|perda de peso|emagrecer|peso/.test(themeLower)
 
-      // Score genérico para temas não-emagrecimento (intestino, energia, etc.)
+      // Score genérico para temas não-emagrecimento (intestino, energia, alimentação saudável, etc.)
       if (!isEmagrecimento) {
         const generic = calcGenericScoreAndLevel(answers)
         if (generic) {
@@ -140,6 +140,19 @@ export function normalizeVisitorAnswers(
           out.symptoms = ['relatado'] // mínimo para o motor não falhar
           out.history_flags = []
           out.impact_level = generic.level === 'alto' ? 'alto' : generic.level === 'medio' ? 'medio' : 'baixo'
+          out.attempts_count = 0
+          break
+        }
+        // Respostas em texto livre (sem opções 0-3): garantir nível para o motor não falhar
+        const hasAnyText = [q1Raw, q2Raw, q3Raw, q4Raw].some(
+          (v) => typeof v === 'string' && String(v).trim().length > 0
+        )
+        if (hasAnyText) {
+          out.generic_score = 0
+          out.generic_level = 'medio'
+          out.symptoms = ['relatado']
+          out.history_flags = []
+          out.impact_level = 'medio'
           out.attempts_count = 0
           break
         }

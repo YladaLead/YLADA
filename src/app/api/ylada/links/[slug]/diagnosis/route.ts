@@ -550,7 +550,13 @@ export async function POST(
       metrics_id: row.id,
     })
   } catch (e) {
-    console.error('[ylada/links/[slug]/diagnosis]', e)
-    return NextResponse.json({ success: false, error: 'Erro ao gerar diagnóstico' }, { status: 500 })
+    const err = e instanceof Error ? e : new Error(String(e))
+    console.error('[ylada/links/[slug]/diagnosis]', err.message, err.stack)
+    const isDev = process.env.NODE_ENV === 'development'
+    const detail = isDev ? err.message : undefined
+    return NextResponse.json(
+      { success: false, error: 'Erro ao gerar diagnóstico', ...(detail && { detail }) },
+      { status: 500 }
+    )
   }
 }
