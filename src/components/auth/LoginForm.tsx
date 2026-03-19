@@ -475,8 +475,8 @@ export default function LoginForm({
                 console.log('🔄 Login YLADA: perfil incompleto (nome/whatsapp), redirecionando para onboarding')
               }
             } else if (!temPerfilEmpresarial) {
-              baseRedirectPath = '/pt/perfil-empresarial'
-              console.log('🔄 Login YLADA: nome+whatsapp ok, falta perfil empresarial, redirecionando para preencher')
+              baseRedirectPath = '/pt/home'
+              console.log('🔄 Login YLADA: nome+whatsapp ok, falta perfil empresarial, redirecionando para board (preencher pelo menu)')
             } else {
               baseRedirectPath = '/pt/home'
               console.log('🔄 Login YLADA: perfil completo, redirecionando para home')

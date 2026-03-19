@@ -16,7 +16,7 @@ export default async function MatrixLayout({ children }: { children: ReactNode }
       allowAdmin: true,
       allowSupport: true,
       currentPath: pathname,
-      allowAnyPerfilForPaths: ['onboarding'],
+      allowAnyPerfilForPaths: ['onboarding', 'perfil-empresarial'],
     })
     return <>{children}</>
   } catch (error: unknown) {

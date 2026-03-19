@@ -92,7 +92,8 @@ export default function AutoRedirect() {
                 const temWhatsapp = as?.whatsapp && String(as.whatsapp).replace(/\D/g, '').length >= 10
                 const temPerfilEmpresarial = p?.profile_type && p?.profession
                 if (temNome && temWhatsapp && temPerfilEmpresarial) redirectPath = '/pt/home'
-                else if (temNome && temWhatsapp) redirectPath = '/pt/perfil-empresarial'
+                // Sempre ir para o board; perfil empresarial pode ser preenchido pelo menu (evita loop perfil-empresarial ↔ login)
+                else if (temNome && temWhatsapp) redirectPath = '/pt/home'
                 // Usuárias da área Nutri (e outras áreas) que ainda não têm perfil ylada: ir direto para o board para evitar tela piscando/loop
                 else if (!p && userProfile?.perfil && userProfile.perfil !== 'ylada') {
                   redirectPath = '/pt/home'

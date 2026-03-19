@@ -92,7 +92,7 @@ export async function GET(request: NextRequest) {
     if (temNome && temWhatsapp && temPerfilEmpresarial) {
       redirectPath = '/pt/home'
     } else if (temNome && temWhatsapp) {
-      redirectPath = '/pt/perfil-empresarial'
+      redirectPath = '/pt/home'
     }
 
     // Se tem 'next' na URL, usar ele (tem prioridade)

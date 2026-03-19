@@ -276,9 +276,11 @@ export async function validateProtectedAccess(
     const canBypassProfile = (allowAdmin && profile.is_admin) || (allowSupport && profile.is_support)
     const matrixAreas = ['med', 'psi', 'psicanalise', 'odonto', 'nutra', 'coach', 'seller', 'perfumaria', 'estetica', 'fitness'] as const
     const isMatrixArea = (a: string): a is (typeof matrixAreas)[number] => matrixAreas.includes(a as any)
+    // Área ylada (matriz): aceita perfil ylada, med, nutri e demais perfis da matriz para evitar loop (ex.: Nutri acessa /pt/home e /pt/perfil-empresarial)
+    const canAccessYladaMatrix = area === 'ylada' && (profile.perfil === 'ylada' || profile.perfil === 'med' || profile.perfil === 'nutri' || isMatrixArea(profile.perfil))
     const profileMatchesArea =
       profile.perfil === area ||
-      (area === 'ylada' && profile.perfil === 'med') ||
+      canAccessYladaMatrix ||
       (area === 'coach-bem-estar' && (profile.perfil === 'coach-bem-estar' || profile.perfil === 'wellness')) || // legado: rotas /pt/coach-bem-estar/* ainda redirecionam para coach
       (area === 'wellness' && profile.perfil === 'coach-bem-estar') ||
       (isMatrixArea(area) && (profile.perfil === 'ylada' || profile.perfil === 'med' || profile.perfil === area))
