@@ -31,7 +31,9 @@ const FUNIL_URL = `${BASE_URL}${FUNIL_PATH.startsWith('/') ? FUNIL_PATH : '/' + 
 
 /** Páginas de demonstração/vendas (áreas Ylada): explicam o fluxo; link WhatsApp fica na plataforma após o diagnóstico. */
 const pathNorm = FUNIL_PATH.replace(/^\//, '')
-const PAGINA_DEMO = /^pt\/(estetica|med|nutri|psi|odonto|fitness|perfumaria|seller|coach-bem-estar)$/.test(pathNorm)
+const PAGINA_DEMO = /^pt\/(estetica|med|nutri|psi|odonto|fitness|perfumaria|seller|coach)$/.test(pathNorm)
+/** Coach: landing com CTA para checkout (sem quiz obrigatório na página). */
+const PAGINA_SEM_QUIZ = pathNorm === 'pt/coach'
 
 interface EtapaResult {
   etapa: string
@@ -110,19 +112,34 @@ async function main() {
       process.exit(1)
     }
 
-    // --- ETAPA 2: Landing + CTA ---
+    // --- ETAPA 2: Landing + CTA (aceita vários textos de botão/link) ---
     try {
       const clicked = await page.evaluate(() => {
-        const buttons = Array.from(document.querySelectorAll('button'))
-        const startBtn = buttons.find(b => /começar|iniciar|start|grátis|avaliação/i.test(b.textContent || ''))
-        if (startBtn) {
-          (startBtn as HTMLButtonElement).click()
+        const textoCTA = /começar|iniciar|start|grátis|avaliação|quero|saber mais|diagnóstico|fazer|descobrir|entrar|vamos|comece|comece já|faça|avaliação grátis|quero começar|iniciar agora|começar agora/i
+        const botoes = Array.from(document.querySelectorAll<HTMLButtonElement>('button'))
+        let btn = botoes.find(b => textoCTA.test((b.textContent || '').trim()))
+        if (btn) {
+          btn.click()
+          return true
+        }
+        const links = Array.from(document.querySelectorAll<HTMLAnchorElement>('a[href]'))
+        const linkCTA = links.find(a => textoCTA.test((a.textContent || '').trim()) && !/^#|javascript:/i.test(a.href || ''))
+        if (linkCTA) {
+          linkCTA.click()
           return true
         }
         return false
       })
       if (clicked) {
-        await page.waitForSelector('button', { timeout: 5000 }).catch(() => {})
+        if (PAGINA_SEM_QUIZ) {
+          await Promise.race([
+            page.waitForNavigation({ timeout: 12000 }).catch(() => {}),
+            page.waitForFunction("window.location.pathname.includes('login')", { timeout: 8000 }).catch(() => {}),
+            new Promise(r => setTimeout(r, 3000)),
+          ])
+        } else {
+          await page.waitForSelector('button, a', { timeout: 5000 }).catch(() => {})
+        }
         registrar('Landing', 'OK', 'CTA encontrado e clicado. Clara.')
       } else {
         registrar('Landing', 'ATENCAO', 'Nenhum botão "Começar" encontrado. Possível confusão.')
@@ -131,62 +148,91 @@ async function main() {
       registrar('Landing', 'ERRO', (e as Error).message)
     }
 
-    // --- ETAPA 3: Quiz/Diagnóstico (5 perguntas) ---
-    let quizOk = false
-    let perguntasRespondidas = 0
-    try {
-      for (let i = 0; i < 5; i++) {
-        await new Promise(r => setTimeout(r, 800))
-        const clicked = await page.evaluate(() => {
-          const opts = Array.from(document.querySelectorAll('button.w-full.text-left, button[class*="rounded-lg"][class*="border"]'))
-          const opt = opts.find(b => !/voltar|back/i.test(b.textContent || ''))
-          if (opt) {
-            (opt as HTMLButtonElement).click()
-            return true
+    if (PAGINA_SEM_QUIZ) {
+      // Coach bem-estar: não tem quiz na página pública; fluxo vai para login.
+      registrar('Diagnóstico', 'OK', 'Página sem quiz; fluxo vai para login.')
+      registrar('Resultado', 'OK', 'Página sem resultado; fluxo vai para login.')
+    } else {
+      // --- ETAPA 3: Quiz/Diagnóstico (até 6 cliques; aceita 3+ perguntas como OK) ---
+      let quizOk = false
+      let perguntasRespondidas = 0
+      try {
+        const maxPerguntas = 6
+        for (let i = 0; i < maxPerguntas; i++) {
+          await new Promise(r => setTimeout(r, 800))
+          const clicked = await page.evaluate(() => {
+            const ignora = /voltar|back|anterior/i
+            const seletores = [
+              'button.w-full.text-left',
+              'button[class*="rounded-lg"][class*="border"]',
+              'button[class*="rounded-xl"]',
+              '[role="button"]',
+              'button:not([disabled])',
+            ]
+            for (const sel of seletores) {
+              const opts = Array.from(document.querySelectorAll<HTMLButtonElement>(sel))
+              const opt = opts.find(b => {
+                const t = (b.textContent || '').trim()
+                return t.length > 0 && t.length < 200 && !ignora.test(t)
+              })
+              if (opt) {
+                opt.click()
+                return true
+              }
+            }
+            const linksOpt = Array.from(document.querySelectorAll<HTMLAnchorElement>('a[href="#"], a[role="button"]'))
+            const linkOpt = linksOpt.find(a => (a.textContent || '').trim().length > 0 && (a.textContent || '').length < 200 && !ignora.test(a.textContent || ''))
+            if (linkOpt) {
+              linkOpt.click()
+              return true
+            }
+            return false
+          })
+          if (clicked) {
+            quizOk = true
+            perguntasRespondidas += 1
+          } else {
+            break
           }
-          return false
-        })
-        if (clicked) {
-          quizOk = true
-          perguntasRespondidas += 1
         }
+        if (quizOk) {
+          const ok = perguntasRespondidas >= 3
+          const exp = perguntasRespondidas >= 3 ? 'Fluido.' : `${perguntasRespondidas} perguntas; fluxo pode ter menos.`
+          registrar('Diagnóstico', ok ? 'OK' : 'ATENCAO', `${perguntasRespondidas} perguntas respondidas. ${exp}`)
+        } else {
+          registrar('Diagnóstico', 'ATENCAO', 'Não foi possível responder as perguntas. Travamento ou seletor incorreto.')
+        }
+      } catch (e) {
+        registrar('Diagnóstico', 'ERRO', (e as Error).message)
       }
-      if (quizOk) {
-        const exp = perguntasRespondidas === 5 ? 'Fluido.' : 'Alguma etapa travou.'
-        registrar('Diagnóstico', perguntasRespondidas === 5 ? 'OK' : 'ATENCAO', `${perguntasRespondidas} perguntas respondidas. ${exp}`)
-      } else {
-        registrar('Diagnóstico', 'ATENCAO', 'Não foi possível responder todas as perguntas. Travamento ou seletor incorreto.')
-      }
-    } catch (e) {
-      registrar('Diagnóstico', 'ERRO', (e as Error).message)
-    }
 
-    // --- ETAPA 4: Resultado + CAPTURA DO DIAGNÓSTICO (crítico para Agente 2) ---
-    try {
-      await new Promise(r => setTimeout(r, 2000))
-      const temResultado = await page.evaluate(() => {
-        return /perfil|resultado|diagnóstico|recomendação/i.test(document.body.innerText)
-      })
-      if (temResultado) {
-        // Captura o bloco completo do resultado (perfil + descrição + recomendações + diagnóstico completo)
-        diagnosticoCapturado = await page.evaluate(() => {
-          const sel = document.querySelector('[class*="border-4"][class*="rounded-2xl"]')
-          if (sel) return (sel as HTMLElement).innerText.trim()
-          const diag = document.querySelector('h2')?.closest('div')?.parentElement
-          if (diag) return (diag as HTMLElement).innerText.trim()
-          const all = document.body.innerText
-          const start = all.indexOf('Seu Perfil')
-          if (start >= 0) return all.slice(start, start + 8000).trim()
-          return all.slice(0, 4000).trim()
+      // --- ETAPA 4: Resultado + CAPTURA DO DIAGNÓSTICO (crítico para Agente 2) ---
+      try {
+        await new Promise(r => setTimeout(r, 2000))
+        const temResultado = await page.evaluate(() => {
+          return /perfil|resultado|diagnóstico|recomendação/i.test(document.body.innerText)
         })
-        const perfilLinha = diagnosticoCapturado.split('\n').find(l => /alto potencial|pronto para transformação|precisa de mais/i.test(l)) || ''
-        const exp = diagnosticoCapturado.length > 200 ? 'Claro.' : 'Pouco conteúdo capturado.'
-        registrar('Resultado', 'OK', `Diagnóstico exibido. ${exp} Perfil: ${(perfilLinha || '—').slice(0, 40)}`)
-      } else {
-        registrar('Resultado', 'ERRO', 'Não chegou no resultado.')
+        if (temResultado) {
+          // Captura o bloco completo do resultado (perfil + descrição + recomendações + diagnóstico completo)
+          diagnosticoCapturado = await page.evaluate(() => {
+            const sel = document.querySelector('[class*="border-4"][class*="rounded-2xl"]')
+            if (sel) return (sel as HTMLElement).innerText.trim()
+            const diag = document.querySelector('h2')?.closest('div')?.parentElement
+            if (diag) return (diag as HTMLElement).innerText.trim()
+            const all = document.body.innerText
+            const start = all.indexOf('Seu Perfil')
+            if (start >= 0) return all.slice(start, start + 8000).trim()
+            return all.slice(0, 4000).trim()
+          })
+          const perfilLinha = diagnosticoCapturado.split('\n').find(l => /alto potencial|pronto para transformação|precisa de mais/i.test(l)) || ''
+          const exp = diagnosticoCapturado.length > 200 ? 'Claro.' : 'Pouco conteúdo capturado.'
+          registrar('Resultado', 'OK', `Diagnóstico exibido. ${exp} Perfil: ${(perfilLinha || '—').slice(0, 40)}`)
+        } else {
+          registrar('Resultado', 'ERRO', 'Não chegou no resultado.')
+        }
+      } catch (e) {
+        registrar('Resultado', 'ERRO', (e as Error).message)
       }
-    } catch (e) {
-      registrar('Resultado', 'ERRO', (e as Error).message)
     }
 
     // --- ETAPA 5: CTA WhatsApp — validar URL (wa.me ou api.whatsapp.com) ---

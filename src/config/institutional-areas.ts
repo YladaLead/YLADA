@@ -10,12 +10,13 @@ export interface InstitutionalArea {
   path: string
   status: AreaStatus
   /** Chave em t.institutional.areas.list[id] */
-  translationKey: 'nutri' | 'coach-bem-estar' | 'med' | 'estetica' | 'fitness' | 'perfumaria' | 'nutra' | 'profissional-liberal' | 'vendedores-geral' | 'psi' | 'psicanalise' | 'odonto'
+  translationKey: 'nutri' | 'coach' | 'med' | 'estetica' | 'fitness' | 'perfumaria' | 'nutra' | 'profissional-liberal' | 'vendedores-geral' | 'psi' | 'psicanalise' | 'odonto'
 }
 
 /**
  * Áreas na ordem de exibição: profissionais de saúde, bem-estar, vendedores, em breve.
  * Áreas com landing: path aponta para a landing. Sem landing: path aponta para login.
+ * Coach é a única porta de entrada para coaches; a diferenciação (bem-estar, carreira, vida) ocorre no perfil.
  * Wellness (Herbalife) não aparece — funciona em paralelo, fora da divulgação oficial.
  */
 export const INSTITUTIONAL_AREAS: InstitutionalArea[] = [
@@ -26,7 +27,7 @@ export const INSTITUTIONAL_AREAS: InstitutionalArea[] = [
   { id: 'odonto', path: '/pt/odonto/login', status: 'ready', translationKey: 'odonto' },
   { id: 'med', path: '/pt/med/login', status: 'ready', translationKey: 'med' },
   // Bem-estar e estética
-  { id: 'coach-bem-estar', path: '/pt/coach-bem-estar', status: 'ready', translationKey: 'coach-bem-estar' },
+  { id: 'coach', path: '/pt/coach', status: 'ready', translationKey: 'coach' },
   { id: 'estetica', path: '/pt/estetica/login', status: 'ready', translationKey: 'estetica' },
   { id: 'fitness', path: '/pt/fitness/login', status: 'ready', translationKey: 'fitness' },
   // Vendedores
@@ -44,7 +45,7 @@ const AREA_BASE_PATHS: Record<string, string> = {
   psicanalise: '/psicanalise/login',
   odonto: '/odonto',
   med: '/med',
-  'coach-bem-estar': '/coach-bem-estar',
+  coach: '/coach',
   estetica: '/estetica',
   fitness: '/fitness',
   nutra: '/nutra',

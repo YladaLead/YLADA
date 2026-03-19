@@ -31,7 +31,7 @@ const EXEMPLOS_DIAGNOSTICOS = [
 ]
 
 /** Rotas com landing em pt/en/es. Outras usam /pt (painel não traduzido). */
-const LOCALIZED_BASE = new Set(['nutri', 'estetica', 'fitness', 'psi', 'odonto', 'med', 'nutra', 'perfumaria', 'coach-bem-estar', 'seller'])
+const LOCALIZED_BASE = new Set(['nutri', 'estetica', 'fitness', 'psi', 'odonto', 'med', 'nutra', 'perfumaria', 'coach', 'seller'])
 
 function getLocalizedPath(path: string, locale: Language): string {
   const normalized = path.startsWith('/') ? path : `/${path}`

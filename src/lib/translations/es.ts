@@ -124,7 +124,7 @@ export const esTranslations: Translations = {
       subtitle: 'Accede a la plataforma YLADA para tu actuación. Áreas disponibles o próximamente.',
       list: {
         nutri: { title: 'Nutri', description: 'Nutricionistas: herramientas inteligentes y resultados medibles.' },
-        'coach-bem-estar': { title: 'Coach de bienestar', description: 'Coaches de bienestar: captación de clientes, enlaces inteligentes y herramientas para tus sesiones y atención individual.' },
+        coach: { title: 'Coach', description: 'Coaches (bienestar, carrera, vida): captación de clientes, enlaces inteligentes y herramientas para tus sesiones.' },
         med: { title: 'Medicina', description: 'Médicos y especialistas: diagnóstico, enlaces y autoridad en el campo.' },
         estetica: { title: 'Estética', description: 'Profesionales de estética: captación de clientes y enlaces inteligentes.' },
         fitness: { title: 'Fitness', description: 'Entrenadores personales y coaches: captación y formación empresarial.' },

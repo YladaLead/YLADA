@@ -22,6 +22,7 @@ const YLADA_LANDING_AREAS_BASE: Omit<YladaLandingArea, 'href'>[] = [
   { codigo: 'psi', label: 'Psicólogos', slogan: 'Começar conversas com pacientes mais preparados', descricao: 'Para psicólogos e psicanalistas.' },
   { codigo: 'odonto', label: 'Odontologia', slogan: 'Mostrar o valor dos tratamentos antes da avaliação', descricao: 'Para dentistas e clínicas odontológicas.' },
   { codigo: 'estetica', label: 'Estética', slogan: 'Atrair clientes interessados em procedimentos', descricao: 'Para profissionais de estética.' },
+  { codigo: 'coach', label: 'Coach', slogan: 'Começar conversas com clientes mais preparados', descricao: 'Para coaches (bem-estar, carreira, vida).' },
   { codigo: 'fitness', label: 'Fitness', slogan: 'Atrair alunos que já entendem o valor do treino', descricao: 'Para profissionais de fitness.' },
   { codigo: 'perfumaria', label: 'Perfumaria', slogan: 'Atrair clientes interessados em fragrâncias ideais', descricao: 'Para consultores de fragrância, vendedores especializados e lojas de perfume.' },
   { codigo: 'seller', label: 'Vendedores', slogan: 'Iniciar conversas com clientes mais qualificados', descricao: 'Profissionais que vendem produtos ou serviços consultivos podem usar diagnósticos para gerar conversas mais qualificadas.' },
@@ -31,7 +32,7 @@ const YLADA_LANDING_AREAS_BASE: Omit<YladaLandingArea, 'href'>[] = [
 export function getYladaLandingAreas(locale: string): YladaLandingArea[] {
   return YLADA_LANDING_AREAS_BASE.map((a) => ({
     ...a,
-    href: `/${locale}/${a.codigo === 'seller' ? 'seller' : a.codigo}`,
+    href: `/${locale}/${a.codigo === 'seller' ? 'seller' : a.codigo === 'coach' ? 'coach' : a.codigo}`,
   }))
 }
 

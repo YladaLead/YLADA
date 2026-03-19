@@ -6,7 +6,7 @@ export interface InstitutionalAreaTranslation {
 
 export interface InstitutionalAreas {
   nutri: InstitutionalAreaTranslation
-  'coach-bem-estar': InstitutionalAreaTranslation
+  coach: InstitutionalAreaTranslation
   med: InstitutionalAreaTranslation
   estetica: InstitutionalAreaTranslation
   fitness: InstitutionalAreaTranslation

@@ -1,7 +1,7 @@
 /**
  * Conteúdo do carrossel por área — personalização conforme FLOWS-POR-AREA-YLADA
  */
-export type AreaCodigo = 'med' | 'nutri' | 'psi' | 'odonto' | 'estetica' | 'fitness' | 'perfumaria' | 'seller'
+export type AreaCodigo = 'med' | 'nutri' | 'psi' | 'odonto' | 'estetica' | 'coach' | 'fitness' | 'perfumaria' | 'seller'
 
 export interface AreaFlowContent {
   /** Slide 1 - Dor (problem-solution) */
@@ -118,6 +118,24 @@ const FLOW_MED: AreaFlowContent = {
   closingBenefit: 'Pacientes mais conscientes',
 }
 
+const FLOW_COACH: AreaFlowContent = {
+  slide1Problem: 'Conversas não viram sessão.',
+  slide1ProblemHint: 'Tenta várias coisas, mas nada conecta',
+  slide3Question: 'Por que as pessoas não iniciam uma conversa com você?',
+  linkTitle: 'Descubra o que você precisa agora',
+  linkHint: '3 perguntas · Resultado na hora',
+  formQuestion: 'O que mais você quer transformar?',
+  formOptions: ['Bem-estar e hábitos', 'Carreira e produtividade', 'Vida e autoconhecimento', 'Não sei por onde começar'],
+  resultInsight: 'Você não precisa de mais informação. Precisa de uma conversa com contexto.',
+  resultSubtext: 'O próximo passo é falar com quem pode te acompanhar.',
+  resultInsights: ['Clareza sobre o que busca', 'Reconhecer o momento', 'Pronto para conversar'],
+  resultCta: 'Quero conversar',
+  whatsappProTitle: 'Coach · Sessões',
+  whatsappClientMsg1: 'Oi! Fiz seu diagnóstico. Vi que preciso de uma conversa com contexto.',
+  whatsappClientMsg2: 'Quero falar com você.',
+  closingBenefit: 'Clientes chegam preparados',
+}
+
 const FLOW_FITNESS: AreaFlowContent = {
   slide1Problem: 'Você não consegue fechar alunos.',
   slide1ProblemHint: 'Tenta várias coisas, mas nada conecta',
@@ -178,6 +196,7 @@ const FLOWS: Record<AreaCodigo, AreaFlowContent> = {
   psi: FLOW_PSI,
   odonto: FLOW_ODONTO,
   estetica: FLOW_ESTETICA,
+  coach: FLOW_COACH,
   fitness: FLOW_FITNESS,
   perfumaria: FLOW_PERFUMARIA,
   seller: FLOW_SELLER,

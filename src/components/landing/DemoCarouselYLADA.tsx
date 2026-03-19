@@ -10,7 +10,7 @@ const CARROSSEL_AREAS = YLADA_LANDING_AREAS.map((a) => ({
   codigo: a.codigo,
   label: a.label,
   slogan: a.slogan,
-  icon: a.codigo === 'med' ? '🩺' : a.codigo === 'nutri' ? '🥗' : a.codigo === 'psi' ? '🧠' : a.codigo === 'odonto' ? '🦷' : a.codigo === 'estetica' ? '✨' : a.codigo === 'fitness' ? '💪' : a.codigo === 'perfumaria' ? '🌸' : '💼',
+  icon: a.codigo === 'med' ? '🩺' : a.codigo === 'nutri' ? '🥗' : a.codigo === 'psi' ? '🧠' : a.codigo === 'odonto' ? '🦷' : a.codigo === 'estetica' ? '✨' : a.codigo === 'coach' ? '🧘' : a.codigo === 'fitness' ? '💪' : a.codigo === 'perfumaria' ? '🌸' : '💼',
 }))
 
 type ChatMessage = { from: 'client' | 'pro'; text: string; time?: string }

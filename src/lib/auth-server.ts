@@ -267,6 +267,11 @@ export async function validateProtectedAccess(
       }
     }
 
+    // Coach unificado: usuários com perfil coach-bem-estar (legado) acessam a plataforma wellness
+    if (area === 'coach' && profile.perfil === 'coach-bem-estar') {
+      redirect('/pt/wellness/home')
+    }
+
     // 4. Verificar se perfil corresponde (admin/suporte pode bypassar)
     const canBypassProfile = (allowAdmin && profile.is_admin) || (allowSupport && profile.is_support)
     const matrixAreas = ['med', 'psi', 'psicanalise', 'odonto', 'nutra', 'coach', 'seller', 'perfumaria', 'estetica', 'fitness'] as const
@@ -274,8 +279,8 @@ export async function validateProtectedAccess(
     const profileMatchesArea =
       profile.perfil === area ||
       (area === 'ylada' && profile.perfil === 'med') ||
-      (area === 'coach-bem-estar' && (profile.perfil === 'coach-bem-estar' || profile.perfil === 'wellness')) || // Wellness também acessa (redireciona para plataforma)
-      (area === 'wellness' && profile.perfil === 'coach-bem-estar') || // Coach-bem-estar usa plataforma wellness
+      (area === 'coach-bem-estar' && (profile.perfil === 'coach-bem-estar' || profile.perfil === 'wellness')) || // legado: rotas /pt/coach-bem-estar/* ainda redirecionam para coach
+      (area === 'wellness' && profile.perfil === 'coach-bem-estar') ||
       (isMatrixArea(area) && (profile.perfil === 'ylada' || profile.perfil === 'med' || profile.perfil === area))
 
     // Permitir acesso em rotas de “completar perfil” para qualquer perfil (evita loop para usuárias antigas)

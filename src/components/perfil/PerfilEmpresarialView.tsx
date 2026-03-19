@@ -124,6 +124,12 @@ const NOEL_FEEDBACK_BY_PROFESSION: Record<string, Record<string, Record<string, 
     },
   },
   coach: {
+    coach_tipo: {
+      bem_estar: 'Coaching de bem-estar combina com avaliações de hábitos e qualidade de vida. O Noel vai sugerir diagnósticos alinhados.',
+      carreira: 'Coaching de carreira beneficia-se de avaliações de perfil e objetivos. O Noel vai direcionar estratégias de captação.',
+      vida: 'Desenvolvimento pessoal e vida permitem posicionamento amplo. O Noel vai sugerir ferramentas de autoconhecimento e metas.',
+      outro: 'Com "Outro", o Noel vai se basear no resto do perfil para sugerir as melhores estratégias.',
+    },
     modelo_entrega_coach: {
       sessoes_individuais: 'Sessões individuais costumam ter ticket mais alto. O Noel vai sugerir diagnósticos para qualificar leads.',
       grupo: 'Trabalho em grupo beneficia-se de captação para turmas. O Noel pode ajudar com funis de avaliação.',

@@ -154,6 +154,7 @@ export function buildProfileResumo(profile: YladaNoelProfileRow | null): string 
   }
   if (areaSpec.modalidade_atendimento) areaParts.push(`Modalidade atendimento: ${areaSpec.modalidade_atendimento}.`)
   if (areaSpec.area_nutri) areaParts.push(`Área nutri: ${areaSpec.area_nutri}.`)
+  if (areaSpec.coach_tipo) areaParts.push(`Tipo coach: ${areaSpec.coach_tipo}.`)
   if (areaSpec.modelo_entrega_coach) areaParts.push(`Modelo entrega (coach): ${areaSpec.modelo_entrega_coach}.`)
   if (Array.isArray(areaSpec.abordagens) && areaSpec.abordagens.length > 0) {
     areaParts.push(`Abordagens: ${(areaSpec.abordagens as string[]).join(', ')}.`)

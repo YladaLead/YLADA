@@ -1,7 +1,9 @@
-'use client'
+import { redirect } from 'next/navigation'
 
-import { AreaLandingPage } from '@/components/ylada/AreaLandingPage'
-
+/**
+ * Coach bem-estar unificado com Coach.
+ * Redireciona para a única porta de entrada Coach (/pt/coach).
+ */
 export default function EnCoachBemEstarLandingPage() {
-  return <AreaLandingPage area="coach-bem-estar" locale="en" />
+  redirect('/pt/coach')
 }

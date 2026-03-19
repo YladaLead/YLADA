@@ -98,6 +98,8 @@ export function getOptionsForProfileField(
       return [...MODALIDADE_ATENDIMENTO_OPTIONS]
     case 'area_nutri':
       return [...AREA_NUTRI_OPTIONS]
+    case 'coach_tipo':
+      return [...COACH_TIPO_OPTIONS]
     case 'modelo_entrega_coach':
       return [...COACH_MODELO_ENTREGA_OPTIONS]
     case 'fitness_tipo_atuacao':
@@ -253,6 +255,14 @@ export const AREA_NUTRI_OPTIONS = [
   { value: 'esportiva', label: 'Esportiva' },
   { value: 'clinica', label: 'Clínica' },
   { value: 'infantil', label: 'Infantil' },
+  { value: 'outro', label: 'Outro' },
+] as const
+
+/** Coach: de que você é coach (bem-estar, carreira, vida — padrões de coaching). */
+export const COACH_TIPO_OPTIONS = [
+  { value: 'bem_estar', label: 'Bem-estar' },
+  { value: 'carreira', label: 'Carreira' },
+  { value: 'vida', label: 'Vida / Desenvolvimento pessoal' },
   { value: 'outro', label: 'Outro' },
 ] as const
 

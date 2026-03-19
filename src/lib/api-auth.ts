@@ -258,11 +258,11 @@ export async function requireApiAuth(
       let inferredProfile: string | null = null
       const referer = request.headers.get('referer') || ''
       const url = request.url.toLowerCase()
-      // Referer tem prioridade para novos usuários (ex: vindo de /pt/coach-bem-estar/login)
-      if (referer.includes('/coach-bem-estar/')) {
-        inferredProfile = 'coach-bem-estar'
-      } else if (url.includes('/coach-bem-estar/')) {
-        inferredProfile = 'coach-bem-estar'
+      // Coach bem-estar unificado com Coach: entrada única é /pt/coach
+      if (referer.includes('/coach-bem-estar/') || referer.includes('/coach/')) {
+        inferredProfile = 'coach'
+      } else if (url.includes('/coach-bem-estar/') || url.includes('/coach/')) {
+        inferredProfile = 'coach'
       } else if (allowedProfiles && allowedProfiles.length > 0) {
         inferredProfile = allowedProfiles[0]
       } else {

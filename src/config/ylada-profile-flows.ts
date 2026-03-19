@@ -471,6 +471,7 @@ export const FIELD_LABELS_BY_PROFESSION: Partial<Record<ProfessionCode, Record<s
     observacoes: 'Algo mais que o Noel deve saber?',
   },
   coach: {
+    coach_tipo: 'De que você é coach?',
     category: 'Nicho principal',
     sub_category: 'Subárea (opcional)',
     modelo_entrega_coach: 'Modelo de entrega',
@@ -1073,13 +1074,14 @@ const LIBERAL_FITNESS_STEPS: ProfileFlowStep[] = [
   },
 ]
 
-/** Coach: nicho, modelo de entrega (Sessões individuais/Grupo/Programa), tempo. */
+/** Coach: tipo (bem-estar/carreira/vida), nicho, modelo de entrega, tempo. */
 const LIBERAL_COACH_STEPS: ProfileFlowStep[] = [
   {
     id: 'contexto',
     title: 'Contexto',
-    description: 'Modelo de atuação.',
+    description: 'Modelo de atuação e foco do seu coaching.',
     fields: [
+      { key: 'coach_tipo', source: 'area_specific', path: 'coach_tipo', required: false, type: 'select' },
       { key: 'category', source: 'column', required: false, type: 'text' },
       { key: 'modelo_entrega_coach', source: 'area_specific', path: 'modelo_entrega_coach', required: false, type: 'select' },
       { key: 'tempo_atuacao_anos', source: 'column', required: false, type: 'number' },
