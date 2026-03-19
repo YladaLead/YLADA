@@ -458,6 +458,7 @@ export default function PerfilEmpresarialView({ areaCodigo, areaLabel }: PerfilE
                   else setOnboardingStep(4)
                 }}
                 className="px-8 py-4 bg-indigo-600 text-white text-base font-semibold rounded-xl hover:bg-indigo-700 transition-colors"
+                data-testid="perfil-comecar-perguntas"
               >
                 Começar as perguntas →
               </button>
@@ -522,6 +523,7 @@ export default function PerfilEmpresarialView({ areaCodigo, areaLabel }: PerfilE
                   <label className="block">
                     <span className="text-sm font-medium text-gray-700">Você atua como</span>
                     <select
+                      data-testid="perfil-select-tipo"
                       className="mt-2 block w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                       value={form.profile_type}
                       onChange={(e) => update({ profile_type: e.target.value, profession: '' })}
@@ -535,6 +537,7 @@ export default function PerfilEmpresarialView({ areaCodigo, areaLabel }: PerfilE
                   <label className="block">
                     <span className="text-sm font-medium text-gray-700">{professionFieldLabel}</span>
                     <select
+                      data-testid="perfil-select-profissao"
                       className="mt-2 block w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 disabled:bg-gray-50 disabled:text-gray-400"
                       value={form.profession}
                       onChange={(e) => update({ profession: e.target.value })}
@@ -578,6 +581,7 @@ export default function PerfilEmpresarialView({ areaCodigo, areaLabel }: PerfilE
                       }}
                       disabled={saving}
                       className="px-5 py-2.5 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                      data-testid="perfil-continuar"
                     >
                       {saving ? 'Salvando...' : 'Continuar →'}
                     </button>
@@ -603,6 +607,7 @@ export default function PerfilEmpresarialView({ areaCodigo, areaLabel }: PerfilE
                         checked={modalidadeValue === opt.value}
                         onChange={() => updateAreaSpec('modalidade_atendimento', opt.value)}
                         className="text-indigo-600 focus:ring-indigo-500"
+                        data-testid={`perfil-modalidade-${opt.value}`}
                       />
                       <span className="text-gray-700">{opt.value === 'ambos' ? 'Presencial e online' : opt.label}</span>
                     </label>
@@ -622,6 +627,7 @@ export default function PerfilEmpresarialView({ areaCodigo, areaLabel }: PerfilE
                     }}
                     disabled={saving}
                     className="px-5 py-2.5 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    data-testid="perfil-continuar"
                   >
                     {saving ? 'Salvando...' : 'Continuar →'}
                   </button>
@@ -642,6 +648,7 @@ export default function PerfilEmpresarialView({ areaCodigo, areaLabel }: PerfilE
                     <label key={opt.value} className="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-gray-50 cursor-pointer">
                       <input
                         type="checkbox"
+                        data-testid={`perfil-canal-${opt.value}`}
                         checked={form.canais_principais.includes(opt.value)}
                         onChange={() => {
                           const next = form.canais_principais.includes(opt.value)
@@ -669,6 +676,7 @@ export default function PerfilEmpresarialView({ areaCodigo, areaLabel }: PerfilE
                     }}
                     disabled={saving}
                     className="px-5 py-2.5 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    data-testid="perfil-continuar"
                   >
                     {saving ? 'Salvando...' : 'Continuar →'}
                   </button>
@@ -691,6 +699,7 @@ export default function PerfilEmpresarialView({ areaCodigo, areaLabel }: PerfilE
                 type="button"
                 onClick={() => router.push('/pt/home')}
                 className="px-8 py-4 bg-indigo-600 text-white text-base font-semibold rounded-xl hover:bg-indigo-700 transition-colors"
+                data-testid="perfil-entrar-plataforma"
               >
                 🚀 Entrar na plataforma
               </button>
@@ -737,6 +746,7 @@ export default function PerfilEmpresarialView({ areaCodigo, areaLabel }: PerfilE
               <label className="block">
                 <span className="text-sm font-medium text-gray-700">Você atua como</span>
                 <select
+                  data-testid="perfil-select-tipo"
                   className="mt-2 block w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                   value={form.profile_type}
                   onChange={(e) => update({ profile_type: e.target.value, profession: '' })}
@@ -750,6 +760,7 @@ export default function PerfilEmpresarialView({ areaCodigo, areaLabel }: PerfilE
               <label className="block">
                 <span className="text-sm font-medium text-gray-700">{professionFieldLabel}</span>
                 <select
+                  data-testid="perfil-select-profissao"
                   className="mt-2 block w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 disabled:bg-gray-50 disabled:text-gray-400"
                   value={form.profession}
                   onChange={(e) => update({ profession: e.target.value })}
@@ -789,6 +800,7 @@ export default function PerfilEmpresarialView({ areaCodigo, areaLabel }: PerfilE
                   setStepIndex(1)
                 }}
                 className="px-5 py-2.5 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors"
+                data-testid="perfil-continuar-definir-area"
               >
                 Continuar e definir minha área →
               </button>
@@ -1275,6 +1287,7 @@ export default function PerfilEmpresarialView({ areaCodigo, areaLabel }: PerfilE
                       }
                     }}
                     className="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-md hover:bg-indigo-700"
+                    data-testid="perfil-avancar"
                   >
                     {currentStepCopy?.nextStepButtonLabel
                       ? currentStepCopy.nextStepButtonLabel
@@ -1289,6 +1302,7 @@ export default function PerfilEmpresarialView({ areaCodigo, areaLabel }: PerfilE
                     type="submit"
                     disabled={saving}
                     className="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-md hover:bg-indigo-700 disabled:opacity-50"
+                    data-testid="perfil-salvar"
                   >
                     {saving ? 'Salvando...' : 'Salvar perfil'}
                   </button>
@@ -1624,6 +1638,7 @@ export default function PerfilEmpresarialView({ areaCodigo, areaLabel }: PerfilE
               type="submit"
               disabled={saving}
               className="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-md hover:bg-indigo-700 disabled:opacity-50"
+              data-testid="perfil-salvar"
             >
               {saving ? 'Salvando...' : 'Salvar perfil'}
             </button>

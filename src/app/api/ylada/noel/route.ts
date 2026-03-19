@@ -368,6 +368,23 @@ SCRIPTS PARA CONTATO FRIO: O Noel deve sugerir script INVESTIGATIVO — várias 
 Exemplo de fluxo correto: "Oi! Tudo bem? [pausa] Você trabalha muito com Uber? [aguardar] Como tá a rotina, dá pra fechar as contas tranquilo ou às vezes aperta? [aguardar] O que mais te incomoda — a renda, o tempo, ou os dois? [aguardar] Já pensou em ter algo extra no seu tempo ou tá ok assim? [aguardar] Se quiser, tenho um quiz rápido que mostra onde a gente costuma travar. Leva 2 min. [link do quiz] — Só depois de interesse: link da apresentação."
 `
 
+/** Regras de uso dos links ativos (quando a lista [LINKS ATIVOS DO PROFISSIONAL] estiver presente). Base: docs/ANALISE-NOEL-TESTE-INTERNO-19-03-2026.md */
+const NOEL_REGRAS_USO_LINKS_ATIVOS = `
+[REGRAS DE USO DOS LINKS ATIVOS — OBRIGATÓRIO QUANDO HOUVER LISTA ACIMA]
+
+1. LINK DO ÚLTIMO DIAGNÓSTICO / LINK PARA COMPARTILHAR
+Quando o profissional pedir "link do último diagnóstico", "link do último que criei", "link para compartilhar", "me dá o link" ou similar: use a lista [LINKS ATIVOS DO PROFISSIONAL]. O primeiro link da lista é o mais recente (último criado). Entregue esse link em destaque: nome + URL clicável em markdown, ex.: [Nome do diagnóstico](URL). Adicione uma frase curta de uso, ex.: "Pode compartilhar esse link no WhatsApp ou nas redes." NUNCA diga que não tem acesso — você tem os links na lista. Se a lista estiver vazia (não foi injetada), diga que ainda não há diagnóstico criado e oriente a criar um em "Links" ou pedindo aqui com o tema.
+
+2. PRÓXIMO PASSO / CONVERSA
+Quando o profissional perguntar "qual meu próximo passo?", "o que fazer agora?" ou falar de "conversa" e existir lista de links ativos: além de orientar o passo, inclua pelo menos um link real da lista (ex.: "Use este diagnóstico para iniciar conversas: [Nome](URL)."). O primeiro da lista é o mais recente.
+
+3. MELHOR DIAGNÓSTICO PARA CONVERSAR / COMEÇAR
+Quando perguntarem "qual o melhor diagnóstico para começar a conversar?", "qual diagnóstico usar?" ou similar: intenção é obter link/opção. Se houver links ativos, liste 1–2 com nome + URL e diga quando usar cada um. Se não houver, aí sim pode pedir tema/nicho e sugerir criar um. Não responda só com teoria nem só pedindo clarificação — entregue links quando existirem.
+
+4. ORGANIZAR SEMANA / ROTINA / ATRAIR LEADS
+Quando perguntarem "como organizar minha semana?", "rotina para atrair leads" ou similar: responda CURTO (3–5 tópicos objetivos, não calendário longo dia a dia). Inclua uma "próxima ação em 24h" clara. Se fizer sentido, ofereça 1 link da lista para compartilhar hoje. Priorize formato: diagnóstico rápido + ajuste + ação imediata.
+`
+
 const SEGMENT_CONTEXT: Record<string, string> = {
   ylada: 'Você é o Noel, mentor da YLADA (motor de conversas). Oriente qualquer profissional ou vendedor sobre rotina, links inteligentes, trilha empresarial e geração de conversas qualificadas no WhatsApp. Tom direto e prático.',
   med: 'Você é o Noel, mentor da YLADA para médicos. Oriente sobre rotina, links inteligentes, captação de pacientes e formação empresarial. Tom direto e prático.',
@@ -421,7 +438,7 @@ export async function POST(request: NextRequest) {
     }
 
     const segmentKey = (segment ?? area) as string
-    const validSegment = YLADA_SEGMENT_CODES.includes(segmentKey as any) ? segmentKey : 'ylada'
+    let validSegment: string = YLADA_SEGMENT_CODES.includes(segmentKey as any) ? segmentKey : 'ylada'
 
     // Buscar perfil e snapshot da trilha para personalizar o Noel (etapa 2.4)
     let profileResumo = ''
@@ -450,9 +467,48 @@ export async function POST(request: NextRequest) {
           .maybeSingle(),
       ])
       profileRow = profileRes.data as YladaNoelProfileRow | null
+      // Fallback: na matriz (area ylada) o front envia area 'ylada', mas o perfil pode estar em segment = perfil do usuário (ex.: estetica, nutri)
+      if (!profileRow && validSegment === 'ylada') {
+        const { data: up } = await supabaseAdmin
+          .from('user_profiles')
+          .select('perfil')
+          .eq('user_id', user.id)
+          .maybeSingle()
+        const perfilSegment = (up?.perfil as string)?.trim()
+        if (perfilSegment && YLADA_SEGMENT_CODES.includes(perfilSegment as (typeof YLADA_SEGMENT_CODES)[number])) {
+          const { data: fallbackRow } = await supabaseAdmin
+            .from('ylada_noel_profile')
+            .select('*')
+            .eq('user_id', user.id)
+            .eq('segment', perfilSegment)
+            .maybeSingle()
+          if (fallbackRow) {
+            profileRow = fallbackRow as YladaNoelProfileRow
+            validSegment = perfilSegment
+          }
+        }
+      }
       profileResumo = buildProfileResumo(profileRow)
       const snap = snapshotRes.data as { snapshot_text?: string | null } | null
       snapshotText = snap?.snapshot_text?.trim() ?? ''
+    }
+
+    // Exigir perfil empresarial completo para usar o Noel (qualidade das respostas)
+    if (!simulateKey) {
+      const as = (profileRow?.area_specific || {}) as Record<string, unknown>
+      const temNome = as?.nome && String(as.nome).trim().length >= 2
+      const temWhatsapp = as?.whatsapp && String(as.whatsapp).replace(/\D/g, '').length >= 10
+      const temPerfilEmpresarial = profileRow?.profile_type && profileRow?.profession
+      if (!temNome || !temWhatsapp || !temPerfilEmpresarial) {
+        return NextResponse.json(
+          {
+            error: 'profile_required',
+            message: 'Complete seu perfil empresarial (nome, telefone e tipo de atuação) para usar o Noel e receber orientações personalizadas.',
+            profile_url: '/pt/perfil-empresarial',
+          },
+          { status: 403 }
+        )
+      }
     }
 
     // Memória estratégica + Mapa Estratégico do Noel (jornada entre conversas)
@@ -780,7 +836,10 @@ export async function POST(request: NextRequest) {
     if (detectedStrategicProfileText || detectedProfessionalProfileText || detectedObjectiveText || detectedFunnelStageText || noelMemoryText || strategyMapText || noelLibraryContext.trim() || diagnosisInsightsText || intentInsightsText) {
       parts.push('\n' + NOEL_LAYER4_PRIORITY_RULE)
     }
-    if (linksAtivosBlock) parts.push(linksAtivosBlock)
+    if (linksAtivosBlock) {
+      parts.push(linksAtivosBlock)
+      parts.push(NOEL_REGRAS_USO_LINKS_ATIVOS)
+    }
     if (linkPerformanceBlock) parts.push(linkPerformanceBlock)
     if (linkGeradoBlock) parts.push(linkGeradoBlock)
     if (linkGeradoBlock) {
