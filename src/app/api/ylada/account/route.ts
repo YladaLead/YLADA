@@ -10,7 +10,7 @@ import { translateError } from '@/lib/error-messages'
 
 const YLADA_ACCOUNT_PROFILES = [
   'psi', 'psicanalise', 'odonto', 'fitness', 'estetica', 'med', 'ylada',
-  'nutra', 'coach', 'perfumaria', 'seller', 'admin',
+  'nutra', 'nutri', 'coach', 'perfumaria', 'seller', 'admin',
 ] as const
 
 export async function GET(request: NextRequest) {

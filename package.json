@@ -5,11 +5,12 @@
   "private": true,
   "scripts": {
     "predev": "bash scripts/sync-env-local.sh || true",
-    "dev": "next dev",
+    "dev": "NODE_OPTIONS='--max-old-space-size=8192' next dev",
+    "dev:3004": "NODE_OPTIONS='--max-old-space-size=8192' next dev -p 3004",
     "dev:port": "next dev -p 3001 -H 0.0.0.0",
     "dev:webpack": "next dev --webpack",
     "dev:mobile": "next dev -H 0.0.0.0",
-    "build": "next build",
+    "build": "NODE_OPTIONS='--max-old-space-size=8192' next build",
     "start": "next start",
     "lint": "eslint",
     "create-stripe-products": "node scripts/create-stripe-products.js",
@@ -27,8 +28,10 @@
     "migrate:236": "npx tsx scripts/run-migration.ts 236-ylada-templates-calculadoras-biblioteca-nutri.sql",
     "archetypes:gerar": "npx tsx scripts/gerar-archetypes-diagnostico.ts",
     "agente:simulador": "npx tsx scripts/agents/ylada-simulador.ts",
+    "agente:simulador-todos": "npx tsx scripts/agents/ylada-simulador-todos-segmentos.ts",
     "agente:auditor": "npx tsx scripts/agents/ylada-auditor-noel.ts",
-    "agente:otimizador": "npx tsx scripts/agents/ylada-otimizador-noel.ts"
+    "agente:otimizador": "npx tsx scripts/agents/ylada-otimizador-noel.ts",
+    "agente:interno": "npx tsx scripts/agents/ylada-interno.ts"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
