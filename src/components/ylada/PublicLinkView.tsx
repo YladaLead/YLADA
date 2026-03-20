@@ -375,9 +375,10 @@ function ConfigDrivenLinkView({
     e.preventDefault()
     
     // VALIDAÇÃO: Verificar se todas as perguntas obrigatórias foram respondidas
-    // No modo quiz, valores são índices (String(0), String(1), etc)
-    // No modo formulário, valores são strings normais
-    const camposObrigatorios = fieldsValidados.filter((f) => f.id && (!f.hasOwnProperty('obrigatoria') || f.obrigatoria !== false))
+    // IMPORTANTE: No modo quiz, validar APENAS os campos que estão sendo exibidos (quizFields)
+    // Não validar campos que não estão visíveis na tela
+    const camposParaValidar = isQuizMode ? quizFields : fieldsValidados
+    const camposObrigatorios = camposParaValidar.filter((f) => f.id && (!f.hasOwnProperty('obrigatoria') || f.obrigatoria !== false))
     const camposNaoRespondidos = camposObrigatorios.filter((f) => {
       const valor = values[f.id]
       // Verificar se o valor existe e não está vazio
