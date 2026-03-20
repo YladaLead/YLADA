@@ -53,7 +53,7 @@ const PERFIL_NOEL_POR_AREA = {
   ylada: {
     segment: 'ylada',
     profile_type: 'liberal',
-    profession: null,
+    profession: 'consultor',
     category: 'ylada',
     tempo_atuacao_anos: 3,
     dor_principal: 'agenda_vazia',
@@ -67,7 +67,7 @@ const PERFIL_NOEL_POR_AREA = {
     modelo_pagamento: 'particular',
     canais_principais: ['instagram', 'whatsapp'],
     rotina_atual_resumo: 'Atendimentos alguns dias por semana, quero ferramentas para captar',
-    area_specific: { modalidade_atendimento: 'ambos', whatsapp: TELEFONE_NOEL }
+    area_specific: { nome: 'Teste Ylada Matriz', modalidade_atendimento: 'ambos', whatsapp: TELEFONE_NOEL }
   },
   nutri: {
     segment: 'ylada',
@@ -346,11 +346,16 @@ async function criarOuAtualizarPerfilNoel (userId, perfil, nome) {
   const noelProfile = PERFIL_NOEL_POR_AREA[perfil]
   if (!noelProfile) return true
   // Perfil completo exige area_specific.nome e area_specific.whatsapp (auth-server)
+  // Garantir que nome e whatsapp estão presentes e válidos
+  const nomeFinal = nome && nome.trim().length >= 2 ? nome.trim() : 'Profissional'
+  const whatsappFinal = noelProfile.area_specific?.whatsapp ?? TELEFONE_NOEL
   const areaSpecific = {
     ...noelProfile.area_specific,
-    nome: nome || 'Profissional',
-    whatsapp: noelProfile.area_specific?.whatsapp ?? TELEFONE_NOEL
+    nome: nomeFinal,
+    whatsapp: whatsappFinal
   }
+  // Log para debug
+  console.log(`   📝 Perfil ${perfil}: nome="${nomeFinal}", whatsapp="${whatsappFinal.substring(0, 5)}..."`)
   const row = {
     user_id: userId,
     segment: noelProfile.segment,

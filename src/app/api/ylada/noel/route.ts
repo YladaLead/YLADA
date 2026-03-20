@@ -115,9 +115,43 @@ function buildNoelLinkBlock(
     ? 'O sistema acabou de criar um link para o profissional.'
     : 'O sistema criou um novo link com as alterações pedidas.'
 
-  let block = `\n[${tituloBloco}]\n${intro}\n\nOBRIGATÓRIO: O profissional precisa VER o quiz (perguntas, opções) e o link real na conversa. Inclua SEMPRE o quiz completo e o link. Use tom natural e conversacional — evite rótulos técnicos.\n\nFONTE ÚNICA (o link usa exatamente isto):\n${conteudoReal || '(calculadora ou link sem opções)'}\n\nREGRAS: NÃO invente perguntas. Use APENAS as perguntas acima. NÃO use "Raio-X" — use "quiz", "diagnóstico". O link correto é: ${url}\n\nFORMATO DA RESPOSTA (exemplo ideal — natural, menos técnico):\n\nÓtima ideia. Vamos criar um diagnóstico para [tema que o profissional pediu].\n\nPreparei um diagnóstico curto com [N] perguntas para identificar quem realmente está considerando [objetivo/tema].\n\n[Mostre as perguntas com opções A, B, C, D — use a fonte única acima]\n\nAqui está o link: [Acesse seu quiz](${url})\n\nSe quiser, posso ajustar as perguntas para seu público.\n\nIMPORTANTE: Inclua o quiz completo (perguntas + opções) antes do link. O link deve ser em markdown: [Acesse seu quiz](${url}).
+  let block = `\n[${tituloBloco}]\n${intro}\n\n⚠️ CRÍTICO: O texto "[${tituloBloco}]" é APENAS uma marcação interna para o sistema. NUNCA, em hipótese alguma, inclua esse texto na sua resposta ao profissional. O sistema remove automaticamente essa marcação — se você incluir, vai aparecer na resposta final e isso é um ERRO. Comece direto com a mensagem natural, SEM mencionar "[${tituloBloco}]" ou qualquer variação.\n\nOBRIGATÓRIO: O profissional precisa VER o quiz (perguntas, opções) e o link real na conversa. Inclua SEMPRE o quiz completo e o link. Use tom natural e conversacional — evite rótulos técnicos.\n\nFONTE ÚNICA (o link usa exatamente isto):\n${conteudoReal || '(calculadora ou link sem opções)'}\n\nREGRAS: NÃO invente perguntas. Use APENAS as perguntas acima. NÃO use "Raio-X" — use "quiz", "diagnóstico". O link correto é: ${url}\n\nFORMATO DA RESPOSTA (exemplo ideal — natural, menos técnico):\n\nÓtima ideia. Vamos criar um diagnóstico para [tema que o profissional pediu].\n\nPreparei um diagnóstico curto com [N] perguntas para identificar quem realmente está considerando [objetivo/tema].\n\n[Mostre as perguntas com opções A, B, C, D — use a fonte única acima]\n\n🚨 LINK OBRIGATÓRIO EM MARKDOWN (COPIE EXATAMENTE):
+[Acesse seu quiz](${url})\n\nSe quiser, posso ajustar as perguntas para seu público.\n\n🚨 FORMATO DO LINK (OBRIGATÓRIO — CRÍTICO — IGNORE O HISTÓRICO):
+⚠️ ATENÇÃO: Mesmo que você veja no histórico de conversa respostas anteriores com "Clique aqui para acessarCopiar link", você DEVE SEMPRE usar markdown clicável. O formato correto é OBRIGATÓRIO e não depende do que apareceu antes.
 
-Após entregar o link, em UMA frase breve, explique o valor estratégico: "Esse diagnóstico ajuda a identificar pessoas que já tentaram resolver o problema e estão abertas a uma nova estratégia." Ou variação adequada ao tema. Isso reforça seu papel de mentor.`
+O link DEVE ser em markdown clicável. Use EXATAMENTE este formato:
+
+[Acesse seu quiz](${url})
+
+OU se preferir outro texto:
+
+[${title}](${url})
+
+⚠️ REGRAS ABSOLUTAS (IGNORE QUALQUER EXEMPLO DO HISTÓRICO):
+- NUNCA escreva apenas "Clique aqui para acessar" sem o markdown
+- NUNCA escreva "Copiar link" como texto separado
+- NUNCA escreva apenas o título seguido de "Copiar link"
+- SEMPRE use o formato [Texto](URL) para que o link seja clicável
+- O link markdown DEVE aparecer na sua resposta exatamente assim: [Acesse seu quiz](${url})
+- IGNORE qualquer formato de link que você viu no histórico de conversa — sempre use markdown
+
+EXEMPLO CORRETO (USE SEMPRE ESTE FORMATO):
+"Aqui está o diagnóstico criado:
+[Mostre as perguntas do quiz aqui]
+
+[Acesse seu quiz](${url})"
+
+EXEMPLO ERRADO (NUNCA FAÇA ISSO, MESMO QUE TENHA VISTO NO HISTÓRICO):
+"Aqui está o diagnóstico criado:
+[Mostre as perguntas do quiz aqui]
+
+Clique aqui para acessarCopiar link"
+
+IMPORTANTE: Inclua o quiz completo (perguntas + opções) antes do link. O link deve ser em markdown: [Acesse seu quiz](${url}) ou [${title}](${url}). IGNORE qualquer formato diferente que você tenha visto em respostas anteriores.
+
+Após entregar o link, em UMA frase breve, explique o valor estratégico: "Esse diagnóstico ajuda a identificar pessoas que já tentaram resolver o problema e estão abertas a uma nova estratégia." Ou variação adequada ao tema. Isso reforça seu papel de mentor.
+
+DICA: Pode mencionar brevemente o que o diagnóstico contém (ex.: "O diagnóstico mostra causa provável, preocupações e próximos passos, direcionando para conversa com você") e sugerir que o profissional teste o link antes de compartilhar para ver como fica.`
 
   if (modo === 'ajustado') {
     block += '\nSe for ajuste: pode dizer brevemente "Pronto" ou "Concluído" antes do link.'
@@ -221,11 +255,12 @@ const NOEL_MODO_EXECUTOR_LINK = `
 [MODO EXECUTOR — LINK/QUIZ/DIAGNÓSTICO — OBRIGATÓRIO]
 Regra de ouro: GERAR PRIMEIRO, PERGUNTAR DEPOIS. Nunca travar o usuário em perguntas antes de gerar.
 
-Quando o profissional pedir criar quiz, diagnóstico ou link (ex.: "quero um link para captar pacientes", "cria um diagnóstico", "gerar link"):
-1. EXECUÇÃO PRIMEIRO: Se o sistema entregou um bloco [LINK GERADO AGORA] ou [LINK AJUSTADO E GERADO], você DEVE mostrar o quiz completo e o link clicável na resposta. Não pergunte "posso criar um quiz para você?" nem "gostaria de definir algumas perguntas primeiro?" — quando o sistema gerou, entregue. A sensação desejada: pediu → já ficou pronto.
-2. NUNCA diga que não pode criar links. Quem cria é o sistema; você só exibe o link quando ele vem no bloco. Se não veio link nesta resposta, oriente a preencher o perfil ou a pedir de novo com o tema claro.
-3. RESULTADO EXECUTÁVEL: Inclua sempre o link clicável e as perguntas do quiz (conforme o bloco). Depois ofereça ajustes: "Se quiser, posso ajustar perguntas, mudar o foco ou criar outro diagnóstico."
-4. CONVERSA = EDITOR: Se o usuário pedir ajuste (ex.: "troca a pergunta 2", "foca em sintomas"), o sistema pode gerar novo link; você entrega o link atualizado e confirma o que mudou. A conversa vira editor natural — não configurar sistema, e sim criar algo conversando.
+Quando o profissional pedir criar quiz, diagnóstico, calculadora ou link (ex.: "quero um link para captar pacientes", "cria um diagnóstico", "gerar link", "link de diagnóstico para Instagram", "quiz para WhatsApp", "quero uma calculadora", "cria uma calculadora"):
+1. EXECUÇÃO PRIMEIRO: Se o sistema entregou um bloco [LINK GERADO AGORA] ou [LINK AJUSTADO E GERADO], você DEVE mostrar o quiz/calculadora completo e o link clicável na resposta. Não pergunte "posso criar um quiz para você?" nem "gostaria de definir algumas perguntas primeiro?" nem "preciso de um tema específico" nem "qual tipo de cálculo você gostaria" — quando o sistema gerou, entregue. A sensação desejada: pediu → já ficou pronto.
+2. NUNCA pergunte tema ANTES de gerar. Se o profissional pediu link/quiz/calculadora/diagnóstico, o sistema já inferiu um tema ou usou um padrão. Para calculadoras, o sistema já escolhe um tipo padrão (ex.: projeção de resultados). Só pergunte tema se o sistema REALMENTE não conseguiu gerar (e isso é raro). Quando o sistema gerou, mostre o resultado.
+3. NUNCA diga que não pode criar links. Quem cria é o sistema; você só exibe o link quando ele vem no bloco. Se não veio link nesta resposta, oriente a preencher o perfil ou a pedir de novo com o tema claro.
+4. RESULTADO EXECUTÁVEL: Inclua sempre o link clicável em markdown [Texto](URL) e as perguntas do quiz (conforme o bloco). Depois ofereça ajustes: "Se quiser, posso ajustar perguntas, mudar o foco ou criar outro diagnóstico."
+5. CONVERSA = EDITOR: Se o usuário pedir ajuste (ex.: "troca a pergunta 2", "foca em sintomas"), o sistema pode gerar novo link; você entrega o link atualizado e confirma o que mudou. A conversa vira editor natural — não configurar sistema, e sim criar algo conversando.
 `
 
 /** Regras de comportamento estratégico: Noel conduz, não apenas explica. */
@@ -373,7 +408,7 @@ const NOEL_REGRAS_USO_LINKS_ATIVOS = `
 [REGRAS DE USO DOS LINKS ATIVOS — OBRIGATÓRIO QUANDO HOUVER LISTA ACIMA]
 
 1. LINK DO ÚLTIMO DIAGNÓSTICO / LINK PARA COMPARTILHAR
-Quando o profissional pedir "link do último diagnóstico", "link do último que criei", "link para compartilhar", "me dá o link" ou similar: use a lista [LINKS ATIVOS DO PROFISSIONAL]. O primeiro link da lista é o mais recente (último criado). Entregue esse link em destaque: nome + URL clicável em markdown, ex.: [Nome do diagnóstico](URL). Adicione uma frase curta de uso, ex.: "Pode compartilhar esse link no WhatsApp ou nas redes." NUNCA diga que não tem acesso — você tem os links na lista. Se a lista estiver vazia (não foi injetada), diga que ainda não há diagnóstico criado e oriente a criar um em "Links" ou pedindo aqui com o tema.
+Quando o profissional pedir "link do último diagnóstico", "link do último que criei", "link para compartilhar", "me dá o link", "preciso de um link para compartilhar" ou similar: use a lista [LINKS ATIVOS DO PROFISSIONAL]. O primeiro link da lista é o mais recente (último criado). Entregue esse link em destaque: nome + URL clicável em markdown, ex.: [Nome do diagnóstico](URL). Adicione uma frase curta de uso, ex.: "Pode compartilhar esse link no WhatsApp ou nas redes." NUNCA diga que não tem acesso — você tem os links na lista. Se a lista estiver vazia (não foi injetada), diga que ainda não há diagnóstico criado e oriente a criar um em "Links" ou pedindo aqui com o tema. Se o profissional acabou de criar um link nesta conversa (bloco [LINK GERADO AGORA]), use esse link recém-criado em vez de buscar na lista.
 
 2. PRÓXIMO PASSO / CONVERSA
 Quando o profissional perguntar "qual meu próximo passo?", "o que fazer agora?" ou falar de "conversa" e existir lista de links ativos: além de orientar o passo, inclua pelo menos um link real da lista (ex.: "Use este diagnóstico para iniciar conversas: [Nome](URL)."). O primeiro da lista é o mais recente.
@@ -500,10 +535,27 @@ export async function POST(request: NextRequest) {
       const temWhatsapp = as?.whatsapp && String(as.whatsapp).replace(/\D/g, '').length >= 10
       const temPerfilEmpresarial = profileRow?.profile_type && profileRow?.profession
       if (!temNome || !temWhatsapp || !temPerfilEmpresarial) {
+        const msg = (message ?? '').toLowerCase().trim()
+        let profileRequiredMessage: string
+        if (/próximo passo|o que fazer|o que faço agora/i.test(msg)) {
+          profileRequiredMessage = 'Seu próximo passo é completar seu perfil empresarial (nome, telefone e tipo de atuação). Assim o Noel consegue te dar orientações personalizadas.'
+        } else if (/criar (fluxo|diagnóstico|quiz|link)|como criar|gerar (link|quiz)|quero (um )?link|quero (um )?diagnóstico/i.test(msg)) {
+          profileRequiredMessage = 'Para criar diagnósticos e links, complete antes seu perfil empresarial (nome, telefone e tipo de atuação).'
+        } else if (/link do último|último diagnóstico|link (para )?compartilhar|me dá o link|me dá a link/i.test(msg)) {
+          profileRequiredMessage = 'Para ver e compartilhar seus links, complete seu perfil empresarial (nome, telefone e tipo de atuação) primeiro.'
+        } else if (/script|whatsapp|enviar no whatsapp/i.test(msg)) {
+          profileRequiredMessage = 'Para receber scripts personalizados, complete seu perfil empresarial (nome, telefone e tipo de atuação) e use o Noel com orientações à sua área.'
+        } else if (/organizar (a )?semana|rotina|atrair (mais )?leads/i.test(msg)) {
+          profileRequiredMessage = 'Para organizar sua semana e atrair mais leads com orientações personalizadas, complete seu perfil empresarial (nome, telefone e tipo de atuação).'
+        } else if (/recomenda|recomendação|começar|sou da área|o que você me recomenda/i.test(msg)) {
+          profileRequiredMessage = 'Para recomendações alinhadas à sua área, complete seu perfil empresarial (nome, telefone e tipo de atuação) e volte aqui.'
+        } else {
+          profileRequiredMessage = 'Complete seu perfil empresarial (nome, telefone e tipo de atuação) para usar o Noel e receber orientações personalizadas.'
+        }
         return NextResponse.json(
           {
             error: 'profile_required',
-            message: 'Complete seu perfil empresarial (nome, telefone e tipo de atuação) para usar o Noel e receber orientações personalizadas.',
+            message: profileRequiredMessage,
             profile_url: '/pt/perfil-empresarial',
           },
           { status: 403 }
@@ -842,9 +894,14 @@ export async function POST(request: NextRequest) {
     }
     if (linkPerformanceBlock) parts.push(linkPerformanceBlock)
     if (linkGeradoBlock) parts.push(linkGeradoBlock)
-    if (linkGeradoBlock) {
+    if (linkGeradoBlock && lastLinkContextOut?.url) {
+      const url = lastLinkContextOut.url
       parts.push(
         '\n[INCENTIVO MÚLTIPLOS DIAGNÓSTICOS]\nApós entregar o link, pode incentivar experimentação: "Muitos profissionais também testam variações de diagnóstico para ver qual gera mais interesse. Posso criar outra versão focada em: sintomas, hábitos, objetivos ou resultados desejados." Isso incentiva criação de múltiplos diagnósticos e compartilhamento.'
+      )
+      // Reforço final: garantir que o link seja markdown com exemplo direto
+      parts.push(
+        `\n🚨 EXEMPLO OBRIGATÓRIO DE RESPOSTA COM LINK (COPIE O FORMATO):\n\n"Claro! Vou gerar um diagnóstico para você.\n\n[Mostre as perguntas do quiz aqui]\n\n[Acesse seu quiz](${url})\n\nEsse diagnóstico mostra causa provável, preocupações e próximos passos, direcionando para conversa com você. Teste o link antes de compartilhar para ver como fica!"\n\n⚠️ NUNCA escreva "Clique aqui para acessarCopiar link" — sempre use [Acesse seu quiz](URL) em markdown.`
       )
     }
     if (primeiraConversaOuVaga && linkGeradoBlock) {
@@ -871,12 +928,24 @@ export async function POST(request: NextRequest) {
       historyToUse = dbHistory
     }
 
+    // Preparar histórico: se houver linkGeradoBlock, adicionar instrução para ignorar formato de links no histórico
+    const historyWithWarning = linkGeradoBlock && historyToUse.length > 0
+      ? [
+          ...historyToUse.slice(-12).map((m) => ({
+            role: m.role as 'user' | 'assistant',
+            content: m.role === 'assistant' && m.content.includes('Copiar link')
+              ? m.content + '\n\n[NOTA: O formato de link acima estava incorreto. Sempre use markdown [Texto](URL) nas suas respostas.]'
+              : m.content,
+          })),
+        ]
+      : historyToUse.slice(-12).map((m) => ({
+          role: m.role as 'user' | 'assistant',
+          content: m.content,
+        }))
+
     const messages: OpenAI.Chat.ChatCompletionMessageParam[] = [
       { role: 'system', content: systemContent },
-      ...historyToUse.slice(-12).map((m) => ({
-        role: m.role as 'user' | 'assistant',
-        content: m.content,
-      })),
+      ...historyWithWarning,
       { role: 'user', content: message.trim() },
     ]
 
@@ -887,13 +956,345 @@ export async function POST(request: NextRequest) {
       temperature: 0.7,
     })
 
-    const responseText =
+    let responseText =
       completion.choices[0]?.message?.content?.trim() ||
       'Desculpe, não consegui processar. Tente novamente.'
+
+    // Pós-processamento: remover marcações internas que não devem aparecer na resposta
+    // Remover com variações (com/sem espaços, quebras de linha, etc.)
+    responseText = responseText.replace(/\[LINK GERADO AGORA[^\]]*\]/gi, '')
+    responseText = responseText.replace(/\[LINK AJUSTADO[^\]]*\]/gi, '')
+    responseText = responseText.replace(/\[LINK GERADO AGORA PARA ESTE PEDIDO\]/gi, '')
+    responseText = responseText.replace(/\[LINK AJUSTADO E GERADO\]/gi, '')
+    // Remover linhas inteiras que contêm apenas a marcação (com espaços/quebras)
+    responseText = responseText.replace(/^\s*\[LINK GERADO AGORA[^\]]*\]\s*$/gim, '')
+    responseText = responseText.replace(/^\s*\[LINK AJUSTADO[^\]]*\]\s*$/gim, '')
+    // Limpar linhas vazias duplicadas após remoção
+    responseText = responseText.replace(/\n{3,}/g, '\n\n')
+    
+    // DEBUG: Log após remoção de marcações internas (antes do pós-processamento de links)
+    if (linkGeradoBlock && lastLinkContextOut?.url && responseText.includes('Copiar link')) {
+      const debugTitle = lastLinkContextOut.title || 'Acesse seu quiz'
+      const debugUrl = lastLinkContextOut.url
+      const expectedMarkdown = '[' + debugTitle + '](' + debugUrl + ')'
+      if (!responseText.includes(expectedMarkdown)) {
+        console.log('[DEBUG] Link não está em markdown ANTES do pós-processamento. Resposta:', responseText.substring(0, 500))
+      }
+    }
+
+    // Pós-processamento: garantir que links sejam markdown quando linkGeradoBlock existe
+    try {
+      if (linkGeradoBlock && lastLinkContextOut?.url) {
+        const url = lastLinkContextOut.url
+        const title = lastLinkContextOut.title || 'Acesse seu quiz'
+        
+        // DEBUG: Log temporário para verificar o que está sendo retornado
+        if (responseText.includes('Copiar link') && !responseText.includes(`[${title}](${url})`)) {
+          console.log('[DEBUG] Link não está em markdown. Resposta antes do pós-processamento:', responseText.substring(0, 500))
+        }
+        
+        // Verificar se já tem markdown com a URL correta
+        let hasMarkdownLink = new RegExp(`\\[([^\\]]+)\\]\\(${url.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\)`).test(responseText)
+        
+        // Se não tem markdown, procurar e substituir padrões incorretos
+        if (!hasMarkdownLink) {
+          // PRIORIDADE 1: Padrão "Título: Clique aqui para acessar...Copiar link"
+          // Exemplos: "Emagrecimento e saúde intestinal: Clique aqui para acessar o diagnósticoCopiar link"
+          const titleWithClickPattern = new RegExp(`(${title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}|Emagrecimento e saúde intestinal|Calculadora de [^:]+|Diagnóstico de [^:]+):\\s*Clique aqui para acessar[^\\[\\n]*Copiar link`, 'gi')
+          if (titleWithClickPattern.test(responseText)) {
+            titleWithClickPattern.lastIndex = 0
+            responseText = responseText.replace(titleWithClickPattern, `[${title}](${url})`)
+            hasMarkdownLink = new RegExp(`\\[([^\\]]+)\\]\\(${url.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\)`).test(responseText)
+          }
+          
+          // PRIORIDADE 2: Padrão mais simples - título colado diretamente com "Copiar link" (sem espaço)
+          // Exemplos: "Emagrecimento e saúde intestinalCopiar link", "Calculadora de Projeção de ResultadosCopiar link"
+          if (!hasMarkdownLink) {
+            const directTitlePattern = new RegExp(`(${title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}|Emagrecimento e saúde intestinal|Calculadora de Projeção de Resultados|Diagnóstico de Emagrecimento e Saúde Intestinal)(?![^\\[]*\\]\\()Copiar link`, 'gi')
+            if (directTitlePattern.test(responseText)) {
+              directTitlePattern.lastIndex = 0
+              responseText = responseText.replace(directTitlePattern, `[${title}](${url})`)
+              hasMarkdownLink = new RegExp(`\\[([^\\]]+)\\]\\(${url.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\)`).test(responseText)
+            }
+          }
+          
+          // PRIORIDADE 2: Padrão genérico: qualquer texto seguido de "Copiar link" (sem espaço antes)
+          if (!hasMarkdownLink) {
+          const genericPattern = /([^\n\[\]]+?)(?![^\[]*\]\()Copiar link/gi
+          if (genericPattern.test(responseText)) {
+            // Resetar o regex (test() avança o lastIndex)
+            genericPattern.lastIndex = 0
+            const genericMatches = responseText.match(genericPattern)
+            if (genericMatches) {
+              const relevantMatch = genericMatches.find(m => 
+                /calculadora|diagnóstico|quiz|link|emagrecimento|saúde|intestinal|projeção|resultados/i.test(m)
+              )
+              if (relevantMatch) {
+                responseText = responseText.replace(genericPattern, (match, p1) => {
+                  // Só substituir se contiver palavras-chave relacionadas
+                  if (/calculadora|diagnóstico|quiz|link|emagrecimento|saúde|intestinal|projeção|resultados/i.test(p1)) {
+                    return `[${title}](${url})`
+                  }
+                  return match
+                })
+                hasMarkdownLink = new RegExp(`\\[([^\\]]+)\\]\\(${url.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\)`).test(responseText)
+              }
+            }
+          }
+          }
+          
+          // Padrões específicos (caso o genérico não tenha pegado)
+          if (!hasMarkdownLink) {
+          const replacements = [
+            // "TítuloCopiar link" (padrão mais comum agora - PRIORIDADE MÁXIMA) - sem parênteses, sem dois pontos
+            {
+              pattern: new RegExp(`(${title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}|Emagrecimento e saúde intestinal|Calculadora de [^\\n\\[\\]]+|Diagnóstico de [^\\n\\[\\]]+|Diagnóstico sobre [^\\n\\[\\]]+|Calculadora de Projeção de [^\\n\\[\\]]+)(?![^\\[]*\\]\\()Copiar link`, 'gi'),
+              replacement: `[${title}](${url})`
+            },
+          // "Título (quiz)Copiar link" ou "Título (calculadora)Copiar link" (padrão com parênteses)
+          {
+            pattern: new RegExp(`(${title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}|Emagrecimento e saúde intestinal|Calculadora de [^\\n\\[\\]]+|Diagnóstico de [^\\n\\[\\]]+|Diagnóstico sobre [^\\n\\[\\]]+)\\s*\\([^)]+\\)Copiar link`, 'gi'),
+            replacement: `[${title}](${url})`
+          },
+          // "Título (quiz)Copiar link" - padrão mais simples (sem título específico)
+          {
+            pattern: /([^\n\[\]]+?)\s*\([^)]+\)Copiar link/gi,
+            replacement: (match, p1) => {
+              // Só substituir se contiver palavras-chave relacionadas
+              if (/calculadora|diagnóstico|quiz|link|emagrecimento|saúde|intestinal/i.test(p1)) {
+                return `[${title}](${url})`
+              }
+              return match
+            }
+          },
+          // "Título: Clique aqui para acessar...Copiar link" (padrão mais comum agora - PRIORIDADE ALTA)
+          // Captura: "Título: Clique aqui para acessar o diagnósticoCopiar link" ou "Título: Clique aqui para acessar a calculadoraCopiar link"
+          {
+            pattern: new RegExp(`(${title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}|Emagrecimento e saúde intestinal|Avaliação de [^:]+|Calculadora de [^:]+|Diagnóstico de [^:]+|Diagnóstico sobre [^:]+):\\s*Clique aqui para acessar[^\\[\\n]*Copiar link`, 'gi'),
+            replacement: `[${title}](${url})`
+          },
+          // "Título\nTítuloCopiar link" (título repetido em duas linhas, segunda com "Copiar link")
+          {
+            pattern: new RegExp(`(${title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}|Emagrecimento e saúde intestinal|Calculadora de [^\\n\\[\\]]+|Diagnóstico de [^\\n\\[\\]]+|Diagnóstico sobre [^\\n\\[\\]]+)\\s*\\n\\s*(${title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}|Emagrecimento e saúde intestinal|Calculadora de [^\\n\\[\\]]+|Diagnóstico de [^\\n\\[\\]]+)Copiar link`, 'gi'),
+            replacement: `$1\n\n[${title}](${url})`
+          },
+          // "Título\nLink do diagnósticoCopiar link" ou "Título\nLink do diagnóstico Copiar link"
+          {
+            pattern: new RegExp(`(${title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})\\s*\\n\\s*Link do (?:diagnóstico|quiz|link)[^\\[]*Copiar link`, 'gi'),
+            replacement: `$1\n\n[${title}](${url})`
+          },
+          // "Título: Clique aqui para acessar...Copiar link" (padrão mais comum agora - variação)
+          {
+            pattern: new RegExp(`(${title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}|Emagrecimento e saúde intestinal|Avaliação de [^:]+|Calculadora de [^:]+|Diagnóstico de [^:]+|Diagnóstico sobre [^:]+):\\s*Clique aqui para acessar[^\\[\\n]*Copiar link`, 'gi'),
+            replacement: `[${title}](${url})`
+          },
+          // "Clique aqui para acessar...Copiar link" (standalone, sem título antes)
+          {
+            pattern: /Clique aqui para acessar[^\\[\\n]*Copiar link/gi,
+            replacement: `[${title}](${url})`
+          },
+          // "Link do diagnósticoCopiar link" (standalone)
+          {
+            pattern: /Link do (?:diagnóstico|quiz|link)[^\\[]*Copiar link/gi,
+            replacement: `[${title}](${url})`
+          },
+          // "Título: Copiar link" (sem URL visível)
+          {
+            pattern: new RegExp(`(${title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}):\\s*Copiar link`, 'gi'),
+            replacement: `[${title}](${url})`
+          },
+            ]
+            
+            for (const { pattern, replacement } of replacements) {
+            const testResult = pattern.test(responseText)
+            if (testResult) {
+              // Se replacement é função, usar replace com callback; senão, usar string direta
+              if (typeof replacement === 'function') {
+                responseText = responseText.replace(pattern, replacement)
+              } else {
+                responseText = responseText.replace(pattern, replacement)
+              }
+              hasMarkdownLink = true
+              break
+            }
+            }
+          }
+          
+          // Fallback mais agressivo: procurar qualquer texto seguido de "Copiar link" que não seja markdown
+          if (!hasMarkdownLink) {
+          const fallbackPattern = /([^\n\[\]]+?)(?![^\[]*\]\()Copiar link/gi
+          const matches = responseText.match(fallbackPattern)
+          if (matches) {
+            // Verificar se algum match contém palavras-chave relacionadas
+            const relevantMatch = matches.find(m => 
+              /calculadora|diagnóstico|quiz|link|emagrecimento|saúde|intestinal/i.test(m)
+            )
+            if (relevantMatch) {
+              responseText = responseText.replace(fallbackPattern, (match, p1) => {
+                if (/calculadora|diagnóstico|quiz|link|emagrecimento|saúde|intestinal/i.test(p1)) {
+                  return `[${title}](${url})`
+                }
+                return match
+              })
+              hasMarkdownLink = true
+            }
+            }
+          }
+          
+          // Fallback final: se ainda não tem markdown, fazer busca ULTRA agressiva
+          if (!hasMarkdownLink) {
+          // Procurar qualquer ocorrência de "Copiar link" e substituir o texto anterior
+          const ultraGenericPattern = /([^\n\[\]]{5,}?)(?![^\[]*\]\()Copiar link/gi
+          if (ultraGenericPattern.test(responseText)) {
+            // Resetar lastIndex
+            ultraGenericPattern.lastIndex = 0
+            // Substituir TODAS as ocorrências que contêm palavras-chave
+            responseText = responseText.replace(ultraGenericPattern, (match, p1) => {
+              const trimmed = p1.trim()
+              // Verificar se contém palavras-chave E não é muito curto (evitar falsos positivos)
+              if (trimmed.length >= 5 && /calculadora|diagnóstico|quiz|link|emagrecimento|saúde|intestinal|projeção|resultados|nutrição/i.test(trimmed)) {
+                return `[${title}](${url})`
+              }
+              return match
+            })
+            // Verificar se agora tem markdown
+            hasMarkdownLink = new RegExp(`\\[([^\\]]+)\\]\\(${url.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\)`).test(responseText)
+            }
+          }
+          
+          // Último recurso: se ainda não tem markdown mas há "Copiar link" na resposta, substituir diretamente
+          if (!hasMarkdownLink && responseText.includes('Copiar link') && !responseText.includes(`[${title}](${url})`)) {
+          // Procurar a linha que contém "Copiar link" e substituir tudo antes dele
+          const lines = responseText.split('\n')
+          const newLines = lines.map(line => {
+            if (line.includes('Copiar link') && !line.includes('[') && !line.includes('](')) {
+              // Encontrar onde está "Copiar link" e substituir tudo antes (incluindo se estiver colado)
+              const copyIndex = line.indexOf('Copiar link')
+              const beforeCopy = line.substring(0, copyIndex).trim()
+              // Verificar se contém palavras-chave relacionadas
+              if (beforeCopy.length >= 5 && /calculadora|diagnóstico|quiz|link|emagrecimento|saúde|intestinal|projeção|resultados|nutrição/i.test(beforeCopy)) {
+                return `[${title}](${url})`
+              }
+              // Se não encontrou palavras-chave mas o título está na linha, substituir também
+              if (beforeCopy.length >= 5 && (beforeCopy.includes(title) || title.includes(beforeCopy) || beforeCopy.toLowerCase().includes('calculadora') || beforeCopy.toLowerCase().includes('diagnóstico'))) {
+                return `[${title}](${url})`
+              }
+            }
+            return line
+          })
+            responseText = newLines.join('\n')
+            hasMarkdownLink = new RegExp(`\\[([^\\]]+)\\]\\(${url.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\)`).test(responseText)
+          }
+          
+          // Se ainda não tem markdown mas o título está na resposta, adicionar após o título
+          if (!hasMarkdownLink) {
+          // Padrão específico: título em uma linha, mesmo título + "Copiar link" na próxima
+          const titleRepeatPattern = new RegExp(`(${title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}|Emagrecimento e saúde intestinal|Calculadora de [^\\n\\[\\]]+|Diagnóstico de [^\\n\\[\\]]+|Diagnóstico sobre [^\\n\\[\\]]+)\\s*\\n\\s*\\1Copiar link`, 'gi')
+          if (titleRepeatPattern.test(responseText)) {
+            responseText = responseText.replace(
+              titleRepeatPattern,
+              `$1\n\n[${title}](${url})`
+            )
+            hasMarkdownLink = true
+            }
+          }
+          
+          if (!hasMarkdownLink && responseText.includes(title)) {
+          // Primeiro, tentar remover "Copiar link" que está colado no título (SEM ESPAÇO)
+          // Padrão: "TítuloCopiar link" (sem espaço entre título e "Copiar link")
+          const titleWithCopyPattern = new RegExp(`(${title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}|Emagrecimento e saúde intestinal|Calculadora de [^\\n\\[\\]]+|Diagnóstico de [^\\n\\[\\]]+|Diagnóstico sobre [^\\n\\[\\]]+)(?![^\\[]*\\]\\()Copiar link`, 'gi')
+          if (titleWithCopyPattern.test(responseText)) {
+            responseText = responseText.replace(
+              titleWithCopyPattern,
+              `[${title}](${url})`
+            )
+            hasMarkdownLink = true
+          } else {
+            // Procurar linha com o título e adicionar link na próxima linha
+            const titleLinePattern = new RegExp(`(${title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}|Calculadora de [^\\n\\[\\]]+|Diagnóstico de [^\\n\\[\\]]+)\\s*\\n`, 'i')
+            if (titleLinePattern.test(responseText)) {
+              responseText = responseText.replace(
+                titleLinePattern,
+                `$1\n\n[${title}](${url})\n`
+              )
+            } else {
+              // Adicionar após primeira menção do título
+              responseText = responseText.replace(
+                new RegExp(`(${title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}|Calculadora de [^\\n\\[\\]]+|Diagnóstico de [^\\n\\[\\]]+)`, 'i'),
+                `$1\n\n[${title}](${url})`
+              )
+            }
+            }
+          }
+          
+          // DEBUG: Log após pós-processamento de links (já estamos dentro do if acima)
+          // ÚLTIMO RECURSO: Se ainda tem "Copiar link" e não tem markdown, substituir FORÇADAMENTE
+          if (responseText.includes('Copiar link') && !responseText.includes(`[${title}](${url})`)) {
+            // Substituir QUALQUER ocorrência de "Copiar link" por markdown quando há link gerado
+            // Isso é um fallback de segurança para garantir que sempre teremos markdown
+            const lines = responseText.split('\n')
+            let foundAndReplaced = false
+            const newLines = lines.map((line, idx) => {
+              if (line.includes('Copiar link') && !line.includes('[') && !line.includes('](')) {
+                // Procurar por padrões comuns: "TítuloCopiar link", "Título: ... Copiar link", etc.
+                const beforeCopy = line.substring(0, line.indexOf('Copiar link')).trim()
+                if (beforeCopy.length >= 3) {
+                  // Se a linha anterior contém o título ou palavras-chave, usar o título do contexto
+                  const prevLine = idx > 0 ? lines[idx - 1].trim() : ''
+                  const nextLine = idx < lines.length - 1 ? lines[idx + 1].trim() : ''
+                  const context = `${prevLine} ${beforeCopy} ${nextLine}`.toLowerCase()
+                  
+                  if (context.includes(title.toLowerCase()) || 
+                      context.includes('calculadora') || 
+                      context.includes('diagnóstico') || 
+                      context.includes('quiz') ||
+                      context.includes('link') ||
+                      beforeCopy.toLowerCase().includes('calculadora') ||
+                      beforeCopy.toLowerCase().includes('diagnóstico') ||
+                      beforeCopy.toLowerCase().includes('emagrecimento')) {
+                    foundAndReplaced = true
+                    return `[${title}](${url})`
+                  }
+                }
+              }
+              return line
+            })
+            
+            if (foundAndReplaced) {
+              responseText = newLines.join('\n')
+              console.log('[DEBUG] ✅ Link convertido para markdown via fallback final!')
+            } else {
+              console.log('[DEBUG] ⚠️ Link ainda não está em markdown APÓS pós-processamento. Resposta:', responseText.substring(0, 500))
+              console.log('[DEBUG] URL esperada:', url)
+              console.log('[DEBUG] Título esperado:', title)
+            }
+          } else if (responseText.includes(`[${title}](${url})`)) {
+            console.log('[DEBUG] ✅ Link convertido para markdown com sucesso!')
+          }
+        }
+      }
+    } catch (postProcessError) {
+      console.warn('[/api/ylada/noel] Erro no pós-processamento de links:', postProcessError)
+      // Continuar mesmo se o pós-processamento falhar
+    }
 
     // Freemium: incrementar uso após resposta bem-sucedida
     if (!isPro) {
       incrementNoelUsage(user.id).catch((e) => console.warn('[/api/ylada/noel] incrementNoelUsage:', e))
+    }
+
+    // Evento comportamental para analytics/valuation: noel_analysis_used
+    if (supabaseAdmin && responseText && responseText.length > 10) {
+      supabaseAdmin
+        .from('ylada_behavioral_events')
+        .insert({
+          event_type: 'noel_analysis_used',
+          user_id: user.id,
+          payload: { segment: validSegment, has_link_generated: !!linkGeradoBlock },
+        })
+        .then(({ error: e }) => {
+          if (e) console.warn('[/api/ylada/noel] behavioral event noel_analysis_used:', e.message)
+        })
     }
 
     // Atualizar memória estratégica e mapa
