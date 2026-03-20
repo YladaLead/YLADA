@@ -882,32 +882,47 @@ function ConfigDrivenLinkView({
             })}
           </div>
           {isLastQuizStep && (
-            <form
-              onSubmit={(e) => {
-                e.preventDefault()
-                console.log('[PublicLinkView] Form submit clicado', { allQuizAnswered, loading, values, quizFields: quizFields.map(f => ({ id: f.id, valor: values[f.id] })) })
-                if (!allQuizAnswered) {
-                  console.warn('[PublicLinkView] Bloqueado: nem todas as perguntas foram respondidas', { 
-                    allQuizAnswered, 
-                    quizFields: quizFields.map(f => ({ id: f.id, label: f.label, valor: values[f.id], temValor: (values[f.id] ?? '') !== '' }))
-                  })
-                  return
-                }
-                if (loading) {
-                  console.warn('[PublicLinkView] Bloqueado: já está carregando')
-                  return
-                }
-                console.log('[PublicLinkView] Chamando handleSubmit...')
-                handleSubmit(e)
-              }}
-              className="mt-8"
-            >
+            <div className="mt-8">
               <button
-                type="submit"
+                type="button"
                 disabled={loading || !allQuizAnswered}
                 onClick={(e) => {
-                  console.log('[PublicLinkView] Botão clicado diretamente', { loading, allQuizAnswered, disabled: loading || !allQuizAnswered })
-                  // Não prevenir default aqui - deixar o form onSubmit lidar
+                  e.preventDefault()
+                  e.stopPropagation()
+                  console.log('[PublicLinkView] Botão clicado diretamente', { 
+                    loading, 
+                    allQuizAnswered, 
+                    disabled: loading || !allQuizAnswered,
+                    values,
+                    quizFields: quizFields.map(f => ({ id: f.id, label: f.label, valor: values[f.id] }))
+                  })
+                  
+                  if (!allQuizAnswered) {
+                    console.warn('[PublicLinkView] Bloqueado: nem todas as perguntas foram respondidas', { 
+                      allQuizAnswered, 
+                      quizFields: quizFields.map(f => ({ 
+                        id: f.id, 
+                        label: f.label, 
+                        valor: values[f.id], 
+                        temValor: values[f.id] !== undefined && values[f.id] !== null && String(values[f.id]).trim() !== ''
+                      }))
+                    })
+                    setError('Por favor, responda todas as perguntas antes de ver o resultado.')
+                    return
+                  }
+                  
+                  if (loading) {
+                    console.warn('[PublicLinkView] Bloqueado: já está carregando')
+                    return
+                  }
+                  
+                  console.log('[PublicLinkView] Chamando handleSubmit via onClick...')
+                  // Criar um evento sintético para o handleSubmit
+                  const syntheticEvent = {
+                    preventDefault: () => {},
+                    stopPropagation: () => {},
+                  } as React.FormEvent
+                  handleSubmit(syntheticEvent)
                 }}
                 className="w-full py-4 px-4 bg-sky-600 hover:bg-sky-700 disabled:opacity-60 disabled:cursor-not-allowed text-white font-semibold rounded-xl shadow-lg shadow-sky-500/25 transition-all duration-200"
               >
@@ -918,7 +933,7 @@ function ConfigDrivenLinkView({
                   Responda todas as perguntas para ver o resultado
                 </p>
               )}
-            </form>
+            </div>
           )}
         </div>
       </div>
