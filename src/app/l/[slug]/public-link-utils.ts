@@ -20,7 +20,7 @@ export async function fetchPublicLinkPayload(slug: string): Promise<PublicLinkPa
 
   const { data: link, error } = await supabaseAdmin
     .from('ylada_links')
-    .select('id, slug, title, config_json, cta_whatsapp, status, template_id')
+    .select('id, slug, title, config_json, cta_whatsapp, status, template_id, user_id')
     .eq('slug', slug)
     .eq('status', 'active')
     .maybeSingle()
@@ -43,11 +43,56 @@ export async function fetchPublicLinkPayload(slug: string): Promise<PublicLinkPa
     type = t as 'diagnostico' | 'calculator'
   }
 
+  // Se o link não tem cta_whatsapp, buscar do perfil do usuário
+  let ctaWhatsapp = link.cta_whatsapp ?? null
+  if (!ctaWhatsapp && link.user_id) {
+    // Buscar WhatsApp do perfil
+    const { data: profile } = await supabaseAdmin
+      .from('user_profiles')
+      .select('whatsapp, country_code')
+      .eq('user_id', link.user_id)
+      .maybeSingle()
+    
+    const wp = (profile as { whatsapp?: string | null; country_code?: string | null } | null)?.whatsapp
+    const countryCode = (profile as { country_code?: string | null } | null)?.country_code || 'BR'
+    
+    if (typeof wp === 'string' && wp.trim().length >= 10) {
+      let num = wp.trim().replace(/\D/g, '')
+      // Adicionar código do país se não tiver (BR = 55)
+      if (countryCode === 'BR' && !num.startsWith('55')) {
+        num = '55' + num
+      }
+      ctaWhatsapp = num
+      console.log('[public-link-utils] WhatsApp encontrado no perfil:', { whatsapp: wp, formatado: ctaWhatsapp })
+    } else {
+      // Tentar buscar em ylada_noel_profile
+      const { data: noelProfile } = await supabaseAdmin
+        .from('ylada_noel_profile')
+        .select('area_specific')
+        .eq('user_id', link.user_id)
+        .maybeSingle()
+      
+      if (noelProfile?.area_specific) {
+        const areaSpecific = noelProfile.area_specific as Record<string, unknown>
+        const wpNoel = areaSpecific.whatsapp as string | undefined
+        if (typeof wpNoel === 'string' && wpNoel.trim().length >= 10) {
+          let num = wpNoel.trim().replace(/\D/g, '')
+          const countryCodeNoel = (areaSpecific.country_code as string) || 'BR'
+          if (countryCodeNoel === 'BR' && !num.startsWith('55')) {
+            num = '55' + num
+          }
+          ctaWhatsapp = num
+          console.log('[public-link-utils] WhatsApp encontrado no perfil Noel:', { whatsapp: wpNoel, formatado: ctaWhatsapp })
+        }
+      }
+    }
+  }
+
   return {
     slug: link.slug,
     type,
     title: (config.page as Record<string, unknown>)?.title as string ?? (config.title as string) ?? link.title ?? 'Link',
     config,
-    ctaWhatsapp: link.cta_whatsapp ?? null,
+    ctaWhatsapp,
   }
 }
