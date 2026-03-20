@@ -887,42 +887,56 @@ function ConfigDrivenLinkView({
                 type="button"
                 disabled={loading || !allQuizAnswered}
                 onClick={(e) => {
-                  e.preventDefault()
-                  e.stopPropagation()
-                  console.log('[PublicLinkView] Botão clicado diretamente', { 
-                    loading, 
-                    allQuizAnswered, 
-                    disabled: loading || !allQuizAnswered,
-                    values,
-                    quizFields: quizFields.map(f => ({ id: f.id, label: f.label, valor: values[f.id] }))
-                  })
-                  
-                  if (!allQuizAnswered) {
-                    console.warn('[PublicLinkView] Bloqueado: nem todas as perguntas foram respondidas', { 
+                  try {
+                    console.log('🔵 [PublicLinkView] BOTÃO CLICADO!', { 
+                      loading, 
                       allQuizAnswered, 
-                      quizFields: quizFields.map(f => ({ 
-                        id: f.id, 
-                        label: f.label, 
-                        valor: values[f.id], 
-                        temValor: values[f.id] !== undefined && values[f.id] !== null && String(values[f.id]).trim() !== ''
-                      }))
+                      disabled: loading || !allQuizAnswered,
+                      values,
+                      quizFieldsCount: quizFields.length,
+                      quizFields: quizFields.map(f => ({ id: f.id, label: f.label, valor: values[f.id] }))
                     })
-                    setError('Por favor, responda todas as perguntas antes de ver o resultado.')
-                    return
+                    
+                    e.preventDefault()
+                    e.stopPropagation()
+                    
+                    if (!allQuizAnswered) {
+                      console.warn('⚠️ [PublicLinkView] Bloqueado: nem todas as perguntas foram respondidas', { 
+                        allQuizAnswered, 
+                        quizFields: quizFields.map(f => ({ 
+                          id: f.id, 
+                          label: f.label, 
+                          valor: values[f.id], 
+                          temValor: values[f.id] !== undefined && values[f.id] !== null && String(values[f.id]).trim() !== ''
+                        }))
+                      })
+                      setError('Por favor, responda todas as perguntas antes de ver o resultado.')
+                      return
+                    }
+                    
+                    if (loading) {
+                      console.warn('⚠️ [PublicLinkView] Bloqueado: já está carregando')
+                      return
+                    }
+                    
+                    console.log('✅ [PublicLinkView] Chamando handleSubmit via onClick...')
+                    // Criar um evento sintético para o handleSubmit
+                    const syntheticEvent = {
+                      preventDefault: () => {},
+                      stopPropagation: () => {},
+                    } as React.FormEvent
+                    handleSubmit(syntheticEvent).catch((err) => {
+                      console.error('❌ [PublicLinkView] Erro no handleSubmit:', err)
+                      setError('Erro ao processar. Tente novamente.')
+                    })
+                  } catch (err) {
+                    console.error('❌ [PublicLinkView] Erro no onClick do botão:', err)
+                    setError('Erro ao processar. Tente novamente.')
                   }
-                  
-                  if (loading) {
-                    console.warn('[PublicLinkView] Bloqueado: já está carregando')
-                    return
-                  }
-                  
-                  console.log('[PublicLinkView] Chamando handleSubmit via onClick...')
-                  // Criar um evento sintético para o handleSubmit
-                  const syntheticEvent = {
-                    preventDefault: () => {},
-                    stopPropagation: () => {},
-                  } as React.FormEvent
-                  handleSubmit(syntheticEvent)
+                }}
+                style={{
+                  cursor: (loading || !allQuizAnswered) ? 'not-allowed' : 'pointer',
+                  pointerEvents: (loading || !allQuizAnswered) ? 'none' : 'auto'
                 }}
                 className="w-full py-4 px-4 bg-sky-600 hover:bg-sky-700 disabled:opacity-60 disabled:cursor-not-allowed text-white font-semibold rounded-xl shadow-lg shadow-sky-500/25 transition-all duration-200"
               >
@@ -932,6 +946,13 @@ function ConfigDrivenLinkView({
                 <p className="text-xs text-gray-500 mt-2 text-center">
                   Responda todas as perguntas para ver o resultado
                 </p>
+              )}
+              {/* Debug info */}
+              {process.env.NODE_ENV === 'development' && (
+                <div className="mt-2 text-xs text-gray-400 text-center">
+                  Debug: allQuizAnswered={String(allQuizAnswered)}, loading={String(loading)}, 
+                  valores={JSON.stringify(Object.keys(values).map(k => ({ [k]: values[k] })))}
+                </div>
               )}
             </div>
           )}
