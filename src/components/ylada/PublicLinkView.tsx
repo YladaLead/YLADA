@@ -787,7 +787,30 @@ function ConfigDrivenLinkView({
   const isQuizMode = quizFields.length > 0
   const currentField = isQuizMode ? quizFields[formStep] : null
   const isLastQuizStep = isQuizMode && formStep >= quizFields.length - 1
-  const allQuizAnswered = isQuizMode && quizFields.every((f) => (values[f.id] ?? '') !== '')
+  // Verificar se todas as perguntas foram respondidas
+  // IMPORTANTE: Aceitar qualquer valor não-undefined/non-null, incluindo "0"
+  const allQuizAnswered = isQuizMode && quizFields.every((f) => {
+    const valor = values[f.id]
+    const temValor = valor !== undefined && valor !== null && String(valor).trim() !== ''
+    if (!temValor) {
+      console.log('[PublicLinkView] Pergunta não respondida:', f.id, f.label, 'valor:', valor)
+    }
+    return temValor
+  })
+  
+  // Debug: logar estado de todas as perguntas
+  if (isQuizMode && isLastQuizStep) {
+    console.log('[PublicLinkView] Estado das perguntas:', {
+      allQuizAnswered,
+      totalPerguntas: quizFields.length,
+      perguntas: quizFields.map(f => ({ 
+        id: f.id, 
+        label: f.label, 
+        valor: values[f.id], 
+        temValor: values[f.id] !== undefined && values[f.id] !== null && String(values[f.id]).trim() !== ''
+      }))
+    })
+  }
 
   const handleOptionSelect = (fieldId: string, value: string) => {
     if (!startSent.current) {
