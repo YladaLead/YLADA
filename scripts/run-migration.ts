@@ -11,6 +11,12 @@ import { config } from 'dotenv'
 config({ path: join(process.cwd(), '.env.local') })
 
 const migrationFile = process.argv[2] || '235-ylada-templates-biblioteca-nutri-bloco2.sql'
+if (!migrationFile.endsWith('.sql')) {
+  console.error('❌ Só é possível executar arquivos .sql com este script.')
+  console.error('   Exemplo: npx tsx scripts/run-migration.ts migrations/235-exemplo.sql')
+  console.error('   Para criar contas de teste (Node.js): node scripts/criar-contas-teste-interno.js')
+  process.exit(1)
+}
 const migrationPath = join(process.cwd(), 'migrations', migrationFile)
 
 async function run() {

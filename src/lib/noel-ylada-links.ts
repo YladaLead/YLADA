@@ -57,9 +57,16 @@ export async function getNoelYladaLinks(
 
 /**
  * Monta o texto de "links ativos" para o system prompt do Noel.
+ * A lista vem ordenada do mais recente ao mais antigo (created_at desc).
+ * O primeiro item é o "último diagnóstico/link criado".
  */
 export function formatLinksAtivosParaNoel(links: NoelYladaLinkItem[]): string {
   if (!links.length) return ''
   const linhas = links.map((l) => `- ${l.nome} (${l.tipo}): ${l.url}`)
-  return '\n[LINKS ATIVOS DO PROFISSIONAL — já criados por ele]\n' + linhas.join('\n') + '\nUse esses links quando fizer sentido sugerir um que ele já tem. Para criar um link novo, o sistema fará isso por você quando o profissional pedir.'
+  return (
+    '\n[LINKS ATIVOS DO PROFISSIONAL — já criados por ele]\n' +
+    'Lista ordenada do mais recente ao mais antigo. O primeiro é o último criado ("último diagnóstico").\n\n' +
+    linhas.join('\n') +
+    '\n\nUse esses links quando fizer sentido sugerir um que ele já tem. Para criar um link novo, o sistema fará isso por você quando o profissional pedir.'
+  )
 }

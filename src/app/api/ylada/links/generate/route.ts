@@ -67,13 +67,53 @@ export async function POST(request: NextRequest) {
 
     // Bloco 6.1: se cta_whatsapp não informado, buscar do perfil do usuário (com country_code para DDI correto)
     if (!ctaWhatsapp && supabaseAdmin) {
+      // Primeiro, tentar buscar de user_profiles
       const { data: profile } = await supabaseAdmin
         .from('user_profiles')
         .select('whatsapp, country_code')
         .eq('user_id', user.id)
         .maybeSingle()
-      const wp = (profile as { whatsapp?: string | null; country_code?: string | null } | null)?.whatsapp
-      const countryCode = (profile as { country_code?: string | null } | null)?.country_code || 'BR'
+      let wp = (profile as { whatsapp?: string | null; country_code?: string | null } | null)?.whatsapp
+      let countryCode = (profile as { country_code?: string | null } | null)?.country_code || 'BR'
+      
+      // Se não encontrou em user_profiles, tentar em ylada_noel_profile
+      if ((!wp || wp.trim().length < 10) && supabaseAdmin) {
+        // Tentar buscar pelo segment do link, se disponível
+        let noelProfile = null
+        if (segment) {
+          const { data: profileBySegment } = await supabaseAdmin
+            .from('ylada_noel_profile')
+            .select('area_specific')
+            .eq('user_id', user.id)
+            .eq('segment', segment)
+            .maybeSingle()
+          noelProfile = profileBySegment
+        }
+        
+        // Se não encontrou pelo segment, buscar qualquer perfil do usuário
+        if (!noelProfile) {
+          const { data: profileAny } = await supabaseAdmin
+            .from('ylada_noel_profile')
+            .select('area_specific')
+            .eq('user_id', user.id)
+            .limit(1)
+            .maybeSingle()
+          noelProfile = profileAny
+        }
+        
+        if (noelProfile?.area_specific) {
+          const areaSpecific = noelProfile.area_specific as Record<string, unknown>
+          const wpNoel = areaSpecific.whatsapp as string | undefined
+          const countryCodeNoel = (areaSpecific.country_code as string) || 'BR'
+          if (typeof wpNoel === 'string' && wpNoel.trim().length >= 10) {
+            wp = wpNoel
+            countryCode = countryCodeNoel
+            console.log('[ylada/links/generate] WhatsApp encontrado no perfil Noel:', { whatsapp: wp, country_code: countryCode, segment })
+          }
+        }
+      }
+      
+      // Formatar número com código do país
       if (typeof wp === 'string' && wp.trim().length >= 10) {
         let num = wp.trim().replace(/\D/g, '')
         const country = getCountryByCode(countryCode)
@@ -82,6 +122,9 @@ export async function POST(request: NextRequest) {
           num = phoneCode + num
         }
         ctaWhatsapp = num
+        console.log('[ylada/links/generate] WhatsApp formatado do perfil:', { original: wp, formatado: ctaWhatsapp, country_code: countryCode })
+      } else {
+        console.warn('[ylada/links/generate] WhatsApp não encontrado no perfil do usuário:', user.id)
       }
     }
 

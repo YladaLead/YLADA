@@ -3,7 +3,7 @@
 -- Problema: Botão do WhatsApp não aparece no diagnóstico
 -- =====================================================
 -- Este script verifica:
--- 1. Se o perfil da Diana tem WhatsApp configurado
+-- 1. Se o perfil da Diana tem WhatsApp configurado já
 -- 2. Se os links da Diana têm cta_whatsapp configurado
 -- 3. Atualiza os links sem cta_whatsapp com o WhatsApp do perfil
 -- =====================================================

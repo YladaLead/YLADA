@@ -209,8 +209,14 @@ export function getOnboardingCopyForArea(
     ctaIntro: overrides?.ctaIntro ?? base.ctaIntro,
     proofText: overrides?.proofText ?? base.proofText,
   }
+  const rawTitle =
+    typeof merged.welcomeTitle === 'function' ? merged.welcomeTitle(areaLabel) : merged.welcomeTitle
+  // Evita "Bem-vindo(a) à YLADA YLADA" quando areaLabel já é "YLADA" (perfil matriz)
+  const welcomeTitle =
+    rawTitle === 'Bem-vindo(a) à YLADA YLADA' ? 'Bem-vindo(a) à YLADA' : rawTitle
+
   return {
     ...merged,
-    welcomeTitle: typeof merged.welcomeTitle === 'function' ? merged.welcomeTitle(areaLabel) : merged.welcomeTitle,
+    welcomeTitle,
   }
 }

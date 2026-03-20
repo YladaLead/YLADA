@@ -32,8 +32,8 @@ const FUNIL_URL = `${BASE_URL}${FUNIL_PATH.startsWith('/') ? FUNIL_PATH : '/' + 
 /** Páginas de demonstração/vendas (áreas Ylada): explicam o fluxo; link WhatsApp fica na plataforma após o diagnóstico. */
 const pathNorm = FUNIL_PATH.replace(/^\//, '')
 const PAGINA_DEMO = /^pt\/(estetica|med|nutri|psi|odonto|fitness|perfumaria|seller|coach)$/.test(pathNorm)
-/** Coach: landing com CTA para checkout (sem quiz obrigatório na página). */
-const PAGINA_SEM_QUIZ = pathNorm === 'pt/coach'
+/** Páginas sem quiz (só landing → login): Coach está nos novos padrões com quiz; nenhuma exceção. */
+const PAGINA_SEM_QUIZ = false
 
 interface EtapaResult {
   etapa: string

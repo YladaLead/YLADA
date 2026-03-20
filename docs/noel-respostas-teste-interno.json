@@ -1,0 +1,45 @@
+{
+  "data": "19/03/2026, 21:06:58",
+  "conta": "teste-interno-11@teste.ylada.com",
+  "total_mensagens": 9,
+  "mensagens_user": 4,
+  "mensagens_noel": 5,
+  "mensagens": [
+    {
+      "role": "assistant",
+      "content": "Olá! Eu sou o Noel.\nVocê ainda tem poucos diagnósticos ativos. Criar mais diagnósticos aumenta suas chances de iniciar conversas com clientes.\nQuer criar um novo?"
+    },
+    {
+      "role": "user",
+      "content": "Preciso de um link de diagnóstico para colocar no meu Instagram. Pode criar um e me mandar o link?"
+    },
+    {
+      "role": "assistant",
+      "content": "Complete seu perfil empresarial (nome, telefone e tipo de atuação) para usar o Noel e receber orientações personalizadas.\nCompletar perfil empresarialCopiar link"
+    },
+    {
+      "role": "user",
+      "content": "Quero uma calculadora para meus clientes preencherem. Cria uma e me dá o link."
+    },
+    {
+      "role": "assistant",
+      "content": "Para ver e compartilhar seus links, complete seu perfil empresarial (nome, telefone e tipo de atuação) primeiro.\nCompletar perfil empresarialCopiar link"
+    },
+    {
+      "role": "user",
+      "content": "Qual fluxo você me recomenda para reativar clientes que sumiram?"
+    },
+    {
+      "role": "assistant",
+      "content": "Para recomendações alinhadas à sua área, complete seu perfil empresarial (nome, telefone e tipo de atuação) e volte aqui.\nCompletar perfil empresarialCopiar link"
+    },
+    {
+      "role": "user",
+      "content": "Cria um diagnóstico para minha área e me manda o link para eu testar."
+    },
+    {
+      "role": "assistant",
+      "content": "Complete seu perfil empresarial (nome, telefone e tipo de atuação) para usar o Noel e receber orientações personalizadas.\nCompletar perfil empresarialCopiar link"
+    }
+  ]
+}

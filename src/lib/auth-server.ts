@@ -276,8 +276,11 @@ export async function validateProtectedAccess(
     const canBypassProfile = (allowAdmin && profile.is_admin) || (allowSupport && profile.is_support)
     const matrixAreas = ['med', 'psi', 'psicanalise', 'odonto', 'nutra', 'coach', 'seller', 'perfumaria', 'estetica', 'fitness'] as const
     const isMatrixArea = (a: string): a is (typeof matrixAreas)[number] => matrixAreas.includes(a as any)
-    // Área ylada (matriz): aceita perfil ylada, med, nutri e demais perfis da matriz para evitar loop (ex.: Nutri acessa /pt/home e /pt/perfil-empresarial)
-    const canAccessYladaMatrix = area === 'ylada' && (profile.perfil === 'ylada' || profile.perfil === 'med' || profile.perfil === 'nutri' || isMatrixArea(profile.perfil))
+    // Área ylada (matriz): perfil "ylada" não é público — só admin/suporte. Demais perfis (estética, nutri, med, etc.) acessam o painel normalmente.
+    const canAccessYladaMatrix =
+      area === 'ylada' &&
+      ((profile.is_admin || profile.is_support) ||
+        (profile.perfil !== 'ylada' && (profile.perfil === 'med' || profile.perfil === 'nutri' || isMatrixArea(profile.perfil))))
     const profileMatchesArea =
       profile.perfil === area ||
       canAccessYladaMatrix ||
@@ -301,26 +304,37 @@ export async function validateProtectedAccess(
       console.log(`ℹ️ ProtectedLayout [${area}]: Rota de onboarding/perfil — permitindo qualquer perfil: ${actualPath}`)
     }
 
-    // 4b. Nutri e Coach: exigir perfil YLADA completo (nome+whatsapp+profile_type+profession).
-    // Wellness NÃO redireciona — mantém fluxo próprio.
-    if ((area === 'nutri' || area === 'coach') && !canBypassProfile && supabaseAdmin) {
+    // 4b. Nutri, Coach e YLADA (matriz): exigir perfil empresarial completo (nome+whatsapp+profile_type+profession).
+    // Quem acessa a matriz ou Noel precisa ter perfil completo para a qualidade das respostas do Noel.
+    // Não exigir nas rotas de completar perfil (evita loop). Wellness NÃO redireciona — mantém fluxo próprio.
+    if ((area === 'nutri' || area === 'coach' || area === 'ylada') && !canBypassProfile && !isAllowAnyPerfilPath && supabaseAdmin) {
       try {
+        const segmentCheck = area === 'ylada' ? profile.perfil : 'ylada'
         const { data: ynp } = await supabaseAdmin
           .from('ylada_noel_profile')
           .select('area_specific, profile_type, profession')
           .eq('user_id', user.id)
-          .eq('segment', 'ylada')
+          .eq('segment', segmentCheck)
           .maybeSingle()
-        const as = (ynp?.area_specific || {}) as Record<string, unknown>
+        const ynpFallback = area === 'ylada' && segmentCheck !== 'ylada'
+          ? (await supabaseAdmin
+              .from('ylada_noel_profile')
+              .select('area_specific, profile_type, profession')
+              .eq('user_id', user.id)
+              .eq('segment', 'ylada')
+              .maybeSingle()).data
+          : null
+        const row = ynp || ynpFallback
+        const as = (row?.area_specific || {}) as Record<string, unknown>
         const temNome = as?.nome && String(as.nome).trim().length >= 2
         const temWhatsapp = as?.whatsapp && String(as.whatsapp).replace(/\D/g, '').length >= 10
-        const temPerfilEmpresarial = ynp?.profile_type && ynp?.profession
+        const temPerfilEmpresarial = row?.profile_type && row?.profession
         if (!temNome || !temWhatsapp) {
           console.log(`ℹ️ ProtectedLayout [${area}]: Perfil YLADA incompleto (nome/whatsapp), redirecionando para onboarding`)
           redirect('/pt/onboarding')
         }
         if (!temPerfilEmpresarial) {
-          console.log(`ℹ️ ProtectedLayout [${area}]: Perfil YLADA sem profile_type/profession, redirecionando para perfil empresarial`)
+          console.log(`ℹ️ ProtectedLayout [${area}]: Perfil empresarial incompleto (profile_type/profession), redirecionando para perfil empresarial`)
           redirect('/pt/perfil-empresarial')
         }
       } catch (e) {

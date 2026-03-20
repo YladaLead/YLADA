@@ -254,6 +254,23 @@ export default function NoelChat({ area = 'med', className = '', initialMessage,
           message?: string
           limit_type?: string
           upgrade_url?: string
+          profile_url?: string
+        }
+        if (err.error === 'profile_required') {
+          const profileMsg = err.message || 'Complete seu perfil empresarial para usar o Noel.'
+          const profileUrl = err.profile_url || '/pt/perfil-empresarial'
+          setMessages((prev) => [
+            ...prev,
+            {
+              id: `e-${Date.now()}`,
+              role: 'assistant',
+              content: `${profileMsg}\n\n[Completar perfil empresarial](${profileUrl})`,
+              timestamp: new Date(),
+            },
+          ])
+          setLoading(false)
+          inputRef.current?.focus()
+          return
         }
         if (err.limit_type === 'noel_advanced' || err.error === 'limit_reached') {
           const upgradeMsg = err.message || 'Você atingiu o limite de análises do plano gratuito. Ative o plano profissional para continuar.'
@@ -528,6 +545,8 @@ export default function NoelChat({ area = 'med', className = '', initialMessage,
         {messages.map((msg) => (
           <div
             key={msg.id}
+            data-noel-role={msg.role}
+            data-noel-msg={msg.role === 'user' ? msg.content : undefined}
             className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
           >
             <div

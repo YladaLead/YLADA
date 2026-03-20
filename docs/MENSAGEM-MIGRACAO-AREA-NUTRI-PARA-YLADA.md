@@ -28,5 +28,20 @@ Oi! Fizemos vários ajustes de otimização na plataforma. Agora fica assim:
 
 Se der qualquer problema ao entrar, me avise. Qualquer dúvida, estou à disposição.
 
+---
+
+## WhatsApp — número e mensagem que o profissional recebe
+
+**Telefone:** +55 19 99723-0912  
+
+**Ver a mensagem que o usuário YLADA recebe quando quem preencheu envia:**  
+clique no link abaixo para abrir o WhatsApp com a mensagem já preenchida (é exatamente o que aparece para o profissional quando a pessoa que preencheu o formulário envia):
+
+**[Abrir WhatsApp e ver a mensagem](https://wa.me/5519997230912?text=Acabei%20de%20me%20inscrever%20na%20aula%20prática%20da%20YLADA%20Nutri%20e%20gostaria%20de%20agendar%20uma%20conversa%20rápida%20para%20entender%20os%20próximos%20passos.)**
+
+*(Texto da mensagem: "Acabei de me inscrever na aula prática da YLADA Nutri e gostaria de agendar uma conversa rápida para entender os próximos passos.")*
+
+---
+
 Abraço,  
 [Seu nome]

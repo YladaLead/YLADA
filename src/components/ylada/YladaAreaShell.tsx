@@ -49,7 +49,9 @@ export default function YladaAreaShell({ areaCodigo, areaLabel, children }: Ylad
                 className="h-7 w-auto object-contain"
                 priority
               />
-              <span className="text-gray-500 text-sm font-medium hidden sm:inline">· {areaLabel}</span>
+              {areaLabel !== 'YLADA' && (
+                <span className="text-gray-500 text-sm font-medium hidden sm:inline">· {areaLabel}</span>
+              )}
             </Link>
           </div>
           <div className="flex items-center gap-3 shrink-0">
