@@ -369,9 +369,24 @@ function ConfigDrivenLinkView({
 
   // Garantir que quando diagnosis e metricsId estiverem prontos, o step seja 'result'
   useEffect(() => {
-    if (diagnosis && metricsId && step !== 'result' && !loading) {
-      console.log('✅ [PublicLinkView] Diagnosis e metricsId prontos, mudando para result')
-      setStep('result')
+    if (diagnosis && metricsId) {
+      console.log('✅ [PublicLinkView] useEffect: Diagnosis e metricsId prontos', {
+        step,
+        hasDiagnosis: !!diagnosis,
+        hasMetricsId: !!metricsId,
+        loading
+      })
+      if (step !== 'result') {
+        console.log('✅ [PublicLinkView] useEffect: Mudando step de', step, 'para result')
+        setStep('result')
+      }
+    } else {
+      console.log('⏳ [PublicLinkView] useEffect: Aguardando diagnosis/metricsId', {
+        step,
+        hasDiagnosis: !!diagnosis,
+        hasMetricsId: !!metricsId,
+        loading
+      })
     }
   }, [diagnosis, metricsId, step, loading])
 
@@ -455,7 +470,8 @@ function ConfigDrivenLinkView({
           hasMetricsId: !!data.metrics_id,
           limitReached: data.limit_reached,
           error: data.error,
-          message: data.message
+          message: data.message,
+          fullData: data // Log completo para debug
         })
         if (!res.ok) {
           if (data.limit_reached) {
@@ -473,19 +489,24 @@ function ConfigDrivenLinkView({
           console.log('✅ [PublicLinkView] Diagnóstico recebido:', { 
             hasDiagnosis: !!data.diagnosis, 
             metricsId: data.metrics_id,
-            diagnosisKeys: Object.keys(data.diagnosis || {})
+            diagnosisKeys: Object.keys(data.diagnosis || {}),
+            diagnosisPreview: JSON.stringify(data.diagnosis).substring(0, 200)
           })
           // Atualizar estados primeiro
           setDiagnosis(data.diagnosis)
           setMetricsId(data.metrics_id)
-          // Usar setTimeout para garantir que os estados foram atualizados antes de mudar step
-          setTimeout(() => {
-            console.log('✅ [PublicLinkView] Mudando para step result após atualizar estados')
-            setStep('result')
-          }, 0)
+          // Mudar step imediatamente - React vai reagir quando diagnosis/metricsId mudarem
+          console.log('✅ [PublicLinkView] Estados atualizados, mudando step para result AGORA')
+          setStep('result')
+          setLoading(false) // Importante: desabilitar loading para mostrar resultado
         } else {
-          console.error('❌ [PublicLinkView] Resposta inválida da API:', data)
-          setError('Resposta inválida.')
+          console.error('❌ [PublicLinkView] Resposta inválida da API - faltando diagnosis ou metrics_id:', {
+            hasDiagnosis: !!data.diagnosis,
+            hasMetricsId: !!data.metrics_id,
+            dataKeys: Object.keys(data)
+          })
+          setError('Resposta inválida da API. Tente novamente.')
+          setLoading(false)
         }
       } catch (err) {
         console.error('❌ [PublicLinkView] Erro no fetch:', err)
