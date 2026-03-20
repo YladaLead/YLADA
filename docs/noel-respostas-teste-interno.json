@@ -1,13 +1,13 @@
 {
-  "data": "19/03/2026, 21:06:58",
-  "conta": "teste-interno-11@teste.ylada.com",
-  "total_mensagens": 9,
-  "mensagens_user": 4,
-  "mensagens_noel": 5,
+  "data": "20/03/2026, 14:53:34",
+  "conta": "teste-interno-12@teste.ylada.com",
+  "total_mensagens": 7,
+  "mensagens_user": 3,
+  "mensagens_noel": 4,
   "mensagens": [
     {
       "role": "assistant",
-      "content": "Olá! Eu sou o Noel.\nVocê ainda tem poucos diagnósticos ativos. Criar mais diagnósticos aumenta suas chances de iniciar conversas com clientes.\nQuer criar um novo?"
+      "content": "Olá! Eu sou o Noel.\nPosso te ajudar a:\n• Criar diagnósticos que atraem clientes\n• Melhorar seus diagnósticos\n• Gerar ideias de conteúdo\n• Organizar sua estratégia de crescimento\nO que você gostaria de fazer agora?"
     },
     {
       "role": "user",
@@ -15,15 +15,7 @@
     },
     {
       "role": "assistant",
-      "content": "Complete seu perfil empresarial (nome, telefone e tipo de atuação) para usar o Noel e receber orientações personalizadas.\nCompletar perfil empresarialCopiar link"
-    },
-    {
-      "role": "user",
-      "content": "Quero uma calculadora para meus clientes preencherem. Cria uma e me dá o link."
-    },
-    {
-      "role": "assistant",
-      "content": "Para ver e compartilhar seus links, complete seu perfil empresarial (nome, telefone e tipo de atuação) primeiro.\nCompletar perfil empresarialCopiar link"
+      "content": "Claro! Vou gerar um diagnóstico para você.\nAqui estão as perguntas que ajudarão a identificar o perfil olfativo dos seus clientes:\n\n\nQual dessas situações mais parece com você hoje?\nA) Estou em dúvida sobre qual perfume escolher\nB) Já comprei perfumes que não gostei\nC) Busco um perfume que combine com minha personalidade\nD) Quero impressionar alguém com a escolha do perfume\n\n\nO que você já tentou para escolher um perfume?\nA) Pesquisei online sobre fragrâncias\nB) Perguntei a amigos ou familiares\nC) Fui a lojas e experimentei\nD) Nada, estou perdido\n\n\nO que mais dificulta sua escolha de perfume hoje?\nA) Não sei quais notas me agradam\nB) A variedade de opções é confusa\nC) Falta de informações sobre os perfumes\nD) Não tenho tempo para pesquisar\n\n\nQual é seu principal objetivo ao escolher um perfume?\nA) Encontrar um perfume que me represente\nB) Fazer uma boa impressão em uma ocasião especial\nC) Usar um perfume que me faça sentir bem\nD) Receber elogios de outras pessoas\n\n\nAcesse seu quizCopiar link\nEsse diagnóstico ajuda a identificar pessoas que já tentaram resolver o problema e estão abertas a uma nova estratégia. Teste o link antes de compartilhar para ver como fica!\nSe quiser, posso ajustar as perguntas ou criar outra versão."
     },
     {
       "role": "user",
@@ -31,7 +23,7 @@
     },
     {
       "role": "assistant",
-      "content": "Para recomendações alinhadas à sua área, complete seu perfil empresarial (nome, telefone e tipo de atuação) e volte aqui.\nCompletar perfil empresarialCopiar link"
+      "content": "Para reativar clientes que sumiram, é importante fazer isso de maneira estratégica e personalizada. Aqui está um fluxo que você pode seguir:\n\n\nReconhecimento: Comece com uma mensagem amigável, lembrando quem você é e que já teve um contato anterior. Por exemplo:\n\"Oi [Nome]! Aqui é o [Seu Nome] da [sua loja de perfumes]. Espero que você esteja bem!\"\n\n\nEmpatia: Mostre que você se importa e que notou a ausência. Exemplo:\n\"Percebi que não temos nos falado há um tempo e queria saber como você está e se ainda está em busca de um novo perfume.\"\n\n\nPergunta Diagnóstica: Faça uma pergunta que os leve a refletir sobre suas necessidades atuais. Por exemplo:\n\"Você ainda está buscando aquele perfume ideal ou encontrou algo que adorou?\"\n\n\nOfereça Valor: Baseado na resposta, você pode oferecer um diagnóstico ou uma nova promoção. Por exemplo:\n\"Se estiver em dúvida, posso te ajudar com um quiz rápido para descobrir qual fragrância combina mais com você. Posso te enviar o link?\"\n\n\nChamada para Ação: Termine com uma ação clara que encoraje a resposta. Por exemplo:\n\"Me avise se você quiser o link do quiz ou se preferir conversar sobre alguma fragrância específica!\"\n\n\nEsse fluxo não só reactiva o contato, mas também mostra que você se importa com a experiência deles e está disposto a ajudar.\nQuer que eu crie um link de diagnóstico específico para reativar esses clientes?"
     },
     {
       "role": "user",
@@ -39,7 +31,7 @@
     },
     {
       "role": "assistant",
-      "content": "Complete seu perfil empresarial (nome, telefone e tipo de atuação) para usar o Noel e receber orientações personalizadas.\nCompletar perfil empresarialCopiar link"
+      "content": "Aqui está o diagnóstico que vai ajudar a entender melhor as necessidades dos seus clientes em relação a fragrâncias:\n\n\nQual é o seu estilo de vida?\nA) Casual e descontraído\nB) Elegante e sofisticado\nC) Ativo e esportivo\nD) Aventureiro e ousado\n\n\nVocê prefere perfumes mais:\nA) Florais e suaves\nB) Amadeirados e intensos\nC) Frutais e frescos\nD) Orientais e exóticos\n\n\nQual é a ocasião que você mais deseja um perfume?\nA) Uso diário\nB) Eventos especiais\nC) Atividades ao ar livre\nD) Noites de festa\n\n\nO que mais te incomoda na escolha de um perfume?\nA) Não saber quais notas escolher\nB) A variedade de opções me confunde\nC) Dificuldade em testar perfumes\nD) Preço elevado\n\n\nComo você gostaria de se sentir ao usar um perfume?\nA) Confiante e poderoso\nB) Fresco e leve\nC) Elegante e sofisticado\nD) Atraente e sedutor\n\n\nAqui está o link para você testar e usar: Diagnóstico de FragrânciaCopiar link\nEsse diagnóstico ajudará a qualificar os leads e entender melhor suas preferências. Se precisar de ajustes ou de um novo foco, é só avisar!"
     }
   ]
 }
