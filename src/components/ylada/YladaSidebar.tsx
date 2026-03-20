@@ -1,9 +1,12 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { YLADA_MENU_GROUPS, getYladaAreaPathPrefix, getYladaLeadsPath } from '@/config/ylada-areas'
 import { useAuth } from '@/hooks/useAuth'
+
+const YLADA_LOGO = '/images/logo/ylada/horizontal/azul-claro/ylada-horizontal-azul-claro-30.png'
 
 interface YladaSidebarProps {
   areaCodigo: string
@@ -39,8 +42,22 @@ export default function YladaSidebar({
     <aside className="flex flex-col h-full bg-white border-r border-gray-200 w-56">
       <div className="p-4 border-b border-gray-200">
         <Link href={`${prefix}/home`} className="flex flex-col gap-0.5">
-          <span className="font-bold text-gray-900 text-lg tracking-tight">YLADA</span>
-          <span className="text-sm text-gray-500 font-medium">{areaLabel}</span>
+          {/* Desktop: mostra logo oficial */}
+          <div className="hidden lg:block">
+            <Image
+              src={YLADA_LOGO}
+              alt="YLADA"
+              width={90}
+              height={28}
+              className="h-7 w-auto object-contain"
+              priority
+            />
+          </div>
+          {/* Mobile: mantém texto simples (já está bom) */}
+          <span className="lg:hidden font-bold text-gray-900 text-lg tracking-tight">YLADA</span>
+          {areaLabel !== 'YLADA' && (
+            <span className="text-sm text-gray-500 font-medium">{areaLabel}</span>
+          )}
         </Link>
       </div>
       <nav className="flex-1 p-3 space-y-4 overflow-y-auto">
