@@ -287,6 +287,15 @@ function AdminDashboardContent() {
       destaque: true
     },
     {
+      id: 'gerar-fluxos',
+      title: 'Gerador de Fluxos (IA)',
+      description: 'Criar novos fluxos e diagnósticos com agente IA para alimentar a biblioteca',
+      icon: '🤖',
+      link: '/admin/fluxos/gerar',
+      color: 'bg-indigo-600',
+      destaque: true
+    },
+    {
       id: 'analytics',
       title: 'Analytics',
       description: 'Relatórios detalhados',
