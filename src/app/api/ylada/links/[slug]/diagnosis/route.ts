@@ -200,6 +200,28 @@ export async function POST(
     const config = (link.config_json as Record<string, unknown>) ?? {}
     let metaRaw = config.meta as Record<string, unknown> | undefined
 
+    // VALIDAÇÃO: Verificar se todas as perguntas obrigatórias foram respondidas
+    const formConfig = config.form as Record<string, unknown> | undefined
+    const fields = (formConfig?.fields as Array<{ id?: string; label?: string; obrigatoria?: boolean }> | undefined) ?? []
+    const camposObrigatorios = fields.filter((f) => f.id && (!f.hasOwnProperty('obrigatoria') || f.obrigatoria !== false))
+    
+    const camposNaoRespondidos = camposObrigatorios.filter((f) => {
+      const valor = visitor_answers[f.id!]
+      return valor === undefined || valor === null || valor === '' || (typeof valor === 'string' && valor.trim() === '')
+    })
+
+    if (camposNaoRespondidos.length > 0) {
+      const camposNomes = camposNaoRespondidos.map((f) => f.label || f.id).join(', ')
+      return NextResponse.json(
+        {
+          success: false,
+          error: `Por favor, responda todas as perguntas obrigatórias: ${camposNomes}`,
+          missing_fields: camposNaoRespondidos.map((f) => ({ id: f.id, label: f.label })),
+        },
+        { status: 400 }
+      )
+    }
+
     // Suporte a links da biblioteca (questions + results sem meta): inferir meta via registry
     if (!metaRaw && Array.isArray(config.questions) && Array.isArray(config.results)) {
       const title = (config.title as string) || 'seu perfil'

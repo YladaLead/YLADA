@@ -325,6 +325,20 @@ function ConfigDrivenLinkView({
   const meta = (config.meta as Record<string, unknown>) || {}
   const fields = (formConfig.fields as FormField[]) || []
   const submitLabel = (formConfig.submit_label as string) || t.seeResult
+  
+  // GARANTIR: Nenhum campo pode ser dissertativo (text/textarea) - sempre deve ter opções
+  // Se um campo não tem opções, converter para select com opções padrão
+  const fieldsValidados = fields.map((f) => {
+    // Se não tem type ou é text/textarea, e não tem opções, converter para select
+    if ((!f.type || f.type === 'text' || f.type === 'textarea') && (!f.options || f.options.length === 0)) {
+      return {
+        ...f,
+        type: 'select',
+        options: ['Sim', 'Não', 'Às vezes', 'Não tenho certeza'],
+      }
+    }
+    return f
+  })
 
   const pageTitleRaw = (page.title as string) ?? (config.title as string) ?? 'Link'
   const hasTechnicalName = /diagnóstico de bloqueios|diagnóstico de saúde|raio-x/i.test(pageTitleRaw)
@@ -359,6 +373,27 @@ function ConfigDrivenLinkView({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    
+    // VALIDAÇÃO: Verificar se todas as perguntas obrigatórias foram respondidas
+    // VALIDAÇÃO: Verificar se todas as perguntas obrigatórias foram respondidas
+    const camposObrigatorios = fieldsValidados.filter((f) => f.id && (!f.hasOwnProperty('obrigatoria') || f.obrigatoria !== false))
+    const camposNaoRespondidos = camposObrigatorios.filter((f) => {
+      const valor = values[f.id] ?? ''
+      return !valor || valor.trim() === ''
+    })
+
+    if (camposNaoRespondidos.length > 0) {
+      const camposNomes = camposNaoRespondidos.map((f) => f.label || f.id).join(', ')
+      setError(
+        locale === 'en'
+          ? `Please answer all required questions: ${camposNomes}`
+          : locale === 'es'
+          ? `Por favor responda todas las preguntas requeridas: ${camposNomes}`
+          : `Por favor, responda todas as perguntas obrigatórias: ${camposNomes}`
+      )
+      return
+    }
+
     if (!startSent.current) {
       startSent.current = true
       trackEvent(slug, 'start')
@@ -420,7 +455,7 @@ function ConfigDrivenLinkView({
     strategic_profile: meta.strategic_profile && typeof meta.strategic_profile === 'object' ? (meta.strategic_profile as { maturityStage?: string; dominantPain?: string; urgencyLevel?: string; mindset?: string }) : undefined,
     theme_raw: themeFromMeta || themeFromTitle || undefined,
     page_title: pageTitleRaw || undefined,
-    questions_count: fields.length > 0 ? fields.length : undefined,
+    questions_count: fieldsValidados.length > 0 ? fieldsValidados.length : undefined,
   })
 
   // Tela de limite atingido (freemium) — tom de crescimento + promoção do Pro
@@ -729,9 +764,9 @@ function ConfigDrivenLinkView({
     )
   }
 
-  const hasQuizFields = fields.some((f) => Array.isArray(f.options) && f.options.length > 0)
-  const quizFields = hasQuizFields ? fields.filter((f) => Array.isArray(f.options) && f.options.length > 0) : []
-  const textFields = hasQuizFields ? fields.filter((f) => !Array.isArray(f.options) || f.options.length === 0) : fields
+  const hasQuizFields = fieldsValidados.some((f) => Array.isArray(f.options) && f.options.length > 0)
+  const quizFields = hasQuizFields ? fieldsValidados.filter((f) => Array.isArray(f.options) && f.options.length > 0) : []
+  const textFields = hasQuizFields ? fieldsValidados.filter((f) => !Array.isArray(f.options) || f.options.length === 0) : fieldsValidados
   const isQuizMode = quizFields.length > 0
   const currentField = isQuizMode ? quizFields[formStep] : null
   const isLastQuizStep = isQuizMode && formStep >= quizFields.length - 1
@@ -1056,7 +1091,9 @@ function CalculatorBlock({
   const calculatorStartSent = useRef(false)
   const calculatorCompleteSent = useRef(false)
 
-  const numberFields = fields.filter((f) => (f.type as string)?.toLowerCase() !== 'select')
+  // Usar fieldsValidados para garantir que não há campos dissertativos
+  const fieldsParaCalculadora = fieldsValidados
+  const numberFields = fieldsParaCalculadora.filter((f) => (f.type as string)?.toLowerCase() !== 'select')
   const allNumberFieldsFilled = numberFields.every((f) => {
     const v = values[f.id]
     return v !== undefined && v !== null && !Number.isNaN(v)
@@ -1065,7 +1102,7 @@ function CalculatorBlock({
   let resultNum = 0
   try {
     let expr = formula
-    fields.forEach((f) => {
+    fieldsParaCalculadora.forEach((f) => {
       const val = values[f.id] ?? 0
       expr = expr.replace(new RegExp(f.id.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'), String(val))
     })
@@ -1094,7 +1131,7 @@ function CalculatorBlock({
         <h1 className="text-xl font-bold text-gray-900 mb-2">{title}</h1>
         {!showResult ? (
           <form onSubmit={handleSubmit} className="space-y-4">
-            {fields.map((f) => (
+            {fieldsParaCalculadora.map((f) => (
               <div key={f.id}>
                 <label className="block text-sm font-medium text-gray-700 mb-1">{f.label}</label>
                 {(f.type as string)?.toLowerCase() === 'select' && Array.isArray(f.options) && f.options.length > 0 ? (
