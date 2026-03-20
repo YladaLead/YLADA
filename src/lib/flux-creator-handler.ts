@@ -290,9 +290,43 @@ export async function gerarFluxoComAgente(
     }
     
     console.log('✅ [Flux Creator] Run criado com sucesso:', run.id)
+    console.log('🔍 [Flux Creator] Valores antes de retrieve - threadId:', threadId, 'runId:', run.id)
+
+    // Validar valores antes de usar
+    if (!threadId || typeof threadId !== 'string') {
+      console.error('❌ [Flux Creator] threadId inválido:', threadId, typeof threadId)
+      return {
+        success: false,
+        message: `Erro: threadId inválido (${threadId}). Verifique os logs.`,
+      }
+    }
+    
+    if (!run.id || typeof run.id !== 'string') {
+      console.error('❌ [Flux Creator] run.id inválido:', run.id, typeof run.id)
+      return {
+        success: false,
+        message: `Erro: run.id inválido (${run.id}). Verifique os logs.`,
+      }
+    }
 
     // Aguardar conclusão
-    let runStatus = await openai.beta.threads.runs.retrieve(threadId, run.id)
+    // IMPORTANTE: A SDK do OpenAI v6 espera: runs.retrieve(runId, { thread_id: threadId })
+    // NÃO: runs.retrieve(threadId, runId)
+    console.log('🔄 [Flux Creator] Buscando status do run...')
+    let runStatus
+    try {
+      runStatus = await openai.beta.threads.runs.retrieve(run.id, {
+        thread_id: threadId
+      })
+    } catch (retrieveError: any) {
+      console.error('❌ [Flux Creator] Erro ao buscar run status:', retrieveError)
+      console.error('❌ [Flux Creator] threadId usado:', threadId)
+      console.error('❌ [Flux Creator] run.id usado:', run.id)
+      return {
+        success: false,
+        message: `Erro ao buscar status do run: ${retrieveError.message}`,
+      }
+    }
     let attempts = 0
     const maxAttempts = 60 // 60 tentativas = ~2 minutos
 
@@ -305,7 +339,28 @@ export async function gerarFluxoComAgente(
       }
 
       await new Promise((resolve) => setTimeout(resolve, 2000)) // 2 segundos
-      runStatus = await openai.beta.threads.runs.retrieve(threadId, run.id)
+      
+      // Validar threadId antes de cada chamada
+      if (!threadId || !run.id) {
+        console.error('❌ [Flux Creator] threadId ou run.id perdido durante loop')
+        return {
+          success: false,
+          message: 'Erro: threadId ou run.id perdido durante o processamento.',
+        }
+      }
+      
+      try {
+        // IMPORTANTE: A SDK espera: runs.retrieve(runId, { thread_id: threadId })
+        runStatus = await openai.beta.threads.runs.retrieve(run.id, {
+          thread_id: threadId
+        })
+      } catch (retrieveError: any) {
+        console.error('❌ [Flux Creator] Erro ao buscar run status no loop:', retrieveError)
+        return {
+          success: false,
+          message: `Erro ao buscar status: ${retrieveError.message}`,
+        }
+      }
       attempts++
     }
 
