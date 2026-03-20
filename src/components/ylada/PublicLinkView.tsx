@@ -367,6 +367,14 @@ function ConfigDrivenLinkView({
     }
   }, [step, diagnosis, metricsId, slug])
 
+  // Garantir que quando diagnosis e metricsId estiverem prontos, o step seja 'result'
+  useEffect(() => {
+    if (diagnosis && metricsId && step !== 'result' && !loading) {
+      console.log('✅ [PublicLinkView] Diagnosis e metricsId prontos, mudando para result')
+      setStep('result')
+    }
+  }, [diagnosis, metricsId, step, loading])
+
   const useDiagnosisApi =
     typeof meta.architecture === 'string' &&
     DIAGNOSIS_ARCHITECTURES.includes(meta.architecture as (typeof DIAGNOSIS_ARCHITECTURES)[number])
@@ -445,10 +453,19 @@ function ConfigDrivenLinkView({
           return
         }
         if (data.diagnosis && data.metrics_id) {
-          console.log('✅ [PublicLinkView] Diagnóstico recebido, mudando para step result')
+          console.log('✅ [PublicLinkView] Diagnóstico recebido:', { 
+            hasDiagnosis: !!data.diagnosis, 
+            metricsId: data.metrics_id,
+            diagnosisKeys: Object.keys(data.diagnosis || {})
+          })
+          // Atualizar estados primeiro
           setDiagnosis(data.diagnosis)
           setMetricsId(data.metrics_id)
-          setStep('result') // IMPORTANTE: Mudar para tela de resultado após receber diagnóstico
+          // Usar setTimeout para garantir que os estados foram atualizados antes de mudar step
+          setTimeout(() => {
+            console.log('✅ [PublicLinkView] Mudando para step result após atualizar estados')
+            setStep('result')
+          }, 0)
         } else {
           console.error('❌ [PublicLinkView] Resposta inválida da API:', data)
           setError('Resposta inválida.')
