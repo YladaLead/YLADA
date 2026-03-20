@@ -445,9 +445,12 @@ function ConfigDrivenLinkView({
           return
         }
         if (data.diagnosis && data.metrics_id) {
+          console.log('✅ [PublicLinkView] Diagnóstico recebido, mudando para step result')
           setDiagnosis(data.diagnosis)
           setMetricsId(data.metrics_id)
+          setStep('result') // IMPORTANTE: Mudar para tela de resultado após receber diagnóstico
         } else {
+          console.error('❌ [PublicLinkView] Resposta inválida da API:', data)
           setError('Resposta inválida.')
         }
       } catch (err) {
