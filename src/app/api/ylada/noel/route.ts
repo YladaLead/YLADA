@@ -502,8 +502,8 @@ export async function POST(request: NextRequest) {
           .maybeSingle(),
       ])
       profileRow = profileRes.data as YladaNoelProfileRow | null
-      // Fallback: na matriz (area ylada) o front envia area 'ylada', mas o perfil pode estar em segment = perfil do usuário (ex.: estetica, nutri)
-      if (!profileRow && validSegment === 'ylada') {
+      // Fallback: buscar perfil pelo segmento do user_profiles (ex.: front envia area 'ylada' mas perfil está em 'estetica'; ou perfil só existe em um segment)
+      if (!profileRow) {
         const { data: up } = await supabaseAdmin
           .from('user_profiles')
           .select('perfil')
@@ -530,9 +530,22 @@ export async function POST(request: NextRequest) {
 
     // Exigir perfil empresarial completo para usar o Noel (qualidade das respostas)
     if (!simulateKey) {
-      const as = (profileRow?.area_specific || {}) as Record<string, unknown>
-      const temNome = as?.nome && String(as.nome).trim().length >= 2
-      const temWhatsapp = as?.whatsapp && String(as.whatsapp).replace(/\D/g, '').length >= 10
+      // Normalizar area_specific (Supabase JSONB pode vir como objeto ou string)
+      let as: Record<string, unknown> = {}
+      const raw = profileRow?.area_specific
+      if (raw != null) {
+        if (typeof raw === 'string') {
+          try {
+            as = (JSON.parse(raw) as Record<string, unknown>) || {}
+          } catch {
+            as = {}
+          }
+        } else if (typeof raw === 'object' && !Array.isArray(raw)) {
+          as = raw as Record<string, unknown>
+        }
+      }
+      const temNome = as?.nome != null && String(as.nome).trim().length >= 2
+      const temWhatsapp = as?.whatsapp != null && String(as.whatsapp).replace(/\D/g, '').length >= 10
       const temPerfilEmpresarial = profileRow?.profile_type && profileRow?.profession
       if (!temNome || !temWhatsapp || !temPerfilEmpresarial) {
         const msg = (message ?? '').toLowerCase().trim()
