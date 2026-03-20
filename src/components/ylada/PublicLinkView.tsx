@@ -449,13 +449,19 @@ function ConfigDrivenLinkView({
         } else {
           setError('Resposta inválida.')
         }
-      } catch {
+      } catch (err) {
+        console.error('❌ [PublicLinkView] Erro no fetch:', err)
         setError('Erro de conexão.')
+        setLoading(false)
+        return
       } finally {
         setLoading(false)
       }
+    } else {
+      // Se não usar API de diagnóstico, apenas mudar para resultado
+      console.log('[PublicLinkView] Não usando API de diagnóstico, mudando para step result')
+      setStep('result')
     }
-    setStep('result')
   }
 
   const headline = resultConfig.headline || t.yourResult
