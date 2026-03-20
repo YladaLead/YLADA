@@ -375,15 +375,30 @@ function ConfigDrivenLinkView({
     e.preventDefault()
     
     // VALIDAÇÃO: Verificar se todas as perguntas obrigatórias foram respondidas
-    // VALIDAÇÃO: Verificar se todas as perguntas obrigatórias foram respondidas
+    // No modo quiz, valores são índices (String(0), String(1), etc)
+    // No modo formulário, valores são strings normais
     const camposObrigatorios = fieldsValidados.filter((f) => f.id && (!f.hasOwnProperty('obrigatoria') || f.obrigatoria !== false))
     const camposNaoRespondidos = camposObrigatorios.filter((f) => {
-      const valor = values[f.id] ?? ''
-      return !valor || valor.trim() === ''
+      const valor = values[f.id]
+      // Verificar se o valor existe e não está vazio
+      // IMPORTANTE: "0" é um valor válido (índice da primeira opção no quiz)
+      if (valor === undefined || valor === null) {
+        console.log('[PublicLinkView] Campo não respondido:', f.id, f.label, 'valor:', valor)
+        return true
+      }
+      const valorStr = String(valor)
+      // Se for string vazia (após trim), está vazio
+      if (valorStr.trim() === '') {
+        console.log('[PublicLinkView] Campo vazio:', f.id, f.label, 'valorStr:', valorStr)
+        return true
+      }
+      // Qualquer outro valor (incluindo "0") é válido
+      return false
     })
 
     if (camposNaoRespondidos.length > 0) {
       const camposNomes = camposNaoRespondidos.map((f) => f.label || f.id).join(', ')
+      console.log('[PublicLinkView] Campos não respondidos:', camposNaoRespondidos.map(f => ({ id: f.id, label: f.label, valor: values[f.id] })))
       setError(
         locale === 'en'
           ? `Please answer all required questions: ${camposNomes}`
@@ -393,6 +408,8 @@ function ConfigDrivenLinkView({
       )
       return
     }
+
+    console.log('[PublicLinkView] Todas as validações passaram, enviando formulário...', { values, camposObrigatorios: camposObrigatorios.length })
 
     if (!startSent.current) {
       startSent.current = true
