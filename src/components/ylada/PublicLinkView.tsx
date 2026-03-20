@@ -450,11 +450,24 @@ function ConfigDrivenLinkView({
       setError(null)
       try {
         const url = `/api/ylada/links/${encodeURIComponent(slug)}/diagnosis`
+        // IMPORTANTE: Enviar apenas os valores dos campos que foram exibidos no quiz
+        // No modo quiz, enviar apenas os valores de quizFields
+        const answersToSend = isQuizMode 
+          ? Object.fromEntries(
+              quizFields.map(f => [f.id, values[f.id]]).filter(([_, v]) => v !== undefined && v !== null)
+            )
+          : values
         const body = {
-          visitor_answers: values,
+          visitor_answers: answersToSend,
           ...(locale !== 'pt' && { locale }),
         }
-        console.log('🔵 [PublicLinkView] Fazendo POST para:', url, { body })
+        console.log('🔵 [PublicLinkView] Fazendo POST para:', url, { 
+          body,
+          isQuizMode,
+          quizFieldsCount: quizFields.length,
+          answersToSend,
+          allValues: values
+        })
         const res = await fetch(url, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },

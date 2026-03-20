@@ -201,9 +201,24 @@ export async function POST(
     let metaRaw = config.meta as Record<string, unknown> | undefined
 
     // VALIDAÇÃO: Verificar se todas as perguntas obrigatórias foram respondidas
+    // IMPORTANTE: Validar apenas os campos que foram enviados (visitor_answers)
+    // Não validar campos que não foram enviados (podem não estar visíveis no quiz)
     const formConfig = config.form as Record<string, unknown> | undefined
-    const fields = (formConfig?.fields as Array<{ id?: string; label?: string; obrigatoria?: boolean }> | undefined) ?? []
-    const camposObrigatorios = fields.filter((f) => f.id && (!f.hasOwnProperty('obrigatoria') || f.obrigatoria !== false))
+    const fields = (formConfig?.fields as Array<{ id?: string; label?: string; obrigatoria?: boolean; options?: string[] }> | undefined) ?? []
+    
+    // Filtrar apenas campos que têm opções (quiz) OU que foram enviados nas respostas
+    // Campos sem opções que não foram enviados não devem ser validados (podem estar ocultos)
+    const camposEnviados = Object.keys(visitor_answers)
+    const camposParaValidar = fields.filter((f) => {
+      // Se tem opções, é campo de quiz - validar se foi enviado
+      if (f.options && f.options.length > 0) {
+        return camposEnviados.includes(f.id || '')
+      }
+      // Se não tem opções mas foi enviado, validar
+      return camposEnviados.includes(f.id || '')
+    })
+    
+    const camposObrigatorios = camposParaValidar.filter((f) => f.id && (!f.hasOwnProperty('obrigatoria') || f.obrigatoria !== false))
     
     const camposNaoRespondidos = camposObrigatorios.filter((f) => {
       const valor = visitor_answers[f.id!]
