@@ -430,24 +430,41 @@ function ConfigDrivenLinkView({
     }
 
     if (useDiagnosisApi) {
+      console.log('🔵 [PublicLinkView] useDiagnosisApi = true, fazendo fetch para API...', { slug, values })
       setLoading(true)
       setError(null)
       try {
-        const res = await fetch(`/api/ylada/links/${encodeURIComponent(slug)}/diagnosis`, {
+        const url = `/api/ylada/links/${encodeURIComponent(slug)}/diagnosis`
+        const body = {
+          visitor_answers: values,
+          ...(locale !== 'pt' && { locale }),
+        }
+        console.log('🔵 [PublicLinkView] Fazendo POST para:', url, { body })
+        const res = await fetch(url, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            visitor_answers: values,
-            ...(locale !== 'pt' && { locale }),
-          }),
+          body: JSON.stringify(body),
         })
-        const data = await res.json().catch(() => ({}))
+        console.log('🔵 [PublicLinkView] Resposta recebida:', { status: res.status, ok: res.ok })
+        const data = await res.json().catch((err) => {
+          console.error('❌ [PublicLinkView] Erro ao fazer parse do JSON:', err)
+          return {}
+        })
+        console.log('🔵 [PublicLinkView] Dados recebidos da API:', { 
+          hasDiagnosis: !!data.diagnosis, 
+          hasMetricsId: !!data.metrics_id,
+          limitReached: data.limit_reached,
+          error: data.error,
+          message: data.message
+        })
         if (!res.ok) {
           if (data.limit_reached) {
+            console.log('⚠️ [PublicLinkView] Limite atingido')
             setStep('limit_reached')
             setLoading(false)
             return
           }
+          console.error('❌ [PublicLinkView] Erro na resposta da API:', data)
           setError(data.error || data.message || 'Erro ao gerar resultado.')
           setLoading(false)
           return
