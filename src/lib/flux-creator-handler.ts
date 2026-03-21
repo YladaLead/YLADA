@@ -14,9 +14,16 @@
 
 import OpenAI from 'openai'
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-})
+/** Lazy init: evita falha no `next build` quando OPENAI_API_KEY não existe no ambiente de build. */
+let openaiClient: OpenAI | null = null
+function getOpenAI(): OpenAI {
+  if (!openaiClient) {
+    openaiClient = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+    })
+  }
+  return openaiClient
+}
 
 // ID do Assistant criador (pode vir de env ou ser criado automaticamente)
 let ASSISTANT_CREATOR_ID: string | undefined = process.env.OPENAI_ASSISTANT_FLUX_CREATOR_ID
@@ -57,7 +64,7 @@ async function getOrCreateAssistant(): Promise<{ success: boolean; assistantId?:
   // Se temos ID na env, verificar se existe
   if (ASSISTANT_CREATOR_ID) {
     try {
-      await openai.beta.assistants.retrieve(ASSISTANT_CREATOR_ID)
+      await getOpenAI().beta.assistants.retrieve(ASSISTANT_CREATOR_ID)
       assistantCreated = true
       return { success: true, assistantId: ASSISTANT_CREATOR_ID }
     } catch (error) {
@@ -72,7 +79,7 @@ async function getOrCreateAssistant(): Promise<{ success: boolean; assistantId?:
   const model = process.env.OPENAI_ASSISTANT_FLUX_CREATOR_MODEL || 'gpt-4o-mini'
   
   try {
-    const assistant = await openai.beta.assistants.create({
+    const assistant = await getOpenAI().beta.assistants.create({
       name: 'YLADA Flux Creator',
       instructions: getAssistantInstructions(),
       model: model,
@@ -202,7 +209,7 @@ export async function gerarFluxoComAgente(
     console.log('🔄 [Flux Creator] Criando thread...')
     let thread
     try {
-      thread = await openai.beta.threads.create()
+      thread = await getOpenAI().beta.threads.create()
     } catch (threadError: any) {
       console.error('❌ [Flux Creator] Erro ao criar thread:', threadError)
       return {
@@ -236,7 +243,7 @@ export async function gerarFluxoComAgente(
     // Adicionar mensagem
     console.log('📨 [Flux Creator] Adicionando mensagem ao thread...')
     try {
-      await openai.beta.threads.messages.create(threadId, {
+      await getOpenAI().beta.threads.messages.create(threadId, {
         role: 'user',
         content: prompt,
       })
@@ -261,7 +268,7 @@ export async function gerarFluxoComAgente(
     console.log('🚀 [Flux Creator] Criando run com assistant:', assistantId, 'thread:', threadId)
     let run
     try {
-      run = await openai.beta.threads.runs.create(threadId, {
+      run = await getOpenAI().beta.threads.runs.create(threadId, {
         assistant_id: assistantId,
       })
     } catch (runError: any) {
@@ -315,7 +322,7 @@ export async function gerarFluxoComAgente(
     console.log('🔄 [Flux Creator] Buscando status do run...')
     let runStatus
     try {
-      runStatus = await openai.beta.threads.runs.retrieve(run.id, {
+      runStatus = await getOpenAI().beta.threads.runs.retrieve(run.id, {
         thread_id: threadId
       })
     } catch (retrieveError: any) {
@@ -351,7 +358,7 @@ export async function gerarFluxoComAgente(
       
       try {
         // IMPORTANTE: A SDK espera: runs.retrieve(runId, { thread_id: threadId })
-        runStatus = await openai.beta.threads.runs.retrieve(run.id, {
+        runStatus = await getOpenAI().beta.threads.runs.retrieve(run.id, {
           thread_id: threadId
         })
       } catch (retrieveError: any) {
@@ -366,7 +373,7 @@ export async function gerarFluxoComAgente(
 
     if (runStatus.status === 'completed') {
       // Buscar mensagens
-      const messages = await openai.beta.threads.messages.list(threadId)
+      const messages = await getOpenAI().beta.threads.messages.list(threadId)
       const assistantMessage = messages.data.find((m) => m.role === 'assistant')
 
       if (!assistantMessage) {
