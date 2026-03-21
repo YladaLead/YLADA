@@ -242,69 +242,7 @@ export async function GET(request: NextRequest) {
 
 
     // =====================================================
-    // 8. ATIVIDADE RECENTE
-    // =====================================================
-    const atividadesRecentes: Array<{
-      tipo: string
-      descricao: string
-      area?: string
-      timestamp: string
-    }> = []
-
-    try {
-      const { data: ultimosLeads } = await supabaseAdmin
-        .from('leads')
-        .select('id, name, created_at, template_id')
-        .order('created_at', { ascending: false })
-        .limit(5)
-
-      if (ultimosLeads) {
-        for (const lead of ultimosLeads) {
-          if (lead.template_id) {
-            const { data: template } = await supabaseAdmin
-              .from('user_templates')
-              .select('title, profession')
-              .eq('id', lead.template_id)
-              .maybeSingle()
-
-            atividadesRecentes.push({
-              tipo: 'lead',
-              descricao: `Novo lead: ${lead.name}`,
-              area: template?.profession || 'unknown',
-              timestamp: lead.created_at
-            })
-          }
-        }
-      }
-
-      const { data: ultimosModulos } = await supabaseAdmin
-        .from('wellness_curso_modulos')
-        .select('id, titulo, created_at')
-        .order('created_at', { ascending: false })
-        .limit(3)
-
-      if (ultimosModulos) {
-        ultimosModulos.forEach(modulo => {
-          atividadesRecentes.push({
-            tipo: 'curso',
-            descricao: `Novo módulo criado: ${modulo.titulo}`,
-            area: 'wellness',
-            timestamp: modulo.created_at
-          })
-        })
-      }
-
-      atividadesRecentes.sort((a, b) =>
-        new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-      )
-    } catch (e) {
-      console.error('Erro ao buscar atividades recentes:', e)
-    }
-
-    const atividadesRecentesLimitadas = atividadesRecentes.slice(0, 5)
-
-    // =====================================================
-    // 9. MONTAR RESPOSTA
+    // 8. MONTAR RESPOSTA
     // =====================================================
     const stats = {
       usuariosTotal: usuariosTotal || 0,
@@ -316,7 +254,6 @@ export async function GET(request: NextRequest) {
       assinaturasAtivas: assinaturasAtivas,
       usuariosPorArea,
       receitasPorArea,
-      atividadesRecentes: atividadesRecentesLimitadas,
       filtroAplicado: areaFiltro
     }
 

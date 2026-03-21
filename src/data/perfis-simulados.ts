@@ -35,10 +35,19 @@ const medico: YladaNoelProfileRow = {
   ticket_medio: 350,
   modelo_pagamento: 'convenio',
   canais_principais: ['instagram', 'indicacao'],
-  rotina_atual_resumo: 'Atendo 3–4 dias por semana, pouco tempo para divulgar',
+  rotina_atual_resumo: 'Atendo estética (pele) e emagrecimento; 3–4 dias por semana, pouco tempo para divulgar',
   frequencia_postagem: null,
   observacoes: 'Perfil simulado para testes.',
-  area_specific: { especialidades: ['clínica_geral'], temas_atuacao: ['emagrecimento', 'intestino', 'alimentacao'] },
+  area_specific: {
+    nome: 'Dr. Demo Medicina',
+    whatsapp: '19981868000',
+    countryCode: 'BR',
+    publico_principal: ['particular', 'feminino'],
+    especialidades: ['dermatologia'],
+    foco_principal: 'procedimentos',
+    modelo_receita: 'procedimentos_alto_ticket',
+    temas_atuacao: ['emagrecimento', 'pele'],
+  },
 }
 
 /** Vendedor de suplementos (Nutra) — funil, comissão, recorrência. */

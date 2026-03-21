@@ -34,49 +34,30 @@ export const YLADA_AREAS: YladaAreaConfig[] = [
 ]
 
 /**
- * Menu organizado pelo fluxo do método YLADA: Hoje → Mentor → Atrair clientes → Conversas → Estratégia → Aprender → Conta.
- * Lab e Sistema apenas para admin.
+ * Menu enxuto: fluxo do dia em “Principal”, conteúdo em “Aprender” (inclui Academia).
+ * Lab e Planejamento só para admin.
  */
 export const YLADA_MENU_GROUPS = [
   {
-    label: 'HOJE',
+    label: 'Principal',
     items: [
       { key: 'painel', label: 'Painel', path: 'painel', icon: '📊' },
-    ],
-  },
-  {
-    label: 'MENTOR',
-    items: [
-      { key: 'home', label: 'Noel', path: 'home', icon: '💬' },
-    ],
-  },
-  {
-    label: 'ATRAIR CLIENTES',
-    items: [
-      { key: 'links', label: 'Diagnósticos', path: 'links', icon: '🧪' },
-    ],
-  },
-  {
-    label: 'CONVERSAS',
-    items: [
+      { key: 'home', label: 'Noel (mentor)', path: 'home', icon: '💬' },
+      { key: 'links', label: 'Links de captação', path: 'links', icon: '🔗' },
       { key: 'leads', label: 'Leads', path: 'leads', icon: '👥' },
-    ],
-  },
-  {
-    label: 'ESTRATÉGIA',
-    items: [
       { key: 'crescimento', label: 'Crescimento', path: 'crescimento', icon: '📈' },
     ],
   },
   {
-    label: 'APRENDER',
+    label: 'Aprender',
     items: [
       { key: 'biblioteca', label: 'Biblioteca', path: 'biblioteca', icon: '📚' },
       { key: 'metodo', label: 'Método YLADA', path: 'metodo', icon: '🚀' },
+      { key: 'trilha', label: 'Academia YLADA', path: 'trilha', icon: '🎓' },
     ],
   },
   {
-    label: 'CONTA',
+    label: 'Conta',
     items: [
       { key: 'perfil-empresarial', label: 'Perfil', path: 'perfil-empresarial', icon: '👤' },
       { key: 'assinatura', label: 'Assinatura', path: 'configuracao', icon: '📋', hash: 'assinatura' as const },
@@ -92,10 +73,7 @@ export const YLADA_MENU_GROUPS = [
   },
   {
     label: 'Sistema',
-    items: [
-      { key: 'planejamento', label: 'Planejamento', path: 'planejamento', icon: '📋' },
-      { key: 'trilha', label: 'Academia YLADA', path: 'trilha', icon: '🎓' },
-    ],
+    items: [{ key: 'planejamento', label: 'Planejamento', path: 'planejamento', icon: '📋' }],
   },
 ] as const
 

@@ -148,10 +148,8 @@ function FluxoContent() {
             Use estes caminhos no admin para acompanhar cada etapa do WhatsApp (Nutri):
           </p>
           <ul className="text-sm text-blue-800 space-y-1 list-disc list-inside">
-            <li><strong>Conversas e tags:</strong> <Link href="/admin/whatsapp" className="underline">/admin/whatsapp</Link> — ver conversas, editar tags (ex.: Link Workshop), enviar link manualmente.</li>
+            <li><strong>Conversas e tags:</strong> <Link href="/admin/whatsapp" className="underline">/admin/whatsapp</Link> — ver conversas e editar tags (histórico do fluxo Nutri).</li>
             <li><strong>Textos deste fluxo:</strong> você está em <code className="bg-blue-100 px-1 rounded">/admin/whatsapp/fluxo</code> — editar mensagens do formulário, Carol, participou e não participou.</li>
-            <li><strong>Sessões de aula (Zoom):</strong> <Link href="/admin/whatsapp/workshop" className="underline">/admin/whatsapp/workshop</Link> — datas, links e participantes.</li>
-            <li><strong>Cadastros workshop:</strong> <Link href="/admin/whatsapp/cadastros-workshop" className="underline">/admin/whatsapp/cadastros-workshop</Link> — inscrições e integração com o formulário.</li>
             <li><strong>Automação em lote:</strong> <Link href="/admin/whatsapp/automation" className="underline">/admin/whatsapp/automation</Link> — processar pendentes e reprocessar fluxo.</li>
           </ul>
         </div>

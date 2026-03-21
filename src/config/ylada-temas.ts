@@ -13,6 +13,7 @@ export interface TemaOption {
 export const TEMAS_BY_PROFESSION: Record<string, TemaOption[]> = {
   medico: [
     { value: 'emagrecimento', label: 'Emagrecimento' },
+    { value: 'pele', label: 'Pele e estética' },
     { value: 'intestino', label: 'Intestino / digestão' },
     { value: 'alimentacao', label: 'Alimentação saudável' },
     { value: 'pressao', label: 'Pressão e saúde cardiovascular' },

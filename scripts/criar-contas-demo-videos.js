@@ -50,17 +50,27 @@ const DEMO_ACCOUNTS = [
       category: 'medicina',
       tempo_atuacao_anos: 8,
       dor_principal: 'agenda_instavel',
-      prioridade_atual: 'Preencher agenda e organizar divulgação',
+      prioridade_atual: 'Crescer demanda em estética e emagrecimento com agenda organizada',
       fase_negocio: 'em_crescimento',
-      metas_principais: 'Aumentar número de consultas e ter mais indicações',
-      objetivos_curto_prazo: 'Criar rotina de posts e usar um link para qualificar quem quer agendar',
+      metas_principais: 'Aumentar consultas e procedimentos em medicina estética e acompanhamento de emagrecimento',
+      objetivos_curto_prazo: 'Links de diagnóstico para qualificar interesse em estética e emagrecimento',
       modelo_atuacao: ['consultorio', 'online'],
       capacidade_semana: 25,
-      ticket_medio: 350,
-      modelo_pagamento: 'convenio',
+      ticket_medio: 450,
+      modelo_pagamento: 'particular',
       canais_principais: ['instagram', 'indicacao'],
-      rotina_atual_resumo: 'Atendo 3–4 dias por semana, pouco tempo para divulgar',
-      area_specific: { especialidades: ['clinica_geral'], temas_atuacao: ['emagrecimento', 'intestino', 'alimentacao'] }
+      rotina_atual_resumo: 'Atendo estética e linha de emagrecimento; 3–4 dias por semana, pouco tempo para divulgar',
+      area_specific: {
+        nome: 'Dr. Demo Medicina',
+        whatsapp: '19981868000',
+        countryCode: 'BR',
+        publico_principal: ['particular', 'feminino'],
+        especialidades: ['dermatologia'],
+        foco_principal: 'procedimentos',
+        modelo_receita: 'procedimentos_alto_ticket',
+        temas_atuacao: ['emagrecimento', 'pele'],
+        equipe_operacional: 'secretaria'
+      }
     }
   },
   {

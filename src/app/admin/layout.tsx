@@ -22,6 +22,12 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
           Dashboard
         </Link>
         <Link
+          href="/admin/suporte"
+          className="text-sm font-semibold text-sky-700 hover:text-sky-800 bg-sky-50 px-3 py-1.5 rounded-lg hover:bg-sky-100 transition-colors"
+        >
+          💬 Suporte
+        </Link>
+        <Link
           href="/admin/motor-crescimento"
           className="text-sm font-semibold text-indigo-700 hover:text-indigo-800 bg-indigo-50 px-3 py-1.5 rounded-lg hover:bg-indigo-100 transition-colors"
         >

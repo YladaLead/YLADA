@@ -96,6 +96,12 @@ export default function NutriSidebar({ isMobileOpen = false, onMobileClose }: Nu
         color: 'orange'
       },
       {
+        title: 'Suporte',
+        icon: '💬',
+        href: '/pt/suporte/tickets',
+        color: 'gray'
+      },
+      {
         title: 'Configurações',
         icon: '⚙️',
         href: '/pt/nutri/configuracao',

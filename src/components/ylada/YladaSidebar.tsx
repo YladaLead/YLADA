@@ -26,16 +26,10 @@ export default function YladaSidebar({
   const { signOut, userProfile } = useAuth()
   const isAdmin = userProfile?.is_admin === true
 
-  /** Usuário comum: Noel, Links, Biblioteca, Perfil, Leads, Trilha, Configuração. Admin: + Lab + Planejamento + Wellness + Admin. */
+  /** Admin: + Lab + Planejamento. Links rápidos Wellness/Admin abaixo da navegação principal. */
   const visibleGroups = YLADA_MENU_GROUPS.filter((group) => {
-    if (group.label === 'Lab') return isAdmin
-    if (group.label === 'Sistema' && !isAdmin) return true // filtramos itens abaixo
+    if (group.label === 'Lab' || group.label === 'Sistema') return isAdmin
     return true
-  }).map((group) => {
-    if (group.label === 'Sistema' && !isAdmin) {
-      return { ...group, items: group.items.filter((i) => i.key !== 'planejamento') }
-    }
-    return group
   })
 
   const content = (
@@ -63,7 +57,7 @@ export default function YladaSidebar({
       <nav className="flex-1 p-3 space-y-4 overflow-y-auto">
         {visibleGroups.map((group) => (
           <div key={group.label}>
-            <p className="px-3 mb-1.5 text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <p className="px-3 mb-1.5 text-xs font-medium text-gray-500 tracking-wide">
               {group.label}
             </p>
             <div className="space-y-0.5">
@@ -92,9 +86,9 @@ export default function YladaSidebar({
           </div>
         ))}
         <div className="pt-3 mt-3 border-t border-gray-200 space-y-1">
-          <p className="px-3 mb-1.5 text-xs font-medium text-gray-500 uppercase tracking-wider">Conta</p>
           {isAdmin && (
             <>
+              <p className="px-3 mb-1.5 text-xs font-medium text-gray-500 tracking-wide">Equipe</p>
               <Link
                 href="/pt/wellness"
                 onClick={onMobileClose}

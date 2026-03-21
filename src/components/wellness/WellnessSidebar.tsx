@@ -84,6 +84,12 @@ export default function WellnessSidebar({ isMobileOpen = false, onMobileClose }:
       color: 'green'
     },
     {
+      title: 'Suporte',
+      icon: '💬',
+      href: '/pt/suporte/tickets',
+      color: 'gray'
+    },
+    {
       title: 'Configurações',
       icon: '⚙️',
       href: '/pt/wellness/configuracao',

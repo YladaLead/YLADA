@@ -5,6 +5,24 @@
 
 import { resend, FROM_EMAIL, FROM_NAME, isResendConfigured } from './resend'
 import { supabaseAdmin } from './supabase'
+import { isTelegramSupportConfigured, sendTelegramSupportMessage } from './telegram-support'
+import { PLATFORM_SUPPORT_AREA } from './platform-support-constants'
+
+/** Link para o admin abrir o ticket (email, Telegram, push do atendente). */
+export function getSupportTicketStaffUrl(ticketId: string, area: string, baseUrl: string): string {
+  if (area === PLATFORM_SUPPORT_AREA) {
+    return `${baseUrl}/admin/suporte/tickets/${ticketId}`
+  }
+  return `${baseUrl}/pt/${area}/suporte/tickets/${ticketId}`
+}
+
+/** Link para o usuário final abrir a conversa no app. */
+export function getSupportTicketUserUrl(ticketId: string, area: string, baseUrl: string): string {
+  if (area === PLATFORM_SUPPORT_AREA) {
+    return `${baseUrl}/pt/suporte/tickets/${ticketId}`
+  }
+  return `${baseUrl}/pt/${area}/suporte/tickets/${ticketId}`
+}
 
 // Importar web-push dinamicamente
 let webpush: any = null
@@ -71,7 +89,11 @@ async function getOnlineAgentsEmails(area: string): Promise<string[]> {
 /**
  * Gera HTML do email de notificação de novo ticket
  */
-function generateTicketNotificationEmail(data: TicketNotificationData, baseUrl: string): string {
+function generateTicketNotificationEmail(
+  data: TicketNotificationData,
+  baseUrl: string,
+  ticketPath: string
+): string {
   const prioridadeEmoji: Record<string, string> = {
     baixa: '🟢',
     normal: '🟡',
@@ -165,7 +187,7 @@ function generateTicketNotificationEmail(data: TicketNotificationData, baseUrl: 
 
             <!-- Botão de Ação -->
             <div style="text-align: center; margin: 30px 0;">
-              <a href="${baseUrl}/pt/nutri/suporte/tickets/${data.ticketId}" 
+              <a href="${ticketPath}" 
                  style="display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; text-decoration: none; padding: 14px 28px; border-radius: 8px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
                 📥 Ver Ticket e Responder
               </a>
@@ -197,45 +219,57 @@ export async function notifyAgentsNewTicket(data: TicketNotificationData): Promi
   const errors: string[] = []
   let emailsSent = 0
 
-  // Verificar se Resend está configurado
-  if (!isResendConfigured() || !resend) {
-    console.warn('[Support Notifications] Resend não configurado, notificações não serão enviadas')
-    return {
-      success: false,
-      emailsSent: 0,
-      errors: ['Resend não configurado']
-    }
-  }
+  const baseUrl =
+    process.env.NEXT_PUBLIC_APP_URL_PRODUCTION ||
+    process.env.NEXT_PUBLIC_APP_URL ||
+    'https://www.ylada.com'
+  const ticketPath = getSupportTicketStaffUrl(data.ticketId, data.area, baseUrl)
 
   try {
-    // Obter base URL
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL_PRODUCTION || 
-                   process.env.NEXT_PUBLIC_APP_URL || 
-                   'https://www.ylada.com'
+    if (data.area === PLATFORM_SUPPORT_AREA && isTelegramSupportConfigured()) {
+      const preview =
+        data.primeiraMensagem.length > 400
+          ? `${data.primeiraMensagem.slice(0, 400)}…`
+          : data.primeiraMensagem
+      const tgText =
+        `🎫 YLADA — novo ticket (plataforma)\n` +
+        `Assunto: ${data.assunto || '—'}\n` +
+        `Usuário: ${data.userName || '—'}${data.userEmail ? ` (${data.userEmail})` : ''}\n` +
+        `Prioridade: ${data.prioridade}\n\n` +
+        `${preview}\n\n` +
+        `Abrir: ${ticketPath}`
+      sendTelegramSupportMessage(tgText).catch((e) =>
+        console.error('[Support Notifications] Telegram:', e)
+      )
+    }
 
-    // Buscar emails dos atendentes online
+    if (!isResendConfigured() || !resend) {
+      console.warn('[Support Notifications] Resend não configurado, emails de ticket não serão enviados')
+      return {
+        success: data.area === PLATFORM_SUPPORT_AREA && isTelegramSupportConfigured(),
+        emailsSent: 0,
+        errors: ['Resend não configurado']
+      }
+    }
+
     const agentEmails = await getOnlineAgentsEmails(data.area)
-
-    // Se não há atendentes online, enviar para email de notificação geral (se configurado)
     const notificationEmail = process.env.SUPPORT_NOTIFICATION_EMAIL || process.env.CONTACT_NOTIFICATION_EMAIL
-    
-    const emailsToNotify = agentEmails.length > 0 
-      ? agentEmails 
-      : (notificationEmail ? [notificationEmail] : [])
+    const emailsToNotify =
+      agentEmails.length > 0 ? agentEmails : notificationEmail ? [notificationEmail] : []
 
     if (emailsToNotify.length === 0) {
-      console.warn('[Support Notifications] Nenhum email para notificar (sem atendentes online e sem email de notificação configurado)')
+      console.warn(
+        '[Support Notifications] Nenhum email para notificar (sem atendentes online e sem email de notificação configurado)'
+      )
       return {
-        success: false,
+        success: emailsSent > 0 || (data.area === PLATFORM_SUPPORT_AREA && isTelegramSupportConfigured()),
         emailsSent: 0,
         errors: ['Nenhum email para notificar']
       }
     }
 
-    // Gerar HTML do email
-    const emailHtml = generateTicketNotificationEmail(data, baseUrl)
+    const emailHtml = generateTicketNotificationEmail(data, baseUrl, ticketPath)
 
-    // Enviar email para cada destinatário
     for (const email of emailsToNotify) {
       try {
         await resend.emails.send({
@@ -279,7 +313,8 @@ async function sendPushNotificationForNewMessage(
   ticketId: string,
   area: string,
   message: string,
-  senderName: string
+  senderName: string,
+  openUrl: string
 ): Promise<boolean> {
   try {
     // Verificar se web-push está disponível
@@ -310,11 +345,6 @@ async function sendPushNotificationForNewMessage(
       return false // Usuário não tem subscriptions
     }
 
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL_PRODUCTION || 
-                   process.env.NEXT_PUBLIC_APP_URL || 
-                   'https://www.ylada.com'
-
-    // Preparar payload
     const messagePreview = message.length > 100 ? message.substring(0, 100) + '...' : message
     const payload = JSON.stringify({
       title: `💬 Nova mensagem de ${senderName}`,
@@ -323,7 +353,7 @@ async function sendPushNotificationForNewMessage(
       badge: '/images/logo/ylada/quadrado/azul-claro/ylada-quadrado-azul-claro-31.png',
       tag: `ticket-${ticketId}`,
       data: {
-        url: `${baseUrl}/pt/${area}/suporte/tickets/${ticketId}`,
+        url: openUrl,
         ticketId,
         area
       },
@@ -390,6 +420,7 @@ export async function notifyAgentNewMessage(
         const baseUrl = process.env.NEXT_PUBLIC_APP_URL_PRODUCTION || 
                        process.env.NEXT_PUBLIC_APP_URL || 
                        'https://www.ylada.com'
+        const ticketUrl = getSupportTicketStaffUrl(ticketId, area, baseUrl)
 
         await resend.emails.send({
           from: `${FROM_NAME} <${FROM_EMAIL}>`,
@@ -408,7 +439,7 @@ export async function notifyAgentNewMessage(
                   <div style="background-color: #f9fafb; padding: 15px; border-radius: 6px; margin: 20px 0;">
                     <p style="margin: 0; white-space: pre-wrap;">${message}</p>
                   </div>
-                  <a href="${baseUrl}/pt/${area}/suporte/tickets/${ticketId}" 
+                  <a href="${ticketUrl}" 
                      style="display: inline-block; background-color: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin-top: 20px;">
                     Ver Ticket
                   </a>
@@ -425,12 +456,18 @@ export async function notifyAgentNewMessage(
   }
 
   // Enviar push notification
+  const baseUrl =
+    process.env.NEXT_PUBLIC_APP_URL_PRODUCTION ||
+    process.env.NEXT_PUBLIC_APP_URL ||
+    'https://www.ylada.com'
+  const agentOpenUrl = getSupportTicketStaffUrl(ticketId, area, baseUrl)
   pushSent = await sendPushNotificationForNewMessage(
     agentId,
     ticketId,
     area,
     message,
-    'Usuário'
+    'Usuário',
+    agentOpenUrl
   )
 
   return emailSent || pushSent
@@ -439,6 +476,31 @@ export async function notifyAgentNewMessage(
 /**
  * Envia notificação push quando usuário recebe nova mensagem de atendente
  */
+/** Resposta do usuário em ticket `platform`: alerta rápido no Telegram (e-mail opcional reduz ruído). */
+export async function notifyPlatformStaffUserReplied(params: {
+  ticketId: string
+  snippet: string
+  userName?: string
+  userEmail?: string
+}): Promise<void> {
+  const baseUrl =
+    process.env.NEXT_PUBLIC_APP_URL_PRODUCTION ||
+    process.env.NEXT_PUBLIC_APP_URL ||
+    'https://www.ylada.com'
+  const path = getSupportTicketStaffUrl(params.ticketId, PLATFORM_SUPPORT_AREA, baseUrl)
+  if (isTelegramSupportConfigured()) {
+    const text =
+      `💬 YLADA — nova mensagem (plataforma)\n` +
+      `Ticket: ${params.ticketId.slice(0, 8)}…\n` +
+      `Usuário: ${params.userName || '—'}${params.userEmail ? ` (${params.userEmail})` : ''}\n\n` +
+      `${params.snippet.slice(0, 500)}${params.snippet.length > 500 ? '…' : ''}\n\n` +
+      `Abrir: ${path}`
+    await sendTelegramSupportMessage(text).catch((e) =>
+      console.error('[Support Notifications] Telegram (reply):', e)
+    )
+  }
+}
+
 export async function notifyUserNewMessage(
   ticketId: string,
   area: string,
@@ -446,12 +508,18 @@ export async function notifyUserNewMessage(
   userId: string,
   senderName: string
 ): Promise<boolean> {
+  const baseUrl =
+    process.env.NEXT_PUBLIC_APP_URL_PRODUCTION ||
+    process.env.NEXT_PUBLIC_APP_URL ||
+    'https://www.ylada.com'
+  const userOpenUrl = getSupportTicketUserUrl(ticketId, area, baseUrl)
   return await sendPushNotificationForNewMessage(
     userId,
     ticketId,
     area,
     message,
-    senderName
+    senderName,
+    userOpenUrl
   )
 }
 
