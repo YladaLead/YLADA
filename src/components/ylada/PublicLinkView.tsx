@@ -326,11 +326,20 @@ function ConfigDrivenLinkView({
   const fields = (formConfig.fields as FormField[]) || []
   const submitLabel = (formConfig.submit_label as string) || t.seeResult
   
-  // GARANTIR: Nenhum campo pode ser dissertativo (text/textarea) - sempre deve ter opções
-  // Se um campo não tem opções, converter para select com opções padrão
+  // GARANTIR: todo campo de pergunta sem opções vira múltipla escolha (evita intro "6 perguntas" com só 3 no fluxo).
+  // Templates da biblioteca usam type 'single' com options às vezes ausentes — antes só text/textarea recebiam defaults.
   const fieldsValidados = fields.map((f) => {
-    // Se não tem type ou é text/textarea, e não tem opções, converter para select
-    if ((!f.type || f.type === 'text' || f.type === 'textarea') && (!f.options || f.options.length === 0)) {
+    const noOptions = !f.options || f.options.length === 0
+    const tipo = (f.type || '').toLowerCase()
+    const isQuestionLike =
+      !f.type ||
+      tipo === 'text' ||
+      tipo === 'textarea' ||
+      tipo === 'select' ||
+      tipo === 'single' ||
+      tipo === 'radio' ||
+      tipo === 'multiselect'
+    if (noOptions && isQuestionLike) {
       return {
         ...f,
         type: 'select',
@@ -339,6 +348,10 @@ function ConfigDrivenLinkView({
     }
     return f
   })
+
+  /** Perguntas que de fato aparecem no modo quiz (com opções) — deve bater com o texto da intro */
+  const visibleQuizQuestionCount =
+    fieldsValidados.filter((f) => Array.isArray(f.options) && f.options.length > 0).length || fieldsValidados.length
 
   const pageTitleRaw = (page.title as string) ?? (config.title as string) ?? 'Link'
   const hasTechnicalName = /diagnóstico de bloqueios|diagnóstico de saúde|raio-x/i.test(pageTitleRaw)
@@ -550,7 +563,7 @@ function ConfigDrivenLinkView({
     strategic_profile: meta.strategic_profile && typeof meta.strategic_profile === 'object' ? (meta.strategic_profile as { maturityStage?: string; dominantPain?: string; urgencyLevel?: string; mindset?: string }) : undefined,
     theme_raw: themeFromMeta || themeFromTitle || undefined,
     page_title: pageTitleRaw || undefined,
-    questions_count: fieldsValidados.length > 0 ? fieldsValidados.length : undefined,
+    questions_count: visibleQuizQuestionCount > 0 ? visibleQuizQuestionCount : undefined,
   })
 
   // Tela de limite atingido (freemium) — tom de crescimento + promoção do Pro
