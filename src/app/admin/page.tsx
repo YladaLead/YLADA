@@ -278,6 +278,24 @@ function AdminDashboardContent() {
       destaque: true
     },
     {
+      id: 'motor-crescimento-hub',
+      title: 'Motor de crescimento',
+      description: 'Toda a documentação strategy + agentes (links GitHub) e atalho para o checklist',
+      icon: '📚',
+      link: '/admin/motor-crescimento',
+      color: 'bg-indigo-600',
+      destaque: true
+    },
+    {
+      id: 'minhas-acoes-growth',
+      title: 'Minhas ações (growth)',
+      description: 'Checklist de captação e validação — marque etapas; salva no navegador',
+      icon: '✅',
+      link: '/admin/minhas-acoes',
+      color: 'bg-emerald-600',
+      destaque: true
+    },
+    {
       id: 'diagnosticos-links',
       title: 'Marketing – Biblioteca de diagnósticos',
       description: '54 páginas indexáveis: links para campanhas, anúncios e SEO',

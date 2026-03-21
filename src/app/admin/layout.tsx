@@ -22,6 +22,18 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
           Dashboard
         </Link>
         <Link
+          href="/admin/motor-crescimento"
+          className="text-sm font-semibold text-indigo-700 hover:text-indigo-800 bg-indigo-50 px-3 py-1.5 rounded-lg hover:bg-indigo-100 transition-colors"
+        >
+          📚 Motor crescimento
+        </Link>
+        <Link
+          href="/admin/minhas-acoes"
+          className="text-sm font-semibold text-emerald-700 hover:text-emerald-800 bg-emerald-50 px-3 py-1.5 rounded-lg hover:bg-emerald-100 transition-colors"
+        >
+          ✅ Minhas ações
+        </Link>
+        <Link
           href="/admin/diagnosticos-links"
           className="text-sm font-semibold text-amber-700 hover:text-amber-800 bg-amber-50 px-3 py-1.5 rounded-lg hover:bg-amber-100 transition-colors"
         >
