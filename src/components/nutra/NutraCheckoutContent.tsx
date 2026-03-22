@@ -14,7 +14,7 @@ interface NutraCheckoutContentProps {
 
 export default function NutraCheckoutContent({ locale, basePath }: NutraCheckoutContentProps) {
   const router = useRouter()
-  const { user, loading: authLoading } = useAuth()
+  const { user } = useAuth()
   const [planType, setPlanType] = useState<'monthly' | 'annual'>('annual')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -47,8 +47,14 @@ export default function NutraCheckoutContent({ locale, basePath }: NutraCheckout
     }
   }, [])
 
+  useEffect(() => {
+    if (user?.email) {
+      setEmail((prev) => prev.trim() || user.email || '')
+    }
+  }, [user?.email])
+
   const handleCheckout = async () => {
-    const userEmail = email || user?.email || ''
+    const userEmail = email.trim() || user?.email?.trim() || ''
     if (!userEmail || !userEmail.includes('@')) {
       setError(t.errorEmail)
       return
@@ -172,32 +178,32 @@ export default function NutraCheckoutContent({ locale, basePath }: NutraCheckout
             </div>
           </div>
 
-          {(!user || authLoading) && (
-            <div className="mb-6">
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                {t.emailLabel} {user && t.emailLoggedIn}
-              </label>
-              <input
-                id="email"
-                type="email"
-                value={email || user?.email || ''}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder={t.emailPlaceholder}
-                required
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              />
-              <p className="text-xs text-gray-500 mt-2">
-                {user ? t.emailNotePayment : t.emailNoteAccount}
-              </p>
-            </div>
-          )}
+          <div className="mb-6">
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+              {t.emailLabel}
+            </label>
+            <input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder={t.emailPlaceholder}
+              required
+              autoComplete="email"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            />
+            <p className="text-xs text-gray-500 mt-2">
+              {user ? t.emailNotePayment : t.emailNoteAccount}
+            </p>
+          </div>
 
           <button
             onClick={(e) => {
               e.preventDefault()
-              if (!loading && (email || user?.email)) handleCheckout()
+              const checkoutEmail = email.trim() || user?.email?.trim() || ''
+              if (!loading && checkoutEmail.includes('@')) handleCheckout()
             }}
-            disabled={loading || (!user && !email)}
+            disabled={loading || !(email.trim() || user?.email?.trim() || '').includes('@')}
             className="w-full bg-blue-600 text-white py-4 rounded-xl font-bold text-lg hover:bg-blue-700 transition-all shadow-lg disabled:bg-blue-400 disabled:cursor-not-allowed"
           >
             {loading ? t.processing : t.continueButton}

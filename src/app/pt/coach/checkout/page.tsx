@@ -7,7 +7,7 @@ import { useAuth } from '@/contexts/AuthContext'
 
 export default function CoachCheckoutPage() {
   const router = useRouter()
-  const { user, loading: authLoading } = useAuth()
+  const { user } = useAuth()
   const [planType, setPlanType] = useState<'monthly' | 'annual'>('annual')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -37,8 +37,14 @@ export default function CoachCheckoutPage() {
     }
   }, [])
 
+  useEffect(() => {
+    if (user?.email) {
+      setEmail((prev) => prev.trim() || user.email || '')
+    }
+  }, [user?.email])
+
   const handleCheckout = async () => {
-    const userEmail = email || user?.email || ''
+    const userEmail = email.trim() || user?.email?.trim() || ''
     if (!userEmail || !userEmail.includes('@')) {
       setError('Por favor, informe seu e-mail para continuar.')
       return
@@ -157,32 +163,34 @@ export default function CoachCheckoutPage() {
             </div>
           </div>
 
-          {(!user || authLoading) && (
-            <div className="mb-6">
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                E-mail {user && '(você está logado, mas pode alterar se necessário)'}
-              </label>
-              <input
-                id="email"
-                type="email"
-                value={email || user?.email || ''}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="seu@email.com"
-                required
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              />
-              <p className="text-xs text-gray-500 mt-2">
-                {user ? 'Seu e-mail será usado para o pagamento.' : 'Seu e-mail será usado para criar sua conta após o pagamento.'}
-              </p>
-            </div>
-          )}
+          <div className="mb-6">
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+              Seu e-mail
+            </label>
+            <input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="seu@email.com"
+              required
+              autoComplete="email"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            />
+            <p className="text-xs text-gray-500 mt-2">
+              {user
+                ? 'Confira ou altere o e-mail que será usado nesta assinatura e no comprovante.'
+                : 'Seu e-mail será usado para criar sua conta após o pagamento.'}
+            </p>
+          </div>
 
           <button
             onClick={(e) => {
               e.preventDefault()
-              if (!loading && (email || user?.email)) handleCheckout()
+              const checkoutEmail = email.trim() || user?.email?.trim() || ''
+              if (!loading && checkoutEmail.includes('@')) handleCheckout()
             }}
-            disabled={loading || (!user && !email)}
+            disabled={loading || !(email.trim() || user?.email?.trim() || '').includes('@')}
             className="w-full bg-blue-600 text-white py-4 rounded-xl font-bold text-lg hover:bg-blue-700 transition-all shadow-lg disabled:bg-blue-400 disabled:cursor-not-allowed"
           >
             {loading ? 'Processando...' : 'Continuar para Pagamento'}

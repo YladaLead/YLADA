@@ -83,6 +83,12 @@ export default function WellnessCheckoutPage() {
     return () => clearTimeout(timer)
   }, [email, user?.email, checkEmailTrial])
 
+  useEffect(() => {
+    if (user?.email) {
+      setEmail((prev) => prev.trim() || user.email || '')
+    }
+  }, [user?.email])
+
   // Mostrar mensagem ex-trial quando veio de renovar OU email fez trial
   const showExTrialMessage = fromRenovar || hadTrialEmail
 
@@ -123,8 +129,7 @@ export default function WellnessCheckoutPage() {
       authLoading,
     })
     
-    // Determinar e-mail a usar (prioridade: campo email > user.email)
-    const userEmail = email || user?.email || ''
+    const userEmail = email.trim() || user?.email?.trim() || ''
     console.log('🔘 E-mail a usar:', userEmail)
     
     // Validar e-mail (obrigatório sempre)
@@ -382,31 +387,28 @@ export default function WellnessCheckoutPage() {
             </div>
           )}
 
-          {/* Campo de E-mail (se não estiver logado ou ainda carregando) */}
-          {(!user || authLoading) && (
-            <div className="mb-6">
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                E-mail {user && '(você está logado, mas pode alterar se necessário)'}
-              </label>
-              <input
-                id="email"
-                type="email"
-                value={email || user?.email || ''}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="seu@email.com"
-                required
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
-              />
-              <p className="text-xs text-gray-500 mt-2">
-                {user 
-                  ? 'Seu e-mail será usado para o pagamento. Você pode alterar se necessário.'
-                  : showExTrialMessage
-                    ? 'Use o mesmo e-mail do seu trial. Após o pagamento, você terá acesso imediato.'
-                    : 'Seu e-mail será usado para criar sua conta automaticamente após o pagamento.'
-                }
-              </p>
-            </div>
-          )}
+          <div className="mb-6">
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+              Seu e-mail
+            </label>
+            <input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="seu@email.com"
+              required
+              autoComplete="email"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+            />
+            <p className="text-xs text-gray-500 mt-2">
+              {user
+                ? 'Confira ou altere o e-mail que será usado nesta assinatura e no comprovante.'
+                : showExTrialMessage
+                  ? 'Use o mesmo e-mail do seu trial. Após o pagamento, você terá acesso imediato.'
+                  : 'Seu e-mail será usado para criar sua conta automaticamente após o pagamento.'}
+            </p>
+          </div>
 
           {/* Aviso sobre Parcelamento (Plano Anual) */}
           {planType === 'annual' && (
@@ -433,16 +435,15 @@ export default function WellnessCheckoutPage() {
           <button
             onClick={(e) => {
               e.preventDefault()
-              console.log('🔘 Botão clicado - Estado:', { loading, authLoading, hasUser: !!user, hasEmail: !!email, emailValue: email || user?.email })
-              // Permitir checkout se tiver e-mail, mesmo que authLoading seja true
-              const hasEmail = email || user?.email
-              if (!loading && hasEmail) {
+              const checkoutEmail = email.trim() || user?.email?.trim() || ''
+              console.log('🔘 Botão clicado - Estado:', { loading, authLoading, hasUser: !!user, checkoutEmail })
+              if (!loading && checkoutEmail.includes('@')) {
                 handleCheckout()
               } else {
-                console.warn('⚠️ Botão clicado mas está desabilitado:', { loading, authLoading, hasEmail })
+                console.warn('⚠️ Botão clicado mas está desabilitado:', { loading, authLoading, checkoutEmail })
               }
             }}
-            disabled={loading || (!user && !email)}
+            disabled={loading || !(email.trim() || user?.email?.trim() || '').includes('@')}
             className="w-full bg-green-600 text-white py-4 rounded-lg font-semibold text-lg hover:bg-green-700 transition-colors disabled:bg-green-400 disabled:cursor-not-allowed"
           >
             {loading ? 'Processando...' : '💚 Continuar para Pagamento'}

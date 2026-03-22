@@ -94,6 +94,13 @@ export default function NutriCheckoutPage() {
     }
   }, [])
 
+  // Quem está logada ainda precisa ver e confirmar o e-mail no plano; preenche o campo uma vez a partir da sessão.
+  useEffect(() => {
+    if (user?.email) {
+      setEmail((prev) => prev.trim() || user.email || '')
+    }
+  }, [user?.email])
+
   const handleCheckout = async () => {
     console.log('🔘 ========================================')
     console.log('🔘 BOTÃO DE CHECKOUT CLICADO (NUTRI)')
@@ -107,8 +114,7 @@ export default function NutriCheckoutPage() {
       authLoading,
     })
     
-    // Determinar e-mail a usar (prioridade: campo email > user.email)
-    const userEmail = email || user?.email || ''
+    const userEmail = email.trim() || user?.email?.trim() || ''
     console.log('🔘 E-mail a usar:', userEmail)
     
     // Validar e-mail (obrigatório sempre)
@@ -353,43 +359,41 @@ export default function NutriCheckoutPage() {
             </p>
           </div>
 
-          {/* Campo de E-mail (se não estiver logado ou ainda carregando) */}
-          {(!user || authLoading) && (
-            <div className="mb-6">
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                E-mail {user && '(você está logado, mas pode alterar se necessário)'}
-              </label>
-              <input
-                id="email"
-                type="email"
-                value={email || user?.email || ''}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="seu@email.com"
-                required
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              />
-              <p className="text-xs text-gray-500 mt-2">
-                {user 
-                  ? 'Seu e-mail será usado para o pagamento. Você pode alterar se necessário.'
-                  : 'Seu e-mail será usado para criar sua conta automaticamente após o pagamento.'
-                }
-              </p>
-            </div>
-          )}
+          {/* E-mail obrigatório no plano — sempre visível (logada ou não) */}
+          <div className="mb-6">
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+              Seu e-mail
+            </label>
+            <input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="seu@email.com"
+              required
+              autoComplete="email"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            />
+            <p className="text-xs text-gray-500 mt-2">
+              {user
+                ? 'Confira ou altere o e-mail que será usado nesta assinatura e no comprovante.'
+                : 'Seu e-mail será usado para criar sua conta automaticamente após o pagamento.'}
+            </p>
+          </div>
 
           {/* Botão de Checkout — emocional, decisivo */}
           <button
             onClick={(e) => {
               e.preventDefault()
-              console.log('🔘 Botão clicado - Estado:', { loading, authLoading, hasUser: !!user, hasEmail: !!email, emailValue: email || user?.email })
-              const hasEmail = email || user?.email
-              if (!loading && hasEmail) {
+              const checkoutEmail = email.trim() || user?.email?.trim() || ''
+              console.log('🔘 Botão clicado - Estado:', { loading, authLoading, hasUser: !!user, checkoutEmail })
+              if (!loading && checkoutEmail.includes('@')) {
                 handleCheckout()
               } else {
-                console.warn('⚠️ Botão clicado mas está desabilitado:', { loading, authLoading, hasEmail })
+                console.warn('⚠️ Botão clicado mas está desabilitado:', { loading, authLoading, checkoutEmail })
               }
             }}
-            disabled={loading || (!user && !email)}
+            disabled={loading || !(email.trim() || user?.email?.trim() || '').includes('@')}
             className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white py-4 rounded-xl font-bold text-lg hover:from-blue-700 hover:to-blue-800 transition-all shadow-lg disabled:from-blue-400 disabled:to-blue-400 disabled:cursor-not-allowed"
           >
             {loading ? 'Processando...' : '👉 Quero começar agora'}
