@@ -160,16 +160,6 @@ export interface AdminUsuariosTranslations {
     matrizFreeMigrationCreateBtn: string
     matrizFreeCourtesyCreateBtn: string
   }
-  bulkYladaMigration: {
-    title: string
-    intro: string
-    daysLabel: string
-    dryRun: string
-    run: string
-    confirmRun: string
-    doneDryRun: string
-    doneRun: string
-  }
   messages: {
     noUsers: string
     loading: string
@@ -346,18 +336,6 @@ const pt: AdminUsuariosTranslations = {
       'Concessão pontual com prazo definido (trial estendido, apoio, etc.). Não confunde com a migração em massa do legado.',
     matrizFreeMigrationCreateBtn: 'Criar free (migração)',
     matrizFreeCourtesyCreateBtn: 'Criar free (cortesia)',
-  },
-  bulkYladaMigration: {
-    title: 'Migração em lote — free matriz (YLADA)',
-    intro:
-      'Perfis da matriz (nutri, med, psi…), sem Wellness. Ignora quem já tem free ylada ativo ou mensal/anual ativo. Simule antes.',
-    daysLabel: 'Dias de validade (cada novo free)',
-    dryRun: 'Simular (quantos elegíveis)',
-    run: 'Aplicar a todos elegíveis',
-    confirmRun:
-      'Confirmar migração em lote? Serão criadas assinaturas free area ylada (tipo migração) para todos os elegíveis. Wellness não entra.',
-    doneDryRun: 'Simulação: elegíveis para free matriz (migração).',
-    doneRun: 'Migração em lote concluída.',
   },
   messages: {
     noUsers: 'Nenhum usuário encontrado',
@@ -538,18 +516,6 @@ const es: AdminUsuariosTranslations = {
     matrizFreeMigrationCreateBtn: 'Crear free (migración)',
     matrizFreeCourtesyCreateBtn: 'Crear free (cortesía)',
   },
-  bulkYladaMigration: {
-    title: 'Migración masiva — free matriz (YLADA)',
-    intro:
-      'Perfiles de la matriz (nutri, med, psi…), sin Wellness. Omite quien ya tiene free ylada activo o mensual/anual activo. Simule primero.',
-    daysLabel: 'Días de validez (cada free nuevo)',
-    dryRun: 'Simular (cuántos elegibles)',
-    run: 'Aplicar a todos los elegibles',
-    confirmRun:
-      '¿Confirmar migración masiva? Se crearán suscripciones free area ylada (tipo migración) para todos los elegibles. Wellness no entra.',
-    doneDryRun: 'Simulación: elegibles para free matriz (migración).',
-    doneRun: 'Migración masiva finalizada.',
-  },
   messages: {
     noUsers: 'Ningún usuario encontrado',
     loading: 'Cargando usuarios...',
@@ -728,18 +694,6 @@ const en: AdminUsuariosTranslations = {
       'One-off access with a defined period (support, extended trial, etc.). Not the same as bulk legacy migration.',
     matrizFreeMigrationCreateBtn: 'Create free (migration)',
     matrizFreeCourtesyCreateBtn: 'Create free (courtesy)',
-  },
-  bulkYladaMigration: {
-    title: 'Bulk migration — matrix free (YLADA)',
-    intro:
-      'Matrix profiles (nutri, med, psi…), not Wellness. Skips users who already have active ylada free or active monthly/annual. Simulate first.',
-    daysLabel: 'Validity days (each new free)',
-    dryRun: 'Simulate (eligible count)',
-    run: 'Apply to all eligible',
-    confirmRun:
-      'Confirm bulk migration? This creates ylada-area free subscriptions (migration type) for every eligible user. Wellness is excluded.',
-    doneDryRun: 'Simulation: eligible for matrix free (migration).',
-    doneRun: 'Bulk migration finished.',
   },
   messages: {
     noUsers: 'No users found',

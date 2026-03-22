@@ -84,8 +84,6 @@ export default function AdminUsuarios() {
   const [diasCortesiaMatriz, setDiasCortesiaMatriz] = useState(90)
   const [diasEstenderMatriz, setDiasEstenderMatriz] = useState(30)
   const [salvandoFreeMatriz, setSalvandoFreeMatriz] = useState(false)
-  const [diasBulkMigracao, setDiasBulkMigracao] = useState(3650)
-  const [salvandoBulkMigracao, setSalvandoBulkMigracao] = useState(false)
 
   // Todas as áreas para edição de perfil (modal Editar Usuário)
   const TODAS_AREAS_EDICAO: { value: string; label: string }[] = useMemo(() => [
@@ -281,56 +279,6 @@ export default function AdminUsuarios() {
       setError(err.message || t.modal.matrizFreeError)
     } finally {
       setSalvandoFreeMatriz(false)
-    }
-  }
-
-  const simularBulkMigracao = async () => {
-    setSalvandoBulkMigracao(true)
-    setError(null)
-    setSuccess(null)
-    try {
-      const days = Math.min(3650, Math.max(1, Math.floor(Number(diasBulkMigracao)) || 3650))
-      const res = await fetch('/api/admin/subscriptions/bulk-ylada-migration', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ expires_in_days: days, dry_run: true }),
-      })
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.error || t.messages.errorLoad)
-      setSuccess(
-        `${t.bulkYladaMigration.doneDryRun} ${data.eligible ?? 0} (${t.stats.showing}: ${data.total_matriz_profiles ?? 0} perfis matriz).`
-      )
-    } catch (err: any) {
-      setError(err.message || t.messages.errorLoad)
-    } finally {
-      setSalvandoBulkMigracao(false)
-    }
-  }
-
-  const executarBulkMigracao = async () => {
-    if (!confirm(t.bulkYladaMigration.confirmRun)) return
-    setSalvandoBulkMigracao(true)
-    setError(null)
-    setSuccess(null)
-    try {
-      const days = Math.min(3650, Math.max(1, Math.floor(Number(diasBulkMigracao)) || 3650))
-      const res = await fetch('/api/admin/subscriptions/bulk-ylada-migration', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ expires_in_days: days, dry_run: false }),
-      })
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.error || t.messages.errorLoad)
-      setSuccess(
-        `${t.bulkYladaMigration.doneRun} Criados: ${data.created ?? 0}. Falhas: ${data.failed ?? 0}.`
-      )
-      carregarUsuarios()
-    } catch (err: any) {
-      setError(err.message || t.messages.errorLoad)
-    } finally {
-      setSalvandoBulkMigracao(false)
     }
   }
 
@@ -903,44 +851,6 @@ export default function AdminUsuarios() {
             <span className="text-gray-600">
               {t.stats.showing}: <strong className="text-blue-600 tabular-nums">{usuarios.length}</strong>
             </span>
-          </div>
-        )}
-
-        {!loading && (
-          <div className="flex-shrink-0 rounded-lg border border-indigo-200 bg-indigo-50/70 px-2.5 py-2 text-xs">
-            <div className="font-semibold text-gray-900">{t.bulkYladaMigration.title}</div>
-            <p className="text-gray-600 mt-0.5 mb-2 leading-snug">{t.bulkYladaMigration.intro}</p>
-            <div className="flex flex-wrap items-end gap-2">
-              <div>
-                <label className="block text-[11px] font-medium text-gray-600 mb-0.5">
-                  {t.bulkYladaMigration.daysLabel}
-                </label>
-                <input
-                  type="number"
-                  min={1}
-                  max={3650}
-                  value={diasBulkMigracao}
-                  onChange={(e) => setDiasBulkMigracao(Number(e.target.value))}
-                  className="w-24 px-2 py-1 border border-gray-300 rounded-md text-sm"
-                />
-              </div>
-              <button
-                type="button"
-                onClick={simularBulkMigracao}
-                disabled={salvandoBulkMigracao}
-                className="px-3 py-1.5 bg-white border border-indigo-300 text-indigo-800 text-xs font-medium rounded-md hover:bg-indigo-50 disabled:opacity-50"
-              >
-                {salvandoBulkMigracao ? t.modal.saving : t.bulkYladaMigration.dryRun}
-              </button>
-              <button
-                type="button"
-                onClick={executarBulkMigracao}
-                disabled={salvandoBulkMigracao}
-                className="px-3 py-1.5 bg-indigo-600 text-white text-xs font-medium rounded-md hover:bg-indigo-700 disabled:opacity-50"
-              >
-                {salvandoBulkMigracao ? t.modal.saving : t.bulkYladaMigration.run}
-              </button>
-            </div>
           </div>
         )}
 
