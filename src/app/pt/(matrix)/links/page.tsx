@@ -7,7 +7,6 @@ import { getYladaAreaPathPrefix } from '@/config/ylada-areas'
 import { getFlowById } from '@/config/ylada-flow-catalog'
 import { getTemasForProfession, getTemaLabel, TEMA_OUTRO_VALUE, TEMA_ICONS } from '@/config/ylada-temas'
 import { getFerramentasForTema, type FerramentaConcreta } from '@/config/ylada-temas-ferramentas'
-import { getSugestoesDiagnostico, getLabelSegmentoSugestoes } from '@/config/ylada-links-sugestoes'
 import { useAuth } from '@/hooks/useAuth'
 import { CompartilharDiagnosticoContent } from '@/components/ylada/CompartilharDiagnosticoContent'
 /** Objetivos do link: norte para a sugestão (quiz vs calculadora e texto). */
@@ -171,6 +170,8 @@ function LinksPageContent({ areaCodigo = 'ylada', areaLabel = 'YLADA' }: LinksPa
   const linksListRef = useRef<HTMLDivElement>(null)
   const suggestionBoxRef = useRef<HTMLDivElement>(null)
   const criadorRef = useRef<HTMLDivElement>(null)
+  /** `<details>` não aceita `defaultOpen` no React — estado + `open`/`onToggle`. */
+  const [comoFuncionaAberto, setComoFuncionaAberto] = useState(true)
 
   const segment = areaCodigo && areaCodigo !== 'ylada' ? areaCodigo : 'ylada'
 
@@ -218,6 +219,12 @@ function LinksPageContent({ areaCodigo = 'ylada', areaLabel = 'YLADA' }: LinksPa
   useEffect(() => {
     loadTemplatesAndLinks()
   }, [])
+
+  useEffect(() => {
+    if (!loading && links.length > 0) {
+      setComoFuncionaAberto(false)
+    }
+  }, [loading, links.length])
 
   const fetchStrategy = useCallback(() => {
     setStrategyLoading(true)
@@ -543,183 +550,70 @@ function LinksPageContent({ areaCodigo = 'ylada', areaLabel = 'YLADA' }: LinksPa
     }
   }
 
-  const sugestoes = getSugestoesDiagnostico(areaCodigo)
-  const labelSegmento = getLabelSegmentoSugestoes(areaCodigo)
+  const hasLinks = links.length > 0
+  const totalRespostasAgregado = links.reduce((s, l) => s + (l.stats?.diagnosis_count ?? l.stats?.complete ?? 0), 0)
+  const totalConversasAgregado = links.reduce((s, l) => s + (l.stats?.cta_click ?? 0), 0)
 
-  /** Criar link a partir de sugestão pronta. */
-  const handleCreateFromSuggested = async (sug: { title: string; flow_id: string; tema: string }) => {
-    setCreating(true)
-    setMessage(null)
-    try {
-      const flow = getFlowById(sug.flow_id)
-      const questions = (flow?.question_labels ?? []).map((label, i) => ({
-        id: `q${i + 1}`,
-        label,
-        type: 'text' as const,
-      }))
-      const body = {
-        flow_id: sug.flow_id,
-        title: sug.title,
-        segment: areaCodigo && areaCodigo !== 'ylada' ? areaCodigo : 'ylada',
-        interpretacao: {
-          objetivo: 'captar' as const,
-          tema: sug.tema,
-          tipo_publico: 'pacientes',
-          area_profissional: 'geral',
-        },
-        questions,
-        cta_suggestion: flow?.cta_default ?? 'Quero analisar meu caso',
-      }
-      const res = await fetch('/api/ylada/links/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify(body),
-      })
-      const json = await res.json()
-      if (json?.success && json?.data) {
-        const base = typeof window !== 'undefined' ? window.location.origin : ''
-        const url = json.data.url || `${base}/l/${json.data.slug}`
-        setLinks((prev) => [
-          { ...json.data, url, template_name: null, template_type: null, stats: { view: 0, start: 0, complete: 0, cta_click: 0, diagnosis_count: 0 } },
-          ...prev,
-        ])
-        setLastCreatedUrl(url)
-        setMessage({ type: 'success', text: 'Seu diagnóstico foi criado.' })
-        setTimeout(() => linksListRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 300)
-      } else {
-        const msg = json?.limit_reached ? json?.message : json?.error || 'Erro ao criar link.'
-        setMessage({ type: 'error', text: msg })
-      }
-    } catch {
-      setMessage({ type: 'error', text: 'Erro ao criar link. Tente novamente.' })
-    } finally {
-      setCreating(false)
-    }
+  const scrollToCriadorTexto = () => {
+    setInterpretResult(null)
+    setInterpretText('')
+    setShowTextFlow(true)
+    setTimeout(() => criadorRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100)
   }
 
   return (
     <YladaAreaShell areaCodigo={areaCodigo} areaLabel={areaLabel}>
       <div className="max-w-2xl space-y-6">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-1">
-            Diagnósticos que iniciam conversas com clientes
-          </h1>
-          <p className="text-gray-600 text-sm mb-4">
-            Crie links que despertam curiosidade, atraem pessoas interessadas e iniciam conversas no WhatsApp.
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-1">Links de captação</h1>
+          <p className="text-gray-600 text-sm mb-3">
+            Diagnósticos interativos (quizzes e calculadoras) que viram conversas no WhatsApp com possíveis clientes.
           </p>
-          {/* Fluxo visual do Método YLADA */}
-          <div className="rounded-lg border border-sky-100 bg-sky-50/50 p-4 mb-4">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2 gap-1 text-sm text-gray-700">
-              <span className="flex items-center gap-1.5 shrink-0">
-                <span aria-hidden>🧪</span>
-                <span>Criar diagnóstico</span>
-              </span>
-              <span className="hidden sm:inline text-sky-400" aria-hidden>→</span>
-              <span className="sm:hidden text-sky-400 self-center" aria-hidden>↓</span>
-              <span className="flex items-center gap-1.5 shrink-0">
-                <span aria-hidden>👩</span>
-                <span>Pessoa responde</span>
-              </span>
-              <span className="hidden sm:inline text-sky-400" aria-hidden>→</span>
-              <span className="sm:hidden text-sky-400 self-center" aria-hidden>↓</span>
-              <span className="flex items-center gap-1.5 shrink-0">
-                <span aria-hidden>💡</span>
-                <span>Curiosidade</span>
-              </span>
-              <span className="hidden sm:inline text-sky-400" aria-hidden>→</span>
-              <span className="sm:hidden text-sky-400 self-center" aria-hidden>↓</span>
-              <span className="flex items-center gap-1.5 shrink-0">
-                <span aria-hidden>💬</span>
-                <span>Conversa com você</span>
-              </span>
-              <span className="hidden sm:inline text-sky-400" aria-hidden>→</span>
-              <span className="sm:hidden text-sky-400 self-center" aria-hidden>↓</span>
-              <span className="flex items-center gap-1.5 shrink-0">
-                <span aria-hidden>👥</span>
-                <span>Novo cliente</span>
-              </span>
-            </div>
-          </div>
-        </div>
-
-        {/* Primeira vitória imediata — CTA central */}
-        <div className="rounded-xl border-2 border-amber-200 bg-amber-50/80 p-5">
-          <p className="text-sm font-semibold text-gray-900 mb-2">Crie seu primeiro diagnóstico agora</p>
-          <button
-            type="button"
-            onClick={() => {
-              setInterpretResult(null)
-              setInterpretText('')
-              setShowTextFlow(true)
-              setTimeout(() => criadorRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100)
-            }}
-            className="w-full sm:w-auto flex items-center justify-center gap-2 rounded-xl bg-amber-500 px-6 py-4 text-base font-bold text-white hover:bg-amber-600 transition-colors shadow-md hover:shadow-lg"
+          <details
+            className="rounded-lg border border-sky-100 bg-sky-50/50 p-4 group"
+            open={comoFuncionaAberto}
+            onToggle={(e) => setComoFuncionaAberto(e.currentTarget.open)}
           >
-            <span aria-hidden>⚡</span>
-            Criar diagnóstico em 30 segundos
-          </button>
-          <p className="text-xs text-gray-600 mt-3">
-            O Noel cria as perguntas automaticamente.
-          </p>
-        </div>
-
-        {/* Contador de impacto — progresso e motivação */}
-        {(() => {
-          const totalRespostas = links.reduce((s, l) => s + (l.stats?.diagnosis_count ?? l.stats?.complete ?? 0), 0)
-          const totalConversas = links.reduce((s, l) => s + (l.stats?.cta_click ?? 0), 0)
-          return (
-            <div className="rounded-lg border border-emerald-100 bg-emerald-50/60 px-4 py-4">
-              <p className="text-sm font-semibold text-gray-900 mb-3">📊 Impacto dos seus diagnósticos</p>
-              <div className="flex flex-wrap gap-6">
-                <div className="flex items-center gap-2">
+            <summary className="cursor-pointer text-sm font-medium text-gray-800 list-none flex items-center justify-between gap-2 [&::-webkit-details-marker]:hidden">
+              <span>Como funciona — do link ao novo cliente</span>
+              <span className="text-sky-500 text-xs shrink-0 group-open:rotate-180 transition-transform" aria-hidden>
+                ▼
+              </span>
+            </summary>
+            <div className="mt-3 pt-3 border-t border-sky-100/80">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2 gap-1 text-sm text-gray-700">
+                <span className="flex items-center gap-1.5 shrink-0">
+                  <span aria-hidden>🧪</span>
+                  <span>Criar diagnóstico</span>
+                </span>
+                <span className="hidden sm:inline text-sky-400" aria-hidden>→</span>
+                <span className="sm:hidden text-sky-400 self-center" aria-hidden>↓</span>
+                <span className="flex items-center gap-1.5 shrink-0">
                   <span aria-hidden>👩</span>
-                  <span className="text-lg font-bold text-gray-900">
-                    {totalRespostas} {totalRespostas === 1 ? 'resposta recebida' : 'respostas recebidas'}
-                  </span>
-                </div>
-                <div className="flex items-center gap-2">
+                  <span>Pessoa responde</span>
+                </span>
+                <span className="hidden sm:inline text-sky-400" aria-hidden>→</span>
+                <span className="sm:hidden text-sky-400 self-center" aria-hidden>↓</span>
+                <span className="flex items-center gap-1.5 shrink-0">
+                  <span aria-hidden>💡</span>
+                  <span>Curiosidade</span>
+                </span>
+                <span className="hidden sm:inline text-sky-400" aria-hidden>→</span>
+                <span className="sm:hidden text-sky-400 self-center" aria-hidden>↓</span>
+                <span className="flex items-center gap-1.5 shrink-0">
                   <span aria-hidden>💬</span>
-                  <span className="text-lg font-bold text-gray-900">
-                    {totalConversas} {totalConversas === 1 ? 'conversa iniciada' : 'conversas iniciadas'}
-                  </span>
-                </div>
+                  <span>Conversa com você</span>
+                </span>
+                <span className="hidden sm:inline text-sky-400" aria-hidden>→</span>
+                <span className="sm:hidden text-sky-400 self-center" aria-hidden>↓</span>
+                <span className="flex items-center gap-1.5 shrink-0">
+                  <span aria-hidden>👥</span>
+                  <span>Novo cliente</span>
+                </span>
               </div>
             </div>
-          )
-        })()}
-
-        {/* Diagnósticos sugeridos */}
-        {sugestoes.length > 0 && (
-          <section className="rounded-lg border border-blue-100 bg-blue-50/50 p-4">
-            <h2 className="text-sm font-semibold text-gray-800 mb-3">
-              Diagnósticos sugeridos para {labelSegmento}
-            </h2>
-            <div className="space-y-2">
-              {sugestoes.map((sug, i) => (
-                <div
-                  key={i}
-                  className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 p-3 rounded-lg bg-white border border-gray-100 hover:border-blue-200 transition-colors"
-                >
-                  <p className="text-sm text-gray-800 flex-1">{sug.title}</p>
-                  <button
-                    type="button"
-                    onClick={() => handleCreateFromSuggested(sug)}
-                    disabled={creating}
-                    className="shrink-0 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50 transition-colors"
-                  >
-                    {creating ? 'Gerando...' : 'Criar diagnóstico'}
-                  </button>
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
-
-        {/* Dica do método YLADA */}
-        <p className="text-xs text-gray-500 italic">
-          Dica do método YLADA: Diagnósticos que despertam curiosidade geram mais conversas no WhatsApp. Evite perguntas muito óbvias.
-        </p>
+          </details>
+        </div>
 
         {message && (
           <div
@@ -759,18 +653,258 @@ function LinksPageContent({ areaCodigo = 'ylada', areaLabel = 'YLADA' }: LinksPa
           </div>
         )}
 
+        {hasLinks && (
+          <section ref={linksListRef} className="bg-white rounded-lg border border-gray-200 p-4">
+            <h2 className="text-base font-semibold text-gray-900 mb-1">Seus links</h2>
+            <p className="text-xs text-gray-500 mb-3">Copie a URL, compartilhe e acompanhe as métricas abaixo.</p>
+            {(() => {
+              const linkMaisAtivo = links.length > 0
+                ? [...links].sort((a, b) => {
+                    const sa = a.stats?.diagnosis_count ?? a.stats?.complete ?? 0
+                    const sb = b.stats?.diagnosis_count ?? b.stats?.complete ?? 0
+                    return sb - sa
+                  })[0]
+                : null
+              const respostasMaisAtivo = linkMaisAtivo ? (linkMaisAtivo.stats?.diagnosis_count ?? linkMaisAtivo.stats?.complete ?? 0) : 0
+              const conversasMaisAtivo = linkMaisAtivo ? (linkMaisAtivo.stats?.cta_click ?? 0) : 0
+              if (!linkMaisAtivo || (respostasMaisAtivo === 0 && conversasMaisAtivo === 0)) return null
+              return (
+                <div className="mb-4 p-4 rounded-lg border border-amber-100 bg-amber-50/80">
+                  <p className="text-xs font-semibold text-amber-800 uppercase tracking-wide mb-2">Diagnóstico mais respondido</p>
+                  <p className="text-sm font-medium text-gray-900 mb-1 truncate">{linkMaisAtivo.title || linkMaisAtivo.slug}</p>
+                  <p className="text-xs text-gray-600">
+                    <span aria-hidden>👩</span> {respostasMaisAtivo} {respostasMaisAtivo === 1 ? 'resposta' : 'respostas'}
+                    <span className="mx-2 text-gray-300">·</span>
+                    <span aria-hidden>💬</span> {conversasMaisAtivo} {conversasMaisAtivo === 1 ? 'conversa' : 'conversas'}
+                  </p>
+                </div>
+              )
+            })()}
+            <ul className="space-y-4">
+              {links.map((link) => {
+                const stats = link.stats ?? { view: 0, start: 0, complete: 0, cta_click: 0, diagnosis_count: 0 }
+                const isActive = link.status === 'active'
+                return (
+                  <li key={`top-${link.id}`} className="py-3 border-b border-gray-100 last:border-0 last:pb-0">
+                    <div className="flex flex-wrap items-start justify-between gap-2">
+                      <div className="min-w-0 flex-1">
+                        <div className="flex flex-wrap items-center gap-2 mb-1">
+                          <p className="text-sm font-medium text-gray-900 truncate">{link.title || link.slug}</p>
+                          <span
+                            className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${
+                              link.status === 'active'
+                                ? 'bg-green-100 text-green-800'
+                                : link.status === 'paused'
+                                  ? 'bg-amber-100 text-amber-800'
+                                  : 'bg-gray-100 text-gray-600'
+                            }`}
+                          >
+                            {link.status === 'active' ? 'Ativo' : link.status === 'paused' ? 'Pausado' : 'Arquivado'}
+                          </span>
+                        </div>
+                        {link.template_name && (
+                          <p className="text-xs text-gray-500 mb-0.5">
+                            Modelo: {link.template_name}
+                            {link.template_type ? ` (${link.template_type})` : ''}
+                          </p>
+                        )}
+                        <p className="text-xs text-gray-400 truncate">{link.url}</p>
+                        <details className="mt-2 group/stats">
+                          <summary className="cursor-pointer text-xs text-gray-500 hover:text-gray-700 list-none flex items-center gap-1 [&::-webkit-details-marker]:hidden">
+                            <span>Métricas</span>
+                            <span className="text-gray-400 group-open/stats:rotate-180 transition-transform" aria-hidden>
+                              ▼
+                            </span>
+                          </summary>
+                          <div className="flex flex-wrap gap-3 mt-2 pl-0 text-xs text-gray-500">
+                            <span title="Acessos ao link">{stats.view} acessos</span>
+                            {(stats.diagnosis_count ?? 0) > 0 && (
+                              <span title="Diagnósticos realizados">{stats.diagnosis_count} diagnósticos</span>
+                            )}
+                            <span title="Conclusões">{stats.complete} conclusões</span>
+                            <span title="Cliques no WhatsApp">{stats.cta_click} cliques WhatsApp</span>
+                            {typeof stats.conversion_rate === 'number' && (
+                              <span
+                                title="Taxa de conversão"
+                                className={stats.conversion_rate < 10 ? 'text-amber-600 font-medium' : undefined}
+                              >
+                                {stats.conversion_rate}% conversão
+                              </span>
+                            )}
+                          </div>
+                        </details>
+                      </div>
+                      <div className="flex flex-col items-stretch gap-2 shrink-0 w-full sm:w-auto sm:min-w-[11rem]">
+                        <div className="flex flex-wrap gap-1 justify-end">
+                          <button
+                            type="button"
+                            onClick={() => copyUrl(link.url)}
+                            className="rounded-lg px-3 py-2 text-xs font-medium text-white bg-slate-800 hover:bg-slate-900"
+                          >
+                            Copiar URL
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setDivulgarLink(link)}
+                            className="rounded-lg px-3 py-2 text-xs font-medium text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200"
+                          >
+                            Divulgar
+                          </button>
+                        </div>
+                        <details className="relative group/actions">
+                          <summary className="cursor-pointer rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-xs font-medium text-gray-700 hover:bg-gray-100 list-none text-center [&::-webkit-details-marker]:hidden">
+                            Mais ações
+                          </summary>
+                          <div className="mt-2 flex flex-col gap-1 rounded-lg border border-gray-200 bg-white p-2 shadow-sm">
+                            <Link
+                              href={`${prefix}/links/editar/${link.id}`}
+                              className="rounded px-2 py-2 text-xs font-medium text-sky-600 hover:bg-sky-50 text-left"
+                            >
+                              Editar quiz
+                            </Link>
+                            {(stats.diagnosis_count ?? 0) >= 3 && (
+                              <Link
+                                href={`${prefix}/home?msg=${encodeURIComponent(
+                                  `Quero melhorar o diagnóstico do link "${link.title || link.slug}". Ele está com ${stats.conversion_rate ?? 0}% de conversão.`
+                                )}`}
+                                className="rounded px-2 py-2 text-xs font-medium text-amber-700 hover:bg-amber-50 text-left"
+                              >
+                                Melhorar diagnóstico
+                              </Link>
+                            )}
+                            <button
+                              type="button"
+                              onClick={() => openEditModal(link)}
+                              className="rounded px-2 py-2 text-xs font-medium text-gray-700 hover:bg-gray-100 text-left w-full"
+                            >
+                              Título e WhatsApp
+                            </button>
+                            {isActive && (
+                              <button
+                                type="button"
+                                onClick={() => handleUpdateStatus(link.id, 'paused')}
+                                className="rounded px-2 py-2 text-xs font-medium text-amber-700 hover:bg-amber-50 text-left w-full"
+                              >
+                                Pausar
+                              </button>
+                            )}
+                            {link.status === 'paused' && (
+                              <button
+                                type="button"
+                                onClick={() => handleUpdateStatus(link.id, 'active')}
+                                className="rounded px-2 py-2 text-xs font-medium text-green-700 hover:bg-green-50 text-left w-full"
+                              >
+                                Ativar
+                              </button>
+                            )}
+                            {link.status !== 'archived' && (
+                              <button
+                                type="button"
+                                onClick={() => handleUpdateStatus(link.id, 'archived')}
+                                className="rounded px-2 py-2 text-xs font-medium text-gray-600 hover:bg-gray-100 text-left w-full"
+                              >
+                                Arquivar
+                              </button>
+                            )}
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteLink(link)}
+                              disabled={deletingId === link.id}
+                              className="rounded px-2 py-2 text-xs font-medium text-red-600 hover:bg-red-50 text-left w-full disabled:opacity-50"
+                            >
+                              {deletingId === link.id ? 'Excluindo...' : 'Excluir'}
+                            </button>
+                          </div>
+                        </details>
+                      </div>
+                    </div>
+                  </li>
+                )
+              })}
+            </ul>
+          </section>
+        )}
+
+        {!hasLinks && (
+          <div className="rounded-xl border-2 border-amber-200 bg-amber-50/80 p-5">
+            <p className="text-sm font-semibold text-gray-900 mb-2">Primeiro link em poucos passos</p>
+            <button
+              type="button"
+              onClick={scrollToCriadorTexto}
+              className="w-full sm:w-auto flex items-center justify-center gap-2 rounded-xl bg-amber-500 px-6 py-3.5 text-sm font-bold text-white hover:bg-amber-600 transition-colors shadow-md hover:shadow-lg"
+            >
+              <span aria-hidden>⚡</span>
+              Descrever o que quero captar (Noel monta as perguntas)
+            </button>
+            <p className="text-xs text-gray-600 mt-3">Ou escolha um tema no criador abaixo — é o caminho mais rápido para muita gente.</p>
+          </div>
+        )}
+
+        <div
+          className={`rounded-lg border border-emerald-100 bg-emerald-50/60 px-4 ${hasLinks ? 'py-3' : 'py-4'}`}
+        >
+          {hasLinks ? (
+            <p className="text-sm text-gray-800">
+              <span className="font-semibold text-gray-900">Resumo:</span>{' '}
+              {totalRespostasAgregado} {totalRespostasAgregado === 1 ? 'resposta' : 'respostas'} ·{' '}
+              {totalConversasAgregado} {totalConversasAgregado === 1 ? 'conversa no WhatsApp' : 'conversas no WhatsApp'}
+            </p>
+          ) : (
+            <>
+              <p className="text-sm font-semibold text-gray-900 mb-3">📊 Impacto dos seus diagnósticos</p>
+              <div className="flex flex-wrap gap-6">
+                <div className="flex items-center gap-2">
+                  <span aria-hidden>👩</span>
+                  <span className="text-lg font-bold text-gray-900">
+                    {totalRespostasAgregado}{' '}
+                    {totalRespostasAgregado === 1 ? 'resposta recebida' : 'respostas recebidas'}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span aria-hidden>💬</span>
+                  <span className="text-lg font-bold text-gray-900">
+                    {totalConversasAgregado}{' '}
+                    {totalConversasAgregado === 1 ? 'conversa iniciada' : 'conversas iniciadas'}
+                  </span>
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+
+        <div className="rounded-lg border border-indigo-100 bg-indigo-50/50 p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div className="min-w-0">
+            <p className="text-sm font-semibold text-gray-900">Modelos prontos e biblioteca completa</p>
+            <p className="text-xs text-gray-600 mt-1">
+              Todos os diagnósticos e calculadoras da sua área ficam na Biblioteca, com filtros por tema e situação — sem repetir o que você já vê aqui.
+            </p>
+          </div>
+          <Link
+            href={`${prefix}/biblioteca`}
+            className="shrink-0 inline-flex items-center justify-center rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-700 transition-colors"
+          >
+            Abrir Biblioteca
+          </Link>
+        </div>
+
+        {!hasLinks && (
+          <p className="text-xs text-gray-500 italic">
+            Dica: diagnósticos que despertam curiosidade geram mais conversas no WhatsApp. Evite perguntas muito óbvias.
+          </p>
+        )}
+
         {/* Criar novo diagnóstico */}
         <section ref={criadorRef} className="bg-white rounded-lg border border-gray-200 p-4">
-          <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between mb-4">
             <div>
-              <h2 className="text-base font-semibold text-gray-900 mb-1">Criar novo diagnóstico</h2>
-              <p className="text-xs text-gray-500">Escolha o tema que você quer trabalhar.</p>
+              <h2 className="text-base font-semibold text-gray-900 mb-1">Criar novo link</h2>
+              <p className="text-xs text-gray-500">Comece pelo tema — é o caminho principal.</p>
             </div>
             <Link
               href={`${prefix}/links/novo`}
-              className="shrink-0 rounded-xl bg-sky-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-sky-700 transition-colors"
+              className="text-sm font-medium text-sky-600 hover:text-sky-800 underline underline-offset-2 shrink-0 self-start"
             >
-              🧠 Criar em 1 clique com o Noel
+              Preferir criar com o Noel em 1 clique →
             </Link>
           </div>
           {!showTextFlow ? (
@@ -1072,183 +1206,25 @@ function LinksPageContent({ areaCodigo = 'ylada', areaLabel = 'YLADA' }: LinksPa
           )}
         </section>
 
-        <section ref={linksListRef} className="bg-white rounded-lg border border-gray-200 p-4">
-          <h2 className="text-base font-semibold text-gray-900 mb-1">Seus diagnósticos criados</h2>
-          <p className="text-xs text-gray-500 mb-3">Todos os diagnósticos que você criar aparecerão aqui. Copie a URL e compartilhe com seus clientes.</p>
-          {(() => {
-            const linkMaisAtivo = links.length > 0
-              ? [...links].sort((a, b) => {
-                  const sa = a.stats?.diagnosis_count ?? a.stats?.complete ?? 0
-                  const sb = b.stats?.diagnosis_count ?? b.stats?.complete ?? 0
-                  return sb - sa
-                })[0]
-              : null
-            const respostasMaisAtivo = linkMaisAtivo ? (linkMaisAtivo.stats?.diagnosis_count ?? linkMaisAtivo.stats?.complete ?? 0) : 0
-            const conversasMaisAtivo = linkMaisAtivo ? (linkMaisAtivo.stats?.cta_click ?? 0) : 0
-            if (!linkMaisAtivo || (respostasMaisAtivo === 0 && conversasMaisAtivo === 0)) return null
-            return (
-              <div className="mb-4 p-4 rounded-lg border border-amber-100 bg-amber-50/80">
-                <p className="text-xs font-semibold text-amber-800 uppercase tracking-wide mb-2">Diagnóstico mais respondido</p>
-                <p className="text-sm font-medium text-gray-900 mb-1 truncate">{linkMaisAtivo.title || linkMaisAtivo.slug}</p>
-                <p className="text-xs text-gray-600">
-                  <span aria-hidden>👩</span> {respostasMaisAtivo} {respostasMaisAtivo === 1 ? 'resposta' : 'respostas'}
-                  <span className="mx-2 text-gray-300">·</span>
-                  <span aria-hidden>💬</span> {conversasMaisAtivo} {conversasMaisAtivo === 1 ? 'conversa' : 'conversas'}
-                </p>
-              </div>
-            )
-          })()}
-          {links.length === 0 ? (
+        {!hasLinks && (
+          <section ref={linksListRef} className="bg-white rounded-lg border border-gray-200 p-4">
+            <h2 className="text-base font-semibold text-gray-900 mb-1">Seus links</h2>
+            <p className="text-xs text-gray-500 mb-3">Quando você criar o primeiro, ele aparece aqui para copiar e acompanhar.</p>
             <div className="rounded-xl border border-amber-100 bg-amber-50/60 p-6">
-              <h3 className="text-base font-semibold text-gray-900 mb-2">Crie seu primeiro diagnóstico</h3>
+              <h3 className="text-base font-semibold text-gray-900 mb-2">Ainda sem links</h3>
               <p className="text-gray-700 text-sm mb-4">
-                Diagnósticos despertam curiosidade e iniciam conversas com possíveis clientes. Use um dos sugeridos acima ou escolha um tema para criar o seu.
+                Abra a Biblioteca para modelos prontos, use o criador (logo acima) ou descreva seu objetivo no atalho âmbar no topo da página.
               </p>
               <button
                 type="button"
-                onClick={() => {
-                  setInterpretResult(null)
-                  setInterpretText('')
-                  setShowTextFlow(true)
-                  setTimeout(() => criadorRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100)
-                }}
+                onClick={scrollToCriadorTexto}
                 className="inline-flex items-center gap-2 rounded-xl bg-amber-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-amber-700 transition-colors"
               >
-                ⚡ Criar diagnóstico agora
+                ⚡ Ir ao criador (objetivo em texto)
               </button>
             </div>
-          ) : (
-            <ul className="space-y-4">
-              {links.map((link) => {
-                const stats = link.stats ?? { view: 0, start: 0, complete: 0, cta_click: 0, diagnosis_count: 0 }
-                const isActive = link.status === 'active'
-                return (
-                  <li key={link.id} className="py-3 border-b border-gray-100 last:border-0 last:pb-0">
-                    <div className="flex flex-wrap items-start justify-between gap-2">
-                      <div className="min-w-0 flex-1">
-                        <div className="flex flex-wrap items-center gap-2 mb-1">
-                          <p className="text-sm font-medium text-gray-900 truncate">{link.title || link.slug}</p>
-                          <span
-                            className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${
-                              link.status === 'active'
-                                ? 'bg-green-100 text-green-800'
-                                : link.status === 'paused'
-                                  ? 'bg-amber-100 text-amber-800'
-                                  : 'bg-gray-100 text-gray-600'
-                            }`}
-                          >
-                            {link.status === 'active' ? 'Ativo' : link.status === 'paused' ? 'Pausado' : 'Arquivado'}
-                          </span>
-                        </div>
-                        {link.template_name && (
-                          <p className="text-xs text-gray-500 mb-0.5">
-                            Template: {link.template_name}
-                            {link.template_type ? ` (${link.template_type})` : ''}
-                          </p>
-                        )}
-                        <p className="text-xs text-gray-400 truncate">{link.url}</p>
-                        <div className="flex flex-wrap gap-3 mt-2 text-xs text-gray-500">
-                          <span title="Visualizações">{stats.view} views</span>
-                          {(stats.diagnosis_count ?? 0) > 0 && (
-                            <span title="Diagnósticos realizados">{stats.diagnosis_count} diagnósticos</span>
-                          )}
-                          <span title="Conclusões">{stats.complete} conclusões</span>
-                          <span title="Cliques no WhatsApp">{stats.cta_click} cliques WhatsApp</span>
-                          {typeof stats.conversion_rate === 'number' && (
-                            <span
-                              title="Taxa de conversão"
-                              className={
-                                stats.conversion_rate < 10 ? 'text-amber-600 font-medium' : undefined
-                              }
-                            >
-                              {stats.conversion_rate}% conversão
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                      <div className="flex flex-wrap items-center gap-1 shrink-0">
-                        <Link
-                          href={`${prefix}/links/editar/${link.id}`}
-                          className="rounded px-2 py-1.5 text-xs font-medium text-sky-600 hover:bg-sky-50"
-                        >
-                          Editar quiz
-                        </Link>
-                        {(stats.diagnosis_count ?? 0) >= 3 && (
-                          <Link
-                            href={`${prefix}/home?msg=${encodeURIComponent(
-                              `Quero melhorar o diagnóstico do link "${link.title || link.slug}". Ele está com ${stats.conversion_rate ?? 0}% de conversão.`
-                            )}`}
-                            className="rounded px-2 py-1.5 text-xs font-medium text-amber-700 hover:bg-amber-50"
-                            title="Pedir ao Noel sugestões para melhorar a conversão"
-                          >
-                            Melhorar diagnóstico
-                          </Link>
-                        )}
-                        <button
-                          type="button"
-                          onClick={() => openEditModal(link)}
-                          className="rounded px-2 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-100"
-                        >
-                          Título/WhatsApp
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => copyUrl(link.url)}
-                          className="rounded px-2 py-1.5 text-xs font-medium text-blue-600 hover:bg-blue-50"
-                        >
-                          Copiar URL
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setDivulgarLink(link)}
-                          className="rounded px-2 py-1.5 text-xs font-medium text-indigo-600 hover:bg-indigo-50"
-                        >
-                          Divulgar
-                        </button>
-                        {isActive && (
-                          <button
-                            type="button"
-                            onClick={() => handleUpdateStatus(link.id, 'paused')}
-                            className="rounded px-2 py-1.5 text-xs font-medium text-amber-700 hover:bg-amber-50"
-                          >
-                            Pausar
-                          </button>
-                        )}
-                        {link.status === 'paused' && (
-                          <button
-                            type="button"
-                            onClick={() => handleUpdateStatus(link.id, 'active')}
-                            className="rounded px-2 py-1.5 text-xs font-medium text-green-700 hover:bg-green-50"
-                          >
-                            Ativar
-                          </button>
-                        )}
-                        {link.status !== 'archived' && (
-                          <button
-                            type="button"
-                            onClick={() => handleUpdateStatus(link.id, 'archived')}
-                            className="rounded px-2 py-1.5 text-xs font-medium text-gray-600 hover:bg-gray-100"
-                          >
-                            Arquivar
-                          </button>
-                        )}
-                        <button
-                          type="button"
-                          onClick={() => handleDeleteLink(link)}
-                          disabled={deletingId === link.id}
-                          className="rounded px-2 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50 disabled:opacity-50"
-                          title="Excluir link (para testes)"
-                        >
-                          {deletingId === link.id ? 'Excluindo...' : 'Excluir'}
-                        </button>
-                      </div>
-                    </div>
-                  </li>
-                )
-              })}
-            </ul>
-          )}
-        </section>
+          </section>
+        )}
 
         {divulgarLink && (
           <div
