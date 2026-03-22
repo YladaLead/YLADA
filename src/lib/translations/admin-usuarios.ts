@@ -13,6 +13,9 @@ export interface AdminUsuariosTranslations {
   filters: {
     block: string
     blockHint: string
+    matrizYlada: string
+    legadoSegmentos: string
+    demaisSegmentos: string
     search: string
     searchPlaceholder: string
     area: string
@@ -41,6 +44,7 @@ export interface AdminUsuariosTranslations {
     fitness: string
     perfumaria: string
     ylada: string
+    seller: string
   }
   export: string
   stats: {
@@ -57,6 +61,9 @@ export interface AdminUsuariosTranslations {
     status: string
     subscription: string
     enrollment: string
+    /** Subtítulo no cabeçalho da coluna — evita confundir com vencimento do plano */
+    enrollmentSub: string
+    profileDateStamp: string
     leads: string
     actions: string
     edit: string
@@ -70,11 +77,18 @@ export interface AdminUsuariosTranslations {
     leadsLabel: string
     linksLabel: string
     clicksLabel: string
+    whatsapp: string
     notDefined: string
     yes: string
     nameLabel: string
     statusActive: string
     statusInactive: string
+    /** Gratuita com data de fim (admin concedeu prazo, ex. 90 dias) */
+    freeGiftedHint: string
+    /** Só quando não existe linha em subscriptions (matriz) */
+    matrizNoSubRowHint: string
+    /** Destaque na coluna Assinatura quando há vencimento */
+    planEndHighlight: string
   }
   subscriptionBadge: {
     active: string
@@ -116,6 +130,19 @@ export interface AdminUsuariosTranslations {
     expiresAt: string
     tempPasswordTip: string
     close: string
+    matrizFreeTitle: string
+    matrizFreeIntro: string
+    matrizFreeNotPassword: string
+    matrizFreeImplicitHint: string
+    matrizFreeHasRowHint: string
+    matrizFreeExpiresLabel: string
+    matrizFreeDaysValid: string
+    matrizFreeCreate: string
+    matrizFreeExtendDays: string
+    matrizFreeExtend: string
+    matrizFreeSuccessCreate: string
+    matrizFreeSuccessExtend: string
+    matrizFreeError: string
   }
   messages: {
     noUsers: string
@@ -132,22 +159,27 @@ export interface AdminUsuariosTranslations {
     errorDefinePresident: string
     errorNoSubscription: string
     errorNotAuthenticated: string
+    yladaSignupHint: string
+    searchHintAdmin: string
   }
 }
 
 const pt: AdminUsuariosTranslations = {
   page: {
     title: 'Usuários',
-    subtitle: 'Gerencie seus nutricionistas, coaches e consultores',
+    subtitle: 'Matriz YLADA (/pt), Wellness e segmentos — filtros alinhados ao modelo atual',
     back: 'Voltar',
   },
   filters: {
     block: 'Bloco',
-    blockHint: 'Princípios diferentes',
+    blockHint: 'Wellness (Herbalife) vs YLADA (matriz e segmentos)',
+    matrizYlada: 'Matriz YLADA (/pt)',
+    legadoSegmentos: 'Legado Nutri / Coach / Nutra',
+    demaisSegmentos: 'Outros segmentos (med, psi, vendas…)',
     search: 'Buscar',
-    searchPlaceholder: 'Nome ou email...',
-    area: 'Área',
-    areaHint: 'Conforme o bloco',
+    searchPlaceholder: 'E-mail, nome ou WhatsApp…',
+    area: 'Segmento',
+    areaHint: 'Refina dentro do bloco (matriz, legado ou outros)',
     status: 'Status',
     subscription: 'Assinatura',
     president: 'Presidente',
@@ -172,6 +204,7 @@ const pt: AdminUsuariosTranslations = {
     fitness: 'Fitness',
     perfumaria: 'Perfumaria',
     ylada: 'YLADA',
+    seller: 'Vendas',
   },
   export: 'Exportar planilha (CSV)',
   stats: {
@@ -187,7 +220,9 @@ const pt: AdminUsuariosTranslations = {
     president: 'Presidente',
     status: 'Status',
     subscription: 'Assinatura',
-    enrollment: 'Inscrição',
+    enrollment: 'Cadastro',
+    enrollmentSub: 'data do perfil (não é fim do plano)',
+    profileDateStamp: 'Perfil',
     leads: 'Leads',
     actions: 'Ações',
     edit: 'Editar',
@@ -201,11 +236,17 @@ const pt: AdminUsuariosTranslations = {
     leadsLabel: 'Leads',
     linksLabel: 'Links',
     clicksLabel: 'Cliques',
+    whatsapp: 'WhatsApp',
     notDefined: 'Não definido',
     yes: 'Sim',
     nameLabel: 'Nome',
     statusActive: 'Ativo',
     statusInactive: 'Inativo',
+    freeGiftedHint:
+      'Cortesia: período concedido (acesso completo; sem cobrança). O vencimento é o da linha acima.',
+    matrizNoSubRowHint:
+      'Sem linha de assinatura no banco — em Editar, crie plano free matriz (area ylada) com os dias.',
+    planEndHighlight: 'Fim do plano',
   },
   subscriptionBadge: {
     active: 'Ativa',
@@ -247,6 +288,22 @@ const pt: AdminUsuariosTranslations = {
     expiresAt: 'Expira em',
     tempPasswordTip: 'Dica: Após copiar, envie pelo canal de suporte com as instruções:',
     close: 'Fechar',
+    matrizFreeTitle: 'Plano free matriz (YLADA /pt)',
+    matrizFreeIntro:
+      'Define o prazo de acesso à matriz (registro em assinaturas com area ylada). Isto é independente da senha provisória de 3 dias.',
+    matrizFreeNotPassword:
+      'A senha provisória (abaixo) expira em 3 dias só para login; o plano free matriz pode ter prazo longo para uso da plataforma.',
+    matrizFreeImplicitHint:
+      'Ainda não há assinatura no banco para este usuário. Crie o registro (area ylada, ex. 90 dias) para fixar o prazo da cortesia.',
+    matrizFreeHasRowHint: 'Já existe assinatura area=ylada — estenda o prazo ou edite em “Assinatura”.',
+    matrizFreeExpiresLabel: 'Vencimento atual (free matriz)',
+    matrizFreeDaysValid: 'Validade inicial (dias)',
+    matrizFreeCreate: 'Criar plano free matriz',
+    matrizFreeExtendDays: 'Somar dias ao vencimento',
+    matrizFreeExtend: 'Estender prazo',
+    matrizFreeSuccessCreate: 'Plano free matriz criado com sucesso.',
+    matrizFreeSuccessExtend: 'Prazo do free matriz atualizado.',
+    matrizFreeError: 'Não foi possível salvar o plano free matriz.',
   },
   messages: {
     noUsers: 'Nenhum usuário encontrado',
@@ -261,24 +318,32 @@ const pt: AdminUsuariosTranslations = {
     errorUpdate: 'Erro ao atualizar usuário',
     errorDelete: 'Erro ao deletar usuário',
     errorDefinePresident: 'Erro ao definir presidente.',
-    errorNoSubscription: 'Usuário não tem assinatura ativa',
+    errorNoSubscription:
+      'Sem assinatura no banco. Abra Editar e use “Criar plano free matriz” com os dias; depois o botão Assinatura aparece para ajustar a data.',
     errorNotAuthenticated: 'Não autenticado',
+    yladaSignupHint:
+      'Cadastro em /pt (login matriz): e-mail e nome vão para o Supabase Auth e para a tabela user_profiles com perfil ylada. O telefone/WhatsApp fica em user_profiles.whatsapp quando a pessoa preenche Conta (ou API /api/ylada/account). Para achar alguém: use a busca por e-mail ou Bloco YLADA + segmento Matriz YLADA.',
+    searchHintAdmin:
+      'Use e-mail, nome ou número (WhatsApp). Quem está só na área gratuita pode aparecer como “Inativo” no status: deixe Status em Todos para não esconder na listagem.',
   },
 }
 
 const es: AdminUsuariosTranslations = {
   page: {
     title: 'Usuarios',
-    subtitle: 'Gestione sus nutricionistas, coaches y consultores',
+    subtitle: 'Matriz YLADA (/pt), Wellness y segmentos',
     back: 'Volver',
   },
   filters: {
     block: 'Bloque',
-    blockHint: 'Principios diferentes',
+    blockHint: 'Wellness vs YLADA (matriz y segmentos)',
+    matrizYlada: 'Matriz YLADA (/pt)',
+    legadoSegmentos: 'Legado Nutri / Coach / Nutra',
+    demaisSegmentos: 'Otros segmentos (med, psi, ventas…)',
     search: 'Buscar',
-    searchPlaceholder: 'Nombre o email...',
-    area: 'Área',
-    areaHint: 'Según el bloque',
+    searchPlaceholder: 'Email, nombre o WhatsApp…',
+    area: 'Segmento',
+    areaHint: 'Refina dentro del bloque',
     status: 'Estado',
     subscription: 'Suscripción',
     president: 'Presidente',
@@ -303,6 +368,7 @@ const es: AdminUsuariosTranslations = {
     fitness: 'Fitness',
     perfumaria: 'Perfumaria',
     ylada: 'YLADA',
+    seller: 'Ventas',
   },
   export: 'Exportar hoja (CSV)',
   stats: {
@@ -318,7 +384,9 @@ const es: AdminUsuariosTranslations = {
     president: 'Presidente',
     status: 'Estado',
     subscription: 'Suscripción',
-    enrollment: 'Inscripción',
+    enrollment: 'Registro',
+    enrollmentSub: 'fecha del perfil (no es fin del plan)',
+    profileDateStamp: 'Perfil',
     leads: 'Leads',
     actions: 'Acciones',
     edit: 'Editar',
@@ -332,11 +400,17 @@ const es: AdminUsuariosTranslations = {
     leadsLabel: 'Leads',
     linksLabel: 'Enlaces',
     clicksLabel: 'Clics',
+    whatsapp: 'WhatsApp',
     notDefined: 'No definido',
     yes: 'Sí',
     nameLabel: 'Nombre',
     statusActive: 'Activo',
     statusInactive: 'Inactivo',
+    freeGiftedHint:
+      'Cortesía: período otorgado (acceso completo; sin cobro). La fecha de fin es la indicada arriba.',
+    matrizNoSubRowHint:
+      'Sin fila de suscripción — en Editar, cree plan free matriz (area ylada) con los días.',
+    planEndHighlight: 'Fin del plan',
   },
   subscriptionBadge: {
     active: 'Activa',
@@ -378,6 +452,22 @@ const es: AdminUsuariosTranslations = {
     expiresAt: 'Expira en',
     tempPasswordTip: 'Consejo: Después de copiar, envíe por el canal de soporte con las instrucciones:',
     close: 'Cerrar',
+    matrizFreeTitle: 'Plan free matriz (YLADA /pt)',
+    matrizFreeIntro:
+      'Define la vigencia del acceso a la matriz (suscripción area ylada). Independiente de la contraseña provisional de 3 días.',
+    matrizFreeNotPassword:
+      'La contraseña provisional expira en 3 días solo para login; el plan free matriz puede tener plazos largos.',
+    matrizFreeImplicitHint:
+      'Aún no hay suscripción en la base para este usuario. Cree el registro (area ylada, ej. 90 días) para fijar el plazo de la cortesía.',
+    matrizFreeHasRowHint: 'Ya existe suscripción area=ylada — extienda o edite en “Suscripción”.',
+    matrizFreeExpiresLabel: 'Vencimiento actual (free matriz)',
+    matrizFreeDaysValid: 'Validez inicial (días)',
+    matrizFreeCreate: 'Crear plan free matriz',
+    matrizFreeExtendDays: 'Sumar días al vencimiento',
+    matrizFreeExtend: 'Extender plazo',
+    matrizFreeSuccessCreate: 'Plan free matriz creado.',
+    matrizFreeSuccessExtend: 'Plazo del free matriz actualizado.',
+    matrizFreeError: 'No se pudo guardar el plan free matriz.',
   },
   messages: {
     noUsers: 'Ningún usuario encontrado',
@@ -392,24 +482,32 @@ const es: AdminUsuariosTranslations = {
     errorUpdate: 'Error al actualizar usuario',
     errorDelete: 'Error al eliminar usuario',
     errorDefinePresident: 'Error al definir presidente.',
-    errorNoSubscription: 'El usuario no tiene suscripción activa',
+    errorNoSubscription:
+      'Sin suscripción en la base. En Editar use “Crear plan free matriz”; luego aparece el botón Suscripción.',
     errorNotAuthenticated: 'No autenticado',
+    yladaSignupHint:
+      'Registro en /pt: email y nombre en Auth y user_profiles (perfil ylada). WhatsApp en user_profiles.whatsapp al completar Cuenta. Busque por email o Bloque YLADA + Matriz YLADA.',
+    searchHintAdmin:
+      'Busque por email, nombre o WhatsApp. Usuarios solo gratuitos pueden verse “Inactivos”: deje Estado en Todos.',
   },
 }
 
 const en: AdminUsuariosTranslations = {
   page: {
     title: 'Users',
-    subtitle: 'Manage your nutritionists, coaches and consultants',
+    subtitle: 'YLADA matrix (/pt), Wellness and segments',
     back: 'Back',
   },
   filters: {
     block: 'Block',
-    blockHint: 'Different principles',
+    blockHint: 'Wellness vs YLADA (matrix and segments)',
+    matrizYlada: 'YLADA matrix (/pt)',
+    legadoSegmentos: 'Legacy Nutri / Coach / Nutra',
+    demaisSegmentos: 'Other segments (med, psi, sales…)',
     search: 'Search',
-    searchPlaceholder: 'Name or email...',
-    area: 'Area',
-    areaHint: 'According to block',
+    searchPlaceholder: 'Email, name or WhatsApp…',
+    area: 'Segment',
+    areaHint: 'Refine within the block',
     status: 'Status',
     subscription: 'Subscription',
     president: 'President',
@@ -434,6 +532,7 @@ const en: AdminUsuariosTranslations = {
     fitness: 'Fitness',
     perfumaria: 'Perfumaria',
     ylada: 'YLADA',
+    seller: 'Sales',
   },
   export: 'Export spreadsheet (CSV)',
   stats: {
@@ -449,7 +548,9 @@ const en: AdminUsuariosTranslations = {
     president: 'President',
     status: 'Status',
     subscription: 'Subscription',
-    enrollment: 'Enrollment',
+    enrollment: 'Signed up',
+    enrollmentSub: 'profile date (not plan end)',
+    profileDateStamp: 'Profile',
     leads: 'Leads',
     actions: 'Actions',
     edit: 'Edit',
@@ -463,11 +564,17 @@ const en: AdminUsuariosTranslations = {
     leadsLabel: 'Leads',
     linksLabel: 'Links',
     clicksLabel: 'Clicks',
+    whatsapp: 'WhatsApp',
     notDefined: 'Not defined',
     yes: 'Yes',
     nameLabel: 'Name',
     statusActive: 'Active',
     statusInactive: 'Inactive',
+    freeGiftedHint:
+      'Complimentary: access granted for a period (full access; no charge). End date is shown above.',
+    matrizNoSubRowHint:
+      'No subscription row — in Edit, create matrix free plan (ylada area) with the days.',
+    planEndHighlight: 'Plan ends',
   },
   subscriptionBadge: {
     active: 'Active',
@@ -509,6 +616,22 @@ const en: AdminUsuariosTranslations = {
     expiresAt: 'Expires in',
     tempPasswordTip: 'Tip: After copying, send via support channel with the instructions:',
     close: 'Close',
+    matrizFreeTitle: 'Matrix free plan (YLADA /pt)',
+    matrizFreeIntro:
+      'Sets matrix access duration (subscription with area ylada). Independent from the 3-day provisional password.',
+    matrizFreeNotPassword:
+      'The provisional password expires in 3 days for login only; the matrix free plan can have a long access window.',
+    matrizFreeImplicitHint:
+      'No subscription row yet for this user. Create one (ylada area, e.g. 90 days) to record the complimentary period end date.',
+    matrizFreeHasRowHint: 'A ylada-area subscription exists — extend or use “Subscription” edit.',
+    matrizFreeExpiresLabel: 'Current end date (matrix free)',
+    matrizFreeDaysValid: 'Initial term (days)',
+    matrizFreeCreate: 'Create matrix free plan',
+    matrizFreeExtendDays: 'Add days to end date',
+    matrizFreeExtend: 'Extend',
+    matrizFreeSuccessCreate: 'Matrix free plan created.',
+    matrizFreeSuccessExtend: 'Matrix free end date updated.',
+    matrizFreeError: 'Could not save matrix free plan.',
   },
   messages: {
     noUsers: 'No users found',
@@ -523,8 +646,13 @@ const en: AdminUsuariosTranslations = {
     errorUpdate: 'Error updating user',
     errorDelete: 'Error deleting user',
     errorDefinePresident: 'Error setting president.',
-    errorNoSubscription: 'User has no active subscription',
+    errorNoSubscription:
+      'No subscription row. In Edit use “Create matrix free plan”; then the Subscription button appears.',
     errorNotAuthenticated: 'Not authenticated',
+    yladaSignupHint:
+      'Sign up at /pt: email and name go to Auth and user_profiles (perfil ylada). Phone/WhatsApp is stored in user_profiles.whatsapp when the user saves Account (or /api/ylada/account). Find them via search or Block YLADA + YLADA matrix.',
+    searchHintAdmin:
+      'Search by email, name or WhatsApp. Free-only users may show as Inactive: set Status to All.',
   },
 }
 

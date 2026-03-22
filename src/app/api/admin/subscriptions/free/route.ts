@@ -45,10 +45,11 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Validar área
-    if (!['wellness', 'nutri', 'coach', 'nutra'].includes(area)) {
+    // Validar área (ylada = plano free da matriz /pt, independente do segmento do perfil)
+    const AREAS_VALIDAS = ['wellness', 'nutri', 'coach', 'nutra', 'ylada'] as const
+    if (!(AREAS_VALIDAS as readonly string[]).includes(area)) {
       return NextResponse.json(
-        { error: 'Área inválida. Use: wellness, nutri, coach ou nutra' },
+        { error: 'Área inválida. Use: wellness, nutri, coach, nutra ou ylada' },
         { status: 400 }
       )
     }
@@ -222,19 +223,24 @@ export async function POST(request: NextRequest) {
     const now = new Date()
     const periodStart = now.toISOString()
 
-    // Wellness: trial é sempre 3 dias. Ninguém pode receber 30 ou mais por engano.
+    // Wellness: trial é sempre 3 dias. YLADA (matriz): prazo longo permitido para free /pt.
     const isWellness = area === 'wellness'
-    const defaultDays = isWellness ? 3 : 365
+    const isYladaArea = area === 'ylada'
+    const defaultDays = isWellness ? 3 : isYladaArea ? 365 : 365
     let days = expires_in_days ?? defaultDays
     if (isWellness && days > 3) {
       days = 3
       console.log('⚠️ Wellness: trial limitado a 3 dias (valor solicitado foi ajustado).')
     }
 
-    // 🛡️ VALIDAÇÃO: Verificar que expires_in_days é razoável
-    if (days > 400) {
+    const maxDays = isWellness ? 3 : isYladaArea ? 3650 : 400
+    if (days > maxDays) {
       return NextResponse.json(
-        { error: 'Plano gratuito não pode ter mais de 400 dias de validade. Use um valor menor.' },
+        {
+          error: isYladaArea
+            ? 'Plano gratuito matriz (ylada) não pode ultrapassar 3650 dias (~10 anos).'
+            : 'Plano gratuito não pode ter mais de 400 dias de validade. Use um valor menor.',
+        },
         { status: 400 }
       )
     }
@@ -311,13 +317,27 @@ export async function POST(request: NextRequest) {
         console.error('❌ Hint:', error.hint)
         console.error('❌ Details:', error.details)
         console.error('❌ subscriptionData enviado:', JSON.stringify(subscriptionData, null, 2))
-        
-        // Verificar se é erro de constraint
-        if (error.message?.includes('plan_type') || error.message?.includes('check constraint')) {
+
+        const msg = error.message || ''
+        if (error.code === '23514' && msg.includes('subscriptions_area_check')) {
+          return NextResponse.json(
+            {
+              error:
+                'O Supabase ainda não aceita area "ylada" (e alguns segmentos) na tabela subscriptions. Abra o SQL Editor e execute o arquivo migrations/278-subscriptions-area-ylada-matriz.sql. Depois tente criar de novo os 90 dias.',
+              details: msg,
+              migration_required: true,
+              migration_file: '278-subscriptions-area-ylada-matriz.sql',
+            },
+            { status: 500 }
+          )
+        }
+
+        // Verificar se é erro de constraint plan_type
+        if (msg.includes('subscriptions_plan_type_check') || (msg.includes('plan_type') && msg.includes('check constraint'))) {
           return NextResponse.json(
             { 
               error: 'Erro: O banco de dados não permite plan_type "free". Execute a migração add-free-to-plan-type.sql no Supabase primeiro.',
-              details: error.message,
+              details: msg,
               migration_required: true
             },
             { status: 500 }

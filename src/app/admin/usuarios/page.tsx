@@ -30,6 +30,12 @@ interface Usuario {
   nome_presidente: string | null
   nome_presidente_canonico?: string | null
   is_presidente?: boolean
+  whatsapp?: string | null
+  /** Free matriz sem linha em subscriptions */
+  implicitMatrizFree?: boolean
+  podeGerenciarFreeMatriz?: boolean
+  yladaFreeSubscriptionId?: string | null
+  yladaFreePeriodEnd?: string | null
 }
 
 interface Stats {
@@ -42,36 +48,34 @@ export default function AdminUsuarios() {
   // Admin sempre em português
   const t = useMemo(() => getAdminUsuariosTranslations('pt'), [])
 
-  const [filtroBloco, setFiltroBloco] = useState<'todos' | 'ylada' | 'wellness'>('todos')
+  /** Padrão YLADA: lista alinhada à matriz; colunas de presidente removidas (gestão fica fora desta tela). */
+  const [filtroBloco, setFiltroBloco] = useState<'todos' | 'ylada' | 'wellness'>('ylada')
   const [filtroArea, setFiltroArea] = useState<string>('todos')
 
-  // Áreas disponíveis conforme o bloco selecionado (YLADA vs Wellness)
+  /** Segmento no filtro (API: todos | wellness | ylada | legado | demais_segmentos | perfil puntual) */
+  const mostrarColunasPresidente = false
+
   const opcoesArea = useMemo(() => {
     if (filtroBloco === 'wellness') {
-      return [{ value: 'todos' as const, label: t.filters.all }, { value: 'wellness' as const, label: t.areas.wellness }]
+      return [
+        { value: 'todos', label: t.filters.all },
+        { value: 'wellness', label: t.areas.wellness },
+      ]
     }
     if (filtroBloco === 'ylada') {
       return [
-        { value: 'todos' as const, label: t.filters.all },
-        { value: 'nutri' as const, label: t.areas.nutri },
-        { value: 'coach' as const, label: t.areas.coach },
-        { value: 'nutra' as const, label: t.areas.nutra },
-        { value: 'med' as const, label: t.areas.med },
-        { value: 'psi' as const, label: t.areas.psi },
-        { value: 'psicanalise' as const, label: t.areas.psicanalise },
-        { value: 'odonto' as const, label: t.areas.odonto },
-        { value: 'estetica' as const, label: t.areas.estetica },
-        { value: 'fitness' as const, label: t.areas.fitness },
-        { value: 'perfumaria' as const, label: t.areas.perfumaria },
-        { value: 'ylada' as const, label: t.areas.ylada },
+        { value: 'todos', label: t.filters.all },
+        { value: 'ylada', label: t.filters.matrizYlada },
+        { value: 'demais_segmentos', label: t.filters.demaisSegmentos },
+        { value: 'legado', label: t.filters.legadoSegmentos },
       ]
     }
     return [
-      { value: 'todos' as const, label: t.filters.all },
-      { value: 'nutri' as const, label: t.areas.nutri },
-      { value: 'coach' as const, label: t.areas.coach },
-      { value: 'nutra' as const, label: t.areas.nutra },
-      { value: 'wellness' as const, label: t.areas.wellness },
+      { value: 'todos', label: t.filters.all },
+      { value: 'wellness', label: t.areas.wellness },
+      { value: 'ylada', label: t.filters.matrizYlada },
+      { value: 'demais_segmentos', label: t.filters.demaisSegmentos },
+      { value: 'legado', label: t.filters.legadoSegmentos },
     ]
   }, [filtroBloco, t])
   const [filtroStatus, setFiltroStatus] = useState<'todos' | 'ativo' | 'inativo'>('todos')
@@ -96,7 +100,10 @@ export default function AdminUsuarios() {
     password: string
     expiresAt: string
   } | null>(null)
-  
+
+  const [diasNovaFreeMatriz, setDiasNovaFreeMatriz] = useState(365)
+  const [diasEstenderMatriz, setDiasEstenderMatriz] = useState(30)
+  const [salvandoFreeMatriz, setSalvandoFreeMatriz] = useState(false)
 
   // Todas as áreas para edição de perfil (modal Editar Usuário)
   const TODAS_AREAS_EDICAO: { value: string; label: string }[] = useMemo(() => [
@@ -112,6 +119,7 @@ export default function AdminUsuarios() {
     { value: 'fitness', label: t.areas.fitness },
     { value: 'perfumaria', label: t.areas.perfumaria },
     { value: 'ylada', label: t.areas.ylada },
+    { value: 'seller', label: t.areas.seller },
   ], [t])
 
   // Formulários
@@ -182,18 +190,23 @@ export default function AdminUsuarios() {
     }
   }
 
-  // Buscar dados da API
-  const carregarUsuarios = async () => {
+  // Buscar dados da API (`silent`: atualiza tabela sem spinner de página inteira — ex. após criar plano matriz)
+  const carregarUsuarios = async (opts?: { silent?: boolean }) => {
+    const silent = !!opts?.silent
     try {
-      setLoading(true)
-      setError(null)
+      if (!silent) {
+        setLoading(true)
+        setError(null)
+      }
 
       const params = new URLSearchParams()
       if (filtroBloco !== 'todos') params.append('bloco', filtroBloco)
       if (filtroArea !== 'todos') params.append('area', filtroArea)
       if (filtroStatus !== 'todos') params.append('status', filtroStatus)
       if (filtroAssinatura !== 'todos') params.append('assinatura', filtroAssinatura)
-      if (filtroPresidente !== 'todos') params.append('presidente', filtroPresidente)
+      if (filtroBloco === 'todos' && filtroPresidente !== 'todos') {
+        params.append('presidente', filtroPresidente)
+      }
       if (busca) params.append('busca', busca)
 
       const url = `/api/admin/usuarios?${params.toString()}`
@@ -215,9 +228,9 @@ export default function AdminUsuarios() {
       }
     } catch (err: any) {
       console.error('Erro ao carregar usuários:', err)
-      setError(err.message || t.messages.errorLoad)
+      if (!silent) setError(err.message || t.messages.errorLoad)
     } finally {
-      setLoading(false)
+      if (!silent) setLoading(false)
     }
   }
 
@@ -238,19 +251,114 @@ export default function AdminUsuarios() {
       nome_completo: usuario.nome,
       nome_presidente: (usuario.nome_presidente_canonico ?? usuario.nome_presidente) || null
     })
+    setDiasNovaFreeMatriz(365)
+    setDiasEstenderMatriz(30)
     setMostrarEditarUsuario(true)
   }
 
-  // Abrir modal de editar assinatura
+  const criarPlanoFreeYlada = async () => {
+    if (!usuarioSelecionado) return
+    setSalvandoFreeMatriz(true)
+    setError(null)
+    try {
+      const dias = Math.min(3650, Math.max(1, Math.floor(Number(diasNovaFreeMatriz)) || 365))
+      const res = await fetch('/api/admin/subscriptions/free', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          user_id: usuarioSelecionado.id,
+          area: 'ylada',
+          expires_in_days: dias,
+        }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || t.modal.matrizFreeError)
+      setSuccess(t.modal.matrizFreeSuccessCreate)
+      if (data.subscription && usuarioSelecionado) {
+        setUsuarioSelecionado({
+          ...usuarioSelecionado,
+          yladaFreeSubscriptionId: data.subscription.id,
+          yladaFreePeriodEnd: data.subscription.current_period_end,
+          implicitMatrizFree: false,
+          assinatura: 'gratuita',
+          assinaturaSituacao: 'ativa',
+          status: 'ativo',
+        })
+      }
+      carregarUsuarios()
+    } catch (err: any) {
+      setError(err.message || t.modal.matrizFreeError)
+    } finally {
+      setSalvandoFreeMatriz(false)
+    }
+  }
+
+  const estenderPlanoFreeYlada = async () => {
+    if (!usuarioSelecionado?.yladaFreeSubscriptionId) return
+    setSalvandoFreeMatriz(true)
+    setError(null)
+    setSuccess(null)
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session?.access_token) {
+        setError(t.messages.errorNotAuthenticated)
+        return
+      }
+      const currentEndMs = usuarioSelecionado.yladaFreePeriodEnd
+        ? new Date(usuarioSelecionado.yladaFreePeriodEnd).getTime()
+        : Date.now()
+      const base = new Date(Math.max(Date.now(), currentEndMs))
+      const add = Math.min(3650, Math.max(1, Math.floor(Number(diasEstenderMatriz)) || 30))
+      base.setUTCDate(base.getUTCDate() + add)
+      const res = await fetch(`/api/admin/subscriptions/${usuarioSelecionado.yladaFreeSubscriptionId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        credentials: 'include',
+        body: JSON.stringify({ current_period_end: base.toISOString() }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || t.modal.matrizFreeError)
+      const endIso = data.subscription?.current_period_end as string | undefined
+      const endFmt = endIso ? new Date(endIso).toLocaleDateString('pt-BR') : ''
+      setSuccess(endFmt ? `${t.modal.matrizFreeSuccessExtend} ${t.table.planEndHighlight}: ${endFmt}.` : t.modal.matrizFreeSuccessExtend)
+      if (data.subscription?.current_period_end) {
+        setUsuarioSelecionado((u) =>
+          u
+            ? {
+                ...u,
+                yladaFreePeriodEnd: data.subscription.current_period_end,
+                assinaturaVencimento: String(data.subscription.current_period_end).slice(0, 10),
+              }
+            : null
+        )
+      }
+      await carregarUsuarios({ silent: true })
+    } catch (err: any) {
+      setError(err.message || t.modal.matrizFreeError)
+    } finally {
+      setSalvandoFreeMatriz(false)
+    }
+  }
+
+  // Abrir modal de editar assinatura (assinaturaId OU linha ylada free matriz)
   const abrirEditarAssinatura = (usuario: Usuario) => {
-    if (!usuario.assinaturaId) {
+    const subId = usuario.assinaturaId ?? usuario.yladaFreeSubscriptionId
+    if (!subId) {
       setError(t.messages.errorNoSubscription)
       return
     }
-    setUsuarioSelecionado(usuario)
-    
-    // Data de vencimento no fuso local (YYYY-MM-DD) para bater com o "Vence: DD/MM" da lista — ver lib/date-utils.ts
-    const dataFormatada = toLocalDateStringISO(usuario.assinaturaVencimento)
+    setUsuarioSelecionado({
+      ...usuario,
+      assinaturaId: subId,
+    })
+    const vencFonte =
+      usuario.assinaturaVencimento ||
+      (usuario.yladaFreePeriodEnd ? String(usuario.yladaFreePeriodEnd).slice(0, 10) : null)
+    const dataFormatada = toLocalDateStringISO(vencFonte)
     
     setFormAssinatura({
       current_period_end: dataFormatada,
@@ -282,13 +390,17 @@ export default function AdminUsuarios() {
         return
       }
 
+      const payload = mostrarColunasPresidente
+        ? formUsuario
+        : { area: formUsuario.area, nome_completo: formUsuario.nome_completo }
+
       const response = await fetch(`/api/admin/usuarios/${usuarioSelecionado.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${session.access_token}`
         },
-        body: JSON.stringify(formUsuario)
+        body: JSON.stringify(payload)
       })
 
       const data = await response.json()
@@ -310,7 +422,8 @@ export default function AdminUsuarios() {
 
   // Salvar edição de assinatura
   const salvarEditarAssinatura = async () => {
-    if (!usuarioSelecionado || !usuarioSelecionado.assinaturaId) return
+    const subId = usuarioSelecionado?.assinaturaId ?? usuarioSelecionado?.yladaFreeSubscriptionId
+    if (!usuarioSelecionado || !subId) return
 
     setSalvando(true)
     setError(null)
@@ -333,12 +446,13 @@ export default function AdminUsuarios() {
         body.current_period_end = date.toISOString()
       }
 
-      const response = await fetch(`/api/admin/subscriptions/${usuarioSelecionado.assinaturaId}`, {
+      const response = await fetch(`/api/admin/subscriptions/${subId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${session.access_token}`
         },
+        credentials: 'include',
         body: JSON.stringify(body)
       })
 
@@ -351,7 +465,7 @@ export default function AdminUsuarios() {
 
       setSuccess(t.messages.subscriptionUpdated)
       setMostrarEditarAssinatura(false)
-      carregarUsuarios()
+      await carregarUsuarios({ silent: true })
     } catch (err: any) {
       setError(err.message || t.messages.errorUpdate)
     } finally {
@@ -483,6 +597,8 @@ export default function AdminUsuarios() {
       case 'coach': return '💜'
       case 'nutra': return '🔬'
       case 'wellness': return '💖'
+      case 'ylada': return '🔷'
+      case 'seller': return '🛒'
       default: return '👤'
     }
   }
@@ -493,24 +609,16 @@ export default function AdminUsuarios() {
       case 'coach': return 'bg-purple-100 text-purple-800'
       case 'nutra': return 'bg-blue-100 text-blue-800'
       case 'wellness': return 'bg-teal-100 text-teal-800'
+      case 'ylada': return 'bg-sky-100 text-sky-800'
+      case 'seller': return 'bg-amber-100 text-amber-900'
       default: return 'bg-gray-100 text-gray-800'
     }
   }
 
   const getAreaLabel = (area: Usuario['area']) => {
-    // Compactar o texto para evitar scroll horizontal após adicionar "Presidente"
-    switch (area) {
-      case 'wellness':
-        return 'Well'
-      case 'nutri':
-        return 'Nutri'
-      case 'coach':
-        return 'Coach'
-      case 'nutra':
-        return 'Nutra'
-      default:
-        return area
-    }
+    const key = area as keyof typeof t.areas
+    if (key in t.areas) return t.areas[key]
+    return area
   }
 
   const getStatusBadge = (status: string) => {
@@ -550,19 +658,29 @@ export default function AdminUsuarios() {
   }
 
   const exportarPlanilhaUsuarios = () => {
-    const headers = [t.table.nameLabel, 'Email', t.table.area, t.table.president, t.table.status, t.table.subscription, t.table.enrollment, t.table.leads, t.table.linksLabel, t.table.clicksLabel]
-    const rows = usuarios.map((u) => [
-      u.nome,
-      u.email,
-      u.area,
-      u.nome_presidente_canonico || u.nome_presidente || '',
-      u.status,
-      getAssinaturaTipoLabel(u.assinatura),
-      u.dataCadastro ? new Date(u.dataCadastro).toLocaleDateString('pt-BR') : '',
-      String(u.leadsGerados),
-      String(u.linksEnviados ?? 0),
-      String(u.cliquesLinks ?? 0),
-    ])
+    const headers = mostrarColunasPresidente
+      ? [t.table.nameLabel, 'Email', t.table.whatsapp, t.table.area, t.table.isPresident, t.table.president, t.table.status, t.table.subscription, t.table.enrollment, t.table.leads, t.table.linksLabel, t.table.clicksLabel]
+      : [t.table.nameLabel, 'Email', t.table.whatsapp, t.table.area, t.table.status, t.table.subscription, t.table.enrollment, t.table.leads, t.table.linksLabel, t.table.clicksLabel]
+    const rows = usuarios.map((u) => {
+      const base = [
+        u.nome,
+        u.email,
+        u.whatsapp || '',
+        u.area,
+      ]
+      const pres = mostrarColunasPresidente
+        ? [u.is_presidente ? t.table.yes : '—', u.nome_presidente_canonico || u.nome_presidente || '']
+        : []
+      const rest = [
+        u.status,
+        getAssinaturaTipoLabel(u.assinatura),
+        u.dataCadastro ? new Date(u.dataCadastro).toLocaleDateString('pt-BR') : '',
+        String(u.leadsGerados),
+        String(u.linksEnviados ?? 0),
+        String(u.cliquesLinks ?? 0),
+      ]
+      return [...base, ...pres, ...rest]
+    })
     const csv = [headers.join(';'), ...rows.map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(';'))].join('\n')
     const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8' })
     const url = URL.createObjectURL(blob)
@@ -574,9 +692,9 @@ export default function AdminUsuarios() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="h-dvh max-h-dvh flex flex-col overflow-hidden bg-gray-50">
       {/* Header */}
-      <header className="bg-white shadow-sm border-b border-gray-200">
+      <header className="flex-shrink-0 bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
@@ -592,6 +710,7 @@ export default function AdminUsuarios() {
               <div className="h-12 w-px bg-gray-300"></div>
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">{t.page.title}</h1>
+                <p className="text-sm text-gray-600 mt-0.5">{t.page.subtitle}</p>
               </div>
             </div>
             <div className="flex items-center space-x-3">
@@ -606,22 +725,22 @@ export default function AdminUsuarios() {
         </div>
       </header>
 
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      {/* Main Content: flex para a tabela ter área fixa na viewport — rolagem H+V no mesmo painel */}
+      <main className="flex-1 min-h-0 flex flex-col max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 pt-4 pb-4 gap-4">
         {/* Mensagens */}
         {success && (
-          <div className="mb-6 bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-lg">
+          <div className="flex-shrink-0 bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-lg">
             {success}
           </div>
         )}
         {error && (
-          <div className="mb-6 bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg">
+          <div className="flex-shrink-0 bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg">
             {error}
           </div>
         )}
 
         {/* Filtros */}
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200 mb-6">
+        <div className="flex-shrink-0 bg-white rounded-xl p-6 shadow-sm border border-gray-200">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">{t.filters.block}</label>
@@ -630,9 +749,13 @@ export default function AdminUsuarios() {
                 onChange={(e) => {
                   const novo = e.target.value as 'todos' | 'ylada' | 'wellness'
                   setFiltroBloco(novo)
-                  if (novo === 'wellness' && filtroArea !== 'todos' && filtroArea !== 'wellness') {
+                  if (novo !== 'todos') setFiltroPresidente('todos')
+                  const areaSohWellness = ['wellness', 'todos']
+                  if (novo === 'wellness' && !areaSohWellness.includes(filtroArea)) {
                     setFiltroArea('todos')
                   } else if (novo === 'ylada' && filtroArea === 'wellness') {
+                    setFiltroArea('todos')
+                  } else if (novo === 'todos' && !['todos', 'wellness', 'ylada', 'legado', 'demais_segmentos'].includes(filtroArea)) {
                     setFiltroArea('todos')
                   }
                 }}
@@ -654,6 +777,7 @@ export default function AdminUsuarios() {
                 placeholder={t.filters.searchPlaceholder}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
+              <p className="text-xs text-gray-500 mt-1">{t.messages.searchHintAdmin}</p>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">{t.filters.area}</label>
@@ -697,22 +821,24 @@ export default function AdminUsuarios() {
                 <option value="sem">{t.filters.noSubscription}</option>
               </select>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">{t.filters.president}</label>
-              <select
-                value={filtroPresidente}
-                onChange={(e) => setFiltroPresidente(e.target.value)}
-                disabled={loading}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50"
-              >
-                <option value="todos">{t.filters.all}</option>
-                {presidentesAutorizados.map((p) => (
-                  <option key={p.nome_completo} value={p.nome_completo}>
-                    {p.nome_completo}
-                  </option>
-                ))}
-              </select>
-            </div>
+            {filtroBloco === 'todos' && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">{t.filters.president}</label>
+                <select
+                  value={filtroPresidente}
+                  onChange={(e) => setFiltroPresidente(e.target.value)}
+                  disabled={loading}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50"
+                >
+                  <option value="todos">{t.filters.all}</option>
+                  {presidentesAutorizados.map((p) => (
+                    <option key={p.nome_completo} value={p.nome_completo}>
+                      {p.nome_completo}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
             <div className="flex items-end">
               <button
                 type="button"
@@ -728,7 +854,7 @@ export default function AdminUsuarios() {
 
         {/* Loading */}
         {loading && (
-          <div className="mb-6 text-center py-8">
+          <div className="flex-1 min-h-0 flex flex-col items-center justify-center py-8">
             <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
             <p className="mt-2 text-sm text-gray-600">{t.messages.loading}</p>
           </div>
@@ -736,7 +862,7 @@ export default function AdminUsuarios() {
 
         {/* Stats */}
         {!loading && (
-          <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-6">
+          <div className="flex-shrink-0 grid grid-cols-1 sm:grid-cols-4 gap-4">
             <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
               <p className="text-sm text-gray-600 mb-1">{t.stats.total}</p>
               <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
@@ -756,28 +882,40 @@ export default function AdminUsuarios() {
           </div>
         )}
 
-        {/* Lista de Usuários */}
+        {/* Lista de Usuários — scroll único (vertical + horizontal) no espaço restante da tela */}
         {!loading && (
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+          <div className="flex-1 min-h-0 flex flex-col bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden min-h-[12rem]">
             {usuarios.length === 0 ? (
-              <div className="text-center py-12">
+              <div className="flex-1 flex items-center justify-center text-center py-12 px-4">
                 <p className="text-gray-500">{t.messages.noUsers}</p>
               </div>
             ) : (
               <div
-                className="overflow-x-auto w-full max-w-full touch-pan-x"
+                className="flex-1 min-h-0 w-full overflow-auto overscroll-contain [scrollbar-gutter:stable] touch-pan-x"
                 style={{ WebkitOverflowScrolling: 'touch' }}
               >
-                <table className="w-full min-w-[800px] divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
+                <table
+                  className={`w-full divide-y divide-gray-200 ${mostrarColunasPresidente ? 'min-w-[920px]' : 'min-w-[720px]'}`}
+                >
+                  <thead className="bg-gray-50 sticky top-0 z-10 shadow-[inset_0_-1px_0_0_rgb(229,231,235)]">
                     <tr>
                       <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t.table.user}</th>
+                      <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t.table.whatsapp}</th>
                       <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t.table.area}</th>
-                      <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t.table.isPresident}</th>
-                      <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t.table.president}</th>
+                      {mostrarColunasPresidente && (
+                        <>
+                          <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t.table.isPresident}</th>
+                          <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t.table.president}</th>
+                        </>
+                      )}
                       <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t.table.status}</th>
                       <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t.table.subscription}</th>
-                      <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t.table.enrollment}</th>
+                      <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase align-top">
+                        <span className="block uppercase tracking-wider">{t.table.enrollment}</span>
+                        <span className="block text-[10px] font-normal normal-case text-gray-400 tracking-normal mt-0.5 max-w-[9rem] leading-tight">
+                          {t.table.enrollmentSub}
+                        </span>
+                      </th>
                       <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t.table.leads}</th>
                       <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t.table.actions}</th>
                     </tr>
@@ -800,6 +938,13 @@ export default function AdminUsuarios() {
                             </div>
                           </div>
                         </td>
+                        <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-700 font-mono">
+                          {usuario.whatsapp ? (
+                            <span title={usuario.whatsapp}>{usuario.whatsapp}</span>
+                          ) : (
+                            <span className="text-gray-400">—</span>
+                          )}
+                        </td>
                         <td className="px-3 py-4 whitespace-nowrap">
                           <div className="flex items-center">
                             <span className="text-xl mr-2">{getAreaIcon(usuario.area)}</span>
@@ -811,62 +956,98 @@ export default function AdminUsuarios() {
                             </span>
                           </div>
                         </td>
-                        <td className="px-3 py-4 whitespace-nowrap">
-                          {usuario.is_presidente ? (
-                            <span className="text-xs font-medium text-green-700">{t.table.yes}</span>
-                          ) : usuario.area === 'wellness' ? (
-                            <button
-                              type="button"
-                              onClick={() => definirComoPresidente(usuario.id)}
-                              disabled={definindoPresidente === usuario.id}
-                              className="text-xs text-green-600 hover:text-green-800 font-medium disabled:opacity-50"
-                            >
-                              {definindoPresidente === usuario.id ? t.table.saving : t.table.defineAsPresident}
-                            </button>
-                          ) : (
-                            <span className="text-xs text-gray-400">—</span>
-                          )}
-                        </td>
-                        <td className="px-3 py-4 min-w-[150px]">
-                          <div className="text-sm text-gray-900 truncate" title={usuario.nome_presidente_canonico || usuario.nome_presidente || ''}>
-                            {usuario.nome_presidente_canonico || usuario.nome_presidente || <span className="text-gray-400 italic">{t.table.notDefined}</span>}
-                          </div>
-                        </td>
+                        {mostrarColunasPresidente && (
+                          <>
+                            <td className="px-3 py-4 whitespace-nowrap">
+                              {usuario.is_presidente ? (
+                                <span className="text-xs font-medium text-green-700">{t.table.yes}</span>
+                              ) : usuario.area === 'wellness' ? (
+                                <button
+                                  type="button"
+                                  onClick={() => definirComoPresidente(usuario.id)}
+                                  disabled={definindoPresidente === usuario.id}
+                                  className="text-xs text-green-600 hover:text-green-800 font-medium disabled:opacity-50"
+                                >
+                                  {definindoPresidente === usuario.id ? t.table.saving : t.table.defineAsPresident}
+                                </button>
+                              ) : (
+                                <span className="text-xs text-gray-400">—</span>
+                              )}
+                            </td>
+                            <td className="px-3 py-4 min-w-[150px]">
+                              <div className="text-sm text-gray-900 truncate" title={usuario.nome_presidente_canonico || usuario.nome_presidente || ''}>
+                                {usuario.nome_presidente_canonico || usuario.nome_presidente || <span className="text-gray-400 italic">{t.table.notDefined}</span>}
+                              </div>
+                            </td>
+                          </>
+                        )}
                         <td className="px-3 py-4 whitespace-nowrap">
                           {getStatusBadge(usuario.status)}
                         </td>
-                        <td className="px-3 py-4 min-w-[180px]">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            {getAssinaturaStatusBadge(usuario.assinaturaSituacao)}
-                            <span className="text-sm text-gray-900">
-                              {getAssinaturaTipoLabel(usuario.assinatura)}
-                            </span>
-                            {usuario.isMigrado && (
-                              <span className="text-xs text-orange-600" title="Usuário migrado">🔄</span>
-                            )}
-                          </div>
-                          {usuario.assinaturaVencimento ? (
-                            usuario.assinaturaSituacao === 'ativa' ? (
-                              <div className="text-xs text-gray-500 mt-1">
-                                {t.table.expires}: {new Date(usuario.assinaturaVencimento).toLocaleDateString('pt-BR')}
-                              </div>
-                            ) : (
-                              <div className="text-xs text-red-600 mt-1">
-                                {t.table.expired}: {new Date(usuario.assinaturaVencimento).toLocaleDateString('pt-BR')}
-                                {typeof usuario.assinaturaDiasVencida === 'number' && (
-                                  <span className="ml-1">
-                                    ({usuario.assinaturaDiasVencida === 0 ? 'hoje' : `há ${usuario.assinaturaDiasVencida} dia${usuario.assinaturaDiasVencida === 1 ? '' : 's'}`})
+                        <td className="px-3 py-4 min-w-[200px]">
+                          {(() => {
+                            const dataVencStr =
+                              usuario.assinaturaVencimento ||
+                              (usuario.yladaFreePeriodEnd
+                                ? String(usuario.yladaFreePeriodEnd).slice(0, 10)
+                                : null)
+                            const dataVencFmt = dataVencStr
+                              ? new Date(dataVencStr + 'T12:00:00').toLocaleDateString('pt-BR')
+                              : null
+                            return (
+                              <>
+                                {dataVencStr ? (
+                                  usuario.assinaturaSituacao === 'ativa' ? (
+                                    <div className="text-sm font-semibold text-gray-900">
+                                      {t.table.planEndHighlight}: {dataVencFmt}
+                                    </div>
+                                  ) : usuario.assinaturaSituacao === 'vencida' ? (
+                                    <div className="text-sm font-semibold text-red-800">
+                                      {t.table.planEndHighlight} ({t.table.expired}): {dataVencFmt}
+                                      {typeof usuario.assinaturaDiasVencida === 'number' && (
+                                        <span className="text-xs font-normal text-red-600 ml-1">
+                                          ({usuario.assinaturaDiasVencida === 0 ? 'hoje' : `há ${usuario.assinaturaDiasVencida} dia${usuario.assinaturaDiasVencida === 1 ? '' : 's'}`})
+                                        </span>
+                                      )}
+                                    </div>
+                                  ) : (
+                                    <div className="text-sm font-semibold text-gray-800">
+                                      {t.table.planEndHighlight}: {dataVencFmt}
+                                    </div>
+                                  )
+                                ) : null}
+                                <div className="flex items-center gap-2 flex-wrap mt-1.5">
+                                  {getAssinaturaStatusBadge(usuario.assinaturaSituacao)}
+                                  <span className="text-sm text-gray-800">
+                                    {getAssinaturaTipoLabel(usuario.assinatura)}
                                   </span>
+                                  {usuario.isMigrado && (
+                                    <span className="text-xs text-orange-600" title="Usuário migrado">🔄</span>
+                                  )}
+                                </div>
+                                {dataVencStr && usuario.assinaturaSituacao === 'ativa' && usuario.assinatura === 'gratuita' && (
+                                  <div className="text-[11px] text-indigo-800 mt-1.5 font-medium leading-snug">
+                                    {t.table.freeGiftedHint}
+                                  </div>
                                 )}
-                              </div>
+                                {!dataVencStr &&
+                                  (usuario.implicitMatrizFree && !usuario.yladaFreeSubscriptionId ? (
+                                    <div className="text-xs text-gray-600 mt-1 leading-snug">
+                                      {t.table.matrizNoSubRowHint}
+                                    </div>
+                                  ) : usuario.assinatura === 'sem assinatura' ? (
+                                    <div className="text-xs text-gray-500 mt-1">{t.table.neverSubscribed}</div>
+                                  ) : (
+                                    <div className="text-xs text-amber-800 mt-1">
+                                      Vencimento não exibido — use Editar ou Assinatura
+                                    </div>
+                                  ))}
+                              </>
                             )
-                          ) : (
-                            <div className="text-xs text-gray-500 mt-1">
-                              {t.table.neverSubscribed}
-                            </div>
-                          )}
+                          })()}
                         </td>
                         <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-600">
+                          <div className="text-[10px] text-gray-400 uppercase tracking-wide mb-0.5">{t.table.profileDateStamp}</div>
                           {usuario.dataCadastro
                             ? new Date(usuario.dataCadastro).toLocaleDateString('pt-BR')
                             : <span className="text-gray-400">—</span>}
@@ -892,7 +1073,7 @@ export default function AdminUsuarios() {
                             >
                               {t.table.edit}
                             </button>
-                            {usuario.assinaturaId && (
+                            {(usuario.assinaturaId || usuario.yladaFreeSubscriptionId) && (
                               <button
                                 onClick={() => abrirEditarAssinatura(usuario)}
                                 className="text-green-600 hover:text-green-900 whitespace-nowrap"
@@ -921,7 +1102,7 @@ export default function AdminUsuarios() {
       {/* Modal Editar Usuário */}
       {mostrarEditarUsuario && usuarioSelecionado && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+          <div className="bg-white rounded-lg p-6 max-w-lg w-full mx-4 max-h-[90vh] overflow-y-auto">
             <h2 className="text-xl font-bold mb-4">{t.modal.editUser}</h2>
             <div className="space-y-4">
               <div>
@@ -946,24 +1127,103 @@ export default function AdminUsuarios() {
                 </select>
                 <p className="text-xs text-gray-500 mt-1">{t.modal.areaHint}</p>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">{t.modal.president}</label>
-                <select
-                  value={formUsuario.nome_presidente || ''}
-                  onChange={(e) => setFormUsuario({ ...formUsuario, nome_presidente: e.target.value || null })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="">{t.table.notDefined}</option>
-                  {presidentesAutorizados.map((presidente) => (
-                    <option key={presidente.nome_completo} value={presidente.nome_completo}>
-                      {presidente.nome_completo}
-                    </option>
-                  ))}
-                </select>
-                <p className="mt-1 text-xs text-gray-500">
-                  {t.modal.presidentHint}
-                </p>
-              </div>
+              {mostrarColunasPresidente && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{t.modal.president}</label>
+                  <select
+                    value={formUsuario.nome_presidente || ''}
+                    onChange={(e) => setFormUsuario({ ...formUsuario, nome_presidente: e.target.value || null })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="">{t.table.notDefined}</option>
+                    {presidentesAutorizados.map((presidente) => (
+                      <option key={presidente.nome_completo} value={presidente.nome_completo}>
+                        {presidente.nome_completo}
+                      </option>
+                    ))}
+                  </select>
+                  <p className="mt-1 text-xs text-gray-500">
+                    {t.modal.presidentHint}
+                  </p>
+                </div>
+              )}
+
+              {usuarioSelecionado.podeGerenciarFreeMatriz && (
+                <div className="mt-6 pt-4 border-t border-gray-200 space-y-3">
+                  <h3 className="text-sm font-semibold text-gray-900">{t.modal.matrizFreeTitle}</h3>
+                  <p className="text-xs text-gray-600">{t.modal.matrizFreeIntro}</p>
+                  <p className="text-xs text-amber-800 bg-amber-50 border border-amber-200 rounded-md px-2 py-1.5">
+                    {t.modal.matrizFreeNotPassword}
+                  </p>
+                  {usuarioSelecionado.implicitMatrizFree && !usuarioSelecionado.yladaFreeSubscriptionId && (
+                    <p className="text-xs text-gray-600">{t.modal.matrizFreeImplicitHint}</p>
+                  )}
+                  {usuarioSelecionado.yladaFreeSubscriptionId && (
+                    <p className="text-xs text-gray-600">{t.modal.matrizFreeHasRowHint}</p>
+                  )}
+
+                  {!usuarioSelecionado.yladaFreeSubscriptionId && (
+                    <div className="flex flex-col sm:flex-row sm:items-end gap-2">
+                      <div className="flex-1">
+                        <label className="block text-xs font-medium text-gray-700 mb-1">
+                          {t.modal.matrizFreeDaysValid}
+                        </label>
+                        <input
+                          type="number"
+                          min={1}
+                          max={3650}
+                          value={diasNovaFreeMatriz}
+                          onChange={(e) => setDiasNovaFreeMatriz(Number(e.target.value))}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                        />
+                      </div>
+                      <button
+                        type="button"
+                        onClick={criarPlanoFreeYlada}
+                        disabled={salvandoFreeMatriz || salvando}
+                        className="px-4 py-2 bg-indigo-600 text-white text-sm rounded-lg hover:bg-indigo-700 disabled:opacity-50 whitespace-nowrap"
+                      >
+                        {salvandoFreeMatriz ? t.modal.saving : t.modal.matrizFreeCreate}
+                      </button>
+                    </div>
+                  )}
+
+                  {usuarioSelecionado.yladaFreeSubscriptionId && (
+                    <div className="space-y-2">
+                      <p className="text-xs text-gray-700">
+                        <span className="font-medium">{t.modal.matrizFreeExpiresLabel}:</span>{' '}
+                        {usuarioSelecionado.yladaFreePeriodEnd
+                          ? new Date(usuarioSelecionado.yladaFreePeriodEnd).toLocaleDateString('pt-BR')
+                          : '—'}
+                      </p>
+                      <div className="flex flex-col sm:flex-row sm:items-end gap-2">
+                        <div className="flex-1">
+                          <label className="block text-xs font-medium text-gray-700 mb-1">
+                            {t.modal.matrizFreeExtendDays}
+                          </label>
+                          <input
+                            type="number"
+                            min={1}
+                            max={3650}
+                            value={diasEstenderMatriz}
+                            onChange={(e) => setDiasEstenderMatriz(Number(e.target.value))}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                          />
+                        </div>
+                        <button
+                          type="button"
+                          onClick={estenderPlanoFreeYlada}
+                          disabled={salvandoFreeMatriz || salvando}
+                          className="px-4 py-2 bg-indigo-600 text-white text-sm rounded-lg hover:bg-indigo-700 disabled:opacity-50 whitespace-nowrap"
+                        >
+                          {salvandoFreeMatriz ? t.modal.saving : t.modal.matrizFreeExtend}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
               <div className="mt-6 pt-4 border-t border-gray-200">
                 <h3 className="text-sm font-medium text-gray-700 mb-3">🔑 {t.modal.tempPassword}</h3>
                 <p className="text-xs text-gray-600 mb-3">

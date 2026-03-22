@@ -16,7 +16,7 @@ import { requireApiAuth } from '@/lib/api-auth'
  */
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> | { id: string } }
 ) {
   try {
     // Verificar se é admin
@@ -25,7 +25,11 @@ export async function PUT(
       return authResult
     }
 
-    const subscriptionId = params.id
+    const resolved =
+      params !== null && typeof params === 'object' && 'then' in params && typeof (params as Promise<{ id: string }>).then === 'function'
+        ? await (params as Promise<{ id: string }>)
+        : (params as { id: string })
+    const subscriptionId = resolved.id
     const body = await request.json()
     const { current_period_end, plan_type, status } = body
 

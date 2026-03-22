@@ -123,6 +123,19 @@ function AdminConfigContent() {
 
       {/* Main Content */}
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+          <h2 className="text-xl font-bold text-gray-900 mb-2">Relatórios</h2>
+          <p className="text-sm text-gray-600 mb-4">
+            Plano free da matriz (area ylada): prazos, leads e prévia de contas só com free implícito.
+          </p>
+          <Link
+            href="/admin/plano-free-matriz"
+            className="inline-flex items-center px-4 py-2 bg-slate-800 text-white text-sm font-medium rounded-lg hover:bg-slate-900 transition-colors"
+          >
+            Plano free matriz — painel
+          </Link>
+        </div>
+
         {/* Segurança */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
           <h2 className="text-xl font-bold text-gray-900 mb-6">🔒 Segurança</h2>

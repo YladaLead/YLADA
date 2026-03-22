@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
 import { requireApiAuth } from '@/lib/api-auth'
 import { getNamesForCanonical, getCanonicalName } from '@/lib/presidente-canonicos'
+import { isPerfilMatrizYlada, PERFIS_MATRIZ_YLADA } from '@/lib/admin-matriz-constants'
 
 /**
  * GET /api/admin/usuarios
@@ -10,12 +11,18 @@ import { getNamesForCanonical, getCanonicalName } from '@/lib/presidente-canonic
  * 
  * Query params:
  * - bloco?: 'todos' | 'ylada' | 'wellness' - Separar YLADA de Wellness (princípios diferentes)
- * - area?: 'todos' | 'wellness' | 'nutri' | 'coach' | 'nutra' - Filtrar por área
+ * - area?: 'todos' | 'wellness' | 'ylada' | 'legado' | 'demais_segmentos' | perfil específico (nutri, med, …)
+ *   Obs.: area=ylada = matriz /pt inteira (med, nutri, perfil ylada, …), não só user_profiles.perfil = 'ylada'
  * - status?: 'todos' | 'ativo' | 'inativo' - Filtrar por status
  * - assinatura?: 'todos' | 'gratuita' | 'mensal' | 'anual' | 'sem' - Filtrar por tipo de assinatura
  * - presidente?: string - Filtrar por nome do presidente (equipe do presidente)
- * - busca?: string - Buscar por nome ou email
+ * - busca?: string - Buscar por nome, email (user_profiles ou Auth) ou WhatsApp
  */
+function sanitizeBuscaIlike(raw: string) {
+  // Vírgula quebra o operador .or() do PostgREST; %/_ em e-mail são raros
+  return raw.trim().replace(/,/g, ' ').slice(0, 120)
+}
+
 export async function GET(request: NextRequest) {
   try {
     // Verificar se é admin
@@ -33,20 +40,28 @@ export async function GET(request: NextRequest) {
     const busca = searchParams.get('busca') || ''
 
     // Buscar todos os perfis de usuários
-    const YLADA_AREAS = ['nutri', 'coach', 'nutra', 'med', 'psi', 'psicanalise', 'odonto', 'estetica', 'fitness', 'perfumaria', 'ylada']
+    const LEGADO_AREAS = ['nutri', 'coach', 'nutra']
+    const DEMAIS_SEGMENTOS = ['med', 'psi', 'psicanalise', 'odonto', 'estetica', 'fitness', 'perfumaria', 'seller']
     let profilesQuery = supabaseAdmin
       .from('user_profiles')
-      .select('id, user_id, nome_completo, email, perfil, created_at, nome_presidente')
+      .select('id, user_id, nome_completo, email, whatsapp, perfil, created_at, nome_presidente')
 
     // Aplicar filtro de bloco (YLADA vs Wellness - princípios diferentes)
     if (blocoFiltro === 'ylada') {
-      profilesQuery = profilesQuery.in('perfil', YLADA_AREAS)
+      profilesQuery = profilesQuery.in('perfil', [...PERFIS_MATRIZ_YLADA])
     } else if (blocoFiltro === 'wellness') {
       profilesQuery = profilesQuery.eq('perfil', 'wellness')
     }
 
     // Aplicar filtro de área (refinamento dentro do bloco)
-    if (areaFiltro !== 'todos') {
+    if (areaFiltro === 'legado') {
+      profilesQuery = profilesQuery.in('perfil', LEGADO_AREAS)
+    } else if (areaFiltro === 'demais_segmentos') {
+      profilesQuery = profilesQuery.in('perfil', DEMAIS_SEGMENTOS)
+    } else if (areaFiltro === 'ylada') {
+      // Rótulo na UI: "Matriz YLADA (/pt)" — todos os segmentos da matriz, inclusive Med, não só perfil literal 'ylada'
+      profilesQuery = profilesQuery.in('perfil', [...PERFIS_MATRIZ_YLADA])
+    } else if (areaFiltro !== 'todos') {
       profilesQuery = profilesQuery.eq('perfil', areaFiltro)
     }
 
@@ -58,12 +73,15 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // Aplicar busca por nome ou email
-    if (busca) {
-      profilesQuery = profilesQuery.or(`nome_completo.ilike.%${busca}%,email.ilike.%${busca}%`)
+    // Busca: nome, e-mail ou WhatsApp em user_profiles
+    const buscaLimpa = busca ? sanitizeBuscaIlike(busca) : ''
+    if (buscaLimpa) {
+      profilesQuery = profilesQuery.or(
+        `nome_completo.ilike.%${buscaLimpa}%,email.ilike.%${buscaLimpa}%,whatsapp.ilike.%${buscaLimpa}%`
+      )
     }
 
-    const { data: profiles, error: profilesError } = await profilesQuery
+    let { data: profiles, error: profilesError } = await profilesQuery
 
     if (profilesError) {
       console.error('Erro ao buscar perfis:', profilesError)
@@ -71,6 +89,32 @@ export async function GET(request: NextRequest) {
         { error: 'Erro ao buscar usuários' },
         { status: 500 }
       )
+    }
+
+    // E-mail existe no Auth e às vezes não está copiado em user_profiles — localizar pelo Auth e carregar o perfil
+    if (buscaLimpa && buscaLimpa.includes('@') && (!profiles || profiles.length === 0)) {
+      const q = buscaLimpa.toLowerCase()
+      let foundId: string | null = null
+      const perPage = 200
+      for (let page = 1; page <= 25 && !foundId; page++) {
+        const { data: lu, error: listErr } = await supabaseAdmin.auth.admin.listUsers({ page, perPage })
+        if (listErr || !lu?.users?.length) break
+        const hit = lu.users.find(
+          (x) =>
+            (x.email && x.email.toLowerCase() === q) ||
+            (x.email && x.email.toLowerCase().includes(q))
+        )
+        if (hit) foundId = hit.id
+        if (lu.users.length < perPage) break
+      }
+      if (foundId) {
+        const { data: p } = await supabaseAdmin
+          .from('user_profiles')
+          .select('id, user_id, nome_completo, email, whatsapp, perfil, created_at, nome_presidente')
+          .eq('user_id', foundId)
+          .maybeSingle()
+        if (p) profiles = [p]
+      }
     }
 
     if (!profiles || profiles.length === 0) {
@@ -83,6 +127,55 @@ export async function GET(request: NextRequest) {
           inativos: 0
         }
       })
+    }
+
+    // Preencher e-mail a partir do Auth quando a linha do perfil está sem e-mail (até 60 usuários por request)
+    const idsSemEmail = profiles.filter((p) => !p.email?.trim()).map((p) => p.user_id)
+    const emailDoAuth = new Map<string, string>()
+    const limiteAuth = 60
+    for (let i = 0; i < Math.min(idsSemEmail.length, limiteAuth); i += 15) {
+      const slice = idsSemEmail.slice(i, i + 15)
+      await Promise.all(
+        slice.map(async (uid) => {
+          try {
+            const { data } = await supabaseAdmin.auth.admin.getUserById(uid)
+            const em = data?.user?.email
+            if (em) emailDoAuth.set(uid, em)
+          } catch {
+            /* ignore */
+          }
+        })
+      )
+    }
+
+    // WhatsApp em user_profiles às vezes vazio; tentar phone / metadata do Auth (lista atual)
+    const idsSemWhatsapp = profiles.filter((p) => !p.whatsapp?.trim()).map((p) => p.user_id)
+    const whatsappDoAuth = new Map<string, string>()
+    const limiteWa = 120
+    const phoneFromAuthUser = (u: { phone?: string | null; user_metadata?: Record<string, unknown> } | null | undefined) => {
+      if (!u) return ''
+      if (u.phone && String(u.phone).trim()) return String(u.phone).trim()
+      const m = u.user_metadata
+      if (!m || typeof m !== 'object') return ''
+      for (const key of ['whatsapp', 'phone', 'phone_number', 'telefone'] as const) {
+        const v = m[key]
+        if (typeof v === 'string' && v.trim()) return v.trim()
+      }
+      return ''
+    }
+    for (let i = 0; i < Math.min(idsSemWhatsapp.length, limiteWa); i += 12) {
+      const slice = idsSemWhatsapp.slice(i, i + 12)
+      await Promise.all(
+        slice.map(async (uid) => {
+          try {
+            const { data } = await supabaseAdmin.auth.admin.getUserById(uid)
+            const ph = phoneFromAuthUser(data?.user ?? null)
+            if (ph) whatsappDoAuth.set(uid, ph)
+          } catch {
+            /* ignore */
+          }
+        })
+      )
     }
 
     // Buscar assinaturas (ativas e vencidas) para todos os usuários
@@ -176,7 +269,24 @@ export async function GET(request: NextRequest) {
     // Montar lista de usuários com dados completos
     const usuarios = profiles.map(profile => {
       const userArea = profile.perfil || 'wellness'
-      const userSubscriptions = subscriptions?.filter(s => s.user_id === profile.user_id && s.area === userArea) || []
+      const todasSubsUsuario = subscriptions?.filter((s) => s.user_id === profile.user_id) || []
+      const subsMesmaArea = todasSubsUsuario.filter((s) => s.area === userArea)
+      const subsYlada = todasSubsUsuario.filter((s) => s.area === 'ylada')
+
+      const isSubVigente = (sub: { status: string; current_period_end: string | null }) => {
+        if (!sub.current_period_end || sub.status !== 'active') return false
+        return new Date(sub.current_period_end).getTime() > now.getTime()
+      }
+
+      // Se existir linha "do segmento" mas só vencida/cancelada, não esconder ylada ativa (ex.: Med + free matriz)
+      const mesmaAreaTemVigente = subsMesmaArea.some(isSubVigente)
+      const userSubscriptions = mesmaAreaTemVigente
+        ? subsMesmaArea
+        : subsYlada.length > 0
+          ? subsYlada
+          : subsMesmaArea.length > 0
+            ? subsMesmaArea
+            : todasSubsUsuario
       const activeSubscription = userSubscriptions.find(sub => {
         if (!sub.current_period_end) return false
         const expiresAt = new Date(sub.current_period_end)
@@ -184,43 +294,71 @@ export async function GET(request: NextRequest) {
       })
       const latestSubscription = userSubscriptions[0]
 
-      const subscriptionToEdit = activeSubscription || latestSubscription || null
+      let subscriptionToEdit = activeSubscription || latestSubscription || null
       const subscriptionForStatus = activeSubscription || latestSubscription || null
-      const isAtivo = !!activeSubscription
-      const status = isAtivo ? 'ativo' : 'inativo'
+
+      /**
+       * Matriz /pt: zero linhas em `subscriptions` — acesso gratuito exibido no admin até criar registro (ex. ylada + prazo).
+       * Diferente de plano free com linha (cortesia 90 dias etc.).
+       */
+      const implicitMatrizFree = isPerfilMatrizYlada(userArea) && todasSubsUsuario.length === 0
+
+      const subsYladaOrdenadas = todasSubsUsuario.filter((s) => s.area === 'ylada')
+      const yladaSubAtiva = subsYladaOrdenadas.find(
+        (s) =>
+          s.status === 'active' &&
+          s.current_period_end &&
+          new Date(s.current_period_end).getTime() > now.getTime()
+      )
+      const yladaSubParaAdmin = yladaSubAtiva || subsYladaOrdenadas[0] || null
+
+      let isAtivo: boolean
+      let status: 'ativo' | 'inativo'
+      let assinaturaTipo: 'mensal' | 'anual' | 'gratuita' | 'sem assinatura'
+      let assinaturaVencimento: string | null = null
+      let assinaturaSituacao: 'ativa' | 'vencida' | 'sem'
+      let assinaturaDiasVencida: number | null = null
+
+      if (implicitMatrizFree) {
+        isAtivo = true
+        status = 'ativo'
+        assinaturaTipo = 'gratuita'
+        assinaturaSituacao = 'ativa'
+        assinaturaDiasVencida = null
+        subscriptionToEdit = null
+      } else {
+        isAtivo = !!activeSubscription
+        status = isAtivo ? 'ativo' : 'inativo'
+        assinaturaTipo = 'sem assinatura'
+        assinaturaSituacao = 'sem'
+
+        if (subscriptionForStatus) {
+          if (subscriptionForStatus.plan_type === 'free') {
+            assinaturaTipo = 'gratuita'
+          } else if (subscriptionForStatus.plan_type === 'monthly') {
+            assinaturaTipo = 'mensal'
+          } else if (subscriptionForStatus.plan_type === 'annual') {
+            assinaturaTipo = 'anual'
+          }
+          assinaturaVencimento = subscriptionForStatus.current_period_end
+        }
+
+        if (activeSubscription) {
+          assinaturaSituacao = 'ativa'
+        } else if (latestSubscription && latestSubscription.current_period_end) {
+          assinaturaSituacao = 'vencida'
+          const vencimento = new Date(latestSubscription.current_period_end)
+          assinaturaVencimento = latestSubscription.current_period_end
+          const diffMs = now.getTime() - vencimento.getTime()
+          assinaturaDiasVencida = diffMs > 0 ? Math.floor(diffMs / (1000 * 60 * 60 * 24)) : 0
+        } else {
+          assinaturaSituacao = 'sem'
+        }
+      }
 
       // Aplicar filtro de status
       if (statusFiltro !== 'todos' && status !== statusFiltro) {
         return null
-      }
-
-      // Determinar tipo de assinatura (antes do filtro)
-      let assinaturaTipo = 'sem assinatura'
-      let assinaturaVencimento: string | null = null
-      let assinaturaSituacao: 'ativa' | 'vencida' | 'sem' = 'sem'
-      let assinaturaDiasVencida: number | null = null
-      
-      if (subscriptionForStatus) {
-        if (subscriptionForStatus.plan_type === 'free') {
-          assinaturaTipo = 'gratuita'
-        } else if (subscriptionForStatus.plan_type === 'monthly') {
-          assinaturaTipo = 'mensal'
-        } else if (subscriptionForStatus.plan_type === 'annual') {
-          assinaturaTipo = 'anual'
-        }
-        assinaturaVencimento = subscriptionForStatus.current_period_end
-      }
-
-      if (activeSubscription) {
-        assinaturaSituacao = 'ativa'
-      } else if (latestSubscription && latestSubscription.current_period_end) {
-        assinaturaSituacao = 'vencida'
-        const vencimento = new Date(latestSubscription.current_period_end)
-        assinaturaVencimento = latestSubscription.current_period_end
-        const diffMs = now.getTime() - vencimento.getTime()
-        assinaturaDiasVencida = diffMs > 0 ? Math.floor(diffMs / (1000 * 60 * 60 * 24)) : 0
-      } else {
-        assinaturaSituacao = 'sem'
       }
 
       // Aplicar filtro de assinatura ('sem' no filtro = 'sem assinatura' no tipo)
@@ -231,10 +369,17 @@ export async function GET(request: NextRequest) {
         if (!tipoMatch) return null
       }
 
+      const emailExibicao =
+        (profile.email && profile.email.trim()) || emailDoAuth.get(profile.user_id) || ''
+
+      const whatsappExibicao =
+        (profile.whatsapp && profile.whatsapp.trim()) || whatsappDoAuth.get(profile.user_id) || null
+
       return {
         id: profile.user_id,
-        nome: profile.nome_completo || profile.email?.split('@')[0] || 'Sem nome',
-        email: profile.email || '',
+        nome: profile.nome_completo || emailExibicao.split('@')[0] || 'Sem nome',
+        email: emailExibicao,
+        whatsapp: whatsappExibicao,
         area: profile.perfil || 'wellness',
         status,
         assinatura: assinaturaTipo,
@@ -248,10 +393,16 @@ export async function GET(request: NextRequest) {
         isMigrado: subscriptionForStatus?.is_migrated || false,
         assinaturaSituacao,
         assinaturaDiasVencida,
-        statusAssinatura: subscriptionForStatus?.status || null, // active | canceled | past_due (para admin editar)
+        statusAssinatura: implicitMatrizFree
+          ? 'active'
+          : subscriptionForStatus?.status || null, // active | canceled | past_due (para admin editar)
         nome_presidente: profile.nome_presidente || null,
         nome_presidente_canonico: getCanonicalName(profile.nome_presidente) || null,
         is_presidente: presidentesUserIds.has(profile.user_id),
+        implicitMatrizFree,
+        podeGerenciarFreeMatriz: isPerfilMatrizYlada(userArea),
+        yladaFreeSubscriptionId: yladaSubParaAdmin?.id ?? null,
+        yladaFreePeriodEnd: yladaSubParaAdmin?.current_period_end ?? null,
       }
     }).filter(u => u !== null) // Remover nulls do filtro de status
 
