@@ -4,6 +4,7 @@ import { requireApiAuth } from '@/lib/api-auth'
 import { getNamesForCanonical, getCanonicalName } from '@/lib/presidente-canonicos'
 import { isPerfilMatrizYlada, PERFIS_MATRIZ_YLADA } from '@/lib/admin-matriz-constants'
 import { parseYladaFreeGrantKind } from '@/lib/admin-ylada-free-matriz'
+import { isAdminTestAccountEmail } from '@/lib/admin-test-accounts'
 
 /**
  * GET /api/admin/usuarios
@@ -410,20 +411,30 @@ export async function GET(request: NextRequest) {
               (yladaSubParaAdmin as { stripe_subscription_id?: string | null }).stripe_subscription_id
             )
           : null,
+        isContaTeste: isAdminTestAccountEmail(emailExibicao),
       }
     }).filter(u => u !== null) // Remover nulls do filtro de status
 
-    // Calcular estatísticas
+    const lista = usuarios as NonNullable<(typeof usuarios)[number]>[]
+    const producao = lista.filter((u) => !u.isContaTeste)
+    const testes = lista.filter((u) => u.isContaTeste)
+
+    // Totais “reais”: sem e-mails de domínios de teste (ex.: @ylada.com); ver getAdminTestEmailDomains
     const stats = {
-      total: usuarios.length,
-      ativos: usuarios.filter(u => u?.status === 'ativo').length,
-      inativos: usuarios.filter(u => u?.status === 'inativo').length
+      total: producao.length,
+      ativos: producao.filter((u) => u.status === 'ativo').length,
+      inativos: producao.filter((u) => u.status === 'inativo').length,
+      contasTeste: {
+        total: testes.length,
+        ativos: testes.filter((u) => u.status === 'ativo').length,
+        inativos: testes.filter((u) => u.status === 'inativo').length,
+      },
     }
 
     return NextResponse.json({
       success: true,
       usuarios,
-      stats
+      stats,
     })
   } catch (error: any) {
     console.error('Erro ao buscar usuários:', error)

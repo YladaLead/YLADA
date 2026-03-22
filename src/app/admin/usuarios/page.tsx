@@ -38,12 +38,15 @@ interface Usuario {
   yladaFreePeriodEnd?: string | null
   /** Derivado do prefixo em stripe_subscription_id (free_mig_ / free_cor_ / legado free_) */
   yladaFreeGrantKind?: 'migration' | 'courtesy' | 'legacy' | null
+  /** E-mail em domínio de teste (@ylada.com etc.) — stats de produção excluem */
+  isContaTeste?: boolean
 }
 
 interface Stats {
   total: number
   ativos: number
   inativos: number
+  contasTeste?: { total: number; ativos: number; inativos: number }
 }
 
 export default function AdminUsuarios() {
@@ -200,7 +203,13 @@ export default function AdminUsuarios() {
 
       if (data.success) {
         setUsuarios(data.usuarios || [])
-        setStats(data.stats || { total: 0, ativos: 0, inativos: 0 })
+        const s = data.stats || { total: 0, ativos: 0, inativos: 0 }
+        setStats({
+          total: s.total ?? 0,
+          ativos: s.ativos ?? 0,
+          inativos: s.inativos ?? 0,
+          contasTeste: s.contasTeste ?? { total: 0, ativos: 0, inativos: 0 },
+        })
       } else {
         throw new Error(t.messages.errorLoad)
       }
@@ -652,46 +661,23 @@ export default function AdminUsuarios() {
     return area
   }
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'ativo':
-        return <span className="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">{t.table.statusActive}</span>
-      case 'inativo':
-        return <span className="px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">{t.table.statusInactive}</span>
-      default:
-        return null
+  /** Coluna Assinatura: um rótulo (Free / Cortesia / Mensal / Anual); “Ativa” omitida na listagem. */
+  const getAssinaturaListLabel = (u: Usuario) => {
+    if (u.isContaTeste) return t.subscriptionType.courtesy
+    if (u.assinatura === 'sem assinatura') return t.subscriptionType.none
+    if (u.assinatura === 'mensal') return t.subscriptionType.monthly
+    if (u.assinatura === 'anual') return t.subscriptionType.annual
+    if (u.assinatura === 'gratuita') {
+      if (u.yladaFreeGrantKind === 'courtesy') return t.subscriptionType.courtesy
+      return t.subscriptionType.free
     }
-  }
-
-  const getAssinaturaStatusBadge = (situacao: Usuario['assinaturaSituacao']) => {
-    switch (situacao) {
-      case 'ativa':
-        return <span className="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-green-100 text-green-800">{t.subscriptionBadge.active}</span>
-      case 'vencida':
-        return <span className="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-red-100 text-red-700">{t.subscriptionBadge.expired}</span>
-      case 'sem':
-      default:
-        return <span className="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-gray-100 text-gray-600">{t.subscriptionBadge.none}</span>
-    }
-  }
-
-  const getAssinaturaTipoLabel = (tipo: Usuario['assinatura']) => {
-    switch (tipo) {
-      case 'mensal':
-        return t.subscriptionType.monthly
-      case 'anual':
-        return t.subscriptionType.annual
-      case 'gratuita':
-        return t.subscriptionType.free
-      default:
-        return t.subscriptionType.none
-    }
+    return t.subscriptionType.none
   }
 
   const exportarPlanilhaUsuarios = () => {
     const headers = mostrarColunasPresidente
-      ? [t.table.nameLabel, 'Email', t.table.whatsapp, t.table.area, t.table.isPresident, t.table.president, t.table.status, t.table.subscription, t.table.enrollment, t.table.leads, t.table.linksLabel, t.table.clicksLabel]
-      : [t.table.nameLabel, 'Email', t.table.whatsapp, t.table.area, t.table.status, t.table.subscription, t.table.enrollment, t.table.leads, t.table.linksLabel, t.table.clicksLabel]
+      ? [t.table.nameLabel, 'Email', t.table.whatsapp, t.table.area, t.table.isPresident, t.table.president, t.table.subscription, t.table.enrollment, t.table.leads, t.table.linksLabel, t.table.clicksLabel]
+      : [t.table.nameLabel, 'Email', t.table.whatsapp, t.table.area, t.table.subscription, t.table.enrollment, t.table.leads, t.table.linksLabel, t.table.clicksLabel]
     const rows = usuarios.map((u) => {
       const base = [
         u.nome,
@@ -703,8 +689,7 @@ export default function AdminUsuarios() {
         ? [u.is_presidente ? t.table.yes : '—', u.nome_presidente_canonico || u.nome_presidente || '']
         : []
       const rest = [
-        u.status,
-        getAssinaturaTipoLabel(u.assinatura),
+        getAssinaturaListLabel(u),
         u.dataCadastro ? new Date(u.dataCadastro).toLocaleDateString('pt-BR') : '',
         String(u.leadsGerados),
         String(u.linksEnviados ?? 0),
@@ -883,9 +868,13 @@ export default function AdminUsuarios() {
 
         {/* Stats — faixa compacta (mais altura para a tabela) */}
         {!loading && (
-          <div className="flex-shrink-0 flex flex-wrap items-baseline gap-x-4 gap-y-1 px-2.5 py-1.5 bg-white rounded-lg border border-gray-200 shadow-sm text-sm">
+          <div
+            className="flex-shrink-0 flex flex-wrap items-baseline gap-x-4 gap-y-1 px-2.5 py-1.5 bg-white rounded-lg border border-gray-200 shadow-sm text-sm"
+            title={t.stats.testDomainsHint}
+          >
             <span className="text-gray-600">
               {t.stats.total}: <strong className="text-gray-900 tabular-nums">{stats.total}</strong>
+              <span className="text-[10px] text-gray-400 font-normal ml-1 hidden sm:inline">(prod.)</span>
             </span>
             <span className="text-gray-300 hidden sm:inline" aria-hidden>
               |
@@ -898,6 +887,15 @@ export default function AdminUsuarios() {
             </span>
             <span className="text-gray-600">
               {t.stats.inactive}: <strong className="text-gray-700 tabular-nums">{stats.inativos}</strong>
+            </span>
+            <span className="text-gray-300 hidden sm:inline" aria-hidden>
+              |
+            </span>
+            <span className="text-gray-600" title={t.stats.testDomainsHint}>
+              {t.stats.testAccounts}:{' '}
+              <strong className="text-amber-700 tabular-nums">
+                {stats.contasTeste?.total ?? 0}
+              </strong>
             </span>
             <span className="text-gray-300 hidden sm:inline" aria-hidden>
               |
@@ -959,7 +957,7 @@ export default function AdminUsuarios() {
                 style={{ WebkitOverflowScrolling: 'touch' }}
               >
                 <table
-                  className={`w-full divide-y divide-gray-200 ${mostrarColunasPresidente ? 'min-w-[920px]' : 'min-w-[720px]'}`}
+                  className={`w-full divide-y divide-gray-200 ${mostrarColunasPresidente ? 'min-w-[860px]' : 'min-w-[640px]'}`}
                 >
                   <thead className="bg-gray-50 sticky top-0 z-10 shadow-[inset_0_-1px_0_0_rgb(229,231,235)]">
                     <tr>
@@ -972,7 +970,6 @@ export default function AdminUsuarios() {
                           <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t.table.president}</th>
                         </>
                       )}
-                      <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t.table.status}</th>
                       <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t.table.subscription}</th>
                       <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase align-top">
                         <span className="block uppercase tracking-wider">{t.table.enrollment}</span>
@@ -993,8 +990,15 @@ export default function AdminUsuarios() {
                               {usuario.nome.charAt(0).toUpperCase()}
                             </div>
                             <div className="ml-3 min-w-0">
-                              <div className="text-sm font-medium text-gray-900 truncate" title={usuario.nome}>
-                                {usuario.nome}
+                              <div className="flex items-center gap-1.5 min-w-0">
+                                <span className="text-sm font-medium text-gray-900 truncate" title={usuario.nome}>
+                                  {usuario.nome}
+                                </span>
+                                {usuario.isContaTeste && (
+                                  <span className="flex-shrink-0 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-amber-100 text-amber-900">
+                                    {t.table.testAccountBadge}
+                                  </span>
+                                )}
                               </div>
                               <div className="text-sm text-gray-500 truncate" title={usuario.email}>
                                 {usuario.email}
@@ -1045,9 +1049,6 @@ export default function AdminUsuarios() {
                             </td>
                           </>
                         )}
-                        <td className="px-3 py-4 whitespace-nowrap">
-                          {getStatusBadge(usuario.status)}
-                        </td>
                         <td className="px-3 py-4 min-w-[200px]">
                           {(() => {
                             const dataVencStr =
@@ -1058,9 +1059,12 @@ export default function AdminUsuarios() {
                             const dataVencFmt = dataVencStr
                               ? new Date(dataVencStr + 'T12:00:00').toLocaleDateString('pt-BR')
                               : null
+                            /** Free ativo: não exibir data de fim na listagem (prazo técnico longo confunde). */
+                            const ocultarFimPlano =
+                              usuario.assinatura === 'gratuita' && usuario.assinaturaSituacao === 'ativa'
                             return (
                               <>
-                                {dataVencStr ? (
+                                {dataVencStr && !ocultarFimPlano ? (
                                   usuario.assinaturaSituacao === 'ativa' ? (
                                     <div className="text-sm font-semibold text-gray-900">
                                       {t.table.planEndHighlight}: {dataVencFmt}
@@ -1081,9 +1085,13 @@ export default function AdminUsuarios() {
                                   )
                                 ) : null}
                                 <div className="flex items-center gap-2 flex-wrap mt-1.5">
-                                  {getAssinaturaStatusBadge(usuario.assinaturaSituacao)}
-                                  <span className="text-sm text-gray-800">
-                                    {getAssinaturaTipoLabel(usuario.assinatura)}
+                                  {usuario.assinaturaSituacao === 'vencida' && (
+                                    <span className="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-red-100 text-red-700">
+                                      {t.subscriptionBadge.expired}
+                                    </span>
+                                  )}
+                                  <span className="text-sm font-medium text-gray-900">
+                                    {getAssinaturaListLabel(usuario)}
                                   </span>
                                   {usuario.isMigrado && (
                                     <span className="text-xs text-orange-600" title="Usuário migrado">🔄</span>

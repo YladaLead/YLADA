@@ -50,6 +50,9 @@ export interface AdminUsuariosTranslations {
     active: string
     inactive: string
     showing: string
+    /** Contagem de e-mails em domínios de teste (excluídos do Total/Ativos acima) */
+    testAccounts: string
+    testDomainsHint: string
   }
   table: {
     user: string
@@ -91,6 +94,8 @@ export interface AdminUsuariosTranslations {
     matrizNoSubRowHint: string
     /** Destaque na coluna Assinatura quando há vencimento */
     planEndHighlight: string
+    /** Badge ao lado do e-mail para domínios de teste */
+    testAccountBadge: string
   }
   subscriptionBadge: {
     active: string
@@ -100,7 +105,10 @@ export interface AdminUsuariosTranslations {
   subscriptionType: {
     monthly: string
     annual: string
+    /** Free matriz padrão (migração / legado / implícito), sem ser cortesia explícita */
     free: string
+    /** Free criado como cortesia admin (free_cor_) */
+    courtesy: string
     none: string
   }
   modal: {
@@ -228,7 +236,9 @@ const pt: AdminUsuariosTranslations = {
     total: 'Total',
     active: 'Ativos',
     inactive: 'Inativos',
-    showing: 'Mostrando',
+    showing: 'Na lista',
+    testAccounts: 'Contas teste',
+    testDomainsHint: 'Domínios @ylada.com (e extras em ADMIN_TEST_EMAIL_DOMAINS) fora do total',
   },
   table: {
     user: 'Usuário',
@@ -269,6 +279,7 @@ const pt: AdminUsuariosTranslations = {
     matrizNoSubRowHint:
       'Sem linha de assinatura no banco — em Editar, crie plano free matriz (area ylada) com os dias.',
     planEndHighlight: 'Fim do plano',
+    testAccountBadge: 'Teste',
   },
   subscriptionBadge: {
     active: 'Ativa',
@@ -278,7 +289,8 @@ const pt: AdminUsuariosTranslations = {
   subscriptionType: {
     monthly: 'Mensal',
     annual: 'Anual',
-    free: 'Gratuita',
+    free: 'Free',
+    courtesy: 'Cortesia',
     none: 'Sem assinatura',
   },
   modal: {
@@ -416,7 +428,9 @@ const es: AdminUsuariosTranslations = {
     total: 'Total',
     active: 'Activos',
     inactive: 'Inactivos',
-    showing: 'Mostrando',
+    showing: 'En la lista',
+    testAccounts: 'Cuentas de prueba',
+    testDomainsHint: 'Dominios @ylada.com (y ADMIN_TEST_EMAIL_DOMAINS) fuera del total',
   },
   table: {
     user: 'Usuario',
@@ -456,6 +470,7 @@ const es: AdminUsuariosTranslations = {
     matrizNoSubRowHint:
       'Sin fila de suscripción — en Editar, cree plan free matriz (area ylada) con los días.',
     planEndHighlight: 'Fin del plan',
+    testAccountBadge: 'Prueba',
   },
   subscriptionBadge: {
     active: 'Activa',
@@ -465,7 +480,8 @@ const es: AdminUsuariosTranslations = {
   subscriptionType: {
     monthly: 'Mensual',
     annual: 'Anual',
-    free: 'Gratuita',
+    free: 'Free',
+    courtesy: 'Cortesía',
     none: 'Sin suscripción',
   },
   modal: {
@@ -603,7 +619,9 @@ const en: AdminUsuariosTranslations = {
     total: 'Total',
     active: 'Active',
     inactive: 'Inactive',
-    showing: 'Showing',
+    showing: 'In list',
+    testAccounts: 'Test accounts',
+    testDomainsHint: '@ylada.com domains (and ADMIN_TEST_EMAIL_DOMAINS) excluded from total',
   },
   table: {
     user: 'User',
@@ -643,6 +661,7 @@ const en: AdminUsuariosTranslations = {
     matrizNoSubRowHint:
       'No subscription row — in Edit, create matrix free plan (ylada area) with the days.',
     planEndHighlight: 'Plan ends',
+    testAccountBadge: 'Test',
   },
   subscriptionBadge: {
     active: 'Active',
@@ -653,6 +672,7 @@ const en: AdminUsuariosTranslations = {
     monthly: 'Monthly',
     annual: 'Annual',
     free: 'Free',
+    courtesy: 'Courtesy',
     none: 'No subscription',
   },
   modal: {
