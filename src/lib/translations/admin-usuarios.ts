@@ -11,17 +11,15 @@ export interface AdminUsuariosTranslations {
     back: string
   }
   filters: {
-    block: string
-    blockHint: string
-    matrizYlada: string
-    legadoSegmentos: string
-    demaisSegmentos: string
+    /** Um único filtro: escopo da listagem (YLADA segmentos vs Wellness vs ambos) */
+    base: string
+    baseHint: string
+    yladaAllSegments: string
     search: string
     searchPlaceholder: string
-    area: string
-    areaHint: string
     status: string
     subscription: string
+    subscriptionHint: string
     president: string
     all: string
     active: string
@@ -83,8 +81,12 @@ export interface AdminUsuariosTranslations {
     nameLabel: string
     statusActive: string
     statusInactive: string
-    /** Gratuita com data de fim (admin concedeu prazo, ex. 90 dias) */
-    freeGiftedHint: string
+    /** Free matriz criado como migração (novo padrão) */
+    freeMigrationHint: string
+    /** Free matriz como cortesia administrativa explícita */
+    freeCourtesyHint: string
+    /** Registro antigo (antes de separar migração/cortesia) */
+    freeLegacyMatrizHint: string
     /** Só quando não existe linha em subscriptions (matriz) */
     matrizNoSubRowHint: string
     /** Destaque na coluna Assinatura quando há vencimento */
@@ -143,6 +145,22 @@ export interface AdminUsuariosTranslations {
     matrizFreeSuccessCreate: string
     matrizFreeSuccessExtend: string
     matrizFreeError: string
+    matrizFreeMigrationTitle: string
+    matrizFreeMigrationIntro: string
+    matrizFreeCourtesyTitle: string
+    matrizFreeCourtesyIntro: string
+    matrizFreeMigrationCreateBtn: string
+    matrizFreeCourtesyCreateBtn: string
+  }
+  bulkYladaMigration: {
+    title: string
+    intro: string
+    daysLabel: string
+    dryRun: string
+    run: string
+    confirmRun: string
+    doneDryRun: string
+    doneRun: string
   }
   messages: {
     noUsers: string
@@ -167,21 +185,20 @@ export interface AdminUsuariosTranslations {
 const pt: AdminUsuariosTranslations = {
   page: {
     title: 'Usuários',
-    subtitle: 'Matriz YLADA (/pt), Wellness e segmentos — filtros alinhados ao modelo atual',
+    subtitle: 'Lista por base (YLADA ou Wellness). O segmento exato de cada pessoa continua na coluna Área.',
     back: 'Voltar',
   },
   filters: {
-    block: 'Bloco',
-    blockHint: 'Wellness (Herbalife) vs YLADA (matriz e segmentos)',
-    matrizYlada: 'Matriz YLADA (/pt)',
-    legadoSegmentos: 'Legado Nutri / Coach / Nutra',
-    demaisSegmentos: 'Outros segmentos (med, psi, vendas…)',
+    base: 'Base',
+    baseHint:
+      'Todos = YLADA e Wellness na mesma lista. YLADA = todos os perfis da matriz (ylada, med, psi, vendas, nutri…). Wellness = só Herbalife.',
+    yladaAllSegments: 'YLADA (todos os segmentos)',
     search: 'Buscar',
     searchPlaceholder: 'E-mail, nome ou WhatsApp…',
-    area: 'Segmento',
-    areaHint: 'Refina dentro do bloco (matriz, legado ou outros)',
     status: 'Status',
     subscription: 'Assinatura',
+    subscriptionHint:
+      'Free, trial com prazo ou pago (mensal/anual) é independente do segmento: filtre aqui pelo tipo de plano, a coluna Área mostra med, psi, Wellness, etc.',
     president: 'Presidente',
     all: 'Todos',
     active: 'Ativos',
@@ -242,8 +259,13 @@ const pt: AdminUsuariosTranslations = {
     nameLabel: 'Nome',
     statusActive: 'Ativo',
     statusInactive: 'Inativo',
-    freeGiftedHint:
-      'Cortesia: período concedido (acesso completo; sem cobrança). O vencimento é o da linha acima.',
+    /** Só exibido na tabela quando o registro é cortesia explícita (free_cor_) */
+    freeMigrationHint:
+      'Plano free da matriz: vigente até a data acima. Sem mensalidade.',
+    freeCourtesyHint:
+      'Cortesia administrativa: prazo concedido manualmente pela equipe; vencimento na data acima.',
+    freeLegacyMatrizHint:
+      'Plano free da matriz: vigente até a data acima. Sem mensalidade.',
     matrizNoSubRowHint:
       'Sem linha de assinatura no banco — em Editar, crie plano free matriz (area ylada) com os dias.',
     planEndHighlight: 'Fim do plano',
@@ -294,7 +316,7 @@ const pt: AdminUsuariosTranslations = {
     matrizFreeNotPassword:
       'A senha provisória (abaixo) expira em 3 dias só para login; o plano free matriz pode ter prazo longo para uso da plataforma.',
     matrizFreeImplicitHint:
-      'Ainda não há assinatura no banco para este usuário. Crie o registro (area ylada, ex. 90 dias) para fixar o prazo da cortesia.',
+      'Ainda não há assinatura no banco. Use “Migração” (padrão longo) ou “Cortesia” (prazo curto) conforme o caso.',
     matrizFreeHasRowHint: 'Já existe assinatura area=ylada — estenda o prazo ou edite em “Assinatura”.',
     matrizFreeExpiresLabel: 'Vencimento atual (free matriz)',
     matrizFreeDaysValid: 'Validade inicial (dias)',
@@ -304,6 +326,26 @@ const pt: AdminUsuariosTranslations = {
     matrizFreeSuccessCreate: 'Plano free matriz criado com sucesso.',
     matrizFreeSuccessExtend: 'Prazo do free matriz atualizado.',
     matrizFreeError: 'Não foi possível salvar o plano free matriz.',
+    matrizFreeMigrationTitle: 'Migração — plano free matriz (novo padrão)',
+    matrizFreeMigrationIntro:
+      'Para ex-mensal/anual vencido ou modelo antigo: mesmo acesso da matriz, registro free com prazo. Padrão sugerido: muitos dias (ex. 3650).',
+    matrizFreeCourtesyTitle: 'Cortesia administrativa',
+    matrizFreeCourtesyIntro:
+      'Concessão pontual com prazo definido (trial estendido, apoio, etc.). Não confunde com a migração em massa do legado.',
+    matrizFreeMigrationCreateBtn: 'Criar free (migração)',
+    matrizFreeCourtesyCreateBtn: 'Criar free (cortesia)',
+  },
+  bulkYladaMigration: {
+    title: 'Migração em lote — free matriz (YLADA)',
+    intro:
+      'Perfis da matriz (nutri, med, psi…), sem Wellness. Ignora quem já tem free ylada ativo ou mensal/anual ativo. Simule antes.',
+    daysLabel: 'Dias de validade (cada novo free)',
+    dryRun: 'Simular (quantos elegíveis)',
+    run: 'Aplicar a todos elegíveis',
+    confirmRun:
+      'Confirmar migração em lote? Serão criadas assinaturas free area ylada (tipo migração) para todos os elegíveis. Wellness não entra.',
+    doneDryRun: 'Simulação: elegíveis para free matriz (migração).',
+    doneRun: 'Migração em lote concluída.',
   },
   messages: {
     noUsers: 'Nenhum usuário encontrado',
@@ -322,7 +364,7 @@ const pt: AdminUsuariosTranslations = {
       'Sem assinatura no banco. Abra Editar e use “Criar plano free matriz” com os dias; depois o botão Assinatura aparece para ajustar a data.',
     errorNotAuthenticated: 'Não autenticado',
     yladaSignupHint:
-      'Cadastro em /pt (login matriz): e-mail e nome vão para o Supabase Auth e para a tabela user_profiles com perfil ylada. O telefone/WhatsApp fica em user_profiles.whatsapp quando a pessoa preenche Conta (ou API /api/ylada/account). Para achar alguém: use a busca por e-mail ou Bloco YLADA + segmento Matriz YLADA.',
+      'Cadastro em /pt (login matriz): e-mail e nome vão para o Supabase Auth e para user_profiles. WhatsApp em user_profiles.whatsapp ao preencher Conta. Para achar alguém: busca por e-mail ou Base YLADA.',
     searchHintAdmin:
       'Use e-mail, nome ou número (WhatsApp). Quem está só na área gratuita pode aparecer como “Inativo” no status: deixe Status em Todos para não esconder na listagem.',
   },
@@ -331,21 +373,20 @@ const pt: AdminUsuariosTranslations = {
 const es: AdminUsuariosTranslations = {
   page: {
     title: 'Usuarios',
-    subtitle: 'Matriz YLADA (/pt), Wellness y segmentos',
+    subtitle: 'Lista por base (YLADA o Wellness). El segmento exacto sigue en la columna Área.',
     back: 'Volver',
   },
   filters: {
-    block: 'Bloque',
-    blockHint: 'Wellness vs YLADA (matriz y segmentos)',
-    matrizYlada: 'Matriz YLADA (/pt)',
-    legadoSegmentos: 'Legado Nutri / Coach / Nutra',
-    demaisSegmentos: 'Otros segmentos (med, psi, ventas…)',
+    base: 'Base',
+    baseHint:
+      'Todos = YLADA y Wellness juntos. YLADA = todos los perfiles de la matriz. Wellness = solo Herbalife.',
+    yladaAllSegments: 'YLADA (todos los segmentos)',
     search: 'Buscar',
     searchPlaceholder: 'Email, nombre o WhatsApp…',
-    area: 'Segmento',
-    areaHint: 'Refina dentro del bloque',
     status: 'Estado',
     subscription: 'Suscripción',
+    subscriptionHint:
+      'Gratis, prueba con plazo o pago es independiente del segmento: filtre por tipo de plano; la columna Área muestra med, psi, Wellness, etc.',
     president: 'Presidente',
     all: 'Todos',
     active: 'Activos',
@@ -406,8 +447,12 @@ const es: AdminUsuariosTranslations = {
     nameLabel: 'Nombre',
     statusActive: 'Activo',
     statusInactive: 'Inactivo',
-    freeGiftedHint:
-      'Cortesía: período otorgado (acceso completo; sin cobro). La fecha de fin es la indicada arriba.',
+    freeMigrationHint:
+      'Plan free de la matriz: vigente hasta la fecha de arriba. Sin mensualidad.',
+    freeCourtesyHint:
+      'Cortesía administrativa: plazo otorgado manualmente por el equipo; vencimiento en la fecha de arriba.',
+    freeLegacyMatrizHint:
+      'Plan free de la matriz: vigente hasta la fecha de arriba. Sin mensualidad.',
     matrizNoSubRowHint:
       'Sin fila de suscripción — en Editar, cree plan free matriz (area ylada) con los días.',
     planEndHighlight: 'Fin del plan',
@@ -458,7 +503,7 @@ const es: AdminUsuariosTranslations = {
     matrizFreeNotPassword:
       'La contraseña provisional expira en 3 días solo para login; el plan free matriz puede tener plazos largos.',
     matrizFreeImplicitHint:
-      'Aún no hay suscripción en la base para este usuario. Cree el registro (area ylada, ej. 90 días) para fijar el plazo de la cortesía.',
+      'Aún no hay suscripción en la base. Use “Migración” (plazo largo) o “Cortesía” (plazo corto) según el caso.',
     matrizFreeHasRowHint: 'Ya existe suscripción area=ylada — extienda o edite en “Suscripción”.',
     matrizFreeExpiresLabel: 'Vencimiento actual (free matriz)',
     matrizFreeDaysValid: 'Validez inicial (días)',
@@ -468,6 +513,26 @@ const es: AdminUsuariosTranslations = {
     matrizFreeSuccessCreate: 'Plan free matriz creado.',
     matrizFreeSuccessExtend: 'Plazo del free matriz actualizado.',
     matrizFreeError: 'No se pudo guardar el plan free matriz.',
+    matrizFreeMigrationTitle: 'Migración — plan free matriz (nuevo estándar)',
+    matrizFreeMigrationIntro:
+      'Para ex mensual/anual vencido o modelo antiguo: acceso a la matriz con registro free a plazo. Sugerido: muchos días (ej. 3650).',
+    matrizFreeCourtesyTitle: 'Cortesía administrativa',
+    matrizFreeCourtesyIntro:
+      'Concesión puntual con plazo (soporte, prueba extendida, etc.). No es la migración masiva del legado.',
+    matrizFreeMigrationCreateBtn: 'Crear free (migración)',
+    matrizFreeCourtesyCreateBtn: 'Crear free (cortesía)',
+  },
+  bulkYladaMigration: {
+    title: 'Migración masiva — free matriz (YLADA)',
+    intro:
+      'Perfiles de la matriz (nutri, med, psi…), sin Wellness. Omite quien ya tiene free ylada activo o mensual/anual activo. Simule primero.',
+    daysLabel: 'Días de validez (cada free nuevo)',
+    dryRun: 'Simular (cuántos elegibles)',
+    run: 'Aplicar a todos los elegibles',
+    confirmRun:
+      '¿Confirmar migración masiva? Se crearán suscripciones free area ylada (tipo migración) para todos los elegibles. Wellness no entra.',
+    doneDryRun: 'Simulación: elegibles para free matriz (migración).',
+    doneRun: 'Migración masiva finalizada.',
   },
   messages: {
     noUsers: 'Ningún usuario encontrado',
@@ -486,7 +551,7 @@ const es: AdminUsuariosTranslations = {
       'Sin suscripción en la base. En Editar use “Crear plan free matriz”; luego aparece el botón Suscripción.',
     errorNotAuthenticated: 'No autenticado',
     yladaSignupHint:
-      'Registro en /pt: email y nombre en Auth y user_profiles (perfil ylada). WhatsApp en user_profiles.whatsapp al completar Cuenta. Busque por email o Bloque YLADA + Matriz YLADA.',
+      'Registro en /pt: email y nombre en Auth y user_profiles. WhatsApp al completar Cuenta. Busque por email o Base YLADA.',
     searchHintAdmin:
       'Busque por email, nombre o WhatsApp. Usuarios solo gratuitos pueden verse “Inactivos”: deje Estado en Todos.',
   },
@@ -495,21 +560,20 @@ const es: AdminUsuariosTranslations = {
 const en: AdminUsuariosTranslations = {
   page: {
     title: 'Users',
-    subtitle: 'YLADA matrix (/pt), Wellness and segments',
+    subtitle: 'List by base (YLADA or Wellness). Each person’s segment stays in the Area column.',
     back: 'Back',
   },
   filters: {
-    block: 'Block',
-    blockHint: 'Wellness vs YLADA (matrix and segments)',
-    matrizYlada: 'YLADA matrix (/pt)',
-    legadoSegmentos: 'Legacy Nutri / Coach / Nutra',
-    demaisSegmentos: 'Other segments (med, psi, sales…)',
+    base: 'Base',
+    baseHint:
+      'All = YLADA and Wellness together. YLADA = all matrix profiles (ylada, med, psi, sales, nutri…). Wellness = Herbalife only.',
+    yladaAllSegments: 'YLADA (all segments)',
     search: 'Search',
     searchPlaceholder: 'Email, name or WhatsApp…',
-    area: 'Segment',
-    areaHint: 'Refine within the block',
     status: 'Status',
     subscription: 'Subscription',
+    subscriptionHint:
+      'Free, time-limited trial, or paid is independent of segment: filter by plan type; the Area column shows med, psi, Wellness, etc.',
     president: 'President',
     all: 'All',
     active: 'Active',
@@ -570,8 +634,12 @@ const en: AdminUsuariosTranslations = {
     nameLabel: 'Name',
     statusActive: 'Active',
     statusInactive: 'Inactive',
-    freeGiftedHint:
-      'Complimentary: access granted for a period (full access; no charge). End date is shown above.',
+    freeMigrationHint:
+      'Matrix free plan: active until the date above. No monthly fee.',
+    freeCourtesyHint:
+      'Administrative courtesy: period set manually by the team; end date is shown above.',
+    freeLegacyMatrizHint:
+      'Matrix free plan: active until the date above. No monthly fee.',
     matrizNoSubRowHint:
       'No subscription row — in Edit, create matrix free plan (ylada area) with the days.',
     planEndHighlight: 'Plan ends',
@@ -622,7 +690,7 @@ const en: AdminUsuariosTranslations = {
     matrizFreeNotPassword:
       'The provisional password expires in 3 days for login only; the matrix free plan can have a long access window.',
     matrizFreeImplicitHint:
-      'No subscription row yet for this user. Create one (ylada area, e.g. 90 days) to record the complimentary period end date.',
+      'No subscription row yet. Use “Migration” (long term) or “Courtesy” (short term) as appropriate.',
     matrizFreeHasRowHint: 'A ylada-area subscription exists — extend or use “Subscription” edit.',
     matrizFreeExpiresLabel: 'Current end date (matrix free)',
     matrizFreeDaysValid: 'Initial term (days)',
@@ -632,6 +700,26 @@ const en: AdminUsuariosTranslations = {
     matrizFreeSuccessCreate: 'Matrix free plan created.',
     matrizFreeSuccessExtend: 'Matrix free end date updated.',
     matrizFreeError: 'Could not save matrix free plan.',
+    matrizFreeMigrationTitle: 'Migration — matrix free plan (new standard)',
+    matrizFreeMigrationIntro:
+      'For expired monthly/annual or legacy model: matrix access with a dated free row. Suggested: many days (e.g. 3650).',
+    matrizFreeCourtesyTitle: 'Administrative courtesy',
+    matrizFreeCourtesyIntro:
+      'One-off access with a defined period (support, extended trial, etc.). Not the same as bulk legacy migration.',
+    matrizFreeMigrationCreateBtn: 'Create free (migration)',
+    matrizFreeCourtesyCreateBtn: 'Create free (courtesy)',
+  },
+  bulkYladaMigration: {
+    title: 'Bulk migration — matrix free (YLADA)',
+    intro:
+      'Matrix profiles (nutri, med, psi…), not Wellness. Skips users who already have active ylada free or active monthly/annual. Simulate first.',
+    daysLabel: 'Validity days (each new free)',
+    dryRun: 'Simulate (eligible count)',
+    run: 'Apply to all eligible',
+    confirmRun:
+      'Confirm bulk migration? This creates ylada-area free subscriptions (migration type) for every eligible user. Wellness is excluded.',
+    doneDryRun: 'Simulation: eligible for matrix free (migration).',
+    doneRun: 'Bulk migration finished.',
   },
   messages: {
     noUsers: 'No users found',
@@ -650,7 +738,7 @@ const en: AdminUsuariosTranslations = {
       'No subscription row. In Edit use “Create matrix free plan”; then the Subscription button appears.',
     errorNotAuthenticated: 'Not authenticated',
     yladaSignupHint:
-      'Sign up at /pt: email and name go to Auth and user_profiles (perfil ylada). Phone/WhatsApp is stored in user_profiles.whatsapp when the user saves Account (or /api/ylada/account). Find them via search or Block YLADA + YLADA matrix.',
+      'Sign up at /pt: email and name go to Auth and user_profiles. Phone/WhatsApp in user_profiles.whatsapp when the user saves Account. Find them via search or Base YLADA.',
     searchHintAdmin:
       'Search by email, name or WhatsApp. Free-only users may show as Inactive: set Status to All.',
   },

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
 import { requireApiAuth } from '@/lib/api-auth'
+import { createYladaFreeMatrizSubscription, type YladaFreeMatrizKind } from '@/lib/admin-ylada-free-matriz'
 
 /**
  * POST /api/admin/subscriptions/free
@@ -16,7 +17,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { user_id, email, name, area, expires_in_days } = body
+    const { user_id, email, name, area, expires_in_days, ylada_free_kind } = body
 
     // Debug: log do body recebido
     console.log('📥 Body recebido na API:', JSON.stringify(body, null, 2))
@@ -251,7 +252,52 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       )
     }
-    
+
+    /** Matriz /pt: insert dedicado (prefixo free_mig_ / free_cor_ no stripe_subscription_id). */
+    if (isYladaArea) {
+      const kind: YladaFreeMatrizKind = ylada_free_kind === 'courtesy' ? 'courtesy' : 'migration'
+      const created = await createYladaFreeMatrizSubscription(finalUserId, days, kind)
+      if (created.error || !created.data) {
+        const msg = created.error || 'Erro ao criar assinatura'
+        if (created.code === '23514' && msg.includes('subscriptions_area_check')) {
+          return NextResponse.json(
+            {
+              error:
+                'O Supabase ainda não aceita area "ylada" (e alguns segmentos) na tabela subscriptions. Abra o SQL Editor e execute o arquivo migrations/278-subscriptions-area-ylada-matriz.sql. Depois tente criar de novo.',
+              details: msg,
+              migration_required: true,
+              migration_file: '278-subscriptions-area-ylada-matriz.sql',
+            },
+            { status: 500 }
+          )
+        }
+        if (msg.includes('subscriptions_plan_type_check') || (msg.includes('plan_type') && msg.includes('check constraint'))) {
+          return NextResponse.json(
+            {
+              error:
+                'Erro: O banco de dados não permite plan_type "free". Execute a migração add-free-to-plan-type.sql no Supabase primeiro.',
+              details: msg,
+              migration_required: true,
+            },
+            { status: 500 }
+          )
+        }
+        if (created.code === '23505' || msg.includes('unique') || msg.includes('duplicate')) {
+          return NextResponse.json(
+            { error: 'Erro: Já existe uma assinatura com este ID. Tente novamente.', details: msg, code: created.code },
+            { status: 409 }
+          )
+        }
+        return NextResponse.json({ error: 'Erro ao criar plano gratuito', details: msg, code: created.code }, { status: 500 })
+      }
+      console.log('✅ Subscription ylada (matriz) criada:', created.data)
+      return NextResponse.json({
+        success: true,
+        subscription: created.data,
+        message: `Plano gratuito matriz criado (${kind === 'migration' ? 'migração' : 'cortesia'}). Válido por ${days} dias.`,
+      })
+    }
+
     const periodEnd = new Date(now.getTime() + days * 24 * 60 * 60 * 1000).toISOString()
 
     // Gerar ID único para stripe_subscription_id

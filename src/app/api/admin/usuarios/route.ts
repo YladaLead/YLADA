@@ -3,6 +3,7 @@ import { supabaseAdmin } from '@/lib/supabase'
 import { requireApiAuth } from '@/lib/api-auth'
 import { getNamesForCanonical, getCanonicalName } from '@/lib/presidente-canonicos'
 import { isPerfilMatrizYlada, PERFIS_MATRIZ_YLADA } from '@/lib/admin-matriz-constants'
+import { parseYladaFreeGrantKind } from '@/lib/admin-ylada-free-matriz'
 
 /**
  * GET /api/admin/usuarios
@@ -10,9 +11,10 @@ import { isPerfilMatrizYlada, PERFIS_MATRIZ_YLADA } from '@/lib/admin-matriz-con
  * Apenas admin pode acessar
  * 
  * Query params:
- * - bloco?: 'todos' | 'ylada' | 'wellness' - Separar YLADA de Wellness (princípios diferentes)
- * - area?: 'todos' | 'wellness' | 'ylada' | 'legado' | 'demais_segmentos' | perfil específico (nutri, med, …)
- *   Obs.: area=ylada = matriz /pt inteira (med, nutri, perfil ylada, …), não só user_profiles.perfil = 'ylada'
+ * - bloco?: 'todos' | 'ylada' | 'wellness' — escopo da listagem (UI: um único filtro “Base”).
+ *   ylada = todos os perfis da matriz (PERFIS_MATRIZ_YLADA: med, psi, ylada, nutri…); wellness = só perfil wellness; omitido/todos = sem filtro de bloco.
+ * - area?: opcional, refinamento legado (scripts/links antigos). Ex.: legado, demais_segmentos, ylada, ou perfil puntual.
+ *   Com a UI atual não envie `area`; use só `bloco`.
  * - status?: 'todos' | 'ativo' | 'inativo' - Filtrar por status
  * - assinatura?: 'todos' | 'gratuita' | 'mensal' | 'anual' | 'sem' - Filtrar por tipo de assinatura
  * - presidente?: string - Filtrar por nome do presidente (equipe do presidente)
@@ -182,7 +184,7 @@ export async function GET(request: NextRequest) {
     const userIds = profiles.map(p => p.user_id)
     const { data: subscriptions } = await supabaseAdmin
       .from('subscriptions')
-      .select('id, user_id, area, plan_type, status, current_period_end, is_migrated')
+      .select('id, user_id, area, plan_type, status, current_period_end, is_migrated, stripe_subscription_id')
       .in('user_id', userIds)
       .order('current_period_end', { ascending: false })
 
@@ -403,6 +405,11 @@ export async function GET(request: NextRequest) {
         podeGerenciarFreeMatriz: isPerfilMatrizYlada(userArea),
         yladaFreeSubscriptionId: yladaSubParaAdmin?.id ?? null,
         yladaFreePeriodEnd: yladaSubParaAdmin?.current_period_end ?? null,
+        yladaFreeGrantKind: yladaSubParaAdmin
+          ? parseYladaFreeGrantKind(
+              (yladaSubParaAdmin as { stripe_subscription_id?: string | null }).stripe_subscription_id
+            )
+          : null,
       }
     }).filter(u => u !== null) // Remover nulls do filtro de status
 

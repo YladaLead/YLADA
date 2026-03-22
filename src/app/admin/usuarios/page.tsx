@@ -36,6 +36,8 @@ interface Usuario {
   podeGerenciarFreeMatriz?: boolean
   yladaFreeSubscriptionId?: string | null
   yladaFreePeriodEnd?: string | null
+  /** Derivado do prefixo em stripe_subscription_id (free_mig_ / free_cor_ / legado free_) */
+  yladaFreeGrantKind?: 'migration' | 'courtesy' | 'legacy' | null
 }
 
 interface Stats {
@@ -48,36 +50,10 @@ export default function AdminUsuarios() {
   // Admin sempre em português
   const t = useMemo(() => getAdminUsuariosTranslations('pt'), [])
 
-  /** Padrão YLADA: lista alinhada à matriz; colunas de presidente removidas (gestão fica fora desta tela). */
+  /** Base da listagem: Todos (YLADA+Wellness) | só YLADA (todos os segmentos) | só Wellness. API: query `bloco`. */
   const [filtroBloco, setFiltroBloco] = useState<'todos' | 'ylada' | 'wellness'>('ylada')
-  const [filtroArea, setFiltroArea] = useState<string>('todos')
 
-  /** Segmento no filtro (API: todos | wellness | ylada | legado | demais_segmentos | perfil puntual) */
   const mostrarColunasPresidente = false
-
-  const opcoesArea = useMemo(() => {
-    if (filtroBloco === 'wellness') {
-      return [
-        { value: 'todos', label: t.filters.all },
-        { value: 'wellness', label: t.areas.wellness },
-      ]
-    }
-    if (filtroBloco === 'ylada') {
-      return [
-        { value: 'todos', label: t.filters.all },
-        { value: 'ylada', label: t.filters.matrizYlada },
-        { value: 'demais_segmentos', label: t.filters.demaisSegmentos },
-        { value: 'legado', label: t.filters.legadoSegmentos },
-      ]
-    }
-    return [
-      { value: 'todos', label: t.filters.all },
-      { value: 'wellness', label: t.areas.wellness },
-      { value: 'ylada', label: t.filters.matrizYlada },
-      { value: 'demais_segmentos', label: t.filters.demaisSegmentos },
-      { value: 'legado', label: t.filters.legadoSegmentos },
-    ]
-  }, [filtroBloco, t])
   const [filtroStatus, setFiltroStatus] = useState<'todos' | 'ativo' | 'inativo'>('todos')
   const [filtroAssinatura, setFiltroAssinatura] = useState<'todos' | 'gratuita' | 'mensal' | 'anual' | 'sem'>('todos')
   const [filtroPresidente, setFiltroPresidente] = useState<string>('todos')
@@ -101,9 +77,12 @@ export default function AdminUsuarios() {
     expiresAt: string
   } | null>(null)
 
-  const [diasNovaFreeMatriz, setDiasNovaFreeMatriz] = useState(365)
+  const [diasMigracaoMatriz, setDiasMigracaoMatriz] = useState(3650)
+  const [diasCortesiaMatriz, setDiasCortesiaMatriz] = useState(90)
   const [diasEstenderMatriz, setDiasEstenderMatriz] = useState(30)
   const [salvandoFreeMatriz, setSalvandoFreeMatriz] = useState(false)
+  const [diasBulkMigracao, setDiasBulkMigracao] = useState(3650)
+  const [salvandoBulkMigracao, setSalvandoBulkMigracao] = useState(false)
 
   // Todas as áreas para edição de perfil (modal Editar Usuário)
   const TODAS_AREAS_EDICAO: { value: string; label: string }[] = useMemo(() => [
@@ -201,7 +180,6 @@ export default function AdminUsuarios() {
 
       const params = new URLSearchParams()
       if (filtroBloco !== 'todos') params.append('bloco', filtroBloco)
-      if (filtroArea !== 'todos') params.append('area', filtroArea)
       if (filtroStatus !== 'todos') params.append('status', filtroStatus)
       if (filtroAssinatura !== 'todos') params.append('assinatura', filtroAssinatura)
       if (filtroBloco === 'todos' && filtroPresidente !== 'todos') {
@@ -241,7 +219,7 @@ export default function AdminUsuarios() {
     }, busca ? 500 : 0)
 
     return () => clearTimeout(timeoutId)
-  }, [filtroBloco, filtroArea, filtroStatus, filtroAssinatura, filtroPresidente, busca])
+  }, [filtroBloco, filtroStatus, filtroAssinatura, filtroPresidente, busca])
 
   // Abrir modal de editar usuário (usa nome canônico no dropdown quando existir)
   const abrirEditarUsuario = (usuario: Usuario) => {
@@ -251,17 +229,18 @@ export default function AdminUsuarios() {
       nome_completo: usuario.nome,
       nome_presidente: (usuario.nome_presidente_canonico ?? usuario.nome_presidente) || null
     })
-    setDiasNovaFreeMatriz(365)
+    setDiasMigracaoMatriz(3650)
+    setDiasCortesiaMatriz(90)
     setDiasEstenderMatriz(30)
     setMostrarEditarUsuario(true)
   }
 
-  const criarPlanoFreeYlada = async () => {
+  const criarPlanoFreeYlada = async (kind: 'migration' | 'courtesy', diasBruto: number) => {
     if (!usuarioSelecionado) return
     setSalvandoFreeMatriz(true)
     setError(null)
     try {
-      const dias = Math.min(3650, Math.max(1, Math.floor(Number(diasNovaFreeMatriz)) || 365))
+      const dias = Math.min(3650, Math.max(1, Math.floor(Number(diasBruto)) || (kind === 'migration' ? 3650 : 90)))
       const res = await fetch('/api/admin/subscriptions/free', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -270,11 +249,12 @@ export default function AdminUsuarios() {
           user_id: usuarioSelecionado.id,
           area: 'ylada',
           expires_in_days: dias,
+          ylada_free_kind: kind,
         }),
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || t.modal.matrizFreeError)
-      setSuccess(t.modal.matrizFreeSuccessCreate)
+      setSuccess(data.message || t.modal.matrizFreeSuccessCreate)
       if (data.subscription && usuarioSelecionado) {
         setUsuarioSelecionado({
           ...usuarioSelecionado,
@@ -284,6 +264,7 @@ export default function AdminUsuarios() {
           assinatura: 'gratuita',
           assinaturaSituacao: 'ativa',
           status: 'ativo',
+          yladaFreeGrantKind: kind,
         })
       }
       carregarUsuarios()
@@ -291,6 +272,56 @@ export default function AdminUsuarios() {
       setError(err.message || t.modal.matrizFreeError)
     } finally {
       setSalvandoFreeMatriz(false)
+    }
+  }
+
+  const simularBulkMigracao = async () => {
+    setSalvandoBulkMigracao(true)
+    setError(null)
+    setSuccess(null)
+    try {
+      const days = Math.min(3650, Math.max(1, Math.floor(Number(diasBulkMigracao)) || 3650))
+      const res = await fetch('/api/admin/subscriptions/bulk-ylada-migration', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ expires_in_days: days, dry_run: true }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || t.messages.errorLoad)
+      setSuccess(
+        `${t.bulkYladaMigration.doneDryRun} ${data.eligible ?? 0} (${t.stats.showing}: ${data.total_matriz_profiles ?? 0} perfis matriz).`
+      )
+    } catch (err: any) {
+      setError(err.message || t.messages.errorLoad)
+    } finally {
+      setSalvandoBulkMigracao(false)
+    }
+  }
+
+  const executarBulkMigracao = async () => {
+    if (!confirm(t.bulkYladaMigration.confirmRun)) return
+    setSalvandoBulkMigracao(true)
+    setError(null)
+    setSuccess(null)
+    try {
+      const days = Math.min(3650, Math.max(1, Math.floor(Number(diasBulkMigracao)) || 3650))
+      const res = await fetch('/api/admin/subscriptions/bulk-ylada-migration', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ expires_in_days: days, dry_run: false }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || t.messages.errorLoad)
+      setSuccess(
+        `${t.bulkYladaMigration.doneRun} Criados: ${data.created ?? 0}. Falhas: ${data.failed ?? 0}.`
+      )
+      carregarUsuarios()
+    } catch (err: any) {
+      setError(err.message || t.messages.errorLoad)
+    } finally {
+      setSalvandoBulkMigracao(false)
     }
   }
 
@@ -695,124 +726,114 @@ export default function AdminUsuarios() {
     <div className="h-dvh max-h-dvh flex flex-col overflow-hidden bg-gray-50">
       {/* Header */}
       <header className="flex-shrink-0 bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <Link href="/admin">
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 py-2">
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+              <Link href="/admin" className="flex-shrink-0">
                 <Image
                   src="/images/logo/ylada/horizontal/azul-claro/ylada-horizontal-azul-claro-30.png"
                   alt="YLADA"
-                  width={180}
-                  height={60}
-                  className="h-12"
+                  width={140}
+                  height={48}
+                  className="h-8 sm:h-9 w-auto"
                 />
               </Link>
-              <div className="h-12 w-px bg-gray-300"></div>
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">{t.page.title}</h1>
-                <p className="text-sm text-gray-600 mt-0.5">{t.page.subtitle}</p>
+              <div className="h-8 w-px bg-gray-300 flex-shrink-0 hidden sm:block" />
+              <div className="min-w-0" title={t.page.subtitle}>
+                <h1 className="text-base sm:text-lg font-bold text-gray-900 leading-tight">{t.page.title}</h1>
+                <p className="text-[11px] text-gray-500 truncate max-w-[min(100vw-8rem,28rem)] hidden md:block">{t.page.subtitle}</p>
               </div>
             </div>
-            <div className="flex items-center space-x-3">
-              <Link
-                href="/admin"
-                className="text-gray-600 hover:text-gray-900 text-sm px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors"
-              >
-                ← {t.page.back}
-              </Link>
-            </div>
+            <Link
+              href="/admin"
+              className="text-gray-600 hover:text-gray-900 text-xs sm:text-sm px-2 py-1.5 rounded-md hover:bg-gray-50 transition-colors flex-shrink-0"
+            >
+              ← {t.page.back}
+            </Link>
           </div>
         </div>
       </header>
 
       {/* Main Content: flex para a tabela ter área fixa na viewport — rolagem H+V no mesmo painel */}
-      <main className="flex-1 min-h-0 flex flex-col max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 pt-4 pb-4 gap-4">
+      <main className="flex-1 min-h-0 flex flex-col max-w-7xl mx-auto w-full px-3 sm:px-4 lg:px-6 pt-2 pb-2 gap-2">
         {/* Mensagens */}
         {success && (
-          <div className="flex-shrink-0 bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-lg">
+          <div className="flex-shrink-0 bg-green-50 border border-green-200 text-green-800 px-3 py-1.5 rounded-md text-sm">
             {success}
           </div>
         )}
         {error && (
-          <div className="flex-shrink-0 bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg">
+          <div className="flex-shrink-0 bg-red-50 border border-red-200 text-red-800 px-3 py-1.5 rounded-md text-sm">
             {error}
           </div>
         )}
 
-        {/* Filtros */}
-        <div className="flex-shrink-0 bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">{t.filters.block}</label>
+        {/* Filtros compactos — dicas longas no title (passe o mouse no rótulo) */}
+        <div className="flex-shrink-0 bg-white rounded-lg px-3 py-2 shadow-sm border border-gray-200">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-10 gap-x-2 gap-y-1.5 items-end">
+            <div className="col-span-2 sm:col-span-1 md:col-span-1 lg:col-span-2 xl:col-span-2">
+              <label
+                className="block text-[11px] font-medium text-gray-600 mb-0.5 cursor-help"
+                title={t.filters.baseHint}
+              >
+                {t.filters.base}
+              </label>
               <select
                 value={filtroBloco}
                 onChange={(e) => {
                   const novo = e.target.value as 'todos' | 'ylada' | 'wellness'
                   setFiltroBloco(novo)
                   if (novo !== 'todos') setFiltroPresidente('todos')
-                  const areaSohWellness = ['wellness', 'todos']
-                  if (novo === 'wellness' && !areaSohWellness.includes(filtroArea)) {
-                    setFiltroArea('todos')
-                  } else if (novo === 'ylada' && filtroArea === 'wellness') {
-                    setFiltroArea('todos')
-                  } else if (novo === 'todos' && !['todos', 'wellness', 'ylada', 'legado', 'demais_segmentos'].includes(filtroArea)) {
-                    setFiltroArea('todos')
-                  }
                 }}
                 disabled={loading}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50"
+                className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50"
               >
                 <option value="todos">{t.filters.all}</option>
-                <option value="ylada">YLADA</option>
+                <option value="ylada">{t.filters.yladaAllSegments}</option>
                 <option value="wellness">{t.areas.wellness}</option>
               </select>
-              <p className="text-xs text-gray-500 mt-1">{t.filters.blockHint}</p>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">{t.filters.search}</label>
+            <div className="col-span-2 sm:col-span-2 md:col-span-2 lg:col-span-2 xl:col-span-3">
+              <label
+                className="block text-[11px] font-medium text-gray-600 mb-0.5 cursor-help"
+                title={t.messages.searchHintAdmin}
+              >
+                {t.filters.search}
+              </label>
               <input
                 type="text"
                 value={busca}
                 onChange={(e) => setBusca(e.target.value)}
                 placeholder={t.filters.searchPlaceholder}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                title={t.messages.searchHintAdmin}
+                className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
               />
-              <p className="text-xs text-gray-500 mt-1">{t.messages.searchHintAdmin}</p>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">{t.filters.area}</label>
-              <select
-                value={opcoesArea.some((o) => o.value === filtroArea) ? filtroArea : 'todos'}
-                onChange={(e) => setFiltroArea(e.target.value)}
-                disabled={loading}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50"
-              >
-                {opcoesArea.map((o) => (
-                  <option key={o.value} value={o.value}>{o.label}</option>
-                ))}
-              </select>
-              <p className="text-xs text-gray-500 mt-1">{t.filters.areaHint}</p>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">{t.filters.status}</label>
+            <div className="col-span-1">
+              <label className="block text-[11px] font-medium text-gray-600 mb-0.5">{t.filters.status}</label>
               <select
                 value={filtroStatus}
                 onChange={(e) => setFiltroStatus(e.target.value as any)}
                 disabled={loading}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50"
+                className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50"
               >
                 <option value="todos">{t.filters.all}</option>
                 <option value="ativo">{t.filters.active}</option>
                 <option value="inativo">{t.filters.inactive}</option>
               </select>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">{t.filters.subscription}</label>
+            <div className="col-span-1 sm:col-span-1 lg:col-span-2 xl:col-span-2">
+              <label
+                className="block text-[11px] font-medium text-gray-600 mb-0.5 cursor-help"
+                title={t.filters.subscriptionHint}
+              >
+                {t.filters.subscription}
+              </label>
               <select
                 value={filtroAssinatura}
                 onChange={(e) => setFiltroAssinatura(e.target.value as any)}
                 disabled={loading}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50"
+                className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50"
               >
                 <option value="todos">{t.filters.all}</option>
                 <option value="gratuita">{t.filters.free}</option>
@@ -822,13 +843,13 @@ export default function AdminUsuarios() {
               </select>
             </div>
             {filtroBloco === 'todos' && (
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">{t.filters.president}</label>
+              <div className="col-span-2 sm:col-span-2 lg:col-span-2 xl:col-span-2">
+                <label className="block text-[11px] font-medium text-gray-600 mb-0.5">{t.filters.president}</label>
                 <select
                   value={filtroPresidente}
                   onChange={(e) => setFiltroPresidente(e.target.value)}
                   disabled={loading}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50"
+                  className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50"
                 >
                   <option value="todos">{t.filters.all}</option>
                   {presidentesAutorizados.map((p) => (
@@ -839,12 +860,12 @@ export default function AdminUsuarios() {
                 </select>
               </div>
             )}
-            <div className="flex items-end">
+            <div className="col-span-2 sm:col-span-1 flex items-end xl:col-span-2">
               <button
                 type="button"
                 onClick={exportarPlanilhaUsuarios}
                 disabled={loading || usuarios.length === 0}
-                className="px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full sm:w-auto px-3 py-1.5 bg-green-600 text-white text-xs font-medium rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
               >
                 📥 {t.export}
               </button>
@@ -860,24 +881,67 @@ export default function AdminUsuarios() {
           </div>
         )}
 
-        {/* Stats */}
+        {/* Stats — faixa compacta (mais altura para a tabela) */}
         {!loading && (
-          <div className="flex-shrink-0 grid grid-cols-1 sm:grid-cols-4 gap-4">
-            <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
-              <p className="text-sm text-gray-600 mb-1">{t.stats.total}</p>
-              <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
-            </div>
-            <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
-              <p className="text-sm text-gray-600 mb-1">{t.stats.active}</p>
-              <p className="text-2xl font-bold text-green-600">{stats.ativos}</p>
-            </div>
-            <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
-              <p className="text-sm text-gray-600 mb-1">{t.stats.inactive}</p>
-              <p className="text-2xl font-bold text-gray-600">{stats.inativos}</p>
-            </div>
-            <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
-              <p className="text-sm text-gray-600 mb-1">{t.stats.showing}</p>
-              <p className="text-2xl font-bold text-blue-600">{usuarios.length}</p>
+          <div className="flex-shrink-0 flex flex-wrap items-baseline gap-x-4 gap-y-1 px-2.5 py-1.5 bg-white rounded-lg border border-gray-200 shadow-sm text-sm">
+            <span className="text-gray-600">
+              {t.stats.total}: <strong className="text-gray-900 tabular-nums">{stats.total}</strong>
+            </span>
+            <span className="text-gray-300 hidden sm:inline" aria-hidden>
+              |
+            </span>
+            <span className="text-gray-600">
+              {t.stats.active}: <strong className="text-green-600 tabular-nums">{stats.ativos}</strong>
+            </span>
+            <span className="text-gray-300 hidden sm:inline" aria-hidden>
+              |
+            </span>
+            <span className="text-gray-600">
+              {t.stats.inactive}: <strong className="text-gray-700 tabular-nums">{stats.inativos}</strong>
+            </span>
+            <span className="text-gray-300 hidden sm:inline" aria-hidden>
+              |
+            </span>
+            <span className="text-gray-600">
+              {t.stats.showing}: <strong className="text-blue-600 tabular-nums">{usuarios.length}</strong>
+            </span>
+          </div>
+        )}
+
+        {!loading && (
+          <div className="flex-shrink-0 rounded-lg border border-indigo-200 bg-indigo-50/70 px-2.5 py-2 text-xs">
+            <div className="font-semibold text-gray-900">{t.bulkYladaMigration.title}</div>
+            <p className="text-gray-600 mt-0.5 mb-2 leading-snug">{t.bulkYladaMigration.intro}</p>
+            <div className="flex flex-wrap items-end gap-2">
+              <div>
+                <label className="block text-[11px] font-medium text-gray-600 mb-0.5">
+                  {t.bulkYladaMigration.daysLabel}
+                </label>
+                <input
+                  type="number"
+                  min={1}
+                  max={3650}
+                  value={diasBulkMigracao}
+                  onChange={(e) => setDiasBulkMigracao(Number(e.target.value))}
+                  className="w-24 px-2 py-1 border border-gray-300 rounded-md text-sm"
+                />
+              </div>
+              <button
+                type="button"
+                onClick={simularBulkMigracao}
+                disabled={salvandoBulkMigracao}
+                className="px-3 py-1.5 bg-white border border-indigo-300 text-indigo-800 text-xs font-medium rounded-md hover:bg-indigo-50 disabled:opacity-50"
+              >
+                {salvandoBulkMigracao ? t.modal.saving : t.bulkYladaMigration.dryRun}
+              </button>
+              <button
+                type="button"
+                onClick={executarBulkMigracao}
+                disabled={salvandoBulkMigracao}
+                className="px-3 py-1.5 bg-indigo-600 text-white text-xs font-medium rounded-md hover:bg-indigo-700 disabled:opacity-50"
+              >
+                {salvandoBulkMigracao ? t.modal.saving : t.bulkYladaMigration.run}
+              </button>
             </div>
           </div>
         )}
@@ -1025,9 +1089,13 @@ export default function AdminUsuarios() {
                                     <span className="text-xs text-orange-600" title="Usuário migrado">🔄</span>
                                   )}
                                 </div>
-                                {dataVencStr && usuario.assinaturaSituacao === 'ativa' && usuario.assinatura === 'gratuita' && (
-                                  <div className="text-[11px] text-indigo-800 mt-1.5 font-medium leading-snug">
-                                    {t.table.freeGiftedHint}
+                                {usuario.podeGerenciarFreeMatriz &&
+                                  dataVencStr &&
+                                  usuario.assinaturaSituacao === 'ativa' &&
+                                  usuario.assinatura === 'gratuita' &&
+                                  usuario.yladaFreeGrantKind === 'courtesy' && (
+                                  <div className="text-[11px] text-amber-900 mt-1.5 font-medium leading-snug">
+                                    {t.table.freeCourtesyHint}
                                   </div>
                                 )}
                                 {!dataVencStr &&
@@ -1102,7 +1170,7 @@ export default function AdminUsuarios() {
       {/* Modal Editar Usuário */}
       {mostrarEditarUsuario && usuarioSelecionado && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-lg w-full mx-4 max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-lg p-6 max-w-xl w-full mx-4 max-h-[90vh] overflow-y-auto">
             <h2 className="text-xl font-bold mb-4">{t.modal.editUser}</h2>
             <div className="space-y-4">
               <div>
@@ -1149,7 +1217,7 @@ export default function AdminUsuarios() {
               )}
 
               {usuarioSelecionado.podeGerenciarFreeMatriz && (
-                <div className="mt-6 pt-4 border-t border-gray-200 space-y-3">
+                <div className="mt-6 pt-4 border-t border-gray-200 space-y-4">
                   <h3 className="text-sm font-semibold text-gray-900">{t.modal.matrizFreeTitle}</h3>
                   <p className="text-xs text-gray-600">{t.modal.matrizFreeIntro}</p>
                   <p className="text-xs text-amber-800 bg-amber-50 border border-amber-200 rounded-md px-2 py-1.5">
@@ -1163,28 +1231,57 @@ export default function AdminUsuarios() {
                   )}
 
                   {!usuarioSelecionado.yladaFreeSubscriptionId && (
-                    <div className="flex flex-col sm:flex-row sm:items-end gap-2">
-                      <div className="flex-1">
-                        <label className="block text-xs font-medium text-gray-700 mb-1">
-                          {t.modal.matrizFreeDaysValid}
-                        </label>
-                        <input
-                          type="number"
-                          min={1}
-                          max={3650}
-                          value={diasNovaFreeMatriz}
-                          onChange={(e) => setDiasNovaFreeMatriz(Number(e.target.value))}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
-                        />
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <div className="rounded-lg border border-gray-200 bg-slate-50/80 p-3 space-y-2">
+                        <h4 className="text-xs font-semibold text-gray-900">{t.modal.matrizFreeMigrationTitle}</h4>
+                        <p className="text-[11px] text-gray-600 leading-snug">{t.modal.matrizFreeMigrationIntro}</p>
+                        <div className="flex flex-col gap-2">
+                          <label className="text-[11px] font-medium text-gray-700">{t.modal.matrizFreeDaysValid}</label>
+                          <div className="flex flex-col xs:flex-row gap-2 items-stretch xs:items-end">
+                            <input
+                              type="number"
+                              min={1}
+                              max={3650}
+                              value={diasMigracaoMatriz}
+                              onChange={(e) => setDiasMigracaoMatriz(Number(e.target.value))}
+                              className="w-full px-2 py-1.5 border border-gray-300 rounded-md text-sm"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => criarPlanoFreeYlada('migration', diasMigracaoMatriz)}
+                              disabled={salvandoFreeMatriz || salvando}
+                              className="px-3 py-1.5 bg-indigo-600 text-white text-xs rounded-md hover:bg-indigo-700 disabled:opacity-50 whitespace-nowrap"
+                            >
+                              {salvandoFreeMatriz ? t.modal.saving : t.modal.matrizFreeMigrationCreateBtn}
+                            </button>
+                          </div>
+                        </div>
                       </div>
-                      <button
-                        type="button"
-                        onClick={criarPlanoFreeYlada}
-                        disabled={salvandoFreeMatriz || salvando}
-                        className="px-4 py-2 bg-indigo-600 text-white text-sm rounded-lg hover:bg-indigo-700 disabled:opacity-50 whitespace-nowrap"
-                      >
-                        {salvandoFreeMatriz ? t.modal.saving : t.modal.matrizFreeCreate}
-                      </button>
+                      <div className="rounded-lg border border-amber-200 bg-amber-50/50 p-3 space-y-2">
+                        <h4 className="text-xs font-semibold text-gray-900">{t.modal.matrizFreeCourtesyTitle}</h4>
+                        <p className="text-[11px] text-gray-600 leading-snug">{t.modal.matrizFreeCourtesyIntro}</p>
+                        <div className="flex flex-col gap-2">
+                          <label className="text-[11px] font-medium text-gray-700">{t.modal.matrizFreeDaysValid}</label>
+                          <div className="flex flex-col xs:flex-row gap-2 items-stretch xs:items-end">
+                            <input
+                              type="number"
+                              min={1}
+                              max={3650}
+                              value={diasCortesiaMatriz}
+                              onChange={(e) => setDiasCortesiaMatriz(Number(e.target.value))}
+                              className="w-full px-2 py-1.5 border border-gray-300 rounded-md text-sm"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => criarPlanoFreeYlada('courtesy', diasCortesiaMatriz)}
+                              disabled={salvandoFreeMatriz || salvando}
+                              className="px-3 py-1.5 bg-amber-700 text-white text-xs rounded-md hover:bg-amber-800 disabled:opacity-50 whitespace-nowrap"
+                            >
+                              {salvandoFreeMatriz ? t.modal.saving : t.modal.matrizFreeCourtesyCreateBtn}
+                            </button>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   )}
 
