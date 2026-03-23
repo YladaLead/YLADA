@@ -280,15 +280,21 @@ async function handlePaymentEvent(data: any, isTest: boolean = false, preFetched
     })
     
     // Se não tiver user_id no metadata, tentar extrair do external_reference
-    // Formato: area_planType_userId (ex: wellness_monthly_temp_portalmagra@gmail.com)
-    if (!userId && fullData.external_reference) {
-      const parts = fullData.external_reference.split('_')
-      console.log('📋 Partes do external_reference:', parts)
-      if (parts.length >= 3) {
-        userId = parts.slice(2).join('_') // Pega tudo depois de area_planType_
-        console.log('✅ User ID extraído do external_reference:', userId)
+    // Formatos: area_planType_<uuid> | area_planType_temp_email@dominio | area_planType_temp_apelido (truncado — exige e-mail do pagador)
+    if (!userId && fullData.external_reference && typeof fullData.external_reference === 'string') {
+      const ref = fullData.external_reference
+      const tempWithEmail = ref.match(/_temp_(.+@.+\..+)$/i)
+      if (tempWithEmail?.[1]) {
+        userId = `temp_${tempWithEmail[1]}`
+        console.log('✅ User ID extraído (temp + e-mail na referência):', userId)
       } else {
-        console.warn('⚠️ external_reference não tem formato esperado:', fullData.external_reference)
+        const parts = ref.split('_')
+        if (parts.length >= 3) {
+          userId = parts.slice(2).join('_')
+          console.log('✅ User ID extraído do external_reference:', userId)
+        } else {
+          console.warn('⚠️ external_reference não tem formato esperado:', ref)
+        }
       }
     }
     
@@ -314,6 +320,34 @@ async function handlePaymentEvent(data: any, isTest: boolean = false, preFetched
       }
     }
     const payerEmailEarlyFinal = payerEmailEarly || payerEmailFromRef
+
+    // nutri_monthly_temp_cavalcantesirle (sem @) virava temp_cavalcantesirle e quebrava o fluxo — corrigir com e-mail do MP
+    if (userId && String(userId).startsWith('temp_')) {
+      const tail = String(userId).slice('temp_'.length)
+      if (tail && !tail.includes('@')) {
+        if (payerEmailEarlyFinal && payerEmailEarlyFinal.includes('@')) {
+          userId = `temp_${payerEmailEarlyFinal}`
+          console.log('✅ Referência temp_ sem e-mail: usando e-mail do pagador Mercado Pago')
+        } else {
+          console.warn('⚠️ Referência temp_ truncada e pagador sem e-mail — limpando userId para fallbacks')
+          userId = undefined as unknown as string
+        }
+      }
+    }
+
+    // Conta já cadastrada: associar pagamento ao UUID (ex.: assinatura após free matriz)
+    if (payerEmailEarlyFinal?.includes('@')) {
+      const { data: profMatch } = await supabaseAdmin
+        .from('user_profiles')
+        .select('user_id')
+        .ilike('email', payerEmailEarlyFinal)
+        .limit(1)
+        .maybeSingle()
+      if (profMatch?.user_id && (!userId || String(userId).startsWith('temp_'))) {
+        userId = profMatch.user_id
+        console.log('✅ Pagamento associado a user_id existente via e-mail do pagador:', userId)
+      }
+    }
 
     // Se ainda não tiver, tentar usar o e-mail do pagador como temp_email
     if (!userId && payerEmailEarlyFinal && payerEmailEarlyFinal.includes('@')) {

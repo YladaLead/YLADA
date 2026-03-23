@@ -288,13 +288,17 @@ export async function GET(request: NextRequest) {
 
       // Se existir linha "do segmento" mas só vencida/cancelada, não esconder ylada ativa (ex.: Med + free matriz)
       const mesmaAreaTemVigente = subsMesmaArea.some(isSubVigente)
+      const yladaTemVigente = subsYlada.some(isSubVigente)
+      // Prioridade: assinatura ativa no segmento do perfil; senão free matriz ativa; senão linhas do segmento (ex.: mensal vencido); depois ylada
       const userSubscriptions = mesmaAreaTemVigente
         ? subsMesmaArea
-        : subsYlada.length > 0
+        : yladaTemVigente
           ? subsYlada
           : subsMesmaArea.length > 0
             ? subsMesmaArea
-            : todasSubsUsuario
+            : subsYlada.length > 0
+              ? subsYlada
+              : todasSubsUsuario
       const activeSubscription = userSubscriptions.find(sub => {
         if (!sub.current_period_end) return false
         const expiresAt = new Date(sub.current_period_end)
