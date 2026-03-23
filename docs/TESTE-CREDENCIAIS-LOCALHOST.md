@@ -7,11 +7,11 @@ Use estes e-mails e senhas para testar a **parte interna** em **localhost**, sem
 **Telefone para preenchimento interno (todas as áreas):** use o mesmo número ao preencher perfil/onboarding em qualquer conta de teste — evita cadastrar números reais e serve para fluxos que pedem telefone/WhatsApp.
 
 - **Telefone:** `+55 19 99723-0912` ou `5519997230912` (mensagens chegam no seu WhatsApp para você ver o que o profissional recebe)  
-- Pode ser usado em **todas** as 12 contas (ylada, nutri, coach, seller, estética, perfumaria, etc.) quando o formulário de perfil ou onboarding pedir Telefone/WhatsApp.
+- Pode ser usado em **todas** as 13 contas (ylada, nutri, coach, seller, estética, perfumaria, psicanalise, etc.) quando o formulário de perfil ou onboarding pedir Telefone/WhatsApp.
 
 ---
 
-## Contas sugeridas (12)
+## Contas sugeridas (13)
 
 | # | E-mail | Uso sugerido |
 |---|--------|----------------|
@@ -27,6 +27,7 @@ Use estes e-mails e senhas para testar a **parte interna** em **localhost**, sem
 | 10 | teste-interno-10@teste.ylada.com | Perfil fitness |
 | 11 | teste-interno-11@teste.ylada.com | Perfil estética |
 | 12 | teste-interno-12@teste.ylada.com | Perfil perfumaria |
+| 13 | teste-interno-13@teste.ylada.com | Perfil psicanalise (perfil empresarial / Noel preenchido) |
 
 ---
 
@@ -35,7 +36,7 @@ Use estes e-mails e senhas para testar a **parte interna** em **localhost**, sem
 1. **Subir o app:** `npm run dev` (app em http://localhost:3000).
 2. **Criar as contas:**  
    - Se o cadastro estiver aberto em localhost: abra **http://localhost:3000/pt/cadastro** (ou /pt/login com “Criar conta”) e cadastre cada e-mail com a senha `TesteYlada2025!`, escolhendo o **perfil** na hora do cadastro/onboarding.  
-   - **Recomendado:** rode `node scripts/criar-contas-teste-interno.js` (usa o Supabase do `.env.local`); ele cria ou atualiza as 12 contas com a senha, o perfil e o telefone +55 19 99723-0912 já preenchido no perfil.
+   - **Recomendado:** rode `node scripts/criar-contas-teste-interno.js` (usa o Supabase do `.env.local`); ele cria ou atualiza as 13 contas com a senha, o perfil e o telefone +55 19 99723-0912 já preenchido no perfil.
 3. **Testar:** acesse **http://localhost:3000/pt/login**, entre com uma das contas e siga o **PASSO-A-PASSO-PARTE-INTERNA.md** (board, perfil, Noel, configurações, etc.).
 4. **Trocar de perfil:** faça logout e login com outro e-mail da lista para ver se a experiência muda conforme o perfil.
 
@@ -63,7 +64,7 @@ Se aparecer **"Falha no login (verifique e-mail e senha)"** ou **"Email ou senha
 
 1. No terminal, na pasta do projeto:  
    `node scripts/criar-contas-teste-interno.js`  
-   (isso cria/atualiza as 12 contas no Supabase do seu `.env.local`.)
+   (isso cria/atualiza as 13 contas no Supabase do seu `.env.local`.)
 
 2. Confirme que o app está usando o **mesmo** projeto Supabase (variáveis no `.env.local`).
 
@@ -86,4 +87,4 @@ Se aparecer **"Falha no login (verifique e-mail e senha)"** ou **"Email ou senha
 - **URL de teste:** http://localhost:3000/pt/login  
 - **Senha (todas):** `TesteYlada2025!`  
 - **Telefone (preenchimento interno):** +55 19 99723-0912 — use em todas as contas; ao clicar no WhatsApp você vê a mensagem que chega no profissional.  
-- **E-mails:** teste-interno-01@teste.ylada.com … teste-interno-12@teste.ylada.com  
+- **E-mails:** teste-interno-01@teste.ylada.com … teste-interno-13@teste.ylada.com  

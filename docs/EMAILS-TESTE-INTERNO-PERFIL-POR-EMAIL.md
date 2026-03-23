@@ -1,9 +1,9 @@
 # E-mails teste interno — perfil por e-mail
 
-Use esta lista no outro chat. **Contas 03 a 12 têm perfil empresarial já preenchido** pelo script `scripts/criar-contas-teste-interno.js` (nome, WhatsApp, tipo, profissão e textos realistas por área). O agente **não precisa passar pelo fluxo de perfil** nessas contas — pode ir direto para Noel, diagnósticos, leads, etc.
+Use esta lista no outro chat. **Contas 03 a 13 têm perfil empresarial já preenchido** pelo script `scripts/criar-contas-teste-interno.js` (nome, WhatsApp, tipo, profissão e textos realistas por área). O agente **não precisa passar pelo fluxo de perfil** nessas contas — pode ir direto para Noel, diagnósticos, leads, etc.
 
 - **01 e 02:** área ylada (matriz); não é necessário preencher perfil para os testes.
-- **03 a 12:** cada uma com nome e perfil realistas; perfil já completo no banco.
+- **03 a 13:** cada uma com nome e perfil realistas; perfil já completo no banco.
 
 ---
 
@@ -23,6 +23,7 @@ Use esta lista no outro chat. **Contas 03 a 12 têm perfil empresarial já preen
 | 10 | teste-interno-10@teste.ylada.com | Lucas Ferreira | fitness | Personal e turmas; preencher vagas com link que engaja e traz lead para avaliação/primeira aula |
 | 11 | teste-interno-11@teste.ylada.com | Juliana Martins | estetica | Facial e limpeza de pele; destacar no Instagram com link que qualifica e gera agendamento |
 | 12 | teste-interno-12@teste.ylada.com | Amanda Ribeiro | perfumaria | Quiz de perfil olfativo para reduzir dúvida e aumentar conversão no Instagram/WhatsApp |
+| 13 | teste-interno-13@teste.ylada.com | Dra. Helena Vasconcelos | psicanalise | Primeiro contato com contexto; link que qualifica sem prometer solução rápida — Instagram, indicação e WhatsApp |
 
 **Senha (todas):** `TesteYlada2025!`
 
@@ -43,6 +44,7 @@ teste-interno-09@teste.ylada.com
 teste-interno-10@teste.ylada.com
 teste-interno-11@teste.ylada.com
 teste-interno-12@teste.ylada.com
+teste-interno-13@teste.ylada.com
 ```
 
 ---
@@ -50,7 +52,7 @@ teste-interno-12@teste.ylada.com
 ## Para o agente de verificação
 
 - **Contas 01 e 02:** não é necessário preencher perfil; pode testar fluxo ylada como está.
-- **Contas 03 a 12:** perfil já está preenchido (nome, WhatsApp, profile_type, profession e textos por área). **Não é preciso passar pelo processo de perfil empresarial** — o login já leva para a área correta com perfil completo. Use essas contas para testar Noel, diagnósticos, leads, sidebar, etc., sem etapa de perfil.
+- **Contas 03 a 13:** perfil já está preenchido (nome, WhatsApp, profile_type, profession e textos por área). **Não é preciso passar pelo processo de perfil empresarial** — o login já leva para a área correta com perfil completo. Use essas contas para testar Noel, diagnósticos, leads, sidebar, etc., sem etapa de perfil.
 
 Para recriar ou atualizar todas as contas e perfis no banco, execute:
 

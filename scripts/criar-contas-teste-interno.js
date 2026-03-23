@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 
 /**
- * Cria as 12 contas de teste da parte interna (docs/TESTE-CREDENCIAIS-LOCALHOST.md).
+ * Cria as 13 contas de teste da parte interna (docs/TESTE-CREDENCIAIS-LOCALHOST.md).
  * Senha (todas): TesteYlada2025!
  * Telefone (perfil/onboarding, todas): 5519997230912 — +55 19 99723-0912 (para ver mensagens no WhatsApp do profissional)
  *
  * Também preenche ylada_noel_profile (perfil Noel) por área com características comuns a cada profissão,
- * para o board e o Noel já terem contexto (ylada, nutri, coach, seller, nutra, med, psi, odonto, fitness, estética, perfumaria).
+ * para o board e o Noel já terem contexto (ylada, nutri, coach, seller, nutra, med, psi, psicanalise, odonto, fitness, estética, perfumaria).
  *
  * Execute: node scripts/criar-contas-teste-interno.js
  *
@@ -183,6 +183,34 @@ const PERFIL_NOEL_POR_AREA = {
     rotina_atual_resumo: 'Atendo presencial e online; quero recurso que mostre meu jeito de trabalhar e traga quem se identifica com ansiedade e sono',
     area_specific: { publico_psi: ['adultos'], modalidade_atendimento: 'ambos', whatsapp: TELEFONE_NOEL, temas_atuacao: ['ansiedade', 'sono'] }
   },
+  psicanalise: {
+    segment: 'psicanalise',
+    profile_type: 'liberal',
+    profession: 'psicanalise',
+    category: 'psicanalise',
+    tempo_atuacao_anos: 6,
+    dor_principal: 'sem_indicacao',
+    prioridade_atual:
+      'Quero primeiro contatos mais organizados: quem chega já refletiu um pouco sobre o que sente e entende que o processo tem tempo — menos curiosos e mais analisandos alinhados ao setting',
+    fase_negocio: 'estabilizado',
+    metas_principais:
+      'Divulgar com ética e clareza: um link leve (diagnóstico) que ajuda a pessoa a nomear a demanda antes da conversa, sem prometer cura rápida',
+    objetivos_curto_prazo:
+      'Instagram e indicação com ferramenta que qualifica e respeita o ritmo analítico; WhatsApp só depois de algum contexto',
+    modelo_atuacao: ['consultorio', 'online'],
+    capacidade_semana: 12,
+    ticket_medio: 220,
+    modelo_pagamento: 'particular',
+    canais_principais: ['instagram', 'indicacao'],
+    rotina_atual_resumo:
+      'Atendo presencial e online; busco analisandos que já entendem um pouco do processo — diagnóstico no bio ajuda a filtrar e abrir conversa com mais maturidade',
+    area_specific: {
+      publico_psi: ['adultos'],
+      modalidade_atendimento: 'ambos',
+      whatsapp: TELEFONE_NOEL,
+      temas_atuacao: ['sintoma', 'repetição', 'luto', 'relacionamentos']
+    }
+  },
   odonto: {
     segment: 'odonto',
     profile_type: 'liberal',
@@ -274,7 +302,8 @@ const CONTAS = [
   { email: 'teste-interno-09@teste.ylada.com', nome: 'Dr. André Souza', perfil: 'odonto' },
   { email: 'teste-interno-10@teste.ylada.com', nome: 'Lucas Ferreira', perfil: 'fitness' },
   { email: 'teste-interno-11@teste.ylada.com', nome: 'Juliana Martins', perfil: 'estetica' },
-  { email: 'teste-interno-12@teste.ylada.com', nome: 'Amanda Ribeiro', perfil: 'perfumaria' }
+  { email: 'teste-interno-12@teste.ylada.com', nome: 'Amanda Ribeiro', perfil: 'perfumaria' },
+  { email: 'teste-interno-13@teste.ylada.com', nome: 'Dra. Helena Vasconcelos', perfil: 'psicanalise' }
 ]
 
 function slug (email) {
