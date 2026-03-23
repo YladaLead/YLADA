@@ -77,7 +77,7 @@ export default function PilotPage() {
             <button
               type="button"
               onClick={() => setStep('areas')}
-              className="mt-10 w-full min-h-[44px] rounded-xl bg-blue-600 px-8 py-3 text-base font-semibold text-white hover:bg-blue-700 sm:mx-auto sm:w-auto sm:min-h-[48px]"
+              className="mt-10 w-full min-h-[44px] rounded-xl bg-blue-600 px-8 py-3 text-base font-semibold text-white hover:bg-blue-700 sm:w-auto sm:self-start sm:min-h-[48px]"
             >
               Comece agora
             </button>
