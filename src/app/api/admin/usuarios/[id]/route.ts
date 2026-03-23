@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
 import { requireApiAuth } from '@/lib/api-auth'
+import { PERFIS_MATRIZ_YLADA } from '@/lib/admin-matriz-constants'
 
-/** Perfis válidos (YLADA + Wellness) */
-const PERFIS_VALIDOS = ['wellness', 'nutri', 'coach', 'nutra', 'med', 'psi', 'psicanalise', 'odonto', 'estetica', 'fitness', 'perfumaria', 'ylada']
+/** Alinhado à matriz + Wellness + perfis extra no CHECK do banco (ex.: coach-bem-estar). Inclui seller (Vendas). */
+const PERFIS_VALIDOS: string[] = ['wellness', ...PERFIS_MATRIZ_YLADA, 'coach-bem-estar']
 
 /**
  * PUT /api/admin/usuarios/[id]

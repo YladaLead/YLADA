@@ -5,6 +5,7 @@ import { getNamesForCanonical, getCanonicalName } from '@/lib/presidente-canonic
 import { isPerfilMatrizYlada, PERFIS_MATRIZ_YLADA } from '@/lib/admin-matriz-constants'
 import { parseYladaFreeGrantKind } from '@/lib/admin-ylada-free-matriz'
 import { isAdminTestAccountEmail } from '@/lib/admin-test-accounts'
+import { toYmdInTimeZone } from '@/lib/date-utils'
 
 /**
  * GET /api/admin/usuarios
@@ -391,8 +392,8 @@ export async function GET(request: NextRequest) {
         status,
         assinatura: assinaturaTipo,
         assinaturaId: subscriptionToEdit?.id || null,
-        assinaturaVencimento: assinaturaVencimento ? new Date(assinaturaVencimento).toISOString().split('T')[0] : null,
-        dataCadastro: profile.created_at ? new Date(profile.created_at).toISOString().split('T')[0] : null,
+        assinaturaVencimento: assinaturaVencimento ? toYmdInTimeZone(assinaturaVencimento) : null,
+        dataCadastro: profile.created_at ? toYmdInTimeZone(profile.created_at) : null,
         leadsGerados: leadsPorUsuario[profile.user_id] || 0,
         cursosCompletos: templatesPorUsuario[profile.user_id] || 0, // legacy (UI não deve mais exibir como cursos)
         linksEnviados: templatesPorUsuario[profile.user_id] || 0,

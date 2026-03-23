@@ -21,3 +21,32 @@ export function toLocalDateStringISO(date: Date | string | null | undefined): st
   const day = String(d.getDate()).padStart(2, '0')
   return `${y}-${m}-${day}`
 }
+
+/** Fuso padrão para datas “civis” no admin (cadastro, vencimento exibido no Brasil). */
+export const DATE_DISPLAY_TIMEZONE_BR = 'America/Sao_Paulo'
+
+/**
+ * Instante ISO → YYYY-MM-DD no calendário do fuso (ex. cadastro: evita dia “errado” vs .toISOString().split).
+ */
+export function toYmdInTimeZone(iso: string | Date | null | undefined, timeZone = DATE_DISPLAY_TIMEZONE_BR): string | null {
+  if (iso == null) return null
+  const d = typeof iso === 'string' ? new Date(iso) : iso
+  if (Number.isNaN(d.getTime())) return null
+  return new Intl.DateTimeFormat('sv-SE', {
+    timeZone,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).format(d)
+}
+
+/**
+ * YYYY-MM-DD já “civil” → DD/MM/AAAA sem interpretar como UTC meia-noite (bug do new Date('2026-03-23')).
+ */
+export function formatYmdSlashPtBr(ymd: string | null | undefined): string {
+  if (ymd == null || ymd === '') return '—'
+  const s = ymd.trim().slice(0, 10)
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(s)) return '—'
+  const [y, m, d] = s.split('-')
+  return `${d}/${m}/${y}`
+}

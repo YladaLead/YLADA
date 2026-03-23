@@ -4,7 +4,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { useState, useEffect, useMemo } from 'react'
 import { createClient } from '@/lib/supabase-client'
-import { toLocalDateStringISO } from '@/lib/date-utils'
+import { toLocalDateStringISO, formatYmdSlashPtBr } from '@/lib/date-utils'
 import { getAdminUsuariosTranslations } from '@/lib/translations/admin-usuarios'
 import { PERFIS_MATRIZ_YLADA } from '@/lib/admin-matriz-constants'
 
@@ -662,7 +662,7 @@ export default function AdminUsuarios() {
         : []
       const rest = [
         getAssinaturaListLabel(u),
-        u.dataCadastro ? new Date(u.dataCadastro).toLocaleDateString('pt-BR') : '',
+        u.dataCadastro ? formatYmdSlashPtBr(u.dataCadastro) : '',
         String(u.leadsGerados),
         String(u.linksEnviados ?? 0),
         String(u.cliquesLinks ?? 0),
@@ -1109,7 +1109,7 @@ export default function AdminUsuarios() {
                         <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-600">
                           <div className="text-[10px] text-gray-400 uppercase tracking-wide mb-0.5">{t.table.profileDateStamp}</div>
                           {usuario.dataCadastro
-                            ? new Date(usuario.dataCadastro).toLocaleDateString('pt-BR')
+                            ? formatYmdSlashPtBr(usuario.dataCadastro)
                             : <span className="text-gray-400">—</span>}
                         </td>
                         <td className="px-3 py-4 whitespace-nowrap min-w-[100px]">
