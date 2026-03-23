@@ -10,6 +10,13 @@ import { useTranslations } from '@/hooks/useTranslations'
 /** Itens só por solicitação — no piloto entram apenas pelo campo livre. */
 const PILOT_EXCLUDED_IDS = new Set(['profissional-liberal', 'vendedores-geral'])
 
+/** Minimalismo: médicos e nutri passam pelo passo intermédio /pt/pilot/med|nutri. */
+function pilotHrefForArea(areaId: string, defaultPath: string): string {
+  if (areaId === 'med') return '/pt/pilot/med'
+  if (areaId === 'nutri') return '/pt/pilot/nutri'
+  return defaultPath
+}
+
 export default function PilotPage() {
   const [otherText, setOtherText] = useState('')
   const router = useRouter()
@@ -80,10 +87,11 @@ export default function PilotPage() {
             {pilotAreas.map((area) => {
               const label =
                 list[area.translationKey as keyof typeof list]?.title ?? area.id
+              const href = pilotHrefForArea(area.id, area.path)
               return (
                 <li key={area.id}>
                   <Link
-                    href={area.path}
+                    href={href}
                     className="flex min-h-[44px] items-center px-3.5 py-2.5 rounded-xl border border-gray-200 bg-white text-sm font-medium text-gray-900 hover:border-blue-300 hover:bg-sky-50/60 active:bg-sky-50 transition-colors sm:min-h-[48px] sm:px-4 sm:py-3"
                   >
                     {label}
@@ -95,6 +103,7 @@ export default function PilotPage() {
         </section>
 
         <section className="pt-2 space-y-3 border-t border-gray-100">
+          <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Outro</p>
           <label htmlFor="pilot-outro" className="block text-sm font-medium text-gray-900">
             Qual é a sua área?
           </label>
@@ -103,7 +112,7 @@ export default function PilotPage() {
             type="text"
             value={otherText}
             onChange={(e) => setOtherText(e.target.value)}
-            placeholder="Ex.: profissional liberal, vendedor, suplementos (outra linha)…"
+            placeholder="Ex.: vendedor, fono, fisioterapeuta…"
             className="w-full min-h-[44px] px-3.5 py-2 border border-gray-300 rounded-xl text-base focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:min-h-[48px] sm:px-4"
             autoComplete="organization-title"
           />

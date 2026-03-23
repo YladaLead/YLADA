@@ -3,8 +3,8 @@
 import MedInstitutionalContent from './MedInstitutionalContent'
 
 /**
- * Página de medicina: mesma estrutura e seções da home e da estética,
- * com conteúdo 100% focado em médicos (dor agenda instável, fluxo sem perguntar área, vídeo med).
+ * Landing completa de medicina (conteúdo institucional).
+ * Fluxo minimalista do piloto: /pt/pilot/med → atalhos para cá e para o login.
  */
 export default function MedLandingPage() {
   return <MedInstitutionalContent />
