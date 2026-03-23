@@ -13,12 +13,14 @@ import { DiagnosticoExemploSection } from '@/components/ylada/DiagnosticoExemplo
 import { PricingSectionLanding } from '@/components/ylada/PricingSectionLanding'
 import { useRouter } from 'next/navigation'
 import type { Language } from '@/lib/i18n'
+import { landingPageVideos } from '@/lib/landing-pages-assets'
 
 const AREA_LABELS: Record<string, Record<Language, string>> = {
   nutri: { pt: 'Nutrição', en: 'Nutrition', es: 'Nutrición' },
   estetica: { pt: 'Estética', en: 'Aesthetics', es: 'Estética' },
   fitness: { pt: 'Fitness', en: 'Fitness', es: 'Fitness' },
   psi: { pt: 'Psicologia', en: 'Psychology', es: 'Psicología' },
+  psicanalise: { pt: 'Psicanálise', en: 'Psychoanalysis', es: 'Psicoanálisis' },
   odonto: { pt: 'Odontologia', en: 'Dentistry', es: 'Odontología' },
   med: { pt: 'Medicina', en: 'Medicine', es: 'Medicina' },
   nutra: { pt: 'Nutra', en: 'Nutra', es: 'Nutra' },
@@ -45,14 +47,29 @@ const COMMON = {
   },
 }
 
-export type AreaLandingArea = 'nutri' | 'estetica' | 'fitness' | 'psi' | 'odonto' | 'med' | 'nutra' | 'perfumaria' | 'coach-bem-estar' | 'seller'
+export type AreaLandingArea =
+  | 'nutri'
+  | 'estetica'
+  | 'fitness'
+  | 'psi'
+  | 'psicanalise'
+  | 'odonto'
+  | 'med'
+  | 'nutra'
+  | 'perfumaria'
+  | 'coach-bem-estar'
+  | 'seller'
 
 /** Mapeia área institucional para área dos componentes (HeroBeforeAfter, UseCasesSection) */
-const AREA_TO_COMPONENT: Record<string, 'med' | 'psi' | 'odonto' | 'nutri' | 'estetica' | 'fitness' | 'coach' | 'seller' | 'perfumaria'> = {
+const AREA_TO_COMPONENT: Record<
+  string,
+  'med' | 'psi' | 'psicanalise' | 'odonto' | 'nutri' | 'estetica' | 'fitness' | 'coach' | 'seller' | 'perfumaria'
+> = {
   nutri: 'nutri',
   estetica: 'estetica',
   fitness: 'fitness',
   psi: 'psi',
+  psicanalise: 'psicanalise',
   odonto: 'odonto',
   med: 'med',
   nutra: 'seller',
@@ -77,6 +94,7 @@ const AREA_TO_QUIZ_INDEX: Record<AreaLandingArea, number> = {
   estetica: 2,
   fitness: 4,
   psi: 1,
+  psicanalise: 7,
   odonto: 6,
   med: 0,
   nutra: 5,
@@ -121,6 +139,26 @@ const DIAGNOSTIC_SECTION_BY_AREA: Record<
     bullet1: { pt: 'Pacientes pedindo orientação gratuita', en: 'Patients asking for free guidance', es: 'Pacientes pidiendo orientación gratuita' },
     bullet2: { pt: 'Conversas que não viram consulta', en: 'Conversations that don\'t turn into consultations', es: 'Conversaciones que no se convierten en consulta' },
     closing: { pt: 'Isso consome tempo, gera conversas improdutivas e reduz a qualidade das consultas.', en: 'This consumes time, generates unproductive conversations and reduces the quality of consultations.', es: 'Esto consume tiempo, genera conversaciones improductivas y reduce la calidad de las consultas.' },
+  },
+  psicanalise: {
+    pt: 'Psicanalistas enfrentam três dificuldades comuns ao captar analisandos online',
+    en: 'Psychoanalysts face three common challenges when attracting clients online',
+    es: 'Los psicoanalistas enfrentan tres dificultades comunes al captar consultantes online',
+    bullet1: {
+      pt: 'Pedidos de orientação rápida, fora do ritmo do processo',
+      en: 'Requests for quick guidance, out of step with the process',
+      es: 'Pedidos de orientación rápida, fuera del ritmo del proceso',
+    },
+    bullet2: {
+      pt: 'Primeiros contatos sem clareza sobre o que é análise',
+      en: 'First contacts without clarity about what analysis is',
+      es: 'Primeros contactos sin claridad sobre qué es el análisis',
+    },
+    closing: {
+      pt: 'Isso gera explicações repetidas e conversas pouco alinhadas ao setting.',
+      en: 'This leads to repeated explanations and conversations misaligned with the setting.',
+      es: 'Esto genera explicaciones repetidas y conversaciones poco alineadas con el setting.',
+    },
   },
   odonto: {
     pt: 'Dentistas enfrentam três dificuldades comuns no marketing online',
@@ -178,6 +216,7 @@ const AREA_TO_CHECKOUT: Record<AreaLandingArea, string> = {
   estetica: '/pt/nutri/checkout',
   fitness: '/pt/nutri/checkout',
   psi: '/pt/nutri/checkout',
+  psicanalise: '/pt/nutri/checkout',
   odonto: '/pt/nutri/checkout',
   med: '/pt/nutri/checkout',
   nutra: '/pt/nutra/checkout',
@@ -474,7 +513,11 @@ export function AreaLandingPage({ area, locale, appBasePath = '/pt' }: AreaLandi
           </div>
         </section>
 
-        <DiagnosticoExemploSection area={area === 'nutra' ? 'nutra' : componentArea} ctaHref={`${checkoutBase}?plan=annual`} />
+        <DiagnosticoExemploSection
+          area={area === 'nutra' ? 'nutra' : componentArea}
+          ctaHref={`${checkoutBase}?plan=annual`}
+          fluxoVideoUrl={area === 'psicanalise' ? landingPageVideos.yladaDemonstracaoFluxoPsicanalise : undefined}
+        />
 
         <section className="py-12 sm:py-16 bg-gray-50">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">

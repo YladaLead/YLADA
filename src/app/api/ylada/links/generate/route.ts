@@ -23,6 +23,10 @@ import { translateQuestions } from '@/lib/translate-questions'
 import { getCountryByCode } from '@/components/CountrySelector'
 import { hasYladaProPlan } from '@/lib/subscription-helpers'
 import { FREEMIUM_LIMITS } from '@/config/freemium-limits'
+import {
+  buildProjectionFormFields,
+  projectionQuestionsOverrideAllowed,
+} from '@/lib/ylada/projection-form-fields'
 
 function generateSlug(): string {
   return randomBytes(6).toString('base64url').toLowerCase().replace(/[^a-z0-9]/g, '') || 'link'
@@ -270,7 +274,18 @@ export async function POST(request: NextRequest) {
         questionsOverride.length > 0 &&
         questionsOverride.some((q) => Array.isArray((q as { options?: string[] }).options) && (q as { options: string[] }).options!.length > 0)
 
-      if (hasOverrideWithOptions) {
+      if (flow.architecture === 'PROJECTION_CALCULATOR') {
+        const canonical = buildProjectionFormFields(themeRaw)
+        const mergeLabels = projectionQuestionsOverrideAllowed(questionsOverride)
+        formFields = canonical.map((c, i) => ({
+          id: c.id,
+          label:
+            mergeLabels && questionsOverride?.[i]?.label?.trim()
+              ? questionsOverride[i].label!.trim()
+              : c.label,
+          type: 'number',
+        }))
+      } else if (hasOverrideWithOptions) {
         formFields = questionsOverride!.map((q) => ({
           id: (q as { id?: string }).id ?? `q${questionsOverride!.indexOf(q) + 1}`,
           label: q.label,

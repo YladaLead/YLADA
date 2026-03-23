@@ -78,6 +78,13 @@ export const landingPageVideos = {
   get yladaDemonstracaoFluxoPoster() {
     return getLandingPageAssetUrl('ylada-demonstracao-fluxo-poster.png')
   },
+  /** Vídeo específico da landing de psicanálise. Defina NEXT_PUBLIC_YLADA_VIDEO_FLUXO_PSICANALISE_URL (YouTube, Vimeo ou MP4); senão usa o mesmo demonstração geral. */
+  get yladaDemonstracaoFluxoPsicanalise(): string {
+    if (typeof process !== 'undefined' && process.env.NEXT_PUBLIC_YLADA_VIDEO_FLUXO_PSICANALISE_URL) {
+      return process.env.NEXT_PUBLIC_YLADA_VIDEO_FLUXO_PSICANALISE_URL
+    }
+    return getLandingPageAssetUrl('ylada-demonstracao-fluxo.mp4')
+  },
   /** Vídeo tutorial "Como escolher seu slug" (Configurações Nutri). Defina NEXT_PUBLIC_NUTRI_SLUG_VIDEO_URL (YouTube, Vimeo ou URL direta do vídeo). */
   get nutriSlugTutorial(): string {
     return (typeof process !== 'undefined' && process.env.NEXT_PUBLIC_NUTRI_SLUG_VIDEO_URL) || ''

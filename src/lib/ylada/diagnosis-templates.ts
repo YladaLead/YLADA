@@ -755,15 +755,15 @@ const PROJECTION: ArchitectureTemplates = {
     'Cenário provável em {THEME}',
   ],
   explanation:
-    'Com base no que você informou, essa é uma projeção realista.',
+    'Com base nos números que você informou, uma faixa possível fica entre {PROJ_MIN} e {PROJ_MAX} {UNIT} ao longo de cerca de {DAYS} dias — o ajuste fino depende da sua rotina e de acompanhamento.',
   causa_provavel:
-    'A causa provável: se a meta ou o prazo estiverem fora do realista, a adesão tende a quebrar.',
+    'O que costuma acontecer: prazo curto e mudança grande ao mesmo tempo pedem consistência muito alta; quando isso não bate com o dia a dia real, o ritmo quebra antes da meta.',
   preocupacoes:
-    'Metas ou prazos fora do sustentável tendem a gerar desistência cedo.',
+    'Se a diferença desejada ({DELTA} na unidade informada) estiver comprimida em poucos dias, aumenta o risco de cortes extremos, oscilação de peso e sensação de fracasso — não é falta de disciplina.',
   consequence:
-    'Se a meta estiver fora do realista, tende a desistir cedo.',
+    'Sem recalibrar meta ou prazo, a tendência é ir e voltar: esforço intenso seguido de desistência, com resultado instável mesmo com vontade.',
   possibility:
-    'Vale calibrar com quem acompanha pra evoluir. Dá pra ajustar.',
+    'Metas intermediárias e prazo mais alinhado à consistência que você colocou costumam sustentar melhor o processo. Vale alinhar isso com quem acompanha.',
   cta_helper: 'Quer que eu monte seu próximo passo com base nisso?',
   cta_button: ['Quero calibrar', 'Quero um plano'],
   cta_imperative: 'Fale comigo sobre isso',

@@ -13,13 +13,19 @@ export interface YladaLandingArea {
 
 /**
  * Áreas do Método YLADA — ordem sugerida para o grid:
- * Linha 1: Saúde (Médicos, Nutricionistas, Psicólogos, Odontologia)
+ * Linha 1: Saúde (Médicos, Nutricionistas, Psicólogos, Psicanalistas, Odontologia)
  * Linha 2: Estética e bem-estar + Mercado de vendas (Estética, Fitness, Perfumaria, Vendedores)
  */
 const YLADA_LANDING_AREAS_BASE: Omit<YladaLandingArea, 'href'>[] = [
   { codigo: 'med', label: 'Médicos', slogan: 'Atrair pacientes que já entendem o valor da consulta', descricao: 'Para médicos e clínicas.' },
   { codigo: 'nutri', label: 'Nutricionistas', slogan: 'Explicar melhor o processo antes da primeira consulta', descricao: 'Para nutricionistas que querem atrair pacientes interessados.' },
-  { codigo: 'psi', label: 'Psicólogos', slogan: 'Começar conversas com pacientes mais preparados', descricao: 'Para psicólogos e psicanalistas.' },
+  { codigo: 'psi', label: 'Psicólogos', slogan: 'Começar conversas com pacientes mais preparados', descricao: 'Para psicólogos e terapeutas.' },
+  {
+    codigo: 'psicanalise',
+    label: 'Psicanalistas',
+    slogan: 'Atrair analisandos mais preparados para o processo',
+    descricao: 'Para psicanalistas e profissionais do setting analítico.',
+  },
   { codigo: 'odonto', label: 'Odontologia', slogan: 'Mostrar o valor dos tratamentos antes da avaliação', descricao: 'Para dentistas e clínicas odontológicas.' },
   { codigo: 'estetica', label: 'Estética', slogan: 'Atrair clientes interessados em procedimentos', descricao: 'Para profissionais de estética.' },
   { codigo: 'coach', label: 'Coach', slogan: 'Começar conversas com clientes mais preparados', descricao: 'Para coaches (bem-estar, carreira, vida).' },

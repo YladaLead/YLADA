@@ -556,6 +556,10 @@ export function generateDiagnosis(input: DiagnosisInput): DiagnosisGenerationRes
     PROFILE: '',
     SCORE: '',
     DAYS: '',
+    PROJ_MIN: '',
+    PROJ_MAX: '',
+    DELTA: '',
+    UNIT: 'kg',
   }
 
   let level: RiskLevel | undefined
@@ -609,6 +613,15 @@ export function generateDiagnosis(input: DiagnosisInput): DiagnosisGenerationRes
       projection = proj.projection
       evidence_bullets = proj.evidence
       warning = proj.warning
+      const cur = getNum(visitor_answers, 'current_value', 0)
+      const tgt = getNum(visitor_answers, 'target_value', cur)
+      const daysProj = getNum(visitor_answers, 'days', 30)
+      slots.DAYS = daysProj
+      slots.PROJ_MIN = proj.projection.min
+      slots.PROJ_MAX = proj.projection.max
+      slots.DELTA = Math.round(Math.abs(tgt - cur))
+      const unitRaw = (visitor_answers.unit as string)?.trim()
+      slots.UNIT = unitRaw || 'kg'
       next_step = getNextStep(meta.architecture, { warning: proj.warning })
       break
     }

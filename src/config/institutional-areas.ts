@@ -23,7 +23,7 @@ export const INSTITUTIONAL_AREAS: InstitutionalArea[] = [
   // Profissionais de saúde
   { id: 'nutri', path: '/pt/nutri', status: 'ready', translationKey: 'nutri' },
   { id: 'psi', path: '/pt/psi', status: 'ready', translationKey: 'psi' },
-  { id: 'psicanalise', path: '/pt/psicanalise/login', status: 'ready', translationKey: 'psicanalise' },
+  { id: 'psicanalise', path: '/pt/psicanalise', status: 'ready', translationKey: 'psicanalise' },
   { id: 'odonto', path: '/pt/odonto/login', status: 'ready', translationKey: 'odonto' },
   { id: 'med', path: '/pt/med/login', status: 'ready', translationKey: 'med' },
   // Bem-estar e estética
@@ -42,7 +42,7 @@ export const INSTITUTIONAL_AREAS: InstitutionalArea[] = [
 const AREA_BASE_PATHS: Record<string, string> = {
   nutri: '/nutri',
   psi: '/psi',
-  psicanalise: '/psicanalise/login',
+  psicanalise: '/psicanalise',
   odonto: '/odonto',
   med: '/med',
   coach: '/coach',

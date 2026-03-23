@@ -175,6 +175,33 @@ export const SEGMENTOS_DORES_OBJETIVOS: SegmentoDoresObjetivos[] = [
     ],
   },
   {
+    segment_code: 'psychoanalysis',
+    label: 'Psicanálise',
+    temas: [
+      { value: 'autoconhecimento', label: 'Autoconhecimento' },
+      { value: 'transferencia', label: 'Vínculo e escuta' },
+      { value: 'ansiedade', label: 'Ansiedade' },
+      { value: 'sono', label: 'Sono e ritmo' },
+      { value: 'relacionamentos', label: 'Relacionamentos' },
+      { value: 'equilibrio_emocional', label: 'Equilíbrio emocional' },
+    ],
+    dores: [
+      'Dificuldade de nomear o que sente',
+      'Sintomas que se repetem',
+      'Relações que esgotam',
+      'Busca por escuta contínua',
+      'Expectativas sobre o processo',
+      'Medo de começar ou abandonar',
+    ],
+    objetivos: [
+      'Dar espaço ao que emerge',
+      'Fortalecer escuta e vínculo terapêutico',
+      'Clarear demandas do analisando',
+      'Qualificar primeiros contatos',
+      'Explicar o processo sem simplificar demais',
+    ],
+  },
+  {
     segment_code: 'medicine',
     label: 'Médicos (Bem-estar geral)',
     temas: [

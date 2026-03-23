@@ -104,6 +104,19 @@ const NOEL_FEEDBACK_BY_PROFESSION: Record<string, Record<string, Record<string, 
       ambos: 'Modelo híbrido amplia possibilidades. O Noel vai sugerir estratégias para ambos os canais.',
     },
   },
+  psicanalise: {
+    publico_psi: {
+      adultos: 'Atendimento de adultos é comum na psicanálise. O Noel vai sugerir diagnósticos que organizam a demanda antes do setting.',
+      criancas: 'Atendimento infantil pode envolver mediação com responsáveis. O Noel vai sugerir estratégias de triagem respeitosas.',
+      casais: 'Casal exige linguagem cuidadosa nos diagnósticos. O Noel pode ajudar a qualificar o primeiro contato.',
+      empresas: 'Demanda institucional combina com avaliações de bem-estar; o Noel adapta o tom ao contexto analítico.',
+    },
+    modalidade_atendimento: {
+      presencial: 'Setting presencial: indicação e divulgação qualificada costumam ser centrais. O Noel vai priorizar isso.',
+      online: 'Análise online exige clareza de limites e privacidade. O Noel pode sugerir diagnósticos para captação digital.',
+      ambos: 'Modelo híbrido amplia possibilidades. O Noel vai sugerir estratégias para ambos os formatos.',
+    },
+  },
   medico: {
     publico_principal: {
       adultos: 'Atendimento de adultos é o mais comum. O Noel vai sugerir diagnósticos para triagem e qualificação.',
@@ -263,7 +276,7 @@ export default function PerfilEmpresarialView({ areaCodigo, areaLabel }: PerfilE
       } else if (profession === 'odonto') {
         const voceAtende = form.area_specific?.odonto_voce_atende as string | undefined
         profile = getStrategicProfileOdonto(voceAtende, form.tempo_atuacao_anos)
-      } else if (profession === 'psi') {
+      } else if (profession === 'psi' || profession === 'psicanalise') {
         const publico = form.area_specific?.publico_psi as string[] | string | undefined
         const modalidade = form.area_specific?.modalidade_atendimento as string | undefined
         profile = getStrategicProfilePsi(publico, modalidade, form.tempo_atuacao_anos)
@@ -828,12 +841,23 @@ export default function PerfilEmpresarialView({ areaCodigo, areaLabel }: PerfilE
         : null
 
     const isContextoStepWithFeedback =
-      ['estetica', 'odonto', 'psi', 'fitness', 'coach', 'nutricionista', 'medico'].includes(profession || '') && currentStep?.id === 'contexto'
-    const isEspecialidadeStepWithFeedback = (profession === 'psi' || profession === 'medico') && currentStep?.id === 'especialidade'
+      ['estetica', 'odonto', 'psi', 'psicanalise', 'fitness', 'coach', 'nutricionista', 'medico'].includes(profession || '') &&
+      currentStep?.id === 'contexto'
+    const isEspecialidadeStepWithFeedback =
+      (profession === 'psi' || profession === 'psicanalise' || profession === 'medico') && currentStep?.id === 'especialidade'
     const isAtendimentoStepWithFeedback = isEspecialidadeStepWithFeedback
     const isFieldWithNoelFeedback = (f: ProfileFieldDef) =>
       !!NOEL_FEEDBACK_BY_PROFESSION[profession]?.[f.key]
-    const hasStrategicProfileDiscovery = ['estetica', 'odonto', 'psi', 'fitness', 'coach', 'nutricionista', 'medico'].includes(profession || '')
+    const hasStrategicProfileDiscovery = [
+      'estetica',
+      'odonto',
+      'psi',
+      'psicanalise',
+      'fitness',
+      'coach',
+      'nutricionista',
+      'medico',
+    ].includes(profession || '')
     const showStrategicProfileDiscovery =
       hasStrategicProfileDiscovery && stepIndex === 1 && (strategicProfilePhase === 'analyzing' || strategicProfilePhase === 'result')
 
@@ -1051,6 +1075,8 @@ export default function PerfilEmpresarialView({ areaCodigo, areaLabel }: PerfilE
                         {profession === 'estetica' && 'Uma esteticista facial autônoma precisa de estratégias diferentes de uma clínica com equipe. O Noel usa essas informações para ajustar recomendações automaticamente.'}
                         {profession === 'odonto' && 'Um dentista particular precisa de estratégias diferentes de uma clínica com convênio. O Noel usa essas informações para ajustar recomendações automaticamente.'}
                         {profession === 'psi' && 'Um psicólogo que atende adultos pode usar diagnósticos diferentes de quem atende casais. O Noel usa essas informações para ajustar recomendações automaticamente.'}
+                        {profession === 'psicanalise' &&
+                          'Um psicanalista com público adulto pode usar diagnósticos com tom diferente de quem atende adolescentes ou casais. O Noel usa essas informações para ajustar recomendações automaticamente.'}
                         {profession === 'fitness' && 'Um personal trainer precisa de estratégias diferentes de quem atua em academia. O Noel usa essas informações para ajustar recomendações automaticamente.'}
                         {profession === 'coach' && 'Um coach de sessões individuais precisa de estratégias diferentes de quem trabalha com grupos. O Noel usa essas informações para ajustar recomendações automaticamente.'}
                         {profession === 'nutricionista' && 'Uma nutricionista de emagrecimento precisa de estratégias diferentes de quem atende esportistas. O Noel usa essas informações para ajustar recomendações automaticamente.'}

@@ -9,6 +9,7 @@ import type { Language } from '@/lib/i18n'
 export type UseCasesArea =
   | 'med'
   | 'psi'
+  | 'psicanalise'
   | 'odonto'
   | 'nutri'
   | 'estetica'
@@ -44,6 +45,14 @@ const CONFIG: Record<
     card1Text: 'O psicólogo compartilha uma avaliação rápida. O cliente responde antes do contato. Quando a conversa começa, o profissional já entende sintomas, interesses ou preocupações.',
     card2Text: 'O profissional publica o link da avaliação. Pessoas curiosas respondem. Quem realmente precisa de ajuda acaba iniciando conversa.',
     card3Text: 'Quando alguém pede orientação, o profissional envia a avaliação. Isso ajuda a organizar a conversa desde o início.',
+  },
+  psicanalise: {
+    title: 'Como psicanalistas usam o YLADA no dia a dia',
+    subtitle: 'Avaliações que organizam a demanda antes do setting, sem apressar o processo.',
+    card1Title: 'Antes do primeiro contato',
+    card1Text: 'O analista compartilha uma avaliação breve. A pessoa responde antes da conversa. Quando o contato acontece, já há mais clareza sobre o que incomoda.',
+    card2Text: 'O profissional publica o link. Quem tem afinidade com escuta contínua tende a se identificar e iniciar conversa.',
+    card3Text: 'Em pedidos de “orientação rápida”, o link ajuda a filtrar quem está aberto ao ritmo da análise.',
   },
   odonto: {
     title: 'Como dentistas usam o YLADA no dia a dia',
@@ -114,6 +123,14 @@ const CONFIG: Record<
 const CONFIG_EN: Record<UseCasesArea, { title: string; subtitle: string; card1Title: string; card1Text: string; card2Text: string; card3Text: string }> = {
   med: { title: 'How doctors use YLADA in their daily practice', subtitle: 'Simple assessments that help start clearer conversations with patients.', card1Title: 'Before the first consultation', card1Text: 'The doctor shares a quick assessment. The patient responds before contact. When the conversation starts, the doctor already understands symptoms and initial concerns.', card2Text: 'The doctor publishes the assessment link. Curious patients respond. Those who really need guidance end up starting a conversation.', card3Text: 'When someone asks for guidance, the doctor sends the assessment. This helps the patient reflect and start a more organized conversation.' },
   psi: { title: 'How psychologists use YLADA in their daily practice', subtitle: 'Simple assessments that help start clearer conversations with clients.', card1Title: 'Before the first consultation', card1Text: 'The psychologist shares a quick assessment. The client responds before contact. When the conversation starts, the professional already understands symptoms, interests or concerns.', card2Text: 'The professional publishes the assessment link. Curious people respond. Those who really need help end up starting a conversation.', card3Text: 'When someone asks for guidance, the professional sends the assessment. This helps organize the conversation from the start.' },
+  psicanalise: {
+    title: 'How psychoanalysts use YLADA in their daily practice',
+    subtitle: 'Assessments that organize demand before the setting, without rushing the process.',
+    card1Title: 'Before the first contact',
+    card1Text: 'The analyst shares a brief assessment. The person responds before the conversation. When contact happens, there is more clarity about what bothers them.',
+    card2Text: 'The professional publishes the link. People drawn to ongoing listening tend to relate and start a conversation.',
+    card3Text: 'For “quick guidance” requests, the link helps filter who is open to the pace of analysis.',
+  },
   odonto: { title: 'How dentists use YLADA in their daily practice', subtitle: 'Simple assessments that help start clearer conversations with patients.', card1Title: 'Before the first consultation', card1Text: 'The dentist shares a quick assessment. The patient responds before contact. When the conversation starts, the professional already understands symptoms and initial concerns.', card2Text: 'The dentist publishes the assessment link. Curious patients respond. Those who really need guidance end up starting a conversation.', card3Text: 'When someone asks for guidance, the dentist sends the assessment. This helps the patient reflect and start a more organized conversation.' },
   nutri: { title: 'How nutritionists use YLADA in their daily practice', subtitle: 'Simple assessments that help start clearer conversations with patients.', card1Title: 'Before the first consultation', card1Text: 'The nutritionist shares a quick assessment. The patient responds before contact. When the conversation starts, the professional already understands symptoms, interests or concerns.', card2Text: 'The professional publishes the assessment link. Curious people respond. Those who really need help end up starting a conversation.', card3Text: 'When someone asks for guidance, the nutritionist sends the assessment. This helps organize the conversation from the start.' },
   estetica: { title: 'How aesthetics professionals use YLADA in their daily practice', subtitle: 'Simple assessments that help start clearer conversations with clients.', card1Title: 'Before the first appointment', card1Text: 'The professional shares a quick assessment. The client responds before contact. When the conversation starts, the professional already understands interests and concerns.', card2Text: 'The professional publishes the assessment link. Curious people respond. Those who really need help end up starting a conversation.', card3Text: 'When someone asks for guidance, the professional sends the assessment. This helps organize the conversation from the start.' },
@@ -127,6 +144,14 @@ const CONFIG_EN: Record<UseCasesArea, { title: string; subtitle: string; card1Ti
 const CONFIG_ES: Record<UseCasesArea, { title: string; subtitle: string; card1Title: string; card1Text: string; card2Text: string; card3Text: string }> = {
   med: { title: 'Cómo los médicos usan YLADA en el día a día', subtitle: 'Evaluaciones simples que ayudan a iniciar conversaciones más claras con pacientes.', card1Title: 'Antes de la primera consulta', card1Text: 'El médico comparte una evaluación rápida. El paciente responde antes del contacto. Cuando la conversación comienza, el médico ya entiende síntomas y preocupaciones iniciales.', card2Text: 'El médico publica el enlace de la evaluación. Pacientes curiosos responden. Quien realmente necesita orientación termina iniciando una conversación.', card3Text: 'Cuando alguien pide orientación, el médico envía la evaluación. Esto ayuda al paciente a reflexionar e iniciar una conversación más organizada.' },
   psi: { title: 'Cómo los psicólogos usan YLADA en el día a día', subtitle: 'Evaluaciones simples que ayudan a iniciar conversaciones más claras con clientes.', card1Title: 'Antes de la primera consulta', card1Text: 'El psicólogo comparte una evaluación rápida. El cliente responde antes del contacto. Cuando la conversación comienza, el profesional ya entiende síntomas, intereses o preocupaciones.', card2Text: 'El profesional publica el enlace de la evaluación. Personas curiosas responden. Quien realmente necesita ayuda termina iniciando conversación.', card3Text: 'Cuando alguien pide orientación, el profesional envía la evaluación. Esto ayuda a organizar la conversación desde el inicio.' },
+  psicanalise: {
+    title: 'Cómo los psicoanalistas usan YLADA en el día a día',
+    subtitle: 'Evaluaciones que organizan la demanda antes del setting, sin acelerar el proceso.',
+    card1Title: 'Antes del primer contacto',
+    card1Text: 'El analista comparte una evaluación breve. La persona responde antes de la conversación. Cuando el contacto ocurre, hay más claridad sobre lo que molesta.',
+    card2Text: 'El profesional publica el enlace. Quien se identifica con la escucha continua tiende a iniciar conversación.',
+    card3Text: 'En pedidos de “orientación rápida”, el enlace ayuda a filtrar quien está abierto al ritmo del análisis.',
+  },
   odonto: { title: 'Cómo los dentistas usan YLADA en el día a día', subtitle: 'Evaluaciones simples que ayudan a iniciar conversaciones más claras con pacientes.', card1Title: 'Antes de la primera consulta', card1Text: 'El dentista comparte una evaluación rápida. El paciente responde antes del contacto. Cuando la conversación comienza, el profesional ya entiende síntomas y preocupaciones iniciales.', card2Text: 'El dentista publica el enlace de la evaluación. Pacientes curiosos responden. Quien realmente necesita orientación termina iniciando una conversación.', card3Text: 'Cuando alguien pide orientación, el dentista envía la evaluación. Esto ayuda al paciente a reflexionar e iniciar una conversación más organizada.' },
   nutri: { title: 'Cómo los nutricionistas usan YLADA en el día a día', subtitle: 'Evaluaciones simples que ayudan a iniciar conversaciones más claras con pacientes.', card1Title: 'Antes de la primera consulta', card1Text: 'El nutricionista comparte una evaluación rápida. El paciente responde antes del contacto. Cuando la conversación comienza, el profesional ya entiende síntomas, intereses o preocupaciones.', card2Text: 'El profesional publica el enlace de la evaluación. Personas curiosas responden. Quien realmente necesita ayuda termina iniciando conversación.', card3Text: 'Cuando alguien pide orientación, el nutricionista envía la evaluación. Esto ayuda a organizar la conversación desde el inicio.' },
   estetica: { title: 'Cómo los profesionales de estética usan YLADA en el día a día', subtitle: 'Evaluaciones simples que ayudan a iniciar conversaciones más claras con clientes.', card1Title: 'Antes de la primera atención', card1Text: 'El profesional comparte una evaluación rápida. El cliente responde antes del contacto. Cuando la conversación comienza, el profesional ya entiende intereses y preocupaciones.', card2Text: 'El profesional publica el enlace de la evaluación. Personas curiosas responden. Quien realmente necesita ayuda termina iniciando conversación.', card3Text: 'Cuando alguien pide orientación, el profesional envía la evaluación. Esto ayuda a organizar la conversación desde el inicio.' },

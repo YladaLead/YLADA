@@ -9,6 +9,7 @@ import type { Language } from '@/lib/i18n'
 export type HeroBeforeAfterArea =
   | 'med'
   | 'psi'
+  | 'psicanalise'
   | 'odonto'
   | 'nutri'
   | 'estetica'
@@ -37,6 +38,12 @@ const CONFIG: Record<
     quoteComYlada: 'Respondi a avaliação sobre ansiedade. Podemos conversar sobre isso?',
     bullet1ComYlada: 'Cliente já refletiu sobre sintomas',
     bullet3ComYlada: 'Consulta mais qualificada',
+  },
+  psicanalise: {
+    quoteSemContexto: 'O que é análise mesmo?',
+    quoteComYlada: 'Respondi a avaliação sobre o que sinto. Podemos conversar com mais calma?',
+    bullet1ComYlada: 'Demanda mais organizada antes da sessão',
+    bullet3ComYlada: 'Primeiro contato alinhado ao processo',
   },
   odonto: {
     quoteSemContexto: 'Doutor, pode me orientar?',
@@ -85,6 +92,12 @@ const CONFIG: Record<
 const CONFIG_EN: Record<HeroBeforeAfterArea, { quoteSemContexto: string; quoteComYlada: string; bullet1ComYlada: string; bullet3ComYlada: string }> = {
   med: { quoteSemContexto: 'Doctor, can you guide me?', quoteComYlada: 'I answered the stress assessment. Can we talk about it?', bullet1ComYlada: 'Patient already reflected on symptoms', bullet3ComYlada: 'More qualified consultation' },
   psi: { quoteSemContexto: 'Can you guide me?', quoteComYlada: 'I answered the anxiety assessment. Can we talk about it?', bullet1ComYlada: 'Client already reflected on symptoms', bullet3ComYlada: 'More qualified consultation' },
+  psicanalise: {
+    quoteSemContexto: 'What is analysis, exactly?',
+    quoteComYlada: 'I answered the assessment about what I feel. Can we talk more calmly?',
+    bullet1ComYlada: 'Clearer demand before the session',
+    bullet3ComYlada: 'First contact aligned with the process',
+  },
   odonto: { quoteSemContexto: 'Doctor, can you guide me?', quoteComYlada: 'I answered the oral health assessment. Can we talk about it?', bullet1ComYlada: 'Patient already reflected on symptoms', bullet3ComYlada: 'More qualified consultation' },
   nutri: { quoteSemContexto: 'Can you guide me?', quoteComYlada: 'I answered the nutrition assessment. Can we talk about it?', bullet1ComYlada: 'Patient already reflected on symptoms', bullet3ComYlada: 'More qualified consultation' },
   estetica: { quoteSemContexto: 'Can you guide me?', quoteComYlada: 'I answered the procedure assessment. Can we talk about it?', bullet1ComYlada: 'Client already reflected on interests', bullet3ComYlada: 'More qualified service' },
@@ -97,6 +110,12 @@ const CONFIG_EN: Record<HeroBeforeAfterArea, { quoteSemContexto: string; quoteCo
 const CONFIG_ES: Record<HeroBeforeAfterArea, { quoteSemContexto: string; quoteComYlada: string; bullet1ComYlada: string; bullet3ComYlada: string }> = {
   med: { quoteSemContexto: 'Doctor, ¿puede orientarme?', quoteComYlada: 'Respondí la evaluación sobre estrés. ¿Podemos hablar de eso?', bullet1ComYlada: 'Paciente ya reflexionó sobre síntomas', bullet3ComYlada: 'Consulta más cualificada' },
   psi: { quoteSemContexto: '¿Puede orientarme?', quoteComYlada: 'Respondí la evaluación sobre ansiedad. ¿Podemos hablar de eso?', bullet1ComYlada: 'Cliente ya reflexionó sobre síntomas', bullet3ComYlada: 'Consulta más cualificada' },
+  psicanalise: {
+    quoteSemContexto: '¿Qué es el análisis exactamente?',
+    quoteComYlada: 'Respondí la evaluación sobre lo que siento. ¿Podemos hablar con más calma?',
+    bullet1ComYlada: 'Demanda más clara antes de la sesión',
+    bullet3ComYlada: 'Primer contacto alineado con el proceso',
+  },
   odonto: { quoteSemContexto: 'Doctor, ¿puede orientarme?', quoteComYlada: 'Respondí la evaluación sobre salud bucal. ¿Podemos hablar de eso?', bullet1ComYlada: 'Paciente ya reflexionó sobre síntomas', bullet3ComYlada: 'Consulta más cualificada' },
   nutri: { quoteSemContexto: '¿Puede orientarme?', quoteComYlada: 'Respondí la evaluación sobre alimentación. ¿Podemos hablar de eso?', bullet1ComYlada: 'Paciente ya reflexionó sobre síntomas', bullet3ComYlada: 'Consulta más cualificada' },
   estetica: { quoteSemContexto: '¿Puede orientarme?', quoteComYlada: 'Respondí la evaluación sobre el procedimiento. ¿Podemos hablar de eso?', bullet1ComYlada: 'Cliente ya reflexionó sobre intereses', bullet3ComYlada: 'Atención más cualificada' },

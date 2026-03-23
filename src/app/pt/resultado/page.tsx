@@ -21,6 +21,11 @@ const STORAGE_KEY = 'ylada_diagnosticos_feitos'
 const AREA_CONTEXTO: Record<string, { label: string; paragrafo: string }> = {
   '0': { label: 'médica', paragrafo: 'Na área médica, muitas conversas começam quando o paciente ainda não entende o próprio problema. A conversa começa sem contexto.' },
   '1': { label: 'de psicologia', paragrafo: 'Na psicologia, muitas pessoas procuram ajuda sem compreender o que estão sentindo. A primeira conversa precisa começar organizando pensamentos e emoções.' },
+  '7': {
+    label: 'de psicanálise',
+    paragrafo:
+      'Na psicanálise, muitas pessoas chegam sem clareza sobre o que buscam no processo. A primeira conversa ganha qualidade quando há espaço para nomear expectativas e o próprio sofrimento.',
+  },
   '2': { label: 'de estética', paragrafo: 'Na estética, muitas clientes chegam buscando procedimentos sem compreender as necessidades da pele ou do corpo.' },
   '3': { label: 'de nutrição', paragrafo: 'Na nutrição, muitas pessoas chegam buscando soluções rápidas sem entender os hábitos que influenciam o resultado.' },
   '4': { label: 'de fitness', paragrafo: 'No fitness, muitas pessoas entram em contato sem clareza sobre objetivos e limitações. A conversa precisa começar alinhando expectativas.' },
@@ -36,7 +41,7 @@ const SEGMENT_TO_AREA: Record<string, string> = {
   med: '0',
   medico: '0',
   psi: '1',
-  psicanalise: '1',
+  psicanalise: '7',
   estetica: '2',
   nutri: '3',
   nutricionista: '3',
@@ -51,6 +56,7 @@ const SEGMENT_TO_AREA: Record<string, string> = {
 const AREA_TO_SEGMENT: Record<string, string> = {
   '0': 'med',
   '1': 'psi',
+  '7': 'psicanalise',
   '2': 'estetica',
   '3': 'nutri',
   '4': 'fitness',

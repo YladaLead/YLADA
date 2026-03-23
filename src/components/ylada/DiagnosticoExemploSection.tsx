@@ -7,8 +7,9 @@ import {
 } from '@/config/ylada-diagnostico-exemplos'
 import { landingPageVideos } from '@/lib/landing-pages-assets'
 
-/** Vídeo do fluxo completo: preferência pelo vídeo correto YLADA ("Não sei por onde começar" / "É aqui que a coisa acontece"). Prioridade: env > yladaDemonstracaoFluxo > fluxoCompleto > fallback local. */
-function getVideoFluxoUrl(): string {
+/** Vídeo do fluxo completo: override (ex.: psicanálise) > env global > bucket > fallback local. */
+function getVideoFluxoUrl(overrideUrl?: string | null): string {
+  if (overrideUrl && String(overrideUrl).trim()) return String(overrideUrl).trim()
   if (typeof process !== 'undefined' && process.env.NEXT_PUBLIC_YLADA_VIDEO_FLUXO_URL) {
     return process.env.NEXT_PUBLIC_YLADA_VIDEO_FLUXO_URL
   }
@@ -34,6 +35,10 @@ interface DiagnosticoExemploSectionProps {
   ctaHref?: string
   /** Para nutri: usa /pt/nutri/oferta em vez de /pt/precos */
   ctaLabel?: string
+  /** Substitui o vídeo padrão do fluxo (ex.: NEXT_PUBLIC_YLADA_VIDEO_FLUXO_PSICANALISE_URL na landing de psicanálise). */
+  fluxoVideoUrl?: string | null
+  /** Se false, oculta a linha "Acesso liberado após o pagamento" (ex.: CTA para login grátis). */
+  showPaymentNote?: boolean
 }
 
 /**
@@ -45,13 +50,17 @@ export function DiagnosticoExemploSection({
   area,
   ctaHref = '/pt/nutri/checkout?plan=annual',
   ctaLabel = 'Começar agora',
+  fluxoVideoUrl,
+  showPaymentNote = true,
 }: DiagnosticoExemploSectionProps) {
   const config = DIAGNOSTICO_EXEMPLOS[area]
 
   const tituloPrincipal =
     area === 'seller' || area === 'coach' || area === 'nutra'
       ? 'Veja como uma avaliação pode gerar uma conversa'
-      : 'Veja como uma avaliação pode gerar uma consulta'
+      : area === 'psicanalise'
+        ? 'Veja como uma avaliação pode qualificar o primeiro contato'
+        : 'Veja como uma avaliação pode gerar uma consulta'
 
   return (
     <section className="py-12 sm:py-16 bg-gray-50">
@@ -117,10 +126,10 @@ export function DiagnosticoExemploSection({
             {/* Coluna direita: Vídeo do fluxo completo (mesmo vídeo da primeira página / carrossel) */}
             <div className="space-y-4">
               <p className="text-sm font-medium text-gray-600">Vídeo do fluxo completo</p>
-              {getVideoFluxoUrl() ? (
+              {getVideoFluxoUrl(fluxoVideoUrl) ? (
                 <div className="aspect-video rounded-xl overflow-hidden bg-gray-900 border border-gray-200">
                   {(() => {
-                    const videoUrl = getVideoFluxoUrl()
+                    const videoUrl = getVideoFluxoUrl(fluxoVideoUrl)
                     const yt = getYoutubeEmbedUrl(videoUrl)
                     const vimeo = getVimeoEmbedUrl(videoUrl)
                     if (yt) {
@@ -223,7 +232,9 @@ export function DiagnosticoExemploSection({
             >
               {ctaLabel}
             </Link>
-            <p className="text-gray-500 text-sm mt-2">Acesso liberado após o pagamento</p>
+            {showPaymentNote ? (
+              <p className="text-gray-500 text-sm mt-2">Acesso liberado após o pagamento</p>
+            ) : null}
           </div>
         </div>
       </div>

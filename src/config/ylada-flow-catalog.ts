@@ -80,7 +80,7 @@ export const YLADA_FLOW_CATALOG: FlowCatalogItem[] = [
     description:
       'O visitante informa ponto atual, meta e prazo. O link devolve uma projeção realista (min/max) considerando consistência, e um aviso se a meta estiver agressiva.',
     perfil_lead_atraido: 'Pessoas que gostam de números e querem ver cenário possível.',
-    question_labels: ['Valor atual', 'Meta desejada', 'Prazo (dias)', 'Nível de consistência'],
+    question_labels: ['Peso ou valor atual (kg)', 'Meta desejada (kg)', 'Prazo (dias)', 'Consistência (1–10)'],
     result_preview: 'Projeção realista (min–max) + aviso se meta agressiva + próximo passo + WhatsApp.',
     cta_default: 'Quero calibrar minha meta',
   },

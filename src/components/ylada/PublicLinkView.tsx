@@ -323,14 +323,23 @@ function ConfigDrivenLinkView({
   const formConfig = (config.form as Record<string, unknown>) || {}
   const resultConfig = (config.result as ResultConfig) || {}
   const meta = (config.meta as Record<string, unknown>) || {}
-  const fields = (formConfig.fields as FormField[]) || []
+  const fieldsRaw = (formConfig.fields as FormField[]) || []
   const submitLabel = (formConfig.submit_label as string) || t.seeResult
-  
+  const archMeta = typeof meta.architecture === 'string' ? meta.architecture : ''
+  /** Calculadora de projeção: nunca injetar opções Sim/Não — sempre entrada numérica (corrige links antigos mal gerados). */
+  const fields =
+    archMeta === 'PROJECTION_CALCULATOR'
+      ? fieldsRaw.map((f) => ({ ...f, type: 'number', options: undefined }))
+      : fieldsRaw
+
   // GARANTIR: todo campo de pergunta sem opções vira múltipla escolha (evita intro "6 perguntas" com só 3 no fluxo).
   // Templates da biblioteca usam type 'single' com options às vezes ausentes — antes só text/textarea recebiam defaults.
   const fieldsValidados = fields.map((f) => {
-    const noOptions = !f.options || f.options.length === 0
     const tipo = (f.type || '').toLowerCase()
+    if (tipo === 'number') {
+      return { ...f, options: undefined }
+    }
+    const noOptions = !f.options || f.options.length === 0
     const isQuestionLike =
       !f.type ||
       tipo === 'text' ||

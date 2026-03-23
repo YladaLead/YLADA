@@ -1,7 +1,17 @@
 /**
  * Conteúdo do carrossel por área — personalização conforme FLOWS-POR-AREA-YLADA
  */
-export type AreaCodigo = 'med' | 'nutri' | 'psi' | 'odonto' | 'estetica' | 'coach' | 'fitness' | 'perfumaria' | 'seller'
+export type AreaCodigo =
+  | 'med'
+  | 'nutri'
+  | 'psi'
+  | 'psicanalise'
+  | 'odonto'
+  | 'estetica'
+  | 'coach'
+  | 'fitness'
+  | 'perfumaria'
+  | 'seller'
 
 export interface AreaFlowContent {
   /** Slide 1 - Dor (problem-solution) */
@@ -80,6 +90,24 @@ const FLOW_PSI: AreaFlowContent = {
   whatsappClientMsg1: 'Oi! Fiz seu diagnóstico. Vi que preciso de acompanhamento.',
   whatsappClientMsg2: 'Quero falar com você.',
   closingBenefit: 'Pacientes mais preparados',
+}
+
+const FLOW_PSICANALISE: AreaFlowContent = {
+  slide1Problem: 'Primeiros contatos não viram processo.',
+  slide1ProblemHint: 'Muita explicação, pouca escuta antes da sessão',
+  slide3Question: 'Por que as pessoas não entendem o que é análise?',
+  linkTitle: 'O que você busca ao falar com um analista?',
+  linkHint: '3 perguntas · Resultado na hora',
+  formQuestion: 'O que mais te incomoda hoje?',
+  formOptions: ['Ansiedade ou tensão', 'Padrões que se repetem', 'Relações que esgotam', 'Quero entender melhor o que sinto'],
+  resultInsight: 'Às vezes não falta informação. Falta espaço para nomear o que está acontecendo.',
+  resultSubtext: 'Um bom primeiro contato prepara o terreno para o processo — sem prometer atalhos.',
+  resultInsights: ['Mais clareza sobre a demanda', 'Expectativas mais realistas', 'Pronto para conversar com contexto'],
+  resultCta: 'Quero conversar',
+  whatsappProTitle: 'Psicanalista · Consultório',
+  whatsappClientMsg1: 'Oi! Fiz a avaliação. Acho que faz sentido conversarmos com mais calma.',
+  whatsappClientMsg2: 'Quero falar com você.',
+  closingBenefit: 'Analisandos mais alinhados ao processo',
 }
 
 const FLOW_ODONTO: AreaFlowContent = {
@@ -194,6 +222,7 @@ const FLOWS: Record<AreaCodigo, AreaFlowContent> = {
   med: FLOW_MED,
   nutri: FLOW_NUTRI,
   psi: FLOW_PSI,
+  psicanalise: FLOW_PSICANALISE,
   odonto: FLOW_ODONTO,
   estetica: FLOW_ESTETICA,
   coach: FLOW_COACH,

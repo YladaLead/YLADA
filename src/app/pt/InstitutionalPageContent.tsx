@@ -14,7 +14,7 @@ import LanguageSelector from '@/components/LanguageSelector'
 import Link from 'next/link'
 import { useTranslations } from '@/hooks/useTranslations'
 import { useAuth } from '@/contexts/AuthContext'
-import { getYladaLandingAreas } from '@/config/ylada-landing-areas'
+import { YladaProfissionaisGridSection } from '@/components/landing/YladaProfissionaisGridSection'
 import DemoCarouselYLADA from '@/components/landing/DemoCarouselYLADA'
 import { getLocaleFromPathname, type Language } from '@/lib/i18n'
 import { ptTranslations } from '@/lib/translations/pt'
@@ -31,7 +31,19 @@ const EXEMPLOS_DIAGNOSTICOS = [
 ]
 
 /** Rotas com landing em pt/en/es. Outras usam /pt (painel não traduzido). */
-const LOCALIZED_BASE = new Set(['nutri', 'estetica', 'fitness', 'psi', 'odonto', 'med', 'nutra', 'perfumaria', 'coach', 'seller'])
+const LOCALIZED_BASE = new Set([
+  'nutri',
+  'estetica',
+  'fitness',
+  'psi',
+  'psicanalise',
+  'odonto',
+  'med',
+  'nutra',
+  'perfumaria',
+  'coach',
+  'seller',
+])
 
 function getLocalizedPath(path: string, locale: Language): string {
   const normalized = path.startsWith('/') ? path : `/${path}`
@@ -408,37 +420,13 @@ export default function InstitutionalPageContent() {
           </div>
         </section>
 
-        {/* PARA QUEM É — Áreas */}
-        <section className="bg-gray-50 py-12 sm:py-16 lg:py-20 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8">
-          <div className="max-w-4xl mx-auto">
-            <h2 className="text-xl sm:text-3xl font-bold text-gray-900 text-center mb-2">
-              {home?.areas?.title ?? 'Para quais profissionais o YLADA foi criado'}
-            </h2>
-            <p className="text-gray-600 text-center mb-8 max-w-2xl mx-auto">
-              {home?.areas?.subtitle ?? 'Profissionais e vendedores consultivos usam diagnósticos para atrair clientes mais preparados.'}
-            </p>
-            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-              {getYladaLandingAreas(locale).map((area) => (
-                <Link
-                  key={area.codigo}
-                  href={area.href}
-                  className="block bg-white rounded-xl p-5 border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all text-center"
-                >
-                  <span className="font-semibold text-gray-900 block mb-1">{area.label}</span>
-                  <span className="text-sm text-gray-600">{area.slogan}</span>
-                </Link>
-              ))}
-            </div>
-            <div className="text-center">
-              <Link
-                href={getLocalizedPath('/pt/profissionais', locale)}
-                className="inline-flex items-center justify-center px-6 py-3 border-2 border-gray-300 text-gray-700 font-medium rounded-xl hover:bg-gray-50 transition-all"
-              >
-                {home?.areas?.seeAll ?? 'Ver todas as áreas'}
-              </Link>
-            </div>
-          </div>
-        </section>
+        <YladaProfissionaisGridSection
+          locale={locale}
+          title={home?.areas?.title}
+          subtitle={home?.areas?.subtitle}
+          verTodasHref={getLocalizedPath('/pt/profissionais', locale)}
+          verTodasLabel={home?.areas?.seeAll}
+        />
 
         {/* TESTE GRÁTIS */}
         <section className="bg-sky-50 py-12 sm:py-16 border-y border-sky-100">

@@ -7,6 +7,7 @@ export type DiagnosticoExemploArea =
   | 'med'
   | 'nutri'
   | 'psi'
+  | 'psicanalise'
   | 'odonto'
   | 'estetica'
   | 'fitness'
@@ -70,6 +71,19 @@ export const DIAGNOSTICO_EXEMPLOS: Record<DiagnosticoExemploArea, DiagnosticoExe
     labelPaciente: 'cliente',
     tituloSecaoCards: 'Avaliações usadas por psicólogos',
     tituloSecaoCardsDesc: 'Psicólogos usam avaliações como:',
+  },
+  psicanalise: {
+    avaliacao: 'O que você busca ao falar com um analista?',
+    perfil: 'Demanda ainda pouco nomeada',
+    explicacao: 'Indícios de que um primeiro contato com mais escuta pode organizar a queixa.',
+    sinais: ['sintomas que voltam', 'dificuldade de falar do que sente', 'expectativas sobre o processo'],
+    mensagem: 'Respondi a avaliação. Acho que faz sentido conversarmos com mais calma sobre isso.',
+    sugestao: 'Esse resultado sugere que vale explorar o que está por trás da queixa, no ritmo do processo.',
+    fraseAgendamento: 'Isso ajuda a qualificar o primeiro contato e respeitar o setting analítico.',
+    cards: ['Autoconhecimento', 'Escuta', 'Processo'],
+    labelPaciente: 'analisando',
+    tituloSecaoCards: 'Avaliações usadas por psicanalistas',
+    tituloSecaoCardsDesc: 'Psicanalistas usam avaliações como:',
   },
   odonto: {
     avaliacao: 'Sua saúde bucal pode precisar de atenção?',

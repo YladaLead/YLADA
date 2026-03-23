@@ -16,6 +16,7 @@ export type BibliotecaSegmentCode =
   | 'nutrition_vendedor'
   | 'medicine'
   | 'psychology'
+  | 'psychoanalysis'
   | 'dentistry'
   | 'aesthetics'
   | 'fitness'
@@ -26,7 +27,8 @@ export const BIBLIOTECA_SEGMENTOS: { value: BibliotecaSegmentCode; label: string
   { value: 'nutrition', label: 'Nutrição' },
   { value: 'nutrition_vendedor', label: 'Vendedores Nutracêuticos e suplementos' },
   { value: 'medicine', label: 'Médicos' },
-  { value: 'psychology', label: 'Psicólogos e psicanalistas' },
+  { value: 'psychology', label: 'Psicólogos' },
+  { value: 'psychoanalysis', label: 'Psicanálise' },
   { value: 'dentistry', label: 'Odontologia' },
   { value: 'aesthetics', label: 'Estética' },
   { value: 'fitness', label: 'Fitness' },
@@ -62,6 +64,7 @@ export const BIBLIOTECA_TEMAS_POR_SEGMENTO: Record<BibliotecaSegmentCode, string
   nutrition_vendedor: BIBLIOTECA_TEMAS.map((t) => t.value),
   medicine: BIBLIOTECA_TEMAS.map((t) => t.value),
   psychology: BIBLIOTECA_TEMAS.map((t) => t.value),
+  psychoanalysis: BIBLIOTECA_TEMAS.map((t) => t.value),
   dentistry: BIBLIOTECA_TEMAS.map((t) => t.value),
   aesthetics: BIBLIOTECA_TEMAS.map((t) => t.value),
   fitness: BIBLIOTECA_TEMAS.map((t) => t.value),
@@ -85,7 +88,7 @@ const PROFESSION_TO_BIBLIOTECA: Record<string, BibliotecaSegmentCode> = {
   endocrinologista: 'medicine',
   gastroenterologista: 'medicine',
   psi: 'psychology',
-  psicanalise: 'psychology',
+  psicanalise: 'psychoanalysis',
   terapeuta: 'psychology',
   psiquiatra: 'psychology',
   odonto: 'dentistry',
@@ -110,7 +113,7 @@ const AREA_TO_BIBLIOTECA: Partial<Record<string, BibliotecaSegmentCode>> = {
   estetica: 'aesthetics',
   med: 'medicine',
   psi: 'psychology',
-  psicanalise: 'psychology',
+  psicanalise: 'psychoanalysis',
   odonto: 'dentistry',
   nutra: 'nutrition_vendedor',
   coach: 'fitness',
@@ -160,6 +163,8 @@ export function getDicaNoelBiblioteca(segmentCode: BibliotecaSegmentCode | null)
     aesthetics: 'Comece por Idade da pele, Tipo de pele ou Cuidados com a pele. São os que mais geram conversas.',
     fitness: 'Comece por Treino, Energia ou Metabolismo. São os que mais engajam alunos.',
     psychology: 'Comece por Estresse, Sono ou Autoconhecimento. São os que mais geram primeiros contatos.',
+    psychoanalysis:
+      'Comece por Autoconhecimento, Ansiedade ou Relacionamentos. Ajuste o tom ao setting analítico quando for publicar.',
     dentistry: 'Comece por Saúde bucal ou Clareamento. São os que mais geram agendamentos.',
     perfumaria: 'Comece pelo diagnóstico de perfil olfativo. É o que mais qualifica e converte leads.',
   }
@@ -297,6 +302,7 @@ const SUGESTAO_NOEL_TEMAS: Partial<Record<BibliotecaSegmentCode, [string, string
   aesthetics: ['pele', 'autoestima', 'rotina_cuidados'],
   fitness: ['treino', 'energia', 'metabolismo'],
   psychology: ['estresse', 'sono', 'vitalidade_geral'],
+  psychoanalysis: ['autoconhecimento', 'ansiedade', 'equilibrio_emocional'],
   dentistry: ['saude_bucal', 'clareamento', 'saude_bucal'],
   perfumaria: ['perfil_olfativo', 'perfil_olfativo', 'perfil_olfativo'],
 }
@@ -419,6 +425,7 @@ const TITULOS_ADAPTADOS: Partial<Record<string, Partial<Record<BibliotecaSegment
     aesthetics: 'Descubra o que pode estar travando os resultados da sua pele',
     fitness: 'Descubra o que pode estar travando sua evolução física',
     psychology: 'Descubra o que pode estar travando seu bem-estar emocional',
+    psychoanalysis: 'Descubra o que pode estar pedindo escuta no seu momento de vida',
     dentistry: 'Descubra o que pode estar travando a saúde da sua boca',
     perfumaria: 'Descubra o que pode estar travando sua escolha de fragrância',
   },
@@ -432,6 +439,7 @@ const TITULOS_ADAPTADOS: Partial<Record<string, Partial<Record<BibliotecaSegment
     aesthetics: 'Sua pele está com a energia que deveria?',
     fitness: 'Sua energia está acompanhando seu treino?',
     psychology: 'Como está seu nível de energia e bem-estar?',
+    psychoanalysis: 'O que mais pede atenção no que você sente hoje?',
   },
   vitalidade_geral: {
     nutrition: 'Como está sua vitalidade e disposição?',

@@ -1,5 +1,5 @@
-import { redirect } from 'next/navigation'
+import PsicanaliseInstitutionalContent from './PsicanaliseInstitutionalContent'
 
 export default function PsicanaliseLandingPage() {
-  redirect('/pt/psicanalise/home')
+  return <PsicanaliseInstitutionalContent />
 }

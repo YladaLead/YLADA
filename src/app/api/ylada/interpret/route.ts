@@ -17,6 +17,10 @@ import { getStrategyRecommendation } from '@/lib/ylada/strategy-engine'
 import { buildProfileInput, fetchBehavior } from '@/lib/ylada/strategy-engine/profile-fetcher'
 import type { ProfessionalDiagnosis } from '@/lib/ylada/strategy-engine'
 import OpenAI from 'openai'
+import {
+  buildProjectionFormFields,
+  projectionQuestionsOverrideAllowed,
+} from '@/lib/ylada/projection-form-fields'
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
 
@@ -116,6 +120,7 @@ Regras:
 - PROIBIDO em qualquer pergunta: motivação, organização, disciplina, expectativas abstratas — são perguntas de coaching, não de diagnóstico. Foque em: situação real, tentativa, objetivo.
 - Opções: curtas, situações reais, que gerem identificação (ex.: "emagrecer ficou mais difícil" vs "pouco motivado").
 - QUIZ = sempre com 4 opções. CALCULADORA = campos numéricos sem opções.
+- CRÍTICO — calculadora_projecao: NUNCA envie "options" nas perguntas. Cada pergunta: { "id": "q1"|"q2"|"q3"|"q4", "label": "texto claro", "type": "number" }. Ordem: valor atual → meta → prazo em dias → consistência de 1 a 10.
 - CTA em 1ª pessoa, consultivo (ex.: "Quero analisar meu caso", nunca "Falar com especialista")
 
 Resposta APENAS em JSON válido, sem markdown.`
@@ -380,12 +385,29 @@ REGRAS: Retorne o JSON com flow_id (mantenha o mesmo), theme, e questions AJUSTA
       recommendedTemplateId = t?.id ?? null
     }
 
+    let questionsOut: InterpretQuestion[] =
+      questionsFinal.length > 0 ? questionsFinal : (Array.isArray(parsed.questions) ? parsed.questions : [])
+
+    if (flow1?.architecture === 'PROJECTION_CALCULATOR') {
+      const themeProj = (parsed.theme ?? parsed.interpretacao?.tema ?? '').toString()
+      const canonical = buildProjectionFormFields(themeProj)
+      const keepLabels = projectionQuestionsOverrideAllowed(questionsOut)
+      questionsOut = canonical.map((c, i) => ({
+        id: c.id,
+        label:
+          keepLabels && questionsOut[i]?.label?.trim()
+            ? String(questionsOut[i].label).trim()
+            : c.label,
+        type: 'number',
+      }))
+    }
+
     const response: InterpretResponse = {
       flow_id: finalFlowId,
       flow_id_secondary: flowIdSecondary,
       theme: parsed.theme ?? parsed.interpretacao?.tema ?? '',
-      questions: questionsFinal.length > 0 ? questionsFinal : (Array.isArray(parsed.questions) ? parsed.questions : []),
-      architecture: parsed.architecture ?? flow1?.architecture ?? 'BLOCKER_DIAGNOSIS',
+      questions: questionsOut,
+      architecture: flow1?.architecture ?? parsed.architecture ?? 'BLOCKER_DIAGNOSIS',
       cta_suggestion: parsed.cta_suggestion ?? flow1?.cta_default ?? 'Quero analisar meu caso',
       interpretacao: parsed.interpretacao ?? buildDefaultInterpretacao(text),
       profileSuggest: parsed.profileSuggest ?? { segment: 'ylada', category: areaProf },
@@ -394,7 +416,7 @@ REGRAS: Retorne o JSON com flow_id (mantenha o mesmo), theme, e questions AJUSTA
       o_que_captar: parsed.theme ?? parsed.interpretacao?.tema ?? null,
       recommendedTemplateId,
       recommendedTemplateName: templateByArch === 'calculator' ? 'calculadora_perda' : 'diagnostico_agenda',
-      diagnosticSummary: buildDiagnosticSummary(finalFlowId, parsed.questions),
+      diagnosticSummary: buildDiagnosticSummary(finalFlowId, questionsOut),
       safe_theme: strategyDecision.safety_mode ? strategyDecision.safe_theme : null,
       confidence: typeof parsed.confidence === 'number' ? Math.max(0, Math.min(1, parsed.confidence)) : 0.8,
     }

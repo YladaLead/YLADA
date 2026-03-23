@@ -25,7 +25,9 @@ export default function DiagnosticoQuiz({ slug, variantOverride }: DiagnosticoQu
 
   const areaParam = searchParams.get('area')
   const areaFromHome = areaParam !== null ? parseInt(areaParam, 10) : null
-  const hasAreaFromHome = areaFromHome !== null && !Number.isNaN(areaFromHome) && areaFromHome >= 0 && areaFromHome <= 6
+  /** Índice de área no quiz comunicação: 0–6 clássicos; 7 = psicanálise (liberal, mesmo trilho que psicologia). */
+  const hasAreaFromHome =
+    areaFromHome !== null && !Number.isNaN(areaFromHome) && areaFromHome >= 0 && areaFromHome <= 7
 
   const q1Param = searchParams.get('q1')
   const q1FromHome = q1Param !== null ? parseInt(q1Param, 10) : null
@@ -43,7 +45,17 @@ export default function DiagnosticoQuiz({ slug, variantOverride }: DiagnosticoQu
 
   useEffect(() => {
     // Fluxo por área (med=0, psi=1, estética=2, nutri=3, fitness=4, seller=5, odonto/perfumaria=6): não pergunta área nem tipo — vai direto às perguntas.
-    const areaSkipToContent = hasAreaFromHome && (areaFromHome === 0 || areaFromHome === 1 || areaFromHome === 2 || areaFromHome === 3 || areaFromHome === 4 || areaFromHome === 5 || areaFromHome === 6) && !iniciado
+    const areaSkipToContent =
+      hasAreaFromHome &&
+      (areaFromHome === 0 ||
+        areaFromHome === 1 ||
+        areaFromHome === 2 ||
+        areaFromHome === 3 ||
+        areaFromHome === 4 ||
+        areaFromHome === 5 ||
+        areaFromHome === 6 ||
+        areaFromHome === 7) &&
+      !iniciado
     if (slug === 'comunicacao' && areaSkipToContent) {
       const tipo = areaFromHome === 6 ? (fromArea === 'perfumaria' ? 1 : 0) : 0 // perfumaria = vendedor, odonto = liberal
       setRespostas({

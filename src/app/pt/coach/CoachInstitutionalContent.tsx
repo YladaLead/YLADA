@@ -13,7 +13,7 @@ import Link from 'next/link'
 import YLADALogo from '@/components/YLADALogo'
 import { useAuth } from '@/contexts/AuthContext'
 import DemoCarouselYLADA from '@/components/landing/DemoCarouselYLADA'
-import { getYladaLandingAreas } from '@/config/ylada-landing-areas'
+import { YladaProfissionaisGridSection } from '@/components/landing/YladaProfissionaisGridSection'
 
 const PERGUNTA_HERO_VALUES = [2, 1, 0, 1] as const
 
@@ -366,41 +366,7 @@ export default function CoachInstitutionalContent() {
           </div>
         </section>
 
-        {/* PARA QUEM É — Áreas (grid igual à home) */}
-        <section className="bg-gray-50 py-12 sm:py-16 lg:py-20 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8">
-          <div className="max-w-4xl mx-auto">
-            <h2 className="text-xl sm:text-3xl font-bold text-gray-900 text-center mb-2">
-              Para quais profissionais o YLADA foi criado
-            </h2>
-            <p className="text-gray-600 text-center mb-8 max-w-2xl mx-auto">
-              Profissionais e vendedores consultivos usam diagnósticos para atrair clientes mais preparados.
-            </p>
-            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-              {getYladaLandingAreas(locale).map((area) => (
-                <Link
-                  key={area.codigo}
-                  href={area.href}
-                  className={`block rounded-xl p-5 border text-center transition-all ${
-                    area.codigo === 'coach'
-                      ? 'border-blue-400 bg-blue-50/50 hover:border-blue-500 hover:shadow-md'
-                      : 'bg-white border-gray-200 hover:border-blue-300 hover:shadow-md'
-                  }`}
-                >
-                  <span className="font-semibold text-gray-900 block mb-1">{area.label}</span>
-                  <span className="text-sm text-gray-600">{area.slogan}</span>
-                </Link>
-              ))}
-            </div>
-            <div className="text-center">
-              <Link
-                href="/pt/profissionais"
-                className="inline-flex items-center justify-center px-6 py-3 border-2 border-gray-300 text-gray-700 font-medium rounded-xl hover:bg-gray-50 transition-all"
-              >
-                Ver todas as áreas
-              </Link>
-            </div>
-          </div>
-        </section>
+        <YladaProfissionaisGridSection locale={locale} highlightCodigo="coach" />
 
         {/* TESTE GRÁTIS */}
         <section className="bg-sky-50 py-12 sm:py-16 border-y border-sky-100">

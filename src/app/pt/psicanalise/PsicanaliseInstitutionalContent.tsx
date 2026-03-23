@@ -1,8 +1,8 @@
 'use client'
 
 /**
- * Página de vendedores: mesma estrutura e seções da home,
- * com conteúdo 100% focado em vendedores (dor tenta vender e não conecta, fluxo area=5, vídeo seller).
+ * Landing pública de psicanálise: mesma estrutura da página de psicologia,
+ * com copy e CTAs para psicanalistas (quiz area=7, carrossel próprio).
  */
 
 import { useState, useEffect } from 'react'
@@ -12,31 +12,33 @@ import Link from 'next/link'
 import YLADALogo from '@/components/YLADALogo'
 import { useAuth } from '@/contexts/AuthContext'
 import DemoCarouselYLADA from '@/components/landing/DemoCarouselYLADA'
+import { DiagnosticoExemploSection } from '@/components/ylada/DiagnosticoExemploSection'
+import { landingPageVideos } from '@/lib/landing-pages-assets'
 import { YladaProfissionaisGridSection } from '@/components/landing/YladaProfissionaisGridSection'
 
 const PERGUNTA_HERO_VALUES = [2, 1, 0, 1] as const
 
-const EXEMPLOS_SELLER = [
-  { titulo: 'Descubra o que sua energia precisa', href: '/pt/diagnostico?area=5' },
-  { titulo: 'Como está sua energia?', href: '/pt/diagnostico?area=5' },
-  { titulo: 'O que está impedindo seus resultados?', href: '/pt/diagnostico?area=5' },
-  { titulo: 'Você está pronto para conversas mais qualificadas?', href: '/pt/diagnostico?area=5' },
+const EXEMPLOS_PSICANALISE = [
+  { titulo: 'O que você busca ao falar com um analista?', href: '/pt/diagnostico?area=7' },
+  { titulo: 'O que mais pede atenção no que você sente?', href: '/pt/diagnostico?area=7' },
+  { titulo: 'Padrões que se repetem na sua vida?', href: '/pt/diagnostico?area=7' },
+  { titulo: 'Primeiro contato com mais clareza', href: '/pt/diagnostico?area=7' },
 ]
 
-const HOW_IT_WORKS_SELLER = [
-  { title: 'Criar diagnóstico', desc: 'Transforme seu conhecimento em perguntas que revelam necessidades e momento do cliente.' },
+const HOW_IT_WORKS_PSICANALISE = [
+  { title: 'Criar diagnóstico', desc: 'Transforme seu olhar clínico em perguntas que organizam a demanda antes da sessão.' },
   { title: 'Compartilhar link', desc: 'Envie nas redes sociais, WhatsApp ou site.' },
-  { title: 'O cliente responde', desc: 'O cliente responde e inicia conversa com você no WhatsApp.' },
-  { title: 'Conversa com contexto', desc: 'O cliente chega com mais clareza e a venda avança com mais facilidade.' },
+  { title: 'A pessoa responde', desc: 'A pessoa reflete e inicia conversa com você no WhatsApp.' },
+  { title: 'Conversa com contexto', desc: 'Quem chega já nomeou melhor o que sente — a conversa respeita o processo.' },
 ]
 
-export default function SellerInstitutionalContent() {
+export default function PsicanaliseInstitutionalContent() {
   const pathname = usePathname() ?? ''
   const locale = pathname.startsWith('/en') ? 'en' : pathname.startsWith('/es') ? 'es' : 'pt'
   const { user, loading } = useAuth()
   const router = useRouter()
 
-  const isSellerPage = /^\/pt\/seller\/?(\?|$)/.test(pathname)
+  const isPsicanalisePage = /^\/pt\/psicanalise\/?(\?|$)/.test(pathname)
   const [respostaHeroIdx, setRespostaHeroIdx] = useState<number | null>(null)
   const [authTimeout, setAuthTimeout] = useState(false)
 
@@ -46,13 +48,13 @@ export default function SellerInstitutionalContent() {
   }, [])
 
   useEffect(() => {
-    if (loading || !isSellerPage) return
+    if (loading || !isPsicanalisePage) return
     if (user) {
-      router.replace('/pt/seller/home')
+      router.replace('/pt/psicanalise/home')
     }
-  }, [loading, user, pathname, router, isSellerPage])
+  }, [loading, user, pathname, router, isPsicanalisePage])
 
-  const showAuthLoading = loading && isSellerPage && !authTimeout
+  const showAuthLoading = loading && isPsicanalisePage && !authTimeout
   if (showAuthLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center p-4">
@@ -61,7 +63,7 @@ export default function SellerInstitutionalContent() {
     )
   }
 
-  if (user && isSellerPage) {
+  if (user && isPsicanalisePage) {
     return (
       <div className="min-h-screen flex items-center justify-center p-4">
         <p className="text-gray-500">Redirecionando...</p>
@@ -75,10 +77,10 @@ export default function SellerInstitutionalContent() {
         <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-full">
           <Link href="/pt" className="flex items-center gap-2 flex-shrink-0 touch-manipulation" aria-label="YLADA início">
             <YLADALogo size="md" responsive className="bg-transparent" />
-            <span className="text-gray-500 text-sm font-medium hidden sm:inline">· Vendedores</span>
+            <span className="text-gray-500 text-sm font-medium hidden sm:inline">· Psicanálise</span>
           </Link>
           <nav className="flex items-center gap-3 sm:gap-6">
-            <Link href="/pt/diagnostico?area=5" className="text-gray-600 hover:text-gray-900 text-sm font-medium hidden md:inline">
+            <Link href="/pt/diagnostico?area=7" className="text-gray-600 hover:text-gray-900 text-sm font-medium hidden md:inline">
               Fazer diagnóstico
             </Link>
             <Link href="/pt/metodo-ylada" className="text-gray-600 hover:text-gray-900 text-sm font-medium hidden md:inline">
@@ -96,11 +98,11 @@ export default function SellerInstitutionalContent() {
             <Link href="/pt/precos" className="text-gray-600 hover:text-gray-900 text-sm font-medium hidden lg:inline">
               Preços
             </Link>
-            <Link href="/pt/seller/login" className="text-gray-600 hover:text-gray-900 text-sm font-medium">
+            <Link href="/pt/psicanalise/login" className="text-gray-600 hover:text-gray-900 text-sm font-medium">
               Entrar
             </Link>
             <Link
-              href="/pt/seller/login"
+              href="/pt/psicanalise/login"
               className="inline-flex items-center justify-center px-4 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 transition-all"
             >
               Começar grátis
@@ -114,12 +116,12 @@ export default function SellerInstitutionalContent() {
           <div className="max-w-2xl mx-auto px-1">
             <h1 className="text-center mb-8">
               <span className="block text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 leading-tight mb-2">
-                Tenta vender e as pessoas não se interessam?
+                Primeiros contatos não viram processo?
               </span>
               <span className="block text-xl sm:text-2xl lg:text-3xl font-bold text-gray-800 leading-snug">
-                Aprenda a se posicionar e atrair
+                Posicione sua prática e atraia
                 <br className="hidden sm:block" />
-                <span className="sm:inline"> os clientes certos.</span>
+                <span className="sm:inline"> quem está pronto para escuta.</span>
               </span>
             </h1>
             <div className="flex justify-center mb-8">
@@ -143,9 +145,9 @@ export default function SellerInstitutionalContent() {
                 <p className="font-semibold text-gray-900 mb-4">Seu marketing hoje atrai mais:</p>
                 <div className="space-y-2 mb-6">
                   {[
-                    { label: 'Pessoas que não se interessam ou somem', value: 0 },
-                    { label: 'Interessados que não viram clientes', value: 1 },
-                    { label: 'Clientes realmente preparados para comprar', value: 2 },
+                    { label: 'Pedidos de orientação sem compromisso com o processo', value: 0 },
+                    { label: 'Conversas que não viram análise', value: 1 },
+                    { label: 'Pessoas com demanda mais clara para o setting', value: 2 },
                     { label: 'Não tenho certeza', value: 3 },
                   ].map((opt) => (
                     <label
@@ -178,7 +180,7 @@ export default function SellerInstitutionalContent() {
                     onClick={() => {
                       if (respostaHeroIdx !== null) {
                         const problemaValue = PERGUNTA_HERO_VALUES[respostaHeroIdx] ?? 1
-                        router.push(`/pt/diagnostico?fromHome=1&area=5&problema=${problemaValue}`)
+                        router.push(`/pt/diagnostico?fromHome=1&area=7&problema=${problemaValue}`)
                       }
                     }}
                     disabled={respostaHeroIdx === null}
@@ -187,7 +189,7 @@ export default function SellerInstitutionalContent() {
                     {respostaHeroIdx !== null ? 'Fazer meu diagnóstico' : 'Selecione uma opção acima'}
                   </button>
                   <Link
-                    href="/pt/seller/login"
+                    href="/pt/psicanalise/login"
                     className="inline-flex items-center justify-center px-8 py-4 bg-white text-gray-700 font-medium rounded-xl border-2 border-gray-200 hover:border-gray-300 transition-all"
                   >
                     Criar meu diagnóstico
@@ -199,37 +201,45 @@ export default function SellerInstitutionalContent() {
           </div>
         </section>
 
-        <DemoCarouselYLADA initialArea="seller" />
+        <DemoCarouselYLADA initialArea="psicanalise" />
+
+        <DiagnosticoExemploSection
+          area="psicanalise"
+          ctaHref="/pt/psicanalise/login"
+          ctaLabel="Criar meu diagnóstico grátis"
+          fluxoVideoUrl={landingPageVideos.yladaDemonstracaoFluxoPsicanalise}
+          showPaymentNote={false}
+        />
 
         <section className="bg-gray-50 py-12 sm:py-16 lg:py-20 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl mx-auto">
             <h2 className="text-xl sm:text-3xl font-bold text-gray-900 mb-6 sm:mb-8 text-center">
-              A maioria dos vendedores fala de produto antes de entender o cliente.
+              Muitos psicanalistas explicam demais o processo antes da primeira conversa.
             </h2>
             <ul className="space-y-3 text-gray-700 mb-6">
               <li className="flex items-start gap-3">
                 <span className="text-red-500 mt-1">•</span>
-                <span>Você tenta vender, mas as pessoas não se interessam</span>
+                <span>Pedidos rápidos sem espaço para a escuta</span>
               </li>
               <li className="flex items-start gap-3">
                 <span className="text-red-500 mt-1">•</span>
-                <span>Interessados que não viram clientes</span>
+                <span>Conversas que não respeitam o tempo do processo</span>
               </li>
               <li className="flex items-start gap-3">
                 <span className="text-red-500 mt-1">•</span>
-                <span>Conversas que não evoluem para venda</span>
+                <span>Expectativas irreais sobre análise e frequência</span>
               </li>
               <li className="flex items-start gap-3">
                 <span className="text-red-500 mt-1">•</span>
-                <span>Falta de qualificação antes do contato</span>
+                <span>Profissionais que precisam convencer o tempo todo</span>
               </li>
             </ul>
             <p className="text-lg font-semibold text-gray-900 text-center mb-8">
-              O problema raramente é seu produto.<br />
-              É a forma como o cliente entende a própria necessidade antes da conversa.
+              O problema raramente é seu conhecimento.<br />
+              É a forma como o cliente chega até você — e por que as conversas não evoluem.
             </p>
             <p className="text-gray-500 text-sm text-center">
-              Quando o cliente responde perguntas sobre necessidades, momento ou objetivos, ele começa a se identificar com a solução antes do contato.
+              Muitos profissionais investem em cursos e marketing. Mas ignoram um fator essencial: como o cliente entende a própria necessidade antes da conversa.
             </p>
           </div>
         </section>
@@ -237,9 +247,9 @@ export default function SellerInstitutionalContent() {
         <section className="py-10 sm:py-14 bg-white border-b border-gray-100">
           <div className="max-w-2xl mx-auto text-center px-4">
             <div className="bg-gray-900 text-white rounded-2xl p-8 sm:p-10">
-              <p className="text-base sm:text-lg text-gray-300 mb-3">Vender primeiro não gera clientes qualificados.</p>
+              <p className="text-base sm:text-lg text-gray-300 mb-3">Explicar demais não cria clientes.</p>
               <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-white leading-tight">
-                Boas vendas começam com boas perguntas.
+                Boas conversas começam com boas perguntas.
               </p>
             </div>
           </div>
@@ -250,7 +260,7 @@ export default function SellerInstitutionalContent() {
             <div className="rounded-2xl overflow-hidden border border-gray-200 shadow-lg bg-gray-50/50">
               <Image
                 src="/images/ylada/marketing-tradicional-vs-ylada-funil.png"
-                alt="Comparação: Funil tradicional vs Funil de diagnóstico YLADA. Boas vendas começam com boas perguntas."
+                alt="Comparação: Funil tradicional vs Funil de diagnóstico YLADA. Boas conversas começam com boas perguntas."
                 width={900}
                 height={600}
                 className="w-full h-auto"
@@ -264,9 +274,9 @@ export default function SellerInstitutionalContent() {
         <section className="py-12 sm:py-16 lg:py-20 bg-white">
           <h2 className="text-xl sm:text-3xl font-bold text-gray-900 text-center mb-8">Como funciona</h2>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-5xl mx-auto px-4">
-            {HOW_IT_WORKS_SELLER.map((item, i) => (
+            {HOW_IT_WORKS_PSICANALISE.map((item, i) => (
               <div key={i} className="text-center bg-gray-50 rounded-xl p-6 border border-gray-100">
-                <div className="text-4xl mb-3" aria-hidden>{['💼', '🔗', '💬', '🤝'][i]}</div>
+                <div className="text-4xl mb-3" aria-hidden>{['🧠', '🔗', '💬', '🤝'][i]}</div>
                 <h3 className="font-semibold text-gray-900 mb-2">{item.title}</h3>
                 <p className="text-sm text-gray-600 leading-relaxed">{item.desc}</p>
               </div>
@@ -285,7 +295,7 @@ export default function SellerInstitutionalContent() {
               O que acontece quando alguém responde um diagnóstico
             </h2>
             <p className="text-gray-700 mb-6 leading-relaxed">
-              Quando uma pessoa responde perguntas sobre necessidades, momento ou objetivos, ela começa a entender a própria situação antes da conversa.
+              Quando uma pessoa responde perguntas sobre o que sente, necessidades ou momento de vida, ela começa a entender a própria situação antes da conversa.
             </p>
             <div className="flex flex-col items-center gap-2 py-6 px-6 bg-white rounded-xl border border-gray-100 max-w-xs mx-auto shadow-sm">
               <span className="text-sm font-semibold text-gray-800">Perguntas</span>
@@ -296,10 +306,10 @@ export default function SellerInstitutionalContent() {
               <span className="text-gray-400">↓</span>
               <span className="text-sm font-semibold text-gray-800">Conversa</span>
               <span className="text-gray-400">↓</span>
-              <span className="text-sm font-bold text-gray-900">Cliente / Venda</span>
+              <span className="text-sm font-bold text-gray-900">Cliente / Sessão</span>
             </div>
             <p className="text-lg font-semibold text-gray-900 mt-6">
-              Quando o cliente entende o que precisa, a venda acontece.
+              Quando o cliente entende o que precisa, a conversa evolui.
             </p>
           </div>
         </section>
@@ -307,10 +317,10 @@ export default function SellerInstitutionalContent() {
         <section className="py-12 sm:py-16 lg:py-20">
           <div className="max-w-4xl mx-auto">
             <h2 className="text-xl sm:text-3xl font-bold text-gray-900 text-center mb-4">
-              Exemplos de diagnósticos para vendedores
+              Exemplos de diagnósticos para psicanalistas
             </h2>
             <div className="grid sm:grid-cols-2 gap-4 mb-6">
-              {EXEMPLOS_SELLER.map((ex, i) => (
+              {EXEMPLOS_PSICANALISE.map((ex, i) => (
                 <Link
                   key={i}
                   href={ex.href}
@@ -322,7 +332,7 @@ export default function SellerInstitutionalContent() {
               ))}
             </div>
             <p className="text-center text-gray-600 text-sm">
-              Esses são exemplos de diagnósticos que vendedores podem criar com YLADA.
+              Exemplos de diagnósticos que psicanalistas podem criar com YLADA.
             </p>
           </div>
         </section>
@@ -330,30 +340,30 @@ export default function SellerInstitutionalContent() {
         <section className="bg-gray-50 py-12 sm:py-16 lg:py-20 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8">
           <div className="max-w-2xl mx-auto text-center">
             <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6">
-              Vendedores usam diagnósticos para:
+              Psicanalistas usam diagnósticos para:
             </h2>
             <ul className="space-y-2 text-gray-700">
               <li className="flex items-center justify-center gap-2">
                 <span className="text-green-600">✔</span>
-                <span>atrair clientes mais preparados para comprar</span>
+                <span>atrair pessoas mais alinhadas ao processo analítico</span>
               </li>
               <li className="flex items-center justify-center gap-2">
                 <span className="text-green-600">✔</span>
-                <span>reduzir conversas que não evoluem para venda</span>
+                <span>reduzir explicações repetidas antes da primeira sessão</span>
               </li>
               <li className="flex items-center justify-center gap-2">
                 <span className="text-green-600">✔</span>
-                <span>explicar valor do produto com mais facilidade</span>
+                <span>ajustar expectativas sobre análise sem simplificar demais</span>
               </li>
               <li className="flex items-center justify-center gap-2">
                 <span className="text-green-600">✔</span>
-                <span>transformar curiosidade em cliente qualificado</span>
+                <span>transformar curiosidade em primeiro contato qualificado</span>
               </li>
             </ul>
           </div>
         </section>
 
-        <YladaProfissionaisGridSection locale={locale} highlightCodigo="seller" />
+        <YladaProfissionaisGridSection locale={locale} highlightCodigo="psicanalise" />
 
         <section className="bg-sky-50 py-12 sm:py-16 border-y border-sky-100">
           <div className="max-w-2xl mx-auto text-center">
@@ -367,7 +377,7 @@ export default function SellerInstitutionalContent() {
               <li className="flex items-center gap-2"><span className="text-green-600">✔</span> até 10 análises do Noel por mês</li>
             </ul>
             <Link
-              href="/pt/seller/login"
+              href="/pt/psicanalise/login"
               className="inline-flex items-center justify-center px-8 py-4 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition-all"
             >
               Criar meu primeiro diagnóstico grátis
@@ -381,10 +391,10 @@ export default function SellerInstitutionalContent() {
               Crie um diagnóstico, compartilhe o link e atraia clientes certos para seu WhatsApp.
             </h2>
             <p className="text-white/90 text-base sm:text-lg mb-8 max-w-xl mx-auto">
-              Em vez de vender na primeira conversa, deixe o cliente chegar já entendendo a própria necessidade — e feche com mais facilidade.
+              Em vez de explicar e convencer, deixe o cliente chegar já entendendo a própria necessidade — e agende com mais facilidade.
             </p>
             <Link
-              href="/pt/seller/login"
+              href="/pt/psicanalise/login"
               className="inline-flex items-center justify-center px-10 py-4 bg-white text-[#1e3a8a] font-semibold rounded-xl hover:bg-gray-100 transition-all shadow-lg"
             >
               Criar meu primeiro diagnóstico grátis
@@ -400,15 +410,15 @@ export default function SellerInstitutionalContent() {
               <YLADALogo size="lg" className="bg-transparent" />
             </div>
             <nav className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 mb-6 text-sm">
-              <Link href="/pt/diagnostico?area=5" className="text-gray-600 hover:text-gray-900">Fazer diagnóstico</Link>
+              <Link href="/pt/diagnostico?area=7" className="text-gray-600 hover:text-gray-900">Fazer diagnóstico</Link>
               <Link href="/pt/diagnosticos" className="text-gray-600 hover:text-gray-900">Biblioteca de diagnósticos</Link>
               <Link href="/pt/metodo-ylada" className="text-gray-600 hover:text-gray-900">Filosofia</Link>
               <Link href="/pt/sobre" className="text-gray-600 hover:text-gray-900">Sobre</Link>
               <Link href="/pt/profissionais" className="text-gray-600 hover:text-gray-900">Profissionais</Link>
               <Link href="/pt/como-funciona" className="text-gray-600 hover:text-gray-900">Como funciona</Link>
               <Link href="/pt/precos" className="text-gray-600 hover:text-gray-900">Preços</Link>
-              <Link href="/pt/seller/login" className="text-gray-600 hover:text-gray-900">Entrar</Link>
-              <Link href="/pt/seller/login" className="text-blue-600 hover:text-blue-700 font-medium">Criar diagnóstico</Link>
+              <Link href="/pt/psicanalise/login" className="text-gray-600 hover:text-gray-900">Entrar</Link>
+              <Link href="/pt/psicanalise/login" className="text-blue-600 hover:text-blue-700 font-medium">Criar diagnóstico</Link>
             </nav>
             <p className="text-gray-600 text-sm mb-4">Plataforma de diagnósticos para iniciar conversas com contexto.</p>
             <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 mb-4 text-sm text-gray-500">
