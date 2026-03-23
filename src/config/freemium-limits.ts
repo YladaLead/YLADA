@@ -15,3 +15,6 @@ export const FREEMIUM_LIMITS = {
 } as const
 
 export type FreemiumLimitKey = keyof typeof FREEMIUM_LIMITS
+
+/** Resposta API quando o link não é o único ativo permitido no Free (só o mais antigo fica público). */
+export const FREEMIUM_LIMIT_TYPE_EXTRA_ACTIVE_LINK = 'freemium_extra_active_link' as const

@@ -18,7 +18,8 @@ import { sanitizeThemeForPatient } from '@/lib/ylada/strategic-intro'
 import { inferArchitectureFromTitle } from '@/config/ylada-segments'
 import { translateDiagnosis } from '@/lib/translate-diagnosis'
 import { hasYladaProPlan } from '@/lib/subscription-helpers'
-import { FREEMIUM_LIMITS } from '@/config/freemium-limits'
+import { FREEMIUM_LIMITS, FREEMIUM_LIMIT_TYPE_EXTRA_ACTIVE_LINK } from '@/config/freemium-limits'
+import { isYladaLinkHiddenFromPublicDueToFreemium } from '@/lib/ylada-freemium-public-link'
 import { storeDiagnosisAnswers } from '@/lib/ylada/diagnosis-answers-store'
 
 const ARCHITECTURES: DiagnosisArchitecture[] = [
@@ -161,8 +162,24 @@ export async function POST(
       return NextResponse.json({ success: false, error: 'Link não encontrado ou inativo' }, { status: 404 })
     }
 
-    // Freemium: verificar limite de contatos WhatsApp mensais antes de processar (bloquear antes do custo de IA)
     const ownerId = link.user_id as string | undefined
+    if (
+      ownerId &&
+      (await isYladaLinkHiddenFromPublicDueToFreemium(ownerId, link.id as string, 'active'))
+    ) {
+      return NextResponse.json(
+        {
+          success: false,
+          limit_reached: true,
+          limit_type: FREEMIUM_LIMIT_TYPE_EXTRA_ACTIVE_LINK,
+          message:
+            'No plano gratuito só um diagnóstico ativo fica disponível para visitantes. Os demais ficam pausados na experiência pública até a profissional reativar o Plano Pro.',
+        },
+        { status: 403 }
+      )
+    }
+
+    // Freemium: verificar limite de contatos WhatsApp mensais antes de processar (bloquear antes do custo de IA)
     if (ownerId) {
       const isPro = await hasYladaProPlan(ownerId)
       if (!isPro) {

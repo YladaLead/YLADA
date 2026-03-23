@@ -3,6 +3,7 @@
  */
 import { notFound } from 'next/navigation'
 import { supabaseAdmin } from '@/lib/supabase'
+import { isYladaLinkHiddenFromPublicDueToFreemium } from '@/lib/ylada-freemium-public-link'
 
 export type PublicLinkPayload = {
   slug: string
@@ -10,6 +11,8 @@ export type PublicLinkPayload = {
   title: string
   config: Record<string, unknown>
   ctaWhatsapp: string | null
+  /** Dono sem Pro com >1 link ativo: este não é o link “principal” (mais antigo) — visitante não usa o quiz. */
+  accessBlockedDueToPlan?: boolean
 }
 
 export async function fetchPublicLinkPayload(slug: string): Promise<PublicLinkPayload> {
@@ -26,6 +29,26 @@ export async function fetchPublicLinkPayload(slug: string): Promise<PublicLinkPa
     .maybeSingle()
 
   if (error || !link) notFound()
+
+  if (link.user_id) {
+    const hidden = await isYladaLinkHiddenFromPublicDueToFreemium(link.user_id, link.id, link.status)
+    if (hidden) {
+      const configEarly = (link.config_json as Record<string, unknown>) ?? {}
+      const pageTitle =
+        (configEarly.page as Record<string, unknown> | undefined)?.title ??
+        (configEarly.title as string) ??
+        link.title ??
+        'Link'
+      return {
+        slug: link.slug,
+        type: 'diagnostico',
+        title: typeof pageTitle === 'string' ? pageTitle : 'Link',
+        config: {},
+        ctaWhatsapp: null,
+        accessBlockedDueToPlan: true,
+      }
+    }
+  }
 
   const config = (link.config_json as Record<string, unknown>) ?? {}
   const meta = config.meta as Record<string, unknown> | undefined

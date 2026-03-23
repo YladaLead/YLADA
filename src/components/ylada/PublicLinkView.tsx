@@ -1,7 +1,9 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import Link from 'next/link'
 import { formatDisplayTitle, getStrategicIntro } from '@/lib/ylada/strategic-intro'
+import { FREEMIUM_LIMIT_TYPE_EXTRA_ACTIVE_LINK } from '@/config/freemium-limits'
 import DiagnosisDisclaimer from '@/components/ylada/DiagnosisDisclaimer'
 import PoweredByYlada from '@/components/ylada/PoweredByYlada'
 import type { Language } from '@/lib/i18n'
@@ -112,12 +114,80 @@ const PUBLIC_LINK_UI: Record<Language, {
   },
 }
 
+/** Visitante: link “extra” quando a dona não é Pro e tem mais de um diagnóstico ativo. */
+function FreemiumExtraLinkBlockedScreen({
+  locale,
+  pageTitle,
+}: {
+  locale: Language
+  pageTitle: string
+}) {
+  const title =
+    locale === 'en'
+      ? 'This link is not available right now'
+      : locale === 'es'
+        ? 'Este enlace no está disponible por ahora'
+        : 'Este link não está disponível no momento'
+  const body =
+    locale === 'en'
+      ? 'The professional is on the free YLADA plan, which keeps only one active diagnosis open to the public at a time. To use several links at once again, they can reactivate the Pro plan — with unlimited active diagnostics and unlimited WhatsApp contacts per month.'
+      : locale === 'es'
+        ? 'La profesional está en el plan gratuito de YLADA: solo un diagnóstico activo puede recibir visitas a la vez. Para volver a usar varios enlaces a la vez, puede reactivar el plan Pro, con diagnósticos activos ilimitados y contactos ilimitados por WhatsApp al mes.'
+        : 'A profissional está no plano gratuito da YLADA: só um diagnóstico ativo fica aberto para novas visitas por vez. Para voltar a usar todos os links ao mesmo tempo, ela pode reativar o Plano Pro — com diagnósticos ativos ilimitados e contatos ilimitados no WhatsApp por mês.'
+  const proLine =
+    locale === 'en'
+      ? 'Pro unlocks every active link for your clients and removes this limitation.'
+      : locale === 'es'
+        ? 'Con Pro todos los enlaces activos vuelven a funcionar para tus clientas.'
+        : 'Com o Pro, todos os links ativos voltam a funcionar para suas clientes.'
+  const cta = locale === 'en' ? 'View YLADA plans' : locale === 'es' ? 'Ver planes YLADA' : 'Ver planos YLADA'
+  const souPro =
+    locale === 'en' ? 'I am the professional — log in' : locale === 'es' ? 'Soy la profesional — entrar' : 'Sou a profissional — entrar'
+  const footer = locale === 'en' ? 'Created with YLADA' : locale === 'es' ? 'Creado con YLADA' : 'Criado com YLADA'
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-amber-50 via-sky-50/90 to-blue-50 flex items-center justify-center p-4 sm:p-6">
+      <div className="max-w-md w-full bg-white rounded-2xl shadow-xl border border-amber-100/80 p-6 sm:p-8">
+        <p className="text-xs font-semibold text-amber-800 uppercase tracking-wide mb-2">
+          {locale === 'en' ? 'Unavailable' : locale === 'es' ? 'No disponible' : 'Indisponível'}
+        </p>
+        <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2 leading-tight">{title}</h1>
+        {pageTitle ? (
+          <p className="text-sm text-gray-500 mb-3 truncate" title={pageTitle}>
+            {pageTitle}
+          </p>
+        ) : null}
+        <p className="text-gray-700 text-sm leading-relaxed mb-4">{body}</p>
+        <div className="mb-6 p-4 rounded-xl bg-sky-50 border border-sky-100">
+          <p className="text-sm font-medium text-sky-900">{proLine}</p>
+        </div>
+        <div className="space-y-3 mb-6">
+          <Link
+            href="/pt/precos"
+            className="block w-full py-3 px-4 bg-sky-600 hover:bg-sky-700 text-white font-semibold rounded-xl text-center transition-colors"
+          >
+            {cta}
+          </Link>
+          <Link
+            href="/pt/login"
+            className="block w-full py-2 px-4 text-sky-700 hover:text-sky-900 text-sm font-medium text-center"
+          >
+            {souPro}
+          </Link>
+        </div>
+        <p className="text-center text-xs text-gray-500">{footer}</p>
+      </div>
+    </div>
+  )
+}
+
 type Payload = {
   slug: string
   type: 'diagnostico' | 'calculator'
   title: string
   config: Record<string, unknown>
   ctaWhatsapp: string | null
+  accessBlockedDueToPlan?: boolean
 }
 
 function buildWhatsAppUrl(ctaWhatsapp: string | null): string {
@@ -205,15 +275,16 @@ function normalizeBibliotecaConfig(config: Record<string, unknown>, locale: Lang
 }
 
 export default function PublicLinkView({ payload, locale = 'pt' }: { payload: Payload; locale?: Language }) {
-  const { slug, type, title, config, ctaWhatsapp } = payload
+  const { slug, type, title, config, ctaWhatsapp, accessBlockedDueToPlan } = payload
   const t = PUBLIC_LINK_UI[locale]
   const viewSent = useRef(false)
 
   useEffect(() => {
+    if (accessBlockedDueToPlan) return
     if (viewSent.current) return
     viewSent.current = true
     trackEvent(slug, 'view')
-  }, [slug])
+  }, [slug, accessBlockedDueToPlan])
 
   const resultCta = (config.result as Record<string, unknown>)?.cta as Record<string, unknown> | undefined
   const ctaText = (resultCta?.text as string) || (config.ctaText as string) || (config.ctaDefault as string) || t.speakWhatsApp
@@ -227,6 +298,10 @@ export default function PublicLinkView({ payload, locale = 'pt' }: { payload: Pa
         : whatsappUrl
       window.open(url, '_blank', 'noopener,noreferrer')
     }
+  }
+
+  if (accessBlockedDueToPlan) {
+    return <FreemiumExtraLinkBlockedScreen locale={locale} pageTitle={formatDisplayTitle(title)} />
   }
 
   if (type === 'diagnostico') {
@@ -372,7 +447,7 @@ function ConfigDrivenLinkView({
   const subtitle = (page.subtitle as string) || ''
 
   const [values, setValues] = useState<Record<string, string>>({})
-  const [step, setStep] = useState<'intro' | 'form' | 'result' | 'limit_reached'>('intro')
+  const [step, setStep] = useState<'intro' | 'form' | 'result' | 'limit_reached' | 'access_paused'>('intro')
   const [formStep, setFormStep] = useState(0)
   const [diagnosis, setDiagnosis] = useState<DiagnosisResultState | null>(null)
   const [metricsId, setMetricsId] = useState<string | null>(null)
@@ -509,6 +584,11 @@ function ConfigDrivenLinkView({
           fullData: data // Log completo para debug
         })
         if (!res.ok) {
+          if (data.limit_reached && data.limit_type === FREEMIUM_LIMIT_TYPE_EXTRA_ACTIVE_LINK) {
+            setStep('access_paused')
+            setLoading(false)
+            return
+          }
           if (data.limit_reached) {
             console.log('⚠️ [PublicLinkView] Limite atingido')
             setStep('limit_reached')
@@ -574,6 +654,10 @@ function ConfigDrivenLinkView({
     page_title: pageTitleRaw || undefined,
     questions_count: visibleQuizQuestionCount > 0 ? visibleQuizQuestionCount : undefined,
   })
+
+  if (step === 'access_paused') {
+    return <FreemiumExtraLinkBlockedScreen locale={locale} pageTitle={displayTitle} />
+  }
 
   // Tela de limite atingido (freemium) — tom de crescimento + promoção do Pro
   if (step === 'limit_reached') {

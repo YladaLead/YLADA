@@ -6,6 +6,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireApiAuth } from '@/lib/api-auth'
 import { supabaseAdmin } from '@/lib/supabase'
 import { YLADA_API_ALLOWED_PROFILES } from '@/config/ylada-areas'
+import { hasYladaProPlan } from '@/lib/subscription-helpers'
 
 type EventCounts = {
   view: number
@@ -109,12 +110,23 @@ export async function GET(request: NextRequest) {
     const protocol = request.headers.get('x-forwarded-proto') || 'http'
     const baseUrl = host ? `${protocol}://${host}` : ''
 
+    const isPro = await hasYladaProPlan(user.id)
+    const activeOrdered = [...links]
+      .filter((l) => l.status === 'active')
+      .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
+    const primaryActiveId = activeOrdered[0]?.id
+
     const list = links.map((row) => ({
       ...row,
       url: baseUrl ? `${baseUrl}/l/${row.slug}` : `/l/${row.slug}`,
       template_name: row.template_id ? templatesMap[row.template_id]?.name ?? null : null,
       template_type: row.template_id ? templatesMap[row.template_id]?.type ?? null : null,
       stats: statsMap[row.id] ?? { view: 0, start: 0, complete: 0, cta_click: 0 },
+      public_paused_freemium:
+        !isPro &&
+        row.status === 'active' &&
+        activeOrdered.length > 1 &&
+        row.id !== primaryActiveId,
     }))
 
     return NextResponse.json({ success: true, data: list })

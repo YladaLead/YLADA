@@ -7,6 +7,7 @@
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
+import { isYladaLinkHiddenFromPublicDueToFreemium } from '@/lib/ylada-freemium-public-link'
 
 const ALLOWED_TYPES = ['view', 'start', 'complete', 'result_view', 'cta_click'] as const
 
@@ -44,6 +45,13 @@ export async function POST(request: NextRequest) {
 
     if (linkError || !link) {
       return NextResponse.json({ success: false, error: 'Link não encontrado ou inativo' }, { status: 404 })
+    }
+
+    if (
+      link.user_id &&
+      (await isYladaLinkHiddenFromPublicDueToFreemium(link.user_id as string, link.id as string, 'active'))
+    ) {
+      return NextResponse.json({ success: true, skipped_freemium: true })
     }
 
     const utmJson = body.utm_json && typeof body.utm_json === 'object' ? body.utm_json : {}

@@ -50,6 +50,8 @@ type LinkRow = {
   template_name?: string | null
   template_type?: string | null
   stats?: LinkStats
+  /** Não-Pro com >1 ativo: link não é o mais antigo — público não usa. */
+  public_paused_freemium?: boolean
 }
 
 /** Rótulos amigáveis de perfil/categoria para exibir ao usuário (sem jargão técnico). */
@@ -731,7 +733,21 @@ function LinksPageContent({ areaCodigo = 'ylada', areaLabel = 'YLADA' }: LinksPa
                           >
                             {link.status === 'active' ? 'Ativo' : link.status === 'paused' ? 'Pausado' : 'Arquivado'}
                           </span>
+                          {link.public_paused_freemium && (
+                            <span className="shrink-0 rounded-full px-2 py-0.5 text-xs font-medium bg-rose-100 text-rose-900">
+                              Indisponível no plano grátis
+                            </span>
+                          )}
                         </div>
+                        {link.public_paused_freemium && (
+                          <p className="text-xs text-rose-800 mt-1.5 leading-snug">
+                            Quem abre este link não consegue usar o diagnóstico até você reativar o{' '}
+                            <Link href="/pt/precos" className="font-semibold underline hover:text-rose-950">
+                              Plano Pro
+                            </Link>{' '}
+                            ou pausar outros diagnósticos ativos (no grátis só um fica público).
+                          </p>
+                        )}
                         {link.template_name && (
                           <p className="text-xs text-gray-500 mb-0.5">
                             Modelo: {link.template_name}
