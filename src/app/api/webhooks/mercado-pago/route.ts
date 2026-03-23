@@ -5,6 +5,121 @@ import { createAccessToken } from '@/lib/email-tokens'
 import { sendWelcomeEmail } from '@/lib/email-templates'
 import { getCarolAutomationDisabled } from '@/lib/carol-admin-settings'
 import { redirectToSupportAfterPayment } from '@/lib/whatsapp-carol-ai'
+import { createYladaFreeMatrizSubscription } from '@/lib/admin-ylada-free-matriz'
+
+function mercadoPagoReversalStatus(status: string | undefined): boolean {
+  return status === 'refunded' || status === 'charged_back'
+}
+
+/**
+ * Estorno ou chargeback no MP: cancela assinatura ligada a mp_<paymentId>, marca pagamento,
+ * cancela comissões pendentes e cria plano free Ylada (matriz) quando havia assinatura paga ativa.
+ */
+async function applyMercadoPagoReversal(paymentId: string, fullData: any) {
+  console.log('💸 Estorno/chargeback Mercado Pago:', paymentId, fullData?.status)
+  const stripeSubId = `mp_${paymentId}`
+  const nowIso = new Date().toISOString()
+
+  const { data: subsByMp, error: subErr } = await supabaseAdmin
+    .from('subscriptions')
+    .select('id, user_id, area, plan_type, status')
+    .eq('stripe_subscription_id', stripeSubId)
+
+  if (subErr) {
+    console.error('❌ Erro ao buscar assinatura por mp_ id:', subErr)
+    return
+  }
+
+  let targets = subsByMp || []
+  if (targets.length === 0) {
+    const { data: payLink } = await supabaseAdmin
+      .from('payments')
+      .select('subscription_id')
+      .eq('stripe_payment_intent_id', paymentId)
+      .maybeSingle()
+    if (payLink?.subscription_id) {
+      const { data: subOne } = await supabaseAdmin
+        .from('subscriptions')
+        .select('id, user_id, area, plan_type, status')
+        .eq('id', payLink.subscription_id)
+        .maybeSingle()
+      if (subOne) targets = [subOne]
+    }
+  }
+
+  let grantYladaFreeUserId: string | null = null
+  let hadActivePaid = false
+
+  for (const sub of targets) {
+    const isPaidPlan = sub.plan_type === 'monthly' || sub.plan_type === 'annual'
+    const wasActive = sub.status === 'active'
+    if (isPaidPlan && wasActive) hadActivePaid = true
+
+    if (wasActive) {
+      const uid = String(sub.user_id)
+      const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(uid)
+      if (isPaidPlan && isUuid) grantYladaFreeUserId = uid
+
+      const { error: cancelErr } = await supabaseAdmin
+        .from('subscriptions')
+        .update({
+          status: 'canceled',
+          canceled_at: nowIso,
+          updated_at: nowIso,
+        })
+        .eq('id', sub.id)
+
+      if (cancelErr) {
+        console.error(`❌ Erro ao cancelar assinatura ${sub.id}:`, cancelErr)
+      } else {
+        console.log('✅ Assinatura cancelada (estorno MP):', sub.id, sub.area, sub.plan_type)
+      }
+    }
+  }
+
+  const { data: payRows } = await supabaseAdmin.from('payments').select('id').eq('stripe_payment_intent_id', paymentId)
+
+  for (const p of payRows || []) {
+    await supabaseAdmin
+      .from('payments')
+      .update({ status: 'refunded', updated_at: nowIso })
+      .eq('id', p.id)
+    await supabaseAdmin
+      .from('vendedor_comissoes')
+      .update({ status: 'cancelled' })
+      .eq('payment_id', p.id)
+      .eq('status', 'pending')
+  }
+
+  let finalUserId = grantYladaFreeUserId
+  if (!finalUserId && hadActivePaid) {
+    const emailSources = [
+      fullData?.payer?.email,
+      fullData?.payer_email,
+      fullData?.payer?.identification?.email,
+      fullData?.additional_info?.payer?.email,
+      fullData?.additional_info?.payer?.email_address,
+    ]
+    const payerEmail = emailSources.find((e) => e && typeof e === 'string' && e.includes('@')) as string | undefined
+    if (payerEmail) {
+      const { data: prof } = await supabaseAdmin
+        .from('user_profiles')
+        .select('user_id')
+        .ilike('email', payerEmail)
+        .limit(1)
+        .maybeSingle()
+      if (prof?.user_id) finalUserId = prof.user_id
+    }
+  }
+
+  if (finalUserId && hadActivePaid) {
+    const { error: freeErr } = await createYladaFreeMatrizSubscription(finalUserId, 365, 'courtesy')
+    if (freeErr) console.error('❌ Free matriz pós-estorno:', freeErr)
+    else console.log('✅ Plano free Ylada (matriz) após estorno:', finalUserId)
+  } else if (hadActivePaid && !finalUserId) {
+    console.warn('⚠️ Estorno MP: não foi possível resolver user_id para criar free matriz; use o admin.')
+  }
+}
 
 /**
  * Determina features baseado em área, planType e productType.
@@ -213,10 +328,15 @@ async function handlePaymentEvent(data: any, isTest: boolean = false, preFetched
     hasExternalReference: !!data.external_reference,
   })
 
+    // Estorno/chargeback com dados já buscados (ex.: sync admin)
+    if (preFetchedFullData && mercadoPagoReversalStatus(preFetchedFullData.status)) {
+      await applyMercadoPagoReversal(String(paymentId), preFetchedFullData)
+      return
+    }
+
     // Usar dados já buscados (sync manual) ou buscar via API
-    let paymentDataFull: any = preFetchedFullData && preFetchedFullData.status === 'approved'
-      ? preFetchedFullData
-      : null
+    let paymentDataFull: any =
+      preFetchedFullData && preFetchedFullData.status === 'approved' ? preFetchedFullData : null
 
     if (!paymentDataFull) {
       try {
@@ -229,29 +349,39 @@ async function handlePaymentEvent(data: any, isTest: boolean = false, preFetched
           const { Payment } = await import('mercadopago')
           const { createMercadoPagoClient } = await import('@/lib/mercado-pago')
 
+          paymentDataFull = null
           for (const tryTest of [isTest, !isTest]) {
             try {
               console.log('🔍 Buscando dados completos do pagamento via API...', { isTest: tryTest })
               const client = createMercadoPagoClient(tryTest)
               const payment = new Payment(client)
-              paymentDataFull = await payment.get({ id: paymentId })
-              if (paymentDataFull?.status === 'approved') {
-                console.log('✅ Dados completos do pagamento obtidos:', {
-                  hasMetadata: !!paymentDataFull.metadata,
-                  hasExternalReference: !!paymentDataFull.external_reference,
-                  hasPayer: !!paymentDataFull.payer,
-                  status: paymentDataFull.status,
+              const got = await payment.get({ id: paymentId })
+              if (got?.id) {
+                paymentDataFull = got
+                console.log('✅ Pagamento obtido na API MP:', {
+                  hasMetadata: !!got.metadata,
+                  hasExternalReference: !!got.external_reference,
+                  hasPayer: !!got.payer,
+                  status: got.status,
                 })
                 break
               }
             } catch (apiError: any) {
               console.warn(`⚠️ Falha ao buscar pagamento (isTest=${tryTest}):`, apiError?.message || apiError)
-              paymentDataFull = null
             }
           }
 
+          if (paymentDataFull && mercadoPagoReversalStatus(paymentDataFull.status)) {
+            await applyMercadoPagoReversal(String(paymentId), paymentDataFull)
+            return
+          }
+
           if (!paymentDataFull || paymentDataFull.status !== 'approved') {
-            console.error('❌ Não foi possível obter dados aprovados do pagamento (tentou ambos os tokens).', paymentId)
+            console.error(
+              '❌ Pagamento não aprovado ou não encontrado (tentou ambos os tokens).',
+              paymentId,
+              paymentDataFull?.status
+            )
             return
           }
         }
@@ -1350,10 +1480,17 @@ export async function syncPaymentByIdFromMercadoPago(
     const client = createMercadoPagoClient(isTest)
     const payment = new Payment(client)
     const fullData = await payment.get({ id: String(paymentId) })
-    if (!fullData || fullData.status !== 'approved') {
+    if (!fullData) {
+      return { success: false, error: 'Pagamento não encontrado na API do Mercado Pago.' }
+    }
+    if (mercadoPagoReversalStatus(fullData.status)) {
+      await applyMercadoPagoReversal(String(fullData.id), fullData)
+      return { success: true, message: 'Estorno/chargeback sincronizado (assinatura cancelada / free matriz se aplicável).' }
+    }
+    if (fullData.status !== 'approved') {
       return {
         success: false,
-        error: `Pagamento não aprovado. Status: ${fullData?.status ?? 'n/a'}`,
+        error: `Pagamento não aprovado. Status: ${fullData.status ?? 'n/a'}`,
       }
     }
     await handlePaymentEvent({ id: fullData.id }, isTest, fullData)
