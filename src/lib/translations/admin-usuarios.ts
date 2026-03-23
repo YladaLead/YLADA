@@ -29,6 +29,10 @@ export interface AdminUsuariosTranslations {
     active: string
     inactive: string
     free: string
+    /** Subfiltros de Free na listagem admin */
+    freeNeverPaid: string
+    freeFormerPaid: string
+    freeMigration: string
     monthly: string
     annual: string
     noSubscription: string
@@ -113,6 +117,9 @@ export interface AdminUsuariosTranslations {
     free: string
     /** Cortesia administrativa (free_cor_ / concessão explícita) */
     courtesy: string
+    freeNeverPaid: string
+    freeFormerPaid: string
+    freeMigration: string
     /** Plano ativo sem data de fim no registro */
     noPlanEnd: string
     none: string
@@ -208,7 +215,7 @@ const pt: AdminUsuariosTranslations = {
     status: 'Situação',
     subscription: 'Assinatura',
     subscriptionHint:
-      'Free, trial com prazo ou pago (mensal/anual) é independente do segmento: filtre aqui pelo tipo de plano, a coluna Área mostra med, psi, Wellness, etc.',
+      'Free está dividido: nunca pagou, ex-pagante, ou migração/manual (is_migrated / free_mig_). Mensal e anual incluem vigentes e vencidos.',
     president: 'Presidente',
     segment: 'Segmento',
     segmentHint:
@@ -217,7 +224,10 @@ const pt: AdminUsuariosTranslations = {
     all: 'Todos',
     active: 'Com acesso (pago ou Free vigente)',
     inactive: 'Vencido ou sem plano pago ativo',
-    free: 'Free',
+    free: 'Free (todos)',
+    freeNeverPaid: 'Free — nunca pagou',
+    freeFormerPaid: 'Free — já foi pagante',
+    freeMigration: 'Free — migração / manual',
     monthly: 'Mensal',
     annual: 'Anual',
     noSubscription: 'Sem assinatura',
@@ -296,6 +306,9 @@ const pt: AdminUsuariosTranslations = {
     annual: 'Anual',
     free: 'Free',
     courtesy: 'Cortesia',
+    freeNeverPaid: 'Free — nunca pagou',
+    freeFormerPaid: 'Free — já foi pagante',
+    freeMigration: 'Free — migração / manual',
     noPlanEnd: 'Sem vencimento no registro',
     none: 'Sem assinatura',
   },
@@ -397,7 +410,7 @@ const es: AdminUsuariosTranslations = {
     status: 'Estado',
     subscription: 'Suscripción',
     subscriptionHint:
-      'Gratis, prueba con plazo o pago es independiente del segmento: filtre por tipo de plano; la columna Área muestra med, psi, Wellness, etc.',
+      'Gratis: nunca pagó, ex pagador, o migración/manual (is_migrated / free_mig_). Mensual y anual incluyen vigentes y vencidos.',
     president: 'Presidente',
     segment: 'Segmento',
     segmentHint:
@@ -406,7 +419,10 @@ const es: AdminUsuariosTranslations = {
     all: 'Todos',
     active: 'Con acceso (pago o Free vigente)',
     inactive: 'Vencido o sin plan pagado activo',
-    free: 'Gratis',
+    free: 'Gratis (todos)',
+    freeNeverPaid: 'Gratis — nunca pagó',
+    freeFormerPaid: 'Gratis — ya fue pagador',
+    freeMigration: 'Gratis — migración / manual',
     monthly: 'Mensual',
     annual: 'Anual',
     noSubscription: 'Sin suscripción',
@@ -485,6 +501,9 @@ const es: AdminUsuariosTranslations = {
     annual: 'Anual',
     free: 'Free',
     courtesy: 'Cortesía',
+    freeNeverPaid: 'Gratis — nunca pagó',
+    freeFormerPaid: 'Gratis — ya fue pagador',
+    freeMigration: 'Gratis — migración / manual',
     noPlanEnd: 'Sin vencimiento en el registro',
     none: 'Sin suscripción',
   },
@@ -586,7 +605,7 @@ const en: AdminUsuariosTranslations = {
     status: 'Status',
     subscription: 'Subscription',
     subscriptionHint:
-      'Free, time-limited trial, or paid is independent of segment: filter by plan type; the Area column shows med, psi, Wellness, etc.',
+      'Free is split: never paid, former payer, or migration/manual (is_migrated / free_mig_). Monthly and annual include active and expired.',
     president: 'President',
     segment: 'Segment',
     segmentHint:
@@ -595,7 +614,10 @@ const en: AdminUsuariosTranslations = {
     all: 'All',
     active: 'With access (paid or active Free)',
     inactive: 'Expired or no active paid plan',
-    free: 'Free',
+    free: 'Free (all)',
+    freeNeverPaid: 'Free — never paid',
+    freeFormerPaid: 'Free — former payer',
+    freeMigration: 'Free — migration / manual',
     monthly: 'Monthly',
     annual: 'Annual',
     noSubscription: 'No subscription',
@@ -674,6 +696,9 @@ const en: AdminUsuariosTranslations = {
     annual: 'Annual',
     free: 'Free',
     courtesy: 'Courtesy',
+    freeNeverPaid: 'Free — never paid',
+    freeFormerPaid: 'Free — former payer',
+    freeMigration: 'Free — migration / manual',
     noPlanEnd: 'No end date on record',
     none: 'No subscription',
   },

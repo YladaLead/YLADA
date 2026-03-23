@@ -39,6 +39,14 @@ interface Usuario {
   yladaFreePeriodEnd?: string | null
   /** Derivado do prefixo em stripe_subscription_id (free_mig_ / free_cor_ / legado free_) */
   yladaFreeGrantKind?: 'migration' | 'courtesy' | 'legacy' | null
+  /** Categoria para filtro/coluna: free granular, mensal, anual, sem */
+  assinaturaCategoria?:
+    | 'mensal'
+    | 'anual'
+    | 'sem'
+    | 'free_nunca_pago'
+    | 'free_ex_pagante'
+    | 'free_migracao'
   /** E-mail em domínio de teste (@ylada.com etc.) — stats de produção excluem */
   isContaTeste?: boolean
 }
@@ -62,7 +70,16 @@ export default function AdminUsuarios() {
 
   const mostrarColunasPresidente = false
   const [filtroStatus, setFiltroStatus] = useState<'todos' | 'ativo' | 'inativo'>('todos')
-  const [filtroAssinatura, setFiltroAssinatura] = useState<'todos' | 'gratuita' | 'mensal' | 'anual' | 'sem'>('todos')
+  const [filtroAssinatura, setFiltroAssinatura] = useState<
+    | 'todos'
+    | 'gratuita'
+    | 'free_nunca_pago'
+    | 'free_ex_pagante'
+    | 'free_migracao'
+    | 'mensal'
+    | 'anual'
+    | 'sem'
+  >('todos')
   const [filtroPresidente, setFiltroPresidente] = useState<string>('todos')
   const [busca, setBusca] = useState('')
   const [usuarios, setUsuarios] = useState<Usuario[]>([])
@@ -634,15 +651,24 @@ export default function AdminUsuarios() {
     return area
   }
 
-  /** Categorias padronizadas na listagem: Free, Cortesia, Mensal, Anual, Sem assinatura. */
+  /** Categorias na listagem / CSV: free granular, cortesia, mensal, anual, sem. */
   const getAssinaturaListLabel = (u: Usuario) => {
-    if (u.assinatura === 'sem assinatura') return t.subscriptionType.none
-    if (u.assinatura === 'mensal') return t.subscriptionType.monthly
-    if (u.assinatura === 'anual') return t.subscriptionType.annual
+    const c = u.assinaturaCategoria
+    if (c === 'free_nunca_pago') {
+      if (u.yladaFreeGrantKind === 'courtesy') return t.subscriptionType.courtesy
+      return t.subscriptionType.freeNeverPaid
+    }
+    if (c === 'free_ex_pagante') return t.subscriptionType.freeFormerPaid
+    if (c === 'free_migracao') return t.subscriptionType.freeMigration
+    if (c === 'mensal') return t.subscriptionType.monthly
+    if (c === 'anual') return t.subscriptionType.annual
+    if (c === 'sem' || u.assinatura === 'sem assinatura') return t.subscriptionType.none
     if (u.assinatura === 'gratuita') {
       if (u.yladaFreeGrantKind === 'courtesy') return t.subscriptionType.courtesy
       return t.subscriptionType.free
     }
+    if (u.assinatura === 'mensal') return t.subscriptionType.monthly
+    if (u.assinatura === 'anual') return t.subscriptionType.annual
     return t.subscriptionType.none
   }
 
@@ -815,6 +841,9 @@ export default function AdminUsuarios() {
               >
                 <option value="todos">{t.filters.all}</option>
                 <option value="gratuita">{t.filters.free}</option>
+                <option value="free_nunca_pago">{t.filters.freeNeverPaid}</option>
+                <option value="free_ex_pagante">{t.filters.freeFormerPaid}</option>
+                <option value="free_migracao">{t.filters.freeMigration}</option>
                 <option value="mensal">{t.filters.monthly}</option>
                 <option value="anual">{t.filters.annual}</option>
                 <option value="sem">{t.filters.noSubscription}</option>

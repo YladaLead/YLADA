@@ -19,7 +19,7 @@ import { toYmdInTimeZone } from '@/lib/date-utils'
  *   Preferir a `perfil` em vez de `area` para o perfil literal `ylada` ( `area=ylada` continua legado = matriz inteira).
  * - area?: legado | demais_segmentos | ylada (matriz) | todos — refinamentos antigos; sem `perfil`.
  * - status?: 'todos' | 'ativo' | 'inativo' - Filtrar por status
- * - assinatura?: 'todos' | 'gratuita' | 'mensal' | 'anual' | 'sem' - Filtrar por tipo de assinatura
+ * - assinatura?: 'todos' | 'gratuita' | 'free_nunca_pago' | 'free_ex_pagante' | 'free_migracao' | 'mensal' | 'anual' | 'sem' — gratuita = qualquer free (união das três subcategorias)
  * - presidente?: string - Filtrar por nome do presidente (equipe do presidente)
  * - busca?: string - Buscar por nome, email (user_profiles ou Auth) ou WhatsApp
  */
@@ -278,6 +278,9 @@ export async function GET(request: NextRequest) {
     const usuarios = profiles.map(profile => {
       const userArea = profile.perfil || 'wellness'
       const todasSubsUsuario = subscriptions?.filter((s) => s.user_id === profile.user_id) || []
+      const everHadPaid = todasSubsUsuario.some(
+        (s) => s.plan_type === 'monthly' || s.plan_type === 'annual'
+      )
       const subsMesmaArea = todasSubsUsuario.filter((s) => s.area === userArea)
       const subsYlada = todasSubsUsuario.filter((s) => s.area === 'ylada')
 
@@ -323,6 +326,11 @@ export async function GET(request: NextRequest) {
           new Date(s.current_period_end).getTime() > now.getTime()
       )
       const yladaSubParaAdmin = yladaSubAtiva || subsYladaOrdenadas[0] || null
+      const yladaFreeGrantKind = yladaSubParaAdmin
+        ? parseYladaFreeGrantKind(
+            (yladaSubParaAdmin as { stripe_subscription_id?: string | null }).stripe_subscription_id
+          )
+        : null
 
       let isAtivo: boolean
       let status: 'ativo' | 'inativo'
@@ -368,17 +376,55 @@ export async function GET(request: NextRequest) {
         }
       }
 
+      const hasMigratedFreeRow = todasSubsUsuario.some(
+        (s) => s.plan_type === 'free' && Boolean((s as { is_migrated?: boolean }).is_migrated)
+      )
+      const isFreeMigracaoEffective =
+        !implicitMatrizFree &&
+        assinaturaTipo === 'gratuita' &&
+        (hasMigratedFreeRow || yladaFreeGrantKind === 'migration')
+
+      let assinaturaCategoria:
+        | 'mensal'
+        | 'anual'
+        | 'sem'
+        | 'free_nunca_pago'
+        | 'free_ex_pagante'
+        | 'free_migracao'
+      if (implicitMatrizFree) {
+        assinaturaCategoria = everHadPaid ? 'free_ex_pagante' : 'free_nunca_pago'
+      } else if (assinaturaTipo === 'mensal') {
+        assinaturaCategoria = 'mensal'
+      } else if (assinaturaTipo === 'anual') {
+        assinaturaCategoria = 'anual'
+      } else if (assinaturaTipo === 'sem assinatura') {
+        assinaturaCategoria = 'sem'
+      } else if (assinaturaTipo === 'gratuita') {
+        if (isFreeMigracaoEffective) assinaturaCategoria = 'free_migracao'
+        else if (everHadPaid) assinaturaCategoria = 'free_ex_pagante'
+        else assinaturaCategoria = 'free_nunca_pago'
+      } else {
+        assinaturaCategoria = 'sem'
+      }
+
       // Aplicar filtro de status
       if (statusFiltro !== 'todos' && status !== statusFiltro) {
         return null
       }
 
-      // Aplicar filtro de assinatura ('sem' no filtro = 'sem assinatura' no tipo)
+      // Filtro de assinatura (subcategorias de free + mensal/anual/sem)
       if (assinaturaFiltro !== 'todos') {
-        const tipoMatch = assinaturaFiltro === 'sem'
-          ? assinaturaTipo === 'sem assinatura'
-          : assinaturaTipo === assinaturaFiltro
-        if (!tipoMatch) return null
+        if (assinaturaFiltro === 'gratuita') {
+          if (
+            assinaturaCategoria !== 'free_nunca_pago' &&
+            assinaturaCategoria !== 'free_ex_pagante' &&
+            assinaturaCategoria !== 'free_migracao'
+          ) {
+            return null
+          }
+        } else if (assinaturaFiltro !== assinaturaCategoria) {
+          return null
+        }
       }
 
       const emailExibicao =
@@ -415,11 +461,8 @@ export async function GET(request: NextRequest) {
         podeGerenciarFreeMatriz: isPerfilMatrizYlada(userArea),
         yladaFreeSubscriptionId: yladaSubParaAdmin?.id ?? null,
         yladaFreePeriodEnd: yladaSubParaAdmin?.current_period_end ?? null,
-        yladaFreeGrantKind: yladaSubParaAdmin
-          ? parseYladaFreeGrantKind(
-              (yladaSubParaAdmin as { stripe_subscription_id?: string | null }).stripe_subscription_id
-            )
-          : null,
+        yladaFreeGrantKind,
+        assinaturaCategoria,
         isContaTeste: isAdminTestAccountEmail(emailExibicao),
       }
     }).filter(u => u !== null) // Remover nulls do filtro de status
