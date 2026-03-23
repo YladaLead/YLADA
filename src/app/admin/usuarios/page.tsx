@@ -634,17 +634,13 @@ export default function AdminUsuarios() {
     return area
   }
 
-  /** Coluna Assinatura: Free (migração/legado/cortesia), mensal/anual, implícito, etc. */
+  /** Categorias padronizadas na listagem: Free, Cortesia, Mensal, Anual, Sem assinatura. */
   const getAssinaturaListLabel = (u: Usuario) => {
-    if (u.isContaTeste) return t.subscriptionType.courtesy
     if (u.assinatura === 'sem assinatura') return t.subscriptionType.none
     if (u.assinatura === 'mensal') return t.subscriptionType.monthly
     if (u.assinatura === 'anual') return t.subscriptionType.annual
     if (u.assinatura === 'gratuita') {
-      if (u.implicitMatrizFree && !u.yladaFreeSubscriptionId) return t.subscriptionType.freeImplicit
       if (u.yladaFreeGrantKind === 'courtesy') return t.subscriptionType.courtesy
-      if (u.yladaFreeGrantKind === 'migration') return t.subscriptionType.freeMigration
-      if (u.yladaFreeGrantKind === 'legacy') return t.subscriptionType.freeLegacy
       return t.subscriptionType.free
     }
     return t.subscriptionType.none
@@ -1074,31 +1070,22 @@ export default function AdminUsuarios() {
                                     <span className="text-xs text-orange-600" title="Usuário migrado">🔄</span>
                                   )}
                                 </div>
-                                {usuario.podeGerenciarFreeMatriz &&
-                                  dataVencStr &&
-                                  usuario.assinaturaSituacao === 'ativa' &&
+                                {dataVencStr &&
                                   usuario.assinatura === 'gratuita' &&
-                                  usuario.yladaFreeGrantKind === 'courtesy' && (
+                                  usuario.yladaFreeGrantKind === 'courtesy' &&
+                                  (usuario.assinaturaSituacao === 'ativa' ||
+                                    usuario.assinaturaSituacao === 'vencida') && (
                                   <div className="text-[11px] text-amber-900 mt-1.5 font-medium leading-snug">
                                     {t.table.freeCourtesyHint}
                                   </div>
                                 )}
-                                {usuario.podeGerenciarFreeMatriz &&
-                                  dataVencStr &&
-                                  usuario.assinaturaSituacao === 'ativa' &&
+                                {dataVencStr &&
                                   usuario.assinatura === 'gratuita' &&
-                                  usuario.yladaFreeGrantKind === 'migration' && (
-                                  <div className="text-[11px] text-sky-900 mt-1.5 font-medium leading-snug">
-                                    {t.table.freeMigrationHint}
-                                  </div>
-                                )}
-                                {usuario.podeGerenciarFreeMatriz &&
-                                  dataVencStr &&
-                                  usuario.assinaturaSituacao === 'ativa' &&
-                                  usuario.assinatura === 'gratuita' &&
-                                  usuario.yladaFreeGrantKind === 'legacy' && (
+                                  usuario.yladaFreeGrantKind !== 'courtesy' &&
+                                  (usuario.assinaturaSituacao === 'ativa' ||
+                                    usuario.assinaturaSituacao === 'vencida') && (
                                   <div className="text-[11px] text-gray-700 mt-1.5 font-medium leading-snug">
-                                    {t.table.freeLegacyMatrizHint}
+                                    {t.table.freeMatrizHint}
                                   </div>
                                 )}
                                 {!dataVencStr &&
@@ -1385,12 +1372,10 @@ export default function AdminUsuarios() {
                   <option value="annual">{t.filters.annual}</option>
                   <option value="free">{t.filters.free}</option>
                 </select>
-                {formAssinatura.plan_type === 'free' && usuarioSelecionado.podeGerenciarFreeMatriz && (
-                  <p className="text-xs text-gray-600 mt-1.5 bg-slate-50 border border-slate-100 rounded-md px-2 py-1.5">
-                    <span className="font-semibold text-gray-700">{t.modal.matrizFreeKindInModal}</span>{' '}
-                    {getAssinaturaListLabel(usuarioSelecionado)}
-                  </p>
-                )}
+                <p className="text-xs text-gray-600 mt-1.5 bg-slate-50 border border-slate-100 rounded-md px-2 py-1.5">
+                  <span className="font-semibold text-gray-700">{t.modal.planCategoryInModal}</span>{' '}
+                  {getAssinaturaListLabel(usuarioSelecionado)}
+                </p>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">{t.modal.expirationDate}</label>
