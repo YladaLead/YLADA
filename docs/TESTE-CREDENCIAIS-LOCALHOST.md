@@ -2,6 +2,8 @@
 
 Use estes e-mails e senhas para testar a **parte interna** em **localhost**, sem afetar produção.
 
+**Padrão de e-mail:** `teste-{segmento}@teste.ylada.com` (matriz em duplicata: `teste-ylada@` e `teste-ylada-2@`). Quem ainda tiver contas antigas `teste-interno-NN@` pode rodar o script uma vez: ele renomeia no Auth antes de criar/atualizar.
+
 **Senha padrão (todas as contas):** `TesteYlada2025!`
 
 **Telefone para preenchimento interno (todas as áreas):** use o mesmo número ao preencher perfil/onboarding em qualquer conta de teste — evita cadastrar números reais e serve para fluxos que pedem telefone/WhatsApp.
@@ -15,19 +17,19 @@ Use estes e-mails e senhas para testar a **parte interna** em **localhost**, sem
 
 | # | E-mail | Uso sugerido |
 |---|--------|----------------|
-| 1 | teste-interno-01@teste.ylada.com | Perfil ylada (matriz) — primeiro teste. *O que é “ylada”?* Ver **docs/O-QUE-E-A-AREA-YLADA.md** |
-| 2 | teste-interno-02@teste.ylada.com | Perfil ylada (reserva ou segundo cenário) |
-| 3 | teste-interno-03@teste.ylada.com | Perfil nutri |
-| 4 | teste-interno-04@teste.ylada.com | Perfil coach |
-| 5 | teste-interno-05@teste.ylada.com | Perfil seller |
-| 6 | teste-interno-06@teste.ylada.com | Perfil nutra |
-| 7 | teste-interno-07@teste.ylada.com | Perfil med |
-| 8 | teste-interno-08@teste.ylada.com | Perfil psi |
-| 9 | teste-interno-09@teste.ylada.com | Perfil odonto |
-| 10 | teste-interno-10@teste.ylada.com | Perfil fitness |
-| 11 | teste-interno-11@teste.ylada.com | Perfil estética |
-| 12 | teste-interno-12@teste.ylada.com | Perfil perfumaria |
-| 13 | teste-interno-13@teste.ylada.com | Perfil psicanalise (perfil empresarial / Noel preenchido) |
+| 1 | teste-ylada@teste.ylada.com | Perfil ylada (matriz) — primeiro teste. *O que é “ylada”?* Ver **docs/O-QUE-E-A-AREA-YLADA.md** |
+| 2 | teste-ylada-2@teste.ylada.com | Perfil ylada (reserva ou segundo cenário) |
+| 3 | teste-nutri@teste.ylada.com | Perfil nutri |
+| 4 | teste-coach@teste.ylada.com | Perfil coach |
+| 5 | teste-seller@teste.ylada.com | Perfil seller |
+| 6 | teste-nutra@teste.ylada.com | Perfil nutra |
+| 7 | teste-med@teste.ylada.com | Perfil med |
+| 8 | teste-psi@teste.ylada.com | Perfil psi |
+| 9 | teste-odonto@teste.ylada.com | Perfil odonto |
+| 10 | teste-fitness@teste.ylada.com | Perfil fitness |
+| 11 | teste-estetica@teste.ylada.com | Perfil estética |
+| 12 | teste-perfumaria@teste.ylada.com | Perfil perfumaria |
+| 13 | teste-psicanalise@teste.ylada.com | Perfil psicanalise (perfil empresarial / Noel preenchido) |
 
 ---
 
@@ -87,4 +89,4 @@ Se aparecer **"Falha no login (verifique e-mail e senha)"** ou **"Email ou senha
 - **URL de teste:** http://localhost:3000/pt/login  
 - **Senha (todas):** `TesteYlada2025!`  
 - **Telefone (preenchimento interno):** +55 19 99723-0912 — use em todas as contas; ao clicar no WhatsApp você vê a mensagem que chega no profissional.  
-- **E-mails:** teste-interno-01@teste.ylada.com … teste-interno-13@teste.ylada.com  
+- **E-mails:** teste-ylada@teste.ylada.com … teste-psicanalise@teste.ylada.com  

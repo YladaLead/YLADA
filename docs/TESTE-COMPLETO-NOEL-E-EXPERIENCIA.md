@@ -6,7 +6,7 @@ Objetivo: garantir que a experiência do usuário tenha o **Noel como guia**, qu
 
 ## 1. O que precisa estar pronto
 
-- **Contas e perfil:** `node scripts/criar-contas-teste-interno.js` — cria as 12 contas (telefone +55 19 99723-0912) e **preenche o perfil Noel (`ylada_noel_profile`) por área** com características comuns a cada profissão (ylada, nutri, coach, med, psi, odonto, fitness, seller, nutra, estética, perfumaria). Assim o board e o Noel já têm contexto ao fazer login.
+- **Contas e perfil:** `node scripts/criar-contas-teste-interno.js` — cria as 13 contas (telefone +55 19 99723-0912) e **preenche o perfil Noel (`ylada_noel_profile`) por área** com características comuns a cada profissão (ylada, nutri, coach, med, psi, psicanalise, odonto, fitness, seller, nutra, estética, perfumaria). Assim o board e o Noel já têm contexto ao fazer login.
 - **App:** `npm run dev` (anote a porta: 3000, 3004, etc.).
 - **Telefone em todas as contas:** +55 19 99723-0912 (para você ver no WhatsApp a mensagem que chega no profissional).
 
@@ -16,7 +16,7 @@ Objetivo: garantir que a experiência do usuário tenha o **Noel como guia**, qu
 
 - **Perfil Noel já preenchido:** ao rodar `node scripts/criar-contas-teste-interno.js`, cada conta ganha um registro em `ylada_noel_profile` com dados típicos da área (dor, fase, metas, área específica — ex.: estética com `area_estetica`/`estetica_tipo_atuacao`, nutri com `area_nutri`/`modalidade_atendimento`). O board e o Noel usam esse perfil.
 - **Onboarding (nome + telefone):** se após o login cair em **/pt/onboarding**, preencher **Nome** e **Telefone/WhatsApp** (+55 19 99723-0912) e clicar em **"Gerar meu Diagnóstico Estratégico"** (ou Continuar/Começar). Isso garante que a experiência de primeiro acesso fique completa.
-- Para testar por **área** (ex.: estética), use a conta dessa área: **teste-interno-11@teste.ylada.com** (estética). O perfil Noel dessa conta já vem com características de estética (facial, clínica com equipe, pele, skincare, etc.).
+- Para testar por **área** (ex.: estética), use a conta dessa área: **teste-estetica@teste.ylada.com** (estética). O perfil Noel dessa conta já vem com características de estética (facial, clínica com equipe, pele, skincare, etc.).
 
 ---
 
@@ -43,9 +43,9 @@ Para testar o comportamento do Noel em situações reais, fazer **pelo menos 5 a
 
 ## 4. Áreas e perfis a testar
 
-- **ylada (matriz):** teste-interno-01@teste.ylada.com — primeiro teste, board geral.
-- **estética:** teste-interno-11@teste.ylada.com — para ver board e Noel específicos de estética.
-- **perfumaria:** teste-interno-12@teste.ylada.com — para ver board e Noel de vendas em perfumaria (perfil olfativo, fragrâncias).
+- **ylada (matriz):** teste-ylada@teste.ylada.com — primeiro teste, board geral.
+- **estética:** teste-estetica@teste.ylada.com — para ver board e Noel específicos de estética.
+- **perfumaria:** teste-perfumaria@teste.ylada.com — para ver board e Noel de vendas em perfumaria (perfil olfativo, fragrâncias).
 - **nutri, coach, seller, etc.:** usar os outros e-mails da lista para conferir se o conteúdo muda por perfil.
 
 Em cada perfil: **onboarding concluído** → **board preenchido** → **Noel com 5–10 perguntas variadas** (incl. criar fluxo, estratégia, link para post).
@@ -56,7 +56,7 @@ Em cada perfil: **onboarding concluído** → **board preenchido** → **Noel co
 
 **Base recomendada:** testes da parte interna com **estética** como referência — ver **docs/CHECKLIST-TESTE-INTERNO-ESTETICA.md**.
 
-- [ ] Login com conta da área desejada (ex.: estética = teste-interno-11).
+- [ ] Login com conta da área desejada (ex.: estética = teste-estetica).
 - [ ] Se cair no onboarding: preencher nome e telefone (+55 19 99723-0912) e concluir.
 - [ ] Board/Home carregado e com conteúdo (não vazio).
 - [ ] Noel: 5–10 perguntas variadas (próximo passo, criar diagnóstico, estratégia, link para post, script WhatsApp, etc.).
@@ -90,7 +90,7 @@ Preciso que você execute o teste completo da experiência do usuário na plataf
 
 CONTEXTO
 - App: [URL, ex.: http://localhost:3004]
-- Login: teste-interno-01@teste.ylada.com (ou teste-interno-11 para estética) | Senha: TesteYlada2025!
+- Login: teste-ylada@teste.ylada.com (ou teste-estetica para estética) | Senha: TesteYlada2025!
 - Telefone para preencher onde pedir: +55 19 99723-0912
 
 PRIORIDADE 1 — Onboarding e board preenchido

@@ -9,16 +9,16 @@
  * Perfil completo (tipo + profissão) é obrigatório para Noel gerar link; o bloco 2 apenas valida (perfil pré-preenchido pelo script).
  * Contas com perfil pré-preenchido: node scripts/criar-contas-teste-interno.js
  *
- * Padrão: conta Estética (teste-interno-11). Para outra área use TESTE_EMAIL.
+ * Padrão: conta Estética (teste-estetica). Para outra área use TESTE_EMAIL.
  *
  * Uso:
  *   npm run agente:interno
  *   URL=http://localhost:3004 HEADLESS=false npm run agente:interno
  *   SKIP_NOEL=1 URL=... npm run agente:interno  — pula Noel; testa links, edições, biblioteca (Noel em agente dedicado)
- *   TESTE_TODAS_AREAS=1 URL=... npm run agente:interno  — roda as 12 áreas em sequência (sem Noel); relatório em docs/RELATORIO-TODAS-AREAS-INTERNO.md
- *   TESTE_EMAIL=teste-interno-03@teste.ylada.com npm run agente:interno
- *   Varredura COM Noel: contas 01 e 02 são neutras/matriz (não usar para Noel). Usar a partir da 03 (nutri):
- *     URL=http://localhost:3004 TESTE_EMAIL=teste-interno-03@teste.ylada.com npm run agente:interno  (sem SKIP_NOEL; depois expandir 04–12)
+ *   TESTE_TODAS_AREAS=1 URL=... npm run agente:interno  — roda as 13 contas em sequência (sem Noel); relatório em docs/RELATORIO-TODAS-AREAS-INTERNO.md
+ *   TESTE_EMAIL=teste-nutri@teste.ylada.com npm run agente:interno
+ *   Varredura COM Noel: teste-ylada / teste-ylada-2 são matriz (não usar para Noel). Usar a partir de teste-nutri:
+ *     URL=http://localhost:3004 TESTE_EMAIL=teste-nutri@teste.ylada.com npm run agente:interno
  *
  * Pré-requisitos:
  * - App rodando (npm run dev).
@@ -32,11 +32,11 @@ import * as path from 'path'
 const BASE_URL = process.env.URL || 'http://localhost:3000'
 const HEADLESS = process.env.HEADLESS !== 'false' && process.env.HEADLESS !== '0'
 const LOGIN_URL = `${BASE_URL}/pt/login`
-const EMAIL = process.env.TESTE_EMAIL || 'teste-interno-11@teste.ylada.com'
+const EMAIL = process.env.TESTE_EMAIL || 'teste-estetica@teste.ylada.com'
 const SENHA = process.env.TESTE_SENHA || 'TesteYlada2025!'
 /** Se true, pula blocos 3 e 3b (Noel); use para testar links, edições, biblioteca etc. sem Noel. Noel em agente dedicado. */
 const SKIP_NOEL = process.env.SKIP_NOEL === '1' || process.env.SKIP_NOEL === 'true'
-/** Se true, roda as 12 áreas em sequência (entra/sai de cada conta) e gera relatório consolidado. Implica SKIP_NOEL. */
+/** Se true, roda as 13 contas em sequência (entra/sai de cada conta) e gera relatório consolidado. Implica SKIP_NOEL. */
 const TODAS_AREAS = process.env.TESTE_TODAS_AREAS === '1' || process.env.TESTE_TODAS_AREAS === 'true'
 
 /** Blocos Noel: número de perguntas (≥3 para OK); timeout para esperar resposta do assistente (evita "context destroyed" e timeouts). */
@@ -46,23 +46,31 @@ const NOEL_ESPERA_APOS_RESPOSTA_MS = 2500
 const NOEL_3B_ESPERA_RESPOSTA_MS = 30000
 
 const CONTAS_TODAS_AREAS: { email: string; area: string }[] = [
-  { email: 'teste-interno-01@teste.ylada.com', area: 'ylada' },
-  { email: 'teste-interno-02@teste.ylada.com', area: 'ylada' },
-  { email: 'teste-interno-03@teste.ylada.com', area: 'nutri' },
-  { email: 'teste-interno-04@teste.ylada.com', area: 'coach' },
-  { email: 'teste-interno-05@teste.ylada.com', area: 'seller' },
-  { email: 'teste-interno-06@teste.ylada.com', area: 'nutra' },
-  { email: 'teste-interno-07@teste.ylada.com', area: 'med' },
-  { email: 'teste-interno-08@teste.ylada.com', area: 'psi' },
-  { email: 'teste-interno-09@teste.ylada.com', area: 'odonto' },
-  { email: 'teste-interno-10@teste.ylada.com', area: 'fitness' },
-  { email: 'teste-interno-11@teste.ylada.com', area: 'estética' },
-  { email: 'teste-interno-12@teste.ylada.com', area: 'perfumaria' },
+  { email: 'teste-ylada@teste.ylada.com', area: 'ylada' },
+  { email: 'teste-ylada-2@teste.ylada.com', area: 'ylada' },
+  { email: 'teste-nutri@teste.ylada.com', area: 'nutri' },
+  { email: 'teste-coach@teste.ylada.com', area: 'coach' },
+  { email: 'teste-seller@teste.ylada.com', area: 'seller' },
+  { email: 'teste-nutra@teste.ylada.com', area: 'nutra' },
+  { email: 'teste-med@teste.ylada.com', area: 'med' },
+  { email: 'teste-psi@teste.ylada.com', area: 'psi' },
+  { email: 'teste-odonto@teste.ylada.com', area: 'odonto' },
+  { email: 'teste-fitness@teste.ylada.com', area: 'fitness' },
+  { email: 'teste-estetica@teste.ylada.com', area: 'estética' },
+  { email: 'teste-perfumaria@teste.ylada.com', area: 'perfumaria' },
+  { email: 'teste-psicanalise@teste.ylada.com', area: 'psicanalise' },
 ]
 
 /** Sessão atual (uma conta por vez); usado quando TODAS_AREAS para trocar de conta no loop. */
 let currentEmail = EMAIL
-let currentAreaLabel = EMAIL.includes('teste-interno-11') ? 'estética' : EMAIL.includes('teste-interno-01') ? 'ylada (matriz)' : 'teste'
+/** Rótulo exibido no relatório (evita confundir teste-ylada-2 com substring de outro local-part). */
+function areaLabelFromTestEmail (email: string): string {
+  const local = (email.split('@')[0] || '').toLowerCase()
+  if (local === 'teste-estetica') return 'estética'
+  if (local === 'teste-ylada' || local === 'teste-ylada-2') return 'ylada (matriz)'
+  return 'teste'
+}
+let currentAreaLabel = areaLabelFromTestEmail(EMAIL)
 
 const CHROME_MAC = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
 const useChromeSistema = process.platform === 'darwin' && fs.existsSync(CHROME_MAC)
@@ -241,7 +249,7 @@ async function main() {
   const contasToRun = TODAS_AREAS ? CONTAS_TODAS_AREAS : [{ email: EMAIL, area: currentAreaLabel }]
   if (!TODAS_AREAS) {
     currentEmail = EMAIL
-    currentAreaLabel = EMAIL.includes('teste-interno-11') ? 'estética' : EMAIL.includes('teste-interno-01') ? 'ylada (matriz)' : 'teste'
+    currentAreaLabel = areaLabelFromTestEmail(EMAIL)
   }
   const allRuns: { email: string; area: string; resultados: BlocoResult[] }[] = []
 

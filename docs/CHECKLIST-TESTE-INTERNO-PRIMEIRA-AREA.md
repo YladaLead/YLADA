@@ -13,7 +13,7 @@ Use este checklist para rodar o **teste completo da parte interna** na **primeir
 **Opção 2 — Manual:**
 
 - **URL de login:** http://localhost:3002/pt/login *(se o app estiver em outra porta, use 3000 ou 3001)*
-- **E-mail:** teste-interno-01@teste.ylada.com
+- **E-mail:** teste-ylada@teste.ylada.com
 - **Senha:** TesteYlada2025!
 - **Telefone (se pedir no perfil/onboarding):** +55 19 99723-0912
 

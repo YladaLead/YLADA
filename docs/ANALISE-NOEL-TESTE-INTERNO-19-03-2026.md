@@ -67,6 +67,6 @@
 
 ## Observação
 
-O teste foi feito com a conta `teste-interno-11@teste.ylada.com`. Se essa conta tem poucos ou nenhum link ativo, a pergunta 4 pode ter falhado por falta de dados no contexto. Mesmo assim, o Noel deve: (a) se houver links, entregar o primeiro; (b) se não houver, dizer de forma clara que ainda não há diagnóstico criado e orientar a criar um (com CTA para “criar diagnóstico”/Links).
+O teste foi feito com a conta `teste-estetica@teste.ylada.com`. Se essa conta tem poucos ou nenhum link ativo, a pergunta 4 pode ter falhado por falta de dados no contexto. Mesmo assim, o Noel deve: (a) se houver links, entregar o primeiro; (b) se não houver, dizer de forma clara que ainda não há diagnóstico criado e orientar a criar um (com CTA para “criar diagnóstico”/Links).
 
 Quando quiser, podemos aplicar essas regras direto no prompt do Noel (Ylada) e no `formatLinksAtivosParaNoel`.

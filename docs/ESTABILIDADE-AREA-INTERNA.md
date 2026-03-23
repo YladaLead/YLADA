@@ -58,7 +58,7 @@
 **O que não pode falhar no dia a dia:** login, perfil completo, Noel respondendo, criação de diagnóstico + link que abre, leads atualizando, sidebar e telas abrindo, e tudo que for “salvar” de fato persistir.  
 Se isso estiver entregue e estável, os erros no uso diário caem bastante.
 
-**Perfil completo:** O script `scripts/criar-contas-teste-interno.js` preenche `ylada_noel_profile` (tipo + profissão e demais campos) para todas as contas de teste. Valores exatos da **estética (conta 11)** estão em `docs/PERFIL-ESTETICA-PREENCHIMENTO-TESTE.md`. Rodar o script antes dos testes garante que o Noel possa gerar link e que o agente valide o fluxo completo.
+**Perfil completo:** O script `scripts/criar-contas-teste-interno.js` preenche `ylada_noel_profile` (tipo + profissão e demais campos) para todas as contas de teste. Valores exatos da **estética** (`teste-estetica@teste.ylada.com`) estão em `docs/PERFIL-ESTETICA-PREENCHIMENTO-TESTE.md`. Rodar o script antes dos testes garante que o Noel possa gerar link e que o agente valide o fluxo completo.
 
 ---
 

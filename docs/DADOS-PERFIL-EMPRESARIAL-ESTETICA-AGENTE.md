@@ -2,7 +2,7 @@
 
 Este documento define **um perfil empresarial completo e padrão** para o segmento **estética**, baseado no cenário mais comum (esteticista autônoma, facial, querendo preencher agenda e divulgar). O agente deve usar estes dados para **configurar qualquer conta de teste estética** dessa forma e ter um perfil 100% preenchido para o Noel funcionar (gerar link, recomendações personalizadas).
 
-**Conta de teste sugerida:** `teste-interno-11@teste.ylada.com` (perfil estética).  
+**Conta de teste sugerida:** `teste-estetica@teste.ylada.com` (perfil estética).  
 **Telefone padrão (credenciais):** `5519997230912` (ver `docs/TESTE-CREDENCIAIS-LOCALHOST.md`).
 
 ---
@@ -49,7 +49,7 @@ O agente deve executar na ordem abaixo. Em cada passo: preencher o valor indicad
 
 1. **Login**  
    - URL: `/pt/login`.  
-   - E-mail: `teste-interno-11@teste.ylada.com` (ou a conta estética que estiver testando).  
+   - E-mail: `teste-estetica@teste.ylada.com` (ou a conta estética que estiver testando).  
    - Senha: `TesteYlada2025!`.
 
 2. **Onboarding (somente se a URL for /pt/onboarding)**  
@@ -242,7 +242,7 @@ Se a interface do Perfil empresarial não tiver nome/telefone, garantir que o on
 
 ## Ordem de preenchimento pelo agente
 
-1. **Login** com `teste-interno-11@teste.ylada.com` e senha `TesteYlada2025!`.
+1. **Login** com `teste-estetica@teste.ylada.com` e senha `TesteYlada2025!`.
 2. Se redirecionar para **/pt/onboarding**: preencher **Nome** = `Teste Interno 11`, **Telefone** = `5519997230912` e avançar.
 3. Ir em **Perfil** (sidebar) → **Perfil empresarial** (ou acessar `/pt/perfil-empresarial`).
 4. **Tela inicial:** selecionar tipo **liberal** e profissão **Estética**; avançar.

@@ -9,16 +9,16 @@
 
 | Área | Conta | Status Geral | Noel | Links | Observações |
 |------|-------|--------------|------|-------|-------------|
-| **Estética** | teste-interno-11 | ✅ OK | ✅ | ✅ | Testada anteriormente |
-| **Nutrição** | teste-interno-03 | ✅ OK | ✅ | ✅ | Link gerado: `l/8j9ew3n` |
-| **Medicina** | teste-interno-07 | ✅ OK | ✅ | ✅ | Link gerado: `l/qwe4q5g` |
-| **Psicologia** | teste-interno-08 | ✅ OK | ✅ | ✅ | Link gerado: `l/qgfmri3w` |
-| **Odontologia** | teste-interno-09 | ✅ OK* | ✅ | ✅ | Link gerado: `l/2aayueu` - Erro menor no Método YLADA (timing) |
-| **Fitness** | teste-interno-10 | ✅ OK | ✅ | ✅ | Link gerado: `l/axl3czrt` |
-| **Coach** | teste-interno-04 | ✅ OK* | ✅ | ✅ | Link gerado: `l/xtnatbj4` - Erro menor no Método YLADA (timing) |
-| **Seller** | teste-interno-05 | ✅ OK | ✅ | ✅ | Link gerado: `l/bca5fc` |
-| **Nutra** | teste-interno-06 | ✅ OK* | ✅ | ✅ | Link gerado: `l/knchb8f4` - Erro menor em Configurações (timing) |
-| **Perfumaria** | teste-interno-12 | ✅ OK | ✅ | ✅ | Link gerado: `l/ff4dnsm` - Corrigido após atualizar perfil |
+| **Estética** | teste-estetica | ✅ OK | ✅ | ✅ | Testada anteriormente |
+| **Nutrição** | teste-nutri | ✅ OK | ✅ | ✅ | Link gerado: `l/8j9ew3n` |
+| **Medicina** | teste-med | ✅ OK | ✅ | ✅ | Link gerado: `l/qwe4q5g` |
+| **Psicologia** | teste-psi | ✅ OK | ✅ | ✅ | Link gerado: `l/qgfmri3w` |
+| **Odontologia** | teste-odonto | ✅ OK* | ✅ | ✅ | Link gerado: `l/2aayueu` - Erro menor no Método YLADA (timing) |
+| **Fitness** | teste-fitness | ✅ OK | ✅ | ✅ | Link gerado: `l/axl3czrt` |
+| **Coach** | teste-coach | ✅ OK* | ✅ | ✅ | Link gerado: `l/xtnatbj4` - Erro menor no Método YLADA (timing) |
+| **Seller** | teste-seller | ✅ OK | ✅ | ✅ | Link gerado: `l/bca5fc` |
+| **Nutra** | teste-nutra | ✅ OK* | ✅ | ✅ | Link gerado: `l/knchb8f4` - Erro menor em Configurações (timing) |
+| **Perfumaria** | teste-perfumaria | ✅ OK | ✅ | ✅ | Link gerado: `l/ff4dnsm` - Corrigido após atualizar perfil |
 
 **Legenda:**
 - ✅ OK = Funcionando perfeitamente
@@ -29,69 +29,69 @@
 
 ## Detalhamento por Área
 
-### ✅ Estética (teste-interno-11)
+### ✅ Estética (teste-estetica)
 - **Status:** OK para MVP
 - **Noel:** Funcionando, links gerados
 - **Navegação:** Todas as páginas OK
 - **Observações:** Testada anteriormente, confirmada funcionando
 
-### ✅ Nutrição (teste-interno-03)
+### ✅ Nutrição (teste-nutri)
 - **Status:** OK para MVP
 - **Noel:** 5 perguntas enviadas, respostas recebidas
 - **Link gerado:** `http://localhost:3000/l/8j9ew3n`
 - **Biblioteca:** Filtra corretamente por segmento (nutrition)
 - **Observações:** Erro 403 ao gerar segundo link (limite freemium - esperado)
 
-### ✅ Medicina (teste-interno-07)
+### ✅ Medicina (teste-med)
 - **Status:** OK para MVP
 - **Noel:** 5 perguntas enviadas, respostas recebidas
 - **Link gerado:** `http://localhost:3000/l/qwe4q5g`
 - **Navegação:** Todas as páginas OK
 - **Observações:** Funcionando perfeitamente
 
-### ✅ Psicologia (teste-interno-08)
+### ✅ Psicologia (teste-psi)
 - **Status:** OK para MVP
 - **Noel:** 5 perguntas enviadas, respostas recebidas
 - **Link gerado:** `http://localhost:3000/l/qgfmri3w`
 - **Navegação:** Todas as páginas OK
 - **Observações:** Funcionando perfeitamente
 
-### ✅ Odontologia (teste-interno-09)
+### ✅ Odontologia (teste-odonto)
 - **Status:** OK para MVP (com ressalva)
 - **Noel:** 5 perguntas enviadas, respostas recebidas
 - **Link gerado:** `http://localhost:3000/l/2aayueu`
 - **Erro:** Método YLADA - "Execution context was destroyed" (timing do agente)
 - **Observações:** Erro é do agente, não do sistema. Funcionalidade OK.
 
-### ✅ Fitness (teste-interno-10)
+### ✅ Fitness (teste-fitness)
 - **Status:** OK para MVP
 - **Noel:** 5 perguntas enviadas, respostas recebidas
 - **Link gerado:** `http://localhost:3000/l/axl3czrt`
 - **Navegação:** Todas as páginas OK
 - **Observações:** Funcionando perfeitamente
 
-### ✅ Coach (teste-interno-04)
+### ✅ Coach (teste-coach)
 - **Status:** OK para MVP (com ressalva)
 - **Noel:** 5 perguntas enviadas, respostas recebidas
 - **Link gerado:** `http://localhost:3000/l/xtnatbj4`
 - **Erro:** Método YLADA - "Execution context was destroyed" (timing do agente)
 - **Observações:** Erro é do agente, não do sistema. Funcionalidade OK.
 
-### ✅ Seller (teste-interno-05)
+### ✅ Seller (teste-seller)
 - **Status:** OK para MVP
 - **Noel:** 5 perguntas enviadas, respostas recebidas
 - **Link gerado:** `http://localhost:3000/l/bca5fc`
 - **Navegação:** Todas as páginas OK
 - **Observações:** Funcionando perfeitamente
 
-### ✅ Nutra (teste-interno-06)
+### ✅ Nutra (teste-nutra)
 - **Status:** OK para MVP (com ressalva)
 - **Noel:** 5 perguntas enviadas, respostas recebidas
 - **Link gerado:** `http://localhost:3000/l/knchb8f4`
 - **Erro:** Configurações - "Execution context was destroyed" (timing do agente)
 - **Observações:** Erro é do agente, não do sistema. Funcionalidade OK.
 
-### ✅ Perfumaria (teste-interno-12)
+### ✅ Perfumaria (teste-perfumaria)
 - **Status:** OK para MVP (corrigido)
 - **Noel:** 5 perguntas enviadas, respostas recebidas
 - **Link gerado:** `http://localhost:3000/l/ff4dnsm`

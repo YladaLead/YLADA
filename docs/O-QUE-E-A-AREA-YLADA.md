@@ -47,4 +47,4 @@ A **área ylada** é então o **painel padrão** quando não há uma área espec
 | perfumaria | Perfumaria | /pt/perfumaria |
 | nutri, nutra, psi, odonto, fitness, seller | Demais áreas | /pt/{área} |
 
-**Em testes:** a conta **teste-interno-01@teste.ylada.com** tem perfil **ylada** = entra na **matriz**. A conta **teste-interno-11@teste.ylada.com** tem perfil **estética** = área Estética.
+**Em testes:** a conta **teste-ylada@teste.ylada.com** tem perfil **ylada** = entra na **matriz**. A conta **teste-estetica@teste.ylada.com** tem perfil **estética** = área Estética.

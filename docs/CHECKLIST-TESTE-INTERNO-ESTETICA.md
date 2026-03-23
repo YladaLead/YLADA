@@ -9,7 +9,7 @@ Use este checklist para rodar o **teste completo da parte interna** com o perfil
 ## Antes de começar
 
 **Conta estética (perfil já preenchido pelo script):**
-- **E-mail:** teste-interno-11@teste.ylada.com
+- **E-mail:** teste-estetica@teste.ylada.com
 - **Senha:** TesteYlada2025!
 - **Telefone (perfil/onboarding):** +55 19 99723-0912
 
@@ -20,7 +20,7 @@ node scripts/criar-contas-teste-interno.js
 
 **Agente (automático):** com o app rodando:
 ```bash
-URL=http://localhost:3004 HEADLESS=false TESTE_EMAIL=teste-interno-11@teste.ylada.com TESTE_SENHA=TesteYlada2025! npm run agente:interno
+URL=http://localhost:3004 HEADLESS=false TESTE_EMAIL=teste-estetica@teste.ylada.com TESTE_SENHA=TesteYlada2025! npm run agente:interno
 ```
 *(Troque 3004 pela porta do seu `npm run dev`.)*
 
@@ -138,11 +138,11 @@ Depois de validar estética, use o **mesmo checklist** trocando apenas a conta:
 
 | Área      | E-mail |
 |-----------|--------|
-| ylada     | teste-interno-01@teste.ylada.com |
-| nutri     | teste-interno-03@teste.ylada.com |
-| coach     | teste-interno-04@teste.ylada.com |
-| estética  | teste-interno-11@teste.ylada.com **(base)** |
-| perfumaria | teste-interno-12@teste.ylada.com |
+| ylada     | teste-ylada@teste.ylada.com |
+| nutri     | teste-nutri@teste.ylada.com |
+| coach     | teste-coach@teste.ylada.com |
+| estética  | teste-estetica@teste.ylada.com **(base)** |
+| perfumaria | teste-perfumaria@teste.ylada.com |
 | med, psi, odonto, fitness, seller, nutra | ver **docs/TESTE-CREDENCIAIS-LOCALHOST.md** |
 
 ---

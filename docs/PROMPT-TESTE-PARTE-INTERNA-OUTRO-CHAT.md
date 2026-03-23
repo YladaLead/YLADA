@@ -16,18 +16,19 @@ Copie o bloco abaixo e cole em outro chat. Quem for executar (ou orientar) o tes
 
 | # | E-mail | Perfil |
 |---|--------|--------|
-| 1 | teste-interno-01@teste.ylada.com | ylada (matriz) |
-| 2 | teste-interno-02@teste.ylada.com | ylada |
-| 3 | teste-interno-03@teste.ylada.com | nutri |
-| 4 | teste-interno-04@teste.ylada.com | coach |
-| 5 | teste-interno-05@teste.ylada.com | seller |
-| 6 | teste-interno-06@teste.ylada.com | nutra |
-| 7 | teste-interno-07@teste.ylada.com | med |
-| 8 | teste-interno-08@teste.ylada.com | psi |
-| 9 | teste-interno-09@teste.ylada.com | odonto |
-| 10 | teste-interno-10@teste.ylada.com | fitness |
-| 11 | teste-interno-11@teste.ylada.com | estética |
-| 12 | teste-interno-12@teste.ylada.com | perfumaria |
+| 1 | teste-ylada@teste.ylada.com | ylada (matriz) |
+| 2 | teste-ylada-2@teste.ylada.com | ylada |
+| 3 | teste-nutri@teste.ylada.com | nutri |
+| 4 | teste-coach@teste.ylada.com | coach |
+| 5 | teste-seller@teste.ylada.com | seller |
+| 6 | teste-nutra@teste.ylada.com | nutra |
+| 7 | teste-med@teste.ylada.com | med |
+| 8 | teste-psi@teste.ylada.com | psi |
+| 9 | teste-odonto@teste.ylada.com | odonto |
+| 10 | teste-fitness@teste.ylada.com | fitness |
+| 11 | teste-estetica@teste.ylada.com | estética |
+| 12 | teste-perfumaria@teste.ylada.com | perfumaria |
+| 13 | teste-psicanalise@teste.ylada.com | psicanalise |
 
 ---
 
@@ -46,18 +47,19 @@ CREDENCIAIS (use para login na área interna)
 - Senha (todas as contas): TesteYlada2025!
 - Telefone para perfil/onboarding (use em todas as contas): +55 19 99723-0912 ou 5519997230912
 - E-mails por perfil:
-  1. teste-interno-01@teste.ylada.com — ylada (matriz)
-  2. teste-interno-02@teste.ylada.com — ylada
-  3. teste-interno-03@teste.ylada.com — nutri
-  4. teste-interno-04@teste.ylada.com — coach
-  5. teste-interno-05@teste.ylada.com — seller
-  6. teste-interno-06@teste.ylada.com — nutra
-  7. teste-interno-07@teste.ylada.com — med
-  8. teste-interno-08@teste.ylada.com — psi
-  9. teste-interno-09@teste.ylada.com — odonto
-  10. teste-interno-10@teste.ylada.com — fitness
-  11. teste-interno-11@teste.ylada.com — estética
-  12. teste-interno-12@teste.ylada.com — perfumaria
+  1. teste-ylada@teste.ylada.com — ylada (matriz)
+  2. teste-ylada-2@teste.ylada.com — ylada
+  3. teste-nutri@teste.ylada.com — nutri
+  4. teste-coach@teste.ylada.com — coach
+  5. teste-seller@teste.ylada.com — seller
+  6. teste-nutra@teste.ylada.com — nutra
+  7. teste-med@teste.ylada.com — med
+  8. teste-psi@teste.ylada.com — psi
+  9. teste-odonto@teste.ylada.com — odonto
+  10. teste-fitness@teste.ylada.com — fitness
+  11. teste-estetica@teste.ylada.com — estética
+  12. teste-perfumaria@teste.ylada.com — perfumaria
+  13. teste-psicanalise@teste.ylada.com — psicanalise
 
 PERFIL DO USUÁRIO E NOEL (referência: docs/AGENTE-TESTE-PERFIL-E-NOEL.md)
 1) Onde está o perfil

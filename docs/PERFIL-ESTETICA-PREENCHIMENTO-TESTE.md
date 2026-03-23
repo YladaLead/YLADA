@@ -85,7 +85,7 @@ Garantir **nome** e **whatsapp** em `area_specific` (ou no onboarding/perfil), c
 
 ## 6. Ordem de preenchimento (passo a passo)
 
-1. **Login** com teste-interno-11@teste.ylada.com e senha.
+1. **Login** com teste-estetica@teste.ylada.com e senha.
 2. **Onboarding** (se existir): Nome = Teste Interno 11, Telefone = 5519997230912 → Salvar.
 3. **Perfil empresarial:** Tipo = Liberal → Profissão = Estética.
 4. **Wizard:** Etapa 1 (Contexto) → Etapa 2 (Especialidade) → Etapa 3 (Diagnóstico) → Etapa 4 (Metas e modelo) → Etapa 5 (Canais e rotina) → Etapa 6 (Observações), com os valores da tabela acima.
@@ -94,6 +94,6 @@ Garantir **nome** e **whatsapp** em `area_specific` (ou no onboarding/perfil), c
 
 ---
 
-**Uso pelo script:** `scripts/criar-contas-teste-interno.js` usa o objeto `PERFIL_NOEL_POR_AREA.estetica` para preencher `ylada_noel_profile` da conta 11 com esses valores. Rodar `node scripts/criar-contas-teste-interno.js` antes do agente deixa o perfil completo no backend.
+**Uso pelo script:** `scripts/criar-contas-teste-interno.js` usa o objeto `PERFIL_NOEL_POR_AREA.estetica` para preencher `ylada_noel_profile` de `teste-estetica@teste.ylada.com` com esses valores. Rodar `node scripts/criar-contas-teste-interno.js` antes do agente deixa o perfil completo no backend.
 
 **Uso pelo agente:** Para o agente “vivenciar” a experiência e preencher a UI etapa por etapa, usar esta tabela e a ordem acima em um fluxo de preenchimento do perfil (onboarding → perfil → wizard → Salvar).

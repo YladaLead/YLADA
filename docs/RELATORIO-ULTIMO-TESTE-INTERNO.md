@@ -2,7 +2,7 @@
 
 **Data:** 20/03/2026, 14:56:31  
 **URL:** http://localhost:3000  
-**Conta:** teste-interno-12@teste.ylada.com (área teste)
+**Conta:** teste-perfumaria@teste.ylada.com (área teste)
 
 ## Resultados
 

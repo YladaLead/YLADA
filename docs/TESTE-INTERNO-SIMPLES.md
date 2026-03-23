@@ -13,7 +13,7 @@ Você tem **dois** abertos (3000 e 3004). Use **só um** para não confundir.
 
 ## Login automático (agente)
 
-**Sim.** O agente **faz o login sozinho** com a conta **Estética** (teste-interno-11@teste.ylada.com). Você não precisa digitar nada.
+**Sim.** O agente **faz o login sozinho** com a conta **Estética** (teste-estetica@teste.ylada.com). Você não precisa digitar nada.
 
 Ele **abre uma janela nova** do Chrome, entra na página de login, preenche e-mail e senha e clica em Entrar. Tudo automático.
 
@@ -27,7 +27,7 @@ Ele **abre uma janela nova** do Chrome, entra na página de login, preenche e-ma
 URL=http://localhost:3004 HEADLESS=false npm run agente:interno
 ```
 
-(Para testar outra área: `TESTE_EMAIL=teste-interno-03@teste.ylada.com npm run agente:interno`.)
+(Para testar outra área: `TESTE_EMAIL=teste-nutri@teste.ylada.com npm run agente:interno`.)
 
 4. Vai abrir **uma janela nova** do Chrome (com um aviso “controlado por software…” — é normal). Nessa janela o agente faz login e percorre tudo. Você só olha.
 5. No **terminal** aparece o resultado no final (tabela com ✅ / ⚠️ / ❌).

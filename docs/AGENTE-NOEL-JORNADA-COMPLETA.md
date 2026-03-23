@@ -22,7 +22,7 @@
 
 ## 2. Pré-requisitos do agente
 
-- **Conta:** Uma conta de teste com **perfil completo** (ex.: `node scripts/criar-contas-teste-interno.js` rodado; conta 11 = estética).
+- **Conta:** Uma conta de teste com **perfil completo** (ex.: `node scripts/criar-contas-teste-interno.js` rodado; `teste-estetica@teste.ylada.com` = estética).
 - **Área:** Definir área (ex.: estética) para validar personalização e paths (`/pt/estetica/...`).
 - **Ambiente:** App rodando (ex.: localhost); agente consegue abrir home, enviar mensagens ao Noel e (se fizer UI) clicar em botões.
 

@@ -290,20 +290,63 @@ const PERFIL_NOEL_POR_AREA = {
   }
 }
 
+/**
+ * E-mails antigos (teste-interno-NN) → novos (teste-{segmento}).
+ * Rodamos no início do main para bases que ainda têm o padrão numerado.
+ */
+const EMAIL_LEGACY_PARA_NOVO = [
+  ['teste-interno-13@teste.ylada.com', 'teste-psicanalise@teste.ylada.com'],
+  ['teste-interno-12@teste.ylada.com', 'teste-perfumaria@teste.ylada.com'],
+  ['teste-interno-11@teste.ylada.com', 'teste-estetica@teste.ylada.com'],
+  ['teste-interno-10@teste.ylada.com', 'teste-fitness@teste.ylada.com'],
+  ['teste-interno-09@teste.ylada.com', 'teste-odonto@teste.ylada.com'],
+  ['teste-interno-08@teste.ylada.com', 'teste-psi@teste.ylada.com'],
+  ['teste-interno-07@teste.ylada.com', 'teste-med@teste.ylada.com'],
+  ['teste-interno-06@teste.ylada.com', 'teste-nutra@teste.ylada.com'],
+  ['teste-interno-05@teste.ylada.com', 'teste-seller@teste.ylada.com'],
+  ['teste-interno-04@teste.ylada.com', 'teste-coach@teste.ylada.com'],
+  ['teste-interno-03@teste.ylada.com', 'teste-nutri@teste.ylada.com'],
+  ['teste-interno-02@teste.ylada.com', 'teste-ylada-2@teste.ylada.com'],
+  ['teste-interno-01@teste.ylada.com', 'teste-ylada@teste.ylada.com']
+]
+
+async function renomearEmailsLegados () {
+  const { data, error } = await supabase.auth.admin.listUsers()
+  if (error || !data?.users?.length) return
+  const users = data.users
+  for (const [de, para] of EMAIL_LEGACY_PARA_NOVO) {
+    const deL = de.toLowerCase()
+    const paraL = para.toLowerCase()
+    if (users.some((u) => u.email?.toLowerCase() === paraL)) continue
+    const u = users.find((x) => x.email?.toLowerCase() === deL)
+    if (!u) continue
+    const { error: upErr } = await supabase.auth.admin.updateUserById(u.id, {
+      email: paraL
+    })
+    if (upErr) {
+      console.warn(`   ⚠️ Renomear ${de} → ${para}:`, upErr.message)
+      continue
+    }
+    await supabase.from('user_profiles').update({ email: paraL }).eq('user_id', u.id)
+    u.email = paraL
+    console.log(`   📧 Legado: ${de} → ${para}`)
+  }
+}
+
 const CONTAS = [
-  { email: 'teste-interno-01@teste.ylada.com', nome: 'Teste Interno 01', perfil: 'ylada' },
-  { email: 'teste-interno-02@teste.ylada.com', nome: 'Teste Interno 02', perfil: 'ylada' },
-  { email: 'teste-interno-03@teste.ylada.com', nome: 'Marina Silva', perfil: 'nutri' },
-  { email: 'teste-interno-04@teste.ylada.com', nome: 'Ricardo Costa', perfil: 'coach' },
-  { email: 'teste-interno-05@teste.ylada.com', nome: 'Fernanda Lima', perfil: 'seller' },
-  { email: 'teste-interno-06@teste.ylada.com', nome: 'Bruno Oliveira', perfil: 'nutra' },
-  { email: 'teste-interno-07@teste.ylada.com', nome: 'Dra. Camila Rocha', perfil: 'med' },
-  { email: 'teste-interno-08@teste.ylada.com', nome: 'Patrícia Alves', perfil: 'psi' },
-  { email: 'teste-interno-09@teste.ylada.com', nome: 'Dr. André Souza', perfil: 'odonto' },
-  { email: 'teste-interno-10@teste.ylada.com', nome: 'Lucas Ferreira', perfil: 'fitness' },
-  { email: 'teste-interno-11@teste.ylada.com', nome: 'Juliana Martins', perfil: 'estetica' },
-  { email: 'teste-interno-12@teste.ylada.com', nome: 'Amanda Ribeiro', perfil: 'perfumaria' },
-  { email: 'teste-interno-13@teste.ylada.com', nome: 'Dra. Helena Vasconcelos', perfil: 'psicanalise' }
+  { email: 'teste-ylada@teste.ylada.com', nome: 'Teste Interno 01', perfil: 'ylada' },
+  { email: 'teste-ylada-2@teste.ylada.com', nome: 'Teste Interno 02', perfil: 'ylada' },
+  { email: 'teste-nutri@teste.ylada.com', nome: 'Marina Silva', perfil: 'nutri' },
+  { email: 'teste-coach@teste.ylada.com', nome: 'Ricardo Costa', perfil: 'coach' },
+  { email: 'teste-seller@teste.ylada.com', nome: 'Fernanda Lima', perfil: 'seller' },
+  { email: 'teste-nutra@teste.ylada.com', nome: 'Bruno Oliveira', perfil: 'nutra' },
+  { email: 'teste-med@teste.ylada.com', nome: 'Dra. Camila Rocha', perfil: 'med' },
+  { email: 'teste-psi@teste.ylada.com', nome: 'Patrícia Alves', perfil: 'psi' },
+  { email: 'teste-odonto@teste.ylada.com', nome: 'Dr. André Souza', perfil: 'odonto' },
+  { email: 'teste-fitness@teste.ylada.com', nome: 'Lucas Ferreira', perfil: 'fitness' },
+  { email: 'teste-estetica@teste.ylada.com', nome: 'Juliana Martins', perfil: 'estetica' },
+  { email: 'teste-perfumaria@teste.ylada.com', nome: 'Amanda Ribeiro', perfil: 'perfumaria' },
+  { email: 'teste-psicanalise@teste.ylada.com', nome: 'Dra. Helena Vasconcelos', perfil: 'psicanalise' }
 ]
 
 function slug (email) {
@@ -420,7 +463,9 @@ async function criarOuAtualizarPerfilNoel (userId, perfil, nome) {
 async function main () {
   console.log('\n🔐 Criando/atualizando contas de teste da parte interna\n')
   console.log('   Senha (todas):', SENHA)
-  console.log('')
+  console.log('   Padrão de e-mail: teste-{segmento}@teste.ylada.com\n')
+
+  await renomearEmailsLegados()
 
   let ok = 0
   let noelOk = 0

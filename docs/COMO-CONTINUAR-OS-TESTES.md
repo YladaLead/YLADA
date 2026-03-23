@@ -7,9 +7,9 @@
 | O quê | Onde |
 |-------|------|
 | **App** | Abra no navegador a URL que apareceu no terminal ao rodar `npm run dev` (ex.: **http://localhost:3004** — a porta pode ser 3000, 3003, 3004, etc.). |
-| **Login** | **http://localhost:PORTA/pt/login** — E-mail: `teste-interno-01@teste.ylada.com` | Senha: `TesteYlada2025!` |
+| **Login** | **http://localhost:PORTA/pt/login** — E-mail: `teste-ylada@teste.ylada.com` | Senha: `TesteYlada2025!` |
 | **Verificação manual** | Depois de logar, siga **docs/CHECKLIST-TESTE-INTERNO-ESTETICA.md** (estética como base) ou **docs/CHECKLIST-TESTE-INTERNO-PRIMEIRA-AREA.md** (ylada matriz) e vá marcando ✅/⚠️/❌ em cada bloco. |
-| **Verificação pelo agente** | Em outro terminal: `URL=http://localhost:PORTA HEADLESS=false npm run agente:interno` (troque PORTA pela porta do app). O agente usa por padrão a **conta Estética** (teste-interno-11). O **resultado** aparece **no final do terminal** e em **docs/RELATORIO-ULTIMO-TESTE-INTERNO.md**. |
+| **Verificação pelo agente** | Em outro terminal: `URL=http://localhost:PORTA HEADLESS=false npm run agente:interno` (troque PORTA pela porta do app). O agente usa por padrão a **conta Estética** (teste-estetica). O **resultado** aparece **no final do terminal** e em **docs/RELATORIO-ULTIMO-TESTE-INTERNO.md**. |
 
 **Contas já criadas:** as 12 contas de teste foram criadas/atualizadas. Basta o app estar rodando e usar o login acima.
 
@@ -55,7 +55,7 @@ O agente abre o navegador, faz login e percorre Board → Perfil → Noel → Co
 
 **Opção B — Manual**  
 Abra no navegador: `http://localhost:3000/pt/login` (ou a porta que apareceu).  
-Login: `teste-interno-01@teste.ylada.com` | Senha: `TesteYlada2025!`  
+Login: `teste-ylada@teste.ylada.com` | Senha: `TesteYlada2025!`  
 Siga o **docs/CHECKLIST-TESTE-INTERNO-PRIMEIRA-AREA.md** ou **docs/PASSO-A-PASSO-PARTE-INTERNA.md**.
 
 ---

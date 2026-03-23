@@ -23,62 +23,62 @@
 
 ## Detalhes por área
 
-### ylada (teste-interno-01@teste.ylada.com)
+### ylada (teste-ylada@teste.ylada.com)
 
 - ❌ **Login**: net::ERR_CONNECTION_REFUSED at http://localhost:3004/pt/login
 - ❌ **Sistema**: net::ERR_CONNECTION_REFUSED at http://localhost:3004/pt/login
 
-### ylada (teste-interno-02@teste.ylada.com)
+### ylada (teste-ylada-2@teste.ylada.com)
 
 - ❌ **Login**: net::ERR_CONNECTION_REFUSED at http://localhost:3004/pt/login
 - ❌ **Sistema**: net::ERR_CONNECTION_REFUSED at http://localhost:3004/pt/login
 
-### nutri (teste-interno-03@teste.ylada.com)
+### nutri (teste-nutri@teste.ylada.com)
 
 - ❌ **Login**: net::ERR_CONNECTION_REFUSED at http://localhost:3004/pt/login
 - ❌ **Sistema**: net::ERR_CONNECTION_REFUSED at http://localhost:3004/pt/login
 
-### coach (teste-interno-04@teste.ylada.com)
+### coach (teste-coach@teste.ylada.com)
 
 - ❌ **Login**: net::ERR_CONNECTION_REFUSED at http://localhost:3004/pt/login
 - ❌ **Sistema**: net::ERR_CONNECTION_REFUSED at http://localhost:3004/pt/login
 
-### seller (teste-interno-05@teste.ylada.com)
+### seller (teste-seller@teste.ylada.com)
 
 - ❌ **Login**: net::ERR_CONNECTION_REFUSED at http://localhost:3004/pt/login
 - ❌ **Sistema**: net::ERR_CONNECTION_REFUSED at http://localhost:3004/pt/login
 
-### nutra (teste-interno-06@teste.ylada.com)
+### nutra (teste-nutra@teste.ylada.com)
 
 - ❌ **Login**: net::ERR_CONNECTION_REFUSED at http://localhost:3004/pt/login
 - ❌ **Sistema**: net::ERR_CONNECTION_REFUSED at http://localhost:3004/pt/login
 
-### med (teste-interno-07@teste.ylada.com)
+### med (teste-med@teste.ylada.com)
 
 - ❌ **Login**: net::ERR_CONNECTION_REFUSED at http://localhost:3004/pt/login
 - ❌ **Sistema**: net::ERR_CONNECTION_REFUSED at http://localhost:3004/pt/login
 
-### psi (teste-interno-08@teste.ylada.com)
+### psi (teste-psi@teste.ylada.com)
 
 - ❌ **Login**: net::ERR_CONNECTION_REFUSED at http://localhost:3004/pt/login
 - ❌ **Sistema**: net::ERR_CONNECTION_REFUSED at http://localhost:3004/pt/login
 
-### odonto (teste-interno-09@teste.ylada.com)
+### odonto (teste-odonto@teste.ylada.com)
 
 - ❌ **Login**: net::ERR_CONNECTION_REFUSED at http://localhost:3004/pt/login
 - ❌ **Sistema**: net::ERR_CONNECTION_REFUSED at http://localhost:3004/pt/login
 
-### fitness (teste-interno-10@teste.ylada.com)
+### fitness (teste-fitness@teste.ylada.com)
 
 - ❌ **Login**: net::ERR_CONNECTION_REFUSED at http://localhost:3004/pt/login
 - ❌ **Sistema**: net::ERR_CONNECTION_REFUSED at http://localhost:3004/pt/login
 
-### estética (teste-interno-11@teste.ylada.com)
+### estética (teste-estetica@teste.ylada.com)
 
 - ❌ **Login**: net::ERR_CONNECTION_REFUSED at http://localhost:3004/pt/login
 - ❌ **Sistema**: net::ERR_CONNECTION_REFUSED at http://localhost:3004/pt/login
 
-### perfumaria (teste-interno-12@teste.ylada.com)
+### perfumaria (teste-perfumaria@teste.ylada.com)
 
 - ❌ **Login**: net::ERR_CONNECTION_REFUSED at http://localhost:3004/pt/login
 - ❌ **Sistema**: net::ERR_CONNECTION_REFUSED at http://localhost:3004/pt/login

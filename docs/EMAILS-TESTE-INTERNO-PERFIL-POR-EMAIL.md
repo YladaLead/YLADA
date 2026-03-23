@@ -1,5 +1,7 @@
 # E-mails teste interno — perfil por e-mail
 
+**Padrão:** `teste-{segmento}@teste.ylada.com` (ex.: `teste-nutri@`, `teste-psicanalise@`). Duas contas matriz: `teste-ylada@` e `teste-ylada-2@`.
+
 Use esta lista no outro chat. **Contas 03 a 13 têm perfil empresarial já preenchido** pelo script `scripts/criar-contas-teste-interno.js` (nome, WhatsApp, tipo, profissão e textos realistas por área). O agente **não precisa passar pelo fluxo de perfil** nessas contas — pode ir direto para Noel, diagnósticos, leads, etc.
 
 - **01 e 02:** área ylada (matriz); não é necessário preencher perfil para os testes.
@@ -11,19 +13,19 @@ Use esta lista no outro chat. **Contas 03 a 13 têm perfil empresarial já preen
 
 | # | E-mail | Nome | Área | Foco do perfil (argumento forte) |
 |---|--------|------|------|-----------------------------------|
-| 1 | teste-interno-01@teste.ylada.com | Teste Interno 01 | ylada | — |
-| 2 | teste-interno-02@teste.ylada.com | Teste Interno 02 | ylada | — |
-| 3 | teste-interno-03@teste.ylada.com | Marina Silva | nutri | Emagrecimento e intestino; preencher agenda com link que qualifica no Instagram/WhatsApp |
-| 4 | teste-interno-04@teste.ylada.com | Ricardo Costa | coach | Carreira e produtividade; escalar com programa online e quiz que qualifica no LinkedIn/Instagram |
-| 5 | teste-interno-05@teste.ylada.com | Fernanda Lima | seller | Reconectar leads frios e fechar mais pelo WhatsApp com calculadora/quiz que qualifica |
-| 6 | teste-interno-06@teste.ylada.com | Bruno Oliveira | nutra | Suplementos (B12, energia, emagrecimento); link que mostra necessidade antes de falar de produto |
-| 7 | teste-interno-07@teste.ylada.com | Dra. Camila Rocha | med | Clínica geral; preencher horários com presença digital e link que gera agendamento |
-| 8 | teste-interno-08@teste.ylada.com | Patrícia Alves | psi | Ansiedade e sono; ser encontrada por quem já se identifica e reduzir tabu da terapia |
-| 9 | teste-interno-09@teste.ylada.com | Dr. André Souza | odonto | Consultório particular; divulgar tratamentos e qualificar quem entra em contato |
-| 10 | teste-interno-10@teste.ylada.com | Lucas Ferreira | fitness | Personal e turmas; preencher vagas com link que engaja e traz lead para avaliação/primeira aula |
-| 11 | teste-interno-11@teste.ylada.com | Juliana Martins | estetica | Facial e limpeza de pele; destacar no Instagram com link que qualifica e gera agendamento |
-| 12 | teste-interno-12@teste.ylada.com | Amanda Ribeiro | perfumaria | Quiz de perfil olfativo para reduzir dúvida e aumentar conversão no Instagram/WhatsApp |
-| 13 | teste-interno-13@teste.ylada.com | Dra. Helena Vasconcelos | psicanalise | Primeiro contato com contexto; link que qualifica sem prometer solução rápida — Instagram, indicação e WhatsApp |
+| 1 | teste-ylada@teste.ylada.com | Teste Interno 01 | ylada | — |
+| 2 | teste-ylada-2@teste.ylada.com | Teste Interno 02 | ylada | — |
+| 3 | teste-nutri@teste.ylada.com | Marina Silva | nutri | Emagrecimento e intestino; preencher agenda com link que qualifica no Instagram/WhatsApp |
+| 4 | teste-coach@teste.ylada.com | Ricardo Costa | coach | Carreira e produtividade; escalar com programa online e quiz que qualifica no LinkedIn/Instagram |
+| 5 | teste-seller@teste.ylada.com | Fernanda Lima | seller | Reconectar leads frios e fechar mais pelo WhatsApp com calculadora/quiz que qualifica |
+| 6 | teste-nutra@teste.ylada.com | Bruno Oliveira | nutra | Suplementos (B12, energia, emagrecimento); link que mostra necessidade antes de falar de produto |
+| 7 | teste-med@teste.ylada.com | Dra. Camila Rocha | med | Clínica geral; preencher horários com presença digital e link que gera agendamento |
+| 8 | teste-psi@teste.ylada.com | Patrícia Alves | psi | Ansiedade e sono; ser encontrada por quem já se identifica e reduzir tabu da terapia |
+| 9 | teste-odonto@teste.ylada.com | Dr. André Souza | odonto | Consultório particular; divulgar tratamentos e qualificar quem entra em contato |
+| 10 | teste-fitness@teste.ylada.com | Lucas Ferreira | fitness | Personal e turmas; preencher vagas com link que engaja e traz lead para avaliação/primeira aula |
+| 11 | teste-estetica@teste.ylada.com | Juliana Martins | estetica | Facial e limpeza de pele; destacar no Instagram com link que qualifica e gera agendamento |
+| 12 | teste-perfumaria@teste.ylada.com | Amanda Ribeiro | perfumaria | Quiz de perfil olfativo para reduzir dúvida e aumentar conversão no Instagram/WhatsApp |
+| 13 | teste-psicanalise@teste.ylada.com | Dra. Helena Vasconcelos | psicanalise | Primeiro contato com contexto; link que qualifica sem prometer solução rápida — Instagram, indicação e WhatsApp |
 
 **Senha (todas):** `TesteYlada2025!`
 
@@ -32,19 +34,19 @@ Use esta lista no outro chat. **Contas 03 a 13 têm perfil empresarial já preen
 ## Lista só de e-mails (copiar/colar)
 
 ```
-teste-interno-01@teste.ylada.com
-teste-interno-02@teste.ylada.com
-teste-interno-03@teste.ylada.com
-teste-interno-04@teste.ylada.com
-teste-interno-05@teste.ylada.com
-teste-interno-06@teste.ylada.com
-teste-interno-07@teste.ylada.com
-teste-interno-08@teste.ylada.com
-teste-interno-09@teste.ylada.com
-teste-interno-10@teste.ylada.com
-teste-interno-11@teste.ylada.com
-teste-interno-12@teste.ylada.com
-teste-interno-13@teste.ylada.com
+teste-ylada@teste.ylada.com
+teste-ylada-2@teste.ylada.com
+teste-nutri@teste.ylada.com
+teste-coach@teste.ylada.com
+teste-seller@teste.ylada.com
+teste-nutra@teste.ylada.com
+teste-med@teste.ylada.com
+teste-psi@teste.ylada.com
+teste-odonto@teste.ylada.com
+teste-fitness@teste.ylada.com
+teste-estetica@teste.ylada.com
+teste-perfumaria@teste.ylada.com
+teste-psicanalise@teste.ylada.com
 ```
 
 ---

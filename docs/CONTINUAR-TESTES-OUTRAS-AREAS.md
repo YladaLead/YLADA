@@ -7,7 +7,7 @@
 
 ## Onde paramos
 
-### ✅ Área Estética (teste-interno-11)
+### ✅ Área Estética (teste-estetica)
 - **Status:** Testada e funcionando
 - **Correções aplicadas:**
   - Fallback para buscar perfil por `user_profiles.perfil`
@@ -19,22 +19,23 @@
 
 ## Próximas áreas para testar
 
-### Contas disponíveis (12 áreas):
+### Contas disponíveis (13 contas):
 
 | # | Email | Área | Status |
 |---|-------|------|--------|
-| 01 | teste-interno-01@teste.ylada.com | ylada (matriz) | ⬜ Pendente |
-| 02 | teste-interno-02@teste.ylada.com | ylada (matriz) | ⬜ Pendente |
-| 03 | teste-interno-03@teste.ylada.com | nutri | ⬜ Pendente |
-| 04 | teste-interno-04@teste.ylada.com | coach | ⬜ Pendente |
-| 05 | teste-interno-05@teste.ylada.com | seller | ⬜ Pendente |
-| 06 | teste-interno-06@teste.ylada.com | nutra | ⬜ Pendente |
-| 07 | teste-interno-07@teste.ylada.com | med | ⬜ Pendente |
-| 08 | teste-interno-08@teste.ylada.com | psi | ⬜ Pendente |
-| 09 | teste-interno-09@teste.ylada.com | odonto | ⬜ Pendente |
-| 10 | teste-interno-10@teste.ylada.com | fitness | ⬜ Pendente |
-| 11 | teste-interno-11@teste.ylada.com | estética | ✅ Testada |
-| 12 | teste-interno-12@teste.ylada.com | perfumaria | ⬜ Pendente |
+| 01 | teste-ylada@teste.ylada.com | ylada (matriz) | ⬜ Pendente |
+| 02 | teste-ylada-2@teste.ylada.com | ylada (matriz) | ⬜ Pendente |
+| 03 | teste-nutri@teste.ylada.com | nutri | ⬜ Pendente |
+| 04 | teste-coach@teste.ylada.com | coach | ⬜ Pendente |
+| 05 | teste-seller@teste.ylada.com | seller | ⬜ Pendente |
+| 06 | teste-nutra@teste.ylada.com | nutra | ⬜ Pendente |
+| 07 | teste-med@teste.ylada.com | med | ⬜ Pendente |
+| 08 | teste-psi@teste.ylada.com | psi | ⬜ Pendente |
+| 09 | teste-odonto@teste.ylada.com | odonto | ⬜ Pendente |
+| 10 | teste-fitness@teste.ylada.com | fitness | ⬜ Pendente |
+| 11 | teste-estetica@teste.ylada.com | estética | ✅ Testada |
+| 12 | teste-perfumaria@teste.ylada.com | perfumaria | ⬜ Pendente |
+| 13 | teste-psicanalise@teste.ylada.com | psicanalise | ⬜ Pendente |
 
 ---
 
@@ -44,31 +45,31 @@
 
 ```bash
 # Nutrição
-TESTE_EMAIL=teste-interno-03@teste.ylada.com npm run agente:interno
+TESTE_EMAIL=teste-nutri@teste.ylada.com npm run agente:interno
 
 # Medicina
-TESTE_EMAIL=teste-interno-07@teste.ylada.com npm run agente:interno
+TESTE_EMAIL=teste-med@teste.ylada.com npm run agente:interno
 
 # Psicologia
-TESTE_EMAIL=teste-interno-08@teste.ylada.com npm run agente:interno
+TESTE_EMAIL=teste-psi@teste.ylada.com npm run agente:interno
 
 # Odontologia
-TESTE_EMAIL=teste-interno-09@teste.ylada.com npm run agente:interno
+TESTE_EMAIL=teste-odonto@teste.ylada.com npm run agente:interno
 
 # Fitness
-TESTE_EMAIL=teste-interno-10@teste.ylada.com npm run agente:interno
+TESTE_EMAIL=teste-fitness@teste.ylada.com npm run agente:interno
 
 # Coach
-TESTE_EMAIL=teste-interno-04@teste.ylada.com npm run agente:interno
+TESTE_EMAIL=teste-coach@teste.ylada.com npm run agente:interno
 
 # Seller
-TESTE_EMAIL=teste-interno-05@teste.ylada.com npm run agente:interno
+TESTE_EMAIL=teste-seller@teste.ylada.com npm run agente:interno
 
 # Nutra
-TESTE_EMAIL=teste-interno-06@teste.ylada.com npm run agente:interno
+TESTE_EMAIL=teste-nutra@teste.ylada.com npm run agente:interno
 
 # Perfumaria
-TESTE_EMAIL=teste-interno-12@teste.ylada.com npm run agente:interno
+TESTE_EMAIL=teste-perfumaria@teste.ylada.com npm run agente:interno
 ```
 
 ### Opção 2: Testar todas as áreas de uma vez (sem Noel)
@@ -83,7 +84,7 @@ TESTE_TODAS_AREAS=1 npm run agente:interno
 ### Opção 3: Testar com servidor em outra porta
 
 ```bash
-URL=http://localhost:3004 TESTE_EMAIL=teste-interno-03@teste.ylada.com npm run agente:interno
+URL=http://localhost:3004 TESTE_EMAIL=teste-nutri@teste.ylada.com npm run agente:interno
 ```
 
 ---
@@ -118,20 +119,20 @@ URL=http://localhost:3004 TESTE_EMAIL=teste-interno-03@teste.ylada.com npm run a
 ## Prioridade de teste
 
 ### Alta prioridade (áreas principais)
-1. **Nutrição** (teste-interno-03) - Área importante, tem método próprio
-2. **Medicina** (teste-interno-07) - Área principal
-3. **Psicologia** (teste-interno-08) - Área principal
-4. **Odontologia** (teste-interno-09) - Área principal
+1. **Nutrição** (teste-nutri) - Área importante, tem método próprio
+2. **Medicina** (teste-med) - Área principal
+3. **Psicologia** (teste-psi) - Área principal
+4. **Odontologia** (teste-odonto) - Área principal
 
 ### Média prioridade
-5. **Fitness** (teste-interno-10)
-6. **Coach** (teste-interno-04)
-7. **Perfumaria** (teste-interno-12)
+5. **Fitness** (teste-fitness)
+6. **Coach** (teste-coach)
+7. **Perfumaria** (teste-perfumaria)
 
 ### Baixa prioridade (pode testar depois)
-8. **Seller** (teste-interno-05)
-9. **Nutra** (teste-interno-06)
-10. **Ylada matriz** (teste-interno-01, 02)
+8. **Seller** (teste-seller)
+9. **Nutra** (teste-nutra)
+10. **Ylada matriz** (teste-ylada, teste-ylada-2)
 
 ---
 
@@ -167,12 +168,12 @@ Para múltiplas áreas:
 
 1. **Testar Nutrição** (área importante, tem método próprio)
    ```bash
-   TESTE_EMAIL=teste-interno-03@teste.ylada.com npm run agente:interno
+   TESTE_EMAIL=teste-nutri@teste.ylada.com npm run agente:interno
    ```
 
 2. **Testar Medicina** (área principal)
    ```bash
-   TESTE_EMAIL=teste-interno-07@teste.ylada.com npm run agente:interno
+   TESTE_EMAIL=teste-med@teste.ylada.com npm run agente:interno
    ```
 
 3. **Testar todas de uma vez** (visão geral)

@@ -1,6 +1,6 @@
 # Análise do processo — Teste interno (agente)
 
-**Data da análise:** com base no último run do agente (área Estética, conta teste-interno-11).  
+**Data da análise:** com base no último run do agente (área Estética, conta teste-estetica).  
 **Referência do run:** terminal 12 / `RELATORIO-ULTIMO-TESTE-INTERNO.md`.
 
 ---
@@ -8,7 +8,7 @@
 ## 1. Objetivo do processo
 
 O **agente de teste interno** (`scripts/agents/ylada-interno.ts`) automatiza a verificação da **parte interna** do app (pós-login): fluxo de uso, Noel, biblioteca, método, links, aparência, etc.  
-Ele usa a **área Estética** como base (conta `teste-interno-11@teste.ylada.com`) e cobre os blocos definidos em `docs/COBERTURA-AGENTE-TESTE-INTERNO-DUDA.md`.
+Ele usa a **área Estética** como base (conta `teste-estetica@teste.ylada.com`) e cobre os blocos definidos em `docs/COBERTURA-AGENTE-TESTE-INTERNO-DUDA.md`.
 
 **O que o processo entrega:**
 - Uma **tabela de resultados** (✅ OK, ⚠️ ATENCAO, ❌ ERRO) por bloco.
@@ -56,7 +56,7 @@ O bloco **11. Calculadora** abre um **link público** (tipo `/l/...`) a partir d
 - Se **não existir nenhum link público** na página Links, o agente não tem o que abrir e marca **ATENCAO** com a mensagem: *"Nenhum link público na página Links para testar"*.
 - **Não é falha de código:** para o bloco passar como OK, a conta de teste precisa ter **pelo menos um link criado e público** (ex.: um diagnóstico ou calculadora) em Links.
 
-**Ação opcional:** criar um link (ex.: calculadora ou quiz) na conta `teste-interno-11` e rodar o agente de novo; o 11 tende a passar.
+**Ação opcional:** criar um link (ex.: calculadora ou quiz) na conta `teste-estetica` e rodar o agente de novo; o 11 tende a passar.
 
 ---
 

@@ -1,7 +1,7 @@
 # Respostas do Noel — Teste interno
 
 **Data:** 20/03/2026, 14:53:34  
-**Conta:** teste-interno-12@teste.ylada.com  
+**Conta:** teste-perfumaria@teste.ylada.com  
 **Total:** 7 mensagens (3 do usuário, 4 do Noel).  
 **Uso:** Revisar a conversa completa para fazer os ajustes necessários (comportamento, links, tom).
 

@@ -132,5 +132,5 @@ TESTE_TODAS_AREAS=1 npm run agente:interno
 npm run agente:simulador
 
 # Testar com conta específica
-TESTE_EMAIL=teste-interno-03@teste.ylada.com npm run agente:interno
+TESTE_EMAIL=teste-nutri@teste.ylada.com npm run agente:interno
 ```

@@ -193,11 +193,12 @@ O agente pode rodar com contas de diferentes áreas para garantir personalizaç�
 
 | Área (código) | Path prefix | Conta teste (ex.) | O que deve refletir |
 |---------------|-------------|-------------------|---------------------|
-| ylada (matriz) | /pt | teste-interno-01@teste.ylada.com | Board, Noel e links genéricos matriz. |
-| estetica | /pt/estetica | teste-interno-11@teste.ylada.com | Conteúdo estética (pele, autocuidado, diagnósticos estética). |
-| nutri | /pt/nutri | teste-interno-03@teste.ylada.com | Método Nutri, LYA, jornada, quiz personalizado nutri. |
-| coach | /pt/coach | teste-interno-04@teste.ylada.com | Conteúdo coach. |
-| perfumaria | /pt/perfumaria | teste-interno-12@teste.ylada.com | Conteúdo perfumaria. |
+| ylada (matriz) | /pt | teste-ylada@teste.ylada.com | Board, Noel e links genéricos matriz. |
+| estetica | /pt/estetica | teste-estetica@teste.ylada.com | Conteúdo estética (pele, autocuidado, diagnósticos estética). |
+| nutri | /pt/nutri | teste-nutri@teste.ylada.com | Método Nutri, LYA, jornada, quiz personalizado nutri. |
+| coach | /pt/coach | teste-coach@teste.ylada.com | Conteúdo coach. |
+| psicanalise | /pt/psicanalise | teste-psicanalise@teste.ylada.com | Conteúdo psicanálise / setting analítico. |
+| perfumaria | /pt/perfumaria | teste-perfumaria@teste.ylada.com | Conteúdo perfumaria. |
 | med, psi, odonto, fitness, seller, nutra | /pt/{área} | Ver docs/TESTE-CREDENCIAIS-LOCALHOST.md | Menu e conteúdo da área. |
 
 Para cada área: login → home deve carregar; menu deve ter itens corretos (Noel, Biblioteca, Links, Configurações, etc.); Noel deve responder no contexto da área.
