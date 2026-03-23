@@ -128,6 +128,20 @@ function BibliotecaCard({
         }
       } else if (data?.success && data?.data?.url) {
         window.location.href = `${linksPath}?created=1`
+      } else if (data?.limit_reached && typeof data?.message === 'string' && data.message.trim()) {
+        try {
+          if (data.limit_type === 'active_links') {
+            sessionStorage.setItem(
+              'ylada_pending_link_limit_modal',
+              JSON.stringify({ limit_type: 'active_links', message: data.message.trim() })
+            )
+          } else {
+            sessionStorage.setItem('ylada_pending_freemium_link_message', data.message.trim())
+          }
+        } catch {
+          // ignore
+        }
+        window.location.href = linksPath
       } else {
         window.location.href = `${linksPath}?tema=${encodeURIComponent(item.tema)}&flow_id=${item.flow_id ?? 'diagnostico_risco'}`
       }
@@ -421,6 +435,20 @@ export default function BibliotecaPageContent({ areaCodigo, areaLabel }: Bibliot
                   }
                 } else if (data?.success && data?.data?.url) {
                   window.location.href = `${linksPath}?created=1`
+                } else if (data?.limit_reached && typeof data?.message === 'string' && data.message.trim()) {
+                  try {
+                    if (data.limit_type === 'active_links') {
+                      sessionStorage.setItem(
+                        'ylada_pending_link_limit_modal',
+                        JSON.stringify({ limit_type: 'active_links', message: data.message.trim() })
+                      )
+                    } else {
+                      sessionStorage.setItem('ylada_pending_freemium_link_message', data.message.trim())
+                    }
+                  } catch {
+                    // ignore
+                  }
+                  window.location.href = linksPath
                 } else {
                   window.location.href = `${linksPath}?tema=${encodeURIComponent(ideiaDoDia.tema)}&flow_id=${itemIdeia.flow_id ?? 'diagnostico_risco'}`
                 }

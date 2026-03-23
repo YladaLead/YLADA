@@ -9,6 +9,7 @@ import { getTemasForProfession, getTemaLabel, TEMA_OUTRO_VALUE, TEMA_ICONS } fro
 import { getFerramentasForTema, type FerramentaConcreta } from '@/config/ylada-temas-ferramentas'
 import { useAuth } from '@/hooks/useAuth'
 import { CompartilharDiagnosticoContent } from '@/components/ylada/CompartilharDiagnosticoContent'
+import { ActiveLinksProModal } from '@/components/ylada/ActiveLinksProModal'
 /** Objetivos do link: norte para a sugestão (quiz vs calculadora e texto). */
 const LINK_OBJECTIVES = [
   { value: 'captar', label: 'Captar', description: 'Trazer pessoas novas (possíveis pacientes ou clientes)' },
@@ -172,6 +173,8 @@ function LinksPageContent({ areaCodigo = 'ylada', areaLabel = 'YLADA' }: LinksPa
   const criadorRef = useRef<HTMLDivElement>(null)
   /** `<details>` não aceita `defaultOpen` no React — estado + `open`/`onToggle`. */
   const [comoFuncionaAberto, setComoFuncionaAberto] = useState(true)
+  /** Modal: limite de diagnósticos ativos (Free) ao tentar criar outro link. */
+  const [activeLinksModalMessage, setActiveLinksModalMessage] = useState<string | null>(null)
 
   const segment = areaCodigo && areaCodigo !== 'ylada' ? areaCodigo : 'ylada'
 
@@ -213,6 +216,23 @@ function LinksPageContent({ areaCodigo = 'ylada', areaLabel = 'YLADA' }: LinksPa
       setMessage({ type: 'error', text: 'Não foi possível carregar. Verifique sua conexão e tente recarregar a página.' })
     } finally {
       setLoading(false)
+      try {
+        const modalRaw = sessionStorage.getItem('ylada_pending_link_limit_modal')
+        if (modalRaw) {
+          sessionStorage.removeItem('ylada_pending_link_limit_modal')
+          const p = JSON.parse(modalRaw) as { limit_type?: string; message?: string }
+          if (p.limit_type === 'active_links' && typeof p.message === 'string' && p.message.trim()) {
+            setActiveLinksModalMessage(p.message.trim())
+          }
+        }
+        const pending = sessionStorage.getItem('ylada_pending_freemium_link_message')
+        if (pending) {
+          sessionStorage.removeItem('ylada_pending_freemium_link_message')
+          setMessage({ type: 'error', text: pending })
+        }
+      } catch {
+        // ignore
+      }
     }
   }
 
@@ -490,7 +510,12 @@ function LinksPageContent({ areaCodigo = 'ylada', areaLabel = 'YLADA' }: LinksPa
         setTimeout(() => linksListRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 300)
       } else {
         const msg = json?.limit_reached ? json?.message : json?.error || 'Erro ao criar link.'
-        setMessage({ type: 'error', text: msg })
+        const text = typeof msg === 'string' ? msg : String(msg)
+        if (json?.limit_reached && json?.limit_type === 'active_links' && text) {
+          setActiveLinksModalMessage(text)
+        } else {
+          setMessage({ type: 'error', text })
+        }
       }
     } catch {
       setMessage({ type: 'error', text: 'Erro ao criar link. Tente novamente.' })
@@ -541,7 +566,12 @@ function LinksPageContent({ areaCodigo = 'ylada', areaLabel = 'YLADA' }: LinksPa
         setTimeout(() => linksListRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 300)
       } else {
         const msg = json?.limit_reached ? json?.message : json?.error || 'Erro ao criar link.'
-        setMessage({ type: 'error', text: msg })
+        const text = typeof msg === 'string' ? msg : String(msg)
+        if (json?.limit_reached && json?.limit_type === 'active_links' && text) {
+          setActiveLinksModalMessage(text)
+        } else {
+          setMessage({ type: 'error', text })
+        }
       }
     } catch {
       setMessage({ type: 'error', text: 'Erro ao criar link. Tente novamente.' })
@@ -1305,6 +1335,12 @@ function LinksPageContent({ areaCodigo = 'ylada', areaLabel = 'YLADA' }: LinksPa
             </div>
           </div>
         )}
+
+        <ActiveLinksProModal
+          open={activeLinksModalMessage !== null}
+          onClose={() => setActiveLinksModalMessage(null)}
+          message={activeLinksModalMessage ?? ''}
+        />
       </div>
     </YladaAreaShell>
   )

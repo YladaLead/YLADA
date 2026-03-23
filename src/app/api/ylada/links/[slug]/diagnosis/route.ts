@@ -188,7 +188,7 @@ export async function POST(
                 limit_reached: true,
                 limit_type: 'whatsapp_clicks_monthly',
                 message:
-                  'Este diagnóstico atingiu o limite de 10 contatos no WhatsApp deste mês. Para continuar recebendo pessoas que te contactam, o profissional precisa ativar o plano profissional.',
+                  'Este diagnóstico atingiu o limite de 10 contatos no WhatsApp deste mês. No plano Pro o profissional tem diagnósticos ativos ilimitados e contatos ilimitados no WhatsApp por mês (e Noel completo). Para continuar recebendo contatos aqui, é preciso ativar o plano profissional.',
               },
               { status: 403 }
             )

@@ -588,10 +588,10 @@ function ConfigDrivenLinkView({
       ? 'Este diagnóstico ya generó 10 conversaciones por WhatsApp este mes. ¿Quieres crear diagnósticos así para generar conversaciones con tus clientes?'
       : 'Este diagnóstico já gerou 10 conversas no WhatsApp este mês. Quer criar diagnósticos como esse para gerar conversas com seus clientes?'
     const proBenefit = locale === 'en'
-      ? 'With the Pro plan: unlimited WhatsApp contacts per month, multiple diagnostics, and full Noel analyses.'
+      ? 'With the Pro plan: unlimited active diagnostics, unlimited WhatsApp contacts per month, and full Noel analyses.'
       : locale === 'es'
-      ? 'Con el plan Pro: contactos ilimitados por WhatsApp al mes, múltiples diagnósticos y análisis completos del Noel.'
-      : 'Com o plano Pro: contatos ilimitados no WhatsApp por mês, vários diagnósticos e análises completas do Noel.'
+      ? 'Con el plan Pro: diagnósticos activos ilimitados, contactos ilimitados por WhatsApp al mes y análisis completos del Noel.'
+      : 'No plano Pro há diagnósticos ativos ilimitados, contatos ilimitados no WhatsApp por mês e análises completas do Noel.'
     const verPlanos = locale === 'en' ? 'View plans' : locale === 'es' ? 'Ver planes' : 'Ver planos'
     const criarMeu = locale === 'en' ? 'Create my free diagnosis' : locale === 'es' ? 'Crear mi diagnóstico gratis' : 'Criar meu diagnóstico grátis'
     return (

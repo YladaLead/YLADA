@@ -97,7 +97,7 @@ export default function PainelPageContent({
                 </p>
                 {(data.freemium.whatsapp_clicks_mes ?? 0) >= (data.freemium.limite_whatsapp_clicks ?? 10) ? (
                   <p className="text-sm text-gray-700 mb-3">
-                    Seu diagnóstico atingiu o limite gratuito. Com o Pro: contatos ilimitados no WhatsApp, vários diagnósticos e Noel sem limite.
+                    Seu diagnóstico atingiu o limite gratuito. No Pro: diagnósticos ativos ilimitados, contatos ilimitados no WhatsApp por mês e Noel sem limite.
                   </p>
                 ) : (data.freemium.whatsapp_clicks_mes ?? 0) >= 7 ? (
                   <p className="text-sm text-gray-700 mb-3">

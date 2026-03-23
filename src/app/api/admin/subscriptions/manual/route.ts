@@ -2,11 +2,31 @@ import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
 import { requireApiAuth } from '@/lib/api-auth'
 
+/** Alinhado a `subscriptions_area_check` (ex.: migrations/278-subscriptions-area-ylada-matriz.sql). */
+const ADMIN_MANUAL_SUBSCRIPTION_AREAS = [
+  'wellness',
+  'nutri',
+  'coach',
+  'nutra',
+  'ylada',
+  'med',
+  'psi',
+  'psicanalise',
+  'odonto',
+  'estetica',
+  'fitness',
+  'perfumaria',
+  'seller',
+] as const
+
 /**
  * POST /api/admin/subscriptions/manual
  * Cria assinatura manual (ex.: plano mensal Wellness) para um usuário.
  * Usado quando o pagamento foi aprovado no MP mas o webhook não criou a assinatura.
  * Apenas admin pode criar.
+ *
+ * Para liberar Pro da **matriz** (links, Noel, limites em /pt/links): use **area: "ylada"**.
+ * Plano em nutri/wellness/etc. não substitui assinatura ylada em `hasYladaProPlan`.
  */
 export async function POST(request: NextRequest) {
   try {
@@ -24,9 +44,11 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       )
     }
-    if (!['wellness', 'nutri', 'coach', 'nutra'].includes(area)) {
+    if (!ADMIN_MANUAL_SUBSCRIPTION_AREAS.includes(area)) {
       return NextResponse.json(
-        { error: 'Área inválida. Use: wellness, nutri, coach ou nutra' },
+        {
+          error: `Área inválida. Use uma de: ${ADMIN_MANUAL_SUBSCRIPTION_AREAS.join(', ')}. Para matriz YLADA (links/Noel), use ylada.`,
+        },
         { status: 400 }
       )
     }

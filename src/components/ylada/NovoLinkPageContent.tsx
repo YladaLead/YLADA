@@ -11,6 +11,7 @@ import YladaAreaShell from '@/components/ylada/YladaAreaShell'
 import { getYladaAreaPathPrefix } from '@/config/ylada-areas'
 import { useAuth } from '@/hooks/useAuth'
 import { CompartilharDiagnosticoContent } from '@/components/ylada/CompartilharDiagnosticoContent'
+import { ActiveLinksProModal } from '@/components/ylada/ActiveLinksProModal'
 
 const META_PRIMEIRAS_RESPOSTAS = 10
 
@@ -73,6 +74,7 @@ export function NovoLinkPageContent({
   const [created, setCreated] = useState<CreatedLink | null>(null)
   const [loadingStep, setLoadingStep] = useState(0)
   const [linkCopiado, setLinkCopiado] = useState(false)
+  const [activeLinksModalMessage, setActiveLinksModalMessage] = useState<string | null>(null)
 
   const handleCriar = async (inputOverride?: string) => {
     const text = (inputOverride ?? temaInput).trim()
@@ -108,7 +110,16 @@ export function NovoLinkPageContent({
       setLoadingStep(steps.length)
 
       if (!data?.success || !data?.data?.id) {
-        setError(data?.error || 'Não foi possível criar o diagnóstico.')
+        const limitMsg =
+          data?.limit_reached && typeof data?.message === 'string' && data.message.trim()
+            ? data.message.trim()
+            : null
+        if (data?.limit_reached && data?.limit_type === 'active_links' && limitMsg) {
+          setActiveLinksModalMessage(limitMsg)
+          setError(null)
+        } else {
+          setError(limitMsg ?? data?.error ?? 'Não foi possível criar o diagnóstico.')
+        }
         setStep('form')
         setCreating(false)
         return
@@ -148,6 +159,7 @@ export function NovoLinkPageContent({
 
   if (step === 'form') {
     return (
+      <>
       <YladaAreaShell areaCodigo={areaCodigo} areaLabel={areaLabel}>
         <div className="max-w-lg mx-auto space-y-6">
           <Link href={linksPath} className="text-sm text-sky-600 hover:underline flex items-center gap-1">
@@ -169,7 +181,25 @@ export function NovoLinkPageContent({
               className="w-full rounded-xl border border-gray-200 px-4 py-3 text-base text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
               autoFocus
             />
-            {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
+            {error && (
+              <div
+                className={`mt-3 rounded-lg border p-3 text-sm ${
+                  /plano gratuito|plano profissional|limite/i.test(error)
+                    ? 'border-amber-200 bg-amber-50 text-amber-950'
+                    : 'border-red-200 bg-red-50 text-red-800'
+                }`}
+              >
+                <p className="font-medium whitespace-pre-wrap">{error}</p>
+                {/plano profissional|limite|plano gratuito/i.test(error) && (
+                  <Link
+                    href="/pt/precos"
+                    className="mt-3 inline-block rounded-lg bg-sky-600 px-4 py-2 text-sm font-medium text-white hover:bg-sky-700"
+                  >
+                    Ver planos Pro
+                  </Link>
+                )}
+              </div>
+            )}
             <button
               type="button"
               onClick={() => handleCriar()}
@@ -195,6 +225,12 @@ export function NovoLinkPageContent({
           </div>
         </div>
       </YladaAreaShell>
+      <ActiveLinksProModal
+        open={activeLinksModalMessage !== null}
+        onClose={() => setActiveLinksModalMessage(null)}
+        message={activeLinksModalMessage ?? ''}
+      />
+      </>
     )
   }
 

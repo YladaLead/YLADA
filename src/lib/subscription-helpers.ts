@@ -1,4 +1,5 @@
 import { supabaseAdmin } from '@/lib/supabase'
+import { parseYladaFreeGrantKind } from '@/lib/admin-ylada-free-matriz'
 
 /**
  * Verifica se usuário tem assinatura ativa para uma área específica
@@ -127,8 +128,9 @@ export async function getActiveSubscription(
 }
 
 /**
- * Verifica se usuário tem plano Pro (pago) na área YLADA.
- * Pro = monthly ou annual. Free ou sem assinatura = false.
+ * Verifica se usuário tem benefícios “sem limite freemium” na matriz YLADA (links, Noel, WhatsApp).
+ * Inclui: plano pago (monthly/annual) **ou** cortesia administrativa (`plan_type` free + `stripe_subscription_id` prefixo `free_cor_`).
+ * Não inclui: free de migração (`free_mig_`) nem free legado — esses seguem limites do plano gratuito.
  * @see docs/SPEC-FREEMIUM-YLADA.md
  */
 export async function hasYladaProPlan(userId: string): Promise<boolean> {
@@ -136,7 +138,12 @@ export async function hasYladaProPlan(userId: string): Promise<boolean> {
     const sub = await getActiveSubscription(userId, 'ylada')
     if (!sub) return false
     const planType = sub.plan_type as string | undefined
-    return planType === 'monthly' || planType === 'annual'
+    if (planType === 'monthly' || planType === 'annual') return true
+    if (planType === 'free') {
+      const sid = sub.stripe_subscription_id as string | undefined
+      if (parseYladaFreeGrantKind(sid) === 'courtesy') return true
+    }
+    return false
   } catch {
     return false
   }
