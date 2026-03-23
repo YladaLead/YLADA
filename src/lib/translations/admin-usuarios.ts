@@ -21,6 +21,10 @@ export interface AdminUsuariosTranslations {
     subscription: string
     subscriptionHint: string
     president: string
+    /** Filtro pela coluna Área (slug do perfil) */
+    segment: string
+    segmentHint: string
+    hideTestAccounts: string
     all: string
     active: string
     inactive: string
@@ -53,6 +57,8 @@ export interface AdminUsuariosTranslations {
     /** Contagem de e-mails em domínios de teste (excluídos do Total/Ativos acima) */
     testAccounts: string
     testDomainsHint: string
+    /** Sufixo quando a lista oculta contas de teste */
+    excludingTestAccounts: string
   }
   table: {
     user: string
@@ -162,6 +168,8 @@ export interface AdminUsuariosTranslations {
   }
   messages: {
     noUsers: string
+    /** Lista tem usuários, mas todos são teste e estão ocultos */
+    noUsersVisibleHiddenTests: string
     loading: string
     userUpdated: string
     subscriptionUpdated: string
@@ -198,6 +206,10 @@ const pt: AdminUsuariosTranslations = {
     subscriptionHint:
       'Free, trial com prazo ou pago (mensal/anual) é independente do segmento: filtre aqui pelo tipo de plano, a coluna Área mostra med, psi, Wellness, etc.',
     president: 'Presidente',
+    segment: 'Segmento',
+    segmentHint:
+      'Refina pela coluna Área (perfil no cadastro). As opções respeitam a Base: em YLADA, só segmentos da matriz.',
+    hideTestAccounts: 'Ocultar contas de teste (lista e CSV)',
     all: 'Todos',
     active: 'Ativos',
     inactive: 'Inativos',
@@ -228,7 +240,9 @@ const pt: AdminUsuariosTranslations = {
     inactive: 'Inativos',
     showing: 'Na lista',
     testAccounts: 'Contas teste',
-    testDomainsHint: 'Domínios @ylada.com (e extras em ADMIN_TEST_EMAIL_DOMAINS) fora do total',
+    testDomainsHint:
+      'Domínios @ylada.com, @ylada.app e e-mails configurados (ex.: portalmagra@gmail.com). Extras: ADMIN_TEST_EMAIL_DOMAINS e ADMIN_TEST_EMAILS no servidor.',
+    excludingTestAccounts: 'sem testes',
   },
   table: {
     user: 'Usuário',
@@ -339,6 +353,8 @@ const pt: AdminUsuariosTranslations = {
   },
   messages: {
     noUsers: 'Nenhum usuário encontrado',
+    noUsersVisibleHiddenTests:
+      'Com estes filtros há usuários, mas todos são contas de teste e estão ocultas. Desmarque “Ocultar contas de teste” para vê-los.',
     loading: 'Carregando usuários...',
     userUpdated: 'Usuário atualizado com sucesso!',
     subscriptionUpdated: 'Assinatura atualizada com sucesso!',
@@ -378,6 +394,10 @@ const es: AdminUsuariosTranslations = {
     subscriptionHint:
       'Gratis, prueba con plazo o pago es independiente del segmento: filtre por tipo de plano; la columna Área muestra med, psi, Wellness, etc.',
     president: 'Presidente',
+    segment: 'Segmento',
+    segmentHint:
+      'Filtra por la columna Área (perfil). Las opciones dependen de la Base: en YLADA, solo la matriz.',
+    hideTestAccounts: 'Ocultar cuentas de prueba (lista y CSV)',
     all: 'Todos',
     active: 'Activos',
     inactive: 'Inactivos',
@@ -408,7 +428,9 @@ const es: AdminUsuariosTranslations = {
     inactive: 'Inactivos',
     showing: 'En la lista',
     testAccounts: 'Cuentas de prueba',
-    testDomainsHint: 'Dominios @ylada.com (y ADMIN_TEST_EMAIL_DOMAINS) fuera del total',
+    testDomainsHint:
+      'Dominios @ylada.com, @ylada.app y correos configurados (ej.: portalmagra@gmail.com). Extras: ADMIN_TEST_EMAIL_DOMAINS y ADMIN_TEST_EMAILS en el servidor.',
+    excludingTestAccounts: 'sin pruebas',
   },
   table: {
     user: 'Usuario',
@@ -518,6 +540,8 @@ const es: AdminUsuariosTranslations = {
   },
   messages: {
     noUsers: 'Ningún usuario encontrado',
+    noUsersVisibleHiddenTests:
+      'Con estos filtros hay usuarios, pero todos son cuentas de prueba y están ocultas. Desmarque “Ocultar cuentas de prueba” para verlas.',
     loading: 'Cargando usuarios...',
     userUpdated: '¡Usuario actualizado con éxito!',
     subscriptionUpdated: '¡Suscripción actualizada con éxito!',
@@ -557,6 +581,10 @@ const en: AdminUsuariosTranslations = {
     subscriptionHint:
       'Free, time-limited trial, or paid is independent of segment: filter by plan type; the Area column shows med, psi, Wellness, etc.',
     president: 'President',
+    segment: 'Segment',
+    segmentHint:
+      'Filter by the Area column (profile). Options follow Base: under YLADA, matrix segments only.',
+    hideTestAccounts: 'Hide test accounts (list and CSV)',
     all: 'All',
     active: 'Active',
     inactive: 'Inactive',
@@ -587,7 +615,9 @@ const en: AdminUsuariosTranslations = {
     inactive: 'Inactive',
     showing: 'In list',
     testAccounts: 'Test accounts',
-    testDomainsHint: '@ylada.com domains (and ADMIN_TEST_EMAIL_DOMAINS) excluded from total',
+    testDomainsHint:
+      '@ylada.com, @ylada.app and configured addresses (e.g. portalmagra@gmail.com). Server env: ADMIN_TEST_EMAIL_DOMAINS, ADMIN_TEST_EMAILS.',
+    excludingTestAccounts: 'excl. test',
   },
   table: {
     user: 'User',
@@ -697,6 +727,8 @@ const en: AdminUsuariosTranslations = {
   },
   messages: {
     noUsers: 'No users found',
+    noUsersVisibleHiddenTests:
+      'There are users for these filters, but they are all test accounts and are hidden. Uncheck “Hide test accounts” to see them.',
     loading: 'Loading users...',
     userUpdated: 'User updated successfully!',
     subscriptionUpdated: 'Subscription updated successfully!',

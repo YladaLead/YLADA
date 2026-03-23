@@ -126,12 +126,20 @@ function AdminDashboardContent() {
         setLoading(true)
         setError(null)
         const response = await fetch('/api/admin/stats', { credentials: 'include' })
-        if (!response.ok) throw new Error('Erro ao carregar estatísticas')
-        const data = await response.json()
+        const data = await response.json().catch(() => ({} as { success?: boolean; stats?: StatsData; error?: string }))
+        if (!response.ok) {
+          const msg =
+            typeof data.error === 'string' && data.error.trim()
+              ? data.error
+              : `Erro ao carregar estatísticas (${response.status})`
+          throw new Error(msg)
+        }
         if (data.success && data.stats) {
           setStats(data.stats)
         } else {
-          throw new Error('Formato de dados inválido')
+          throw new Error(
+            typeof data.error === 'string' && data.error.trim() ? data.error : 'Formato de dados inválido'
+          )
         }
       } catch (err: any) {
         console.error('Erro ao carregar estatísticas:', err)

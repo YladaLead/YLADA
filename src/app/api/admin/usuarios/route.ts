@@ -14,8 +14,9 @@ import { isAdminTestAccountEmail } from '@/lib/admin-test-accounts'
  * Query params:
  * - bloco?: 'todos' | 'ylada' | 'wellness' — escopo da listagem (UI: um único filtro “Base”).
  *   ylada = todos os perfis da matriz (PERFIS_MATRIZ_YLADA: med, psi, ylada, nutri…); wellness = só perfil wellness; omitido/todos = sem filtro de bloco.
- * - area?: opcional, refinamento legado (scripts/links antigos). Ex.: legado, demais_segmentos, ylada, ou perfil puntual.
- *   Com a UI atual não envie `area`; use só `bloco`.
+ * - perfil?: slug exato em user_profiles.perfil (nutri, coach, ylada, …). UI: filtro “Segmento”.
+ *   Preferir a `perfil` em vez de `area` para o perfil literal `ylada` ( `area=ylada` continua legado = matriz inteira).
+ * - area?: legado | demais_segmentos | ylada (matriz) | todos — refinamentos antigos; sem `perfil`.
  * - status?: 'todos' | 'ativo' | 'inativo' - Filtrar por status
  * - assinatura?: 'todos' | 'gratuita' | 'mensal' | 'anual' | 'sem' - Filtrar por tipo de assinatura
  * - presidente?: string - Filtrar por nome do presidente (equipe do presidente)
@@ -36,6 +37,7 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url)
     const blocoFiltro = searchParams.get('bloco') || 'todos'
+    const perfilFiltro = (searchParams.get('perfil') || '').trim().toLowerCase()
     const areaFiltro = searchParams.get('area') || 'todos'
     const statusFiltro = searchParams.get('status') || 'todos'
     const assinaturaFiltro = searchParams.get('assinatura') || 'todos'
@@ -56,8 +58,10 @@ export async function GET(request: NextRequest) {
       profilesQuery = profilesQuery.eq('perfil', 'wellness')
     }
 
-    // Aplicar filtro de área (refinamento dentro do bloco)
-    if (areaFiltro === 'legado') {
+    // Segmento exato (coluna Área) — não usar `area=ylada` aqui (esse valor é legado = matriz inteira)
+    if (perfilFiltro && perfilFiltro !== 'todos') {
+      profilesQuery = profilesQuery.eq('perfil', perfilFiltro)
+    } else if (areaFiltro === 'legado') {
       profilesQuery = profilesQuery.in('perfil', LEGADO_AREAS)
     } else if (areaFiltro === 'demais_segmentos') {
       profilesQuery = profilesQuery.in('perfil', DEMAIS_SEGMENTOS)

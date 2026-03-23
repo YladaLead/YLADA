@@ -21,6 +21,17 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const areaFiltro = searchParams.get('area') || 'todos'
 
+    if (!supabaseAdmin) {
+      return NextResponse.json(
+        {
+          success: false,
+          error:
+            'Servidor sem cliente admin do Supabase (verifique SUPABASE_SERVICE_ROLE_KEY e NEXT_PUBLIC_SUPABASE_URL no .env e reinicie).',
+        },
+        { status: 503 }
+      )
+    }
+
     // Validar área
     const areasValidas = ['todos', 'wellness', 'nutri', 'coach', 'nutra']
     if (!areasValidas.includes(areaFiltro)) {
@@ -44,7 +55,7 @@ export async function GET(request: NextRequest) {
     try {
       let usuariosQuery = supabaseAdmin
         .from('user_profiles')
-        .select('user_id, perfil', { count: 'exact', head: false })
+        .select('user_id', { count: 'exact', head: true })
 
       if (areaFiltro !== 'todos') {
         usuariosQuery = usuariosQuery.eq('perfil', areaFiltro)
@@ -63,7 +74,7 @@ export async function GET(request: NextRequest) {
     try {
       let usuariosAtivosQuery = supabaseAdmin
         .from('subscriptions')
-        .select('user_id', { count: 'exact', head: false })
+        .select('user_id', { count: 'exact', head: true })
         .eq('status', 'active')
         .gt('current_period_end', new Date().toISOString())
 

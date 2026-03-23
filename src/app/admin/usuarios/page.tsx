@@ -6,6 +6,7 @@ import { useState, useEffect, useMemo } from 'react'
 import { createClient } from '@/lib/supabase-client'
 import { toLocalDateStringISO } from '@/lib/date-utils'
 import { getAdminUsuariosTranslations } from '@/lib/translations/admin-usuarios'
+import { PERFIS_MATRIZ_YLADA } from '@/lib/admin-matriz-constants'
 
 const supabase = createClient()
 
@@ -55,6 +56,9 @@ export default function AdminUsuarios() {
 
   /** Base da listagem: Todos (YLADA+Wellness) | só YLADA (todos os segmentos) | só Wellness. API: query `bloco`. */
   const [filtroBloco, setFiltroBloco] = useState<'todos' | 'ylada' | 'wellness'>('ylada')
+  /** Coluna Área — API: query `perfil` (slug exato; não confundir com area=ylada legado). */
+  const [filtroSegmento, setFiltroSegmento] = useState('todos')
+  const [ocultarContasTeste, setOcultarContasTeste] = useState(true)
 
   const mostrarColunasPresidente = false
   const [filtroStatus, setFiltroStatus] = useState<'todos' | 'ativo' | 'inativo'>('todos')
@@ -101,6 +105,26 @@ export default function AdminUsuarios() {
     { value: 'ylada', label: t.areas.ylada },
     { value: 'seller', label: t.areas.seller },
   ], [t])
+
+  const opcoesSegmento = useMemo(() => {
+    const todosOpt = { value: 'todos', label: t.filters.all }
+    const labelFor = (value: string) => {
+      const k = value as keyof typeof t.areas
+      return k in t.areas ? t.areas[k] : value
+    }
+    if (filtroBloco === 'wellness') {
+      return [todosOpt, { value: 'wellness', label: t.areas.wellness }]
+    }
+    if (filtroBloco === 'ylada') {
+      return [todosOpt, ...PERFIS_MATRIZ_YLADA.map((p) => ({ value: p, label: labelFor(p) }))]
+    }
+    return [todosOpt, ...TODAS_AREAS_EDICAO.map((a) => ({ value: a.value, label: a.label }))]
+  }, [filtroBloco, t, TODAS_AREAS_EDICAO])
+
+  const usuariosVisiveis = useMemo(() => {
+    if (!ocultarContasTeste) return usuarios
+    return usuarios.filter((u) => !u.isContaTeste)
+  }, [usuarios, ocultarContasTeste])
 
   // Formulários
   const [formUsuario, setFormUsuario] = useState({
@@ -187,6 +211,7 @@ export default function AdminUsuarios() {
         params.append('presidente', filtroPresidente)
       }
       if (busca) params.append('busca', busca)
+      if (filtroSegmento !== 'todos') params.append('perfil', filtroSegmento)
 
       const url = `/api/admin/usuarios?${params.toString()}`
       const response = await fetch(url, {
@@ -226,7 +251,7 @@ export default function AdminUsuarios() {
     }, busca ? 500 : 0)
 
     return () => clearTimeout(timeoutId)
-  }, [filtroBloco, filtroStatus, filtroAssinatura, filtroPresidente, busca])
+  }, [filtroBloco, filtroSegmento, filtroStatus, filtroAssinatura, filtroPresidente, busca])
 
   // Abrir modal de editar usuário (usa nome canônico no dropdown quando existir)
   const abrirEditarUsuario = (usuario: Usuario) => {
@@ -626,7 +651,7 @@ export default function AdminUsuarios() {
     const headers = mostrarColunasPresidente
       ? [t.table.nameLabel, 'Email', t.table.whatsapp, t.table.area, t.table.isPresident, t.table.president, t.table.subscription, t.table.enrollment, t.table.leads, t.table.linksLabel, t.table.clicksLabel]
       : [t.table.nameLabel, 'Email', t.table.whatsapp, t.table.area, t.table.subscription, t.table.enrollment, t.table.leads, t.table.linksLabel, t.table.clicksLabel]
-    const rows = usuarios.map((u) => {
+    const rows = usuariosVisiveis.map((u) => {
       const base = [
         u.nome,
         u.email,
@@ -703,7 +728,7 @@ export default function AdminUsuarios() {
 
         {/* Filtros compactos — dicas longas no title (passe o mouse no rótulo) */}
         <div className="flex-shrink-0 bg-white rounded-lg px-3 py-2 shadow-sm border border-gray-200">
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-10 gap-x-2 gap-y-1.5 items-end">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-11 gap-x-2 gap-y-1.5 items-end">
             <div className="col-span-2 sm:col-span-1 md:col-span-1 lg:col-span-2 xl:col-span-2">
               <label
                 className="block text-[11px] font-medium text-gray-600 mb-0.5 cursor-help"
@@ -716,6 +741,7 @@ export default function AdminUsuarios() {
                 onChange={(e) => {
                   const novo = e.target.value as 'todos' | 'ylada' | 'wellness'
                   setFiltroBloco(novo)
+                  setFiltroSegmento('todos')
                   if (novo !== 'todos') setFiltroPresidente('todos')
                 }}
                 disabled={loading}
@@ -724,6 +750,26 @@ export default function AdminUsuarios() {
                 <option value="todos">{t.filters.all}</option>
                 <option value="ylada">{t.filters.yladaAllSegments}</option>
                 <option value="wellness">{t.areas.wellness}</option>
+              </select>
+            </div>
+            <div className="col-span-2 sm:col-span-1 md:col-span-1 lg:col-span-2 xl:col-span-2">
+              <label
+                className="block text-[11px] font-medium text-gray-600 mb-0.5 cursor-help"
+                title={t.filters.segmentHint}
+              >
+                {t.filters.segment}
+              </label>
+              <select
+                value={filtroSegmento}
+                onChange={(e) => setFiltroSegmento(e.target.value)}
+                disabled={loading}
+                className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50"
+              >
+                {opcoesSegmento.map((o) => (
+                  <option key={o.value} value={o.value}>
+                    {o.label}
+                  </option>
+                ))}
               </select>
             </div>
             <div className="col-span-2 sm:col-span-2 md:col-span-2 lg:col-span-2 xl:col-span-3">
@@ -797,12 +843,24 @@ export default function AdminUsuarios() {
               <button
                 type="button"
                 onClick={exportarPlanilhaUsuarios}
-                disabled={loading || usuarios.length === 0}
+                disabled={loading || usuariosVisiveis.length === 0}
                 className="w-full sm:w-auto px-3 py-1.5 bg-green-600 text-white text-xs font-medium rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
               >
                 📥 {t.export}
               </button>
             </div>
+          </div>
+          <div className="mt-2 pt-2 border-t border-gray-100 flex items-center gap-2">
+            <input
+              id="hide-test-accounts"
+              type="checkbox"
+              checked={ocultarContasTeste}
+              onChange={(e) => setOcultarContasTeste(e.target.checked)}
+              className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+            />
+            <label htmlFor="hide-test-accounts" className="text-xs text-gray-700 cursor-pointer select-none">
+              {t.filters.hideTestAccounts}
+            </label>
           </div>
         </div>
 
@@ -849,7 +907,12 @@ export default function AdminUsuarios() {
               |
             </span>
             <span className="text-gray-600">
-              {t.stats.showing}: <strong className="text-blue-600 tabular-nums">{usuarios.length}</strong>
+              {t.stats.showing}: <strong className="text-blue-600 tabular-nums">{usuariosVisiveis.length}</strong>
+              {ocultarContasTeste && usuarios.length !== usuariosVisiveis.length && (
+                <span className="text-[10px] text-gray-400 font-normal ml-1" title={t.stats.testDomainsHint}>
+                  ({t.stats.excludingTestAccounts})
+                </span>
+              )}
             </span>
           </div>
         )}
@@ -860,6 +923,10 @@ export default function AdminUsuarios() {
             {usuarios.length === 0 ? (
               <div className="flex-1 flex items-center justify-center text-center py-12 px-4">
                 <p className="text-gray-500">{t.messages.noUsers}</p>
+              </div>
+            ) : usuariosVisiveis.length === 0 ? (
+              <div className="flex-1 flex items-center justify-center text-center py-12 px-4">
+                <p className="text-gray-500 max-w-md">{t.messages.noUsersVisibleHiddenTests}</p>
               </div>
             ) : (
               <div
@@ -892,7 +959,7 @@ export default function AdminUsuarios() {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {usuarios.map((usuario) => (
+                    {usuariosVisiveis.map((usuario) => (
                       <tr key={usuario.id} className="hover:bg-gray-50">
                         <td className="px-3 py-4">
                           <div className="flex items-center min-w-[200px]">
