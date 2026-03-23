@@ -115,6 +115,14 @@ export interface AdminUsuariosTranslations {
     free: string
     /** Free criado como cortesia admin (free_cor_) */
     courtesy: string
+    /** Free com prefixo free_mig_ */
+    freeMigration: string
+    /** Free com prefixo legado free_ */
+    freeLegacy: string
+    /** Matriz sem linha em subscriptions (implícito) */
+    freeImplicit: string
+    /** Plano ativo sem data de fim no registro */
+    noPlanEnd: string
     none: string
   }
   modal: {
@@ -133,6 +141,10 @@ export interface AdminUsuariosTranslations {
     editSubscription: string
     planType: string
     expirationDate: string
+    /** Dica sob o campo de vencimento (free matriz vs perfil) */
+    expirationDateHint: string
+    /** No modal, rótulo do subtipo de free matriz */
+    matrizFreeKindInModal: string
     subscriptionStatus: string
     subscriptionStatusHint: string
     deleteUser: string
@@ -295,6 +307,10 @@ const pt: AdminUsuariosTranslations = {
     annual: 'Anual',
     free: 'Free',
     courtesy: 'Cortesia',
+    freeMigration: 'Free (migração)',
+    freeLegacy: 'Free (legado)',
+    freeImplicit: 'Free (sem registro no DB)',
+    noPlanEnd: 'Sem vencimento no registro',
     none: 'Sem assinatura',
   },
   modal: {
@@ -313,6 +329,9 @@ const pt: AdminUsuariosTranslations = {
     editSubscription: 'Editar Assinatura',
     planType: 'Tipo de Plano',
     expirationDate: 'Data de Vencimento',
+    expirationDateHint:
+      'Para free da matriz (/pt), esta data é o fim do período concedido (migração, cortesia ou legado). Mensal/anual do segmento usam a mesma lógica de fim de ciclo.',
+    matrizFreeKindInModal: 'Classificação do free (matriz YLADA):',
     subscriptionStatus: 'Status da assinatura',
     subscriptionStatusHint: 'Use "Cancelada" quando o reembolso foi feito no Mercado Pago e a pessoa deve sair do ativo.',
     deleteUser: 'Deletar Usuário',
@@ -482,6 +501,10 @@ const es: AdminUsuariosTranslations = {
     annual: 'Anual',
     free: 'Free',
     courtesy: 'Cortesía',
+    freeMigration: 'Free (migración)',
+    freeLegacy: 'Free (legado)',
+    freeImplicit: 'Free (sin fila en BD)',
+    noPlanEnd: 'Sin vencimiento en el registro',
     none: 'Sin suscripción',
   },
   modal: {
@@ -500,6 +523,9 @@ const es: AdminUsuariosTranslations = {
     editSubscription: 'Editar Suscripción',
     planType: 'Tipo de Plan',
     expirationDate: 'Fecha de Vencimiento',
+    expirationDateHint:
+      'Para free de la matriz (/pt), esta fecha es el fin del período concedido (migración, cortesía o legado).',
+    matrizFreeKindInModal: 'Clasificación del free (matriz YLADA):',
     subscriptionStatus: 'Estado de la suscripción',
     subscriptionStatusHint: 'Use "Cancelada" cuando se hizo el reembolso en Mercado Pago y la persona debe salir del activo.',
     deleteUser: 'Eliminar Usuario',
@@ -669,6 +695,10 @@ const en: AdminUsuariosTranslations = {
     annual: 'Annual',
     free: 'Free',
     courtesy: 'Courtesy',
+    freeMigration: 'Free (migration)',
+    freeLegacy: 'Free (legacy)',
+    freeImplicit: 'Free (no DB row)',
+    noPlanEnd: 'No end date on record',
     none: 'No subscription',
   },
   modal: {
@@ -687,6 +717,9 @@ const en: AdminUsuariosTranslations = {
     editSubscription: 'Edit Subscription',
     planType: 'Plan Type',
     expirationDate: 'Expiration Date',
+    expirationDateHint:
+      'For matrix free (/pt), this date is the end of the granted period (migration, courtesy, or legacy).',
+    matrizFreeKindInModal: 'Matrix free classification (YLADA):',
     subscriptionStatus: 'Subscription status',
     subscriptionStatusHint: 'Use "Canceled" when refund was made on Mercado Pago and the person should be removed from active.',
     deleteUser: 'Delete User',

@@ -634,14 +634,17 @@ export default function AdminUsuarios() {
     return area
   }
 
-  /** Coluna Assinatura: um rótulo (Free / Cortesia / Mensal / Anual); “Ativa” omitida na listagem. */
+  /** Coluna Assinatura: Free (migração/legado/cortesia), mensal/anual, implícito, etc. */
   const getAssinaturaListLabel = (u: Usuario) => {
     if (u.isContaTeste) return t.subscriptionType.courtesy
     if (u.assinatura === 'sem assinatura') return t.subscriptionType.none
     if (u.assinatura === 'mensal') return t.subscriptionType.monthly
     if (u.assinatura === 'anual') return t.subscriptionType.annual
     if (u.assinatura === 'gratuita') {
+      if (u.implicitMatrizFree && !u.yladaFreeSubscriptionId) return t.subscriptionType.freeImplicit
       if (u.yladaFreeGrantKind === 'courtesy') return t.subscriptionType.courtesy
+      if (u.yladaFreeGrantKind === 'migration') return t.subscriptionType.freeMigration
+      if (u.yladaFreeGrantKind === 'legacy') return t.subscriptionType.freeLegacy
       return t.subscriptionType.free
     }
     return t.subscriptionType.none
@@ -1036,12 +1039,9 @@ export default function AdminUsuarios() {
                             const dataVencFmt = dataVencStr
                               ? new Date(dataVencStr + 'T12:00:00').toLocaleDateString('pt-BR')
                               : null
-                            /** Free ativo: não exibir data de fim na listagem (prazo técnico longo confunde). */
-                            const ocultarFimPlano =
-                              usuario.assinatura === 'gratuita' && usuario.assinaturaSituacao === 'ativa'
                             return (
                               <>
-                                {dataVencStr && !ocultarFimPlano ? (
+                                {dataVencStr ? (
                                   usuario.assinaturaSituacao === 'ativa' ? (
                                     <div className="text-sm font-semibold text-gray-900">
                                       {t.table.planEndHighlight}: {dataVencFmt}
@@ -1083,6 +1083,24 @@ export default function AdminUsuarios() {
                                     {t.table.freeCourtesyHint}
                                   </div>
                                 )}
+                                {usuario.podeGerenciarFreeMatriz &&
+                                  dataVencStr &&
+                                  usuario.assinaturaSituacao === 'ativa' &&
+                                  usuario.assinatura === 'gratuita' &&
+                                  usuario.yladaFreeGrantKind === 'migration' && (
+                                  <div className="text-[11px] text-sky-900 mt-1.5 font-medium leading-snug">
+                                    {t.table.freeMigrationHint}
+                                  </div>
+                                )}
+                                {usuario.podeGerenciarFreeMatriz &&
+                                  dataVencStr &&
+                                  usuario.assinaturaSituacao === 'ativa' &&
+                                  usuario.assinatura === 'gratuita' &&
+                                  usuario.yladaFreeGrantKind === 'legacy' && (
+                                  <div className="text-[11px] text-gray-700 mt-1.5 font-medium leading-snug">
+                                    {t.table.freeLegacyMatrizHint}
+                                  </div>
+                                )}
                                 {!dataVencStr &&
                                   (usuario.implicitMatrizFree && !usuario.yladaFreeSubscriptionId ? (
                                     <div className="text-xs text-gray-600 mt-1 leading-snug">
@@ -1090,6 +1108,8 @@ export default function AdminUsuarios() {
                                     </div>
                                   ) : usuario.assinatura === 'sem assinatura' ? (
                                     <div className="text-xs text-gray-500 mt-1">{t.table.neverSubscribed}</div>
+                                  ) : usuario.assinatura === 'gratuita' && usuario.assinaturaSituacao === 'ativa' ? (
+                                    <div className="text-xs text-amber-800 mt-1">{t.subscriptionType.noPlanEnd}</div>
                                   ) : (
                                     <div className="text-xs text-amber-800 mt-1">
                                       Vencimento não exibido — use Editar ou Assinatura
@@ -1351,7 +1371,7 @@ export default function AdminUsuarios() {
       {/* Modal Editar Assinatura */}
       {mostrarEditarAssinatura && usuarioSelecionado && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+          <div className="bg-white rounded-lg p-6 max-w-lg w-full mx-4">
             <h2 className="text-xl font-bold mb-4">{t.modal.editSubscription}</h2>
             <div className="space-y-4">
               <div>
@@ -1365,6 +1385,12 @@ export default function AdminUsuarios() {
                   <option value="annual">{t.filters.annual}</option>
                   <option value="free">{t.filters.free}</option>
                 </select>
+                {formAssinatura.plan_type === 'free' && usuarioSelecionado.podeGerenciarFreeMatriz && (
+                  <p className="text-xs text-gray-600 mt-1.5 bg-slate-50 border border-slate-100 rounded-md px-2 py-1.5">
+                    <span className="font-semibold text-gray-700">{t.modal.matrizFreeKindInModal}</span>{' '}
+                    {getAssinaturaListLabel(usuarioSelecionado)}
+                  </p>
+                )}
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">{t.modal.expirationDate}</label>
@@ -1374,6 +1400,7 @@ export default function AdminUsuarios() {
                   onChange={(e) => setFormAssinatura({ ...formAssinatura, current_period_end: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                 />
+                <p className="text-xs text-gray-500 mt-1">{t.modal.expirationDateHint}</p>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">{t.modal.subscriptionStatus}</label>
