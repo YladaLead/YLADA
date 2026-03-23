@@ -21,6 +21,13 @@ function SolicitarAcessoContent() {
     email: '',
   })
   const [submitting, setSubmitting] = useState(false)
+
+  useEffect(() => {
+    const pre = searchParams.get('profissao')
+    if (pre && pre.trim()) {
+      setFormData((prev) => (prev.profissao ? prev : { ...prev, profissao: pre.trim() }))
+    }
+  }, [searchParams])
   const [showSuccess, setShowSuccess] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
