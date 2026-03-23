@@ -123,7 +123,12 @@ function LinksPageContent({ areaCodigo = 'ylada', areaLabel = 'YLADA' }: LinksPa
   const [links, setLinks] = useState<LinkRow[]>([])
   const [loading, setLoading] = useState(true)
   const [creating, setCreating] = useState(false)
-  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
+  const [message, setMessage] = useState<{
+    type: 'success' | 'error'
+    text: string
+    /** Erro de sessão (401) — mostrar CTA login, sem texto de “migration”. */
+    sessionExpired?: boolean
+  } | null>(null)
   const [interpretText, setInterpretText] = useState('')
   const [interpreting, setInterpreting] = useState(false)
   /** strategyCards: 1 card (slot single) quando só BLOCKER permitido; 2 cards (qualidade + volume) caso contrário. */
@@ -189,30 +194,56 @@ function LinksPageContent({ areaCodigo = 'ylada', areaLabel = 'YLADA' }: LinksPa
         fetch('/api/ylada/links', { credentials: 'include' }),
         fetch(`/api/ylada/profile?segment=${encodeURIComponent(segment)}`, { credentials: 'include' }),
       ])
-      const tJson = await tRes.json()
-      const lJson = await lRes.json()
-      const pJson = await pRes.json()
-      if (tJson?.success && Array.isArray(tJson.data)) {
-        setTemplates(tJson.data)
-      } else {
+      const tJson = (await tRes.json().catch(() => ({}))) as Record<string, unknown>
+      const lJson = (await lRes.json().catch(() => ({}))) as Record<string, unknown>
+      const pJson = (await pRes.json().catch(() => ({}))) as Record<string, unknown>
+
+      const tErr = typeof tJson.error === 'string' ? tJson.error : ''
+      const authByStatus = tRes.status === 401 || lRes.status === 401 || pRes.status === 401
+      const authByMessage =
+        /faça login|fazer login|login para continuar|você precisa fazer login|sessão|não autorizado|unauthorized/i.test(
+          tErr
+        )
+      const authFailed = authByStatus || authByMessage
+
+      if (authFailed) {
         setTemplates([])
-        const err = tJson?.error || (tRes.ok ? '' : 'Resposta inválida')
-        if (err) {
-          const isProfileError = /criar perfil|perfil não encontrado|não permitido na tabela/i.test(err)
-          const text = isProfileError ? err : `Templates: ${err}. Verifique se as migrations (ylada_link_templates) foram aplicadas no banco.`
-          setMessage({ type: 'error', text: tJson?.technical ? `${text} ${tJson.technical}` : text })
-        }
-      }
-      if (lJson?.success && Array.isArray(lJson.data)) setLinks(lJson.data)
-      if (pJson?.success && pJson.data?.profile) {
-        const p = pJson.data.profile as Record<string, unknown>
-        setProfile({
-          profile_type: typeof p.profile_type === 'string' ? p.profile_type : null,
-          profession: typeof p.profession === 'string' ? p.profession : null,
-          area_specific: typeof p.area_specific === 'object' && p.area_specific !== null ? (p.area_specific as Record<string, unknown>) : null,
+        setLinks([])
+        setProfile(null)
+        setMessage({
+          type: 'error',
+          sessionExpired: true,
+          text:
+            'Sua sessão expirou ou não foi reconhecida — no celular isso costuma acontecer depois que o app fica em segundo plano ou com pouca bateria/rede. Faça login de novo e abra de novo a página de Links.',
         })
       } else {
-        setProfile(null)
+        if (tJson?.success && Array.isArray(tJson.data)) {
+          setTemplates(tJson.data as Template[])
+        } else {
+          setTemplates([])
+          const err = tErr || (tRes.ok ? '' : 'Resposta inválida')
+          if (err) {
+            const isProfileError = /criar perfil|perfil não encontrado|não permitido na tabela/i.test(err)
+            const text = isProfileError
+              ? err
+              : `Não foi possível carregar os modelos de diagnóstico: ${err}. Atualize a página; se continuar, fale com o suporte.`
+            setMessage({
+              type: 'error',
+              text: tJson?.technical ? `${text} ${String(tJson.technical)}` : text,
+            })
+          }
+        }
+        if (lJson?.success && Array.isArray(lJson.data)) setLinks(lJson.data as LinkRow[])
+        if (pJson?.success && (pJson.data as Record<string, unknown>)?.profile) {
+          const p = (pJson.data as Record<string, unknown>).profile as Record<string, unknown>
+          setProfile({
+            profile_type: typeof p.profile_type === 'string' ? p.profile_type : null,
+            profession: typeof p.profession === 'string' ? p.profession : null,
+            area_specific: typeof p.area_specific === 'object' && p.area_specific !== null ? (p.area_specific as Record<string, unknown>) : null,
+          })
+        } else {
+          setProfile(null)
+        }
       }
     } catch (e) {
       setMessage({ type: 'error', text: 'Não foi possível carregar. Verifique sua conexão e tente recarregar a página.' })
@@ -652,7 +683,15 @@ function LinksPageContent({ areaCodigo = 'ylada', areaLabel = 'YLADA' }: LinksPa
             className={`p-4 rounded-lg text-sm ${message.type === 'success' ? 'bg-green-50 text-green-800 border border-green-200' : 'bg-red-50 text-red-800 border border-red-200'}`}
           >
             <p className="font-medium whitespace-pre-wrap">{message.text}</p>
-            {message.type === 'error' && (message.text.includes('plano profissional') || message.text.includes('limite')) && (
+            {message.type === 'error' && message.sessionExpired && (
+              <Link
+                href="/pt/login"
+                className="mt-3 inline-block rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800"
+              >
+                Fazer login de novo
+              </Link>
+            )}
+            {message.type === 'error' && !message.sessionExpired && (message.text.includes('plano profissional') || message.text.includes('limite')) && (
               <Link href="/pt/precos" className="mt-3 inline-block rounded-lg bg-sky-600 px-4 py-2 text-sm font-medium text-white hover:bg-sky-700">
                 Liberar mais conversas
               </Link>
