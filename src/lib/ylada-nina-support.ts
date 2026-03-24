@@ -10,12 +10,14 @@ export async function completeNinaSupportTurn(opts: {
   localeInstruction: string
   profileResumo: string
   linksAtivosBlock: string
+  appOrigin?: string
 }): Promise<string> {
   const system = buildNinaSupportSystemPrompt({
     segment: opts.segment,
     localeInstruction: opts.localeInstruction,
     profileResumo: opts.profileResumo,
     linksAtivosBlock: opts.linksAtivosBlock,
+    appOrigin: opts.appOrigin,
   })
 
   const history = (opts.conversationHistory || []).slice(-12).map((m) => ({
@@ -32,12 +34,12 @@ export async function completeNinaSupportTurn(opts: {
   const completion = await openai.chat.completions.create({
     model: 'gpt-4o-mini',
     messages,
-    max_tokens: 900,
-    temperature: 0.45,
+    max_tokens: 1000,
+    temperature: 0.35,
   })
 
   return (
     completion.choices[0]?.message?.content?.trim() ||
-    'Desculpe, não consegui responder agora. Tente de novo ou fale com a Carol no WhatsApp.'
+    'Desculpe, não consegui responder agora. Tente de novo em instantes.'
   )
 }

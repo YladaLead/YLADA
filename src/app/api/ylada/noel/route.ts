@@ -581,6 +581,7 @@ export async function POST(request: NextRequest) {
         localeInstruction,
         profileResumo,
         linksAtivosBlock: linksAtivosBlock || '',
+        appOrigin: baseUrl,
       })
       return NextResponse.json({
         response: responseText,
