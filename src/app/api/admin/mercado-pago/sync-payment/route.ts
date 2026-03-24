@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireApiAuth } from '@/lib/api-auth'
-import { syncPaymentByIdFromMercadoPago } from '@/app/api/webhooks/mercado-pago/route'
 
 /**
  * POST /api/admin/mercado-pago/sync-payment
@@ -25,6 +24,9 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    const { syncPaymentByIdFromMercadoPago } = await import(
+      '@/app/api/webhooks/mercado-pago/route'
+    )
     const result = await syncPaymentByIdFromMercadoPago(
       String(paymentId).trim(),
       Boolean(isTest)
