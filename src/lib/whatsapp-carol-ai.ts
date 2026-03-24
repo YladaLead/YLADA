@@ -10,12 +10,9 @@
 
 import { supabaseAdmin } from '@/lib/supabase'
 import { createZApiClient } from '@/lib/z-api'
-import OpenAI from 'openai'
+import type OpenAI from 'openai'
+import { getOpenAI } from '@/lib/openai-singleton'
 import { applyTemplate, getFlowTemplate } from '@/lib/whatsapp-flow-templates'
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-})
 
 const WHATSAPP_NUMBER = '5519997230912' // Número principal
 
@@ -962,7 +959,7 @@ export async function generateCarolResponse(
     const isFirstMessage = context?.isFirstMessage || false
     const maxTokens = isFirstMessage ? 800 : 400
     
-    const completion = await openai.chat.completions.create({
+    const completion = await getOpenAI().chat.completions.create({
       model: 'gpt-4o-mini', // Modelo mais barato e rápido
       messages,
       temperature: 0.6, // Reduzido para respostas mais consistentes

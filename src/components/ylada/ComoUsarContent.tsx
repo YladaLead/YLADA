@@ -127,7 +127,7 @@ export default function ComoUsarContent({ areaCodigo, areaLabel }: ComoUsarConte
           <div>
             <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Como usar</h1>
             <p className="text-gray-800 mt-1.5 text-sm sm:text-base font-medium leading-snug">
-              Menos explicação. Mais resposta — e venda.
+              Menos explicação. Apenas mais respostas e venda.
             </p>
           </div>
           <p className="text-base font-semibold text-sky-900 bg-sky-50/80 border border-sky-100 rounded-xl px-3 py-2.5 leading-snug">
