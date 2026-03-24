@@ -55,6 +55,10 @@ export const SEGMENTOS_DORES_OBJETIVOS: SegmentoDoresObjetivos[] = [
     label: 'Estética',
     temas: [
       { value: 'pele', label: 'Pele' },
+      { value: 'cabelo', label: 'Cabelo' },
+      { value: 'unhas', label: 'Unhas' },
+      { value: 'sobrancelha', label: 'Sobrancelha' },
+      { value: 'maquiagem', label: 'Maquiagem' },
       { value: 'autoestima', label: 'Autoestima' },
       { value: 'rotina_cuidados', label: 'Rotina de cuidados' },
       { value: 'rejuvenescimento', label: 'Rejuvenescimento' },

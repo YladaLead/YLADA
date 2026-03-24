@@ -1,5 +1,5 @@
-import { LinksPageContent } from '@/app/pt/(matrix)/links/page'
+import LinksHubContent from '@/components/ylada/LinksHubContent'
 
 export default function NutraLinksPage() {
-  return <LinksPageContent areaCodigo="nutra" areaLabel="Nutra" />
+  return <LinksHubContent areaCodigo="nutra" areaLabel="Nutra" />
 }

@@ -10,6 +10,7 @@ import { getFerramentasForTema, type FerramentaConcreta } from '@/config/ylada-t
 import { useAuth } from '@/hooks/useAuth'
 import { CompartilharDiagnosticoContent } from '@/components/ylada/CompartilharDiagnosticoContent'
 import { ActiveLinksProModal } from '@/components/ylada/ActiveLinksProModal'
+import LinksHubContent from '@/components/ylada/LinksHubContent'
 /** Objetivos do link: norte para a sugestão (quiz vs calculadora e texto). */
 const LINK_OBJECTIVES = [
   { value: 'captar', label: 'Captar', description: 'Trazer pessoas novas (possíveis pacientes ou clientes)' },
@@ -115,9 +116,11 @@ function getSuggestionPurposePhrase(objective: LinkObjectiveValue): string {
 interface LinksPageContentProps {
   areaCodigo?: string
   areaLabel?: string
+  /** Quando true, não renderiza YladaAreaShell (para uso em Links hub com abas). */
+  embedded?: boolean
 }
 
-function LinksPageContent({ areaCodigo = 'ylada', areaLabel = 'YLADA' }: LinksPageContentProps) {
+function LinksPageContent({ areaCodigo = 'ylada', areaLabel = 'YLADA', embedded = false }: LinksPageContentProps) {
   const prefix = getYladaAreaPathPrefix(areaCodigo)
   const [templates, setTemplates] = useState<Template[]>([])
   const [links, setLinks] = useState<LinkRow[]>([])
@@ -178,8 +181,8 @@ function LinksPageContent({ areaCodigo = 'ylada', areaLabel = 'YLADA' }: LinksPa
   const linksListRef = useRef<HTMLDivElement>(null)
   const suggestionBoxRef = useRef<HTMLDivElement>(null)
   const criadorRef = useRef<HTMLDivElement>(null)
-  /** `<details>` não aceita `defaultOpen` no React — estado + `open`/`onToggle`. */
-  const [comoFuncionaAberto, setComoFuncionaAberto] = useState(true)
+  /** `<details>` não aceita `defaultOpen` no React — estado + `open`/`onToggle`. Colapsado por padrão quando embedded (hub). */
+  const [comoFuncionaAberto, setComoFuncionaAberto] = useState(!embedded)
   /** Modal: limite de diagnósticos ativos (Free) ao tentar criar outro link. */
   const [activeLinksModalMessage, setActiveLinksModalMessage] = useState<string | null>(null)
 
@@ -625,59 +628,65 @@ function LinksPageContent({ areaCodigo = 'ylada', areaLabel = 'YLADA' }: LinksPa
     setTimeout(() => criadorRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100)
   }
 
-  return (
-    <YladaAreaShell areaCodigo={areaCodigo} areaLabel={areaLabel}>
-      <div className="max-w-2xl space-y-6">
+  const inner = (
+    <div className="max-w-2xl space-y-6">
+      {embedded && (
+        <Link
+          href={`${prefix}/links?tab=prontos`}
+          className="inline-flex items-center gap-1.5 text-sm text-sky-600 hover:text-sky-800"
+        >
+          <span aria-hidden>📚</span>
+          Usar modelo pronto da biblioteca
+        </Link>
+      )}
+      {!embedded && (
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-1">Links de captação</h1>
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-1">Links</h1>
           <p className="text-gray-600 text-sm mb-3">
-            Diagnósticos interativos (quizzes e calculadoras) que viram conversas no WhatsApp com possíveis clientes.
+            Diagnósticos interativos (quizzes e calculadoras) que viram conversas no WhatsApp.
           </p>
-          <details
-            className="rounded-lg border border-sky-100 bg-sky-50/50 p-4 group"
-            open={comoFuncionaAberto}
-            onToggle={(e) => setComoFuncionaAberto(e.currentTarget.open)}
-          >
-            <summary className="cursor-pointer text-sm font-medium text-gray-800 list-none flex items-center justify-between gap-2 [&::-webkit-details-marker]:hidden">
-              <span>Como funciona — do link ao novo cliente</span>
-              <span className="text-sky-500 text-xs shrink-0 group-open:rotate-180 transition-transform" aria-hidden>
-                ▼
-              </span>
-            </summary>
-            <div className="mt-3 pt-3 border-t border-sky-100/80">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2 gap-1 text-sm text-gray-700">
-                <span className="flex items-center gap-1.5 shrink-0">
-                  <span aria-hidden>🧪</span>
-                  <span>Criar diagnóstico</span>
-                </span>
-                <span className="hidden sm:inline text-sky-400" aria-hidden>→</span>
-                <span className="sm:hidden text-sky-400 self-center" aria-hidden>↓</span>
-                <span className="flex items-center gap-1.5 shrink-0">
-                  <span aria-hidden>👩</span>
-                  <span>Pessoa responde</span>
-                </span>
-                <span className="hidden sm:inline text-sky-400" aria-hidden>→</span>
-                <span className="sm:hidden text-sky-400 self-center" aria-hidden>↓</span>
-                <span className="flex items-center gap-1.5 shrink-0">
-                  <span aria-hidden>💡</span>
-                  <span>Curiosidade</span>
-                </span>
-                <span className="hidden sm:inline text-sky-400" aria-hidden>→</span>
-                <span className="sm:hidden text-sky-400 self-center" aria-hidden>↓</span>
-                <span className="flex items-center gap-1.5 shrink-0">
-                  <span aria-hidden>💬</span>
-                  <span>Conversa com você</span>
-                </span>
-                <span className="hidden sm:inline text-sky-400" aria-hidden>→</span>
-                <span className="sm:hidden text-sky-400 self-center" aria-hidden>↓</span>
-                <span className="flex items-center gap-1.5 shrink-0">
-                  <span aria-hidden>👥</span>
-                  <span>Novo cliente</span>
-                </span>
-              </div>
-            </div>
-          </details>
         </div>
+      )}
+      {!embedded && (
+        <details
+          className="rounded-lg border border-sky-100 bg-sky-50/50 p-4 group"
+          open={comoFuncionaAberto}
+          onToggle={(e) => setComoFuncionaAberto(e.currentTarget.open)}
+        >
+          <summary className="cursor-pointer text-sm font-medium text-gray-800 list-none flex items-center justify-between gap-2 [&::-webkit-details-marker]:hidden">
+            <span>Como funciona</span>
+            <span className="text-sky-500 text-xs shrink-0 group-open:rotate-180 transition-transform" aria-hidden>
+              ▼
+            </span>
+          </summary>
+          <div className="mt-3 pt-3 border-t border-sky-100/80">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2 gap-1 text-sm text-gray-700">
+              <span className="flex items-center gap-1.5 shrink-0">
+                <span aria-hidden>🧪</span>
+                <span>Criar</span>
+              </span>
+              <span className="hidden sm:inline text-sky-400" aria-hidden>→</span>
+              <span className="sm:hidden text-sky-400 self-center" aria-hidden>↓</span>
+              <span className="flex items-center gap-1.5 shrink-0">
+                <span aria-hidden>👩</span>
+                <span>Responde</span>
+              </span>
+              <span className="hidden sm:inline text-sky-400" aria-hidden>→</span>
+              <span className="sm:hidden text-sky-400 self-center" aria-hidden>↓</span>
+              <span className="flex items-center gap-1.5 shrink-0">
+                <span aria-hidden>💬</span>
+                <span>Conversa</span>
+              </span>
+              <span className="hidden sm:inline text-sky-400" aria-hidden>→</span>
+              <span className="sm:hidden text-sky-400 self-center" aria-hidden>↓</span>
+              <span className="flex items-center gap-1.5 shrink-0">
+                <span aria-hidden>👥</span>
+                <span>Cliente</span>
+              </span>
+            </div>
+          </div>
+        </details>
+      )}
 
         {message && (
           <div
@@ -958,20 +967,22 @@ function LinksPageContent({ areaCodigo = 'ylada', areaLabel = 'YLADA' }: LinksPa
           )}
         </div>
 
-        <div className="rounded-lg border border-indigo-100 bg-indigo-50/50 p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <div className="min-w-0">
-            <p className="text-sm font-semibold text-gray-900">Modelos prontos e biblioteca completa</p>
-            <p className="text-xs text-gray-600 mt-1">
-              Todos os diagnósticos e calculadoras da sua área ficam na Biblioteca, com filtros por tema e situação — sem repetir o que você já vê aqui.
-            </p>
+        {!embedded && (
+          <div className="rounded-lg border border-indigo-100 bg-indigo-50/50 p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div className="min-w-0">
+              <p className="text-sm font-semibold text-gray-900">Modelos prontos e biblioteca completa</p>
+              <p className="text-xs text-gray-600 mt-1">
+                Todos os diagnósticos e calculadoras da sua área ficam na Biblioteca, com filtros por tema e situação — sem repetir o que você já vê aqui.
+              </p>
+            </div>
+            <Link
+              href={`${prefix}/biblioteca`}
+              className="shrink-0 inline-flex items-center justify-center rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-700 transition-colors"
+            >
+              Abrir Biblioteca
+            </Link>
           </div>
-          <Link
-            href={`${prefix}/biblioteca`}
-            className="shrink-0 inline-flex items-center justify-center rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-700 transition-colors"
-          >
-            Abrir Biblioteca
-          </Link>
-        </div>
+        )}
 
         {!hasLinks && (
           <p className="text-xs text-gray-500 italic">
@@ -1399,11 +1410,13 @@ function LinksPageContent({ areaCodigo = 'ylada', areaLabel = 'YLADA' }: LinksPa
           message={activeLinksModalMessage ?? ''}
         />
       </div>
-    </YladaAreaShell>
   )
+
+  if (embedded) return inner
+  return <YladaAreaShell areaCodigo={areaCodigo} areaLabel={areaLabel}>{inner}</YladaAreaShell>
 }
 
 export { LinksPageContent }
 export default function MatrixLinksPage() {
-  return <LinksPageContent areaCodigo="ylada" areaLabel="YLADA" />
+  return <LinksHubContent areaCodigo="ylada" areaLabel="YLADA" />
 }

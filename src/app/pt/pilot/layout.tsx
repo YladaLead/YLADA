@@ -15,7 +15,7 @@ export const metadata: Metadata = {
     siteName: 'YLADA',
     type: 'website',
     locale: 'pt_BR',
-    url: 'https://www.ylada.com/pt/pilot',
+    url: 'https://www.ylada.com/pt',
     images: [
       {
         url: OG_IMAGE,

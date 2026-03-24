@@ -84,19 +84,7 @@ function PrecosPageContent() {
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-1 mt-2">Grátis</h3>
               <p className="text-2xl font-bold text-gray-900 mb-2">R$ 0</p>
-              <p className="text-gray-600 text-sm mb-4">Comece grátis e teste com clientes reais.</p>
-              <ul className="space-y-2 mb-6 flex-1">
-                {[
-                  '1 diagnóstico ativo',
-                  'até 10 contatos no WhatsApp por mês',
-                  'até 10 análises do Noel por mês',
-                ].map((item) => (
-                  <li key={item} className="flex items-center gap-2 text-gray-700 text-sm">
-                    <span className="text-green-600">✔</span>
-                    {item}
-                  </li>
-                ))}
-              </ul>
+              <p className="text-gray-600 text-sm mb-6 flex-1">Comece grátis e teste com clientes reais.</p>
               <Link
                 href="/pt/cadastro"
                 className="block w-full text-center py-3.5 bg-sky-600 hover:bg-sky-700 text-white font-semibold rounded-xl transition-colors"

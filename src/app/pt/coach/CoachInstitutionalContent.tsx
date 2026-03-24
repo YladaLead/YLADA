@@ -372,14 +372,9 @@ export default function CoachInstitutionalContent() {
         <section className="bg-sky-50 py-12 sm:py-16 border-y border-sky-100">
           <div className="max-w-2xl mx-auto text-center">
             <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">
-              Comece grátis com 1 diagnóstico ativo
+              Comece grátis
             </h2>
-            <p className="text-gray-600 mb-4">Comece grátis e teste com clientes reais.</p>
-            <ul className="space-y-2 text-gray-700 mb-6 text-left max-w-sm mx-auto">
-              <li className="flex items-center gap-2"><span className="text-green-600">✔</span> 1 diagnóstico ativo</li>
-              <li className="flex items-center gap-2"><span className="text-green-600">✔</span> até 10 contatos no WhatsApp por mês</li>
-              <li className="flex items-center gap-2"><span className="text-green-600">✔</span> até 10 análises do Noel por mês</li>
-            </ul>
+            <p className="text-gray-600 mb-6">Comece grátis e teste com clientes reais.</p>
             <Link
               href="/pt/coach/login"
               className="inline-flex items-center justify-center px-8 py-4 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition-all"

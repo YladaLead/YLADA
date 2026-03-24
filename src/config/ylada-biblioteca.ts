@@ -299,7 +299,7 @@ const SUGESTAO_NOEL_TEMAS: Partial<Record<BibliotecaSegmentCode, [string, string
   nutrition: ['peso_gordura', 'metabolismo', 'vitalidade_geral'],
   nutrition_vendedor: ['metabolismo', 'peso_gordura', 'energia'],
   medicine: ['metabolismo', 'energia', 'peso_gordura'],
-  aesthetics: ['pele', 'autoestima', 'rotina_cuidados'],
+  aesthetics: ['pele', 'cabelo', 'unhas', 'sobrancelha', 'maquiagem', 'autoestima', 'rotina_cuidados'],
   fitness: ['treino', 'energia', 'metabolismo'],
   psychology: ['estresse', 'sono', 'vitalidade_geral'],
   psychoanalysis: ['autoconhecimento', 'ansiedade', 'equilibrio_emocional'],
@@ -406,9 +406,72 @@ export const IDEIAS_RAPIDAS_NOEL: IdeiaRapidaNoel[] = [
   },
 ]
 
+/** Ideias por área da estética (vinculadas ao perfil area_estetica). */
+const IDEIAS_RAPIDAS_ESTETICA: Record<string, IdeiaRapidaNoel[]> = {
+  facial: [
+    { texto: 'O que sua pele está precisando?', tema: 'pele', titulo_sugerido: 'O que sua pele está precisando?' },
+    { texto: 'Sua rotina de skincare está adequada?', tema: 'rotina_cuidados', titulo_sugerido: 'Sua rotina de skincare funciona?' },
+    { texto: 'Sua pele parece mais jovem ou mais velha que sua idade?', tema: 'rejuvenescimento', titulo_sugerido: 'Sua pele reflete sua idade?' },
+  ],
+  corporal: [
+    { texto: 'O que pode estar causando sua celulite?', tema: 'celulite', titulo_sugerido: 'O que pode estar causando sua celulite?' },
+    { texto: 'Você tem sinais de flacidez?', tema: 'flacidez', titulo_sugerido: 'Você tem sinais de flacidez?' },
+    { texto: 'O que está travando os resultados da sua pele?', tema: 'gordura_localizada', titulo_sugerido: 'O que está travando seus resultados?' },
+  ],
+  capilar: [
+    { texto: 'Seu cabelo está recebendo os cuidados certos?', tema: 'cabelo', titulo_sugerido: 'Seu cabelo está saudável?' },
+    { texto: 'O que pode estar afetando a saúde do seu cabelo?', tema: 'cabelo', titulo_sugerido: 'O que seu cabelo está precisando?' },
+    { texto: 'Seu couro cabeludo está saudável?', tema: 'cabelo', titulo_sugerido: 'Como está seu couro cabeludo?' },
+  ],
+  unhas: [
+    { texto: 'Suas unhas estão fortes e saudáveis?', tema: 'unhas', titulo_sugerido: 'Suas unhas estão fortes?' },
+    { texto: 'O que suas unhas dizem sobre sua saúde?', tema: 'unhas', titulo_sugerido: 'O que suas unhas revelam?' },
+    { texto: 'Suas cutículas estão saudáveis?', tema: 'unhas', titulo_sugerido: 'Como estão suas cutículas?' },
+  ],
+  sobrancelha: [
+    { texto: 'Qual formato de sobrancelha combina com você?', tema: 'sobrancelha', titulo_sugerido: 'Qual formato combina com você?' },
+    { texto: 'Sua sobrancelha valoriza seu rosto?', tema: 'sobrancelha', titulo_sugerido: 'Sua sobrancelha valoriza seu rosto?' },
+    { texto: 'Você sabe como preencher suas sobrancelhas?', tema: 'sobrancelha', titulo_sugerido: 'Como preencher sua sobrancelha?' },
+  ],
+  maquiagem: [
+    { texto: 'Qual maquiagem valoriza seu tipo de pele?', tema: 'maquiagem', titulo_sugerido: 'Qual maquiagem valoriza sua pele?' },
+    { texto: 'Sua base combina com seu tom de pele?', tema: 'maquiagem', titulo_sugerido: 'Sua base está certa?' },
+    { texto: 'Você sabe qual look combina com você?', tema: 'maquiagem', titulo_sugerido: 'Qual look combina com você?' },
+  ],
+  harmonizacao: [
+    { texto: 'Sua pele está protegida contra o envelhecimento?', tema: 'rejuvenescimento', titulo_sugerido: 'Sua pele está protegida?' },
+    { texto: 'O que sua pele está precisando?', tema: 'pele', titulo_sugerido: 'O que sua pele está precisando?' },
+  ],
+  depilacao_laser: [
+    { texto: 'Sua pele está preparada para depilação a laser?', tema: 'pele', titulo_sugerido: 'Sua pele está preparada?' },
+    { texto: 'O que sua pele está precisando?', tema: 'pele', titulo_sugerido: 'O que sua pele está precisando?' },
+  ],
+  integrativa: [
+    { texto: 'O que sua pele está precisando?', tema: 'pele', titulo_sugerido: 'O que sua pele está precisando?' },
+    { texto: 'Sua aparência está alinhada com como você quer se sentir?', tema: 'autoestima', titulo_sugerido: 'Sua aparência reflete o que você sente?' },
+  ],
+  outro: [
+    { texto: 'O que sua pele está precisando?', tema: 'pele', titulo_sugerido: 'O que sua pele está precisando?' },
+    { texto: 'Sua aparência está alinhada com como você quer se sentir?', tema: 'autoestima', titulo_sugerido: 'Sua aparência reflete o que você sente?' },
+  ],
+}
+
 /** Retorna a "ideia do dia" para o gatilho de criação (índice estável por dia, sem IA). */
-export function getIdeiaRapidaDoDia(): IdeiaRapidaNoel {
+export function getIdeiaRapidaDoDia(options?: {
+  segmentCode?: BibliotecaSegmentCode | null
+  areaEspecifica?: Record<string, unknown> | null
+}): IdeiaRapidaNoel {
   const dayIndex = Math.floor(Date.now() / 86400000)
+
+  if (options?.segmentCode === 'aesthetics' && options?.areaEspecifica) {
+    const areaEstetica = (options.areaEspecifica.area_estetica as string)?.toLowerCase()?.trim()
+    const ideias = areaEstetica && IDEIAS_RAPIDAS_ESTETICA[areaEstetica]
+      ? IDEIAS_RAPIDAS_ESTETICA[areaEstetica]
+      : IDEIAS_RAPIDAS_ESTETICA.facial
+    const idx = dayIndex % ideias.length
+    return ideias[idx]!
+  }
+
   const idx = dayIndex % IDEIAS_RAPIDAS_NOEL.length
   return IDEIAS_RAPIDAS_NOEL[idx]!
 }

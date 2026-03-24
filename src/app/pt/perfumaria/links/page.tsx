@@ -1,5 +1,5 @@
-import { LinksPageContent } from '@/app/pt/(matrix)/links/page'
+import LinksHubContent from '@/components/ylada/LinksHubContent'
 
 export default function PerfumariaLinksPage() {
-  return <LinksPageContent areaCodigo="perfumaria" areaLabel="Perfumaria" />
+  return <LinksHubContent areaCodigo="perfumaria" areaLabel="Perfumaria" />
 }

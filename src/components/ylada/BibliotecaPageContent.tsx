@@ -153,6 +153,10 @@ function BibliotecaCard({
   }
 
   const compacto = isSugestao || isComece
+  const quandoUsarText = getQuandoUsar(item.tema, item.meta)
+  const metaParts = [getTemaLabel(item.tema), tempo, perguntas].filter(Boolean)
+  const metaLine = metaParts.join(' · ')
+  const hasTags = !!(item.dor_principal || item.objetivo_principal || (item.pilar && !item.dor_principal))
 
   return (
     <article
@@ -169,63 +173,44 @@ function BibliotecaCard({
           )}
           <h3 className={`font-semibold text-gray-900 ${compacto ? 'text-sm leading-snug' : ''}`}>{tituloExibido}</h3>
           {item.description && (
-            <p className={`mt-1 text-gray-500 ${compacto ? 'text-xs line-clamp-1' : 'text-sm line-clamp-2'}`}>{item.description}</p>
+            <p className={`mt-1 text-gray-500 ${compacto ? 'text-xs line-clamp-1' : 'text-sm line-clamp-1'}`}>{item.description}</p>
           )}
-          <div
-            className={`mt-2 rounded-lg border border-indigo-100 bg-indigo-50/90 px-3 py-2 ${compacto ? 'py-1.5' : ''}`}
-          >
-            <p className="text-sm text-indigo-900 leading-snug">
-              <span className="font-medium text-indigo-800">💡 Quando usar:</span>{' '}
-              <span className="text-indigo-800">{getQuandoUsar(item.tema, item.meta)}</span>
+          {metaLine && (
+            <p className={`mt-1.5 text-xs text-gray-500 ${compacto ? 'mt-1' : ''}`}>{metaLine}</p>
+          )}
+          {compacto ? (
+            <p className="mt-1.5 text-xs text-indigo-700 line-clamp-2" title={quandoUsarText}>
+              {quandoUsarText}
             </p>
-          </div>
-          <div className={`flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-gray-500 ${compacto ? 'mt-2' : 'mt-3'}`} role="list">
-            <span className="flex items-center gap-1">
-              <span aria-hidden>🧠</span> {getTemaLabel(item.tema)}
-            </span>
-            {tempo && (
-              <span className="flex items-center gap-1">
-                <span aria-hidden>⏱</span> {tempo}
-              </span>
-            )}
-            {perguntas && (
-              <span className="flex items-center gap-1">
-                <span aria-hidden>📊</span> {perguntas}
-              </span>
-            )}
-          </div>
-          {!compacto && (
-            <div className="mt-2 flex flex-wrap gap-1.5">
-              {item.dor_principal && (
-                <span className="inline-flex items-center rounded-md bg-amber-50 px-2 py-0.5 text-xs text-amber-700">
-                  {item.dor_principal}
-                </span>
-              )}
-              {item.objetivo_principal && (
-                <span className="inline-flex items-center rounded-md bg-emerald-50 px-2 py-0.5 text-xs text-emerald-700">
-                  {item.objetivo_principal}
-                </span>
-              )}
-              {item.pilar && !item.dor_principal && (
-                <span className="inline-flex items-center rounded-md bg-gray-100 px-2 py-0.5 text-xs text-gray-600">
-                  {item.pilar}
-                </span>
-              )}
-            </div>
-          )}
-          {compacto && (item.dor_principal || item.objetivo_principal) && (
-            <div className="mt-1.5 flex flex-wrap gap-1">
-              {item.dor_principal && (
-                <span className="inline-flex items-center rounded bg-amber-50 px-1.5 py-0.5 text-[10px] text-amber-700">
-                  {item.dor_principal}
-                </span>
-              )}
-              {item.objetivo_principal && (
-                <span className="inline-flex items-center rounded bg-emerald-50 px-1.5 py-0.5 text-[10px] text-emerald-700">
-                  {item.objetivo_principal}
-                </span>
-              )}
-            </div>
+          ) : (
+            <details className="mt-2 group/details">
+              <summary className="cursor-pointer text-xs font-medium text-indigo-700 hover:text-indigo-800 list-none flex items-center gap-1 [&::-webkit-details-marker]:hidden">
+                <span>Quando usar</span>
+                <span className="text-indigo-500 group-open/details:rotate-180 transition-transform" aria-hidden>▼</span>
+              </summary>
+              <div className="mt-2 rounded-lg border border-indigo-100 bg-indigo-50/60 px-3 py-2">
+                <p className="text-sm text-indigo-900 leading-snug">{quandoUsarText}</p>
+                {hasTags && (
+                  <div className="mt-2 flex flex-wrap gap-1.5 pt-2 border-t border-indigo-100/80">
+                    {item.dor_principal && (
+                      <span className="inline-flex items-center rounded-md bg-amber-50 px-2 py-0.5 text-xs text-amber-700">
+                        {item.dor_principal}
+                      </span>
+                    )}
+                    {item.objetivo_principal && (
+                      <span className="inline-flex items-center rounded-md bg-emerald-50 px-2 py-0.5 text-xs text-emerald-700">
+                        {item.objetivo_principal}
+                      </span>
+                    )}
+                    {item.pilar && !item.dor_principal && (
+                      <span className="inline-flex items-center rounded-md bg-gray-100 px-2 py-0.5 text-xs text-gray-600">
+                        {item.pilar}
+                      </span>
+                    )}
+                  </div>
+                )}
+              </div>
+            </details>
           )}
         </div>
         <div className="flex shrink-0 flex-col items-end gap-2">
@@ -258,9 +243,11 @@ function BibliotecaCard({
 interface BibliotecaPageContentProps {
   areaCodigo: string
   areaLabel: string
+  /** Quando true, não renderiza YladaAreaShell (para uso em Links hub com abas). */
+  embedded?: boolean
 }
 
-export default function BibliotecaPageContent({ areaCodigo, areaLabel }: BibliotecaPageContentProps) {
+export default function BibliotecaPageContent({ areaCodigo, areaLabel, embedded = false }: BibliotecaPageContentProps) {
   const prefix = getYladaAreaPathPrefix(areaCodigo)
   const linksPath = `${prefix}/links`
 
@@ -283,6 +270,7 @@ export default function BibliotecaPageContent({ areaCodigo, areaLabel }: Bibliot
   const [linksCreatedToday, setLinksCreatedToday] = useState<number | null>(null)
   const [meusLinks, setMeusLinks] = useState<Array<{ id: string; slug: string; title: string | null; url: string; stats?: { diagnosis_count?: number } }>>([])
   const [divulgarMeuLink, setDivulgarMeuLink] = useState<{ id: string; slug: string; title: string | null; url: string; stats?: { diagnosis_count?: number } } | null>(null)
+  const [areaEspecifica, setAreaEspecifica] = useState<Record<string, unknown> | null>(null)
   const { userProfile } = useAuth()
 
   useEffect(() => {
@@ -348,6 +336,23 @@ export default function BibliotecaPageContent({ areaCodigo, areaLabel }: Bibliot
     }
   }, [areaCodigo])
 
+  // Buscar perfil (area_specific) para personalizar Sugestão do Noel quando segmento = aesthetics
+  useEffect(() => {
+    const seg = getBibliotecaSegmentFromArea(areaCodigo)
+    if (seg !== 'aesthetics') return
+    let cancelled = false
+    fetch(`/api/ylada/profile?segment=${encodeURIComponent(areaCodigo)}`, { credentials: 'include' })
+      .then((r) => r.json())
+      .then((data) => {
+        if (!cancelled && data?.success && data?.data?.profile) {
+          const p = data.data.profile as { area_specific?: Record<string, unknown> | null }
+          setAreaEspecifica(p?.area_specific && typeof p.area_specific === 'object' ? p.area_specific : null)
+        }
+      })
+      .catch(() => {})
+    return () => { cancelled = true }
+  }, [areaCodigo])
+
   useEffect(() => {
     if (segmentoFiltro && temaFiltro) {
       const temasDoSegmento = getTemasParaBiblioteca(segmentoFiltro)
@@ -377,36 +382,39 @@ export default function BibliotecaPageContent({ areaCodigo, areaLabel }: Bibliot
     return () => { cancelled = true }
   }, [tipoAtivo, segmentoFiltro, temaFiltro])
 
-  return (
-    <YladaAreaShell areaCodigo={areaCodigo} areaLabel={areaLabel}>
-      <div className="max-w-4xl mx-auto space-y-6">
-        <header className="space-y-2">
-          <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Biblioteca</h1>
-          <p className="text-gray-600 text-sm leading-relaxed">
-            {segmentoSugerido && segmentoFiltro === segmentoSugerido
-              ? 'Diagnósticos adaptados ao seu perfil profissional. Cada um traz orientação de quando usar.'
-              : 'Biblioteca estratégica de geração de clientes. Cada item traz orientação de quando usar — Marketing para atrair ou CRM para aprofundar.'}
-          </p>
-          {segmentoSugerido && segmentoFiltro === segmentoSugerido && (
-            <p className="text-sm font-medium text-indigo-700 flex items-center gap-2">
-              <span aria-hidden>💡</span> Sugestão baseada no seu perfil
-            </p>
-          )}
-        </header>
+  const inner = (
+    <div className="max-w-4xl mx-auto space-y-6">
+      {embedded && (
+        <Link
+          href={`${prefix}/links?tab=meus`}
+          className="inline-flex items-center gap-1.5 text-sm text-sky-600 hover:text-sky-800"
+        >
+          <span aria-hidden>🔗</span>
+          Ver meus links
+        </Link>
+      )}
+      <header className="space-y-1">
+        {!embedded && <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Biblioteca</h1>}
+        <p className="text-gray-600 text-sm">
+          {segmentoFiltro && BIBLIOTECA_SEGMENTOS.find((s) => s.value === segmentoFiltro)?.label
+            ? `Mostrando diagnósticos para ${BIBLIOTECA_SEGMENTOS.find((s) => s.value === segmentoFiltro)!.label}.`
+            : 'Escolha um modelo e use.'}
+        </p>
+      </header>
 
-        {/* Contador: sensação de movimento e comunidade */}
+        {/* Contador: compacto */}
         {linksCreatedToday !== null && (
-          <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-center">
-            <p className="text-sm text-slate-700">
-              <span className="font-semibold text-slate-900" aria-hidden>📊</span>{' '}
-              Hoje já foram criados <strong>{linksCreatedToday}</strong> diagnóstico{linksCreatedToday !== 1 ? 's' : ''} na plataforma
-            </p>
-          </div>
+          <p className="text-xs text-gray-500 text-right">
+            {linksCreatedToday} criado{linksCreatedToday !== 1 ? 's' : ''} hoje
+          </p>
         )}
 
-        {/* Ação primeiro: bloco grande "Criar diagnóstico agora" + Sugestão do Noel */}
+        {/* Ação primeiro: bloco "Sugestão do Noel" (personalizada por perfil quando Estética) */}
         {(() => {
-          const ideiaDoDia = getIdeiaRapidaDoDia()
+          const ideiaDoDia = getIdeiaRapidaDoDia({
+            segmentCode: getBibliotecaSegmentFromArea(areaCodigo) ?? undefined,
+            areaEspecifica: areaEspecifica ?? undefined,
+          })
           const itemIdeia = items.find((i) => i.tema === ideiaDoDia.tema && i.tipo === 'quiz')
           const tituloParaLink = ideiaDoDia.titulo_sugerido || itemIdeia?.titulo || getTemaLabel(ideiaDoDia.tema)
           const handleCriarDaIdeia = async () => {
@@ -462,171 +470,88 @@ export default function BibliotecaPageContent({ areaCodigo, areaLabel }: Bibliot
             }
           }
           return (
-            <div className="rounded-2xl border-2 border-sky-200 bg-gradient-to-br from-sky-50 to-white p-6 shadow-md">
-              <h2 className="text-xl font-bold text-gray-900 mb-1 flex items-center gap-2">
-                <span aria-hidden>🎯</span> Criar diagnóstico agora
-              </h2>
-              <p className="text-sm font-medium text-sky-900 mb-2 flex items-center gap-1.5">
-                <span aria-hidden>🧠</span> Sugestão do Noel
-              </p>
-              <p className="text-sm text-gray-700 mb-5">{ideiaDoDia.texto}</p>
+            <div className="rounded-xl border border-sky-200 bg-sky-50/50 p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <div className="min-w-0">
+                <h2 className="text-sm font-semibold text-sky-900 mb-0.5">🧠 Sugestão do Noel</h2>
+                <p className="text-sm text-gray-700 line-clamp-1">{ideiaDoDia.texto}</p>
+              </div>
               <button
                 type="button"
                 onClick={handleCriarDaIdeia}
                 disabled={!!creatingId}
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-sky-600 px-8 py-4 text-base font-semibold text-white hover:bg-sky-700 disabled:opacity-60 transition-colors shadow-sm"
+                className="shrink-0 rounded-lg bg-sky-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-sky-700 disabled:opacity-60 transition-colors"
               >
-                {creatingId === `ideia-${ideiaDoDia.tema}` ? 'Criando...' : 'Criar diagnóstico'}
+                {creatingId === `ideia-${ideiaDoDia.tema}` ? 'Criando...' : 'Usar este'}
               </button>
             </div>
           )
         })()}
 
-        {/* Progressão guiada — primeiro cliente com o YLADA */}
-        <div className="rounded-xl border border-emerald-100 bg-gradient-to-br from-emerald-50/90 to-white p-5 shadow-sm">
-          <h2 className="text-base font-semibold text-gray-900 mb-1 flex items-center gap-2">
-            <span aria-hidden>🚀</span> Sua primeira conversa com cliente
-          </h2>
-          <p className="text-xs text-gray-600 mb-4">
-            Siga os passos abaixo. Assim você entende na prática como usar a plataforma.
-          </p>
-          <ol className="space-y-3">
-            <li className="flex items-center gap-3">
-              {progressao.passo1 ? (
-                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-emerald-500 text-white text-sm font-medium" aria-hidden>✓</span>
-              ) : (
-                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border-2 border-gray-300 bg-white text-gray-400 text-sm" aria-hidden>1</span>
-              )}
-              <div className="min-w-0">
-                <span className={`text-sm font-medium ${progressao.passo1 ? 'text-emerald-800' : 'text-gray-900'}`}>
-                  Passo 1 — Criar seu primeiro diagnóstico
-                </span>
-                {progressao.passo1 && <span className="ml-2 text-xs text-emerald-600">Concluído</span>}
-              </div>
-            </li>
-            <li className="flex items-center gap-3">
-              {progressao.passo2 ? (
-                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-emerald-500 text-white text-sm font-medium" aria-hidden>✓</span>
-              ) : (
-                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border-2 border-gray-300 bg-white text-gray-400 text-sm" aria-hidden>2</span>
-              )}
-              <div className="min-w-0">
-                <span className={`text-sm font-medium ${progressao.passo2 ? 'text-emerald-800' : 'text-gray-900'}`}>
-                  Passo 2 — Compartilhar o link no Instagram ou WhatsApp
-                </span>
-                {progressao.passo2 && <span className="ml-2 text-xs text-emerald-600">Pronto para compartilhar</span>}
-                {!progressao.passo2 && progressao.passo1 && (
-                  <p className="text-xs text-gray-500 mt-0.5">Crie um diagnóstico acima e copie a URL para compartilhar.</p>
-                )}
-              </div>
-            </li>
-            <li className="flex items-center gap-3">
-              {progressao.passo3 ? (
-                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-emerald-500 text-white text-sm font-medium" aria-hidden>✓</span>
-              ) : (
-                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border-2 border-gray-300 bg-white text-gray-400 text-sm" aria-hidden>3</span>
-              )}
-              <div className="min-w-0">
-                <span className={`text-sm font-medium ${progressao.passo3 ? 'text-emerald-800' : 'text-gray-900'}`}>
-                  Passo 3 — Receber respostas e iniciar conversa
-                </span>
-                {progressao.passo3 && <span className="ml-2 text-xs text-emerald-600">Concluído</span>}
-                {!progressao.passo3 && progressao.passo2 && (
-                  <p className="text-xs text-gray-500 mt-0.5">Quem responder aparecerá em Leads. Responda e converta.</p>
-                )}
-              </div>
-            </li>
-          </ol>
-          {progressao.passo1 && progressao.passo2 && progressao.passo3 && (
-            <p className="mt-4 pt-3 border-t border-emerald-100 text-sm font-medium text-emerald-800">
-              🎉 Parabéns! Você concluiu os primeiros passos. Continue criando diagnósticos e compartilhando.
+        {/* Progressão guiada — só para quem ainda não criou o primeiro diagnóstico */}
+        {!progressao.passo1 && (
+          <div className="rounded-xl border border-emerald-100 bg-emerald-50/70 p-4">
+            <h2 className="text-sm font-semibold text-gray-900 mb-2 flex items-center gap-2">
+              <span aria-hidden>🚀</span> Primeiros passos
+            </h2>
+            <ol className="space-y-2 text-sm text-gray-700">
+              <li className="flex items-center gap-2">
+                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 border-gray-300 bg-white text-xs text-gray-400">1</span>
+                Criar seu primeiro diagnóstico
+              </li>
+              <li className="flex items-center gap-2">
+                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 border-gray-300 bg-white text-xs text-gray-400">2</span>
+                Compartilhar o link
+              </li>
+              <li className="flex items-center gap-2">
+                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 border-gray-300 bg-white text-xs text-gray-400">3</span>
+                Receber respostas e conversar
+              </li>
+            </ol>
+            <p className="mt-3 text-xs text-gray-600">
+              Use o botão acima ou escolha na lista abaixo.
             </p>
-          )}
-          {!progressao.passo1 && (
-            <p className="mt-4 text-xs text-gray-600">
-              Use o botão <strong>Criar diagnóstico</strong> acima ou escolha outro diagnóstico na lista abaixo.
-            </p>
-          )}
-          {progressao.passo1 && (
-            <p className="mt-3 text-xs text-gray-500">
-              Parte do <strong>Método YLADA</strong>: Atrair → Filtrar → Conversar → Converter.
-              {progressao.linksCount > 0 && (
-                <Link href={`${prefix}/links`} className="ml-2 text-sky-600 hover:underline">
-                  Ver meus links →
-                </Link>
-              )}
-            </p>
-          )}
-        </div>
-
-        {/* Destaque do segmento ativo */}
-        <div className="flex flex-wrap items-center gap-3 rounded-xl border border-blue-100 bg-blue-50/80 px-4 py-3">
-          <span className="text-sm font-medium text-blue-900">
-            Segmento ativo:{' '}
-            <span className="font-semibold">
-              {segmentoFiltro && BIBLIOTECA_SEGMENTOS.find((s) => s.value === segmentoFiltro)?.label
-                ? BIBLIOTECA_SEGMENTOS.find((s) => s.value === segmentoFiltro)!.label
-                : 'Todos'}
-            </span>
-          </span>
-          <label className="flex items-center gap-1.5 text-sm text-blue-800 cursor-pointer">
-            <span className="shrink-0">Alterar segmento ▼</span>
-            <select
-              value={segmentoFiltro}
-              onChange={(e) => setSegmentoFiltro(e.target.value as BibliotecaSegmentCode | '')}
-              className="rounded-lg border border-blue-200 bg-white px-3 py-1.5 text-sm text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            >
-            {segmentoSugerido ? (
-              <>
-                <option value="">Todos</option>
-                <option value={segmentoSugerido}>
-                  {BIBLIOTECA_SEGMENTOS.find((s) => s.value === segmentoSugerido)?.label ?? segmentoSugerido} (seu perfil)
-                </option>
-              </>
-            ) : (
-              <>
-                <option value="">Todos</option>
-                {BIBLIOTECA_SEGMENTOS.map((s) => (
-                  <option key={s.value} value={s.value}>
-                    {s.label}
-                  </option>
-                ))}
-              </>
-            )}
-            </select>
-          </label>
-          <span className="text-xs text-blue-700/90 w-full sm:w-auto">
-            {segmentoSugerido && segmentoFiltro === segmentoSugerido ? (
-              <>
-                Preparei diagnósticos que costumam funcionar bem para profissionais de{' '}
-                <strong>{BIBLIOTECA_SEGMENTOS.find((s) => s.value === segmentoSugerido)?.label ?? segmentoSugerido}</strong>.
-              </>
-            ) : (
-              'Esses itens foram selecionados para o seu tipo de negócio.'
-            )}
-          </span>
-        </div>
-
-        {/* Dica do Noel */}
-        {segmentoSugerido && segmentoFiltro === segmentoSugerido && getDicaNoelBiblioteca(segmentoSugerido) && (
-          <div className="flex items-start gap-3 rounded-xl border border-amber-100 bg-amber-50/80 px-4 py-3">
-            <span className="text-lg shrink-0" aria-hidden>💡</span>
-            <div>
-              <p className="text-sm font-medium text-amber-900">Dica do Noel</p>
-              <p className="text-sm text-amber-800 mt-0.5">{getDicaNoelBiblioteca(segmentoSugerido)}</p>
-            </div>
           </div>
         )}
 
-        {/* Diagnósticos mais usados / temas do segmento — efeito tendência */}
-        <div className="rounded-xl border border-amber-100 bg-amber-50/70 px-4 py-3">
-          <p className="text-xs font-semibold text-amber-900 mb-2 flex items-center gap-1.5">
-            <span aria-hidden>📊</span>
-            {segmentoFiltro
-              ? `Temas para ${BIBLIOTECA_SEGMENTOS.find((s) => s.value === segmentoFiltro)?.label ?? segmentoFiltro}`
-              : 'Diagnósticos mais usados'}
-          </p>
-          <div className="flex flex-wrap gap-2">
+        {/* Segmento + temas em uma linha */}
+        <div className="flex flex-wrap items-center gap-3">
+          <label className="flex items-center gap-2 text-sm text-gray-700">
+            <span>Segmento:</span>
+            <select
+              value={segmentoFiltro}
+              onChange={(e) => setSegmentoFiltro(e.target.value as BibliotecaSegmentCode | '')}
+              className="rounded-lg border border-gray-200 bg-white px-2.5 py-1.5 text-sm text-gray-700 focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
+            >
+              {segmentoSugerido ? (
+                <>
+                  <option value="">Todos</option>
+                  <option value={segmentoSugerido}>
+                    {BIBLIOTECA_SEGMENTOS.find((s) => s.value === segmentoSugerido)?.label ?? segmentoSugerido} (seu perfil)
+                  </option>
+                </>
+              ) : (
+                <>
+                  <option value="">Todos</option>
+                  {BIBLIOTECA_SEGMENTOS.map((s) => (
+                    <option key={s.value} value={s.value}>
+                      {s.label}
+                    </option>
+                  ))}
+                </>
+              )}
+            </select>
+          </label>
+          <span className="text-gray-300">|</span>
+          <div className="flex flex-wrap items-center gap-2">
+            {segmentoSugerido && segmentoFiltro === segmentoSugerido && getDicaNoelBiblioteca(segmentoSugerido) && (
+              <span
+                className="cursor-help"
+                title={getDicaNoelBiblioteca(segmentoSugerido) ?? undefined}
+                aria-label="Dica do Noel"
+              >
+                💡
+              </span>
+            )}
             {(segmentoFiltro
               ? getTemasParaBiblioteca(segmentoFiltro)
               : (TEMAS_MAIS_USADOS as readonly string[]).map((value) => ({ value, label: getTemaLabel(value) }))
@@ -649,11 +574,44 @@ export default function BibliotecaPageContent({ areaCodigo, areaLabel }: Bibliot
           </div>
         </div>
 
-        <h2 className="text-lg font-semibold text-gray-900 pt-2 flex items-center gap-2">
-          <span aria-hidden>📚</span> Outros diagnósticos disponíveis
-        </h2>
+        <div className="flex flex-wrap items-center gap-4 pt-2">
+          <h2 className="text-base font-semibold text-gray-900 flex items-center gap-2">
+            <span aria-hidden>📚</span> Todos os diagnósticos
+          </h2>
+          <div className="flex flex-wrap items-center gap-3">
+            <label className="flex items-center gap-2 text-xs text-gray-600">
+              Situação:
+              <select
+                value={situacaoFiltro}
+                onChange={(e) => setSituacaoFiltro((e.target.value || '') as '' | SituacaoBiblioteca)}
+                className="rounded border border-gray-200 px-2 py-1.5 text-sm text-gray-700 focus:ring-2 focus:ring-sky-500"
+              >
+                {BIBLIOTECA_SITUACOES_OPTIONS.map((o) => (
+                  <option key={o.value || 'todas'} value={o.value}>
+                    {o.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="flex items-center gap-2 text-xs text-gray-600">
+              Tema:
+              <select
+                value={temaFiltro}
+                onChange={(e) => setTemaFiltro(e.target.value)}
+                className="rounded border border-gray-200 px-2 py-1.5 text-sm text-gray-700 focus:ring-2 focus:ring-sky-500 w-44"
+              >
+                <option value="">Todos</option>
+                {getTemasParaBiblioteca(segmentoFiltro || undefined).map((t) => (
+                  <option key={t.value} value={t.value}>
+                    {t.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
+        </div>
 
-        <div className="flex gap-1 p-1 rounded-xl bg-gray-100">
+        <div className="flex gap-1 p-1 rounded-lg bg-gray-100">
           {BIBLIOTECA_TIPOS.map((t) => (
             <button
               key={t.value}
@@ -668,38 +626,6 @@ export default function BibliotecaPageContent({ areaCodigo, areaLabel }: Bibliot
           ))}
         </div>
 
-        <div className="flex flex-wrap gap-4 items-end">
-          <div className="space-y-1.5">
-            <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider">Situação</label>
-            <select
-              value={situacaoFiltro}
-              onChange={(e) => setSituacaoFiltro((e.target.value || '') as '' | SituacaoBiblioteca)}
-              className="block w-72 max-w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            >
-              {BIBLIOTECA_SITUACOES_OPTIONS.map((o) => (
-                <option key={o.value || 'todas'} value={o.value}>
-                  {o.label}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="space-y-1.5">
-            <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider">Tema</label>
-            <select
-              value={temaFiltro}
-              onChange={(e) => setTemaFiltro(e.target.value)}
-              className="block w-56 px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            >
-              <option value="">Todos</option>
-              {getTemasParaBiblioteca(segmentoFiltro || undefined).map((t) => (
-                <option key={t.value} value={t.value}>
-                  {t.label}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
-
         {loading ? (
           <div className="rounded-2xl border border-gray-200 bg-white p-12 text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-2 border-sky-500 border-t-transparent mx-auto" />
@@ -710,10 +636,9 @@ export default function BibliotecaPageContent({ areaCodigo, areaLabel }: Bibliot
             {/* Sugestões para hoje — 3 recomendados com selos (camada 2) */}
             {itemsComecePorAqui.length > 0 && (
               <section>
-                <h2 className="text-sm font-semibold text-gray-900 mb-2 flex items-center gap-2">
+                <h2 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
                   <span aria-hidden>💡</span> Sugestões para hoje
                 </h2>
-                <p className="text-sm text-gray-600 mb-4">3 diagnósticos recomendados para você.</p>
                 <div className="grid gap-4 sm:grid-cols-3">
                   {itemsComecePorAqui.slice(0, 3).map((item, idx) => {
                     const badges: { icon: string; label: string }[] = [
@@ -763,10 +688,9 @@ export default function BibliotecaPageContent({ areaCodigo, areaLabel }: Bibliot
                             : '🔁'
                     return (
                       <div key={situacao.value} className="mb-8 last:mb-0">
-                        <h2 className="text-sm font-semibold text-gray-800 mb-1 flex items-center gap-2">
+                        <h2 className="text-sm font-semibold text-gray-800 mb-3 flex items-center gap-2">
                           <span aria-hidden>{icon}</span> {situacao.label}
                         </h2>
-                        <p className="text-xs text-gray-500 mb-3">{situacao.description}</p>
                         <div className="grid gap-4 sm:grid-cols-2">
                           {itensSituacao.map((item) => (
                             <BibliotecaCard
@@ -795,9 +719,6 @@ export default function BibliotecaPageContent({ areaCodigo, areaLabel }: Bibliot
                   <h2 className="text-sm font-semibold text-gray-800 mb-3">
                     {BIBLIOTECA_SITUACOES.find((s) => s.value === situacaoFiltro)?.label ?? situacaoFiltro}
                   </h2>
-                  <p className="text-xs text-gray-500 mb-4">
-                    {BIBLIOTECA_SITUACOES.find((s) => s.value === situacaoFiltro)?.description}
-                  </p>
                   <div className="grid gap-4 sm:grid-cols-2">
                     {itemsFiltered.map((item) => (
                       <BibliotecaCard
@@ -853,7 +774,8 @@ export default function BibliotecaPageContent({ areaCodigo, areaLabel }: Bibliot
           </div>
         )}
 
-        {/* Camada 4: Diagnósticos do profissional */}
+        {/* Meus diagnósticos — oculto quando embedded (hub tem "Ver meus links") */}
+        {!embedded && (
         <section className="rounded-xl border border-gray-200 bg-gray-50/50 p-5">
           <h2 className="text-base font-semibold text-gray-900 mb-3 flex items-center gap-2">
             <span aria-hidden>📂</span> Meus diagnósticos
@@ -899,6 +821,7 @@ export default function BibliotecaPageContent({ areaCodigo, areaLabel }: Bibliot
             </Link>
           )}
         </section>
+        )}
 
         {divulgarMeuLink && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50" aria-modal="true" role="dialog" onClick={() => setDivulgarMeuLink(null)}>
@@ -969,6 +892,8 @@ export default function BibliotecaPageContent({ areaCodigo, areaLabel }: Bibliot
           </div>
         )}
       </div>
-    </YladaAreaShell>
   )
+
+  if (embedded) return inner
+  return <YladaAreaShell areaCodigo={areaCodigo} areaLabel={areaLabel}>{inner}</YladaAreaShell>
 }

@@ -212,9 +212,12 @@ export const EQUIPE_OPERACIONAL_OPTIONS = [
 export const AREA_ESTETICA_OPTIONS = [
   { value: 'facial', label: 'Estética facial' },
   { value: 'corporal', label: 'Estética corporal' },
+  { value: 'capilar', label: 'Cabelo / tricologia' },
+  { value: 'unhas', label: 'Unhas' },
+  { value: 'sobrancelha', label: 'Sobrancelha' },
+  { value: 'maquiagem', label: 'Maquiagem' },
   { value: 'depilacao_laser', label: 'Depilação / laser' },
   { value: 'harmonizacao', label: 'Harmonização facial' },
-  { value: 'capilar', label: 'Capilar / tricologia' },
   { value: 'integrativa', label: 'Estética integrativa' },
   { value: 'outro', label: 'Outro' },
 ] as const

@@ -40,6 +40,8 @@ export interface OnboardingPageContentProps {
   redirectAfterSave: string
   /** Texto da prova social (opcional). */
   proofText?: string
+  /** Versão minimalista: menos texto, foco no formulário e CTA (filosofia "explique menos, venda mais"). */
+  minimal?: boolean
 }
 
 export function OnboardingPageContent({
@@ -48,6 +50,7 @@ export function OnboardingPageContent({
   redirectIfDone,
   redirectAfterSave,
   proofText,
+  minimal = false,
 }: OnboardingPageContentProps) {
   const { user, session, loading } = useAuth()
   const router = useRouter()
@@ -279,40 +282,50 @@ export function OnboardingPageContent({
         </div>
 
         <div className="bg-white rounded-2xl shadow-2xl p-8 sm:p-12 border border-gray-100">
-          <div className="text-center mb-8">
+          <div className={minimal ? 'text-center mb-8' : 'text-center mb-8'}>
             <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4 leading-tight">
               {copy.welcomeTitle}
             </h1>
             <p className="text-xl text-gray-700 leading-relaxed mb-6">
               {copy.valueSubtitle}
             </p>
-            <p className="text-gray-600 leading-relaxed mb-2">
-              A YLADA foi criada para ajudar profissionais a:
-            </p>
-            <ul className="text-gray-600 text-left list-disc list-inside max-w-md mx-auto space-y-1 mb-4">
-              <li>{copy.benefits[0]}</li>
-              <li>{copy.benefits[1]}</li>
-              <li>{copy.benefits[2]}</li>
-            </ul>
-            <p className="text-gray-600 leading-relaxed">
-              Em poucos minutos vamos gerar um <strong className="text-gray-800">Diagnóstico Estratégico</strong> para entender melhor o seu momento.
-            </p>
+            {!minimal && (
+              <>
+                <p className="text-gray-600 leading-relaxed mb-2">
+                  A YLADA foi criada para ajudar profissionais a:
+                </p>
+                <ul className="text-gray-600 text-left list-disc list-inside max-w-md mx-auto space-y-1 mb-4">
+                  <li>{copy.benefits[0]}</li>
+                  <li>{copy.benefits[1]}</li>
+                  <li>{copy.benefits[2]}</li>
+                </ul>
+                <p className="text-gray-600 leading-relaxed">
+                  Em poucos minutos vamos gerar um <strong className="text-gray-800">Diagnóstico Estratégico</strong> para entender melhor o seu momento.
+                </p>
+              </>
+            )}
           </div>
 
           <div className="border-t border-gray-200 my-8" />
 
           <div className="mb-8">
-            <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 mb-6">
-              <p className="text-blue-800 text-sm leading-relaxed">
-                <strong>Por que o perfil é importante?</strong> É através dele que definimos suas áreas de atuação, os fluxos da biblioteca e as orientações personalizadas do Noel. Sem essas informações, não conseguimos entregar o melhor para você — por isso pedimos que preencha no primeiro acesso.
-              </p>
-            </div>
-            <p className="text-center text-gray-700 text-lg leading-relaxed mb-2">
-              Antes de começar, precisamos de duas informações rápidas.
-            </p>
-            <p className="text-center text-gray-600 text-sm mb-6">
-              Assim podemos personalizar seu diagnóstico e preparar sua conta na plataforma.
-            </p>
+            {!minimal && (
+              <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 mb-6">
+                <p className="text-blue-800 text-sm leading-relaxed">
+                  <strong>Por que o perfil é importante?</strong> É através dele que definimos suas áreas de atuação, os fluxos da biblioteca e as orientações personalizadas do Noel. Sem essas informações, não conseguimos entregar o melhor para você — por isso pedimos que preencha no primeiro acesso.
+                </p>
+              </div>
+            )}
+            {!minimal && (
+              <>
+                <p className="text-center text-gray-700 text-lg leading-relaxed mb-2">
+                  Antes de começar, precisamos de duas informações rápidas.
+                </p>
+                <p className="text-center text-gray-600 text-sm mb-6">
+                  Assim podemos personalizar seu diagnóstico e preparar sua conta na plataforma.
+                </p>
+              </>
+            )}
 
             <div className="space-y-4">
               <div>
@@ -342,9 +355,11 @@ export function OnboardingPageContent({
                   className="w-full rounded-xl focus-within:ring-2 focus-within:ring-blue-500"
                   placeholder="11 99999-9999"
                 />
-                <p className="text-xs text-gray-500 mt-1">
-                  Usamos esse número apenas para facilitar sua comunicação dentro da plataforma.
-                </p>
+                {!minimal && (
+                  <p className="text-xs text-gray-500 mt-1">
+                    Usamos esse número apenas para facilitar sua comunicação dentro da plataforma.
+                  </p>
+                )}
               </div>
             </div>
 
@@ -356,16 +371,18 @@ export function OnboardingPageContent({
           </div>
 
           <div className="text-center">
-            <p className="text-sm font-semibold text-sky-600 mb-2">🧠 NOEL</p>
-            <p className="text-gray-700 mb-2">
-              {copy.ctaIntro}
-            </p>
-            <p className="text-gray-600 font-medium mb-4">
-              {nomeCompleto.trim()
-                ? `Seu diagnóstico será personalizado para você, ${nomeCompleto.trim().split(/\s+/)[0] || nomeCompleto.trim()}.`
-                : 'Seu diagnóstico será personalizado para você.'}
-            </p>
-            <p className="text-sm text-blue-600 font-medium mb-3">💡 São apenas 5 perguntas rápidas.</p>
+            {!minimal && (
+              <>
+                <p className="text-sm font-semibold text-sky-600 mb-2">🧠 NOEL</p>
+                <p className="text-gray-700 mb-2">{copy.ctaIntro}</p>
+                <p className="text-gray-600 font-medium mb-4">
+                  {nomeCompleto.trim()
+                    ? `Seu diagnóstico será personalizado para você, ${nomeCompleto.trim().split(/\s+/)[0] || nomeCompleto.trim()}.`
+                    : 'Seu diagnóstico será personalizado para você.'}
+                </p>
+                <p className="text-sm text-blue-600 font-medium mb-3">💡 São apenas 5 perguntas rápidas.</p>
+              </>
+            )}
 
             <button
               type="button"
@@ -378,17 +395,19 @@ export function OnboardingPageContent({
 
             <p className="text-sm text-gray-500 mt-3">Leva menos de 2 minutos.</p>
 
-            {displayProofText && (
+            {!minimal && displayProofText && (
               <p className="text-xs text-gray-400 mt-4">{displayProofText}</p>
             )}
           </div>
         </div>
 
-        <div className="mt-6 text-center">
-          <p className="text-sm text-gray-500">
-            Você pode editar essas informações a qualquer momento em Configurações
-          </p>
-        </div>
+        {!minimal && (
+          <div className="mt-6 text-center">
+            <p className="text-sm text-gray-500">
+              Você pode editar essas informações a qualquer momento em Configurações
+            </p>
+          </div>
+        )}
       </div>
     </div>
   )

@@ -12,6 +12,8 @@ export interface PilotAreaMinimalProps {
   primaryLabel?: string
   fullPageHref: string
   fullPageLabel?: string
+  /** Prova social breve (ex.: "+3.000 profissionais já usam") */
+  proofLine?: string
 }
 
 export default function PilotAreaMinimal({
@@ -22,12 +24,13 @@ export default function PilotAreaMinimal({
   primaryLabel = 'Entrar',
   fullPageHref,
   fullPageLabel = 'Ver página completa',
+  proofLine,
 }: PilotAreaMinimalProps) {
   return (
     <div className="min-h-screen bg-white text-gray-900 flex flex-col">
       <header className="shrink-0 border-b border-gray-100">
         <div className="max-w-lg mx-auto px-4 h-14 sm:h-16 flex items-center justify-between">
-          <Link href="/pt/pilot" className="touch-manipulation" aria-label="Voltar ao piloto">
+          <Link href="/pt" className="touch-manipulation" aria-label="Voltar ao piloto">
             <YLADALogo size="md" responsive className="bg-transparent" />
           </Link>
           <Link
@@ -46,7 +49,10 @@ export default function PilotAreaMinimal({
         </h1>
         <p className="mt-4 text-sm sm:text-base text-gray-600 leading-relaxed">{subline}</p>
 
-        <div className="mt-10 space-y-4">
+        {proofLine && (
+          <p className="mt-6 text-xs text-gray-500 text-center">{proofLine}</p>
+        )}
+        <div className="mt-6 sm:mt-10 space-y-4">
           <Link
             href={primaryHref}
             className="flex w-full min-h-[44px] items-center justify-center rounded-xl bg-blue-600 px-6 py-3 text-base font-semibold text-white hover:bg-blue-700 active:bg-blue-800 sm:min-h-[48px]"
@@ -62,7 +68,7 @@ export default function PilotAreaMinimal({
         </div>
 
         <p className="mt-auto pt-10 text-center">
-          <Link href="/pt/pilot" className="text-sm text-gray-500 hover:text-gray-800">
+          <Link href="/pt" className="text-sm text-gray-500 hover:text-gray-800">
             ← Outros segmentos
           </Link>
         </p>

@@ -389,9 +389,9 @@ export function AreaLandingPage({ area, locale, appBasePath = '/pt' }: AreaLandi
                 </Link>
               </div>
               <p className="text-gray-500 text-sm mt-3">
-                {locale === 'pt' && 'Comece grátis com 1 diagnóstico ativo'}
-                {locale === 'en' && 'Start free with 1 active diagnosis'}
-                {locale === 'es' && 'Comienza gratis con 1 diagnóstico activo'}
+                {locale === 'pt' && 'Comece grátis'}
+                {locale === 'en' && 'Start for free'}
+                {locale === 'es' && 'Comienza gratis'}
               </p>
             </div>
           </div>

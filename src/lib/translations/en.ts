@@ -340,11 +340,8 @@ export const enTranslations: Translations = {
       item4: 'turn curiosity into commitment'
     },
     freeTrial: {
-      title: 'Start free with 1 active diagnosis',
+      title: 'Start for free',
       subtitle: 'Start free and test with real clients.',
-      item1: '1 active diagnosis',
-      item2: 'up to 10 WhatsApp contacts per month',
-      item3: 'up to 10 Noel analyses per month',
       cta: 'Create my first free diagnosis'
     },
     ctaFinal: {

@@ -43,7 +43,7 @@ export const YLADA_MENU_GROUPS = [
     items: [
       { key: 'painel', label: 'Painel', path: 'painel', icon: '📊' },
       { key: 'home', label: 'Noel (mentor)', path: 'home', icon: '💬' },
-      { key: 'links', label: 'Links de captação', path: 'links', icon: '🔗' },
+      { key: 'links', label: 'Links', path: 'links', icon: '🔗' },
       { key: 'leads', label: 'Leads', path: 'leads', icon: '👥' },
       { key: 'crescimento', label: 'Crescimento', path: 'crescimento', icon: '📈' },
     ],
@@ -51,9 +51,7 @@ export const YLADA_MENU_GROUPS = [
   {
     label: 'Aprender',
     items: [
-      { key: 'biblioteca', label: 'Biblioteca', path: 'biblioteca', icon: '📚' },
-      { key: 'metodo', label: 'Método YLADA', path: 'metodo', icon: '🚀' },
-      { key: 'trilha', label: 'Academia YLADA', path: 'trilha', icon: '🎓' },
+      { key: 'como-usar', label: 'Como usar', path: 'como-usar', icon: '📖' },
     ],
   },
   {

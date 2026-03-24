@@ -344,11 +344,8 @@ export const ptTranslations: Translations = {
       item4: 'transformar curiosidade em decisão'
     },
     freeTrial: {
-      title: 'Comece grátis com 1 diagnóstico ativo',
+      title: 'Comece grátis',
       subtitle: 'Comece grátis e teste com clientes reais.',
-      item1: '1 diagnóstico ativo',
-      item2: 'até 10 contatos no WhatsApp por mês',
-      item3: 'até 10 análises do Noel por mês',
       cta: 'Criar meu primeiro diagnóstico grátis'
     },
     ctaFinal: {

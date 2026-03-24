@@ -62,7 +62,7 @@ const DEMO_ACCOUNTS = [
       rotina_atual_resumo: 'Atendo estética e linha de emagrecimento; 3–4 dias por semana, pouco tempo para divulgar',
       area_specific: {
         nome: 'Dr. Demo Medicina',
-        whatsapp: '19981868000',
+        whatsapp: '19997230912',
         countryCode: 'BR',
         publico_principal: ['particular', 'feminino'],
         especialidades: ['dermatologia'],
@@ -94,7 +94,12 @@ const DEMO_ACCOUNTS = [
       modelo_pagamento: 'particular',
       canais_principais: ['instagram', 'indicacao'],
       rotina_atual_resumo: 'Atendo presencial e online, quero link para quem busca terapia',
-      area_specific: { temas_atuacao: ['ansiedade', 'sono', 'autoconhecimento'] }
+      area_specific: {
+        nome: 'Dra. Demo Psicologia',
+        whatsapp: '19997230912',
+        countryCode: 'BR',
+        temas_atuacao: ['ansiedade', 'sono', 'autoconhecimento']
+      }
     }
   },
   {
@@ -118,7 +123,13 @@ const DEMO_ACCOUNTS = [
       modelo_pagamento: 'comissao',
       canais_principais: ['whatsapp', 'instagram'],
       rotina_atual_resumo: 'Vendo por WhatsApp e redes, quero ferramentas para qualificar',
-      area_specific: { canal_principal_vendas: 'whatsapp', temas_atuacao: ['vendas_gerais'] }
+      area_specific: {
+        nome: 'Demo Vendedor (vendas em gerais)',
+        whatsapp: '19997230912',
+        countryCode: 'BR',
+        canal_principal_vendas: 'whatsapp',
+        temas_atuacao: ['vendas_gerais']
+      }
     }
   },
   {
@@ -142,7 +153,13 @@ const DEMO_ACCOUNTS = [
       modelo_pagamento: 'comissao',
       canais_principais: ['whatsapp', 'instagram'],
       rotina_atual_resumo: 'Vendo por WhatsApp e redes, quero ferramentas para qualificar',
-      area_specific: { canal_principal_vendas: 'whatsapp', temas_atuacao: ['b12_vitaminas', 'energia', 'emagrecimento'] }
+      area_specific: {
+        nome: 'Demo Nutra',
+        whatsapp: '19997230912',
+        countryCode: 'BR',
+        canal_principal_vendas: 'whatsapp',
+        temas_atuacao: ['b12_vitaminas', 'energia', 'emagrecimento']
+      }
     }
   },
   {
@@ -166,7 +183,12 @@ const DEMO_ACCOUNTS = [
       modelo_pagamento: 'particular',
       canais_principais: ['instagram', 'whatsapp'],
       rotina_atual_resumo: 'Clínica de estética, quero ferramentas para captar e qualificar',
-      area_specific: { temas_atuacao: ['pele', 'skincare', 'autocuidado', 'retencao'] }
+      area_specific: {
+        nome: 'Demo Esteticista',
+        whatsapp: '19997230912',
+        countryCode: 'BR',
+        temas_atuacao: ['pele', 'skincare', 'autocuidado', 'retencao']
+      }
     }
   },
   {
@@ -190,7 +212,13 @@ const DEMO_ACCOUNTS = [
       modelo_pagamento: 'particular',
       canais_principais: ['instagram', 'whatsapp'],
       rotina_atual_resumo: 'Atendo presencial e online, quero ferramentas para captar',
-      area_specific: { area_nutri: 'emagrecimento', temas_atuacao: ['emagrecimento', 'intestino', 'energia'] }
+      area_specific: {
+        nome: 'Dra. Demo Nutricionista',
+        whatsapp: '19997230912',
+        countryCode: 'BR',
+        area_nutri: 'emagrecimento',
+        temas_atuacao: ['emagrecimento', 'intestino', 'energia']
+      }
     }
   },
   {
@@ -214,7 +242,13 @@ const DEMO_ACCOUNTS = [
       modelo_pagamento: 'recorrencia',
       canais_principais: ['instagram', 'indicacao'],
       rotina_atual_resumo: 'Trabalho com programas online, pouca divulgação estruturada',
-      area_specific: { modelo_entrega_coach: 'programa_online', temas_atuacao: ['carreira', 'produtividade', 'autoconhecimento'] }
+      area_specific: {
+        nome: 'Demo Coach',
+        whatsapp: '19997230912',
+        countryCode: 'BR',
+        modelo_entrega_coach: 'programa_online',
+        temas_atuacao: ['carreira', 'produtividade', 'autoconhecimento']
+      }
     }
   },
   {
@@ -238,7 +272,12 @@ const DEMO_ACCOUNTS = [
       modelo_pagamento: 'avulso',
       canais_principais: ['instagram', 'whatsapp'],
       rotina_atual_resumo: 'Vendo perfumes por loja e redes, quero ferramentas para qualificar e indicar',
-      area_specific: { temas_atuacao: ['perfil_olfativo', 'familia_olfativa', 'ocasiao_uso'] }
+      area_specific: {
+        nome: 'Demo Vendedor Perfumaria',
+        whatsapp: '19997230912',
+        countryCode: 'BR',
+        temas_atuacao: ['perfil_olfativo', 'familia_olfativa', 'ocasiao_uso']
+      }
     }
   }
 ]

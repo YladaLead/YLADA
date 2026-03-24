@@ -20,7 +20,9 @@ export type YladaOgSegment =
 /** Pasta única compartilhada — todas as imagens em /images/og/ylada/ */
 const OG_BASE = '/images/og/ylada'
 
-/** Mapeamento tema/ferramenta normalizado → nome do arquivo de imagem. */
+/** Mapeamento tema/ferramenta normalizado → nome do arquivo de imagem.
+ * Nomes de arquivo são descritivos para orientar qual imagem colocar.
+ * Placeholders podem ser substituídos depois pelas imagens finais. */
 const TEMA_TO_IMAGE: Record<string, string> = {
   // Calculadoras (compartilhadas entre todas as áreas)
   imc: 'peso-gordura.jpg',
@@ -51,6 +53,9 @@ const TEMA_TO_IMAGE: Record<string, string> = {
   vitalidade_geral: 'vitalidade.jpg',
   detox: 'detox.jpg',
   performance: 'performance.jpg',
+  saude: 'nutri-saude.jpg',
+  saude_geral: 'nutri-saude.jpg',
+  nutricao_saudavel: 'nutri-saude.jpg',
 
   // Perfumaria
   preferencias_olfativas: 'perfumaria-perfil.jpg',
@@ -60,18 +65,29 @@ const TEMA_TO_IMAGE: Record<string, string> = {
   perfume_assinatura: 'perfumaria-perfil.jpg',
   perfil_olfativo: 'perfumaria-perfil.jpg',
 
-  // Estética
-  pele: 'estetica-pele.jpg',
-  autoestima: 'estetica-pele.jpg',
-  rotina_cuidados: 'estetica-pele.jpg',
+  // Estética — nomes orientam tipo de imagem a colocar
+  pele: 'estetica-pele-cuidados.jpg',
+  pele_cuidados: 'estetica-pele-cuidados.jpg',
+  cuidados_pele: 'estetica-pele-cuidados.jpg',
+  autoestima: 'estetica-pele-cuidados.jpg',
+  rotina_cuidados: 'estetica-pele-cuidados.jpg',
+  manchas: 'estetica-pele-manchas.jpg',
+  pele_manchas: 'estetica-pele-manchas.jpg',
+  manchas_pele: 'estetica-pele-manchas.jpg',
+  antienvelhecimento: 'estetica-pele-antienvelhecimento.jpg',
+  pele_antienvelhecimento: 'estetica-pele-antienvelhecimento.jpg',
   rejuvenescimento: 'estetica-rejuvenescimento.jpg',
-  gordura_localizada: 'estetica-corporal.jpg',
-  celulite: 'estetica-corporal.jpg',
-  flacidez: 'estetica-corporal.jpg',
-  manchas: 'estetica-pele.jpg',
-  antienvelhecimento: 'estetica-rejuvenescimento.jpg',
+  unhas: 'estetica-unhas.jpg',
+  cuidado_unhas: 'estetica-unhas.jpg',
+  alongamento_unhas: 'estetica-unhas.jpg',
+  cabelos: 'estetica-cabelos.jpg',
+  cuidado_cabelos: 'estetica-cabelos.jpg',
+  gordura_localizada: 'estetica-corporal-celulite.jpg',
+  celulite: 'estetica-corporal-celulite.jpg',
+  corporal_celulite: 'estetica-corporal-celulite.jpg',
+  flacidez: 'estetica-corporal-flacidez.jpg',
+  corporal_flacidez: 'estetica-corporal-flacidez.jpg',
   corporal: 'estetica-corporal.jpg',
-  cabelos: 'estetica-pele.jpg',
 
   // Fitness
   treino: 'fitness-treino.jpg',
@@ -80,22 +96,33 @@ const TEMA_TO_IMAGE: Record<string, string> = {
   forca: 'fitness-treino.jpg',
   consistencia: 'fitness-treino.jpg',
 
-  // Psicologia
+  // Psicologia / Psicanálise
   ansiedade: 'psicologia-ansiedade.jpg',
   emocoes: 'psicologia-ansiedade.jpg',
-  autoconhecimento: 'psicologia-ansiedade.jpg',
-  relacionamentos: 'psicologia-ansiedade.jpg',
   equilibrio_emocional: 'psicologia-ansiedade.jpg',
+  depressao: 'psicologia-depressao.jpg',
+  relacionamentos: 'psicologia-relacionamentos.jpg',
+  autoconhecimento: 'psicologia-autoconhecimento.jpg',
+  emocional: 'psicologia-emocional.jpg',
+  saude_mental: 'psicologia-emocional.jpg',
+  autoestima_psicologia: 'psicologia-autoestima.jpg',
 
-  // Odontologia
-  saude_bucal: 'odonto-saude.jpg',
-  higiene_oral: 'odonto-saude.jpg',
+  // Odontologia — nomes orientam imagem (ex: sorriso → foto de sorriso)
+  sorriso: 'odonto-sorriso.jpg',
+  sorriso_saudavel: 'odonto-sorriso.jpg',
+  saude_bucal: 'odonto-saude-bucal.jpg',
+  higiene_oral: 'odonto-saude-bucal.jpg',
+  clareamento: 'odonto-clareamento.jpg',
+  clareamento_dental: 'odonto-clareamento.jpg',
+  halitose: 'odonto-halitose.jpg',
+  mau_halito: 'odonto-halitose.jpg',
+  implantes: 'odonto-implantes.jpg',
+  implante_dental: 'odonto-implantes.jpg',
+  ortodontia: 'odonto-ortodontia.jpg',
+  aparelho: 'odonto-ortodontia.jpg',
+  sensibilidade: 'odonto-sensibilidade.jpg',
+  sensibilidade_dental: 'odonto-sensibilidade.jpg',
   estetica_dental: 'odonto-estetica.jpg',
-  halitose: 'odonto-saude.jpg',
-  sensibilidade: 'odonto-saude.jpg',
-  clareamento: 'odonto-estetica.jpg',
-  implantes: 'odonto-estetica.jpg',
-  ortodontia: 'odonto-estetica.jpg',
 
   // Medicina
   prevencao: 'medicina-prevencao.jpg',
@@ -103,16 +130,19 @@ const TEMA_TO_IMAGE: Record<string, string> = {
   estilo_vida: 'medicina-prevencao.jpg',
   habitos: 'medicina-prevencao.jpg',
   vitalidade: 'medicina-prevencao.jpg',
-  pressao: 'medicina-prevencao.jpg',
-  diabetes: 'medicina-prevencao.jpg',
-  suplementacao: 'medicina-prevencao.jpg',
+  diabetes: 'medicina-diabetes.jpg',
+  pressao: 'medicina-pressao.jpg',
+  hipertensao: 'medicina-pressao.jpg',
+  suplementacao: 'medicina-suplementacao.jpg',
 
-  // Vendedor
+  // Vendedor / Coach
   b12_vitaminas: 'vendedor-energia.jpg',
   bem_estar: 'vendedor-energia.jpg',
   carreira: 'carreira.jpg',
   produtividade: 'carreira.jpg',
   vendas: 'carreira.jpg',
+  proposito: 'coach-proposito.jpg',
+  coach_proposito: 'coach-proposito.jpg',
 }
 
 /** Padrão por segmento quando tema não mapeia (todos na pasta compartilhada). */
@@ -172,7 +202,12 @@ function extractTemaKeywords(tema: string): string[] {
   if (!n) return []
   const keywords: string[] = [n]
   // Palavras comuns que podem ser o tema principal
-  const common = ['emagrecimento', 'intestino', 'energia', 'pele', 'perfume', 'treino', 'ansiedade', 'metabolismo', 'alimentacao', 'hidratacao', 'sono', 'estresse', 'detox', 'performance', 'perfil_olfativo', 'familia_olfativa']
+  const common = [
+    'emagrecimento', 'intestino', 'energia', 'pele', 'perfume', 'treino', 'ansiedade', 'metabolismo',
+    'alimentacao', 'hidratacao', 'sono', 'estresse', 'detox', 'performance', 'perfil_olfativo', 'familia_olfativa',
+    'sorriso', 'unhas', 'cabelos', 'celulite', 'flacidez', 'manchas', 'clareamento', 'halitose', 'implantes',
+    'ortodontia', 'sensibilidade', 'depressao', 'relacionamentos', 'autoconhecimento', 'proposito', 'saude', 'diabetes', 'pressao'
+  ]
   for (const c of common) {
     if (n.includes(c)) keywords.push(c)
   }

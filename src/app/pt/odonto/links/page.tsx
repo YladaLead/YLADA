@@ -1,5 +1,5 @@
-import { LinksPageContent } from '@/app/pt/(matrix)/links/page'
+import LinksHubContent from '@/components/ylada/LinksHubContent'
 
 export default function OdontoLinksPage() {
-  return <LinksPageContent areaCodigo="odonto" areaLabel="Odontologia" />
+  return <LinksHubContent areaCodigo="odonto" areaLabel="Odontologia" />
 }
