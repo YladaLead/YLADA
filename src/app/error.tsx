@@ -44,6 +44,12 @@ export default function GlobalError({
           >
             Entrar
           </Link>
+          <Link
+            href="/pt/wellness/recuperar-acesso"
+            className="px-4 py-2 border border-green-300 rounded-lg font-medium text-green-700 hover:bg-green-50"
+          >
+            Recuperar acesso
+          </Link>
         </div>
       </div>
     </div>
