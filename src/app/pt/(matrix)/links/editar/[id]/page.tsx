@@ -200,42 +200,36 @@ export default function EditarLinkPage({ params }: { params: Promise<{ id: strin
           <Link href={linksPath} className="text-sm text-sky-600 hover:underline flex items-center gap-1">
             <span>←</span> Voltar aos links
           </Link>
-          <a
-            href={previewUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-sm text-sky-600 hover:underline"
-          >
-            Ver como visitante →
-          </a>
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 justify-end">
+            <button
+              type="button"
+              onClick={() => setShowCompartilhar(true)}
+              className="text-sm font-medium text-emerald-700 hover:text-emerald-900 hover:underline"
+            >
+              Compartilhar link
+            </button>
+            <a
+              href={previewUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm text-sky-600 hover:underline"
+            >
+              Ver como visitante →
+            </a>
+          </div>
         </div>
 
-        {/* Diagnóstico em movimento — prova social + compartilhar (mesmo link) */}
-        <div className="rounded-2xl border-2 border-emerald-100 bg-gradient-to-br from-emerald-50/90 to-white p-5 shadow-sm">
-          <h2 className="text-base font-semibold text-gray-900 mb-1 flex items-center gap-2">
-            <span aria-hidden>📊</span> Resultados
-          </h2>
-          <p className="text-2xl font-bold text-emerald-800 mb-0.5">
-            {respostas} {respostas === 1 ? 'pessoa já respondeu' : 'pessoas já responderam'} esse diagnóstico
+        <div className="rounded-xl border border-sky-100 bg-sky-50/50 p-4 text-sm text-gray-700">
+          <p className="font-medium text-gray-900 mb-1">Personalize se quiser</p>
+          <p>
+            Se o quiz já combina com você, pode salvar e usar assim mesmo. Quiser mudar título ou perguntas, edite abaixo —{' '}
+            <span className="text-gray-600">é isso que seu paciente ou cliente vê no link.</span>
           </p>
-          {metaSugerida > 0 && (
-            <p className="text-sm text-emerald-700 mb-4">
-              🎯 Meta sugerida: {metaSugerida} respostas
-            </p>
-          )}
-          <p className="text-sm text-gray-600 mb-4">Compartilhe o mesmo link para gerar mais respostas.</p>
-          <button
-            type="button"
-            onClick={() => setShowCompartilhar(true)}
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-6 py-3 text-sm font-semibold text-white hover:bg-emerald-700 shadow-sm"
-          >
-            Compartilhar diagnóstico
-          </button>
         </div>
 
         <h1 className="text-lg font-bold text-gray-900">Editar quiz</h1>
         <p className="text-sm text-gray-600">
-          O que você edita aqui é o que seu paciente vê. Toque em qualquer parte para editar.
+          Toque em qualquer pergunta para abrir e editar o texto e as opções.
         </p>
 
         {message && (
@@ -431,6 +425,34 @@ export default function EditarLinkPage({ params }: { params: Promise<{ id: strin
           >
             Ver preview
           </a>
+        </div>
+
+        <div className="rounded-xl border border-gray-200 bg-gray-50/80 p-4 sm:p-5 space-y-3">
+          <h2 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
+            <span aria-hidden>📊</span> Respostas e divulgação
+          </h2>
+          {respostas > 0 ? (
+            <>
+              <p className="text-sm text-gray-800">
+                <span className="font-semibold text-emerald-800">{respostas}</span>{' '}
+                {respostas === 1 ? 'pessoa já respondeu' : 'pessoas já responderam'} a este diagnóstico.
+              </p>
+              <p className="text-xs text-gray-600">
+                Meta sugerida: {metaSugerida} respostas. Continue usando o mesmo link para somar mais respostas.
+              </p>
+            </>
+          ) : (
+            <p className="text-sm text-gray-600">
+              Quando terminar de editar e salvar, use o botão abaixo para copiar mensagens e divulgar. As respostas aparecem aqui depois que as pessoas começarem a responder.
+            </p>
+          )}
+          <button
+            type="button"
+            onClick={() => setShowCompartilhar(true)}
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-emerald-700"
+          >
+            Compartilhar diagnóstico
+          </button>
         </div>
       </div>
 

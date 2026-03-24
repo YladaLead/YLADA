@@ -13,6 +13,7 @@ import {
   getTemaLabel,
   getBibliotecaSegmentFromProfile,
   getBibliotecaSegmentFromArea,
+  getBibliotecaSegmentFromUserPerfil,
   isTemaMaisUsado,
   getDicaNoelBiblioteca,
   getQuandoUsar,
@@ -327,21 +328,26 @@ export default function BibliotecaPageContent({ areaCodigo, areaLabel, embedded 
         setSegmentoFiltro(seg)
       }
     } else {
-      // Sem cookie de simulação: usar segmento da área (ex: /pt/estetica/biblioteca → aesthetics)
-      const segFromArea = getBibliotecaSegmentFromArea(areaCodigo)
-      if (segFromArea) {
-        setSegmentoSugerido(segFromArea)
-        setSegmentoFiltro(segFromArea)
+      // Matriz (/pt/links): segmento vem do perfil do usuário; demais rotas → área na URL
+      let seg: BibliotecaSegmentCode | null = null
+      if ((areaCodigo || '').toLowerCase().trim() === 'ylada') {
+        seg = getBibliotecaSegmentFromUserPerfil(userProfile?.perfil ?? null)
+      }
+      if (!seg) {
+        seg = getBibliotecaSegmentFromArea(areaCodigo)
+      }
+      if (seg) {
+        setSegmentoSugerido(seg)
+        setSegmentoFiltro(seg)
       }
     }
-  }, [areaCodigo])
+  }, [areaCodigo, userProfile?.perfil])
 
   // Buscar perfil (area_specific) para personalizar Sugestão do Noel quando segmento = aesthetics
   useEffect(() => {
-    const seg = getBibliotecaSegmentFromArea(areaCodigo)
-    if (seg !== 'aesthetics') return
+    if (segmentoFiltro !== 'aesthetics') return
     let cancelled = false
-    fetch(`/api/ylada/profile?segment=${encodeURIComponent(areaCodigo)}`, { credentials: 'include' })
+    fetch(`/api/ylada/profile?segment=${encodeURIComponent('estetica')}`, { credentials: 'include' })
       .then((r) => r.json())
       .then((data) => {
         if (!cancelled && data?.success && data?.data?.profile) {
@@ -351,7 +357,7 @@ export default function BibliotecaPageContent({ areaCodigo, areaLabel, embedded 
       })
       .catch(() => {})
     return () => { cancelled = true }
-  }, [areaCodigo])
+  }, [segmentoFiltro])
 
   useEffect(() => {
     if (segmentoFiltro && temaFiltro) {
@@ -382,8 +388,149 @@ export default function BibliotecaPageContent({ areaCodigo, areaLabel, embedded 
     return () => { cancelled = true }
   }, [tipoAtivo, segmentoFiltro, temaFiltro])
 
+  const renderNoelSugestao = () => {
+    const ideiaDoDia = getIdeiaRapidaDoDia({
+      segmentCode: (segmentoFiltro || getBibliotecaSegmentFromArea(areaCodigo)) ?? undefined,
+      areaEspecifica: areaEspecifica ?? undefined,
+    })
+    const itemIdeia = items.find((i) => i.tema === ideiaDoDia.tema && i.tipo === 'quiz')
+    const tituloParaLink = ideiaDoDia.titulo_sugerido || itemIdeia?.titulo || getTemaLabel(ideiaDoDia.tema)
+    const handleCriarDaIdeia = async () => {
+      if (itemIdeia) {
+        setCreatingId(`ideia-${ideiaDoDia.tema}`)
+        try {
+          const res = await fetch('/api/ylada/links/generate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({
+              flow_id: itemIdeia.flow_id ?? 'diagnostico_risco',
+              biblioteca_template_id: itemIdeia.template_id || undefined,
+              interpretacao: { tema: itemIdeia.tema, objetivo: 'captar' },
+              title: tituloParaLink,
+            }),
+          })
+          const data = await res.json()
+          if (data?.success && data?.data?.id) {
+            if (itemIdeia.tipo === 'calculadora' && data?.data?.url) {
+              const base = typeof window !== 'undefined' ? window.location.origin : ''
+              const url = data.data.url || `${base}/l/${data.data.slug}`
+              setLinkCriado({ url, slug: data.data.slug, titulo: tituloParaLink })
+            } else {
+              window.location.href = `${linksPath}/editar/${data.data.id}`
+            }
+          } else if (data?.success && data?.data?.url) {
+            window.location.href = `${linksPath}?created=1`
+          } else if (data?.limit_reached && typeof data?.message === 'string' && data.message.trim()) {
+            try {
+              if (data.limit_type === 'active_links') {
+                sessionStorage.setItem(
+                  'ylada_pending_link_limit_modal',
+                  JSON.stringify({ limit_type: 'active_links', message: data.message.trim() })
+                )
+              } else {
+                sessionStorage.setItem('ylada_pending_freemium_link_message', data.message.trim())
+              }
+            } catch {
+              // ignore
+            }
+            window.location.href = linksPath
+          } else {
+            window.location.href = `${linksPath}?tema=${encodeURIComponent(ideiaDoDia.tema)}&flow_id=${itemIdeia.flow_id ?? 'diagnostico_risco'}`
+          }
+        } catch {
+          window.location.href = `${linksPath}?tema=${encodeURIComponent(ideiaDoDia.tema)}&flow_id=${itemIdeia.flow_id ?? 'diagnostico_risco'}`
+        } finally {
+          setCreatingId(null)
+        }
+      } else {
+        window.location.href = `${linksPath}?tema=${encodeURIComponent(ideiaDoDia.tema)}&flow_id=diagnostico_risco`
+      }
+    }
+    return (
+      <div className="rounded-xl border border-sky-200 bg-sky-50/50 p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div className="min-w-0">
+          <h2 className="text-sm font-semibold text-sky-900 mb-0.5">🧠 Sugestão do Noel</h2>
+          <p className="text-sm text-gray-700 line-clamp-2 sm:line-clamp-1">{ideiaDoDia.texto}</p>
+        </div>
+        <button
+          type="button"
+          onClick={handleCriarDaIdeia}
+          disabled={!!creatingId}
+          className="shrink-0 rounded-lg bg-sky-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-sky-700 disabled:opacity-60 transition-colors"
+        >
+          {creatingId === `ideia-${ideiaDoDia.tema}` ? 'Criando...' : 'Usar este'}
+        </button>
+      </div>
+    )
+  }
+
+  const segmentoSelect = (
+    <label className="flex items-center gap-2 text-sm text-gray-700">
+      <span className="shrink-0">Segmento</span>
+      <select
+        value={segmentoFiltro}
+        onChange={(e) => setSegmentoFiltro(e.target.value as BibliotecaSegmentCode | '')}
+        className="min-w-0 max-w-[200px] sm:max-w-none rounded-lg border border-gray-200 bg-white px-2.5 py-1.5 text-sm text-gray-700 focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
+      >
+        {segmentoSugerido ? (
+          <>
+            <option value="">Todos</option>
+            <option value={segmentoSugerido}>
+              {BIBLIOTECA_SEGMENTOS.find((s) => s.value === segmentoSugerido)?.label ?? segmentoSugerido} (seu perfil)
+            </option>
+          </>
+        ) : (
+          <>
+            <option value="">Todos</option>
+            {BIBLIOTECA_SEGMENTOS.map((s) => (
+              <option key={s.value} value={s.value}>
+                {s.label}
+              </option>
+            ))}
+          </>
+        )}
+      </select>
+    </label>
+  )
+
+  const situacaoSelect = (
+    <label className="flex items-center gap-2 text-xs text-gray-600">
+      <span className="shrink-0">Situação</span>
+      <select
+        value={situacaoFiltro}
+        onChange={(e) => setSituacaoFiltro((e.target.value || '') as '' | SituacaoBiblioteca)}
+        className="rounded border border-gray-200 px-2 py-1.5 text-sm text-gray-700 focus:ring-2 focus:ring-sky-500 min-w-[9rem]"
+      >
+        {BIBLIOTECA_SITUACOES_OPTIONS.map((o) => (
+          <option key={o.value || 'todas'} value={o.value}>
+            {o.label}
+          </option>
+        ))}
+      </select>
+    </label>
+  )
+
+  const temaSelect = (
+    <label className="flex items-center gap-2 text-xs text-gray-600">
+      <span className="shrink-0">Tema</span>
+      <select
+        value={temaFiltro}
+        onChange={(e) => setTemaFiltro(e.target.value)}
+        className="rounded border border-gray-200 px-2 py-1.5 text-sm text-gray-700 focus:ring-2 focus:ring-sky-500 w-40 sm:w-44 min-w-0"
+      >
+        <option value="">Todos</option>
+        {getTemasParaBiblioteca(segmentoFiltro || undefined).map((t) => (
+          <option key={t.value} value={t.value}>
+            {t.label}
+          </option>
+        ))}
+      </select>
+    </label>
+  )
+
   const inner = (
-    <div className="max-w-4xl mx-auto space-y-6">
+    <div className={`max-w-4xl mx-auto ${embedded ? 'space-y-4' : 'space-y-6'}`}>
       {embedded && (
         <Link
           href={`${prefix}/links?tab=meus`}
@@ -393,223 +540,126 @@ export default function BibliotecaPageContent({ areaCodigo, areaLabel, embedded 
           Ver meus links
         </Link>
       )}
-      <header className="space-y-1">
-        {!embedded && <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Biblioteca</h1>}
-        <p className="text-gray-600 text-sm">
-          {segmentoFiltro && BIBLIOTECA_SEGMENTOS.find((s) => s.value === segmentoFiltro)?.label
-            ? `Mostrando diagnósticos para ${BIBLIOTECA_SEGMENTOS.find((s) => s.value === segmentoFiltro)!.label}.`
-            : 'Escolha um modelo e use.'}
-        </p>
-      </header>
 
-        {/* Contador: compacto */}
-        {linksCreatedToday !== null && (
-          <p className="text-xs text-gray-500 text-right">
-            {linksCreatedToday} criado{linksCreatedToday !== 1 ? 's' : ''} hoje
-          </p>
-        )}
-
-        {/* Ação primeiro: bloco "Sugestão do Noel" (personalizada por perfil quando Estética) */}
-        {(() => {
-          const ideiaDoDia = getIdeiaRapidaDoDia({
-            segmentCode: getBibliotecaSegmentFromArea(areaCodigo) ?? undefined,
-            areaEspecifica: areaEspecifica ?? undefined,
-          })
-          const itemIdeia = items.find((i) => i.tema === ideiaDoDia.tema && i.tipo === 'quiz')
-          const tituloParaLink = ideiaDoDia.titulo_sugerido || itemIdeia?.titulo || getTemaLabel(ideiaDoDia.tema)
-          const handleCriarDaIdeia = async () => {
-            if (itemIdeia) {
-              setCreatingId(`ideia-${ideiaDoDia.tema}`)
-              try {
-                const res = await fetch('/api/ylada/links/generate', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  credentials: 'include',
-                  body: JSON.stringify({
-                    flow_id: itemIdeia.flow_id ?? 'diagnostico_risco',
-                    biblioteca_template_id: itemIdeia.template_id || undefined,
-                    interpretacao: { tema: itemIdeia.tema, objetivo: 'captar' },
-                    title: tituloParaLink,
-                  }),
-                })
-                const data = await res.json()
-                if (data?.success && data?.data?.id) {
-                  if (itemIdeia.tipo === 'calculadora' && data?.data?.url) {
-                    const base = typeof window !== 'undefined' ? window.location.origin : ''
-                    const url = data.data.url || `${base}/l/${data.data.slug}`
-                    setLinkCriado({ url, slug: data.data.slug, titulo: tituloParaLink })
-                  } else {
-                    window.location.href = `${linksPath}/editar/${data.data.id}`
-                  }
-                } else if (data?.success && data?.data?.url) {
-                  window.location.href = `${linksPath}?created=1`
-                } else if (data?.limit_reached && typeof data?.message === 'string' && data.message.trim()) {
-                  try {
-                    if (data.limit_type === 'active_links') {
-                      sessionStorage.setItem(
-                        'ylada_pending_link_limit_modal',
-                        JSON.stringify({ limit_type: 'active_links', message: data.message.trim() })
-                      )
-                    } else {
-                      sessionStorage.setItem('ylada_pending_freemium_link_message', data.message.trim())
-                    }
-                  } catch {
-                    // ignore
-                  }
-                  window.location.href = linksPath
-                } else {
-                  window.location.href = `${linksPath}?tema=${encodeURIComponent(ideiaDoDia.tema)}&flow_id=${itemIdeia.flow_id ?? 'diagnostico_risco'}`
-                }
-              } catch {
-                window.location.href = `${linksPath}?tema=${encodeURIComponent(ideiaDoDia.tema)}&flow_id=${itemIdeia.flow_id ?? 'diagnostico_risco'}`
-              } finally {
-                setCreatingId(null)
-              }
-            } else {
-              window.location.href = `${linksPath}?tema=${encodeURIComponent(ideiaDoDia.tema)}&flow_id=diagnostico_risco`
-            }
-          }
-          return (
-            <div className="rounded-xl border border-sky-200 bg-sky-50/50 p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-              <div className="min-w-0">
-                <h2 className="text-sm font-semibold text-sky-900 mb-0.5">🧠 Sugestão do Noel</h2>
-                <p className="text-sm text-gray-700 line-clamp-1">{ideiaDoDia.texto}</p>
-              </div>
-              <button
-                type="button"
-                onClick={handleCriarDaIdeia}
-                disabled={!!creatingId}
-                className="shrink-0 rounded-lg bg-sky-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-sky-700 disabled:opacity-60 transition-colors"
-              >
-                {creatingId === `ideia-${ideiaDoDia.tema}` ? 'Criando...' : 'Usar este'}
-              </button>
-            </div>
-          )
-        })()}
-
-        {/* Progressão guiada — só para quem ainda não criou o primeiro diagnóstico */}
-        {!progressao.passo1 && (
-          <div className="rounded-xl border border-emerald-100 bg-emerald-50/70 p-4">
-            <h2 className="text-sm font-semibold text-gray-900 mb-2 flex items-center gap-2">
-              <span aria-hidden>🚀</span> Primeiros passos
-            </h2>
-            <ol className="space-y-2 text-sm text-gray-700">
-              <li className="flex items-center gap-2">
-                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 border-gray-300 bg-white text-xs text-gray-400">1</span>
-                Criar seu primeiro diagnóstico
-              </li>
-              <li className="flex items-center gap-2">
-                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 border-gray-300 bg-white text-xs text-gray-400">2</span>
-                Compartilhar o link
-              </li>
-              <li className="flex items-center gap-2">
-                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 border-gray-300 bg-white text-xs text-gray-400">3</span>
-                Receber respostas e conversar
-              </li>
-            </ol>
-            <p className="mt-3 text-xs text-gray-600">
-              Use o botão acima ou escolha na lista abaixo.
+      {!embedded && (
+        <>
+          <header className="space-y-1">
+            <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Biblioteca</h1>
+            <p className="text-gray-600 text-sm">
+              {segmentoFiltro && BIBLIOTECA_SEGMENTOS.find((s) => s.value === segmentoFiltro)?.label
+                ? `Mostrando diagnósticos para ${BIBLIOTECA_SEGMENTOS.find((s) => s.value === segmentoFiltro)!.label}.`
+                : 'Escolha um modelo e use.'}
             </p>
-          </div>
-        )}
+          </header>
 
-        {/* Segmento + temas em uma linha */}
-        <div className="flex flex-wrap items-center gap-3">
-          <label className="flex items-center gap-2 text-sm text-gray-700">
-            <span>Segmento:</span>
-            <select
-              value={segmentoFiltro}
-              onChange={(e) => setSegmentoFiltro(e.target.value as BibliotecaSegmentCode | '')}
-              className="rounded-lg border border-gray-200 bg-white px-2.5 py-1.5 text-sm text-gray-700 focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
-            >
-              {segmentoSugerido ? (
-                <>
-                  <option value="">Todos</option>
-                  <option value={segmentoSugerido}>
-                    {BIBLIOTECA_SEGMENTOS.find((s) => s.value === segmentoSugerido)?.label ?? segmentoSugerido} (seu perfil)
-                  </option>
-                </>
-              ) : (
-                <>
-                  <option value="">Todos</option>
-                  {BIBLIOTECA_SEGMENTOS.map((s) => (
-                    <option key={s.value} value={s.value}>
-                      {s.label}
-                    </option>
-                  ))}
-                </>
+          {linksCreatedToday !== null && (
+            <p className="text-xs text-gray-500 text-right">
+              {linksCreatedToday} criado{linksCreatedToday !== 1 ? 's' : ''} hoje
+            </p>
+          )}
+
+          {renderNoelSugestao()}
+
+          {!progressao.passo1 && (
+            <div className="rounded-xl border border-emerald-100 bg-emerald-50/70 p-4">
+              <h2 className="text-sm font-semibold text-gray-900 mb-2 flex items-center gap-2">
+                <span aria-hidden>🚀</span> Primeiros passos
+              </h2>
+              <ol className="space-y-2 text-sm text-gray-700">
+                <li className="flex items-center gap-2">
+                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 border-gray-300 bg-white text-xs text-gray-400">1</span>
+                  Criar seu primeiro diagnóstico
+                </li>
+                <li className="flex items-center gap-2">
+                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 border-gray-300 bg-white text-xs text-gray-400">2</span>
+                  Compartilhar o link
+                </li>
+                <li className="flex items-center gap-2">
+                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 border-gray-300 bg-white text-xs text-gray-400">3</span>
+                  Receber respostas e conversar
+                </li>
+              </ol>
+              <p className="mt-3 text-xs text-gray-600">
+                Use o botão acima ou escolha na lista abaixo.
+              </p>
+            </div>
+          )}
+
+          <div className="flex flex-wrap items-center gap-3">
+            {segmentoSelect}
+            <span className="text-gray-300">|</span>
+            <div className="flex flex-wrap items-center gap-2">
+              {segmentoSugerido && segmentoFiltro === segmentoSugerido && getDicaNoelBiblioteca(segmentoSugerido) && (
+                <span
+                  className="cursor-help"
+                  title={getDicaNoelBiblioteca(segmentoSugerido) ?? undefined}
+                  aria-label="Dica do Noel"
+                >
+                  💡
+                </span>
               )}
-            </select>
-          </label>
-          <span className="text-gray-300">|</span>
-          <div className="flex flex-wrap items-center gap-2">
+              {(segmentoFiltro
+                ? getTemasParaBiblioteca(segmentoFiltro)
+                : (TEMAS_MAIS_USADOS as readonly string[]).map((value) => ({ value, label: getTemaLabel(value) }))
+              )
+                .slice(0, 8)
+                .map((t) => (
+                  <button
+                    key={t.value}
+                    type="button"
+                    onClick={() => setTemaFiltro(temaFiltro === t.value ? '' : t.value)}
+                    className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
+                      temaFiltro === t.value
+                        ? 'bg-amber-200 text-amber-900 ring-1 ring-amber-400'
+                        : 'bg-white/80 text-amber-800 hover:bg-amber-100 border border-amber-200'
+                    }`}
+                  >
+                    {t.label}
+                  </button>
+                ))}
+            </div>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-4 pt-2">
+            <h2 className="text-base font-semibold text-gray-900 flex items-center gap-2">
+              <span aria-hidden>📚</span> Todos os diagnósticos
+            </h2>
+            <div className="flex flex-wrap items-center gap-3">
+              {situacaoSelect}
+              {temaSelect}
+            </div>
+          </div>
+        </>
+      )}
+
+      {embedded && (
+        <div className="rounded-xl border border-gray-200 bg-white p-3 sm:p-4">
+          <p className="sr-only">
+            {segmentoFiltro && BIBLIOTECA_SEGMENTOS.find((s) => s.value === segmentoFiltro)?.label
+              ? `Modelos para ${BIBLIOTECA_SEGMENTOS.find((s) => s.value === segmentoFiltro)!.label}.`
+              : 'Biblioteca de modelos.'}
+          </p>
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-3">
+            {segmentoSelect}
             {segmentoSugerido && segmentoFiltro === segmentoSugerido && getDicaNoelBiblioteca(segmentoSugerido) && (
               <span
-                className="cursor-help"
+                className="cursor-help text-base leading-none"
                 title={getDicaNoelBiblioteca(segmentoSugerido) ?? undefined}
                 aria-label="Dica do Noel"
               >
                 💡
               </span>
             )}
-            {(segmentoFiltro
-              ? getTemasParaBiblioteca(segmentoFiltro)
-              : (TEMAS_MAIS_USADOS as readonly string[]).map((value) => ({ value, label: getTemaLabel(value) }))
-            )
-              .slice(0, 8)
-              .map((t) => (
-                <button
-                  key={t.value}
-                  type="button"
-                  onClick={() => setTemaFiltro(temaFiltro === t.value ? '' : t.value)}
-                  className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
-                    temaFiltro === t.value
-                      ? 'bg-amber-200 text-amber-900 ring-1 ring-amber-400'
-                      : 'bg-white/80 text-amber-800 hover:bg-amber-100 border border-amber-200'
-                  }`}
-                >
-                  {t.label}
-                </button>
-              ))}
+            {situacaoSelect}
+            {temaSelect}
+            {linksCreatedToday !== null && (
+              <span className="text-xs text-gray-500 ml-auto">
+                {linksCreatedToday} criado{linksCreatedToday !== 1 ? 's' : ''} hoje
+              </span>
+            )}
           </div>
         </div>
-
-        <div className="flex flex-wrap items-center gap-4 pt-2">
-          <h2 className="text-base font-semibold text-gray-900 flex items-center gap-2">
-            <span aria-hidden>📚</span> Todos os diagnósticos
-          </h2>
-          <div className="flex flex-wrap items-center gap-3">
-            <label className="flex items-center gap-2 text-xs text-gray-600">
-              Situação:
-              <select
-                value={situacaoFiltro}
-                onChange={(e) => setSituacaoFiltro((e.target.value || '') as '' | SituacaoBiblioteca)}
-                className="rounded border border-gray-200 px-2 py-1.5 text-sm text-gray-700 focus:ring-2 focus:ring-sky-500"
-              >
-                {BIBLIOTECA_SITUACOES_OPTIONS.map((o) => (
-                  <option key={o.value || 'todas'} value={o.value}>
-                    {o.label}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label className="flex items-center gap-2 text-xs text-gray-600">
-              Tema:
-              <select
-                value={temaFiltro}
-                onChange={(e) => setTemaFiltro(e.target.value)}
-                className="rounded border border-gray-200 px-2 py-1.5 text-sm text-gray-700 focus:ring-2 focus:ring-sky-500 w-44"
-              >
-                <option value="">Todos</option>
-                {getTemasParaBiblioteca(segmentoFiltro || undefined).map((t) => (
-                  <option key={t.value} value={t.value}>
-                    {t.label}
-                  </option>
-                ))}
-              </select>
-            </label>
-          </div>
-        </div>
+      )}
 
         <div className="flex gap-1 p-1 rounded-lg bg-gray-100">
           {BIBLIOTECA_TIPOS.map((t) => (
@@ -772,6 +822,40 @@ export default function BibliotecaPageContent({ areaCodigo, areaLabel, embedded 
               </>
             )}
           </div>
+        )}
+
+        {embedded && (
+          <details className="rounded-xl border border-dashed border-gray-200 bg-gray-50/40">
+            <summary className="cursor-pointer px-4 py-3 text-sm font-medium text-gray-700 list-none [&::-webkit-details-marker]:hidden">
+              Sugestão do Noel e guia rápido{' '}
+              <span className="text-xs font-normal text-gray-500">— toque para expandir</span>
+            </summary>
+            <div className="px-4 pb-4 pt-0 space-y-4 border-t border-gray-100">
+              {renderNoelSugestao()}
+              {!progressao.passo1 && (
+                <div className="rounded-xl border border-emerald-100 bg-emerald-50/70 p-4">
+                  <h2 className="text-sm font-semibold text-gray-900 mb-2 flex items-center gap-2">
+                    <span aria-hidden>🚀</span> Primeiros passos
+                  </h2>
+                  <ol className="space-y-2 text-sm text-gray-700">
+                    <li className="flex items-center gap-2">
+                      <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 border-gray-300 bg-white text-xs text-gray-400">1</span>
+                      Criar seu primeiro diagnóstico
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 border-gray-300 bg-white text-xs text-gray-400">2</span>
+                      Compartilhar o link
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 border-gray-300 bg-white text-xs text-gray-400">3</span>
+                      Receber respostas e conversar
+                    </li>
+                  </ol>
+                  <p className="mt-3 text-xs text-gray-600">Use a sugestão acima ou escolha um modelo na lista.</p>
+                </div>
+              )}
+            </div>
+          </details>
         )}
 
         {/* Meus diagnósticos — oculto quando embedded (hub tem "Ver meus links") */}

@@ -124,6 +124,33 @@ const AREA_TO_BIBLIOTECA: Partial<Record<string, BibliotecaSegmentCode>> = {
   ylada: 'nutrition',
 }
 
+/**
+ * user_profiles.perfil (Supabase) → segmento da biblioteca.
+ * Usado em /pt/links (areaCodigo ylada), onde a rota não indica o segmento do profissional.
+ */
+const USER_PERFIL_TO_BIBLIOTECA: Partial<Record<string, BibliotecaSegmentCode>> = {
+  nutri: 'nutrition',
+  estetica: 'aesthetics',
+  med: 'medicine',
+  psi: 'psychology',
+  psicanalise: 'psychoanalysis',
+  odonto: 'dentistry',
+  fitness: 'fitness',
+  coach: 'fitness',
+  nutra: 'nutrition_vendedor',
+  perfumaria: 'perfumaria',
+  seller: 'nutrition_vendedor',
+  wellness: 'nutrition',
+  'coach-bem-estar': 'fitness',
+}
+
+/** Deriva segmento da biblioteca a partir de user_profiles.perfil (matriz YLADA). */
+export function getBibliotecaSegmentFromUserPerfil(perfil: string | null | undefined): BibliotecaSegmentCode | null {
+  const p = (perfil || '').toLowerCase().trim()
+  if (!p) return null
+  return USER_PERFIL_TO_BIBLIOTECA[p] ?? null
+}
+
 /** Deriva segmento da biblioteca a partir da área (rota). */
 export function getBibliotecaSegmentFromArea(areaCodigo: string | null | undefined): BibliotecaSegmentCode | null {
   const area = (areaCodigo || '').toLowerCase().trim()

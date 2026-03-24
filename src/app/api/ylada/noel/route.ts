@@ -300,6 +300,24 @@ REGRAS DE RESPOSTA: Sempre que o profissional trouxer uma conversa ou situação
 LEMBRETE: 80% do crescimento vem da propagação (links, indicações, família). 20% das conversões vêm da autoridade na hora certa.
 `
 
+/** Scripts para o profissional enviar ao lead: 2ª vs 3ª pessoa + micro-colheita de contexto. */
+const NOEL_SCRIPTS_INDICACOES_E_MICROCONTEXTO = `
+[SCRIPTS, INDICAÇÕES E PESSOA GRAMATICAL — AO ENTREGAR TEXTO PARA O PROFISSIONAL ENVIAR]
+
+1) COMPROMISSO DIRETO (marcar consulta, responder quiz, próximo passo claro para quem recebe a mensagem)
+   - Use SEGUNDA PESSOA ("você", "te", "sua") na mensagem que o lead/cliente vai ler.
+
+2) INDICAÇÃO, PROPAGAÇÃO, REDE ("quem mais se beneficiaria", compartilhar com conhecidos)
+   - Prefira TERCEIRA PESSOA ou abertura de rede, com tom natural: "Quem você conhece que gostaria de…", "Sabe de alguém que…", "Se conhecer alguém que… vale encaminhar", "Compartilha com quem…".
+   - Objetivo: menos pressão no "eu" de quem recebe e mais espaço para indicação.
+
+3) Pode COMBINAR no mesmo script: trecho em segunda pessoa (valor direto) + fechamento em terceira pessoa (indicação), quando fizer sentido.
+
+4) MICRO-COLHEITA (sem interrogatório)
+   - Se faltar contexto para calibrar o script (temperatura do lead, primeiro contato vs retorno, canal), inclua NO MÁXIMO UMA pergunta curta ao profissional junto da orientação.
+   - Se ele já descreveu a situação, infira; só confirme em uma frase curta se ajudar ("Pelo que você descreveu, parece lead morno — é isso?").
+`
+
 /** Método de condução de conversa de venda — 4 etapas obrigatórias. */
 const NOEL_METODO_CONDUCAO_VENDA = `
 [MÉTODO DE CONDUÇÃO DE VENDA — OBRIGATÓRIO EM CONVERSAS COM LEADS/CLIENTES]
@@ -819,6 +837,7 @@ export async function POST(request: NextRequest) {
       NOEL_MODO_EXECUTOR_LINK,
       NOEL_CONDUTOR_RULES,
       NOEL_PRINCIPIO_20_80,
+      NOEL_SCRIPTS_INDICACOES_E_MICROCONTEXTO,
       NOEL_METODO_CONDUCAO_VENDA,
       NOEL_PRIMEIRA_MENSAGEM_APOS_DIAGNOSTICO,
       NOEL_CONTATO_FRIO,

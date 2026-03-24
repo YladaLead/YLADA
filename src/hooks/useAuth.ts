@@ -10,7 +10,23 @@ const supabase = createClient()
 interface UserProfile {
   id: string
   user_id: string
-  perfil: 'nutri' | 'wellness' | 'coach' | 'nutra' | 'admin' | 'coach-bem-estar' | null
+  perfil:
+    | 'nutri'
+    | 'wellness'
+    | 'coach'
+    | 'nutra'
+    | 'admin'
+    | 'coach-bem-estar'
+    | 'ylada'
+    | 'estetica'
+    | 'med'
+    | 'psi'
+    | 'psicanalise'
+    | 'odonto'
+    | 'fitness'
+    | 'perfumaria'
+    | 'seller'
+    | null
   nome_completo: string | null
   email: string | null
   is_admin?: boolean
