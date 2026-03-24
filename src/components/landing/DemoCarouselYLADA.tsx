@@ -750,7 +750,7 @@ export default function DemoCarouselYLADA({ initialArea = null }: DemoCarouselYL
           </div>
 
           <div className="flex-shrink-0 relative order-2 lg:order-2">
-            <div className="relative">
+            <div className="relative" key={index}>
               <SlideVisual slide={slide} />
               {isPlaying && (
                 <div className="absolute -bottom-6 left-0 right-0 mx-auto w-[calc(100%-1rem)] max-w-[280px] sm:max-w-[300px] h-2 bg-gray-800 rounded-full overflow-hidden border border-gray-600 shadow-lg">
@@ -880,7 +880,7 @@ export default function DemoCarouselYLADA({ initialArea = null }: DemoCarouselYL
           </button>
 
           <div className="flex items-center gap-1.5">
-            {DEMO_SLIDES.map((_, i) => (
+            {slides.map((_, i) => (
               <button
                 key={i}
                 type="button"

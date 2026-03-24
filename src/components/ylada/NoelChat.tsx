@@ -566,7 +566,7 @@ export default function NoelChat({ area = 'med', className = '', initialMessage,
                     <ReactMarkdown
                       remarkPlugins={[remarkGfm]}
                       components={{
-                        a: ({ href, children }) => <LinkWithCopy href={href}>{children}</LinkWithCopy>,
+                        a: ({ href, children }) => <LinkWithCopy key={href ?? undefined} href={href}>{children}</LinkWithCopy>,
                       }}
                     >
                       {msg.content}

@@ -327,10 +327,11 @@ function LinksPageContent({ areaCodigo = 'ylada', areaLabel = 'YLADA' }: LinksPa
     return () => window.removeEventListener('focus', onFocus)
   }, [segment])
 
-  const copyUrl = (url: string) => {
+  const copyUrl = (url: string, title?: string | null) => {
     if (typeof navigator !== 'undefined' && navigator.clipboard) {
       navigator.clipboard.writeText(url)
-      setMessage({ type: 'success', text: 'URL copiada!' })
+      const label = title ? `"${title}"` : ''
+      setMessage({ type: 'success', text: label ? `URL de ${label} copiada!` : 'URL copiada!' })
     }
   }
 
@@ -823,7 +824,7 @@ function LinksPageContent({ areaCodigo = 'ylada', areaLabel = 'YLADA' }: LinksPa
                         <div className="flex flex-wrap gap-1 justify-end">
                           <button
                             type="button"
-                            onClick={() => copyUrl(link.url)}
+                            onClick={() => copyUrl(link.url, link.title || link.slug)}
                             className="rounded-lg px-3 py-2 text-xs font-medium text-white bg-slate-800 hover:bg-slate-900"
                           >
                             Copiar URL
@@ -1322,6 +1323,7 @@ function LinksPageContent({ areaCodigo = 'ylada', areaLabel = 'YLADA' }: LinksPa
               <h3 className="text-sm font-semibold text-gray-900 mb-1">Divulgar</h3>
               <p className="text-xs text-gray-600 mb-4">{divulgarLink.title || divulgarLink.slug}</p>
               <CompartilharDiagnosticoContent
+                key={divulgarLink.id}
                 titulo={divulgarLink.title || divulgarLink.slug}
                 url={divulgarLink.url}
                 nomeProfissional={userProfile?.nome_completo ?? 'Profissional'}

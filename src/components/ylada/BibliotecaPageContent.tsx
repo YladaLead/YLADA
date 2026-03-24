@@ -906,6 +906,7 @@ export default function BibliotecaPageContent({ areaCodigo, areaLabel }: Bibliot
               <h3 className="text-sm font-semibold text-gray-900 mb-2">Divulgar</h3>
               <p className="text-xs text-gray-600 mb-4">{divulgarMeuLink.title || divulgarMeuLink.slug}</p>
               <CompartilharDiagnosticoContent
+                key={divulgarMeuLink.id}
                 titulo={divulgarMeuLink.title || divulgarMeuLink.slug || 'Diagnóstico'}
                 url={divulgarMeuLink.url}
                 nomeProfissional={userProfile?.nome_completo ?? 'Profissional'}
