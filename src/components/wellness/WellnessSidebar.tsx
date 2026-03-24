@@ -86,7 +86,7 @@ export default function WellnessSidebar({ isMobileOpen = false, onMobileClose }:
     {
       title: 'Suporte',
       icon: '💬',
-      href: '/pt/suporte/tickets',
+      href: '/pt/wellness/suporte',
       color: 'gray'
     },
     {

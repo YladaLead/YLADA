@@ -458,7 +458,7 @@ export async function POST(request: NextRequest) {
   try {
     const auth = await requireApiAuth(request, [
       'ylada', 'med', 'psi', 'psicanalise', 'odonto', 'nutra', 'coach', 'seller',
-      'perfumaria', 'estetica', 'fitness', 'nutri', 'admin',
+      'perfumaria', 'estetica', 'fitness', 'nutri', 'admin', 'wellness', 'coach-bem-estar',
     ])
     if (auth instanceof NextResponse) return auth
     const { user } = auth
@@ -472,6 +472,7 @@ export async function POST(request: NextRequest) {
       lastLinkContext,
       locale,
       channel,
+      supportUi,
     } = body as {
       message?: string
       conversationHistory?: { role: 'user' | 'assistant'; content: string }[]
@@ -480,6 +481,7 @@ export async function POST(request: NextRequest) {
       lastLinkContext?: { flow_id: string; interpretacao: Record<string, unknown>; questions: Array<{ id: string; label: string; type?: string; options?: string[] }>; url?: string; title?: string; link_id?: string }
       locale?: 'pt' | 'en' | 'es'
       channel?: string
+      supportUi?: 'matrix' | 'wellness'
     }
 
     const isSupportChannel = channel === 'support'
@@ -582,6 +584,7 @@ export async function POST(request: NextRequest) {
         profileResumo,
         linksAtivosBlock: linksAtivosBlock || '',
         appOrigin: baseUrl,
+        supportUi: supportUi === 'wellness' ? 'wellness' : 'matrix',
       })
       return NextResponse.json({
         response: responseText,

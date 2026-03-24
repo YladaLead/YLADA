@@ -1,5 +1,5 @@
 import OpenAI from 'openai'
-import { buildNinaSupportSystemPrompt } from '@/lib/ylada-nina-support-prompt'
+import { buildNinaSupportSystemPrompt, type NinaSupportUi } from '@/lib/ylada-nina-support-prompt'
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
 
@@ -11,6 +11,7 @@ export async function completeNinaSupportTurn(opts: {
   profileResumo: string
   linksAtivosBlock: string
   appOrigin?: string
+  supportUi?: NinaSupportUi
 }): Promise<string> {
   const system = buildNinaSupportSystemPrompt({
     segment: opts.segment,
@@ -18,6 +19,7 @@ export async function completeNinaSupportTurn(opts: {
     profileResumo: opts.profileResumo,
     linksAtivosBlock: opts.linksAtivosBlock,
     appOrigin: opts.appOrigin,
+    supportUi: opts.supportUi,
   })
 
   const history = (opts.conversationHistory || []).slice(-12).map((m) => ({

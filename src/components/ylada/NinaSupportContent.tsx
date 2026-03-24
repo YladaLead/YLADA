@@ -5,8 +5,9 @@ import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { useAuthenticatedFetch } from '@/hooks/useAuthenticatedFetch'
 import { buildYladaSupportWhatsappPrefill, getCarolWhatsAppUrl } from '@/config/ylada-support'
-import { useAuth } from '@/hooks/useAuth'
+import { useAuth } from '@/contexts/AuthContext'
 import type { NoelArea } from '@/config/noel-ux-content'
+import type { NinaSupportUi } from '@/lib/ylada-nina-support-prompt'
 
 type Message = {
   id: string
@@ -43,13 +44,16 @@ const welcomeContent = 'Oi! Sou a Nina — como posso te ajudar hoje?'
 interface NinaSupportContentProps {
   areaCodigo: NoelArea
   areaLabel: string
+  /** Wellness usa prompt e rotas /pt/wellness; matriz usa areaCodigo. */
+  supportUi?: NinaSupportUi
 }
 
 export default function NinaSupportContent(props: NinaSupportContentProps) {
-  const { areaCodigo, areaLabel } = props
+  const { areaCodigo, areaLabel, supportUi = 'matrix' } = props
+  const chatStorageKey = supportUi === 'wellness' ? 'wellness' : areaCodigo
   const { user, userProfile } = useAuth()
   const [messages, setMessages] = useState<Message[]>(() => {
-    const saved = loadMessages(areaCodigo)
+    const saved = loadMessages(chatStorageKey)
     if (saved.length > 0) return saved
     return [
       {
@@ -67,7 +71,7 @@ export default function NinaSupportContent(props: NinaSupportContentProps) {
   const authFetch = useAuthenticatedFetch()
 
   useEffect(() => {
-    const saved = loadMessages(areaCodigo)
+    const saved = loadMessages(chatStorageKey)
     if (saved.length > 0) setMessages(saved)
     else {
       setMessages([
@@ -79,11 +83,11 @@ export default function NinaSupportContent(props: NinaSupportContentProps) {
         },
       ])
     }
-  }, [areaCodigo])
+  }, [chatStorageKey])
 
   useEffect(() => {
-    saveMessages(areaCodigo, messages)
-  }, [areaCodigo, messages])
+    saveMessages(chatStorageKey, messages)
+  }, [chatStorageKey, messages])
 
   useEffect(() => {
     scrollRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -111,14 +115,16 @@ export default function NinaSupportContent(props: NinaSupportContentProps) {
           .slice(-12)
           .map((m) => ({ role: m.role, content: m.content }))
 
+        const apiArea = supportUi === 'wellness' ? 'ylada' : areaCodigo
         const res = await authFetch('/api/ylada/noel', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             message: trimmed,
             conversationHistory,
-            area: areaCodigo,
+            area: apiArea,
             channel: 'support',
+            supportUi,
           }),
         })
 
@@ -155,7 +161,7 @@ export default function NinaSupportContent(props: NinaSupportContentProps) {
         textareaRef.current?.focus()
       }
     },
-    [loading, messages, areaCodigo, authFetch]
+    [loading, messages, areaCodigo, authFetch, supportUi]
   )
 
   const clearChat = useCallback(() => {
@@ -168,8 +174,8 @@ export default function NinaSupportContent(props: NinaSupportContentProps) {
       },
     ]
     setMessages(initial)
-    saveMessages(areaCodigo, initial)
-  }, [areaCodigo])
+    saveMessages(chatStorageKey, initial)
+  }, [chatStorageKey])
 
   const whatsappUrl = useMemo(() => {
     if (!user) {
@@ -184,12 +190,12 @@ export default function NinaSupportContent(props: NinaSupportContentProps) {
       email,
       nomeCompleto: nomeCompleto || null,
       areaLabel,
-      areaCodigo,
+      areaCodigo: supportUi === 'wellness' ? 'wellness' : areaCodigo,
       perfilConta: userProfile?.perfil ?? null,
       userId: user.id,
     })
     return getCarolWhatsAppUrl(prefill)
-  }, [user, userProfile, areaLabel, areaCodigo])
+  }, [user, userProfile, areaLabel, areaCodigo, supportUi])
 
   return (
     <div className="max-w-3xl mx-auto space-y-4 pb-8">
