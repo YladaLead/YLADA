@@ -1,11 +1,8 @@
 'use client'
 
-import { AreaLandingPage } from '@/components/ylada/AreaLandingPage'
+import NutraInstitutionalContent from './NutraInstitutionalContent'
 
-/**
- * Landing YLADA para Nutra (vendedores de nutraceuticos e suplementos) — template oficial.
- * Mesmo padrão das outras áreas: nutri, fitness, estetica, etc.
- */
+/** Landing Nutra no modelo novo (quiz no hero, mesmo fluxo da Estética). */
 export default function NutraLandingPage() {
-  return <AreaLandingPage area="nutra" locale="pt" />
+  return <NutraInstitutionalContent />
 }

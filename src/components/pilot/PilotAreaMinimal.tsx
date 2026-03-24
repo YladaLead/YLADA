@@ -29,20 +29,20 @@ export default function PilotAreaMinimal({
   return (
     <div className="min-h-screen bg-white text-gray-900 flex flex-col">
       <header className="shrink-0 border-b border-gray-100">
-        <div className="max-w-lg mx-auto px-4 h-14 sm:h-16 flex items-center justify-between">
-          <Link href="/pt" className="touch-manipulation" aria-label="Voltar ao piloto">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-14 sm:h-16 flex items-center justify-between">
+          <Link href="/pt" className="touch-manipulation shrink-0" aria-label="Voltar ao piloto">
             <YLADALogo size="md" responsive className="bg-transparent" />
           </Link>
           <Link
             href={primaryHref}
-            className="text-sm font-medium text-gray-600 hover:text-gray-900 py-2 -mr-1"
+            className="text-sm font-medium text-gray-600 hover:text-gray-900 py-2 shrink-0"
           >
             {primaryLabel}
           </Link>
         </div>
       </header>
 
-      <main className="flex-1 w-full max-w-lg mx-auto px-4 pt-8 pb-10 sm:pt-10 flex flex-col">
+      <main className="flex-1 w-full max-w-xl mx-auto px-4 sm:px-6 pt-8 pb-10 sm:pt-10 flex flex-col">
         <p className="text-xs font-semibold uppercase tracking-wide text-gray-500 mb-3">{segmentBadge}</p>
         <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900 leading-snug">
           {headline}

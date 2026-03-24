@@ -104,7 +104,7 @@ export default function CoachInstitutionalContent() {
               Entrar
             </Link>
             <Link
-              href="/pt/coach/login"
+              href="/pt/cadastro?area=coach"
               className="inline-flex items-center justify-center px-4 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 transition-all"
             >
               Começar grátis
@@ -192,7 +192,7 @@ export default function CoachInstitutionalContent() {
                     {respostaHeroIdx !== null ? 'Fazer meu diagnóstico' : 'Selecione uma opção acima'}
                   </button>
                   <Link
-                    href="/pt/coach/login"
+                    href="/pt/cadastro?area=coach"
                     className="inline-flex items-center justify-center px-8 py-4 bg-white text-gray-700 font-medium rounded-xl border-2 border-gray-200 hover:border-gray-300 transition-all"
                   >
                     Criar meu diagnóstico
@@ -376,7 +376,7 @@ export default function CoachInstitutionalContent() {
             </h2>
             <p className="text-gray-600 mb-6">Comece grátis e teste com clientes reais.</p>
             <Link
-              href="/pt/coach/login"
+              href="/pt/cadastro?area=coach"
               className="inline-flex items-center justify-center px-8 py-4 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition-all"
             >
               Criar meu primeiro diagnóstico grátis
@@ -394,7 +394,7 @@ export default function CoachInstitutionalContent() {
               Em vez de explicar e convencer, deixe o cliente chegar já entendendo a própria necessidade — e agende sessões com mais facilidade.
             </p>
             <Link
-              href="/pt/coach/login"
+              href="/pt/cadastro?area=coach"
               className="inline-flex items-center justify-center px-10 py-4 bg-white text-[#1e3a8a] font-semibold rounded-xl hover:bg-gray-100 transition-all shadow-lg"
             >
               Criar meu primeiro diagnóstico grátis
@@ -419,7 +419,7 @@ export default function CoachInstitutionalContent() {
               <Link href="/pt/como-funciona" className="text-gray-600 hover:text-gray-900">Como funciona</Link>
               <Link href="/pt/precos" className="text-gray-600 hover:text-gray-900">Preços</Link>
               <Link href="/pt/coach/login" className="text-gray-600 hover:text-gray-900">Entrar</Link>
-              <Link href="/pt/coach/login" className="text-blue-600 hover:text-blue-700 font-medium">Criar diagnóstico</Link>
+              <Link href="/pt/cadastro?area=coach" className="text-blue-600 hover:text-blue-700 font-medium">Criar diagnóstico</Link>
             </nav>
             <p className="text-gray-600 text-sm mb-4">Plataforma de diagnósticos para iniciar conversas com contexto.</p>
             <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 mb-4 text-sm text-gray-500">
