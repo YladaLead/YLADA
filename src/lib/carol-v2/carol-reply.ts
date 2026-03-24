@@ -4,8 +4,10 @@
  * Reaproveita: getZApiInstance, getRegistrationName, getFirstName, sendWhatsAppMessage (whatsapp-carol-ai).
  */
 
-import OpenAI from 'openai'
+import { CAROL_AI_DISABLED } from '@/config/carol-ai'
+import type OpenAI from 'openai'
 import { supabaseAdmin } from '@/lib/supabase'
+import { getOpenAI } from '@/lib/openai-singleton'
 import {
   getZApiInstance,
   getRegistrationName,
@@ -13,8 +15,6 @@ import {
   sendWhatsAppMessage,
 } from '@/lib/whatsapp-carol-ai'
 import { getFaseFromTagsAndContext, type Fase } from './fase'
-
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
 
 function instrucaoPorFase(fase: Fase, leadName: string): string {
   const nome = leadName ? getFirstName(leadName) : ''
@@ -54,6 +54,10 @@ export interface ReplyAsCarolResult {
  */
 export async function replyAsCarol(params: ReplyAsCarolParams): Promise<ReplyAsCarolResult> {
   const { conversationId, phone, message, area = 'nutri', instanceId: instanceIdParam } = params
+
+  if (CAROL_AI_DISABLED) {
+    return { success: false, error: 'Carol IA desativada' }
+  }
 
   if (!process.env.OPENAI_API_KEY) {
     return { success: false, error: 'OpenAI API Key não configurada' }

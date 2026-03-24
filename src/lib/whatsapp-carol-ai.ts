@@ -1,13 +1,9 @@
 /**
- * Carol - IA de Atendimento WhatsApp
- * 
- * Sistema completo de automação com OpenAI para:
- * - Recepção automática
- * - Atendimento de quem chamou
- * - Disparo para quem não chamou
- * - Remarketing para quem agendou mas não participou
+ * Carol — automação WhatsApp (Z-API) para Nutri/workshop: disparos, links, remarketing, suporte pós-pagamento.
+ * A parte de **resposta automática com OpenAI** pode ser desligada em `src/config/carol-ai.ts` (CAROL_AI_DISABLED).
  */
 
+import { CAROL_AI_DISABLED } from '@/config/carol-ai'
 import { supabaseAdmin } from '@/lib/supabase'
 import { createZApiClient } from '@/lib/z-api'
 import type OpenAI from 'openai'
@@ -754,6 +750,10 @@ export async function generateCarolResponse(
     adminSituacao?: string
   }
 ): Promise<string> {
+  if (CAROL_AI_DISABLED) {
+    return ''
+  }
+
   if (!process.env.OPENAI_API_KEY) {
     return 'Olá! Sou a Carol, secretária da YLADA Nutri. Como posso te ajudar? 😊'
   }
@@ -1225,6 +1225,11 @@ export async function processIncomingMessageWithCarol(
       instanceId,
       hasOpenAIKey: !!process.env.OPENAI_API_KEY
     })
+
+    if (CAROL_AI_DISABLED) {
+      console.log('[Carol AI] ⏭️ IA desativada (src/config/carol-ai.ts — CAROL_AI_DISABLED)')
+      return { success: false, error: 'Carol IA desativada' }
+    }
 
     // Verificar se OpenAI está configurado
     if (!process.env.OPENAI_API_KEY) {

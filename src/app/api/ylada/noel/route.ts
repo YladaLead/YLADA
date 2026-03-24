@@ -1,7 +1,7 @@
 /**
  * NOEL YLADA - API por segmento (ylada, psi, odonto, nutra, coach, seller).
  * POST /api/ylada/noel
- * Body: { message, conversationHistory?, segment?, area? }
+ * Body: { message, conversationHistory?, segment?, area?, channel?: 'support' }
  * Injeta no system prompt: contexto + perfil (ylada_noel_profile) + snapshot da trilha.
  * Quando o profissional pede link/quiz/calculadora: interpret + generate e entrega o link na resposta.
  * @see docs/MATRIZ-CENTRAL-CRONOGRAMA.md
@@ -59,6 +59,7 @@ import OpenAI from 'openai'
 import { hasYladaProPlan } from '@/lib/subscription-helpers'
 import { getNoelUsageCount, incrementNoelUsage } from '@/lib/noel-usage-helpers'
 import { FREEMIUM_LIMITS } from '@/config/freemium-limits'
+import { completeNinaSupportTurn } from '@/lib/ylada-nina-support'
 
 type FormField = { id?: string; label?: string; type?: string; options?: string[] }
 
@@ -463,22 +464,33 @@ export async function POST(request: NextRequest) {
     const { user } = auth
 
     const body = await request.json()
-    const { message, conversationHistory = [], segment, area = 'ylada', lastLinkContext, locale } = body as {
+    const {
+      message,
+      conversationHistory = [],
+      segment,
+      area = 'ylada',
+      lastLinkContext,
+      locale,
+      channel,
+    } = body as {
       message?: string
       conversationHistory?: { role: 'user' | 'assistant'; content: string }[]
       segment?: string
       area?: string
       lastLinkContext?: { flow_id: string; interpretacao: Record<string, unknown>; questions: Array<{ id: string; label: string; type?: string; options?: string[] }>; url?: string; title?: string; link_id?: string }
       locale?: 'pt' | 'en' | 'es'
+      channel?: string
     }
+
+    const isSupportChannel = channel === 'support'
 
     if (!message || typeof message !== 'string' || !message.trim()) {
       return NextResponse.json({ error: 'Mensagem é obrigatória.' }, { status: 400 })
     }
 
-    // Freemium: verificar limite de análises avançadas antes de chamar IA
+    // Freemium: verificar limite de análises avançadas antes de chamar IA (mentor; Nina não consome cota)
     const isPro = await hasYladaProPlan(user.id)
-    if (!isPro) {
+    if (!isSupportChannel && !isPro) {
       const used = await getNoelUsageCount(user.id)
       if (used >= FREEMIUM_LIMITS.FREE_LIMIT_NOEL_ADVANCED_ANALYSES_PER_MONTH) {
         return NextResponse.json(
@@ -548,6 +560,34 @@ export async function POST(request: NextRequest) {
       profileResumo = buildProfileResumo(profileRow)
       const snap = snapshotRes.data as { snapshot_text?: string | null } | null
       snapshotText = snap?.snapshot_text?.trim() ?? ''
+    }
+
+    // Nina — suporte ao produto (sem cota freemium, sem exigência de perfil completo)
+    if (isSupportChannel) {
+      const baseUrl =
+        typeof request.url === 'string' ? new URL(request.url).origin : process.env.NEXT_PUBLIC_APP_URL || 'https://ylada.app'
+      const linksAtivos = await getNoelYladaLinks(user.id, baseUrl)
+      const linksAtivosBlock = formatLinksAtivosParaNoel(linksAtivos)
+      const localeInstruction =
+        locale === 'en'
+          ? '\n[IDIOMA]\nResponda SEMPRE em inglês.'
+          : locale === 'es'
+            ? '\n[IDIOMA]\nResponda SEMPRE em espanhol.'
+            : ''
+      const responseText = await completeNinaSupportTurn({
+        message: message.trim(),
+        conversationHistory,
+        segment: validSegment,
+        localeInstruction,
+        profileResumo,
+        linksAtivosBlock: linksAtivosBlock || '',
+      })
+      return NextResponse.json({
+        response: responseText,
+        segment: validSegment,
+        area: validSegment,
+        lastLinkContext: null,
+      })
     }
 
     // Exigir perfil empresarial completo para usar o Noel (qualidade das respostas)

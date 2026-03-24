@@ -3,7 +3,12 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
-import { YLADA_MENU_GROUPS, getYladaAreaPathPrefix, getYladaLeadsPath } from '@/config/ylada-areas'
+import {
+  YLADA_MENU_GROUPS,
+  getYladaAreaPathPrefix,
+  getYladaLeadsPath,
+  getYladaSuportePath,
+} from '@/config/ylada-areas'
 import { useAuth } from '@/hooks/useAuth'
 
 const YLADA_LOGO = '/images/logo/ylada/horizontal/azul-claro/ylada-horizontal-azul-claro-30.png'
@@ -62,7 +67,12 @@ export default function YladaSidebar({
             </p>
             <div className="space-y-0.5">
               {group.items.map((item) => {
-                const path = item.key === 'leads' ? getYladaLeadsPath(areaCodigo) : item.path
+                const path =
+                  item.key === 'leads'
+                    ? getYladaLeadsPath(areaCodigo)
+                    : item.key === 'suporte'
+                      ? getYladaSuportePath(areaCodigo)
+                      : item.path
                 const hash = 'hash' in item && item.hash ? `#${item.hash}` : ''
                 const href = `${prefix}/${path}${hash}`
                 const isActive = pathname === href || pathname?.startsWith(href + '/')

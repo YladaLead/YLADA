@@ -49,6 +49,7 @@ export const YLADA_MENU_GROUPS = [
       { key: 'links', label: 'Links', path: 'links', icon: '🔗' },
       { key: 'leads', label: 'Leads', path: 'leads', icon: '👥' },
       { key: 'crescimento', label: 'Crescimento', path: 'crescimento', icon: '📈' },
+      { key: 'suporte', label: 'Suporte', path: 'suporte', icon: '💬' },
     ],
   },
   {
@@ -110,6 +111,13 @@ export function getYladaDiagnosticoBuilderHref(areaCodigo: string): string {
 /** Path do menu Leads por área. Coach usa 'ylada-leads' pois /pt/coach/leads é o leads do Coach. */
 export function getYladaLeadsPath(areaCodigo: string): string {
   return areaCodigo === 'coach' ? 'ylada-leads' : 'leads'
+}
+
+/**
+ * Rota da Nina (suporte in-app). Nutri e Coach já usam /suporte para outra página de ajuda.
+ */
+export function getYladaSuportePath(areaCodigo: string): string {
+  return areaCodigo === 'nutri' || areaCodigo === 'coach' ? 'suporte/chat' : 'suporte'
 }
 
 /** Retorna path prefix pelo segment_code (uso em Smart Links e APIs). */
