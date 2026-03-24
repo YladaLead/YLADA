@@ -9,12 +9,37 @@ import { useLastVisitedPage } from '@/hooks/useLastVisitedPage'
 
 const supabase = createClient()
 
+export type LoginFormPerfil =
+  | 'nutri'
+  | 'wellness'
+  | 'coach'
+  | 'nutra'
+  | 'admin'
+  | 'ylada'
+  | 'med'
+  | 'seller'
+  | 'perfumaria'
+  | 'estetica'
+  | 'fitness'
+  | 'coach-bem-estar'
+  | 'psi'
+  | 'psicanalise'
+  | 'odonto'
+
 interface LoginFormProps {
-  perfil: 'nutri' | 'wellness' | 'coach' | 'nutra' | 'admin' | 'ylada' | 'med' | 'seller' | 'perfumaria' | 'estetica' | 'fitness' | 'coach-bem-estar'
+  perfil: LoginFormPerfil
   redirectPath: string
   logoColor?: 'azul-claro' | 'verde' | 'laranja' | 'roxo'
   logoPath?: string
   initialSignUpMode?: boolean // Iniciar em modo cadastro
+}
+
+function forgotPasswordHref(perfil: LoginFormPerfil): string {
+  if (perfil === 'ylada') return '/pt/recuperar-senha'
+  if (perfil === 'wellness' || perfil === 'coach-bem-estar') return '/pt/wellness/recuperar-senha'
+  if (perfil === 'nutri') return '/pt/nutri/recuperar-senha'
+  if (perfil === 'coach') return '/pt/coach/recuperar-senha'
+  return '/pt/recuperar-senha'
 }
 
 export default function LoginForm({ 
@@ -117,7 +142,7 @@ export default function LoginForm({
     }
   }
 
-  const perfilLabels = {
+  const perfilLabels: Record<LoginFormPerfil, string> = {
     nutri: 'Nutricionista',
     wellness: 'Consultor Wellness',
     coach: 'Coach',
@@ -130,9 +155,12 @@ export default function LoginForm({
     estetica: 'Estética',
     fitness: 'Fitness',
     'coach-bem-estar': 'Coach de bem-estar',
+    psi: 'Psicologia',
+    psicanalise: 'Psicanálise',
+    odonto: 'Odontologia',
   }
 
-  const perfilAreaLabels: Record<string, string> = {
+  const perfilAreaLabels: Record<LoginFormPerfil, string> = {
     nutri: 'Nutricionista',
     wellness: 'Wellness',
     coach: 'Coach',
@@ -144,6 +172,9 @@ export default function LoginForm({
     estetica: 'Estética',
     fitness: 'Fitness',
     'coach-bem-estar': 'Coach de bem-estar',
+    psi: 'Psicologia',
+    psicanalise: 'Psicanálise',
+    odonto: 'Odontologia',
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -200,7 +231,8 @@ export default function LoginForm({
               // Admin/Suporte pode criar conta em qualquer área
               // Continuar com cadastro
             } else {
-              const areaLabel = perfilAreaLabels[checkData.perfil] || checkData.perfil
+              const areaLabel =
+              perfilAreaLabels[checkData.perfil as LoginFormPerfil] || checkData.perfil
               setError(`Este email já está cadastrado na área ${areaLabel}. Faça login na área correta ou use outro email.`)
               setLoading(false)
               return
@@ -338,7 +370,8 @@ export default function LoginForm({
             // Continuar com login
           } else if (checkData.perfil !== perfil) {
             // Perfil não corresponde à área atual
-            const areaLabel = perfilAreaLabels[checkData.perfil] || checkData.perfil
+            const areaLabel =
+              perfilAreaLabels[checkData.perfil as LoginFormPerfil] || checkData.perfil
             console.error('❌ Perfil não corresponde:', {
               perfilAtual: checkData.perfil,
               perfilDesejado: perfil
@@ -794,7 +827,7 @@ export default function LoginForm({
         {!isSignUp && (
           <div className="mt-4 text-center">
             <a
-              href={perfil === 'ylada' ? '/pt/recuperar-senha' : `/pt/${perfil === 'wellness' || perfil === 'coach-bem-estar' ? 'wellness' : perfil === 'nutri' ? 'nutri' : perfil === 'coach' ? 'coach' : 'wellness'}/recuperar-senha`}
+              href={forgotPasswordHref(perfil)}
               className="text-sm text-gray-600 hover:text-gray-900 transition-colors duration-200 font-medium underline"
             >
               Esqueci minha senha

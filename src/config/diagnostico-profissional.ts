@@ -81,7 +81,7 @@ function interpretAnswers(answers: Record<string, string>): ProfessionalDiagnosi
   // q3 define o bloqueio principal
   if (q3 === 'perguntam_preco') {
     return {
-      profile_title: 'Profissional em fase de atração inicial',
+      profile_title: 'Profissional em fase de captação inicial',
       main_blocker: 'Conversa começa direto pelo preço',
       growth_potential: 'Alto',
       recommended_strategy: 'Usar diagnóstico antes da conversa',
@@ -91,7 +91,7 @@ function interpretAnswers(answers: Record<string, string>): ProfessionalDiagnosi
   }
   if (q3 === 'nao_respondem') {
     return {
-      profile_title: 'Profissional em fase de atração',
+      profile_title: 'Profissional em fase de captação',
       main_blocker: 'Pouca interação nas conversas',
       growth_potential: 'Alto',
       recommended_strategy: 'Usar diagnósticos para despertar curiosidade',
@@ -146,7 +146,7 @@ function interpretAnswers(answers: Record<string, string>): ProfessionalDiagnosi
       profile_title: 'Profissional com agenda vazia',
       main_blocker: 'Poucas conversas',
       growth_potential: 'Alto',
-      recommended_strategy: 'Aumentar atração com diagnósticos',
+      recommended_strategy: 'Aumentar captação com diagnósticos',
       next_action: 'Criar e compartilhar diagnóstico',
       growth_stage: 'atracao',
     }

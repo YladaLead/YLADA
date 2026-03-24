@@ -1,9 +1,7 @@
 'use client'
 
 /**
- * Página de medicina: mesma estrutura e seções da home YLADA (/pt) e da estética,
- * com conteúdo 100% focado em médicos (argumentos, fluxo, CTAs).
- * Dor principal: agenda instável. Fluxo sem perguntar área; vídeo com initialArea="med".
+ * Landing longa Medicina — /pt/med/como-funciona. Entrada minimal: /pt/med.
  */
 
 import { useState, useEffect } from 'react'
@@ -14,6 +12,7 @@ import YLADALogo from '@/components/YLADALogo'
 import { useAuth } from '@/contexts/AuthContext'
 import DemoCarouselYLADA from '@/components/landing/DemoCarouselYLADA'
 import { YladaProfissionaisGridSection } from '@/components/landing/YladaProfissionaisGridSection'
+import { isPtAreaComoFuncionaPage } from '@/config/area-public-entry'
 
 const PERGUNTA_HERO_VALUES = [2, 1, 0, 1] as const
 
@@ -37,7 +36,7 @@ export default function MedInstitutionalContent() {
   const { user, loading } = useAuth()
   const router = useRouter()
 
-  const isMedPage = /^\/pt\/med\/?(\?|$)/.test(pathname)
+  const isMedPage = isPtAreaComoFuncionaPage(pathname, 'med')
   const [respostaHeroIdx, setRespostaHeroIdx] = useState<number | null>(null)
   const [authTimeout, setAuthTimeout] = useState(false)
 

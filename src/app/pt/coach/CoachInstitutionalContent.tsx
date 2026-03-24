@@ -1,9 +1,7 @@
 'use client'
 
 /**
- * Página de Coach: mesma estrutura e seções da home YLADA (/pt) e das demais áreas (estética, nutri, etc.),
- * com conteúdo 100% focado em coaches (bem-estar, carreira, vida). Vídeo/carrossel, quiz, fluxo idêntico.
- * Quem chega por anúncio em /pt/coach vê uma "home de coach".
+ * Landing longa Coach — /pt/coach/como-funciona. Entrada minimal: /pt/coach.
  */
 
 import { useState, useEffect } from 'react'
@@ -14,6 +12,7 @@ import YLADALogo from '@/components/YLADALogo'
 import { useAuth } from '@/contexts/AuthContext'
 import DemoCarouselYLADA from '@/components/landing/DemoCarouselYLADA'
 import { YladaProfissionaisGridSection } from '@/components/landing/YladaProfissionaisGridSection'
+import { isPtAreaComoFuncionaPage } from '@/config/area-public-entry'
 
 const PERGUNTA_HERO_VALUES = [2, 1, 0, 1] as const
 
@@ -39,7 +38,7 @@ export default function CoachInstitutionalContent() {
   const { user, loading } = useAuth()
   const router = useRouter()
 
-  const isCoachPage = /^\/pt\/coach\/?(\?|$)/.test(pathname)
+  const isCoachPage = isPtAreaComoFuncionaPage(pathname, 'coach')
   const [respostaHeroIdx, setRespostaHeroIdx] = useState<number | null>(null)
   const [authTimeout, setAuthTimeout] = useState(false)
 

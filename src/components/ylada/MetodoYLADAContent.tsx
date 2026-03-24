@@ -137,10 +137,10 @@ export default function MetodoYLADAContent({ areaCodigo, areaLabel }: MetodoYLAD
         <h2 className="text-xl font-bold text-gray-900 mb-4">
           Os três motores do YLADA
         </h2>
-        <p className="text-gray-600 text-sm mb-4">Atração → Conversa → Relacionamento → Cliente</p>
+        <p className="text-gray-600 text-sm mb-4">Captação → Conversa → Relacionamento → Cliente</p>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div className="p-3 rounded-lg bg-blue-50 border border-blue-100">
-            <p className="font-bold text-blue-800 text-sm">Atração</p>
+            <p className="font-bold text-blue-800 text-sm">Captação</p>
             <p className="text-xs text-gray-600">Diagnósticos despertam curiosidade.</p>
           </div>
           <div className="p-3 rounded-lg bg-indigo-50 border border-indigo-100">

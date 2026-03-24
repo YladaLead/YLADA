@@ -34,6 +34,16 @@ interface ResultadoTeste {
   linkPrincipal?: { nome: string; url: string; markdown: string } | null
 }
 
+/** Resposta do motor único POST /api/ylada/noel */
+function linkFromLastLinkContext(last: unknown): { nome: string; url: string; markdown: string } | null {
+  if (!last || typeof last !== 'object') return null
+  const o = last as { url?: string; title?: string }
+  const url = typeof o.url === 'string' ? o.url.trim() : ''
+  const title = typeof o.title === 'string' ? o.title.trim() : ''
+  if (!url || !title) return null
+  return { nome: title, url, markdown: `[${title}](${url})` }
+}
+
 function NoelTestContent() {
   const authenticatedFetch = useAuthenticatedFetch()
   const [pergunta, setPergunta] = useState('')
@@ -55,13 +65,14 @@ function NoelTestContent() {
     setResposta('')
     setModelUsed('')
     try {
-      const res = await authenticatedFetch('/api/nutri/noel', {
+      const res = await authenticatedFetch('/api/ylada/noel', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           message: msg,
-          conversationHistory: historico
-        })
+          conversationHistory: historico,
+          area: 'nutri',
+        }),
       })
       const data = await res.json().catch(() => ({}))
       if (!res.ok) {
@@ -70,8 +81,8 @@ function NoelTestContent() {
       }
       const text = data.response || data.message || ''
       setResposta(text)
-      setModelUsed(data.modelUsed || '')
-      setLinkPrincipal(data.linkPrincipal ?? null)
+      setModelUsed(data.segment ? `YLADA · ${data.segment}` : 'YLADA')
+      setLinkPrincipal(linkFromLastLinkContext(data.lastLinkContext) ?? data.linkPrincipal ?? null)
       setHistorico(prev => [...prev, { role: 'user', content: msg }, { role: 'assistant', content: text }])
       setPergunta('')
     } catch (e: any) {
@@ -91,10 +102,10 @@ function NoelTestContent() {
       setProgresso({ atual: i + 1, total: PERGUNTAS_TESTE.length })
       const { categoria, pergunta: p } = PERGUNTAS_TESTE[i]
       try {
-        const res = await authenticatedFetch('/api/nutri/noel', {
+        const res = await authenticatedFetch('/api/ylada/noel', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message: p, conversationHistory: [] })
+          body: JSON.stringify({ message: p, conversationHistory: [], area: 'nutri' }),
         })
         const data = await res.json().catch(() => ({}))
         if (res.ok) {
@@ -102,7 +113,7 @@ function NoelTestContent() {
             categoria,
             pergunta: p,
             resposta: data.response || data.message || '',
-            linkPrincipal: data.linkPrincipal ?? null
+            linkPrincipal: linkFromLastLinkContext(data.lastLinkContext) ?? data.linkPrincipal ?? null,
           })
         } else {
           resultados.push({ categoria, pergunta: p, erro: data.error || data.message || `Erro ${res.status}` })
@@ -121,8 +132,9 @@ function NoelTestContent() {
       <main className="flex-1 p-6 max-w-2xl mx-auto">
         <h1 className="text-xl font-bold text-gray-900 mb-2">Testar Noel (Nutri)</h1>
         <p className="text-sm text-gray-600 mb-4">
-          Faça qualquer pergunta: links, agenda, ativar conversas, leads, fechar consulta, jornada, ferramentas.
-          O Noel usa seus links reais (nomes e URLs) do contexto.
+          Motor único YLADA (<code className="text-xs bg-gray-100 px-1 rounded">POST /api/ylada/noel</code> com{' '}
+          <code className="text-xs bg-gray-100 px-1 rounded">area: nutri</code>). Perguntas sobre links, agenda,
+          conversas, fechamento, etc.
         </p>
 
         <div className="mb-6 p-4 bg-white border border-gray-200 rounded-xl shadow-sm">

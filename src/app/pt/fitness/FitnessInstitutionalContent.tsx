@@ -1,8 +1,7 @@
 'use client'
 
 /**
- * Página de fitness: mesma estrutura e seções da home,
- * com conteúdo 100% focado em profissionais de fitness (dor não consegue fechar alunos, fluxo area=4, vídeo fitness).
+ * Landing longa Fitness — /pt/fitness/como-funciona. Entrada minimal: /pt/fitness.
  */
 
 import { useState, useEffect } from 'react'
@@ -13,6 +12,7 @@ import YLADALogo from '@/components/YLADALogo'
 import { useAuth } from '@/contexts/AuthContext'
 import DemoCarouselYLADA from '@/components/landing/DemoCarouselYLADA'
 import { YladaProfissionaisGridSection } from '@/components/landing/YladaProfissionaisGridSection'
+import { isPtAreaComoFuncionaPage } from '@/config/area-public-entry'
 
 const PERGUNTA_HERO_VALUES = [2, 1, 0, 1] as const
 
@@ -36,7 +36,7 @@ export default function FitnessInstitutionalContent() {
   const { user, loading } = useAuth()
   const router = useRouter()
 
-  const isFitnessPage = /^\/pt\/fitness\/?(\?|$)/.test(pathname)
+  const isFitnessPage = isPtAreaComoFuncionaPage(pathname, 'fitness')
   const [respostaHeroIdx, setRespostaHeroIdx] = useState<number | null>(null)
   const [authTimeout, setAuthTimeout] = useState(false)
 

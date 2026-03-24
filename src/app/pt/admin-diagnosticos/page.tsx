@@ -25,7 +25,7 @@ const ferramentasYLADA = [
   
   // CONTEÚDO EDUCATIVO (6)
   { id: 'mini-ebook', nome: 'Mini E-book Educativo', categoria: 'Autoridade', objetivo: 'Autoridade', icon: '📚' },
-  { id: 'guia-nutraceutico', nome: 'Guia Nutracêutico', categoria: 'Atração', objetivo: 'Atração de interesse', icon: '💊' },
+  { id: 'guia-nutraceutico', nome: 'Guia Nutracêutico', categoria: 'Captação', objetivo: 'Captação de interesse', icon: '💊' },
   { id: 'guia-proteico', nome: 'Guia Proteico', categoria: 'Especialização', objetivo: 'Especialização', icon: '🥛' },
   { id: 'tabela-comparativa', nome: 'Tabela Comparativa', categoria: 'Conversão', objetivo: 'Conversão', icon: '📊' },
   { id: 'tabela-substituicoes', nome: 'Tabela de Substituições', categoria: 'Valor', objetivo: 'Valor agregado', icon: '🔄' },
@@ -61,7 +61,7 @@ const ferramentasYLADA = [
   { id: 'template-story-interativo', nome: 'Story Interativo', categoria: 'Engajamento', objetivo: 'Engajamento nas redes', icon: '📱' },
   { id: 'post-curiosidades', nome: 'Post de Curiosidades', categoria: 'Autoridade', objetivo: 'Autoridade', icon: '💡' },
   { id: 'template-post-dica', nome: 'Post com Dica', categoria: 'Conteúdo', objetivo: 'Conteúdo recorrente', icon: '📝' },
-  { id: 'template-reels-roteirizado', nome: 'Reels Roteirizado', categoria: 'Atração', objetivo: 'Atração visual', icon: '🎬' },
+  { id: 'template-reels-roteirizado', nome: 'Reels Roteirizado', categoria: 'Captação', objetivo: 'Captação visual', icon: '🎬' },
   { id: 'template-artigo-curto', nome: 'Artigo Curto', categoria: 'Autoridade', objetivo: 'Autoridade escrita', icon: '📄' },
   
   // CATÁLOGOS (1)
@@ -2543,24 +2543,24 @@ const diagnosticosCompletos = {
   'template-reels-roteirizado': {
     nutri: {
       reelsBasico: [
-        '🎬 DIAGNÓSTICO: Você precisa de template básico de reels roteirizado para atração visual',
-        '🔍 CAUSA RAIZ: Necessidade de atração visual simples e eficaz através de reels roteirizados',
+        '🎬 DIAGNÓSTICO: Você precisa de template básico de reels roteirizado para captação visual',
+        '🔍 CAUSA RAIZ: Necessidade de captação visual simples e eficaz através de reels roteirizados',
         '⚡ AÇÃO IMEDIATA: Implemente template básico de reels roteirizado por 7 dias',
         '📅 PLANO 7 DIAS: Protocolo de template básico de reels roteirizado',
         '💊 SUPLEMENTAÇÃO: Multivitamínico + Ômega-3 + Probióticos básicos',
         '🍎 ALIMENTAÇÃO: Foque em template básico de reels roteirizado e sustentável'
       ],
       reelsModerado: [
-        '🎬 DIAGNÓSTICO: Você precisa de template moderado de reels roteirizado para atração visual',
-        '🔍 CAUSA RAIZ: Necessidade de atração visual com critérios específicos através de reels roteirizados',
+        '🎬 DIAGNÓSTICO: Você precisa de template moderado de reels roteirizado para captação visual',
+        '🔍 CAUSA RAIZ: Necessidade de captação visual com critérios específicos através de reels roteirizados',
         '⚡ AÇÃO IMEDIATA: Implemente template moderado de reels roteirizado por 7 dias',
         '📅 PLANO 7 DIAS: Protocolo de template moderado de reels roteirizado',
         '💊 SUPLEMENTAÇÃO: Suplementos específicos + Adaptógenos + Antioxidantes',
         '🍎 ALIMENTAÇÃO: Compare template moderado de reels roteirizado funcional e superalimentos'
       ],
       reelsAvancado: [
-        '🎬 DIAGNÓSTICO: Você precisa de template avançado de reels roteirizado para atração visual',
-        '🔍 CAUSA RAIZ: Necessidade de atração visual sofisticada e completa através de reels roteirizados',
+        '🎬 DIAGNÓSTICO: Você precisa de template avançado de reels roteirizado para captação visual',
+        '🔍 CAUSA RAIZ: Necessidade de captação visual sofisticada e completa através de reels roteirizados',
         '⚡ AÇÃO IMEDIATA: Implemente template avançado de reels roteirizado por 7 dias',
         '📅 PLANO 7 DIAS: Protocolo de template avançado de reels roteirizado',
         '💊 SUPLEMENTAÇÃO: Suplementos premium + Nutracêuticos + Fitoquímicos',
@@ -2569,54 +2569,54 @@ const diagnosticosCompletos = {
     },
     sales: {
       reelsBasico: [
-        '🎬 DIAGNÓSTICO: Você precisa de produtos básicos para atração visual através de reels roteirizados',
-        '🔍 CAUSA RAIZ: Necessidade de produtos básicos para atração visual através de reels roteirizados',
+        '🎬 DIAGNÓSTICO: Você precisa de produtos básicos para captação visual através de reels roteirizados',
+        '🔍 CAUSA RAIZ: Necessidade de produtos básicos para captação visual através de reels roteirizados',
         '⚡ AÇÃO IMEDIATA: Implemente produtos básicos por 7 dias',
         '📅 PLANO 7 DIAS: Protocolo de produtos básicos',
         '💊 SUPLEMENTAÇÃO: Produtos básicos + Suplementos essenciais + Multivitamínico',
-        '🍎 ALIMENTAÇÃO: Alimentos básicos para sustentar atração visual através de reels roteirizados'
+        '🍎 ALIMENTAÇÃO: Alimentos básicos para sustentar captação visual através de reels roteirizados'
       ],
       reelsModerado: [
-        '🎬 DIAGNÓSTICO: Você precisa de produtos moderados para atração visual através de reels roteirizados',
-        '🔍 CAUSA RAIZ: Necessidade de produtos específicos para atração visual através de reels roteirizados',
+        '🎬 DIAGNÓSTICO: Você precisa de produtos moderados para captação visual através de reels roteirizados',
+        '🔍 CAUSA RAIZ: Necessidade de produtos específicos para captação visual através de reels roteirizados',
         '⚡ AÇÃO IMEDIATA: Implemente produtos moderados por 7 dias',
         '📅 PLANO 7 DIAS: Protocolo de produtos moderados',
         '💊 SUPLEMENTAÇÃO: Produtos específicos + Suplementos especializados + Antioxidantes',
-        '🍎 ALIMENTAÇÃO: Alimentos específicos para potencializar atração visual através de reels roteirizados'
+        '🍎 ALIMENTAÇÃO: Alimentos específicos para potencializar captação visual através de reels roteirizados'
       ],
       reelsAvancado: [
-        '🎬 DIAGNÓSTICO: Você precisa de produtos avançados para atração visual através de reels roteirizados',
-        '🔍 CAUSA RAIZ: Necessidade de produtos premium para atração visual através de reels roteirizados',
+        '🎬 DIAGNÓSTICO: Você precisa de produtos avançados para captação visual através de reels roteirizados',
+        '🔍 CAUSA RAIZ: Necessidade de produtos premium para captação visual através de reels roteirizados',
         '⚡ AÇÃO IMEDIATA: Implemente produtos avançados por 7 dias',
         '📅 PLANO 7 DIAS: Protocolo de produtos avançados',
         '💊 SUPLEMENTAÇÃO: Produtos premium + Nutracêuticos + Adaptógenos + Antioxidantes',
-        '🍎 ALIMENTAÇÃO: Alimentos funcionais para sustentar atração visual através de reels roteirizados avançado'
+        '🍎 ALIMENTAÇÃO: Alimentos funcionais para sustentar captação visual através de reels roteirizados avançado'
       ]
     },
     coach: {
       reelsBasico: [
-        '🌱 DIAGNÓSTICO: Você precisa de coaching básico com atração visual através de reels roteirizados',
-        '🔍 CAUSA RAIZ: Necessidade de orientação básica em atração visual através de reels roteirizados',
+        '🌱 DIAGNÓSTICO: Você precisa de coaching básico com captação visual através de reels roteirizados',
+        '🔍 CAUSA RAIZ: Necessidade de orientação básica em captação visual através de reels roteirizados',
         '⚡ AÇÃO IMEDIATA: Implemente coaching básico por 7 dias',
         '📅 PLANO 7 DIAS: Protocolo de coaching básico',
         '💊 SUPLEMENTAÇÃO: Produtos naturais básicos e suplementos essenciais',
-        '🍎 ALIMENTAÇÃO: Foque em conceitos básicos de atração visual através de reels roteirizados'
+        '🍎 ALIMENTAÇÃO: Foque em conceitos básicos de captação visual através de reels roteirizados'
       ],
       reelsModerado: [
-        '🌼 DIAGNÓSTICO: Você precisa de coaching moderado com atração visual através de reels roteirizados',
-        '🔍 CAUSA RAIZ: Necessidade de orientação moderada em atração visual através de reels roteirizados',
+        '🌼 DIAGNÓSTICO: Você precisa de coaching moderado com captação visual através de reels roteirizados',
+        '🔍 CAUSA RAIZ: Necessidade de orientação moderada em captação visual através de reels roteirizados',
         '⚡ AÇÃO IMEDIATA: Implemente coaching moderado por 7 dias',
         '📅 PLANO 7 DIAS: Protocolo de coaching moderado',
         '💊 SUPLEMENTAÇÃO: Produtos naturais específicos e suplementos especializados',
-        '🍎 ALIMENTAÇÃO: Compare atração visual através de reels roteirizados funcional e superalimentos'
+        '🍎 ALIMENTAÇÃO: Compare captação visual através de reels roteirizados funcional e superalimentos'
       ],
       reelsAvancado: [
-        '🔆 DIAGNÓSTICO: Você precisa de coaching avançado com atração visual através de reels roteirizados',
-        '🔍 CAUSA RAIZ: Necessidade de orientação avançada em atração visual através de reels roteirizados',
+        '🔆 DIAGNÓSTICO: Você precisa de coaching avançado com captação visual através de reels roteirizados',
+        '🔍 CAUSA RAIZ: Necessidade de orientação avançada em captação visual através de reels roteirizados',
         '⚡ AÇÃO IMEDIATA: Implemente coaching avançado por 7 dias',
         '📅 PLANO 7 DIAS: Protocolo de coaching avançado',
-        '💊 SUPLEMENTAÇÃO: Adaptógenos e superalimentos para sustentar atração visual através de reels roteirizados',
-        '🍎 ALIMENTAÇÃO: Atração visual através de reels roteirizados consciente e funcional mantido'
+        '💊 SUPLEMENTAÇÃO: Adaptógenos e superalimentos para sustentar captação visual através de reels roteirizados',
+        '🍎 ALIMENTAÇÃO: Captação visual através de reels roteirizados consciente e funcional mantido'
       ]
     }
   },
@@ -5180,11 +5180,11 @@ export default function AdminDiagnosticos() {
   // Filtrar ferramentas por profissão
   const ferramentasFiltradas = ferramentasYLADA.filter(ferramenta => {
     if (profissaoSelecionada === 'nutri') {
-      return ['Atrair Leads', 'Engajamento', 'Diagnóstico', 'Captação', 'Segmentação', 'Avaliação', 'Nutrição', 'Educação', 'Autoridade', 'Atração', 'Especialização', 'Conversão', 'Valor', 'Organização', 'Acompanhamento', 'Motivação', 'Gamificação', 'Comprometimento', 'Curiosidade', 'Profissionalização', 'Conteúdo', 'Branding', 'Prova Social', 'Negócio', 'Estratégico', 'Viralização'].includes(ferramenta.categoria)
+      return ['Atrair Leads', 'Engajamento', 'Diagnóstico', 'Captação', 'Segmentação', 'Avaliação', 'Nutrição', 'Educação', 'Autoridade', 'Especialização', 'Conversão', 'Valor', 'Organização', 'Acompanhamento', 'Motivação', 'Gamificação', 'Comprometimento', 'Curiosidade', 'Profissionalização', 'Conteúdo', 'Branding', 'Prova Social', 'Negócio', 'Estratégico', 'Viralização'].includes(ferramenta.categoria)
     } else if (profissaoSelecionada === 'sales') {
-      return ['Atrair Leads', 'Engajamento', 'Diagnóstico', 'Captação', 'Segmentação', 'Avaliação', 'Nutrição', 'Educação', 'Autoridade', 'Atração', 'Especialização', 'Conversão', 'Valor', 'Organização', 'Acompanhamento', 'Motivação', 'Gamificação', 'Comprometimento', 'Curiosidade', 'Profissionalização', 'Conteúdo', 'Branding', 'Prova Social', 'Negócio', 'Estratégico', 'Recrutamento', 'Duplicação', 'Gestão', 'Fidelização', 'Retenção', 'Relacionamento'].includes(ferramenta.categoria)
+      return ['Atrair Leads', 'Engajamento', 'Diagnóstico', 'Captação', 'Segmentação', 'Avaliação', 'Nutrição', 'Educação', 'Autoridade', 'Especialização', 'Conversão', 'Valor', 'Organização', 'Acompanhamento', 'Motivação', 'Gamificação', 'Comprometimento', 'Curiosidade', 'Profissionalização', 'Conteúdo', 'Branding', 'Prova Social', 'Negócio', 'Estratégico', 'Recrutamento', 'Duplicação', 'Gestão', 'Fidelização', 'Retenção', 'Relacionamento'].includes(ferramenta.categoria)
     } else if (profissaoSelecionada === 'coach') {
-      return ['Atrair Leads', 'Engajamento', 'Diagnóstico', 'Captação', 'Segmentação', 'Avaliação', 'Nutrição', 'Educação', 'Autoridade', 'Atração', 'Especialização', 'Conversão', 'Valor', 'Organização', 'Acompanhamento', 'Motivação', 'Gamificação', 'Comprometimento', 'Curiosidade', 'Profissionalização', 'Conteúdo', 'Branding', 'Prova Social', 'Negócio', 'Estratégico', 'Viralização'].includes(ferramenta.categoria)
+      return ['Atrair Leads', 'Engajamento', 'Diagnóstico', 'Captação', 'Segmentação', 'Avaliação', 'Nutrição', 'Educação', 'Autoridade', 'Especialização', 'Conversão', 'Valor', 'Organização', 'Acompanhamento', 'Motivação', 'Gamificação', 'Comprometimento', 'Curiosidade', 'Profissionalização', 'Conteúdo', 'Branding', 'Prova Social', 'Negócio', 'Estratégico', 'Viralização'].includes(ferramenta.categoria)
     }
     return true
   })
@@ -9497,17 +9497,17 @@ export default function AdminDiagnosticos() {
                     <div className="space-y-3">
                       <div className="bg-green-50 p-3 rounded-lg">
                         <p className="text-xs text-green-600 font-semibold mb-1">REELS BÁSICO</p>
-                        <p className="text-sm text-gray-700">"Receba template básico de reels roteirizado para atração visual."</p>
+                        <p className="text-sm text-gray-700">"Receba template básico de reels roteirizado para captação visual."</p>
                         <p className="text-xs text-green-600 mt-1">🎬 Quero reels básico</p>
                       </div>
                       <div className="bg-green-50 p-3 rounded-lg">
                         <p className="text-xs text-green-600 font-semibold mb-1">REELS MODERADO</p>
-                        <p className="text-sm text-gray-700">"Receba template moderado de reels roteirizado para atração visual."</p>
+                        <p className="text-sm text-gray-700">"Receba template moderado de reels roteirizado para captação visual."</p>
                         <p className="text-xs text-green-600 mt-1">✅ Quero reels moderado</p>
                       </div>
                       <div className="bg-green-50 p-3 rounded-lg">
                         <p className="text-xs text-green-600 font-semibold mb-1">REELS AVANÇADO</p>
-                        <p className="text-sm text-gray-700">"Receba template avançado de reels roteirizado para atração visual."</p>
+                        <p className="text-sm text-gray-700">"Receba template avançado de reels roteirizado para captação visual."</p>
                         <p className="text-xs text-green-600 mt-1">🚀 Quero reels avançado</p>
                       </div>
                     </div>
@@ -9521,17 +9521,17 @@ export default function AdminDiagnosticos() {
                     <div className="space-y-3">
                       <div className="bg-blue-50 p-3 rounded-lg">
                         <p className="text-xs text-blue-600 font-semibold mb-1">REELS BÁSICO</p>
-                        <p className="text-sm text-gray-700">"Receba produtos básicos para atração visual através de reels roteirizados."</p>
+                        <p className="text-sm text-gray-700">"Receba produtos básicos para captação visual através de reels roteirizados."</p>
                         <p className="text-xs text-blue-600 mt-1">🎬 Quero produtos básicos</p>
                       </div>
                       <div className="bg-blue-50 p-3 rounded-lg">
                         <p className="text-xs text-blue-600 font-semibold mb-1">REELS MODERADO</p>
-                        <p className="text-sm text-gray-700">"Receba produtos moderados para atração visual através de reels roteirizados."</p>
+                        <p className="text-sm text-gray-700">"Receba produtos moderados para captação visual através de reels roteirizados."</p>
                         <p className="text-xs text-blue-600 mt-1">✅ Quero produtos moderados</p>
                       </div>
                       <div className="bg-blue-50 p-3 rounded-lg">
                         <p className="text-xs text-blue-600 font-semibold mb-1">REELS AVANÇADO</p>
-                        <p className="text-sm text-gray-700">"Receba produtos avançados para atração visual através de reels roteirizados."</p>
+                        <p className="text-sm text-gray-700">"Receba produtos avançados para captação visual através de reels roteirizados."</p>
                         <p className="text-xs text-blue-600 mt-1">🚀 Quero produtos avançados</p>
                       </div>
                     </div>
@@ -9545,17 +9545,17 @@ export default function AdminDiagnosticos() {
                     <div className="space-y-3">
                       <div className="bg-purple-50 p-3 rounded-lg">
                         <p className="text-xs text-purple-600 font-semibold mb-1">REELS BÁSICO</p>
-                        <p className="text-sm text-gray-700">"Receba coaching básico com atração visual através de reels roteirizados."</p>
+                        <p className="text-sm text-gray-700">"Receba coaching básico com captação visual através de reels roteirizados."</p>
                         <p className="text-xs text-purple-600 mt-1">🎬 Quero coaching básico</p>
                       </div>
                       <div className="bg-purple-50 p-3 rounded-lg">
                         <p className="text-xs text-purple-600 font-semibold mb-1">REELS MODERADO</p>
-                        <p className="text-sm text-gray-700">"Receba coaching moderado com atração visual através de reels roteirizados."</p>
+                        <p className="text-sm text-gray-700">"Receba coaching moderado com captação visual através de reels roteirizados."</p>
                         <p className="text-xs text-purple-600 mt-1">✅ Quero coaching moderado</p>
                       </div>
                       <div className="bg-purple-50 p-3 rounded-lg">
                         <p className="text-xs text-purple-600 font-semibold mb-1">REELS AVANÇADO</p>
-                        <p className="text-sm text-gray-700">"Receba coaching avançado com atração visual através de reels roteirizados."</p>
+                        <p className="text-sm text-gray-700">"Receba coaching avançado com captação visual através de reels roteirizados."</p>
                         <p className="text-xs text-purple-600 mt-1">🚀 Quero coaching avançado</p>
                       </div>
                     </div>
@@ -9573,7 +9573,7 @@ export default function AdminDiagnosticos() {
                     </div>
                     <div>
                       <p className="font-semibold text-gray-800 mb-1">🎬 Adaptação por Resultado:</p>
-                      <p>CTA específico para cada nível de atração visual através de reels roteirizados</p>
+                      <p>CTA específico para cada nível de captação visual através de reels roteirizados</p>
                     </div>
                     <div>
                       <p className="font-semibold text-gray-800 mb-1">⚡ Ação Clara:</p>
@@ -15916,14 +15916,14 @@ export default function AdminDiagnosticos() {
             {ferramentaSelecionada === 'template-reels-roteirizado' && (
               <div className="mt-8 bg-white rounded-xl p-6 shadow-sm border border-gray-200">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                  🎬 Preview do Template de Reels Roteirizado - "Crie atração visual através de reels roteirizados"
+                  🎬 Preview do Template de Reels Roteirizado - "Crie captação visual através de reels roteirizados"
                 </h3>
                 
                 {/* Tela de Abertura */}
                 <div className="bg-gradient-to-r from-purple-50 to-pink-50 p-6 rounded-lg mb-6">
-                  <h4 className="text-xl font-bold text-gray-900 mb-2">🎬 Crie Atração Visual através de Reels Roteirizados</h4>
+                  <h4 className="text-xl font-bold text-gray-900 mb-2">🎬 Crie Captação Visual através de Reels Roteirizados</h4>
                   <p className="text-gray-700 mb-3">Desenvolva reels envolventes com roteiros estruturados que capturam atenção e geram engajamento nas redes sociais.</p>
-                  <p className="text-purple-600 font-semibold">🎬 Atração visual através de reels roteirizados que pode transformar sua presença digital em 7 dias.</p>
+                  <p className="text-purple-600 font-semibold">🎬 Captação visual através de reels roteirizados que pode transformar sua presença digital em 7 dias.</p>
                 </div>
                 
                 <div className="space-y-6">
@@ -16070,10 +16070,10 @@ export default function AdminDiagnosticos() {
                   <div className="bg-purple-50 p-4 rounded-lg">
                     <h4 className="font-semibold text-purple-900 mb-3">ℹ️ Informações Importantes</h4>
                     <div className="space-y-2 text-sm text-gray-700">
-                      <p>• <strong>Atração Visual através de Reels Roteirizados:</strong> Tipo de conteúdo, objetivo, plataforma, estilo visual, roteiro</p>
-                      <p>• <strong>Análise:</strong> Critérios de atração visual através de reels roteirizados, evidências científicas, feedback de usuários</p>
+                      <p>• <strong>Captação Visual através de Reels Roteirizados:</strong> Tipo de conteúdo, objetivo, plataforma, estilo visual, roteiro</p>
+                      <p>• <strong>Análise:</strong> Critérios de captação visual através de reels roteirizados, evidências científicas, feedback de usuários</p>
                       <p>• <strong>Personalização:</strong> Template específico baseado em suas necessidades</p>
-                      <p>• <strong>Duração:</strong> Atração visual através de reels roteirizados evolui com novas metas e objetivos</p>
+                      <p>• <strong>Duração:</strong> Captação visual através de reels roteirizados evolui com novas metas e objetivos</p>
                     </div>
                     <p className="text-xs text-purple-600 mt-2">🧠 Gatilho: Credibilidade científica</p>
                   </div>

@@ -1,7 +1,7 @@
 /**
- * Áreas exibidas na página institucional (/pt).
- * status 'ready' = link direto; 'construction' = página "Em construção" com formulário de solicitação.
- * Paths: ready → login; construction → /pt/solicitar-acesso?area=...
+ * Áreas exibidas na grade em /pt (piloto).
+ * status 'ready' = entrada minimal em path; 'construction' = /pt/solicitar-acesso?area=...
+ * Cada área ready: /pt/{id} (minimal) e /pt/{id}/como-funciona (landing longa).
  */
 export type AreaStatus = 'ready' | 'construction'
 
@@ -15,7 +15,7 @@ export interface InstitutionalArea {
 
 /**
  * Áreas na ordem de exibição: profissionais de saúde, bem-estar, vendedores, em breve.
- * Áreas com landing: path aponta para a landing. Sem landing: path aponta para login.
+ * Paths ready: raiz do segmento (/pt/{id}), entrada para divulgação.
  * Coach é a única porta de entrada para coaches; a diferenciação (bem-estar, carreira, vida) ocorre no perfil.
  * Wellness (Herbalife) não aparece — funciona em paralelo, fora da divulgação oficial.
  */
@@ -24,15 +24,15 @@ export const INSTITUTIONAL_AREAS: InstitutionalArea[] = [
   { id: 'nutri', path: '/pt/nutri', status: 'ready', translationKey: 'nutri' },
   { id: 'psi', path: '/pt/psi', status: 'ready', translationKey: 'psi' },
   { id: 'psicanalise', path: '/pt/psicanalise', status: 'ready', translationKey: 'psicanalise' },
-  { id: 'odonto', path: '/pt/odonto/login', status: 'ready', translationKey: 'odonto' },
-  { id: 'med', path: '/pt/med/login', status: 'ready', translationKey: 'med' },
+  { id: 'odonto', path: '/pt/odonto', status: 'ready', translationKey: 'odonto' },
+  { id: 'med', path: '/pt/med', status: 'ready', translationKey: 'med' },
   // Bem-estar e estética
   { id: 'coach', path: '/pt/coach', status: 'ready', translationKey: 'coach' },
-  { id: 'estetica', path: '/pt/estetica/login', status: 'ready', translationKey: 'estetica' },
-  { id: 'fitness', path: '/pt/fitness/login', status: 'ready', translationKey: 'fitness' },
+  { id: 'estetica', path: '/pt/estetica', status: 'ready', translationKey: 'estetica' },
+  { id: 'fitness', path: '/pt/fitness', status: 'ready', translationKey: 'fitness' },
   // Vendedores
   { id: 'nutra', path: '/pt/nutra', status: 'ready', translationKey: 'nutra' },
-  { id: 'perfumaria', path: '/pt/perfumaria/login', status: 'ready', translationKey: 'perfumaria' },
+  { id: 'perfumaria', path: '/pt/perfumaria', status: 'ready', translationKey: 'perfumaria' },
   // Em breve
   { id: 'profissional-liberal', path: '/pt/solicitar-acesso?area=profissional-liberal', status: 'construction', translationKey: 'profissional-liberal' },
   { id: 'vendedores-geral', path: '/pt/solicitar-acesso?area=vendedores-geral', status: 'construction', translationKey: 'vendedores-geral' },

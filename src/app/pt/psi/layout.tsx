@@ -8,7 +8,11 @@ function isPsiPublicPath(pathname: string): boolean {
   const path = pathname.replace(/\/$/, '') || '/'
   if (path === '/pt/psi') return true
   const suffix = path.replace(/^\/pt\/psi\/?/, '') || '/'
-  return PSI_PUBLIC.has(suffix) || suffix.startsWith('login')
+  return (
+    PSI_PUBLIC.has(suffix) ||
+    suffix.startsWith('login') ||
+    suffix.startsWith('como-funciona')
+  )
 }
 
 export default async function PsiLayout({ children }: { children: ReactNode }) {

@@ -211,7 +211,7 @@ const DEMO_SLIDES: DemoSlide[] = [
     title: 'O link que atrai clientes da sua área.',
     description:
       'É o que o Noel criou pra você compartilhar. A pessoa vê e quer responder.',
-    pills: ['Atração'],
+    pills: ['Captação'],
     visualType: 'link',
     linkTitle: 'Responda e entenda o que precisa mudar',
     linkHint: 'Começar agora',

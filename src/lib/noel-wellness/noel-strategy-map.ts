@@ -1,6 +1,6 @@
 /**
  * Mapa Estratégico do Profissional — visualização da jornada.
- * Etapas: posicionamento → atração → diagnóstico → conversa → clientes → fidelização → indicações.
+ * Etapas: posicionamento → captação → diagnóstico → conversa → clientes → fidelização → indicações.
  *
  * O Noel usa para orientar o próximo passo; o front pode exibir progresso.
  */
@@ -266,7 +266,7 @@ export function formatStrategyMapForPrompt(map: StrategyMapRow | null): string {
 
   const stages: Array<{ name: string; ok: boolean }> = [
     { name: 'Posicionamento', ok: !!map.posicionamento_ok },
-    { name: 'Atração', ok: !!map.atracao_ok },
+    { name: 'Captação', ok: !!map.atracao_ok },
     { name: 'Diagnóstico', ok: !!map.diagnostico_ok },
     { name: 'Conversa', ok: !!map.conversa_ok },
     { name: 'Clientes', ok: !!map.clientes_ok },
@@ -284,7 +284,7 @@ export function formatStrategyMapForPrompt(map: StrategyMapRow | null): string {
 
 const STAGE_NAMES: Record<StrategyMapStage, string> = {
   posicionamento: 'Posicionamento',
-  atracao: 'Atração',
+  atracao: 'Captação',
   diagnostico: 'Diagnóstico',
   conversa: 'Conversa',
   clientes: 'Clientes',

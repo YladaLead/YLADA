@@ -1,11 +1,6 @@
-'use client'
+import AreaMinimalLandingById from '@/components/pilot/AreaMinimalLandingById'
 
-import MedInstitutionalContent from './MedInstitutionalContent'
-
-/**
- * Landing completa de medicina (conteúdo institucional).
- * Fluxo minimalista do piloto: /pt/pilot/med → atalhos para cá e para o login.
- */
-export default function MedLandingPage() {
-  return <MedInstitutionalContent />
+/** Entrada minimal Medicina — landing longa em /pt/med/como-funciona */
+export default function MedPublicEntryPage() {
+  return <AreaMinimalLandingById areaId="med" />
 }

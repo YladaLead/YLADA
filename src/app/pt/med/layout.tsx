@@ -8,7 +8,11 @@ function isMedPublicPath(pathname: string): boolean {
   const path = pathname.replace(/\/$/, '') || '/'
   if (path === '/pt/med') return true
   const suffix = path.replace(/^\/pt\/med\/?/, '') || '/'
-  return MED_PUBLIC.has(suffix) || suffix.startsWith('login')
+  return (
+    MED_PUBLIC.has(suffix) ||
+    suffix.startsWith('login') ||
+    suffix.startsWith('como-funciona')
+  )
 }
 
 export default async function MedLayout({ children }: { children: ReactNode }) {

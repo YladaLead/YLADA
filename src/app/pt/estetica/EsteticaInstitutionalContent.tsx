@@ -1,9 +1,8 @@
 'use client'
 
 /**
- * Página de estética: mesma estrutura e seções da home YLADA (/pt),
- * com conteúdo 100% focado em estética (argumentos, fluxo, CTAs).
- * Quem chega por anúncio em /pt/estetica vê uma "home de estética".
+ * Landing longa de estética — rota pública /pt/estetica/como-funciona.
+ * Entrada minimal para divulgação: /pt/estetica.
  */
 
 import { useState, useEffect } from 'react'
@@ -14,6 +13,7 @@ import YLADALogo from '@/components/YLADALogo'
 import { useAuth } from '@/contexts/AuthContext'
 import DemoCarouselYLADA from '@/components/landing/DemoCarouselYLADA'
 import { YladaProfissionaisGridSection } from '@/components/landing/YladaProfissionaisGridSection'
+import { isPtAreaComoFuncionaPage } from '@/config/area-public-entry'
 
 const PERGUNTA_HERO_VALUES = [2, 1, 0, 1] as const
 
@@ -37,7 +37,7 @@ export default function EsteticaInstitutionalContent() {
   const { user, loading } = useAuth()
   const router = useRouter()
 
-  const isEsteticaPage = /^\/pt\/estetica\/?(\?|$)/.test(pathname)
+  const isEsteticaPage = isPtAreaComoFuncionaPage(pathname, 'estetica')
   const [respostaHeroIdx, setRespostaHeroIdx] = useState<number | null>(null)
   const [authTimeout, setAuthTimeout] = useState(false)
 

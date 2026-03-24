@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import LoginForm from '@/components/auth/LoginForm'
+import LoginForm, { type LoginFormPerfil } from '@/components/auth/LoginForm'
 
 /** Áreas disponíveis para cadastro (sem ylada — matriz não é área pública). */
 const AREAS_CADASTRO: { value: string; label: string }[] = [
@@ -11,6 +11,7 @@ const AREAS_CADASTRO: { value: string; label: string }[] = [
   { value: 'coach', label: 'Coach' },
   { value: 'med', label: 'Médicos' },
   { value: 'psi', label: 'Psicologia' },
+  { value: 'psicanalise', label: 'Psicanálise' },
   { value: 'odonto', label: 'Odontologia' },
   { value: 'fitness', label: 'Fitness' },
   { value: 'perfumaria', label: 'Perfumaria' },
@@ -47,7 +48,7 @@ export default function CadastroPage() {
   if (areaAtiva) {
     return (
       <LoginForm
-        perfil={areaAtiva as any}
+        perfil={areaAtiva as LoginFormPerfil}
         redirectPath="/pt/onboarding"
         initialSignUpMode={true}
       />

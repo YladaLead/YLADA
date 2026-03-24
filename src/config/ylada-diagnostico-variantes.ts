@@ -65,7 +65,7 @@ const BULLETS_POR_DIAGNOSTICO: Record<string, string[]> = {
   comunicacao: ['clareza de posicionamento', 'percepção de valor', 'comunicação com clientes', 'qualidade das conversas'],
   agenda: ['clareza de posicionamento', 'percepção de valor', 'comunicação com clientes', 'geração de oportunidades'],
   autoridade: ['clareza de posicionamento', 'demonstração de expertise', 'percepção de valor'],
-  indicacoes: ['controle sobre o fluxo', 'diversificação de fontes', 'sistema de atração'],
+  indicacoes: ['controle sobre o fluxo', 'diversificação de fontes', 'sistema de captação'],
   conteudo: ['conexão conteúdo–decisão', 'clareza do trabalho', 'qualidade dos contatos'],
   investimento: ['posicionamento claro', 'retorno dos investimentos', 'transformação em clientes'],
 }

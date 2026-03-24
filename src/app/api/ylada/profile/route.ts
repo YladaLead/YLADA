@@ -10,6 +10,7 @@ import { supabaseAdmin } from '@/lib/supabase'
 import { buildProfileResumo, type YladaNoelProfileRow } from '@/lib/ylada-profile-resumo'
 import { validateProfessionForSegment } from '@/config/ylada-profile-flows'
 import { getPerfilSimuladoByKey, SIMULATE_COOKIE_NAME } from '@/data/perfis-simulados'
+import { yladaApiRejectWellnessProductUser } from '@/lib/ylada-api-guard'
 
 const VALID_SEGMENTS = ['ylada', 'med', 'psi', 'psicanalise', 'odonto', 'nutra', 'coach', 'seller', 'perfumaria', 'estetica', 'fitness'] as const
 
@@ -100,6 +101,9 @@ export async function GET(request: NextRequest) {
     if (auth instanceof NextResponse) return auth
     const { user } = auth
 
+    const wellnessBlock = await yladaApiRejectWellnessProductUser(user.id)
+    if (wellnessBlock) return wellnessBlock
+
     const { searchParams } = new URL(request.url)
     const segment = searchParams.get('segment')?.trim().toLowerCase()
     if (!segment || !VALID_SEGMENTS.includes(segment as (typeof VALID_SEGMENTS)[number])) {
@@ -157,6 +161,9 @@ export async function PUT(request: NextRequest) {
     const auth = await requireApiAuth(request)
     if (auth instanceof NextResponse) return auth
     const { user } = auth
+
+    const wellnessBlock = await yladaApiRejectWellnessProductUser(user.id)
+    if (wellnessBlock) return wellnessBlock
 
     // Em modo simulação não persiste — evita sobrescrever perfil real
     const simulateKey = request.cookies.get(SIMULATE_COOKIE_NAME)?.value?.trim()

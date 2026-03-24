@@ -190,7 +190,7 @@ export async function POST(request: NextRequest) {
               theme_raw: title,
               theme_display: title,
               architecture,
-              area_profissional: 'wellness',
+              area_profissional: 'geral',
               ...(segmentCode && { segment_code: segmentCode }),
             },
             form: {

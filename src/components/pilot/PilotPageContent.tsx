@@ -10,9 +10,9 @@ import { useTranslations } from '@/hooks/useTranslations'
 /** Itens só por solicitação — no piloto entram apenas pelo campo livre. */
 const PILOT_EXCLUDED_IDS = new Set(['profissional-liberal', 'vendedores-geral'])
 
-/** Todas as áreas da grade passam pelo passo curto /pt/pilot/{id} antes do cadastro ou da landing longa. */
+/** Entrada minimal por segmento: /pt/{id} (landing longa em /pt/{id}/como-funciona). */
 function pilotHrefForArea(areaId: string): string {
-  return `/pt/pilot/${areaId}`
+  return `/pt/${areaId}`
 }
 
 type PilotStep = 'intro' | 'areas'
@@ -38,8 +38,8 @@ export default function PilotPageContent() {
     return (
       <div className="min-h-screen bg-white flex flex-col">
         <header className="shrink-0 border-b border-gray-100">
-          <div className="max-w-6xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
-            <Link href="/pt" className="touch-manipulation" aria-label="YLADA início">
+          <div className="max-w-6xl mx-auto flex items-center justify-between gap-4 px-4 py-2.5 sm:px-6 sm:py-3">
+            <Link href="/pt" className="inline-flex touch-manipulation items-center" aria-label="YLADA início">
               <YLADALogo size="md" responsive className="bg-transparent" />
             </Link>
           </div>
@@ -54,8 +54,12 @@ export default function PilotPageContent() {
   return (
     <div className="min-h-screen bg-white text-gray-900 flex flex-col">
       <header className="shrink-0 border-b border-gray-100">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-14 sm:h-16 flex items-center justify-between">
-          <Link href="/pt" className="touch-manipulation shrink-0" aria-label="YLADA início">
+        <div className="max-w-6xl mx-auto flex items-center justify-between gap-4 px-4 py-2.5 sm:px-6 sm:py-3">
+          <Link
+            href="/pt"
+            className="inline-flex touch-manipulation shrink-0 items-center"
+            aria-label="YLADA início"
+          >
             <YLADALogo size="md" responsive className="bg-transparent" />
           </Link>
           <Link href="/pt/login" className="text-sm font-medium text-gray-600 hover:text-gray-900 py-2 shrink-0">

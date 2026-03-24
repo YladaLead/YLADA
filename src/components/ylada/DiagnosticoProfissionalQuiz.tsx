@@ -13,7 +13,7 @@ interface DiagnosticoProfissionalQuizProps {
 
 const STAGE_NAMES: Record<string, string> = {
   posicionamento: 'Posicionamento',
-  atracao: 'Atração',
+  atracao: 'Captação',
   diagnostico: 'Diagnóstico',
   conversa: 'Conversa',
   clientes: 'Clientes',

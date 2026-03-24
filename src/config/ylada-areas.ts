@@ -1,7 +1,10 @@
 /**
  * Área padrão da matriz central YLADA (motor de conversas).
  * Segmentos (perfil): seller, professional, clinic, coach, etc. — definidos no perfil, não na rota.
- * Nutri e Wellness são produtos separados em comercialização; migração para a matriz depois.
+ *
+ * Produto: **YLADA** = todos os segmentos abaixo + futuros (um motor: POST /api/ylada/noel + `area`).
+ * **Wellness** (Herbalife) fica fora desta matriz — APIs em /api/wellness/*.
+ * Nutri continua com rotas próprias de domínio (/api/nutri/*) para clientes, LYA, etc.; o **Noel mentor** é unificado via YLADA.
  * @see docs/MATRIZ-CENTRAL-CRONOGRAMA.md
  */
 export type YladaSegmentCode = 'ylada' | 'med' | 'psi' | 'psicanalise' | 'odonto' | 'nutra' | 'nutri' | 'coach' | 'seller' | 'perfumaria' | 'estetica' | 'fitness'
@@ -82,6 +85,28 @@ export function getYladaAreaPathPrefix(areaCodigo: string): string {
   return YLADA_AREAS.find((a) => a.codigo === areaCodigo)?.pathPrefix ?? `/pt/${areaCodigo}`
 }
 
+/**
+ * URL do fluxo de criação de diagnóstico (quiz comunicação) por área da matriz.
+ * Alinhado aos links das landings institucionais.
+ */
+export function getYladaDiagnosticoBuilderHref(areaCodigo: string): string {
+  const m: Record<string, string> = {
+    ylada: '/pt/diagnostico',
+    med: '/pt/diagnostico?area=0',
+    psi: '/pt/diagnostico?area=1',
+    estetica: '/pt/diagnostico?area=2',
+    nutri: '/pt/diagnostico?area=3',
+    fitness: '/pt/diagnostico?area=4',
+    nutra: '/pt/diagnostico?area=5',
+    coach: '/pt/diagnostico?area=5',
+    seller: '/pt/diagnostico?area=5',
+    perfumaria: '/pt/diagnostico?area=6&fromArea=perfumaria',
+    odonto: '/pt/diagnostico?area=6&fromArea=odonto',
+    psicanalise: '/pt/diagnostico?area=7',
+  }
+  return m[areaCodigo] ?? '/pt/diagnostico?area=5'
+}
+
 /** Path do menu Leads por área. Coach usa 'ylada-leads' pois /pt/coach/leads é o leads do Coach. */
 export function getYladaLeadsPath(areaCodigo: string): string {
   return areaCodigo === 'coach' ? 'ylada-leads' : 'leads'
@@ -95,8 +120,8 @@ export function getYladaSegmentPathPrefix(segmentCode: YladaSegmentCode): string
 /** Lista de segment_code válidos para validação (ex.: body.segment na API Noel). */
 export const YLADA_SEGMENT_CODES: YladaSegmentCode[] = ['ylada', 'med', 'psi', 'psicanalise', 'odonto', 'nutra', 'nutri', 'coach', 'seller', 'perfumaria', 'estetica', 'fitness']
 
-/** Perfis permitidos nas APIs YLADA (Links, Templates, Biblioteca, etc.). */
+/** Perfis permitidos nas APIs YLADA (Links, Templates, Biblioteca, etc.). Wellness/coach-bem-estar ficam só em /api/wellness/*. */
 export const YLADA_API_ALLOWED_PROFILES = [
   'ylada', 'med', 'psi', 'psicanalise', 'odonto', 'nutra', 'coach', 'seller',
-  'perfumaria', 'estetica', 'fitness', 'nutri', 'wellness', 'admin'
+  'perfumaria', 'estetica', 'fitness', 'nutri', 'admin',
 ] as const

@@ -1,6 +1,25 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  async redirects() {
+    const areas = [
+      'nutri',
+      'psi',
+      'psicanalise',
+      'odonto',
+      'med',
+      'coach',
+      'estetica',
+      'fitness',
+      'nutra',
+      'perfumaria',
+    ]
+    return areas.map((area) => ({
+      source: `/pt/pilot/${area}`,
+      destination: `/pt/${area}`,
+      permanent: true,
+    }))
+  },
   /* config options here */
   typescript: {
     ignoreBuildErrors: true,

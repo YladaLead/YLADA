@@ -8,7 +8,11 @@ function isOdontoPublicPath(pathname: string): boolean {
   const path = pathname.replace(/\/$/, '') || '/'
   if (path === '/pt/odonto') return true
   const suffix = path.replace(/^\/pt\/odonto\/?/, '') || '/'
-  return ODONTO_PUBLIC.has(suffix) || suffix.startsWith('login')
+  return (
+    ODONTO_PUBLIC.has(suffix) ||
+    suffix.startsWith('login') ||
+    suffix.startsWith('como-funciona')
+  )
 }
 
 export default async function OdontoLayout({ children }: { children: ReactNode }) {

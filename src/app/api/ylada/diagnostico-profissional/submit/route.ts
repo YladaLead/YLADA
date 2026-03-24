@@ -30,7 +30,6 @@ const ALLOWED_PROFILES = [
   'estetica',
   'fitness',
   'nutri',
-  'wellness',
   'admin',
 ] as const
 

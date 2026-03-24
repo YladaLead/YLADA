@@ -8,7 +8,11 @@ function isPsicanalisePublicPath(pathname: string): boolean {
   const path = pathname.replace(/\/$/, '') || '/'
   if (path === '/pt/psicanalise') return true
   const suffix = path.replace(/^\/pt\/psicanalise\/?/, '') || '/'
-  return PSICANALISE_PUBLIC.has(suffix) || suffix.startsWith('login')
+  return (
+    PSICANALISE_PUBLIC.has(suffix) ||
+    suffix.startsWith('login') ||
+    suffix.startsWith('como-funciona')
+  )
 }
 
 export default async function PsicanaliseLayout({ children }: { children: ReactNode }) {

@@ -427,6 +427,7 @@ const SEGMENT_CONTEXT: Record<string, string> = {
   psicanalise: 'Você é o Noel, mentor da YLADA para a área de Psicanálise. Oriente o profissional sobre rotina, links inteligentes e formação empresarial. Tom direto e prático.',
   odonto: 'Você é o Noel, mentor da YLADA para a área de Odontologia. Oriente o profissional sobre rotina, links inteligentes e formação empresarial. Tom direto e prático.',
   nutra: 'Você é o Noel, mentor da YLADA para a área Nutra (vendedores de suplementos). Oriente sobre rotina, links inteligentes e formação empresarial. Tom direto e prático.',
+  nutri: 'Você é o Noel, mentor da YLADA para nutricionistas. Oriente sobre rotina, links inteligentes, captação de pacientes para consulta nutricional e formação empresarial. Tom direto e prático, em conversa (evite formato de relatório).',
   coach: 'Você é o Noel, mentor da YLADA para a área de Coach. Oriente o profissional sobre rotina, links inteligentes e formação empresarial. Tom direto e prático.',
   perfumaria: 'Você é o Noel, mentor da YLADA para a área de Perfumaria. Oriente vendedores de fragrâncias sobre rotina, links inteligentes, quizzes de perfil olfativo e geração de conversas qualificadas no WhatsApp. Tom direto e prático.',
   seller: 'Você é o Noel, mentor da YLADA para vendedores. Oriente sobre rotina, links inteligentes, funil de vendas e geração de conversas qualificadas no WhatsApp. Tom direto e prático.',
@@ -436,7 +437,10 @@ const SEGMENT_CONTEXT: Record<string, string> = {
 
 export async function POST(request: NextRequest) {
   try {
-    const auth = await requireApiAuth(request, ['ylada', 'med', 'psi', 'psicanalise', 'odonto', 'nutra', 'coach', 'seller', 'perfumaria', 'estetica', 'fitness', 'nutri', 'wellness', 'admin'])
+    const auth = await requireApiAuth(request, [
+      'ylada', 'med', 'psi', 'psicanalise', 'odonto', 'nutra', 'coach', 'seller',
+      'perfumaria', 'estetica', 'fitness', 'nutri', 'admin',
+    ])
     if (auth instanceof NextResponse) return auth
     const { user } = auth
 
@@ -859,7 +863,7 @@ export async function POST(request: NextRequest) {
       parts.push(
         '\n[MAPA ESTRATÉGICO — progresso nas etapas]\n' +
           strategyMapText +
-          '\nUse o mapa para orientar o próximo passo. Ex.: "Você já está em Atração e Diagnóstico. Agora vamos focar em Conversa — use o diagnóstico para iniciar conversas."'
+          '\nUse o mapa para orientar o próximo passo. Ex.: "Você já está em Captação e Diagnóstico. Agora vamos focar em Conversa — use o diagnóstico para iniciar conversas."'
       )
     }
     if (detectedStrategicProfileText) {

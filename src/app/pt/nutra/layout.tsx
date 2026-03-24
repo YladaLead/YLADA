@@ -17,7 +17,13 @@ function isNutraPublicPath(pathname: string): boolean {
   const path = pathname.replace(/\/$/, '') || '/'
   if (path === '/pt/nutra') return true
   const suffix = path.replace(/^\/pt\/nutra\/?/, '') || '/'
-  return NUTRA_PUBLIC.has(suffix) || suffix.startsWith('login') || suffix.startsWith('oferta') || suffix.startsWith('checkout')
+  return (
+    NUTRA_PUBLIC.has(suffix) ||
+    suffix.startsWith('login') ||
+    suffix.startsWith('oferta') ||
+    suffix.startsWith('checkout') ||
+    suffix.startsWith('como-funciona')
+  )
 }
 
 export default async function NutraLayout({ children }: { children: ReactNode }) {

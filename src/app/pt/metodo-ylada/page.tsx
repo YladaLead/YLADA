@@ -351,11 +351,11 @@ export default function MetodoYLADALandingPage() {
                 Os três motores do YLADA
               </h2>
               <p className="text-lg text-gray-600 mb-10 text-center">
-                Atração → Conversa → Relacionamento → Cliente
+                Captação → Conversa → Relacionamento → Cliente
               </p>
               <div className="grid sm:grid-cols-3 gap-6 mb-8">
                 <div className="rounded-xl p-6 border-2 border-blue-100 bg-blue-50/50">
-                  <h3 className="text-lg font-bold text-blue-800 mb-2">Motor de Atração</h3>
+                  <h3 className="text-lg font-bold text-blue-800 mb-2">Motor de Captação</h3>
                   <p className="text-gray-700 text-sm mb-2">Diagnósticos despertam curiosidade e atraem pessoas interessadas.</p>
                   <p className="text-xs text-gray-500">Curiosidade → Diagnóstico → Pessoa interessada</p>
                 </div>

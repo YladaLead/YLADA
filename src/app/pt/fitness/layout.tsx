@@ -8,7 +8,11 @@ function isFitnessPublicPath(pathname: string): boolean {
   const path = pathname.replace(/\/$/, '') || '/'
   if (path === '/pt/fitness') return true
   const suffix = path.replace(/^\/pt\/fitness\/?/, '') || '/'
-  return FITNESS_PUBLIC.has(suffix) || suffix.startsWith('login')
+  return (
+    FITNESS_PUBLIC.has(suffix) ||
+    suffix.startsWith('login') ||
+    suffix.startsWith('como-funciona')
+  )
 }
 
 export default async function FitnessLayout({ children }: { children: ReactNode }) {

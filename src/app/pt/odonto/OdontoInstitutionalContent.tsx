@@ -1,8 +1,7 @@
 'use client'
 
 /**
- * Página de odontologia: mesma estrutura e seções da home,
- * com conteúdo 100% focado em dentistas (dor perguntam preço e somem, fluxo area=6+fromArea=odonto, vídeo odonto).
+ * Landing longa Odonto — /pt/odonto/como-funciona. Entrada minimal: /pt/odonto.
  */
 
 import { useState, useEffect } from 'react'
@@ -13,6 +12,7 @@ import YLADALogo from '@/components/YLADALogo'
 import { useAuth } from '@/contexts/AuthContext'
 import DemoCarouselYLADA from '@/components/landing/DemoCarouselYLADA'
 import { YladaProfissionaisGridSection } from '@/components/landing/YladaProfissionaisGridSection'
+import { isPtAreaComoFuncionaPage } from '@/config/area-public-entry'
 
 const DIAG_BASE = '/pt/diagnostico?area=6&fromArea=odonto'
 const PERGUNTA_HERO_VALUES = [2, 1, 0, 1] as const
@@ -37,7 +37,7 @@ export default function OdontoInstitutionalContent() {
   const { user, loading } = useAuth()
   const router = useRouter()
 
-  const isOdontoPage = /^\/pt\/odonto\/?(\?|$)/.test(pathname)
+  const isOdontoPage = isPtAreaComoFuncionaPage(pathname, 'odonto')
   const [respostaHeroIdx, setRespostaHeroIdx] = useState<number | null>(null)
   const [authTimeout, setAuthTimeout] = useState(false)
 

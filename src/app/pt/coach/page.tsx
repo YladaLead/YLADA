@@ -1,11 +1,5 @@
-'use client'
+import AreaMinimalLandingById from '@/components/pilot/AreaMinimalLandingById'
 
-import CoachInstitutionalContent from './CoachInstitutionalContent'
-
-/**
- * Página de Coach: mesma estrutura e seções das demais áreas (estética, nutri, etc.),
- * com vídeo/carrossel, quiz, fluxo e comunicação alinhados ao padrão YLADA.
- */
-export default function CoachLandingPage() {
-  return <CoachInstitutionalContent />
+export default function CoachPublicEntryPage() {
+  return <AreaMinimalLandingById areaId="coach" />
 }

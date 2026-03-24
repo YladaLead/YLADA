@@ -158,24 +158,24 @@ export default function TemplateReelsRoteirizado() {
     const reelsPorProfissao = {
       nutri: {
         reelsBasico: [
-          '🎬 DIAGNÓSTICO: Você precisa de reels básico roteirizado para atração visual',
-          '🔍 CAUSA RAIZ: Necessidade de atração visual simples e eficaz através de reels',
+          '🎬 DIAGNÓSTICO: Você precisa de reels básico roteirizado para captação visual',
+          '🔍 CAUSA RAIZ: Necessidade de captação visual simples e eficaz através de reels',
           '⚡ AÇÃO IMEDIATA: Implemente reels básico roteirizado por 7 dias',
           '📅 PLANO 7 DIAS: Protocolo de reels básico roteirizado',
           '💊 SUPLEMENTAÇÃO: Multivitamínico + Ômega-3 + Probióticos básicos',
           '🍎 ALIMENTAÇÃO: Foque em reels básico roteirizado e sustentável'
         ],
         reelsModerado: [
-          '🎬 DIAGNÓSTICO: Você precisa de reels moderado roteirizado para atração visual',
-          '🔍 CAUSA RAIZ: Necessidade de atração visual com critérios específicos através de reels',
+          '🎬 DIAGNÓSTICO: Você precisa de reels moderado roteirizado para captação visual',
+          '🔍 CAUSA RAIZ: Necessidade de captação visual com critérios específicos através de reels',
           '⚡ AÇÃO IMEDIATA: Implemente reels moderado roteirizado por 7 dias',
           '📅 PLANO 7 DIAS: Protocolo de reels moderado roteirizado',
           '💊 SUPLEMENTAÇÃO: Suplementos específicos + Adaptógenos + Antioxidantes',
           '🍎 ALIMENTAÇÃO: Compare reels moderado roteirizado funcional e superalimentos'
         ],
         reelsAvancado: [
-          '🎬 DIAGNÓSTICO: Você precisa de reels avançado roteirizado para atração visual',
-          '🔍 CAUSA RAIZ: Necessidade de atração visual sofisticada e completa através de reels',
+          '🎬 DIAGNÓSTICO: Você precisa de reels avançado roteirizado para captação visual',
+          '🔍 CAUSA RAIZ: Necessidade de captação visual sofisticada e completa através de reels',
           '⚡ AÇÃO IMEDIATA: Implemente reels avançado roteirizado por 7 dias',
           '📅 PLANO 7 DIAS: Protocolo de reels avançado roteirizado',
           '💊 SUPLEMENTAÇÃO: Suplementos premium + Nutracêuticos + Fitoquímicos',
@@ -184,54 +184,54 @@ export default function TemplateReelsRoteirizado() {
       },
       sales: {
         reelsBasico: [
-          '🎬 DIAGNÓSTICO: Você precisa de produtos básicos para atração visual através de reels',
-          '🔍 CAUSA RAIZ: Necessidade de produtos básicos para atração visual através de reels',
+          '🎬 DIAGNÓSTICO: Você precisa de produtos básicos para captação visual através de reels',
+          '🔍 CAUSA RAIZ: Necessidade de produtos básicos para captação visual através de reels',
           '⚡ AÇÃO IMEDIATA: Implemente produtos básicos por 7 dias',
           '📅 PLANO 7 DIAS: Protocolo de produtos básicos',
           '💊 SUPLEMENTAÇÃO: Produtos básicos + Suplementos essenciais + Multivitamínico',
-          '🍎 ALIMENTAÇÃO: Alimentos básicos para sustentar atração visual através de reels'
+          '🍎 ALIMENTAÇÃO: Alimentos básicos para sustentar captação visual através de reels'
         ],
         reelsModerado: [
-          '🎬 DIAGNÓSTICO: Você precisa de produtos moderados para atração visual através de reels',
-          '🔍 CAUSA RAIZ: Necessidade de produtos específicos para atração visual através de reels',
+          '🎬 DIAGNÓSTICO: Você precisa de produtos moderados para captação visual através de reels',
+          '🔍 CAUSA RAIZ: Necessidade de produtos específicos para captação visual através de reels',
           '⚡ AÇÃO IMEDIATA: Implemente produtos moderados por 7 dias',
           '📅 PLANO 7 DIAS: Protocolo de produtos moderados',
           '💊 SUPLEMENTAÇÃO: Produtos específicos + Suplementos especializados + Antioxidantes',
-          '🍎 ALIMENTAÇÃO: Alimentos específicos para potencializar atração visual através de reels'
+          '🍎 ALIMENTAÇÃO: Alimentos específicos para potencializar captação visual através de reels'
         ],
         reelsAvancado: [
-          '🎬 DIAGNÓSTICO: Você precisa de produtos avançados para atração visual através de reels',
-          '🔍 CAUSA RAIZ: Necessidade de produtos premium para atração visual através de reels',
+          '🎬 DIAGNÓSTICO: Você precisa de produtos avançados para captação visual através de reels',
+          '🔍 CAUSA RAIZ: Necessidade de produtos premium para captação visual através de reels',
           '⚡ AÇÃO IMEDIATA: Implemente produtos avançados por 7 dias',
           '📅 PLANO 7 DIAS: Protocolo de produtos avançados',
           '💊 SUPLEMENTAÇÃO: Produtos premium + Nutracêuticos + Adaptógenos + Antioxidantes',
-          '🍎 ALIMENTAÇÃO: Alimentos funcionais para sustentar atração visual através de reels avançado'
+          '🍎 ALIMENTAÇÃO: Alimentos funcionais para sustentar captação visual através de reels avançado'
         ]
       },
       coach: {
         reelsBasico: [
-          '🌱 DIAGNÓSTICO: Você precisa de coaching básico com atração visual através de reels',
-          '🔍 CAUSA RAIZ: Necessidade de orientação básica em atração visual através de reels',
+          '🌱 DIAGNÓSTICO: Você precisa de coaching básico com captação visual através de reels',
+          '🔍 CAUSA RAIZ: Necessidade de orientação básica em captação visual através de reels',
           '⚡ AÇÃO IMEDIATA: Implemente coaching básico por 7 dias',
           '📅 PLANO 7 DIAS: Protocolo de coaching básico',
           '💊 SUPLEMENTAÇÃO: Produtos naturais básicos e suplementos essenciais',
-          '🍎 ALIMENTAÇÃO: Foque em conceitos básicos de atração visual através de reels'
+          '🍎 ALIMENTAÇÃO: Foque em conceitos básicos de captação visual através de reels'
         ],
         reelsModerado: [
-          '🌼 DIAGNÓSTICO: Você precisa de coaching moderado com atração visual através de reels',
-          '🔍 CAUSA RAIZ: Necessidade de orientação moderada em atração visual através de reels',
+          '🌼 DIAGNÓSTICO: Você precisa de coaching moderado com captação visual através de reels',
+          '🔍 CAUSA RAIZ: Necessidade de orientação moderada em captação visual através de reels',
           '⚡ AÇÃO IMEDIATA: Implemente coaching moderado por 7 dias',
           '📅 PLANO 7 DIAS: Protocolo de coaching moderado',
           '💊 SUPLEMENTAÇÃO: Produtos naturais específicos e suplementos especializados',
-          '🍎 ALIMENTAÇÃO: Compare atração visual através de reels funcional e superalimentos'
+          '🍎 ALIMENTAÇÃO: Compare captação visual através de reels funcional e superalimentos'
         ],
         reelsAvancado: [
-          '🔆 DIAGNÓSTICO: Você precisa de coaching avançado com atração visual através de reels',
-          '🔍 CAUSA RAIZ: Necessidade de orientação avançada em atração visual através de reels',
+          '🔆 DIAGNÓSTICO: Você precisa de coaching avançado com captação visual através de reels',
+          '🔍 CAUSA RAIZ: Necessidade de orientação avançada em captação visual através de reels',
           '⚡ AÇÃO IMEDIATA: Implemente coaching avançado por 7 dias',
           '📅 PLANO 7 DIAS: Protocolo de coaching avançado',
-          '💊 SUPLEMENTAÇÃO: Adaptógenos e superalimentos para sustentar atração visual através de reels',
-          '🍎 ALIMENTAÇÃO: Atração visual através de reels consciente e funcional mantido'
+          '💊 SUPLEMENTAÇÃO: Adaptógenos e superalimentos para sustentar captação visual através de reels',
+          '🍎 ALIMENTAÇÃO: Captação visual através de reels consciente e funcional mantido'
         ]
       }
     }
@@ -334,7 +334,7 @@ export default function TemplateReelsRoteirizado() {
               Template de Reels Roteirizado
             </h1>
             <p className="text-gray-600">
-              Crie reels estruturados e envolventes para máxima atração visual
+              Crie reels estruturados e envolventes para máxima captação visual
             </p>
           </div>
 

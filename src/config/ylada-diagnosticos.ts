@@ -144,9 +144,9 @@ export const DIAGNOSTICOS: Record<string, DiagnosticoConfig> = {
         posicionamento: 'Você está entre os 60% com agenda instável.',
         proximoNivel: 'Agenda em desenvolvimento',
         insight: 'O problema não é sua capacidade de atender. É a forma como novos clientes chegam até você.',
-        caminho: 'Criar um sistema de atração que gere contatos qualificados de forma previsível.',
+        caminho: 'Criar um sistema de captação que gere contatos qualificados de forma previsível.',
         porQueAcontece: {
-          itens: ['dependem de indicações casuais', 'não têm canal próprio de atração', 'por isso o fluxo de clientes é imprevisível'],
+          itens: ['dependem de indicações casuais', 'não têm canal próprio de captação', 'por isso o fluxo de clientes é imprevisível'],
           resultado: 'a agenda oscila entre períodos cheios e vazios.',
         },
       },
@@ -161,7 +161,7 @@ export const DIAGNOSTICOS: Record<string, DiagnosticoConfig> = {
         insight: 'Sua agenda já tem movimento. O próximo passo é tornar o fluxo mais previsível.',
         caminho: 'Usar diagnósticos para qualificar leads e preencher a agenda com pessoas preparadas.',
         porQueAcontece: {
-          itens: ['já geram fluxo de várias fontes', 'mas ainda falta sistematizar a atração', 'por isso há picos e vales na agenda'],
+          itens: ['já geram fluxo de várias fontes', 'mas ainda falta sistematizar a captação', 'por isso há picos e vales na agenda'],
           resultado: 'há potencial para tornar o preenchimento mais previsível.',
         },
       },
@@ -176,7 +176,7 @@ export const DIAGNOSTICOS: Record<string, DiagnosticoConfig> = {
         insight: 'Você já tem um bom sistema. O foco pode ser ampliar ou otimizar.',
         caminho: 'Usar diagnósticos para ampliar alcance e manter a qualidade.',
         porQueAcontece: {
-          itens: ['têm sistema de atração estruturado', 'o fluxo de clientes é previsível', 'a agenda se mantém preenchida'],
+          itens: ['têm sistema de captação estruturado', 'o fluxo de clientes é previsível', 'a agenda se mantém preenchida'],
           resultado: 'o foco pode ser ampliar ou otimizar o que já funciona.',
         },
       },
@@ -277,10 +277,10 @@ export const DIAGNOSTICOS: Record<string, DiagnosticoConfig> = {
         pct: 60,
         posicionamento: 'Você está entre os 60% que dependem demais de indicações.',
         proximoNivel: 'Indicações + Marketing',
-        insight: 'Indicações são valiosas, mas não são um sistema. Você precisa de um canal próprio de atração.',
+        insight: 'Indicações são valiosas, mas não são um sistema. Você precisa de um canal próprio de captação.',
         caminho: 'Criar um sistema de marketing que gere contatos qualificados de forma previsível.',
         porQueAcontece: {
-          itens: ['não têm canal próprio de atração', 'dependem de terceiros para gerar clientes', 'por isso o fluxo varia conforme as indicações'],
+          itens: ['não têm canal próprio de captação', 'dependem de terceiros para gerar clientes', 'por isso o fluxo varia conforme as indicações'],
           resultado: 'quando as indicações caem, os resultados caem junto.',
         },
       },
@@ -310,7 +310,7 @@ export const DIAGNOSTICOS: Record<string, DiagnosticoConfig> = {
         insight: 'Você já tem um sistema. O foco pode ser otimizar e escalar.',
         caminho: 'Usar diagnósticos para ampliar o alcance e manter a qualidade dos leads.',
         porQueAcontece: {
-          itens: ['têm canal próprio de atração', 'o marketing gera contatos de forma previsível', 'não dependem de indicações para crescer'],
+          itens: ['têm canal próprio de captação', 'o marketing gera contatos de forma previsível', 'não dependem de indicações para crescer'],
           resultado: 'o fluxo de novos clientes está sob controle.',
         },
       },

@@ -14,7 +14,10 @@ import {
 
 export async function GET(request: NextRequest) {
   try {
-    const auth = await requireApiAuth(request, ['ylada', 'med', 'psi', 'psicanalise', 'odonto', 'nutra', 'coach', 'seller', 'perfumaria', 'estetica', 'fitness', 'nutri', 'wellness', 'admin'])
+    const auth = await requireApiAuth(request, [
+      'ylada', 'med', 'psi', 'psicanalise', 'odonto', 'nutra', 'coach', 'seller',
+      'perfumaria', 'estetica', 'fitness', 'nutri', 'admin',
+    ])
     if (auth instanceof NextResponse) return auth
     const { user } = auth
 

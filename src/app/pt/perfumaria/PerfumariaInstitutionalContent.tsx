@@ -1,8 +1,7 @@
 'use client'
 
 /**
- * Página de perfumaria: mesma estrutura e seções da home e da estética,
- * com conteúdo 100% focado em consultores de fragrância (dor não converte, fluxo sem perguntar área, vídeo perfumaria).
+ * Landing longa Perfumaria — /pt/perfumaria/como-funciona. Entrada minimal: /pt/perfumaria.
  */
 
 import { useState, useEffect } from 'react'
@@ -13,6 +12,7 @@ import YLADALogo from '@/components/YLADALogo'
 import { useAuth } from '@/contexts/AuthContext'
 import DemoCarouselYLADA from '@/components/landing/DemoCarouselYLADA'
 import { YladaProfissionaisGridSection } from '@/components/landing/YladaProfissionaisGridSection'
+import { isPtAreaComoFuncionaPage } from '@/config/area-public-entry'
 
 const PERGUNTA_HERO_VALUES = [2, 1, 0, 1] as const
 
@@ -36,7 +36,7 @@ export default function PerfumariaInstitutionalContent() {
   const { user, loading } = useAuth()
   const router = useRouter()
 
-  const isPerfumariaPage = /^\/pt\/perfumaria\/?(\?|$)/.test(pathname)
+  const isPerfumariaPage = isPtAreaComoFuncionaPage(pathname, 'perfumaria')
   const [respostaHeroIdx, setRespostaHeroIdx] = useState<number | null>(null)
   const [authTimeout, setAuthTimeout] = useState(false)
 

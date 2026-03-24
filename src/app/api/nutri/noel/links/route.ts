@@ -1,5 +1,6 @@
 /**
  * GET /api/nutri/noel/links
+ * Debug / legado: links da Nutri para contexto. O Noel mentor usa o motor em POST /api/ylada/noel.
  *
  * Retorna os links ativos do usuário (ferramentas + quizzes) e o link principal,
  * mesma fonte de verdade que o Noel usa. Páginas podem exibir "Seu link" sem passar pelo chat.

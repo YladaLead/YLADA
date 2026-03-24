@@ -1,5 +1,5 @@
-import PsicanaliseInstitutionalContent from './PsicanaliseInstitutionalContent'
+import AreaMinimalLandingById from '@/components/pilot/AreaMinimalLandingById'
 
-export default function PsicanaliseLandingPage() {
-  return <PsicanaliseInstitutionalContent />
+export default function PsicanalisePublicEntryPage() {
+  return <AreaMinimalLandingById areaId="psicanalise" />
 }

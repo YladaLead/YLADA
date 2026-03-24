@@ -8,7 +8,11 @@ function isPerfumariaPublicPath(pathname: string): boolean {
   const path = pathname.replace(/\/$/, '') || '/'
   if (path === '/pt/perfumaria') return true
   const suffix = path.replace(/^\/pt\/perfumaria\/?/, '') || '/'
-  return PERFUMARIA_PUBLIC.has(suffix) || suffix.startsWith('login')
+  return (
+    PERFUMARIA_PUBLIC.has(suffix) ||
+    suffix.startsWith('login') ||
+    suffix.startsWith('como-funciona')
+  )
 }
 
 export default async function PerfumariaLayout({ children }: { children: ReactNode }) {

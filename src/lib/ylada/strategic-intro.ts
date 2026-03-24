@@ -30,8 +30,8 @@ export interface StrategicIntroContext {
 }
 
 /**
- * Remove termos de objetivo profissional (captação, atração de pacientes) do tema.
- * O paciente não deve ver "atração de pacientes" no resultado — só o tema dele (ex.: cáries, saúde bucal).
+ * Remove termos de objetivo profissional (captação de pacientes/clientes, marketing do consultório) do tema.
+ * O paciente não deve ver isso no resultado — só o tema dele (ex.: cáries, saúde bucal).
  */
 export function sanitizeThemeForPatient(theme: string): string {
   if (!theme) return ''

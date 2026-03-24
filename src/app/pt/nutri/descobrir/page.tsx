@@ -190,7 +190,7 @@ export default function NutriDescobrirPage() {
                     Fale conosco no WhatsApp
                   </button>
                   <Link
-                    href="/pt/nutri#como-funciona"
+                    href="/pt/nutri/como-funciona#como-funciona-na-pratica"
                     className="inline-block bg-blue-500 hover:bg-blue-400 text-white px-8 py-3 rounded-xl text-lg font-bold transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1 w-full sm:w-auto"
                   >
                     Ver mais detalhes
@@ -340,7 +340,7 @@ export default function NutriDescobrirPage() {
                 </button>
                 
                 <Link
-                  href="/pt/nutri#como-funciona"
+                  href="/pt/nutri/como-funciona#como-funciona-na-pratica"
                   className="inline-block bg-white text-blue-600 px-10 py-4 rounded-xl text-lg font-bold hover:bg-gray-100 transition-all shadow-xl hover:shadow-2xl transform hover:-translate-y-1 w-full sm:w-auto"
                 >
                   Ver mais detalhes

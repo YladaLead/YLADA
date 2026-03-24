@@ -1,8 +1,6 @@
-'use client'
+import AreaMinimalLandingById from '@/components/pilot/AreaMinimalLandingById'
 
-import NutraInstitutionalContent from './NutraInstitutionalContent'
-
-/** Landing Nutra no modelo novo (quiz no hero, mesmo fluxo da Estética). */
-export default function NutraLandingPage() {
-  return <NutraInstitutionalContent />
+/** Entrada minimal Nutra — landing longa em /pt/nutra/como-funciona */
+export default function NutraPublicEntryPage() {
+  return <AreaMinimalLandingById areaId="nutra" />
 }

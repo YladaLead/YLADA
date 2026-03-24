@@ -1,8 +1,7 @@
 'use client'
 
 /**
- * Página de psicologia: mesma estrutura e seções da home e da estética,
- * com conteúdo 100% focado em psicólogos (dor conversas não evoluem, fluxo sem perguntar área, vídeo psi).
+ * Landing longa Psicologia — /pt/psi/como-funciona. Entrada minimal: /pt/psi.
  */
 
 import { useState, useEffect } from 'react'
@@ -13,6 +12,7 @@ import YLADALogo from '@/components/YLADALogo'
 import { useAuth } from '@/contexts/AuthContext'
 import DemoCarouselYLADA from '@/components/landing/DemoCarouselYLADA'
 import { YladaProfissionaisGridSection } from '@/components/landing/YladaProfissionaisGridSection'
+import { isPtAreaComoFuncionaPage } from '@/config/area-public-entry'
 
 const PERGUNTA_HERO_VALUES = [2, 1, 0, 1] as const
 
@@ -36,7 +36,7 @@ export default function PsiInstitutionalContent() {
   const { user, loading } = useAuth()
   const router = useRouter()
 
-  const isPsiPage = /^\/pt\/psi\/?(\?|$)/.test(pathname)
+  const isPsiPage = isPtAreaComoFuncionaPage(pathname, 'psi')
   const [respostaHeroIdx, setRespostaHeroIdx] = useState<number | null>(null)
   const [authTimeout, setAuthTimeout] = useState(false)
 

@@ -1,11 +1,5 @@
-'use client'
+import AreaMinimalLandingById from '@/components/pilot/AreaMinimalLandingById'
 
-/**
- * Landing YLADA para Fitness — mesma estrutura da home (dor em destaque, quiz, carrossel, seções).
- * Fluxo: /pt/fitness → diagnóstico com area=4 (sem perguntar área) → /pt/fitness/login ou /pt/fitness/home se logado.
- */
-import FitnessInstitutionalContent from './FitnessInstitutionalContent'
-
-export default function FitnessLandingPage() {
-  return <FitnessInstitutionalContent />
+export default function FitnessPublicEntryPage() {
+  return <AreaMinimalLandingById areaId="fitness" />
 }

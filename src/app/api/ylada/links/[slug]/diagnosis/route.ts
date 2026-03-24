@@ -31,6 +31,7 @@ const ARCHITECTURES: DiagnosisArchitecture[] = [
   'PERFUME_PROFILE',
 ]
 const OBJECTIVES: LinkObjective[] = ['captar', 'educar', 'reter', 'propagar', 'indicar']
+/** Inclui `wellness` só para links antigos no banco; novos fallbacks usam `geral`. */
 const AREAS: AreaProfissional[] = ['saude', 'profissional_liberal', 'vendas', 'wellness', 'geral']
 
 /** x-forwarded-for pode vir com vários IPs (proxy); usar sempre o primeiro. */
@@ -263,7 +264,7 @@ export async function POST(
         theme_raw: title,
         theme_display: title,
         objective: 'captar',
-        area_profissional: 'wellness',
+        area_profissional: 'geral',
         ...(inferred.segment_code && { segment_code: inferred.segment_code }),
       }
     }
