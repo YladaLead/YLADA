@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { Suspense, useState, useEffect } from 'react'
 import { useSearchParams, useRouter, usePathname } from 'next/navigation'
 import YladaAreaShell from './YladaAreaShell'
 import BibliotecaPageContent from './BibliotecaPageContent'
@@ -16,7 +16,7 @@ interface LinksHubContentProps {
   areaLabel: string
 }
 
-export default function LinksHubContent({ areaCodigo, areaLabel }: LinksHubContentProps) {
+function LinksHubContentInner({ areaCodigo, areaLabel }: LinksHubContentProps) {
   const searchParams = useSearchParams()
   const router = useRouter()
   const pathname = usePathname()
@@ -100,5 +100,19 @@ export default function LinksHubContent({ areaCodigo, areaLabel }: LinksHubConte
         )}
       </div>
     </YladaAreaShell>
+  )
+}
+
+export default function LinksHubContent(props: LinksHubContentProps) {
+  return (
+    <Suspense fallback={
+      <YladaAreaShell areaCodigo={props.areaCodigo} areaLabel={props.areaLabel}>
+        <div className="flex items-center justify-center py-12">
+          <p className="text-gray-500 text-sm">Carregando...</p>
+        </div>
+      </YladaAreaShell>
+    }>
+      <LinksHubContentInner {...props} />
+    </Suspense>
   )
 }
