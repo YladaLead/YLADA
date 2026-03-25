@@ -39,41 +39,44 @@ function LinksHubContentInner({ areaCodigo, areaLabel }: LinksHubContentProps) {
 
   return (
     <YladaAreaShell areaCodigo={areaCodigo} areaLabel={areaLabel}>
-      <div className="space-y-4">
-        {/* Escolha principal: dois blocos evidentes */}
-        <div className="space-y-3">
-          <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Links</h1>
-          <p className="text-gray-600 text-sm">O que você quer fazer?</p>
+      <div className="space-y-3">
+        {/* Dois blocos lado a lado desde o mobile — menos altura, sugestões aparecem antes no scroll */}
+        <div className="space-y-2">
+          <h1 className="text-lg sm:text-xl font-bold text-gray-900 leading-tight">Links</h1>
+          <p className="text-gray-600 text-xs sm:text-sm">O que você quer fazer?</p>
 
-          <div className="grid sm:grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-2 sm:gap-3">
             <button
               type="button"
               onClick={() => switchTab('prontos')}
-              className={`rounded-xl border-2 p-4 sm:p-5 text-left transition-all ${
+              className={`rounded-lg sm:rounded-xl border-2 p-2.5 sm:p-4 text-left transition-all min-h-0 ${
                 tab === 'prontos'
                   ? 'border-sky-500 bg-sky-50'
                   : 'border-gray-200 bg-white hover:border-sky-200 hover:bg-sky-50/30'
               }`}
             >
-              <span className="text-2xl sm:text-3xl block mb-2" aria-hidden>📚</span>
-              <span className="block font-semibold text-gray-900">Usar modelo pronto</span>
-              <span className="block text-sm text-gray-600 mt-1">Escolher na biblioteca da YLADA</span>
+              <span className="text-lg sm:text-2xl block mb-1 sm:mb-2" aria-hidden>📚</span>
+              <span className="block font-semibold text-gray-900 text-xs sm:text-sm leading-snug">Usar modelo pronto</span>
+              <span className="block text-[11px] sm:text-sm text-gray-600 mt-0.5 sm:mt-1 leading-snug line-clamp-2">
+                Biblioteca YLADA
+              </span>
             </button>
             <button
               type="button"
               onClick={() => switchTab('meus')}
-              className={`rounded-xl border-2 p-4 sm:p-5 text-left transition-all ${
+              className={`rounded-lg sm:rounded-xl border-2 p-2.5 sm:p-4 text-left transition-all min-h-0 ${
                 tab === 'meus'
                   ? 'border-sky-500 bg-sky-50'
                   : 'border-gray-200 bg-white hover:border-sky-200 hover:bg-sky-50/30'
               }`}
             >
-              <span className="text-2xl sm:text-3xl block mb-2" aria-hidden>🔗</span>
-              <span className="block font-semibold text-gray-900">Ver meus links</span>
-              <span className="block text-sm text-gray-600 mt-1">Criar, editar e acompanhar</span>
+              <span className="text-lg sm:text-2xl block mb-1 sm:mb-2" aria-hidden>🔗</span>
+              <span className="block font-semibold text-gray-900 text-xs sm:text-sm leading-snug">Meus links</span>
+              <span className="block text-[11px] sm:text-sm text-gray-600 mt-0.5 sm:mt-1 leading-snug line-clamp-2">
+                Criar e acompanhar
+              </span>
             </button>
           </div>
-
         </div>
 
         {tab === 'prontos' && (

@@ -86,6 +86,8 @@ export default function AdminUsuarios() {
   const [filtroHistorico, setFiltroHistorico] = useState<'todos' | 'nunca_pagou' | 'ja_pagou'>('todos')
   const [filtroPresidente, setFiltroPresidente] = useState<string>('todos')
   const [busca, setBusca] = useState('')
+  /** Painel de filtros recolhido por padrão — mais espaço para a lista. */
+  const [filtrosAbertos, setFiltrosAbertos] = useState(false)
   const [usuarios, setUsuarios] = useState<Usuario[]>([])
   const [stats, setStats] = useState<Stats>({
     total: 0,
@@ -146,6 +148,28 @@ export default function AdminUsuarios() {
     }
     return [todosOpt, ...TODAS_AREAS_EDICAO.map((a) => ({ value: a.value, label: a.label }))]
   }, [filtroBloco, t, TODAS_AREAS_EDICAO])
+
+  const filtrosAtivosCount = useMemo(() => {
+    let n = 0
+    if (filtroBloco !== 'ylada') n++
+    if (filtroSegmento !== 'todos') n++
+    if (busca.trim()) n++
+    if (filtroStatus !== 'todos') n++
+    if (filtroAssinatura !== 'todos') n++
+    if (filtroHistorico !== 'todos') n++
+    if (filtroBloco === 'todos' && filtroPresidente !== 'todos') n++
+    if (!ocultarContasTeste) n++
+    return n
+  }, [
+    filtroBloco,
+    filtroSegmento,
+    busca,
+    filtroStatus,
+    filtroAssinatura,
+    filtroHistorico,
+    filtroPresidente,
+    ocultarContasTeste,
+  ])
 
   const usuariosVisiveis = useMemo(() => {
     if (!ocultarContasTeste) return usuarios
@@ -683,8 +707,43 @@ export default function AdminUsuarios() {
     return t.subscriptionType.none
   }
 
+  /** Uma linha na tabela — detalhes longos ficam no title (tooltip). */
+  const getAssinaturaCompactLabel = (u: Usuario): string => {
+    const c = u.assinaturaCategoria
+    if (c === 'free_nunca_pago') return u.yladaFreeGrantKind === 'courtesy' ? 'Cortesia' : 'Free'
+    if (c === 'free_ex_pagante') return 'Free'
+    if (c === 'free_migracao') return 'Free'
+    if (c === 'mensal') return 'Mensal'
+    if (c === 'anual') return 'Anual'
+    if (c === 'sem' || u.assinatura === 'sem assinatura') return 'Sem assinatura'
+    if (u.assinatura === 'gratuita') return u.yladaFreeGrantKind === 'courtesy' ? 'Cortesia' : 'Free'
+    if (u.assinatura === 'mensal') return 'Mensal'
+    if (u.assinatura === 'anual') return 'Anual'
+    return '—'
+  }
+
   const getPaymentHistoryLabel = (u: Usuario) =>
     u.everHadPaid ? t.filters.hadPaidPlan : t.filters.neverHadPaidPlan
+
+  const getAssinaturaRowTitle = (u: Usuario): string => {
+    const lines = [getAssinaturaListLabel(u), getPaymentHistoryLabel(u)]
+    if (u.implicitMatrizFree && !u.yladaFreeSubscriptionId) lines.push(t.table.matrizNoSubRowHint)
+    if (
+      u.assinatura === 'gratuita' &&
+      u.yladaFreeGrantKind === 'courtesy' &&
+      (u.assinaturaSituacao === 'ativa' || u.assinaturaSituacao === 'vencida')
+    ) {
+      lines.push(t.table.freeCourtesyHint)
+    }
+    if (
+      u.assinatura === 'gratuita' &&
+      u.yladaFreeGrantKind !== 'courtesy' &&
+      (u.assinaturaSituacao === 'ativa' || u.assinaturaSituacao === 'vencida')
+    ) {
+      lines.push(t.table.freeMatrizHint)
+    }
+    return lines.filter(Boolean).join('\n')
+  }
 
   const exportarPlanilhaUsuarios = () => {
     const headers = mostrarColunasPresidente
@@ -766,8 +825,30 @@ export default function AdminUsuarios() {
           </div>
         )}
 
-        {/* Filtros compactos — dicas longas no title (passe o mouse no rótulo) */}
-        <div className="flex-shrink-0 bg-white rounded-lg px-3 py-2 shadow-sm border border-gray-200">
+        {/* Filtros — fechados por padrão; abre ao clicar (mais linhas visíveis na tabela). */}
+        <div className="flex-shrink-0 bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+          <button
+            type="button"
+            onClick={() => setFiltrosAbertos((v) => !v)}
+            className="w-full flex items-center justify-between gap-2 px-3 py-2 text-left text-sm font-medium text-gray-800 hover:bg-gray-50 transition-colors"
+            aria-expanded={filtrosAbertos}
+          >
+            <span className="min-w-0">
+              Filtros de listagem
+              {filtrosAtivosCount > 0 ? (
+                <span className="ml-2 text-xs font-normal text-sky-600 tabular-nums">
+                  ({filtrosAtivosCount} ativo{filtrosAtivosCount !== 1 ? 's' : ''})
+                </span>
+              ) : (
+                <span className="ml-2 text-xs font-normal text-gray-500">— toque para abrir</span>
+              )}
+            </span>
+            <span className="text-gray-400 text-base leading-none shrink-0" aria-hidden>
+              {filtrosAbertos ? '▴' : '▾'}
+            </span>
+          </button>
+          {filtrosAbertos && (
+            <div className="px-3 pb-2 pt-1 border-t border-gray-100">
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-12 gap-x-2 gap-y-1.5 items-end">
             <div className="col-span-2 sm:col-span-1 md:col-span-1 lg:col-span-2 xl:col-span-2">
               <label
@@ -923,6 +1004,8 @@ export default function AdminUsuarios() {
               {t.filters.hideTestAccounts}
             </label>
           </div>
+            </div>
+          )}
         </div>
 
         {/* Loading */}
@@ -1013,67 +1096,67 @@ export default function AdminUsuarios() {
                 style={{ WebkitOverflowScrolling: 'touch' }}
               >
                 <table
-                  className={`w-full divide-y divide-gray-200 ${mostrarColunasPresidente ? 'min-w-[860px]' : 'min-w-[640px]'}`}
+                  className={`w-full divide-y divide-gray-200 ${mostrarColunasPresidente ? 'min-w-[780px]' : 'min-w-[560px]'}`}
                 >
                   <thead className="bg-gray-50 sticky top-0 z-10 shadow-[inset_0_-1px_0_0_rgb(229,231,235)]">
                     <tr>
-                      <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t.table.user}</th>
-                      <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t.table.whatsapp}</th>
-                      <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t.table.area}</th>
+                      <th className="w-[13rem] max-w-[13rem] px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t.table.user}</th>
+                      <th className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t.table.whatsapp}</th>
+                      <th className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t.table.area}</th>
                       {mostrarColunasPresidente && (
                         <>
                           <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t.table.isPresident}</th>
                           <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t.table.president}</th>
                         </>
                       )}
-                      <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t.table.subscription}</th>
-                      <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase align-top">
+                      <th className="w-[6.5rem] sm:w-24 px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t.table.subscription}</th>
+                      <th className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase align-top">
                         <span className="block uppercase tracking-wider">{t.table.enrollment}</span>
                         <span className="block text-[10px] font-normal normal-case text-gray-400 tracking-normal mt-0.5 max-w-[9rem] leading-tight">
                           {t.table.enrollmentSub}
                         </span>
                       </th>
-                      <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t.table.leads}</th>
-                      <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t.table.actions}</th>
+                      <th className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t.table.leads}</th>
+                      <th className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t.table.actions}</th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
                     {usuariosVisiveis.map((usuario) => (
                       <tr key={usuario.id} className="hover:bg-gray-50">
-                        <td className="px-3 py-4">
-                          <div className="flex items-center min-w-[200px]">
-                            <div className="flex-shrink-0 h-10 w-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold">
+                        <td className="px-2 py-2 align-top w-[13rem] max-w-[13rem]">
+                          <div className="flex items-start gap-2 min-w-0">
+                            <div className="flex-shrink-0 h-7 w-7 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-xs font-semibold">
                               {usuario.nome.charAt(0).toUpperCase()}
                             </div>
-                            <div className="ml-3 min-w-0">
-                              <div className="flex items-center gap-1.5 min-w-0">
-                                <span className="text-sm font-medium text-gray-900 truncate" title={usuario.nome}>
+                            <div className="min-w-0 flex-1">
+                              <div className="flex items-center gap-1 min-w-0">
+                                <span className="text-xs font-medium text-gray-900 truncate" title={usuario.nome}>
                                   {usuario.nome}
                                 </span>
                                 {usuario.isContaTeste && (
-                                  <span className="flex-shrink-0 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-amber-100 text-amber-900">
+                                  <span className="flex-shrink-0 px-1 py-0.5 rounded text-[9px] font-semibold bg-amber-100 text-amber-900">
                                     {t.table.testAccountBadge}
                                   </span>
                                 )}
                               </div>
-                              <div className="text-sm text-gray-500 truncate" title={usuario.email}>
+                              <div className="text-[11px] text-gray-500 truncate leading-tight" title={usuario.email}>
                                 {usuario.email}
                               </div>
                             </div>
                           </div>
                         </td>
-                        <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-700 font-mono">
+                        <td className="px-2 py-2 whitespace-nowrap text-xs text-gray-700 font-mono">
                           {usuario.whatsapp ? (
                             <span title={usuario.whatsapp}>{usuario.whatsapp}</span>
                           ) : (
                             <span className="text-gray-400">—</span>
                           )}
                         </td>
-                        <td className="px-3 py-4 whitespace-nowrap">
+                        <td className="px-2 py-2 whitespace-nowrap">
                           <div className="flex items-center">
-                            <span className="text-xl mr-2">{getAreaIcon(usuario.area)}</span>
+                            <span className="text-base mr-1.5">{getAreaIcon(usuario.area)}</span>
                             <span
-                              className={`px-2 py-0.5 rounded-full text-[11px] font-semibold ${getAreaColor(usuario.area)}`}
+                              className={`px-1.5 py-0.5 rounded-full text-[10px] font-semibold ${getAreaColor(usuario.area)}`}
                               title={usuario.area}
                             >
                               {getAreaLabel(usuario.area)}
@@ -1105,7 +1188,7 @@ export default function AdminUsuarios() {
                             </td>
                           </>
                         )}
-                        <td className="px-3 py-4 min-w-[200px]">
+                        <td className="px-2 py-2 align-top w-[6.5rem] sm:w-24 max-w-[7rem]">
                           {(() => {
                             const dataVencStr =
                               usuario.assinaturaVencimento ||
@@ -1115,101 +1198,53 @@ export default function AdminUsuarios() {
                             const dataVencFmt = dataVencStr
                               ? new Date(dataVencStr + 'T12:00:00').toLocaleDateString('pt-BR')
                               : null
+                            const vencida = usuario.assinaturaSituacao === 'vencida'
+                            const diasV = usuario.assinaturaDiasVencida
+                            const titleExtra =
+                              typeof diasV === 'number'
+                                ? `\n${diasV === 0 ? 'Vence hoje' : `Vencido há ${diasV} dia(s)`}`
+                                : ''
                             return (
-                              <>
-                                {dataVencStr ? (
-                                  usuario.assinaturaSituacao === 'ativa' ? (
-                                    <div className="text-sm font-semibold text-gray-900">
-                                      {t.table.planEndHighlight}: {dataVencFmt}
-                                    </div>
-                                  ) : usuario.assinaturaSituacao === 'vencida' ? (
-                                    <div className="text-sm font-semibold text-red-800">
-                                      {t.table.planEndHighlight} ({t.table.expired}): {dataVencFmt}
-                                      {typeof usuario.assinaturaDiasVencida === 'number' && (
-                                        <span className="text-xs font-normal text-red-600 ml-1">
-                                          ({usuario.assinaturaDiasVencida === 0 ? 'hoje' : `há ${usuario.assinaturaDiasVencida} dia${usuario.assinaturaDiasVencida === 1 ? '' : 's'}`})
-                                        </span>
-                                      )}
-                                    </div>
-                                  ) : (
-                                    <div className="text-sm font-semibold text-gray-800">
-                                      {t.table.planEndHighlight}: {dataVencFmt}
-                                    </div>
-                                  )
-                                ) : null}
-                                <div className="flex items-center gap-2 flex-wrap mt-1.5">
-                                  {usuario.assinaturaSituacao === 'vencida' && (
-                                    <span className="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-red-100 text-red-700">
+                              <div
+                                className="space-y-0.5"
+                                title={`${getAssinaturaRowTitle(usuario)}${titleExtra}`}
+                              >
+                                {dataVencFmt && (
+                                  <p
+                                    className={`text-[10px] leading-tight tabular-nums truncate ${
+                                      vencida ? 'text-red-700 font-medium' : 'text-gray-500'
+                                    }`}
+                                  >
+                                    {dataVencFmt}
+                                  </p>
+                                )}
+                                <div className="flex items-center gap-1 flex-wrap">
+                                  {vencida && (
+                                    <span className="px-1 py-0 rounded text-[9px] font-semibold bg-red-100 text-red-700 shrink-0">
                                       {t.subscriptionBadge.expired}
                                     </span>
                                   )}
-                                  <span className="text-sm font-medium text-gray-900">
-                                    {getAssinaturaListLabel(usuario)}
+                                  <span className="text-xs font-medium text-gray-900 leading-tight">
+                                    {getAssinaturaCompactLabel(usuario)}
                                   </span>
                                   {usuario.isMigrado && (
-                                    <span className="text-xs text-orange-600" title="Usuário migrado">🔄</span>
+                                    <span className="text-[10px] text-orange-600 shrink-0" title="Usuário migrado">
+                                      🔄
+                                    </span>
                                   )}
                                 </div>
-                                {typeof usuario.everHadPaid === 'boolean' && (
-                                  <div className="mt-1.5">
-                                    <span
-                                      className={`inline-block px-2 py-0.5 rounded text-[10px] font-semibold ${
-                                        usuario.everHadPaid
-                                          ? 'bg-indigo-50 text-indigo-800 border border-indigo-100'
-                                          : 'bg-slate-100 text-slate-700 border border-slate-200'
-                                      }`}
-                                      title={t.filters.paymentHistoryHint}
-                                    >
-                                      {usuario.everHadPaid
-                                        ? t.table.paymentHistoryFormerBadge
-                                        : t.table.paymentHistoryNeverBadge}
-                                    </span>
-                                  </div>
-                                )}
-                                {dataVencStr &&
-                                  usuario.assinatura === 'gratuita' &&
-                                  usuario.yladaFreeGrantKind === 'courtesy' &&
-                                  (usuario.assinaturaSituacao === 'ativa' ||
-                                    usuario.assinaturaSituacao === 'vencida') && (
-                                  <div className="text-[11px] text-amber-900 mt-1.5 font-medium leading-snug">
-                                    {t.table.freeCourtesyHint}
-                                  </div>
-                                )}
-                                {dataVencStr &&
-                                  usuario.assinatura === 'gratuita' &&
-                                  usuario.yladaFreeGrantKind !== 'courtesy' &&
-                                  (usuario.assinaturaSituacao === 'ativa' ||
-                                    usuario.assinaturaSituacao === 'vencida') && (
-                                  <div className="text-[11px] text-gray-700 mt-1.5 font-medium leading-snug">
-                                    {t.table.freeMatrizHint}
-                                  </div>
-                                )}
-                                {!dataVencStr &&
-                                  (usuario.implicitMatrizFree && !usuario.yladaFreeSubscriptionId ? (
-                                    <div className="text-xs text-gray-600 mt-1 leading-snug">
-                                      {t.table.matrizNoSubRowHint}
-                                    </div>
-                                  ) : usuario.assinatura === 'sem assinatura' ? (
-                                    <div className="text-xs text-gray-500 mt-1">{t.table.neverSubscribed}</div>
-                                  ) : usuario.assinatura === 'gratuita' && usuario.assinaturaSituacao === 'ativa' ? (
-                                    <div className="text-xs text-amber-800 mt-1">{t.subscriptionType.noPlanEnd}</div>
-                                  ) : (
-                                    <div className="text-xs text-amber-800 mt-1">
-                                      Vencimento não exibido — use Editar ou Assinatura
-                                    </div>
-                                  ))}
-                              </>
+                              </div>
                             )
                           })()}
                         </td>
-                        <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-600">
-                          <div className="text-[10px] text-gray-400 uppercase tracking-wide mb-0.5">{t.table.profileDateStamp}</div>
+                        <td className="px-2 py-2 whitespace-nowrap text-xs text-gray-600">
+                          <div className="text-[9px] text-gray-400 uppercase tracking-wide mb-0.5">{t.table.profileDateStamp}</div>
                           {usuario.dataCadastro
                             ? formatYmdSlashPtBr(usuario.dataCadastro)
                             : <span className="text-gray-400">—</span>}
                         </td>
-                        <td className="px-3 py-4 whitespace-nowrap min-w-[100px]">
-                          <div className="text-[11px] text-gray-600 space-y-1">
+                        <td className="px-2 py-2 whitespace-nowrap min-w-[5.5rem]">
+                          <div className="text-[10px] text-gray-600 space-y-0.5 leading-tight">
                             <div>
                               <span className="font-medium">{t.table.leadsLabel}:</span> <span className="text-gray-900 font-semibold">{usuario.leadsGerados}</span>
                             </div>
@@ -1221,7 +1256,7 @@ export default function AdminUsuarios() {
                             </div>
                           </div>
                         </td>
-                        <td className="px-3 py-4 whitespace-nowrap text-sm font-medium min-w-[140px]">
+                        <td className="px-2 py-2 whitespace-nowrap text-xs font-medium min-w-[7rem]">
                           <div className="flex items-center gap-2 flex-wrap">
                             <button
                               onClick={() => abrirEditarUsuario(usuario)}

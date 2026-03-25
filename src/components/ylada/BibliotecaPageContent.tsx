@@ -283,6 +283,10 @@ export default function BibliotecaPageContent({ areaCodigo, areaLabel, embedded 
   const [areaEspecifica, setAreaEspecifica] = useState<Record<string, unknown> | null>(null)
   const { userProfile } = useAuth()
 
+  /** Só faz sentido escolher segmento se não há um fixo pelo perfil/URL ou se é admin/suporte. */
+  const isPrivilegedBiblioteca = !!(userProfile?.is_admin || userProfile?.is_support)
+  const mostrarFiltroSegmento = isPrivilegedBiblioteca || !segmentoSugerido
+
   useEffect(() => {
     let cancelled = false
     fetch('/api/ylada/stats/links-created-today', { credentials: 'include' })
@@ -481,7 +485,7 @@ export default function BibliotecaPageContent({ areaCodigo, areaLabel, embedded 
     )
   }
 
-  const segmentoSelect = (
+  const segmentoSelect = mostrarFiltroSegmento ? (
     <label className="flex items-center gap-2 text-sm text-gray-700">
       <span className="shrink-0">Segmento</span>
       <select
@@ -489,14 +493,7 @@ export default function BibliotecaPageContent({ areaCodigo, areaLabel, embedded 
         onChange={(e) => setSegmentoFiltro(e.target.value as BibliotecaSegmentCode | '')}
         className="min-w-0 max-w-[200px] sm:max-w-none rounded-lg border border-gray-200 bg-white px-2.5 py-1.5 text-sm text-gray-700 focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
       >
-        {segmentoSugerido ? (
-          <>
-            <option value="">Todos</option>
-            <option value={segmentoSugerido}>
-              {BIBLIOTECA_SEGMENTOS.find((s) => s.value === segmentoSugerido)?.label ?? segmentoSugerido} (seu perfil)
-            </option>
-          </>
-        ) : (
+        {isPrivilegedBiblioteca || !segmentoSugerido ? (
           <>
             <option value="">Todos</option>
             {BIBLIOTECA_SEGMENTOS.map((s) => (
@@ -505,10 +502,17 @@ export default function BibliotecaPageContent({ areaCodigo, areaLabel, embedded 
               </option>
             ))}
           </>
+        ) : (
+          <>
+            <option value="">Todos</option>
+            <option value={segmentoSugerido}>
+              {BIBLIOTECA_SEGMENTOS.find((s) => s.value === segmentoSugerido)?.label ?? segmentoSugerido} (seu perfil)
+            </option>
+          </>
         )}
       </select>
     </label>
-  )
+  ) : null
 
   const situacaoSelect = (
     <label className="flex items-center gap-2 text-xs text-gray-600">
@@ -546,17 +550,7 @@ export default function BibliotecaPageContent({ areaCodigo, areaLabel, embedded 
   )
 
   const inner = (
-    <div className={`max-w-4xl mx-auto ${embedded ? 'space-y-4' : 'space-y-6'}`}>
-      {embedded && (
-        <Link
-          href={`${prefix}/links?tab=meus`}
-          className="inline-flex items-center gap-1.5 text-sm text-sky-600 hover:text-sky-800"
-        >
-          <span aria-hidden>🔗</span>
-          Ver meus links
-        </Link>
-      )}
-
+    <div className={`max-w-4xl mx-auto ${embedded ? 'space-y-3' : 'space-y-6'}`}>
       {!embedded && (
         <>
           <header className="space-y-1">
@@ -603,7 +597,7 @@ export default function BibliotecaPageContent({ areaCodigo, areaLabel, embedded 
 
           <div className="flex flex-wrap items-center gap-3">
             {segmentoSelect}
-            <span className="text-gray-300">|</span>
+            {mostrarFiltroSegmento ? <span className="text-gray-300">|</span> : null}
             <div className="flex flex-wrap items-center gap-2">
               {segmentoSugerido && segmentoFiltro === segmentoSugerido && getDicaNoelBiblioteca(segmentoSugerido) && (
                 <span
@@ -649,13 +643,13 @@ export default function BibliotecaPageContent({ areaCodigo, areaLabel, embedded 
       )}
 
       {embedded && (
-        <div className="rounded-xl border border-gray-200 bg-white p-3 sm:p-4">
+        <div className="rounded-lg sm:rounded-xl border border-gray-200 bg-white p-2 sm:p-3">
           <p className="sr-only">
             {segmentoFiltro && BIBLIOTECA_SEGMENTOS.find((s) => s.value === segmentoFiltro)?.label
               ? `Modelos para ${BIBLIOTECA_SEGMENTOS.find((s) => s.value === segmentoFiltro)!.label}.`
               : 'Biblioteca de modelos.'}
           </p>
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-3">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
             {segmentoSelect}
             {segmentoSugerido && segmentoFiltro === segmentoSugerido && getDicaNoelBiblioteca(segmentoSugerido) && (
               <span
@@ -677,20 +671,56 @@ export default function BibliotecaPageContent({ areaCodigo, areaLabel, embedded 
         </div>
       )}
 
-        <div className="flex gap-1 p-1 rounded-lg bg-gray-100">
-          {BIBLIOTECA_TIPOS.map((t) => (
-            <button
-              key={t.value}
-              type="button"
-              onClick={() => setTipoAtivo(t.value)}
-              className={`flex-1 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-                tipoAtivo === t.value ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600 hover:text-gray-900'
-              }`}
-            >
-              {t.label}
-            </button>
-          ))}
-        </div>
+        {embedded ? (
+          <>
+            <div className="md:hidden">
+              <label htmlFor="biblioteca-tipo-embedded" className="sr-only">
+                Tipo de modelo
+              </label>
+              <select
+                id="biblioteca-tipo-embedded"
+                value={tipoAtivo}
+                onChange={(e) => setTipoAtivo(e.target.value as BibliotecaTipo)}
+                className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-800 shadow-sm focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
+              >
+                {BIBLIOTECA_TIPOS.map((t) => (
+                  <option key={t.value} value={t.value}>
+                    {t.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="hidden md:flex gap-1 p-1 rounded-lg bg-gray-100">
+              {BIBLIOTECA_TIPOS.map((t) => (
+                <button
+                  key={t.value}
+                  type="button"
+                  onClick={() => setTipoAtivo(t.value)}
+                  className={`flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    tipoAtivo === t.value ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600 hover:text-gray-900'
+                  }`}
+                >
+                  {t.label}
+                </button>
+              ))}
+            </div>
+          </>
+        ) : (
+          <div className="flex gap-1 p-1 rounded-lg bg-gray-100">
+            {BIBLIOTECA_TIPOS.map((t) => (
+              <button
+                key={t.value}
+                type="button"
+                onClick={() => setTipoAtivo(t.value)}
+                className={`flex-1 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                  tipoAtivo === t.value ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                {t.label}
+              </button>
+            ))}
+          </div>
+        )}
 
         {loading ? (
           <div className="rounded-2xl border border-gray-200 bg-white p-12 text-center">
@@ -701,11 +731,11 @@ export default function BibliotecaPageContent({ areaCodigo, areaLabel, embedded 
           <div className="space-y-8">
             {/* Sugestões para hoje — 3 recomendados com selos (camada 2) */}
             {itemsComecePorAqui.length > 0 && (
-              <section>
-                <h2 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
+              <section className={embedded ? '-mt-0.5' : ''}>
+                <h2 className="text-sm font-semibold text-gray-900 mb-2 sm:mb-3 flex items-center gap-2">
                   <span aria-hidden>💡</span> Sugestões para hoje
                 </h2>
-                <div className="grid gap-4 sm:grid-cols-3">
+                <div className={`grid sm:grid-cols-3 ${embedded ? 'gap-3' : 'gap-4'}`}>
                   {itemsComecePorAqui.slice(0, 3).map((item, idx) => {
                     const badges: { icon: string; label: string }[] = [
                       { icon: '🔥', label: 'Mais usado' },
