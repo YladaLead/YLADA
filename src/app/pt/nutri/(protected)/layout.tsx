@@ -1,4 +1,5 @@
 import { ReactNode } from 'react'
+import { headers } from 'next/headers'
 import { validateProtectedAccess } from '@/lib/auth-server'
 
 interface ProtectedLayoutProps {
@@ -17,12 +18,15 @@ interface ProtectedLayoutProps {
  * Login e checkout ficam fora deste layout e continuam acessíveis.
  */
 export default async function ProtectedNutriLayout({ children }: ProtectedLayoutProps) {
+  const headersList = await headers()
+  const pathname = headersList.get('x-pathname') || headersList.get('x-invoke-path') || ''
   await validateProtectedAccess('nutri', {
     requireSubscription: true,
     allowAdmin: true,
     allowSupport: true,
     excludeRoutesFromSubscription: [], // Nenhuma rota livre: é obrigatório assinar para acessar a plataforma
-    currentPath: '',
+    currentPath: pathname,
+    pathsWithoutYladaNoelProfile: ['home', 'onboarding', 'diagnostico'],
   })
 
   return <>{children}</>

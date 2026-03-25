@@ -4,7 +4,7 @@ export default function NutriCadastroPage() {
   return (
     <LoginForm
       perfil="nutri"
-      redirectPath="/pt/nutri/onboarding"
+      redirectPath="/pt/nutri/home"
       initialSignUpMode={true}
     />
   )

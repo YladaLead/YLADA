@@ -40,6 +40,10 @@ export async function validateProtectedAccess(
     currentPath?: string // Pathname atual (opcional)
     /** Rotas onde qualquer perfil autenticado pode acessar (ex.: /pt/onboarding para usuárias antigas) */
     allowAnyPerfilForPaths?: string[]
+    /**
+     * Sufixos de rota sob /pt/{area}/ que não exigem ylada_noel_profile completo (Nutri: home primeiro, onboarding/diagnóstico).
+     */
+    pathsWithoutYladaNoelProfile?: string[]
   } = {}
 ): Promise<AuthValidationResult> {
   const {
@@ -49,6 +53,7 @@ export async function validateProtectedAccess(
     excludeRoutesFromSubscription = [],
     currentPath = '',
     allowAnyPerfilForPaths = [],
+    pathsWithoutYladaNoelProfile = [],
   } = options
   
   // Tentar obter pathname da requisição atual
@@ -304,10 +309,32 @@ export async function validateProtectedAccess(
       console.log(`ℹ️ ProtectedLayout [${area}]: Rota de onboarding/perfil — permitindo qualquer perfil: ${actualPath}`)
     }
 
+    const fullPathForYladaSkip =
+      actualPath && actualPath.startsWith('/pt/')
+        ? actualPath.split('?')[0].replace(/\/$/, '')
+        : actualPath
+          ? `/pt/${area}/${actualPath.replace(/^\//, '')}`.replace(/\/+/g, '/').split('?')[0].replace(/\/$/, '')
+          : ''
+    const skipYladaNoelProfileForRoute =
+      pathsWithoutYladaNoelProfile.length > 0 &&
+      fullPathForYladaSkip &&
+      (area === 'nutri' || area === 'coach') &&
+      pathsWithoutYladaNoelProfile.some((suffix) => {
+        const s = suffix.replace(/^\//, '')
+        const prefix = `/pt/${area}/${s}`.replace(/\/+/g, '/')
+        return fullPathForYladaSkip === prefix || fullPathForYladaSkip.startsWith(`${prefix}/`)
+      })
+
     // 4b. Nutri, Coach e YLADA (matriz): exigir perfil empresarial completo (nome+whatsapp+profile_type+profession).
     // Quem acessa a matriz ou Noel precisa ter perfil completo para a qualidade das respostas do Noel.
     // Não exigir nas rotas de completar perfil (evita loop). Wellness NÃO redireciona — mantém fluxo próprio.
-    if ((area === 'nutri' || area === 'coach' || area === 'ylada') && !canBypassProfile && !isAllowAnyPerfilPath && supabaseAdmin) {
+    if (
+      (area === 'nutri' || area === 'coach' || area === 'ylada') &&
+      !canBypassProfile &&
+      !isAllowAnyPerfilPath &&
+      !skipYladaNoelProfileForRoute &&
+      supabaseAdmin
+    ) {
       try {
         const segmentCheck = area === 'ylada' ? profile.perfil : 'ylada'
         const { data: ynp } = await supabaseAdmin

@@ -198,14 +198,14 @@ function NutriPagamentoSucessoContent() {
 
             {user ? (
               <Link
-                href="/pt/nutri/onboarding?payment=success"
+                href="/pt/nutri/home?payment=success"
                 className="px-6 py-4 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors text-center text-lg"
               >
                 ✨ Continuar e Completar Cadastro
               </Link>
             ) : (
               <Link
-                href="/pt/nutri/onboarding?payment=success"
+                href="/pt/nutri/home?payment=success"
                 className="px-6 py-4 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors text-center text-lg block"
               >
                 ✨ Preencher seu Cadastro

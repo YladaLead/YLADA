@@ -151,10 +151,7 @@ export default function AutoRedirect() {
               const hasSubscription = data.hasActiveSubscription || data.bypassed
               
               if (hasSubscription) {
-                let redirectPath = getHomePath(perfil)
-                if (perfil === 'nutri' && userProfile && !userProfile.diagnostico_completo) {
-                  redirectPath = '/pt/nutri/onboarding'
-                }
+                const redirectPath = getHomePath(perfil)
                 console.log('✅ AutoRedirect (UX): redirecionando para:', redirectPath)
                 hasRedirectedRef.current = true
                 router.replace(redirectPath)

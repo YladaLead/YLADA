@@ -1,6 +1,9 @@
 /**
  * Conteúdo UX do Noel por área (mensagem inicial, sugestões, placeholder).
- * Usado em NoelChat para orientar o usuário e aumentar engajamento.
+ * Usado em NoelChat para orientar o usuário e aumentar o engajamento.
+ *
+ * A mensagem de boas-vindas é única para todas as áreas; sugestões e placeholders continuam por segmento.
+ * Ao adicionar um valor em NoelArea, inclua uma entrada em NOEL_UX_BY_AREA ou o fallback DEFAULT_NOEL_UX_ROW será usado.
  */
 
 export type NoelArea = 'ylada' | 'med' | 'psi' | 'psicanalise' | 'odonto' | 'nutra' | 'nutri' | 'coach' | 'seller' | 'perfumaria' | 'estetica' | 'fitness'
@@ -11,6 +14,15 @@ export interface NoelUxContent {
   placeholder: string
   placeholderExample: string
 }
+
+/** Texto fixo de abertura (sem API) — igual para todas as áreas da matriz YLADA. */
+export const NOEL_UNIVERSAL_WELCOME = `Olá, sou o Noel, seu mentor na YLADA.
+
+Te ajudo a montar sequências de perguntas e diagnósticos prontos para sua audiência, para a pessoa se engajar e ficar mais afim do seu serviço. Em Links você usa modelos prontos da YLADA e monta fluxos com links dentro de links para criar, editar e acompanhar.
+
+Faça sua primeira pergunta ao Noel: qual é o seu desafio principal agora? Uma frase já basta.`
+
+type NoelUxContentWithoutWelcome = Omit<NoelUxContent, 'welcomeMessage'>
 
 const DEFAULT_SUGGESTIONS = [
   { label: '🧪 Criar diagnóstico', prompt: 'Quero criar um diagnóstico para atrair clientes' },
@@ -96,183 +108,70 @@ const SELLER_SUGGESTIONS = [
   { label: '🎯 Conseguir mais clientes', prompt: 'Como conseguir mais clientes e aumentar vendas?' },
 ]
 
-const NOEL_UX_BY_AREA: Record<NoelArea, NoelUxContent> = {
+/** Fallback quando uma nova NoelArea ainda não tem linha dedicada em NOEL_UX_BY_AREA. */
+const DEFAULT_NOEL_UX_ROW: NoelUxContentWithoutWelcome = {
+  suggestions: DEFAULT_SUGGESTIONS,
+  placeholder: 'Pergunte algo ao Noel...',
+  placeholderExample: 'Ex: Quero gerar mais clientes',
+}
+
+const NOEL_UX_BY_AREA: Record<NoelArea, NoelUxContentWithoutWelcome> = {
   ylada: {
-    welcomeMessage: `Olá! Eu sou o Noel.
-
-Posso te ajudar a:
-
-• Criar diagnósticos que atraem clientes
-• Melhorar seus diagnósticos
-• Gerar ideias de conteúdo
-• Organizar sua estratégia de crescimento
-
-O que você gostaria de fazer agora?`,
     suggestions: DEFAULT_SUGGESTIONS,
     placeholder: 'Pergunte algo ao Noel...',
     placeholderExample: 'Ex: Quero gerar mais clientes',
   },
   estetica: {
-    welcomeMessage: `Olá! Eu sou o Noel.
-
-Posso te ajudar a:
-
-• Criar diagnósticos que atraem clientes
-• Melhorar seus diagnósticos
-• Gerar ideias de conteúdo
-• Organizar sua estratégia de crescimento
-
-O que você gostaria de fazer agora?`,
     suggestions: ESTETICA_SUGGESTIONS,
     placeholder: 'Pergunte algo ao Noel...',
     placeholderExample: 'Ex: Quero gerar mais clientes para limpeza de pele',
   },
   med: {
-    welcomeMessage: `Olá! Eu sou o Noel.
-
-Posso te ajudar a:
-
-• Criar diagnósticos que atraem pacientes
-• Melhorar seus diagnósticos
-• Gerar ideias de conteúdo
-• Organizar sua estratégia de crescimento
-
-O que você gostaria de fazer agora?`,
     suggestions: MED_SUGGESTIONS,
     placeholder: 'Pergunte algo ao Noel...',
     placeholderExample: 'Ex: Quero atrair mais pacientes para consulta',
   },
   psi: {
-    welcomeMessage: `Olá! Eu sou o Noel.
-
-Posso te ajudar a:
-
-• Criar diagnósticos que atraem clientes
-• Melhorar seus diagnósticos
-• Gerar ideias de conteúdo
-• Organizar sua estratégia de crescimento
-
-O que você gostaria de fazer agora?`,
     suggestions: PSI_SUGGESTIONS,
     placeholder: 'Pergunte algo ao Noel...',
     placeholderExample: 'Ex: Como atrair mais clientes para terapia',
   },
   psicanalise: {
-    welcomeMessage: `Olá! Eu sou o Noel.
-
-Posso te ajudar a:
-
-• Criar diagnósticos que atraem clientes
-• Melhorar seus diagnósticos
-• Gerar ideias de conteúdo
-• Organizar sua estratégia de crescimento
-
-O que você gostaria de fazer agora?`,
     suggestions: PSICANALISE_SUGGESTIONS,
     placeholder: 'Pergunte algo ao Noel...',
     placeholderExample: 'Ex: Como atrair mais clientes',
   },
   odonto: {
-    welcomeMessage: `Olá! Eu sou o Noel.
-
-Posso te ajudar a:
-
-• Criar diagnósticos para atrair pacientes
-• Melhorar seus diagnósticos
-• Gerar ideias de conteúdo
-• Organizar sua estratégia de crescimento
-
-O que você gostaria de fazer agora?`,
     suggestions: ODONTO_SUGGESTIONS,
     placeholder: 'Pergunte algo ao Noel...',
     placeholderExample: 'Ex: Quero atrair mais pacientes para clareamento',
   },
   nutra: {
-    welcomeMessage: `Olá! Eu sou o Noel.
-
-Posso te ajudar a:
-
-• Criar diagnósticos que atraem clientes
-• Melhorar seus diagnósticos
-• Gerar ideias de conteúdo
-• Organizar sua estratégia de crescimento
-
-O que você gostaria de fazer agora?`,
     suggestions: NUTRA_SUGGESTIONS,
     placeholder: 'Pergunte algo ao Noel...',
     placeholderExample: 'Ex: Como vender mais produtos',
   },
   nutri: {
-    welcomeMessage: `Olá! Eu sou o Noel.
-
-Posso te ajudar a:
-
-• Criar diagnósticos que atraem pacientes
-• Melhorar seus diagnósticos
-• Gerar ideias de conteúdo
-• Organizar sua estratégia de crescimento
-
-O que você gostaria de fazer agora?`,
     suggestions: NUTRI_SUGGESTIONS,
     placeholder: 'Pergunte algo ao Noel...',
     placeholderExample: 'Ex: Como atrair mais pacientes para consulta',
   },
   coach: {
-    welcomeMessage: `Olá! Eu sou o Noel.
-
-Posso te ajudar a:
-
-• Criar diagnósticos que atraem clientes
-• Melhorar seus diagnósticos
-• Gerar ideias de conteúdo
-• Organizar sua estratégia de crescimento
-
-O que você gostaria de fazer agora?`,
     suggestions: COACH_SUGGESTIONS,
     placeholder: 'Pergunte algo ao Noel...',
     placeholderExample: 'Ex: Como conseguir mais leads',
   },
   seller: {
-    welcomeMessage: `Olá! Eu sou o Noel.
-
-Posso te ajudar a:
-
-• Criar diagnósticos que atraem clientes
-• Melhorar seus diagnósticos
-• Gerar ideias de conteúdo
-• Organizar sua estratégia de crescimento
-
-O que você gostaria de fazer agora?`,
     suggestions: SELLER_SUGGESTIONS,
     placeholder: 'Pergunte algo ao Noel...',
     placeholderExample: 'Ex: Como aumentar minhas vendas',
   },
   perfumaria: {
-    welcomeMessage: `Olá! Eu sou o Noel.
-
-Posso te ajudar a:
-
-• Criar diagnósticos que atraem clientes
-• Melhorar seus diagnósticos
-• Gerar ideias de conteúdo
-• Organizar sua estratégia de crescimento
-
-O que você gostaria de fazer agora?`,
     suggestions: PERFUMARIA_SUGGESTIONS,
     placeholder: 'Pergunte algo ao Noel...',
     placeholderExample: 'Ex: Como atrair mais clientes para perfumaria',
   },
   fitness: {
-    welcomeMessage: `Olá! Eu sou o Noel.
-
-Posso te ajudar a:
-
-• Criar diagnósticos que atraem clientes
-• Melhorar seus diagnósticos
-• Gerar ideias de conteúdo
-• Organizar sua estratégia de crescimento
-
-O que você gostaria de fazer agora?`,
     suggestions: FITNESS_SUGGESTIONS,
     placeholder: 'Pergunte algo ao Noel...',
     placeholderExample: 'Ex: Como atrair mais alunos para academia',
@@ -280,5 +179,9 @@ O que você gostaria de fazer agora?`,
 }
 
 export function getNoelUxContent(area: NoelArea): NoelUxContent {
-  return NOEL_UX_BY_AREA[area] ?? NOEL_UX_BY_AREA.med
+  const row = NOEL_UX_BY_AREA[area] ?? DEFAULT_NOEL_UX_ROW
+  return {
+    welcomeMessage: NOEL_UNIVERSAL_WELCOME,
+    ...row,
+  }
 }
