@@ -26,14 +26,22 @@ Documento **mapa + guia** para replicar o modelo da **Estética** nas demais ár
 | `esteticav2` | Minimal | — | Arquivo de rollback |
 | `nutri` | Progressivo | Sim | Feito (`/pt/nutriv2` = minimal) |
 | `nutriv2` | Minimal | — | Rollback |
-| `nutra` | Minimal | Sim | Pendente |
-| `coach` | Minimal | Sim | Pendente |
-| `med` | Minimal | Sim | Pendente |
-| `fitness` | Minimal | Sim | Pendente |
-| `perfumaria` | Minimal | Sim | Pendente |
-| `odonto` | Minimal | Sim | Pendente |
-| `psi` | Minimal | Sim | Pendente |
-| `psicanalise` | Minimal | Sim | Pendente |
+| `odontov2` | Minimal | — | Rollback |
+| `nutrav2` | Minimal | — | Rollback |
+| `nutra` | Progressivo | Sim | Feito (`/pt/nutrav2` = minimal) |
+| `psiv2` | Minimal | — | Rollback |
+| `psi` | Progressivo | Sim | Feito (`/pt/psiv2` = minimal) |
+| `coachv2` | Minimal | — | Rollback |
+| `coach` | Progressivo | Sim | Feito (`/pt/coachv2` = minimal) |
+| `medv2` | Minimal | — | Rollback |
+| `med` | Progressivo | Sim | Feito (`/pt/medv2` = minimal) |
+| `psicanalisev2` | Minimal | — | Rollback |
+| `psicanalise` | Progressivo | Sim | Feito (`/pt/psicanalisev2` = minimal) |
+| `perfumariav2` | Minimal | — | Rollback |
+| `perfumaria` | Progressivo | Sim | Feito (`/pt/perfumariav2` = minimal) |
+| `fitnessv2` | Minimal | — | Rollback |
+| `fitness` | Progressivo | Sim | Feito (`/pt/fitnessv2` = minimal) |
+| `odonto` | Progressivo | Sim | Feito (`/pt/odontov2` = minimal) |
 | `seller` | `SellerInstitutionalContent` (diferente) | Ver pasta | Tratar à parte |
 
 **Novas áreas:** ao criar pasta em `src/app/pt/{slug}/`, repetir o trio: `page.tsx` (progressivo), `{slug}v2/page.tsx` (minimal ou última versão estável), `como-funciona/page.tsx` (longo).
@@ -75,7 +83,7 @@ Muitas vezes você nem tem gente suficiente te chamando.
 Até quando o post bomba em curtida, isso nem sempre vira alguém te procurando de verdade.
 ```
 
-**Referência no código:** `EsteticaEntradaSocraticaContent.tsx` e `NutriEntradaSocraticaContent.tsx` (passo com “Exatamente isso”, logo após a escolha inicial).
+**Referência no código:** `EsteticaEntradaSocraticaContent.tsx`, `NutriEntradaSocraticaContent.tsx`, `OdontoEntradaSocraticaContent.tsx`, `NutraEntradaSocraticaContent.tsx`, `PsiEntradaSocraticaContent.tsx`, `MedEntradaSocraticaContent.tsx`, `PsicanaliseEntradaSocraticaContent.tsx`, `PerfumariaEntradaSocraticaContent.tsx`, `CoachEntradaSocraticaContent.tsx`, `FitnessEntradaSocraticaContent.tsx` (passo com “Exatamente isso”, logo após a escolha inicial).
 
 ### 3.2 Onde falar de “link”, diagnóstico ou convite
 
@@ -153,6 +161,54 @@ src/app/pt/nutriv2/page.tsx
 src/lib/nutri-demo-context.ts
 src/lib/nutri-demo-cliente-data.ts
 src/app/pt/nutri/exemplo-cliente/
+src/app/pt/odonto/page.tsx
+src/app/pt/odonto/OdontoEntradaSocraticaContent.tsx
+src/app/pt/odontov2/page.tsx
+src/lib/odonto-demo-context.ts
+src/lib/odonto-demo-cliente-data.ts
+src/app/pt/odonto/exemplo-cliente/
+src/app/pt/nutra/page.tsx
+src/app/pt/nutra/NutraEntradaSocraticaContent.tsx
+src/app/pt/nutrav2/page.tsx
+src/lib/nutra-demo-context.ts
+src/lib/nutra-demo-cliente-data.ts
+src/app/pt/nutra/exemplo-cliente/
+src/app/pt/psi/page.tsx
+src/app/pt/psi/PsiEntradaSocraticaContent.tsx
+src/app/pt/psiv2/page.tsx
+src/lib/psi-demo-context.ts
+src/lib/psi-demo-cliente-data.ts
+src/app/pt/psi/exemplo-cliente/
+src/app/pt/med/page.tsx
+src/app/pt/med/MedEntradaSocraticaContent.tsx
+src/app/pt/medv2/page.tsx
+src/lib/med-demo-context.ts
+src/lib/med-demo-cliente-data.ts
+src/app/pt/med/exemplo-cliente/
+src/app/pt/psicanalise/page.tsx
+src/app/pt/psicanalise/PsicanaliseEntradaSocraticaContent.tsx
+src/app/pt/psicanalisev2/page.tsx
+src/lib/psicanalise-demo-context.ts
+src/lib/psicanalise-demo-cliente-data.ts
+src/app/pt/psicanalise/exemplo-cliente/
+src/app/pt/perfumaria/page.tsx
+src/app/pt/perfumaria/PerfumariaEntradaSocraticaContent.tsx
+src/app/pt/perfumariav2/page.tsx
+src/lib/perfumaria-demo-context.ts
+src/lib/perfumaria-demo-cliente-data.ts
+src/app/pt/perfumaria/exemplo-cliente/
+src/app/pt/coach/page.tsx
+src/app/pt/coach/CoachEntradaSocraticaContent.tsx
+src/app/pt/coachv2/page.tsx
+src/lib/coach-demo-context.ts
+src/lib/coach-demo-cliente-data.ts
+src/app/pt/coach/exemplo-cliente/
+src/app/pt/fitness/page.tsx
+src/app/pt/fitness/FitnessEntradaSocraticaContent.tsx
+src/app/pt/fitnessv2/page.tsx
+src/lib/fitness-demo-context.ts
+src/lib/fitness-demo-cliente-data.ts
+src/app/pt/fitness/exemplo-cliente/
 src/components/pilot/AreaMinimalLandingById.tsx
 ```
 

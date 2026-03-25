@@ -11,7 +11,8 @@ function isPsicanalisePublicPath(pathname: string): boolean {
   return (
     PSICANALISE_PUBLIC.has(suffix) ||
     suffix.startsWith('login') ||
-    suffix.startsWith('como-funciona')
+    suffix.startsWith('como-funciona') ||
+    suffix.startsWith('exemplo-cliente')
   )
 }
 

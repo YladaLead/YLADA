@@ -11,7 +11,8 @@ function isMedPublicPath(pathname: string): boolean {
   return (
     MED_PUBLIC.has(suffix) ||
     suffix.startsWith('login') ||
-    suffix.startsWith('como-funciona')
+    suffix.startsWith('como-funciona') ||
+    suffix.startsWith('exemplo-cliente')
   )
 }
 

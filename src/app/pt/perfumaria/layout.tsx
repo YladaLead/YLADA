@@ -11,7 +11,8 @@ function isPerfumariaPublicPath(pathname: string): boolean {
   return (
     PERFUMARIA_PUBLIC.has(suffix) ||
     suffix.startsWith('login') ||
-    suffix.startsWith('como-funciona')
+    suffix.startsWith('como-funciona') ||
+    suffix.startsWith('exemplo-cliente')
   )
 }
 

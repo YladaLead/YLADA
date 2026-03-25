@@ -493,6 +493,7 @@ const COACH_PUBLIC_PREFIXES: (string | RegExp)[] = [
   '/pt/coach/pagamento-sucesso',
   '/pt/coach/recuperar-senha',
   '/pt/coach/reset-password',
+  '/pt/coach/exemplo-cliente',
   /^\/pt\/coach\/portal\/[^/]+$/,
   /^\/pt\/coach\/[^/]+\/(quiz|formulario)(\/|$)/,
   /^\/pt\/coach\/[^/]+\/[^/]+\/.+/,

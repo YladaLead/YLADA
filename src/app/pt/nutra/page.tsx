@@ -1,6 +1,12 @@
-import AreaMinimalLandingById from '@/components/pilot/AreaMinimalLandingById'
+import type { Metadata } from 'next'
+import NutraEntradaSocraticaContent from './NutraEntradaSocraticaContent'
 
-/** Entrada minimal Nutra — landing longa em /pt/nutra/como-funciona */
+export const metadata: Metadata = {
+  title: 'Nutra · suplementos | YLADA',
+  description:
+    'Muita conversa e pouca venda? Em poucos passos: mais clareza antes do WhatsApp e indicação com segurança, com o Noel.',
+}
+
 export default function NutraPublicEntryPage() {
-  return <AreaMinimalLandingById areaId="nutra" />
+  return <NutraEntradaSocraticaContent />
 }

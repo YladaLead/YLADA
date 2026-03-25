@@ -11,7 +11,8 @@ function isPsiPublicPath(pathname: string): boolean {
   return (
     PSI_PUBLIC.has(suffix) ||
     suffix.startsWith('login') ||
-    suffix.startsWith('como-funciona')
+    suffix.startsWith('como-funciona') ||
+    suffix.startsWith('exemplo-cliente')
   )
 }
 

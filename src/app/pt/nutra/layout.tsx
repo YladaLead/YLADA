@@ -22,7 +22,8 @@ function isNutraPublicPath(pathname: string): boolean {
     suffix.startsWith('login') ||
     suffix.startsWith('oferta') ||
     suffix.startsWith('checkout') ||
-    suffix.startsWith('como-funciona')
+    suffix.startsWith('como-funciona') ||
+    suffix.startsWith('exemplo-cliente')
   )
 }
 

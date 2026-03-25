@@ -1,6 +1,6 @@
 /**
  * Entrada pública por segmento:
- * - /pt/{area} → landing minimal (divulgação, CTAs), exceto estética: fluxo em passos em /pt/estetica (mobile-first, manifest PWA /manifest-estetica.json); minimal antiga em /pt/esteticav2
+ * - /pt/{area} → landing minimal (divulgação, CTAs), exceto estética/nutri/odonto/nutra/psi/med/psicanalise/perfumaria/coach/fitness: fluxo em passos; rollbacks …v2 (estetica, nutri, odonto, nutra, psi, med, psicanalise, perfumaria, coach, fitness)
  * - /pt/{area}/como-funciona → landing longa (quiz, seções)
  */
 
