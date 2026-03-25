@@ -1,6 +1,6 @@
 /**
  * Entrada pública por segmento:
- * - Marketing canónico (PT): / e /pt redirecionam para /pt/estetica (fluxo progressivo). Hub para escolher outra área: /pt/segmentos.
+ * - Marketing PT (raiz): / e /pt redirecionam para /pt/segmentos (escolher segmento). Fluxos progressivos em /pt/{area}.
  * - Rotas *v2 redirecionam para /pt/{area} (landing minimal descontinuada).
  * - /pt/{area} → fluxo progressivo (estética, nutri, odonto, nutra, psi, med, psicanalise, perfumaria, coach, fitness); cadastro ?area=
  * - /pt/{area}/como-funciona → landing longa (quiz, seções)

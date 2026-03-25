@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation'
 
-/** Entrada pública oficial do marketing: fluxo progressivo em /pt/estetica. Hub de segmentos: /pt/segmentos. */
+/** /pt redireciona para o hub de segmentos (cada vertical em /pt/{area}). */
 export default function PtHomePage() {
-  redirect('/pt/estetica')
+  redirect('/pt/segmentos')
 }

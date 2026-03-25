@@ -31,7 +31,7 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(url, 308)
   }
 
-  // Entrada pública oficial: fluxo progressivo (referência Estética). Hub de segmentos: /pt/segmentos.
+  // Raiz e /pt: hub para escolher segmento (cada área tem fluxo em /pt/{area}).
   if (
     pathname === '/' ||
     pathname === '' ||
@@ -39,7 +39,7 @@ export function middleware(request: NextRequest) {
     pathname === '/pt/'
   ) {
     const url = request.nextUrl.clone()
-    url.pathname = '/pt/estetica'
+    url.pathname = '/pt/segmentos'
     return NextResponse.redirect(url, 308)
   }
 

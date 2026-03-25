@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation'
 
-/** Raiz: mesma entrada canónica que /pt (fluxo progressivo /pt/estetica). */
+/** Raiz: hub PT para escolher segmento. */
 export default function HomePage() {
-  redirect('/pt/estetica')
+  redirect('/pt/segmentos')
 }

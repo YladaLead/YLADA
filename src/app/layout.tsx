@@ -25,7 +25,7 @@ export const metadata = {
   openGraph: {
     title: 'YLADA - Boas conversas começam com boas perguntas',
     description: 'Boas conversas começam com boas perguntas. Conecte-se através de links inteligentes.',
-    url: 'https://www.ylada.com/pt/estetica',
+    url: 'https://www.ylada.com/pt/segmentos',
     siteName: 'YLADA',
     images: [
       {
