@@ -19,6 +19,7 @@ type LinkData = {
     title?: string
     page?: { title?: string; subtitle?: string }
     form?: { fields?: FormField[]; submit_label?: string }
+    meta?: { theme_raw?: string }
   }
   cta_whatsapp?: string | null
   url?: string
@@ -190,6 +191,7 @@ export default function EditarLinkPage({ params }: { params: Promise<{ id: strin
   const baseUrl = typeof window !== 'undefined' ? window.location.origin : ''
   const previewUrl = link.url ?? `${baseUrl}/l/${link.slug}`
   const tituloLink = link.title ?? link.config_json?.title ?? link.config_json?.page?.title ?? 'Diagnóstico'
+  const temaCompartilhar = link.config_json?.meta?.theme_raw
   const respostas = link.stats?.diagnosis_count ?? link.stats?.complete ?? 0
   const metaSugerida = 20
 
@@ -466,6 +468,7 @@ export default function EditarLinkPage({ params }: { params: Promise<{ id: strin
               url={previewUrl}
               nomeProfissional={userProfile?.nome_completo ?? 'Profissional'}
               contador={respostas}
+              tema={temaCompartilhar}
             />
             <button type="button" onClick={() => setShowCompartilhar(false)} className="mt-4 w-full py-2 text-sm text-gray-500 hover:text-gray-700">
               Fechar

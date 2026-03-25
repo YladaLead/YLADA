@@ -10,6 +10,7 @@ import { resolve } from 'path'
 import { readFile, writeFile } from 'fs/promises'
 
 import sharp from 'sharp'
+import { compositeYladaLogoOnOgBuffer } from './og-ylada-composite-logo'
 
 config({ path: resolve(process.cwd(), '.env.local') })
 
@@ -85,10 +86,12 @@ async function main() {
         continue
       }
       const buf = await downloadBuffer(srcUrl)
-      await sharp(buf)
-        .resize(1200, 630, { fit: 'cover', position: 'attention' })
-        .jpeg({ quality: 86, mozjpeg: true })
-        .toFile(outPath)
+      let pipeline = sharp(buf).resize(1200, 630, { fit: 'cover', position: 'attention' })
+      let jpegBuf = await pipeline.jpeg({ quality: 86, mozjpeg: true }).toBuffer()
+      if (arquivo === 'default.jpg') {
+        jpegBuf = await compositeYladaLogoOnOgBuffer(jpegBuf)
+      }
+      await writeFile(outPath, jpegBuf)
 
       report.push({
         arquivo,

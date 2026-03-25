@@ -32,7 +32,8 @@
     "agente:auditor": "npx tsx scripts/agents/ylada-auditor-noel.ts",
     "agente:otimizador": "npx tsx scripts/agents/ylada-otimizador-noel.ts",
     "agente:interno": "npx tsx scripts/agents/ylada-interno.ts",
-    "og:pexels": "tsx scripts/fetch-og-ylada-pexels.ts"
+    "og:pexels": "tsx scripts/fetch-og-ylada-pexels.ts",
+    "og:logo-default": "tsx scripts/og-ylada-composite-logo.ts"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

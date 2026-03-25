@@ -2,8 +2,11 @@
  * Mapeamento tema/segmento → imagem OG fixa para links YLADA (/l/[slug]).
  * Uma pasta única compartilhada: médico, nutricionista, etc. usam a mesma imagem por tema.
  * Ex: Calculadora de IMC → sempre usa peso-gordura.jpg, independente de quem usa.
+ * Quando o ficheiro seria default.jpg, usa o logotipo YLADA (marca estável no WhatsApp).
  * @see docs/CORRIGIR-IMAGENS-OG-WHATSAPP.md
  */
+
+import { YLADA_OG_FALLBACK_LOGO_PATH } from '@/lib/ylada-og-fallback-logo'
 
 /** Segmentos YLADA (alinhado com ylada_links.segment e meta.segment_code). */
 export type YladaOgSegment =
@@ -155,7 +158,7 @@ const SEGMENT_DEFAULT_IMAGE: Record<YladaOgSegment, string> = {
   psychology: 'psicologia-ansiedade.jpg',
   dentistry: 'odonto-saude.jpg',
   nutrition_vendedor: 'vendedor-energia.jpg',
-  ylada: 'default.jpg',
+  ylada: 'default.jpg', // resolvido para logo em ogPathFromFilename
 }
 
 /** Normaliza segmento do meta/DB para YladaOgSegment. */
@@ -214,6 +217,11 @@ function extractTemaKeywords(tema: string): string[] {
   return keywords
 }
 
+function ogPathFromFilename(filename: string): string {
+  if (filename === 'default.jpg') return YLADA_OG_FALLBACK_LOGO_PATH
+  return `${OG_BASE}/${filename}`
+}
+
 /**
  * Retorna o caminho da imagem OG para um link YLADA.
  * Pasta única compartilhada: médico, nutricionista, fitness etc. usam a mesma imagem por tema.
@@ -231,19 +239,19 @@ export function getYladaOgImagePath(
     const normalized = normalizeTema(tema)
     const direct = TEMA_TO_IMAGE[normalized]
     if (direct) {
-      return `${OG_BASE}/${direct}`
+      return ogPathFromFilename(direct)
     }
     const keywords = extractTemaKeywords(tema)
     for (const kw of keywords) {
       const match = TEMA_TO_IMAGE[kw]
       if (match) {
-        return `${OG_BASE}/${match}`
+        return ogPathFromFilename(match)
       }
     }
   }
 
   const segmentDefault = SEGMENT_DEFAULT_IMAGE[seg]
-  return `${OG_BASE}/${segmentDefault}`
+  return ogPathFromFilename(segmentDefault)
 }
 
 /**

@@ -87,7 +87,7 @@ function BibliotecaCard({
   linksPath: string
   creatingId: string | null
   setCreatingId: (id: string | null) => void
-  setLinkCriado: (v: { url: string; slug: string; titulo: string } | null) => void
+  setLinkCriado: (v: { url: string; slug: string; titulo: string; tema?: string } | null) => void
   variant: 'default' | 'sugestao' | 'comece'
   segmentCode?: BibliotecaSegmentCode | null
   /** Selo para "Sugestões para hoje" (ex: "🔥 Mais usado"). */
@@ -123,7 +123,7 @@ function BibliotecaCard({
         if (item.tipo === 'calculadora' && data?.data?.url) {
           const base = typeof window !== 'undefined' ? window.location.origin : ''
           const url = data.data.url || `${base}/l/${data.data.slug}`
-          setLinkCriado({ url, slug: data.data.slug, titulo: item.titulo })
+          setLinkCriado({ url, slug: data.data.slug, titulo: item.titulo, tema: item.tema })
         } else {
           window.location.href = `${linksPath}/editar/${data.data.id}`
         }
@@ -260,7 +260,7 @@ export default function BibliotecaPageContent({ areaCodigo, areaLabel, embedded 
   const [items, setItems] = useState<BibliotecaItemRow[]>([])
   const [loading, setLoading] = useState(true)
   const [creatingId, setCreatingId] = useState<string | null>(null)
-  const [linkCriado, setLinkCriado] = useState<{ url: string; slug: string; titulo: string } | null>(null)
+  const [linkCriado, setLinkCriado] = useState<{ url: string; slug: string; titulo: string; tema?: string } | null>(null)
   const [copiado, setCopiado] = useState(false)
   const [progressao, setProgressao] = useState<{
     passo1: boolean
@@ -269,8 +269,17 @@ export default function BibliotecaPageContent({ areaCodigo, areaLabel, embedded 
     linksCount: number
   }>({ passo1: false, passo2: false, passo3: false, linksCount: 0 })
   const [linksCreatedToday, setLinksCreatedToday] = useState<number | null>(null)
-  const [meusLinks, setMeusLinks] = useState<Array<{ id: string; slug: string; title: string | null; url: string; stats?: { diagnosis_count?: number } }>>([])
-  const [divulgarMeuLink, setDivulgarMeuLink] = useState<{ id: string; slug: string; title: string | null; url: string; stats?: { diagnosis_count?: number } } | null>(null)
+  const [meusLinks, setMeusLinks] = useState<
+    Array<{ id: string; slug: string; title: string | null; url: string; theme_raw?: string | null; stats?: { diagnosis_count?: number } }>
+  >([])
+  const [divulgarMeuLink, setDivulgarMeuLink] = useState<{
+    id: string
+    slug: string
+    title: string | null
+    url: string
+    theme_raw?: string | null
+    stats?: { diagnosis_count?: number }
+  } | null>(null)
   const [areaEspecifica, setAreaEspecifica] = useState<Record<string, unknown> | null>(null)
   const { userProfile } = useAuth()
 
@@ -291,7 +300,14 @@ export default function BibliotecaPageContent({ areaCodigo, areaLabel, embedded 
       .then((r) => r.json())
       .then((data) => {
         if (cancelled || !data?.success || !Array.isArray(data.data)) return
-        const links = data.data as Array<{ id: string; slug: string; title: string | null; url: string; stats?: { complete?: number; cta_click?: number; diagnosis_count?: number } }>
+        const links = data.data as Array<{
+          id: string
+          slug: string
+          title: string | null
+          url: string
+          theme_raw?: string | null
+          stats?: { complete?: number; cta_click?: number; diagnosis_count?: number }
+        }>
         setMeusLinks(links)
         const linksCount = links.length
         const totalRespostas = links.reduce((s, l) => s + (l.stats?.diagnosis_count ?? l.stats?.complete ?? 0), 0)
@@ -415,7 +431,7 @@ export default function BibliotecaPageContent({ areaCodigo, areaLabel, embedded 
             if (itemIdeia.tipo === 'calculadora' && data?.data?.url) {
               const base = typeof window !== 'undefined' ? window.location.origin : ''
               const url = data.data.url || `${base}/l/${data.data.slug}`
-              setLinkCriado({ url, slug: data.data.slug, titulo: tituloParaLink })
+              setLinkCriado({ url, slug: data.data.slug, titulo: tituloParaLink, tema: ideiaDoDia.tema })
             } else {
               window.location.href = `${linksPath}/editar/${data.data.id}`
             }
@@ -918,6 +934,7 @@ export default function BibliotecaPageContent({ areaCodigo, areaLabel, embedded 
                 url={divulgarMeuLink.url}
                 nomeProfissional={userProfile?.nome_completo ?? 'Profissional'}
                 contador={divulgarMeuLink.stats?.diagnosis_count}
+                tema={divulgarMeuLink.theme_raw}
               />
               <button type="button" onClick={() => setDivulgarMeuLink(null)} className="mt-4 w-full py-2 text-sm text-gray-500 hover:text-gray-700">
                 Fechar
@@ -963,6 +980,7 @@ export default function BibliotecaPageContent({ areaCodigo, areaLabel, embedded 
                   titulo={linkCriado.titulo}
                   url={linkCriado.url}
                   nomeProfissional={userProfile?.nome_completo ?? 'Profissional'}
+                  tema={linkCriado.tema}
                 />
               </div>
               <button

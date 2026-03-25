@@ -4,9 +4,14 @@
  */
 import type { Metadata } from 'next'
 import { supabaseAdmin } from '@/lib/supabase'
+import { YLADA_OG_FALLBACK_LOGO_PATH } from '@/lib/ylada-og-fallback-logo'
 import { getYladaOgImageUrl } from '@/lib/ylada-og-tema-imagem'
 
 const baseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXT_PUBLIC_APP_URL_PRODUCTION || 'https://ylada.app'
+
+function ogImageMime(url: string): 'image/jpeg' | 'image/png' {
+  return url.includes('.png') ? 'image/png' : 'image/jpeg'
+}
 
 type Props = { params: Promise<{ slug: string }>; children: React.ReactNode }
 
@@ -42,6 +47,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const segment = (meta.segment_code as string) ?? (link.segment as string) ?? null
 
   const ogImageUrl = getYladaOgImageUrl(themeRaw || title, segment, baseUrl)
+  const ogMime = ogImageMime(ogImageUrl)
   const pageUrl = `${baseUrl}/l/${slug}`
   const description =
     (page.subtitle as string) ??
@@ -64,7 +70,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
           width: 1200,
           height: 630,
           alt: title,
-          type: 'image/jpeg',
+          type: ogMime,
         },
       ],
     },
@@ -82,8 +88,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 function defaultMetadata(title: string, base: string): Metadata {
-  // Fallback: logo YLADA (sempre existe) até criar /images/og/ylada/ylada/default.jpg
-  const defaultImage = `${base}/images/logo/ylada/horizontal/azul-claro/ylada-horizontal-azul-claro-30.png`
+  const defaultImage = `${base.replace(/\/$/, '')}${YLADA_OG_FALLBACK_LOGO_PATH}`
   return {
     title: `${title} | YLADA`,
     description: 'Link inteligente com quiz personalizado.',
@@ -100,7 +105,7 @@ function defaultMetadata(title: string, base: string): Metadata {
           width: 1200,
           height: 630,
           alt: 'YLADA',
-          type: 'image/jpeg',
+          type: 'image/png',
         },
       ],
     },

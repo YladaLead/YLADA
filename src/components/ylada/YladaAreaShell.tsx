@@ -5,8 +5,9 @@ import Link from 'next/link'
 import Image from 'next/image'
 import YladaSidebar from './YladaSidebar'
 import { useAuth } from '@/hooks/useAuth'
+import { YLADA_OG_FALLBACK_LOGO_PATH } from '@/lib/ylada-og-fallback-logo'
 
-const YLADA_LOGO = '/images/logo/ylada/horizontal/azul-claro/ylada-horizontal-azul-claro-30.png'
+const YLADA_LOGO = YLADA_OG_FALLBACK_LOGO_PATH
 
 interface YladaAreaShellProps {
   areaCodigo: string

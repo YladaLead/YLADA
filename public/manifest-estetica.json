@@ -1,0 +1,29 @@
+{
+  "id": "/pt/estetica/",
+  "name": "YLADA Estética",
+  "short_name": "Estética",
+  "description": "Tour, exemplos e painel para profissionais de estética — YLADA.",
+  "start_url": "/pt/estetica",
+  "scope": "/pt/estetica/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#ffffff",
+  "theme_color": "#2563eb",
+  "icons": [
+    {
+      "src": "/images/logo/ylada/quadrado/azul-claro/logo_ylada_azul_quadrado.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/images/logo/ylada/quadrado/azul-claro/logo_ylada_azul_quadrado.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "categories": ["business", "lifestyle"],
+  "lang": "pt-BR",
+  "dir": "ltr"
+}

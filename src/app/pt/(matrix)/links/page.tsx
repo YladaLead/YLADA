@@ -51,6 +51,8 @@ type LinkRow = {
   template_name?: string | null
   template_type?: string | null
   stats?: LinkStats
+  /** De `config_json.meta.theme_raw` quando existir. */
+  theme_raw?: string | null
   /** Não-Pro com >1 ativo: link não é o mais antigo — público não usa. */
   public_paused_freemium?: boolean
 }
@@ -1339,6 +1341,7 @@ function LinksPageContent({ areaCodigo = 'ylada', areaLabel = 'YLADA', embedded 
                 url={divulgarLink.url}
                 nomeProfissional={userProfile?.nome_completo ?? 'Profissional'}
                 contador={divulgarLink.stats?.diagnosis_count ?? divulgarLink.stats?.complete}
+                tema={divulgarLink.theme_raw}
               />
               <button
                 type="button"

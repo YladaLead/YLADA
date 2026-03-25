@@ -8,6 +8,7 @@ import { buildWellnessToolUrl, buildShortUrl } from '@/lib/url-utils'
 import QRCode from '@/components/QRCode'
 import { getTemplateBenefits } from '@/lib/template-benefits'
 import { getOGImageUrl } from '@/lib/og-image-map'
+import { YLADA_OG_FALLBACK_LOGO_PATH } from '@/lib/ylada-og-fallback-logo'
 
 interface ItemQuadro {
   id: string
@@ -215,10 +216,9 @@ function QuadroConteudo({
                         style={!compacto ? undefined : { width: '100%', height: '100%' }}
                         onError={(e) => {
                           const target = e.currentTarget
-                          if (!target.dataset.fallback) {
-                            target.dataset.fallback = '1'
-                            target.src = getOGImageUrl('default', 'wellness')
-                          }
+                          if (target.dataset.fallback === 'logo') return
+                          target.dataset.fallback = 'logo'
+                          target.src = YLADA_OG_FALLBACK_LOGO_PATH
                         }}
                       />
                     </div>

@@ -17,6 +17,14 @@ type EventCounts = {
   conversion_rate?: number | null
 }
 
+function themeRawFromConfigJson(configJson: unknown): string | null {
+  if (!configJson || typeof configJson !== 'object') return null
+  const meta = (configJson as { meta?: unknown }).meta
+  if (!meta || typeof meta !== 'object') return null
+  const raw = (meta as { theme_raw?: unknown }).theme_raw
+  return typeof raw === 'string' && raw.trim() ? raw.trim() : null
+}
+
 function buildStatsMap(
   rows: Array<{ link_id: string; event_type: string; cnt: number | string }> | null
 ): Record<string, EventCounts> {
@@ -47,7 +55,7 @@ export async function GET(request: NextRequest) {
 
     const { data: linksData, error } = await supabaseAdmin
       .from('ylada_links')
-      .select('id, slug, title, template_id, status, cta_whatsapp, created_at')
+      .select('id, slug, title, template_id, status, cta_whatsapp, created_at, config_json')
       .eq('user_id', user.id)
       .order('created_at', { ascending: false })
 
@@ -116,18 +124,23 @@ export async function GET(request: NextRequest) {
       .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
     const primaryActiveId = activeOrdered[0]?.id
 
-    const list = links.map((row) => ({
-      ...row,
-      url: baseUrl ? `${baseUrl}/l/${row.slug}` : `/l/${row.slug}`,
-      template_name: row.template_id ? templatesMap[row.template_id]?.name ?? null : null,
-      template_type: row.template_id ? templatesMap[row.template_id]?.type ?? null : null,
-      stats: statsMap[row.id] ?? { view: 0, start: 0, complete: 0, cta_click: 0 },
-      public_paused_freemium:
-        !isPro &&
-        row.status === 'active' &&
-        activeOrdered.length > 1 &&
-        row.id !== primaryActiveId,
-    }))
+    const list = links.map((row) => {
+      const { config_json, ...rest } = row as typeof row & { config_json?: unknown }
+      const theme_raw = themeRawFromConfigJson(config_json)
+      return {
+        ...rest,
+        theme_raw,
+        url: baseUrl ? `${baseUrl}/l/${row.slug}` : `/l/${row.slug}`,
+        template_name: row.template_id ? templatesMap[row.template_id]?.name ?? null : null,
+        template_type: row.template_id ? templatesMap[row.template_id]?.type ?? null : null,
+        stats: statsMap[row.id] ?? { view: 0, start: 0, complete: 0, cta_click: 0 },
+        public_paused_freemium:
+          !isPro &&
+          row.status === 'active' &&
+          activeOrdered.length > 1 &&
+          row.id !== primaryActiveId,
+      }
+    })
 
     return NextResponse.json({ success: true, data: list })
   } catch (e) {

@@ -14,6 +14,11 @@ import {
   type PerfilResultado,
 } from '@/config/ylada-diagnosticos'
 import { YLADA_AREAS } from '@/config/ylada-areas'
+import {
+  ESTETICA_DEMO_LOCAIS,
+  STORAGE_KEY_ESTETICA_DEMO_LOCAL,
+  STORAGE_KEY_ESTETICA_CONTINUAR_TOUR,
+} from '@/lib/estetica-demo-context'
 
 const STORAGE_KEY = 'ylada_diagnosticos_feitos'
 
@@ -73,6 +78,8 @@ function ResultadoContent() {
     ? SEGMENT_TO_AREA[segmentParam]
     : (searchParams.get('area') ?? '0')
   const areaContexto = AREA_CONTEXTO[areaParam] ?? AREA_CONTEXTO['6']
+  const fromDemoEstetica = searchParams.get('origem') === 'demo-estetica'
+  const [demoContextoLocalLabel, setDemoContextoLocalLabel] = useState<string | null>(null)
   const [linkCopiado, setLinkCopiado] = useState(false)
   const [diagnosticosFeitos, setDiagnosticosFeitos] = useState<Record<string, { perfil: string }>>({})
   /** Quando a pessoa chega sem área na URL, ela escolhe a profissão aqui (segment code, ex: 'odonto'); usamos para o CTA. */
@@ -95,6 +102,18 @@ function ResultadoContent() {
       setDiagnosticosFeitos({})
     }
   }, [])
+
+  useEffect(() => {
+    if (!fromDemoEstetica || typeof window === 'undefined') return
+    try {
+      const v = sessionStorage.getItem(STORAGE_KEY_ESTETICA_DEMO_LOCAL)
+      if (!v) return
+      const found = ESTETICA_DEMO_LOCAIS.find((l) => l.value === v)
+      setDemoContextoLocalLabel(found?.label ?? null)
+    } catch {
+      setDemoContextoLocalLabel(null)
+    }
+  }, [fromDemoEstetica])
 
   useEffect(() => {
     if (typeof window === 'undefined' || !diagnosticoSlug || !perfilParam) return
@@ -170,6 +189,44 @@ function ResultadoContent() {
       </header>
 
       <main className="w-full max-w-2xl mx-auto px-4 sm:px-6 py-10 sm:py-16">
+        {fromDemoEstetica && (
+          <div className="mb-8 rounded-2xl border border-emerald-200 bg-emerald-50/90 p-5 sm:p-6 shadow-sm">
+            <p className="text-sm font-semibold text-emerald-950 mb-2">Você viu o caminho da sua cliente</p>
+            <p className="text-sm text-emerald-900/95 leading-relaxed mb-3">
+              Perguntas → resultado → botão de WhatsApp. Depois do seu link, a pessoa costuma chegar assim: já passou
+              por um passo a passo antes de te escrever.
+            </p>
+            <p className="text-sm text-emerald-900/95 leading-relaxed mb-3">
+              No seu diagnóstico real, as perguntas são as que você definir (com o Noel). O efeito é o mesmo: quem te
+              chama tende a vir com mais contexto — menos “só preço” e sumiu, mais conversa objetiva.
+            </p>
+            {demoContextoLocalLabel ? (
+              <p className="text-xs text-emerald-800/90 mb-4">
+                Você marcou que atua em: {demoContextoLocalLabel}. Esse tipo de preparo ajuda em qualquer formato de
+                atendimento.
+              </p>
+            ) : null}
+            <p className="text-sm text-emerald-900/95 leading-relaxed mb-4">
+              Abaixo está o <span className="font-semibold">diagnóstico</span> (interpretação das respostas). É o tipo de
+              leitura que ajuda a pessoa a se situar antes de te chamar. Depois você confere o WhatsApp de exemplo no
+              fim da página.
+            </p>
+            <Link
+              href="/pt/estetica"
+              onClick={() => {
+                try {
+                  sessionStorage.setItem(STORAGE_KEY_ESTETICA_CONTINUAR_TOUR, '1')
+                } catch {
+                  /* ok */
+                }
+              }}
+              className="flex w-full min-h-[48px] items-center justify-center rounded-xl bg-emerald-800 px-4 py-3 text-sm font-semibold text-white hover:bg-emerald-900 transition-colors"
+            >
+              Continuar o tour na Estética
+            </Link>
+          </div>
+        )}
+
         <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-4 text-center">
           Interpretação baseada nas suas respostas e na sua área
         </p>
@@ -322,6 +379,13 @@ function ResultadoContent() {
             Leva menos de 5 minutos. Não é necessário conhecimento técnico.
           </p>
           <div className="mt-6 pt-6 border-t border-blue-200">
+            {fromDemoEstetica ? (
+              <p className="text-center text-sm text-gray-700 leading-relaxed mb-4 max-w-lg mx-auto">
+                Este WhatsApp é <span className="font-medium">exemplo</span> (contato YLADA). No seu link de estética, o
+                botão seria o <span className="font-medium">seu</span> — e a pessoa chegaria depois de ver um resultado
+                como o de cima, <span className="font-medium">muito mais pronta</span> para conversar com você.
+              </p>
+            ) : null}
             <p className="text-center text-gray-800 font-medium mb-3">
               Quer falar com a gente por WhatsApp?
             </p>

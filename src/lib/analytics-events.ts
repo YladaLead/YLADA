@@ -18,6 +18,16 @@ export type AnalyticsEventName =
   | 'noel_sugestao_clicada'
   | 'link_criado'
   | 'diagnostico_gerado'
+  | 'estetica_landing_escolha_inicial'
+  | 'estetica_demo_local'
+  | 'estetica_demo_inicio'
+  | 'estetica_demo_nicho'
+  | 'estetica_demo_cliente_concluiu'
+  | 'nutri_landing_escolha_inicial'
+  | 'nutri_demo_local'
+  | 'nutri_demo_inicio'
+  | 'nutri_demo_nicho'
+  | 'nutri_demo_cliente_concluiu'
 
 export interface AnalyticsEventPayload {
   area?: string

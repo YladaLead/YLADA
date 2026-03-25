@@ -39,6 +39,8 @@ export default function DiagnosticoQuiz({ slug, variantOverride }: DiagnosticoQu
   const problemaFromHome = problemaParam !== null ? parseInt(problemaParam, 10) : null
   const hasProblemaFromHome = slug === 'comunicacao' && problemaFromHome !== null && !Number.isNaN(problemaFromHome) && problemaFromHome >= 0 && problemaFromHome <= 2
 
+  const origemDemoEstetica = searchParams.get('origem') === 'demo-estetica'
+
   const [iniciado, setIniciado] = useState(false)
   const [respostas, setRespostas] = useState<Record<string, number>>({})
   const [etapaAtual, setEtapaAtual] = useState(0)
@@ -121,6 +123,8 @@ export default function DiagnosticoQuiz({ slug, variantOverride }: DiagnosticoQu
     const area = respostas['area'] ?? 0
     const tipo = respostas['tipo'] ?? 0
     const params = new URLSearchParams({ diagnostico: slug, perfil, area: String(area), tipo: String(tipo) })
+    const origem = searchParams.get('origem')
+    if (origem) params.set('origem', origem)
     router.push(`/pt/resultado?${params.toString()}`)
   }
 
@@ -196,6 +200,26 @@ export default function DiagnosticoQuiz({ slug, variantOverride }: DiagnosticoQu
               </p>
             </div>
 
+            {origemDemoEstetica && (
+              <div
+                className="mb-5 rounded-xl border border-sky-200 bg-sky-50 px-4 py-4 text-sm text-sky-950 leading-relaxed space-y-2"
+                role="note"
+              >
+                <p className="font-semibold text-center text-sky-950">Por que essas perguntas?</p>
+                <p>
+                  Elas ajudam a organizar o que está por trás do seu dia a dia no Instagram ou WhatsApp: curiosos,
+                  conversa que não fecha, sensação de explicar demais.
+                </p>
+                <p className="text-center text-sky-900 font-medium">
+                  No seu link, sua cliente responde algo nesse estilo — e chega ao resultado com o próprio incômodo um
+                  pouco mais claro na cabeça.
+                </p>
+                <p className="text-center text-xs text-sky-800 pt-1">
+                  Fluxo completo: perguntas → diagnóstico (a leitura) → passo de WhatsApp.
+                </p>
+              </div>
+            )}
+
             <div
               className="bg-gray-50 rounded-xl p-6 sm:p-8 border border-gray-200"
               data-quiz-pergunta={etapaAtual + 1}
@@ -247,6 +271,15 @@ export default function DiagnosticoQuiz({ slug, variantOverride }: DiagnosticoQu
             {/* Botão no final: sempre visível na última pergunta; habilitado quando todas respondidas. data-cta para automação. */}
             {(todasRespondidas || etapaAtual === totalPerguntas - 1) && (
               <div className="mt-8 text-center" data-quiz-step="result-cta">
+                {origemDemoEstetica && (
+                  <p className="text-sm text-gray-600 max-w-md mx-auto leading-relaxed mb-4">
+                    Em <span className="font-medium text-gray-800">Ver diagnóstico</span>, você vê a leitura (o que sua
+                    cliente veria depois das respostas). Depois, no final da página, vem o{' '}
+                    <span className="font-medium text-gray-800">WhatsApp</span> — no seu link seria o seu contato, e a
+                    pessoa já viria <span className="font-medium text-gray-800">bem mais preparada</span> pra falar com
+                    você.
+                  </p>
+                )}
                 <button
                   type="button"
                   onClick={todasRespondidas ? handleVerDiagnostico : undefined}

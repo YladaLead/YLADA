@@ -12,12 +12,9 @@ import { getYladaAreaPathPrefix } from '@/config/ylada-areas'
 import { useAuth } from '@/hooks/useAuth'
 import { CompartilharDiagnosticoContent } from '@/components/ylada/CompartilharDiagnosticoContent'
 import { ActiveLinksProModal } from '@/components/ylada/ActiveLinksProModal'
+import { getMensagemWhatsAppDiagnostico } from '@/lib/ylada-compartilhar-diagnostico-copy'
 
 const META_PRIMEIRAS_RESPOSTAS = 10
-
-function getMensagemWhatsApp(titulo: string, nomeProfissional: string, url: string): string {
-  return `Olá! 👋\n\n${titulo}\n\nLeva só 1 minuto. No final você recebe uma análise personalizada.\n\n${url}`
-}
 
 /** Sugestões rápidas: valor enviado como tema na API. */
 const SUGESTOES_CRIAR = [
@@ -53,7 +50,14 @@ function normalizeTemaETitulo(input: string): { tema: string; title: string } {
 }
 
 type Step = 'form' | 'loading' | 'ready' | 'share'
-type CreatedLink = { id: string; slug: string; url: string; title: string; questions: { label: string }[] }
+type CreatedLink = {
+  id: string
+  slug: string
+  url: string
+  title: string
+  tema: string
+  questions: { label: string }[]
+}
 
 export type AreaCodigo = 'ylada' | 'med' | 'psi' | 'odonto' | 'nutra' | 'nutri' | 'coach' | 'psicanalise' | 'perfumaria' | 'seller' | 'estetica' | 'fitness'
 
@@ -140,7 +144,7 @@ export function NovoLinkPageContent({
         // ignore
       }
 
-      setCreated({ id: data.data.id, slug: data.data.slug, url, title: createdTitle, questions })
+      setCreated({ id: data.data.id, slug: data.data.slug, url, title: createdTitle, tema, questions })
       setStep('share')
     } catch {
       clearInterval(timer)
@@ -256,7 +260,7 @@ export function NovoLinkPageContent({
 
   if (step === 'share' && created) {
     const nomeProfissional = userProfile?.nome_completo ?? 'Profissional'
-    const msgWhats = getMensagemWhatsApp(created.title, nomeProfissional, created.url)
+    const msgWhats = getMensagemWhatsAppDiagnostico(created.title, nomeProfissional, created.url, created.tema)
     const waUrl = `https://wa.me/?text=${encodeURIComponent(msgWhats)}`
 
     const copiarLink = () => {
@@ -316,6 +320,7 @@ export function NovoLinkPageContent({
                   titulo={created.title}
                   url={created.url}
                   nomeProfissional={nomeProfissional}
+                  tema={created.tema}
                 />
               </div>
             </div>

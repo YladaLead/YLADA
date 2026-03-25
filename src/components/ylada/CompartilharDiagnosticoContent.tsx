@@ -1,6 +1,12 @@
 'use client'
 
 import { useState, useRef } from 'react'
+import {
+  getDestaqueCardCompartilhar,
+  getMensagemWhatsAppDiagnostico,
+  getTextoPostInstagramDiagnostico,
+  getTextoStoryDiagnostico,
+} from '@/lib/ylada-compartilhar-diagnostico-copy'
 
 export interface CompartilharDiagnosticoProps {
   titulo: string
@@ -8,21 +14,8 @@ export interface CompartilharDiagnosticoProps {
   nomeProfissional: string
   /** Número de pessoas que já fizeram o diagnóstico (opcional). */
   contador?: number
-}
-
-/** Texto sugerido para post no Instagram. */
-function getTextoPostInstagram(titulo: string, nomeProfissional: string, url: string): string {
-  return `${titulo}\n\nResponda em 1 minuto e receba uma análise personalizada com ${nomeProfissional}.\n\n🔗 Link na bio ou primeiro comentário.\n\n#diagnostico #saude #bemestar`
-}
-
-/** Texto sugerido para story (curto). */
-function getTextoStory(nomeProfissional: string, url: string): string {
-  return `Responda em 1 minuto e receba uma análise com ${nomeProfissional}.\n\n👇 Link na bio`
-}
-
-/** Mensagem sugerida para WhatsApp. */
-function getMensagemWhatsApp(titulo: string, nomeProfissional: string, url: string): string {
-  return `Olá! 👋\n\n${titulo}\n\nLeva só 1 minuto. No final você recebe uma análise personalizada.\n\n${url}`
+  /** Tema do link (ex. `meta.theme_raw`) para alinhar convites ao assunto. */
+  tema?: string | null
 }
 
 export function CompartilharDiagnosticoContent({
@@ -30,6 +23,7 @@ export function CompartilharDiagnosticoContent({
   url,
   nomeProfissional,
   contador,
+  tema,
 }: CompartilharDiagnosticoProps) {
   const [copiadoQual, setCopiadoQual] = useState<'post' | 'story' | 'whatsapp' | null>(null)
   const [baixando, setBaixando] = useState<'post' | 'story' | null>(null)
@@ -65,9 +59,10 @@ export function CompartilharDiagnosticoContent({
     setTimeout(() => setCopiadoQual(null), 2000)
   }
 
-  const textoPost = getTextoPostInstagram(titulo, nomeProfissional, url)
-  const textoStory = getTextoStory(nomeProfissional, url)
-  const msgWhats = getMensagemWhatsApp(titulo, nomeProfissional, url)
+  const textoPost = getTextoPostInstagramDiagnostico(titulo, nomeProfissional, url, tema)
+  const textoStory = getTextoStoryDiagnostico(nomeProfissional, url, titulo, tema)
+  const msgWhats = getMensagemWhatsAppDiagnostico(titulo, nomeProfissional, url, tema)
+  const destaqueCard = getDestaqueCardCompartilhar(tema)
 
   return (
     <div className="space-y-6">
@@ -89,8 +84,8 @@ export function CompartilharDiagnosticoContent({
               <p className="text-xs text-gray-600 mt-1">{nomeProfissional}</p>
             </div>
             <div className="rounded-lg bg-white/80 py-2 px-3">
-              <p className="text-xs font-medium text-indigo-700">Responda em 1 minuto</p>
-              <p className="text-[10px] text-gray-500 truncate mt-0.5">Fazer diagnóstico →</p>
+              <p className="text-xs font-medium text-indigo-700 line-clamp-2">{destaqueCard}</p>
+              <p className="text-[10px] text-gray-500 truncate mt-0.5">Responder o diagnóstico →</p>
             </div>
             {contador != null && contador > 0 && (
               <p className="text-[10px] text-gray-500">{contador} pessoas já fizeram</p>
@@ -127,7 +122,7 @@ export function CompartilharDiagnosticoContent({
           <div className="h-full flex flex-col p-3 justify-between text-center">
             <p className="font-semibold text-gray-900 text-xs line-clamp-2">{titulo}</p>
             <div className="rounded-lg bg-white/80 py-2 px-2">
-              <p className="text-[10px] font-medium text-violet-700">Responda em 1 minuto</p>
+              <p className="text-[10px] font-medium text-violet-700 line-clamp-3">{destaqueCard}</p>
               <p className="text-[9px] text-gray-500 mt-0.5">Link na bio 👇</p>
             </div>
             {contador != null && contador > 0 && (

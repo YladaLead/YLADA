@@ -235,3 +235,18 @@ select:focus {
 .animate-fade-in {
   animation: fadeIn 0.3s ease-out;
 }
+
+/* Estética / PWA: mobile-first, safe areas, toque */
+.estetica-touch {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.estetica-safe-main-bottom {
+  padding-bottom: max(2.5rem, env(safe-area-inset-bottom, 0px));
+}
+
+.estetica-safe-modal-bottom {
+  padding-bottom: max(1rem, env(safe-area-inset-bottom, 0px));
+}
+
