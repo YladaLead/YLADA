@@ -1,18 +1,46 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
+/** Rollbacks *v2 (landing minimal) → fluxo progressivo canónico. */
+const SEGMENT_V2_TO_PROGRESSIVE: Record<string, string> = {
+  '/pt/esteticav2': '/pt/estetica',
+  '/pt/nutriv2': '/pt/nutri',
+  '/pt/odontov2': '/pt/odonto',
+  '/pt/nutrav2': '/pt/nutra',
+  '/pt/psiv2': '/pt/psi',
+  '/pt/medv2': '/pt/med',
+  '/pt/psicanalisev2': '/pt/psicanalise',
+  '/pt/perfumariav2': '/pt/perfumaria',
+  '/pt/coachv2': '/pt/coach',
+  '/pt/fitnessv2': '/pt/fitness',
+}
+
 export function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname
-  
+
   // Debug: log da rota
   console.log('Middleware - Rota:', pathname)
-  
-  // Raiz: redirecionar para /pt (página institucional)
-  if (pathname === '/' || pathname === '') {
-    console.log('Middleware - Raiz, redirecionando para /pt')
+
+  const normalized =
+    pathname.length > 1 && pathname.endsWith('/') ? pathname.replace(/\/+$/, '') : pathname
+
+  const v2Target = SEGMENT_V2_TO_PROGRESSIVE[normalized] ?? SEGMENT_V2_TO_PROGRESSIVE[pathname]
+  if (v2Target) {
     const url = request.nextUrl.clone()
-    url.pathname = '/pt'
-    return NextResponse.redirect(url)
+    url.pathname = v2Target
+    return NextResponse.redirect(url, 308)
+  }
+
+  // Entrada pública oficial: fluxo progressivo (referência Estética). Hub de segmentos: /pt/segmentos.
+  if (
+    pathname === '/' ||
+    pathname === '' ||
+    pathname === '/pt' ||
+    pathname === '/pt/'
+  ) {
+    const url = request.nextUrl.clone()
+    url.pathname = '/pt/estetica'
+    return NextResponse.redirect(url, 308)
   }
 
   // Rotas que NUNCA devem ser redirecionadas (verificar PRIMEIRO)

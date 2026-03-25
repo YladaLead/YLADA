@@ -39,7 +39,7 @@ export default function PilotPageContent() {
       <div className="min-h-screen bg-white flex flex-col">
         <header className="shrink-0 border-b border-gray-100">
           <div className="max-w-6xl mx-auto flex items-center justify-between gap-4 px-4 py-2.5 sm:px-6 sm:py-3">
-            <Link href="/pt" className="inline-flex touch-manipulation items-center" aria-label="YLADA início">
+            <Link href="/pt/estetica" className="inline-flex touch-manipulation items-center" aria-label="YLADA início">
               <YLADALogo size="md" responsive className="bg-transparent" />
             </Link>
           </div>
@@ -56,7 +56,7 @@ export default function PilotPageContent() {
       <header className="shrink-0 border-b border-gray-100">
         <div className="max-w-6xl mx-auto flex items-center justify-between gap-4 px-4 py-2.5 sm:px-6 sm:py-3">
           <Link
-            href="/pt"
+            href="/pt/estetica"
             className="inline-flex touch-manipulation shrink-0 items-center"
             aria-label="YLADA início"
           >

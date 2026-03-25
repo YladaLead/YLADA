@@ -1,7 +1,6 @@
-'use client'
+import { redirect } from 'next/navigation'
 
-import HomePageContent from '@/components/landing/HomePageContent'
-
+/** Raiz: mesma entrada canónica que /pt (fluxo progressivo /pt/estetica). */
 export default function HomePage() {
-  return <HomePageContent />
+  redirect('/pt/estetica')
 }

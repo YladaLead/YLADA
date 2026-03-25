@@ -1,12 +1,6 @@
-import AreaMinimalLandingById from '@/components/pilot/AreaMinimalLandingById'
-import type { Metadata } from 'next'
+import { redirect } from 'next/navigation'
 
-/** Entrada minimal anterior a /pt/estetica (teste A/B ou rollback). */
-export const metadata: Metadata = {
-  title: 'Estética (v2) | YLADA',
-  description: 'Entrada minimal anterior ao fluxo progressivo em /pt/estetica.',
-}
-
-export default function EsteticaV2ArchivePage() {
-  return <AreaMinimalLandingById areaId="estetica" />
+/** URL antiga: redireciona para o fluxo progressivo canónico. */
+export default function EsteticaV2RedirectPage() {
+  redirect('/pt/estetica')
 }

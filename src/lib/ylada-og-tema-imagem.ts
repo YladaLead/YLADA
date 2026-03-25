@@ -1,7 +1,7 @@
 /**
  * Mapeamento tema/segmento → imagem OG fixa para links YLADA (/l/[slug]).
  * Uma pasta única compartilhada: médico, nutricionista, etc. usam a mesma imagem por tema.
- * Ex: Calculadora de IMC → sempre usa peso-gordura.jpg, independente de quem usa.
+ * Ex: Calculadora de IMC → sempre usa peso-gordura.webp, independente de quem usa.
  * Quando o ficheiro seria default.jpg, usa o logotipo YLADA (marca estável no WhatsApp).
  * @see docs/CORRIGIR-IMAGENS-OG-WHATSAPP.md
  */
@@ -14,6 +14,7 @@ export type YladaOgSegment =
   | 'perfumaria'
   | 'estetica'
   | 'fitness'
+  | 'coach'
   | 'medicine'
   | 'psychology'
   | 'dentistry'
@@ -28,37 +29,37 @@ const OG_BASE = '/images/og/ylada'
  * Placeholders podem ser substituídos depois pelas imagens finais. */
 const TEMA_TO_IMAGE: Record<string, string> = {
   // Calculadoras (compartilhadas entre todas as áreas)
-  imc: 'peso-gordura.jpg',
-  calc_imc: 'peso-gordura.jpg',
-  calculadora_imc: 'peso-gordura.jpg',
-  proteina: 'peso-gordura.jpg',
-  calc_proteina: 'peso-gordura.jpg',
+  imc: 'peso-gordura.webp',
+  calc_imc: 'peso-gordura.webp',
+  calculadora_imc: 'peso-gordura.webp',
+  proteina: 'peso-gordura.webp',
+  calc_proteina: 'peso-gordura.webp',
   hidratacao: 'hidratacao.jpg',
   calc_hidratacao: 'hidratacao.jpg',
-  calorias: 'alimentacao.jpg',
-  calc_calorias: 'alimentacao.jpg',
-  composicao: 'peso-gordura.jpg',
-  calc_composicao: 'peso-gordura.jpg',
+  calorias: 'alimentacao.png',
+  calc_calorias: 'alimentacao.png',
+  composicao: 'peso-gordura.webp',
+  calc_composicao: 'peso-gordura.webp',
   // Nutrição / bem-estar geral
-  emagrecimento: 'emagrecimento.jpg',
+  emagrecimento: 'emagrecimento.png',
   intestino: 'intestino.jpg',
   digestao: 'intestino.jpg',
   metabolismo: 'metabolismo.jpg',
   energia: 'energia.jpg',
-  alimentacao: 'alimentacao.jpg',
-  peso_gordura: 'peso-gordura.jpg',
+  alimentacao: 'alimentacao.png',
+  peso_gordura: 'peso-gordura.webp',
   inchaço_retencao: 'inchaço-retencao.jpg',
   retencao: 'inchaço-retencao.jpg',
-  rotina_saudavel: 'rotina-saudavel.jpg',
+  rotina_saudavel: 'rotina-saudavel.png',
   sono: 'sono.jpg',
   estresse: 'estresse.jpg',
   foco_concentracao: 'foco.jpg',
-  vitalidade_geral: 'vitalidade.jpg',
+  vitalidade_geral: 'vitalidade.png',
   detox: 'detox.jpg',
   performance: 'performance.jpg',
-  saude: 'nutri-saude.jpg',
-  saude_geral: 'nutri-saude.jpg',
-  nutricao_saudavel: 'nutri-saude.jpg',
+  saude: 'nutri-saude.png',
+  saude_geral: 'nutri-saude.png',
+  nutricao_saudavel: 'nutri-saude.png',
 
   // Perfumaria
   preferencias_olfativas: 'perfumaria-perfil.jpg',
@@ -79,15 +80,15 @@ const TEMA_TO_IMAGE: Record<string, string> = {
   manchas_pele: 'estetica-pele-manchas.jpg',
   antienvelhecimento: 'estetica-pele-antienvelhecimento.jpg',
   pele_antienvelhecimento: 'estetica-pele-antienvelhecimento.jpg',
-  rejuvenescimento: 'estetica-rejuvenescimento.jpg',
+  rejuvenescimento: 'estetica-rejuvenescimento.png',
   unhas: 'estetica-unhas.jpg',
   cuidado_unhas: 'estetica-unhas.jpg',
   alongamento_unhas: 'estetica-unhas.jpg',
-  cabelos: 'estetica-cabelos.jpg',
-  cuidado_cabelos: 'estetica-cabelos.jpg',
-  gordura_localizada: 'estetica-corporal-celulite.jpg',
-  celulite: 'estetica-corporal-celulite.jpg',
-  corporal_celulite: 'estetica-corporal-celulite.jpg',
+  cabelos: 'estetica-cabelos.png',
+  cuidado_cabelos: 'estetica-cabelos.png',
+  gordura_localizada: 'estetica-corporal-celulite.png',
+  celulite: 'estetica-corporal-celulite.png',
+  corporal_celulite: 'estetica-corporal-celulite.png',
   flacidez: 'estetica-corporal-flacidez.jpg',
   corporal_flacidez: 'estetica-corporal-flacidez.jpg',
   corporal: 'estetica-corporal.jpg',
@@ -111,21 +112,21 @@ const TEMA_TO_IMAGE: Record<string, string> = {
   autoestima_psicologia: 'psicologia-autoestima.jpg',
 
   // Odontologia — nomes orientam imagem (ex: sorriso → foto de sorriso)
-  sorriso: 'odonto-sorriso.jpg',
-  sorriso_saudavel: 'odonto-sorriso.jpg',
+  sorriso: 'odonto-sorriso.webp',
+  sorriso_saudavel: 'odonto-sorriso.webp',
   saude_bucal: 'odonto-saude-bucal.jpg',
   higiene_oral: 'odonto-saude-bucal.jpg',
-  clareamento: 'odonto-clareamento.jpg',
-  clareamento_dental: 'odonto-clareamento.jpg',
+  clareamento: 'odonto-clareamento.png',
+  clareamento_dental: 'odonto-clareamento.png',
   halitose: 'odonto-halitose.jpg',
   mau_halito: 'odonto-halitose.jpg',
-  implantes: 'odonto-implantes.jpg',
-  implante_dental: 'odonto-implantes.jpg',
+  implantes: 'odonto-implantes.png',
+  implante_dental: 'odonto-implantes.png',
   ortodontia: 'odonto-ortodontia.jpg',
   aparelho: 'odonto-ortodontia.jpg',
-  sensibilidade: 'odonto-sensibilidade.jpg',
-  sensibilidade_dental: 'odonto-sensibilidade.jpg',
-  estetica_dental: 'odonto-estetica.jpg',
+  sensibilidade: 'odonto-sensibilidade.avif',
+  sensibilidade_dental: 'odonto-sensibilidade.avif',
+  estetica_dental: 'odonto-estetica.png',
 
   // Medicina
   prevencao: 'medicina-prevencao.jpg',
@@ -139,25 +140,26 @@ const TEMA_TO_IMAGE: Record<string, string> = {
   suplementacao: 'medicina-suplementacao.jpg',
 
   // Vendedor / Coach
-  b12_vitaminas: 'vendedor-energia.jpg',
-  bem_estar: 'vendedor-energia.jpg',
-  carreira: 'carreira.jpg',
-  produtividade: 'carreira.jpg',
-  vendas: 'carreira.jpg',
+  b12_vitaminas: 'vendedor-energia.png',
+  bem_estar: 'vendedor-energia.png',
+  carreira: 'carreira.webp',
+  produtividade: 'carreira.webp',
+  vendas: 'carreira.webp',
   proposito: 'coach-proposito.jpg',
   coach_proposito: 'coach-proposito.jpg',
 }
 
 /** Padrão por segmento quando tema não mapeia (todos na pasta compartilhada). */
 const SEGMENT_DEFAULT_IMAGE: Record<YladaOgSegment, string> = {
-  nutrition: 'emagrecimento.jpg',
+  nutrition: 'emagrecimento.png',
   perfumaria: 'perfumaria-perfil.jpg',
-  estetica: 'estetica-pele.jpg',
+  estetica: 'estetica-pele.png',
   fitness: 'fitness-treino.jpg',
+  coach: 'coach-proposito.jpg',
   medicine: 'medicina-prevencao.jpg',
   psychology: 'psicologia-ansiedade.jpg',
   dentistry: 'odonto-saude.jpg',
-  nutrition_vendedor: 'vendedor-energia.jpg',
+  nutrition_vendedor: 'vendedor-energia.png',
   ylada: 'default.jpg', // resolvido para logo em ogPathFromFilename
 }
 
@@ -173,6 +175,7 @@ function normalizeSegment(segment: string | null | undefined): YladaOgSegment {
     estetica: 'estetica',
     aesthetics: 'estetica',
     fitness: 'fitness',
+    coach: 'coach',
     med: 'medicine',
     medicine: 'medicine',
     psi: 'psychology',
@@ -227,7 +230,7 @@ function ogPathFromFilename(filename: string): string {
  * Pasta única compartilhada: médico, nutricionista, fitness etc. usam a mesma imagem por tema.
  * @param tema - Tema do quiz (meta.theme_raw, meta.theme, title)
  * @param segment - Segmento (para fallback quando tema não mapeia)
- * @returns Caminho relativo, ex: /images/og/ylada/emagrecimento.jpg
+ * @returns Caminho relativo, ex: /images/og/ylada/emagrecimento.png
  */
 export function getYladaOgImagePath(
   tema: string | null | undefined,

@@ -68,7 +68,13 @@ export default function InstitutionalPageContent() {
   const router = useRouter()
 
   const searchParams = useSearchParams()
-  const isInstitutionalPage = pathname === '/pt' || pathname === '/pt/' || pathname === '/pt/institucional' || pathname === '/pt/institucional/' || pathname === '/en' || pathname === '/en/' || pathname === '/es' || pathname === '/es/'
+  const isInstitutionalPage =
+    pathname === '/pt/institucional' ||
+    pathname === '/pt/institucional/' ||
+    pathname === '/en' ||
+    pathname === '/en/' ||
+    pathname === '/es' ||
+    pathname === '/es/'
   const forceLanding = searchParams?.get('landing') === '1'
 
   useEffect(() => {

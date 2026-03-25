@@ -1,16 +1,6 @@
-import type { Metadata } from 'next'
-import PtHomeClient from './PtHomeClient'
+import { redirect } from 'next/navigation'
 
-export const metadata: Metadata = {
-  title: 'Explique menos. Venda mais. | YLADA',
-  description: 'Explique menos. Venda mais.',
-  openGraph: {
-    title: 'Explique menos. Venda mais. | YLADA',
-    description: 'Explique menos. Venda mais.',
-    url: 'https://www.ylada.com/pt',
-  },
-}
-
+/** Entrada pública oficial do marketing: fluxo progressivo em /pt/estetica. Hub de segmentos: /pt/segmentos. */
 export default function PtHomePage() {
-  return <PtHomeClient />
+  redirect('/pt/estetica')
 }

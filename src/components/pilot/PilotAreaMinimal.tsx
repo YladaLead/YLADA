@@ -31,9 +31,9 @@ export default function PilotAreaMinimal({
       <header className="shrink-0 border-b border-gray-100">
         <div className="max-w-6xl mx-auto flex items-center justify-between gap-4 px-4 py-2.5 sm:px-6 sm:py-3">
           <Link
-            href="/pt"
+            href="/pt/estetica"
             className="inline-flex touch-manipulation shrink-0 items-center"
-            aria-label="Voltar ao piloto"
+            aria-label="YLADA início"
           >
             <YLADALogo size="md" responsive className="bg-transparent" />
           </Link>
@@ -72,7 +72,7 @@ export default function PilotAreaMinimal({
         </div>
 
         <p className="mt-auto pt-10 text-center">
-          <Link href="/pt" className="text-sm text-gray-500 hover:text-gray-800">
+          <Link href="/pt/segmentos" className="text-sm text-gray-500 hover:text-gray-800">
             ← Outros segmentos
           </Link>
         </p>

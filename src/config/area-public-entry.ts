@@ -1,6 +1,8 @@
 /**
  * Entrada pública por segmento:
- * - /pt/{area} → landing minimal (divulgação, CTAs), exceto estética/nutri/odonto/nutra/psi/med/psicanalise/perfumaria/coach/fitness: fluxo em passos; rollbacks …v2 (estetica, nutri, odonto, nutra, psi, med, psicanalise, perfumaria, coach, fitness)
+ * - Marketing canónico (PT): / e /pt redirecionam para /pt/estetica (fluxo progressivo). Hub para escolher outra área: /pt/segmentos.
+ * - Rotas *v2 redirecionam para /pt/{area} (landing minimal descontinuada).
+ * - /pt/{area} → fluxo progressivo (estética, nutri, odonto, nutra, psi, med, psicanalise, perfumaria, coach, fitness); cadastro ?area=
  * - /pt/{area}/como-funciona → landing longa (quiz, seções)
  */
 

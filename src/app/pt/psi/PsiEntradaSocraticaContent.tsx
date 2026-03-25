@@ -107,15 +107,15 @@ const STEPS: StepBody[] = [
       '',
       'É aqui que entra o Noel.',
       '',
-      'Ele te ajuda a:',
+      'Ele monta isso com você:',
       '',
-      'transformar o que você sabe em algo que funciona',
-      'montar perguntas certas',
-      'organizar tudo de forma simples',
+      'perguntas certas',
+      'diagnóstico pronto',
+      'mensagem alinhada',
       '',
       'Sem complicação.',
     ],
-    primary: { label: 'Ver como funciona', action: 'demo-modal' },
+    primary: { label: 'Continuar e ver na prática', action: 'demo-modal' },
     secondary: { label: 'Continuar', action: 'next' },
   },
   {
@@ -440,7 +440,7 @@ export default function PsiEntradaSocraticaContent() {
             aria-label="Fechar"
             onClick={() => setDemoOpen(false)}
           />
-          <div className="relative flex min-h-full max-h-[100dvh] items-end justify-center p-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:items-center pointer-events-none sm:py-8 supports-[height:100svh]:max-h-[100svh]">
+          <div className="relative flex min-h-full max-h-[100dvh] items-center justify-center p-4 pt-[max(0.75rem,env(safe-area-inset-top))] pb-[max(1rem,env(safe-area-inset-bottom))] pointer-events-none sm:py-8 supports-[height:100svh]:max-h-[100svh]">
             <div className="pointer-events-auto w-full max-w-md max-h-[min(90dvh,640px)] overflow-y-auto overscroll-y-contain bg-white rounded-2xl p-6 estetica-safe-modal-bottom shadow-2xl border border-gray-200 animate-fade-in-up estetica-touch supports-[height:100svh]:max-h-[min(90svh,640px)]">
               {demoPhase === 'local' ? (
                 <>
