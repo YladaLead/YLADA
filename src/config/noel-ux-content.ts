@@ -22,6 +22,13 @@ Te ajudo a montar sequências de perguntas e diagnósticos prontos para sua audi
 
 Faça sua primeira pergunta ao Noel: qual é o seu desafio principal agora? Uma frase já basta.`
 
+/**
+ * Aviso na recepção do Noel (/pt/home) para quem ainda está em área neutra (perfil ylada ou outros).
+ * Mostrado só na primeira visita; ver NoelNeutralSpecializationNotice.
+ */
+export const NOEL_NEUTRAL_SPECIALIZATION_NOTICE =
+  'O Noel ainda não é especialista na sua área, mas já pode te ajudar a trazer mais clientes, com estratégia, vendas e organização do seu dia a dia.'
+
 type NoelUxContentWithoutWelcome = Omit<NoelUxContent, 'welcomeMessage'>
 
 const DEFAULT_SUGGESTIONS = [

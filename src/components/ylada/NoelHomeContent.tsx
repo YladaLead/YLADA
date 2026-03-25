@@ -2,6 +2,7 @@
 
 import { Suspense } from 'react'
 import NoelChatWithParams from '@/components/ylada/NoelChatWithParams'
+import NoelNeutralSpecializationNotice from '@/components/ylada/NoelNeutralSpecializationNotice'
 import type { NoelArea } from '@/config/noel-ux-content'
 
 interface NoelHomeContentProps {
@@ -21,6 +22,7 @@ export default function NoelHomeContent({ areaCodigo, areaLabel, area, subtitle 
         </h1>
         <p className="text-sm text-gray-600 mt-1">{subtitle}</p>
       </div>
+      <NoelNeutralSpecializationNotice mentorArea={area} />
       <Suspense fallback={<div className="flex-1 min-h-[400px] rounded-xl bg-gray-100 animate-pulse" />}>
         <NoelChatWithParams area={area} className="flex-1 min-h-0 flex flex-col" />
       </Suspense>

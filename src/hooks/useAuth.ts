@@ -26,6 +26,7 @@ interface UserProfile {
     | 'fitness'
     | 'perfumaria'
     | 'seller'
+    | 'outros'
     | null
   nome_completo: string | null
   email: string | null
