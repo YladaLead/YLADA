@@ -64,6 +64,7 @@
     "react-markdown": "^10.1.0",
     "react-player": "^3.4.0",
     "recharts": "^3.6.0",
+    "remark-breaks": "^4.0.0",
     "remark-gfm": "^4.0.1",
     "remotion": "^4.0.398",
     "resend": "^6.4.2",

@@ -1,15 +1,53 @@
 'use client'
 
-import { useState, useRef, useEffect, useCallback } from 'react'
+import { useState, useRef, useEffect, useCallback, type ReactNode } from 'react'
 import Link from 'next/link'
 import { useRouter, usePathname } from 'next/navigation'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
+import remarkBreaks from 'remark-breaks'
 import { useAuthenticatedFetch } from '@/hooks/useAuthenticatedFetch'
 import { getYladaAreaPathPrefix, getYladaLeadsPath } from '@/config/ylada-areas'
 import { getNoelUxContent, type NoelArea } from '@/config/noel-ux-content'
 import { buildNoelContextualWelcome, type NoelContextualAction } from '@/config/noel-contextual-welcome'
 import { getLocaleFromPathname, type Language } from '@/lib/i18n'
+
+/** Texto plano dos nós do markdown (para detectar parágrafos que são perguntas). */
+function markdownPlainText(children: ReactNode): string {
+  if (children == null) return ''
+  if (typeof children === 'string' || typeof children === 'number') return String(children)
+  if (Array.isArray(children)) return children.map(markdownPlainText).join('')
+  if (typeof children === 'object' && children !== null && 'props' in children) {
+    const ch = (children as { props?: { children?: ReactNode } }).props?.children
+    return markdownPlainText(ch)
+  }
+  return ''
+}
+
+/**
+ * O modelo às vezes devolve quizzes em um bloco só. Separa opções A–D em linhas/blocos
+ * e aplica negrito, para o ReactMarkdown renderizar hierarquia legível.
+ */
+function normalizeNoelAssistantMarkdown(raw: string): string {
+  let t = raw.replace(/\r\n/g, '\n').trim()
+  if (!t) return t
+
+  // Quebra antes de "2. 3. ..." quando vier colado ao parágrafo anterior
+  t = t.replace(/([^\n])\s+(\d+)\.\s+(?=[^\d\s])/g, '$1\n\n$2. ')
+
+  // Uma opção por vez: "…? A) x B) y" → parágrafos separados com **A)** **B)** …
+  let prev = ''
+  while (prev !== t) {
+    prev = t
+    t = t.replace(/\s+([A-D])\)\s+/, '\n\n**$1)** ')
+  }
+
+  // "A) texto" no início de linha (sem espaço antes)
+  t = t.replace(/^([A-D])\)\s+/gm, '**$1)** ')
+
+  t = t.replace(/\n{3,}/g, '\n\n')
+  return t
+}
 
 function LinkWithCopy({ href, children }: { href?: string; children: React.ReactNode }) {
   const [copied, setCopied] = useState(false)
@@ -564,12 +602,26 @@ export default function NoelChat({ area = 'med', className = '', initialMessage,
                 <div>
                   <div className="prose prose-sm max-w-none prose-p:my-4 prose-p:leading-relaxed prose-ul:my-5 prose-li:my-2 prose-li:leading-relaxed prose-strong:text-gray-900 prose-a:no-underline hover:prose-a:underline [&_h3]:border-l-4 [&_h3]:border-sky-400 [&_h3]:pl-3 [&_h3]:-ml-1 [&_h3]:border-b [&_h3]:border-sky-100 [&_h3]:pb-2 [&_h3]:mb-4 [&_h3]:mt-8 [&_h3]:text-lg [&_h3]:font-bold [&_h3]:text-sky-600">
                     <ReactMarkdown
-                      remarkPlugins={[remarkGfm]}
+                      remarkPlugins={[remarkGfm, remarkBreaks]}
                       components={{
                         a: ({ href, children }) => <LinkWithCopy key={href ?? undefined} href={href}>{children}</LinkWithCopy>,
+                        p: ({ children, className, ...props }) => {
+                          const plain = markdownPlainText(children).trim()
+                          const looksLikeQuestion = plain.endsWith('?') && plain.length > 3
+                          return (
+                            <p
+                              {...props}
+                              className={[className, looksLikeQuestion ? 'font-semibold text-gray-900' : '']
+                                .filter(Boolean)
+                                .join(' ')}
+                            >
+                              {children}
+                            </p>
+                          )
+                        },
                       }}
                     >
-                      {msg.content}
+                      {normalizeNoelAssistantMarkdown(msg.content)}
                     </ReactMarkdown>
                   </div>
                   {lastAssistantMsg?.id === msg.id && msg.id !== 'welcome' && messageHasScript(msg.content) && (
