@@ -20,6 +20,7 @@ import { toYmdInTimeZone } from '@/lib/date-utils'
  * - area?: legado | demais_segmentos | ylada (matriz) | todos — refinamentos antigos; sem `perfil`.
  * - status?: 'todos' | 'ativo' | 'inativo' - Filtrar por status
  * - assinatura?: 'todos' | 'gratuita' | 'free_nunca_pago' | 'free_ex_pagante' | 'free_migracao' | 'mensal' | 'anual' | 'sem' — gratuita = qualquer free (união das três subcategorias)
+ * - historico?: 'todos' | 'nunca_pagou' | 'ja_pagou' — já existiu assinatura mensal ou anual em qualquer área (independente de estar vigente)
  * - presidente?: string - Filtrar por nome do presidente (equipe do presidente)
  * - busca?: string - Buscar por nome, email (user_profiles ou Auth) ou WhatsApp
  */
@@ -42,6 +43,7 @@ export async function GET(request: NextRequest) {
     const areaFiltro = searchParams.get('area') || 'todos'
     const statusFiltro = searchParams.get('status') || 'todos'
     const assinaturaFiltro = searchParams.get('assinatura') || 'todos'
+    const historicoFiltro = searchParams.get('historico') || 'todos'
     const presidenteFiltro = searchParams.get('presidente') || ''
     const busca = searchParams.get('busca') || ''
 
@@ -427,6 +429,13 @@ export async function GET(request: NextRequest) {
         }
       }
 
+      if (historicoFiltro === 'nunca_pagou' && everHadPaid) {
+        return null
+      }
+      if (historicoFiltro === 'ja_pagou' && !everHadPaid) {
+        return null
+      }
+
       const emailExibicao =
         (profile.email && profile.email.trim()) || emailDoAuth.get(profile.user_id) || ''
 
@@ -463,6 +472,8 @@ export async function GET(request: NextRequest) {
         yladaFreePeriodEnd: yladaSubParaAdmin?.current_period_end ?? null,
         yladaFreeGrantKind,
         assinaturaCategoria,
+        /** Já existiu registro mensal ou anual (qualquer área); ver query `historico` */
+        everHadPaid,
         isContaTeste: isAdminTestAccountEmail(emailExibicao),
       }
     }).filter(u => u !== null) // Remover nulls do filtro de status
@@ -476,6 +487,11 @@ export async function GET(request: NextRequest) {
       total: producao.length,
       ativos: producao.filter((u) => u.status === 'ativo').length,
       inativos: producao.filter((u) => u.status === 'inativo').length,
+      /** Mesmo conjunto “prod.” do total: respeita filtros atuais da listagem */
+      historicoPago: {
+        nuncaPagouRecorrente: producao.filter((u) => !u.everHadPaid).length,
+        jaPagouRecorrente: producao.filter((u) => u.everHadPaid).length,
+      },
       contasTeste: {
         total: testes.length,
         ativos: testes.filter((u) => u.status === 'ativo').length,

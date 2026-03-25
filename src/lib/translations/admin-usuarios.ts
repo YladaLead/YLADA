@@ -36,6 +36,11 @@ export interface AdminUsuariosTranslations {
     monthly: string
     annual: string
     noSubscription: string
+    /** Histórico: nunca teve mensal/anual vs já teve (qualquer área) */
+    paymentHistory: string
+    paymentHistoryHint: string
+    neverHadPaidPlan: string
+    hadPaidPlan: string
   }
   areas: {
     nutri: string
@@ -63,6 +68,10 @@ export interface AdminUsuariosTranslations {
     testDomainsHint: string
     /** Sufixo quando a lista oculta contas de teste */
     excludingTestAccounts: string
+    /** Contagens histórico mensal/anual no mesmo conjunto do Total (prod., filtros atuais) */
+    paymentHistoryNeverProd: string
+    paymentHistoryFormerProd: string
+    paymentHistoryProdHint: string
   }
   table: {
     user: string
@@ -104,6 +113,10 @@ export interface AdminUsuariosTranslations {
     planEndHighlight: string
     /** Badge ao lado do e-mail para domínios de teste */
     testAccountBadge: string
+    /** Chip na coluna Assinatura: nunca teve plano pago recorrente */
+    paymentHistoryNeverBadge: string
+    /** Chip: já teve mensal ou anual em algum momento */
+    paymentHistoryFormerBadge: string
   }
   subscriptionBadge: {
     active: string
@@ -231,6 +244,11 @@ const pt: AdminUsuariosTranslations = {
     monthly: 'Mensal',
     annual: 'Anual',
     noSubscription: 'Sem assinatura',
+    paymentHistory: 'Histórico pago',
+    paymentHistoryHint:
+      'Com base em registros mensal/anual em subscriptions (qualquer área). Independente do plano atual ou se está vencido.',
+    neverHadPaidPlan: 'Nunca teve mensal/anual',
+    hadPaidPlan: 'Já teve mensal ou anual',
   },
   areas: {
     nutri: 'Nutricionistas',
@@ -257,6 +275,10 @@ const pt: AdminUsuariosTranslations = {
     testDomainsHint:
       'Domínios @ylada.com, @ylada.app e e-mails configurados (ex.: portalmagra@gmail.com). Extras: ADMIN_TEST_EMAIL_DOMAINS e ADMIN_TEST_EMAILS no servidor.',
     excludingTestAccounts: 'sem testes',
+    paymentHistoryNeverProd: 'Nunca teve mensal/anual (prod.)',
+    paymentHistoryFormerProd: 'Já teve mensal ou anual (prod.)',
+    paymentHistoryProdHint:
+      'Contagens no mesmo conjunto do Total (prod.): usuários visíveis com os filtros atuais, excluindo contas de teste. Soma com “Já teve…” = Total.',
   },
   table: {
     user: 'Usuário',
@@ -295,6 +317,8 @@ const pt: AdminUsuariosTranslations = {
       'Plano Free sem linha em assinaturas ainda — em Editar, crie o free matriz (area ylada) com o prazo.',
     planEndHighlight: 'Fim do plano',
     testAccountBadge: 'Teste',
+    paymentHistoryNeverBadge: 'Só free / nunca pagou recorrente',
+    paymentHistoryFormerBadge: 'Já foi assinante (mensal ou anual)',
   },
   subscriptionBadge: {
     active: 'Ativa',
@@ -426,6 +450,11 @@ const es: AdminUsuariosTranslations = {
     monthly: 'Mensual',
     annual: 'Anual',
     noSubscription: 'Sin suscripción',
+    paymentHistory: 'Historial de pago',
+    paymentHistoryHint:
+      'Según registros mensual/anual en subscriptions (cualquier área). Independiente del plan actual o si está vencido.',
+    neverHadPaidPlan: 'Nunca tuvo mensual/anual',
+    hadPaidPlan: 'Ya tuvo mensual o anual',
   },
   areas: {
     nutri: 'Nutricionistas',
@@ -452,6 +481,10 @@ const es: AdminUsuariosTranslations = {
     testDomainsHint:
       'Dominios @ylada.com, @ylada.app y correos configurados (ej.: portalmagra@gmail.com). Extras: ADMIN_TEST_EMAIL_DOMAINS y ADMIN_TEST_EMAILS en el servidor.',
     excludingTestAccounts: 'sin pruebas',
+    paymentHistoryNeverProd: 'Nunca tuvo mensual/anual (prod.)',
+    paymentHistoryFormerProd: 'Ya tuvo mensual o anual (prod.)',
+    paymentHistoryProdHint:
+      'Mismo conjunto que Total (prod.): usuarios visibles con los filtros actuales, sin cuentas de prueba. La suma con “Ya tuvo…” = Total.',
   },
   table: {
     user: 'Usuario',
@@ -490,6 +523,8 @@ const es: AdminUsuariosTranslations = {
       'Plan Free sin fila en suscripciones — en Editar, cree el free matriz (area ylada) con el plazo.',
     planEndHighlight: 'Fin del plan',
     testAccountBadge: 'Prueba',
+    paymentHistoryNeverBadge: 'Solo gratis / nunca pagó recurrente',
+    paymentHistoryFormerBadge: 'Ya fue suscriptor (mensual o anual)',
   },
   subscriptionBadge: {
     active: 'Activa',
@@ -621,6 +656,11 @@ const en: AdminUsuariosTranslations = {
     monthly: 'Monthly',
     annual: 'Annual',
     noSubscription: 'No subscription',
+    paymentHistory: 'Paid history',
+    paymentHistoryHint:
+      'Based on monthly/annual rows in subscriptions (any area). Independent of current plan or expiry.',
+    neverHadPaidPlan: 'Never had monthly/annual',
+    hadPaidPlan: 'Had monthly or annual before',
   },
   areas: {
     nutri: 'Nutritionists',
@@ -647,6 +687,10 @@ const en: AdminUsuariosTranslations = {
     testDomainsHint:
       '@ylada.com, @ylada.app and configured addresses (e.g. portalmagra@gmail.com). Server env: ADMIN_TEST_EMAIL_DOMAINS, ADMIN_TEST_EMAILS.',
     excludingTestAccounts: 'excl. test',
+    paymentHistoryNeverProd: 'Never had monthly/annual (prod.)',
+    paymentHistoryFormerProd: 'Had monthly or annual (prod.)',
+    paymentHistoryProdHint:
+      'Same set as Total (prod.): visible users with current filters, excluding test accounts. Sum with “Had…” = Total.',
   },
   table: {
     user: 'User',
@@ -685,6 +729,8 @@ const en: AdminUsuariosTranslations = {
       'Free plan with no subscription row yet — in Edit, create matrix free (ylada area) with the term.',
     planEndHighlight: 'Plan ends',
     testAccountBadge: 'Test',
+    paymentHistoryNeverBadge: 'Free only / never paid recurring',
+    paymentHistoryFormerBadge: 'Former subscriber (monthly or annual)',
   },
   subscriptionBadge: {
     active: 'Active',

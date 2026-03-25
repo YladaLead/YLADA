@@ -49,12 +49,15 @@ interface Usuario {
     | 'free_migracao'
   /** E-mail em domínio de teste (@ylada.com etc.) — stats de produção excluem */
   isContaTeste?: boolean
+  /** Já existiu assinatura mensal ou anual (qualquer área), ver API `everHadPaid` */
+  everHadPaid?: boolean
 }
 
 interface Stats {
   total: number
   ativos: number
   inativos: number
+  historicoPago?: { nuncaPagouRecorrente: number; jaPagouRecorrente: number }
   contasTeste?: { total: number; ativos: number; inativos: number }
 }
 
@@ -80,10 +83,16 @@ export default function AdminUsuarios() {
     | 'anual'
     | 'sem'
   >('todos')
+  const [filtroHistorico, setFiltroHistorico] = useState<'todos' | 'nunca_pagou' | 'ja_pagou'>('todos')
   const [filtroPresidente, setFiltroPresidente] = useState<string>('todos')
   const [busca, setBusca] = useState('')
   const [usuarios, setUsuarios] = useState<Usuario[]>([])
-  const [stats, setStats] = useState<Stats>({ total: 0, ativos: 0, inativos: 0 })
+  const [stats, setStats] = useState<Stats>({
+    total: 0,
+    ativos: 0,
+    inativos: 0,
+    historicoPago: { nuncaPagouRecorrente: 0, jaPagouRecorrente: 0 },
+  })
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
@@ -224,6 +233,7 @@ export default function AdminUsuarios() {
       if (filtroBloco !== 'todos') params.append('bloco', filtroBloco)
       if (filtroStatus !== 'todos') params.append('status', filtroStatus)
       if (filtroAssinatura !== 'todos') params.append('assinatura', filtroAssinatura)
+      if (filtroHistorico !== 'todos') params.append('historico', filtroHistorico)
       if (filtroBloco === 'todos' && filtroPresidente !== 'todos') {
         params.append('presidente', filtroPresidente)
       }
@@ -248,6 +258,7 @@ export default function AdminUsuarios() {
           total: s.total ?? 0,
           ativos: s.ativos ?? 0,
           inativos: s.inativos ?? 0,
+          historicoPago: s.historicoPago ?? { nuncaPagouRecorrente: 0, jaPagouRecorrente: 0 },
           contasTeste: s.contasTeste ?? { total: 0, ativos: 0, inativos: 0 },
         })
       } else {
@@ -268,7 +279,7 @@ export default function AdminUsuarios() {
     }, busca ? 500 : 0)
 
     return () => clearTimeout(timeoutId)
-  }, [filtroBloco, filtroSegmento, filtroStatus, filtroAssinatura, filtroPresidente, busca])
+  }, [filtroBloco, filtroSegmento, filtroStatus, filtroAssinatura, filtroHistorico, filtroPresidente, busca])
 
   // Abrir modal de editar usuário (usa nome canônico no dropdown quando existir)
   const abrirEditarUsuario = (usuario: Usuario) => {
@@ -672,10 +683,13 @@ export default function AdminUsuarios() {
     return t.subscriptionType.none
   }
 
+  const getPaymentHistoryLabel = (u: Usuario) =>
+    u.everHadPaid ? t.filters.hadPaidPlan : t.filters.neverHadPaidPlan
+
   const exportarPlanilhaUsuarios = () => {
     const headers = mostrarColunasPresidente
-      ? [t.table.nameLabel, 'Email', t.table.whatsapp, t.table.area, t.table.isPresident, t.table.president, t.table.subscription, t.table.enrollment, t.table.leads, t.table.linksLabel, t.table.clicksLabel]
-      : [t.table.nameLabel, 'Email', t.table.whatsapp, t.table.area, t.table.subscription, t.table.enrollment, t.table.leads, t.table.linksLabel, t.table.clicksLabel]
+      ? [t.table.nameLabel, 'Email', t.table.whatsapp, t.table.area, t.table.isPresident, t.table.president, t.table.subscription, t.filters.paymentHistory, t.table.enrollment, t.table.leads, t.table.linksLabel, t.table.clicksLabel]
+      : [t.table.nameLabel, 'Email', t.table.whatsapp, t.table.area, t.table.subscription, t.filters.paymentHistory, t.table.enrollment, t.table.leads, t.table.linksLabel, t.table.clicksLabel]
     const rows = usuariosVisiveis.map((u) => {
       const base = [
         u.nome,
@@ -688,6 +702,7 @@ export default function AdminUsuarios() {
         : []
       const rest = [
         getAssinaturaListLabel(u),
+        getPaymentHistoryLabel(u),
         u.dataCadastro ? formatYmdSlashPtBr(u.dataCadastro) : '',
         String(u.leadsGerados),
         String(u.linksEnviados ?? 0),
@@ -753,7 +768,7 @@ export default function AdminUsuarios() {
 
         {/* Filtros compactos — dicas longas no title (passe o mouse no rótulo) */}
         <div className="flex-shrink-0 bg-white rounded-lg px-3 py-2 shadow-sm border border-gray-200">
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-11 gap-x-2 gap-y-1.5 items-end">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-12 gap-x-2 gap-y-1.5 items-end">
             <div className="col-span-2 sm:col-span-1 md:col-span-1 lg:col-span-2 xl:col-span-2">
               <label
                 className="block text-[11px] font-medium text-gray-600 mb-0.5 cursor-help"
@@ -849,6 +864,24 @@ export default function AdminUsuarios() {
                 <option value="sem">{t.filters.noSubscription}</option>
               </select>
             </div>
+            <div className="col-span-2 sm:col-span-1 lg:col-span-2 xl:col-span-2">
+              <label
+                className="block text-[11px] font-medium text-gray-600 mb-0.5 cursor-help"
+                title={t.filters.paymentHistoryHint}
+              >
+                {t.filters.paymentHistory}
+              </label>
+              <select
+                value={filtroHistorico}
+                onChange={(e) => setFiltroHistorico(e.target.value as 'todos' | 'nunca_pagou' | 'ja_pagou')}
+                disabled={loading}
+                className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50"
+              >
+                <option value="todos">{t.filters.all}</option>
+                <option value="nunca_pagou">{t.filters.neverHadPaidPlan}</option>
+                <option value="ja_pagou">{t.filters.hadPaidPlan}</option>
+              </select>
+            </div>
             {filtroBloco === 'todos' && (
               <div className="col-span-2 sm:col-span-2 lg:col-span-2 xl:col-span-2">
                 <label className="block text-[11px] font-medium text-gray-600 mb-0.5">{t.filters.president}</label>
@@ -904,7 +937,7 @@ export default function AdminUsuarios() {
         {!loading && (
           <div
             className="flex-shrink-0 flex flex-wrap items-baseline gap-x-4 gap-y-1 px-2.5 py-1.5 bg-white rounded-lg border border-gray-200 shadow-sm text-sm"
-            title={t.stats.testDomainsHint}
+            title={`${t.stats.testDomainsHint}\n${t.stats.paymentHistoryProdHint}`}
           >
             <span className="text-gray-600">
               {t.stats.total}: <strong className="text-gray-900 tabular-nums">{stats.total}</strong>
@@ -921,6 +954,24 @@ export default function AdminUsuarios() {
             </span>
             <span className="text-gray-600">
               {t.stats.inactive}: <strong className="text-gray-700 tabular-nums">{stats.inativos}</strong>
+            </span>
+            <span className="text-gray-300 hidden sm:inline" aria-hidden>
+              |
+            </span>
+            <span className="text-gray-600" title={t.stats.paymentHistoryProdHint}>
+              {t.stats.paymentHistoryNeverProd}:{' '}
+              <strong className="text-slate-700 tabular-nums">
+                {stats.historicoPago?.nuncaPagouRecorrente ?? 0}
+              </strong>
+            </span>
+            <span className="text-gray-300 hidden sm:inline" aria-hidden>
+              |
+            </span>
+            <span className="text-gray-600" title={t.stats.paymentHistoryProdHint}>
+              {t.stats.paymentHistoryFormerProd}:{' '}
+              <strong className="text-indigo-700 tabular-nums">
+                {stats.historicoPago?.jaPagouRecorrente ?? 0}
+              </strong>
             </span>
             <span className="text-gray-300 hidden sm:inline" aria-hidden>
               |
@@ -1099,6 +1150,22 @@ export default function AdminUsuarios() {
                                     <span className="text-xs text-orange-600" title="Usuário migrado">🔄</span>
                                   )}
                                 </div>
+                                {typeof usuario.everHadPaid === 'boolean' && (
+                                  <div className="mt-1.5">
+                                    <span
+                                      className={`inline-block px-2 py-0.5 rounded text-[10px] font-semibold ${
+                                        usuario.everHadPaid
+                                          ? 'bg-indigo-50 text-indigo-800 border border-indigo-100'
+                                          : 'bg-slate-100 text-slate-700 border border-slate-200'
+                                      }`}
+                                      title={t.filters.paymentHistoryHint}
+                                    >
+                                      {usuario.everHadPaid
+                                        ? t.table.paymentHistoryFormerBadge
+                                        : t.table.paymentHistoryNeverBadge}
+                                    </span>
+                                  </div>
+                                )}
                                 {dataVencStr &&
                                   usuario.assinatura === 'gratuita' &&
                                   usuario.yladaFreeGrantKind === 'courtesy' &&
