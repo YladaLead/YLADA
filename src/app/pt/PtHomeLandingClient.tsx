@@ -3,23 +3,23 @@
 import { useEffect } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
-import PilotPageContent from '@/components/pilot/PilotPageContent'
+import PilotLandingIntro from '@/components/pilot/PilotLandingIntro'
 
-/** Hub: escolher segmento. Primeira tela só com “Explique menos” em /pt. */
-export default function PtSegmentosHubClient() {
+/** /pt — só hero; segmentos após “Comece agora” em /pt/segmentos. */
+export default function PtHomeLandingClient() {
   const { user, loading } = useAuth()
   const router = useRouter()
   const pathname = usePathname()
-  const isHub = pathname === '/pt/segmentos' || pathname === '/pt/segmentos/'
+  const isPtRoot = pathname === '/pt' || pathname === '/pt/'
 
   useEffect(() => {
-    if (loading || !isHub) return
+    if (loading || !isPtRoot) return
     if (user) {
       router.replace('/pt/painel')
     }
-  }, [loading, user, pathname, router, isHub])
+  }, [loading, user, pathname, router, isPtRoot])
 
-  if (loading && isHub) {
+  if (loading && isPtRoot) {
     return (
       <div className="min-h-screen flex items-center justify-center p-4 bg-white">
         <p className="text-gray-500">Carregando...</p>
@@ -27,7 +27,7 @@ export default function PtSegmentosHubClient() {
     )
   }
 
-  if (user && isHub) {
+  if (user && isPtRoot) {
     return (
       <div className="min-h-screen flex items-center justify-center p-4 bg-white">
         <p className="text-gray-500">Redirecionando...</p>
@@ -35,5 +35,5 @@ export default function PtSegmentosHubClient() {
     )
   }
 
-  return <PilotPageContent />
+  return <PilotLandingIntro />
 }

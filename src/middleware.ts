@@ -31,15 +31,10 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(url, 308)
   }
 
-  // Raiz e /pt: hub para escolher segmento (cada área tem fluxo em /pt/{area}).
-  if (
-    pathname === '/' ||
-    pathname === '' ||
-    pathname === '/pt' ||
-    pathname === '/pt/'
-  ) {
+  // Raiz → /pt (primeira tela só “Explique menos”; segmentos em /pt/segmentos após CTA).
+  if (pathname === '/' || pathname === '') {
     const url = request.nextUrl.clone()
-    url.pathname = '/pt/segmentos'
+    url.pathname = '/pt'
     return NextResponse.redirect(url, 308)
   }
 

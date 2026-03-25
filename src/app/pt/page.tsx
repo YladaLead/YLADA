@@ -1,6 +1,16 @@
-import { redirect } from 'next/navigation'
+import type { Metadata } from 'next'
+import PtHomeLandingClient from './PtHomeLandingClient'
 
-/** /pt redireciona para o hub de segmentos (cada vertical em /pt/{area}). */
+export const metadata: Metadata = {
+  title: 'Explique menos. Venda mais. | YLADA',
+  description: 'Explique menos. Venda mais.',
+  openGraph: {
+    title: 'Explique menos. Venda mais. | YLADA',
+    description: 'Explique menos. Venda mais.',
+    url: 'https://www.ylada.com/pt',
+  },
+}
+
 export default function PtHomePage() {
-  redirect('/pt/segmentos')
+  return <PtHomeLandingClient />
 }

@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation'
 
-/** Raiz: hub PT para escolher segmento. */
+/** Raiz → /pt (hero); segmentos só após “Comece agora”. */
 export default function HomePage() {
-  redirect('/pt/segmentos')
+  redirect('/pt')
 }
