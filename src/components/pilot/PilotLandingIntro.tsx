@@ -1,16 +1,14 @@
 'use client'
 
-import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import YLADALogo from '@/components/YLADALogo'
 
 /**
- * Primeira tela pública PT: gancho + “Próximo”; só depois o CTA para /pt/segmentos.
+ * Primeira tela pública PT: só o gancho + CTA. Segmentos em /pt/segmentos.
  */
 export default function PilotLandingIntro() {
   const router = useRouter()
-  const [passo, setPasso] = useState<1 | 2>(1)
 
   return (
     <div className="min-h-screen bg-white text-gray-900 flex flex-col">
@@ -32,19 +30,12 @@ export default function PilotLandingIntro() {
             <br />
             Venda mais.
           </h1>
-          {passo === 2 ? (
-            <p className="mt-6 text-base text-gray-600 max-w-md">
-              No próximo passo, escolha o seu segmento.
-            </p>
-          ) : null}
           <button
             type="button"
-            onClick={() =>
-              passo === 1 ? setPasso(2) : router.push('/pt/segmentos')
-            }
+            onClick={() => router.push('/pt/segmentos')}
             className="mt-10 w-full max-w-sm min-h-[44px] rounded-xl bg-blue-600 px-8 py-3 text-base font-semibold text-white hover:bg-blue-700 sm:min-h-[48px]"
           >
-            {passo === 1 ? 'Próximo' : 'Comece agora'}
+            Comece agora
           </button>
         </div>
       </main>
