@@ -126,5 +126,5 @@ export const ESTETICA_QUIZ_RESULT_COPY = {
     'Você vai entender na hora quando ver',
   ] as const,
   ctaPrimary: 'Ver na prática agora',
-  ctaMicro: 'simulação rápida, sem senha · em seguida você vê o fluxo como sua cliente',
+  ctaMicro: 'Em seguida: onde você atua e o fluxo como sua cliente veria',
 } as const

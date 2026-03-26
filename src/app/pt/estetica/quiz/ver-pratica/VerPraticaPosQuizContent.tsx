@@ -1,7 +1,8 @@
 'use client'
 
 /**
- * Pós-quiz: simulação de login → onde atua → (nicho, se não veio na URL) → exemplo-cliente?origem=quiz
+ * Pós-quiz: onde atua → (nicho, se não veio na URL) → exemplo-cliente?origem=quiz
+ * Sem tela de login simulado — o usuário já está no fluxo real da experiência.
  */
 
 import { useCallback, useMemo, useState } from 'react'
@@ -17,22 +18,23 @@ import {
 } from '@/lib/estetica-demo-context'
 import { trackEvent } from '@/lib/analytics-events'
 
-type Fase = 'login' | 'local' | 'nicho'
+type Fase = 'local' | 'nicho'
 
 export default function VerPraticaPosQuizContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const [fase, setFase] = useState<Fase>('login')
+  const [fase, setFase] = useState<Fase>('local')
 
   const nichoPredefinido = useMemo(() => {
     const n = searchParams.get('nicho')
     return n && ESTETICA_DEMO_CLIENTE_NICHOS.some((o) => o.value === n) ? n : null
   }, [searchParams])
 
-  const avancarLogin = useCallback(() => {
-    trackEvent('estetica_quiz_ver_pratica', { area: 'estetica', step: 'pos_login_simulado' })
-    setFase('local')
-  }, [])
+  const voltarQuizHref = useMemo(() => {
+    return nichoPredefinido
+      ? `/pt/estetica?nicho=${encodeURIComponent(nichoPredefinido)}`
+      : '/pt/estetica'
+  }, [nichoPredefinido])
 
   const escolherLocal = useCallback(
     (value: string) => {
@@ -92,47 +94,6 @@ export default function VerPraticaPosQuizContent() {
       </header>
 
       <main className="flex-1 px-4 sm:px-6 py-8 max-w-lg mx-auto w-full estetica-safe-main-bottom">
-        {fase === 'login' && (
-          <div className="space-y-8 animate-fade-in-up">
-            <div className="space-y-3">
-              <p className="text-xs font-semibold uppercase tracking-wider text-amber-800 bg-amber-50 border border-amber-100 rounded-xl px-3 py-2 leading-snug">
-                Simulação · sem senha de verdade
-              </p>
-              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 leading-tight">Entrar no YLADA</h1>
-              <p className="text-base text-gray-600 leading-relaxed">
-                É só para você enxergar o próximo passo: como fica o fluxo na prática, do jeito que sua cliente veria.
-              </p>
-            </div>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-xs font-medium text-gray-500 mb-1.5">E-mail (exemplo)</label>
-                <input
-                  type="email"
-                  disabled
-                  placeholder="voce@exemplo.com"
-                  className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-gray-600 text-sm cursor-not-allowed placeholder:text-gray-400"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-gray-500 mb-1.5">Senha (exemplo)</label>
-                <input
-                  type="password"
-                  disabled
-                  placeholder="••••••••"
-                  className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-gray-600 text-sm cursor-not-allowed placeholder:text-gray-400"
-                />
-              </div>
-            </div>
-            <button
-              type="button"
-              onClick={avancarLogin}
-              className="w-full min-h-[52px] rounded-2xl bg-blue-600 px-5 py-3.5 text-base font-bold text-white hover:bg-blue-700 shadow-lg shadow-blue-600/30 transition-colors"
-            >
-              Continuar e ver na prática
-            </button>
-          </div>
-        )}
-
         {fase === 'local' && (
           <div className="space-y-6 animate-fade-in-up">
             <h1 className="text-xl font-bold text-gray-900">Onde você trabalha com estética?</h1>
@@ -153,13 +114,12 @@ export default function VerPraticaPosQuizContent() {
                 </button>
               ))}
             </div>
-            <button
-              type="button"
-              onClick={() => setFase('login')}
-              className="w-full min-h-[44px] text-sm font-medium text-gray-500 hover:text-gray-800"
+            <Link
+              href={voltarQuizHref}
+              className="block w-full min-h-[44px] text-sm font-medium text-gray-500 hover:text-gray-800 text-center pt-2"
             >
-              ← Voltar
-            </button>
+              ← Voltar ao resultado
+            </Link>
           </div>
         )}
 

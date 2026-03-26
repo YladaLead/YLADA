@@ -116,7 +116,7 @@ export default function YladaSidebar({
   }
 
   const content = (
-    <aside className="flex flex-col h-full bg-white border-r border-gray-200 w-56">
+    <aside className="flex flex-col h-full min-h-0 bg-white border-r border-gray-200 w-56">
       <div className="p-4 border-b border-gray-200">
         <Link href={`${prefix}/home`} className="flex flex-col gap-0.5">
           {/* Desktop: mostra logo oficial */}
@@ -212,8 +212,10 @@ export default function YladaSidebar({
 
   return (
     <>
-      {/* Desktop */}
-      <div className="hidden lg:flex lg:flex-shrink-0">{content}</div>
+      {/* Desktop: altura da viewport; não estica com o main; sticky mantém visível ao rolar */}
+      <div className="hidden lg:flex lg:flex-shrink-0 lg:self-start lg:h-screen lg:max-h-[100dvh] lg:sticky lg:top-0 lg:z-20">
+        {content}
+      </div>
       {/* Mobile overlay */}
       {isMobileOpen && (
         <>

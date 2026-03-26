@@ -229,14 +229,9 @@ export default function EsteticaQuizPublicContent({ entradaComNicho = false }: E
       <main className="flex-1 min-h-0 overflow-y-auto overscroll-y-contain px-4 sm:px-6 py-6 max-w-lg mx-auto w-full estetica-safe-main-bottom">
         {showNichoPicker && (
           <div className="animate-fade-in-up flex flex-col pb-2 space-y-6" role="region" aria-live="polite">
-            <div className="space-y-2">
-              <h1 className="text-xl sm:text-2xl font-bold text-gray-900 leading-snug tracking-tight">
-                Qual é o seu foco em estética?
-              </h1>
-              <p className="text-sm text-gray-600 leading-relaxed">
-                Assim personalizamos as perguntas e o exemplo na prática fica mais próximo do que você faz no dia a dia.
-              </p>
-            </div>
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-900 leading-snug tracking-tight">
+              Qual é o seu foco em estética?
+            </h1>
             <div className="flex flex-col gap-3">
               {ESTETICA_DEMO_CLIENTE_NICHOS.map((opt) => (
                 <button
@@ -249,12 +244,6 @@ export default function EsteticaQuizPublicContent({ entradaComNicho = false }: E
                 </button>
               ))}
             </div>
-            <Link
-              href={ESTETICA_APRESENTACAO_HREF}
-              className="block text-center text-sm text-gray-500 hover:text-gray-800 pt-4"
-            >
-              Ver apresentação completa (tour)
-            </Link>
           </div>
         )}
 
