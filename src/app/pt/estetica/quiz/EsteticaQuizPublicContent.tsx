@@ -186,30 +186,30 @@ export default function EsteticaQuizPublicContent() {
         )}
 
         {isResult && (
-          <div className="animate-fade-in-up space-y-8 pb-4" role="region" aria-live="polite">
-            <div className="space-y-5">
-              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 leading-tight tracking-tight">
-                {ESTETICA_QUIZ_RESULT_COPY.headline}
-              </h1>
-              <div className="space-y-2 text-lg sm:text-xl text-gray-800 font-medium leading-snug">
-                {ESTETICA_QUIZ_RESULT_COPY.subLines.map((line) => (
-                  <p key={line}>{line}</p>
-                ))}
+          <div className="animate-fade-in-up pb-8 pt-2" role="region" aria-live="polite">
+            <div className="space-y-10 sm:space-y-12">
+              <div className="space-y-6 sm:space-y-8">
+                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 leading-tight tracking-tight">
+                  {ESTETICA_QUIZ_RESULT_COPY.headline}
+                </h1>
+                <div className="space-y-4 sm:space-y-5 text-lg sm:text-xl text-gray-800 font-medium leading-snug">
+                  {ESTETICA_QUIZ_RESULT_COPY.subLines.map((line) => (
+                    <p key={line}>{line}</p>
+                  ))}
+                </div>
               </div>
-            </div>
-            <div className="flex flex-col gap-3 pt-2">
-              <Link
-                href={ESTETICA_QUIZ_CADASTRO_HREF}
-                className="w-full min-h-[56px] rounded-2xl bg-blue-600 px-5 py-4 text-center font-semibold text-white hover:bg-blue-700 shadow-sm shadow-blue-600/25 transition-colors inline-flex flex-col items-center justify-center gap-0.5 leading-tight"
-              >
-                <span className="text-lg inline-flex items-center gap-2">
+              <div className="pt-4 sm:pt-6 flex flex-col items-stretch gap-3">
+                <Link
+                  href={ESTETICA_QUIZ_CADASTRO_HREF}
+                  className="w-full min-h-[58px] sm:min-h-[60px] rounded-2xl bg-blue-600 px-6 py-4 text-center text-lg sm:text-xl font-bold text-white hover:bg-blue-700 shadow-lg shadow-blue-600/35 active:scale-[0.99] transition-all inline-flex items-center justify-center gap-2.5"
+                >
                   <span aria-hidden>👉</span>
                   {ESTETICA_QUIZ_RESULT_COPY.ctaPrimary}
-                </span>
-                <span className="text-sm font-medium text-white/90 uppercase tracking-wide">
-                  {ESTETICA_QUIZ_RESULT_COPY.ctaGratuito}
-                </span>
-              </Link>
+                </Link>
+                <p className="text-center text-sm text-gray-500 leading-relaxed px-1">
+                  {ESTETICA_QUIZ_RESULT_COPY.ctaMicro}
+                </p>
+              </div>
             </div>
           </div>
         )}

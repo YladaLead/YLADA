@@ -74,10 +74,17 @@ export const ESTETICA_QUIZ_QUESTIONS: EsteticaQuizQuestion[] = [
   },
 ]
 
-/** Fechamento pós-quiz: curto, direto, foco no cadastro. */
+/**
+ * Fechamento pós-quiz: curto, curiosidade + CTA único.
+ * A/B futuro: variante CTA "Quero agendar mais clientes" vs "Começar agora grátis".
+ */
 export const ESTETICA_QUIZ_RESULT_COPY = {
   headline: 'Você poderia estar agendando muito mais',
-  subLines: ['Pare de tentar convencer.', 'Faça sua cliente chegar pronta pra fechar.'] as const,
-  ctaPrimary: 'Começar agora',
-  ctaGratuito: 'Gratuito',
+  subLines: [
+    'Pare de tentar convencer',
+    'Faça sua cliente chegar pronta pra fechar',
+    'Você vai entender na hora quando ver',
+  ] as const,
+  ctaPrimary: 'Começar agora grátis',
+  ctaMicro: 'leva menos de 1 minuto · sem precisar configurar nada',
 } as const
