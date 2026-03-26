@@ -29,8 +29,8 @@ const NICHOS: FitnessDemoNichoClienteConfig[] = [
   {
     value: 'emagrecimento',
     label: 'Emagrecimento ou composição corporal',
-    tituloQuiz: 'Antes de falar com o profissional de educação física',
-    subtitulo: 'Rotina e expectativas. Não é plano médico nem promessa de resultado.',
+    tituloQuiz: 'Treina, restringe, e a balança finge que não vê?',
+    subtitulo: 'Mostre o padrão real — ele monta o caminho com base no que você vive. Não é plano médico nem promessa de resultado.',
     perguntas: [
       {
         id: 'p1',
@@ -73,8 +73,8 @@ const NICHOS: FitnessDemoNichoClienteConfig[] = [
   {
     value: 'hipertrofia',
     label: 'Hipertrofia ou ganho de força',
-    tituloQuiz: 'Antes de falar com o profissional de educação física',
-    subtitulo: 'Experiência e equipamento. Não substitui nutrição clínica.',
+    tituloQuiz: 'Peso na barra sobe e o volume no espelho trava?',
+    subtitulo: 'Experiência e equipamento em foco. Não substitui nutrição clínica.',
     perguntas: [
       {
         id: 'p1',
@@ -117,8 +117,8 @@ const NICHOS: FitnessDemoNichoClienteConfig[] = [
   {
     value: 'condicionamento',
     label: 'Condicionamento ou resistência',
-    tituloQuiz: 'Antes de falar com o profissional de educação física',
-    subtitulo: 'Base e limitações percebidas. Não é teste cardiológico.',
+    tituloQuiz: 'Sobe escada e falta ar — ou a meta parece longe demais?',
+    subtitulo: 'Base honesta antes do primeiro treino. Não é teste cardiológico.',
     perguntas: [
       {
         id: 'p1',
@@ -161,8 +161,8 @@ const NICHOS: FitnessDemoNichoClienteConfig[] = [
   {
     value: 'retorno_treino',
     label: 'Retorno após pausa ou gestação',
-    tituloQuiz: 'Antes de falar com o profissional de educação física',
-    subtitulo: 'Tempo parado e cautela. Não substitui liberação médica quando necessária.',
+    tituloQuiz: 'Parou e tem medo de retomar do jeito errado?',
+    subtitulo: 'Tempo parado e cautela em poucos toques. Não substitui liberação médica quando necessária.',
     perguntas: [
       {
         id: 'p1',
@@ -205,8 +205,8 @@ const NICHOS: FitnessDemoNichoClienteConfig[] = [
   {
     value: 'mobilidade',
     label: 'Mobilidade, postura ou dor leve',
-    tituloQuiz: 'Antes de falar com o profissional de educação física',
-    subtitulo: 'Incômodos do dia a dia. Não é diagnóstico nem tratamento de lesão.',
+    tituloQuiz: 'Corpo travado e você acha que “é idade” antes de testar?',
+    subtitulo: 'Incômodos do dia a dia, sem drama. Não é diagnóstico nem tratamento de lesão.',
     perguntas: [
       {
         id: 'p1',
@@ -249,8 +249,8 @@ const NICHOS: FitnessDemoNichoClienteConfig[] = [
   {
     value: 'esporte',
     label: 'Esporte ou performance',
-    tituloQuiz: 'Antes de falar com o profissional de educação física',
-    subtitulo: 'Modalidade e nível. Não substitui técnico específico da modalidade.',
+    tituloQuiz: 'Seu esporte pede mais que treino genérico — você sentiu isso?',
+    subtitulo: 'Modalidade e nível com clareza. Não substitui técnico específico da modalidade.',
     perguntas: [
       {
         id: 'p1',

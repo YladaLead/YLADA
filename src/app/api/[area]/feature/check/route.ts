@@ -1,7 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireApiAuth } from '@/lib/api-auth'
 import { hasFeatureAccess, hasAnyFeature, type Feature } from '@/lib/feature-helpers'
-import { canBypassSubscription, hasActiveSubscription } from '@/lib/subscription-helpers'
+import {
+  canBypassSubscription,
+  hasActiveSubscription,
+  getActiveSubscription,
+  subscriptionRowIsMatrixSegmentCommercialUnlimited,
+} from '@/lib/subscription-helpers'
 
 /**
  * GET /api/[area]/feature/check?feature=gestao
@@ -80,10 +85,22 @@ export async function GET(
       }
     }
 
+    const matrixFeatureAreas = ['nutri', 'coach', 'nutra'] as const
+    let matrixCommercialTier: 'pro' | 'freedom' | 'none' | undefined
+    let upgradePath: string | undefined
+    if ((matrixFeatureAreas as readonly string[]).includes(area)) {
+      const sub = await getActiveSubscription(user.id, area)
+      matrixCommercialTier = !sub ? 'none' : subscriptionRowIsMatrixSegmentCommercialUnlimited(sub) ? 'pro' : 'freedom'
+      upgradePath = `/pt/${area}/checkout`
+    }
+
     return NextResponse.json({
       hasAccess,
       bypassed: false,
       feature: featureParam || featuresParam,
+      ...(matrixCommercialTier !== undefined
+        ? { matrixCommercialTier, nutriCommercialTier: matrixCommercialTier, upgradePath }
+        : {}),
     })
   } catch (error: any) {
     console.error(`❌ Erro ao verificar feature para ${params.area}:`, error)

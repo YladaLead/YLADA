@@ -260,7 +260,7 @@ function NutriDiagnosticoContent() {
       // Gerar primeira análise da LYA (não bloquear se falhar)
       try {
         console.log('🤖 Gerando análise da LYA...')
-        const lyaResponse = await fetch('/api/nutri/lya/analise', {
+        const lyaResponse = await fetch('/api/nutri/noel/analise', {
           method: 'POST',
           credentials: 'include'
         })

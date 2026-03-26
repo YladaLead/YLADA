@@ -9,7 +9,7 @@ import { useTranslations } from '@/hooks/useTranslations'
 import { getMatrixHubHrefForArea } from '@/lib/ylada-matrix-entry'
 
 /** Itens só por solicitação — no piloto entram apenas pelo campo livre. */
-const PILOT_EXCLUDED_IDS = new Set(['profissional-liberal', 'vendedores-geral'])
+const PILOT_EXCLUDED_IDS = new Set(['profissional-liberal'])
 
 /** Entrada por segmento: funil matriz (ex.: /pt/entrada/estetica) ou /pt/{id}. */
 function pilotHrefForArea(areaId: string): string {
@@ -108,7 +108,7 @@ export default function PilotPageContent() {
               type="text"
               value={otherText}
               onChange={(e) => setOtherText(e.target.value)}
-              placeholder="Ex.: vendedor, fono, fisioterapeuta…"
+              placeholder="Ex.: fono, fisioterapeuta, outro…"
               className="w-full min-h-[44px] rounded-xl border border-gray-300 px-3.5 py-2 text-base focus:border-blue-500 focus:ring-2 focus:ring-blue-500 sm:min-h-[48px] sm:px-4"
               autoComplete="organization-title"
             />

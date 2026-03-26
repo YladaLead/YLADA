@@ -29,8 +29,8 @@ const NICHOS: PsicanaliseDemoNichoClienteConfig[] = [
   {
     value: 'inicio_processo',
     label: 'Primeiro contato com a análise',
-    tituloQuiz: 'Antes da primeira conversa com o psicanalista ou a psicanalista',
-    subtitulo: 'Reflexão sobre o que te trouxe até aqui. Não substitui sessão.',
+    tituloQuiz: 'Psicanálise parece mistério e você quer saber se é pra você?',
+    subtitulo: 'Expectativas honestas antes do primeiro contato. Não substitui sessão.',
     perguntas: [
       {
         id: 'p1',
@@ -73,8 +73,8 @@ const NICHOS: PsicanaliseDemoNichoClienteConfig[] = [
   {
     value: 'inquietacao_sofrimento',
     label: 'Inquietação ou sofrimento persistente',
-    tituloQuiz: 'Antes da primeira conversa com o psicanalista ou a psicanalista',
-    subtitulo: 'Nomear o que incomoda. Não é diagnóstico.',
+    tituloQuiz: 'Sofrimento que você explica com “é stress” há tempo demais?',
+    subtitulo: 'Nomear o que incomoda sem rótulo pronto. Não é diagnóstico.',
     perguntas: [
       {
         id: 'p1',
@@ -117,8 +117,8 @@ const NICHOS: PsicanaliseDemoNichoClienteConfig[] = [
   {
     value: 'relacoes_vinculos',
     label: 'Relações e vínculos',
-    tituloQuiz: 'Antes da primeira conversa com o psicanalista ou a psicanalista',
-    subtitulo: 'Contexto afetivo. Não é aconselhamento de casal.',
+    tituloQuiz: 'Mesmo padrão afetivo repetindo e você notou o fio condutor?',
+    subtitulo: 'Contexto afetivo em claro. Não é aconselhamento de casal.',
     perguntas: [
       {
         id: 'p1',
@@ -161,7 +161,7 @@ const NICHOS: PsicanaliseDemoNichoClienteConfig[] = [
   {
     value: 'luto_mudanca',
     label: 'Luto, perda ou mudança de fase',
-    tituloQuiz: 'Antes da primeira conversa com o psicanalista ou a psicanalista',
+    tituloQuiz: 'Luto ou ruptura e a dor não cabe no discurso dos outros?',
     subtitulo: 'Dar lugar ao que mudou. Não substitui rede de apoio urgente.',
     perguntas: [
       {
@@ -205,8 +205,8 @@ const NICHOS: PsicanaliseDemoNichoClienteConfig[] = [
   {
     value: 'trabalho_sentido',
     label: 'Trabalho, criatividade ou sentido',
-    tituloQuiz: 'Antes da primeira conversa com o psicanalista ou a psicanalista',
-    subtitulo: 'Vida profissional e desejo. Não é coaching.',
+    tituloQuiz: 'Trabalho ocupa a cabeça e o sentido não aparece?',
+    subtitulo: 'Vida profissional e desejo com profundidade. Não é coaching.',
     perguntas: [
       {
         id: 'p1',
@@ -249,8 +249,8 @@ const NICHOS: PsicanaliseDemoNichoClienteConfig[] = [
   {
     value: 'duvidas_formato',
     label: 'Dúvidas sobre formato (online, frequência, valores)',
-    tituloQuiz: 'Antes da primeira conversa com o psicanalista ou a psicanalista',
-    subtitulo: 'Organizar expectativas. O acordo fino fica com o profissional.',
+    tituloQuiz: 'Frequência, divã, investimento — dúvidas que travam o primeiro sim?',
+    subtitulo: 'Organize expectativas; o acordo fino fica com o profissional.',
     perguntas: [
       {
         id: 'p1',

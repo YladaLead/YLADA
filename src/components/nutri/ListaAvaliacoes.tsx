@@ -81,7 +81,7 @@ export default function ListaAvaliacoes({
       return ordenacao === 'recente' ? dateB - dateA : dateA - dateB
     })
 
-  // Pedir sugestão da LYA sobre quando reavaliar
+  // Sugestão do Noel (via /api/nutri/noel) sobre quando reavaliar
   const pedirSugestaoReavaliacao = async () => {
     if (avaliacoes.length === 0) return
     
@@ -105,7 +105,7 @@ export default function ListaAvaliacoes({
 Com base nas boas práticas nutricionais, você recomenda fazer uma nova reavaliação agora? Por quê?
 Seja breve e objetiva.`
 
-      const response = await fetch('/api/nutri/lya', {
+      const response = await fetch('/api/nutri/noel', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -117,8 +117,8 @@ Seja breve e objetiva.`
         setLyaSuggestion(data.response || 'Não consegui gerar sugestão no momento.')
       }
     } catch (error) {
-      console.error('Erro ao pedir sugestão LYA:', error)
-      setLyaSuggestion('Erro ao conectar com a LYA.')
+      console.error('Erro ao pedir sugestão (Noel):', error)
+      setLyaSuggestion('Erro ao conectar com o Noel.')
     } finally {
       setLoadingLya(false)
     }

@@ -1,11 +1,44 @@
 import { supabaseAdmin } from '@/lib/supabase'
 import { parseYladaFreeGrantKind } from '@/lib/admin-ylada-free-matriz'
+import { isPerfilMatrizYlada } from '@/lib/admin-matriz-constants'
 
 /**
  * Verifica se usuário tem assinatura ativa para uma área específica
  * Inclui planos pagos (monthly, annual), gratuitos (free) e trials (trial)
+ * Alinhado ao CHECK `subscriptions_area_check` (matriz /pt + wellness + ylada).
  */
-export type SubscriptionArea = 'wellness' | 'nutri' | 'coach' | 'nutra' | 'med' | 'ylada'
+export type SubscriptionArea =
+  | 'wellness'
+  | 'nutri'
+  | 'coach'
+  | 'nutra'
+  | 'med'
+  | 'ylada'
+  | 'psi'
+  | 'psicanalise'
+  | 'odonto'
+  | 'estetica'
+  | 'fitness'
+  | 'perfumaria'
+  | 'seller'
+
+/** Mapeia perfil da matriz YLADA (lado /pt) para coluna `subscriptions.area`. */
+export function perfilMatrizToSubscriptionArea(perfil: string | null | undefined): SubscriptionArea | null {
+  if (!perfil || !isPerfilMatrizYlada(perfil)) return null
+  return perfil as SubscriptionArea
+}
+
+function activeYladaRowIsUnlimited(sub: {
+  plan_type?: string | null
+  stripe_subscription_id?: string | null
+}): boolean {
+  const planType = sub.plan_type as string | undefined
+  if (planType === 'monthly' || planType === 'annual' || planType === 'trial') return true
+  if (planType === 'free') {
+    return parseYladaFreeGrantKind(sub.stripe_subscription_id) === 'courtesy'
+  }
+  return false
+}
 
 export async function hasActiveSubscription(
   userId: string,
@@ -128,22 +161,73 @@ export async function getActiveSubscription(
 }
 
 /**
+ * Qualquer segmento da matriz: mensal, anual, trial ou free com cortesia admin (`free_cor_`) = sem teto freemium / Freedom.
+ */
+export function subscriptionRowIsMatrixSegmentCommercialUnlimited(sub: {
+  plan_type?: string | null
+  stripe_subscription_id?: string | null
+} | null): boolean {
+  if (!sub) return false
+  const pt = String(sub.plan_type || '').toLowerCase()
+  if (pt === 'monthly' || pt === 'annual' || pt === 'trial') return true
+  if (pt === 'free') {
+    return parseYladaFreeGrantKind(sub.stripe_subscription_id) === 'courtesy'
+  }
+  return false
+}
+
+/** @deprecated Use subscriptionRowIsMatrixSegmentCommercialUnlimited (mesmo comportamento). */
+export const subscriptionRowIsNutriCommercialUnlimited = subscriptionRowIsMatrixSegmentCommercialUnlimited
+
+/**
+ * Perfil na matriz YLADA (/pt), com assinatura ativa na área do segmento, mas sem pago/trial/cortesia.
+ * Wellness e quem não é matriz → false (regras de Freedom da matriz não se aplicam).
+ */
+export async function isMatrixFreedomTierUser(userId: string): Promise<boolean> {
+  try {
+    const { data: profile } = await supabaseAdmin
+      .from('user_profiles')
+      .select('perfil')
+      .eq('user_id', userId)
+      .maybeSingle()
+
+    const perfil = profile?.perfil as string | undefined
+    const area = perfilMatrizToSubscriptionArea(perfil)
+    if (!area) return false
+
+    const sub = await getActiveSubscription(userId, area)
+    if (!sub) return false
+    return !subscriptionRowIsMatrixSegmentCommercialUnlimited(sub)
+  } catch {
+    return false
+  }
+}
+
+/** @deprecated Use isMatrixFreedomTierUser (cobre todos os segmentos da matriz). */
+export const isNutriFreedomTierUser = isMatrixFreedomTierUser
+
+/**
  * Verifica se usuário tem benefícios “sem limite freemium” na matriz YLADA (links, Noel, WhatsApp).
- * Inclui: plano pago (monthly/annual) **ou** cortesia administrativa (`plan_type` free + `stripe_subscription_id` prefixo `free_cor_`).
- * Não inclui: free de migração (`free_mig_`) nem free legado — esses seguem limites do plano gratuito.
+ * Inclui: ylada mensal/anual/trial ou free cortesia; **ou** assinatura ativa no **segmento do perfil** (nutri, med, coach, …) equivalente a pago/trial/cortesia.
+ * Wellness não entra aqui. Não inclui: free migração/legado no segmento.
  * @see docs/SPEC-FREEMIUM-YLADA.md
  */
 export async function hasYladaProPlan(userId: string): Promise<boolean> {
   try {
-    const sub = await getActiveSubscription(userId, 'ylada')
-    if (!sub) return false
-    const planType = sub.plan_type as string | undefined
-    if (planType === 'monthly' || planType === 'annual') return true
-    if (planType === 'free') {
-      const sid = sub.stripe_subscription_id as string | undefined
-      if (parseYladaFreeGrantKind(sid) === 'courtesy') return true
-    }
-    return false
+    const yladaSub = await getActiveSubscription(userId, 'ylada')
+    if (yladaSub && activeYladaRowIsUnlimited(yladaSub)) return true
+
+    const { data: profile } = await supabaseAdmin
+      .from('user_profiles')
+      .select('perfil')
+      .eq('user_id', userId)
+      .maybeSingle()
+
+    const area = perfilMatrizToSubscriptionArea(profile?.perfil as string | undefined)
+    if (!area) return false
+
+    const segSub = await getActiveSubscription(userId, area)
+    return !!(segSub && subscriptionRowIsMatrixSegmentCommercialUnlimited(segSub))
   } catch {
     return false
   }

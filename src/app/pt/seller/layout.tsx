@@ -8,7 +8,13 @@ function isSellerPublicPath(pathname: string): boolean {
   const path = pathname.replace(/\/$/, '') || '/'
   if (path === '/pt/seller') return true
   const suffix = path.replace(/^\/pt\/seller\/?/, '') || '/'
-  return SELLER_PUBLIC.has(suffix) || suffix.startsWith('login')
+  return (
+    SELLER_PUBLIC.has(suffix) ||
+    suffix.startsWith('login') ||
+    suffix.startsWith('quiz') ||
+    suffix.startsWith('exemplo-cliente') ||
+    suffix.startsWith('apresentacao')
+  )
 }
 
 export default async function SellerLayout({ children }: { children: ReactNode }) {

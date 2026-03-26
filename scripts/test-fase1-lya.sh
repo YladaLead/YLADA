@@ -23,7 +23,7 @@ echo ""
 
 # 2. Verificar estrutura da API
 echo "2️⃣ Verificando estrutura da API..."
-API_RESPONSE=$(curl -s http://localhost:3000/api/nutri/lya/analise 2>&1)
+API_RESPONSE=$(curl -s http://localhost:3000/api/nutri/noel/analise 2>&1)
 if echo "$API_RESPONSE" | grep -q "error\|401\|403"; then
     echo -e "${YELLOW}⚠️  API retornou erro (normal se não estiver autenticado)${NC}"
     echo "   Resposta: $(echo "$API_RESPONSE" | head -c 200)"
@@ -35,8 +35,7 @@ echo ""
 # 3. Verificar arquivos implementados
 echo "3️⃣ Verificando arquivos implementados..."
 FILES=(
-    "src/components/nutri/LyaAnaliseHoje.tsx"
-    "src/app/api/nutri/lya/analise/route.ts"
+    "src/app/api/nutri/noel/analise/route.ts"
     "src/lib/nutri/parse-lya-response.ts"
     "src/types/nutri-diagnostico.ts"
     "migrations/155-atualizar-tabela-lya-analise-formato-fixo.sql"
@@ -68,19 +67,11 @@ else
 fi
 echo ""
 
-# 5. Verificar se componente usa novo formato
-echo "5️⃣ Verificando componente..."
-if grep -q "foco_prioritario\|acoes_recomendadas\|onde_aplicar\|metrica_sucesso" src/components/nutri/LyaAnaliseHoje.tsx; then
-    echo -e "${GREEN}✅ Componente usa novo formato${NC}"
-else
-    echo -e "${RED}❌ Componente não usa novo formato${NC}"
-    exit 1
-fi
-echo ""
+# 5. (LyaAnaliseHoje removido — home matriz usa Noel; API analise segue para diagnóstico/jornada.)
 
 # 6. Verificar se API usa parser
-echo "6️⃣ Verificando integração API..."
-if grep -q "parseLyaResponse\|parse-lya-response" src/app/api/nutri/lya/analise/route.ts; then
+echo "5️⃣ Verificando integração API..."
+if grep -q "parseLyaResponse\|parse-lya-response" src/app/api/nutri/noel/analise/route.ts; then
     echo -e "${GREEN}✅ API integrada com parser${NC}"
 else
     echo -e "${RED}❌ API não usa parser${NC}"
@@ -98,7 +89,7 @@ echo ""
 echo "2. Testar no navegador:"
 echo "   - Login com demo.nutri@ylada.com"
 echo "   - Acessar /pt/nutri/home"
-echo "   - Verificar card da LYA"
+echo "   - Verificar home matriz (Noel)"
 echo ""
 echo "3. Verificar console (F12) para logs de validação"
 

@@ -29,8 +29,8 @@ const NICHOS: PsiDemoNichoClienteConfig[] = [
   {
     value: 'ansiedade_rotina',
     label: 'Ansiedade e rotina',
-    tituloQuiz: 'Antes da primeira conversa com a psicóloga ou o psicólogo',
-    subtitulo: 'Algumas perguntas rápidas para organizar o que você sente. Não é avaliação clínica.',
+    tituloQuiz: 'Cabeça que não desliga e o corpo que cobra a conta?',
+    subtitulo: 'Organize o que sente em poucos toques. Não é avaliação clínica.',
     perguntas: [
       {
         id: 'p1',
@@ -73,8 +73,8 @@ const NICHOS: PsiDemoNichoClienteConfig[] = [
   {
     value: 'humor_tristeza',
     label: 'Humor baixo ou sensação de vazio',
-    tituloQuiz: 'Antes da primeira conversa com a psicóloga ou o psicólogo',
-    subtitulo: 'Perguntas para reflexão. Não substitui avaliação profissional.',
+    tituloQuiz: 'Tristeza ou vazio que você minimiza até não dar mais?',
+    subtitulo: 'Nomeie o que pesa antes da primeira conversa. Não substitui avaliação profissional.',
     perguntas: [
       {
         id: 'p1',
@@ -117,8 +117,8 @@ const NICHOS: PsiDemoNichoClienteConfig[] = [
   {
     value: 'relacionamentos',
     label: 'Relacionamentos e vínculos',
-    tituloQuiz: 'Antes da primeira conversa com a psicóloga ou o psicólogo',
-    subtitulo: 'Algumas perguntas sobre o que te trouxe até aqui.',
+    tituloQuiz: 'Mesma briga, mesmo silêncio — e você cansou de rodar o disco?',
+    subtitulo: 'Contexto afetivo em claro — menos tempo perdido no “de onde começo”.',
     perguntas: [
       {
         id: 'p1',
@@ -161,8 +161,8 @@ const NICHOS: PsiDemoNichoClienteConfig[] = [
   {
     value: 'trabalho_burnout',
     label: 'Trabalho, estudo e esgotamento',
-    tituloQuiz: 'Antes da primeira conversa com a psicóloga ou o psicólogo',
-    subtitulo: 'Reflexão sobre carga e equilíbrio. Não é laudo.',
+    tituloQuiz: 'Esgotamento que parece rotina até virar seu novo normal?',
+    subtitulo: 'Carga e equilíbrio em foco. Não é laudo.',
     perguntas: [
       {
         id: 'p1',
@@ -205,8 +205,8 @@ const NICHOS: PsiDemoNichoClienteConfig[] = [
   {
     value: 'autoestima',
     label: 'Autoestima e autoconhecimento',
-    tituloQuiz: 'Antes da primeira conversa com a psicóloga ou o psicólogo',
-    subtitulo: 'Perguntas para clarear o que você quer trabalhar.',
+    tituloQuiz: 'Autocrítica em alta e reconhecimento em falta — mesmo tentando?',
+    subtitulo: 'Diga o que quer mudar por dentro — ela já chega alinhada.',
     perguntas: [
       {
         id: 'p1',
@@ -249,8 +249,8 @@ const NICHOS: PsiDemoNichoClienteConfig[] = [
   {
     value: 'luto_mudanca',
     label: 'Luto, mudança ou fase nova',
-    tituloQuiz: 'Antes da primeira conversa com a psicóloga ou o psicólogo',
-    subtitulo: 'Um espaço para nomear o que você está vivendo.',
+    tituloQuiz: 'Mudança grande e ninguém te ensinou a atravessar isso só?',
+    subtitulo: 'Dê nome ao que está vivo agora — primeiro passo mais honesto.',
     perguntas: [
       {
         id: 'p1',

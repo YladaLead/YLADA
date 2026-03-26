@@ -23,8 +23,8 @@ const NICHOS: EsteticaDemoNichoClienteConfig[] = [
   {
     value: 'pele',
     label: 'Pele / facial',
-    tituloQuiz: 'Antes de falar com a profissional',
-    subtitulo: 'Algumas perguntas rápidas sobre sua pele.',
+    tituloQuiz: 'Rotina cheia de produto e a pele continua te incomodando?',
+    subtitulo: 'Quatro perguntas — a profissional já vê seu contexto antes de marcar.',
     perguntas: [
       {
         id: 'p1',
@@ -67,8 +67,8 @@ const NICHOS: EsteticaDemoNichoClienteConfig[] = [
   {
     value: 'cabelo',
     label: 'Cabelo / capilar',
-    tituloQuiz: 'Antes de falar com a profissional',
-    subtitulo: 'Algumas perguntas rápidas sobre seu cabelo.',
+    tituloQuiz: 'Cabelo que cai, quebra ou não obedece mesmo com tratamento?',
+    subtitulo: 'Mostre o que incomoda — ela entende a urgência antes do primeiro oi.',
     perguntas: [
       {
         id: 'p1',
@@ -111,8 +111,8 @@ const NICHOS: EsteticaDemoNichoClienteConfig[] = [
   {
     value: 'unhas',
     label: 'Unhas',
-    tituloQuiz: 'Antes de falar com a profissional',
-    subtitulo: 'Algumas perguntas rápidas sobre suas unhas.',
+    tituloQuiz: 'Unhas que lascam ou nunca ficam como você imagina?',
+    subtitulo: 'Respostas rápidas para alinhar expectativa antes de sentar na cadeira.',
     perguntas: [
       {
         id: 'p1',
@@ -155,8 +155,8 @@ const NICHOS: EsteticaDemoNichoClienteConfig[] = [
   {
     value: 'sobrancelha',
     label: 'Sobrancelha / design',
-    tituloQuiz: 'Antes de falar com a profissional',
-    subtitulo: 'Algumas perguntas rápidas sobre suas sobrancelhas.',
+    tituloQuiz: 'Sobrancelha assimétrica ou medo de errar o desenho?',
+    subtitulo: 'Ela já chega sabendo o que você quer resolver primeiro.',
     perguntas: [
       {
         id: 'p1',
@@ -199,8 +199,8 @@ const NICHOS: EsteticaDemoNichoClienteConfig[] = [
   {
     value: 'maquiagem',
     label: 'Maquiagem',
-    tituloQuiz: 'Antes de falar com a profissional',
-    subtitulo: 'Algumas perguntas rápidas sobre o que você precisa.',
+    tituloQuiz: 'Data marcada e você ainda não sabe se a make vai durar?',
+    subtitulo: 'Contexto e pele em poucos toques — menos surpresa no dia.',
     perguntas: [
       {
         id: 'p1',
@@ -243,8 +243,8 @@ const NICHOS: EsteticaDemoNichoClienteConfig[] = [
   {
     value: 'corporal',
     label: 'Corporal / contorno',
-    tituloQuiz: 'Antes de falar com a profissional',
-    subtitulo: 'Algumas perguntas rápidas sobre seu objetivo.',
+    tituloQuiz: 'Treino à risca e aquele ponto ainda te incomoda no espelho?',
+    subtitulo: 'Deixe claro o foco — o próximo passo fica mais objetivo.',
     perguntas: [
       {
         id: 'p1',

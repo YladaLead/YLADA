@@ -155,7 +155,7 @@ Me ajude com sugestões de:
 
 Seja breve e prática.`
 
-      const response = await fetch('/api/nutri/lya', {
+      const response = await fetch('/api/nutri/noel', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -166,11 +166,11 @@ Seja breve e prática.`
       if (response.ok) {
         setLyaSuggestions(data.response || 'Não consegui gerar sugestões no momento.')
       } else {
-        setLyaSuggestions('Erro ao carregar sugestões da LYA.')
+        setLyaSuggestions('Erro ao carregar sugestões do Noel.')
       }
     } catch (error) {
-      console.error('Erro ao pedir sugestões LYA:', error)
-      setLyaSuggestions('Erro ao conectar com a LYA.')
+      console.error('Erro ao pedir sugestões (Noel):', error)
+      setLyaSuggestions('Erro ao conectar com o Noel.')
     } finally {
       setLoadingLya(false)
     }
@@ -204,7 +204,7 @@ Me forneça:
 
 Seja profissional, clara e objetiva.`
 
-      const response = await fetch('/api/nutri/lya', {
+      const response = await fetch('/api/nutri/noel', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -219,7 +219,7 @@ Seja profissional, clara e objetiva.`
         }))
       }
     } catch (error) {
-      console.error('Erro ao pedir interpretação LYA:', error)
+      console.error('Erro ao pedir interpretação (Noel):', error)
     } finally {
       setLoadingLya(false)
     }

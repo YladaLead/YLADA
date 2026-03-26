@@ -7,6 +7,7 @@ import Image from 'next/image'
 import { useAuth } from '@/contexts/AuthContext'
 import { getCachedSubscription, setCachedSubscription } from '@/lib/subscription-cache'
 import { getAccessRule, getRenewOrCheckoutPath, getHomePath, getAreaFromPath } from '@/lib/access-rules'
+import { isPerfilMatrizYlada } from '@/lib/admin-matriz-constants'
 
 interface RequireSubscriptionProps {
   children: React.ReactNode
@@ -31,6 +32,9 @@ export default function RequireSubscription({
   const [hasSubscription, setHasSubscription] = useState(false)
   const [canBypass, setCanBypass] = useState(false)
   const [subscriptionData, setSubscriptionData] = useState<any>(null)
+  /** Matriz YLADA: `pro` = pago/trial/cortesia; `freedom` = free com limites do freemium (links, WhatsApp, Noel). */
+  const [matrixCommercialTier, setMatrixCommercialTier] = useState<'pro' | 'freedom' | 'none' | null>(null)
+  const [matrixUpgradePath, setMatrixUpgradePath] = useState<string>('/pt/nutri/checkout')
   const [profileCheckTimeout, setProfileCheckTimeout] = useState(false)
   const [showLoading, setShowLoading] = useState(true)
   const [hasRedirected, setHasRedirected] = useState(false)
@@ -208,8 +212,24 @@ export default function RequireSubscription({
           // Usar requestIdleCallback para não bloquear renderização
           if (data.hasActiveSubscription) {
             const fetchDetails = () => {
+              if (isPerfilMatrizYlada(userProfile?.perfil)) {
+                fetch('/api/matrix/commercial-tier', { credentials: 'include', headers })
+                  .then((r) => (r.ok ? r.json() : null))
+                  .then((tierData) => {
+                    if (!isMounted || !tierData?.onMatrix) return
+                    if (tierData.matrixCommercialTier) {
+                      setMatrixCommercialTier(tierData.matrixCommercialTier)
+                    }
+                    if (typeof tierData.upgradePath === 'string' && tierData.upgradePath) {
+                      setMatrixUpgradePath(tierData.upgradePath)
+                    }
+                  })
+                  .catch(() => {})
+              }
+
               fetch(`/api/${area}/subscription`, {
                 credentials: 'include',
+                headers,
               })
                 .then(subResponse => {
                   if (subResponse.ok) {
@@ -372,9 +392,19 @@ export default function RequireSubscription({
       (!isMigrated && daysUntilExpiry <= 7)
     )
     
+    const showFreedomBanner =
+      isPerfilMatrizYlada(userProfile?.perfil) &&
+      matrixCommercialTier === 'freedom' &&
+      !canBypass
+
     return (
-      <div className={shouldShowBanner && !canBypass ? 'pb-24 sm:pb-20' : ''}>
+      <div
+        className={
+          (shouldShowBanner && !canBypass) || showFreedomBanner ? 'pb-24 sm:pb-20' : ''
+        }
+      >
         {children}
+        {showFreedomBanner && <MatrixFreedomPlanBanner upgradeHref={matrixUpgradePath} />}
         {/* Sempre renderizar banner, mas controlar visibilidade internamente */}
         <SubscriptionExpiryBanner 
           daysUntilExpiry={daysUntilExpiry} 
@@ -464,6 +494,30 @@ export default function RequireSubscription({
   // Este return nunca deve ser alcançado se a lógica acima estiver correta
   // Mas é necessário para TypeScript
   return null
+}
+
+/** Aviso fixo para quem está no plano Freedom na matriz YLADA (freemium: diagnósticos ativos, WhatsApp, Noel). */
+function MatrixFreedomPlanBanner({ upgradeHref }: { upgradeHref: string }) {
+  return (
+    <div
+      className="fixed bottom-0 left-0 right-0 z-[60] px-3 py-2.5 bg-amber-50 border-t border-amber-200 text-amber-950 text-sm shadow-[0_-4px_12px_rgba(0,0,0,0.06)]"
+      role="status"
+    >
+      <div className="max-w-4xl mx-auto flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+        <p className="leading-snug">
+          <span className="font-semibold">Plano Freedom:</span> na matriz valem os limites do plano gratuito
+          (diagnóstico ativo, contatos no WhatsApp por mês e análises estratégicas do Noel). No Pro esses tetos
+          são ampliados ou removidos.
+        </p>
+        <Link
+          href={upgradeHref}
+          className="shrink-0 inline-flex items-center justify-center px-3 py-1.5 rounded-md bg-amber-700 text-white text-xs font-semibold hover:bg-amber-800 transition-colors"
+        >
+          Ver plano Pro
+        </Link>
+      </div>
+    </div>
+  )
 }
 
 /**

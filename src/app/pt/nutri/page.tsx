@@ -1,12 +1,26 @@
+import { Suspense } from 'react'
 import type { Metadata } from 'next'
-import NutriEntradaSocraticaContent from './NutriEntradaSocraticaContent'
+import NutriQuizPublicContent from './quiz/NutriQuizPublicContent'
 
 export const metadata: Metadata = {
   title: 'Nutri | YLADA',
   description:
-    'Preço, WhatsApp e paciente que some? Em poucos passos: mais clareza antes da consulta e menos esforço pra você, com o Noel.',
+    'Menos explicação no WhatsApp, pacientes mais preparados: quiz rápido e fluxo como seu paciente veria, com o Noel.',
 }
 
+function NutriEntradaFallback() {
+  return (
+    <div className="min-h-[100dvh] flex items-center justify-center bg-white">
+      <p className="text-gray-500 text-sm">Carregando…</p>
+    </div>
+  )
+}
+
+/** Entrada pública matriz — paridade com Estética (Suspense + quiz). */
 export default function NutriPublicEntryPage() {
-  return <NutriEntradaSocraticaContent />
+  return (
+    <Suspense fallback={<NutriEntradaFallback />}>
+      <NutriQuizPublicContent entradaComNicho />
+    </Suspense>
+  )
 }

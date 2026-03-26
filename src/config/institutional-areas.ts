@@ -33,9 +33,14 @@ export const INSTITUTIONAL_AREAS: InstitutionalArea[] = [
   // Vendedores
   { id: 'nutra', path: '/pt/nutra', status: 'ready', translationKey: 'nutra' },
   { id: 'perfumaria', path: '/pt/perfumaria', status: 'ready', translationKey: 'perfumaria' },
+  {
+    id: 'seller',
+    path: '/pt/seller',
+    status: 'ready',
+    translationKey: 'vendedores-geral',
+  },
   // Em breve
   { id: 'profissional-liberal', path: '/pt/solicitar-acesso?area=profissional-liberal', status: 'construction', translationKey: 'profissional-liberal' },
-  { id: 'vendedores-geral', path: '/pt/solicitar-acesso?area=vendedores-geral', status: 'construction', translationKey: 'vendedores-geral' },
 ]
 
 /** Mapeamento área → path base (sem locale). Landings em /area, login em /area/login. */
@@ -50,7 +55,9 @@ const AREA_BASE_PATHS: Record<string, string> = {
   fitness: '/fitness',
   nutra: '/nutra',
   perfumaria: '/perfumaria',
+  seller: '/seller',
   'profissional-liberal': '/solicitar-acesso?area=profissional-liberal',
+  /** Legado: solicitar acesso por interesse */
   'vendedores-geral': '/solicitar-acesso?area=vendedores-geral',
 }
 

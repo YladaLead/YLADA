@@ -4,7 +4,7 @@
  *
  * Produto: **YLADA** = todos os segmentos abaixo + futuros (um motor: POST /api/ylada/noel + `area`).
  * **Wellness** (Herbalife) fica fora desta matriz — APIs em /api/wellness/*.
- * Nutri continua com rotas próprias de domínio (/api/nutri/*) para clientes, LYA, etc.; o **Noel mentor** é unificado via YLADA.
+ * Nutri mantém `/api/nutri/*` para clientes, avaliações e fluxos legados; o **mentor na matriz** é o Noel (`POST /api/ylada/noel`).
  * @see docs/MATRIZ-CENTRAL-CRONOGRAMA.md
  */
 export type YladaSegmentCode = 'ylada' | 'med' | 'psi' | 'psicanalise' | 'odonto' | 'nutra' | 'nutri' | 'coach' | 'seller' | 'perfumaria' | 'estetica' | 'fitness'
@@ -33,14 +33,27 @@ export interface YladaAreaConfig {
 /** Matriz central: pathPrefix /pt (idioma + funcionalidade; sem /ylada no path). */
 export const YLADA_AREAS: YladaAreaConfig[] = [
   { codigo: 'ylada', segment_code: 'ylada', label: 'YLADA', pathPrefix: '/pt' },
-  { codigo: 'med', segment_code: 'med', label: 'Médicos', pathPrefix: '/pt/med' },
-  { codigo: 'psi', segment_code: 'psi', label: 'Psicologia', pathPrefix: '/pt/psi' },
-  { codigo: 'psicanalise', segment_code: 'psicanalise', label: 'Psicanálise', pathPrefix: '/pt/psicanalise' },
-  { codigo: 'odonto', segment_code: 'odonto', label: 'Odontologia', pathPrefix: '/pt/odonto' },
-  { codigo: 'nutra', segment_code: 'nutra', label: 'Nutra', pathPrefix: '/pt/nutra' },
-  { codigo: 'coach', segment_code: 'coach', label: 'Coach', pathPrefix: '/pt/coach' },
-  { codigo: 'perfumaria', segment_code: 'perfumaria', label: 'Perfumaria', pathPrefix: '/pt/perfumaria' },
-  { codigo: 'seller', segment_code: 'seller', label: 'Vendedores', pathPrefix: '/pt/seller' },
+  { codigo: 'med', segment_code: 'med', label: 'Médicos', pathPrefix: '/pt/med', publicEntry: 'standard' },
+  { codigo: 'psi', segment_code: 'psi', label: 'Psicologia', pathPrefix: '/pt/psi', publicEntry: 'standard' },
+  {
+    codigo: 'psicanalise',
+    segment_code: 'psicanalise',
+    label: 'Psicanálise',
+    pathPrefix: '/pt/psicanalise',
+    publicEntry: 'standard',
+  },
+  { codigo: 'odonto', segment_code: 'odonto', label: 'Odontologia', pathPrefix: '/pt/odonto', publicEntry: 'standard' },
+  { codigo: 'nutra', segment_code: 'nutra', label: 'Nutra', pathPrefix: '/pt/nutra', publicEntry: 'standard' },
+  { codigo: 'coach', segment_code: 'coach', label: 'Coach', pathPrefix: '/pt/coach', publicEntry: 'standard' },
+  {
+    codigo: 'perfumaria',
+    segment_code: 'perfumaria',
+    label: 'Perfumaria',
+    pathPrefix: '/pt/perfumaria',
+    publicEntry: 'standard',
+  },
+  /** Funil imparcial para vendedores em geral. Segmentos com jornada própria (ex.: Wellness) usam rota dedicada. */
+  { codigo: 'seller', segment_code: 'seller', label: 'Vendedores', pathPrefix: '/pt/seller', publicEntry: 'standard' },
   {
     codigo: 'estetica',
     segment_code: 'estetica',
@@ -48,8 +61,14 @@ export const YLADA_AREAS: YladaAreaConfig[] = [
     pathPrefix: '/pt/estetica',
     publicEntry: 'standard',
   },
-  { codigo: 'fitness', segment_code: 'fitness', label: 'Fitness', pathPrefix: '/pt/fitness' },
-  { codigo: 'nutri', segment_code: 'nutri', label: 'Nutri', pathPrefix: '/pt/nutri' },
+  { codigo: 'fitness', segment_code: 'fitness', label: 'Fitness', pathPrefix: '/pt/fitness', publicEntry: 'standard' },
+  {
+    codigo: 'nutri',
+    segment_code: 'nutri',
+    label: 'Nutri',
+    pathPrefix: '/pt/nutri',
+    publicEntry: 'standard',
+  },
 ]
 
 /**

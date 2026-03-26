@@ -6,6 +6,20 @@ import OrientacaoTecnica from '@/components/wellness/OrientacaoTecnica'
 import FormatarMensagem from '@/components/wellness/FormatarMensagem'
 import { getChatbotConfig, NOEL_MENU_PRIMEIRA_MSG } from '@/lib/nutri-chatbots'
 import type { OrientacaoResposta } from '@/types/orientation'
+import {
+  fetchNutriMatrixNoel,
+  matrixNoelLimitMessageFromResponse,
+  type NoelConversationTurn,
+} from '@/lib/nutri-matrix-noel-client'
+
+function noelHistoryFromMensagens(mensagens: Mensagem[]): NoelConversationTurn[] {
+  return mensagens
+    .filter((m) => m.tipo !== 'sistema' || !m.orientacao)
+    .map((m) => ({
+      role: m.tipo === 'usuario' ? ('user' as const) : ('assistant' as const),
+      content: m.texto,
+    }))
+}
 
 interface Mensagem {
   id: string
@@ -22,7 +36,7 @@ interface NutriChatWidgetProps {
 
 export default function NutriChatWidget({ chatbotId, defaultOpen = false }: NutriChatWidgetProps = {} as NutriChatWidgetProps) {
   const [aberto, setAberto] = useState(defaultOpen)
-  // LYA sempre inicia como Assistente de Formação (ela conduz tudo)
+  // Noel (matriz, segmento nutri) — assistente de formação / GSAL conforme chatbotId
   const chatbotSelecionado = chatbotId || 'formacao'
   const chatbotConfig = getChatbotConfig(chatbotSelecionado)
   
@@ -140,53 +154,31 @@ export default function NutriChatWidget({ chatbotId, defaultOpen = false }: Nutr
       // Se for pergunta sobre jornada/formacao, usar API da LYA
       if (isPerguntaJornada(pergunta)) {
         try {
-          console.log('🚀 [LYA] Chamando API da LYA para pergunta sobre jornada:', pergunta)
-          
-          const response = await authenticatedFetch('/api/nutri/lya', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              message: pergunta,
-              conversationHistory: mensagens
-                .filter(m => m.tipo !== 'sistema' || !m.orientacao)
-                .map(m => ({
-                  role: m.tipo === 'usuario' ? 'user' : 'assistant',
-                  content: m.texto
-                }))
-            })
-          })
-
-          console.log('📥 [LYA] Resposta recebida, status:', response.status, response.ok)
+          const history = noelHistoryFromMensagens(mensagens)
+          const { response, data } = await fetchNutriMatrixNoel(authenticatedFetch, pergunta, history)
 
           if (!response.ok) {
-            const errorData = await response.json().catch(() => ({}))
-            console.error('❌ [LYA] Erro na resposta:', errorData)
-            const errorMessage = errorData.details || errorData.message || errorData.error || 'Erro ao buscar resposta do Noel'
+            const lim = matrixNoelLimitMessageFromResponse(response, data)
+            if (lim) throw new Error(lim)
+            const errorMessage =
+              (data.details as string) ||
+              (data.message as string) ||
+              (data.error as string) ||
+              'Erro ao buscar resposta do Noel'
             throw new Error(errorMessage)
           }
 
-          const data = await response.json()
-          console.log('📦 [LYA] Dados recebidos:', { 
-            hasResponse: !!data.response, 
-            hasMessage: !!data.message, 
-            hasError: !!data.error,
-            keys: Object.keys(data)
-          })
-          
-          // Verificar se há erro na resposta
           if (data.error) {
-            console.error('❌ [LYA] Erro nos dados:', data.error)
-            throw new Error(data.details || data.message || data.error)
-          }
-          
-          const respostaLya = data.response || data.message
-          
-          if (!respostaLya || respostaLya.trim() === '') {
-            console.error('❌ [LYA] Resposta vazia')
-            throw new Error('O Noel não retornou uma resposta válida')
+            throw new Error(
+              (data.details as string) || (data.message as string) || String(data.error)
+            )
           }
 
-          console.log('✅ [LYA] Resposta válida recebida, tamanho:', respostaLya.length)
+          const respostaLya = (data.response as string) || (data.message as string)
+
+          if (!respostaLya || String(respostaLya).trim() === '') {
+            throw new Error('O Noel não retornou uma resposta válida')
+          }
 
           const mensagemSistema: Mensagem = {
             id: (Date.now() + 1).toString(),
@@ -197,8 +189,7 @@ export default function NutriChatWidget({ chatbotId, defaultOpen = false }: Nutr
           setMensagens(prev => [...prev, mensagemSistema])
           return
         } catch (error: any) {
-          console.error('❌ [LYA] Erro completo:', error)
-          // Se der erro na LYA, mostrar mensagem mais amigável
+          console.error('❌ [Noel Nutri] Erro na trilha/jornada:', error)
           const mensagemErro: Mensagem = {
             id: (Date.now() + 1).toString(),
             texto: `Ops! Tive um problema ao processar sua pergunta sobre a trilha. 😅\n\n**Erro:** ${error.message || 'Erro desconhecido'}\n\n**Mas não se preocupe!** Você pode:\n\n🔄 **Tentar novamente** — Às vezes é só um problema momentâneo\n📘 **Acessar diretamente** — Vá em "Trilha Empresarial" no menu para ver seu progresso\n💬 **Falar com nossa equipe** — Entre em contato pelo WhatsApp se precisar de ajuda\n\nDesculpe pelo inconveniente! 😊`,
@@ -216,35 +207,26 @@ export default function NutriChatWidget({ chatbotId, defaultOpen = false }: Nutr
       )
 
       if (!response.ok) {
-        // Se falhar, tentar LYA como fallback
-        console.log('⚠️ [LYA] Orientação técnica falhou, tentando LYA como fallback')
-        const responseLya = await authenticatedFetch('/api/nutri/lya', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            message: pergunta,
-            conversationHistory: mensagens
-              .filter(m => m.tipo !== 'sistema' || !m.orientacao)
-              .map(m => ({
-                role: m.tipo === 'usuario' ? 'user' : 'assistant',
-                content: m.texto
-              }))
-          })
-        })
-
-        if (responseLya.ok) {
-          const dataLya = await responseLya.json()
-          if (!dataLya.error && dataLya.response) {
-            const respostaLya = dataLya.response || dataLya.message
-            const mensagemSistema: Mensagem = {
-              id: (Date.now() + 1).toString(),
-              texto: respostaLya,
-              tipo: 'sistema',
-              timestamp: new Date()
-            }
-            setMensagens(prev => [...prev, mensagemSistema])
-            return
+        const history = noelHistoryFromMensagens(mensagens)
+        const { response: rNoel, data: dNoel } = await fetchNutriMatrixNoel(
+          authenticatedFetch,
+          pergunta,
+          history
+        )
+        if (!rNoel.ok) {
+          const lim = matrixNoelLimitMessageFromResponse(rNoel, dNoel)
+          if (lim) throw new Error(lim)
+        }
+        if (rNoel.ok && !dNoel.error && (dNoel.response || dNoel.message)) {
+          const respostaLya = (dNoel.response as string) || (dNoel.message as string)
+          const mensagemSistema: Mensagem = {
+            id: (Date.now() + 1).toString(),
+            texto: respostaLya,
+            tipo: 'sistema',
+            timestamp: new Date(),
           }
+          setMensagens((prev) => [...prev, mensagemSistema])
+          return
         }
         throw new Error('Erro ao buscar orientação')
       }
@@ -258,35 +240,26 @@ export default function NutriChatWidget({ chatbotId, defaultOpen = false }: Nutr
         const temPalavraJornada = palavrasJornadaNaPergunta.some(p => pergunta.toLowerCase().includes(p))
         
         if (temPalavraJornada) {
-          // Provavelmente é pergunta sobre jornada, não técnica - tentar LYA
-          console.log('⚠️ [LYA] Pergunta tem palavras de jornada mas encontrou orientação técnica, tentando LYA')
-          const responseLya = await authenticatedFetch('/api/nutri/lya', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              message: pergunta,
-              conversationHistory: mensagens
-                .filter(m => m.tipo !== 'sistema' || !m.orientacao)
-                .map(m => ({
-                  role: m.tipo === 'usuario' ? 'user' : 'assistant',
-                  content: m.texto
-                }))
-            })
-          })
-
-          if (responseLya.ok) {
-            const dataLya = await responseLya.json()
-            if (!dataLya.error && dataLya.response) {
-              const respostaLya = dataLya.response || dataLya.message
-              const mensagemSistema: Mensagem = {
-                id: (Date.now() + 1).toString(),
-                texto: respostaLya,
-                tipo: 'sistema',
-                timestamp: new Date()
-              }
-              setMensagens(prev => [...prev, mensagemSistema])
-              return
+          const history = noelHistoryFromMensagens(mensagens)
+          const { response: rNoel, data: dNoel } = await fetchNutriMatrixNoel(
+            authenticatedFetch,
+            pergunta,
+            history
+          )
+          if (!rNoel.ok) {
+            const lim = matrixNoelLimitMessageFromResponse(rNoel, dNoel)
+            if (lim) throw new Error(lim)
+          }
+          if (rNoel.ok && !dNoel.error && (dNoel.response || dNoel.message)) {
+            const respostaLya = (dNoel.response as string) || (dNoel.message as string)
+            const mensagemSistema: Mensagem = {
+              id: (Date.now() + 1).toString(),
+              texto: respostaLya,
+              tipo: 'sistema',
+              timestamp: new Date(),
             }
+            setMensagens((prev) => [...prev, mensagemSistema])
+            return
           }
         }
         
@@ -300,35 +273,26 @@ export default function NutriChatWidget({ chatbotId, defaultOpen = false }: Nutr
         }
         setMensagens(prev => [...prev, mensagemSistema])
       } else {
-        // Não encontrou orientação técnica - tentar LYA como fallback
-        console.log('⚠️ [LYA] Não encontrou orientação técnica, tentando LYA como fallback')
-        const responseLya = await authenticatedFetch('/api/nutri/lya', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            message: pergunta,
-            conversationHistory: mensagens
-              .filter(m => m.tipo !== 'sistema' || !m.orientacao)
-              .map(m => ({
-                role: m.tipo === 'usuario' ? 'user' : 'assistant',
-                content: m.texto
-              }))
-          })
-        })
-
-        if (responseLya.ok) {
-          const dataLya = await responseLya.json()
-          if (!dataLya.error && dataLya.response) {
-            const respostaLya = dataLya.response || dataLya.message
-            const mensagemSistema: Mensagem = {
-              id: (Date.now() + 1).toString(),
-              texto: respostaLya,
-              tipo: 'sistema',
-              timestamp: new Date()
-            }
-            setMensagens(prev => [...prev, mensagemSistema])
-            return
+        const history = noelHistoryFromMensagens(mensagens)
+        const { response: rNoel, data: dNoel } = await fetchNutriMatrixNoel(
+          authenticatedFetch,
+          pergunta,
+          history
+        )
+        if (!rNoel.ok) {
+          const lim = matrixNoelLimitMessageFromResponse(rNoel, dNoel)
+          if (lim) throw new Error(lim)
+        }
+        if (rNoel.ok && !dNoel.error && (dNoel.response || dNoel.message)) {
+          const respostaLya = (dNoel.response as string) || (dNoel.message as string)
+          const mensagemSistema: Mensagem = {
+            id: (Date.now() + 1).toString(),
+            texto: respostaLya,
+            tipo: 'sistema',
+            timestamp: new Date(),
           }
+          setMensagens((prev) => [...prev, mensagemSistema])
+          return
         }
         
         // Fallback final

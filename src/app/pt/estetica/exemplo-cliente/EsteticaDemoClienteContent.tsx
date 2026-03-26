@@ -163,6 +163,10 @@ export default function EsteticaDemoClienteContent() {
               <p>já mais decidida</p>
               <p className="text-gray-900">e muito mais pronta pra fechar</p>
             </div>
+            <p className="text-sm text-gray-700 font-medium leading-relaxed max-w-md mx-auto pt-1">
+              Pelas respostas dela, ela fica com mais clareza, mais decidida a mudar o que precisa e com mais vontade de
+              te chamar no WhatsApp pra fechar com você.
+            </p>
           </div>
 
           <div

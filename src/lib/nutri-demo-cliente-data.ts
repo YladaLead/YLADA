@@ -28,8 +28,8 @@ const NICHOS: NutriDemoNichoClienteConfig[] = [
   {
     value: 'emagrecimento',
     label: 'Emagrecimento / composição',
-    tituloQuiz: 'Antes de falar com a nutricionista',
-    subtitulo: 'Algumas perguntas rápidas sobre seu objetivo.',
+    tituloQuiz: 'Por que você não emagrece mesmo se cuidando?',
+    subtitulo: 'Quatro toques — a nutricionista entende seu cenário antes do primeiro contato.',
     perguntas: [
       {
         id: 'p1',
@@ -72,8 +72,8 @@ const NICHOS: NutriDemoNichoClienteConfig[] = [
   {
     value: 'ganho_massa',
     label: 'Ganho de massa / hipertrofia',
-    tituloQuiz: 'Antes de falar com a nutricionista',
-    subtitulo: 'Algumas perguntas rápidas sobre treino e alimentação.',
+    tituloQuiz: 'Treina firme e o corpo não acompanha o esforço?',
+    subtitulo: 'Respostas rápidas para mostrar onde está o gargalo — antes da consulta.',
     perguntas: [
       {
         id: 'p1',
@@ -116,8 +116,8 @@ const NICHOS: NutriDemoNichoClienteConfig[] = [
   {
     value: 'reeducacao',
     label: 'Reeducação alimentar',
-    tituloQuiz: 'Antes de falar com a nutricionista',
-    subtitulo: 'Algumas perguntas rápidas sobre hábitos.',
+    tituloQuiz: 'Toda segunda você recomeça e na quarta já desanimou?',
+    subtitulo: 'Organize o padrão em instantes — ela chega sabendo por onde puxar.',
     perguntas: [
       {
         id: 'p1',
@@ -160,8 +160,8 @@ const NICHOS: NutriDemoNichoClienteConfig[] = [
   {
     value: 'esporte',
     label: 'Esporte e performance',
-    tituloQuiz: 'Antes de falar com a nutricionista',
-    subtitulo: 'Algumas perguntas rápidas sobre treino e nutrição.',
+    tituloQuiz: 'Performance travada pode estar no prato, não só no treino.',
+    subtitulo: 'Mostre em poucos cliques o que você quer otimizar para o seu esporte.',
     perguntas: [
       {
         id: 'p1',
@@ -204,8 +204,8 @@ const NICHOS: NutriDemoNichoClienteConfig[] = [
   {
     value: 'gestante',
     label: 'Gestante / pós-parto',
-    tituloQuiz: 'Antes de falar com a nutricionista',
-    subtitulo: 'Algumas perguntas rápidas sobre essa fase.',
+    tituloQuiz: 'Gravidez ou pós-parto: quer comer certo sem viver com medo de errar?',
+    subtitulo: 'Contexto claro antes da primeira conversa — com segurança e sem achismo.',
     perguntas: [
       {
         id: 'p1',
@@ -248,8 +248,8 @@ const NICHOS: NutriDemoNichoClienteConfig[] = [
   {
     value: 'clinico',
     label: 'Saúde clínica (diabetes, lipídios, etc.)',
-    tituloQuiz: 'Antes de falar com a nutricionista',
-    subtitulo: 'Algumas perguntas rápidas sobre seu cuidado.',
+    tituloQuiz: 'Exames alterados e ninguém te explicou o plano no prato?',
+    subtitulo: 'Priorize o que importa — ela organiza o primeiro passo com você.',
     perguntas: [
       {
         id: 'p1',

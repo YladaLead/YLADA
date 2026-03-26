@@ -29,8 +29,8 @@ const NICHOS: CoachDemoNichoClienteConfig[] = [
   {
     value: 'carreira_transicao',
     label: 'Carreira ou transição profissional',
-    tituloQuiz: 'Antes da primeira conversa com o coach ou a coach',
-    subtitulo: 'Organizar o que você busca. Não é recrutamento nem promessa de vaga.',
+    tituloQuiz: 'Troca de emprego na cabeça há meses e o próximo passo sumiu?',
+    subtitulo: 'Clareie foco antes da conversa. Não é recrutamento nem promessa de vaga.',
     perguntas: [
       {
         id: 'p1',
@@ -73,8 +73,8 @@ const NICHOS: CoachDemoNichoClienteConfig[] = [
   {
     value: 'habitos_bem_estar',
     label: 'Hábitos, energia e bem-estar',
-    tituloQuiz: 'Antes da primeira conversa com o coach ou a coach',
-    subtitulo: 'Rotina e prioridades. Não é plano médico nem nutricional.',
+    tituloQuiz: 'Boa intenção na segunda, culpa no domingo — o ciclo te cansa?',
+    subtitulo: 'Rotina real, não discurso. Não é plano médico nem nutricional.',
     perguntas: [
       {
         id: 'p1',
@@ -117,8 +117,8 @@ const NICHOS: CoachDemoNichoClienteConfig[] = [
   {
     value: 'relacionamentos',
     label: 'Relacionamentos e limites',
-    tituloQuiz: 'Antes da primeira conversa com o coach ou a coach',
-    subtitulo: 'Autonomia e comunicação. Não substitui terapia de casal ou trauma.',
+    tituloQuiz: 'Conversa difícil adiada virou elefante na sala?',
+    subtitulo: 'Autonomia e comunicação em foco. Não substitui terapia de casal ou trauma.',
     perguntas: [
       {
         id: 'p1',
@@ -161,8 +161,8 @@ const NICHOS: CoachDemoNichoClienteConfig[] = [
   {
     value: 'empreendedor',
     label: 'Empreendedor ou projeto próprio',
-    tituloQuiz: 'Antes da primeira conversa com o coach ou a coach',
-    subtitulo: 'Foco e decisões. Não é consultoria financeira nem jurídica.',
+    tituloQuiz: 'Ideia boa na cabeça e execução que escorrega pela lateral?',
+    subtitulo: 'Decisão e prioridade antes do call. Não é consultoria financeira nem jurídica.',
     perguntas: [
       {
         id: 'p1',
@@ -205,8 +205,8 @@ const NICHOS: CoachDemoNichoClienteConfig[] = [
   {
     value: 'autoconfianca',
     label: 'Autoconfiança e comunicação',
-    tituloQuiz: 'Antes da primeira conversa com o coach ou a coach',
-    subtitulo: 'Presença e voz. Não é tratamento para ansiedade clínica.',
+    tituloQuiz: 'Medo de parecer incapaz mesmo sabendo o que faz?',
+    subtitulo: 'Presença e voz com honestidade. Não é tratamento para ansiedade clínica.',
     perguntas: [
       {
         id: 'p1',
@@ -249,8 +249,8 @@ const NICHOS: CoachDemoNichoClienteConfig[] = [
   {
     value: 'proposito',
     label: 'Propósito e sentido',
-    tituloQuiz: 'Antes da primeira conversa com o coach ou a coach',
-    subtitulo: 'Direção e valores. Não promete respostas prontas sobre a vida.',
+    tituloQuiz: 'Sucesso por fora e vazio por dentro — e você não sabe nomear?',
+    subtitulo: 'Direção e valores em poucos toques. Não promete respostas prontas sobre a vida.',
     perguntas: [
       {
         id: 'p1',

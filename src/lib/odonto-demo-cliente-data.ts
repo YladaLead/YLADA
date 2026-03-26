@@ -28,8 +28,8 @@ const NICHOS: OdontoDemoNichoClienteConfig[] = [
   {
     value: 'clareamento',
     label: 'Clareamento / estética do sorriso',
-    tituloQuiz: 'Antes de falar com o dentista',
-    subtitulo: 'Algumas perguntas rápidas sobre o que você busca.',
+    tituloQuiz: 'Sorriso que te incomoda na foto ou no espelho?',
+    subtitulo: 'Quatro toques — o dentista já sabe o que priorizar na conversa.',
     perguntas: [
       {
         id: 'p1',
@@ -72,8 +72,8 @@ const NICHOS: OdontoDemoNichoClienteConfig[] = [
   {
     value: 'implantes',
     label: 'Implantes / reposição de dentes',
-    tituloQuiz: 'Antes de falar com o dentista',
-    subtitulo: 'Algumas perguntas rápidas sobre sua situação.',
+    tituloQuiz: 'Buraco na mastigação ou prótese que atrapalha — e você adiando?',
+    subtitulo: 'Organize o caso antes do primeiro contato; menos ida e volta.',
     perguntas: [
       {
         id: 'p1',
@@ -116,8 +116,8 @@ const NICHOS: OdontoDemoNichoClienteConfig[] = [
   {
     value: 'ortodontia',
     label: 'Ortodontia (aparelho / alinhadores)',
-    tituloQuiz: 'Antes de falar com o dentista',
-    subtitulo: 'Algumas perguntas rápidas sobre alinhamento.',
+    tituloQuiz: 'Dente torto ou mordida que cansa e você não sabe por onde começar?',
+    subtitulo: 'Mostre expectativa e rotina — a avaliação fica mais direta.',
     perguntas: [
       {
         id: 'p1',
@@ -160,8 +160,9 @@ const NICHOS: OdontoDemoNichoClienteConfig[] = [
   {
     value: 'dor_urgencia',
     label: 'Dor ou urgência',
-    tituloQuiz: 'Antes de falar com o dentista',
-    subtitulo: 'Algumas perguntas rápidas para orientar o primeiro contato.',
+    tituloQuiz: 'Dor na boca não combina com “vou ver depois”.',
+    subtitulo:
+      'Ajuda a clínica a te orientar rápido. Dor forte, inchaço grande ou trauma: busque atendimento presencial urgente.',
     perguntas: [
       {
         id: 'p1',
@@ -204,8 +205,8 @@ const NICHOS: OdontoDemoNichoClienteConfig[] = [
   {
     value: 'prevencao',
     label: 'Prevenção e check-up',
-    tituloQuiz: 'Antes de falar com o dentista',
-    subtitulo: 'Algumas perguntas rápidas sobre rotina.',
+    tituloQuiz: 'Check-up bucal virou “um dia desses” há meses?',
+    subtitulo: 'Prevenção em poucos cliques — agenda com propósito, não por impulso.',
     perguntas: [
       {
         id: 'p1',
@@ -248,8 +249,8 @@ const NICHOS: OdontoDemoNichoClienteConfig[] = [
   {
     value: 'saude_bucal',
     label: 'Gengiva, hálito ou sensibilidade',
-    tituloQuiz: 'Antes de falar com o dentista',
-    subtitulo: 'Algumas perguntas rápidas sobre sintomas.',
+    tituloQuiz: 'Hálito, sangrar na escova ou sensibilidade que você já normalizou?',
+    subtitulo: 'Nomeie o incômodo — o profissional prioriza antes de você sentar no consultório.',
     perguntas: [
       {
         id: 'p1',

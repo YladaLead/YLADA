@@ -1,11 +1,26 @@
-'use client'
+import { Suspense } from 'react'
+import type { Metadata } from 'next'
+import SellerQuizPublicContent from './quiz/SellerQuizPublicContent'
 
-/**
- * Landing YLADA para Vendedores — mesma estrutura da home (dor em destaque, quiz, carrossel, seções).
- * Fluxo: /pt/seller → diagnóstico com area=5 (sem perguntar área) → /pt/seller/login ou /pt/seller/home se logado.
- */
-import SellerInstitutionalContent from './SellerInstitutionalContent'
+export const metadata: Metadata = {
+  title: 'Vendedores | YLADA',
+  description:
+    'Para quem vende de qualquer forma: quiz e exemplo de fluxo antes do WhatsApp. Imparcial entre ramos. Jornada Wellness: menu Wellness no app.',
+}
 
-export default function SellerLandingPage() {
-  return <SellerInstitutionalContent />
+function SellerEntradaFallback() {
+  return (
+    <div className="min-h-[100dvh] flex items-center justify-center bg-white">
+      <p className="text-gray-500 text-sm">Carregando…</p>
+    </div>
+  )
+}
+
+/** Entrada matriz — funil genérico de vendedor; sem acoplamento a marca/rede. Landing longa: /pt/seller/apresentacao */
+export default function SellerPublicEntryPage() {
+  return (
+    <Suspense fallback={<SellerEntradaFallback />}>
+      <SellerQuizPublicContent entradaComNicho />
+    </Suspense>
+  )
 }

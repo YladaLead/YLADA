@@ -28,8 +28,8 @@ const NICHOS: NutraDemoNichoClienteConfig[] = [
   {
     value: 'emagrecimento',
     label: 'Emagrecimento / composição',
-    tituloQuiz: 'Antes de falar com quem te indica',
-    subtitulo: 'Algumas perguntas rápidas sobre o que você busca.',
+    tituloQuiz: 'Shake e promessa milagrosa e o efeito sanfona continua?',
+    subtitulo: 'Quem te indica entende seu caso em segundos — responda rápido.',
     perguntas: [
       {
         id: 'p1',
@@ -72,8 +72,8 @@ const NICHOS: NutraDemoNichoClienteConfig[] = [
   {
     value: 'hipertrofia',
     label: 'Hipertrofia / proteína e treino',
-    tituloQuiz: 'Antes de falar com quem te indica',
-    subtitulo: 'Algumas perguntas rápidas sobre treino e suplementação.',
+    tituloQuiz: 'Whey no automático e o treino ainda não “fecha”?',
+    subtitulo: 'Alinhe treino, rotina e suplemento antes da conversa.',
     perguntas: [
       {
         id: 'p1',
@@ -116,8 +116,8 @@ const NICHOS: NutraDemoNichoClienteConfig[] = [
   {
     value: 'energia',
     label: 'Energia e disposição',
-    tituloQuiz: 'Antes de falar com quem te indica',
-    subtitulo: 'Algumas perguntas rápidas sobre seu dia a dia.',
+    tituloQuiz: 'Bateria no chão depois do almoço virou seu normal?',
+    subtitulo: 'Mostre o ritmo real — menos chute, mais encaixe.',
     perguntas: [
       {
         id: 'p1',
@@ -160,8 +160,8 @@ const NICHOS: NutraDemoNichoClienteConfig[] = [
   {
     value: 'pele_cabelo',
     label: 'Pele, cabelo e unhas',
-    tituloQuiz: 'Antes de falar com quem te indica',
-    subtitulo: 'Algumas perguntas rápidas sobre beleza de dentro pra fora.',
+    tituloQuiz: 'Pele e cabelo pedindo ajuda e você comprando no escuro?',
+    subtitulo: 'Objetivo claro — indicação com menos tentativa e erro.',
     perguntas: [
       {
         id: 'p1',
@@ -204,8 +204,8 @@ const NICHOS: NutraDemoNichoClienteConfig[] = [
   {
     value: 'imunidade',
     label: 'Imunidade e rotina saudável',
-    tituloQuiz: 'Antes de falar com quem te indica',
-    subtitulo: 'Algumas perguntas rápidas sobre cuidado contínuo.',
+    tituloQuiz: 'Imunidade virou vitrine de caixa sem explicação que faça sentido?',
+    subtitulo: 'Contexto em poucos toques — conversa mais segura e direta.',
     perguntas: [
       {
         id: 'p1',
@@ -248,8 +248,8 @@ const NICHOS: NutraDemoNichoClienteConfig[] = [
   {
     value: 'esporte',
     label: 'Esporte e performance',
-    tituloQuiz: 'Antes de falar com quem te indica',
-    subtitulo: 'Algumas perguntas rápidas sobre treino.',
+    tituloQuiz: 'Pré e pós-treino no chute ou no achismo?',
+    subtitulo: 'Performance com base no que você faz de verdade na semana.',
     perguntas: [
       {
         id: 'p1',

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { useAuth } from '@/contexts/AuthContext'
+import { fetchNutriMatrixNoel, matrixNoelLimitMessageFromResponse } from '@/lib/nutri-matrix-noel-client'
 
 interface Message {
   id?: string
@@ -17,13 +17,11 @@ interface LyaChatWidgetProps {
 }
 
 export default function LyaChatWidget({ defaultOpen = false, embedded = false, className }: LyaChatWidgetProps) {
-  const { user } = useAuth()
   const [isOpen, setIsOpen] = useState<boolean>(embedded || defaultOpen)
   const [isMinimized, setIsMinimized] = useState(false)
   const [messages, setMessages] = useState<Message[]>([])
   const [inputMessage, setInputMessage] = useState('')
   const [loading, setLoading] = useState(false)
-  const [threadId, setThreadId] = useState<string | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
@@ -89,38 +87,40 @@ export default function LyaChatWidget({ defaultOpen = false, embedded = false, c
     setMessages(prev => [...prev, userMessage])
 
     try {
-      const response = await fetch('/api/nutri/lya', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({
-          message,
-          threadId: threadId || undefined
-        })
-      })
+      const priorHistory = messages
+        .filter((m) => m.sender_type === 'user' || m.sender_type === 'lya')
+        .map((m) => ({
+          role: m.sender_type === 'user' ? ('user' as const) : ('assistant' as const),
+          content: m.message,
+        }))
 
-      const data = await response.json()
+      const { response, data } = await fetchNutriMatrixNoel(
+        (url, init) => fetch(url, { ...init, credentials: 'include' }),
+        message,
+        priorHistory
+      )
 
       if (!response.ok) {
-        // Se for erro de configuração, mostrar mensagem mais amigável
-        if (data.error?.includes('não configurado') || data.error?.includes('não está configurado')) {
+        const lim = matrixNoelLimitMessageFromResponse(response, data)
+        if (lim) throw new Error(lim)
+        const err = (data.error as string) || (data.message as string) || 'Erro ao enviar mensagem'
+        if (err.includes('não configurado') || err.includes('não está configurado')) {
           throw new Error('O Noel ainda não está configurado. Entre em contato com o suporte para ativar.')
         }
-        throw new Error(data.error || data.message || data.details || 'Erro ao enviar mensagem')
+        throw new Error(err)
       }
 
-      // Atualizar threadId se retornado
-      if (data.threadId) {
-        setThreadId(data.threadId)
-      }
+      const text =
+        (typeof data.response === 'string' && data.response) ||
+        (typeof data.message === 'string' && data.message) ||
+        'Desculpe, não consegui processar sua mensagem.'
 
-      // Adicionar resposta da LYA
       const lyaMessage: Message = {
         sender_type: 'lya',
-        message: data.response || 'Desculpe, não consegui processar sua mensagem.',
-        created_at: new Date().toISOString()
+        message: text,
+        created_at: new Date().toISOString(),
       }
-      setMessages(prev => [...prev, lyaMessage])
+      setMessages((prev) => [...prev, lyaMessage])
     } catch (error: any) {
       console.error('Erro ao enviar mensagem:', error)
       const errorMessage: Message = {
@@ -359,7 +359,6 @@ export default function LyaChatWidget({ defaultOpen = false, embedded = false, c
     // Fechar de forma síncrona - garantir que todos os estados são atualizados
     setIsMinimized(false)
     setMessages([])
-    setThreadId(null)
     setIsOpen(false)
   }
 

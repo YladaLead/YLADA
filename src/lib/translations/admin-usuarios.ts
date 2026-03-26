@@ -41,6 +41,12 @@ export interface AdminUsuariosTranslations {
     paymentHistoryHint: string
     neverHadPaidPlan: string
     hadPaidPlan: string
+    /** Ordenação pela coluna Cadastro (data do perfil) */
+    sortProfileDate: string
+    sortProfileDateHint: string
+    sortDefault: string
+    sortRecentFirst: string
+    sortOldestFirst: string
   }
   areas: {
     nutri: string
@@ -228,19 +234,19 @@ const pt: AdminUsuariosTranslations = {
     status: 'Situação',
     subscription: 'Assinatura',
     subscriptionHint:
-      'Free está dividido: nunca pagou, ex-pagante, ou migração/manual (is_migrated / free_mig_). Mensal e anual incluem vigentes e vencidos.',
+      'Freedom = free com limites do freemium na matriz (links, WhatsApp, Noel). Cortesia (free_cor_) = tratamento Pro. Mensal e anual incluem vigentes e vencidos.',
     president: 'Presidente',
     segment: 'Segmento',
     segmentHint:
       'Refina pela coluna Área (perfil no cadastro). As opções respeitam a Base: em YLADA, só segmentos da matriz.',
     hideTestAccounts: 'Ocultar contas de teste (lista e CSV)',
     all: 'Todos',
-    active: 'Com acesso (pago ou Free vigente)',
+    active: 'Com acesso (pago ou Freedom vigente)',
     inactive: 'Vencido ou sem plano pago ativo',
-    free: 'Free (todos)',
-    freeNeverPaid: 'Free — nunca pagou',
-    freeFormerPaid: 'Free — já foi pagante',
-    freeMigration: 'Free — migração / manual',
+    free: 'Freedom (todos)',
+    freeNeverPaid: 'Freedom — nunca pagou',
+    freeFormerPaid: 'Freedom — ex-pagante',
+    freeMigration: 'Freedom — migração / manual',
     monthly: 'Mensal',
     annual: 'Anual',
     noSubscription: 'Sem assinatura',
@@ -249,6 +255,12 @@ const pt: AdminUsuariosTranslations = {
       'Com base em registros mensal/anual em subscriptions (qualquer área). Independente do plano atual ou se está vencido.',
     neverHadPaidPlan: 'Nunca teve mensal/anual',
     hadPaidPlan: 'Já teve mensal ou anual',
+    sortProfileDate: 'Ordem no cadastro',
+    sortProfileDateHint:
+      'Use “Últimos que entraram” para ver quem criou o perfil mais recentemente (data da coluna Cadastro).',
+    sortDefault: 'Padrão (banco)',
+    sortRecentFirst: 'Últimos que entraram',
+    sortOldestFirst: 'Mais antigos primeiro',
   },
   areas: {
     nutri: 'Nutricionistas',
@@ -310,7 +322,7 @@ const pt: AdminUsuariosTranslations = {
     statusActive: 'Ativo',
     statusInactive: 'Inativo',
     freeMatrizHint:
-      'Plano Free: não é mensal nem anual. A data acima é o fim do período concedido (ativo ou vencido). Quem cancelou plano pago fica em Free até assinar de novo ou receber cortesia.',
+      'Plano Freedom (limites): não é mensal nem anual. Na matriz YLADA vale o teto freemium (diagnóstico ativo, WhatsApp/mês, Noel) até migrar ao Pro. A data acima é o fim do período concedido (ativo ou vencido).',
     freeCourtesyHint:
       'Cortesia: prazo concedido manualmente pela equipe; vencimento na data acima. Não é plano mensal nem anual.',
     matrizNoSubRowHint:
@@ -328,11 +340,11 @@ const pt: AdminUsuariosTranslations = {
   subscriptionType: {
     monthly: 'Mensal',
     annual: 'Anual',
-    free: 'Free',
-    courtesy: 'Cortesia',
-    freeNeverPaid: 'Free — nunca pagou',
-    freeFormerPaid: 'Free — já foi pagante',
-    freeMigration: 'Free — migração / manual',
+    free: 'Freedom (limites)',
+    courtesy: 'Cortesia (Pro)',
+    freeNeverPaid: 'Freedom — nunca pagou',
+    freeFormerPaid: 'Freedom — ex-pagante',
+    freeMigration: 'Freedom — migração / manual',
     noPlanEnd: 'Sem vencimento no registro',
     none: 'Sem assinatura',
   },
@@ -434,7 +446,7 @@ const es: AdminUsuariosTranslations = {
     status: 'Estado',
     subscription: 'Suscripción',
     subscriptionHint:
-      'Gratis: nunca pagó, ex pagador, o migración/manual (is_migrated / free_mig_). Mensual y anual incluyen vigentes y vencidos.',
+      'Freedom = gratis con límites freemium en la matriz (enlaces, WhatsApp, Noel). Cortesía (free_cor_) = tratamiento Pro. Mensual y anual incluyen vigentes y vencidos.',
     president: 'Presidente',
     segment: 'Segmento',
     segmentHint:
@@ -443,10 +455,10 @@ const es: AdminUsuariosTranslations = {
     all: 'Todos',
     active: 'Con acceso (pago o Free vigente)',
     inactive: 'Vencido o sin plan pagado activo',
-    free: 'Gratis (todos)',
-    freeNeverPaid: 'Gratis — nunca pagó',
-    freeFormerPaid: 'Gratis — ya fue pagador',
-    freeMigration: 'Gratis — migración / manual',
+    free: 'Freedom (todos)',
+    freeNeverPaid: 'Freedom — nunca pagó',
+    freeFormerPaid: 'Freedom — ex pagador',
+    freeMigration: 'Freedom — migración / manual',
     monthly: 'Mensual',
     annual: 'Anual',
     noSubscription: 'Sin suscripción',
@@ -455,6 +467,12 @@ const es: AdminUsuariosTranslations = {
       'Según registros mensual/anual en subscriptions (cualquier área). Independiente del plan actual o si está vencido.',
     neverHadPaidPlan: 'Nunca tuvo mensual/anual',
     hadPaidPlan: 'Ya tuvo mensual o anual',
+    sortProfileDate: 'Orden de registro',
+    sortProfileDateHint:
+      '“Últimos en entrar” ordena por fecha de creación del perfil (columna Registro).',
+    sortDefault: 'Predeterminado (BD)',
+    sortRecentFirst: 'Últimos en entrar',
+    sortOldestFirst: 'Más antiguos primero',
   },
   areas: {
     nutri: 'Nutricionistas',
@@ -516,7 +534,7 @@ const es: AdminUsuariosTranslations = {
     statusActive: 'Activo',
     statusInactive: 'Inactivo',
     freeMatrizHint:
-      'Plan Free: no es mensual ni anual. La fecha de arriba es el fin del período (activo o vencido). Si canceló un plan pago, queda en Free hasta nueva suscripción o cortesía.',
+      'Plan Freedom (límites): no es mensual ni anual. En la matriz YLADA aplica el techo freemium (diagnóstico activo, WhatsApp/mes, Noel) hasta pasar a Pro. La fecha de arriba es el fin del período.',
     freeCourtesyHint:
       'Cortesía: plazo otorgado manualmente por el equipo. No es plan mensual ni anual.',
     matrizNoSubRowHint:
@@ -534,11 +552,11 @@ const es: AdminUsuariosTranslations = {
   subscriptionType: {
     monthly: 'Mensual',
     annual: 'Anual',
-    free: 'Free',
-    courtesy: 'Cortesía',
-    freeNeverPaid: 'Gratis — nunca pagó',
-    freeFormerPaid: 'Gratis — ya fue pagador',
-    freeMigration: 'Gratis — migración / manual',
+    free: 'Freedom (límites)',
+    courtesy: 'Cortesía (Pro)',
+    freeNeverPaid: 'Freedom — nunca pagó',
+    freeFormerPaid: 'Freedom — ex pagador',
+    freeMigration: 'Freedom — migración / manual',
     noPlanEnd: 'Sin vencimiento en el registro',
     none: 'Sin suscripción',
   },
@@ -640,19 +658,19 @@ const en: AdminUsuariosTranslations = {
     status: 'Status',
     subscription: 'Subscription',
     subscriptionHint:
-      'Free is split: never paid, former payer, or migration/manual (is_migrated / free_mig_). Monthly and annual include active and expired.',
+      'Freedom = free with matrix freemium limits (links, WhatsApp, Noel). Courtesy (free_cor_) = Pro treatment. Monthly and annual include active and expired.',
     president: 'President',
     segment: 'Segment',
     segmentHint:
       'Filter by the Area column (profile). Options follow Base: under YLADA, matrix segments only.',
     hideTestAccounts: 'Hide test accounts (list and CSV)',
     all: 'All',
-    active: 'With access (paid or active Free)',
+    active: 'With access (paid or active Freedom)',
     inactive: 'Expired or no active paid plan',
-    free: 'Free (all)',
-    freeNeverPaid: 'Free — never paid',
-    freeFormerPaid: 'Free — former payer',
-    freeMigration: 'Free — migration / manual',
+    free: 'Freedom (all)',
+    freeNeverPaid: 'Freedom — never paid',
+    freeFormerPaid: 'Freedom — former payer',
+    freeMigration: 'Freedom — migration / manual',
     monthly: 'Monthly',
     annual: 'Annual',
     noSubscription: 'No subscription',
@@ -661,6 +679,12 @@ const en: AdminUsuariosTranslations = {
       'Based on monthly/annual rows in subscriptions (any area). Independent of current plan or expiry.',
     neverHadPaidPlan: 'Never had monthly/annual',
     hadPaidPlan: 'Had monthly or annual before',
+    sortProfileDate: 'Profile signup order',
+    sortProfileDateHint:
+      '“Latest signups” sorts by profile creation time (Enrollment column).',
+    sortDefault: 'Default (database)',
+    sortRecentFirst: 'Latest signups first',
+    sortOldestFirst: 'Oldest first',
   },
   areas: {
     nutri: 'Nutritionists',
@@ -722,7 +746,7 @@ const en: AdminUsuariosTranslations = {
     statusActive: 'Active',
     statusInactive: 'Inactive',
     freeMatrizHint:
-      'Free plan: not monthly or annual. The date above is the end of the granted period (active or expired). After canceling a paid plan, they remain Free until they subscribe again or get courtesy.',
+      'Freedom plan (limits): not monthly or annual. On the YLADA matrix, freemium caps apply (active diagnosis, WhatsApp/month, Noel) until upgrading to Pro. The date above is the end of the period.',
     freeCourtesyHint:
       'Courtesy: period granted manually by the team. Not a monthly or annual plan.',
     matrizNoSubRowHint:
@@ -740,11 +764,11 @@ const en: AdminUsuariosTranslations = {
   subscriptionType: {
     monthly: 'Monthly',
     annual: 'Annual',
-    free: 'Free',
-    courtesy: 'Courtesy',
-    freeNeverPaid: 'Free — never paid',
-    freeFormerPaid: 'Free — former payer',
-    freeMigration: 'Free — migration / manual',
+    free: 'Freedom (limits)',
+    courtesy: 'Courtesy (Pro)',
+    freeNeverPaid: 'Freedom — never paid',
+    freeFormerPaid: 'Freedom — former payer',
+    freeMigration: 'Freedom — migration / manual',
     noPlanEnd: 'No end date on record',
     none: 'No subscription',
   },

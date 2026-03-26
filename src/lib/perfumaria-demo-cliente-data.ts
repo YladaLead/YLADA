@@ -29,8 +29,8 @@ const NICHOS: PerfumariaDemoNichoClienteConfig[] = [
   {
     value: 'primeira_fragancia',
     label: 'Primeira compra ou redescobrir estilo',
-    tituloQuiz: 'Antes de pedir indicação à loja ou ao consultor',
-    subtitulo: 'Reflexão sobre gosto e rotina. Não substitui prova na pele.',
+    tituloQuiz: 'Frasco bonito na prateleira e você quase não usa?',
+    subtitulo: 'Gosto e rotina em poucos toques — o consultor chega mais certeiro. Não substitui prova na pele.',
     perguntas: [
       {
         id: 'p1',
@@ -73,8 +73,8 @@ const NICHOS: PerfumariaDemoNichoClienteConfig[] = [
   {
     value: 'presente',
     label: 'Presente para alguém',
-    tituloQuiz: 'Antes de pedir ajuda para escolher o presente',
-    subtitulo: 'Organizar perfil de quem vai ganhar. Não garante gosto alheio.',
+    tituloQuiz: 'Presente errado em perfume dói mais que errar o tamanho da roupa?',
+    subtitulo: 'Perfil de quem vai ganhar em claro. Não garante gosto alheio.',
     perguntas: [
       {
         id: 'p1',
@@ -117,8 +117,8 @@ const NICHOS: PerfumariaDemoNichoClienteConfig[] = [
   {
     value: 'assinatura_dia',
     label: 'Perfume do dia a dia',
-    tituloQuiz: 'Antes de trocar ou fixar sua assinatura',
-    subtitulo: 'Rotina e ambiente. Não é reformulação técnica.',
+    tituloQuiz: 'Cansou do mesmo cheiro ou nunca achou “o seu”?',
+    subtitulo: 'Rotina e ambiente com honestidade. Não é reformulação técnica.',
     perguntas: [
       {
         id: 'p1',
@@ -161,8 +161,8 @@ const NICHOS: PerfumariaDemoNichoClienteConfig[] = [
   {
     value: 'pele_ou_alergia',
     label: 'Pele sensível ou preferências sem álcool',
-    tituloQuiz: 'Antes de pedir opções mais suaves',
-    subtitulo: 'Preferências declaradas. Não substitui avaliação médica ou teste de alergia.',
+    tituloQuiz: 'Pele sensível e medo de reação — comprando no escuro?',
+    subtitulo: 'Preferências declaradas com cuidado. Não substitui avaliação médica ou teste de alergia.',
     perguntas: [
       {
         id: 'p1',
@@ -205,8 +205,8 @@ const NICHOS: PerfumariaDemoNichoClienteConfig[] = [
   {
     value: 'ocasiao',
     label: 'Ocasião especial',
-    tituloQuiz: 'Antes de escolher para um momento marcante',
-    subtitulo: 'Data e clima da ocasião. Não substitui prova antes do evento.',
+    tituloQuiz: 'Look fechado e o perfume ainda é uma dúvida nervosa?',
+    subtitulo: 'Data e clima da ocasião em foco. Não substitui prova antes do evento.',
     perguntas: [
       {
         id: 'p1',
@@ -249,8 +249,8 @@ const NICHOS: PerfumariaDemoNichoClienteConfig[] = [
   {
     value: 'familias_olfativas',
     label: 'Explorar famílias olfativas',
-    tituloQuiz: 'Antes de pedir “algo parecido com…”',
-    subtitulo: 'Referências e curiosidade. Não copia fórmula nem garante equivalência.',
+    tituloQuiz: '“Algo doce mas não enjoativo” — frase que nunca funcionou sozinha?',
+    subtitulo: 'Referências e curiosidade com precisão. Não copia fórmula nem garante equivalência.',
     perguntas: [
       {
         id: 'p1',

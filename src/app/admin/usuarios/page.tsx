@@ -39,6 +39,8 @@ interface Usuario {
   yladaFreePeriodEnd?: string | null
   /** Derivado do prefixo em stripe_subscription_id (free_mig_ / free_cor_ / legado free_) */
   yladaFreeGrantKind?: 'migration' | 'courtesy' | 'legacy' | null
+  /** Prefixo free_cor_ / free_mig_ na assinatura do segmento do perfil (qualquer matriz) */
+  segmentFreeGrantKind?: 'migration' | 'courtesy' | 'legacy' | null
   /** Categoria para filtro/coluna: free granular, mensal, anual, sem */
   assinaturaCategoria?:
     | 'mensal'
@@ -84,6 +86,8 @@ export default function AdminUsuarios() {
     | 'sem'
   >('todos')
   const [filtroHistorico, setFiltroHistorico] = useState<'todos' | 'nunca_pagou' | 'ja_pagou'>('todos')
+  /** Ordenação por `user_profiles.created_at` (coluna Cadastro); API: `ordenacao_cadastro`. */
+  const [filtroOrdenacaoCadastro, setFiltroOrdenacaoCadastro] = useState<'padrao' | 'recente' | 'antigo'>('padrao')
   const [filtroPresidente, setFiltroPresidente] = useState<string>('todos')
   const [busca, setBusca] = useState('')
   /** Painel de filtros recolhido por padrão — mais espaço para a lista. */
@@ -157,6 +161,7 @@ export default function AdminUsuarios() {
     if (filtroStatus !== 'todos') n++
     if (filtroAssinatura !== 'todos') n++
     if (filtroHistorico !== 'todos') n++
+    if (filtroOrdenacaoCadastro !== 'padrao') n++
     if (filtroBloco === 'todos' && filtroPresidente !== 'todos') n++
     if (!ocultarContasTeste) n++
     return n
@@ -167,6 +172,7 @@ export default function AdminUsuarios() {
     filtroStatus,
     filtroAssinatura,
     filtroHistorico,
+    filtroOrdenacaoCadastro,
     filtroPresidente,
     ocultarContasTeste,
   ])
@@ -258,6 +264,8 @@ export default function AdminUsuarios() {
       if (filtroStatus !== 'todos') params.append('status', filtroStatus)
       if (filtroAssinatura !== 'todos') params.append('assinatura', filtroAssinatura)
       if (filtroHistorico !== 'todos') params.append('historico', filtroHistorico)
+      if (filtroOrdenacaoCadastro === 'recente') params.append('ordenacao_cadastro', 'recente')
+      if (filtroOrdenacaoCadastro === 'antigo') params.append('ordenacao_cadastro', 'antigo')
       if (filtroBloco === 'todos' && filtroPresidente !== 'todos') {
         params.append('presidente', filtroPresidente)
       }
@@ -303,7 +311,16 @@ export default function AdminUsuarios() {
     }, busca ? 500 : 0)
 
     return () => clearTimeout(timeoutId)
-  }, [filtroBloco, filtroSegmento, filtroStatus, filtroAssinatura, filtroHistorico, filtroPresidente, busca])
+  }, [
+    filtroBloco,
+    filtroSegmento,
+    filtroStatus,
+    filtroAssinatura,
+    filtroHistorico,
+    filtroOrdenacaoCadastro,
+    filtroPresidente,
+    busca,
+  ])
 
   // Abrir modal de editar usuário (usa nome canônico no dropdown quando existir)
   const abrirEditarUsuario = (usuario: Usuario) => {
@@ -687,10 +704,13 @@ export default function AdminUsuarios() {
   }
 
   /** Categorias na listagem / CSV: free granular, cortesia, mensal, anual, sem. */
+  const isAssinaturaCourtesy = (u: Usuario) =>
+    u.yladaFreeGrantKind === 'courtesy' || u.segmentFreeGrantKind === 'courtesy'
+
   const getAssinaturaListLabel = (u: Usuario) => {
     const c = u.assinaturaCategoria
     if (c === 'free_nunca_pago') {
-      if (u.yladaFreeGrantKind === 'courtesy') return t.subscriptionType.courtesy
+      if (isAssinaturaCourtesy(u)) return t.subscriptionType.courtesy
       return t.subscriptionType.freeNeverPaid
     }
     if (c === 'free_ex_pagante') return t.subscriptionType.freeFormerPaid
@@ -699,7 +719,7 @@ export default function AdminUsuarios() {
     if (c === 'anual') return t.subscriptionType.annual
     if (c === 'sem' || u.assinatura === 'sem assinatura') return t.subscriptionType.none
     if (u.assinatura === 'gratuita') {
-      if (u.yladaFreeGrantKind === 'courtesy') return t.subscriptionType.courtesy
+      if (isAssinaturaCourtesy(u)) return t.subscriptionType.courtesy
       return t.subscriptionType.free
     }
     if (u.assinatura === 'mensal') return t.subscriptionType.monthly
@@ -710,13 +730,13 @@ export default function AdminUsuarios() {
   /** Uma linha na tabela — detalhes longos ficam no title (tooltip). */
   const getAssinaturaCompactLabel = (u: Usuario): string => {
     const c = u.assinaturaCategoria
-    if (c === 'free_nunca_pago') return u.yladaFreeGrantKind === 'courtesy' ? 'Cortesia' : 'Free'
-    if (c === 'free_ex_pagante') return 'Free'
-    if (c === 'free_migracao') return 'Free'
+    if (c === 'free_nunca_pago') return isAssinaturaCourtesy(u) ? 'Cortesia' : 'Freedom'
+    if (c === 'free_ex_pagante') return 'Freedom'
+    if (c === 'free_migracao') return 'Freedom'
     if (c === 'mensal') return 'Mensal'
     if (c === 'anual') return 'Anual'
     if (c === 'sem' || u.assinatura === 'sem assinatura') return 'Sem assinatura'
-    if (u.assinatura === 'gratuita') return u.yladaFreeGrantKind === 'courtesy' ? 'Cortesia' : 'Free'
+    if (u.assinatura === 'gratuita') return isAssinaturaCourtesy(u) ? 'Cortesia' : 'Freedom'
     if (u.assinatura === 'mensal') return 'Mensal'
     if (u.assinatura === 'anual') return 'Anual'
     return '—'
@@ -730,14 +750,14 @@ export default function AdminUsuarios() {
     if (u.implicitMatrizFree && !u.yladaFreeSubscriptionId) lines.push(t.table.matrizNoSubRowHint)
     if (
       u.assinatura === 'gratuita' &&
-      u.yladaFreeGrantKind === 'courtesy' &&
+      isAssinaturaCourtesy(u) &&
       (u.assinaturaSituacao === 'ativa' || u.assinaturaSituacao === 'vencida')
     ) {
       lines.push(t.table.freeCourtesyHint)
     }
     if (
       u.assinatura === 'gratuita' &&
-      u.yladaFreeGrantKind !== 'courtesy' &&
+      !isAssinaturaCourtesy(u) &&
       (u.assinaturaSituacao === 'ativa' || u.assinaturaSituacao === 'vencida')
     ) {
       lines.push(t.table.freeMatrizHint)
@@ -961,6 +981,26 @@ export default function AdminUsuarios() {
                 <option value="todos">{t.filters.all}</option>
                 <option value="nunca_pagou">{t.filters.neverHadPaidPlan}</option>
                 <option value="ja_pagou">{t.filters.hadPaidPlan}</option>
+              </select>
+            </div>
+            <div className="col-span-2 sm:col-span-1 lg:col-span-2 xl:col-span-2">
+              <label
+                className="block text-[11px] font-medium text-gray-600 mb-0.5 cursor-help"
+                title={t.filters.sortProfileDateHint}
+              >
+                {t.filters.sortProfileDate}
+              </label>
+              <select
+                value={filtroOrdenacaoCadastro}
+                onChange={(e) =>
+                  setFiltroOrdenacaoCadastro(e.target.value as 'padrao' | 'recente' | 'antigo')
+                }
+                disabled={loading}
+                className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50"
+              >
+                <option value="padrao">{t.filters.sortDefault}</option>
+                <option value="recente">{t.filters.sortRecentFirst}</option>
+                <option value="antigo">{t.filters.sortOldestFirst}</option>
               </select>
             </div>
             {filtroBloco === 'todos' && (

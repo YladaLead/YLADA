@@ -7,7 +7,6 @@ import YLADALogo from '@/components/YLADALogo'
 import { getYladaAreaConfig, getYladaAreaPathPrefix } from '@/config/ylada-areas'
 import { getPublicFlowConfig, areaUsesStandardPublicFlowMotor } from '@/config/ylada-public-flow-registry'
 import { useAuth } from '@/contexts/AuthContext'
-import { getMatrixEntradaNichoPack } from '@/lib/ylada-matrix-entrada-fallback'
 import { savePublicFlowHandoff } from '@/lib/ylada-public-flow-handoff'
 import { trackEvent } from '@/lib/analytics-events'
 
@@ -18,12 +17,10 @@ export default function PtEntradaAreaClient({ areaCodigo }: { areaCodigo: string
 
   const standard =
     areaUsesStandardPublicFlowMotor(areaCodigo) ? getPublicFlowConfig(areaCodigo) : null
-  const fallback = getMatrixEntradaNichoPack(areaCodigo)
   const areaMeta = getYladaAreaConfig(areaCodigo)
   const pathPrefix = getYladaAreaPathPrefix(areaCodigo)
 
   const hasStandard = !!(standard && standard.nichos.length > 0)
-  const hasFallback = !!fallback
 
   useEffect(() => {
     if (loading) return
@@ -31,45 +28,32 @@ export default function PtEntradaAreaClient({ areaCodigo }: { areaCodigo: string
       router.replace('/pt/painel')
       return
     }
-    if (!hasStandard && !hasFallback) {
+    if (!hasStandard) {
       router.replace(pathPrefix)
       return
     }
     setReady(true)
-  }, [loading, user, router, hasStandard, hasFallback, pathPrefix])
+  }, [loading, user, router, hasStandard, pathPrefix])
 
   const onPickNicho = useCallback(
     (nichoSlug: string) => {
-      if (standard) {
-        if (!standard.isValidNicho(nichoSlug)) return
-        savePublicFlowHandoff({
-          areaCodigo,
-          nichoSlug,
-          source: 'matrix_entrada',
-        })
-        trackEvent('ylada_matrix_entrada_nicho', { area: areaCodigo, opcao: nichoSlug })
-        router.push(standard.pathPrefix)
-        return
-      }
-      if (fallback) {
-        if (!fallback.isValidNicho(nichoSlug)) return
-        savePublicFlowHandoff({
-          areaCodigo,
-          nichoSlug,
-          source: 'matrix_entrada',
-        })
-        trackEvent('ylada_matrix_entrada_nicho', { area: areaCodigo, opcao: nichoSlug })
-        router.push(fallback.destinoPathPrefix)
-      }
+      if (!standard) return
+      if (!standard.isValidNicho(nichoSlug)) return
+      savePublicFlowHandoff({
+        areaCodigo,
+        nichoSlug,
+        source: 'matrix_entrada',
+      })
+      trackEvent('ylada_matrix_entrada_nicho', { area: areaCodigo, opcao: nichoSlug })
+      router.push(standard.pathPrefix)
     },
-    [areaCodigo, standard, fallback, router]
+    [areaCodigo, standard, router]
   )
 
-  const title = standard?.nichoPickerTitle ?? fallback?.nichoPickerTitle ?? ''
-  const subtitle = standard
-    ? 'Em seguida você responde algumas perguntas rápidas para ver como o YLADA se aplica ao seu dia a dia.'
-    : (fallback?.subtitle ?? '')
-  const nichos = standard?.nichos ?? fallback?.nichos ?? []
+  const title = standard?.nichoPickerTitle ?? ''
+  const subtitle =
+    'Em seguida você responde algumas perguntas rápidas para ver como o YLADA se aplica ao seu dia a dia.'
+  const nichos = standard?.nichos ?? []
 
   if (loading || !ready || nichos.length === 0) {
     return (

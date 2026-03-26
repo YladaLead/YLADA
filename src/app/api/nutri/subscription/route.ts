@@ -1,6 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireApiAuth } from '@/lib/api-auth'
-import { getActiveSubscription } from '@/lib/subscription-helpers'
+import {
+  getActiveSubscription,
+  hasYladaProPlan,
+  subscriptionRowIsMatrixSegmentCommercialUnlimited,
+} from '@/lib/subscription-helpers'
+import { getNoelUsageCount } from '@/lib/noel-usage-helpers'
+import { FREEMIUM_LIMITS } from '@/config/freemium-limits'
 
 /**
  * GET /api/nutri/subscription
@@ -22,12 +28,23 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({
         hasActiveSubscription: false,
         subscription: null,
+        nutriCommercialTier: 'none' as const,
       })
     }
+
+    const unlimited = subscriptionRowIsMatrixSegmentCommercialUnlimited(subscription)
+    const nutriCommercialTier = unlimited ? ('pro' as const) : ('freedom' as const)
+    const noelAdvancedLimitPerMonth = FREEMIUM_LIMITS.FREE_LIMIT_NOEL_ADVANCED_ANALYSES_PER_MONTH
+    const isYladaPro = await hasYladaProPlan(user.id)
+    const noelAdvancedUsedThisMonth = !isYladaPro ? await getNoelUsageCount(user.id) : 0
 
     return NextResponse.json({
       hasActiveSubscription: true,
       subscription,
+      nutriCommercialTier,
+      noelAdvancedUsedThisMonth,
+      noelAdvancedLimitPerMonth,
+      upgradePath: '/pt/nutri/checkout',
     })
   } catch (error: any) {
     console.error('❌ Erro ao buscar assinatura nutri:', error)

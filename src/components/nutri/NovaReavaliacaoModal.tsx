@@ -185,8 +185,7 @@ export default function NovaReavaliacaoModal({
     setComparacao(comparacaoData)
   }
 
-  // Pedir insights da LYA sobre a comparação
-  const pedirInsightsLya = async () => {
+  const pedirInsightsNoel = async () => {
     if (!comparacao || !avaliacaoAnterior) return
 
     setLoadingLya(true)
@@ -215,7 +214,7 @@ Me forneça:
 
 Seja profissional, motivadora quando apropriado, e objetiva.`
 
-      const response = await fetch('/api/nutri/lya', {
+      const response = await fetch('/api/nutri/noel', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -225,7 +224,7 @@ Seja profissional, motivadora quando apropriado, e objetiva.`
       const data = await response.json()
       if (response.ok) {
         setLyaInsights(data.response || '')
-        // Sugerir preencher interpretação com insights da LYA
+        // Sugerir preencher interpretação com insights do Noel
         if (data.response && !formData.interpretation) {
           setFormData(prev => ({
             ...prev,
@@ -234,7 +233,7 @@ Seja profissional, motivadora quando apropriado, e objetiva.`
         }
       }
     } catch (error) {
-      console.error('Erro ao pedir insights LYA:', error)
+      console.error('Erro ao pedir insights (Noel):', error)
     } finally {
       setLoadingLya(false)
     }
@@ -611,7 +610,7 @@ Seja profissional, motivadora quando apropriado, e objetiva.`
                 </div>
               </div>
 
-              {/* LYA Insights */}
+              {/* Insights Noel */}
               <div className="bg-gradient-to-r from-purple-50 to-blue-50 border border-purple-200 rounded-lg p-4">
                 <div className="flex items-start space-x-3">
                   <div className="w-10 h-10 bg-purple-600 rounded-full flex items-center justify-center flex-shrink-0">

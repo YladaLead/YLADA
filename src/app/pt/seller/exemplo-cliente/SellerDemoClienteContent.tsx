@@ -1,0 +1,291 @@
+'use client'
+
+/**
+ * Demo: fluxo no lugar do cliente — imparcial entre vendedores. Rota: ?nicho=catalogo_revenda
+ */
+
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import Link from 'next/link'
+import { useRouter, useSearchParams } from 'next/navigation'
+import YLADALogo from '@/components/YLADALogo'
+import {
+  SELLER_DEMO_CLIENTE_NICHOS,
+  getSellerDemoClienteConfig,
+  type SellerDemoNicho,
+} from '@/lib/seller-demo-cliente-data'
+import { STORAGE_KEY_SELLER_CONTINUAR_TOUR, STORAGE_KEY_SELLER_DEMO_NICHO } from '@/lib/seller-demo-context'
+import { trackEvent } from '@/lib/analytics-events'
+
+const CADASTRO_POS_DEMO_HREF = '/pt/cadastro?area=seller'
+
+export default function SellerDemoClienteContent() {
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const nichoParam = searchParams.get('nicho')
+  const origemQuiz = searchParams.get('origem') === 'quiz'
+
+  const configFromUrl = useMemo(() => getSellerDemoClienteConfig(nichoParam), [nichoParam])
+
+  const [nichoAtivo, setNichoAtivo] = useState<SellerDemoNicho | null>(configFromUrl?.value ?? null)
+  const [etapa, setEtapa] = useState(0)
+  const [finalizado, setFinalizado] = useState(false)
+
+  const cfg = useMemo(() => (nichoAtivo ? getSellerDemoClienteConfig(nichoAtivo) : null), [nichoAtivo])
+
+  useEffect(() => {
+    if (configFromUrl && configFromUrl.value !== nichoAtivo) {
+      setNichoAtivo(configFromUrl.value)
+      setEtapa(0)
+      setFinalizado(false)
+    }
+  }, [configFromUrl, nichoAtivo])
+
+  const total = cfg?.perguntas.length ?? 0
+  const perguntaAtual = cfg?.perguntas[etapa]
+
+  const escolherNicho = useCallback(
+    (v: SellerDemoNicho) => {
+      try {
+        sessionStorage.setItem(STORAGE_KEY_SELLER_DEMO_NICHO, v)
+      } catch {
+        /* ok */
+      }
+      setNichoAtivo(v)
+      setEtapa(0)
+      setFinalizado(false)
+      router.replace(`/pt/seller/exemplo-cliente?nicho=${v}`, { scroll: false })
+    },
+    [router]
+  )
+
+  const avancar = useCallback(() => {
+    if (!cfg || !perguntaAtual) return
+    if (etapa < total - 1) {
+      setEtapa((e) => e + 1)
+    } else {
+      setFinalizado(true)
+      trackEvent('seller_demo_cliente_concluiu', { area: 'seller', opcao: cfg.value })
+    }
+  }, [cfg, perguntaAtual, etapa, total])
+
+  const voltar = useCallback(() => {
+    if (etapa <= 0) return
+    setEtapa((e) => e - 1)
+    setFinalizado(false)
+  }, [etapa])
+
+  const continuarTour = useCallback(() => {
+    try {
+      sessionStorage.setItem(STORAGE_KEY_SELLER_CONTINUAR_TOUR, '1')
+    } catch {
+      /* ok */
+    }
+    router.push('/pt/seller')
+  }, [router])
+
+  if (!cfg && !nichoParam) {
+    return (
+      <div className="min-h-[100dvh] bg-white text-gray-900 flex flex-col estetica-touch supports-[height:100svh]:min-h-[100svh]">
+        <header className="sticky top-0 z-10 shrink-0 border-b border-gray-100 bg-white/95 pt-[env(safe-area-inset-top,0px)]">
+          <div className="max-w-lg mx-auto flex items-center justify-between px-4 py-3">
+            <Link
+              href="/pt/seller"
+              className="inline-flex min-h-[48px] min-w-[48px] items-center justify-center -ml-1"
+              aria-label="Voltar"
+            >
+              <YLADALogo size="md" responsive className="bg-transparent" />
+            </Link>
+          </div>
+        </header>
+        <main className="flex-1 px-4 py-8 max-w-lg mx-auto w-full estetica-safe-main-bottom">
+          <p className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-2">Exemplo · visão do cliente</p>
+          <h1 className="text-xl font-bold text-gray-900 mb-2">Escolha um cenário de exemplo</h1>
+          <p className="text-sm text-gray-600 mb-6 leading-relaxed">
+            Perguntas genéricas, como as que seu cliente veria no link — vale para quem vende de vários jeitos. Escolha
+            o que mais se parece com você.
+          </p>
+          <div className="flex flex-col gap-2">
+            {SELLER_DEMO_CLIENTE_NICHOS.map((n) => (
+              <button
+                key={n.value}
+                type="button"
+                onClick={() => escolherNicho(n.value as SellerDemoNicho)}
+                className="w-full min-h-[52px] rounded-xl border border-gray-200 bg-white px-4 py-3 text-left text-sm font-semibold text-gray-900 hover:bg-gray-50 active:scale-[0.99] transition-transform"
+              >
+                {n.label}
+              </button>
+            ))}
+          </div>
+          <Link href="/pt/seller" className="mt-8 block text-center text-sm text-gray-500 hover:text-gray-800">
+            ← Voltar
+          </Link>
+        </main>
+      </div>
+    )
+  }
+
+  if (nichoParam && !cfg) {
+    return (
+      <div className="min-h-[100dvh] flex flex-col items-center justify-center p-6 bg-white">
+        <p className="text-gray-600 text-sm mb-4">Opção não encontrada.</p>
+        <Link href="/pt/seller/exemplo-cliente" className="text-blue-600 font-medium text-sm">
+          Ver opções
+        </Link>
+      </div>
+    )
+  }
+
+  if (!cfg) return null
+
+  if (finalizado) {
+    return (
+      <div className="min-h-[100dvh] bg-white text-gray-900 flex flex-col estetica-touch supports-[height:100svh]:min-h-[100svh]">
+        <header className="sticky top-0 z-10 shrink-0 border-b border-gray-100 bg-white/95 pt-[env(safe-area-inset-top,0px)]">
+          <div className="max-w-lg mx-auto flex items-center justify-between px-4 py-3">
+            <Link
+              href="/pt/seller"
+              className="text-sm font-medium text-gray-500 hover:text-gray-900 min-h-[48px] inline-flex items-center"
+            >
+              ← Voltar
+            </Link>
+            <span className="text-xs text-gray-400 uppercase tracking-wider">Simulação</span>
+          </div>
+        </header>
+        <main className="flex-1 px-4 py-8 max-w-lg mx-auto w-full flex flex-col estetica-safe-main-bottom space-y-10">
+          <div className="space-y-5 text-center">
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-900 leading-snug">
+              É assim que seu cliente chega até você
+            </h1>
+            <div className="space-y-1.5 text-base sm:text-lg text-gray-800 font-medium leading-snug">
+              <p>já entendendo melhor o que quer</p>
+              <p>já mais decidido</p>
+              <p className="text-gray-900">e mais pronto pra fechar no WhatsApp</p>
+            </div>
+            <p className="text-sm text-gray-700 font-medium leading-relaxed max-w-md mx-auto pt-1">
+              Com respostas organizadas, a pessoa chega com mais contexto e você evita repetir o mesmo no primeiro
+              contato.
+            </p>
+          </div>
+
+          <div
+            className="rounded-xl border-2 border-dashed border-green-200 bg-green-50/80 p-4"
+            role="group"
+            aria-label="Modelo do botão de WhatsApp no seu link"
+          >
+            <div
+              className="flex w-full min-h-[52px] items-center justify-center rounded-xl bg-green-600/85 text-white font-semibold cursor-default select-none shadow-sm shadow-green-900/15"
+              aria-hidden="true"
+            >
+              WhatsApp (modelo)
+            </div>
+            <p className="mt-3 text-sm text-gray-700 text-center leading-relaxed">
+              No seu link, seu cliente toca aqui e abre <span className="font-semibold">seu</span> WhatsApp com mensagem
+              alinhada ao que viu.
+            </p>
+          </div>
+
+          {origemQuiz ? (
+            <div className="space-y-3 pt-2">
+              <Link
+                href={CADASTRO_POS_DEMO_HREF}
+                onClick={() =>
+                  trackEvent('seller_cadastro_promo_cta', { area: 'seller', origem: 'quiz_exemplo_cliente' })
+                }
+                className="flex w-full flex-col min-h-[58px] rounded-2xl bg-blue-600 px-5 py-3.5 text-center text-white hover:bg-blue-700 shadow-lg shadow-blue-600/35 items-center justify-center gap-0.5 leading-tight"
+              >
+                <span className="text-lg font-bold inline-flex items-center gap-2">
+                  <span aria-hidden>👉</span>
+                  Começar agora
+                </span>
+                <span className="text-sm font-semibold text-white/95 tracking-wide">é gratuito</span>
+              </Link>
+              <p className="text-center text-sm text-gray-600 leading-relaxed px-1">
+                Monte seu link e receba contatos mais objetivos — em poucos minutos.
+              </p>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={continuarTour}
+              className="w-full min-h-[52px] rounded-2xl bg-blue-600 text-white text-base font-bold hover:bg-blue-700 shadow-lg shadow-blue-600/30"
+            >
+              Continuar para entender mais
+            </button>
+          )}
+        </main>
+      </div>
+    )
+  }
+
+  return (
+    <div className="min-h-[100dvh] bg-white text-gray-900 flex flex-col estetica-touch supports-[height:100svh]:min-h-[100svh]">
+      <header className="sticky top-0 z-10 shrink-0 border-b border-gray-100 bg-white/95 pt-[env(safe-area-inset-top,0px)]">
+        <div className="max-w-lg mx-auto flex items-center justify-between px-4 py-3">
+          <Link
+            href="/pt/seller"
+            className="text-sm font-medium text-gray-500 hover:text-gray-900 min-h-[48px] inline-flex items-center pr-2"
+          >
+            ← Vendedores
+          </Link>
+          <span className="text-xs text-gray-400 uppercase tracking-wider">Cliente</span>
+        </div>
+      </header>
+
+      <main className="flex-1 px-4 py-6 max-w-lg mx-auto w-full flex flex-col estetica-safe-main-bottom">
+        <p className="text-xs font-semibold uppercase tracking-wider text-sky-700 bg-sky-50 border border-sky-100 rounded-lg px-3 py-2 mb-1 text-center leading-snug">
+          Isso é o que seu cliente veria
+        </p>
+        <p className="text-center text-xs text-gray-500 mb-4">{cfg.label}</p>
+
+        <div className="text-center mb-6">
+          <h1 className="text-lg sm:text-xl font-bold text-gray-900 mb-1">{cfg.tituloQuiz}</h1>
+          <p className="text-sm text-gray-600">{cfg.subtitulo}</p>
+        </div>
+
+        <div className="bg-gray-50 rounded-xl p-5 sm:p-6 border border-gray-200 flex-1 flex flex-col overscroll-y-contain">
+          <div className="mb-4">
+            <div className="flex justify-between text-xs text-gray-500 mb-1.5">
+              <span>
+                Pergunta {etapa + 1} de {total}
+              </span>
+            </div>
+            <div className="h-1.5 bg-gray-200 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-blue-600 rounded-full transition-all duration-300"
+                style={{ width: `${((etapa + 1) / total) * 100}%` }}
+              />
+            </div>
+          </div>
+
+          {perguntaAtual ? (
+            <>
+              <h2 className="text-base sm:text-lg font-semibold text-gray-900 mb-4">{perguntaAtual.texto}</h2>
+              <div className="space-y-2 flex-1">
+                {perguntaAtual.opcoes.map((op, idx) => (
+                  <button
+                    key={op.label + idx}
+                    type="button"
+                    onClick={avancar}
+                    className="w-full text-left px-4 py-3 rounded-lg border-2 border-gray-200 bg-white hover:border-blue-500 hover:bg-blue-50/80 transition-all font-medium text-gray-800 text-sm sm:text-base"
+                  >
+                    {op.label}
+                  </button>
+                ))}
+              </div>
+            </>
+          ) : null}
+
+          {etapa > 0 && (
+            <button
+              type="button"
+              onClick={voltar}
+              className="mt-6 text-gray-500 hover:text-gray-700 text-sm font-medium"
+            >
+              ← Voltar
+            </button>
+          )}
+        </div>
+      </main>
+    </div>
+  )
+}

@@ -23,6 +23,7 @@ import { toYmdInTimeZone } from '@/lib/date-utils'
  * - historico?: 'todos' | 'nunca_pagou' | 'ja_pagou' — já existiu assinatura mensal ou anual em qualquer área (independente de estar vigente)
  * - presidente?: string - Filtrar por nome do presidente (equipe do presidente)
  * - busca?: string - Buscar por nome, email (user_profiles ou Auth) ou WhatsApp
+ * - ordenacao_cadastro?: 'recente' | 'antigo' — ordena pela data de criação do perfil (`user_profiles.created_at`); omitido = ordem do banco
  */
 function sanitizeBuscaIlike(raw: string) {
   // Vírgula quebra o operador .or() do PostgREST; %/_ em e-mail são raros
@@ -46,6 +47,7 @@ export async function GET(request: NextRequest) {
     const historicoFiltro = searchParams.get('historico') || 'todos'
     const presidenteFiltro = searchParams.get('presidente') || ''
     const busca = searchParams.get('busca') || ''
+    const ordenacaoCadastro = (searchParams.get('ordenacao_cadastro') || '').trim().toLowerCase()
 
     // Buscar todos os perfis de usuários
     const LEGADO_AREAS = ['nutri', 'coach', 'nutra']
@@ -471,6 +473,12 @@ export async function GET(request: NextRequest) {
         yladaFreeSubscriptionId: yladaSubParaAdmin?.id ?? null,
         yladaFreePeriodEnd: yladaSubParaAdmin?.current_period_end ?? null,
         yladaFreeGrantKind,
+        segmentFreeGrantKind:
+          isPerfilMatrizYlada(userArea) && subscriptionForStatus?.plan_type === 'free'
+            ? parseYladaFreeGrantKind(
+                (subscriptionForStatus as { stripe_subscription_id?: string | null }).stripe_subscription_id
+              )
+            : null,
         assinaturaCategoria,
         /** Já existiu registro mensal ou anual (qualquer área); ver query `historico` */
         everHadPaid,
@@ -479,6 +487,21 @@ export async function GET(request: NextRequest) {
     }).filter(u => u !== null) // Remover nulls do filtro de status
 
     const lista = usuarios as NonNullable<(typeof usuarios)[number]>[]
+    if (ordenacaoCadastro === 'recente' || ordenacaoCadastro === 'antigo') {
+      const createdAtByUserId = new Map(
+        (profiles || []).map((p) => [p.user_id, p.created_at] as const)
+      )
+      const ts = (userId: string) => {
+        const raw = createdAtByUserId.get(userId)
+        const t = raw ? new Date(raw).getTime() : 0
+        return Number.isFinite(t) ? t : 0
+      }
+      lista.sort((a, b) => {
+        const da = ts(a.id)
+        const db = ts(b.id)
+        return ordenacaoCadastro === 'recente' ? db - da : da - db
+      })
+    }
     const producao = lista.filter((u) => !u.isContaTeste)
     const testes = lista.filter((u) => u.isContaTeste)
 
@@ -501,7 +524,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      usuarios,
+      usuarios: lista,
       stats,
     })
   } catch (error: any) {

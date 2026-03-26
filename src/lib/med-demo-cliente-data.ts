@@ -29,8 +29,8 @@ const NICHOS: MedDemoNichoClienteConfig[] = [
   {
     value: 'rotina',
     label: 'Consulta de rotina ou retorno',
-    tituloQuiz: 'Antes de falar com o médico ou a médica',
-    subtitulo: 'Perguntas para reflexão. Não substitui consulta nem urgência.',
+    tituloQuiz: 'Consulta de rotina virou promessa para “quando der tempo”?',
+    subtitulo: 'Organize o que levar na conversa. Não substitui consulta nem urgência.',
     perguntas: [
       {
         id: 'p1',
@@ -73,8 +73,8 @@ const NICHOS: MedDemoNichoClienteConfig[] = [
   {
     value: 'preventivo',
     label: 'Check-up ou prevenção',
-    tituloQuiz: 'Antes de falar com o médico ou a médica',
-    subtitulo: 'Organizar expectativas. Não é laudo nem exame.',
+    tituloQuiz: 'Check-up completo ainda só “na cabeça” há anos?',
+    subtitulo: 'Clareie prioridades antes da consulta. Não é laudo nem exame.',
     perguntas: [
       {
         id: 'p1',
@@ -117,9 +117,9 @@ const NICHOS: MedDemoNichoClienteConfig[] = [
   {
     value: 'sintomas_leves',
     label: 'Sintomas ou incômodos recentes',
-    tituloQuiz: 'Antes de falar com o médico ou a médica',
+    tituloQuiz: 'Algo no corpo mudou e você não sabe se é “coisa boba”?',
     subtitulo:
-      'Só reflexão. Em emergência (dor forte, falta de ar, sangramento intenso) ligue 192 ou vá ao pronto-socorro.',
+      'Só reflexão. Emergência (dor forte, falta de ar, sangramento intenso): ligue 192 ou vá ao pronto-socorro.',
     perguntas: [
       {
         id: 'p1',
@@ -162,8 +162,8 @@ const NICHOS: MedDemoNichoClienteConfig[] = [
   {
     value: 'cronico',
     label: 'Condição crônica ou uso de medicação',
-    tituloQuiz: 'Antes de falar com o médico ou a médica',
-    subtitulo: 'Organizar informação para a consulta. Não muda prescrição.',
+    tituloQuiz: 'Condição crônica e a conversa com o médico ainda patina?',
+    subtitulo: 'Linha do tempo e foco em poucos toques. Não muda prescrição.',
     perguntas: [
       {
         id: 'p1',
@@ -206,8 +206,8 @@ const NICHOS: MedDemoNichoClienteConfig[] = [
   {
     value: 'encaminhamento',
     label: 'Encaminhamento ou segunda opinião',
-    tituloQuiz: 'Antes de falar com o médico ou a médica',
-    subtitulo: 'Clarear contexto. Não substitui avaliação especializada.',
+    tituloQuiz: 'Exame ou encaminhamento na mão e dúvida antes da volta?',
+    subtitulo: 'Contexto organizado para a próxima conversa. Não substitui avaliação especializada.',
     perguntas: [
       {
         id: 'p1',
@@ -250,8 +250,8 @@ const NICHOS: MedDemoNichoClienteConfig[] = [
   {
     value: 'familia',
     label: 'Saúde de familiar (criança ou idoso)',
-    tituloQuiz: 'Antes de falar com o médico ou a médica',
-    subtitulo: 'Quem responde organiza o contexto para a consulta. Não é pediatria/geriatria online.',
+    tituloQuiz: 'Cuidar da saúde de alguém da família está mais pesado que deveria?',
+    subtitulo: 'Quem responde organiza o contexto para a consulta. Não é atendimento pediátrico ou geriátrico online.',
     perguntas: [
       {
         id: 'p1',

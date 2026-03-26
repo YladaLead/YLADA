@@ -20,10 +20,13 @@ import {
 } from '@/lib/fitness-demo-context'
 import { trackEvent } from '@/lib/analytics-events'
 
+const CADASTRO_POS_DEMO_HREF = '/pt/cadastro?area=fitness'
+
 export default function FitnessDemoClienteContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const nichoParam = searchParams.get('nicho')
+  const origemQuiz = searchParams.get('origem') === 'quiz'
 
   const configFromUrl = useMemo(() => getFitnessDemoClienteConfig(nichoParam), [nichoParam])
 
@@ -154,22 +157,24 @@ export default function FitnessDemoClienteContent() {
             <span className="text-xs text-gray-400 uppercase tracking-wider">Simulação</span>
           </div>
         </header>
-        <main className="flex-1 px-4 py-8 max-w-lg mx-auto w-full flex flex-col estetica-safe-main-bottom">
-          <div className="rounded-2xl border border-emerald-200 bg-emerald-50/90 p-5 mb-6">
-            <p className="text-sm font-semibold text-emerald-950 mb-2">No seu link, a pessoa recebe um direcionamento</p>
-            <p className="text-sm text-emerald-900/95 leading-relaxed mb-3">
-              Na jornada real, o conteúdo conversa com o que ela respondeu. Aqui é só demonstração:{' '}
-              <span className="font-semibold">não é diagnóstico, laudo nem prescrição de exercício clínico</span>.
-            </p>
-            <p className="text-sm text-emerald-900/95 leading-relaxed">
-              A ideia é ela <span className="font-semibold">organizar objetivo e rotina</span>, chegar com mais{' '}
-              <span className="font-semibold">contexto</span> e facilitar a <span className="font-semibold">primeira
-              conversa</span> com você.
+        <main className="flex-1 px-4 py-8 max-w-lg mx-auto w-full flex flex-col estetica-safe-main-bottom space-y-10">
+          <div className="space-y-5 text-center">
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-900 leading-snug">
+              É assim que a pessoa chega até você
+            </h1>
+            <div className="space-y-1.5 text-base sm:text-lg text-gray-800 font-medium leading-snug">
+              <p>já entendendo melhor</p>
+              <p>já mais decidida</p>
+              <p className="text-gray-900">e muito mais pronta pra fechar</p>
+            </div>
+            <p className="text-sm text-gray-700 font-medium leading-relaxed max-w-md mx-auto pt-1">
+              Pelas respostas, ela fica com mais clareza, mais decidida a mudar o que precisa e com mais vontade de te
+              chamar no WhatsApp pra fechar com você.
             </p>
           </div>
 
           <div
-            className="rounded-xl border-2 border-dashed border-green-200 bg-green-50/80 p-4 mb-6"
+            className="rounded-xl border-2 border-dashed border-green-200 bg-green-50/80 p-4"
             role="group"
             aria-label="Modelo do botão de WhatsApp no link de fitness"
           >
@@ -179,31 +184,40 @@ export default function FitnessDemoClienteContent() {
             >
               WhatsApp (modelo)
             </div>
-            <p className="mt-4 text-sm text-gray-700 leading-relaxed text-left">
-              <span className="font-semibold text-gray-900">No seu link:</span> depois do fluxo, ela toca aqui e abre o{' '}
-              <span className="font-medium">seu</span> WhatsApp. A mensagem já vem alinhada ao que ela respondeu.
+            <p className="mt-3 text-sm text-gray-700 text-center leading-relaxed">
+              No seu link, ela toca aqui e abre <span className="font-semibold">seu</span> WhatsApp com mensagem alinhada ao
+              que viu.
             </p>
           </div>
 
-          <h1 className="text-xl font-bold text-gray-900 mb-2">Como a mensagem chega pra você</h1>
-          <p className="text-sm text-gray-700 leading-relaxed mb-4">
-            Do seu lado: quando chega mensagem no <span className="font-semibold">seu WhatsApp</span>, ela já traz o{' '}
-            <span className="font-semibold">resultado dela</span> na conversa. Você ganha{' '}
-            <span className="font-semibold">contexto</span> para montar plano ou aula experimental e reduzir troca vaga só
-            de <span className="font-semibold">mensalidade ou “me manda um treino”</span>.
-          </p>
-          <p className="text-sm text-gray-700 leading-relaxed mb-8">
-            Isso ajuda a <span className="font-semibold">filtrar curiosos</span> e{' '}
-            <span className="font-semibold">preparar</span> quem tem disposição real para treinar com método.
-          </p>
-
-          <button
-            type="button"
-            onClick={continuarTour}
-            className="w-full min-h-[48px] rounded-xl bg-blue-600 text-white font-semibold hover:bg-blue-700 shadow-sm shadow-blue-900/15"
-          >
-            Continuar para entender mais
-          </button>
+          {origemQuiz ? (
+            <div className="space-y-3 pt-2">
+              <Link
+                href={CADASTRO_POS_DEMO_HREF}
+                onClick={() =>
+                  trackEvent('fitness_cadastro_promo_cta', { area: 'fitness', origem: 'quiz_exemplo_cliente' })
+                }
+                className="flex w-full flex-col min-h-[58px] rounded-2xl bg-blue-600 px-5 py-3.5 text-center text-white hover:bg-blue-700 shadow-lg shadow-blue-600/35 items-center justify-center gap-0.5 leading-tight"
+              >
+                <span className="text-lg font-bold inline-flex items-center gap-2">
+                  <span aria-hidden>👉</span>
+                  Começar agora
+                </span>
+                <span className="text-sm font-semibold text-white/95 tracking-wide">é gratuito</span>
+              </Link>
+              <p className="text-center text-sm text-gray-600 leading-relaxed px-1">
+                Crie seu link e comece a atrair pessoas mais prontas em menos de 1 minuto.
+              </p>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={continuarTour}
+              className="w-full min-h-[52px] rounded-2xl bg-blue-600 text-white text-base font-bold hover:bg-blue-700 shadow-lg shadow-blue-600/30"
+            >
+              Continuar para entender mais
+            </button>
+          )}
         </main>
       </div>
     )
@@ -224,9 +238,10 @@ export default function FitnessDemoClienteContent() {
       </header>
 
       <main className="flex-1 px-4 py-6 max-w-lg mx-auto w-full flex flex-col estetica-safe-main-bottom">
-        <p className="text-xs font-semibold uppercase tracking-wider text-sky-700 bg-sky-50 border border-sky-100 rounded-lg px-3 py-2 mb-4 text-center leading-snug">
-          Fluxo como a pessoa veria · {cfg.label}
+        <p className="text-xs font-semibold uppercase tracking-wider text-sky-700 bg-sky-50 border border-sky-100 rounded-lg px-3 py-2 mb-1 text-center leading-snug">
+          Isso é o que a pessoa veria
         </p>
+        <p className="text-center text-xs text-gray-500 mb-4">{cfg.label}</p>
 
         <div className="text-center mb-6">
           <h1 className="text-lg sm:text-xl font-bold text-gray-900 mb-1">{cfg.tituloQuiz}</h1>

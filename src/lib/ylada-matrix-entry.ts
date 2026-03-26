@@ -1,14 +1,12 @@
 /**
- * Links do hub /pt/segmentos → quiz standard (Estética) ou entrada só-nicho (Med/Psi)
- * em /pt/entrada/{area}, com handoff antes da landing da área.
+ * Links do hub /pt/segmentos → funil matriz em /pt/entrada/{area} quando o motor standard está ativo.
  */
 
 import { areaUsesStandardPublicFlowMotor } from '@/config/ylada-public-flow-registry'
-import { supportsMatrixEntradaNicho } from '@/lib/ylada-matrix-entrada-fallback'
 
-/** Destino ao tocar no segmento no piloto: /pt/entrada/{id} quando há funil matriz ou pack só-nicho. */
+/** Destino ao tocar no segmento: /pt/entrada/{id} com handoff antes da landing pública da área. */
 export function getMatrixHubHrefForArea(areaId: string): string {
-  if (areaUsesStandardPublicFlowMotor(areaId) || supportsMatrixEntradaNicho(areaId)) {
+  if (areaUsesStandardPublicFlowMotor(areaId)) {
     return `/pt/entrada/${areaId}`
   }
   return `/pt/${areaId}`

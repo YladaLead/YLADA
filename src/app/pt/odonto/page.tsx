@@ -1,12 +1,26 @@
+import { Suspense } from 'react'
 import type { Metadata } from 'next'
-import OdontoEntradaSocraticaContent from './OdontoEntradaSocraticaContent'
+import OdontoQuizPublicContent from './quiz/OdontoQuizPublicContent'
 
 export const metadata: Metadata = {
   title: 'Odontologia | YLADA',
   description:
-    'Preço no escuro, WhatsApp e paciente que some? Em poucos passos: mais clareza antes do contato e menos esforço pra você, com o Noel.',
+    'Menos ida e volta no WhatsApp, pacientes mais preparados: quiz rápido e fluxo como seu paciente veria, com o Noel.',
 }
 
+function OdontoEntradaFallback() {
+  return (
+    <div className="min-h-[100dvh] flex items-center justify-center bg-white">
+      <p className="text-gray-500 text-sm">Carregando…</p>
+    </div>
+  )
+}
+
+/** Entrada pública matriz — paridade com Estética/Nutri. */
 export default function OdontoPublicEntryPage() {
-  return <OdontoEntradaSocraticaContent />
+  return (
+    <Suspense fallback={<OdontoEntradaFallback />}>
+      <OdontoQuizPublicContent entradaComNicho />
+    </Suspense>
+  )
 }

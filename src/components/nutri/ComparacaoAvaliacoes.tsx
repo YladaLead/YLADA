@@ -146,8 +146,7 @@ export default function ComparacaoAvaliacoes({
     setComparacao(comparacaoData)
   }
 
-  // Pedir análise completa da LYA
-  const pedirAnaliseLya = async () => {
+  const pedirAnaliseNoel = async () => {
     if (!comparacao || !avaliacaoAtual || !avaliacaoAnterior) return
 
     setLoadingLya(true)
@@ -187,7 +186,7 @@ Forneça uma análise COMPLETA E DETALHADA incluindo:
 
 Seja profissional, detalhada, motivadora quando apropriado, e forneça insights acionáveis.`
 
-      const response = await fetch('/api/nutri/lya', {
+      const response = await fetch('/api/nutri/noel', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -199,8 +198,8 @@ Seja profissional, detalhada, motivadora quando apropriado, e forneça insights 
         setLyaAnalise(data.response || 'Não foi possível gerar análise.')
       }
     } catch (error) {
-      console.error('Erro ao pedir análise LYA:', error)
-      setLyaAnalise('Erro ao conectar com a LYA.')
+      console.error('Erro ao pedir análise (Noel):', error)
+      setLyaAnalise('Erro ao conectar com o Noel.')
     } finally {
       setLoadingLya(false)
     }
@@ -366,16 +365,16 @@ Seja profissional, detalhada, motivadora quando apropriado, e forneça insights 
 
         {/* Content */}
         <div className="flex-1 overflow-y-auto p-6">
-          {/* LYA Análise Completa */}
+          {/* Análise completa (Noel) */}
           <div className="mb-6 bg-gradient-to-r from-purple-50 to-blue-50 border-2 border-purple-200 rounded-lg p-5">
             <div className="flex items-start space-x-3">
               <div className="w-12 h-12 bg-purple-600 rounded-full flex items-center justify-center flex-shrink-0">
-                <span className="text-white font-bold">LYA</span>
+                <span className="text-white font-bold">Noel</span>
               </div>
               <div className="flex-1">
-                <h3 className="text-lg font-bold text-gray-900 mb-2">Análise Completa da LYA</h3>
+                <h3 className="text-lg font-bold text-gray-900 mb-2">Análise completa (Noel)</h3>
                 <p className="text-sm text-gray-600 mb-3">
-                  Deixe a LYA fazer uma análise profissional completa desta evolução
+                  Peça ao Noel uma análise profissional completa desta evolução
                 </p>
                 
                 {lyaAnalise && (
@@ -386,21 +385,21 @@ Seja profissional, detalhada, motivadora quando apropriado, e forneça insights 
                 
                 <button
                   type="button"
-                  onClick={pedirAnaliseLya}
+                  onClick={pedirAnaliseNoel}
                   disabled={loadingLya}
                   className="px-5 py-2.5 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium disabled:opacity-50 flex items-center gap-2"
                 >
                   {loadingLya ? (
                     <>
                       <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                      Analisando com LYA...
+                      Analisando com o Noel...
                     </>
                   ) : (
                     <>
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
-                      Gerar Análise Completa com LYA
+                      Gerar análise completa com o Noel
                     </>
                   )}
                 </button>

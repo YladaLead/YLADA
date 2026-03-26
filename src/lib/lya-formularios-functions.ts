@@ -79,7 +79,7 @@ export async function executeLyaFormulariosFunction(
   try {
     switch (functionName) {
       case 'criarFormulario': {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/nutri/lya/criarFormulario`, {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/nutri/noel/criarFormulario`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -103,7 +103,7 @@ export async function executeLyaFormulariosFunction(
       }
 
       case 'resumirRespostas': {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/nutri/lya/resumirRespostas`, {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/nutri/noel/resumirRespostas`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -129,7 +129,7 @@ export async function executeLyaFormulariosFunction(
       }
 
       case 'identificarPadroes': {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/nutri/lya/identificarPadroes`, {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/nutri/noel/identificarPadroes`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({

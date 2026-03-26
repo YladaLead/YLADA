@@ -4,11 +4,31 @@
  */
 
 import { getYladaAreaPublicEntryMode } from '@/config/ylada-areas'
+import { buildCoachPublicFlowConfig } from '@/config/ylada-public-flow-coach'
 import { buildEsteticaPublicFlowConfig } from '@/config/ylada-public-flow-estetica'
+import { buildFitnessPublicFlowConfig } from '@/config/ylada-public-flow-fitness'
+import { buildMedPublicFlowConfig } from '@/config/ylada-public-flow-med'
+import { buildNutraPublicFlowConfig } from '@/config/ylada-public-flow-nutra'
+import { buildNutriPublicFlowConfig } from '@/config/ylada-public-flow-nutri'
+import { buildOdontoPublicFlowConfig } from '@/config/ylada-public-flow-odonto'
+import { buildPerfumariaPublicFlowConfig } from '@/config/ylada-public-flow-perfumaria'
+import { buildPsiPublicFlowConfig } from '@/config/ylada-public-flow-psi'
+import { buildPsicanalisePublicFlowConfig } from '@/config/ylada-public-flow-psicanalise'
+import { buildSellerPublicFlowConfig } from '@/config/ylada-public-flow-seller'
 import type { PublicFlowConfig } from '@/config/ylada-public-flow-types'
 
 const CONFIG_BY_AREA: Record<string, () => PublicFlowConfig> = {
+  coach: buildCoachPublicFlowConfig,
   estetica: buildEsteticaPublicFlowConfig,
+  fitness: buildFitnessPublicFlowConfig,
+  med: buildMedPublicFlowConfig,
+  nutra: buildNutraPublicFlowConfig,
+  nutri: buildNutriPublicFlowConfig,
+  odonto: buildOdontoPublicFlowConfig,
+  perfumaria: buildPerfumariaPublicFlowConfig,
+  psi: buildPsiPublicFlowConfig,
+  psicanalise: buildPsicanalisePublicFlowConfig,
+  seller: buildSellerPublicFlowConfig,
 }
 
 const configCache = new Map<string, PublicFlowConfig>()
