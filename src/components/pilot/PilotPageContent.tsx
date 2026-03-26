@@ -6,13 +6,14 @@ import { useState } from 'react'
 import YLADALogo from '@/components/YLADALogo'
 import { INSTITUTIONAL_AREAS } from '@/config/institutional-areas'
 import { useTranslations } from '@/hooks/useTranslations'
+import { getMatrixHubHrefForArea } from '@/lib/ylada-matrix-entry'
 
 /** Itens só por solicitação — no piloto entram apenas pelo campo livre. */
 const PILOT_EXCLUDED_IDS = new Set(['profissional-liberal', 'vendedores-geral'])
 
-/** Entrada por segmento: /pt/{id} (fluxo progressivo; longo em /pt/{id}/como-funciona). */
+/** Entrada por segmento: funil matriz (ex.: /pt/entrada/estetica) ou /pt/{id}. */
 function pilotHrefForArea(areaId: string): string {
-  return `/pt/${areaId}`
+  return getMatrixHubHrefForArea(areaId)
 }
 
 /**

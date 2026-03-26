@@ -1,8 +1,9 @@
 /**
  * Registry do funil público por código de área da matriz YLADA.
- * Fase 1: apenas estetica. Novas áreas: buildXPublicFlowConfig + entrada no mapa.
+ * Fase 1: motor + Estética. Fase 2: alinhado a YLADA_AREAS.publicEntry === 'standard'.
  */
 
+import { getYladaAreaPublicEntryMode } from '@/config/ylada-areas'
 import { buildEsteticaPublicFlowConfig } from '@/config/ylada-public-flow-estetica'
 import type { PublicFlowConfig } from '@/config/ylada-public-flow-types'
 
@@ -22,4 +23,9 @@ export function getPublicFlowConfig(areaCodigo: string): PublicFlowConfig | null
     configCache.set(areaCodigo, cached)
   }
   return cached
+}
+
+/** Área declarada como standard no registro YLADA e com config de funil carregável. */
+export function areaUsesStandardPublicFlowMotor(areaCodigo: string): boolean {
+  return getYladaAreaPublicEntryMode(areaCodigo) === 'standard' && getPublicFlowConfig(areaCodigo) != null
 }

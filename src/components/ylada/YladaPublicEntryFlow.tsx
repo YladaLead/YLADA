@@ -6,6 +6,7 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import YLADALogo from '@/components/YLADALogo'
 import { useAuth } from '@/contexts/AuthContext'
 import type { PublicFlowConfig } from '@/config/ylada-public-flow-types'
+import { clearPublicFlowHandoff, readPublicFlowHandoff } from '@/lib/ylada-public-flow-handoff'
 import { trackEvent } from '@/lib/analytics-events'
 
 export interface YladaPublicEntryFlowProps {
@@ -39,9 +40,32 @@ export default function YladaPublicEntryFlow({ config, entradaComNicho = false }
       setProfNicho(q)
       setStep(0)
       setAnswers({})
+    } else {
+      const handoff = readPublicFlowHandoff()
+      const slug = handoff?.nichoSlug ?? null
+      if (
+        handoff?.areaCodigo === config.areaCodigo &&
+        slug &&
+        isValidNicho(slug)
+      ) {
+        setProfNicho(slug)
+        setStep(0)
+        setAnswers({})
+        clearPublicFlowHandoff()
+        router.replace(`${pathPrefix}?${nichoQueryKey}=${encodeURIComponent(slug)}`, { scroll: false })
+      }
     }
     setUrlNichoSynced(true)
-  }, [entradaComNicho, searchParams, urlNichoSynced, nichoQueryKey, isValidNicho])
+  }, [
+    entradaComNicho,
+    searchParams,
+    urlNichoSynced,
+    nichoQueryKey,
+    isValidNicho,
+    config.areaCodigo,
+    pathPrefix,
+    router,
+  ])
 
   const quizQuestions = useMemo(
     () => config.resolveQuestions(entradaComNicho, profNicho),
@@ -275,8 +299,8 @@ export default function YladaPublicEntryFlow({ config, entradaComNicho = false }
                 </button>
               ))}
             </div>
-            <div className="pt-8 flex flex-col gap-2">
-              {step > 0 && (
+            {step > 0 && (
+              <div className="pt-8">
                 <button
                   type="button"
                   onClick={goBack}
@@ -284,25 +308,8 @@ export default function YladaPublicEntryFlow({ config, entradaComNicho = false }
                 >
                   ← Pergunta anterior
                 </button>
-              )}
-              <button
-                type="button"
-                onClick={() => {
-                  setProfNicho(null)
-                  setStep(0)
-                  setAnswers({})
-                  try {
-                    sessionStorage.removeItem(sessionStorageKey)
-                  } catch {
-                    /* ignore */
-                  }
-                  router.replace(pathPrefix, { scroll: false })
-                }}
-                className="w-full min-h-[44px] text-sm font-medium text-gray-400 hover:text-gray-700 py-2"
-              >
-                ← Trocar área de atuação
-              </button>
-            </div>
+              </div>
+            )}
           </div>
         )}
 

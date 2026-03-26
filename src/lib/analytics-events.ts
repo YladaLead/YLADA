@@ -81,6 +81,7 @@ export type AnalyticsEventName =
   | 'ylada_home_activation_compact_cta'
   | 'ylada_home_activation_compact_dismiss'
   | 'ylada_noel_home_expand'
+  | 'ylada_matrix_entrada_nicho'
 
 export interface AnalyticsEventPayload {
   area?: string

@@ -9,6 +9,14 @@
  */
 export type YladaSegmentCode = 'ylada' | 'med' | 'psi' | 'psicanalise' | 'odonto' | 'nutra' | 'nutri' | 'coach' | 'seller' | 'perfumaria' | 'estetica' | 'fitness'
 
+/**
+ * Funil público na entrada da área (quiz matriz / ylada.com → área).
+ * - `standard`: usa getPublicFlowConfig(codigo) + YladaPublicEntryFlow
+ * - `custom`: fluxo próprio (ex.: Nutri)
+ * - `none` ou omitido: sem funil unificado nesta fase
+ */
+export type YladaPublicEntryMode = 'none' | 'standard' | 'custom'
+
 export interface YladaAreaConfig {
   /** Código da área (rota). */
   codigo: string
@@ -18,6 +26,8 @@ export interface YladaAreaConfig {
   label: string
   /** Prefixo de path (matriz ylada: /pt; demais: /pt/{area}). */
   pathPrefix: string
+  /** @see YladaPublicEntryMode */
+  publicEntry?: YladaPublicEntryMode
 }
 
 /** Matriz central: pathPrefix /pt (idioma + funcionalidade; sem /ylada no path). */
@@ -31,7 +41,13 @@ export const YLADA_AREAS: YladaAreaConfig[] = [
   { codigo: 'coach', segment_code: 'coach', label: 'Coach', pathPrefix: '/pt/coach' },
   { codigo: 'perfumaria', segment_code: 'perfumaria', label: 'Perfumaria', pathPrefix: '/pt/perfumaria' },
   { codigo: 'seller', segment_code: 'seller', label: 'Vendedores', pathPrefix: '/pt/seller' },
-  { codigo: 'estetica', segment_code: 'estetica', label: 'Estética', pathPrefix: '/pt/estetica' },
+  {
+    codigo: 'estetica',
+    segment_code: 'estetica',
+    label: 'Estética',
+    pathPrefix: '/pt/estetica',
+    publicEntry: 'standard',
+  },
   { codigo: 'fitness', segment_code: 'fitness', label: 'Fitness', pathPrefix: '/pt/fitness' },
   { codigo: 'nutri', segment_code: 'nutri', label: 'Nutri', pathPrefix: '/pt/nutri' },
 ]
@@ -83,6 +99,20 @@ export const YLADA_MENU_ITEMS = YLADA_MENU_GROUPS.flatMap((g) => g.items)
 
 export function getYladaAreaPathPrefix(areaCodigo: string): string {
   return YLADA_AREAS.find((a) => a.codigo === areaCodigo)?.pathPrefix ?? `/pt/${areaCodigo}`
+}
+
+export function getYladaAreaConfig(areaCodigo: string): YladaAreaConfig | undefined {
+  return YLADA_AREAS.find((a) => a.codigo === areaCodigo)
+}
+
+/** Modo de entrada pública; omitido no registro = none. */
+export function getYladaAreaPublicEntryMode(areaCodigo: string): YladaPublicEntryMode {
+  return getYladaAreaConfig(areaCodigo)?.publicEntry ?? 'none'
+}
+
+/** Áreas com funil matriz registrado em getPublicFlowConfig (Fase 1+). */
+export function getYladaAreasWithStandardPublicEntry(): YladaAreaConfig[] {
+  return YLADA_AREAS.filter((a) => a.publicEntry === 'standard')
 }
 
 /**
