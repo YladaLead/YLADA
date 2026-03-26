@@ -5,12 +5,13 @@
  * Landing minimal anterior: /pt/medv2.
  */
 
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import { useRouter, usePathname } from 'next/navigation'
 import YLADALogo from '@/components/YLADALogo'
 import { useAuth } from '@/contexts/AuthContext'
 import { trackEvent } from '@/lib/analytics-events'
+import { clearPublicFlowHandoff, readPublicFlowHandoff } from '@/lib/ylada-public-flow-handoff'
 import {
   MED_DEMO_LOCAIS,
   MED_DEMO_CLIENTE_BASE_PATH,
@@ -210,6 +211,9 @@ export default function MedEntradaSocraticaContent() {
   const [demoPhase, setDemoPhase] = useState<'local' | 'nicho' | 'intro'>('local')
   const [demoLocalChoice, setDemoLocalChoice] = useState<string | null>(null)
   const [demoNichoChoice, setDemoNichoChoice] = useState<string | null>(null)
+  /** Nicho escolhido em /pt/entrada/med — aplicado na primeira abertura do modal (evita confundir com session antiga). */
+  const matrixPrefillNichoRef = useRef<string | null>(null)
+  const demoNichoChoiceRef = useRef<string | null>(null)
 
   const isMedRoot = pathname === '/pt/med' || pathname.startsWith('/pt/med?')
 
@@ -243,12 +247,30 @@ export default function MedEntradaSocraticaContent() {
   }, [demoOpen])
 
   useEffect(() => {
-    if (demoOpen) {
-      setDemoPhase('local')
-      setDemoLocalChoice(null)
-      setDemoNichoChoice(null)
-    }
+    if (!demoOpen) return
+    setDemoLocalChoice(null)
+    const pre = matrixPrefillNichoRef.current
+    matrixPrefillNichoRef.current = null
+    const valid = pre && MED_DEMO_CLIENTE_NICHOS.some((n) => n.value === pre)
+    setDemoNichoChoice(valid ? pre : null)
+    setDemoPhase('local')
   }, [demoOpen])
+
+  useEffect(() => {
+    demoNichoChoiceRef.current = demoNichoChoice
+  }, [demoNichoChoice])
+
+  useEffect(() => {
+    if (!isMedRoot) return
+    const h = readPublicFlowHandoff()
+    if (h?.areaCodigo !== 'med' || !h.nichoSlug) return
+    if (!MED_DEMO_CLIENTE_NICHOS.some((n) => n.value === h.nichoSlug)) {
+      clearPublicFlowHandoff()
+      return
+    }
+    clearPublicFlowHandoff()
+    matrixPrefillNichoRef.current = h.nichoSlug
+  }, [isMedRoot])
 
   useEffect(() => {
     if (!isMedRoot) return
@@ -277,7 +299,8 @@ export default function MedEntradaSocraticaContent() {
       /* storage indisponível */
     }
     setDemoLocalChoice(value)
-    setDemoPhase('nicho')
+    if (demoNichoChoiceRef.current) setDemoPhase('intro')
+    else setDemoPhase('nicho')
   }, [])
 
   const pickDemoNicho = useCallback((value: string) => {

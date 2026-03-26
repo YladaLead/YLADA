@@ -7,6 +7,7 @@ import YLADALogo from '@/components/YLADALogo'
 import { getYladaAreaConfig, getYladaAreaPathPrefix } from '@/config/ylada-areas'
 import { getPublicFlowConfig, areaUsesStandardPublicFlowMotor } from '@/config/ylada-public-flow-registry'
 import { useAuth } from '@/contexts/AuthContext'
+import { getMatrixEntradaNichoPack } from '@/lib/ylada-matrix-entrada-fallback'
 import { savePublicFlowHandoff } from '@/lib/ylada-public-flow-handoff'
 import { trackEvent } from '@/lib/analytics-events'
 
@@ -15,9 +16,14 @@ export default function PtEntradaAreaClient({ areaCodigo }: { areaCodigo: string
   const { user, loading } = useAuth()
   const [ready, setReady] = useState(false)
 
-  const config = getPublicFlowConfig(areaCodigo)
+  const standard =
+    areaUsesStandardPublicFlowMotor(areaCodigo) ? getPublicFlowConfig(areaCodigo) : null
+  const fallback = getMatrixEntradaNichoPack(areaCodigo)
   const areaMeta = getYladaAreaConfig(areaCodigo)
   const pathPrefix = getYladaAreaPathPrefix(areaCodigo)
+
+  const hasStandard = !!(standard && standard.nichos.length > 0)
+  const hasFallback = !!fallback
 
   useEffect(() => {
     if (loading) return
@@ -25,32 +31,47 @@ export default function PtEntradaAreaClient({ areaCodigo }: { areaCodigo: string
       router.replace('/pt/painel')
       return
     }
-    if (!areaUsesStandardPublicFlowMotor(areaCodigo) || !config) {
-      router.replace(pathPrefix)
-      return
-    }
-    if (config.nichos.length === 0) {
+    if (!hasStandard && !hasFallback) {
       router.replace(pathPrefix)
       return
     }
     setReady(true)
-  }, [loading, user, router, areaCodigo, config, pathPrefix])
+  }, [loading, user, router, hasStandard, hasFallback, pathPrefix])
 
   const onPickNicho = useCallback(
     (nichoSlug: string) => {
-      if (!config?.isValidNicho(nichoSlug)) return
-      savePublicFlowHandoff({
-        areaCodigo,
-        nichoSlug,
-        source: 'matrix_entrada',
-      })
-      trackEvent('ylada_matrix_entrada_nicho', { area: areaCodigo, opcao: nichoSlug })
-      router.push(pathPrefix)
+      if (standard) {
+        if (!standard.isValidNicho(nichoSlug)) return
+        savePublicFlowHandoff({
+          areaCodigo,
+          nichoSlug,
+          source: 'matrix_entrada',
+        })
+        trackEvent('ylada_matrix_entrada_nicho', { area: areaCodigo, opcao: nichoSlug })
+        router.push(standard.pathPrefix)
+        return
+      }
+      if (fallback) {
+        if (!fallback.isValidNicho(nichoSlug)) return
+        savePublicFlowHandoff({
+          areaCodigo,
+          nichoSlug,
+          source: 'matrix_entrada',
+        })
+        trackEvent('ylada_matrix_entrada_nicho', { area: areaCodigo, opcao: nichoSlug })
+        router.push(fallback.destinoPathPrefix)
+      }
     },
-    [areaCodigo, config, pathPrefix, router]
+    [areaCodigo, standard, fallback, router]
   )
 
-  if (loading || !ready || !config) {
+  const title = standard?.nichoPickerTitle ?? fallback?.nichoPickerTitle ?? ''
+  const subtitle = standard
+    ? 'Em seguida você responde algumas perguntas rápidas para ver como o YLADA se aplica ao seu dia a dia.'
+    : (fallback?.subtitle ?? '')
+  const nichos = standard?.nichos ?? fallback?.nichos ?? []
+
+  if (loading || !ready || nichos.length === 0) {
     return (
       <div className="min-h-screen bg-white flex flex-col">
         <header className="shrink-0 border-b border-gray-100">
@@ -90,13 +111,11 @@ export default function PtEntradaAreaClient({ areaCodigo }: { areaCodigo: string
             {areaMeta ? (
               <p className="text-xs font-medium uppercase tracking-wide text-gray-500">{areaMeta.label}</p>
             ) : null}
-            <h1 className="text-lg font-semibold text-gray-900">{config.nichoPickerTitle}</h1>
-            <p className="text-xs text-gray-600 sm:text-sm">
-              Em seguida você responde algumas perguntas rápidas para ver como o YLADA se aplica ao seu dia a dia.
-            </p>
+            <h1 className="text-lg font-semibold text-gray-900">{title}</h1>
+            <p className="text-xs text-gray-600 sm:text-sm">{subtitle}</p>
 
             <ul className="flex flex-col gap-2 pt-2">
-              {config.nichos.map((opt) => (
+              {nichos.map((opt) => (
                 <li key={opt.value}>
                   <button
                     type="button"

@@ -5,12 +5,13 @@
  * Landing minimal anterior: /pt/psiv2.
  */
 
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import { useRouter, usePathname } from 'next/navigation'
 import YLADALogo from '@/components/YLADALogo'
 import { useAuth } from '@/contexts/AuthContext'
 import { trackEvent } from '@/lib/analytics-events'
+import { clearPublicFlowHandoff, readPublicFlowHandoff } from '@/lib/ylada-public-flow-handoff'
 import {
   PSI_DEMO_LOCAIS,
   PSI_DEMO_CLIENTE_BASE_PATH,
@@ -210,6 +211,8 @@ export default function PsiEntradaSocraticaContent() {
   const [demoPhase, setDemoPhase] = useState<'local' | 'nicho' | 'intro'>('local')
   const [demoLocalChoice, setDemoLocalChoice] = useState<string | null>(null)
   const [demoNichoChoice, setDemoNichoChoice] = useState<string | null>(null)
+  const matrixPrefillNichoRef = useRef<string | null>(null)
+  const demoNichoChoiceRef = useRef<string | null>(null)
 
   const isPsiRoot = pathname === '/pt/psi' || pathname.startsWith('/pt/psi?')
 
@@ -243,12 +246,30 @@ export default function PsiEntradaSocraticaContent() {
   }, [demoOpen])
 
   useEffect(() => {
-    if (demoOpen) {
-      setDemoPhase('local')
-      setDemoLocalChoice(null)
-      setDemoNichoChoice(null)
-    }
+    if (!demoOpen) return
+    setDemoLocalChoice(null)
+    const pre = matrixPrefillNichoRef.current
+    matrixPrefillNichoRef.current = null
+    const valid = pre && PSI_DEMO_CLIENTE_NICHOS.some((n) => n.value === pre)
+    setDemoNichoChoice(valid ? pre : null)
+    setDemoPhase('local')
   }, [demoOpen])
+
+  useEffect(() => {
+    demoNichoChoiceRef.current = demoNichoChoice
+  }, [demoNichoChoice])
+
+  useEffect(() => {
+    if (!isPsiRoot) return
+    const h = readPublicFlowHandoff()
+    if (h?.areaCodigo !== 'psi' || !h.nichoSlug) return
+    if (!PSI_DEMO_CLIENTE_NICHOS.some((n) => n.value === h.nichoSlug)) {
+      clearPublicFlowHandoff()
+      return
+    }
+    clearPublicFlowHandoff()
+    matrixPrefillNichoRef.current = h.nichoSlug
+  }, [isPsiRoot])
 
   useEffect(() => {
     if (!isPsiRoot) return
@@ -277,7 +298,8 @@ export default function PsiEntradaSocraticaContent() {
       /* storage indisponível */
     }
     setDemoLocalChoice(value)
-    setDemoPhase('nicho')
+    if (demoNichoChoiceRef.current) setDemoPhase('intro')
+    else setDemoPhase('nicho')
   }, [])
 
   const pickDemoNicho = useCallback((value: string) => {
