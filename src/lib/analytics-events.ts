@@ -25,6 +25,7 @@ export type AnalyticsEventName =
   | 'estetica_demo_cliente_concluiu'
   | 'estetica_quiz_step'
   | 'estetica_quiz_concluiu'
+  | 'estetica_quiz_ver_pratica'
   | 'nutri_landing_escolha_inicial'
   | 'nutri_demo_local'
   | 'nutri_demo_inicio'

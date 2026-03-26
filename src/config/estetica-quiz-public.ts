@@ -15,6 +15,8 @@ export interface EsteticaQuizQuestion {
 }
 
 export const ESTETICA_QUIZ_CADASTRO_HREF = '/pt/cadastro?area=estetica'
+/** Após o quiz: login simulado + local + nicho → exemplo-cliente (origem=quiz). */
+export const ESTETICA_QUIZ_VER_PRATICA_HREF = '/pt/estetica/quiz/ver-pratica'
 export const ESTETICA_QUIZ_LOGIN_HREF = '/pt/estetica/login'
 
 export const ESTETICA_QUIZ_QUESTIONS: EsteticaQuizQuestion[] = [
@@ -86,5 +88,5 @@ export const ESTETICA_QUIZ_RESULT_COPY = {
     'Você vai entender na hora quando ver',
   ] as const,
   ctaPrimary: 'Começar agora grátis',
-  ctaMicro: 'leva menos de 1 minuto · sem precisar configurar nada',
+  ctaMicro: 'simulação rápida, sem senha · em seguida você vê o fluxo como sua cliente',
 } as const

@@ -7,10 +7,10 @@ import YLADALogo from '@/components/YLADALogo'
 import { useAuth } from '@/contexts/AuthContext'
 import { trackEvent } from '@/lib/analytics-events'
 import {
-  ESTETICA_QUIZ_CADASTRO_HREF,
   ESTETICA_QUIZ_LOGIN_HREF,
   ESTETICA_QUIZ_QUESTIONS,
   ESTETICA_QUIZ_RESULT_COPY,
+  ESTETICA_QUIZ_VER_PRATICA_HREF,
 } from '@/config/estetica-quiz-public'
 
 const STORAGE_KEY = 'ylada_estetica_quiz_respostas_v1'
@@ -199,10 +199,10 @@ export default function EsteticaQuizPublicContent() {
                 </div>
               </div>
               <div className="pt-4 sm:pt-6 flex flex-col items-stretch gap-3">
-                <Link
-                  href={ESTETICA_QUIZ_CADASTRO_HREF}
-                  className="w-full min-h-[58px] sm:min-h-[60px] rounded-2xl bg-blue-600 px-6 py-4 text-center text-lg sm:text-xl font-bold text-white hover:bg-blue-700 shadow-lg shadow-blue-600/35 active:scale-[0.99] transition-all inline-flex items-center justify-center gap-2.5"
-                >
+              <Link
+                href={ESTETICA_QUIZ_VER_PRATICA_HREF}
+                className="w-full min-h-[58px] sm:min-h-[60px] rounded-2xl bg-blue-600 px-6 py-4 text-center text-lg sm:text-xl font-bold text-white hover:bg-blue-700 shadow-lg shadow-blue-600/35 active:scale-[0.99] transition-all inline-flex items-center justify-center gap-2.5"
+              >
                   <span aria-hidden>👉</span>
                   {ESTETICA_QUIZ_RESULT_COPY.ctaPrimary}
                 </Link>
