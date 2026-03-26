@@ -215,12 +215,12 @@ Seja breve e objetiva.`
         </div>
       </div>
 
-      {/* LYA Suggestion sobre reavaliação */}
+      {/* Sugestão Noel sobre reavaliação */}
       {avaliacoes.length > 0 && (
         <div className="bg-gradient-to-r from-purple-50 to-blue-50 border border-purple-200 rounded-lg p-4">
           <div className="flex items-start space-x-3">
             <div className="w-10 h-10 bg-purple-600 rounded-full flex items-center justify-center flex-shrink-0">
-              <span className="text-white font-bold text-sm">LYA</span>
+              <span className="text-white font-bold text-sm">Noel</span>
             </div>
             <div className="flex-1">
               <h4 className="font-semibold text-gray-900 mb-1">Sugestão de Reavaliação</h4>
@@ -243,14 +243,14 @@ Seja breve e objetiva.`
                 {loadingLya ? (
                   <>
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                    Consultando LYA...
+                    Consultando o Noel...
                   </>
                 ) : (
                   <>
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
-                    Perguntar à LYA
+                    Perguntar ao Noel
                   </>
                 )}
               </button>

@@ -205,7 +205,7 @@ export default function PDF03ChecklistDia7() {
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-blue-600 mt-1">•</span>
-                <span>Use a LYA para tirar dúvidas pontuais.</span>
+                <span>Use o Noel para tirar dúvidas pontuais.</span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-blue-600 mt-1">•</span>

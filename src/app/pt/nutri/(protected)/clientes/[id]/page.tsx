@@ -334,7 +334,6 @@ function ClienteDetalhesNutriContent() {
         </div>
       )}
 
-      {/* Widget da LYA - sempre visível */}
       <LyaChatWidget />
     </div>
   )
@@ -924,7 +923,7 @@ function EvolucaoTab({ cliente, clientId }: { cliente: any; clientId: string }) 
   const [carregando, setCarregando] = useState(true)
   const [erro, setErro] = useState<string | null>(null)
   const [mostrarModal, setMostrarModal] = useState(false)
-  const [lyaInsightMessage, setLyaInsightMessage] = useState<string | null>(null)
+  const [noelInsightMessage, setNoelInsightMessage] = useState<string | null>(null)
 
   // Carregar evoluções
   const carregarEvolucoes = async () => {
@@ -960,11 +959,10 @@ function EvolucaoTab({ cliente, clientId }: { cliente: any; clientId: string }) 
     setMostrarModal(false)
   }
 
-  // Handler para mensagem de insight da LYA
-  const handleLyaInsight = (message: string) => {
-    setLyaInsightMessage(message)
+  const handleNoelInsight = (message: string) => {
+    setNoelInsightMessage(message)
     // Limpar mensagem após 5 segundos
-    setTimeout(() => setLyaInsightMessage(null), 5000)
+    setTimeout(() => setNoelInsightMessage(null), 5000)
   }
 
   if (carregando) {
@@ -1004,18 +1002,17 @@ function EvolucaoTab({ cliente, clientId }: { cliente: any; clientId: string }) 
           </div>
         )}
 
-        {/* Mensagem de Insight da LYA */}
-        {lyaInsightMessage && (
+        {noelInsightMessage && (
           <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-4 flex items-start gap-3 animate-fade-in">
             <div className="flex-shrink-0">
               <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center">
-                <span className="text-white font-bold">LYA</span>
+                <span className="text-white font-bold">Noel</span>
               </div>
             </div>
             <div className="flex-1">
-              <p className="text-sm font-medium text-blue-900 mb-1">Insight da LYA</p>
-              <p className="text-sm text-blue-700">{lyaInsightMessage}</p>
-              <p className="text-xs text-blue-600 mt-2">💬 Clique no widget da LYA para conversar sobre essa evolução</p>
+              <p className="text-sm font-medium text-blue-900 mb-1">Insight do Noel</p>
+              <p className="text-sm text-blue-700">{noelInsightMessage}</p>
+              <p className="text-xs text-blue-600 mt-2">💬 Abra o chat do Noel para conversar sobre essa evolução</p>
             </div>
           </div>
         )}
@@ -1062,7 +1059,7 @@ function EvolucaoTab({ cliente, clientId }: { cliente: any; clientId: string }) 
         onClose={() => setMostrarModal(false)}
         clientId={clientId}
         onSuccess={handleEvolucaoSalva}
-        onLyaInsight={handleLyaInsight}
+        onNoelInsight={handleNoelInsight}
       />
     </>
   )

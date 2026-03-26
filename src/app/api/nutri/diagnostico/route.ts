@@ -91,7 +91,7 @@ export async function POST(request: NextRequest) {
       success: true,
       diagnostico,
       perfil_estrategico: perfil || perfilEstrategico,
-      message: 'Diagnóstico salvo com sucesso. A LYA está analisando seus dados...'
+      message: 'Diagnóstico salvo com sucesso. O Noel está analisando seus dados...'
     })
   } catch (error: any) {
     console.error('❌ Erro ao processar diagnóstico:', error)

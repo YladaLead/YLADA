@@ -285,7 +285,7 @@ export default function PDF04RotinaMinima() {
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-blue-600 mt-1">•</span>
-                <span>A LYA ajuda a adaptar quando necessário.</span>
+                <span>O Noel ajuda a adaptar quando necessário.</span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-blue-600 mt-1">•</span>

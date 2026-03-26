@@ -217,8 +217,8 @@ export default function NutriDescobrirPage() {
                   É um sistema que te guia.
                 </p>
                 <p className="text-lg text-gray-600 leading-relaxed mb-4">
-                  A LYA, uma mentora por IA, está lá quando você precisa. 
-                  Ela explica o que fazer, quando fazer, e por que fazer.
+                  O Noel, mentor por IA, está lá quando você precisa.
+                  Ele explica o que fazer, quando fazer, e por que fazer.
                 </p>
                 <p className="text-lg text-gray-600 leading-relaxed mb-6">
                   Você tem acesso a ferramentas prontas, formação que transforma, 
@@ -266,7 +266,7 @@ export default function NutriDescobrirPage() {
                   },
                   {
                     pergunta: 'E se eu não entender como usar?',
-                    resposta: 'A LYA está lá pra isso. Ela te guia, explica, e ajuda a focar no que é prioritário pro seu momento. Você não precisa descobrir sozinha.'
+                    resposta: 'O Noel está lá pra isso. Ele te guia, explica, e ajuda a focar no que é prioritário pro seu momento. Você não precisa descobrir sozinha.'
                   },
                   {
                     pergunta: 'Vai funcionar pra mim?',
@@ -274,7 +274,7 @@ export default function NutriDescobrirPage() {
                   },
                   {
                     pergunta: 'Preciso usar tudo de uma vez?',
-                    resposta: 'Não. O YLADA não é sobre usar tudo. É sobre usar o que você precisa, quando precisa. A LYA te ajuda a focar no que é prioritário.'
+                    resposta: 'Não. O YLADA não é sobre usar tudo. É sobre usar o que você precisa, quando precisa. O Noel te ajuda a focar no que é prioritário.'
                   },
                   {
                     pergunta: 'E se não funcionar?',
@@ -282,11 +282,11 @@ export default function NutriDescobrirPage() {
                   },
                   {
                     pergunta: 'E se eu não conseguir usar tudo? Vou ter desperdiçado meu dinheiro?',
-                    resposta: 'Você não precisa usar tudo. O YLADA não é sobre usar todas as ferramentas. É sobre usar as ferramentas certas, no momento certo. A LYA te ajuda a focar no que é prioritário para o seu momento atual. E com a garantia de 7 dias, você pode testar sem risco.'
+                    resposta: 'Você não precisa usar tudo. O YLADA não é sobre usar todas as ferramentas. É sobre usar as ferramentas certas, no momento certo. O Noel te ajuda a focar no que é prioritário para o seu momento atual. E com a garantia de 7 dias, você pode testar sem risco.'
                   },
                   {
                     pergunta: 'E se eu não tiver tempo para isso?',
-                    resposta: 'O YLADA foi feito para economizar seu tempo, não para consumir. A ideia é você trabalhar menos e ganhar mais. A LYA te guia para focar no que realmente importa, sem perder tempo com o que não faz diferença agora. O método foi pensado para nutricionistas que já têm uma rotina corrida.'
+                    resposta: 'O YLADA foi feito para economizar seu tempo, não para consumir. A ideia é você trabalhar menos e ganhar mais. O Noel te guia para focar no que realmente importa, sem perder tempo com o que não faz diferença agora. O método foi pensado para nutricionistas que já têm uma rotina corrida.'
                   }
                 ].map((item, index) => (
                   <div key={index} className="bg-white rounded-xl shadow-sm overflow-hidden">

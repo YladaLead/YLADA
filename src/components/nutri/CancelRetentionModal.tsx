@@ -36,7 +36,7 @@ const RETENTION_STRATEGY: Record<CancelReason, RetentionOffer> = {
   },
   'didnt_understand': {
     type: 'guided_tour',
-    message: 'Talvez a gente não tenha te mostrado o melhor caminho ainda. Quer que a LYA te guie em 5 minutos agora?',
+    message: 'Talvez a gente não tenha te mostrado o melhor caminho ainda. Quer que o Noel te guie em 5 minutos agora?',
     actionButton: 'Quero ajuda agora',
     secondaryButton: 'Cancelar'
   },
@@ -162,8 +162,7 @@ export default function CancelRetentionModal({
       
       // Redirecionar baseado no tipo de retenção
       if (retentionOffer.type === 'guided_tour') {
-        // Redirecionar para home com LYA aberto (via query param)
-        window.location.href = '/pt/nutri/home?lya=tour'
+        window.location.href = '/pt/nutri/home?noel=tour'
       } else if (retentionOffer.type === 'show_feature') {
         // Redirecionar para criar ferramenta
         window.location.href = '/pt/nutri/ferramentas/nova'

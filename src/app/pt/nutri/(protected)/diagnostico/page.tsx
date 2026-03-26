@@ -257,24 +257,6 @@ function NutriDiagnosticoContent() {
 
       console.log('✅ Diagnóstico salvo com sucesso!')
 
-      // Gerar primeira análise da LYA (não bloquear se falhar)
-      try {
-        console.log('🤖 Gerando análise da LYA...')
-        const lyaResponse = await fetch('/api/nutri/noel/analise', {
-          method: 'POST',
-          credentials: 'include'
-        })
-        
-        if (lyaResponse.ok) {
-          console.log('✅ Análise da LYA gerada!')
-        } else {
-          console.warn('⚠️ Erro ao gerar análise da LYA (não crítico)')
-        }
-      } catch (lyaError) {
-        console.warn('⚠️ Erro ao gerar análise da LYA (não crítico):', lyaError)
-        // Não bloquear - análise pode ser gerada depois
-      }
-
       // Redirecionar para home
       console.log('🔄 Redirecionando para home...')
       router.push('/pt/nutri/home')

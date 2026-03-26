@@ -21,7 +21,7 @@ export const MATRIX_PUBLIC_QUIZ_QUESTIONS_BASE: PublicFlowQuizQuestion[] = [
     options: [
       { value: 'agenda', label: 'A pessoa agenda ou retorna rápido' },
       { value: 'duvida', label: 'Fica em dúvida' },
-      { value: 'some', label: 'Some ou some o contato' },
+      { value: 'some', label: 'Some ou para de responder' },
     ],
   },
   {

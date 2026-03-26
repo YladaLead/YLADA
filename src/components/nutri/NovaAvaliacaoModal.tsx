@@ -135,8 +135,7 @@ export default function NovaAvaliacaoModal({
     return isNaN(parsed) ? null : parsed
   }
 
-  // Pedir sugestões da LYA
-  const pedirSugestoesLya = async () => {
+  const pedirSugestoesNoel = async () => {
     setLoadingLya(true)
     setLyaSuggestions(null)
     try {
@@ -176,8 +175,7 @@ Seja breve e prática.`
     }
   }
 
-  // Pedir interpretação da LYA
-  const pedirInterpretacaoLya = async () => {
+  const pedirInterpretacaoNoel = async () => {
     setLoadingLya(true)
     try {
       const dadosCompletos = {
@@ -418,15 +416,15 @@ Seja profissional, clara e objetiva.`
                 </div>
               </div>
 
-              {/* LYA Suggestions */}
+              {/* Sugestões Noel */}
               <div className="bg-gradient-to-r from-purple-50 to-blue-50 border border-purple-200 rounded-lg p-4">
                 <div className="flex items-start justify-between">
                   <div className="flex items-start space-x-3">
                     <div className="w-10 h-10 bg-purple-600 rounded-full flex items-center justify-center flex-shrink-0">
-                      <span className="text-white font-bold text-sm">LYA</span>
+                      <span className="text-white font-bold text-sm">Noel</span>
                     </div>
                     <div className="flex-1">
-                      <h4 className="font-semibold text-gray-900 mb-1">Ajuda da LYA</h4>
+                      <h4 className="font-semibold text-gray-900 mb-1">Ajuda do Noel</h4>
                       <p className="text-sm text-gray-600 mb-3">
                         Precisa de sugestões sobre quais medidas coletar ou valores de referência?
                       </p>
@@ -437,21 +435,21 @@ Seja profissional, clara e objetiva.`
                       )}
                       <button
                         type="button"
-                        onClick={pedirSugestoesLya}
+                        onClick={pedirSugestoesNoel}
                         disabled={loadingLya}
                         className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium disabled:opacity-50 flex items-center gap-2"
                       >
                         {loadingLya ? (
                           <>
                             <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                            Consultando LYA...
+                            Consultando o Noel...
                           </>
                         ) : (
                           <>
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                             </svg>
-                            Pedir Sugestões da LYA
+                            Pedir sugestões ao Noel
                           </>
                         )}
                       </button>
@@ -599,20 +597,20 @@ Seja profissional, clara e objetiva.`
           {/* Step 4: Interpretação & Recomendações */}
           {currentStep === 4 && (
             <div className="space-y-6">
-              {/* LYA Interpretation */}
+              {/* Interpretação Noel */}
               <div className="bg-gradient-to-r from-purple-50 to-blue-50 border border-purple-200 rounded-lg p-4">
                 <div className="flex items-start space-x-3">
                   <div className="w-10 h-10 bg-purple-600 rounded-full flex items-center justify-center flex-shrink-0">
-                    <span className="text-white font-bold text-sm">LYA</span>
+                    <span className="text-white font-bold text-sm">Noel</span>
                   </div>
                   <div className="flex-1">
-                    <h4 className="font-semibold text-gray-900 mb-1">Interpretação da LYA</h4>
+                    <h4 className="font-semibold text-gray-900 mb-1">Interpretação do Noel</h4>
                     <p className="text-sm text-gray-600 mb-3">
-                      Deixe a LYA analisar os dados e gerar uma interpretação profissional automática
+                      Peça ao Noel para analisar os dados e gerar uma interpretação profissional
                     </p>
                     <button
                       type="button"
-                      onClick={pedirInterpretacaoLya}
+                      onClick={pedirInterpretacaoNoel}
                       disabled={loadingLya || !formData.data.weight || !formData.data.height}
                       className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium disabled:opacity-50 flex items-center gap-2"
                     >
@@ -626,7 +624,7 @@ Seja profissional, clara e objetiva.`
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                           </svg>
-                          Gerar Interpretação com LYA
+                          Gerar interpretação com o Noel
                         </>
                       )}
                     </button>

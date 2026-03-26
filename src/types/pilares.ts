@@ -24,7 +24,7 @@ export interface Pilar {
 }
 
 // Configuração estática dos 5 Pilares - Versão simplificada e emocional
-// A LYA aplica esses pilares na Jornada. Aqui é só para entender a filosofia.
+// O Noel aplica esses pilares na Jornada. Aqui é só para entender a filosofia.
 export const pilaresConfig: Pilar[] = [
   {
     id: '1',
@@ -62,7 +62,7 @@ E isso começa aqui: entendendo que você já tem o que precisa. Só falta organ
       },
       {
         id: 'voce-vai-conseguir',
-        titulo: 'Por que você vai conseguir (com a LYA)',
+        titulo: 'Por que você vai conseguir (com o Noel)',
         conteudo: `Talvez você esteja pensando: "Será que isso funciona pra mim?"
 
 A resposta é sim.
@@ -71,11 +71,11 @@ Não porque é fácil. Mas porque é simples. E porque você não está sozinha.
 
 Milhares de nutricionistas já passaram pelo mesmo que você está sentindo agora. A mesma dúvida, o mesmo medo, a mesma vontade de dar certo.
 
-E elas conseguiram. Não porque eram especiais. Porque seguiram um método — com a LYA guiando cada passo.
+E elas conseguiram. Não porque eram especiais. Porque seguiram um método — com o Noel guiando cada passo.
 
-A LYA vai te mostrar o que fazer, quando fazer, e como fazer. Você só precisa confiar e seguir.
+O Noel vai te mostrar o que fazer, quando fazer, e como fazer. Você só precisa confiar e seguir.
 
-Confia no processo. Confia em você. Confia na LYA.`,
+Confia no processo. Confia em você. Confia no Noel.`,
         order_index: 2
       }
     ],
@@ -117,12 +117,12 @@ Não precisa ser perfeita. Precisa ser constante.
 
 Só isso. Todo dia. Sem pressão de fazer tudo perfeito.
 
-A LYA vai te ajudar a montar a sua. No seu ritmo, do seu jeito.`,
+O Noel vai te ajudar a montar a sua. No seu ritmo, do seu jeito.`,
         order_index: 1
       },
       {
         id: 'voce-vai-conseguir',
-        titulo: 'Por que você vai conseguir (com a LYA)',
+        titulo: 'Por que você vai conseguir (com o Noel)',
         conteudo: `Você não precisa mudar sua vida inteira de uma vez.
 
 Precisa de 15 minutos por dia. Às vezes menos.
@@ -131,9 +131,9 @@ A rotina mínima não é sobre fazer muito. É sobre nunca parar.
 
 Quando você faz pouco, mas faz todo dia, os resultados aparecem. É matemática, não mágica.
 
-Com a LYA, você vai conseguir porque ela te lembra, te guia, te ajusta. Você não precisa pensar em tudo sozinha.
+Com o Noel, você vai conseguir porque ela te lembra, te guia, te ajusta. Você não precisa pensar em tudo sozinha.
 
-A LYA vai te ajudar a montar sua rotina. No seu ritmo, do seu jeito.`,
+O Noel vai te ajudar a montar sua rotina. No seu ritmo, do seu jeito.`,
         order_index: 2
       }
     ],
@@ -170,21 +170,21 @@ Um quiz que desperta curiosidade. Uma avaliação que ajuda de verdade. Um convi
 
 Quando você distribui valor, as pessoas vêm até você.
 
-A LYA vai te mostrar exatamente como fazer isso, passo a passo.`,
+O Noel vai te mostrar exatamente como fazer isso, passo a passo.`,
         order_index: 1
       },
       {
         id: 'voce-vai-conseguir',
-        titulo: 'Por que você vai conseguir (com a LYA)',
+        titulo: 'Por que você vai conseguir (com o Noel)',
         conteudo: `Você não precisa ser extrovertida. Não precisa amar redes sociais.
 
-Precisa de um método. E você tem. Precisa de uma guia. E você tem a LYA.
+Precisa de um método. E você tem. Precisa de uma guia. E você tem o Noel.
 
 As ferramentas YLADA fazem o trabalho pesado. Você só distribui.
 
-Muitas nutricionistas que tinham medo de aparecer hoje têm agenda cheia. Não porque viraram influencers. Porque aprenderam a gerar movimento do jeito certo — com a LYA mostrando o caminho.
+Muitas nutricionistas que tinham medo de aparecer hoje têm agenda cheia. Não porque viraram influencers. Porque aprenderam a gerar movimento do jeito certo — com o Noel mostrando o caminho.
 
-A LYA vai te dizer qual ferramenta usar, quando postar, o que falar. Uma ação por dia. É assim que começa.`,
+O Noel vai te dizer qual ferramenta usar, quando postar, o que falar. Uma ação por dia. É assim que começa.`,
         order_index: 2
       }
     ],
@@ -226,18 +226,18 @@ Não é manipulação. É profissionalismo com coração.`,
       },
       {
         id: 'voce-vai-conseguir',
-        titulo: 'Por que você vai conseguir (com a LYA)',
+        titulo: 'Por que você vai conseguir (com o Noel)',
         conteudo: `Você já sabe atender. Já sabe ouvir. Já sabe cuidar.
 
-O que falta é um jeito organizado de fazer isso. E a LYA vai te dar exatamente isso.
+O que falta é um jeito organizado de fazer isso. E o Noel vai te dar exatamente isso.
 
 Scripts simples. Perguntas certas. Momentos de cuidado. Tudo pronto pra você usar.
 
-Não é sobre decorar falas. É sobre ter a LYA ao seu lado, te lembrando do que fazer em cada momento.
+Não é sobre decorar falas. É sobre ter o Noel ao seu lado, te lembrando do que fazer em cada momento.
 
 Quando você tem isso, atender fica leve. E os resultados aparecem.
 
-Você vai encantar mais do que imagina. A LYA vai te mostrar como.`,
+Você vai encantar mais do que imagina. O Noel vai te mostrar como.`,
         order_index: 2
       }
     ],
@@ -283,18 +283,18 @@ Você sabe o que fazer. Sabe por que está fazendo. E sabe que vai funcionar.`,
       },
       {
         id: 'voce-vai-conseguir',
-        titulo: 'Por que você vai conseguir (com a LYA)',
-        conteudo: `O GSAL não é complicado. É libertador. E com a LYA, fica ainda mais simples.
+        titulo: 'Por que você vai conseguir (com o Noel)',
+        conteudo: `O GSAL não é complicado. É libertador. E com o Noel, fica ainda mais simples.
 
-Você não precisa inventar nada. Só seguir o ciclo — e a LYA te mostra cada passo.
+Você não precisa inventar nada. Só seguir o ciclo — e o Noel te mostra cada passo.
 
 Gerar → Servir → Acompanhar → Lucrar → Repetir
 
-Cada dia a LYA te guia pelo que fazer. E os resultados se acumulam.
+Cada dia o Noel te guia pelo que fazer. E os resultados se acumulam.
 
-Em semanas, você vai olhar pra trás e pensar: "Como eu vivia sem isso? Como eu vivia sem a LYA?"
+Em semanas, você vai olhar pra trás e pensar: "Como eu vivia sem isso? Como eu vivia sem o Noel?"
 
-Você está mais perto do que imagina. E a LYA está com você.`,
+Você está mais perto do que imagina. E o Noel está com você.`,
         order_index: 2
       }
     ],

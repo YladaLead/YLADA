@@ -15,7 +15,7 @@ interface RequireDia1CompletoProps {
  * Se não foi, redireciona para o Dia 1 da Jornada
  * 
  * Usado para controlar acesso a funcionalidades que só devem estar disponíveis
- * após completar o Dia 1 (ex: chat livre da LYA)
+ * após completar o Dia 1 (ex.: chat com o Noel)
  */
 export default function RequireDia1Completo({ 
   children, 

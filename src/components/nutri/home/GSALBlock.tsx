@@ -97,14 +97,14 @@ export default function GSALBlock() {
           GSAL é o jeito YLADA de organizar sua gestão de clientes em 4 etapas: <strong>Gerar</strong> oportunidades, <strong>Servir</strong> com valor, <strong>Acompanhar</strong> a evolução e <strong>Lucrar</strong> de forma organizada.
         </p>
         <p className="text-xs text-gray-600 italic">
-          💬 <strong>Dúvida?</strong> Pergunte para a LYA: "O que é GSAL?" ou "Como funciona a gestão de clientes?"
+          💬 <strong>Dúvida?</strong> Pergunte ao Noel: "O que é GSAL?" ou "Como funciona a gestão de clientes?"
         </p>
       </div>
 
-      {/* Microcopy sobre LYA */}
+      {/* Microcopy Noel */}
       <div className="mb-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
         <p className="text-xs text-gray-700">
-          💡 <strong>Dica:</strong> A LYA usa os dados do seu GSAL para te orientar com precisão. 
+          💡 <strong>Dica:</strong> O Noel usa os dados do seu GSAL para te orientar com precisão. 
           Mantenha seus números atualizados para receber orientações mais personalizadas.
         </p>
       </div>

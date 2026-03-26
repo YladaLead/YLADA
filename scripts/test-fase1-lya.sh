@@ -1,95 +1,58 @@
 #!/bin/bash
+# Smoke: mentor Nutri via POST /api/nutri/noel (proxy → /api/ylada/noel).
+# Nome histórico do script; rotas /api/nutri/noel/analise foram removidas.
 
-echo "🧪 TESTE FASE 1: Formato Fixo da LYA"
-echo "======================================"
+echo "🧪 Smoke: Nutri Noel (proxy)"
+echo "============================"
 echo ""
 
-# Cores
 GREEN='\033[0;32m'
 RED='\033[0;31m'
 YELLOW='\033[1;33m'
-NC='\033[0m' # No Color
+NC='\033[0m'
 
-# 1. Verificar se servidor está rodando
-echo "1️⃣ Verificando se servidor está rodando..."
+echo "1️⃣ Servidor em localhost:3000..."
 if curl -s http://localhost:3000 > /dev/null; then
-    echo -e "${GREEN}✅ Servidor rodando em http://localhost:3000${NC}"
+    echo -e "${GREEN}✅ Servidor respondendo${NC}"
 else
-    echo -e "${RED}❌ Servidor não está rodando${NC}"
-    echo "   Execute: npm run dev"
+    echo -e "${RED}❌ Servidor não está rodando (npm run dev)${NC}"
     exit 1
 fi
 echo ""
 
-# 2. Verificar estrutura da API
-echo "2️⃣ Verificando estrutura da API..."
-API_RESPONSE=$(curl -s http://localhost:3000/api/nutri/noel/analise 2>&1)
-if echo "$API_RESPONSE" | grep -q "error\|401\|403"; then
-    echo -e "${YELLOW}⚠️  API retornou erro (normal se não estiver autenticado)${NC}"
-    echo "   Resposta: $(echo "$API_RESPONSE" | head -c 200)"
+echo "2️⃣ POST /api/nutri/noel (sem cookie → esperado 401 ou erro JSON)..."
+API_RESPONSE=$(curl -s -w "\n%{http_code}" -X POST http://localhost:3000/api/nutri/noel \
+  -H "Content-Type: application/json" \
+  -d '{"messages":[{"role":"user","content":"ping"}]}')
+HTTP_CODE=$(echo "$API_RESPONSE" | tail -n 1)
+HTTP_BODY=$(echo "$API_RESPONSE" | sed '$d')
+if [ "$HTTP_CODE" = "401" ] || [ "$HTTP_CODE" = "403" ] || echo "$HTTP_BODY" | grep -q "error"; then
+    echo -e "${YELLOW}⚠️  Resposta esperada sem sessão (HTTP $HTTP_CODE)${NC}"
 else
-    echo -e "${GREEN}✅ API está respondendo${NC}"
+    echo -e "${GREEN}✅ HTTP $HTTP_CODE${NC}"
 fi
 echo ""
 
-# 3. Verificar arquivos implementados
-echo "3️⃣ Verificando arquivos implementados..."
-FILES=(
-    "src/app/api/nutri/noel/analise/route.ts"
-    "src/lib/nutri/parse-lya-response.ts"
-    "src/types/nutri-diagnostico.ts"
-    "migrations/155-atualizar-tabela-lya-analise-formato-fixo.sql"
-)
-
-ALL_EXIST=true
-for file in "${FILES[@]}"; do
-    if [ -f "$file" ]; then
-        echo -e "${GREEN}✅ $file${NC}"
-    else
-        echo -e "${RED}❌ $file (não encontrado)${NC}"
-        ALL_EXIST=false
-    fi
+echo "3️⃣ Arquivos atuais..."
+for f in \
+  "src/lib/nutri/jornada-phase-display.ts" \
+  "src/app/api/nutri/noel/route.ts" \
+  "src/types/nutri-diagnostico.ts"
+do
+  if [ -f "$f" ]; then
+    echo -e "${GREEN}✅ $f${NC}"
+  else
+    echo -e "${RED}❌ $f${NC}"
+    exit 1
+  fi
 done
 
-if [ "$ALL_EXIST" = false ]; then
-    echo -e "${RED}❌ Alguns arquivos estão faltando${NC}"
+if [ -f "src/app/api/nutri/noel/analise/route.ts" ]; then
+    echo -e "${RED}❌ Rota legada analise ainda existe${NC}"
     exit 1
 fi
+echo -e "${GREEN}✅ Rota /api/nutri/noel/analise removida${NC}"
 echo ""
 
-# 4. Verificar se parser tem função parseLyaResponse
-echo "4️⃣ Verificando parser..."
-if grep -q "parseLyaResponse" src/lib/nutri/parse-lya-response.ts; then
-    echo -e "${GREEN}✅ Parser implementado${NC}"
-else
-    echo -e "${RED}❌ Parser não encontrado${NC}"
-    exit 1
-fi
-echo ""
-
-# 5. (LyaAnaliseHoje removido — home matriz usa Noel; API analise segue para diagnóstico/jornada.)
-
-# 6. Verificar se API usa parser
-echo "5️⃣ Verificando integração API..."
-if grep -q "parseLyaResponse\|parse-lya-response" src/app/api/nutri/noel/analise/route.ts; then
-    echo -e "${GREEN}✅ API integrada com parser${NC}"
-else
-    echo -e "${RED}❌ API não usa parser${NC}"
-    exit 1
-fi
-echo ""
-
-echo "======================================"
-echo -e "${GREEN}✅ TESTE ESTRUTURAL COMPLETO${NC}"
-echo ""
-echo "📋 PRÓXIMOS PASSOS:"
-echo "1. Executar migration no Supabase:"
-echo "   migrations/155-atualizar-tabela-lya-analise-formato-fixo.sql"
-echo ""
-echo "2. Testar no navegador:"
-echo "   - Login com demo.nutri@ylada.com"
-echo "   - Acessar /pt/nutri/home"
-echo "   - Verificar home matriz (Noel)"
-echo ""
-echo "3. Verificar console (F12) para logs de validação"
-
+echo "============================"
+echo -e "${GREEN}✅ Smoke OK${NC}"

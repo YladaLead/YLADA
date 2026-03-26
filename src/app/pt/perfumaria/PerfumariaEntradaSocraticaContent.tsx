@@ -20,6 +20,7 @@ import {
   PERFUMARIA_LANDING_STEP_APOS_DEMO,
 } from '@/lib/perfumaria-demo-context'
 import { PERFUMARIA_DEMO_CLIENTE_NICHOS } from '@/lib/perfumaria-demo-cliente-data'
+import EntradaSocraticaDemoIntroPanel from '@/components/ylada/EntradaSocraticaDemoIntroPanel'
 
 const TOTAL_STEPS = 12
 const CADASTRO_HREF = '/pt/cadastro?area=perfumaria'
@@ -500,31 +501,12 @@ export default function PerfumariaEntradaSocraticaContent() {
                   </button>
                 </>
               ) : (
-                <>
-                  <h2 id="demo-title" className="text-lg font-semibold text-gray-900">
-                    Só falta começar
-                  </h2>
-                  <p className="mt-3 text-sm text-gray-700 leading-relaxed">
-                    Responda como o cliente responderia. O restante você vê na sequência.
-                  </p>
-                  <div className="mt-6 flex flex-col gap-2">
-                    <button
-                      type="button"
-                      onClick={startDemoQuiz}
-                      disabled={!demoLocalChoice || !demoNichoChoice}
-                      className="w-full min-h-[48px] rounded-xl bg-blue-600 text-white font-semibold hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      Começar experiência
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setDemoPhase('nicho')}
-                      className="w-full min-h-[44px] rounded-xl text-gray-600 font-medium hover:bg-gray-50 text-sm"
-                    >
-                      ← Voltar
-                    </button>
-                  </div>
-                </>
+                <EntradaSocraticaDemoIntroPanel
+                  quemRespondeNoExemplo="seu cliente"
+                  onAbrirExemplo={startDemoQuiz}
+                  onVoltar={() => setDemoPhase('nicho')}
+                  disabled={!demoLocalChoice || !demoNichoChoice}
+                />
               )}
             </div>
           </div>

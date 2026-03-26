@@ -61,6 +61,23 @@ export function formatDisplayTitle(raw: string): string {
   return normalized.charAt(0).toUpperCase() + normalized.slice(1).toLowerCase()
 }
 
+/**
+ * Título voltado ao paciente quando o link guarda prefixo técnico (ex.: "Diagnóstico de Saúde — emagrecimento").
+ * Se o profissional editar só o trecho após " — ", ou o título inteiro, isso passa a ser o que importa para a intro.
+ */
+const TECHNICAL_PAGE_TITLE_PREFIX_RE =
+  /raio-?x|diagnóstico de bloqueios|diagnóstico de saúde|diagnostico de bloqueios|diagnostico de saude/i
+
+export function patientFacingTitleFromStoredPageTitle(pageTitleRaw: string): string {
+  const raw = (pageTitleRaw ?? '').trim()
+  if (!raw) return ''
+  if (TECHNICAL_PAGE_TITLE_PREFIX_RE.test(raw) && raw.includes(' — ')) {
+    const suffix = raw.split(' — ').slice(1).join(' — ').trim()
+    return suffix || raw
+  }
+  return raw
+}
+
 /** Capitaliza a primeira letra para coerência visual (ex.: "saúde intestinal" → "Saúde intestinal"). */
 function capitalizeFirst(s: string): string {
   if (!s) return ''
@@ -129,8 +146,8 @@ export function getStrategicIntro(context: StrategicIntroContext): StrategicIntr
 
   if (isPatientQuiz) {
     const themeLabel = formatThemeLabel(theme)
-    const hasTechnicalName = /raio-?x|diagnóstico de bloqueios|diagnóstico de saúde|diagnostico de bloqueios|diagnostico de saude/i.test(pageTitle)
-    const sanitizedPageTitle = pageTitle && !hasTechnicalName ? formatDisplayTitle(pageTitle) : ''
+    const visibleBase = patientFacingTitleFromStoredPageTitle(pageTitle)
+    const sanitizedPageTitle = visibleBase ? formatDisplayTitle(visibleBase) : ''
     const isPerfumaria = /perfume|fragrância|fragrancia|olfativo|perfumaria/.test(theme)
     const title =
       sanitizedPageTitle ||

@@ -185,7 +185,7 @@ export default function ImportPatientsModal({ isOpen, onClose, onImportSuccess }
         setError(null)
         
         try {
-          // Processar cada arquivo com LYA
+          // Processar cada arquivo com IA (import)
           const processedFiles: ParsedData[] = []
           let finalMappings: MappedField[] = []
           
@@ -285,8 +285,7 @@ export default function ImportPatientsModal({ isOpen, onClose, onImportSuccess }
           setImportProgress(90)
           await validateAndImportDirectly(processedFiles, finalMappings)
         } catch (aiError: any) {
-          // Se falhar com LYA, usar detecção automática tradicional
-          console.warn('LYA não disponível, usando detecção automática:', aiError)
+          console.warn('IA de import não disponível, usando detecção automática:', aiError)
           
           // Tentar detecção automática primeiro
           const autoMappings = autoDetectMappings(parsed[0]?.headers || [])

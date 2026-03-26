@@ -2,7 +2,10 @@
 
 import { useRouter } from 'next/navigation'
 import { useJornadaProgress } from '@/hooks/useJornadaProgress'
-import { getLyaPhase, getLyaConfig } from '@/lib/nutri/lya-prompts'
+import {
+  getJornadaPhaseFromDay,
+  getJornadaPhaseLabel,
+} from '@/lib/nutri/jornada-phase-display'
 import Link from 'next/link'
 
 interface WelcomeCardProps {
@@ -14,8 +17,8 @@ export default function WelcomeCard({ currentDay, userName }: WelcomeCardProps) 
   const router = useRouter()
   const { progress } = useJornadaProgress()
   
-  const phase = getLyaPhase(currentDay)
-  const lyaConfig = getLyaConfig(phase)
+  const phase = getJornadaPhaseFromDay(currentDay)
+  const phaseLabel = getJornadaPhaseLabel(phase)
   
   // 🎉 TRILHA CONCLUÍDA: Layout simplificado após todas as etapas
   if (currentDay && currentDay > 30) {
@@ -156,7 +159,7 @@ export default function WelcomeCard({ currentDay, userName }: WelcomeCardProps) 
           {/* Informação adicional (opcional) */}
           {currentDay && currentDay <= 7 && (
             <p className="text-sm text-blue-100 mt-4 opacity-90">
-              Fase atual: {lyaConfig.name} • Etapa {currentDay}
+              Fase atual: {phaseLabel} • Etapa {currentDay}
             </p>
           )}
         </div>

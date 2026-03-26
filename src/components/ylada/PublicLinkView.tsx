@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
-import { formatDisplayTitle, getStrategicIntro } from '@/lib/ylada/strategic-intro'
+import { formatDisplayTitle, getStrategicIntro, patientFacingTitleFromStoredPageTitle } from '@/lib/ylada/strategic-intro'
 import { FREEMIUM_LIMIT_TYPE_EXTRA_ACTIVE_LINK } from '@/config/freemium-limits'
 import DiagnosisDisclaimer from '@/components/ylada/DiagnosisDisclaimer'
 import PoweredByYlada from '@/components/ylada/PoweredByYlada'
@@ -438,11 +438,7 @@ function ConfigDrivenLinkView({
     fieldsValidados.filter((f) => Array.isArray(f.options) && f.options.length > 0).length || fieldsValidados.length
 
   const pageTitleRaw = (page.title as string) ?? (config.title as string) ?? 'Link'
-  const hasTechnicalName = /diagnóstico de bloqueios|diagnóstico de saúde|raio-x/i.test(pageTitleRaw)
-  const pageTitle =
-    hasTechnicalName && pageTitleRaw.includes(' — ')
-      ? pageTitleRaw.split(' — ').slice(1).join(' — ').trim() || pageTitleRaw
-      : pageTitleRaw
+  const pageTitle = patientFacingTitleFromStoredPageTitle(pageTitleRaw)
   const displayTitle = formatDisplayTitle(pageTitle)
   const subtitle = (page.subtitle as string) || ''
 

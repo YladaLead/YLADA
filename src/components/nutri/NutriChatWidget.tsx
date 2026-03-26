@@ -112,7 +112,7 @@ export default function NutriChatWidget({ chatbotId, defaultOpen = false }: Nutr
     // Verificar padrões primeiro
     const matchPadrao = padroesJornada.some(padrao => padrao.test(perguntaLower))
     if (matchPadrao) {
-      console.log('✅ [LYA] Detectado como pergunta sobre jornada:', pergunta)
+      console.log('✅ [Noel] Detectado como pergunta sobre jornada:', pergunta)
       return true
     }
     
@@ -126,11 +126,11 @@ export default function NutriChatWidget({ chatbotId, defaultOpen = false }: Nutr
     
     const temPalavraChave = palavrasJornada.some(palavra => perguntaLower.includes(palavra))
     if (temPalavraChave) {
-      console.log('✅ [LYA] Detectado como pergunta sobre jornada (palavra-chave):', pergunta)
+      console.log('✅ [Noel] Detectado como pergunta sobre jornada (palavra-chave):', pergunta)
       return true
     }
     
-    console.log('❌ [LYA] NÃO detectado como pergunta sobre jornada:', pergunta)
+    console.log('❌ [Noel] NÃO detectado como pergunta sobre jornada:', pergunta)
     return false
   }
 

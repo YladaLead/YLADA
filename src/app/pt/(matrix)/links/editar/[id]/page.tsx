@@ -88,12 +88,12 @@ export default function EditarLinkPage({ params }: { params: Promise<{ id: strin
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ config_json: config }),
+        body: JSON.stringify({ title: editTitle, config_json: config }),
       })
       const json = await res.json()
       if (json?.success) {
         setMessage({ type: 'success', text: 'Salvo!' })
-        setLink((prev) => (prev ? { ...prev, config_json: config } : null))
+        setLink((prev) => (prev ? { ...prev, title: editTitle, config_json: config } : null))
         setEditingFieldIndex(null)
         // Disparar geração de diagnóstico via IA (memoriza para não chamar de novo)
         const arch = (config.meta as Record<string, unknown>)?.architecture as string | undefined

@@ -106,14 +106,14 @@ export default function PilarPage() {
           </div>
         ))}
 
-        {/* Mensagem de Conexão com a LYA */}
+        {/* Mensagem de Conexão com o Noel */}
         <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl p-6 sm:p-8 text-white mb-8">
           <div className="flex items-start gap-4">
             <div className="text-3xl">✨</div>
             <div>
-              <h3 className="text-lg font-semibold mb-2">A LYA está com você</h3>
+              <h3 className="text-lg font-semibold mb-2">O Noel está com você</h3>
               <p className="text-blue-100 leading-relaxed">
-                Você não precisa decorar nada disso. A LYA vai aplicar este pilar com você na Jornada, 
+                Você não precisa decorar nada disso. O Noel vai aplicar este pilar com você na Jornada, 
                 no momento certo, da forma certa. Seu único trabalho é confiar e seguir.
               </p>
             </div>
@@ -181,7 +181,7 @@ export default function PilarPage() {
         {/* Rodapé */}
         <div className="text-center pt-8 border-t border-gray-200">
           <p className="text-sm text-gray-500 mb-4">
-            💡 Lembre-se: os pilares são a filosofia. A LYA é quem aplica com você.
+            💡 Lembre-se: os pilares são a filosofia. O Noel é quem aplica com você.
           </p>
           <Link
             href="/pt/nutri/metodo/pilares"

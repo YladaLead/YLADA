@@ -46,7 +46,7 @@ export default function PilaresBlock() {
   return (
     <Section
       title="A Filosofia por Trás de Tudo"
-      subtitle="5 pilares que a LYA aplica com você no dia a dia"
+      subtitle="5 pilares que o Noel aplica com você no dia a dia"
     >
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         {pilares.map((pilar) => (
@@ -66,7 +66,7 @@ export default function PilaresBlock() {
       </div>
       <div className="mt-6 text-center">
         <p className="text-sm text-gray-500">
-          💡 Você não precisa estudar tudo. A LYA guia você pelo que importa, no momento certo.
+          💡 Você não precisa estudar tudo. O Noel guia você pelo que importa, no momento certo.
         </p>
       </div>
     </Section>

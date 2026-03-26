@@ -25,7 +25,7 @@ export default function NutriDashboard() {
 /* 
  * CÓDIGO ANTIGO DO DASHBOARD REMOVIDO
  * Esta página agora redireciona automaticamente para /pt/nutri/home
- * para evitar confusão e manter foco na Jornada e LYA.
+ * para evitar confusão e manter foco na Jornada e no Noel.
  * 
  * Todos os links antigos que apontam para /dashboard continuam funcionando,
  * mas agora levam para a Home otimizada.

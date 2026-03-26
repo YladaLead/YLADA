@@ -168,7 +168,7 @@ function GSALPageContent() {
                   <strong>💡 GSAL</strong> é como você organiza sua gestão: <strong>Gerar</strong> oportunidades, <strong>Servir</strong> com valor, <strong>Acompanhar</strong> evolução e <strong>Lucrar</strong> de forma organizada.
                 </p>
                 <p className="text-xs text-gray-600 italic">
-                  💬 Dúvidas? Pergunte para a LYA: "Como usar o GSAL?"
+                  💬 Dúvidas? Pergunte para o Noel: "Como usar o GSAL?"
                 </p>
               </div>
 

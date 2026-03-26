@@ -1,8 +1,7 @@
 /**
- * POST /api/nutri/noel
+ * POST /api/nutri/noel — chat mentor: encaminha para `/api/ylada/noel` (segmento nutri).
  *
- * Compatibilidade: encaminha para o motor único YLADA (`/api/ylada/noel` com area=nutri).
- * Novos clientes devem chamar diretamente `/api/ylada/noel` com `area: 'nutri'` (ou `segment`).
+ * Rota irmã: `GET /api/nutri/noel/links` (links contextuais para o mentor).
  */
 import { NextRequest, NextResponse } from 'next/server'
 

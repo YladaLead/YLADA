@@ -614,12 +614,12 @@ Seja profissional, motivadora quando apropriado, e objetiva.`
               <div className="bg-gradient-to-r from-purple-50 to-blue-50 border border-purple-200 rounded-lg p-4">
                 <div className="flex items-start space-x-3">
                   <div className="w-10 h-10 bg-purple-600 rounded-full flex items-center justify-center flex-shrink-0">
-                    <span className="text-white font-bold text-sm">LYA</span>
+                    <span className="text-white font-bold text-sm">Noel</span>
                   </div>
                   <div className="flex-1">
-                    <h4 className="font-semibold text-gray-900 mb-1">Insights da LYA sobre a Evolução</h4>
+                    <h4 className="font-semibold text-gray-900 mb-1">Insights do Noel sobre a evolução</h4>
                     <p className="text-sm text-gray-600 mb-3">
-                      Deixe a LYA analisar as mudanças e gerar insights profissionais automáticos
+                      Peça ao Noel para analisar as mudanças e gerar insights profissionais
                     </p>
                     
                     {lyaInsights && (
@@ -644,7 +644,7 @@ Seja profissional, motivadora quando apropriado, e objetiva.`
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                           </svg>
-                          Analisar Evolução com LYA
+                          Analisar evolução com o Noel
                         </>
                       )}
                     </button>

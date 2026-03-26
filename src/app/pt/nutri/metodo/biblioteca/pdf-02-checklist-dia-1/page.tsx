@@ -213,7 +213,7 @@ export default function PDF02ChecklistDia1() {
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-blue-600 mt-1">•</span>
-                <span>A LYA já começa a ajustar as orientações para você.</span>
+                <span>O Noel já começa a ajustar as orientações para você.</span>
               </li>
             </ul>
             <p className="text-blue-700 font-semibold mt-4">👉 Direção clara é sinal de conclusão correta.</p>
@@ -250,7 +250,7 @@ export default function PDF02ChecklistDia1() {
               Use como referência para garantir que está no caminho certo.
             </p>
             <p className="text-blue-700 font-semibold text-center mt-4">
-              💙 A LYA te acompanha em cada dia da sua jornada.
+              💙 O Noel te acompanha em cada dia da sua jornada.
             </p>
           </div>
 

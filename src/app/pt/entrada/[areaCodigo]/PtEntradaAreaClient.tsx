@@ -50,9 +50,6 @@ export default function PtEntradaAreaClient({ areaCodigo }: { areaCodigo: string
     [areaCodigo, standard, router]
   )
 
-  const title = standard?.nichoPickerTitle ?? ''
-  const subtitle =
-    'Em seguida você responde algumas perguntas rápidas para ver como o YLADA se aplica ao seu dia a dia.'
   const nichos = standard?.nichos ?? []
 
   if (loading || !ready || nichos.length === 0) {
@@ -92,11 +89,10 @@ export default function PtEntradaAreaClient({ areaCodigo }: { areaCodigo: string
           </Link>
 
           <section className="space-y-3">
+            <h1 className="sr-only">Escolha uma opção para continuar</h1>
             {areaMeta ? (
               <p className="text-xs font-medium uppercase tracking-wide text-gray-500">{areaMeta.label}</p>
             ) : null}
-            <h1 className="text-lg font-semibold text-gray-900">{title}</h1>
-            <p className="text-xs text-gray-600 sm:text-sm">{subtitle}</p>
 
             <ul className="flex flex-col gap-2 pt-2">
               {nichos.map((opt) => (

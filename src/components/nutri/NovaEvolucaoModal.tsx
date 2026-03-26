@@ -8,7 +8,7 @@ interface NovaEvolucaoModalProps {
   onClose: () => void
   clientId: string
   onSuccess: () => void
-  onLyaInsight?: (message: string) => void
+  onNoelInsight?: (message: string) => void
 }
 
 export default function NovaEvolucaoModal({
@@ -16,7 +16,7 @@ export default function NovaEvolucaoModal({
   onClose,
   clientId,
   onSuccess,
-  onLyaInsight
+  onNoelInsight,
 }: NovaEvolucaoModalProps) {
   const [salvando, setSalvando] = useState(false)
   const [erro, setErro] = useState<string | null>(null)
@@ -116,10 +116,9 @@ export default function NovaEvolucaoModal({
       }
 
       if (data.success) {
-        // Notificar LYA sobre a nova evolução
-        if (onLyaInsight && payload.weight) {
+        if (onNoelInsight && payload.weight) {
           const insight = generateInsight(payload)
-          setTimeout(() => onLyaInsight(insight), 500)
+          setTimeout(() => onNoelInsight(insight), 500)
         }
 
         onSuccess()
@@ -133,7 +132,7 @@ export default function NovaEvolucaoModal({
     }
   }
 
-  // Gerar insight para a LYA
+  // Insight local para o toast (não chama API)
   const generateInsight = (data: any): string => {
     const insights = []
     

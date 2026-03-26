@@ -59,20 +59,18 @@ export interface PerfilEstrategico {
 }
 
 // ============================================
-// ANÁLISE DA LYA (FORMATO FIXO)
+// Análise diária (formato fixo; tabela legada `lya_analise_nutri`)
 // ============================================
 
-export interface LyaAnalise {
+export interface NutriAnaliseHistorico {
   id?: string
   user_id: string
-  // Formato fixo de 4 blocos
-  foco_prioritario: string // Bloco 1
-  acoes_recomendadas: string[] // Bloco 2 (array de ações)
-  onde_aplicar: string // Bloco 3
-  metrica_sucesso: string // Bloco 4
-  // Dados auxiliares
-  link_interno: string // Link para ação principal
-  mensagem_completa: string // Resposta completa da LYA (para histórico)
+  foco_prioritario: string
+  acoes_recomendadas: string[]
+  onde_aplicar: string
+  metrica_sucesso: string
+  link_interno: string
+  mensagem_completa: string
   created_at?: string
   updated_at?: string
 }

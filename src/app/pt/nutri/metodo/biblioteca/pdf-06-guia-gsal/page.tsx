@@ -273,11 +273,11 @@ export default function PDF06GuiaGSAL() {
 
           {/* Slide 11 */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">A LYA como aliada na gestão</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">O Noel como aliada na gestão</h2>
             <ul className="space-y-2 text-gray-700">
               <li className="flex items-start gap-2">
                 <span className="text-blue-600 mt-1">•</span>
-                <span>A LYA interpreta seus dados.</span>
+                <span>O Noel interpreta seus dados.</span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-blue-600 mt-1">•</span>
