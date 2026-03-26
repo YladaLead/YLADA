@@ -1,0 +1,65 @@
+/**
+ * Tipos compartilhados do funil público (quiz → resultado → prévia → cadastro).
+ * Fase 1: consumido por YladaPublicEntryFlow; primeira instância = Estética.
+ */
+
+import type { AnalyticsEventName } from '@/lib/analytics-events'
+
+export interface PublicFlowQuizOption {
+  value: string
+  label: string
+}
+
+export interface PublicFlowQuizQuestion {
+  id: string
+  title: string
+  options: PublicFlowQuizOption[]
+}
+
+export interface PublicFlowNichoOption {
+  value: string
+  label: string
+}
+
+export interface PublicFlowResultCopy {
+  headline: string
+  subLines: readonly string[] | string[]
+  ctaPrimary: string
+  ctaMicro: string
+}
+
+/** Eventos de analytics do fluxo de quiz por área (nomes já declarados em analytics-events). */
+export interface PublicFlowQuizAnalytics {
+  entradaNicho: AnalyticsEventName
+  quizStep: AnalyticsEventName
+  quizConcluiu: AnalyticsEventName
+}
+
+/**
+ * Configuração estática + funções para um funil público de uma área da matriz.
+ */
+export interface PublicFlowConfig {
+  areaCodigo: string
+  /** Prefixo sem barra final, ex. /pt/estetica */
+  pathPrefix: string
+  sessionStorageKey: string
+  /** Redirect quando já autenticado no fluxo público */
+  homePath: string
+  logoHref: string
+  /** Link “Apresentação” no header quando entradaComNicho */
+  apresentacaoHref?: string
+  loginHref: string
+  /** Base da URL “ver na prática” (query de nicho acrescentada quando aplicável) */
+  verPraticaHrefBase: string
+  nichoQueryKey: string
+  nichos: PublicFlowNichoOption[]
+  nichoPickerTitle: string
+  resultCopy: PublicFlowResultCopy
+  analytics: PublicFlowQuizAnalytics
+  /** Classes extras no container raiz (ex.: estetica-touch, 100svh) */
+  rootExtraClassName?: string
+  /** Classes extras no main (ex.: estetica-safe-main-bottom) */
+  mainExtraClassName?: string
+  isValidNicho: (v: string | null) => v is string
+  resolveQuestions: (entradaComNicho: boolean, nicho: string | null) => PublicFlowQuizQuestion[]
+}
