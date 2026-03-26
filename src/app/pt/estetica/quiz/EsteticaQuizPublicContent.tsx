@@ -10,7 +10,7 @@ import {
   ESTETICA_QUIZ_CADASTRO_HREF,
   ESTETICA_QUIZ_LOGIN_HREF,
   ESTETICA_QUIZ_QUESTIONS,
-  buildEsteticaQuizDiagnosis,
+  ESTETICA_QUIZ_RESULT_COPY,
 } from '@/config/estetica-quiz-public'
 
 const STORAGE_KEY = 'ylada_estetica_quiz_respostas_v1'
@@ -22,8 +22,6 @@ export default function EsteticaQuizPublicContent() {
   const [authTimeout, setAuthTimeout] = useState(false)
   const [step, setStep] = useState(0)
   const [answers, setAnswers] = useState<Record<string, string>>({})
-  const [selected, setSelected] = useState<string | null>(null)
-  const [error, setError] = useState<string | null>(null)
 
   const isQuizPath = pathname === '/pt/estetica/quiz' || pathname.startsWith('/pt/estetica/quiz?')
   const totalPhases = ESTETICA_QUIZ_QUESTIONS.length + 1
@@ -50,46 +48,44 @@ export default function EsteticaQuizPublicContent() {
     }
   }, [])
 
-  useEffect(() => {
-    if (isResult || !current) {
-      setSelected(null)
-      return
-    }
-    setSelected(answers[current.id] ?? null)
-    setError(null)
-  }, [step, current, answers, isResult])
-
   const progress = useMemo(() => {
     if (isResult) return 100
     return ((step + 1) / totalPhases) * 100
   }, [step, isResult, totalPhases])
 
-  const diagnosis = useMemo(() => {
-    if (!isResult) return null
-    return buildEsteticaQuizDiagnosis(answers)
-  }, [isResult, answers])
-
-  const goNext = useCallback(() => {
-    if (!current || !selected) {
-      setError('Escolha uma opção para continuar.')
-      return
-    }
-    const next = { ...answers, [current.id]: selected }
-    setAnswers(next)
-    trackEvent('estetica_quiz_step', { area: 'estetica', step: current.id, value: selected })
-    try {
-      sessionStorage.setItem(STORAGE_KEY, JSON.stringify(next))
-    } catch {
-      /* ignore */
-    }
-    setStep((s) => s + 1)
-    setError(null)
-  }, [current, selected, answers])
+  const pickOption = useCallback(
+    (value: string) => {
+      if (!current) return
+      const qId = current.id
+      setAnswers((prev) => {
+        const next = { ...prev, [qId]: value }
+        try {
+          sessionStorage.setItem(STORAGE_KEY, JSON.stringify(next))
+        } catch {
+          /* ignore */
+        }
+        return next
+      })
+      trackEvent('estetica_quiz_step', { area: 'estetica', step: qId, value })
+      setStep((s) => s + 1)
+    },
+    [current]
+  )
 
   const goBack = useCallback(() => {
     if (step <= 0) return
+    const qId = ESTETICA_QUIZ_QUESTIONS[step - 1].id
+    setAnswers((prev) => {
+      const next = { ...prev }
+      delete next[qId]
+      try {
+        sessionStorage.setItem(STORAGE_KEY, JSON.stringify(next))
+      } catch {
+        /* ignore */
+      }
+      return next
+    })
     setStep((s) => s - 1)
-    setError(null)
   }, [step])
 
   useEffect(() => {
@@ -157,47 +153,26 @@ export default function EsteticaQuizPublicContent() {
             role="region"
             aria-live="polite"
           >
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-gray-400">Quiz · Estética</p>
-            <p className="mt-3 text-sm text-gray-500 leading-relaxed">
+            <p className="text-sm text-gray-500 leading-relaxed">
               Pergunta {step + 1} de {ESTETICA_QUIZ_QUESTIONS.length}
             </p>
             <h1 className="mt-4 text-xl sm:text-2xl font-semibold text-gray-900 leading-snug tracking-tight">
               {current.title}
             </h1>
-            {selected && (
-              <p className="mt-4 text-sm text-blue-800/90 bg-blue-50 border border-blue-100 rounded-xl px-4 py-3 leading-relaxed">
-                {current.microHint}
-              </p>
-            )}
             <div className="flex flex-col gap-3 pt-6">
               {current.options.map((opt) => (
                 <button
                   key={opt.value}
                   type="button"
-                  onClick={() => {
-                    setSelected(opt.value)
-                    setError(null)
-                  }}
-                  className={`w-full min-h-[48px] rounded-2xl border-2 px-5 py-3.5 text-base font-semibold shadow-sm shadow-gray-900/5 hover:shadow-md active:scale-[0.99] transition-all text-left ${
-                    selected === opt.value
-                      ? 'border-blue-500 bg-blue-50 text-blue-950'
-                      : 'border-gray-300 bg-slate-50/90 text-gray-900 hover:border-gray-500 hover:bg-white'
-                  }`}
+                  onClick={() => pickOption(opt.value)}
+                  className="w-full min-h-[48px] rounded-2xl border-2 border-gray-300 bg-slate-50/90 px-5 py-3.5 text-base font-semibold text-gray-900 shadow-sm shadow-gray-900/5 hover:border-gray-500 hover:bg-white hover:shadow-md active:scale-[0.99] transition-all text-left"
                 >
                   {opt.label}
                 </button>
               ))}
             </div>
-            {error && <p className="mt-3 text-sm text-red-600">{error}</p>}
-            <div className="flex flex-col gap-3 pt-8">
-              <button
-                type="button"
-                onClick={goNext}
-                className="w-full min-h-[52px] rounded-2xl bg-blue-600 px-5 py-3.5 text-base font-semibold text-white hover:bg-blue-700 active:bg-blue-800 shadow-sm shadow-blue-600/20 transition-colors"
-              >
-                Continuar
-              </button>
-              {step > 0 && (
+            {step > 0 && (
+              <div className="pt-8">
                 <button
                   type="button"
                   onClick={goBack}
@@ -205,57 +180,36 @@ export default function EsteticaQuizPublicContent() {
                 >
                   ← Pergunta anterior
                 </button>
-              )}
-            </div>
+              </div>
+            )}
           </div>
         )}
 
-        {isResult && diagnosis && (
-          <div className="animate-fade-in-up space-y-6 pb-4" role="region" aria-live="polite">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-gray-400">Resultado</p>
-            <h1 className="text-xl sm:text-2xl font-semibold text-gray-900 leading-snug">{diagnosis.headline}</h1>
-            <ul className="space-y-3 text-base text-gray-800 leading-relaxed">
-              {diagnosis.bullets.map((line) => (
-                <li key={line} className="flex gap-3">
-                  <span className="text-blue-600 font-bold shrink-0" aria-hidden>
-                    ·
-                  </span>
-                  <span>{line}</span>
-                </li>
-              ))}
-            </ul>
-            <p className="text-base text-gray-700 leading-relaxed border-t border-gray-100 pt-6">{diagnosis.bridge}</p>
-            <div className="flex flex-col gap-3 pt-4">
+        {isResult && (
+          <div className="animate-fade-in-up space-y-8 pb-4" role="region" aria-live="polite">
+            <div className="space-y-5">
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 leading-tight tracking-tight">
+                {ESTETICA_QUIZ_RESULT_COPY.headline}
+              </h1>
+              <div className="space-y-2 text-lg sm:text-xl text-gray-800 font-medium leading-snug">
+                {ESTETICA_QUIZ_RESULT_COPY.subLines.map((line) => (
+                  <p key={line}>{line}</p>
+                ))}
+              </div>
+            </div>
+            <div className="flex flex-col gap-3 pt-2">
               <Link
                 href={ESTETICA_QUIZ_CADASTRO_HREF}
-                className="w-full min-h-[52px] rounded-2xl bg-blue-600 px-5 py-3.5 text-center text-base font-semibold text-white hover:bg-blue-700 shadow-sm shadow-blue-600/20 transition-colors inline-flex items-center justify-center"
+                className="w-full min-h-[56px] rounded-2xl bg-blue-600 px-5 py-4 text-center font-semibold text-white hover:bg-blue-700 shadow-sm shadow-blue-600/25 transition-colors inline-flex flex-col items-center justify-center gap-0.5 leading-tight"
               >
-                Começar grátis agora
+                <span className="text-lg inline-flex items-center gap-2">
+                  <span aria-hidden>👉</span>
+                  {ESTETICA_QUIZ_RESULT_COPY.ctaPrimary}
+                </span>
+                <span className="text-sm font-medium text-white/90 uppercase tracking-wide">
+                  {ESTETICA_QUIZ_RESULT_COPY.ctaGratuito}
+                </span>
               </Link>
-              <p className="text-center text-sm text-gray-500">Leva menos de 1 minuto</p>
-              <Link
-                href={ESTETICA_QUIZ_LOGIN_HREF}
-                className="w-full min-h-[48px] rounded-2xl border-2 border-gray-200 text-center text-base font-semibold text-gray-800 hover:bg-gray-50 inline-flex items-center justify-center"
-              >
-                Já tenho conta — entrar
-              </Link>
-              <button
-                type="button"
-                onClick={() => {
-                  setStep(0)
-                  setAnswers({})
-                  setSelected(null)
-                  setError(null)
-                  try {
-                    sessionStorage.removeItem(STORAGE_KEY)
-                  } catch {
-                    /* ignore */
-                  }
-                }}
-                className="w-full min-h-[44px] text-sm font-medium text-gray-500 hover:text-gray-800 py-2"
-              >
-                Refazer o quiz
-              </button>
             </div>
           </div>
         )}
