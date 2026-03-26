@@ -1,20 +1,28 @@
-import { notFound } from 'next/navigation'
+import type { Metadata } from 'next'
+import Link from 'next/link'
 import YladaAreaShell from '@/components/ylada/YladaAreaShell'
 import NoelHomeContent from '@/components/ylada/NoelHomeContent'
 
 /**
- * Rota só para desenvolvimento: mesma composição da home após onboarding
- * (banner grande + Noel com CTA colapsado), sem depender de sessionStorage ou de não ter links.
+ * Tela fixa para estudos internos: avaliar copy e decisões da primeira home pós-onboarding
+ * (banner completo + Noel com chat colapsado), sem depender de sessionStorage ou de não ter links.
  */
-export default function EsteticaPreviewPrimeiraHomePage() {
-  if (process.env.NODE_ENV === 'production') {
-    notFound()
-  }
+export const metadata: Metadata = {
+  title: 'Estudo — primeira home pós-onboarding (Estética)',
+  description: 'Referência interna para avaliação de UX e decisões de produto.',
+  robots: { index: false, follow: false },
+}
 
+export default function EsteticaPreviewPrimeiraHomePage() {
   return (
     <YladaAreaShell areaCodigo="estetica" areaLabel="Estética">
       <p className="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-950">
-        Preview local: primeira tela da home (banner de ativação completo + Noel antes de expandir o chat).
+        Estudo interno — avaliação e decisões: referência da primeira home após o cadastro (banner de ativação +
+        Noel com o chat ainda fechado). Para comparar com o ambiente real:{' '}
+        <Link href="/pt/estetica/home" className="font-medium text-amber-900 underline underline-offset-2">
+          /pt/estetica/home
+        </Link>
+        .
       </p>
       <NoelHomeContent
         areaCodigo="estetica"
