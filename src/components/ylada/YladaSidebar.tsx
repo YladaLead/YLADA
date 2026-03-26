@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import {
   YLADA_MENU_GROUPS,
   getYladaAreaPathPrefix,
@@ -20,6 +21,8 @@ interface YladaSidebarProps {
   onMobileClose?: () => void
 }
 
+type YladaMenuItem = (typeof YLADA_MENU_GROUPS)[number]['items'][number]
+
 export default function YladaSidebar({
   areaCodigo,
   areaLabel,
@@ -30,12 +33,87 @@ export default function YladaSidebar({
   const prefix = getYladaAreaPathPrefix(areaCodigo)
   const { signOut, userProfile } = useAuth()
   const isAdmin = userProfile?.is_admin === true
+  const [contaOpen, setContaOpen] = useState(false)
+  const [locationHash, setLocationHash] = useState('')
+  const contaRouteKeyRef = useRef<string | null>(null)
 
   /** Admin: + Lab + Planejamento. Links rápidos Wellness/Admin abaixo da navegação principal. */
   const visibleGroups = YLADA_MENU_GROUPS.filter((group) => {
     if (group.label === 'Lab' || group.label === 'Sistema') return isAdmin
     return true
   })
+  const mainGroups = visibleGroups.filter((g) => g.label !== 'Conta')
+  const contaGroup = visibleGroups.find((g) => g.label === 'Conta')
+
+  const itemPath = useCallback(
+    (item: YladaMenuItem) =>
+      item.key === 'leads'
+        ? getYladaLeadsPath(areaCodigo)
+        : item.key === 'suporte'
+          ? getYladaSuportePath(areaCodigo)
+          : item.path,
+    [areaCodigo]
+  )
+
+  const itemHref = useCallback(
+    (item: YladaMenuItem) => {
+      const path = itemPath(item)
+      const hash = 'hash' in item && item.hash ? `#${item.hash}` : ''
+      return `${prefix}/${path}${hash}`
+    },
+    [itemPath, prefix]
+  )
+
+  const itemIsActive = useCallback(
+    (item: YladaMenuItem) => {
+      const path = itemPath(item)
+      const base = `${prefix}/${path}`
+      if (item.key === 'assinatura') {
+        return pathname === base && locationHash === '#assinatura'
+      }
+      if (item.key === 'configuracao') {
+        return pathname === base && locationHash !== '#assinatura'
+      }
+      return pathname === base || pathname?.startsWith(`${base}/`)
+    },
+    [itemPath, pathname, prefix, locationHash]
+  )
+
+  useEffect(() => {
+    setLocationHash(typeof window !== 'undefined' ? window.location.hash : '')
+    const onHash = () => setLocationHash(window.location.hash)
+    window.addEventListener('hashchange', onHash)
+    return () => window.removeEventListener('hashchange', onHash)
+  }, [pathname])
+
+  useEffect(() => {
+    if (!contaGroup) return
+    const routeKey = `${pathname ?? ''}|${locationHash}`
+    if (contaRouteKeyRef.current === routeKey) return
+    contaRouteKeyRef.current = routeKey
+    const matchesConta = contaGroup.items.some((item) => itemIsActive(item))
+    setContaOpen(matchesConta)
+  }, [contaGroup, pathname, locationHash, itemIsActive])
+
+  const contaSectionActive = contaGroup?.items.some((item) => itemIsActive(item)) ?? false
+
+  const renderItemLink = (item: YladaMenuItem) => {
+    const href = itemHref(item)
+    const isActive = itemIsActive(item)
+    return (
+      <Link
+        key={item.key}
+        href={href}
+        onClick={onMobileClose}
+        className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+          isActive ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100'
+        }`}
+      >
+        <span aria-hidden>{item.icon}</span>
+        {item.label}
+      </Link>
+    )
+  }
 
   const content = (
     <aside className="flex flex-col h-full bg-white border-r border-gray-200 w-56">
@@ -59,43 +137,42 @@ export default function YladaSidebar({
           )}
         </Link>
       </div>
-      <nav className="flex-1 p-3 space-y-4 overflow-y-auto">
-        {visibleGroups.map((group) => (
-          <div key={group.label}>
-            <p className="px-3 mb-1.5 text-xs font-medium text-gray-500 tracking-wide">
-              {group.label}
-            </p>
-            <div className="space-y-0.5">
-              {group.items.map((item) => {
-                const path =
-                  item.key === 'leads'
-                    ? getYladaLeadsPath(areaCodigo)
-                    : item.key === 'suporte'
-                      ? getYladaSuportePath(areaCodigo)
-                      : item.path
-                const hash = 'hash' in item && item.hash ? `#${item.hash}` : ''
-                const href = `${prefix}/${path}${hash}`
-                const isActive = pathname === href || pathname?.startsWith(href + '/')
-                return (
-                  <Link
-                    key={item.key}
-                    href={href}
-                    onClick={onMobileClose}
-                    className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                      isActive
-                        ? 'bg-blue-50 text-blue-700'
-                        : 'text-gray-700 hover:bg-gray-100'
-                    }`}
-                  >
-                    <span aria-hidden>{item.icon}</span>
-                    {item.label}
-                  </Link>
-                )
-              })}
+      <nav className="flex flex-col flex-1 min-h-0">
+        <div className="flex-1 min-h-0 overflow-y-auto p-3 space-y-4">
+          {mainGroups.map((group) => (
+            <div key={group.label}>
+              <p className="px-3 mb-1.5 text-xs font-medium text-gray-500 tracking-wide">
+                {group.label}
+              </p>
+              <div className="space-y-0.5">{group.items.map((item) => renderItemLink(item))}</div>
             </div>
+          ))}
+        </div>
+
+        {contaGroup && (
+          <div className="flex-shrink-0 border-t border-gray-200 p-3 pt-2">
+            <button
+              type="button"
+              onClick={() => setContaOpen((o) => !o)}
+              className={`flex w-full items-center justify-between gap-2 rounded-lg px-3 py-2 text-left text-sm font-medium transition-colors ${
+                contaSectionActive && !contaOpen
+                  ? 'bg-blue-50 text-blue-700'
+                  : 'text-gray-700 hover:bg-gray-100'
+              }`}
+              aria-expanded={contaOpen}
+            >
+              <span className="text-xs font-medium text-gray-500 tracking-wide">Conta</span>
+              <span className="text-gray-400" aria-hidden>
+                {contaOpen ? '▾' : '▸'}
+              </span>
+            </button>
+            {contaOpen && (
+              <div className="mt-1 space-y-0.5">{contaGroup.items.map((item) => renderItemLink(item))}</div>
+            )}
           </div>
-        ))}
-        <div className="pt-3 mt-3 border-t border-gray-200 space-y-1">
+        )}
+
+        <div className="flex-shrink-0 border-t border-gray-200 p-3 pt-2 space-y-1">
           {isAdmin && (
             <>
               <p className="px-3 mb-1.5 text-xs font-medium text-gray-500 tracking-wide">Equipe</p>
@@ -119,7 +196,10 @@ export default function YladaSidebar({
           )}
           <button
             type="button"
-            onClick={() => { signOut(); onMobileClose?.() }}
+            onClick={() => {
+              signOut()
+              onMobileClose?.()
+            }}
             className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-700 hover:bg-red-50 hover:text-red-600 transition-colors"
           >
             <span aria-hidden>🚪</span>

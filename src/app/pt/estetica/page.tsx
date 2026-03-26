@@ -1,12 +1,25 @@
+import { Suspense } from 'react'
 import type { Metadata } from 'next'
-import EsteticaEntradaSocraticaContent from './EsteticaEntradaSocraticaContent'
+import EsteticaQuizPublicContent from './quiz/EsteticaQuizPublicContent'
 
 export const metadata: Metadata = {
   title: 'Estética | YLADA',
   description:
-    'Direct, preço, conversa que não agenda? Em poucos passos: mais clareza antes do contato e menos esforço pra você — com o Noel.',
+    'Escolha sua área, responda em poucos passos e veja na prática como sua cliente chega mais pronta para fechar — antes do cadastro.',
+}
+
+function EsteticaEntradaFallback() {
+  return (
+    <div className="min-h-[100dvh] flex items-center justify-center bg-white">
+      <p className="text-gray-500 text-sm">Carregando…</p>
+    </div>
+  )
 }
 
 export default function EsteticaPublicEntryPage() {
-  return <EsteticaEntradaSocraticaContent />
+  return (
+    <Suspense fallback={<EsteticaEntradaFallback />}>
+      <EsteticaQuizPublicContent entradaComNicho />
+    </Suspense>
+  )
 }

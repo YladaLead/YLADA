@@ -2,31 +2,74 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
-import { usePathname, useRouter } from 'next/navigation'
+import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import YLADALogo from '@/components/YLADALogo'
 import { useAuth } from '@/contexts/AuthContext'
 import { trackEvent } from '@/lib/analytics-events'
+import { ESTETICA_DEMO_CLIENTE_NICHOS } from '@/lib/estetica-demo-cliente-data'
 import {
+  ESTETICA_APRESENTACAO_HREF,
   ESTETICA_QUIZ_LOGIN_HREF,
   ESTETICA_QUIZ_QUESTIONS,
   ESTETICA_QUIZ_RESULT_COPY,
   ESTETICA_QUIZ_VER_PRATICA_HREF,
+  getEsteticaQuizQuestionsForNicho,
 } from '@/config/estetica-quiz-public'
 
 const STORAGE_KEY = 'ylada_estetica_quiz_respostas_v1'
 
-export default function EsteticaQuizPublicContent() {
+function isValidProfNicho(v: string | null): v is string {
+  return !!v && ESTETICA_DEMO_CLIENTE_NICHOS.some((n) => n.value === v)
+}
+
+export interface EsteticaQuizPublicContentProps {
+  /** true = /pt/estetica: escolhe nicho → quiz personalizado → resultado */
+  entradaComNicho?: boolean
+}
+
+export default function EsteticaQuizPublicContent({ entradaComNicho = false }: EsteticaQuizPublicContentProps) {
   const pathname = usePathname() ?? ''
   const router = useRouter()
+  const searchParams = useSearchParams()
   const { user, loading } = useAuth()
   const [authTimeout, setAuthTimeout] = useState(false)
+  const [profNicho, setProfNicho] = useState<string | null>(null)
   const [step, setStep] = useState(0)
   const [answers, setAnswers] = useState<Record<string, string>>({})
+  const [urlNichoSynced, setUrlNichoSynced] = useState(false)
 
-  const isQuizPath = pathname === '/pt/estetica/quiz' || pathname.startsWith('/pt/estetica/quiz?')
-  const totalPhases = ESTETICA_QUIZ_QUESTIONS.length + 1
-  const isResult = step >= ESTETICA_QUIZ_QUESTIONS.length
-  const current = ESTETICA_QUIZ_QUESTIONS[step]
+  const isEntradaRoot = pathname === '/pt/estetica' || pathname.startsWith('/pt/estetica?')
+  const isLegacyQuizPath = pathname === '/pt/estetica/quiz' || pathname.startsWith('/pt/estetica/quiz?')
+  const isPublicFlowPath = entradaComNicho ? isEntradaRoot : isLegacyQuizPath
+
+  useEffect(() => {
+    if (!entradaComNicho || urlNichoSynced) return
+    const q = searchParams.get('nicho')
+    if (isValidProfNicho(q)) {
+      setProfNicho(q)
+      setStep(0)
+      setAnswers({})
+    }
+    setUrlNichoSynced(true)
+  }, [entradaComNicho, searchParams, urlNichoSynced])
+
+  const quizQuestions = useMemo(() => {
+    if (entradaComNicho && profNicho) {
+      return getEsteticaQuizQuestionsForNicho(profNicho)
+    }
+    return ESTETICA_QUIZ_QUESTIONS
+  }, [entradaComNicho, profNicho])
+
+  const totalPhases = quizQuestions.length + 1
+  const isResult = step >= quizQuestions.length
+  const current = quizQuestions[step]
+
+  const verPraticaHref = useMemo(() => {
+    if (entradaComNicho && profNicho) {
+      return `${ESTETICA_QUIZ_VER_PRATICA_HREF}?nicho=${encodeURIComponent(profNicho)}`
+    }
+    return ESTETICA_QUIZ_VER_PRATICA_HREF
+  }, [entradaComNicho, profNicho])
 
   useEffect(() => {
     const id = setTimeout(() => setAuthTimeout(true), 800)
@@ -34,11 +77,11 @@ export default function EsteticaQuizPublicContent() {
   }, [])
 
   useEffect(() => {
-    if (loading || !isQuizPath) return
+    if (loading || !isPublicFlowPath) return
     if (user) {
       router.replace('/pt/estetica/home')
     }
-  }, [loading, user, router, isQuizPath])
+  }, [loading, user, router, isPublicFlowPath])
 
   useEffect(() => {
     const prev = document.body.style.overflow
@@ -49,9 +92,24 @@ export default function EsteticaQuizPublicContent() {
   }, [])
 
   const progress = useMemo(() => {
+    if (entradaComNicho && !profNicho) return 8
     if (isResult) return 100
     return ((step + 1) / totalPhases) * 100
-  }, [step, isResult, totalPhases])
+  }, [entradaComNicho, profNicho, step, isResult, totalPhases])
+
+  const pickProfNicho = useCallback((value: string) => {
+    if (!isValidProfNicho(value)) return
+    setProfNicho(value)
+    setStep(0)
+    setAnswers({})
+    try {
+      sessionStorage.removeItem(STORAGE_KEY)
+    } catch {
+      /* ignore */
+    }
+    trackEvent('estetica_entrada_nicho', { area: 'estetica', opcao: value })
+    router.replace(`/pt/estetica?nicho=${encodeURIComponent(value)}`, { scroll: false })
+  }, [router])
 
   const pickOption = useCallback(
     (value: string) => {
@@ -66,15 +124,27 @@ export default function EsteticaQuizPublicContent() {
         }
         return next
       })
-      trackEvent('estetica_quiz_step', { area: 'estetica', step: qId, value })
+      trackEvent('estetica_quiz_step', { area: 'estetica', step: qId, value, nicho: profNicho })
       setStep((s) => s + 1)
     },
-    [current]
+    [current, profNicho]
   )
 
   const goBack = useCallback(() => {
-    if (step <= 0) return
-    const qId = ESTETICA_QUIZ_QUESTIONS[step - 1].id
+    if (step <= 0) {
+      if (entradaComNicho && profNicho) {
+        setProfNicho(null)
+        setAnswers({})
+        try {
+          sessionStorage.removeItem(STORAGE_KEY)
+        } catch {
+          /* ignore */
+        }
+        router.replace('/pt/estetica', { scroll: false })
+      }
+      return
+    }
+    const qId = quizQuestions[step - 1].id
     setAnswers((prev) => {
       const next = { ...prev }
       delete next[qId]
@@ -86,15 +156,15 @@ export default function EsteticaQuizPublicContent() {
       return next
     })
     setStep((s) => s - 1)
-  }, [step])
+  }, [step, entradaComNicho, profNicho, quizQuestions, router])
 
   useEffect(() => {
     if (isResult) {
-      trackEvent('estetica_quiz_concluiu', { area: 'estetica' })
+      trackEvent('estetica_quiz_concluiu', { area: 'estetica', nicho: profNicho })
     }
-  }, [isResult])
+  }, [isResult, profNicho])
 
-  const showAuthLoading = loading && isQuizPath && !authTimeout
+  const showAuthLoading = loading && isPublicFlowPath && !authTimeout
   if (showAuthLoading) {
     return (
       <div className="min-h-[100dvh] flex items-center justify-center p-6 bg-white">
@@ -103,13 +173,15 @@ export default function EsteticaQuizPublicContent() {
     )
   }
 
-  if (user && isQuizPath) {
+  if (user && isPublicFlowPath) {
     return (
       <div className="min-h-[100dvh] flex items-center justify-center p-6 bg-white">
         <p className="text-gray-500 text-sm">Redirecionando…</p>
       </div>
     )
   }
+
+  const showNichoPicker = entradaComNicho && !profNicho
 
   return (
     <div className="h-[100dvh] max-h-[100dvh] flex flex-col overflow-hidden bg-white text-gray-900 estetica-touch supports-[height:100svh]:h-[100svh] supports-[height:100svh]:max-h-[100svh]">
@@ -122,19 +194,28 @@ export default function EsteticaQuizPublicContent() {
         </div>
         <div className="max-w-lg mx-auto flex items-center justify-between gap-3 px-4 py-3 sm:px-6">
           <Link
-            href="/pt/estetica"
+            href="/pt"
             className="inline-flex touch-manipulation min-h-[48px] min-w-[48px] items-center justify-center -ml-1"
-            aria-label="YLADA Estética"
+            aria-label="YLADA"
           >
             <YLADALogo size="md" responsive className="bg-transparent" />
           </Link>
           <div className="flex items-center gap-2 text-sm">
-            <Link
-              href="/pt/estetica"
-              className="text-gray-500 hover:text-gray-900 font-medium min-h-[48px] inline-flex items-center px-2"
-            >
-              Voltar
-            </Link>
+            {entradaComNicho ? (
+              <Link
+                href={ESTETICA_APRESENTACAO_HREF}
+                className="text-gray-500 hover:text-gray-900 font-medium min-h-[48px] inline-flex items-center px-2"
+              >
+                Apresentação
+              </Link>
+            ) : (
+              <Link
+                href="/pt/estetica"
+                className="text-gray-500 hover:text-gray-900 font-medium min-h-[48px] inline-flex items-center px-2"
+              >
+                Voltar
+              </Link>
+            )}
             <Link
               href={ESTETICA_QUIZ_LOGIN_HREF}
               className="text-gray-500 hover:text-gray-900 font-medium min-h-[48px] inline-flex items-center px-2 -mr-2"
@@ -146,7 +227,38 @@ export default function EsteticaQuizPublicContent() {
       </header>
 
       <main className="flex-1 min-h-0 overflow-y-auto overscroll-y-contain px-4 sm:px-6 py-6 max-w-lg mx-auto w-full estetica-safe-main-bottom">
-        {!isResult && current && (
+        {showNichoPicker && (
+          <div className="animate-fade-in-up flex flex-col pb-2 space-y-6" role="region" aria-live="polite">
+            <div className="space-y-2">
+              <h1 className="text-xl sm:text-2xl font-bold text-gray-900 leading-snug tracking-tight">
+                Qual é o seu foco em estética?
+              </h1>
+              <p className="text-sm text-gray-600 leading-relaxed">
+                Assim personalizamos as perguntas e o exemplo na prática fica mais próximo do que você faz no dia a dia.
+              </p>
+            </div>
+            <div className="flex flex-col gap-3">
+              {ESTETICA_DEMO_CLIENTE_NICHOS.map((opt) => (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => pickProfNicho(opt.value)}
+                  className="w-full min-h-[48px] rounded-2xl border-2 border-gray-300 bg-slate-50/90 px-5 py-3.5 text-base font-semibold text-gray-900 shadow-sm shadow-gray-900/5 hover:border-gray-500 hover:bg-white hover:shadow-md active:scale-[0.99] transition-all text-left"
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+            <Link
+              href={ESTETICA_APRESENTACAO_HREF}
+              className="block text-center text-sm text-gray-500 hover:text-gray-800 pt-4"
+            >
+              Ver apresentação completa (tour)
+            </Link>
+          </div>
+        )}
+
+        {entradaComNicho && profNicho && !isResult && current && (
           <div
             key={current.id}
             className="animate-fade-in-up flex flex-col pb-2"
@@ -154,7 +266,63 @@ export default function EsteticaQuizPublicContent() {
             aria-live="polite"
           >
             <p className="text-sm text-gray-500 leading-relaxed">
-              Pergunta {step + 1} de {ESTETICA_QUIZ_QUESTIONS.length}
+              Pergunta {step + 1} de {quizQuestions.length}
+            </p>
+            <h1 className="mt-4 text-xl sm:text-2xl font-semibold text-gray-900 leading-snug tracking-tight">
+              {current.title}
+            </h1>
+            <div className="flex flex-col gap-3 pt-6">
+              {current.options.map((opt) => (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => pickOption(opt.value)}
+                  className="w-full min-h-[48px] rounded-2xl border-2 border-gray-300 bg-slate-50/90 px-5 py-3.5 text-base font-semibold text-gray-900 shadow-sm shadow-gray-900/5 hover:border-gray-500 hover:bg-white hover:shadow-md active:scale-[0.99] transition-all text-left"
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+            <div className="pt-8 flex flex-col gap-2">
+              {step > 0 && (
+                <button
+                  type="button"
+                  onClick={goBack}
+                  className="w-full min-h-[48px] rounded-2xl text-sm font-semibold text-gray-500 hover:text-gray-800 py-2 touch-manipulation"
+                >
+                  ← Pergunta anterior
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={() => {
+                  setProfNicho(null)
+                  setStep(0)
+                  setAnswers({})
+                  try {
+                    sessionStorage.removeItem(STORAGE_KEY)
+                  } catch {
+                    /* ignore */
+                  }
+                  router.replace('/pt/estetica', { scroll: false })
+                }}
+                className="w-full min-h-[44px] text-sm font-medium text-gray-400 hover:text-gray-700 py-2"
+              >
+                ← Trocar área de atuação
+              </button>
+            </div>
+          </div>
+        )}
+
+        {!entradaComNicho && !isResult && current && (
+          <div
+            key={current.id}
+            className="animate-fade-in-up flex flex-col pb-2"
+            role="region"
+            aria-live="polite"
+          >
+            <p className="text-sm text-gray-500 leading-relaxed">
+              Pergunta {step + 1} de {quizQuestions.length}
             </p>
             <h1 className="mt-4 text-xl sm:text-2xl font-semibold text-gray-900 leading-snug tracking-tight">
               {current.title}
@@ -199,10 +367,10 @@ export default function EsteticaQuizPublicContent() {
                 </div>
               </div>
               <div className="pt-4 sm:pt-6 flex flex-col items-stretch gap-3">
-              <Link
-                href={ESTETICA_QUIZ_VER_PRATICA_HREF}
-                className="w-full min-h-[58px] sm:min-h-[60px] rounded-2xl bg-blue-600 px-6 py-4 text-center text-lg sm:text-xl font-bold text-white hover:bg-blue-700 shadow-lg shadow-blue-600/35 active:scale-[0.99] transition-all inline-flex items-center justify-center gap-2.5"
-              >
+                <Link
+                  href={verPraticaHref}
+                  className="w-full min-h-[58px] sm:min-h-[60px] rounded-2xl bg-blue-600 px-6 py-4 text-center text-lg sm:text-xl font-bold text-white hover:bg-blue-700 shadow-lg shadow-blue-600/35 active:scale-[0.99] transition-all inline-flex items-center justify-center gap-2.5"
+                >
                   <span aria-hidden>👉</span>
                   {ESTETICA_QUIZ_RESULT_COPY.ctaPrimary}
                 </Link>

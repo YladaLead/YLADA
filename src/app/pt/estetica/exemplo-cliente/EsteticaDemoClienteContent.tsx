@@ -5,7 +5,7 @@
  * Rota: /pt/estetica/exemplo-cliente?nicho=pele
  */
 
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import YLADALogo from '@/components/YLADALogo'
@@ -18,6 +18,8 @@ import { STORAGE_KEY_ESTETICA_CONTINUAR_TOUR, STORAGE_KEY_ESTETICA_DEMO_NICHO } 
 import { trackEvent } from '@/lib/analytics-events'
 
 const CADASTRO_POS_DEMO_HREF = '/pt/cadastro?area=estetica'
+
+type FechamentoFase = 'simulacao' | 'promo'
 
 export default function EsteticaDemoClienteContent() {
   const router = useRouter()
@@ -32,6 +34,8 @@ export default function EsteticaDemoClienteContent() {
   )
   const [etapa, setEtapa] = useState(0)
   const [finalizado, setFinalizado] = useState(false)
+  const [fechamentoFase, setFechamentoFase] = useState<FechamentoFase>('simulacao')
+  const prevFinalizadoRef = useRef(false)
 
   const cfg = useMemo(
     () => (nichoAtivo ? getEsteticaDemoClienteConfig(nichoAtivo) : null),
@@ -43,8 +47,21 @@ export default function EsteticaDemoClienteContent() {
       setNichoAtivo(configFromUrl.value)
       setEtapa(0)
       setFinalizado(false)
+      setFechamentoFase('simulacao')
     }
   }, [configFromUrl, nichoAtivo])
+
+  useEffect(() => {
+    if (finalizado && !prevFinalizadoRef.current) {
+      setFechamentoFase('simulacao')
+    }
+    prevFinalizadoRef.current = finalizado
+  }, [finalizado])
+
+  useEffect(() => {
+    if (!finalizado || !origemQuiz || fechamentoFase !== 'promo') return
+    trackEvent('estetica_cadastro_promo_view', { area: 'estetica', origem: 'quiz_exemplo_cliente' })
+  }, [finalizado, origemQuiz, fechamentoFase])
 
   const total = cfg?.perguntas.length ?? 0
   const perguntaAtual = cfg?.perguntas[etapa]
@@ -58,6 +75,7 @@ export default function EsteticaDemoClienteContent() {
     setNichoAtivo(v)
     setEtapa(0)
     setFinalizado(false)
+    setFechamentoFase('simulacao')
     router.replace(`/pt/estetica/exemplo-cliente?nicho=${v}`, { scroll: false })
   }, [router])
 
@@ -140,6 +158,10 @@ export default function EsteticaDemoClienteContent() {
   if (!cfg) return null
 
   if (finalizado) {
+    const irParaPromo = () => {
+      setFechamentoFase('promo')
+    }
+
     return (
       <div className="min-h-[100dvh] bg-white text-gray-900 flex flex-col estetica-touch supports-[height:100svh]:min-h-[100svh]">
         <header className="sticky top-0 z-10 shrink-0 border-b border-gray-100 bg-white/95 pt-[env(safe-area-inset-top,0px)]">
@@ -154,53 +176,104 @@ export default function EsteticaDemoClienteContent() {
           </div>
         </header>
         <main className="flex-1 px-4 py-8 max-w-lg mx-auto w-full flex flex-col estetica-safe-main-bottom space-y-10">
-          <div className="space-y-5 text-center">
-            <h1 className="text-xl sm:text-2xl font-bold text-gray-900 leading-snug">
-              É assim que sua cliente chega até você
-            </h1>
-            <div className="space-y-1.5 text-base sm:text-lg text-gray-800 font-medium leading-snug">
-              <p>já entendendo melhor</p>
-              <p>já mais decidida</p>
-              <p className="text-gray-900">e muito mais pronta pra fechar</p>
-            </div>
-          </div>
-
-          <div
-            className="rounded-xl border-2 border-dashed border-green-200 bg-green-50/80 p-4"
-            role="group"
-            aria-label="Modelo do botão de WhatsApp no link da profissional"
-          >
-            <div
-              className="flex w-full min-h-[52px] items-center justify-center rounded-xl bg-green-600/85 text-white font-semibold cursor-default select-none shadow-sm shadow-green-900/15"
-              aria-hidden="true"
-            >
-              WhatsApp (modelo)
-            </div>
-            <p className="mt-3 text-sm text-gray-700 text-center leading-relaxed">
-              No seu link, ela toca aqui e abre <span className="font-semibold">seu</span> WhatsApp com mensagem alinhada ao
-              que ela viu.
-            </p>
-          </div>
-
-          {origemQuiz ? (
-            <div className="space-y-3 pt-2">
-              <Link
-                href={CADASTRO_POS_DEMO_HREF}
-                className="flex w-full min-h-[56px] rounded-2xl bg-blue-600 px-5 py-4 text-center text-lg font-bold text-white hover:bg-blue-700 shadow-lg shadow-blue-600/35 items-center justify-center gap-2"
-              >
-                <span aria-hidden>👉</span>
-                Criar meu primeiro agora
-              </Link>
-              <p className="text-center text-sm text-gray-500">leva menos de 1 minuto</p>
+          {origemQuiz && fechamentoFase === 'promo' ? (
+            <div className="space-y-8 animate-fade-in-up">
+              <div className="space-y-2">
+                <p className="text-xs font-semibold uppercase tracking-wider text-blue-700 bg-blue-50 border border-blue-100 rounded-xl px-3 py-2 leading-snug inline-block">
+                  Comece grátis
+                </p>
+                <h1 className="text-xl sm:text-2xl font-bold text-gray-900 leading-snug">
+                  Atraia clientes mais prontos para fechar
+                </h1>
+                <p className="text-base text-gray-700 leading-relaxed">
+                  No YLADA você guia a pessoa com perguntas certas antes do WhatsApp — menos curioso pedindo preço, mais gente
+                  chegando decidida.
+                </p>
+              </div>
+              <ul className="space-y-3 text-sm text-gray-800 leading-relaxed">
+                <li className="flex gap-2">
+                  <span className="text-blue-600 font-bold">·</span>
+                  Cadastro em menos de um minuto; você já entra no painel.
+                </li>
+                <li className="flex gap-2">
+                  <span className="text-blue-600 font-bold">·</span>
+                  Lá dentro: passo a passo, Noel e modelos — você entende o resto no uso.
+                </li>
+              </ul>
+              <div className="space-y-3 pt-2">
+                <Link
+                  href={CADASTRO_POS_DEMO_HREF}
+                  onClick={() =>
+                    trackEvent('estetica_cadastro_promo_cta', { area: 'estetica', origem: 'quiz_exemplo_cliente' })
+                  }
+                  className="flex w-full min-h-[56px] rounded-2xl bg-blue-600 px-5 py-4 text-center text-lg font-bold text-white hover:bg-blue-700 shadow-lg shadow-blue-600/35 items-center justify-center gap-2"
+                >
+                  <span aria-hidden>👉</span>
+                  Fazer cadastro agora
+                </Link>
+                <button
+                  type="button"
+                  onClick={() => setFechamentoFase('simulacao')}
+                  className="w-full min-h-[44px] text-sm font-medium text-gray-500 hover:text-gray-800"
+                >
+                  ← Voltar à simulação
+                </button>
+              </div>
             </div>
           ) : (
-            <button
-              type="button"
-              onClick={continuarTour}
-              className="w-full min-h-[52px] rounded-2xl bg-blue-600 text-white text-base font-bold hover:bg-blue-700 shadow-lg shadow-blue-600/30"
-            >
-              Continuar para entender mais
-            </button>
+            <>
+              <div className="space-y-5 text-center">
+                <h1 className="text-xl sm:text-2xl font-bold text-gray-900 leading-snug">
+                  É assim que sua cliente chega até você
+                </h1>
+                <div className="space-y-1.5 text-base sm:text-lg text-gray-800 font-medium leading-snug">
+                  <p>já entendendo melhor</p>
+                  <p>já mais decidida</p>
+                  <p className="text-gray-900">e muito mais pronta pra fechar</p>
+                </div>
+              </div>
+
+              <div
+                className="rounded-xl border-2 border-dashed border-green-200 bg-green-50/80 p-4"
+                role="group"
+                aria-label="Modelo do botão de WhatsApp no link da profissional"
+              >
+                <div
+                  className="flex w-full min-h-[52px] items-center justify-center rounded-xl bg-green-600/85 text-white font-semibold cursor-default select-none shadow-sm shadow-green-900/15"
+                  aria-hidden="true"
+                >
+                  WhatsApp (modelo)
+                </div>
+                <p className="mt-3 text-sm text-gray-700 text-center leading-relaxed">
+                  No seu link, ela toca aqui e abre <span className="font-semibold">seu</span> WhatsApp com mensagem alinhada ao
+                  que ela viu.
+                </p>
+              </div>
+
+              {origemQuiz ? (
+                <div className="space-y-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={irParaPromo}
+                    className="flex w-full min-h-[56px] rounded-2xl bg-blue-600 px-5 py-4 text-center text-lg font-bold text-white hover:bg-blue-700 shadow-lg shadow-blue-600/35 items-center justify-center gap-2"
+                  >
+                    <span aria-hidden>👉</span>
+                    Quero começar grátis
+                  </button>
+                  <p className="text-center text-sm text-gray-500 leading-relaxed">
+                    Na próxima tela: por que vale a pena e cadastro em menos de 1 minuto.
+                  </p>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={continuarTour}
+                  className="w-full min-h-[52px] rounded-2xl bg-blue-600 text-white text-base font-bold hover:bg-blue-700 shadow-lg shadow-blue-600/30"
+                >
+                  Continuar para entender mais
+                </button>
+              )}
+            </>
           )}
         </main>
       </div>

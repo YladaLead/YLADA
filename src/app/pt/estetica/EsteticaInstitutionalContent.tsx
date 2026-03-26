@@ -2,7 +2,7 @@
 
 /**
  * Landing longa de estética — rota pública /pt/estetica/como-funciona.
- * Entrada progressiva (socrática): /pt/estetica. Entrada minimal arquivada: /pt/esteticav2.
+ * Tour socrático: /pt/estetica/apresentacao. Entrada principal (quiz): /pt/estetica.
  */
 
 import { useState, useEffect } from 'react'

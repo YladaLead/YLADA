@@ -1,7 +1,10 @@
 /**
- * Quiz público /pt/estetica/quiz — perguntas guiadas + diagnóstico + CTA cadastro.
- * Copy alinhada à entrada socrática e às dores de esteticista.
+ * Quiz profissional estética — entrada em /pt/estetica (com nicho) ou legado /pt/estetica/quiz → redirect.
  */
+
+import { ESTETICA_DEMO_CLIENTE_NICHOS } from '@/lib/estetica-demo-cliente-data'
+
+export const ESTETICA_APRESENTACAO_HREF = '/pt/estetica/apresentacao'
 
 export interface EsteticaQuizOption {
   value: string
@@ -76,6 +79,41 @@ export const ESTETICA_QUIZ_QUESTIONS: EsteticaQuizQuestion[] = [
   },
 ]
 
+/** Contexto curto para personalizar a pergunta “antes do contato” por nicho. */
+const ESTETICA_QUIZ_NICHO_CONTEXTO: Record<string, string> = {
+  pele: 'cuidados de pele e facial',
+  cabelo: 'cabelo e tratamentos capilares',
+  unhas: 'unhas e nail design',
+  sobrancelha: 'sobrancelha e design',
+  maquiagem: 'maquiagem',
+  corporal: 'estética corporal',
+}
+
+export function getEsteticaQuizLabelForNicho(nicho: string): string {
+  return ESTETICA_DEMO_CLIENTE_NICHOS.find((n) => n.value === nicho)?.label ?? 'Estética'
+}
+
+/** Perguntas iguais à base, com 1ª e 5ª ajustadas ao nicho (mais identificação). */
+export function getEsteticaQuizQuestionsForNicho(nicho: string): EsteticaQuizQuestion[] {
+  const label = getEsteticaQuizLabelForNicho(nicho)
+  const ctx = ESTETICA_QUIZ_NICHO_CONTEXTO[nicho] ?? 'seus serviços'
+  return ESTETICA_QUIZ_QUESTIONS.map((q) => {
+    if (q.id === 'conversa_inicio') {
+      return {
+        ...q,
+        title: `Na sua área (${label}), como você sente que suas conversas começam?`,
+      }
+    }
+    if (q.id === 'antes_contato') {
+      return {
+        ...q,
+        title: `Antes de falar com você sobre ${ctx}, quanto a pessoa costuma entender do que precisa?`,
+      }
+    }
+    return q
+  })
+}
+
 /**
  * Fechamento pós-quiz: curto, curiosidade + CTA único.
  * A/B futuro: variante CTA "Quero agendar mais clientes" vs "Começar agora grátis".
@@ -87,6 +125,6 @@ export const ESTETICA_QUIZ_RESULT_COPY = {
     'Faça sua cliente chegar pronta pra fechar',
     'Você vai entender na hora quando ver',
   ] as const,
-  ctaPrimary: 'Começar agora grátis',
+  ctaPrimary: 'Ver na prática agora',
   ctaMicro: 'simulação rápida, sem senha · em seguida você vê o fluxo como sua cliente',
 } as const

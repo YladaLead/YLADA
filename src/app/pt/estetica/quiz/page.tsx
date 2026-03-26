@@ -1,12 +1,6 @@
-import type { Metadata } from 'next'
-import EsteticaQuizPublicContent from './EsteticaQuizPublicContent'
+import { redirect } from 'next/navigation'
 
-export const metadata: Metadata = {
-  title: 'Quiz · Estética | YLADA',
-  description:
-    'Poucas perguntas e um fechamento direto: faça sua cliente chegar pronta pra fechar. Comece grátis no YLADA.',
-}
-
-export default function EsteticaQuizPage() {
-  return <EsteticaQuizPublicContent />
+/** URL legada: fluxo principal de estética está em /pt/estetica */
+export default function EsteticaQuizLegacyRedirectPage() {
+  redirect('/pt/estetica')
 }

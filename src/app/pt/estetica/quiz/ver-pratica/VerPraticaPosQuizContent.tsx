@@ -1,12 +1,12 @@
 'use client'
 
 /**
- * Pós-quiz: simulação de login (sem auth) → onde atua → nicho → /exemplo-cliente?origem=quiz
+ * Pós-quiz: simulação de login → onde atua → (nicho, se não veio na URL) → exemplo-cliente?origem=quiz
  */
 
-import { useCallback, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import YLADALogo from '@/components/YLADALogo'
 import { ESTETICA_DEMO_CLIENTE_NICHOS } from '@/lib/estetica-demo-cliente-data'
 import {
@@ -21,22 +21,42 @@ type Fase = 'login' | 'local' | 'nicho'
 
 export default function VerPraticaPosQuizContent() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [fase, setFase] = useState<Fase>('login')
+
+  const nichoPredefinido = useMemo(() => {
+    const n = searchParams.get('nicho')
+    return n && ESTETICA_DEMO_CLIENTE_NICHOS.some((o) => o.value === n) ? n : null
+  }, [searchParams])
 
   const avancarLogin = useCallback(() => {
     trackEvent('estetica_quiz_ver_pratica', { area: 'estetica', step: 'pos_login_simulado' })
     setFase('local')
   }, [])
 
-  const escolherLocal = useCallback((value: string) => {
-    try {
-      sessionStorage.setItem(STORAGE_KEY_ESTETICA_DEMO_LOCAL, value)
-    } catch {
-      /* ok */
-    }
-    trackEvent('estetica_quiz_ver_pratica', { area: 'estetica', step: 'local', opcao: value })
-    setFase('nicho')
-  }, [])
+  const escolherLocal = useCallback(
+    (value: string) => {
+      try {
+        sessionStorage.setItem(STORAGE_KEY_ESTETICA_DEMO_LOCAL, value)
+      } catch {
+        /* ok */
+      }
+      trackEvent('estetica_quiz_ver_pratica', { area: 'estetica', step: 'local', opcao: value })
+      if (nichoPredefinido) {
+        try {
+          sessionStorage.setItem(STORAGE_KEY_ESTETICA_DEMO_NICHO, nichoPredefinido)
+        } catch {
+          /* ok */
+        }
+        router.push(
+          `${ESTETICA_DEMO_CLIENTE_BASE_PATH}?nicho=${encodeURIComponent(nichoPredefinido)}&origem=quiz`
+        )
+      } else {
+        setFase('nicho')
+      }
+    },
+    [router, nichoPredefinido]
+  )
 
   const escolherNicho = useCallback(
     (value: string) => {
@@ -56,9 +76,9 @@ export default function VerPraticaPosQuizContent() {
       <header className="sticky top-0 z-20 shrink-0 border-b border-gray-100/80 bg-white/95 backdrop-blur-sm pt-[env(safe-area-inset-top,0px)]">
         <div className="max-w-lg mx-auto flex items-center justify-between gap-3 px-4 py-3 sm:px-6">
           <Link
-            href="/pt/estetica/quiz"
+            href="/pt/estetica"
             className="inline-flex touch-manipulation min-h-[48px] min-w-[48px] items-center justify-center -ml-1"
-            aria-label="Voltar ao quiz"
+            aria-label="Voltar à estética"
           >
             <YLADALogo size="md" responsive className="bg-transparent" />
           </Link>
@@ -117,7 +137,9 @@ export default function VerPraticaPosQuizContent() {
           <div className="space-y-6 animate-fade-in-up">
             <h1 className="text-xl font-bold text-gray-900">Onde você trabalha com estética?</h1>
             <p className="text-sm text-gray-600 leading-relaxed">
-              Escolha onde você atua. Na próxima tela você define o nicho do exemplo.
+              {nichoPredefinido
+                ? 'Escolha onde você atua. Em seguida você vê o fluxo como sua cliente, já no nicho que você escolheu antes.'
+                : 'Escolha onde você atua. Na próxima tela você define o nicho do exemplo.'}
             </p>
             <div className="flex flex-col gap-2">
               {ESTETICA_DEMO_LOCAIS.map((opt) => (

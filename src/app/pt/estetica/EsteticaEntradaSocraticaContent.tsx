@@ -1,8 +1,8 @@
 'use client'
 
 /**
- * Entrada pública /pt/estética — fluxo progressivo, foco em estética, tom direto.
- * Landing minimal anterior: /pt/esteticav2.
+ * Tour progressivo (apresentação) — rota pública /pt/estetica/apresentacao.
+ * Entrada principal com quiz + demo: /pt/estetica. Landing minimal arquivada: /pt/esteticav2 → /pt/estetica.
  */
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
@@ -21,7 +21,7 @@ import {
 } from '@/lib/estetica-demo-context'
 import { ESTETICA_DEMO_CLIENTE_NICHOS } from '@/lib/estetica-demo-cliente-data'
 
-const TOTAL_STEPS = 12
+const TOTAL_STEPS = 13
 const CADASTRO_HREF = '/pt/cadastro?area=estetica'
 
 type ChoiceItem = { label: string; analyticsValue: string }
@@ -29,7 +29,7 @@ type ChoiceItem = { label: string; analyticsValue: string }
 type StepBody = {
   lines: string[]
   primary?: { label: string; action: 'next' | 'href' | 'open-exemplo' | 'demo-modal'; href?: string }
-  secondary?: { label: string; action: 'next' | 'open-exemplo' | 'demo-modal' }
+  secondary?: { label: string; action: 'next' | 'open-exemplo' | 'demo-modal' | 'prev' }
   choices?: ChoiceItem[]
 }
 
@@ -190,11 +190,27 @@ const STEPS: StepBody[] = [
       '',
       'E se travar… o Noel te ajuda.',
     ],
+    primary: { label: 'Quero começar grátis', action: 'next' },
+  },
+  {
+    lines: [
+      'Comece grátis e atraia clientes mais prontos para fechar.',
+      '',
+      'No YLADA você guia a pessoa com perguntas certas antes do WhatsApp:',
+      '',
+      'menos gente sumindo na hora do preço',
+      'mais clareza do que ela precisa',
+      'e conversas que viram agendamento com menos esforço seu',
+      '',
+      'O cadastro leva menos de um minuto.',
+      'Lá dentro você vê o passo a passo e usa no seu ritmo.',
+    ],
     primary: {
-      label: 'Gostei, quero começar grátis agora',
+      label: 'Fazer cadastro agora',
       action: 'href',
       href: CADASTRO_HREF,
     },
+    secondary: { label: '← Voltar', action: 'prev' },
   },
 ]
 
@@ -210,7 +226,7 @@ export default function EsteticaEntradaSocraticaContent() {
   const [demoNichoChoice, setDemoNichoChoice] = useState<string | null>(null)
 
   const isEsteticaRoot =
-    pathname === '/pt/estetica' || pathname.startsWith('/pt/estetica?')
+    pathname === '/pt/estetica/apresentacao' || pathname.startsWith('/pt/estetica/apresentacao?')
 
   useEffect(() => {
     const id = setTimeout(() => setAuthTimeout(true), 800)
@@ -261,12 +277,22 @@ export default function EsteticaEntradaSocraticaContent() {
     }
   }, [isEsteticaRoot])
 
+  useEffect(() => {
+    if (!isEsteticaRoot) return
+    if (step !== STEPS.length - 1) return
+    trackEvent('estetica_cadastro_promo_view', { area: 'estetica', origem: 'apresentacao' })
+  }, [isEsteticaRoot, step])
+
   const goNext = useCallback(() => {
     setStep((s) => {
       // Passo 7 só para quem volta do exemplo-cliente; fluxo linear (6 → 8) pula direto para “compartilha o link”.
       if (s === 6) return Math.min(8, STEPS.length - 1)
       return Math.min(s + 1, STEPS.length - 1)
     })
+  }, [])
+
+  const goPrev = useCallback(() => {
+    setStep((s) => Math.max(0, s - 1))
   }, [])
 
   const pickDemoLocal = useCallback((value: string) => {
@@ -339,7 +365,12 @@ export default function EsteticaEntradaSocraticaContent() {
     const p = body.primary
     if (!p) return
     if (p.action === 'next') goNext()
-    else if (p.action === 'href' && p.href) router.push(p.href)
+    else if (p.action === 'href' && p.href) {
+      if (p.href === CADASTRO_HREF) {
+        trackEvent('estetica_cadastro_promo_cta', { area: 'estetica', origem: 'apresentacao' })
+      }
+      router.push(p.href)
+    }
     else if (p.action === 'open-exemplo') setDemoOpen(true)
     else if (p.action === 'demo-modal') setDemoOpen(true)
   }
@@ -347,6 +378,7 @@ export default function EsteticaEntradaSocraticaContent() {
   const runSecondary = () => {
     if (!body.secondary) return
     if (body.secondary.action === 'next') goNext()
+    else if (body.secondary.action === 'prev') goPrev()
     else if (body.secondary.action === 'open-exemplo') setDemoOpen(true)
     else if (body.secondary.action === 'demo-modal') setDemoOpen(true)
   }

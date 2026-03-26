@@ -48,7 +48,6 @@ export const YLADA_MENU_GROUPS = [
       { key: 'home', label: 'Noel (mentor)', path: 'home', icon: '💬' },
       { key: 'links', label: 'Links', path: 'links', icon: '🔗' },
       { key: 'leads', label: 'Leads', path: 'leads', icon: '👥' },
-      { key: 'crescimento', label: 'Crescimento', path: 'crescimento', icon: '📈' },
       { key: 'suporte', label: 'Suporte', path: 'suporte', icon: '💬' },
     ],
   },
