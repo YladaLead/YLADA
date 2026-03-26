@@ -649,8 +649,15 @@ export default function YladaConfiguracaoContent({ areaCodigo, areaLabel }: Ylad
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50" role="dialog" aria-modal="true" aria-labelledby="cancel-modal-title">
           <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6">
             <h3 id="cancel-modal-title" className="text-lg font-semibold text-gray-900 mb-2">Cancelar assinatura?</h3>
-            <p className="text-gray-600 text-sm mb-6">
+            <p className="text-gray-600 text-sm mb-3">
               Você continua com acesso até o fim do período já pago. Depois disso, não haverá nova cobrança.
+            </p>
+            <p className="text-gray-600 text-sm mb-6 rounded-lg bg-sky-50 border border-sky-100 px-3 py-2.5">
+              Quando o período pago terminar, sua conta passa para o{' '}
+              <strong className="text-gray-900">plano gratuito</strong>: você segue usando a YLADA com{' '}
+              <strong className="text-gray-900">um diagnóstico/link ativo por vez</strong> e limites mensais de
+              conversas no WhatsApp e análises com o Noel. Assim dá para continuar divulgando e evoluindo; o Pro
+              continua disponível quando fizer sentido para você.
             </p>
             <div className="flex gap-3 justify-end">
               <button

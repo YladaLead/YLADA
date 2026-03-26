@@ -75,7 +75,7 @@ export default function PilotPageContent() {
             <div>
               <h2 className="text-lg font-semibold text-gray-900">Qual é o seu segmento?</h2>
               <p className="mt-0.5 text-xs text-gray-600 sm:text-sm">
-                Toque na sua área ou digite abaixo se não estiver na lista.
+                Escolha sua área. Se não estiver na lista, digite abaixo.
               </p>
             </div>
 

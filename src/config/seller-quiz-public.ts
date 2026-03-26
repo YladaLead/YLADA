@@ -40,6 +40,5 @@ export const SELLER_QUIZ_RESULT_COPY = {
     'Na sequência você vê um exemplo na prática',
   ] as const,
   ctaPrimary: 'Ver na prática agora',
-  ctaMicro:
-    'Depois: seu canal e o fluxo como o cliente veria. Wellness tem entrada própria no app; aqui é funil imparcial de vendedor.',
+  ctaMicro: 'Próximo passo: seu canal e um exemplo do fluxo do cliente',
 } as const

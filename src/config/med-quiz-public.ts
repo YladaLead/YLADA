@@ -40,5 +40,5 @@ export const MED_QUIZ_RESULT_COPY = {
     'Você vai entender na hora quando ver',
   ] as const,
   ctaPrimary: 'Ver na prática agora',
-  ctaMicro: 'Em seguida: onde você atua e o fluxo como o paciente veria (demonstração)',
+  ctaMicro: 'Próximo passo: onde você atua, depois um exemplo do fluxo do paciente',
 } as const

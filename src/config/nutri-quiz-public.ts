@@ -97,7 +97,7 @@ export function getNutriQuizQuestionsForNicho(nicho: string): NutriQuizQuestion[
     if (q.id === 'conversa_inicio') {
       return {
         ...q,
-        title: `Na sua área (${label}), como você sente que suas conversas começam?`,
+        title: `No seu foco em ${label}, como você sente que suas conversas começam?`,
       }
     }
     if (q.id === 'antes_contato') {
@@ -118,5 +118,5 @@ export const NUTRI_QUIZ_RESULT_COPY = {
     'Você vai entender na hora quando ver',
   ] as const,
   ctaPrimary: 'Ver na prática agora',
-  ctaMicro: 'Em seguida: onde você atua e o fluxo como seu paciente veria',
+  ctaMicro: 'Próximo passo: onde você atua, depois um exemplo do fluxo do seu paciente',
 } as const

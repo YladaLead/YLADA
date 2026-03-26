@@ -25,16 +25,15 @@ export default function EntradaSocraticaDemoIntroPanel({
       </h2>
       <div className="mt-3 space-y-3 text-sm text-gray-700 leading-relaxed">
         <p>
-          Você <strong>cria e compartilha um link seu</strong>, personalizado para a sua área — bio, Instagram,
-          WhatsApp ou anúncio.
+          Você <strong>cria seu link</strong> e <strong>compartilha</strong> onde as pessoas te encontram.
         </p>
         <p>
-          Quem tem interesse <strong>abre esse link e responde às perguntas</strong> antes de te chamar. Assim essa
-          pessoa chega com mais contexto na primeira conversa com você.
+          <strong>Quem te procura</strong> abre o link, <strong>responde às perguntas</strong> e chega na conversa com
+          mais clareza. A seguir você vê <strong>só um exemplo</strong> do que {quemRespondeNoExemplo} passa nesse
+          fluxo.
         </p>
         <p>
-          A seguir você vê <strong>só um exemplo</strong> do que {quemRespondeNoExemplo} veria nesse fluxo. Depois do
-          cadastro, o <strong>Noel</strong> te ajuda a montar o seu de verdade.
+          Depois do cadastro, o <strong>Noel</strong> te ajuda a montar o seu de verdade.
         </p>
       </div>
       <div className="mt-6 flex flex-col gap-2">

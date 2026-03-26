@@ -101,7 +101,7 @@ export function getEsteticaQuizQuestionsForNicho(nicho: string): EsteticaQuizQue
     if (q.id === 'conversa_inicio') {
       return {
         ...q,
-        title: `Na sua área (${label}), como você sente que suas conversas começam?`,
+        title: `No seu foco em ${label}, como você sente que suas conversas começam?`,
       }
     }
     if (q.id === 'antes_contato') {
@@ -126,5 +126,5 @@ export const ESTETICA_QUIZ_RESULT_COPY = {
     'Você vai entender na hora quando ver',
   ] as const,
   ctaPrimary: 'Ver na prática agora',
-  ctaMicro: 'Em seguida: onde você atua e o fluxo como sua cliente veria',
+  ctaMicro: 'Próximo passo: onde você atua, depois um exemplo do fluxo da sua cliente',
 } as const
