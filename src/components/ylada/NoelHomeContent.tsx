@@ -13,6 +13,8 @@ interface NoelHomeContentProps {
   areaLabel: string
   area: NoelArea
   subtitle: string
+  /** Só para preview em dev: força banner de ativação (full/compact). */
+  homeActivationPreview?: 'full' | 'compact'
 }
 
 function NoelHomeChatShell({ area }: { area: NoelArea }) {
@@ -84,11 +86,17 @@ function NoelHomeChatShell({ area }: { area: NoelArea }) {
   )
 }
 
-export default function NoelHomeContent({ areaCodigo, areaLabel, area, subtitle }: NoelHomeContentProps) {
+export default function NoelHomeContent({
+  areaCodigo,
+  areaLabel,
+  area,
+  subtitle,
+  homeActivationPreview,
+}: NoelHomeContentProps) {
   return (
     <div className="flex flex-col min-h-[calc(100vh-10rem)]">
       <Suspense fallback={null}>
-        <PosOnboardingHomePanel areaCodigo={areaCodigo} />
+        <PosOnboardingHomePanel areaCodigo={areaCodigo} variantOverride={homeActivationPreview} />
       </Suspense>
       <div className="mb-4">
         <h1 className="text-xl sm:text-2xl font-bold text-gray-900 flex items-center gap-2">

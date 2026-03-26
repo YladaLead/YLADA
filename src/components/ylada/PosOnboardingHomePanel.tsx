@@ -9,7 +9,6 @@ import {
   yladaHomeActivationCompactCopy,
   YLADA_POS_ONBOARDING_STORAGE_KEY,
   YLADA_HOME_ACTIVATION_BANNER_KEY,
-  markHomeActivationDismissedFull,
   markHomeActivationComplete,
 } from '@/lib/ylada-pos-onboarding'
 import { trackEvent } from '@/lib/analytics-events'
@@ -18,9 +17,11 @@ type BannerVariant = 'hidden' | 'full' | 'compact'
 
 interface PosOnboardingHomePanelProps {
   areaCodigo: string
+  /** Só para páginas de preview em dev: força o banner sem depender de sessionStorage/links. */
+  variantOverride?: 'full' | 'compact'
 }
 
-export default function PosOnboardingHomePanel({ areaCodigo }: PosOnboardingHomePanelProps) {
+export default function PosOnboardingHomePanel({ areaCodigo, variantOverride }: PosOnboardingHomePanelProps) {
   const searchParams = useSearchParams()
   const [variant, setVariant] = useState<BannerVariant>('hidden')
   const [linkCount, setLinkCount] = useState<number | null>(null)
@@ -40,7 +41,7 @@ export default function PosOnboardingHomePanel({ areaCodigo }: PosOnboardingHome
         if (cancelled) return
         const n = data?.success && Array.isArray(data.data) ? data.data.length : 0
         setLinkCount(n)
-        if (n > 0) {
+        if (n > 0 && !variantOverride) {
           try {
             localStorage.setItem(YLADA_HOME_ACTIVATION_BANNER_KEY, 'off')
           } catch {
@@ -54,9 +55,23 @@ export default function PosOnboardingHomePanel({ areaCodigo }: PosOnboardingHome
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [variantOverride])
 
   useEffect(() => {
+    if (variantOverride) {
+      setVariant(variantOverride)
+      if (variantOverride === 'full') {
+        trackEvent('ylada_pos_onboarding_view', { area: areaCodigo, preview: 'variant_override' })
+      }
+      return
+    }
+
+    if (devPreview) {
+      setVariant('full')
+      trackEvent('ylada_pos_onboarding_view', { area: areaCodigo, preview: true })
+      return
+    }
+
     if (linkCount === null) return
 
     if (linkCount > 0) {
@@ -82,9 +97,9 @@ export default function PosOnboardingHomePanel({ areaCodigo }: PosOnboardingHome
       /* ok */
     }
 
-    if (devPreview || sessionOnboarding) {
+    if (sessionOnboarding) {
       setVariant('full')
-      trackEvent('ylada_pos_onboarding_view', { area: areaCodigo, preview: devPreview || undefined })
+      trackEvent('ylada_pos_onboarding_view', { area: areaCodigo })
       return
     }
 
@@ -95,18 +110,7 @@ export default function PosOnboardingHomePanel({ areaCodigo }: PosOnboardingHome
     }
 
     setVariant('hidden')
-  }, [linkCount, areaCodigo, devPreview])
-
-  const dismissFull = useCallback(() => {
-    try {
-      sessionStorage.removeItem(YLADA_POS_ONBOARDING_STORAGE_KEY)
-    } catch {
-      /* ok */
-    }
-    markHomeActivationDismissedFull()
-    setVariant('compact')
-    trackEvent('ylada_pos_onboarding_dismiss', { area: areaCodigo })
-  }, [areaCodigo])
+  }, [linkCount, areaCodigo, devPreview, variantOverride])
 
   const dismissCompact = useCallback(() => {
     markHomeActivationComplete()
@@ -153,26 +157,13 @@ export default function PosOnboardingHomePanel({ areaCodigo }: PosOnboardingHome
           <p className="text-sm text-gray-700 leading-relaxed">{c.sub}</p>
         </div>
 
-        <div className="flex flex-col gap-1.5">
-          <Link
-            href={novoLinkHref}
-            onClick={() => trackEvent('ylada_pos_onboarding_links_cta', { area: areaCodigo })}
-            className="inline-flex w-full min-h-[52px] items-center justify-center rounded-2xl bg-blue-600 px-5 py-3.5 text-center text-base font-bold text-white shadow-lg shadow-blue-600/30 hover:bg-blue-700 transition-colors"
-          >
-            {c.ctaPrimary}
-          </Link>
-          <p className="text-center text-xs text-gray-500">{c.ctaMicro}</p>
-        </div>
-
-        <p className="text-center text-xs text-gray-600 leading-snug px-1">{c.hintOneLiner}</p>
-
-        <button
-          type="button"
-          onClick={dismissFull}
-          className="w-full min-h-[40px] text-xs sm:text-sm font-medium text-gray-500 hover:text-gray-800 py-1"
+        <Link
+          href={novoLinkHref}
+          onClick={() => trackEvent('ylada_pos_onboarding_links_cta', { area: areaCodigo })}
+          className="inline-flex w-full min-h-[52px] items-center justify-center rounded-2xl bg-blue-600 px-5 py-3.5 text-center text-base font-bold text-white shadow-lg shadow-blue-600/30 hover:bg-blue-700 transition-colors"
         >
-          {c.dismiss}
-        </button>
+          {c.ctaPrimary}
+        </Link>
       </div>
     </section>
   )

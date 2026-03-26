@@ -75,7 +75,6 @@ export type AnalyticsEventName =
   | 'fitness_demo_nicho'
   | 'fitness_demo_cliente_concluiu'
   | 'ylada_pos_onboarding_view'
-  | 'ylada_pos_onboarding_dismiss'
   | 'ylada_pos_onboarding_noel_cta'
   | 'ylada_pos_onboarding_links_cta'
   | 'ylada_home_activation_compact_view'
