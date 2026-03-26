@@ -195,11 +195,10 @@ export default function EsteticaDemoClienteContent() {
                   <span aria-hidden>👉</span>
                   Começar agora
                 </span>
-                <span className="text-sm font-semibold text-white/95 tracking-wide">(gratuito)</span>
+                <span className="text-sm font-semibold text-white/95 tracking-wide">é gratuito</span>
               </Link>
               <p className="text-center text-sm text-gray-600 leading-relaxed px-1">
-                Você já viu na prática: ela chega mais clara e mais pronta pra fechar. O próximo passo é o mesmo fluxo no{' '}
-                <span className="font-semibold text-gray-800">seu</span> link — leva menos de 1 minuto e não pede cartão.
+                Crie seu link e comece a atrair clientes mais prontas em menos de 1 minuto.
               </p>
             </div>
           ) : (
