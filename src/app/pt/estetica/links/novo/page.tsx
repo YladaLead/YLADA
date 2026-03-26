@@ -1,5 +1,5 @@
-import { NovoLinkPageContent } from '@/components/ylada/NovoLinkPageContent'
+import EsteticaNovoLinkRapidoContent from '@/components/ylada/EsteticaNovoLinkRapidoContent'
 
 export default function EsteticaNovoLinkPage() {
-  return <NovoLinkPageContent areaCodigo="estetica" areaLabel="Estética" />
+  return <EsteticaNovoLinkRapidoContent />
 }

@@ -1,6 +1,6 @@
 /**
- * Gera mensagem e botões contextuais do Noel com base em dashboard e links.
- * Formato: Observação → Sugestão → Botões (mentor ativo, não chat passivo).
+ * Mensagem inicial do Noel na home (com base em links/dashboard).
+ * Copy curta: primeiro a pessoa age no banner; aqui só apoio, sem texto longo.
  */
 
 export type NoelContextualAction = {
@@ -49,115 +49,90 @@ export function buildNoelContextualWelcome(
   const respostasSemana = dashboard?.respostas_semana ?? 0
   const linkMaisAtivo = dashboard?.link_mais_ativo_semana ?? null
 
-  // 1) Sem diagnósticos
+  const novoLinkHref = `${prefix}/links/novo`
+
   if (safeLinks.length === 0) {
     return {
-      message: `Olá! Eu sou o Noel.
-
-Você ainda tem poucos diagnósticos ativos. Criar mais diagnósticos aumenta suas chances de iniciar conversas com clientes.
-
-Quer criar um novo?`,
+      message: 'Vamos montar seu primeiro link agora.',
       actions: [
-        { label: '🧪 Criar diagnóstico', href: `${prefix}/links` },
-        { label: '💡 Ideias de conteúdo', prompt: 'Preciso de ideias de conteúdo para meu marketing' },
+        { label: 'Criar meu primeiro link', href: novoLinkHref },
+        { label: 'Atrair mais clientes', prompt: 'Quero ideias para atrair mais clientes com meu link' },
+        { label: 'Melhorar minhas conversas', prompt: 'Como melhorar minhas conversas quando alguém responde o link?' },
       ],
     }
   }
 
-  // Link mais recente (para "não compartilhado" ou "sem respostas")
   const maisRecente = safeLinks[0]
   const views = maisRecente.stats?.view ?? 0
   const respostas = maisRecente.stats?.diagnosis_count ?? maisRecente.stats?.complete ?? 0
   const url = maisRecente.url ?? `${typeof window !== 'undefined' ? window.location.origin : ''}/l/${maisRecente.slug}`
 
-  // 2) Diagnóstico criado mas nunca compartilhado (0 visualizações)
   if (views === 0) {
-    const titulo = maisRecente.title || maisRecente.slug || 'Seu diagnóstico'
     return {
-      message: `Olá! Eu sou o Noel.
-
-Você criou um diagnóstico, mas ele ainda não foi compartilhado.
-
-Compartilhar o link é o que permite que as pessoas respondam e iniciem conversas com você. Quer compartilhar agora?`,
+      message: 'Seu link ainda não foi compartilhado. Quando você envia, as pessoas começam a responder.',
       actions: [
-        { label: '📲 Compartilhar no WhatsApp', whatsappShareUrl: url },
-        { label: '🔗 Copiar link', copyUrl: url },
-        { label: '🧪 Criar outro diagnóstico', href: `${prefix}/links` },
+        { label: 'Compartilhar no WhatsApp', whatsappShareUrl: url },
+        { label: 'Copiar link', copyUrl: url },
+        { label: 'Criar outro link', href: novoLinkHref },
       ],
     }
   }
 
-  // 3) Compartilhado mas sem respostas ainda
   if (respostas === 0 && respostasSemana === 0) {
-    const titulo = maisRecente.title || maisRecente.slug || 'Seu diagnóstico'
     return {
-      message: `Olá! Eu sou o Noel.
-
-Seu diagnóstico ainda não recebeu respostas. Talvez o título possa despertar mais curiosidade — ou seja um bom momento para compartilhar novamente.
-
-Quer melhorar o diagnóstico ou copiar o link?`,
+      message: 'Seu link já está no ar, mas ainda sem respostas. Vale compartilhar de novo ou ajustar o título.',
       actions: [
-        { label: '✏️ Melhorar diagnóstico', href: `${prefix}/links/editar/${maisRecente.id}` },
-        { label: '🔗 Copiar link', copyUrl: url },
-        { label: '👥 Ver leads', href: `${prefix}/${leadsPath}` },
+        { label: 'Copiar link', copyUrl: url },
+        { label: 'Atrair mais clientes', prompt: 'Como melhorar meu link para gerar mais respostas?' },
+        { label: 'Ver leads', href: `${prefix}/${leadsPath}` },
       ],
     }
   }
 
-  // 4) Atividade hoje
   if (respostasHoje > 0 || conversasHoje > 0) {
-    const partes: string[] = ['Olá! Eu sou o Noel.', '']
+    const partes: string[] = []
     if (respostasHoje > 0) {
-      partes.push(`Hoje ${respostasHoje} ${respostasHoje === 1 ? 'pessoa respondeu' : 'pessoas responderam'} seus diagnósticos.`)
+      partes.push(
+        `Hoje ${respostasHoje} ${respostasHoje === 1 ? 'pessoa respondeu' : 'pessoas responderam'} seu link.`
+      )
     }
     if (conversasHoje > 0) {
-      partes.push(`${conversasHoje} ${conversasHoje === 1 ? 'conversa foi iniciada' : 'conversas foram iniciadas'}.`)
+      partes.push(`${conversasHoje} ${conversasHoje === 1 ? 'conversa começou' : 'conversas começaram'}.`)
     }
     if (linkMaisAtivo) {
-      partes.push(`O diagnóstico "${linkMaisAtivo.title}" está entre os mais ativos esta semana.`)
+      partes.push(`“${linkMaisAtivo.title}” está entre os mais ativos esta semana.`)
     }
-    partes.push('', 'Quer ver os leads ou criar um novo diagnóstico?')
     return {
-      message: partes.join('\n'),
+      message: partes.join(' '),
       actions: [
-        { label: '👥 Ver leads', href: `${prefix}/${leadsPath}` },
-        { label: '🧪 Criar diagnóstico', href: `${prefix}/links` },
+        { label: 'Ver leads', href: `${prefix}/${leadsPath}` },
+        { label: 'Criar outro link', href: novoLinkHref },
         ...(linkMaisAtivo
-          ? [{ label: '📈 Melhorar diagnóstico', href: `${prefix}/links/editar/${linkMaisAtivo.id}` } as NoelContextualAction]
+          ? [{ label: 'Melhorar minhas conversas', href: `${prefix}/links/editar/${linkMaisAtivo.id}` } as NoelContextualAction]
           : []),
       ],
     }
   }
 
-  // 5) Atividade na semana (sem atividade hoje)
   if (respostasSemana > 0) {
     return {
-      message: `Olá! Eu sou o Noel.
-
-Seu diagnóstico recebeu ${respostasSemana} ${respostasSemana === 1 ? 'resposta' : 'respostas'} esta semana.
-
-Talvez seja um bom momento para ver quem respondeu ou compartilhar novamente nas redes. O que você prefere?`,
+      message: `Esta semana: ${respostasSemana} ${respostasSemana === 1 ? 'resposta' : 'respostas'} no seu link.`,
       actions: [
-        { label: '👥 Ver leads', href: `${prefix}/${leadsPath}` },
-        { label: '🧪 Criar novo diagnóstico', href: `${prefix}/links` },
+        { label: 'Ver leads', href: `${prefix}/${leadsPath}` },
+        { label: 'Criar outro link', href: novoLinkHref },
         ...(linkMaisAtivo
-          ? [{ label: '📈 Melhorar diagnóstico', href: `${prefix}/links/editar/${linkMaisAtivo.id}` } as NoelContextualAction]
+          ? [{ label: 'Melhorar minhas conversas', href: `${prefix}/links/editar/${linkMaisAtivo.id}` } as NoelContextualAction]
           : []),
       ],
     }
   }
 
-  // 6) Default: tem links mas pouca atividade
   return {
-    message: `Olá! Eu sou o Noel.
-
-Você já tem diagnósticos criados. O próximo passo é compartilhar o link para começar a receber respostas e conversas.
-
-Quer ver seus diagnósticos ou criar um novo?`,
+    message: 'Seu link está ativo. O próximo passo é compartilhar de novo ou acompanhar quem respondeu.',
     actions: [
-      { label: '👥 Ver leads', href: `${prefix}/${leadsPath}` },
-      { label: '🧪 Criar diagnóstico', href: `${prefix}/links` },
-      { label: '📈 Melhorar marketing', prompt: 'Como posso melhorar meus diagnósticos?' },
+      { label: 'Ver leads', href: `${prefix}/${leadsPath}` },
+      { label: 'Criar outro link', href: novoLinkHref },
+      { label: 'Atrair mais clientes', prompt: 'Como atrair mais pessoas para responder meu link?' },
     ],
   }
 }

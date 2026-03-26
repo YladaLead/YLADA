@@ -13,6 +13,7 @@ import { useAuth } from '@/hooks/useAuth'
 import { CompartilharDiagnosticoContent } from '@/components/ylada/CompartilharDiagnosticoContent'
 import { ActiveLinksProModal } from '@/components/ylada/ActiveLinksProModal'
 import { getMensagemWhatsAppDiagnostico } from '@/lib/ylada-compartilhar-diagnostico-copy'
+import { markHomeActivationComplete } from '@/lib/ylada-pos-onboarding'
 
 const META_PRIMEIRAS_RESPOSTAS = 10
 
@@ -145,6 +146,7 @@ export function NovoLinkPageContent({
       }
 
       setCreated({ id: data.data.id, slug: data.data.slug, url, title: createdTitle, tema, questions })
+      markHomeActivationComplete()
       setStep('share')
     } catch {
       clearInterval(timer)

@@ -15,12 +15,10 @@ export interface NoelUxContent {
   placeholderExample: string
 }
 
-/** Texto fixo de abertura (sem API) — igual para todas as áreas da matriz YLADA. */
-export const NOEL_UNIVERSAL_WELCOME = `Olá, sou o Noel, seu mentor na YLADA.
+/** Texto fixo de abertura (sem API) — curto; detalhes vêm depois que a pessoa age ou pergunta. */
+export const NOEL_UNIVERSAL_WELCOME = `Vamos montar seu primeiro link agora.
 
-Te ajudo a montar sequências de perguntas e diagnósticos prontos para sua audiência, para a pessoa se engajar e ficar mais afim do seu serviço. Em Links você usa modelos prontos da YLADA e monta fluxos com links dentro de links para criar, editar e acompanhar.
-
-Faça sua primeira pergunta ao Noel: qual é o seu desafio principal agora? Uma frase já basta.`
+Me diga em uma frase o que você quer conquistar hoje.`
 
 /**
  * Aviso na recepção do Noel (/pt/home) para quem ainda está em área neutra (perfil ylada ou outros).
@@ -32,87 +30,75 @@ export const NOEL_NEUTRAL_SPECIALIZATION_NOTICE =
 type NoelUxContentWithoutWelcome = Omit<NoelUxContent, 'welcomeMessage'>
 
 const DEFAULT_SUGGESTIONS = [
-  { label: '🧪 Criar diagnóstico', prompt: 'Quero criar um diagnóstico para atrair clientes' },
-  { label: '📈 Melhorar meu marketing', prompt: 'Como posso melhorar meus diagnósticos?' },
-  { label: '💡 Ideias de conteúdo', prompt: 'Preciso de ideias de conteúdo para meu marketing' },
-  { label: '🎯 Conseguir mais clientes', prompt: 'Como conseguir mais clientes?' },
+  { label: 'Criar meu primeiro link', prompt: 'Quero criar meu primeiro link para atrair clientes' },
+  { label: 'Atrair mais clientes', prompt: 'Como atrair mais clientes com meu link?' },
+  { label: 'Melhorar minhas conversas', prompt: 'Como melhorar minhas conversas com quem responde o link?' },
 ]
 
 const ESTETICA_SUGGESTIONS = [
-  { label: '🧪 Criar diagnóstico', prompt: 'Quero criar um diagnóstico para atrair clientes de estética' },
-  { label: '📈 Melhorar meu marketing', prompt: 'Como melhorar meu marketing para estética?' },
-  { label: '💡 Ideias de conteúdo', prompt: 'Preciso de ideias de conteúdo para redes sociais' },
-  { label: '🎯 Conseguir mais clientes', prompt: 'Como conseguir mais clientes para limpeza de pele?' },
+  { label: 'Criar meu primeiro link', prompt: 'Quero criar um link para atrair clientes na estética' },
+  { label: 'Atrair mais clientes', prompt: 'Como atrair mais clientes para meus serviços de estética?' },
+  { label: 'Melhorar minhas conversas', prompt: 'Como melhorar minhas conversas depois que a cliente responde?' },
 ]
 
 const ODONTO_SUGGESTIONS = [
-  { label: '🧪 Criar diagnóstico', prompt: 'Quero criar um diagnóstico para atrair pacientes odontológicos' },
-  { label: '📈 Melhorar meu marketing', prompt: 'Como melhorar meu marketing para odontologia?' },
-  { label: '💡 Ideias de conteúdo', prompt: 'Preciso de ideias de conteúdo para clínica odontológica' },
-  { label: '🎯 Conseguir mais pacientes', prompt: 'Como conseguir mais pacientes para clareamento ou implante?' },
+  { label: 'Criar meu primeiro link', prompt: 'Quero criar um link para atrair pacientes na odontologia' },
+  { label: 'Atrair mais clientes', prompt: 'Como atrair mais pacientes com meu link?' },
+  { label: 'Melhorar minhas conversas', prompt: 'Como melhorar conversas depois que a pessoa responde?' },
 ]
 
 const PSI_SUGGESTIONS = [
-  { label: '🧪 Criar diagnóstico', prompt: 'Quero criar um diagnóstico para atrair clientes para terapia' },
-  { label: '📈 Melhorar meu marketing', prompt: 'Como melhorar meu marketing para psicologia?' },
-  { label: '💡 Ideias de conteúdo', prompt: 'Preciso de ideias de conteúdo sobre saúde mental' },
-  { label: '🎯 Conseguir mais clientes', prompt: 'Como conseguir mais clientes para atendimento psicológico?' },
+  { label: 'Criar meu primeiro link', prompt: 'Quero criar um link para atrair clientes para terapia' },
+  { label: 'Atrair mais clientes', prompt: 'Como atrair mais clientes para psicologia?' },
+  { label: 'Melhorar minhas conversas', prompt: 'Como melhorar minhas conversas com novos contatos?' },
 ]
 
 const FITNESS_SUGGESTIONS = [
-  { label: '🧪 Criar diagnóstico', prompt: 'Quero criar um diagnóstico para atrair alunos de treino' },
-  { label: '📈 Melhorar meu marketing', prompt: 'Como melhorar meu marketing para fitness?' },
-  { label: '💡 Ideias de conteúdo', prompt: 'Preciso de ideias de conteúdo para academia ou personal' },
-  { label: '🎯 Conseguir mais alunos', prompt: 'Como conseguir mais alunos para treino ou avaliação?' },
+  { label: 'Criar meu primeiro link', prompt: 'Quero criar um link para atrair alunos ou avaliações' },
+  { label: 'Atrair mais clientes', prompt: 'Como atrair mais pessoas para treino ou academia?' },
+  { label: 'Melhorar minhas conversas', prompt: 'Como melhorar conversas com quem responde meu link?' },
 ]
 
 const COACH_SUGGESTIONS = [
-  { label: '🧪 Criar diagnóstico', prompt: 'Quero criar um diagnóstico para atrair clientes de coaching' },
-  { label: '📈 Melhorar meu marketing', prompt: 'Como melhorar meu marketing como coach?' },
-  { label: '💡 Ideias de conteúdo', prompt: 'Preciso de ideias de conteúdo para meu posicionamento' },
-  { label: '🎯 Conseguir mais clientes', prompt: 'Como conseguir mais clientes para sessões de coaching?' },
+  { label: 'Criar meu primeiro link', prompt: 'Quero criar um link para atrair clientes de coaching' },
+  { label: 'Atrair mais clientes', prompt: 'Como atrair mais clientes para sessões?' },
+  { label: 'Melhorar minhas conversas', prompt: 'Como melhorar conversas com leads?' },
 ]
 
 const MED_SUGGESTIONS = [
-  { label: '🧪 Criar diagnóstico', prompt: 'Quero criar um diagnóstico para atrair pacientes' },
-  { label: '📈 Melhorar meu marketing', prompt: 'Como melhorar meu marketing médico?' },
-  { label: '💡 Ideias de conteúdo', prompt: 'Preciso de ideias de conteúdo para consultório' },
-  { label: '🎯 Conseguir mais pacientes', prompt: 'Como conseguir mais pacientes para consulta?' },
+  { label: 'Criar meu primeiro link', prompt: 'Quero criar um link para atrair pacientes' },
+  { label: 'Atrair mais clientes', prompt: 'Como atrair mais pacientes com meu link?' },
+  { label: 'Melhorar minhas conversas', prompt: 'Como melhorar conversas no consultório?' },
 ]
 
 const NUTRA_SUGGESTIONS = [
-  { label: '🧪 Criar diagnóstico', prompt: 'Quero criar um diagnóstico para atrair clientes de suplementos' },
-  { label: '📈 Melhorar meu marketing', prompt: 'Como melhorar meu marketing para vendas?' },
-  { label: '💡 Ideias de conteúdo', prompt: 'Preciso de ideias de conteúdo para produtos' },
-  { label: '🎯 Conseguir mais clientes', prompt: 'Como conseguir mais clientes para meus produtos?' },
+  { label: 'Criar meu primeiro link', prompt: 'Quero criar um link para vender mais' },
+  { label: 'Atrair mais clientes', prompt: 'Como atrair mais clientes para meus produtos?' },
+  { label: 'Melhorar minhas conversas', prompt: 'Como melhorar conversas com quem responde?' },
 ]
 
 const NUTRI_SUGGESTIONS = [
-  { label: '🧪 Criar diagnóstico', prompt: 'Quero criar um diagnóstico para atrair pacientes nutricionais' },
-  { label: '📈 Melhorar meu marketing', prompt: 'Como melhorar meu marketing para nutrição?' },
-  { label: '💡 Ideias de conteúdo', prompt: 'Preciso de ideias de conteúdo sobre alimentação' },
-  { label: '🎯 Conseguir mais pacientes', prompt: 'Como conseguir mais pacientes para consulta nutricional?' },
+  { label: 'Criar meu primeiro link', prompt: 'Quero criar um link para atrair pacientes nutricionais' },
+  { label: 'Atrair mais clientes', prompt: 'Como atrair mais pacientes para consulta?' },
+  { label: 'Melhorar minhas conversas', prompt: 'Como melhorar conversas depois do link?' },
 ]
 
 const PSICANALISE_SUGGESTIONS = [
-  { label: '🧪 Criar diagnóstico', prompt: 'Quero criar um diagnóstico para atrair clientes para análise' },
-  { label: '📈 Melhorar meu marketing', prompt: 'Como melhorar meu marketing para psicanálise?' },
-  { label: '💡 Ideias de conteúdo', prompt: 'Preciso de ideias de conteúdo sobre psicanálise' },
-  { label: '🎯 Conseguir mais clientes', prompt: 'Como conseguir mais clientes para atendimento?' },
+  { label: 'Criar meu primeiro link', prompt: 'Quero criar um link para atrair análises' },
+  { label: 'Atrair mais clientes', prompt: 'Como atrair mais clientes para atendimento?' },
+  { label: 'Melhorar minhas conversas', prompt: 'Como melhorar conversas com interessados?' },
 ]
 
 const PERFUMARIA_SUGGESTIONS = [
-  { label: '🧪 Criar diagnóstico', prompt: 'Quero criar um diagnóstico para atrair clientes de perfumaria' },
-  { label: '📈 Melhorar meu marketing', prompt: 'Como melhorar meu marketing para perfumaria?' },
-  { label: '💡 Ideias de conteúdo', prompt: 'Preciso de ideias de conteúdo sobre fragrâncias' },
-  { label: '🎯 Conseguir mais clientes', prompt: 'Como conseguir mais clientes para perfumaria?' },
+  { label: 'Criar meu primeiro link', prompt: 'Quero criar um link para perfumaria' },
+  { label: 'Atrair mais clientes', prompt: 'Como atrair mais clientes para meus produtos?' },
+  { label: 'Melhorar minhas conversas', prompt: 'Como melhorar conversas no WhatsApp?' },
 ]
 
 const SELLER_SUGGESTIONS = [
-  { label: '🧪 Criar diagnóstico', prompt: 'Quero criar um diagnóstico para atrair clientes' },
-  { label: '📈 Melhorar meu marketing', prompt: 'Como melhorar meu marketing de vendas?' },
-  { label: '💡 Ideias de conteúdo', prompt: 'Preciso de ideias de conteúdo para vendas' },
-  { label: '🎯 Conseguir mais clientes', prompt: 'Como conseguir mais clientes e aumentar vendas?' },
+  { label: 'Criar meu primeiro link', prompt: 'Quero criar um link para vender mais' },
+  { label: 'Atrair mais clientes', prompt: 'Como atrair mais clientes?' },
+  { label: 'Melhorar minhas conversas', prompt: 'Como melhorar minhas conversas de venda?' },
 ]
 
 /** Fallback quando uma nova NoelArea ainda não tem linha dedicada em NOEL_UX_BY_AREA. */

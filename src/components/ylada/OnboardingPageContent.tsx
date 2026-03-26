@@ -12,6 +12,7 @@ import { useEffect, useState } from 'react'
 import PhoneInputWithCountry from '@/components/PhoneInputWithCountry'
 import { getYladaAreaPathPrefix } from '@/config/ylada-areas'
 import { getOnboardingCopyForArea } from '@/config/onboarding-by-area'
+import { YLADA_POS_ONBOARDING_STORAGE_KEY } from '@/lib/ylada-pos-onboarding'
 
 export type OnboardingAreaCodigo =
   | 'ylada'
@@ -228,6 +229,13 @@ export function OnboardingPageContent({
 
       setSalvando(false)
       setPreparando(true)
+      if (typeof window !== 'undefined' && AREA_SEGMENT_YLADA.includes(areaCodigo) && !isNutri) {
+        try {
+          sessionStorage.setItem(YLADA_POS_ONBOARDING_STORAGE_KEY, '1')
+        } catch {
+          /* storage indisponível */
+        }
+      }
       setTimeout(() => {
         if (typeof window !== 'undefined') {
           window.location.href = redirectAfterSave

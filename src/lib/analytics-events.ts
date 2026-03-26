@@ -74,6 +74,14 @@ export type AnalyticsEventName =
   | 'fitness_demo_inicio'
   | 'fitness_demo_nicho'
   | 'fitness_demo_cliente_concluiu'
+  | 'ylada_pos_onboarding_view'
+  | 'ylada_pos_onboarding_dismiss'
+  | 'ylada_pos_onboarding_noel_cta'
+  | 'ylada_pos_onboarding_links_cta'
+  | 'ylada_home_activation_compact_view'
+  | 'ylada_home_activation_compact_cta'
+  | 'ylada_home_activation_compact_dismiss'
+  | 'ylada_noel_home_expand'
 
 export interface AnalyticsEventPayload {
   area?: string
