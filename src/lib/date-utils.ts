@@ -50,3 +50,29 @@ export function formatYmdSlashPtBr(ymd: string | null | undefined): string {
   const [y, m, d] = s.split('-')
   return `${d}/${m}/${y}`
 }
+
+const YMD_RE = /^\d{4}-\d{2}-\d{2}$/
+
+/**
+ * Início do dia civil YYYY-MM-DD em America/Sao_Paulo → ISO UTC.
+ * Usa offset fixo -03:00 (Brasil sem horário de verão desde 2019).
+ */
+export function brYmdStartUtcIso(ymd: string): string {
+  if (!YMD_RE.test(ymd)) throw new Error('brYmdStartUtcIso: YMD inválido')
+  return new Date(`${ymd}T00:00:00-03:00`).toISOString()
+}
+
+/** Fim do dia civil (23:59:59.999) em America/Sao_Paulo → ISO UTC. */
+export function brYmdEndUtcIso(ymd: string): string {
+  if (!YMD_RE.test(ymd)) throw new Error('brYmdEndUtcIso: YMD inválido')
+  return new Date(`${ymd}T23:59:59.999-03:00`).toISOString()
+}
+
+/** Dias inclusivos entre duas datas civis YYYY-MM-DD (calendário gregoriano). */
+export function daysInclusiveYmd(de: string, ate: string): number {
+  const [y1, m1, d1] = de.split('-').map(Number)
+  const [y2, m2, d2] = ate.split('-').map(Number)
+  const t1 = Date.UTC(y1, m1 - 1, d1)
+  const t2 = Date.UTC(y2, m2 - 1, d2)
+  return Math.floor((t2 - t1) / 86400000) + 1
+}

@@ -4,6 +4,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { useState, useEffect } from 'react'
 import AdminProtectedRoute from '@/components/auth/AdminProtectedRoute'
+import { formatYmdSlashPtBr, toLocalDateStringISO } from '@/lib/date-utils'
 
 interface Stats {
   usuariosTotal: number
@@ -76,6 +77,43 @@ interface UsersOverview {
   totalGeral: { total: number; emTrial: number; pagantes: number; free: number; usando: number; receitaMensal: number }
 }
 
+interface ProductActivityRow {
+  bucket: string
+  novosUsuarios: number
+  novosJaPagaram: number
+  novosNuncaPagaram: number
+  linksCriados: number
+  visualizacoesLinks: number
+}
+
+interface ProductActivityTotals {
+  novosUsuarios: number
+  novosJaPagaram: number
+  novosNuncaPagaram: number
+  linksCriados: number
+  visualizacoesLinks: number
+}
+
+interface ProductActivityPayload {
+  granularity: 'day' | 'month'
+  data: ProductActivityRow[]
+  totals: ProductActivityTotals
+  period: string
+  customRange: { de: string; ate: string } | null
+}
+
+function formatActivityBucketLabel(bucket: string): string {
+  if (bucket.length === 7 && /^\d{4}-\d{2}$/.test(bucket)) {
+    const [y, m] = bucket.split('-').map(Number)
+    return new Date(y, m - 1, 1).toLocaleDateString('pt-BR', { month: 'short', year: 'numeric' })
+  }
+  if (bucket.length >= 10 && /^\d{4}-\d{2}-\d{2}/.test(bucket)) {
+    const [y, m, d] = bucket.slice(0, 10).split('-').map(Number)
+    return new Date(y, m - 1, d).toLocaleDateString('pt-BR')
+  }
+  return bucket
+}
+
 function AdminAnalyticsContent() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -88,6 +126,15 @@ function AdminAnalyticsContent() {
   const [topTemplates, setTopTemplates] = useState<TopTemplate[]>([])
   const [topUsers, setTopUsers] = useState<TopUser[]>([])
   const [usersOverview, setUsersOverview] = useState<UsersOverview | null>(null)
+  const [productActivity, setProductActivity] = useState<ProductActivityPayload | null>(null)
+  const [activityLoading, setActivityLoading] = useState(true)
+  const [activityError, setActivityError] = useState<string | null>(null)
+  const [monitorDeInput, setMonitorDeInput] = useState('')
+  const [monitorAteInput, setMonitorAteInput] = useState('')
+  const [monitorCustom, setMonitorCustom] = useState(false)
+  const [monitorDe, setMonitorDe] = useState('')
+  const [monitorAte, setMonitorAte] = useState('')
+  const [monitorPreset, setMonitorPreset] = useState<null | '7d' | '30d' | 'mes_passado' | 'meses_3'>(null)
 
   // Filtros
   const [period, setPeriod] = useState<'7d' | '30d' | '3m' | '6m' | '1y' | 'all'>('30d')
@@ -102,15 +149,16 @@ function AdminAnalyticsContent() {
         setError(null)
 
         // Carregar em paralelo (users-overview é opcional - não quebra o resto se falhar)
-        const [statsRes, growthRes, comparisonRes, funnelRes, templatesRes, usersRes, overviewRes] = await Promise.all([
-          fetch('/api/admin/analytics/stats', { credentials: 'include' }),
-          fetch(`/api/admin/analytics/growth?period=${period}`, { credentials: 'include' }),
-          fetch('/api/admin/analytics/comparison', { credentials: 'include' }),
-          fetch(`/api/admin/analytics/funnel?area=${funnelArea}`, { credentials: 'include' }),
-          fetch('/api/admin/analytics/top-templates?metric=leads&limit=10', { credentials: 'include' }),
-          fetch('/api/admin/analytics/top-users?metric=leads&limit=10', { credentials: 'include' }),
-          fetch(`/api/admin/analytics/users-overview?bloco=${blocoFiltro}`, { credentials: 'include' })
-        ])
+        const [statsRes, growthRes, comparisonRes, funnelRes, templatesRes, usersRes, overviewRes] =
+          await Promise.all([
+            fetch('/api/admin/analytics/stats', { credentials: 'include' }),
+            fetch(`/api/admin/analytics/growth?period=${period}`, { credentials: 'include' }),
+            fetch('/api/admin/analytics/comparison', { credentials: 'include' }),
+            fetch(`/api/admin/analytics/funnel?area=${funnelArea}`, { credentials: 'include' }),
+            fetch('/api/admin/analytics/top-templates?metric=leads&limit=10', { credentials: 'include' }),
+            fetch('/api/admin/analytics/top-users?metric=leads&limit=10', { credentials: 'include' }),
+            fetch(`/api/admin/analytics/users-overview?bloco=${blocoFiltro}`, { credentials: 'include' }),
+          ])
 
         // APIs principais devem funcionar
         const failed = [
@@ -153,6 +201,134 @@ function AdminAnalyticsContent() {
 
     carregarDados()
   }, [period, funnelArea, blocoFiltro])
+
+  useEffect(() => {
+    let cancelled = false
+    const load = async () => {
+      setActivityLoading(true)
+      setActivityError(null)
+      try {
+        const params = new URLSearchParams()
+        params.set('bloco', blocoFiltro)
+        if (monitorCustom && monitorDe && monitorAte) {
+          params.set('de', monitorDe)
+          params.set('ate', monitorAte)
+        } else {
+          params.set('period', period)
+        }
+        const res = await fetch(`/api/admin/analytics/product-activity?${params.toString()}`, {
+          credentials: 'include',
+        })
+        const json = await res.json()
+        if (cancelled) return
+        if (!res.ok) {
+          setActivityError(typeof json?.error === 'string' ? json.error : 'Erro ao carregar monitoramento')
+          setProductActivity(null)
+          return
+        }
+        if (json?.success && Array.isArray(json.data) && json.totals) {
+          setProductActivity({
+            granularity: json.granularity,
+            data: json.data,
+            totals: json.totals,
+            period: json.period ?? period,
+            customRange: json.customRange ?? null,
+          })
+        } else {
+          setProductActivity(null)
+        }
+      } catch (e: unknown) {
+        if (!cancelled) {
+          const msg = e instanceof Error ? e.message : 'Erro ao carregar monitoramento'
+          setActivityError(msg)
+          setProductActivity(null)
+        }
+      } finally {
+        if (!cancelled) setActivityLoading(false)
+      }
+    }
+    load()
+    return () => {
+      cancelled = true
+    }
+  }, [period, blocoFiltro, monitorCustom, monitorDe, monitorAte])
+
+  const aplicarDatasMonitoramento = () => {
+    const de = monitorDeInput.trim()
+    const ate = monitorAteInput.trim()
+    const ok = /^\d{4}-\d{2}-\d{2}$/
+    if (!ok.test(de) || !ok.test(ate)) {
+      setActivityError('Informe data inicial e final válidas.')
+      return
+    }
+    let d = de
+    let a = ate
+    if (d > a) {
+      const t = d
+      d = a
+      a = t
+    }
+    setMonitorDe(d)
+    setMonitorAte(a)
+    setMonitorDeInput(d)
+    setMonitorAteInput(a)
+    setMonitorCustom(true)
+    setMonitorPreset(null)
+    setActivityError(null)
+  }
+
+  const aplicarPresetMonitoramento = (preset: '7d' | '30d' | 'mes_passado' | 'meses_3') => {
+    const now = new Date()
+    const hoje = toLocalDateStringISO(now)
+    if (!hoje) return
+
+    let de: string
+    let ate: string
+
+    if (preset === '7d') {
+      const start = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 6)
+      de = toLocalDateStringISO(start) || hoje
+      ate = hoje
+    } else if (preset === '30d') {
+      const start = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 29)
+      de = toLocalDateStringISO(start) || hoje
+      ate = hoje
+    } else if (preset === 'mes_passado') {
+      const firstPrev = new Date(now.getFullYear(), now.getMonth() - 1, 1)
+      const lastPrev = new Date(now.getFullYear(), now.getMonth(), 0)
+      de = toLocalDateStringISO(firstPrev) || hoje
+      ate = toLocalDateStringISO(lastPrev) || hoje
+    } else {
+      const start = new Date(now.getFullYear(), now.getMonth() - 2, 1)
+      de = toLocalDateStringISO(start) || hoje
+      ate = hoje
+    }
+
+    let d = de
+    let a = ate
+    if (d > a) {
+      const t = d
+      d = a
+      a = t
+    }
+    setMonitorDeInput(d)
+    setMonitorAteInput(a)
+    setMonitorDe(d)
+    setMonitorAte(a)
+    setMonitorCustom(true)
+    setMonitorPreset(preset)
+    setActivityError(null)
+  }
+
+  const limparDatasMonitoramento = () => {
+    setMonitorCustom(false)
+    setMonitorDe('')
+    setMonitorAte('')
+    setMonitorDeInput('')
+    setMonitorAteInput('')
+    setMonitorPreset(null)
+    setActivityError(null)
+  }
 
   // Componente de gráfico de barras simples
   const SimpleBarChart = ({ data, labelKey, valueKey, title }: { data: any[], labelKey: string, valueKey: string, title: string }) => {
@@ -323,36 +499,38 @@ function AdminAnalyticsContent() {
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <header className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <Link href="/admin">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-3 sm:py-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-3 min-w-0">
+              <Link href="/admin" className="shrink-0 touch-manipulation">
                 <Image
                   src="/images/logo/ylada/horizontal/azul-claro/ylada-horizontal-azul-claro-30.png"
                   alt="YLADA"
                   width={180}
                   height={60}
-                  className="h-12"
+                  className="h-9 sm:h-12 w-auto max-w-[140px] sm:max-w-none"
                 />
               </Link>
-              <div className="h-12 w-px bg-gray-300"></div>
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">Analytics</h1>
-                <p className="text-sm text-gray-600">Análise completa de dados e métricas</p>
+              <div className="hidden sm:block h-10 sm:h-12 w-px bg-gray-300 shrink-0" aria-hidden />
+              <div className="min-w-0">
+                <h1 className="text-lg sm:text-2xl font-bold text-gray-900 leading-tight">Analytics</h1>
+                <p className="text-xs sm:text-sm text-gray-600 mt-0.5 line-clamp-2 sm:line-clamp-none">
+                  Dados e métricas
+                </p>
               </div>
             </div>
             <Link
               href="/admin"
-              className="text-gray-600 hover:text-gray-900 text-sm px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors"
+              className="inline-flex items-center justify-center sm:justify-start min-h-[44px] sm:min-h-0 text-gray-700 hover:text-gray-900 text-sm font-medium px-4 py-2.5 rounded-lg border border-gray-200 sm:border-0 hover:bg-gray-50 transition-colors touch-manipulation self-stretch sm:self-auto text-center"
             >
-              ← Voltar
+              ← Voltar ao admin
             </Link>
           </div>
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-5 sm:py-8 pb-24 sm:pb-8">
         {/* Mensagens de Erro */}
         {error && (
           <div className="mb-6 bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg">
@@ -361,19 +539,20 @@ function AdminAnalyticsContent() {
         )}
 
         {/* Filtros */}
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200 mb-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="bg-white rounded-xl p-4 sm:p-6 shadow-sm border border-gray-200 mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 md:gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Bloco</label>
-              <div className="flex gap-2">
+              <div className="grid grid-cols-3 gap-2">
                 {(['todos', 'ylada', 'wellness'] as const).map((b) => (
                   <button
                     key={b}
+                    type="button"
                     onClick={() => setBlocoFiltro(b)}
-                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    className={`min-h-[44px] px-2 sm:px-4 py-2.5 rounded-lg text-sm font-medium transition-colors touch-manipulation ${
                       blocoFiltro === b
                         ? 'bg-indigo-600 text-white'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        : 'bg-gray-100 text-gray-700 active:bg-gray-200'
                     }`}
                   >
                     {b === 'todos' ? 'Todos' : b === 'ylada' ? 'YLADA' : 'Wellness'}
@@ -383,15 +562,16 @@ function AdminAnalyticsContent() {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Período de Crescimento</label>
-              <div className="flex gap-2 flex-wrap">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                 {(['7d', '30d', '3m', '6m', '1y', 'all'] as const).map((p) => (
                   <button
                     key={p}
+                    type="button"
                     onClick={() => setPeriod(p)}
-                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    className={`min-h-[44px] px-2 sm:px-4 py-2.5 rounded-lg text-sm font-medium transition-colors touch-manipulation ${
                       period === p
                         ? 'bg-blue-600 text-white'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        : 'bg-gray-100 text-gray-700 active:bg-gray-200'
                     }`}
                   >
                     {p === '7d' ? '7 dias' : p === '30d' ? '30 dias' : p === '3m' ? '3 meses' : p === '6m' ? '6 meses' : p === '1y' ? '1 ano' : 'Tudo'}
@@ -401,15 +581,16 @@ function AdminAnalyticsContent() {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Área do Funil</label>
-              <div className="flex gap-2 flex-wrap">
+              <div className="grid grid-cols-3 gap-2">
                 {(['todos', 'ylada', 'wellness'] as const).map((a) => (
                   <button
                     key={a}
+                    type="button"
                     onClick={() => setFunnelArea(a)}
-                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    className={`min-h-[44px] px-2 sm:px-4 py-2.5 rounded-lg text-sm font-medium transition-colors touch-manipulation ${
                       funnelArea === a
                         ? 'bg-purple-600 text-white'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        : 'bg-gray-100 text-gray-700 active:bg-gray-200'
                     }`}
                   >
                     {a === 'todos' ? 'Todos' : a === 'ylada' ? 'YLADA' : 'Wellness'}
@@ -563,6 +744,271 @@ function AdminAnalyticsContent() {
 
               </div>
             )}
+
+            {/* Cadastros, uso de links e histórico de pagamento por data */}
+            <div className="mb-8">
+              <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+                <div className="p-4 sm:p-6 border-b border-gray-200 bg-slate-50/80">
+                  <h2 className="text-lg sm:text-xl font-bold text-gray-900 leading-snug">Monitoramento por data</h2>
+                  <p className="text-sm text-gray-600 mt-2 leading-relaxed">
+                    Novos cadastros (com split de quem já teve plano mensal ou anual alguma vez), links YLADA criados e
+                    visualizações. O bloco segue o seletor <strong>Bloco</strong> no topo da página.
+                    {productActivity && (
+                      <>
+                        {' '}
+                        Agrupado por{' '}
+                        {productActivity.granularity === 'day' ? 'dia (calendário Brasil)' : 'mês'}.
+                        {monitorCustom && productActivity.customRange
+                          ? ` Intervalo: ${formatYmdSlashPtBr(productActivity.customRange.de)} a ${formatYmdSlashPtBr(productActivity.customRange.ate)}.`
+                          : ` Período rápido: ${period === '7d' ? '7 dias' : period === '30d' ? '30 dias' : period === '3m' ? '3 meses' : period === '6m' ? '6 meses' : period === '1y' ? '1 ano' : 'tudo'}.`}
+                      </>
+                    )}
+                  </p>
+                  <p className="md:hidden mt-2 text-xs text-indigo-700 font-medium">
+                    No celular, cada dia aparece em um cartão abaixo; na tabela larga, use a rolagem horizontal.
+                  </p>
+                  <div className="mt-4">
+                    <p className="text-xs font-medium text-gray-600 mb-2">Atalhos (um clique)</p>
+                    <div className="flex flex-wrap gap-2">
+                      {(
+                        [
+                          { id: '7d' as const, label: 'Últimos 7 dias' },
+                          { id: '30d' as const, label: 'Últimos 30 dias' },
+                          { id: 'mes_passado' as const, label: 'Mês passado' },
+                          { id: 'meses_3' as const, label: 'Últimos 3 meses' },
+                        ] as const
+                      ).map(({ id, label }) => (
+                        <button
+                          key={id}
+                          type="button"
+                          onClick={() => aplicarPresetMonitoramento(id)}
+                          className={`min-h-[44px] px-3 sm:px-4 py-2 rounded-lg text-sm font-medium transition-colors touch-manipulation border ${
+                            monitorCustom && monitorPreset === id
+                              ? 'border-indigo-600 bg-indigo-50 text-indigo-900 ring-2 ring-indigo-500/30'
+                              : 'border-gray-200 bg-white text-gray-800 hover:bg-gray-50 active:bg-gray-100'
+                          }`}
+                        >
+                          {label}
+                        </button>
+                      ))}
+                    </div>
+                    <p className="mt-1.5 text-[11px] text-gray-500">
+                      Mês passado = calendário completo do mês anterior. Últimos 3 meses = do dia 1 (há dois meses) até
+                      hoje.
+                    </p>
+                  </div>
+                  <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:flex lg:flex-row lg:flex-wrap lg:items-end gap-3">
+                    <div className="min-w-0 sm:min-w-[10rem]">
+                      <label htmlFor="monitor-de" className="block text-xs font-medium text-gray-600 mb-1">
+                        Data inicial
+                      </label>
+                      <input
+                        id="monitor-de"
+                        type="date"
+                        value={monitorDeInput}
+                        onChange={(e) => {
+                          setMonitorDeInput(e.target.value)
+                          setMonitorPreset(null)
+                        }}
+                        className="w-full min-h-[44px] px-3 py-2 text-base sm:text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 touch-manipulation"
+                      />
+                    </div>
+                    <div className="min-w-0 sm:min-w-[10rem]">
+                      <label htmlFor="monitor-ate" className="block text-xs font-medium text-gray-600 mb-1">
+                        Data final
+                      </label>
+                      <input
+                        id="monitor-ate"
+                        type="date"
+                        value={monitorAteInput}
+                        onChange={(e) => {
+                          setMonitorAteInput(e.target.value)
+                          setMonitorPreset(null)
+                        }}
+                        className="w-full min-h-[44px] px-3 py-2 text-base sm:text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 touch-manipulation"
+                      />
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 sm:col-span-2 lg:col-span-1 lg:flex lg:gap-2 gap-2">
+                      <button
+                        type="button"
+                        onClick={aplicarDatasMonitoramento}
+                        className="min-h-[48px] w-full lg:w-auto px-4 py-3 text-sm font-semibold rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 active:bg-indigo-800 transition-colors touch-manipulation"
+                      >
+                        Aplicar datas
+                      </button>
+                      <button
+                        type="button"
+                        onClick={limparDatasMonitoramento}
+                        className={`min-h-[48px] w-full lg:w-auto px-4 py-3 text-sm font-medium rounded-lg border transition-colors touch-manipulation ${
+                          monitorCustom
+                            ? 'border-gray-400 text-gray-800 hover:bg-gray-100 active:bg-gray-200'
+                            : 'border-gray-200 text-gray-400 cursor-not-allowed'
+                        }`}
+                        disabled={!monitorCustom}
+                      >
+                        Usar período do topo
+                      </button>
+                    </div>
+                  </div>
+                  {activityError && (
+                    <p className="mt-3 text-sm text-red-700 bg-red-50 border border-red-100 rounded-lg px-3 py-2">
+                      {activityError}
+                    </p>
+                  )}
+                </div>
+                {activityLoading ? (
+                  <div className="p-12 flex flex-col items-center justify-center text-gray-500 text-sm">
+                    <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mb-3" />
+                    Carregando monitoramento…
+                  </div>
+                ) : !productActivity ? (
+                  <div className="p-8 text-center text-gray-500 text-sm">Não foi possível carregar os dados.</div>
+                ) : productActivity.data.length === 0 ? (
+                  <div className="p-8 text-center text-gray-500 text-sm">
+                    Nenhum dado neste período para o bloco selecionado.
+                  </div>
+                ) : (
+                  <>
+                    {/* Celular: cartões legíveis sem zoom */}
+                    <div className="md:hidden divide-y divide-gray-200 max-h-[min(70vh,32rem)] overflow-y-auto overscroll-y-contain [-webkit-overflow-scrolling:touch]">
+                      {productActivity.data.map((row) => (
+                        <div key={row.bucket} className="p-4 bg-white">
+                          <p className="text-base font-bold text-gray-900 mb-3">
+                            {formatActivityBucketLabel(row.bucket)}
+                          </p>
+                          <dl className="grid grid-cols-[1fr_auto] gap-x-3 gap-y-2.5 text-sm">
+                            <dt className="text-gray-600">Novos usuários</dt>
+                            <dd className="text-right font-semibold tabular-nums text-gray-900">
+                              {row.novosUsuarios.toLocaleString('pt-BR')}
+                            </dd>
+                            <dt className="text-emerald-800/90">Já pagaram*</dt>
+                            <dd className="text-right font-semibold tabular-nums text-emerald-700">
+                              {row.novosJaPagaram.toLocaleString('pt-BR')}
+                            </dd>
+                            <dt className="text-slate-600">Nunca pagaram*</dt>
+                            <dd className="text-right font-semibold tabular-nums text-slate-700">
+                              {row.novosNuncaPagaram.toLocaleString('pt-BR')}
+                            </dd>
+                            <dt className="text-indigo-800/90">Links criados</dt>
+                            <dd className="text-right font-semibold tabular-nums text-indigo-700">
+                              {row.linksCriados.toLocaleString('pt-BR')}
+                            </dd>
+                            <dt className="text-sky-800/90">Views nos links</dt>
+                            <dd className="text-right font-semibold tabular-nums text-sky-700">
+                              {row.visualizacoesLinks.toLocaleString('pt-BR')}
+                            </dd>
+                          </dl>
+                        </div>
+                      ))}
+                      <div className="p-4 bg-gray-100 border-t-2 border-gray-200">
+                        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
+                          Totais no período
+                        </p>
+                        <dl className="grid grid-cols-[1fr_auto] gap-x-3 gap-y-2 text-sm">
+                          <dt className="text-gray-700 font-medium">Novos usuários</dt>
+                          <dd className="text-right font-bold tabular-nums">
+                            {productActivity.totals.novosUsuarios.toLocaleString('pt-BR')}
+                          </dd>
+                          <dt className="text-emerald-800 font-medium">Já pagaram*</dt>
+                          <dd className="text-right font-bold tabular-nums text-emerald-800">
+                            {productActivity.totals.novosJaPagaram.toLocaleString('pt-BR')}
+                          </dd>
+                          <dt className="text-gray-700 font-medium">Nunca pagaram*</dt>
+                          <dd className="text-right font-bold tabular-nums">
+                            {productActivity.totals.novosNuncaPagaram.toLocaleString('pt-BR')}
+                          </dd>
+                          <dt className="text-indigo-900 font-medium">Links criados</dt>
+                          <dd className="text-right font-bold tabular-nums text-indigo-800">
+                            {productActivity.totals.linksCriados.toLocaleString('pt-BR')}
+                          </dd>
+                          <dt className="text-sky-900 font-medium">Views nos links</dt>
+                          <dd className="text-right font-bold tabular-nums text-sky-800">
+                            {productActivity.totals.visualizacoesLinks.toLocaleString('pt-BR')}
+                          </dd>
+                        </dl>
+                      </div>
+                    </div>
+                    {/* Tablet/desktop: tabela */}
+                    <div className="hidden md:block overflow-x-auto max-h-[28rem] overflow-y-auto overscroll-x-contain [-webkit-overflow-scrolling:touch] shadow-[inset_-12px_0_12px_-12px_rgba(0,0,0,0.08)]">
+                      <table className="min-w-[640px] w-full divide-y divide-gray-200 text-sm">
+                        <thead className="bg-gray-50 sticky top-0 z-10 shadow-sm">
+                          <tr>
+                            <th className="sticky left-0 z-20 bg-gray-50 px-4 py-3 text-left font-semibold text-gray-700 shadow-[2px_0_6px_-2px_rgba(0,0,0,0.06)]">
+                              Período
+                            </th>
+                            <th className="px-4 py-3 text-right font-semibold text-gray-700 whitespace-nowrap">
+                              Novos usuários
+                            </th>
+                            <th className="px-4 py-3 text-right font-semibold text-gray-700 whitespace-nowrap">
+                              …já pagaram*
+                            </th>
+                            <th className="px-4 py-3 text-right font-semibold text-gray-700 whitespace-nowrap">
+                              …nunca pagaram*
+                            </th>
+                            <th className="px-4 py-3 text-right font-semibold text-gray-700 whitespace-nowrap">
+                              Links criados
+                            </th>
+                            <th className="px-4 py-3 text-right font-semibold text-gray-700 whitespace-nowrap">
+                              Views nos links
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-100 bg-white">
+                          {productActivity.data.map((row) => (
+                            <tr key={row.bucket} className="group hover:bg-gray-50/80">
+                              <td className="sticky left-0 z-10 bg-white group-hover:bg-gray-50/80 px-4 py-2.5 font-medium text-gray-900 whitespace-nowrap shadow-[2px_0_6px_-2px_rgba(0,0,0,0.06)]">
+                                {formatActivityBucketLabel(row.bucket)}
+                              </td>
+                              <td className="px-4 py-2.5 text-right tabular-nums text-gray-800">
+                                {row.novosUsuarios.toLocaleString('pt-BR')}
+                              </td>
+                              <td className="px-4 py-2.5 text-right tabular-nums text-emerald-700">
+                                {row.novosJaPagaram.toLocaleString('pt-BR')}
+                              </td>
+                              <td className="px-4 py-2.5 text-right tabular-nums text-slate-600">
+                                {row.novosNuncaPagaram.toLocaleString('pt-BR')}
+                              </td>
+                              <td className="px-4 py-2.5 text-right tabular-nums text-indigo-700">
+                                {row.linksCriados.toLocaleString('pt-BR')}
+                              </td>
+                              <td className="px-4 py-2.5 text-right tabular-nums text-sky-700">
+                                {row.visualizacoesLinks.toLocaleString('pt-BR')}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                        <tfoot className="bg-gray-100/95 sticky bottom-0 z-10 font-semibold border-t border-gray-200">
+                          <tr>
+                            <td className="sticky left-0 z-20 bg-gray-100 px-4 py-3 text-gray-900 shadow-[2px_0_6px_-2px_rgba(0,0,0,0.06)]">
+                              Totais no período
+                            </td>
+                            <td className="px-4 py-3 text-right tabular-nums">
+                              {productActivity.totals.novosUsuarios.toLocaleString('pt-BR')}
+                            </td>
+                            <td className="px-4 py-3 text-right tabular-nums text-emerald-800">
+                              {productActivity.totals.novosJaPagaram.toLocaleString('pt-BR')}
+                            </td>
+                            <td className="px-4 py-3 text-right tabular-nums">
+                              {productActivity.totals.novosNuncaPagaram.toLocaleString('pt-BR')}
+                            </td>
+                            <td className="px-4 py-3 text-right tabular-nums text-indigo-800">
+                              {productActivity.totals.linksCriados.toLocaleString('pt-BR')}
+                            </td>
+                            <td className="px-4 py-3 text-right tabular-nums text-sky-800">
+                              {productActivity.totals.visualizacoesLinks.toLocaleString('pt-BR')}
+                            </td>
+                          </tr>
+                        </tfoot>
+                      </table>
+                    </div>
+                  </>
+                )}
+                <div className="px-4 sm:px-6 py-3 bg-gray-50 border-t border-gray-100 text-xs text-gray-600 leading-relaxed">
+                  * “Já pagaram” / “Nunca pagaram” referem-se a quem já teve assinatura mensal ou anual em algum momento
+                  (como na lista de usuários), não apenas ao plano atual.
+                </div>
+              </div>
+            </div>
 
             {/* Gráfico de Crescimento */}
             {growthData.length > 0 && (
