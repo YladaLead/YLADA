@@ -52,17 +52,25 @@ export default function PtEntradaAreaClient({ areaCodigo }: { areaCodigo: string
 
   const nichos = standard?.nichos ?? []
 
+  const rootExtraClass = standard?.rootExtraClassName?.trim() ?? ''
+  const loginHref = standard?.loginHref ?? '/pt/login'
+
   if (loading || !ready || nichos.length === 0) {
     return (
-      <div className="min-h-screen bg-white flex flex-col">
-        <header className="shrink-0 border-b border-gray-100">
-          <div className="max-w-6xl mx-auto flex items-center justify-between gap-4 px-4 py-2.5 sm:px-6 sm:py-3">
+      <div
+        className={`h-[100dvh] max-h-[100dvh] flex flex-col overflow-hidden bg-white text-gray-900 ${rootExtraClass}`.trim()}
+      >
+        <header className="sticky top-0 z-20 shrink-0 border-b border-gray-100/80 bg-white/95 backdrop-blur-sm pt-[env(safe-area-inset-top,0px)]">
+          <div className="h-0.5 w-full bg-gray-100 overflow-hidden" aria-hidden>
+            <div className="h-full w-[8%] bg-blue-600" />
+          </div>
+          <div className="max-w-lg mx-auto flex items-center justify-between gap-3 px-4 py-3 sm:px-6">
             <Link href="/pt" className="inline-flex touch-manipulation items-center" aria-label="YLADA início">
               <YLADALogo size="md" responsive className="bg-transparent" />
             </Link>
           </div>
         </header>
-        <div className="flex-1 flex items-center justify-center px-4">
+        <div className="flex-1 min-h-0 flex items-center justify-center px-4">
           <p className="text-gray-500 text-sm">Carregando…</p>
         </div>
       </div>
@@ -70,37 +78,59 @@ export default function PtEntradaAreaClient({ areaCodigo }: { areaCodigo: string
   }
 
   return (
-    <div className="min-h-screen bg-white text-gray-900 flex flex-col">
-      <header className="shrink-0 border-b border-gray-100">
-        <div className="max-w-6xl mx-auto flex items-center justify-between gap-4 px-4 py-2.5 sm:px-6 sm:py-3">
-          <Link href="/pt" className="inline-flex touch-manipulation shrink-0 items-center" aria-label="YLADA início">
+    <div
+      className={`h-[100dvh] max-h-[100dvh] flex flex-col overflow-hidden bg-white text-gray-900 ${rootExtraClass}`.trim()}
+    >
+      <header className="sticky top-0 z-20 shrink-0 border-b border-gray-100/80 bg-white/95 backdrop-blur-sm pt-[env(safe-area-inset-top,0px)]">
+        <div className="h-0.5 w-full bg-gray-100 overflow-hidden" aria-hidden>
+          <div
+            className="h-full bg-blue-600 transition-[width] duration-500 ease-out"
+            style={{ width: '8%' }}
+          />
+        </div>
+        <div className="max-w-lg mx-auto flex items-center justify-between gap-3 px-4 py-3 sm:px-6">
+          <Link
+            href="/pt"
+            className="inline-flex touch-manipulation min-h-[48px] min-w-[48px] shrink-0 items-center justify-center -ml-1"
+            aria-label="YLADA início"
+          >
             <YLADALogo size="md" responsive className="bg-transparent" />
           </Link>
-          <Link href="/pt/login" className="text-sm font-medium text-gray-600 hover:text-gray-900 py-2 shrink-0">
+          <Link
+            href={loginHref}
+            className="text-sm font-medium text-gray-500 hover:text-gray-900 min-h-[48px] inline-flex items-center px-2 -mr-2 shrink-0"
+          >
             Entrar
           </Link>
         </div>
       </header>
 
-      <main className="flex-1 w-full max-w-6xl mx-auto px-4 sm:px-6 pt-6 pb-10 sm:pb-12">
-        <div className="space-y-6 max-w-2xl mx-auto">
-          <Link href="/pt/segmentos" className="inline-block text-sm text-gray-500 hover:text-gray-800">
+      <main
+        className={`flex-1 min-h-0 overflow-y-auto overscroll-y-contain px-4 sm:px-6 py-6 max-w-lg mx-auto w-full ${standard?.mainExtraClassName ?? ''}`.trim()}
+      >
+        <div className="animate-fade-in-up flex flex-col pb-2 space-y-6" role="region" aria-live="polite">
+          <Link
+            href="/pt/segmentos"
+            className="inline-block text-sm font-medium text-gray-500 hover:text-gray-800 min-h-[44px] py-2"
+          >
             ← Voltar
           </Link>
 
-          <section className="space-y-3">
-            <h1 className="sr-only">Escolha uma opção para continuar</h1>
+          <section className="space-y-4">
             {areaMeta ? (
               <p className="text-xs font-medium uppercase tracking-wide text-gray-500">{areaMeta.label}</p>
             ) : null}
+            <h1 className="text-xl sm:text-2xl font-semibold text-gray-900 leading-snug tracking-tight">
+              {standard.nichoPickerTitle}
+            </h1>
 
-            <ul className="flex flex-col gap-2 pt-2">
+            <ul className="flex flex-col gap-3">
               {nichos.map((opt) => (
                 <li key={opt.value}>
                   <button
                     type="button"
                     onClick={() => onPickNicho(opt.value)}
-                    className="flex w-full min-h-[44px] items-center rounded-xl border border-gray-200 bg-white px-3.5 py-2.5 text-left text-sm font-medium text-gray-900 transition-colors hover:border-blue-300 hover:bg-sky-50/60 active:bg-sky-50 sm:min-h-[48px] sm:px-4 sm:py-3"
+                    className="w-full min-h-[48px] rounded-2xl border-2 border-gray-300 bg-slate-50/90 px-5 py-3.5 text-left text-base font-semibold text-gray-900 shadow-sm shadow-gray-900/5 hover:border-gray-500 hover:bg-white hover:shadow-md active:scale-[0.99] transition-all"
                   >
                     {opt.label}
                   </button>

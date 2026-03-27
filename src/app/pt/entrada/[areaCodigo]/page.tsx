@@ -9,8 +9,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const meta = getYladaAreaConfig(areaCodigo)
   const label = meta?.label ?? areaCodigo
   return {
-    title: `Escolha seu foco | ${label} | YLADA`,
-    description: `Fluxo YLADA para ${label}: escolha seu foco e continue o diagnóstico.`,
+    title: `Em qual nicho você atua? | ${label} | YLADA`,
+    description: `Fluxo YLADA para ${label}: escolha seu nicho e continue.`,
     robots: { index: true, follow: true },
   }
 }
