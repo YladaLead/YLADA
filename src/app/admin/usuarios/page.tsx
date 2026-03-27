@@ -1150,13 +1150,12 @@ export default function AdminUsuarios() {
                         </>
                       )}
                       <th className="w-[6.5rem] sm:w-24 px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t.table.subscription}</th>
-                      <th className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase align-top">
-                        <span className="block uppercase tracking-wider">{t.table.enrollment}</span>
-                        <span className="block text-[10px] font-normal normal-case text-gray-400 tracking-normal mt-0.5 max-w-[9rem] leading-tight">
-                          {t.table.enrollmentSub}
-                        </span>
+                      <th className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        {t.table.enrollment}
                       </th>
-                      <th className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t.table.leads}</th>
+                      <th className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        {t.table.leads}
+                      </th>
                       <th className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t.table.actions}</th>
                     </tr>
                   </thead>
@@ -1277,13 +1276,19 @@ export default function AdminUsuarios() {
                             )
                           })()}
                         </td>
-                        <td className="px-2 py-2 whitespace-nowrap text-xs text-gray-600">
+                        <td
+                          className="px-2 py-2 whitespace-nowrap text-xs text-gray-600"
+                          title={t.table.enrollmentSub}
+                        >
                           <div className="text-[9px] text-gray-400 uppercase tracking-wide mb-0.5">{t.table.profileDateStamp}</div>
                           {usuario.dataCadastro
                             ? formatYmdSlashPtBr(usuario.dataCadastro)
                             : <span className="text-gray-400">—</span>}
                         </td>
-                        <td className="px-2 py-2 whitespace-nowrap min-w-[5.5rem]">
+                        <td
+                          className="px-2 py-2 whitespace-nowrap min-w-[5.5rem]"
+                          title={t.table.leadsColumnSub}
+                        >
                           <div className="text-[10px] text-gray-600 space-y-0.5 leading-tight">
                             <div>
                               <span className="font-medium">{t.table.leadsLabel}:</span> <span className="text-gray-900 font-semibold">{usuario.leadsGerados}</span>

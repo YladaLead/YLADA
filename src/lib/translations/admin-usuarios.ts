@@ -90,6 +90,8 @@ export interface AdminUsuariosTranslations {
     /** Subtítulo no cabeçalho da coluna — evita confundir com vencimento do plano */
     enrollmentSub: string
     profileDateStamp: string
+    /** Subtítulo no cabeçalho da coluna Leads (links vs cliques) */
+    leadsColumnSub: string
     leads: string
     actions: string
     edit: string
@@ -257,7 +259,7 @@ const pt: AdminUsuariosTranslations = {
     hadPaidPlan: 'Já teve mensal ou anual',
     sortProfileDate: 'Ordem no cadastro',
     sortProfileDateHint:
-      'Use “Últimos que entraram” para ver quem criou o perfil mais recentemente (data da coluna Cadastro).',
+      'Use “Últimos que entraram” para ordenar pela data de criação da conta no sistema (coluna Cadastro), não por edições posteriores do perfil.',
     sortDefault: 'Padrão (banco)',
     sortRecentFirst: 'Últimos que entraram',
     sortOldestFirst: 'Mais antigos primeiro',
@@ -300,8 +302,11 @@ const pt: AdminUsuariosTranslations = {
     status: 'Status',
     subscription: 'Assinatura',
     enrollment: 'Cadastro',
-    enrollmentSub: 'data do perfil (não é fim do plano)',
-    profileDateStamp: 'Perfil',
+    enrollmentSub:
+      'Criação da conta no sistema (signup). Não é fim do plano nem “perfil todo preenchido”.',
+    profileDateStamp: 'Conta',
+    leadsColumnSub:
+      'Links = gerados na plataforma. Cliques = aberturas rastreadas (0 se ninguém abriu ainda).',
     leads: 'Leads',
     actions: 'Ações',
     edit: 'Editar',
@@ -512,8 +517,11 @@ const es: AdminUsuariosTranslations = {
     status: 'Estado',
     subscription: 'Suscripción',
     enrollment: 'Registro',
-    enrollmentSub: 'fecha del perfil (no es fin del plan)',
-    profileDateStamp: 'Perfil',
+    enrollmentSub:
+      'Creación de la cuenta en el sistema (registro). No es fin del plan ni “perfil completo”.',
+    profileDateStamp: 'Cuenta',
+    leadsColumnSub:
+      'Links = generados en la plataforma. Clics = vistas registradas (0 si nadie abrió aún).',
     leads: 'Leads',
     actions: 'Acciones',
     edit: 'Editar',
@@ -724,8 +732,11 @@ const en: AdminUsuariosTranslations = {
     status: 'Status',
     subscription: 'Subscription',
     enrollment: 'Signed up',
-    enrollmentSub: 'profile date (not plan end)',
-    profileDateStamp: 'Profile',
+    enrollmentSub:
+      'Account created in the system (signup). Not plan end nor “fully completed profile”.',
+    profileDateStamp: 'Account',
+    leadsColumnSub:
+      'Links = created in the app. Clicks = tracked opens (0 if nobody opened yet).',
     leads: 'Leads',
     actions: 'Actions',
     edit: 'Edit',
