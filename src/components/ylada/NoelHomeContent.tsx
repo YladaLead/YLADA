@@ -86,6 +86,8 @@ function NoelHomeChatShell({ area }: { area: NoelArea }) {
   )
 }
 
+const NOEL_SUBTITLE_PREFIX = 'Use o Noel para '
+
 export default function NoelHomeContent({
   areaCodigo,
   areaLabel,
@@ -93,19 +95,40 @@ export default function NoelHomeContent({
   subtitle,
   homeActivationPreview,
 }: NoelHomeContentProps) {
+  const mentorLine =
+    areaLabel !== 'YLADA'
+      ? `Mentor estratégico para ${areaLabel.toLowerCase()}`
+      : 'Mentor estratégico'
+
+  const subtitleBody =
+    subtitle.startsWith(NOEL_SUBTITLE_PREFIX) ? subtitle.slice(NOEL_SUBTITLE_PREFIX.length) : null
+
   return (
     <div className="flex flex-col min-h-[calc(100vh-10rem)]">
       <Suspense fallback={null}>
         <PosOnboardingHomePanel areaCodigo={areaCodigo} variantOverride={homeActivationPreview} />
       </Suspense>
       <div className="mb-4">
-        <h1 className="text-xl sm:text-2xl font-bold text-gray-900 flex items-center gap-2">
-          <span className="text-2xl" aria-hidden>
+        <h1 className="text-gray-900 flex flex-wrap items-baseline gap-x-2 gap-y-1">
+          <span className="text-2xl shrink-0 leading-none" aria-hidden>
             🧠
           </span>
-          Noel — Mentor estratégico{areaLabel !== 'YLADA' ? ` para ${areaLabel.toLowerCase()}` : ''}
+          <span className="text-xl sm:text-2xl font-bold tracking-tight">Noel</span>
+          <span className="text-gray-300 font-light select-none" aria-hidden>
+            —
+          </span>
+          <span className="text-base sm:text-lg font-medium text-gray-600 leading-snug">{mentorLine}</span>
         </h1>
-        <p className="text-sm text-gray-600 mt-1">{subtitle}</p>
+        <p className="text-sm text-gray-600 mt-2 leading-relaxed max-w-2xl">
+          {subtitleBody !== null ? (
+            <>
+              {NOEL_SUBTITLE_PREFIX}
+              <span className="font-semibold text-gray-900 text-sm sm:text-[15px]">{subtitleBody}</span>
+            </>
+          ) : (
+            subtitle
+          )}
+        </p>
       </div>
       <NoelNeutralSpecializationNotice mentorArea={area} />
       <NoelHomeChatShell area={area} />
