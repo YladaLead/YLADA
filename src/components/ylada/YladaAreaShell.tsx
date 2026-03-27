@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import YladaSidebar from './YladaSidebar'
+import { YladaSidebarRevealProvider, useYladaSidebarReveal } from './YladaSidebarRevealContext'
 import { useAuth } from '@/hooks/useAuth'
 import { YLADA_OG_FALLBACK_LOGO_PATH } from '@/lib/ylada-og-fallback-logo'
 
@@ -13,34 +14,51 @@ interface YladaAreaShellProps {
   areaCodigo: string
   areaLabel: string
   children: React.ReactNode
+  /**
+   * Quando true, a sidebar (e o botão de menu no mobile) ficam ocultos até
+   * o Noel na home chamar `revealSidebar()` ao expandir o chat (“Começar agora”).
+   */
+  suppressSidebarUntilRevealed?: boolean
 }
 
-export default function YladaAreaShell({ areaCodigo, areaLabel, children }: YladaAreaShellProps) {
+function YladaAreaShellLayout({
+  areaCodigo,
+  areaLabel,
+  children,
+}: Omit<YladaAreaShellProps, 'suppressSidebarUntilRevealed'>) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const { user, userProfile } = useAuth()
   const userName = userProfile?.nome_completo || user?.user_metadata?.full_name || user?.user_metadata?.name || user?.email?.split('@')[0] || 'Usuário'
+  const revealCtx = useYladaSidebarReveal()
+  const sidebarVisible = revealCtx?.sidebarVisible ?? true
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
-      <YladaSidebar
-        areaCodigo={areaCodigo}
-        areaLabel={areaLabel}
-        isMobileOpen={mobileMenuOpen}
-        onMobileClose={() => setMobileMenuOpen(false)}
-      />
+      {sidebarVisible ? (
+        <YladaSidebar
+          areaCodigo={areaCodigo}
+          areaLabel={areaLabel}
+          isMobileOpen={mobileMenuOpen}
+          onMobileClose={() => setMobileMenuOpen(false)}
+        />
+      ) : null}
       <div className="flex-1 flex flex-col min-w-0">
         <header className="sticky top-0 z-30 flex items-center justify-between gap-3 h-14 px-4 bg-white border-b border-gray-200 lg:px-6">
           <div className="flex items-center gap-3 min-w-0">
-            <button
-              type="button"
-              onClick={() => setMobileMenuOpen(true)}
-              className="lg:hidden p-2 rounded-lg text-gray-600 hover:bg-gray-100 shrink-0"
-              aria-label="Abrir menu"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-            </button>
+            {sidebarVisible ? (
+              <button
+                type="button"
+                onClick={() => setMobileMenuOpen(true)}
+                className="lg:hidden p-2 rounded-lg text-gray-600 hover:bg-gray-100 shrink-0"
+                aria-label="Abrir menu"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+              </button>
+            ) : (
+              <span className="lg:hidden w-10 shrink-0" aria-hidden />
+            )}
             <Link href={areaCodigo === 'ylada' ? '/pt' : `/pt/${areaCodigo}/home`} className="flex items-center gap-2 min-w-0">
               <Image
                 src={YLADA_LOGO}
@@ -70,5 +88,20 @@ export default function YladaAreaShell({ areaCodigo, areaLabel, children }: Ylad
         <main className="flex-1 p-4 lg:p-6">{children}</main>
       </div>
     </div>
+  )
+}
+
+export default function YladaAreaShell({
+  areaCodigo,
+  areaLabel,
+  children,
+  suppressSidebarUntilRevealed = false,
+}: YladaAreaShellProps) {
+  return (
+    <YladaSidebarRevealProvider suppressUntilRevealed={suppressSidebarUntilRevealed}>
+      <YladaAreaShellLayout areaCodigo={areaCodigo} areaLabel={areaLabel}>
+        {children}
+      </YladaAreaShellLayout>
+    </YladaSidebarRevealProvider>
   )
 }
