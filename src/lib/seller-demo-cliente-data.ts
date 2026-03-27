@@ -27,7 +27,7 @@ const NICHOS: SellerDemoNichoClienteConfig[] = [
     value: 'catalogo_revenda',
     label: 'Muitas opções: portfólio amplo ou várias linhas',
     tituloQuiz: 'Muita opção na oferta e a pessoa trava antes de escolher?',
-    subtitulo: 'Exemplo imparcial: o cliente chega mais organizado — você encaixa no que realmente vende.',
+    subtitulo: 'Exemplo imparcial: o cliente chega mais organizado. Você encaixa no que realmente vende.',
     perguntas: [
       {
         id: 'p1',
@@ -159,7 +159,7 @@ const NICHOS: SellerDemoNichoClienteConfig[] = [
     value: 'digital',
     label: 'Digital: curso, e-book, assinatura ou infoproduto',
     tituloQuiz: 'Clique no anúncio e some antes de concluir?',
-    subtitulo: 'Exemplo: dúvidas comuns antes de fechar — você vê o que ajuda a destravar.',
+    subtitulo: 'Exemplo: dúvidas comuns antes de fechar. Você vê o que ajuda a destravar.',
     perguntas: [
       {
         id: 'p1',

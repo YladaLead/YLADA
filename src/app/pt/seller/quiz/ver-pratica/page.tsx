@@ -3,7 +3,7 @@ import type { Metadata } from 'next'
 import SellerVerPraticaPosQuizContent from './SellerVerPraticaPosQuizContent'
 
 export const metadata: Metadata = {
-  title: 'Ver na prática | Quiz Vendedores · YLADA',
+  title: 'Ver na prática | Vendedores · YLADA',
   description:
     'Simulação imparcial: canal e fluxo como o cliente veria. Para vendedores em geral. Segmentos com área própria seguem pelo menu correspondente.',
 }

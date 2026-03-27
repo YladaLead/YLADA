@@ -29,7 +29,7 @@ const NICHOS: NutriDemoNichoClienteConfig[] = [
     value: 'emagrecimento',
     label: 'Emagrecimento / composição',
     tituloQuiz: 'Por que você não emagrece mesmo se cuidando?',
-    subtitulo: 'Quatro toques — a nutricionista entende seu cenário antes do primeiro contato.',
+    subtitulo: 'Quatro toques. A nutricionista entende seu cenário antes do primeiro contato.',
     perguntas: [
       {
         id: 'p1',
@@ -73,7 +73,7 @@ const NICHOS: NutriDemoNichoClienteConfig[] = [
     value: 'ganho_massa',
     label: 'Ganho de massa / hipertrofia',
     tituloQuiz: 'Treina firme e o corpo não acompanha o esforço?',
-    subtitulo: 'Respostas rápidas para mostrar onde está o gargalo — antes da consulta.',
+    subtitulo: 'Respostas rápidas para mostrar onde está o gargalo antes da consulta.',
     perguntas: [
       {
         id: 'p1',
@@ -117,7 +117,7 @@ const NICHOS: NutriDemoNichoClienteConfig[] = [
     value: 'reeducacao',
     label: 'Reeducação alimentar',
     tituloQuiz: 'Toda segunda você recomeça e na quarta já desanimou?',
-    subtitulo: 'Organize o padrão em instantes — ela chega sabendo por onde puxar.',
+    subtitulo: 'Organize o padrão em instantes. Ela chega sabendo por onde puxar.',
     perguntas: [
       {
         id: 'p1',
@@ -205,7 +205,7 @@ const NICHOS: NutriDemoNichoClienteConfig[] = [
     value: 'gestante',
     label: 'Gestante / pós-parto',
     tituloQuiz: 'Gravidez ou pós-parto: quer comer certo sem viver com medo de errar?',
-    subtitulo: 'Contexto claro antes da primeira conversa — com segurança e sem achismo.',
+    subtitulo: 'Contexto claro antes da primeira conversa, com segurança e sem achismo.',
     perguntas: [
       {
         id: 'p1',
@@ -249,7 +249,7 @@ const NICHOS: NutriDemoNichoClienteConfig[] = [
     value: 'clinico',
     label: 'Saúde clínica (diabetes, lipídios, etc.)',
     tituloQuiz: 'Exames alterados e ninguém te explicou o plano no prato?',
-    subtitulo: 'Priorize o que importa — ela organiza o primeiro passo com você.',
+    subtitulo: 'Priorize o que importa. Ela organiza o primeiro passo com você.',
     perguntas: [
       {
         id: 'p1',

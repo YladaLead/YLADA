@@ -25,13 +25,11 @@ export default function SellerVerPraticaPosQuizContent() {
       strings={{
         headerAriaBack: 'Voltar aos Vendedores',
         tituloLocal: 'Onde você mais fala com cliente ou fecha venda?',
-        textoLocalComNicho:
-          'Escolha o canal principal. Na sequência você vê o fluxo como seu comprador, no cenário que você já escolheu no quiz.',
-        textoLocalSemNicho:
-          'Escolha o canal principal. Depois o tipo de exemplo (muitas opções, marca própria, serviço ou digital).',
+        textoLocalComNicho: '',
+        textoLocalSemNicho: '',
         tituloNicho: 'Qual cenário no exemplo?',
-        textoNicho: 'Demonstração genérica — vale para vários tipos de venda.',
-        voltarQuiz: '← Voltar ao quiz',
+        textoNicho: 'Demonstração genérica. Vale para vários tipos de venda.',
+        voltarQuiz: '← Voltar',
       }}
     />
   )

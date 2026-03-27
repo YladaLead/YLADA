@@ -30,7 +30,7 @@ export function buildEsteticaPublicFlowConfig(): PublicFlowConfig {
     verPraticaHrefBase: ESTETICA_QUIZ_VER_PRATICA_HREF,
     nichoQueryKey: 'nicho',
     nichos: ESTETICA_DEMO_CLIENTE_NICHOS,
-    nichoPickerTitle: 'Qual é o seu foco em estética?',
+    nichoPickerTitle: 'Em qual nicho você atua em estética?',
     resultCopy: ESTETICA_QUIZ_RESULT_COPY,
     analytics: {
       entradaNicho: 'estetica_entrada_nicho',

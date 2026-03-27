@@ -35,10 +35,10 @@ export const PERFUMARIA_QUIZ_QUESTIONS = MATRIX_PUBLIC_QUIZ_QUESTIONS_BASE
 export const PERFUMARIA_QUIZ_RESULT_COPY = {
   headline: 'Você poderia estar vendendo mais com menos troca vaga',
   subLines: [
-    'Pare de adivinhar gosto no WhatsApp',
-    'Faça seu cliente chegar mais pronto pra fechar',
-    'Você vai entender na hora quando ver',
+    'Pare de tentar conversar',
+    'Faça seus clientes chegarem mais prontos para fechar',
+    'Você entende na hora ao ver seus links personalizados em ação',
   ] as const,
   ctaPrimary: 'Ver na prática agora',
-  ctaMicro: 'Próximo passo: onde você atua, depois um exemplo do fluxo do seu cliente',
+  ctaMicro: 'Um exemplo de link personalizado na sequência.',
 } as const

@@ -23,7 +23,7 @@ export function buildPsiPublicFlowConfig(): PublicFlowConfig {
     verPraticaHrefBase: PSI_QUIZ_VER_PRATICA_HREF,
     nichoQueryKey: 'nicho',
     nichos: PSI_DEMO_CLIENTE_NICHOS,
-    nichoPickerTitle: 'Qual é o foco principal do seu atendimento?',
+    nichoPickerTitle: 'Em qual nicho você atua na psicologia?',
     resultCopy: PSI_QUIZ_RESULT_COPY,
     analytics: {
       entradaNicho: 'psi_entrada_nicho',

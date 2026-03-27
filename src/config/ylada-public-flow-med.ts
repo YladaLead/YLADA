@@ -23,7 +23,7 @@ export function buildMedPublicFlowConfig(): PublicFlowConfig {
     verPraticaHrefBase: MED_QUIZ_VER_PRATICA_HREF,
     nichoQueryKey: 'nicho',
     nichos: MED_DEMO_CLIENTE_NICHOS,
-    nichoPickerTitle: 'Qual é o foco principal do seu atendimento?',
+    nichoPickerTitle: 'Em qual nicho você atua na medicina?',
     resultCopy: MED_QUIZ_RESULT_COPY,
     analytics: {
       entradaNicho: 'med_entrada_nicho',

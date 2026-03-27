@@ -35,10 +35,10 @@ export const PSICANALISE_QUIZ_QUESTIONS = MATRIX_PUBLIC_QUIZ_QUESTIONS_BASE
 export const PSICANALISE_QUIZ_RESULT_COPY = {
   headline: 'Você poderia estar preenchendo a agenda com quem vem mais preparado',
   subLines: [
-    'Pare de explicar setting só no WhatsApp',
-    'Faça a pessoa chegar mais pronta pra conversar',
-    'Você vai entender na hora quando ver',
+    'Pare de tentar conversar',
+    'Faça quem busca análise chegar mais preparado para conversar',
+    'Você entende na hora ao ver seus links personalizados em ação',
   ] as const,
   ctaPrimary: 'Ver na prática agora',
-  ctaMicro: 'Próximo passo: onde você atua, depois um exemplo do fluxo de quem busca análise',
+  ctaMicro: 'Um exemplo de link personalizado na sequência.',
 } as const

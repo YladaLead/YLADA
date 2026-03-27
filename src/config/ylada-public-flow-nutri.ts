@@ -27,7 +27,7 @@ export function buildNutriPublicFlowConfig(): PublicFlowConfig {
     verPraticaHrefBase: NUTRI_QUIZ_VER_PRATICA_HREF,
     nichoQueryKey: 'nicho',
     nichos: NUTRI_DEMO_CLIENTE_NICHOS,
-    nichoPickerTitle: 'Qual é o seu foco como nutricionista?',
+    nichoPickerTitle: 'Em qual nicho você atua?',
     resultCopy: NUTRI_QUIZ_RESULT_COPY,
     analytics: {
       entradaNicho: 'nutri_entrada_nicho',

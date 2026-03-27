@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireApiAuth } from '@/lib/api-auth'
-import { getActiveSubscription } from '@/lib/subscription-helpers'
+import { getActiveSubscriptionForYladaConfig } from '@/lib/subscription-helpers'
 import { supabaseAdmin } from '@/lib/supabase'
 import { YLADA_API_ALLOWED_PROFILES } from '@/config/ylada-areas'
 
@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
     if (auth instanceof NextResponse) return auth
     const { user } = auth
 
-    const subscription = await getActiveSubscription(user.id, 'ylada')
+    const subscription = await getActiveSubscriptionForYladaConfig(user.id)
 
     if (!subscription) {
       return NextResponse.json(

@@ -5,7 +5,7 @@ import OdontoQuizPublicContent from './quiz/OdontoQuizPublicContent'
 export const metadata: Metadata = {
   title: 'Odontologia | YLADA',
   description:
-    'Menos ida e volta no WhatsApp, pacientes mais preparados: quiz rápido e fluxo como seu paciente veria, com o Noel.',
+    'Menos ida e volta no WhatsApp, pacientes mais preparados: em poucos passos e fluxo como seu paciente veria, com o Noel.',
 }
 
 function OdontoEntradaFallback() {

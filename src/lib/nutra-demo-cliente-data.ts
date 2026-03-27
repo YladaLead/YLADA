@@ -29,7 +29,7 @@ const NICHOS: NutraDemoNichoClienteConfig[] = [
     value: 'emagrecimento',
     label: 'Emagrecimento / composição',
     tituloQuiz: 'Shake e promessa milagrosa e o efeito sanfona continua?',
-    subtitulo: 'Quem te indica entende seu caso em segundos — responda rápido.',
+    subtitulo: 'Quem te indica entende seu caso em segundos. Responda rápido.',
     perguntas: [
       {
         id: 'p1',
@@ -117,7 +117,7 @@ const NICHOS: NutraDemoNichoClienteConfig[] = [
     value: 'energia',
     label: 'Energia e disposição',
     tituloQuiz: 'Bateria no chão depois do almoço virou seu normal?',
-    subtitulo: 'Mostre o ritmo real — menos chute, mais encaixe.',
+    subtitulo: 'Mostre o ritmo real: menos chute, mais encaixe.',
     perguntas: [
       {
         id: 'p1',
@@ -161,7 +161,7 @@ const NICHOS: NutraDemoNichoClienteConfig[] = [
     value: 'pele_cabelo',
     label: 'Pele, cabelo e unhas',
     tituloQuiz: 'Pele e cabelo pedindo ajuda e você comprando no escuro?',
-    subtitulo: 'Objetivo claro — indicação com menos tentativa e erro.',
+    subtitulo: 'Objetivo claro. Indicação com menos tentativa e erro.',
     perguntas: [
       {
         id: 'p1',
@@ -205,7 +205,7 @@ const NICHOS: NutraDemoNichoClienteConfig[] = [
     value: 'imunidade',
     label: 'Imunidade e rotina saudável',
     tituloQuiz: 'Imunidade virou vitrine de caixa sem explicação que faça sentido?',
-    subtitulo: 'Contexto em poucos toques — conversa mais segura e direta.',
+    subtitulo: 'Contexto em poucos toques e conversa mais segura e direta.',
     perguntas: [
       {
         id: 'p1',

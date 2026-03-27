@@ -35,10 +35,10 @@ export const ODONTO_QUIZ_QUESTIONS = MATRIX_PUBLIC_QUIZ_QUESTIONS_BASE
 export const ODONTO_QUIZ_RESULT_COPY = {
   headline: 'Você poderia estar preenchendo a agenda com mais tranquilidade',
   subLines: [
-    'Pare de repetir o mesmo texto no WhatsApp',
-    'Faça seu paciente chegar mais pronto pra fechar',
-    'Você vai entender na hora quando ver',
+    'Pare de tentar conversar',
+    'Faça seus pacientes chegarem prontos para fechar',
+    'Você entende na hora ao ver seus links personalizados em ação',
   ] as const,
   ctaPrimary: 'Ver na prática agora',
-  ctaMicro: 'Próximo passo: onde você atua, depois um exemplo do fluxo do seu paciente',
+  ctaMicro: 'Um exemplo de link personalizado na sequência.',
 } as const

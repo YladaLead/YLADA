@@ -35,10 +35,10 @@ export const COACH_QUIZ_QUESTIONS = MATRIX_PUBLIC_QUIZ_QUESTIONS_BASE
 export const COACH_QUIZ_RESULT_COPY = {
   headline: 'Você poderia estar fechando mais processos com menos explicação',
   subLines: [
-    'Pare de vender coaching no escuro',
-    'Faça a pessoa chegar mais pronta pra fechar',
-    'Você vai entender na hora quando ver',
+    'Pare de tentar conversar',
+    'Faça as pessoas chegarem mais prontas para fechar',
+    'Você entende na hora ao ver seus links personalizados em ação',
   ] as const,
   ctaPrimary: 'Ver na prática agora',
-  ctaMicro: 'Próximo passo: onde você atua, depois um exemplo do fluxo de quem te procura',
+  ctaMicro: 'Um exemplo de link personalizado na sequência.',
 } as const

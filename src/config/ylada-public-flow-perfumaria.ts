@@ -23,7 +23,7 @@ export function buildPerfumariaPublicFlowConfig(): PublicFlowConfig {
     verPraticaHrefBase: PERFUMARIA_QUIZ_VER_PRATICA_HREF,
     nichoQueryKey: 'nicho',
     nichos: PERFUMARIA_DEMO_CLIENTE_NICHOS,
-    nichoPickerTitle: 'Qual é o foco do seu atendimento em perfumaria?',
+    nichoPickerTitle: 'Em qual nicho você atua em perfumaria?',
     resultCopy: PERFUMARIA_QUIZ_RESULT_COPY,
     analytics: {
       entradaNicho: 'perfumaria_entrada_nicho',

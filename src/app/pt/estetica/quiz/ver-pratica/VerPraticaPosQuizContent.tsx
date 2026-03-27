@@ -1,7 +1,7 @@
 'use client'
 
 /**
- * Pós-quiz: onde atua → (nicho, se não veio na URL) → exemplo-cliente?origem=quiz
+ * Pós-matriz: onde atua → (nicho, se não veio na URL) → exemplo-cliente?origem=matriz
  * Sem tela de login simulado — o usuário já está no fluxo real da experiência.
  */
 
@@ -51,7 +51,7 @@ export default function VerPraticaPosQuizContent() {
           /* ok */
         }
         router.push(
-          `${ESTETICA_DEMO_CLIENTE_BASE_PATH}?nicho=${encodeURIComponent(nichoPredefinido)}&origem=quiz`
+          `${ESTETICA_DEMO_CLIENTE_BASE_PATH}?nicho=${encodeURIComponent(nichoPredefinido)}&origem=matriz`
         )
       } else {
         setFase('nicho')
@@ -68,7 +68,7 @@ export default function VerPraticaPosQuizContent() {
         /* ok */
       }
       trackEvent('estetica_quiz_ver_pratica', { area: 'estetica', step: 'nicho', opcao: value })
-      router.push(`${ESTETICA_DEMO_CLIENTE_BASE_PATH}?nicho=${encodeURIComponent(value)}&origem=quiz`)
+      router.push(`${ESTETICA_DEMO_CLIENTE_BASE_PATH}?nicho=${encodeURIComponent(value)}&origem=matriz`)
     },
     [router]
   )
@@ -97,11 +97,6 @@ export default function VerPraticaPosQuizContent() {
         {fase === 'local' && (
           <div className="space-y-6 animate-fade-in-up">
             <h1 className="text-xl font-bold text-gray-900">Onde você trabalha com estética?</h1>
-            <p className="text-sm text-gray-600 leading-relaxed">
-              {nichoPredefinido
-                ? 'Escolha onde você atua. Em seguida você vê o fluxo como sua cliente, já no nicho que você escolheu antes.'
-                : 'Escolha onde você atua. Na próxima tela você define o nicho do exemplo.'}
-            </p>
             <div className="flex flex-col gap-2">
               {ESTETICA_DEMO_LOCAIS.map((opt) => (
                 <button
@@ -118,15 +113,17 @@ export default function VerPraticaPosQuizContent() {
               href={voltarQuizHref}
               className="block w-full min-h-[44px] text-sm font-medium text-gray-500 hover:text-gray-800 text-center pt-2"
             >
-              ← Voltar ao resultado
+              ← Voltar
             </Link>
           </div>
         )}
 
         {fase === 'nicho' && (
           <div className="space-y-6 animate-fade-in-up">
-            <h1 className="text-xl font-bold text-gray-900">Em que área você mais atua?</h1>
-            <p className="text-sm text-gray-600 leading-relaxed">Cada opção abre um fluxo curto como sua cliente veria.</p>
+            <h1 className="text-xl font-bold text-gray-900">Qual foco do exemplo?</h1>
+            <p className="text-sm text-gray-600 leading-relaxed">
+              Fluxo curto só para demonstração. Depois você vê como sua cliente responderia.
+            </p>
             <div className="flex flex-col gap-2">
               {ESTETICA_DEMO_CLIENTE_NICHOS.map((opt) => (
                 <button

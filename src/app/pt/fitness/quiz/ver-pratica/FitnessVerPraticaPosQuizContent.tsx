@@ -25,12 +25,11 @@ export default function FitnessVerPraticaPosQuizContent() {
       strings={{
         headerAriaBack: 'Voltar ao Fitness',
         tituloLocal: 'Onde você atende ou vende?',
-        textoLocalComNicho:
-          'Escolha o canal principal. Em seguida você vê o fluxo como seu aluno, já no foco que você escolheu antes.',
-        textoLocalSemNicho: 'Escolha o canal principal. Na próxima tela você define o nicho do exemplo.',
+        textoLocalComNicho: '',
+        textoLocalSemNicho: '',
         tituloNicho: 'Qual foco do exemplo?',
-        textoNicho: 'Fluxo curto só para demonstração. Depois você vê como o cliente responderia.',
-        voltarQuiz: '← Voltar ao quiz',
+        textoNicho: 'Fluxo curto só para demonstração. Depois você vê como a pessoa responderia.',
+        voltarQuiz: '← Voltar',
       }}
     />
   )

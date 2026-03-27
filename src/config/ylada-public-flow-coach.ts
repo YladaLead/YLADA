@@ -23,7 +23,7 @@ export function buildCoachPublicFlowConfig(): PublicFlowConfig {
     verPraticaHrefBase: COACH_QUIZ_VER_PRATICA_HREF,
     nichoQueryKey: 'nicho',
     nichos: COACH_DEMO_CLIENTE_NICHOS,
-    nichoPickerTitle: 'Qual é o foco do seu coaching?',
+    nichoPickerTitle: 'Em qual nicho você atua no coaching?',
     resultCopy: COACH_QUIZ_RESULT_COPY,
     analytics: {
       entradaNicho: 'coach_entrada_nicho',

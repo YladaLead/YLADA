@@ -23,7 +23,7 @@ export function buildFitnessPublicFlowConfig(): PublicFlowConfig {
     verPraticaHrefBase: FITNESS_QUIZ_VER_PRATICA_HREF,
     nichoQueryKey: 'nicho',
     nichos: FITNESS_DEMO_CLIENTE_NICHOS,
-    nichoPickerTitle: 'Qual é o foco do seu atendimento em fitness?',
+    nichoPickerTitle: 'Em qual nicho você atua no fitness?',
     resultCopy: FITNESS_QUIZ_RESULT_COPY,
     analytics: {
       entradaNicho: 'fitness_entrada_nicho',

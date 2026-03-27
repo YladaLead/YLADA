@@ -3,7 +3,7 @@ import type { Metadata } from 'next'
 import VerPraticaPosQuizContent from './VerPraticaPosQuizContent'
 
 export const metadata: Metadata = {
-  title: 'Ver na prática | Quiz Estética · YLADA',
+  title: 'Ver na prática | Estética · YLADA',
   description: 'Simulação rápida: em seguida você vê o fluxo como sua cliente veria.',
 }
 

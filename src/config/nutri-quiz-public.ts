@@ -61,8 +61,8 @@ export const NUTRI_QUIZ_QUESTIONS: NutriQuizQuestion[] = [
     id: 'antes_contato',
     title: 'Antes de falar com você, quanto a pessoa costuma entender do que precisa?',
     options: [
-      { value: 'pouco', label: 'Muito pouco — quase sempre do zero' },
-      { value: 'as_vezes', label: 'Depende — às vezes sim, às vezes não' },
+      { value: 'pouco', label: 'Muito pouco, quase sempre do zero' },
+      { value: 'as_vezes', label: 'Depende: às vezes sim, às vezes não' },
       { value: 'claro', label: 'Já chega bem clara na maioria das vezes' },
     ],
   },
@@ -113,10 +113,10 @@ export function getNutriQuizQuestionsForNicho(nicho: string): NutriQuizQuestion[
 export const NUTRI_QUIZ_RESULT_COPY = {
   headline: 'Você poderia estar agendando muito mais',
   subLines: [
-    'Pare de tentar convencer',
-    'Faça seu paciente chegar pronto pra fechar',
-    'Você vai entender na hora quando ver',
+    'Pare de tentar conversar',
+    'Faça seus pacientes chegarem prontos para fechar',
+    'Você entende na hora ao ver seus links personalizados em ação',
   ] as const,
   ctaPrimary: 'Ver na prática agora',
-  ctaMicro: 'Próximo passo: onde você atua, depois um exemplo do fluxo do seu paciente',
+  ctaMicro: 'Um exemplo de link personalizado na sequência.',
 } as const

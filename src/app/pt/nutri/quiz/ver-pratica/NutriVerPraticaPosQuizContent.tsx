@@ -1,7 +1,7 @@
 'use client'
 
 /**
- * Pós-quiz matriz Nutri: local → (nicho se não veio na URL) → exemplo-cliente?origem=quiz
+ * Pós-matriz Nutri: local → (nicho se não veio na URL) → exemplo-cliente?origem=matriz
  */
 
 import { useCallback, useMemo, useState } from 'react'
@@ -50,7 +50,7 @@ export default function NutriVerPraticaPosQuizContent() {
           /* ok */
         }
         router.push(
-          `${NUTRI_DEMO_CLIENTE_BASE_PATH}?nicho=${encodeURIComponent(nichoPredefinido)}&origem=quiz`
+          `${NUTRI_DEMO_CLIENTE_BASE_PATH}?nicho=${encodeURIComponent(nichoPredefinido)}&origem=matriz`
         )
       } else {
         setFase('nicho')
@@ -67,7 +67,7 @@ export default function NutriVerPraticaPosQuizContent() {
         /* ok */
       }
       trackEvent('nutri_quiz_ver_pratica', { area: 'nutri', step: 'nicho', opcao: value })
-      router.push(`${NUTRI_DEMO_CLIENTE_BASE_PATH}?nicho=${encodeURIComponent(value)}&origem=quiz`)
+      router.push(`${NUTRI_DEMO_CLIENTE_BASE_PATH}?nicho=${encodeURIComponent(value)}&origem=matriz`)
     },
     [router]
   )
@@ -96,11 +96,6 @@ export default function NutriVerPraticaPosQuizContent() {
         {fase === 'local' && (
           <div className="space-y-6 animate-fade-in-up">
             <h1 className="text-xl font-bold text-gray-900">Onde você atende como nutricionista?</h1>
-            <p className="text-sm text-gray-600 leading-relaxed">
-              {nichoPredefinido
-                ? 'Escolha onde você atua. Em seguida você vê o fluxo como seu paciente, já no foco que você escolheu antes.'
-                : 'Escolha onde você atua. Na próxima tela você define o nicho do exemplo.'}
-            </p>
             <div className="flex flex-col gap-2">
               {NUTRI_DEMO_LOCAIS.map((opt) => (
                 <button
@@ -117,7 +112,7 @@ export default function NutriVerPraticaPosQuizContent() {
               href={voltarQuizHref}
               className="block w-full min-h-[44px] text-sm font-medium text-gray-500 hover:text-gray-800 text-center pt-2"
             >
-              ← Voltar ao quiz
+              ← Voltar
             </Link>
           </div>
         )}

@@ -35,10 +35,10 @@ export const MED_QUIZ_QUESTIONS = MATRIX_PUBLIC_QUIZ_QUESTIONS_BASE
 export const MED_QUIZ_RESULT_COPY = {
   headline: 'Você poderia estar organizando a agenda com menos ruído no WhatsApp',
   subLines: [
-    'Pare de repetir a mesma orientação antes da consulta',
-    'Faça o paciente chegar com mais contexto',
-    'Você vai entender na hora quando ver',
+    'Pare de tentar conversar',
+    'Faça seus pacientes chegarem prontos para fechar',
+    'Você entende na hora ao ver seus links personalizados em ação',
   ] as const,
   ctaPrimary: 'Ver na prática agora',
-  ctaMicro: 'Próximo passo: onde você atua, depois um exemplo do fluxo do paciente',
+  ctaMicro: 'Um exemplo de link personalizado na sequência.',
 } as const

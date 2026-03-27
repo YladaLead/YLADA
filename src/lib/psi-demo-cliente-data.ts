@@ -117,8 +117,8 @@ const NICHOS: PsiDemoNichoClienteConfig[] = [
   {
     value: 'relacionamentos',
     label: 'Relacionamentos e vínculos',
-    tituloQuiz: 'Mesma briga, mesmo silêncio — e você cansou de rodar o disco?',
-    subtitulo: 'Contexto afetivo em claro — menos tempo perdido no “de onde começo”.',
+    tituloQuiz: 'Mesma briga, mesmo silêncio. Você cansou de rodar o disco?',
+    subtitulo: 'Contexto afetivo em claro. Menos tempo perdido no “de onde começo”.',
     perguntas: [
       {
         id: 'p1',
@@ -205,8 +205,8 @@ const NICHOS: PsiDemoNichoClienteConfig[] = [
   {
     value: 'autoestima',
     label: 'Autoestima e autoconhecimento',
-    tituloQuiz: 'Autocrítica em alta e reconhecimento em falta — mesmo tentando?',
-    subtitulo: 'Diga o que quer mudar por dentro — ela já chega alinhada.',
+    tituloQuiz: 'Autocrítica em alta e reconhecimento em falta, mesmo tentando?',
+    subtitulo: 'Diga o que quer mudar por dentro. Ela já chega alinhada.',
     perguntas: [
       {
         id: 'p1',
@@ -250,7 +250,7 @@ const NICHOS: PsiDemoNichoClienteConfig[] = [
     value: 'luto_mudanca',
     label: 'Luto, mudança ou fase nova',
     tituloQuiz: 'Mudança grande e ninguém te ensinou a atravessar isso só?',
-    subtitulo: 'Dê nome ao que está vivo agora — primeiro passo mais honesto.',
+    subtitulo: 'Dê nome ao que está vivo agora. Primeiro passo mais honesto.',
     perguntas: [
       {
         id: 'p1',

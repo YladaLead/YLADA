@@ -35,10 +35,10 @@ export const FITNESS_QUIZ_QUESTIONS = MATRIX_PUBLIC_QUIZ_QUESTIONS_BASE
 export const FITNESS_QUIZ_RESULT_COPY = {
   headline: 'Você poderia estar fechando mais alunos com menos conversa vaga',
   subLines: [
-    'Pare de repetir o mesmo pitch no direct',
-    'Faça a pessoa chegar mais pronta pra fechar',
-    'Você vai entender na hora quando ver',
+    'Pare de tentar conversar',
+    'Faça seus alunos chegarem mais prontos para fechar',
+    'Você entende na hora ao ver seus links personalizados em ação',
   ] as const,
   ctaPrimary: 'Ver na prática agora',
-  ctaMicro: 'Próximo passo: onde você atua, depois um exemplo do fluxo de quem treina com você',
+  ctaMicro: 'Um exemplo de link personalizado na sequência.',
 } as const

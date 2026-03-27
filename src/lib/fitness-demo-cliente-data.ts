@@ -30,7 +30,7 @@ const NICHOS: FitnessDemoNichoClienteConfig[] = [
     value: 'emagrecimento',
     label: 'Emagrecimento ou composição corporal',
     tituloQuiz: 'Treina, restringe, e a balança finge que não vê?',
-    subtitulo: 'Mostre o padrão real — ele monta o caminho com base no que você vive. Não é plano médico nem promessa de resultado.',
+    subtitulo: 'Mostre o padrão real. Ele monta o caminho com base no que você vive. Não é plano médico nem promessa de resultado.',
     perguntas: [
       {
         id: 'p1',
@@ -117,7 +117,7 @@ const NICHOS: FitnessDemoNichoClienteConfig[] = [
   {
     value: 'condicionamento',
     label: 'Condicionamento ou resistência',
-    tituloQuiz: 'Sobe escada e falta ar — ou a meta parece longe demais?',
+    tituloQuiz: 'Sobe escada e falta ar, ou a meta parece longe demais?',
     subtitulo: 'Base honesta antes do primeiro treino. Não é teste cardiológico.',
     perguntas: [
       {
@@ -249,7 +249,7 @@ const NICHOS: FitnessDemoNichoClienteConfig[] = [
   {
     value: 'esporte',
     label: 'Esporte ou performance',
-    tituloQuiz: 'Seu esporte pede mais que treino genérico — você sentiu isso?',
+    tituloQuiz: 'Seu esporte pede mais que treino genérico. Você sentiu isso?',
     subtitulo: 'Modalidade e nível com clareza. Não substitui técnico específico da modalidade.',
     perguntas: [
       {

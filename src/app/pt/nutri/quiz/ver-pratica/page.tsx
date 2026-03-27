@@ -3,7 +3,7 @@ import type { Metadata } from 'next'
 import NutriVerPraticaPosQuizContent from './NutriVerPraticaPosQuizContent'
 
 export const metadata: Metadata = {
-  title: 'Ver na prática | Quiz Nutri · YLADA',
+  title: 'Ver na prática | Nutri · YLADA',
   description: 'Simulação rápida: em seguida você vê o fluxo como seu paciente veria.',
 }
 

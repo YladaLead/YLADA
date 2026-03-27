@@ -30,7 +30,7 @@ const NICHOS: PerfumariaDemoNichoClienteConfig[] = [
     value: 'primeira_fragancia',
     label: 'Primeira compra ou redescobrir estilo',
     tituloQuiz: 'Frasco bonito na prateleira e você quase não usa?',
-    subtitulo: 'Gosto e rotina em poucos toques — o consultor chega mais certeiro. Não substitui prova na pele.',
+    subtitulo: 'Gosto e rotina em poucos toques. O consultor chega mais certeiro. Não substitui prova na pele.',
     perguntas: [
       {
         id: 'p1',
@@ -161,7 +161,7 @@ const NICHOS: PerfumariaDemoNichoClienteConfig[] = [
   {
     value: 'pele_ou_alergia',
     label: 'Pele sensível ou preferências sem álcool',
-    tituloQuiz: 'Pele sensível e medo de reação — comprando no escuro?',
+    tituloQuiz: 'Pele sensível e medo de reação. Comprando no escuro?',
     subtitulo: 'Preferências declaradas com cuidado. Não substitui avaliação médica ou teste de alergia.',
     perguntas: [
       {
@@ -249,7 +249,7 @@ const NICHOS: PerfumariaDemoNichoClienteConfig[] = [
   {
     value: 'familias_olfativas',
     label: 'Explorar famílias olfativas',
-    tituloQuiz: '“Algo doce mas não enjoativo” — frase que nunca funcionou sozinha?',
+    tituloQuiz: '“Algo doce mas não enjoativo”: frase que nunca funcionou sozinha?',
     subtitulo: 'Referências e curiosidade com precisão. Não copia fórmula nem garante equivalência.',
     perguntas: [
       {

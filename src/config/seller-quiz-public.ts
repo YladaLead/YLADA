@@ -35,10 +35,10 @@ export const SELLER_QUIZ_QUESTIONS = MATRIX_PUBLIC_QUIZ_QUESTIONS_BASE
 export const SELLER_QUIZ_RESULT_COPY = {
   headline: 'Menos ida e volta: contato mais preparado antes do Zap',
   subLines: [
-    'Serve vendedores de qualquer ramo — o fluxo se adapta ao cenário que você escolheu',
-    'Menos repetir o básico na primeira mensagem',
-    'Na sequência você vê um exemplo na prática',
+    'Pare de tentar conversar',
+    'Faça seus clientes chegarem mais prontos para fechar',
+    'Você entende na hora ao ver seus links personalizados em ação',
   ] as const,
   ctaPrimary: 'Ver na prática agora',
-  ctaMicro: 'Próximo passo: seu canal e um exemplo do fluxo do cliente',
+  ctaMicro: 'Um exemplo de link personalizado na sequência.',
 } as const

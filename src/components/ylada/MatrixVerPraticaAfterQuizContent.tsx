@@ -1,7 +1,7 @@
 'use client'
 
 /**
- * Pós-quiz matriz: local → (nicho se não veio na URL) → exemplo-cliente?origem=quiz
+ * Pós-matriz: local → (nicho se não veio na URL) → exemplo-cliente?origem=matriz
  * Parâmetros por área (demo context + copy).
  */
 
@@ -84,7 +84,7 @@ export default function MatrixVerPraticaAfterQuizContent({
           /* ok */
         }
         router.push(
-          `${exemploClienteBasePath}?nicho=${encodeURIComponent(nichoPredefinido)}&origem=quiz`
+          `${exemploClienteBasePath}?nicho=${encodeURIComponent(nichoPredefinido)}&origem=matriz`
         )
       } else {
         setFase('nicho')
@@ -109,10 +109,14 @@ export default function MatrixVerPraticaAfterQuizContent({
         /* ok */
       }
       trackEvent(analyticsVerPratica, { area: areaForPayload, step: 'nicho', opcao: value })
-      router.push(`${exemploClienteBasePath}?nicho=${encodeURIComponent(value)}&origem=quiz`)
+      router.push(`${exemploClienteBasePath}?nicho=${encodeURIComponent(value)}&origem=matriz`)
     },
     [router, storageNichoKey, exemploClienteBasePath, analyticsVerPratica, areaForPayload]
   )
+
+  const textoLocalIntro = (
+    nichoPredefinido ? strings.textoLocalComNicho : strings.textoLocalSemNicho
+  ).trim()
 
   return (
     <div className="min-h-[100dvh] bg-white text-gray-900 flex flex-col estetica-touch supports-[height:100svh]:min-h-[100svh]">
@@ -138,9 +142,9 @@ export default function MatrixVerPraticaAfterQuizContent({
         {fase === 'local' && (
           <div className="space-y-6 animate-fade-in-up">
             <h1 className="text-xl font-bold text-gray-900">{strings.tituloLocal}</h1>
-            <p className="text-sm text-gray-600 leading-relaxed">
-              {nichoPredefinido ? strings.textoLocalComNicho : strings.textoLocalSemNicho}
-            </p>
+            {textoLocalIntro ? (
+              <p className="text-sm text-gray-600 leading-relaxed">{textoLocalIntro}</p>
+            ) : null}
             <div className="flex flex-col gap-2">
               {locais.map((opt) => (
                 <button

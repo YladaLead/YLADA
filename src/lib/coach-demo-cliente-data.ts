@@ -73,7 +73,7 @@ const NICHOS: CoachDemoNichoClienteConfig[] = [
   {
     value: 'habitos_bem_estar',
     label: 'Hábitos, energia e bem-estar',
-    tituloQuiz: 'Boa intenção na segunda, culpa no domingo — o ciclo te cansa?',
+    tituloQuiz: 'Boa intenção na segunda, culpa no domingo. O ciclo te cansa?',
     subtitulo: 'Rotina real, não discurso. Não é plano médico nem nutricional.',
     perguntas: [
       {
@@ -249,7 +249,7 @@ const NICHOS: CoachDemoNichoClienteConfig[] = [
   {
     value: 'proposito',
     label: 'Propósito e sentido',
-    tituloQuiz: 'Sucesso por fora e vazio por dentro — e você não sabe nomear?',
+    tituloQuiz: 'Sucesso por fora e vazio por dentro. Você não sabe nomear?',
     subtitulo: 'Direção e valores em poucos toques. Não promete respostas prontas sobre a vida.',
     perguntas: [
       {

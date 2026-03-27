@@ -256,7 +256,9 @@ export default function YladaPublicEntryFlow({ config, entradaComNicho = false }
       <main className={mainClass}>
         {showNichoPicker && (
           <div className="animate-fade-in-up flex flex-col pb-2 space-y-6" role="region" aria-live="polite">
-            <h1 className="sr-only">Escolha uma opção para continuar</h1>
+            <h1 className="text-xl sm:text-2xl font-semibold text-gray-900 leading-snug tracking-tight">
+              {config.nichoPickerTitle}
+            </h1>
             <div className="flex flex-col gap-3">
               {config.nichos.map((opt) => (
                 <button

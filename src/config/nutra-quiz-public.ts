@@ -35,10 +35,10 @@ export const NUTRA_QUIZ_QUESTIONS = MATRIX_PUBLIC_QUIZ_QUESTIONS_BASE
 export const NUTRA_QUIZ_RESULT_COPY = {
   headline: 'Você poderia estar fechando mais com contexto no Zap',
   subLines: [
-    'Pare de explicar produto no vácuo',
-    'Faça seu cliente chegar mais pronto pra decidir',
-    'Você vai entender na hora quando ver',
+    'Pare de tentar conversar',
+    'Faça seus clientes chegarem mais prontos para decidir',
+    'Você entende na hora ao ver seus links personalizados em ação',
   ] as const,
   ctaPrimary: 'Ver na prática agora',
-  ctaMicro: 'Próximo passo: onde você atua, depois um exemplo do fluxo do seu cliente',
+  ctaMicro: 'Um exemplo de link personalizado na sequência.',
 } as const

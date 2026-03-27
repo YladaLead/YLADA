@@ -23,7 +23,7 @@ export function buildPsicanalisePublicFlowConfig(): PublicFlowConfig {
     verPraticaHrefBase: PSICANALISE_QUIZ_VER_PRATICA_HREF,
     nichoQueryKey: 'nicho',
     nichos: PSICANALISE_DEMO_CLIENTE_NICHOS,
-    nichoPickerTitle: 'Qual é o foco do seu atendimento em psicanálise?',
+    nichoPickerTitle: 'Em qual nicho você atua na psicanálise?',
     resultCopy: PSICANALISE_QUIZ_RESULT_COPY,
     analytics: {
       entradaNicho: 'psicanalise_entrada_nicho',

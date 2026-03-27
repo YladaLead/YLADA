@@ -35,10 +35,10 @@ export const PSI_QUIZ_QUESTIONS = MATRIX_PUBLIC_QUIZ_QUESTIONS_BASE
 export const PSI_QUIZ_RESULT_COPY = {
   headline: 'Você poderia estar fechando mais primeiras sessões com menos troca vaga',
   subLines: [
-    'Pare de explicar terapia só no WhatsApp',
-    'Faça a pessoa chegar mais pronta pra conversar',
-    'Você vai entender na hora quando ver',
+    'Pare de tentar conversar',
+    'Faça quem te procura chegar mais preparado para conversar',
+    'Você entende na hora ao ver seus links personalizados em ação',
   ] as const,
   ctaPrimary: 'Ver na prática agora',
-  ctaMicro: 'Próximo passo: onde você atua, depois um exemplo do fluxo de quem te procura',
+  ctaMicro: 'Um exemplo de link personalizado na sequência.',
 } as const

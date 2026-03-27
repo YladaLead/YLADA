@@ -449,7 +449,7 @@ export default function NutraEntradaSocraticaContent() {
                     Como você vende ou indica hoje?
                   </h2>
                   <p className="mt-2 text-sm text-gray-600 leading-relaxed">
-                    Escolha o canal principal. Na próxima tela você define o foco do exemplo.
+                    Escolha onde você atua. Na próxima tela você define o foco do exemplo.
                   </p>
                   <div className="mt-5 flex flex-col gap-2">
                     {NUTRA_DEMO_LOCAIS.map((opt) => (

@@ -3,7 +3,7 @@ import type { Metadata } from 'next'
 import MedVerPraticaPosQuizContent from './MedVerPraticaPosQuizContent'
 
 export const metadata: Metadata = {
-  title: 'Ver na prática | Quiz Med · YLADA',
+  title: 'Ver na prática | Med · YLADA',
   description: 'Simulação rápida: em seguida você vê o fluxo como seu paciente veria.',
 }
 

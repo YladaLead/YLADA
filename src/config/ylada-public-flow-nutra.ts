@@ -23,7 +23,7 @@ export function buildNutraPublicFlowConfig(): PublicFlowConfig {
     verPraticaHrefBase: NUTRA_QUIZ_VER_PRATICA_HREF,
     nichoQueryKey: 'nicho',
     nichos: NUTRA_DEMO_CLIENTE_NICHOS,
-    nichoPickerTitle: 'Qual é o foco do seu atendimento Nutra?',
+    nichoPickerTitle: 'Em qual nicho você atua?',
     resultCopy: NUTRA_QUIZ_RESULT_COPY,
     analytics: {
       entradaNicho: 'nutra_entrada_nicho',

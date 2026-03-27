@@ -26,7 +26,7 @@ export default function PsicanaliseDemoClienteContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const nichoParam = searchParams.get('nicho')
-  const origemQuiz = searchParams.get('origem') === 'quiz'
+  const veioDaMatriz = searchParams.get('origem') === 'matriz' || searchParams.get('origem') === 'quiz'
 
   const configFromUrl = useMemo(() => getPsicanaliseDemoClienteConfig(nichoParam), [nichoParam])
 
@@ -193,14 +193,14 @@ export default function PsicanaliseDemoClienteContent() {
             </p>
           </div>
 
-          {origemQuiz ? (
+          {veioDaMatriz ? (
             <div className="space-y-3 pt-2">
               <Link
                 href={CADASTRO_POS_DEMO_HREF}
                 onClick={() =>
                   trackEvent('psicanalise_cadastro_promo_cta', {
                     area: 'psicanalise',
-                    origem: 'quiz_exemplo_cliente',
+                    origem: 'matriz_exemplo_cliente',
                   })
                 }
                 className="flex w-full flex-col min-h-[58px] rounded-2xl bg-blue-600 px-5 py-3.5 text-center text-white hover:bg-blue-700 shadow-lg shadow-blue-600/35 items-center justify-center gap-0.5 leading-tight"
@@ -244,14 +244,16 @@ export default function PsicanaliseDemoClienteContent() {
       </header>
 
       <main className="flex-1 px-4 py-6 max-w-lg mx-auto w-full flex flex-col estetica-safe-main-bottom">
-        <p className="text-xs font-semibold uppercase tracking-wider text-sky-700 bg-sky-50 border border-sky-100 rounded-lg px-3 py-2 mb-1 text-center leading-snug">
+        <p className="text-xs font-bold uppercase tracking-wide text-sky-900 bg-sky-100 border border-sky-200 rounded-xl px-3 py-2.5 mb-2 text-center leading-snug shadow-sm" role="status">
           Isso é o que quem busca análise veria
+        </p>
+        <p className="text-center text-sm font-semibold text-sky-950 bg-sky-50 border border-sky-300/80 rounded-xl px-3 py-3 mb-3 leading-snug shadow-sm" role="note">
+          Você terá vários fluxos como esse para engajar com as pessoas.
         </p>
         <p className="text-center text-xs text-gray-500 mb-4">{cfg.label}</p>
 
         <div className="text-center mb-6">
-          <h1 className="text-lg sm:text-xl font-bold text-gray-900 mb-1">{cfg.tituloQuiz}</h1>
-          <p className="text-sm text-gray-600">{cfg.subtitulo}</p>
+          <h1 className="text-lg sm:text-xl font-bold text-gray-900">{cfg.tituloQuiz}</h1>
         </div>
 
         <div className="bg-gray-50 rounded-xl p-5 sm:p-6 border border-gray-200 flex-1 flex flex-col overscroll-y-contain">

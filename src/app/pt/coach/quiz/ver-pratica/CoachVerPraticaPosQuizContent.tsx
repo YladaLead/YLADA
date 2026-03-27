@@ -25,12 +25,11 @@ export default function CoachVerPraticaPosQuizContent() {
       strings={{
         headerAriaBack: 'Voltar ao Coach',
         tituloLocal: 'Onde você atende?',
-        textoLocalComNicho:
-          'Escolha o canal principal. Em seguida você vê o fluxo como sua pessoa, já no foco que você escolheu antes.',
-        textoLocalSemNicho: 'Escolha o canal principal. Na próxima tela você define o nicho do exemplo.',
+        textoLocalComNicho: '',
+        textoLocalSemNicho: '',
         tituloNicho: 'Qual foco do exemplo?',
-        textoNicho: 'Fluxo curto só para demonstração. Depois você vê como o cliente responderia.',
-        voltarQuiz: '← Voltar ao quiz',
+        textoNicho: 'Fluxo curto só para demonstração. Depois você vê como a pessoa responderia.',
+        voltarQuiz: '← Voltar',
       }}
     />
   )

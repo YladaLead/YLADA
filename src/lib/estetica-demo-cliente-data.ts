@@ -24,7 +24,7 @@ const NICHOS: EsteticaDemoNichoClienteConfig[] = [
     value: 'pele',
     label: 'Pele / facial',
     tituloQuiz: 'Rotina cheia de produto e a pele continua te incomodando?',
-    subtitulo: 'Quatro perguntas — a profissional já vê seu contexto antes de marcar.',
+    subtitulo: 'Quatro perguntas. A profissional já vê seu contexto antes de marcar.',
     perguntas: [
       {
         id: 'p1',
@@ -68,7 +68,7 @@ const NICHOS: EsteticaDemoNichoClienteConfig[] = [
     value: 'cabelo',
     label: 'Cabelo / capilar',
     tituloQuiz: 'Cabelo que cai, quebra ou não obedece mesmo com tratamento?',
-    subtitulo: 'Mostre o que incomoda — ela entende a urgência antes do primeiro oi.',
+    subtitulo: 'Mostre o que incomoda. Ela entende a urgência antes do primeiro oi.',
     perguntas: [
       {
         id: 'p1',
@@ -200,7 +200,7 @@ const NICHOS: EsteticaDemoNichoClienteConfig[] = [
     value: 'maquiagem',
     label: 'Maquiagem',
     tituloQuiz: 'Data marcada e você ainda não sabe se a make vai durar?',
-    subtitulo: 'Contexto e pele em poucos toques — menos surpresa no dia.',
+    subtitulo: 'Contexto e pele em poucos toques, com menos surpresa no dia.',
     perguntas: [
       {
         id: 'p1',
@@ -244,7 +244,7 @@ const NICHOS: EsteticaDemoNichoClienteConfig[] = [
     value: 'corporal',
     label: 'Corporal / contorno',
     tituloQuiz: 'Treino à risca e aquele ponto ainda te incomoda no espelho?',
-    subtitulo: 'Deixe claro o foco — o próximo passo fica mais objetivo.',
+    subtitulo: 'Deixe claro o foco. O próximo passo fica mais objetivo.',
     perguntas: [
       {
         id: 'p1',

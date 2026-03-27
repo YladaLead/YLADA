@@ -29,7 +29,7 @@ const NICHOS: OdontoDemoNichoClienteConfig[] = [
     value: 'clareamento',
     label: 'Clareamento / estética do sorriso',
     tituloQuiz: 'Sorriso que te incomoda na foto ou no espelho?',
-    subtitulo: 'Quatro toques — o dentista já sabe o que priorizar na conversa.',
+    subtitulo: 'Quatro toques. O dentista já sabe o que priorizar na conversa.',
     perguntas: [
       {
         id: 'p1',
@@ -72,7 +72,7 @@ const NICHOS: OdontoDemoNichoClienteConfig[] = [
   {
     value: 'implantes',
     label: 'Implantes / reposição de dentes',
-    tituloQuiz: 'Buraco na mastigação ou prótese que atrapalha — e você adiando?',
+    tituloQuiz: 'Buraco na mastigação ou prótese que atrapalha. Você adiando?',
     subtitulo: 'Organize o caso antes do primeiro contato; menos ida e volta.',
     perguntas: [
       {
@@ -117,7 +117,7 @@ const NICHOS: OdontoDemoNichoClienteConfig[] = [
     value: 'ortodontia',
     label: 'Ortodontia (aparelho / alinhadores)',
     tituloQuiz: 'Dente torto ou mordida que cansa e você não sabe por onde começar?',
-    subtitulo: 'Mostre expectativa e rotina — a avaliação fica mais direta.',
+    subtitulo: 'Mostre expectativa e rotina. A avaliação fica mais direta.',
     perguntas: [
       {
         id: 'p1',
@@ -206,7 +206,7 @@ const NICHOS: OdontoDemoNichoClienteConfig[] = [
     value: 'prevencao',
     label: 'Prevenção e check-up',
     tituloQuiz: 'Check-up bucal virou “um dia desses” há meses?',
-    subtitulo: 'Prevenção em poucos cliques — agenda com propósito, não por impulso.',
+    subtitulo: 'Prevenção em poucos cliques. Agenda com propósito, não por impulso.',
     perguntas: [
       {
         id: 'p1',
@@ -250,7 +250,7 @@ const NICHOS: OdontoDemoNichoClienteConfig[] = [
     value: 'saude_bucal',
     label: 'Gengiva, hálito ou sensibilidade',
     tituloQuiz: 'Hálito, sangrar na escova ou sensibilidade que você já normalizou?',
-    subtitulo: 'Nomeie o incômodo — o profissional prioriza antes de você sentar no consultório.',
+    subtitulo: 'Nomeie o incômodo. O profissional prioriza antes de você sentar no consultório.',
     perguntas: [
       {
         id: 'p1',

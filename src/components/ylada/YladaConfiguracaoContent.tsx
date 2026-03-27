@@ -7,6 +7,7 @@ import { useAuth } from '@/hooks/useAuth'
 import { useAuthenticatedFetch } from '@/hooks/useAuthenticatedFetch'
 import { translateError } from '@/lib/error-messages'
 import { getYladaAreaPathPrefix } from '@/config/ylada-areas'
+import YladaCancelRetentionModal from '@/components/ylada/YladaCancelRetentionModal'
 
 interface YladaConfiguracaoContentProps {
   areaCodigo: string
@@ -64,7 +65,6 @@ export default function YladaConfiguracaoContent({ areaCodigo, areaLabel }: Ylad
   } | null>(null)
   const [loadingSubscription, setLoadingSubscription] = useState(true)
   const [showCancelModal, setShowCancelModal] = useState(false)
-  const [canceling, setCanceling] = useState(false)
   const [erroAssinatura, setErroAssinatura] = useState<string | null>(null)
 
   const carregarPerfil = async () => {
@@ -126,23 +126,6 @@ export default function YladaConfiguracaoContent({ areaCodigo, areaLabel }: Ylad
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user])
-
-  const cancelarAssinatura = async () => {
-    try {
-      setCanceling(true)
-      setErroAssinatura(null)
-      const res = await authenticatedFetch('/api/ylada/subscription/cancel', { method: 'POST' })
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.error || 'Erro ao cancelar')
-      setShowCancelModal(false)
-      setSubscription(null)
-    } catch (e: any) {
-      setErroAssinatura(e.message || 'Erro ao cancelar assinatura')
-      setTimeout(() => setErroAssinatura(null), 5000)
-    } finally {
-      setCanceling(false)
-    }
-  }
 
   const salvarPerfil = async () => {
     if (!perfil.nome?.trim()) {
@@ -644,41 +627,16 @@ export default function YladaConfiguracaoContent({ areaCodigo, areaLabel }: Ylad
         )}
       </section>
 
-      {/* Modal confirmar cancelamento */}
-      {showCancelModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50" role="dialog" aria-modal="true" aria-labelledby="cancel-modal-title">
-          <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6">
-            <h3 id="cancel-modal-title" className="text-lg font-semibold text-gray-900 mb-2">Cancelar assinatura?</h3>
-            <p className="text-gray-600 text-sm mb-3">
-              Você continua com acesso até o fim do período já pago. Depois disso, não haverá nova cobrança.
-            </p>
-            <p className="text-gray-600 text-sm mb-6 rounded-lg bg-sky-50 border border-sky-100 px-3 py-2.5">
-              Quando o período pago terminar, sua conta passa para o{' '}
-              <strong className="text-gray-900">plano gratuito</strong>: você segue usando a YLADA com{' '}
-              <strong className="text-gray-900">um diagnóstico/link ativo por vez</strong> e limites mensais de
-              conversas no WhatsApp e análises com o Noel. Assim dá para continuar divulgando e evoluindo; o Pro
-              continua disponível quando fizer sentido para você.
-            </p>
-            <div className="flex gap-3 justify-end">
-              <button
-                type="button"
-                onClick={() => setShowCancelModal(false)}
-                disabled={canceling}
-                className="px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50"
-              >
-                Voltar
-              </button>
-              <button
-                type="button"
-                onClick={cancelarAssinatura}
-                disabled={canceling}
-                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50"
-              >
-                {canceling ? 'Cancelando...' : 'Sim, cancelar'}
-              </button>
-            </div>
-          </div>
-        </div>
+      {showCancelModal && subscription?.id && (
+        <YladaCancelRetentionModal
+          isOpen={showCancelModal}
+          onClose={() => setShowCancelModal(false)}
+          onCanceled={() => {
+            carregarAssinatura()
+          }}
+          subscription={{ id: subscription.id }}
+          pathPrefix={prefix}
+        />
       )}
 
       {/* Conta */}

@@ -24,7 +24,7 @@ export function buildSellerPublicFlowConfig(): PublicFlowConfig {
     verPraticaHrefBase: SELLER_QUIZ_VER_PRATICA_HREF,
     nichoQueryKey: 'nicho',
     nichos: SELLER_DEMO_CLIENTE_NICHOS,
-    nichoPickerTitle: 'Qual destes cenários se parece mais com o jeito que você vende hoje?',
+    nichoPickerTitle: 'Em qual nicho você vende?',
     resultCopy: SELLER_QUIZ_RESULT_COPY,
     analytics: {
       entradaNicho: 'seller_entrada_nicho',

@@ -27,7 +27,7 @@ export function buildOdontoPublicFlowConfig(): PublicFlowConfig {
     verPraticaHrefBase: ODONTO_QUIZ_VER_PRATICA_HREF,
     nichoQueryKey: 'nicho',
     nichos: ODONTO_DEMO_CLIENTE_NICHOS,
-    nichoPickerTitle: 'Qual é o foco do seu atendimento odontológico?',
+    nichoPickerTitle: 'Em qual nicho você atua em odontologia?',
     resultCopy: ODONTO_QUIZ_RESULT_COPY,
     analytics: {
       entradaNicho: 'odonto_entrada_nicho',

@@ -249,7 +249,7 @@ const NICHOS: PsicanaliseDemoNichoClienteConfig[] = [
   {
     value: 'duvidas_formato',
     label: 'Dúvidas sobre formato (online, frequência, valores)',
-    tituloQuiz: 'Frequência, divã, investimento — dúvidas que travam o primeiro sim?',
+    tituloQuiz: 'Frequência, divã, investimento: dúvidas que travam o primeiro sim?',
     subtitulo: 'Organize expectativas; o acordo fino fica com o profissional.',
     perguntas: [
       {

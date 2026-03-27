@@ -12,7 +12,7 @@ export interface RefundRequestNotificationData {
   userId: string
   userEmail: string
   userName: string
-  area: 'nutri' | 'wellness' | 'coach' | 'nutra'
+  area: 'nutri' | 'wellness' | 'coach' | 'nutra' | 'ylada'
   amount: number
   reason: string
   daysSincePurchase: number
@@ -35,7 +35,8 @@ function generateRefundRequestEmail(data: RefundRequestNotificationData, baseUrl
     nutri: 'Nutri',
     wellness: 'Wellness',
     coach: 'Coach',
-    nutra: 'Nutra'
+    nutra: 'Nutra',
+    ylada: 'YLADA (matriz)',
   }
 
   const reasonLabels: Record<string, string> = {
@@ -205,7 +206,8 @@ export async function notifyAdminRefundRequest(
           nutri: 'Nutri',
           wellness: 'Wellness',
           coach: 'Coach',
-          nutra: 'Nutra'
+          nutra: 'Nutra',
+          ylada: 'YLADA (matriz)',
         }
 
         const reasonLabels: Record<string, string> = {

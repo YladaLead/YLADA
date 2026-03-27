@@ -3,7 +3,7 @@ import type { Metadata } from 'next'
 import PsicanaliseVerPraticaPosQuizContent from './PsicanaliseVerPraticaPosQuizContent'
 
 export const metadata: Metadata = {
-  title: 'Ver na prática | Quiz Psicanálise · YLADA',
+  title: 'Ver na prática | Psicanálise · YLADA',
   description: 'Simulação rápida: em seguida você vê o fluxo como seu cliente veria.',
 }
 

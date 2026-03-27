@@ -25,12 +25,11 @@ export default function OdontoVerPraticaPosQuizContent() {
       strings={{
         headerAriaBack: 'Voltar à Odonto',
         tituloLocal: 'Onde você atende em odontologia?',
-        textoLocalComNicho:
-          'Escolha onde você atua. Em seguida você vê o fluxo como seu paciente, já no foco que você escolheu antes.',
-        textoLocalSemNicho: 'Escolha onde você atua. Na próxima tela você define o nicho do exemplo.',
+        textoLocalComNicho: '',
+        textoLocalSemNicho: '',
         tituloNicho: 'Qual foco do exemplo?',
         textoNicho: 'Fluxo curto só para demonstração. Depois você vê como o paciente responderia.',
-        voltarQuiz: '← Voltar ao quiz',
+        voltarQuiz: '← Voltar',
       }}
     />
   )

@@ -46,8 +46,8 @@ export const MATRIX_PUBLIC_QUIZ_QUESTIONS_BASE: PublicFlowQuizQuestion[] = [
     id: 'antes_contato',
     title: 'Antes de falar com você, quanto a pessoa costuma entender do que precisa?',
     options: [
-      { value: 'pouco', label: 'Muito pouco — quase sempre do zero' },
-      { value: 'as_vezes', label: 'Depende — às vezes sim, às vezes não' },
+      { value: 'pouco', label: 'Muito pouco, quase sempre do zero' },
+      { value: 'as_vezes', label: 'Depende: às vezes sim, às vezes não' },
       { value: 'claro', label: 'Já chega bem clara na maioria das vezes' },
     ],
   },

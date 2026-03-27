@@ -18,7 +18,7 @@ export interface EsteticaQuizQuestion {
 }
 
 export const ESTETICA_QUIZ_CADASTRO_HREF = '/pt/cadastro?area=estetica'
-/** Após o quiz: login simulado + local + nicho → exemplo-cliente (origem=quiz). */
+/** Após o fluxo público: local + nicho → exemplo-cliente (?origem=matriz; URLs antigas ainda aceitas). */
 export const ESTETICA_QUIZ_VER_PRATICA_HREF = '/pt/estetica/quiz/ver-pratica'
 export const ESTETICA_QUIZ_LOGIN_HREF = '/pt/estetica/login'
 
@@ -63,8 +63,8 @@ export const ESTETICA_QUIZ_QUESTIONS: EsteticaQuizQuestion[] = [
     id: 'antes_contato',
     title: 'Antes de falar com você, quanto a pessoa costuma entender do que precisa?',
     options: [
-      { value: 'pouco', label: 'Muito pouco — quase sempre do zero' },
-      { value: 'as_vezes', label: 'Depende — às vezes sim, às vezes não' },
+      { value: 'pouco', label: 'Muito pouco, quase sempre do zero' },
+      { value: 'as_vezes', label: 'Depende: às vezes sim, às vezes não' },
       { value: 'claro', label: 'Já chega bem clara na maioria das vezes' },
     ],
   },
@@ -121,10 +121,10 @@ export function getEsteticaQuizQuestionsForNicho(nicho: string): EsteticaQuizQue
 export const ESTETICA_QUIZ_RESULT_COPY = {
   headline: 'Você poderia estar agendando muito mais',
   subLines: [
-    'Pare de tentar convencer',
-    'Faça sua cliente chegar pronta pra fechar',
-    'Você vai entender na hora quando ver',
+    'Pare de tentar conversar',
+    'Faça suas clientes chegarem prontas para fechar',
+    'Você entende na hora ao ver seus links personalizados em ação',
   ] as const,
   ctaPrimary: 'Ver na prática agora',
-  ctaMicro: 'Próximo passo: onde você atua, depois um exemplo do fluxo da sua cliente',
+  ctaMicro: 'Um exemplo de link personalizado na sequência.',
 } as const

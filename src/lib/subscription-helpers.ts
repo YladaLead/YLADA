@@ -128,6 +128,43 @@ export async function requiresManualRenewal(
 /**
  * Obtém assinatura ativa do usuário para uma área específica
  */
+/**
+ * Assinatura ativa exibida em Configurações da matriz YLADA: prioriza `ylada`, senão o segmento do perfil (nutri, med, …).
+ */
+export async function getActiveSubscriptionForYladaConfig(userId: string) {
+  const ylada = await getActiveSubscription(userId, 'ylada')
+  if (ylada) return ylada
+  const { data: profile } = await supabaseAdmin
+    .from('user_profiles')
+    .select('perfil')
+    .eq('user_id', userId)
+    .maybeSingle()
+  const area = perfilMatrizToSubscriptionArea(profile?.perfil as string | undefined)
+  if (!area) return null
+  return getActiveSubscription(userId, area)
+}
+
+/** Áreas de assinatura que podem ser canceladas pelo fluxo unificado da matriz (`/api/ylada/subscription/*-cancel*`). */
+export const YLADA_MATRIX_CANCEL_SUBSCRIPTION_AREAS: SubscriptionArea[] = [
+  'ylada',
+  'med',
+  'psi',
+  'psicanalise',
+  'odonto',
+  'nutra',
+  'coach',
+  'seller',
+  'perfumaria',
+  'estetica',
+  'fitness',
+  'nutri',
+]
+
+export function isSubscriptionCancellableViaYladaMatrixFlow(area: string | undefined | null): boolean {
+  if (!area) return false
+  return YLADA_MATRIX_CANCEL_SUBSCRIPTION_AREAS.includes(area as SubscriptionArea)
+}
+
 export async function getActiveSubscription(
   userId: string,
   area: SubscriptionArea
