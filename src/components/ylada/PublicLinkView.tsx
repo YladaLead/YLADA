@@ -3,7 +3,11 @@
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { formatDisplayTitle, getStrategicIntro, patientFacingTitleFromStoredPageTitle } from '@/lib/ylada/strategic-intro'
-import { FREEMIUM_LIMIT_TYPE_EXTRA_ACTIVE_LINK } from '@/config/freemium-limits'
+import {
+  FREEMIUM_LIMIT_TYPE_EXTRA_ACTIVE_LINK,
+  YLADA_FREEMIUM_WHATSAPP_MONTHLY_LIMIT_MESSAGE_VISITOR,
+  YLADA_PRO_UPGRADE_PITCH_VISITOR,
+} from '@/config/freemium-limits'
 import DiagnosisDisclaimer from '@/components/ylada/DiagnosisDisclaimer'
 import PoweredByYlada from '@/components/ylada/PoweredByYlada'
 import type { Language } from '@/lib/i18n'
@@ -130,16 +134,16 @@ function FreemiumExtraLinkBlockedScreen({
         : 'Este link não está disponível no momento'
   const body =
     locale === 'en'
-      ? 'The professional is on the free YLADA plan, which keeps only one active diagnosis open to the public at a time. To use several links at once again, they can reactivate the Pro plan — with unlimited active diagnostics and unlimited WhatsApp contacts per month.'
+      ? 'The professional is on the free YLADA plan: only one active diagnosis is open to the public at a time. This link is paused for now.'
       : locale === 'es'
-        ? 'La profesional está en el plan gratuito de YLADA: solo un diagnóstico activo puede recibir visitas a la vez. Para volver a usar varios enlaces a la vez, puede reactivar el plan Pro, con diagnósticos activos ilimitados y contactos ilimitados por WhatsApp al mes.'
-        : 'A profissional está no plano gratuito da YLADA: só um diagnóstico ativo fica aberto para novas visitas por vez. Para voltar a usar todos os links ao mesmo tempo, ela pode reativar o Plano Pro — com diagnósticos ativos ilimitados e contatos ilimitados no WhatsApp por mês.'
+        ? 'La profesional está en el plan gratuito de YLADA: solo un diagnóstico activo está abierto al público a la vez. Este enlace está pausado por ahora.'
+        : 'No plano gratuito da YLADA, só um diagnóstico fica aberto para novas visitas por vez. Por isso este link está pausado no momento.'
   const proLine =
     locale === 'en'
-      ? 'Pro unlocks every active link for your clients and removes this limitation.'
+      ? 'With Pro she unlocks unlimited Noel for strategy and attracting clients, unlimited links and flows for lead generation, and unlimited WhatsApp conversations.'
       : locale === 'es'
-        ? 'Con Pro todos los enlaces activos vuelven a funcionar para tus clientas.'
-        : 'Com o Pro, todos os links ativos voltam a funcionar para suas clientes.'
+        ? 'Con Pro libera Noel ilimitado para estrategia y atraer clientes, enlaces y flujos ilimitados para generar contactos y conversaciones ilimitadas por WhatsApp.'
+        : YLADA_PRO_UPGRADE_PITCH_VISITOR
   const cta = locale === 'en' ? 'View YLADA plans' : locale === 'es' ? 'Ver planes YLADA' : 'Ver planos YLADA'
   const souPro =
     locale === 'en' ? 'I am the professional — log in' : locale === 'es' ? 'Soy la profesional — entrar' : 'Sou a profissional — entrar'
@@ -159,7 +163,7 @@ function FreemiumExtraLinkBlockedScreen({
         ) : null}
         <p className="text-gray-700 text-sm leading-relaxed mb-4">{body}</p>
         <div className="mb-6 p-4 rounded-xl bg-sky-50 border border-sky-100">
-          <p className="text-sm font-medium text-sky-900">{proLine}</p>
+          <p className="text-sm text-sky-800 leading-relaxed">{proLine}</p>
         </div>
         <div className="space-y-3 mb-6">
           <Link
@@ -449,9 +453,14 @@ function ConfigDrivenLinkView({
   const [metricsId, setMetricsId] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [freemiumLimitMessage, setFreemiumLimitMessage] = useState<string | null>(null)
   const startSent = useRef(false)
   const completeSent = useRef(false)
   const resultViewSent = useRef(false)
+
+  useEffect(() => {
+    setFreemiumLimitMessage(null)
+  }, [slug])
 
   useEffect(() => {
     if (step === 'result' && diagnosis && metricsId && !resultViewSent.current) {
@@ -587,6 +596,9 @@ function ConfigDrivenLinkView({
           }
           if (data.limit_reached) {
             console.log('⚠️ [PublicLinkView] Limite atingido')
+            setFreemiumLimitMessage(
+              typeof data.message === 'string' && data.message.trim() ? data.message.trim() : null
+            )
             setStep('limit_reached')
             setLoading(false)
             return
@@ -657,36 +669,92 @@ function ConfigDrivenLinkView({
 
   // Tela de limite atingido (freemium) — tom de crescimento + promoção do Pro
   if (step === 'limit_reached') {
-    const limitTitle = locale === 'en'
-      ? 'This diagnosis already generated 10 WhatsApp conversations this month'
-      : locale === 'es'
-      ? 'Este diagnóstico ya generó 10 conversaciones por WhatsApp este mes'
-      : 'Este diagnóstico já gerou 10 conversas no WhatsApp este mês'
-    const limitBody = locale === 'en'
-      ? 'This diagnosis already generated 10 WhatsApp conversations this month. Want to create diagnostics like this to generate conversations with your clients?'
-      : locale === 'es'
-      ? 'Este diagnóstico ya generó 10 conversaciones por WhatsApp este mes. ¿Quieres crear diagnósticos así para generar conversaciones con tus clientes?'
-      : 'Este diagnóstico já gerou 10 conversas no WhatsApp este mês. Quer criar diagnósticos como esse para gerar conversas com seus clientes?'
-    const proBenefit = locale === 'en'
-      ? 'With the Pro plan: unlimited active diagnostics, unlimited WhatsApp contacts per month, and full Noel analyses.'
-      : locale === 'es'
-      ? 'Con el plan Pro: diagnósticos activos ilimitados, contactos ilimitados por WhatsApp al mes y análisis completos del Noel.'
-      : 'No plano Pro há diagnósticos ativos ilimitados, contatos ilimitados no WhatsApp por mês e análises completas do Noel.'
-    const verPlanos = locale === 'en' ? 'View plans' : locale === 'es' ? 'Ver planes' : 'Ver planos'
-    const criarMeu = locale === 'en' ? 'Create my free diagnosis' : locale === 'es' ? 'Crear mi diagnóstico gratis' : 'Criar meu diagnóstico grátis'
+    if (locale === 'pt') {
+      const bodyText = freemiumLimitMessage?.trim() || YLADA_FREEMIUM_WHATSAPP_MONTHLY_LIMIT_MESSAGE_VISITOR
+      const criarMeu = 'Criar meu diagnóstico grátis'
+      const segments = bodyText
+        .split(/\n\n+/)
+        .map((s) => s.trim())
+        .filter(Boolean)
+      const situationText = segments[0] ?? bodyText
+      const proPitchText = segments.length > 1 ? segments.slice(1).join('\n\n') : ''
+      return (
+        <div className="min-h-screen bg-gradient-to-b from-slate-50 via-sky-50/80 to-sky-100/90 flex items-center justify-center p-4 sm:p-6">
+          <div className="max-w-md w-full bg-white rounded-2xl shadow-xl shadow-sky-200/40 border border-sky-100/80 p-6 sm:p-8 ring-1 ring-sky-100/60">
+            <div className="mb-4 flex flex-wrap items-center gap-2">
+              <span className="inline-block text-xs font-semibold text-sky-700 bg-sky-100/90 px-3 py-1.5 rounded-full border border-sky-200/80">
+                Resultado
+              </span>
+              <span className="inline-block text-xs font-medium text-amber-800 bg-amber-50 px-3 py-1.5 rounded-full border border-amber-200/80">
+                Limite do mês
+              </span>
+            </div>
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 leading-tight tracking-tight">
+              Pausa neste diagnóstico
+            </h1>
+            <div className="rounded-xl border border-amber-200/90 bg-gradient-to-br from-amber-50 to-amber-50/30 p-4 mb-4 shadow-sm">
+              <p className="text-[11px] font-semibold uppercase tracking-wider text-amber-900/80 mb-2">
+                O que aconteceu
+              </p>
+              <p className="text-sm text-amber-950 leading-relaxed">{situationText}</p>
+            </div>
+            {proPitchText ? (
+              <div className="rounded-xl border border-sky-200 bg-gradient-to-br from-sky-50 via-white to-sky-50/50 p-4 mb-6 shadow-sm">
+                <p className="text-[11px] font-semibold uppercase tracking-wider text-sky-800 mb-2">
+                  Plano Pro
+                </p>
+                <p className="text-sm text-slate-800 leading-relaxed">{proPitchText}</p>
+              </div>
+            ) : null}
+            <div className="space-y-3 mb-6">
+              <a
+                href="/pt/precos"
+                className="block w-full py-3.5 px-4 bg-gradient-to-r from-sky-600 to-sky-700 hover:from-sky-700 hover:to-sky-800 text-white font-semibold rounded-xl text-center text-base shadow-lg shadow-sky-600/25 transition-all hover:shadow-sky-600/35 active:scale-[0.99]"
+              >
+                Quero o plano Pro
+              </a>
+              <p className="text-center text-xs text-slate-500">Sem compromisso — veja valores e benefícios na próxima tela.</p>
+              <a
+                href="/pt/precos"
+                className="block w-full py-2.5 px-4 text-sky-700 hover:text-sky-900 text-sm font-medium text-center rounded-lg hover:bg-sky-50 transition-colors"
+              >
+                {criarMeu}
+              </a>
+            </div>
+            <p className="text-center text-xs text-gray-500">Criado com YLADA</p>
+          </div>
+        </div>
+      )
+    }
+
+    const limitTitle =
+      locale === 'en'
+        ? 'A pause on this diagnosis'
+        : 'Una pausa en este diagnóstico'
+    const limitBody =
+      locale === 'en'
+        ? 'WhatsApp conversations from this link have reached what the free plan allows this month. They resume next month. For unlimited reception, the professional can activate Pro.'
+        : 'Las conversaciones por WhatsApp de este enlace alcanzaron lo que permite el plan gratuito este mes. Vuelven el próximo mes. Para recepción sin límite, la profesional puede activar Pro.'
+    const proBenefit =
+      locale === 'en'
+        ? 'With Pro she unlocks unlimited Noel for strategy and attracting clients, unlimited links and flows for lead generation, and unlimited WhatsApp conversations.'
+        : 'Con Pro libera Noel ilimitado para estrategia y atraer clientes, enlaces y flujos ilimitados para generar contactos y conversaciones ilimitadas por WhatsApp.'
+    const verPlanos = locale === 'en' ? 'View plans' : 'Ver planes'
+    const criarMeu =
+      locale === 'en' ? 'Create my free diagnosis' : 'Crear mi diagnóstico gratis'
     return (
       <div className="min-h-screen bg-gradient-to-b from-sky-50 via-sky-50/90 to-blue-50 flex items-center justify-center p-4 sm:p-6">
         <div className="max-w-md w-full bg-white rounded-2xl shadow-xl shadow-sky-100/50 border border-sky-100/60 p-6 sm:p-8">
           <div className="mb-4">
             <span className="inline-block text-xs font-semibold text-sky-600 bg-sky-50 px-3 py-1.5 rounded-full border border-sky-100">
-              {locale === 'en' ? 'Result' : locale === 'es' ? 'Resultado' : 'Resultado'}
+              {locale === 'en' ? 'Result' : 'Resultado'}
             </span>
           </div>
           <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3 leading-tight">{limitTitle}</h1>
           <p className="text-gray-600 text-sm leading-relaxed mb-3">{limitBody}</p>
           <div className="mb-6 p-4 rounded-xl bg-sky-50 border border-sky-100">
             <p className="text-sm font-medium text-sky-900 mb-1">
-              {locale === 'en' ? 'What you get with Pro' : locale === 'es' ? 'Qué obtienes con Pro' : 'O que você ganha com o Pro'}
+              {locale === 'en' ? 'What Pro unlocks' : 'Qué desbloquea Pro'}
             </p>
             <p className="text-sm text-sky-800 leading-relaxed">{proBenefit}</p>
           </div>

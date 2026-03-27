@@ -4,9 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { useAuthenticatedFetch } from '@/hooks/useAuthenticatedFetch'
-import { buildYladaSupportWhatsappPrefill, getCarolWhatsAppUrl } from '@/config/ylada-support'
-import { getNinaNoelHref, getNinaSupportQuickChips } from '@/config/ylada-nina-support-ux'
-import { useAuth } from '@/contexts/AuthContext'
+import { getNinaSupportQuickChips } from '@/config/ylada-nina-support-ux'
 import type { NoelArea } from '@/config/noel-ux-content'
 import type { NinaSupportUi } from '@/lib/ylada-nina-support-prompt'
 import NinaSupportTriage from '@/components/ylada/NinaSupportTriage'
@@ -42,7 +40,7 @@ function saveMessages(area: string, messages: Message[]) {
 }
 
 const welcomeContent =
-  'Oi! Sou a Nina. Acima está o mapa de canais (Nina, Noel, WhatsApp) e atalhos para dúvidas comuns. Por aqui te ajudo com **uso do app**. Como posso te ajudar?'
+  'Eu sou a Nina. Por aqui te ajudo com uso do app. Como posso te ajudar?'
 
 interface NinaSupportContentProps {
   areaCodigo: NoelArea
@@ -54,7 +52,6 @@ interface NinaSupportContentProps {
 export default function NinaSupportContent(props: NinaSupportContentProps) {
   const { areaCodigo, areaLabel, supportUi = 'matrix' } = props
   const chatStorageKey = supportUi === 'wellness' ? 'wellness' : areaCodigo
-  const { user, userProfile } = useAuth()
   const [messages, setMessages] = useState<Message[]>(() => {
     const saved = loadMessages(chatStorageKey)
     if (saved.length > 0) return saved
@@ -172,11 +169,6 @@ export default function NinaSupportContent(props: NinaSupportContentProps) {
     [supportUi, areaCodigo]
   )
 
-  const noelHref = useMemo(
-    () => getNinaNoelHref({ areaCodigo, supportUi }),
-    [areaCodigo, supportUi]
-  )
-
   const clearChat = useCallback(() => {
     const initial: Message[] = [
       {
@@ -190,37 +182,11 @@ export default function NinaSupportContent(props: NinaSupportContentProps) {
     saveMessages(chatStorageKey, initial)
   }, [chatStorageKey])
 
-  const whatsappUrl = useMemo(() => {
-    if (!user) {
-      return getCarolWhatsAppUrl()
-    }
-    const email = user.email ?? userProfile?.email ?? ''
-    const nomeCompleto =
-      userProfile?.nome_completo?.trim() ||
-      (typeof user.user_metadata?.full_name === 'string' ? user.user_metadata.full_name : '') ||
-      (typeof user.user_metadata?.name === 'string' ? user.user_metadata.name : '')
-    const prefill = buildYladaSupportWhatsappPrefill({
-      email,
-      nomeCompleto: nomeCompleto || null,
-      areaLabel,
-      areaCodigo: supportUi === 'wellness' ? 'wellness' : areaCodigo,
-      perfilConta: userProfile?.perfil ?? null,
-      userId: user.id,
-    })
-    return getCarolWhatsAppUrl(prefill)
-  }, [user, userProfile, areaLabel, areaCodigo, supportUi])
-
   return (
     <div className="max-w-3xl mx-auto space-y-4 pb-8">
       <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Suporte</h1>
 
-      <NinaSupportTriage
-        noelHref={noelHref}
-        whatsappUrl={whatsappUrl}
-        chips={quickChips}
-        onChipClick={sendText}
-        chipsDisabled={loading}
-      />
+      <NinaSupportTriage chips={quickChips} onChipClick={sendText} chipsDisabled={loading} />
 
       <div className="rounded-2xl border border-gray-200 bg-white shadow-sm overflow-hidden flex flex-col min-h-[420px] max-h-[min(70vh,640px)] sm:max-h-[min(72vh,680px)]">
         <div className="px-4 py-3 border-b border-gray-100 bg-gray-50 flex items-center justify-between gap-2">

@@ -1,4 +1,3 @@
-import { getYladaAreaPathPrefix } from '@/config/ylada-areas'
 import type { NinaSupportUi } from '@/lib/ylada-nina-support-prompt'
 
 export interface NinaSupportQuickChip {
@@ -7,76 +6,30 @@ export interface NinaSupportQuickChip {
   message: string
 }
 
-/**
- * Rota do Noel (mentor) no app — matriz: `/pt/{area}/home`; Wellness: `/pt/wellness/noel`.
- */
-export function getNinaNoelHref(params: {
-  areaCodigo: string
-  supportUi: NinaSupportUi
-}): string {
-  if (params.supportUi === 'wellness') return '/pt/wellness/noel'
-  const prefix = getYladaAreaPathPrefix(params.areaCodigo)
-  return `${prefix}/home`
-}
-
 const MATRIX_BASE_CHIPS: NinaSupportQuickChip[] = [
-  {
-    label: 'Senha e conta',
-    message: 'Onde altero minha senha e os dados da minha conta?',
-  },
-  {
-    label: 'Meus links',
-    message: 'Onde encontro meus links e como compartilho?',
-  },
-  {
-    label: 'Leads',
-    message: 'Onde vejo leads e conversas?',
-  },
-  {
-    label: 'Assinatura',
-    message: 'Onde vejo minha assinatura, plano e pagamentos?',
-  },
-  {
-    label: 'Chamado técnico',
-    message: 'Como abro um chamado de suporte para bug ou melhoria?',
-  },
+  { label: 'Conta', message: 'Como altero senha e dados da conta?' },
+  { label: 'Links', message: 'Onde ficam meus links e como compartilho?' },
+  { label: 'Leads', message: 'Onde vejo leads?' },
+  { label: 'Plano', message: 'Onde vejo assinatura e pagamentos?' },
+  { label: 'Falar com a equipe', message: 'Preciso falar com alguém da equipe (WhatsApp ou chamado).' },
   {
     label: 'Prévia no WhatsApp',
-    message:
-      'Ao compartilhar o link no WhatsApp a imagem ou o título aparece errado. O que fazer?',
+    message: 'No WhatsApp, a imagem ou o título do meu link aparece errado.',
   },
 ]
 
 const NUTRI_EXTRA: NinaSupportQuickChip = {
-  label: 'Cancelar assinatura',
-  message: 'Como funciona o cancelamento da minha assinatura?',
+  label: 'Cancelamento',
+  message: 'Como cancelo minha assinatura?',
 }
 
 const WELLNESS_CHIPS: NinaSupportQuickChip[] = [
-  {
-    label: 'Onde fica o NOEL',
-    message: 'Onde abro o NOEL no app Wellness?',
-  },
-  {
-    label: 'Meus links',
-    message: 'Onde ficam meus links na área Wellness?',
-  },
-  {
-    label: 'Configurações',
-    message: 'Onde altero dados da conta e configurações?',
-  },
-  {
-    label: 'Perfil e metas',
-    message: 'Onde fica meu perfil e minhas metas?',
-  },
-  {
-    label: 'Chamado de suporte',
-    message: 'Como abro um chamado de suporte?',
-  },
-  {
-    label: 'Prévia no WhatsApp',
-    message: 'O link no WhatsApp mostra imagem ou título errado.',
-  },
+  { label: 'Noel', message: 'Onde abro o Noel no Wellness?' },
+  { label: 'Links', message: 'Onde ficam meus links?' },
+  { label: 'Configurações', message: 'Onde altero dados da conta?' },
+  { label: 'Perfil', message: 'Onde fica meu perfil e minhas metas?' },
+  { label: 'Suporte', message: 'Como falo com o suporte?' },
+  { label: 'Prévia no WhatsApp', message: 'No WhatsApp, imagem ou título do link errados.' },
 ]
 
 export function getNinaSupportQuickChips(params: {
@@ -88,7 +41,7 @@ export function getNinaSupportQuickChips(params: {
   }
   const chips = [...MATRIX_BASE_CHIPS]
   if (params.areaCodigo === 'nutri') {
-    const idx = chips.findIndex((c) => c.label === 'Assinatura')
+    const idx = chips.findIndex((c) => c.label === 'Plano')
     if (idx >= 0) {
       chips.splice(idx + 1, 0, NUTRI_EXTRA)
     } else {

@@ -11,6 +11,7 @@ import { getYladaAreaPathPrefix, getYladaLeadsPath } from '@/config/ylada-areas'
 import { getNoelUxContent, type NoelArea } from '@/config/noel-ux-content'
 import { buildNoelContextualWelcome, type NoelContextualAction } from '@/config/noel-contextual-welcome'
 import { getLocaleFromPathname, type Language } from '@/lib/i18n'
+import { YLADA_FREEMIUM_NOEL_MONTHLY_LIMIT_MESSAGE } from '@/config/freemium-limits'
 
 /** Texto plano dos nós do markdown (para detectar parágrafos que são perguntas). */
 function markdownPlainText(children: ReactNode): string {
@@ -311,14 +312,16 @@ export default function NoelChat({ area = 'med', className = '', initialMessage,
           return
         }
         if (err.limit_type === 'noel_advanced' || err.error === 'limit_reached') {
-          const upgradeMsg = err.message || 'Você atingiu o limite de análises do plano gratuito. Ative o plano profissional para continuar.'
+          const upgradeMsg =
+            err.message ||
+            YLADA_FREEMIUM_NOEL_MONTHLY_LIMIT_MESSAGE
           const upgradeUrl = err.upgrade_url || '/pt/precos'
           setMessages((prev) => [
             ...prev,
             {
               id: `e-${Date.now()}`,
               role: 'assistant',
-              content: `${upgradeMsg}\n\n[Ativar plano profissional](${upgradeUrl})`,
+              content: `${upgradeMsg}\n\n[Quero o plano Pro](${upgradeUrl})`,
               timestamp: new Date(),
             },
           ])
@@ -515,14 +518,16 @@ export default function NoelChat({ area = 'med', className = '', initialMessage,
             upgrade_url?: string
           }
           if (err.limit_type === 'noel_advanced' || err.error === 'limit_reached') {
-            const upgradeMsg = err.message || 'Você atingiu o limite de análises do plano gratuito. Ative o plano profissional para continuar.'
+            const upgradeMsg =
+              err.message ||
+              YLADA_FREEMIUM_NOEL_MONTHLY_LIMIT_MESSAGE
             const upgradeUrl = err.upgrade_url || '/pt/precos'
             setMessages((prev) => [
               ...prev,
               {
                 id: `e-${Date.now()}`,
                 role: 'assistant',
-                content: `${upgradeMsg}\n\n[Ativar plano profissional](${upgradeUrl})`,
+                content: `${upgradeMsg}\n\n[Quero o plano Pro](${upgradeUrl})`,
                 timestamp: new Date(),
               },
             ])

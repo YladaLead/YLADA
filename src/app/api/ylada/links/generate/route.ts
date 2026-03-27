@@ -22,7 +22,7 @@ import { randomBytes } from 'crypto'
 import { translateQuestions } from '@/lib/translate-questions'
 import { getCountryByCode } from '@/components/CountrySelector'
 import { hasYladaProPlan } from '@/lib/subscription-helpers'
-import { FREEMIUM_LIMITS } from '@/config/freemium-limits'
+import { FREEMIUM_LIMITS, YLADA_FREEMIUM_ACTIVE_LINK_LIMIT_MESSAGE } from '@/config/freemium-limits'
 import {
   buildProjectionFormFields,
   projectionQuestionsOverrideAllowed,
@@ -404,8 +404,7 @@ export async function POST(request: NextRequest) {
             success: false,
             limit_reached: true,
             limit_type: 'active_links',
-            message:
-              'Seu plano gratuito permite 1 diagnóstico ativo por vez.\n\nCom o plano Pro você ganha: vários diagnósticos ativos, contatos ilimitados no WhatsApp por mês e análises ilimitadas do Noel. Ative o plano profissional para ampliar sua operação.',
+            message: YLADA_FREEMIUM_ACTIVE_LINK_LIMIT_MESSAGE,
           },
           { status: 403 }
         )

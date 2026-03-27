@@ -10,6 +10,7 @@ import {
   getYladaLeadsPath,
   getYladaSuportePath,
 } from '@/config/ylada-areas'
+import { buildYladaReferralWhatsappHref } from '@/lib/ylada-referral-whatsapp'
 import { useAuth } from '@/hooks/useAuth'
 
 const YLADA_LOGO = '/images/logo/ylada/horizontal/azul-claro/ylada-horizontal-azul-claro-30.png'
@@ -147,6 +148,20 @@ export default function YladaSidebar({
               <div className="space-y-0.5">{group.items.map((item) => renderItemLink(item))}</div>
             </div>
           ))}
+
+          <div className="pt-3 mt-1 border-t border-gray-100">
+            <a
+              href={buildYladaReferralWhatsappHref(areaCodigo, areaLabel)}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={onMobileClose}
+              className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium text-gray-700 hover:bg-green-50 transition-colors"
+              title="Indicar pelo WhatsApp com mensagem pronta"
+            >
+              <span aria-hidden>🤝</span>
+              Indicar colega
+            </a>
+          </div>
         </div>
 
         {contaGroup && (

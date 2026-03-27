@@ -58,7 +58,7 @@ import {
 import OpenAI from 'openai'
 import { hasYladaProPlan } from '@/lib/subscription-helpers'
 import { getNoelUsageCount, incrementNoelUsage } from '@/lib/noel-usage-helpers'
-import { FREEMIUM_LIMITS } from '@/config/freemium-limits'
+import { FREEMIUM_LIMITS, YLADA_FREEMIUM_NOEL_MONTHLY_LIMIT_MESSAGE } from '@/config/freemium-limits'
 import { completeNinaSupportTurn } from '@/lib/ylada-nina-support'
 import { notifyNinaSupportInquiry } from '@/lib/support-notifications'
 
@@ -504,8 +504,7 @@ export async function POST(request: NextRequest) {
           {
             error: 'limit_reached',
             limit_type: 'noel_advanced',
-            message:
-              'Você já utilizou as 10 análises estratégicas disponíveis no plano gratuito este mês.\n\n**O que você ganha com o Pro:** análises ilimitadas do Noel, diagnósticos ilimitados e contatos ilimitados no WhatsApp. Sem limite mensal.',
+            message: YLADA_FREEMIUM_NOEL_MONTHLY_LIMIT_MESSAGE,
             upgrade_url: '/pt/precos',
           },
           { status: 403 }

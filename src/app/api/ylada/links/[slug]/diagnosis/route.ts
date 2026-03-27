@@ -18,7 +18,12 @@ import { sanitizeThemeForPatient } from '@/lib/ylada/strategic-intro'
 import { inferArchitectureFromTitle } from '@/config/ylada-segments'
 import { translateDiagnosis } from '@/lib/translate-diagnosis'
 import { hasYladaProPlan } from '@/lib/subscription-helpers'
-import { FREEMIUM_LIMITS, FREEMIUM_LIMIT_TYPE_EXTRA_ACTIVE_LINK } from '@/config/freemium-limits'
+import {
+  FREEMIUM_LIMITS,
+  FREEMIUM_LIMIT_TYPE_EXTRA_ACTIVE_LINK,
+  YLADA_FREEMIUM_EXTRA_ACTIVE_LINK_MESSAGE_VISITOR,
+  YLADA_FREEMIUM_WHATSAPP_MONTHLY_LIMIT_MESSAGE_VISITOR,
+} from '@/config/freemium-limits'
 import { isYladaLinkHiddenFromPublicDueToFreemium } from '@/lib/ylada-freemium-public-link'
 import { storeDiagnosisAnswers } from '@/lib/ylada/diagnosis-answers-store'
 
@@ -202,8 +207,7 @@ export async function POST(
           success: false,
           limit_reached: true,
           limit_type: FREEMIUM_LIMIT_TYPE_EXTRA_ACTIVE_LINK,
-          message:
-            'No plano gratuito só um diagnóstico ativo fica disponível para visitantes. Os demais ficam pausados na experiência pública até a profissional reativar o Plano Pro.',
+          message: YLADA_FREEMIUM_EXTRA_ACTIVE_LINK_MESSAGE_VISITOR,
         },
         { status: 403 }
       )
@@ -234,8 +238,7 @@ export async function POST(
                 success: false,
                 limit_reached: true,
                 limit_type: 'whatsapp_clicks_monthly',
-                message:
-                  'Este diagnóstico atingiu o limite de 10 contatos no WhatsApp deste mês. No plano Pro o profissional tem diagnósticos ativos ilimitados e contatos ilimitados no WhatsApp por mês (e Noel completo). Para continuar recebendo contatos aqui, é preciso ativar o plano profissional.',
+                message: YLADA_FREEMIUM_WHATSAPP_MONTHLY_LIMIT_MESSAGE_VISITOR,
               },
               { status: 403 }
             )

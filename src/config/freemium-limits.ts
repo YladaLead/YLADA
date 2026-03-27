@@ -18,3 +18,27 @@ export type FreemiumLimitKey = keyof typeof FREEMIUM_LIMITS
 
 /** Resposta API quando o link não é o único ativo permitido no Free (só o mais antigo fica público). */
 export const FREEMIUM_LIMIT_TYPE_EXTRA_ACTIVE_LINK = 'freemium_extra_active_link' as const
+
+/** Bloco único de benefícios Pro (tom: profissional / segunda pessoa). */
+export const YLADA_PRO_UPGRADE_PITCH =
+  'No plano Pro você tem o Noel sem limite para pensar em estratégias, atrair clientes e promover melhor o seu trabalho. Também cria links ilimitados e usa vários fluxos para gerar contato, com conversas ilimitadas chegando no seu WhatsApp.' as const
+
+/** Mesmo pitch na terceira pessoa (visitante do link falando da profissional). */
+export const YLADA_PRO_UPGRADE_PITCH_VISITOR =
+  'Com o plano Pro ela libera o Noel sem limite para pensar em estratégias, atrair clientes e promover melhor o trabalho; cria links ilimitados e usa vários fluxos para gerar contato, com conversas ilimitadas no WhatsApp.' as const
+
+/** Limite mensal de contatos WhatsApp (visitante) — texto completo da API + fallback da UI pública. */
+export const YLADA_FREEMIUM_WHATSAPP_MONTHLY_LIMIT_MESSAGE_VISITOR =
+  `O limite de contatos pelo WhatsApp do plano gratuito para este mês já foi utilizado neste diagnóstico. Na virada do mês o contador renova e novas conversas voltam a chegar. Se precisar receber sem esperar, ela pode ativar o Pro.\n\n${YLADA_PRO_UPGRADE_PITCH_VISITOR}` as const
+
+/** Link extra pausado no Free (visitante) — texto completo. */
+export const YLADA_FREEMIUM_EXTRA_ACTIVE_LINK_MESSAGE_VISITOR =
+  `No plano gratuito, só um diagnóstico fica disponível para visitantes por vez — por isso este link está pausado na experiência pública até a profissional ativar o Pro.\n\n${YLADA_PRO_UPGRADE_PITCH_VISITOR}` as const
+
+/** Limite do Noel no mês (profissional) — texto completo. */
+export const YLADA_FREEMIUM_NOEL_MONTHLY_LIMIT_MESSAGE =
+  `Seus créditos com o Noel neste mês já foram utilizados — quando o ciclo renovar, eles voltam automaticamente.\n\n${YLADA_PRO_UPGRADE_PITCH}` as const
+
+/** Só um link ativo no Free (profissional) — texto completo ao tentar criar outro. */
+export const YLADA_FREEMIUM_ACTIVE_LINK_LIMIT_MESSAGE =
+  `No plano gratuito você mantém um diagnóstico ativo por vez. Para deixar vários links e fluxos no ar ao mesmo tempo, o caminho é o Pro.\n\n${YLADA_PRO_UPGRADE_PITCH}` as const

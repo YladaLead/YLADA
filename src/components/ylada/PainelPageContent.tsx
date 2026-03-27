@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import YladaAreaShell from './YladaAreaShell'
 import { getYladaAreaPathPrefix, getYladaLeadsPath } from '@/config/ylada-areas'
+import { YLADA_PRO_UPGRADE_PITCH } from '@/config/freemium-limits'
 
 type DashboardData = {
   respostas_hoje: number
@@ -96,9 +97,22 @@ export default function PainelPageContent({
                   Cada contato é uma pessoa que clicou no botão e te contactou no WhatsApp.
                 </p>
                 {(data.freemium.whatsapp_clicks_mes ?? 0) >= (data.freemium.limite_whatsapp_clicks ?? 10) ? (
-                  <p className="text-sm text-gray-700 mb-3">
-                    Seu diagnóstico atingiu o limite gratuito. No Pro: diagnósticos ativos ilimitados, contatos ilimitados no WhatsApp por mês e Noel sem limite.
-                  </p>
+                  <>
+                    <div className="rounded-lg border border-amber-200 bg-amber-50/90 p-3 mb-3">
+                      <p className="text-[11px] font-semibold uppercase tracking-wider text-amber-900/80 mb-1.5">
+                        Limite do mês utilizado
+                      </p>
+                      <p className="text-sm text-amber-950 leading-relaxed">
+                        Seus contatos pelo WhatsApp neste mês chegaram ao teto do plano gratuito. No próximo ciclo o contador renova sozinho.
+                      </p>
+                    </div>
+                    <div className="rounded-lg border border-sky-200 bg-gradient-to-br from-sky-50 to-white p-3 mb-3">
+                      <p className="text-[11px] font-semibold uppercase tracking-wider text-sky-800 mb-1.5">
+                        Plano Pro
+                      </p>
+                      <p className="text-sm text-slate-800 leading-relaxed">{YLADA_PRO_UPGRADE_PITCH}</p>
+                    </div>
+                  </>
                 ) : (data.freemium.whatsapp_clicks_mes ?? 0) >= 7 ? (
                   <p className="text-sm text-gray-700 mb-3">
                     Seu diagnóstico está gerando contatos. Faltam {(data.freemium.limite_whatsapp_clicks ?? 10) - (data.freemium.whatsapp_clicks_mes ?? 0)} para o limite gratuito.
@@ -114,10 +128,13 @@ export default function PainelPageContent({
                 )}
                 <Link
                   href="/pt/precos"
-                  className="inline-flex items-center gap-1.5 rounded-lg bg-sky-600 px-4 py-2 text-sm font-medium text-white hover:bg-sky-700"
+                  className="inline-flex w-full sm:w-auto justify-center items-center gap-1.5 rounded-xl bg-gradient-to-r from-sky-600 to-sky-700 px-5 py-3 text-sm font-semibold text-white shadow-md shadow-sky-600/20 hover:from-sky-700 hover:to-sky-800 transition-all"
                 >
-                  Ver planos
+                  Quero o plano Pro
                 </Link>
+                {(data.freemium.whatsapp_clicks_mes ?? 0) >= (data.freemium.limite_whatsapp_clicks ?? 10) ? (
+                  <p className="text-xs text-slate-500 mt-2">Veja preços e ative em um clique.</p>
+                ) : null}
               </section>
             )}
 
