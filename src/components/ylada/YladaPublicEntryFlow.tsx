@@ -150,34 +150,6 @@ export default function YladaPublicEntryFlow({ config, entradaComNicho = false }
     [current, profNicho, sessionStorageKey, config]
   )
 
-  const goBack = useCallback(() => {
-    if (step <= 0) {
-      if (entradaComNicho && profNicho) {
-        setProfNicho(null)
-        setAnswers({})
-        try {
-          sessionStorage.removeItem(sessionStorageKey)
-        } catch {
-          /* ignore */
-        }
-        router.replace(pathPrefix, { scroll: false })
-      }
-      return
-    }
-    const qId = quizQuestions[step - 1].id
-    setAnswers((prev) => {
-      const next = { ...prev }
-      delete next[qId]
-      try {
-        sessionStorage.setItem(sessionStorageKey, JSON.stringify(next))
-      } catch {
-        /* ignore */
-      }
-      return next
-    })
-    setStep((s) => s - 1)
-  }, [step, entradaComNicho, profNicho, quizQuestions, router, sessionStorageKey, pathPrefix])
-
   useEffect(() => {
     if (isResult) {
       trackEvent(config.analytics.quizConcluiu, { area: config.areaCodigo, nicho: profNicho })
@@ -202,6 +174,8 @@ export default function YladaPublicEntryFlow({ config, entradaComNicho = false }
   }
 
   const showNichoPicker = entradaComNicho && !profNicho
+  const showEntrarNoTopo =
+    (!entradaComNicho && step === 0 && !isResult) || (entradaComNicho && showNichoPicker)
   const rc = config.resultCopy
 
   const rootClass =
@@ -213,13 +187,20 @@ export default function YladaPublicEntryFlow({ config, entradaComNicho = false }
   return (
     <div className={rootClass}>
       <header className="sticky top-0 z-20 shrink-0 border-b border-gray-100/80 bg-white/95 backdrop-blur-sm pt-[env(safe-area-inset-top,0px)]">
-        <div className="h-0.5 w-full bg-gray-100 overflow-hidden" aria-hidden>
+        <div className="h-0.5 w-full bg-gray-100 overflow-hidden">
           <div
             className="h-full bg-blue-600 transition-[width] duration-500 ease-out"
             style={{ width: `${progress}%` }}
+            role="progressbar"
+            aria-valuenow={Math.round(progress)}
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-label="Progresso do questionário"
           />
         </div>
-        <div className="max-w-lg mx-auto flex items-center justify-between gap-3 px-4 py-3 sm:px-6">
+        <div
+          className={`max-w-lg mx-auto flex items-center gap-3 px-4 py-3 sm:px-6 ${showEntrarNoTopo ? 'justify-between' : ''}`}
+        >
           <Link
             href={config.logoHref}
             className="inline-flex touch-manipulation min-h-[48px] min-w-[48px] items-center justify-center -ml-1"
@@ -227,29 +208,14 @@ export default function YladaPublicEntryFlow({ config, entradaComNicho = false }
           >
             <YLADALogo size="md" responsive className="bg-transparent" />
           </Link>
-          <div className="flex items-center gap-2 text-sm">
-            {entradaComNicho && config.apresentacaoHref ? (
-              <Link
-                href={config.apresentacaoHref}
-                className="text-gray-500 hover:text-gray-900 font-medium min-h-[48px] inline-flex items-center px-2"
-              >
-                Apresentação
-              </Link>
-            ) : (
-              <Link
-                href={pathPrefix}
-                className="text-gray-500 hover:text-gray-900 font-medium min-h-[48px] inline-flex items-center px-2"
-              >
-                Voltar
-              </Link>
-            )}
+          {showEntrarNoTopo ? (
             <Link
               href={config.loginHref}
-              className="text-gray-500 hover:text-gray-900 font-medium min-h-[48px] inline-flex items-center px-2 -mr-2"
+              className="text-xs font-medium text-gray-400 hover:text-gray-600 min-h-[44px] inline-flex items-center px-2 -mr-2"
             >
               Entrar
             </Link>
-          </div>
+          ) : null}
         </div>
       </header>
 
@@ -281,10 +247,7 @@ export default function YladaPublicEntryFlow({ config, entradaComNicho = false }
             role="region"
             aria-live="polite"
           >
-            <p className="text-sm text-gray-500 leading-relaxed">
-              Pergunta {step + 1} de {quizQuestions.length}
-            </p>
-            <h1 className="mt-4 text-xl sm:text-2xl font-semibold text-gray-900 leading-snug tracking-tight">
+            <h1 className="text-xl sm:text-2xl font-semibold text-gray-900 leading-snug tracking-tight">
               {current.title}
             </h1>
             <div className="flex flex-col gap-3 pt-6">
@@ -299,17 +262,6 @@ export default function YladaPublicEntryFlow({ config, entradaComNicho = false }
                 </button>
               ))}
             </div>
-            {step > 0 && (
-              <div className="pt-8">
-                <button
-                  type="button"
-                  onClick={goBack}
-                  className="w-full min-h-[48px] rounded-2xl text-sm font-semibold text-gray-500 hover:text-gray-800 py-2 touch-manipulation"
-                >
-                  ← Pergunta anterior
-                </button>
-              </div>
-            )}
           </div>
         )}
 
@@ -320,10 +272,7 @@ export default function YladaPublicEntryFlow({ config, entradaComNicho = false }
             role="region"
             aria-live="polite"
           >
-            <p className="text-sm text-gray-500 leading-relaxed">
-              Pergunta {step + 1} de {quizQuestions.length}
-            </p>
-            <h1 className="mt-4 text-xl sm:text-2xl font-semibold text-gray-900 leading-snug tracking-tight">
+            <h1 className="text-xl sm:text-2xl font-semibold text-gray-900 leading-snug tracking-tight">
               {current.title}
             </h1>
             <div className="flex flex-col gap-3 pt-6">
@@ -338,17 +287,6 @@ export default function YladaPublicEntryFlow({ config, entradaComNicho = false }
                 </button>
               ))}
             </div>
-            {step > 0 && (
-              <div className="pt-8">
-                <button
-                  type="button"
-                  onClick={goBack}
-                  className="w-full min-h-[48px] rounded-2xl text-sm font-semibold text-gray-500 hover:text-gray-800 py-2 touch-manipulation"
-                >
-                  ← Pergunta anterior
-                </button>
-              </div>
-            )}
           </div>
         )}
 

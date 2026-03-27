@@ -29,7 +29,6 @@ export default function CoachVerPraticaPosQuizContent() {
         textoLocalSemNicho: '',
         tituloNicho: 'Qual foco do exemplo?',
         textoNicho: 'Fluxo curto só para demonstração. Depois você vê como a pessoa responderia.',
-        voltarQuiz: '← Voltar',
       }}
     />
   )

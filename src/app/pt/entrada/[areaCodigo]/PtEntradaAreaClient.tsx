@@ -61,12 +61,26 @@ export default function PtEntradaAreaClient({ areaCodigo }: { areaCodigo: string
         className={`h-[100dvh] max-h-[100dvh] flex flex-col overflow-hidden bg-white text-gray-900 ${rootExtraClass}`.trim()}
       >
         <header className="sticky top-0 z-20 shrink-0 border-b border-gray-100/80 bg-white/95 backdrop-blur-sm pt-[env(safe-area-inset-top,0px)]">
-          <div className="h-0.5 w-full bg-gray-100 overflow-hidden" aria-hidden>
-            <div className="h-full w-[8%] bg-blue-600" />
+          <div className="h-0.5 w-full bg-gray-100 overflow-hidden">
+            <div
+              className="h-full bg-blue-600 transition-[width] duration-500 ease-out"
+              style={{ width: '8%' }}
+              role="progressbar"
+              aria-valuenow={8}
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-label="Progresso"
+            />
           </div>
           <div className="max-w-lg mx-auto flex items-center justify-between gap-3 px-4 py-3 sm:px-6">
             <Link href="/pt" className="inline-flex touch-manipulation items-center" aria-label="YLADA início">
               <YLADALogo size="md" responsive className="bg-transparent" />
+            </Link>
+            <Link
+              href={loginHref}
+              className="text-xs font-medium text-gray-400 hover:text-gray-600 min-h-[44px] inline-flex items-center px-2 -mr-2 shrink-0"
+            >
+              Entrar
             </Link>
           </div>
         </header>
@@ -82,10 +96,15 @@ export default function PtEntradaAreaClient({ areaCodigo }: { areaCodigo: string
       className={`h-[100dvh] max-h-[100dvh] flex flex-col overflow-hidden bg-white text-gray-900 ${rootExtraClass}`.trim()}
     >
       <header className="sticky top-0 z-20 shrink-0 border-b border-gray-100/80 bg-white/95 backdrop-blur-sm pt-[env(safe-area-inset-top,0px)]">
-        <div className="h-0.5 w-full bg-gray-100 overflow-hidden" aria-hidden>
+        <div className="h-0.5 w-full bg-gray-100 overflow-hidden">
           <div
             className="h-full bg-blue-600 transition-[width] duration-500 ease-out"
             style={{ width: '8%' }}
+            role="progressbar"
+            aria-valuenow={8}
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-label="Progresso"
           />
         </div>
         <div className="max-w-lg mx-auto flex items-center justify-between gap-3 px-4 py-3 sm:px-6">
@@ -98,7 +117,7 @@ export default function PtEntradaAreaClient({ areaCodigo }: { areaCodigo: string
           </Link>
           <Link
             href={loginHref}
-            className="text-sm font-medium text-gray-500 hover:text-gray-900 min-h-[48px] inline-flex items-center px-2 -mr-2 shrink-0"
+            className="text-xs font-medium text-gray-400 hover:text-gray-600 min-h-[44px] inline-flex items-center px-2 -mr-2 shrink-0"
           >
             Entrar
           </Link>
@@ -109,13 +128,6 @@ export default function PtEntradaAreaClient({ areaCodigo }: { areaCodigo: string
         className={`flex-1 min-h-0 overflow-y-auto overscroll-y-contain px-4 sm:px-6 py-6 max-w-lg mx-auto w-full ${standard?.mainExtraClassName ?? ''}`.trim()}
       >
         <div className="animate-fade-in-up flex flex-col pb-2 space-y-6" role="region" aria-live="polite">
-          <Link
-            href="/pt/segmentos"
-            className="inline-block text-sm font-medium text-gray-500 hover:text-gray-800 min-h-[44px] py-2"
-          >
-            ← Voltar
-          </Link>
-
           <section className="space-y-4">
             {areaMeta ? (
               <p className="text-xs font-medium uppercase tracking-wide text-gray-500">{areaMeta.label}</p>

@@ -29,7 +29,6 @@ export default function SellerVerPraticaPosQuizContent() {
         textoLocalSemNicho: '',
         tituloNicho: 'Qual cenário no exemplo?',
         textoNicho: 'Demonstração genérica. Vale para vários tipos de venda.',
-        voltarQuiz: '← Voltar',
       }}
     />
   )

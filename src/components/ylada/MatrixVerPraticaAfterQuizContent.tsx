@@ -24,7 +24,6 @@ export interface MatrixVerPraticaStrings {
   textoLocalSemNicho: string
   tituloNicho: string
   textoNicho: string
-  voltarQuiz: string
 }
 
 export interface MatrixVerPraticaAfterQuizContentProps {
@@ -63,11 +62,10 @@ export default function MatrixVerPraticaAfterQuizContent({
     return n && nichos.some((o) => o.value === n) ? n : null
   }, [searchParams, nichos])
 
-  const voltarQuizHref = useMemo(() => {
-    return nichoPredefinido
-      ? `${pathPrefix}?nicho=${encodeURIComponent(nichoPredefinido)}`
-      : pathPrefix
-  }, [nichoPredefinido, pathPrefix])
+  const progressPercent = useMemo(() => {
+    if (nichoPredefinido) return 100
+    return fase === 'local' ? 50 : 100
+  }, [fase, nichoPredefinido])
 
   const escolherLocal = useCallback(
     (value: string) => {
@@ -121,7 +119,20 @@ export default function MatrixVerPraticaAfterQuizContent({
   return (
     <div className="min-h-[100dvh] bg-white text-gray-900 flex flex-col estetica-touch supports-[height:100svh]:min-h-[100svh]">
       <header className="sticky top-0 z-20 shrink-0 border-b border-gray-100/80 bg-white/95 backdrop-blur-sm pt-[env(safe-area-inset-top,0px)]">
-        <div className="max-w-lg mx-auto flex items-center justify-between gap-3 px-4 py-3 sm:px-6">
+        <div className="h-0.5 w-full bg-gray-100 overflow-hidden">
+          <div
+            className="h-full bg-blue-600 transition-[width] duration-500 ease-out"
+            style={{ width: `${progressPercent}%` }}
+            role="progressbar"
+            aria-valuenow={progressPercent}
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-label="Progresso"
+          />
+        </div>
+        <div
+          className={`max-w-lg mx-auto flex items-center gap-3 px-4 py-3 sm:px-6 ${fase === 'local' ? 'justify-between' : ''}`}
+        >
           <Link
             href={pathPrefix}
             className="inline-flex touch-manipulation min-h-[48px] min-w-[48px] items-center justify-center -ml-1"
@@ -129,12 +140,14 @@ export default function MatrixVerPraticaAfterQuizContent({
           >
             <YLADALogo size="md" responsive className="bg-transparent" />
           </Link>
-          <Link
-            href={loginHref}
-            className="text-sm font-medium text-gray-500 hover:text-gray-900 min-h-[48px] inline-flex items-center px-2"
-          >
-            Entrar
-          </Link>
+          {fase === 'local' ? (
+            <Link
+              href={loginHref}
+              className="text-xs font-medium text-gray-400 hover:text-gray-600 min-h-[44px] inline-flex items-center px-2 -mr-2"
+            >
+              Entrar
+            </Link>
+          ) : null}
         </div>
       </header>
 
@@ -157,12 +170,6 @@ export default function MatrixVerPraticaAfterQuizContent({
                 </button>
               ))}
             </div>
-            <Link
-              href={voltarQuizHref}
-              className="block w-full min-h-[44px] text-sm font-medium text-gray-500 hover:text-gray-800 text-center pt-2"
-            >
-              {strings.voltarQuiz}
-            </Link>
           </div>
         )}
 
@@ -182,13 +189,6 @@ export default function MatrixVerPraticaAfterQuizContent({
                 </button>
               ))}
             </div>
-            <button
-              type="button"
-              onClick={() => setFase('local')}
-              className="w-full min-h-[44px] text-sm font-medium text-gray-500 hover:text-gray-800"
-            >
-              ← Voltar
-            </button>
           </div>
         )}
       </main>

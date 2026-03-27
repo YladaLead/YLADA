@@ -29,7 +29,6 @@ export default function OdontoVerPraticaPosQuizContent() {
         textoLocalSemNicho: '',
         tituloNicho: 'Qual foco do exemplo?',
         textoNicho: 'Fluxo curto só para demonstração. Depois você vê como o paciente responderia.',
-        voltarQuiz: '← Voltar',
       }}
     />
   )
