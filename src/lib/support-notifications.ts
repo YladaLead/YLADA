@@ -533,16 +533,11 @@ export async function notifyNinaSupportInquiry(params: {
 
   const agentArea = params.supportUi === 'wellness' ? 'wellness' : params.segment
   const agentEmails = await getOnlineAgentsEmails(agentArea)
-  const notificationEmail = process.env.SUPPORT_NOTIFICATION_EMAIL || process.env.CONTACT_NOTIFICATION_EMAIL
-  const emailsToNotify =
-    agentEmails.length > 0 ? agentEmails : notificationEmail ? [notificationEmail] : []
-
-  if (emailsToNotify.length === 0) {
-    console.warn(
-      '[Support Notifications] Nina: nenhum e-mail para notificar (sem agentes online e sem SUPPORT_NOTIFICATION_EMAIL / CONTACT_NOTIFICATION_EMAIL)'
-    )
-    return { emailsSent: 0 }
-  }
+  const notificationEmail =
+    process.env.SUPPORT_NOTIFICATION_EMAIL ||
+    process.env.CONTACT_NOTIFICATION_EMAIL ||
+    'ylada.app@gmail.com'
+  const emailsToNotify = agentEmails.length > 0 ? agentEmails : [notificationEmail]
 
   const areaLabel = params.supportUi === 'wellness' ? 'Wellness' : params.segment
   const previewRaw =
