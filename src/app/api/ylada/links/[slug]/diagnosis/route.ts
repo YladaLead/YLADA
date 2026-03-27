@@ -89,28 +89,55 @@ function optionIndexToText(idx: unknown, options: string[] | undefined): string 
   return options[i]?.trim() || null
 }
 
-/** Monta resumo estruturado para WhatsApp a partir das respostas (Ficha Inteligente do Lead). */
-function buildWhatsAppResumoFromAnswers(
+const MAX_WHATSAPP_PREFILL_CHARS = 1700
+
+/**
+ * Linhas de contexto para o profissional (respostas objetivas + achado do diagnóstico quando faltar na lista).
+ */
+function buildWhatsAppLeadBulletLines(
   visitor_answers: Record<string, unknown>,
   formFields: FormFieldForNormalize[] | undefined,
   mainBlocker?: string
-): string | null {
-  if (!formFields || formFields.length === 0) return null
+): string[] {
   const bullets: string[] = []
-  for (let i = 0; i < Math.min(formFields.length, 4); i++) {
-    const f = formFields[i]
-    const val = visitor_answers[f.id]
-    const text = optionIndexToText(val, f.options)
-    if (text) {
-      const label = RESUMO_4D_LABELS[i] ?? `pergunta ${i + 1}`
-      bullets.push(`• ${label}: ${text}`)
+  if (formFields && formFields.length > 0) {
+    for (let i = 0; i < Math.min(formFields.length, 4); i++) {
+      const f = formFields[i]
+      const val = visitor_answers[f.id]
+      const text = optionIndexToText(val, f.options)
+      if (text) {
+        const label = RESUMO_4D_LABELS[i] ?? `pergunta ${i + 1}`
+        bullets.push(`• ${label}: ${text}`)
+      }
     }
   }
-  if (bullets.length === 0 && mainBlocker) {
-    bullets.push(`• problema principal: ${mainBlocker}`)
+  const blocker = (mainBlocker || '').trim()
+  if (blocker) {
+    const bundle = bullets.join(' ').toLowerCase()
+    const prefixLen = Math.min(28, blocker.length)
+    const prefix = prefixLen > 0 ? blocker.slice(0, prefixLen).toLowerCase() : ''
+    if (!prefix || !bundle.includes(prefix)) {
+      bullets.push(`• achado do diagnóstico: ${blocker}`)
+    }
   }
-  if (bullets.length === 0) return null
-  return `Olá! Resumo rápido do meu caso:\n\n${bullets.join('\n')}\n\nPodemos conversar sobre isso?`
+  return bullets
+}
+
+/** Junta a mensagem conversacional da IA com o resumo estruturado (sem substituir uma pela outra). */
+function appendLeadContextToWhatsAppPrefill(basePrefill: string | undefined, bullets: string[]): string {
+  const base = (basePrefill || '').trim()
+  if (bullets.length === 0) return base
+  const block = `Resumo pro profissional:\n${bullets.join('\n')}`
+  if (base.includes('Resumo pro profissional:')) return base
+  if (!base) {
+    return `Olá!\n\n${block}\n\nPodemos conversar sobre isso?`
+  }
+  return `${base}\n\n${block}`.trim()
+}
+
+function clampWhatsAppPrefill(text: string, max: number): string {
+  if (text.length <= max) return text
+  return `${text.slice(0, max - 1).trimEnd()}…`
 }
 
 export async function POST(
@@ -541,16 +568,9 @@ export async function POST(
       formFields,
     }).catch((e) => console.warn('[ylada/links/[slug]/diagnosis] storeDiagnosisAnswers:', e))
 
-    // Mensagem WhatsApp: Ficha Inteligente do Lead — resumo estruturado para o profissional receber contexto no WhatsApp
+    // WhatsApp: manter o prefill conversacional (IA) e acrescentar resumo objetivo para o profissional entender o caso
     let whatsappPrefill = diagnosis.whatsapp_prefill
-    const resumoFromAnswers = buildWhatsAppResumoFromAnswers(
-      visitor_answers,
-      formFields,
-      diagnosis.main_blocker
-    )
-    if (resumoFromAnswers && architecture !== 'PERFUME_PROFILE') {
-      whatsappPrefill = resumoFromAnswers
-    } else if (architecture !== 'PERFUME_PROFILE') {
+    if (architecture !== 'PERFUME_PROFILE') {
       const msgContainsResult =
         diagnosis.main_blocker &&
         whatsappPrefill?.toLowerCase().includes((diagnosis.main_blocker || '').toLowerCase().slice(0, 15))
@@ -559,6 +579,15 @@ export async function POST(
         const theme = themeForSlots?.trim() || 'a análise'
         whatsappPrefill = `Oi, fiz a análise de ${theme} e o resultado apontou ${diagnosis.main_blocker}. Gostaria de conversar sobre o próximo passo.`
       }
+      const bulletLines = buildWhatsAppLeadBulletLines(
+        visitor_answers,
+        formFields,
+        diagnosis.main_blocker
+      )
+      if (bulletLines.length > 0) {
+        whatsappPrefill = appendLeadContextToWhatsAppPrefill(whatsappPrefill, bulletLines)
+      }
+      whatsappPrefill = clampWhatsAppPrefill(whatsappPrefill, MAX_WHATSAPP_PREFILL_CHARS)
     }
     // PERFUME_PROFILE: enriquecer whatsapp_prefill com perfume_usage para o vendedor qualificar o lead
     const perfumeUsage = (diagnosis as Record<string, unknown>).perfume_usage as string | undefined

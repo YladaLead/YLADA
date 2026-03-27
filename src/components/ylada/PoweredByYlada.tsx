@@ -5,7 +5,7 @@ import Link from 'next/link'
 /**
  * Rodapé "Powered by YLADA" para resultados de diagnóstico.
  * Objetivos: proteção institucional/jurídica e crescimento orgânico (duplicação).
- * Estilo discreto: fundo cinza claro, texto pequeno, link azul discreto.
+ * Variante compact: texto neutro + domínio em sky (parece link); clique em toda a linha; href continua /pt.
  * Exibir antes do DiagnosisDisclaimer na ordem final da página.
  * @see DiagnosisDisclaimer.tsx
  */
@@ -28,9 +28,12 @@ export default function PoweredByYlada({ variant = 'compact', className = '' }: 
       >
         <Link
           href={YLADA_HOME_SOURCE}
-          className="text-xs text-gray-400 hover:text-blue-600 transition-colors"
+          className="group inline-flex flex-wrap items-baseline justify-center gap-x-1 text-sm font-medium text-center"
         >
-          Diagnóstico gerado com YLADA
+          <span className="text-gray-600">Powered by</span>
+          <span className="text-sky-600 underline-offset-2 transition-colors group-hover:text-sky-700 group-hover:underline">
+            ylada.com
+          </span>
         </Link>
       </div>
     )
