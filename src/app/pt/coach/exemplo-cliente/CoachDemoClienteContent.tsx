@@ -157,16 +157,14 @@ export default function CoachDemoClienteContent() {
         <main className="flex-1 px-4 py-8 max-w-lg mx-auto w-full flex flex-col estetica-safe-main-bottom space-y-10">
           <div className="space-y-5 text-center">
             <h1 className="text-xl sm:text-2xl font-bold text-gray-900 leading-snug">
-              É assim que a pessoa chega até você
+              Com base no que ela responde, é gerado automaticamente um diagnóstico personalizado.
             </h1>
-            <div className="space-y-1.5 text-base sm:text-lg text-gray-800 font-medium leading-snug">
-              <p>já entendendo melhor</p>
-              <p>já mais decidida</p>
-              <p className="text-gray-900">e muito mais pronta pra fechar</p>
-            </div>
-            <p className="text-sm text-gray-700 font-medium leading-relaxed max-w-md mx-auto pt-1">
-              Pelas respostas dela, ela fica com mais clareza, mais decidida a mudar o que precisa e com mais vontade de
-              te chamar no WhatsApp pra fechar com você.
+            <p className="text-base sm:text-lg text-gray-800 font-medium leading-snug max-w-md mx-auto">
+              Isso faz com que ela entenda melhor o problema e chegue mais decidida a fechar com você.
+            </p>
+            <p className="text-xs sm:text-sm text-gray-600 leading-relaxed max-w-md mx-auto border-t border-gray-100 pt-4 mt-1">
+              No seu link, cada escolha atualiza o diagnóstico na hora. É{' '}
+              <span className="font-semibold text-gray-800">automático</span>; você não monta nada manualmente.
             </p>
           </div>
 
@@ -194,13 +192,15 @@ export default function CoachDemoClienteContent() {
                 onClick={() =>
                   trackEvent('coach_cadastro_promo_cta', { area: 'coach', origem: 'matriz_exemplo_cliente' })
                 }
-                className="flex w-full flex-col min-h-[58px] rounded-2xl bg-blue-600 px-5 py-3.5 text-center text-white hover:bg-blue-700 shadow-lg shadow-blue-600/35 items-center justify-center gap-0.5 leading-tight"
+                className="flex w-full flex-col min-h-[68px] rounded-2xl bg-blue-600 px-5 py-4 text-center text-white hover:bg-blue-700 shadow-lg shadow-blue-600/35 items-center justify-center gap-1.5 leading-tight"
               >
                 <span className="text-lg font-bold inline-flex items-center gap-2">
                   <span aria-hidden>👉</span>
                   Começar agora
                 </span>
-                <span className="text-sm font-semibold text-white/95 tracking-wide">é gratuito</span>
+                <span className="mt-0.5 inline-flex items-center justify-center rounded-full bg-white px-3 py-1.5 text-sm font-extrabold text-blue-700 shadow-md ring-1 ring-blue-600/10">
+                  É gratuito
+                </span>
               </Link>
               <p className="text-center text-sm text-gray-600 leading-relaxed px-1">
                 Crie seu link e comece a atrair pessoas mais prontas em menos de 1 minuto.
