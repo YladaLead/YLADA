@@ -206,14 +206,21 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ success: false, error: error.message }, { status: 500 })
     }
 
-    // Sincronizar nome para user_profiles para exibir na plataforma (header, etc.)
+    // Sincronizar nome e WhatsApp para user_profiles (admin, header, gate de área protegida)
     const areaSpec = parsed.row.area_specific as Record<string, unknown> | null | undefined
     const nome = areaSpec?.nome && String(areaSpec.nome).trim()
-    if (nome && nome.length >= 2) {
-      await supabaseAdmin
-        .from('user_profiles')
-        .update({ nome_completo: nome, updated_at: new Date().toISOString() })
-        .eq('user_id', user.id)
+    const waRaw = areaSpec?.whatsapp
+    const waDigits =
+      waRaw !== undefined && waRaw !== null
+        ? String(waRaw).replace(/\D/g, '')
+        : ''
+    const patch: { nome_completo?: string; whatsapp?: string; updated_at: string } = {
+      updated_at: new Date().toISOString(),
+    }
+    if (nome && nome.length >= 2) patch.nome_completo = nome
+    if (waDigits.length >= 10) patch.whatsapp = waDigits
+    if (patch.nome_completo !== undefined || patch.whatsapp !== undefined) {
+      await supabaseAdmin.from('user_profiles').update(patch).eq('user_id', user.id)
     }
 
     const resumo = buildProfileResumo(data as YladaNoelProfileRow)

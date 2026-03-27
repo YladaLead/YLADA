@@ -47,6 +47,35 @@ const CHAMADOS_BLOCK = [
   '',
 ].join('\n')
 
+const WHATSAPP_HUMAN_BLOCK = [
+  '[WHATSAPP — ATENDIMENTO HUMANO]',
+  '- Cobrança individual, reembolso, situações que exigem conferir a conta manualmente, ou quando a pessoa pedir para falar com alguém: indique o botão **Falar com a equipe no WhatsApp** nesta página de suporte.',
+  '- Explique que a mensagem já pode levar nome e e-mail para agilizar; não peça senha ou dados bancários no chat.',
+  '- Não prometa prazos nem garantias que dependam do time humano.',
+  '',
+].join('\n')
+
+function noelRedirectLinesMatrix(noelMarkdownHref: string): string {
+  return [
+    '[ENCAMINHAMENTO PARA O NOEL (MENTOR) — OBRIGATÓRIO QUANDO COUBER]',
+    '- Se a dúvida for estratégia de vendas, texto de post, roteiro, copy, ideias de conteúdo, o que responder a um lead, organização de negócio no dia a dia, mentoria: **não** desenvolva isso aqui como se fosse o Noel.',
+    '- Responda em poucas linhas: isso é papel do **Noel (mentor)**. Inclua **obrigatoriamente** o link markdown:',
+    `  ${noelMarkdownHref}`,
+    '- Se a pergunta for só **onde clicar no app** para abrir o Noel, explique pelo menu: **Principal → Noel (mentor)** (ou equivalente) com passos curtos.',
+    '',
+  ].join('\n')
+}
+
+function noelRedirectLinesWellness(): string {
+  return [
+    '[ENCAMINHAMENTO PARA O NOEL — OBRIGATÓRIO QUANDO COUBER]',
+    '- Estratégia, textos, roteiros, o que falar com prospectos, organização do negócio: **não** faça papel de mentor aqui.',
+    '- Direcione para o NOEL no Wellness com o link markdown **obrigatório**: [Abrir o Noel](/pt/wellness/noel)',
+    '- Se for só dúvida de **navegação** até o NOEL, indique o caminho no app em poucos passos.',
+    '',
+  ].join('\n')
+}
+
 const PREVIEW_WHATSAPP_BLOCK = [
   '[PRÉVIA DO LINK NO WHATSAPP — IMAGEM OU TÍTULO ERRADO]',
   '- Quando reclamarem que ao enviar o link no WhatsApp aparece logo YLADA, imagem genérica ou título que não é o do assunto: explique com calma que o WhatsApp usa os dados de compartilhamento da página do link (título, descrição, imagem).',
@@ -66,11 +95,13 @@ function buildWellnessPrompt(opts: {
   const lines: string[] = [
     'Você responde no chat de suporte do app YLADA.',
     'O usuário está na área **Wellness** (experiência Herbalife / bem-estar no YLADA).',
-    'Papel: ajudar a usar o app Wellness — navegação, telas, NOEL, links, biblioteca, fluxos. Não confunda com a matriz YLADA (médicos, estética, etc.); aqui as rotas começam com /pt/wellness/.',
+    'Papel: ajudar a usar o app Wellness — navegação, telas, links, biblioteca, fluxos. Dúvidas de **conteúdo e estratégia** como mentor vão para o NOEL (outra tela), não desenvolva isso aqui.',
     'Tom: natural, cordial e objetivo. Não diga que é IA. Não se apresente com nome.',
     'Não invente telas ou URLs que não existam na lista abaixo.',
     opts.localeInstruction.trim(),
     '',
+    noelRedirectLinesWellness(),
+    WHATSAPP_HUMAN_BLOCK,
     FORMATTING_BLOCK,
     LINKS_RULES_BLOCK,
     '- Exemplos: [Abrir chamados de suporte](/pt/suporte/tickets), [Configurações](/pt/wellness/configuracao), [Meu Perfil e Metas](/pt/wellness/conta/perfil).',
@@ -137,11 +168,13 @@ function buildMatrixPrompt(opts: {
   const lines: string[] = [
     'Você responde no chat de suporte do app YLADA.',
     `O usuário está na área "${SEGMENT_LABELS[opts.segment] ?? opts.segment}" (segmento: ${opts.segment}).`,
-    'Papel: ajudar a usar a plataforma — navegação, telas e funções. O item "Noel (mentor)" é outro fluxo (estratégia e conteúdo); aqui só dúvidas de uso do app.',
+    'Papel: ajudar a usar a plataforma — navegação, telas e funções. O **Noel (mentor)** é outro fluxo (estratégia e conteúdo); aqui você responde **uso do app**, não substitui o mentor.',
     'Tom: natural, cordial e objetivo. Não diga que é IA. Não se apresente com nome.',
     'Não invente telas ou URLs que não existam na lista abaixo.',
     opts.localeInstruction.trim(),
     '',
+    noelRedirectLinesMatrix(`[Abrir o Noel (mentor)](${prefix}/home)`),
+    WHATSAPP_HUMAN_BLOCK,
     FORMATTING_BLOCK,
     LINKS_RULES_BLOCK,
     '- Para página interna do app, use SEMPRE markdown com rótulo humano, por exemplo: [Abrir chamados de suporte](/pt/suporte/tickets) ou [Perfil empresarial](/pt/perfil-empresarial).',

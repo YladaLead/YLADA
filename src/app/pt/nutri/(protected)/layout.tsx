@@ -26,7 +26,7 @@ export default async function ProtectedNutriLayout({ children }: ProtectedLayout
     allowSupport: true,
     excludeRoutesFromSubscription: [], // Nenhuma rota livre: é obrigatório assinar para acessar a plataforma
     currentPath: pathname,
-    pathsWithoutYladaNoelProfile: ['home', 'onboarding', 'diagnostico'],
+    // Nutri: nome + WhatsApp obrigatórios em user_profiles (ver auth-server 4a); só /pt/nutri/onboarding isento.
   })
 
   return <>{children}</>

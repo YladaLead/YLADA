@@ -67,19 +67,17 @@ O mapeamento está em `src/config/intent-category-map.ts`.
 
 ## 4. Views para analytics
 
-As views abaixo facilitam consultas de padrões de intenção:
+As views abaixo facilitam consultas de padrões de intenção (migração `278-ylada-intent-views.sql` e seguintes):
 
-### `v_intent_answers_by_segment`
+| View | Uso |
+|------|-----|
+| `v_intent_answers_by_segment` | Frequência de respostas por segmento, `intent_category` e pergunta |
+| `v_intent_top_by_segment` | Ranking por segmento e categoria (Noel, admin) |
+| `v_intent_trends_monthly` | Série mensal por segmento e categoria |
+| `v_intent_answer_conversion` | Taxa de clique no WhatsApp por resposta (intenção × conversão); migração `281-ylada-intent-answer-conversion-view.sql` |
+| `v_intent_combinations` | Pares de respostas no mesmo diagnóstico (`metrics_id`); migração `282-ylada-intent-combinations-view.sql` |
 
-Respostas mais frequentes por segmento e categoria de intenção.
-
-### `v_intent_combinations`
-
-Combinações mais comuns de respostas (ex.: dificuldade=ansiedade + objetivo=perder 10kg).
-
-### `v_intent_trends`
-
-Evolução temporal de intenções por segmento.
+Mais detalhes e roadmap: [PLANO-IMPLANTACAO-VALUATION-DADOS-INTENCAO.md](./PLANO-IMPLANTACAO-VALUATION-DADOS-INTENCAO.md).
 
 ---
 

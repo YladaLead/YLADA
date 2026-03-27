@@ -3,6 +3,7 @@ import { createServerClient } from '@supabase/ssr'
 import { redirect } from 'next/navigation'
 import { hasActiveSubscription, canBypassSubscription } from '@/lib/subscription-helpers'
 import { supabaseAdmin } from '@/lib/supabase'
+import { PERFIS_MATRIZ_YLADA } from '@/lib/admin-matriz-constants'
 
 type Area = 'wellness' | 'nutri' | 'coach' | 'nutra' | 'ylada' | 'med' | 'psi' | 'psicanalise' | 'odonto' | 'seller' | 'perfumaria' | 'estetica' | 'fitness' | 'coach-bem-estar'
 
@@ -221,7 +222,7 @@ export async function validateProtectedAccess(
     try {
       const res = await supabase
         .from('user_profiles')
-        .select('id, user_id, perfil, is_admin, is_support, nome_completo, email, diagnostico_completo')
+        .select('id, user_id, perfil, is_admin, is_support, nome_completo, email, whatsapp, diagnostico_completo')
         .eq('user_id', user.id)
         .maybeSingle()
 
@@ -236,7 +237,7 @@ export async function validateProtectedAccess(
       try {
         const adminRes = await supabaseAdmin
           .from('user_profiles')
-          .select('id, user_id, perfil, is_admin, is_support, nome_completo, email, diagnostico_completo')
+          .select('id, user_id, perfil, is_admin, is_support, nome_completo, email, whatsapp, diagnostico_completo')
           .eq('user_id', user.id)
           .maybeSingle()
 
@@ -315,21 +316,52 @@ export async function validateProtectedAccess(
         : actualPath
           ? `/pt/${area}/${actualPath.replace(/^\//, '')}`.replace(/\/+/g, '/').split('?')[0].replace(/\/$/, '')
           : ''
+
+    // 4a. Todos os segmentos do novo formato matriz (PERFIS_MATRIZ_YLADA), incluindo perfil literal "ylada".
+    // Wellness (Herbalife) não está nessa lista — fluxo próprio. Nome + WhatsApp em user_profiles.
+    // Onboarding: /pt/onboarding para área ylada (matriz central); /pt/{segmento}/onboarding nos demais.
+    const segmentosContatoObrigatorio = PERFIS_MATRIZ_YLADA as readonly string[]
+    if (
+      segmentosContatoObrigatorio.includes(area) &&
+      !canBypassProfile &&
+      !isAllowAnyPerfilPath &&
+      supabaseAdmin
+    ) {
+      const onboardingPaths =
+        area === 'ylada' ? ['/pt/onboarding'] : [`/pt/${area}/onboarding`]
+      const onSegmentOnboarding =
+        !!fullPathForYladaSkip &&
+        onboardingPaths.some(
+          (prefix) =>
+            fullPathForYladaSkip === prefix || fullPathForYladaSkip.startsWith(`${prefix}/`)
+        )
+      if (!onSegmentOnboarding) {
+        const nomeOk = profile.nome_completo && String(profile.nome_completo).trim().length >= 2
+        const waDigits = profile.whatsapp ? String(profile.whatsapp).replace(/\D/g, '') : ''
+        const waOk = waDigits.length >= 10
+        if (!nomeOk || !waOk) {
+          console.log(
+            `ℹ️ ProtectedLayout [${area}]: falta nome ou WhatsApp (mín. 10 dígitos) em user_profiles — redirecionando para onboarding`
+          )
+          redirect(area === 'ylada' ? '/pt/onboarding' : `/pt/${area}/onboarding`)
+        }
+      }
+    }
+
     const skipYladaNoelProfileForRoute =
       pathsWithoutYladaNoelProfile.length > 0 &&
       fullPathForYladaSkip &&
-      (area === 'nutri' || area === 'coach') &&
+      area === 'coach' &&
       pathsWithoutYladaNoelProfile.some((suffix) => {
         const s = suffix.replace(/^\//, '')
         const prefix = `/pt/${area}/${s}`.replace(/\/+/g, '/')
         return fullPathForYladaSkip === prefix || fullPathForYladaSkip.startsWith(`${prefix}/`)
       })
 
-    // 4b. Nutri, Coach e YLADA (matriz): exigir perfil empresarial completo (nome+whatsapp+profile_type+profession).
-    // Quem acessa a matriz ou Noel precisa ter perfil completo para a qualidade das respostas do Noel.
-    // Não exigir nas rotas de completar perfil (evita loop). Wellness NÃO redireciona — mantém fluxo próprio.
+    // 4b. Coach e YLADA (matriz): exigir perfil Noel/YLADA completo em ylada_noel_profile (além da 4a em user_profiles).
+    // Wellness não passa por aqui. Não exigir nas rotas de completar perfil (evita loop).
     if (
-      (area === 'nutri' || area === 'coach' || area === 'ylada') &&
+      (area === 'coach' || area === 'ylada') &&
       !canBypassProfile &&
       !isAllowAnyPerfilPath &&
       !skipYladaNoelProfileForRoute &&

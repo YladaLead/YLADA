@@ -29,6 +29,21 @@ interface NutriSidebarProps {
   onMobileClose?: () => void
 }
 
+const nutriPublicBase =
+  (process.env.NEXT_PUBLIC_APP_URL || process.env.NEXT_PUBLIC_APP_URL_PRODUCTION || 'https://www.ylada.com').replace(
+    /\/$/,
+    ''
+  )
+const nutriLandingUrl = `${nutriPublicBase}/pt/nutri`
+
+function buildIndicarColegaWhatsAppHref(): string {
+  const text = [
+    'Oi! Indico a YLADA Nutri — é um sistema pra nutricionistas usarem links e conversas que atraem os pacientes certos e ajudam a organizar a agenda.',
+    `Vale conhecer: ${nutriLandingUrl}`,
+  ].join(' ')
+  return `https://wa.me/?text=${encodeURIComponent(text)}`
+}
+
 export default function NutriSidebar({ isMobileOpen = false, onMobileClose }: NutriSidebarProps) {
   const pathname = usePathname()
   const [hoveredSection, setHoveredSection] = useState<string | null>(null)
@@ -403,6 +418,26 @@ export default function NutriSidebar({ isMobileOpen = false, onMobileClose }: Nu
               </div>
             )
           })}
+
+          {/* Indicar colega — abre WhatsApp com mensagem + link da landing */}
+          <a
+            href={buildIndicarColegaWhatsAppHref()}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={onMobileClose}
+            className="flex flex-col gap-0.5 px-3 py-2.5 rounded-lg text-sm text-gray-700 hover:bg-green-50 transition-colors mt-2 border-t border-gray-100 pt-3"
+            title="Enviar indicação pelo WhatsApp com texto pronto"
+          >
+            <span className="flex items-center gap-2">
+              <span className="text-lg flex-shrink-0" aria-hidden>
+                🤝
+              </span>
+              <span className="flex-1 font-medium truncate">Indicar uma colega</span>
+            </span>
+            <span className="text-xs text-gray-500 pl-8 leading-snug">
+              Abre o WhatsApp com mensagem e link pra ela conhecer a Nutri
+            </span>
+          </a>
 
           {/* Botão Suporte — WhatsApp */}
           <a

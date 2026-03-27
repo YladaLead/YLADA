@@ -60,6 +60,7 @@ import { hasYladaProPlan } from '@/lib/subscription-helpers'
 import { getNoelUsageCount, incrementNoelUsage } from '@/lib/noel-usage-helpers'
 import { FREEMIUM_LIMITS } from '@/config/freemium-limits'
 import { completeNinaSupportTurn } from '@/lib/ylada-nina-support'
+import { notifyNinaSupportInquiry } from '@/lib/support-notifications'
 
 type FormField = { id?: string; label?: string; type?: string; options?: string[] }
 
@@ -580,6 +581,25 @@ export async function POST(request: NextRequest) {
           : locale === 'es'
             ? '\n[IDIOMA]\nResponda SEMPRE em espanhol.'
             : ''
+
+      const history = Array.isArray(conversationHistory) ? conversationHistory : []
+      const isFirstUserTurnInThread = !history.some((m) => m.role === 'user')
+      if (isFirstUserTurnInThread) {
+        const meta = user.user_metadata as Record<string, unknown> | undefined
+        const displayName =
+          (typeof meta?.full_name === 'string' && meta.full_name.trim()) ||
+          (typeof meta?.name === 'string' && meta.name.trim()) ||
+          null
+        void notifyNinaSupportInquiry({
+          userId: user.id,
+          userEmail: user.email ?? null,
+          displayName,
+          message: message.trim(),
+          segment: validSegment,
+          supportUi: supportUi === 'wellness' ? 'wellness' : 'matrix',
+        }).catch((err) => console.error('[/api/ylada/noel] Nina support e-mail notify:', err))
+      }
+
       const responseText = await completeNinaSupportTurn({
         message: message.trim(),
         conversationHistory,

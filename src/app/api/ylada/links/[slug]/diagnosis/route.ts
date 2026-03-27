@@ -61,17 +61,19 @@ function hashAnswers(answers: Record<string, unknown>): string {
 /** Extrai formFields do config (form.fields ou questions) para mapear índice→texto. */
 function extractFormFieldsFromConfig(config: Record<string, unknown>): FormFieldForNormalize[] | undefined {
   const form = config.form as Record<string, unknown> | undefined
-  const fields = form?.fields as Array<{ id?: string; options?: string[] }> | undefined
+  const fields = form?.fields as Array<{ id?: string; label?: string; options?: string[] }> | undefined
   if (Array.isArray(fields) && fields.length > 0) {
     return fields.map((f, i) => ({
       id: (f.id as string) ?? `q${i + 1}`,
+      label: typeof f.label === 'string' ? f.label.trim() || undefined : undefined,
       options: Array.isArray(f.options) ? f.options : undefined,
     }))
   }
-  const questions = config.questions as Array<{ id?: string; options?: string[] }> | undefined
+  const questions = config.questions as Array<{ id?: string; label?: string; options?: string[] }> | undefined
   if (Array.isArray(questions) && questions.length > 0) {
     return questions.map((q, i) => ({
       id: (q.id as string) ?? `q${i + 1}`,
+      label: typeof q.label === 'string' ? q.label.trim() || undefined : undefined,
       options: Array.isArray(q.options) ? q.options : undefined,
     }))
   }

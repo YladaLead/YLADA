@@ -83,7 +83,7 @@ function calcGenericScoreAndLevel(answers: Record<string, unknown>): { score: nu
 }
 
 /** FormField para mapear índice de opção → texto (ex.: q2="0" → "Floral"). */
-export type FormFieldForNormalize = { id: string; options?: string[] }
+export type FormFieldForNormalize = { id: string; label?: string; options?: string[] }
 
 /** Converte valor de opção (índice "0","1",...) no texto da opção quando formFields disponível. */
 function mapOptionToText(

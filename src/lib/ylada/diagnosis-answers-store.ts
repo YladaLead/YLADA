@@ -10,6 +10,8 @@ import { inferIntentCategory } from '@/config/intent-category-map'
 
 export interface FormFieldForAnswers {
   id: string
+  /** Rótulo humano do config do link (form.fields / questions). */
+  label?: string
   options?: string[]
 }
 
@@ -98,13 +100,17 @@ export async function storeDiagnosisAnswers(params: StoreDiagnosisAnswersParams)
       answerValue = String(rawVal)
     }
 
+    const labelRaw = field?.label
+    const questionLabel =
+      typeof labelRaw === 'string' && labelRaw.trim() ? labelRaw.trim() : null
+
     rows.push({
       metrics_id: metricsId,
       link_id: linkId,
       segment: segment ?? null,
       architecture,
       question_id: questionId,
-      question_label: null,
+      question_label: questionLabel,
       answer_value: answerValue,
       answer_text: text,
       answer_index: idx,

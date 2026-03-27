@@ -71,7 +71,6 @@ export default async function NutriLayout({ children }: { children: ReactNode })
       allowSupport: true,
       excludeRoutesFromSubscription: [],
       currentPath: pathname,
-      pathsWithoutYladaNoelProfile: ['home', 'onboarding', 'diagnostico'],
     })
   }
   return (

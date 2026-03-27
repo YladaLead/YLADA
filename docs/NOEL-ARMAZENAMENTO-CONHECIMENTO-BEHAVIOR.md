@@ -177,8 +177,9 @@ Além do armazenamento do Noel, existe uma **área administrativa dedicada** que
 
 ### 7.1 Página administrativa
 
-**Rota:** `/admin/ylada/behavioral-data`  
-**API:** `/api/admin/ylada/behavioral-data`  
+**Valuation (intenção agregada):** `/admin/ylada/valuation` — API `/api/admin/ylada/valuation`
+
+**Operacional (eventos):** `/admin/ylada/behavioral-data` — API `/api/admin/ylada/behavioral-data`
 **Descrição:** "Dados Comportamentais & Intenção — Eventos, respostas por pergunta e padrões de intenção da plataforma. **Base para valuation e inteligência de mercado.**"
 
 ### 7.2 Tabelas para Valuation

@@ -501,6 +501,92 @@ export async function notifyPlatformStaffUserReplied(params: {
   }
 }
 
+function escapeHtmlForEmail(text: string): string {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+}
+
+/**
+ * E-mail quando o usuário envia a **primeira** mensagem no chat da Nina (suporte in-app).
+ * Destinatários: atendentes online da área (quando existir) ou SUPPORT_NOTIFICATION_EMAIL / CONTACT_NOTIFICATION_EMAIL.
+ * Não bloqueia a resposta da API (chamar com void + .catch no caller).
+ */
+export async function notifyNinaSupportInquiry(params: {
+  userId: string
+  userEmail?: string | null
+  displayName?: string | null
+  message: string
+  segment: string
+  supportUi: 'matrix' | 'wellness'
+}): Promise<{ emailsSent: number }> {
+  if (process.env.NINA_SUPPORT_EMAIL_NOTIFY === '0' || process.env.NINA_SUPPORT_EMAIL_NOTIFY === 'false') {
+    return { emailsSent: 0 }
+  }
+
+  if (!isResendConfigured() || !resend) {
+    console.warn('[Support Notifications] Nina: Resend não configurado, e-mail não enviado')
+    return { emailsSent: 0 }
+  }
+
+  const agentArea = params.supportUi === 'wellness' ? 'wellness' : params.segment
+  const agentEmails = await getOnlineAgentsEmails(agentArea)
+  const notificationEmail = process.env.SUPPORT_NOTIFICATION_EMAIL || process.env.CONTACT_NOTIFICATION_EMAIL
+  const emailsToNotify =
+    agentEmails.length > 0 ? agentEmails : notificationEmail ? [notificationEmail] : []
+
+  if (emailsToNotify.length === 0) {
+    console.warn(
+      '[Support Notifications] Nina: nenhum e-mail para notificar (sem agentes online e sem SUPPORT_NOTIFICATION_EMAIL / CONTACT_NOTIFICATION_EMAIL)'
+    )
+    return { emailsSent: 0 }
+  }
+
+  const areaLabel = params.supportUi === 'wellness' ? 'Wellness' : params.segment
+  const previewRaw =
+    params.message.length > 800 ? `${params.message.slice(0, 800)}…` : params.message
+  const preview = escapeHtmlForEmail(previewRaw).replace(/\r\n|\n/g, '<br/>')
+
+  const nome = params.displayName?.trim() || '—'
+  const email = params.userEmail?.trim() || '—'
+  const html = `<!DOCTYPE html>
+<html><head><meta charset="utf-8"/></head>
+<body style="font-family:system-ui,sans-serif;padding:20px;background:#f5f5f5;">
+  <div style="max-width:560px;margin:0 auto;background:#fff;padding:24px;border-radius:12px;">
+    <h1 style="font-size:18px;color:#111;">Nova pergunta no suporte (Nina)</h1>
+    <p style="color:#444;font-size:14px;margin:12px 0;"><strong>Área:</strong> ${escapeHtmlForEmail(areaLabel)}</p>
+    <p style="color:#444;font-size:14px;margin:12px 0;"><strong>Nome:</strong> ${escapeHtmlForEmail(nome)}</p>
+    <p style="color:#444;font-size:14px;margin:12px 0;"><strong>E-mail:</strong> ${escapeHtmlForEmail(email)}</p>
+    <p style="color:#444;font-size:14px;margin:12px 0;"><strong>ID usuário:</strong> ${escapeHtmlForEmail(params.userId)}</p>
+    <div style="margin-top:16px;padding:14px;background:#f9fafb;border-radius:8px;border:1px solid #e5e7eb;">
+      <p style="margin:0 0 8px;font-size:13px;color:#6b7280;">Primeira mensagem</p>
+      <p style="margin:0;font-size:14px;color:#111;line-height:1.5;">${preview}</p>
+    </div>
+    <p style="margin-top:16px;font-size:12px;color:#9ca3af;">Responda pelo WhatsApp de suporte ou quando o usuário abrir chamado, conforme o fluxo da equipe.</p>
+  </div>
+</body></html>`
+
+  let emailsSent = 0
+  for (const to of emailsToNotify) {
+    try {
+      await resend.emails.send({
+        from: `${FROM_NAME} <${FROM_EMAIL}>`,
+        to,
+        subject: `💬 Nina — nova pergunta (${areaLabel})`,
+        html,
+      })
+      emailsSent++
+      console.log(`[Support Notifications] Nina inquiry enviado para: ${to}`)
+    } catch (e: unknown) {
+      console.error('[Support Notifications] Nina inquiry erro:', e)
+    }
+  }
+
+  return { emailsSent }
+}
+
 export async function notifyUserNewMessage(
   ticketId: string,
   area: string,
