@@ -33,6 +33,7 @@ export function buildOdontoPublicFlowConfig(): PublicFlowConfig {
       entradaNicho: 'odonto_entrada_nicho',
       quizStep: 'odonto_quiz_step',
       quizConcluiu: 'odonto_quiz_concluiu',
+      cadastroPromoCta: 'odonto_cadastro_promo_cta',
     },
     rootExtraClassName:
       'estetica-touch supports-[height:100svh]:h-[100svh] supports-[height:100svh]:max-h-[100svh]',

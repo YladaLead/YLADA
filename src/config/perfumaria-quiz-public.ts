@@ -6,6 +6,7 @@ import {
   MATRIX_PUBLIC_QUIZ_QUESTIONS_BASE,
   personalizeMatrixPublicQuizForNicho,
 } from '@/config/matrix-public-quiz-base'
+import { YLADA_QUIZ_POST_RESULT_COPY } from '@/config/ylada-quiz-result-post-copy'
 import { PERFUMARIA_DEMO_CLIENTE_NICHOS } from '@/lib/perfumaria-demo-cliente-data'
 
 export const PERFUMARIA_QUIZ_CADASTRO_HREF = '/pt/cadastro?area=perfumaria'
@@ -32,13 +33,4 @@ export function getPerfumariaQuizQuestionsForNicho(nicho: string) {
 
 export const PERFUMARIA_QUIZ_QUESTIONS = MATRIX_PUBLIC_QUIZ_QUESTIONS_BASE
 
-export const PERFUMARIA_QUIZ_RESULT_COPY = {
-  headline: 'Você poderia estar vendendo mais com menos troca vaga',
-  subLines: [
-    'Pare de tentar conversar',
-    'Faça seus clientes chegarem mais prontos para fechar',
-    'Você entende na hora ao ver seus links personalizados em ação',
-  ] as const,
-  ctaPrimary: 'Ver na prática agora',
-  ctaMicro: 'Um exemplo de link personalizado na sequência.',
-} as const
+export const PERFUMARIA_QUIZ_RESULT_COPY = { ...YLADA_QUIZ_POST_RESULT_COPY } as const

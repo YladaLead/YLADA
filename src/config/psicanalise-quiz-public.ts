@@ -6,6 +6,7 @@ import {
   MATRIX_PUBLIC_QUIZ_QUESTIONS_BASE,
   personalizeMatrixPublicQuizForNicho,
 } from '@/config/matrix-public-quiz-base'
+import { YLADA_QUIZ_POST_RESULT_COPY } from '@/config/ylada-quiz-result-post-copy'
 import { PSICANALISE_DEMO_CLIENTE_NICHOS } from '@/lib/psicanalise-demo-cliente-data'
 
 export const PSICANALISE_QUIZ_CADASTRO_HREF = '/pt/cadastro?area=psicanalise'
@@ -32,13 +33,4 @@ export function getPsicanaliseQuizQuestionsForNicho(nicho: string) {
 
 export const PSICANALISE_QUIZ_QUESTIONS = MATRIX_PUBLIC_QUIZ_QUESTIONS_BASE
 
-export const PSICANALISE_QUIZ_RESULT_COPY = {
-  headline: 'Você poderia estar preenchendo a agenda com quem vem mais preparado',
-  subLines: [
-    'Pare de tentar conversar',
-    'Faça quem busca análise chegar mais preparado para conversar',
-    'Você entende na hora ao ver seus links personalizados em ação',
-  ] as const,
-  ctaPrimary: 'Ver na prática agora',
-  ctaMicro: 'Um exemplo de link personalizado na sequência.',
-} as const
+export const PSICANALISE_QUIZ_RESULT_COPY = { ...YLADA_QUIZ_POST_RESULT_COPY } as const

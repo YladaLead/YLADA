@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import LoginForm, { type LoginFormPerfil } from '@/components/auth/LoginForm'
+import LoginForm, { type LoginFormPerfil, YLADA_SIGNUP_PAGE_HERO } from '@/components/auth/LoginForm'
 
 /** Áreas disponíveis para cadastro (sem ylada — matriz não é área pública). */
 const AREAS_CADASTRO: { value: string; label: string }[] = [
@@ -51,6 +51,8 @@ export default function CadastroPage() {
         perfil={areaAtiva as LoginFormPerfil}
         redirectPath="/pt/onboarding"
         initialSignUpMode={true}
+        useYladaBrandingOnSignUp
+        signUpHeroTitle={YLADA_SIGNUP_PAGE_HERO}
       />
     )
   }

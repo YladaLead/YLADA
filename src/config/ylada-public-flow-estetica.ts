@@ -36,6 +36,7 @@ export function buildEsteticaPublicFlowConfig(): PublicFlowConfig {
       entradaNicho: 'estetica_entrada_nicho',
       quizStep: 'estetica_quiz_step',
       quizConcluiu: 'estetica_quiz_concluiu',
+      cadastroPromoCta: 'estetica_cadastro_promo_cta',
     },
     rootExtraClassName:
       'estetica-touch supports-[height:100svh]:h-[100svh] supports-[height:100svh]:max-h-[100svh]',

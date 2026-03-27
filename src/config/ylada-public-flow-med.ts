@@ -29,6 +29,7 @@ export function buildMedPublicFlowConfig(): PublicFlowConfig {
       entradaNicho: 'med_entrada_nicho',
       quizStep: 'med_quiz_step',
       quizConcluiu: 'med_quiz_concluiu',
+      cadastroPromoCta: 'med_cadastro_promo_cta',
     },
     rootExtraClassName:
       'estetica-touch supports-[height:100svh]:h-[100svh] supports-[height:100svh]:max-h-[100svh]',

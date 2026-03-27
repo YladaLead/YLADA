@@ -29,6 +29,7 @@ export function buildPsiPublicFlowConfig(): PublicFlowConfig {
       entradaNicho: 'psi_entrada_nicho',
       quizStep: 'psi_quiz_step',
       quizConcluiu: 'psi_quiz_concluiu',
+      cadastroPromoCta: 'psi_cadastro_promo_cta',
     },
     rootExtraClassName:
       'estetica-touch supports-[height:100svh]:h-[100svh] supports-[height:100svh]:max-h-[100svh]',

@@ -6,6 +6,7 @@ import {
   MATRIX_PUBLIC_QUIZ_QUESTIONS_BASE,
   personalizeMatrixPublicQuizForNicho,
 } from '@/config/matrix-public-quiz-base'
+import { YLADA_QUIZ_POST_RESULT_COPY } from '@/config/ylada-quiz-result-post-copy'
 import { PSI_DEMO_CLIENTE_NICHOS } from '@/lib/psi-demo-cliente-data'
 
 export const PSI_QUIZ_CADASTRO_HREF = '/pt/cadastro?area=psi'
@@ -32,13 +33,4 @@ export function getPsiQuizQuestionsForNicho(nicho: string) {
 
 export const PSI_QUIZ_QUESTIONS = MATRIX_PUBLIC_QUIZ_QUESTIONS_BASE
 
-export const PSI_QUIZ_RESULT_COPY = {
-  headline: 'Você poderia estar fechando mais primeiras sessões com menos troca vaga',
-  subLines: [
-    'Pare de tentar conversar',
-    'Faça quem te procura chegar mais preparado para conversar',
-    'Você entende na hora ao ver seus links personalizados em ação',
-  ] as const,
-  ctaPrimary: 'Ver na prática agora',
-  ctaMicro: 'Um exemplo de link personalizado na sequência.',
-} as const
+export const PSI_QUIZ_RESULT_COPY = { ...YLADA_QUIZ_POST_RESULT_COPY } as const

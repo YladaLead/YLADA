@@ -3,6 +3,7 @@
  * Quiz de carreira: /pt/nutri/quiz/legacy (/pt/nutri/quiz redireciona para /pt/nutri).
  */
 
+import { YLADA_QUIZ_POST_RESULT_COPY } from '@/config/ylada-quiz-result-post-copy'
 import { NUTRI_DEMO_CLIENTE_NICHOS } from '@/lib/nutri-demo-cliente-data'
 
 export interface NutriQuizOption {
@@ -110,13 +111,4 @@ export function getNutriQuizQuestionsForNicho(nicho: string): NutriQuizQuestion[
   })
 }
 
-export const NUTRI_QUIZ_RESULT_COPY = {
-  headline: 'Você poderia estar agendando muito mais',
-  subLines: [
-    'Pare de tentar conversar',
-    'Faça seus pacientes chegarem prontos para fechar',
-    'Você entende na hora ao ver seus links personalizados em ação',
-  ] as const,
-  ctaPrimary: 'Ver na prática agora',
-  ctaMicro: 'Um exemplo de link personalizado na sequência.',
-} as const
+export const NUTRI_QUIZ_RESULT_COPY = { ...YLADA_QUIZ_POST_RESULT_COPY } as const

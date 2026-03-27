@@ -2,6 +2,7 @@
  * Quiz profissional estética — entrada em /pt/estetica (com nicho) ou legado /pt/estetica/quiz → redirect.
  */
 
+import { YLADA_QUIZ_POST_RESULT_COPY } from '@/config/ylada-quiz-result-post-copy'
 import { ESTETICA_DEMO_CLIENTE_NICHOS } from '@/lib/estetica-demo-cliente-data'
 
 export const ESTETICA_APRESENTACAO_HREF = '/pt/estetica/apresentacao'
@@ -114,17 +115,5 @@ export function getEsteticaQuizQuestionsForNicho(nicho: string): EsteticaQuizQue
   })
 }
 
-/**
- * Fechamento pós-quiz: curto, curiosidade + CTA único.
- * A/B futuro: variante CTA "Quero agendar mais clientes" vs "Começar agora grátis".
- */
-export const ESTETICA_QUIZ_RESULT_COPY = {
-  headline: 'Você poderia estar agendando muito mais',
-  subLines: [
-    'Pare de tentar conversar',
-    'Faça suas clientes chegarem prontas para fechar',
-    'Você entende na hora ao ver seus links personalizados em ação',
-  ] as const,
-  ctaPrimary: 'Ver na prática agora',
-  ctaMicro: 'Um exemplo de link personalizado na sequência.',
-} as const
+/** Fechamento pós-quiz: pergunta + CTAs → cadastro (copy padrão matriz). */
+export const ESTETICA_QUIZ_RESULT_COPY = { ...YLADA_QUIZ_POST_RESULT_COPY } as const

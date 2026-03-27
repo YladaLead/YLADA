@@ -22,10 +22,11 @@ export interface PublicFlowNichoOption {
 }
 
 export interface PublicFlowResultCopy {
-  headline: string
-  subLines: readonly string[] | string[]
-  ctaPrimary: string
-  ctaMicro: string
+  question: string
+  ctaSim: string
+  ctaSimCerteza: string
+  /** Texto opcional abaixo dos botões */
+  ctaMicro?: string
 }
 
 /** Eventos de analytics do fluxo de quiz por área (nomes já declarados em analytics-events). */
@@ -33,6 +34,8 @@ export interface PublicFlowQuizAnalytics {
   entradaNicho: AnalyticsEventName
   quizStep: AnalyticsEventName
   quizConcluiu: AnalyticsEventName
+  /** CTA pós-quiz (ir para cadastro) — reutiliza evento de promo cadastro por área */
+  cadastroPromoCta: AnalyticsEventName
 }
 
 /**

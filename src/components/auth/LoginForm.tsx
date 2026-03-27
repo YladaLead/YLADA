@@ -26,12 +26,19 @@ export type LoginFormPerfil =
   | 'psicanalise'
   | 'odonto'
 
+/** Título padrão no topo das páginas de cadastro da matriz (abaixo do logo YLADA). */
+export const YLADA_SIGNUP_PAGE_HERO = 'Crie sua conta e comece a usar agora. É gratuito.'
+
 interface LoginFormProps {
   perfil: LoginFormPerfil
   redirectPath: string
   logoColor?: 'azul-claro' | 'verde' | 'laranja' | 'roxo'
   logoPath?: string
   initialSignUpMode?: boolean // Iniciar em modo cadastro
+  /** Com cadastro ativo: usa logotipo YLADA em vez do logo vertical da área (ex.: Nutri). */
+  useYladaBrandingOnSignUp?: boolean
+  /** Substitui o título “Criar conta” no modo cadastro (ex.: hero da matriz). */
+  signUpHeroTitle?: string
 }
 
 function forgotPasswordHref(perfil: LoginFormPerfil): string {
@@ -47,7 +54,9 @@ export default function LoginForm({
   redirectPath,
   logoColor = 'azul-claro',
   logoPath,
-  initialSignUpMode = false
+  initialSignUpMode = false,
+  useYladaBrandingOnSignUp = false,
+  signUpHeroTitle,
 }: LoginFormProps) {
   const router = useRouter()
   const { getLastVisitedPage } = useLastVisitedPage()
@@ -596,17 +605,23 @@ export default function LoginForm({
     }
   }
 
-  const logoSrc = logoPath || (perfil === 'wellness' || perfil === 'coach-bem-estar' 
-    ? '/images/logo/wellness-horizontal.png'
-    : perfil === 'nutri'
-    ? '/images/logo/nutri-horizontal.png'
-    : perfil === 'coach'
-    ? '/images/logo/coach-horizontal.png'
-    : perfil === 'ylada'
-    ? '/images/logo/ylada/horizontal/azul-claro/ylada-horizontal-azul-claro.png'
-    : (perfil === 'nutra' && logoColor === 'laranja') || logoColor === 'laranja'
-    ? '/images/logo/ylada/horizontal/laranja/ylada-horizontal-laranja-14.png'
-    : '/images/logo/ylada/horizontal/azul-claro/ylada-horizontal-azul-claro.png')
+  const yladaHorizontalLogo = '/images/logo/ylada/horizontal/azul-claro/ylada-horizontal-azul-claro.png'
+
+  const logoSrc =
+    logoPath ||
+    (useYladaBrandingOnSignUp && isSignUp
+      ? yladaHorizontalLogo
+      : perfil === 'wellness' || perfil === 'coach-bem-estar'
+        ? '/images/logo/wellness-horizontal.png'
+        : perfil === 'nutri'
+          ? '/images/logo/nutri-horizontal.png'
+          : perfil === 'coach'
+            ? '/images/logo/coach-horizontal.png'
+            : perfil === 'ylada'
+              ? yladaHorizontalLogo
+              : (perfil === 'nutra' && logoColor === 'laranja') || logoColor === 'laranja'
+                ? '/images/logo/ylada/horizontal/laranja/ylada-horizontal-laranja-14.png'
+                : yladaHorizontalLogo)
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 flex items-center justify-center px-4 py-8 sm:py-12">
@@ -616,22 +631,46 @@ export default function LoginForm({
           <div className="flex justify-center mb-6 sm:mb-8">
             <Image
               src={logoSrc}
-              alt={perfil === 'wellness' || perfil === 'coach-bem-estar' ? 'YLADA - Coach de bem-estar' : perfil === 'nutri' ? 'Nutri by YLADA' : perfil === 'coach' ? 'Coach by YLADA' : perfil === 'ylada' ? 'YLADA' : 'YLADA Logo'}
+              alt={
+                useYladaBrandingOnSignUp && isSignUp
+                  ? 'YLADA'
+                  : perfil === 'wellness' || perfil === 'coach-bem-estar'
+                    ? 'YLADA - Coach de bem-estar'
+                    : perfil === 'nutri'
+                      ? 'Nutri by YLADA'
+                      : perfil === 'coach'
+                        ? 'Coach by YLADA'
+                        : perfil === 'ylada'
+                          ? 'YLADA'
+                          : 'YLADA Logo'
+              }
               width={perfil === 'wellness' || perfil === 'coach-bem-estar' ? 572 : 280}
               height={perfil === 'wellness' || perfil === 'coach-bem-estar' ? 150 : 84}
               className="bg-transparent object-contain h-16 sm:h-20 w-auto"
               priority
             />
           </div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
-            {isSignUp ? 'Criar conta' : 'Bem-vindo'}
-          </h1>
-          <p className="text-sm sm:text-base text-gray-600">
-            {isSignUp 
-              ? `Cadastre-se como ${perfilLabels[perfil]}`
-              : `Entre na sua conta de ${perfilLabels[perfil]}`
-            }
-          </p>
+          {isSignUp && signUpHeroTitle ? (
+            <>
+              <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2 text-center leading-snug">
+                {signUpHeroTitle}
+              </h1>
+              <p className="text-sm sm:text-base text-gray-600">
+                Cadastre-se como {perfilLabels[perfil]}
+              </p>
+            </>
+          ) : (
+            <>
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
+                {isSignUp ? 'Criar conta' : 'Bem-vindo'}
+              </h1>
+              <p className="text-sm sm:text-base text-gray-600">
+                {isSignUp
+                  ? `Cadastre-se como ${perfilLabels[perfil]}`
+                  : `Entre na sua conta de ${perfilLabels[perfil]}`}
+              </p>
+            </>
+          )}
         </div>
 
         {/* Formulário */}

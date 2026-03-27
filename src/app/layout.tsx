@@ -1,3 +1,4 @@
+import type { Viewport } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
 import { AuthProviderWrapper } from '@/components/providers/AuthProviderWrapper'
@@ -59,8 +60,11 @@ export const metadata = {
   },
 }
 
-// Viewport completo (com viewport-fit=cover para PWA) está no <head> abaixo
-export const viewport = {
+/** PWA / iOS: viewport-fit=cover + theme; meta viewport duplicado removido (Next injeta a partir daqui). */
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  viewportFit: 'cover',
   themeColor: '#3B82F6',
 }
 
@@ -73,9 +77,8 @@ export default function RootLayout({
   const pixelId = process.env.NEXT_PUBLIC_FACEBOOK_PIXEL_ID || '881640870918286' // YLADA NUTRI
   
   return (
-    <html lang="pt">
+    <html lang="pt" className="h-full">
       <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="apple-mobile-web-app-title" content="YLADA" />
@@ -88,13 +91,20 @@ export default function RootLayout({
         <meta httpEquiv="Pragma" content="no-cache" />
         <meta httpEquiv="Expires" content="0" />
       </head>
-      <body className={inter.className} style={{ margin: 0, minHeight: '100dvh', minHeight: '100vh', background: '#ffffff', padding: 'env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)' }}>
-        <FacebookPixel pixelId={pixelId} />
-        <PWAInitializer />
-        <AuthProviderWrapper>
-          {children}
-          <CookieConsentBanner />
-        </AuthProviderWrapper>
+      <body
+        className={`${inter.className} flex min-h-[100dvh] flex-col bg-white`}
+        style={{
+          margin: 0,
+          padding:
+            'env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)',
+        }}
+      >
+        <div className="flex min-h-0 min-w-0 w-full flex-1 flex-col">
+          <FacebookPixel pixelId={pixelId} />
+          <PWAInitializer />
+          <AuthProviderWrapper>{children}</AuthProviderWrapper>
+        </div>
+        <CookieConsentBanner />
       </body>
     </html>
   )

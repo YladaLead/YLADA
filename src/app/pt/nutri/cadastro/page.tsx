@@ -1,4 +1,4 @@
-import LoginForm from '@/components/auth/LoginForm'
+import LoginForm, { YLADA_SIGNUP_PAGE_HERO } from '@/components/auth/LoginForm'
 
 export default function NutriCadastroPage() {
   return (
@@ -6,6 +6,8 @@ export default function NutriCadastroPage() {
       perfil="nutri"
       redirectPath="/pt/nutri/home"
       initialSignUpMode={true}
+      useYladaBrandingOnSignUp
+      signUpHeroTitle={YLADA_SIGNUP_PAGE_HERO}
     />
   )
 }

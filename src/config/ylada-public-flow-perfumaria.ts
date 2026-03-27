@@ -29,6 +29,7 @@ export function buildPerfumariaPublicFlowConfig(): PublicFlowConfig {
       entradaNicho: 'perfumaria_entrada_nicho',
       quizStep: 'perfumaria_quiz_step',
       quizConcluiu: 'perfumaria_quiz_concluiu',
+      cadastroPromoCta: 'perfumaria_cadastro_promo_cta',
     },
     rootExtraClassName:
       'estetica-touch supports-[height:100svh]:h-[100svh] supports-[height:100svh]:max-h-[100svh]',

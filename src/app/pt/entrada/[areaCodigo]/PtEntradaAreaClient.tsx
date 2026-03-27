@@ -58,21 +58,10 @@ export default function PtEntradaAreaClient({ areaCodigo }: { areaCodigo: string
   if (loading || !ready || nichos.length === 0) {
     return (
       <div
-        className={`h-[100dvh] max-h-[100dvh] flex flex-col overflow-hidden bg-white text-gray-900 ${rootExtraClass}`.trim()}
+        className={`flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-white text-gray-900 ${rootExtraClass}`.trim()}
       >
-        <header className="sticky top-0 z-20 shrink-0 border-b border-gray-100/80 bg-white/95 backdrop-blur-sm pt-[env(safe-area-inset-top,0px)]">
-          <div className="h-0.5 w-full bg-gray-100 overflow-hidden">
-            <div
-              className="h-full bg-blue-600 transition-[width] duration-500 ease-out"
-              style={{ width: '8%' }}
-              role="progressbar"
-              aria-valuenow={8}
-              aria-valuemin={0}
-              aria-valuemax={100}
-              aria-label="Progresso"
-            />
-          </div>
-          <div className="max-w-lg mx-auto flex items-center justify-between gap-3 px-4 py-3 sm:px-6">
+        <header className="sticky top-0 z-20 shrink-0 border-b border-gray-200 bg-white">
+          <div className="max-w-lg mx-auto flex items-center justify-between gap-3 px-4 pt-3 pb-2 sm:px-6">
             <Link href="/pt" className="inline-flex touch-manipulation items-center" aria-label="YLADA início">
               <YLADALogo size="md" responsive className="bg-transparent" />
             </Link>
@@ -82,6 +71,21 @@ export default function PtEntradaAreaClient({ areaCodigo }: { areaCodigo: string
             >
               Entrar
             </Link>
+          </div>
+          <div className="max-w-lg mx-auto w-full px-4 pb-3.5 sm:px-6">
+            <div
+              className="w-full rounded-full border border-slate-300/90 bg-slate-100 p-px shadow-[inset_0_1px_2px_rgba(15,23,42,0.07)]"
+              role="progressbar"
+              aria-valuenow={8}
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-label="Progresso"
+            >
+              <div
+                className="h-2 sm:h-2.5 rounded-full bg-blue-600 transition-[width] duration-500 ease-out shadow-[0_1px_2px_rgba(37,99,235,0.35)]"
+                style={{ width: '8%', minWidth: '8px' }}
+              />
+            </div>
           </div>
         </header>
         <div className="flex-1 min-h-0 flex items-center justify-center px-4">
@@ -93,21 +97,10 @@ export default function PtEntradaAreaClient({ areaCodigo }: { areaCodigo: string
 
   return (
     <div
-      className={`h-[100dvh] max-h-[100dvh] flex flex-col overflow-hidden bg-white text-gray-900 ${rootExtraClass}`.trim()}
+      className={`flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-white text-gray-900 ${rootExtraClass}`.trim()}
     >
-      <header className="sticky top-0 z-20 shrink-0 border-b border-gray-100/80 bg-white/95 backdrop-blur-sm pt-[env(safe-area-inset-top,0px)]">
-        <div className="h-0.5 w-full bg-gray-100 overflow-hidden">
-          <div
-            className="h-full bg-blue-600 transition-[width] duration-500 ease-out"
-            style={{ width: '8%' }}
-            role="progressbar"
-            aria-valuenow={8}
-            aria-valuemin={0}
-            aria-valuemax={100}
-            aria-label="Progresso"
-          />
-        </div>
-        <div className="max-w-lg mx-auto flex items-center justify-between gap-3 px-4 py-3 sm:px-6">
+      <header className="sticky top-0 z-20 shrink-0 border-b border-gray-200 bg-white">
+        <div className="max-w-lg mx-auto flex items-center justify-between gap-3 px-4 pt-3 pb-2 sm:px-6">
           <Link
             href="/pt"
             className="inline-flex touch-manipulation min-h-[48px] min-w-[48px] shrink-0 items-center justify-center -ml-1"
@@ -121,6 +114,21 @@ export default function PtEntradaAreaClient({ areaCodigo }: { areaCodigo: string
           >
             Entrar
           </Link>
+        </div>
+        <div className="max-w-lg mx-auto w-full px-4 pb-3.5 sm:px-6">
+          <div
+            className="w-full rounded-full border border-slate-300/90 bg-slate-100 p-px shadow-[inset_0_1px_2px_rgba(15,23,42,0.07)]"
+            role="progressbar"
+            aria-valuenow={8}
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-label="Progresso"
+          >
+            <div
+              className="h-2 sm:h-2.5 rounded-full bg-blue-600 transition-[width] duration-500 ease-out shadow-[0_1px_2px_rgba(37,99,235,0.35)]"
+              style={{ width: '8%', minWidth: '8px' }}
+            />
+          </div>
         </div>
       </header>
 

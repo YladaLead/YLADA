@@ -72,16 +72,28 @@ export default function YladaPublicEntryFlow({ config, entradaComNicho = false }
     [config, entradaComNicho, profNicho]
   )
 
-  const totalPhases = quizQuestions.length + 1
   const isResult = step >= quizQuestions.length
   const current = quizQuestions[step]
 
-  const verPraticaHref = useMemo(() => {
-    if (entradaComNicho && profNicho) {
-      return `${config.verPraticaHrefBase}?${nichoQueryKey}=${encodeURIComponent(profNicho)}`
+  const cadastroHref = useMemo(() => {
+    const { areaCodigo, pathPrefix } = config
+    if (areaCodigo === 'nutri' || areaCodigo === 'estetica' || areaCodigo === 'med') {
+      return `${pathPrefix}/cadastro`
     }
-    return config.verPraticaHrefBase
-  }, [entradaComNicho, profNicho, config.verPraticaHrefBase, nichoQueryKey])
+    return `/pt/cadastro?area=${encodeURIComponent(areaCodigo)}`
+  }, [config])
+
+  const irParaCadastro = useCallback(
+    (opcao: 'sim' | 'sim_certeza') => {
+      trackEvent(config.analytics.cadastroPromoCta, {
+        area: config.areaCodigo,
+        origem: 'quiz_result',
+        opcao,
+        nicho: profNicho,
+      })
+    },
+    [config, profNicho]
+  )
 
   useEffect(() => {
     const id = setTimeout(() => setAuthTimeout(true), 800)
@@ -106,8 +118,11 @@ export default function YladaPublicEntryFlow({ config, entradaComNicho = false }
   const progress = useMemo(() => {
     if (entradaComNicho && !profNicho) return 8
     if (isResult) return 100
-    return ((step + 1) / totalPhases) * 100
-  }, [entradaComNicho, profNicho, step, isResult, totalPhases])
+    const n = quizQuestions.length
+    if (n <= 0) return 100
+    // Uma fatia por pergunta (última pergunta = barra cheia); ecrã final continua 100%
+    return ((step + 1) / n) * 100
+  }, [entradaComNicho, profNicho, step, isResult, quizQuestions.length])
 
   const pickProfNicho = useCallback(
     (value: string) => {
@@ -179,27 +194,16 @@ export default function YladaPublicEntryFlow({ config, entradaComNicho = false }
   const rc = config.resultCopy
 
   const rootClass =
-    `h-[100dvh] max-h-[100dvh] flex flex-col overflow-hidden bg-white text-gray-900 ${config.rootExtraClassName ?? ''}`.trim()
+    `flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-white text-gray-900 ${config.rootExtraClassName ?? ''}`.trim()
 
   const mainClass =
     `flex-1 min-h-0 overflow-y-auto overscroll-y-contain px-4 sm:px-6 py-6 max-w-lg mx-auto w-full ${config.mainExtraClassName ?? ''}`.trim()
 
   return (
     <div className={rootClass}>
-      <header className="sticky top-0 z-20 shrink-0 border-b border-gray-100/80 bg-white/95 backdrop-blur-sm pt-[env(safe-area-inset-top,0px)]">
-        <div className="h-0.5 w-full bg-gray-100 overflow-hidden">
-          <div
-            className="h-full bg-blue-600 transition-[width] duration-500 ease-out"
-            style={{ width: `${progress}%` }}
-            role="progressbar"
-            aria-valuenow={Math.round(progress)}
-            aria-valuemin={0}
-            aria-valuemax={100}
-            aria-label="Progresso do questionário"
-          />
-        </div>
+      <header className="sticky top-0 z-20 shrink-0 border-b border-gray-200 bg-white">
         <div
-          className={`max-w-lg mx-auto flex items-center gap-3 px-4 py-3 sm:px-6 ${showEntrarNoTopo ? 'justify-between' : ''}`}
+          className={`max-w-lg mx-auto flex items-center gap-3 px-4 pt-3 pb-2 sm:px-6 ${showEntrarNoTopo ? 'justify-between' : ''}`}
         >
           <Link
             href={config.logoHref}
@@ -216,6 +220,24 @@ export default function YladaPublicEntryFlow({ config, entradaComNicho = false }
               Entrar
             </Link>
           ) : null}
+        </div>
+        <div className="max-w-lg mx-auto w-full px-4 pb-3.5 sm:px-6">
+          <div
+            className="w-full rounded-full border border-slate-300/90 bg-slate-100 p-px shadow-[inset_0_1px_2px_rgba(15,23,42,0.07)]"
+            role="progressbar"
+            aria-valuenow={Math.round(progress)}
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-label="Progresso do questionário"
+          >
+            <div
+              className="h-2 sm:h-2.5 rounded-full bg-blue-600 transition-[width] duration-500 ease-out shadow-[0_1px_2px_rgba(37,99,235,0.35)]"
+              style={{
+                width: `${progress}%`,
+                minWidth: progress > 0 ? '8px' : undefined,
+              }}
+            />
+          </div>
         </div>
       </header>
 
@@ -292,26 +314,28 @@ export default function YladaPublicEntryFlow({ config, entradaComNicho = false }
 
         {isResult && (
           <div className="animate-fade-in-up pb-8 pt-2" role="region" aria-live="polite">
-            <div className="space-y-10 sm:space-y-12">
-              <div className="space-y-6 sm:space-y-8">
-                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 leading-tight tracking-tight">
-                  {rc.headline}
-                </h1>
-                <div className="space-y-4 sm:space-y-5 text-lg sm:text-xl text-gray-800 font-medium leading-snug">
-                  {rc.subLines.map((line) => (
-                    <p key={line}>{line}</p>
-                  ))}
-                </div>
-              </div>
-              <div className="pt-4 sm:pt-6 flex flex-col items-stretch gap-3">
+            <div className="space-y-8 sm:space-y-10">
+              <h1 className="text-xl sm:text-2xl font-semibold text-gray-900 leading-snug tracking-tight">
+                {rc.question}
+              </h1>
+              <div className="flex flex-col gap-3 pt-2">
                 <Link
-                  href={verPraticaHref}
-                  className="w-full min-h-[58px] sm:min-h-[60px] rounded-2xl bg-blue-600 px-6 py-4 text-center text-lg sm:text-xl font-bold text-white hover:bg-blue-700 shadow-lg shadow-blue-600/35 active:scale-[0.99] transition-all inline-flex items-center justify-center gap-2.5"
+                  href={cadastroHref}
+                  onClick={() => irParaCadastro('sim')}
+                  className="w-full min-h-[52px] rounded-2xl border-2 border-gray-300 bg-slate-50/90 px-5 py-3.5 text-center text-base font-semibold text-gray-900 shadow-sm shadow-gray-900/5 hover:border-gray-500 hover:bg-white hover:shadow-md active:scale-[0.99] transition-all"
                 >
-                  <span aria-hidden>👉</span>
-                  {rc.ctaPrimary}
+                  {rc.ctaSim}
                 </Link>
-                <p className="text-center text-sm text-gray-500 leading-relaxed px-1">{rc.ctaMicro}</p>
+                <Link
+                  href={cadastroHref}
+                  onClick={() => irParaCadastro('sim_certeza')}
+                  className="w-full min-h-[52px] rounded-2xl bg-blue-600 px-5 py-3.5 text-center text-base font-bold text-white hover:bg-blue-700 shadow-lg shadow-blue-600/30 active:scale-[0.99] transition-all"
+                >
+                  {rc.ctaSimCerteza}
+                </Link>
+                {rc.ctaMicro ? (
+                  <p className="text-center text-sm text-gray-500 leading-relaxed px-1 pt-2">{rc.ctaMicro}</p>
+                ) : null}
               </div>
             </div>
           </div>

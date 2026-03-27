@@ -29,6 +29,7 @@ export function buildNutraPublicFlowConfig(): PublicFlowConfig {
       entradaNicho: 'nutra_entrada_nicho',
       quizStep: 'nutra_quiz_step',
       quizConcluiu: 'nutra_quiz_concluiu',
+      cadastroPromoCta: 'nutra_cadastro_promo_cta',
     },
     rootExtraClassName:
       'estetica-touch supports-[height:100svh]:h-[100svh] supports-[height:100svh]:max-h-[100svh]',

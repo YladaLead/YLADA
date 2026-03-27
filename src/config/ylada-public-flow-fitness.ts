@@ -29,6 +29,7 @@ export function buildFitnessPublicFlowConfig(): PublicFlowConfig {
       entradaNicho: 'fitness_entrada_nicho',
       quizStep: 'fitness_quiz_step',
       quizConcluiu: 'fitness_quiz_concluiu',
+      cadastroPromoCta: 'fitness_cadastro_promo_cta',
     },
     rootExtraClassName:
       'estetica-touch supports-[height:100svh]:h-[100svh] supports-[height:100svh]:max-h-[100svh]',

@@ -29,6 +29,7 @@ export function buildPsicanalisePublicFlowConfig(): PublicFlowConfig {
       entradaNicho: 'psicanalise_entrada_nicho',
       quizStep: 'psicanalise_quiz_step',
       quizConcluiu: 'psicanalise_quiz_concluiu',
+      cadastroPromoCta: 'psicanalise_cadastro_promo_cta',
     },
     rootExtraClassName:
       'estetica-touch supports-[height:100svh]:h-[100svh] supports-[height:100svh]:max-h-[100svh]',

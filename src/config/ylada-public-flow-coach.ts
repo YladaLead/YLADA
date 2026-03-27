@@ -29,6 +29,7 @@ export function buildCoachPublicFlowConfig(): PublicFlowConfig {
       entradaNicho: 'coach_entrada_nicho',
       quizStep: 'coach_quiz_step',
       quizConcluiu: 'coach_quiz_concluiu',
+      cadastroPromoCta: 'coach_cadastro_promo_cta',
     },
     rootExtraClassName:
       'estetica-touch supports-[height:100svh]:h-[100svh] supports-[height:100svh]:max-h-[100svh]',

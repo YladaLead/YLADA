@@ -30,6 +30,7 @@ export function buildSellerPublicFlowConfig(): PublicFlowConfig {
       entradaNicho: 'seller_entrada_nicho',
       quizStep: 'seller_quiz_step',
       quizConcluiu: 'seller_quiz_concluiu',
+      cadastroPromoCta: 'seller_cadastro_promo_cta',
     },
     rootExtraClassName:
       'estetica-touch supports-[height:100svh]:h-[100svh] supports-[height:100svh]:max-h-[100svh]',

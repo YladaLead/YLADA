@@ -72,21 +72,10 @@ export default function NutriVerPraticaPosQuizContent() {
   )
 
   return (
-    <div className="min-h-[100dvh] bg-white text-gray-900 flex flex-col estetica-touch supports-[height:100svh]:min-h-[100svh]">
-      <header className="sticky top-0 z-20 shrink-0 border-b border-gray-100/80 bg-white/95 backdrop-blur-sm pt-[env(safe-area-inset-top,0px)]">
-        <div className="h-0.5 w-full bg-gray-100 overflow-hidden">
-          <div
-            className="h-full bg-blue-600 transition-[width] duration-500 ease-out"
-            style={{ width: `${progressPercent}%` }}
-            role="progressbar"
-            aria-valuenow={progressPercent}
-            aria-valuemin={0}
-            aria-valuemax={100}
-            aria-label="Progresso"
-          />
-        </div>
+    <div className="flex min-h-0 min-w-0 flex-1 flex-col bg-white text-gray-900 estetica-touch">
+      <header className="sticky top-0 z-20 shrink-0 border-b border-gray-200 bg-white">
         <div
-          className={`max-w-lg mx-auto flex items-center gap-3 px-4 py-3 sm:px-6 ${fase === 'local' ? 'justify-between' : ''}`}
+          className={`max-w-lg mx-auto flex items-center gap-3 px-4 pt-3 pb-2 sm:px-6 ${fase === 'local' ? 'justify-between' : ''}`}
         >
           <Link
             href="/pt/nutri"
@@ -103,6 +92,24 @@ export default function NutriVerPraticaPosQuizContent() {
               Entrar
             </Link>
           ) : null}
+        </div>
+        <div className="max-w-lg mx-auto w-full px-4 pb-3.5 sm:px-6">
+          <div
+            className="w-full rounded-full border border-slate-300/90 bg-slate-100 p-px shadow-[inset_0_1px_2px_rgba(15,23,42,0.07)]"
+            role="progressbar"
+            aria-valuenow={progressPercent}
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-label="Progresso"
+          >
+            <div
+              className="h-2 sm:h-2.5 rounded-full bg-blue-600 transition-[width] duration-500 ease-out shadow-[0_1px_2px_rgba(37,99,235,0.35)]"
+              style={{
+                width: `${progressPercent}%`,
+                minWidth: progressPercent > 0 ? '8px' : undefined,
+              }}
+            />
+          </div>
         </div>
       </header>
 

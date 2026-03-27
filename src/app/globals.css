@@ -242,8 +242,9 @@ select:focus {
   -webkit-tap-highlight-color: transparent;
 }
 
+/* Só respiro do conteúdo: o body (layout raiz) já aplica env(safe-area-inset-bottom). */
 .estetica-safe-main-bottom {
-  padding-bottom: max(2.5rem, env(safe-area-inset-bottom, 0px));
+  padding-bottom: 2.5rem;
 }
 
 .estetica-safe-modal-bottom {

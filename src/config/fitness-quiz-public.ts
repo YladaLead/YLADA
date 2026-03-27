@@ -6,6 +6,7 @@ import {
   MATRIX_PUBLIC_QUIZ_QUESTIONS_BASE,
   personalizeMatrixPublicQuizForNicho,
 } from '@/config/matrix-public-quiz-base'
+import { YLADA_QUIZ_POST_RESULT_COPY } from '@/config/ylada-quiz-result-post-copy'
 import { FITNESS_DEMO_CLIENTE_NICHOS } from '@/lib/fitness-demo-cliente-data'
 
 export const FITNESS_QUIZ_CADASTRO_HREF = '/pt/cadastro?area=fitness'
@@ -32,13 +33,4 @@ export function getFitnessQuizQuestionsForNicho(nicho: string) {
 
 export const FITNESS_QUIZ_QUESTIONS = MATRIX_PUBLIC_QUIZ_QUESTIONS_BASE
 
-export const FITNESS_QUIZ_RESULT_COPY = {
-  headline: 'Você poderia estar fechando mais alunos com menos conversa vaga',
-  subLines: [
-    'Pare de tentar conversar',
-    'Faça seus alunos chegarem mais prontos para fechar',
-    'Você entende na hora ao ver seus links personalizados em ação',
-  ] as const,
-  ctaPrimary: 'Ver na prática agora',
-  ctaMicro: 'Um exemplo de link personalizado na sequência.',
-} as const
+export const FITNESS_QUIZ_RESULT_COPY = { ...YLADA_QUIZ_POST_RESULT_COPY } as const
