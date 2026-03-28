@@ -43,58 +43,80 @@ function ReceptionCtas({
   onComecar,
   ctaLabel,
   area,
+  layout = 'inline',
 }: {
   comoUsarHref: string
   onComecar: () => void
   ctaLabel: string
   area: NoelArea
+  /** `hero`: texto e lista centralizados no cartão; `inline`: alinhado à esquerda (layout compacto). */
+  layout?: 'inline' | 'hero'
 }) {
+  const isHeroLayout = layout === 'hero'
   return (
-    <div className="flex flex-col gap-3">
-      <div className="text-[13px] sm:text-sm text-gray-700 leading-snug sm:leading-relaxed text-pretty space-y-2.5">
+    <div
+      className={
+        isHeroLayout ? 'flex w-full max-w-full flex-col items-center gap-3' : 'flex w-full flex-col gap-3'
+      }
+    >
+      <div
+        className={`text-[13px] sm:text-sm text-gray-700 leading-snug sm:leading-relaxed text-pretty space-y-2.5 ${
+          isHeroLayout ? 'w-full text-center' : ''
+        }`}
+      >
         <p>
           Clique em <span className="font-semibold text-sky-800">Como usar</span> e descubra na prática como fazer o{' '}
           <strong className="text-gray-900">Instagram te favorecer</strong>:
         </p>
-        <ul className="list-none space-y-1.5 pl-0 text-gray-800">
-          <li className="flex gap-2">
-            <span className="text-sky-600 font-bold shrink-0" aria-hidden>
-              ·
-            </span>
-            <span>Direct, engajamento e posicionamento.</span>
-          </li>
-          <li className="flex gap-2">
-            <span className="text-sky-600 font-bold shrink-0" aria-hidden>
-              ·
-            </span>
-            <span>Fluxos e diagnósticos gratuitos, leads mais preparadas no WhatsApp.</span>
-          </li>
-          <li className="flex gap-2">
-            <span className="text-sky-600 font-bold shrink-0" aria-hidden>
-              ·
-            </span>
-            <span>Posts que fazem a pessoa te procurar pra conversar, não só curtida.</span>
-          </li>
-          <li className="flex gap-2">
-            <span className="text-sky-600 font-bold shrink-0" aria-hidden>
-              ·
-            </span>
-            <span>Lead quente × lead só curioso: como tratar cada um.</span>
-          </li>
-        </ul>
+        <div className={isHeroLayout ? 'flex w-full justify-center' : ''}>
+          <ul
+            className={`list-none space-y-1.5 text-gray-800 ${
+              isHeroLayout ? 'max-w-lg text-left pl-0' : 'pl-0'
+            }`}
+          >
+            <li className="flex gap-2">
+              <span className="text-sky-600 font-bold shrink-0" aria-hidden>
+                ·
+              </span>
+              <span>Direct, engajamento e posicionamento.</span>
+            </li>
+            <li className="flex gap-2">
+              <span className="text-sky-600 font-bold shrink-0" aria-hidden>
+                ·
+              </span>
+              <span>Fluxos e diagnósticos gratuitos, leads mais preparadas no WhatsApp.</span>
+            </li>
+            <li className="flex gap-2">
+              <span className="text-sky-600 font-bold shrink-0" aria-hidden>
+                ·
+              </span>
+              <span>Posts que fazem a pessoa te procurar pra conversar, não só curtida.</span>
+            </li>
+            <li className="flex gap-2">
+              <span className="text-sky-600 font-bold shrink-0" aria-hidden>
+                ·
+              </span>
+              <span>Lead quente × lead só curioso: como tratar cada um.</span>
+            </li>
+          </ul>
+        </div>
       </div>
-      <div className="flex flex-col sm:flex-row gap-3 sm:gap-3">
+      <div
+        className={`flex w-full flex-col gap-3 sm:flex-row sm:items-stretch sm:gap-3 ${
+          isHeroLayout ? 'mx-auto max-w-xl sm:max-w-2xl' : ''
+        }`}
+      >
         <Link
           href={comoUsarHref}
           onClick={() => trackEvent('ylada_noel_home_como_usar', { area })}
-          className="inline-flex flex-1 min-h-[52px] items-center justify-center rounded-2xl border-2 border-sky-600 bg-white px-5 py-3.5 text-center text-base font-bold text-sky-700 shadow-sm hover:bg-sky-50 active:bg-sky-100/80 transition-colors touch-manipulation"
+          className="flex min-h-[52px] w-full flex-1 min-w-0 items-center justify-center rounded-2xl border-2 border-sky-600 bg-white px-4 py-3 text-center text-base font-bold leading-tight text-sky-700 shadow-sm box-border hover:bg-sky-50 active:bg-sky-100/80 transition-colors touch-manipulation sm:px-5"
         >
           Abrir Como usar
         </Link>
         <button
           type="button"
           onClick={onComecar}
-          className="inline-flex flex-1 min-h-[52px] items-center justify-center rounded-2xl bg-sky-600 px-5 py-3.5 text-center text-base font-bold text-white shadow-lg shadow-sky-600/25 hover:bg-sky-700 active:bg-sky-800 transition-colors touch-manipulation"
+          className="flex min-h-[52px] w-full flex-1 min-w-0 items-center justify-center rounded-2xl border-2 border-sky-600 bg-sky-600 px-4 py-3 text-center text-base font-bold leading-tight text-white shadow-lg shadow-sky-600/25 box-border hover:bg-sky-700 active:bg-sky-800 transition-colors touch-manipulation sm:px-5"
         >
           {ctaLabel}
         </button>
@@ -168,8 +190,9 @@ function NoelHomeChatShell({
             className="mb-3 sm:mb-6 rounded-2xl border border-sky-200/90 bg-gradient-to-b from-sky-50/90 via-white to-white px-4 py-5 sm:p-6 shadow-md shadow-sky-900/5 touch-manipulation"
             aria-label="Recepção do Noel"
           >
-            <div className="flex flex-col gap-4 sm:gap-6">
-              <p className="text-[15px] sm:text-lg font-medium text-gray-900 leading-[1.55] sm:leading-relaxed text-pretty">
+            {/* Conteúdo centralizado no cartão (mobile e desktop); largura máxima confortável para leitura. */}
+            <div className="flex w-full max-w-full flex-col items-center gap-4 text-center sm:mx-auto sm:max-w-2xl sm:gap-6">
+              <p className="text-[15px] sm:text-lg font-medium text-gray-900 leading-[1.55] sm:leading-relaxed text-pretty whitespace-pre-line">
                 {prompt}
               </p>
               {comoUsarHref ? (
@@ -178,6 +201,7 @@ function NoelHomeChatShell({
                   onComecar={openChat}
                   ctaLabel={nc.cta}
                   area={area}
+                  layout="hero"
                 />
               ) : (
                 <button

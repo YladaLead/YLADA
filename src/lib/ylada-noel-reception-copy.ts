@@ -79,9 +79,9 @@ export function buildNoelUnifiedReceptionMessage(generoParam: string | null, voc
   const welcome = welcomeSentence(kind)
   if (vocative) {
     const head = welcome.endsWith('.') ? welcome.slice(0, -1) : welcome
-    return `${head}, ${vocative}. ${NOEL_RECEPTION_REST}`
+    return `${head}, ${vocative}.\n\n${NOEL_RECEPTION_REST}`
   }
-  return `${welcome} ${NOEL_RECEPTION_REST}`
+  return `${welcome}\n\n${NOEL_RECEPTION_REST}`
 }
 
 export function noelUnifiedReceptionWelcome(generoParam: string | null): string {
