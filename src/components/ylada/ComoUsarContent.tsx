@@ -132,6 +132,12 @@ export default function ComoUsarContent({ areaCodigo, areaLabel }: ComoUsarConte
               Você compartilha o link na bio, no Direct ou nos stories. O sistema ajuda a transformar curiosidade em
               conversa mais qualificada.
             </p>
+            <Destaque tone="blue">
+              Quanto mais pessoas te chamam no Direct para pedir o link ou o diagnóstico, mais o Instagram enxerga
+              conversa real com o seu perfil — isso costuma fortalecer o alcance e o posicionamento ao longo do tempo
+              (o algoritmo privilegia sinais de engajamento genuíno). Não é promessa de viralizar: é efeito cumulativo
+              quando você vira referência para “quem quer descobrir algo sobre si” antes de fechar contigo.
+            </Destaque>
           </div>
 
           <Link
@@ -186,6 +192,34 @@ export default function ComoUsarContent({ areaCodigo, areaLabel }: ComoUsarConte
                   Você cresce em autoridade e abre espaço para novas conversas sem depender só de post genérico.
                 </Destaque>
               </div>
+            </div>
+          </BlocoComoUsar>
+
+          <BlocoComoUsar
+            id="instagram-algoritmo"
+            variant="white"
+            titulo="Direct, algoritmo e audiência"
+            resumo="Por que responder no Direct e puxar pro link ajuda não só na venda, mas também no crescimento do perfil."
+          >
+            <div className="pt-4 space-y-3">
+              <p className="text-gray-800">
+                O Instagram usa sinais de interação (mensagens, respostas a stories, comentários, salvamentos, etc.)
+                para entender se o conteúdo e o perfil geram conversa de verdade. Quando o seu post ou story leva a
+                pessoa a <strong>te chamar no Direct</strong> (“me manda o link”, “quero o diagnóstico”), você acumula
+                esse tipo de sinal — e o algoritmo <strong>tende a</strong> distribuir mais o que gera esse tipo de
+                retorno.
+              </p>
+              <p className="text-gray-800">
+                Por isso combina bem com o YLADA: você não fica só “postando dica”; você cria um motivo para a pessoa
+                a <strong>agir</strong> (curiosidade + diagnóstico gratuito) e <strong>falar com você</strong> antes do
+                WhatsApp. Isso reforça a ideia de que o seu perfil é lugar de descoberta — e ajuda a sustentar
+                audiência e autoridade no médio prazo.
+              </p>
+              <Destaque tone="green">
+                Resumindo: mais DMs qualificados por causa do fluxo → mais sinais de engajamento → mais chance de o
+                Instagram continuar mostrando você para gente parecida com quem já interagiu. É um ciclo que você
+                fortalece a cada boa chamada no Direct e cada link bem usado.
+              </Destaque>
             </div>
           </BlocoComoUsar>
 
