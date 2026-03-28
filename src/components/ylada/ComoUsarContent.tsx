@@ -52,18 +52,22 @@ function BlocoComoUsar({
   titulo,
   resumo,
   variant,
+  defaultOpen,
   children,
 }: {
   id: string
   titulo: string
   resumo: string
   variant: BlocoVariant
+  /** Abre o bloco ao carregar (bom para o primeiro tópico do guia). */
+  defaultOpen?: boolean
   children: ReactNode
 }) {
   const shell = VARIANT_CLASS[variant]
   return (
     <details
       id={id}
+      {...(defaultOpen ? { defaultOpen: true } : {})}
       className={`group rounded-xl border shadow-sm open:shadow-md transition-shadow ${shell}`}
     >
       <summary className="cursor-pointer list-none flex items-start justify-between gap-3 p-4 sm:p-5 [&::-webkit-details-marker]:hidden">
@@ -95,6 +99,37 @@ function ListaMarcadores({ items }: { items: string[] }) {
   )
 }
 
+const GUIA_ANCORAS: { href: string; label: string }[] = [
+  { href: '#por-que-funciona', label: 'Por que funciona' },
+  { href: '#instagram-algoritmo', label: 'Direct e algoritmo' },
+  { href: '#como-postar', label: 'Como postar' },
+  { href: '#depois', label: 'Depois do fluxo' },
+  { href: '#diferencial', label: 'Diferencial' },
+  { href: '#regra-ouro', label: 'Regra de ouro' },
+]
+
+function GuiaNavegacaoRapida() {
+  return (
+    <nav
+      className="rounded-xl border border-gray-200 bg-gray-50/90 px-3 py-3 sm:px-4"
+      aria-label="Ir para uma seção do guia"
+    >
+      <p className="text-xs font-semibold uppercase tracking-wide text-gray-500 mb-2">Neste guia</p>
+      <div className="flex flex-wrap gap-2">
+        {GUIA_ANCORAS.map(({ href, label }) => (
+          <a
+            key={href}
+            href={href}
+            className="inline-flex items-center rounded-full bg-white border border-gray-200 px-3 py-1.5 text-xs sm:text-sm font-medium text-sky-800 hover:border-sky-300 hover:bg-sky-50/80 transition-colors"
+          >
+            {label}
+          </a>
+        ))}
+      </div>
+    </nav>
+  )
+}
+
 export default function ComoUsarContent({ areaCodigo, areaLabel }: ComoUsarContentProps) {
   const diagnosticoHref = getYladaDiagnosticoBuilderHref(areaCodigo)
 
@@ -108,44 +143,44 @@ export default function ComoUsarContent({ areaCodigo, areaLabel }: ComoUsarConte
               Como usar o YLADA
             </h1>
             <p className="text-gray-800 mt-3 text-base font-medium leading-snug">
-              Primeiro, entenda o que muda tudo: você não precisa mais ficar pensando sozinha no que postar, nem
-              explicando tudo no Direct para cada pessoa do mesmo jeito.
+              <strong>Agora fica bem mais fácil</strong> para você: dá para <strong>engajar mais</strong>,{' '}
+              <strong>aprender a atrair gente mais qualificada</strong> e parar de fazer marketing sozinha no chute. O{' '}
+              <strong>Noel</strong> entra para te ajudar com isso.
             </p>
           </div>
 
           <div className="rounded-xl border border-sky-100 bg-gradient-to-b from-sky-50/90 to-white p-4 sm:p-5 space-y-3">
-            <p className="font-semibold text-gray-900">O Noel trabalha com você</p>
-            <p className="text-sm sm:text-[15px] text-gray-700 leading-relaxed">
-              Ele te guia para montar diagnósticos gratuitos para quem responde seu link, perguntas estratégicas,
-              uma leitura personalizada e o caminho até o WhatsApp. Você revisa, publica e compartilha — quem passa
-              pelo fluxo é conduzida passo a passo.
+            <p className="font-semibold text-gray-900">No chat, você conversa com o Noel</p>
+            <p className="text-sm sm:text-[15px] text-gray-800 leading-relaxed">
+              Você fala com ele sobre <strong>suas buscas</strong> e <strong>o que você quer</strong>: metas, sua área,
+              como quer chamar cliente. Ele te orienta com <strong>estratégia</strong>, em cima do que você contou.
+            </p>
+            <p className="text-sm sm:text-[15px] text-gray-800 leading-relaxed">
+              Além disso, ele <strong>monta sozinho</strong> a sequência de perguntas e te dá o{' '}
+              <strong>link personalizado</strong>.
+              As pessoas entram, respondem e <strong>recebem o diagnóstico na hora</strong> (automático, com base nas
+              respostas). Você não precisa escrever análise na mão para cada uma.
+            </p>
+            <p className="text-sm sm:text-[15px] text-gray-800 leading-relaxed">
+              Você só <strong>revisa</strong>, <strong>publica</strong> o link e manda para bio, Direct ou stories.
+              Quem passa pelo fluxo é guiada até o fim. Depois que ela recebe o <strong>diagnóstico automático</strong>,
+              aparece um <strong>convite para te chamar</strong> e um <strong>botão de WhatsApp</strong>: ao clicar, a
+              conversa já abre <strong>direto com você</strong> (no seu WhatsApp).
             </p>
             <ListaMarcadores
               items={[
-                'Diagnóstico pronto para quem completa o fluxo',
-                'Perguntas estratégicas (você adapta à sua área)',
-                'Análise personalizada com base nas respostas',
-                'Encaminhamento até o WhatsApp quando fizer sentido',
+                'Estratégia no chat: você explica o que busca, o Noel te guia.',
+                'Perguntas e diagnóstico para quem responde: automáticos depois que vocês alinham o fluxo.',
+                'Link seu: é por ele que a pessoa responde e vê o resultado.',
               ]}
             />
             <p className="text-sm text-gray-600 pt-1">
-              Você compartilha o link na bio, no Direct ou nos stories. O sistema ajuda a transformar curiosidade em
-              conversa mais qualificada.
+              Quanto mais gente usar seu link e te chamar no Direct, mais o Instagram costuma enxergar conversa de verdade
+              com seu perfil (isso ajuda alcance com o tempo, sem promessa de viralizar).
             </p>
-            <Destaque tone="blue">
-              Quanto mais pessoas te chamam no Direct para pedir o link ou o diagnóstico, mais o Instagram enxerga
-              conversa real com o seu perfil — isso costuma fortalecer o alcance e o posicionamento ao longo do tempo
-              (o algoritmo privilegia sinais de engajamento genuíno). Não é promessa de viralizar: é efeito cumulativo
-              quando você vira referência para “quem quer descobrir algo sobre si” antes de fechar contigo.
-            </Destaque>
           </div>
 
-          <Link
-            href={diagnosticoHref}
-            className="inline-flex items-center justify-center rounded-xl bg-sky-600 px-5 py-3 text-sm font-semibold text-white shadow-sm hover:bg-sky-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 transition-colors w-full sm:w-auto"
-          >
-            Criar meu primeiro diagnóstico
-          </Link>
+          <GuiaNavegacaoRapida />
         </header>
 
         <div className="space-y-3">
@@ -154,6 +189,7 @@ export default function ComoUsarContent({ areaCodigo, areaLabel }: ComoUsarConte
             variant="blue"
             titulo="Por que isso funciona"
             resumo="Você para de falar com todo mundo igual — no Instagram isso faz diferença imediata."
+            defaultOpen
           >
             <div className="pt-4 space-y-4">
               <p>

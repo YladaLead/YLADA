@@ -38,19 +38,68 @@ type NoelHomeChatShellProps = {
   comoUsarHref?: string
 }
 
-function ComoUsarHomeHint({ href }: { href: string }) {
+function ReceptionCtas({
+  comoUsarHref,
+  onComecar,
+  ctaLabel,
+  area,
+}: {
+  comoUsarHref: string
+  onComecar: () => void
+  ctaLabel: string
+  area: NoelArea
+}) {
   return (
-    <p className="text-[13px] sm:text-sm text-gray-600 leading-[1.55] sm:leading-relaxed">
-      <Link
-        href={href}
-        className="font-semibold text-sky-700 hover:text-sky-800 underline underline-offset-2 rounded-md px-1 -mx-1 inline-flex items-center min-h-[44px] sm:min-h-0 py-2 sm:py-0 touch-manipulation active:bg-sky-50/80"
-      >
-        Como usar
-      </Link>
-      {' '}
-      explica como potencializar seu negócio no Instagram, com fluxos e diagnósticos gratuitos para quem responde. Vale
-      a pena dar uma olhada antes de começar.
-    </p>
+    <div className="flex flex-col gap-3">
+      <div className="text-[13px] sm:text-sm text-gray-700 leading-snug sm:leading-relaxed text-pretty space-y-2.5">
+        <p>
+          Clique em <span className="font-semibold text-sky-800">Como usar</span> e descubra na prática como fazer o{' '}
+          <strong className="text-gray-900">Instagram te favorecer</strong>:
+        </p>
+        <ul className="list-none space-y-1.5 pl-0 text-gray-800">
+          <li className="flex gap-2">
+            <span className="text-sky-600 font-bold shrink-0" aria-hidden>
+              ·
+            </span>
+            <span>Direct, engajamento e posicionamento.</span>
+          </li>
+          <li className="flex gap-2">
+            <span className="text-sky-600 font-bold shrink-0" aria-hidden>
+              ·
+            </span>
+            <span>Fluxos e diagnósticos gratuitos, leads mais preparadas no WhatsApp.</span>
+          </li>
+          <li className="flex gap-2">
+            <span className="text-sky-600 font-bold shrink-0" aria-hidden>
+              ·
+            </span>
+            <span>Posts que fazem a pessoa te procurar pra conversar, não só curtida.</span>
+          </li>
+          <li className="flex gap-2">
+            <span className="text-sky-600 font-bold shrink-0" aria-hidden>
+              ·
+            </span>
+            <span>Lead quente × lead só curioso: como tratar cada um.</span>
+          </li>
+        </ul>
+      </div>
+      <div className="flex flex-col sm:flex-row gap-3 sm:gap-3">
+        <Link
+          href={comoUsarHref}
+          onClick={() => trackEvent('ylada_noel_home_como_usar', { area })}
+          className="inline-flex flex-1 min-h-[52px] items-center justify-center rounded-2xl border-2 border-sky-600 bg-white px-5 py-3.5 text-center text-base font-bold text-sky-700 shadow-sm hover:bg-sky-50 active:bg-sky-100/80 transition-colors touch-manipulation"
+        >
+          Abrir Como usar
+        </Link>
+        <button
+          type="button"
+          onClick={onComecar}
+          className="inline-flex flex-1 min-h-[52px] items-center justify-center rounded-2xl bg-sky-600 px-5 py-3.5 text-center text-base font-bold text-white shadow-lg shadow-sky-600/25 hover:bg-sky-700 active:bg-sky-800 transition-colors touch-manipulation"
+        >
+          {ctaLabel}
+        </button>
+      </div>
+    </div>
   )
 }
 
@@ -123,29 +172,43 @@ function NoelHomeChatShell({
               <p className="text-[15px] sm:text-lg font-medium text-gray-900 leading-[1.55] sm:leading-relaxed text-pretty">
                 {prompt}
               </p>
-              {comoUsarHref ? <ComoUsarHomeHint href={comoUsarHref} /> : null}
-              <button
-                type="button"
-                onClick={openChat}
-                className="inline-flex w-full min-h-[52px] sm:min-h-[52px] items-center justify-center rounded-2xl bg-sky-600 px-5 py-3.5 text-center text-base font-bold text-white shadow-lg shadow-sky-600/25 hover:bg-sky-700 active:bg-sky-800 transition-colors touch-manipulation"
-              >
-                {nc.cta}
-              </button>
+              {comoUsarHref ? (
+                <ReceptionCtas
+                  comoUsarHref={comoUsarHref}
+                  onComecar={openChat}
+                  ctaLabel={nc.cta}
+                  area={area}
+                />
+              ) : (
+                <button
+                  type="button"
+                  onClick={openChat}
+                  className="inline-flex w-full min-h-[52px] items-center justify-center rounded-2xl bg-sky-600 px-5 py-3.5 text-center text-base font-bold text-white shadow-lg shadow-sky-600/25 hover:bg-sky-700 active:bg-sky-800 transition-colors touch-manipulation"
+                >
+                  {nc.cta}
+                </button>
+              )}
             </div>
           </section>
         ) : (
           <div className="rounded-xl border border-sky-200 bg-white shadow-sm p-4 flex flex-col gap-3 mb-2 sm:mb-3">
-            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
-              <p className="text-sm font-medium text-gray-900 leading-snug min-w-0 flex-1">{prompt}</p>
+            <p className="text-sm font-medium text-gray-900 leading-snug min-w-0">{prompt}</p>
+            {comoUsarHref ? (
+              <ReceptionCtas
+                comoUsarHref={comoUsarHref}
+                onComecar={openChat}
+                ctaLabel={nc.cta}
+                area={area}
+              />
+            ) : (
               <button
                 type="button"
                 onClick={openChat}
-                className="shrink-0 min-h-[48px] rounded-xl bg-sky-600 px-5 py-3 text-sm font-semibold text-white hover:bg-sky-700 w-full sm:w-auto transition-colors"
+                className="min-h-[48px] rounded-xl bg-sky-600 px-5 py-3 text-sm font-semibold text-white hover:bg-sky-700 w-full transition-colors"
               >
                 {nc.cta}
               </button>
-            </div>
-            {comoUsarHref ? <ComoUsarHomeHint href={comoUsarHref} /> : null}
+            )}
           </div>
         )
       ) : null}
