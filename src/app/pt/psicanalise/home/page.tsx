@@ -3,7 +3,7 @@ import NoelHomeContent from '@/components/ylada/NoelHomeContent'
 
 export default function PsicanaliseHomePage() {
   return (
-    <YladaAreaShell areaCodigo="psicanalise" areaLabel="Psicanálise">
+    <YladaAreaShell areaCodigo="psicanalise" areaLabel="Psicanálise" suppressSidebarUntilRevealed>
       <NoelHomeContent
         areaCodigo="psicanalise"
         areaLabel="Psicanálise"

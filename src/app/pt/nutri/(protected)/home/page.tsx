@@ -3,7 +3,7 @@ import NoelHomeContent from '@/components/ylada/NoelHomeContent'
 
 export default function NutriHomePage() {
   return (
-    <YladaAreaShell areaCodigo="nutri" areaLabel="Nutri">
+    <YladaAreaShell areaCodigo="nutri" areaLabel="Nutri" suppressSidebarUntilRevealed>
       <NoelHomeContent
         areaCodigo="nutri"
         areaLabel="Nutri"

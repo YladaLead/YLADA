@@ -3,7 +3,7 @@ import NoelHomeContent from '@/components/ylada/NoelHomeContent'
 
 export default function PerfumariaHomePage() {
   return (
-    <YladaAreaShell areaCodigo="perfumaria" areaLabel="Perfumaria">
+    <YladaAreaShell areaCodigo="perfumaria" areaLabel="Perfumaria" suppressSidebarUntilRevealed>
       <NoelHomeContent
         areaCodigo="perfumaria"
         areaLabel="Perfumaria"

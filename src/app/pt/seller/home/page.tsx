@@ -3,7 +3,7 @@ import NoelHomeContent from '@/components/ylada/NoelHomeContent'
 
 export default function SellerHomePage() {
   return (
-    <YladaAreaShell areaCodigo="seller" areaLabel="Vendedores">
+    <YladaAreaShell areaCodigo="seller" areaLabel="Vendedores" suppressSidebarUntilRevealed>
       <NoelHomeContent
         areaCodigo="seller"
         areaLabel="Vendedores"

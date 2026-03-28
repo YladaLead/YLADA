@@ -3,7 +3,7 @@ import NoelHomeContent from '@/components/ylada/NoelHomeContent'
 
 export default function MatrixHomePage() {
   return (
-    <YladaAreaShell areaCodigo="ylada" areaLabel="YLADA">
+    <YladaAreaShell areaCodigo="ylada" areaLabel="YLADA" suppressSidebarUntilRevealed>
       <NoelHomeContent
         areaCodigo="ylada"
         areaLabel="YLADA"

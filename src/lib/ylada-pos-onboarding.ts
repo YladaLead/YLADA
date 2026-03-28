@@ -36,6 +36,7 @@ export const yladaHomeActivationCompactCopy = {
 
 /** Barra colapsada do Noel (abaixo do CTA principal na home). */
 export const yladaNoelHomeCollapsedCopy = {
-  question: 'Quer melhorar seu marketing e atrair mais clientes? Posso te orientar aqui no chat.',
+  question:
+    'Sou o Noel: te ajudo a montar fluxos e diagnósticos gratuitos para quem responde — na bio, no Direct e no WhatsApp.',
   cta: 'Começar agora',
 } as const

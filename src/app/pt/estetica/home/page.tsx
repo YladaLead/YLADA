@@ -3,7 +3,7 @@ import NoelHomeContent from '@/components/ylada/NoelHomeContent'
 
 export default function EsteticaHomePage() {
   return (
-    <YladaAreaShell areaCodigo="estetica" areaLabel="Estética">
+    <YladaAreaShell areaCodigo="estetica" areaLabel="Estética" suppressSidebarUntilRevealed>
       <NoelHomeContent
         areaCodigo="estetica"
         areaLabel="Estética"

@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { Suspense, useCallback, useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import NoelChatWithParams from '@/components/ylada/NoelChatWithParams'
@@ -11,6 +12,7 @@ import { YLADA_NOEL_HOME_EXPANDED_KEY, yladaNoelHomeCollapsedCopy } from '@/lib/
 import { trackEvent } from '@/lib/analytics-events'
 import { useAuthenticatedFetch } from '@/hooks/useAuthenticatedFetch'
 import { useYladaSidebarReveal } from '@/components/ylada/YladaSidebarRevealContext'
+import { getYladaAreaPathPrefix } from '@/config/ylada-areas'
 
 interface NoelHomeContentProps {
   areaCodigo: string
@@ -20,8 +22,8 @@ interface NoelHomeContentProps {
   /** Só para preview em dev: força banner de ativação (full/compact). */
   homeActivationPreview?: 'full' | 'compact'
   /**
-   * Estudo interno (ex.: /preview-primeira-home): uma única carta de recepção do Noel + “Começar agora”.
-   * Saudação por gênero: use `?genero=m` ou `?genero=f` na URL; sem parâmetro → “bem-vindo(a)”.
+   * Preview mínimo (ex.: /preview-primeira-home): só o cartão do Noel, sem banner pós-onboarding.
+   * Saudação: `?genero=m` ou `?genero=f` para Dr./Dra. em médico/odonto sem título no nome.
    */
   unifiedReceptionPreview?: boolean
 }
@@ -32,9 +34,32 @@ type NoelHomeChatShellProps = {
   area: NoelArea
   collapsedPromptOverride?: string
   collapsedLayout?: 'inline' | 'receptionHero'
+  /** Link para a página Como usar da mesma área (texto de apoio abaixo da recepção). */
+  comoUsarHref?: string
 }
 
-function NoelHomeChatShell({ area, collapsedPromptOverride, collapsedLayout = 'inline' }: NoelHomeChatShellProps) {
+function ComoUsarHomeHint({ href }: { href: string }) {
+  return (
+    <p className="text-[13px] sm:text-sm text-gray-600 leading-[1.55] sm:leading-relaxed">
+      <Link
+        href={href}
+        className="font-semibold text-sky-700 hover:text-sky-800 underline underline-offset-2 rounded-md px-1 -mx-1 inline-flex items-center min-h-[44px] sm:min-h-0 py-2 sm:py-0 touch-manipulation active:bg-sky-50/80"
+      >
+        Como usar
+      </Link>
+      {' '}
+      explica como potencializar seu negócio no Instagram, com fluxos e diagnósticos gratuitos para quem responde. Vale
+      a pena dar uma olhada antes de começar.
+    </p>
+  )
+}
+
+function NoelHomeChatShell({
+  area,
+  collapsedPromptOverride,
+  collapsedLayout = 'inline',
+  comoUsarHref,
+}: NoelHomeChatShellProps) {
   const [expanded, setExpanded] = useState(false)
   const [mounted, setMounted] = useState(false)
   const nc = yladaNoelHomeCollapsedCopy
@@ -91,30 +116,36 @@ function NoelHomeChatShell({ area, collapsedPromptOverride, collapsedLayout = 'i
       {!expanded ? (
         isHero ? (
           <section
-            className="mb-4 sm:mb-6 rounded-2xl border border-sky-200/90 bg-gradient-to-b from-sky-50/90 via-white to-white p-5 sm:p-6 shadow-md shadow-sky-900/5"
+            className="mb-3 sm:mb-6 rounded-2xl border border-sky-200/90 bg-gradient-to-b from-sky-50/90 via-white to-white px-4 py-5 sm:p-6 shadow-md shadow-sky-900/5 touch-manipulation"
             aria-label="Recepção do Noel"
           >
-            <div className="flex flex-col gap-5 sm:gap-6">
-              <p className="text-base sm:text-lg font-medium text-gray-900 leading-relaxed">{prompt}</p>
+            <div className="flex flex-col gap-4 sm:gap-6">
+              <p className="text-[15px] sm:text-lg font-medium text-gray-900 leading-[1.55] sm:leading-relaxed text-pretty">
+                {prompt}
+              </p>
+              {comoUsarHref ? <ComoUsarHomeHint href={comoUsarHref} /> : null}
               <button
                 type="button"
                 onClick={openChat}
-                className="inline-flex w-full min-h-[52px] items-center justify-center rounded-2xl bg-sky-600 px-5 py-3.5 text-center text-base font-bold text-white shadow-lg shadow-sky-600/25 hover:bg-sky-700 transition-colors"
+                className="inline-flex w-full min-h-[52px] sm:min-h-[52px] items-center justify-center rounded-2xl bg-sky-600 px-5 py-3.5 text-center text-base font-bold text-white shadow-lg shadow-sky-600/25 hover:bg-sky-700 active:bg-sky-800 transition-colors touch-manipulation"
               >
                 {nc.cta}
               </button>
             </div>
           </section>
         ) : (
-          <div className="rounded-xl border border-sky-200 bg-white shadow-sm p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-2 sm:mb-3">
-            <p className="text-sm font-medium text-gray-900 leading-snug">{prompt}</p>
-            <button
-              type="button"
-              onClick={openChat}
-              className="shrink-0 min-h-[48px] rounded-xl bg-sky-600 px-5 py-3 text-sm font-semibold text-white hover:bg-sky-700 w-full sm:w-auto transition-colors"
-            >
-              {nc.cta}
-            </button>
+          <div className="rounded-xl border border-sky-200 bg-white shadow-sm p-4 flex flex-col gap-3 mb-2 sm:mb-3">
+            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+              <p className="text-sm font-medium text-gray-900 leading-snug min-w-0 flex-1">{prompt}</p>
+              <button
+                type="button"
+                onClick={openChat}
+                className="shrink-0 min-h-[48px] rounded-xl bg-sky-600 px-5 py-3 text-sm font-semibold text-white hover:bg-sky-700 w-full sm:w-auto transition-colors"
+              >
+                {nc.cta}
+              </button>
+            </div>
+            {comoUsarHref ? <ComoUsarHomeHint href={comoUsarHref} /> : null}
           </div>
         )
       ) : null}
@@ -128,9 +159,15 @@ function NoelHomeChatShell({ area, collapsedPromptOverride, collapsedLayout = 'i
   )
 }
 
-const NOEL_SUBTITLE_PREFIX = 'Use o Noel para '
-
-function UnifiedReceptionNoelBlock({ area, areaCodigo }: { area: NoelArea; areaCodigo: string }) {
+function UnifiedReceptionNoelBlock({
+  area,
+  areaCodigo,
+  comoUsarHref,
+}: {
+  area: NoelArea
+  areaCodigo: string
+  comoUsarHref: string
+}) {
   const searchParams = useSearchParams()
   const genero = searchParams.get('genero')
   const authenticatedFetch = useAuthenticatedFetch()
@@ -178,7 +215,7 @@ function UnifiedReceptionNoelBlock({ area, areaCodigo }: { area: NoelArea; areaC
   if (receptionMessage === null) {
     return (
       <div
-        className="mb-4 min-h-[180px] rounded-2xl border border-sky-100 bg-sky-50/50 animate-pulse"
+        className="mb-3 sm:mb-4 min-h-[168px] sm:min-h-[180px] rounded-2xl border border-sky-100 bg-sky-50/50 animate-pulse"
         aria-hidden
       />
     )
@@ -189,69 +226,42 @@ function UnifiedReceptionNoelBlock({ area, areaCodigo }: { area: NoelArea; areaC
       area={area}
       collapsedPromptOverride={receptionMessage}
       collapsedLayout="receptionHero"
+      comoUsarHref={comoUsarHref}
     />
   )
 }
 
 export default function NoelHomeContent({
   areaCodigo,
-  areaLabel,
   area,
-  subtitle,
   homeActivationPreview,
   unifiedReceptionPreview,
 }: NoelHomeContentProps) {
-  const mentorLine =
-    areaLabel !== 'YLADA'
-      ? `Mentor estratégico para ${areaLabel.toLowerCase()}`
-      : 'Mentor estratégico'
+  const comoUsarHref = `${getYladaAreaPathPrefix(areaCodigo)}/como-usar`
 
-  const subtitleBody =
-    subtitle.startsWith(NOEL_SUBTITLE_PREFIX) ? subtitle.slice(NOEL_SUBTITLE_PREFIX.length) : null
+  const receptionSkeleton = (
+    <div className="mb-3 sm:mb-4 min-h-[168px] sm:min-h-[180px] rounded-2xl border border-sky-100 bg-sky-50/50 animate-pulse" />
+  )
 
   if (unifiedReceptionPreview) {
     return (
-      <div className="flex flex-col min-h-[calc(100vh-10rem)]">
-        <Suspense
-          fallback={
-            <div className="mb-4 min-h-[180px] rounded-2xl border border-sky-100 bg-sky-50/50 animate-pulse" />
-          }
-        >
-          <UnifiedReceptionNoelBlock area={area} areaCodigo={areaCodigo} />
+      <div className="flex flex-col min-h-[calc(100vh-10rem)] pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+        <Suspense fallback={receptionSkeleton}>
+          <UnifiedReceptionNoelBlock area={area} areaCodigo={areaCodigo} comoUsarHref={comoUsarHref} />
         </Suspense>
       </div>
     )
   }
 
   return (
-    <div className="flex flex-col min-h-[calc(100vh-10rem)]">
+    <div className="flex flex-col min-h-[calc(100vh-10rem)] pb-[max(0.75rem,env(safe-area-inset-bottom))]">
       <Suspense fallback={null}>
         <PosOnboardingHomePanel areaCodigo={areaCodigo} variantOverride={homeActivationPreview} />
       </Suspense>
-      <div className="mb-4">
-        <h1 className="text-gray-900 flex flex-wrap items-baseline gap-x-2 gap-y-1">
-          <span className="text-2xl shrink-0 leading-none" aria-hidden>
-            🧠
-          </span>
-          <span className="text-xl sm:text-2xl font-bold tracking-tight">Noel</span>
-          <span className="text-gray-300 font-light select-none" aria-hidden>
-            —
-          </span>
-          <span className="text-base sm:text-lg font-medium text-gray-600 leading-snug">{mentorLine}</span>
-        </h1>
-        <p className="text-sm text-gray-600 mt-2 leading-relaxed max-w-2xl">
-          {subtitleBody !== null ? (
-            <>
-              {NOEL_SUBTITLE_PREFIX}
-              <span className="font-semibold text-gray-900 text-sm sm:text-[15px]">{subtitleBody}</span>
-            </>
-          ) : (
-            subtitle
-          )}
-        </p>
-      </div>
       <NoelNeutralSpecializationNotice mentorArea={area} />
-      <NoelHomeChatShell area={area} />
+      <Suspense fallback={receptionSkeleton}>
+        <UnifiedReceptionNoelBlock area={area} areaCodigo={areaCodigo} comoUsarHref={comoUsarHref} />
+      </Suspense>
     </div>
   )
 }

@@ -3,7 +3,7 @@ import NoelHomeContent from '@/components/ylada/NoelHomeContent'
 
 export default function FitnessHomePage() {
   return (
-    <YladaAreaShell areaCodigo="fitness" areaLabel="Fitness">
+    <YladaAreaShell areaCodigo="fitness" areaLabel="Fitness" suppressSidebarUntilRevealed>
       <NoelHomeContent
         areaCodigo="fitness"
         areaLabel="Fitness"
