@@ -6,6 +6,7 @@ import { useState } from 'react'
 import YLADALogo from '@/components/YLADALogo'
 import { INSTITUTIONAL_AREAS } from '@/config/institutional-areas'
 import { useTranslations } from '@/hooks/useTranslations'
+import { freeTextMatchesBelezaEsteticaSegment } from '@/lib/pilot-other-to-estetica'
 import { getMatrixHubHrefForArea } from '@/lib/ylada-matrix-entry'
 
 /** Itens só por solicitação — no piloto entram apenas pelo campo livre. */
@@ -28,9 +29,13 @@ export default function PilotPageContent() {
   const pilotAreas = INSTITUTIONAL_AREAS.filter((a) => !PILOT_EXCLUDED_IDS.has(a.id))
 
   const submitOther = () => {
+    const trimmed = otherText.trim()
+    if (freeTextMatchesBelezaEsteticaSegment(trimmed)) {
+      router.push(pilotHrefForArea('estetica'))
+      return
+    }
     const q = new URLSearchParams()
     q.set('area', 'profissional-liberal')
-    const trimmed = otherText.trim()
     if (trimmed) q.set('profissao', trimmed)
     router.push(`/pt/solicitar-acesso?${q.toString()}`)
   }

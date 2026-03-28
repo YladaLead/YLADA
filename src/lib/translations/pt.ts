@@ -130,7 +130,7 @@ export const ptTranslations: Translations = {
         nutri: { title: 'Nutricionistas', description: 'Nutricionistas: ferramentas inteligentes e resultados mensuráveis.' },
         coach: { title: 'Coach do bem-estar', description: 'Coaches (bem-estar, carreira, vida): captação de clientes, links inteligentes e ferramentas para seus atendimentos e sessões.' },
         med: { title: 'Médicos', description: 'Médicos e especialistas: diagnóstico, links e autoridade no campo.' },
-        estetica: { title: 'Estética', description: 'Profissionais de estética: captação de clientes e links inteligentes.' },
+        estetica: { title: 'Beleza/Estética', description: 'Profissionais de estética: captação de clientes e links inteligentes.' },
         fitness: { title: 'Fitness', description: 'Personal trainers e coaches: captação e formação empresarial.' },
         perfumaria: { title: 'Perfumaria', description: 'Vendedores de fragrâncias: quizzes de perfil olfativo e leads.' },
         nutra: { title: 'Nutra / suplementos', description: 'Vendedores de suplementos: leads e conversão.' },
