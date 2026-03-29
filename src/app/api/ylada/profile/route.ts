@@ -207,7 +207,8 @@ export async function PUT(request: NextRequest) {
     }
 
     // Sincronizar nome e WhatsApp para user_profiles (admin, header, gate de área protegida)
-    const areaSpec = parsed.row.area_specific as Record<string, unknown> | null | undefined
+    const savedRow = data as Record<string, unknown> | null
+    const areaSpec = (savedRow?.area_specific ?? parsed.row.area_specific) as Record<string, unknown> | null | undefined
     const nome = areaSpec?.nome && String(areaSpec.nome).trim()
     const waRaw = areaSpec?.whatsapp
     const waDigits =
@@ -220,7 +221,37 @@ export async function PUT(request: NextRequest) {
     if (nome && nome.length >= 2) patch.nome_completo = nome
     if (waDigits.length >= 10) patch.whatsapp = waDigits
     if (patch.nome_completo !== undefined || patch.whatsapp !== undefined) {
-      await supabaseAdmin.from('user_profiles').update(patch).eq('user_id', user.id)
+      const { data: updatedRows, error: updateErr } = await supabaseAdmin
+        .from('user_profiles')
+        .update(patch)
+        .eq('user_id', user.id)
+        .select('user_id')
+      if (updateErr) {
+        console.error('[ylada/profile] user_profiles update:', updateErr)
+      } else if (!updatedRows?.length) {
+        const meta = user.user_metadata as Record<string, unknown> | undefined
+        const nomeFallback =
+          patch.nome_completo ??
+          (typeof meta?.full_name === 'string' ? meta.full_name : null) ??
+          (typeof meta?.name === 'string' ? meta.name : null) ??
+          ''
+        const { error: insertErr } = await supabaseAdmin.from('user_profiles').insert({
+          user_id: user.id,
+          email: user.email ?? '',
+          nome_completo: nomeFallback,
+          whatsapp: patch.whatsapp ?? null,
+          perfil: parsed.segment,
+          updated_at: patch.updated_at,
+        })
+        if (insertErr) {
+          if (insertErr.code === '23505') {
+            const { error: retryErr } = await supabaseAdmin.from('user_profiles').update(patch).eq('user_id', user.id)
+            if (retryErr) console.error('[ylada/profile] user_profiles update after duplicate:', retryErr)
+          } else {
+            console.error('[ylada/profile] user_profiles insert (sem linha prévia):', insertErr)
+          }
+        }
+      }
     }
 
     const resumo = buildProfileResumo(data as YladaNoelProfileRow)
