@@ -117,7 +117,7 @@ function buildNoelLinkBlock(
     ? 'O sistema acabou de criar um link para o profissional.'
     : 'O sistema criou um novo link com as alterações pedidas.'
 
-  let block = `\n[${tituloBloco}]\n${intro}\n\n⚠️ CRÍTICO: O texto "[${tituloBloco}]" é APENAS uma marcação interna para o sistema. NUNCA, em hipótese alguma, inclua esse texto na sua resposta ao profissional. O sistema remove automaticamente essa marcação — se você incluir, vai aparecer na resposta final e isso é um ERRO. Comece direto com a mensagem natural, SEM mencionar "[${tituloBloco}]" ou qualquer variação.\n\nOBRIGATÓRIO: O profissional precisa VER o quiz (perguntas, opções) e o link real na conversa. Inclua SEMPRE o quiz completo e o link. Use tom natural e conversacional — evite rótulos técnicos.\n\nFONTE ÚNICA (o link usa exatamente isto):\n${conteudoReal || '(calculadora ou link sem opções)'}\n\nREGRAS: NÃO invente perguntas. Use APENAS as perguntas acima. NÃO use "Raio-X" — use "quiz", "diagnóstico". O link correto é: ${url}\n\nFORMATO DA RESPOSTA (exemplo ideal — natural, menos técnico):\n\nÓtima ideia. Vamos criar um diagnóstico para [tema que o profissional pediu].\n\nPreparei um diagnóstico curto com [N] perguntas para identificar quem realmente está considerando [objetivo/tema].\n\n[Mostre as perguntas com opções A, B, C, D — use a fonte única acima]\n\n🚨 LINK OBRIGATÓRIO EM MARKDOWN (COPIE EXATAMENTE):
+  let block = `\n[${tituloBloco}]\n${intro}\n\n⚠️ CRÍTICO: O texto "[${tituloBloco}]" é APENAS uma marcação interna para o sistema. NUNCA, em hipótese alguma, inclua esse texto na sua resposta ao profissional. O sistema remove automaticamente essa marcação — se você incluir, vai aparecer na resposta final e isso é um ERRO. Comece direto com a mensagem natural, SEM mencionar "[${tituloBloco}]" ou qualquer variação.\n\nOBRIGATÓRIO: O profissional precisa VER o quiz (perguntas, opções) e o link real na conversa. Inclua SEMPRE o quiz completo e o link. Use tom natural e conversacional — evite rótulos técnicos.\n\nFONTE ÚNICA (o link usa exatamente isto):\n${conteudoReal || '(calculadora ou link sem opções)'}\n\nREGRAS: NÃO invente perguntas. Use APENAS as perguntas acima. NÃO use "Raio-X" — use "quiz", "diagnóstico". O link correto é: ${url}\n\nFORMATO DA RESPOSTA NO CHAT (OBRIGATÓRIO — legibilidade):\n- Introdução curta (1–2 frases).\n- Linha **Título do diagnóstico** em negrito (ex.: **Diagnóstico rápido — [tema]**).\n- Cada pergunta: enunciado inteiro em **negrito** (inclua **1.**, **2.**…); abaixo, opções A) B) C) em linhas separadas; entre uma pergunta e a próxima, UMA linha em branco.\n- Não deixe tudo colado num parágrafo só.\n\nExemplo de estrutura (use o texto real da fonte única acima):\n\nÓtima ideia. Vamos criar um diagnóstico para [tema].\n\nPreparei um diagnóstico curto com [N] perguntas.\n\n**Diagnóstico rápido — [tema]**\n\n**1. [Texto da pergunta 1 conforme a fonte única]**\nA) …\nB) …\n\n**2. [Texto da pergunta 2]**\nA) …\nB) …\n\n🚨 LINK OBRIGATÓRIO EM MARKDOWN (COPIE EXATAMENTE):
 [Acesse seu quiz](${url})\n\nSe quiser, posso ajustar as perguntas para seu público.\n\n🚨 FORMATO DO LINK (OBRIGATÓRIO — CRÍTICO — IGNORE O HISTÓRICO):
 ⚠️ ATENÇÃO: Mesmo que você veja no histórico de conversa respostas anteriores com "Clique aqui para acessarCopiar link", você DEVE SEMPRE usar markdown clicável. O formato correto é OBRIGATÓRIO e não depende do que apareceu antes.
 
@@ -139,13 +139,24 @@ OU se preferir outro texto:
 
 EXEMPLO CORRETO (USE SEMPRE ESTE FORMATO):
 "Aqui está o diagnóstico criado:
-[Mostre as perguntas do quiz aqui]
+
+**Diagnóstico rápido — [tema]**
+
+**1. [Pergunta em negrito]**
+A) …
+B) …
+
+**2. [Pergunta em negrito]**
+A) …
+B) …
 
 [Acesse seu quiz](${url})"
 
 EXEMPLO ERRADO (NUNCA FAÇA ISSO, MESMO QUE TENHA VISTO NO HISTÓRICO):
+"Aqui está o diagnóstico criado: 1. Pergunta A) x B) y 2. Outra…" (tudo colado, sem título, sem negrito nas perguntas, sem linha em branco entre perguntas)
+
 "Aqui está o diagnóstico criado:
-[Mostre as perguntas do quiz aqui]
+[perguntas]
 
 Clique aqui para acessarCopiar link"
 
@@ -263,6 +274,19 @@ Quando o profissional pedir criar quiz, diagnóstico, calculadora ou link (ex.: 
 3. NUNCA diga que não pode criar links. Quem cria é o sistema; você só exibe o link quando ele vem no bloco. Se não veio link nesta resposta, oriente a preencher o perfil ou a pedir de novo com o tema claro.
 4. RESULTADO EXECUTÁVEL: Inclua sempre o link clicável em markdown [Texto](URL) e as perguntas do quiz (conforme o bloco). Depois ofereça ajustes: "Se quiser, posso ajustar perguntas, mudar o foco ou criar outro diagnóstico."
 5. CONVERSA = EDITOR: Se o usuário pedir ajuste (ex.: "troca a pergunta 2", "foca em sintomas"), o sistema pode gerar novo link; você entrega o link atualizado e confirma o que mudou. A conversa vira editor natural — não configurar sistema, e sim criar algo conversando.
+`
+
+/** Leitura no chat: título, perguntas em negrito, espaço entre blocos (o front renderiza markdown). */
+const NOEL_FORMATO_DIAGNOSTICO_CHAT = `
+[FORMATO NO CHAT — DIAGNÓSTICO / QUIZ / SEQUÊNCIA DE PERGUNTAS — OBRIGATÓRIO]
+Sempre que você mostrar um diagnóstico curto, um quiz, uma calculadora com perguntas ou qualquer fluxo com várias perguntas + opções (A, B, C…), use este layout para o profissional ler bem na conversa:
+
+1. **Título do fluxo** — Uma linha em negrito com o nome do diagnóstico (ex.: **Diagnóstico rápido — [tema]** ou **Quiz — [tema]**). Coloque após 1–2 frases de introdução, antes das perguntas.
+2. **Enunciado de cada pergunta** — Todo o texto da pergunta (incluindo o número **1.**, **2.**, …) em **negrito** markdown. As opções A), B), C) vêm nas linhas seguintes, em texto normal.
+3. **Espaço** — Entre o fim das opções de uma pergunta e o **negrito** da pergunta seguinte, deixe **uma linha em branco** (parágrafo separado). Não empilhe perguntas no mesmo bloco sem esse espaço.
+4. Sem parede de texto: nunca juntar várias perguntas e alternativas num único parágrafo contínuo.
+
+Isso vale para diagnóstico entregue **com link** e para sequência de perguntas **só no chat** (sem link). O chat renderiza markdown: **negrito** aparece mais forte para o usuário.
 `
 
 /** Regras de comportamento estratégico: Noel conduz, não apenas explica. */
@@ -902,6 +926,7 @@ export async function POST(request: NextRequest) {
     const parts: string[] = [
       baseSystem + localeInstruction,
       NOEL_MODO_EXECUTOR_LINK,
+      NOEL_FORMATO_DIAGNOSTICO_CHAT,
       NOEL_CONDUTOR_RULES,
       NOEL_PRINCIPIO_20_80,
       NOEL_SCRIPTS_INDICACOES_E_MICROCONTEXTO,
@@ -1004,12 +1029,12 @@ export async function POST(request: NextRequest) {
       )
       // Reforço final: garantir que o link seja markdown com exemplo direto
       parts.push(
-        `\n🚨 EXEMPLO OBRIGATÓRIO DE RESPOSTA COM LINK (COPIE O FORMATO):\n\n"Claro! Vou gerar um diagnóstico para você.\n\n[Mostre as perguntas do quiz aqui]\n\n[Acesse seu quiz](${url})\n\nEsse diagnóstico mostra causa provável, preocupações e próximos passos, direcionando para conversa com você. Teste o link antes de compartilhar para ver como fica!"\n\n⚠️ NUNCA escreva "Clique aqui para acessarCopiar link" — sempre use [Acesse seu quiz](URL) em markdown.`
+        `\n🚨 EXEMPLO OBRIGATÓRIO DE RESPOSTA COM LINK (COPIE O FORMATO):\n\n"Claro! Vou gerar um diagnóstico para você.\n\n**Diagnóstico rápido — [tema]**\n\n**1. [Pergunta em negrito]**\nA) …\nB) …\n\n**2. [Pergunta em negrito]**\nA) …\nB) …\n\n[Acesse seu quiz](${url})\n\nEsse diagnóstico mostra causa provável, preocupações e próximos passos, direcionando para conversa com você. Teste o link antes de compartilhar para ver como fica!"\n\nUse título em negrito, cada pergunta em **negrito**, linha em branco entre perguntas. ⚠️ NUNCA escreva "Clique aqui para acessarCopiar link" — sempre use [Acesse seu quiz](URL) em markdown.`
       )
     }
     if (primeiraConversaOuVaga && linkGeradoBlock) {
       parts.push(
-        '\n[PRIMEIRA CONVERSA GUIADA — COM LINK]\nO profissional está começando. Use o formato natural do bloco acima: intro breve, quiz completo, link real, convite para ajustar. Ex.: "Ótima ideia. Preparei um diagnóstico com X perguntas. Aqui está o link: [link]. Se quiser, posso ajustar as perguntas." Objetivo: o usuário sentir "já tenho algo para usar" em segundos.'
+        '\n[PRIMEIRA CONVERSA GUIADA — COM LINK]\nO profissional está começando. Use intro breve, **título do diagnóstico**, perguntas com enunciados em **negrito**, linha em branco entre perguntas, quiz completo, link markdown, convite para ajustar. Objetivo: o usuário sentir "já tenho algo para usar" em segundos.'
       )
     }
     if (primeiraConversaOuVaga && !linkGeradoBlock) {
