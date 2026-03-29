@@ -611,10 +611,10 @@ export default function LoginForm({
     logoPath ||
     (useYladaBrandingOnSignUp && isSignUp
       ? yladaHorizontalLogo
-      : perfil === 'wellness' || perfil === 'coach-bem-estar'
+        : perfil === 'wellness' || perfil === 'coach-bem-estar'
         ? '/images/logo/wellness-horizontal.png'
         : perfil === 'nutri'
-          ? '/images/logo/nutri-horizontal.png'
+          ? yladaHorizontalLogo
           : perfil === 'coach'
             ? '/images/logo/coach-horizontal.png'
             : perfil === 'ylada'
@@ -637,7 +637,7 @@ export default function LoginForm({
                   : perfil === 'wellness' || perfil === 'coach-bem-estar'
                     ? 'YLADA - Coach de bem-estar'
                     : perfil === 'nutri'
-                      ? 'Nutri by YLADA'
+                      ? 'YLADA'
                       : perfil === 'coach'
                         ? 'Coach by YLADA'
                         : perfil === 'ylada'

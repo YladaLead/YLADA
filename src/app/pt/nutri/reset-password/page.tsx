@@ -170,8 +170,8 @@ function ResetPasswordContent() {
         <div className="text-center mb-8 sm:mb-10">
           <div className="flex justify-center mb-6 sm:mb-8">
             <Image
-              src="/images/logo/nutri-horizontal.png"
-              alt="Nutri by YLADA"
+              src="/images/logo/ylada/horizontal/azul-claro/ylada-horizontal-azul-claro.png"
+              alt="YLADA"
               width={280}
               height={84}
               className="bg-transparent object-contain h-16 sm:h-20 w-auto"

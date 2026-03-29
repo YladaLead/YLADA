@@ -245,12 +245,15 @@ export const isNutriFreedomTierUser = isMatrixFreedomTierUser
 
 /**
  * Verifica se usuário tem benefícios “sem limite freemium” na matriz YLADA (links, Noel, WhatsApp).
- * Inclui: ylada mensal/anual/trial ou free cortesia; **ou** assinatura ativa no **segmento do perfil** (nutri, med, coach, …) equivalente a pago/trial/cortesia.
+ * Inclui: **admin ou suporte** (contas demo e equipe, ex. `demo.nutri@ylada.com` com `is_support`);
+ * ylada mensal/anual/trial ou free cortesia; **ou** assinatura ativa no **segmento do perfil** (nutri, med, coach, …) equivalente a pago/trial/cortesia.
  * Wellness não entra aqui. Não inclui: free migração/legado no segmento.
  * @see docs/SPEC-FREEMIUM-YLADA.md
  */
 export async function hasYladaProPlan(userId: string): Promise<boolean> {
   try {
+    if (await canBypassSubscription(userId)) return true
+
     const yladaSub = await getActiveSubscription(userId, 'ylada')
     if (yladaSub && activeYladaRowIsUnlimited(yladaSub)) return true
 
