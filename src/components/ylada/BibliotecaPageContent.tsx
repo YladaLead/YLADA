@@ -29,7 +29,6 @@ import {
 } from '@/config/ylada-biblioteca'
 import { getPerfilSimuladoByKey, SIMULATE_COOKIE_NAME } from '@/data/perfis-simulados'
 import { useAuth } from '@/hooks/useAuth'
-import { CompartilharDiagnosticoContent } from './CompartilharDiagnosticoContent'
 
 function getSimulateCookie(): string | null {
   if (typeof document === 'undefined') return null
@@ -87,7 +86,7 @@ function BibliotecaCard({
   linksPath: string
   creatingId: string | null
   setCreatingId: (id: string | null) => void
-  setLinkCriado: (v: { url: string; slug: string; titulo: string; tema?: string } | null) => void
+  setLinkCriado: (v: { id: string; url: string; slug: string; titulo: string; tema?: string } | null) => void
   variant: 'default' | 'sugestao' | 'comece'
   segmentCode?: BibliotecaSegmentCode | null
   /** Selo para "Sugestões para hoje" (ex: "🔥 Mais usado"). */
@@ -120,13 +119,9 @@ function BibliotecaCard({
       })
       const data = await res.json()
       if (data?.success && data?.data?.id) {
-        if (item.tipo === 'calculadora' && data?.data?.url) {
-          const base = typeof window !== 'undefined' ? window.location.origin : ''
-          const url = data.data.url || `${base}/l/${data.data.slug}`
-          setLinkCriado({ url, slug: data.data.slug, titulo: item.titulo, tema: item.tema })
-        } else {
-          window.location.href = `${linksPath}/editar/${data.data.id}`
-        }
+        const base = typeof window !== 'undefined' ? window.location.origin : ''
+        const url = data.data.url || `${base}/l/${data.data.slug}`
+        setLinkCriado({ id: data.data.id, url, slug: data.data.slug, titulo: item.titulo, tema: item.tema })
       } else if (data?.success && data?.data?.url) {
         window.location.href = `${linksPath}?created=1`
       } else if (data?.limit_reached && typeof data?.message === 'string' && data.message.trim()) {
@@ -233,7 +228,7 @@ function BibliotecaCard({
               isSugestao ? 'bg-amber-600 hover:bg-amber-700' : 'bg-sky-600 hover:bg-sky-700'
             }`}
           >
-            {creatingId === item.id ? 'Criando...' : isSugestao ? 'Usar agora' : 'Usar'}
+            {creatingId === item.id ? 'Criando...' : 'Usar esse'}
           </button>
         </div>
       </div>
@@ -260,7 +255,7 @@ export default function BibliotecaPageContent({ areaCodigo, areaLabel, embedded 
   const [items, setItems] = useState<BibliotecaItemRow[]>([])
   const [loading, setLoading] = useState(true)
   const [creatingId, setCreatingId] = useState<string | null>(null)
-  const [linkCriado, setLinkCriado] = useState<{ url: string; slug: string; titulo: string; tema?: string } | null>(null)
+  const [linkCriado, setLinkCriado] = useState<{ id: string; url: string; slug: string; titulo: string; tema?: string } | null>(null)
   const [copiado, setCopiado] = useState(false)
   const [progressao, setProgressao] = useState<{
     passo1: boolean
@@ -432,13 +427,9 @@ export default function BibliotecaPageContent({ areaCodigo, areaLabel, embedded 
           })
           const data = await res.json()
           if (data?.success && data?.data?.id) {
-            if (itemIdeia.tipo === 'calculadora' && data?.data?.url) {
-              const base = typeof window !== 'undefined' ? window.location.origin : ''
-              const url = data.data.url || `${base}/l/${data.data.slug}`
-              setLinkCriado({ url, slug: data.data.slug, titulo: tituloParaLink, tema: ideiaDoDia.tema })
-            } else {
-              window.location.href = `${linksPath}/editar/${data.data.id}`
-            }
+            const base = typeof window !== 'undefined' ? window.location.origin : ''
+            const url = data.data.url || `${base}/l/${data.data.slug}`
+            setLinkCriado({ id: data.data.id, url, slug: data.data.slug, titulo: tituloParaLink, tema: ideiaDoDia.tema })
           } else if (data?.success && data?.data?.url) {
             window.location.href = `${linksPath}?created=1`
           } else if (data?.limit_reached && typeof data?.message === 'string' && data.message.trim()) {
@@ -479,7 +470,7 @@ export default function BibliotecaPageContent({ areaCodigo, areaLabel, embedded 
           disabled={!!creatingId}
           className="shrink-0 rounded-lg bg-sky-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-sky-700 disabled:opacity-60 transition-colors"
         >
-          {creatingId === `ideia-${ideiaDoDia.tema}` ? 'Criando...' : 'Usar este'}
+          {creatingId === `ideia-${ideiaDoDia.tema}` ? 'Criando...' : 'Usar esse'}
         </button>
       </div>
     )
@@ -954,19 +945,49 @@ export default function BibliotecaPageContent({ areaCodigo, areaLabel, embedded 
         )}
 
         {divulgarMeuLink && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50" aria-modal="true" role="dialog" onClick={() => setDivulgarMeuLink(null)}>
-            <div className="bg-white rounded-xl shadow-lg border border-gray-200 w-full max-w-lg max-h-[90vh] overflow-y-auto p-5" onClick={(e) => e.stopPropagation()}>
-              <h3 className="text-sm font-semibold text-gray-900 mb-2">Divulgar</h3>
-              <p className="text-xs text-gray-600 mb-4">{divulgarMeuLink.title || divulgarMeuLink.slug}</p>
-              <CompartilharDiagnosticoContent
-                key={divulgarMeuLink.id}
-                titulo={divulgarMeuLink.title || divulgarMeuLink.slug || 'Diagnóstico'}
-                url={divulgarMeuLink.url}
-                nomeProfissional={userProfile?.nome_completo ?? 'Profissional'}
-                contador={divulgarMeuLink.stats?.diagnosis_count}
-                tema={divulgarMeuLink.theme_raw}
-              />
-              <button type="button" onClick={() => setDivulgarMeuLink(null)} className="mt-4 w-full py-2 text-sm text-gray-500 hover:text-gray-700">
+          <div
+            className="fixed inset-0 z-50 flex items-end justify-center sm:items-center sm:p-4 bg-black/50"
+            aria-modal="true"
+            role="dialog"
+            onClick={() => setDivulgarMeuLink(null)}
+          >
+            <div
+              className="w-full max-w-md bg-white rounded-t-2xl sm:rounded-xl shadow-xl border border-gray-200 p-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:p-5"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <h3 className="text-sm font-semibold text-gray-900">Seu link</h3>
+              <p className="text-xs text-gray-600 mt-1 line-clamp-2">{divulgarMeuLink.title || divulgarMeuLink.slug}</p>
+              <div className="mt-4 flex flex-col gap-2">
+                <a
+                  href={divulgarMeuLink.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center rounded-xl bg-sky-600 px-4 py-3 text-sm font-medium text-white hover:bg-sky-700"
+                >
+                  Ver preview
+                </a>
+                <button
+                  type="button"
+                  onClick={() => {
+                    navigator.clipboard.writeText(divulgarMeuLink.url)
+                  }}
+                  className="rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm font-medium text-gray-800 hover:bg-gray-50"
+                >
+                  Copiar URL
+                </button>
+                <Link
+                  href={`${linksPath}/editar/${divulgarMeuLink.id}`}
+                  className="flex items-center justify-center rounded-xl border border-sky-200 bg-sky-50 px-4 py-3 text-sm font-medium text-sky-800 hover:bg-sky-100"
+                  onClick={() => setDivulgarMeuLink(null)}
+                >
+                  Editar link
+                </Link>
+              </div>
+              <button
+                type="button"
+                onClick={() => setDivulgarMeuLink(null)}
+                className="mt-3 w-full py-2 text-sm text-gray-500 hover:text-gray-700"
+              >
                 Fechar
               </button>
             </div>
@@ -974,18 +995,43 @@ export default function BibliotecaPageContent({ areaCodigo, areaLabel, embedded 
         )}
 
         {linkCriado && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
-            <div className="bg-white rounded-2xl shadow-xl max-w-lg w-full max-h-[90vh] overflow-y-auto p-6 space-y-4">
-              <h3 className="text-lg font-semibold text-gray-900">Link criado!</h3>
-              <p className="text-sm text-gray-600">{linkCriado.titulo}</p>
-              <div className="flex flex-col gap-3">
+          <div
+            className="fixed inset-0 z-50 flex items-end justify-center sm:items-center sm:p-4 bg-black/50"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="biblioteca-link-pronto-title"
+            onClick={() => setLinkCriado(null)}
+          >
+            <div
+              className="w-full max-w-md bg-white rounded-t-2xl sm:rounded-2xl shadow-xl p-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:p-5 sm:max-h-[min(90vh,520px)] sm:overflow-y-auto"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-gray-200 sm:hidden" aria-hidden />
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <h3 id="biblioteca-link-pronto-title" className="text-base font-semibold text-gray-900">
+                    Link pronto
+                  </h3>
+                  <p className="text-sm text-gray-600 mt-1 line-clamp-3">{linkCriado.titulo}</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setLinkCriado(null)}
+                  className="shrink-0 rounded-lg px-2 py-1 text-sm text-gray-500 hover:bg-gray-100 hover:text-gray-800"
+                  aria-label="Fechar"
+                >
+                  ✕
+                </button>
+              </div>
+              <p className="text-xs text-gray-500 mt-3 mb-2">O que você quer fazer?</p>
+              <div className="flex flex-col gap-2">
                 <a
                   href={linkCriado.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-sky-100 text-sky-700 font-medium hover:bg-sky-200 transition-colors"
+                  className="flex items-center justify-center gap-2 rounded-xl bg-sky-600 px-4 py-3 text-sm font-medium text-white hover:bg-sky-700"
                 >
-                  <span>👁</span> Ver preview
+                  Ver preview
                 </a>
                 <button
                   type="button"
@@ -994,32 +1040,18 @@ export default function BibliotecaPageContent({ areaCodigo, areaLabel, embedded 
                     setCopiado(true)
                     setTimeout(() => setCopiado(false), 2000)
                   }}
-                  className="flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-gray-100 text-gray-700 font-medium hover:bg-gray-200 transition-colors"
+                  className="flex items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm font-medium text-gray-800 hover:bg-gray-50"
                 >
-                  {copiado ? '✓ Copiado!' : '📋 Copiar URL'}
+                  {copiado ? '✓ URL copiada' : 'Copiar URL'}
                 </button>
-                <a
-                  href={linksPath}
-                  className="flex items-center justify-center gap-2 py-3 px-4 rounded-xl border border-gray-200 text-gray-600 font-medium hover:bg-gray-50 transition-colors"
+                <Link
+                  href={`${linksPath}/editar/${linkCriado.id}`}
+                  className="flex items-center justify-center rounded-xl border border-sky-200 bg-sky-50 px-4 py-3 text-sm font-medium text-sky-800 hover:bg-sky-100"
+                  onClick={() => setLinkCriado(null)}
                 >
-                  Ir para meus links
-                </a>
+                  Editar link
+                </Link>
               </div>
-              <div className="pt-4 border-t border-gray-200">
-                <CompartilharDiagnosticoContent
-                  titulo={linkCriado.titulo}
-                  url={linkCriado.url}
-                  nomeProfissional={userProfile?.nome_completo ?? 'Profissional'}
-                  tema={linkCriado.tema}
-                />
-              </div>
-              <button
-                type="button"
-                onClick={() => setLinkCriado(null)}
-                className="w-full py-2 text-sm text-gray-500 hover:text-gray-700"
-              >
-                Fechar
-              </button>
             </div>
           </div>
         )}

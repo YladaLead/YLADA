@@ -52,9 +52,9 @@ export default function NinaSupportTriage({
             type="button"
             disabled={chipsDisabled || whatsappLoading}
             onClick={() => void onWhatsAppClick()}
-            className="group flex w-full items-center justify-center gap-2.5 rounded-2xl bg-[#25D366] px-4 py-3.5 text-sm font-semibold text-white shadow-md shadow-emerald-900/20 transition-all hover:bg-[#20BD5A] hover:shadow-lg active:scale-[0.99] disabled:opacity-60 disabled:pointer-events-none touch-manipulation"
+            className="group flex w-full items-center justify-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-3.5 py-2.5 text-sm font-medium text-emerald-800 transition-colors hover:bg-emerald-100 active:bg-emerald-100/90 disabled:opacity-60 disabled:pointer-events-none touch-manipulation"
           >
-            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/20" aria-hidden>
+            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-100" aria-hidden>
               {whatsappLoading ? (
                 <svg className="h-5 w-5 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden>
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
@@ -74,7 +74,7 @@ export default function NinaSupportTriage({
               {whatsappLoading ? 'Abrindo…' : whatsappChip.label}
             </span>
           </button>
-          <p className="mt-2 text-center text-[11px] text-gray-500">
+          <p className="mt-1.5 text-center text-[11px] text-gray-500">
             A equipe é avisada automaticamente. Você será redirecionado para o WhatsApp.
           </p>
         </div>

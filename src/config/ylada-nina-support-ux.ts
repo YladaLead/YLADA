@@ -19,10 +19,6 @@ const MATRIX_BASE_CHIPS: NinaSupportQuickChip[] = [
   { label: 'Links', message: 'Onde ficam meus links e como compartilho?' },
   { label: 'Leads', message: 'Onde vejo leads?' },
   { label: 'Plano', message: 'Onde vejo assinatura e pagamentos?' },
-  {
-    label: 'Prévia no WhatsApp',
-    message: 'No WhatsApp, a imagem ou o título do meu link aparece errado.',
-  },
   WHATSAPP_CTA,
 ]
 
@@ -36,7 +32,6 @@ const WELLNESS_CHIPS: NinaSupportQuickChip[] = [
   { label: 'Links', message: 'Onde ficam meus links?' },
   { label: 'Configurações', message: 'Onde altero dados da conta?' },
   { label: 'Perfil', message: 'Onde fica meu perfil e minhas metas?' },
-  { label: 'Prévia no WhatsApp', message: 'No WhatsApp, imagem ou título do link errados.' },
   WHATSAPP_CTA,
 ]
 

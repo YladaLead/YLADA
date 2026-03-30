@@ -329,6 +329,23 @@ const NOEL_SCRIPTS_INDICACOES_E_MICROCONTEXTO = `
    - Se ele já descreveu a situação, infira; só confirme em uma frase curta se ajudar ("Pelo que você descreveu, parece lead morno — é isso?").
 `
 
+/** Antes de mandar link/quiz: curiosidade + permissão — evita “atacar” o contato com ferramenta. */
+const NOEL_PERMISSAO_E_CURIOSIDADE_ANTES_DO_LINK = `
+[LINK / FERRAMENTA / QUIZ — CURIOSIDADE E PERMISSÃO ANTES]
+Quando o profissional pedir script para enviar link, diagnóstico, quiz ou ferramenta, ou perguntar “o que mandar”, o padrão é **não** sugerir só jogar o link na frente sem contexto (isso parece spam e baixa resposta).
+
+ORDEM OBRIGATÓRIA — sugira ao profissional **pelo menos duas mensagens** (ou uma mensagem em dois blocos claros), nesta ordem:
+1) **Uma pergunta de curiosidade ou contexto** — adaptada ao nicho (ex.: estética/pele: o que mais incomoda hoje; saúde: rotina ou sintoma; negócio: maior dificuldade). Objetivo: despertar curiosidade e mostrar que você entende do assunto, sem interrogatório longo.
+2) **Script pedindo permissão explícita** antes de enviar o link — ex.: “Se fizer sentido, te mando um link que [benefício em uma linha]. Posso te enviar?” ou “Quer que eu te mande um diagnóstico rápido que ajuda com [X]? Só mando se você topar.”
+3) **Só então** a mensagem com o link — quando a pessoa alinhar, responder bem à pergunta, ou quando o profissional disser que o contato já pediu.
+
+Exceções (pode ir direto ao texto com link na sugestão):
+- O contato **já pediu** o link, o quiz ou “manda aí”.
+- Follow-up de quem já respondeu diagnóstico — use também [PRIMEIRA MENSAGEM APÓS DIAGNÓSTICO]; ainda pode acrescentar linha de permissão se soar natural.
+
+Regra de ouro: **pergunta curta + pedido de permissão** antes de ferramenta solta. Treine o profissional nesse hábito.
+`
+
 /**
  * Evita que o Noel assuma sempre "captação / diagnóstico para atrair clientes" quando o profissional
  * quer mensagem para cliente ou paciente que já atende (B2C / relacionamento).
@@ -965,6 +982,7 @@ export async function POST(request: NextRequest) {
       NOEL_CONDUTOR_RULES,
       NOEL_PRINCIPIO_20_80,
       NOEL_SCRIPTS_INDICACOES_E_MICROCONTEXTO,
+      NOEL_PERMISSAO_E_CURIOSIDADE_ANTES_DO_LINK,
       NOEL_METODO_CONDUCAO_VENDA,
       NOEL_PRIMEIRA_MENSAGEM_APOS_DIAGNOSTICO,
       NOEL_CONTATO_FRIO,

@@ -131,23 +131,25 @@ function NoelHomeChatShell({
   collapsedLayout = 'inline',
   comoUsarHref,
 }: NoelHomeChatShellProps) {
+  const searchParams = useSearchParams()
   const [expanded, setExpanded] = useState(false)
   const [mounted, setMounted] = useState(false)
   const nc = yladaNoelHomeCollapsedCopy
   const prompt = collapsedPromptOverride ?? nc.question
   const isHero = collapsedLayout === 'receptionHero'
   const sidebarReveal = useYladaSidebarReveal()
+  const forceOpenFromSidebar = searchParams.get('chat') === '1'
 
   useEffect(() => {
     setMounted(true)
     try {
-      if (localStorage.getItem(YLADA_NOEL_HOME_EXPANDED_KEY) === '1') {
+      if (forceOpenFromSidebar || localStorage.getItem(YLADA_NOEL_HOME_EXPANDED_KEY) === '1') {
         setExpanded(true)
       }
     } catch {
       /* ok */
     }
-  }, [])
+  }, [forceOpenFromSidebar])
 
   useEffect(() => {
     if (expanded) sidebarReveal?.revealSidebar()

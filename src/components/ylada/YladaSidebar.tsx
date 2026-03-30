@@ -60,7 +60,8 @@ export default function YladaSidebar({
     (item: YladaMenuItem) => {
       const path = itemPath(item)
       const hash = 'hash' in item && item.hash ? `#${item.hash}` : ''
-      return `${prefix}/${path}${hash}`
+      const query = item.key === 'home' ? '?chat=1' : ''
+      return `${prefix}/${path}${query}${hash}`
     },
     [itemPath, prefix]
   )
