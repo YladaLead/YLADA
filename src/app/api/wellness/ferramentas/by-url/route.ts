@@ -453,6 +453,16 @@ export async function GET(request: NextRequest) {
             title: 'Avaliação do Sono e Energia',
             description: 'Avalie se o sono está restaurando sua energia diária',
             emoji: '😴'
+          },
+          'quiz-perfil-nutricional': {
+            title: 'Quiz Perfil Nutricional',
+            description: 'Identifique como seu corpo absorve nutrientes e receba orientações personalizadas',
+            emoji: '🥗'
+          },
+          'quiz-nutrition-assessment': {
+            title: 'Quiz Perfil Nutricional',
+            description: 'Identifique como seu corpo absorve nutrientes e receba orientações personalizadas',
+            emoji: '🥗'
           }
         }
         const builtIn = builtInTemplates[toolSlug]

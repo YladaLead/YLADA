@@ -360,6 +360,8 @@ export default function FerramentaPersonalizadaPage() {
       )
     }
 
+    const normalizedSlug = normalizeTemplateSlug(tool.template_slug)
+
     const config = {
       title: tool.title,
       description: tool.description,
@@ -374,9 +376,6 @@ export default function FerramentaPersonalizadaPage() {
       template_slug: tool.template_slug || normalizedSlug, // Incluir template_slug para mensagens WhatsApp
       slug: tool.template_slug || normalizedSlug, // Incluir slug como fallback
     }
-
-    // ✅ Normalizar template_slug para garantir consistência
-    const normalizedSlug = normalizeTemplateSlug(tool.template_slug)
 
     switch (normalizedSlug) {
       case 'calc-imc':
@@ -527,6 +526,60 @@ export default function FerramentaPersonalizadaPage() {
                   description: tool.description,
                   whatsapp_number: tool.whatsapp_number,
                   country_code: tool.user_profiles?.country_code
+                }}
+                profession="wellness"
+                onClose={() => router.push('/pt/wellness/ferramentas')}
+                isPreview={false}
+              />
+            </main>
+          </div>
+        )
+      }
+      // Quiz Perfil Nutricional — mesmo padrão do sono-energia: content vazio no banco / built-in ainda renderiza o fluxo
+      // (quiz-nutrition-assessment normaliza para quiz-perfil-nutricional)
+      case 'quiz-perfil-nutricional': {
+        const contentPerfilNutricional =
+          tool.content?.questions?.length || tool.content?.items?.length
+            ? tool.content
+            : {
+                template_type: 'quiz' as const,
+                questions: [
+                  {
+                    question: 'Você costuma sentir desconforto digestivo após refeições?',
+                    options: ['Sim, frequentemente', 'Às vezes', 'Raramente', 'Não'],
+                  },
+                  {
+                    question: 'Consome alimentos probióticos ou fermentados regularmente?',
+                    options: ['Sim, quase todos os dias', 'Algumas vezes por semana', 'Raramente', 'Não'],
+                  },
+                  {
+                    question: 'Nota que absorve bem os nutrientes (sem sintomas de deficiência)?',
+                    options: ['Sim, em geral', 'Na maior parte do tempo', 'Às vezes tenho dúvidas', 'Não, sinto sintomas'],
+                  },
+                  {
+                    question: 'Costuma combinar alimentos estrategicamente (ex.: ferro + vitamina C)?',
+                    options: ['Sim, com frequência', 'Às vezes', 'Raramente', 'Não costumo pensar nisso'],
+                  },
+                  {
+                    question: 'Faz uso de suplementos vitamínicos ou minerais?',
+                    options: ['Sim, com orientação', 'Sim, por conta própria', 'Só ocasionalmente', 'Não'],
+                  },
+                ],
+              }
+        return (
+          <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+            <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+              <DynamicTemplatePreview
+                template={{
+                  id: tool.id,
+                  nome: tool.title,
+                  name: tool.title,
+                  slug: tool.template_slug,
+                  type: contentPerfilNutricional.template_type || 'quiz',
+                  content: contentPerfilNutricional,
+                  description: tool.description,
+                  whatsapp_number: tool.whatsapp_number,
+                  country_code: tool.user_profiles?.country_code,
                 }}
                 profession="wellness"
                 onClose={() => router.push('/pt/wellness/ferramentas')}
