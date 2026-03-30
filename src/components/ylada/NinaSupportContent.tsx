@@ -5,9 +5,11 @@ import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { useAuthenticatedFetch } from '@/hooks/useAuthenticatedFetch'
 import { getNinaSupportQuickChips } from '@/config/ylada-nina-support-ux'
+import { getCarolWhatsAppUrl } from '@/config/ylada-support'
 import type { NoelArea } from '@/config/noel-ux-content'
 import type { NinaSupportUi } from '@/lib/ylada-nina-support-prompt'
 import NinaSupportTriage from '@/components/ylada/NinaSupportTriage'
+import { trackEvent } from '@/lib/analytics-events'
 
 type Message = {
   id: string
@@ -66,6 +68,7 @@ export default function NinaSupportContent(props: NinaSupportContentProps) {
   })
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
+  const [whatsappLoading, setWhatsappLoading] = useState(false)
   const scrollRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const authFetch = useAuthenticatedFetch()
@@ -169,6 +172,35 @@ export default function NinaSupportContent(props: NinaSupportContentProps) {
     [supportUi, areaCodigo]
   )
 
+  const openSupportWhatsApp = useCallback(async () => {
+    setWhatsappLoading(true)
+    try {
+      trackEvent('ylada_nina_support_whatsapp', {
+        area: areaCodigo,
+        supportUi: supportUi === 'wellness' ? 'wellness' : 'matrix',
+      })
+      const res = await authFetch('/api/ylada/support/whatsapp-intent', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ supportUi, segment: areaCodigo }),
+      })
+      const data = (await res.json().catch(() => ({}))) as { whatsappUrl?: string; error?: string }
+      if (!res.ok) {
+        throw new Error(data.error || 'Não foi possível abrir o WhatsApp.')
+      }
+      const url = data.whatsappUrl?.trim()
+      if (url) {
+        window.open(url, '_blank', 'noopener,noreferrer')
+      } else {
+        window.open(getCarolWhatsAppUrl(null), '_blank', 'noopener,noreferrer')
+      }
+    } catch {
+      window.open(getCarolWhatsAppUrl(null), '_blank', 'noopener,noreferrer')
+    } finally {
+      setWhatsappLoading(false)
+    }
+  }, [areaCodigo, authFetch, supportUi])
+
   const clearChat = useCallback(() => {
     const initial: Message[] = [
       {
@@ -186,7 +218,13 @@ export default function NinaSupportContent(props: NinaSupportContentProps) {
     <div className="max-w-3xl mx-auto space-y-4 pb-8">
       <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Suporte</h1>
 
-      <NinaSupportTriage chips={quickChips} onChipClick={sendText} chipsDisabled={loading} />
+      <NinaSupportTriage
+        chips={quickChips}
+        onChipClick={sendText}
+        onWhatsAppClick={openSupportWhatsApp}
+        chipsDisabled={loading || whatsappLoading}
+        whatsappLoading={whatsappLoading}
+      />
 
       <div className="rounded-2xl border border-gray-200 bg-white shadow-sm overflow-hidden flex flex-col min-h-[420px] max-h-[min(70vh,640px)] sm:max-h-[min(72vh,680px)]">
         <div className="px-4 py-3 border-b border-gray-100 bg-gray-50 flex items-center justify-between gap-2">

@@ -2,8 +2,16 @@ import type { NinaSupportUi } from '@/lib/ylada-nina-support-prompt'
 
 export interface NinaSupportQuickChip {
   label: string
-  /** Texto enviado ao chat da Nina ao clicar. */
+  /** Texto enviado ao chat da Nina ao clicar (ignorado se `action` for whatsapp). */
   message: string
+  /** Último CTA: abre WhatsApp e notifica a equipe (não envia mensagem ao chat). */
+  action?: 'whatsapp'
+}
+
+const WHATSAPP_CTA: NinaSupportQuickChip = {
+  label: 'Falar por WhatsApp',
+  message: '',
+  action: 'whatsapp',
 }
 
 const MATRIX_BASE_CHIPS: NinaSupportQuickChip[] = [
@@ -11,11 +19,11 @@ const MATRIX_BASE_CHIPS: NinaSupportQuickChip[] = [
   { label: 'Links', message: 'Onde ficam meus links e como compartilho?' },
   { label: 'Leads', message: 'Onde vejo leads?' },
   { label: 'Plano', message: 'Onde vejo assinatura e pagamentos?' },
-  { label: 'Falar com a equipe', message: 'Preciso falar com alguém da equipe (WhatsApp ou chamado).' },
   {
     label: 'Prévia no WhatsApp',
     message: 'No WhatsApp, a imagem ou o título do meu link aparece errado.',
   },
+  WHATSAPP_CTA,
 ]
 
 const NUTRI_EXTRA: NinaSupportQuickChip = {
@@ -28,8 +36,8 @@ const WELLNESS_CHIPS: NinaSupportQuickChip[] = [
   { label: 'Links', message: 'Onde ficam meus links?' },
   { label: 'Configurações', message: 'Onde altero dados da conta?' },
   { label: 'Perfil', message: 'Onde fica meu perfil e minhas metas?' },
-  { label: 'Suporte', message: 'Como falo com o suporte?' },
   { label: 'Prévia no WhatsApp', message: 'No WhatsApp, imagem ou título do link errados.' },
+  WHATSAPP_CTA,
 ]
 
 export function getNinaSupportQuickChips(params: {
@@ -39,7 +47,8 @@ export function getNinaSupportQuickChips(params: {
   if (params.supportUi === 'wellness') {
     return [...WELLNESS_CHIPS]
   }
-  const chips = [...MATRIX_BASE_CHIPS]
+  const chips = MATRIX_BASE_CHIPS.filter((c) => c.action !== 'whatsapp')
+  const wa = MATRIX_BASE_CHIPS.find((c) => c.action === 'whatsapp') ?? WHATSAPP_CTA
   if (params.areaCodigo === 'nutri') {
     const idx = chips.findIndex((c) => c.label === 'Plano')
     if (idx >= 0) {
@@ -48,5 +57,5 @@ export function getNinaSupportQuickChips(params: {
       chips.push(NUTRI_EXTRA)
     }
   }
-  return chips
+  return [...chips, wa]
 }

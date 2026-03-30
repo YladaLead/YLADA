@@ -45,8 +45,9 @@ export function ActiveLinksProModal({
           Limite do plano gratuito
         </h2>
         <p className="mt-1 text-sm font-medium text-amber-900">
-          O link não foi criado: no plano gratuito você pode manter <strong>1 diagnóstico ativo por vez</strong>
-          (não é um limite mensal — é um diagnóstico publicado de cada vez).
+          O link não foi criado: no plano gratuito você pode manter <strong>1 diagnóstico ativo por vez</strong>.
+          Isso não é &quot;um link por mês&quot; — é um diagnóstico no ar ao mesmo tempo. Para criar outro, pause ou
+          arquive um na página Links ou assine o Pro.
         </p>
         {message.trim() ? (
           <p className="mt-3 text-sm text-gray-700 whitespace-pre-wrap border-t border-amber-100 pt-3">

@@ -41,4 +41,8 @@ export const YLADA_FREEMIUM_NOEL_MONTHLY_LIMIT_MESSAGE =
 
 /** Só um link ativo no Free (profissional) — texto completo ao tentar criar outro. */
 export const YLADA_FREEMIUM_ACTIVE_LINK_LIMIT_MESSAGE =
-  `No plano gratuito você mantém um diagnóstico ativo por vez. Para deixar vários links e fluxos no ar ao mesmo tempo, o caminho é o Pro.\n\n${YLADA_PRO_UPGRADE_PITCH}` as const
+  `No plano gratuito você mantém um diagnóstico ativo por vez (não é um limite por mês em quantidade de links — é um diagnóstico publicado ao mesmo tempo). Para criar outro, pause ou arquive um link na lista desta página, ou assine o Pro para vários ativos.\n\n${YLADA_PRO_UPGRADE_PITCH}` as const
+
+/** Texto curto para banner na página de Links (plano gratuito). */
+export const YLADA_FREEMIUM_LINKS_PAGE_HINT =
+  'No plano gratuito: 1 diagnóstico ativo por vez. Não é limite mensal de criação — você pode pausar um e criar outro. Todos os links que você cria ficam nesta lista; em cada linha, Copiar URL é sempre o endereço daquele diagnóstico.' as const

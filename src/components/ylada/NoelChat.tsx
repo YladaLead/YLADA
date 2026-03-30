@@ -12,6 +12,7 @@ import { getNoelUxContent, type NoelArea } from '@/config/noel-ux-content'
 import { buildNoelContextualWelcome, type NoelContextualAction } from '@/config/noel-contextual-welcome'
 import { getLocaleFromPathname, type Language } from '@/lib/i18n'
 import { YLADA_FREEMIUM_NOEL_MONTHLY_LIMIT_MESSAGE } from '@/config/freemium-limits'
+import { copyTextToClipboard } from '@/lib/clipboard'
 
 /** Texto plano dos nós do markdown (para detectar parágrafos que são perguntas). */
 function markdownPlainText(children: ReactNode): string {
@@ -52,12 +53,13 @@ function normalizeNoelAssistantMarkdown(raw: string): string {
 
 function LinkWithCopy({ href, children }: { href?: string; children: React.ReactNode }) {
   const [copied, setCopied] = useState(false)
-  const copy = useCallback(() => {
+  const copy = useCallback(async () => {
     if (!href) return
-    navigator.clipboard.writeText(href).then(() => {
+    const ok = await copyTextToClipboard(href)
+    if (ok) {
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
-    })
+    }
   }, [href])
   if (!href) return <>{children}</>
   return (
@@ -100,16 +102,6 @@ function LinkWithCopy({ href, children }: { href?: string; children: React.React
 
 export type { NoelArea }
 
-interface Message {
-  id: string
-  role: 'user' | 'assistant'
-  content: string
-  timestamp: Date
-}
-
-const STORAGE_KEY_PREFIX = 'noel_ylada_'
-const LAST_LINK_KEY_PREFIX = 'noel_ylada_last_link_'
-
 type LastLinkContext = {
   flow_id: string
   interpretacao: Record<string, unknown>
@@ -118,6 +110,18 @@ type LastLinkContext = {
   title?: string
   link_id?: string
 }
+
+interface Message {
+  id: string
+  role: 'user' | 'assistant'
+  content: string
+  timestamp: Date
+  /** Contexto do link gerado nesta mensagem — alinha Editar / Abrir com o mesmo `link_id` e URL do backend. */
+  linkContext?: LastLinkContext
+}
+
+const STORAGE_KEY_PREFIX = 'noel_ylada_'
+const LAST_LINK_KEY_PREFIX = 'noel_ylada_last_link_'
 
 function loadLastLinkContext(area: NoelArea): LastLinkContext | null {
   if (typeof window === 'undefined') return null
@@ -342,6 +346,7 @@ export default function NoelChat({ area = 'med', className = '', initialMessage,
         role: 'assistant',
         content: data.response?.trim() || 'Desculpe, não consegui processar. Tente novamente.',
         timestamp: new Date(),
+        linkContext: data.lastLinkContext ?? undefined,
       }
       setMessages((prev) => [...prev, assistantMsg])
     } catch (e) {
@@ -359,7 +364,7 @@ export default function NoelChat({ area = 'med', className = '', initialMessage,
       setLoading(false)
       inputRef.current?.focus()
     }
-  }, [input, loading, messages, area, authenticatedFetch, lastLinkContext])
+  }, [input, loading, messages, area, authenticatedFetch, lastLinkContext, locale])
 
   const clearChat = () => {
     contextualLoadedRef.current = false
@@ -454,18 +459,20 @@ export default function NoelChat({ area = 'med', className = '', initialMessage,
   }
 
   const [copiedScriptId, setCopiedScriptId] = useState<string | null>(null)
-  const copyScript = useCallback((msg: Message) => {
+  const copyScript = useCallback(async (msg: Message) => {
     const script = extractScriptFromMessage(msg.content)
-    navigator.clipboard.writeText(script).then(() => {
+    const ok = await copyTextToClipboard(script)
+    if (ok) {
       setCopiedScriptId(msg.id)
       setTimeout(() => setCopiedScriptId(null), 2000)
-    })
+    }
   }, [])
 
   const lastAssistantMsg = [...messages].reverse().find((m) => m.role === 'assistant')
 
   /** A mensagem contém quiz e/ou link? Mostramos Editar/Gerar quando o profissional recebeu o diagnóstico. */
-  function messageContainsQuizContent(content: string): boolean {
+  function messageContainsQuizContent(content: string, linkCtx?: LastLinkContext | null): boolean {
+    if (linkCtx?.url) return true
     const t = content.trim()
     if (!t) return false
     const hasLink = /\[.*?\]\(https?:\/\/[^)]+\)/.test(t) || /https?:\/\/[^\s)]+/.test(t)
@@ -477,11 +484,19 @@ export default function NoelChat({ area = 'med', className = '', initialMessage,
     return hasSecaoPerguntas || hasEstruturaQuiz || hasFormatoNatural
   }
 
+  /** Última mensagem do assistente que trouxe `link_id` — evita misturar com respostas só de texto depois. */
+  const lastAssistantWithLinkContext = [...messages]
+    .reverse()
+    .find((m) => m.role === 'assistant' && m.linkContext?.link_id)
+
+  const ctxForLinkActions = lastAssistantWithLinkContext?.linkContext ?? lastAssistantMsg?.linkContext ?? lastLinkContext
+
   const showEditarConcordoButtons =
-    lastLinkContext?.link_id &&
+    Boolean(ctxForLinkActions?.link_id) &&
     !loading &&
     lastAssistantMsg &&
-    messageContainsQuizContent(lastAssistantMsg.content)
+    (!!lastAssistantWithLinkContext ||
+      messageContainsQuizContent(lastAssistantMsg.content, ctxForLinkActions))
 
   const handleSuggestionClick = useCallback(
     async (prompt: string) => {
@@ -508,6 +523,7 @@ export default function NoelChat({ area = 'med', className = '', initialMessage,
             conversationHistory,
             area,
             lastLinkContext: lastLinkContext ?? undefined,
+            locale,
           }),
         })
         if (!res.ok) {
@@ -547,6 +563,7 @@ export default function NoelChat({ area = 'med', className = '', initialMessage,
           role: 'assistant',
           content: data.response?.trim() || 'Desculpe, não consegui processar. Tente novamente.',
           timestamp: new Date(),
+          linkContext: data.lastLinkContext ?? undefined,
         }
         setMessages((prev) => [...prev, assistantMsg])
       } catch (e) {
@@ -560,7 +577,7 @@ export default function NoelChat({ area = 'med', className = '', initialMessage,
         inputRef.current?.focus()
       }
     },
-    [area, authenticatedFetch, lastLinkContext, loading, messages]
+    [area, authenticatedFetch, lastLinkContext, loading, messages, locale]
   )
 
   const showSuggestions = messages.length === 1 && messages[0]?.role === 'assistant'
@@ -693,11 +710,12 @@ export default function NoelChat({ area = 'med', className = '', initialMessage,
                     <button
                       key={action.label}
                       type="button"
-                      onClick={() => {
-                        navigator.clipboard.writeText(action.copyUrl!).then(() => {
+                      onClick={async () => {
+                        const ok = await copyTextToClipboard(action.copyUrl!)
+                        if (ok) {
                           setCopiedActionLabel(action.label)
                           setTimeout(() => setCopiedActionLabel(null), 2000)
-                        })
+                        }
                       }}
                       className="px-4 py-2.5 rounded-xl bg-sky-50 text-sky-700 text-sm font-medium hover:bg-sky-100 border border-sky-200 transition-colors inline-flex items-center"
                     >
@@ -735,7 +753,7 @@ export default function NoelChat({ area = 'med', className = '', initialMessage,
         {showEditarConcordoButtons && (
           <div className="flex flex-wrap gap-2 pt-2">
             <Link
-              href={`${getYladaAreaPathPrefix(area)}/links/editar/${lastLinkContext!.link_id}`}
+              href={`${getYladaAreaPathPrefix(area)}/links/editar/${ctxForLinkActions!.link_id}`}
               className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-sky-600 text-white text-sm font-medium hover:bg-sky-700 transition-colors touch-manipulation"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -743,9 +761,9 @@ export default function NoelChat({ area = 'med', className = '', initialMessage,
               </svg>
               Editar perguntas
             </Link>
-            {lastLinkContext?.url && (
+            {ctxForLinkActions?.url && (
               <a
-                href={lastLinkContext.url}
+                href={ctxForLinkActions.url}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-sky-50 text-sky-700 text-sm font-medium border border-sky-200 hover:bg-sky-100 transition-colors touch-manipulation"

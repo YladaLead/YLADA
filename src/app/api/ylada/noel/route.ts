@@ -104,6 +104,25 @@ function buildLinkBlock(
   return { descResumida, conteudoReal }
 }
 
+/** Bloco anexado à resposta final — mesma fonte que o link público e a tela de edição (`config`). */
+function buildCanonicalQuizMarkdownForResponse(
+  title: string,
+  url: string,
+  flowId: string,
+  config: Record<string, unknown> | null
+): string {
+  const { conteudoReal } = buildLinkBlock(title, flowId, url, config)
+  const lines: string[] = []
+  lines.push('### Quiz e link (oficial — igual ao link público e à edição)')
+  lines.push('')
+  if (conteudoReal.trim()) {
+    lines.push(conteudoReal.trim())
+    lines.push('')
+  }
+  lines.push(`[Acesse seu quiz](${url})`)
+  return lines.join('\n')
+}
+
 /** Monta o bloco de instruções para o Noel — fonte única: config do link. */
 function buildNoelLinkBlock(
   title: string,
@@ -117,54 +136,7 @@ function buildNoelLinkBlock(
     ? 'O sistema acabou de criar um link para o profissional.'
     : 'O sistema criou um novo link com as alterações pedidas.'
 
-  let block = `\n[${tituloBloco}]\n${intro}\n\n⚠️ CRÍTICO: O texto "[${tituloBloco}]" é APENAS uma marcação interna para o sistema. NUNCA, em hipótese alguma, inclua esse texto na sua resposta ao profissional. O sistema remove automaticamente essa marcação — se você incluir, vai aparecer na resposta final e isso é um ERRO. Comece direto com a mensagem natural, SEM mencionar "[${tituloBloco}]" ou qualquer variação.\n\nOBRIGATÓRIO: O profissional precisa VER o quiz (perguntas, opções) e o link real na conversa. Inclua SEMPRE o quiz completo e o link. Use tom natural e conversacional — evite rótulos técnicos.\n\nFONTE ÚNICA (o link usa exatamente isto):\n${conteudoReal || '(calculadora ou link sem opções)'}\n\nREGRAS: NÃO invente perguntas. Use APENAS as perguntas acima. NÃO use "Raio-X" — use "quiz", "diagnóstico". O link correto é: ${url}\n\nFORMATO DA RESPOSTA NO CHAT (OBRIGATÓRIO — legibilidade):\n- Introdução curta (1–2 frases).\n- Linha **Título do diagnóstico** em negrito (ex.: **Diagnóstico rápido — [tema]**).\n- Cada pergunta: enunciado inteiro em **negrito** (inclua **1.**, **2.**…); abaixo, opções A) B) C) em linhas separadas; entre uma pergunta e a próxima, UMA linha em branco.\n- Não deixe tudo colado num parágrafo só.\n\nExemplo de estrutura (use o texto real da fonte única acima):\n\nÓtima ideia. Vamos criar um diagnóstico para [tema].\n\nPreparei um diagnóstico curto com [N] perguntas.\n\n**Diagnóstico rápido — [tema]**\n\n**1. [Texto da pergunta 1 conforme a fonte única]**\nA) …\nB) …\n\n**2. [Texto da pergunta 2]**\nA) …\nB) …\n\n🚨 LINK OBRIGATÓRIO EM MARKDOWN (COPIE EXATAMENTE):
-[Acesse seu quiz](${url})\n\nSe quiser, posso ajustar as perguntas para seu público.\n\n🚨 FORMATO DO LINK (OBRIGATÓRIO — CRÍTICO — IGNORE O HISTÓRICO):
-⚠️ ATENÇÃO: Mesmo que você veja no histórico de conversa respostas anteriores com "Clique aqui para acessarCopiar link", você DEVE SEMPRE usar markdown clicável. O formato correto é OBRIGATÓRIO e não depende do que apareceu antes.
-
-O link DEVE ser em markdown clicável. Use EXATAMENTE este formato:
-
-[Acesse seu quiz](${url})
-
-OU se preferir outro texto:
-
-[${title}](${url})
-
-⚠️ REGRAS ABSOLUTAS (IGNORE QUALQUER EXEMPLO DO HISTÓRICO):
-- NUNCA escreva apenas "Clique aqui para acessar" sem o markdown
-- NUNCA escreva "Copiar link" como texto separado
-- NUNCA escreva apenas o título seguido de "Copiar link"
-- SEMPRE use o formato [Texto](URL) para que o link seja clicável
-- O link markdown DEVE aparecer na sua resposta exatamente assim: [Acesse seu quiz](${url})
-- IGNORE qualquer formato de link que você viu no histórico de conversa — sempre use markdown
-
-EXEMPLO CORRETO (USE SEMPRE ESTE FORMATO):
-"Aqui está o diagnóstico criado:
-
-**Diagnóstico rápido — [tema]**
-
-**1. [Pergunta em negrito]**
-A) …
-B) …
-
-**2. [Pergunta em negrito]**
-A) …
-B) …
-
-[Acesse seu quiz](${url})"
-
-EXEMPLO ERRADO (NUNCA FAÇA ISSO, MESMO QUE TENHA VISTO NO HISTÓRICO):
-"Aqui está o diagnóstico criado: 1. Pergunta A) x B) y 2. Outra…" (tudo colado, sem título, sem negrito nas perguntas, sem linha em branco entre perguntas)
-
-"Aqui está o diagnóstico criado:
-[perguntas]
-
-Clique aqui para acessarCopiar link"
-
-IMPORTANTE: Inclua o quiz completo (perguntas + opções) antes do link. O link deve ser em markdown: [Acesse seu quiz](${url}) ou [${title}](${url}). IGNORE qualquer formato diferente que você tenha visto em respostas anteriores.
-
-Após entregar o link, em UMA frase breve, explique o valor estratégico: "Esse diagnóstico ajuda a identificar pessoas que já tentaram resolver o problema e estão abertas a uma nova estratégia." Ou variação adequada ao tema. Isso reforça seu papel de mentor.
-
-DICA: Pode mencionar brevemente o que o diagnóstico contém (ex.: "O diagnóstico mostra causa provável, preocupações e próximos passos, direcionando para conversa com você") e sugerir que o profissional teste o link antes de compartilhar para ver como fica.`
+  let block = `\n[${tituloBloco}]\n${intro}\n\n⚠️ CRÍTICO: O texto "[${tituloBloco}]" é APENAS uma marcação interna para o sistema. NUNCA inclua isso na resposta ao profissional.\n\n🚨 NOVO FLUXO (OBRIGATÓRIO): O sistema ANEXARÁ automaticamente ao final da sua mensagem um bloco **### Quiz e link (oficial)** com as perguntas exatas e o link — a mesma fonte do link público e da tela "Editar perguntas".\n\nSUA RESPOSTA AO PROFISSIONAL DEVE SER SÓ:\n- Introdução breve e natural (3–6 frases): parabenize, diga o tema, que o quiz está pronto e que abaixo (no bloco oficial) estão as perguntas iguais ao que o cliente verá.\n- Opcional: **título** em uma linha (ex.: **Diagnóstico rápido — [tema]**).\n- Uma frase de valor (ex.: qualificar leads, conversa no WhatsApp).\n- NÃO liste perguntas nem opções A/B no texto — isso gera divergência com o link real.\n- NÃO inclua link markdown [texto](url) na sua resposta — o bloco oficial já trará o único link correto.\n- NÃO escreva "Copiar link" nem "Clique aqui para acessar" soltos.\n\nREFERÊNCIA INTERNA (não copie na resposta — só para você saber o tema):\n${conteudoReal || '(calculadora ou fluxo sem lista de opções)'}\n\nLink que será anexado pelo sistema: ${url}\n\nDICA: Convide a pessoa a rolar até **Quiz e link (oficial)** para testar e copiar o link.`
 
   if (modo === 'ajustado') {
     block += '\nSe for ajuste: pode dizer brevemente "Pronto" ou "Concluído" antes do link.'
@@ -344,6 +316,28 @@ const NOEL_SCRIPTS_INDICACOES_E_MICROCONTEXTO = `
    - Se ele já descreveu a situação, infira; só confirme em uma frase curta se ajudar ("Pelo que você descreveu, parece lead morno — é isso?").
 `
 
+/**
+ * Evita que o Noel assuma sempre "captação / diagnóstico para atrair clientes" quando o profissional
+ * quer mensagem para cliente ou paciente que já atende (B2C / relacionamento).
+ */
+const NOEL_CLIENTE_ATENDIDO_VS_CAPTACAO = `
+[CLIENTE ATENDIDO VS CAPTAÇÃO — OBRIGATÓRIO]
+O profissional pode estar em dois momentos. NÃO assuma sempre o segundo.
+
+1) **RELACIONAMENTO COM QUEM JÁ É CLIENTE/PACIENTE** (carteira, retorno, pós-procedimento, acompanhamento, reagendar, follow-up, mensagem para "uma cliente", "minha paciente", "na estética para uma cliente" no sentido de atendida)
+   - Entregue script de **conversa direta com essa pessoa**: acolhimento, próximo passo do serviço, autoridade no tema, continuidade.
+   - **NÃO** use como padrão o roteiro de "atrair mais clientes para o negócio", "diagnóstico para a pessoa descobrir como atrair clientes" ou convite genérico de link de captação — isso frustra quem quer falar com clientela existente.
+   - Link/diagnóstico de prospecção só se o profissional pedir explícito para **pessoas novas** ou para **divulgar**.
+
+2) **CAPTAÇÃO / NOVOS CONTATOS / CRESCER CARTEIRA** (atrair leads, preencher agenda com gente nova, divulgar quiz, "quero mais clientes")
+   - Aí sim: diagnóstico, link para compartilhar, scripts de convite e qualificação.
+
+3) **SE ESTIVER AMBÍGUO** (ex.: só disse "estética" e "script" sem dizer se é para quem já veio ou para prospectar)
+   - Uma pergunta curta: "É mensagem para **uma cliente que já te procura** ou para **atrair pessoas novas**?" — depois entregue o script certo.
+
+Regra: "cliente" na boca do profissional muitas vezes é **quem ele já atende**. Só inverta para captação quando o texto pedir crescimento, novos contatos, divulgação ou estiver claro que é prospecção.
+`
+
 /** Método de condução de conversa de venda — 4 etapas obrigatórias. */
 const NOEL_METODO_CONDUCAO_VENDA = `
 [MÉTODO DE CONDUÇÃO DE VENDA — OBRIGATÓRIO EM CONVERSAS COM LEADS/CLIENTES]
@@ -479,7 +473,8 @@ const SEGMENT_CONTEXT: Record<string, string> = {
   coach: 'Você é o Noel, mentor da YLADA para a área de Coach. Oriente o profissional sobre rotina, links inteligentes e formação empresarial. Tom direto e prático.',
   perfumaria: 'Você é o Noel, mentor da YLADA para a área de Perfumaria. Oriente vendedores de fragrâncias sobre rotina, links inteligentes, quizzes de perfil olfativo e geração de conversas qualificadas no WhatsApp. Tom direto e prático.',
   seller: 'Você é o Noel, mentor da YLADA para vendedores. Oriente sobre rotina, links inteligentes, funil de vendas e geração de conversas qualificadas no WhatsApp. Tom direto e prático.',
-  estetica: 'Você é o Noel, mentor da YLADA para a área de Estética. Oriente o profissional sobre rotina, links inteligentes, captação de clientes e formação empresarial. Tom direto e prático.',
+  estetica:
+    'Você é o Noel, mentor da YLADA para a área de Estética. Oriente sobre rotina, links inteligentes, relacionamento com clientes que já atende (retorno, pós-procedimento) e captação quando for o caso, além de formação empresarial. Não assuma que todo pedido de script é só para atrair clientes novos. Tom direto e prático.',
   fitness: 'Você é o Noel, mentor da YLADA para a área de Fitness. Oriente personal trainers e coaches sobre rotina, links inteligentes, captação de clientes e formação empresarial. Tom direto e prático.',
 }
 
@@ -715,6 +710,12 @@ export async function POST(request: NextRequest) {
     // Se o profissional pediu ajuste no link anterior: interpret com contexto + generate novo link
     let linkGeradoBlock = ''
     let lastLinkContextOut: typeof lastLinkContext = undefined
+    let canonicalAppendix: {
+      title: string
+      url: string
+      flowId: string
+      config: Record<string, unknown> | null
+    } | null = null
 
     if (lastLinkContext?.flow_id && lastLinkContext?.interpretacao && isIntencaoAjustarLink(message)) {
       try {
@@ -759,6 +760,12 @@ export async function POST(request: NextRequest) {
             const titleRaw = genJson.data.title || genJson.data.slug || 'Link'
             const title = formatDisplayTitle(titleRaw)
             lastLinkContextOut = { flow_id: flowId, interpretacao, questions, url: genJson.data.url, title, link_id: genJson.data.id }
+            canonicalAppendix = {
+              title,
+              url: genJson.data.url,
+              flowId,
+              config: (genJson.data.config as Record<string, unknown> | undefined) ?? null,
+            }
             const { descResumida, conteudoReal } = buildLinkBlock(title, flowId, genJson.data.url, genJson.data.config ?? null)
             linkGeradoBlock = buildNoelLinkBlock(title, genJson.data.url, descResumida, conteudoReal, 'ajustado')
           }
@@ -811,6 +818,12 @@ export async function POST(request: NextRequest) {
               const titleRaw = genJson.data.title || genJson.data.slug || 'Link'
               const title = formatDisplayTitle(titleRaw)
               lastLinkContextOut = { flow_id: flowId, interpretacao, questions, url: genJson.data.url, title, link_id: genJson.data.id }
+              canonicalAppendix = {
+                title,
+                url: genJson.data.url,
+                flowId,
+                config: (genJson.data.config as Record<string, unknown> | undefined) ?? null,
+              }
               const { descResumida, conteudoReal } = buildLinkBlock(title, flowId, genJson.data.url, genJson.data.config ?? null)
               linkGeradoBlock = buildNoelLinkBlock(title, genJson.data.url, descResumida, conteudoReal, 'novo')
             }
@@ -861,6 +874,12 @@ export async function POST(request: NextRequest) {
             const titleRaw = genJson.data.title || genJson.data.slug || 'Link'
             const title = formatDisplayTitle(titleRaw)
             lastLinkContextOut = { flow_id: flowId, interpretacao, questions, url: genJson.data.url, title, link_id: genJson.data.id }
+            canonicalAppendix = {
+              title,
+              url: genJson.data.url,
+              flowId,
+              config: (genJson.data.config as Record<string, unknown> | undefined) ?? null,
+            }
             const { descResumida, conteudoReal } = buildLinkBlock(title, flowId, genJson.data.url, genJson.data.config ?? null)
             linkGeradoBlock = buildNoelLinkBlock(title, genJson.data.url, descResumida, conteudoReal, 'novo')
           }
@@ -927,6 +946,7 @@ export async function POST(request: NextRequest) {
       baseSystem + localeInstruction,
       NOEL_MODO_EXECUTOR_LINK,
       NOEL_FORMATO_DIAGNOSTICO_CHAT,
+      NOEL_CLIENTE_ATENDIDO_VS_CAPTACAO,
       NOEL_CONDUTOR_RULES,
       NOEL_PRINCIPIO_20_80,
       NOEL_SCRIPTS_INDICACOES_E_MICROCONTEXTO,
@@ -950,6 +970,15 @@ export async function POST(request: NextRequest) {
     if (falaDeComunicacao) {
       parts.push(
         '\n[FOCO EM COMUNICAÇÃO]\nO profissional mencionou COMUNICAÇÃO ou diagnóstico para comunicação. Mantenha o tema em: como o profissional se comunica com clientes/leads, qualificação (curiosos vs clientes preparados), marketing e conversas. NÃO mude para emagrecimento, saúde, produto ou outro tema a menos que ele peça explicitamente. Se ele pedir um diagnóstico, sugira perguntas sobre comunicação/abordagem/qualificação, não sobre peso ou hábitos alimentares.'
+      )
+    }
+    const pareceScriptParaClienteAtendido =
+      /para (uma |minha )?(cliente|paciente)\b|com (uma |minha )?(cliente|paciente)\b|minha cliente\b|minha paciente\b|(cliente|paciente) que já\b|quem já veio|retorno|follow[- ]?up|pós[- ]?proced|reagendar|mensagem para (o |a )?(cliente|paciente)/i.test(
+        message
+      )
+    if (pareceScriptParaClienteAtendido) {
+      parts.push(
+        '\n[CONTEXTO — MENSAGEM PARA QUEM JÁ ATENDE]\nA mensagem do profissional indica foco em **cliente/paciente da carteira ou retorno**, não em prospecção. Priorize script de WhatsApp para **relacionamento e continuidade do serviço** (estética, saúde, etc.). Não use como padrão roteiro de "atrair mais clientes para o negócio" ou diagnóstico de captação.'
       )
     }
     if (profileResumo) {
@@ -1027,14 +1056,13 @@ export async function POST(request: NextRequest) {
       parts.push(
         '\n[INCENTIVO MÚLTIPLOS DIAGNÓSTICOS]\nApós entregar o link, pode incentivar experimentação: "Muitos profissionais também testam variações de diagnóstico para ver qual gera mais interesse. Posso criar outra versão focada em: sintomas, hábitos, objetivos ou resultados desejados." Isso incentiva criação de múltiplos diagnósticos e compartilhamento.'
       )
-      // Reforço final: garantir que o link seja markdown com exemplo direto
       parts.push(
-        `\n🚨 EXEMPLO OBRIGATÓRIO DE RESPOSTA COM LINK (COPIE O FORMATO):\n\n"Claro! Vou gerar um diagnóstico para você.\n\n**Diagnóstico rápido — [tema]**\n\n**1. [Pergunta em negrito]**\nA) …\nB) …\n\n**2. [Pergunta em negrito]**\nA) …\nB) …\n\n[Acesse seu quiz](${url})\n\nEsse diagnóstico mostra causa provável, preocupações e próximos passos, direcionando para conversa com você. Teste o link antes de compartilhar para ver como fica!"\n\nUse título em negrito, cada pergunta em **negrito**, linha em branco entre perguntas. ⚠️ NUNCA escreva "Clique aqui para acessarCopiar link" — sempre use [Acesse seu quiz](URL) em markdown.`
+        `\n🚨 ALINHAMENTO COM O BLOCO OFICIAL:\nO sistema anexará ao final **### Quiz e link (oficial — igual ao link público e à edição)** com as perguntas exatas e [Acesse seu quiz](${url}). Sua mensagem deve ser só introdução (sem listar perguntas, sem outro link markdown).`
       )
     }
     if (primeiraConversaOuVaga && linkGeradoBlock) {
       parts.push(
-        '\n[PRIMEIRA CONVERSA GUIADA — COM LINK]\nO profissional está começando. Use intro breve, **título do diagnóstico**, perguntas com enunciados em **negrito**, linha em branco entre perguntas, quiz completo, link markdown, convite para ajustar. Objetivo: o usuário sentir "já tenho algo para usar" em segundos.'
+        '\n[PRIMEIRA CONVERSA GUIADA — COM LINK]\nO profissional está começando. Mensagem curta: boas-vindas, tema, que o bloco oficial abaixo traz o quiz idêntico ao link. Objetivo: "já tenho algo para usar" em segundos.'
       )
     }
     if (primeiraConversaOuVaga && !linkGeradoBlock) {
@@ -1404,6 +1432,19 @@ export async function POST(request: NextRequest) {
     } catch (postProcessError) {
       console.warn('[/api/ylada/noel] Erro no pós-processamento de links:', postProcessError)
       // Continuar mesmo se o pós-processamento falhar
+    }
+
+    if (canonicalAppendix && lastLinkContextOut?.url) {
+      const marker = '### Quiz e link (oficial'
+      if (!responseText.includes(marker)) {
+        const footer = buildCanonicalQuizMarkdownForResponse(
+          canonicalAppendix.title,
+          canonicalAppendix.url,
+          canonicalAppendix.flowId,
+          canonicalAppendix.config
+        )
+        responseText = `${responseText.trim()}\n\n---\n\n${footer}`
+      }
     }
 
     // Freemium: incrementar uso após resposta bem-sucedida

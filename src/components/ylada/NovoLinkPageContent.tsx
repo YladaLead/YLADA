@@ -5,7 +5,7 @@
  * Recebe areaCodigo e areaLabel para links e shell; mesma UX em todas as áreas.
  * Após criar, vai direto para o "momento de ativação": compartilhar para gerar as primeiras respostas.
  */
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import YladaAreaShell from '@/components/ylada/YladaAreaShell'
 import { getYladaAreaPathPrefix } from '@/config/ylada-areas'
@@ -14,6 +14,7 @@ import { CompartilharDiagnosticoContent } from '@/components/ylada/CompartilharD
 import { ActiveLinksProModal } from '@/components/ylada/ActiveLinksProModal'
 import { getMensagemWhatsAppDiagnostico } from '@/lib/ylada-compartilhar-diagnostico-copy'
 import { markHomeActivationComplete } from '@/lib/ylada-pos-onboarding'
+import { YLADA_FREEMIUM_ACTIVE_LINK_LIMIT_MESSAGE } from '@/config/freemium-limits'
 
 const META_PRIMEIRAS_RESPOSTAS = 10
 
@@ -80,8 +81,34 @@ export function NovoLinkPageContent({
   const [loadingStep, setLoadingStep] = useState(0)
   const [linkCopiado, setLinkCopiado] = useState(false)
   const [activeLinksModalMessage, setActiveLinksModalMessage] = useState<string | null>(null)
+  /** true = grátis e já tem 1 ativo — não pode criar outro ativo sem pausar ou Pro. */
+  const [freeTierBlocksNewActive, setFreeTierBlocksNewActive] = useState(false)
+
+  useEffect(() => {
+    let cancelled = false
+    Promise.all([
+      fetch('/api/ylada/links', { credentials: 'include' }),
+      fetch('/api/ylada/subscription', { credentials: 'include' }),
+    ])
+      .then(async ([lr, sr]) => {
+        const lj = (await lr.json().catch(() => ({}))) as { data?: Array<{ status: string }> }
+        const sj = (await sr.json().catch(() => ({}))) as { subscription?: { plan_type?: string } | null }
+        if (cancelled) return
+        const pro = sj?.subscription?.plan_type === 'monthly' || sj?.subscription?.plan_type === 'annual'
+        const active = Array.isArray(lj?.data) ? lj.data!.filter((l) => l.status === 'active').length : 0
+        setFreeTierBlocksNewActive(!pro && active >= 1)
+      })
+      .catch(() => {})
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   const handleCriar = async (inputOverride?: string) => {
+    if (freeTierBlocksNewActive) {
+      setActiveLinksModalMessage(YLADA_FREEMIUM_ACTIVE_LINK_LIMIT_MESSAGE)
+      return
+    }
     const text = (inputOverride ?? temaInput).trim()
     if (!text) {
       setError('Digite um tema ou escolha uma sugestão.')

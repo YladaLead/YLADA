@@ -135,25 +135,11 @@ export function getYladaAreasWithStandardPublicEntry(): YladaAreaConfig[] {
 }
 
 /**
- * URL do fluxo de criação de diagnóstico (quiz comunicação) por área da matriz.
- * Alinhado aos links das landings institucionais.
+ * URL do CTA “criar diagnóstico” no guia **Como usar** (in-app): abre o Noel na home da área,
+ * onde a pessoa monta fluxo e diagnóstico no chat — não o quiz público de comunicação em /pt/diagnostico.
  */
 export function getYladaDiagnosticoBuilderHref(areaCodigo: string): string {
-  const m: Record<string, string> = {
-    ylada: '/pt/diagnostico',
-    med: '/pt/diagnostico?area=0',
-    psi: '/pt/diagnostico?area=1',
-    estetica: '/pt/diagnostico?area=2',
-    nutri: '/pt/diagnostico?area=3',
-    fitness: '/pt/diagnostico?area=4',
-    nutra: '/pt/diagnostico?area=5',
-    coach: '/pt/diagnostico?area=5',
-    seller: '/pt/diagnostico?area=5',
-    perfumaria: '/pt/diagnostico?area=6&fromArea=perfumaria',
-    odonto: '/pt/diagnostico?area=6&fromArea=odonto',
-    psicanalise: '/pt/diagnostico?area=7',
-  }
-  return m[areaCodigo] ?? '/pt/diagnostico?area=5'
+  return `${getYladaAreaPathPrefix(areaCodigo)}/home`
 }
 
 /** Path do menu Leads por área. Coach usa 'ylada-leads' pois /pt/coach/leads é o leads do Coach. */

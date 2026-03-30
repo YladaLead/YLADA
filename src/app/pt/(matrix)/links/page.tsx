@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import Link from 'next/link'
 import YladaAreaShell from '@/components/ylada/YladaAreaShell'
 import { getYladaAreaPathPrefix } from '@/config/ylada-areas'
@@ -8,9 +8,11 @@ import { getFlowById } from '@/config/ylada-flow-catalog'
 import { getTemasForProfession, getTemaLabel, TEMA_OUTRO_VALUE, TEMA_ICONS } from '@/config/ylada-temas'
 import { getFerramentasForTema, type FerramentaConcreta } from '@/config/ylada-temas-ferramentas'
 import { useAuth } from '@/hooks/useAuth'
+import { copyTextToClipboard } from '@/lib/clipboard'
 import { CompartilharDiagnosticoContent } from '@/components/ylada/CompartilharDiagnosticoContent'
 import { ActiveLinksProModal } from '@/components/ylada/ActiveLinksProModal'
 import LinksHubContent from '@/components/ylada/LinksHubContent'
+import { YLADA_FREEMIUM_ACTIVE_LINK_LIMIT_MESSAGE } from '@/config/freemium-limits'
 /** Objetivos do link: norte para a sugestão (quiz vs calculadora e texto). */
 const LINK_OBJECTIVES = [
   { value: 'captar', label: 'Captar', description: 'Trazer pessoas novas (possíveis pacientes ou clientes)' },
@@ -187,21 +189,36 @@ function LinksPageContent({ areaCodigo = 'ylada', areaLabel = 'YLADA', embedded 
   const [comoFuncionaAberto, setComoFuncionaAberto] = useState(!embedded)
   /** Modal: limite de diagnósticos ativos (Free) ao tentar criar outro link. */
   const [activeLinksModalMessage, setActiveLinksModalMessage] = useState<string | null>(null)
+  /** Qual link acabou de ser copiado (feedback por linha). */
+  const [copiedLinkId, setCopiedLinkId] = useState<string | null>(null)
+  /** null = ainda carregando assinatura; false = gratuito; true = Pro (ou equivalente). */
+  const [isProUser, setIsProUser] = useState<boolean | null>(null)
 
   const segment = areaCodigo && areaCodigo !== 'ylada' ? areaCodigo : 'ylada'
+
+  const activeLinksCount = useMemo(
+    () => links.filter((l) => l.status === 'active').length,
+    [links]
+  )
+  /** Plano gratuito já tem 1 diagnóstico ativo: não dá para criar outro ativo até pausar/arquivar ou fazer Pro. */
+  const freeTierBlocksNewActive = isProUser === false && activeLinksCount >= 1
 
   const loadTemplatesAndLinks = async () => {
     setLoading(true)
     setMessage(null)
     try {
-      const [tRes, lRes, pRes] = await Promise.all([
+      const [tRes, lRes, pRes, subRes] = await Promise.all([
         fetch('/api/ylada/templates', { credentials: 'include' }),
         fetch('/api/ylada/links', { credentials: 'include' }),
         fetch(`/api/ylada/profile?segment=${encodeURIComponent(segment)}`, { credentials: 'include' }),
+        fetch('/api/ylada/subscription', { credentials: 'include' }),
       ])
       const tJson = (await tRes.json().catch(() => ({}))) as Record<string, unknown>
       const lJson = (await lRes.json().catch(() => ({}))) as Record<string, unknown>
       const pJson = (await pRes.json().catch(() => ({}))) as Record<string, unknown>
+      const subJson = (await subRes.json().catch(() => ({}))) as Record<string, unknown>
+      const planType = (subJson?.subscription as { plan_type?: string } | null | undefined)?.plan_type
+      setIsProUser(planType === 'monthly' || planType === 'annual')
 
       const tErr = typeof tJson.error === 'string' ? tJson.error : ''
       const authByStatus = tRes.status === 401 || lRes.status === 401 || pRes.status === 401
@@ -215,6 +232,7 @@ function LinksPageContent({ areaCodigo = 'ylada', areaLabel = 'YLADA', embedded 
         setTemplates([])
         setLinks([])
         setProfile(null)
+        setIsProUser(null)
         setMessage({
           type: 'error',
           sessionExpired: true,
@@ -332,11 +350,20 @@ function LinksPageContent({ areaCodigo = 'ylada', areaLabel = 'YLADA', embedded 
     return () => window.removeEventListener('focus', onFocus)
   }, [segment])
 
-  const copyUrl = (url: string, title?: string | null) => {
-    if (typeof navigator !== 'undefined' && navigator.clipboard) {
-      navigator.clipboard.writeText(url)
-      const label = title ? `"${title}"` : ''
+  const copyUrl = async (url: string, title?: string | null, linkId?: string) => {
+    const ok = await copyTextToClipboard(url)
+    const label = title ? `"${title}"` : ''
+    if (ok) {
+      if (linkId) {
+        setCopiedLinkId(linkId)
+        setTimeout(() => setCopiedLinkId(null), 2000)
+      }
       setMessage({ type: 'success', text: label ? `URL de ${label} copiada!` : 'URL copiada!' })
+    } else {
+      setMessage({
+        type: 'error',
+        text: 'Não foi possível copiar automaticamente. Selecione o endereço abaixo e copie manualmente (Ctrl+C / compartilhar).',
+      })
     }
   }
 
@@ -507,6 +534,10 @@ function LinksPageContent({ areaCodigo = 'ylada', areaLabel = 'YLADA', embedded 
   /** Criar link a partir de um card do fluxo por texto (com questions + cta do flow). */
   const handleCreateFromInterpretCard = async (card: { flow_id: string; title?: string; subtitle?: string; description?: string }) => {
     if (!interpretResult?.interpretacao) return
+    if (freeTierBlocksNewActive) {
+      setActiveLinksModalMessage(YLADA_FREEMIUM_ACTIVE_LINK_LIMIT_MESSAGE)
+      return
+    }
     setCreating(true)
     setMessage(null)
     try {
@@ -565,6 +596,10 @@ function LinksPageContent({ areaCodigo = 'ylada', areaLabel = 'YLADA', embedded 
 
   /** Criar link a partir de uma ferramenta concreta (tema + catálogo). */
   const handleCreateFromFerramenta = async (ferramenta: FerramentaConcreta, temaLabel: string) => {
+    if (freeTierBlocksNewActive) {
+      setActiveLinksModalMessage(YLADA_FREEMIUM_ACTIVE_LINK_LIMIT_MESSAGE)
+      return
+    }
     setCreating(true)
     setMessage(null)
     try {
@@ -624,6 +659,10 @@ function LinksPageContent({ areaCodigo = 'ylada', areaLabel = 'YLADA', embedded 
   const totalConversasAgregado = links.reduce((s, l) => s + (l.stats?.cta_click ?? 0), 0)
 
   const scrollToCriadorTexto = () => {
+    if (freeTierBlocksNewActive) {
+      setActiveLinksModalMessage(YLADA_FREEMIUM_ACTIVE_LINK_LIMIT_MESSAGE)
+      return
+    }
     setInterpretResult(null)
     setInterpretText('')
     setShowTextFlow(true)
@@ -725,7 +764,10 @@ function LinksPageContent({ areaCodigo = 'ylada', areaLabel = 'YLADA', embedded 
                   </a>
                   <button
                     type="button"
-                    onClick={() => { copyUrl(lastCreatedUrl); setLastCreatedUrl(null) }}
+                    onClick={() => {
+                      void copyUrl(lastCreatedUrl)
+                      setLastCreatedUrl(null)
+                    }}
                     className="rounded-lg border border-green-600 bg-white px-4 py-2 text-sm font-medium text-green-800 hover:bg-green-50 transition-colors"
                   >
                     Copiar URL
@@ -739,7 +781,9 @@ function LinksPageContent({ areaCodigo = 'ylada', areaLabel = 'YLADA', embedded 
         {hasLinks && (
           <section ref={linksListRef} className="bg-white rounded-lg border border-gray-200 p-4">
             <h2 className="text-base font-semibold text-gray-900 mb-1">Seus links</h2>
-            <p className="text-xs text-gray-500 mb-3">Copie a URL, compartilhe e acompanhe as métricas abaixo.</p>
+            <p className="text-xs text-gray-500 mb-3">
+              Cada botão &quot;Copiar URL&quot; copia <strong>só aquele</strong> diagnóstico. Se algo não colar no celular, copie o endereço manualmente na linha cinza.
+            </p>
             {(() => {
               const linkMaisAtivo = links.length > 0
                 ? [...links].sort((a, b) => {
@@ -792,11 +836,11 @@ function LinksPageContent({ areaCodigo = 'ylada', areaLabel = 'YLADA', embedded 
                         </div>
                         {link.public_paused_freemium && (
                           <p className="text-xs text-rose-800 mt-1.5 leading-snug">
-                            Quem abre este link não consegue usar o diagnóstico até você reativar o{' '}
+                            A URL copiada é deste link, mas <strong>no plano grátis só o diagnóstico mais antigo</strong> fica disponível para visitantes. Os outros abrem sem o quiz até você fazer upgrade ou{' '}
+                            <span className="whitespace-nowrap">pausar</span> um ativo — por isso pode parecer &quot;outro fluxo&quot; ao testar.{' '}
                             <Link href="/pt/precos" className="font-semibold underline hover:text-rose-950">
                               Plano Pro
-                            </Link>{' '}
-                            ou pausar outros diagnósticos ativos (no grátis só um fica público).
+                            </Link>
                           </p>
                         )}
                         {link.template_name && (
@@ -835,10 +879,10 @@ function LinksPageContent({ areaCodigo = 'ylada', areaLabel = 'YLADA', embedded 
                         <div className="flex flex-wrap gap-1 justify-end">
                           <button
                             type="button"
-                            onClick={() => copyUrl(link.url, link.title || link.slug)}
+                            onClick={() => void copyUrl(link.url, link.title || link.slug, link.id)}
                             className="rounded-lg px-3 py-2 text-xs font-medium text-white bg-slate-800 hover:bg-slate-900"
                           >
-                            Copiar URL
+                            {copiedLinkId === link.id ? '✓ Copiado' : 'Copiar URL'}
                           </button>
                           <button
                             type="button"
@@ -1001,6 +1045,12 @@ function LinksPageContent({ areaCodigo = 'ylada', areaLabel = 'YLADA', embedded 
             </div>
             <Link
               href={`${prefix}/links/novo`}
+              onClick={(e) => {
+                if (freeTierBlocksNewActive) {
+                  e.preventDefault()
+                  setActiveLinksModalMessage(YLADA_FREEMIUM_ACTIVE_LINK_LIMIT_MESSAGE)
+                }
+              }}
               className="text-sm font-medium text-sky-600 hover:text-sky-800 underline underline-offset-2 shrink-0 self-start"
             >
               Preferir criar com o Noel em 1 clique →
