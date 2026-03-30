@@ -45,36 +45,48 @@ function LinksHubContentInner({ areaCodigo, areaLabel }: LinksHubContentProps) {
           <h1 className="text-lg sm:text-xl font-bold text-gray-900 leading-tight">Links</h1>
           <p className="text-gray-600 text-xs sm:text-sm">O que você quer fazer?</p>
 
-          <div className="grid grid-cols-2 gap-2 sm:gap-3">
+          <div className="grid grid-cols-2 gap-2 sm:gap-2.5">
             <button
               type="button"
               onClick={() => switchTab('prontos')}
-              className={`rounded-lg sm:rounded-xl border-2 p-2.5 sm:p-4 text-left transition-all min-h-0 ${
+              className={`rounded-lg border-2 p-2 sm:p-2.5 text-left transition-all min-h-0 ${
                 tab === 'prontos'
                   ? 'border-sky-500 bg-sky-50'
                   : 'border-gray-200 bg-white hover:border-sky-200 hover:bg-sky-50/30'
               }`}
             >
-              <span className="text-lg sm:text-2xl block mb-1 sm:mb-2" aria-hidden>📚</span>
-              <span className="block font-semibold text-gray-900 text-xs sm:text-sm leading-snug">Usar modelo pronto</span>
-              <span className="block text-[11px] sm:text-sm text-gray-600 mt-0.5 sm:mt-1 leading-snug line-clamp-2">
+              <div className="flex items-center gap-2 min-w-0">
+                <span className="text-base sm:text-lg shrink-0 leading-none" aria-hidden>
+                  📚
+                </span>
+                <span className="font-semibold text-gray-900 text-xs sm:text-sm leading-tight min-w-0">
+                  Usar modelo pronto
+                </span>
+              </div>
+              <p className="text-[11px] sm:text-xs text-gray-600 mt-1 leading-snug line-clamp-2 pl-[calc(1.25rem+0.5rem)]">
                 Biblioteca YLADA
-              </span>
+              </p>
             </button>
             <button
               type="button"
               onClick={() => switchTab('meus')}
-              className={`rounded-lg sm:rounded-xl border-2 p-2.5 sm:p-4 text-left transition-all min-h-0 ${
+              className={`rounded-lg border-2 p-2 sm:p-2.5 text-left transition-all min-h-0 ${
                 tab === 'meus'
                   ? 'border-sky-500 bg-sky-50'
                   : 'border-gray-200 bg-white hover:border-sky-200 hover:bg-sky-50/30'
               }`}
             >
-              <span className="text-lg sm:text-2xl block mb-1 sm:mb-2" aria-hidden>🔗</span>
-              <span className="block font-semibold text-gray-900 text-xs sm:text-sm leading-snug">Meus links</span>
-              <span className="block text-[11px] sm:text-sm text-gray-600 mt-0.5 sm:mt-1 leading-snug line-clamp-2">
+              <div className="flex items-center gap-2 min-w-0">
+                <span className="text-base sm:text-lg shrink-0 leading-none" aria-hidden>
+                  🔗
+                </span>
+                <span className="font-semibold text-gray-900 text-xs sm:text-sm leading-tight min-w-0">
+                  Meus links
+                </span>
+              </div>
+              <p className="text-[11px] sm:text-xs text-gray-600 mt-1 leading-snug line-clamp-2 pl-[calc(1.25rem+0.5rem)]">
                 Criar e acompanhar
-              </span>
+              </p>
             </button>
           </div>
         </div>

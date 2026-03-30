@@ -670,7 +670,7 @@ function LinksPageContent({ areaCodigo = 'ylada', areaLabel = 'YLADA', embedded 
   }
 
   const inner = (
-    <div className="max-w-2xl space-y-6">
+    <div className={`max-w-2xl ${embedded ? 'space-y-4' : 'space-y-6'}`}>
       {embedded && (
         <Link
           href={`${prefix}/links?tab=prontos`}
@@ -779,10 +779,13 @@ function LinksPageContent({ areaCodigo = 'ylada', areaLabel = 'YLADA', embedded 
         )}
 
         {hasLinks && (
-          <section ref={linksListRef} className="bg-white rounded-lg border border-gray-200 p-4">
-            <h2 className="text-base font-semibold text-gray-900 mb-1">Seus links</h2>
-            <p className="text-xs text-gray-500 mb-3">
-              Cada botão &quot;Copiar URL&quot; copia <strong>só aquele</strong> diagnóstico. Se algo não colar no celular, copie o endereço manualmente na linha cinza.
+          <section
+            ref={linksListRef}
+            className={`bg-white rounded-lg border border-gray-200 ${embedded ? 'p-3 sm:p-4' : 'p-4'}`}
+          >
+            <h2 className={`font-semibold text-gray-900 ${embedded ? 'text-sm mb-0.5' : 'text-base mb-1'}`}>Seus links</h2>
+            <p className={`text-gray-500 ${embedded ? 'text-[11px] leading-snug mb-2.5' : 'text-xs mb-3'}`}>
+              Cada &quot;Copiar URL&quot; copia <strong>só aquele</strong> link. No celular, se não colar, copie o endereço cinza abaixo.
             </p>
             {(() => {
               const linkMaisAtivo = links.length > 0
@@ -796,10 +799,10 @@ function LinksPageContent({ areaCodigo = 'ylada', areaLabel = 'YLADA', embedded 
               const conversasMaisAtivo = linkMaisAtivo ? (linkMaisAtivo.stats?.cta_click ?? 0) : 0
               if (!linkMaisAtivo || (respostasMaisAtivo === 0 && conversasMaisAtivo === 0)) return null
               return (
-                <div className="mb-4 p-4 rounded-lg border border-amber-100 bg-amber-50/80">
-                  <p className="text-xs font-semibold text-amber-800 uppercase tracking-wide mb-2">Diagnóstico mais respondido</p>
-                  <p className="text-sm font-medium text-gray-900 mb-1 truncate">{linkMaisAtivo.title || linkMaisAtivo.slug}</p>
-                  <p className="text-xs text-gray-600">
+                <div className={`rounded-lg border border-amber-100 bg-amber-50/80 ${embedded ? 'mb-3 p-3' : 'mb-4 p-4'}`}>
+                  <p className="text-[10px] sm:text-xs font-semibold text-amber-800 uppercase tracking-wide mb-1">Diagnóstico mais respondido</p>
+                  <p className="text-sm font-medium text-gray-900 mb-0.5 truncate">{linkMaisAtivo.title || linkMaisAtivo.slug}</p>
+                  <p className="text-[11px] sm:text-xs text-gray-600">
                     <span aria-hidden>👩</span> {respostasMaisAtivo} {respostasMaisAtivo === 1 ? 'resposta' : 'respostas'}
                     <span className="mx-2 text-gray-300">·</span>
                     <span aria-hidden>💬</span> {conversasMaisAtivo} {conversasMaisAtivo === 1 ? 'conversa' : 'conversas'}
@@ -807,16 +810,19 @@ function LinksPageContent({ areaCodigo = 'ylada', areaLabel = 'YLADA', embedded 
                 </div>
               )
             })()}
-            <ul className="space-y-4">
+            <ul className={embedded ? 'space-y-3' : 'space-y-4'}>
               {links.map((link) => {
                 const stats = link.stats ?? { view: 0, start: 0, complete: 0, cta_click: 0, diagnosis_count: 0 }
                 const isActive = link.status === 'active'
                 return (
-                  <li key={`top-${link.id}`} className="py-3 border-b border-gray-100 last:border-0 last:pb-0">
-                    <div className="flex flex-wrap items-start justify-between gap-2">
+                  <li
+                    key={`top-${link.id}`}
+                    className={`border-b border-gray-100 last:border-0 ${embedded ? 'py-2.5 last:pb-0' : 'py-3 last:pb-0'}`}
+                  >
+                    <div className="flex flex-col gap-2.5 sm:flex-row sm:items-start sm:justify-between sm:gap-3">
                       <div className="min-w-0 flex-1">
-                        <div className="flex flex-wrap items-center gap-2 mb-1">
-                          <p className="text-sm font-medium text-gray-900 truncate">{link.title || link.slug}</p>
+                        <div className="flex flex-wrap items-center gap-1.5 mb-0.5">
+                          <p className="text-sm font-semibold text-gray-900 truncate">{link.title || link.slug}</p>
                           <span
                             className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${
                               link.status === 'active'
@@ -844,14 +850,14 @@ function LinksPageContent({ areaCodigo = 'ylada', areaLabel = 'YLADA', embedded 
                           </p>
                         )}
                         {link.template_name && (
-                          <p className="text-xs text-gray-500 mb-0.5">
+                          <p className="text-[11px] text-gray-500 mb-0.5">
                             Modelo: {link.template_name}
                             {link.template_type ? ` (${link.template_type})` : ''}
                           </p>
                         )}
-                        <p className="text-xs text-gray-400 truncate">{link.url}</p>
-                        <details className="mt-2 group/stats">
-                          <summary className="cursor-pointer text-xs text-gray-500 hover:text-gray-700 list-none flex items-center gap-1 [&::-webkit-details-marker]:hidden">
+                        <p className="text-[11px] text-gray-400 truncate">{link.url}</p>
+                        <details className={`group/stats ${embedded ? 'mt-1.5' : 'mt-2'}`}>
+                          <summary className="cursor-pointer text-[11px] text-gray-500 hover:text-gray-700 list-none flex items-center gap-1 [&::-webkit-details-marker]:hidden">
                             <span>Métricas</span>
                             <span className="text-gray-400 group-open/stats:rotate-180 transition-transform" aria-hidden>
                               ▼
@@ -875,26 +881,24 @@ function LinksPageContent({ areaCodigo = 'ylada', areaLabel = 'YLADA', embedded 
                           </div>
                         </details>
                       </div>
-                      <div className="flex flex-col items-stretch gap-2 shrink-0 w-full sm:w-auto sm:min-w-[11rem]">
-                        <div className="flex flex-wrap gap-1 justify-end">
-                          <button
-                            type="button"
-                            onClick={() => void copyUrl(link.url, link.title || link.slug, link.id)}
-                            className="rounded-lg px-3 py-2 text-xs font-medium text-white bg-slate-800 hover:bg-slate-900"
-                          >
-                            {copiedLinkId === link.id ? '✓ Copiado' : 'Copiar URL'}
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => setDivulgarLink(link)}
-                            className="rounded-lg px-3 py-2 text-xs font-medium text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200"
-                          >
-                            Divulgar
-                          </button>
-                        </div>
+                      <div className="flex flex-wrap items-center gap-1.5 shrink-0 w-full sm:w-auto sm:max-w-[min(100%,20rem)] sm:justify-end">
+                        <button
+                          type="button"
+                          onClick={() => void copyUrl(link.url, link.title || link.slug, link.id)}
+                          className="rounded-lg px-2.5 py-1.5 text-xs font-medium text-white bg-slate-800 hover:bg-slate-900"
+                        >
+                          {copiedLinkId === link.id ? '✓ Copiado' : 'Copiar URL'}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setDivulgarLink(link)}
+                          className="rounded-lg px-2.5 py-1.5 text-xs font-medium text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200"
+                        >
+                          Divulgar
+                        </button>
                         <details className="relative group/actions">
-                          <summary className="cursor-pointer rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-xs font-medium text-gray-700 hover:bg-gray-100 list-none text-center [&::-webkit-details-marker]:hidden">
-                            Mais ações
+                          <summary className="cursor-pointer rounded-lg border border-gray-200 bg-gray-50 px-2.5 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-100 list-none text-center [&::-webkit-details-marker]:hidden whitespace-nowrap">
+                            Mais
                           </summary>
                           <div className="mt-2 flex flex-col gap-1 rounded-lg border border-gray-200 bg-white p-2 shadow-sm">
                             <Link
