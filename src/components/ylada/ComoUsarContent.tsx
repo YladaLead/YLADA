@@ -131,7 +131,7 @@ function GuiaNavegacaoRapida() {
 }
 
 export default function ComoUsarContent({ areaCodigo, areaLabel }: ComoUsarContentProps) {
-  const diagnosticoHref = getYladaDiagnosticoBuilderHref(areaCodigo)
+  const noelChatHref = `${getYladaDiagnosticoBuilderHref(areaCodigo)}?chat=1`
 
   return (
     <YladaAreaShell areaCodigo={areaCodigo} areaLabel={areaLabel}>
@@ -366,10 +366,10 @@ export default function ComoUsarContent({ areaCodigo, areaLabel }: ComoUsarConte
             Pronto para montar seu primeiro fluxo?
           </p>
           <Link
-            href={diagnosticoHref}
+            href={noelChatHref}
             className="inline-flex items-center justify-center rounded-xl bg-sky-600 px-5 py-3 text-sm font-semibold text-white shadow-sm hover:bg-sky-700 transition-colors"
           >
-            Criar meu primeiro diagnóstico
+            Começar com o Noel
           </Link>
         </footer>
       </div>
