@@ -211,6 +211,19 @@ function isIntencaoCriarLink(
   return false
 }
 
+/**
+ * Em pedidos de relacionamento com cliente já atendida, não deve gerar link automaticamente
+ * (a menos que o profissional peça link/quiz/diagnóstico de forma explícita).
+ */
+function shouldBlockAutoLinkForClientFollowUp(message: string): boolean {
+  const m = message.toLowerCase().trim()
+  const falaDeCarteira = /(?:minha|uma|para uma|para minha)?\s*(cliente|paciente)|retorno|follow[- ]?up|pós[- ]?proced|reagendar|sumiu|já fez|ja fez|carteira/.test(m)
+  const pediuScript = /script|mensagem|whatsapp|texto para enviar/.test(m)
+  const negouCaptacao = /sem falar em atrair|sem captar|não captar|nao captar|não prospectar|nao prospectar/.test(m)
+  const pediuLinkExplito = /quero (o )?link|me dá o link|me de o link|gera (o )?link|cria (o )?link|quiz|diagnóstico|diagnostico|calculadora/.test(m)
+  return falaDeCarteira && (pediuScript || negouCaptacao) && !pediuLinkExplito
+}
+
 /** Primeira conversa: no máximo 1 troca anterior e mensagem vaga (oi, como funciona, quero captar, etc.). */
 function isPrimeiraConversaOuVaga(
   message: string,
@@ -775,8 +788,10 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    const blockAutoLinkForClientFollowUp = shouldBlockAutoLinkForClientFollowUp(message)
+
     // Se o profissional pediu link/quiz/calculadora: verificar perfil; se tiver, interpret + generate
-    if (!linkGeradoBlock && isIntencaoCriarLink(message, conversationHistory)) {
+    if (!linkGeradoBlock && !blockAutoLinkForClientFollowUp && isIntencaoCriarLink(message, conversationHistory)) {
       const temPerfil = profileRow && (profileRow.profile_type || profileRow.profession)
       if (!temPerfil) {
         linkGeradoBlock = '\n[AVISO: SEM PERFIL]\nO perfil do profissional está incompleto (falta tipo de atuação e/ou área). NÃO gere link. Explique de forma amigável: (1) que o perfil está incompleto e ele precisa preencher em "Perfil empresarial" (menu ao lado); (2) que você sempre se baseia no perfil dele para recomendar o link mais adequado — por isso é essencial que ele complete o perfil primeiro. Depois que preencher, ele pode pedir o link de novo que aí você entrega.'
@@ -836,7 +851,7 @@ export async function POST(request: NextRequest) {
 
     // Primeira conversa guiada: mensagem vaga + perfil existe → gerar diagnóstico base automaticamente (demonstrar valor)
     const primeiraConversaOuVaga = isPrimeiraConversaOuVaga(message, conversationHistory)
-    if (!linkGeradoBlock && primeiraConversaOuVaga && profileRow && (profileRow.profile_type || profileRow.profession)) {
+    if (!linkGeradoBlock && !blockAutoLinkForClientFollowUp && primeiraConversaOuVaga && profileRow && (profileRow.profile_type || profileRow.profession)) {
       try {
         const cookie = request.headers.get('cookie') || ''
         const defaultText = getDefaultInterpretTextPrimeiraConversa(validSegment)
