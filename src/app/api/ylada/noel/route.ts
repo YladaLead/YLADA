@@ -61,6 +61,10 @@ import { getNoelUsageCount, incrementNoelUsage } from '@/lib/noel-usage-helpers'
 import { FREEMIUM_LIMITS, YLADA_FREEMIUM_NOEL_MONTHLY_LIMIT_MESSAGE } from '@/config/freemium-limits'
 import { completeNinaSupportTurn } from '@/lib/ylada-nina-support'
 import { notifyNinaSupportInquiry } from '@/lib/support-notifications'
+import {
+  appendNinaBotReplyToPlatformTicket,
+  createPlatformTicketFromNinaFirstTurn,
+} from '@/lib/platform-support-from-nina'
 
 type FormField = { id?: string; label?: string; type?: string; options?: string[] }
 
@@ -632,20 +636,32 @@ export async function POST(request: NextRequest) {
 
       const history = Array.isArray(conversationHistory) ? conversationHistory : []
       const isFirstUserTurnInThread = !history.some((m) => m.role === 'user')
+      let platformTicketId: string | null = null
       if (isFirstUserTurnInThread) {
         const meta = user.user_metadata as Record<string, unknown> | undefined
         const displayName =
           (typeof meta?.full_name === 'string' && meta.full_name.trim()) ||
           (typeof meta?.name === 'string' && meta.name.trim()) ||
           null
-        void notifyNinaSupportInquiry({
-          userId: user.id,
-          userEmail: user.email ?? null,
-          displayName,
-          message: message.trim(),
-          segment: validSegment,
-          supportUi: supportUi === 'wellness' ? 'wellness' : 'matrix',
-        }).catch((err) => console.error('[/api/ylada/noel] Nina support e-mail notify:', err))
+        const su = supportUi === 'wellness' ? 'wellness' : 'matrix'
+        const ticketRes = await createPlatformTicketFromNinaFirstTurn({
+          user,
+          primeiraMensagem: message.trim(),
+          segmentLabel: validSegment,
+          supportUi: su,
+        })
+        if (ticketRes.ok) {
+          platformTicketId = ticketRes.ticketId
+        } else {
+          void notifyNinaSupportInquiry({
+            userId: user.id,
+            userEmail: user.email ?? null,
+            displayName,
+            message: message.trim(),
+            segment: validSegment,
+            supportUi: su,
+          }).catch((err) => console.error('[/api/ylada/noel] Nina support e-mail notify:', err))
+        }
       }
 
       const responseText = await completeNinaSupportTurn({
@@ -658,6 +674,13 @@ export async function POST(request: NextRequest) {
         appOrigin: baseUrl,
         supportUi: supportUi === 'wellness' ? 'wellness' : 'matrix',
       })
+
+      if (platformTicketId) {
+        void appendNinaBotReplyToPlatformTicket(platformTicketId, responseText).catch((err) =>
+          console.error('[/api/ylada/noel] Nina → support_messages:', err)
+        )
+      }
+
       return NextResponse.json({
         response: responseText,
         segment: validSegment,
