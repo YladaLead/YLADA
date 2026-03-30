@@ -54,6 +54,35 @@ export interface InterpretQuestion {
   options?: string[]
 }
 
+function isProfessionalSelfAssessmentQuestion(label: string): boolean {
+  const t = (label || '').toLowerCase().trim()
+  if (!t) return false
+  return (
+    /público[- ]?alvo|publico[- ]?alvo|persona|funil|pipeline|estratégia|estrategia|marketing|conteúdo|conteudo|redes sociais|instagram|posicionamento|captação|captacao/.test(
+      t
+    ) ||
+    /(consultório|consultorio|clínica|clinica|negócio|negocio|agenda).*(sua|seu|do seu|da sua)/.test(
+      t
+    ) ||
+    /(você|voce).*(define|usa|faz|organiza).*(estratégia|estrategia|marketing|captação|captacao|conteúdo|conteudo|redes sociais)/.test(
+      t
+    )
+  )
+}
+
+function shouldForcePatientFacing(
+  text: string,
+  objetivo: LinkObjective,
+  tipoPublico: string
+): boolean {
+  const raw = (text || '').toLowerCase()
+  const publico = (tipoPublico || '').toLowerCase()
+  const targetIsExternal =
+    /paciente|cliente|lead|indicado/.test(publico) ||
+    /para (meus|minha|um|uma)?\s*(pacientes?|clientes?|leads?)|para compartilhar|link para/.test(raw)
+  return objetivo === 'captar' && targetIsExternal
+}
+
 /** Resposta unificada do interpret. */
 export interface InterpretResponse {
   flow_id: string
@@ -387,6 +416,22 @@ REGRAS: Retorne o JSON com flow_id (mantenha o mesmo), theme, e questions AJUSTA
 
     let questionsOut: InterpretQuestion[] =
       questionsFinal.length > 0 ? questionsFinal : (Array.isArray(parsed.questions) ? parsed.questions : [])
+
+    // Segurança semântica: link para público externo não pode usar perguntas de autoavaliação do profissional.
+    // Quando isso ocorrer, limpamos override para o generate usar perguntas canônicas do fluxo.
+    const forcePatientFacing = shouldForcePatientFacing(
+      text,
+      parsed.interpretacao?.objetivo ?? 'captar',
+      parsed.interpretacao?.tipo_publico ?? ''
+    )
+    if (forcePatientFacing && finalFlowId !== 'checklist_prontidao') {
+      const hasProfessionalBias = questionsOut.some((q) =>
+        isProfessionalSelfAssessmentQuestion(q.label || '')
+      )
+      if (hasProfessionalBias) {
+        questionsOut = []
+      }
+    }
 
     if (flow1?.architecture === 'PROJECTION_CALCULATOR') {
       const themeProj = (parsed.theme ?? parsed.interpretacao?.tema ?? '').toString()
