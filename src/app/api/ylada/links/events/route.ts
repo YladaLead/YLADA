@@ -1,5 +1,5 @@
 /**
- * POST /api/ylada/links/events — registra evento de visitante (view, start, complete, result_view, cta_click).
+ * POST /api/ylada/links/events — registra evento de visitante (view, start, complete, result_view, cta_click, share_click, full_analysis_expand).
  * Pública (sem auth). Insere em ylada_link_events; view e cta_click espelham em link_events.
  * Body: { slug, event_type, utm_json?, device?, metrics_id? }
  * - result_view + metrics_id: atualiza ylada_diagnosis_metrics.diagnosis_shown_at (quando o resultado foi exibido).
@@ -9,7 +9,15 @@ import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
 import { isYladaLinkHiddenFromPublicDueToFreemium } from '@/lib/ylada-freemium-public-link'
 
-const ALLOWED_TYPES = ['view', 'start', 'complete', 'result_view', 'cta_click'] as const
+const ALLOWED_TYPES = [
+  'view',
+  'start',
+  'complete',
+  'result_view',
+  'cta_click',
+  'share_click',
+  'full_analysis_expand',
+] as const
 
 /** Mapeia evento YLADA → evento unificado (só view e whatsapp_click entram em link_events) */
 function toUnifiedEventType(eventType: string): 'view' | 'whatsapp_click' | null {

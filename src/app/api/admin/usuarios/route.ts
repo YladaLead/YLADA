@@ -9,7 +9,8 @@ import { toYmdInTimeZone } from '@/lib/date-utils'
 
 /**
  * GET /api/admin/usuarios
- * Retorna lista de usuários com dados reais (perfil, assinaturas, leads, etc.)
+ * Retorna lista de usuários com dados reais (perfil, assinaturas, etc.)
+ * Leads = cliques no botão WhatsApp (`cta_click`). Também: compartilhar (`share_click`), análise expandida (`full_analysis_expand`), views.
  * Apenas admin pode acessar
  * 
  * Query params:
@@ -198,19 +199,10 @@ export async function GET(request: NextRequest) {
       .in('user_id', userIds)
       .order('current_period_end', { ascending: false })
 
-    // Buscar leads para todos os usuários
-    const { data: leads } = await supabaseAdmin
-      .from('leads')
-      .select('user_id, template_id')
-      .in('user_id', userIds)
-
-    // Contar leads por usuário
-    const leadsPorUsuario: Record<string, number> = {}
-    if (leads) {
-      leads.forEach(lead => {
-        leadsPorUsuario[lead.user_id] = (leadsPorUsuario[lead.user_id] || 0) + 1
-      })
-    }
+    /** Leads (Admin): cta_click | share_click | full_analysis_expand — bloco ylada_links */
+    const whatsappLeadsPorUsuario: Record<string, number> = {}
+    const shareYladaPorUsuario: Record<string, number> = {}
+    const analiseExpandidaPorUsuario: Record<string, number> = {}
 
     // Buscar templates (cursos/ferramentas) por usuário — user_templates (legado)
     const { data: templates } = await supabaseAdmin
@@ -240,23 +232,73 @@ export async function GET(request: NextRequest) {
           templatesPorUsuario[link.user_id] = (templatesPorUsuario[link.user_id] || 0) + 1
         })
 
-        // Buscar eventos (views) dos ylada_links para somar cliques
+        // Eventos: views = aberturas do link; cta_click = clique no botão WhatsApp (Leads no Admin)
         const linkIds = yladaLinks.map((l: { id: string }) => l.id)
         const linkIdToUserId = new Map(yladaLinks.map((l: { id: string; user_id: string }) => [l.id, l.user_id]))
 
-        const { data: yladaEvents } = await supabaseAdmin
-          .from('ylada_link_events')
-          .select('link_id')
-          .in('link_id', linkIds)
-          .eq('event_type', 'view')
+        const chunkSize = 100
+        for (let i = 0; i < linkIds.length; i += chunkSize) {
+          const chunk = linkIds.slice(i, i + chunkSize)
 
-        if (yladaEvents) {
-          yladaEvents.forEach((ev: { link_id: string }) => {
-            const uid = linkIdToUserId.get(ev.link_id)
-            if (uid) {
-              cliquesPorUsuario[uid] = (cliquesPorUsuario[uid] || 0) + 1
-            }
-          })
+          const { data: viewEvents } = await supabaseAdmin
+            .from('ylada_link_events')
+            .select('link_id')
+            .in('link_id', chunk)
+            .eq('event_type', 'view')
+
+          if (viewEvents) {
+            viewEvents.forEach((ev: { link_id: string }) => {
+              const uid = linkIdToUserId.get(ev.link_id)
+              if (uid) {
+                cliquesPorUsuario[uid] = (cliquesPorUsuario[uid] || 0) + 1
+              }
+            })
+          }
+
+          const { data: waClickEvents } = await supabaseAdmin
+            .from('ylada_link_events')
+            .select('link_id')
+            .in('link_id', chunk)
+            .eq('event_type', 'cta_click')
+
+          if (waClickEvents) {
+            waClickEvents.forEach((ev: { link_id: string }) => {
+              const uid = linkIdToUserId.get(ev.link_id)
+              if (uid) {
+                whatsappLeadsPorUsuario[uid] = (whatsappLeadsPorUsuario[uid] || 0) + 1
+              }
+            })
+          }
+
+          const { data: shareEvents } = await supabaseAdmin
+            .from('ylada_link_events')
+            .select('link_id')
+            .in('link_id', chunk)
+            .eq('event_type', 'share_click')
+
+          if (shareEvents) {
+            shareEvents.forEach((ev: { link_id: string }) => {
+              const uid = linkIdToUserId.get(ev.link_id)
+              if (uid) {
+                shareYladaPorUsuario[uid] = (shareYladaPorUsuario[uid] || 0) + 1
+              }
+            })
+          }
+
+          const { data: expandEvents } = await supabaseAdmin
+            .from('ylada_link_events')
+            .select('link_id')
+            .in('link_id', chunk)
+            .eq('event_type', 'full_analysis_expand')
+
+          if (expandEvents) {
+            expandEvents.forEach((ev: { link_id: string }) => {
+              const uid = linkIdToUserId.get(ev.link_id)
+              if (uid) {
+                analiseExpandidaPorUsuario[uid] = (analiseExpandidaPorUsuario[uid] || 0) + 1
+              }
+            })
+          }
         }
       }
     } catch (err) {
@@ -455,10 +497,12 @@ export async function GET(request: NextRequest) {
         assinaturaId: subscriptionToEdit?.id || null,
         assinaturaVencimento: assinaturaVencimento ? toYmdInTimeZone(assinaturaVencimento) : null,
         dataCadastro: profile.created_at ? toYmdInTimeZone(profile.created_at) : null,
-        leadsGerados: leadsPorUsuario[profile.user_id] || 0,
+        leadsGerados: whatsappLeadsPorUsuario[profile.user_id] || 0,
         cursosCompletos: templatesPorUsuario[profile.user_id] || 0, // legacy (UI não deve mais exibir como cursos)
         linksEnviados: templatesPorUsuario[profile.user_id] || 0,
         cliquesLinks: cliquesPorUsuario[profile.user_id] || 0,
+        compartilharYlada: shareYladaPorUsuario[profile.user_id] || 0,
+        analiseExpandidaYlada: analiseExpandidaPorUsuario[profile.user_id] || 0,
         isMigrado: subscriptionForStatus?.is_migrated || false,
         assinaturaSituacao,
         assinaturaDiasVencida,

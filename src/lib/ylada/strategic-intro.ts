@@ -25,6 +25,8 @@ export interface StrategicIntroContext {
   theme_raw?: string
   /** Título da página (ex.: "Diagnóstico de Saúde — emagrecimento"). */
   page_title?: string
+  /** Arquitetura do link (ex.: RISK_DIAGNOSIS); quando presente, força intro voltada ao visitante no diagnóstico. */
+  architecture?: string
   /** Número de perguntas do quiz (para "Responda N perguntas"); quando ausente, usa "poucos minutos". */
   questions_count?: number
 }
@@ -98,6 +100,8 @@ function formatThemeLabel(theme: string): string {
   else if (/peso/.test(t)) label = 'peso'
   else if (/alimentação|alimentacao/.test(t)) label = 'alimentação'
   else if (/pele|skincare|estética|celulite|flacidez|manchas/.test(t)) label = 'sua pele'
+  else if (/unha|unhas|manicure|nail/.test(t)) label = 'saúde das unhas'
+  else if (/cabelo|capilar|calvície|calvicie|queda de cabelo/.test(t)) label = 'seu cabelo'
   else if (/perfume|fragrância|fragrancia|olfativo|perfumaria/.test(t)) label = 'perfil olfativo'
   else label = theme.trim()
   return capitalizeFirst(label)
@@ -142,7 +146,17 @@ function getPatientQuizSubtitle(theme: string, questionsCount?: number): string 
 export function getStrategicIntro(context: StrategicIntroContext): StrategicIntroContent {
   const theme = (context.theme_raw ?? '').toString().trim().toLowerCase()
   const pageTitle = (context.page_title ?? '').toString().trim()
-  const isPatientQuiz = /emagrecimento|perda de peso|intestino|energia|ansiedade|bem-estar|saúde|peso|alimentação|pele|skincare|estética|celulite|flacidez|manchas|hidratação da pele|idade real da pele|perfume|fragrância|fragrancia|olfativo|perfumaria|perfil olfativo/.test(theme)
+  const pageTitleLower = pageTitle.toLowerCase()
+  const arch = (context.architecture ?? '').toString().trim()
+  const isPatientDiagnosisFlow = arch === 'RISK_DIAGNOSIS' || arch === 'BLOCKER_DIAGNOSIS'
+  const isPatientQuiz =
+    isPatientDiagnosisFlow ||
+    /emagrecimento|perda de peso|intestino|energia|ansiedade|bem-estar|saúde|saude|peso|alimentação|alimentacao|pele|skincare|estética|estetica|celulite|flacidez|manchas|hidratação da pele|hidratacao da pele|idade real da pele|unha|unhas|manicure|nail|cabelo|capilar|calvície|calvicie|queda de cabelo|perfume|fragrância|fragrancia|olfativo|perfumaria|perfil olfativo/.test(
+      pageTitleLower
+    ) ||
+    /emagrecimento|perda de peso|intestino|energia|ansiedade|bem-estar|saúde|peso|alimentação|pele|skincare|estética|celulite|flacidez|manchas|hidratação da pele|idade real da pele|unha|unhas|manicure|nail|cabelo|capilar|calvície|calvicie|queda de cabelo|perfume|fragrância|fragrancia|olfativo|perfumaria|perfil olfativo/.test(
+      theme
+    )
 
   if (isPatientQuiz) {
     const themeLabel = formatThemeLabel(theme)

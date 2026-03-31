@@ -14,7 +14,6 @@ import { supabaseAdmin } from '@/lib/supabase'
 import { buildProfileResumo, type YladaNoelProfileRow } from '@/lib/ylada-profile-resumo'
 import { getNoelYladaLinks, formatLinksAtivosParaNoel } from '@/lib/noel-ylada-links'
 import { getPerfilSimuladoByKey, SIMULATE_COOKIE_NAME } from '@/data/perfis-simulados'
-import { getFlowById } from '@/config/ylada-flow-catalog'
 import { formatDisplayTitle } from '@/lib/ylada/strategic-intro'
 import { getStrategicProfilesForMessage, formatStrategicProfileForPrompt } from '@/lib/noel-wellness/strategic-profile-matcher'
 import {
@@ -67,6 +66,22 @@ import {
 } from '@/lib/platform-support-from-nina'
 
 type FormField = { id?: string; label?: string; type?: string; options?: string[] }
+type NoelResponseMode = 'modo_link' | 'modo_mentor' | 'modo_copy' | 'modo_execucao'
+
+function extractRequestedTitleFromMessage(message: string): string | null {
+  const raw = (message || '').trim()
+  if (!raw) return null
+
+  const cleaned = raw.replace(/\s+/g, ' ')
+  const match =
+    cleaned.match(/(?:diagn[oó]stico|quiz|calculadora)\s+para\s+(.+)$/i) ||
+    cleaned.match(/(?:quero|cria|criar|gera|gerar)\s+(?:um|uma)?\s*(?:diagn[oó]stico|quiz|calculadora)\s+de\s+(.+)$/i) ||
+    cleaned.match(/(?:quero|cria|criar|gera|gerar)\s+(?:um|uma)?\s*(?:diagn[oó]stico|quiz|calculadora)\s+para\s+(.+)$/i)
+
+  const candidate = (match?.[1] ?? '').trim().replace(/[.!?]+$/, '')
+  if (!candidate || candidate.length < 4) return null
+  return candidate.slice(0, 140)
+}
 
 /** Monta o bloco completo para o Noel: descrição resumida + conteúdo real do quiz (fonte única = config do link). */
 function buildLinkBlock(
@@ -79,7 +94,6 @@ function buildLinkBlock(
   const fields = Array.isArray(form?.fields) ? form.fields : []
   const firstWithOptions = fields.find((f) => Array.isArray(f.options) && f.options.length > 0)
   const isCalculadora = flowId === 'calculadora_projecao'
-  const flow = getFlowById(flowId)
 
   let descResumida: string
   let conteudoReal = ''
@@ -96,7 +110,8 @@ function buildLinkBlock(
         const optsBlock = options
           .map((opt, j) => `${String.fromCharCode(65 + j)}) ${opt}`)
           .join('\n')
-        return optsBlock ? `${i + 1}. ${f.label ?? ''}\n${optsBlock}` : `${i + 1}. ${f.label ?? ''}`
+        const pergunta = `**${i + 1}. ${f.label ?? ''}**`
+        return optsBlock ? `${pergunta}\n${optsBlock}\n` : `${pergunta}\n`
       })
       .join('\n\n')
   } else {
@@ -164,6 +179,13 @@ function isIntencaoAjustarLink(message: string): boolean {
   return termos.some((t) => m.includes(t))
 }
 
+function isExplicitNoLinkRequest(message: string): boolean {
+  const m = message.toLowerCase().trim()
+  return /sem criar link|sem link|sem diagnóstico|sem diagnostico|só direção|so direcao|só direcao|apenas direção|apenas direcao|só script|apenas script|não gere link|nao gere link|não gerar link|nao gerar link|sem quiz|sem fluxo|apenas responda sem link/.test(
+    m
+  )
+}
+
 /** Detecta se a mensagem indica pedido de link / quiz / calculadora / ferramenta para engajar. */
 function isIntencaoCriarLink(
   message: string,
@@ -213,6 +235,37 @@ function isIntencaoCriarLink(
     if (rest.length >= 3) return true
   }
   return false
+}
+
+function isIntencaoRecuperarLinkExistente(message: string): boolean {
+  const m = message.toLowerCase().trim()
+  return /link do último|link do ultimo|último diagnóstico|ultimo diagnostico|link para compartilhar|me dá o link|me de o link|cadê o link|cade o link|onde está o link|onde esta o link/.test(
+    m
+  )
+}
+
+function classifyNoelResponseMode(
+  message: string,
+  conversationHistory?: Array<{ role: string; content: string }>
+): NoelResponseMode {
+  const m = message.toLowerCase().trim()
+  if (isExplicitNoLinkRequest(m)) {
+    if (/script|mensagem|copy|cta|story|legenda|tom|follow[- ]?up/.test(m)) return 'modo_copy'
+    if (/ação|acao|executa|execute|tarefa|métrica|metrica|hoje|amanhã|amanha|próximo passo|proximo passo/.test(m)) {
+      return 'modo_execucao'
+    }
+    return 'modo_mentor'
+  }
+
+  if (isIntencaoCriarLink(message, conversationHistory) || isIntencaoAjustarLink(message)) {
+    return 'modo_link'
+  }
+
+  if (/script|mensagem|copy|cta|story|legenda|humaniza|menos vendedor|tom/.test(m)) return 'modo_copy'
+  if (/ação|acao|executa|execute|tarefa|métrica|metrica|hoje|amanhã|amanha|próximo passo|proximo passo/.test(m)) {
+    return 'modo_execucao'
+  }
+  return 'modo_mentor'
 }
 
 /**
@@ -601,6 +654,8 @@ export async function POST(request: NextRequest) {
     if (!message || typeof message !== 'string' || !message.trim()) {
       return NextResponse.json({ error: 'Mensagem é obrigatória.' }, { status: 400 })
     }
+    const noelResponseMode = classifyNoelResponseMode(message, conversationHistory)
+    const linkModeEnabled = noelResponseMode === 'modo_link'
 
     // Freemium: verificar limite de análises avançadas antes de chamar IA (mentor; Nina não consome cota)
     const isPro = await hasYladaProPlan(user.id)
@@ -620,7 +675,11 @@ export async function POST(request: NextRequest) {
     }
 
     const segmentKey = (segment ?? area) as string
-    let validSegment: string = YLADA_SEGMENT_CODES.includes(segmentKey as any) ? segmentKey : 'ylada'
+    let validSegment: string = YLADA_SEGMENT_CODES.includes(
+      segmentKey as (typeof YLADA_SEGMENT_CODES)[number]
+    )
+      ? segmentKey
+      : 'ylada'
 
     // Buscar perfil e snapshot da trilha para personalizar o Noel (etapa 2.4)
     let profileResumo = ''
@@ -824,7 +883,7 @@ export async function POST(request: NextRequest) {
       config: Record<string, unknown> | null
     } | null = null
 
-    if (lastLinkContext?.flow_id && lastLinkContext?.interpretacao && isIntencaoAjustarLink(message)) {
+    if (linkModeEnabled && lastLinkContext?.flow_id && lastLinkContext?.interpretacao && isIntencaoAjustarLink(message)) {
       try {
         const cookie = request.headers.get('cookie') || ''
         const interpretRes = await fetch(`${baseUrl}/api/ylada/interpret`, {
@@ -858,6 +917,7 @@ export async function POST(request: NextRequest) {
               flow_id: flowId,
               interpretacao,
               questions: questions.length > 0 ? questions : undefined,
+              title: requestedTitle ?? undefined,
               segment: validSegment,
               ...(locale && { locale }),
             }),
@@ -883,9 +943,15 @@ export async function POST(request: NextRequest) {
     }
 
     const blockAutoLinkForClientFollowUp = shouldBlockAutoLinkForClientFollowUp(message)
+    const retrieveExistingLinkIntent = isIntencaoRecuperarLinkExistente(message)
+    const shouldGenerateNewLink =
+      linkModeEnabled &&
+      isIntencaoCriarLink(message, conversationHistory) &&
+      !retrieveExistingLinkIntent
+    const requestedTitle = extractRequestedTitleFromMessage(message)
 
     // Se o profissional pediu link/quiz/calculadora: verificar perfil; se tiver, interpret + generate
-    if (!linkGeradoBlock && !blockAutoLinkForClientFollowUp && isIntencaoCriarLink(message, conversationHistory)) {
+    if (!linkGeradoBlock && shouldGenerateNewLink && !blockAutoLinkForClientFollowUp) {
       const temPerfil = profileRow && (profileRow.profile_type || profileRow.profession)
       if (!temPerfil) {
         linkGeradoBlock = '\n[AVISO: SEM PERFIL]\nO perfil do profissional está incompleto (falta tipo de atuação e/ou área). NÃO gere link. Explique de forma amigável: (1) que o perfil está incompleto e ele precisa preencher em "Perfil empresarial" (menu ao lado); (2) que você sempre se baseia no perfil dele para recomendar o link mais adequado — por isso é essencial que ele complete o perfil primeiro. Depois que preencher, ele pode pedir o link de novo que aí você entrega.'
@@ -918,6 +984,7 @@ export async function POST(request: NextRequest) {
                 flow_id: flowId,
                 interpretacao,
                 questions: questions.length > 0 ? questions : undefined,
+                title: requestedTitle ?? undefined,
                 segment: validSegment,
                 ...(locale && { locale }),
               }),
@@ -945,7 +1012,7 @@ export async function POST(request: NextRequest) {
 
     // Primeira conversa guiada: mensagem vaga + perfil existe → gerar diagnóstico base automaticamente (demonstrar valor)
     const primeiraConversaOuVaga = isPrimeiraConversaOuVaga(message, conversationHistory)
-    if (!linkGeradoBlock && !blockAutoLinkForClientFollowUp && primeiraConversaOuVaga && profileRow && (profileRow.profile_type || profileRow.profession)) {
+    if (!linkGeradoBlock && linkModeEnabled && !blockAutoLinkForClientFollowUp && primeiraConversaOuVaga && profileRow && (profileRow.profile_type || profileRow.profession)) {
       try {
         const cookie = request.headers.get('cookie') || ''
         const defaultText = getDefaultInterpretTextPrimeiraConversa(validSegment)
@@ -974,6 +1041,7 @@ export async function POST(request: NextRequest) {
               flow_id: flowId,
               interpretacao,
               questions: questions.length > 0 ? questions : undefined,
+              title: requestedTitle ?? undefined,
               segment: validSegment,
               ...(locale && { locale }),
             }),
@@ -1065,6 +1133,9 @@ export async function POST(request: NextRequest) {
       NOEL_CLIQUE_MENTAL_E_RETORNO_DIARIO,
       NOEL_CONTATO_FRIO,
     ]
+    parts.push(
+      `\n[MODO DA RESPOSTA — CAMADA 0]\nModo atual detectado: ${noelResponseMode}.\n- modo_link: pode criar/ajustar link, quiz e anexar bloco oficial.\n- modo_mentor: foco em direção estratégica; NÃO gerar/anexar link.\n- modo_copy: foco em texto/script/CTA; NÃO gerar/anexar link.\n- modo_execucao: foco em ação prática e rotina; NÃO gerar/anexar link.`
+    )
 
     // Detecção de contato frio: Uber, recrutar, link de recrutamento — injeta alerta para forçar diagnóstico primeiro
     const m = message.toLowerCase().trim()
@@ -1181,7 +1252,7 @@ export async function POST(request: NextRequest) {
         '\n[PRIMEIRA CONVERSA OU MENSAGEM VAGA — SEM LINK]\nO profissional está começando ou não sabe por onde começar. NÃO apenas explique o sistema — mostre o caminho prático. Se o perfil estiver incompleto: diga para preencher em "Perfil empresarial" (menu ao lado) e que em um minuto você cria um diagnóstico para ele testar. Se o perfil já existir: diga que pode criar um diagnóstico agora e sugira que ele peça com o tema, ex.: "Quero um diagnóstico para captar clientes" (ou "captar pacientes" se for médico), e aí você gera o link. Objetivo: demonstrar valor, não só explicar.'
       )
     }
-    if (isIntencaoCriarLink(message, conversationHistory) && !linkGeradoBlock) {
+    if (linkModeEnabled && shouldGenerateNewLink && !linkGeradoBlock) {
       parts.push(
         '\n[PEDIDO DE LINK SEM GERAÇÃO]\nO profissional pediu link/quiz/fluxo mas o sistema não gerou o link nesta resposta. NUNCA invente um link ou diga "Clique aqui para acessar o diagnóstico" sem um URL real. O link só existe quando o sistema fornece. Oriente: "Para eu gerar o link, pode pedir com o tema explícito, por exemplo: Quero um link para emagrecimento ou Cria um quiz para tizerpatide." Na próxima mensagem com tema claro o sistema gerará o link e o quiz completo na conversa.'
       )
@@ -1545,7 +1616,15 @@ export async function POST(request: NextRequest) {
       // Continuar mesmo se o pós-processamento falhar
     }
 
-    if (canonicalAppendix && lastLinkContextOut?.url) {
+    if (linkModeEnabled && canonicalAppendix && lastLinkContextOut?.url) {
+      // Evita duplicação: quando já existe bloco oficial, mantenha acima apenas uma introdução curta.
+      responseText = [
+        'Perfeito — seu diagnóstico está pronto.',
+        '',
+        'Abaixo está o bloco **Quiz e link (oficial)** com as perguntas exatas e o link certo para compartilhar.',
+        '',
+        'Se quiser, eu ajusto as perguntas e gero uma versão alternativa em seguida.',
+      ].join('\n')
       const marker = '### Quiz e link (oficial'
       if (!responseText.includes(marker)) {
         const footer = buildCanonicalQuizMarkdownForResponse(

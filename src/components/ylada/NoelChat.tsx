@@ -100,6 +100,15 @@ function LinkWithCopy({ href, children }: { href?: string; children: React.React
   )
 }
 
+function extractFirstHttpUrl(text: string): string | null {
+  if (!text) return null
+  const mdMatch = text.match(/\[[^\]]+\]\((https?:\/\/[^)\s]+)\)/i)
+  if (mdMatch?.[1]) return mdMatch[1]
+  const rawMatch = text.match(/https?:\/\/[^\s)]+/i)
+  if (rawMatch?.[0]) return rawMatch[0]
+  return null
+}
+
 export type { NoelArea }
 
 type LastLinkContext = {
@@ -459,6 +468,7 @@ export default function NoelChat({ area = 'med', className = '', initialMessage,
   }
 
   const [copiedScriptId, setCopiedScriptId] = useState<string | null>(null)
+  const [copiedQuizLinkMsgId, setCopiedQuizLinkMsgId] = useState<string | null>(null)
   const copyScript = useCallback(async (msg: Message) => {
     const script = extractScriptFromMessage(msg.content)
     const ok = await copyTextToClipboard(script)
@@ -484,19 +494,13 @@ export default function NoelChat({ area = 'med', className = '', initialMessage,
     return hasSecaoPerguntas || hasEstruturaQuiz || hasFormatoNatural
   }
 
-  /** Última mensagem do assistente que trouxe `link_id` — evita misturar com respostas só de texto depois. */
-  const lastAssistantWithLinkContext = [...messages]
-    .reverse()
-    .find((m) => m.role === 'assistant' && m.linkContext?.link_id)
-
-  const ctxForLinkActions = lastAssistantWithLinkContext?.linkContext ?? lastAssistantMsg?.linkContext ?? lastLinkContext
-
+  const ctxForLinkActions = lastAssistantMsg?.linkContext ?? null
+  const lastAssistantHasLinkContext = Boolean(lastAssistantMsg?.linkContext?.link_id)
   const showEditarConcordoButtons =
-    Boolean(ctxForLinkActions?.link_id) &&
+    lastAssistantHasLinkContext &&
     !loading &&
     lastAssistantMsg &&
-    (!!lastAssistantWithLinkContext ||
-      messageContainsQuizContent(lastAssistantMsg.content, ctxForLinkActions))
+    messageContainsQuizContent(lastAssistantMsg.content, ctxForLinkActions)
 
   const handleSuggestionClick = useCallback(
     async (prompt: string) => {
@@ -669,6 +673,39 @@ export default function NoelChat({ area = 'med', className = '', initialMessage,
                       )}
                     </button>
                   )}
+                  {msg.id !== 'welcome' && msg.role === 'assistant' && (() => {
+                    const isLastAssistantMessage = lastAssistantMsg?.id === msg.id
+                    const ctxForMessage = msg.linkContext ?? (isLastAssistantMessage ? lastLinkContext : null)
+                    const hasQuizContent = messageContainsQuizContent(msg.content, ctxForMessage)
+                    if (!hasQuizContent) return null
+                    const quizUrl = ctxForMessage?.url ?? extractFirstHttpUrl(msg.content)
+                    return (
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        {ctxForMessage?.link_id && (
+                          <Link
+                            href={`${getYladaAreaPathPrefix(area)}/links/editar/${ctxForMessage.link_id}`}
+                            className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-sky-600 text-white text-sm font-medium hover:bg-sky-700 transition-colors touch-manipulation"
+                          >
+                            Editar quiz
+                          </Link>
+                        )}
+                        {quizUrl && (
+                          <button
+                            type="button"
+                            onClick={async () => {
+                              const ok = await copyTextToClipboard(quizUrl)
+                              if (!ok) return
+                              setCopiedQuizLinkMsgId(msg.id)
+                              setTimeout(() => setCopiedQuizLinkMsgId((prev) => (prev === msg.id ? null : prev)), 2000)
+                            }}
+                            className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-sky-50 text-sky-700 text-sm font-medium border border-sky-200 hover:bg-sky-100 transition-colors touch-manipulation"
+                          >
+                            {copiedQuizLinkMsgId === msg.id ? 'Copiado!' : 'Copiar link do quiz'}
+                          </button>
+                        )}
+                      </div>
+                    )
+                  })()}
                 </div>
               )}
             </div>

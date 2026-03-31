@@ -40,11 +40,24 @@ export async function GET(
     }
 
     // Stats para "Diagnóstico em movimento" (respostas, views, etc.)
-    let stats: { view: number; start: number; complete: number; cta_click: number; diagnosis_count: number; conversion_rate: number | null } = {
+    let stats: {
+      view: number
+      start: number
+      complete: number
+      cta_click: number
+      result_view: number
+      share_click: number
+      full_analysis_expand: number
+      diagnosis_count: number
+      conversion_rate: number | null
+    } = {
       view: 0,
       start: 0,
       complete: 0,
       cta_click: 0,
+      result_view: 0,
+      share_click: 0,
+      full_analysis_expand: 0,
       diagnosis_count: 0,
       conversion_rate: null,
     }
@@ -57,6 +70,9 @@ export async function GET(
           else if (r.event_type === 'start') stats.start = n
           else if (r.event_type === 'complete') stats.complete = n
           else if (r.event_type === 'cta_click') stats.cta_click = n
+          else if (r.event_type === 'result_view') stats.result_view = n
+          else if (r.event_type === 'share_click') stats.share_click = n
+          else if (r.event_type === 'full_analysis_expand') stats.full_analysis_expand = n
         }
       }
       const { count: diagCount } = await supabaseAdmin

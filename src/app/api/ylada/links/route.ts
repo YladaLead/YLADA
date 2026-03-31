@@ -13,6 +13,9 @@ type EventCounts = {
   start: number
   complete: number
   cta_click: number
+  result_view: number
+  share_click: number
+  full_analysis_expand: number
   diagnosis_count?: number
   conversion_rate?: number | null
 }
@@ -32,13 +35,24 @@ function buildStatsMap(
   if (!rows?.length) return map
   for (const r of rows) {
     if (!map[r.link_id]) {
-      map[r.link_id] = { view: 0, start: 0, complete: 0, cta_click: 0 }
+      map[r.link_id] = {
+        view: 0,
+        start: 0,
+        complete: 0,
+        cta_click: 0,
+        result_view: 0,
+        share_click: 0,
+        full_analysis_expand: 0,
+      }
     }
     const n = typeof r.cnt === 'number' ? r.cnt : parseInt(String(r.cnt), 10) || 0
     if (r.event_type === 'view') map[r.link_id].view = n
     else if (r.event_type === 'start') map[r.link_id].start = n
     else if (r.event_type === 'complete') map[r.link_id].complete = n
     else if (r.event_type === 'cta_click') map[r.link_id].cta_click = n
+    else if (r.event_type === 'result_view') map[r.link_id].result_view = n
+    else if (r.event_type === 'share_click') map[r.link_id].share_click = n
+    else if (r.event_type === 'full_analysis_expand') map[r.link_id].full_analysis_expand = n
   }
   return map
 }
@@ -103,7 +117,17 @@ export async function GET(request: NextRequest) {
           diagCountMap[r.link_id] = (diagCountMap[r.link_id] ?? 0) + 1
         }
         for (const id of linkIds) {
-          if (!statsMap[id]) statsMap[id] = { view: 0, start: 0, complete: 0, cta_click: 0 }
+          if (!statsMap[id]) {
+            statsMap[id] = {
+              view: 0,
+              start: 0,
+              complete: 0,
+              cta_click: 0,
+              result_view: 0,
+              share_click: 0,
+              full_analysis_expand: 0,
+            }
+          }
           statsMap[id].diagnosis_count = diagCountMap[id] ?? 0
           // Taxa de conversão: cliques WhatsApp / respostas (diagnósticos completos)
           const diagCount = diagCountMap[id] ?? 0
@@ -133,7 +157,15 @@ export async function GET(request: NextRequest) {
         url: baseUrl ? `${baseUrl}/l/${row.slug}` : `/l/${row.slug}`,
         template_name: row.template_id ? templatesMap[row.template_id]?.name ?? null : null,
         template_type: row.template_id ? templatesMap[row.template_id]?.type ?? null : null,
-        stats: statsMap[row.id] ?? { view: 0, start: 0, complete: 0, cta_click: 0 },
+        stats: statsMap[row.id] ?? {
+          view: 0,
+          start: 0,
+          complete: 0,
+          cta_click: 0,
+          result_view: 0,
+          share_click: 0,
+          full_analysis_expand: 0,
+        },
         public_paused_freemium:
           !isPro &&
           row.status === 'active' &&

@@ -63,6 +63,20 @@ function hashAnswers(answers: Record<string, unknown>): string {
   return createHash('sha256').update(JSON.stringify(obj)).digest('hex').slice(0, 32)
 }
 
+/**
+ * Cache deve invalidar quando o profissional muda tema/título do link — antes só o hash das
+ * respostas gerava colisão (mesmas respostas, tema diferente = diagnóstico errado em cache).
+ */
+function hashAnswersForCache(
+  answers: Record<string, unknown>,
+  themeRaw: string,
+  linkTitle: string
+): string {
+  const base = hashAnswers(answers)
+  const salt = `${themeRaw.trim()}|${linkTitle.trim()}`
+  return createHash('sha256').update(`${base}|${salt}`).digest('hex').slice(0, 32)
+}
+
 /** Extrai formFields do config (form.fields ou questions) para mapear índice→texto. */
 function extractFormFieldsFromConfig(config: Record<string, unknown>): FormFieldForNormalize[] | undefined {
   const form = config.form as Record<string, unknown> | undefined
@@ -353,9 +367,15 @@ export async function POST(
 
     const formFields = extractFormFieldsFromConfig(config)
 
-    // Cache: v5 — whatsapp_prefill com perfume_usage (PERFUME_PROFILE)
-    const answers_hash = hashAnswers(visitor_answers)
-    const TEMPLATE_VERSION = 5
+    const themeForCache =
+      typeof metaRaw.theme_raw === 'string'
+        ? metaRaw.theme_raw
+        : ((metaRaw.theme as Record<string, unknown>)?.raw as string | undefined) ?? ''
+    const linkTitleForCache = (config.title as string) || ''
+
+    // Cache: v6 — fingerprint inclui tema + título do link (evita reuso com tema antigo)
+    const answers_hash = hashAnswersForCache(visitor_answers, themeForCache, linkTitleForCache)
+    const TEMPLATE_VERSION = 6
     const { data: cached } = await supabaseAdmin
       .from('ylada_diagnosis_cache')
       .select('diagnosis_json')

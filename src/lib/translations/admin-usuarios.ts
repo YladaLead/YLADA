@@ -105,6 +105,10 @@ export interface AdminUsuariosTranslations {
     leadsLabel: string
     linksLabel: string
     clicksLabel: string
+    /** Compartilhar resultado (links YLADA) */
+    shareYladaLabel: string
+    /** Abrir análise completa no resultado */
+    fullAnalysisExpandLabel: string
     whatsapp: string
     notDefined: string
     yes: string
@@ -306,7 +310,7 @@ const pt: AdminUsuariosTranslations = {
       'Criação da conta no sistema (signup). Não é fim do plano nem “perfil todo preenchido”.',
     profileDateStamp: 'Conta',
     leadsColumnSub:
-      'Links = gerados na plataforma. Cliques = aberturas rastreadas (0 se ninguém abriu ainda).',
+      'Leads = WhatsApp. Links = diagnósticos. Cliques = views. Compartilhar / análise expandida = botões no resultado (links YLADA).',
     leads: 'Leads',
     actions: 'Ações',
     edit: 'Editar',
@@ -320,6 +324,8 @@ const pt: AdminUsuariosTranslations = {
     leadsLabel: 'Leads',
     linksLabel: 'Links',
     clicksLabel: 'Cliques',
+    shareYladaLabel: 'Compartilhar',
+    fullAnalysisExpandLabel: 'Análise exp.',
     whatsapp: 'WhatsApp',
     notDefined: 'Não definido',
     yes: 'Sim',
@@ -521,7 +527,7 @@ const es: AdminUsuariosTranslations = {
       'Creación de la cuenta en el sistema (registro). No es fin del plan ni “perfil completo”.',
     profileDateStamp: 'Cuenta',
     leadsColumnSub:
-      'Links = generados en la plataforma. Clics = vistas registradas (0 si nadie abrió aún).',
+      'Leads = WhatsApp. Enlaces = diagnósticos. Clics = vistas. Compartir / análisis exp. = botones en el resultado (YLADA).',
     leads: 'Leads',
     actions: 'Acciones',
     edit: 'Editar',
@@ -535,6 +541,8 @@ const es: AdminUsuariosTranslations = {
     leadsLabel: 'Leads',
     linksLabel: 'Enlaces',
     clicksLabel: 'Clics',
+    shareYladaLabel: 'Compartir',
+    fullAnalysisExpandLabel: 'Análisis exp.',
     whatsapp: 'WhatsApp',
     notDefined: 'No definido',
     yes: 'Sí',
@@ -736,7 +744,7 @@ const en: AdminUsuariosTranslations = {
       'Account created in the system (signup). Not plan end nor “fully completed profile”.',
     profileDateStamp: 'Account',
     leadsColumnSub:
-      'Links = created in the app. Clicks = tracked opens (0 if nobody opened yet).',
+      'Leads = WhatsApp. Links = diagnoses. Clicks = views. Share / full analysis = result screen buttons (YLADA links).',
     leads: 'Leads',
     actions: 'Actions',
     edit: 'Edit',
@@ -750,6 +758,8 @@ const en: AdminUsuariosTranslations = {
     leadsLabel: 'Leads',
     linksLabel: 'Links',
     clicksLabel: 'Clicks',
+    shareYladaLabel: 'Share',
+    fullAnalysisExpandLabel: 'Full analysis',
     whatsapp: 'WhatsApp',
     notDefined: 'Not defined',
     yes: 'Yes',

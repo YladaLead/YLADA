@@ -335,6 +335,29 @@ function shouldAvoidAsProfileName(text: string): boolean {
   return v.startsWith('qual ') || v.includes('?')
 }
 
+function isGenericProfileToken(text: string): boolean {
+  const v = normalizeForCompare(text)
+  if (!v) return true
+  const generic = new Set([
+    'unha',
+    'unhas',
+    'pele',
+    'cabelo',
+    'saude',
+    'resultado',
+    'perfil',
+  ])
+  return generic.has(v)
+}
+
+/** Frase cortada no meio (ex.: 8 palavras parando em "pode resultar"). */
+function isIncompleteFragment(text: string): boolean {
+  const t = (text || '').trim()
+  if (!t) return true
+  if (/[.!?]$/.test(t)) return false
+  return /\b(pode|poderia|resultar|será|deve|ter|dar|ficar|estar)\s*$/i.test(t)
+}
+
 function toShortProfileName(text: string): string {
   const trimmed = (text || '').trim()
   if (!trimmed) return ''
@@ -351,20 +374,52 @@ function toShortProfileName(text: string): string {
   if (/rotina de cuidados .* irregular/i.test(base)) {
     return 'Rotina de cuidados inconsistente'
   }
-  if (/hidratacao|hidratação|sol|protecao|proteção|pele/i.test(base)) {
+  if (
+    /hidratacao|hidratação|sol|protecao|proteção|pele/i.test(base) &&
+    !/unha|unhas|manicure|esmalte/i.test(base)
+  ) {
     return 'Descuido com hidratação e proteção da pele'
   }
   const words = base.split(/\s+/).filter(Boolean)
-  if (words.length > 8) {
-    base = words.slice(0, 8).join(' ')
+  const maxWords = 14
+  if (words.length > maxWords) {
+    base = words.slice(0, maxWords).join(' ')
+  }
+  if (isIncompleteFragment(base)) {
+    const fullWords = trimmed.split(/\s+/).filter(Boolean)
+    const extended = fullWords.slice(0, 22).join(' ')
+    if (!isIncompleteFragment(extended) || extended.length > base.length + 8) {
+      base = extended
+    }
+  }
+  if (isIncompleteFragment(base)) {
+    const withEnding = trimmed.match(/^[^.!?]+[.!?]/)
+    if (withEnding && withEnding[0].trim().length >= 12) {
+      base = withEnding[0].trim()
+    }
   }
   return base
 }
 
-function toImpactDiagnosisText(text: string): string {
+function themeHintImpliesSkin(themeHint: string): boolean {
+  const t = themeHint.toLowerCase()
+  if (/unha|unhas|manicure|esmalte/.test(t)) return false
+  return /pele|skincare|dermat|manchas|celulite|flacidez|idrata|sol|prote[cç][aã]o|est[eé]tica facial/.test(t)
+}
+
+function themeHintImpliesNails(themeHint: string): boolean {
+  return /unha|unhas|manicure|esmalte/.test(themeHint.toLowerCase())
+}
+
+function toImpactDiagnosisText(text: string, themeHint = ''): string {
   const trimmed = (text || '').trim()
   if (!trimmed) return trimmed
-  if (/rotina de cuidados|hidratacao|hidratação|sol|protecao|proteção/i.test(trimmed) && /pele/i.test(trimmed)) {
+  const skinRewriteOk = themeHintImpliesSkin(themeHint) && !themeHintImpliesNails(themeHint)
+  if (
+    skinRewriteOk &&
+    /rotina de cuidados|hidratacao|hidratação|sol|protecao|proteção/i.test(trimmed) &&
+    /pele/i.test(trimmed)
+  ) {
     return 'Sua pele já está dando sinais claros — e esse quadro tende a se intensificar sem ajuste.'
   }
   const cleaned = trimmed
@@ -374,7 +429,7 @@ function toImpactDiagnosisText(text: string): string {
     .replace(/em relação à sua pele/gi, '')
     .replace(/\s{2,}/g, ' ')
     .trim()
-  if (/^pelos seus relatos/i.test(trimmed)) {
+  if (skinRewriteOk && /^pelos seus relatos/i.test(trimmed)) {
     return cleaned
       .replace(/^pelos seus relatos,\s*/i, '')
       .replace(/^alguns sinais/i, 'Sua pele já está dando sinais')
@@ -962,12 +1017,26 @@ function ConfigDrivenLinkView({
       const pessoaLabel = useEspecialista ? 'especialista' : 'profissional'
       const rawProfileName = sanitizeResultTitle(diagnosis.profile_title || '')
       const fallbackProfileFromInsight = sanitizeResultTitle(diagnosis.main_blocker || diagnosis.causa_provavel || '')
-      const chosenProfileBase = shouldAvoidAsProfileName(rawProfileName)
-        ? (shouldAvoidAsProfileName(fallbackProfileFromInsight) ? 'Padrão de atenção identificado' : fallbackProfileFromInsight)
-        : rawProfileName
-      const profileName = toShortProfileName(chosenProfileBase)
-      const formattedProfileTitle = profileName
       const contextTitle = sanitizeResultTitle(displayTitle)
+      const rawProfileTooWeak =
+        shouldAvoidAsProfileName(rawProfileName) ||
+        isGenericProfileToken(rawProfileName) ||
+        rawProfileName.trim().length < 5
+      const fallbackTooWeak =
+        shouldAvoidAsProfileName(fallbackProfileFromInsight) ||
+        isGenericProfileToken(fallbackProfileFromInsight) ||
+        fallbackProfileFromInsight.trim().length < 5
+      const chosenProfileBase = !rawProfileTooWeak
+        ? rawProfileName
+        : !fallbackTooWeak
+          ? fallbackProfileFromInsight
+          : contextTitle || 'Padrão de atenção identificado'
+      const themeHintForUi = `${themeFromMeta || ''} ${pageTitleRaw} ${displayTitle || ''}`
+      let profileName = toShortProfileName(chosenProfileBase)
+      if (isIncompleteFragment(profileName) && contextTitle.trim().length >= 6) {
+        profileName = contextTitle
+      }
+      const formattedProfileTitle = profileName || contextTitle || 'Padrão de atenção identificado'
       const compactSummary = diagnosis.profile_summary?.trim()
       const mainBlockerText = personalizeMainBlocker(diagnosis.main_blocker || '').trim()
       const shouldUseSummaryInDiagnosisCard =
@@ -975,7 +1044,7 @@ function ConfigDrivenLinkView({
       const diagnosisCardText = shouldUseSummaryInDiagnosisCard
         ? compactSummary
         : mainBlockerText
-      const impactDiagnosisText = toImpactDiagnosisText(diagnosisCardText)
+      const impactDiagnosisText = toImpactDiagnosisText(diagnosisCardText, themeHintForUi)
       const primaryInsightText = buildPrimaryInsight(diagnosis, diagnosisCardText)
       const showDetailedCause = !!diagnosis.causa_provavel && !isVerySimilarText(diagnosis.causa_provavel, primaryInsightText)
 

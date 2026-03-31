@@ -10,6 +10,9 @@ interface LinkStats {
   start: number
   complete: number
   cta_click: number
+  result_view?: number
+  share_click?: number
+  full_analysis_expand?: number
   diagnosis_count?: number
   conversion_rate?: number | null
 }
@@ -176,6 +179,12 @@ export default function DiagnosticoClienteMetricas({ areaCodigo, areaLabel }: Di
                   </span>
                   <span title="Cliques no CTA">
                     <strong>{link.stats?.cta_click ?? 0}</strong> cliques CTA
+                  </span>
+                  <span title="Compartilhar">
+                    <strong>{link.stats?.share_click ?? 0}</strong> compartilhar
+                  </span>
+                  <span title="Análise completa expandida">
+                    <strong>{link.stats?.full_analysis_expand ?? 0}</strong> análise expandida
                   </span>
                   {typeof link.stats?.diagnosis_count === 'number' && (
                     <span title="Resultados gerados">

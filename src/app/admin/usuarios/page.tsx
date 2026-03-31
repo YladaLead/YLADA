@@ -24,6 +24,10 @@ interface Usuario {
   cursosCompletos: number
   linksEnviados?: number
   cliquesLinks?: number
+  /** ylada_link_events share_click agregado por usuário */
+  compartilharYlada?: number
+  /** ylada_link_events full_analysis_expand agregado por usuário */
+  analiseExpandidaYlada?: number
   isMigrado?: boolean
   assinaturaSituacao: 'ativa' | 'vencida' | 'sem'
   statusAssinatura?: 'active' | 'canceled' | 'past_due' | null
@@ -767,8 +771,8 @@ export default function AdminUsuarios() {
 
   const exportarPlanilhaUsuarios = () => {
     const headers = mostrarColunasPresidente
-      ? [t.table.nameLabel, 'Email', t.table.whatsapp, t.table.area, t.table.isPresident, t.table.president, t.table.subscription, t.filters.paymentHistory, t.table.enrollment, t.table.leads, t.table.linksLabel, t.table.clicksLabel]
-      : [t.table.nameLabel, 'Email', t.table.whatsapp, t.table.area, t.table.subscription, t.filters.paymentHistory, t.table.enrollment, t.table.leads, t.table.linksLabel, t.table.clicksLabel]
+      ? [t.table.nameLabel, 'Email', t.table.whatsapp, t.table.area, t.table.isPresident, t.table.president, t.table.subscription, t.filters.paymentHistory, t.table.enrollment, t.table.leads, t.table.linksLabel, t.table.clicksLabel, t.table.shareYladaLabel, t.table.fullAnalysisExpandLabel]
+      : [t.table.nameLabel, 'Email', t.table.whatsapp, t.table.area, t.table.subscription, t.filters.paymentHistory, t.table.enrollment, t.table.leads, t.table.linksLabel, t.table.clicksLabel, t.table.shareYladaLabel, t.table.fullAnalysisExpandLabel]
     const rows = usuariosVisiveis.map((u) => {
       const base = [
         u.nome,
@@ -786,6 +790,8 @@ export default function AdminUsuarios() {
         String(u.leadsGerados),
         String(u.linksEnviados ?? 0),
         String(u.cliquesLinks ?? 0),
+        String(u.compartilharYlada ?? 0),
+        String(u.analiseExpandidaYlada ?? 0),
       ]
       return [...base, ...pres, ...rest]
     })
@@ -1136,7 +1142,7 @@ export default function AdminUsuarios() {
                 style={{ WebkitOverflowScrolling: 'touch' }}
               >
                 <table
-                  className={`w-full divide-y divide-gray-200 ${mostrarColunasPresidente ? 'min-w-[780px]' : 'min-w-[560px]'}`}
+                  className={`w-full divide-y divide-gray-200 ${mostrarColunasPresidente ? 'min-w-[780px]' : 'min-w-[620px]'}`}
                 >
                   <thead className="bg-gray-50 sticky top-0 z-10 shadow-[inset_0_-1px_0_0_rgb(229,231,235)]">
                     <tr>
@@ -1286,7 +1292,7 @@ export default function AdminUsuarios() {
                             : <span className="text-gray-400">—</span>}
                         </td>
                         <td
-                          className="px-2 py-2 whitespace-nowrap min-w-[5.5rem]"
+                          className="px-2 py-2 whitespace-nowrap min-w-[6.75rem]"
                           title={t.table.leadsColumnSub}
                         >
                           <div className="text-[10px] text-gray-600 space-y-0.5 leading-tight">
@@ -1298,6 +1304,14 @@ export default function AdminUsuarios() {
                             </div>
                             <div>
                               <span className="font-medium">{t.table.clicksLabel}:</span> <span className="text-gray-900 font-semibold">{usuario.cliquesLinks ?? 0}</span>
+                            </div>
+                            <div>
+                              <span className="font-medium">{t.table.shareYladaLabel}:</span>{' '}
+                              <span className="text-gray-900 font-semibold">{usuario.compartilharYlada ?? 0}</span>
+                            </div>
+                            <div>
+                              <span className="font-medium">{t.table.fullAnalysisExpandLabel}:</span>{' '}
+                              <span className="text-gray-900 font-semibold">{usuario.analiseExpandidaYlada ?? 0}</span>
                             </div>
                           </div>
                         </td>
