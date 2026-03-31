@@ -13,6 +13,7 @@ import { trackEvent } from '@/lib/analytics-events'
 import { useAuthenticatedFetch } from '@/hooks/useAuthenticatedFetch'
 import { useYladaSidebarReveal } from '@/components/ylada/YladaSidebarRevealContext'
 import { getYladaAreaPathPrefix } from '@/config/ylada-areas'
+import YladaReceptionWelcomeVideo from '@/components/ylada/YladaReceptionWelcomeVideo'
 
 interface NoelHomeContentProps {
   areaCodigo: string
@@ -194,6 +195,7 @@ function NoelHomeChatShell({
           >
             {/* Conteúdo centralizado no cartão (mobile e desktop); largura máxima confortável para leitura. */}
             <div className="flex w-full max-w-full flex-col items-center gap-4 text-center sm:mx-auto sm:max-w-2xl sm:gap-6">
+              <YladaReceptionWelcomeVideo />
               <p className="text-[15px] sm:text-lg font-medium text-gray-900 leading-[1.55] sm:leading-relaxed text-pretty whitespace-pre-line">
                 {prompt}
               </p>
