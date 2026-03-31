@@ -331,6 +331,11 @@ const NOEL_SCRIPTS_INDICACOES_E_MICROCONTEXTO = `
 4) MICRO-COLHEITA (sem interrogatório)
    - Se faltar contexto para calibrar o script (temperatura do lead, primeiro contato vs retorno, canal), inclua NO MÁXIMO UMA pergunta curta ao profissional junto da orientação.
    - Se ele já descreveu a situação, infira; só confirme em uma frase curta se ajudar ("Pelo que você descreveu, parece lead morno — é isso?").
+
+5) FECHAMENTO COM CTA DE CONVERSA (diretriz padrão)
+   - Ao finalizar scripts, prefira incluir CTA de conversa: "me chama no Direct" ou "me chama no WhatsApp".
+   - Isso é diretriz padrão (forte), não obrigação absoluta: adapte quando o contexto pedir outro fechamento.
+   - Se houver link gerado no turno, oriente de forma natural a pessoa a rolar até o bloco oficial para acessar/copiar o link correto.
 `
 
 /** Antes de mandar link/quiz: curiosidade + permissão — evita “atacar” o contato com ferramenta. */

@@ -83,6 +83,22 @@ function shouldForcePatientFacing(
   return objetivo === 'captar' && targetIsExternal
 }
 
+function normalizeOptionText(value: string): string {
+  return value
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim()
+}
+
+function isGenericOptionSet(options?: string[]): boolean {
+  if (!options || options.length === 0) return true
+  const normalized = options.map(normalizeOptionText)
+  const genericPool = new Set(['sim', 'nao', 'as vezes', 'nao tenho certeza', 'talvez'])
+  const genericHits = normalized.filter((opt) => genericPool.has(opt)).length
+  return genericHits >= 3
+}
+
 /** Resposta unificada do interpret. */
 export interface InterpretResponse {
   flow_id: string
@@ -429,6 +445,15 @@ REGRAS: Retorne o JSON com flow_id (mantenha o mesmo), theme, e questions AJUSTA
         isProfessionalSelfAssessmentQuestion(q.label || '')
       )
       if (hasProfessionalBias) {
+        questionsOut = []
+      }
+    }
+
+    // Se o modelo devolver opções muito genéricas (sim/não/às vezes), descartamos o override
+    // para o generate montar perguntas mais coerentes com o tema/fluxo.
+    if (finalFlowId === 'diagnostico_risco' || finalFlowId === 'diagnostico_bloqueio') {
+      const genericQuestions = questionsOut.filter((q) => isGenericOptionSet(q.options)).length
+      if (genericQuestions >= 2) {
         questionsOut = []
       }
     }

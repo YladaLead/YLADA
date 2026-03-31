@@ -28,6 +28,86 @@ import {
   projectionQuestionsOverrideAllowed,
 } from '@/lib/ylada/projection-form-fields'
 
+function normalizeOptionText(value: string): string {
+  return value
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim()
+}
+
+function isGenericLowSignalOptions(options?: string[]): boolean {
+  if (!options || options.length === 0) return true
+  const normalized = options.map(normalizeOptionText)
+  const genericPool = new Set([
+    'sim',
+    'nao',
+    'as vezes',
+    'nao tenho certeza',
+    'talvez',
+    'raramente',
+    'frequentemente',
+  ])
+  const genericHits = normalized.filter((opt) => genericPool.has(opt)).length
+  return genericHits >= 3
+}
+
+function buildCoherentFallbackOptions(label: string, index: number): string[] {
+  const q = normalizeOptionText(label)
+
+  if (index === 0 || /situacao|acontece|parece com voce|hoje/.test(q)) {
+    return [
+      'Tenho tentado melhorar, mas perco consistencia',
+      'Comeco animado(a), mas paro no meio',
+      'Faço varias coisas e nao sei o que funciona',
+      'Ainda nao consegui organizar um caminho claro',
+    ]
+  }
+
+  if (/atrapalha|dificulta|desafio|bloqueio/.test(q)) {
+    return [
+      'Falta de consistencia na rotina',
+      'Nao saber o que priorizar primeiro',
+      'Expectativa de resultado muito rapido',
+      'Comeco, mas nao consigo manter',
+    ]
+  }
+
+  if (/rotina|constancia|manter|frequencia/.test(q)) {
+    return [
+      'Tenho rotina definida e sigo bem',
+      'Tenho rotina, mas oscilo durante a semana',
+      'Nao tenho rotina fixa e improviso',
+      'Estou comecando agora e preciso de estrutura',
+    ]
+  }
+
+  if (/clareza|processo|plano|por onde comecar/.test(q)) {
+    return [
+      'Tenho clareza do passo a passo',
+      'Entendo parte do processo, mas tenho duvidas',
+      'Tenho muitas informacoes e pouca direcao',
+      'Nao sei por onde comecar no meu caso',
+    ]
+  }
+
+  if (/meta|objetivo|resultado|expectativa|melhorar/.test(q)) {
+    return [
+      'Quero destravar e voltar a evoluir com consistencia',
+      'Quero um plano realista para manter resultado',
+      'Quero entender o que ajustar primeiro',
+      'Quero avaliar meu caso antes de decidir o proximo passo',
+    ]
+  }
+
+  return [
+    'Isso me atrapalha bastante hoje',
+    'Me atrapalha em alguns momentos',
+    'Atrapalha pouco, mas quero melhorar',
+    'Nao sei avaliar com clareza ainda',
+  ]
+}
+
 function generateSlug(): string {
   return randomBytes(6).toString('base64url').toLowerCase().replace(/[^a-z0-9]/g, '') || 'link'
 }
@@ -329,6 +409,25 @@ export async function POST(request: NextRequest) {
         if (locale && formFields.length > 0 && !usedOverride) {
           formFields = await translateQuestions(formFields, locale)
         }
+      }
+
+      if (flow.architecture === 'RISK_DIAGNOSIS' || flow.architecture === 'BLOCKER_DIAGNOSIS') {
+        formFields = formFields.map((field, index) => {
+          const options = Array.isArray(field.options) ? field.options.slice(0, 4) : undefined
+          const needsFallback = isGenericLowSignalOptions(options) || (options?.length ?? 0) < 4
+          if (needsFallback) {
+            return {
+              ...field,
+              type: 'single',
+              options: buildCoherentFallbackOptions(field.label, index),
+            }
+          }
+          return {
+            ...field,
+            type: 'single',
+            options,
+          }
+        })
       }
 
       configJson = {
