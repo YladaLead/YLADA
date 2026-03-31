@@ -58,6 +58,7 @@ import OpenAI from 'openai'
 import { hasYladaProPlan } from '@/lib/subscription-helpers'
 import { getNoelUsageCount, incrementNoelUsage } from '@/lib/noel-usage-helpers'
 import { FREEMIUM_LIMITS, YLADA_FREEMIUM_NOEL_MONTHLY_LIMIT_MESSAGE } from '@/config/freemium-limits'
+import { recordFreemiumLimitHit } from '@/lib/freemium-behavioral-events'
 import { completeNinaSupportTurn } from '@/lib/ylada-nina-support'
 import { notifyNinaSupportInquiry } from '@/lib/support-notifications'
 import {
@@ -662,6 +663,7 @@ export async function POST(request: NextRequest) {
     if (!isSupportChannel && !isPro) {
       const used = await getNoelUsageCount(user.id)
       if (used >= FREEMIUM_LIMITS.FREE_LIMIT_NOEL_ADVANCED_ANALYSES_PER_MONTH) {
+        void recordFreemiumLimitHit(user.id, 'noel')
         return NextResponse.json(
           {
             error: 'limit_reached',

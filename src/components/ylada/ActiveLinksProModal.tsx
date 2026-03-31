@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react'
 import Link from 'next/link'
+import { trackFreemiumConversionEvent } from '@/lib/ylada-freemium-client'
 
 /**
  * Modal quando o usuário Free atinge o limite de diagnósticos ativos (freemium).
@@ -24,6 +25,18 @@ export function ActiveLinksProModal({
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
   }, [open, onClose])
+
+  useEffect(() => {
+    if (!open) return
+    try {
+      const k = 'ylada_paywall_view_active_link_modal_v1'
+      if (sessionStorage.getItem(k)) return
+      sessionStorage.setItem(k, '1')
+      trackFreemiumConversionEvent('freemium_paywall_view', { surface: 'active_links_modal', kind: 'active_link' })
+    } catch {
+      trackFreemiumConversionEvent('freemium_paywall_view', { surface: 'active_links_modal', kind: 'active_link' })
+    }
+  }, [open])
 
   if (!open) return null
 
@@ -68,6 +81,12 @@ export function ActiveLinksProModal({
           </button>
           <Link
             href="/pt/precos"
+            onClick={() =>
+              trackFreemiumConversionEvent('freemium_upgrade_cta_click', {
+                surface: 'active_links_modal',
+                kind: 'active_link',
+              })
+            }
             className="inline-flex justify-center items-center rounded-xl bg-sky-600 px-4 py-3 text-sm font-semibold text-white hover:bg-sky-700 text-center"
           >
             Assinar Plano Pro

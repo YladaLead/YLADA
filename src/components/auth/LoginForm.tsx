@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase-client'
 import Image from 'next/image'
 import { useLastVisitedPage } from '@/hooks/useLastVisitedPage'
+import { trackYladaFunnelUserCreated } from '@/lib/ylada-funnel-client'
 
 const supabase = createClient()
 
@@ -294,7 +295,8 @@ export default function LoginForm({
           } else {
             // Sessão criada - usuário já está logado
             console.log('✅ Cadastro bem-sucedido com sessão ativa')
-            
+            trackYladaFunnelUserCreated(perfil)
+
             // Verificar e ativar autorizações pendentes para este email
             try {
               await fetch('/api/auth/activate-pending-authorization', {

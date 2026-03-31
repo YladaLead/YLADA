@@ -4,6 +4,7 @@ import { useEffect } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
 import PilotPageContent from '@/components/pilot/PilotPageContent'
+import { trackYladaFunnelEvent } from '@/lib/ylada-funnel-client'
 
 /** Hub: escolher segmento. Primeira tela só com “Explique menos” em /pt. */
 export default function PtSegmentosHubClient() {
@@ -18,6 +19,13 @@ export default function PtSegmentosHubClient() {
       router.replace('/pt/painel')
     }
   }, [loading, user, pathname, router, isHub])
+
+  useEffect(() => {
+    if (loading || !isHub || user) return
+    trackYladaFunnelEvent('funnel_segmentos_view', undefined, {
+      oncePerSessionKey: 'ylada_funnel_segmentos_v1',
+    })
+  }, [loading, user, isHub])
 
   if (loading && isHub) {
     return (

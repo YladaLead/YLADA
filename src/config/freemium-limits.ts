@@ -16,6 +16,10 @@ export const FREEMIUM_LIMITS = {
 
 export type FreemiumLimitKey = keyof typeof FREEMIUM_LIMITS
 
+/** Tipos de gatilho Free → Pro para analytics (Noel, WhatsApp/mês, diagnóstico ativo). */
+export const FREEMIUM_CONVERSION_KINDS = ['noel', 'whatsapp', 'active_link'] as const
+export type FreemiumConversionKind = (typeof FREEMIUM_CONVERSION_KINDS)[number]
+
 /** Resposta API quando o link não é o único ativo permitido no Free (só o mais antigo fica público). */
 export const FREEMIUM_LIMIT_TYPE_EXTRA_ACTIVE_LINK = 'freemium_extra_active_link' as const
 

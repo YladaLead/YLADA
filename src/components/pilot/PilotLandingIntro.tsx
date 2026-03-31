@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import YLADALogo from '@/components/YLADALogo'
+import { trackYladaFunnelEvent } from '@/lib/ylada-funnel-client'
 
 /**
  * Primeira tela pública PT: só o gancho + CTA. Segmentos em /pt/segmentos.
@@ -32,7 +33,10 @@ export default function PilotLandingIntro() {
           </h1>
           <button
             type="button"
-            onClick={() => router.push('/pt/segmentos')}
+            onClick={() => {
+              trackYladaFunnelEvent('funnel_landing_cta_segmentos')
+              router.push('/pt/segmentos')
+            }}
             className="mt-10 w-full max-w-sm min-h-[44px] rounded-xl bg-blue-600 px-8 py-3 text-base font-semibold text-white hover:bg-blue-700 sm:min-h-[48px]"
           >
             Comece agora

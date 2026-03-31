@@ -8,6 +8,7 @@ import { INSTITUTIONAL_AREAS } from '@/config/institutional-areas'
 import { useTranslations } from '@/hooks/useTranslations'
 import { freeTextMatchesBelezaEsteticaSegment } from '@/lib/pilot-other-to-estetica'
 import { getMatrixHubHrefForArea } from '@/lib/ylada-matrix-entry'
+import { trackYladaFunnelEvent } from '@/lib/ylada-funnel-client'
 
 /** Itens só por solicitação — no piloto entram apenas pelo campo livre. */
 const PILOT_EXCLUDED_IDS = new Set(['profissional-liberal'])
@@ -93,6 +94,9 @@ export default function PilotPageContent() {
                   <li key={area.id}>
                     <Link
                       href={href}
+                      onClick={() =>
+                        trackYladaFunnelEvent('funnel_hub_segmento_clicado', { area: area.id })
+                      }
                       className="flex min-h-[44px] items-center rounded-xl border border-gray-200 bg-white px-3.5 py-2.5 text-sm font-medium text-gray-900 transition-colors hover:border-blue-300 hover:bg-sky-50/60 active:bg-sky-50 sm:min-h-[48px] sm:px-4 sm:py-3"
                     >
                       {label}

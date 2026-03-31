@@ -13,6 +13,7 @@ import { buildNoelContextualWelcome, type NoelContextualAction } from '@/config/
 import { getLocaleFromPathname, type Language } from '@/lib/i18n'
 import { YLADA_FREEMIUM_NOEL_MONTHLY_LIMIT_MESSAGE } from '@/config/freemium-limits'
 import { copyTextToClipboard } from '@/lib/clipboard'
+import { trackFreemiumConversionEvent } from '@/lib/ylada-freemium-client'
 
 /** Texto plano dos nós do markdown (para detectar parágrafos que são perguntas). */
 function markdownPlainText(children: ReactNode): string {
@@ -53,6 +54,11 @@ function normalizeNoelAssistantMarkdown(raw: string): string {
 
 function LinkWithCopy({ href, children }: { href?: string; children: React.ReactNode }) {
   const [copied, setCopied] = useState(false)
+  const onAnchorClick = useCallback(() => {
+    if (href && /precos/i.test(href)) {
+      trackFreemiumConversionEvent('freemium_upgrade_cta_click', { surface: 'noel_chat', kind: 'noel' })
+    }
+  }, [href])
   const copy = useCallback(async () => {
     if (!href) return
     const ok = await copyTextToClipboard(href)
@@ -68,6 +74,7 @@ function LinkWithCopy({ href, children }: { href?: string; children: React.React
         href={href}
         target="_blank"
         rel="noopener noreferrer"
+        onClick={onAnchorClick}
         className="flex items-center gap-1.5 w-fit px-3 py-2 rounded-lg bg-sky-50 text-sky-700 font-medium hover:bg-sky-100 transition-colors border border-sky-200"
       >
         <span className="truncate">{children}</span>
@@ -213,6 +220,17 @@ export default function NoelChat({ area = 'med', className = '', initialMessage,
   const inputRef = useRef<HTMLTextAreaElement>(null)
   const initializedRef = useRef(false)
   const contextualLoadedRef = useRef(false)
+  const noelPaywallSessionRef = useRef(false)
+  const trackNoelPaywallOnceIfNeeded = useCallback(() => {
+    try {
+      if (sessionStorage.getItem('ylada_paywall_view_noel_chat_v1')) return
+      sessionStorage.setItem('ylada_paywall_view_noel_chat_v1', '1')
+    } catch {
+      if (noelPaywallSessionRef.current) return
+      noelPaywallSessionRef.current = true
+    }
+    trackFreemiumConversionEvent('freemium_paywall_view', { surface: 'noel_chat', kind: 'noel' })
+  }, [])
 
   useEffect(() => {
     if (initializedRef.current) return
@@ -325,6 +343,7 @@ export default function NoelChat({ area = 'med', className = '', initialMessage,
           return
         }
         if (err.limit_type === 'noel_advanced' || err.error === 'limit_reached') {
+          trackNoelPaywallOnceIfNeeded()
           const upgradeMsg =
             err.message ||
             YLADA_FREEMIUM_NOEL_MONTHLY_LIMIT_MESSAGE
@@ -373,7 +392,7 @@ export default function NoelChat({ area = 'med', className = '', initialMessage,
       setLoading(false)
       inputRef.current?.focus()
     }
-  }, [input, loading, messages, area, authenticatedFetch, lastLinkContext, locale])
+  }, [input, loading, messages, area, authenticatedFetch, lastLinkContext, locale, trackNoelPaywallOnceIfNeeded])
 
   const clearChat = () => {
     contextualLoadedRef.current = false
@@ -538,6 +557,7 @@ export default function NoelChat({ area = 'med', className = '', initialMessage,
             upgrade_url?: string
           }
           if (err.limit_type === 'noel_advanced' || err.error === 'limit_reached') {
+            trackNoelPaywallOnceIfNeeded()
             const upgradeMsg =
               err.message ||
               YLADA_FREEMIUM_NOEL_MONTHLY_LIMIT_MESSAGE
@@ -581,7 +601,7 @@ export default function NoelChat({ area = 'med', className = '', initialMessage,
         inputRef.current?.focus()
       }
     },
-    [area, authenticatedFetch, lastLinkContext, loading, messages, locale]
+    [area, authenticatedFetch, lastLinkContext, loading, messages, locale, trackNoelPaywallOnceIfNeeded]
   )
 
   const showSuggestions = messages.length === 1 && messages[0]?.role === 'assistant'

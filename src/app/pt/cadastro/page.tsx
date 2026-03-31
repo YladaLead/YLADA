@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import LoginForm, { type LoginFormPerfil, YLADA_SIGNUP_PAGE_HERO } from '@/components/auth/LoginForm'
+import { trackYladaFunnelEvent } from '@/lib/ylada-funnel-client'
 
 /** Áreas disponíveis para cadastro (sem ylada — matriz não é área pública). */
 const AREAS_CADASTRO: { value: string; label: string }[] = [
@@ -45,6 +46,25 @@ export default function CadastroPage() {
     setInicializado(true)
   }, [])
 
+  useEffect(() => {
+    if (!inicializado) return
+    trackYladaFunnelEvent('funnel_cadastro_view', undefined, {
+      oncePerSessionKey: 'ylada_funnel_cadastro_v1',
+    })
+  }, [inicializado])
+
+  useEffect(() => {
+    if (!inicializado) return
+    const area = getAreaFromUrl()
+    if (area) {
+      trackYladaFunnelEvent(
+        'funnel_cadastro_area_selected',
+        { area },
+        { oncePerSessionKey: 'ylada_funnel_cadastro_area_url_v1' }
+      )
+    }
+  }, [inicializado])
+
   if (areaAtiva) {
     return (
       <LoginForm
@@ -75,7 +95,10 @@ export default function CadastroPage() {
             <li key={value}>
               <button
                 type="button"
-                onClick={() => setAreaAtiva(value)}
+                onClick={() => {
+                  trackYladaFunnelEvent('funnel_cadastro_area_selected', { area: value })
+                  setAreaAtiva(value)
+                }}
                 className="w-full text-left px-4 py-3 rounded-lg border border-gray-200 hover:border-blue-500 hover:bg-blue-50/50 text-gray-800 font-medium transition-colors"
               >
                 {label}

@@ -9,6 +9,7 @@ import { getPublicFlowConfig, areaUsesStandardPublicFlowMotor } from '@/config/y
 import { useAuth } from '@/contexts/AuthContext'
 import { savePublicFlowHandoff } from '@/lib/ylada-public-flow-handoff'
 import { trackEvent } from '@/lib/analytics-events'
+import { trackYladaFunnelEvent } from '@/lib/ylada-funnel-client'
 
 export default function PtEntradaAreaClient({ areaCodigo }: { areaCodigo: string }) {
   const router = useRouter()
@@ -45,6 +46,7 @@ export default function PtEntradaAreaClient({ areaCodigo }: { areaCodigo: string
         source: 'matrix_entrada',
       })
       trackEvent('ylada_matrix_entrada_nicho', { area: areaCodigo, opcao: nichoSlug })
+      trackYladaFunnelEvent('funnel_entrada_nicho', { area: areaCodigo, nicho: nichoSlug })
       router.push(standard.pathPrefix)
     },
     [areaCodigo, standard, router]

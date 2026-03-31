@@ -9,8 +9,9 @@ import { requireApiAuth } from '@/lib/api-auth'
  */
 export async function POST(request: NextRequest) {
   try {
-    // Verificar autenticação (qualquer perfil pode ativar sua própria autorização)
-    const authResult = await requireApiAuth(request, ['wellness', 'coach-bem-estar', 'nutri', 'coach', 'nutra', 'admin'])
+    // Só exige usuário logado: ativação usa o email da sessão e autorizações da própria conta.
+    // Não filtrar por perfil da matriz (psi, psicanalise, etc.) — evita 403 após cadastro e ruído nos logs.
+    const authResult = await requireApiAuth(request)
     if (authResult instanceof NextResponse) {
       return authResult
     }

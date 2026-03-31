@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import type { ReactNode } from 'react'
-import Link from 'next/link'
+import { AdminNavClient } from '@/components/admin/AdminNavClient'
 
 export const metadata: Metadata = {
   manifest: '/manifest-admin.json',
@@ -13,53 +13,8 @@ export const metadata: Metadata = {
 export default function AdminLayout({ children }: { children: ReactNode }) {
   return (
     <>
-      {/* Barra fixa: acesso rápido a Presidentes em qualquer página admin */}
-      <div className="sticky top-0 z-50 bg-white border-b border-gray-200 px-4 py-2 flex items-center justify-center gap-6 shadow-sm">
-        <Link
-          href="/admin"
-          className="text-sm text-gray-600 hover:text-gray-900 font-medium"
-        >
-          Dashboard
-        </Link>
-        <Link
-          href="/admin/suporte"
-          className="text-sm font-semibold text-sky-700 hover:text-sky-800 bg-sky-50 px-3 py-1.5 rounded-lg hover:bg-sky-100 transition-colors"
-        >
-          💬 Suporte
-        </Link>
-        <Link
-          href="/admin/motor-crescimento"
-          className="text-sm font-semibold text-indigo-700 hover:text-indigo-800 bg-indigo-50 px-3 py-1.5 rounded-lg hover:bg-indigo-100 transition-colors"
-        >
-          📚 Motor crescimento
-        </Link>
-        <Link
-          href="/admin/minhas-acoes"
-          className="text-sm font-semibold text-emerald-700 hover:text-emerald-800 bg-emerald-50 px-3 py-1.5 rounded-lg hover:bg-emerald-100 transition-colors"
-        >
-          ✅ Minhas ações
-        </Link>
-        <Link
-          href="/admin/diagnosticos-links"
-          className="text-sm font-semibold text-amber-700 hover:text-amber-800 bg-amber-50 px-3 py-1.5 rounded-lg hover:bg-amber-100 transition-colors"
-        >
-          📣 Marketing
-        </Link>
-        <Link
-          href="/admin/usuarios"
-          className="text-sm font-semibold text-indigo-700 hover:text-indigo-800 bg-indigo-50 px-3 py-1.5 rounded-lg hover:bg-indigo-100 transition-colors"
-        >
-          👥 Usuários
-        </Link>
-        <Link
-          href="/admin/presidentes"
-          className="text-sm font-semibold text-purple-700 hover:text-purple-800 bg-purple-50 px-3 py-1.5 rounded-lg hover:bg-purple-100 transition-colors"
-        >
-          🏆 Presidentes
-        </Link>
-      </div>
+      <AdminNavClient />
       {children}
     </>
   )
 }
-

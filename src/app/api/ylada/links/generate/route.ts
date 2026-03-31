@@ -23,6 +23,7 @@ import { translateQuestions } from '@/lib/translate-questions'
 import { getCountryByCode } from '@/components/CountrySelector'
 import { hasYladaProPlan } from '@/lib/subscription-helpers'
 import { FREEMIUM_LIMITS, YLADA_FREEMIUM_ACTIVE_LINK_LIMIT_MESSAGE } from '@/config/freemium-limits'
+import { recordFreemiumLimitHit } from '@/lib/freemium-behavioral-events'
 import {
   buildProjectionFormFields,
   projectionQuestionsOverrideAllowed,
@@ -498,6 +499,7 @@ export async function POST(request: NextRequest) {
         .eq('user_id', user.id)
         .eq('status', 'active')
       if ((count ?? 0) >= FREEMIUM_LIMITS.FREE_LIMIT_ACTIVE_LINKS) {
+        void recordFreemiumLimitHit(user.id, 'active_link')
         return NextResponse.json(
           {
             success: false,

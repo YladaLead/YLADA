@@ -25,6 +25,7 @@ import {
   YLADA_FREEMIUM_WHATSAPP_MONTHLY_LIMIT_MESSAGE_VISITOR,
 } from '@/config/freemium-limits'
 import { isYladaLinkHiddenFromPublicDueToFreemium } from '@/lib/ylada-freemium-public-link'
+import { recordFreemiumLimitHit } from '@/lib/freemium-behavioral-events'
 import { storeDiagnosisAnswers } from '@/lib/ylada/diagnosis-answers-store'
 
 const ARCHITECTURES: DiagnosisArchitecture[] = [
@@ -249,6 +250,7 @@ export async function POST(
       ownerId &&
       (await isYladaLinkHiddenFromPublicDueToFreemium(ownerId, link.id as string, 'active'))
     ) {
+      void recordFreemiumLimitHit(ownerId, 'active_link', { link_id: link.id as string })
       return NextResponse.json(
         {
           success: false,
@@ -280,6 +282,7 @@ export async function POST(
             .gte('created_at', firstDayOfMonth)
           const used = count ?? 0
           if (used >= FREEMIUM_LIMITS.FREE_LIMIT_WHATSAPP_CLICKS_PER_MONTH) {
+            void recordFreemiumLimitHit(ownerId, 'whatsapp', { link_id: link.id as string })
             return NextResponse.json(
               {
                 success: false,

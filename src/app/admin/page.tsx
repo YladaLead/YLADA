@@ -141,9 +141,9 @@ function AdminDashboardContent() {
             typeof data.error === 'string' && data.error.trim() ? data.error : 'Formato de dados inválido'
           )
         }
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error('Erro ao carregar estatísticas:', err)
-        setError(err.message || 'Erro ao carregar dados')
+        setError(err instanceof Error ? err.message : 'Erro ao carregar dados')
       } finally {
         setLoading(false)
       }
@@ -154,6 +154,24 @@ function AdminDashboardContent() {
   const negocio = useMemo(() => resumoPorNegocio(stats), [stats])
 
   const acoesOperacao: QuickAction[] = [
+    {
+      id: 'minha-orientacao',
+      title: 'Minha orientação',
+      description: 'Tarefas semanais para otimizar: checklist + próximo passo sugerido',
+      icon: '📋',
+      link: '/admin/minha-orientacao',
+      color: 'bg-emerald-600',
+      destaque: true,
+    },
+    {
+      id: 'inteligencia-ylada',
+      title: 'Inteligência YLADA',
+      description: 'Decisões em um lugar: insights, funil, intenção e links para o restante',
+      icon: '🧠',
+      link: '/admin/inteligencia-ylada',
+      color: 'bg-indigo-600',
+      destaque: true,
+    },
     {
       id: 'usuarios',
       title: 'Usuários',
@@ -208,9 +226,18 @@ function AdminDashboardContent() {
       destaque: true,
     },
     {
+      id: 'funnel-tracking',
+      title: 'Funil visitante (Tracking)',
+      description: 'Da página inicial ao cadastro: quantos passam em cada etapa',
+      icon: '📍',
+      link: '/admin/tracking',
+      color: 'bg-cyan-600',
+      destaque: true,
+    },
+    {
       id: 'ylada-behavioral-data',
       title: 'Dados comportamentais',
-      description: 'Eventos operacionais e volume de gravações (telemetria)',
+      description: 'Telemetria geral; o funil da landing está em “Funil visitante (Tracking)”',
       icon: '📈',
       link: '/admin/ylada/behavioral-data',
       color: 'bg-violet-500',
@@ -349,29 +376,29 @@ function AdminDashboardContent() {
     <div className="min-h-screen bg-gray-50">
       <header className="bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <Link href="/">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-3 min-w-0">
+              <Link href="/" className="shrink-0">
                 <Image
                   src="/images/logo/ylada/horizontal/azul-claro/ylada-horizontal-azul-claro-30.png"
                   alt="YLADA"
                   width={200}
                   height={70}
-                  className="h-14 sm:h-16 w-auto"
+                  className="h-10 sm:h-14 w-auto"
                 />
               </Link>
-              <div className="h-14 sm:h-16 w-px bg-gray-300" />
-              <div>
-                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Painel Administrativo</h1>
-                <p className="text-sm text-gray-600">YLADA + Wellness — visão compacta</p>
+              <div className="h-10 sm:h-14 w-px bg-gray-300 shrink-0 hidden sm:block" />
+              <div className="min-w-0">
+                <h1 className="text-lg sm:text-2xl font-bold text-gray-900 truncate">Painel admin</h1>
+                <p className="text-xs sm:text-sm text-gray-600">Visão geral</p>
               </div>
             </div>
-            <div className="flex items-center space-x-4">
-              <div className="text-right hidden sm:block">
+            <div className="flex items-center justify-end gap-2 sm:gap-4 shrink-0">
+              <div className="text-right hidden md:block">
                 <p className="text-sm font-medium text-gray-900">Admin</p>
-                <p className="text-xs text-gray-600">Administrador do Sistema</p>
+                <p className="text-xs text-gray-600">Sistema</p>
               </div>
-              <div className="h-10 w-10 bg-blue-100 rounded-full flex items-center justify-center">
+              <div className="h-9 w-9 sm:h-10 sm:w-10 bg-blue-100 rounded-full flex items-center justify-center text-sm">
                 <span className="text-blue-600">A</span>
               </div>
               <button
@@ -394,17 +421,7 @@ function AdminDashboardContent() {
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-6 flex flex-wrap items-center gap-3">
-          <Link
-            href="/admin/contas-demo"
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-gray-800 text-white hover:bg-gray-900 transition-colors"
-          >
-            🎬 Credenciais demo (vídeos)
-          </Link>
-          <span className="text-xs text-gray-500">Página interna — não use em material público</span>
-        </div>
-
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         {loading && (
           <div className="mb-8 text-center py-8">
             <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
@@ -426,87 +443,33 @@ function AdminDashboardContent() {
         )}
 
         {!loading && !error && (
-          <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-              <div className="bg-white rounded-lg p-5 shadow-sm border border-gray-200">
-                <p className="text-sm font-medium text-gray-600">Total de usuários</p>
-                <p className="text-3xl font-bold text-gray-900">{stats.usuariosTotal.toLocaleString('pt-BR')}</p>
-                <p className="text-sm text-green-600 font-medium mt-1">{stats.usuariosAtivos.toLocaleString('pt-BR')} ativos</p>
-              </div>
-              <div className="bg-white rounded-lg p-5 shadow-sm border border-gray-200">
-                <p className="text-sm font-medium text-gray-600">Cursos (Wellness)</p>
-                <p className="text-3xl font-bold text-gray-900">{stats.cursosTotal.toLocaleString('pt-BR')}</p>
-                <p className="text-sm text-green-600 font-medium mt-1">{stats.cursosAtivos.toLocaleString('pt-BR')} ativos</p>
-              </div>
-              <div className="bg-white rounded-lg p-5 shadow-sm border border-gray-200">
-                <p className="text-sm font-medium text-gray-600">Leads gerados</p>
-                <p className="text-3xl font-bold text-gray-900">{stats.leadsTotal.toLocaleString('pt-BR')}</p>
-                <p className="text-sm text-gray-500 mt-1">Total acumulado</p>
-              </div>
-              <div className="bg-white rounded-lg p-5 shadow-sm border border-gray-200">
-                <p className="text-sm font-medium text-gray-600">Receita mensal</p>
-                <p className="text-3xl font-bold text-gray-900">
-                  {stats.receitaMensal >= 1000
-                    ? `R$ ${(stats.receitaMensal / 1000).toFixed(1)}k`
-                    : `R$ ${stats.receitaMensal.toFixed(2)}`}
-                </p>
-                <p className="text-sm text-green-600 font-medium mt-1">
-                  {stats.assinaturasAtivas.toLocaleString('pt-BR')} assinaturas
-                </p>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-10">
-              <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-200">
-                <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">Usuários por negócio</h2>
-                <div className="space-y-2">
-                  {[negocio.ylada, negocio.wellness].map((row) => (
-                    <div
-                      key={row.label}
-                      className="flex items-center justify-between py-2.5 px-3 rounded-lg bg-gray-50"
-                    >
-                      <div className="flex items-center gap-2 min-w-0">
-                        <span className="text-lg shrink-0">{row.icon}</span>
-                        <span className="font-medium text-gray-900 text-sm truncate">{row.label}</span>
-                      </div>
-                      <div className="text-right text-sm shrink-0">
-                        <span className="font-bold text-gray-900">{row.ativos.toLocaleString('pt-BR')}</span>
-                        <span className="text-gray-500"> ativos · </span>
-                        <span className="text-gray-700">{row.total.toLocaleString('pt-BR')} cad.</span>
-                      </div>
-                    </div>
-                  ))}
+          <div className="mb-6">
+            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-4 sm:p-5">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <p className="text-xs font-medium uppercase tracking-wide text-gray-500">Usuários ativos</p>
+                  <p className="text-3xl sm:text-4xl font-bold text-gray-900 tabular-nums">
+                    {stats.usuariosAtivos.toLocaleString('pt-BR')}
+                    <span className="text-lg sm:text-xl font-semibold text-gray-400 ml-1">
+                      / {stats.usuariosTotal.toLocaleString('pt-BR')}
+                    </span>
+                  </p>
+                  <p className="text-xs text-gray-500 mt-1">ativos · total cadastrados</p>
                 </div>
-              </div>
-              <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-200">
-                <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">Receita por negócio</h2>
-                <div className="space-y-2">
-                  {[negocio.ylada, negocio.wellness].map((row) => (
-                    <div
-                      key={row.label}
-                      className="flex items-center justify-between py-2.5 px-3 rounded-lg bg-gray-50"
-                    >
-                      <div className="flex items-center gap-2 min-w-0">
-                        <span className="text-lg shrink-0">{row.icon}</span>
-                        <span className="font-medium text-gray-900 text-sm truncate">{row.label}</span>
-                      </div>
-                      <div className="text-right text-sm shrink-0">
-                        <span className="font-bold text-green-700">
-                          {row.mensal >= 1000
-                            ? `R$ ${(row.mensal / 1000).toFixed(1)}k`
-                            : `R$ ${row.mensal.toFixed(2)}`}
-                          <span className="text-gray-500 font-normal">/mês</span>
-                        </span>
-                        <span className="text-gray-500 block text-xs">
-                          {row.anual >= 1000 ? `R$ ${(row.anual / 1000).toFixed(0)}k` : `R$ ${row.anual.toFixed(2)}`} /ano
-                        </span>
-                      </div>
-                    </div>
-                  ))}
+                <div className="flex flex-col sm:items-end gap-2 shrink-0">
+                  <Link
+                    href="/admin/contas-demo"
+                    className="inline-flex items-center justify-center min-h-[44px] px-4 rounded-xl text-sm font-semibold bg-gray-900 text-white hover:bg-gray-800 active:bg-black w-full sm:w-auto text-center"
+                  >
+                    🎬 Credenciais demo
+                  </Link>
+                  <span className="text-[10px] text-gray-400 text-center sm:text-right max-w-[14rem] sm:max-w-none">
+                    Uso interno — vídeos
+                  </span>
                 </div>
               </div>
             </div>
-          </>
+          </div>
         )}
 
         <section className="mb-10">
@@ -539,7 +502,7 @@ function AdminDashboardContent() {
           </div>
         </section>
 
-        <details className="mb-6">
+        <details className="mb-10">
           <summary className="cursor-pointer text-sm font-medium text-gray-600 hover:text-gray-900">
             Outros (templates, ChatIA)
           </summary>
@@ -549,6 +512,69 @@ function AdminDashboardContent() {
             ))}
           </div>
         </details>
+
+        {!loading && !error && (
+          <section className="mb-6 pt-2 border-t border-gray-200">
+            <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4">
+              Resumo financeiro e negócios
+            </h2>
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-3">
+                <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+                  <p className="text-xs font-medium text-gray-500">Leads</p>
+                  <p className="text-2xl font-bold text-gray-900 tabular-nums">
+                    {stats.leadsTotal.toLocaleString('pt-BR')}
+                  </p>
+                  <p className="text-[11px] text-gray-400 mt-0.5">acumulado</p>
+                </div>
+                <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+                  <p className="text-xs font-medium text-gray-500">Receita / mês</p>
+                  <p className="text-2xl font-bold text-gray-900 tabular-nums">
+                    {stats.receitaMensal >= 1000
+                      ? `R$ ${(stats.receitaMensal / 1000).toFixed(1)}k`
+                      : `R$ ${stats.receitaMensal.toFixed(0)}`}
+                  </p>
+                  <p className="text-[11px] text-green-700 mt-0.5 font-medium">
+                    {stats.assinaturasAtivas.toLocaleString('pt-BR')} assinaturas
+                  </p>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-2xl border border-gray-200 p-4 sm:p-5 shadow-sm">
+                <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">
+                  YLADA vs Wellness
+                </h3>
+                <div className="space-y-3">
+                  {[negocio.ylada, negocio.wellness].map((row) => (
+                    <div
+                      key={row.label}
+                      className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 py-3 border-b border-gray-100 last:border-0 last:pb-0"
+                    >
+                      <div className="flex items-center gap-2 min-w-0">
+                        <span className="text-lg shrink-0">{row.icon}</span>
+                        <span className="font-medium text-gray-900 text-sm truncate">{row.label}</span>
+                      </div>
+                      <div className="flex flex-wrap items-baseline justify-between sm:justify-end gap-x-4 gap-y-1 text-sm pl-7 sm:pl-0">
+                        <span className="text-gray-700">
+                          <strong className="text-gray-900">{row.ativos.toLocaleString('pt-BR')}</strong>{' '}
+                          <span className="text-gray-500">ativos</span> · {row.total.toLocaleString('pt-BR')} cad.
+                        </span>
+                        <span className="font-semibold text-green-700 tabular-nums">
+                          {row.mensal >= 1000
+                            ? `R$ ${(row.mensal / 1000).toFixed(1)}k/mês`
+                            : `R$ ${row.mensal.toFixed(0)}/mês`}
+                          <span className="text-gray-400 font-normal text-xs ml-1">
+                            ({row.anual >= 1000 ? `R$ ${(row.anual / 1000).toFixed(0)}k` : `R$ ${row.anual.toFixed(0)}`}/ano)
+                          </span>
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
       </main>
     </div>
   )
