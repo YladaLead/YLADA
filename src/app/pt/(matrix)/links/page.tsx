@@ -7,9 +7,8 @@ import { getYladaAreaPathPrefix } from '@/config/ylada-areas'
 import { getFlowById } from '@/config/ylada-flow-catalog'
 import { getTemasForProfession, getTemaLabel, TEMA_OUTRO_VALUE, TEMA_ICONS } from '@/config/ylada-temas'
 import { getFerramentasForTema, type FerramentaConcreta } from '@/config/ylada-temas-ferramentas'
-import { useAuth } from '@/hooks/useAuth'
 import { copyTextToClipboard } from '@/lib/clipboard'
-import { CompartilharDiagnosticoContent } from '@/components/ylada/CompartilharDiagnosticoContent'
+import { DiagnosticoLinkQrPanel } from '@/components/shared/DiagnosticoLinkQrPanel'
 import { ActiveLinksProModal } from '@/components/ylada/ActiveLinksProModal'
 import LinksHubContent from '@/components/ylada/LinksHubContent'
 import { YLADA_FREEMIUM_ACTIVE_LINK_LIMIT_MESSAGE } from '@/config/freemium-limits'
@@ -39,6 +38,9 @@ type LinkStats = {
   start: number
   complete: number
   cta_click: number
+  result_view?: number
+  share_click?: number
+  full_analysis_expand?: number
   diagnosis_count?: number
   conversion_rate?: number | null
 }
@@ -155,8 +157,7 @@ function LinksPageContent({ areaCodigo = 'ylada', areaLabel = 'YLADA', embedded 
   const [editTitle, setEditTitle] = useState('')
   const [editCtaWhatsapp, setEditCtaWhatsapp] = useState('')
   const [savingEdit, setSavingEdit] = useState(false)
-  const [divulgarLink, setDivulgarLink] = useState<LinkRow | null>(null)
-  const { userProfile } = useAuth()
+  const [linkQrModal, setLinkQrModal] = useState<LinkRow | null>(null)
   const [profile, setProfile] = useState<{ profile_type?: string | null; profession?: string | null; area_specific?: Record<string, unknown> | null } | null>(null)
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [linkObjective, setLinkObjective] = useState<LinkObjectiveValue>('captar')
@@ -570,7 +571,22 @@ function LinksPageContent({ areaCodigo = 'ylada', areaLabel = 'YLADA', embedded 
         const base = typeof window !== 'undefined' ? window.location.origin : ''
         const url = json.data.url || `${base}/l/${json.data.slug}`
         setLinks((prev) => [
-          { ...json.data, url, template_name: null, template_type: null, stats: { view: 0, start: 0, complete: 0, cta_click: 0, diagnosis_count: 0 } },
+          {
+            ...json.data,
+            url,
+            template_name: null,
+            template_type: null,
+            stats: {
+              view: 0,
+              start: 0,
+              complete: 0,
+              cta_click: 0,
+              result_view: 0,
+              share_click: 0,
+              full_analysis_expand: 0,
+              diagnosis_count: 0,
+            },
+          },
           ...prev,
         ])
         setLastCreatedUrl(url)
@@ -632,7 +648,22 @@ function LinksPageContent({ areaCodigo = 'ylada', areaLabel = 'YLADA', embedded 
         const base = typeof window !== 'undefined' ? window.location.origin : ''
         const url = json.data.url || `${base}/l/${json.data.slug}`
         setLinks((prev) => [
-          { ...json.data, url, template_name: null, template_type: null, stats: { view: 0, start: 0, complete: 0, cta_click: 0, diagnosis_count: 0 } },
+          {
+            ...json.data,
+            url,
+            template_name: null,
+            template_type: null,
+            stats: {
+              view: 0,
+              start: 0,
+              complete: 0,
+              cta_click: 0,
+              result_view: 0,
+              share_click: 0,
+              full_analysis_expand: 0,
+              diagnosis_count: 0,
+            },
+          },
           ...prev,
         ])
         setLastCreatedUrl(url)
@@ -812,7 +843,16 @@ function LinksPageContent({ areaCodigo = 'ylada', areaLabel = 'YLADA', embedded 
             })()}
             <ul className={embedded ? 'space-y-3' : 'space-y-4'}>
               {links.map((link) => {
-                const stats = link.stats ?? { view: 0, start: 0, complete: 0, cta_click: 0, diagnosis_count: 0 }
+                const stats = link.stats ?? {
+                  view: 0,
+                  start: 0,
+                  complete: 0,
+                  cta_click: 0,
+                  result_view: 0,
+                  share_click: 0,
+                  full_analysis_expand: 0,
+                  diagnosis_count: 0,
+                }
                 const isActive = link.status === 'active'
                 return (
                   <li
@@ -870,6 +910,8 @@ function LinksPageContent({ areaCodigo = 'ylada', areaLabel = 'YLADA', embedded 
                             )}
                             <span title="Conclusões">{stats.complete} conclusões</span>
                             <span title="Cliques no WhatsApp">{stats.cta_click} cliques WhatsApp</span>
+                            <span title="Compartilhar resultado">{stats.share_click ?? 0} compartilhar</span>
+                            <span title="Abrir análise completa">{stats.full_analysis_expand ?? 0} análise expandida</span>
                             {typeof stats.conversion_rate === 'number' && (
                               <span
                                 title="Taxa de conversão"
@@ -891,10 +933,10 @@ function LinksPageContent({ areaCodigo = 'ylada', areaLabel = 'YLADA', embedded 
                         </button>
                         <button
                           type="button"
-                          onClick={() => setDivulgarLink(link)}
+                          onClick={() => setLinkQrModal(link)}
                           className="rounded-lg px-2.5 py-1.5 text-xs font-medium text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200"
                         >
-                          Divulgar
+                          QR Code
                         </button>
                         <details className="relative group/actions">
                           <summary className="cursor-pointer rounded-lg border border-gray-200 bg-gray-50 px-2.5 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-100 list-none text-center [&::-webkit-details-marker]:hidden whitespace-nowrap">
@@ -1379,27 +1421,20 @@ function LinksPageContent({ areaCodigo = 'ylada', areaLabel = 'YLADA', embedded 
           </section>
         )}
 
-        {divulgarLink && (
+        {linkQrModal && (
           <div
             className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50"
             aria-modal="true"
             role="dialog"
-            onClick={() => setDivulgarLink(null)}
+            onClick={() => setLinkQrModal(null)}
           >
             <div className="bg-white rounded-xl shadow-lg border border-gray-200 w-full max-w-lg max-h-[90vh] overflow-y-auto p-5" onClick={(e) => e.stopPropagation()}>
-              <h3 className="text-sm font-semibold text-gray-900 mb-1">Divulgar</h3>
-              <p className="text-xs text-gray-600 mb-4">{divulgarLink.title || divulgarLink.slug}</p>
-              <CompartilharDiagnosticoContent
-                key={divulgarLink.id}
-                titulo={divulgarLink.title || divulgarLink.slug}
-                url={divulgarLink.url}
-                nomeProfissional={userProfile?.nome_completo ?? 'Profissional'}
-                contador={divulgarLink.stats?.diagnosis_count ?? divulgarLink.stats?.complete}
-                tema={divulgarLink.theme_raw}
-              />
+              <h3 className="text-sm font-semibold text-gray-900 mb-1">QR Code do link</h3>
+              <p className="text-xs text-gray-600 mb-4">{linkQrModal.title || linkQrModal.slug}</p>
+              <DiagnosticoLinkQrPanel key={linkQrModal.id} url={linkQrModal.url} />
               <button
                 type="button"
-                onClick={() => setDivulgarLink(null)}
+                onClick={() => setLinkQrModal(null)}
                 className="mt-4 w-full py-2 text-sm text-gray-500 hover:text-gray-700"
               >
                 Fechar

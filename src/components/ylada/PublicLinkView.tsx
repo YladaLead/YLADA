@@ -804,6 +804,7 @@ function ConfigDrivenLinkView({
     strategic_profile: meta.strategic_profile && typeof meta.strategic_profile === 'object' ? (meta.strategic_profile as { maturityStage?: string; dominantPain?: string; urgencyLevel?: string; mindset?: string }) : undefined,
     theme_raw: themeFromMeta || themeFromTitle || undefined,
     page_title: pageTitleRaw || undefined,
+    architecture: typeof meta.architecture === 'string' ? meta.architecture : undefined,
     questions_count: visibleQuizQuestionCount > 0 ? visibleQuizQuestionCount : undefined,
   })
 
@@ -979,6 +980,7 @@ function ConfigDrivenLinkView({
       const showDetailedCause = !!diagnosis.causa_provavel && !isVerySimilarText(diagnosis.causa_provavel, primaryInsightText)
 
       const handleShareResult = async () => {
+        trackEvent(slug, 'share_click', { metrics_id: metricsId })
         const shareText =
           locale === 'en'
             ? `I just took this assessment on Ylada. Try it too:`
@@ -987,7 +989,6 @@ function ConfigDrivenLinkView({
               : `Acabei de fazer este diagnóstico no Ylada. Faça também:`
         const shareUrl = typeof window !== 'undefined' ? window.location.href : ''
         try {
-          trackEvent(slug, 'share_click', { metrics_id: metricsId })
           if (typeof navigator !== 'undefined' && navigator.share) {
             await navigator.share({
               title: 'Ylada',
@@ -1166,7 +1167,14 @@ function ConfigDrivenLinkView({
                 </button>
                 <button
                   type="button"
-                  onClick={() => setShowFullAnalysis((prev) => !prev)}
+                  onClick={() => {
+                    setShowFullAnalysis((prev) => {
+                      if (!prev) {
+                        trackEvent(slug, 'full_analysis_expand', { metrics_id: metricsId })
+                      }
+                      return !prev
+                    })
+                  }}
                   className="w-full py-3 px-4 border border-sky-200 text-sky-700 hover:bg-sky-50 font-semibold rounded-xl transition-colors"
                 >
                   {showFullAnalysis ? t.hideFullAnalysis : t.seeFullAnalysis}
@@ -1194,6 +1202,7 @@ function ConfigDrivenLinkView({
       areaProfStatic === 'vendas' || ['seller', 'perfumaria', 'nutra'].includes(segmentCodeStatic)
     const pessoaLabelStatic = useEspecialistaStatic ? 'especialista' : 'profissional'
     const handleShareStaticResult = () => {
+      trackEvent(slug, 'share_click')
       if (typeof window === 'undefined') return
       const shareText =
         locale === 'en'

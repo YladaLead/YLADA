@@ -6,11 +6,20 @@ import { formatDisplayTitle } from '@/lib/ylada/strategic-intro'
 import { usePathname } from 'next/navigation'
 import YladaAreaShell from '@/components/ylada/YladaAreaShell'
 import { getYladaAreaPathPrefix } from '@/config/ylada-areas'
-import { useAuth } from '@/hooks/useAuth'
-import { CompartilharDiagnosticoContent } from '@/components/ylada/CompartilharDiagnosticoContent'
+import { DiagnosticoLinkQrPanel } from '@/components/shared/DiagnosticoLinkQrPanel'
 
 type FormField = { id: string; label: string; type?: string; options?: string[] }
-type LinkStats = { view: number; start: number; complete: number; cta_click: number; diagnosis_count?: number; conversion_rate?: number | null }
+type LinkStats = {
+  view: number
+  start: number
+  complete: number
+  cta_click: number
+  result_view?: number
+  share_click?: number
+  full_analysis_expand?: number
+  diagnosis_count?: number
+  conversion_rate?: number | null
+}
 type LinkData = {
   id: string
   slug: string
@@ -47,8 +56,7 @@ export default function EditarLinkPage({ params }: { params: Promise<{ id: strin
   const [editTitle, setEditTitle] = useState('')
   const [editFields, setEditFields] = useState<FormField[]>([])
   const [editingFieldIndex, setEditingFieldIndex] = useState<number | null>(null)
-  const [showCompartilhar, setShowCompartilhar] = useState(false)
-  const { userProfile } = useAuth()
+  const [showQrModal, setShowQrModal] = useState(false)
 
   useEffect(() => {
     params.then((p) => setId(p.id))
@@ -191,7 +199,6 @@ export default function EditarLinkPage({ params }: { params: Promise<{ id: strin
   const baseUrl = typeof window !== 'undefined' ? window.location.origin : ''
   const previewUrl = link.url ?? `${baseUrl}/l/${link.slug}`
   const tituloLink = link.title ?? link.config_json?.title ?? link.config_json?.page?.title ?? 'Diagnóstico'
-  const temaCompartilhar = link.config_json?.meta?.theme_raw
   const respostas = link.stats?.diagnosis_count ?? link.stats?.complete ?? 0
   const metaSugerida = 20
 
@@ -431,7 +438,7 @@ export default function EditarLinkPage({ params }: { params: Promise<{ id: strin
 
         <div className="rounded-xl border border-gray-200 bg-gray-50/80 p-4 sm:p-5 space-y-3">
           <h2 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
-            <span aria-hidden>📊</span> Respostas e divulgação
+            <span aria-hidden>📊</span> Respostas e link
           </h2>
           {respostas > 0 ? (
             <>
@@ -445,32 +452,26 @@ export default function EditarLinkPage({ params }: { params: Promise<{ id: strin
             </>
           ) : (
             <p className="text-sm text-gray-600">
-              Quando terminar de editar e salvar, use o botão abaixo para copiar mensagens e divulgar. As respostas aparecem aqui depois que as pessoas começarem a responder.
+              Quando terminar de editar e salvar, use o QR Code abaixo para compartilhar o link. As respostas aparecem aqui depois que as pessoas começarem a responder.
             </p>
           )}
           <button
             type="button"
-            onClick={() => setShowCompartilhar(true)}
+            onClick={() => setShowQrModal(true)}
             className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-emerald-700"
           >
-            Compartilhar diagnóstico
+            QR Code do link
           </button>
         </div>
       </div>
 
-      {showCompartilhar && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50" aria-modal="true" role="dialog" onClick={() => setShowCompartilhar(false)}>
+      {showQrModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50" aria-modal="true" role="dialog" onClick={() => setShowQrModal(false)}>
           <div className="bg-white rounded-xl shadow-lg border border-gray-200 w-full max-w-lg max-h-[90vh] overflow-y-auto p-5" onClick={(e) => e.stopPropagation()}>
-            <h3 className="text-sm font-semibold text-gray-900 mb-2">Compartilhar diagnóstico</h3>
+            <h3 className="text-sm font-semibold text-gray-900 mb-2">QR Code do link</h3>
             <p className="text-xs text-gray-600 mb-4">{tituloLink}</p>
-            <CompartilharDiagnosticoContent
-              titulo={tituloLink}
-              url={previewUrl}
-              nomeProfissional={userProfile?.nome_completo ?? 'Profissional'}
-              contador={respostas}
-              tema={temaCompartilhar}
-            />
-            <button type="button" onClick={() => setShowCompartilhar(false)} className="mt-4 w-full py-2 text-sm text-gray-500 hover:text-gray-700">
+            <DiagnosticoLinkQrPanel url={previewUrl} />
+            <button type="button" onClick={() => setShowQrModal(false)} className="mt-4 w-full py-2 text-sm text-gray-500 hover:text-gray-700">
               Fechar
             </button>
           </div>

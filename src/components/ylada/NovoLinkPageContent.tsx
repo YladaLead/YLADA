@@ -10,7 +10,7 @@ import Link from 'next/link'
 import YladaAreaShell from '@/components/ylada/YladaAreaShell'
 import { getYladaAreaPathPrefix } from '@/config/ylada-areas'
 import { useAuth } from '@/hooks/useAuth'
-import { CompartilharDiagnosticoContent } from '@/components/ylada/CompartilharDiagnosticoContent'
+import { DiagnosticoLinkQrPanel } from '@/components/shared/DiagnosticoLinkQrPanel'
 import { ActiveLinksProModal } from '@/components/ylada/ActiveLinksProModal'
 import { getMensagemWhatsAppDiagnostico } from '@/lib/ylada-compartilhar-diagnostico-copy'
 import { markHomeActivationComplete } from '@/lib/ylada-pos-onboarding'
@@ -342,15 +342,8 @@ export function NovoLinkPageContent({
                 {linkCopiado ? '✓ Link copiado!' : '🔗 Copiar link'}
               </button>
               <div className="border-t border-gray-200 pt-4 mt-2">
-                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
-                  Outras formas de compartilhar
-                </p>
-                <CompartilharDiagnosticoContent
-                  titulo={created.title}
-                  url={created.url}
-                  nomeProfissional={nomeProfissional}
-                  tema={created.tema}
-                />
+                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">QR Code</p>
+                <DiagnosticoLinkQrPanel url={created.url} />
               </div>
             </div>
 

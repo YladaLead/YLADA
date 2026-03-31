@@ -28,6 +28,7 @@ import {
   type SituacaoBiblioteca,
 } from '@/config/ylada-biblioteca'
 import { getPerfilSimuladoByKey, SIMULATE_COOKIE_NAME } from '@/data/perfis-simulados'
+import { DiagnosticoLinkQrPanel } from '@/components/shared/DiagnosticoLinkQrPanel'
 import { useAuth } from '@/hooks/useAuth'
 
 function getSimulateCookie(): string | null {
@@ -267,7 +268,7 @@ export default function BibliotecaPageContent({ areaCodigo, areaLabel, embedded 
   const [meusLinks, setMeusLinks] = useState<
     Array<{ id: string; slug: string; title: string | null; url: string; theme_raw?: string | null; stats?: { diagnosis_count?: number } }>
   >([])
-  const [divulgarMeuLink, setDivulgarMeuLink] = useState<{
+  const [linkQrModal, setLinkQrModal] = useState<{
     id: string
     slug: string
     title: string | null
@@ -920,10 +921,10 @@ export default function BibliotecaPageContent({ areaCodigo, areaLabel, embedded 
                     </button>
                     <button
                       type="button"
-                      onClick={() => setDivulgarMeuLink(link)}
+                      onClick={() => setLinkQrModal(link)}
                       className="rounded px-2 py-1 text-xs font-medium text-indigo-600 hover:bg-indigo-50"
                     >
-                      Divulgar
+                      QR Code
                     </button>
                     <Link
                       href={`${linksPath}/editar/${link.id}`}
@@ -944,48 +945,42 @@ export default function BibliotecaPageContent({ areaCodigo, areaLabel, embedded 
         </section>
         )}
 
-        {divulgarMeuLink && (
+        {linkQrModal && (
           <div
             className="fixed inset-0 z-50 flex items-end justify-center sm:items-center sm:p-4 bg-black/50"
             aria-modal="true"
             role="dialog"
-            onClick={() => setDivulgarMeuLink(null)}
+            onClick={() => setLinkQrModal(null)}
           >
             <div
-              className="w-full max-w-md bg-white rounded-t-2xl sm:rounded-xl shadow-xl border border-gray-200 p-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:p-5"
+              className="w-full max-w-md bg-white rounded-t-2xl sm:rounded-xl shadow-xl border border-gray-200 p-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:p-5 max-h-[90vh] overflow-y-auto"
               onClick={(e) => e.stopPropagation()}
             >
-              <h3 className="text-sm font-semibold text-gray-900">Seu link</h3>
-              <p className="text-xs text-gray-600 mt-1 line-clamp-2">{divulgarMeuLink.title || divulgarMeuLink.slug}</p>
+              <h3 className="text-sm font-semibold text-gray-900">QR Code do link</h3>
+              <p className="text-xs text-gray-600 mt-1 line-clamp-2">{linkQrModal.title || linkQrModal.slug}</p>
+              <div className="mt-4">
+                <DiagnosticoLinkQrPanel url={linkQrModal.url} />
+              </div>
               <div className="mt-4 flex flex-col gap-2">
                 <a
-                  href={divulgarMeuLink.url}
+                  href={linkQrModal.url}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center justify-center rounded-xl bg-sky-600 px-4 py-3 text-sm font-medium text-white hover:bg-sky-700"
                 >
                   Ver preview
                 </a>
-                <button
-                  type="button"
-                  onClick={() => {
-                    navigator.clipboard.writeText(divulgarMeuLink.url)
-                  }}
-                  className="rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm font-medium text-gray-800 hover:bg-gray-50"
-                >
-                  Copiar URL
-                </button>
                 <Link
-                  href={`${linksPath}/editar/${divulgarMeuLink.id}`}
+                  href={`${linksPath}/editar/${linkQrModal.id}`}
                   className="flex items-center justify-center rounded-xl border border-sky-200 bg-sky-50 px-4 py-3 text-sm font-medium text-sky-800 hover:bg-sky-100"
-                  onClick={() => setDivulgarMeuLink(null)}
+                  onClick={() => setLinkQrModal(null)}
                 >
                   Editar link
                 </Link>
               </div>
               <button
                 type="button"
-                onClick={() => setDivulgarMeuLink(null)}
+                onClick={() => setLinkQrModal(null)}
                 className="mt-3 w-full py-2 text-sm text-gray-500 hover:text-gray-700"
               >
                 Fechar
