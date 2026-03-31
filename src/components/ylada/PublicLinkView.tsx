@@ -72,8 +72,8 @@ const PUBLIC_LINK_UI: Record<Language, {
     talkNow: '💬 Falar com profissional',
     seeFullAnalysis: 'Ver análise completa',
     hideFullAnalysis: 'Ocultar análise completa',
-    shareResult: '📲 Enviar pra alguém fazer também',
-    shareLoveCta: 'Gostou? Compartilhe com quem você ama.',
+    shareResult: '📲 Compartilhe: Isso pode ajudar alguém que você conhece',
+    shareLoveCta: 'Você pode ajudar alguém',
     profileLabel: 'Seu perfil',
   },
   en: {
@@ -351,8 +351,12 @@ function toShortProfileName(text: string): string {
   if (/rotina de cuidados .* irregular/i.test(base)) {
     return 'Rotina de cuidados inconsistente'
   }
-  if (base.length > 64) {
-    base = `${base.slice(0, 61).trimEnd()}...`
+  if (/hidratacao|hidratação|sol|protecao|proteção|pele/i.test(base)) {
+    return 'Descuido com hidratação e proteção da pele'
+  }
+  const words = base.split(/\s+/).filter(Boolean)
+  if (words.length > 8) {
+    base = words.slice(0, 8).join(' ')
   }
   return base
 }
@@ -360,6 +364,9 @@ function toShortProfileName(text: string): string {
 function toImpactDiagnosisText(text: string): string {
   const trimmed = (text || '').trim()
   if (!trimmed) return trimmed
+  if (/rotina de cuidados|hidratacao|hidratação|sol|protecao|proteção/i.test(trimmed) && /pele/i.test(trimmed)) {
+    return 'Sua pele já está dando sinais claros — e esse quadro tende a se intensificar sem ajuste.'
+  }
   const cleaned = trimmed
     .replace(/em relacao a sua pele com frequencia/gi, 'com frequência')
     .replace(/em relação à sua pele com frequência/gi, 'com frequência')
