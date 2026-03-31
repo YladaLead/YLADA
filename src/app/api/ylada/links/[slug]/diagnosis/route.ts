@@ -147,6 +147,39 @@ function clampWhatsAppPrefill(text: string, max: number): string {
   return `${text.slice(0, max - 1).trimEnd()}…`
 }
 
+function normalizeCompare(text: string): string {
+  return text
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
+function shouldReplaceMainBlocker(mainBlocker: string | undefined, title: string, summary: string | undefined): boolean {
+  const blocker = (mainBlocker || '').trim()
+  if (!blocker) return true
+  const normalizedBlocker = normalizeCompare(blocker)
+  const normalizedTitle = normalizeCompare(title)
+  if (!normalizedBlocker) return true
+  if (
+    normalizedBlocker.includes('seu resultado indica sinais em') ||
+    normalizedBlocker.includes('seu resultado indica') ||
+    normalizedBlocker.length < 18
+  ) {
+    return true
+  }
+  if (normalizedTitle && (normalizedBlocker.includes(normalizedTitle) || normalizedTitle.includes(normalizedBlocker))) {
+    return true
+  }
+  const summaryNorm = normalizeCompare(summary || '')
+  if (summaryNorm && (summaryNorm.includes(normalizedBlocker) || normalizedBlocker.includes(summaryNorm))) {
+    return true
+  }
+  return false
+}
+
 export async function POST(
   request: NextRequest,
   context: { params: Promise<{ slug: string }> }
@@ -602,10 +635,18 @@ export async function POST(
     }
 
     // Memorização: gravar diagnóstico no cache para reutilização futura
+    const safeMainBlocker = shouldReplaceMainBlocker(
+      diagnosis.main_blocker,
+      themeForSlots || themeRaw || 'seu resultado',
+      profileSummary
+    )
+      ? (diagnosis.causa_provavel || diagnosis.consequence || profileSummary || diagnosis.main_blocker || '').trim()
+      : (diagnosis.main_blocker || '').trim()
+
     const diagnosisPayload = {
       profile_title: diagnosis.profile_title,
       profile_summary: profileSummary,
-      main_blocker: diagnosis.main_blocker,
+      main_blocker: safeMainBlocker,
       causa_provavel: diagnosis.causa_provavel,
       preocupacoes: diagnosis.preocupacoes,
       espelho_comportamental: diagnosis.espelho_comportamental,

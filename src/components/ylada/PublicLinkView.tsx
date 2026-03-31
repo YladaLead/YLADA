@@ -37,6 +37,12 @@ const PUBLIC_LINK_UI: Record<Language, {
   understandCase: string
   contactNotAvailable: string
   speakWhatsApp: string
+  talkNow: string
+  seeFullAnalysis: string
+  hideFullAnalysis: string
+  shareResult: string
+  shareLoveCta: string
+  profileLabel: string
 }> = {
   pt: {
     start: 'Começar',
@@ -63,6 +69,12 @@ const PUBLIC_LINK_UI: Record<Language, {
     understandCase: 'Clique para entender melhor seu caso',
     contactNotAvailable: 'O {pessoa} ainda não disponibilizou o contato por aqui.',
     speakWhatsApp: 'Falar no WhatsApp',
+    talkNow: '💬 Falar com profissional',
+    seeFullAnalysis: 'Ver análise completa',
+    hideFullAnalysis: 'Ocultar análise completa',
+    shareResult: '📲 Enviar pra alguém fazer também',
+    shareLoveCta: 'Gostou? Compartilhe com quem você ama.',
+    profileLabel: 'Seu perfil',
   },
   en: {
     start: 'Start',
@@ -89,6 +101,12 @@ const PUBLIC_LINK_UI: Record<Language, {
     understandCase: 'Click to better understand your case',
     contactNotAvailable: 'The {pessoa} has not yet made contact available here.',
     speakWhatsApp: 'Contact on WhatsApp',
+    talkNow: '💬 Talk to a professional',
+    seeFullAnalysis: 'See full analysis',
+    hideFullAnalysis: 'Hide full analysis',
+    shareResult: '📲 Send this so someone can try it',
+    shareLoveCta: 'Liked it? Share with someone you love.',
+    profileLabel: 'Your profile',
   },
   es: {
     start: 'Comenzar',
@@ -115,6 +133,12 @@ const PUBLIC_LINK_UI: Record<Language, {
     understandCase: 'Haz clic para entender mejor tu caso',
     contactNotAvailable: 'El {pessoa} aún no ha puesto el contacto disponible aquí.',
     speakWhatsApp: 'Contactar por WhatsApp',
+    talkNow: '💬 Hablar con profesional',
+    seeFullAnalysis: 'Ver análisis completo',
+    hideFullAnalysis: 'Ocultar análisis completo',
+    shareResult: '📲 Enviar para que alguien lo haga',
+    shareLoveCta: 'Te gustó? Compártelo con alguien que amas.',
+    profileLabel: 'Tu perfil',
   },
 }
 
@@ -242,6 +266,115 @@ function personalizeMainBlocker(text: string): string {
   const m5 = t.match(/^Desequilíbrio em (.+) que pede ação$/i)
   if (m5) return `Seu resultado indica um desequilíbrio em ${m5[1].toLowerCase()} que pede ação`
   return t
+}
+
+function sanitizeResultTitle(text: string): string {
+  if (!text?.trim()) return ''
+  let cleaned = text.trim()
+  cleaned = cleaned.replace(/^seu resultado inicial em\s+/i, '')
+  cleaned = cleaned.replace(/^seu resultado em\s+/i, '')
+  cleaned = cleaned.replace(/^resultado em\s+/i, '')
+  return cleaned.trim()
+}
+
+function normalizeForCompare(text: string): string {
+  return text
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
+function isRedundantWithTitle(title: string, text: string): boolean {
+  const t = normalizeForCompare(title)
+  const x = normalizeForCompare(text)
+  if (!t || !x) return false
+  return x.includes(t) || t.includes(x) || x.includes('seu resultado indica sinais em')
+}
+
+function isVerySimilarText(a?: string, b?: string): boolean {
+  const x = normalizeForCompare(a || '')
+  const y = normalizeForCompare(b || '')
+  if (!x || !y) return false
+  if (x === y) return true
+  const xWords = x.split(' ').filter(Boolean)
+  const yWords = y.split(' ').filter(Boolean)
+  if (xWords.length === 0 || yWords.length === 0) return false
+  const xSet = new Set(xWords)
+  const overlap = yWords.filter((w) => xSet.has(w)).length
+  const ratio = overlap / Math.max(xWords.length, yWords.length)
+  return ratio >= 0.8
+}
+
+function buildPrimaryInsight(diagnosis: DiagnosisResultState, diagnosisCardText: string): string {
+  const cause = diagnosis.causa_provavel?.trim() || ''
+  const concern = diagnosis.preocupacoes?.trim() || ''
+  const consequence = diagnosis.consequence?.trim() || ''
+  const growth = diagnosis.growth_potential?.trim() || ''
+
+  if (cause && !isVerySimilarText(cause, diagnosisCardText) && !isVerySimilarText(cause, consequence)) {
+    return cause
+  }
+  if (consequence && !isVerySimilarText(consequence, diagnosisCardText)) {
+    return consequence
+  }
+  if (concern && !isVerySimilarText(concern, diagnosisCardText)) {
+    return concern
+  }
+  if (growth) {
+    return growth
+  }
+  return diagnosisCardText
+}
+
+function shouldAvoidAsProfileName(text: string): boolean {
+  const v = normalizeForCompare(text)
+  if (!v) return true
+  return v.startsWith('qual ') || v.includes('?')
+}
+
+function toShortProfileName(text: string): string {
+  const trimmed = (text || '').trim()
+  if (!trimmed) return ''
+  const firstSentence = trimmed.split(/[.!?]/)[0]?.trim() || trimmed
+  let base = firstSentence
+    .replace(/^a causa provavel:\s*/i, '')
+    .replace(/^causa provavel:\s*/i, '')
+    .replace(/^a causa provável:\s*/i, '')
+    .replace(/^causa provável:\s*/i, '')
+    .replace(/^seu resultado indica\s*/i, '')
+    .replace(/^sinais em\s*/i, '')
+    .trim()
+
+  if (/rotina de cuidados .* irregular/i.test(base)) {
+    return 'Rotina de cuidados inconsistente'
+  }
+  if (base.length > 64) {
+    base = `${base.slice(0, 61).trimEnd()}...`
+  }
+  return base
+}
+
+function toImpactDiagnosisText(text: string): string {
+  const trimmed = (text || '').trim()
+  if (!trimmed) return trimmed
+  const cleaned = trimmed
+    .replace(/em relacao a sua pele com frequencia/gi, 'com frequência')
+    .replace(/em relação à sua pele com frequência/gi, 'com frequência')
+    .replace(/em relacao a sua pele/gi, '')
+    .replace(/em relação à sua pele/gi, '')
+    .replace(/\s{2,}/g, ' ')
+    .trim()
+  if (/^pelos seus relatos/i.test(trimmed)) {
+    return cleaned
+      .replace(/^pelos seus relatos,\s*/i, '')
+      .replace(/^alguns sinais/i, 'Sua pele já está dando sinais')
+      .replace(/aparecem com frequência/i, 'com frequência')
+      .replace(/com frequência\./i, 'frequentes.')
+  }
+  return cleaned
 }
 
 /** Tem resultados estáticos utilizáveis (não placeholder). */
@@ -380,6 +513,9 @@ type DiagnosisResultState = {
   growth_potential: string
   cta_text: string
   whatsapp_prefill: string
+  frase_identificacao?: string
+  dica_rapida?: string
+  specific_actions?: string[]
 }
 
 function ConfigDrivenLinkView({
@@ -454,6 +590,7 @@ function ConfigDrivenLinkView({
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [freemiumLimitMessage, setFreemiumLimitMessage] = useState<string | null>(null)
+  const [showFullAnalysis, setShowFullAnalysis] = useState(false)
   const startSent = useRef(false)
   const completeSent = useRef(false)
   const resultViewSent = useRef(false)
@@ -815,7 +952,52 @@ function ConfigDrivenLinkView({
       const useEspecialista =
         areaProf === 'vendas' || ['seller', 'perfumaria', 'nutra'].includes(segmentCode)
       const pessoaLabel = useEspecialista ? 'especialista' : 'profissional'
-      const formattedProfileTitle = formatDisplayTitle(diagnosis.profile_title)
+      const rawProfileName = sanitizeResultTitle(diagnosis.profile_title || '')
+      const fallbackProfileFromInsight = sanitizeResultTitle(diagnosis.main_blocker || diagnosis.causa_provavel || '')
+      const chosenProfileBase = shouldAvoidAsProfileName(rawProfileName)
+        ? (shouldAvoidAsProfileName(fallbackProfileFromInsight) ? 'Padrão de atenção identificado' : fallbackProfileFromInsight)
+        : rawProfileName
+      const profileName = toShortProfileName(chosenProfileBase)
+      const formattedProfileTitle = profileName
+      const contextTitle = sanitizeResultTitle(displayTitle)
+      const compactSummary = diagnosis.profile_summary?.trim()
+      const mainBlockerText = personalizeMainBlocker(diagnosis.main_blocker || '').trim()
+      const shouldUseSummaryInDiagnosisCard =
+        !!compactSummary && (isRedundantWithTitle(formattedProfileTitle, mainBlockerText) || mainBlockerText.length < 18)
+      const diagnosisCardText = shouldUseSummaryInDiagnosisCard
+        ? compactSummary
+        : mainBlockerText
+      const impactDiagnosisText = toImpactDiagnosisText(diagnosisCardText)
+      const primaryInsightText = buildPrimaryInsight(diagnosis, diagnosisCardText)
+      const showDetailedCause = !!diagnosis.causa_provavel && !isVerySimilarText(diagnosis.causa_provavel, primaryInsightText)
+
+      const handleShareResult = async () => {
+        const shareText =
+          locale === 'en'
+            ? `I just took this assessment on Ylada. Try it too:`
+            : locale === 'es'
+              ? `Acabo de hacer este diagnóstico en Ylada. Hazlo tú también:`
+              : `Acabei de fazer este diagnóstico no Ylada. Faça também:`
+        const shareUrl = typeof window !== 'undefined' ? window.location.href : ''
+        try {
+          trackEvent(slug, 'share_click', { metrics_id: metricsId })
+          if (typeof navigator !== 'undefined' && navigator.share) {
+            await navigator.share({
+              title: 'Ylada',
+              text: shareText,
+              url: shareUrl,
+            })
+            return
+          }
+        } catch {
+          // ignore and fallback to WhatsApp share
+        }
+        if (typeof window !== 'undefined') {
+          const waUrl = `https://wa.me/?text=${encodeURIComponent(`${shareText} ${shareUrl}`)}`
+          window.open(waUrl, '_blank', 'noopener,noreferrer')
+        }
+      }
+
       return (
         <div className="min-h-screen bg-gradient-to-b from-sky-50 via-sky-50/90 to-blue-50 flex items-center justify-center p-4 sm:p-6">
           <div className="max-w-md w-full bg-white rounded-2xl shadow-xl shadow-sky-100/50 border border-sky-100/60 p-6 sm:p-8">
@@ -824,14 +1006,16 @@ function ConfigDrivenLinkView({
                 {t.yourResult}
               </span>
             </div>
+            {contextTitle && (
+              <p className="text-xs text-gray-500 mb-2">{contextTitle}</p>
+            )}
+            <p className="text-[11px] font-semibold uppercase tracking-wider text-sky-600 mb-1">
+              {t.profileLabel}
+            </p>
             <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3 leading-tight">
               {formattedProfileTitle}
             </h1>
 
-            {/* 1. Leitura personalizada */}
-            <p className="text-gray-600 text-sm leading-relaxed mb-5">{diagnosis.profile_summary}</p>
-
-            {/* 2. Diagnóstico — ponto chave */}
             <div className="relative mb-5 overflow-hidden rounded-2xl bg-gradient-to-br from-sky-50 to-white border border-sky-100/80 shadow-sm">
               <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-gradient-to-b from-sky-400 to-sky-600 rounded-l-2xl" />
               <div className="pl-5 pr-5 py-5 sm:pl-6 sm:pr-6 sm:py-6">
@@ -839,7 +1023,7 @@ function ConfigDrivenLinkView({
                   {t.diagnosis}
                 </p>
                 <p className="text-lg sm:text-xl font-bold text-gray-900 leading-snug mb-2">
-                  {personalizeMainBlocker(diagnosis.main_blocker)}
+                  {impactDiagnosisText}
                 </p>
                 {diagnosis.espelho_comportamental && (
                   <p className="text-sm text-sky-700 font-medium italic">
@@ -849,127 +1033,149 @@ function ConfigDrivenLinkView({
               </div>
             </div>
 
-            {/* 2b. Frase de identificação emocional */}
-            {diagnosis.frase_identificacao && (
-              <p className="text-gray-600 text-sm leading-relaxed mb-4 italic">
-                {diagnosis.frase_identificacao}
-              </p>
-            )}
-
-            {/* 3. Causa provável / O que isso significa (perfumaria) */}
-            {diagnosis.causa_provavel && (
-              <div className="mb-4">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-sky-600 mb-1">
-                  {isPerfumery ? t.whatItMeans : t.probableCause}
-                </p>
-                <p className="text-gray-600 text-sm leading-relaxed">
-                  {diagnosis.causa_provavel}
-                </p>
-              </div>
-            )}
-
-            {/* 4. Preocupações */}
-            {diagnosis.preocupacoes && (
-              <div className="mb-4">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-sky-600 mb-1">
-                  {t.concerns}
-                </p>
-                <p className="text-gray-600 text-sm leading-relaxed">
-                  {diagnosis.preocupacoes}
-                </p>
-              </div>
-            )}
-
-            {/* 5. Consequência / Benefício (perfumaria) */}
-            <div className="mb-4">
-              <p className="text-[10px] font-semibold uppercase tracking-wider text-sky-600 mb-1">
-                {isPerfumery ? t.benefit : t.consequence}
-              </p>
-              <p className="text-gray-600 text-sm leading-relaxed">
-                {diagnosis.consequence}
+            <div className="mb-5 p-4 rounded-xl border border-gray-100 bg-gray-50/70">
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-gray-500 mb-2">Ponto principal</p>
+              <p className="text-sm text-gray-700 leading-relaxed">
+                {primaryInsightText}
               </p>
             </div>
 
-            {/* 5a. Gatilho de esperança — cria ponte para conversa */}
-            <div className="mb-4 p-4 rounded-xl bg-green-50/80 border border-green-100">
-              <p className="text-gray-700 text-sm leading-relaxed">
-                {t.goodNews}
-              </p>
-            </div>
+            {showFullAnalysis && (
+              <>
+                {diagnosis.frase_identificacao && (
+                  <p className="text-gray-600 text-sm leading-relaxed mb-4 italic">
+                    {diagnosis.frase_identificacao}
+                  </p>
+                )}
 
-            {/* 5b. Dica rápida (micro-conteúdo educativo) */}
-            {diagnosis.dica_rapida && (
-              <div className="mb-4 p-4 rounded-xl bg-sky-50/60 border border-sky-100">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-sky-600 mb-1">
-                  {t.quickTip}
-                </p>
-                <p className="text-gray-700 text-sm leading-relaxed">
-                  {diagnosis.dica_rapida}
-                </p>
-              </div>
+                {showDetailedCause && diagnosis.causa_provavel && (
+                  <div className="mb-4">
+                    <p className="text-[10px] font-semibold uppercase tracking-wider text-sky-600 mb-1">
+                      {isPerfumery ? t.whatItMeans : t.probableCause}
+                    </p>
+                    <p className="text-gray-600 text-sm leading-relaxed">
+                      {diagnosis.causa_provavel}
+                    </p>
+                  </div>
+                )}
+
+                {diagnosis.preocupacoes && (
+                  <div className="mb-4">
+                    <p className="text-[10px] font-semibold uppercase tracking-wider text-sky-600 mb-1">
+                      {t.concerns}
+                    </p>
+                    <p className="text-gray-600 text-sm leading-relaxed">
+                      {diagnosis.preocupacoes}
+                    </p>
+                  </div>
+                )}
+
+                <div className="mb-4">
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-sky-600 mb-1">
+                    {isPerfumery ? t.benefit : t.consequence}
+                  </p>
+                  <p className="text-gray-600 text-sm leading-relaxed">
+                    {diagnosis.consequence}
+                  </p>
+                </div>
+
+                <div className="mb-4 p-4 rounded-xl bg-green-50/80 border border-green-100">
+                  <p className="text-gray-700 text-sm leading-relaxed">
+                    {t.goodNews}
+                  </p>
+                </div>
+
+                {diagnosis.dica_rapida && (
+                  <div className="mb-4 p-4 rounded-xl bg-sky-50/60 border border-sky-100">
+                    <p className="text-[10px] font-semibold uppercase tracking-wider text-sky-600 mb-1">
+                      {t.quickTip}
+                    </p>
+                    <p className="text-gray-700 text-sm leading-relaxed">
+                      {diagnosis.dica_rapida}
+                    </p>
+                  </div>
+                )}
+
+                <div className="mb-6">
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-sky-600 mb-2">
+                    {t.nextSteps}
+                  </p>
+                  {diagnosis.specific_actions && diagnosis.specific_actions.length > 0 ? (
+                    <ul className="space-y-2">
+                      {diagnosis.specific_actions.map((action, idx) => (
+                        <li key={idx} className="flex items-start gap-2 text-sky-700 text-sm font-medium leading-relaxed">
+                          <span className="flex-shrink-0 w-5 h-5 rounded-full bg-sky-100 text-sky-600 flex items-center justify-center text-xs font-semibold">
+                            {idx + 1}
+                          </span>
+                          {action}
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="text-sky-700 text-sm font-medium leading-relaxed">
+                      {diagnosis.growth_potential}
+                    </p>
+                  )}
+                </div>
+
+                <div className="mb-6 p-4 rounded-xl bg-sky-50/80 border border-sky-100">
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-sky-600 mb-2">
+                    {t.moreFactors}
+                  </p>
+                  <p className="text-gray-600 text-sm leading-relaxed mb-2">
+                    {t.resultDisclaimer.replace('{pessoa}', pessoaLabel)}
+                  </p>
+                  <p className="text-gray-700 text-sm font-medium">
+                    {t.talkToPro.replace('{pessoa}', pessoaLabel)}
+                  </p>
+                </div>
+              </>
             )}
 
-            {/* 6. Providências — 2–3 ações específicas ou texto único */}
-            <div className="mb-6">
-              <p className="text-[10px] font-semibold uppercase tracking-wider text-sky-600 mb-2">
-                {t.nextSteps}
-              </p>
-              {diagnosis.specific_actions && diagnosis.specific_actions.length > 0 ? (
-                <ul className="space-y-2">
-                  {diagnosis.specific_actions.map((action, idx) => (
-                    <li key={idx} className="flex items-start gap-2 text-sky-700 text-sm font-medium leading-relaxed">
-                      <span className="flex-shrink-0 w-5 h-5 rounded-full bg-sky-100 text-sky-600 flex items-center justify-center text-xs font-semibold">
-                        {idx + 1}
-                      </span>
-                      {action}
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="text-sky-700 text-sm font-medium leading-relaxed">
-                  {diagnosis.growth_potential}
-                </p>
-              )}
-            </div>
-
-            {/* 7. Ponte para conversa — gatilho de continuação (não conclusão) */}
-            <div className="mb-6 p-4 rounded-xl bg-sky-50/80 border border-sky-100">
-              <p className="text-[10px] font-semibold uppercase tracking-wider text-sky-600 mb-2">
-                {t.moreFactors}
-              </p>
-              <p className="text-gray-600 text-sm leading-relaxed mb-2">
-                {t.resultDisclaimer.replace('{pessoa}', pessoaLabel)}
-              </p>
-              <p className="text-gray-700 text-sm font-medium">
-                {t.talkToPro.replace('{pessoa}', pessoaLabel)}
-              </p>
-            </div>
-
-            {/* 8. CTA — botão de ação */}
             {whatsappUrl ? (
-              <button
-                type="button"
-                onClick={() =>
-                  onCtaClick(
-                    metricsId,
-                    diagnosis.whatsapp_prefill?.trim() ||
-                      (locale === 'en' ? 'Hi, I did the assessment and would like to talk about the result.' : locale === 'es' ? 'Hola, hice la evaluación y me gustaría hablar sobre el resultado.' : 'Oi, fiz a análise e gostaria de conversar sobre o resultado.')
-                  )
-                }
-                className="w-full py-4 px-4 bg-sky-600 hover:bg-sky-700 text-white font-semibold rounded-xl shadow-lg shadow-sky-500/25 transition-colors"
-              >
-                {diagnosis.cta_text?.replace(/profissional/gi, pessoaLabel) ?? (useEspecialista ? t.talkToSpecialist : t.understandCase)}
-              </button>
+              <div className="space-y-3">
+                <p className="text-center text-sm text-gray-600">
+                  Esse padrão é comum e pode ser ajustado com orientação certa.
+                </p>
+                <button
+                  type="button"
+                  onClick={() =>
+                    onCtaClick(
+                      metricsId,
+                      diagnosis.whatsapp_prefill?.trim() ||
+                        (locale === 'en' ? 'Hi, I did the assessment and would like to talk about the result.' : locale === 'es' ? 'Hola, hice la evaluación y me gustaría hablar sobre el resultado.' : 'Oi, fiz a análise e gostaria de conversar sobre o resultado.')
+                    )
+                  }
+                  className="w-full py-4 px-4 bg-sky-600 hover:bg-sky-700 text-white font-semibold rounded-xl shadow-lg shadow-sky-500/25 transition-colors"
+                >
+                  {t.talkNow}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleShareResult}
+                  className="w-full py-3 px-4 border border-sky-200 text-sky-700 hover:bg-sky-50 font-semibold rounded-xl transition-colors"
+                >
+                  {t.shareResult}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowFullAnalysis((prev) => !prev)}
+                  className="w-full py-3 px-4 border border-sky-200 text-sky-700 hover:bg-sky-50 font-semibold rounded-xl transition-colors"
+                >
+                  {showFullAnalysis ? t.hideFullAnalysis : t.seeFullAnalysis}
+                </button>
+              </div>
             ) : (
               <span className="text-gray-500 text-sm">{t.contactNotAvailable.replace('{pessoa}', pessoaLabel)}</span>
             )}
 
-            {/* Disclaimer — orientação e responsabilidade */}
+            <div className="mt-5 pt-4 border-t border-gray-100">
+              <PoweredByYlada variant="compact" />
+            </div>
             <DiagnosisDisclaimer
               variant={isPerfumery ? 'wellness' : 'informative'}
-              className="mt-5 pt-4 border-t border-gray-100"
+              className="mt-4"
             />
-            <PoweredByYlada variant="compact" />
           </div>
         </div>
       )
@@ -980,10 +1186,17 @@ function ConfigDrivenLinkView({
     const useEspecialistaStatic =
       areaProfStatic === 'vendas' || ['seller', 'perfumaria', 'nutra'].includes(segmentCodeStatic)
     const pessoaLabelStatic = useEspecialistaStatic ? 'especialista' : 'profissional'
-    const ctaDisplay =
-      (resultCtaText && resultCtaText.trim()
-        ? resultCtaText.replace(/profissional/gi, pessoaLabelStatic)
-        : null) ?? (useEspecialistaStatic ? t.talkToSpecialist : t.understandCase)
+    const handleShareStaticResult = () => {
+      if (typeof window === 'undefined') return
+      const shareText =
+        locale === 'en'
+          ? 'I just took this assessment on Ylada. Try it too:'
+          : locale === 'es'
+            ? 'Acabo de hacer este diagnóstico en Ylada. Hazlo tú también:'
+            : 'Acabei de fazer este diagnóstico no Ylada. Faça também:'
+      const waUrl = `https://wa.me/?text=${encodeURIComponent(`${shareText} ${window.location.href}`)}`
+      window.open(waUrl, '_blank', 'noopener,noreferrer')
+    }
 
     return (
       <div className="min-h-screen bg-gradient-to-b from-sky-50 via-sky-50/90 to-blue-50 flex items-center justify-center p-4 sm:p-6">
@@ -1011,19 +1224,30 @@ function ConfigDrivenLinkView({
             </p>
           </div>
           {whatsappUrl ? (
-            <button
-              type="button"
-              onClick={() => onCtaClick()}
-              className="w-full py-4 px-4 bg-sky-600 hover:bg-sky-700 text-white font-semibold rounded-xl shadow-lg shadow-sky-500/25 transition-colors"
-            >
-              {ctaDisplay}
-            </button>
+            <div className="space-y-3">
+              <button
+                type="button"
+                onClick={() => onCtaClick()}
+                className="w-full py-4 px-4 bg-sky-600 hover:bg-sky-700 text-white font-semibold rounded-xl shadow-lg shadow-sky-500/25 transition-colors"
+              >
+                {t.talkNow}
+              </button>
+              <button
+                type="button"
+                onClick={handleShareStaticResult}
+                className="w-full py-3 px-4 border border-sky-200 text-sky-700 hover:bg-sky-50 font-semibold rounded-xl transition-colors"
+              >
+                {t.shareResult}
+              </button>
+            </div>
           ) : (
             <span className="text-gray-500 text-sm">{t.contactNotAvailable.replace('{pessoa}', pessoaLabelStatic)}</span>
           )}
 
-          <DiagnosisDisclaimer variant="informative" className="mt-5 pt-4" />
-          <PoweredByYlada variant="compact" />
+          <div className="mt-5 pt-4 border-t border-gray-100">
+            <PoweredByYlada variant="compact" />
+          </div>
+          <DiagnosisDisclaimer variant="informative" className="mt-4" />
         </div>
       </div>
     )
