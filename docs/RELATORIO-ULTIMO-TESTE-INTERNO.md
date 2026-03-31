@@ -1,15 +1,15 @@
 # Último relatório — Teste interno (agente)
 
-**Data:** 30/03/2026, 10:20:52  
-**URL:** http://localhost:3000  
-**Conta:** demo.estetica@ylada.app (área teste)
+**Data:** 31/03/2026, 12:52:45  
+**URL:** https://www.ylada.com  
+**Conta:** teste-estetica@teste.ylada.com (área estética)
 
 ## Resultados
 
 | Bloco | Status | Observação |
 |-------|--------|------------|
 | Login | ✅ OK | Login ok. |
-| 1. Board/Home | ❌ ERRO | Página vazia ou não carregou. |
+| 1. Board/Home | ✅ OK | Página carregou; menu e conteúdo presentes. |
 | 1b. Método YLADA | ✅ OK | Página do método carregou; sem repetição de título. |
 | 2. Perfil | ✅ OK | Omitido (perfil por e-mail); foco em diagnóstico, edições, Noel, etc.) |
 | 3. Noel | ⚠️ ATENCAO | Campo de chat não encontrado (verificar se componente Noel está renderizado) |
@@ -26,4 +26,4 @@
 
 ## Tabela resumo (COBERTURA blocos 0–11 + 3b + 3c)
 
-| teste | ❌ | ✅ | ✅ | ⚠️ | ⚠️ | ⚠️ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ⚠️ |
+| estética | ✅ | ✅ | ✅ | ⚠️ | ⚠️ | ⚠️ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ⚠️ |
