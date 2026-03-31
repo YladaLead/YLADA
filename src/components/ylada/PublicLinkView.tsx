@@ -1745,8 +1745,7 @@ function CalculatorBlock({
   const calculatorStartSent = useRef(false)
   const calculatorCompleteSent = useRef(false)
 
-  // Usar fieldsValidados para garantir que não há campos dissertativos
-  const fieldsParaCalculadora = fieldsValidados
+  const fieldsParaCalculadora = fields
   const numberFields = fieldsParaCalculadora.filter((f) => (f.type as string)?.toLowerCase() !== 'select')
   const allNumberFieldsFilled = numberFields.every((f) => {
     const v = values[f.id]
