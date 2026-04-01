@@ -11,6 +11,7 @@ import {
 import DiagnosisDisclaimer from '@/components/ylada/DiagnosisDisclaimer'
 import PoweredByYlada from '@/components/ylada/PoweredByYlada'
 import type { Language } from '@/lib/i18n'
+import { createClient } from '@/lib/supabase-client'
 
 const PUBLIC_LINK_UI: Record<Language, {
   start: string
@@ -216,18 +217,26 @@ type Payload = {
   config: Record<string, unknown>
   ctaWhatsapp: string | null
   accessBlockedDueToPlan?: boolean
+  link_owner_user_id?: string | null
 }
 
-function buildWhatsAppUrl(ctaWhatsapp: string | null): string {
-  if (!ctaWhatsapp || !ctaWhatsapp.trim()) return ''
-  const v = ctaWhatsapp.trim()
-  if (/^https?:\/\//i.test(v)) return v
-  const num = v.replace(/\D/g, '')
-  if (!num.length) return ''
-  return `https://wa.me/${num}`
+type LinkTelemetryCtx = {
+  viewerReady: boolean
+  viewerUserId: string | null
+  ownerId: string | null
+  slug: string
 }
 
-function trackEvent(slug: string, eventType: string, options?: { metrics_id?: string }) {
+const linkTelemetryRef: { current: LinkTelemetryCtx } = {
+  current: { viewerReady: false, viewerUserId: null, ownerId: null, slug: '' },
+}
+
+/** Telemetria do link público: aguarda sessão; não registra quando o visitante é o dono do link. */
+function trackLinkEvent(slug: string, eventType: string, options?: { metrics_id?: string }) {
+  const ctx = linkTelemetryRef.current
+  if (ctx.slug !== slug) return
+  if (!ctx.viewerReady) return
+  if (ctx.ownerId && ctx.viewerUserId && ctx.ownerId === ctx.viewerUserId) return
   try {
     const body: Record<string, unknown> = {
       slug,
@@ -235,6 +244,7 @@ function trackEvent(slug: string, eventType: string, options?: { metrics_id?: st
       device: typeof navigator !== 'undefined' ? navigator.userAgent?.slice(0, 200) : null,
     }
     if (options?.metrics_id) body.metrics_id = options.metrics_id
+    if (ctx.viewerUserId) body.viewer_user_id = ctx.viewerUserId
     fetch('/api/ylada/links/events', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -244,6 +254,15 @@ function trackEvent(slug: string, eventType: string, options?: { metrics_id?: st
   } catch {
     // ignore
   }
+}
+
+function buildWhatsAppUrl(ctaWhatsapp: string | null): string {
+  if (!ctaWhatsapp || !ctaWhatsapp.trim()) return ''
+  const v = ctaWhatsapp.trim()
+  if (/^https?:\/\//i.test(v)) return v
+  const num = v.replace(/\D/g, '')
+  if (!num.length) return ''
+  return `https://wa.me/${num}`
 }
 
 const DIAGNOSIS_PLACEHOLDER = 'O diagnóstico será gerado com base no seu perfil.'
@@ -474,23 +493,46 @@ function normalizeBibliotecaConfig(config: Record<string, unknown>, locale: Lang
 }
 
 export default function PublicLinkView({ payload, locale = 'pt' }: { payload: Payload; locale?: Language }) {
-  const { slug, type, title, config, ctaWhatsapp, accessBlockedDueToPlan } = payload
+  const { slug, type, title, config, ctaWhatsapp, accessBlockedDueToPlan, link_owner_user_id: linkOwnerUserId } = payload
   const t = PUBLIC_LINK_UI[locale]
   const viewSent = useRef(false)
+  const [viewerReady, setViewerReady] = useState(false)
+  const [viewerUserId, setViewerUserId] = useState<string | null>(null)
+
+  linkTelemetryRef.current = {
+    viewerReady,
+    viewerUserId,
+    ownerId: linkOwnerUserId ?? null,
+    slug,
+  }
 
   useEffect(() => {
+    const supabase = createClient()
+    if (!supabase) {
+      setViewerUserId(null)
+      setViewerReady(true)
+      return
+    }
+    supabase.auth.getSession().then(({ data }) => {
+      setViewerUserId(data.session?.user?.id ?? null)
+      setViewerReady(true)
+    })
+  }, [])
+
+  useEffect(() => {
+    if (!viewerReady) return
     if (accessBlockedDueToPlan) return
     if (viewSent.current) return
     viewSent.current = true
-    trackEvent(slug, 'view')
-  }, [slug, accessBlockedDueToPlan])
+    trackLinkEvent(slug, 'view')
+  }, [slug, accessBlockedDueToPlan, viewerReady])
 
   const resultCta = (config.result as Record<string, unknown>)?.cta as Record<string, unknown> | undefined
   const ctaText = (resultCta?.text as string) || (config.ctaText as string) || (config.ctaDefault as string) || t.speakWhatsApp
   const whatsappUrl = buildWhatsAppUrl(ctaWhatsapp)
 
   const handleCtaClick = (metricsId?: string, whatsappPrefill?: string) => {
-    trackEvent(slug, 'cta_click', metricsId ? { metrics_id: metricsId } : undefined)
+    trackLinkEvent(slug, 'cta_click', metricsId ? { metrics_id: metricsId } : undefined)
     if (whatsappUrl) {
       const url = whatsappPrefill
         ? `${whatsappUrl}${whatsappUrl.includes('?') ? '&' : '?'}text=${encodeURIComponent(whatsappPrefill)}`
@@ -664,7 +706,7 @@ function ConfigDrivenLinkView({
   useEffect(() => {
     if (step === 'result' && diagnosis && metricsId && !resultViewSent.current) {
       resultViewSent.current = true
-      trackEvent(slug, 'result_view', { metrics_id: metricsId })
+      trackLinkEvent(slug, 'result_view', { metrics_id: metricsId })
     }
   }, [step, diagnosis, metricsId, slug])
 
@@ -738,11 +780,11 @@ function ConfigDrivenLinkView({
 
     if (!startSent.current) {
       startSent.current = true
-      trackEvent(slug, 'start')
+      trackLinkEvent(slug, 'start')
     }
     if (!completeSent.current) {
       completeSent.current = true
-      trackEvent(slug, 'complete')
+      trackLinkEvent(slug, 'complete')
     }
 
     if (useDiagnosisApi) {
@@ -1049,7 +1091,7 @@ function ConfigDrivenLinkView({
       const showDetailedCause = !!diagnosis.causa_provavel && !isVerySimilarText(diagnosis.causa_provavel, primaryInsightText)
 
       const handleShareResult = async () => {
-        trackEvent(slug, 'share_click', { metrics_id: metricsId })
+        trackLinkEvent(slug, 'share_click', { metrics_id: metricsId })
         const shareText =
           locale === 'en'
             ? `I just took this assessment on Ylada. Try it too:`
@@ -1239,7 +1281,7 @@ function ConfigDrivenLinkView({
                   onClick={() => {
                     setShowFullAnalysis((prev) => {
                       if (!prev) {
-                        trackEvent(slug, 'full_analysis_expand', { metrics_id: metricsId })
+                        trackLinkEvent(slug, 'full_analysis_expand', { metrics_id: metricsId })
                       }
                       return !prev
                     })
@@ -1271,7 +1313,7 @@ function ConfigDrivenLinkView({
       areaProfStatic === 'vendas' || ['seller', 'perfumaria', 'nutra'].includes(segmentCodeStatic)
     const pessoaLabelStatic = useEspecialistaStatic ? 'especialista' : 'profissional'
     const handleShareStaticResult = () => {
-      trackEvent(slug, 'share_click')
+      trackLinkEvent(slug, 'share_click')
       if (typeof window === 'undefined') return
       const shareText =
         locale === 'en'
@@ -1372,7 +1414,7 @@ function ConfigDrivenLinkView({
   const handleOptionSelect = (fieldId: string, value: string) => {
     if (!startSent.current) {
       startSent.current = true
-      trackEvent(slug, 'start')
+      trackLinkEvent(slug, 'start')
     }
     setValues((prev) => ({ ...prev, [fieldId]: value }))
     if (isLastQuizStep) return
@@ -1607,7 +1649,7 @@ function DiagnosticoQuiz({
     if (!currentQuestion) return
     if (!startSent.current) {
       startSent.current = true
-      trackEvent(slug, 'start')
+      trackLinkEvent(slug, 'start')
     }
     const next = { ...answers, [currentQuestion.id]: optionIndex }
     setAnswers(next)
@@ -1615,7 +1657,7 @@ function DiagnosticoQuiz({
       setStep('result')
       if (!completeSent.current) {
         completeSent.current = true
-        trackEvent(slug, 'complete')
+        trackLinkEvent(slug, 'complete')
       }
     }
   }
@@ -1703,6 +1745,96 @@ type CalculatorConfig = {
   resultIntro?: string
 }
 
+function getCalculatorResultCopy(title: string, value: number, locale: Language): { insight: string; tip: string } | null {
+  const normalized = title.toLowerCase()
+
+  if (normalized.includes('prote')) {
+    if (value < 90) {
+      return {
+        insight:
+          locale === 'en'
+            ? 'This target is lower than what many active people need, which can worsen hunger and recovery.'
+            : locale === 'es'
+              ? 'Esta meta está por debajo de lo que muchas personas activas necesitan y puede empeorar hambre y recuperación.'
+              : 'Esse alvo está abaixo do que muita gente ativa precisa e pode piorar fome e recuperação.',
+        tip:
+          locale === 'en'
+            ? 'Practical tip: split your protein into 3-5 meals and include one high-protein source in each.'
+            : locale === 'es'
+              ? 'Consejo práctico: distribuye la proteína en 3-5 comidas e incluye una fuente proteica en cada una.'
+              : 'Dica prática: distribua a proteína em 3-5 refeições e inclua uma fonte proteica em cada uma.',
+      }
+    }
+    return {
+      insight:
+        locale === 'en'
+          ? 'This target can improve satiety and consistency, especially when your routine is busy.'
+          : locale === 'es'
+            ? 'Esta meta puede mejorar saciedad y constancia, especialmente con una rutina intensa.'
+            : 'Esse alvo pode melhorar saciedade e constância, principalmente em rotina corrida.',
+      tip:
+        locale === 'en'
+          ? 'Practical tip: keep one easy protein option ready (yogurt, eggs, tuna, whey) for your hardest times.'
+          : locale === 'es'
+            ? 'Consejo práctico: deja una opción proteica fácil lista para los momentos de más prisa.'
+            : 'Dica prática: deixe uma opção proteica fácil pronta para os horários mais difíceis.',
+    }
+  }
+
+  if (normalized.includes('água') || normalized.includes('agua') || normalized.includes('hidrata')) {
+    return {
+      insight:
+        locale === 'en'
+          ? 'When hydration is below ideal, fatigue, headache and appetite confusion are common.'
+          : locale === 'es'
+            ? 'Cuando la hidratación queda por debajo de lo ideal, son comunes cansancio, dolor de cabeza y hambre confusa.'
+            : 'Quando a hidratação fica abaixo do ideal, é comum sentir cansaço, dor de cabeça e fome confusa.',
+      tip:
+        locale === 'en'
+          ? 'Practical tip: split the total in 4 blocks during the day and start with one glass right after waking.'
+          : locale === 'es'
+            ? 'Consejo práctico: divide el total en 4 bloques al día y empieza con un vaso al despertar.'
+            : 'Dica prática: divida o total em 4 blocos no dia e comece com um copo logo ao acordar.',
+    }
+  }
+
+  if (normalized.includes('imc')) {
+    return {
+      insight:
+        locale === 'en'
+          ? 'BMI is a screening signal, not a full diagnosis, but it helps show if your strategy needs adjustment.'
+          : locale === 'es'
+            ? 'El IMC es una señal de cribado, no un diagnóstico completo, pero ayuda a indicar si la estrategia necesita ajuste.'
+            : 'IMC é um sinal de triagem, não diagnóstico completo, mas ajuda a mostrar se a estratégia precisa ajuste.',
+      tip:
+        locale === 'en'
+          ? 'Practical tip: combine this with waist measurement and routine habits for a more realistic plan.'
+          : locale === 'es'
+            ? 'Consejo práctico: combina esto con medida de cintura y hábitos para un plan más realista.'
+            : 'Dica prática: combine esse número com medida de cintura e hábitos para um plano mais realista.',
+    }
+  }
+
+  if (normalized.includes('caloria')) {
+    return {
+      insight:
+        locale === 'en'
+          ? 'This estimate gives a starting point to avoid both excess and an unsustainable low intake.'
+          : locale === 'es'
+            ? 'Esta estimación da un punto de partida para evitar tanto exceso como ingesta insuficiente difícil de sostener.'
+            : 'Essa estimativa dá um ponto de partida para evitar tanto excesso quanto restrição difícil de sustentar.',
+      tip:
+        locale === 'en'
+          ? 'Practical tip: adjust every 2 weeks based on body response and adherence, not only on the number.'
+          : locale === 'es'
+            ? 'Consejo práctico: ajusta cada 2 semanas según respuesta del cuerpo y adherencia, no solo por el número.'
+            : 'Dica prática: ajuste a cada 2 semanas com base na resposta do corpo e adesão, não só no número.',
+    }
+  }
+
+  return null
+}
+
 function CalculatorBlock({
   slug,
   config,
@@ -1729,6 +1861,14 @@ function CalculatorBlock({
   const resultPrefix = (cfg.resultPrefix as string) ?? ''
   const resultSuffix = (cfg.resultSuffix as string) ?? ''
   const resultIntro = (cfg.resultIntro as string) || (locale === 'en' ? 'Based on what you provided:' : locale === 'es' ? 'Según lo que proporcionaste:' : 'Com base no que você informou:')
+  const ctaLabel =
+    /quero falar no whatsapp/i.test(ctaText)
+      ? locale === 'en'
+        ? 'I want to talk to a professional'
+        : locale === 'es'
+          ? 'Quiero hablar con un profesional'
+          : 'Quero falar com um profissional'
+      : ctaText
 
   const [values, setValues] = useState<Record<string, number | undefined>>(() => {
     const init: Record<string, number | undefined> = {}
@@ -1744,6 +1884,7 @@ function CalculatorBlock({
   const [showResult, setShowResult] = useState(false)
   const calculatorStartSent = useRef(false)
   const calculatorCompleteSent = useRef(false)
+  const calculatorResultViewSent = useRef(false)
 
   const fieldsParaCalculadora = fields
   const numberFields = fieldsParaCalculadora.filter((f) => (f.type as string)?.toLowerCase() !== 'select')
@@ -1764,18 +1905,53 @@ function CalculatorBlock({
   } catch {
     resultNum = 0
   }
+  const resultCopy = getCalculatorResultCopy(title, resultNum, locale)
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (!calculatorStartSent.current) {
       calculatorStartSent.current = true
-      trackEvent(slug, 'start')
+      trackLinkEvent(slug, 'start')
     }
     if (!calculatorCompleteSent.current) {
       calculatorCompleteSent.current = true
-      trackEvent(slug, 'complete')
+      trackLinkEvent(slug, 'complete')
     }
     setShowResult(true)
+  }
+
+  useEffect(() => {
+    if (!showResult) return
+    if (calculatorResultViewSent.current) return
+    calculatorResultViewSent.current = true
+    trackLinkEvent(slug, 'result_view')
+  }, [showResult, slug])
+
+  const handleShareCalculatorResult = async () => {
+    trackLinkEvent(slug, 'share_click')
+    const shareText =
+      locale === 'en'
+        ? 'I just used this calculator on Ylada. Try it too:'
+        : locale === 'es'
+          ? 'Acabo de usar esta calculadora en Ylada. Hazla tú también:'
+          : 'Acabei de usar essa calculadora no Ylada. Faça também:'
+    const shareUrl = typeof window !== 'undefined' ? window.location.href : ''
+    try {
+      if (typeof navigator !== 'undefined' && navigator.share) {
+        await navigator.share({
+          title: 'Ylada',
+          text: shareText,
+          url: shareUrl,
+        })
+        return
+      }
+    } catch {
+      // ignore and fallback to WhatsApp share
+    }
+    if (typeof window !== 'undefined') {
+      const waUrl = `https://wa.me/?text=${encodeURIComponent(`${shareText} ${shareUrl}`)}`
+      window.open(waUrl, '_blank', 'noopener,noreferrer')
+    }
   }
 
   return (
@@ -1824,6 +2000,11 @@ function CalculatorBlock({
           </form>
         ) : (
           <>
+            <div className="mb-4">
+              <span className="inline-block text-xs font-semibold text-sky-600 bg-sky-50 px-3 py-1.5 rounded-full border border-sky-100">
+                {t.yourResult}
+              </span>
+            </div>
             <p className="text-gray-600 mb-2">{resultIntro}</p>
             <p className="text-sm font-medium text-gray-700 mb-1">{resultLabel}</p>
             <p className="text-2xl font-bold text-gray-900 mb-6">
@@ -1831,20 +2012,47 @@ function CalculatorBlock({
               {resultNum.toLocaleString('pt-BR')}
               {resultSuffix}
             </p>
+            {resultCopy && (
+              <div className="mb-6 space-y-3">
+                <div className="p-4 rounded-xl border border-sky-100 bg-sky-50/70">
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-sky-600 mb-1">
+                    {locale === 'en' ? 'What this may indicate' : locale === 'es' ? 'Qué puede indicar' : 'O que isso pode indicar'}
+                  </p>
+                  <p className="text-sm text-gray-700 leading-relaxed">{resultCopy.insight}</p>
+                </div>
+                <div className="p-4 rounded-xl border border-emerald-100 bg-emerald-50/70">
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-emerald-700 mb-1">
+                    {locale === 'en' ? 'Quick action' : locale === 'es' ? 'Acción rápida' : 'Ajuste rápido'}
+                  </p>
+                  <p className="text-sm text-gray-700 leading-relaxed">{resultCopy.tip}</p>
+                </div>
+              </div>
+            )}
             {whatsappUrl ? (
-              <button
-                type="button"
-                onClick={onCtaClick}
-                className="w-full py-3 px-4 bg-sky-600 hover:bg-sky-700 text-white font-medium rounded-lg transition-colors"
-              >
-                {ctaText}
-              </button>
+              <div className="space-y-3">
+                <button
+                  type="button"
+                  onClick={onCtaClick}
+                  className="w-full py-3 px-4 bg-sky-600 hover:bg-sky-700 text-white font-medium rounded-lg transition-colors"
+                >
+                  {ctaLabel}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleShareCalculatorResult}
+                  className="w-full py-3 px-4 border border-sky-200 text-sky-700 hover:bg-sky-50 font-semibold rounded-lg transition-colors"
+                >
+                  {t.shareResult}
+                </button>
+              </div>
             ) : (
               <span className="text-gray-500 text-sm">{t.contactNotAvailable.replace('{pessoa}', locale === 'en' ? 'professional' : locale === 'es' ? 'profesional' : 'profissional')}</span>
             )}
 
-            <DiagnosisDisclaimer variant="informative" className="mt-5 pt-4" />
-            <PoweredByYlada variant="compact" />
+            <div className="mt-5 pt-4 border-t border-gray-100">
+              <PoweredByYlada variant="compact" />
+            </div>
+            <DiagnosisDisclaimer variant="informative" className="mt-4" />
           </>
         )}
       </div>
