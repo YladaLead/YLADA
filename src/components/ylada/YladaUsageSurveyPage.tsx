@@ -164,12 +164,15 @@ export default function YladaUsageSurveyPage() {
 
         {step === 'intro' && (
           <div className="space-y-6 animate-in fade-in duration-300">
-            <p className="text-xs font-semibold uppercase tracking-wide text-sky-700">Diagnóstico rápido</p>
+            <p className="text-xs font-semibold uppercase tracking-wide text-sky-700">Pesquisa de uso · YLADA</p>
+            <p className="text-base sm:text-lg font-semibold text-sky-900">Pergunte menos, venda mais.</p>
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 leading-tight">
-              Quer atrair clientes com mais consistência?
+              Quer que o YLADA encaixe melhor no seu jeito de vender?
             </h1>
             <p className="text-lg text-gray-600 leading-relaxed">
-              Veja em menos de 1 minuto o que ajustar no seu uso do YLADA — sem login, respostas anônimas.
+              Em menos de um minuto, sem login e de forma anônima: você nos diz onde trava e o que espera. A gente
+              usa isso para priorizar o que realmente destrava — sem cobrança, só evolução do produto. Esse tempinho
+              faz diferença pra gente.
             </p>
             <button
               type="button"
