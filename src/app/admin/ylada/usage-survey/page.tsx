@@ -3,6 +3,10 @@
 import Link from 'next/link'
 import { useCallback, useEffect, useState } from 'react'
 import AdminProtectedRoute from '@/components/auth/AdminProtectedRoute'
+import {
+  USAGE_SURVEY_PROFILE_LABELS,
+  formatUsageSurveyObjective,
+} from '@/lib/ylada-usage-survey-labels'
 
 type Row = {
   id: string
@@ -11,11 +15,21 @@ type Row = {
   answers: Record<string, unknown>
 }
 
+type SurveyStats = {
+  totalInDb: number
+  profileCountsGlobal: Record<string, number>
+  aggregationSampleSize: number
+  objectiveTop: Array<{ key: string; count: number; pct: number }>
+  blockerTop: Array<{ key: string; count: number; pct: number }>
+}
+
 export default function AdminYladaUsageSurveyPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [rows, setRows] = useState<Row[]>([])
   const [total, setTotal] = useState(0)
+  const [stats, setStats] = useState<SurveyStats | null>(null)
+  const [insights, setInsights] = useState<string[]>([])
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -26,6 +40,8 @@ export default function AdminYladaUsageSurveyPage() {
       if (json.success) {
         setRows(json.data ?? [])
         setTotal(json.total ?? 0)
+        setStats(json.stats ?? null)
+        setInsights(Array.isArray(json.insights) ? json.insights : [])
       } else {
         setError(json.error || 'Erro ao carregar')
       }
@@ -73,6 +89,65 @@ export default function AdminYladaUsageSurveyPage() {
           {!loading && !error && rows.length === 0 && (
             <p className="text-gray-600">Nenhuma resposta ainda ou execute a migration 296 no Supabase.</p>
           )}
+          {!loading && !error && stats && total > 0 && (
+            <div className="mb-6 space-y-4">
+              <div className="rounded-xl border border-sky-100 bg-sky-50/80 p-4">
+                <p className="text-xs font-semibold uppercase tracking-wide text-sky-800 mb-2">
+                  Perfis (total no banco)
+                </p>
+                <ul className="text-sm text-gray-800 space-y-1">
+                  {(['1', '2', '3', '4'] as const).map((k) => (
+                    <li key={k}>
+                      <strong>{stats.profileCountsGlobal[k] ?? 0}</strong> — Perfil {k}
+                      {USAGE_SURVEY_PROFILE_LABELS[k] ? `: ${USAGE_SURVEY_PROFILE_LABELS[k]}` : ''}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              {insights.length > 0 && (
+                <div className="rounded-xl border border-amber-100 bg-amber-50/80 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-amber-900 mb-2">
+                    Leitura rápida
+                  </p>
+                  <ul className="list-disc list-inside text-sm text-amber-950 space-y-2">
+                    {insights.map((line, i) => (
+                      <li key={i}>{line}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {(stats.objectiveTop.length > 0 || stats.blockerTop.length > 0) && (
+                <div className="rounded-xl border border-gray-200 bg-white p-4 grid sm:grid-cols-2 gap-4">
+                  {stats.objectiveTop.length > 0 && (
+                    <div>
+                      <p className="text-xs font-semibold text-gray-500 mb-2">
+                        Objetivos (amostra {stats.aggregationSampleSize} mais recentes)
+                      </p>
+                      <ul className="text-xs text-gray-700 space-y-1">
+                        {stats.objectiveTop.slice(0, 6).map((o) => (
+                          <li key={o.key}>
+                            {formatUsageSurveyObjective(o.key)} — {o.count} ({o.pct}%)
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  {stats.blockerTop.length > 0 && (
+                    <div>
+                      <p className="text-xs font-semibold text-gray-500 mb-2">Travas citadas (top)</p>
+                      <ul className="text-xs text-gray-700 space-y-1">
+                        {stats.blockerTop.slice(0, 6).map((b, i) => (
+                          <li key={i} className="break-words">
+                            {b.count}× — {b.key.length > 120 ? `${b.key.slice(0, 117)}…` : b.key}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
           <div className="space-y-4">
             {rows.map((r) => (
               <article
@@ -81,7 +156,12 @@ export default function AdminYladaUsageSurveyPage() {
               >
                 <div className="flex flex-wrap gap-2 text-xs text-gray-500 mb-2">
                   <span>{new Date(r.created_at).toLocaleString('pt-BR')}</span>
-                  <span className="font-semibold text-sky-800">Perfil {r.profile}</span>
+                  <span className="font-semibold text-sky-800">
+                    Perfil {r.profile}
+                    {USAGE_SURVEY_PROFILE_LABELS[r.profile]
+                      ? ` — ${USAGE_SURVEY_PROFILE_LABELS[r.profile]}`
+                      : ''}
+                  </span>
                   <span className="font-mono text-gray-400">{r.id.slice(0, 8)}…</span>
                 </div>
                 <pre className="text-xs text-gray-800 whitespace-pre-wrap break-words overflow-x-auto max-h-64 overflow-y-auto bg-gray-50 rounded-lg p-3">
