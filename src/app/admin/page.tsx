@@ -243,6 +243,14 @@ function AdminDashboardContent() {
       color: 'bg-violet-500',
     },
     {
+      id: 'ylada-usage-survey',
+      title: 'Pesquisa de uso (anônima)',
+      description: 'Respostas da página /pt/pesquisa-uso-ylada — perfil 1–4 e JSON',
+      icon: '📝',
+      link: '/admin/ylada/usage-survey',
+      color: 'bg-teal-600',
+    },
+    {
       id: 'motor-crescimento-hub',
       title: 'Motor de crescimento',
       description: 'Documentação, agentes e checklist',
