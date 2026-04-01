@@ -23,20 +23,20 @@ export function markHomeActivationComplete(): void {
 }
 
 export const yladaPosOnboardingCopy = {
-  headline: 'Pronto. Agora você não precisa mais perder tempo explicando tudo.',
-  sub: 'Aqui você cria um link que entende sua cliente antes e faz ela chegar muito mais pronta pra falar com você.',
+  headline: 'O YLADA só funciona quando você usa — e o primeiro passo leva poucos minutos.',
+  sub: 'Crie um link de diagnóstico. Depois você coloca na frente das pessoas e responde quem chegar no WhatsApp. Sem esse ciclo, a ferramenta não entrega resultado — e não é culpa sua; é falta de rotina.',
   ctaPrimary: 'Criar meu link agora',
 } as const
 
 export const yladaHomeActivationCompactCopy = {
-  line: 'Quer criar um novo link?',
-  cta: 'Criar meu link',
-  dismiss: 'Dispensar',
+  line: 'Bora colocar um diagnóstico no ar? Em dois minutos você já pode enviar para alguém.',
+  cta: 'Criar link',
+  dismiss: 'Agora não',
 } as const
 
 /** Barra colapsada do Noel (abaixo do CTA principal na home). */
 export const yladaNoelHomeCollapsedCopy = {
   question:
-    'Sou o Noel: te ajudo a montar fluxos e diagnósticos gratuitos para quem responde — na bio, no Direct e no WhatsApp.',
-  cta: 'Começar agora',
+    'Sou o Noel: te ajudo a montar diagnósticos e textos para mandar com o link — Direct, status ou WhatsApp.',
+  cta: 'Abrir o Noel',
 } as const

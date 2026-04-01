@@ -6,6 +6,7 @@ import { useSearchParams } from 'next/navigation'
 import NoelChatWithParams from '@/components/ylada/NoelChatWithParams'
 import NoelNeutralSpecializationNotice from '@/components/ylada/NoelNeutralSpecializationNotice'
 import PosOnboardingHomePanel from '@/components/ylada/PosOnboardingHomePanel'
+import YladaActivationJourneyCard from '@/components/ylada/YladaActivationJourneyCard'
 import type { NoelArea } from '@/config/noel-ux-content'
 import { buildNoelUnifiedReceptionMessage, formatReceptionVocativeName } from '@/lib/ylada-noel-reception-copy'
 import { YLADA_NOEL_HOME_EXPANDED_KEY, yladaNoelHomeCollapsedCopy } from '@/lib/ylada-pos-onboarding'
@@ -348,6 +349,9 @@ export default function NoelHomeContent({
     <div className="flex flex-col min-h-[calc(100vh-10rem)] pb-[max(0.75rem,env(safe-area-inset-bottom))]">
       <Suspense fallback={null}>
         <PosOnboardingHomePanel areaCodigo={areaCodigo} variantOverride={homeActivationPreview} />
+      </Suspense>
+      <Suspense fallback={null}>
+        <YladaActivationJourneyCard areaCodigo={areaCodigo} />
       </Suspense>
       <NoelNeutralSpecializationNotice mentorArea={area} />
       <Suspense fallback={receptionSkeleton}>
