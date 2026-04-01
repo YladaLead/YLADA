@@ -1,17 +1,98 @@
--- =====================================================
--- Bloco: Novas calculadoras da biblioteca YLADA (fase 2)
--- Mantém o padrão type=calculator com schema_json (fields + formula).
--- =====================================================
+-- Revisão de rótulos em todas as calculadoras da biblioteca (unidades, quando usar 0, clareza de prazo/TDEE).
+-- Alinha ylada_link_templates ao conteúdo atual de 236 + 293 (ambientes que já rodaram migrations anteriores).
 
--- b1000029 = calc_meta_peso_prazo
--- b1000030 = calc_calorias_alvo
--- b1000031 = calc_hidratacao_avancada
--- b1000032 = calc_projecao_peso_deficit
--- b1000033 = calc_tmb_tdee
--- b1000034 = calc_macros_objetivo
--- b1000035 = calc_passos_meta
 INSERT INTO ylada_link_templates (id, name, type, schema_json, allowed_vars_json, version, active)
 VALUES
+  (
+    'b1000025-0025-4000-8000-000000000025',
+    'calc_agua',
+    'calculator',
+    '{
+      "title": "Calculadora de Água",
+      "fields": [
+        {"id": "peso", "label": "Peso atual (kg)", "type": "number", "min": 1, "max": 300},
+        {"id": "atividade", "label": "Nível de atividade física (rotina + treinos)", "type": "select", "options": [{"value": 0, "label": "Sedentário (pouco ou nenhum exercício)"}, {"value": 300, "label": "Leve (caminhadas regulares)"}, {"value": 600, "label": "Moderado (1-3x/semana)"}, {"value": 1000, "label": "Intenso (4-6x/semana)"}, {"value": 1500, "label": "Muito intenso (atleta ou trabalho físico)"}]},
+        {"id": "clima", "label": "Clima onde você vive", "type": "select", "options": [{"value": 0, "label": "Temperado"}, {"value": 500, "label": "Quente"}, {"value": 1000, "label": "Muito quente"}]}
+      ],
+      "formula": "Math.round((peso * 35 + atividade + clima) / 250)",
+      "resultLabel": "Sua necessidade diária de água:",
+      "resultPrefix": "",
+      "resultSuffix": " copos de 250ml",
+      "resultIntro": "Com base no que você informou:",
+      "ctaDefault": "Quero falar no WhatsApp"
+    }'::jsonb,
+    '["title", "resultIntro", "resultLabel", "ctaText", "nomeProfissional"]'::jsonb,
+    1,
+    true
+  ),
+  (
+    'b1000026-0026-4000-8000-000000000026',
+    'calc_calorias',
+    'calculator',
+    '{
+      "title": "Calculadora de Calorias",
+      "fields": [
+        {"id": "peso", "label": "Peso atual (kg)", "type": "number", "min": 30, "max": 300},
+        {"id": "altura", "label": "Altura (cm) — em pé", "type": "number", "min": 100, "max": 250},
+        {"id": "idade", "label": "Idade (anos completos)", "type": "number", "min": 10, "max": 120},
+        {"id": "genero", "label": "Sexo biológico (para fórmula de gasto calórico)", "type": "select", "options": [{"value": 5, "label": "Masculino"}, {"value": -161, "label": "Feminino"}]},
+        {"id": "atividade", "label": "Nível de atividade física (rotina + treinos)", "type": "select", "options": [{"value": 1.2, "label": "Sedentário (pouco ou nenhum exercício)"}, {"value": 1.375, "label": "Leve (1-3 dias/semana)"}, {"value": 1.55, "label": "Moderado (3-5 dias/semana)"}, {"value": 1.725, "label": "Intenso (6-7 dias/semana)"}, {"value": 1.9, "label": "Muito intenso (atleta ou trabalho físico)"}]},
+        {"id": "objetivo", "label": "Objetivo de peso (ajuste calórico)", "type": "select", "options": [{"value": 0.85, "label": "Perder peso"}, {"value": 1, "label": "Manter peso"}, {"value": 1.15, "label": "Ganhar peso/massa muscular"}]}
+      ],
+      "formula": "Math.round((10 * peso + 6.25 * altura - 5 * idade + genero) * atividade * objetivo)",
+      "resultLabel": "Calorias diárias recomendadas:",
+      "resultPrefix": "",
+      "resultSuffix": " kcal",
+      "resultIntro": "Com base no que você informou (fórmula Mifflin-St Jeor):",
+      "ctaDefault": "Quero falar no WhatsApp"
+    }'::jsonb,
+    '["title", "resultIntro", "resultLabel", "ctaText", "nomeProfissional"]'::jsonb,
+    1,
+    true
+  ),
+  (
+    'b1000027-0027-4000-8000-000000000027',
+    'calc_imc',
+    'calculator',
+    '{
+      "title": "Calculadora de IMC",
+      "fields": [
+        {"id": "peso", "label": "Peso atual (kg)", "type": "number", "min": 20, "max": 300},
+        {"id": "altura", "label": "Altura (cm) — em pé, sem sapatos", "type": "number", "min": 100, "max": 250}
+      ],
+      "formula": "Math.round((peso / ((altura / 100) * (altura / 100))) * 100) / 100",
+      "resultLabel": "Seu IMC:",
+      "resultPrefix": "",
+      "resultSuffix": "",
+      "resultIntro": "Com base no que você informou:",
+      "ctaDefault": "Quero falar no WhatsApp"
+    }'::jsonb,
+    '["title", "resultIntro", "resultLabel", "ctaText", "nomeProfissional"]'::jsonb,
+    1,
+    true
+  ),
+  (
+    'b1000028-0028-4000-8000-000000000028',
+    'calc_proteina',
+    'calculator',
+    '{
+      "title": "Calculadora de Proteína",
+      "fields": [
+        {"id": "peso", "label": "Peso atual (kg)", "type": "number", "min": 30, "max": 300},
+        {"id": "objetivo", "label": "Objetivo principal", "type": "select", "options": [{"value": 1.8, "label": "Manter peso"}, {"value": 2.2, "label": "Perder peso"}, {"value": 2.5, "label": "Ganhar massa muscular"}]},
+        {"id": "atividade", "label": "Nível de treino e movimento na semana", "type": "select", "options": [{"value": 0, "label": "Sedentário (pouco ou nenhum exercício)"}, {"value": 0.1, "label": "Leve (1-3 dias/semana)"}, {"value": 0.2, "label": "Moderado (3-5 dias/semana)"}, {"value": 0.4, "label": "Intenso (6-7 dias/semana)"}, {"value": 0.6, "label": "Muito intenso (atleta ou trabalho físico)"}]}
+      ],
+      "formula": "Math.round(peso * (objetivo + atividade))",
+      "resultLabel": "Proteína diária recomendada:",
+      "resultPrefix": "",
+      "resultSuffix": " g",
+      "resultIntro": "Com base no que você informou:",
+      "ctaDefault": "Quero falar no WhatsApp"
+    }'::jsonb,
+    '["title", "resultIntro", "resultLabel", "ctaText", "nomeProfissional"]'::jsonb,
+    1,
+    true
+  ),
   (
     'b1000029-0029-4000-8000-000000000029',
     'calc_meta_peso_prazo',
@@ -172,28 +253,3 @@ ON CONFLICT (id) DO UPDATE SET
   version = EXCLUDED.version,
   active = EXCLUDED.active,
   updated_at = NOW();
-
-INSERT INTO ylada_biblioteca_itens (
-  tipo,
-  segment_codes,
-  tema,
-  pilar,
-  titulo,
-  description,
-  source_type,
-  source_id,
-  template_id,
-  flow_id,
-  architecture,
-  meta,
-  sort_order,
-  active
-) VALUES
-  ('calculadora', ARRAY['nutrition', 'nutrition_vendedor', 'medicine', 'fitness'], 'peso_gordura', 'metabolismo', 'Calculadora de Meta de Peso por Prazo', 'Descubra quanto precisa variar por semana para bater sua meta no prazo escolhido.', 'custom', NULL, 'b1000029-0029-4000-8000-000000000029', NULL, NULL, '{"nomenclatura":"calc_meta_peso_prazo"}'::jsonb, 74, true),
-  ('calculadora', ARRAY['nutrition', 'nutrition_vendedor', 'medicine', 'fitness'], 'metabolismo', 'metabolismo', 'Calculadora de Calorias Alvo', 'Defina uma meta calórica diária com base no gasto total e no ajuste desejado.', 'custom', NULL, 'b1000030-0030-4000-8000-000000000030', NULL, NULL, '{"nomenclatura":"calc_calorias_alvo"}'::jsonb, 75, true),
-  ('calculadora', ARRAY['nutrition', 'nutrition_vendedor', 'medicine', 'fitness'], 'hidratacao', 'habitos', 'Calculadora de Hidratação Avançada', 'Ajuste sua meta de hidratação diária considerando peso, treino e clima.', 'custom', NULL, 'b1000031-0031-4000-8000-000000000031', NULL, NULL, '{"nomenclatura":"calc_hidratacao_avancada"}'::jsonb, 76, true),
-  ('calculadora', ARRAY['nutrition', 'nutrition_vendedor', 'medicine', 'fitness'], 'peso_gordura', 'metabolismo', 'Calculadora de Projeção de Peso por Déficit', 'Projete perda estimada no período com base no déficit calórico diário informado.', 'custom', NULL, 'b1000032-0032-4000-8000-000000000032', NULL, NULL, '{"nomenclatura":"calc_projecao_peso_deficit"}'::jsonb, 77, true),
-  ('calculadora', ARRAY['nutrition', 'nutrition_vendedor', 'medicine', 'fitness'], 'metabolismo', 'metabolismo', 'Calculadora de TMB e Gasto Total', 'Estime seu gasto calórico diário total com base em dados corporais e rotina.', 'custom', NULL, 'b1000033-0033-4000-8000-000000000033', NULL, NULL, '{"nomenclatura":"calc_tmb_tdee"}'::jsonb, 78, true),
-  ('calculadora', ARRAY['nutrition', 'nutrition_vendedor', 'medicine', 'fitness'], 'alimentacao', 'habitos', 'Calculadora de Macronutrientes por Objetivo', 'Converta meta calórica em proteína diária para organizar seu plano alimentar.', 'custom', NULL, 'b1000034-0034-4000-8000-000000000034', NULL, NULL, '{"nomenclatura":"calc_macros_objetivo"}'::jsonb, 79, true),
-  ('calculadora', ARRAY['nutrition', 'nutrition_vendedor', 'medicine', 'fitness'], 'habitos', 'habitos', 'Calculadora de Meta de Passos', 'Projete uma meta diária de passos para acelerar resultados com consistência.', 'custom', NULL, 'b1000035-0035-4000-8000-000000000035', NULL, NULL, '{"nomenclatura":"calc_passos_meta"}'::jsonb, 80, true)
-ON CONFLICT DO NOTHING;

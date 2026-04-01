@@ -36,6 +36,10 @@ export async function POST(request: NextRequest) {
     const slug = typeof body.slug === 'string' ? body.slug.trim() : ''
     const eventType = typeof body.event_type === 'string' ? body.event_type.trim().toLowerCase() : ''
     const metricsId = typeof body.metrics_id === 'string' ? body.metrics_id.trim() || null : null
+    const viewerUserId =
+      typeof body.viewer_user_id === 'string' && body.viewer_user_id.trim().length > 0
+        ? body.viewer_user_id.trim()
+        : null
 
     if (!slug) {
       return NextResponse.json({ success: false, error: 'slug é obrigatório' }, { status: 400 })
@@ -53,6 +57,11 @@ export async function POST(request: NextRequest) {
 
     if (linkError || !link) {
       return NextResponse.json({ success: false, error: 'Link não encontrado ou inativo' }, { status: 404 })
+    }
+
+    /** Dono logado testando o próprio link: não contam como visitante (retorno, stats, jornada de ativação). */
+    if (viewerUserId && link.user_id && viewerUserId === link.user_id) {
+      return NextResponse.json({ success: true, skipped_owner_preview: true })
     }
 
     if (

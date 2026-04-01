@@ -14,8 +14,8 @@ VALUES
     '{
       "title": "Calculadora de Água",
       "fields": [
-        {"id": "peso", "label": "Peso (kg)", "type": "number", "min": 1, "max": 300},
-        {"id": "atividade", "label": "Nível de atividade física", "type": "select", "options": [{"value": 0, "label": "Sedentário (pouco ou nenhum exercício)"}, {"value": 300, "label": "Leve (caminhadas regulares)"}, {"value": 600, "label": "Moderado (1-3x/semana)"}, {"value": 1000, "label": "Intenso (4-6x/semana)"}, {"value": 1500, "label": "Muito intenso (atleta ou trabalho físico)"}]},
+        {"id": "peso", "label": "Peso atual (kg)", "type": "number", "min": 1, "max": 300},
+        {"id": "atividade", "label": "Nível de atividade física (rotina + treinos)", "type": "select", "options": [{"value": 0, "label": "Sedentário (pouco ou nenhum exercício)"}, {"value": 300, "label": "Leve (caminhadas regulares)"}, {"value": 600, "label": "Moderado (1-3x/semana)"}, {"value": 1000, "label": "Intenso (4-6x/semana)"}, {"value": 1500, "label": "Muito intenso (atleta ou trabalho físico)"}]},
         {"id": "clima", "label": "Clima onde você vive", "type": "select", "options": [{"value": 0, "label": "Temperado"}, {"value": 500, "label": "Quente"}, {"value": 1000, "label": "Muito quente"}]}
       ],
       "formula": "Math.round((peso * 35 + atividade + clima) / 250)",
@@ -36,12 +36,12 @@ VALUES
     '{
       "title": "Calculadora de Calorias",
       "fields": [
-        {"id": "peso", "label": "Peso (kg)", "type": "number", "min": 30, "max": 300},
-        {"id": "altura", "label": "Altura (cm)", "type": "number", "min": 100, "max": 250},
-        {"id": "idade", "label": "Idade (anos)", "type": "number", "min": 10, "max": 120},
-        {"id": "genero", "label": "Gênero", "type": "select", "options": [{"value": 5, "label": "Masculino"}, {"value": -161, "label": "Feminino"}]},
-        {"id": "atividade", "label": "Nível de atividade física", "type": "select", "options": [{"value": 1.2, "label": "Sedentário (pouco ou nenhum exercício)"}, {"value": 1.375, "label": "Leve (1-3 dias/semana)"}, {"value": 1.55, "label": "Moderado (3-5 dias/semana)"}, {"value": 1.725, "label": "Intenso (6-7 dias/semana)"}, {"value": 1.9, "label": "Muito intenso (atleta ou trabalho físico)"}]},
-        {"id": "objetivo", "label": "Objetivo", "type": "select", "options": [{"value": 0.85, "label": "Perder peso"}, {"value": 1, "label": "Manter peso"}, {"value": 1.15, "label": "Ganhar peso/massa muscular"}]}
+        {"id": "peso", "label": "Peso atual (kg)", "type": "number", "min": 30, "max": 300},
+        {"id": "altura", "label": "Altura (cm) — em pé", "type": "number", "min": 100, "max": 250},
+        {"id": "idade", "label": "Idade (anos completos)", "type": "number", "min": 10, "max": 120},
+        {"id": "genero", "label": "Sexo biológico (para fórmula de gasto calórico)", "type": "select", "options": [{"value": 5, "label": "Masculino"}, {"value": -161, "label": "Feminino"}]},
+        {"id": "atividade", "label": "Nível de atividade física (rotina + treinos)", "type": "select", "options": [{"value": 1.2, "label": "Sedentário (pouco ou nenhum exercício)"}, {"value": 1.375, "label": "Leve (1-3 dias/semana)"}, {"value": 1.55, "label": "Moderado (3-5 dias/semana)"}, {"value": 1.725, "label": "Intenso (6-7 dias/semana)"}, {"value": 1.9, "label": "Muito intenso (atleta ou trabalho físico)"}]},
+        {"id": "objetivo", "label": "Objetivo de peso (ajuste calórico)", "type": "select", "options": [{"value": 0.85, "label": "Perder peso"}, {"value": 1, "label": "Manter peso"}, {"value": 1.15, "label": "Ganhar peso/massa muscular"}]}
       ],
       "formula": "Math.round((10 * peso + 6.25 * altura - 5 * idade + genero) * atividade * objetivo)",
       "resultLabel": "Calorias diárias recomendadas:",
@@ -61,8 +61,8 @@ VALUES
     '{
       "title": "Calculadora de IMC",
       "fields": [
-        {"id": "peso", "label": "Peso (kg)", "type": "number", "min": 20, "max": 300},
-        {"id": "altura", "label": "Altura (cm)", "type": "number", "min": 100, "max": 250}
+        {"id": "peso", "label": "Peso atual (kg)", "type": "number", "min": 20, "max": 300},
+        {"id": "altura", "label": "Altura (cm) — em pé, sem sapatos", "type": "number", "min": 100, "max": 250}
       ],
       "formula": "Math.round((peso / ((altura / 100) * (altura / 100))) * 100) / 100",
       "resultLabel": "Seu IMC:",
@@ -82,9 +82,9 @@ VALUES
     '{
       "title": "Calculadora de Proteína",
       "fields": [
-        {"id": "peso", "label": "Peso (kg)", "type": "number", "min": 30, "max": 300},
-        {"id": "objetivo", "label": "Objetivo", "type": "select", "options": [{"value": 1.8, "label": "Manter peso"}, {"value": 2.2, "label": "Perder peso"}, {"value": 2.5, "label": "Ganhar massa muscular"}]},
-        {"id": "atividade", "label": "Nível de atividade física", "type": "select", "options": [{"value": 0, "label": "Sedentário (pouco ou nenhum exercício)"}, {"value": 0.1, "label": "Leve (1-3 dias/semana)"}, {"value": 0.2, "label": "Moderado (3-5 dias/semana)"}, {"value": 0.4, "label": "Intenso (6-7 dias/semana)"}, {"value": 0.6, "label": "Muito intenso (atleta ou trabalho físico)"}]}
+        {"id": "peso", "label": "Peso atual (kg)", "type": "number", "min": 30, "max": 300},
+        {"id": "objetivo", "label": "Objetivo principal", "type": "select", "options": [{"value": 1.8, "label": "Manter peso"}, {"value": 2.2, "label": "Perder peso"}, {"value": 2.5, "label": "Ganhar massa muscular"}]},
+        {"id": "atividade", "label": "Nível de treino e movimento na semana", "type": "select", "options": [{"value": 0, "label": "Sedentário (pouco ou nenhum exercício)"}, {"value": 0.1, "label": "Leve (1-3 dias/semana)"}, {"value": 0.2, "label": "Moderado (3-5 dias/semana)"}, {"value": 0.4, "label": "Intenso (6-7 dias/semana)"}, {"value": 0.6, "label": "Muito intenso (atleta ou trabalho físico)"}]}
       ],
       "formula": "Math.round(peso * (objetivo + atividade))",
       "resultLabel": "Proteína diária recomendada:",

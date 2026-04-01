@@ -1835,6 +1835,29 @@ function getCalculatorResultCopy(title: string, value: number, locale: Language)
   return null
 }
 
+/** Meta em copos de 250 ml: mostra litros no destaque e a contagem entre parênteses. */
+function formatCopos250HydrationDisplay(
+  resultNum: number,
+  resultPrefix: string,
+  resultSuffix: string,
+  locale: Language
+): string | null {
+  if (resultPrefix?.trim()) return null
+  const suf = (resultSuffix || '').trim().toLowerCase()
+  if (!suf.includes('250') || !/copo|glass|vaso/.test(suf)) return null
+  const liters = resultNum * 0.25
+  const loc = locale === 'en' ? 'en-US' : locale === 'es' ? 'es-ES' : 'pt-BR'
+  const litersFmt = liters.toLocaleString(loc, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+  const n = resultNum.toLocaleString(loc)
+  if (locale === 'en') {
+    return `${litersFmt} L (${n} glasses of 250ml)`
+  }
+  if (locale === 'es') {
+    return `${litersFmt} L (${n} vasos de 250ml)`
+  }
+  return `${litersFmt} L (${n} copos de 250ml)`
+}
+
 function CalculatorBlock({
   slug,
   config,
@@ -2008,9 +2031,13 @@ function CalculatorBlock({
             <p className="text-gray-600 mb-2">{resultIntro}</p>
             <p className="text-sm font-medium text-gray-700 mb-1">{resultLabel}</p>
             <p className="text-2xl font-bold text-gray-900 mb-6">
-              {resultPrefix}
-              {resultNum.toLocaleString('pt-BR')}
-              {resultSuffix}
+              {formatCopos250HydrationDisplay(resultNum, resultPrefix, resultSuffix, locale) ?? (
+                <>
+                  {resultPrefix}
+                  {resultNum.toLocaleString('pt-BR')}
+                  {resultSuffix}
+                </>
+              )}
             </p>
             {resultCopy && (
               <div className="mb-6 space-y-3">

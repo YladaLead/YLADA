@@ -11,6 +11,8 @@ export type PublicLinkPayload = {
   title: string
   config: Record<string, unknown>
   ctaWhatsapp: string | null
+  /** Dono do link (sessão igual = não contar view/start como visitante). */
+  link_owner_user_id?: string | null
   /** Dono sem Pro com >1 link ativo: este não é o link “principal” (mais antigo) — visitante não usa o quiz. */
   accessBlockedDueToPlan?: boolean
 }
@@ -45,6 +47,7 @@ export async function fetchPublicLinkPayload(slug: string): Promise<PublicLinkPa
         title: typeof pageTitle === 'string' ? pageTitle : 'Link',
         config: {},
         ctaWhatsapp: null,
+        link_owner_user_id: link.user_id ?? null,
         accessBlockedDueToPlan: true,
       }
     }
@@ -117,5 +120,6 @@ export async function fetchPublicLinkPayload(slug: string): Promise<PublicLinkPa
     title: (config.page as Record<string, unknown>)?.title as string ?? (config.title as string) ?? link.title ?? 'Link',
     config,
     ctaWhatsapp,
+    link_owner_user_id: link.user_id ?? null,
   }
 }
