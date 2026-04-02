@@ -215,6 +215,9 @@ function isIntencaoCriarLink(
     'pode criar esse', 'pode gerar o link', 'gera esse link',
     // Medicamentos e temas específicos (GLP-1, emagrecimento medicamentoso)
     'tizerpatide', 'tirzepatida', 'ozempic', 'wegovy', 'mounjaro', 'zepbound', 'semaglutida', 'liraglutida',
+    // "Formulário" na fala do profissional costuma ser quiz/perguntas com opções — também dispara criação de link quando possível
+    'formulário', 'formulario', 'questionário', 'questionario', 'montar um formul', 'criar um formul',
+    'pesquisa com pergunt', 'lista de pergunt',
   ]
   if (termos.some((t) => m.includes(t))) return true
 
@@ -330,6 +333,19 @@ Sempre que você mostrar um diagnóstico curto, um quiz, uma calculadora com per
 4. Sem parede de texto: nunca juntar várias perguntas e alternativas num único parágrafo contínuo.
 
 Isso vale para diagnóstico entregue **com link** e para sequência de perguntas **só no chat** (sem link). O chat renderiza markdown: **negrito** aparece mais forte para o usuário.
+`
+
+/** Evita URLs inventadas; alinha "formulário" com quiz em texto e com link só quando o sistema gerar. */
+const NOEL_FORMULARIO_QUIZ_LIMITES = `
+[FORMULÁRIO, QUIZ E LINK — INTERPRETAÇÃO E LIMITES — OBRIGATÓRIO]
+
+1) Quando o profissional disser **formulário**, **questionário** ou **pesquisa com perguntas**, na maioria dos casos ele quer **sequência de perguntas com alternativas** (quiz/diagnóstico), não necessariamente um produto "Google Forms" na hora. Se estiver ambíguo, faça **no máximo uma** pergunta curta: quer só o **texto** para enviar (WhatsApp, Instagram, e-mail) ou um **link único** online para as pessoas responderem?
+
+2) **Link clicável real:** o único URL de quiz/diagnóstico que você pode apresentar como "seu link" é o que o **sistema YLADA** fornecer (bloco interno [LINK GERADO…] / anexo **### Quiz e link (oficial)** com [Acesse seu quiz](URL)). Fora isso, **NUNCA** invente, exemplifique ou sugira domínios aleatórios; **NUNCA** escreva "Aqui está o link", "Copiar link" ou "link gerado" sem um markdown válido \`[texto](URL)\` cuja URL venha do sistema nesta resposta.
+
+3) Se **não** existir link do sistema nesta resposta e ele precisar de URL externa (planilha de respostas, link único): diga com honestidade em **uma frase** que **você não hospeda formulário** na internet, entregue o **roteiro completo** (título, perguntas, opções, mensagem de convite, CTA) e oriente que ela pode colar no Google Forms, Typeform ou similar em poucos minutos. **Reforce que ela consegue** fazer isso; ofereça, se ela quiser, o passo a passo na **próxima** mensagem.
+
+4) Quando o sistema **puder** gerar link (modo com geração ativa), prefira pedir tema claro e deixar o sistema criar o link YLADA — é a forma correta de "ter um link do quiz" dentro da plataforma.
 `
 
 /** Regras de comportamento estratégico: Noel conduz, não apenas explica. */
@@ -1125,6 +1141,7 @@ export async function POST(request: NextRequest) {
       baseSystem + localeInstruction,
       NOEL_MODO_EXECUTOR_LINK,
       NOEL_FORMATO_DIAGNOSTICO_CHAT,
+      NOEL_FORMULARIO_QUIZ_LIMITES,
       NOEL_CLIENTE_ATENDIDO_VS_CAPTACAO,
       NOEL_CONDUTOR_RULES,
       NOEL_PRINCIPIO_20_80,
@@ -1256,7 +1273,7 @@ export async function POST(request: NextRequest) {
     }
     if (linkModeEnabled && shouldGenerateNewLink && !linkGeradoBlock) {
       parts.push(
-        '\n[PEDIDO DE LINK SEM GERAÇÃO]\nO profissional pediu link/quiz/fluxo mas o sistema não gerou o link nesta resposta. NUNCA invente um link ou diga "Clique aqui para acessar o diagnóstico" sem um URL real. O link só existe quando o sistema fornece. Oriente: "Para eu gerar o link, pode pedir com o tema explícito, por exemplo: Quero um link para emagrecimento ou Cria um quiz para tizerpatide." Na próxima mensagem com tema claro o sistema gerará o link e o quiz completo na conversa.'
+        '\n[PEDIDO DE LINK SEM GERAÇÃO]\nO profissional pediu link/quiz/formulário/fluxo mas o sistema não gerou o link nesta resposta. NUNCA invente um link nem diga "Clique aqui", "Copiar link" ou "link gerado" sem URL real fornecido pelo sistema. O link só existe quando o backend anexar o bloco oficial. Faça assim: (1) Explique brevemente que nesta rodada o link automático não saiu (perfil, tema ou limite técnico). (2) Ofereça o **texto completo** do quiz/formulário no chat (perguntas + opções + CTA) para ela usar já. (3) Diga que, para **link único YLADA**, ela pode repetir o pedido com tema explícito, ex.: "Quero um quiz para [tema]" ou "Cria um formulário para captar clientes de estética". (4) Se ela precisar de **URL fora da YLADA** (Google Forms), seja honesto: você não hospeda; ela cola o roteiro lá — reforce que é rápido e que ela consegue.'
       )
     }
     const systemContent = parts.join('')
