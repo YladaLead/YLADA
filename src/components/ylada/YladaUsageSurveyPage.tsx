@@ -167,7 +167,7 @@ export default function YladaUsageSurveyPage() {
         )}
 
         {step === 'intro' && (
-          <div className="space-y-6 animate-in fade-in duration-300">
+          <div className="space-y-6 animate-in fade-in duration-300 text-left">
             <p className="text-xs font-semibold uppercase tracking-wide text-sky-700">Pesquisa de uso · YLADA</p>
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 leading-tight">
               Ajude-nos a melhorar
@@ -182,7 +182,7 @@ export default function YladaUsageSurveyPage() {
             >
               Começar
             </button>
-            <p className="text-xs text-gray-500 text-center">
+            <p className="text-xs text-gray-500">
               Não pedimos nome nem e-mail. Usamos as respostas só para melhorar o produto.
             </p>
           </div>
