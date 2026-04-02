@@ -181,7 +181,7 @@ export default function AdminYladaUsageSurveyPage() {
           {error && <p className="text-red-600 text-sm rounded-lg bg-red-50 border border-red-100 p-3">{error}</p>}
 
           {!loading && !error && stats && stats.totalInDb === 0 && (
-            <p className="text-gray-600">Nenhuma resposta ainda — ou rode a migration 296.</p>
+            <p className="text-gray-600">Nenhuma resposta ainda, ou rode a migration 296.</p>
           )}
 
           {stats && stats.totalInDb > 0 && (

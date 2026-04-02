@@ -3,10 +3,10 @@ import type { Metadata } from 'next'
 const OG_IMAGE =
   'https://www.ylada.com/images/logo/ylada/horizontal/azul-claro/ylada-horizontal-azul-claro-30.png'
 
-const SURVEY_TITLE = 'Pesquisa de 1 minuto — YLADA'
+const SURVEY_TITLE = 'Pesquisa de 1 minuto · YLADA'
 const SURVEY_SLOGAN = 'Pergunte menos, venda mais.'
 const SURVEY_DESCRIPTION =
-  'Em cerca de um minuto, anônimo e sem cadastro: conte onde você trava e o que espera do YLADA. A gente usa suas respostas para priorizar melhorias que destravam sua rotina — sem julgamento, só evolução do produto. Obrigado por esse tempinho.'
+  'Em menos de um minuto, anônimo e sem cadastro: atrair mais clientes ou entender o que está travando e fazer grandes ajustes com o YLADA.'
 
 export const metadata: Metadata = {
   title: {
@@ -28,7 +28,7 @@ export const metadata: Metadata = {
         url: OG_IMAGE,
         width: 1080,
         height: 1080,
-        alt: `YLADA — ${SURVEY_SLOGAN}`,
+        alt: `YLADA · ${SURVEY_SLOGAN}`,
         type: 'image/png',
       },
     ],

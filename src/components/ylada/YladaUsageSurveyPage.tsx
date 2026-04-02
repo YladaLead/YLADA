@@ -27,35 +27,39 @@ const PROFILE_COPY: Record<
   { title: string; badge: string; body: string; action: string; color: string }
 > = {
   '1': {
-    title: 'Seu perfil: travado no início',
-    badge: 'Travado no início',
+    title: 'Seu perfil: primeiro passo do método',
+    badge: 'Primeiro passo',
     body:
-      'Você ainda não criou seu diagnóstico. E sem isso, o YLADA não começa a funcionar de verdade.',
-    action: 'Crie seu primeiro diagnóstico. Leva menos de 2 minutos. Depois volte aqui e continue o método.',
+      'Você ainda não criou seu diagnóstico, e tudo bem. É o ponto de partida: em poucos minutos você coloca o método no ar e o Noel te orienta no que vem depois, passo a passo.',
+    action:
+      'Crie seu primeiro diagnóstico (menos de 2 minutos). Depois volte aqui e siga o método com calma, com o Noel ao seu lado.',
     color: 'red',
   },
   '2': {
-    title: 'Seu perfil: parado antes do resultado',
-    badge: 'Antes do resultado',
+    title: 'Seu perfil: diagnóstico pronto, hora de compartilhar',
+    badge: 'Diagnóstico criado',
     body:
-      'Você já fez a parte mais fácil: criar. No YLADA é simples: sem envio, sem cliente.',
+      'Você já criou a base. O próximo passo é colocar o link no mundo: é assim que aparecem conversas de verdade. Você não precisa adivinhar sozinho: o método te guia no envio e no que fazer em seguida.',
     action:
-      'Envie seu link para 5 pessoas hoje — status, contatos ou Instagram. Depois volte e me conta o que aconteceu.',
+      'Envie seu link para 5 pessoas hoje (status do WhatsApp, contatos ou Instagram). Depois volte e conte o que aconteceu; o Noel ajuda a ajustar.',
     color: 'yellow',
   },
   '3': {
-    title: 'Seu perfil: perto do resultado',
-    badge: 'Perto do resultado',
-    body: 'Você já começou. Agora falta o principal: conduzir a conversa.',
+    title: 'Seu perfil: na reta do resultado',
+    badge: 'Quase no resultado',
+    body:
+      'Você já movimentou o funil: isso conta muito. Agora o foco é conduzir a conversa com leveza: uma pergunta de cada vez, sem se sobrecarregar. O Noel te orienta na hora de responder.',
     action:
-      'Responda quem te chamou com uma pergunta simples. Não explique demais. O Noel pode te ajudar com isso.',
+      'Responda quem te chamou com uma pergunta simples. Sem textão. Se travar, chame o Noel no app: ele te dá o próximo passo concreto.',
     color: 'orange',
   },
   '4': {
-    title: 'Seu perfil: em movimento',
+    title: 'Seu perfil: método em movimento',
     badge: 'Em movimento',
-    body: 'Você já entendeu como o YLADA funciona. Agora é consistência.',
-    action: 'Busque gerar pelo menos uma nova conversa por dia. Isso vira previsibilidade na agenda.',
+    body:
+      'Você já está usando o YLADA como caminho, não como arquivo esquecido. Isso é o que destrava resultado. O próximo nível é manter o ritmo, com o Noel te ajudando a não perder o fio.',
+    action:
+      'Busque pelo menos uma nova conversa por dia. Com consistência e orientação, isso vira previsibilidade na agenda.',
     color: 'green',
   },
 }
@@ -167,12 +171,10 @@ export default function YladaUsageSurveyPage() {
             <p className="text-xs font-semibold uppercase tracking-wide text-sky-700">Pesquisa de uso · YLADA</p>
             <p className="text-base sm:text-lg font-semibold text-sky-900">Pergunte menos, venda mais.</p>
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 leading-tight">
-              Quer que o YLADA encaixe melhor no seu jeito de vender?
+              Quer atrair mais clientes ou entender por que não está atraindo?
             </h1>
-            <p className="text-lg text-gray-600 leading-relaxed">
-              Em menos de um minuto, sem login e de forma anônima: você nos diz onde trava e o que espera. A gente
-              usa isso para priorizar o que realmente destrava — sem cobrança, só evolução do produto. Esse tempinho
-              faz diferença pra gente.
+            <p className="text-base sm:text-lg text-gray-600 leading-snug">
+              Em menos de um minuto, faça grandes ajustes.
             </p>
             <button
               type="button"
@@ -380,9 +382,12 @@ export default function YladaUsageSurveyPage() {
           <div className="space-y-6 animate-in fade-in duration-500">
             <div>
               <p className="text-xs font-semibold uppercase tracking-wide text-sky-700">Seu diagnóstico de uso do YLADA</p>
-              <h2 className="mt-2 text-xl font-bold text-gray-900">Pelo que você respondeu, não é que o YLADA “não funciona”.</h2>
+              <h2 className="mt-2 text-xl font-bold text-gray-900">
+                Pelo que você respondeu, dá para ir além com o YLADA como método guiado.
+              </h2>
               <p className="mt-2 text-gray-700 leading-relaxed">
-                Ele precisa ser usado da forma certa — como um método, não como um arquivo esquecido.
+                O segredo não é “força bruta”: é seguir os passos com orientação (criar, compartilhar e conversar), com o
+                Noel te ajudando em cada etapa, no seu ritmo.
               </p>
             </div>
 
@@ -392,22 +397,22 @@ export default function YladaUsageSurveyPage() {
               </span>
               <h3 className="mt-3 text-lg font-bold text-gray-900">{pc.title}</h3>
               <p className="mt-2 text-sm text-gray-700 leading-relaxed">{pc.body}</p>
-              <p className="mt-4 text-sm font-medium text-gray-900">Sua ação</p>
+              <p className="mt-4 text-sm font-medium text-gray-900">Seu próximo passo (com apoio)</p>
               <p className="text-sm text-gray-700 leading-relaxed">{pc.action}</p>
             </div>
 
             <div className="rounded-2xl border border-sky-100 bg-sky-50/50 p-4">
-              <p className="text-sm font-semibold text-sky-900">A partir de agora, o Noel te conduz para ação</p>
+              <p className="text-sm font-semibold text-sky-900">Use o YLADA com orientação: o Noel te conduz</p>
               <ul className="mt-2 space-y-1.5 text-sm text-gray-700">
-                <li>✓ Perguntas antes de te entregar tudo pronto</li>
-                <li>✓ Próximo passo concreto (não só teoria)</li>
+                <li>✓ Ele pergunta antes de te entregar tudo pronto, para você não ficar perdido</li>
+                <li>✓ Próximo passo concreto, não só teoria</li>
                 <li>✓ Ajuda com leads e conversa no WhatsApp</li>
                 <li>✓ Uma ação simples por dia e retorno no dia seguinte</li>
               </ul>
             </div>
 
             <p className="text-center text-sm font-medium text-gray-900">
-              Agora você já sabe exatamente o que ajustar.
+              Você já tem clareza do que fazer e apoio para fazer acontecer.
             </p>
 
             <div className="flex flex-col gap-3">
@@ -421,7 +426,7 @@ export default function YladaUsageSurveyPage() {
                 href="/pt/login?redirect=%2Fpt%2Fhome"
                 className="flex min-h-[48px] items-center justify-center rounded-2xl border-2 border-sky-600 bg-white px-6 text-base font-semibold text-sky-800 hover:bg-sky-50"
               >
-                Já tenho conta — entrar
+                Já tenho conta: entrar
               </Link>
               <Link
                 href="/pt/login?redirect=%2Fpt%2Fhome%23noel-home-chat-anchor"
@@ -433,7 +438,8 @@ export default function YladaUsageSurveyPage() {
 
             <div className="rounded-xl bg-gray-50 border border-gray-200 p-4 text-center">
               <p className="text-sm text-gray-700 font-medium leading-relaxed">
-                Obrigado por dedicar esse tempo. Suas respostas nos ajudam a deixar o YLADA mais claro e útil — no seu ritmo, com apoio quando precisar.
+                Obrigado por dedicar esse tempo. Suas respostas nos ajudam a melhorar o produto, e você pode contar com o
+                Noel para usar o método com orientação, no seu ritmo.
               </p>
               <p className="mt-3 text-xs text-gray-500">
                 Guarde este link para refazer a pesquisa quando quiser. Suas respostas são anônimas.
