@@ -4,9 +4,9 @@ const OG_IMAGE =
   'https://www.ylada.com/images/logo/ylada/horizontal/azul-claro/ylada-horizontal-azul-claro-30.png'
 
 const SURVEY_TITLE = 'Pesquisa de 1 minuto · YLADA'
-const SURVEY_SLOGAN = 'Pergunte menos, venda mais.'
+const SURVEY_SLOGAN = 'Ajude-nos a melhorar'
 const SURVEY_DESCRIPTION =
-  'Em menos de um minuto, anônimo e sem cadastro: atrair mais clientes ou entender o que está travando e fazer grandes ajustes com o YLADA.'
+  'Leva menos de 1 minuto. Anônimo e sem cadastro — suas respostas ajudam a melhorar o produto.'
 
 export const metadata: Metadata = {
   title: {

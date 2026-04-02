@@ -90,8 +90,8 @@ export default function AdminUsuarios() {
     | 'sem'
   >('todos')
   const [filtroHistorico, setFiltroHistorico] = useState<'todos' | 'nunca_pagou' | 'ja_pagou'>('todos')
-  /** Ordenação por `user_profiles.created_at` (coluna Cadastro); API: `ordenacao_cadastro`. */
-  const [filtroOrdenacaoCadastro, setFiltroOrdenacaoCadastro] = useState<'padrao' | 'recente' | 'antigo'>('padrao')
+  /** Ordenação por `user_profiles.created_at` (coluna Cadastro); API: `ordenacao_cadastro`. Padrão: mais recentes primeiro. */
+  const [filtroOrdenacaoCadastro, setFiltroOrdenacaoCadastro] = useState<'padrao' | 'recente' | 'antigo'>('recente')
   const [filtroPresidente, setFiltroPresidente] = useState<string>('todos')
   const [busca, setBusca] = useState('')
   /** Painel de filtros recolhido por padrão — mais espaço para a lista. */

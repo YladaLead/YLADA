@@ -152,7 +152,7 @@ export default function YladaUsageSurveyPage() {
   const pc = PROFILE_COPY[profile]
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 via-white to-sky-50/40">
+    <div className="min-h-screen bg-gradient-to-b from-slate-50 via-white to-sky-50/40 text-gray-950 [color-scheme:light]">
       <div className="mx-auto max-w-lg px-4 py-8 sm:py-12 pb-24">
         {step !== 'intro' && step !== 'result' && (
           <div className="mb-6">
@@ -169,12 +169,11 @@ export default function YladaUsageSurveyPage() {
         {step === 'intro' && (
           <div className="space-y-6 animate-in fade-in duration-300">
             <p className="text-xs font-semibold uppercase tracking-wide text-sky-700">Pesquisa de uso · YLADA</p>
-            <p className="text-base sm:text-lg font-semibold text-sky-900">Pergunte menos, venda mais.</p>
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 leading-tight">
-              Quer atrair mais clientes ou entender por que não está atraindo?
+              Ajude-nos a melhorar
             </h1>
             <p className="text-base sm:text-lg text-gray-600 leading-snug">
-              Em menos de um minuto, faça grandes ajustes.
+              Leva menos de 1 minuto
             </p>
             <button
               type="button"
@@ -204,7 +203,9 @@ export default function YladaUsageSurveyPage() {
                     }
                   }}
                   className={`w-full rounded-xl border-2 px-4 py-3 text-left text-sm font-medium transition-colors ${
-                    objective === o.id ? 'border-sky-600 bg-sky-50 text-sky-900' : 'border-gray-200 bg-white hover:border-sky-300'
+                    objective === o.id
+                      ? 'border-sky-600 bg-sky-50 text-sky-950'
+                      : 'border-gray-200 bg-white text-gray-950 hover:border-sky-300'
                   }`}
                 >
                   {o.label}
@@ -303,7 +304,9 @@ export default function YladaUsageSurveyPage() {
                     setStep('q6')
                   }}
                   className={`w-full rounded-xl border-2 px-4 py-3 text-left text-sm font-medium transition-colors ${
-                    blocker === b.id ? 'border-sky-600 bg-sky-50' : 'border-gray-200 bg-white hover:border-sky-300'
+                    blocker === b.id
+                      ? 'border-sky-600 bg-sky-50 text-sky-950'
+                      : 'border-gray-200 bg-white text-gray-950 hover:border-sky-300'
                   }`}
                 >
                   {b.label}
@@ -470,7 +473,7 @@ function QuestionCard({
       <button type="button" onClick={onBack} className="text-sm font-medium text-sky-700 hover:underline">
         ← Voltar
       </button>
-      <h2 className="text-lg sm:text-xl font-bold text-gray-900 leading-snug">{title}</h2>
+      <h2 className="text-lg sm:text-xl font-bold text-gray-950 leading-snug">{title}</h2>
       {children}
     </div>
   )
@@ -482,14 +485,14 @@ function BinaryChoice({ onPick }: { onPick: (v: boolean) => void }) {
       <button
         type="button"
         onClick={() => onPick(true)}
-        className="min-h-[52px] rounded-2xl border-2 border-gray-200 bg-white py-3 text-base font-semibold text-gray-900 hover:border-sky-500 hover:bg-sky-50"
+        className="min-h-[52px] rounded-2xl border-2 border-gray-200 bg-white py-3 text-base font-semibold text-gray-950 hover:border-sky-500 hover:bg-sky-50"
       >
         Sim
       </button>
       <button
         type="button"
         onClick={() => onPick(false)}
-        className="min-h-[52px] rounded-2xl border-2 border-gray-200 bg-white py-3 text-base font-semibold text-gray-900 hover:border-sky-500 hover:bg-sky-50"
+        className="min-h-[52px] rounded-2xl border-2 border-gray-200 bg-white py-3 text-base font-semibold text-gray-950 hover:border-sky-500 hover:bg-sky-50"
       >
         Não
       </button>
