@@ -25,7 +25,7 @@ export const ptTranslations: Translations = {
       description: 'Crie diagnósticos que despertam interesse e levam pacientes a conversar com você.'
     },
     sales: {
-      title: 'Nutra / Suplementos',
+      title: 'Vendas de suplementos e nutracêuticos',
       description: 'Crie diagnósticos que geram curiosidade e iniciam conversas sobre produtos e resultados.'
     },
     coach: {
@@ -133,7 +133,7 @@ export const ptTranslations: Translations = {
         estetica: { title: 'Beleza/Estética', description: 'Profissionais de estética: captação de clientes e links inteligentes.' },
         fitness: { title: 'Fitness', description: 'Personal trainers e coaches: captação e formação empresarial.' },
         perfumaria: { title: 'Perfumaria', description: 'Vendedores de fragrâncias: quizzes de perfil olfativo e leads.' },
-        nutra: { title: 'Nutra / suplementos', description: 'Vendedores de suplementos: leads e conversão.' },
+        nutra: { title: 'Vendas de suplementos e nutracêuticos', description: 'Vendedores de suplementos: leads e conversão.' },
         'profissional-liberal': { title: 'Profissional liberal', description: 'Advogados, contadores, consultores: captação e diagnósticos para sua área.' },
         'vendedores-geral': { title: 'Vendedores em geral', description: 'Vendedores de qualquer segmento: funil, links inteligentes e conversas qualificadas.' },
         psi: { title: 'Psicologia', description: 'Psicólogos: ferramentas de captação e conversas que convertem.' },

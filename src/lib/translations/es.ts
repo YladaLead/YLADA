@@ -129,7 +129,7 @@ export const esTranslations: Translations = {
         estetica: { title: 'Estética', description: 'Profesionales de estética: captación de clientes y enlaces inteligentes.' },
         fitness: { title: 'Fitness', description: 'Entrenadores personales y coaches: captación y formación empresarial.' },
         perfumaria: { title: 'Perfumería', description: 'Vendedores de fragancias: quizzes de perfil olfativo y leads.' },
-        nutra: { title: 'Nutra / suplementos', description: 'Vendedores de suplementos: leads y conversión.' },
+        nutra: { title: 'Ventas de suplementos y nutracéuticos', description: 'Vendedores de suplementos: leads y conversión.' },
         'profissional-liberal': { title: 'Profesional liberal', description: 'Abogados, contadores, consultores: captación y diagnósticos para tu área.' },
         'vendedores-geral': { title: 'Vendedores en general', description: 'Vendedores de cualquier segmento: embudo, enlaces inteligentes y conversaciones cualificadas.' },
         psi: { title: 'Psicología', description: 'Psicólogos: herramientas de captación y conversaciones que convierten.' },
