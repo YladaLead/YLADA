@@ -251,6 +251,14 @@ function AdminDashboardContent() {
       color: 'bg-teal-600',
     },
     {
+      id: 'ylada-uso-wellness-v1',
+      title: 'Pesquisa Wellness v1',
+      description: 'Respostas de /uso-wellness-v1 — hábitos, Noel e JSON',
+      icon: '🌿',
+      link: '/admin/ylada/uso-wellness-v1',
+      color: 'bg-emerald-600',
+    },
+    {
       id: 'motor-crescimento-hub',
       title: 'Motor de crescimento',
       description: 'Documentação, agentes e checklist',

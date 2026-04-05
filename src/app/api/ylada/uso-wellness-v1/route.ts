@@ -1,18 +1,21 @@
 /**
  * POST /api/ylada/uso-wellness-v1 — pesquisa wellness (sem auth).
+ * Núcleo: resultado percebido + hábitos do método + barreira + texto aberto.
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
 
 const CORE_KEYS = [
-  'usage_description',
-  'last_week',
-  'shared_link',
-  'diagnosis_replies',
-  'works_best',
-  'level_using',
-  'more_frequency_effect',
-  'help_use_more',
+  'result_conversations',
+  'result_organized',
+  'weekly_usage',
+  'links_count',
+  'share_link_doubts',
+  'asked_noel_before',
+  'shared_link_week',
+  'followup_after_reply',
+  'uses_noel_weekly',
+  'main_barrier',
 ] as const
 
 const NOEL_KEYS = [
@@ -45,7 +48,6 @@ export async function POST(request: NextRequest) {
     }
 
     const raw = (await request.json().catch(() => ({}))) as Body
-    const optionalNoel = raw.optional_noel === true
     const ans = raw.answers && typeof raw.answers === 'object' ? raw.answers : {}
 
     for (const k of CORE_KEYS) {
@@ -58,38 +60,59 @@ export async function POST(request: NextRequest) {
     for (const k of CORE_KEYS) {
       out[k] = clampStr(ans[k], 120)
     }
+    out.open_suggestion = clampStr(ans.open_suggestion, 4000)
+    out.survey_version = 'wellness_v3_method'
 
-    if (optionalNoel) {
-      for (const k of NOEL_KEYS) {
-        if (!isNonEmptyStr(ans[k])) {
-          return NextResponse.json({ success: false, error: 'Bloco Noel incompleto' }, { status: 400 })
-        }
-        out[k] = clampStr(ans[k], 120)
+    for (const k of NOEL_KEYS) {
+      if (!isNonEmptyStr(ans[k])) {
+        return NextResponse.json({ success: false, error: 'Respostas sobre o Noel incompletas' }, { status: 400 })
       }
-      const rating = Number(ans.noel_rating)
-      if (!Number.isInteger(rating) || rating < 1 || rating > 5) {
-        return NextResponse.json({ success: false, error: 'Avaliação do Noel inválida' }, { status: 400 })
-      }
-      out.noel_rating = rating
-      const barrier = String(ans.noel_barrier)
-      const other = clampStr(ans.noel_barrier_other, 500)
-      if (barrier === 'outro' && other.length < 2) {
-        return NextResponse.json({ success: false, error: 'Descreva brevemente a opção "Outro"' }, { status: 400 })
-      }
-      if (other) out.noel_barrier_other = other
-      out.noel_improve = clampStr(ans.noel_improve, 4000)
-      out.noel_one_line = clampStr(ans.noel_one_line, 500)
+      out[k] = clampStr(ans[k], 120)
     }
+    const barrier = String(ans.noel_barrier)
+    const other = clampStr(ans.noel_barrier_other, 500)
+    if (barrier === 'outro' && other.length < 2) {
+      return NextResponse.json({ success: false, error: 'Descreva brevemente a opção "Outro"' }, { status: 400 })
+    }
+    if (other) out.noel_barrier_other = other
+    out.noel_improve = clampStr(ans.noel_improve, 4000)
+    out.noel_one_line = clampStr(ans.noel_one_line, 500)
 
     const { data, error } = await supabaseAdmin
       .from('ylada_uso_wellness_v1_responses')
-      .insert({ optional_noel: optionalNoel, answers: out })
+      .insert({ optional_noel: true, answers: out })
       .select('id')
       .single()
 
     if (error) {
       console.error('[uso-wellness-v1]', error)
-      return NextResponse.json({ success: false, error: 'Não foi possível salvar' }, { status: 500 })
+      const msg = String(error.message || '')
+      const code = String((error as { code?: string }).code || '')
+      const hint = String((error as { hint?: string }).hint || '')
+      const blob = `${msg} ${code} ${hint}`
+
+      const missingTable = /relation|does not exist|schema cache|42P01/i.test(blob)
+      const rlsOrDenied =
+        /row-level security|violates row-level|permission denied|42501|PGRST301|not allowed/i.test(blob)
+
+      let errorText = 'Não foi possível salvar'
+      if (missingTable) {
+        errorText =
+          'Não foi possível salvar: a tabela não existe neste projeto Supabase (rode o SQL da migration 299 no mesmo projeto do .env.local).'
+      } else if (rlsOrDenied) {
+        errorText =
+          'Não foi possível salvar: o banco recusou o insert (RLS/permissão). No servidor, use SUPABASE_SERVICE_ROLE_KEY (chave “service_role”, longa, do painel Project Settings → API) — não a anon “public”. Ela precisa ser do mesmo projeto que NEXT_PUBLIC_SUPABASE_URL.'
+      }
+
+      if (process.env.NODE_ENV === 'development' && msg.trim()) {
+        errorText = `${errorText} [Supabase: ${msg}]`
+      }
+
+      const payload: Record<string, unknown> = { success: false, error: errorText }
+      if (process.env.NODE_ENV === 'development') {
+        payload.debug = { supabaseMessage: msg, code: code || null, hint: hint || null }
+      }
+      return NextResponse.json(payload, { status: 500 })
     }
 
     return NextResponse.json({ success: true, id: data?.id })

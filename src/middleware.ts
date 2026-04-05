@@ -38,9 +38,18 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(url, 308)
   }
 
+  // Pesquisa wellness: URL canônica sem /pt (evita /pt/uso-wellness-v1)
+  if (pathname === '/pt/uso-wellness-v1' || pathname === '/pt/uso-wellness-v1/') {
+    const url = request.nextUrl.clone()
+    url.pathname = '/uso-wellness-v1'
+    return NextResponse.redirect(url, 308)
+  }
+
   // Rotas que NUNCA devem ser redirecionadas (verificar PRIMEIRO)
   if (
     pathname === '/migrado' || // Página de acesso migrado - não redirecionar
+    pathname === '/uso-wellness-v1' ||
+    pathname.startsWith('/uso-wellness-v1/') ||
     pathname.startsWith('/p/') || // IMPORTANTE: Links curtos (/p/code) - não redirecionar
     pathname.startsWith('/l/') || // Links inteligentes YLADA (/l/[slug]) - público, sem /pt
     pathname.startsWith('/f/') || // IMPORTANTE: Formulários públicos (/f/formId) - não redirecionar

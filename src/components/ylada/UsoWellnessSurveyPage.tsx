@@ -12,7 +12,9 @@ type StepId =
   | 'w6'
   | 'w7'
   | 'w8'
-  | 'offer_noel'
+  | 'w9'
+  | 'w10'
+  | 'core_open'
   | 'n1'
   | 'n2'
   | 'n3'
@@ -24,83 +26,102 @@ type StepId =
 
 type Opt = { id: string; label: string }
 
-const CORE_STEPS: Array<{ key: string; title: string; options: Opt[] }> = [
+/** 10 escolhas + 1 aberta: resultado → hábitos → barreira; reflexão + dados para produto. */
+const CORE_STEPS: Array<{ key: string; title: string; subtitle?: string; options: Opt[] }> = [
   {
-    key: 'usage_description',
-    title: 'Hoje, como você descreveria seu uso do YLADA?',
-    options: [
-      { id: 'frequencia', label: 'Uso com frequência' },
-      { id: 'as_vezes', label: 'Uso às vezes' },
-      { id: 'parei', label: 'Já usei, mas parei' },
-      { id: 'nunca', label: 'Ainda não usei' },
-    ],
-  },
-  {
-    key: 'last_week',
-    title: 'Na última semana, você chegou a usar o YLADA em algum momento?',
-    options: [
-      { id: 'mais_uma', label: 'Sim, mais de uma vez' },
-      { id: 'uma_vez', label: 'Sim, uma vez' },
-      { id: 'nao_usei', label: 'Não usei' },
-    ],
-  },
-  {
-    key: 'shared_link',
-    title: 'Você já compartilhou seu link com alguém?',
-    options: [
-      { id: 'varias_algumas', label: 'Sim — várias ou algumas vezes' },
-      { id: 'uma_vez', label: 'Uma vez só' },
-      { id: 'nao', label: 'Ainda não' },
-    ],
-  },
-  {
-    key: 'diagnosis_replies',
-    title: 'Alguma pessoa já respondeu seu diagnóstico?',
-    options: [
-      { id: 'varias_algumas', label: 'Sim — várias ou algumas' },
-      { id: 'poucas', label: 'Poucas' },
-      { id: 'nenhuma', label: 'Nenhuma' },
-    ],
-  },
-  {
-    key: 'works_best',
-    title: 'Na sua visão, o YLADA funciona melhor quando:',
-    options: [
-      { id: 'consistente', label: 'É usado de forma consistente' },
-      { id: 'quando_da', label: 'É usado só quando dá tempo' },
-      { id: 'nao_sei', label: 'Não sei ao certo' },
-    ],
-  },
-  {
-    key: 'level_using',
-    title: 'Hoje, você sente que está usando o YLADA no nível que poderia?',
+    key: 'result_conversations',
+    title: 'Hoje você sente que o YLADA te ajuda a ter mais conversas com pessoas interessadas no que você oferece?',
     options: [
       { id: 'sim', label: 'Sim' },
+      { id: 'nao', label: 'Não' },
+      { id: 'nao_sei', label: 'Ainda não sei' },
+    ],
+  },
+  {
+    key: 'result_organized',
+    title: 'Você sente mais clareza no que fazer com leads e acompanhamentos?',
+    options: [
+      { id: 'sim', label: 'Sim' },
+      { id: 'nao', label: 'Não' },
       { id: 'mais_ou_menos', label: 'Mais ou menos' },
+    ],
+  },
+  {
+    key: 'weekly_usage',
+    title: 'Quantas vezes por semana você usa o YLADA?',
+    options: [
+      { id: '1_a_2', label: 'De 1 a 2 vezes' },
+      { id: '3_a_4', label: 'De 3 a 4 vezes' },
+      { id: 'acima_5', label: 'Acima de 5 vezes' },
+    ],
+  },
+  {
+    key: 'links_count',
+    title: 'Quantos links você está usando?',
+    options: [
+      { id: '1_a_2', label: 'De um a dois' },
+      { id: '3_a_5', label: 'De três a cinco' },
+      { id: 'acima_5', label: 'Acima de cinco' },
+    ],
+  },
+  {
+    key: 'share_link_doubts',
+    title: 'Tem dúvidas na hora de compartilhar o link ou sobre com quem compartilhar?',
+    options: [
+      { id: 'sim', label: 'Sim' },
       { id: 'nao', label: 'Não' },
     ],
   },
   {
-    key: 'more_frequency_effect',
-    title: 'Se você usasse o YLADA com mais frequência, o que você acredita que poderia acontecer?',
+    key: 'asked_noel_before',
+    title: 'Antes de mandar mensagem ou postar, você costuma perguntar ao Noel o que fazer ou o que escrever?',
     options: [
-      { id: 'conversas', label: 'Gerar mais conversas' },
-      { id: 'preparados', label: 'Atrair clientes mais preparados' },
-      { id: 'consistencia', label: 'Ter mais consistência' },
-      { id: 'nao_sei', label: 'Não sei' },
+      { id: 'sim', label: 'Sim' },
+      { id: 'nao', label: 'Não' },
+      { id: 'as_vezes', label: 'Às vezes' },
     ],
   },
   {
-    key: 'help_use_more',
-    title: 'O que mais te ajudaria a usar com mais frequência?',
+    key: 'shared_link_week',
+    title: 'Na última semana, você compartilhou o link do seu diagnóstico com alguém?',
     options: [
-      { id: 'passo_diario', label: 'Ter um passo simples diário' },
-      { id: 'entender', label: 'Entender melhor como usar' },
-      { id: 'resultados', label: 'Ver mais resultados rápidos' },
-      { id: 'habito', label: 'Criar o hábito' },
+      { id: 'sim', label: 'Sim' },
+      { id: 'nao', label: 'Não' },
+    ],
+  },
+  {
+    key: 'followup_after_reply',
+    title: 'Quando alguém respondeu ao diagnóstico, você deu continuidade (mensagem ou acompanhamento)?',
+    options: [
+      { id: 'sim', label: 'Sim' },
+      { id: 'nao', label: 'Não' },
+      { id: 'sem_resposta', label: 'Ainda não tive resposta' },
+    ],
+  },
+  {
+    key: 'uses_noel_weekly',
+    title: 'Você usa o Noel pelo menos uma vez por semana?',
+    options: [
+      { id: 'sim', label: 'Sim' },
+      { id: 'nao', label: 'Não' },
+      { id: 'as_vezes', label: 'Às vezes' },
+    ],
+  },
+  {
+    key: 'main_barrier',
+    title: 'O que mais te impede de usar o link e o Noel com mais frequência?',
+    options: [
+      { id: 'esqueco', label: 'Esqueço de abrir o app' },
+      { id: 'tempo', label: 'Falta de tempo' },
+      { id: 'nao_sei_como', label: 'Não sei exatamente como usar' },
+      { id: 'pouco_resultado', label: 'Sinto pouco resultado até agora' },
+      { id: 'habito', label: 'Falta de hábito / rotina' },
+      { id: 'outro', label: 'Outro motivo' },
     ],
   },
 ]
+
+const CORE_TOTAL_STEPS = CORE_STEPS.length + 1
 
 const NOEL_STEPS: Array<{ key: string; title: string; options: Opt[] }> = [
   {
@@ -164,13 +185,22 @@ const NOEL_BARRIER_OPTS: Opt[] = [
   { id: 'outro', label: 'Outro' },
 ]
 
-function coreStepIndex(s: StepId): number {
-  if (s.startsWith('w')) return parseInt(s.slice(1), 10) - 1
-  return -1
+function coreChoiceIndex(s: StepId): number {
+  if (!s.startsWith('w')) return -1
+  const n = parseInt(s.slice(1), 10)
+  if (n < 1 || n > CORE_STEPS.length) return -1
+  return n - 1
+}
+
+function coreProgress(step: StepId): { n: number; total: number } | null {
+  if (step === 'core_open') return { n: CORE_TOTAL_STEPS, total: CORE_TOTAL_STEPS }
+  const wi = coreChoiceIndex(step)
+  if (wi >= 0) return { n: wi + 1, total: CORE_TOTAL_STEPS }
+  return null
 }
 
 function noelStepIndex(s: StepId): number {
-  if (s.startsWith('n') && s !== 'n6' && s !== 'n7' && s !== 'offer_noel') {
+  if (s.startsWith('n') && s !== 'n6' && s !== 'n7') {
     const n = parseInt(s.slice(1), 10)
     if (n >= 1 && n <= 5) return n - 1
   }
@@ -183,25 +213,23 @@ const btnChoice =
 export default function UsoWellnessSurveyPage() {
   const [step, setStep] = useState<StepId>('intro')
   const [answers, setAnswers] = useState<Record<string, string>>({})
-  const [noelRating, setNoelRating] = useState<number | null>(null)
+  const [openSuggestion, setOpenSuggestion] = useState('')
   const [noelImprove, setNoelImprove] = useState('')
   const [noelOneLine, setNoelOneLine] = useState('')
   const [noelBarrierOther, setNoelBarrierOther] = useState('')
   const [submitError, setSubmitError] = useState<string | null>(null)
   const [savedId, setSavedId] = useState<string | null>(null)
   const submittedRef = useRef(false)
-  const [tookNoel, setTookNoel] = useState(false)
 
   const buildPayload = useCallback(() => {
-    const core: Record<string, string> = {}
+    const core: Record<string, unknown> = {}
     for (const row of CORE_STEPS) {
       const v = answers[row.key]
       if (!v) return null
       core[row.key] = v
     }
-    if (!tookNoel) {
-      return { optional_noel: false, answers: core }
-    }
+    core.open_suggestion = openSuggestion.trim()
+
     for (const row of NOEL_STEPS) {
       const v = answers[row.key]
       if (!v) return null
@@ -209,11 +237,9 @@ export default function UsoWellnessSurveyPage() {
     }
     const b = answers.noel_barrier
     if (!b) return null
-    if (noelRating === null || noelRating < 1 || noelRating > 5) return null
     const payload: Record<string, unknown> = {
       ...core,
       noel_barrier: b,
-      noel_rating: noelRating,
       noel_improve: noelImprove.trim(),
       noel_one_line: noelOneLine.trim(),
     }
@@ -221,7 +247,7 @@ export default function UsoWellnessSurveyPage() {
       payload.noel_barrier_other = noelBarrierOther.trim()
     }
     return { optional_noel: true, answers: payload }
-  }, [answers, tookNoel, noelRating, noelImprove, noelOneLine, noelBarrierOther])
+  }, [answers, noelImprove, noelOneLine, noelBarrierOther, openSuggestion])
 
   useEffect(() => {
     if (step !== 'result' || submittedRef.current) return
@@ -233,18 +259,36 @@ export default function UsoWellnessSurveyPage() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
     })
-      .then((r) => r.json())
-      .then((data) => {
+      .then(async (r) => {
+        let data: { success?: boolean; error?: string; id?: string } = {}
+        try {
+          data = await r.json()
+        } catch {
+          if (process.env.NODE_ENV === 'development') {
+            console.error('[uso-wellness-v1] Corpo da resposta não é JSON', r.status, r.statusText)
+          }
+          setSubmitError('Erro de rede.')
+          return
+        }
+        if (process.env.NODE_ENV === 'development' && !data.success) {
+          console.warn('[uso-wellness-v1] POST não salvou', {
+            httpStatus: r.status,
+            error: data.error,
+            debug: (data as { debug?: unknown }).debug,
+          })
+        }
         if (data.success) setSavedId(data.id ?? null)
         else setSubmitError(data.error || 'Não foi possível salvar.')
       })
-      .catch(() => setSubmitError('Erro de rede.'))
+      .catch((e) => {
+        if (process.env.NODE_ENV === 'development') console.error('[uso-wellness-v1]', e)
+        setSubmitError('Erro de rede.')
+      })
   }, [step, buildPayload])
 
-  const wi = coreStepIndex(step)
+  const wi = coreChoiceIndex(step)
   const ni = noelStepIndex(step)
-  const coreProg =
-    wi >= 0 ? { n: wi + 1, total: CORE_STEPS.length } : null
+  const coreProg = coreProgress(step)
   const noelProg =
     step === 'n6'
       ? { n: 6, total: 7 }
@@ -255,7 +299,7 @@ export default function UsoWellnessSurveyPage() {
           : null
 
   const showCoreBar = coreProg !== null
-  const showNoelBar = noelProg !== null && tookNoel
+  const showNoelBar = noelProg !== null
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 via-white to-sky-50/40 text-gray-950 [color-scheme:light]">
@@ -276,7 +320,7 @@ export default function UsoWellnessSurveyPage() {
 
         {showNoelBar && noelProg && (
           <div className="mb-6">
-            <p className="text-xs font-semibold text-sky-800 text-center mb-1">Sobre o Noel (opcional)</p>
+            <p className="text-xs font-semibold text-sky-800 text-center mb-1">Sobre o Noel</p>
             <div className="h-2 w-full rounded-full bg-gray-200 overflow-hidden">
               <div
                 className="h-full rounded-full bg-violet-500 transition-all duration-300"
@@ -284,18 +328,14 @@ export default function UsoWellnessSurveyPage() {
               />
             </div>
             <p className="mt-2 text-xs text-gray-500 text-center">
-              Complemento {noelProg.n} de {noelProg.total}
+              Passo {noelProg.n} de {noelProg.total}
             </p>
           </div>
         )}
 
         {step === 'intro' && (
-          <div className="space-y-6 animate-in fade-in duration-300 text-left">
-            <p className="text-xs font-semibold uppercase tracking-wide text-sky-700">Pesquisa de uso · YLADA · Wellness</p>
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 leading-tight">Ajude-nos a melhorar o produto</h1>
-            <p className="text-base sm:text-lg text-gray-600 leading-snug">
-              Pesquisa para quem usa o YLADA no contexto wellness. Poucos minutos, anônima.
-            </p>
+          <div className="flex flex-col items-stretch gap-6 animate-in fade-in duration-300 text-left">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 leading-tight">Ajude-nos a melhorar</h1>
             <button
               type="button"
               onClick={() => setStep('w1')}
@@ -303,8 +343,8 @@ export default function UsoWellnessSurveyPage() {
             >
               Começar
             </button>
-            <p className="text-xs text-gray-500">
-              Não pedimos nome nem e-mail. Usamos as respostas só para melhorar a experiência no YLADA.
+            <p className="w-full max-w-full text-xs text-gray-500 text-left leading-relaxed">
+              É anônimo. Usamos as respostas apenas para melhorar.
             </p>
           </div>
         )}
@@ -312,45 +352,38 @@ export default function UsoWellnessSurveyPage() {
         {wi >= 0 && wi < CORE_STEPS.length && (
           <ChoiceBlock
             title={CORE_STEPS[wi].title}
+            subtitle={CORE_STEPS[wi].subtitle}
             options={CORE_STEPS[wi].options}
             onBack={() => (wi === 0 ? setStep('intro') : setStep(`w${wi}` as StepId))}
             onPick={(id) => {
               const key = CORE_STEPS[wi].key
               setAnswers((a) => ({ ...a, [key]: id }))
-              if (wi === CORE_STEPS.length - 1) setStep('offer_noel')
+              if (wi === CORE_STEPS.length - 1) setStep('core_open')
               else setStep(`w${wi + 2}` as StepId)
             }}
           />
         )}
 
-        {step === 'offer_noel' && (
+        {step === 'core_open' && (
           <QuestionCard
-            title="Quer responder algumas perguntas rápidas sobre o Noel?"
-            subtitle="É opcional e leva poucos minutos a mais."
-            onBack={() => setStep('w8')}
+            title="Pensando na sua rotina: o que faria a maior diferença para você usar o método (link, conversas e Noel) toda semana?"
+            subtitle="Opcional — mas sua opinião ajuda muito a gente a ajustar o produto."
+            onBack={() => setStep('w10')}
           >
-            <div className="grid grid-cols-1 gap-3">
-              <button
-                type="button"
-                onClick={() => {
-                  setTookNoel(true)
-                  setStep('n1')
-                }}
-                className="min-h-[52px] rounded-2xl border-2 border-sky-600 bg-sky-50 py-3 text-base font-semibold text-sky-950 hover:bg-sky-100"
-              >
-                Sim, quero continuar
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setTookNoel(false)
-                  setStep('result')
-                }}
-                className="min-h-[52px] rounded-2xl border-2 border-gray-200 bg-white py-3 text-base font-semibold text-gray-950 hover:border-sky-300"
-              >
-                Não, finalizar agora
-              </button>
-            </div>
+            <textarea
+              value={openSuggestion}
+              onChange={(e) => setOpenSuggestion(e.target.value)}
+              rows={4}
+              className="w-full rounded-xl border border-gray-300 px-3 py-2 text-sm text-gray-950"
+              placeholder="Ex.: um lembrete diário, um vídeo curto, exemplo de mensagem..."
+            />
+            <button
+              type="button"
+              onClick={() => setStep('n1')}
+              className="mt-4 w-full rounded-xl bg-sky-600 py-3 text-sm font-semibold text-white"
+            >
+              Continuar
+            </button>
           </QuestionCard>
         )}
 
@@ -358,7 +391,7 @@ export default function UsoWellnessSurveyPage() {
           <ChoiceBlock
             title={NOEL_STEPS[ni].title}
             options={NOEL_STEPS[ni].options}
-            onBack={() => (ni === 0 ? setStep('offer_noel') : setStep(`n${ni}` as StepId))}
+            onBack={() => (ni === 0 ? setStep('core_open') : setStep(`n${ni}` as StepId))}
             onPick={(id) => {
               const key = NOEL_STEPS[ni].key
               setAnswers((a) => ({ ...a, [key]: id }))
@@ -411,25 +444,8 @@ export default function UsoWellnessSurveyPage() {
         )}
 
         {step === 'n7' && (
-          <QuestionCard title="Para fechar: avaliação e sugestões sobre o Noel" onBack={() => setStep('n6')}>
-            <p className="text-sm text-gray-600">De forma geral, como você avalia o Noel?</p>
-            <p className="text-xs text-gray-500 mt-1">(1 = Nada satisfeito, 5 = Muito satisfeito)</p>
-            <div className="flex justify-center gap-1.5 py-3" role="group" aria-label="Nota de 1 a 5">
-              {[1, 2, 3, 4, 5].map((n) => (
-                <button
-                  key={n}
-                  type="button"
-                  onClick={() => setNoelRating(n)}
-                  className="rounded-xl p-2 text-3xl leading-none focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
-                  aria-label={`Nota ${n}`}
-                >
-                  <span className={noelRating !== null && n <= noelRating ? 'text-amber-400' : 'text-gray-300'}>
-                    ★
-                  </span>
-                </button>
-              ))}
-            </div>
-            <label className="block text-xs font-medium text-gray-600 mt-4">
+          <QuestionCard title="Para fechar: sugestões sobre o Noel" onBack={() => setStep('n6')}>
+            <label className="block text-xs font-medium text-gray-600">
               Se o Noel pudesse melhorar em algo, o que você gostaria? (opcional)
             </label>
             <textarea
@@ -451,9 +467,8 @@ export default function UsoWellnessSurveyPage() {
             />
             <button
               type="button"
-              disabled={noelRating === null}
               onClick={() => setStep('result')}
-              className="mt-6 w-full rounded-xl bg-sky-600 py-3 text-sm font-semibold text-white disabled:opacity-50"
+              className="mt-6 w-full rounded-xl bg-sky-600 py-3 text-sm font-semibold text-white"
             >
               Enviar
             </button>
@@ -469,7 +484,17 @@ export default function UsoWellnessSurveyPage() {
             <p className="text-sm text-gray-700 leading-relaxed">
               Suas respostas ajudam a melhorar ainda mais a experiência dentro do YLADA. A gente valoriza muito isso.
             </p>
-            {submitError && <p className="text-xs text-amber-700">{submitError}</p>}
+            {submitError && (
+              <div className="text-left space-y-2 rounded-xl border border-amber-200 bg-amber-50/80 px-3 py-3">
+                <p className="text-xs text-amber-900 whitespace-pre-wrap break-words">{submitError}</p>
+                <p className="text-[11px] text-amber-800/90 leading-relaxed">
+                  Obrigatório: todas as perguntas de opções (incluindo bloco Noel); se escolher “Outro” na barreira do
+                  Noel, preencher a linha de texto. Os textos longos opcionais podem ficar vazios. Se aparecer{' '}
+                  <span className="font-mono">[Supabase: …]</span>, é erro de banco/rede (ex.: URL do Supabase,
+                  firewall, VPN), não pergunta faltando.
+                </p>
+              </div>
+            )}
             {savedId && !submitError && (
               <p className="text-xs text-emerald-700">Resposta registrada. Obrigado por ajudar.</p>
             )}
@@ -482,17 +507,19 @@ export default function UsoWellnessSurveyPage() {
 
 function ChoiceBlock({
   title,
+  subtitle,
   options,
   onPick,
   onBack,
 }: {
   title: string
+  subtitle?: string
   options: Opt[]
   onPick: (id: string) => void
   onBack: () => void
 }) {
   return (
-    <QuestionCard title={title} onBack={onBack}>
+    <QuestionCard title={title} subtitle={subtitle} onBack={onBack}>
       <div className="space-y-2">
         {options.map((o) => (
           <button key={o.id} type="button" className={btnChoice} onClick={() => onPick(o.id)}>
