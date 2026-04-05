@@ -210,6 +210,45 @@ function noelStepIndex(s: StepId): number {
 const btnChoice =
   'w-full rounded-xl border-2 px-4 py-3 text-left text-sm font-medium transition-colors border-gray-200 bg-white text-gray-950 hover:border-sky-300'
 
+function isLikelyNetworkSubmitError(msg: string): boolean {
+  return /fetch failed|não conseguiu conectar ao Supabase|ECONNREFUSED|ENOTFOUND|getaddrinfo|rede \(não chegou/i.test(
+    msg
+  )
+}
+
+function SubmitErrorHint({ submitError }: { submitError: string }) {
+  const network = isLikelyNetworkSubmitError(submitError)
+  const isDev = process.env.NODE_ENV === 'development'
+
+  return (
+    <div className="text-left space-y-2 rounded-xl border border-amber-200 bg-amber-50/80 px-3 py-3">
+      <p className="text-xs text-amber-900 whitespace-pre-wrap break-words">{submitError}</p>
+      {network ? (
+        <p className="text-[11px] text-amber-800/90 leading-relaxed">
+          {isDev ? (
+            <>
+              Isso não é pergunta em branco: o processo do Next não completou o HTTP até o host do Supabase. Confira
+              se a URL no <code className="rounded bg-amber-100/80 px-1">.env.local</code> está certa, teste sem VPN,
+              e veja o mesmo erro no <strong>terminal do next dev</strong>. Opcional:{' '}
+              <code className="rounded bg-amber-100/80 px-1 text-[10px]">curl -I &quot;$NEXT_PUBLIC_SUPABASE_URL&quot;</code>{' '}
+              no terminal (com a variável exportada).
+            </>
+          ) : (
+            <>Pode ser instabilidade de rede ou manutenção. Tente de novo em alguns minutos ou outra conexão.</>
+          )}
+        </p>
+      ) : (
+        <p className="text-[11px] text-amber-800/90 leading-relaxed">
+          Se a mensagem acima citar tabela, RLS ou chave <span className="font-mono">service_role</span>, é
+          configuração do Supabase — não falta de resposta no formulário. Caso contrário, confira se respondeu todas as
+          opções e, se marcou “Outro” na barreira do Noel, preencheu a linha de texto (campos longos opcionais podem
+          ficar vazios).
+        </p>
+      )}
+    </div>
+  )
+}
+
 export default function UsoWellnessSurveyPage() {
   const [step, setStep] = useState<StepId>('intro')
   const [answers, setAnswers] = useState<Record<string, string>>({})
@@ -485,15 +524,7 @@ export default function UsoWellnessSurveyPage() {
               Suas respostas ajudam a melhorar ainda mais a experiência dentro do YLADA. A gente valoriza muito isso.
             </p>
             {submitError && (
-              <div className="text-left space-y-2 rounded-xl border border-amber-200 bg-amber-50/80 px-3 py-3">
-                <p className="text-xs text-amber-900 whitespace-pre-wrap break-words">{submitError}</p>
-                <p className="text-[11px] text-amber-800/90 leading-relaxed">
-                  Obrigatório: todas as perguntas de opções (incluindo bloco Noel); se escolher “Outro” na barreira do
-                  Noel, preencher a linha de texto. Os textos longos opcionais podem ficar vazios. Se aparecer{' '}
-                  <span className="font-mono">[Supabase: …]</span>, é erro de banco/rede (ex.: URL do Supabase,
-                  firewall, VPN), não pergunta faltando.
-                </p>
-              </div>
+              <SubmitErrorHint submitError={submitError} />
             )}
             {savedId && !submitError && (
               <p className="text-xs text-emerald-700">Resposta registrada. Obrigado por ajudar.</p>

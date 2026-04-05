@@ -6,6 +6,7 @@ import AdminProtectedRoute from '@/components/auth/AdminProtectedRoute'
 import {
   USAGE_SURVEY_PROFILE_LABELS,
   formatUsageSurveyObjective,
+  type UsageSurveyActionItem,
 } from '@/lib/ylada-usage-survey-labels'
 
 type Row = {
@@ -87,6 +88,7 @@ export default function AdminYladaUsageSurveyPage() {
   const [total, setTotal] = useState(0)
   const [stats, setStats] = useState<Stats | null>(null)
   const [insights, setInsights] = useState<string[]>([])
+  const [recommendedActions, setRecommendedActions] = useState<UsageSurveyActionItem[]>([])
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -99,6 +101,9 @@ export default function AdminYladaUsageSurveyPage() {
         setTotal(json.total ?? 0)
         setStats(json.stats ?? null)
         setInsights(Array.isArray(json.insights) ? json.insights : [])
+        setRecommendedActions(
+          Array.isArray(json.recommendedActions) ? json.recommendedActions : []
+        )
       } else {
         setError(json.error || 'Erro ao carregar')
       }
@@ -203,6 +208,51 @@ export default function AdminYladaUsageSurveyPage() {
                   recentes. Perfis: contagem exata em todo o banco.
                 </p>
               </section>
+
+              {recommendedActions.length > 0 && (
+                <section className="rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50/90 to-white p-5 shadow-sm">
+                  <h2 className="text-sm font-bold text-emerald-900 uppercase tracking-wide mb-1">
+                    Ações sugeridas (priorização)
+                  </h2>
+                  <p className="text-xs text-emerald-800/80 mb-4">
+                    Ideias automáticas a partir dos perfis, objetivos e travas — ajuste ao contexto do time antes de
+                    executar.
+                  </p>
+                  <ul className="space-y-4">
+                    {recommendedActions.map((item, i) => (
+                      <li
+                        key={`${item.title}-${i}`}
+                        className="rounded-xl border border-emerald-100 bg-white/80 p-4 shadow-sm"
+                      >
+                        <div className="flex flex-wrap items-center gap-2 mb-2">
+                          <span
+                            className={`text-[10px] font-bold uppercase tracking-wide rounded-full px-2 py-0.5 ${
+                              item.priority === 'alta'
+                                ? 'bg-red-100 text-red-800'
+                                : item.priority === 'media'
+                                  ? 'bg-amber-100 text-amber-900'
+                                  : 'bg-gray-100 text-gray-700'
+                            }`}
+                          >
+                            {item.priority === 'alta'
+                              ? 'Prioridade alta'
+                              : item.priority === 'media'
+                                ? 'Prioridade média'
+                                : 'Prioridade baixa'}
+                          </span>
+                          <h3 className="text-sm font-semibold text-gray-900">{item.title}</h3>
+                        </div>
+                        <p className="text-xs text-gray-600 mb-2">{item.basis}</p>
+                        <ol className="list-decimal list-inside space-y-1.5 text-sm text-gray-800 leading-relaxed">
+                          {item.steps.map((step, j) => (
+                            <li key={j}>{step}</li>
+                          ))}
+                        </ol>
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+              )}
 
               <section>
                 <h2 className="text-lg font-semibold text-gray-900 mb-3">Distribuição por perfil (funil)</h2>

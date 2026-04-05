@@ -8,6 +8,7 @@ import { supabaseAdmin } from '@/lib/supabase'
 import {
   aggregateUsageSurveyAnswers,
   buildUsageSurveyInsights,
+  buildUsageSurveyRecommendedActions,
 } from '@/lib/ylada-usage-survey-labels'
 
 export async function GET(request: NextRequest) {
@@ -76,6 +77,14 @@ export async function GET(request: NextRequest) {
       blockerTop,
     })
 
+    const recommendedActions = buildUsageSurveyRecommendedActions({
+      totalInDb,
+      profileCounts: profileCountsGlobal,
+      aggregationSampleSize: sampleSize,
+      objectiveTop,
+      blockerTop,
+    })
+
     return NextResponse.json({
       success: true,
       data: listRes.data ?? [],
@@ -90,6 +99,7 @@ export async function GET(request: NextRequest) {
         blockerTop,
       },
       insights,
+      recommendedActions,
     })
   } catch (e) {
     console.error('[admin/usage-survey]', e)

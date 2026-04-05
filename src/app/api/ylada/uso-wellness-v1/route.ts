@@ -94,9 +94,16 @@ export async function POST(request: NextRequest) {
       const missingTable = /relation|does not exist|schema cache|42P01/i.test(blob)
       const rlsOrDenied =
         /row-level security|violates row-level|permission denied|42501|PGRST301|not allowed/i.test(blob)
+      const networkFetchFailed =
+        /fetch failed|ECONNREFUSED|ENOTFOUND|getaddrinfo|ECONNRESET|certificate|SSL|UNABLE_TO_VERIFY_LEAF_SIGNATURE/i.test(
+          msg
+        )
 
       let errorText = 'Não foi possível salvar'
-      if (missingTable) {
+      if (networkFetchFailed) {
+        errorText =
+          'Não foi possível salvar: o servidor Next não conseguiu conectar ao Supabase pela rede (não chegou nem a validar login no banco). Confira NEXT_PUBLIC_SUPABASE_URL no .env.local, internet, VPN/firewall e DNS; reinicie o next dev após alterar o .env.'
+      } else if (missingTable) {
         errorText =
           'Não foi possível salvar: a tabela não existe neste projeto Supabase (rode o SQL da migration 299 no mesmo projeto do .env.local).'
       } else if (rlsOrDenied) {
@@ -105,7 +112,7 @@ export async function POST(request: NextRequest) {
       }
 
       if (process.env.NODE_ENV === 'development' && msg.trim()) {
-        errorText = `${errorText} [Supabase: ${msg}]`
+        errorText = `${errorText} [técnico: ${msg}]`
       }
 
       const payload: Record<string, unknown> = { success: false, error: errorText }
