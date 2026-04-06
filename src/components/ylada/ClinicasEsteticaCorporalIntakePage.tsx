@@ -237,50 +237,54 @@ export default function ClinicasEsteticaCorporalIntakePage() {
   ])
 
   const btnPrimary =
-    'flex-1 rounded-xl bg-green-600 text-white font-semibold py-3 disabled:opacity-40 hover:bg-green-700 transition-colors shadow-sm'
-  const btnGhost = 'flex-1 rounded-xl border border-gray-300 py-3 font-medium text-gray-700 hover:bg-gray-50'
+    'flex-1 rounded-xl bg-green-600 text-white font-semibold py-3 disabled:opacity-40 hover:bg-green-800 transition-all shadow-md shadow-green-900/15 hover:shadow-lg hover:shadow-green-900/25'
+  const btnGhost =
+    'flex-1 rounded-xl border border-gray-300 py-3 font-medium text-gray-700 hover:bg-slate-50 shadow-sm hover:shadow'
   const choice = (active: boolean) =>
-    `w-full text-left rounded-xl border-2 px-4 py-3 font-medium transition-colors ${
-      active ? 'border-blue-600 bg-blue-50 text-blue-950' : 'border-gray-200 hover:border-blue-300 text-gray-900'
+    `w-full text-left rounded-xl border-2 px-4 py-3 font-medium transition-all ${
+      active
+        ? 'border-blue-700 bg-blue-50 text-blue-950 shadow-md shadow-blue-900/10 ring-1 ring-blue-700/20'
+        : 'border-gray-200 hover:border-blue-400 text-gray-900 bg-white shadow-sm hover:shadow-md hover:shadow-slate-900/5'
     }`
+  const stepSurface = 'rounded-2xl border border-slate-200/90 bg-white p-5 sm:p-6 shadow-[0_8px_30px_rgba(15,23,42,0.07)]'
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white text-gray-900">
+    <div className="min-h-screen bg-gradient-to-b from-slate-100 via-slate-50 to-white text-gray-900">
       <div className="max-w-lg mx-auto px-4 py-10 pb-16">
         <header className="mb-8">
-          <Link href="/pt" className="text-sm text-blue-600 hover:text-blue-800 font-medium">
+          <Link href="/pt" className="text-sm text-blue-700 hover:text-blue-900 font-semibold">
             ← Início
           </Link>
           {step !== 'result' && (
             <>
-              <div className="h-1.5 w-full bg-blue-100 rounded-full mt-6 overflow-hidden">
+              <div className="h-2 w-full bg-blue-200/90 rounded-full mt-6 overflow-hidden shadow-inner">
                 <div
-                  className="h-full bg-blue-600 transition-all duration-300 rounded-full"
+                  className="h-full bg-blue-700 transition-all duration-300 rounded-full shadow-sm"
                   style={{ width: `${Math.min(100, progressPct)}%` }}
                 />
               </div>
-              <p className="text-xs text-gray-500 mt-2">Análise comercial — clínicas de estética corporal</p>
+              <p className="text-xs text-gray-600 font-medium mt-2">Análise comercial — clínicas de estética corporal</p>
             </>
           )}
         </header>
 
         {step === 'intro' && (
-          <section className="space-y-5">
+          <section className={`space-y-5 ${stepSurface}`}>
             <h1 className="text-2xl font-bold text-gray-900 leading-snug">
               Sua clínica recebe mensagens…
               <span className="block mt-1">mas a maioria não vira cliente?</span>
             </h1>
-            <p className="text-gray-700 leading-relaxed text-base">
-              E quase sempre começa assim: <span className="font-medium text-gray-900">“qual o valor?”</span>… e some.
+            <p className="text-gray-800 leading-relaxed text-base">
+              E quase sempre começa assim: <span className="font-semibold text-gray-900">“qual o valor?”</span>… e some.
             </p>
-            <p className="text-sm text-gray-500">Responda rápido e veja o que pode estar acontecendo.</p>
-            <p className="text-xs text-gray-400 leading-snug">
+            <p className="text-sm font-medium text-gray-700 -mt-1">Responda rápido e veja o que pode estar acontecendo.</p>
+            <p className="text-xs text-gray-500 leading-snug">
               Uso estratégico e comercial — não substitui orientação de saúde.
             </p>
             <button
               type="button"
               onClick={goNext}
-              className="w-full rounded-xl bg-green-600 text-white font-semibold py-3.5 px-4 hover:bg-green-700 transition-colors shadow-sm"
+              className="w-full rounded-xl bg-green-600 text-white font-semibold py-3.5 px-4 hover:bg-green-800 transition-all shadow-[0_8px_24px_rgba(22,163,74,0.35)] hover:shadow-[0_10px_28px_rgba(21,128,61,0.4)]"
             >
               Começar diagnóstico gratuito
             </button>
@@ -288,14 +292,14 @@ export default function ClinicasEsteticaCorporalIntakePage() {
         )}
 
         {step === 'clinic' && (
-          <section className="space-y-5">
+          <section className={`space-y-5 ${stepSurface}`}>
             <h2 className="text-xl font-bold text-gray-900">Sobre sua clínica</h2>
             <label className="block">
               <span className="text-sm font-medium text-gray-700">Nome da clínica ou marca *</span>
               <input
                 value={clinicName}
                 onChange={(e) => setClinicName(e.target.value)}
-                className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2.5 text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2.5 text-gray-900 focus:ring-2 focus:ring-blue-600 focus:border-blue-600 outline-none shadow-sm"
                 placeholder="Ex.: Estética Corpo em Harmonia"
                 autoComplete="organization"
               />
@@ -305,12 +309,12 @@ export default function ClinicasEsteticaCorporalIntakePage() {
               <input
                 value={city}
                 onChange={(e) => setCity(e.target.value)}
-                className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2.5 focus:ring-2 focus:ring-blue-500 outline-none"
+                className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2.5 focus:ring-2 focus:ring-blue-600 focus:border-blue-600 outline-none shadow-sm"
                 placeholder="Opcional"
               />
             </label>
             {microTension(step) && (
-              <p className="text-sm text-gray-500 italic pt-1">{microTension(step)}</p>
+              <p className="text-sm text-gray-600 italic pt-1">{microTension(step)}</p>
             )}
             <div className="flex gap-3 pt-2">
               <button type="button" onClick={goBack} className={btnGhost}>
@@ -324,7 +328,7 @@ export default function ClinicasEsteticaCorporalIntakePage() {
         )}
 
         {step === 'structure' && (
-          <section className="space-y-4">
+          <section className={`space-y-4 ${stepSurface}`}>
             <h2 className="text-xl font-bold">Estrutura atual</h2>
             <p className="text-sm text-gray-600">Hoje, quem atende os clientes na sua clínica?</p>
             {[
@@ -343,7 +347,7 @@ export default function ClinicasEsteticaCorporalIntakePage() {
               </button>
             ))}
             {microTension(step) && (
-              <p className="text-sm text-gray-500 italic pt-1">{microTension(step)}</p>
+              <p className="text-sm text-gray-600 italic pt-1">{microTension(step)}</p>
             )}
             <div className="flex gap-3 pt-4">
               <button type="button" onClick={goBack} className={btnGhost}>
@@ -376,12 +380,12 @@ export default function ClinicasEsteticaCorporalIntakePage() {
                 value={servicesDetail}
                 onChange={(e) => setServicesDetail(e.target.value)}
                 rows={3}
-                className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-600 focus:border-blue-600 outline-none shadow-sm"
                 placeholder="Opcional"
               />
             </label>
             {microTension(step) && (
-              <p className="text-sm text-gray-500 italic pt-1">{microTension(step)}</p>
+              <p className="text-sm text-gray-600 italic pt-1">{microTension(step)}</p>
             )}
             <div className="flex gap-3 pt-2">
               <button type="button" onClick={goBack} className={btnGhost}>
@@ -395,7 +399,7 @@ export default function ClinicasEsteticaCorporalIntakePage() {
         )}
 
         {step === 'pain' && (
-          <section className="space-y-4">
+          <section className={`space-y-4 ${stepSurface}`}>
             <h2 className="text-xl font-bold">O que mais está travando seus resultados hoje?</h2>
             {[
               { id: 'preco_nao_fecha', label: 'Muitas pessoas perguntam preço e não fecham' },
@@ -410,7 +414,7 @@ export default function ClinicasEsteticaCorporalIntakePage() {
               </button>
             ))}
             {microTension(step) && (
-              <p className="text-sm text-gray-500 italic pt-1">{microTension(step)}</p>
+              <p className="text-sm text-gray-600 italic pt-1">{microTension(step)}</p>
             )}
             <div className="flex gap-3 pt-4">
               <button type="button" onClick={goBack} className={btnGhost}>
@@ -424,7 +428,7 @@ export default function ClinicasEsteticaCorporalIntakePage() {
         )}
 
         {step === 'lead_prep' && (
-          <section className="space-y-4">
+          <section className={`space-y-4 ${stepSurface}`}>
             <h2 className="text-xl font-bold">Sobre os clientes que chegam</h2>
             <p className="text-sm text-gray-600">
               Você sente que poderia cobrar mais caro… se a pessoa chegasse mais preparada?
@@ -439,7 +443,7 @@ export default function ClinicasEsteticaCorporalIntakePage() {
               </button>
             ))}
             {microTension(step) && (
-              <p className="text-sm text-gray-500 italic pt-1">{microTension(step)}</p>
+              <p className="text-sm text-gray-600 italic pt-1">{microTension(step)}</p>
             )}
             <div className="flex gap-3 pt-4">
               <button type="button" onClick={goBack} className={btnGhost}>
@@ -453,7 +457,7 @@ export default function ClinicasEsteticaCorporalIntakePage() {
         )}
 
         {step === 'margin' && (
-          <section className="space-y-4">
+          <section className={`space-y-4 ${stepSurface}`}>
             <h2 className="text-xl font-bold">Resultado financeiro</h2>
             <p className="text-sm text-gray-600">Você sente que poderia ganhar mais… com o mesmo esforço?</p>
             {[
@@ -466,7 +470,7 @@ export default function ClinicasEsteticaCorporalIntakePage() {
               </button>
             ))}
             {microTension(step) && (
-              <p className="text-sm text-gray-500 italic pt-1">{microTension(step)}</p>
+              <p className="text-sm text-gray-600 italic pt-1">{microTension(step)}</p>
             )}
             <div className="flex gap-3 pt-4">
               <button type="button" onClick={goBack} className={btnGhost}>
@@ -480,7 +484,7 @@ export default function ClinicasEsteticaCorporalIntakePage() {
         )}
 
         {step === 'operation' && (
-          <section className="space-y-4">
+          <section className={`space-y-4 ${stepSurface}`}>
             <h2 className="text-xl font-bold">Dia a dia da clínica</h2>
             <p className="text-sm text-gray-600">Você perde tempo respondendo gente que não fecha?</p>
             {[
@@ -493,7 +497,7 @@ export default function ClinicasEsteticaCorporalIntakePage() {
               </button>
             ))}
             {microTension(step) && (
-              <p className="text-sm text-gray-500 italic pt-1">{microTension(step)}</p>
+              <p className="text-sm text-gray-600 italic pt-1">{microTension(step)}</p>
             )}
             <div className="flex gap-3 pt-4">
               <button type="button" onClick={goBack} className={btnGhost}>
@@ -507,7 +511,7 @@ export default function ClinicasEsteticaCorporalIntakePage() {
         )}
 
         {step === 'interest' && (
-          <section className="space-y-4">
+          <section className={`space-y-4 ${stepSurface}`}>
             <h2 className="text-xl font-bold">Se existisse uma forma de melhorar isso…</h2>
             <p className="text-sm text-gray-600">
               Você teria interesse em entender como atrair clientes mais preparados antes mesmo do contato?
@@ -528,7 +532,7 @@ export default function ClinicasEsteticaCorporalIntakePage() {
               </button>
             ))}
             {microTension(step) && (
-              <p className="text-sm text-gray-500 italic pt-1">{microTension(step)}</p>
+              <p className="text-sm text-gray-600 italic pt-1">{microTension(step)}</p>
             )}
             <div className="flex gap-3 pt-4">
               <button type="button" onClick={goBack} className={btnGhost}>
@@ -542,7 +546,7 @@ export default function ClinicasEsteticaCorporalIntakePage() {
         )}
 
         {step === 'timeline' && (
-          <section className="space-y-4">
+          <section className={`space-y-4 ${stepSurface}`}>
             <h2 className="text-xl font-bold">Momento atual</h2>
             <p className="text-sm text-gray-600">Se fizer sentido, quando você gostaria de ajustar isso na sua clínica?</p>
             {[
@@ -556,7 +560,7 @@ export default function ClinicasEsteticaCorporalIntakePage() {
               </button>
             ))}
             {microTension(step) && (
-              <p className="text-sm text-gray-500 italic pt-1">{microTension(step)}</p>
+              <p className="text-sm text-gray-600 italic pt-1">{microTension(step)}</p>
             )}
             <div className="flex gap-3 pt-4">
               <button type="button" onClick={goBack} className={btnGhost}>
@@ -570,14 +574,14 @@ export default function ClinicasEsteticaCorporalIntakePage() {
         )}
 
         {step === 'contact' && (
-          <section className="space-y-4">
+          <section className={`space-y-4 ${stepSurface}`}>
             <h2 className="text-xl font-bold">Para te mostrar o resultado da análise</h2>
             <label className="block">
               <span className="text-sm font-medium text-gray-700">Nome *</span>
               <input
                 value={contactName}
                 onChange={(e) => setContactName(e.target.value)}
-                className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2.5 focus:ring-2 focus:ring-blue-500 outline-none"
+                className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2.5 focus:ring-2 focus:ring-blue-600 focus:border-blue-600 outline-none shadow-sm"
                 autoComplete="name"
               />
             </label>
@@ -586,7 +590,7 @@ export default function ClinicasEsteticaCorporalIntakePage() {
               <input
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
-                className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2.5 focus:ring-2 focus:ring-blue-500 outline-none"
+                className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2.5 focus:ring-2 focus:ring-blue-600 focus:border-blue-600 outline-none shadow-sm"
                 placeholder="DDD + número"
                 autoComplete="tel"
               />
@@ -597,7 +601,7 @@ export default function ClinicasEsteticaCorporalIntakePage() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2.5 focus:ring-2 focus:ring-blue-500 outline-none"
+                className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2.5 focus:ring-2 focus:ring-blue-600 focus:border-blue-600 outline-none shadow-sm"
                 autoComplete="email"
               />
             </label>
@@ -607,7 +611,7 @@ export default function ClinicasEsteticaCorporalIntakePage() {
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 rows={3}
-                className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-600 focus:border-blue-600 outline-none shadow-sm"
                 placeholder="Opcional"
               />
             </label>
@@ -616,7 +620,7 @@ export default function ClinicasEsteticaCorporalIntakePage() {
                 type="checkbox"
                 checked={consent}
                 onChange={(e) => setConsent(e.target.checked)}
-                className="mt-1 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                className="mt-1 rounded border-gray-300 text-blue-700 focus:ring-blue-600"
               />
               <span className="text-sm text-gray-600 leading-snug">
                 Autorizo contato para <strong>análise e orientação comercial</strong>. *
@@ -657,7 +661,7 @@ export default function ClinicasEsteticaCorporalIntakePage() {
         )}
 
         {step === 'result' && (
-          <section className="space-y-6">
+          <section className={`space-y-6 ${stepSurface}`}>
             <div className="text-center space-y-3">
               <h2 className="text-xl sm:text-2xl font-bold text-gray-900 leading-snug">
                 Análise recebida — já dá pra ver padrões importantes
@@ -673,16 +677,16 @@ export default function ClinicasEsteticaCorporalIntakePage() {
               </p>
             </div>
 
-            <div className="rounded-xl border-2 border-green-200 bg-green-50/80 px-4 py-4 text-center">
+            <div className="rounded-xl border-2 border-green-300/80 bg-green-50 px-4 py-4 text-center shadow-md shadow-green-900/10">
               <p className="text-xs font-medium text-green-900 uppercase tracking-wide">Contato confirmado</p>
               <p className="text-lg font-bold text-gray-900 mt-1 tabular-nums">Vamos falar neste número</p>
               <p className="text-xl font-semibold text-green-800 mt-1 tabular-nums">{phoneDisplay}</p>
               <p className="text-xs text-gray-600 mt-2">Confira se está certo. Se não estiver, chame pelo site.</p>
             </div>
 
-            <div className="rounded-2xl border border-blue-100 bg-white shadow-sm overflow-hidden">
-              <div className="bg-blue-600 px-4 py-3">
-                <p className="text-white text-sm font-semibold">Pré-diagnóstico</p>
+            <div className="rounded-2xl border border-blue-200/90 bg-white overflow-hidden shadow-[0_8px_32px_rgba(30,58,138,0.12)]">
+              <div className="bg-blue-800 px-4 py-3 shadow-inner">
+                <p className="text-white text-sm font-semibold tracking-tight">Pré-diagnóstico</p>
               </div>
               <div className="px-4 py-4 space-y-3 text-sm text-gray-700 leading-relaxed">
                 {diagnosis.length === 0 ? (
@@ -701,7 +705,7 @@ export default function ClinicasEsteticaCorporalIntakePage() {
 
             <Link
               href="/pt"
-              className="inline-block w-full text-center rounded-xl bg-green-600 text-white font-semibold py-3.5 hover:bg-green-700 shadow-sm"
+              className="inline-block w-full text-center rounded-xl bg-green-600 text-white font-semibold py-3.5 hover:bg-green-800 transition-all shadow-md shadow-green-900/20 hover:shadow-lg"
             >
               Voltar ao site
             </Link>
