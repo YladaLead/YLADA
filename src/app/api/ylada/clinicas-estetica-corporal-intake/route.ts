@@ -3,6 +3,7 @@
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { buildClinicasEsteticaDiagnosis } from '@/lib/clinicas-estetica-corporal-diagnosis'
+import { formatBrazilPhoneDisplay } from '@/lib/format-brazil-phone'
 import { supabaseAdmin } from '@/lib/supabase'
 import { resend, FROM_EMAIL, FROM_NAME, isResendConfigured } from '@/lib/resend'
 
@@ -153,7 +154,7 @@ export async function POST(request: NextRequest) {
     out.city = clampStr(src.city, 120)
     out.services_detail = clampStr(src.services_detail, 500)
     out.notes = clampStr(src.notes, 4000)
-    out.survey_version = 'clinicas_estetica_v2'
+    out.survey_version = 'clinicas_estetica_v3'
 
     const consent = src.consent === true || src.consent === 'true' || src.consent === 'yes'
     if (!consent) {
@@ -218,6 +219,7 @@ export async function POST(request: NextRequest) {
       const tlL = LABELS.timeline[out.timeline] || out.timeline
 
       const diagnosisHtml = diagnosis.map((p) => `<p style="margin:0 0 12px 0;line-height:1.5;">${escapeHtml(p)}</p>`).join('')
+      const phoneFmt = formatBrazilPhoneDisplay(out.phone)
 
       const html = `
 <!DOCTYPE html>
@@ -225,6 +227,7 @@ export async function POST(request: NextRequest) {
 <body style="font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5;">
   <div style="max-width: 640px; margin: 0 auto; background: #fff; padding: 28px; border-radius: 8px;">
     <h1 style="color: #2563eb;">Nova resposta — estética corporal (intake)</h1>
+    <p style="font-size:18px;font-weight:700;color:#15803d;margin:12px 0;">WhatsApp: ${escapeHtml(phoneFmt)}</p>
     <p style="color:#374151;font-size:14px;">ID: <code>${data?.id ?? ''}</code></p>
     <div style="background:#eff6ff;padding:16px;border-radius:8px;margin:16px 0;">
       <p><strong>Clínica:</strong> ${escapeHtml(out.clinic_name)}</p>
@@ -240,7 +243,8 @@ export async function POST(request: NextRequest) {
     </div>
     <div style="background:#f9fafb;padding:16px;border-radius:8px;">
       <p><strong>Contato:</strong> ${escapeHtml(out.contact_name)}</p>
-      <p><strong>WhatsApp:</strong> ${escapeHtml(out.phone)}</p>
+      <p><strong>WhatsApp (formatado):</strong> ${escapeHtml(phoneFmt)}</p>
+      <p><strong>WhatsApp (como veio):</strong> ${escapeHtml(out.phone)}</p>
       ${out.email ? `<p><strong>E-mail:</strong> ${escapeHtml(out.email)}</p>` : ''}
       ${
         out.services_detail
@@ -264,7 +268,7 @@ export async function POST(request: NextRequest) {
           from: `${FROM_NAME} <${FROM_EMAIL}>`,
           to: notificationEmail,
           ...(out.email ? { replyTo: out.email } : {}),
-          subject: `Intake estética corporal: ${out.clinic_name} · ${out.contact_name}`,
+          subject: `Intake · ${phoneFmt} · ${out.clinic_name}`,
           html,
         })
       } catch (e) {

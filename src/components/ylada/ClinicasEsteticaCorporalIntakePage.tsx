@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { useCallback, useMemo, useRef, useState } from 'react'
+import { formatBrazilPhoneDisplay } from '@/lib/format-brazil-phone'
 
 type StepId =
   | 'intro'
@@ -31,6 +32,48 @@ const FLOW: StepId[] = [
   'contact',
   'result',
 ]
+
+function advanceLabel(s: StepId): string {
+  switch (s) {
+    case 'clinic':
+      return 'Continuar análise'
+    case 'structure':
+      return 'Seguir diagnóstico'
+    case 'focus':
+      return 'Ver próximo passo'
+    case 'pain':
+      return 'Quero avançar'
+    case 'lead_prep':
+      return 'Continuar análise'
+    case 'margin':
+      return 'Seguir diagnóstico'
+    case 'operation':
+      return 'Ver próximo passo'
+    case 'interest':
+      return 'Quero avançar'
+    case 'timeline':
+      return 'Ver próximo passo'
+    default:
+      return 'Continuar'
+  }
+}
+
+function microTension(s: StepId): string | null {
+  switch (s) {
+    case 'pain':
+      return 'Isso é mais comum do que parece.'
+    case 'lead_prep':
+      return 'Isso já pesa no faturamento.'
+    case 'margin':
+      return 'Aqui costuma doer de verdade.'
+    case 'operation':
+      return 'Tempo de equipe também é dinheiro.'
+    case 'interest':
+      return 'Seja franca aqui — ajuda a leitura.'
+    default:
+      return null
+  }
+}
 
 export default function ClinicasEsteticaCorporalIntakePage() {
   const [step, setStep] = useState<StepId>('intro')
@@ -119,14 +162,19 @@ export default function ClinicasEsteticaCorporalIntakePage() {
       })
       const json = await r.json().catch(() => ({}))
       if (!r.ok || !json.success) {
-        setSubmitError(typeof json.error === 'string' ? json.error : 'Não foi possível enviar. Tente de novo.')
+        let msg =
+          typeof json.error === 'string' ? json.error : 'Não foi possível enviar agora.'
+        if (!/tente de novo|segundos/i.test(msg)) {
+          msg = `${msg} Tente de novo em alguns segundos.`
+        }
+        setSubmitError(msg)
         return
       }
       submittedRef.current = true
       setDiagnosis(Array.isArray(json.diagnosis) ? json.diagnosis : [])
       setStep('result')
     } catch {
-      setSubmitError('Erro de rede. Verifique sua conexão.')
+      setSubmitError('Erro de rede. Confira sua conexão e tente de novo em alguns segundos.')
     } finally {
       setSaving(false)
     }
@@ -146,6 +194,8 @@ export default function ClinicasEsteticaCorporalIntakePage() {
   const canTimeline = timeline.length > 0
   const canContact =
     contactName.trim().length >= 2 && phoneDigits.length >= 10 && emailOk && consent
+
+  const phoneDisplay = useMemo(() => formatBrazilPhoneDisplay(phone), [phone])
 
   const blockNext = useMemo(() => {
     switch (step) {
@@ -216,16 +266,16 @@ export default function ClinicasEsteticaCorporalIntakePage() {
 
         {step === 'intro' && (
           <section className="space-y-5">
-            <h1 className="text-2xl font-bold text-gray-900 leading-tight">
-              Sua clínica recebe mensagens… mas nem todas viram clientes?
+            <h1 className="text-2xl font-bold text-gray-900 leading-snug">
+              Sua clínica recebe mensagens…
+              <span className="block mt-1">mas a maioria não vira cliente?</span>
             </h1>
-            <p className="text-gray-600 leading-relaxed">
-              Em poucos minutos, responda algumas perguntas e veja o que pode estar travando agendamentos, conversão e
-              até margem — com um pré-diagnóstico direto ao ponto no final.
+            <p className="text-gray-700 leading-relaxed text-base">
+              E quase sempre começa assim: <span className="font-medium text-gray-900">“qual o valor?”</span>… e some.
             </p>
-            <p className="text-sm text-blue-900 bg-blue-50 border border-blue-100 rounded-lg p-3 leading-snug">
-              Esta análise é <strong>comercial e estratégica</strong> — focada em captação e conversão. Não substitui
-              avaliação clínica nem orientação de saúde.
+            <p className="text-sm text-gray-500">Responda rápido e veja o que pode estar acontecendo.</p>
+            <p className="text-xs text-gray-400 leading-snug">
+              Uso estratégico e comercial — não substitui orientação de saúde.
             </p>
             <button
               type="button"
@@ -259,12 +309,15 @@ export default function ClinicasEsteticaCorporalIntakePage() {
                 placeholder="Opcional"
               />
             </label>
+            {microTension(step) && (
+              <p className="text-sm text-gray-500 italic pt-1">{microTension(step)}</p>
+            )}
             <div className="flex gap-3 pt-2">
               <button type="button" onClick={goBack} className={btnGhost}>
                 Voltar
               </button>
               <button type="button" disabled={blockNext} onClick={goNext} className={btnPrimary}>
-                Continuar
+                {advanceLabel(step)}
               </button>
             </div>
           </section>
@@ -289,12 +342,15 @@ export default function ClinicasEsteticaCorporalIntakePage() {
                 {o.label}
               </button>
             ))}
+            {microTension(step) && (
+              <p className="text-sm text-gray-500 italic pt-1">{microTension(step)}</p>
+            )}
             <div className="flex gap-3 pt-4">
               <button type="button" onClick={goBack} className={btnGhost}>
                 Voltar
               </button>
               <button type="button" disabled={blockNext} onClick={goNext} className={btnPrimary}>
-                Continuar
+                {advanceLabel(step)}
               </button>
             </div>
           </section>
@@ -324,12 +380,15 @@ export default function ClinicasEsteticaCorporalIntakePage() {
                 placeholder="Opcional"
               />
             </label>
+            {microTension(step) && (
+              <p className="text-sm text-gray-500 italic pt-1">{microTension(step)}</p>
+            )}
             <div className="flex gap-3 pt-2">
               <button type="button" onClick={goBack} className={btnGhost}>
                 Voltar
               </button>
               <button type="button" disabled={blockNext} onClick={goNext} className={btnPrimary}>
-                Continuar
+                {advanceLabel(step)}
               </button>
             </div>
           </section>
@@ -350,12 +409,15 @@ export default function ClinicasEsteticaCorporalIntakePage() {
                 {o.label}
               </button>
             ))}
+            {microTension(step) && (
+              <p className="text-sm text-gray-500 italic pt-1">{microTension(step)}</p>
+            )}
             <div className="flex gap-3 pt-4">
               <button type="button" onClick={goBack} className={btnGhost}>
                 Voltar
               </button>
               <button type="button" disabled={blockNext} onClick={goNext} className={btnPrimary}>
-                Continuar
+                {advanceLabel(step)}
               </button>
             </div>
           </section>
@@ -365,7 +427,7 @@ export default function ClinicasEsteticaCorporalIntakePage() {
           <section className="space-y-4">
             <h2 className="text-xl font-bold">Sobre os clientes que chegam</h2>
             <p className="text-sm text-gray-600">
-              Hoje você sente que poderia cobrar mais caro… se os clientes chegassem mais preparados?
+              Você sente que poderia cobrar mais caro… se a pessoa chegasse mais preparada?
             </p>
             {[
               { id: 'sim', label: 'Sim' },
@@ -376,12 +438,15 @@ export default function ClinicasEsteticaCorporalIntakePage() {
                 {o.label}
               </button>
             ))}
+            {microTension(step) && (
+              <p className="text-sm text-gray-500 italic pt-1">{microTension(step)}</p>
+            )}
             <div className="flex gap-3 pt-4">
               <button type="button" onClick={goBack} className={btnGhost}>
                 Voltar
               </button>
               <button type="button" disabled={blockNext} onClick={goNext} className={btnPrimary}>
-                Continuar
+                {advanceLabel(step)}
               </button>
             </div>
           </section>
@@ -390,9 +455,7 @@ export default function ClinicasEsteticaCorporalIntakePage() {
         {step === 'margin' && (
           <section className="space-y-4">
             <h2 className="text-xl font-bold">Resultado financeiro</h2>
-            <p className="text-sm text-gray-600">
-              Você sente que sua margem poderia ser melhor se tivesse clientes mais qualificados?
-            </p>
+            <p className="text-sm text-gray-600">Você sente que poderia ganhar mais… com o mesmo esforço?</p>
             {[
               { id: 'sim', label: 'Sim, com certeza' },
               { id: 'talvez', label: 'Talvez' },
@@ -402,12 +465,15 @@ export default function ClinicasEsteticaCorporalIntakePage() {
                 {o.label}
               </button>
             ))}
+            {microTension(step) && (
+              <p className="text-sm text-gray-500 italic pt-1">{microTension(step)}</p>
+            )}
             <div className="flex gap-3 pt-4">
               <button type="button" onClick={goBack} className={btnGhost}>
                 Voltar
               </button>
               <button type="button" disabled={blockNext} onClick={goNext} className={btnPrimary}>
-                Continuar
+                {advanceLabel(step)}
               </button>
             </div>
           </section>
@@ -416,24 +482,25 @@ export default function ClinicasEsteticaCorporalIntakePage() {
         {step === 'operation' && (
           <section className="space-y-4">
             <h2 className="text-xl font-bold">Dia a dia da clínica</h2>
-            <p className="text-sm text-gray-600">
-              Hoje você ou sua equipe perdem tempo com atendimentos que não viram venda?
-            </p>
+            <p className="text-sm text-gray-600">Você perde tempo respondendo gente que não fecha?</p>
             {[
-              { id: 'frequentemente', label: 'Sim, frequentemente' },
-              { id: 'as_vezes', label: 'Às vezes' },
-              { id: 'raramente', label: 'Raramente' },
+              { id: 'frequentemente', label: 'Sim, com frequência' },
+              { id: 'as_vezes', label: 'Acontece em alguns casos' },
+              { id: 'raramente', label: 'Quase nunca' },
             ].map((o) => (
               <button key={o.id} type="button" onClick={() => setTimeWaste(o.id)} className={choice(timeWaste === o.id)}>
                 {o.label}
               </button>
             ))}
+            {microTension(step) && (
+              <p className="text-sm text-gray-500 italic pt-1">{microTension(step)}</p>
+            )}
             <div className="flex gap-3 pt-4">
               <button type="button" onClick={goBack} className={btnGhost}>
                 Voltar
               </button>
               <button type="button" disabled={blockNext} onClick={goNext} className={btnPrimary}>
-                Continuar
+                {advanceLabel(step)}
               </button>
             </div>
           </section>
@@ -460,12 +527,15 @@ export default function ClinicasEsteticaCorporalIntakePage() {
                 {o.label}
               </button>
             ))}
+            {microTension(step) && (
+              <p className="text-sm text-gray-500 italic pt-1">{microTension(step)}</p>
+            )}
             <div className="flex gap-3 pt-4">
               <button type="button" onClick={goBack} className={btnGhost}>
                 Voltar
               </button>
               <button type="button" disabled={blockNext} onClick={goNext} className={btnPrimary}>
-                Continuar
+                {advanceLabel(step)}
               </button>
             </div>
           </section>
@@ -485,12 +555,15 @@ export default function ClinicasEsteticaCorporalIntakePage() {
                 {o.label}
               </button>
             ))}
+            {microTension(step) && (
+              <p className="text-sm text-gray-500 italic pt-1">{microTension(step)}</p>
+            )}
             <div className="flex gap-3 pt-4">
               <button type="button" onClick={goBack} className={btnGhost}>
                 Voltar
               </button>
               <button type="button" disabled={blockNext} onClick={goNext} className={btnPrimary}>
-                Continuar
+                {advanceLabel(step)}
               </button>
             </div>
           </section>
@@ -557,7 +630,27 @@ export default function ClinicasEsteticaCorporalIntakePage() {
                 Voltar
               </button>
               <button type="button" disabled={blockNext || saving} onClick={submit} className={btnPrimary}>
-                {saving ? 'Enviando…' : 'Receber meu diagnóstico'}
+                {saving ? (
+                  <span className="inline-flex items-center justify-center gap-2 w-full">
+                    <svg
+                      className="animate-spin h-5 w-5 text-white shrink-0"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      aria-hidden
+                    >
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      />
+                    </svg>
+                    Enviando…
+                  </span>
+                ) : (
+                  'Receber meu diagnóstico'
+                )}
               </button>
             </div>
           </section>
@@ -565,22 +658,35 @@ export default function ClinicasEsteticaCorporalIntakePage() {
 
         {step === 'result' && (
           <section className="space-y-6">
-            <div className="text-center space-y-2">
-              <h2 className="text-2xl font-bold text-gray-900">Recebemos suas respostas 🙌</h2>
-              <p className="text-gray-600 leading-relaxed text-sm px-1">
-                Agora você vê abaixo um pré-diagnóstico com base no que marcou — para estimular reflexão e mostrar
-                potencial que talvez ainda não esteja sendo aproveitado. Em alguns casos faz sentido aprofundar com
-                alguém da equipe.
+            <div className="text-center space-y-3">
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 leading-snug">
+                Análise recebida — já dá pra ver padrões importantes
+              </h2>
+              <p className="text-gray-600 leading-relaxed text-sm text-left">
+                Pelo que você respondeu, há sinais de que pode estar escapando oportunidade de faturamento — muitas
+                vezes <span className="font-medium text-gray-800">não por falta de gente na porta</span>, mas pela
+                forma como as pessoas chegam até você (conversão, tempo da equipe, margem).
               </p>
+              <p className="text-gray-600 leading-relaxed text-sm text-left">
+                Abaixo vai uma leitura direta. Em seguida, se fizer sentido no seu caso, dá pra aprofundar —{' '}
+                <span className="font-medium text-gray-800">olhe o WhatsApp que você informou.</span>
+              </p>
+            </div>
+
+            <div className="rounded-xl border-2 border-green-200 bg-green-50/80 px-4 py-4 text-center">
+              <p className="text-xs font-medium text-green-900 uppercase tracking-wide">Contato confirmado</p>
+              <p className="text-lg font-bold text-gray-900 mt-1 tabular-nums">Vamos falar neste número</p>
+              <p className="text-xl font-semibold text-green-800 mt-1 tabular-nums">{phoneDisplay}</p>
+              <p className="text-xs text-gray-600 mt-2">Confira se está certo. Se não estiver, chame pelo site.</p>
             </div>
 
             <div className="rounded-2xl border border-blue-100 bg-white shadow-sm overflow-hidden">
               <div className="bg-blue-600 px-4 py-3">
-                <p className="text-white text-sm font-semibold">Seu pré-diagnóstico</p>
+                <p className="text-white text-sm font-semibold">Pré-diagnóstico</p>
               </div>
               <div className="px-4 py-4 space-y-3 text-sm text-gray-700 leading-relaxed">
                 {diagnosis.length === 0 ? (
-                  <p>Salvamos suas respostas. Em breve você pode receber um retorno pelo WhatsApp.</p>
+                  <p>Salvamos suas respostas. Em breve você pode receber um retorno neste WhatsApp.</p>
                 ) : (
                   diagnosis.map((p, i) => (
                     <p key={i} className={i === 0 ? 'font-semibold text-gray-900' : ''}>
@@ -591,7 +697,7 @@ export default function ClinicasEsteticaCorporalIntakePage() {
               </div>
             </div>
 
-            <p className="text-center text-sm text-gray-600 font-medium">Fique atento ao WhatsApp.</p>
+            <p className="text-center text-sm text-gray-700 font-medium">Fique de olho no WhatsApp acima.</p>
 
             <Link
               href="/pt"
