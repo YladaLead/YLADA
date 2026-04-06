@@ -259,6 +259,14 @@ function AdminDashboardContent() {
       color: 'bg-emerald-600',
     },
     {
+      id: 'ylada-clinicas-estetica-corporal',
+      title: 'Clínicas estética corporal',
+      description: 'Intake B2B /pt/clinicas-estetica-corporal — CSV e notificação e-mail',
+      icon: '💆‍♀️',
+      link: '/admin/ylada/clinicas-estetica-corporal',
+      color: 'bg-teal-600',
+    },
+    {
       id: 'motor-crescimento-hub',
       title: 'Motor de crescimento',
       description: 'Documentação, agentes e checklist',
