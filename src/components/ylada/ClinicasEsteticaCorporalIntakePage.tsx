@@ -58,23 +58,6 @@ function advanceLabel(s: StepId): string {
   }
 }
 
-function microTension(s: StepId): string | null {
-  switch (s) {
-    case 'pain':
-      return 'Isso é mais comum do que parece.'
-    case 'lead_prep':
-      return 'Isso já pesa no faturamento.'
-    case 'margin':
-      return 'Aqui costuma doer de verdade.'
-    case 'operation':
-      return 'Tempo de equipe também é dinheiro.'
-    case 'interest':
-      return 'Seja franca aqui — ajuda a leitura.'
-    default:
-      return null
-  }
-}
-
 export default function ClinicasEsteticaCorporalIntakePage() {
   const [step, setStep] = useState<StepId>('intro')
   const [clinicName, setClinicName] = useState('')
@@ -263,7 +246,7 @@ export default function ClinicasEsteticaCorporalIntakePage() {
                   style={{ width: `${Math.min(100, progressPct)}%` }}
                 />
               </div>
-              <p className="text-xs text-gray-600 font-medium mt-2">Análise comercial — clínicas de estética corporal</p>
+              <p className="text-xs text-gray-600 font-medium mt-2">O que pode estar travando seus fechamentos</p>
             </>
           )}
         </header>
@@ -276,10 +259,6 @@ export default function ClinicasEsteticaCorporalIntakePage() {
             </h1>
             <p className="text-gray-800 leading-relaxed text-base">
               E quase sempre começa assim: <span className="font-semibold text-gray-900">“qual o valor?”</span>… e some.
-            </p>
-            <p className="text-sm font-medium text-gray-700 -mt-1">Responda rápido e veja o que pode estar acontecendo.</p>
-            <p className="text-xs text-gray-500 leading-snug">
-              Uso estratégico e comercial — não substitui orientação de saúde.
             </p>
             <button
               type="button"
@@ -313,9 +292,6 @@ export default function ClinicasEsteticaCorporalIntakePage() {
                 placeholder="Opcional"
               />
             </label>
-            {microTension(step) && (
-              <p className="text-sm text-gray-600 italic pt-1">{microTension(step)}</p>
-            )}
             <div className="flex gap-3 pt-2">
               <button type="button" onClick={goBack} className={btnGhost}>
                 Voltar
@@ -329,8 +305,7 @@ export default function ClinicasEsteticaCorporalIntakePage() {
 
         {step === 'structure' && (
           <section className={`space-y-4 ${stepSurface}`}>
-            <h2 className="text-xl font-bold">Estrutura atual</h2>
-            <p className="text-sm text-gray-600">Hoje, quem atende os clientes na sua clínica?</p>
+            <h2 className="text-xl font-bold text-gray-900 leading-snug">Hoje, quem atende os clientes na sua clínica?</h2>
             {[
               { id: 'so_1', label: 'Só eu' },
               { id: 'pequena_2_4', label: 'Pequena equipe (2 a 4 pessoas)' },
@@ -346,9 +321,6 @@ export default function ClinicasEsteticaCorporalIntakePage() {
                 {o.label}
               </button>
             ))}
-            {microTension(step) && (
-              <p className="text-sm text-gray-600 italic pt-1">{microTension(step)}</p>
-            )}
             <div className="flex gap-3 pt-4">
               <button type="button" onClick={goBack} className={btnGhost}>
                 Voltar
@@ -361,9 +333,8 @@ export default function ClinicasEsteticaCorporalIntakePage() {
         )}
 
         {step === 'focus' && (
-          <section className="space-y-4">
-            <h2 className="text-xl font-bold">Tipo de atendimento</h2>
-            <p className="text-sm text-gray-600">Hoje, qual é o principal foco da sua clínica?</p>
+          <section className={`space-y-4 ${stepSurface}`}>
+            <h2 className="text-xl font-bold text-gray-900 leading-snug">Hoje, qual é o principal foco da sua clínica?</h2>
             {[
               { id: 'corporal', label: 'Estética corporal' },
               { id: 'corporal_facial', label: 'Corporal e facial' },
@@ -384,9 +355,6 @@ export default function ClinicasEsteticaCorporalIntakePage() {
                 placeholder="Opcional"
               />
             </label>
-            {microTension(step) && (
-              <p className="text-sm text-gray-600 italic pt-1">{microTension(step)}</p>
-            )}
             <div className="flex gap-3 pt-2">
               <button type="button" onClick={goBack} className={btnGhost}>
                 Voltar
@@ -413,9 +381,6 @@ export default function ClinicasEsteticaCorporalIntakePage() {
                 {o.label}
               </button>
             ))}
-            {microTension(step) && (
-              <p className="text-sm text-gray-600 italic pt-1">{microTension(step)}</p>
-            )}
             <div className="flex gap-3 pt-4">
               <button type="button" onClick={goBack} className={btnGhost}>
                 Voltar
@@ -429,10 +394,9 @@ export default function ClinicasEsteticaCorporalIntakePage() {
 
         {step === 'lead_prep' && (
           <section className={`space-y-4 ${stepSurface}`}>
-            <h2 className="text-xl font-bold">Sobre os clientes que chegam</h2>
-            <p className="text-sm text-gray-600">
+            <h2 className="text-xl font-bold text-gray-900 leading-snug">
               Você sente que poderia cobrar mais caro… se a pessoa chegasse mais preparada?
-            </p>
+            </h2>
             {[
               { id: 'sim', label: 'Sim' },
               { id: 'talvez', label: 'Talvez' },
@@ -442,9 +406,6 @@ export default function ClinicasEsteticaCorporalIntakePage() {
                 {o.label}
               </button>
             ))}
-            {microTension(step) && (
-              <p className="text-sm text-gray-600 italic pt-1">{microTension(step)}</p>
-            )}
             <div className="flex gap-3 pt-4">
               <button type="button" onClick={goBack} className={btnGhost}>
                 Voltar
@@ -458,8 +419,9 @@ export default function ClinicasEsteticaCorporalIntakePage() {
 
         {step === 'margin' && (
           <section className={`space-y-4 ${stepSurface}`}>
-            <h2 className="text-xl font-bold">Resultado financeiro</h2>
-            <p className="text-sm text-gray-600">Você sente que poderia ganhar mais… com o mesmo esforço?</p>
+            <h2 className="text-xl font-bold text-gray-900 leading-snug">
+              Você sente que poderia ganhar mais… com o mesmo esforço?
+            </h2>
             {[
               { id: 'sim', label: 'Sim, com certeza' },
               { id: 'talvez', label: 'Talvez' },
@@ -469,9 +431,6 @@ export default function ClinicasEsteticaCorporalIntakePage() {
                 {o.label}
               </button>
             ))}
-            {microTension(step) && (
-              <p className="text-sm text-gray-600 italic pt-1">{microTension(step)}</p>
-            )}
             <div className="flex gap-3 pt-4">
               <button type="button" onClick={goBack} className={btnGhost}>
                 Voltar
@@ -485,8 +444,7 @@ export default function ClinicasEsteticaCorporalIntakePage() {
 
         {step === 'operation' && (
           <section className={`space-y-4 ${stepSurface}`}>
-            <h2 className="text-xl font-bold">Dia a dia da clínica</h2>
-            <p className="text-sm text-gray-600">Você perde tempo respondendo gente que não fecha?</p>
+            <h2 className="text-xl font-bold text-gray-900 leading-snug">Você perde tempo respondendo gente que não fecha?</h2>
             {[
               { id: 'frequentemente', label: 'Sim, com frequência' },
               { id: 'as_vezes', label: 'Acontece em alguns casos' },
@@ -496,9 +454,6 @@ export default function ClinicasEsteticaCorporalIntakePage() {
                 {o.label}
               </button>
             ))}
-            {microTension(step) && (
-              <p className="text-sm text-gray-600 italic pt-1">{microTension(step)}</p>
-            )}
             <div className="flex gap-3 pt-4">
               <button type="button" onClick={goBack} className={btnGhost}>
                 Voltar
@@ -512,10 +467,9 @@ export default function ClinicasEsteticaCorporalIntakePage() {
 
         {step === 'interest' && (
           <section className={`space-y-4 ${stepSurface}`}>
-            <h2 className="text-xl font-bold">Se existisse uma forma de melhorar isso…</h2>
-            <p className="text-sm text-gray-600">
+            <h2 className="text-xl font-bold text-gray-900 leading-snug">
               Você teria interesse em entender como atrair clientes mais preparados antes mesmo do contato?
-            </p>
+            </h2>
             {[
               { id: 'sim_ver', label: 'Sim, quero ver isso' },
               { id: 'tenho_interesse', label: 'Tenho interesse' },
@@ -531,9 +485,6 @@ export default function ClinicasEsteticaCorporalIntakePage() {
                 {o.label}
               </button>
             ))}
-            {microTension(step) && (
-              <p className="text-sm text-gray-600 italic pt-1">{microTension(step)}</p>
-            )}
             <div className="flex gap-3 pt-4">
               <button type="button" onClick={goBack} className={btnGhost}>
                 Voltar
@@ -547,8 +498,9 @@ export default function ClinicasEsteticaCorporalIntakePage() {
 
         {step === 'timeline' && (
           <section className={`space-y-4 ${stepSurface}`}>
-            <h2 className="text-xl font-bold">Momento atual</h2>
-            <p className="text-sm text-gray-600">Se fizer sentido, quando você gostaria de ajustar isso na sua clínica?</p>
+            <h2 className="text-xl font-bold text-gray-900 leading-snug">
+              Se fizer sentido, quando você gostaria de ajustar isso na sua clínica?
+            </h2>
             {[
               { id: 'ja', label: 'O quanto antes' },
               { id: '30d', label: 'Nos próximos 30 dias' },
@@ -559,9 +511,6 @@ export default function ClinicasEsteticaCorporalIntakePage() {
                 {o.label}
               </button>
             ))}
-            {microTension(step) && (
-              <p className="text-sm text-gray-600 italic pt-1">{microTension(step)}</p>
-            )}
             <div className="flex gap-3 pt-4">
               <button type="button" onClick={goBack} className={btnGhost}>
                 Voltar
