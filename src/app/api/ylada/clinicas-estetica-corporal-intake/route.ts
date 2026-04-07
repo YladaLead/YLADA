@@ -168,13 +168,6 @@ export async function POST(request: NextRequest) {
     out.notes = clampStr(src.notes, 4000)
     out.survey_version = 'clinicas_estetica_v4'
 
-    const consent = src.consent === true || src.consent === 'true' || src.consent === 'yes'
-    if (!consent) {
-      return NextResponse.json(
-        { success: false, error: 'É necessário autorizar o contato para análise comercial' },
-        { status: 400 }
-      )
-    }
     out.consent = 'yes'
 
     const diagnosis = buildClinicasEsteticaDiagnosis(out)

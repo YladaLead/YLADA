@@ -38,23 +38,7 @@ const FLOW: StepId[] = [
 function advanceLabel(s: StepId): string {
   switch (s) {
     case 'clinic':
-      return 'Continuar análise'
-    case 'structure':
-      return 'Seguir diagnóstico'
-    case 'focus':
-      return 'Ver próximo passo'
-    case 'pain':
-      return 'Quero avançar'
-    case 'lead_prep':
-      return 'Continuar análise'
-    case 'margin':
-      return 'Seguir diagnóstico'
-    case 'operation':
-      return 'Ver próximo passo'
-    case 'interest':
-      return 'Quero avançar'
-    case 'timeline':
-      return 'Ver próximo passo'
+      return 'Continuar'
     case 'wish_today':
       return 'Ir para contato'
     default:
@@ -80,7 +64,6 @@ export default function ClinicasEsteticaCorporalIntakePage() {
   const [email, setEmail] = useState('')
   const [phone, setPhone] = useState('')
   const [notes, setNotes] = useState('')
-  const [consent, setConsent] = useState(false)
   const [submitError, setSubmitError] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
   const [diagnosis, setDiagnosis] = useState<string[]>([])
@@ -108,7 +91,7 @@ export default function ClinicasEsteticaCorporalIntakePage() {
       email: email.trim().toLowerCase(),
       phone: phone.trim(),
       notes: notes.trim(),
-      consent: consent ? 'yes' : '',
+      consent: 'yes',
     }
   }, [
     clinicName,
@@ -127,7 +110,6 @@ export default function ClinicasEsteticaCorporalIntakePage() {
     email,
     phone,
     notes,
-    consent,
   ])
 
   const goNext = useCallback(() => {
@@ -174,17 +156,8 @@ export default function ClinicasEsteticaCorporalIntakePage() {
   const emailOk = email.trim() === '' || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())
 
   const canClinic = clinicName.trim().length >= 2
-  const canStructure = teamStructure.length > 0
-  const canFocus = mainFocus.length > 0
-  const canPain = pain.length > 0
-  const canLead = leadPrep.length > 0
-  const canMargin = marginQual.length > 0
-  const canOp = timeWaste.length > 0
-  const canInterest = interestAttract.length > 0
-  const canTimeline = timeline.length > 0
   const canWishToday = wishToday.trim().length >= 8
-  const canContact =
-    contactName.trim().length >= 2 && phoneDigits.length >= 10 && emailOk && consent
+  const canContact = contactName.trim().length >= 2 && phoneDigits.length >= 10 && emailOk
 
   const phoneDisplay = useMemo(() => formatBrazilPhoneDisplay(phone), [phone])
 
@@ -192,22 +165,6 @@ export default function ClinicasEsteticaCorporalIntakePage() {
     switch (step) {
       case 'clinic':
         return !canClinic
-      case 'structure':
-        return !canStructure
-      case 'focus':
-        return !canFocus
-      case 'pain':
-        return !canPain
-      case 'lead_prep':
-        return !canLead
-      case 'margin':
-        return !canMargin
-      case 'operation':
-        return !canOp
-      case 'interest':
-        return !canInterest
-      case 'timeline':
-        return !canTimeline
       case 'wish_today':
         return !canWishToday
       case 'contact':
@@ -215,23 +172,11 @@ export default function ClinicasEsteticaCorporalIntakePage() {
       default:
         return false
     }
-  }, [
-    step,
-    canClinic,
-    canStructure,
-    canFocus,
-    canPain,
-    canLead,
-    canMargin,
-    canOp,
-    canInterest,
-    canTimeline,
-    canWishToday,
-    canContact,
-  ])
+  }, [step, canClinic, canWishToday, canContact])
 
-  const btnPrimary =
-    'flex-1 rounded-xl bg-green-600 text-white font-semibold py-3 disabled:opacity-40 hover:bg-green-800 transition-all shadow-md shadow-green-900/15 hover:shadow-lg hover:shadow-green-900/25'
+  /** Continuar em passos com texto (azul; escolhas avançam ao toque). */
+  const btnContinue =
+    'flex-1 rounded-xl bg-blue-700 text-white font-semibold py-3 disabled:opacity-40 hover:bg-blue-900 transition-all shadow-md shadow-blue-900/15 hover:shadow-lg'
   const btnGhost =
     'flex-1 rounded-xl border border-gray-300 py-3 font-medium text-gray-700 hover:bg-slate-50 shadow-sm hover:shadow'
   const choice = (active: boolean) =>
@@ -314,11 +259,21 @@ export default function ClinicasEsteticaCorporalIntakePage() {
                 placeholder="Opcional"
               />
             </label>
+            <label className="block">
+              <span className="text-sm font-medium text-gray-700">Principais procedimentos ou diferenciais</span>
+              <textarea
+                value={servicesDetail}
+                onChange={(e) => setServicesDetail(e.target.value)}
+                rows={3}
+                className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-600 focus:border-blue-600 outline-none shadow-sm"
+                placeholder="Opcional"
+              />
+            </label>
             <div className="flex gap-3 pt-2">
               <button type="button" onClick={goBack} className={btnGhost}>
                 Voltar
               </button>
-              <button type="button" disabled={blockNext} onClick={goNext} className={btnPrimary}>
+              <button type="button" disabled={blockNext} onClick={goNext} className={btnContinue}>
                 {advanceLabel(step)}
               </button>
             </div>
@@ -337,18 +292,18 @@ export default function ClinicasEsteticaCorporalIntakePage() {
               <button
                 key={o.id}
                 type="button"
-                onClick={() => setTeamStructure(o.id)}
+                onClick={() => {
+                  setTeamStructure(o.id)
+                  goNext()
+                }}
                 className={choice(teamStructure === o.id)}
               >
                 {o.label}
               </button>
             ))}
-            <div className="flex gap-3 pt-4">
-              <button type="button" onClick={goBack} className={btnGhost}>
+            <div className="pt-4">
+              <button type="button" onClick={goBack} className={`${btnGhost} w-full sm:w-auto`}>
                 Voltar
-              </button>
-              <button type="button" disabled={blockNext} onClick={goNext} className={btnPrimary}>
-                {advanceLabel(step)}
               </button>
             </div>
           </section>
@@ -363,26 +318,21 @@ export default function ClinicasEsteticaCorporalIntakePage() {
               { id: 'mais_facial', label: 'Mais facial' },
               { id: 'outro', label: 'Outro' },
             ].map((o) => (
-              <button key={o.id} type="button" onClick={() => setMainFocus(o.id)} className={choice(mainFocus === o.id)}>
+              <button
+                key={o.id}
+                type="button"
+                onClick={() => {
+                  setMainFocus(o.id)
+                  goNext()
+                }}
+                className={choice(mainFocus === o.id)}
+              >
                 {o.label}
               </button>
             ))}
-            <label className="block pt-2">
-              <span className="text-sm font-medium text-gray-700">Principais procedimentos ou diferenciais</span>
-              <textarea
-                value={servicesDetail}
-                onChange={(e) => setServicesDetail(e.target.value)}
-                rows={3}
-                className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-600 focus:border-blue-600 outline-none shadow-sm"
-                placeholder="Opcional"
-              />
-            </label>
-            <div className="flex gap-3 pt-2">
-              <button type="button" onClick={goBack} className={btnGhost}>
+            <div className="pt-4">
+              <button type="button" onClick={goBack} className={`${btnGhost} w-full sm:w-auto`}>
                 Voltar
-              </button>
-              <button type="button" disabled={blockNext} onClick={goNext} className={btnPrimary}>
-                {advanceLabel(step)}
               </button>
             </div>
           </section>
@@ -399,16 +349,21 @@ export default function ClinicasEsteticaCorporalIntakePage() {
               { id: 'movimento_mais_faturamento', label: 'Tenho movimento, mas poderia faturar mais' },
               { id: 'outro', label: 'Outro' },
             ].map((o) => (
-              <button key={o.id} type="button" onClick={() => setPain(o.id)} className={choice(pain === o.id)}>
+              <button
+                key={o.id}
+                type="button"
+                onClick={() => {
+                  setPain(o.id)
+                  goNext()
+                }}
+                className={choice(pain === o.id)}
+              >
                 {o.label}
               </button>
             ))}
-            <div className="flex gap-3 pt-4">
-              <button type="button" onClick={goBack} className={btnGhost}>
+            <div className="pt-4">
+              <button type="button" onClick={goBack} className={`${btnGhost} w-full sm:w-auto`}>
                 Voltar
-              </button>
-              <button type="button" disabled={blockNext} onClick={goNext} className={btnPrimary}>
-                {advanceLabel(step)}
               </button>
             </div>
           </section>
@@ -424,16 +379,21 @@ export default function ClinicasEsteticaCorporalIntakePage() {
               { id: 'talvez', label: 'Talvez' },
               { id: 'nao', label: 'Não' },
             ].map((o) => (
-              <button key={o.id} type="button" onClick={() => setLeadPrep(o.id)} className={choice(leadPrep === o.id)}>
+              <button
+                key={o.id}
+                type="button"
+                onClick={() => {
+                  setLeadPrep(o.id)
+                  goNext()
+                }}
+                className={choice(leadPrep === o.id)}
+              >
                 {o.label}
               </button>
             ))}
-            <div className="flex gap-3 pt-4">
-              <button type="button" onClick={goBack} className={btnGhost}>
+            <div className="pt-4">
+              <button type="button" onClick={goBack} className={`${btnGhost} w-full sm:w-auto`}>
                 Voltar
-              </button>
-              <button type="button" disabled={blockNext} onClick={goNext} className={btnPrimary}>
-                {advanceLabel(step)}
               </button>
             </div>
           </section>
@@ -449,16 +409,21 @@ export default function ClinicasEsteticaCorporalIntakePage() {
               { id: 'talvez', label: 'Talvez' },
               { id: 'nao', label: 'Não' },
             ].map((o) => (
-              <button key={o.id} type="button" onClick={() => setMarginQual(o.id)} className={choice(marginQual === o.id)}>
+              <button
+                key={o.id}
+                type="button"
+                onClick={() => {
+                  setMarginQual(o.id)
+                  goNext()
+                }}
+                className={choice(marginQual === o.id)}
+              >
                 {o.label}
               </button>
             ))}
-            <div className="flex gap-3 pt-4">
-              <button type="button" onClick={goBack} className={btnGhost}>
+            <div className="pt-4">
+              <button type="button" onClick={goBack} className={`${btnGhost} w-full sm:w-auto`}>
                 Voltar
-              </button>
-              <button type="button" disabled={blockNext} onClick={goNext} className={btnPrimary}>
-                {advanceLabel(step)}
               </button>
             </div>
           </section>
@@ -472,16 +437,21 @@ export default function ClinicasEsteticaCorporalIntakePage() {
               { id: 'as_vezes', label: 'Acontece em alguns casos' },
               { id: 'raramente', label: 'Quase nunca' },
             ].map((o) => (
-              <button key={o.id} type="button" onClick={() => setTimeWaste(o.id)} className={choice(timeWaste === o.id)}>
+              <button
+                key={o.id}
+                type="button"
+                onClick={() => {
+                  setTimeWaste(o.id)
+                  goNext()
+                }}
+                className={choice(timeWaste === o.id)}
+              >
                 {o.label}
               </button>
             ))}
-            <div className="flex gap-3 pt-4">
-              <button type="button" onClick={goBack} className={btnGhost}>
+            <div className="pt-4">
+              <button type="button" onClick={goBack} className={`${btnGhost} w-full sm:w-auto`}>
                 Voltar
-              </button>
-              <button type="button" disabled={blockNext} onClick={goNext} className={btnPrimary}>
-                {advanceLabel(step)}
               </button>
             </div>
           </section>
@@ -501,18 +471,18 @@ export default function ClinicasEsteticaCorporalIntakePage() {
               <button
                 key={o.id}
                 type="button"
-                onClick={() => setInterestAttract(o.id)}
+                onClick={() => {
+                  setInterestAttract(o.id)
+                  goNext()
+                }}
                 className={choice(interestAttract === o.id)}
               >
                 {o.label}
               </button>
             ))}
-            <div className="flex gap-3 pt-4">
-              <button type="button" onClick={goBack} className={btnGhost}>
+            <div className="pt-4">
+              <button type="button" onClick={goBack} className={`${btnGhost} w-full sm:w-auto`}>
                 Voltar
-              </button>
-              <button type="button" disabled={blockNext} onClick={goNext} className={btnPrimary}>
-                {advanceLabel(step)}
               </button>
             </div>
           </section>
@@ -529,16 +499,21 @@ export default function ClinicasEsteticaCorporalIntakePage() {
               { id: '90d', label: 'Até 90 dias' },
               { id: 'sem_pressa', label: 'Sem pressa' },
             ].map((o) => (
-              <button key={o.id} type="button" onClick={() => setTimeline(o.id)} className={choice(timeline === o.id)}>
+              <button
+                key={o.id}
+                type="button"
+                onClick={() => {
+                  setTimeline(o.id)
+                  goNext()
+                }}
+                className={choice(timeline === o.id)}
+              >
                 {o.label}
               </button>
             ))}
-            <div className="flex gap-3 pt-4">
-              <button type="button" onClick={goBack} className={btnGhost}>
+            <div className="pt-4">
+              <button type="button" onClick={goBack} className={`${btnGhost} w-full sm:w-auto`}>
                 Voltar
-              </button>
-              <button type="button" disabled={blockNext} onClick={goNext} className={btnPrimary}>
-                {advanceLabel(step)}
               </button>
             </div>
           </section>
@@ -564,7 +539,7 @@ export default function ClinicasEsteticaCorporalIntakePage() {
               <button type="button" onClick={goBack} className={btnGhost}>
                 Voltar
               </button>
-              <button type="button" disabled={blockNext} onClick={goNext} className={btnPrimary}>
+              <button type="button" disabled={blockNext} onClick={goNext} className={btnContinue}>
                 {advanceLabel(step)}
               </button>
             </div>
@@ -618,17 +593,6 @@ export default function ClinicasEsteticaCorporalIntakePage() {
                 placeholder="Opcional"
               />
             </label>
-            <label className="flex gap-3 items-start cursor-pointer">
-              <input
-                type="checkbox"
-                checked={consent}
-                onChange={(e) => setConsent(e.target.checked)}
-                className="mt-1 rounded border-gray-300 text-blue-700 focus:ring-blue-600"
-              />
-              <span className="text-sm text-gray-600 leading-snug">
-                Autorizo contato para <strong>análise e orientação comercial</strong>. *
-              </span>
-            </label>
             {submitError && (
               <p className="text-sm text-red-600 bg-red-50 border border-red-100 rounded-lg p-3">{submitError}</p>
             )}
@@ -636,7 +600,7 @@ export default function ClinicasEsteticaCorporalIntakePage() {
               <button type="button" onClick={goBack} className={btnGhost}>
                 Voltar
               </button>
-              <button type="button" disabled={blockNext || saving} onClick={submit} className={btnPrimary}>
+              <button type="button" disabled={blockNext || saving} onClick={submit} className={btnContinue}>
                 {saving ? (
                   <span className="inline-flex items-center justify-center gap-2 w-full">
                     <svg
