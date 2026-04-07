@@ -15,6 +15,7 @@ type StepId =
   | 'operation'
   | 'interest'
   | 'timeline'
+  | 'wish_today'
   | 'contact'
   | 'result'
 
@@ -29,6 +30,7 @@ const FLOW: StepId[] = [
   'operation',
   'interest',
   'timeline',
+  'wish_today',
   'contact',
   'result',
 ]
@@ -53,6 +55,8 @@ function advanceLabel(s: StepId): string {
       return 'Quero avançar'
     case 'timeline':
       return 'Ver próximo passo'
+    case 'wish_today':
+      return 'Ir para contato'
     default:
       return 'Continuar'
   }
@@ -71,6 +75,7 @@ export default function ClinicasEsteticaCorporalIntakePage() {
   const [timeWaste, setTimeWaste] = useState('')
   const [interestAttract, setInterestAttract] = useState('')
   const [timeline, setTimeline] = useState('')
+  const [wishToday, setWishToday] = useState('')
   const [contactName, setContactName] = useState('')
   const [email, setEmail] = useState('')
   const [phone, setPhone] = useState('')
@@ -98,6 +103,7 @@ export default function ClinicasEsteticaCorporalIntakePage() {
       time_waste: timeWaste,
       interest_attract: interestAttract,
       timeline,
+      wish_one_thing: wishToday.trim(),
       contact_name: contactName.trim(),
       email: email.trim().toLowerCase(),
       phone: phone.trim(),
@@ -116,6 +122,7 @@ export default function ClinicasEsteticaCorporalIntakePage() {
     timeWaste,
     interestAttract,
     timeline,
+    wishToday,
     contactName,
     email,
     phone,
@@ -175,6 +182,7 @@ export default function ClinicasEsteticaCorporalIntakePage() {
   const canOp = timeWaste.length > 0
   const canInterest = interestAttract.length > 0
   const canTimeline = timeline.length > 0
+  const canWishToday = wishToday.trim().length >= 8
   const canContact =
     contactName.trim().length >= 2 && phoneDigits.length >= 10 && emailOk && consent
 
@@ -200,6 +208,8 @@ export default function ClinicasEsteticaCorporalIntakePage() {
         return !canInterest
       case 'timeline':
         return !canTimeline
+      case 'wish_today':
+        return !canWishToday
       case 'contact':
         return !canContact
       default:
@@ -216,6 +226,7 @@ export default function ClinicasEsteticaCorporalIntakePage() {
     canOp,
     canInterest,
     canTimeline,
+    canWishToday,
     canContact,
   ])
 
@@ -247,7 +258,18 @@ export default function ClinicasEsteticaCorporalIntakePage() {
                 />
               </div>
               <p className="text-xs text-gray-600 font-medium mt-2">O que pode estar travando seus fechamentos</p>
+              <p className="text-xs text-gray-500 mt-1 tabular-nums">
+                Passo {FLOW.indexOf(step) + 1} de {FLOW.length}
+              </p>
             </>
+          )}
+          {step === 'result' && (
+            <div className="mt-6">
+              <p className="text-xs text-gray-600 font-medium">Pré-diagnóstico pronto</p>
+              <p className="text-xs text-gray-500 mt-1 tabular-nums">
+                Passo {FLOW.indexOf(step) + 1} de {FLOW.length}
+              </p>
+            </div>
           )}
         </header>
 
@@ -522,9 +544,41 @@ export default function ClinicasEsteticaCorporalIntakePage() {
           </section>
         )}
 
+        {step === 'wish_today' && (
+          <section className={`space-y-4 ${stepSurface}`}>
+            <h2 className="text-xl font-bold text-gray-900 leading-snug">
+              Se você pudesse resolver uma coisa hoje na sua clínica… o que seria?
+            </h2>
+            <label className="block">
+              <span className="text-sm font-medium text-gray-700">Sua resposta *</span>
+              <textarea
+                value={wishToday}
+                onChange={(e) => setWishToday(e.target.value)}
+                rows={5}
+                className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 focus:ring-2 focus:ring-blue-600 focus:border-blue-600 outline-none shadow-sm"
+                placeholder="Ex.: parar de perder tempo com gente que só quer preço / encher a agenda de segunda / ter alguém da equipe alinhada no WhatsApp…"
+              />
+            </label>
+            <p className="text-xs text-gray-500">Mínimo de 8 caracteres.</p>
+            <div className="flex gap-3 pt-2">
+              <button type="button" onClick={goBack} className={btnGhost}>
+                Voltar
+              </button>
+              <button type="button" disabled={blockNext} onClick={goNext} className={btnPrimary}>
+                {advanceLabel(step)}
+              </button>
+            </div>
+          </section>
+        )}
+
         {step === 'contact' && (
           <section className={`space-y-4 ${stepSurface}`}>
-            <h2 className="text-xl font-bold">Para te mostrar o resultado da análise</h2>
+            <h2 className="text-xl font-bold text-gray-900 leading-snug">
+              Seu contato — para retorno no WhatsApp
+            </h2>
+            <p className="text-sm text-gray-600">
+              Próximo passo: combinamos por mensagem no número abaixo (confirmação, dúvidas ou próximo passo prático).
+            </p>
             <label className="block">
               <span className="text-sm font-medium text-gray-700">Nome *</span>
               <input
@@ -613,24 +667,26 @@ export default function ClinicasEsteticaCorporalIntakePage() {
           <section className={`space-y-6 ${stepSurface}`}>
             <div className="text-center space-y-3">
               <h2 className="text-xl sm:text-2xl font-bold text-gray-900 leading-snug">
-                Análise recebida — já dá pra ver padrões importantes
+                Pronto — seu próximo passo é no WhatsApp
               </h2>
               <p className="text-gray-600 leading-relaxed text-sm text-left">
-                Pelo que você respondeu, há sinais de que pode estar escapando oportunidade de faturamento — muitas
-                vezes <span className="font-medium text-gray-800">não por falta de gente na porta</span>, mas pela
-                forma como as pessoas chegam até você (conversão, tempo da equipe, margem).
+                Abaixo está o pré-diagnóstico com base no que você marcou. O retorno humano (dúvidas, prioridade ou
+                convite para conversa) vem no <span className="font-semibold text-gray-900">WhatsApp que você informou</span>
+                — é por lá que a equipe confirma o número e segue o contato.
               </p>
               <p className="text-gray-600 leading-relaxed text-sm text-left">
-                Abaixo vai uma leitura direta. Em seguida, se fizer sentido no seu caso, dá pra aprofundar —{' '}
-                <span className="font-medium text-gray-800">olhe o WhatsApp que você informou.</span>
+                <span className="font-medium text-gray-800">Guarde este número na tela:</span> é o canal oficial para
+                falar com você depois deste diagnóstico.
               </p>
             </div>
 
             <div className="rounded-xl border-2 border-green-300/80 bg-green-50 px-4 py-4 text-center shadow-md shadow-green-900/10">
-              <p className="text-xs font-medium text-green-900 uppercase tracking-wide">Contato confirmado</p>
-              <p className="text-lg font-bold text-gray-900 mt-1 tabular-nums">Vamos falar neste número</p>
+              <p className="text-xs font-medium text-green-900 uppercase tracking-wide">WhatsApp para retorno</p>
+              <p className="text-lg font-bold text-gray-900 mt-1">Mensagens neste número</p>
               <p className="text-xl font-semibold text-green-800 mt-1 tabular-nums">{phoneDisplay}</p>
-              <p className="text-xs text-gray-600 mt-2">Confira se está certo. Se não estiver, chame pelo site.</p>
+              <p className="text-xs text-gray-600 mt-2">
+                Confira se está correto. Em geral respondemos em horário comercial; se não bater, fale pelo site.
+              </p>
             </div>
 
             <div className="rounded-2xl border border-blue-200/90 bg-white overflow-hidden shadow-[0_8px_32px_rgba(30,58,138,0.12)]">
@@ -650,7 +706,9 @@ export default function ClinicasEsteticaCorporalIntakePage() {
               </div>
             </div>
 
-            <p className="text-center text-sm text-gray-700 font-medium">Fique de olho no WhatsApp acima.</p>
+            <p className="text-center text-sm text-gray-800 font-semibold">
+              Abra o WhatsApp neste número — é o próximo passo após o pré-diagnóstico.
+            </p>
 
             <Link
               href="/pt"

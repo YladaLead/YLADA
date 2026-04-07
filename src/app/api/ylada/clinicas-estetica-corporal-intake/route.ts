@@ -151,10 +151,22 @@ export async function POST(request: NextRequest) {
       out[key] = v
     }
 
+    const wishOne = clampStr(src.wish_one_thing, 2000)
+    if (wishOne.length < 8) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Descreva o que gostaria de resolver hoje (pelo menos uma frase curta).',
+        },
+        { status: 400 }
+      )
+    }
+    out.wish_one_thing = wishOne
+
     out.city = clampStr(src.city, 120)
     out.services_detail = clampStr(src.services_detail, 500)
     out.notes = clampStr(src.notes, 4000)
-    out.survey_version = 'clinicas_estetica_v3'
+    out.survey_version = 'clinicas_estetica_v4'
 
     const consent = src.consent === true || src.consent === 'true' || src.consent === 'yes'
     if (!consent) {
@@ -240,6 +252,7 @@ export async function POST(request: NextRequest) {
       <p><strong>Tempo com quem não fecha:</strong> ${escapeHtml(twL)}</p>
       <p><strong>Interesse em entender captação:</strong> ${escapeHtml(intL)}</p>
       <p><strong>Momento:</strong> ${escapeHtml(tlL)}</p>
+      <p><strong>O que resolveria hoje:</strong><br/>${escapeHtml(out.wish_one_thing).replace(/\n/g, '<br/>')}</p>
     </div>
     <div style="background:#f9fafb;padding:16px;border-radius:8px;">
       <p><strong>Contato:</strong> ${escapeHtml(out.contact_name)}</p>

@@ -36,6 +36,14 @@ export function buildClinicasEsteticaDiagnosis(a: Record<string, string>): strin
   lines.push('Analisei suas respostas 👇')
   lines.push(hookPorDor(pain))
 
+  const wish = (a.wish_one_thing || '').trim()
+  if (wish.length > 0) {
+    const short = wish.length > 140 ? `${wish.slice(0, 137)}…` : wish
+    lines.push(
+      `Você deixou claro o que mais importa agora: “${short}” — isso ajuda a cruzar com o restante das respostas e ver onde atacar primeiro.`
+    )
+  }
+
   lines.push('Isso não é falta de cliente.')
   lines.push('É a forma como eles chegam até você.')
 
