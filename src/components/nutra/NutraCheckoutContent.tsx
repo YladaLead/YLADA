@@ -77,6 +77,7 @@ export default function NutraCheckoutContent({ locale, basePath }: NutraCheckout
           language: apiLanguage,
           email: userEmail,
           countryCode: 'BR',
+          paymentMethod: planType === 'annual' ? 'auto' : undefined,
         }),
       })
 

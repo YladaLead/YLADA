@@ -67,6 +67,7 @@ export default function CoachCheckoutPage() {
           language: 'pt',
           email: userEmail,
           countryCode: 'BR',
+          paymentMethod: planType === 'annual' ? 'auto' : undefined,
         }),
       })
 

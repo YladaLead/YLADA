@@ -171,8 +171,8 @@ export default function WellnessCheckoutPage() {
           language: 'pt',
           email: userEmail,
           countryCode: userProfile?.countryCode || 'BR', // Evita bloqueio quando geo retorna US (VPN/proxy)
-          // Plano mensal sempre usa assinatura automática (cartão)
-          // Plano anual sempre usa assinatura recorrente (cartão)
+          // Anual: Preapproval no MP (renovação a cada 12 meses). Mensal sem auto: Preference (PIX/boleto/cartão).
+          paymentMethod: planType === 'annual' ? 'auto' : undefined,
         }),
       })
 

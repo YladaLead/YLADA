@@ -302,9 +302,56 @@ async function createMercadoPagoCheckout(
       }
     }
   } else {
-    // Plano anual: sempre pagamento único (Preference) - permite PIX, Boleto e parcelamento
+    // Plano anual:
+    // - paymentMethod === 'auto' → Preapproval (cobrança recorrente a cada 12 meses, mesmo contrato que o mensal)
+    // - caso contrário → Preference (pagamento único: PIX, Boleto, cartão parcelado)
+    if (paymentMethod === 'auto') {
+      console.log('🔄 Criando assinatura recorrente (Preapproval) para plano anual — renovação a cada 12 meses')
+
+      const subscriptionRequest: CreateSubscriptionRequest = {
+        area: request.area,
+        planType: 'annual',
+        productType: request.productType,
+        userId: request.userId,
+        userEmail: request.userEmail,
+        amount,
+        description: request.productType === 'formation_only'
+          ? `YLADA ${request.area.toUpperCase()} - Formação Empresarial Nutri (anual)`
+          : `YLADA ${request.area.toUpperCase()} - Plano Anual (renovação anual)`,
+        successUrl,
+        failureUrl,
+        pendingUrl,
+        refVendedor: request.refVendedor,
+      }
+
+      try {
+        const subscription = await createRecurringSubscription(subscriptionRequest, isTest)
+        console.log('✅ Preapproval anual Mercado Pago criada:', subscription.id)
+
+        return {
+          gateway: 'mercadopago',
+          checkoutUrl: subscription.initPoint,
+          sessionId: subscription.id,
+          metadata: {
+            area: request.area,
+            planType: request.planType,
+            productType: request.productType,
+            countryCode: request.countryCode || 'BR',
+            gateway: 'mercadopago',
+            isRecurring: true,
+            paymentMethod: 'auto',
+          },
+        }
+      } catch (error: any) {
+        console.error('❌ Erro ao criar assinatura anual recorrente Mercado Pago:', error)
+        throw new Error(
+          `Erro ao criar assinatura anual recorrente Mercado Pago: ${error.message || 'Erro desconhecido'}`
+        )
+      }
+    }
+
     console.log('💳 Criando pagamento único (Preference) para plano anual - PIX/Boleto/Cartão com parcelamento')
-    
+
     const preferenceRequest: CreatePreferenceRequest = {
       area: request.area,
       planType: request.planType,
@@ -335,11 +382,11 @@ async function createMercadoPagoCheckout(
         metadata: {
           area: request.area,
           planType: request.planType,
-          productType: request.productType, // Adicionar productType no metadata
+          productType: request.productType,
           countryCode: request.countryCode || 'BR',
           gateway: 'mercadopago',
-          isRecurring: false, // Pagamento único (anual)
-          paymentMethod: 'any', // Permite qualquer método (PIX, Boleto, Cartão)
+          isRecurring: false,
+          paymentMethod: 'any',
         },
       }
     } catch (error: any) {
