@@ -199,13 +199,36 @@ interface NoelChatProps {
   initialMessage?: string
   /** Idioma da resposta do Noel (default: detectado da URL) */
   locale?: Language
+  /** POST do chat; default `/api/ylada/noel` */
+  chatApiPath?: string
+  /** Não buscar dashboard/links da matriz YLADA para substituir o welcome (ex.: Pro Líderes). */
+  skipYladaContextualWelcome?: boolean
+  /** Título no cabeçalho do cartão */
+  headerTitle?: string
+  /** Esconder ações "Editar quiz" / "Meus links" que dependem da área YLADA (embed Pro Líderes). */
+  disableYladaLinkEditor?: boolean
 }
 
-export default function NoelChat({ area = 'med', className = '', initialMessage, locale: localeProp }: NoelChatProps) {
+function isProLideresNoelApiPath(path: string | undefined): boolean {
+  return Boolean(path?.includes('/pro-lideres/noel'))
+}
+
+export default function NoelChat({
+  area = 'med',
+  className = '',
+  initialMessage,
+  locale: localeProp,
+  chatApiPath,
+  skipYladaContextualWelcome = false,
+  headerTitle,
+  disableYladaLinkEditor = false,
+}: NoelChatProps) {
   const router = useRouter()
   const pathname = usePathname()
   const locale = localeProp ?? getLocaleFromPathname(pathname ?? '')
   const uxContent = getNoelUxContent(area)
+  const resolvedChatApi = chatApiPath ?? '/api/ylada/noel'
+  const proLideresPayload = isProLideresNoelApiPath(resolvedChatApi)
   const [messages, setMessages] = useState<Message[]>(() => {
     const saved = loadMessages(area)
     return saved.length > 0 ? saved : [getWelcomeMessage(area)]
@@ -268,7 +291,7 @@ export default function NoelChat({ area = 'med', className = '', initialMessage,
         if (!cancelled) setContextualActions([])
       })
     return () => { cancelled = true }
-  }, [area])
+  }, [area, skipYladaContextualWelcome])
 
   useEffect(() => {
     if (initialMessage?.trim()) setInput(initialMessage.trim())
@@ -306,16 +329,20 @@ export default function NoelChat({ area = 'med', className = '', initialMessage,
         .slice(-12)
         .map((m) => ({ role: m.role, content: m.content }))
 
-      const res = await authenticatedFetch('/api/ylada/noel', {
+      const res = await authenticatedFetch(resolvedChatApi, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          message: text,
-          conversationHistory,
-          area,
-          lastLinkContext: lastLinkContext ?? undefined,
-          locale,
-        }),
+        body: JSON.stringify(
+          proLideresPayload
+            ? { message: text, conversationHistory, locale }
+            : {
+                message: text,
+                conversationHistory,
+                area,
+                lastLinkContext: lastLinkContext ?? undefined,
+                locale,
+              }
+        ),
       })
 
       if (!res.ok) {
@@ -326,7 +353,7 @@ export default function NoelChat({ area = 'med', className = '', initialMessage,
           upgrade_url?: string
           profile_url?: string
         }
-        if (err.error === 'profile_required') {
+        if (err.error === 'profile_required' && !proLideresPayload) {
           const profileMsg = err.message || 'Complete seu perfil empresarial para usar o Noel.'
           const profileUrl = err.profile_url || '/pt/perfil-empresarial'
           setMessages((prev) => [
@@ -342,7 +369,7 @@ export default function NoelChat({ area = 'med', className = '', initialMessage,
           inputRef.current?.focus()
           return
         }
-        if (err.limit_type === 'noel_advanced' || err.error === 'limit_reached') {
+        if (!proLideresPayload && (err.limit_type === 'noel_advanced' || err.error === 'limit_reached')) {
           trackNoelPaywallOnceIfNeeded()
           const upgradeMsg =
             err.message ||
@@ -392,7 +419,18 @@ export default function NoelChat({ area = 'med', className = '', initialMessage,
       setLoading(false)
       inputRef.current?.focus()
     }
-  }, [input, loading, messages, area, authenticatedFetch, lastLinkContext, locale, trackNoelPaywallOnceIfNeeded])
+  }, [
+    input,
+    loading,
+    messages,
+    area,
+    authenticatedFetch,
+    lastLinkContext,
+    locale,
+    trackNoelPaywallOnceIfNeeded,
+    resolvedChatApi,
+    proLideresPayload,
+  ])
 
   const clearChat = () => {
     contextualLoadedRef.current = false
@@ -516,6 +554,7 @@ export default function NoelChat({ area = 'med', className = '', initialMessage,
   const ctxForLinkActions = lastAssistantMsg?.linkContext ?? null
   const lastAssistantHasLinkContext = Boolean(lastAssistantMsg?.linkContext?.link_id)
   const showEditarConcordoButtons =
+    !disableYladaLinkEditor &&
     lastAssistantHasLinkContext &&
     !loading &&
     lastAssistantMsg &&
@@ -538,16 +577,20 @@ export default function NoelChat({ area = 'med', className = '', initialMessage,
           .filter((m) => m.role === 'user' || m.role === 'assistant')
           .slice(-12)
           .map((m) => ({ role: m.role, content: m.content }))
-        const res = await authenticatedFetch('/api/ylada/noel', {
+        const res = await authenticatedFetch(resolvedChatApi, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            message: text,
-            conversationHistory,
-            area,
-            lastLinkContext: lastLinkContext ?? undefined,
-            locale,
-          }),
+          body: JSON.stringify(
+            proLideresPayload
+              ? { message: text, conversationHistory, locale }
+              : {
+                  message: text,
+                  conversationHistory,
+                  area,
+                  lastLinkContext: lastLinkContext ?? undefined,
+                  locale,
+                }
+          ),
         })
         if (!res.ok) {
           const err = (await res.json().catch(() => ({}))) as {
@@ -556,7 +599,7 @@ export default function NoelChat({ area = 'med', className = '', initialMessage,
             limit_type?: string
             upgrade_url?: string
           }
-          if (err.limit_type === 'noel_advanced' || err.error === 'limit_reached') {
+          if (!proLideresPayload && (err.limit_type === 'noel_advanced' || err.error === 'limit_reached')) {
             trackNoelPaywallOnceIfNeeded()
             const upgradeMsg =
               err.message ||
@@ -601,7 +644,17 @@ export default function NoelChat({ area = 'med', className = '', initialMessage,
         inputRef.current?.focus()
       }
     },
-    [area, authenticatedFetch, lastLinkContext, loading, messages, locale, trackNoelPaywallOnceIfNeeded]
+    [
+      area,
+      authenticatedFetch,
+      lastLinkContext,
+      loading,
+      messages,
+      locale,
+      trackNoelPaywallOnceIfNeeded,
+      resolvedChatApi,
+      proLideresPayload,
+    ]
   )
 
   const showSuggestions = messages.length === 1 && messages[0]?.role === 'assistant'
@@ -611,7 +664,7 @@ export default function NoelChat({ area = 'med', className = '', initialMessage,
       <div className="flex items-center justify-between px-4 py-2.5 border-b border-sky-200 bg-sky-100/80">
         <span className="text-sm font-bold text-sky-800 flex items-center gap-2">
           <span className="text-lg" aria-hidden>🧠</span>
-          Noel — Mentor estratégico
+          {headerTitle ?? 'Noel — Mentor estratégico'}
         </span>
         <button
           type="button"
@@ -693,7 +746,7 @@ export default function NoelChat({ area = 'med', className = '', initialMessage,
                       )}
                     </button>
                   )}
-                  {msg.id !== 'welcome' && msg.role === 'assistant' && (() => {
+                  {msg.id !== 'welcome' && msg.role === 'assistant' && !disableYladaLinkEditor && (() => {
                     const isLastAssistantMessage = lastAssistantMsg?.id === msg.id
                     const ctxForMessage = msg.linkContext ?? (isLastAssistantMessage ? lastLinkContext : null)
                     const hasQuizContent = messageContainsQuizContent(msg.content, ctxForMessage)

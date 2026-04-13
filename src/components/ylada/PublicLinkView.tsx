@@ -225,10 +225,12 @@ type LinkTelemetryCtx = {
   viewerUserId: string | null
   ownerId: string | null
   slug: string
+  /** Pro Líderes: ?pl_m= token — atribui cliques/WhatsApp ao membro da equipa. */
+  plShareToken: string | null
 }
 
 const linkTelemetryRef: { current: LinkTelemetryCtx } = {
-  current: { viewerReady: false, viewerUserId: null, ownerId: null, slug: '' },
+  current: { viewerReady: false, viewerUserId: null, ownerId: null, slug: '', plShareToken: null },
 }
 
 /** Telemetria do link público: aguarda sessão; não registra quando o visitante é o dono do link. */
@@ -242,6 +244,9 @@ function trackLinkEvent(slug: string, eventType: string, options?: { metrics_id?
       slug,
       event_type: eventType,
       device: typeof navigator !== 'undefined' ? navigator.userAgent?.slice(0, 200) : null,
+    }
+    if (ctx.plShareToken) {
+      body.utm_json = { pl_m: ctx.plShareToken }
     }
     if (options?.metrics_id) body.metrics_id = options.metrics_id
     if (ctx.viewerUserId) body.viewer_user_id = ctx.viewerUserId
@@ -492,18 +497,54 @@ function normalizeBibliotecaConfig(config: Record<string, unknown>, locale: Lang
   }
 }
 
-export default function PublicLinkView({ payload, locale = 'pt' }: { payload: Payload; locale?: Language }) {
+export default function PublicLinkView({
+  payload,
+  locale = 'pt',
+  shareAttributionToken = null,
+}: {
+  payload: Payload
+  locale?: Language
+  /** Query `pl_m` na URL pública — Pro Líderes (rastreio por membro). */
+  shareAttributionToken?: string | null
+}) {
   const { slug, type, title, config, ctaWhatsapp, accessBlockedDueToPlan, link_owner_user_id: linkOwnerUserId } = payload
   const t = PUBLIC_LINK_UI[locale]
   const viewSent = useRef(false)
   const [viewerReady, setViewerReady] = useState(false)
   const [viewerUserId, setViewerUserId] = useState<string | null>(null)
+  const [plShareTokenState, setPlShareTokenState] = useState<string | null>(() => {
+    const u = shareAttributionToken?.trim()
+    return u || null
+  })
+  const [plAttributionReady, setPlAttributionReady] = useState(() => Boolean(shareAttributionToken?.trim()))
+
+  useEffect(() => {
+    const fromUrl = shareAttributionToken?.trim()
+    if (fromUrl) {
+      try {
+        sessionStorage.setItem(`ylada_plm_${slug}`, fromUrl)
+      } catch {
+        /* ignore */
+      }
+      setPlShareTokenState(fromUrl)
+      setPlAttributionReady(true)
+      return
+    }
+    try {
+      const s = sessionStorage.getItem(`ylada_plm_${slug}`)?.trim()
+      if (s) setPlShareTokenState(s)
+    } catch {
+      /* ignore */
+    }
+    setPlAttributionReady(true)
+  }, [slug, shareAttributionToken])
 
   linkTelemetryRef.current = {
     viewerReady,
     viewerUserId,
     ownerId: linkOwnerUserId ?? null,
     slug,
+    plShareToken: plShareTokenState,
   }
 
   useEffect(() => {
@@ -521,11 +562,12 @@ export default function PublicLinkView({ payload, locale = 'pt' }: { payload: Pa
 
   useEffect(() => {
     if (!viewerReady) return
+    if (!plAttributionReady) return
     if (accessBlockedDueToPlan) return
     if (viewSent.current) return
     viewSent.current = true
     trackLinkEvent(slug, 'view')
-  }, [slug, accessBlockedDueToPlan, viewerReady])
+  }, [slug, accessBlockedDueToPlan, viewerReady, plAttributionReady])
 
   const resultCta = (config.result as Record<string, unknown>)?.cta as Record<string, unknown> | undefined
   const ctaText = (resultCta?.text as string) || (config.ctaText as string) || (config.ctaDefault as string) || t.speakWhatsApp
@@ -595,7 +637,12 @@ export default function PublicLinkView({ payload, locale = 'pt' }: { payload: Pa
 
 // --- Config-driven (flow_id) form + result (Etapa 8) ---
 type FormField = { id: string; label: string; type?: string; options?: string[] }
-type ResultConfig = { headline?: string; summary_bullets?: string[]; cta?: { text?: string } }
+type ResultConfig = {
+  headline?: string
+  description?: string
+  summary_bullets?: string[]
+  cta?: { text?: string }
+}
 
 const DIAGNOSIS_ARCHITECTURES = [
   'RISK_DIAGNOSIS',
@@ -888,6 +935,10 @@ function ConfigDrivenLinkView({
   }
 
   const headline = resultConfig.headline || t.yourResult
+  const resultDescription =
+    typeof resultConfig.description === 'string' && resultConfig.description.trim()
+      ? resultConfig.description.trim()
+      : ''
   const summaryBullets = Array.isArray(resultConfig.summary_bullets) ? resultConfig.summary_bullets : []
   const resultCtaText = resultConfig.cta?.text || ctaText
 
@@ -1331,6 +1382,9 @@ function ConfigDrivenLinkView({
           <h1 className="text-xl font-bold text-gray-900 mb-2">{displayTitle}</h1>
           <div className="mb-6">
             <h2 className="text-lg font-semibold text-gray-900">{headline}</h2>
+            {resultDescription ? (
+              <p className="text-gray-600 text-sm leading-relaxed mt-2">{resultDescription}</p>
+            ) : null}
             {summaryBullets.length > 0 && (
               <ul className="list-disc list-inside text-gray-600 mt-2 space-y-1">
                 {summaryBullets.map((b, i) => (

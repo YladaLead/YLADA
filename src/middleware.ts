@@ -57,6 +57,7 @@ export function middleware(request: NextRequest) {
     pathname.startsWith('/template/') ||
     pathname.startsWith('/calculadora-imc') ||
     pathname.startsWith('/admin') || // IMPORTANTE: Admin SEMPRE sem /pt
+    pathname.startsWith('/pro-lideres') || // YLADA Pro Líderes — canônico sem /pt
     pathname.startsWith('/cursos') ||
     pathname.startsWith('/create') ||
     pathname.startsWith('/api/') ||

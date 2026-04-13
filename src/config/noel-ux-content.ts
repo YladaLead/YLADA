@@ -6,7 +6,21 @@
  * Ao adicionar um valor em NoelArea, inclua uma entrada em NOEL_UX_BY_AREA ou o fallback DEFAULT_NOEL_UX_ROW será usado.
  */
 
-export type NoelArea = 'ylada' | 'med' | 'psi' | 'psicanalise' | 'odonto' | 'nutra' | 'nutri' | 'coach' | 'seller' | 'perfumaria' | 'estetica' | 'fitness'
+export type NoelArea =
+  | 'ylada'
+  | 'med'
+  | 'psi'
+  | 'psicanalise'
+  | 'odonto'
+  | 'nutra'
+  | 'nutri'
+  | 'coach'
+  | 'seller'
+  | 'perfumaria'
+  | 'estetica'
+  | 'fitness'
+  /** Mentor no painel Pro Líderes (operador / equipe; contexto em /api/pro-lideres/noel). */
+  | 'pro_lideres'
 
 export interface NoelUxContent {
   welcomeMessage: string
@@ -101,6 +115,35 @@ const SELLER_SUGGESTIONS = [
   { label: 'Melhorar minhas conversas', prompt: 'Como melhorar minhas conversas de venda?' },
 ]
 
+const PRO_LIDERES_SUGGESTIONS = [
+  {
+    label: 'Primeiro contato no WhatsApp',
+    prompt:
+      'Preciso de um script curto e natural para o primeiro contato no WhatsApp com alguém que demonstrou interesse (sem ser invasivo).',
+  },
+  {
+    label: 'Explicar a ferramenta (link)',
+    prompt:
+      'Me ajuda com um texto para explicar, em poucas linhas, o que a pessoa vai fazer ao abrir o meu link YLADA (quiz/calculadora) e por que vale a pena.',
+  },
+  {
+    label: 'Pedir permissão antes do link',
+    prompt:
+      'Quero um script educado para pedir permissão antes de enviar o link (opt-in), no tom de conversa de WhatsApp.',
+  },
+  {
+    label: 'Atender no WhatsApp',
+    prompt:
+      'Me dá um roteiro para conduzir a conversa no WhatsApp depois que a pessoa respondeu ao link: tirar dúvidas, criar confiança e próximo passo.',
+  },
+]
+
+const NOEL_PRO_LIDERES_WELCOME = `Sou o **Noel** no teu espaço **Pro Líderes**.
+
+Estou focado na operação de campo: **contato**, **WhatsApp**, **links YLADA** e **scripts** para tu e a tua equipa — no contexto do teu operador (ex.: Herbalife / h‑líder).
+
+Diz-me em uma frase o que precisas agora (ou usa uma sugestão abaixo).`
+
 /** Fallback quando uma nova NoelArea ainda não tem linha dedicada em NOEL_UX_BY_AREA. */
 const DEFAULT_NOEL_UX_ROW: NoelUxContentWithoutWelcome = {
   suggestions: DEFAULT_SUGGESTIONS,
@@ -169,12 +212,18 @@ const NOEL_UX_BY_AREA: Record<NoelArea, NoelUxContentWithoutWelcome> = {
     placeholder: 'Pergunte algo ao Noel...',
     placeholderExample: 'Ex: Como atrair mais alunos para academia',
   },
+  pro_lideres: {
+    suggestions: PRO_LIDERES_SUGGESTIONS,
+    placeholder: 'Pergunte ao Noel sobre scripts, links ou WhatsApp...',
+    placeholderExample: 'Ex: Script para retomar conversa depois de 3 dias',
+  },
 }
 
 export function getNoelUxContent(area: NoelArea): NoelUxContent {
   const row = NOEL_UX_BY_AREA[area] ?? DEFAULT_NOEL_UX_ROW
+  const welcomeMessage = area === 'pro_lideres' ? NOEL_PRO_LIDERES_WELCOME : NOEL_UNIVERSAL_WELCOME
   return {
-    welcomeMessage: NOEL_UNIVERSAL_WELCOME,
+    welcomeMessage,
     ...row,
   }
 }

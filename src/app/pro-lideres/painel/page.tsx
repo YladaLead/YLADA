@@ -1,0 +1,114 @@
+import Link from 'next/link'
+import { redirect } from 'next/navigation'
+
+import { ensureLeaderTenantAccess } from '@/lib/pro-lideres-server'
+
+export default async function ProLideresPainelVisaoPage() {
+  const gate = await ensureLeaderTenantAccess()
+  if (!gate.ok) redirect(gate.redirect)
+
+  const isLeader = gate.role === 'leader'
+  const op =
+    gate.tenant.display_name?.trim() ||
+    gate.tenant.team_name?.trim() ||
+    'este espaço'
+
+  const leaderCards = [
+    {
+      title: 'Links & convites',
+      desc: 'Gerar links para a equipe entrar com o e-mail certo',
+      href: '/pro-lideres/painel/links',
+    },
+    {
+      title: 'Equipe',
+      desc: 'Quem faz parte do espaço',
+      href: '/pro-lideres/painel/equipe',
+    },
+    {
+      title: 'Catálogo de ferramentas',
+      desc: 'Links YLADA (/l/…) partilhados no painel',
+      href: '/pro-lideres/painel/catalogo',
+    },
+    {
+      title: 'Scripts',
+      desc: 'Roteiros de conversa (com Noel) para a equipe',
+      href: '/pro-lideres/painel/scripts',
+    },
+    {
+      title: 'Noel (mentor)',
+      desc: 'Apoio no contexto do Pro Líderes',
+      href: '/pro-lideres/painel/noel',
+    },
+  ] as const
+
+  const teamCards = [
+    {
+      title: 'Equipe',
+      desc: 'Colegas neste espaço',
+      href: '/pro-lideres/painel/equipe',
+    },
+    {
+      title: 'Catálogo de ferramentas',
+      desc: 'Links YLADA (/l/…) partilhados pelo líder',
+      href: '/pro-lideres/painel/catalogo',
+    },
+    {
+      title: 'Scripts',
+      desc: 'Roteiros de conversa partilhados pelo líder',
+      href: '/pro-lideres/painel/scripts',
+    },
+    {
+      title: 'Noel (mentor)',
+      desc: 'Tirar dúvidas no contexto da operação',
+      href: '/pro-lideres/painel/noel',
+    },
+  ] as const
+
+  const cards = isLeader ? leaderCards : teamCards
+
+  return (
+    <div className="space-y-8">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <p className="text-sm font-medium text-blue-600">Visão geral</p>
+          <h1 className="text-2xl font-bold text-gray-900">
+            {isLeader ? 'Painel do líder' : 'O seu espaço na equipe'}
+          </h1>
+          <p className="mt-1 text-gray-600">
+            {isLeader ? (
+              <>
+                Ambiente de gestão de <strong className="text-gray-800">{op}</strong>. Convites e configurações são só
+                tuas; a equipa vê um menu mais simples.
+              </>
+            ) : (
+              <>
+                Você está no <strong className="text-emerald-800">ambiente da equipe</strong> de{' '}
+                <strong className="text-gray-800">{op}</strong>. O líder gere convites e definições; aqui você acessa o
+                conteúdo e a lista da equipe.
+              </>
+            )}
+          </p>
+        </div>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        {cards.map((card) => (
+          <Link
+            key={card.title}
+            href={card.href}
+            className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm transition hover:border-blue-200 hover:shadow-md"
+          >
+            <h2 className="font-semibold text-gray-900">{card.title}</h2>
+            <p className="mt-1 text-sm text-gray-600">{card.desc}</p>
+          </Link>
+        ))}
+      </div>
+
+      <p className="text-sm text-gray-500">
+        <Link href="/pro-lideres" className="font-medium text-blue-600 hover:text-blue-800">
+          Site público Pro Líderes
+        </Link>
+      </p>
+    </div>
+  )
+}

@@ -71,7 +71,42 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: true, skipped_freemium: true })
     }
 
-    const utmJson = body.utm_json && typeof body.utm_json === 'object' ? body.utm_json : {}
+    let utmJson =
+      body.utm_json && typeof body.utm_json === 'object' && !Array.isArray(body.utm_json)
+        ? { ...(body.utm_json as Record<string, unknown>) }
+        : {}
+    const plRaw =
+      (typeof utmJson.pl_m === 'string' && utmJson.pl_m.trim()) ||
+      (typeof body.pl_m === 'string' && body.pl_m.trim()) ||
+      ''
+    if (plRaw) {
+      try {
+        const { data: plTok, error: plTokErr } = await supabaseAdmin
+          .from('pro_lideres_member_link_tokens')
+          .select('member_user_id, leader_tenant_id, ylada_link_id')
+          .eq('token', plRaw)
+          .maybeSingle()
+        if (
+          !plTokErr &&
+          plTok &&
+          String(plTok.ylada_link_id) === String(link.id) &&
+          plTok.member_user_id &&
+          plTok.leader_tenant_id
+        ) {
+          utmJson.pl_m = plRaw
+          utmJson.pl_member_user_id = plTok.member_user_id as string
+          utmJson.pl_tenant_id = plTok.leader_tenant_id as string
+          const { data: ten } = await supabaseAdmin
+            .from('leader_tenants')
+            .select('vertical_code')
+            .eq('id', plTok.leader_tenant_id as string)
+            .maybeSingle()
+          if (ten?.vertical_code) utmJson.pl_vertical = ten.vertical_code as string
+        }
+      } catch {
+        utmJson.pl_m = plRaw
+      }
+    }
     const device = typeof body.device === 'string' ? body.device.trim() || null : null
 
     const { error: insertError } = await supabaseAdmin.from('ylada_link_events').insert({

@@ -4,15 +4,27 @@ import { fetchPublicLinkPayload } from '@/app/l/[slug]/public-link-utils'
 
 export const dynamic = 'force-dynamic'
 
-type PageProps = { params: Promise<{ slug: string }> }
+type PageProps = {
+  params: Promise<{ slug: string }>
+  searchParams?: Promise<Record<string, string | string[] | undefined>>
+}
+
+function pickPlM(sp: Record<string, string | string[] | undefined>): string | null {
+  const v = sp.pl_m
+  const s = Array.isArray(v) ? v[0] : v
+  return typeof s === 'string' && s.trim() ? s.trim() : null
+}
 
 /**
  * Página pública do link inteligente em inglês (/en/l/[slug]).
  */
-export default async function PublicLinkPageEn({ params }: PageProps) {
+export default async function PublicLinkPageEn({ params, searchParams }: PageProps) {
   const { slug } = await params
   if (!slug) notFound()
 
+  const sp = searchParams ? await searchParams : {}
+  const plM = pickPlM(sp)
+
   const payload = await fetchPublicLinkPayload(slug)
-  return <PublicLinkView payload={payload} locale="en" />
+  return <PublicLinkView payload={payload} locale="en" shareAttributionToken={plM} />
 }

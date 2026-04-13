@@ -40,6 +40,10 @@ interface LoginFormProps {
   useYladaBrandingOnSignUp?: boolean
   /** Substitui o título “Criar conta” no modo cadastro (ex.: hero da matriz). */
   signUpHeroTitle?: string
+  /** Sem cadastro self-service: só login + recuperar senha; direciona quem não tem conta ao suporte (ex.: Pro Líderes). */
+  disableSignUp?: boolean
+  /** Login em /pro-lideres/entrar: usa `redirectPath` e rotas /pro-lideres na “última página”, sem redirecionar para onboarding /pt. */
+  proLideresLogin?: boolean
 }
 
 function forgotPasswordHref(perfil: LoginFormPerfil): string {
@@ -58,6 +62,8 @@ export default function LoginForm({
   initialSignUpMode = false,
   useYladaBrandingOnSignUp = false,
   signUpHeroTitle,
+  disableSignUp = false,
+  proLideresLogin = false,
 }: LoginFormProps) {
   const router = useRouter()
   const { getLastVisitedPage } = useLastVisitedPage()
@@ -108,6 +114,14 @@ export default function LoginForm({
     const timer = setTimeout(() => checkEmailTrial(email), 600)
     return () => clearTimeout(timer)
   }, [email, checkEmailTrial])
+
+  useEffect(() => {
+    if (disableSignUp && isSignUp) {
+      setIsSignUp(false)
+      setConfirmPassword('')
+      setError(null)
+    }
+  }, [disableSignUp, isSignUp])
 
   // Verificar parâmetros da URL para mensagens de sucesso
   // E LIMPAR localStorage se houver /checkout salvo (evitar redirecionamento indesejado)
@@ -193,6 +207,12 @@ export default function LoginForm({
     setError(null)
 
     try {
+      if (disableSignUp && isSignUp) {
+        setError('O cadastro por aqui não está disponível.')
+        setLoading(false)
+        return
+      }
+
       // VALIDAÇÃO: Verificar perfil antes de fazer login/cadastro (opcional - não bloqueia)
       let checkData = { exists: false, hasProfile: false, canCreate: true }
       
@@ -493,9 +513,10 @@ export default function LoginForm({
         let baseRedirectPath = redirectPath
 
         // Login em /pt/login (ylada): todos vão para YLADA (matriz). Priorizar onboarding se perfil não preenchido.
+        // Pro Líderes (/pro-lideres/entrar): não aplicar esta lógica — respeita redirectPath (ex.: convite).
         // Se tem nome+whatsapp mas falta profile_type/profession → perfil-empresarial (ex.: usuárias Nutri migradas).
         // Usuárias da área Nutri (e outras) que já estavam cadastradas: ir para o board (/pt/home) para evitar tela piscando.
-        if (perfil === 'ylada') {
+        if (!proLideresLogin && perfil === 'ylada') {
           baseRedirectPath = '/pt/onboarding'
           try {
             const { data: yladaProfile } = await supabase
@@ -558,7 +579,10 @@ export default function LoginForm({
           lastPage && 
           !isLandingPage && // Excluir páginas de vendas
           lastPage.startsWith('/') && 
-          (lastPage.startsWith('/pt/') || lastPage.startsWith('/en/') || lastPage.startsWith('/es/')) &&
+          (lastPage.startsWith('/pt/') ||
+            lastPage.startsWith('/en/') ||
+            lastPage.startsWith('/es/') ||
+            (proLideresLogin && lastPage.startsWith('/pro-lideres'))) &&
           !excludedFromRedirect.some(path => lastPage.includes(path)) &&
           lastPage.length > 3 && // Garantir que não é apenas "/pt" ou "/e"
           !lastPage.includes('/checkout') && // Garantir que não é checkout
@@ -846,22 +870,24 @@ export default function LoginForm({
           </div>
         )}
 
-        {/* Toggle entre Login e Sign Up */}
-        <div className="mt-6 sm:mt-8 text-center">
-          <button
-            type="button"
-            onClick={() => {
-              setIsSignUp(!isSignUp)
-              setError(null)
-              if (isSignUp) setConfirmPassword('')
-            }}
-            className="text-sm text-gray-600 hover:text-gray-900 transition-colors duration-200 font-medium"
-          >
-            {isSignUp 
-              ? 'Já tem uma conta? Fazer login' 
-              : 'Não tem uma conta? Criar conta'}
-          </button>
-        </div>
+        {/* Toggle entre Login e Sign Up (omitido quando cadastro está desativado, ex.: Pro Líderes) */}
+        {!disableSignUp && (
+          <div className="mt-6 sm:mt-8 text-center">
+            <button
+              type="button"
+              onClick={() => {
+                setIsSignUp(!isSignUp)
+                setError(null)
+                if (isSignUp) setConfirmPassword('')
+              }}
+              className="text-sm text-gray-600 hover:text-gray-900 transition-colors duration-200 font-medium"
+            >
+              {isSignUp
+                ? 'Já tem uma conta? Fazer login'
+                : 'Não tem uma conta? Criar conta'}
+            </button>
+          </div>
+        )}
       </div>
     </div>
   )

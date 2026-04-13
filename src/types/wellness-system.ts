@@ -519,3 +519,34 @@ export interface ObjeçãoFilter {
   tags?: string[]
   ativo?: boolean
 }
+
+// =====================================================
+// FLUXOS (CLIENTES / RECRUTAMENTO) — perguntas fixas
+// =====================================================
+
+export type TipoKit = string
+
+export type PerguntaFluxoCliente =
+  | { id: string; texto: string; tipo: 'sim_nao' }
+  | { id: string; texto: string; tipo: 'escala'; escalaMin: number; escalaMax: number }
+  | { id: string; texto: string; tipo: 'multipla_escolha'; opcoes: string[] }
+
+export interface FluxoCliente {
+  id: string
+  nome: string
+  objetivo: string
+  perguntas: PerguntaFluxoCliente[]
+  diagnostico: {
+    titulo: string
+    descricao: string
+    sintomas: string[]
+    beneficios: string[]
+    mensagemPositiva: string
+  }
+  kitRecomendado: TipoKit
+  cta: string
+  tags: string[]
+}
+
+/** Chave de perfil em perfisRecrutamento (uso genérico nas APIs). */
+export type PerfilRecrutamento = string

@@ -1,0 +1,195 @@
+'use client'
+
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { PRO_LIDERES_MENU_GROUPS, proLideresItemHref, type ProLideresMenuItem } from '@/config/pro-lideres-menu'
+import { useAuth } from '@/hooks/useAuth'
+import { useProLideresPainel } from '@/components/pro-lideres/pro-lideres-painel-context'
+
+interface ProLideresSidebarProps {
+  isMobileOpen?: boolean
+  onMobileClose?: () => void
+}
+
+export default function ProLideresSidebar({ isMobileOpen = false, onMobileClose }: ProLideresSidebarProps) {
+  const pathname = usePathname()
+  const { isLeaderWorkspace } = useProLideresPainel()
+  const { signOut, user, userProfile } = useAuth()
+  const [contaOpen, setContaOpen] = useState(false)
+  const contaRouteKeyRef = useRef<string | null>(null)
+
+  const userName =
+    userProfile?.nome_completo ||
+    user?.user_metadata?.full_name ||
+    user?.user_metadata?.name ||
+    user?.email?.split('@')[0] ||
+    'Líder'
+  const initials =
+    userName
+      .split(' ')
+      .map((n) => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2) || 'L'
+
+  const filteredMenu = useMemo(() => {
+    return PRO_LIDERES_MENU_GROUPS.map((g) => ({
+      ...g,
+      items: g.items.filter((item) => isLeaderWorkspace || !item.leaderOnly),
+    })).filter((g) => g.items.length > 0)
+  }, [isLeaderWorkspace])
+
+  const mainGroups = filteredMenu.filter((g) => g.label !== 'Conta')
+  const contaGroup = filteredMenu.find((g) => g.label === 'Conta')
+
+  const itemHref = useCallback((item: ProLideresMenuItem) => proLideresItemHref(item.path), [])
+
+  const itemIsActive = useCallback(
+    (item: ProLideresMenuItem) => {
+      const href = itemHref(item)
+      if (item.key === 'visao') {
+        return pathname === '/pro-lideres/painel' || pathname === '/pro-lideres/painel/'
+      }
+      return pathname === href || pathname?.startsWith(`${href}/`)
+    },
+    [pathname, itemHref]
+  )
+
+  useEffect(() => {
+    if (!contaGroup) return
+    const routeKey = pathname ?? ''
+    if (contaRouteKeyRef.current === routeKey) return
+    contaRouteKeyRef.current = routeKey
+    const matchesConta = contaGroup.items.some((item) => itemIsActive(item))
+    setContaOpen(matchesConta)
+  }, [contaGroup, pathname, itemIsActive])
+
+  const contaSectionActive = contaGroup?.items.some((item) => itemIsActive(item)) ?? false
+  const perfilPath = '/pro-lideres/painel/perfil'
+  const perfilActive = pathname === perfilPath || pathname?.startsWith(`${perfilPath}/`)
+
+  const renderItemLink = (item: ProLideresMenuItem) => {
+    const href = itemHref(item)
+    const isActive = itemIsActive(item)
+    return (
+      <Link
+        key={item.key}
+        href={href}
+        onClick={onMobileClose}
+        className={`flex min-h-[44px] items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors touch-manipulation ${
+          isActive ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100'
+        }`}
+      >
+        <span aria-hidden>{item.icon}</span>
+        {item.label}
+      </Link>
+    )
+  }
+
+  const content = (
+    <aside className="flex h-full min-h-0 w-[min(100vw-2rem,14rem)] flex-col border-r border-gray-200 bg-white lg:w-56">
+      {/* Drawer mobile: fechar (marca única fica no header da página) */}
+      <div className="flex items-center justify-between border-b border-gray-200 px-3 py-2 lg:hidden">
+        <span className="text-sm font-semibold text-gray-900">Menu</span>
+        <button
+          type="button"
+          onClick={onMobileClose}
+          className="touch-manipulation flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg text-gray-600 hover:bg-gray-100"
+          aria-label="Fechar menu"
+        >
+          <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <div className="border-b border-gray-200 p-3">
+        <Link
+          href={perfilPath}
+          onClick={onMobileClose}
+          className={`flex min-h-[44px] items-center gap-3 rounded-lg p-2 transition-colors touch-manipulation ${
+            perfilActive ? 'bg-blue-50' : 'hover:bg-gray-50'
+          }`}
+        >
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-100 text-sm font-semibold text-blue-800">
+            {initials}
+          </div>
+          <div className="min-w-0 flex-1 text-left">
+            <p className={`truncate text-sm font-semibold ${perfilActive ? 'text-blue-800' : 'text-gray-900'}`}>
+              {userName}
+            </p>
+            <p className="text-xs font-medium text-blue-600">Meu perfil</p>
+          </div>
+        </Link>
+      </div>
+
+      <nav className="flex min-h-0 flex-1 flex-col">
+        <div className="min-h-0 flex-1 space-y-4 overflow-y-auto p-3">
+          {mainGroups.map((group) => (
+            <div key={group.label}>
+              <p className="mb-1.5 px-3 text-xs font-medium tracking-wide text-gray-500">{group.label}</p>
+              <div className="space-y-0.5">{group.items.map((item) => renderItemLink(item))}</div>
+            </div>
+          ))}
+        </div>
+
+        <div className="shrink-0 border-t border-gray-200">
+          {contaGroup && (
+            <div className="p-3 pb-2">
+              <button
+                type="button"
+                onClick={() => setContaOpen((o) => !o)}
+                className={`flex min-h-[44px] w-full items-center justify-between gap-2 rounded-lg px-3 py-2 text-left text-sm font-medium transition-colors touch-manipulation ${
+                  contaSectionActive && !contaOpen ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100'
+                }`}
+                aria-expanded={contaOpen}
+              >
+                <span className="text-xs font-medium tracking-wide text-gray-500">Conta</span>
+                <span className="text-gray-400" aria-hidden>
+                  {contaOpen ? '▾' : '▸'}
+                </span>
+              </button>
+              {contaOpen && (
+                <div className="mt-1 space-y-0.5">{contaGroup.items.map((item) => renderItemLink(item))}</div>
+              )}
+            </div>
+          )}
+          <div className="px-3 pb-3">
+            <button
+              type="button"
+              onClick={() => {
+                signOut()
+                onMobileClose?.()
+              }}
+              className="flex min-h-[44px] w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-medium text-gray-700 transition-colors touch-manipulation hover:bg-red-50 hover:text-red-600"
+            >
+              <span aria-hidden>🚪</span>
+              Sair
+            </button>
+          </div>
+        </div>
+      </nav>
+    </aside>
+  )
+
+  return (
+    <>
+      <div className="hidden lg:flex lg:h-screen lg:max-h-[100dvh] lg:flex-shrink-0 lg:self-start lg:sticky lg:top-0 lg:z-20">
+        {content}
+      </div>
+      {isMobileOpen && (
+        <>
+          <div
+            className="fixed inset-0 z-40 bg-black/50 lg:hidden"
+            onClick={onMobileClose}
+            aria-hidden
+          />
+          <div className="fixed inset-y-0 left-0 z-50 max-w-[calc(100vw-1rem)] shadow-xl lg:hidden">
+            {content}
+          </div>
+        </>
+      )}
+    </>
+  )
+}
