@@ -3,7 +3,12 @@
 import { useCallback, useEffect, useState } from 'react'
 import type { LeaderTenantRow } from '@/types/leader-tenant'
 
-export function ProLideresPerfilForm() {
+export function ProLideresPerfilForm({
+  tenantApiPath = '/api/pro-lideres/tenant',
+}: {
+  /** ex.: `/api/pro-estetica-corporal/tenant` */
+  tenantApiPath?: string
+} = {}) {
   const [tenant, setTenant] = useState<LeaderTenantRow | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -21,7 +26,7 @@ export function ProLideresPerfilForm() {
     setLoading(true)
     setError(null)
     try {
-      const res = await fetch('/api/pro-lideres/tenant', { credentials: 'include' })
+      const res = await fetch(tenantApiPath, { credentials: 'include' })
       const data = await res.json().catch(() => ({}))
       if (!res.ok) {
         setError((data as { error?: string }).error || 'Não foi possível carregar o perfil.')
@@ -42,7 +47,7 @@ export function ProLideresPerfilForm() {
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [tenantApiPath])
 
   useEffect(() => {
     load()
@@ -55,7 +60,7 @@ export function ProLideresPerfilForm() {
     setError(null)
     setSavedAt(null)
     try {
-      const res = await fetch('/api/pro-lideres/tenant', {
+      const res = await fetch(tenantApiPath, {
         method: 'PATCH',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },

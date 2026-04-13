@@ -1,7 +1,7 @@
 /**
- * Três quizzes clássicos de recrutamento (Wellness / área YLADA), no mesmo formato dos
- * outros links diagnóstico YLADA: perguntas + resultado (API de diagnóstico + fallback
- * estático em config.result). Alinhados aos previews em @/components/wellness-previews/quizzes.
+ * Quizzes de recrutamento Pro Líderes (contexto equipa Herbalife / oportunidade de negócio).
+ * Copy focada em perfil e conversa — sem tom clínico nem kit de bem-estar no resultado.
+ * Tag `pro-lideres` ativa disclaimer e textos de UI específicos em FluxoDiagnostico.
  */
 import type { FluxoCliente } from '@/types/wellness-system'
 
@@ -73,13 +73,17 @@ export const proLideresRecruitmentQuizFluxos: FluxoCliente[] = [
       descricao:
         'Com base nas respostas, faz sentido conversar com quem te enviou o link para explorar oportunidades alinhadas aos teus objetivos.',
       sintomas: ['Abertura a novas oportunidades', 'Interesse em crescimento e flexibilidade'],
-      beneficios: ['Conversa personalizada', 'Caminhos simples e duplicáveis', 'Produtos de bem-estar'],
+      beneficios: [
+        'Conversa personalizada com a tua liderança na equipa',
+        'Modelo de negócio com suporte da comunidade',
+        'Caminhos simples e duplicáveis para construir ao teu ritmo',
+      ],
       mensagemPositiva:
-        'Pessoas com o teu perfil costumam ter bons resultados quando encontram o modelo certo — fala com quem te partilhou este diagnóstico.',
+        'Pessoas com o teu perfil costumam encontrar encaixe quando exploram o modelo certo — fala com quem te partilhou esta avaliação.',
     },
     kitRecomendado: 'energia',
     cta: 'Quero saber mais',
-    tags: ['quiz', 'ganhos', 'prosperidade', 'recrutamento'],
+    tags: ['quiz', 'ganhos', 'prosperidade', 'recrutamento', 'pro-lideres'],
   },
   {
     id: 'quiz-recrut-potencial-crescimento',
@@ -154,7 +158,7 @@ export const proLideresRecruitmentQuizFluxos: FluxoCliente[] = [
     },
     kitRecomendado: 'energia',
     cta: 'Quero saber mais',
-    tags: ['quiz', 'potencial', 'crescimento', 'recrutamento'],
+    tags: ['quiz', 'potencial', 'crescimento', 'recrutamento', 'pro-lideres'],
   },
   {
     id: 'quiz-recrut-proposito-equilibrio',
@@ -225,10 +229,10 @@ export const proLideresRecruitmentQuizFluxos: FluxoCliente[] = [
       sintomas: ['Busca de significado', 'Desejo de mais equilíbrio'],
       beneficios: ['Visão de caminhos possíveis', 'Modelo flexível', 'Impacto nas pessoas'],
       mensagemPositiva:
-        'Uma conversa simples pode mostrar como unir propósito e resultado prático — fala com quem te enviou o diagnóstico.',
+        'Uma conversa simples pode mostrar como unir propósito e resultado prático — fala com quem te enviou esta avaliação.',
     },
     kitRecomendado: 'energia',
     cta: 'Quero saber mais',
-    tags: ['quiz', 'propósito', 'equilíbrio', 'recrutamento'],
+    tags: ['quiz', 'propósito', 'equilíbrio', 'recrutamento', 'pro-lideres'],
   },
 ]

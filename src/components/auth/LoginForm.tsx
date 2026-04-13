@@ -44,6 +44,8 @@ interface LoginFormProps {
   disableSignUp?: boolean
   /** Login em /pro-lideres/entrar: usa `redirectPath` e rotas /pro-lideres na “última página”, sem redirecionar para onboarding /pt. */
   proLideresLogin?: boolean
+  /** Login em /pro-estetica-corporal/entrar — mesmo comportamento do Pro Líderes para rotas desta área. */
+  proEsteticaCorporalLogin?: boolean
 }
 
 function forgotPasswordHref(perfil: LoginFormPerfil): string {
@@ -64,6 +66,7 @@ export default function LoginForm({
   signUpHeroTitle,
   disableSignUp = false,
   proLideresLogin = false,
+  proEsteticaCorporalLogin = false,
 }: LoginFormProps) {
   const router = useRouter()
   const { getLastVisitedPage } = useLastVisitedPage()
@@ -516,7 +519,7 @@ export default function LoginForm({
         // Pro Líderes (/pro-lideres/entrar): não aplicar esta lógica — respeita redirectPath (ex.: convite).
         // Se tem nome+whatsapp mas falta profile_type/profession → perfil-empresarial (ex.: usuárias Nutri migradas).
         // Usuárias da área Nutri (e outras) que já estavam cadastradas: ir para o board (/pt/home) para evitar tela piscando.
-        if (!proLideresLogin && perfil === 'ylada') {
+        if (!proLideresLogin && !proEsteticaCorporalLogin && perfil === 'ylada') {
           baseRedirectPath = '/pt/onboarding'
           try {
             const { data: yladaProfile } = await supabase
@@ -582,7 +585,8 @@ export default function LoginForm({
           (lastPage.startsWith('/pt/') ||
             lastPage.startsWith('/en/') ||
             lastPage.startsWith('/es/') ||
-            (proLideresLogin && lastPage.startsWith('/pro-lideres'))) &&
+            ((proLideresLogin && lastPage.startsWith('/pro-lideres')) ||
+              (proEsteticaCorporalLogin && lastPage.startsWith('/pro-estetica-corporal')))) &&
           !excludedFromRedirect.some(path => lastPage.includes(path)) &&
           lastPage.length > 3 && // Garantir que não é apenas "/pt" ou "/e"
           !lastPage.includes('/checkout') && // Garantir que não é checkout

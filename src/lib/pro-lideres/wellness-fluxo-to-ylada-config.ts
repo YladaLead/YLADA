@@ -44,9 +44,10 @@ export function wellnessFluxoToYladaConfigJson(
 ): Record<string, unknown> {
   const fields = fluxo.perguntas.map(perguntaToFormField)
   const d = fluxo.diagnostico
+  // Sem "•" no texto: `<ul class="list-disc">` já desenha o marcador (evita duas bolinhas).
   const summary_bullets: string[] = [
-    ...d.sintomas.slice(0, 5).map((s) => (s.startsWith('•') ? s : `• ${s}`)),
-    ...d.beneficios.slice(0, 5).map((b) => (b.startsWith('•') ? b : `• ${b}`)),
+    ...d.sintomas.slice(0, 5),
+    ...d.beneficios.slice(0, 5),
   ]
   if (d.mensagemPositiva?.trim()) {
     summary_bullets.push(d.mensagemPositiva.trim())
@@ -60,7 +61,8 @@ export function wellnessFluxoToYladaConfigJson(
       when_to_use: fluxo.objetivo,
     },
     meta: {
-      architecture: 'RISK_DIAGNOSIS',
+      // Recrutamento: não usar RISK_DIAGNOSIS (API gera copy clínica). Resultado só a partir de `result` estático.
+      architecture: kind === 'recruitment' ? 'PRO_LIDERES_RECRUITMENT_STATIC' : 'RISK_DIAGNOSIS',
       theme_raw: fluxo.nome,
       theme_display: fluxo.nome,
       objective: kind === 'recruitment' ? 'propagar' : 'educar',
@@ -71,7 +73,7 @@ export function wellnessFluxoToYladaConfigJson(
     },
     form: {
       fields,
-      submit_label: 'Ver meu diagnóstico',
+      submit_label: kind === 'recruitment' ? 'Ver minha avaliação' : 'Ver meu diagnóstico',
     },
     result: {
       headline: d.titulo,

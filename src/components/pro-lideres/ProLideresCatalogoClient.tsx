@@ -179,7 +179,15 @@ function CatalogRowCard({
   )
 }
 
-export function ProLideresCatalogoClient() {
+export function ProLideresCatalogoClient({
+  flowsApiBase = '/api/pro-lideres',
+  painelHomeHref = '/pro-lideres/painel',
+}: {
+  /** Base da API de fluxos (ex.: `/api/pro-estetica-corporal`). */
+  flowsApiBase?: string
+  /** Link "Visão geral" no rodapé. */
+  painelHomeHref?: string
+} = {}) {
   const { isLeaderWorkspace, verticalCode } = useProLideresPainel()
   const brandDisplay = verticalCode === 'h-lider' ? PRO_LIDERES_VERTICAL_BRAND_LABEL : verticalCode
   const [catalog, setCatalog] = useState<ProLideresCatalogItem[]>([])
@@ -197,7 +205,7 @@ export function ProLideresCatalogoClient() {
     setLoading(true)
     setError(null)
     try {
-      const res = await fetch('/api/pro-lideres/flows', { credentials: 'include' })
+      const res = await fetch(`${flowsApiBase}/flows`, { credentials: 'include' })
       const data = (await res.json().catch(() => ({}))) as CatalogPayload & { error?: string }
       if (!res.ok) {
         setError(data.error || 'Não foi possível carregar o catálogo.')
@@ -211,7 +219,7 @@ export function ProLideresCatalogoClient() {
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [flowsApiBase])
 
   useEffect(() => {
     void load()
@@ -233,7 +241,7 @@ export function ProLideresCatalogoClient() {
     setSaving(true)
     setError(null)
     try {
-      const res = await fetch('/api/pro-lideres/flows', {
+      const res = await fetch(`${flowsApiBase}/flows`, {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
@@ -258,7 +266,7 @@ export function ProLideresCatalogoClient() {
     if (!confirm('Remover esta entrada extra do catálogo?')) return
     setError(null)
     try {
-      const res = await fetch(`/api/pro-lideres/flows/${id}`, {
+      const res = await fetch(`${flowsApiBase}/flows/${id}`, {
         method: 'DELETE',
         credentials: 'include',
       })
@@ -461,7 +469,7 @@ export function ProLideresCatalogoClient() {
       )}
 
       <p className="text-sm text-gray-500">
-        <Link href="/pro-lideres/painel" className="font-medium text-blue-700 hover:text-blue-900">
+        <Link href={painelHomeHref} className="font-medium text-blue-700 hover:text-blue-900">
           ← Visão geral
         </Link>
       </p>

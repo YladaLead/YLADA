@@ -44,6 +44,16 @@ const PUBLIC_LINK_UI: Record<Language, {
   shareResult: string
   shareLoveCta: string
   profileLabel: string
+  /** Pro Líderes: quiz recrutamento (negócio Herbalife — sem tom clínico) */
+  recruitmentBadge: string
+  recruitmentIntroTitle: string
+  recruitmentIntroSubtitle: string
+  recruitmentIntroMicro: string
+  recruitmentBoxTitle: string
+  recruitmentBoxDisclaimer: string
+  recruitmentBoxHint: string
+  recruitmentTalkNow: string
+  recruitmentYourResult: string
 }> = {
   pt: {
     start: 'Começar',
@@ -76,6 +86,17 @@ const PUBLIC_LINK_UI: Record<Language, {
     shareResult: '📲 Compartilhe: Isso pode ajudar alguém que você conhece',
     shareLoveCta: 'Você pode ajudar alguém',
     profileLabel: 'Seu perfil',
+    recruitmentBadge: 'Avaliação de perfil',
+    recruitmentIntroTitle: 'Algumas perguntas rápidas',
+    recruitmentIntroSubtitle:
+      'Vamos alinhar o teu perfil e o teu interesse em conversar sobre oportunidade de negócio — sem compromisso.',
+    recruitmentIntroMicro: 'Tempo estimado: 2 a 3 minutos',
+    recruitmentBoxTitle: 'Próximo passo',
+    recruitmentBoxDisclaimer:
+      'Este resumo reflete as tuas respostas. Para o modelo de negócio, próximos passos e dúvidas sobre a oportunidade com a equipa, fala com quem te enviou este link.',
+    recruitmentBoxHint: 'Usa o WhatsApp abaixo para continuar a conversa com a pessoa que partilhou o quiz.',
+    recruitmentTalkNow: '💬 Falar no WhatsApp',
+    recruitmentYourResult: 'O teu resultado',
   },
   en: {
     start: 'Start',
@@ -108,6 +129,17 @@ const PUBLIC_LINK_UI: Record<Language, {
     shareResult: '📲 Send this so someone can try it',
     shareLoveCta: 'Liked it? Share with someone you love.',
     profileLabel: 'Your profile',
+    recruitmentBadge: 'Profile assessment',
+    recruitmentIntroTitle: 'A few quick questions',
+    recruitmentIntroSubtitle:
+      "We'll align your profile and interest in discussing a business opportunity — no commitment.",
+    recruitmentIntroMicro: 'Estimated time: 2–3 minutes',
+    recruitmentBoxTitle: 'Next step',
+    recruitmentBoxDisclaimer:
+      'This summary reflects your answers. For the business model, next steps and questions about the opportunity with the team, talk to whoever sent you this link.',
+    recruitmentBoxHint: 'Use WhatsApp below to continue the conversation with the person who shared the quiz.',
+    recruitmentTalkNow: '💬 Continue on WhatsApp',
+    recruitmentYourResult: 'Your result',
   },
   es: {
     start: 'Comenzar',
@@ -140,7 +172,27 @@ const PUBLIC_LINK_UI: Record<Language, {
     shareResult: '📲 Enviar para que alguien lo haga',
     shareLoveCta: 'Te gustó? Compártelo con alguien que amas.',
     profileLabel: 'Tu perfil',
+    recruitmentBadge: 'Evaluación de perfil',
+    recruitmentIntroTitle: 'Algunas preguntas rápidas',
+    recruitmentIntroSubtitle:
+      'Alineamos tu perfil y tu interés en conversar sobre oportunidad de negocio — sin compromiso.',
+    recruitmentIntroMicro: 'Tiempo estimado: 2 a 3 minutos',
+    recruitmentBoxTitle: 'Próximo paso',
+    recruitmentBoxDisclaimer:
+      'Este resumen refleja tus respuestas. Para el modelo de negocio, próximos pasos y dudas sobre la oportunidad con el equipo, habla con quien te envió este enlace.',
+    recruitmentBoxHint: 'Usa el WhatsApp abajo para seguir la conversación con quien compartió el quiz.',
+    recruitmentTalkNow: '💬 Hablar por WhatsApp',
+    recruitmentYourResult: 'Tu resultado',
   },
+}
+
+/** Remove marcadores no texto quando a lista HTML já usa `list-disc` (evita bolinhas duplicadas em `summary_bullets`). */
+function stripLeadingListMarkers(raw: string): string {
+  let s = raw.trim()
+  while (/^[•·∙\-\*–—]\s*/u.test(s)) {
+    s = s.replace(/^[•·∙\-\*–—]\s*/u, '')
+  }
+  return s.trim()
 }
 
 /** Visitante: link “extra” quando a dona não é Pro e tem mais de um diagnóstico ativo. */
@@ -689,6 +741,8 @@ function ConfigDrivenLinkView({
   const formConfig = (config.form as Record<string, unknown>) || {}
   const resultConfig = (config.result as ResultConfig) || {}
   const meta = (config.meta as Record<string, unknown>) || {}
+  const isProLideresRecruitmentLink =
+    meta.pro_lideres_preset === true && meta.pro_lideres_kind === 'recruitment'
   const fieldsRaw = (formConfig.fields as FormField[]) || []
   const submitLabel = (formConfig.submit_label as string) || t.seeResult
   const archMeta = typeof meta.architecture === 'string' ? meta.architecture : ''
@@ -781,6 +835,7 @@ function ConfigDrivenLinkView({
   }, [diagnosis, metricsId, step, loading])
 
   const useDiagnosisApi =
+    !isProLideresRecruitmentLink &&
     typeof meta.architecture === 'string' &&
     DIAGNOSIS_ARCHITECTURES.includes(meta.architecture as (typeof DIAGNOSIS_ARCHITECTURES)[number])
 
@@ -934,7 +989,7 @@ function ConfigDrivenLinkView({
     }
   }
 
-  const headline = resultConfig.headline || t.yourResult
+  const headline = resultConfig.headline || (isProLideresRecruitmentLink ? t.recruitmentYourResult : t.yourResult)
   const resultDescription =
     typeof resultConfig.description === 'string' && resultConfig.description.trim()
       ? resultConfig.description.trim()
@@ -955,6 +1010,13 @@ function ConfigDrivenLinkView({
     architecture: typeof meta.architecture === 'string' ? meta.architecture : undefined,
     questions_count: visibleQuizQuestionCount > 0 ? visibleQuizQuestionCount : undefined,
   })
+  const introForDisplay = isProLideresRecruitmentLink
+    ? {
+        title: t.recruitmentIntroTitle,
+        subtitle: t.recruitmentIntroSubtitle,
+        micro: t.recruitmentIntroMicro,
+      }
+    : introContent
 
   if (step === 'access_paused') {
     return <FreemiumExtraLinkBlockedScreen locale={locale} pageTitle={displayTitle} />
@@ -1077,16 +1139,16 @@ function ConfigDrivenLinkView({
         <div className="max-w-md w-full bg-white rounded-2xl shadow-xl shadow-sky-100/50 border border-sky-100/60 p-6 sm:p-8">
           <div className="mb-4">
             <span className="inline-block text-xs font-semibold text-sky-600 bg-sky-50 px-3 py-1.5 rounded-full border border-sky-100">
-              {t.personalizedDiagnosis}
+              {isProLideresRecruitmentLink ? t.recruitmentBadge : t.personalizedDiagnosis}
             </span>
           </div>
-          <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 leading-tight">{introContent.title}</h1>
-          <p className="text-sm text-gray-600 leading-relaxed mb-4">{introContent.subtitle}</p>
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 leading-tight">{introForDisplay.title}</h1>
+          <p className="text-sm text-gray-600 leading-relaxed mb-4">{introForDisplay.subtitle}</p>
           <p className="text-xs font-medium text-sky-600 mb-6 flex items-center gap-1.5">
             <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            {introContent.micro}
+            {introForDisplay.micro}
           </p>
           <button
             type="button"
@@ -1101,7 +1163,7 @@ function ConfigDrivenLinkView({
   }
 
   if (step === 'result') {
-    if (diagnosis && metricsId) {
+    if (diagnosis && metricsId && !isProLideresRecruitmentLink) {
       const isPerfumery = meta.architecture === 'PERFUME_PROFILE' || meta.segment_code === 'perfumaria'
       const areaProf = typeof meta.area_profissional === 'string' ? meta.area_profissional : ''
       const segmentCode = typeof meta.segment_code === 'string' ? meta.segment_code : ''
@@ -1350,7 +1412,9 @@ function ConfigDrivenLinkView({
               <PoweredByYlada variant="compact" />
             </div>
             <DiagnosisDisclaimer
-              variant={isPerfumery ? 'wellness' : 'informative'}
+              variant={
+                isPerfumery ? 'wellness' : isProLideresRecruitmentLink ? 'recrutamento_pro_lideres' : 'informative'
+              }
               className="mt-4"
             />
           </div>
@@ -1366,8 +1430,13 @@ function ConfigDrivenLinkView({
     const handleShareStaticResult = () => {
       trackLinkEvent(slug, 'share_click')
       if (typeof window === 'undefined') return
-      const shareText =
-        locale === 'en'
+      const shareText = isProLideresRecruitmentLink
+        ? locale === 'en'
+          ? 'I just did this quiz on Ylada. Try it too:'
+          : locale === 'es'
+            ? 'Acabo de hacer este cuestionario en Ylada. Pruébalo tú también:'
+            : 'Acabei de fazer este quiz no Ylada. Experimenta também:'
+        : locale === 'en'
           ? 'I just took this assessment on Ylada. Try it too:'
           : locale === 'es'
             ? 'Acabo de hacer este diagnóstico en Ylada. Hazlo tú también:'
@@ -1388,21 +1457,27 @@ function ConfigDrivenLinkView({
             {summaryBullets.length > 0 && (
               <ul className="list-disc list-inside text-gray-600 mt-2 space-y-1">
                 {summaryBullets.map((b, i) => (
-                  <li key={i}>{b}</li>
+                  <li key={i}>{stripLeadingListMarkers(String(b))}</li>
                 ))}
               </ul>
             )}
           </div>
           <div className="mb-6 p-4 rounded-xl bg-sky-50/80 border border-sky-100">
             <p className="text-[10px] font-semibold uppercase tracking-wider text-sky-600 mb-2">
-              {t.moreFactors}
+              {isProLideresRecruitmentLink ? t.recruitmentBoxTitle : t.moreFactors}
             </p>
             <p className="text-gray-600 text-sm leading-relaxed mb-2">
-              {t.resultDisclaimer.replace('{pessoa}', pessoaLabelStatic)}
+              {isProLideresRecruitmentLink
+                ? t.recruitmentBoxDisclaimer
+                : t.resultDisclaimer.replace('{pessoa}', pessoaLabelStatic)}
             </p>
-            <p className="text-gray-700 text-sm font-medium">
-              {t.talkToPro.replace('{pessoa}', pessoaLabelStatic)}
-            </p>
+            {isProLideresRecruitmentLink ? (
+              <p className="text-gray-700 text-sm font-medium">{t.recruitmentBoxHint}</p>
+            ) : (
+              <p className="text-gray-700 text-sm font-medium">
+                {t.talkToPro.replace('{pessoa}', pessoaLabelStatic)}
+              </p>
+            )}
           </div>
           {whatsappUrl ? (
             <div className="space-y-3">
@@ -1411,7 +1486,7 @@ function ConfigDrivenLinkView({
                 onClick={() => onCtaClick()}
                 className="w-full py-4 px-4 bg-sky-600 hover:bg-sky-700 text-white font-semibold rounded-xl shadow-lg shadow-sky-500/25 transition-colors"
               >
-                {t.talkNow}
+                {isProLideresRecruitmentLink ? t.recruitmentTalkNow : t.talkNow}
               </button>
               <button
                 type="button"
@@ -1428,7 +1503,10 @@ function ConfigDrivenLinkView({
           <div className="mt-5 pt-4 border-t border-gray-100">
             <PoweredByYlada variant="compact" />
           </div>
-          <DiagnosisDisclaimer variant="informative" className="mt-4" />
+          <DiagnosisDisclaimer
+            variant={isProLideresRecruitmentLink ? 'recrutamento_pro_lideres' : 'informative'}
+            className="mt-4"
+          />
         </div>
       </div>
     )

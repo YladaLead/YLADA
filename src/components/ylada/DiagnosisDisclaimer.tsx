@@ -8,7 +8,13 @@
  * @see docs/conversa-disclaimer
  */
 
-export type DisclaimerVariant = 'informative' | 'wellness'
+export type DisclaimerVariant =
+  | 'informative'
+  | 'wellness'
+  /** Recrutamento / negócio (sem tom clínico nem produto de bem-estar). */
+  | 'recrutamento'
+  /** Pro Líderes + contexto equipa Herbalife (oportunidade de negócio independente). */
+  | 'recrutamento_pro_lideres'
 
 const TEXTS: Record<DisclaimerVariant, string[]> = {
   informative: [
@@ -21,10 +27,20 @@ const TEXTS: Record<DisclaimerVariant, string[]> = {
     'Ele não substitui avaliação profissional, diagnóstico clínico ou orientação especializada.',
     'Caso esteja enfrentando sintomas ou dificuldades, procure orientação de um profissional qualificado.',
   ],
+  recrutamento: [
+    'Este resultado é uma avaliação orientativa com base nas tuas respostas; não é consulta nem avaliação de saúde.',
+    'Foca-se em interesse e perfil para conversa sobre oportunidade de negócio — não indica produtos de bem-estar nem tratamentos.',
+    'Para próximos passos e esclarecimentos, fala com a pessoa que partilhou este link.',
+  ],
+  recrutamento_pro_lideres: [
+    'Este resultado é uma avaliação informal para conversa sobre oportunidade de negócio no contexto Pro Líderes (equipa independente Herbalife).',
+    'Não substitui aconselhamento jurídico, fiscal ou contabilístico; não constitui promessa de ganhos nem avaliação médica.',
+    'Para produtos, oportunidade e regras oficiais, esclarece com quem te enviou o link ou com os canais da Herbalife.',
+  ],
 }
 
 type Props = {
-  /** Variante do texto: "informative" (padrão, universal) ou "wellness" (bem-estar) */
+  /** Variante do texto (bem-estar, recrutamento, Pro Líderes, etc.) */
   variant?: DisclaimerVariant
   /** Classe CSS adicional para o container */
   className?: string

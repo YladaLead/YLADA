@@ -5,7 +5,9 @@ import { FluxoCliente, RespostaFluxo } from '@/types/wellness-system'
 import { getKitByTipo } from '@/lib/wellness-system/produtos'
 import WellnessCTAButton from '@/components/wellness/WellnessCTAButton'
 import { obterMensagemWhatsApp, mensagemPadraoWhatsApp } from '@/lib/wellness-system/mensagens-whatsapp-por-ferramenta'
-import DiagnosisDisclaimer from '@/components/ylada/DiagnosisDisclaimer'
+import DiagnosisDisclaimer, {
+  type DisclaimerVariant,
+} from '@/components/ylada/DiagnosisDisclaimer'
 import PoweredByYlada from '@/components/ylada/PoweredByYlada'
 
 interface FluxoDiagnosticoProps {
@@ -144,6 +146,16 @@ export default function FluxoDiagnostico({
   const kitRecomendado = calcularKitRecomendado()
   const kit = getKitByTipo(kitRecomendado)
 
+  const isRecrutamento = !mostrarProdutos
+  const isProLideresRecruitment =
+    isRecrutamento && Boolean(fluxo.tags?.includes('pro-lideres'))
+
+  const disclaimerVariant: DisclaimerVariant = isRecrutamento
+    ? isProLideresRecruitment
+      ? 'recrutamento_pro_lideres'
+      : 'recrutamento'
+    : 'wellness'
+
   // Salvar diagnóstico quando mostrar resultado
   useEffect(() => {
     if (mostrarResultado && !diagnosticoId && Object.keys(respostas).length === fluxo.perguntas.length) {
@@ -158,7 +170,7 @@ export default function FluxoDiagnostico({
   if (mostrarResultado) {
     return (
       <div className="max-w-3xl mx-auto">
-        {/* Resultado do Diagnóstico */}
+        {/* Resultado (vendas: diagnóstico wellness; recrutamento: perfil / oportunidade) */}
         <div className="bg-white rounded-xl shadow-lg p-6 sm:p-8 mb-6">
           <div className="text-center mb-6">
             <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
@@ -169,27 +181,32 @@ export default function FluxoDiagnostico({
             </p>
           </div>
 
-          {/* Sintomas */}
+          {/* Padrões de perfil (recrutamento) vs “relatam” (vendas wellness) */}
           <div className="bg-blue-50 rounded-lg p-4 mb-6">
             <p className="font-semibold text-gray-900 mb-3">
-              Pessoas com seu perfil geralmente relatam:
+              {isRecrutamento
+                ? 'Perfil identificado — o que as tuas respostas sugerem:'
+                : 'Pessoas com seu perfil geralmente relatam:'}
             </p>
             <ul className="space-y-2">
               {fluxo.diagnostico.sintomas.map((sintoma, index) => (
                 <li key={index} className="flex items-start">
                   <span className="text-green-600 mr-2">✔</span>
-                  <span className="text-gray-700 capitalize">{sintoma}</span>
+                  <span className={`text-gray-700 ${isRecrutamento ? '' : 'capitalize'}`}>{sintoma}</span>
                 </li>
               ))}
             </ul>
           </div>
 
-          {/* Mensagem Positiva */}
+          {/* Próximo passo / mensagem positiva */}
           <div className="bg-green-50 rounded-lg p-4 mb-6">
             <p className="text-gray-800 font-medium">
               {fluxo.diagnostico.mensagemPositiva}
             </p>
-            <ul className="mt-3 space-y-2">
+            {isRecrutamento && (
+              <p className="mt-3 text-sm font-semibold text-gray-800">Próximos passos sugeridos:</p>
+            )}
+            <ul className={`space-y-2 ${isRecrutamento ? 'mt-2' : 'mt-3'}`}>
               {fluxo.diagnostico.beneficios.map((beneficio, index) => (
                 <li key={index} className="text-gray-700">
                   • {beneficio}
@@ -248,8 +265,10 @@ export default function FluxoDiagnostico({
                         // Fluxo de vendas (cliente)
                         return `Olá! Completei o diagnóstico "${fluxo.nome}" e gostaria de saber mais sobre o ${kit?.nome || 'kit recomendado'}.`
                       } else {
-                        // Fluxo de recrutamento (negócio)
-                        return `Olá! Completei a avaliação "${fluxo.nome}" e queria saber mais sobre essa oportunidade.`
+                        // Recrutamento (negócio / conversa — sem kit nem produto wellness)
+                        const herbalife =
+                          isProLideresRecruitment ? ' sobre a oportunidade com a equipa Herbalife' : ''
+                        return `Olá! Completei a avaliação "${fluxo.nome}" e queria saber mais${herbalife}.`
                       }
                     })(),
                     template_slug: fluxo.id, // Passar ID do fluxo para identificar mensagem automática
@@ -267,7 +286,7 @@ export default function FluxoDiagnostico({
           </div>
 
           {/* Disclaimer e Powered by Ylada */}
-          <DiagnosisDisclaimer variant="wellness" className="mt-8" />
+          <DiagnosisDisclaimer variant={disclaimerVariant} className="mt-8" />
           <PoweredByYlada variant="compact" className="mt-4" />
         </div>
       </div>

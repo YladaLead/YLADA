@@ -210,7 +210,7 @@ interface NoelChatProps {
 }
 
 function isProLideresNoelApiPath(path: string | undefined): boolean {
-  return Boolean(path?.includes('/pro-lideres/noel'))
+  return Boolean(path?.includes('/pro-lideres/noel') || path?.includes('/pro-estetica-corporal/noel'))
 }
 
 export default function NoelChat({
