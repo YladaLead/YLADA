@@ -40,7 +40,7 @@ FORMATO
 
 /**
  * POST /api/pro-lideres/noel
- * Chat do mentor no painel Pro Líderes (líder ou membro do tenant).
+ * Chat do mentor no painel Pro Líderes — **só o líder** do tenant (equipa usa scripts, sem Noel).
  */
 export async function POST(request: NextRequest) {
   const auth = await requireApiAuth(request)
@@ -58,6 +58,12 @@ export async function POST(request: NextRequest) {
   const ctx = await resolveProLideresTenantContext(supabaseAdmin, user)
   if (!ctx) {
     return NextResponse.json({ error: 'Sem acesso a um espaço Pro Líderes.' }, { status: 403 })
+  }
+  if (ctx.role !== 'leader') {
+    return NextResponse.json(
+      { error: 'O mentor Noel neste espaço está disponível apenas para o líder. Usa Scripts e o catálogo partilhado.' },
+      { status: 403 }
+    )
   }
 
   let body: { message?: string; conversationHistory?: HistoryTurn[]; locale?: string }

@@ -9,8 +9,8 @@ export default function ProLideresNoelPage() {
         <p className="text-sm font-medium text-blue-600">Principal</p>
         <h1 className="text-2xl font-bold text-gray-900">Noel (mentor)</h1>
         <p className="mt-1 max-w-2xl text-sm text-gray-600">
-          O mesmo mentor visual da matriz YLADA, com contexto do <strong className="text-gray-800">teu espaço Pro Líderes</strong>{' '}
-          (operador, notas de foco e papel: líder ou equipe). Ideal para scripts de WhatsApp, links e conversas de campo.
+          Mentor com contexto do <strong className="text-gray-800">teu espaço Pro Líderes</strong> (operador e notas
+          de foco). A equipa não tem acesso a esta página — partilha roteiros pela área <strong>Scripts</strong>.
         </p>
       </div>
 

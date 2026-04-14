@@ -19,8 +19,10 @@ export const PRO_LIDERES_MENU_GROUPS: { label: string; items: ProLideresMenuItem
     items: [
       { key: 'visao', label: 'Visão geral', path: '', icon: '📊' },
       { key: 'links', label: 'Links & convites', path: 'links', icon: '🔗', leaderOnly: true },
-      { key: 'equipe', label: 'Equipe', path: 'equipe', icon: '👥' },
-      { key: 'noel', label: 'Noel (mentor)', path: 'noel', icon: '💬' },
+      /** Lista de pessoas do espaço: só o líder (membro foca em catálogo + scripts). */
+      { key: 'equipe', label: 'Equipe', path: 'equipe', icon: '👥', leaderOnly: true },
+      /** Mentor IA: só o líder; a equipa usa scripts e materiais partilhados. */
+      { key: 'noel', label: 'Noel (mentor)', path: 'noel', icon: '💬', leaderOnly: true },
     ],
   },
   {

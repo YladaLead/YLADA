@@ -15,10 +15,14 @@ export default async function ProLideresEquipePage() {
   const gate = await ensureLeaderTenantAccess()
   if (!gate.ok) redirect(gate.redirect)
 
-  const members = await fetchProLideresMembersEnriched(gate.tenant.id)
   const cookieStore = await cookies()
   const teamViewPreview = proLideresTeamViewPreviewFromCookies(gate.role, cookieStore)
   const isLeader = gate.role === 'leader' && !teamViewPreview
+  if (!isLeader) {
+    redirect('/pro-lideres/painel')
+  }
+
+  const members = await fetchProLideresMembersEnriched(gate.tenant.id)
   const ctx = { tenant: gate.tenant, role: gate.role }
 
   return (

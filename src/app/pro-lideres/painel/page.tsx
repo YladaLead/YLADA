@@ -47,24 +47,14 @@ export default async function ProLideresPainelVisaoPage() {
 
   const teamCards = [
     {
-      title: 'Equipe',
-      desc: 'Colegas neste espaço',
-      href: '/pro-lideres/painel/equipe',
-    },
-    {
       title: 'Catálogo de ferramentas',
       desc: 'Links YLADA (/l/…) partilhados pelo líder',
       href: '/pro-lideres/painel/catalogo',
     },
     {
       title: 'Scripts',
-      desc: 'Roteiros de conversa partilhados pelo líder',
+      desc: 'Roteiros e mensagens partilhados pelo líder para executares no campo',
       href: '/pro-lideres/painel/scripts',
-    },
-    {
-      title: 'Noel (mentor)',
-      desc: 'Tirar dúvidas no contexto da operação',
-      href: '/pro-lideres/painel/noel',
     },
   ] as const
 
@@ -87,8 +77,9 @@ export default async function ProLideresPainelVisaoPage() {
             ) : (
               <>
                 Você está no <strong className="text-emerald-800">ambiente da equipe</strong> de{' '}
-                <strong className="text-gray-800">{op}</strong>. O líder gere convites e definições; aqui você acessa o
-                conteúdo e a lista da equipe.
+                <strong className="text-gray-800">{op}</strong>. O líder gere convites, equipa e definições; aqui acede
+                só ao <strong>catálogo</strong> e aos <strong>scripts</strong> para executar no campo — sem Noel nem
+                gestão de equipa.
               </>
             )}
           </p>
