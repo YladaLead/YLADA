@@ -595,9 +595,26 @@ export default function LoginForm({
           !lastPage.includes('/configuracao') && // Não usar última página se for configurações
           !lastPage.includes('/dashboard')
         
-        const finalRedirectPath = isValidRoute ? lastPage : baseRedirectPath
-        
-        console.log('🔄 Redirecionando após login para:', finalRedirectPath, isValidRoute ? '(última página visitada)' : isLandingPage ? '(página de vendas ignorada, usando padrão)' : '(padrão)')
+        // Pro Líderes / Pro Estética: nunca deixar "última página" (/pt/home, etc.) roubar o destino —
+        // senão o login em /pro-…/entrar manda o utilizador para a matriz em vez do painel.
+        const finalRedirectPath =
+          proLideresLogin || proEsteticaCorporalLogin
+            ? baseRedirectPath
+            : isValidRoute
+              ? lastPage
+              : baseRedirectPath
+
+        console.log(
+          '🔄 Redirecionando após login para:',
+          finalRedirectPath,
+          proLideresLogin || proEsteticaCorporalLogin
+            ? '(destino fixo Pro workspace)'
+            : isValidRoute
+              ? '(última página visitada)'
+              : isLandingPage
+                ? '(página de vendas ignorada, usando padrão)'
+                : '(padrão)'
+        )
         
         // Verificar se já está na página de destino para evitar loop
         const currentPath = typeof window !== 'undefined' ? window.location.pathname : ''

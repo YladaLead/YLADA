@@ -33,7 +33,7 @@ export default function ProLideresAreaShell({
       .toUpperCase()
       .slice(0, 2) || 'L'
 
-  const { isLeaderWorkspace, operationLabel, devStubPanel } = painelContext
+  const { isLeaderWorkspace, operationLabel, devStubPanel, teamViewPreview } = painelContext
 
   return (
     <ProLideresPainelProvider value={painelContext}>
@@ -47,6 +47,16 @@ export default function ProLideresAreaShell({
           >
             Modo desenvolvimento: painel sem tenant na base de dados. Convites, fluxos e dados reais não aplicam até
             criares o tenant ou desligares o bypass com <code className="rounded bg-amber-100/80 px-1">PRO_LIDERES_DEV_OPEN_PAINEL=false</code>.
+          </div>
+        )}
+        {teamViewPreview && (
+          <div
+            className="border-b border-emerald-200 bg-emerald-50 px-3 py-2.5 text-center text-xs text-emerald-950 sm:px-4"
+            role="status"
+          >
+            <strong className="font-semibold">A ver como a equipa</strong> — menu e ecrãs iguais ao que a tua equipa
+            vê. As tuas permissões de líder mantêm-se nas APIs; usa o menu para{' '}
+            <span className="font-medium">voltar ao ambiente do líder</span> quando terminares.
           </div>
         )}
         {/* Única barra de marca: mobile-first (44px mín. toque no menu) */}

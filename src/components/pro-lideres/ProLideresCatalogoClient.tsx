@@ -182,11 +182,25 @@ function CatalogRowCard({
 export function ProLideresCatalogoClient({
   flowsApiBase = '/api/pro-lideres',
   painelHomeHref = '/pro-lideres/painel',
+  /** Pro Estética: só o separador de vendas/fluxos — sem recrutamento MMN. */
+  hideRecruitmentTab = false,
+  salesTabLabel = 'Vendas',
+  catalogTitle = 'Catálogo de ferramentas',
+  catalogIntro,
+  addFormAudienceNote = 'à equipa',
 }: {
   /** Base da API de fluxos (ex.: `/api/pro-estetica-corporal`). */
   flowsApiBase?: string
   /** Link "Visão geral" no rodapé. */
   painelHomeHref?: string
+  hideRecruitmentTab?: boolean
+  /** Rótulo do separador principal (ex.: "Fluxos e links"). */
+  salesTabLabel?: string
+  catalogTitle?: string
+  /** Parágrafo introdutório abaixo do título. */
+  catalogIntro?: string
+  /** Texto no formulário "link extra" (ex.: "à tua operação"). */
+  addFormAudienceNote?: string
 } = {}) {
   const { isLeaderWorkspace, verticalCode } = useProLideresPainel()
   const brandDisplay = verticalCode === 'h-lider' ? PRO_LIDERES_VERTICAL_BRAND_LABEL : verticalCode
@@ -200,6 +214,11 @@ export function ProLideresCatalogoClient({
   const [tab, setTab] = useState<TabKey>('sales')
   const [search, setSearch] = useState('')
   const [addCategory, setAddCategory] = useState<TabKey>('sales')
+
+  const defaultIntro =
+    'Lista única por ferramenta (mesmo link ou mesmo nome no separador). Em Recrutamento, o sistema completa automaticamente os presets (3 quizzes + dois fluxos) em /l/… — funcionam como os teus outros links YLADA, com perguntas e diagnóstico. Edita em Meus links se precisares.'
+
+  const introText = catalogIntro ?? defaultIntro
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -300,37 +319,37 @@ export function ProLideresCatalogoClient({
     >
       <header className="space-y-1">
         <p className="text-sm font-medium text-blue-600">Conteúdo</p>
-        <h1 className="text-2xl font-bold text-gray-900">Catálogo de ferramentas</h1>
-        <p className="text-sm text-gray-600">
-          Lista única por ferramenta (mesmo link ou mesmo nome no separador). Em Recrutamento, o sistema completa
-          automaticamente os presets (3 quizzes + dois fluxos) em /l/… — funcionam como os teus outros links YLADA,
-          com perguntas e diagnóstico. Edita em Meus links se precisares.
-        </p>
+        <h1 className="text-2xl font-bold text-gray-900">{catalogTitle}</h1>
+        <p className="text-sm text-gray-600">{introText}</p>
       </header>
 
       <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-stretch sm:gap-3">
-          <div className="flex flex-1 rounded-xl bg-gray-100 p-1">
+          <div
+            className={`flex flex-1 rounded-xl bg-gray-100 p-1 ${hideRecruitmentTab ? 'max-w-md' : ''}`}
+          >
             <button
               type="button"
               onClick={() => setTab('sales')}
-              title="Fluxos e links de venda de produtos"
+              title="Fluxos e links da tua operação"
               className={`min-h-[44px] flex-1 rounded-lg px-3 text-sm font-semibold transition ${
                 tab === 'sales' ? 'bg-white text-blue-700 shadow-sm' : 'text-gray-600 hover:text-gray-900'
               }`}
             >
-              Vendas
+              {salesTabLabel}
             </button>
-            <button
-              type="button"
-              onClick={() => setTab('recruitment')}
-              title="Fluxos e links para recrutar pessoas"
-              className={`min-h-[44px] flex-1 rounded-lg px-3 text-sm font-semibold transition ${
-                tab === 'recruitment' ? 'bg-white text-blue-700 shadow-sm' : 'text-gray-600 hover:text-gray-900'
-              }`}
-            >
-              Recrutamento
-            </button>
+            {!hideRecruitmentTab && (
+              <button
+                type="button"
+                onClick={() => setTab('recruitment')}
+                title="Fluxos e links para recrutar pessoas"
+                className={`min-h-[44px] flex-1 rounded-lg px-3 text-sm font-semibold transition ${
+                  tab === 'recruitment' ? 'bg-white text-blue-700 shadow-sm' : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                Recrutamento
+              </button>
+            )}
           </div>
           <label className="block min-w-0 flex-1 sm:max-w-md">
             <span className="sr-only">Buscar por nome</span>
@@ -373,8 +392,12 @@ export function ProLideresCatalogoClient({
           <p className="font-medium text-gray-900">Nada neste separador</p>
           <p className="mt-1 text-sm">
             {search.trim()
-              ? 'Nenhum resultado para a pesquisa — experimenta outro termo ou o outro separador (Vendas / Recrutamento).'
-              : 'Não há itens em Vendas ou Recrutamento nesta vista. Adiciona um link extra (categoria recrutamento) ou cria ferramentas em Meus links.'}
+              ? hideRecruitmentTab
+                ? 'Nenhum resultado para a pesquisa — experimenta outro termo.'
+                : 'Nenhum resultado para a pesquisa — experimenta outro termo ou o outro separador (Vendas / Recrutamento).'
+              : hideRecruitmentTab
+                ? 'Não há itens nesta vista. Cria ferramentas em Meus links ou adiciona um link extra abaixo.'
+                : 'Não há itens em Vendas ou Recrutamento nesta vista. Adiciona um link extra (categoria recrutamento) ou cria ferramentas em Meus links.'}
           </p>
         </div>
       ) : (
@@ -393,9 +416,19 @@ export function ProLideresCatalogoClient({
       )}
 
       <div className="rounded-lg border border-amber-100 bg-amber-50/80 px-3 py-2 text-xs text-amber-950">
-        Duplicados: mesmo URL ou mesmo nome dentro de <strong>Vendas</strong> / <strong>Recrutamento</strong> ficam num
-        só cartão (fica a versão com mais utilização). Tipos como em Meus links. Extras:{' '}
-        <code className="rounded bg-amber-100 px-1">leader_tenant_flow_entries</code> (304).
+        {hideRecruitmentTab ? (
+          <>
+            Duplicados: mesmo URL ou mesmo nome ficam num só cartão (fica a versão com mais utilização). Tipos como em
+            Meus links. Extras:{' '}
+            <code className="rounded bg-amber-100 px-1">leader_tenant_flow_entries</code>.
+          </>
+        ) : (
+          <>
+            Duplicados: mesmo URL ou mesmo nome dentro de <strong>Vendas</strong> / <strong>Recrutamento</strong> ficam num
+            só cartão (fica a versão com mais utilização). Tipos como em Meus links. Extras:{' '}
+            <code className="rounded bg-amber-100 px-1">leader_tenant_flow_entries</code> (304).
+          </>
+        )}
       </div>
 
       {isLeaderWorkspace && (
@@ -404,37 +437,39 @@ export function ProLideresCatalogoClient({
             Link extra no painel
           </h2>
           <p className="mt-1 text-sm text-gray-600">
-            Opcional. Os teus links YLADA já entram automaticamente; usa isto só para fixar mais um URL à equipa.
+            Opcional. Os teus links YLADA já entram automaticamente; usa isto só para fixar mais um URL {addFormAudienceNote}.
           </p>
           <form onSubmit={onAdd} className="mt-4 grid gap-3 sm:grid-cols-2">
-            <fieldset className="sm:col-span-2">
-              <legend className="mb-2 text-sm font-medium text-gray-700">Categoria</legend>
-              <div className="flex flex-wrap gap-2">
-                <button
-                  type="button"
-                  onClick={() => setAddCategory('sales')}
-                  className={`min-h-[40px] rounded-lg px-4 text-sm font-semibold transition ${
-                    addCategory === 'sales'
-                      ? 'bg-blue-600 text-white shadow-sm'
-                      : 'border border-gray-200 bg-white text-gray-700 hover:bg-gray-50'
-                  }`}
-                >
-                  Vendas
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setAddCategory('recruitment')}
-                  title="Guardar como fluxo de recrutamento"
-                  className={`min-h-[40px] rounded-lg px-4 text-sm font-semibold transition ${
-                    addCategory === 'recruitment'
-                      ? 'bg-blue-600 text-white shadow-sm'
-                      : 'border border-gray-200 bg-white text-gray-700 hover:bg-gray-50'
-                  }`}
-                >
-                  Recrutamento
-                </button>
-              </div>
-            </fieldset>
+            {!hideRecruitmentTab && (
+              <fieldset className="sm:col-span-2">
+                <legend className="mb-2 text-sm font-medium text-gray-700">Categoria</legend>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setAddCategory('sales')}
+                    className={`min-h-[40px] rounded-lg px-4 text-sm font-semibold transition ${
+                      addCategory === 'sales'
+                        ? 'bg-blue-600 text-white shadow-sm'
+                        : 'border border-gray-200 bg-white text-gray-700 hover:bg-gray-50'
+                    }`}
+                  >
+                    Vendas
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setAddCategory('recruitment')}
+                    title="Guardar como fluxo de recrutamento"
+                    className={`min-h-[40px] rounded-lg px-4 text-sm font-semibold transition ${
+                      addCategory === 'recruitment'
+                        ? 'bg-blue-600 text-white shadow-sm'
+                        : 'border border-gray-200 bg-white text-gray-700 hover:bg-gray-50'
+                    }`}
+                  >
+                    Recrutamento
+                  </button>
+                </div>
+              </fieldset>
+            )}
             <label className="block text-sm sm:col-span-2">
               <span className="mb-1 block font-medium text-gray-700">Nome</span>
               <input

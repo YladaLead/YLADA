@@ -47,6 +47,18 @@ export type LeaderTenantInviteRow = {
   created_at: string
 }
 
+/** Script guardado no painel Pro Estética Corporal (tabela leader_tenant_estetica_scripts). */
+export type LeaderTenantEsteticaScriptRow = {
+  id: string
+  leader_tenant_id: string
+  title: string
+  body: string
+  sort_order: number
+  category: 'captar' | 'retencao' | 'acompanhar' | 'geral'
+  created_at: string
+  updated_at: string
+}
+
 /** Resposta enriquecida na listagem do painel do líder. */
 export type LeaderTenantInviteListItem = LeaderTenantInviteRow & {
   effectiveStatus: LeaderTenantInviteStatus

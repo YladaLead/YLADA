@@ -30,7 +30,7 @@ export async function createProLideresServerClient() {
 }
 
 /** E-mails que sempre podem ter tenant criado ao entrar (idealizador / admin geral), mesmo com auto-provision global desligada. */
-const PRO_LIDERES_BOOTSTRAP_EMAILS_BUILTIN = ['faulaandre@gmail.com'] as const
+const PRO_LIDERES_BOOTSTRAP_EMAILS_BUILTIN = ['andre@prolider.com'] as const
 
 /** Lista normalizada: built-in + PRO_LIDERES_BOOTSTRAP_LEADER_EMAILS (vírgulas). */
 export function isProLideresBootstrapLeaderEmail(email: string | undefined | null): boolean {

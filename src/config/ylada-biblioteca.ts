@@ -442,8 +442,31 @@ const IDEIAS_RAPIDAS_ESTETICA: Record<string, IdeiaRapidaNoel[]> = {
   ],
   corporal: [
     { texto: 'O que pode estar causando sua celulite?', tema: 'celulite', titulo_sugerido: 'O que pode estar causando sua celulite?' },
-    { texto: 'Você tem sinais de flacidez?', tema: 'flacidez', titulo_sugerido: 'Você tem sinais de flacidez?' },
-    { texto: 'O que está travando os resultados da sua pele?', tema: 'gordura_localizada', titulo_sugerido: 'O que está travando seus resultados?' },
+    {
+      texto: 'Descubra o que pode estar travando os benefícios da sua pele.',
+      tema: 'pele',
+      titulo_sugerido: 'Descubra o que pode estar travando os benefícios da sua pele',
+    },
+    {
+      texto: 'Flacidez costuma começar antes de ficar evidente no espelho.',
+      tema: 'flacidez',
+      titulo_sugerido: 'Você tem sinais de flacidez que ainda não percebeu?',
+    },
+    {
+      texto: 'Inchaço e retenção mascaram resultado e desanimam na balança.',
+      tema: 'inchaço_retencao',
+      titulo_sugerido: 'Seu corpo está acumulando retenção de líquido?',
+    },
+    {
+      texto: 'Antes de montar protocolo, ajuda a cliente a nomear o que a trava.',
+      tema: 'habitos',
+      titulo_sugerido: 'O que mais te impede de investir no seu corpo agora?',
+    },
+    {
+      texto: 'Mapa de zonas abre conversa sobre prioridade e pacote.',
+      tema: 'peso_gordura',
+      titulo_sugerido: 'Quais zonas do seu corpo mais te incomodam hoje?',
+    },
   ],
   capilar: [
     { texto: 'Seu cabelo está recebendo os cuidados certos?', tema: 'cabelo', titulo_sugerido: 'Seu cabelo está saudável?' },
@@ -483,6 +506,9 @@ const IDEIAS_RAPIDAS_ESTETICA: Record<string, IdeiaRapidaNoel[]> = {
   ],
 }
 
+/** Ideias rápidas só corpo (Pro Estética Corporal / biblioteca com subscope). */
+export const IDEIAS_RAPIDAS_ESTETICA_CORPORAIS: IdeiaRapidaNoel[] = IDEIAS_RAPIDAS_ESTETICA.corporal
+
 /** Retorna a "ideia do dia" para o gatilho de criação (índice estável por dia, sem IA). */
 export function getIdeiaRapidaDoDia(options?: {
   segmentCode?: BibliotecaSegmentCode | null
@@ -521,7 +547,6 @@ const TITULOS_ADAPTADOS: Partial<Record<string, Partial<Record<BibliotecaSegment
   },
   peso_gordura: {
     nutrition: 'O que pode estar travando seu emagrecimento?',
-    aesthetics: 'O que pode estar travando os resultados da sua pele?',
     fitness: 'O que pode estar travando sua evolução no treino?',
   },
   energia: {
@@ -537,7 +562,7 @@ const TITULOS_ADAPTADOS: Partial<Record<string, Partial<Record<BibliotecaSegment
     fitness: 'Sua vitalidade está no nível que você quer?',
   },
   pele: {
-    aesthetics: 'Descubra o que pode estar travando os resultados da sua pele',
+    aesthetics: 'Descubra o que pode estar travando os benefícios da sua pele',
   },
   rotina_cuidados: {
     aesthetics: 'Sua rotina de skincare está favorecendo ou prejudicando sua pele?',

@@ -45,6 +45,13 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(url, 308)
   }
 
+  // Pro Estética (e subrotas): URL canónica sem /pt — quem abrir /pt/pro-estetica-corporal… vai para a rota certa
+  if (pathname === '/pt/pro-estetica-corporal' || pathname.startsWith('/pt/pro-estetica-corporal/')) {
+    const url = request.nextUrl.clone()
+    url.pathname = pathname.replace(/^\/pt(?=\/pro-estetica-corporal)/, '') || '/pro-estetica-corporal'
+    return NextResponse.redirect(url, 308)
+  }
+
   // Rotas que NUNCA devem ser redirecionadas (verificar PRIMEIRO)
   if (
     pathname === '/migrado' || // Página de acesso migrado - não redirecionar
@@ -58,6 +65,7 @@ export function middleware(request: NextRequest) {
     pathname.startsWith('/calculadora-imc') ||
     pathname.startsWith('/admin') || // IMPORTANTE: Admin SEMPRE sem /pt
     pathname.startsWith('/pro-lideres') || // YLADA Pro Líderes — canônico sem /pt
+    pathname.startsWith('/pro-estetica-corporal') || // YLADA Pro Estética Corporal — canônico sem /pt
     pathname.startsWith('/cursos') ||
     pathname.startsWith('/create') ||
     pathname.startsWith('/api/') ||

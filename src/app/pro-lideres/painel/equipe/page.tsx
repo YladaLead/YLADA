@@ -1,8 +1,10 @@
+import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 
 import { ProLideresEquipeAttributionPanel } from '@/components/pro-lideres/ProLideresEquipeAttributionPanel'
 import { ensureLeaderTenantAccess } from '@/lib/pro-lideres-server'
 import { fetchProLideresMembersEnriched } from '@/lib/pro-lideres-members-enriched'
+import { proLideresTeamViewPreviewFromCookies } from '@/lib/pro-lideres-team-preview'
 import type { ProLideresTenantRole } from '@/types/leader-tenant'
 
 function roleLabel(role: ProLideresTenantRole): string {
@@ -14,7 +16,9 @@ export default async function ProLideresEquipePage() {
   if (!gate.ok) redirect(gate.redirect)
 
   const members = await fetchProLideresMembersEnriched(gate.tenant.id)
-  const isLeader = gate.role === 'leader'
+  const cookieStore = await cookies()
+  const teamViewPreview = proLideresTeamViewPreviewFromCookies(gate.role, cookieStore)
+  const isLeader = gate.role === 'leader' && !teamViewPreview
   const ctx = { tenant: gate.tenant, role: gate.role }
 
   return (
@@ -72,7 +76,7 @@ export default async function ProLideresEquipePage() {
         </ul>
       </div>
 
-      {isLeader && <ProLideresEquipeAttributionPanel />}
+      {isLeader ? <ProLideresEquipeAttributionPanel /> : null}
     </div>
   )
 }

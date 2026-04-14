@@ -1,11 +1,15 @@
 /**
  * GET /api/ylada/biblioteca — lista itens da biblioteca com filtros.
- * Query: tipo?, segmento?, tema?
+ * Query: tipo?, segmento?, tema?, subscope=estetica_corporal (lista fechada por template_id em `pro-estetica-corporal-biblioteca.ts`)
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { requireApiAuth } from '@/lib/api-auth'
 import { supabaseAdmin } from '@/lib/supabase'
 import { YLADA_API_ALLOWED_PROFILES } from '@/config/ylada-areas'
+import {
+  SEGMENT_CODES_BIBLIOTECA_ESTETICA_CORPORAL,
+  filtrarBibliotecaItensEsteticaCorporal,
+} from '@/config/pro-estetica-corporal-biblioteca'
 
 export async function GET(request: NextRequest) {
   try {
@@ -20,6 +24,8 @@ export async function GET(request: NextRequest) {
     const tipo = searchParams.get('tipo')?.trim() || ''
     const segmento = searchParams.get('segmento')?.trim() || ''
     const tema = searchParams.get('tema')?.trim() || ''
+    const subscope = searchParams.get('subscope')?.trim() || ''
+    const esteticaCorporal = subscope === 'estetica_corporal'
 
     let query = supabaseAdmin
       .from('ylada_biblioteca_itens')
@@ -34,7 +40,9 @@ export async function GET(request: NextRequest) {
     if (tema) {
       query = query.eq('tema', tema)
     }
-    if (segmento) {
+    if (esteticaCorporal) {
+      query = query.overlaps('segment_codes', [...SEGMENT_CODES_BIBLIOTECA_ESTETICA_CORPORAL])
+    } else if (segmento) {
       // Overlap: segment_codes do item intersecta o array. Psicanálise ainda pode reutilizar itens marcados só como psychology até migrar no admin.
       const codes = segmento === 'psychoanalysis' ? ['psychoanalysis', 'psychology'] : [segmento]
       query = query.overlaps('segment_codes', codes)
@@ -47,7 +55,11 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
-    return NextResponse.json({ items: data ?? [] })
+    let items = data ?? []
+    if (esteticaCorporal) {
+      items = filtrarBibliotecaItensEsteticaCorporal(items)
+    }
+    return NextResponse.json({ items })
   } catch (err: unknown) {
     console.error('[biblioteca] Erro:', err)
     return NextResponse.json(

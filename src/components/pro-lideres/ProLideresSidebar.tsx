@@ -1,11 +1,12 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { PRO_LIDERES_MENU_GROUPS, proLideresItemHref, type ProLideresMenuItem } from '@/config/pro-lideres-menu'
 import { useAuth } from '@/hooks/useAuth'
 import { useProLideresPainel } from '@/components/pro-lideres/pro-lideres-painel-context'
+import { setProLideresTeamViewPreviewCookie } from '@/lib/pro-lideres-team-preview'
 
 interface ProLideresSidebarProps {
   isMobileOpen?: boolean
@@ -14,7 +15,8 @@ interface ProLideresSidebarProps {
 
 export default function ProLideresSidebar({ isMobileOpen = false, onMobileClose }: ProLideresSidebarProps) {
   const pathname = usePathname()
-  const { isLeaderWorkspace } = useProLideresPainel()
+  const router = useRouter()
+  const { isLeaderWorkspace, role, teamViewPreview } = useProLideresPainel()
   const { signOut, user, userProfile } = useAuth()
   const [contaOpen, setContaOpen] = useState(false)
   const contaRouteKeyRef = useRef<string | null>(null)
@@ -155,10 +157,44 @@ export default function ProLideresSidebar({ isMobileOpen = false, onMobileClose 
               )}
             </div>
           )}
-          <div className="px-3 pb-3">
+          <div className="space-y-1 px-3 pb-3">
+            {role === 'leader' && (
+              <>
+                {!teamViewPreview ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setProLideresTeamViewPreviewCookie(true)
+                      onMobileClose?.()
+                      router.push('/pro-lideres/painel')
+                      router.refresh()
+                    }}
+                    className="flex min-h-[44px] w-full items-center gap-3 rounded-lg border border-emerald-200 bg-emerald-50/80 px-3 py-2.5 text-left text-sm font-semibold text-emerald-900 transition-colors touch-manipulation hover:bg-emerald-100"
+                  >
+                    <span aria-hidden>👀</span>
+                    Ver como equipe
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setProLideresTeamViewPreviewCookie(false)
+                      onMobileClose?.()
+                      router.push('/pro-lideres/painel')
+                      router.refresh()
+                    }}
+                    className="flex min-h-[44px] w-full items-center gap-3 rounded-lg border border-blue-200 bg-blue-50/90 px-3 py-2.5 text-left text-sm font-semibold text-blue-900 transition-colors touch-manipulation hover:bg-blue-100"
+                  >
+                    <span aria-hidden>↩</span>
+                    Voltar ao ambiente do líder
+                  </button>
+                )}
+              </>
+            )}
             <button
               type="button"
               onClick={() => {
+                setProLideresTeamViewPreviewCookie(false)
                 signOut()
                 onMobileClose?.()
               }}
