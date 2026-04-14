@@ -3,6 +3,7 @@ import { createServerClient } from '@supabase/ssr'
 import type { SupabaseClient, User } from '@supabase/supabase-js'
 import type { LeaderTenantRow, ProLideresTenantRole } from '@/types/leader-tenant'
 import { applyCompletedLeaderOnboardingForEmail } from '@/lib/pro-lideres-leader-onboarding'
+import { supabaseAdmin } from '@/lib/supabase'
 
 export type { LeaderTenantRow, ProLideresTenantRole }
 
@@ -179,8 +180,52 @@ export async function ensureLeaderTenantAccess(): Promise<
       .insert(newLeaderTenantInsertPayload(user))
       .select()
       .single()
+    if (error) {
+      console.error(
+        '[ensureLeaderTenantAccess] provision (user client) falhou:',
+        error.code,
+        error.message,
+        user.email
+      )
+    }
     if (!error && inserted) {
       ctx = { tenant: inserted as LeaderTenantRow, role: 'leader' }
+    }
+  }
+
+  /**
+   * Fallback com service role: corrige casos em que RLS/cookie impede SELECT/INSERT com o JWT
+   * (utilizador autenticado mas sem contexto → aguardando-acesso em loop).
+   * Só corre quando o e-mail já era elegível para auto-provision / bootstrap.
+   */
+  if (!ctx && shouldProvisionProLideresTenant(user.email) && supabaseAdmin) {
+    const { data: existingOwner, error: fetchErr } = await supabaseAdmin
+      .from('leader_tenants')
+      .select('*')
+      .eq('owner_user_id', user.id)
+      .maybeSingle()
+    if (fetchErr) {
+      console.error('[ensureLeaderTenantAccess] admin lookup owner:', fetchErr.message, user.email)
+    }
+    if (existingOwner) {
+      ctx = { tenant: existingOwner as LeaderTenantRow, role: 'leader' }
+    } else {
+      const { data: ins, error: insErr } = await supabaseAdmin
+        .from('leader_tenants')
+        .insert(newLeaderTenantInsertPayload(user))
+        .select()
+        .single()
+      if (insErr) {
+        console.error(
+          '[ensureLeaderTenantAccess] provision (admin) falhou:',
+          insErr.code,
+          insErr.message,
+          user.email
+        )
+      }
+      if (!insErr && ins) {
+        ctx = { tenant: ins as LeaderTenantRow, role: 'leader' }
+      }
     }
   }
 
