@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireApiAuth } from '@/lib/api-auth'
 import { supabaseAdmin } from '@/lib/supabase'
+import { proLideresApiDevHint } from '@/lib/pro-lideres-api-dev-hints'
 import { resolveProLideresTenantContext } from '@/lib/pro-lideres-server'
 import { buildProLideresCatalog, type ProLideresCatalogItem } from '@/lib/pro-lideres-catalog-build'
 
@@ -34,12 +35,18 @@ export async function GET(request: NextRequest) {
   const { user } = auth
 
   if (!supabaseAdmin) {
-    return NextResponse.json({ error: 'Servidor sem service role' }, { status: 503 })
+    return NextResponse.json(
+      { error: 'Servidor sem service role', ...proLideresApiDevHint('noServiceRole') },
+      { status: 503 }
+    )
   }
 
   const ctx = await resolveProLideresTenantContext(supabaseAdmin, user)
   if (!ctx) {
-    return NextResponse.json({ error: 'Tenant não encontrado' }, { status: 404 })
+    return NextResponse.json(
+      { error: 'Tenant não encontrado', ...proLideresApiDevHint('noTenant') },
+      { status: 404 }
+    )
   }
 
   const { data: rows, error } = await supabaseAdmin

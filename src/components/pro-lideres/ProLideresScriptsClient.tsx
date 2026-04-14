@@ -11,6 +11,8 @@ type ScriptsPayload = {
   sections?: ProLideresScriptSectionWithEntries[]
   canEdit?: boolean
   error?: string
+  /** Só em desenvolvimento (API): dica para .env.local / tenant */
+  devHint?: string
 }
 
 async function copyText(text: string): Promise<boolean> {
@@ -37,6 +39,7 @@ export function ProLideresScriptsClient() {
   const [canEdit, setCanEdit] = useState(false)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [devHint, setDevHint] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
   const [copiedId, setCopiedId] = useState<string | null>(null)
 
@@ -53,18 +56,32 @@ export function ProLideresScriptsClient() {
   const load = useCallback(async () => {
     setLoading(true)
     setError(null)
+    setDevHint(null)
     try {
       const [scriptsRes, flowsRes] = await Promise.all([
         fetch('/api/pro-lideres/scripts', { credentials: 'include' }),
         fetch('/api/pro-lideres/flows', { credentials: 'include' }),
       ])
       const scriptsData = (await scriptsRes.json().catch(() => ({}))) as ScriptsPayload
-      const flowsData = (await flowsRes.json().catch(() => ({}))) as { catalog?: ProLideresCatalogItem[] }
+      const flowsData = (await flowsRes.json().catch(() => ({}))) as {
+        catalog?: ProLideresCatalogItem[]
+        error?: string
+        devHint?: string
+      }
 
       if (!scriptsRes.ok) {
         setError(scriptsData.error || 'Não foi possível carregar os scripts.')
+        setDevHint(scriptsData.devHint ?? null)
         setSections([])
         setCanEdit(false)
+        return
+      }
+      if (!flowsRes.ok) {
+        setError(flowsData.error || 'Não foi possível carregar o catálogo (fluxos).')
+        setDevHint(flowsData.devHint ?? null)
+        setSections(scriptsData.sections ?? [])
+        setCanEdit(scriptsData.canEdit !== false)
+        setCatalog([])
         return
       }
       setSections(scriptsData.sections ?? [])
@@ -190,7 +207,10 @@ export function ProLideresScriptsClient() {
       )}
 
       {error && (
-        <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">{error}</div>
+        <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+          <p>{error}</p>
+          {devHint ? <p className="mt-2 border-t border-red-200/80 pt-2 text-xs text-red-900/90">{devHint}</p> : null}
+        </div>
       )}
 
       {canEditUi && (
