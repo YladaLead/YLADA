@@ -1,10 +1,10 @@
-import { NextResponse } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
 import { requireApiAuth } from '@/lib/api-auth'
 import { supabaseAdmin } from '@/lib/supabase'
 import { resolveProLideresTenantContext } from '@/lib/pro-lideres-server'
 import type { LeaderTenantPlScriptEntryRow, LeaderTenantPlScriptSectionRow, ProLideresScriptSectionWithEntries } from '@/types/leader-tenant'
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   const auth = await requireApiAuth(request)
   if (auth instanceof NextResponse) return auth
   const { user } = auth
