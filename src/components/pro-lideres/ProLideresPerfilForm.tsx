@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import type { LeaderTenantRow } from '@/types/leader-tenant'
+import PhoneInputWithCountry from '@/components/PhoneInputWithCountry'
 
 export function ProLideresPerfilForm({
   tenantApiPath = '/api/pro-lideres/tenant',
@@ -18,6 +19,7 @@ export function ProLideresPerfilForm({
   const [displayName, setDisplayName] = useState('')
   const [teamName, setTeamName] = useState('')
   const [whatsapp, setWhatsapp] = useState('')
+  const [whatsappCountryCode, setWhatsappCountryCode] = useState('BR')
   const [contactEmail, setContactEmail] = useState('')
   const [focusNotes, setFocusNotes] = useState('')
   const [canEditTenantProfile, setCanEditTenantProfile] = useState(true)
@@ -40,6 +42,7 @@ export function ProLideresPerfilForm({
       setDisplayName(t.display_name ?? '')
       setTeamName(t.team_name ?? '')
       setWhatsapp(t.whatsapp ?? '')
+      setWhatsappCountryCode('BR')
       setContactEmail(t.contact_email ?? '')
       setFocusNotes(t.focus_notes ?? '')
     } catch {
@@ -128,26 +131,27 @@ export function ProLideresPerfilForm({
           />
         </label>
         <label className="block sm:col-span-2">
-          <span className="mb-1 block text-sm font-medium text-gray-700">Nome da operação / equipa</span>
+          <span className="mb-1 block text-sm font-medium text-gray-700">Nome da operação/equipe</span>
           <input
             disabled={!canEditTenantProfile}
             className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-600"
             value={teamName}
             onChange={(e) => setTeamName(e.target.value)}
-            placeholder="Ex.: Equipa Norte"
+            placeholder="Ex.: Equipe Sul"
             maxLength={500}
           />
         </label>
         <label className="block">
           <span className="mb-1 block text-sm font-medium text-gray-700">WhatsApp</span>
-          <input
+          <PhoneInputWithCountry
             disabled={!canEditTenantProfile}
-            className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-600"
+            className="w-full disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-600"
             value={whatsapp}
-            onChange={(e) => setWhatsapp(e.target.value)}
-            placeholder="+351 …"
-            maxLength={500}
-            autoComplete="tel"
+            defaultCountryCode={whatsappCountryCode || 'BR'}
+            onChange={(phone, countryCode) => {
+              setWhatsapp(phone)
+              setWhatsappCountryCode(countryCode || 'BR')
+            }}
           />
         </label>
         <label className="block">

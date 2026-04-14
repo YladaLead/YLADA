@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
 
     const { data: link, error: linkError } = await supabaseAdmin
       .from('ylada_links')
-      .select('id, user_id')
+      .select('id, user_id, config_json')
       .eq('slug', slug)
       .eq('status', 'active')
       .maybeSingle()
@@ -64,8 +64,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: true, skipped_owner_preview: true })
     }
 
+    const configEarly = (link.config_json as Record<string, unknown>) ?? {}
+    const metaEarly = (configEarly.meta as Record<string, unknown> | undefined) ?? {}
+    const isProLideresPresetLink = metaEarly.pro_lideres_preset === true
+
     if (
       link.user_id &&
+      !isProLideresPresetLink &&
       (await isYladaLinkHiddenFromPublicDueToFreemium(link.user_id as string, link.id as string, 'active'))
     ) {
       return NextResponse.json({ success: true, skipped_freemium: true })

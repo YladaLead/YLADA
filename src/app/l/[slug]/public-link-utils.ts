@@ -32,10 +32,13 @@ export async function fetchPublicLinkPayload(slug: string): Promise<PublicLinkPa
 
   if (error || !link) notFound()
 
-  if (link.user_id) {
+  const configEarly = (link.config_json as Record<string, unknown>) ?? {}
+  const metaEarly = (configEarly.meta as Record<string, unknown> | undefined) ?? {}
+  const isProLideresPresetLink = metaEarly.pro_lideres_preset === true
+
+  if (link.user_id && !isProLideresPresetLink) {
     const hidden = await isYladaLinkHiddenFromPublicDueToFreemium(link.user_id, link.id, link.status)
     if (hidden) {
-      const configEarly = (link.config_json as Record<string, unknown>) ?? {}
       const pageTitle =
         (configEarly.page as Record<string, unknown> | undefined)?.title ??
         (configEarly.title as string) ??

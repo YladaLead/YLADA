@@ -267,6 +267,15 @@ function AdminDashboardContent() {
       color: 'bg-teal-600',
     },
     {
+      id: 'pro-lideres-onboarding',
+      title: 'Pro Líderes onboarding',
+      description: 'Criar links de onboarding e acompanhar respostas por e-mail',
+      icon: '🧭',
+      link: '/admin/pro-lideres/onboarding',
+      color: 'bg-emerald-600',
+      destaque: true,
+    },
+    {
       id: 'motor-crescimento-hub',
       title: 'Motor de crescimento',
       description: 'Documentação, agentes e checklist',

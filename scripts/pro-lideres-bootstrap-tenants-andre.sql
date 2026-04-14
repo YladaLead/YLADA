@@ -130,6 +130,31 @@ WHERE lower(trim(u.email)) = 'andre@proestetica.com'
   AND NOT EXISTS (SELECT 1 FROM leader_tenants lt WHERE lt.owner_user_id = u.id);
 
 -- -----------------------------------------------------------------------------
+-- 2.1) Perfil e contacto WhatsApp de teste (André Pro Líderes)
+-- -----------------------------------------------------------------------------
+-- Número informado para testes neste ambiente:
+-- 19981868000  -> formatado com DDI BR (55) = 5519981868000
+
+UPDATE user_profiles up
+SET
+  whatsapp = '19981868000',
+  country_code = 'BR',
+  updated_at = NOW()
+FROM auth.users u
+WHERE up.user_id = u.id
+  AND lower(trim(u.email)) = 'andre@prolider.com';
+
+UPDATE leader_tenants lt
+SET
+  whatsapp = '5519981868000',
+  contact_email = coalesce(lt.contact_email, 'andre@prolider.com'),
+  updated_at = NOW()
+FROM auth.users u
+WHERE lt.owner_user_id = u.id
+  AND lower(trim(u.email)) = 'andre@prolider.com'
+  AND lt.vertical_code = 'h-lider';
+
+-- -----------------------------------------------------------------------------
 -- 3) Verificação
 -- -----------------------------------------------------------------------------
 SELECT u.email, u.email_confirmed_at IS NOT NULL AS email_confirmado
@@ -140,5 +165,10 @@ SELECT lt.id, u.email, lt.slug, lt.vertical_code, lt.display_name
 FROM leader_tenants lt
 JOIN auth.users u ON u.id = lt.owner_user_id
 WHERE lower(u.email) IN ('andre@prolider.com', 'andre@proestetica.com');
+
+SELECT u.email, up.nome_completo, up.whatsapp, up.country_code
+FROM user_profiles up
+JOIN auth.users u ON u.id = up.user_id
+WHERE lower(u.email) = 'andre@prolider.com';
 
 -- Login na app: e-mail acima + senha 123456 (trocar em produção).

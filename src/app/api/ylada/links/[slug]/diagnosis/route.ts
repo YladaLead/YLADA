@@ -246,8 +246,12 @@ export async function POST(
     }
 
     const ownerId = link.user_id as string | undefined
+    const configEarly = (link.config_json as Record<string, unknown>) ?? {}
+    const metaEarly = (configEarly.meta as Record<string, unknown> | undefined) ?? {}
+    const isProLideresPresetLink = metaEarly.pro_lideres_preset === true
     if (
       ownerId &&
+      !isProLideresPresetLink &&
       (await isYladaLinkHiddenFromPublicDueToFreemium(ownerId, link.id as string, 'active'))
     ) {
       void recordFreemiumLimitHit(ownerId, 'active_link', { link_id: link.id as string })
@@ -297,7 +301,7 @@ export async function POST(
       }
     }
 
-    const config = (link.config_json as Record<string, unknown>) ?? {}
+    const config = configEarly
     let metaRaw = config.meta as Record<string, unknown> | undefined
 
     // VALIDAÇÃO: Verificar se todas as perguntas obrigatórias foram respondidas

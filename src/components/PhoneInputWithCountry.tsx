@@ -9,6 +9,7 @@ interface PhoneInputWithCountryProps {
   defaultCountryCode?: string
   className?: string
   placeholder?: string
+  disabled?: boolean
 }
 
 export default function PhoneInputWithCountry({
@@ -16,7 +17,8 @@ export default function PhoneInputWithCountry({
   onChange,
   defaultCountryCode = 'BR',
   className = '',
-  placeholder = 'Ex: 5511999999999'
+  placeholder = 'Ex: 5511999999999',
+  disabled = false,
 }: PhoneInputWithCountryProps) {
   const [countryCode, setCountryCode] = useState(defaultCountryCode)
   const [phoneNumber, setPhoneNumber] = useState('')
@@ -85,7 +87,8 @@ export default function PhoneInputWithCountry({
         <select
           value={countryCode}
           onChange={(e) => handleCountryChange(e.target.value)}
-          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10 rounded-l-lg"
+          disabled={disabled}
+          className="absolute inset-0 h-full w-full rounded-l-lg opacity-0 z-10 disabled:cursor-not-allowed cursor-pointer"
           title={selectedCountry?.name || 'Selecione o país'}
         >
           {COUNTRIES.map(country => (
@@ -95,7 +98,7 @@ export default function PhoneInputWithCountry({
           ))}
         </select>
         {/* Bandeira visível - área clicável */}
-        <div className="w-12 h-full flex items-center justify-center border-r border-gray-300 rounded-l-lg bg-white hover:bg-gray-50 transition-colors min-h-[42px]">
+        <div className="w-12 h-full flex min-h-[42px] items-center justify-center rounded-l-lg border-r border-gray-300 bg-white transition-colors hover:bg-gray-50">
           <span className="text-xl">{selectedCountry?.flag || '🌍'}</span>
         </div>
       </div>
@@ -111,7 +114,8 @@ export default function PhoneInputWithCountry({
             placeholder="DDI"
             value={otherCountryCode}
             onChange={handleOtherCountryCodeChange}
-            className="text-gray-600 px-1 w-12 text-sm font-medium text-center outline-none bg-transparent border-none"
+            disabled={disabled}
+            className="w-12 border-none bg-transparent px-1 text-center text-sm font-medium text-gray-600 outline-none disabled:cursor-not-allowed"
             maxLength={4}
           />
         </div>
@@ -120,9 +124,10 @@ export default function PhoneInputWithCountry({
       {/* Input do Telefone */}
       <input
         type="tel"
+        disabled={disabled}
         value={phoneNumber}
         onChange={handlePhoneNumberChange}
-        className="flex-1 px-3 py-2 outline-none bg-transparent text-base min-h-[42px]"
+        className="min-h-[42px] flex-1 bg-transparent px-3 py-2 text-base outline-none disabled:cursor-not-allowed"
         placeholder={isOtherCountry ? "Número completo" : "11 99999-9999"}
       />
     </div>

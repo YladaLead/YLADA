@@ -2,6 +2,7 @@ import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
 import type { SupabaseClient, User } from '@supabase/supabase-js'
 import type { LeaderTenantRow, ProLideresTenantRole } from '@/types/leader-tenant'
+import { applyCompletedLeaderOnboardingForEmail } from '@/lib/pro-lideres-leader-onboarding'
 
 export type { LeaderTenantRow, ProLideresTenantRole }
 
@@ -192,6 +193,15 @@ export async function ensureLeaderTenantAccess(): Promise<
       }
     }
     return { ok: false, redirect: '/pro-lideres/aguardando-acesso' }
+  }
+
+  if (ctx.role === 'leader') {
+    await applyCompletedLeaderOnboardingForEmail({
+      supabase,
+      email: user.email,
+      ownerUserId: user.id,
+      tenantId: ctx.tenant.id,
+    })
   }
 
   return { ok: true, tenant: ctx.tenant, role: ctx.role }
