@@ -2,7 +2,6 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 
 // Singleton pattern para evitar múltiplas instâncias
 let supabaseInstance: SupabaseClient | null = null
@@ -29,34 +28,45 @@ export const supabase = (() => {
   return supabaseInstance
 })()
 
-// Cliente para operações do servidor (API routes)
-// NOTA: Esta função só deve ser usada no SERVIDOR (API routes), nunca no browser
-export const supabaseAdmin = (() => {
-  // Só executar no servidor (typeof window === 'undefined')
+/**
+ * Cliente service role — só no servidor. Preferir esta função (lazy) em layouts/API
+ * para garantir leitura de env no momento da chamada (ex.: Vercel serverless).
+ */
+export function getSupabaseAdmin(): SupabaseClient | null {
   if (typeof window !== 'undefined') {
-    // No browser, retornar null silenciosamente (não logar avisos)
-    return null as unknown as SupabaseClient
+    return null
   }
-  
-  // No servidor, verificar variáveis de ambiente
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY
-  
+
   if (!url || !key) {
-    console.error('❌ [SERVER] Supabase Admin não configurado:')
-    console.error('   NEXT_PUBLIC_SUPABASE_URL:', url ? '✅' : '❌')
-    console.error('   SUPABASE_SERVICE_ROLE_KEY:', key ? '✅' : '❌')
-    return null as unknown as SupabaseClient
+    return null
   }
-  
+
   if (!supabaseAdminInstance) {
     console.log('✅ [SERVER] Criando instância do Supabase Admin...')
     supabaseAdminInstance = createClient(url, key, {
       auth: {
         persistSession: false,
-        autoRefreshToken: false
-      }
+        autoRefreshToken: false,
+      },
     })
   }
   return supabaseAdminInstance
-})()
+}
+
+// Cliente para operações do servidor (API routes)
+// NOTA: Esta função só deve ser usada no SERVIDOR (API routes), nunca no browser
+export const supabaseAdmin = (() => {
+  const c = getSupabaseAdmin()
+  if (!c && typeof window === 'undefined') {
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const key = process.env.SUPABASE_SERVICE_ROLE_KEY
+    if (!url || !key) {
+      console.error('❌ [SERVER] Supabase Admin não configurado:')
+      console.error('   NEXT_PUBLIC_SUPABASE_URL:', url ? '✅' : '❌')
+      console.error('   SUPABASE_SERVICE_ROLE_KEY:', key ? '✅' : '❌')
+    }
+  }
+  return c
+})() as unknown as SupabaseClient

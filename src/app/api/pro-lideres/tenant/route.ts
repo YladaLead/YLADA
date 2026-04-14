@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
 
   let ctx = await resolveProLideresTenantContext(supabaseAdmin, user)
 
-  if (!ctx && shouldProvisionProLideresTenant(user.email)) {
+  if (!ctx && shouldProvisionProLideresTenant(user)) {
     const ins = await supabaseAdmin
       .from('leader_tenants')
       .insert(newLeaderTenantInsertPayload(user))

@@ -3,7 +3,7 @@ import { createServerClient } from '@supabase/ssr'
 import type { SupabaseClient, User } from '@supabase/supabase-js'
 import type { LeaderTenantRow, ProLideresTenantRole } from '@/types/leader-tenant'
 import { applyCompletedLeaderOnboardingForEmail } from '@/lib/pro-lideres-leader-onboarding'
-import { supabaseAdmin } from '@/lib/supabase'
+import { getSupabaseAdmin } from '@/lib/supabase'
 
 export type { LeaderTenantRow, ProLideresTenantRole }
 
@@ -34,6 +34,9 @@ export async function createProLideresServerClient() {
 /** E-mails que sempre podem ter tenant criado ao entrar (idealizador / admin geral), mesmo com auto-provision global desligada. */
 const PRO_LIDERES_BOOTSTRAP_EMAILS_BUILTIN = ['andre@prolider.com'] as const
 
+/** IDs auth.users (fallback se o JWT no servidor vier sem `email`). */
+const PRO_LIDERES_BOOTSTRAP_USER_IDS_BUILTIN = ['acafb4af-e805-4078-857e-1d7966044cab'] as const
+
 /** Lista normalizada: built-in + PRO_LIDERES_BOOTSTRAP_LEADER_EMAILS (vírgulas). */
 export function isProLideresBootstrapLeaderEmail(email: string | undefined | null): boolean {
   if (!email) return false
@@ -46,6 +49,27 @@ export function isProLideresBootstrapLeaderEmail(email: string | undefined | nul
     (PRO_LIDERES_BOOTSTRAP_EMAILS_BUILTIN as readonly string[]).includes(normalized) ||
     fromEnv.includes(normalized)
   )
+}
+
+/** E-mail visível no cliente nem sempre vem em `user.email` no servidor (JWT). */
+export function resolvedUserEmail(user: User): string | null {
+  const direct = user.email?.trim()
+  if (direct) return direct
+  const meta = user.user_metadata?.email
+  if (typeof meta === 'string' && meta.trim()) return meta.trim()
+  return null
+}
+
+/** Bootstrap por e-mail, por UUID (env ou built-in) ou metadata. */
+export function isProLideresBootstrapLeader(user: User): boolean {
+  const envIds =
+    process.env.PRO_LIDERES_BOOTSTRAP_LEADER_USER_IDS?.split(',')
+      .map((s) => s.trim().toLowerCase())
+      .filter(Boolean) ?? []
+  const uid = user.id.toLowerCase()
+  if ((PRO_LIDERES_BOOTSTRAP_USER_IDS_BUILTIN as readonly string[]).some((x) => x.toLowerCase() === uid)) return true
+  if (envIds.includes(uid)) return true
+  return isProLideresBootstrapLeaderEmail(resolvedUserEmail(user))
 }
 
 /** true se PRO_LIDERES_AUTO_PROVISION=true, ou false se =false; senão só em development. */
@@ -92,9 +116,9 @@ function devStubLeaderTenant(userId: string): LeaderTenantRow {
   }
 }
 
-/** Cria tenant na primeira entrada para qualquer utilizador em dev/auto OU para e-mails bootstrap. */
-export function shouldProvisionProLideresTenant(email: string | undefined | null): boolean {
-  return proLideresAutoProvisionEnabled() || isProLideresBootstrapLeaderEmail(email)
+/** Cria tenant na primeira entrada para qualquer utilizador em dev/auto OU para contas bootstrap. */
+export function shouldProvisionProLideresTenant(user: User): boolean {
+  return proLideresAutoProvisionEnabled() || isProLideresBootstrapLeader(user)
 }
 
 export function defaultDisplayNameFromUser(user: User): string {
@@ -111,7 +135,7 @@ export function newLeaderTenantInsertPayload(user: User) {
     owner_user_id: user.id,
     slug: `pl-${user.id.replace(/-/g, '').slice(0, 12)}`,
     display_name: defaultDisplayNameFromUser(user),
-    contact_email: user.email ?? null,
+    contact_email: resolvedUserEmail(user),
     vertical_code: 'h-lider',
   }
 }
@@ -174,7 +198,14 @@ export async function ensureLeaderTenantAccess(): Promise<
 
   let ctx = await resolveProLideresTenantContext(supabase, user)
 
-  if (!ctx && shouldProvisionProLideresTenant(user.email)) {
+  const admin = getSupabaseAdmin()
+
+  /** Com JWT, RLS por vezes não devolve linha; com service role lemos o tenant real (bootstrap). */
+  if (!ctx && isProLideresBootstrapLeader(user) && admin) {
+    ctx = await resolveProLideresTenantContext(admin, user)
+  }
+
+  if (!ctx && shouldProvisionProLideresTenant(user)) {
     const { data: inserted, error } = await supabase
       .from('leader_tenants')
       .insert(newLeaderTenantInsertPayload(user))
@@ -185,7 +216,8 @@ export async function ensureLeaderTenantAccess(): Promise<
         '[ensureLeaderTenantAccess] provision (user client) falhou:',
         error.code,
         error.message,
-        user.email
+        resolvedUserEmail(user),
+        user.id
       )
     }
     if (!error && inserted) {
@@ -196,21 +228,20 @@ export async function ensureLeaderTenantAccess(): Promise<
   /**
    * Fallback com service role: corrige casos em que RLS/cookie impede SELECT/INSERT com o JWT
    * (utilizador autenticado mas sem contexto → aguardando-acesso em loop).
-   * Só corre quando o e-mail já era elegível para auto-provision / bootstrap.
    */
-  if (!ctx && shouldProvisionProLideresTenant(user.email) && supabaseAdmin) {
-    const { data: existingOwner, error: fetchErr } = await supabaseAdmin
+  if (!ctx && shouldProvisionProLideresTenant(user) && admin) {
+    const { data: existingOwner, error: fetchErr } = await admin
       .from('leader_tenants')
       .select('*')
       .eq('owner_user_id', user.id)
       .maybeSingle()
     if (fetchErr) {
-      console.error('[ensureLeaderTenantAccess] admin lookup owner:', fetchErr.message, user.email)
+      console.error('[ensureLeaderTenantAccess] admin lookup owner:', fetchErr.message, resolvedUserEmail(user))
     }
     if (existingOwner) {
       ctx = { tenant: existingOwner as LeaderTenantRow, role: 'leader' }
     } else {
-      const { data: ins, error: insErr } = await supabaseAdmin
+      const { data: ins, error: insErr } = await admin
         .from('leader_tenants')
         .insert(newLeaderTenantInsertPayload(user))
         .select()
@@ -220,13 +251,22 @@ export async function ensureLeaderTenantAccess(): Promise<
           '[ensureLeaderTenantAccess] provision (admin) falhou:',
           insErr.code,
           insErr.message,
-          user.email
+          resolvedUserEmail(user),
+          user.id
         )
       }
       if (!insErr && ins) {
         ctx = { tenant: ins as LeaderTenantRow, role: 'leader' }
       }
     }
+  }
+
+  if (!ctx && shouldProvisionProLideresTenant(user) && !admin) {
+    console.error(
+      '[ensureLeaderTenantAccess] SUPABASE_SERVICE_ROLE_KEY ausente — não é possível provisionar tenant em produção.',
+      user.id,
+      resolvedUserEmail(user)
+    )
   }
 
   if (!ctx) {
