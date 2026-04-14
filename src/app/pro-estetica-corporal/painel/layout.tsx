@@ -27,6 +27,7 @@ export default async function ProEsteticaCorporalPainelLayout({ children }: { ch
         devStubPanel: isDevStubEsteticaCorporalPanel(gate.tenant) || previewWithoutLogin,
         previewWithoutLogin,
         verticalCode,
+        dailyTasksVisibleToTeam: true,
       }}
     >
       {children}

@@ -83,12 +83,22 @@ export async function PATCH(request: NextRequest) {
     return s.slice(0, max)
   }
 
-  const payload: Record<string, string | null> = {
+  const payload: Record<string, string | null | boolean | number> = {
     display_name: clip(body.display_name),
     team_name: clip(body.team_name),
     whatsapp: clip(body.whatsapp),
     contact_email: clip(body.contact_email, 320),
     focus_notes: clip(body.focus_notes, 2000),
+  }
+  if (body.daily_tasks_visible_to_team !== undefined) {
+    payload.daily_tasks_visible_to_team = Boolean(body.daily_tasks_visible_to_team)
+  }
+  if (body.daily_tasks_full_day_bonus_points !== undefined) {
+    const n = Number(body.daily_tasks_full_day_bonus_points)
+    if (!Number.isFinite(n) || n < 0 || n > 100000) {
+      return NextResponse.json({ error: 'Bónus de dia completo inválido (0–100000).' }, { status: 400 })
+    }
+    payload.daily_tasks_full_day_bonus_points = Math.floor(n)
   }
 
   const { data: tenant, error } = await supabaseAdmin

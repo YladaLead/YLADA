@@ -1,9 +1,11 @@
 'use client'
 
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 
 import { useProLideresPainel } from '@/components/pro-lideres/pro-lideres-painel-context'
+import { ProLideresCatalogToolPicker } from '@/components/pro-lideres/ProLideresCatalogToolPicker'
+import { ProLideresScriptsNoelGenerator } from '@/components/pro-lideres/ProLideresScriptsNoelGenerator'
 import type { ProLideresCatalogItem } from '@/lib/pro-lideres-catalog-build'
 import type { ProLideresScriptSectionWithEntries } from '@/types/leader-tenant'
 
@@ -192,10 +194,8 @@ export function ProLideresScriptsClient() {
         <p className="text-sm font-medium text-blue-600">Conteúdo</p>
         <h1 className="text-2xl font-bold text-gray-900">Scripts</h1>
         <p className="mt-1 max-w-2xl text-gray-600">
-          Roteiros por <strong className="text-gray-800">situação</strong> (assunto / ferramenta): em cada uma defines a
-          ordem, o <strong className="text-gray-800">título</strong>, <strong className="text-gray-800">subtítulo</strong>{' '}
-          (ex.: postagens, antes de enviar o link), o <strong className="text-gray-800">texto</strong> e opcionalmente{' '}
-          <strong className="text-gray-800">como usar</strong>. A tua equipe vê o mesmo painel, em leitura.
+          Montas <strong className="text-gray-800">grupos de textos</strong> para a equipe copiar no contacto com
+          clientes (WhatsApp, redes, etc.). Cada grupo tem vários textos por ordem. A equipe só vê e copia — não edita.
         </p>
       </div>
 
@@ -214,20 +214,67 @@ export function ProLideresScriptsClient() {
       )}
 
       {canEditUi && (
-        <NewSectionForm
-          saving={saving}
-          catalog={catalog}
-          onCreated={async () => {
-            setSaving(true)
-            try {
-              await load()
-            } finally {
-              setSaving(false)
-            }
-          }}
-          onError={setError}
-          onSaving={setSaving}
-        />
+        <section className="space-y-3" aria-labelledby="scripts-adicionar-heading">
+          <h2 id="scripts-adicionar-heading" className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+            Criar
+          </h2>
+
+          <details className="rounded-xl border border-indigo-200 bg-gradient-to-b from-indigo-50/90 to-white shadow-sm">
+            <summary className="cursor-pointer list-none px-4 py-3 text-sm font-semibold text-indigo-950 [&::-webkit-details-marker]:hidden">
+              <span className="flex items-center justify-between gap-2">
+                <span>1. Com o Noel — gera textos para a equipe</span>
+                <span className="text-xs font-normal text-indigo-700">abrir</span>
+              </span>
+              <span className="mt-1 block text-xs font-normal text-indigo-900/80">
+                Escolhes o tipo, descreves o que queres; o Noel monta um grupo que podes guardar
+              </span>
+            </summary>
+            <div className="border-t border-indigo-100 px-4 pb-4 pt-3">
+              <ProLideresScriptsNoelGenerator
+                catalog={catalog}
+                saving={saving}
+                onSaving={setSaving}
+                onError={setError}
+                onApplied={async () => {
+                  setSaving(true)
+                  try {
+                    await load()
+                  } finally {
+                    setSaving(false)
+                  }
+                }}
+              />
+            </div>
+          </details>
+
+          <details className="rounded-xl border border-gray-200 bg-white shadow-sm">
+            <summary className="cursor-pointer list-none px-4 py-3 text-sm font-semibold text-gray-900 [&::-webkit-details-marker]:hidden">
+              <span className="flex items-center justify-between gap-2">
+                <span>2. Grupo novo (à mão, sem Noel)</span>
+                <span className="text-xs font-normal text-gray-500">abrir</span>
+              </span>
+              <span className="mt-1 block text-xs font-normal text-gray-600">
+                Só o nome do grupo; depois adicionas textos um a um
+              </span>
+            </summary>
+            <div className="border-t border-gray-100 px-4 pb-4 pt-3">
+              <NewSectionForm
+                saving={saving}
+                catalog={catalog}
+                onCreated={async () => {
+                  setSaving(true)
+                  try {
+                    await load()
+                  } finally {
+                    setSaving(false)
+                  }
+                }}
+                onError={setError}
+                onSaving={setSaving}
+              />
+            </div>
+          </details>
+        </section>
       )}
 
       {loading ? (
@@ -235,11 +282,13 @@ export function ProLideresScriptsClient() {
       ) : sections.length === 0 ? (
         <p className="rounded-xl border border-dashed border-gray-300 bg-gray-50 px-4 py-8 text-center text-sm text-gray-600">
           {canEditUi
-            ? 'Ainda não há situações. Cria a primeira acima (ex.: uma ferramenta do catálogo ou uma fase da conversa).'
+            ? 'Ainda não há grupos. Usa «Criar» acima (Noel ou grupo vazio).'
             : 'O líder ainda não publicou scripts aqui.'}
         </p>
       ) : (
-        <ul className="space-y-6">
+        <div className="space-y-3">
+          <h2 className="text-xs font-semibold uppercase tracking-wide text-gray-500">Grupos guardados</h2>
+          <ul className="space-y-3">
           {sections.map((sec, secIdx) => (
             <li key={sec.id} className="rounded-xl border border-gray-200 bg-white shadow-sm">
               <SectionBlock
@@ -260,15 +309,17 @@ export function ProLideresScriptsClient() {
               />
             </li>
           ))}
-        </ul>
+          </ul>
+        </div>
       )}
 
       <p className="text-sm text-gray-500">
-        Dica: usa o{' '}
-        <Link href="/pro-lideres/painel/noel" className="font-medium text-blue-600 hover:text-blue-800">
+        <strong className="font-medium text-gray-700">Scripts</strong> = o que a equipe manda a{' '}
+        <strong className="font-medium text-gray-700">clientes</strong>. Para falar com a equipe, use o{' '}
+        <Link href="/pro-lideres/painel/noel" className="font-medium text-violet-700 hover:text-violet-900">
           Noel
         </Link>{' '}
-        para gerar variantes e depois organiza aqui por situação.
+        (inclui mensagens internas e conversa livre).
       </p>
     </div>
   )
@@ -290,11 +341,6 @@ function NewSectionForm({
   const [title, setTitle] = useState('')
   const [subtitle, setSubtitle] = useState('')
   const [yladaLinkId, setYladaLinkId] = useState('')
-
-  const toolOptions = useMemo(() => {
-    const withId = catalog.filter((c): c is ProLideresCatalogItem & { yladaLinkId: string } => Boolean(c.yladaLinkId))
-    return withId
-  }, [catalog])
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -330,58 +376,45 @@ function NewSectionForm({
   }
 
   return (
-    <section className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-      <h2 className="text-base font-semibold text-gray-900">Nova situação</h2>
-      <p className="mt-1 text-sm text-gray-600">
-        Assunto do bloco (ex.: &quot;Quiz metabolismo&quot; ou &quot;Antes de mandar o link&quot;). Opcionalmente associa
-        uma ferramenta do catálogo.
-      </p>
-      <form onSubmit={(e) => void onSubmit(e)} className="mt-4 space-y-3">
+    <div>
+      <form onSubmit={(e) => void onSubmit(e)} className="space-y-3">
         <label className="block text-sm">
-          <span className="mb-1 block font-medium text-gray-700">Assunto (título da situação)</span>
+          <span className="mb-1 block font-medium text-gray-700">Nome do grupo</span>
           <input
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             className="w-full rounded-lg border border-gray-200 px-3 py-2.5 text-sm"
             maxLength={200}
             required
-            placeholder="Ex.: Ferramenta X — explicar e pedir permissão"
+            placeholder="Ex.: IMC — antes do link"
           />
         </label>
         <label className="block text-sm">
-          <span className="mb-1 block font-medium text-gray-700">Subtítulo (opcional)</span>
+          <span className="mb-1 block font-medium text-gray-700">Nota curta (opcional)</span>
           <input
             value={subtitle}
             onChange={(e) => setSubtitle(e.target.value)}
             className="w-full rounded-lg border border-gray-200 px-3 py-2.5 text-sm"
             maxLength={300}
-            placeholder="Ex.: sequência sugerida para esta ferramenta"
+            placeholder="Ex.: WhatsApp em 3 passos"
           />
         </label>
-        <label className="block text-sm">
-          <span className="mb-1 block font-medium text-gray-700">Ferramenta do catálogo (opcional)</span>
-          <select
-            value={yladaLinkId}
-            onChange={(e) => setYladaLinkId(e.target.value)}
-            className="w-full rounded-lg border border-gray-200 px-3 py-2.5 text-sm"
-          >
-            <option value="">Nenhuma — só texto / fase da conversa</option>
-            {toolOptions.map((c) => (
-              <option key={c.yladaLinkId} value={c.yladaLinkId}>
-                {c.label}
-              </option>
-            ))}
-          </select>
-        </label>
+        <ProLideresCatalogToolPicker
+          catalog={catalog}
+          value={yladaLinkId}
+          onChange={setYladaLinkId}
+          disabled={saving}
+          accent="gray"
+        />
         <button
           type="submit"
           disabled={saving}
           className="min-h-[44px] rounded-lg bg-blue-600 px-5 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
         >
-          {saving ? 'A guardar…' : 'Criar situação'}
+          {saving ? 'A guardar…' : 'Criar grupo'}
         </button>
       </form>
-    </section>
+    </div>
   )
 }
 
@@ -427,10 +460,6 @@ function SectionBlock({
     setYladaLinkId(section.ylada_link_id ?? '')
   }, [section.title, section.subtitle, section.ylada_link_id])
 
-  const toolOptions = useMemo(() => {
-    return catalog.filter((c): c is ProLideresCatalogItem & { yladaLinkId: string } => Boolean(c.yladaLinkId))
-  }, [catalog])
-
   async function saveSection() {
     onError(null)
     onSaving(true)
@@ -460,7 +489,7 @@ function SectionBlock({
   }
 
   async function removeSection() {
-    if (!confirm('Apagar esta situação e todos os scripts dentro dela?')) return
+    if (!confirm('Apagar este grupo e todos os textos dentro dele?')) return
     onError(null)
     onSaving(true)
     try {
@@ -481,156 +510,180 @@ function SectionBlock({
     }
   }
 
-  return (
-    <div>
-      <div className="border-b border-gray-100 p-4 sm:p-5">
-        {editing ? (
-          <div className="space-y-3">
-            <label className="block text-sm">
-              <span className="mb-1 block font-medium text-gray-700">Assunto</span>
-              <input
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm"
-                maxLength={200}
-              />
-            </label>
-            <label className="block text-sm">
-              <span className="mb-1 block font-medium text-gray-700">Subtítulo</span>
-              <input
-                value={subtitle}
-                onChange={(e) => setSubtitle(e.target.value)}
-                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm"
-                maxLength={300}
-              />
-            </label>
-            <label className="block text-sm">
-              <span className="mb-1 block font-medium text-gray-700">Ferramenta</span>
-              <select
-                value={yladaLinkId}
-                onChange={(e) => setYladaLinkId(e.target.value)}
-                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm"
-              >
-                <option value="">Nenhuma</option>
-                {toolOptions.map((c) => (
-                  <option key={c.yladaLinkId} value={c.yladaLinkId}>
-                    {c.label}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <div className="flex flex-wrap gap-2">
-              <button
-                type="button"
-                onClick={() => void saveSection()}
-                disabled={saving}
-                className="min-h-[44px] rounded-lg bg-blue-600 px-4 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
-              >
-                Guardar
-              </button>
-              <button
-                type="button"
-                onClick={() => setEditing(false)}
-                className="min-h-[44px] rounded-lg border border-gray-300 px-4 text-sm font-medium text-gray-700 hover:bg-gray-50"
-              >
-                Cancelar
-              </button>
-            </div>
-          </div>
-        ) : (
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-            <div className="min-w-0">
-              <h2 className="text-lg font-bold text-gray-900">{section.title}</h2>
-              {section.subtitle?.trim() && <p className="mt-1 text-sm text-gray-600">{section.subtitle}</p>}
-              {toolLabel && (
-                <p className="mt-2 text-xs text-gray-500">
-                  Ferramenta: <span className="font-medium text-gray-700">{toolLabel}</span>
-                </p>
-              )}
-              {section.ylada_link_id && !toolLabel && (
-                <p className="mt-2 text-xs text-amber-700">Ferramenta ligada (detalhe no catálogo).</p>
-              )}
-            </div>
-            {canEditUi && (
-              <div className="flex flex-wrap gap-2">
-                <button
-                  type="button"
-                  onClick={() => void onMoveSection(secIdx, -1)}
-                  disabled={saving || secIdx <= 0}
-                  className="min-h-[44px] rounded-lg border border-gray-200 px-3 text-sm font-semibold text-gray-700 hover:bg-gray-50 disabled:opacity-40"
-                  aria-label="Mover situação para cima"
-                >
-                  ↑
-                </button>
-                <button
-                  type="button"
-                  onClick={() => void onMoveSection(secIdx, 1)}
-                  disabled={saving || secIdx >= secCount - 1}
-                  className="min-h-[44px] rounded-lg border border-gray-200 px-3 text-sm font-semibold text-gray-700 hover:bg-gray-50 disabled:opacity-40"
-                  aria-label="Mover situação para baixo"
-                >
-                  ↓
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setEditing(true)}
-                  className="min-h-[44px] rounded-lg border border-gray-200 px-3 text-sm font-semibold text-gray-700 hover:bg-gray-50"
-                >
-                  Editar situação
-                </button>
-                <button
-                  type="button"
-                  onClick={() => void removeSection()}
-                  className="min-h-[44px] rounded-lg border border-red-200 px-3 text-sm font-semibold text-red-700 hover:bg-red-50"
-                >
-                  Apagar
-                </button>
-              </div>
-            )}
-          </div>
-        )}
-      </div>
+  const entriesBlock = (
+    <div className="space-y-3 p-4 sm:p-5 sm:pt-4">
+      {canEditUi && !editing && (
+        <NewEntryForm
+          sectionId={section.id}
+          saving={saving}
+          onCreated={onReload}
+          onError={onError}
+          onSaving={onSaving}
+        />
+      )}
 
-      <div className="space-y-3 p-4 sm:p-5 sm:pt-4">
-        {canEditUi && !editing && (
-          <NewEntryForm
-            sectionId={section.id}
-            saving={saving}
-            onCreated={onReload}
-            onError={onError}
-            onSaving={onSaving}
-          />
-        )}
+      {section.entries.length === 0 ? (
+        <p className="text-sm text-gray-500">
+          {canEditUi && !editing ? 'Ainda não há textos neste grupo.' : 'Sem textos neste grupo.'}
+        </p>
+      ) : (
+        <ol className="list-decimal space-y-3 pl-5 marker:font-semibold marker:text-blue-700">
+          {section.entries.map((ent, entIdx) => (
+            <li key={ent.id} className="pl-1">
+              <EntryCard
+                entry={ent}
+                entIdx={entIdx}
+                entCount={section.entries.length}
+                sectionId={section.id}
+                canEditUi={canEditUi}
+                editingSection={editing}
+                saving={saving}
+                copiedId={copiedId}
+                onReload={onReload}
+                onError={onError}
+                onSaving={onSaving}
+                onCopyEntry={onCopyEntry}
+                onMoveEntry={onMoveEntry}
+              />
+            </li>
+          ))}
+        </ol>
+      )}
+    </div>
+  )
 
-        {section.entries.length === 0 ? (
-          <p className="text-sm text-gray-500">
-            {canEditUi && !editing ? 'Ainda não há scripts nesta situação.' : 'Sem scripts nesta situação.'}
-          </p>
-        ) : (
-          <ol className="list-decimal space-y-4 pl-5 marker:font-semibold marker:text-blue-700">
-            {section.entries.map((ent, entIdx) => (
-              <li key={ent.id} className="pl-1">
-                <EntryCard
-                  entry={ent}
-                  entIdx={entIdx}
-                  entCount={section.entries.length}
-                  sectionId={section.id}
-                  canEditUi={canEditUi}
-                  editingSection={editing}
-                  saving={saving}
-                  copiedId={copiedId}
-                  onReload={onReload}
-                  onError={onError}
-                  onSaving={onSaving}
-                  onCopyEntry={onCopyEntry}
-                  onMoveEntry={onMoveEntry}
-                />
-              </li>
-            ))}
-          </ol>
-        )}
+  const editHeader = (
+    <div className="space-y-3 border-b border-gray-100 p-4 sm:p-5">
+      <label className="block text-sm">
+        <span className="mb-1 block font-medium text-gray-700">Nome do grupo</span>
+        <input
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm"
+          maxLength={200}
+        />
+      </label>
+      <label className="block text-sm">
+        <span className="mb-1 block font-medium text-gray-700">Nota curta (opcional)</span>
+        <input
+          value={subtitle}
+          onChange={(e) => setSubtitle(e.target.value)}
+          className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm"
+          maxLength={300}
+        />
+      </label>
+      <ProLideresCatalogToolPicker
+        catalog={catalog}
+        value={yladaLinkId}
+        onChange={setYladaLinkId}
+        disabled={saving}
+        accent="gray"
+      />
+      <div className="flex flex-wrap gap-2">
+        <button
+          type="button"
+          onClick={() => void saveSection()}
+          disabled={saving}
+          className="min-h-[44px] rounded-lg bg-blue-600 px-4 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
+        >
+          Guardar
+        </button>
+        <button
+          type="button"
+          onClick={() => setEditing(false)}
+          className="min-h-[44px] rounded-lg border border-gray-300 px-4 text-sm font-medium text-gray-700 hover:bg-gray-50"
+        >
+          Cancelar
+        </button>
       </div>
     </div>
+  )
+
+  const toolbar = canEditUi ? (
+    <div className="flex flex-wrap gap-2 border-b border-gray-50 px-4 py-2">
+      <button
+        type="button"
+        onClick={(e) => {
+          e.stopPropagation()
+          void onMoveSection(secIdx, -1)
+        }}
+        disabled={saving || secIdx <= 0}
+        className="min-h-[40px] rounded-lg border border-gray-200 px-3 text-sm font-semibold text-gray-700 hover:bg-gray-50 disabled:opacity-40"
+        aria-label="Mover grupo para cima"
+      >
+        ↑
+      </button>
+      <button
+        type="button"
+        onClick={(e) => {
+          e.stopPropagation()
+          void onMoveSection(secIdx, 1)
+        }}
+        disabled={saving || secIdx >= secCount - 1}
+        className="min-h-[40px] rounded-lg border border-gray-200 px-3 text-sm font-semibold text-gray-700 hover:bg-gray-50 disabled:opacity-40"
+        aria-label="Mover grupo para baixo"
+      >
+        ↓
+      </button>
+      <button
+        type="button"
+        onClick={(e) => {
+          e.stopPropagation()
+          setEditing(true)
+        }}
+        className="min-h-[40px] rounded-lg border border-gray-200 px-3 text-sm font-semibold text-gray-700 hover:bg-gray-50"
+      >
+        Editar grupo
+      </button>
+      <button
+        type="button"
+        onClick={(e) => {
+          e.stopPropagation()
+          void removeSection()
+        }}
+        className="min-h-[40px] rounded-lg border border-red-200 px-3 text-sm font-semibold text-red-700 hover:bg-red-50"
+      >
+        Apagar
+      </button>
+    </div>
+  ) : null
+
+  if (editing) {
+    return (
+      <div className="rounded-xl border border-blue-200 bg-white shadow-sm">
+        {editHeader}
+        {entriesBlock}
+      </div>
+    )
+  }
+
+  return (
+    <details className="rounded-xl border border-gray-200 bg-white shadow-sm">
+      <summary className="cursor-pointer list-none px-4 py-3 [&::-webkit-details-marker]:hidden">
+        <span className="flex items-start justify-between gap-3">
+          <span className="min-w-0 flex-1">
+            <span className="block text-base font-bold text-gray-900">{section.title}</span>
+            {section.subtitle?.trim() ? (
+              <span className="mt-0.5 block text-sm text-gray-600">{section.subtitle}</span>
+            ) : null}
+            <span className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-gray-500">
+              <span>{section.entries.length} texto(s)</span>
+              {toolLabel ? (
+                <span className="rounded-full bg-gray-100 px-2 py-0.5 font-medium text-gray-700">{toolLabel}</span>
+              ) : null}
+              {section.ylada_link_id && !toolLabel ? (
+                <span className="text-amber-700">Ferramenta ligada</span>
+              ) : null}
+            </span>
+          </span>
+          <span className="shrink-0 text-xs text-gray-400">ver</span>
+        </span>
+      </summary>
+      <div className="border-t border-gray-100">
+        {toolbar}
+        {entriesBlock}
+      </div>
+    </details>
   )
 }
 
@@ -647,6 +700,7 @@ function NewEntryForm({
   onError: (e: string | null) => void
   onSaving: (v: boolean) => void
 }) {
+  const detailsRef = useRef<HTMLDetailsElement>(null)
   const [title, setTitle] = useState('')
   const [subtitle, setSubtitle] = useState('')
   const [body, setBody] = useState('')
@@ -680,6 +734,7 @@ function NewEntryForm({
       setSubtitle('')
       setBody('')
       setHow('')
+      detailsRef.current?.removeAttribute('open')
       await onCreated()
     } catch {
       onError('Erro de rede.')
@@ -689,62 +744,61 @@ function NewEntryForm({
   }
 
   return (
-    <form
-      onSubmit={(e) => void onSubmit(e)}
-      className="rounded-lg border border-dashed border-blue-200 bg-blue-50/40 p-4"
-    >
-      <p className="text-sm font-semibold text-gray-900">Novo script nesta situação</p>
-      <div className="mt-3 space-y-3">
+    <details ref={detailsRef} className="rounded-lg border border-dashed border-blue-200 bg-blue-50/30">
+      <summary className="cursor-pointer list-none px-3 py-2 text-sm font-semibold text-blue-900 [&::-webkit-details-marker]:hidden">
+        + Adicionar texto a este grupo
+      </summary>
+      <form onSubmit={(e) => void onSubmit(e)} className="space-y-2 border-t border-blue-100/80 px-3 pb-3 pt-2">
         <label className="block text-sm">
-          <span className="mb-1 block font-medium text-gray-700">Título</span>
+          <span className="mb-0.5 block text-xs font-medium text-gray-700">Título do texto</span>
           <input
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm"
+            className="w-full rounded-md border border-gray-200 bg-white px-2.5 py-1.5 text-sm"
             maxLength={200}
             required
-            placeholder="Ex.: Mensagem de postagem"
+            placeholder="Ex.: 1.ª mensagem"
           />
         </label>
         <label className="block text-sm">
-          <span className="mb-1 block font-medium text-gray-700">Subtítulo</span>
+          <span className="mb-0.5 block text-xs font-medium text-gray-700">Detalhe (opcional)</span>
           <input
             value={subtitle}
             onChange={(e) => setSubtitle(e.target.value)}
-            className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm"
+            className="w-full rounded-md border border-gray-200 bg-white px-2.5 py-1.5 text-sm"
             maxLength={300}
-            placeholder="Ex.: texto curto · WhatsApp"
+            placeholder="Ex.: WhatsApp"
           />
         </label>
         <label className="block text-sm">
-          <span className="mb-1 block font-medium text-gray-700">Texto do script</span>
+          <span className="mb-0.5 block text-xs font-medium text-gray-700">Texto (copiar e colar)</span>
           <textarea
             value={body}
             onChange={(e) => setBody(e.target.value)}
-            rows={4}
-            className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm"
-            placeholder="Mensagem pronta a copiar…"
+            rows={3}
+            className="w-full rounded-md border border-gray-200 bg-white px-2.5 py-1.5 text-sm"
+            placeholder="Mensagem para o cliente…"
           />
         </label>
         <label className="block text-sm">
-          <span className="mb-1 block font-medium text-gray-700">Como usar (opcional)</span>
+          <span className="mb-0.5 block text-xs font-medium text-gray-700">Quando usar (opcional)</span>
           <textarea
             value={how}
             onChange={(e) => setHow(e.target.value)}
             rows={2}
-            className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm"
-            placeholder="Quando enviar, tom de voz, objeção…"
+            className="w-full rounded-md border border-gray-200 bg-white px-2.5 py-1.5 text-sm"
+            placeholder="Para a equipe saber o momento…"
           />
         </label>
         <button
           type="submit"
           disabled={saving}
-          className="min-h-[44px] rounded-lg bg-blue-600 px-4 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
+          className="min-h-[40px] rounded-lg bg-blue-600 px-3 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
         >
-          {saving ? 'A guardar…' : 'Adicionar à sequência'}
+          {saving ? 'A guardar…' : 'Guardar texto'}
         </button>
-      </div>
-    </form>
+      </form>
+    </details>
   )
 }
 
@@ -931,7 +985,7 @@ function EntryCard({
                     onClick={() => setEditing(true)}
                     className="min-h-[44px] rounded-lg border border-gray-200 bg-white px-3 text-xs font-semibold text-gray-700 hover:bg-gray-50"
                   >
-                    Editar
+                    Editar texto
                   </button>
                   <button
                     type="button"
@@ -945,7 +999,7 @@ function EntryCard({
             </div>
           </div>
           {entry.body?.trim() && (
-            <pre className="mt-3 max-h-64 overflow-auto whitespace-pre-wrap rounded-lg bg-white p-3 font-sans text-sm text-gray-800 ring-1 ring-gray-100">
+            <pre className="mt-3 max-h-44 overflow-auto whitespace-pre-wrap rounded-lg bg-white p-3 font-sans text-sm text-gray-800 ring-1 ring-gray-100">
               {entry.body}
             </pre>
           )}

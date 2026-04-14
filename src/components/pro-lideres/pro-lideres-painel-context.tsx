@@ -20,6 +20,11 @@ export type ProLideresPainelContextValue = {
   previewWithoutLogin?: boolean
   /** Código vertical do tenant (ex. h-lider = Herbalife). */
   verticalCode: string
+  /**
+   * Quando false, membros não veem Tarefas diárias no menu nem na visão geral.
+   * Líder e pré-visualização «ver como equipe» seguem a mesma regra da equipe.
+   */
+  dailyTasksVisibleToTeam: boolean
 }
 
 const ProLideresPainelContext = createContext<ProLideresPainelContextValue | null>(null)

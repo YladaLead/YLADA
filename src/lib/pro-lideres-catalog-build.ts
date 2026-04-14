@@ -39,6 +39,8 @@ export type ProLideresCatalogItem = {
   situationBucket: ProLideresSituationBucket
   createdAt: string | null
   badge: 'most_used' | 'most_shared' | null
+  /** Só em entradas `custom` (BD): notas do líder (edição no painel). */
+  customFlowNotes?: string
 }
 
 type EventRow = { link_id: string; event_type: string; cnt: number | string }
@@ -353,7 +355,14 @@ function assignBadges(items: ProLideresCatalogItem[]): void {
 export async function buildProLideresCatalog(
   ownerUserId: string,
   baseUrl: string,
-  customRows: Array<{ id: string; label: string; href: string; sort_order: number; category?: string }>
+  customRows: Array<{
+    id: string
+    label: string
+    href: string
+    sort_order: number
+    category?: string
+    notes?: string | null
+  }>
 ): Promise<ProLideresCatalogItem[]> {
   const out: ProLideresCatalogItem[] = []
 
@@ -451,14 +460,22 @@ export async function buildProLideresCatalog(
     })
     .sort((a, b) => a.sort_order - b.sort_order)
 
+  const customFallbackWhen =
+    'Fluxo definido por ti. Preferir links YLADA em /l/… quando for diagnóstico ou quiz; ajusta o texto acima à tua necessidade.'
+
   for (const r of customs) {
     const href = r.href.trim()
     const k = inferCustomKind(href)
     const label = r.label.trim()
     const catalogCategory: ProLideresCatalogCategory =
       r.category === 'recruitment' ? 'recruitment' : 'sales'
+    const rawNotes = typeof r.notes === 'string' ? r.notes.trim() : ''
     const metaLine =
-      k === 'calculator' ? `Ferramenta · ~1 min` : `${label.slice(0, 24)}${label.length > 24 ? '…' : ''} · link extra`
+      k === 'calculator'
+        ? `Ferramenta · ~1 min`
+        : rawNotes
+          ? `${rawNotes.slice(0, 40)}${rawNotes.length > 40 ? '…' : ''}`
+          : `${label.slice(0, 24)}${label.length > 24 ? '…' : ''} · fluxo próprio`
 
     out.push({
       id: r.id,
@@ -472,8 +489,8 @@ export async function buildProLideresCatalog(
       stats: { views: 0, conversions: 0, shares: 0 },
       description: null,
       metaLine,
-      whenToUse:
-        'Entrada adicionada pelo líder. Confirma que o destino usa o motor de diagnóstico YLADA em /l/… quando possível.',
+      whenToUse: rawNotes || customFallbackWhen,
+      customFlowNotes: rawNotes,
       segmentLabel: null,
       themeLabel: null,
       situationBucket: 'all',

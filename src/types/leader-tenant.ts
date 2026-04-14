@@ -15,6 +15,10 @@ export type LeaderTenantRow = {
   vertical_code?: string
   /** Máximo de convites pending (não expirados) em simultâneo. */
   team_invite_pending_quota?: number
+  /** Se false, a equipe não vê Tarefas diárias (líder vê sempre). */
+  daily_tasks_visible_to_team?: boolean
+  /** Pontos extra uma vez por dia quando o membro marca todas as tarefas desse dia. */
+  daily_tasks_full_day_bonus_points?: number
   created_at: string
   updated_at: string
 }

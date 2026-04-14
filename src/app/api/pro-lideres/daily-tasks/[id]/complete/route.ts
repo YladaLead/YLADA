@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireApiAuth } from '@/lib/api-auth'
 import { supabaseAdmin } from '@/lib/supabase'
+import { proLideresDailyTasksBlockedForMember } from '@/lib/pro-lideres-daily-tasks-access'
 import { resolveProLideresTenantContext } from '@/lib/pro-lideres-server'
+import { weekdayFromYmd } from '@/lib/pro-lideres-daily-tasks-points'
 import type { ProLideresDailyTaskCompletionRow, ProLideresDailyTaskRow } from '@/types/pro-lideres-daily-tasks'
 
 type RouteCtx = { params: Promise<{ id: string }> }
@@ -9,12 +11,6 @@ type RouteCtx = { params: Promise<{ id: string }> }
 function parseYmd(s: string): string | null {
   const t = s.trim()
   return /^\d{4}-\d{2}-\d{2}$/.test(t) ? t : null
-}
-
-/** Dia da semana JS (0=dom … 6=sáb) para uma data civil local Y-M-D. */
-function weekdayFromYmd(ymd: string): number {
-  const [y, m, d] = ymd.split('-').map((x) => parseInt(x, 10))
-  return new Date(y, m - 1, d).getDay()
 }
 
 /**
@@ -34,6 +30,9 @@ export async function POST(request: NextRequest, ctx: RouteCtx) {
   const tenantCtx = await resolveProLideresTenantContext(supabaseAdmin, user)
   if (!tenantCtx) {
     return NextResponse.json({ error: 'Tenant não encontrado' }, { status: 404 })
+  }
+  if (proLideresDailyTasksBlockedForMember(tenantCtx.tenant, tenantCtx.role)) {
+    return NextResponse.json({ error: 'Esta área não está visível para a equipe.' }, { status: 403 })
   }
 
   let bodyDate: string | undefined
@@ -110,6 +109,9 @@ export async function DELETE(request: NextRequest, ctx: RouteCtx) {
   const tenantCtx = await resolveProLideresTenantContext(supabaseAdmin, user)
   if (!tenantCtx) {
     return NextResponse.json({ error: 'Tenant não encontrado' }, { status: 404 })
+  }
+  if (proLideresDailyTasksBlockedForMember(tenantCtx.tenant, tenantCtx.role)) {
+    return NextResponse.json({ error: 'Esta área não está visível para a equipe.' }, { status: 403 })
   }
 
   const dateStr = parseYmd(request.nextUrl.searchParams.get('date') ?? '')

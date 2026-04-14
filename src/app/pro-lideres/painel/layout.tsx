@@ -18,6 +18,7 @@ export default async function ProLideresPainelLayout({ children }: { children: R
   const operationLabel =
     gate.tenant.display_name?.trim() || gate.tenant.team_name?.trim() || null
   const verticalCode = (gate.tenant.vertical_code ?? 'h-lider').trim() || 'h-lider'
+  const dailyTasksVisibleToTeam = gate.tenant.daily_tasks_visible_to_team !== false
 
   return (
     <ProLideresAreaShell
@@ -28,6 +29,7 @@ export default async function ProLideresPainelLayout({ children }: { children: R
         operationLabel,
         devStubPanel: isProLideresDevStubTenant(gate.tenant),
         verticalCode,
+        dailyTasksVisibleToTeam,
       }}
     >
       {children}

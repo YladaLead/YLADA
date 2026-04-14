@@ -62,12 +62,14 @@ function CatalogRowCard({
   item,
   showRemove,
   onRemove,
+  onEdit,
   copied,
   onCopied,
 }: {
   item: ProLideresCatalogItem
   showRemove: boolean
   onRemove: (id: string) => void
+  onEdit?: () => void
   copied: 'link' | 'qr' | null
   onCopied: (mode: 'link' | 'qr') => void
 }) {
@@ -87,7 +89,7 @@ function CatalogRowCard({
                 </span>
               ) : item.source === 'custom' ? (
                 <span className="inline-flex items-center rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-900 ring-1 ring-amber-100">
-                  Link extra
+                  Fluxo próprio
                 </span>
               ) : (
                 <span className="inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-800 ring-1 ring-slate-200">
@@ -170,13 +172,24 @@ function CatalogRowCard({
           Scripts
         </Link>
         {showRemove && item.source === 'custom' && (
-          <button
-            type="button"
-            onClick={() => onRemove(item.id)}
-            className="ml-auto text-xs font-medium text-red-600 underline-offset-2 hover:underline"
-          >
-            Remover extra
-          </button>
+          <span className="ml-auto flex flex-wrap items-center gap-2">
+            {onEdit && (
+              <button
+                type="button"
+                onClick={onEdit}
+                className="text-xs font-medium text-indigo-600 underline-offset-2 hover:underline"
+              >
+                Editar
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={() => onRemove(item.id)}
+              className="text-xs font-medium text-red-600 underline-offset-2 hover:underline"
+            >
+              Remover
+            </button>
+          </span>
         )}
       </div>
 
@@ -217,6 +230,8 @@ export function ProLideresCatalogoClient({
   const [error, setError] = useState<string | null>(null)
   const [label, setLabel] = useState('')
   const [href, setHref] = useState('')
+  const [flowNotes, setFlowNotes] = useState('')
+  const [editFlowId, setEditFlowId] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
   const [copyState, setCopyState] = useState<Record<string, 'link' | 'qr'>>({})
   const [tab, setTab] = useState<TabKey>('sales')
@@ -261,31 +276,57 @@ export function ProLideresCatalogoClient({
       if (!q) return true
       const name = item.label.toLowerCase()
       const desc = (item.description ?? '').toLowerCase()
-      return name.includes(q) || desc.includes(q)
+      const when = (item.whenToUse ?? '').toLowerCase()
+      return name.includes(q) || desc.includes(q) || when.includes(q)
     })
   }, [catalog, tab, section, search])
+
+  function resetFlowForm() {
+    setEditFlowId(null)
+    setLabel('')
+    setHref('')
+    setFlowNotes('')
+  }
+
+  function startEditFlow(item: ProLideresCatalogItem) {
+    if (item.source !== 'custom') return
+    setEditFlowId(item.id)
+    setLabel(item.label)
+    setHref(item.href)
+    setAddCategory(item.catalogCategory)
+    setFlowNotes(item.customFlowNotes ?? '')
+    setError(null)
+    const el = document.getElementById('pro-lideres-flow-form')
+    el?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
 
   async function onAdd(e: React.FormEvent) {
     e.preventDefault()
     setSaving(true)
     setError(null)
     try {
-      const res = await fetch(`${flowsApiBase}/flows`, {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ category: addCategory, label, href }),
-      })
+      const payload = { category: addCategory, label, href, notes: flowNotes }
+      const res = await fetch(
+        editFlowId ? `${flowsApiBase}/flows/${editFlowId}` : `${flowsApiBase}/flows`,
+        {
+          method: editFlowId ? 'PATCH' : 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        }
+      )
       const data = await res.json().catch(() => ({}))
       if (!res.ok) {
-        setError((data as { error?: string }).error || 'Não foi possível adicionar.')
+        setError(
+          (data as { error?: string }).error ||
+            (editFlowId ? 'Não foi possível guardar.' : 'Não foi possível adicionar.')
+        )
         return
       }
-      setLabel('')
-      setHref('')
+      resetFlowForm()
       await load()
     } catch {
-      setError('Erro de rede ao adicionar.')
+      setError(editFlowId ? 'Erro de rede ao guardar.' : 'Erro de rede ao adicionar.')
     } finally {
       setSaving(false)
     }
@@ -304,6 +345,7 @@ export function ProLideresCatalogoClient({
         setError((data as { error?: string }).error || 'Não foi possível remover.')
         return
       }
+      if (editFlowId === id) resetFlowForm()
       await load()
     } catch {
       setError('Erro de rede ao remover.')
@@ -457,6 +499,9 @@ export function ProLideresCatalogoClient({
               item={item}
               showRemove={isLeaderWorkspace}
               onRemove={(id) => void removeCustom(id)}
+              onEdit={
+                item.source === 'custom' && isLeaderWorkspace ? () => startEditFlow(item) : undefined
+              }
               copied={copyState[item.id] ?? null}
               onCopied={(mode) => setCopiedFor(item.id, mode)}
             />
@@ -482,14 +527,18 @@ export function ProLideresCatalogoClient({
 
       {isLeaderWorkspace && (
         <section
+          id="pro-lideres-flow-form"
           className="rounded-2xl border-2 border-slate-200 bg-white p-5 shadow-md ring-1 ring-slate-900/5"
           aria-labelledby="add-catalog-extra"
         >
           <h2 id="add-catalog-extra" className="text-base font-semibold text-slate-900">
-            Link extra no painel
+            {editFlowId ? 'Editar fluxo próprio' : 'Criar fluxo próprio'}
           </h2>
           <p className="mt-1 text-sm text-slate-600">
-            Opcional. Seus links YLADA já entram sozinhos; use isso só para fixar mais um URL {addFormAudienceNote}.
+            Defina um nome, o destino (caminho <code className="rounded bg-slate-100 px-1">/l/…</code> ou URL) e, se
+            quiser, a <strong>necessidade ou contexto</strong> deste fluxo para você e {addFormAudienceNote}. Os links
+            YLADA criados em <strong>Meus links</strong> já aparecem em &quot;Minhas ferramentas&quot;; aqui você
+            acrescenta atalhos e notas à sua estratégia.
           </p>
           <form onSubmit={onAdd} className="mt-4 grid gap-3 sm:grid-cols-2">
             {!hideRecruitmentTab && (
@@ -542,14 +591,36 @@ export function ProLideresCatalogoClient({
                 required
               />
             </label>
-            <div className="sm:col-span-2">
+            <label className="block text-sm sm:col-span-2">
+              <span className="mb-1 block font-medium text-gray-700">
+                Necessidade / quando usar <span className="font-normal text-gray-500">(opcional)</span>
+              </span>
+              <textarea
+                value={flowNotes}
+                onChange={(e) => setFlowNotes(e.target.value)}
+                rows={3}
+                maxLength={4000}
+                placeholder="Ex.: usar com quem já mostrou interesse em negócio paralelo; enviar depois do café da manhã…"
+                className="w-full rounded-lg border border-gray-200 px-3 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
+              />
+            </label>
+            <div className="flex flex-wrap gap-2 sm:col-span-2">
               <button
                 type="submit"
                 disabled={saving}
                 className="min-h-[44px] rounded-lg bg-blue-600 px-5 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
               >
-                {saving ? 'Salvando…' : 'Adicionar'}
+                {saving ? 'Salvando…' : editFlowId ? 'Guardar alterações' : 'Adicionar fluxo'}
               </button>
+              {editFlowId && (
+                <button
+                  type="button"
+                  onClick={() => resetFlowForm()}
+                  className="min-h-[44px] rounded-lg border border-gray-300 bg-white px-5 text-sm font-semibold text-gray-800 hover:bg-gray-50"
+                >
+                  Cancelar edição
+                </button>
+              )}
             </div>
           </form>
         </section>

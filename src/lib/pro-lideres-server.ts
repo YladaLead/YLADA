@@ -111,6 +111,8 @@ function devStubLeaderTenant(userId: string): LeaderTenantRow {
     contact_email: null,
     focus_notes: null,
     vertical_code: 'h-lider',
+    daily_tasks_visible_to_team: true,
+    daily_tasks_full_day_bonus_points: 10,
     created_at: now,
     updated_at: now,
   }

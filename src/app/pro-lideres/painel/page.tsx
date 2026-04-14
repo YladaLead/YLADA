@@ -16,6 +16,7 @@ export default async function ProLideresPainelVisaoPage() {
     gate.tenant.display_name?.trim() ||
     gate.tenant.team_name?.trim() ||
     'este espaço'
+  const dailyTasksVisibleToTeam = gate.tenant.daily_tasks_visible_to_team !== false
 
   const leaderCards = [
     {
@@ -30,7 +31,7 @@ export default async function ProLideresPainelVisaoPage() {
     },
     {
       title: 'Scripts',
-      desc: 'Roteiros de conversa (com Noel) para a equipe',
+      desc: 'Grupos de textos para a equipe usar com clientes',
       href: '/pro-lideres/painel/scripts',
     },
     {
@@ -66,11 +67,15 @@ export default async function ProLideresPainelVisaoPage() {
       desc: 'Roteiros e mensagens partilhados pelo líder para executares no campo',
       href: '/pro-lideres/painel/scripts',
     },
-    {
-      title: 'Tarefas diárias',
-      desc: 'Marca o que cumpriste e acumula pontos',
-      href: '/pro-lideres/painel/tarefas',
-    },
+    ...(dailyTasksVisibleToTeam
+      ? ([
+          {
+            title: 'Tarefas diárias',
+            desc: 'Marca o que cumpriste e acumula pontos',
+            href: '/pro-lideres/painel/tarefas',
+          },
+        ] as const)
+      : []),
   ] as const
 
   const cards = isLeader ? leaderCards : teamCards

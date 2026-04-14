@@ -147,7 +147,7 @@ CREATE POLICY pro_lideres_weekday_reminders_delete_owner ON pro_lideres_weekday_
 COMMENT ON TABLE pro_lideres_weekday_reminders IS
   'Pro Líderes: orientação/lembrete por dia da semana (0=dom … 6=sáb); separado das tarefas de construção.';
 
--- --- Conclusões: líder (dono) também pode marcar como a equipa ---
+-- --- Conclusões: líder (dono) também pode marcar como a equipe ---
 DROP POLICY IF EXISTS pro_lideres_daily_compl_insert_self ON pro_lideres_daily_task_completions;
 CREATE POLICY pro_lideres_daily_compl_insert_self ON pro_lideres_daily_task_completions
   FOR INSERT TO authenticated

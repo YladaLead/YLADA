@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { useAuth } from '@/hooks/useAuth'
 import { useProLideresPainel } from '@/components/pro-lideres/pro-lideres-painel-context'
 import {
@@ -15,7 +16,7 @@ import type { ProLideresMemberListItem } from '@/lib/pro-lideres-members-enriche
 type ApiGet = {
   tasks: ProLideresDailyTaskRow[]
   completions: ProLideresDailyTaskCompletionRow[]
-  reminders: Record<string, string>
+  fullDayBonusPoints: number
   pointsByUserId: Record<string, number>
   myPointsInRange: number
   members: ProLideresMemberListItem[]
@@ -45,10 +46,31 @@ function endOfWeek(d: Date): Date {
   return e
 }
 
+/** Data civil Y-M-D → texto legível em português (fuso local). */
+function formatCivilDateLongPt(ymd: string): string {
+  const [y, m, d] = ymd.split('-').map((x) => parseInt(x, 10))
+  if (!y || !m || !d) return ymd
+  const dt = new Date(y, m - 1, d, 12, 0, 0)
+  return dt.toLocaleDateString('pt-BR', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  })
+}
+
 export function ProLideresDailyTasksClient() {
-  const { isLeaderWorkspace: isLeader } = useProLideresPainel()
+  const router = useRouter()
+  const { isLeaderWorkspace: isLeader, dailyTasksVisibleToTeam } = useProLideresPainel()
   const { user } = useAuth()
   const myUserId = user?.id ?? ''
+
+  const [teamVisible, setTeamVisible] = useState(dailyTasksVisibleToTeam)
+  const [savingTeamVisible, setSavingTeamVisible] = useState(false)
+
+  useEffect(() => {
+    setTeamVisible(dailyTasksVisibleToTeam)
+  }, [dailyTasksVisibleToTeam])
 
   const [from, setFrom] = useState(() => {
     const n = new Date()
@@ -67,9 +89,10 @@ export function ProLideresDailyTasksClient() {
     () => new Set([1, 2, 3, 4, 5, 6, 0])
   )
   const [saving, setSaving] = useState(false)
-  const [savingReminders, setSavingReminders] = useState(false)
-
-  const [reminderDrafts, setReminderDrafts] = useState<Record<number, string>>({})
+  const [savingToday, setSavingToday] = useState(false)
+  const [todayDraft, setTodayDraft] = useState<Set<string>>(() => new Set())
+  const [bonusPts, setBonusPts] = useState('10')
+  const [savingBonus, setSavingBonus] = useState(false)
 
   const now = new Date()
   const todayStr = localIsoDate(now)
@@ -91,11 +114,7 @@ export function ProLideresDailyTasksClient() {
       }
       const payload = json as ApiGet
       setData(payload)
-      const next: Record<number, string> = {}
-      for (const d of PL_WEEKDAY_ORDER) {
-        next[d] = (payload.reminders?.[String(d)] ?? '').trim()
-      }
-      setReminderDrafts(next)
+      setBonusPts(String(payload.fullDayBonusPoints ?? 10))
     } catch {
       setError('Erro de rede.')
       setData(null)
@@ -108,6 +127,16 @@ export function ProLideresDailyTasksClient() {
     void load()
   }, [load])
 
+  useEffect(() => {
+    if (!data || !myUserId || isLeader) return
+    const done = new Set(
+      data.completions
+        .filter((c) => c.completed_on === todayStr && c.member_user_id === myUserId)
+        .map((c) => c.task_id)
+    )
+    setTodayDraft(done)
+  }, [data, todayStr, myUserId, isLeader])
+
   const memberName = useCallback(
     (userId: string) => {
       const m = data?.members.find((x) => x.userId === userId)
@@ -115,6 +144,85 @@ export function ProLideresDailyTasksClient() {
     },
     [data?.members]
   )
+
+  async function updateTeamVisible(next: boolean) {
+    if (!isLeader) return
+    setSavingTeamVisible(true)
+    setError(null)
+    try {
+      const res = await fetch('/api/pro-lideres/tenant', {
+        method: 'PATCH',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ daily_tasks_visible_to_team: next }),
+      })
+      const json = await res.json().catch(() => ({}))
+      if (!res.ok) {
+        setError((json as { error?: string }).error || 'Erro ao atualizar visibilidade.')
+        return
+      }
+      setTeamVisible(next)
+      router.refresh()
+    } catch {
+      setError('Erro de rede.')
+    } finally {
+      setSavingTeamVisible(false)
+    }
+  }
+
+  async function saveFullDayBonus() {
+    if (!isLeader) return
+    setSavingBonus(true)
+    setError(null)
+    try {
+      const n = Math.min(100000, Math.max(0, Math.floor(Number(bonusPts) || 0)))
+      const res = await fetch('/api/pro-lideres/tenant', {
+        method: 'PATCH',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ daily_tasks_full_day_bonus_points: n }),
+      })
+      const json = await res.json().catch(() => ({}))
+      if (!res.ok) {
+        setError((json as { error?: string }).error || 'Erro ao guardar bónus.')
+        return
+      }
+      setBonusPts(String(n))
+      router.refresh()
+      await load()
+    } catch {
+      setError('Erro de rede.')
+    } finally {
+      setSavingBonus(false)
+    }
+  }
+
+  async function saveTodayExecution() {
+    if (isLeader || !myUserId) return
+    setSavingToday(true)
+    setError(null)
+    try {
+      const res = await fetch('/api/pro-lideres/daily-tasks/today', {
+        method: 'PUT',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          date: todayStr,
+          completed_task_ids: Array.from(todayDraft),
+        }),
+      })
+      const json = await res.json().catch(() => ({}))
+      if (!res.ok) {
+        setError((json as { error?: string }).error || 'Erro ao guardar.')
+        return
+      }
+      await load()
+    } catch {
+      setError('Erro de rede.')
+    } finally {
+      setSavingToday(false)
+    }
+  }
 
   function toggleExecutionDay(day: number) {
     setExecutionWeekdays((prev) => {
@@ -127,32 +235,6 @@ export function ProLideresDailyTasksClient() {
       }
       return n
     })
-  }
-
-  async function saveReminders() {
-    if (!isLeader) return
-    setSavingReminders(true)
-    setError(null)
-    try {
-      const reminders = PL_WEEKDAY_ORDER.map((weekday) => ({
-        weekday,
-        body: (reminderDrafts[weekday] ?? '').trim(),
-      }))
-      const res = await fetch('/api/pro-lideres/daily-tasks/reminders', {
-        method: 'PUT',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ reminders }),
-      })
-      const json = await res.json().catch(() => ({}))
-      if (!res.ok) {
-        setError((json as { error?: string }).error || 'Erro ao guardar lembretes.')
-        return
-      }
-      await load()
-    } finally {
-      setSavingReminders(false)
-    }
   }
 
   async function createTask(e: React.FormEvent) {
@@ -204,25 +286,6 @@ export function ProLideresDailyTasksClient() {
     }
   }
 
-  async function toggleComplete(taskId: string, done: boolean, dateStr: string) {
-    const method = done ? 'POST' : 'DELETE'
-    const url =
-      method === 'DELETE'
-        ? `/api/pro-lideres/daily-tasks/${encodeURIComponent(taskId)}/complete?date=${encodeURIComponent(dateStr)}`
-        : `/api/pro-lideres/daily-tasks/${encodeURIComponent(taskId)}/complete`
-    const init: RequestInit = { method, credentials: 'include' }
-    if (method === 'POST') {
-      init.headers = { 'Content-Type': 'application/json' }
-      init.body = JSON.stringify({ date: dateStr })
-    }
-    const res = await fetch(url, init)
-    if (res.ok) await load()
-    else {
-      const j = await res.json().catch(() => ({}))
-      setError((j as { error?: string }).error || 'Erro ao atualizar.')
-    }
-  }
-
   const presets = (
     <div className="flex flex-wrap gap-2">
       <button
@@ -261,83 +324,144 @@ export function ProLideresDailyTasksClient() {
     </div>
   )
 
-  const reminderToday = (data?.reminders?.[String(todayDow)] ?? '').trim()
+  const applicableToday =
+    data?.tasks.filter((t) => (t.execution_weekdays ?? []).includes(todayDow)) ?? []
 
   return (
     <div className="max-w-4xl space-y-6">
       <div>
-        <p className="text-sm font-medium text-blue-600">Principal</p>
+        {isLeader ? (
+          <p className="text-sm font-medium text-blue-600">Principal</p>
+        ) : null}
         <h1 className="text-2xl font-bold text-gray-900">Tarefas diárias</h1>
-        <p className="mt-1 max-w-2xl text-sm text-gray-600">
-          {isLeader ? (
-            <>
-              <strong className="text-gray-800">Lembretes</strong> são só orientações por dia da semana (ex.: o que
-              reforçar à segunda ou ao sábado). <strong className="text-gray-800">Tarefas de construção</strong> são o
-              que o distribuidor executa nos dias que definires (segunda a sexta, só fins de semana, todos os dias, etc.)
-              — sem data fixa no calendário; o registo de conclusão é por dia civil.
-            </>
-          ) : (
-            <>
-              Vê o lembrete de hoje, as tarefas que o líder definiu para o teu dia da semana e marca o que cumpriste
-              hoje para acumular pontos.
-            </>
-          )}
-        </p>
+        {isLeader ? (
+          <p className="mt-1 max-w-2xl text-sm text-gray-600">
+            Define as <strong className="text-gray-800">tarefas do dia</strong> (e em que dias da semana contam),
+            pontos por tarefa e o <strong className="text-gray-800">bónus</strong> quando alguém marca tudo. A equipe
+            usa uma checklist simples: marca, guarda uma vez por dia e pontua.
+          </p>
+        ) : (
+          <p className="mt-1 max-w-xl text-sm text-gray-500">
+            Marca o que fizeste hoje e guarda. Abaixo podes ver o relatório por dia, semana ou mês.
+          </p>
+        )}
       </div>
 
-      {!isLeader && data && (
-        <div className="space-y-2 rounded-xl border border-slate-200 bg-slate-50/80 p-4">
-          <p className="text-sm font-semibold text-slate-900">
-            Hoje ({PL_WEEKDAY_LABEL[todayDow]} · {todayStr})
-          </p>
-          {reminderToday ? (
-            <p className="text-sm text-slate-800">
-              <span className="font-medium text-slate-700">Lembrete do líder:</span> {reminderToday}
+      {isLeader && (
+        <div className="space-y-4 rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+          <label className="flex cursor-pointer items-start gap-3">
+            <input
+              type="checkbox"
+              className="mt-1 h-4 w-4 shrink-0 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+              checked={teamVisible}
+              disabled={savingTeamVisible}
+              onChange={(e) => void updateTeamVisible(e.target.checked)}
+            />
+            <div>
+              <p className="text-sm font-semibold text-gray-900">Mostrar Tarefas diárias à equipe</p>
+              <p className="mt-1 text-xs text-gray-600">
+                Quando desligas, os membros deixam de ver esta área no menu e na visão geral do painel.
+              </p>
+            </div>
+          </label>
+          <div className="border-t border-gray-100 pt-4">
+            <p className="text-sm font-semibold text-gray-900">Bónus de dia completo</p>
+            <p className="mt-0.5 text-xs text-gray-600">
+              Pontos extra quando alguém marca todas as tarefas que aplicam àquele dia da semana (uma vez por dia).
             </p>
-          ) : (
-            <p className="text-sm text-slate-500">Sem lembrete de texto para este dia da semana.</p>
-          )}
+            <div className="mt-3 flex flex-wrap items-end gap-2">
+              <label className="block">
+                <span className="mb-1 block text-xs font-medium text-gray-600">Pontos do bónus</span>
+                <input
+                  type="number"
+                  min={0}
+                  max={100000}
+                  value={bonusPts}
+                  onChange={(e) => setBonusPts(e.target.value)}
+                  className="w-28 rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                />
+              </label>
+              <button
+                type="button"
+                disabled={savingBonus}
+                onClick={() => void saveFullDayBonus()}
+                className="rounded-lg bg-gray-900 px-4 py-2 text-sm font-semibold text-white hover:bg-gray-800 disabled:opacity-60"
+              >
+                {savingBonus ? 'A guardar…' : 'Guardar bónus'}
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
-      {isLeader && (
-        <div className="space-y-3 rounded-xl border border-indigo-100 bg-indigo-50/40 p-4">
-          <div>
-            <p className="text-sm font-semibold text-indigo-950">Lembretes por dia da semana</p>
-            <p className="mt-0.5 text-xs text-indigo-900/80">
-              Uma orientação por dia (opcional). Isto não conta como tarefa nem pontos — serve para alinhar o discurso
-              da equipa.
+      {!isLeader && data && (
+        <div className="overflow-hidden rounded-2xl border border-emerald-200/70 bg-white shadow-sm">
+          <div className="border-b border-emerald-100/80 px-4 py-4">
+            <p className="text-lg font-semibold capitalize leading-snug text-gray-900">
+              {formatCivilDateLongPt(todayStr)}
+            </p>
+            <p className="mt-2 text-xs text-gray-500">
+              Marca o que fizeste. Se completares tudo o que aplica a hoje:{' '}
+              <span className="font-medium text-emerald-800">+{data.fullDayBonusPoints ?? 0} pts</span> extra.
             </p>
           </div>
-          <div className="grid gap-3 sm:grid-cols-2">
-            {PL_WEEKDAY_ORDER.map((d) => (
-              <label key={d} className="block">
-                <span className="mb-1 block text-xs font-medium text-indigo-900">{PL_WEEKDAY_LABEL[d]}</span>
-                <textarea
-                  value={reminderDrafts[d] ?? ''}
-                  onChange={(e) => setReminderDrafts((prev) => ({ ...prev, [d]: e.target.value }))}
-                  className="min-h-[56px] w-full rounded-lg border border-indigo-200/80 bg-white px-3 py-2 text-sm text-gray-900"
-                  placeholder="Opcional"
-                  maxLength={4000}
-                />
-              </label>
-            ))}
+          <ul className="divide-y divide-gray-100">
+            {applicableToday.length === 0 ? (
+              <li className="px-4 py-8 text-center text-sm text-gray-500">Sem tarefas para hoje.</li>
+            ) : (
+              applicableToday.map((t) => {
+                const checked = todayDraft.has(t.id)
+                return (
+                  <li key={t.id} className="flex gap-3 px-4 py-3.5">
+                    <input
+                      type="checkbox"
+                      checked={checked}
+                      onChange={() => {
+                        setTodayDraft((prev) => {
+                          const n = new Set(prev)
+                          if (n.has(t.id)) n.delete(t.id)
+                          else n.add(t.id)
+                          return n
+                        })
+                      }}
+                      className="mt-1 h-4 w-4 shrink-0 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
+                    />
+                    <div className="min-w-0 flex-1">
+                      <p className="text-[15px] font-medium leading-snug text-gray-900">
+                        <span className="text-emerald-700">{t.points} pts</span>
+                        <span className="mx-2 text-gray-200">·</span>
+                        {t.title}
+                      </p>
+                      {t.description ? (
+                        <p className="mt-1.5 text-sm leading-relaxed text-emerald-800/90">{t.description}</p>
+                      ) : null}
+                    </div>
+                  </li>
+                )
+              })
+            )}
+          </ul>
+          <div className="border-t border-gray-100 p-4">
+            <button
+              type="button"
+              disabled={savingToday || applicableToday.length === 0}
+              onClick={() => void saveTodayExecution()}
+              className="w-full rounded-xl bg-emerald-700 px-4 py-3.5 text-sm font-semibold text-white shadow-sm hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {savingToday ? 'A guardar…' : 'Salvar execução de hoje'}
+            </button>
           </div>
-          <button
-            type="button"
-            disabled={savingReminders}
-            onClick={() => void saveReminders()}
-            className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700 disabled:opacity-60"
-          >
-            {savingReminders ? 'A guardar…' : 'Guardar lembretes'}
-          </button>
         </div>
       )}
 
       <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-        <p className="mb-2 text-sm font-semibold text-gray-900">Período do relatório</p>
+        <p className="mb-2 text-sm font-semibold text-gray-900">
+          {isLeader ? 'Período do relatório' : 'Relatório'}
+        </p>
         <p className="mb-2 text-xs text-gray-500">
-          Ajusta o intervalo para ver pontos e conclusões registadas nesses dias (as tarefas em si não têm data).
+          {isLeader
+            ? 'Ajusta o intervalo para ver pontos e conclusões registadas nesses dias (as tarefas em si não têm data).'
+            : 'Vê os teus pontos no dia, na semana ou no mês — usa os atalhos ou escolhe as datas.'}
         </p>
         {presets}
         <div className="mt-3 flex flex-wrap items-end gap-3">
@@ -370,8 +494,10 @@ export function ProLideresDailyTasksClient() {
       </div>
 
       {!isLeader && data && (
-        <div className="rounded-xl border border-emerald-200 bg-emerald-50/60 px-4 py-3 text-sm text-emerald-950">
-          <strong>Pontos no período do relatório:</strong> {data.myPointsInRange}
+        <div className="rounded-xl border border-gray-200 bg-gray-50/80 px-4 py-4 text-center">
+          <p className="text-xs font-medium uppercase tracking-wide text-gray-500">Total no período</p>
+          <p className="mt-1 text-3xl font-semibold tabular-nums text-gray-900">{data.myPointsInRange}</p>
+          <p className="text-xs text-gray-500">pontos · inclui bónus quando completas tudo num dia</p>
         </div>
       )}
 
@@ -456,57 +582,32 @@ export function ProLideresDailyTasksClient() {
             </form>
           )}
 
-          <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
-            <div className="border-b border-gray-100 px-4 py-3">
-              <p className="text-sm font-semibold text-gray-900">Tarefas de construção</p>
-              <p className="text-xs text-gray-500">Definição atual (não depende do período do relatório)</p>
-            </div>
-            <ul className="divide-y divide-gray-100">
-              {(data?.tasks ?? []).length === 0 ? (
-                <li className="px-4 py-6 text-sm text-gray-600">Nenhuma tarefa definida ainda.</li>
-              ) : (
-                (data?.tasks ?? []).map((t) => {
-                  const days = t.execution_weekdays ?? []
-                  const appliesToday = days.includes(todayDow)
-                  const selfDone =
-                    !isLeader &&
-                    myUserId &&
-                    appliesToday &&
-                    (data?.completions ?? []).some(
-                      (c) =>
-                        c.task_id === t.id &&
-                        c.member_user_id === myUserId &&
-                        c.completed_on === todayStr
-                    )
-                  return (
-                    <li key={t.id} className="flex flex-col gap-2 px-4 py-3 sm:flex-row sm:items-start sm:justify-between">
-                      <div className="min-w-0">
-                        <p className="font-medium text-gray-900">
-                          {t.title} <span className="text-emerald-700">(+{t.points} pts)</span>
-                        </p>
-                        <p className="mt-0.5 text-xs text-gray-500">
-                          Executar: {formatExecutionWeekdays(days)}
-                        </p>
-                        {t.description ? <p className="mt-1 text-sm text-gray-600">{t.description}</p> : null}
-                        {!isLeader && (
-                          <div className="mt-2">
-                            {!appliesToday ? (
-                              <p className="text-sm text-gray-500">Esta tarefa não aplica ao dia de hoje.</p>
-                            ) : (
-                              <label className="flex cursor-pointer items-center gap-2 text-sm">
-                                <input
-                                  type="checkbox"
-                                  checked={selfDone}
-                                  onChange={(e) => void toggleComplete(t.id, e.target.checked, todayStr)}
-                                  className="h-4 w-4 rounded border-gray-300"
-                                />
-                                <span>Marcar como feita hoje ({todayStr})</span>
-                              </label>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                      {isLeader && (
+          {isLeader && (
+            <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
+              <div className="border-b border-gray-100 px-4 py-3">
+                <p className="text-sm font-semibold text-gray-900">Tarefas de construção</p>
+                <p className="text-xs text-gray-500">Definição atual (não depende do período do relatório)</p>
+              </div>
+              <ul className="divide-y divide-gray-100">
+                {(data?.tasks ?? []).length === 0 ? (
+                  <li className="px-4 py-6 text-sm text-gray-600">Nenhuma tarefa definida ainda.</li>
+                ) : (
+                  (data?.tasks ?? []).map((t) => {
+                    const days = t.execution_weekdays ?? []
+                    return (
+                      <li
+                        key={t.id}
+                        className="flex flex-col gap-2 px-4 py-3 sm:flex-row sm:items-start sm:justify-between"
+                      >
+                        <div className="min-w-0">
+                          <p className="font-medium text-gray-900">
+                            {t.title} <span className="text-emerald-700">(+{t.points} pts)</span>
+                          </p>
+                          <p className="mt-0.5 text-xs text-gray-500">
+                            Executar: {formatExecutionWeekdays(days)}
+                          </p>
+                          {t.description ? <p className="mt-1 text-sm text-gray-600">{t.description}</p> : null}
+                        </div>
                         <button
                           type="button"
                           onClick={() => void deleteTask(t.id)}
@@ -514,13 +615,13 @@ export function ProLideresDailyTasksClient() {
                         >
                           Remover
                         </button>
-                      )}
-                    </li>
-                  )
-                })
-              )}
-            </ul>
-          </div>
+                      </li>
+                    )
+                  })
+                )}
+              </ul>
+            </div>
+          )}
 
           {isLeader && data && data.members.length > 0 && (
             <div className="rounded-xl border border-gray-200 bg-white shadow-sm">

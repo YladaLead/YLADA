@@ -3,6 +3,8 @@ import { requireApiAuth } from '@/lib/api-auth'
 import { supabaseAdmin } from '@/lib/supabase'
 import { resolveProLideresTenantContext } from '@/lib/pro-lideres-server'
 import { fetchProLideresMembersEnriched } from '@/lib/pro-lideres-members-enriched'
+import { proLideresDailyTasksBlockedForMember } from '@/lib/pro-lideres-daily-tasks-access'
+import { pointsForUserInRange } from '@/lib/pro-lideres-daily-tasks-points'
 import { PL_WEEKDAY_ORDER, type ProLideresDailyTaskCompletionRow, type ProLideresDailyTaskRow } from '@/types/pro-lideres-daily-tasks'
 
 function isoDate(d: Date): string {
@@ -29,7 +31,7 @@ function normalizeExecutionWeekdays(raw: unknown): number[] | null {
 }
 
 /**
- * GET: todas as tarefas do tenant + conclusões no intervalo [from, to] (por dia civil) + lembretes + pontos.
+ * GET: tarefas do tenant + conclusões no intervalo [from, to] + pontos (incl. bónus de dia completo).
  * POST: criar tarefa (só líder) com dias da semana em que se executa.
  */
 export async function GET(request: NextRequest) {
@@ -44,6 +46,9 @@ export async function GET(request: NextRequest) {
   const ctx = await resolveProLideresTenantContext(supabaseAdmin, user)
   if (!ctx) {
     return NextResponse.json({ error: 'Tenant não encontrado' }, { status: 404 })
+  }
+  if (proLideresDailyTasksBlockedForMember(ctx.tenant, ctx.role)) {
+    return NextResponse.json({ error: 'Esta área não está visível para a equipe.' }, { status: 403 })
   }
 
   const sp = request.nextUrl.searchParams
@@ -91,45 +96,29 @@ export async function GET(request: NextRequest) {
     completions = completions.filter((c) => c.member_user_id === user.id)
   }
 
-  const taskById = new Map(tasks.map((t) => [t.id, t]))
+  const complAll = (complRows ?? []) as ProLideresDailyTaskCompletionRow[]
+  const fullDayBonusPoints = Math.min(
+    100000,
+    Math.max(0, Math.floor(Number(ctx.tenant.daily_tasks_full_day_bonus_points ?? 10)))
+  )
+
+  const members = isOwner ? await fetchProLideresMembersEnriched(tenantId) : []
+
   const pointsByUserId: Record<string, number> = {}
   if (isOwner) {
-    for (const c of complRows ?? []) {
-      const t = taskById.get(c.task_id)
-      if (!t) continue
-      const uid = c.member_user_id
-      pointsByUserId[uid] = (pointsByUserId[uid] ?? 0) + t.points
+    const ids = new Set<string>(members.map((m) => m.userId))
+    for (const c of complAll) ids.add(c.member_user_id)
+    for (const uid of ids) {
+      pointsByUserId[uid] = pointsForUserInRange(uid, tasks, complAll, from, to, fullDayBonusPoints)
     }
   }
 
-  let myPointsInRange = 0
-  for (const c of complRows ?? []) {
-    if (c.member_user_id !== user.id) continue
-    const t = taskById.get(c.task_id)
-    if (t) myPointsInRange += t.points
-  }
-
-  const { data: reminderRows, error: remErr } = await supabaseAdmin
-    .from('pro_lideres_weekday_reminders')
-    .select('weekday, body')
-    .eq('leader_tenant_id', tenantId)
-
-  if (remErr) {
-    console.error('[daily-tasks GET reminders]', remErr)
-    return NextResponse.json({ error: 'Erro ao carregar lembretes.' }, { status: 500 })
-  }
-
-  const reminders: Record<string, string> = {}
-  for (const r of reminderRows ?? []) {
-    reminders[String(r.weekday)] = (r.body as string) ?? ''
-  }
-
-  const members = isOwner ? await fetchProLideresMembersEnriched(tenantId) : []
+  const myPointsInRange = pointsForUserInRange(user.id, tasks, complAll, from, to, fullDayBonusPoints)
 
   return NextResponse.json({
     tasks,
     completions,
-    reminders,
+    fullDayBonusPoints,
     pointsByUserId,
     myPointsInRange,
     members,

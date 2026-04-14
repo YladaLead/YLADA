@@ -4,20 +4,14 @@ import { supabaseAdmin } from '@/lib/supabase'
 import { proLideresApiDevHint } from '@/lib/pro-lideres-api-dev-hints'
 import { resolveProLideresTenantContext } from '@/lib/pro-lideres-server'
 import { buildProLideresCatalog, type ProLideresCatalogItem } from '@/lib/pro-lideres-catalog-build'
+import {
+  isProLideresFlowHrefAllowed,
+  PRO_LIDERES_FLOW_HREF_MAX,
+  PRO_LIDERES_FLOW_LABEL_MAX,
+  PRO_LIDERES_FLOW_NOTES_MAX,
+} from '@/lib/pro-lideres-flow-href'
 
 export type { ProLideresCatalogItem }
-
-function isAllowedHref(href: string): boolean {
-  const t = href.trim()
-  if (!t) return false
-  if (t.startsWith('/')) return true
-  try {
-    const u = new URL(t)
-    return u.protocol === 'https:' || u.protocol === 'http:'
-  } catch {
-    return false
-  }
-}
 
 function requestBaseUrl(request: NextRequest): string {
   const host = request.headers.get('host') || ''
@@ -51,7 +45,7 @@ export async function GET(request: NextRequest) {
 
   const { data: rows, error } = await supabaseAdmin
     .from('leader_tenant_flow_entries')
-    .select('id, category, label, href, sort_order')
+    .select('id, category, label, href, sort_order, notes')
     .eq('leader_tenant_id', ctx.tenant.id)
     .order('sort_order', { ascending: true })
 
@@ -66,6 +60,7 @@ export async function GET(request: NextRequest) {
     href: r.href as string,
     sort_order: typeof r.sort_order === 'number' ? r.sort_order : 0,
     category: r.category as string,
+    notes: typeof r.notes === 'string' ? r.notes : '',
   }))
   const baseUrl = requestBaseUrl(request)
   const catalog = await buildProLideresCatalog(ctx.tenant.owner_user_id, baseUrl, customRows)
@@ -93,7 +88,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Apenas o líder pode adicionar itens ao catálogo.' }, { status: 403 })
   }
 
-  let body: { category?: string; label?: string; href?: string; sort_order?: number }
+  let body: { category?: string; label?: string; href?: string; sort_order?: number; notes?: string }
   try {
     body = await request.json()
   } catch {
@@ -102,16 +97,17 @@ export async function POST(request: NextRequest) {
 
   const category = body.category === 'recruitment' ? 'recruitment' : 'sales'
 
-  const label = String(body.label ?? '').trim().slice(0, 200)
-  const href = String(body.href ?? '').trim().slice(0, 2000)
+  const label = String(body.label ?? '').trim().slice(0, PRO_LIDERES_FLOW_LABEL_MAX)
+  const href = String(body.href ?? '').trim().slice(0, PRO_LIDERES_FLOW_HREF_MAX)
   if (!label) {
     return NextResponse.json({ error: 'label é obrigatório' }, { status: 400 })
   }
-  if (!isAllowedHref(href)) {
+  if (!isProLideresFlowHrefAllowed(href)) {
     return NextResponse.json({ error: 'href inválido (use caminho /... ou https://)' }, { status: 400 })
   }
 
   const sort_order = typeof body.sort_order === 'number' && Number.isFinite(body.sort_order) ? body.sort_order : 999
+  const notes = String(body.notes ?? '').trim().slice(0, PRO_LIDERES_FLOW_NOTES_MAX)
 
   const { data: inserted, error } = await supabaseAdmin
     .from('leader_tenant_flow_entries')
@@ -121,6 +117,7 @@ export async function POST(request: NextRequest) {
       label,
       href,
       sort_order,
+      notes,
     })
     .select()
     .single()
