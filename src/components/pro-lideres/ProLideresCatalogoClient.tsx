@@ -89,20 +89,10 @@ function CatalogRowCard({
             </div>
           </div>
 
-          {item.description ? (
-            <p className="mt-2 line-clamp-3 text-sm text-gray-600">{item.description}</p>
-          ) : (
-            <p className="mt-2 text-sm text-gray-500">
-              Diagnóstico entregue pelo motor YLADA no link público — detalhes completos no editor em Meus links.
-            </p>
-          )}
-
-          {item.metaLine && <p className="mt-2 text-xs text-gray-400">{item.metaLine}</p>}
-
           <button
             type="button"
             onClick={() => setWhenOpen((v) => !v)}
-            className="mt-3 text-sm font-medium text-indigo-600 hover:text-indigo-800"
+            className="mt-2 text-sm font-medium text-indigo-600 hover:text-indigo-800"
             aria-expanded={whenOpen}
           >
             Quando usar {whenOpen ? '▲' : '▼'}
@@ -216,7 +206,7 @@ export function ProLideresCatalogoClient({
   const [addCategory, setAddCategory] = useState<TabKey>('sales')
 
   const defaultIntro =
-    'Lista única por ferramenta (mesmo link ou mesmo nome no separador). Em Recrutamento, o sistema completa automaticamente os presets (3 quizzes + dois fluxos) em /l/… — funcionam como os teus outros links YLADA, com perguntas e diagnóstico. Edita em Meus links se precisares.'
+    'Lista única por ferramenta (mesmo link ou mesmo nome no separador). O sistema garante uma biblioteca base prefixada em /l/… para Vendas e Recrutamento; além disso, os teus links próprios e extras entram no catálogo.'
 
   const introText = catalogIntro ?? defaultIntro
 

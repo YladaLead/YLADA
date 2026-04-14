@@ -99,11 +99,6 @@ export default async function ProLideresPainelVisaoPage() {
         ))}
       </div>
 
-      <p className="text-sm text-gray-500">
-        <Link href="/pro-lideres" className="font-medium text-blue-600 hover:text-blue-800">
-          Site público Pro Líderes
-        </Link>
-      </p>
     </div>
   )
 }

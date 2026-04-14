@@ -25,8 +25,8 @@ function requestBaseUrl(request: NextRequest): string {
 }
 
 /**
- * Catálogo Pro Líderes: links YLADA ativos do líder (ferramentas interativas) em /l/…
- * + entradas custom (vendas e recrutamento) na BD.
+ * Catálogo Pro Líderes: biblioteca base prefixada em /l/… (Vendas + Recrutamento),
+ * links YLADA ativos do líder e entradas custom (sales/recruitment) na BD.
  */
 export async function GET(request: NextRequest) {
   const auth = await requireApiAuth(request)
@@ -67,7 +67,7 @@ export async function GET(request: NextRequest) {
     tenantId: ctx.tenant.id,
     catalog,
     note:
-      'Ao carregar: cria-se o que faltar do pacote Recrutamento em /l/… (3 quizzes + Renda Extra + Mães), com o mesmo fluxo e diagnóstico YLADA que os outros links. Catálogo = ylada_links + extras; duplicados fundidos.',
+      'Ao carregar: cria-se o que faltar da biblioteca base Pro Líderes em /l/… (Vendas + Recrutamento, padrão YLADA). Catálogo = presets + links do líder + extras; duplicados fundidos.',
   })
 }
 

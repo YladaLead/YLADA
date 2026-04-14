@@ -6,6 +6,7 @@ import type { Metadata } from 'next'
 import { supabaseAdmin } from '@/lib/supabase'
 import { YLADA_OG_FALLBACK_LOGO_PATH } from '@/lib/ylada-og-fallback-logo'
 import { getYladaOgImageUrl } from '@/lib/ylada-og-tema-imagem'
+import { getFullOGImageUrl } from '@/lib/og-image-map'
 
 const baseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXT_PUBLIC_APP_URL_PRODUCTION || 'https://ylada.app'
 
@@ -45,8 +46,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const themeRaw =
     (meta.theme_raw as string) ?? (meta.theme as string) ?? (meta.theme_display as string) ?? ''
   const segment = (meta.segment_code as string) ?? (link.segment as string) ?? null
+  const proLideresFluxoId =
+    typeof meta.pro_lideres_fluxo_id === 'string' ? meta.pro_lideres_fluxo_id.trim() : ''
+  const isProLideresPreset = meta.pro_lideres_preset === true
 
-  const ogImageUrl = getYladaOgImageUrl(themeRaw || title, segment, baseUrl)
+  const ogImageUrl =
+    isProLideresPreset && proLideresFluxoId
+      ? getFullOGImageUrl(proLideresFluxoId, baseUrl, 'wellness')
+      : getYladaOgImageUrl(themeRaw || title, segment, baseUrl)
   const ogMime = ogImageMime(ogImageUrl)
   const pageUrl = `${baseUrl}/l/${slug}`
   const description =
