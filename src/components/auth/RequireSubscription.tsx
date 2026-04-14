@@ -34,7 +34,7 @@ export default function RequireSubscription({
   const [subscriptionData, setSubscriptionData] = useState<any>(null)
   /** Matriz YLADA: `pro` = pago/trial/cortesia; `freedom` = free com limites do freemium (links, WhatsApp, Noel). */
   const [matrixCommercialTier, setMatrixCommercialTier] = useState<'pro' | 'freedom' | 'none' | null>(null)
-  const [matrixUpgradePath, setMatrixUpgradePath] = useState<string>('/pt/nutri/checkout')
+  const [matrixUpgradePath, setMatrixUpgradePath] = useState<string>('/pt/precos/checkout')
   const [profileCheckTimeout, setProfileCheckTimeout] = useState(false)
   const [showLoading, setShowLoading] = useState(true)
   const [hasRedirected, setHasRedirected] = useState(false)

@@ -44,7 +44,7 @@ export async function GET(request: NextRequest) {
       nutriCommercialTier,
       noelAdvancedUsedThisMonth,
       noelAdvancedLimitPerMonth,
-      upgradePath: '/pt/nutri/checkout',
+      upgradePath: '/pt/precos/checkout',
     })
   } catch (error: any) {
     console.error('❌ Erro ao buscar assinatura nutri:', error)

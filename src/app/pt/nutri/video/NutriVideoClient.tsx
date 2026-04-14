@@ -13,7 +13,7 @@ const NUTRI_POSTER_SRC = landingPageVideos.nutriHeroPoster
 /** Liberar botões de CTA apenas após o usuário assistir até 5:00 */
 const UNLOCK_AFTER_SECONDS = 5 * 60 // 5:00
 
-const checkoutUrl = '/pt/nutri/checkout?plan=annual'
+const checkoutUrl = '/pt/precos/checkout?plan=annual'
 
 /** Número WhatsApp para dúvidas (formato: 5511999999999). Configure NEXT_PUBLIC_NUTRI_SUPPORT_WHATSAPP no .env.local */
 const supportWhatsApp = typeof process.env.NEXT_PUBLIC_NUTRI_SUPPORT_WHATSAPP === 'string'

@@ -186,7 +186,7 @@ export default function ChatVendas({ isOpen, onClose }: ChatVendasProps) {
         {/* CTA Fixo */}
         <div className="px-4 py-2 bg-blue-50 border-t border-blue-100">
           <Link
-            href="/pt/nutri/checkout"
+            href="/pt/precos/checkout"
             className="block w-full bg-blue-600 text-white text-center py-2 rounded-lg font-semibold hover:bg-blue-700 transition-colors text-sm"
           >
             🛒 Ver Planos e Preços

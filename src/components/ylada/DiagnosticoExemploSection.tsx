@@ -48,7 +48,7 @@ interface DiagnosticoExemploSectionProps {
  */
 export function DiagnosticoExemploSection({
   area,
-  ctaHref = '/pt/nutri/checkout?plan=annual',
+  ctaHref = '/pt/precos/checkout?plan=annual',
   ctaLabel = 'Começar agora',
   fluxoVideoUrl,
   showPaymentNote = true,

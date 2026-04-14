@@ -215,7 +215,7 @@ export async function POST(request: NextRequest) {
           'Clique no botão abaixo e comece sua transformação'
         ],
         description: 'Venda direta - para remarketing. SEMPRE mencionar "Clique no botão abaixo" para Instagram.',
-        url: '/pt/nutri/checkout'
+        url: '/pt/precos/checkout'
       }
     }
 

@@ -4,8 +4,8 @@ import { resend, FROM_EMAIL, FROM_NAME, isResendConfigured } from '@/lib/resend'
 import { supabaseAdmin } from '@/lib/supabase'
 
 const CHECKOUT_NUTRI_URL =
-  process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, '') + '/pt/nutri/checkout' ||
-  'https://www.ylada.com/pt/nutri/checkout'
+  process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, '') + '/pt/precos/checkout' ||
+  'https://www.ylada.com/pt/precos/checkout'
 
 /**
  * POST /api/admin/notify-subscription-required

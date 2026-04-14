@@ -58,14 +58,14 @@ OBJETIVO:
 - Identificar dores e necessidades
 - Apresentar soluções relevantes
 - Remover objeções
-- Conduzir para o checkout (/pt/nutri/checkout)
+- Conduzir para o checkout (/pt/precos/checkout)
 
 INFORMAÇÕES IMPORTANTES:
 - Plano anual: R$ 1.800 (12× de R$ 150) - pacote V1 (Trilha + Noel + Captação)
 - Plano mensal: R$ 300/mês - pacote V1 (Trilha + Noel + Captação)
 - Garantia: 7 dias incondicional
 - Trilha Empresarial (30 dias): incluída em ambos os planos
-- Link para checkout: /pt/nutri/checkout
+- Link para checkout: /pt/precos/checkout
 
 RESPONDA DE FORMA:
 - Conversacional e natural

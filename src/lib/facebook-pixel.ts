@@ -335,7 +335,7 @@ export const trackNutriCheckoutMonthly = () => {
         content_name: 'Checkout Plano Mensal',
         value,
         currency: 'BRL',
-        page_location: '/pt/nutri/checkout?plan=monthly',
+        page_location: '/pt/precos/checkout?plan=monthly',
       });
       return;
     }
@@ -364,7 +364,7 @@ export const trackNutriCheckoutAnnual = () => {
         content_name: 'Checkout Plano Anual',
         value,
         currency: 'BRL',
-        page_location: '/pt/nutri/checkout?plan=annual',
+        page_location: '/pt/precos/checkout?plan=annual',
       });
       return;
     }

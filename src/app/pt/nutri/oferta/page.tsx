@@ -10,7 +10,7 @@ import Image from 'next/image'
  */
 export default function NutriOfertaPage() {
   const handleCheckout = (plan: 'monthly' | 'annual') => {
-    window.location.href = `/pt/nutri/checkout?plan=${plan}`
+    window.location.href = `/pt/precos/checkout?plan=${plan}`
   }
 
   return (

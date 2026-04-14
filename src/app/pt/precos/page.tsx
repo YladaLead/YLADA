@@ -111,7 +111,7 @@ function PrecosPageContent() {
                 ))}
               </ul>
               <Link
-                href="/pt/nutri/checkout?plan=monthly"
+                href="/pt/precos/checkout?plan=monthly"
                 className="block w-full text-center py-3.5 bg-gray-100 hover:bg-gray-200 text-gray-900 font-semibold rounded-xl transition-colors border border-gray-200"
               >
                 Assinar Pro
@@ -146,7 +146,7 @@ function PrecosPageContent() {
                 ))}
               </ul>
               <Link
-                href="/pt/nutri/checkout?plan=annual"
+                href="/pt/precos/checkout?plan=annual"
                 className="block w-full text-center py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-colors"
               >
                 Assinar Pro

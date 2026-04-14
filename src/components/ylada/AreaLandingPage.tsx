@@ -210,19 +210,19 @@ const DIAGNOSTIC_SECTION_BY_AREA: Record<
   },
 }
 
-/** Mapeia área para checkout real. Áreas sem checkout próprio usam nutri. "Começar agora" vai direto ao checkout (escolher plano anual/mensal). */
+/** Mapeia área para checkout real. Áreas sem checkout próprio usam checkout de preços YLADA. */
 const AREA_TO_CHECKOUT: Record<AreaLandingArea, string> = {
-  nutri: '/pt/nutri/checkout',
-  estetica: '/pt/nutri/checkout',
-  fitness: '/pt/nutri/checkout',
-  psi: '/pt/nutri/checkout',
-  psicanalise: '/pt/nutri/checkout',
-  odonto: '/pt/nutri/checkout',
-  med: '/pt/nutri/checkout',
+  nutri: '/pt/precos/checkout',
+  estetica: '/pt/precos/checkout',
+  fitness: '/pt/precos/checkout',
+  psi: '/pt/precos/checkout',
+  psicanalise: '/pt/precos/checkout',
+  odonto: '/pt/precos/checkout',
+  med: '/pt/precos/checkout',
   nutra: '/pt/nutra/checkout',
-  perfumaria: '/pt/nutri/checkout',
+  perfumaria: '/pt/precos/checkout',
   'coach-bem-estar': '/pt/wellness/checkout',
-  seller: '/pt/nutri/checkout',
+  seller: '/pt/precos/checkout',
 }
 
 export function AreaLandingPage({ area, locale, appBasePath = '/pt' }: AreaLandingPageProps) {
@@ -237,7 +237,7 @@ export function AreaLandingPage({ area, locale, appBasePath = '/pt' }: AreaLandi
   const loginHref = `${appBasePath}/${area}/login`
   const homeRedirect = `${appBasePath}/${area}/home`
   /** Checkout direto (escolher plano anual/mensal). Nutra: por locale (/pt, /en, /es); demais: /pt. */
-  const checkoutBase = area === 'nutra' ? `/${locale}/nutra/checkout` : (AREA_TO_CHECKOUT[area] ?? '/pt/nutri/checkout')
+  const checkoutBase = area === 'nutra' ? `/${locale}/nutra/checkout` : (AREA_TO_CHECKOUT[area] ?? '/pt/precos/checkout')
 
   const c = COMMON[locale]
   const label = AREA_LABELS[area]?.[locale] ?? AREA_LABELS[area]?.pt ?? area

@@ -10,6 +10,7 @@ export default function WellnessCheckoutPage() {
   const router = useRouter()
   const { user, userProfile, loading: authLoading } = useAuth()
   const [planType, setPlanType] = useState<'monthly' | 'annual'>('annual')
+  const [planLocked, setPlanLocked] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [canceled, setCanceled] = useState(false)
@@ -102,8 +103,10 @@ export default function WellnessCheckoutPage() {
       
       if (plan === 'annual') {
         setPlanType('annual')
+        setPlanLocked(true)
       } else if (plan === 'monthly') {
         setPlanType('monthly')
+        setPlanLocked(true)
       }
       
       if (canceledParam === 'true') {
@@ -318,63 +321,101 @@ export default function WellnessCheckoutPage() {
 
           {/* Seleção de Plano - Anual primeiro (recomendado e selecionado por padrão) */}
           <div className="mb-8">
-            <div className="grid sm:grid-cols-2 gap-4">
-              {/* Plano Anual - Primeiro e selecionado por padrão */}
-              <button
-                onClick={() => setPlanType('annual')}
-                className={`p-6 rounded-lg border-2 transition-all relative ${
-                  planType === 'annual'
-                    ? 'border-green-500 bg-green-50 shadow-md'
-                    : 'border-gray-200 bg-white hover:border-green-300 hover:bg-green-50/30'
-                }`}
-              >
-                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-green-600 text-white text-xs font-bold px-3 py-1 rounded-full">
-                  RECOMENDADO
-                </div>
-                {planType === 'annual' && (
-                  <div className="absolute -top-3 right-4 bg-green-700 text-white text-xs font-bold px-2 py-1 rounded">
-                    SELECIONADO
-                  </div>
-                )}
-                <div className="text-center">
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">
-                    Anual
-                  </h3>
-                  <div className="text-3xl font-bold text-green-600 mb-1">
-                    R$ 60
-                  </div>
-                  <div className="text-sm text-gray-600">/mês</div>
-                  <div className="text-xs text-gray-500 mt-2">
-                    Total: R$ 720/ano (12× de R$ 60)
-                  </div>
-                </div>
-              </button>
-
-              {/* Plano Mensal */}
-              <button
-                onClick={() => setPlanType('monthly')}
-                className={`p-6 rounded-lg border-2 transition-all relative ${
-                  planType === 'monthly'
-                    ? 'border-green-500 bg-green-50 shadow-md'
-                    : 'border-gray-200 bg-white hover:border-green-300 hover:bg-green-50/30'
-                }`}
-              >
-                <div className="text-center">
-                  {planType === 'monthly' && (
+            {planLocked ? (
+              <div className="max-w-xl mx-auto">
+                <div className="p-6 rounded-lg border-2 border-green-500 bg-green-50 shadow-md relative">
+                  {planType === 'annual' && (
                     <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-green-600 text-white text-xs font-bold px-3 py-1 rounded-full">
+                      RECOMENDADO
+                    </div>
+                  )}
+                  <div className="text-center">
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">
+                      {planType === 'annual' ? 'Anual' : 'Mensal'}
+                    </h3>
+                    {planType === 'annual' ? (
+                      <>
+                        <div className="text-3xl font-bold text-green-600 mb-1">R$ 60</div>
+                        <div className="text-sm text-gray-600">/mês</div>
+                        <div className="text-xs text-gray-500 mt-2">Total: R$ 720/ano (12× de R$ 60)</div>
+                      </>
+                    ) : (
+                      <>
+                        <div className="text-3xl font-bold text-green-600 mb-1">R$ 100,00</div>
+                        <div className="text-sm text-gray-600">/mês</div>
+                      </>
+                    )}
+                  </div>
+                </div>
+                <div className="text-center mt-3">
+                  <button
+                    type="button"
+                    onClick={() => setPlanLocked(false)}
+                    className="text-sm text-green-700 hover:text-green-800 underline font-medium"
+                  >
+                    Quero escolher outro plano
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="grid sm:grid-cols-2 gap-4">
+                {/* Plano Anual - Primeiro e selecionado por padrão */}
+                <button
+                  onClick={() => setPlanType('annual')}
+                  className={`p-6 rounded-lg border-2 transition-all relative ${
+                    planType === 'annual'
+                      ? 'border-green-500 bg-green-50 shadow-md'
+                      : 'border-gray-200 bg-white hover:border-green-300 hover:bg-green-50/30'
+                  }`}
+                >
+                  <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-green-600 text-white text-xs font-bold px-3 py-1 rounded-full">
+                    RECOMENDADO
+                  </div>
+                  {planType === 'annual' && (
+                    <div className="absolute -top-3 right-4 bg-green-700 text-white text-xs font-bold px-2 py-1 rounded">
                       SELECIONADO
                     </div>
                   )}
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">
-                    Mensal
-                  </h3>
-                  <div className="text-3xl font-bold text-green-600 mb-1">
-                    R$ 100,00
+                  <div className="text-center">
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">
+                      Anual
+                    </h3>
+                    <div className="text-3xl font-bold text-green-600 mb-1">
+                      R$ 60
+                    </div>
+                    <div className="text-sm text-gray-600">/mês</div>
+                    <div className="text-xs text-gray-500 mt-2">
+                      Total: R$ 720/ano (12× de R$ 60)
+                    </div>
                   </div>
-                  <div className="text-sm text-gray-600">/mês</div>
-                </div>
-              </button>
-            </div>
+                </button>
+
+                {/* Plano Mensal */}
+                <button
+                  onClick={() => setPlanType('monthly')}
+                  className={`p-6 rounded-lg border-2 transition-all relative ${
+                    planType === 'monthly'
+                      ? 'border-green-500 bg-green-50 shadow-md'
+                      : 'border-gray-200 bg-white hover:border-green-300 hover:bg-green-50/30'
+                  }`}
+                >
+                  <div className="text-center">
+                    {planType === 'monthly' && (
+                      <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-green-600 text-white text-xs font-bold px-3 py-1 rounded-full">
+                        SELECIONADO
+                      </div>
+                    )}
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">
+                      Mensal
+                    </h3>
+                    <div className="text-3xl font-bold text-green-600 mb-1">
+                      R$ 100,00
+                    </div>
+                    <div className="text-sm text-gray-600">/mês</div>
+                  </div>
+                </button>
+              </div>
+            )}
           </div>
 
 

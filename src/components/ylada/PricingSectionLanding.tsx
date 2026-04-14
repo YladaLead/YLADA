@@ -5,7 +5,7 @@ import Link from 'next/link'
 /**
  * Seção de planos igual à da página de preços, para usar nas landings de cada profissional.
  * Os botões "Começar agora" redirecionam direto para o checkout da área (pagamento), sem voltar para /pt/precos.
- * @param checkoutBasePath - Base do checkout da área (ex: '/pt/coach/checkout', '/pt/nutri/checkout'). Se não informado, usa /pt/precos.
+ * @param checkoutBasePath - Base do checkout da área (ex: '/pt/coach/checkout', '/pt/precos/checkout'). Se não informado, usa /pt/precos.
  */
 export function PricingSectionLanding({
   checkoutBasePath = '/pt/precos',

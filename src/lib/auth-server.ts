@@ -522,6 +522,7 @@ export function isWellnessPublicPath(pathname: string): boolean {
 
 /** Rotas Nutri que NÃO exigem assinatura. */
 const NUTRI_PUBLIC_PREFIXES: (string | RegExp)[] = [
+  '/pt/precos/checkout',
   '/pt/nutri/login',
   '/pt/nutri/checkout',
   '/pt/nutri/cadastro',
