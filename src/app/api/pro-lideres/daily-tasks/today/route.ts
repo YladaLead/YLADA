@@ -4,6 +4,7 @@ import { supabaseAdmin } from '@/lib/supabase'
 import { proLideresDailyTasksBlockedForMember } from '@/lib/pro-lideres-daily-tasks-access'
 import { weekdayFromYmd } from '@/lib/pro-lideres-daily-tasks-points'
 import { resolveProLideresTenantContext } from '@/lib/pro-lideres-server'
+import { requireProLideresPaidContext } from '@/lib/pro-lideres-subscription-access'
 import type { ProLideresDailyTaskRow } from '@/types/pro-lideres-daily-tasks'
 
 function parseYmd(s: string): string | null {
@@ -28,6 +29,10 @@ export async function PUT(request: NextRequest) {
   if (!tenantCtx) {
     return NextResponse.json({ error: 'Tenant não encontrado' }, { status: 404 })
   }
+
+  const paid = await requireProLideresPaidContext(supabaseAdmin, user)
+  if (!paid.ok) return paid.response
+
   if (proLideresDailyTasksBlockedForMember(tenantCtx.tenant, tenantCtx.role)) {
     return NextResponse.json({ error: 'Esta área não está visível para a equipe.' }, { status: 403 })
   }

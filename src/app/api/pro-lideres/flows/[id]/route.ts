@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireApiAuth } from '@/lib/api-auth'
 import { supabaseAdmin } from '@/lib/supabase'
 import { resolveProLideresTenantContext } from '@/lib/pro-lideres-server'
+import { requireProLideresPaidContext } from '@/lib/pro-lideres-subscription-access'
 import {
   isProLideresFlowHrefAllowed,
   PRO_LIDERES_FLOW_HREF_MAX,
@@ -32,6 +33,9 @@ export async function PATCH(
   if (!ctx || ctx.tenant.owner_user_id !== user.id) {
     return NextResponse.json({ error: 'Apenas o líder pode editar fluxos próprios.' }, { status: 403 })
   }
+
+  const paidPatch = await requireProLideresPaidContext(supabaseAdmin, user)
+  if (!paidPatch.ok) return paidPatch.response
 
   let body: {
     category?: string
@@ -120,6 +124,9 @@ export async function DELETE(
   if (!ctx || ctx.tenant.owner_user_id !== user.id) {
     return NextResponse.json({ error: 'Apenas o líder pode remover fluxos personalizados.' }, { status: 403 })
   }
+
+  const paidDel = await requireProLideresPaidContext(supabaseAdmin, user)
+  if (!paidDel.ok) return paidDel.response
 
   const { data: removed, error } = await supabaseAdmin
     .from('leader_tenant_flow_entries')

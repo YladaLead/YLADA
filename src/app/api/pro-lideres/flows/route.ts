@@ -3,6 +3,7 @@ import { requireApiAuth } from '@/lib/api-auth'
 import { supabaseAdmin } from '@/lib/supabase'
 import { proLideresApiDevHint } from '@/lib/pro-lideres-api-dev-hints'
 import { resolveProLideresTenantContext } from '@/lib/pro-lideres-server'
+import { requireProLideresPaidContext } from '@/lib/pro-lideres-subscription-access'
 import { buildProLideresCatalog, type ProLideresCatalogItem } from '@/lib/pro-lideres-catalog-build'
 import {
   isProLideresFlowHrefAllowed,
@@ -42,6 +43,9 @@ export async function GET(request: NextRequest) {
       { status: 404 }
     )
   }
+
+  const paidGet = await requireProLideresPaidContext(supabaseAdmin, user)
+  if (!paidGet.ok) return paidGet.response
 
   const { data: rows, error } = await supabaseAdmin
     .from('leader_tenant_flow_entries')
@@ -87,6 +91,9 @@ export async function POST(request: NextRequest) {
   if (!ctx || ctx.tenant.owner_user_id !== user.id) {
     return NextResponse.json({ error: 'Apenas o líder pode adicionar itens ao catálogo.' }, { status: 403 })
   }
+
+  const paidPost = await requireProLideresPaidContext(supabaseAdmin, user)
+  if (!paidPost.ok) return paidPost.response
 
   let body: { category?: string; label?: string; href?: string; sort_order?: number; notes?: string }
   try {

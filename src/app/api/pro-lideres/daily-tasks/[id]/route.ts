@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireApiAuth } from '@/lib/api-auth'
 import { supabaseAdmin } from '@/lib/supabase'
 import { resolveProLideresTenantContext } from '@/lib/pro-lideres-server'
+import { requireProLideresPaidContext } from '@/lib/pro-lideres-subscription-access'
 import { PL_WEEKDAY_ORDER, type ProLideresDailyTaskRow } from '@/types/pro-lideres-daily-tasks'
 
 type RouteCtx = { params: Promise<{ id: string }> }
@@ -34,6 +35,9 @@ export async function PATCH(request: NextRequest, ctx: RouteCtx) {
   if (tenantCtx.tenant.owner_user_id !== user.id) {
     return NextResponse.json({ error: 'Apenas o líder pode editar tarefas.' }, { status: 403 })
   }
+
+  const paidPatch = await requireProLideresPaidContext(supabaseAdmin, user)
+  if (!paidPatch.ok) return paidPatch.response
 
   let body: Record<string, unknown>
   try {
@@ -100,6 +104,9 @@ export async function DELETE(request: NextRequest, ctx: RouteCtx) {
   if (tenantCtx.tenant.owner_user_id !== user.id) {
     return NextResponse.json({ error: 'Apenas o líder pode remover tarefas.' }, { status: 403 })
   }
+
+  const paidDel = await requireProLideresPaidContext(supabaseAdmin, user)
+  if (!paidDel.ok) return paidDel.response
 
   const { error } = await supabaseAdmin
     .from('pro_lideres_daily_tasks')

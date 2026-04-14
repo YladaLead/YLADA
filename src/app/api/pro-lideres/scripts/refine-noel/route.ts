@@ -3,6 +3,7 @@ import OpenAI from 'openai'
 import { requireApiAuth } from '@/lib/api-auth'
 import { supabaseAdmin } from '@/lib/supabase'
 import { resolveProLideresTenantContext } from '@/lib/pro-lideres-server'
+import { requireProLideresPaidContext } from '@/lib/pro-lideres-subscription-access'
 import { resolveYladaLinkIdForOwner } from '@/lib/pro-lideres-scripts-api'
 import {
   PRO_LIDERES_SCRIPT_PILLARS,
@@ -56,6 +57,9 @@ export async function POST(request: NextRequest) {
       { status: 403 }
     )
   }
+
+  const paid = await requireProLideresPaidContext(supabaseAdmin, user)
+  if (!paid.ok) return paid.response
 
   let body: {
     draft?: unknown

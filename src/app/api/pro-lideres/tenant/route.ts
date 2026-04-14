@@ -6,6 +6,10 @@ import {
   newLeaderTenantInsertPayload,
   resolveProLideresTenantContext,
 } from '@/lib/pro-lideres-server'
+import {
+  proLideresTeamSubscriptionAllowsAccess,
+  requireProLideresPaidContext,
+} from '@/lib/pro-lideres-subscription-access'
 import type { LeaderTenantRow } from '@/types/leader-tenant'
 
 const MAX_LEN = 500
@@ -41,11 +45,13 @@ export async function GET(request: NextRequest) {
   }
 
   const canEditTenantProfile = ctx.tenant.owner_user_id === user.id
+  const teamSubscriptionActive = await proLideresTeamSubscriptionAllowsAccess(user, ctx)
 
   return NextResponse.json({
     tenant: ctx.tenant,
     role: ctx.role,
     canEditTenantProfile,
+    teamSubscriptionActive,
   })
 }
 
@@ -68,6 +74,9 @@ export async function PATCH(request: NextRequest) {
       { status: 403 }
     )
   }
+
+  const paid = await requireProLideresPaidContext(supabaseAdmin, user)
+  if (!paid.ok) return paid.response
 
   let body: Record<string, unknown>
   try {

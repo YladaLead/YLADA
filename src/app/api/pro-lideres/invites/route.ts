@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireApiAuth } from '@/lib/api-auth'
 import { supabaseAdmin } from '@/lib/supabase'
 import { resolveProLideresTenantContext } from '@/lib/pro-lideres-server'
+import { requireProLideresPaidContext } from '@/lib/pro-lideres-subscription-access'
 import {
   buildProLideresInviteUrl,
   generateProLideresInviteToken,
@@ -38,6 +39,9 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Apenas o líder pode gerir convites.' }, { status: 403 })
   }
 
+  const paid = await requireProLideresPaidContext(supabaseAdmin, user)
+  if (!paid.ok) return paid.response
+
   const tenantId = ctx.tenant.id
   const qRaw = request.nextUrl.searchParams.get('q') ?? ''
   const statusParam = (request.nextUrl.searchParams.get('status') ?? 'all').toLowerCase()
@@ -52,7 +56,7 @@ export async function GET(request: NextRequest) {
   const pendingQuota =
     typeof tenantRow?.team_invite_pending_quota === 'number' && tenantRow.team_invite_pending_quota > 0
       ? tenantRow.team_invite_pending_quota
-      : 30
+      : 50
 
   const { data: rows, error } = await supabaseAdmin
     .from('leader_tenant_invites')
@@ -165,6 +169,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Apenas o líder pode criar convites.' }, { status: 403 })
   }
 
+  const paid = await requireProLideresPaidContext(supabaseAdmin, user)
+  if (!paid.ok) return paid.response
+
   const tenantId = ctx.tenant.id
 
   const { data: tenantRow } = await supabaseAdmin
@@ -176,7 +183,7 @@ export async function POST(request: NextRequest) {
   const pendingQuota =
     typeof tenantRow?.team_invite_pending_quota === 'number' && tenantRow.team_invite_pending_quota > 0
       ? tenantRow.team_invite_pending_quota
-      : 30
+      : 50
 
   const nowIso = new Date().toISOString()
   const { count: pendingCount, error: countErr } = await supabaseAdmin

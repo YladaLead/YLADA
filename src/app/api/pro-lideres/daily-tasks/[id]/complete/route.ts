@@ -3,6 +3,7 @@ import { requireApiAuth } from '@/lib/api-auth'
 import { supabaseAdmin } from '@/lib/supabase'
 import { proLideresDailyTasksBlockedForMember } from '@/lib/pro-lideres-daily-tasks-access'
 import { resolveProLideresTenantContext } from '@/lib/pro-lideres-server'
+import { requireProLideresPaidContext } from '@/lib/pro-lideres-subscription-access'
 import { weekdayFromYmd } from '@/lib/pro-lideres-daily-tasks-points'
 import type { ProLideresDailyTaskCompletionRow, ProLideresDailyTaskRow } from '@/types/pro-lideres-daily-tasks'
 
@@ -31,6 +32,10 @@ export async function POST(request: NextRequest, ctx: RouteCtx) {
   if (!tenantCtx) {
     return NextResponse.json({ error: 'Tenant não encontrado' }, { status: 404 })
   }
+
+  const paidPost = await requireProLideresPaidContext(supabaseAdmin, user)
+  if (!paidPost.ok) return paidPost.response
+
   if (proLideresDailyTasksBlockedForMember(tenantCtx.tenant, tenantCtx.role)) {
     return NextResponse.json({ error: 'Esta área não está visível para a equipe.' }, { status: 403 })
   }
@@ -110,6 +115,10 @@ export async function DELETE(request: NextRequest, ctx: RouteCtx) {
   if (!tenantCtx) {
     return NextResponse.json({ error: 'Tenant não encontrado' }, { status: 404 })
   }
+
+  const paidDel = await requireProLideresPaidContext(supabaseAdmin, user)
+  if (!paidDel.ok) return paidDel.response
+
   if (proLideresDailyTasksBlockedForMember(tenantCtx.tenant, tenantCtx.role)) {
     return NextResponse.json({ error: 'Esta área não está visível para a equipe.' }, { status: 403 })
   }

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireApiAuth } from '@/lib/api-auth'
 import { supabaseAdmin } from '@/lib/supabase'
 import { resolveProLideresTenantContext } from '@/lib/pro-lideres-server'
+import { requireProLideresPaidContext } from '@/lib/pro-lideres-subscription-access'
 
 export async function POST(request: NextRequest) {
   const auth = await requireApiAuth(request)
@@ -16,6 +17,9 @@ export async function POST(request: NextRequest) {
   if (!ctx || ctx.tenant.owner_user_id !== user.id) {
     return NextResponse.json({ error: 'Apenas o líder pode revogar convites.' }, { status: 403 })
   }
+
+  const paid = await requireProLideresPaidContext(supabaseAdmin, user)
+  if (!paid.ok) return paid.response
 
   let body: { id?: string }
   try {

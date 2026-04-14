@@ -1,14 +1,36 @@
 import type { ReactNode } from 'react'
-import { cookies } from 'next/headers'
+import { cookies, headers } from 'next/headers'
 import { redirect } from 'next/navigation'
-import { ensureLeaderTenantAccess, isProLideresDevStubTenant } from '@/lib/pro-lideres-server'
+import {
+  createProLideresServerClient,
+  ensureLeaderTenantAccess,
+  isProLideresDevStubTenant,
+} from '@/lib/pro-lideres-server'
 import { proLideresTeamViewPreviewFromCookies } from '@/lib/pro-lideres-team-preview'
+import { proLideresTeamSubscriptionAllowsAccess } from '@/lib/pro-lideres-subscription-access'
 import ProLideresAreaShell from '@/components/pro-lideres/ProLideresAreaShell'
 
 export default async function ProLideresPainelLayout({ children }: { children: ReactNode }) {
   const gate = await ensureLeaderTenantAccess()
   if (!gate.ok) {
     redirect(gate.redirect)
+  }
+
+  const pathname = (await headers()).get('x-pathname') || ''
+  const isAssinaturaEquipe = pathname.includes('/painel/assinatura-equipe')
+  if (!isAssinaturaEquipe) {
+    const supabase = await createProLideresServerClient()
+    const { data: userData } = await supabase.auth.getUser()
+    const user = userData.user
+    if (
+      user &&
+      !(await proLideresTeamSubscriptionAllowsAccess(user, {
+        tenant: gate.tenant,
+        role: gate.role,
+      }))
+    ) {
+      redirect('/pro-lideres/painel/assinatura-equipe')
+    }
   }
 
   const cookieStore = await cookies()

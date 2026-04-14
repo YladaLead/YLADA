@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
+import { ownerHasProLideresTeamSubscription } from '@/lib/pro-lideres-subscription-access'
 import type { LeaderTenantInviteRow } from '@/types/leader-tenant'
 
 /**
@@ -51,9 +52,16 @@ export async function GET(request: NextRequest) {
 
   const { data: tenant } = await supabaseAdmin
     .from('leader_tenants')
-    .select('display_name, team_name')
+    .select('display_name, team_name, owner_user_id')
     .eq('id', row.leader_tenant_id)
     .maybeSingle()
+
+  if (
+    tenant &&
+    !(await ownerHasProLideresTeamSubscription(tenant.owner_user_id as string))
+  ) {
+    return NextResponse.json({ ok: false, reason: 'leader_subscription_inactive' })
+  }
 
   const spaceName =
     (tenant?.display_name as string) ||

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireApiAuth } from '@/lib/api-auth'
 import { supabaseAdmin } from '@/lib/supabase'
 import { normalizeInviteEmail } from '@/lib/pro-lideres-invite-helpers'
+import { ownerHasProLideresTeamSubscription } from '@/lib/pro-lideres-subscription-access'
 import { loadValidPendingProLideresInvite } from '@/lib/pro-lideres-invite-server'
 import type { LeaderTenantInviteRow } from '@/types/leader-tenant'
 
@@ -90,6 +91,16 @@ export async function POST(request: NextRequest) {
 
   if (!tenant) {
     return NextResponse.json({ error: 'Espaço não encontrado.' }, { status: 404 })
+  }
+
+  if (!(await ownerHasProLideresTeamSubscription(tenant.owner_user_id as string))) {
+    return NextResponse.json(
+      {
+        error: 'A assinatura do líder está inativa. Não é possível aceitar o convite neste momento.',
+        code: 'pro_lideres_team_subscription_required',
+      },
+      { status: 402 }
+    )
   }
 
   if (tenant.owner_user_id === user.id) {

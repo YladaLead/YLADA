@@ -21,6 +21,7 @@ export type SubscriptionArea =
   | 'fitness'
   | 'perfumaria'
   | 'seller'
+  | 'pro_lideres_team'
 
 /** Mapeia perfil da matriz YLADA (lado /pt) para coluna `subscriptions.area`. */
 export function perfilMatrizToSubscriptionArea(perfil: string | null | undefined): SubscriptionArea | null {

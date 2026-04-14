@@ -5,6 +5,7 @@ import { supabaseAdmin } from '@/lib/supabase'
 import { proLideresApiDevHint } from '@/lib/pro-lideres-api-dev-hints'
 import { PRO_LIDERES_TEAM_PREVIEW_COOKIE } from '@/lib/pro-lideres-team-preview'
 import { resolveProLideresTenantContext } from '@/lib/pro-lideres-server'
+import { requireProLideresPaidContext } from '@/lib/pro-lideres-subscription-access'
 import type { LeaderTenantPlScriptEntryRow, LeaderTenantPlScriptSectionRow, ProLideresScriptSectionWithEntries } from '@/types/leader-tenant'
 
 export async function GET(request: NextRequest) {
@@ -26,6 +27,9 @@ export async function GET(request: NextRequest) {
       { status: 404 }
     )
   }
+
+  const paid = await requireProLideresPaidContext(supabaseAdmin, user)
+  if (!paid.ok) return paid.response
 
   const cookieStore = await cookies()
   const leaderTeamPreview =

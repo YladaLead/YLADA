@@ -132,6 +132,10 @@ function determineFeatures(
   productType?: string
 ): string[] {
   // Área Nutri: pacote plataforma = ferramentas + cursos; formation_only = só cursos
+  if (area === 'pro_lideres_team') {
+    return ['equipe']
+  }
+
   if (area === 'nutri') {
     if (productType === 'formation_only') {
       return ['cursos']
@@ -1218,6 +1222,7 @@ async function handleSubscriptionEvent(data: any, isTest: boolean = false) {
     const metadata = data.metadata || {}
     let userId = metadata.user_id
     let area = metadata.area || (data.external_reference?.split('_')[0]) || ''
+    if (area === 'prolideres') area = 'pro_lideres_team'
     let planType = metadata.plan_type || (data.external_reference?.split('_')[1]) || ''
     const productType = metadata.product_type || metadata.productType
     // Sem ref na URL = matriz (ida); com ref=paula (etc) = esse vendedor
@@ -1250,8 +1255,9 @@ async function handleSubscriptionEvent(data: any, isTest: boolean = false) {
 
     // Fallback: área e plano pela descrição (reason)
     const reasonUpper = (data.reason || '').toUpperCase()
-    if (!area || !['wellness', 'nutri', 'coach', 'nutra'].includes(area)) {
-      if (reasonUpper.includes('WELLNESS')) area = 'wellness'
+    if (!area || !['wellness', 'nutri', 'coach', 'nutra', 'pro_lideres_team'].includes(area)) {
+      if (reasonUpper.includes('PRO LÍDERES') || reasonUpper.includes('PRO LIDERES')) area = 'pro_lideres_team'
+      else if (reasonUpper.includes('WELLNESS')) area = 'wellness'
       else if (reasonUpper.includes('NUTRI')) area = 'nutri'
       else if (reasonUpper.includes('COACH')) area = 'coach'
       else if (reasonUpper.includes('NUTRA')) area = 'nutra'
@@ -1315,6 +1321,9 @@ async function handleSubscriptionEvent(data: any, isTest: boolean = false) {
     if (area === 'nutri' && (!features || features.length === 0)) {
       features = ['ferramentas', 'cursos']
       console.log('🛡️ Features Nutri garantidas (Subscription fallback):', features)
+    }
+    if (area === 'pro_lideres_team' && (!features || features.length === 0)) {
+      features = ['equipe']
     }
     console.log('🎯 Features determinadas (Subscription):', { area, planType, productType, features })
 
@@ -1414,8 +1423,14 @@ async function handleSubscriptionEvent(data: any, isTest: boolean = false) {
       throw subError
     }
 
-    // Enviar e-mail de boas-vindas (apenas se ainda não foi enviado e status é authorized)
-    if (subscription && !subscription.welcome_email_sent && mappedStatus === 'active' && payerEmail) {
+    // Enviar e-mail de boas-vindas (apenas se ainda não foi enviado e status é authorized; Pro Líderes equipe não usa o mesmo template)
+    if (
+      subscription &&
+      !subscription.welcome_email_sent &&
+      mappedStatus === 'active' &&
+      payerEmail &&
+      area !== 'pro_lideres_team'
+    ) {
       try {
         // Obter base URL
         const baseUrl = process.env.NEXT_PUBLIC_APP_URL_PRODUCTION || 

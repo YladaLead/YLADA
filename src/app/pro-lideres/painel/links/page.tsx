@@ -19,9 +19,7 @@ export default async function ProLideresLinksPage() {
         <h1 className="text-2xl font-bold text-gray-900">Convidar equipe</h1>
       </div>
       <p className="text-gray-700">
-        <strong className="text-gray-900">Gere um link por e-mail</strong> e envie à pessoa da equipe. Ela deve usar{' '}
-        <strong className="text-gray-800">o mesmo e-mail</strong> na conta YLADA ao aceitar o convite. Quem já entrou
-        aparece em <strong className="text-gray-800">Análise da equipe</strong>.
+        <strong className="text-gray-900">Gere um link por e-mail</strong> e envie à pessoa da equipe.
       </p>
       <ProLideresInvitesPanel />
     </div>

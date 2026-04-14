@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireApiAuth } from '@/lib/api-auth'
 import { supabaseAdmin } from '@/lib/supabase'
 import { resolveProLideresTenantContext } from '@/lib/pro-lideres-server'
+import { requireProLideresPaidContext } from '@/lib/pro-lideres-subscription-access'
 import { fetchProLideresMembersEnriched } from '@/lib/pro-lideres-members-enriched'
 import { proLideresDailyTasksBlockedForMember } from '@/lib/pro-lideres-daily-tasks-access'
 import { pointsForUserInRange } from '@/lib/pro-lideres-daily-tasks-points'
@@ -47,6 +48,10 @@ export async function GET(request: NextRequest) {
   if (!ctx) {
     return NextResponse.json({ error: 'Tenant não encontrado' }, { status: 404 })
   }
+
+  const paid = await requireProLideresPaidContext(supabaseAdmin, user)
+  if (!paid.ok) return paid.response
+
   if (proLideresDailyTasksBlockedForMember(ctx.tenant, ctx.role)) {
     return NextResponse.json({ error: 'Esta área não está visível para a equipe.' }, { status: 403 })
   }
@@ -141,6 +146,10 @@ export async function POST(request: NextRequest) {
   if (!ctx) {
     return NextResponse.json({ error: 'Tenant não encontrado' }, { status: 404 })
   }
+
+  const paidPost = await requireProLideresPaidContext(supabaseAdmin, user)
+  if (!paidPost.ok) return paidPost.response
+
   if (ctx.tenant.owner_user_id !== user.id) {
     return NextResponse.json({ error: 'Apenas o líder pode criar tarefas.' }, { status: 403 })
   }

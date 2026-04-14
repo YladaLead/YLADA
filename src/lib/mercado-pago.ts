@@ -61,6 +61,14 @@ export function createMercadoPagoClient(isTest: boolean = true): MercadoPagoConf
 const EXTERNAL_REFERENCE_MAX_LENGTH = 256
 
 /**
+ * Áreas cujo nome contém `_` usam slug curto no external_reference (evita ambiguidade no split area_planType_userId).
+ */
+export function toMercadoPagoExternalAreaSlug(area: string): string {
+  if (area === 'pro_lideres_team') return 'prolideres'
+  return area
+}
+
+/**
  * Monta external_reference no formato area_planType_userId.
  * Garante tamanho <= 256 caracteres (limite da API do MP).
  */

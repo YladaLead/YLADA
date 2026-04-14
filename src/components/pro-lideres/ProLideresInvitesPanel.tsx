@@ -1,6 +1,7 @@
 'use client'
 
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import Link from 'next/link'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { LeaderTenantInviteListItem } from '@/types/leader-tenant'
 
 function statusLabel(s: string): string {
@@ -28,7 +29,10 @@ export function ProLideresInvitesPanel() {
   const [creating, setCreating] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [lastCreatedUrl, setLastCreatedUrl] = useState<string | null>(null)
+  const [lastCreatedInviteId, setLastCreatedInviteId] = useState<string | null>(null)
+  const lastCreatedInviteIdRef = useRef<string | null>(null)
   const [copied, setCopied] = useState(false)
+  const [subscriptionAccessOk, setSubscriptionAccessOk] = useState<boolean | null>(null)
 
   const [search, setSearch] = useState('')
   const [debouncedSearch, setDebouncedSearch] = useState('')
@@ -51,14 +55,33 @@ export function ProLideresInvitesPanel() {
     setLoading(true)
     setError(null)
     try {
+      const subRes = await fetch('/api/pro-lideres/subscription', { credentials: 'include' })
+      const subData = await subRes.json().catch(() => ({}))
+      const accessBlocked =
+        subRes.ok && !Boolean((subData as { accessOk?: boolean }).accessOk)
+
+      if (accessBlocked) {
+        setSubscriptionAccessOk(false)
+        setInvites([])
+        setQuota(null)
+        return
+      }
+
       const res = await fetch(`/api/pro-lideres/invites${queryString}`, { credentials: 'include' })
       const data = await res.json().catch(() => ({}))
       if (!res.ok) {
+        if (res.status === 402) {
+          setSubscriptionAccessOk(false)
+          setInvites([])
+          setQuota(null)
+          return
+        }
         setError((data as { error?: string }).error || 'Não foi possível carregar convites.')
         setInvites([])
         setQuota(null)
         return
       }
+      setSubscriptionAccessOk(true)
       setInvites((data as { invites: LeaderTenantInviteListItem[] }).invites ?? [])
       setQuota((data as { quota?: QuotaInfo }).quota ?? null)
     } catch {
@@ -74,11 +97,17 @@ export function ProLideresInvitesPanel() {
     void load()
   }, [load])
 
+  useEffect(() => {
+    lastCreatedInviteIdRef.current = lastCreatedInviteId
+  }, [lastCreatedInviteId])
+
   async function onCreate(e: React.FormEvent) {
     e.preventDefault()
+    if (subscriptionAccessOk === false) return
     setCreating(true)
     setError(null)
     setLastCreatedUrl(null)
+    setLastCreatedInviteId(null)
     try {
       const res = await fetch('/api/pro-lideres/invites', {
         method: 'POST',
@@ -88,11 +117,24 @@ export function ProLideresInvitesPanel() {
       })
       const data = await res.json().catch(() => ({}))
       if (!res.ok) {
+        if (res.status === 402) {
+          setSubscriptionAccessOk(false)
+          setError(
+            (data as { error?: string }).error ||
+              'Precisas de ter o acesso da equipa ativo para gerar convites.'
+          )
+          return
+        }
         setError((data as { error?: string }).error || 'Não foi possível criar o convite.')
         return
       }
       const url = (data as { invite_url?: string }).invite_url
+      const inv = (data as { invite?: { id?: string } }).invite
       if (url) setLastCreatedUrl(url)
+      if (inv?.id) {
+        setLastCreatedInviteId(inv.id)
+        lastCreatedInviteIdRef.current = inv.id
+      }
       setEmail('')
       await load()
     } catch {
@@ -117,6 +159,11 @@ export function ProLideresInvitesPanel() {
         setError((data as { error?: string }).error || 'Não foi possível revogar.')
         return
       }
+      if (lastCreatedInviteIdRef.current === id) {
+        setLastCreatedUrl(null)
+        setLastCreatedInviteId(null)
+        lastCreatedInviteIdRef.current = null
+      }
       await load()
     } catch {
       setError('Erro de rede ao revogar.')
@@ -138,7 +185,21 @@ export function ProLideresInvitesPanel() {
         <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">{error}</div>
       )}
 
-      {quota && (
+      {subscriptionAccessOk === false && (
+        <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950 shadow-sm">
+          <p className="text-amber-900/95">
+            Para gerar convites, precisas de ter o <strong className="text-amber-950">acesso da equipa ativo</strong>.
+          </p>
+          <Link
+            href="/pro-lideres/painel/assinatura-equipe"
+            className="mt-3 inline-flex min-h-[40px] items-center justify-center rounded-lg bg-amber-800 px-4 text-sm font-semibold text-white hover:bg-amber-900"
+          >
+            Ativar
+          </Link>
+        </div>
+      )}
+
+      {quota && subscriptionAccessOk !== false && (
         <div className="rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-700 shadow-sm">
           <span className="font-semibold text-gray-900">Cota de convites pendentes:</span>{' '}
           <span>
@@ -170,7 +231,7 @@ export function ProLideresInvitesPanel() {
           </label>
           <button
             type="submit"
-            disabled={creating}
+            disabled={creating || subscriptionAccessOk === false || subscriptionAccessOk === null}
             className="min-h-[44px] shrink-0 rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-60"
           >
             {creating ? 'A gerar…' : 'Gerar link'}
@@ -178,17 +239,29 @@ export function ProLideresInvitesPanel() {
         </div>
       </form>
 
-      {lastCreatedUrl && (
+      {lastCreatedUrl && lastCreatedInviteId && (
         <div className="rounded-xl border border-green-200 bg-green-50 p-4 text-sm">
           <p className="font-semibold text-green-900">Link gerado — copie e envie à pessoa</p>
+          <p className="mt-1 text-xs text-green-800/90">
+            Os convites pendentes expiram na data indicada na lista abaixo. Podes revogar a qualquer momento.
+          </p>
           <p className="mt-2 break-all font-mono text-xs text-green-800">{lastCreatedUrl}</p>
-          <button
-            type="button"
-            onClick={() => copyUrl(lastCreatedUrl)}
-            className="mt-3 min-h-[40px] rounded-lg bg-green-700 px-4 py-2 text-sm font-semibold text-white hover:bg-green-800"
-          >
-            {copied ? 'Copiado!' : 'Copiar link'}
-          </button>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => copyUrl(lastCreatedUrl)}
+              className="min-h-[40px] rounded-lg bg-green-700 px-4 py-2 text-sm font-semibold text-white hover:bg-green-800"
+            >
+              {copied ? 'Copiado!' : 'Copiar link'}
+            </button>
+            <button
+              type="button"
+              onClick={() => lastCreatedInviteId && revoke(lastCreatedInviteId)}
+              className="min-h-[40px] rounded-lg border border-red-300 bg-white px-4 py-2 text-sm font-semibold text-red-800 hover:bg-red-50"
+            >
+              Excluir convite
+            </button>
+          </div>
         </div>
       )}
 

@@ -3,6 +3,7 @@ import { supabaseAdmin } from '@/lib/supabase'
 import { loadValidPendingProLideresInvite } from '@/lib/pro-lideres-invite-server'
 import { normalizeInviteEmail } from '@/lib/pro-lideres-invite-helpers'
 import { generateAvailableUserSlug } from '@/lib/user-slug-generator'
+import { ownerHasProLideresTeamSubscription } from '@/lib/pro-lideres-subscription-access'
 import type { LeaderTenantInviteRow } from '@/types/leader-tenant'
 
 /**
@@ -62,6 +63,16 @@ export async function POST(request: NextRequest) {
 
   if (!tenant) {
     return NextResponse.json({ error: 'Espaço não encontrado.' }, { status: 404 })
+  }
+
+  if (!(await ownerHasProLideresTeamSubscription(tenant.owner_user_id as string))) {
+    return NextResponse.json(
+      {
+        error: 'A assinatura do líder está inativa. Não é possível concluir o registo neste momento.',
+        code: 'pro_lideres_team_subscription_required',
+      },
+      { status: 402 }
+    )
   }
 
   const { data: newUser, error: createError } = await supabaseAdmin.auth.admin.createUser({

@@ -4,10 +4,10 @@
  */
 
 import { MercadoPagoConfig, PreApproval } from 'mercadopago'
-import { createMercadoPagoClient, buildExternalReference } from './mercado-pago'
+import { createMercadoPagoClient, buildExternalReference, toMercadoPagoExternalAreaSlug } from './mercado-pago'
 
 export interface CreateSubscriptionRequest {
-  area: 'wellness' | 'nutri' | 'coach' | 'nutra'
+  area: 'wellness' | 'nutri' | 'coach' | 'nutra' | 'pro_lideres_team'
   planType: 'monthly' | 'annual'
   productType?: 'platform_monthly' | 'platform_monthly_12x' | 'platform_annual' | 'formation_only'
   userId: string
@@ -82,7 +82,11 @@ export async function createRecurringSubscription(
   
   const preapprovalData: any = {
     reason: request.description,
-    external_reference: buildExternalReference(request.area, request.planType, request.userId),
+    external_reference: buildExternalReference(
+      toMercadoPagoExternalAreaSlug(request.area),
+      request.planType,
+      request.userId
+    ),
     payer_email: request.userEmail,
     auto_recurring: {
       frequency: frequency, // 12 para anual, 1 para mensal

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireApiAuth } from '@/lib/api-auth'
 import { supabaseAdmin } from '@/lib/supabase'
 import { resolveProLideresTenantContext } from '@/lib/pro-lideres-server'
+import { requireProLideresPaidContext } from '@/lib/pro-lideres-subscription-access'
 import {
   PL_SCRIPT_UUID_RE,
   clipBody,
@@ -59,6 +60,9 @@ export async function PATCH(
   if (ctx.tenant.owner_user_id !== user.id) {
     return NextResponse.json({ error: 'Apenas o líder do espaço pode editar scripts.' }, { status: 403 })
   }
+
+  const paidPatch = await requireProLideresPaidContext(supabaseAdmin, user)
+  if (!paidPatch.ok) return paidPatch.response
 
   const exists = await loadEntryForOwnerTenant(supabaseAdmin, id, ctx.tenant.id)
   if (!exists) {
@@ -140,6 +144,9 @@ export async function DELETE(
   if (ctx.tenant.owner_user_id !== user.id) {
     return NextResponse.json({ error: 'Apenas o líder do espaço pode apagar scripts.' }, { status: 403 })
   }
+
+  const paidDel = await requireProLideresPaidContext(supabaseAdmin, user)
+  if (!paidDel.ok) return paidDel.response
 
   const exists = await loadEntryForOwnerTenant(supabaseAdmin, id, ctx.tenant.id)
   if (!exists) {

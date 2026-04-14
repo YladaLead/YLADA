@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireApiAuth } from '@/lib/api-auth'
 import { supabaseAdmin } from '@/lib/supabase'
 import { resolveProLideresTenantContext } from '@/lib/pro-lideres-server'
+import { requireProLideresPaidContext } from '@/lib/pro-lideres-subscription-access'
 import {
   clipSectionTitle,
   clipSubtitle,
@@ -25,6 +26,9 @@ export async function POST(request: NextRequest) {
   if (ctx.tenant.owner_user_id !== user.id) {
     return NextResponse.json({ error: 'Apenas o líder do espaço pode criar situações de script.' }, { status: 403 })
   }
+
+  const paid = await requireProLideresPaidContext(supabaseAdmin, user)
+  if (!paid.ok) return paid.response
 
   let body: { title?: unknown; subtitle?: unknown; ylada_link_id?: unknown; sort_order?: unknown; visible_to_team?: unknown }
   try {
