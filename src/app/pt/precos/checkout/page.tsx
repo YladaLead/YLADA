@@ -166,6 +166,12 @@ export default function PrecosCheckoutPage() {
             <p className="mt-3 text-sm sm:text-base font-semibold text-emerald-800">
               Você vai ativar previsibilidade no seu crescimento.
             </p>
+            <Link
+              href="/pt/consultoria"
+              className="inline-block mt-3 text-sm font-semibold text-emerald-800 underline hover:text-emerald-900"
+            >
+              Quero apoio humano com consultoria especializada
+            </Link>
           </div>
 
           <div className="mt-6">

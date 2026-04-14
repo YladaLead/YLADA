@@ -251,6 +251,25 @@ export default function PainelPageContent({
               </div>
             </section>
 
+            {/* Consultoria humana */}
+            <section className="rounded-xl border border-emerald-200 bg-emerald-50/70 p-5">
+              <h2 className="text-sm font-semibold text-emerald-900 mb-2">
+                🚀 Consultoria especializada por segmento
+              </h2>
+              <p className="text-sm text-emerald-900/90 mb-3">
+                Se você quer acelerar resultados, nossa equipe ajusta com você mensagem, funil e conversão.
+              </p>
+              <p className="text-sm font-semibold text-emerald-800 mb-3">
+                Você vai ativar previsibilidade no seu crescimento.
+              </p>
+              <Link
+                href="/pt/consultoria"
+                className="inline-flex items-center rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
+              >
+                Quero falar com especialista
+              </Link>
+            </section>
+
             {/* Dica do Noel */}
             <div className="rounded-lg border border-gray-100 bg-gray-50 p-4">
               <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">

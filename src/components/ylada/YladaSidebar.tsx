@@ -162,6 +162,15 @@ export default function YladaSidebar({
               <span aria-hidden>🤝</span>
               Indicar colega
             </a>
+            <Link
+              href="/pt/consultoria"
+              onClick={onMobileClose}
+              className="mt-1 flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium text-gray-700 hover:bg-emerald-50 transition-colors"
+              title="Falar com especialista da equipe YLADA"
+            >
+              <span aria-hidden>🚀</span>
+              Consultoria
+            </Link>
           </div>
         </div>
 
