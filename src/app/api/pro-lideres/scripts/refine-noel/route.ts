@@ -6,7 +6,7 @@ import { resolveProLideresTenantContext } from '@/lib/pro-lideres-server'
 import { resolveYladaLinkIdForOwner } from '@/lib/pro-lideres-scripts-api'
 import {
   PRO_LIDERES_SCRIPT_PILLARS,
-  buildProLideresScriptsNoelSystemPrompt,
+  buildProLideresScriptsNoelRefineSystemPrompt,
   normalizeScriptPillarId,
   parseNoelScriptDraft,
   type NoelScriptDraft,
@@ -19,9 +19,19 @@ function pillarLabel(id: ProLideresScriptPillarId): string {
   return PRO_LIDERES_SCRIPT_PILLARS.find((p) => p.id === id)?.label ?? id
 }
 
+function parseDraftInput(raw: unknown): NoelScriptDraft | null {
+  if (!raw || typeof raw !== 'object') return null
+  const o = raw as Record<string, unknown>
+  const section_title = typeof o.section_title === 'string' ? o.section_title.trim() : ''
+  if (!section_title) return null
+  const entries = o.entries
+  if (!Array.isArray(entries) || entries.length < 1) return null
+  return raw as NoelScriptDraft
+}
+
 /**
- * POST /api/pro-lideres/scripts/generate-noel
- * Gera rascunho JSON de uma situação + sequência de scripts (só dono do tenant / líder do espaço).
+ * POST /api/pro-lideres/scripts/refine-noel
+ * Ajusta um rascunho JSON com base num pedido em linguagem natural (só líder).
  */
 export async function POST(request: NextRequest) {
   const auth = await requireApiAuth(request)
@@ -42,14 +52,16 @@ export async function POST(request: NextRequest) {
   }
   if (ctx.tenant.owner_user_id !== user.id) {
     return NextResponse.json(
-      { error: 'Apenas o líder do espaço pode gerar scripts com o Noel.' },
+      { error: 'Apenas o líder do espaço pode refinar scripts com o Noel.' },
       { status: 403 }
     )
   }
 
   let body: {
-    purpose?: unknown
+    draft?: unknown
+    instruction?: unknown
     pillar?: unknown
+    purpose?: unknown
     ylada_link_id?: unknown
     locale?: unknown
   }
@@ -59,18 +71,25 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'JSON inválido' }, { status: 400 })
   }
 
-  const purpose = typeof body.purpose === 'string' ? body.purpose.trim() : ''
-  if (purpose.length < 8) {
-    return NextResponse.json(
-      { error: 'Descreve o objetivo com pelo menos algumas palavras (mín. 8 caracteres).' },
-      { status: 400 }
-    )
+  const draftIn = parseDraftInput(body.draft)
+  if (!draftIn) {
+    return NextResponse.json({ error: 'Rascunho inválido ou incompleto.' }, { status: 400 })
   }
-  if (purpose.length > 4000) {
-    return NextResponse.json({ error: 'Objetivo demasiado longo.' }, { status: 400 })
+
+  const instruction = typeof body.instruction === 'string' ? body.instruction.trim() : ''
+  if (instruction.length < 3) {
+    return NextResponse.json({ error: 'Escreve o que queres alterar (mínimo 3 caracteres).' }, { status: 400 })
+  }
+  if (instruction.length > 2000) {
+    return NextResponse.json({ error: 'Pedido demasiado longo.' }, { status: 400 })
   }
 
   const pillar = normalizeScriptPillarId(body.pillar)
+  const purpose =
+    typeof body.purpose === 'string' && body.purpose.trim().length >= 8
+      ? body.purpose.trim().slice(0, 4000)
+      : 'Refinar o rascunho conforme o pedido do líder.'
+
   const ylada = await resolveYladaLinkIdForOwner(supabaseAdmin, body.ylada_link_id, ctx.tenant.owner_user_id)
   if (!ylada.ok) {
     return NextResponse.json({ error: ylada.error }, { status: 400 })
@@ -100,7 +119,7 @@ export async function POST(request: NextRequest) {
     t.display_name?.trim() || t.team_name?.trim() || t.slug || 'Pro Líderes'
   const verticalCode = (t.vertical_code ?? 'h-lider').trim() || 'h-lider'
 
-  const systemPrompt = buildProLideresScriptsNoelSystemPrompt({
+  const systemPrompt = buildProLideresScriptsNoelRefineSystemPrompt({
     operationLabel,
     verticalCode,
     focusNotes: t.focus_notes?.trim() || null,
@@ -112,11 +131,13 @@ export async function POST(request: NextRequest) {
     replyLanguage,
   })
 
-  const userMessage = `Gera o JSON para o pilar "${pillar}" e o propósito acima. Regras absolutas:
-- Cada entries[].body é texto que o DISTRIBUIDOR envia a CLIENTE/LEAD/PÚBLICO (copiar/colar), nunca mensagem "Olá equipe" nem ao grupo interno.
-- Português do Brasil: **nunca** uses "follow-up" — usa **"acompanhamento"** se precisares desse conceito.
-- Se houver link/ferramenta no contexto: inclui **pedido de permissão** antes do link; **coleta de indicação** (quem mais pode se beneficiar) de forma natural; ângulo **família / quem ama** para preparar **compartilhar o link** com gatilhos mentais sutis e éticos.
-Só JSON.`
+  const userMessage = `RASCUNHO ATUAL (JSON — devolve o objeto completo atualizado):
+${JSON.stringify(draftIn)}
+
+PEDIDO DO LÍDER PARA ALTERAR:
+${instruction}
+
+Regras: mantém destinatário dos \`body\` como cliente/lead/público; português do Brasil; sem "follow-up" (usa acompanhamento). Só JSON.`
 
   try {
     const completion = await openai.chat.completions.create({
@@ -125,8 +146,8 @@ Só JSON.`
         { role: 'system', content: systemPrompt },
         { role: 'user', content: userMessage },
       ],
-      temperature: 0.55,
-      max_tokens: 3500,
+      temperature: 0.4,
+      max_tokens: 4000,
       response_format: { type: 'json_object' },
     })
     const raw = completion.choices[0]?.message?.content?.trim()
@@ -138,7 +159,7 @@ Só JSON.`
     try {
       draft = parseNoelScriptDraft(raw)
     } catch (e) {
-      console.error('[pro-lideres/scripts/generate-noel parse]', e, raw.slice(0, 500))
+      console.error('[pro-lideres/scripts/refine-noel parse]', e, raw.slice(0, 500))
       return NextResponse.json(
         { error: e instanceof Error ? e.message : 'Não foi possível interpretar a resposta do Noel.' },
         { status: 502 }
@@ -150,7 +171,7 @@ Só JSON.`
       return NextResponse.json(
         {
           error:
-            'O Noel devolveu textos demasiado curtos ou vazios. Tenta de novo com mais detalhe no objetivo, ou reformula.',
+            'O Noel devolveu textos demasiado curtos após o ajuste. Reformula o pedido ou gera de novo.',
         },
         { status: 502 }
       )
@@ -163,7 +184,7 @@ Só JSON.`
       pillar,
     })
   } catch (e) {
-    console.error('[pro-lideres/scripts/generate-noel]', e)
-    return NextResponse.json({ error: 'Falha ao gerar rascunho. Tenta de novo.' }, { status: 502 })
+    console.error('[pro-lideres/scripts/refine-noel]', e)
+    return NextResponse.json({ error: 'Falha ao refinar. Tenta de novo.' }, { status: 502 })
   }
 }

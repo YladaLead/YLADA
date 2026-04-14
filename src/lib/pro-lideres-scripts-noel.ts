@@ -81,10 +81,20 @@ DESTINATÁRIO DE CADA \`body\`
 - Exemplos **proibidos** aqui: instruções ao líder sobre como falar com a equipe; mensagens ao grupo interno de distribuidores.
 
 CAMPOS
-- **title**: rótulo curto da peça (ex.: "Mensagem 1 — pedir permissão para o link").
+- **title**: rótulo curto da peça em **português do Brasil** (ex.: "Mensagem 1 — pedir permissão para enviar o link").
 - **subtitle**: canal ou formato (ex.: "WhatsApp · 1:1", "Legenda").
 - **body**: texto **literal** pronto a copiar (pode ter 2–3 parágrafos curtos ou mensagens numeradas dentro do mesmo body se for sequência muito curta).
 - **how_to_use**: só para o **consultor** saber **quando** usar (ex.: "Depois de ela responder ao story"); **não** uses "envie isto ao grupo da equipe".
+
+PORTUGUÊS DO BRASIL — PROIBIÇÕES LEXICAIS
+- **Nunca** uses no título nem no corpo anglicismos de jargão: **proibido** "follow-up", "follow up", "followup". Em qualquer situação equivalente usa **"acompanhamento"** (ex.: título "Mensagem 3 — acompanhamento depois do cálculo", não "Follow-up…").
+- Vocabulário de **campo** e **conversa humana**; evita termos que soarão tradução literal do inglês.
+
+ÂNGULO DE CÓPIA (SEQUÊNCIAS COM LINK / FERRAMENTA — APLICAR SEMPRE QUE HOUVER FERRAMENTA OU LINK)
+- **Pedido de permissão**: inclui **sempre** um momento claro de **pedir permissão** antes de mandar o link (respeito, abertura, sem pressa).
+- **Coleta de indicação** (natural, não robótico): inclui pelo menos uma peça ou frase que **convide a pessoa a pensar em quem mais pode se beneficiar** (indicação, indicação de alguém da família ou próximo) — sem parecer formulário nem spam.
+- **Família e preparação**: posiciona a ferramenta como algo que **ajuda a pessoa a cuidar de si e de quem ama** ou que **vale a pena compartilhar em casa** — prepara o terreno para **a pessoa repassar o link** (sem soar manipulador).
+- **Gatilhos mentais** (sutis, éticos, consultivos): curiosidade, urgência leve quando fizer sentido, reciprocidade, **"quem você quer ver bem"** — sempre com tom profissional; **sem** promessas ilegais nem pressão tóxica.
 
 ${hLayer}
 
@@ -109,9 +119,44 @@ REGRAS DE SAÍDA
 - Ordem do array = ordem de uso no **campo com clientes** (1 → 2 → 3…).
 - **body** nunca pode ser vazio para a ideia principal; se for WhatsApp, preferir mensagens curtas.
 - Textos em **${params.replyLanguage}**, tom profissional e humano.
+- Se existir ferramenta/link no contexto, a sequência deve **combinar** permissão + (quando fizer sentido) indicação + ângulo família + convite **implícito** a **compartilhar o link** com quem importa.
 
 FORMATO JSON EXATO:
 {"section_title":"...","section_subtitle":null,"entries":[{"title":"...","subtitle":null,"body":"...","how_to_use":"..."}]}`
+}
+
+/** Prompt para o Noel **ajustar** um rascunho já gerado (o utilizador pede alterações em linguagem natural). */
+export function buildProLideresScriptsNoelRefineSystemPrompt(params: {
+  operationLabel: string
+  verticalCode: string
+  focusNotes: string | null
+  pillar: ProLideresScriptPillarId
+  pillarLabel: string
+  purpose: string
+  toolLabel: string | null
+  toolWhenToUse: string | null
+  replyLanguage: string
+}): string {
+  const base = buildProLideresScriptsNoelSystemPrompt(params)
+  return `${base}
+
+MODO ATUAL — REFINAR RASCUNHO (PRIORIDADE SOBRE A GERAÇÃO DO ZERO)
+- Vais receber o **JSON atual** do rascunho e um **pedido do líder** para alterar (ex.: "deixa a mensagem 2 mais curta", "troca o tom para mais informal").
+- **Aplica** o pedido mantendo o **mesmo formato** (\`section_title\`, \`section_subtitle\`, \`entries[]\` com \`title\`, \`subtitle\`, \`body\`, \`how_to_use\`).
+- Devolve o objeto JSON **completo e coerente** — não resumos nem diffs. Podes alterar só o necessário, mas o JSON tem de ser válido e utilizável.
+- Se o pedido for ambíguo, faz a alteração mais provável e mantém o resto estável.
+- **Não** apagues entradas nem reduzas a sequência a menos que o líder peça explicitamente para remover ou juntar mensagens.`
+}
+
+/** Remove anglicismos comuns que a equipa não usa no Brasil (ex.: follow-up → acompanhamento). */
+export function sanitizeNoelScriptBrazilianCopy(s: string): string {
+  return s
+    .replace(/\bFollow-up\b/g, 'Acompanhamento')
+    .replace(/\bFOLLOW-UP\b/g, 'ACOMPANHAMENTO')
+    .replace(/\bfollow-up\b/gi, 'acompanhamento')
+    .replace(/\bFollow up\b/g, 'Acompanhamento')
+    .replace(/\bfollow up\b/gi, 'acompanhamento')
+    .replace(/\bfollowup\b/gi, 'acompanhamento')
 }
 
 export function extractJsonObject(raw: string): string {
@@ -136,7 +181,7 @@ export function parseNoelScriptDraft(raw: string): NoelScriptDraft {
     throw new Error('JSON inválido.')
   }
   const o = parsed as Record<string, unknown>
-  const section_title = clip(String(o.section_title ?? ''), MAX_SECTION_TITLE)
+  const section_title = sanitizeNoelScriptBrazilianCopy(clip(String(o.section_title ?? ''), MAX_SECTION_TITLE))
   if (!section_title) {
     throw new Error('O Noel não devolveu section_title.')
   }
@@ -144,7 +189,7 @@ export function parseNoelScriptDraft(raw: string): NoelScriptDraft {
   const section_subtitle =
     section_subtitle_raw === null || section_subtitle_raw === undefined
       ? null
-      : clip(String(section_subtitle_raw), MAX_SUBTITLE) || null
+      : sanitizeNoelScriptBrazilianCopy(clip(String(section_subtitle_raw), MAX_SUBTITLE)) || null
 
   const entriesRaw = o.entries
   if (!Array.isArray(entriesRaw) || entriesRaw.length < 1) {
@@ -155,15 +200,19 @@ export function parseNoelScriptDraft(raw: string): NoelScriptDraft {
     const e = entriesRaw[i]
     if (!e || typeof e !== 'object') continue
     const er = e as Record<string, unknown>
-    const title = clip(String(er.title ?? ''), MAX_SECTION_TITLE)
+    const title = sanitizeNoelScriptBrazilianCopy(clip(String(er.title ?? ''), MAX_SECTION_TITLE))
     if (!title) continue
     const st = er.subtitle
     const subtitle =
-      st === null || st === undefined ? null : clip(String(st), MAX_SUBTITLE) || null
-    const body = clip(String(er.body ?? ''), MAX_BODY)
+      st === null || st === undefined
+        ? null
+        : sanitizeNoelScriptBrazilianCopy(clip(String(st), MAX_SUBTITLE)) || null
+    const body = sanitizeNoelScriptBrazilianCopy(clip(String(er.body ?? ''), MAX_BODY))
     const hu = er.how_to_use
     const how_to_use =
-      hu === null || hu === undefined ? null : clip(String(hu), MAX_HOW) || null
+      hu === null || hu === undefined
+        ? null
+        : sanitizeNoelScriptBrazilianCopy(clip(String(hu), MAX_HOW)) || null
     entries.push({ title, subtitle, body, how_to_use })
   }
   if (entries.length < 1) {
