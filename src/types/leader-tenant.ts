@@ -58,6 +58,8 @@ export type LeaderTenantPlScriptSectionRow = {
   title: string
   subtitle: string | null
   ylada_link_id: string | null
+  /** Se false, só o líder vê esta sequência no painel; a equipe não. */
+  visible_to_team: boolean
   sort_order: number
   created_at: string
   updated_at: string

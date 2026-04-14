@@ -214,8 +214,8 @@ const NOEL_UX_BY_AREA: Record<NoelArea, NoelUxContentWithoutWelcome> = {
   },
   pro_lideres: {
     suggestions: PRO_LIDERES_SUGGESTIONS,
-    placeholder: 'Pergunte ao Noel sobre scripts, links ou WhatsApp...',
-    placeholderExample: 'Ex: Script para retomar conversa depois de 3 dias',
+    placeholder: 'Escreva aqui…',
+    placeholderExample: 'Ex.: roteiro para follow-up ou dúvida da equipe',
   },
 }
 

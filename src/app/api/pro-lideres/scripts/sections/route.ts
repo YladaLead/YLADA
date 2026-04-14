@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Apenas o líder do espaço pode criar situações de script.' }, { status: 403 })
   }
 
-  let body: { title?: unknown; subtitle?: unknown; ylada_link_id?: unknown; sort_order?: unknown }
+  let body: { title?: unknown; subtitle?: unknown; ylada_link_id?: unknown; sort_order?: unknown; visible_to_team?: unknown }
   try {
     body = await request.json()
   } catch {
@@ -59,6 +59,9 @@ export async function POST(request: NextRequest) {
     sort_order = max + 1
   }
 
+  const visible_to_team =
+    body.visible_to_team === undefined ? true : Boolean(body.visible_to_team)
+
   const { data: inserted, error } = await supabaseAdmin
     .from('leader_tenant_pl_script_sections')
     .insert({
@@ -67,6 +70,7 @@ export async function POST(request: NextRequest) {
       subtitle,
       ylada_link_id: ylada.id,
       sort_order,
+      visible_to_team,
     })
     .select()
     .single()

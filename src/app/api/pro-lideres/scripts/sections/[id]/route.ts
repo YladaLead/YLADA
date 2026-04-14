@@ -35,14 +35,14 @@ export async function PATCH(
     return NextResponse.json({ error: 'Apenas o líder do espaço pode editar situações.' }, { status: 403 })
   }
 
-  let body: { title?: unknown; subtitle?: unknown; ylada_link_id?: unknown; sort_order?: unknown }
+  let body: { title?: unknown; subtitle?: unknown; ylada_link_id?: unknown; sort_order?: unknown; visible_to_team?: unknown }
   try {
     body = await request.json()
   } catch {
     return NextResponse.json({ error: 'JSON inválido' }, { status: 400 })
   }
 
-  const payload: Record<string, string | number | null> = {}
+  const payload: Record<string, string | number | boolean | null> = {}
 
   if (body.title !== undefined) {
     const t = clipSectionTitle(body.title)
@@ -61,6 +61,9 @@ export async function PATCH(
   }
   if (body.sort_order !== undefined && typeof body.sort_order === 'number' && Number.isFinite(body.sort_order)) {
     payload.sort_order = Math.floor(body.sort_order)
+  }
+  if (body.visible_to_team !== undefined) {
+    payload.visible_to_team = Boolean(body.visible_to_team)
   }
 
   if (Object.keys(payload).length === 0) {

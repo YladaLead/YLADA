@@ -192,6 +192,13 @@ function getWelcomeMessage(area: NoelArea): Message {
   }
 }
 
+/** Sem mensagem inicial: se só existia o welcome antigo no storage, começa vazio. */
+function normalizeSavedMessagesForSkipWelcome(saved: Message[], skipWelcomeMessage: boolean): Message[] {
+  if (!skipWelcomeMessage) return saved
+  if (saved.length === 1 && saved[0]?.id === 'welcome' && saved[0]?.role === 'assistant') return []
+  return saved
+}
+
 interface NoelChatProps {
   area?: NoelArea
   className?: string
@@ -203,10 +210,24 @@ interface NoelChatProps {
   chatApiPath?: string
   /** Não buscar dashboard/links da matriz YLADA para substituir o welcome (ex.: Pro Líderes). */
   skipYladaContextualWelcome?: boolean
-  /** Título no cabeçalho do cartão */
+  /** Título no cabeçalho do cartão (ex.: «Noel»). */
   headerTitle?: string
+  /** Frase curta ao lado do título (ex.: disponibilidade para o líder). */
+  headerTagline?: string
+  /** Mostrar emoji 🧠 na barra do chat (default: true). */
+  showHeaderEmoji?: boolean
   /** Esconder ações "Editar quiz" / "Meus links" que dependem da área YLADA (embed Pro Líderes). */
   disableYladaLinkEditor?: boolean
+  /** Sem mensagem inicial do Noel; conversa nova começa vazia (ex.: Pro Líderes). */
+  skipWelcomeMessage?: boolean
+  /** Não mostrar chips de sugestões abaixo da primeira mensagem. */
+  hideSuggestions?: boolean
+  /** Mostrar título à esquerda na barra do chat (ex. "Noel"). Se false, só o botão Limpar. */
+  showChatHeaderTitle?: boolean
+  /** Ocultar a linha de exemplo abaixo do campo de texto. */
+  hideInputHint?: boolean
+  /** Texto do botão de envio (default: «Perguntar ao Noel»). */
+  sendButtonLabel?: string
 }
 
 function isProLideresNoelApiPath(path: string | undefined): boolean {
@@ -221,7 +242,14 @@ export default function NoelChat({
   chatApiPath,
   skipYladaContextualWelcome = false,
   headerTitle,
+  headerTagline,
+  showHeaderEmoji = true,
   disableYladaLinkEditor = false,
+  skipWelcomeMessage = false,
+  hideSuggestions = false,
+  showChatHeaderTitle = true,
+  hideInputHint = false,
+  sendButtonLabel,
 }: NoelChatProps) {
   const router = useRouter()
   const pathname = usePathname()
@@ -230,8 +258,10 @@ export default function NoelChat({
   const resolvedChatApi = chatApiPath ?? '/api/ylada/noel'
   const proLideresPayload = isProLideresNoelApiPath(resolvedChatApi)
   const [messages, setMessages] = useState<Message[]>(() => {
-    const saved = loadMessages(area)
-    return saved.length > 0 ? saved : [getWelcomeMessage(area)]
+    const saved = normalizeSavedMessagesForSkipWelcome(loadMessages(area), skipWelcomeMessage)
+    if (saved.length > 0) return saved
+    if (skipWelcomeMessage) return []
+    return [getWelcomeMessage(area)]
   })
   const [lastLinkContext, setLastLinkContext] = useState<LastLinkContext | null>(() => loadLastLinkContext(area))
   const [input, setInput] = useState(initialMessage ?? '')
@@ -258,14 +288,15 @@ export default function NoelChat({
   useEffect(() => {
     if (initializedRef.current) return
     initializedRef.current = true
-    const saved = loadMessages(area)
+    const saved = normalizeSavedMessagesForSkipWelcome(loadMessages(area), skipWelcomeMessage)
     if (saved.length > 0) setMessages(saved)
-    else setMessages([getWelcomeMessage(area)])
+    else setMessages(skipWelcomeMessage ? [] : [getWelcomeMessage(area)])
     setLastLinkContext(loadLastLinkContext(area))
-  }, [area])
+  }, [area, skipWelcomeMessage])
 
   // Mensagem contextual ao abrir (mentor ativo): busca dashboard + links e substitui o welcome
   useEffect(() => {
+    if (skipYladaContextualWelcome || skipWelcomeMessage) return
     const saved = loadMessages(area)
     if (saved.length > 0 || contextualLoadedRef.current) return
     let cancelled = false
@@ -291,7 +322,7 @@ export default function NoelChat({
         if (!cancelled) setContextualActions([])
       })
     return () => { cancelled = true }
-  }, [area, skipYladaContextualWelcome])
+  }, [area, skipYladaContextualWelcome, skipWelcomeMessage])
 
   useEffect(() => {
     if (initialMessage?.trim()) setInput(initialMessage.trim())
@@ -435,7 +466,7 @@ export default function NoelChat({
   const clearChat = () => {
     contextualLoadedRef.current = false
     setContextualActions(null)
-    setMessages([getWelcomeMessage(area)])
+    setMessages(skipWelcomeMessage ? [] : [getWelcomeMessage(area)])
     setLastLinkContext(null)
     if (typeof window !== 'undefined') {
       try {
@@ -657,19 +688,35 @@ export default function NoelChat({
     ]
   )
 
-  const showSuggestions = messages.length === 1 && messages[0]?.role === 'assistant'
+  const showSuggestions =
+    !hideSuggestions && messages.length === 1 && messages[0]?.role === 'assistant'
 
   return (
     <div className={`flex flex-col rounded-2xl border border-sky-100 bg-white shadow-lg overflow-hidden ${className}`}>
-      <div className="flex items-center justify-between px-4 py-2.5 border-b border-sky-200 bg-sky-100/80">
-        <span className="text-sm font-bold text-sky-800 flex items-center gap-2">
-          <span className="text-lg" aria-hidden>🧠</span>
-          {headerTitle ?? 'Noel — Mentor estratégico'}
-        </span>
+      <div
+        className={`flex items-center gap-3 border-b border-sky-200 bg-sky-100/80 px-4 py-2.5 ${
+          showChatHeaderTitle ? 'justify-between' : 'justify-end'
+        }`}
+      >
+        {showChatHeaderTitle && (
+          <div className="min-w-0 flex flex-1 items-center gap-2 sm:gap-3">
+            {showHeaderEmoji && (
+              <span className="text-lg shrink-0" aria-hidden>
+                🧠
+              </span>
+            )}
+            <div className="min-w-0 flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+              <span className="text-sm font-bold text-sky-800">{headerTitle ?? 'Noel — Mentor estratégico'}</span>
+              {headerTagline?.trim() ? (
+                <span className="text-xs font-medium leading-snug text-sky-800/85">{headerTagline.trim()}</span>
+              ) : null}
+            </div>
+          </div>
+        )}
         <button
           type="button"
           onClick={clearChat}
-          className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-sky-600 hover:text-sky-800 hover:bg-sky-100/80 rounded-lg transition-colors opacity-80 hover:opacity-100"
+          className="flex shrink-0 items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-sky-600 hover:text-sky-800 hover:bg-sky-100/80 rounded-lg transition-colors opacity-80 hover:opacity-100"
           title="Limpar conversa e começar do zero"
         >
           <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -912,7 +959,9 @@ export default function NoelChat({
               disabled={loading}
               className="min-h-[48px] max-h-32 px-4 py-3 text-sm border border-sky-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-400 resize-none disabled:opacity-60 placeholder:text-gray-400"
             />
-            <span className="text-xs text-gray-400">{uxContent.placeholderExample}</span>
+            {!hideInputHint && (
+              <span className="text-xs text-gray-400">{uxContent.placeholderExample}</span>
+            )}
           </div>
           <button
             type="button"
@@ -921,7 +970,7 @@ export default function NoelChat({
             className="h-[48px] px-6 bg-sky-600 text-white rounded-xl hover:bg-sky-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-semibold shrink-0 shadow-md flex items-center gap-2"
           >
             {loading ? '⏳' : '➤'}
-            <span className="hidden sm:inline">Perguntar ao Noel</span>
+            <span className="hidden sm:inline">{sendButtonLabel ?? 'Perguntar ao Noel'}</span>
           </button>
         </div>
       </div>

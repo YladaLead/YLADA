@@ -201,8 +201,9 @@ export function ProLideresScriptsClient() {
 
       {devStubPanel && (
         <p className="rounded-xl border border-amber-200 bg-amber-50/90 px-4 py-3 text-sm text-amber-950">
-          Modo dev sem tenant na base: gravação pode falhar até existir tenant e a migration{' '}
-          <code className="rounded bg-amber-100/80 px-1">312-pro-lideres-tenant-scripts-sections.sql</code> estar aplicada.
+          Modo dev sem tenant na base: gravação pode falhar até existir tenant e as migrations de scripts (ex.{' '}
+          <code className="rounded bg-amber-100/80 px-1">312</code>,{' '}
+          <code className="rounded bg-amber-100/80 px-1">316</code>) estarem aplicadas.
         </p>
       )}
 
@@ -283,7 +284,7 @@ export function ProLideresScriptsClient() {
         <p className="rounded-xl border border-dashed border-gray-300 bg-gray-50 px-4 py-8 text-center text-sm text-gray-600">
           {canEditUi
             ? 'Ainda não há grupos. Usa «Criar» acima (Noel ou grupo vazio).'
-            : 'O líder ainda não publicou scripts aqui.'}
+            : 'O líder ainda não partilhou sequências visíveis para a equipe aqui.'}
         </p>
       ) : (
         <div className="space-y-3">
@@ -341,6 +342,7 @@ function NewSectionForm({
   const [title, setTitle] = useState('')
   const [subtitle, setSubtitle] = useState('')
   const [yladaLinkId, setYladaLinkId] = useState('')
+  const [visibleToTeam, setVisibleToTeam] = useState(true)
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -357,6 +359,7 @@ function NewSectionForm({
           title: t,
           subtitle: subtitle.trim() || null,
           ylada_link_id: yladaLinkId || null,
+          visible_to_team: visibleToTeam,
         }),
       })
       const data = await res.json().catch(() => ({}))
@@ -367,6 +370,7 @@ function NewSectionForm({
       setTitle('')
       setSubtitle('')
       setYladaLinkId('')
+      setVisibleToTeam(true)
       await onCreated()
     } catch {
       onError('Erro de rede.')
@@ -406,6 +410,20 @@ function NewSectionForm({
           disabled={saving}
           accent="gray"
         />
+        <label className="flex cursor-pointer items-start gap-2.5 rounded-lg border border-gray-100 bg-gray-50/80 px-3 py-2.5 text-sm text-gray-800">
+          <input
+            type="checkbox"
+            className="mt-0.5 h-4 w-4 shrink-0 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+            checked={visibleToTeam}
+            onChange={(e) => setVisibleToTeam(e.target.checked)}
+          />
+          <span>
+            <span className="font-medium text-gray-900">Mostrar à equipe</span>
+            <span className="mt-0.5 block text-xs font-normal text-gray-600">
+              Se desmarcares, só tu vês esta sequência no painel; podes apagar quando quiseres.
+            </span>
+          </span>
+        </label>
         <button
           type="submit"
           disabled={saving}
@@ -453,12 +471,38 @@ function SectionBlock({
   const [title, setTitle] = useState(section.title)
   const [subtitle, setSubtitle] = useState(section.subtitle ?? '')
   const [yladaLinkId, setYladaLinkId] = useState(section.ylada_link_id ?? '')
+  const [visibleToTeam, setVisibleToTeam] = useState(section.visible_to_team !== false)
 
   useEffect(() => {
     setTitle(section.title)
     setSubtitle(section.subtitle ?? '')
     setYladaLinkId(section.ylada_link_id ?? '')
-  }, [section.title, section.subtitle, section.ylada_link_id])
+    setVisibleToTeam(section.visible_to_team !== false)
+  }, [section.title, section.subtitle, section.ylada_link_id, section.visible_to_team])
+
+  async function patchTeamVisible(next: boolean) {
+    onError(null)
+    onSaving(true)
+    try {
+      const res = await fetch(`/api/pro-lideres/scripts/sections/${section.id}`, {
+        method: 'PATCH',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ visible_to_team: next }),
+      })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) {
+        onError((data as { error?: string }).error || 'Não foi possível atualizar a visibilidade.')
+        return
+      }
+      setVisibleToTeam(next)
+      await onReload()
+    } catch {
+      onError('Erro de rede.')
+    } finally {
+      onSaving(false)
+    }
+  }
 
   async function saveSection() {
     onError(null)
@@ -472,6 +516,7 @@ function SectionBlock({
           title: title.trim(),
           subtitle: subtitle.trim() || null,
           ylada_link_id: yladaLinkId || null,
+          visible_to_team: visibleToTeam,
         }),
       })
       const data = await res.json().catch(() => ({}))
@@ -579,6 +624,20 @@ function SectionBlock({
         disabled={saving}
         accent="gray"
       />
+      <label className="flex cursor-pointer items-start gap-2.5 rounded-lg border border-gray-100 bg-gray-50/80 px-3 py-2.5 text-sm text-gray-800">
+        <input
+          type="checkbox"
+          className="mt-0.5 h-4 w-4 shrink-0 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+          checked={visibleToTeam}
+          onChange={(e) => setVisibleToTeam(e.target.checked)}
+        />
+        <span>
+          <span className="font-medium text-gray-900">Mostrar à equipe</span>
+          <span className="mt-0.5 block text-xs font-normal text-gray-600">
+            A equipe vê e copia no painel dela. Desmarcado = só tu vês (rascunho ou uso interno).
+          </span>
+        </span>
+      </label>
       <div className="flex flex-wrap gap-2">
         <button
           type="button"
@@ -635,6 +694,19 @@ function SectionBlock({
       >
         Editar grupo
       </button>
+      <label
+        className="inline-flex min-h-[40px] max-w-full cursor-pointer items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50/60 px-3 text-sm font-medium text-emerald-950"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <input
+          type="checkbox"
+          className="h-4 w-4 shrink-0 rounded border-gray-300 text-emerald-700 focus:ring-emerald-500"
+          checked={visibleToTeam}
+          disabled={saving}
+          onChange={(e) => void patchTeamVisible(e.target.checked)}
+        />
+        <span className="whitespace-normal">Equipe vê no painel</span>
+      </label>
       <button
         type="button"
         onClick={(e) => {
@@ -668,6 +740,9 @@ function SectionBlock({
             ) : null}
             <span className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-gray-500">
               <span>{section.entries.length} texto(s)</span>
+              {canEditUi && section.visible_to_team === false ? (
+                <span className="rounded-full bg-slate-200 px-2 py-0.5 font-medium text-slate-800">Só o líder</span>
+              ) : null}
               {toolLabel ? (
                 <span className="rounded-full bg-gray-100 px-2 py-0.5 font-medium text-gray-700">{toolLabel}</span>
               ) : null}

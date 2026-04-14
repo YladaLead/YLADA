@@ -1,7 +1,9 @@
+import { cookies } from 'next/headers'
 import { type NextRequest, NextResponse } from 'next/server'
 import { requireApiAuth } from '@/lib/api-auth'
 import { supabaseAdmin } from '@/lib/supabase'
 import { proLideresApiDevHint } from '@/lib/pro-lideres-api-dev-hints'
+import { PRO_LIDERES_TEAM_PREVIEW_COOKIE } from '@/lib/pro-lideres-team-preview'
 import { resolveProLideresTenantContext } from '@/lib/pro-lideres-server'
 import type { LeaderTenantPlScriptEntryRow, LeaderTenantPlScriptSectionRow, ProLideresScriptSectionWithEntries } from '@/types/leader-tenant'
 
@@ -25,9 +27,14 @@ export async function GET(request: NextRequest) {
     )
   }
 
+  const cookieStore = await cookies()
+  const leaderTeamPreview =
+    ctx.tenant.owner_user_id === user.id && cookieStore.get(PRO_LIDERES_TEAM_PREVIEW_COOKIE)?.value === '1'
+  const viewAsTeam = ctx.role === 'member' || leaderTeamPreview
+
   const { data: sections, error: secErr } = await supabaseAdmin
     .from('leader_tenant_pl_script_sections')
-    .select('id, leader_tenant_id, title, subtitle, ylada_link_id, sort_order, created_at, updated_at')
+    .select('id, leader_tenant_id, title, subtitle, ylada_link_id, visible_to_team, sort_order, created_at, updated_at')
     .eq('leader_tenant_id', ctx.tenant.id)
     .order('sort_order', { ascending: true })
     .order('created_at', { ascending: true })
@@ -37,7 +44,10 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Erro ao carregar scripts.' }, { status: 500 })
   }
 
-  const sectionRows = (sections ?? []) as LeaderTenantPlScriptSectionRow[]
+  let sectionRows = (sections ?? []) as LeaderTenantPlScriptSectionRow[]
+  if (viewAsTeam) {
+    sectionRows = sectionRows.filter((s) => s.visible_to_team !== false)
+  }
   const sectionIds = sectionRows.map((s) => s.id)
 
   let entryRows: LeaderTenantPlScriptEntryRow[] = []
