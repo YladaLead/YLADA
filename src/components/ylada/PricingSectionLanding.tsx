@@ -30,7 +30,7 @@ export function PricingSectionLanding({
         {/* Plano mensal */}
         <div className="bg-white rounded-2xl border-2 border-gray-200 p-6 sm:p-8 flex flex-col">
           <h3 className="text-xl font-bold text-gray-900 mb-1">Plano mensal</h3>
-          <p className="text-2xl font-bold text-gray-900 mb-2">R$ 97</p>
+          <p className="text-2xl font-bold text-gray-900 mb-2">R$ 300</p>
           <p className="text-gray-600 text-sm mb-4">Para quem quer começar e testar.</p>
           <ul className="space-y-2 mb-6 flex-1">
             {[
@@ -63,7 +63,7 @@ export function PricingSectionLanding({
             ⭐ Melhor custo-benefício
           </div>
           <h3 className="text-xl font-bold text-gray-900 mb-1 mt-2">Plano anual (recomendado)</h3>
-          <p className="text-2xl font-bold text-gray-900">R$ 59<span className="text-base font-normal text-gray-600">/mês</span></p>
+          <p className="text-2xl font-bold text-gray-900">12x de R$ 150</p>
           <p className="text-gray-600 text-sm mb-4">Profissionais que querem usar diagnósticos continuamente.</p>
           <p className="text-green-600 text-sm font-semibold mb-4">Economize mais de 35% no plano anual</p>
           <ul className="space-y-2 mb-6 flex-1">

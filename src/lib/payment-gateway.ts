@@ -74,24 +74,24 @@ function getPrice(
         return 708.00 // R$ 708 (12× de R$ 59) — promocional
       }
       if (productType === 'platform_monthly') {
-        return 97.00 // R$ 97/mês (recorrente)
+        return 300.00 // R$ 300/mês (recorrente)
       }
       if (productType === 'platform_monthly_12x') {
-        return 708.00 // R$ 708 (pagamento único parcelável em até 12× de R$ 59)
+        return 1800.00 // R$ 1.800 (pagamento único parcelável em até 12× de R$ 150)
       }
       if (productType === 'platform_annual') {
-        return 708.00 // R$ 708/ano (12× de R$ 59) — promocional
+        return 1800.00 // R$ 1.800/ano (12× de R$ 150)
       }
     }
     
     const prices: Record<string, Record<string, number>> = {
       wellness: {
-        monthly: 97.00, // R$ 97/mês
-        annual: 708.00, // R$ 708/ano (12× de R$ 59)
+        monthly: 100.00, // R$ 100/mês
+        annual: 720.00, // R$ 720/ano (12× de R$ 60)
       },
       nutri: {
-        monthly: 97.00, // R$ 97/mês
-        annual: 708.00, // R$ 708/ano (12× de R$ 59) — promocional
+        monthly: 300.00, // R$ 300/mês
+        annual: 1800.00, // R$ 1.800/ano (12× de R$ 150)
       },
       coach: {
         monthly: 97.00, // R$ 97/mês

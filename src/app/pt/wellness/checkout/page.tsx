@@ -233,19 +233,19 @@ export default function WellnessCheckoutPage() {
 
   const planDetails = {
     monthly: {
-      price: 97.00,
-      priceFormatted: 'R$ 97,00',
+      price: 100.00,
+      priceFormatted: 'R$ 100,00',
       period: 'mês',
       description: 'Plano Mensal',
     },
     annual: {
-      price: 708.00, // Valor total (12× de R$ 59)
-      priceFormatted: 'R$ 708,00',
+      price: 720.00, // Valor total (12× de R$ 60)
+      priceFormatted: 'R$ 720,00',
       period: 'ano',
       description: 'Plano Anual',
-      monthlyEquivalent: 59.00, // 12× de R$ 59
-      totalParcelado: 708.00,
-      savings: 456.00, // (97.00 * 12) - 708.00
+      monthlyEquivalent: 60.00, // 12× de R$ 60
+      totalParcelado: 720.00,
+      savings: 480.00, // (100.00 * 12) - 720.00
     },
   }
 
@@ -341,11 +341,11 @@ export default function WellnessCheckoutPage() {
                     Anual
                   </h3>
                   <div className="text-3xl font-bold text-green-600 mb-1">
-                    R$ 59
+                    R$ 60
                   </div>
                   <div className="text-sm text-gray-600">/mês</div>
                   <div className="text-xs text-gray-500 mt-2">
-                    Total: R$ 708/ano (12× de R$ 59)
+                    Total: R$ 720/ano (12× de R$ 60)
                   </div>
                 </div>
               </button>
@@ -369,7 +369,7 @@ export default function WellnessCheckoutPage() {
                     Mensal
                   </h3>
                   <div className="text-3xl font-bold text-green-600 mb-1">
-                    R$ 97,00
+                    R$ 100,00
                   </div>
                   <div className="text-sm text-gray-600">/mês</div>
                 </div>
@@ -424,7 +424,7 @@ export default function WellnessCheckoutPage() {
                     💳 Parcelamento Disponível
                   </h3>
                   <p className="text-sm text-blue-800">
-                    Após preencher os dados do seu cartão na próxima página, você poderá escolher <strong>12× de R$ 59</strong>. O parcelamento aparecerá automaticamente após inserir o número do cartão.
+                    Após preencher os dados do seu cartão na próxima página, você poderá escolher <strong>12× de R$ 60</strong>. O parcelamento aparecerá automaticamente após inserir o número do cartão.
                   </p>
                 </div>
               </div>

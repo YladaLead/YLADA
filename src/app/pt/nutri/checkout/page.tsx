@@ -10,7 +10,7 @@ import { trackNutriCheckoutAnnual, trackNutriCheckoutMonthly } from '@/lib/faceb
 export default function NutriCheckoutPage() {
   const router = useRouter()
   const { user, userProfile, loading: authLoading } = useAuth()
-  // Área Nutri: oferta mensal R$ 97 e anual 12× de R$ 59 (R$ 708)
+  // Área Nutri: oferta mensal R$ 300 e anual 12× de R$ 150 (R$ 1.800)
   const [planType, setPlanType] = useState<'monthly' | 'annual'>('annual')
   const [planLocked, setPlanLocked] = useState(false)
   const [productTypeOverride, setProductTypeOverride] = useState<
@@ -303,7 +303,7 @@ export default function NutriCheckoutPage() {
             <p className="text-sm text-gray-600 mt-1">Escolha como você quer começar.</p>
           </div>
 
-          {/* Escolha do plano: Mensal R$ 97 ou Anual 12× R$ 59 */}
+          {/* Escolha do plano: Mensal R$ 300 ou Anual 12× de R$ 150 */}
           <div className="mb-6 space-y-3">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <button
@@ -317,7 +317,7 @@ export default function NutriCheckoutPage() {
                 } ${planLocked ? 'opacity-90' : ''}`}
               >
                 <h3 className="font-semibold text-gray-800">Plano Mensal</h3>
-                <p className="text-2xl font-bold text-blue-600 mt-1">R$ 97<span className="text-base font-normal text-gray-600">/mês</span></p>
+                <p className="text-2xl font-bold text-blue-600 mt-1">R$ 300<span className="text-base font-normal text-gray-600">/mês</span></p>
                 <p className="text-xs text-gray-600 mt-1">Cobrança mês a mês. Cancele quando quiser.</p>
               </button>
               <button
@@ -334,9 +334,9 @@ export default function NutriCheckoutPage() {
                   MAIS ESCOLHIDO
                 </span>
                 <h3 className="font-semibold text-gray-800">Plano Anual</h3>
-                <p className="text-2xl font-bold text-blue-600 mt-1">12× de R$ 59</p>
-                <p className="text-xs text-green-700 font-medium mt-1">Economia de R$ 456 no ano</p>
-                <p className="text-xs text-gray-600 mt-0.5">Total: R$ 708/ano</p>
+                <p className="text-2xl font-bold text-blue-600 mt-1">12× de R$ 150</p>
+                <p className="text-xs text-green-700 font-medium mt-1">Economia de R$ 1.800 no ano</p>
+                <p className="text-xs text-gray-600 mt-0.5">Total: R$ 1.800/ano</p>
               </button>
             </div>
             {planType === 'annual' && (

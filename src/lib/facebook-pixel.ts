@@ -319,9 +319,9 @@ export const trackNutriSalesView = () => {
   setTimeout(tryTrack, 100);
 };
 
-// NutriCheckout_Monthly - Início de checkout mensal (R$ 97/mês)
+// NutriCheckout_Monthly - Início de checkout mensal (R$ 300/mês)
 export const trackNutriCheckoutMonthly = () => {
-  const value = 97;
+  const value = 300;
   const tryTrack = () => {
     if (isPixelLoaded()) {
       trackInitiateCheckout({
@@ -348,9 +348,9 @@ export const trackNutriCheckoutMonthly = () => {
   setTimeout(tryTrack, 100);
 };
 
-// NutriCheckout_Annual - Início de checkout anual (R$ 708)
+// NutriCheckout_Annual - Início de checkout anual (R$ 1.800)
 export const trackNutriCheckoutAnnual = () => {
-  const value = 708;
+  const value = 1800;
   const tryTrack = () => {
     if (isPixelLoaded()) {
       trackInitiateCheckout({

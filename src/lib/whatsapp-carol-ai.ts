@@ -4395,7 +4395,7 @@ Você tinha um sonho, um objetivo. Algo que te moveu a buscar essa mudança.
 
 Pensa comigo: quanto custa NÃO mudar? Quanto custa continuar adiando esse sonho?
 
-O investimento é de apenas R$ 97 por mês. Menos de R$ 3,50 por dia.
+O investimento é de apenas R$ 300 por mês.
 
 Pensa no que você vai ganhar: um estado de espírito completamente diferente, a transformação que você busca, a realização desse sonho que te moveu até aqui.
 
@@ -4421,7 +4421,7 @@ Sabe, o momento perfeito não existe. O momento certo é AGORA.
 
 Você veio até aqui porque tinha um sonho. Pensa: quanto custa NÃO realizar esse sonho? Quanto custa continuar adiando?
 
-O investimento é de apenas R$ 97 por mês. Menos de R$ 3,50 por dia para transformar sua vida.
+O investimento é de apenas R$ 300 por mês para transformar sua vida.
 
 Pensa no estado de espírito que você vai adquirir, na transformação que você busca, na realização desse sonho.
 
@@ -4445,7 +4445,7 @@ Você tinha um sonho, um objetivo. Algo que te moveu.
 
 Pensa: quanto custa NÃO mudar? Quanto custa continuar adiando esse sonho que te trouxe até aqui?
 
-O investimento é de apenas R$ 97 por mês. Menos de R$ 3,50 por dia.
+O investimento é de apenas R$ 300 por mês.
 
 Pensa no que você vai ganhar: um estado de espírito completamente diferente, a transformação que você busca, a realização desse sonho.
 
@@ -4784,7 +4784,7 @@ export async function sendRemateValorNovoParticipou(): Promise<{ sent: number; e
 
     const message = `Oi ${leadName}! 💚
 
-Concentramos toda a operação nas ações que realmente enchem agenda. Com isso conseguimos uma redução do plano: *R$ 97/mês no mensal* e *R$ 59/mês no anual*.
+Concentramos toda a operação nas ações que realmente enchem agenda. Condição atual: *R$ 300/mês no mensal* e *12x de R$ 150 no anual*.
 
 Quem participou da aula e ainda não fechou: o link pra garantir essa condição é este: ${url}
 
@@ -4890,7 +4890,7 @@ export async function runRemateFechamentoParticipou(): Promise<{ sent2: number; 
 
 Passando aqui pra lembrar: você já viu o caminho na aula. O que custa *não* dar o próximo passo é continuar adiando o que você quer.
 
-O que mais nos travava era a *aquisição de pacientes*, então estamos com uma condução especial focada só nisso. O investimento é *R$ 97/mês* e o link pra começar é: ${url}
+O que mais nos travava era a *aquisição de pacientes*, então estamos com uma condução especial focada só nisso. O investimento é *R$ 300/mês* e o link pra começar é: ${url}
 
 O que está te travando? Responde aqui que a gente desata. 😊`
     } else if (
@@ -4902,7 +4902,7 @@ O que está te travando? Responde aqui que a gente desata. 😊`
       etapa = '3'
       message = `Oi ${leadName}!
 
-Última mensagem sobre isso: cada dia que passa é um dia a mais na mesma. O investimento é R$ 97/mês e o link segue aqui: ${url}
+Última mensagem sobre isso: cada dia que passa é um dia a mais na mesma. O investimento é R$ 300/mês e o link segue aqui: ${url}
 
 Se ainda tiver dúvida, responde aqui. Caso contrário, tudo bem também. 💚`
     }

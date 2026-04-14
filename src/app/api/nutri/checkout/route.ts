@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
     })
     
     const { planType, productType, language, paymentMethod, email, refVendedor, countryCode: bodyCountryCode } = body
-    // Área Nutri: plano mensal R$ 97 ou anual 12× de R$ 59 (R$ 708)
+    // Área Nutri: plano mensal R$ 300 ou anual 12× de R$ 150 (R$ 1.800)
     // countryCode: opcional; se enviado pelo cliente (ex: BR), evita erro de geo incorreto (IP US)
     // planType: 'monthly' | 'annual'
     // productType: 'platform_monthly' | 'platform_annual' | etc.

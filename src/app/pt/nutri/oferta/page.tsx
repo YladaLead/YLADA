@@ -82,7 +82,7 @@ export default function NutriOfertaPage() {
           <div className="grid grid-cols-2 gap-4">
             <div className="bg-gray-50 rounded-xl p-4 border-2 border-gray-200 text-center">
               <p className="font-semibold text-gray-800">Mensal</p>
-              <p className="text-2xl font-bold text-[#2563EB] mt-1">R$ 97<span className="text-sm font-normal text-gray-600">/mês</span></p>
+              <p className="text-2xl font-bold text-[#2563EB] mt-1">R$ 300<span className="text-sm font-normal text-gray-600">/mês</span></p>
               <button
                 type="button"
                 onClick={() => handleCheckout('monthly')}
@@ -96,7 +96,7 @@ export default function NutriOfertaPage() {
                 ⭐ Mais escolhido
               </div>
               <p className="font-semibold mt-1">Anual</p>
-              <p className="text-2xl font-bold mt-1">R$ 59<span className="text-sm font-normal text-white/90">/mês</span></p>
+              <p className="text-2xl font-bold mt-1">12x de R$ 150</p>
               <p className="text-sm text-white/90">(cobrança anual)</p>
               <p className="text-amber-200 text-sm font-semibold mt-1">Economize mais de 35% no plano anual</p>
               <button
@@ -129,7 +129,7 @@ export default function NutriOfertaPage() {
             Começar com o YLADA agora
           </button>
           <p className="text-center text-xs text-gray-500 mt-3">
-            Mensal R$ 97/mês ou anual 12× R$ 59. Garantia 7 dias.
+            Mensal R$ 300/mês ou anual 12× de R$ 150. Garantia 7 dias.
           </p>
         </section>
       </main>
