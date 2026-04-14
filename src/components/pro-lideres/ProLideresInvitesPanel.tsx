@@ -119,10 +119,7 @@ export function ProLideresInvitesPanel() {
       if (!res.ok) {
         if (res.status === 402) {
           setSubscriptionAccessOk(false)
-          setError(
-            (data as { error?: string }).error ||
-              'Precisas de ter o acesso da equipa ativo para gerar convites.'
-          )
+          setError((data as { error?: string }).error || 'Ativa o plano para gerar convites.')
           return
         }
         setError((data as { error?: string }).error || 'Não foi possível criar o convite.')
@@ -186,13 +183,14 @@ export function ProLideresInvitesPanel() {
       )}
 
       {subscriptionAccessOk === false && (
-        <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950 shadow-sm">
-          <p className="text-amber-900/95">
-            Para gerar convites, precisas de ter o <strong className="text-amber-950">acesso da equipa ativo</strong>.
+        <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-4 text-amber-950 shadow-sm">
+          <p className="text-base font-semibold text-amber-950">Ativar convites</p>
+          <p className="mt-2 text-sm leading-relaxed text-amber-900/95">
+            Comece a convidar sua equipe e construa um <strong className="text-amber-950">crescimento organizado e previsível</strong> com clareza para orientar.
           </p>
           <Link
             href="/pro-lideres/painel/assinatura-equipe"
-            className="mt-3 inline-flex min-h-[40px] items-center justify-center rounded-lg bg-amber-800 px-4 text-sm font-semibold text-white hover:bg-amber-900"
+            className="mt-4 inline-flex min-h-[44px] items-center justify-center rounded-xl bg-amber-800 px-6 text-sm font-semibold text-white hover:bg-amber-900"
           >
             Ativar
           </Link>
