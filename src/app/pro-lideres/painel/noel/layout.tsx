@@ -5,7 +5,7 @@ import { redirect } from 'next/navigation'
 import { ensureLeaderTenantAccess } from '@/lib/pro-lideres-server'
 import { proLideresTeamViewPreviewFromCookies } from '@/lib/pro-lideres-team-preview'
 
-/** Noel Pro Líderes: apenas líder (não equipa nem modo «ver como equipa»). */
+/** Noel Pro Líderes: apenas líder (não equipe nem modo «ver como equipe»). */
 export default async function ProLideresNoelLayout({ children }: { children: ReactNode }) {
   const gate = await ensureLeaderTenantAccess()
   if (!gate.ok) redirect(gate.redirect)

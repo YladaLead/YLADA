@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { PRO_LIDERES_MENU_GROUPS, proLideresItemHref, type ProLideresMenuItem } from '@/config/pro-lideres-menu'
 import { useAuth } from '@/hooks/useAuth'
 import { useProLideresPainel } from '@/components/pro-lideres/pro-lideres-painel-context'
@@ -18,9 +18,6 @@ export default function ProLideresSidebar({ isMobileOpen = false, onMobileClose 
   const router = useRouter()
   const { isLeaderWorkspace, role, teamViewPreview } = useProLideresPainel()
   const { signOut, user, userProfile } = useAuth()
-  const [contaOpen, setContaOpen] = useState(false)
-  const contaRouteKeyRef = useRef<string | null>(null)
-
   const userName =
     userProfile?.nome_completo ||
     user?.user_metadata?.full_name ||
@@ -42,9 +39,6 @@ export default function ProLideresSidebar({ isMobileOpen = false, onMobileClose 
     })).filter((g) => g.items.length > 0)
   }, [isLeaderWorkspace])
 
-  const mainGroups = filteredMenu.filter((g) => g.label !== 'Conta')
-  const contaGroup = filteredMenu.find((g) => g.label === 'Conta')
-
   const itemHref = useCallback((item: ProLideresMenuItem) => proLideresItemHref(item.path), [])
 
   const itemIsActive = useCallback(
@@ -58,16 +52,6 @@ export default function ProLideresSidebar({ isMobileOpen = false, onMobileClose 
     [pathname, itemHref]
   )
 
-  useEffect(() => {
-    if (!contaGroup) return
-    const routeKey = pathname ?? ''
-    if (contaRouteKeyRef.current === routeKey) return
-    contaRouteKeyRef.current = routeKey
-    const matchesConta = contaGroup.items.some((item) => itemIsActive(item))
-    setContaOpen(matchesConta)
-  }, [contaGroup, pathname, itemIsActive])
-
-  const contaSectionActive = contaGroup?.items.some((item) => itemIsActive(item)) ?? false
   const perfilPath = '/pro-lideres/painel/perfil'
   const perfilActive = pathname === perfilPath || pathname?.startsWith(`${perfilPath}/`)
 
@@ -79,12 +63,19 @@ export default function ProLideresSidebar({ isMobileOpen = false, onMobileClose 
         key={item.key}
         href={href}
         onClick={onMobileClose}
-        className={`flex min-h-[44px] items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors touch-manipulation ${
+        className={`flex min-h-[44px] items-center gap-3 rounded-lg px-2 py-1.5 text-sm font-medium transition-colors touch-manipulation ${
           isActive ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100'
         }`}
       >
-        <span aria-hidden>{item.icon}</span>
-        {item.label}
+        <span className="shrink-0" aria-hidden>
+          {item.icon}
+        </span>
+        <span className="flex min-w-0 flex-col gap-0 leading-snug">
+          <span>{item.label}</span>
+          {item.subtitle ? (
+            <span className="text-[11px] font-normal text-gray-500">{item.subtitle}</span>
+          ) : null}
+        </span>
       </Link>
     )
   }
@@ -127,83 +118,65 @@ export default function ProLideresSidebar({ isMobileOpen = false, onMobileClose 
       </div>
 
       <nav className="flex min-h-0 flex-1 flex-col">
-        <div className="min-h-0 flex-1 space-y-4 overflow-y-auto p-3">
-          {mainGroups.map((group) => (
-            <div key={group.label}>
-              <p className="mb-1.5 px-3 text-xs font-medium tracking-wide text-gray-500">{group.label}</p>
+        <div className="min-h-0 flex-1 space-y-3 overflow-y-auto p-2">
+          {filteredMenu.map((group) => (
+            <div key={group.label || 'menu'}>
+              {group.label ? (
+                <p className="mb-1 px-2 text-[11px] font-medium uppercase tracking-wide text-gray-500">
+                  {group.label}
+                </p>
+              ) : null}
               <div className="space-y-0.5">{group.items.map((item) => renderItemLink(item))}</div>
             </div>
           ))}
         </div>
 
-        <div className="shrink-0 border-t border-gray-200">
-          {contaGroup && (
-            <div className="p-3 pb-2">
-              <button
-                type="button"
-                onClick={() => setContaOpen((o) => !o)}
-                className={`flex min-h-[44px] w-full items-center justify-between gap-2 rounded-lg px-3 py-2 text-left text-sm font-medium transition-colors touch-manipulation ${
-                  contaSectionActive && !contaOpen ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100'
-                }`}
-                aria-expanded={contaOpen}
-              >
-                <span className="text-xs font-medium tracking-wide text-gray-500">Conta</span>
-                <span className="text-gray-400" aria-hidden>
-                  {contaOpen ? '▾' : '▸'}
-                </span>
-              </button>
-              {contaOpen && (
-                <div className="mt-1 space-y-0.5">{contaGroup.items.map((item) => renderItemLink(item))}</div>
+        <div className="shrink-0 space-y-1 border-t border-gray-200 p-2">
+          {role === 'leader' && (
+            <>
+              {!teamViewPreview ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setProLideresTeamViewPreviewCookie(true)
+                    onMobileClose?.()
+                    router.push('/pro-lideres/painel')
+                    router.refresh()
+                  }}
+                  className="flex min-h-[40px] w-full items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50/80 px-2 py-2 text-left text-sm font-semibold text-emerald-900 transition-colors touch-manipulation hover:bg-emerald-100"
+                >
+                  <span aria-hidden>👀</span>
+                  Ver como equipe
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setProLideresTeamViewPreviewCookie(false)
+                    onMobileClose?.()
+                    router.push('/pro-lideres/painel')
+                    router.refresh()
+                  }}
+                  className="flex min-h-[40px] w-full items-center gap-2 rounded-lg border border-blue-200 bg-blue-50/90 px-2 py-2 text-left text-sm font-semibold text-blue-900 transition-colors touch-manipulation hover:bg-blue-100"
+                >
+                  <span aria-hidden>↩</span>
+                  Voltar ao ambiente do líder
+                </button>
               )}
-            </div>
+            </>
           )}
-          <div className="space-y-1 px-3 pb-3">
-            {role === 'leader' && (
-              <>
-                {!teamViewPreview ? (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setProLideresTeamViewPreviewCookie(true)
-                      onMobileClose?.()
-                      router.push('/pro-lideres/painel')
-                      router.refresh()
-                    }}
-                    className="flex min-h-[44px] w-full items-center gap-3 rounded-lg border border-emerald-200 bg-emerald-50/80 px-3 py-2.5 text-left text-sm font-semibold text-emerald-900 transition-colors touch-manipulation hover:bg-emerald-100"
-                  >
-                    <span aria-hidden>👀</span>
-                    Ver como equipe
-                  </button>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setProLideresTeamViewPreviewCookie(false)
-                      onMobileClose?.()
-                      router.push('/pro-lideres/painel')
-                      router.refresh()
-                    }}
-                    className="flex min-h-[44px] w-full items-center gap-3 rounded-lg border border-blue-200 bg-blue-50/90 px-3 py-2.5 text-left text-sm font-semibold text-blue-900 transition-colors touch-manipulation hover:bg-blue-100"
-                  >
-                    <span aria-hidden>↩</span>
-                    Voltar ao ambiente do líder
-                  </button>
-                )}
-              </>
-            )}
-            <button
-              type="button"
-              onClick={() => {
-                setProLideresTeamViewPreviewCookie(false)
-                signOut()
-                onMobileClose?.()
-              }}
-              className="flex min-h-[44px] w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-medium text-gray-700 transition-colors touch-manipulation hover:bg-red-50 hover:text-red-600"
-            >
-              <span aria-hidden>🚪</span>
-              Sair
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={() => {
+              setProLideresTeamViewPreviewCookie(false)
+              signOut()
+              onMobileClose?.()
+            }}
+            className="flex min-h-[40px] w-full items-center gap-2 rounded-lg px-2 py-2 text-left text-sm font-medium text-gray-700 transition-colors touch-manipulation hover:bg-red-50 hover:text-red-600"
+          >
+            <span aria-hidden>🚪</span>
+            Sair
+          </button>
         </div>
       </nav>
     </aside>

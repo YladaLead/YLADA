@@ -54,7 +54,7 @@ export default function ProLideresAreaShell({
             className="border-b border-emerald-200 bg-emerald-50 px-3 py-2.5 text-center text-xs text-emerald-950 sm:px-4"
             role="status"
           >
-            <strong className="font-semibold">A ver como a equipa</strong> — menu e ecrãs iguais ao que a tua equipa
+            <strong className="font-semibold">A ver como a equipe</strong> — menu e ecrãs iguais ao que a tua equipe
             vê. As tuas permissões de líder mantêm-se nas APIs; usa o menu para{' '}
             <span className="font-medium">voltar ao ambiente do líder</span> quando terminares.
           </div>

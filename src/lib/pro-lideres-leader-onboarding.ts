@@ -80,7 +80,33 @@ export async function applyCompletedLeaderOnboardingForEmail(params: {
   const display_name = displayNameRaw.trim() || item.leader_name
   const team_name = teamNameRaw.trim() || null
   const whatsapp = whatsappRaw.trim() || null
-  const focus_notes = focusRaw.trim() || null
+
+  const age = typeof ans.leader_age === 'number' ? ans.leader_age : null
+  const hfYears = typeof ans.herbalife_years === 'number' ? ans.herbalife_years : null
+  const before = typeof ans.career_before_herbalife === 'string' ? ans.career_before_herbalife.trim() : ''
+  const teamN = typeof ans.team_total_people === 'number' ? ans.team_total_people : null
+  const leadersN = typeof ans.team_leaders_count === 'number' ? ans.team_leaders_count : null
+  const linesN = typeof ans.team_distinct_lines === 'number' ? ans.team_distinct_lines : null
+
+  const lines: string[] = []
+  if (age != null) lines.push(`Idade: ${age} anos`)
+  if (hfYears != null) lines.push(`Tempo na Herbalife: ${hfYears} ${hfYears === 1 ? 'ano' : 'anos'}`)
+  if (before) lines.push(`Antes da Herbalife: ${before}`)
+  if (teamN != null) lines.push(`Pessoas na equipe: ${teamN}`)
+  if (leadersN != null) lines.push(`Líderes na equipe: ${leadersN}`)
+  if (linesN != null) lines.push(`Linhas distintas: ${linesN}`)
+  const goal = typeof ans.primary_goal === 'string' ? ans.primary_goal.trim() : ''
+  const challenge = typeof ans.main_challenge === 'string' ? ans.main_challenge.trim() : ''
+  if (goal) lines.push(`Objetivo (30 dias): ${goal}`)
+  if (challenge) lines.push(`Maior desafio: ${challenge}`)
+  const structured =
+    lines.length > 0 ? ['[Contexto onboarding Pro Líderes]', ...lines].join('\n') : ''
+
+  const focusExtra = focusRaw.trim()
+  const focus_notes =
+    focusExtra && structured
+      ? `${structured}\n\n---\n\n${focusExtra}`
+      : focusExtra || (structured || null)
 
   await params.supabase
     .from('leader_tenants')

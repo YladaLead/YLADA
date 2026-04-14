@@ -73,7 +73,7 @@ export function proEsteticaCorporalPainelDevBypassEnabled(): boolean {
  * Painel **sem login** para construir / visualizar UI localmente.
  * - `PRO_ESTETICA_CORPORAL_PUBLIC_PREVIEW=true` → liga em qualquer ambiente
  * - `=false` → desliga sempre
- * - omitido → **ligado só em development** (padrão para o equipa iterar sem conta)
+ * - omitido → **ligado só em development** (padrão para a equipe iterar sem conta)
  */
 export function proEsteticaCorporalPublicPreviewNoAuthEnabled(): boolean {
   const raw = process.env.PRO_ESTETICA_CORPORAL_PUBLIC_PREVIEW

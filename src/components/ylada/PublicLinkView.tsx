@@ -93,7 +93,7 @@ const PUBLIC_LINK_UI: Record<Language, {
     recruitmentIntroMicro: 'Tempo estimado: 2 a 3 minutos',
     recruitmentBoxTitle: 'Próximo passo',
     recruitmentBoxDisclaimer:
-      'Este resumo reflete as tuas respostas. Para o modelo de negócio, próximos passos e dúvidas sobre a oportunidade com a equipa, fala com quem te enviou este link.',
+      'Este resumo reflete as tuas respostas. Para o modelo de negócio, próximos passos e dúvidas sobre a oportunidade com a equipe, fala com quem te enviou este link.',
     recruitmentBoxHint: 'Usa o WhatsApp abaixo para continuar a conversa com a pessoa que partilhou o quiz.',
     recruitmentTalkNow: '💬 Falar no WhatsApp',
     recruitmentYourResult: 'O teu resultado',
@@ -277,7 +277,7 @@ type LinkTelemetryCtx = {
   viewerUserId: string | null
   ownerId: string | null
   slug: string
-  /** Pro Líderes: ?pl_m= token — atribui cliques/WhatsApp ao membro da equipa. */
+  /** Pro Líderes: ?pl_m= token — atribui cliques/WhatsApp ao membro da equipe. */
   plShareToken: string | null
 }
 

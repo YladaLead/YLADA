@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Tenant não encontrado' }, { status: 404 })
   }
   if (ctx.tenant.owner_user_id !== user.id) {
-    return NextResponse.json({ error: 'Apenas o líder vê métricas por membro da equipa.' }, { status: 403 })
+    return NextResponse.json({ error: 'Apenas o líder vê métricas por membro da equipe.' }, { status: 403 })
   }
 
   const linkId = request.nextUrl.searchParams.get('link_id')?.trim()

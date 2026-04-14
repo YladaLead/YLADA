@@ -29,13 +29,13 @@ export default async function ProLideresEquipePage() {
     <div className="max-w-4xl space-y-6">
       <div>
         <p className="text-sm font-medium text-blue-600">Principal</p>
-        <h1 className="text-2xl font-bold text-gray-900">Equipe</h1>
+        <h1 className="text-2xl font-bold text-gray-900">Análise da equipe</h1>
         <p className="mt-2 text-gray-700">
           {isLeader ? (
             <>
               Quem faz parte deste espaço: o <strong className="text-gray-900">líder</strong> (você, após a consultoria)
               e a <strong className="text-gray-900">equipe</strong> que convidar. Gere links em{' '}
-              <strong className="text-gray-800">Links &amp; convites</strong>.
+              <strong className="text-gray-800">Convidar equipe</strong>.
             </>
           ) : (
             <>

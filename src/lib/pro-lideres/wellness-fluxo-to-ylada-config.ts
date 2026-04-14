@@ -90,3 +90,10 @@ export function proLideresPresetSlug(ownerUserId: string, kind: 'sales' | 'recru
   const prefix = kind === 'sales' ? 'v' : 'r'
   return `pl-${compact}-${prefix}-${fluxoId}`.slice(0, 200)
 }
+
+/** True se o slug corresponde à biblioteca base criada por `ensureProLideresPresetYladaLinks` (não a um link criado manualmente). */
+export function isProLideresPresetLink(ownerUserId: string, slug: string): boolean {
+  const compact = ownerUserId.replace(/-/g, '').slice(0, 12)
+  if (!slug || compact.length < 4) return false
+  return slug.startsWith(`pl-${compact}-v-`) || slug.startsWith(`pl-${compact}-r-`)
+}

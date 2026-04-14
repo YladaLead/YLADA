@@ -267,7 +267,7 @@ export default function FluxoDiagnostico({
                       } else {
                         // Recrutamento (negócio / conversa — sem kit nem produto wellness)
                         const herbalife =
-                          isProLideresRecruitment ? ' sobre a oportunidade com a equipa Herbalife' : ''
+                          isProLideresRecruitment ? ' sobre a oportunidade com a equipe Herbalife' : ''
                         return `Olá! Completei a avaliação "${fluxo.nome}" e queria saber mais${herbalife}.`
                       }
                     })(),

@@ -15,7 +15,7 @@ export default function ProEsteticaCorporalAguardandoPage() {
     <div className="mx-auto max-w-md space-y-6 text-center">
       <h1 className="text-2xl font-bold text-gray-900">Acesso Pro Estética Corporal</h1>
       <p className="text-base text-gray-600">
-        A sua conta ainda não tem este espaço ativo. Fale com a nossa equipa para implantação ou use outra conta já
+        A sua conta ainda não tem este espaço ativo. Fale com a nossa equipe para implantação ou use outra conta já
         associada a esta edição.
       </p>
       <div className="mx-auto flex w-full max-w-xs flex-col gap-3">

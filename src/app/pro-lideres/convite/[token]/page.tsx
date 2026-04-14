@@ -209,7 +209,7 @@ export default function ProLideresConviteTokenPage() {
               Prazo: até {new Date(valid.expiresAt).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })}
             </p>
             <p className="rounded-lg border border-gray-100 bg-gray-50 px-3 py-2 text-xs leading-relaxed text-gray-600">
-              <strong className="text-gray-800">Onde fica a equipa:</strong> depois de entrar, o painel Pro Líderes
+              <strong className="text-gray-800">Onde fica a equipe:</strong> depois de entrar, o painel Pro Líderes
               abre em <span className="font-mono text-gray-800">/pro-lideres/painel</span> — é um espaço à parte da
               tua área YLADA habitual (ex.: Estética ou Nutri), que continua igual.
             </p>

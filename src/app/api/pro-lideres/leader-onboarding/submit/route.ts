@@ -9,11 +9,31 @@ type SubmitBody = {
   focus_notes?: string
   primary_goal?: string
   main_challenge?: string
+  /** Idade do líder (anos). */
+  leader_age?: number | string
+  /** Anos na Herbalife (só anos). */
+  herbalife_years?: number | string
+  /** Ocupação / experiência antes da Herbalife. */
+  career_before_herbalife?: string
+  /** Total de pessoas na equipe. */
+  team_total_people?: number | string
+  /** Número de líderes na equipe. */
+  team_leaders_count?: number | string
+  /** Linhas / pernas distintas na estrutura. */
+  team_distinct_lines?: number | string
 }
 
 const clip = (value: unknown, max = 500): string | null => {
   const s = String(value ?? '').trim()
   return s ? s.slice(0, max) : null
+}
+
+function parseOptionalInt(value: unknown, opts: { min: number; max: number }): number | null {
+  if (value === '' || value === null || value === undefined) return null
+  const n = typeof value === 'number' ? value : parseInt(String(value).trim(), 10)
+  if (!Number.isFinite(n)) return null
+  if (n < opts.min || n > opts.max) return null
+  return n
 }
 
 export async function POST(request: NextRequest) {
@@ -55,6 +75,12 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Nome para exibição é obrigatório.' }, { status: 400 })
   }
 
+  const leaderAge = parseOptionalInt(body.leader_age, { min: 16, max: 110 })
+  const herbalifeYears = parseOptionalInt(body.herbalife_years, { min: 0, max: 70 })
+  const teamTotal = parseOptionalInt(body.team_total_people, { min: 0, max: 500_000 })
+  const teamLeaders = parseOptionalInt(body.team_leaders_count, { min: 0, max: 100_000 })
+  const teamLines = parseOptionalInt(body.team_distinct_lines, { min: 0, max: 50_000 })
+
   const answers = {
     display_name: displayName,
     team_name: clip(body.team_name, 160),
@@ -62,6 +88,12 @@ export async function POST(request: NextRequest) {
     focus_notes: clip(body.focus_notes, 2000),
     primary_goal: clip(body.primary_goal, 200),
     main_challenge: clip(body.main_challenge, 300),
+    leader_age: leaderAge,
+    herbalife_years: herbalifeYears,
+    career_before_herbalife: clip(body.career_before_herbalife, 300),
+    team_total_people: teamTotal,
+    team_leaders_count: teamLeaders,
+    team_distinct_lines: teamLines,
   }
 
   const { error: updateErr } = await supabaseAdmin

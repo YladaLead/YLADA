@@ -125,7 +125,7 @@ export function ProLideresPerfilForm({
             className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-600"
             value={displayName}
             onChange={(e) => setDisplayName(e.target.value)}
-            placeholder="Como a equipa vê o teu nome"
+            placeholder="Como a equipe vê o teu nome"
             maxLength={500}
             autoComplete="name"
           />

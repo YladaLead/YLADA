@@ -9,6 +9,8 @@ export type ProLideresMenuItem = {
   label: string
   path: string
   icon: string
+  /** Texto pequeno por baixo do rótulo (ex.: Noel → Mentor). */
+  subtitle?: string
   /** Só o dono do tenant (líder) vê; equipe usa ambiente reduzido. */
   leaderOnly?: boolean
 }
@@ -18,16 +20,7 @@ export const PRO_LIDERES_MENU_GROUPS: { label: string; items: ProLideresMenuItem
     label: 'Principal',
     items: [
       { key: 'visao', label: 'Visão geral', path: '', icon: '📊' },
-      { key: 'links', label: 'Links & convites', path: 'links', icon: '🔗', leaderOnly: true },
-      /** Lista de pessoas do espaço: só o líder (membro foca em catálogo + scripts). */
-      { key: 'equipe', label: 'Equipe', path: 'equipe', icon: '👥', leaderOnly: true },
-      /** Mentor IA: só o líder; a equipa usa scripts e materiais partilhados. */
-      { key: 'noel', label: 'Noel (mentor)', path: 'noel', icon: '💬', leaderOnly: true },
-    ],
-  },
-  {
-    label: 'Conteúdo',
-    items: [
+      { key: 'noel', label: 'Noel', subtitle: 'Mentor', path: 'noel', icon: '💬', leaderOnly: true },
       {
         key: 'catalogo',
         label: 'Catálogo de ferramentas',
@@ -35,11 +28,9 @@ export const PRO_LIDERES_MENU_GROUPS: { label: string; items: ProLideresMenuItem
         icon: '🛠️',
       },
       { key: 'scripts', label: 'Scripts', path: 'scripts', icon: '📝' },
-    ],
-  },
-  {
-    label: 'Conta',
-    items: [
+      { key: 'tarefas', label: 'Tarefas diárias', path: 'tarefas', icon: '✅' },
+      { key: 'equipe', label: 'Análise da equipe', path: 'equipe', icon: '👥', leaderOnly: true },
+      { key: 'links', label: 'Convidar equipe', path: 'links', icon: '🔗', leaderOnly: true },
       {
         key: 'configuracao',
         label: 'Configurações',

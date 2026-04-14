@@ -1,5 +1,6 @@
 import { supabaseAdmin } from '@/lib/supabase'
 import { ensureProLideresPresetYladaLinks } from '@/lib/pro-lideres/ensure-pro-lideres-preset-links'
+import { isProLideresPresetLink } from '@/lib/pro-lideres/wellness-fluxo-to-ylada-config'
 
 /** Tipos em ylada_link_templates que entram no catálogo (ferramentas com resultado / diagnóstico). */
 const YLADA_CATALOG_TEMPLATE_TYPES = new Set(['calculator', 'diagnostico', 'quiz', 'triagem'])
@@ -13,6 +14,9 @@ export type ProLideresSituationBucket =
 
 export type ProLideresCatalogCategory = 'sales' | 'recruitment'
 
+/** Biblioteca base (presets) vs ferramentas criadas pelo líder em Meus links / extras. */
+export type ProLideresCatalogOrigin = 'library' | 'mine'
+
 export type ProLideresCatalogItem = {
   id: string
   label: string
@@ -20,6 +24,8 @@ export type ProLideresCatalogItem = {
   publicUrl: string
   source: 'ylada' | 'custom'
   kind: 'calculator' | 'quiz' | 'link'
+  /** Presets Pro Líderes vs links criados pelo utilizador. */
+  origin: ProLideresCatalogOrigin
   /** Vendas vs recrutamento (UI em separadores). */
   catalogCategory: ProLideresCatalogCategory
   stats: { views: number; conversions: number; shares: number }
@@ -274,6 +280,7 @@ function pickBetterCatalogItem(a: ProLideresCatalogItem, b: ProLideresCatalogIte
   const sa = score(a)
   const sb = score(b)
   if (sa !== sb) return sa > sb ? a : b
+  if (a.origin !== b.origin) return a.origin === 'library' ? a : b
   if (a.source !== b.source) return a.source === 'ylada' ? a : b
   const ta = a.createdAt ? new Date(a.createdAt).getTime() : 0
   const tb = b.createdAt ? new Date(b.createdAt).getTime() : 0
@@ -288,7 +295,7 @@ function dedupeProLideresCatalogItems(items: ProLideresCatalogItem[]): ProLidere
   const pathOrder: string[] = []
   const byPath = new Map<string, ProLideresCatalogItem>()
   for (const item of items) {
-    const key = `${item.catalogCategory}|${catalogItemHrefPath(item.href)}`
+    const key = `${item.origin}|${item.catalogCategory}|${catalogItemHrefPath(item.href)}`
     const prev = byPath.get(key)
     if (!prev) {
       byPath.set(key, item)
@@ -302,7 +309,7 @@ function dedupeProLideresCatalogItems(items: ProLideresCatalogItem[]): ProLidere
   const labelOrder: string[] = []
   const byLabel = new Map<string, ProLideresCatalogItem>()
   for (const item of afterPath) {
-    const key = `${item.catalogCategory}|${normalizeCatalogLabelKey(item.label)}`
+    const key = `${item.origin}|${item.catalogCategory}|${normalizeCatalogLabelKey(item.label)}`
     const prev = byLabel.get(key)
     if (!prev) {
       byLabel.set(key, item)
@@ -315,25 +322,27 @@ function dedupeProLideresCatalogItems(items: ProLideresCatalogItem[]): ProLidere
 }
 
 function assignBadges(items: ProLideresCatalogItem[]): void {
-  const ylada = items.filter((i) => i.source === 'ylada')
-  if (!ylada.length) return
+  for (const origin of ['library', 'mine'] as const) {
+    const ylada = items.filter((i) => i.source === 'ylada' && i.origin === origin)
+    if (!ylada.length) continue
 
-  const byViews = [...ylada].sort((a, b) => b.stats.views - a.stats.views)
-  const topView = byViews[0]
-  if (topView && topView.stats.views > 0) {
-    topView.badge = 'most_used'
-  }
+    const byViews = [...ylada].sort((a, b) => b.stats.views - a.stats.views)
+    const topView = byViews[0]
+    if (topView && topView.stats.views > 0) {
+      topView.badge = 'most_used'
+    }
 
-  const byShares = [...ylada].sort((a, b) => b.stats.shares - a.stats.shares)
-  const topShare = byShares[0]
-  if (!topShare?.stats.shares) return
+    const byShares = [...ylada].sort((a, b) => b.stats.shares - a.stats.shares)
+    const topShare = byShares[0]
+    if (!topShare?.stats.shares) continue
 
-  const usedId = ylada.find((x) => x.badge === 'most_used')?.id
-  if (topShare.id !== usedId) {
-    if (!topShare.badge) topShare.badge = 'most_shared'
-  } else {
-    const second = byShares.find((x) => x.id !== usedId && x.stats.shares > 0)
-    if (second && !second.badge) second.badge = 'most_shared'
+    const usedId = ylada.find((x) => x.badge === 'most_used')?.id
+    if (topShare.id !== usedId) {
+      if (!topShare.badge) topShare.badge = 'most_shared'
+    } else {
+      const second = byShares.find((x) => x.id !== usedId && x.stats.shares > 0)
+      if (second && !second.badge) second.badge = 'most_shared'
+    }
   }
 }
 
@@ -408,6 +417,8 @@ export async function buildProLideresCatalog(
           },
           row.config_json
         )
+        const slugStr = (row.slug as string) ?? ''
+        const origin: ProLideresCatalogOrigin = isProLideresPresetLink(ownerUserId, slugStr) ? 'library' : 'mine'
 
         out.push({
           id: `ylada-${row.id}`,
@@ -416,6 +427,7 @@ export async function buildProLideresCatalog(
           publicUrl,
           source: 'ylada',
           kind,
+          origin,
           catalogCategory,
           stats: { views: st.view, conversions: st.cta_click, shares: st.share_click },
           yladaLinkId: row.id as string,
@@ -455,6 +467,7 @@ export async function buildProLideresCatalog(
       publicUrl: normalizePublicUrl(baseUrl, href),
       source: 'custom',
       kind: k,
+      origin: 'mine',
       catalogCategory,
       stats: { views: 0, conversions: 0, shares: 0 },
       description: null,

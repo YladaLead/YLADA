@@ -4,7 +4,11 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 
 import { PRO_LIDERES_VERTICAL_BRAND_LABEL } from '@/config/pro-lideres-vertical'
-import type { ProLideresCatalogCategory, ProLideresCatalogItem } from '@/lib/pro-lideres-catalog-build'
+import type {
+  ProLideresCatalogCategory,
+  ProLideresCatalogItem,
+  ProLideresCatalogOrigin,
+} from '@/lib/pro-lideres-catalog-build'
 import { useProLideresPainel } from '@/components/pro-lideres/pro-lideres-painel-context'
 
 type CatalogPayload = {
@@ -13,6 +17,7 @@ type CatalogPayload = {
 }
 
 type TabKey = ProLideresCatalogCategory
+type SectionKey = ProLideresCatalogOrigin
 
 async function copyText(text: string): Promise<boolean> {
   try {
@@ -70,12 +75,25 @@ function CatalogRowCard({
   const scriptsHref = item.yladaLinkId ? `/pt/links/editar/${item.yladaLinkId}` : '/pt/links'
 
   return (
-    <article className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+    <article className="rounded-xl border border-slate-200/90 bg-white p-4 shadow-md ring-1 ring-slate-900/5">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-start justify-between gap-2">
             <h3 className="text-base font-bold leading-snug text-gray-900">{item.label}</h3>
             <div className="flex shrink-0 flex-wrap justify-end gap-1.5">
+              {item.origin === 'library' ? (
+                <span className="inline-flex items-center rounded-full bg-violet-50 px-2 py-0.5 text-[11px] font-semibold text-violet-900 ring-1 ring-violet-100">
+                  Biblioteca
+                </span>
+              ) : item.source === 'custom' ? (
+                <span className="inline-flex items-center rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-900 ring-1 ring-amber-100">
+                  Link extra
+                </span>
+              ) : (
+                <span className="inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-800 ring-1 ring-slate-200">
+                  Criado por você
+                </span>
+              )}
               {item.badge === 'most_used' && (
                 <span className="inline-flex items-center rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-800 ring-1 ring-emerald-100">
                   🔥 Mais usado
@@ -177,7 +195,7 @@ export function ProLideresCatalogoClient({
   salesTabLabel = 'Vendas',
   catalogTitle = 'Catálogo de ferramentas',
   catalogIntro,
-  addFormAudienceNote = 'à equipa',
+  addFormAudienceNote = 'à equipe',
 }: {
   /** Base da API de fluxos (ex.: `/api/pro-estetica-corporal`). */
   flowsApiBase?: string
@@ -202,11 +220,12 @@ export function ProLideresCatalogoClient({
   const [saving, setSaving] = useState(false)
   const [copyState, setCopyState] = useState<Record<string, 'link' | 'qr'>>({})
   const [tab, setTab] = useState<TabKey>('sales')
+  const [section, setSection] = useState<SectionKey>('library')
   const [search, setSearch] = useState('')
   const [addCategory, setAddCategory] = useState<TabKey>('sales')
 
   const defaultIntro =
-    'Lista única por ferramenta (mesmo link ou mesmo nome no separador). O sistema garante uma biblioteca base prefixada em /l/… para Vendas e Recrutamento; além disso, os teus links próprios e extras entram no catálogo.'
+    'Aqui você separa a biblioteca que a YLADA já deixa pronta dos links que você mesmo criar. Depois é só escolher entre ferramentas de vendas ou de recrutamento.'
 
   const introText = catalogIntro ?? defaultIntro
 
@@ -237,13 +256,14 @@ export function ProLideresCatalogoClient({
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase()
     return catalog.filter((item) => {
+      if (item.origin !== section) return false
       if (item.catalogCategory !== tab) return false
       if (!q) return true
       const name = item.label.toLowerCase()
       const desc = (item.description ?? '').toLowerCase()
       return name.includes(q) || desc.includes(q)
     })
-  }, [catalog, tab, search])
+  }, [catalog, tab, section, search])
 
   async function onAdd(e: React.FormEvent) {
     e.preventDefault()
@@ -307,51 +327,90 @@ export function ProLideresCatalogoClient({
       data-pro-lideres-vertical={verticalCode}
       data-pro-lideres-brand={brandDisplay}
     >
-      <header className="space-y-1">
-        <p className="text-sm font-medium text-blue-600">Conteúdo</p>
-        <h1 className="text-2xl font-bold text-gray-900">{catalogTitle}</h1>
-        <p className="text-sm text-gray-600">{introText}</p>
+      <header className="space-y-2">
+        <p className="text-sm font-semibold text-blue-700">Conteúdo</p>
+        <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">{catalogTitle}</h1>
+        <p className="max-w-2xl text-base leading-relaxed text-slate-700">{introText}</p>
       </header>
 
-      <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-stretch sm:gap-3">
-          <div
-            className={`flex flex-1 rounded-xl bg-gray-100 p-1 ${hideRecruitmentTab ? 'max-w-md' : ''}`}
-          >
-            <button
-              type="button"
-              onClick={() => setTab('sales')}
-              title="Fluxos e links da tua operação"
-              className={`min-h-[44px] flex-1 rounded-lg px-3 text-sm font-semibold transition ${
-                tab === 'sales' ? 'bg-white text-blue-700 shadow-sm' : 'text-gray-600 hover:text-gray-900'
-              }`}
-            >
-              {salesTabLabel}
-            </button>
-            {!hideRecruitmentTab && (
+      <div className="rounded-2xl border-2 border-slate-200 bg-gradient-to-b from-slate-50/90 to-white p-5 shadow-md ring-1 ring-slate-900/5">
+        <div className="flex flex-col gap-5">
+          <div className="rounded-xl border border-violet-200/80 bg-violet-50/60 p-4 shadow-sm">
+            <p className="text-sm font-semibold text-slate-900">Origem</p>
+            <p className="mt-0.5 text-xs text-slate-600">Biblioteca pronta ou o que você criou em Meus links</p>
+            <div className="mt-3 flex max-w-xl rounded-xl bg-slate-300/35 p-1.5 shadow-inner">
               <button
                 type="button"
-                onClick={() => setTab('recruitment')}
-                title="Fluxos e links para recrutar pessoas"
-                className={`min-h-[44px] flex-1 rounded-lg px-3 text-sm font-semibold transition ${
-                  tab === 'recruitment' ? 'bg-white text-blue-700 shadow-sm' : 'text-gray-600 hover:text-gray-900'
+                onClick={() => setSection('library')}
+                title="Ferramentas da biblioteca base Pro Líderes"
+                className={`min-h-[46px] flex-1 rounded-lg px-3 text-sm font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 ${
+                  section === 'library'
+                    ? 'bg-white text-violet-900 shadow-md ring-2 ring-violet-400/70'
+                    : 'text-slate-600 hover:bg-white/60 hover:text-slate-900'
                 }`}
               >
-                Recrutamento
+                Biblioteca
               </button>
-            )}
+              <button
+                type="button"
+                onClick={() => setSection('mine')}
+                title="Links criados em Meus links e extras do painel"
+                className={`min-h-[46px] flex-1 rounded-lg px-3 text-sm font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2 ${
+                  section === 'mine'
+                    ? 'bg-white text-slate-900 shadow-md ring-2 ring-slate-400/80'
+                    : 'text-slate-600 hover:bg-white/60 hover:text-slate-900'
+                }`}
+              >
+                Minhas ferramentas
+              </button>
+            </div>
           </div>
-          <label className="block min-w-0 flex-1 sm:max-w-md">
-            <span className="sr-only">Buscar por nome</span>
-            <input
-              type="search"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Buscar por nome…"
-              autoComplete="off"
-              className="h-full min-h-[44px] w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
-            />
-          </label>
+
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:gap-4">
+            <div className="min-w-0 flex-1 space-y-2 rounded-xl border border-sky-200/80 bg-sky-50/50 p-4 shadow-sm">
+              <p className="text-sm font-semibold text-slate-900">Vendas ou recrutamento</p>
+              <p className="text-xs text-slate-600">Escolha o tipo de ferramenta que quer ver</p>
+              <div className={`mt-2 flex rounded-xl bg-slate-300/35 p-1.5 shadow-inner ${hideRecruitmentTab ? 'max-w-md' : ''}`}>
+                <button
+                  type="button"
+                  onClick={() => setTab('sales')}
+                  title="Ferramentas para vender"
+                  className={`min-h-[46px] flex-1 rounded-lg px-3 text-sm font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 ${
+                    tab === 'sales'
+                      ? 'bg-white text-blue-800 shadow-md ring-2 ring-blue-400/80'
+                      : 'text-slate-600 hover:bg-white/60 hover:text-slate-900'
+                  }`}
+                >
+                  {salesTabLabel}
+                </button>
+                {!hideRecruitmentTab && (
+                  <button
+                    type="button"
+                    onClick={() => setTab('recruitment')}
+                    title="Ferramentas para recrutar"
+                    className={`min-h-[46px] flex-1 rounded-lg px-3 text-sm font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 ${
+                      tab === 'recruitment'
+                        ? 'bg-white text-blue-800 shadow-md ring-2 ring-blue-400/80'
+                        : 'text-slate-600 hover:bg-white/60 hover:text-slate-900'
+                    }`}
+                  >
+                    Recrutamento
+                  </button>
+                )}
+              </div>
+            </div>
+            <label className="block min-w-0 flex-1 sm:max-w-sm">
+              <span className="mb-1.5 block text-sm font-semibold text-slate-900">Buscar</span>
+              <input
+                type="search"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Nome da ferramenta…"
+                autoComplete="off"
+                className="h-full min-h-[46px] w-full rounded-xl border-2 border-slate-200 bg-white px-3.5 py-2.5 text-sm font-medium text-slate-900 shadow-sm placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-100"
+              />
+            </label>
+          </div>
         </div>
       </div>
 
@@ -360,13 +419,13 @@ export function ProLideresCatalogoClient({
       )}
 
       {loading ? (
-        <p className="text-gray-600">A carregar…</p>
+        <p className="font-medium text-slate-600">Carregando…</p>
       ) : catalog.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-gray-300 bg-gray-50 px-6 py-12 text-center">
-          <p className="text-lg font-semibold text-gray-900">Nenhuma ferramenta listada</p>
-          <p className="mt-2 text-sm text-gray-600">
-            As entradas vêm de <strong>Meus links</strong> (motor YLADA, /l/…). Cria e gere ferramentas interativas aí;
-            duplicados no painel são mostrados uma vez só.
+        <div className="rounded-xl border-2 border-dashed border-slate-200 bg-slate-50/80 px-6 py-12 text-center">
+          <p className="text-lg font-semibold text-slate-900">Nenhuma ferramenta listada</p>
+          <p className="mt-2 text-sm text-slate-600">
+            A biblioteca e as ferramentas que você criar vêm de <strong>Meus links</strong> (YLADA, /l/…) e de extras;
+            Use os filtros <strong>Biblioteca</strong> e <strong>Minhas ferramentas</strong> para ver cada grupo.
           </p>
           {isLeaderWorkspace && (
             <Link
@@ -378,16 +437,16 @@ export function ProLideresCatalogoClient({
           )}
         </div>
       ) : filtered.length === 0 ? (
-        <div className="rounded-xl border border-gray-200 bg-white p-8 text-center text-gray-600">
-          <p className="font-medium text-gray-900">Nada neste separador</p>
+        <div className="rounded-xl border-2 border-slate-200 bg-white p-8 text-center text-slate-600 shadow-sm">
+          <p className="font-semibold text-slate-900">Nada nesta combinação</p>
           <p className="mt-1 text-sm">
             {search.trim()
               ? hideRecruitmentTab
-                ? 'Nenhum resultado para a pesquisa — experimenta outro termo.'
-                : 'Nenhum resultado para a pesquisa — experimenta outro termo ou o outro separador (Vendas / Recrutamento).'
+                ? 'Nenhum resultado — tente outro nome.'
+                : 'Nenhum resultado — tente outro nome ou troque os filtros (Vendas / Recrutamento ou Biblioteca / Minhas ferramentas).'
               : hideRecruitmentTab
-                ? 'Não há itens nesta vista. Cria ferramentas em Meus links ou adiciona um link extra abaixo.'
-                : 'Não há itens em Vendas ou Recrutamento nesta vista. Adiciona um link extra (categoria recrutamento) ou cria ferramentas em Meus links.'}
+                ? 'Tente outra origem (Biblioteca / Minhas) ou crie ferramentas em Meus links.'
+                : 'Troque Biblioteca / Minhas ferramentas ou Vendas / Recrutamento, ou crie algo novo em Meus links.'}
           </p>
         </div>
       ) : (
@@ -405,29 +464,32 @@ export function ProLideresCatalogoClient({
         </div>
       )}
 
-      <div className="rounded-lg border border-amber-100 bg-amber-50/80 px-3 py-2 text-xs text-amber-950">
+      <div className="rounded-xl border border-amber-200/90 bg-amber-50 px-4 py-3 text-xs font-medium text-amber-950 shadow-sm">
         {hideRecruitmentTab ? (
           <>
-            Duplicados: mesmo URL ou mesmo nome ficam num só cartão (fica a versão com mais utilização). Tipos como em
-            Meus links. Extras:{' '}
-            <code className="rounded bg-amber-100 px-1">leader_tenant_flow_entries</code>.
+            Se o mesmo link ou o mesmo nome aparecer duas vezes, o sistema mostra só um cartão (fica a versão com mais
+            uso). Extras:{' '}
+            <code className="rounded bg-amber-100/90 px-1.5 py-0.5 font-mono text-[11px]">leader_tenant_flow_entries</code>.
           </>
         ) : (
           <>
-            Duplicados: mesmo URL ou mesmo nome dentro de <strong>Vendas</strong> / <strong>Recrutamento</strong> ficam num
-            só cartão (fica a versão com mais utilização). Tipos como em Meus links. Extras:{' '}
-            <code className="rounded bg-amber-100 px-1">leader_tenant_flow_entries</code> (304).
+            Mesmo URL ou mesmo nome no mesmo grupo (<strong>Biblioteca</strong> ou <strong>Minhas</strong>) e na mesma
+            categoria (<strong>Vendas</strong> / <strong>Recrutamento</strong>) viram um único cartão. Extras:{' '}
+            <code className="rounded bg-amber-100/90 px-1.5 py-0.5 font-mono text-[11px]">leader_tenant_flow_entries</code>.
           </>
         )}
       </div>
 
       {isLeaderWorkspace && (
-        <section className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm" aria-labelledby="add-catalog-extra">
-          <h2 id="add-catalog-extra" className="text-base font-semibold text-gray-900">
+        <section
+          className="rounded-2xl border-2 border-slate-200 bg-white p-5 shadow-md ring-1 ring-slate-900/5"
+          aria-labelledby="add-catalog-extra"
+        >
+          <h2 id="add-catalog-extra" className="text-base font-semibold text-slate-900">
             Link extra no painel
           </h2>
-          <p className="mt-1 text-sm text-gray-600">
-            Opcional. Os teus links YLADA já entram automaticamente; usa isto só para fixar mais um URL {addFormAudienceNote}.
+          <p className="mt-1 text-sm text-slate-600">
+            Opcional. Seus links YLADA já entram sozinhos; use isso só para fixar mais um URL {addFormAudienceNote}.
           </p>
           <form onSubmit={onAdd} className="mt-4 grid gap-3 sm:grid-cols-2">
             {!hideRecruitmentTab && (
@@ -486,7 +548,7 @@ export function ProLideresCatalogoClient({
                 disabled={saving}
                 className="min-h-[44px] rounded-lg bg-blue-600 px-5 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
               >
-                {saving ? 'A guardar…' : 'Adicionar'}
+                {saving ? 'Salvando…' : 'Adicionar'}
               </button>
             </div>
           </form>

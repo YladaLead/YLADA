@@ -43,13 +43,13 @@ export default function ProLideresAcompanharPage() {
               <span className="text-green-600" aria-hidden>
                 ✓
               </span>
-              Menu completo: visão geral, equipe, Noel, catálogo, scripts
+              Menu completo: visão geral, Convidar equipe, Análise da equipe, Noel, catálogo, scripts
             </li>
             <li className="flex gap-2">
               <span className="text-green-600" aria-hidden>
                 ✓
               </span>
-              <strong>Links &amp; convites</strong> — gerar link por e-mail, copiar, revogar
+              <strong>Convidar equipe</strong> — gerar link por e-mail, copiar, revogar
             </li>
             <li className="flex gap-2">
               <span className="text-green-600" aria-hidden>
@@ -61,7 +61,7 @@ export default function ProLideresAcompanharPage() {
               <span className="text-green-600" aria-hidden>
                 ✓
               </span>
-              <strong>Perfil / tenant</strong> — editar dados da operação (nome, equipa, contacto, foco)
+              <strong>Perfil / tenant</strong> — editar dados da operação (nome, equipe, contacto, foco)
             </li>
             <li className="flex gap-2">
               <span className="text-green-600" aria-hidden>
@@ -109,7 +109,8 @@ export default function ProLideresAcompanharPage() {
               <span className="text-green-600" aria-hidden>
                 ✓
               </span>
-              Menu: visão geral, equipe, Noel, catálogo, scripts — <strong>sem</strong> convites nem configurações
+              Menu: visão geral, Noel, catálogo, scripts — <strong>sem</strong> Convidar equipe / Análise da equipe nem
+              configurações
             </li>
             <li className="flex gap-2">
               <span className="text-green-600" aria-hidden>

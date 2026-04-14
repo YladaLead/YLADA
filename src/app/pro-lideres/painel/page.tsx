@@ -19,14 +19,9 @@ export default async function ProLideresPainelVisaoPage() {
 
   const leaderCards = [
     {
-      title: 'Links & convites',
-      desc: 'Gerar links para a equipe entrar com o e-mail certo',
-      href: '/pro-lideres/painel/links',
-    },
-    {
-      title: 'Equipe',
-      desc: 'Quem faz parte do espaço',
-      href: '/pro-lideres/painel/equipe',
+      title: 'Noel',
+      desc: 'Mentor no contexto do Pro Líderes',
+      href: '/pro-lideres/painel/noel',
     },
     {
       title: 'Catálogo de ferramentas',
@@ -39,9 +34,24 @@ export default async function ProLideresPainelVisaoPage() {
       href: '/pro-lideres/painel/scripts',
     },
     {
-      title: 'Noel (mentor)',
-      desc: 'Apoio no contexto do Pro Líderes',
-      href: '/pro-lideres/painel/noel',
+      title: 'Tarefas diárias',
+      desc: 'Pontos por tarefa e acompanhamento da equipe',
+      href: '/pro-lideres/painel/tarefas',
+    },
+    {
+      title: 'Análise da equipe',
+      desc: 'Quem faz parte do espaço e rastreio por membro',
+      href: '/pro-lideres/painel/equipe',
+    },
+    {
+      title: 'Convidar equipe',
+      desc: 'Gerar links para a equipe entrar com o e-mail certo',
+      href: '/pro-lideres/painel/links',
+    },
+    {
+      title: 'Configurações',
+      desc: 'Definições do espaço Pro Líderes',
+      href: '/pro-lideres/painel/configuracao',
     },
   ] as const
 
@@ -55,6 +65,11 @@ export default async function ProLideresPainelVisaoPage() {
       title: 'Scripts',
       desc: 'Roteiros e mensagens partilhados pelo líder para executares no campo',
       href: '/pro-lideres/painel/scripts',
+    },
+    {
+      title: 'Tarefas diárias',
+      desc: 'Marca o que cumpriste e acumula pontos',
+      href: '/pro-lideres/painel/tarefas',
     },
   ] as const
 
@@ -72,14 +87,14 @@ export default async function ProLideresPainelVisaoPage() {
             {isLeader ? (
               <>
                 Ambiente de gestão de <strong className="text-gray-800">{op}</strong>. Convites e configurações são só
-                tuas; a equipa vê um menu mais simples.
+                tuas; a equipe vê um menu mais simples.
               </>
             ) : (
               <>
                 Você está no <strong className="text-emerald-800">ambiente da equipe</strong> de{' '}
-                <strong className="text-gray-800">{op}</strong>. O líder gere convites, equipa e definições; aqui acede
+                <strong className="text-gray-800">{op}</strong>. O líder gere convites, equipe e definições; aqui acede
                 só ao <strong>catálogo</strong> e aos <strong>scripts</strong> para executar no campo — sem Noel nem
-                gestão de equipa.
+                gestão de equipe.
               </>
             )}
           </p>

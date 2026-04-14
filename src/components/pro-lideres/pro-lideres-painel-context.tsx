@@ -8,7 +8,7 @@ export type ProLideresPainelContextValue = {
   /** Dono do tenant (consultoria) — menu e rotas completas de gestão. */
   isLeaderWorkspace: boolean
   /**
-   * Líder a pré-visualizar o mesmo menu/copy que a equipa (cookie + refresh).
+   * Líder a pré-visualizar o mesmo menu/copy que a equipe (cookie + refresh).
    * Continua autenticado como líder nas APIs.
    */
   teamViewPreview?: boolean

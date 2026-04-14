@@ -4,6 +4,11 @@ import { useCallback, useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import Image from 'next/image'
 import { YLADA_OG_FALLBACK_LOGO_PATH } from '@/lib/ylada-og-fallback-logo'
+import {
+  emptyLeaderOnboardingFormValues,
+  ProLideresLeaderOnboardingForm,
+  type LeaderOnboardingFormValues,
+} from '@/components/pro-lideres/ProLideresLeaderOnboardingForm'
 
 type ValidateData = {
   ok: true
@@ -24,12 +29,11 @@ export default function ProLideresLeaderOnboardingPage() {
   const [saved, setSaved] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const [displayName, setDisplayName] = useState('')
-  const [teamName, setTeamName] = useState('')
-  const [whatsapp, setWhatsapp] = useState('')
-  const [primaryGoal, setPrimaryGoal] = useState('')
-  const [mainChallenge, setMainChallenge] = useState('')
-  const [focusNotes, setFocusNotes] = useState('')
+  const [form, setForm] = useState<LeaderOnboardingFormValues>(() => emptyLeaderOnboardingFormValues())
+
+  const onFormChange = useCallback((field: keyof LeaderOnboardingFormValues, value: string) => {
+    setForm((prev) => ({ ...prev, [field]: value }))
+  }, [])
 
   const validate = useCallback(async () => {
     if (!token) {
@@ -57,7 +61,7 @@ export default function ProLideresLeaderOnboardingPage() {
     }
     const payload = data as ValidateData
     setValidData(payload)
-    setDisplayName(payload.leaderName ?? '')
+    setForm((prev) => ({ ...prev, displayName: payload.leaderName ?? '' }))
     setLoading(false)
   }, [token])
 
@@ -74,12 +78,18 @@ export default function ProLideresLeaderOnboardingPage() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         token,
-        display_name: displayName,
-        team_name: teamName,
-        whatsapp,
-        primary_goal: primaryGoal,
-        main_challenge: mainChallenge,
-        focus_notes: focusNotes,
+        display_name: form.displayName,
+        team_name: form.teamName,
+        whatsapp: form.whatsapp,
+        leader_age: form.leaderAge,
+        herbalife_years: form.herbalifeYears,
+        career_before_herbalife: form.careerBeforeHerbalife,
+        team_total_people: form.teamTotalPeople,
+        team_leaders_count: form.teamLeadersCount,
+        team_distinct_lines: form.teamDistinctLines,
+        primary_goal: form.primaryGoal,
+        main_challenge: form.mainChallenge,
+        focus_notes: form.focusNotes,
       }),
     })
     const data = await res.json().catch(() => ({}))
@@ -129,70 +139,7 @@ export default function ProLideresLeaderOnboardingPage() {
 
             {error && <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
 
-            <form className="grid gap-3" onSubmit={(e) => void onSubmit(e)}>
-              <label className="block">
-                <span className="mb-1 block text-sm font-medium text-gray-700">Nome para exibição</span>
-                <input
-                  required
-                  value={displayName}
-                  onChange={(e) => setDisplayName(e.target.value)}
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2.5"
-                />
-              </label>
-              <label className="block">
-                <span className="mb-1 block text-sm font-medium text-gray-700">Nome da operação/equipe</span>
-                <input
-                  value={teamName}
-                  onChange={(e) => setTeamName(e.target.value)}
-                  placeholder="Ex.: Equipe Sul"
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2.5"
-                />
-              </label>
-              <label className="block">
-                <span className="mb-1 block text-sm font-medium text-gray-700">WhatsApp</span>
-                <input
-                  value={whatsapp}
-                  onChange={(e) => setWhatsapp(e.target.value)}
-                  placeholder="Com DDI, ex.: 5511999999999"
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2.5"
-                />
-              </label>
-              <label className="block">
-                <span className="mb-1 block text-sm font-medium text-gray-700">Objetivo principal (30 dias)</span>
-                <input
-                  value={primaryGoal}
-                  onChange={(e) => setPrimaryGoal(e.target.value)}
-                  placeholder="Ex.: aumentar recrutas ativos na equipe"
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2.5"
-                />
-              </label>
-              <label className="block">
-                <span className="mb-1 block text-sm font-medium text-gray-700">Maior desafio hoje</span>
-                <input
-                  value={mainChallenge}
-                  onChange={(e) => setMainChallenge(e.target.value)}
-                  placeholder="Ex.: consistência de acompanhamento da equipe"
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2.5"
-                />
-              </label>
-              <label className="block">
-                <span className="mb-1 block text-sm font-medium text-gray-700">Foco e tom de comunicação</span>
-                <textarea
-                  value={focusNotes}
-                  onChange={(e) => setFocusNotes(e.target.value)}
-                  placeholder="Como deseja conduzir sua comunicação com equipe e prospects."
-                  className="min-h-[120px] w-full rounded-lg border border-gray-300 px-3 py-2.5"
-                />
-              </label>
-
-              <button
-                type="submit"
-                disabled={saving}
-                className="mt-2 min-h-[46px] rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-60"
-              >
-                {saving ? 'Enviando...' : 'Enviar respostas'}
-              </button>
-            </form>
+            <ProLideresLeaderOnboardingForm values={form} onChange={onFormChange} onSubmit={onSubmit} saving={saving} />
           </div>
         ) : null}
       </div>

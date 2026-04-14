@@ -1,5 +1,5 @@
 /**
- * Quizzes de recrutamento Pro Líderes (contexto equipa Herbalife / oportunidade de negócio).
+ * Quizzes de recrutamento Pro Líderes (contexto equipe Herbalife / oportunidade de negócio).
  * Copy focada em perfil e conversa — sem tom clínico nem kit de bem-estar no resultado.
  * Tag `pro-lideres` ativa disclaimer e textos de UI específicos em FluxoDiagnostico.
  */
@@ -74,7 +74,7 @@ export const proLideresRecruitmentQuizFluxos: FluxoCliente[] = [
         'Com base nas respostas, faz sentido conversar com quem te enviou o link para explorar oportunidades alinhadas aos teus objetivos.',
       sintomas: ['Abertura a novas oportunidades', 'Interesse em crescimento e flexibilidade'],
       beneficios: [
-        'Conversa personalizada com a tua liderança na equipa',
+        'Conversa personalizada com a tua liderança na equipe',
         'Modelo de negócio com suporte da comunidade',
         'Caminhos simples e duplicáveis para construir ao teu ritmo',
       ],

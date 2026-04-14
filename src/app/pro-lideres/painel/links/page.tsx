@@ -16,12 +16,12 @@ export default async function ProLideresLinksPage() {
     <div className="max-w-2xl space-y-6">
       <div>
         <p className="text-sm font-medium text-blue-600">Principal · Ambiente do líder</p>
-        <h1 className="text-2xl font-bold text-gray-900">Links & convites</h1>
+        <h1 className="text-2xl font-bold text-gray-900">Convidar equipe</h1>
       </div>
       <p className="text-gray-700">
         <strong className="text-gray-900">Gere um link por e-mail</strong> e envie à pessoa da equipe. Ela deve usar{' '}
         <strong className="text-gray-800">o mesmo e-mail</strong> na conta YLADA ao aceitar o convite. Quem já entrou
-        aparece em <strong className="text-gray-800">Equipe</strong>.
+        aparece em <strong className="text-gray-800">Análise da equipe</strong>.
       </p>
       <ProLideresInvitesPanel />
     </div>

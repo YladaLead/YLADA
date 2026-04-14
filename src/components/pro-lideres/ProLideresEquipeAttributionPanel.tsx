@@ -104,7 +104,7 @@ export function ProLideresEquipeAttributionPanel() {
           Rastreio por membro (links partilhados)
         </h2>
         <p className="mt-1 text-xs text-gray-600">
-          Cada pessoa da equipa (e tu) recebe um link com <code className="rounded bg-white px-1">?pl_m=…</code>. Assim vês{' '}
+          Cada pessoa da equipe (e tu) recebe um link com <code className="rounded bg-white px-1">?pl_m=…</code>. Assim vês{' '}
           <strong className="text-gray-800">cliques</strong> e <strong className="text-gray-800">WhatsApp</strong> por
           membro. Vertical do espaço:{' '}
           <span className="font-mono text-blue-800">{meta.verticalCode ?? 'h-lider'}</span> (ex. Herbalife).
@@ -145,7 +145,7 @@ export function ProLideresEquipeAttributionPanel() {
                 onClick={() => void loadAttribution(true)}
                 className="min-h-[44px] shrink-0 rounded-lg bg-blue-600 px-4 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
               >
-                {loadingData ? 'A atualizar…' : 'Gerar / atualizar links da equipa'}
+                {loadingData ? 'A atualizar…' : 'Gerar / atualizar links da equipe'}
               </button>
             </div>
 

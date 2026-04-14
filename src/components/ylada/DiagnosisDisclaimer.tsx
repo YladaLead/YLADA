@@ -13,7 +13,7 @@ export type DisclaimerVariant =
   | 'wellness'
   /** Recrutamento / negócio (sem tom clínico nem produto de bem-estar). */
   | 'recrutamento'
-  /** Pro Líderes + contexto equipa Herbalife (oportunidade de negócio independente). */
+  /** Pro Líderes + contexto equipe Herbalife (oportunidade de negócio independente). */
   | 'recrutamento_pro_lideres'
 
 const TEXTS: Record<DisclaimerVariant, string[]> = {
@@ -33,7 +33,7 @@ const TEXTS: Record<DisclaimerVariant, string[]> = {
     'Para próximos passos e esclarecimentos, fala com a pessoa que partilhou este link.',
   ],
   recrutamento_pro_lideres: [
-    'Este resultado é uma avaliação informal para conversa sobre oportunidade de negócio no contexto Pro Líderes (equipa independente Herbalife).',
+    'Este resultado é uma avaliação informal para conversa sobre oportunidade de negócio no contexto Pro Líderes (equipe independente Herbalife).',
     'Não substitui aconselhamento jurídico, fiscal ou contabilístico; não constitui promessa de ganhos nem avaliação médica.',
     'Para produtos, oportunidade e regras oficiais, esclarece com quem te enviou o link ou com os canais da Herbalife.',
   ],

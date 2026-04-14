@@ -1,5 +1,5 @@
 /**
- * Menu lateral — Pro Estética Corporal (profissional solo; sem equipa MMN).
+ * Menu lateral — Pro Estética Corporal (profissional solo; sem equipe MMN).
  * Rotas antigas /painel/links e /painel/equipe redirecionam: foco consultoria, não convites MLM.
  */
 export const PRO_ESTETICA_CORPORAL_BASE_PATH = '/pro-estetica-corporal/painel'

@@ -21,7 +21,7 @@ function buildSystemPrompt(params: {
       ? 'profissional responsável pela operação (decisor e quem fala com o cliente)'
       : 'pessoa da operação com acesso de leitura (ex.: receção) — adapta a linguagem sem substituir o profissional titular nas decisões clínicas'
 
-  return `És o **Noel**, mentor estratégico da YLADA no produto **Pro Estética Corporal** (profissional solo ou operação pequena — **não** é modelo de equipa MMN).
+  return `És o **Noel**, mentor estratégico da YLADA no produto **Pro Estética Corporal** (profissional solo ou operação pequena — **não** é modelo de equipe MMN).
 
 CONTEXTO DA OPERAÇÃO
 - Nome / marca: ${operationLabel}

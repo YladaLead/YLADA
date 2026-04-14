@@ -3,44 +3,18 @@ import OpenAI from 'openai'
 import { requireApiAuth } from '@/lib/api-auth'
 import { supabaseAdmin } from '@/lib/supabase'
 import { resolveProLideresTenantContext } from '@/lib/pro-lideres-server'
-import type { ProLideresTenantRole } from '@/types/leader-tenant'
+import {
+  buildProLideresNoelSystemPrompt,
+  resolveProLideresNoelProfileId,
+} from '@/lib/pro-lideres-noel-prompt'
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
 
 type HistoryTurn = { role?: string; content?: string }
 
-function buildSystemPrompt(params: {
-  operationLabel: string
-  verticalCode: string
-  focusNotes: string | null
-  role: ProLideresTenantRole
-  replyLanguage: string
-}): string {
-  const { operationLabel, verticalCode, focusNotes, role, replyLanguage } = params
-  const papel = role === 'leader' ? 'líder (dono do espaço)' : 'membro da equipe'
-
-  return `És o **Noel**, mentor da YLADA no produto **Pro Líderes**.
-
-CONTEXTO DA OPERAÇÃO
-- Nome / operação: ${operationLabel}
-- Código de vertical (ex. h-lider = Herbalife): ${verticalCode}
-- Quem fala contigo é: ${papel}
-${focusNotes ? `- Notas de foco do líder (usa com critério): ${focusNotes}` : ''}
-
-MISSÃO
-- Ajuda em **campo**: WhatsApp, primeiro contacto, pedir permissão antes de enviar link, explicar ferramentas YLADA (quizzes, calculadoras, links /l/…), recrutamento e vendas no tom consultivo.
-- Preferência por **scripts curtos** prontos a copiar (podes usar bloco \`\`\` para a mensagem sugerida).
-- Responde sempre em **${replyLanguage}**, com tom profissional, caloroso e prático.
-- Não prometas rendimentos nem garantias ilegais; evita alegações de cura ou violar regras de marca — mantém-te em orientação de conversa e processo.
-
-FORMATO
-- Usa markdown quando ajudar (títulos curtos, listas).
-- Se deres um script para WhatsApp, identifica claramente (ex.: "**Script:**" ou bloco de código).`
-}
-
 /**
  * POST /api/pro-lideres/noel
- * Chat do mentor no painel Pro Líderes — **só o líder** do tenant (equipa usa scripts, sem Noel).
+ * Chat do mentor no painel Pro Líderes — **só o líder** do tenant (equipe usa scripts, sem Noel).
  */
 export async function POST(request: NextRequest) {
   const auth = await requireApiAuth(request)
@@ -87,7 +61,8 @@ export async function POST(request: NextRequest) {
     t.display_name?.trim() || t.team_name?.trim() || t.slug || 'Pro Líderes'
   const verticalCode = (t.vertical_code ?? 'h-lider').trim() || 'h-lider'
 
-  const systemPrompt = buildSystemPrompt({
+  const noelProfileId = resolveProLideresNoelProfileId(verticalCode)
+  const systemPrompt = buildProLideresNoelSystemPrompt({
     operationLabel,
     verticalCode,
     focusNotes: t.focus_notes?.trim() || null,
@@ -118,7 +93,7 @@ export async function POST(request: NextRequest) {
     if (!text) {
       return NextResponse.json({ error: 'Resposta vazia do modelo' }, { status: 502 })
     }
-    return NextResponse.json({ response: text })
+    return NextResponse.json({ response: text, noelProfileId })
   } catch (e) {
     console.error('[pro-lideres/noel]', e)
     return NextResponse.json({ error: 'Falha ao gerar resposta. Tente novamente.' }, { status: 502 })

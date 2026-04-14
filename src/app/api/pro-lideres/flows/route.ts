@@ -67,7 +67,7 @@ export async function GET(request: NextRequest) {
     tenantId: ctx.tenant.id,
     catalog,
     note:
-      'Ao carregar: cria-se o que faltar da biblioteca base Pro Líderes em /l/… (Vendas + Recrutamento, padrão YLADA). Catálogo = presets + links do líder + extras; duplicados fundidos.',
+      'Ao carregar: cria-se o que faltar da biblioteca base Pro Líderes em /l/… (Vendas + Recrutamento). Cada item tem origin library (presets) ou mine (Meus links + extras); duplicados fundidos no mesmo origin + categoria.',
   })
 }
 

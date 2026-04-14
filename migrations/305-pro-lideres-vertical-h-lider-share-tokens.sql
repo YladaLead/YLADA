@@ -21,7 +21,7 @@ CREATE INDEX IF NOT EXISTS idx_pro_lideres_mlt_token ON pro_lideres_member_link_
 CREATE INDEX IF NOT EXISTS idx_pro_lideres_mlt_tenant_link ON pro_lideres_member_link_tokens (leader_tenant_id, ylada_link_id);
 
 COMMENT ON TABLE pro_lideres_member_link_tokens IS
-  'URL pública /l/[slug]?pl_m=[token] atribui cliques e WhatsApp ao membro da equipa no painel do líder.';
+  'URL pública /l/[slug]?pl_m=[token] atribui cliques e WhatsApp ao membro da equipe no painel do líder.';
 
 ALTER TABLE pro_lideres_member_link_tokens ENABLE ROW LEVEL SECURITY;
 

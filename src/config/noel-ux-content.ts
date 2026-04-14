@@ -140,7 +140,7 @@ const PRO_LIDERES_SUGGESTIONS = [
 
 const NOEL_PRO_LIDERES_WELCOME = `Sou o **Noel** no teu espaço **Pro Líderes**.
 
-Estou focado na operação de campo: **contato**, **WhatsApp**, **links YLADA** e **scripts** para tu e a tua equipa — no contexto do teu operador (ex.: Herbalife / h‑líder).
+Estou focado na operação de campo: **contato**, **WhatsApp**, **links YLADA** e **scripts** para tu e a tua equipe — no contexto do teu operador (ex.: Herbalife / h‑líder).
 
 Diz-me em uma frase o que precisas agora (ou usa uma sugestão abaixo).`
 

@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import Link from 'next/link'
 import AdminProtectedRoute from '@/components/auth/AdminProtectedRoute'
 
 type OnboardingItem = {
@@ -93,6 +94,16 @@ function AdminProLideresOnboardingPageContent() {
           <h1 className="text-2xl font-bold text-gray-900">Admin Pro Líderes - Onboarding do líder</h1>
           <p className="text-sm text-gray-600">
             Crie um link para o líder responder o questionário. As respostas ficam vinculadas ao e-mail.
+          </p>
+          <p className="mt-2 text-sm">
+            <Link
+              href="/pro-lideres/onboarding-exemplo"
+              className="font-semibold text-blue-600 underline hover:text-blue-800"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Ver pré-visualização do formulário (exemplo, não grava dados)
+            </Link>
           </p>
         </div>
 

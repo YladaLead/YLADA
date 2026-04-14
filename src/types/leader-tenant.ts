@@ -47,6 +47,35 @@ export type LeaderTenantInviteRow = {
   created_at: string
 }
 
+/** Situação/ferramenta no painel Pro Líderes — Scripts (tabela leader_tenant_pl_script_sections). */
+export type LeaderTenantPlScriptSectionRow = {
+  id: string
+  leader_tenant_id: string
+  title: string
+  subtitle: string | null
+  ylada_link_id: string | null
+  sort_order: number
+  created_at: string
+  updated_at: string
+}
+
+/** Peça de roteiro ordenada dentro de uma situação (tabela leader_tenant_pl_script_entries). */
+export type LeaderTenantPlScriptEntryRow = {
+  id: string
+  section_id: string
+  title: string
+  subtitle: string | null
+  body: string
+  how_to_use: string | null
+  sort_order: number
+  created_at: string
+  updated_at: string
+}
+
+export type ProLideresScriptSectionWithEntries = LeaderTenantPlScriptSectionRow & {
+  entries: LeaderTenantPlScriptEntryRow[]
+}
+
 /** Script guardado no painel Pro Estética Corporal (tabela leader_tenant_estetica_scripts). */
 export type LeaderTenantEsteticaScriptRow = {
   id: string
