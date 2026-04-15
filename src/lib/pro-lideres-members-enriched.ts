@@ -27,10 +27,10 @@ export async function fetchProLideresMembersEnriched(
   const ids = rows.map((r) => r.user_id as string)
   const { data: profiles } = await supabaseAdmin
     .from('user_profiles')
-    .select('id, nome_completo, email')
-    .in('id', ids)
+    .select('user_id, nome_completo, email')
+    .in('user_id', ids)
 
-  const byId = new Map((profiles ?? []).map((p) => [p.id as string, p]))
+  const byId = new Map((profiles ?? []).map((p) => [p.user_id as string, p]))
 
   return rows.map((r) => {
     const p = byId.get(r.user_id as string)

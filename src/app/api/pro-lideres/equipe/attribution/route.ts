@@ -136,9 +136,12 @@ export async function GET(request: NextRequest) {
     if (e.event_type === 'cta_click') s.whatsapp += 1
   }
 
-  const { data: profiles } = await supabaseAdmin.from('user_profiles').select('id, nome_completo, email').in('id', ids)
+  const { data: profiles } = await supabaseAdmin
+    .from('user_profiles')
+    .select('user_id, nome_completo, email')
+    .in('user_id', ids)
 
-  const profileById = new Map((profiles ?? []).map((p) => [p.id as string, p]))
+  const profileById = new Map((profiles ?? []).map((p) => [p.user_id as string, p]))
   const roleByUser = new Map<string, string>()
   roleByUser.set(ownerId, 'leader')
   for (const r of memberRows ?? []) {

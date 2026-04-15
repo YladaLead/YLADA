@@ -32,7 +32,7 @@ export async function createProLideresServerClient() {
 }
 
 /** E-mails que sempre podem ter tenant criado ao entrar (idealizador / admin geral), mesmo com auto-provision global desligada. */
-const PRO_LIDERES_BOOTSTRAP_EMAILS_BUILTIN = ['andre@prolider.com'] as const
+const PRO_LIDERES_BOOTSTRAP_EMAILS_BUILTIN = ['andre@prolider.com', 'demo@prolider.com'] as const
 
 /** IDs auth.users (fallback se o JWT no servidor vier sem `email`). */
 const PRO_LIDERES_BOOTSTRAP_USER_IDS_BUILTIN = ['acafb4af-e805-4078-857e-1d7966044cab'] as const
