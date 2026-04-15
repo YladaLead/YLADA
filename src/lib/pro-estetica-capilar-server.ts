@@ -5,7 +5,9 @@ import {
   defaultDisplayNameFromUser,
   newLeaderTenantInsertPayload,
   resolveProLideresTenantContext,
+  resolvedUserEmail,
 } from '@/lib/pro-lideres-server'
+import { getSupabaseAdmin } from '@/lib/supabase'
 
 export const PRO_ESTETICA_CAPILAR_VERTICAL_CODE = 'estetica-capilar'
 export const PRO_ESTETICA_CAPILAR_DEV_STUB_TENANT_ID = '00000000-0000-4000-8000-000000000003'
@@ -136,6 +138,12 @@ export async function ensureEsteticaCapilarTenantAccess(): Promise<
   if (!user) return { ok: false, redirect: '/pro-estetica-capilar/entrar' }
 
   let ctx = await resolveEsteticaCapilarTenantContext(supabase, user)
+  const admin = getSupabaseAdmin()
+
+  if (!ctx && isProEsteticaCapilarBootstrapLeaderEmail(user.email) && admin) {
+    ctx = await resolveEsteticaCapilarTenantContext(admin, user)
+  }
+
   if (!ctx) {
     const anyCtx = await resolveProLideresTenantContext(supabase, user)
     if (anyCtx && !isEsteticaCapilarVertical(anyCtx.tenant)) {
@@ -143,23 +151,102 @@ export async function ensureEsteticaCapilarTenantAccess(): Promise<
     }
   }
 
+  if (!ctx && isProEsteticaCapilarBootstrapLeaderEmail(user.email) && admin) {
+    const anyAdmin = await resolveProLideresTenantContext(admin, user)
+    if (anyAdmin && !isEsteticaCapilarVertical(anyAdmin.tenant)) {
+      return { ok: false, redirect: '/pro-estetica-capilar/conta-outra-edicao' }
+    }
+  }
+
   if (!ctx && shouldProvisionEsteticaCapilarTenant(user.email)) {
-    const { data: existingOwner } = await supabase
+    const { data: existingOwner, error: fetchErr } = await supabase
       .from('leader_tenants')
-      .select('id')
+      .select('*')
       .eq('owner_user_id', user.id)
       .maybeSingle()
-    if (!existingOwner) {
-      const { data: inserted } = await supabase
+    if (fetchErr) {
+      console.error(
+        '[ensureEsteticaCapilarTenantAccess] owner lookup (user):',
+        fetchErr.message,
+        resolvedUserEmail(user),
+        user.id
+      )
+    }
+    if (existingOwner && isEsteticaCapilarVertical(existingOwner as LeaderTenantRow)) {
+      ctx = { tenant: existingOwner as LeaderTenantRow, role: 'leader' }
+    } else if (!existingOwner) {
+      const { data: inserted, error } = await supabase
         .from('leader_tenants')
         .insert(newEsteticaCapilarTenantInsertPayload(user))
         .select()
         .single()
-      if (inserted) ctx = { tenant: inserted as LeaderTenantRow, role: 'leader' }
+      if (error) {
+        console.error(
+          '[ensureEsteticaCapilarTenantAccess] provision (user):',
+          error.code,
+          error.message,
+          resolvedUserEmail(user),
+          user.id
+        )
+      }
+      if (!error && inserted) {
+        ctx = { tenant: inserted as LeaderTenantRow, role: 'leader' }
+      }
     }
   }
 
+  if (!ctx && shouldProvisionEsteticaCapilarTenant(user.email) && admin) {
+    const { data: existingOwner, error: fetchErr } = await admin
+      .from('leader_tenants')
+      .select('*')
+      .eq('owner_user_id', user.id)
+      .maybeSingle()
+    if (fetchErr) {
+      console.error(
+        '[ensureEsteticaCapilarTenantAccess] admin owner lookup:',
+        fetchErr.message,
+        resolvedUserEmail(user)
+      )
+    }
+    if (existingOwner) {
+      if (isEsteticaCapilarVertical(existingOwner as LeaderTenantRow)) {
+        ctx = { tenant: existingOwner as LeaderTenantRow, role: 'leader' }
+      } else {
+        return { ok: false, redirect: '/pro-estetica-capilar/conta-outra-edicao' }
+      }
+    } else {
+      const { data: ins, error: insErr } = await admin
+        .from('leader_tenants')
+        .insert(newEsteticaCapilarTenantInsertPayload(user))
+        .select()
+        .single()
+      if (insErr) {
+        console.error(
+          '[ensureEsteticaCapilarTenantAccess] provision (admin):',
+          insErr.code,
+          insErr.message,
+          resolvedUserEmail(user),
+          user.id
+        )
+      }
+      if (!insErr && ins) {
+        ctx = { tenant: ins as LeaderTenantRow, role: 'leader' }
+      }
+    }
+  }
+
+  if (!ctx && shouldProvisionEsteticaCapilarTenant(user.email) && !admin) {
+    console.error(
+      '[ensureEsteticaCapilarTenantAccess] SUPABASE_SERVICE_ROLE_KEY ausente — não é possível provisionar tenant em produção.',
+      user.id,
+      resolvedUserEmail(user)
+    )
+  }
+
   if (!ctx) ctx = await resolveEsteticaCapilarTenantContext(supabase, user)
+  if (!ctx && isProEsteticaCapilarBootstrapLeaderEmail(user.email) && admin) {
+    ctx = await resolveEsteticaCapilarTenantContext(admin, user)
+  }
   if (!ctx) {
     if (proEsteticaCapilarPainelDevBypassEnabled()) {
       return { ok: true, tenant: devStubCapilarTenant(user.id), role: 'leader' }

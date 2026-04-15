@@ -5,7 +5,9 @@ import {
   defaultDisplayNameFromUser,
   newLeaderTenantInsertPayload,
   resolveProLideresTenantContext,
+  resolvedUserEmail,
 } from '@/lib/pro-lideres-server'
+import { getSupabaseAdmin } from '@/lib/supabase'
 
 export type { LeaderTenantRow, ProLideresTenantRole }
 
@@ -159,6 +161,12 @@ export async function ensureEsteticaCorporalTenantAccess(): Promise<
   }
 
   let ctx = await resolveEsteticaCorporalTenantContext(supabase, user)
+  const admin = getSupabaseAdmin()
+
+  /** Com JWT, RLS por vezes não devolve linha; com service role lemos o tenant real (bootstrap). */
+  if (!ctx && isProEsteticaCorporalBootstrapLeaderEmail(user.email) && admin) {
+    ctx = await resolveEsteticaCorporalTenantContext(admin, user)
+  }
 
   if (!ctx) {
     const anyCtx = await resolveProLideresTenantContext(supabase, user)
@@ -167,27 +175,107 @@ export async function ensureEsteticaCorporalTenantAccess(): Promise<
     }
   }
 
+  if (!ctx && isProEsteticaCorporalBootstrapLeaderEmail(user.email) && admin) {
+    const anyAdmin = await resolveProLideresTenantContext(admin, user)
+    if (anyAdmin && !isEsteticaCorporalVertical(anyAdmin.tenant)) {
+      return { ok: false, redirect: '/pro-estetica-corporal/conta-outra-edicao' }
+    }
+  }
+
   if (!ctx && shouldProvisionEsteticaCorporalTenant(user.email)) {
-    const { data: existingOwner } = await supabase
+    const { data: existingOwner, error: fetchErr } = await supabase
       .from('leader_tenants')
-      .select('id, vertical_code')
+      .select('*')
       .eq('owner_user_id', user.id)
       .maybeSingle()
-
-    if (!existingOwner) {
+    if (fetchErr) {
+      console.error(
+        '[ensureEsteticaCorporalTenantAccess] owner lookup (user):',
+        fetchErr.message,
+        resolvedUserEmail(user),
+        user.id
+      )
+    }
+    if (existingOwner && isEsteticaCorporalVertical(existingOwner as LeaderTenantRow)) {
+      ctx = { tenant: existingOwner as LeaderTenantRow, role: 'leader' }
+    } else if (!existingOwner) {
       const { data: inserted, error } = await supabase
         .from('leader_tenants')
         .insert(newEsteticaCorporalTenantInsertPayload(user))
         .select()
         .single()
+      if (error) {
+        console.error(
+          '[ensureEsteticaCorporalTenantAccess] provision (user):',
+          error.code,
+          error.message,
+          resolvedUserEmail(user),
+          user.id
+        )
+      }
       if (!error && inserted) {
         ctx = { tenant: inserted as LeaderTenantRow, role: 'leader' }
       }
     }
   }
 
+  /**
+   * Fallback com service role: INSERT/SELECT com JWT falham com RLS em produção
+   * (conta demo com auth.users mas sem leader_tenants visível ao dono).
+   */
+  if (!ctx && shouldProvisionEsteticaCorporalTenant(user.email) && admin) {
+    const { data: existingOwner, error: fetchErr } = await admin
+      .from('leader_tenants')
+      .select('*')
+      .eq('owner_user_id', user.id)
+      .maybeSingle()
+    if (fetchErr) {
+      console.error(
+        '[ensureEsteticaCorporalTenantAccess] admin owner lookup:',
+        fetchErr.message,
+        resolvedUserEmail(user)
+      )
+    }
+    if (existingOwner) {
+      if (isEsteticaCorporalVertical(existingOwner as LeaderTenantRow)) {
+        ctx = { tenant: existingOwner as LeaderTenantRow, role: 'leader' }
+      } else {
+        return { ok: false, redirect: '/pro-estetica-corporal/conta-outra-edicao' }
+      }
+    } else {
+      const { data: ins, error: insErr } = await admin
+        .from('leader_tenants')
+        .insert(newEsteticaCorporalTenantInsertPayload(user))
+        .select()
+        .single()
+      if (insErr) {
+        console.error(
+          '[ensureEsteticaCorporalTenantAccess] provision (admin):',
+          insErr.code,
+          insErr.message,
+          resolvedUserEmail(user),
+          user.id
+        )
+      }
+      if (!insErr && ins) {
+        ctx = { tenant: ins as LeaderTenantRow, role: 'leader' }
+      }
+    }
+  }
+
+  if (!ctx && shouldProvisionEsteticaCorporalTenant(user.email) && !admin) {
+    console.error(
+      '[ensureEsteticaCorporalTenantAccess] SUPABASE_SERVICE_ROLE_KEY ausente — não é possível provisionar tenant em produção.',
+      user.id,
+      resolvedUserEmail(user)
+    )
+  }
+
   if (!ctx) {
     ctx = await resolveEsteticaCorporalTenantContext(supabase, user)
+  }
+  if (!ctx && isProEsteticaCorporalBootstrapLeaderEmail(user.email) && admin) {
+    ctx = await resolveEsteticaCorporalTenantContext(admin, user)
   }
 
   if (!ctx) {
