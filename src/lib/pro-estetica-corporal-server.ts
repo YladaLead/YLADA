@@ -8,6 +8,7 @@ import {
   resolvedUserEmail,
 } from '@/lib/pro-lideres-server'
 import { getSupabaseAdmin } from '@/lib/supabase'
+import { applyCompletedCorporalOnboardingForEmail } from '@/lib/pro-estetica-corporal-onboarding'
 
 export type { LeaderTenantRow, ProLideresTenantRole }
 
@@ -366,6 +367,15 @@ export async function ensureEsteticaCorporalTenantAccess(): Promise<
   }
 
   await syncProEsteticaCorporalWorkspaceIfLeader(supabase, admin, user, ctx)
+
+  if (ctx.role === 'leader') {
+    await applyCompletedCorporalOnboardingForEmail({
+      supabase,
+      email: user.email,
+      ownerUserId: user.id,
+      tenantId: ctx.tenant.id,
+    })
+  }
 
   return { ok: true, tenant: ctx.tenant, role: ctx.role }
 }

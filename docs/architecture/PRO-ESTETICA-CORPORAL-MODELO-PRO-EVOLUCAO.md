@@ -182,6 +182,7 @@ migrations/318-pro-estetica-corporal-workspace-settings.sql
 - **`ensureEsteticaCorporalTenantAccess`:** após acesso válido, faz **upsert** da ligação para manter o workspace sincronizado (JWT; fallback admin se necessário).
 - **APIs / UI:** inalteradas na superfície; `leader_tenant_id` nas tabelas filhas mantém-se.
 - **Deploy:** executar a migração **318** no Supabase (SQL Editor ou pipeline de migrations) antes de contar com a nova tabela em produção.
+- **Onboarding (consultoria / implantação):** migração **319** (`pro_estetica_corporal_onboarding_links`), página pública `/pro-estetica-corporal/onboarding/[token]`, admin `/admin/pro-estetica-corporal/onboarding`, APIs em `/api/pro-estetica-corporal/leader-onboarding/*` e `applyCompletedCorporalOnboardingForEmail` ao entrar no painel (mesmo padrão Pro Líderes).
 
 **Próximos passos (F2+):** billing Pro estética, eventualmente colunas próprias em `pro_estetica_corporal_settings` (nome da clínica, etc.) em vez de duplicar só via `leader_tenants`.
 

@@ -276,6 +276,15 @@ function AdminDashboardContent() {
       destaque: true,
     },
     {
+      id: 'pro-estetica-corporal-onboarding',
+      title: 'Pro Estética Corporal — onboarding',
+      description: 'Links de questionário (consultoria); respostas aplicadas ao ambiente da dona',
+      icon: '💆‍♀️',
+      link: '/admin/pro-estetica-corporal/onboarding',
+      color: 'bg-sky-600',
+      destaque: true,
+    },
+    {
       id: 'motor-crescimento-hub',
       title: 'Motor de crescimento',
       description: 'Documentação, agentes e checklist',
