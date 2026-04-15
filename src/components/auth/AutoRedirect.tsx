@@ -53,6 +53,15 @@ export default function AutoRedirect() {
       return
     }
 
+    // Pro Líderes / Pro Estética: nunca aplicar redirecionamentos pensados para /pt/login aqui
+    if (
+      pathname.startsWith('/pro-lideres') ||
+      pathname.startsWith('/pro-estetica-corporal') ||
+      pathname.startsWith('/pro-estetica-capilar')
+    ) {
+      return
+    }
+
     // 🚀 NOVA LÓGICA: Usar sistema de regras centralizado
     const accessRule = getAccessRule(pathname)
     const isPublic = accessRule.isPublic || isPublicPage(pathname)

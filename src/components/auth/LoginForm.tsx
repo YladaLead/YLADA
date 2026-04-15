@@ -69,7 +69,7 @@ export default function LoginForm({
   proEsteticaCorporalLogin = false,
 }: LoginFormProps) {
   const router = useRouter()
-  const { getLastVisitedPage } = useLastVisitedPage()
+  const { getLastVisitedPage, clearLastVisitedPage } = useLastVisitedPage()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
@@ -517,9 +517,36 @@ export default function LoginForm({
 
         // Login em /pt/login (ylada): todos vão para YLADA (matriz). Priorizar onboarding se perfil não preenchido.
         // Pro Líderes (/pro-lideres/entrar): não aplicar esta lógica — respeita redirectPath (ex.: convite).
+        // Dono de tenant Pro Líderes / Pro Estética corporal: mesmo que entre por /pt/login, não mandar para onboarding da matriz.
         // Se tem nome+whatsapp mas falta profile_type/profession → perfil-empresarial (ex.: usuárias Nutri migradas).
         // Usuárias da área Nutri (e outras) que já estavam cadastradas: ir para o board (/pt/home) para evitar tela piscando.
         if (!proLideresLogin && !proEsteticaCorporalLogin && perfil === 'ylada') {
+          let skipYladaMatrixRedirect = false
+          try {
+            const { data: plTenant } = await supabase
+              .from('leader_tenants')
+              .select('id, vertical_code')
+              .eq('owner_user_id', session.user.id)
+              .maybeSingle()
+            const vc = (plTenant?.vertical_code as string | undefined)?.trim()
+            if (plTenant?.id && vc === 'h-lider') {
+              baseRedirectPath = '/pro-lideres/painel'
+              skipYladaMatrixRedirect = true
+              console.log('🔄 Login: dono Pro Líderes (h-lider) — redirecionando para /pro-lideres/painel (não onboarding /pt)')
+            } else if (plTenant?.id && vc === 'estetica-corporal') {
+              baseRedirectPath = '/pro-estetica-corporal/painel'
+              skipYladaMatrixRedirect = true
+              console.log(
+                '🔄 Login: dono Pro Estética corporal — redirecionando para /pro-estetica-corporal/painel (não onboarding /pt)'
+              )
+            }
+          } catch (plErr) {
+            console.warn('⚠️ Não foi possível verificar leader_tenants após login:', plErr)
+          }
+
+          if (skipYladaMatrixRedirect) {
+            // Não aplicar regras de ylada_noel_profile / onboarding matriz
+          } else {
           baseRedirectPath = '/pt/onboarding'
           try {
             const { data: yladaProfile } = await supabase
@@ -553,6 +580,7 @@ export default function LoginForm({
             if (profileCheck?.perfil && profileCheck.perfil !== 'ylada') {
               baseRedirectPath = '/pt/home'
             }
+          }
           }
         } else if (perfil === 'nutri') {
           baseRedirectPath = '/pt/nutri/home'
@@ -597,17 +625,22 @@ export default function LoginForm({
         
         // Pro Líderes / Pro Estética: nunca deixar "última página" (/pt/home, etc.) roubar o destino —
         // senão o login em /pro-…/entrar manda o utilizador para a matriz em vez do painel.
-        const finalRedirectPath =
-          proLideresLogin || proEsteticaCorporalLogin
-            ? baseRedirectPath
-            : isValidRoute
-              ? lastPage
-              : baseRedirectPath
+        // Quem entra por /pt/login mas é dono de tenant Pro (h-lider / estética corporal) já tem baseRedirectPath no painel Pro.
+        const preferProWorkspaceDestination =
+          proLideresLogin ||
+          proEsteticaCorporalLogin ||
+          baseRedirectPath.startsWith('/pro-lideres') ||
+          baseRedirectPath.startsWith('/pro-estetica-corporal')
+        const finalRedirectPath = preferProWorkspaceDestination
+          ? baseRedirectPath
+          : isValidRoute
+            ? lastPage
+            : baseRedirectPath
 
         console.log(
           '🔄 Redirecionando após login para:',
           finalRedirectPath,
-          proLideresLogin || proEsteticaCorporalLogin
+          preferProWorkspaceDestination
             ? '(destino fixo Pro workspace)'
             : isValidRoute
               ? '(última página visitada)'
@@ -615,6 +648,14 @@ export default function LoginForm({
                 ? '(página de vendas ignorada, usando padrão)'
                 : '(padrão)'
         )
+
+        if (proLideresLogin || proEsteticaCorporalLogin) {
+          try {
+            clearLastVisitedPage()
+          } catch {
+            /* evitar que /pt/… guardado roube o destino após login Pro */
+          }
+        }
         
         // Verificar se já está na página de destino para evitar loop
         const currentPath = typeof window !== 'undefined' ? window.location.pathname : ''
