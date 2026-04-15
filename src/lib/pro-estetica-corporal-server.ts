@@ -122,13 +122,89 @@ export function newEsteticaCorporalTenantInsertPayload(user: User) {
   }
 }
 
+const PRO_ESTETICA_CORPORAL_SETTINGS = 'pro_estetica_corporal_settings' as const
+
+/**
+ * Mantém a linha do **espaço Pro Estética Corporal** (dona → leader_tenant corporal).
+ * Migração: `318-pro-estetica-corporal-workspace-settings.sql`.
+ */
+async function syncProEsteticaCorporalWorkspaceIfLeader(
+  supabase: SupabaseClient,
+  admin: SupabaseClient | null,
+  user: User,
+  ctx: { tenant: LeaderTenantRow; role: ProLideresTenantRole }
+): Promise<void> {
+  if (ctx.role !== 'leader') return
+  if (ctx.tenant.owner_user_id !== user.id) return
+  if (!isEsteticaCorporalVertical(ctx.tenant)) return
+  if (isProEsteticaCorporalDevStubTenant(ctx.tenant)) return
+
+  const payload = {
+    user_id: user.id,
+    leader_tenant_id: ctx.tenant.id,
+    updated_at: new Date().toISOString(),
+  }
+
+  const tryUpsert = async (client: SupabaseClient) => {
+    const { error } = await client.from(PRO_ESTETICA_CORPORAL_SETTINGS).upsert(payload, { onConflict: 'user_id' })
+    return error
+  }
+
+  const errUser = await tryUpsert(supabase)
+  if (!errUser) return
+  if (admin) {
+    const errAdmin = await tryUpsert(admin)
+    if (!errAdmin) return
+    console.error(
+      '[syncProEsteticaCorporalWorkspaceIfLeader] upsert (admin):',
+      errAdmin.code,
+      errAdmin.message,
+      resolvedUserEmail(user)
+    )
+    return
+  }
+  if (!/relation|does not exist|Could not find the table/i.test(errUser.message ?? '')) {
+    console.error(
+      '[syncProEsteticaCorporalWorkspaceIfLeader] upsert (user):',
+      errUser.code,
+      errUser.message,
+      resolvedUserEmail(user)
+    )
+  }
+}
+
 /**
  * Resolve tenant só se a linha for **estética corporal** (não mistura com Pro Líderes / outras verticais).
+ * Prioridade: tabela `pro_estetica_corporal_settings` (modelo dona) → depois `leader_tenants` + vertical (membros e legado).
  */
 export async function resolveEsteticaCorporalTenantContext(
   supabase: SupabaseClient,
   user: User
 ): Promise<{ tenant: LeaderTenantRow; role: ProLideresTenantRole } | null> {
+  const { data: link, error: linkErr } = await supabase
+    .from(PRO_ESTETICA_CORPORAL_SETTINGS)
+    .select('leader_tenant_id')
+    .eq('user_id', user.id)
+    .maybeSingle()
+
+  if (linkErr && !/relation|does not exist|Could not find the table/i.test(linkErr.message ?? '')) {
+    console.warn('[resolveEsteticaCorporalTenantContext] settings:', linkErr.message)
+  }
+
+  if (link?.leader_tenant_id) {
+    const { data: tenant, error: tenantErr } = await supabase
+      .from('leader_tenants')
+      .select('*')
+      .eq('id', link.leader_tenant_id)
+      .maybeSingle()
+    if (tenantErr) {
+      console.warn('[resolveEsteticaCorporalTenantContext] tenant by link:', tenantErr.message)
+    }
+    if (tenant && isEsteticaCorporalVertical(tenant as LeaderTenantRow)) {
+      return { tenant: tenant as LeaderTenantRow, role: 'leader' }
+    }
+  }
+
   const ctx = await resolveProLideresTenantContext(supabase, user)
   if (!ctx) return null
   if (!isEsteticaCorporalVertical(ctx.tenant)) return null
@@ -288,6 +364,8 @@ export async function ensureEsteticaCorporalTenantAccess(): Promise<
     }
     return { ok: false, redirect: '/pro-estetica-corporal/aguardando-acesso' }
   }
+
+  await syncProEsteticaCorporalWorkspaceIfLeader(supabase, admin, user, ctx)
 
   return { ok: true, tenant: ctx.tenant, role: ctx.role }
 }
