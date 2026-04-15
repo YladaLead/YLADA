@@ -28,6 +28,8 @@ export type ProLideresCatalogItem = {
   origin: ProLideresCatalogOrigin
   /** Vendas vs recrutamento (UI em separadores). */
   catalogCategory: ProLideresCatalogCategory
+  /** Se a equipe vê no catálogo; o líder controla (fluxos custom + override YLADA). */
+  visibleToTeam: boolean
   stats: { views: number; conversions: number; shares: number }
   yladaLinkId?: string
   description: string | null
@@ -284,6 +286,7 @@ function pickBetterCatalogItem(a: ProLideresCatalogItem, b: ProLideresCatalogIte
   if (sa !== sb) return sa > sb ? a : b
   if (a.origin !== b.origin) return a.origin === 'library' ? a : b
   if (a.source !== b.source) return a.source === 'ylada' ? a : b
+  if (a.visibleToTeam !== b.visibleToTeam) return a.visibleToTeam ? a : b
   const ta = a.createdAt ? new Date(a.createdAt).getTime() : 0
   const tb = b.createdAt ? new Date(b.createdAt).getTime() : 0
   return tb >= ta ? b : a
@@ -362,7 +365,12 @@ export async function buildProLideresCatalog(
     sort_order: number
     category?: string
     notes?: string | null
-  }>
+    visible_to_team?: boolean
+  }>,
+  opts?: {
+    /** Por `ylada_links.id`: false = equipe não vê (override em leader_tenant_catalog_ylada_visibility). */
+    yladaVisibleToTeamByLinkId?: Record<string, boolean>
+  }
 ): Promise<ProLideresCatalogItem[]> {
   const out: ProLideresCatalogItem[] = []
 
@@ -428,6 +436,9 @@ export async function buildProLideresCatalog(
         )
         const slugStr = (row.slug as string) ?? ''
         const origin: ProLideresCatalogOrigin = isProLideresPresetLink(ownerUserId, slugStr) ? 'library' : 'mine'
+        const linkRowId = row.id as string
+        const yladaVis = opts?.yladaVisibleToTeamByLinkId?.[linkRowId]
+        const visibleToTeam = yladaVis === undefined ? true : Boolean(yladaVis)
 
         out.push({
           id: `ylada-${row.id}`,
@@ -438,6 +449,7 @@ export async function buildProLideresCatalog(
           kind,
           origin,
           catalogCategory,
+          visibleToTeam,
           stats: { views: st.view, conversions: st.cta_click, shares: st.share_click },
           yladaLinkId: row.id as string,
           description: enriched.description,
@@ -470,6 +482,7 @@ export async function buildProLideresCatalog(
     const catalogCategory: ProLideresCatalogCategory =
       r.category === 'recruitment' ? 'recruitment' : 'sales'
     const rawNotes = typeof r.notes === 'string' ? r.notes.trim() : ''
+    const visibleToTeam = r.visible_to_team !== false
     const metaLine =
       k === 'calculator'
         ? `Ferramenta · ~1 min`
@@ -486,6 +499,7 @@ export async function buildProLideresCatalog(
       kind: k,
       origin: 'mine',
       catalogCategory,
+      visibleToTeam,
       stats: { views: 0, conversions: 0, shares: 0 },
       description: null,
       metaLine,

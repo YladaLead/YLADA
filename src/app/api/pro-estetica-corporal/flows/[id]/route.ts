@@ -39,6 +39,7 @@ export async function PATCH(
     href?: string
     sort_order?: number
     notes?: string
+    visible_to_team?: boolean
   }
   try {
     body = await request.json()
@@ -46,7 +47,7 @@ export async function PATCH(
     return NextResponse.json({ error: 'JSON inválido' }, { status: 400 })
   }
 
-  const patch: Record<string, string | number> = {}
+  const patch: Record<string, string | number | boolean> = {}
   if (body.category !== undefined) {
     patch.category = body.category === 'recruitment' ? 'recruitment' : 'sales'
   }
@@ -73,6 +74,9 @@ export async function PATCH(
   }
   if (body.notes !== undefined) {
     patch.notes = String(body.notes).trim().slice(0, PRO_LIDERES_FLOW_NOTES_MAX)
+  }
+  if (body.visible_to_team !== undefined) {
+    patch.visible_to_team = Boolean(body.visible_to_team)
   }
 
   if (Object.keys(patch).length === 0) {

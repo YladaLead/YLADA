@@ -49,7 +49,7 @@ export async function GET(request: NextRequest) {
 
   const { data: rows, error } = await supabaseAdmin
     .from('leader_tenant_flow_entries')
-    .select('id, category, label, href, sort_order, notes')
+    .select('id, category, label, href, sort_order, notes, visible_to_team')
     .eq('leader_tenant_id', ctx.tenant.id)
     .order('sort_order', { ascending: true })
 
@@ -65,9 +65,38 @@ export async function GET(request: NextRequest) {
     sort_order: typeof r.sort_order === 'number' ? r.sort_order : 0,
     category: r.category as string,
     notes: typeof r.notes === 'string' ? r.notes : '',
+    visible_to_team: typeof r.visible_to_team === 'boolean' ? r.visible_to_team : true,
   }))
+
+  const { data: visRows, error: visErr } = await supabaseAdmin
+    .from('leader_tenant_catalog_ylada_visibility')
+    .select('ylada_link_id, visible_to_team')
+    .eq('leader_tenant_id', ctx.tenant.id)
+
+  const yladaVisibleToTeamByLinkId: Record<string, boolean> = {}
+  if (!visErr && visRows) {
+    for (const v of visRows) {
+      const lid = v.ylada_link_id as string | undefined
+      if (lid) yladaVisibleToTeamByLinkId[lid] = Boolean(v.visible_to_team)
+    }
+  } else if (
+    visErr &&
+    !/leader_tenant_catalog_ylada_visibility|Could not find|does not exist|schema cache/i.test(
+      visErr.message ?? ''
+    )
+  ) {
+    console.error('[pro-lideres/flows GET] ylada visibility', visErr)
+    return NextResponse.json({ error: 'Erro ao carregar visibilidade do catálogo' }, { status: 500 })
+  }
+
   const baseUrl = requestBaseUrl(request)
-  const catalog = await buildProLideresCatalog(ctx.tenant.owner_user_id, baseUrl, customRows)
+  let catalog = await buildProLideresCatalog(ctx.tenant.owner_user_id, baseUrl, customRows, {
+    yladaVisibleToTeamByLinkId,
+  })
+
+  if (ctx.role === 'member') {
+    catalog = catalog.filter((item) => item.visibleToTeam)
+  }
 
   return NextResponse.json({
     tenantId: ctx.tenant.id,

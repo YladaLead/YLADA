@@ -65,6 +65,10 @@ function CatalogRowCard({
   onEdit,
   copied,
   onCopied,
+  flowsApiBase,
+  showTeamVisibilityControls,
+  teamVisibilityBusy,
+  onTeamVisibilityChange,
 }: {
   item: ProLideresCatalogItem
   showRemove: boolean
@@ -72,6 +76,10 @@ function CatalogRowCard({
   onEdit?: () => void
   copied: 'link' | 'qr' | null
   onCopied: (mode: 'link' | 'qr') => void
+  flowsApiBase: string
+  showTeamVisibilityControls: boolean
+  teamVisibilityBusy: boolean
+  onTeamVisibilityChange: (item: ProLideresCatalogItem, visible: boolean) => void
 }) {
   const [whenOpen, setWhenOpen] = useState(false)
   const scriptsHref = item.yladaLinkId ? `/pt/links/editar/${item.yladaLinkId}` : '/pt/links'
@@ -196,6 +204,46 @@ function CatalogRowCard({
       <p className="mt-2 truncate font-mono text-[10px] text-gray-400" title={item.publicUrl}>
         {item.publicUrl}
       </p>
+
+      {showTeamVisibilityControls ? (
+        <div className="mt-3 border-t border-slate-100 pt-3">
+          <p className="text-xs font-semibold text-slate-800">Equipe no painel</p>
+          <p className="mt-0.5 text-[11px] leading-snug text-slate-600">
+            Defina se esta ferramenta aparece na biblioteca dos membros (biblioteca YLADA ou fluxo próprio).
+          </p>
+          <div className="mt-2 flex flex-wrap items-center gap-2">
+            {item.visibleToTeam ? (
+              <>
+                <span className="inline-flex items-center rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-900 ring-1 ring-emerald-100">
+                  Visível para a equipe
+                </span>
+                <button
+                  type="button"
+                  disabled={teamVisibilityBusy}
+                  onClick={() => onTeamVisibilityChange(item, false)}
+                  className="text-xs font-semibold text-amber-800 underline-offset-2 hover:underline disabled:opacity-50"
+                >
+                  Ocultar da equipe
+                </button>
+              </>
+            ) : (
+              <>
+                <span className="inline-flex items-center rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-950 ring-1 ring-amber-100">
+                  Oculta para a equipe
+                </span>
+                <button
+                  type="button"
+                  disabled={teamVisibilityBusy}
+                  onClick={() => onTeamVisibilityChange(item, true)}
+                  className="text-xs font-semibold text-blue-700 underline-offset-2 hover:underline disabled:opacity-50"
+                >
+                  Mostrar à equipe
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+      ) : null}
     </article>
   )
 }
@@ -238,6 +286,7 @@ export function ProLideresCatalogoClient({
   const [section, setSection] = useState<SectionKey>('library')
   const [search, setSearch] = useState('')
   const [addCategory, setAddCategory] = useState<TabKey>('sales')
+  const [teamVisibilityBusyId, setTeamVisibilityBusyId] = useState<string | null>(null)
 
   const defaultIntro =
     'Aqui você separa a biblioteca que a YLADA já deixa pronta dos links que você mesmo criar. Depois é só escolher entre ferramentas de vendas ou de recrutamento.'
@@ -349,6 +398,46 @@ export function ProLideresCatalogoClient({
       await load()
     } catch {
       setError('Erro de rede ao remover.')
+    }
+  }
+
+  async function setItemTeamVisible(item: ProLideresCatalogItem, visible: boolean) {
+    setTeamVisibilityBusyId(item.id)
+    setError(null)
+    try {
+      if (item.yladaLinkId) {
+        const res = await fetch(`${flowsApiBase}/flows/visibility`, {
+          method: 'PATCH',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ yladaLinkId: item.yladaLinkId, visibleToTeam: visible }),
+        })
+        const data = await res.json().catch(() => ({}))
+        if (!res.ok) {
+          setError((data as { error?: string }).error || 'Não foi possível atualizar a visibilidade.')
+          return
+        }
+      } else if (item.source === 'custom') {
+        const res = await fetch(`${flowsApiBase}/flows/${item.id}`, {
+          method: 'PATCH',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ visible_to_team: visible }),
+        })
+        const data = await res.json().catch(() => ({}))
+        if (!res.ok) {
+          setError((data as { error?: string }).error || 'Não foi possível atualizar a visibilidade.')
+          return
+        }
+      } else {
+        setError('Este item não suporta visibilidade por equipe.')
+        return
+      }
+      await load()
+    } catch {
+      setError('Erro de rede ao atualizar a visibilidade.')
+    } finally {
+      setTeamVisibilityBusyId(null)
     }
   }
 
@@ -504,6 +593,10 @@ export function ProLideresCatalogoClient({
               }
               copied={copyState[item.id] ?? null}
               onCopied={(mode) => setCopiedFor(item.id, mode)}
+              flowsApiBase={flowsApiBase}
+              showTeamVisibilityControls={isLeaderWorkspace}
+              teamVisibilityBusy={teamVisibilityBusyId === item.id}
+              onTeamVisibilityChange={(i, vis) => void setItemTeamVisible(i, vis)}
             />
           ))}
         </div>
