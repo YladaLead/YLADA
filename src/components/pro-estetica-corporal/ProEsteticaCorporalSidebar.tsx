@@ -2,8 +2,9 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useMemo } from 'react'
 import {
+  PRO_ESTETICA_CORPORAL_BASE_PATH,
   PRO_ESTETICA_CORPORAL_MENU_GROUPS,
   proEsteticaCorporalItemHref,
   type ProEsteticaCorporalMenuItem,
@@ -26,8 +27,6 @@ export default function ProEsteticaCorporalSidebar({
   const pathname = usePathname()
   const { isLeaderWorkspace, previewWithoutLogin } = useProLideresPainel()
   const { signOut, user, userProfile } = useAuth()
-  const [contaOpen, setContaOpen] = useState(false)
-  const contaRouteKeyRef = useRef<string | null>(null)
 
   const userName = previewWithoutLogin
     ? 'Pré-visualização'
@@ -53,32 +52,23 @@ export default function ProEsteticaCorporalSidebar({
     })).filter((g) => g.items.length > 0)
   }, [isLeaderWorkspace])
 
-  const mainGroups = filteredMenu.filter((g) => g.label !== 'Conta')
-  const contaGroup = filteredMenu.find((g) => g.label === 'Conta')
+  const mainGroups = filteredMenu
 
   const itemHref = useCallback((item: ProEsteticaCorporalMenuItem) => proEsteticaCorporalItemHref(item.path), [])
 
   const itemIsActive = useCallback(
     (item: ProEsteticaCorporalMenuItem) => {
       const href = itemHref(item)
-      if (item.key === 'visao') {
-        return pathname === PAINEL_PREFIX || pathname === `${PAINEL_PREFIX}/`
+      if (item.key === 'inicio') {
+        return pathname === PRO_ESTETICA_CORPORAL_BASE_PATH || pathname === `${PRO_ESTETICA_CORPORAL_BASE_PATH}/`
+      }
+      if (item.key === 'noel') {
+        return pathname === href || pathname?.startsWith(`${href}/`)
       }
       return pathname === href || pathname?.startsWith(`${href}/`)
     },
     [pathname, itemHref]
   )
-
-  useEffect(() => {
-    if (!contaGroup) return
-    const routeKey = pathname ?? ''
-    if (contaRouteKeyRef.current === routeKey) return
-    contaRouteKeyRef.current = routeKey
-    const matchesConta = contaGroup.items.some((item) => itemIsActive(item))
-    setContaOpen(matchesConta)
-  }, [contaGroup, pathname, itemIsActive])
-
-  const contaSectionActive = contaGroup?.items.some((item) => itemIsActive(item)) ?? false
   const perfilActive = pathname === PERFIL_PATH || pathname?.startsWith(`${PERFIL_PATH}/`)
 
   const renderItemLink = (item: ProEsteticaCorporalMenuItem) => {
@@ -94,7 +84,10 @@ export default function ProEsteticaCorporalSidebar({
         }`}
       >
         <span aria-hidden>{item.icon}</span>
-        {item.label}
+        <div className="min-w-0">
+          <p className="truncate">{item.label}</p>
+          {item.hint ? <p className="truncate text-[11px] font-medium text-gray-500">{item.hint}</p> : null}
+        </div>
       </Link>
     )
   }
@@ -146,30 +139,10 @@ export default function ProEsteticaCorporalSidebar({
         </div>
 
         <div className="shrink-0 border-t border-gray-200">
-          {contaGroup && (
-            <div className="p-3 pb-2">
-              <button
-                type="button"
-                onClick={() => setContaOpen((o) => !o)}
-                className={`flex min-h-[44px] w-full items-center justify-between gap-2 rounded-lg px-3 py-2 text-left text-sm font-medium transition-colors touch-manipulation ${
-                  contaSectionActive && !contaOpen ? 'bg-blue-50 text-blue-800' : 'text-gray-700 hover:bg-gray-100'
-                }`}
-                aria-expanded={contaOpen}
-              >
-                <span className="text-xs font-medium tracking-wide text-gray-500">Conta</span>
-                <span className="text-gray-400" aria-hidden>
-                  {contaOpen ? '▾' : '▸'}
-                </span>
-              </button>
-              {contaOpen && (
-                <div className="mt-1 space-y-0.5">{contaGroup.items.map((item) => renderItemLink(item))}</div>
-              )}
-            </div>
-          )}
-          <div className="px-3 pb-3">
+          <div className="px-3 pb-3 pt-2">
             {previewWithoutLogin ? (
               <Link
-                href={`/pro-estetica-corporal/entrar?next=${encodeURIComponent(pathname || '/pro-estetica-corporal/painel')}`}
+                href={`/pro-estetica-corporal/entrar?next=${encodeURIComponent(pathname || PRO_ESTETICA_CORPORAL_BASE_PATH)}`}
                 onClick={onMobileClose}
                 className="flex min-h-[44px] w-full items-center gap-3 rounded-lg bg-blue-600 px-3 py-2.5 text-left text-sm font-semibold text-white transition-colors touch-manipulation hover:bg-blue-700"
               >

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import YladaAreaShell from '@/components/ylada/YladaAreaShell'
 import { getYladaAreaPathPrefix } from '@/config/ylada-areas'
 import { getFlowById } from '@/config/ylada-flow-catalog'
@@ -59,6 +60,8 @@ type LinkRow = {
   theme_raw?: string | null
   /** Não-Pro com >1 ativo: link não é o mais antigo — público não usa. */
   public_paused_freemium?: boolean
+  /** Preset Pro Líderes (rede/MM); oculto no painel Pro Estética corporal. */
+  pro_lideres_preset?: boolean
 }
 
 /** Rótulos amigáveis de perfil/categoria para exibir ao usuário (sem jargão técnico). */
@@ -124,9 +127,17 @@ interface LinksPageContentProps {
   areaLabel?: string
   /** Quando true, não renderiza YladaAreaShell (para uso em Links hub com abas). */
   embedded?: boolean
+  /** Hub Pro Estética corporal: esconde presets Pro Líderes e mostra estado vazio focado em Noel + biblioteca. */
+  proEsteticaCorporalEmbedded?: boolean
 }
 
-function LinksPageContent({ areaCodigo = 'ylada', areaLabel = 'YLADA', embedded = false }: LinksPageContentProps) {
+function LinksPageContent({
+  areaCodigo = 'ylada',
+  areaLabel = 'YLADA',
+  embedded = false,
+  proEsteticaCorporalEmbedded = false,
+}: LinksPageContentProps) {
+  const pathname = usePathname()
   const prefix = getYladaAreaPathPrefix(areaCodigo)
   const [templates, setTemplates] = useState<Template[]>([])
   const [links, setLinks] = useState<LinkRow[]>([])
@@ -201,6 +212,16 @@ function LinksPageContent({ areaCodigo = 'ylada', areaLabel = 'YLADA', embedded 
     () => links.filter((l) => l.status === 'active').length,
     [links]
   )
+  /** Lista exibida: no Pro Estética corporal não misturamos presets Pro Líderes (outra linha de negócio). */
+  const linksForUi = useMemo(() => {
+    if (!proEsteticaCorporalEmbedded) return links
+    return links.filter((l) => {
+      if (l.pro_lideres_preset) return false
+      // Legado: alguns fluxos de recrutamento não tinham flag no meta; slug costuma trazer `recrut`.
+      if (String(l.slug).includes('-recrut-')) return false
+      return true
+    })
+  }, [links, proEsteticaCorporalEmbedded])
   /** Plano gratuito já tem 1 diagnóstico ativo: não dá para criar outro ativo até pausar/arquivar ou fazer Pro. */
   const freeTierBlocksNewActive = isProUser === false && activeLinksCount >= 1
 
@@ -210,7 +231,7 @@ function LinksPageContent({ areaCodigo = 'ylada', areaLabel = 'YLADA', embedded 
     try {
       const [tRes, lRes, pRes, subRes] = await Promise.all([
         fetch('/api/ylada/templates', { credentials: 'include' }),
-        fetch('/api/ylada/links', { credentials: 'include' }),
+        fetch('/api/ylada/links', { credentials: 'include', cache: 'no-store' }),
         fetch(`/api/ylada/profile?segment=${encodeURIComponent(segment)}`, { credentials: 'include' }),
         fetch('/api/ylada/subscription', { credentials: 'include' }),
       ])
@@ -298,10 +319,10 @@ function LinksPageContent({ areaCodigo = 'ylada', areaLabel = 'YLADA', embedded 
   }, [])
 
   useEffect(() => {
-    if (!loading && links.length > 0) {
+    if (!loading && linksForUi.length > 0) {
       setComoFuncionaAberto(false)
     }
-  }, [loading, links.length])
+  }, [loading, linksForUi.length])
 
   const fetchStrategy = useCallback(() => {
     setStrategyLoading(true)
@@ -685,9 +706,16 @@ function LinksPageContent({ areaCodigo = 'ylada', areaLabel = 'YLADA', embedded 
     }
   }
 
-  const hasLinks = links.length > 0
-  const totalRespostasAgregado = links.reduce((s, l) => s + (l.stats?.diagnosis_count ?? l.stats?.complete ?? 0), 0)
-  const totalConversasAgregado = links.reduce((s, l) => s + (l.stats?.cta_click ?? 0), 0)
+  const hasLinks = linksForUi.length > 0
+  const totalRespostasAgregado = linksForUi.reduce((s, l) => s + (l.stats?.diagnosis_count ?? l.stats?.complete ?? 0), 0)
+  const totalConversasAgregado = linksForUi.reduce((s, l) => s + (l.stats?.cta_click ?? 0), 0)
+  /** Enquanto GET /api/ylada/links não termina, `links` fica [] — sem isso a tela “clean” aparece e some (parece cache). */
+  const proEsteticaAwaitingLinks = proEsteticaCorporalEmbedded && loading
+  const showProEsteticaEmpty = proEsteticaCorporalEmbedded && !loading && !hasLinks
+  const libraryTabHref =
+    embedded && pathname?.includes('pro-estetica-corporal')
+      ? `${pathname.split('?')[0]}?tab=prontos`
+      : `${prefix}/links?tab=prontos`
 
   const scrollToCriadorTexto = () => {
     if (freeTierBlocksNewActive) {
@@ -704,12 +732,17 @@ function LinksPageContent({ areaCodigo = 'ylada', areaLabel = 'YLADA', embedded 
     <div className={`max-w-2xl ${embedded ? 'space-y-4' : 'space-y-6'}`}>
       {embedded && (
         <Link
-          href={`${prefix}/links?tab=prontos`}
+          href={libraryTabHref}
           className="inline-flex items-center gap-1.5 text-sm text-sky-600 hover:text-sky-800"
         >
           <span aria-hidden>📚</span>
           Usar modelo pronto da biblioteca
         </Link>
+      )}
+      {proEsteticaAwaitingLinks && (
+        <div className="rounded-lg border border-gray-200 bg-gray-50/90 px-4 py-8 text-center text-sm text-gray-600" aria-busy="true">
+          Carregando seus links…
+        </div>
       )}
       {!embedded && (
         <div>
@@ -809,7 +842,7 @@ function LinksPageContent({ areaCodigo = 'ylada', areaLabel = 'YLADA', embedded 
           </div>
         )}
 
-        {hasLinks && (
+        {hasLinks && !proEsteticaAwaitingLinks && (
           <section
             ref={linksListRef}
             className={`bg-white rounded-lg border border-gray-200 ${embedded ? 'p-3 sm:p-4' : 'p-4'}`}
@@ -819,8 +852,8 @@ function LinksPageContent({ areaCodigo = 'ylada', areaLabel = 'YLADA', embedded 
               Cada &quot;Copiar URL&quot; copia <strong>só aquele</strong> link. No celular, se não colar, copie o endereço cinza abaixo.
             </p>
             {(() => {
-              const linkMaisAtivo = links.length > 0
-                ? [...links].sort((a, b) => {
+              const linkMaisAtivo = linksForUi.length > 0
+                ? [...linksForUi].sort((a, b) => {
                     const sa = a.stats?.diagnosis_count ?? a.stats?.complete ?? 0
                     const sb = b.stats?.diagnosis_count ?? b.stats?.complete ?? 0
                     return sb - sa
@@ -842,7 +875,7 @@ function LinksPageContent({ areaCodigo = 'ylada', areaLabel = 'YLADA', embedded 
               )
             })()}
             <ul className={embedded ? 'space-y-3' : 'space-y-4'}>
-              {links.map((link) => {
+              {linksForUi.map((link) => {
                 const stats = link.stats ?? {
                   view: 0,
                   start: 0,
@@ -1012,7 +1045,41 @@ function LinksPageContent({ areaCodigo = 'ylada', areaLabel = 'YLADA', embedded 
           </section>
         )}
 
-        {!hasLinks && (
+        {showProEsteticaEmpty && (
+          <section className="rounded-xl border border-gray-200 bg-white p-5 sm:p-6 shadow-sm">
+            <h2 className="text-base font-semibold text-gray-900">Seu primeiro link de estética</h2>
+            <p className="text-sm text-gray-600 mt-2 leading-relaxed">
+              Esta lista mostra só o que você criar para <strong>estética corporal</strong>. Links de outras linhas (por exemplo, recrutamento ou distribuição) não aparecem aqui — a ideia é você começar limpo, como na primeira vez.
+            </p>
+            <p className="text-sm text-gray-600 mt-3 leading-relaxed">
+              O caminho mais guiado é conversar com o <strong>Noel</strong>: ele monta o diagnóstico com você. Se preferir algo já estruturado, use um modelo da aba Biblioteca.
+            </p>
+            <div className="mt-5 flex flex-col sm:flex-row gap-2.5">
+              <Link
+                href="/pro-estetica-corporal/painel"
+                className="inline-flex items-center justify-center gap-2 rounded-xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white hover:bg-slate-800 transition-colors"
+              >
+                <span aria-hidden>✨</span>
+                Criar com o Noel
+              </Link>
+              <Link
+                href={libraryTabHref}
+                className="inline-flex items-center justify-center gap-2 rounded-xl border border-sky-200 bg-sky-50 px-5 py-3 text-sm font-semibold text-sky-800 hover:bg-sky-100/80 transition-colors"
+              >
+                <span aria-hidden>📚</span>
+                Ver modelos na biblioteca
+              </Link>
+            </div>
+            <p className="text-xs text-gray-500 mt-4">
+              <Link href={`${prefix}/links/novo`} className="text-sky-700 underline hover:text-sky-900">
+                Abrir o criador completo
+              </Link>{' '}
+              na interface (tema e fluxo passo a passo).
+            </p>
+          </section>
+        )}
+
+        {!hasLinks && !showProEsteticaEmpty && !proEsteticaAwaitingLinks && (
           <div className="rounded-xl border-2 border-amber-200 bg-amber-50/80 p-5">
             <p className="text-sm font-semibold text-gray-900 mb-2">Primeiro link em poucos passos</p>
             <button
@@ -1027,6 +1094,7 @@ function LinksPageContent({ areaCodigo = 'ylada', areaLabel = 'YLADA', embedded 
           </div>
         )}
 
+        {!showProEsteticaEmpty && !proEsteticaAwaitingLinks && (
         <div
           className={`rounded-lg border border-emerald-100 bg-emerald-50/60 px-4 ${hasLinks ? 'py-3' : 'py-4'}`}
         >
@@ -1058,6 +1126,7 @@ function LinksPageContent({ areaCodigo = 'ylada', areaLabel = 'YLADA', embedded 
             </>
           )}
         </div>
+        )}
 
         {!embedded && (
           <div className="rounded-lg border border-indigo-100 bg-indigo-50/50 p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
@@ -1076,13 +1145,14 @@ function LinksPageContent({ areaCodigo = 'ylada', areaLabel = 'YLADA', embedded 
           </div>
         )}
 
-        {!hasLinks && (
+        {!hasLinks && !showProEsteticaEmpty && !proEsteticaAwaitingLinks && (
           <p className="text-xs text-gray-500 italic">
             Dica: diagnósticos que despertam curiosidade geram mais conversas no WhatsApp. Evite perguntas muito óbvias.
           </p>
         )}
 
         {/* Criar novo diagnóstico */}
+        {!showProEsteticaEmpty && !proEsteticaAwaitingLinks && (
         <section ref={criadorRef} className="bg-white rounded-lg border border-gray-200 p-4">
           <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between mb-4">
             <div>
@@ -1400,8 +1470,9 @@ function LinksPageContent({ areaCodigo = 'ylada', areaLabel = 'YLADA', embedded 
             </>
           )}
         </section>
+        )}
 
-        {!hasLinks && (
+        {!hasLinks && !embedded && (
           <section ref={linksListRef} className="bg-white rounded-lg border border-gray-200 p-4">
             <h2 className="text-base font-semibold text-gray-900 mb-1">Seus links</h2>
             <p className="text-xs text-gray-500 mb-3">Quando você criar o primeiro, ele aparece aqui para copiar e acompanhar.</p>

@@ -4,12 +4,14 @@ import { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import ProEsteticaCorporalSidebar from './ProEsteticaCorporalSidebar'
+import ProEsteticaCorporalMobileNav from './ProEsteticaCorporalMobileNav'
+import { PRO_ESTETICA_CORPORAL_INICIO_PATH } from '@/config/pro-estetica-corporal-menu'
 import { ProLideresPainelProvider, type ProLideresPainelContextValue } from '@/components/pro-lideres/pro-lideres-painel-context'
 import { useAuth } from '@/hooks/useAuth'
 import { YLADA_OG_FALLBACK_LOGO_PATH } from '@/lib/ylada-og-fallback-logo'
 
 const YLADA_LOGO = YLADA_OG_FALLBACK_LOGO_PATH
-const PAINEL_HOME = '/pro-estetica-corporal/painel'
+const PAINEL_HOME = PRO_ESTETICA_CORPORAL_INICIO_PATH
 const PERFIL = '/pro-estetica-corporal/painel/perfil'
 
 export default function ProEsteticaCorporalAreaShell({
@@ -126,7 +128,8 @@ export default function ProEsteticaCorporalAreaShell({
               </span>
             </Link>
           </header>
-          <main className="flex-1 p-4 sm:p-5 lg:p-6">{children}</main>
+          <main className="flex-1 p-4 pb-24 sm:p-5 lg:pb-6 lg:p-6">{children}</main>
+          <ProEsteticaCorporalMobileNav />
         </div>
       </div>
     </ProLideresPainelProvider>

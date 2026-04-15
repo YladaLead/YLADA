@@ -228,6 +228,8 @@ interface NoelChatProps {
   hideInputHint?: boolean
   /** Texto do botão de envio (default: «Perguntar ao Noel»). */
   sendButtonLabel?: string
+  /** Se true, não mostra o rótulo "Sugestões:" acima dos chips. */
+  hideSuggestionsHeading?: boolean
 }
 
 function isProLideresNoelApiPath(path: string | undefined): boolean {
@@ -250,6 +252,7 @@ export default function NoelChat({
   showChatHeaderTitle = true,
   hideInputHint = false,
   sendButtonLabel,
+  hideSuggestionsHeading = false,
 }: NoelChatProps) {
   const router = useRouter()
   const pathname = usePathname()
@@ -257,6 +260,11 @@ export default function NoelChat({
   const uxContent = getNoelUxContent(area)
   const resolvedChatApi = chatApiPath ?? '/api/ylada/noel'
   const proLideresPayload = isProLideresNoelApiPath(resolvedChatApi)
+  /** Links da matriz YLADA para esteticista ficam em /pt/estetica, não na rota do painel embed. */
+  const yladaMatrixPathPrefix =
+    area === 'pro_estetica_corporal' || resolvedChatApi?.includes('/pro-estetica-corporal/noel')
+      ? getYladaAreaPathPrefix('estetica')
+      : getYladaAreaPathPrefix(area)
   const [messages, setMessages] = useState<Message[]>(() => {
     const saved = normalizeSavedMessagesForSkipWelcome(loadMessages(area), skipWelcomeMessage)
     if (saved.length > 0) return saved
@@ -726,7 +734,11 @@ export default function NoelChat({
         </button>
       </div>
       <div className="flex-1 overflow-y-auto min-h-[380px] max-h-[70vh] p-4 sm:p-5 space-y-5 bg-gradient-to-b from-sky-50/50 to-white">
-        {messages.map((msg) => (
+        {messages.map((msg) => {
+          if (msg.role === 'assistant' && msg.id === 'welcome' && !String(msg.content ?? '').trim()) {
+            return null
+          }
+          return (
           <div
             key={msg.id}
             data-noel-role={msg.role}
@@ -803,7 +815,7 @@ export default function NoelChat({
                       <div className="mt-3 flex flex-wrap gap-2">
                         {ctxForMessage?.link_id && (
                           <Link
-                            href={`${getYladaAreaPathPrefix(area)}/links/editar/${ctxForMessage.link_id}`}
+                            href={`${yladaMatrixPathPrefix}/links/editar/${ctxForMessage.link_id}`}
                             className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-sky-600 text-white text-sm font-medium hover:bg-sky-700 transition-colors touch-manipulation"
                           >
                             Editar quiz
@@ -830,10 +842,13 @@ export default function NoelChat({
               )}
             </div>
           </div>
-        ))}
+          )
+        })}
         {showSuggestions && (contextualActions?.length ? contextualActions : uxContent.suggestions).length > 0 && (
           <div className="pt-2 pb-1">
-            <p className="text-xs font-medium text-gray-500 mb-2">Sugestões:</p>
+            {!hideSuggestionsHeading ? (
+              <p className="text-xs font-medium text-gray-500 mb-2">Sugestões:</p>
+            ) : null}
             <div className="flex flex-wrap gap-2">
               {(contextualActions?.length ? contextualActions : uxContent.suggestions).map((s, i) => {
                 const action = contextualActions?.length ? (contextualActions[i] as NoelContextualAction) : null
@@ -910,7 +925,7 @@ export default function NoelChat({
         {showEditarConcordoButtons && (
           <div className="flex flex-wrap gap-2 pt-2">
             <Link
-              href={`${getYladaAreaPathPrefix(area)}/links/editar/${ctxForLinkActions!.link_id}`}
+              href={`${yladaMatrixPathPrefix}/links/editar/${ctxForLinkActions!.link_id}`}
               className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-sky-600 text-white text-sm font-medium hover:bg-sky-700 transition-colors touch-manipulation"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -933,7 +948,7 @@ export default function NoelChat({
             )}
             <button
               type="button"
-              onClick={() => router.push(`${getYladaAreaPathPrefix(area)}/links`)}
+              onClick={() => router.push(`${yladaMatrixPathPrefix}/links`)}
               className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-sky-50 text-sky-700 text-sm font-medium border border-sky-200 hover:bg-sky-100 transition-colors touch-manipulation"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

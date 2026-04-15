@@ -32,7 +32,7 @@ export function isProEsteticaCorporalDevStubTenant(tenant: Pick<LeaderTenantRow,
 }
 
 /** E-mails que sempre podem ter tenant estética criado ao entrar (idealizador), além da env. */
-const PRO_ESTETICA_CORPORAL_BOOTSTRAP_EMAILS_BUILTIN = ['andre@proestetica.com'] as const
+const PRO_ESTETICA_CORPORAL_BOOTSTRAP_EMAILS_BUILTIN = ['demo@proesteticacorporal.com'] as const
 
 /** Lista normalizada: built-in + PRO_ESTETICA_CORPORAL_BOOTSTRAP_LEADER_EMAILS (vírgulas). */
 export function isProEsteticaCorporalBootstrapLeaderEmail(email: string | undefined | null): boolean {

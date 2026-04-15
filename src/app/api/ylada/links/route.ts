@@ -28,6 +28,12 @@ function themeRawFromConfigJson(configJson: unknown): string | null {
   return typeof raw === 'string' && raw.trim() ? raw.trim() : null
 }
 
+function proLideresPresetFromConfigJson(configJson: unknown): boolean {
+  if (!configJson || typeof configJson !== 'object') return false
+  const meta = (configJson as { meta?: { pro_lideres_preset?: unknown } }).meta
+  return meta?.pro_lideres_preset === true
+}
+
 function buildStatsMap(
   rows: Array<{ link_id: string; event_type: string; cnt: number | string }> | null
 ): Record<string, EventCounts> {
@@ -151,9 +157,11 @@ export async function GET(request: NextRequest) {
     const list = links.map((row) => {
       const { config_json, ...rest } = row as typeof row & { config_json?: unknown }
       const theme_raw = themeRawFromConfigJson(config_json)
+      const pro_lideres_preset = proLideresPresetFromConfigJson(config_json)
       return {
         ...rest,
         theme_raw,
+        pro_lideres_preset,
         url: baseUrl ? `${baseUrl}/l/${row.slug}` : `/l/${row.slug}`,
         template_name: row.template_id ? templatesMap[row.template_id]?.name ?? null : null,
         template_type: row.template_id ? templatesMap[row.template_id]?.type ?? null : null,
@@ -174,7 +182,10 @@ export async function GET(request: NextRequest) {
       }
     })
 
-    return NextResponse.json({ success: true, data: list })
+    return NextResponse.json(
+      { success: true, data: list },
+      { headers: { 'Cache-Control': 'private, no-store, must-revalidate' } }
+    )
   } catch (e) {
     console.error('[ylada/links]', e)
     return NextResponse.json({ success: false, error: 'Erro ao listar links' }, { status: 500 })

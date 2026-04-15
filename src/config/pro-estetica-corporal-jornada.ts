@@ -18,20 +18,7 @@ export const PRO_ESTETICA_CORPORAL_CAPTAR = {
     'Em **Biblioteca e links**, organiza o que usas para **primeiro contacto** e **marcação** com protocolo claro.',
 } as const
 
-export const PRO_ESTETICA_CORPORAL_RETENCAO = {
-  eyebrow: 'Jornada do cliente · Retenção',
-  title: 'Constância de sessões e pacotes',
-  lead:
-    'Depois da primeira sessão, o foco é frequência combinada, lembretes de retorno e comunicação clara sobre o plano (número de sessões, intervalo, cuidados entre visitas).',
-  bullets: [
-    'Confirmar e reagendar com antecedência; tratar faltas com educação e reforço do combinado do protocolo.',
-    'Scripts para mensagens de “falta pouco” para a próxima sessão e de pós-sessão sem soar genérico.',
-    'Pacotes e continuidade: explicar por que o resultado costuma pedir sequência — sem pressão, com transparência.',
-    'Noel: ajuda a formular comunicação de valor e continuidade no teu posicionamento.',
-  ],
-  nextHint:
-    'Em **Biblioteca e links**, agrupa o que usas **antes e depois** da sessão para reforçar o próximo passo.',
-} as const
+/** Conteúdo longo de retenção foi substituído por `ProEsteticaRetencaoExecucao` + Noel `?focus=ret_*`. */
 
 export const PRO_ESTETICA_CORPORAL_ACOMPANHAR = {
   eyebrow: 'Jornada do cliente · Acompanhar',

@@ -32,7 +32,7 @@ export function ProEsteticaCorporalHeader() {
             href="/pro-estetica-corporal/painel"
             className="rounded-lg px-2 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 sm:px-3"
           >
-            Painel
+            Noel
           </Link>
           {loading ? (
             <span className="rounded-lg px-3 py-2 text-sm text-gray-400" aria-hidden>

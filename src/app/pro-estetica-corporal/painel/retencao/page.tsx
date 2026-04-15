@@ -1,6 +1,6 @@
-import { ProEsteticaJornadaIntro } from '@/components/pro-estetica-corporal/ProEsteticaJornadaIntro'
-import { PRO_ESTETICA_CORPORAL_RETENCAO } from '@/config/pro-estetica-corporal-jornada'
+import ProEsteticaRetencaoExecucao from '@/components/pro-estetica-corporal/ProEsteticaRetencaoExecucao'
 
+/** Retenção: execução imediata (Noel com contexto), não teoria. */
 export default function ProEsteticaRetencaoPage() {
-  return <ProEsteticaJornadaIntro {...PRO_ESTETICA_CORPORAL_RETENCAO} />
+  return <ProEsteticaRetencaoExecucao />
 }

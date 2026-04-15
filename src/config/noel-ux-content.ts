@@ -21,6 +21,8 @@ export type NoelArea =
   | 'fitness'
   /** Mentor no painel Pro Líderes (operador / equipe; contexto em /api/pro-lideres/noel). */
   | 'pro_lideres'
+  /** Mentor no painel Pro Estética Corporal (/api/pro-estetica-corporal/noel). */
+  | 'pro_estetica_corporal'
 
 export interface NoelUxContent {
   welcomeMessage: string
@@ -138,6 +140,35 @@ const PRO_LIDERES_SUGGESTIONS = [
   },
 ]
 
+/** Pro Estética Corporal: sem parágrafo de boas-vindas — só os atalhos abaixo. */
+const PRO_ESTETICA_CORPORAL_SUGGESTIONS = [
+  {
+    label: 'Quero atrair clientes',
+    prompt:
+      'Quero atrair mais clientes para estética corporal. Me guia no próximo passo prático (WhatsApp, Instagram ou link).',
+  },
+  {
+    label: 'Quero fechar sessões',
+    prompt:
+      'Quero fechar mais sessões e marcar a primeira visita. Me ajuda com objeção de preço e tempo e o próximo passo no WhatsApp.',
+  },
+  {
+    label: 'Quero reter clientes',
+    prompt:
+      'Quero reter clientes e manter a recorrência de sessões. Me dá um plano simples de follow-up e mensagens.',
+  },
+  {
+    label: 'Pós-atendimento',
+    prompt:
+      'Preciso de mensagens de pós-atendimento e follow-up entre sessões para estética corporal.',
+  },
+  {
+    label: 'Meus links',
+    prompt:
+      'Quero criar ou ajustar um link YLADA para captar ou qualificar clientes. Me guia passo a passo.',
+  },
+]
+
 const NOEL_PRO_LIDERES_WELCOME = `Sou o **Noel** no teu espaço **Pro Líderes**.
 
 Estou focado na operação de campo: **contato**, **WhatsApp**, **links YLADA** e **scripts** para tu e a tua equipe — no contexto do teu operador (ex.: Herbalife / h‑líder).
@@ -217,11 +248,18 @@ const NOEL_UX_BY_AREA: Record<NoelArea, NoelUxContentWithoutWelcome> = {
     placeholder: 'Escreva aqui…',
     placeholderExample: 'Ex.: roteiro para follow-up ou dúvida da equipe',
   },
+  pro_estetica_corporal: {
+    suggestions: PRO_ESTETICA_CORPORAL_SUGGESTIONS,
+    placeholder: 'Escreva o que precisa…',
+    placeholderExample: 'Ex.: legenda para reel ou resposta no WhatsApp',
+  },
 }
 
 export function getNoelUxContent(area: NoelArea): NoelUxContent {
   const row = NOEL_UX_BY_AREA[area] ?? DEFAULT_NOEL_UX_ROW
-  const welcomeMessage = area === 'pro_lideres' ? NOEL_PRO_LIDERES_WELCOME : NOEL_UNIVERSAL_WELCOME
+  let welcomeMessage = NOEL_UNIVERSAL_WELCOME
+  if (area === 'pro_lideres') welcomeMessage = NOEL_PRO_LIDERES_WELCOME
+  if (area === 'pro_estetica_corporal') welcomeMessage = ''
   return {
     welcomeMessage,
     ...row,

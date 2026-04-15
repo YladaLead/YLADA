@@ -139,6 +139,7 @@ function LinksHubContentInner({
             areaCodigo={areaCodigo as OnboardingAreaCodigo}
             areaLabel={areaLabel}
             embedded
+            proEsteticaCorporalEmbedded={!!bibliotecaEsteticaCorporalScope}
           />
         )}
     </div>

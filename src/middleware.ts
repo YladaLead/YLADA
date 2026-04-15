@@ -45,10 +45,24 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(url, 308)
   }
 
-  // Pro Estética (e subrotas): URL canónica sem /pt — quem abrir /pt/pro-estetica-corporal… vai para a rota certa
+  // Pro Estética (e subrotas): URL canónica sem /pt — quem abrir /pt/pro-estetica… vai para a rota certa
+  if (pathname === '/pt/pro-estetica' || pathname.startsWith('/pt/pro-estetica/')) {
+    const url = request.nextUrl.clone()
+    url.pathname = pathname.replace(/^\/pt(?=\/pro-estetica)/, '') || '/pro-estetica'
+    return NextResponse.redirect(url, 308)
+  }
+
+  // Pro Estética Corporal (e subrotas): URL canónica sem /pt
   if (pathname === '/pt/pro-estetica-corporal' || pathname.startsWith('/pt/pro-estetica-corporal/')) {
     const url = request.nextUrl.clone()
     url.pathname = pathname.replace(/^\/pt(?=\/pro-estetica-corporal)/, '') || '/pro-estetica-corporal'
+    return NextResponse.redirect(url, 308)
+  }
+
+  // Pro Estética Capilar (e subrotas): URL canónica sem /pt
+  if (pathname === '/pt/pro-estetica-capilar' || pathname.startsWith('/pt/pro-estetica-capilar/')) {
+    const url = request.nextUrl.clone()
+    url.pathname = pathname.replace(/^\/pt(?=\/pro-estetica-capilar)/, '') || '/pro-estetica-capilar'
     return NextResponse.redirect(url, 308)
   }
 
@@ -66,6 +80,8 @@ export function middleware(request: NextRequest) {
     pathname.startsWith('/admin') || // IMPORTANTE: Admin SEMPRE sem /pt
     pathname.startsWith('/pro-lideres') || // YLADA Pro Líderes — canônico sem /pt
     pathname.startsWith('/pro-estetica-corporal') || // YLADA Pro Estética Corporal — canônico sem /pt
+    pathname.startsWith('/pro-estetica-capilar') || // YLADA Pro Estética Capilar — canônico sem /pt
+    pathname.startsWith('/pro-estetica') || // YLADA Pro Estética (hub por segmentos) — canônico sem /pt
     pathname.startsWith('/cursos') ||
     pathname.startsWith('/create') ||
     pathname.startsWith('/api/') ||

@@ -1,6 +1,9 @@
 /**
  * GET /api/ylada/biblioteca — lista itens da biblioteca com filtros.
  * Query: tipo?, segmento?, tema?, subscope=estetica_corporal (lista fechada por template_id em `pro-estetica-corporal-biblioteca.ts`)
+ *
+ * Sem login: só quando `subscope=estetica_corporal` e pré-visualização pública estiver ligada
+ * (`PRO_ESTETICA_CORPORAL_PUBLIC_PREVIEW` / dev) — catálogo é leitura pública da BD, sem dado de conta.
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { requireApiAuth } from '@/lib/api-auth'
@@ -10,22 +13,27 @@ import {
   SEGMENT_CODES_BIBLIOTECA_ESTETICA_CORPORAL,
   filtrarBibliotecaItensEsteticaCorporal,
 } from '@/config/pro-estetica-corporal-biblioteca'
+import { proEsteticaCorporalPublicPreviewNoAuthEnabled } from '@/lib/pro-estetica-corporal-server'
 
 export async function GET(request: NextRequest) {
   try {
-    const auth = await requireApiAuth(request, [...YLADA_API_ALLOWED_PROFILES])
-    if (auth instanceof NextResponse) return auth
-
-    if (!supabaseAdmin) {
-      return NextResponse.json({ error: 'Backend não configurado' }, { status: 503 })
-    }
-
     const { searchParams } = new URL(request.url)
     const tipo = searchParams.get('tipo')?.trim() || ''
     const segmento = searchParams.get('segmento')?.trim() || ''
     const tema = searchParams.get('tema')?.trim() || ''
     const subscope = searchParams.get('subscope')?.trim() || ''
     const esteticaCorporal = subscope === 'estetica_corporal'
+    const allowPublicEsteticaCorporalCatalog =
+      esteticaCorporal && proEsteticaCorporalPublicPreviewNoAuthEnabled()
+
+    const auth = await requireApiAuth(request, [...YLADA_API_ALLOWED_PROFILES])
+    if (auth instanceof NextResponse) {
+      if (!allowPublicEsteticaCorporalCatalog) return auth
+    }
+
+    if (!supabaseAdmin) {
+      return NextResponse.json({ error: 'Backend não configurado' }, { status: 503 })
+    }
 
     let query = supabaseAdmin
       .from('ylada_biblioteca_itens')
