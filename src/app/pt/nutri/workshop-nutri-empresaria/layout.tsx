@@ -9,14 +9,14 @@ const workshopOgImage = `${baseUrl}/images/workshop-agenda-instavel/banner-aula-
 export const metadata: Metadata = {
   title: 'Aula Nutri Empresária — YLADA Nutri',
   description:
-    'Aula ao vivo para nutricionistas: agenda, oferta e Método YLADA com Dra. Gláucia Melo e Andre Faula. Inscrição gratuita; WhatsApp com link e lembretes.',
+    'Você é nutricionista, mas seu posicionamento ainda não é de empresária? Aula ao vivo com Dra. Gláucia Melo e Andre Faula (CEO YLADA). Diagnóstico, decisão rápida. Explique menos. Venda mais. Grátis; WhatsApp com acesso e lembretes.',
   alternates: {
     canonical: workshopPageUrl,
   },
   openGraph: {
     title: 'Aula Nutri Empresária — YLADA Nutri',
     description:
-      'Agenda, oferta e método YLADA em aula ao vivo com Dra. Gláucia Melo. Grátis: inscrição e automação no WhatsApp.',
+      'Posicionamento de empresária, diagnóstico rápido e aula ao vivo com Gláucia Melo + CEO YLADA. Grátis, online, vagas limitadas.',
     url: workshopPageUrl,
     siteName: 'YLADA Nutri',
     type: 'website',
@@ -35,7 +35,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Aula Nutri Empresária — YLADA Nutri',
     description:
-      'Aula ao vivo: agenda, oferta e YLADA com Dra. Gláucia Melo. Inscrição grátis e link no WhatsApp.',
+      'Nutricionista: posicionamento, diagnóstico e decisão. Aula gratuita com Gláucia Melo + YLADA. Link no WhatsApp.',
     images: [workshopOgImage],
   },
 }
