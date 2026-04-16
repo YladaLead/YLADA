@@ -179,7 +179,12 @@ export function ProLideresEquipeAttributionPanel() {
             <>
               <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
                 <label className="block min-w-0 flex-1 text-sm">
-                  <span className="mb-1 block font-medium text-gray-700">Qual ferramenta acompanhar</span>
+                  <span className="mb-0.5 block font-medium text-gray-700">Acompanhar cada pessoa da equipa</span>
+                  <span className="mb-2 block text-xs font-normal text-gray-500">
+                    Primeiro escolhe o <strong className="font-medium text-gray-600">link YLADA</strong> em que queres
+                    ver o desempenho individual — a tabela abaixo lista toda a gente; usa a busca para filtrar por
+                    nome.
+                  </span>
                   <select
                     value={linkId}
                     onChange={(e) => setLinkId(e.target.value)}
