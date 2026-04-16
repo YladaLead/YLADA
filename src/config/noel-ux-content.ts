@@ -145,27 +145,27 @@ const PRO_ESTETICA_CORPORAL_SUGGESTIONS = [
   {
     label: 'Quero atrair clientes',
     prompt:
-      'Quero atrair mais clientes para estética corporal. Me guia no próximo passo prático (WhatsApp, Instagram ou link).',
+      'Quero atrair mais clientes para estética corporal. Me guia no próximo passo prático (Instagram, WhatsApp ou link de diagnóstico YLADA para abrir conversa com contexto).',
   },
   {
     label: 'Quero fechar sessões',
     prompt:
-      'Quero fechar mais sessões e marcar a primeira visita. Me ajuda com objeção de preço e tempo e o próximo passo no WhatsApp.',
+      'Quero fechar mais sessões e marcar a primeira visita. Me ajuda com objeções de preço e tempo e o próximo passo no WhatsApp, em tom consultivo.',
   },
   {
     label: 'Quero reter clientes',
     prompt:
-      'Quero reter clientes e manter a recorrência de sessões. Me dá um plano simples de follow-up e mensagens.',
+      'Quero reter clientes e manter a recorrência de sessões. Me dá um plano simples de follow-up e mensagens curtas entre sessões.',
   },
   {
     label: 'Pós-atendimento',
     prompt:
-      'Preciso de mensagens de pós-atendimento e follow-up entre sessões para estética corporal.',
+      'Preciso de mensagens de pós-atendimento e follow-up entre sessões para estética corporal (próximo passo claro, sem pressão).',
   },
   {
-    label: 'Meus links',
+    label: 'Link de diagnóstico',
     prompt:
-      'Quero criar ou ajustar um link YLADA para captar ou qualificar clientes. Me guia passo a passo.',
+      'Quero criar ou ajustar um link YLADA focado em diagnóstico / avaliação inicial (qualificar interesse antes do WhatsApp). Não quero soar como “formulário de contato”. Me guia no que a cliente vê, no que pergunto no fluxo e num texto curto para eu compartilhar o link.',
   },
 ]
 

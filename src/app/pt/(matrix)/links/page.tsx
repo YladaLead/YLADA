@@ -741,7 +741,7 @@ function LinksPageContent({
       )}
       {proEsteticaAwaitingLinks && (
         <div className="rounded-lg border border-gray-200 bg-gray-50/90 px-4 py-8 text-center text-sm text-gray-600" aria-busy="true">
-          Carregando seus links…
+          A carregar os teus links…
         </div>
       )}
       {!embedded && (
@@ -1047,12 +1047,9 @@ function LinksPageContent({
 
         {showProEsteticaEmpty && (
           <section className="rounded-xl border border-gray-200 bg-white p-5 sm:p-6 shadow-sm">
-            <h2 className="text-base font-semibold text-gray-900">Seu primeiro link de estética</h2>
+            <h2 className="text-base font-semibold text-gray-900">Cria o teu primeiro link</h2>
             <p className="text-sm text-gray-600 mt-2 leading-relaxed">
-              Esta lista mostra só o que você criar para <strong>estética corporal</strong>. Links de outras linhas (por exemplo, recrutamento ou distribuição) não aparecem aqui — a ideia é você começar limpo, como na primeira vez.
-            </p>
-            <p className="text-sm text-gray-600 mt-3 leading-relaxed">
-              O caminho mais guiado é conversar com o <strong>Noel</strong>: ele monta o diagnóstico com você. Se preferir algo já estruturado, use um modelo da aba Biblioteca.
+              Aqui ficam os <strong>teus</strong> fluxos com diagnóstico — para gerar contactos, reativar quem parou e acompanhar entre sessões. O <strong>Noel</strong> ajuda-te a montar; na aba Biblioteca tens modelos prontos.
             </p>
             <div className="mt-5 flex flex-col sm:flex-row gap-2.5">
               <Link
@@ -1072,9 +1069,9 @@ function LinksPageContent({
             </div>
             <p className="text-xs text-gray-500 mt-4">
               <Link href={`${prefix}/links/novo`} className="text-sky-700 underline hover:text-sky-900">
-                Abrir o criador completo
-              </Link>{' '}
-              na interface (tema e fluxo passo a passo).
+                Criador completo
+              </Link>
+              {' — tema e fluxo passo a passo.'}
             </p>
           </section>
         )}
