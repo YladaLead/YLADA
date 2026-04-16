@@ -20,6 +20,29 @@ interface WorkshopRegistration {
   needs_manual_whatsapp?: boolean
 }
 
+const KNOWN_WORKSHOP_SOURCES = [
+  'workshop_nutri_empresaria_landing_page',
+  'workshop_agenda_instavel_landing_page',
+  'workshop_landing_page',
+] as const
+
+function formatWorkshopSourceLabel(source?: string | null): string {
+  switch (source) {
+    case 'workshop_nutri_empresaria_landing_page':
+      return 'Nutri → Empresária'
+    case 'workshop_agenda_instavel_landing_page':
+      return 'Agenda instável'
+    case 'workshop_landing_page':
+      return 'Workshop (landing)'
+    case '':
+    case undefined:
+    case null:
+      return '—'
+    default:
+      return source
+  }
+}
+
 function CadastrosWorkshopPage() {
   return (
     <AdminProtectedRoute>
@@ -34,6 +57,9 @@ function CadastrosWorkshopContent() {
   const [processing, setProcessing] = useState(false)
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [filter, setFilter] = useState<'all' | 'pending_welcome' | 'no_conversation' | 'no_tags'>('pending_welcome')
+  const [sourceFilter, setSourceFilter] = useState<
+    '' | (typeof KNOWN_WORKSHOP_SOURCES)[number] | '__other__'
+  >('')
   const [searchTerm, setSearchTerm] = useState('')
   const [tagsModalOpen, setTagsModalOpen] = useState(false)
   const [selectedTags, setSelectedTags] = useState<string[]>([])
@@ -102,6 +128,15 @@ function CadastrosWorkshopContent() {
         r.email.toLowerCase().includes(term) ||
         r.telefone.includes(term)
       )
+    }
+
+    if (sourceFilter === '__other__') {
+      filtered = filtered.filter(r => {
+        const s = r.source || ''
+        return s !== '' && !KNOWN_WORKSHOP_SOURCES.includes(s as (typeof KNOWN_WORKSHOP_SOURCES)[number])
+      })
+    } else if (sourceFilter) {
+      filtered = filtered.filter(r => r.source === sourceFilter)
     }
 
     // Ordenação: pendentes primeiro; depois mais recentes
@@ -440,6 +475,23 @@ function CadastrosWorkshopContent() {
               <option value="no_tags">Sem tags</option>
             </select>
 
+            <select
+              value={sourceFilter}
+              onChange={(e) =>
+                setSourceFilter(
+                  e.target.value as '' | (typeof KNOWN_WORKSHOP_SOURCES)[number] | '__other__'
+                )
+              }
+              className="px-4 py-2 border border-gray-300 rounded-lg min-w-[200px]"
+              title="Filtrar por página de origem da inscrição"
+            >
+              <option value="">Todas as origens</option>
+              <option value="workshop_nutri_empresaria_landing_page">Nutri → Empresária</option>
+              <option value="workshop_agenda_instavel_landing_page">Agenda instável</option>
+              <option value="workshop_landing_page">Workshop (landing)</option>
+              <option value="__other__">Outras origens</option>
+            </select>
+
             {filter === 'pending_welcome' && filteredRegistrations.length > 0 && (
               <button
                 type="button"
@@ -513,6 +565,7 @@ function CadastrosWorkshopContent() {
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Telefone</th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">CRN</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Origem</th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Data Cadastro</th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Conversa</th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tags</th>
@@ -552,6 +605,9 @@ function CadastrosWorkshopContent() {
                       <td className="px-4 py-3 text-sm text-gray-600">{reg.email}</td>
                       <td className="px-4 py-3 text-sm text-gray-600">{reg.telefone}</td>
                       <td className="px-4 py-3 text-sm text-gray-600">{reg.crn || '-'}</td>
+                      <td className="px-4 py-3 text-sm text-gray-600 max-w-[220px]" title={reg.source || ''}>
+                        {formatWorkshopSourceLabel(reg.source)}
+                      </td>
                       <td className="px-4 py-3 text-sm text-gray-600">
                         {new Date(reg.created_at).toLocaleDateString('pt-BR')}
                       </td>
