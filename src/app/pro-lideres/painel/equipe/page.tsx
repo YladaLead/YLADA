@@ -34,9 +34,11 @@ export default async function ProLideresEquipePage() {
         <p className="mt-2 text-gray-700">
           {isLeader ? (
             <>
-              Quem faz parte deste espaço: o <strong className="text-gray-900">líder</strong> (você, após a consultoria)
-              e a <strong className="text-gray-900">equipe</strong> que convidar. Gere links em{' '}
-              <strong className="text-gray-800">Convidar equipe</strong>.
+              Aqui vês <strong className="text-gray-900">quem está contigo neste espaço</strong> e geres o acesso: convida
+              novas pessoas em <strong className="text-gray-800">Convidar equipe</strong>. Para cada nome, podes{' '}
+              <strong className="text-gray-800">pausar o acesso</strong> (a pessoa deixa de entrar até tu reativares),{' '}
+              <strong className="text-gray-800">voltar a dar acesso</strong> ou <strong className="text-gray-800">remover</strong>{' '}
+              da lista deste espaço — <strong className="text-gray-800">o que ela já criou na conta YLADA dela não some</strong>.
             </>
           ) : (
             <>
@@ -47,7 +49,11 @@ export default async function ProLideresEquipePage() {
         </p>
       </div>
 
-      <ProLideresEquipeMembersCollapsible members={members} viewerRoleLabel={roleLabel(ctx.role)} />
+      <ProLideresEquipeMembersCollapsible
+        members={members}
+        viewerRoleLabel={roleLabel(ctx.role)}
+        canManageMembers={isLeader}
+      />
 
       {isLeader ? <ProLideresEquipeAttributionPanel /> : null}
     </div>

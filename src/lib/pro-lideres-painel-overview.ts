@@ -378,17 +378,19 @@ function buildDiagnostic(p: {
 
   if (p.totalTrackedLinkViews === 0) {
     diagnostic +=
-      ' Não há visualizações rastreadas dos links do catálogo (com o código da equipe). Sem isso, não dá para saber quem abriu cada ferramenta.'
+      ' Ainda não há aberturas contadas por pessoa nas ferramentas do catálogo — sem o link certo para cada um, fica difícil saber quem está a divulgar o quê.'
     nextSteps.push(
-      'Em Análise da equipe, abra cada link e peça para cada pessoa usar o URL com rastreio (?pl_m=) ao compartilhar.'
+      'Em Análise da equipe, escolha a ferramenta, carregue em «Criar ou atualizar links» e peça a cada pessoa para usar só o link que copiar dessa página ao partilhar.'
     )
   } else if (linkEngage < 0.3) {
     diagnostic +=
-      ' Os cliques rastreados concentram-se em poucos membros — pode haver diferença forte no uso do catálogo.'
-    nextSteps.push('Pedir para a equipe usar sempre o link do painel (com rastreio) em vez de copiar só o /l/ genérico.')
+      ' As aberturas por pessoa concentram-se em poucos membros — pode haver diferença forte no uso do catálogo.'
+    nextSteps.push(
+      'Reforce que cada um use o link que recebe em Análise da equipe, e não só o endereço genérico da ferramenta.'
+    )
   } else {
     diagnostic +=
-      ' O uso dos links rastreados está bem distribuído; continue reforçando as ferramentas que mais convertem.'
+      ' O uso por pessoa está bem repartido; continue a reforçar as ferramentas que mais convertem.'
   }
 
   if (
@@ -543,7 +545,7 @@ export async function fetchProLideresPainelOverview(opts: {
   }
 
   const enriched = await fetchProLideresMembersEnriched(tenantId)
-  const teamMemberCount = enriched.filter((m) => m.role === 'member').length
+  const teamMemberCount = enriched.filter((m) => m.role === 'member' && m.teamAccessState === 'active').length
 
   const allUserIds = new Set<string>([ownerUserId, ...enriched.map((m) => m.userId)])
 
@@ -664,9 +666,11 @@ export async function fetchProLideresPainelOverview(opts: {
     return a.displayName.localeCompare(b.displayName, 'pt')
   })
 
-  const memberIdsOnly = new Set(enriched.filter((m) => m.role === 'member').map((m) => m.userId))
+  const memberIdsOnly = new Set(
+    enriched.filter((m) => m.role === 'member' && m.teamAccessState === 'active').map((m) => m.userId)
+  )
   const activeMembersOnTasks = enriched.filter((m) => {
-    if (m.role !== 'member') return false
+    if (m.role !== 'member' || m.teamAccessState !== 'active') return false
     return complAll.some((c) => c.member_user_id === m.userId)
   }).length
 

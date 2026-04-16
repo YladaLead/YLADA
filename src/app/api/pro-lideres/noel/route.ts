@@ -8,8 +8,17 @@ import {
   buildProLideresNoelSystemPrompt,
   resolveProLideresNoelProfileId,
 } from '@/lib/pro-lideres-noel-prompt'
+import { formatLinksAtivosParaNoel, getNoelYladaLinks } from '@/lib/noel-ylada-links'
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
+
+function requestOrigin(request: NextRequest): string {
+  try {
+    return new URL(request.url).origin
+  } catch {
+    return process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, '') || 'https://www.ylada.com'
+  }
+}
 
 type HistoryTurn = { role?: string; content?: string }
 
@@ -66,12 +75,17 @@ export async function POST(request: NextRequest) {
   const verticalCode = (t.vertical_code ?? 'h-lider').trim() || 'h-lider'
 
   const noelProfileId = resolveProLideresNoelProfileId(verticalCode)
+  const baseUrl = requestOrigin(request)
+  const linksRows = await getNoelYladaLinks(t.owner_user_id, baseUrl)
+  const linksAtivosContext = linksRows.length ? formatLinksAtivosParaNoel(linksRows) : null
+
   const systemPrompt = buildProLideresNoelSystemPrompt({
     operationLabel,
     verticalCode,
     focusNotes: t.focus_notes?.trim() || null,
     role: ctx.role,
     replyLanguage,
+    linksAtivosContext,
   })
 
   const openaiMessages: OpenAI.Chat.ChatCompletionMessageParam[] = [

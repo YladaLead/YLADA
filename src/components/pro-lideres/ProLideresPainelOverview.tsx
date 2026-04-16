@@ -326,7 +326,8 @@ export function ProLideresPainelOverview() {
           </Link>
         </div>
         <p className="mb-4 text-xs text-gray-500">
-          Eventos nos links YLADA do líder. Rastreio por membro continua em Análise da equipe com <code className="rounded bg-gray-100 px-0.5">?pl_m=</code>.
+          Números gerais dos teus links neste período. Para ver <strong className="font-medium text-gray-600">quem da
+          equipe</strong> abriu cada ferramenta, usa <strong className="font-medium text-gray-600">Análise da equipe</strong>.
         </p>
         <div className="grid gap-3 sm:grid-cols-3">
           <FunnelCard label="Visualizações" value={data.funnel.linkViews} icon="👀" />
@@ -366,14 +367,15 @@ export function ProLideresPainelOverview() {
 
         <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
           <div className="mb-3 flex items-center justify-between gap-2">
-            <h3 className="font-semibold text-gray-900">Uso rastreado (por pessoa)</h3>
+            <h3 className="font-semibold text-gray-900">Uso por pessoa (links personalizados)</h3>
             <Link href="/pro-lideres/painel/equipe" className="text-sm font-medium text-blue-600 hover:text-blue-800">
               Análise da equipe
             </Link>
           </div>
           {data.memberLinkActivity.filter((x) => x.views > 0 || x.whatsappClicks > 0).length === 0 ? (
             <p className="text-sm text-gray-600">
-              Ninguém com cliques rastreados. Peça o link com <code className="rounded bg-gray-100 px-0.5">?pl_m=</code>.
+              Ainda não há aberturas contadas por pessoa. Em <strong className="font-medium text-gray-700">Análise da
+              equipe</strong>, cria os links e peça a cada um para partilhar só o link que copiar daí.
             </p>
           ) : (
             <ul className="max-h-56 space-y-2 overflow-y-auto text-sm">

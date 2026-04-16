@@ -161,12 +161,15 @@ export async function resolveProLideresTenantContext(
 
   const { data: membership } = await supabase
     .from('leader_tenant_members')
-    .select('leader_tenant_id, role')
+    .select('leader_tenant_id, role, team_access_state')
     .eq('user_id', user.id)
     .limit(1)
     .maybeSingle()
 
   if (!membership) return null
+
+  const accessState = (membership.team_access_state as string | undefined) ?? 'active'
+  if (accessState === 'paused') return null
 
   const { data: tenant } = await supabase
     .from('leader_tenants')
@@ -199,6 +202,18 @@ export async function ensureLeaderTenantAccess(): Promise<
   }
 
   let ctx = await resolveProLideresTenantContext(supabase, user)
+
+  if (!ctx) {
+    const { data: selfMembership } = await supabase
+      .from('leader_tenant_members')
+      .select('team_access_state')
+      .eq('user_id', user.id)
+      .maybeSingle()
+    const st = (selfMembership?.team_access_state as string | undefined) ?? 'active'
+    if (st === 'paused') {
+      return { ok: false, redirect: '/pro-lideres/acesso-pausado' }
+    }
+  }
 
   const admin = getSupabaseAdmin()
 

@@ -23,12 +23,17 @@ export type LeaderTenantRow = {
   updated_at: string
 }
 
+/** Estado de acesso à equipe (linha em leader_tenant_members). */
+export type ProLideresTeamAccessState = 'active' | 'paused'
+
 /** Membro do tenant (líder ou equipe). */
 export type LeaderTenantMemberRow = {
   id: string
   leader_tenant_id: string
   user_id: string
   role: ProLideresTenantRole
+  /** Só aplica a role member; líder fica sempre active. */
+  team_access_state: ProLideresTeamAccessState
   created_at: string
 }
 
