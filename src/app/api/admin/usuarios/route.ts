@@ -31,6 +31,48 @@ function sanitizeBuscaIlike(raw: string) {
   return raw.trim().replace(/,/g, ' ').slice(0, 120)
 }
 
+type AdminUsuarioSubRow = {
+  id: string
+  user_id: string
+  area: string
+  plan_type: string
+  status: string
+  current_period_end: string | null
+  is_migrated?: boolean
+  stripe_subscription_id?: string | null
+}
+
+function sortAdminSubsByPeriodEndDesc(a: AdminUsuarioSubRow, b: AdminUsuarioSubRow) {
+  const ta = a.current_period_end ? new Date(a.current_period_end).getTime() : 0
+  const tb = b.current_period_end ? new Date(b.current_period_end).getTime() : 0
+  return tb - ta
+}
+
+/**
+ * Várias linhas em `subscriptions` podem estar `active` com fim no futuro (ex.: trial longo + anual).
+ * A query vem ordenada por `current_period_end` desc — um trial com fim “mais tarde” que o anual
+ * fazia o `.find()` mostrar Trial no admin em vez do plano pago. Preferimos mensal/anual, depois free, depois trial.
+ */
+function pickActiveSubscriptionForAdminList(
+  userSubscriptions: AdminUsuarioSubRow[],
+  now: Date
+): AdminUsuarioSubRow | null {
+  const vigentes = userSubscriptions.filter((sub) => {
+    if (!sub.current_period_end || String(sub.status).toLowerCase() !== 'active') return false
+    return new Date(sub.current_period_end).getTime() > now.getTime()
+  })
+  if (vigentes.length === 0) return null
+  const paid = vigentes.filter((s) => s.plan_type === 'monthly' || s.plan_type === 'annual')
+  if (paid.length > 0) {
+    return [...paid].sort(sortAdminSubsByPeriodEndDesc)[0] ?? null
+  }
+  const freeRows = vigentes.filter((s) => s.plan_type === 'free')
+  if (freeRows.length > 0) {
+    return [...freeRows].sort(sortAdminSubsByPeriodEndDesc)[0] ?? null
+  }
+  return [...vigentes].sort(sortAdminSubsByPeriodEndDesc)[0] ?? null
+}
+
 export async function GET(request: NextRequest) {
   try {
     // Verificar se é admin
@@ -331,7 +373,7 @@ export async function GET(request: NextRequest) {
       const subsYlada = todasSubsUsuario.filter((s) => s.area === 'ylada')
 
       const isSubVigente = (sub: { status: string; current_period_end: string | null }) => {
-        if (!sub.current_period_end || sub.status !== 'active') return false
+        if (!sub.current_period_end || String(sub.status).toLowerCase() !== 'active') return false
         return new Date(sub.current_period_end).getTime() > now.getTime()
       }
 
@@ -348,11 +390,10 @@ export async function GET(request: NextRequest) {
             : subsYlada.length > 0
               ? subsYlada
               : todasSubsUsuario
-      const activeSubscription = userSubscriptions.find(sub => {
-        if (!sub.current_period_end) return false
-        const expiresAt = new Date(sub.current_period_end)
-        return sub.status === 'active' && expiresAt.getTime() > now.getTime()
-      })
+      const activeSubscription = pickActiveSubscriptionForAdminList(
+        userSubscriptions as AdminUsuarioSubRow[],
+        now
+      )
       const latestSubscription = userSubscriptions[0] ?? null
 
       /** Último mensal/anual na área do perfil (para relatório: não deixar trial/free “esconder” histórico pago). */
@@ -384,7 +425,7 @@ export async function GET(request: NextRequest) {
       const subsYladaOrdenadas = todasSubsUsuario.filter((s) => s.area === 'ylada')
       const yladaSubAtiva = subsYladaOrdenadas.find(
         (s) =>
-          s.status === 'active' &&
+          String(s.status).toLowerCase() === 'active' &&
           s.current_period_end &&
           new Date(s.current_period_end).getTime() > now.getTime()
       )
