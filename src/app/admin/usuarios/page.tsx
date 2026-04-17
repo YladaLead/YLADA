@@ -16,7 +16,7 @@ interface Usuario {
   email: string
   area: string
   status: 'ativo' | 'inativo'
-  assinatura: 'mensal' | 'anual' | 'gratuita' | 'sem assinatura'
+  assinatura: 'mensal' | 'anual' | 'gratuita' | 'trial' | 'sem assinatura'
   assinaturaId: string | null
   assinaturaVencimento: string | null
   dataCadastro: string | null
@@ -49,6 +49,7 @@ interface Usuario {
   assinaturaCategoria?:
     | 'mensal'
     | 'anual'
+    | 'trial'
     | 'sem'
     | 'free_nunca_pago'
     | 'free_ex_pagante'
@@ -87,6 +88,7 @@ export default function AdminUsuarios() {
     | 'free_migracao'
     | 'mensal'
     | 'anual'
+    | 'trial'
     | 'sem'
   >('todos')
   const [filtroHistorico, setFiltroHistorico] = useState<'todos' | 'nunca_pagou' | 'ja_pagou'>('todos')
@@ -198,7 +200,7 @@ export default function AdminUsuarios() {
 
   const [formAssinatura, setFormAssinatura] = useState({
     current_period_end: '',
-    plan_type: 'monthly' as 'monthly' | 'annual' | 'free',
+    plan_type: 'monthly' as 'monthly' | 'annual' | 'free' | 'trial',
     status: 'active' as 'active' | 'canceled' | 'past_due'
   })
 
@@ -448,8 +450,14 @@ export default function AdminUsuarios() {
     
     setFormAssinatura({
       current_period_end: dataFormatada,
-      plan_type: usuario.assinatura === 'mensal' ? 'monthly' : 
-                 usuario.assinatura === 'anual' ? 'annual' : 'free',
+      plan_type:
+        usuario.assinatura === 'mensal'
+          ? 'monthly'
+          : usuario.assinatura === 'anual'
+            ? 'annual'
+            : usuario.assinatura === 'trial'
+              ? 'trial'
+              : 'free',
       status: (usuario.statusAssinatura as 'active' | 'canceled' | 'past_due') || 'active'
     })
     setMostrarEditarAssinatura(true)
@@ -721,6 +729,7 @@ export default function AdminUsuarios() {
     if (c === 'free_migracao') return t.subscriptionType.freeMigration
     if (c === 'mensal') return t.subscriptionType.monthly
     if (c === 'anual') return t.subscriptionType.annual
+    if (c === 'trial' || u.assinatura === 'trial') return t.subscriptionType.trial
     if (c === 'sem' || u.assinatura === 'sem assinatura') return t.subscriptionType.none
     if (u.assinatura === 'gratuita') {
       if (isAssinaturaCourtesy(u)) return t.subscriptionType.courtesy
@@ -739,10 +748,12 @@ export default function AdminUsuarios() {
     if (c === 'free_migracao') return 'Freedom'
     if (c === 'mensal') return 'Mensal'
     if (c === 'anual') return 'Anual'
+    if (c === 'trial' || u.assinatura === 'trial') return t.subscriptionType.trial
     if (c === 'sem' || u.assinatura === 'sem assinatura') return 'Sem assinatura'
     if (u.assinatura === 'gratuita') return isAssinaturaCourtesy(u) ? 'Cortesia' : 'Freedom'
     if (u.assinatura === 'mensal') return 'Mensal'
     if (u.assinatura === 'anual') return 'Anual'
+    if (u.assinatura === 'trial') return t.subscriptionType.trial
     return '—'
   }
 
@@ -968,6 +979,7 @@ export default function AdminUsuarios() {
                 <option value="free_migracao">{t.filters.freeMigration}</option>
                 <option value="mensal">{t.filters.monthly}</option>
                 <option value="anual">{t.filters.annual}</option>
+                <option value="trial">{t.filters.trial}</option>
                 <option value="sem">{t.filters.noSubscription}</option>
               </select>
             </div>
@@ -1560,6 +1572,7 @@ export default function AdminUsuarios() {
                 >
                   <option value="monthly">{t.filters.monthly}</option>
                   <option value="annual">{t.filters.annual}</option>
+                  <option value="trial">{t.filters.trial}</option>
                   <option value="free">{t.filters.free}</option>
                 </select>
                 <p className="text-xs text-gray-600 mt-1.5 bg-slate-50 border border-slate-100 rounded-md px-2 py-1.5">

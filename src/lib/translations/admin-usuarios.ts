@@ -35,6 +35,8 @@ export interface AdminUsuariosTranslations {
     freeMigration: string
     monthly: string
     annual: string
+    /** Trial / convite (plan_type trial em subscriptions) */
+    trial: string
     noSubscription: string
     /** Histórico: nunca teve mensal/anual vs já teve (qualquer área) */
     paymentHistory: string
@@ -147,6 +149,8 @@ export interface AdminUsuariosTranslations {
     freeMigration: string
     /** Plano ativo sem data de fim no registro */
     noPlanEnd: string
+    /** Trial Wellness (convite presidente etc.) */
+    trial: string
     none: string
   }
   modal: {
@@ -240,7 +244,7 @@ const pt: AdminUsuariosTranslations = {
     status: 'Situação',
     subscription: 'Assinatura',
     subscriptionHint:
-      'Freedom = free com limites do freemium na matriz (links, WhatsApp, Noel). Cortesia (free_cor_) = tratamento Pro. Mensal e anual incluem vigentes e vencidos.',
+      'Freedom = free com limites do freemium na matriz (links, WhatsApp, Noel). Cortesia (free_cor_) = tratamento Pro. Mensal, anual e trial incluem vigentes e vencidos. Trial não some “por cima” do último mensal/anual na coluna (relatório).',
     president: 'Presidente',
     segment: 'Segmento',
     segmentHint:
@@ -255,6 +259,7 @@ const pt: AdminUsuariosTranslations = {
     freeMigration: 'Freedom — migração / manual',
     monthly: 'Mensal',
     annual: 'Anual',
+    trial: 'Trial',
     noSubscription: 'Sem assinatura',
     paymentHistory: 'Histórico pago',
     paymentHistoryHint:
@@ -357,6 +362,7 @@ const pt: AdminUsuariosTranslations = {
     freeFormerPaid: 'Freedom — ex-pagante',
     freeMigration: 'Freedom — migração / manual',
     noPlanEnd: 'Sem vencimento no registro',
+    trial: 'Trial',
     none: 'Sem assinatura',
   },
   modal: {
@@ -457,7 +463,7 @@ const es: AdminUsuariosTranslations = {
     status: 'Estado',
     subscription: 'Suscripción',
     subscriptionHint:
-      'Freedom = gratis con límites freemium en la matriz (enlaces, WhatsApp, Noel). Cortesía (free_cor_) = tratamiento Pro. Mensual y anual incluyen vigentes y vencidos.',
+      'Freedom = gratis con límites freemium en la matriz (enlaces, WhatsApp, Noel). Cortesía (free_cor_) = tratamiento Pro. Mensual, anual y trial incluyen vigentes y vencidos.',
     president: 'Presidente',
     segment: 'Segmento',
     segmentHint:
@@ -472,6 +478,7 @@ const es: AdminUsuariosTranslations = {
     freeMigration: 'Freedom — migración / manual',
     monthly: 'Mensual',
     annual: 'Anual',
+    trial: 'Trial',
     noSubscription: 'Sin suscripción',
     paymentHistory: 'Historial de pago',
     paymentHistoryHint:
@@ -574,6 +581,7 @@ const es: AdminUsuariosTranslations = {
     freeFormerPaid: 'Freedom — ex pagador',
     freeMigration: 'Freedom — migración / manual',
     noPlanEnd: 'Sin vencimiento en el registro',
+    trial: 'Trial',
     none: 'Sin suscripción',
   },
   modal: {
@@ -674,7 +682,7 @@ const en: AdminUsuariosTranslations = {
     status: 'Status',
     subscription: 'Subscription',
     subscriptionHint:
-      'Freedom = free with matrix freemium limits (links, WhatsApp, Noel). Courtesy (free_cor_) = Pro treatment. Monthly and annual include active and expired.',
+      'Freedom = free with matrix freemium limits (links, WhatsApp, Noel). Courtesy (free_cor_) = Pro treatment. Monthly, annual, and trial include active and expired.',
     president: 'President',
     segment: 'Segment',
     segmentHint:
@@ -689,6 +697,7 @@ const en: AdminUsuariosTranslations = {
     freeMigration: 'Freedom — migration / manual',
     monthly: 'Monthly',
     annual: 'Annual',
+    trial: 'Trial',
     noSubscription: 'No subscription',
     paymentHistory: 'Paid history',
     paymentHistoryHint:
@@ -791,6 +800,7 @@ const en: AdminUsuariosTranslations = {
     freeFormerPaid: 'Freedom — former payer',
     freeMigration: 'Freedom — migration / manual',
     noPlanEnd: 'No end date on record',
+    trial: 'Trial',
     none: 'No subscription',
   },
   modal: {

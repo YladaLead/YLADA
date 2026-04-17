@@ -14,7 +14,7 @@ import {
  * Body:
  * {
  *   current_period_end?: string (ISO date),
- *   plan_type?: 'monthly' | 'annual' | 'free',
+ *   plan_type?: 'monthly' | 'annual' | 'free' | 'trial',
  *   status?: 'active' | 'canceled' | 'past_due'
  * }
  */
@@ -56,9 +56,9 @@ export async function PUT(
     }
 
     if (plan_type) {
-      if (!['monthly', 'annual', 'free'].includes(plan_type)) {
+      if (!['monthly', 'annual', 'free', 'trial'].includes(plan_type)) {
         return NextResponse.json(
-          { error: 'plan_type deve ser monthly, annual ou free' },
+          { error: 'plan_type deve ser monthly, annual, free ou trial' },
           { status: 400 }
         )
       }

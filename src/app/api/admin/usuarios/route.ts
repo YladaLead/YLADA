@@ -20,7 +20,7 @@ import { toYmdInTimeZone } from '@/lib/date-utils'
  *   Preferir a `perfil` em vez de `area` para o perfil literal `ylada` ( `area=ylada` continua legado = matriz inteira).
  * - area?: legado | demais_segmentos | ylada (matriz) | todos — refinamentos antigos; sem `perfil`.
  * - status?: 'todos' | 'ativo' | 'inativo' - Filtrar por status
- * - assinatura?: 'todos' | 'gratuita' | 'free_nunca_pago' | 'free_ex_pagante' | 'free_migracao' | 'mensal' | 'anual' | 'sem' — gratuita = qualquer free (união das três subcategorias)
+ * - assinatura?: 'todos' | 'gratuita' | 'free_nunca_pago' | 'free_ex_pagante' | 'free_migracao' | 'mensal' | 'anual' | 'trial' | 'sem' — gratuita = qualquer free (união das três subcategorias)
  * - historico?: 'todos' | 'nunca_pagou' | 'ja_pagou' — já existiu assinatura mensal ou anual em qualquer área (independente de estar vigente)
  * - presidente?: string - Filtrar por nome do presidente (equipe do presidente)
  * - busca?: string - Buscar por nome, email (user_profiles ou Auth) ou WhatsApp
@@ -353,7 +353,24 @@ export async function GET(request: NextRequest) {
         const expiresAt = new Date(sub.current_period_end)
         return sub.status === 'active' && expiresAt.getTime() > now.getTime()
       })
-      const latestSubscription = userSubscriptions[0]
+      const latestSubscription = userSubscriptions[0] ?? null
+
+      /** Último mensal/anual na área do perfil (para relatório: não deixar trial/free “esconder” histórico pago). */
+      const paidMesmaAreaDesc = subsMesmaArea
+        .filter((s) => s.plan_type === 'monthly' || s.plan_type === 'annual')
+        .sort((a, b) => {
+          const ta = a.current_period_end ? new Date(a.current_period_end).getTime() : 0
+          const tb = b.current_period_end ? new Date(b.current_period_end).getTime() : 0
+          return tb - ta
+        })
+      const latestPaidMesmaArea = paidMesmaAreaDesc[0] ?? null
+
+      /**
+       * Rótulo da coluna Assinatura / CSV: assinatura ativa; senão último mensal/anual na área;
+       * senão a linha mais recente do conjunto (trial, free, etc.).
+       */
+      const subscriptionForPlanDisplay =
+        activeSubscription || latestPaidMesmaArea || latestSubscription || null
 
       let subscriptionToEdit = activeSubscription || latestSubscription || null
       const subscriptionForStatus = activeSubscription || latestSubscription || null
@@ -380,7 +397,7 @@ export async function GET(request: NextRequest) {
 
       let isAtivo: boolean
       let status: 'ativo' | 'inativo'
-      let assinaturaTipo: 'mensal' | 'anual' | 'gratuita' | 'sem assinatura'
+      let assinaturaTipo: 'mensal' | 'anual' | 'gratuita' | 'trial' | 'sem assinatura'
       let assinaturaVencimento: string | null = null
       let assinaturaSituacao: 'ativa' | 'vencida' | 'sem'
       let assinaturaDiasVencida: number | null = null
@@ -398,25 +415,36 @@ export async function GET(request: NextRequest) {
         assinaturaTipo = 'sem assinatura'
         assinaturaSituacao = 'sem'
 
-        if (subscriptionForStatus) {
-          if (subscriptionForStatus.plan_type === 'free') {
+        if (subscriptionForPlanDisplay) {
+          const pt = subscriptionForPlanDisplay.plan_type
+          if (pt === 'free') {
             assinaturaTipo = 'gratuita'
-          } else if (subscriptionForStatus.plan_type === 'monthly') {
+          } else if (pt === 'monthly') {
             assinaturaTipo = 'mensal'
-          } else if (subscriptionForStatus.plan_type === 'annual') {
+          } else if (pt === 'annual') {
             assinaturaTipo = 'anual'
+          } else if (pt === 'trial') {
+            assinaturaTipo = 'trial'
           }
-          assinaturaVencimento = subscriptionForStatus.current_period_end
+          assinaturaVencimento = subscriptionForPlanDisplay.current_period_end
         }
 
         if (activeSubscription) {
           assinaturaSituacao = 'ativa'
-        } else if (latestSubscription && latestSubscription.current_period_end) {
-          assinaturaSituacao = 'vencida'
-          const vencimento = new Date(latestSubscription.current_period_end)
-          assinaturaVencimento = latestSubscription.current_period_end
-          const diffMs = now.getTime() - vencimento.getTime()
-          assinaturaDiasVencida = diffMs > 0 ? Math.floor(diffMs / (1000 * 60 * 60 * 24)) : 0
+          assinaturaDiasVencida = null
+        } else if (subscriptionForPlanDisplay?.current_period_end) {
+          const vencimento = new Date(subscriptionForPlanDisplay.current_period_end)
+          assinaturaVencimento = subscriptionForPlanDisplay.current_period_end
+          const endMs = vencimento.getTime()
+          if (endMs <= now.getTime()) {
+            assinaturaSituacao = 'vencida'
+            const diffMs = now.getTime() - endMs
+            assinaturaDiasVencida = diffMs > 0 ? Math.floor(diffMs / (1000 * 60 * 60 * 24)) : 0
+          } else {
+            // Período ainda não acabou no registro (ex.: cancelamento com acesso até a data)
+            assinaturaSituacao = 'ativa'
+            assinaturaDiasVencida = null
+          }
         } else {
           assinaturaSituacao = 'sem'
         }
@@ -433,6 +461,7 @@ export async function GET(request: NextRequest) {
       let assinaturaCategoria:
         | 'mensal'
         | 'anual'
+        | 'trial'
         | 'sem'
         | 'free_nunca_pago'
         | 'free_ex_pagante'
@@ -443,6 +472,8 @@ export async function GET(request: NextRequest) {
         assinaturaCategoria = 'mensal'
       } else if (assinaturaTipo === 'anual') {
         assinaturaCategoria = 'anual'
+      } else if (assinaturaTipo === 'trial') {
+        assinaturaCategoria = 'trial'
       } else if (assinaturaTipo === 'sem assinatura') {
         assinaturaCategoria = 'sem'
       } else if (assinaturaTipo === 'gratuita') {
