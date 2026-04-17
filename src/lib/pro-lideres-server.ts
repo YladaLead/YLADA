@@ -143,6 +143,35 @@ export function newLeaderTenantInsertPayload(user: User) {
 }
 
 /**
+ * Líder no Pro Líderes: dono de `leader_tenants` ou membro com `role = leader` (equipa não incluída).
+ * Permite `/api/ylada/interpret` e `/api/ylada/links/generate` sem `user_profiles.perfil` da matriz YLADA.
+ */
+export async function isProLideresLeaderForYladaLinkApis(userId: string): Promise<boolean> {
+  const admin = getSupabaseAdmin()
+  if (!admin) return false
+
+  const { data: asOwner } = await admin
+    .from('leader_tenants')
+    .select('id')
+    .eq('owner_user_id', userId)
+    .limit(1)
+    .maybeSingle()
+  if (asOwner) return true
+
+  const { data: row } = await admin
+    .from('leader_tenant_members')
+    .select('team_access_state')
+    .eq('user_id', userId)
+    .eq('role', 'leader')
+    .limit(1)
+    .maybeSingle()
+
+  if (!row) return false
+  const st = (row.team_access_state as string | undefined) ?? 'active'
+  return st !== 'paused'
+}
+
+/**
  * Resolve tenant + papel (dono = líder na consultoria; user_id em leader_tenant_members = equipe ou líder registado).
  */
 export async function resolveProLideresTenantContext(

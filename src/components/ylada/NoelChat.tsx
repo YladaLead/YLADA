@@ -373,7 +373,7 @@ export default function NoelChat({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(
           proLideresPayload
-            ? { message: text, conversationHistory, locale }
+            ? { message: text, conversationHistory, locale, lastLinkContext: lastLinkContext ?? undefined }
             : {
                 message: text,
                 conversationHistory,
@@ -621,7 +621,7 @@ export default function NoelChat({
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(
             proLideresPayload
-              ? { message: text, conversationHistory, locale }
+              ? { message: text, conversationHistory, locale, lastLinkContext: lastLinkContext ?? undefined }
               : {
                   message: text,
                   conversationHistory,

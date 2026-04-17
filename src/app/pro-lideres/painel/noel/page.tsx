@@ -5,6 +5,11 @@ import NoelChat from '@/components/ylada/NoelChat'
 export default function ProLideresNoelPage() {
   return (
     <div className="flex min-h-0 flex-1 flex-col">
+      <p className="mb-2 text-right text-xs text-gray-500">
+        <a href="/pro-lideres/painel/noel-laboratorio" className="font-medium text-violet-700 hover:underline">
+          Laboratório de testes (agente presidente)
+        </a>
+      </p>
       <NoelChat
         area="pro_lideres"
         className="flex min-h-[min(70vh,560px)] flex-1 flex-col"

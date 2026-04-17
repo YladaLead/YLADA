@@ -9,6 +9,11 @@ import {
   resolveProLideresNoelProfileId,
 } from '@/lib/pro-lideres-noel-prompt'
 import { formatLinksAtivosParaNoel, getNoelYladaLinks } from '@/lib/noel-ylada-links'
+import {
+  buildCanonicalQuizMarkdownForProLideresResponse,
+  runProLideresNoelLinkPipeline,
+  type ProLideresNoelLastLinkContext,
+} from '@/lib/pro-lideres-noel-link-generation'
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
 
@@ -22,9 +27,21 @@ function requestOrigin(request: NextRequest): string {
 
 type HistoryTurn = { role?: string; content?: string }
 
+const MODO_EXECUTOR_LINK_PT = `[MODO EXECUTOR — LINK]
+O sistema pode ter acabado de gerar um link real na conta YLADA deste líder (bloco [LINK GERADO…] ou [LINK AJUSTADO…] abaixo, se existir).
+- Se existir esse bloco: responde só com introdução curta em português; não listes perguntas no texto; não coloques outro URL — o bloco **### Quiz e link (oficial)** no fim da resposta traz o link certo.
+- Relembra que o link entra na biblioteca de links do líder e pode ser partilhado com a equipa no **Painel Pro Líderes → Catálogo** (visibilidade).`
+
+const PEDIDO_SEM_GERACAO_PT = `[PEDIDO DE LINK SEM GERAÇÃO NESTE TURNO]
+O líder pediu quiz/link/fluxo mas o backend **não** devolveu URL (tema insuficiente, limite de links, sessão sem permissão nas APIs Ylada, ou erro técnico).
+- Não inventes URL nem digas que o link foi criado.
+- Explica em 1–2 frases e sugere: tema explícito (ex.: "quiz para…"), ou criar em **Links / Ferramentas** na conta Ylada; depois o link aparece no **Catálogo** do Pro Líderes.
+- Podes ainda entregar um **roteiro de perguntas** só em texto para usar já no WhatsApp, se fizer sentido.`
+
 /**
  * POST /api/pro-lideres/noel
  * Chat do mentor no painel Pro Líderes — **só o líder** do tenant (equipe usa scripts, sem Noel).
+ * Geração de link: mesmas APIs `/api/ylada/interpret` + `/api/ylada/links/generate` que a matriz (cookie da sessão).
  */
 export async function POST(request: NextRequest) {
   const auth = await requireApiAuth(request)
@@ -53,7 +70,12 @@ export async function POST(request: NextRequest) {
   const paid = await requireProLideresPaidContext(supabaseAdmin, user)
   if (!paid.ok) return paid.response
 
-  let body: { message?: string; conversationHistory?: HistoryTurn[]; locale?: string }
+  let body: {
+    message?: string
+    conversationHistory?: HistoryTurn[]
+    locale?: string
+    lastLinkContext?: ProLideresNoelLastLinkContext | null
+  }
   try {
     body = await request.json()
   } catch {
@@ -66,6 +88,10 @@ export async function POST(request: NextRequest) {
   }
 
   const history = Array.isArray(body.conversationHistory) ? body.conversationHistory : []
+  const historyNorm = history
+    .filter((h) => (h.role === 'user' || h.role === 'assistant') && typeof h.content === 'string')
+    .map((h) => ({ role: h.role as string, content: h.content as string }))
+
   const locale = typeof body.locale === 'string' ? body.locale : 'pt'
   const replyLanguage = locale === 'en' ? 'English' : 'Português (Brasil)'
 
@@ -75,28 +101,57 @@ export async function POST(request: NextRequest) {
   const verticalCode = (t.vertical_code ?? 'h-lider').trim() || 'h-lider'
 
   const noelProfileId = resolveProLideresNoelProfileId(verticalCode)
-  const baseUrl = requestOrigin(request)
+  const baseUrl = requestOrigin(request).replace(/\/$/, '')
+  const painelTarefasDiariasUrl = `${baseUrl}/pro-lideres/painel/tarefas`
   const linksRows = await getNoelYladaLinks(t.owner_user_id, baseUrl)
   const linksAtivosContext = linksRows.length ? formatLinksAtivosParaNoel(linksRows) : null
 
-  const systemPrompt = buildProLideresNoelSystemPrompt({
-    operationLabel,
+  const lastLinkContext =
+    body.lastLinkContext &&
+    typeof body.lastLinkContext === 'object' &&
+    typeof body.lastLinkContext.flow_id === 'string'
+      ? body.lastLinkContext
+      : null
+
+  const pipeline = await runProLideresNoelLinkPipeline({
+    request,
+    message,
+    conversationHistory: historyNorm,
+    locale,
     verticalCode,
-    focusNotes: t.focus_notes?.trim() || null,
-    role: ctx.role,
-    replyLanguage,
-    linksAtivosContext,
+    ownerUserId: t.owner_user_id,
+    sessionUserId: user.id,
+    lastLinkContext,
   })
+
+  const { linkGeradoBlock, lastLinkContextOut, canonicalAppendix, linkModeEnabled, shouldGenerateNewLink } =
+    pipeline
+
+  const extraSystemParts: string[] = []
+  if (linkGeradoBlock) {
+    extraSystemParts.push(MODO_EXECUTOR_LINK_PT)
+    extraSystemParts.push(linkGeradoBlock)
+  } else if (linkModeEnabled && shouldGenerateNewLink) {
+    extraSystemParts.push(PEDIDO_SEM_GERACAO_PT)
+  }
+
+  const systemPrompt =
+    buildProLideresNoelSystemPrompt({
+      operationLabel,
+      verticalCode,
+      focusNotes: t.focus_notes?.trim() || null,
+      role: ctx.role,
+      replyLanguage,
+      linksAtivosContext,
+      painelTarefasDiariasUrl,
+    }) + extraSystemParts.join('\n')
 
   const openaiMessages: OpenAI.Chat.ChatCompletionMessageParam[] = [
     { role: 'system', content: systemPrompt },
-    ...history
-      .filter((h) => (h.role === 'user' || h.role === 'assistant') && typeof h.content === 'string')
-      .slice(-14)
-      .map((h) => ({
-        role: h.role as 'user' | 'assistant',
-        content: h.content as string,
-      })),
+    ...historyNorm.slice(-14).map((h) => ({
+      role: h.role as 'user' | 'assistant',
+      content: h.content,
+    })),
     { role: 'user', content: message },
   ]
 
@@ -107,11 +162,44 @@ export async function POST(request: NextRequest) {
       temperature: 0.65,
       max_tokens: 1800,
     })
-    const text = completion.choices[0]?.message?.content?.trim()
+    let text = completion.choices[0]?.message?.content?.trim()
     if (!text) {
       return NextResponse.json({ error: 'Resposta vazia do modelo' }, { status: 502 })
     }
-    return NextResponse.json({ response: text, noelProfileId })
+
+    text = text.replace(/\[LINK GERADO AGORA[^\]]*\]/gi, '')
+    text = text.replace(/\[LINK AJUSTADO[^\]]*\]/gi, '')
+    text = text.replace(/\[LINK GERADO AGORA PARA ESTE PEDIDO\]/gi, '')
+    text = text.replace(/\[LINK AJUSTADO E GERADO\]/gi, '')
+    text = text.replace(/^\s*\[LINK GERADO AGORA[^\]]*\]\s*$/gim, '')
+    text = text.replace(/^\s*\[LINK AJUSTADO[^\]]*\]\s*$/gim, '')
+    text = text.replace(/\n{3,}/g, '\n\n')
+
+    if (linkModeEnabled && canonicalAppendix && lastLinkContextOut?.url) {
+      const marker = '### Quiz e link (oficial'
+      if (!text.includes(marker)) {
+        const intro = [
+          'Perfeito — o teu diagnóstico/link está pronto na tua conta YLADA.',
+          '',
+          'Abaixo está o bloco **Quiz e link (oficial)** com as perguntas alinhadas ao link público e à edição.',
+          '',
+          'Podes ajustar perguntas na área **Links / Ferramentas** da Ylada e gerir a visibilidade para a equipa no **Catálogo** do Pro Líderes.',
+        ].join('\n')
+        const footer = buildCanonicalQuizMarkdownForProLideresResponse(
+          canonicalAppendix.title,
+          canonicalAppendix.url,
+          canonicalAppendix.flowId,
+          canonicalAppendix.config
+        )
+        text = `${intro}\n\n---\n\n${footer}`
+      }
+    }
+
+    return NextResponse.json({
+      response: text,
+      noelProfileId,
+      lastLinkContext: lastLinkContextOut ?? null,
+    })
   } catch (e) {
     console.error('[pro-lideres/noel]', e)
     return NextResponse.json({ error: 'Falha ao gerar resposta. Tente novamente.' }, { status: 502 })
