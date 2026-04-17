@@ -138,3 +138,45 @@ export const PRO_LIDERES_NOEL_LAB_BATTERIES: ProLideresNoelLabBattery[] = [
 export function getNoelLabBatteryById(id: string): ProLideresNoelLabBattery | undefined {
   return PRO_LIDERES_NOEL_LAB_BATTERIES.find((b) => b.id === id)
 }
+
+/** Valor do `<select>` para percorrer todas as baterias em sequência (um botão «próxima»). */
+export const NOEL_LAB_FULL_SEQUENCE_ID = '__sequencia_completa__'
+
+export type NoelLabSequenceEntry = {
+  batteryId: string
+  batteryLabel: string
+  questionIndexInBattery: number
+  batteryQuestionCount: number
+  question: string
+}
+
+/** Todas as perguntas de todas as baterias, na ordem do menu. */
+export function getNoelLabFullSequenceFlat(): NoelLabSequenceEntry[] {
+  return PRO_LIDERES_NOEL_LAB_BATTERIES.flatMap((b) =>
+    b.questions.map((question, i) => ({
+      batteryId: b.id,
+      batteryLabel: b.label,
+      questionIndexInBattery: i,
+      batteryQuestionCount: b.questions.length,
+      question,
+    }))
+  )
+}
+
+/** Total de perguntas para o id do select (sequência completa ou uma bateria). */
+export function getNoelLabPresetTotal(batteryId: string): number {
+  if (!batteryId) return 0
+  if (batteryId === NOEL_LAB_FULL_SEQUENCE_ID) return getNoelLabFullSequenceFlat().length
+  return getNoelLabBatteryById(batteryId)?.questions.length ?? 0
+}
+
+/** Pergunta no índice `step` (0-based), ou null se fora do intervalo. */
+export function getNoelLabPresetQuestionAt(batteryId: string, step: number): string | null {
+  if (!batteryId || step < 0) return null
+  if (batteryId === NOEL_LAB_FULL_SEQUENCE_ID) {
+    const flat = getNoelLabFullSequenceFlat()
+    return flat[step]?.question ?? null
+  }
+  const b = getNoelLabBatteryById(batteryId)
+  return b?.questions[step] ?? null
+}

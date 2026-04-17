@@ -8,6 +8,10 @@ import remarkBreaks from 'remark-breaks'
 import { useAuthenticatedFetch } from '@/hooks/useAuthenticatedFetch'
 import {
   getNoelLabBatteryById,
+  getNoelLabFullSequenceFlat,
+  getNoelLabPresetQuestionAt,
+  getNoelLabPresetTotal,
+  NOEL_LAB_FULL_SEQUENCE_ID,
   PRO_LIDERES_NOEL_LAB_BATTERIES,
 } from '@/lib/pro-lideres-noel-lab-battery'
 import {
@@ -32,6 +36,8 @@ function id() {
   return `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`
 }
 
+const NOEL_LAB_FULL_SEQUENCE_TOTAL = getNoelLabPresetTotal(NOEL_LAB_FULL_SEQUENCE_ID)
+
 export default function ProLideresNoelLaboratorioPage() {
   const authenticatedFetch = useAuthenticatedFetch()
   const [scenarioId, setScenarioId] = useState<ProLideresNoelLabScenarioId>('geral')
@@ -43,8 +49,19 @@ export default function ProLideresNoelLaboratorioPage() {
   const [autoNoel, setAutoNoel] = useState(true)
   const [loading, setLoading] = useState<'agent' | 'noel' | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [autoRunning, setAutoRunning] = useState(false)
+  const [autoProgress, setAutoProgress] = useState<string | null>(null)
+  const autoRunCancelRef = useRef(false)
 
-  const activeBattery = batteryId ? getNoelLabBatteryById(batteryId) : undefined
+  const fullSequenceFlat =
+    batteryId === NOEL_LAB_FULL_SEQUENCE_ID ? getNoelLabFullSequenceFlat() : null
+  const activeBattery =
+    batteryId && batteryId !== NOEL_LAB_FULL_SEQUENCE_ID ? getNoelLabBatteryById(batteryId) : undefined
+  const presetActive = !!fullSequenceFlat || !!activeBattery
+  const presetTotal = batteryId ? getNoelLabPresetTotal(batteryId) : 0
+  const presetAtEnd = presetActive && batteryStep >= presetTotal
+  const currentSequenceEntry =
+    fullSequenceFlat && batteryStep < fullSequenceFlat.length ? fullSequenceFlat[batteryStep] : null
 
   useEffect(() => {
     setBatteryStep(0)
@@ -75,16 +92,21 @@ export default function ProLideresNoelLaboratorioPage() {
     setBatteryStep(0)
   }, [])
 
-  const runBatteryThenNoel = useCallback(async () => {
-    if (!activeBattery) {
-      setError('Escolha uma bateria na lista abaixo.')
+  const runNextPresetThenNoel = useCallback(async () => {
+    const total = getNoelLabPresetTotal(batteryId)
+    if (!batteryId || total === 0) {
+      setError('Escolha «Sequência completa» ou uma bateria na lista.')
       return
     }
-    if (batteryStep >= activeBattery.questions.length) {
-      setError('Fim desta bateria. Escolha outra bateria ou use «Limpar sessão» e recomece.')
+    if (batteryStep >= total) {
+      setError('Fim das perguntas deste modo. Clique em «Repetir do início» ou «Limpar sessão».')
       return
     }
-    const question = activeBattery.questions[batteryStep]
+    const question = getNoelLabPresetQuestionAt(batteryId, batteryStep)
+    if (!question) {
+      setError('Pergunta inválida neste índice.')
+      return
+    }
     setError(null)
     setLoading('noel')
     try {
@@ -118,7 +140,74 @@ export default function ProLideresNoelLaboratorioPage() {
     } finally {
       setLoading(null)
     }
-  }, [activeBattery, authenticatedFetch, batteryStep, lastLinkContext, toNoelHistory, turns])
+  }, [authenticatedFetch, batteryId, batteryStep, lastLinkContext, toNoelHistory, turns])
+
+  const stopAutoSequence = useCallback(() => {
+    autoRunCancelRef.current = true
+  }, [])
+
+  const runAllPresetsAutomatically = useCallback(async () => {
+    const total = getNoelLabPresetTotal(batteryId)
+    if (!batteryId || total === 0) {
+      setError('Escolha «Sequência completa» ou uma bateria.')
+      return
+    }
+    autoRunCancelRef.current = false
+    setError(null)
+    setAutoRunning(true)
+    setBatteryStep(0)
+    setAutoProgress(`0/${total}`)
+
+    let localTurns = [...turns]
+    let localLink: LastLinkCtx | null = lastLinkContext
+
+    try {
+      for (let step = 0; step < total; step++) {
+        if (autoRunCancelRef.current) break
+        const question = getNoelLabPresetQuestionAt(batteryId, step)
+        if (!question) break
+
+        setLoading('noel')
+        const conversationHistory = toNoelHistory(localTurns)
+        const noelRes = await authenticatedFetch('/api/pro-lideres/noel', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            message: question,
+            conversationHistory,
+            locale: 'pt',
+            lastLinkContext: localLink ?? undefined,
+          }),
+        })
+        const noelData = (await noelRes.json().catch(() => ({}))) as {
+          response?: string
+          lastLinkContext?: LastLinkCtx | null
+          error?: string
+        }
+        if (!noelRes.ok) throw new Error(noelData.error || 'Falha no Noel')
+        const response = (noelData.response || '').trim()
+        if (noelData.lastLinkContext) {
+          localLink = noelData.lastLinkContext
+        }
+        localTurns = [
+          ...localTurns,
+          { id: id(), from: 'president' as const, text: question },
+          { id: id(), from: 'noel' as const, text: response || '(sem texto)' },
+        ]
+        setTurns(localTurns)
+        if (noelData.lastLinkContext) setLastLinkContext(noelData.lastLinkContext)
+        setBatteryStep(step + 1)
+        setAutoProgress(`${step + 1}/${total}`)
+        await new Promise((r) => setTimeout(r, 450))
+      }
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Erro desconhecido')
+    } finally {
+      setAutoRunning(false)
+      setLoading(null)
+      setAutoProgress(null)
+    }
+  }, [authenticatedFetch, batteryId, lastLinkContext, toNoelHistory, turns])
 
   const sendLeaderChat = useCallback(async () => {
     const text = draftMessage.trim()
@@ -160,7 +249,9 @@ export default function ProLideresNoelLaboratorioPage() {
 
   const runAgentThenNoel = useCallback(async () => {
     if (batteryId) {
-      setError('Com uma bateria fixa selecionada, use «Próxima da bateria + Noel». Para o agente IA, escolha «Livre — agente IA» na bateria.')
+      setError(
+        'Com perguntas pré-definidas selecionadas, use o cartão laranja («Próxima pergunta» ou «Rodar todas»). Para o agente IA, escolha «Livre — agente IA».'
+      )
       return
     }
     setError(null)
@@ -270,7 +361,8 @@ export default function ProLideresNoelLaboratorioPage() {
           <strong>Chat manual:</strong> escreva na caixa abaixo da transcrição — conversa contínua com o Noel no mesmo
           histórico (responde à pergunta dele, aprofunda, testa outro ângulo).{' '}
           <strong>Modo livre:</strong> o agente de IA simula um presidente.{' '}
-          <strong>Bateria fixa:</strong> perguntas pré-montadas por tema; um clique avança <strong>pergunta → Noel</strong>.
+          <strong>Perguntas pré-definidas:</strong> escolha <strong>«Sequência completa»</strong> ou um tema — depois é
+          só ir clicando em <strong>«Próxima pergunta + Noel»</strong> para ver todas as respostas e analisar.
           O <strong>Noel real</strong> usa as mesmas regras do painel. Nada disto grava no Noel de produção fora desta
           sessão no browser.
         </p>
@@ -282,32 +374,48 @@ export default function ProLideresNoelLaboratorioPage() {
 
       <div className="flex flex-col gap-4 rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
         <label className="flex flex-col gap-1 text-sm">
-          <span className="font-medium text-gray-700">Bateria de perguntas (sequência fixa)</span>
+          <span className="font-medium text-gray-700">Perguntas pré-definidas (só clicar em «Próxima»)</span>
           <select
             value={batteryId}
+            disabled={autoRunning}
             onChange={(e) => setBatteryId(e.target.value)}
-            className="rounded-lg border border-gray-300 px-3 py-2 text-gray-900"
+            className="rounded-lg border border-gray-300 px-3 py-2 text-gray-900 disabled:cursor-not-allowed disabled:bg-gray-100"
           >
             <option value="">Livre — agente IA gera a pergunta (cenário abaixo)</option>
+            <option value={NOEL_LAB_FULL_SEQUENCE_ID}>
+              Sequência completa — todas as perguntas ({NOEL_LAB_FULL_SEQUENCE_TOTAL})
+            </option>
             {PRO_LIDERES_NOEL_LAB_BATTERIES.map((b) => (
               <option key={b.id} value={b.id}>
                 {b.label} ({b.questions.length} perguntas)
               </option>
             ))}
           </select>
-          {activeBattery ? (
+          {fullSequenceFlat ? (
+            <p className="text-xs text-gray-600">
+              <span className="font-medium text-gray-700">Modo:</span> percorre todos os temas na ordem do laboratório.
+              Global <strong>{Math.min(batteryStep + 1, presetTotal)}</strong> / <strong>{presetTotal}</strong>
+              {currentSequenceEntry ? (
+                <>
+                  {' '}
+                  · tema atual: <strong>{currentSequenceEntry.batteryLabel}</strong> (
+                  {currentSequenceEntry.questionIndexInBattery + 1}/{currentSequenceEntry.batteryQuestionCount} neste
+                  tema)
+                </>
+              ) : null}
+              {presetAtEnd ? <span className="ml-1 font-medium text-amber-800"> (sequência concluída)</span> : null}
+            </p>
+          ) : activeBattery ? (
             <p className="text-xs text-gray-600">
               <span className="font-medium text-gray-700">Observar:</span> {activeBattery.checklistHint} — pergunta{' '}
               <strong>{Math.min(batteryStep + 1, activeBattery.questions.length)}</strong> de{' '}
               <strong>{activeBattery.questions.length}</strong>
-              {batteryStep >= activeBattery.questions.length ? (
-                <span className="ml-1 font-medium text-amber-800"> (bateria concluída)</span>
-              ) : null}
+              {presetAtEnd ? <span className="ml-1 font-medium text-amber-800"> (tema concluído)</span> : null}
             </p>
           ) : (
             <p className="text-xs text-gray-500">
-              Com «Livre», o botão roxo chama o agente + Noel. Com uma bateria, use o botão laranja para avançar na
-              lista fixa.
+              Para ir clicando só em «próxima», escolha acima <strong>Sequência completa</strong> ou um tema. Com
+              «Livre», use o botão roxo.
             </p>
           )}
         </label>
@@ -317,7 +425,7 @@ export default function ProLideresNoelLaboratorioPage() {
             <span className="font-medium text-gray-700">Cenário do agente (só modo livre)</span>
             <select
               value={scenarioId}
-              disabled={!!batteryId}
+              disabled={presetActive}
               onChange={(e) => setScenarioId(e.target.value as ProLideresNoelLabScenarioId)}
               className="rounded-lg border border-gray-300 px-3 py-2 text-gray-900 disabled:cursor-not-allowed disabled:bg-gray-100"
             >
@@ -341,32 +449,74 @@ export default function ProLideresNoelLaboratorioPage() {
         </label>
       </div>
 
+      {presetActive ? (
+        <div className="rounded-xl border-2 border-amber-400 bg-gradient-to-b from-amber-50 to-white p-4 shadow-sm">
+          <p className="text-center text-sm font-semibold text-amber-950">Teste rápido — mesma ação, várias vezes</p>
+          <p className="mt-1 text-center text-xs text-amber-900/90">
+            <strong>Um clique:</strong> próxima pergunta. <strong>Rodar todas:</strong> dispara o resto da sequência do
+            início (com pausa curta entre chamadas). Depois analise a transcrição.
+          </p>
+          {autoProgress ? (
+            <p className="mt-2 text-center text-sm font-semibold text-amber-900">
+              Automático: {autoProgress}
+              {autoRunning ? (
+                <button
+                  type="button"
+                  onClick={stopAutoSequence}
+                  className="ml-3 rounded-lg border border-red-300 bg-red-50 px-2 py-1 text-xs font-bold text-red-800 hover:bg-red-100"
+                >
+                  Parar
+                </button>
+              ) : null}
+            </p>
+          ) : null}
+          {!presetAtEnd ? (
+            <>
+              <div className="mt-4 flex flex-col gap-2 sm:flex-row">
+                <button
+                  type="button"
+                  disabled={!!loading || autoRunning}
+                  onClick={() => void runNextPresetThenNoel()}
+                  className="w-full flex-1 rounded-xl bg-amber-600 px-4 py-4 text-base font-bold text-white shadow-md hover:bg-amber-700 disabled:opacity-50 sm:text-lg"
+                >
+                  {loading === 'noel' && !autoRunning
+                    ? 'Noel a responder…'
+                    : `Próxima pergunta + Noel (${batteryStep + 1} / ${presetTotal})`}
+                </button>
+                <button
+                  type="button"
+                  disabled={!!loading || autoRunning}
+                  onClick={() => void runAllPresetsAutomatically()}
+                  className="w-full flex-1 rounded-xl border-2 border-amber-700 bg-white px-4 py-4 text-sm font-bold text-amber-950 shadow-sm hover:bg-amber-100 disabled:opacity-50 sm:text-base"
+                >
+                  Rodar todas automaticamente (do início)
+                </button>
+              </div>
+              {turns.length > 0 ? (
+                <p className="mt-2 text-center text-[11px] text-amber-900/80">
+                  Se já tiver perguntas/respostas na transcrição e quiser evitar duplicar ao «rodar todas», use «Limpar
+                  sessão» antes.
+                </p>
+              ) : null}
+            </>
+          ) : (
+            <button
+              type="button"
+              disabled={!!loading || autoRunning}
+              onClick={() => setBatteryStep(0)}
+              className="mt-4 w-full rounded-xl border-2 border-amber-500 bg-amber-100 px-4 py-3 text-sm font-bold text-amber-950 hover:bg-amber-200 disabled:opacity-50"
+              title="Volta à primeira pergunta deste modo. A transcrição mantém-se — use Limpar sessão para teste sem histórico."
+            >
+              Repetir do início (mesma sequência)
+            </button>
+          )}
+        </div>
+      ) : null}
+
       <div className="flex flex-wrap gap-2">
-        {activeBattery && batteryStep < activeBattery.questions.length ? (
-          <button
-            type="button"
-            disabled={!!loading}
-            onClick={runBatteryThenNoel}
-            className="rounded-lg bg-amber-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-amber-700 disabled:opacity-50"
-          >
-            {loading === 'noel'
-              ? 'Noel a responder…'
-              : `Próxima da bateria + Noel (${batteryStep + 1}/${activeBattery.questions.length})`}
-          </button>
-        ) : activeBattery && batteryStep >= activeBattery.questions.length ? (
-          <button
-            type="button"
-            disabled={!!loading}
-            onClick={() => setBatteryStep(0)}
-            className="rounded-lg border border-amber-400 bg-amber-50 px-4 py-2.5 text-sm font-semibold text-amber-900 hover:bg-amber-100 disabled:opacity-50"
-            title="Volta à pergunta 1; a transcrição continua — use Limpar sessão se quiser teste sem histórico."
-          >
-            Repetir índice da bateria
-          </button>
-        ) : null}
         <button
           type="button"
-          disabled={!!loading || !!batteryId}
+          disabled={!!loading || !!batteryId || autoRunning}
           onClick={runAgentThenNoel}
           className="rounded-lg bg-violet-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-violet-700 disabled:opacity-50"
         >
@@ -381,7 +531,7 @@ export default function ProLideresNoelLaboratorioPage() {
         {!autoNoel ? (
           <button
             type="button"
-            disabled={!!loading}
+            disabled={!!loading || autoRunning}
             onClick={runNoelOnly}
             className="rounded-lg border border-violet-300 bg-violet-50 px-4 py-2.5 text-sm font-semibold text-violet-900 hover:bg-violet-100 disabled:opacity-50"
           >
@@ -390,7 +540,7 @@ export default function ProLideresNoelLaboratorioPage() {
         ) : null}
         <button
           type="button"
-          disabled={!!loading}
+          disabled={!!loading || autoRunning}
           onClick={resetSession}
           className="rounded-lg border border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
         >
@@ -418,7 +568,8 @@ export default function ProLideresNoelLaboratorioPage() {
         <h2 className="text-sm font-semibold text-gray-800">Transcrição</h2>
         {turns.length === 0 ? (
           <p className="text-sm text-gray-500">
-            Ainda vazio. Escreva na caixa de chat, ou use «Livre» + «Próximo turno», ou uma bateria + laranja.
+            Ainda vazio. Escolha «Sequência completa» ou um tema e use o botão grande laranja, ou «Livre» + roxo, ou o
+            chat em baixo.
           </p>
         ) : (
           <ul className="max-h-[min(28rem,55vh)] space-y-4 overflow-y-auto pr-1">
@@ -464,13 +615,13 @@ export default function ProLideresNoelLaboratorioPage() {
                 }
               }}
               rows={3}
-              disabled={!!loading}
+              disabled={!!loading || autoRunning}
               placeholder="Responda ao Noel, aprofunde o tema, mude de assunto… (Ctrl+Enter ou ⌘+Enter para enviar)"
               className="min-h-[5rem] w-full flex-1 resize-y rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 disabled:bg-gray-100"
             />
             <button
               type="button"
-              disabled={!!loading || !draftMessage.trim()}
+              disabled={!!loading || autoRunning || !draftMessage.trim()}
               onClick={() => void sendLeaderChat()}
               className="shrink-0 rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-emerald-700 disabled:opacity-50"
             >
