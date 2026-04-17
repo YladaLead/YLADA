@@ -3,6 +3,7 @@
  * @see docs/PROGRAMACAO-ESTRUTURAL-YLADA.md
  */
 import { NextRequest, NextResponse } from 'next/server'
+import { resolveYladaPublicLinkBaseUrl } from '@/lib/ylada-public-link-base-url'
 import { requireApiAuth } from '@/lib/api-auth'
 import { supabaseAdmin } from '@/lib/supabase'
 import { YLADA_API_ALLOWED_PROFILES } from '@/config/ylada-areas'
@@ -144,9 +145,7 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    const host = request.headers.get('host') || ''
-    const protocol = request.headers.get('x-forwarded-proto') || 'http'
-    const baseUrl = host ? `${protocol}://${host}` : ''
+    const baseUrl = resolveYladaPublicLinkBaseUrl(request)
 
     const isPro = await hasYladaProPlan(user.id)
     const activeOrdered = [...links]

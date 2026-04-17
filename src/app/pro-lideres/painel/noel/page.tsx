@@ -23,7 +23,6 @@ export default function ProLideresNoelPage() {
         headerTagline="Estou aqui para ajudar, pergunte o que precisar para desenvolver você e sua equipe."
         hideInputHint
         sendButtonLabel="Enviar"
-        disableYladaLinkEditor
         locale="pt"
       />
     </div>

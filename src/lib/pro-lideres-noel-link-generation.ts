@@ -153,7 +153,15 @@ function isIntencaoCriarLink(
     'intestino', 'energia', 'ansiedade', 'bem-estar', 'suplementação',
     'me ajuda a criar', 'me dá um', 'me faz um', 'cria um', 'cria uma',
     'criar esse fluxo', 'esse fluxo para mim', 'cria esse fluxo', 'criar o fluxo',
-    'meu link', 'e meu link', 'quero o link', 'gera o link', 'gerar o link', 'cria o link',
+    'meu link',
+    'e meu link',
+    'quero o link',
+    'gera o link',
+    'gera um link',
+    'gerar o link',
+    'gerar um link',
+    'cria o link',
+    'cria um link',
     'me dá o link', 'me entrega o link', 'cadê o link', 'onde está o link', 'entregar o link',
     'criar o link', 'link desse', 'link desse diagnóstico', 'link desse quiz', 'link do diagnóstico',
     'pode criar esse', 'pode gerar o link', 'gera esse link',
@@ -345,7 +353,11 @@ export async function runProLideresNoelLinkPipeline(params: {
       if (flowId && interpretacao && confidence >= 0.5) {
         const genRes = await fetch(`${baseUrl}/api/ylada/links/generate`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json', cookie },
+          headers: {
+            'Content-Type': 'application/json',
+            cookie,
+            'x-ylada-public-origin': baseUrl,
+          },
           body: JSON.stringify({
             flow_id: flowId,
             interpretacao,
@@ -404,7 +416,11 @@ export async function runProLideresNoelLinkPipeline(params: {
       if (flowId && interpretacao && confidence >= 0.5) {
         const genRes = await fetch(`${baseUrl}/api/ylada/links/generate`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json', cookie },
+          headers: {
+            'Content-Type': 'application/json',
+            cookie,
+            'x-ylada-public-origin': baseUrl,
+          },
           body: JSON.stringify({
             flow_id: flowId,
             interpretacao,

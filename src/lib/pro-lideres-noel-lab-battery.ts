@@ -95,6 +95,18 @@ export const PRO_LIDERES_NOEL_LAB_BATTERIES: ProLideresNoelLabBattery[] = [
     ],
   },
   {
+    id: 'quiz_diagnostico_fluxo',
+    label: 'Quiz / diagnóstico / link (co-criação na Ylada)',
+    checklistHint:
+      'Brief (tema, público, objetivo pós-quiz, canal); ### Perguntas para fechar o brief se pedido vago; intenção «criar quiz/link» dispara backend — ver bloco oficial e compliance.',
+    questions: [
+      'Noel, cria um quiz para eu qualificar gente que veio de post no Instagram: mulheres 40+, interesse em reeducação alimentar. Quero levar para conversa consultiva no WhatsApp, sem prometer resultado nem falar preço no diagnóstico.',
+      'Preciso de um diagnóstico rápido para quem esteve no evento de captação no sábado. Ainda não tenho título nem sei quantas perguntas — me ajuda a pensar e a criar o link.',
+      'Gera um link tipo quiz para a equipe mandar no grupo: separar quem tem interesse real em saber mais do negócio, tom leve, sem pressão de fechamento.',
+      'Quero uma calculadora ou um fluxo que mostre pro contato o “quanto está deixando de ganhar” se não mudar hábito — dá para fazer ético para Herbalife?',
+    ],
+  },
+  {
     id: 'cliente_conversa',
     label: 'Cliente e conversa (líder orientando equipe)',
     checklistHint: 'Objeções, tom consultivo vs agressivo, consentimento, imagem.',
@@ -143,6 +155,12 @@ export function getNoelLabBatteryById(id: string): ProLideresNoelLabBattery | un
 /** Valor do `<select>` para percorrer todas as baterias em sequência (um botão «próxima»). */
 export const NOEL_LAB_FULL_SEQUENCE_ID = '__sequencia_completa__'
 
+/**
+ * Bateria só de criação de quiz/diagnóstico/link — **excluída** da «sequência completa» para não misturar
+ * chamadas ao pipeline de links com dezenas de testes de mentoria de campo. Teste-a pelo dropdown ou pelo atalho do laboratório.
+ */
+export const NOEL_LAB_LINK_ONLY_BATTERY_ID = 'quiz_diagnostico_fluxo'
+
 export type NoelLabSequenceEntry = {
   batteryId: string
   batteryLabel: string
@@ -151,9 +169,9 @@ export type NoelLabSequenceEntry = {
   question: string
 }
 
-/** Todas as perguntas de todas as baterias, na ordem do menu. */
+/** Todas as perguntas de todas as baterias **de mentoria de campo**, na ordem do menu — **sem** a bateria de quiz/link. */
 export function getNoelLabFullSequenceFlat(): NoelLabSequenceEntry[] {
-  return PRO_LIDERES_NOEL_LAB_BATTERIES.flatMap((b) =>
+  return PRO_LIDERES_NOEL_LAB_BATTERIES.filter((b) => b.id !== NOEL_LAB_LINK_ONLY_BATTERY_ID).flatMap((b) =>
     b.questions.map((question, i) => ({
       batteryId: b.id,
       batteryLabel: b.label,

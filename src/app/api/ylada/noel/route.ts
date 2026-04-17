@@ -930,7 +930,7 @@ export async function POST(request: NextRequest) {
         if (flowId && interpretacao && confidence >= 0.5) {
           const genRes = await fetch(`${baseUrl}/api/ylada/links/generate`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json', cookie },
+            headers: { 'Content-Type': 'application/json', cookie, 'x-ylada-public-origin': baseUrl },
             body: JSON.stringify({
               flow_id: flowId,
               interpretacao,
@@ -997,7 +997,7 @@ export async function POST(request: NextRequest) {
           if (flowId && interpretacao && confidence >= 0.5) {
             const genRes = await fetch(`${baseUrl}/api/ylada/links/generate`, {
               method: 'POST',
-              headers: { 'Content-Type': 'application/json', cookie },
+              headers: { 'Content-Type': 'application/json', cookie, 'x-ylada-public-origin': baseUrl },
               body: JSON.stringify({
                 flow_id: flowId,
                 interpretacao,
@@ -1054,7 +1054,7 @@ export async function POST(request: NextRequest) {
         if (flowId && interpretacao && confidence >= 0.5) {
           const genRes = await fetch(`${baseUrl}/api/ylada/links/generate`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json', cookie },
+            headers: { 'Content-Type': 'application/json', cookie, 'x-ylada-public-origin': baseUrl },
             body: JSON.stringify({
               flow_id: flowId,
               interpretacao,

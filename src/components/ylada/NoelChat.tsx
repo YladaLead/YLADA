@@ -48,8 +48,76 @@ function normalizeNoelAssistantMarkdown(raw: string): string {
   // "A) texto" no início de linha (sem espaço antes)
   t = t.replace(/^([A-D])\)\s+/gm, '**$1)** ')
 
+  // "**Pergunta N:**" / "**Pergunta N**" / "Pergunta N:" → ### (margem prose + separadores)
+  t = t.replace(/\*\*Pergunta\s+(\d+)\*\*\s*:?\s*/gi, '\n\n### Pergunta $1\n\n')
+  t = t.replace(/(^|\n)Pergunta\s+(\d+)\s*:\s*/gi, '$1\n\n### Pergunta $2\n\n')
+
+  // Respiração entre perguntas quando o modelo omitir `---` antes da 2ª em diante
+  t = t.replace(/\n(###\s+Pergunta\s+([2-9]|\d{2,})\b)/gi, '\n\n---\n\n$1')
+
+  t = t.replace(/(?:\n---\s*){2,}/g, '\n\n---\n\n')
   t = t.replace(/\n{3,}/g, '\n\n')
   return t
+}
+
+function normalizeHrefForCompare(h: string): string {
+  const s = h.trim()
+  try {
+    const u = new URL(s)
+    u.hash = ''
+    const path = u.pathname.replace(/\/$/, '') || '/'
+    return `${u.origin}${path}${u.search}`
+  } catch {
+    return s.replace(/\/$/, '')
+  }
+}
+
+/** Remove blocos ``` só com o URL do quiz (o chat Pro Líderes já tem um botão de copiar). */
+function stripRedundantUrlCodeFence(text: string, url: string | null): string {
+  if (!url || !text) return text
+  const esc = url.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  return text
+    .replace(new RegExp(`\\n?\`\`\`(?:[\\w-]*)\\n${esc}\\s*\\n\`\`\``, 'gi'), '')
+    .replace(new RegExp(`^\`\`\`(?:[\\w-]*)\\n${esc}\\s*\\n\`\`\`\\n?`, 'gi'), '')
+}
+
+/** Extrai apenas o script da mensagem do Noel (para copiar sem o resto). */
+function extractScriptFromMessage(content: string): string {
+  const trimmed = content.trim()
+  if (!trimmed) return trimmed
+
+  const codeBlockMatch = trimmed.match(/```(?:[\w-]*)\n?([\s\S]*?)```/)
+  if (codeBlockMatch) {
+    const inner = codeBlockMatch[1].trim()
+    if (inner.length > 20) return inner
+  }
+
+  const scriptHeaderMatch = trimmed.match(
+    /(?:📝|💬)?\s*(?:Script\s*(?:sugerido|pronto)?\s*:?\s*|Chamada para Ação\s*:?\s*)\n+([\s\S]*?)(?=\n###|\n---|\n📝|\n💬|\n🔗|\n💡|$)/i
+  )
+  if (scriptHeaderMatch) {
+    const extracted = scriptHeaderMatch[1].trim()
+    if (extracted.length > 15) return extracted
+  }
+
+  const ctaMatch = trimmed.match(/###\s*Chamada para Ação\s*\n+([\s\S]*?)(?=\n###|$)/i)
+  if (ctaMatch) {
+    const extracted = ctaMatch[1].trim()
+    if (extracted.length > 15) return extracted
+  }
+
+  const msgBlockMatch = trimmed.match(/(?:^|\n)((?:Oi|Olá|Olá\s+\[?nome\]?)[\s\S]*?)(?=\n\n(?:###|📝|🔗|💡|$)|\n---|$)/i)
+  if (msgBlockMatch) {
+    const extracted = msgBlockMatch[1].trim()
+    if (extracted.length > 30) return extracted
+  }
+
+  return trimmed
+}
+
+function isExtractedScriptOnlyUrl(content: string): boolean {
+  const s = extractScriptFromMessage(content).trim()
+  return /^https?:\/\/\S+$/i.test(s)
 }
 
 function LinkWithCopy({ href, children }: { href?: string; children: React.ReactNode }) {
@@ -261,10 +329,13 @@ export default function NoelChat({
   const resolvedChatApi = chatApiPath ?? '/api/ylada/noel'
   const proLideresPayload = isProLideresNoelApiPath(resolvedChatApi)
   /** Links da matriz YLADA para esteticista ficam em /pt/estetica, não na rota do painel embed. */
+  /** Pro Líderes: links do dono ficam na matriz central `/pt/links`, não em `/pt/pro_lideres/...`. */
   const yladaMatrixPathPrefix =
     area === 'pro_estetica_corporal' || resolvedChatApi?.includes('/pro-estetica-corporal/noel')
       ? getYladaAreaPathPrefix('estetica')
-      : getYladaAreaPathPrefix(area)
+      : area === 'pro_lideres' || resolvedChatApi?.includes('/pro-lideres/noel')
+        ? getYladaAreaPathPrefix('ylada')
+        : getYladaAreaPathPrefix(area)
   const [messages, setMessages] = useState<Message[]>(() => {
     const saved = normalizeSavedMessagesForSkipWelcome(loadMessages(area), skipWelcomeMessage)
     if (saved.length > 0) return saved
@@ -348,11 +419,12 @@ export default function NoelChat({
     scrollEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
-  const sendMessage = useCallback(async () => {
-    const text = input.trim()
+  const sendMessage = useCallback(async (forcedText?: string) => {
+    const textSource = forcedText !== undefined ? forcedText : input
+    const text = textSource.trim()
     if (!text || loading) return
 
-    setInput('')
+    if (forcedText === undefined) setInput('')
     const userMsg: Message = {
       id: `u-${Date.now()}`,
       role: 'user',
@@ -495,45 +567,6 @@ export default function NoelChat({
 
   const hasLink = (text: string) => /\[([^\]]+)\]\(([^)]+)\)/.test(text)
 
-  /** Extrai apenas o script da última mensagem do Noel (para copiar sem o resto). */
-  function extractScriptFromMessage(content: string): string {
-    const trimmed = content.trim()
-    if (!trimmed) return trimmed
-
-    // 1. Bloco de código (```...```) — scripts costumam vir em code block
-    const codeBlockMatch = trimmed.match(/```(?:[\w]*)\n?([\s\S]*?)```/)
-    if (codeBlockMatch) {
-      const inner = codeBlockMatch[1].trim()
-      if (inner.length > 20) return inner
-    }
-
-    // 2. Após "Script:" ou "📝 Script:" ou "💬 Script:" ou "Script sugerido:" ou "Script pronto:"
-    const scriptHeaderMatch = trimmed.match(
-      /(?:📝|💬)?\s*(?:Script\s*(?:sugerido|pronto)?\s*:?\s*|Chamada para Ação\s*:?\s*)\n+([\s\S]*?)(?=\n###|\n---|\n📝|\n💬|\n🔗|\n💡|$)/i
-    )
-    if (scriptHeaderMatch) {
-      const extracted = scriptHeaderMatch[1].trim()
-      if (extracted.length > 15) return extracted
-    }
-
-    // 3. Seção ### Chamada para Ação
-    const ctaMatch = trimmed.match(/###\s*Chamada para Ação\s*\n+([\s\S]*?)(?=\n###|$)/i)
-    if (ctaMatch) {
-      const extracted = ctaMatch[1].trim()
-      if (extracted.length > 15) return extracted
-    }
-
-    // 4. Bloco que parece mensagem para enviar (começa com Oi/Olá, várias linhas)
-    const msgBlockMatch = trimmed.match(/(?:^|\n)((?:Oi|Olá|Olá\s+\[?nome\]?)[\s\S]*?)(?=\n\n(?:###|📝|🔗|💡|$)|\n---|$)/i)
-    if (msgBlockMatch) {
-      const extracted = msgBlockMatch[1].trim()
-      if (extracted.length > 30) return extracted
-    }
-
-    // 5. Fallback: retorna a mensagem inteira
-    return trimmed
-  }
-
   /** Retorna true apenas quando a mensagem contém um script identificável (não perguntas genéricas). */
   function messageHasScript(content: string): boolean {
     const trimmed = content.trim()
@@ -585,9 +618,11 @@ export default function NoelChat({
     if (!hasLink) return false
     // Aceita: seção ###, estrutura de quiz (perguntas + A) B) C) D)), ou só link (formato natural)
     const hasSecaoPerguntas = /###\s*(?:AQUI ESTÃO AS PERGUNTAS|Chamada para Ação|Link Inteligente)/i.test(t)
+    const hasQuizOficialProLideres = /###\s*Quiz\s+e\s+link\s*\(oficial/i.test(t)
     const hasEstruturaQuiz = (/\d+\.\s+/.test(t) || /\*\*\d+\.\s+/.test(t)) && /[A-D]\)\s+/.test(t)
-    const hasFormatoNatural = /aqui está o link|acesse seu quiz|preparei um diagnóstico/i.test(t)
-    return hasSecaoPerguntas || hasEstruturaQuiz || hasFormatoNatural
+    const hasFormatoNatural =
+      /aqui está o link|acesse seu quiz|preparei um diagnóstico|diagnóstico\/link\s*\*\*já\s*foi\s*gravado/i.test(t)
+    return hasSecaoPerguntas || hasQuizOficialProLideres || hasEstruturaQuiz || hasFormatoNatural
   }
 
   const ctxForLinkActions = lastAssistantMsg?.linkContext ?? null
@@ -738,6 +773,22 @@ export default function NoelChat({
           if (msg.role === 'assistant' && msg.id === 'welcome' && !String(msg.content ?? '').trim()) {
             return null
           }
+          const isLastAssistantMessage = lastAssistantMsg?.id === msg.id
+          const ctxForMarkdown =
+            msg.role === 'assistant'
+              ? msg.linkContext ?? (isLastAssistantMessage ? lastLinkContext : null)
+              : null
+          const quizSlimHref =
+            msg.role === 'assistant' && proLideresPayload
+              ? ctxForMarkdown?.url ?? extractFirstHttpUrl(msg.content)
+              : null
+          const assistantMarkdownSource =
+            msg.role === 'assistant' && quizSlimHref
+              ? stripRedundantUrlCodeFence(msg.content, quizSlimHref)
+              : msg.content
+          const assistantMarkdownNormalized =
+            msg.role === 'assistant' ? normalizeNoelAssistantMarkdown(assistantMarkdownSource) : ''
+
           return (
           <div
             key={msg.id}
@@ -758,11 +809,41 @@ export default function NoelChat({
                 <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.content}</p>
               ) : (
                 <div>
-                  <div className="prose prose-sm max-w-none prose-p:my-4 prose-p:leading-relaxed prose-ul:my-5 prose-li:my-2 prose-li:leading-relaxed prose-strong:text-gray-900 prose-a:no-underline hover:prose-a:underline [&_h3]:border-l-4 [&_h3]:border-sky-400 [&_h3]:pl-3 [&_h3]:-ml-1 [&_h3]:border-b [&_h3]:border-sky-100 [&_h3]:pb-2 [&_h3]:mb-4 [&_h3]:mt-8 [&_h3]:text-lg [&_h3]:font-bold [&_h3]:text-sky-600">
+                  <div className="prose prose-sm max-w-none prose-p:my-4 prose-p:leading-relaxed prose-ul:my-5 prose-li:my-2 prose-li:leading-relaxed prose-strong:text-gray-900 prose-a:no-underline hover:prose-a:underline prose-hr:my-8 prose-hr:border-sky-100 [&_h3]:border-l-4 [&_h3]:border-sky-400 [&_h3]:pl-3 [&_h3]:-ml-1 [&_h3]:border-b [&_h3]:border-sky-100 [&_h3]:pb-2 [&_h3]:mb-4 [&_h3]:mt-8 [&_h3]:text-lg [&_h3]:font-bold [&_h3]:text-sky-600">
                     <ReactMarkdown
                       remarkPlugins={[remarkGfm, remarkBreaks]}
                       components={{
-                        a: ({ href, children }) => <LinkWithCopy key={href ?? undefined} href={href}>{children}</LinkWithCopy>,
+                        a: ({ href, children }) => {
+                          const slim =
+                            Boolean(
+                              proLideresPayload &&
+                                quizSlimHref &&
+                                href &&
+                                normalizeHrefForCompare(href) === normalizeHrefForCompare(quizSlimHref)
+                            )
+                          if (slim && href) {
+                            return (
+                              <a
+                                key={href}
+                                href={href}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-1.5 w-fit max-w-full px-3 py-2 rounded-lg bg-sky-50 text-sky-700 font-medium hover:bg-sky-100 transition-colors border border-sky-200 mt-2 mb-1 no-underline hover:underline break-all"
+                              >
+                                <span className="truncate">{children}</span>
+                                <svg className="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                                  />
+                                </svg>
+                              </a>
+                            )
+                          }
+                          return <LinkWithCopy key={href ?? undefined} href={href}>{children}</LinkWithCopy>
+                        },
                         p: ({ children, className, ...props }) => {
                           const plain = markdownPlainText(children).trim()
                           const looksLikeQuestion = plain.endsWith('?') && plain.length > 3
@@ -779,10 +860,13 @@ export default function NoelChat({
                         },
                       }}
                     >
-                      {normalizeNoelAssistantMarkdown(msg.content)}
+                      {assistantMarkdownNormalized}
                     </ReactMarkdown>
                   </div>
-                  {lastAssistantMsg?.id === msg.id && msg.id !== 'welcome' && messageHasScript(msg.content) && (
+                  {lastAssistantMsg?.id === msg.id &&
+                    msg.id !== 'welcome' &&
+                    messageHasScript(msg.content) &&
+                    !(proLideresPayload && isExtractedScriptOnlyUrl(msg.content)) && (
                     <button
                       type="button"
                       onClick={() => copyScript(msg)}
@@ -818,7 +902,7 @@ export default function NoelChat({
                             href={`${yladaMatrixPathPrefix}/links/editar/${ctxForMessage.link_id}`}
                             className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-sky-600 text-white text-sm font-medium hover:bg-sky-700 transition-colors touch-manipulation"
                           >
-                            Editar quiz
+                            {proLideresPayload ? 'Editar na Ylada' : 'Editar quiz'}
                           </Link>
                         )}
                         {quizUrl && (
@@ -832,9 +916,21 @@ export default function NoelChat({
                             }}
                             className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-sky-50 text-sky-700 text-sm font-medium border border-sky-200 hover:bg-sky-100 transition-colors touch-manipulation"
                           >
-                            {copiedQuizLinkMsgId === msg.id ? 'Copiado!' : 'Copiar link do quiz'}
+                            {copiedQuizLinkMsgId === msg.id
+                              ? 'Copiado!'
+                              : proLideresPayload
+                                ? 'Copiar link público'
+                                : 'Copiar link do quiz'}
                           </button>
                         )}
+                        {proLideresPayload && quizUrl ? (
+                          <Link
+                            href="/pro-lideres/painel/catalogo"
+                            className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-emerald-50 text-emerald-900 text-sm font-medium border border-emerald-200 hover:bg-emerald-100 transition-colors touch-manipulation"
+                          >
+                            Disponibilizar à equipe
+                          </Link>
+                        ) : null}
                       </div>
                     )
                   })()}
@@ -923,39 +1019,117 @@ export default function NoelChat({
           </div>
         )}
         {showEditarConcordoButtons && (
-          <div className="flex flex-wrap gap-2 pt-2">
-            <Link
-              href={`${yladaMatrixPathPrefix}/links/editar/${ctxForLinkActions!.link_id}`}
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-sky-600 text-white text-sm font-medium hover:bg-sky-700 transition-colors touch-manipulation"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-              </svg>
-              Editar perguntas
-            </Link>
-            {ctxForLinkActions?.url && (
-              <a
-                href={ctxForLinkActions.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-sky-50 text-sky-700 text-sm font-medium border border-sky-200 hover:bg-sky-100 transition-colors touch-manipulation"
+          <div className="flex flex-col gap-2 pt-2">
+            {proLideresPayload ? (
+              <div className="rounded-xl border border-emerald-200 bg-emerald-50/90 px-3 py-2.5 text-xs text-emerald-950">
+                <p className="font-semibold text-emerald-900">Próximos passos</p>
+                <ul className="mt-1.5 list-disc space-y-1 pl-4 text-emerald-900/95">
+                  <li>
+                    O link <strong>já está salvo</strong> na sua conta YLADA — não precisa guardar de novo neste chat.
+                  </li>
+                  <li>
+                    Use <strong>Editar perguntas</strong> (matriz Ylada) ou veja a lista em{' '}
+                    <strong>Links na Ylada</strong> / <strong>Links no painel</strong> abaixo; <strong>Concordo</strong>{' '}
+                    se esta versão já serve, ou <strong>Pedir ajuste ao Noel</strong> para continuar no chat.
+                  </li>
+                  <li>
+                    Depois, libere para a equipe no{' '}
+                    <Link
+                      href="/pro-lideres/painel/catalogo"
+                      className="font-semibold text-emerald-950 underline decoration-emerald-600/60 hover:no-underline"
+                    >
+                      Catálogo de ferramentas
+                    </Link>{' '}
+                    (painel Pro Líderes).
+                  </li>
+                </ul>
+              </div>
+            ) : null}
+            <div className="flex flex-wrap gap-2">
+              <Link
+                href={`${yladaMatrixPathPrefix}/links/editar/${ctxForLinkActions!.link_id}`}
+                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-sky-600 text-white text-sm font-medium hover:bg-sky-700 transition-colors touch-manipulation"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                 </svg>
-                Abrir link
-              </a>
-            )}
-            <button
-              type="button"
-              onClick={() => router.push(`${yladaMatrixPathPrefix}/links`)}
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-sky-50 text-sky-700 text-sm font-medium border border-sky-200 hover:bg-sky-100 transition-colors touch-manipulation"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
-              Ver meus links
-            </button>
+                Editar perguntas
+              </Link>
+              {ctxForLinkActions?.url && (
+                <a
+                  href={ctxForLinkActions.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-sky-50 text-sky-700 text-sm font-medium border border-sky-200 hover:bg-sky-100 transition-colors touch-manipulation"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                  </svg>
+                  Abrir link
+                </a>
+              )}
+              {proLideresPayload ? (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => router.push(`${yladaMatrixPathPrefix}/links`)}
+                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-sky-50 text-sky-700 text-sm font-medium border border-sky-200 hover:bg-sky-100 transition-colors touch-manipulation"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                    Links na Ylada
+                  </button>
+                  <Link
+                    href="/pro-lideres/painel/links"
+                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-violet-50 text-violet-900 text-sm font-medium border border-violet-200 hover:bg-violet-100 transition-colors touch-manipulation"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                    </svg>
+                    Links no painel
+                  </Link>
+                </>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => router.push(`${yladaMatrixPathPrefix}/links`)}
+                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-sky-50 text-sky-700 text-sm font-medium border border-sky-200 hover:bg-sky-100 transition-colors touch-manipulation"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  Ver meus links
+                </button>
+              )}
+              {proLideresPayload ? (
+                <>
+                  <button
+                    type="button"
+                    disabled={loading}
+                    onClick={() =>
+                      void sendMessage(
+                        'Concordo com as perguntas e com o link como estão. Por agora não quero alterar o texto do quiz neste chat.'
+                      )
+                    }
+                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-700 transition-colors touch-manipulation disabled:opacity-50"
+                  >
+                    Concordo
+                  </button>
+                  <button
+                    type="button"
+                    disabled={loading}
+                    onClick={() => {
+                      setInput('Noel, ajusta este quiz: ')
+                      queueMicrotask(() => inputRef.current?.focus())
+                    }}
+                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-emerald-600 bg-white text-emerald-900 text-sm font-medium hover:bg-emerald-50 transition-colors touch-manipulation disabled:opacity-50"
+                  >
+                    Pedir ajuste ao Noel
+                  </button>
+                </>
+              ) : null}
+            </div>
           </div>
         )}
         <div ref={scrollEndRef} />
@@ -980,7 +1154,7 @@ export default function NoelChat({
           </div>
           <button
             type="button"
-            onClick={sendMessage}
+            onClick={() => void sendMessage()}
             disabled={!input.trim() || loading}
             className="h-[48px] px-6 bg-sky-600 text-white rounded-xl hover:bg-sky-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-semibold shrink-0 shadow-md flex items-center gap-2"
           >

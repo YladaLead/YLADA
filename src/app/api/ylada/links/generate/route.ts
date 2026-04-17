@@ -5,6 +5,7 @@
  * @see docs/CHECKLIST-LINKS-INTELIGENTES-ETAPAS.md (Etapa 6)
  */
 import { NextRequest, NextResponse } from 'next/server'
+import { resolveYladaPublicLinkBaseUrl } from '@/lib/ylada-public-link-base-url'
 import { supabaseAdmin } from '@/lib/supabase'
 import { requireAuthForYladaLinkCreation } from '@/lib/ylada-link-api-auth'
 import OpenAI from 'openai'
@@ -558,9 +559,7 @@ export async function POST(request: NextRequest) {
       ).catch((err) => console.warn('[ylada/links/generate] diagnosis generation:', err))
     }
 
-    const host = request.headers.get('host') || ''
-    const protocol = request.headers.get('x-forwarded-proto') || 'http'
-    const baseUrl = host ? `${protocol}://${host}` : ''
+    const baseUrl = resolveYladaPublicLinkBaseUrl(request)
     const url = baseUrl ? `${baseUrl}/l/${link.slug}` : `/l/${link.slug}`
 
     return NextResponse.json({

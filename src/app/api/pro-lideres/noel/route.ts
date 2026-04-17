@@ -159,7 +159,7 @@ export async function POST(request: NextRequest) {
     const completion = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
       messages: openaiMessages,
-      temperature: 0.65,
+      temperature: 0.52,
       max_tokens: 1800,
     })
     let text = completion.choices[0]?.message?.content?.trim()
@@ -179,11 +179,15 @@ export async function POST(request: NextRequest) {
       const marker = '### Quiz e link (oficial'
       if (!text.includes(marker)) {
         const intro = [
-          'Perfeito — o teu diagnóstico/link está pronto na tua conta YLADA.',
+          'Perfeito — o diagnóstico/link **já foi gravado** na sua conta YLADA (**Links / Ferramentas** na matriz).',
+          '',
+          '**Sugestão de próximos passos para você:**',
+          '1. **Revisar** título e perguntas (*Editar perguntas* / *Editar na Ylada* abaixo da mensagem, ou na matriz). Quando aparecerem, os botões **Links na Ylada** e **Links no painel** abrem a lista na matriz e a visão no Pro Líderes.',
+          '2. **Abrir** o link público ou usar **Copiar link público** (um botão só abaixo da mensagem) para testar como o contato vê o fluxo.',
+          '3. No **Pro Líderes → Catálogo de ferramentas**, liberar o fluxo para a equipe (é onde o time vê o que você ativa), conforme a política da operação.',
+          '4. Se quiser mudanças de texto ou de foco, **escreva neste chat** — o Noel continua como co-editor até você fechar a versão.',
           '',
           'Abaixo está o bloco **Quiz e link (oficial)** com as perguntas alinhadas ao link público e à edição.',
-          '',
-          'Podes ajustar perguntas na área **Links / Ferramentas** da Ylada e gerir a visibilidade para a equipa no **Catálogo** do Pro Líderes.',
         ].join('\n')
         const footer = buildCanonicalQuizMarkdownForProLideresResponse(
           canonicalAppendix.title,

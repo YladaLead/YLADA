@@ -12,6 +12,7 @@ import {
   getNoelLabPresetQuestionAt,
   getNoelLabPresetTotal,
   NOEL_LAB_FULL_SEQUENCE_ID,
+  NOEL_LAB_LINK_ONLY_BATTERY_ID,
   PRO_LIDERES_NOEL_LAB_BATTERIES,
 } from '@/lib/pro-lideres-noel-lab-battery'
 import {
@@ -37,6 +38,7 @@ function id() {
 }
 
 const NOEL_LAB_FULL_SEQUENCE_TOTAL = getNoelLabPresetTotal(NOEL_LAB_FULL_SEQUENCE_ID)
+const NOEL_LAB_LINK_ONLY_TOTAL = getNoelLabPresetTotal(NOEL_LAB_LINK_ONLY_BATTERY_ID)
 
 export default function ProLideresNoelLaboratorioPage() {
   const authenticatedFetch = useAuthenticatedFetch()
@@ -90,6 +92,15 @@ export default function ProLideresNoelLaboratorioPage() {
     setLastLinkContext(null)
     setError(null)
     setBatteryStep(0)
+  }, [])
+
+  /** Só testes de quiz/link — mesmas APIs que produção; fora da sequência completa de mentoria. */
+  const startLinksLabOnly = useCallback(() => {
+    setError(null)
+    setTurns([])
+    setLastLinkContext(null)
+    setBatteryStep(0)
+    setBatteryId(NOEL_LAB_LINK_ONLY_BATTERY_ID)
   }, [])
 
   const runNextPresetThenNoel = useCallback(async () => {
@@ -146,68 +157,99 @@ export default function ProLideresNoelLaboratorioPage() {
     autoRunCancelRef.current = true
   }, [])
 
-  const runAllPresetsAutomatically = useCallback(async () => {
-    const total = getNoelLabPresetTotal(batteryId)
-    if (!batteryId || total === 0) {
-      setError('Escolha «Sequência completa» ou uma bateria.')
-      return
-    }
-    autoRunCancelRef.current = false
-    setError(null)
-    setAutoRunning(true)
-    setBatteryStep(0)
-    setAutoProgress(`0/${total}`)
-
-    let localTurns = [...turns]
-    let localLink: LastLinkCtx | null = lastLinkContext
-
-    try {
-      for (let step = 0; step < total; step++) {
-        if (autoRunCancelRef.current) break
-        const question = getNoelLabPresetQuestionAt(batteryId, step)
-        if (!question) break
-
-        setLoading('noel')
-        const conversationHistory = toNoelHistory(localTurns)
-        const noelRes = await authenticatedFetch('/api/pro-lideres/noel', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            message: question,
-            conversationHistory,
-            locale: 'pt',
-            lastLinkContext: localLink ?? undefined,
-          }),
-        })
-        const noelData = (await noelRes.json().catch(() => ({}))) as {
-          response?: string
-          lastLinkContext?: LastLinkCtx | null
-          error?: string
-        }
-        if (!noelRes.ok) throw new Error(noelData.error || 'Falha no Noel')
-        const response = (noelData.response || '').trim()
-        if (noelData.lastLinkContext) {
-          localLink = noelData.lastLinkContext
-        }
-        localTurns = [
-          ...localTurns,
-          { id: id(), from: 'president' as const, text: question },
-          { id: id(), from: 'noel' as const, text: response || '(sem texto)' },
-        ]
-        setTurns(localTurns)
-        if (noelData.lastLinkContext) setLastLinkContext(noelData.lastLinkContext)
-        setBatteryStep(step + 1)
-        setAutoProgress(`${step + 1}/${total}`)
-        await new Promise((r) => setTimeout(r, 450))
+  const runAllPresetsAutomatically = useCallback(
+    async (opts?: { batteryIdOverride?: string; clearSessionFirst?: boolean }) => {
+      const idToUse = opts?.batteryIdOverride ?? batteryId
+      const total = getNoelLabPresetTotal(idToUse)
+      if (!idToUse || total === 0) {
+        setError(
+          opts?.batteryIdOverride
+            ? 'Sequência de laboratório inválida.'
+            : 'Escolha «Sequência completa» ou uma bateria.'
+        )
+        return
       }
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Erro desconhecido')
-    } finally {
-      setAutoRunning(false)
-      setLoading(null)
-      setAutoProgress(null)
-    }
-  }, [authenticatedFetch, batteryId, lastLinkContext, toNoelHistory, turns])
+      if (opts?.batteryIdOverride) {
+        setBatteryId(opts.batteryIdOverride)
+      }
+      if (opts?.clearSessionFirst) {
+        setTurns([])
+        setLastLinkContext(null)
+      }
+      autoRunCancelRef.current = false
+      setError(null)
+      setAutoRunning(true)
+      setBatteryStep(0)
+      setAutoProgress(`0/${total}`)
+
+      let localTurns = opts?.clearSessionFirst ? [] : [...turns]
+      let localLink: LastLinkCtx | null = opts?.clearSessionFirst ? null : lastLinkContext
+
+      try {
+        for (let step = 0; step < total; step++) {
+          if (autoRunCancelRef.current) break
+          const question = getNoelLabPresetQuestionAt(idToUse, step)
+          if (!question) break
+
+          setLoading('noel')
+          const conversationHistory = toNoelHistory(localTurns)
+          const noelRes = await authenticatedFetch('/api/pro-lideres/noel', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              message: question,
+              conversationHistory,
+              locale: 'pt',
+              lastLinkContext: localLink ?? undefined,
+            }),
+          })
+          const noelData = (await noelRes.json().catch(() => ({}))) as {
+            response?: string
+            lastLinkContext?: LastLinkCtx | null
+            error?: string
+          }
+          if (!noelRes.ok) throw new Error(noelData.error || 'Falha no Noel')
+          const response = (noelData.response || '').trim()
+          if (noelData.lastLinkContext) {
+            localLink = noelData.lastLinkContext
+          }
+          localTurns = [
+            ...localTurns,
+            { id: id(), from: 'president' as const, text: question },
+            { id: id(), from: 'noel' as const, text: response || '(sem texto)' },
+          ]
+          setTurns(localTurns)
+          if (noelData.lastLinkContext) setLastLinkContext(noelData.lastLinkContext)
+          setBatteryStep(step + 1)
+          setAutoProgress(`${step + 1}/${total}`)
+          await new Promise((r) => setTimeout(r, 450))
+        }
+      } catch (e) {
+        setError(e instanceof Error ? e.message : 'Erro desconhecido')
+      } finally {
+        setAutoRunning(false)
+        setLoading(null)
+        setAutoProgress(null)
+      }
+    },
+    [authenticatedFetch, batteryId, lastLinkContext, toNoelHistory, turns]
+  )
+
+  /** Um clique: todas as baterias em sequência (laboratório), sessão limpa, igual ao item «Sequência completa» + «Rodar todas». */
+  const runFullAnalysisAllAreasOneClick = useCallback(async () => {
+    await runAllPresetsAutomatically({
+      batteryIdOverride: NOEL_LAB_FULL_SEQUENCE_ID,
+      clearSessionFirst: true,
+    })
+  }, [runAllPresetsAutomatically])
+
+  /** Limpa a sessão, ativa só a bateria de quiz/link e dispara todas as perguntas com pausa (igual «Rodar todas»). */
+  const runLinksBatteryAutoOneClick = useCallback(async () => {
+    await runAllPresetsAutomatically({
+      batteryIdOverride: NOEL_LAB_LINK_ONLY_BATTERY_ID,
+      clearSessionFirst: true,
+    })
+  }, [runAllPresetsAutomatically])
 
   const sendLeaderChat = useCallback(async () => {
     const text = draftMessage.trim()
@@ -361,11 +403,65 @@ export default function ProLideresNoelLaboratorioPage() {
           <strong>Chat manual:</strong> escreva na caixa abaixo da transcrição — conversa contínua com o Noel no mesmo
           histórico (responde à pergunta dele, aprofunda, testa outro ângulo).{' '}
           <strong>Modo livre:</strong> o agente de IA simula um presidente.{' '}
-          <strong>Perguntas pré-definidas:</strong> escolha <strong>«Sequência completa»</strong> ou um tema — depois é
-          só ir clicando em <strong>«Próxima pergunta + Noel»</strong> para ver todas as respostas e analisar.
+          <strong>Perguntas pré-definidas:</strong> escolha <strong>«Sequência completa»</strong> (só mentoria de
+          campo) ou um tema — depois é só ir clicando em <strong>«Próxima pergunta + Noel»</strong>. A{' '}
+          <strong>criação de quiz/link na Ylada</strong> tem bateria própria e atalho abaixo, para não misturar com
+          dezenas de testes de liderança.
           O <strong>Noel real</strong> usa as mesmas regras do painel. Nada disto grava no Noel de produção fora desta
           sessão no browser.
         </p>
+        <div className="mt-4 flex flex-col gap-2 rounded-xl border border-violet-200 bg-violet-50/80 p-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="text-sm text-violet-950">
+            <p className="font-semibold">Análise em massa (todas as áreas)</p>
+            <p className="mt-0.5 text-xs text-violet-900/90">
+              Um clique: limpa a sessão, ativa a sequência completa de <strong>mentoria</strong> e dispara as{' '}
+              <strong>{NOEL_LAB_FULL_SEQUENCE_TOTAL}</strong> perguntas (sem a bateria de quiz/link) com pausa curta
+              entre chamadas — igual a escolher «Sequência completa» no menu e «Rodar todas».
+            </p>
+          </div>
+          <button
+            type="button"
+            disabled={!!loading || autoRunning}
+            onClick={() => void runFullAnalysisAllAreasOneClick()}
+            className="shrink-0 rounded-xl bg-violet-700 px-4 py-3 text-sm font-bold text-white shadow-md hover:bg-violet-800 disabled:opacity-50"
+          >
+            Rodar todas as áreas ({NOEL_LAB_FULL_SEQUENCE_TOTAL} perguntas)
+          </button>
+        </div>
+        <div className="mt-3 flex flex-col gap-2 rounded-xl border border-sky-300 bg-sky-50/90 p-4 sm:flex-row sm:items-start sm:justify-between">
+          <div className="text-sm text-sky-950">
+            <p className="font-semibold">Só criação de quiz / diagnóstico / link (Ylada)</p>
+            <p className="mt-1 text-xs text-sky-900/95">
+              Igual ao fluxo da <strong>ylada.com</strong>: o Noel interpreta o pedido, o backend pode{' '}
+              <strong>gerar o link</strong> na conta do <strong>dono</strong>; o líder edita em{' '}
+              <strong>Links / Ferramentas</strong> (matriz) e disponibiliza no{' '}
+              <strong>Catálogo de ferramentas</strong> do painel para a <strong>equipe</strong> (cada membro acede ao
+              que a operação permitir). Use este modo para
+              validar <strong>brief</strong>, <strong>compliance</strong> e bloco <strong>Quiz e link (oficial)</strong>{' '}
+              sem correr a sequência longa de liderança. Pode <strong>abrir</strong> a bateria e ir clicando em
+              «Próxima», ou <strong>limpar e rodar tudo em automático</strong> (mesmo ritmo da análise em massa
+              violeta).
+            </p>
+          </div>
+          <div className="flex w-full shrink-0 flex-col gap-2 sm:w-auto sm:min-w-[14rem]">
+            <button
+              type="button"
+              disabled={!!loading || autoRunning}
+              onClick={startLinksLabOnly}
+              className="rounded-xl border-2 border-sky-700 bg-white px-4 py-3 text-sm font-bold text-sky-950 shadow-sm hover:bg-sky-100 disabled:opacity-50"
+            >
+              Abrir bateria só de links ({NOEL_LAB_LINK_ONLY_TOTAL} perguntas)
+            </button>
+            <button
+              type="button"
+              disabled={!!loading || autoRunning}
+              onClick={() => void runLinksBatteryAutoOneClick()}
+              className="rounded-xl bg-sky-700 px-4 py-3 text-sm font-bold text-white shadow-md hover:bg-sky-800 disabled:opacity-50"
+            >
+              Limpar e rodar links ({NOEL_LAB_LINK_ONLY_TOTAL} perguntas)
+            </button>
+          </div>
+        </div>
         <p className="mt-2 text-xs text-amber-800">
           Aviso: mensagens passam pelas APIs reais (OpenAI + Noel). Use cenários responsáveis; o conteúdo deve
           respeitar políticas da marca.
@@ -383,7 +479,7 @@ export default function ProLideresNoelLaboratorioPage() {
           >
             <option value="">Livre — agente IA gera a pergunta (cenário abaixo)</option>
             <option value={NOEL_LAB_FULL_SEQUENCE_ID}>
-              Sequência completa — todas as perguntas ({NOEL_LAB_FULL_SEQUENCE_TOTAL})
+              Sequência completa — mentoria de campo ({NOEL_LAB_FULL_SEQUENCE_TOTAL})
             </option>
             {PRO_LIDERES_NOEL_LAB_BATTERIES.map((b) => (
               <option key={b.id} value={b.id}>

@@ -71,7 +71,7 @@ async function main() {
     const completion = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
       messages: history,
-      temperature: 0.65,
+      temperature: 0.52,
       max_tokens: 1800,
     })
 
