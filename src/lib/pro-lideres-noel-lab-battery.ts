@@ -16,7 +16,8 @@ export const PRO_LIDERES_NOEL_LAB_BATTERIES: ProLideresNoelLabBattery[] = [
   {
     id: 'ritmo_operacao',
     label: 'Ritmo e operação de campo',
-    checklistHint: 'Metas da semana, priorização, bloqueios, pós-evento, rotina de contatos; link tarefas diárias se couber.',
+    checklistHint:
+      'Saída em 5 blocos: Diagnóstico → Corte esta semana → Execução (cadência: hoje / até… / na call) → Como conduzir / falar → Próximo passo (1 pergunta). Sem colchetes [placeholder].',
     questions: [
       'Noel, como eu fecho com a equipe a meta desta semana em convites e acompanhamentos sem virar pressão desorganizada?',
       'O tempo apertou: o que deixo de exigir da equipe esta semana sem perder o essencial?',

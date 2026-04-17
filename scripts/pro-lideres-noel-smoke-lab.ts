@@ -17,11 +17,17 @@ const QUESTIONS = [
   'Um membro quer postar promessa de ganho rápido. Como eu intervenho e o que peço para apagar ou ajustar?',
 ] as const
 
-function hasSections(text: string): { diagnostico: boolean; fazer: boolean; conduzir: boolean; proximo: boolean } {
-  const l = text.toLowerCase()
+function hasSections(text: string): {
+  diagnostico: boolean
+  corte: boolean
+  execucao: boolean
+  conduzir: boolean
+  proximo: boolean
+} {
   return {
     diagnostico: /###\s*diagnóstico/i.test(text),
-    fazer: /###\s*o que fazer agora/i.test(text),
+    corte: /###\s*corte esta semana/i.test(text),
+    execucao: /###\s*execução\s*\(cadência\)/i.test(text),
     conduzir: /###\s*como conduzir/i.test(text),
     proximo: /###\s*próximo passo/i.test(text),
   }
@@ -74,7 +80,9 @@ async function main() {
 
     const sec = hasSections(text)
     const words = countWords(text)
-    console.log(`\n[Métricas] palavras≈${words} | seções: Diagnóstico=${sec.diagnostico} O que fazer=${sec.fazer} Conduzir=${sec.conduzir} Próximo=${sec.proximo}`)
+    console.log(
+      `\n[Métricas] palavras≈${words} | seções: Diagnóstico=${sec.diagnostico} Corte=${sec.corte} Execução=${sec.execucao} Conduzir=${sec.conduzir} Próximo=${sec.proximo}`
+    )
     console.log('\n--- Resposta ---\n')
     console.log(text)
   }
