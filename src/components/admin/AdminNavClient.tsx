@@ -17,7 +17,10 @@ const NAV_GROUPS: { title: string; items: { href: string; label: string; emoji: 
   {
     title: 'Operação',
     items: [
-      { href: '/admin/suporte', label: 'Suporte', emoji: '💬' },
+      { href: '/admin/whatsapp/cadastros-workshop', label: 'Workshop — inscrições (WhatsApp)', emoji: '📋' },
+      { href: '/admin/whatsapp/workshop', label: 'Workshop — agenda & sessões', emoji: '📅' },
+      { href: '/admin/whatsapp', label: 'WhatsApp — conversas (Carol)', emoji: '💬' },
+      { href: '/admin/suporte', label: 'Suporte', emoji: '🛟' },
       { href: '/admin/motor-crescimento', label: 'Motor crescimento', emoji: '📚' },
       { href: '/admin/minhas-acoes', label: 'Minhas ações', emoji: '✅' },
       { href: '/admin/diagnosticos-links', label: 'Marketing', emoji: '📣' },

@@ -182,6 +182,16 @@ function AdminDashboardContent() {
       destaque: true,
     },
     {
+      id: 'whatsapp-workshop-inscricoes',
+      title: 'Workshop — inscrições (WhatsApp)',
+      description:
+        'Quem preencheu as landings (ex.: Nutri → Empresária, Gláucia); pendentes e 1ª mensagem. Agenda: WhatsApp → workshop.',
+      icon: '📱',
+      link: '/admin/whatsapp/cadastros-workshop',
+      color: 'bg-purple-600',
+      destaque: true,
+    },
+    {
       id: 'subscriptions',
       title: 'Gerenciar Assinaturas',
       description: 'Planos gratuitos e migração de assinaturas',
