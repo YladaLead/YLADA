@@ -5,6 +5,11 @@ import Image from 'next/image'
 import Link from 'next/link'
 import PhoneInputWithCountry from '@/components/PhoneInputWithCountry'
 import { trackNutriWorkshopLead, trackNutriWorkshopView } from '@/lib/facebook-pixel'
+import {
+  WORKSHOP_SOURCE_NUTRI_EMPRESARIA,
+  buildWhatsappPrefillNutriEmpresaria,
+  primeiroNomeCompleto,
+} from '@/lib/nutri-workshop-whatsapp-prefill'
 
 function buildWhatsappUrl(opts: { phone: string; message: string }) {
   const numeroLimpo = (opts.phone || '').replace(/[^0-9]/g, '')
@@ -12,19 +17,8 @@ function buildWhatsappUrl(opts: { phone: string; message: string }) {
   return `https://wa.me/${numeroLimpo}?text=${encodeURIComponent(opts.message)}`
 }
 
-function primeiroNomeCompleto(nome: string) {
-  const t = nome.trim().split(/\s+/).filter(Boolean)
-  return t[0] || ''
-}
-
 /** WhatsApp da campanha Nutri → Empresária (automação + lembretes). Sobrescrever: NEXT_PUBLIC_WORKSHOP_NUTRI_EMPRESARIA_WHATSAPP_NUMBER */
 const WHATSAPP_NUTRI_EMPRESARIA = '5519997230912'
-
-/**
- * Texto exato enviado no `?text=` do wa.me após inscrição — alinhar o gatilho do robô a esta frase.
- */
-const WA_MSG_ATIVACAO_SEM_NOME =
-  'Oi! Acabei de me inscrever na aula Nutri para Empresaria e quero receber o acesso e os lembretes.'
 
 /**
  * Currículo na landing — alinhado à Dra. Gláucia: formação (UFRJ / CENC-UFRJ) sem sugerir vínculo
@@ -82,9 +76,6 @@ export default function WorkshopNutriEmpresariaPage() {
     }
 
     const pn = primeiroNomeCompleto(formData.nome)
-    const waMsg = pn
-      ? `Oi! Sou ${pn}. Acabei de me inscrever na aula Nutri para Empresaria e quero receber o acesso e os lembretes.`
-      : WA_MSG_ATIVACAO_SEM_NOME
 
     try {
       const response = await fetch('/api/nutri/workshop/inscricao', {
@@ -97,7 +88,7 @@ export default function WorkshopNutriEmpresariaPage() {
           email: formData.email,
           telefone: formData.telefone,
           crn: formData.crn || null,
-          source: 'workshop_nutri_empresaria_landing_page'
+          source: WORKSHOP_SOURCE_NUTRI_EMPRESARIA,
         }),
       })
 
@@ -116,6 +107,12 @@ export default function WorkshopNutriEmpresariaPage() {
       if (!response.ok) {
         throw new Error(data.error || `Erro ao enviar inscrição (${response.status})`)
       }
+
+      const fromApi =
+        typeof data.whatsappPrefillMessage === 'string' && data.whatsappPrefillMessage.trim()
+          ? data.whatsappPrefillMessage.trim()
+          : null
+      const waMsg = fromApi ?? buildWhatsappPrefillNutriEmpresaria(formData.nome)
 
       const waUrl = buildWhatsappUrl({ phone: whatsappNumber, message: waMsg })
       setConfirmedFirstName(pn || null)

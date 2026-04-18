@@ -1,6 +1,8 @@
 import type { Metadata } from 'next'
 import type { ReactNode } from 'react'
 
+export const dynamic = 'force-dynamic'
+
 const baseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXT_PUBLIC_APP_URL_PRODUCTION || 'https://www.ylada.com'
 
 const workshopPageUrl = `${baseUrl}/pt/nutri/workshop-nutri-empresaria`

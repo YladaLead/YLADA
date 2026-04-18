@@ -3,6 +3,10 @@ import { supabaseAdmin } from '@/lib/supabase'
 import { resend, FROM_EMAIL, FROM_NAME, isResendConfigured } from '@/lib/resend'
 import { getCarolAutomationDisabled } from '@/lib/carol-admin-settings'
 import { isWhatsAppAutoInviteEnabled } from '@/config/whatsapp-automation'
+import {
+  WORKSHOP_SOURCE_NUTRI_EMPRESARIA,
+  buildWhatsappPrefillNutriEmpresaria,
+} from '@/lib/nutri-workshop-whatsapp-prefill'
 
 /**
  * POST - Salvar inscrição no workshop
@@ -284,10 +288,18 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    return NextResponse.json({
+    const jsonBody: Record<string, unknown> = {
       success: true,
       message: 'Inscrição realizada com sucesso',
       submissionId: submissionId,
+    }
+    // Mensagem vem do servidor para o wa.me não depender de bundle JS em cache (PWA/CDN).
+    if (sanitizedData.source === WORKSHOP_SOURCE_NUTRI_EMPRESARIA) {
+      jsonBody.whatsappPrefillMessage = buildWhatsappPrefillNutriEmpresaria(sanitizedData.nome)
+    }
+
+    return NextResponse.json(jsonBody, {
+      headers: { 'Cache-Control': 'private, no-store, max-age=0' },
     })
   } catch (error: any) {
     console.error('Erro ao processar inscrição no workshop:', error)

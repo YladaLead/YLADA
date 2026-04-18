@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
+import { buildWhatsappPrefillNutriEmpresaria } from '@/lib/nutri-workshop-whatsapp-prefill'
 
 function buildWhatsappUrl(phone: string, message: string) {
   const numeroLimpo = phone.replace(/\D/g, '')
@@ -18,8 +19,7 @@ export default function WorkshopNutriEmpresariaPreviewSucessoPage() {
   }
 
   const confirmedFirstName = 'Maria'
-  const waMsg =
-    'Oi! Sou Maria. Acabei de me inscrever na aula Nutri para Empresaria e quero receber o acesso e os lembretes.'
+  const waMsg = buildWhatsappPrefillNutriEmpresaria('Maria Silva')
   const whatsappRedirectUrl = buildWhatsappUrl('5519997230912', waMsg)
 
   return (
