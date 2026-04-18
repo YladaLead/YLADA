@@ -193,6 +193,8 @@ type LastLinkContext = {
   url?: string
   title?: string
   link_id?: string
+  /** Pro Líderes: false = equipe não vê no Catálogo até partilhar. */
+  visible_to_team_in_catalog?: boolean
 }
 
 interface Message {
@@ -419,6 +421,39 @@ export default function NoelChat({
     scrollEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
+  /** Sincroniza visibilidade no catálogo quando o contexto veio do storage sem o campo. */
+  useEffect(() => {
+    if (!proLideresPayload || !lastLinkContext?.link_id || lastLinkContext.visible_to_team_in_catalog !== undefined) {
+      return
+    }
+    let cancelled = false
+    ;(async () => {
+      try {
+        const res = await authenticatedFetch(
+          `/api/pro-lideres/flows/visibility?yladaLinkId=${encodeURIComponent(lastLinkContext.link_id!)}`
+        )
+        if (!res.ok || cancelled) return
+        const data = (await res.json()) as { visibleToTeam?: boolean }
+        if (typeof data.visibleToTeam !== 'boolean' || cancelled) return
+        const vis = data.visibleToTeam
+        const lid = lastLinkContext.link_id!
+        setLastLinkContext((prev) => (prev?.link_id === lid ? { ...prev, visible_to_team_in_catalog: vis } : prev))
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.role === 'assistant' && m.linkContext?.link_id === lid
+              ? { ...m, linkContext: { ...m.linkContext!, visible_to_team_in_catalog: vis } }
+              : m
+          )
+        )
+      } catch {
+        /* ignore */
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [proLideresPayload, lastLinkContext?.link_id, lastLinkContext?.visible_to_team_in_catalog, authenticatedFetch])
+
   const sendMessage = useCallback(async (forcedText?: string) => {
     const textSource = forcedText !== undefined ? forcedText : input
     const text = textSource.trim()
@@ -598,6 +633,8 @@ export default function NoelChat({
 
   const [copiedScriptId, setCopiedScriptId] = useState<string | null>(null)
   const [copiedQuizLinkMsgId, setCopiedQuizLinkMsgId] = useState<string | null>(null)
+  const [shareCatalogBusy, setShareCatalogBusy] = useState(false)
+  const [shareCatalogError, setShareCatalogError] = useState<string | null>(null)
   const copyScript = useCallback(async (msg: Message) => {
     const script = extractScriptFromMessage(msg.content)
     const ok = await copyTextToClipboard(script)
@@ -633,6 +670,47 @@ export default function NoelChat({
     !loading &&
     lastAssistantMsg &&
     messageContainsQuizContent(lastAssistantMsg.content, ctxForLinkActions)
+
+  const showShareWithTeamButton =
+    proLideresPayload &&
+    Boolean(lastLinkContext?.link_id) &&
+    lastLinkContext?.visible_to_team_in_catalog === false
+
+  const showAlreadySharedInCatalog =
+    proLideresPayload &&
+    Boolean(lastLinkContext?.link_id) &&
+    lastLinkContext?.visible_to_team_in_catalog === true
+
+  const shareToolWithTeam = useCallback(async () => {
+    const linkId = lastLinkContext?.link_id
+    if (!proLideresPayload || !linkId || shareCatalogBusy) return
+    setShareCatalogBusy(true)
+    setShareCatalogError(null)
+    try {
+      const res = await authenticatedFetch('/api/pro-lideres/flows/visibility', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ yladaLinkId: linkId, visibleToTeam: true }),
+      })
+      const errJson = (await res.json().catch(() => ({}))) as { error?: string }
+      if (!res.ok) {
+        setShareCatalogError(errJson.error || 'Não foi possível compartilhar com a equipe.')
+        return
+      }
+      setLastLinkContext((prev) => (prev?.link_id === linkId ? { ...prev, visible_to_team_in_catalog: true } : prev))
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.linkContext?.link_id === linkId
+            ? { ...m, linkContext: { ...m.linkContext!, visible_to_team_in_catalog: true } }
+            : m
+        )
+      )
+    } catch {
+      setShareCatalogError('Erro de rede. Tente novamente.')
+    } finally {
+      setShareCatalogBusy(false)
+    }
+  }, [proLideresPayload, lastLinkContext?.link_id, shareCatalogBusy, authenticatedFetch])
 
   const handleSuggestionClick = useCallback(
     async (prompt: string) => {
@@ -1033,17 +1111,50 @@ export default function NoelChat({
                     se esta versão já serve, ou <strong>Pedir ajuste ao Noel</strong> para continuar no chat.
                   </li>
                   <li>
-                    Depois, libere para a equipe no{' '}
+                    A equipe <strong>só vê no Catálogo</strong> depois de <strong>Compartilhar com a equipe</strong> (botão
+                    abaixo) ou ao ativar a visibilidade em{' '}
                     <Link
                       href="/pro-lideres/painel/catalogo"
                       className="font-semibold text-emerald-950 underline decoration-emerald-600/60 hover:no-underline"
                     >
                       Catálogo de ferramentas
                     </Link>{' '}
-                    (painel Pro Líderes).
+                    → <strong>Minhas ferramentas</strong>.
                   </li>
                 </ul>
               </div>
+            ) : null}
+            {shareCatalogError ? (
+              <p className="text-xs text-red-600 px-1" role="alert">
+                {shareCatalogError}
+              </p>
+            ) : null}
+            {showShareWithTeamButton ? (
+              <div className="flex flex-col gap-1.5">
+                <button
+                  type="button"
+                  disabled={shareCatalogBusy}
+                  onClick={() => void shareToolWithTeam()}
+                  className="inline-flex w-full sm:w-auto items-center justify-center gap-2 px-4 py-3 rounded-xl bg-violet-600 text-white text-sm font-semibold hover:bg-violet-700 transition-colors disabled:opacity-50 touch-manipulation shadow-md"
+                >
+                  {shareCatalogBusy ? 'Compartilhando…' : 'Compartilhar com a equipe (Catálogo)'}
+                </button>
+                <p className="text-xs text-slate-600 max-w-xl">
+                  Passa a aparecer para cada pessoa em <strong>Catálogo → Minhas ferramentas</strong> no painel da
+                  equipa. O número de WhatsApp no resultado do fluxo é o que estiver definido na <strong>matriz YLADA</strong>{' '}
+                  (editar o link); cada membro trabalha a partir da <strong>sua sessão</strong> no painel.
+                </p>
+              </div>
+            ) : null}
+            {showAlreadySharedInCatalog ? (
+              <p className="text-xs text-emerald-800 bg-emerald-50/80 border border-emerald-200 rounded-lg px-3 py-2">
+                Esta ferramenta já está <strong>disponível para a equipe</strong> no catálogo. Você pode ajustar a
+                visibilidade em{' '}
+                <Link href="/pro-lideres/painel/catalogo" className="font-semibold underline hover:no-underline">
+                  Catálogo → Minhas ferramentas
+                </Link>
+                .
+              </p>
             ) : null}
             <div className="flex flex-wrap gap-2">
               <Link

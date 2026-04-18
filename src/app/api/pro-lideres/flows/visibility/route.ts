@@ -4,8 +4,78 @@ import { supabaseAdmin } from '@/lib/supabase'
 import { proLideresApiDevHint } from '@/lib/pro-lideres-api-dev-hints'
 import { resolveProLideresTenantContext } from '@/lib/pro-lideres-server'
 import { requireProLideresPaidContext } from '@/lib/pro-lideres-subscription-access'
+import {
+  hideProLideresYladaLinkFromTeamCatalog,
+  isProLideresYladaLinkVisibleToTeamInCatalog,
+  showProLideresYladaLinkToTeamCatalog,
+} from '@/lib/pro-lideres-ylada-catalog-team-visibility'
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+
+async function assertLeaderOwnsYladaLink(
+  yladaLinkId: string,
+  ownerUserId: string
+): Promise<{ ok: true } | { ok: false; status: number; body: Record<string, unknown> }> {
+  const { data: linkRow, error: linkErr } = await supabaseAdmin!
+    .from('ylada_links')
+    .select('id')
+    .eq('id', yladaLinkId)
+    .eq('user_id', ownerUserId)
+    .maybeSingle()
+
+  if (linkErr) {
+    console.error('[pro-lideres/flows/visibility] link lookup', linkErr)
+    return { ok: false, status: 500, body: { error: 'Erro ao validar o link' } }
+  }
+  if (!linkRow) {
+    return { ok: false, status: 404, body: { error: 'Link não encontrado nesta conta' } }
+  }
+  return { ok: true }
+}
+
+/**
+ * GET ?yladaLinkId= — líder consulta se a equipe vê a ferramenta no catálogo (default: sim).
+ */
+export async function GET(request: NextRequest) {
+  const auth = await requireApiAuth(request)
+  if (auth instanceof NextResponse) return auth
+  const { user } = auth
+
+  if (!supabaseAdmin) {
+    return NextResponse.json(
+      { error: 'Servidor sem service role', ...proLideresApiDevHint('noServiceRole') },
+      { status: 503 }
+    )
+  }
+
+  const ctx = await resolveProLideresTenantContext(supabaseAdmin, user)
+  if (!ctx || ctx.tenant.owner_user_id !== user.id) {
+    return NextResponse.json({ error: 'Apenas o líder pode consultar a visibilidade do catálogo.' }, { status: 403 })
+  }
+
+  const paid = await requireProLideresPaidContext(supabaseAdmin, user)
+  if (!paid.ok) return paid.response
+
+  const yladaLinkId = String(request.nextUrl.searchParams.get('yladaLinkId') ?? '').trim()
+  if (!yladaLinkId || !UUID_RE.test(yladaLinkId)) {
+    return NextResponse.json({ error: 'yladaLinkId inválido' }, { status: 400 })
+  }
+
+  const owned = await assertLeaderOwnsYladaLink(yladaLinkId, ctx.tenant.owner_user_id)
+  if (!owned.ok) return NextResponse.json(owned.body, { status: owned.status })
+
+  try {
+    const visibleToTeam = await isProLideresYladaLinkVisibleToTeamInCatalog(
+      supabaseAdmin,
+      ctx.tenant.id,
+      yladaLinkId
+    )
+    return NextResponse.json({ ok: true, yladaLinkId, visibleToTeam })
+  } catch (e) {
+    console.error('[pro-lideres/flows/visibility GET]', e)
+    return NextResponse.json({ error: 'Erro ao ler visibilidade' }, { status: 500 })
+  }
+}
 
 /**
  * Visibilidade no catálogo para ferramentas YLADA (biblioteca + Meus links).
@@ -46,46 +116,18 @@ export async function PATCH(request: NextRequest) {
     return NextResponse.json({ error: 'visibleToTeam deve ser booleano' }, { status: 400 })
   }
 
-  const { data: linkRow, error: linkErr } = await supabaseAdmin
-    .from('ylada_links')
-    .select('id')
-    .eq('id', yladaLinkId)
-    .eq('user_id', ctx.tenant.owner_user_id)
-    .maybeSingle()
+  const owned = await assertLeaderOwnsYladaLink(yladaLinkId, ctx.tenant.owner_user_id)
+  if (!owned.ok) return NextResponse.json(owned.body, { status: owned.status })
 
-  if (linkErr) {
-    console.error('[pro-lideres/flows/visibility PATCH] link lookup', linkErr)
-    return NextResponse.json({ error: 'Erro ao validar o link' }, { status: 500 })
-  }
-  if (!linkRow) {
-    return NextResponse.json({ error: 'Link não encontrado nesta conta' }, { status: 404 })
-  }
-
-  if (body.visibleToTeam) {
-    const { error: delErr } = await supabaseAdmin
-      .from('leader_tenant_catalog_ylada_visibility')
-      .delete()
-      .eq('leader_tenant_id', ctx.tenant.id)
-      .eq('ylada_link_id', yladaLinkId)
-
-    if (delErr) {
-      console.error('[pro-lideres/flows/visibility PATCH] delete', delErr)
-      return NextResponse.json({ error: 'Erro ao atualizar visibilidade' }, { status: 500 })
+  try {
+    if (body.visibleToTeam) {
+      await showProLideresYladaLinkToTeamCatalog(supabaseAdmin, ctx.tenant.id, yladaLinkId)
+    } else {
+      await hideProLideresYladaLinkFromTeamCatalog(supabaseAdmin, ctx.tenant.id, yladaLinkId)
     }
-  } else {
-    const { error: upErr } = await supabaseAdmin.from('leader_tenant_catalog_ylada_visibility').upsert(
-      {
-        leader_tenant_id: ctx.tenant.id,
-        ylada_link_id: yladaLinkId,
-        visible_to_team: false,
-      },
-      { onConflict: 'leader_tenant_id,ylada_link_id' }
-    )
-
-    if (upErr) {
-      console.error('[pro-lideres/flows/visibility PATCH] upsert', upErr)
-      return NextResponse.json({ error: 'Erro ao atualizar visibilidade' }, { status: 500 })
-    }
+  } catch (e) {
+    console.error('[pro-lideres/flows/visibility PATCH]', e)
+    return NextResponse.json({ error: 'Erro ao atualizar visibilidade' }, { status: 500 })
   }
 
   return NextResponse.json({ ok: true, yladaLinkId, visibleToTeam: body.visibleToTeam })

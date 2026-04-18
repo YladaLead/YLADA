@@ -15,6 +15,8 @@ export type ProLideresNoelLastLinkContext = {
   url?: string
   title?: string
   link_id?: string
+  /** Preenchido pelo POST `/api/pro-lideres/noel` quando há `link_id`: se a equipe vê no Catálogo de ferramentas. */
+  visible_to_team_in_catalog?: boolean
 }
 
 export function mapProLideresVerticalToYladaSegment(verticalCode: string): string {

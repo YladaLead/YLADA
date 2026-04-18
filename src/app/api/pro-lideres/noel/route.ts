@@ -14,6 +14,10 @@ import {
   runProLideresNoelLinkPipeline,
   type ProLideresNoelLastLinkContext,
 } from '@/lib/pro-lideres-noel-link-generation'
+import {
+  hideProLideresYladaLinkFromTeamCatalog,
+  isProLideresYladaLinkVisibleToTeamInCatalog,
+} from '@/lib/pro-lideres-ylada-catalog-team-visibility'
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
 
@@ -30,7 +34,7 @@ type HistoryTurn = { role?: string; content?: string }
 const MODO_EXECUTOR_LINK_PT = `[MODO EXECUTOR — LINK]
 O sistema pode ter acabado de gerar um link real na conta YLADA deste líder (bloco [LINK GERADO…] ou [LINK AJUSTADO…] abaixo, se existir).
 - Se existir esse bloco: responde só com introdução curta em português; não listes perguntas no texto; não coloques outro URL — o bloco **### Quiz e link (oficial)** no fim da resposta traz o link certo.
-- Relembra que o link entra na biblioteca de links do líder e pode ser partilhado com a equipa no **Painel Pro Líderes → Catálogo** (visibilidade).`
+- Relembra: o link fica em **Links / Ferramentas** na matriz; a **equipe só vê no Catálogo** depois do líder usar **Compartilhar com a equipe (Catálogo)** no chat ou ativar em **Catálogo → Minhas ferramentas**.`
 
 const PEDIDO_SEM_GERACAO_PT = `[PEDIDO DE LINK SEM GERAÇÃO NESTE TURNO]
 O líder pediu quiz/link/fluxo mas o backend **não** devolveu URL (tema insuficiente, limite de links, sessão sem permissão nas APIs Ylada, ou erro técnico).
@@ -127,6 +131,22 @@ export async function POST(request: NextRequest) {
   const { linkGeradoBlock, lastLinkContextOut, canonicalAppendix, linkModeEnabled, shouldGenerateNewLink } =
     pipeline
 
+  let lastLinkContextForResponse: ProLideresNoelLastLinkContext | null = lastLinkContextOut ?? null
+  if (lastLinkContextOut?.link_id) {
+    try {
+      await hideProLideresYladaLinkFromTeamCatalog(supabaseAdmin, ctx.tenant.id, lastLinkContextOut.link_id)
+      const vis = await isProLideresYladaLinkVisibleToTeamInCatalog(
+        supabaseAdmin,
+        ctx.tenant.id,
+        lastLinkContextOut.link_id
+      )
+      lastLinkContextForResponse = { ...lastLinkContextOut, visible_to_team_in_catalog: vis }
+    } catch (e) {
+      console.warn('[pro-lideres/noel] visibilidade catálogo (novo/ajustado link):', e)
+      lastLinkContextForResponse = lastLinkContextOut
+    }
+  }
+
   const extraSystemParts: string[] = []
   if (linkGeradoBlock) {
     extraSystemParts.push(MODO_EXECUTOR_LINK_PT)
@@ -184,8 +204,8 @@ export async function POST(request: NextRequest) {
           '**Sugestão de próximos passos para você:**',
           '1. **Revisar** título e perguntas (*Editar perguntas* / *Editar na Ylada* abaixo da mensagem, ou na matriz). Quando aparecerem, os botões **Links na Ylada** e **Links no painel** abrem a lista na matriz e a visão no Pro Líderes.',
           '2. **Abrir** o link público ou usar **Copiar link público** (um botão só abaixo da mensagem) para testar como o contato vê o fluxo.',
-          '3. No **Pro Líderes → Catálogo de ferramentas**, liberar o fluxo para a equipe (é onde o time vê o que você ativa), conforme a política da operação.',
-          '4. Se quiser mudanças de texto ou de foco, **escreva neste chat** — o Noel continua como co-editor até você fechar a versão.',
+          '3. **A equipe ainda não vê** esta ferramenta no **Catálogo de ferramentas** até clicar em **Compartilhar com a equipe** (abaixo desta conversa) ou ativar a visibilidade em **Pro Líderes → Catálogo** → **Minhas ferramentas**.',
+          '4. Se quiser mudanças de texto ou de foco, **Concordo** / **Pedir ajuste ao Noel** ou edita na matriz — o Noel continua como co-editor até fechares a versão.',
           '',
           'Abaixo está o bloco **Quiz e link (oficial)** com as perguntas alinhadas ao link público e à edição.',
         ].join('\n')
@@ -202,7 +222,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       response: text,
       noelProfileId,
-      lastLinkContext: lastLinkContextOut ?? null,
+      lastLinkContext: lastLinkContextForResponse,
     })
   } catch (e) {
     console.error('[pro-lideres/noel]', e)

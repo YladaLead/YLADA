@@ -31,6 +31,7 @@ type LastLinkCtx = {
   url?: string
   title?: string
   link_id?: string
+  visible_to_team_in_catalog?: boolean
 }
 
 function id() {
