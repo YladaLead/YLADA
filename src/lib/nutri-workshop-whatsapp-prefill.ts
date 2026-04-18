@@ -1,24 +1,22 @@
 /**
- * Texto do wa.me após inscrição na landing Nutri → Empresária.
- * O trecho fixo vem no início (sem "Oi! Sou Fulana" antes) para o gatilho da automação bater sempre.
- *
- * Na ferramenta de campanha: colar em "frase que inicia o robô" o TRIGGER recomendado
- * (sem ponto / ! / ? no fim, se o sistema pedir).
+ * Texto único do wa.me após inscrição na landing Nutri → Empresária.
+ * Sem nome da pessoa (a automação exige a mesma frase inteira).
+ * Sem ponto / ! / ? no fim — igual ao que a campanha aceita em "frase que inicia o robô".
  */
-export const WA_TRIGGER_NUTRI_EMPRESARIA =
+export const WA_PREFILL_NUTRI_EMPRESARIA =
   'Acabei de me inscrever na aula Nutri para Empresaria e quero receber o acesso e os lembretes'
 
-/** Mensagem completa quando não há primeiro nome útil */
-export const WA_MSG_NUTRI_EMPRESARIA_SEM_NOME = `${WA_TRIGGER_NUTRI_EMPRESARIA}.`
+/** Alias para colar no gatilho da automação (é o mesmo texto da mensagem). */
+export const WA_TRIGGER_NUTRI_EMPRESARIA = WA_PREFILL_NUTRI_EMPRESARIA
 
 export function primeiroNomeCompleto(nome: string) {
   const t = nome.trim().split(/\s+/).filter(Boolean)
   return t[0] || ''
 }
 
-export function buildWhatsappPrefillNutriEmpresaria(fullName: string) {
-  const pn = primeiroNomeCompleto(fullName)
-  return pn ? `${WA_TRIGGER_NUTRI_EMPRESARIA}. Sou ${pn}.` : WA_MSG_NUTRI_EMPRESARIA_SEM_NOME
+/** O nome é ignorado de propósito — a mensagem tem de ser idêntica para todas. */
+export function buildWhatsappPrefillNutriEmpresaria(_fullName: string) {
+  return WA_PREFILL_NUTRI_EMPRESARIA
 }
 
 export const WORKSHOP_SOURCE_NUTRI_EMPRESARIA = 'workshop_nutri_empresaria_landing_page' as const
