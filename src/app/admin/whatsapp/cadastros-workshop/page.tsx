@@ -18,6 +18,8 @@ interface WorkshopRegistration {
   created_at: string
 }
 
+const GLAUCIA_WORKSHOP_SOURCE = 'workshop_nutri_empresaria_landing_page' as const
+
 const KNOWN_WORKSHOP_SOURCES = [
   'workshop_nutri_empresaria_landing_page',
   'workshop_agenda_instavel_landing_page',
@@ -49,46 +51,73 @@ function escCsv(v: string | null | undefined): string {
   return `"${s}"`
 }
 
-function exportCadastrosCsv(rows: WorkshopRegistration[]) {
-  const headers = [
-    'nome',
-    'email',
-    'telefone',
-    'crn',
-    'origem',
-    'tipo_workshop',
-    'status_inscricao',
-    'data_cadastro_iso',
-    'data_cadastro_pt',
-    'id',
-    'ip',
-    'user_agent',
-  ]
-  const lines = [headers.join(';')]
-  for (const r of rows) {
-    const created = r.created_at ? new Date(r.created_at) : null
-    lines.push(
-      [
-        escCsv(r.nome),
-        escCsv(r.email),
-        escCsv(r.telefone),
-        escCsv(r.crn || ''),
-        escCsv(formatWorkshopSourceLabel(r.source)),
-        escCsv(r.workshop_type || ''),
-        escCsv(r.inscricao_status || ''),
-        escCsv(created ? created.toISOString() : ''),
-        escCsv(created ? created.toLocaleString('pt-BR') : ''),
-        escCsv(r.id),
-        escCsv(r.ip_address || ''),
-        escCsv(r.user_agent || ''),
-      ].join(';')
-    )
+/** Com origem «Dra. Gláucia»: só ficha do formulário. Demais filtros: export completo. */
+function exportCadastrosCsv(rows: WorkshopRegistration[], modoFichaGlaucia: boolean) {
+  const day = new Date().toISOString().slice(0, 10)
+  let headers: string[]
+  let lines: string[]
+  let filename: string
+
+  if (modoFichaGlaucia) {
+    headers = ['nome', 'email', 'telefone', 'crn', 'data_cadastro', 'id']
+    lines = [headers.join(';')]
+    for (const r of rows) {
+      const created = r.created_at ? new Date(r.created_at) : null
+      lines.push(
+        [
+          escCsv(r.nome),
+          escCsv(r.email),
+          escCsv(r.telefone),
+          escCsv(r.crn || ''),
+          escCsv(created ? created.toLocaleString('pt-BR') : ''),
+          escCsv(r.id),
+        ].join(';')
+      )
+    }
+    filename = `cadastros-dra-glaucia-${day}.csv`
+  } else {
+    headers = [
+      'nome',
+      'email',
+      'telefone',
+      'crn',
+      'origem',
+      'tipo_workshop',
+      'status_inscricao',
+      'data_cadastro_iso',
+      'data_cadastro_pt',
+      'id',
+      'ip',
+      'user_agent',
+    ]
+    lines = [headers.join(';')]
+    for (const r of rows) {
+      const created = r.created_at ? new Date(r.created_at) : null
+      lines.push(
+        [
+          escCsv(r.nome),
+          escCsv(r.email),
+          escCsv(r.telefone),
+          escCsv(r.crn || ''),
+          escCsv(formatWorkshopSourceLabel(r.source)),
+          escCsv(r.workshop_type || ''),
+          escCsv(r.inscricao_status || ''),
+          escCsv(created ? created.toISOString() : ''),
+          escCsv(created ? created.toLocaleString('pt-BR') : ''),
+          escCsv(r.id),
+          escCsv(r.ip_address || ''),
+          escCsv(r.user_agent || ''),
+        ].join(';')
+      )
+    }
+    filename = `cadastros-workshop-${day}.csv`
   }
+
   const blob = new Blob(['\ufeff' + lines.join('\n')], { type: 'text/csv;charset=utf-8;' })
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
   a.href = url
-  a.download = `cadastros-workshop-${new Date().toISOString().slice(0, 10)}.csv`
+  a.download = filename
   a.click()
   URL.revokeObjectURL(url)
 }
@@ -176,9 +205,11 @@ function CadastrosWorkshopContent() {
   }, [registrations, searchTerm, sourceFilter])
 
   const countGlaucia = useMemo(
-    () => registrations.filter((r) => r.source === 'workshop_nutri_empresaria_landing_page').length,
+    () => registrations.filter((r) => r.source === GLAUCIA_WORKSHOP_SOURCE).length,
     [registrations]
   )
+
+  const modoFichaGlaucia = sourceFilter === GLAUCIA_WORKSHOP_SOURCE
 
   return (
     <div className="h-[100dvh] bg-white flex flex-col overflow-hidden">
@@ -188,20 +219,20 @@ function CadastrosWorkshopContent() {
             <div className="min-w-0">
               <h1 className="text-xl font-bold text-gray-900 truncate">Cadastros do workshop</h1>
               <p className="text-xs text-gray-600 mt-1 max-w-2xl">
-                <strong>Fichas de cadastro</strong> preenchidas nas landings (nome, e-mail, WhatsApp, CRN, tipo,
-                status, data, IP, navegador). A <strong>automação no WhatsApp</strong> é feita{' '}
-                <strong>fora desta página</strong> — filtre por origem (ex.: Dra. Gláucia) e use{' '}
-                <strong>Exportar CSV</strong> para a lista completa.
+                Com <strong>Todas as origens</strong> (ou outra origem) vê a tabela <strong>completa</strong> (tipo,
+                status, IP, navegador). Ao escolher <strong>Nutri → Empresária (Dra. Gláucia)</strong>, a tabela e o CSV
+                passam ao <strong>modo ficha</strong>: só nome, e-mail, WhatsApp, CRN e data — o que costuma ir para o
+                fluxo que fazes por fora.
               </p>
             </div>
             <div className="flex flex-wrap items-center justify-end gap-2 shrink-0">
               <button
                 type="button"
                 disabled={loading || filteredRegistrations.length === 0}
-                onClick={() => exportCadastrosCsv(filteredRegistrations)}
+                onClick={() => exportCadastrosCsv(filteredRegistrations, modoFichaGlaucia)}
                 className="px-3 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 text-sm font-semibold disabled:opacity-50"
               >
-                Exportar CSV (lista atual)
+                {modoFichaGlaucia ? 'Exportar CSV (ficha Gláucia)' : 'Exportar CSV (lista atual, completo)'}
               </button>
               <Link
                 href="/admin/whatsapp/workshop"
@@ -262,13 +293,17 @@ function CadastrosWorkshopContent() {
                   title="Filtrar por landing de origem"
                 >
                   <option value="">Todas as origens</option>
-                  <option value="workshop_nutri_empresaria_landing_page">
-                    Nutri → Empresária (Dra. Gláucia)
-                  </option>
+                  <option value={GLAUCIA_WORKSHOP_SOURCE}>Nutri → Empresária (Dra. Gláucia)</option>
                   <option value="workshop_agenda_instavel_landing_page">Agenda instável</option>
                   <option value="workshop_landing_page">Workshop (landing geral)</option>
                   <option value="__other__">Outras origens</option>
                 </select>
+                {modoFichaGlaucia && (
+                  <p className="text-xs text-emerald-800 bg-emerald-50 border border-emerald-200 rounded-lg px-3 py-2 mt-2">
+                    <strong>Modo ficha ativo:</strong> só dados do formulário da landing da Dra. Gláucia (sem IP,
+                    user-agent, etc.).
+                  </p>
+                )}
               </div>
             </div>
           </div>
@@ -287,14 +322,24 @@ function CadastrosWorkshopContent() {
                       <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">E-mail</th>
                       <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">WhatsApp</th>
                       <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">CRN</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Origem</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tipo</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                      {!modoFichaGlaucia && (
+                        <>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Origem</th>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tipo</th>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                        </>
+                      )}
                       <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                         Data cadastro
                       </th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">IP</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">User-agent</th>
+                      {!modoFichaGlaucia && (
+                        <>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">IP</th>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                            User-agent
+                          </th>
+                        </>
+                      )}
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
@@ -304,27 +349,35 @@ function CadastrosWorkshopContent() {
                         <td className="px-4 py-3 text-sm text-gray-700 break-all max-w-[200px]">{reg.email}</td>
                         <td className="px-4 py-3 text-sm text-gray-700 whitespace-nowrap">{reg.telefone}</td>
                         <td className="px-4 py-3 text-sm text-gray-600">{reg.crn || '—'}</td>
-                        <td className="px-4 py-3 text-sm text-gray-700 max-w-[280px]" title={reg.source || ''}>
-                          {formatWorkshopSourceLabel(reg.source)}
-                        </td>
-                        <td className="px-4 py-3 text-sm text-gray-600">{reg.workshop_type || '—'}</td>
-                        <td className="px-4 py-3 text-sm text-gray-600">{reg.inscricao_status || '—'}</td>
+                        {!modoFichaGlaucia && (
+                          <>
+                            <td className="px-4 py-3 text-sm text-gray-700 max-w-[280px]" title={reg.source || ''}>
+                              {formatWorkshopSourceLabel(reg.source)}
+                            </td>
+                            <td className="px-4 py-3 text-sm text-gray-600">{reg.workshop_type || '—'}</td>
+                            <td className="px-4 py-3 text-sm text-gray-600">{reg.inscricao_status || '—'}</td>
+                          </>
+                        )}
                         <td className="px-4 py-3 text-sm text-gray-600 whitespace-nowrap">
                           {new Date(reg.created_at).toLocaleString('pt-BR')}
                         </td>
-                        <td className="px-4 py-3 text-xs text-gray-500 font-mono max-w-[120px] break-all">
-                          {reg.ip_address || '—'}
-                        </td>
-                        <td
-                          className="px-4 py-3 text-xs text-gray-500 max-w-[220px] break-words"
-                          title={reg.user_agent || ''}
-                        >
-                          {reg.user_agent
-                            ? reg.user_agent.length > 80
-                              ? `${reg.user_agent.slice(0, 80)}…`
-                              : reg.user_agent
-                            : '—'}
-                        </td>
+                        {!modoFichaGlaucia && (
+                          <>
+                            <td className="px-4 py-3 text-xs text-gray-500 font-mono max-w-[120px] break-all">
+                              {reg.ip_address || '—'}
+                            </td>
+                            <td
+                              className="px-4 py-3 text-xs text-gray-500 max-w-[220px] break-words"
+                              title={reg.user_agent || ''}
+                            >
+                              {reg.user_agent
+                                ? reg.user_agent.length > 80
+                                  ? `${reg.user_agent.slice(0, 80)}…`
+                                  : reg.user_agent
+                                : '—'}
+                            </td>
+                          </>
+                        )}
                       </tr>
                     ))}
                   </tbody>
@@ -337,12 +390,11 @@ function CadastrosWorkshopContent() {
             <summary className="cursor-pointer font-semibold text-slate-900">Notas</summary>
             <ul className="mt-2 space-y-1 list-disc list-inside">
               <li>
-                O CSV exporta exatamente a <strong>lista filtrada</strong> (busca + origem), com todos os campos
-                acima.
+                <strong>Todas as origens</strong> (ou outra origem): tabela e CSV <strong>completos</strong>.
               </li>
               <li>
-                Para só a turma da Dra. Gláucia, escolha a origem <strong>Nutri → Empresária (Dra. Gláucia)</strong> e
-                exporte.
+                <strong>Nutri → Empresária (Dra. Gláucia)</strong>: tabela e CSV só com{' '}
+                <strong>nome, e-mail, WhatsApp, CRN, data e id</strong> (ficha para o teu fluxo externo).
               </li>
             </ul>
           </details>
