@@ -22,10 +22,10 @@ const WHATSAPP_NUTRI_EMPRESARIA = '5519997230912'
 
 /**
  * Currículo na landing — alinhado à Dra. Gláucia: formação (UFRJ / CENC-UFRJ) sem sugerir vínculo
- * docente com a universidade; atuação em TCC e pólo como prestação de serviços.
+ * docente com a universidade.
  */
 const GLAUCIA_CURRICULO_LINHAS =
-  'Nutricionista · Mestre em Bioquímica da Nutrição (UFRJ) | Especialização em Nutrição Clínica (CENC-UFRJ) | Criadora do Método Restart Metabólico | Emagrecimento e doenças crónicas | Palestrante e revisora científica | Orientação de TCC e coordenação de pólo da pós-graduação em Nutrição Clínica (CENC-UFRJ), em regime de prestação de serviços'
+  'Nutricionista · Mestre em Bioquímica da Nutrição (UFRJ) | Especialização em Nutrição Clínica (CENC-UFRJ) | Criadora do Método Restart Metabólico | Emagrecimento e doenças crónicas | Palestrante e revisora científica | Orientação de TCC e coordenação de pólo da pós-graduação em Nutrição Clínica (CENC-UFRJ)'
     .split('|')
     .map((s) => s.trim())
     .filter(Boolean)
