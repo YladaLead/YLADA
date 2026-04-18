@@ -20,9 +20,12 @@ function primeiroNomeCompleto(nome: string) {
 /** WhatsApp da campanha Nutri → Empresária (automação + lembretes). Sobrescrever: NEXT_PUBLIC_WORKSHOP_NUTRI_EMPRESARIA_WHATSAPP_NUMBER */
 const WHATSAPP_NUTRI_EMPRESARIA = '5519997230912'
 
-/** Currículo na landing — texto solicitado pela Dra. Gláucia (único bloco). */
+/**
+ * Currículo na landing — alinhado à Dra. Gláucia: formação (UFRJ / CENC-UFRJ) sem sugerir vínculo
+ * docente com a universidade; atuação em TCC e pólo como prestação de serviços.
+ */
 const GLAUCIA_CURRICULO_LINHAS =
-  'Nutricionista Mestre em Bioquímica da Nutrição (UFRJ) | Especializada em Nutrição Clínica (UFRJ) | Criadora do Método Restart Metabólico | Emagrecimento e Doenças Crônicas | Docente e Palestrante | Revisora Científica'
+  'Nutricionista · Mestre em Bioquímica da Nutrição (UFRJ) | Especialização em Nutrição Clínica (CENC-UFRJ) | Criadora do Método Restart Metabólico | Emagrecimento e doenças crónicas | Palestrante e revisora científica | Orientação de TCC e coordenação de pólo da pós-graduação em Nutrição Clínica (CENC-UFRJ), em regime de prestação de serviços'
     .split('|')
     .map((s) => s.trim())
     .filter(Boolean)
