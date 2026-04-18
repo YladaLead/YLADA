@@ -9,6 +9,8 @@ import { supabaseAdmin } from '@/lib/supabase'
 const YLADA_PROFILES = [
   'psi', 'psicanalise', 'odonto', 'fitness', 'estetica', 'med', 'ylada',
   'nutra', 'coach', 'perfumaria', 'seller', 'admin',
+  /** Contas que usam configurações / segurança na matriz mas com perfil da área clássica */
+  'nutri', 'wellness', 'coach-bem-estar',
 ] as const
 
 export async function POST(request: NextRequest) {

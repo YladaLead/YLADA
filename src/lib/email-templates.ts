@@ -6,7 +6,7 @@ import { resend, isResendConfigured, FROM_EMAIL, FROM_NAME } from '@/lib/resend'
 export async function sendPasswordResetEmail(data: {
   email: string
   userName?: string
-  area: 'wellness' | 'nutri' | 'coach' | 'nutra'
+  area: 'wellness' | 'nutri' | 'coach' | 'nutra' | 'ylada' | 'admin'
   resetLink: string
   baseUrl: string
 }): Promise<void> {
@@ -29,9 +29,11 @@ export async function sendPasswordResetEmail(data: {
     nutri: 'Nutri',
     coach: 'Coach',
     nutra: 'Nutra',
+    ylada: 'YLADA',
+    admin: 'Admin',
   }[data.area]
 
-  const userName = data.userName || 'Nutri-Empresária'
+  const userName = data.userName || (data.area === 'nutri' ? 'Nutri-Empresária' : 'Utilizador(a)')
 
   console.log('📧 Enviando e-mail de reset de senha via Resend:', {
     from: `${FROM_NAME} <${FROM_EMAIL}>`,

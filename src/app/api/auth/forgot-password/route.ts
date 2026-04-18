@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
 import { sendPasswordResetEmail } from '@/lib/email-templates'
+import {
+  getPasswordResetEmailAreaKey,
+  getResetPasswordPathForUserPerfil,
+} from '@/lib/password-reset-routing'
 
 /**
  * POST /api/auth/forgot-password
@@ -74,23 +78,14 @@ export async function POST(request: NextRequest) {
       })
     }
 
-    const area = (profile.perfil || 'wellness') as 'wellness' | 'nutri' | 'coach' | 'nutra'
+    const resetPath = getResetPasswordPathForUserPerfil(profile.perfil)
+    const area = getPasswordResetEmailAreaKey(profile.perfil)
     const userName = profile.nome_completo || undefined
 
     // Gerar link de reset usando Supabase Admin
     const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 
                    process.env.NEXT_PUBLIC_APP_URL_PRODUCTION || 
                    'https://www.ylada.com'
-
-    // Determinar URL de reset baseado na área
-    let resetPath = '/pt/wellness/reset-password'
-    if (area === 'nutri') {
-      resetPath = '/pt/nutri/reset-password'
-    } else if (area === 'coach') {
-      resetPath = '/pt/coach/reset-password'
-    } else if (area === 'admin') {
-      resetPath = '/admin/reset-password'
-    }
 
     // Gerar link de recovery usando Supabase Admin
     console.log('🔄 Gerando link de recovery para:', email, 'Área:', area)

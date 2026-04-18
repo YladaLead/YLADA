@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
       // O token será verificado na página de reset quando o usuário submeter o formulário
       // Aqui apenas tentamos determinar a área do usuário se possível, mas não é crítico
       
-      let resetPath = '/pt/wellness/reset-password' // padrão
+      let resetPath = '/pt/reset-password' // padrão matriz (Wellness/Nutri/Coach têm redirectTo explícito no e-mail)
       
       // Tentar determinar a área usando o redirectTo se disponível
       if (redirectTo) {
@@ -46,9 +46,6 @@ export async function GET(request: NextRequest) {
       
       // Se não conseguiu determinar pelo redirectTo, tentar buscar pelo token (sem consumir)
       // Mas isso requer decodificar o token, o que pode não ser possível
-      // Por segurança, vamos sempre redirecionar para wellness como padrão
-      // A página de reset tentará verificar o token e determinar a área se necessário
-
       const resetUrl = new URL(resetPath, requestUrl.origin)
       resetUrl.searchParams.set('token', token)
       resetUrl.searchParams.set('type', type)
@@ -59,8 +56,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.redirect(resetUrl)
     } catch (err) {
       console.error('❌ Erro ao processar recovery link, usando padrão:', err)
-      // Fallback: redirecionar para Wellness
-      const resetUrl = new URL('/pt/wellness/reset-password', requestUrl.origin)
+      const resetUrl = new URL('/pt/reset-password', requestUrl.origin)
       resetUrl.searchParams.set('token', token)
       resetUrl.searchParams.set('type', type)
       if (redirectTo) {
@@ -73,8 +69,7 @@ export async function GET(request: NextRequest) {
   // Se houver erro, verificar se é recovery e redirecionar para reset com erro
   if (error && type === 'recovery') {
     console.error('❌ Erro no verify (recovery):', error)
-    // Usar Wellness como padrão para erro
-    const resetUrl = new URL('/pt/wellness/reset-password', requestUrl.origin)
+    const resetUrl = new URL('/pt/reset-password', requestUrl.origin)
     resetUrl.searchParams.set('error', error)
     const errorDesc = requestUrl.searchParams.get('error_description')
     if (errorDesc) {
