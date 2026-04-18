@@ -110,6 +110,11 @@ TÓPICO ESCOLHIDO (PILAR)
 OBJETIVO DO LÍDER (PROPÓSITO)
 ${params.purpose}
 
+BRIEFING ESTRUTURADO (QUANDO O TEXTO ACIMA TIVER RÓTULOS COMO «OBJETIVO DO SCRIPT:», «PÚBLICO:», «TOM DESEJADO:», «CANAL / FORMATO:»)
+- Trata cada rótulo como **restrição**: ajusta vocabulário, extensão e CTA ao **público**, **tom** e **canal** indicados.
+- **Não** ignores o canal (ex.: WhatsApp 1:1 ≠ post longo).
+- Se houver «CONTEXTO ESPECÍFICO:» (ex.: parou de responder), deixa isso explícito na sequência onde fizer sentido.
+
 ${params.toolLabel ? `FERRAMENTA YLADA (CONTEXTO — NÃO INVENTES URLS)\n- Nome: ${params.toolLabel}\n${params.toolWhenToUse ? `- Quando usar: ${params.toolWhenToUse}` : ''}` : 'SEM ferramenta específica — foca no propósito e no pilar.'}
 
 REGRAS DE SAÍDA

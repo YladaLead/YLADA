@@ -188,14 +188,35 @@ export function ProLideresScriptsClient() {
     }
   }
 
+  const teamExperience = !canEditUi
+
   return (
-    <div className="mx-auto max-w-3xl space-y-8">
-      <div>
-        <p className="text-sm font-medium text-blue-600">Conteúdo</p>
-        <h1 className="text-2xl font-bold text-gray-900">Scripts</h1>
-        <p className="mt-1 max-w-2xl text-gray-600">
-          Montas <strong className="text-gray-800">grupos de textos</strong> para a equipe copiar no contacto com
-          clientes (WhatsApp, redes, etc.). Cada grupo tem vários textos por ordem. A equipe só vê e copia — não edita.
+    <div className="mx-auto max-w-4xl space-y-8">
+      <div
+        className={`overflow-hidden rounded-2xl border px-5 py-6 sm:px-8 sm:py-7 ${
+          teamExperience
+            ? 'border-emerald-200/90 bg-gradient-to-br from-emerald-50/90 via-white to-teal-50/30'
+            : 'border-gray-200/80 bg-gradient-to-br from-slate-50/80 via-white to-indigo-50/20'
+        }`}
+      >
+        <p className={`text-sm font-semibold ${teamExperience ? 'text-emerald-800' : 'text-blue-600'}`}>
+          {teamExperience ? 'Biblioteca da equipe' : 'Conteúdo'}
+        </p>
+        <h1 className="mt-1 text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl">Scripts</h1>
+        <p className="mt-2 max-w-2xl text-pretty text-gray-600">
+          {teamExperience ? (
+            <>
+              Sequências prontas para <strong className="text-gray-800">copiar e colar</strong> no contato com clientes
+              (WhatsApp, redes, etc.). Cada card é um passo na ordem — use o botão <strong className="text-gray-800">Copiar</strong>{' '}
+              e adapte o nome se precisar.
+            </>
+          ) : (
+            <>
+              Você monta <strong className="text-gray-800">grupos de textos</strong> para a equipe usar com clientes.
+              Cada grupo tem várias mensagens em ordem. A equipe só vê e copia — não edita. Use o Noel no card abaixo
+              para montar com um briefing rápido.
+            </>
+          )}
         </p>
       </div>
 
@@ -220,17 +241,17 @@ export function ProLideresScriptsClient() {
             Criar
           </h2>
 
-          <details className="rounded-xl border border-indigo-200 bg-gradient-to-b from-indigo-50/90 to-white shadow-sm">
-            <summary className="cursor-pointer list-none px-4 py-3 text-sm font-semibold text-indigo-950 [&::-webkit-details-marker]:hidden">
+          <details className="rounded-2xl border border-indigo-200 bg-gradient-to-b from-indigo-50/90 to-white shadow-md ring-1 ring-indigo-100/60">
+            <summary className="cursor-pointer list-none px-4 py-4 text-sm font-semibold text-indigo-950 sm:px-5 [&::-webkit-details-marker]:hidden">
               <span className="flex items-center justify-between gap-2">
-                <span>1. Com o Noel — gera textos para a equipe</span>
+                <span>1. Com o Noel — montar scripts para a equipe</span>
                 <span className="text-xs font-normal text-indigo-700">abrir</span>
               </span>
               <span className="mt-1 block text-xs font-normal text-indigo-900/80">
-                Escolhes o tipo, descreves o que queres; o Noel monta um grupo que podes guardar
+                Fluxo guiado em poucos passos ou modo livre; o Noel monta o grupo e você salva para a equipe
               </span>
             </summary>
-            <div className="border-t border-indigo-100 px-4 pb-4 pt-3">
+            <div className="border-t border-indigo-100 px-4 pb-5 pt-4 sm:px-5">
               <ProLideresScriptsNoelGenerator
                 catalog={catalog}
                 saving={saving}
@@ -281,10 +302,10 @@ export function ProLideresScriptsClient() {
       {loading ? (
         <p className="text-gray-600">A carregar…</p>
       ) : sections.length === 0 ? (
-        <p className="rounded-xl border border-dashed border-gray-300 bg-gray-50 px-4 py-8 text-center text-sm text-gray-600">
+        <p className="rounded-2xl border border-dashed border-gray-300 bg-gray-50/90 px-4 py-10 text-center text-sm text-gray-600">
           {canEditUi
-            ? 'Ainda não há grupos. Usa «Criar» acima (Noel ou grupo vazio).'
-            : 'O líder ainda não partilhou sequências visíveis para a equipe aqui.'}
+            ? 'Ainda não há grupos. Use «Criar» acima (Noel ou grupo vazio).'
+            : 'O líder ainda não compartilhou sequências visíveis para a equipe aqui.'}
         </p>
       ) : (
         <div className="space-y-3">
@@ -298,6 +319,7 @@ export function ProLideresScriptsClient() {
                 secCount={sections.length}
                 toolLabel={sec.ylada_link_id ? toolLabelByLinkId.get(sec.ylada_link_id) ?? null : null}
                 canEditUi={canEditUi}
+                teamExperience={teamExperience}
                 saving={saving}
                 copiedId={copiedId}
                 catalog={catalog}
@@ -315,12 +337,12 @@ export function ProLideresScriptsClient() {
       )}
 
       <p className="text-sm text-gray-500">
-        <strong className="font-medium text-gray-700">Scripts</strong> = o que a equipe manda a{' '}
+        <strong className="font-medium text-gray-700">Scripts</strong> = o que a equipe envia a{' '}
         <strong className="font-medium text-gray-700">clientes</strong>. Para falar com a equipe, use o{' '}
         <Link href="/pro-lideres/painel/noel" className="font-medium text-violet-700 hover:text-violet-900">
           Noel
         </Link>{' '}
-        (inclui mensagens internas e conversa livre).
+        (mensagens internas e conversa livre).
       </p>
     </div>
   )
@@ -442,6 +464,7 @@ function SectionBlock({
   secCount,
   toolLabel,
   canEditUi,
+  teamExperience,
   saving,
   copiedId,
   catalog,
@@ -457,6 +480,7 @@ function SectionBlock({
   secCount: number
   toolLabel: string | null
   canEditUi: boolean
+  teamExperience: boolean
   saving: boolean
   copiedId: string | null
   catalog: ProLideresCatalogItem[]
@@ -581,6 +605,7 @@ function SectionBlock({
                 entCount={section.entries.length}
                 sectionId={section.id}
                 canEditUi={canEditUi}
+                teamExperience={teamExperience}
                 editingSection={editing}
                 saving={saving}
                 copiedId={copiedId}
@@ -730,11 +755,18 @@ function SectionBlock({
   }
 
   return (
-    <details className="rounded-xl border border-gray-200 bg-white shadow-sm">
-      <summary className="cursor-pointer list-none px-4 py-3 [&::-webkit-details-marker]:hidden">
+    <details className={sectionShell}>
+      <summary className="cursor-pointer list-none px-4 py-4 sm:px-5 [&::-webkit-details-marker]:hidden">
         <span className="flex items-start justify-between gap-3">
           <span className="min-w-0 flex-1">
-            <span className="block text-base font-bold text-gray-900">{section.title}</span>
+            <span className="flex flex-wrap items-center gap-2">
+              <span className="block text-base font-bold text-gray-900">{section.title}</span>
+              {teamExperience ? (
+                <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-emerald-900">
+                  Campo
+                </span>
+              ) : null}
+            </span>
             {section.subtitle?.trim() ? (
               <span className="mt-0.5 block text-sm text-gray-600">{section.subtitle}</span>
             ) : null}
@@ -751,7 +783,7 @@ function SectionBlock({
               ) : null}
             </span>
           </span>
-          <span className="shrink-0 text-xs text-gray-400">ver</span>
+          <span className="shrink-0 text-xs font-medium text-gray-400">{teamExperience ? 'abrir' : 'ver'}</span>
         </span>
       </summary>
       <div className="border-t border-gray-100">
@@ -883,6 +915,7 @@ function EntryCard({
   entCount,
   sectionId,
   canEditUi,
+  teamExperience,
   editingSection,
   saving,
   copiedId,
@@ -897,6 +930,7 @@ function EntryCard({
   entCount: number
   sectionId: string
   canEditUi: boolean
+  teamExperience: boolean
   editingSection: boolean
   saving: boolean
   copiedId: string | null
@@ -1031,9 +1065,13 @@ function EntryCard({
               <button
                 type="button"
                 onClick={() => void onCopyEntry(entry.id, block)}
-                className="min-h-[44px] rounded-lg border border-gray-200 bg-white px-3 text-xs font-semibold text-gray-700 hover:bg-gray-50"
+                className={`min-h-[44px] rounded-xl px-4 text-sm font-semibold shadow-sm transition ${
+                  teamExperience
+                    ? 'bg-emerald-600 text-white hover:bg-emerald-700'
+                    : 'border border-gray-200 bg-white text-xs text-gray-700 hover:bg-gray-50'
+                }`}
               >
-                {copiedId === entry.id ? '✓ Copiado' : 'Copiar bloco'}
+                {copiedId === entry.id ? '✓ Copiado' : teamExperience ? 'Copiar mensagem' : 'Copiar bloco'}
               </button>
               {canEditUi && !editingSection && (
                 <>
@@ -1074,13 +1112,23 @@ function EntryCard({
             </div>
           </div>
           {entry.body?.trim() && (
-            <pre className="mt-3 max-h-44 overflow-auto whitespace-pre-wrap rounded-lg bg-white p-3 font-sans text-sm text-gray-800 ring-1 ring-gray-100">
+            <pre
+              className={`mt-3 max-h-[min(22rem,55vh)] overflow-auto whitespace-pre-wrap rounded-xl bg-white p-3 font-sans text-gray-800 ring-1 ring-gray-100/90 sm:p-4 ${
+                teamExperience ? 'text-[15px] leading-relaxed sm:text-base' : 'text-sm'
+              }`}
+            >
               {entry.body}
             </pre>
           )}
           {entry.how_to_use?.trim() && (
-            <div className="mt-3 rounded-lg border border-sky-100 bg-sky-50/90 px-3 py-2 text-sm text-sky-950">
-              <span className="font-semibold">Como usar: </span>
+            <div
+              className={`mt-3 rounded-xl border px-3 py-2.5 text-sm ${
+                teamExperience
+                  ? 'border-emerald-200/80 bg-emerald-50/90 text-emerald-950'
+                  : 'border-sky-100 bg-sky-50/90 text-sky-950'
+              }`}
+            >
+              <span className="font-semibold">Quando usar: </span>
               {entry.how_to_use}
             </div>
           )}

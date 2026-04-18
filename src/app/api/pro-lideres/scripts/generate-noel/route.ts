@@ -56,6 +56,8 @@ export async function POST(request: NextRequest) {
     pillar?: unknown
     ylada_link_id?: unknown
     locale?: unknown
+    /** Quando true, o propósito veio do fluxo guiado (objetivo, público, tom, canal). */
+    guided?: unknown
   }
   try {
     body = await request.json()
@@ -116,11 +118,12 @@ export async function POST(request: NextRequest) {
     replyLanguage,
   })
 
+  const guided = body.guided === true
   const userMessage = `Gera o JSON para o pilar "${pillar}" e o propósito acima. Regras absolutas:
 - Cada entries[].body é texto que o DISTRIBUIDOR envia a CLIENTE/LEAD/PÚBLICO (copiar/colar), nunca mensagem "Olá equipe" nem ao grupo interno.
 - Português do Brasil: **nunca** uses "follow-up" — usa **"acompanhamento"** se precisares desse conceito.
 - Se houver link/ferramenta no contexto: inclui **pedido de permissão** antes do link; **coleta de indicação** (quem mais pode se beneficiar) de forma natural; ângulo **família / quem ama** para preparar **compartilhar o link** com gatilhos mentais sutis e éticos.
-Só JSON.`
+${guided ? '- O propósito veio de um **fluxo guiado** (rótulos OBJETIVO / PÚBLICO / TOM / CANAL, etc.): **respeita cada linha** como combinado com o líder.\n' : ''}Só JSON.`
 
   try {
     const completion = await openai.chat.completions.create({
