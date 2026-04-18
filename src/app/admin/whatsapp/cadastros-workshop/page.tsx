@@ -383,12 +383,26 @@ function CadastrosWorkshopContent() {
                 Disparo manual e controle de pendências
               </p>
             </div>
-            <Link
-              href="/admin"
-              className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
-            >
-              ← Voltar ao admin
-            </Link>
+            <div className="flex flex-wrap items-center justify-end gap-2 shrink-0">
+              <Link
+                href="/admin/whatsapp/workshop"
+                className="px-3 py-2 bg-blue-100 text-blue-800 rounded-lg hover:bg-blue-200 text-sm font-semibold"
+              >
+                📅 Agenda workshop
+              </Link>
+              <Link
+                href="/admin/whatsapp"
+                className="px-3 py-2 bg-green-100 text-green-800 rounded-lg hover:bg-green-200 text-sm font-semibold"
+              >
+                💬 Conversas
+              </Link>
+              <Link
+                href="/admin"
+                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 text-sm"
+              >
+                ← Admin
+              </Link>
+            </div>
           </div>
         </div>
       </div>

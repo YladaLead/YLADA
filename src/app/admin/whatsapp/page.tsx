@@ -699,6 +699,22 @@ function WhatsAppChatContent() {
             </div>
             <div className="flex items-center gap-1 shrink-0">
               <Link
+                href="/admin/whatsapp/cadastros-workshop"
+                className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg text-purple-600 hover:text-purple-800 hover:bg-purple-50 active:bg-purple-100 text-lg"
+                title="Inscrições feitas nas landings do workshop (Nutri → Empresária, etc.)"
+                aria-label="Inscrições workshop"
+              >
+                📋
+              </Link>
+              <Link
+                href="/admin/whatsapp/workshop"
+                className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg text-blue-600 hover:text-blue-800 hover:bg-blue-50 active:bg-blue-100 text-lg"
+                title="Agenda do workshop — sessões, participantes e link para cadastros"
+                aria-label="Agenda workshop"
+              >
+                📅
+              </Link>
+              <Link
                 href="/admin/whatsapp/automation"
                 className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg text-green-600 hover:text-green-700 hover:bg-green-50 active:bg-green-100 text-lg"
                 title="Configurações de automação — ligar/desligar Carol, horários permitidos"
@@ -723,6 +739,23 @@ function WhatsAppChatContent() {
                 🏷️
               </Link>
             </div>
+          </div>
+          <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 px-2 pb-2 text-[11px] sm:text-xs">
+            <Link
+              href="/admin/whatsapp/cadastros-workshop"
+              className="font-semibold text-purple-700 hover:text-purple-900 underline underline-offset-2"
+            >
+              Inscrições (landings)
+            </Link>
+            <span className="text-gray-300" aria-hidden>
+              ·
+            </span>
+            <Link
+              href="/admin/whatsapp/workshop"
+              className="font-semibold text-blue-700 hover:text-blue-900 underline underline-offset-2"
+            >
+              Agenda workshop
+            </Link>
           </div>
           <div className="flex items-center justify-between text-xs text-gray-500">
             <span title="Total de conversas na lista">{conversations.length} conversas</span>
