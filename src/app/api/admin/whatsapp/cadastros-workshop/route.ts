@@ -223,13 +223,17 @@ export async function GET(request: NextRequest) {
         telefone: reg.telefone || reg.phone || '',
         crn: reg.crn || null,
         source: reg.source || 'workshop_landing_page',
+        workshop_type: reg.workshop_type ?? null,
+        inscricao_status: reg.status ?? null,
+        ip_address: reg.ip_address ?? null,
+        user_agent: reg.user_agent ?? null,
         created_at: reg.created_at || reg.createdAt || new Date().toISOString(),
         conversation_id: conversation?.id || null,
         conversation_tags: tags,
         has_conversation: !!conversation,
         has_welcome_message: hasWelcome,
         welcome_sent_at: sentAt,
-        needs_manual_whatsapp: !hasWelcome
+        needs_manual_whatsapp: !hasWelcome,
       }
     })
 
