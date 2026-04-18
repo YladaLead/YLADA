@@ -21,6 +21,12 @@ function primeiroNomeCompleto(nome: string) {
 const WHATSAPP_NUTRI_EMPRESARIA = '5519997230912'
 
 /**
+ * Texto exato enviado no `?text=` do wa.me após inscrição — alinhar o gatilho do robô a esta frase.
+ */
+const WA_MSG_ATIVACAO_SEM_NOME =
+  'Oi! Acabei de me inscrever na aula Nutri para Empresaria e quero receber o acesso e os lembretes.'
+
+/**
  * Currículo na landing — alinhado à Dra. Gláucia: formação (UFRJ / CENC-UFRJ) sem sugerir vínculo
  * docente com a universidade.
  */
@@ -77,8 +83,8 @@ export default function WorkshopNutriEmpresariaPage() {
 
     const pn = primeiroNomeCompleto(formData.nome)
     const waMsg = pn
-      ? `Olá! Sou ${pn}. Acabei de me inscrever na aula Nutri Empresária (YLADA, nutri → empresária) pelo site. Quero iniciar por aqui para receber o link da aula e os lembretes da automação. Obrigada!`
-      : `Olá! Acabei de me inscrever na aula Nutri Empresária (YLADA, nutri → empresária) pelo site. Quero iniciar por aqui para receber o link da aula e os lembretes da automação. Obrigada!`
+      ? `Oi! Sou ${pn}. Acabei de me inscrever na aula Nutri para Empresaria e quero receber o acesso e os lembretes.`
+      : WA_MSG_ATIVACAO_SEM_NOME
 
     try {
       const response = await fetch('/api/nutri/workshop/inscricao', {

@@ -19,7 +19,7 @@ export default function WorkshopNutriEmpresariaPreviewSucessoPage() {
 
   const confirmedFirstName = 'Maria'
   const waMsg =
-    'Olá! Sou Maria. Acabei de me inscrever na aula Nutri Empresária (YLADA, nutri → empresária) pelo site. Quero iniciar por aqui para receber o link da aula e os lembretes da automação. Obrigada!'
+    'Oi! Sou Maria. Acabei de me inscrever na aula Nutri para Empresaria e quero receber o acesso e os lembretes.'
   const whatsappRedirectUrl = buildWhatsappUrl('5519997230912', waMsg)
 
   return (
