@@ -17,29 +17,15 @@ function primeiroNomeCompleto(nome: string) {
   return t[0] || ''
 }
 
-const GLAUCIA_PARAGRAFOS_PREVIEW = 2
-
 /** WhatsApp da campanha Nutri → Empresária (automação + lembretes). Sobrescrever: NEXT_PUBLIC_WORKSHOP_NUTRI_EMPRESARIA_WHATSAPP_NUMBER */
 const WHATSAPP_NUTRI_EMPRESARIA = '5519997230912'
 
-/** Currículo institucional enviado pela Dra. Gláucia (palestrante convidada). */
-const GLAUCIA_PARAGRAFOS: string[] = [
-  'Nutricionista — Instituto de Nutrição Josué de Castro — UFRJ.',
-  'Mestre em Ciência (Bioquímica da Nutrição) — Instituto de Química, Departamento de Bioquímica — UFRJ.',
-  'Especializada em Nutrição Clínica — CENC — Instituto de Nutrição Josué de Castro — UFRJ.',
-  'Nutricionista autônomo — consultório, telenutrição e atendimento domiciliar.',
-  'Empreendedora (CNPJ) — instrutora de cursos gerenciais; treinamento em desenvolvimento profissional; professora particular independente; editora de revistas; editora de jornal não diário; redatora freelancer.',
-  'Professora particular de disciplinas do curso de nutrição e da saúde.',
-  'Orientadora para redação de monografias (TCC), artigos científicos e trabalhos acadêmicos na área da saúde.',
-  'Autora no projeto pedagógico de abertura do curso de graduação em nutrição da Faculdade Redentor (atual UniRedentor), Itaperuna, RJ — aprovado com conceitos A e B pelo MEC em 2002; coordenadora acadêmica; professora responsável pela disciplina de bioquímica, atividades de pesquisa e extensão (2002–2011).',
-  'Professora no Instituto de Nutrição Josué de Castro — UFRJ — disciplinas: dietoterapia I e II; estágio supervisionado em nutrição clínica (1998–1999).',
-  'Professora na Faculdade Arthur de Sá Earp Neto (Petrópolis, RJ) — professora responsável pela disciplina de nutrição e dietética I no curso de graduação em nutrição e professora auxiliar em bioquímica no curso de medicina da Faculdade de Medicina de Petrópolis (mesmo grupo institucional) — 1999.',
-  'Orientadora de TCC para obtenção do grau de especialista em nutrição clínica do CENC (pós lato sensu) — Instituto de Nutrição Josué de Castro (UFRJ) — 2017–2020.',
-  'Coordenadora local do campus Cabo Frio (RJ) do curso de pós-graduação lato sensu do Instituto de Nutrição Josué de Castro (UFRJ) — CENC — 2020–2022.',
-  'Revisora de artigos científicos por pares em revista científica internacional — 2025 em diante.',
-  'Palestrante — saúde e nutrição.',
-  'Competências: nutricionista; editora e redatora; docência; professor presencial e online; orientação de monografias e dissertações; coordenação; planejamento; gerenciamento; pesquisa; palestrante; consultoria e assessoria nutricional.',
-]
+/** Currículo na landing — texto solicitado pela Dra. Gláucia (único bloco). */
+const GLAUCIA_CURRICULO_LINHAS =
+  'Nutricionista Mestre em Bioquímica da Nutrição (UFRJ) | Especializada em Nutrição Clínica (UFRJ) | Criadora do Método Restart Metabólico | Emagrecimento e Doenças Crônicas | Docente e Palestrante | Revisora Científica'
+    .split('|')
+    .map((s) => s.trim())
+    .filter(Boolean)
 
 /**
  * Landing nutri empresária — copy compacta, tom acolhedor YLADA, mesmo POST /api/nutri/workshop/inscricao.
@@ -59,7 +45,6 @@ export default function WorkshopNutriEmpresariaPage() {
   const [error, setError] = useState<string | null>(null)
   const [whatsappRedirectUrl, setWhatsappRedirectUrl] = useState<string | null>(null)
   const [confirmedFirstName, setConfirmedFirstName] = useState<string | null>(null)
-  const [glauciaBioAberto, setGlauciaBioAberto] = useState(false)
 
   const whatsappNumber =
     process.env.NEXT_PUBLIC_WORKSHOP_NUTRI_EMPRESARIA_WHATSAPP_NUMBER || WHATSAPP_NUTRI_EMPRESARIA
@@ -457,29 +442,13 @@ export default function WorkshopNutriEmpresariaPage() {
                   </div>
                   <div className="min-w-0 flex-1">
                     <h3 className="text-lg sm:text-xl font-black text-gray-900">Dra. Gláucia Melo</h3>
-                    <p className="text-sky-800 text-sm font-semibold mt-1 mb-2">
-                      Nutricionista · Docência UFRJ · Consultório e empreendedorismo
-                    </p>
-                    <p className="text-gray-600 text-xs sm:text-sm mb-4 leading-relaxed">
-                      Mais de duas décadas formando nutricionistas e atuando na prática clínica.
-                    </p>
-                    <div className="text-gray-700 text-xs sm:text-sm leading-relaxed space-y-2.5">
-                      {(glauciaBioAberto
-                        ? GLAUCIA_PARAGRAFOS
-                        : GLAUCIA_PARAGRAFOS.slice(0, GLAUCIA_PARAGRAFOS_PREVIEW)
-                      ).map((bloco, i) => (
-                        <p key={i}>{bloco}</p>
+                    <div className="text-gray-800 text-sm sm:text-base leading-relaxed mt-3 space-y-2">
+                      {GLAUCIA_CURRICULO_LINHAS.map((linha, i) => (
+                        <p key={i} className="font-medium">
+                          {linha}
+                        </p>
                       ))}
                     </div>
-                    {GLAUCIA_PARAGRAFOS.length > GLAUCIA_PARAGRAFOS_PREVIEW && (
-                      <button
-                        type="button"
-                        onClick={() => setGlauciaBioAberto((v) => !v)}
-                        className="mt-3 text-sm font-bold text-sky-700 hover:text-sky-900 underline underline-offset-2"
-                      >
-                        {glauciaBioAberto ? 'Ver menos' : 'Ver mais'}
-                      </button>
-                    )}
                   </div>
                 </div>
               </article>
