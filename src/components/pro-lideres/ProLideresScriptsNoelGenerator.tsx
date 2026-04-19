@@ -371,8 +371,11 @@ export function ProLideresScriptsNoelGenerator({
   return (
     <div className="space-y-5">
       <p className="rounded-2xl border border-indigo-100 bg-gradient-to-br from-indigo-50/90 via-white to-violet-50/40 px-4 py-3 text-sm leading-relaxed text-indigo-950 sm:px-5 sm:py-3.5">
-        Depois você pode <strong className="text-indigo-950">ajustar com o Noel</strong> e{' '}
-        <strong className="text-indigo-950">salvar para a equipe</strong>.
+        O Noel foi treinado para gerar <strong className="text-indigo-950">light copy</strong>: pedido de{' '}
+        <strong className="text-indigo-950">permissão</strong> antes de link ou pedido delicado; indicação como{' '}
+        <strong className="text-indigo-950">missão de ajudar</strong> (terceira pessoa, conforto para quem recebe), sem
+        pressão nem gatilhos agressivos. Depois você pode <strong className="text-indigo-950">ajustar com o Noel</strong>{' '}
+        e <strong className="text-indigo-950">salvar para a equipe</strong>.
       </p>
 
       <div className="flex flex-wrap gap-2 rounded-xl border border-gray-200 bg-gray-50/80 p-1.5">

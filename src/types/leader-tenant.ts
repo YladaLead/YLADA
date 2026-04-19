@@ -34,6 +34,8 @@ export type LeaderTenantMemberRow = {
   role: ProLideresTenantRole
   /** Só aplica a role member; líder fica sempre active. */
   team_access_state: ProLideresTeamAccessState
+  /** Slug escolhido no convite; segmento padrão nos links /l/…/… por membro. */
+  pro_lideres_share_slug?: string | null
   created_at: string
 }
 
@@ -74,6 +76,12 @@ export type LeaderTenantPlScriptSectionRow = {
   tool_preset_key?: string | null
   /** Cópia da biblioteca YLADA, se aplicável. */
   source_template_id?: string | null
+  /** Uma linha: quando usar (biblioteca guiada). */
+  usage_hint?: string | null
+  /** Resumo da sequência (ex.: Permissão → Convite). */
+  sequence_label?: string | null
+  /** Momento da conversa para filtros (migration 325). */
+  conversation_stage?: string | null
   created_at: string
   updated_at: string
 }
@@ -86,6 +94,12 @@ export type ProLideresScriptTemplateRow = {
   tool_preset_key: string | null
   title: string
   subtitle: string | null
+  /** Quando usar (uma frase). */
+  usage_hint?: string | null
+  /** Sequência resumida para o líder. */
+  sequence_label?: string | null
+  /** Filtro «momento da conversa». */
+  conversation_stage?: string | null
   entries: ProLideresScriptTemplateEntry[]
   sort_order: number
   vertical_code: string | null

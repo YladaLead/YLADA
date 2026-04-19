@@ -1055,7 +1055,7 @@ function SectionBlock({
   }
 
   return (
-    <details className={sectionShell}>
+    <details className="w-full overflow-hidden rounded-xl">
       <summary className="cursor-pointer list-none px-4 py-4 sm:px-5 [&::-webkit-details-marker]:hidden">
         <span className="flex items-start justify-between gap-3">
           <span className="min-w-0 flex-1">

@@ -5,6 +5,12 @@ import { normalizeInviteEmail } from '@/lib/pro-lideres-invite-helpers'
 import { generateAvailableUserSlug } from '@/lib/user-slug-generator'
 import { ownerHasProLideresTeamSubscription } from '@/lib/pro-lideres-subscription-access'
 import type { LeaderTenantInviteRow } from '@/types/leader-tenant'
+import { parseProLideresMemberSharePathSlug } from '@/lib/pro-lideres-member-link-tokens-resolve'
+import {
+  isProLideresShareSlugTakenInTenant,
+  syncProLideresMemberLinkTokensShareSlug,
+  whatsappMeetsProLideresMandatory,
+} from '@/lib/pro-lideres-member-mandatory-profile'
 
 /**
  * Público: cria conta com o e-mail do convite, grava nome/WhatsApp no perfil, entra na equipe e marca o convite como usado.
@@ -14,7 +20,13 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Servidor sem service role' }, { status: 503 })
   }
 
-  let body: { token?: string; nome_completo?: string; whatsapp?: string; password?: string }
+  let body: {
+    token?: string
+    nome_completo?: string
+    whatsapp?: string
+    password?: string
+    pro_lideres_share_slug?: string
+  }
   try {
     body = await request.json()
   } catch {
@@ -32,8 +44,25 @@ export async function POST(request: NextRequest) {
   if (nomeCompleto.length < 2) {
     return NextResponse.json({ error: 'Indique o nome completo.' }, { status: 400 })
   }
-  if (whatsapp.length < 8) {
-    return NextResponse.json({ error: 'Indique um WhatsApp válido (mín. 8 caracteres).' }, { status: 400 })
+  if (!whatsappMeetsProLideresMandatory(whatsapp)) {
+    return NextResponse.json(
+      { error: 'Indique o WhatsApp com DDI e número completo (mínimo 10 dígitos no total).' },
+      { status: 400 }
+    )
+  }
+
+  const slugRes = parseProLideresMemberSharePathSlug(body.pro_lideres_share_slug)
+  if (!slugRes.ok) {
+    return NextResponse.json({ error: slugRes.error }, { status: 400 })
+  }
+  if (!slugRes.value) {
+    return NextResponse.json({ error: 'Escolhe o teu slug de divulgação (obrigatório).' }, { status: 400 })
+  }
+  if (/^[a-f0-9]{32}$/i.test(slugRes.value)) {
+    return NextResponse.json(
+      { error: 'Esse formato é reservado ao sistema. Escolhe outro slug (ex.: o-teu-nome).' },
+      { status: 400 }
+    )
   }
   if (password.length < 6) {
     return NextResponse.json({ error: 'A senha deve ter pelo menos 6 caracteres.' }, { status: 400 })
@@ -72,6 +101,19 @@ export async function POST(request: NextRequest) {
         code: 'pro_lideres_team_subscription_required',
       },
       { status: 402 }
+    )
+  }
+
+  const slugTaken = await isProLideresShareSlugTakenInTenant(
+    supabaseAdmin,
+    inv.leader_tenant_id as string,
+    slugRes.value,
+    null
+  )
+  if (slugTaken) {
+    return NextResponse.json(
+      { error: 'Já existe alguém nesta equipe com este slug. Escolhe outro.' },
+      { status: 409 }
     )
   }
 
@@ -132,13 +174,20 @@ export async function POST(request: NextRequest) {
     leader_tenant_id: inv.leader_tenant_id,
     user_id: userId,
     role: 'member',
+    pro_lideres_share_slug: slugRes.value,
   })
 
   if (insErr) {
     console.error('[pro-lideres/invites/register member]', insErr)
     await supabaseAdmin.auth.admin.deleteUser(userId)
     if (insErr.code === '23505') {
-      return NextResponse.json({ error: 'Este utilizador já pertence à equipe.' }, { status: 400 })
+      return NextResponse.json(
+        {
+          error:
+            'Este slug já está em uso nesta equipe ou não foi possível concluir o registo. Escolha outro slug e tente de novo.',
+        },
+        { status: 409 }
+      )
     }
     return NextResponse.json({ error: 'Não foi possível adicionar à equipe.' }, { status: 500 })
   }
@@ -157,6 +206,13 @@ export async function POST(request: NextRequest) {
   if (updErr) {
     console.error('[pro-lideres/invites/register mark used]', updErr)
   }
+
+  await syncProLideresMemberLinkTokensShareSlug(
+    supabaseAdmin,
+    inv.leader_tenant_id as string,
+    userId,
+    slugRes.value
+  )
 
   return NextResponse.json({ ok: true, email })
 }

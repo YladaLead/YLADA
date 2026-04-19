@@ -102,6 +102,40 @@ export async function GET(request: NextRequest) {
         if (!insErr) inserted = true
       }
     }
+
+    const { data: tokensForSlug } = await supabaseAdmin
+      .from('pro_lideres_member_link_tokens')
+      .select('id, member_user_id, share_path_slug')
+      .eq('leader_tenant_id', tenantId)
+      .eq('ylada_link_id', linkId)
+
+    const { data: memSlugRows } = await supabaseAdmin
+      .from('leader_tenant_members')
+      .select('user_id, pro_lideres_share_slug')
+      .eq('leader_tenant_id', tenantId)
+
+    const defaultSlugByUser = new Map<string, string>()
+    for (const m of memSlugRows ?? []) {
+      const raw = (m as { pro_lideres_share_slug?: string | null }).pro_lideres_share_slug
+      const s = typeof raw === 'string' ? raw.trim().toLowerCase() : ''
+      if (s && !/^[a-f0-9]{32}$/i.test(s)) {
+        defaultSlugByUser.set(m.user_id as string, s)
+      }
+    }
+
+    for (const tr of tokensForSlug ?? []) {
+      if ((tr as { share_path_slug?: string | null }).share_path_slug) continue
+      const mid = tr.member_user_id as string
+      const s = defaultSlugByUser.get(mid)
+      if (!s) continue
+      const { error: slugUpdErr } = await supabaseAdmin
+        .from('pro_lideres_member_link_tokens')
+        .update({ share_path_slug: s })
+        .eq('id', tr.id as string)
+      if (slugUpdErr?.code === '23505') {
+        /* colisão rara neste link — mantém null */
+      }
+    }
   }
 
   const { data: tokenRows } = await supabaseAdmin

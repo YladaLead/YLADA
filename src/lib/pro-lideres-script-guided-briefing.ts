@@ -52,6 +52,7 @@ export const PL_SCRIPT_GUIDED_OBJECTIVES = [
   { id: 'reativar', label: 'Reativar contatos' },
   { id: 'converter', label: 'Converter interesse' },
   { id: 'engajar', label: 'Engajar cliente' },
+  { id: 'acompanhar_cliente', label: 'Acompanhar cliente' },
   { id: 'indicacao', label: 'Pedir indicação' },
 ] as const
 
@@ -60,8 +61,9 @@ export type PlScriptGuidedObjectiveId = (typeof PL_SCRIPT_GUIDED_OBJECTIVES)[num
 /** Ordem: campo consumo / ferramentas comuns (vendas e recrutamento). */
 export const PL_SCRIPT_GUIDED_TOOLS_CORE = [
   { id: 'espaco_saudavel', label: 'Espaço saudável' },
-  { id: 'desafio_dias', label: 'Desafio de dias' },
-  { id: 'bebida_funcional', label: 'Bebida funcional' },
+  { id: 'desafio_21', label: 'Desafio 21 dias' },
+  { id: 'plano_90_dias', label: 'Plano 90 dias (acompanhamento)' },
+  { id: 'bebida_funcional', label: 'Bebidas funcionais' },
   { id: 'avaliacao_bemestar', label: 'Avaliação do bem-estar' },
   { id: 'acompanhamento', label: 'Acompanhamento' },
   { id: 'redes_sociais', label: 'Redes sociais' },
@@ -221,11 +223,17 @@ export function composeGuidedScriptPurpose(b: PlScriptGuidedBriefing): string {
       ? 'Tom recrutamento ético: sem promessa de renda, sem garantia de ganho, sem "ganhar fácil"; convite para conversa e curiosidade profissional.'
       : 'Tom consumo/experiência: sem claims de cura ou resultado garantido; consultivo.'
 
+  const indicationExtra =
+    b.objectiveId === 'indicacao'
+      ? 'OBJETIVO INDICAÇÃO: pedir permissão antes de pedir nome; coleta só como missão de ajudar (terceira pessoa, saída honrosa se não houver nome); sem urgência falsa nem gatilhos de persuasão.'
+      : null
+
   const lines = [
     `FOCO PRINCIPAL: ${focus}`,
     `ÂNGULO DE ABORDAGEM: ${angle}`,
     `REGRAS DE FOCO: ${focusRules}`,
     `OBJETIVO DO SCRIPT: ${obj}`,
+    indicationExtra,
     `FERRAMENTA OU SITUAÇÃO: ${toolParts.join(' · ')}`,
     `PÚBLICO: ${audience}`,
     `TOM DESEJADO: ${tone}`,
@@ -233,7 +241,9 @@ export function composeGuidedScriptPurpose(b: PlScriptGuidedBriefing): string {
     `CANAL / FORMATO: ${channel}`,
     notes ? `NOTAS DO LÍDER: ${notes}` : null,
     '',
-    'Instrução: monta a sequência de textos para o distribuidor copiar e colar nesse canal, respeitando tom e público.',
+    'CHARTER DE COPY (obrigatório): light copy; pedido de permissão explícito antes de link, dado sensível ou pedido de indicação; credibilidade educada e conforto para quem recebe; evitar gatilhos mentais agressivos e tom de pressão.',
+    '',
+    'Instrução: monta a sequência de textos para o distribuidor copiar e colar nesse canal, respeitando tom, público e o charter acima.',
   ].filter(Boolean) as string[]
 
   return lines.join('\n')
@@ -249,6 +259,8 @@ export function suggestPillarFromObjective(objectiveId: PlScriptGuidedObjectiveI
       return 'ferramenta_depois'
     case 'engajar':
       return 'ferramenta_depois'
+    case 'acompanhar_cliente':
+      return 'ferramenta_depois'
     case 'indicacao':
       return 'ferramenta_depois'
   }
@@ -257,7 +269,7 @@ export function suggestPillarFromObjective(objectiveId: PlScriptGuidedObjectiveI
 /** Considera foco vendas vs recrutamento para sugerir o pilar Noel. */
 export function suggestPillarFromBriefing(b: PlScriptGuidedBriefing): ProLideresScriptPillarId {
   if (b.focusMainId === 'recrutamento') {
-    if (b.objectiveId === 'engajar') return 'ferramenta_depois'
+    if (b.objectiveId === 'engajar' || b.objectiveId === 'acompanhar_cliente') return 'ferramenta_depois'
     return 'recrutamento'
   }
   return suggestPillarFromObjective(b.objectiveId)

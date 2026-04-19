@@ -32,6 +32,7 @@ export default function ProLideresConviteTokenPage() {
 
   const [nome, setNome] = useState('')
   const [whatsapp, setWhatsapp] = useState('')
+  const [shareSlug, setShareSlug] = useState('')
   const [password, setPassword] = useState('')
   const [passwordConfirm, setPasswordConfirm] = useState('')
   const [showPassword, setShowPassword] = useState(false)
@@ -98,6 +99,7 @@ export default function ProLideresConviteTokenPage() {
           nome_completo: nome.trim(),
           whatsapp: whatsapp.trim(),
           password,
+          pro_lideres_share_slug: shareSlug.trim(),
         }),
       })
       const data = await res.json().catch(() => ({}))
@@ -137,11 +139,12 @@ export default function ProLideresConviteTokenPage() {
     setAccepting(true)
     setAcceptError(null)
     try {
-      const body: { token: string; nome_completo?: string; whatsapp?: string } = { token }
-      const n = nome.trim()
-      const w = whatsapp.trim()
-      if (n.length >= 2) body.nome_completo = n
-      if (w.length >= 8) body.whatsapp = w
+      const body = {
+        token,
+        nome_completo: nome.trim(),
+        whatsapp: whatsapp.trim(),
+        pro_lideres_share_slug: shareSlug.trim(),
+      }
 
       const res = await fetch('/api/pro-lideres/invites/accept', {
         method: 'POST',
@@ -213,6 +216,17 @@ export default function ProLideresConviteTokenPage() {
               abre em <span className="font-mono text-gray-800">/pro-lideres/painel</span> — é um espaço à parte da
               tua área YLADA habitual (ex.: Estética ou Nutri), que continua igual.
             </p>
+            <div className="rounded-lg border border-sky-200 bg-sky-50/90 px-3 py-2.5 text-xs leading-relaxed text-sky-950">
+              <p className="font-semibold text-sky-950">Antes de continuar (obrigatório)</p>
+              <p className="mt-1">
+                <strong>Slug</strong> — é o teu pedaço no fim do link do quiz (só letras minúsculas, números e
+                hífens). Quem faz o quiz é encaminhado para o <strong>teu WhatsApp</strong>.
+              </p>
+              <p className="mt-1">
+                <strong>WhatsApp</strong> — indica com <strong>DDI + número completo</strong> (ex.: Brasil 55 e o
+                número com DDD; no total pelo menos <strong>10 dígitos</strong> só contando os números).
+              </p>
+            </div>
 
             {!user && (
               <div className="space-y-4 text-sm text-gray-700">
@@ -239,14 +253,29 @@ export default function ProLideresConviteTokenPage() {
                     />
                   </label>
                   <label className="block">
-                    <span className="mb-1 block text-xs font-medium text-gray-600">WhatsApp</span>
+                    <span className="mb-1 block text-xs font-medium text-gray-600">O teu slug no link (obrigatório)</span>
                     <input
                       required
-                      minLength={8}
+                      minLength={3}
+                      maxLength={40}
+                      pattern="[a-z0-9]+(-[a-z0-9]+)*"
+                      title="Só minúsculas, números e hífens"
+                      value={shareSlug}
+                      onChange={(e) => setShareSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
+                      className="w-full rounded-lg border border-gray-300 px-3 py-2.5 font-mono text-sm text-gray-900"
+                      placeholder="ex.: maria-silva"
+                      autoComplete="off"
+                    />
+                  </label>
+                  <label className="block">
+                    <span className="mb-1 block text-xs font-medium text-gray-600">WhatsApp com DDI (obrigatório)</span>
+                    <input
+                      required
+                      minLength={10}
                       value={whatsapp}
                       onChange={(e) => setWhatsapp(e.target.value)}
                       className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-gray-900"
-                      placeholder="Com DDI, ex. 5511999998888"
+                      placeholder="ex.: 5511999998888"
                       autoComplete="tel"
                     />
                   </label>
@@ -347,12 +376,15 @@ export default function ProLideresConviteTokenPage() {
             {user && emailMatches && (
               <div className="space-y-3">
                 <p className="text-sm text-gray-700">
-                  Confirme ou complete os dados da sua ficha (opcional) e aceite o convite.
+                  Preencha <strong className="text-gray-900">nome</strong>, <strong className="text-gray-900">slug</strong>{' '}
+                  e <strong className="text-gray-900">WhatsApp com DDI</strong> para aceitar o convite.
                 </p>
                 <div className="grid gap-2">
                   <label className="block">
-                    <span className="mb-1 block text-xs font-medium text-gray-600">Nome completo (opcional)</span>
+                    <span className="mb-1 block text-xs font-medium text-gray-600">Nome completo (obrigatório)</span>
                     <input
+                      required
+                      minLength={2}
                       value={nome}
                       onChange={(e) => setNome(e.target.value)}
                       className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-gray-900"
@@ -360,11 +392,29 @@ export default function ProLideresConviteTokenPage() {
                     />
                   </label>
                   <label className="block">
-                    <span className="mb-1 block text-xs font-medium text-gray-600">WhatsApp (opcional)</span>
+                    <span className="mb-1 block text-xs font-medium text-gray-600">Slug no link (obrigatório)</span>
                     <input
+                      required
+                      minLength={3}
+                      maxLength={40}
+                      pattern="[a-z0-9]+(-[a-z0-9]+)*"
+                      title="Só minúsculas, números e hífens"
+                      value={shareSlug}
+                      onChange={(e) => setShareSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
+                      className="w-full rounded-lg border border-gray-300 px-3 py-2.5 font-mono text-sm text-gray-900"
+                      placeholder="ex.: maria-silva"
+                      autoComplete="off"
+                    />
+                  </label>
+                  <label className="block">
+                    <span className="mb-1 block text-xs font-medium text-gray-600">WhatsApp com DDI (obrigatório)</span>
+                    <input
+                      required
+                      minLength={10}
                       value={whatsapp}
                       onChange={(e) => setWhatsapp(e.target.value)}
                       className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-gray-900"
+                      placeholder="ex.: 5511999998888"
                       autoComplete="tel"
                     />
                   </label>

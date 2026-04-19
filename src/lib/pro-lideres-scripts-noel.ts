@@ -90,11 +90,12 @@ PORTUGUÊS DO BRASIL — PROIBIÇÕES LEXICAIS
 - **Nunca** uses no título nem no corpo anglicismos de jargão: **proibido** "follow-up", "follow up", "followup". Em qualquer situação equivalente usa **"acompanhamento"** (ex.: título "Mensagem 3 — acompanhamento depois do cálculo", não "Follow-up…").
 - Vocabulário de **campo** e **conversa humana**; evita termos que soarão tradução literal do inglês.
 
-ÂNGULO DE CÓPIA (SEQUÊNCIAS COM LINK / FERRAMENTA — APLICAR SEMPRE QUE HOUVER FERRAMENTA OU LINK)
-- **Pedido de permissão**: inclui **sempre** um momento claro de **pedir permissão** antes de mandar o link (respeito, abertura, sem pressa).
-- **Coleta de indicação** (natural, não robótico): inclui pelo menos uma peça ou frase que **convide a pessoa a pensar em quem mais pode se beneficiar** (indicação, indicação de alguém da família ou próximo) — sem parecer formulário nem spam.
-- **Família e preparação**: posiciona a ferramenta como algo que **ajuda a pessoa a cuidar de si e de quem ama** ou que **vale a pena compartilhar em casa** — prepara o terreno para **a pessoa repassar o link** (sem soar manipulador).
-- **Gatilhos mentais** (sutis, éticos, consultivos): curiosidade, urgência leve quando fizer sentido, reciprocidade, **"quem você quer ver bem"** — sempre com tom profissional; **sem** promessas ilegais nem pressão tóxica.
+CHARTER DE COPY — LIGHT COPY (APLICA A **TODA** A SEQUÊNCIA, COM OU SEM LINK)
+- **Light copy**: frases curtas, humanas, **consultivas**; **zero** tom de "fechamento duro", pressão emocional, culpa, urgência falsa, escassez inventada ou linguagem de funil agressivo.
+- **Permissão (obrigatória)**: em **toda** sequência há pelo menos **um** pedido explícito de permissão (ex.: "Posso te fazer uma pergunta rápida?", "Tudo bem se eu te mandar…?", "Posso te pedir um favor leve?") — **antes** de enviar link, pedir dado sensível ou pedir nome/indicação. Se já houver permissão no início, **reconfirma** levemente antes do passo mais delicado, quando fizer sentido.
+- **Coleta de indicação** (quando o objetivo for indicação ou expansão): trata como **missão de ajudar** (propósito, cuidado com a rede da pessoa), **não** como meta de "extrair nome". Preferir **terceira pessoa** ("Quem você conhece que…", "Sabe de alguém que…") com **saída honrosa** ("se não vier ninguém à cabeça, sem problema"). **Proibido** empurrar, contornar "não" ou empilhar gatilhos de persuasão.
+- **Família / contexto**: pode preparar terreno para partilhar o link ou o convite como algo que **ajuda quem importa** — sempre com **conforto** para quem recebe e **credibilidade educada** (sem prometer resultado nem medicalizar).
+- **O que evitar em todas as peças**: técnicas explícitas de manipulação, "última chance", medo, comparação humilhante, "prova social" fabricada. **Curiosidade leve** e **permissão** substituem "gatilho" pesado.
 
 ${hLayer}
 
@@ -126,7 +127,7 @@ REGRAS DE SAÍDA
 - Ordem do array = ordem de uso no **campo com clientes** (1 → 2 → 3…).
 - **body** nunca pode ser vazio para a ideia principal; se for WhatsApp, preferir mensagens curtas.
 - Textos em **${params.replyLanguage}**, tom profissional e humano.
-- Se existir ferramenta/link no contexto, a sequência deve **combinar** permissão + (quando fizer sentido) indicação + ângulo família + convite **implícito** a **compartilhar o link** com quem importa.
+- Se existir ferramenta/link no contexto, a sequência deve **combinar** permissão + (quando fizer sentido) convite a pensar em quem mais pode beneficiar-se, com **tom de missão** (não de extração) + convite **implícito** a **partilhar o link** com quem importa — sempre dentro do charter acima.
 
 FORMATO JSON EXATO:
 {"section_title":"...","section_subtitle":null,"entries":[{"title":"...","subtitle":null,"body":"...","how_to_use":"..."}]}`
@@ -152,7 +153,8 @@ MODO ATUAL — REFINAR RASCUNHO (PRIORIDADE SOBRE A GERAÇÃO DO ZERO)
 - **Aplica** o pedido mantendo o **mesmo formato** (\`section_title\`, \`section_subtitle\`, \`entries[]\` com \`title\`, \`subtitle\`, \`body\`, \`how_to_use\`).
 - Devolve o objeto JSON **completo e coerente** — não resumos nem diffs. Podes alterar só o necessário, mas o JSON tem de ser válido e utilizável.
 - Se o pedido for ambíguo, faz a alteração mais provável e mantém o resto estável.
-- **Não** apagues entradas nem reduzas a sequência a menos que o líder peça explicitamente para remover ou juntar mensagens.`
+- **Não** apagues entradas nem reduzas a sequência a menos que o líder peça explicitamente para remover ou juntar mensagens.
+- Se o líder pedir "mais urgente", "mais persuasivo" ou "mais agressivo", **não** introduzas gatilhos de pressão: mantém **light copy**, **permissão** e indicação só como **propósito de ajuda**; podes só **encurtar** ou **clarear** sem endurecer o tom.`
 }
 
 /** Remove anglicismos comuns que a equipa não usa no Brasil (ex.: follow-up → acompanhamento). */
