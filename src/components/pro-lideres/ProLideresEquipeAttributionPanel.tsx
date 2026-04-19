@@ -15,7 +15,9 @@ type AttributionMember = {
   displayName: string | null
   email: string | null
   token: string | null
+  sharePathSlug?: string | null
   shareUrl: string | null
+  shareUrlLegacyQuery?: string | null
   views: number
   whatsappClicks: number
 }
@@ -157,9 +159,10 @@ export function ProLideresEquipeAttributionPanel() {
                 <strong>endereço só para cada pessoa</strong> — assim consegues saber quem partilhou o quê.
               </li>
               <li>
-                Pede à tua equipe que use <strong>só o link que copiar desta página</strong> ao divulgar. As
-                colunas <strong>Cliques</strong> e <strong>WhatsApp</strong> mostram números por pessoa, não um total
-                misturado.
+                Pede à tua equipe que use <strong>só o link que copiar desta página</strong> (formato{' '}
+                <code className="rounded bg-white px-1">/l/…/…</code>
+                ) ao divulgar. As colunas <strong>Cliques</strong> e <strong>WhatsApp</strong> mostram números por
+                pessoa, não um total misturado.
               </li>
             </ol>
           </div>

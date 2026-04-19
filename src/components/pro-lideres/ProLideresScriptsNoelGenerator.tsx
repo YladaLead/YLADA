@@ -10,14 +10,16 @@ import {
   PL_SCRIPT_GUIDED_FOCUS,
   PL_SCRIPT_GUIDED_OBJECTIVES,
   PL_SCRIPT_GUIDED_SITUATIONS,
-  PL_SCRIPT_GUIDED_TOOLS,
   PL_SCRIPT_GUIDED_TONES,
   anglesForFocus,
   defaultAngleForFocus,
+  normalizeToolPresetForFocus,
+  toolsForFocus,
   type PlScriptGuidedBriefing,
   composeGuidedScriptPurpose,
   suggestPillarFromBriefing,
 } from '@/lib/pro-lideres-script-guided-briefing'
+import { clipToolPresetKey } from '@/lib/pro-lideres-script-section-meta'
 import {
   PRO_LIDERES_SCRIPT_PILLARS,
   type NoelScriptDraft,
@@ -39,7 +41,7 @@ const defaultGuided = (): PlScriptGuidedBriefing => ({
   focusMainId: 'vendas',
   angleId: 'sales_equilibrado',
   objectiveId: 'novos_contatos',
-  toolPresetId: 'direto',
+  toolPresetId: 'conversa_um_a_um',
   toolFreeform: '',
   catalogToolLabel: null,
   audienceId: 'interesse',
@@ -284,6 +286,9 @@ export function ProLideresScriptsNoelGenerator({
           subtitle: draft.section_subtitle,
           ylada_link_id: draftMeta?.ylada_link_id || null,
           visible_to_team: visibleToTeam,
+          focus_main: inputMode === 'guided' ? guided.focusMainId : 'vendas',
+          intention_key: inputMode === 'guided' ? guided.objectiveId : 'geral',
+          tool_preset_key: inputMode === 'guided' ? clipToolPresetKey(guided.toolPresetId) : null,
         }),
       })
       const data = await res.json().catch(() => ({}))
@@ -432,6 +437,7 @@ export function ProLideresScriptsNoelGenerator({
                       ...g,
                       focusMainId: f.id,
                       angleId: defaultAngleForFocus(f.id),
+                      toolPresetId: normalizeToolPresetForFocus(g.toolPresetId, f.id),
                     }))
                   }
                 >
@@ -474,7 +480,7 @@ export function ProLideresScriptsNoelGenerator({
           {guidedStep === 4 && (
             <div className="space-y-4">
               <div className="grid gap-2 sm:grid-cols-2">
-                {PL_SCRIPT_GUIDED_TOOLS.map((t) => (
+                {toolsForFocus(guided.focusMainId).map((t) => (
                   <Chip
                     key={t.id}
                     selected={guided.toolPresetId === t.id}

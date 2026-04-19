@@ -4,6 +4,11 @@ import { supabaseAdmin } from '@/lib/supabase'
 import { resolveProLideresTenantContext } from '@/lib/pro-lideres-server'
 import { requireProLideresPaidContext } from '@/lib/pro-lideres-subscription-access'
 import {
+  clipToolPresetKey,
+  normalizeFocusMain,
+  normalizeIntentionKey,
+} from '@/lib/pro-lideres-script-section-meta'
+import {
   clipSectionTitle,
   clipSubtitle,
   resolveYladaLinkIdForOwner,
@@ -30,7 +35,17 @@ export async function POST(request: NextRequest) {
   const paid = await requireProLideresPaidContext(supabaseAdmin, user)
   if (!paid.ok) return paid.response
 
-  let body: { title?: unknown; subtitle?: unknown; ylada_link_id?: unknown; sort_order?: unknown; visible_to_team?: unknown }
+  let body: {
+    title?: unknown
+    subtitle?: unknown
+    ylada_link_id?: unknown
+    sort_order?: unknown
+    visible_to_team?: unknown
+    focus_main?: unknown
+    intention_key?: unknown
+    tool_preset_key?: unknown
+    source_template_id?: unknown
+  }
   try {
     body = await request.json()
   } catch {
@@ -66,6 +81,10 @@ export async function POST(request: NextRequest) {
   const visible_to_team =
     body.visible_to_team === undefined ? true : Boolean(body.visible_to_team)
 
+  const focus_main = normalizeFocusMain(body.focus_main)
+  const intention_key = normalizeIntentionKey(body.intention_key)
+  const tool_preset_key = clipToolPresetKey(body.tool_preset_key)
+
   const { data: inserted, error } = await supabaseAdmin
     .from('leader_tenant_pl_script_sections')
     .insert({
@@ -75,6 +94,10 @@ export async function POST(request: NextRequest) {
       ylada_link_id: ylada.id,
       sort_order,
       visible_to_team,
+      focus_main,
+      intention_key,
+      tool_preset_key,
+      source_template_id: null,
     })
     .select()
     .single()

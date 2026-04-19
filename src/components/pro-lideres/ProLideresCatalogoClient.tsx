@@ -10,6 +10,7 @@ import type {
   ProLideresCatalogOrigin,
 } from '@/lib/pro-lideres-catalog-build'
 import { useProLideresPainel } from '@/components/pro-lideres/pro-lideres-painel-context'
+import { ProLideresCatalogMemberShareBlock } from '@/components/pro-lideres/ProLideresCatalogMemberShareBlock'
 
 type CatalogPayload = {
   catalog?: ProLideresCatalogItem[]
@@ -69,6 +70,7 @@ function CatalogRowCard({
   showTeamVisibilityControls,
   teamVisibilityBusy,
   onTeamVisibilityChange,
+  showMemberSharePanel,
 }: {
   item: ProLideresCatalogItem
   showRemove: boolean
@@ -80,6 +82,7 @@ function CatalogRowCard({
   showTeamVisibilityControls: boolean
   teamVisibilityBusy: boolean
   onTeamVisibilityChange: (item: ProLideresCatalogItem, visible: boolean) => void
+  showMemberSharePanel?: boolean
 }) {
   const [whenOpen, setWhenOpen] = useState(false)
   const scriptsHref = item.yladaLinkId ? `/pt/links/editar/${item.yladaLinkId}` : '/pt/links'
@@ -204,6 +207,10 @@ function CatalogRowCard({
       <p className="mt-2 truncate font-mono text-[10px] text-gray-400" title={item.publicUrl}>
         {item.publicUrl}
       </p>
+
+      {showMemberSharePanel && item.yladaLinkId ? (
+        <ProLideresCatalogMemberShareBlock yladaLinkId={item.yladaLinkId} />
+      ) : null}
 
       {showTeamVisibilityControls ? (
         <div className="mt-3 border-t border-slate-100 pt-3">
@@ -597,6 +604,7 @@ export function ProLideresCatalogoClient({
               showTeamVisibilityControls={isLeaderWorkspace}
               teamVisibilityBusy={teamVisibilityBusyId === item.id}
               onTeamVisibilityChange={(i, vis) => void setItemTeamVisible(i, vis)}
+              showMemberSharePanel={!isLeaderWorkspace}
             />
           ))}
         </div>

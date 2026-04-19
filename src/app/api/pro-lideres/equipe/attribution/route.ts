@@ -1,6 +1,6 @@
 /**
  * GET /api/pro-lideres/equipe/attribution?link_id=UUID&ensure=1
- * Só o dono do tenant (líder). Lista membros com URL rastreada (?pl_m=), visualizações e cliques WhatsApp.
+ * Só o dono do tenant (líder). Lista membros com URL rastreada (/l/[slug]/[segmento] ou ?pl_m=), views e cliques WhatsApp.
  * ensure=1 cria tokens em falta em pro_lideres_member_link_tokens.
  */
 import { randomBytes } from 'crypto'
@@ -106,13 +106,16 @@ export async function GET(request: NextRequest) {
 
   const { data: tokenRows } = await supabaseAdmin
     .from('pro_lideres_member_link_tokens')
-    .select('member_user_id, token')
+    .select('member_user_id, token, share_path_slug')
     .eq('leader_tenant_id', tenantId)
     .eq('ylada_link_id', linkId)
 
   const tokenByMember = new Map<string, string>()
+  const pathSlugByMember = new Map<string, string | null>()
   for (const tr of tokenRows ?? []) {
     tokenByMember.set(tr.member_user_id as string, tr.token as string)
+    const ps = (tr as { share_path_slug?: string | null }).share_path_slug
+    pathSlugByMember.set(tr.member_user_id as string, typeof ps === 'string' && ps.trim() ? ps.trim() : null)
   }
 
   const host = request.headers.get('host') || ''
@@ -151,16 +154,29 @@ export async function GET(request: NextRequest) {
   const members = ids.map((uid) => {
     const p = profileById.get(uid)
     const tok = tokenByMember.get(uid)
+    const pathSlug = pathSlugByMember.get(uid) ?? null
     const st = stats.get(uid) ?? { views: 0, whatsapp: 0 }
-    const path = `/l/${ylLink.slug as string}${tok ? `?pl_m=${encodeURIComponent(tok)}` : ''}`
-    const shareUrl = base ? `${base.replace(/\/$/, '')}${path}` : path
+    const pathSeg = (pathSlug && pathSlug.trim()) || tok || ''
+    const linkSlug = String(ylLink.slug || '').trim()
+    const pathWithMember =
+      tok && pathSeg && linkSlug
+        ? `/l/${encodeURIComponent(linkSlug)}/${encodeURIComponent(pathSeg)}`
+        : ''
+    const pathLegacy =
+      tok && linkSlug ? `/l/${encodeURIComponent(linkSlug)}?pl_m=${encodeURIComponent(tok)}` : ''
+    const shareUrl =
+      pathWithMember && (base ? `${base.replace(/\/$/, '')}${pathWithMember}` : pathWithMember)
+    const shareUrlLegacyQuery =
+      pathLegacy && (base ? `${base.replace(/\/$/, '')}${pathLegacy}` : pathLegacy)
     return {
       userId: uid,
       role: roleByUser.get(uid) === 'leader' ? 'leader' : 'member',
       displayName: (p?.nome_completo as string | null)?.trim() || null,
       email: (p?.email as string | null)?.trim() || null,
       token: tok ?? null,
+      sharePathSlug: pathSlug,
       shareUrl: tok ? shareUrl : null,
+      shareUrlLegacyQuery: tok ? shareUrlLegacyQuery : null,
       views: st.views,
       whatsappClicks: st.whatsapp,
     }

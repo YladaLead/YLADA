@@ -5,9 +5,24 @@ import Link from 'next/link'
 
 import { useProLideresPainel } from '@/components/pro-lideres/pro-lideres-painel-context'
 import { ProLideresCatalogToolPicker } from '@/components/pro-lideres/ProLideresCatalogToolPicker'
+import { ProLideresScriptsDemoShowcase } from '@/components/pro-lideres/ProLideresScriptsDemoShowcase'
+import { ProLideresScriptsLibraryFilters } from '@/components/pro-lideres/ProLideresScriptsLibraryFilters'
 import { ProLideresScriptsNoelGenerator } from '@/components/pro-lideres/ProLideresScriptsNoelGenerator'
+import { ProLideresScriptsYladaTemplateList } from '@/components/pro-lideres/ProLideresScriptsYladaTemplateList'
+import { ALL_SCRIPT_TOOL_ROWS } from '@/lib/pro-lideres-script-guided-briefing'
+import {
+  DEFAULT_SCRIPT_LIBRARY_FILTERS,
+  PL_SCRIPT_SECTION_FOCUS_OPTIONS,
+  PL_SCRIPT_SECTION_INTENTION_OPTIONS,
+  focusLabel,
+  intentionLabel,
+  sectionMatchesLibraryFilters,
+  toolPresetLabelFromKey,
+  type PlScriptSectionFocusId,
+  type ScriptLibraryFilters,
+} from '@/lib/pro-lideres-script-section-meta'
 import type { ProLideresCatalogItem } from '@/lib/pro-lideres-catalog-build'
-import type { ProLideresScriptSectionWithEntries } from '@/types/leader-tenant'
+import type { ProLideresScriptSectionWithEntries, ProLideresScriptTemplateRow } from '@/types/leader-tenant'
 
 type ScriptsPayload = {
   sections?: ProLideresScriptSectionWithEntries[]
@@ -44,6 +59,10 @@ export function ProLideresScriptsClient() {
   const [devHint, setDevHint] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
   const [copiedId, setCopiedId] = useState<string | null>(null)
+  const [libraryTab, setLibraryTab] = useState<'ylada' | 'mine'>('mine')
+  const [scriptFilters, setScriptFilters] = useState<ScriptLibraryFilters>(DEFAULT_SCRIPT_LIBRARY_FILTERS)
+  const [templates, setTemplates] = useState<ProLideresScriptTemplateRow[]>([])
+  const [tplLoading, setTplLoading] = useState(false)
 
   const toolLabelByLinkId = useMemo(() => {
     const m = new Map<string, string>()
@@ -54,6 +73,63 @@ export function ProLideresScriptsClient() {
   }, [catalog])
 
   const canEditUi = canEdit && !teamViewPreview
+
+  const filteredSections = useMemo(() => {
+    return sections.filter((s) => sectionMatchesLibraryFilters(s, scriptFilters))
+  }, [sections, scriptFilters])
+
+  useEffect(() => {
+    if (!canEditUi || libraryTab !== 'ylada') {
+      setTemplates([])
+      return
+    }
+    let ignore = false
+    const q = new URLSearchParams()
+    if (scriptFilters.focus !== 'todos') q.set('focus_main', scriptFilters.focus)
+    if (scriptFilters.intention !== 'todos') q.set('intention_key', scriptFilters.intention)
+    if (scriptFilters.tool !== 'todos' && scriptFilters.tool !== '__ylada__') {
+      q.set('tool_preset_key', scriptFilters.tool)
+    }
+    setTplLoading(true)
+    void fetch(`/api/pro-lideres/script-templates?${q}`, { credentials: 'include' })
+      .then((r) => r.json().catch(() => ({})))
+      .then((d: { templates?: ProLideresScriptTemplateRow[] }) => {
+        if (!ignore) setTemplates(Array.isArray(d.templates) ? d.templates : [])
+      })
+      .catch(() => {
+        if (!ignore) setTemplates([])
+      })
+      .finally(() => {
+        if (!ignore) setTplLoading(false)
+      })
+    return () => {
+      ignore = true
+    }
+  }, [canEditUi, libraryTab, scriptFilters.focus, scriptFilters.intention, scriptFilters.tool])
+
+  async function copyTemplateToLibrary(templateId: string) {
+    setSaving(true)
+    setError(null)
+    try {
+      const res = await fetch(`/api/pro-lideres/script-templates/${encodeURIComponent(templateId)}/use`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ visible_to_team: true }),
+      })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) {
+        setError((data as { error?: string }).error || 'Não foi possível copiar o modelo.')
+        return
+      }
+      setLibraryTab('mine')
+      await load()
+    } catch {
+      setError('Erro de rede ao copiar o modelo.')
+    } finally {
+      setSaving(false)
+    }
+  }
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -299,38 +375,126 @@ export function ProLideresScriptsClient() {
 
       {loading ? (
         <p className="text-gray-600">A carregar…</p>
-      ) : sections.length === 0 ? (
-        <p className="rounded-2xl border border-dashed border-gray-300 bg-gray-50/90 px-4 py-10 text-center text-sm text-gray-600">
-          {canEditUi
-            ? 'Ainda não há grupos. Use «Criar» acima (Noel ou grupo vazio).'
-            : 'O líder ainda não compartilhou sequências visíveis para a equipe aqui.'}
-        </p>
       ) : (
-        <div className="space-y-3">
-          <h2 className="text-xs font-semibold uppercase tracking-wide text-gray-500">Grupos guardados</h2>
-          <ul className="space-y-3">
-          {sections.map((sec, secIdx) => (
-            <li key={sec.id} className="rounded-xl border border-gray-200 bg-white shadow-sm">
-              <SectionBlock
-                section={sec}
-                secIdx={secIdx}
-                secCount={sections.length}
-                toolLabel={sec.ylada_link_id ? toolLabelByLinkId.get(sec.ylada_link_id) ?? null : null}
-                canEditUi={canEditUi}
-                teamExperience={teamExperience}
+        <div className="space-y-5">
+          <ProLideresScriptsLibraryFilters
+            value={scriptFilters}
+            onChange={setScriptFilters}
+            disabled={saving}
+            showYladaLinkFilter={!canEditUi || libraryTab === 'mine'}
+          />
+
+          {canEditUi ? (
+            <div className="flex flex-wrap gap-2 rounded-xl border border-gray-200 bg-white p-1.5 shadow-sm">
+              <button
+                type="button"
+                disabled={saving}
+                onClick={() => setLibraryTab('ylada')}
+                className={`min-h-[44px] flex-1 rounded-lg px-3 text-sm font-semibold transition sm:flex-none sm:px-5 ${
+                  libraryTab === 'ylada'
+                    ? 'bg-violet-600 text-white shadow-sm'
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                Biblioteca YLADA
+              </button>
+              <button
+                type="button"
+                disabled={saving}
+                onClick={() => setLibraryTab('mine')}
+                className={`min-h-[44px] flex-1 rounded-lg px-3 text-sm font-semibold transition sm:flex-none sm:px-5 ${
+                  libraryTab === 'mine'
+                    ? 'bg-indigo-600 text-white shadow-sm'
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                Minha biblioteca
+              </button>
+            </div>
+          ) : null}
+
+          {canEditUi && libraryTab === 'ylada' ? (
+            <div className="space-y-2">
+              <h2 className="text-xs font-semibold uppercase tracking-wide text-violet-700">Modelos prontos</h2>
+              <p className="text-sm text-gray-600">
+                Copie um modelo para a sua biblioteca e edite os textos como quiser. A equipe só vê o que estiver em
+                «Minha biblioteca» e visível para a equipe.
+              </p>
+              <ProLideresScriptsYladaTemplateList
+                templates={templates}
+                loading={tplLoading}
                 saving={saving}
-                copiedId={copiedId}
-                catalog={catalog}
-                onReload={load}
+                onUse={(id) => copyTemplateToLibrary(id)}
                 onError={setError}
-                onSaving={setSaving}
-                onCopyEntry={onCopyEntry}
-                onMoveSection={moveSection}
-                onMoveEntry={moveEntry}
               />
-            </li>
-          ))}
-          </ul>
+            </div>
+          ) : null}
+
+          {(!canEditUi || libraryTab === 'mine') && (
+            <>
+              {filteredSections.length === 0 && sections.length > 0 ? (
+                <div className="rounded-xl border border-amber-200 bg-amber-50/90 px-4 py-3 text-sm text-amber-950">
+                  <p>Nenhum grupo corresponde a estes filtros.</p>
+                  <button
+                    type="button"
+                    className="mt-2 text-sm font-semibold text-amber-900 underline"
+                    onClick={() => setScriptFilters(DEFAULT_SCRIPT_LIBRARY_FILTERS)}
+                  >
+                    Limpar filtros
+                  </button>
+                </div>
+              ) : null}
+
+              {sections.length === 0 ? (
+                <div className="space-y-5">
+                  {!error ? (
+                    <ProLideresScriptsDemoShowcase
+                      mode={teamExperience ? 'team' : 'leader'}
+                      copiedId={copiedId}
+                      onCopyEntry={onCopyEntry}
+                    />
+                  ) : null}
+                  <p className="rounded-2xl border border-dashed border-gray-300 bg-gray-50/90 px-4 py-10 text-center text-sm text-gray-600">
+                    {canEditUi
+                      ? 'Ainda não há grupos na sua biblioteca. Use «Criar» acima, a aba «Biblioteca YLADA» ou grupo vazio.'
+                      : 'O líder ainda não compartilhou sequências visíveis para a equipe aqui.'}
+                  </p>
+                </div>
+              ) : filteredSections.length > 0 ? (
+                <div className="space-y-3">
+                  <h2 className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                    {canEditUi ? 'Grupos na sua biblioteca' : 'Grupos para copiar'}
+                  </h2>
+                  <ul className="space-y-3">
+                    {filteredSections.map((sec) => {
+                      const secIdx = sections.findIndex((s) => s.id === sec.id)
+                      return (
+                        <li key={sec.id} className="rounded-xl border border-gray-200 bg-white shadow-sm">
+                          <SectionBlock
+                            section={sec}
+                            secIdx={secIdx >= 0 ? secIdx : 0}
+                            secCount={sections.length}
+                            toolLabel={sec.ylada_link_id ? toolLabelByLinkId.get(sec.ylada_link_id) ?? null : null}
+                            canEditUi={canEditUi}
+                            teamExperience={teamExperience}
+                            saving={saving}
+                            copiedId={copiedId}
+                            catalog={catalog}
+                            onReload={load}
+                            onError={setError}
+                            onSaving={setSaving}
+                            onCopyEntry={onCopyEntry}
+                            onMoveSection={moveSection}
+                            onMoveEntry={moveEntry}
+                          />
+                        </li>
+                      )
+                    })}
+                  </ul>
+                </div>
+              ) : null}
+            </>
+          )}
         </div>
       )}
 
@@ -363,6 +527,9 @@ function NewSectionForm({
   const [subtitle, setSubtitle] = useState('')
   const [yladaLinkId, setYladaLinkId] = useState('')
   const [visibleToTeam, setVisibleToTeam] = useState(true)
+  const [focusMain, setFocusMain] = useState<PlScriptSectionFocusId>('vendas')
+  const [intentionKey, setIntentionKey] = useState('geral')
+  const [toolPresetKey, setToolPresetKey] = useState('')
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -380,6 +547,9 @@ function NewSectionForm({
           subtitle: subtitle.trim() || null,
           ylada_link_id: yladaLinkId || null,
           visible_to_team: visibleToTeam,
+          focus_main: focusMain,
+          intention_key: intentionKey,
+          tool_preset_key: toolPresetKey || null,
         }),
       })
       const data = await res.json().catch(() => ({}))
@@ -391,6 +561,9 @@ function NewSectionForm({
       setSubtitle('')
       setYladaLinkId('')
       setVisibleToTeam(true)
+      setFocusMain('vendas')
+      setIntentionKey('geral')
+      setToolPresetKey('')
       await onCreated()
     } catch {
       onError('Erro de rede.')
@@ -423,6 +596,54 @@ function NewSectionForm({
             placeholder="Ex.: WhatsApp em 3 passos"
           />
         </label>
+        <div className="grid gap-3 sm:grid-cols-3">
+          <label className="block text-sm">
+            <span className="mb-1 block font-medium text-gray-700">Foco</span>
+            <select
+              className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2.5 text-sm"
+              value={focusMain}
+              disabled={saving}
+              onChange={(e) => setFocusMain(e.target.value as PlScriptSectionFocusId)}
+            >
+              {PL_SCRIPT_SECTION_FOCUS_OPTIONS.map((o) => (
+                <option key={o.id} value={o.id}>
+                  {o.label}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="block text-sm">
+            <span className="mb-1 block font-medium text-gray-700">Intenção</span>
+            <select
+              className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2.5 text-sm"
+              value={intentionKey}
+              disabled={saving}
+              onChange={(e) => setIntentionKey(e.target.value)}
+            >
+              {PL_SCRIPT_SECTION_INTENTION_OPTIONS.map((o) => (
+                <option key={o.id} value={o.id}>
+                  {o.label}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="block text-sm">
+            <span className="mb-1 block font-medium text-gray-700">Preset (guiado)</span>
+            <select
+              className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2.5 text-sm"
+              value={toolPresetKey}
+              disabled={saving}
+              onChange={(e) => setToolPresetKey(e.target.value)}
+            >
+              <option value="">Não especificar</option>
+              {ALL_SCRIPT_TOOL_ROWS.filter((r) => r.id !== 'outra').map((r) => (
+                <option key={r.id} value={r.id}>
+                  {r.label}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
         <ProLideresCatalogToolPicker
           catalog={catalog}
           value={yladaLinkId}
@@ -494,13 +715,27 @@ function SectionBlock({
   const [subtitle, setSubtitle] = useState(section.subtitle ?? '')
   const [yladaLinkId, setYladaLinkId] = useState(section.ylada_link_id ?? '')
   const [visibleToTeam, setVisibleToTeam] = useState(section.visible_to_team !== false)
+  const [focusMain, setFocusMain] = useState<PlScriptSectionFocusId>(section.focus_main ?? 'vendas')
+  const [intentionKey, setIntentionKey] = useState(section.intention_key ?? 'geral')
+  const [toolPresetKey, setToolPresetKey] = useState(section.tool_preset_key ?? '')
 
   useEffect(() => {
     setTitle(section.title)
     setSubtitle(section.subtitle ?? '')
     setYladaLinkId(section.ylada_link_id ?? '')
     setVisibleToTeam(section.visible_to_team !== false)
-  }, [section.title, section.subtitle, section.ylada_link_id, section.visible_to_team])
+    setFocusMain(section.focus_main ?? 'vendas')
+    setIntentionKey(section.intention_key ?? 'geral')
+    setToolPresetKey(section.tool_preset_key ?? '')
+  }, [
+    section.title,
+    section.subtitle,
+    section.ylada_link_id,
+    section.visible_to_team,
+    section.focus_main,
+    section.intention_key,
+    section.tool_preset_key,
+  ])
 
   async function patchTeamVisible(next: boolean) {
     onError(null)
@@ -539,6 +774,9 @@ function SectionBlock({
           subtitle: subtitle.trim() || null,
           ylada_link_id: yladaLinkId || null,
           visible_to_team: visibleToTeam,
+          focus_main: focusMain,
+          intention_key: intentionKey,
+          tool_preset_key: toolPresetKey || null,
         }),
       })
       const data = await res.json().catch(() => ({}))
@@ -640,6 +878,54 @@ function SectionBlock({
           maxLength={300}
         />
       </label>
+      <div className="grid gap-3 sm:grid-cols-3">
+        <label className="block text-sm">
+          <span className="mb-1 block font-medium text-gray-700">Foco</span>
+          <select
+            className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm"
+            value={focusMain}
+            disabled={saving}
+            onChange={(e) => setFocusMain(e.target.value as PlScriptSectionFocusId)}
+          >
+            {PL_SCRIPT_SECTION_FOCUS_OPTIONS.map((o) => (
+              <option key={o.id} value={o.id}>
+                {o.label}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="block text-sm">
+          <span className="mb-1 block font-medium text-gray-700">Intenção</span>
+          <select
+            className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm"
+            value={intentionKey}
+            disabled={saving}
+            onChange={(e) => setIntentionKey(e.target.value)}
+          >
+            {PL_SCRIPT_SECTION_INTENTION_OPTIONS.map((o) => (
+              <option key={o.id} value={o.id}>
+                {o.label}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="block text-sm">
+          <span className="mb-1 block font-medium text-gray-700">Preset (guiado)</span>
+          <select
+            className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm"
+            value={toolPresetKey}
+            disabled={saving}
+            onChange={(e) => setToolPresetKey(e.target.value)}
+          >
+            <option value="">Não especificar</option>
+            {ALL_SCRIPT_TOOL_ROWS.filter((r) => r.id !== 'outra').map((r) => (
+              <option key={r.id} value={r.id}>
+                {r.label}
+              </option>
+            ))}
+          </select>
+        </label>
+      </div>
       <ProLideresCatalogToolPicker
         catalog={catalog}
         value={yladaLinkId}
@@ -679,6 +965,22 @@ function SectionBlock({
         </button>
       </div>
     </div>
+  )
+
+  const metaBadges = (
+    <span className="mt-1 flex flex-wrap gap-1.5">
+      <span className="rounded-full bg-violet-50 px-2 py-0.5 text-[11px] font-semibold text-violet-900">
+        {focusLabel(section.focus_main ?? 'vendas')}
+      </span>
+      <span className="rounded-full bg-sky-50 px-2 py-0.5 text-[11px] font-semibold text-sky-900">
+        {intentionLabel(section.intention_key ?? 'geral')}
+      </span>
+      {toolPresetLabelFromKey(section.tool_preset_key) ? (
+        <span className="rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-950">
+          {toolPresetLabelFromKey(section.tool_preset_key)}
+        </span>
+      ) : null}
+    </span>
   )
 
   const toolbar = canEditUi ? (
@@ -768,6 +1070,7 @@ function SectionBlock({
             {section.subtitle?.trim() ? (
               <span className="mt-0.5 block text-sm text-gray-600">{section.subtitle}</span>
             ) : null}
+            {metaBadges}
             <span className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-gray-500">
               <span>{section.entries.length} texto(s)</span>
               {canEditUi && section.visible_to_team === false ? (

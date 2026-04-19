@@ -4,6 +4,8 @@
 import { notFound } from 'next/navigation'
 import { supabaseAdmin } from '@/lib/supabase'
 import { isYladaLinkHiddenFromPublicDueToFreemium } from '@/lib/ylada-freemium-public-link'
+import { fetchWhatsappE164ForUserId } from '@/lib/ylada-public-link-whatsapp'
+import { resolveProLideresMemberLinkAttribution } from '@/lib/pro-lideres-member-link-tokens-resolve'
 
 export type PublicLinkPayload = {
   slug: string
@@ -15,9 +17,22 @@ export type PublicLinkPayload = {
   link_owner_user_id?: string | null
   /** Dono sem Pro com >1 link ativo: este não é o link “principal” (mais antigo) — visitante não usa o quiz. */
   accessBlockedDueToPlan?: boolean
+  /**
+   * URL /l/[slug]/[membro]: token canónico para telemetria (pl_m).
+   * O segmento público pode ser `share_path_slug` legível; o cliente envia sempre o token.
+   */
+  proLideresAttributionToken?: string | null
 }
 
-export async function fetchPublicLinkPayload(slug: string): Promise<PublicLinkPayload> {
+export type PublicLinkFetchOptions = {
+  /** Segundo segmento em /l/[slug]/[valor] — token ou share_path_slug Pro Líderes. */
+  memberShareSegment?: string | null
+}
+
+export async function fetchPublicLinkPayload(
+  slug: string,
+  options?: PublicLinkFetchOptions
+): Promise<PublicLinkPayload> {
   if (!supabaseAdmin) {
     console.error('[public-link] Supabase admin não disponível')
     notFound()
@@ -52,9 +67,12 @@ export async function fetchPublicLinkPayload(slug: string): Promise<PublicLinkPa
         ctaWhatsapp: null,
         link_owner_user_id: link.user_id ?? null,
         accessBlockedDueToPlan: true,
+        proLideresAttributionToken: null,
       }
     }
   }
+
+  const memberSeg = options?.memberShareSegment?.trim()
 
   const config = (link.config_json as Record<string, unknown>) ?? {}
   const meta = config.meta as Record<string, unknown> | undefined
@@ -72,57 +90,35 @@ export async function fetchPublicLinkPayload(slug: string): Promise<PublicLinkPa
     type = t as 'diagnostico' | 'calculator'
   }
 
-  // Se o link não tem cta_whatsapp, buscar do perfil do usuário
   let ctaWhatsapp = link.cta_whatsapp ?? null
   if (!ctaWhatsapp && link.user_id) {
-    // Buscar WhatsApp do perfil
-    const { data: profile } = await supabaseAdmin
-      .from('user_profiles')
-      .select('whatsapp, country_code')
-      .eq('user_id', link.user_id)
-      .maybeSingle()
-    
-    const wp = (profile as { whatsapp?: string | null; country_code?: string | null } | null)?.whatsapp
-    const countryCode = (profile as { country_code?: string | null } | null)?.country_code || 'BR'
-    
-    if (typeof wp === 'string' && wp.trim().length >= 10) {
-      let num = wp.trim().replace(/\D/g, '')
-      // Adicionar código do país se não tiver (BR = 55)
-      if (countryCode === 'BR' && !num.startsWith('55')) {
-        num = '55' + num
-      }
-      ctaWhatsapp = num
-      console.log('[public-link-utils] WhatsApp encontrado no perfil:', { whatsapp: wp, formatado: ctaWhatsapp })
-    } else {
-      // Tentar buscar em ylada_noel_profile
-      const { data: noelProfile } = await supabaseAdmin
-        .from('ylada_noel_profile')
-        .select('area_specific')
-        .eq('user_id', link.user_id)
-        .maybeSingle()
-      
-      if (noelProfile?.area_specific) {
-        const areaSpecific = noelProfile.area_specific as Record<string, unknown>
-        const wpNoel = areaSpecific.whatsapp as string | undefined
-        if (typeof wpNoel === 'string' && wpNoel.trim().length >= 10) {
-          let num = wpNoel.trim().replace(/\D/g, '')
-          const countryCodeNoel = (areaSpecific.country_code as string) || 'BR'
-          if (countryCodeNoel === 'BR' && !num.startsWith('55')) {
-            num = '55' + num
-          }
-          ctaWhatsapp = num
-          console.log('[public-link-utils] WhatsApp encontrado no perfil Noel:', { whatsapp: wpNoel, formatado: ctaWhatsapp })
-        }
-      }
+    ctaWhatsapp = await fetchWhatsappE164ForUserId(supabaseAdmin, link.user_id as string)
+  }
+
+  let proLideresAttributionToken: string | null = null
+  if (memberSeg) {
+    const row = await resolveProLideresMemberLinkAttribution(supabaseAdmin, link.id as string, memberSeg)
+    if (!row) {
+      notFound()
+    }
+    proLideresAttributionToken = row.token
+    const memberWa = await fetchWhatsappE164ForUserId(supabaseAdmin, row.member_user_id)
+    if (memberWa) {
+      ctaWhatsapp = memberWa
     }
   }
 
   return {
     slug: link.slug,
     type,
-    title: (config.page as Record<string, unknown>)?.title as string ?? (config.title as string) ?? link.title ?? 'Link',
+    title:
+      (config.page as Record<string, unknown>)?.title as string ??
+      (config.title as string) ??
+      link.title ??
+      'Link',
     config,
     ctaWhatsapp,
     link_owner_user_id: link.user_id ?? null,
+    proLideresAttributionToken,
   }
 }

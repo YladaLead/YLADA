@@ -38,7 +38,9 @@ export async function GET(request: NextRequest) {
 
   const { data: sections, error: secErr } = await supabaseAdmin
     .from('leader_tenant_pl_script_sections')
-    .select('id, leader_tenant_id, title, subtitle, ylada_link_id, visible_to_team, sort_order, created_at, updated_at')
+    .select(
+      'id, leader_tenant_id, title, subtitle, ylada_link_id, visible_to_team, sort_order, focus_main, intention_key, tool_preset_key, source_template_id, created_at, updated_at'
+    )
     .eq('leader_tenant_id', ctx.tenant.id)
     .order('sort_order', { ascending: true })
     .order('created_at', { ascending: true })
@@ -48,7 +50,20 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Erro ao carregar scripts.' }, { status: 500 })
   }
 
-  let sectionRows = (sections ?? []) as LeaderTenantPlScriptSectionRow[]
+  let sectionRows = (sections ?? []).map((row) => {
+    const s = row as Record<string, unknown>
+    return {
+      ...s,
+      focus_main: (s.focus_main === 'recrutamento' ? 'recrutamento' : 'vendas') as 'vendas' | 'recrutamento',
+      intention_key: typeof s.intention_key === 'string' && s.intention_key.trim() ? s.intention_key : 'geral',
+      tool_preset_key:
+        s.tool_preset_key == null || String(s.tool_preset_key).trim() === '' ? null : String(s.tool_preset_key),
+      source_template_id:
+        s.source_template_id == null || String(s.source_template_id).trim() === ''
+          ? null
+          : String(s.source_template_id),
+    } as LeaderTenantPlScriptSectionRow
+  })
   if (viewAsTeam) {
     sectionRows = sectionRows.filter((s) => s.visible_to_team !== false)
   }

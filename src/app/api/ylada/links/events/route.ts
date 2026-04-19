@@ -8,6 +8,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
 import { isYladaLinkHiddenFromPublicDueToFreemium } from '@/lib/ylada-freemium-public-link'
+import { resolveProLideresMemberLinkAttribution } from '@/lib/pro-lideres-member-link-tokens-resolve'
 
 const ALLOWED_TYPES = [
   'view',
@@ -86,25 +87,15 @@ export async function POST(request: NextRequest) {
       ''
     if (plRaw) {
       try {
-        const { data: plTok, error: plTokErr } = await supabaseAdmin
-          .from('pro_lideres_member_link_tokens')
-          .select('member_user_id, leader_tenant_id, ylada_link_id')
-          .eq('token', plRaw)
-          .maybeSingle()
-        if (
-          !plTokErr &&
-          plTok &&
-          String(plTok.ylada_link_id) === String(link.id) &&
-          plTok.member_user_id &&
-          plTok.leader_tenant_id
-        ) {
-          utmJson.pl_m = plRaw
-          utmJson.pl_member_user_id = plTok.member_user_id as string
-          utmJson.pl_tenant_id = plTok.leader_tenant_id as string
+        const plTok = await resolveProLideresMemberLinkAttribution(supabaseAdmin, link.id as string, plRaw)
+        if (plTok && plTok.member_user_id && plTok.leader_tenant_id) {
+          utmJson.pl_m = plTok.token
+          utmJson.pl_member_user_id = plTok.member_user_id
+          utmJson.pl_tenant_id = plTok.leader_tenant_id
           const { data: ten } = await supabaseAdmin
             .from('leader_tenants')
             .select('vertical_code')
-            .eq('id', plTok.leader_tenant_id as string)
+            .eq('id', plTok.leader_tenant_id)
             .maybeSingle()
           if (ten?.vertical_code) utmJson.pl_vertical = ten.vertical_code as string
         }

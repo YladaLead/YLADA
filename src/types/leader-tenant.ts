@@ -66,8 +66,38 @@ export type LeaderTenantPlScriptSectionRow = {
   /** Se false, só o líder vê esta sequência no painel; a equipe não. */
   visible_to_team: boolean
   sort_order: number
+  /** vendas | recrutamento — filtro e biblioteca YLADA (opcional até migration 322). */
+  focus_main?: 'vendas' | 'recrutamento'
+  /** Alinhado ao guiado (ex.: novos_contatos) ou geral. */
+  intention_key?: string
+  /** Preset do fluxo guiado (ex.: espaco_saudavel), opcional. */
+  tool_preset_key?: string | null
+  /** Cópia da biblioteca YLADA, se aplicável. */
+  source_template_id?: string | null
   created_at: string
   updated_at: string
+}
+
+/** Template global da biblioteca YLADA (tabela pro_lideres_script_templates). */
+export type ProLideresScriptTemplateRow = {
+  id: string
+  focus_main: 'vendas' | 'recrutamento'
+  intention_key: string
+  tool_preset_key: string | null
+  title: string
+  subtitle: string | null
+  entries: ProLideresScriptTemplateEntry[]
+  sort_order: number
+  vertical_code: string | null
+  created_at: string
+  updated_at: string
+}
+
+export type ProLideresScriptTemplateEntry = {
+  title: string
+  subtitle: string | null
+  body: string
+  how_to_use: string | null
 }
 
 /** Peça de roteiro ordenada dentro de uma situação (tabela leader_tenant_pl_script_entries). */

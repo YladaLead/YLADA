@@ -4,6 +4,11 @@ import { supabaseAdmin } from '@/lib/supabase'
 import { resolveProLideresTenantContext } from '@/lib/pro-lideres-server'
 import { requireProLideresPaidContext } from '@/lib/pro-lideres-subscription-access'
 import {
+  clipToolPresetKey,
+  normalizeFocusMain,
+  normalizeIntentionKey,
+} from '@/lib/pro-lideres-script-section-meta'
+import {
   PL_SCRIPT_UUID_RE,
   clipSectionTitle,
   clipSubtitle,
@@ -39,7 +44,16 @@ export async function PATCH(
   const paidPatch = await requireProLideresPaidContext(supabaseAdmin, user)
   if (!paidPatch.ok) return paidPatch.response
 
-  let body: { title?: unknown; subtitle?: unknown; ylada_link_id?: unknown; sort_order?: unknown; visible_to_team?: unknown }
+  let body: {
+    title?: unknown
+    subtitle?: unknown
+    ylada_link_id?: unknown
+    sort_order?: unknown
+    visible_to_team?: unknown
+    focus_main?: unknown
+    intention_key?: unknown
+    tool_preset_key?: unknown
+  }
   try {
     body = await request.json()
   } catch {
@@ -68,6 +82,15 @@ export async function PATCH(
   }
   if (body.visible_to_team !== undefined) {
     payload.visible_to_team = Boolean(body.visible_to_team)
+  }
+  if (body.focus_main !== undefined) {
+    payload.focus_main = normalizeFocusMain(body.focus_main)
+  }
+  if (body.intention_key !== undefined) {
+    payload.intention_key = normalizeIntentionKey(body.intention_key)
+  }
+  if (body.tool_preset_key !== undefined) {
+    payload.tool_preset_key = clipToolPresetKey(body.tool_preset_key)
   }
 
   if (Object.keys(payload).length === 0) {

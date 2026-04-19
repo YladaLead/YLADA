@@ -2,8 +2,8 @@ import type { ProLideresScriptPillarId } from '@/lib/pro-lideres-scripts-noel'
 
 /** Passo inicial: separa linguagem e CTA (venda vs oportunidade). */
 export const PL_SCRIPT_GUIDED_FOCUS = [
-  { id: 'vendas', label: 'Vendas (produto, consumo, experiência)' },
-  { id: 'recrutamento', label: 'Recrutamento (oportunidade, negócio)' },
+  { id: 'vendas', label: 'Vendas' },
+  { id: 'recrutamento', label: 'Recrutamento' },
 ] as const
 
 export type PlScriptGuidedFocusId = (typeof PL_SCRIPT_GUIDED_FOCUS)[number]['id']
@@ -57,17 +57,71 @@ export const PL_SCRIPT_GUIDED_OBJECTIVES = [
 
 export type PlScriptGuidedObjectiveId = (typeof PL_SCRIPT_GUIDED_OBJECTIVES)[number]['id']
 
-export const PL_SCRIPT_GUIDED_TOOLS = [
-  { id: 'desafio_21', label: 'Desafio 21 dias' },
+/** Ordem: campo consumo / ferramentas comuns (vendas e recrutamento). */
+export const PL_SCRIPT_GUIDED_TOOLS_CORE = [
   { id: 'espaco_saudavel', label: 'Espaço saudável' },
-  { id: 'hype_drink', label: 'Hype Drink' },
-  { id: 'avaliacao', label: 'Avaliação' },
-  { id: 'evento', label: 'Evento ou reunião' },
-  { id: 'direto', label: 'Conversa direta (sem ferramenta)' },
-  { id: 'outra', label: 'Outra — descrevo abaixo' },
+  { id: 'desafio_dias', label: 'Desafio de dias' },
+  { id: 'bebida_funcional', label: 'Bebida funcional' },
+  { id: 'avaliacao_bemestar', label: 'Avaliação do bem-estar' },
+  { id: 'acompanhamento', label: 'Acompanhamento' },
+  { id: 'redes_sociais', label: 'Redes sociais' },
+  { id: 'conversa_um_a_um', label: 'Conversa direta um a um' },
+  { id: 'evento_reuniao', label: 'Evento ou reunião' },
+  { id: 'indicacoes', label: 'Indicações' },
 ] as const
 
-export type PlScriptGuidedToolPresetId = (typeof PL_SCRIPT_GUIDED_TOOLS)[number]['id']
+/** Só no fluxo com foco Recrutamento (antes de «Outra»). */
+export const PL_SCRIPT_GUIDED_TOOLS_RECRUIT_ONLY = [
+  { id: 'plano_negocio', label: 'Plano de negócio' },
+  {
+    id: 'reuniao_participacao',
+    label: 'Reunião em participação e apresentações',
+  },
+] as const
+
+export const PL_SCRIPT_GUIDED_TOOL_OUTRA = {
+  id: 'outra',
+  label: 'Outra — descrevo abaixo',
+} as const
+
+export type PlScriptGuidedToolCoreId = (typeof PL_SCRIPT_GUIDED_TOOLS_CORE)[number]['id']
+export type PlScriptGuidedToolRecruitOnlyId = (typeof PL_SCRIPT_GUIDED_TOOLS_RECRUIT_ONLY)[number]['id']
+export type PlScriptGuidedToolPresetId =
+  | PlScriptGuidedToolCoreId
+  | PlScriptGuidedToolRecruitOnlyId
+  | (typeof PL_SCRIPT_GUIDED_TOOL_OUTRA)['id']
+
+export const ALL_SCRIPT_TOOL_ROWS: readonly { id: string; label: string }[] = [
+  ...PL_SCRIPT_GUIDED_TOOLS_CORE,
+  ...PL_SCRIPT_GUIDED_TOOLS_RECRUIT_ONLY,
+  PL_SCRIPT_GUIDED_TOOL_OUTRA,
+]
+
+/** Chips do passo ferramenta: comuns + extras de recrutamento + «Outra». */
+export function toolsForFocus(focus: PlScriptGuidedFocusId): readonly { id: string; label: string }[] {
+  const rows: { id: string; label: string }[] = [...PL_SCRIPT_GUIDED_TOOLS_CORE]
+  if (focus === 'recrutamento') {
+    rows.push(...PL_SCRIPT_GUIDED_TOOLS_RECRUIT_ONLY)
+  }
+  rows.push(PL_SCRIPT_GUIDED_TOOL_OUTRA)
+  return rows
+}
+
+export function isToolValidForFocus(
+  toolId: PlScriptGuidedToolPresetId,
+  focus: PlScriptGuidedFocusId
+): boolean {
+  return toolsForFocus(focus).some((t) => t.id === toolId)
+}
+
+/** Se o preset não existir no foco atual (ex.: mudou de Recrutamento para Vendas), volta a um padrão seguro. */
+export function normalizeToolPresetForFocus(
+  toolId: PlScriptGuidedToolPresetId,
+  focus: PlScriptGuidedFocusId
+): PlScriptGuidedToolPresetId {
+  if (isToolValidForFocus(toolId, focus)) return toolId
+  return 'conversa_um_a_um'
+}
 
 export const PL_SCRIPT_GUIDED_AUDIENCES = [
   { id: 'fria', label: 'Pessoa nova (fria)' },
@@ -138,11 +192,18 @@ function labelAngle(b: PlScriptGuidedBriefing): string {
 }
 
 /** Texto enviado ao modelo como «propósito» estruturado. */
+function focusLineForModel(b: PlScriptGuidedBriefing): string {
+  if (b.focusMainId === 'vendas') {
+    return 'Vendas (consumo, produto, experiência com o cliente)'
+  }
+  return 'Recrutamento (oportunidade de negócio, convite ético ao modelo de trabalho)'
+}
+
 export function composeGuidedScriptPurpose(b: PlScriptGuidedBriefing): string {
-  const focus = labelById(PL_SCRIPT_GUIDED_FOCUS, b.focusMainId)
+  const focus = focusLineForModel(b)
   const angle = labelAngle(b)
   const obj = labelById(PL_SCRIPT_GUIDED_OBJECTIVES, b.objectiveId)
-  const toolPreset = labelById(PL_SCRIPT_GUIDED_TOOLS, b.toolPresetId)
+  const toolPreset = labelById(ALL_SCRIPT_TOOL_ROWS as readonly { id: string; label: string }[], b.toolPresetId)
   const toolParts: string[] = [toolPreset]
   if (b.catalogToolLabel?.trim()) {
     toolParts.push(`Ferramenta no catálogo YLADA: ${b.catalogToolLabel.trim()}`)
