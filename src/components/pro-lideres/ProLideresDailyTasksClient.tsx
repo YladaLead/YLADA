@@ -2,7 +2,6 @@
 
 import Link from 'next/link'
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { usePathname } from 'next/navigation'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/hooks/useAuth'
 import { useProLideresPainel } from '@/components/pro-lideres/pro-lideres-painel-context'
@@ -55,7 +54,6 @@ type TaskRowEdit = {
 
 export function ProLideresDailyTasksClient() {
   const router = useRouter()
-  const pathname = usePathname()
   const { isLeaderWorkspace: isLeader, dailyTasksVisibleToTeam } = useProLideresPainel()
   const { user } = useAuth()
   const myUserId = user?.id ?? ''
@@ -259,7 +257,13 @@ export function ProLideresDailyTasksClient() {
   }
 
   async function flushTaskRowEdits() {
-    if (!isLeader || !data?.tasks.length) return
+    if (!isLeader || !data) return
+    for (const row of taskRows) {
+      if (row.title.trim().length < 2) {
+        setError('Cada tarefa precisa de um título com pelo menos 2 caracteres.')
+        return
+      }
+    }
     setSavingEdits(true)
     setError(null)
     try {
@@ -268,10 +272,6 @@ export function ProLideresDailyTasksClient() {
         if (!orig) continue
         const pts = Math.min(100000, Math.max(0, Math.floor(Number(row.points) || 0)))
         const tit = row.title.trim()
-        if (tit.length < 2) {
-          setError('Cada tarefa precisa de um título com pelo menos 2 caracteres.')
-          return
-        }
         const desc = row.description.trim()
         const descNorm = desc || null
         const same =
@@ -356,92 +356,124 @@ export function ProLideresDailyTasksClient() {
   const applicableToday =
     data?.tasks.filter((t) => (t.execution_weekdays ?? []).includes(todayDow)) ?? []
 
+  const execucaoHref = '/pro-lideres/painel/tarefas/execucao'
+
+  const navPill =
+    'inline-flex items-center justify-center rounded-xl px-4 py-2.5 text-sm font-semibold transition-colors'
+  const navPillActive = 'bg-blue-700 text-white shadow-sm'
+  const navPillInactive =
+    'border border-blue-200 bg-white text-blue-900 hover:bg-blue-50'
+
+  function updateTaskRow(id: string, patch: Partial<TaskRowEdit>) {
+    setTaskRows((rows) => rows.map((r) => (r.id === id ? { ...r, ...patch } : r)))
+  }
+
   return (
     <div className="max-w-4xl space-y-6">
-      <div>
-        {isLeader ? (
-          <p className="text-sm font-medium text-blue-600">Principal</p>
-        ) : null}
-        <h1 className="text-2xl font-bold text-gray-900">Tarefas diárias</h1>
-        {isLeader ? (
-          <p className="mt-1 max-w-2xl text-sm text-gray-600">
-            Define as <strong className="text-gray-800">tarefas do dia</strong> (e em que dias da semana contam),
-            pontos por tarefa e o <strong className="text-gray-800">bónus</strong> quando alguém marca tudo. A equipe
-            usa uma checklist simples: marca, guarda uma vez por dia e pontua.
-          </p>
-        ) : (
-          <p className="mt-1 max-w-xl text-sm text-gray-500">
-            Marca o que fizeste hoje e guarda. Abaixo podes ver o relatório por dia, semana ou mês.
-          </p>
-        )}
-      </div>
-
-      {isLeader && (
-        <div className="space-y-4 rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-          <label className="flex cursor-pointer items-start gap-3">
-            <input
-              type="checkbox"
-              className="mt-1 h-4 w-4 shrink-0 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-              checked={teamVisible}
-              disabled={savingTeamVisible}
-              onChange={(e) => void updateTeamVisible(e.target.checked)}
-            />
-            <div>
-              <p className="text-sm font-semibold text-gray-900">Mostrar Tarefas diárias à equipe</p>
-              <p className="mt-1 text-xs text-gray-600">
-                Quando desligas, os membros deixam de ver esta área no menu e na visão geral do painel.
-              </p>
-            </div>
-          </label>
-          <div className="border-t border-gray-100 pt-4">
-            <p className="text-sm font-semibold text-gray-900">Bónus de dia completo</p>
-            <p className="mt-0.5 text-xs text-gray-600">
-              Pontos extra quando alguém marca todas as tarefas que aplicam àquele dia da semana (uma vez por dia).
+      {isLeader ? (
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Tarefas diárias</h1>
+            <p className="mt-1 max-w-xl text-sm text-gray-600">
+              Preenche as linhas como o teu time vai ver: pontos, tarefa e texto extra opcional (aparece em destaque
+              azul para eles). Para análises e quem executou, usa <strong className="font-semibold text-gray-800">Ver
+              execução do time</strong>.
             </p>
-            <div className="mt-3 flex flex-wrap items-end gap-2">
-              <label className="block">
-                <span className="mb-1 block text-xs font-medium text-gray-600">Pontos do bónus</span>
-                <input
-                  type="number"
-                  min={0}
-                  max={100000}
-                  value={bonusPts}
-                  onChange={(e) => setBonusPts(e.target.value)}
-                  className="w-28 rounded-lg border border-gray-300 px-3 py-2 text-sm"
-                />
-              </label>
-              <button
-                type="button"
-                disabled={savingBonus}
-                onClick={() => void saveFullDayBonus()}
-                className="rounded-lg bg-gray-900 px-4 py-2 text-sm font-semibold text-white hover:bg-gray-800 disabled:opacity-60"
-              >
-                {savingBonus ? 'A guardar…' : 'Guardar bónus'}
-              </button>
+          </div>
+          <div className="flex flex-col gap-2 sm:shrink-0 sm:items-end">
+            <div className="flex flex-wrap gap-2">
+              <span className={`${navPill} ${navPillActive} cursor-default`} aria-current="page">
+                Criar tarefas diárias
+              </span>
+              <Link href={execucaoHref} className={`${navPill} ${navPillInactive}`}>
+                Ver execução do time
+              </Link>
             </div>
           </div>
         </div>
+      ) : (
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Tarefas diárias</h1>
+          <p className="mt-1 max-w-xl text-sm text-gray-500">
+            Marca o que fizeste hoje e guarda. Abaixo vês o teu relatório de pontos.
+          </p>
+        </div>
+      )}
+
+      {isLeader && (
+        <details className="group rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+          <summary className="cursor-pointer list-none text-sm font-semibold text-gray-900 marker:hidden [&::-webkit-details-marker]:hidden">
+            <span className="group-open:hidden">Definições da equipe e bónus</span>
+            <span className="hidden group-open:inline">Definições da equipe e bónus (fechar)</span>
+          </summary>
+          <div className="mt-4 space-y-4 border-t border-gray-100 pt-4">
+            <label className="flex cursor-pointer items-start gap-3">
+              <input
+                type="checkbox"
+                className="mt-1 h-4 w-4 shrink-0 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                checked={teamVisible}
+                disabled={savingTeamVisible}
+                onChange={(e) => void updateTeamVisible(e.target.checked)}
+              />
+              <div>
+                <p className="text-sm font-semibold text-gray-900">Mostrar Tarefas diárias à equipe</p>
+                <p className="mt-1 text-xs text-gray-600">
+                  Quando desligas, os membros deixam de ver esta área no menu e na visão geral do painel.
+                </p>
+              </div>
+            </label>
+            <div className="border-t border-gray-100 pt-4">
+              <p className="text-sm font-semibold text-gray-900">Bónus de dia completo</p>
+              <p className="mt-0.5 text-xs text-gray-600">
+                Pontos extra quando alguém marca todas as tarefas do dia (uma vez por dia civil).
+              </p>
+              <div className="mt-3 flex flex-wrap items-end gap-2">
+                <label className="block">
+                  <span className="mb-1 block text-xs font-medium text-gray-600">Pontos do bónus</span>
+                  <input
+                    type="number"
+                    min={0}
+                    max={100000}
+                    value={bonusPts}
+                    onChange={(e) => setBonusPts(e.target.value)}
+                    className="w-28 rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                  />
+                </label>
+                <button
+                  type="button"
+                  disabled={savingBonus}
+                  onClick={() => void saveFullDayBonus()}
+                  className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-60"
+                >
+                  {savingBonus ? 'A guardar…' : 'Guardar bónus'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </details>
       )}
 
       {!isLeader && data && (
-        <div className="overflow-hidden rounded-2xl border border-emerald-200/70 bg-white shadow-sm">
-          <div className="border-b border-emerald-100/80 px-4 py-4">
-            <p className="text-lg font-semibold capitalize leading-snug text-gray-900">
-              {formatCivilDateLongPt(todayStr)}
+        <div className="overflow-hidden rounded-2xl border border-gray-200/90 bg-white shadow-md">
+          <div className="px-4 pb-2 pt-5 sm:px-5">
+            <p className="text-[15px] leading-snug text-gray-900">
+              Marque o que você fez (cada item vale os pontos ao lado).
             </p>
-            <p className="mt-2 text-xs text-gray-500">
-              Marca o que fizeste. Se completares tudo o que aplica a hoje:{' '}
-              <span className="font-medium text-emerald-800">+{data.fullDayBonusPoints ?? 0} pts</span> extra.
+            <p className="mt-2 text-[15px] leading-snug text-gray-900">
+              <span className="font-bold">Marcando tudo:</span>{' '}
+              <span className="font-bold text-blue-800">+{data.fullDayBonusPoints ?? 0} pts</span> bônus de dia
+              completo.
             </p>
+            <p className="mt-3 text-xs text-gray-500">Hoje · {todayStr}</p>
           </div>
-          <ul className="divide-y divide-gray-100">
+          <ul className="divide-y divide-gray-100 border-t border-gray-100">
             {applicableToday.length === 0 ? (
-              <li className="px-4 py-8 text-center text-sm text-gray-500">Sem tarefas para hoje.</li>
+              <li className="px-4 py-10 text-center text-sm text-gray-500 sm:px-5">Sem tarefas para hoje.</li>
             ) : (
               applicableToday.map((t) => {
                 const checked = todayDraft.has(t.id)
                 return (
-                  <li key={t.id} className="flex gap-3 px-4 py-3.5">
+                  <li key={t.id} className="flex gap-3 px-4 py-4 sm:px-5">
                     <input
                       type="checkbox"
                       checked={checked}
@@ -453,29 +485,28 @@ export function ProLideresDailyTasksClient() {
                           return n
                         })
                       }}
-                      className="mt-1 h-4 w-4 shrink-0 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
+                      className="mt-0.5 h-[18px] w-[18px] shrink-0 rounded border-gray-400 text-blue-600 focus:ring-blue-500"
                     />
-                    <div className="min-w-0 flex-1">
-                      <p className="text-[15px] font-medium leading-snug text-gray-900">
-                        <span className="text-emerald-700">{t.points} pts</span>
-                        <span className="mx-2 text-gray-200">·</span>
-                        {t.title}
-                      </p>
-                      {t.description ? (
-                        <p className="mt-1.5 text-sm leading-relaxed text-emerald-800/90">{t.description}</p>
-                      ) : null}
+                    <div className="flex min-w-0 flex-1 gap-3">
+                      <span className="shrink-0 text-[15px] font-bold text-blue-700">{t.points} pts</span>
+                      <div className="min-w-0">
+                        <p className="text-[15px] leading-snug text-gray-900">{t.title}</p>
+                        {t.description ? (
+                          <p className="mt-1.5 text-sm leading-relaxed text-blue-700">{t.description}</p>
+                        ) : null}
+                      </div>
                     </div>
                   </li>
                 )
               })
             )}
           </ul>
-          <div className="border-t border-gray-100 p-4">
+          <div className="border-t border-gray-100 p-4 sm:p-5">
             <button
               type="button"
               disabled={savingToday || applicableToday.length === 0}
               onClick={() => void saveTodayExecution()}
-              className="w-full rounded-xl bg-emerald-700 px-4 py-3.5 text-sm font-semibold text-white shadow-sm hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-60"
+              className="w-full rounded-xl bg-blue-700 px-4 py-3.5 text-sm font-bold text-white shadow-sm hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {savingToday ? 'A guardar…' : 'Salvar execução de hoje'}
             </button>
@@ -483,44 +514,42 @@ export function ProLideresDailyTasksClient() {
         </div>
       )}
 
-      <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-        <p className="mb-2 text-sm font-semibold text-gray-900">
-          {isLeader ? 'Período do relatório' : 'Relatório'}
-        </p>
-        <p className="mb-2 text-xs text-gray-500">
-          {isLeader
-            ? 'Ajusta o intervalo para ver pontos e conclusões registadas nesses dias (as tarefas em si não têm data).'
-            : 'Vê os teus pontos no dia, na semana ou no mês — usa os atalhos ou escolhe as datas.'}
-        </p>
-        {presets}
-        <div className="mt-3 flex flex-wrap items-end gap-3">
-          <label className="block">
-            <span className="mb-1 block text-xs font-medium text-gray-600">De</span>
-            <input
-              type="date"
-              value={from}
-              onChange={(e) => setFrom(e.target.value)}
-              className="rounded-lg border border-gray-300 px-3 py-2 text-sm"
-            />
-          </label>
-          <label className="block">
-            <span className="mb-1 block text-xs font-medium text-gray-600">Até</span>
-            <input
-              type="date"
-              value={to}
-              onChange={(e) => setTo(e.target.value)}
-              className="rounded-lg border border-gray-300 px-3 py-2 text-sm"
-            />
-          </label>
-          <button
-            type="button"
-            onClick={() => void load()}
-            className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
-          >
-            Atualizar
-          </button>
+      {!isLeader && (
+        <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+          <p className="mb-2 text-sm font-semibold text-gray-900">Relatório</p>
+          <p className="mb-2 text-xs text-gray-500">
+            Vê os teus pontos no dia, na semana ou no mês — usa os atalhos ou escolhe as datas.
+          </p>
+          {presets}
+          <div className="mt-3 flex flex-wrap items-end gap-3">
+            <label className="block">
+              <span className="mb-1 block text-xs font-medium text-gray-600">De</span>
+              <input
+                type="date"
+                value={from}
+                onChange={(e) => setFrom(e.target.value)}
+                className="rounded-lg border border-gray-300 px-3 py-2 text-sm"
+              />
+            </label>
+            <label className="block">
+              <span className="mb-1 block text-xs font-medium text-gray-600">Até</span>
+              <input
+                type="date"
+                value={to}
+                onChange={(e) => setTo(e.target.value)}
+                className="rounded-lg border border-gray-300 px-3 py-2 text-sm"
+              />
+            </label>
+            <button
+              type="button"
+              onClick={() => void load()}
+              className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
+            >
+              Atualizar
+            </button>
+          </div>
         </div>
-      </div>
+      )}
 
       {!isLeader && data && (
         <div className="rounded-xl border border-gray-200 bg-gray-50/80 px-4 py-4 text-center">
@@ -539,171 +568,133 @@ export function ProLideresDailyTasksClient() {
       ) : (
         <>
           {isLeader && (
-            <form onSubmit={(e) => void createTask(e)} className="space-y-3 rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-              <div>
-                <p className="text-sm font-semibold text-gray-900">Nova tarefa de construção</p>
-                <p className="mt-0.5 text-xs text-gray-500">
-                  Escolhe em que dias da semana esta ação deve ser executada (ex.: segunda a sexta, ou só sábado e
-                  domingo).
+            <div className="overflow-hidden rounded-2xl border border-gray-200/90 bg-white shadow-md">
+              <div className="border-b border-gray-100 px-4 py-4 sm:px-5">
+                <p className="text-sm font-semibold text-gray-900">Criar tarefas diárias</p>
+                <p className="mt-1 text-xs text-gray-500">
+                  Cada linha é uma tarefa no cartão do membro. Edita à vontade e guarda as alterações; usa + para
+                  acrescentar e ✕ para apagar.
                 </p>
               </div>
-              <div className="grid gap-3 sm:grid-cols-2">
-                <label className="block sm:col-span-2">
-                  <span className="mb-1 block text-xs font-medium text-gray-600">Título</span>
-                  <input
-                    required
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
-                    placeholder="Ex.: Contactar 3 pessoas sobre o plano"
-                  />
-                </label>
-                <label className="block sm:col-span-2">
-                  <span className="mb-1 block text-xs font-medium text-gray-600">Detalhe (opcional)</span>
-                  <textarea
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    className="min-h-[72px] w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
-                  />
-                </label>
-                <label className="block">
-                  <span className="mb-1 block text-xs font-medium text-gray-600">Pontos por conclusão</span>
-                  <input
-                    type="number"
-                    min={0}
-                    max={100000}
-                    value={points}
-                    onChange={(e) => setPoints(e.target.value)}
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
-                  />
-                </label>
-                <div className="sm:col-span-2">
-                  <span className="mb-2 block text-xs font-medium text-gray-600">Dias em que se executa</span>
-                  <div className="flex flex-wrap gap-2">
-                    {PL_WEEKDAY_ORDER.map((d) => (
-                      <label
-                        key={d}
-                        className={`inline-flex cursor-pointer items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium ${
-                          executionWeekdays.has(d)
-                            ? 'border-blue-400 bg-blue-50 text-blue-900'
-                            : 'border-gray-200 bg-white text-gray-600'
-                        }`}
-                      >
-                        <input
-                          type="checkbox"
-                          className="sr-only"
-                          checked={executionWeekdays.has(d)}
-                          onChange={() => toggleExecutionDay(d)}
-                        />
-                        {PL_WEEKDAY_LABEL[d]}
-                      </label>
-                    ))}
-                  </div>
-                </div>
-              </div>
-              <button
-                type="submit"
-                disabled={saving}
-                className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-60"
-              >
-                {saving ? 'A guardar…' : 'Adicionar tarefa'}
-              </button>
-            </form>
-          )}
 
-          {isLeader && (
-            <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
-              <div className="border-b border-gray-100 px-4 py-3">
-                <p className="text-sm font-semibold text-gray-900">Tarefas de construção</p>
-                <p className="text-xs text-gray-500">Definição atual (não depende do período do relatório)</p>
-              </div>
               <ul className="divide-y divide-gray-100">
-                {(data?.tasks ?? []).length === 0 ? (
-                  <li className="px-4 py-6 text-sm text-gray-600">Nenhuma tarefa definida ainda.</li>
+                {taskRows.length === 0 ? (
+                  <li className="px-4 py-8 text-center text-sm text-gray-500 sm:px-5">
+                    Ainda não há tarefas. Adiciona a primeira linha em baixo.
+                  </li>
                 ) : (
-                  (data?.tasks ?? []).map((t) => {
-                    const days = t.execution_weekdays ?? []
-                    return (
-                      <li
-                        key={t.id}
-                        className="flex flex-col gap-2 px-4 py-3 sm:flex-row sm:items-start sm:justify-between"
-                      >
-                        <div className="min-w-0">
-                          <p className="font-medium text-gray-900">
-                            {t.title} <span className="text-emerald-700">(+{t.points} pts)</span>
-                          </p>
-                          <p className="mt-0.5 text-xs text-gray-500">
-                            Executar: {formatExecutionWeekdays(days)}
-                          </p>
-                          {t.description ? <p className="mt-1 text-sm text-gray-600">{t.description}</p> : null}
-                        </div>
+                  taskRows.map((row) => (
+                    <li key={row.id} className="flex flex-col gap-3 px-4 py-4 sm:flex-row sm:items-start sm:px-5">
+                      <label className="block w-20 shrink-0">
+                        <span className="mb-1 block text-[11px] font-medium uppercase tracking-wide text-gray-500">
+                          Pontos
+                        </span>
+                        <input
+                          type="number"
+                          min={0}
+                          max={100000}
+                          value={row.points}
+                          onChange={(e) => updateTaskRow(row.id, { points: e.target.value })}
+                          className="w-full rounded-lg border border-gray-300 px-2 py-2 text-sm font-semibold text-blue-800"
+                        />
+                      </label>
+                      <div className="min-w-0 flex-1 space-y-2">
+                        <label className="block">
+                          <span className="mb-1 block text-[11px] font-medium uppercase tracking-wide text-gray-500">
+                            Tarefa
+                          </span>
+                          <input
+                            value={row.title}
+                            onChange={(e) => updateTaskRow(row.id, { title: e.target.value })}
+                            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900"
+                          />
+                        </label>
+                        <label className="block">
+                          <span className="mb-1 block text-[11px] font-medium uppercase tracking-wide text-blue-800/80">
+                            Texto extra (opcional, destaque para o membro)
+                          </span>
+                          <input
+                            value={row.description}
+                            onChange={(e) => updateTaskRow(row.id, { description: e.target.value })}
+                            className="w-full rounded-lg border border-blue-200 bg-blue-50/60 px-3 py-2 text-sm text-blue-950 placeholder:text-blue-800/40"
+                            placeholder="Ex.: frase ou roteiro de apoio"
+                          />
+                        </label>
+                      </div>
+                      <div className="flex shrink-0 justify-end sm:pt-6">
                         <button
                           type="button"
-                          onClick={() => void deleteTask(t.id)}
-                          className="shrink-0 text-sm font-medium text-red-600 hover:underline"
+                          title="Remover tarefa"
+                          onClick={() => void deleteTask(row.id)}
+                          className="flex h-10 w-10 items-center justify-center rounded-lg border border-red-200 text-lg font-medium text-red-600 hover:bg-red-50"
                         >
-                          Remover
+                          ✕
                         </button>
-                      </li>
-                    )
-                  })
+                      </div>
+                    </li>
+                  ))
                 )}
               </ul>
-            </div>
-          )}
 
-          {isLeader && data && data.members.length > 0 && (
-            <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
-              <div className="border-b border-gray-100 px-4 py-3">
-                <p className="text-sm font-semibold text-gray-900">Pontos por pessoa (no período do relatório)</p>
-              </div>
-              <ul className="divide-y divide-gray-100">
-                {data.members.map((m) => (
-                  <li key={m.userId} className="flex items-center justify-between px-4 py-2 text-sm">
-                    <span className="text-gray-900">{m.displayName || m.email || m.userId}</span>
-                    <span className="font-semibold text-emerald-700">{data.pointsByUserId[m.userId] ?? 0} pts</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
+              <div className="space-y-3 border-t border-gray-100 bg-gray-50/50 px-4 py-4 sm:px-5">
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    disabled={savingEdits || taskRows.length === 0}
+                    onClick={() => void flushTaskRowEdits()}
+                    className="rounded-xl bg-blue-700 px-4 py-2.5 text-sm font-bold text-white hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    {savingEdits ? 'A guardar…' : 'Guardar alterações nas tarefas'}
+                  </button>
+                </div>
 
-          {isLeader && data && (data?.tasks ?? []).length > 0 && (
-            <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
-              <div className="border-b border-gray-100 px-4 py-3">
-                <p className="text-sm font-semibold text-gray-900">Conclusões no período</p>
-                <p className="text-xs text-gray-500">
-                  {data.from} → {data.to}
-                </p>
-              </div>
-              <div className="overflow-x-auto">
-                <table className="min-w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-gray-100 text-left text-gray-500">
-                      <th className="px-4 py-2">Dia</th>
-                      <th className="px-4 py-2">Tarefa</th>
-                      <th className="px-4 py-2">Membro</th>
-                      <th className="px-4 py-2">Pts</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {(data.completions ?? []).map((c) => {
-                      const task = data.tasks.find((tk) => tk.id === c.task_id)
-                      if (!task) return null
-                      return (
-                        <tr key={c.id} className="border-b border-gray-50">
-                          <td className="px-4 py-2 text-gray-700">{c.completed_on}</td>
-                          <td className="px-4 py-2 text-gray-900">{task.title}</td>
-                          <td className="px-4 py-2">{memberName(c.member_user_id)}</td>
-                          <td className="px-4 py-2 font-medium text-emerald-700">{task.points}</td>
-                        </tr>
-                      )
-                    })}
-                  </tbody>
-                </table>
-                {(data.completions ?? []).length === 0 && (
-                  <p className="px-4 py-4 text-sm text-gray-600">Nenhuma conclusão neste período.</p>
-                )}
+                <form
+                  onSubmit={(e) => void createTask(e)}
+                  className="rounded-xl border border-dashed border-blue-300/80 bg-white p-4"
+                >
+                  <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-blue-900">Nova linha</p>
+                  <div className="grid gap-3 sm:grid-cols-[5.5rem_1fr]">
+                    <label className="block">
+                      <span className="mb-1 block text-[11px] font-medium text-gray-500">Pontos</span>
+                      <input
+                        type="number"
+                        min={0}
+                        max={100000}
+                        value={points}
+                        onChange={(e) => setPoints(e.target.value)}
+                        className="w-full rounded-lg border border-gray-300 px-2 py-2 text-sm font-semibold text-blue-800"
+                      />
+                    </label>
+                    <label className="block sm:col-span-1">
+                      <span className="mb-1 block text-[11px] font-medium text-gray-500">Tarefa</span>
+                      <input
+                        required
+                        value={title}
+                        onChange={(e) => setTitle(e.target.value)}
+                        className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                        placeholder="O que o membro deve fazer"
+                      />
+                    </label>
+                    <label className="block sm:col-span-2">
+                      <span className="mb-1 block text-[11px] font-medium text-blue-800/80">
+                        Texto extra (opcional)
+                      </span>
+                      <input
+                        value={description}
+                        onChange={(e) => setDescription(e.target.value)}
+                        className="w-full rounded-lg border border-blue-200 bg-blue-50/50 px-3 py-2 text-sm text-blue-950"
+                        placeholder="Aparece em azul no cartão do membro"
+                      />
+                    </label>
+                  </div>
+                  <button
+                    type="submit"
+                    disabled={saving}
+                    className="mt-4 w-full rounded-xl border-2 border-blue-700 bg-white py-2.5 text-sm font-bold text-blue-900 hover:bg-blue-50 disabled:opacity-60 sm:w-auto sm:px-8"
+                  >
+                    {saving ? 'A adicionar…' : '+ Adicionar tarefa'}
+                  </button>
+                </form>
               </div>
             </div>
           )}

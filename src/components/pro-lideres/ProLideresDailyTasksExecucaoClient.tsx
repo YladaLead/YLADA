@@ -9,6 +9,12 @@ import {
 } from '@/types/pro-lideres-daily-tasks'
 import type { ProLideresMemberListItem } from '@/lib/pro-lideres-members-enriched'
 
+const TAREFAS_HREF = '/pro-lideres/painel/tarefas'
+const navPill =
+  'inline-flex items-center justify-center rounded-xl px-4 py-2.5 text-sm font-semibold transition-colors'
+const navPillActive = 'bg-blue-700 text-white shadow-sm'
+const navPillInactive = 'border border-blue-200 bg-white text-blue-900 hover:bg-blue-50'
+
 type ApiGet = {
   tasks: ProLideresDailyTaskRow[]
   completions: ProLideresDailyTaskCompletionRow[]
@@ -132,18 +138,20 @@ export function ProLideresDailyTasksExecucaoClient() {
     <div className="max-w-4xl space-y-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <p className="text-sm font-medium text-emerald-800">Análise</p>
+          <p className="text-sm font-medium text-blue-700">Análise</p>
           <h1 className="text-2xl font-bold text-gray-900">Execução do time</h1>
           <p className="mt-1 max-w-2xl text-sm text-gray-600">
             Vê quem está a marcar tarefas, os pontos no período e o detalhe das conclusões.
           </p>
         </div>
-        <Link
-          href="/pro-lideres/painel/tarefas"
-          className="inline-flex shrink-0 items-center justify-center rounded-xl border border-emerald-200 bg-white px-4 py-2.5 text-sm font-semibold text-emerald-900 shadow-sm hover:bg-emerald-50"
-        >
-          Criar tarefas diárias
-        </Link>
+        <div className="flex shrink-0 flex-wrap gap-2">
+          <Link href={TAREFAS_HREF} className={`${navPill} ${navPillInactive}`}>
+            Criar tarefas diárias
+          </Link>
+          <span className={`${navPill} ${navPillActive} cursor-default`} aria-current="page">
+            Ver execução do time
+          </span>
+        </div>
       </div>
 
       <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
@@ -172,7 +180,7 @@ export function ProLideresDailyTasksExecucaoClient() {
           <button
             type="button"
             onClick={() => void load()}
-            className="rounded-lg bg-emerald-800 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-900"
+            className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
           >
             Atualizar
           </button>
@@ -198,7 +206,7 @@ export function ProLideresDailyTasksExecucaoClient() {
                   {data.members.map((m) => (
                     <li key={m.userId} className="flex items-center justify-between px-4 py-2 text-sm">
                       <span className="text-gray-900">{m.displayName || m.email || m.userId}</span>
-                      <span className="font-semibold text-emerald-700">{data.pointsByUserId[m.userId] ?? 0} pts</span>
+                      <span className="font-semibold text-blue-700">{data.pointsByUserId[m.userId] ?? 0} pts</span>
                     </li>
                   ))}
                 </ul>
@@ -232,7 +240,7 @@ export function ProLideresDailyTasksExecucaoClient() {
                             <td className="px-4 py-2 text-gray-700">{c.completed_on}</td>
                             <td className="px-4 py-2 text-gray-900">{task.title}</td>
                             <td className="px-4 py-2">{memberName(c.member_user_id)}</td>
-                            <td className="px-4 py-2 font-medium text-emerald-700">{task.points}</td>
+                            <td className="px-4 py-2 font-medium text-blue-700">{task.points}</td>
                           </tr>
                         )
                       })}
@@ -250,8 +258,8 @@ export function ProLideresDailyTasksExecucaoClient() {
                 Ainda não há tarefas definidas.{' '}
                 <button
                   type="button"
-                  className="font-medium text-emerald-800 underline hover:text-emerald-900"
-                  onClick={() => router.push('/pro-lideres/painel/tarefas')}
+                  className="font-medium text-blue-700 underline hover:text-blue-800"
+                  onClick={() => router.push(TAREFAS_HREF)}
                 >
                   Criar tarefas diárias
                 </button>

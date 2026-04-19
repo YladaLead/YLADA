@@ -22,14 +22,6 @@ export const PRO_LIDERES_MENU_GROUPS: { label: string; items: ProLideresMenuItem
       { key: 'visao', label: 'Visão geral', path: '', icon: '📊' },
       { key: 'noel', label: 'Noel', path: 'noel', icon: '💬', leaderOnly: true },
       {
-        key: 'noel-laboratorio',
-        label: 'Laboratório Noel',
-        path: 'noel-laboratorio',
-        icon: '🧪',
-        subtitle: 'Agente + testes',
-        leaderOnly: true,
-      },
-      {
         key: 'catalogo',
         label: 'Catálogo de ferramentas',
         path: 'catalogo',
