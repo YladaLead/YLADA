@@ -1,5 +1,51 @@
 import type { ProLideresScriptPillarId } from '@/lib/pro-lideres-scripts-noel'
 
+/** Passo inicial: separa linguagem e CTA (venda vs oportunidade). */
+export const PL_SCRIPT_GUIDED_FOCUS = [
+  { id: 'vendas', label: 'Vendas (produto, consumo, experiência)' },
+  { id: 'recrutamento', label: 'Recrutamento (oportunidade, negócio)' },
+] as const
+
+export type PlScriptGuidedFocusId = (typeof PL_SCRIPT_GUIDED_FOCUS)[number]['id']
+
+/** Subtom após o foco — opções diferentes por foco (um passo curto). */
+export const PL_SCRIPT_GUIDED_ANGLE_SALES = [
+  {
+    id: 'sales_rotina',
+    label: 'Rotina e bem-estar (leve, sem claims médicos)',
+  },
+  { id: 'sales_curiosidade', label: 'Curiosidade e benefício prático leve' },
+  { id: 'sales_equilibrado', label: 'Equilibrado (Noel equilibra o tom)' },
+] as const
+
+export const PL_SCRIPT_GUIDED_ANGLE_RECRUIT = [
+  {
+    id: 'rec_projeto',
+    label: 'Projeto paralelo / tempo (sem prometer renda)',
+  },
+  { id: 'rec_crescimento', label: 'Crescimento, aprendizado e time' },
+  { id: 'rec_equilibrado', label: 'Equilibrado (Noel equilibra o tom)' },
+] as const
+
+export type PlScriptGuidedAngleSalesId = (typeof PL_SCRIPT_GUIDED_ANGLE_SALES)[number]['id']
+export type PlScriptGuidedAngleRecruitId = (typeof PL_SCRIPT_GUIDED_ANGLE_RECRUIT)[number]['id']
+export type PlScriptGuidedAngleId = PlScriptGuidedAngleSalesId | PlScriptGuidedAngleRecruitId
+
+const SALES_ANGLE_SET = new Set<string>(PL_SCRIPT_GUIDED_ANGLE_SALES.map((a) => a.id))
+const RECRUIT_ANGLE_SET = new Set<string>(PL_SCRIPT_GUIDED_ANGLE_RECRUIT.map((a) => a.id))
+
+export function anglesForFocus(focus: PlScriptGuidedFocusId) {
+  return focus === 'vendas' ? PL_SCRIPT_GUIDED_ANGLE_SALES : PL_SCRIPT_GUIDED_ANGLE_RECRUIT
+}
+
+export function defaultAngleForFocus(focus: PlScriptGuidedFocusId): PlScriptGuidedAngleId {
+  return focus === 'vendas' ? 'sales_equilibrado' : 'rec_equilibrado'
+}
+
+export function isAngleValidForFocus(angleId: string, focus: PlScriptGuidedFocusId): boolean {
+  return focus === 'vendas' ? SALES_ANGLE_SET.has(angleId) : RECRUIT_ANGLE_SET.has(angleId)
+}
+
 /** Opções curtas — fluxo conversacional, não formulário longo. */
 export const PL_SCRIPT_GUIDED_OBJECTIVES = [
   { id: 'novos_contatos', label: 'Gerar novos contatos' },
@@ -66,6 +112,8 @@ export const PL_SCRIPT_GUIDED_CHANNELS = [
 export type PlScriptGuidedChannelId = (typeof PL_SCRIPT_GUIDED_CHANNELS)[number]['id']
 
 export type PlScriptGuidedBriefing = {
+  focusMainId: PlScriptGuidedFocusId
+  angleId: PlScriptGuidedAngleId
   objectiveId: PlScriptGuidedObjectiveId
   toolPresetId: PlScriptGuidedToolPresetId
   /** Texto quando toolPresetId === outra ou complemento da ferramenta. */
@@ -84,8 +132,15 @@ function labelById<T extends readonly { id: string; label: string }[]>(list: T, 
   return list.find((x) => x.id === id)?.label ?? id
 }
 
+function labelAngle(b: PlScriptGuidedBriefing): string {
+  const list = anglesForFocus(b.focusMainId)
+  return labelById(list as readonly { id: string; label: string }[], b.angleId)
+}
+
 /** Texto enviado ao modelo como «propósito» estruturado. */
 export function composeGuidedScriptPurpose(b: PlScriptGuidedBriefing): string {
+  const focus = labelById(PL_SCRIPT_GUIDED_FOCUS, b.focusMainId)
+  const angle = labelAngle(b)
   const obj = labelById(PL_SCRIPT_GUIDED_OBJECTIVES, b.objectiveId)
   const toolPreset = labelById(PL_SCRIPT_GUIDED_TOOLS, b.toolPresetId)
   const toolParts: string[] = [toolPreset]
@@ -100,12 +155,20 @@ export function composeGuidedScriptPurpose(b: PlScriptGuidedBriefing): string {
   const channel = labelById(PL_SCRIPT_GUIDED_CHANNELS, b.channelId)
   const notes = b.leaderNotes.trim()
 
+  const focusRules =
+    b.focusMainId === 'recrutamento'
+      ? 'Tom recrutamento ético: sem promessa de renda, sem garantia de ganho, sem "ganhar fácil"; convite para conversa e curiosidade profissional.'
+      : 'Tom consumo/experiência: sem claims de cura ou resultado garantido; consultivo.'
+
   const lines = [
+    `FOCO PRINCIPAL: ${focus}`,
+    `ÂNGULO DE ABORDAGEM: ${angle}`,
+    `REGRAS DE FOCO: ${focusRules}`,
     `OBJETIVO DO SCRIPT: ${obj}`,
     `FERRAMENTA OU SITUAÇÃO: ${toolParts.join(' · ')}`,
     `PÚBLICO: ${audience}`,
     `TOM DESEJADO: ${tone}`,
-    situation !== 'Nada em especial' ? `CONTEXTO ESPECÍFICO: ${situation}` : null,
+    b.situationId !== 'nenhum' ? `CONTEXTO ESPECÍFICO: ${situation}` : null,
     `CANAL / FORMATO: ${channel}`,
     notes ? `NOTAS DO LÍDER: ${notes}` : null,
     '',
@@ -128,4 +191,13 @@ export function suggestPillarFromObjective(objectiveId: PlScriptGuidedObjectiveI
     case 'indicacao':
       return 'ferramenta_depois'
   }
+}
+
+/** Considera foco vendas vs recrutamento para sugerir o pilar Noel. */
+export function suggestPillarFromBriefing(b: PlScriptGuidedBriefing): ProLideresScriptPillarId {
+  if (b.focusMainId === 'recrutamento') {
+    if (b.objectiveId === 'engajar') return 'ferramenta_depois'
+    return 'recrutamento'
+  }
+  return suggestPillarFromObjective(b.objectiveId)
 }

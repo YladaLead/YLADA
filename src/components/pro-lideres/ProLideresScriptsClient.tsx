@@ -206,15 +206,13 @@ export function ProLideresScriptsClient() {
         <p className="mt-2 max-w-2xl text-pretty text-gray-600">
           {teamExperience ? (
             <>
-              Sequências prontas para <strong className="text-gray-800">copiar e colar</strong> no contato com clientes
-              (WhatsApp, redes, etc.). Cada card é um passo na ordem — use o botão <strong className="text-gray-800">Copiar</strong>{' '}
-              e adapte o nome se precisar.
+              <strong className="text-gray-800">Grupos de textos</strong> para usar com clientes. A equipe{' '}
+              <strong className="text-gray-800">só vê e copia</strong>.
             </>
           ) : (
             <>
               Você monta <strong className="text-gray-800">grupos de textos</strong> para a equipe usar com clientes.
-              Cada grupo tem várias mensagens em ordem. A equipe só vê e copia — não edita. Use o Noel no card abaixo
-              para montar com um briefing rápido.
+              A equipe <strong className="text-gray-800">só vê e copia</strong>.
             </>
           )}
         </p>

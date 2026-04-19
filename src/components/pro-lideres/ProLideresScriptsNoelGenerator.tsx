@@ -7,13 +7,16 @@ import type { ProLideresCatalogItem } from '@/lib/pro-lideres-catalog-build'
 import {
   PL_SCRIPT_GUIDED_AUDIENCES,
   PL_SCRIPT_GUIDED_CHANNELS,
+  PL_SCRIPT_GUIDED_FOCUS,
   PL_SCRIPT_GUIDED_OBJECTIVES,
   PL_SCRIPT_GUIDED_SITUATIONS,
   PL_SCRIPT_GUIDED_TOOLS,
   PL_SCRIPT_GUIDED_TONES,
+  anglesForFocus,
+  defaultAngleForFocus,
   type PlScriptGuidedBriefing,
   composeGuidedScriptPurpose,
-  suggestPillarFromObjective,
+  suggestPillarFromBriefing,
 } from '@/lib/pro-lideres-script-guided-briefing'
 import {
   PRO_LIDERES_SCRIPT_PILLARS,
@@ -30,9 +33,11 @@ type GenerateResponse = {
 
 type ChatLine = { id: string; role: 'user' | 'assistant'; text: string }
 
-const GUIDED_STEPS = 6
+const GUIDED_STEPS = 8
 
 const defaultGuided = (): PlScriptGuidedBriefing => ({
+  focusMainId: 'vendas',
+  angleId: 'sales_equilibrado',
   objectiveId: 'novos_contatos',
   toolPresetId: 'direto',
   toolFreeform: '',
@@ -116,9 +121,9 @@ export function ProLideresScriptsNoelGenerator({
 
   useEffect(() => {
     if (!pillarLocked) {
-      setPillar(suggestPillarFromObjective(guided.objectiveId))
+      setPillar(suggestPillarFromBriefing(guided))
     }
-  }, [guided.objectiveId, pillarLocked])
+  }, [guided, pillarLocked])
 
   useEffect(() => {
     refineEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' })
@@ -338,16 +343,20 @@ export function ProLideresScriptsNoelGenerator({
   const stepTitle = useMemo(() => {
     switch (guidedStep) {
       case 1:
-        return 'O que esse script precisa gerar?'
+        return 'Esse script é para qual foco principal?'
       case 2:
-        return 'Está ligado a alguma ferramenta ou situação?'
+        return 'Qual ângulo puxar primeiro?'
       case 3:
-        return 'Para quem é a mensagem?'
+        return 'O que esse script precisa gerar?'
       case 4:
-        return 'Como você quer soar?'
+        return 'Está ligado a alguma ferramenta ou situação?'
       case 5:
-        return 'Algum detalhe do momento?'
+        return 'Para quem é a mensagem?'
       case 6:
+        return 'Como você quer soar?'
+      case 7:
+        return 'Algum detalhe do momento?'
+      case 8:
         return 'Canal e tipo de texto'
       default:
         return ''
@@ -356,18 +365,10 @@ export function ProLideresScriptsNoelGenerator({
 
   return (
     <div className="space-y-5">
-      <div className="rounded-2xl border border-indigo-100 bg-gradient-to-br from-indigo-50/90 via-white to-violet-50/40 p-4 sm:p-5">
-        <p className="text-sm font-semibold text-indigo-950">Montar comigo — rápido</p>
-        <p className="mt-1 text-xs leading-relaxed text-indigo-900/85">
-          Textos para a <strong className="text-indigo-950">equipe enviar a clientes</strong> (permissão antes do link,
-          indicação natural, tom consultivo). Depois você pode <strong className="text-indigo-950">ajustar com o Noel</strong>{' '}
-          e <strong className="text-indigo-950">salvar para a equipe</strong>. Mensagens internas para o time ficam no{' '}
-          <a href="/pro-lideres/painel/noel" className="font-medium text-indigo-800 underline-offset-2 hover:underline">
-            Noel
-          </a>
-          .
-        </p>
-      </div>
+      <p className="rounded-2xl border border-indigo-100 bg-gradient-to-br from-indigo-50/90 via-white to-violet-50/40 px-4 py-3 text-sm leading-relaxed text-indigo-950 sm:px-5 sm:py-3.5">
+        Depois você pode <strong className="text-indigo-950">ajustar com o Noel</strong> e{' '}
+        <strong className="text-indigo-950">salvar para a equipe</strong>.
+      </p>
 
       <div className="flex flex-wrap gap-2 rounded-xl border border-gray-200 bg-gray-50/80 p-1.5">
         <button
@@ -421,6 +422,42 @@ export function ProLideresScriptsNoelGenerator({
 
           {guidedStep === 1 && (
             <div className="grid gap-2 sm:grid-cols-2">
+              {PL_SCRIPT_GUIDED_FOCUS.map((f) => (
+                <Chip
+                  key={f.id}
+                  selected={guided.focusMainId === f.id}
+                  disabled={busy}
+                  onSelect={() =>
+                    setGuided((g) => ({
+                      ...g,
+                      focusMainId: f.id,
+                      angleId: defaultAngleForFocus(f.id),
+                    }))
+                  }
+                >
+                  {f.label}
+                </Chip>
+              ))}
+            </div>
+          )}
+
+          {guidedStep === 2 && (
+            <div className="grid gap-2 sm:grid-cols-1 sm:grid-cols-2">
+              {anglesForFocus(guided.focusMainId).map((a) => (
+                <Chip
+                  key={a.id}
+                  selected={guided.angleId === a.id}
+                  disabled={busy}
+                  onSelect={() => setGuided((g) => ({ ...g, angleId: a.id }))}
+                >
+                  {a.label}
+                </Chip>
+              ))}
+            </div>
+          )}
+
+          {guidedStep === 3 && (
+            <div className="grid gap-2 sm:grid-cols-2">
               {PL_SCRIPT_GUIDED_OBJECTIVES.map((o) => (
                 <Chip
                   key={o.id}
@@ -434,7 +471,7 @@ export function ProLideresScriptsNoelGenerator({
             </div>
           )}
 
-          {guidedStep === 2 && (
+          {guidedStep === 4 && (
             <div className="space-y-4">
               <div className="grid gap-2 sm:grid-cols-2">
                 {PL_SCRIPT_GUIDED_TOOLS.map((t) => (
@@ -474,7 +511,7 @@ export function ProLideresScriptsNoelGenerator({
             </div>
           )}
 
-          {guidedStep === 3 && (
+          {guidedStep === 5 && (
             <div className="grid gap-2 sm:grid-cols-2">
               {PL_SCRIPT_GUIDED_AUDIENCES.map((a) => (
                 <Chip
@@ -489,7 +526,7 @@ export function ProLideresScriptsNoelGenerator({
             </div>
           )}
 
-          {guidedStep === 4 && (
+          {guidedStep === 6 && (
             <div className="grid gap-2 sm:grid-cols-2">
               {PL_SCRIPT_GUIDED_TONES.map((t) => (
                 <Chip
@@ -504,7 +541,7 @@ export function ProLideresScriptsNoelGenerator({
             </div>
           )}
 
-          {guidedStep === 5 && (
+          {guidedStep === 7 && (
             <div className="grid gap-2 sm:grid-cols-2">
               {PL_SCRIPT_GUIDED_SITUATIONS.map((s) => (
                 <Chip
@@ -519,7 +556,7 @@ export function ProLideresScriptsNoelGenerator({
             </div>
           )}
 
-          {guidedStep === 6 && (
+          {guidedStep === 8 && (
             <div className="space-y-4">
               <div className="grid gap-2 sm:grid-cols-2">
                 {PL_SCRIPT_GUIDED_CHANNELS.map((c) => (
@@ -550,8 +587,9 @@ export function ProLideresScriptsNoelGenerator({
                   ))}
                 </select>
                 <span className="mt-1 block text-xs text-gray-500">
-                  Sugestão pelo objetivo: {PRO_LIDERES_SCRIPT_PILLARS.find((p) => p.id === suggestPillarFromObjective(guided.objectiveId))?.label}
-                  . Você pode mudar acima.
+                  Sugestão pelo briefing:{' '}
+                  {PRO_LIDERES_SCRIPT_PILLARS.find((p) => p.id === suggestPillarFromBriefing(guided))?.label}. Você pode
+                  mudar acima.
                 </span>
               </label>
               <label className="block text-sm">
@@ -663,7 +701,7 @@ export function ProLideresScriptsNoelGenerator({
                   disabled={busy}
                   onClick={() => {
                     resetFlow()
-                    setGuidedStep(6)
+                    setGuidedStep(8)
                   }}
                   className="min-h-[40px] rounded-xl border border-indigo-200 bg-indigo-50 px-3 text-xs font-semibold text-indigo-900 hover:bg-indigo-100 disabled:opacity-50"
                 >
