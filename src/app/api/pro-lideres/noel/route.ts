@@ -34,7 +34,7 @@ type HistoryTurn = { role?: string; content?: string }
 const MODO_EXECUTOR_LINK_PT = `[MODO EXECUTOR — LINK]
 O sistema pode ter acabado de gerar um link real na conta YLADA deste líder (bloco [LINK GERADO…] ou [LINK AJUSTADO…] abaixo, se existir).
 - Se existir esse bloco: responde só com introdução curta em português; não listes perguntas no texto; não coloques outro URL — o bloco **### Quiz e link (oficial)** no fim da resposta traz o link certo.
-- Relembra: o link fica em **Links / Ferramentas** na matriz; a **equipe só vê no Catálogo** depois do líder usar **Compartilhar com a equipe (Catálogo)** no chat ou ativar em **Catálogo → Minhas ferramentas**.`
+- Relembra: o link fica em **Links / Ferramentas** na matriz; a **equipe só vê no Catálogo** depois de **Disponibilizar à equipe** no chat ou ativar em **Catálogo → Minhas ferramentas**. **Não** inventes URL de `/l/…` no texto — só o anexo oficial/backend.`
 
 const PEDIDO_SEM_GERACAO_PT = `[PEDIDO DE LINK SEM GERAÇÃO NESTE TURNO]
 O líder pediu quiz/link/fluxo mas o backend **não** devolveu URL (tema insuficiente, limite de links, sessão sem permissão nas APIs Ylada, ou erro técnico).
@@ -204,7 +204,7 @@ export async function POST(request: NextRequest) {
           '**Sugestão de próximos passos para você:**',
           '1. **Revisar** título e perguntas (*Editar perguntas* / *Editar na Ylada* abaixo da mensagem, ou na matriz). Quando aparecerem, os botões **Links na Ylada** e **Links no painel** abrem a lista na matriz e a visão no Pro Líderes.',
           '2. **Abrir** o link público ou usar **Copiar link público** (um botão só abaixo da mensagem) para testar como o contato vê o fluxo.',
-          '3. **A equipe ainda não vê** esta ferramenta no **Catálogo de ferramentas** até clicar em **Compartilhar com a equipe** (abaixo desta conversa) ou ativar a visibilidade em **Pro Líderes → Catálogo** → **Minhas ferramentas**.',
+          '3. **A equipe ainda não vê** esta ferramenta no **Catálogo de ferramentas** até **Disponibilizar à equipe** (botão na mensagem do quiz ou abaixo) ou ativar a visibilidade em **Pro Líderes → Catálogo** → **Minhas ferramentas**.',
           '4. Se quiser mudanças de texto ou de foco, **Concordo** / **Pedir ajuste ao Noel** ou edita na matriz — o Noel continua como co-editor até fechares a versão.',
           '',
           'Abaixo está o bloco **Quiz e link (oficial)** com as perguntas alinhadas ao link público e à edição.',

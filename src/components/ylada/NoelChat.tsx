@@ -72,6 +72,33 @@ function normalizeHrefForCompare(h: string): string {
   }
 }
 
+/** Qualquer href que aponte a um link público YLADA /l/[slug] (absoluto ou relativo). */
+function looksLikeYladaPublicLinkPath(href: string | undefined): boolean {
+  if (!href || !href.trim()) return false
+  const t = href.trim()
+  if (t.startsWith('/l/')) return true
+  try {
+    const u = new URL(t)
+    return u.pathname.startsWith('/l/')
+  } catch {
+    return /\/l\/[a-z0-9_-]+/i.test(t)
+  }
+}
+
+/**
+ * O modelo às vezes inventa um slug estilo preset (`pl-…-r-tema`) que não existe na BD.
+ * No Pro Líderes, links públicos na mensagem devem abrir o mesmo URL que o backend gravou.
+ */
+function proLideresEffectivePublicHref(
+  href: string | undefined,
+  canonicalQuizUrl: string | null | undefined
+): string | undefined {
+  if (!href || !canonicalQuizUrl) return href
+  if (!looksLikeYladaPublicLinkPath(href)) return href
+  if (normalizeHrefForCompare(href) === normalizeHrefForCompare(canonicalQuizUrl)) return href
+  return canonicalQuizUrl
+}
+
 /** Remove blocos ``` só com o URL do quiz (o chat Pro Líderes já tem um botão de copiar). */
 function stripRedundantUrlCodeFence(text: string, url: string | null): string {
   if (!url || !text) return text
@@ -858,8 +885,10 @@ export default function NoelChat({
               : null
           const quizSlimHref =
             msg.role === 'assistant' && proLideresPayload
-              ? ctxForMarkdown?.url ?? extractFirstHttpUrl(msg.content)
-              : null
+              ? ctxForMarkdown?.url ?? null
+              : msg.role === 'assistant'
+                ? ctxForMarkdown?.url ?? extractFirstHttpUrl(msg.content)
+                : null
           const assistantMarkdownSource =
             msg.role === 'assistant' && quizSlimHref
               ? stripRedundantUrlCodeFence(msg.content, quizSlimHref)
@@ -892,18 +921,22 @@ export default function NoelChat({
                       remarkPlugins={[remarkGfm, remarkBreaks]}
                       components={{
                         a: ({ href, children }) => {
+                          const effectiveHref =
+                            proLideresPayload && quizSlimHref && href
+                              ? proLideresEffectivePublicHref(href, quizSlimHref)
+                              : href
                           const slim =
                             Boolean(
                               proLideresPayload &&
                                 quizSlimHref &&
-                                href &&
-                                normalizeHrefForCompare(href) === normalizeHrefForCompare(quizSlimHref)
+                                effectiveHref &&
+                                normalizeHrefForCompare(effectiveHref) === normalizeHrefForCompare(quizSlimHref)
                             )
-                          if (slim && href) {
+                          if (slim && effectiveHref) {
                             return (
                               <a
-                                key={href}
-                                href={href}
+                                key={effectiveHref}
+                                href={effectiveHref}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="inline-flex items-center gap-1.5 w-fit max-w-full px-3 py-2 rounded-lg bg-sky-50 text-sky-700 font-medium hover:bg-sky-100 transition-colors border border-sky-200 mt-2 mb-1 no-underline hover:underline break-all"
@@ -920,7 +953,11 @@ export default function NoelChat({
                               </a>
                             )
                           }
-                          return <LinkWithCopy key={href ?? undefined} href={href}>{children}</LinkWithCopy>
+                          return (
+                            <LinkWithCopy key={effectiveHref ?? href ?? undefined} href={effectiveHref}>
+                              {children}
+                            </LinkWithCopy>
+                          )
                         },
                         p: ({ children, className, ...props }) => {
                           const plain = markdownPlainText(children).trim()
@@ -972,7 +1009,23 @@ export default function NoelChat({
                     const ctxForMessage = msg.linkContext ?? (isLastAssistantMessage ? lastLinkContext : null)
                     const hasQuizContent = messageContainsQuizContent(msg.content, ctxForMessage)
                     if (!hasQuizContent) return null
-                    const quizUrl = ctxForMessage?.url ?? extractFirstHttpUrl(msg.content)
+                    const quizUrl =
+                      proLideresPayload && ctxForMessage?.url
+                        ? ctxForMessage.url
+                        : ctxForMessage?.url ?? extractFirstHttpUrl(msg.content)
+                    const isSessionQuizLink =
+                      Boolean(ctxForMessage?.link_id && lastLinkContext?.link_id === ctxForMessage.link_id)
+                    const sessionCatalogVis = isSessionQuizLink ? lastLinkContext?.visible_to_team_in_catalog : undefined
+                    const showDisponibilizarCatalog =
+                      proLideresPayload &&
+                      Boolean(quizUrl && ctxForMessage?.link_id) &&
+                      isSessionQuizLink &&
+                      sessionCatalogVis !== true
+                    const showVerCatalogoAposDisponibilizar =
+                      proLideresPayload &&
+                      Boolean(quizUrl && ctxForMessage?.link_id) &&
+                      isSessionQuizLink &&
+                      sessionCatalogVis === true
                     return (
                       <div className="mt-3 flex flex-wrap gap-2">
                         {ctxForMessage?.link_id && (
@@ -1001,12 +1054,22 @@ export default function NoelChat({
                                 : 'Copiar link do quiz'}
                           </button>
                         )}
-                        {proLideresPayload && quizUrl ? (
+                        {showDisponibilizarCatalog ? (
+                          <button
+                            type="button"
+                            disabled={shareCatalogBusy}
+                            onClick={() => void shareToolWithTeam()}
+                            className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-emerald-50 text-emerald-900 text-sm font-medium border border-emerald-200 hover:bg-emerald-100 transition-colors touch-manipulation disabled:opacity-50"
+                          >
+                            {shareCatalogBusy ? 'Disponibilizando…' : 'Disponibilizar à equipe'}
+                          </button>
+                        ) : null}
+                        {showVerCatalogoAposDisponibilizar ? (
                           <Link
                             href="/pro-lideres/painel/catalogo"
                             className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-emerald-50 text-emerald-900 text-sm font-medium border border-emerald-200 hover:bg-emerald-100 transition-colors touch-manipulation"
                           >
-                            Disponibilizar à equipe
+                            Ver no catálogo
                           </Link>
                         ) : null}
                       </div>
@@ -1111,8 +1174,8 @@ export default function NoelChat({
                     se esta versão já serve, ou <strong>Pedir ajuste ao Noel</strong> para continuar no chat.
                   </li>
                   <li>
-                    A equipe <strong>só vê no Catálogo</strong> depois de <strong>Compartilhar com a equipe</strong> (botão
-                    abaixo) ou ao ativar a visibilidade em{' '}
+                    A equipe <strong>só vê no Catálogo</strong> depois de <strong>Disponibilizar à equipe</strong> (botão
+                    na mensagem do quiz ou abaixo) ou ao ativar a visibilidade em{' '}
                     <Link
                       href="/pro-lideres/painel/catalogo"
                       className="font-semibold text-emerald-950 underline decoration-emerald-600/60 hover:no-underline"
@@ -1137,7 +1200,7 @@ export default function NoelChat({
                   onClick={() => void shareToolWithTeam()}
                   className="inline-flex w-full sm:w-auto items-center justify-center gap-2 px-4 py-3 rounded-xl bg-violet-600 text-white text-sm font-semibold hover:bg-violet-700 transition-colors disabled:opacity-50 touch-manipulation shadow-md"
                 >
-                  {shareCatalogBusy ? 'Compartilhando…' : 'Compartilhar com a equipe (Catálogo)'}
+                  {shareCatalogBusy ? 'Disponibilizando…' : 'Disponibilizar à equipe (catálogo)'}
                 </button>
                 <p className="text-xs text-slate-600 max-w-xl">
                   Passa a aparecer para cada pessoa em <strong>Catálogo → Minhas ferramentas</strong> no painel da
