@@ -1,12 +1,12 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
+import Link from 'next/link'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { usePathname } from 'next/navigation'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/hooks/useAuth'
 import { useProLideresPainel } from '@/components/pro-lideres/pro-lideres-painel-context'
 import {
-  formatExecutionWeekdays,
-  PL_WEEKDAY_LABEL,
   PL_WEEKDAY_ORDER,
   type ProLideresDailyTaskCompletionRow,
   type ProLideresDailyTaskRow,
@@ -46,21 +46,16 @@ function endOfWeek(d: Date): Date {
   return e
 }
 
-/** Data civil Y-M-D → texto legível em português (fuso local). */
-function formatCivilDateLongPt(ymd: string): string {
-  const [y, m, d] = ymd.split('-').map((x) => parseInt(x, 10))
-  if (!y || !m || !d) return ymd
-  const dt = new Date(y, m - 1, d, 12, 0, 0)
-  return dt.toLocaleDateString('pt-BR', {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-  })
+type TaskRowEdit = {
+  id: string
+  points: string
+  title: string
+  description: string
 }
 
 export function ProLideresDailyTasksClient() {
   const router = useRouter()
+  const pathname = usePathname()
   const { isLeaderWorkspace: isLeader, dailyTasksVisibleToTeam } = useProLideresPainel()
   const { user } = useAuth()
   const myUserId = user?.id ?? ''
@@ -85,10 +80,9 @@ export function ProLideresDailyTasksClient() {
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [points, setPoints] = useState('1')
-  const [executionWeekdays, setExecutionWeekdays] = useState<Set<number>>(
-    () => new Set([1, 2, 3, 4, 5, 6, 0])
-  )
   const [saving, setSaving] = useState(false)
+  const [taskRows, setTaskRows] = useState<TaskRowEdit[]>([])
+  const [savingEdits, setSavingEdits] = useState(false)
   const [savingToday, setSavingToday] = useState(false)
   const [todayDraft, setTodayDraft] = useState<Set<string>>(() => new Set())
   const [bonusPts, setBonusPts] = useState('10')
@@ -137,13 +131,22 @@ export function ProLideresDailyTasksClient() {
     setTodayDraft(done)
   }, [data, todayStr, myUserId, isLeader])
 
-  const memberName = useCallback(
-    (userId: string) => {
-      const m = data?.members.find((x) => x.userId === userId)
-      return m?.displayName?.trim() || m?.email || userId.slice(0, 8)
-    },
-    [data?.members]
-  )
+  const tasksSnapshot = useMemo(() => {
+    const list = data?.tasks ?? []
+    return list.map((t) => `${t.id}:${t.points}:${t.title}:${t.description ?? ''}`).join('|')
+  }, [data?.tasks])
+
+  useEffect(() => {
+    if (!isLeader || !data?.tasks) return
+    setTaskRows(
+      data.tasks.map((t) => ({
+        id: t.id,
+        points: String(t.points),
+        title: t.title,
+        description: t.description ?? '',
+      }))
+    )
+  }, [isLeader, tasksSnapshot, data?.tasks])
 
   async function updateTeamVisible(next: boolean) {
     if (!isLeader) return
@@ -224,26 +227,9 @@ export function ProLideresDailyTasksClient() {
     }
   }
 
-  function toggleExecutionDay(day: number) {
-    setExecutionWeekdays((prev) => {
-      const n = new Set(prev)
-      if (n.has(day)) {
-        if (n.size <= 1) return prev
-        n.delete(day)
-      } else {
-        n.add(day)
-      }
-      return n
-    })
-  }
-
   async function createTask(e: React.FormEvent) {
     e.preventDefault()
     if (!isLeader) return
-    if (executionWeekdays.size === 0) {
-      setError('Escolhe pelo menos um dia da semana.')
-      return
-    }
     setSaving(true)
     setError(null)
     try {
@@ -255,7 +241,7 @@ export function ProLideresDailyTasksClient() {
           title: title.trim(),
           description: description.trim() || undefined,
           points: Number(points) || 1,
-          execution_weekdays: PL_WEEKDAY_ORDER.filter((d) => executionWeekdays.has(d)),
+          execution_weekdays: [...PL_WEEKDAY_ORDER],
         }),
       })
       const json = await res.json().catch(() => ({}))
@@ -266,10 +252,53 @@ export function ProLideresDailyTasksClient() {
       setTitle('')
       setDescription('')
       setPoints('1')
-      setExecutionWeekdays(new Set([1, 2, 3, 4, 5, 6, 0]))
       await load()
     } finally {
       setSaving(false)
+    }
+  }
+
+  async function flushTaskRowEdits() {
+    if (!isLeader || !data?.tasks.length) return
+    setSavingEdits(true)
+    setError(null)
+    try {
+      for (const row of taskRows) {
+        const orig = data.tasks.find((t) => t.id === row.id)
+        if (!orig) continue
+        const pts = Math.min(100000, Math.max(0, Math.floor(Number(row.points) || 0)))
+        const tit = row.title.trim()
+        if (tit.length < 2) {
+          setError('Cada tarefa precisa de um título com pelo menos 2 caracteres.')
+          return
+        }
+        const desc = row.description.trim()
+        const descNorm = desc || null
+        const same =
+          orig.points === pts && orig.title === tit && (orig.description ?? '') === (descNorm ?? '')
+        if (same) continue
+        const res = await fetch(`/api/pro-lideres/daily-tasks/${encodeURIComponent(row.id)}`, {
+          method: 'PATCH',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            title: tit,
+            description: descNorm,
+            points: pts,
+            execution_weekdays: [...PL_WEEKDAY_ORDER],
+          }),
+        })
+        const j = await res.json().catch(() => ({}))
+        if (!res.ok) {
+          setError((j as { error?: string }).error || 'Erro ao guardar uma tarefa.')
+          return
+        }
+      }
+      await load()
+    } catch {
+      setError('Erro de rede.')
+    } finally {
+      setSavingEdits(false)
     }
   }
 

@@ -71,6 +71,7 @@ function CatalogRowCard({
   teamVisibilityBusy,
   onTeamVisibilityChange,
   showMemberSharePanel,
+  rowHighlight,
 }: {
   item: ProLideresCatalogItem
   showRemove: boolean
@@ -83,12 +84,21 @@ function CatalogRowCard({
   teamVisibilityBusy: boolean
   onTeamVisibilityChange: (item: ProLideresCatalogItem, visible: boolean) => void
   showMemberSharePanel?: boolean
+  /** Destaque vindo do Noel (query highlightYladaLink). */
+  rowHighlight?: boolean
 }) {
   const [whenOpen, setWhenOpen] = useState(false)
   const scriptsHref = item.yladaLinkId ? `/pt/links/editar/${item.yladaLinkId}` : '/pt/links'
 
+  const cardId = item.yladaLinkId ? `pro-lideres-catalog-yd-${item.yladaLinkId}` : undefined
+
   return (
-    <article className="rounded-xl border border-slate-200/90 bg-white p-4 shadow-md ring-1 ring-slate-900/5">
+    <article
+      id={cardId}
+      className={`rounded-xl border border-slate-200/90 bg-white p-4 shadow-md ring-1 ring-slate-900/5 ${
+        rowHighlight ? 'ring-4 ring-blue-400 ring-offset-2' : ''
+      }`}
+    >
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-start justify-between gap-2">
@@ -294,6 +304,7 @@ export function ProLideresCatalogoClient({
   const [search, setSearch] = useState('')
   const [addCategory, setAddCategory] = useState<TabKey>('sales')
   const [teamVisibilityBusyId, setTeamVisibilityBusyId] = useState<string | null>(null)
+  const [highlightYladaLinkId, setHighlightYladaLinkId] = useState<string | null>(null)
 
   const defaultIntro =
     'Aqui você separa a biblioteca que a YLADA já deixa pronta dos links que você mesmo criar. Depois é só escolher entre ferramentas de vendas ou de recrutamento.'
@@ -323,6 +334,28 @@ export function ProLideresCatalogoClient({
   useEffect(() => {
     void load()
   }, [load])
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const raw = new URLSearchParams(window.location.search).get('highlightYladaLink')?.trim() ?? ''
+    if (raw && /^[0-9a-f-]{36}$/i.test(raw)) setHighlightYladaLinkId(raw)
+  }, [])
+
+  useEffect(() => {
+    if (!highlightYladaLinkId || loading || catalog.length === 0) return
+    const match = catalog.find((i) => i.yladaLinkId === highlightYladaLinkId)
+    if (match) {
+      setTab(match.catalogCategory)
+      setSection(match.origin)
+    }
+    const tid = window.setTimeout(() => {
+      document.getElementById(`pro-lideres-catalog-yd-${highlightYladaLinkId}`)?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
+      })
+    }, 200)
+    return () => window.clearTimeout(tid)
+  }, [highlightYladaLinkId, loading, catalog])
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase()
@@ -605,6 +638,7 @@ export function ProLideresCatalogoClient({
               teamVisibilityBusy={teamVisibilityBusyId === item.id}
               onTeamVisibilityChange={(i, vis) => void setItemTeamVisible(i, vis)}
               showMemberSharePanel={!isLeaderWorkspace}
+              rowHighlight={Boolean(highlightYladaLinkId && item.yladaLinkId === highlightYladaLinkId)}
             />
           ))}
         </div>

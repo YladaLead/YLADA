@@ -143,6 +143,15 @@ function shouldShowDecisaoRapidaChipsForMessage(msg: Message, allMessages: Messa
   return parseProLideresDecisaoRapidaOptions(msg.content) != null
 }
 
+function readProLideresLibraryPublishedFlag(linkId: string): boolean {
+  if (typeof window === 'undefined') return false
+  try {
+    return sessionStorage.getItem(`pl_lib_pub_${linkId}`) === '1'
+  } catch {
+    return false
+  }
+}
+
 /** Extrai apenas o script da mensagem do Noel (para copiar sem o resto). */
 function extractScriptFromMessage(content: string): string {
   const trimmed = content.trim()
@@ -392,6 +401,10 @@ export default function NoelChat({
   const uxContent = getNoelUxContent(area)
   const resolvedChatApi = chatApiPath ?? '/api/ylada/noel'
   const proLideresPayload = isProLideresNoelApiPath(resolvedChatApi)
+  const proLideresPainelCatalogHref =
+    area === 'pro_estetica_corporal' ? '/pro-estetica-corporal/painel/catalogo' : '/pro-lideres/painel/catalogo'
+  /** Guia «publicar na biblioteca» + PATCH link-meta: só o Noel do painel Pro Líderes clássico. */
+  const proLideresLeaderLibraryFlow = Boolean(resolvedChatApi?.includes('/pro-lideres/noel'))
   /** Links da matriz YLADA para esteticista ficam em /pt/estetica, não na rota do painel embed. */
   /** Pro Líderes: links do dono ficam na matriz central `/pt/links`, não em `/pt/pro_lideres/...`. */
   const yladaMatrixPathPrefix =
@@ -697,6 +710,22 @@ export default function NoelChat({
   const [copiedQuizLinkMsgId, setCopiedQuizLinkMsgId] = useState<string | null>(null)
   const [shareCatalogBusy, setShareCatalogBusy] = useState(false)
   const [shareCatalogError, setShareCatalogError] = useState<string | null>(null)
+  /** Publicar fluxo na biblioteca do líder (Vendas/Recrutamento) após testar o link no chat. */
+  const [publishKindModal, setPublishKindModal] = useState<{ linkId: string; publicUrl: string } | null>(null)
+  const [linkMetaBusy, setLinkMetaBusy] = useState(false)
+  const [linkMetaError, setLinkMetaError] = useState<string | null>(null)
+  const [libraryPublishedIds, setLibraryPublishedIds] = useState<Record<string, boolean>>({})
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || !lastLinkContext?.link_id) return
+    try {
+      if (sessionStorage.getItem(`pl_lib_pub_${lastLinkContext.link_id}`) === '1') {
+        setLibraryPublishedIds((m) => ({ ...m, [lastLinkContext.link_id!]: true }))
+      }
+    } catch {
+      /* ignore */
+    }
+  }, [lastLinkContext?.link_id])
   const copyScript = useCallback(async (msg: Message) => {
     const script = extractScriptFromMessage(msg.content)
     const ok = await copyTextToClipboard(script)
@@ -773,6 +802,45 @@ export default function NoelChat({
       setShareCatalogBusy(false)
     }
   }, [proLideresPayload, lastLinkContext?.link_id, shareCatalogBusy, authenticatedFetch])
+
+  const confirmPublishCatalogKind = useCallback(
+    async (kind: 'sales' | 'recruitment') => {
+      if (!publishKindModal) return
+      setLinkMetaBusy(true)
+      setLinkMetaError(null)
+      try {
+        const res = await authenticatedFetch('/api/pro-lideres/flows/link-meta', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ yladaLinkId: publishKindModal.linkId, proLideresKind: kind }),
+        })
+        const data = (await res.json().catch(() => ({}))) as { error?: string }
+        if (!res.ok) {
+          setLinkMetaError(data.error || 'Não foi possível guardar.')
+          return
+        }
+        try {
+          sessionStorage.setItem(`pl_lib_pub_${publishKindModal.linkId}`, '1')
+        } catch {
+          /* ignore */
+        }
+        setLibraryPublishedIds((m) => ({ ...m, [publishKindModal.linkId]: true }))
+        const id = publishKindModal.linkId
+        setPublishKindModal(null)
+        const qs = new URLSearchParams({
+          highlightYladaLink: id,
+          section: 'mine',
+          tab: kind,
+        })
+        router.push(`${proLideresPainelCatalogHref}?${qs.toString()}`)
+      } catch {
+        setLinkMetaError('Erro de rede.')
+      } finally {
+        setLinkMetaBusy(false)
+      }
+    },
+    [publishKindModal, authenticatedFetch, router, proLideresPainelCatalogHref]
+  )
 
   const handleSuggestionClick = useCallback(
     async (prompt: string) => {
@@ -1082,53 +1150,114 @@ export default function NoelChat({
                       Boolean(quizUrl && ctxForMessage?.link_id) &&
                       isSessionQuizLink &&
                       sessionCatalogVis === true
+                    const lid = ctxForMessage?.link_id
+                    const showPostLinkCatalogGuide =
+                      proLideresLeaderLibraryFlow &&
+                      proLideresPayload &&
+                      Boolean(lid && quizUrl) &&
+                      isSessionQuizLink &&
+                      /###\s*Quiz\s+e\s+link\s*\(oficial/i.test(msg.content)
+                    const alreadyInLibrary =
+                      Boolean(lid) &&
+                      (Boolean(libraryPublishedIds[lid!]) || readProLideresLibraryPublishedFlag(lid!))
                     return (
-                      <div className="mt-3 flex flex-wrap gap-2">
-                        {ctxForMessage?.link_id && (
-                          <Link
-                            href={`${yladaMatrixPathPrefix}/links/editar/${ctxForMessage.link_id}`}
-                            className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-sky-600 text-white text-sm font-medium hover:bg-sky-700 transition-colors touch-manipulation"
-                          >
-                            {proLideresPayload ? 'Editar na Ylada' : 'Editar quiz'}
-                          </Link>
-                        )}
-                        {quizUrl && (
-                          <button
-                            type="button"
-                            onClick={async () => {
-                              const ok = await copyTextToClipboard(quizUrl)
-                              if (!ok) return
-                              setCopiedQuizLinkMsgId(msg.id)
-                              setTimeout(() => setCopiedQuizLinkMsgId((prev) => (prev === msg.id ? null : prev)), 2000)
-                            }}
-                            className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-sky-50 text-sky-700 text-sm font-medium border border-sky-200 hover:bg-sky-100 transition-colors touch-manipulation"
-                          >
-                            {copiedQuizLinkMsgId === msg.id
-                              ? 'Copiado!'
-                              : proLideresPayload
-                                ? 'Copiar link público'
-                                : 'Copiar link do quiz'}
-                          </button>
-                        )}
-                        {showDisponibilizarCatalog ? (
-                          <button
-                            type="button"
-                            disabled={shareCatalogBusy}
-                            onClick={() => void shareToolWithTeam()}
-                            className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-emerald-50 text-emerald-900 text-sm font-medium border border-emerald-200 hover:bg-emerald-100 transition-colors touch-manipulation disabled:opacity-50"
-                          >
-                            {shareCatalogBusy ? 'Disponibilizando…' : 'Disponibilizar à equipe'}
-                          </button>
+                      <>
+                        {showPostLinkCatalogGuide ? (
+                          <div className="mt-2 w-full rounded-xl border border-indigo-200 bg-indigo-50/95 px-3 py-3 text-indigo-950 shadow-sm">
+                            <p className="text-sm font-bold text-indigo-900">Guia: do link à tua biblioteca</p>
+                            <ol className="mt-2 list-decimal space-y-1 pl-4 text-xs leading-relaxed text-indigo-950/95">
+                              <li>
+                                O link está nesta mensagem — usa <strong>Abrir e testar</strong> como se fosses um
+                                contacto.
+                              </li>
+                              <li>
+                                Se estiver bem, <strong>publica na tua biblioteca</strong> (Vendas ou Recrutamento no
+                                catálogo).
+                              </li>
+                              <li>
+                                Em <strong>Catálogo → Minhas ferramentas</strong> defines se a <strong>equipa</strong> vê
+                                a ferramenta; também podes usar <strong>Disponibilizar à equipe</strong> abaixo.
+                              </li>
+                            </ol>
+                            <div className="mt-3 flex flex-wrap gap-2">
+                              <a
+                                href={quizUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex min-h-[40px] items-center gap-2 rounded-lg bg-indigo-600 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-700 touch-manipulation"
+                              >
+                                Abrir e testar
+                              </a>
+                              {!alreadyInLibrary ? (
+                                <button
+                                  type="button"
+                                  disabled={loading || linkMetaBusy}
+                                  onClick={() => {
+                                    setLinkMetaError(null)
+                                    setPublishKindModal({ linkId: lid!, publicUrl: quizUrl })
+                                  }}
+                                  className="inline-flex min-h-[40px] items-center gap-2 rounded-lg border-2 border-indigo-500 bg-white px-3 py-2 text-sm font-semibold text-indigo-900 hover:bg-indigo-50 disabled:cursor-not-allowed disabled:opacity-50 touch-manipulation"
+                                >
+                                  Publicar na minha biblioteca…
+                                </button>
+                              ) : (
+                                <Link
+                                  href={`${proLideresPainelCatalogHref}?highlightYladaLink=${lid}&section=mine`}
+                                  className="inline-flex min-h-[40px] items-center gap-2 rounded-lg border border-indigo-300 bg-white px-3 py-2 text-sm font-semibold text-indigo-800 hover:bg-indigo-50 touch-manipulation"
+                                >
+                                  Abrir o meu catálogo
+                                </Link>
+                              )}
+                            </div>
+                          </div>
                         ) : null}
-                        {showVerCatalogoAposDisponibilizar ? (
-                          <Link
-                            href="/pro-lideres/painel/catalogo"
-                            className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-emerald-50 text-emerald-900 text-sm font-medium border border-emerald-200 hover:bg-emerald-100 transition-colors touch-manipulation"
-                          >
-                            Ver no catálogo
-                          </Link>
-                        ) : null}
-                      </div>
+                        <div className="mt-3 flex flex-wrap gap-2">
+                          {ctxForMessage?.link_id && (
+                            <Link
+                              href={`${yladaMatrixPathPrefix}/links/editar/${ctxForMessage.link_id}`}
+                              className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-sky-600 text-white text-sm font-medium hover:bg-sky-700 transition-colors touch-manipulation"
+                            >
+                              {proLideresPayload ? 'Editar na Ylada' : 'Editar quiz'}
+                            </Link>
+                          )}
+                          {quizUrl && (
+                            <button
+                              type="button"
+                              onClick={async () => {
+                                const ok = await copyTextToClipboard(quizUrl)
+                                if (!ok) return
+                                setCopiedQuizLinkMsgId(msg.id)
+                                setTimeout(() => setCopiedQuizLinkMsgId((prev) => (prev === msg.id ? null : prev)), 2000)
+                              }}
+                              className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-sky-50 text-sky-700 text-sm font-medium border border-sky-200 hover:bg-sky-100 transition-colors touch-manipulation"
+                            >
+                              {copiedQuizLinkMsgId === msg.id
+                                ? 'Copiado!'
+                                : proLideresPayload
+                                  ? 'Copiar link público'
+                                  : 'Copiar link do quiz'}
+                            </button>
+                          )}
+                          {showDisponibilizarCatalog ? (
+                            <button
+                              type="button"
+                              disabled={shareCatalogBusy}
+                              onClick={() => void shareToolWithTeam()}
+                              className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-emerald-50 text-emerald-900 text-sm font-medium border border-emerald-200 hover:bg-emerald-100 transition-colors touch-manipulation disabled:opacity-50"
+                            >
+                              {shareCatalogBusy ? 'Disponibilizando…' : 'Disponibilizar à equipe'}
+                            </button>
+                          ) : null}
+                          {showVerCatalogoAposDisponibilizar ? (
+                            <Link
+                              href="/pro-lideres/painel/catalogo"
+                              className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-emerald-50 text-emerald-900 text-sm font-medium border border-emerald-200 hover:bg-emerald-100 transition-colors touch-manipulation"
+                            >
+                              Ver no catálogo
+                            </Link>
+                          ) : null}
+                        </div>
+                      </>
                     )
                   })()}
                 </div>
@@ -1204,6 +1333,58 @@ export default function NoelChat({
             </div>
           </div>
         )}
+        {publishKindModal ? (
+          <div
+            className="fixed inset-0 z-[100] flex items-end justify-center bg-black/45 p-4 sm:items-center"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="pl-publish-lib-title"
+          >
+            <div className="w-full max-w-md rounded-2xl border border-indigo-200 bg-white p-5 shadow-2xl">
+              <h2 id="pl-publish-lib-title" className="text-lg font-bold text-slate-900">
+                Publicar na tua biblioteca
+              </h2>
+              <p className="mt-2 text-sm leading-relaxed text-slate-600">
+                Escolhe o separador do catálogo onde esta ferramenta deve aparecer em{' '}
+                <strong>Minhas ferramentas</strong> (podes mudar depois no catálogo).
+              </p>
+              {linkMetaError ? (
+                <p className="mt-2 text-sm text-red-600" role="alert">
+                  {linkMetaError}
+                </p>
+              ) : null}
+              <div className="mt-4 flex flex-col gap-2">
+                <button
+                  type="button"
+                  disabled={linkMetaBusy}
+                  onClick={() => void confirmPublishCatalogKind('sales')}
+                  className="min-h-[48px] rounded-xl bg-blue-600 px-4 py-3 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50 touch-manipulation"
+                >
+                  {linkMetaBusy ? 'A guardar…' : 'Vendas'}
+                </button>
+                <button
+                  type="button"
+                  disabled={linkMetaBusy}
+                  onClick={() => void confirmPublishCatalogKind('recruitment')}
+                  className="min-h-[48px] rounded-xl border-2 border-violet-600 bg-violet-50 px-4 py-3 text-sm font-semibold text-violet-950 hover:bg-violet-100 disabled:opacity-50 touch-manipulation"
+                >
+                  {linkMetaBusy ? 'A guardar…' : 'Recrutamento'}
+                </button>
+                <button
+                  type="button"
+                  disabled={linkMetaBusy}
+                  onClick={() => {
+                    setPublishKindModal(null)
+                    setLinkMetaError(null)
+                  }}
+                  className="min-h-[44px] rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+                >
+                  Cancelar
+                </button>
+              </div>
+            </div>
+          </div>
+        ) : null}
         {loading && (
           <div className="flex justify-start">
             <div className="rounded-xl px-4 py-3 bg-white border border-sky-100 shadow-sm">
