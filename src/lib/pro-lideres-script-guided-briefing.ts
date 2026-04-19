@@ -228,12 +228,18 @@ export function composeGuidedScriptPurpose(b: PlScriptGuidedBriefing): string {
       ? 'OBJETIVO INDICAÇÃO: pedir permissão antes de pedir nome; coleta só como missão de ajudar (terceira pessoa, saída honrosa se não houver nome); sem urgência falsa nem gatilhos de persuasão.'
       : null
 
+  const acompanharExtra =
+    b.objectiveId === 'acompanhar_cliente'
+      ? 'OBJETIVO ACOMPANHAR: continuidade e cuidado; sem cobrança; perguntas abertas; indicação só com permissão e tom de ajuda.'
+      : null
+
   const lines = [
     `FOCO PRINCIPAL: ${focus}`,
     `ÂNGULO DE ABORDAGEM: ${angle}`,
     `REGRAS DE FOCO: ${focusRules}`,
     `OBJETIVO DO SCRIPT: ${obj}`,
     indicationExtra,
+    acompanharExtra,
     `FERRAMENTA OU SITUAÇÃO: ${toolParts.join(' · ')}`,
     `PÚBLICO: ${audience}`,
     `TOM DESEJADO: ${tone}`,

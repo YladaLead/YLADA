@@ -3,7 +3,19 @@ import { requireApiAuth } from '@/lib/api-auth'
 import { supabaseAdmin } from '@/lib/supabase'
 import { resolveProLideresTenantContext } from '@/lib/pro-lideres-server'
 import { requireProLideresPaidContext } from '@/lib/pro-lideres-subscription-access'
-import { PL_SCRIPT_UUID_RE, clipBody, clipEntryTitle, clipHowToUse, clipSubtitle } from '@/lib/pro-lideres-scripts-api'
+import {
+  normalizeConversationStage,
+  clipToolPresetKey,
+  normalizeFocusMain,
+  normalizeIntentionKey,
+} from '@/lib/pro-lideres-script-section-meta'
+import {
+  PL_SCRIPT_UUID_RE,
+  clipBody,
+  clipEntryTitle,
+  clipHowToUse,
+  clipSubtitle,
+} from '@/lib/pro-lideres-scripts-api'
 import type { LeaderTenantPlScriptSectionRow } from '@/types/leader-tenant'
 
 /**
@@ -48,13 +60,24 @@ export async function POST(
     /* default */
   }
 
-  const { data: tpl, error: tplErr } = await supabaseAdmin
-    .from('pro_lideres_script_templates')
-    .select('id, focus_main, intention_key, tool_preset_key, title, subtitle, entries')
-    .eq('id', templateId)
-    .maybeSingle()
+  const tplSelect325 =
+    'id, focus_main, intention_key, tool_preset_key, title, subtitle, usage_hint, sequence_label, conversation_stage, entries'
+  const tplSelect322 = 'id, focus_main, intention_key, tool_preset_key, title, subtitle, entries'
 
-  if (tplErr || !tpl) {
+  let tpl: Record<string, unknown> | null = null
+  for (const sel of [tplSelect325, tplSelect322]) {
+    const { data, error } = await supabaseAdmin
+      .from('pro_lideres_script_templates')
+      .select(sel)
+      .eq('id', templateId)
+      .maybeSingle()
+    if (!error && data) {
+      tpl = data as Record<string, unknown>
+      break
+    }
+  }
+
+  if (!tpl) {
     return NextResponse.json({ error: 'Template não encontrado.' }, { status: 404 })
   }
 
@@ -63,12 +86,12 @@ export async function POST(
     return NextResponse.json({ error: 'Template sem textos.' }, { status: 400 })
   }
 
-  const focus_main = tpl.focus_main === 'recrutamento' ? 'recrutamento' : 'vendas'
-  const intention_key = typeof tpl.intention_key === 'string' && tpl.intention_key.trim() ? tpl.intention_key.trim() : 'geral'
-  const tool_preset_key =
-    tpl.tool_preset_key == null || String(tpl.tool_preset_key).trim() === ''
-      ? null
-      : String(tpl.tool_preset_key).trim().slice(0, 80)
+  const focus_main = normalizeFocusMain(tpl.focus_main)
+  const intention_key = normalizeIntentionKey(tpl.intention_key)
+  const tool_preset_key = clipToolPresetKey(tpl.tool_preset_key)
+  const usage_hint = typeof tpl.usage_hint === 'string' ? clipHowToUse(tpl.usage_hint) : null
+  const sequence_label = typeof tpl.sequence_label === 'string' ? clipSubtitle(tpl.sequence_label) : null
+  const conversation_stage = normalizeConversationStage(tpl.conversation_stage)
 
   const { data: maxRow } = await supabaseAdmin
     .from('leader_tenant_pl_script_sections')
@@ -97,6 +120,9 @@ export async function POST(
       focus_main,
       intention_key,
       tool_preset_key,
+      usage_hint,
+      sequence_label,
+      conversation_stage,
       source_template_id: templateId,
     })
     .select()

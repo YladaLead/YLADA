@@ -86,7 +86,7 @@ export async function GET(request: NextRequest) {
     if (canFilterStage && conversationStage && conversationStage.length <= 32) {
       q = q.eq('conversation_stage', conversationStage)
     }
-    return q
+    return await q
   }
 
   let { data, error } = await runSelect(TEMPLATE_SELECT_325, true)

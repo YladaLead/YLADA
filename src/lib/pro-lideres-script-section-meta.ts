@@ -2,6 +2,7 @@ import {
   ALL_SCRIPT_TOOL_ROWS,
   PL_SCRIPT_GUIDED_OBJECTIVES,
 } from '@/lib/pro-lideres-script-guided-briefing'
+import { clipSubtitle } from '@/lib/pro-lideres-scripts-api'
 
 export const PL_SCRIPT_SECTION_FOCUS_OPTIONS = [
   { id: 'vendas', label: 'Vendas' },
@@ -96,6 +97,43 @@ export function normalizeConversationStage(v: unknown): string | null {
   const s = typeof v === 'string' ? v.trim().toLowerCase() : ''
   if (!s || !STAGE_IDS.has(s)) return null
   return s
+}
+
+/** Mapeia o objetivo do fluxo guiado (Noel) para o filtro «momento da conversa». */
+const GUIDED_OBJECTIVE_TO_STAGE: Partial<
+  Record<string, (typeof PL_SCRIPT_CONVERSATION_STAGE_OPTIONS)[number]['id']>
+> = {
+  novos_contatos: 'primeiro_contato',
+  reativar: 'reativacao',
+  converter: 'convite',
+  engajar: 'pos_interesse',
+  acompanhar_cliente: 'acompanhamento',
+  indicacao: 'indicacao',
+}
+
+export function conversationStageFromGuidedObjective(objectiveId: unknown): string | null {
+  const id = typeof objectiveId === 'string' ? objectiveId.trim().toLowerCase() : ''
+  const mapped = GUIDED_OBJECTIVE_TO_STAGE[id]
+  return mapped && STAGE_IDS.has(mapped) ? mapped : null
+}
+
+/** Metadados iniciais ao gravar um script criado pelo Noel (fluxo guiado). */
+export function suggestedLibraryMetaFromNoelGuided(input: {
+  objectiveId: string
+  toolPresetKey: string | null
+  entryTitles: string[]
+}): {
+  usage_hint: string | null
+  sequence_label: string | null
+  conversation_stage: string | null
+} {
+  const intLbl = intentionLabel(input.objectiveId)
+  const toolLbl = toolPresetLabelFromKey(input.toolPresetKey)
+  const usage_hint = clipSubtitle([intLbl, toolLbl].filter(Boolean).join(' · '))
+  const titles = input.entryTitles.map((t) => String(t).trim()).filter(Boolean)
+  const sequence_label = titles.length ? clipSubtitle(titles.slice(0, 8).join(' → ')) : null
+  const conversation_stage = conversationStageFromGuidedObjective(input.objectiveId)
+  return { usage_hint, sequence_label, conversation_stage }
 }
 
 export const DEFAULT_SCRIPT_LIBRARY_FILTERS: ScriptLibraryFilters = {
