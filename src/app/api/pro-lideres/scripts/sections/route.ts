@@ -5,10 +5,12 @@ import { resolveProLideresTenantContext } from '@/lib/pro-lideres-server'
 import { requireProLideresPaidContext } from '@/lib/pro-lideres-subscription-access'
 import {
   clipToolPresetKey,
+  normalizeConversationStage,
   normalizeFocusMain,
   normalizeIntentionKey,
 } from '@/lib/pro-lideres-script-section-meta'
 import {
+  clipHowToUse,
   clipSectionTitle,
   clipSubtitle,
   resolveYladaLinkIdForOwner,
@@ -45,6 +47,9 @@ export async function POST(request: NextRequest) {
     intention_key?: unknown
     tool_preset_key?: unknown
     source_template_id?: unknown
+    usage_hint?: unknown
+    sequence_label?: unknown
+    conversation_stage?: unknown
   }
   try {
     body = await request.json()
@@ -84,6 +89,9 @@ export async function POST(request: NextRequest) {
   const focus_main = normalizeFocusMain(body.focus_main)
   const intention_key = normalizeIntentionKey(body.intention_key)
   const tool_preset_key = clipToolPresetKey(body.tool_preset_key)
+  const usage_hint = clipHowToUse(body.usage_hint ?? null)
+  const sequence_label = clipSubtitle(body.sequence_label ?? null)
+  const conversation_stage = normalizeConversationStage(body.conversation_stage)
 
   const { data: inserted, error } = await supabaseAdmin
     .from('leader_tenant_pl_script_sections')
@@ -97,6 +105,9 @@ export async function POST(request: NextRequest) {
       focus_main,
       intention_key,
       tool_preset_key,
+      usage_hint,
+      sequence_label,
+      conversation_stage,
       source_template_id: null,
     })
     .select()

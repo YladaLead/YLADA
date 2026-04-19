@@ -18,6 +18,10 @@ import {
   hideProLideresYladaLinkFromTeamCatalog,
   isProLideresYladaLinkVisibleToTeamInCatalog,
 } from '@/lib/pro-lideres-ylada-catalog-team-visibility'
+import {
+  FLUXO_PRESET_GANHAR_MASSA_MUSCULAR,
+  proLideresNoelThreadMentionsMassaMuscular,
+} from '@/lib/pro-lideres-noel-flow-preset-massa-muscular'
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
 
@@ -40,6 +44,7 @@ const PEDIDO_SEM_GERACAO_PT = `[PEDIDO DE LINK SEM GERAÇÃO NESTE TURNO]
 O líder pediu quiz/link/fluxo mas o backend **não** devolveu URL (tema insuficiente, limite de links, sessão sem permissão nas APIs Ylada, ou erro técnico).
 - Não inventes URL nem digas que o link foi criado.
 - Explica em 1–2 frases e sugere: tema explícito (ex.: "quiz para…"), ou criar em **Links / Ferramentas** na conta Ylada; depois o link aparece no **Catálogo** do Pro Líderes.
+- Se a mensagem do líder foi só **aprovação curta** (**gostei**, **ok**, **concordo**) após o rascunho, pede **uma** vez **"gera o link"** ou que **cole de novo** o bloco do quiz — isso reforça o pedido para o sistema.
 - Podes ainda entregar um **roteiro de perguntas** só em texto para usar já no WhatsApp, se fizer sentido.`
 
 /**
@@ -155,6 +160,11 @@ export async function POST(request: NextRequest) {
     extraSystemParts.push(PEDIDO_SEM_GERACAO_PT)
   }
 
+  const histBlob = [message, ...historyNorm.map((h) => h.content)].join('\n')
+  const massaPresetAppendix = proLideresNoelThreadMentionsMassaMuscular(histBlob)
+    ? `\n[REFERÊNCIA — exemplo «Ganhar massa muscular» (espelhe estrutura e tom quando o pedido for compatível)]\n${FLUXO_PRESET_GANHAR_MASSA_MUSCULAR}\n`
+    : ''
+
   const systemPrompt =
     buildProLideresNoelSystemPrompt({
       operationLabel,
@@ -164,7 +174,9 @@ export async function POST(request: NextRequest) {
       replyLanguage,
       linksAtivosContext,
       painelTarefasDiariasUrl,
-    }) + extraSystemParts.join('\n')
+    }) +
+    massaPresetAppendix +
+    extraSystemParts.join('\n')
 
   const openaiMessages: OpenAI.Chat.ChatCompletionMessageParam[] = [
     { role: 'system', content: systemPrompt },

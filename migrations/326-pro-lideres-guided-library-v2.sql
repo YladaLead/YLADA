@@ -25,7 +25,7 @@ INSERT INTO pro_lideres_script_templates (
 ) VALUES
 (
   'vendas', 'novos_contatos', 'bebida_funcional',
-  'Bebidas funcionais — abordagem no primeiro contacto',
+  'Bebidas funcionais — abordagem no primeiro contato',
   'WhatsApp · 3 mensagens',
   'Use quando a pessoa ainda não demonstrou interesse; foco em energia e rotina leve.',
   'Permissão → Dor simples → Curiosidade',
@@ -55,9 +55,9 @@ $j$::jsonb, 20
 ),
 (
   'vendas', 'novos_contatos', 'espaco_saudavel',
-  'Espaço Saudável — abordagem leve (primeiro contacto)',
+  'Espaço Saudável — abordagem leve (primeiro contato)',
   'WhatsApp · 3 mensagens',
-  'Use com contacto morno ou conhecido; ainda sem pedir o link.',
+  'Use com contato morno ou conhecido; ainda sem pedir o link.',
   'Permissão → Identificação → Pergunta aberta',
   'primeiro_contato',
   $j$
@@ -87,7 +87,7 @@ $j$::jsonb, 40
   'vendas', 'reativar', 'espaco_saudavel',
   'Espaço Saudável — reativação sem cobrança',
   'WhatsApp · 2 mensagens',
-  'Use quando o contacto esfriou mas há relação prévia.',
+  'Use quando o contato esfriou mas há relação prévia.',
   'Reabertura → Conexão',
   'reativacao',
   $j$
@@ -225,7 +225,7 @@ $j$::jsonb, 130
   $j$
 [
   {"title":"1. Check-in","subtitle":"WhatsApp","body":"Oi! Passei para saber como você tem se sentido nesses primeiros dias.","how_to_use":null},
-  {"title":"2. Continuidade","subtitle":"WhatsApp","body":"O mais importante agora é continuidade, não perfeição. Como está correndo por aí?","how_to_use":null}
+  {"title":"2. Continuidade","subtitle":"WhatsApp","body":"O mais importante agora é continuidade, não perfeição. Como tem sido por aí?","how_to_use":null}
 ]
 $j$::jsonb, 140
 ),
@@ -233,7 +233,7 @@ $j$::jsonb, 140
   'recrutamento', 'novos_contatos', 'plano_negocio',
   'Plano de negócio — abrir conversa (ético)',
   'WhatsApp · 2 mensagens',
-  'Use com contacto aberto a projeto paralelo; sem prometer renda.',
+  'Use com contato aberto a projeto paralelo; sem prometer renda.',
   'Permissão → Curiosidade profissional',
   'primeiro_contato',
   $j$

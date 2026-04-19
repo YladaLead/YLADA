@@ -5,11 +5,13 @@ import { resolveProLideresTenantContext } from '@/lib/pro-lideres-server'
 import { requireProLideresPaidContext } from '@/lib/pro-lideres-subscription-access'
 import {
   clipToolPresetKey,
+  normalizeConversationStage,
   normalizeFocusMain,
   normalizeIntentionKey,
 } from '@/lib/pro-lideres-script-section-meta'
 import {
   PL_SCRIPT_UUID_RE,
+  clipHowToUse,
   clipSectionTitle,
   clipSubtitle,
   resolveYladaLinkIdForOwner,
@@ -53,6 +55,9 @@ export async function PATCH(
     focus_main?: unknown
     intention_key?: unknown
     tool_preset_key?: unknown
+    usage_hint?: unknown
+    sequence_label?: unknown
+    conversation_stage?: unknown
   }
   try {
     body = await request.json()
@@ -91,6 +96,15 @@ export async function PATCH(
   }
   if (body.tool_preset_key !== undefined) {
     payload.tool_preset_key = clipToolPresetKey(body.tool_preset_key)
+  }
+  if (body.usage_hint !== undefined) {
+    payload.usage_hint = clipHowToUse(body.usage_hint)
+  }
+  if (body.sequence_label !== undefined) {
+    payload.sequence_label = clipSubtitle(body.sequence_label)
+  }
+  if (body.conversation_stage !== undefined) {
+    payload.conversation_stage = normalizeConversationStage(body.conversation_stage)
   }
 
   if (Object.keys(payload).length === 0) {

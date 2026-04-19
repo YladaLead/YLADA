@@ -136,6 +136,10 @@ function isExplicitNoLinkRequest(message: string): boolean {
   )
 }
 
+function stripAccentsForMatch(s: string): string {
+  return s.normalize('NFD').replace(/\p{M}/gu, '')
+}
+
 /** Aprovação curta depois do Noel ter entregue o rascunho (MODELO VISUAL) sem link oficial ainda. */
 function aprovacaoCurtaPosRascunho(message: string): boolean {
   const t = message.trim()
@@ -160,16 +164,51 @@ function ultimoAssistantEntregouRascunhoQuizSemLinkOficial(
 ): boolean {
   const last = conversationHistory?.filter((h) => h.role === 'assistant').pop()?.content
   if (!last) return false
-  const lower = last.toLowerCase()
+  const flat = stripAccentsForMatch(last).toLowerCase()
   const temModelo =
-    (lower.includes('### título do fluxo') || lower.includes('### titulo do fluxo')) &&
-    (lower.includes('### pergunta 1') || lower.includes('### pergunta')) &&
-    (lower.includes('### cta whatsapp') || lower.includes('### cta'))
+    flat.includes('### titulo do fluxo') &&
+    (flat.includes('### pergunta 1') || flat.includes('### pergunta')) &&
+    (flat.includes('### cta whatsapp') || flat.includes('### cta'))
   const jaLinkOficial =
-    lower.includes('### quiz e link (oficial)') ||
-    lower.includes('[link gerado') ||
-    lower.includes('link gerado agora')
+    flat.includes('### quiz e link (oficial)') ||
+    flat.includes('[link gerado') ||
+    flat.includes('link gerado agora')
   return temModelo && !jaLinkOficial
+}
+
+/** «A» ou «A)» após bloco ### Decisão rápida = mesmo efeito que «gostei» para gerar link. */
+function letraAAprovacaoDecisaoRapida(message: string, lastAssistantContent: string): boolean {
+  const msgTrim = message.trim()
+  if (msgTrim.length > 12) return false
+  if (!/^a\)?[\s!.]*$/i.test(msgTrim)) return false
+  const flatLast = stripAccentsForMatch(lastAssistantContent).toLowerCase()
+  return flatLast.includes('### decisao rapida')
+}
+
+function isShortApprovalAfterQuizDraft(
+  message: string,
+  conversationHistory: Array<{ role: string; content: string }>
+): boolean {
+  if (!ultimoAssistantEntregouRascunhoQuizSemLinkOficial(conversationHistory)) return false
+  if (aprovacaoCurtaPosRascunho(message)) return true
+  const lastAsst = conversationHistory.filter((h) => h.role === 'assistant').pop()?.content ?? ''
+  return letraAAprovacaoDecisaoRapida(message, lastAsst)
+}
+
+/**
+ * O `/api/ylada/interpret` precisa do texto do quiz; com só «gostei» o modelo não devolve `flow_id`.
+ */
+function buildInterpretTextForProLideresNewLink(
+  message: string,
+  conversationHistory: Array<{ role: string; content: string }>
+): string {
+  const msg = message.trim()
+  if (!msg) return msg
+  if (!isShortApprovalAfterQuizDraft(msg, conversationHistory)) return msg
+  const draft =
+    conversationHistory.filter((h) => h.role === 'assistant').pop()?.content?.trim() ?? ''
+  if (!draft) return msg
+  return `${draft}\n\n---\nAprovação do líder (gerar link oficial YLADA agora, com perguntas estruturadas): ${msg}`
 }
 
 function isIntencaoCriarLink(
@@ -222,7 +261,7 @@ function isIntencaoCriarLink(
     const rest = m.replace(/^sim[\s,]+/i, '').trim()
     if (rest.length >= 3) return true
   }
-  if (aprovacaoCurtaPosRascunho(message) && ultimoAssistantEntregouRascunhoQuizSemLinkOficial(conversationHistory)) {
+  if (isShortApprovalAfterQuizDraft(message, conversationHistory ?? [])) {
     return true
   }
   return false
@@ -438,11 +477,12 @@ export async function runProLideresNoelLinkPipeline(params: {
   // Novo link (Pro Líderes: tenta mesmo sem perfil Noel completo — interpret usa contexto mínimo)
   if (!linkGeradoBlock && shouldGenerateNewLink) {
     try {
+      const interpretText = buildInterpretTextForProLideresNewLink(message, conversationHistory)
       const interpretRes = await fetch(`${baseUrl}/api/ylada/interpret`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', cookie },
         body: JSON.stringify({
-          text: message.trim(),
+          text: interpretText,
           segment: yladaSegment,
           ...(locale && { locale }),
         }),

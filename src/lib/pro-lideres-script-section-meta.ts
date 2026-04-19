@@ -76,7 +76,7 @@ export type ScriptLibraryFilters = {
 
 /** Momento da conversa (biblioteca YLADA + secções com metadados). */
 export const PL_SCRIPT_CONVERSATION_STAGE_OPTIONS = [
-  { id: 'primeiro_contato', label: 'Primeiro contacto' },
+  { id: 'primeiro_contato', label: 'Primeiro contato' },
   { id: 'pos_interesse', label: 'Depois de interesse' },
   { id: 'convite', label: 'Convite / direcionar' },
   { id: 'reativacao', label: 'Reativação' },

@@ -108,6 +108,41 @@ function stripRedundantUrlCodeFence(text: string, url: string | null): string {
     .replace(new RegExp(`^\`\`\`(?:[\\w-]*)\\n${esc}\\s*\\n\`\`\`\\n?`, 'gi'), '')
 }
 
+/** Opções A–D após ### Decisão rápida (Pro Líderes) — usadas para chips clicáveis. */
+function parseProLideresDecisaoRapidaOptions(content: string): { letter: string; label: string; sendText: string }[] | null {
+  const raw = content.trim()
+  if (!raw) return null
+  if (/###\s*Quiz\s+e\s+link\s*\(oficial\)/i.test(raw)) return null
+  if (!/###\s*Decis[aã]o\s+r[aá]pida/i.test(raw)) return null
+  const parts = raw.split(/###\s*Decis[aã]o\s+r[aá]pida[^\n]*/i)
+  const afterHeader = parts.length > 1 ? parts.slice(1).join('') : ''
+  if (!afterHeader) return null
+  const section = afterHeader.split(/\n###[\s\u00A0]/)[0] ?? afterHeader
+  const options: { letter: string; label: string; sendText: string }[] = []
+  for (const line of section.split('\n')) {
+    const trimmed = line.trim()
+    const m = trimmed.match(/^\*{0,2}([A-D])\*{0,2}\)\s+(.+)$/)
+    if (!m) continue
+    const letter = m[1].toUpperCase()
+    const label = m[2].replace(/\*+/g, '').trim()
+    if (!label) continue
+    options.push({
+      letter,
+      label,
+      sendText: letter === 'A' ? 'A' : `${letter}) ${label}`,
+    })
+  }
+  return options.length >= 2 ? options : null
+}
+
+function shouldShowDecisaoRapidaChipsForMessage(msg: Message, allMessages: Message[], proLideresPayload: boolean): boolean {
+  if (!proLideresPayload || msg.role !== 'assistant' || msg.id === 'welcome') return false
+  const idx = allMessages.findIndex((m) => m.id === msg.id)
+  if (idx < 0) return false
+  if (allMessages.slice(idx + 1).some((m) => m.role === 'user')) return false
+  return parseProLideresDecisaoRapidaOptions(msg.content) != null
+}
+
 /** Extrai apenas o script da mensagem do Noel (para copiar sem o resto). */
 function extractScriptFromMessage(content: string): string {
   const trimmed = content.trim()
@@ -497,7 +532,7 @@ export default function NoelChat({
     setLoading(true)
 
     try {
-      const conversationHistory = messages
+      const conversationHistory = [...messages, userMsg]
         .filter((m) => m.role === 'user' || m.role === 'assistant')
         .slice(-12)
         .map((m) => ({ role: m.role, content: m.content }))
@@ -978,6 +1013,27 @@ export default function NoelChat({
                       {assistantMarkdownNormalized}
                     </ReactMarkdown>
                   </div>
+                  {shouldShowDecisaoRapidaChipsForMessage(msg, messages, proLideresPayload) ? (
+                    <div className="mt-3 flex flex-col gap-2 border-t border-sky-100 pt-3">
+                      <p className="text-xs font-medium text-sky-800/90">Toque numa opção (envia a resposta por você):</p>
+                      <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+                        {parseProLideresDecisaoRapidaOptions(msg.content)!.map((opt) => (
+                          <button
+                            key={opt.letter}
+                            type="button"
+                            disabled={loading}
+                            onClick={() => void sendMessage(opt.sendText)}
+                            className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl border border-sky-200 bg-sky-50 px-3 py-2.5 text-left text-sm font-medium text-sky-900 hover:bg-sky-100 disabled:cursor-not-allowed disabled:opacity-50 transition-colors touch-manipulation"
+                          >
+                            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-sky-600 text-xs font-bold text-white">
+                              {opt.letter}
+                            </span>
+                            <span className="min-w-0 leading-snug">{opt.label}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  ) : null}
                   {lastAssistantMsg?.id === msg.id &&
                     msg.id !== 'welcome' &&
                     messageHasScript(msg.content) &&

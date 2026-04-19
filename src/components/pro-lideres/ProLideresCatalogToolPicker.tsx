@@ -53,7 +53,7 @@ export function ProLideresCatalogToolPicker({
             Selecionada: <span className="font-semibold text-gray-800">{selectedLabel}</span>
           </span>
         ) : (
-          <span className="mt-0.5 block text-xs text-gray-500">Sem ferramenta — abre só se quiseres ligar uma</span>
+          <span className="mt-0.5 block text-xs text-gray-500">Sem ferramenta — abre só se quiser ligar uma</span>
         )}
       </summary>
       <div className="space-y-2 border-t border-gray-200/80 px-3 pb-3 pt-2">

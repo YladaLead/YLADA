@@ -12,8 +12,10 @@ import { ProLideresScriptsYladaTemplateList } from '@/components/pro-lideres/Pro
 import { ALL_SCRIPT_TOOL_ROWS } from '@/lib/pro-lideres-script-guided-briefing'
 import {
   DEFAULT_SCRIPT_LIBRARY_FILTERS,
+  PL_SCRIPT_CONVERSATION_STAGE_OPTIONS,
   PL_SCRIPT_SECTION_FOCUS_OPTIONS,
   PL_SCRIPT_SECTION_INTENTION_OPTIONS,
+  conversationStageLabel,
   focusLabel,
   intentionLabel,
   sectionMatchesLibraryFilters,
@@ -49,6 +51,157 @@ function formatScriptBlock(s: ProLideresScriptSectionWithEntries['entries'][0]):
   return lines.join('\n')
 }
 
+function focusPlScriptSectionInDom(sectionId: string): void {
+  window.requestAnimationFrame(() => {
+    const root = document.getElementById(`pl-script-section-${sectionId}`)
+    root?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    const det = root?.querySelector('details')
+    if (det) (det as HTMLDetailsElement).open = true
+  })
+}
+
+function YladaTemplateReviewDialog({
+  template,
+  saving,
+  onClose,
+  onConfirm,
+}: {
+  template: ProLideresScriptTemplateRow
+  saving: boolean
+  onClose: () => void
+  onConfirm: (visibleToTeam: boolean) => void | Promise<void>
+}) {
+  const [visibleToTeam, setVisibleToTeam] = useState(false)
+
+  useEffect(() => {
+    setVisibleToTeam(false)
+  }, [template.id])
+
+  return (
+    <div
+      className="fixed inset-0 z-[100] flex items-end justify-center sm:items-center sm:p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="ylada-review-title"
+    >
+      <button
+        type="button"
+        className="absolute inset-0 bg-black/45"
+        aria-label="Fechar revisão"
+        onClick={onClose}
+      />
+      <div className="relative z-10 flex max-h-[min(92vh,900px)] w-full max-w-2xl flex-col rounded-t-2xl border border-violet-200 bg-white shadow-2xl sm:rounded-2xl">
+        <div className="shrink-0 border-b border-violet-100 px-5 py-4 sm:px-6">
+          <p className="text-xs font-semibold uppercase tracking-wide text-violet-700">Revisar antes de salvar</p>
+          <h2 id="ylada-review-title" className="mt-1 text-lg font-bold leading-snug text-gray-900 sm:text-xl">
+            {template.title}
+          </h2>
+          {template.subtitle?.trim() ? (
+            <p className="mt-1 text-sm text-gray-600">{template.subtitle.trim()}</p>
+          ) : null}
+          <div className="mt-3 flex flex-wrap gap-1.5">
+            <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-800">
+              {focusLabel(template.focus_main)}
+            </span>
+            <span className="rounded-full bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-900">
+              {intentionLabel(template.intention_key)}
+            </span>
+            {template.tool_preset_key ? (
+              <span className="rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-950">
+                {toolPresetLabelFromKey(template.tool_preset_key) ?? template.tool_preset_key}
+              </span>
+            ) : null}
+            {conversationStageLabel(template.conversation_stage) ? (
+              <span className="rounded-full bg-teal-50 px-2 py-0.5 text-xs font-medium text-teal-900">
+                {conversationStageLabel(template.conversation_stage)}
+              </span>
+            ) : null}
+          </div>
+          {template.usage_hint?.trim() ? (
+            <p className="mt-3 text-sm leading-relaxed text-gray-700">
+              <span className="font-semibold text-gray-900">Quando usar: </span>
+              {template.usage_hint.trim()}
+            </p>
+          ) : null}
+          {template.sequence_label?.trim() ? (
+            <p className="mt-1 text-xs text-gray-600">
+              <span className="font-semibold text-gray-800">Sequência: </span>
+              {template.sequence_label.trim()}
+            </p>
+          ) : null}
+        </div>
+
+        <div className="min-h-0 flex-1 overflow-y-auto px-5 py-4 sm:px-6">
+          <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-gray-500">
+            Textos que vão para a sua biblioteca ({template.entries.length})
+          </p>
+          <ol className="list-decimal space-y-4 pl-5 marker:font-semibold marker:text-violet-700">
+            {template.entries.map((ent, idx) => (
+              <li key={`${idx}-${ent.title}`} className="pl-1">
+                <div className="rounded-xl border border-gray-200 bg-gray-50/60 p-3 sm:p-4">
+                  <p className="font-semibold text-gray-900">{ent.title}</p>
+                  {ent.subtitle?.trim() ? (
+                    <p className="mt-0.5 text-sm text-gray-600">{ent.subtitle.trim()}</p>
+                  ) : null}
+                  <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-gray-800">{ent.body}</p>
+                  {ent.how_to_use?.trim() ? (
+                    <p className="mt-2 border-t border-gray-200/80 pt-2 text-xs text-gray-600">
+                      <span className="font-semibold text-gray-700">Como usar: </span>
+                      {ent.how_to_use.trim()}
+                    </p>
+                  ) : null}
+                </div>
+              </li>
+            ))}
+          </ol>
+        </div>
+
+        <div className="shrink-0 space-y-3 border-t border-gray-100 bg-gray-50/90 px-5 py-4 sm:px-6">
+          <p className="text-sm text-gray-700">
+            Ao salvar, o app muda para «Minha biblioteca» e abre o cartão do grupo. Para ajustar: use{' '}
+            <strong className="text-gray-900">Editar grupo</strong> (nome, notas, visibilidade para a equipe) e, em
+            cada mensagem, <strong className="text-gray-900">Editar texto</strong>. Também pode copiar o texto pronto
+            para colar no WhatsApp.
+          </p>
+          <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-emerald-200 bg-white px-3 py-3 text-sm text-gray-900 shadow-sm">
+            <input
+              type="checkbox"
+              className="mt-0.5 h-4 w-4 shrink-0 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
+              checked={visibleToTeam}
+              disabled={saving}
+              onChange={(e) => setVisibleToTeam(e.target.checked)}
+            />
+            <span>
+              <span className="font-semibold text-gray-900">Autorizar para a equipe já agora</span>
+              <span className="mt-0.5 block text-xs font-normal text-gray-600">
+                Se deixar desmarcado, o grupo fica só com você até ativar «Equipe vê no painel» na biblioteca.
+              </span>
+            </span>
+          </label>
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              disabled={saving}
+              onClick={onClose}
+              className="min-h-[44px] rounded-xl border border-gray-300 bg-white px-4 text-sm font-semibold text-gray-800 hover:bg-gray-50 disabled:opacity-50"
+            >
+              Cancelar
+            </button>
+            <button
+              type="button"
+              disabled={saving}
+              onClick={() => void onConfirm(visibleToTeam)}
+              className="min-h-[44px] rounded-xl bg-violet-600 px-4 text-sm font-semibold text-white hover:bg-violet-700 disabled:opacity-50"
+            >
+              {saving ? 'Salvando…' : 'Salvar na minha biblioteca'}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export function ProLideresScriptsClient() {
   const { teamViewPreview, devStubPanel } = useProLideresPainel()
   const [sections, setSections] = useState<ProLideresScriptSectionWithEntries[]>([])
@@ -63,6 +216,9 @@ export function ProLideresScriptsClient() {
   const [scriptFilters, setScriptFilters] = useState<ScriptLibraryFilters>(DEFAULT_SCRIPT_LIBRARY_FILTERS)
   const [templates, setTemplates] = useState<ProLideresScriptTemplateRow[]>([])
   const [tplLoading, setTplLoading] = useState(false)
+  const [yladaReviewTemplate, setYladaReviewTemplate] = useState<ProLideresScriptTemplateRow | null>(null)
+  const [libraryImportHint, setLibraryImportHint] = useState<{ sectionId: string; title: string } | null>(null)
+  const libraryImportDomDoneRef = useRef<string | null>(null)
 
   const toolLabelByLinkId = useMemo(() => {
     const m = new Map<string, string>()
@@ -90,6 +246,9 @@ export function ProLideresScriptsClient() {
     if (scriptFilters.tool !== 'todos' && scriptFilters.tool !== '__ylada__') {
       q.set('tool_preset_key', scriptFilters.tool)
     }
+    if (scriptFilters.stage !== 'todos') {
+      q.set('conversation_stage', scriptFilters.stage)
+    }
     setTplLoading(true)
     void fetch(`/api/pro-lideres/script-templates?${q}`, { credentials: 'include' })
       .then((r) => r.json().catch(() => ({})))
@@ -105,9 +264,13 @@ export function ProLideresScriptsClient() {
     return () => {
       ignore = true
     }
-  }, [canEditUi, libraryTab, scriptFilters.focus, scriptFilters.intention, scriptFilters.tool])
+  }, [canEditUi, libraryTab, scriptFilters.focus, scriptFilters.intention, scriptFilters.tool, scriptFilters.stage])
 
-  async function copyTemplateToLibrary(templateId: string) {
+  async function copyTemplateToLibrary(
+    templateId: string,
+    visibleToTeam: boolean,
+    hintTitle?: string
+  ): Promise<boolean> {
     setSaving(true)
     setError(null)
     try {
@@ -115,17 +278,33 @@ export function ProLideresScriptsClient() {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ visible_to_team: true }),
+        body: JSON.stringify({ visible_to_team: visibleToTeam }),
       })
-      const data = await res.json().catch(() => ({}))
-      if (!res.ok) {
-        setError((data as { error?: string }).error || 'Não foi possível copiar o modelo.')
-        return
+      const data = (await res.json().catch(() => ({}))) as {
+        section?: { id?: string; title?: string }
+        error?: string
       }
+      if (!res.ok) {
+        setError(data.error || 'Não foi possível copiar o modelo.')
+        return false
+      }
+      const newSectionId = typeof data.section?.id === 'string' ? data.section.id : null
+      const rawHintTitle =
+        (typeof data.section?.title === 'string' && data.section.title.trim()) ||
+        (hintTitle && hintTitle.trim()) ||
+        'Novo grupo'
+      const titleForHint = rawHintTitle.replace(/\bcontacto\b/gi, 'contato')
       setLibraryTab('mine')
+      setScriptFilters(DEFAULT_SCRIPT_LIBRARY_FILTERS)
       await load()
+      if (newSectionId) {
+        libraryImportDomDoneRef.current = null
+        setLibraryImportHint({ sectionId: newSectionId, title: titleForHint })
+      }
+      return true
     } catch {
       setError('Erro de rede ao copiar o modelo.')
+      return false
     } finally {
       setSaving(false)
     }
@@ -148,14 +327,14 @@ export function ProLideresScriptsClient() {
       }
 
       if (!scriptsRes.ok) {
-        setError(scriptsData.error || 'Não foi possível carregar os scripts.')
+        setError(scriptsData.error || 'Não foi possível buscar os scripts.')
         setDevHint(scriptsData.devHint ?? null)
         setSections([])
         setCanEdit(false)
         return
       }
       if (!flowsRes.ok) {
-        setError(flowsData.error || 'Não foi possível carregar o catálogo (fluxos).')
+        setError(flowsData.error || 'Não foi possível buscar o catálogo (fluxos).')
         setDevHint(flowsData.devHint ?? null)
         setSections(scriptsData.sections ?? [])
         setCanEdit(scriptsData.canEdit !== false)
@@ -176,6 +355,14 @@ export function ProLideresScriptsClient() {
   useEffect(() => {
     void load()
   }, [load])
+
+  useEffect(() => {
+    if (!libraryImportHint || loading) return
+    if (libraryImportDomDoneRef.current === libraryImportHint.sectionId) return
+    if (!sections.some((s) => s.id === libraryImportHint.sectionId)) return
+    libraryImportDomDoneRef.current = libraryImportHint.sectionId
+    window.setTimeout(() => focusPlScriptSectionInDom(libraryImportHint.sectionId), 200)
+  }, [sections, loading, libraryImportHint])
 
   async function moveSection(index: number, dir: -1 | 1) {
     const next = index + dir
@@ -205,7 +392,7 @@ export function ProLideresScriptsClient() {
         setError(
           (j1 as { error?: string }).error ||
             (j2 as { error?: string }).error ||
-            'Não foi possível reordenar as situações.'
+            'Não foi possível reordenar os grupos.'
         )
         return
       }
@@ -246,7 +433,7 @@ export function ProLideresScriptsClient() {
         setError(
           (j1 as { error?: string }).error ||
             (j2 as { error?: string }).error ||
-            'Não foi possível reordenar os scripts.'
+            'Não foi possível reordenar as mensagens.'
         )
         return
       }
@@ -287,8 +474,9 @@ export function ProLideresScriptsClient() {
             </>
           ) : (
             <>
-              Você monta <strong className="text-gray-800">grupos de textos</strong> para a equipe usar com clientes.
-              A equipe <strong className="text-gray-800">só vê e copia</strong>.
+              Você organiza <strong className="text-gray-800">sequências de conversa</strong> (contexto, intenção e
+              textos) para a equipe usar com clientes. A equipe <strong className="text-gray-800">só vê e copia</strong>
+              o que estiver visível para ela.
             </>
           )}
         </p>
@@ -296,7 +484,7 @@ export function ProLideresScriptsClient() {
 
       {devStubPanel && (
         <p className="rounded-xl border border-amber-200 bg-amber-50/90 px-4 py-3 text-sm text-amber-950">
-          Modo dev sem tenant na base: gravação pode falhar até existir tenant e as migrations de scripts (ex.{' '}
+          Modo dev sem tenant na base: salvar pode falhar até existir tenant e as migrations de scripts (ex.{' '}
           <code className="rounded bg-amber-100/80 px-1">312</code>,{' '}
           <code className="rounded bg-amber-100/80 px-1">316</code>) estarem aplicadas.
         </p>
@@ -308,6 +496,22 @@ export function ProLideresScriptsClient() {
           {devHint ? <p className="mt-2 border-t border-red-200/80 pt-2 text-xs text-red-900/90">{devHint}</p> : null}
         </div>
       )}
+
+      {yladaReviewTemplate ? (
+        <YladaTemplateReviewDialog
+          template={yladaReviewTemplate}
+          saving={saving}
+          onClose={() => {
+            if (!saving) setYladaReviewTemplate(null)
+          }}
+          onConfirm={async (visibleToTeam) => {
+            const tpl = yladaReviewTemplate
+            if (!tpl) return
+            const ok = await copyTemplateToLibrary(tpl.id, visibleToTeam, tpl.title)
+            if (ok) setYladaReviewTemplate(null)
+          }}
+        />
+      ) : null}
 
       {canEditUi && (
         <section className="space-y-3" aria-labelledby="scripts-adicionar-heading">
@@ -346,11 +550,11 @@ export function ProLideresScriptsClient() {
           <details className="rounded-xl border border-gray-200 bg-white shadow-sm">
             <summary className="cursor-pointer list-none px-4 py-3 text-sm font-semibold text-gray-900 [&::-webkit-details-marker]:hidden">
               <span className="flex items-center justify-between gap-2">
-                <span>2. Grupo novo (à mão, sem Noel)</span>
+                <span>2. Grupo novo (manual, sem Noel)</span>
                 <span className="text-xs font-normal text-gray-500">abrir</span>
               </span>
               <span className="mt-1 block text-xs font-normal text-gray-600">
-                Só o nome do grupo; depois adicionas textos um a um
+                Só o nome do grupo; depois você adiciona os textos um a um
               </span>
             </summary>
             <div className="border-t border-gray-100 px-4 pb-4 pt-3">
@@ -374,7 +578,7 @@ export function ProLideresScriptsClient() {
       )}
 
       {loading ? (
-        <p className="text-gray-600">A carregar…</p>
+        <p className="text-gray-600">Carregando…</p>
       ) : (
         <div className="space-y-5">
           <ProLideresScriptsLibraryFilters
@@ -417,14 +621,15 @@ export function ProLideresScriptsClient() {
             <div className="space-y-2">
               <h2 className="text-xs font-semibold uppercase tracking-wide text-violet-700">Modelos prontos</h2>
               <p className="text-sm text-gray-600">
-                Copie um modelo para a sua biblioteca e edite os textos como quiser. A equipe só vê o que estiver em
-                «Minha biblioteca» e visível para a equipe.
+                «Usar e ajustar» abre uma revisão com todos os textos: confira e escolha se a equipe já pode ver. Depois
+                de salvar, o grupo fica em «Minha biblioteca» — expanda o cartão e use <strong>Editar grupo</strong> ou{' '}
+                <strong>Editar texto</strong> em cada mensagem.
               </p>
               <ProLideresScriptsYladaTemplateList
                 templates={templates}
                 loading={tplLoading}
                 saving={saving}
-                onUse={(id) => copyTemplateToLibrary(id)}
+                onReview={(t) => setYladaReviewTemplate(t)}
                 onError={setError}
               />
             </div>
@@ -432,6 +637,38 @@ export function ProLideresScriptsClient() {
 
           {(!canEditUi || libraryTab === 'mine') && (
             <>
+              {canEditUi && libraryTab === 'mine' && libraryImportHint ? (
+                <div
+                  role="status"
+                  className="rounded-xl border border-violet-200 bg-violet-50/95 px-4 py-3 text-sm text-violet-950 shadow-sm sm:px-5"
+                >
+                  <p className="font-semibold text-violet-900">Grupo salvo na sua biblioteca</p>
+                  <p className="mt-1 text-violet-950/95">
+                    <span className="font-medium text-violet-950">«{libraryImportHint.title}»</span> — para ajustar,
+                    expanda o cartão abaixo (clique no título) e use <strong>Editar grupo</strong> ou{' '}
+                    <strong>Editar texto</strong> em cada mensagem.
+                  </p>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      className="min-h-[40px] rounded-lg bg-violet-600 px-3 text-sm font-semibold text-white hover:bg-violet-700"
+                      onClick={() => focusPlScriptSectionInDom(libraryImportHint.sectionId)}
+                    >
+                      Ir ao grupo
+                    </button>
+                    <button
+                      type="button"
+                      className="min-h-[40px] rounded-lg border border-violet-200 bg-white px-3 text-sm font-medium text-violet-900 hover:bg-violet-100/40"
+                      onClick={() => {
+                        libraryImportDomDoneRef.current = null
+                        setLibraryImportHint(null)
+                      }}
+                    >
+                      Fechar aviso
+                    </button>
+                  </div>
+                </div>
+              ) : null}
               {filteredSections.length === 0 && sections.length > 0 ? (
                 <div className="rounded-xl border border-amber-200 bg-amber-50/90 px-4 py-3 text-sm text-amber-950">
                   <p>Nenhum grupo corresponde a estes filtros.</p>
@@ -457,7 +694,7 @@ export function ProLideresScriptsClient() {
                   <p className="rounded-2xl border border-dashed border-gray-300 bg-gray-50/90 px-4 py-10 text-center text-sm text-gray-600">
                     {canEditUi
                       ? 'Ainda não há grupos na sua biblioteca. Use «Criar» acima, a aba «Biblioteca YLADA» ou grupo vazio.'
-                      : 'O líder ainda não compartilhou sequências visíveis para a equipe aqui.'}
+                      : 'O líder ainda não compartilhou grupos visíveis para a equipe aqui.'}
                   </p>
                 </div>
               ) : filteredSections.length > 0 ? (
@@ -469,7 +706,13 @@ export function ProLideresScriptsClient() {
                     {filteredSections.map((sec) => {
                       const secIdx = sections.findIndex((s) => s.id === sec.id)
                       return (
-                        <li key={sec.id} className="rounded-xl border border-gray-200 bg-white shadow-sm">
+                        <li
+                          key={sec.id}
+                          id={`pl-script-section-${sec.id}`}
+                          className={`scroll-mt-4 rounded-xl border border-gray-200 bg-white shadow-sm ${
+                            libraryImportHint?.sectionId === sec.id ? 'ring-2 ring-violet-300/90' : ''
+                          }`}
+                        >
                           <SectionBlock
                             section={sec}
                             secIdx={secIdx >= 0 ? secIdx : 0}
@@ -661,7 +904,7 @@ function NewSectionForm({
           <span>
             <span className="font-medium text-gray-900">Mostrar à equipe</span>
             <span className="mt-0.5 block text-xs font-normal text-gray-600">
-              Se desmarcares, só tu vês esta sequência no painel; podes apagar quando quiseres.
+              Se desmarcar, só você vê esta sequência no painel; pode apagar quando quiser.
             </span>
           </span>
         </label>
@@ -670,7 +913,7 @@ function NewSectionForm({
           disabled={saving}
           className="min-h-[44px] rounded-lg bg-blue-600 px-5 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
         >
-          {saving ? 'A guardar…' : 'Criar grupo'}
+          {saving ? 'Salvando…' : 'Criar grupo'}
         </button>
       </form>
     </div>
@@ -718,6 +961,9 @@ function SectionBlock({
   const [focusMain, setFocusMain] = useState<PlScriptSectionFocusId>(section.focus_main ?? 'vendas')
   const [intentionKey, setIntentionKey] = useState(section.intention_key ?? 'geral')
   const [toolPresetKey, setToolPresetKey] = useState(section.tool_preset_key ?? '')
+  const [usageHint, setUsageHint] = useState(section.usage_hint ?? '')
+  const [sequenceLabel, setSequenceLabel] = useState(section.sequence_label ?? '')
+  const [conversationStage, setConversationStage] = useState(section.conversation_stage ?? '')
 
   useEffect(() => {
     setTitle(section.title)
@@ -727,6 +973,9 @@ function SectionBlock({
     setFocusMain(section.focus_main ?? 'vendas')
     setIntentionKey(section.intention_key ?? 'geral')
     setToolPresetKey(section.tool_preset_key ?? '')
+    setUsageHint(section.usage_hint ?? '')
+    setSequenceLabel(section.sequence_label ?? '')
+    setConversationStage(section.conversation_stage ?? '')
   }, [
     section.title,
     section.subtitle,
@@ -735,6 +984,9 @@ function SectionBlock({
     section.focus_main,
     section.intention_key,
     section.tool_preset_key,
+    section.usage_hint,
+    section.sequence_label,
+    section.conversation_stage,
   ])
 
   async function patchTeamVisible(next: boolean) {
@@ -777,11 +1029,14 @@ function SectionBlock({
           focus_main: focusMain,
           intention_key: intentionKey,
           tool_preset_key: toolPresetKey || null,
+          usage_hint: usageHint.trim() || null,
+          sequence_label: sequenceLabel.trim() || null,
+          conversation_stage: conversationStage.trim() || null,
         }),
       })
       const data = await res.json().catch(() => ({}))
       if (!res.ok) {
-        onError((data as { error?: string }).error || 'Não foi possível guardar.')
+        onError((data as { error?: string }).error || 'Não foi possível salvar.')
         return
       }
       setEditing(false)
@@ -878,6 +1133,43 @@ function SectionBlock({
           maxLength={300}
         />
       </label>
+      <label className="block text-sm">
+        <span className="mb-1 block font-medium text-gray-700">Quando usar (opcional)</span>
+        <textarea
+          value={usageHint}
+          onChange={(e) => setUsageHint(e.target.value)}
+          rows={2}
+          maxLength={8000}
+          placeholder="Uma frase para você ou para a equipe: em que situação usar este grupo."
+          className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm"
+        />
+      </label>
+      <label className="block text-sm">
+        <span className="mb-1 block font-medium text-gray-700">Sequência resumida (opcional)</span>
+        <input
+          value={sequenceLabel}
+          onChange={(e) => setSequenceLabel(e.target.value)}
+          className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm"
+          maxLength={300}
+          placeholder="Ex.: Permissão → Pergunta → Convite"
+        />
+      </label>
+      <label className="block text-sm">
+        <span className="mb-1 block font-medium text-gray-700">Momento da conversa (opcional)</span>
+        <select
+          className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm"
+          value={conversationStage}
+          disabled={saving}
+          onChange={(e) => setConversationStage(e.target.value)}
+        >
+          <option value="">—</option>
+          {PL_SCRIPT_CONVERSATION_STAGE_OPTIONS.map((o) => (
+            <option key={o.id} value={o.id}>
+              {o.label}
+            </option>
+          ))}
+        </select>
+      </label>
       <div className="grid gap-3 sm:grid-cols-3">
         <label className="block text-sm">
           <span className="mb-1 block font-medium text-gray-700">Foco</span>
@@ -943,7 +1235,7 @@ function SectionBlock({
         <span>
           <span className="font-medium text-gray-900">Mostrar à equipe</span>
           <span className="mt-0.5 block text-xs font-normal text-gray-600">
-            A equipe vê e copia no painel dela. Desmarcado = só tu vês (rascunho ou uso interno).
+            A equipe vê e copia no painel dela. Desmarcado = só você vê (rascunho ou uso interno).
           </span>
         </span>
       </label>
@@ -954,7 +1246,7 @@ function SectionBlock({
           disabled={saving}
           className="min-h-[44px] rounded-lg bg-blue-600 px-4 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
         >
-          Guardar
+          Salvar
         </button>
         <button
           type="button"
@@ -978,6 +1270,11 @@ function SectionBlock({
       {toolPresetLabelFromKey(section.tool_preset_key) ? (
         <span className="rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-950">
           {toolPresetLabelFromKey(section.tool_preset_key)}
+        </span>
+      ) : null}
+      {conversationStageLabel(section.conversation_stage) ? (
+        <span className="rounded-full bg-teal-50 px-2 py-0.5 text-[11px] font-semibold text-teal-900">
+          {conversationStageLabel(section.conversation_stage)}
         </span>
       ) : null}
     </span>
@@ -1069,6 +1366,18 @@ function SectionBlock({
             </span>
             {section.subtitle?.trim() ? (
               <span className="mt-0.5 block text-sm text-gray-600">{section.subtitle}</span>
+            ) : null}
+            {section.usage_hint?.trim() ? (
+              <span className="mt-1 block text-sm text-gray-700">
+                <span className="font-semibold text-gray-800">Quando usar: </span>
+                {section.usage_hint.trim()}
+              </span>
+            ) : null}
+            {section.sequence_label?.trim() ? (
+              <span className="mt-0.5 block text-xs text-gray-500">
+                <span className="font-semibold text-gray-600">Sequência: </span>
+                {section.sequence_label.trim()}
+              </span>
             ) : null}
             {metaBadges}
             <span className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-gray-500">
@@ -1165,7 +1474,7 @@ function NewEntryForm({
             className="w-full rounded-md border border-gray-200 bg-white px-2.5 py-1.5 text-sm"
             maxLength={200}
             required
-            placeholder="Ex.: 1.ª mensagem"
+            placeholder="Ex.: 1ª mensagem"
           />
         </label>
         <label className="block text-sm">
@@ -1203,7 +1512,7 @@ function NewEntryForm({
           disabled={saving}
           className="min-h-[40px] rounded-lg bg-blue-600 px-3 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
         >
-          {saving ? 'A guardar…' : 'Guardar texto'}
+          {saving ? 'Salvando…' : 'Salvar texto'}
         </button>
       </form>
     </details>
@@ -1271,7 +1580,7 @@ function EntryCard({
       })
       const data = await res.json().catch(() => ({}))
       if (!res.ok) {
-        onError((data as { error?: string }).error || 'Não foi possível guardar.')
+        onError((data as { error?: string }).error || 'Não foi possível salvar.')
         return
       }
       setEditing(false)
@@ -1344,7 +1653,7 @@ function EntryCard({
               disabled={saving}
               className="min-h-[44px] rounded-lg bg-blue-600 px-4 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
             >
-              Guardar
+              Salvar
             </button>
             <button
               type="button"
@@ -1381,7 +1690,7 @@ function EntryCard({
                     onClick={() => void onMoveEntry(sectionId, entIdx, -1)}
                     disabled={saving || entIdx <= 0}
                     className="min-h-[44px] rounded-lg border border-gray-200 bg-white px-3 text-xs font-semibold text-gray-700 hover:bg-gray-50 disabled:opacity-40"
-                    aria-label="Mover script para cima"
+                    aria-label="Mover mensagem para cima"
                   >
                     ↑
                   </button>
@@ -1390,7 +1699,7 @@ function EntryCard({
                     onClick={() => void onMoveEntry(sectionId, entIdx, 1)}
                     disabled={saving || entIdx >= entCount - 1}
                     className="min-h-[44px] rounded-lg border border-gray-200 bg-white px-3 text-xs font-semibold text-gray-700 hover:bg-gray-50 disabled:opacity-40"
-                    aria-label="Mover script para baixo"
+                    aria-label="Mover mensagem para baixo"
                   >
                     ↓
                   </button>

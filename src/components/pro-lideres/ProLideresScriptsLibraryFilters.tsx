@@ -2,6 +2,7 @@
 
 import { ALL_SCRIPT_TOOL_ROWS } from '@/lib/pro-lideres-script-guided-briefing'
 import {
+  PL_SCRIPT_CONVERSATION_STAGE_OPTIONS,
   PL_SCRIPT_SECTION_FOCUS_OPTIONS,
   PL_SCRIPT_SECTION_INTENTION_OPTIONS,
   type ScriptLibraryFilters,
@@ -75,6 +76,27 @@ export function ProLideresScriptsLibraryFilters({
           {ALL_SCRIPT_TOOL_ROWS.filter((r) => r.id !== 'outra').map((r) => (
             <option key={r.id} value={r.id}>
               {r.label}
+            </option>
+          ))}
+        </select>
+      </label>
+      <label className="block min-w-[200px] flex-1 text-sm">
+        <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-gray-500">Momento</span>
+        <select
+          className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm font-medium text-gray-900"
+          disabled={disabled}
+          value={value.stage}
+          onChange={(e) =>
+            onChange({
+              ...value,
+              stage: e.target.value as ScriptLibraryFilters['stage'],
+            })
+          }
+        >
+          <option value="todos">Todos</option>
+          {PL_SCRIPT_CONVERSATION_STAGE_OPTIONS.map((o) => (
+            <option key={o.id} value={o.id}>
+              {o.label}
             </option>
           ))}
         </select>

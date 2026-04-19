@@ -19,7 +19,10 @@ import {
   composeGuidedScriptPurpose,
   suggestPillarFromBriefing,
 } from '@/lib/pro-lideres-script-guided-briefing'
-import { clipToolPresetKey } from '@/lib/pro-lideres-script-section-meta'
+import {
+  clipToolPresetKey,
+  suggestedLibraryMetaFromNoelGuided,
+} from '@/lib/pro-lideres-script-section-meta'
 import {
   PRO_LIDERES_SCRIPT_PILLARS,
   type NoelScriptDraft,
@@ -277,6 +280,15 @@ export function ProLideresScriptsNoelGenerator({
     onError(null)
     onSaving(true)
     try {
+      const noelMeta =
+        inputMode === 'guided'
+          ? suggestedLibraryMetaFromNoelGuided({
+              objectiveId: guided.objectiveId,
+              toolPresetKey: clipToolPresetKey(guided.toolPresetId),
+              entryTitles: draft.entries.map((e) => e.title),
+            })
+          : { usage_hint: null, sequence_label: null, conversation_stage: null }
+
       const res = await fetch('/api/pro-lideres/scripts/sections', {
         method: 'POST',
         credentials: 'include',
@@ -289,6 +301,9 @@ export function ProLideresScriptsNoelGenerator({
           focus_main: inputMode === 'guided' ? guided.focusMainId : 'vendas',
           intention_key: inputMode === 'guided' ? guided.objectiveId : 'geral',
           tool_preset_key: inputMode === 'guided' ? clipToolPresetKey(guided.toolPresetId) : null,
+          usage_hint: noelMeta.usage_hint,
+          sequence_label: noelMeta.sequence_label,
+          conversation_stage: noelMeta.conversation_stage,
         }),
       })
       const data = await res.json().catch(() => ({}))
@@ -319,7 +334,7 @@ export function ProLideresScriptsNoelGenerator({
         if (!er.ok) {
           onError(
             (ej as { error?: string }).error ||
-              'A sequência foi criada, mas falhou ao guardar um dos textos. Complete manualmente.'
+              'A sequência foi criada, mas falhou ao salvar um dos textos. Complete manualmente.'
           )
           await onApplied()
           resetFlow()
@@ -825,7 +840,7 @@ export function ProLideresScriptsNoelGenerator({
               onClick={() => void onApply(false)}
               className="min-h-[48px] flex-1 rounded-xl border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-800 hover:bg-slate-50 disabled:opacity-50 sm:max-w-xs"
             >
-              {saving ? 'Salvando…' : 'Guardar só para mim'}
+              {saving ? 'Salvando…' : 'Salvar só para mim'}
             </button>
           </div>
           <p className="text-xs text-gray-500">
