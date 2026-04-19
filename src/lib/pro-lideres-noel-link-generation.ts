@@ -136,6 +136,42 @@ function isExplicitNoLinkRequest(message: string): boolean {
   )
 }
 
+/** Aprovação curta depois do Noel ter entregue o rascunho (MODELO VISUAL) sem link oficial ainda. */
+function aprovacaoCurtaPosRascunho(message: string): boolean {
+  const t = message.trim()
+  if (t.length > 120) return false
+  const m = t.toLowerCase()
+  if (/^(gostei|adorei|curti|perfeito|ótimo|otimo|show|fechei|fechou|legal|concordo|isso|manda|bora)(\s*[!.❤️🔥])*$/iu.test(t)) return true
+  if (/^(sim|ok|okay)(\s*[!.])*$/iu.test(t)) return true
+  if (/^(pode ser|pode sim|vamos|vamos em frente)(\s*[!.])*$/iu.test(t)) return true
+  if (
+    m.length <= 72 &&
+    /^(gostei|adorei|curti|perfeito|ótimo|otimo)\b/i.test(m) &&
+    !/\b(não|nao)\s+gostei\b/i.test(m)
+  ) {
+    return true
+  }
+  return false
+}
+
+/** Última resposta do assistente = quiz em formato título + perguntas + CTA, ainda sem link gravado no turno. */
+function ultimoAssistantEntregouRascunhoQuizSemLinkOficial(
+  conversationHistory?: Array<{ role: string; content: string }>
+): boolean {
+  const last = conversationHistory?.filter((h) => h.role === 'assistant').pop()?.content
+  if (!last) return false
+  const lower = last.toLowerCase()
+  const temModelo =
+    (lower.includes('### título do fluxo') || lower.includes('### titulo do fluxo')) &&
+    (lower.includes('### pergunta 1') || lower.includes('### pergunta')) &&
+    (lower.includes('### cta whatsapp') || lower.includes('### cta'))
+  const jaLinkOficial =
+    lower.includes('### quiz e link (oficial)') ||
+    lower.includes('[link gerado') ||
+    lower.includes('link gerado agora')
+  return temModelo && !jaLinkOficial
+}
+
 function isIntencaoCriarLink(
   message: string,
   conversationHistory?: Array<{ role: string; content: string }>
@@ -185,6 +221,9 @@ function isIntencaoCriarLink(
   if (perguntouCriar && pareceConfirmacao) {
     const rest = m.replace(/^sim[\s,]+/i, '').trim()
     if (rest.length >= 3) return true
+  }
+  if (aprovacaoCurtaPosRascunho(message) && ultimoAssistantEntregouRascunhoQuizSemLinkOficial(conversationHistory)) {
+    return true
   }
   return false
 }
