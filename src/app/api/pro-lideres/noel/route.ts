@@ -11,6 +11,7 @@ import {
 import { formatLinksAtivosParaNoel, getNoelYladaLinks } from '@/lib/noel-ylada-links'
 import {
   buildCanonicalQuizMarkdownForProLideresResponse,
+  isProLideresNoelShortApprovalAfterQuizDraft,
   runProLideresNoelLinkPipeline,
   type ProLideresNoelLastLinkContext,
 } from '@/lib/pro-lideres-noel-link-generation'
@@ -22,6 +23,11 @@ import {
   FLUXO_PRESET_GANHAR_MASSA_MUSCULAR,
   proLideresNoelThreadMentionsMassaMuscular,
 } from '@/lib/pro-lideres-noel-flow-preset-massa-muscular'
+import {
+  rewriteYladaQuizUrlsInMarkdownToCanonical,
+  stripBareYladaPublicQuizUrlLines,
+  stripMarkdownProLideresProximoPassoSection,
+} from '@/lib/ylada-quiz-markdown-url-canonicalize'
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
 
@@ -39,6 +45,11 @@ const MODO_EXECUTOR_LINK_PT = `[MODO EXECUTOR — LINK]
 O sistema pode ter acabado de gerar um link real na conta YLADA deste líder (bloco [LINK GERADO…] ou [LINK AJUSTADO…] abaixo, se existir).
 - Se existir esse bloco: responde só com introdução curta em português; não listes perguntas no texto; não coloques outro URL — o bloco **### Quiz e link (oficial)** no fim da resposta traz o link certo.
 - Relembra: o link fica em **Links / Ferramentas** na matriz; a **equipe só vê no Catálogo** depois de **Disponibilizar à equipe** no chat ou ativar em **Catálogo → Minhas ferramentas**. **Não** inventes URL de caminhos **/l/…** no texto — só o anexo oficial/backend.`
+
+const APROVACAO_CURTA_SEM_SEGUNDA_CONFIRMACAO_PT = `[APROVAÇÃO CURTA — JÁ É "SIM" DEFINITIVO]
+A mensagem atual do líder é **aprovação curta** (gostei, ok, sim, aprovo, gera o link…) **logo após** o **rascunho** do quiz no histórico.
+- **Proibido** pedir nova confirmação: "confirme que deseja prosseguir", "pode confirmar", "você gostaria de gerar o link", "só para confirmar", "posso criar o link agora?".
+- Responda **de forma assertiva**: no máximo **2 frases curtas** — reconhecer a aprovação e dizer que o link está **gravado** / que o bloco **### Quiz e link (oficial)** (se existir nesta resposta) é a fonte de verdade; remeta aos **botões** do chat (copiar, abrir, publicar, equipe). **Sem** nova pergunta ao líder neste turno.`
 
 const PEDIDO_SEM_GERACAO_PT = `[PEDIDO DE LINK SEM GERAÇÃO NESTE TURNO]
 O líder pediu quiz/link/fluxo mas o backend **não** devolveu URL (tema insuficiente, limite de links, sessão sem permissão nas APIs Ylada, ou erro técnico).
@@ -153,6 +164,9 @@ export async function POST(request: NextRequest) {
   }
 
   const extraSystemParts: string[] = []
+  if (isProLideresNoelShortApprovalAfterQuizDraft(message, historyNorm)) {
+    extraSystemParts.push(APROVACAO_CURTA_SEM_SEGUNDA_CONFIRMACAO_PT)
+  }
   if (linkGeradoBlock) {
     extraSystemParts.push(MODO_EXECUTOR_LINK_PT)
     extraSystemParts.push(linkGeradoBlock)
@@ -219,21 +233,19 @@ export async function POST(request: NextRequest) {
       const headingMatch = text.match(officialHeading)
       if (headingMatch && headingMatch.index !== undefined) {
         const cut = headingMatch.index
-        text = `${text.slice(0, cut).trimEnd()}\n\n${footer}`
+        const shortApproval = isProLideresNoelShortApprovalAfterQuizDraft(message, historyNorm)
+        const prefix = shortApproval
+          ? 'Combinado — o link já está gravado na sua conta YLADA.'
+          : text.slice(0, cut).trimEnd()
+        text = `${prefix}\n\n${footer}`
       } else {
-        const intro = [
-          'Perfeito — o diagnóstico/link **já foi gravado** na sua conta YLADA (**Links / Ferramentas** na matriz).',
-          '',
-          '**Sugestão de próximos passos para você:**',
-          '1. **Revisar** título e perguntas (*Editar perguntas* / *Editar na Ylada* abaixo da mensagem, ou na matriz). Quando aparecerem, os botões **Links na Ylada** e **Links no painel** abrem a lista na matriz e a visão no Pro Líderes.',
-          '2. **Abrir** o link público ou usar **Copiar link público** (um botão só abaixo da mensagem) para testar como o contato vê o fluxo.',
-          '3. **A equipe ainda não vê** esta ferramenta no **Catálogo de ferramentas** até **Disponibilizar à equipe** (botão na mensagem do quiz ou abaixo) ou ativar a visibilidade em **Pro Líderes → Catálogo** → **Minhas ferramentas**.',
-          '4. Se quiser mudanças de texto ou de foco, **Concordo** / **Pedir ajuste ao Noel** ou edita na matriz — o Noel continua como co-editor até fechares a versão.',
-          '',
-          'Abaixo está o bloco **Quiz e link (oficial)** com as perguntas alinhadas ao link público e à edição.',
-        ].join('\n')
+        const intro =
+          'O link **já foi gravado** na sua conta YLADA. Use os botões abaixo da mensagem (copiar, abrir, editar, catálogo, biblioteca, equipe).'
         text = `${intro}\n\n---\n\n${footer}`
       }
+      text = rewriteYladaQuizUrlsInMarkdownToCanonical(text, lastLinkContextOut.url)
+      text = stripBareYladaPublicQuizUrlLines(text, lastLinkContextOut.url)
+      text = stripMarkdownProLideresProximoPassoSection(text)
     }
 
     return NextResponse.json({

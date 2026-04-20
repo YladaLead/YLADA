@@ -14,6 +14,12 @@ import { getLocaleFromPathname, type Language } from '@/lib/i18n'
 import { YLADA_FREEMIUM_NOEL_MONTHLY_LIMIT_MESSAGE } from '@/config/freemium-limits'
 import { copyTextToClipboard } from '@/lib/clipboard'
 import { trackFreemiumConversionEvent } from '@/lib/ylada-freemium-client'
+import {
+  rewriteYladaQuizUrlsInMarkdownToCanonical,
+  stripBareYladaPublicQuizUrlLines,
+  stripMarkdownProLideresProximoPassoSection,
+} from '@/lib/ylada-quiz-markdown-url-canonicalize'
+import { assistantContentIsProLideresQuizDraftNoOfficialLink } from '@/lib/pro-lideres-noel-quiz-draft-detect'
 
 /** Texto plano dos nós do markdown (para detectar parágrafos que são perguntas). */
 function markdownPlainText(children: ReactNode): string {
@@ -124,41 +130,6 @@ function stripRedundantUrlCodeFence(text: string, url: string | null): string {
   return text
     .replace(new RegExp(`\\n?\`\`\`(?:[\\w-]*)\\n${esc}\\s*\\n\`\`\``, 'gi'), '')
     .replace(new RegExp(`^\`\`\`(?:[\\w-]*)\\n${esc}\\s*\\n\`\`\`\\n?`, 'gi'), '')
-}
-
-/** Opções A–D após ### Decisão rápida (Pro Líderes) — usadas para chips clicáveis. */
-function parseProLideresDecisaoRapidaOptions(content: string): { letter: string; label: string; sendText: string }[] | null {
-  const raw = content.trim()
-  if (!raw) return null
-  if (/###\s*Quiz\s+e\s+link\s*\(oficial\)/i.test(raw)) return null
-  if (!/###\s*Decis[aã]o\s+r[aá]pida/i.test(raw)) return null
-  const parts = raw.split(/###\s*Decis[aã]o\s+r[aá]pida[^\n]*/i)
-  const afterHeader = parts.length > 1 ? parts.slice(1).join('') : ''
-  if (!afterHeader) return null
-  const section = afterHeader.split(/\n###[\s\u00A0]/)[0] ?? afterHeader
-  const options: { letter: string; label: string; sendText: string }[] = []
-  for (const line of section.split('\n')) {
-    const trimmed = line.trim()
-    const m = trimmed.match(/^\*{0,2}([A-D])\*{0,2}\)\s+(.+)$/)
-    if (!m) continue
-    const letter = m[1].toUpperCase()
-    const label = m[2].replace(/\*+/g, '').trim()
-    if (!label) continue
-    options.push({
-      letter,
-      label,
-      sendText: letter === 'A' ? 'A' : `${letter}) ${label}`,
-    })
-  }
-  return options.length >= 2 ? options : null
-}
-
-function shouldShowDecisaoRapidaChipsForMessage(msg: Message, allMessages: Message[], proLideresPayload: boolean): boolean {
-  if (!proLideresPayload || msg.role !== 'assistant' || msg.id === 'welcome') return false
-  const idx = allMessages.findIndex((m) => m.id === msg.id)
-  if (idx < 0) return false
-  if (allMessages.slice(idx + 1).some((m) => m.role === 'user')) return false
-  return parseProLideresDecisaoRapidaOptions(msg.content) != null
 }
 
 function readProLideresLibraryPublishedFlag(linkId: string): boolean {
@@ -758,6 +729,7 @@ export default function NoelChat({
   /** A mensagem contém quiz e/ou link? Mostramos Editar/Gerar quando o profissional recebeu o diagnóstico. */
   function messageContainsQuizContent(content: string, linkCtx?: LastLinkContext | null): boolean {
     if (linkCtx?.url) return true
+    if (linkCtx?.link_id) return true
     const t = content.trim()
     if (!t) return false
     const hasLink = /\[.*?\]\(https?:\/\/[^)]+\)/.test(t) || /https?:\/\/[^\s)]+/.test(t)
@@ -1012,7 +984,15 @@ export default function NoelChat({
                 : null
           const assistantMarkdownSource =
             msg.role === 'assistant' && quizSlimHref
-              ? stripRedundantUrlCodeFence(msg.content, quizSlimHref)
+              ? stripMarkdownProLideresProximoPassoSection(
+                  stripBareYladaPublicQuizUrlLines(
+                    rewriteYladaQuizUrlsInMarkdownToCanonical(
+                      stripRedundantUrlCodeFence(msg.content, quizSlimHref),
+                      quizSlimHref
+                    ),
+                    quizSlimHref
+                  )
+                )
               : msg.content
           const assistantMarkdownNormalized =
             msg.role === 'assistant' ? normalizeNoelAssistantMarkdown(assistantMarkdownSource) : ''
@@ -1048,14 +1028,13 @@ export default function NoelChat({
                             proLideresPayload && quizSlimHref && hrefAbsolutized
                               ? proLideresEffectivePublicHref(hrefAbsolutized, quizSlimHref)
                               : hrefAbsolutized
-                          const slim =
-                            Boolean(
-                              proLideresPayload &&
-                                quizSlimHref &&
-                                effectiveHref &&
-                                normalizeHrefForCompare(effectiveHref) === normalizeHrefForCompare(quizSlimHref)
-                            )
-                          if (slim && effectiveHref) {
+                          /** Um só chip «abrir» no texto: sem segundo «Copiar link» (há «Copiar link público» abaixo). */
+                          const proLideresPublicQuizChip =
+                            proLideresPayload &&
+                            quizSlimHref &&
+                            effectiveHref &&
+                            looksLikeYladaPublicLinkPath(hrefAbsolutized ?? '')
+                          if (proLideresPublicQuizChip) {
                             return (
                               <a
                                 key={effectiveHref}
@@ -1101,24 +1080,42 @@ export default function NoelChat({
                       {assistantMarkdownNormalized}
                     </ReactMarkdown>
                   </div>
-                  {shouldShowDecisaoRapidaChipsForMessage(msg, messages, proLideresPayload) ? (
+                  {proLideresPayload &&
+                    !disableYladaLinkEditor &&
+                    msg.role === 'assistant' &&
+                    msg.id !== 'welcome' &&
+                    lastAssistantMsg?.id === msg.id &&
+                    !loading &&
+                    !msg.linkContext?.link_id &&
+                    assistantContentIsProLideresQuizDraftNoOfficialLink(msg.content) ? (
                     <div className="mt-3 flex flex-col gap-2 border-t border-sky-100 pt-3">
-                      <p className="text-xs font-medium text-sky-800/90">Toque numa opção (envia a resposta por você):</p>
+                      <p className="text-xs font-medium text-sky-900/90">
+                        Quando estiver satisfeito com o rascunho, gere o link — ou peça ajustes no chat.
+                      </p>
                       <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
-                        {parseProLideresDecisaoRapidaOptions(msg.content)!.map((opt) => (
-                          <button
-                            key={opt.letter}
-                            type="button"
-                            disabled={loading}
-                            onClick={() => void sendMessage(opt.sendText)}
-                            className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl border border-sky-200 bg-sky-50 px-3 py-2.5 text-left text-sm font-medium text-sky-900 hover:bg-sky-100 disabled:cursor-not-allowed disabled:opacity-50 transition-colors touch-manipulation"
-                          >
-                            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-sky-600 text-xs font-bold text-white">
-                              {opt.letter}
-                            </span>
-                            <span className="min-w-0 leading-snug">{opt.label}</span>
-                          </button>
-                        ))}
+                        <button
+                          type="button"
+                          disabled={loading}
+                          onClick={() =>
+                            void sendMessage(
+                              'Aprovo o rascunho. Gera o link oficial na minha conta YLADA agora.'
+                            )
+                          }
+                          className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-sky-600 px-4 py-2.5 text-sm font-semibold text-white shadow-md shadow-sky-500/20 hover:bg-sky-700 disabled:cursor-not-allowed disabled:opacity-50 touch-manipulation transition-colors"
+                        >
+                          Gostei — gerar o link
+                        </button>
+                        <button
+                          type="button"
+                          disabled={loading}
+                          onClick={() => {
+                            setInput('Quero ajustar o fluxo: ')
+                            queueMicrotask(() => inputRef.current?.focus())
+                          }}
+                          className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl border border-sky-300 bg-white px-4 py-2.5 text-sm font-semibold text-sky-900 hover:bg-sky-50 disabled:cursor-not-allowed disabled:opacity-50 touch-manipulation"
+                        >
+                          Pedir ajustes antes do link
+                        </button>
                       </div>
                     </div>
                   ) : null}
@@ -1171,66 +1168,11 @@ export default function NoelChat({
                       isSessionQuizLink &&
                       sessionCatalogVis === true
                     const lid = ctxForMessage?.link_id
-                    const showPostLinkCatalogGuide =
-                      proLideresLeaderLibraryFlow &&
-                      proLideresPayload &&
-                      Boolean(lid && quizUrl) &&
-                      isSessionQuizLink &&
-                      hasQuizContent
                     const alreadyInLibrary =
                       Boolean(lid) &&
                       (Boolean(libraryPublishedIds[lid!]) || readProLideresLibraryPublishedFlag(lid!))
                     return (
                       <>
-                        {showPostLinkCatalogGuide ? (
-                          <div className="mt-2 w-full rounded-xl border border-indigo-200 bg-indigo-50/95 px-3 py-3 text-indigo-950 shadow-sm">
-                            <p className="text-sm font-bold text-indigo-900">Guia: do link à tua biblioteca</p>
-                            <ol className="mt-2 list-decimal space-y-1 pl-4 text-xs leading-relaxed text-indigo-950/95">
-                              <li>
-                                O link está nesta mensagem — usa <strong>Abrir e testar</strong> como se fosses um
-                                contacto.
-                              </li>
-                              <li>
-                                Se estiver bem, <strong>publica na tua biblioteca</strong> (Vendas ou Recrutamento no
-                                catálogo).
-                              </li>
-                              <li>
-                                Em <strong>Catálogo → Minhas ferramentas</strong> defines se a <strong>equipa</strong> vê
-                                a ferramenta; também podes usar <strong>Disponibilizar à equipe</strong> abaixo.
-                              </li>
-                            </ol>
-                            <div className="mt-3 flex flex-wrap gap-2">
-                              <a
-                                href={quizUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="inline-flex min-h-[40px] items-center gap-2 rounded-lg bg-indigo-600 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-700 touch-manipulation"
-                              >
-                                Abrir e testar
-                              </a>
-                              {!alreadyInLibrary ? (
-                                <button
-                                  type="button"
-                                  disabled={loading || linkMetaBusy}
-                                  onClick={() => {
-                                    setLinkMetaError(null)
-                                    setPublishKindModal({ linkId: lid!, publicUrl: quizUrl })
-                                  }}
-                                  className="inline-flex min-h-[40px] items-center gap-2 rounded-lg border-2 border-indigo-500 bg-white px-3 py-2 text-sm font-semibold text-indigo-900 hover:bg-indigo-50 disabled:cursor-not-allowed disabled:opacity-50 touch-manipulation"
-                                >
-                                  Publicar na minha biblioteca…
-                                </button>
-                              ) : (
-                                <Link
-                                  href={`${proLideresPainelCatalogHref}?highlightYladaLink=${lid}&section=mine`}
-                                  className="inline-flex min-h-[40px] items-center gap-2 rounded-lg border border-indigo-300 bg-white px-3 py-2 text-sm font-semibold text-indigo-800 hover:bg-indigo-50 touch-manipulation"
-                                >
-                                  Abrir o meu catálogo
-                                </Link>
-                              )}
-                            </div>
-                          </div>
-                        ) : null}
                         <div className="mt-3 flex flex-wrap gap-2">
                           {ctxForMessage?.link_id && (
                             <Link
@@ -1240,6 +1182,37 @@ export default function NoelChat({
                               {proLideresPayload ? 'Editar na Ylada' : 'Editar quiz'}
                             </Link>
                           )}
+                          {proLideresPayload && proLideresLeaderLibraryFlow && quizUrl ? (
+                            <a
+                              href={quizUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex min-h-[40px] items-center gap-2 px-3 py-2 rounded-lg bg-indigo-600 text-sm font-semibold text-white hover:bg-indigo-700 transition-colors touch-manipulation"
+                            >
+                              Abrir e testar
+                            </a>
+                          ) : null}
+                          {proLideresPayload && proLideresLeaderLibraryFlow && lid && quizUrl && !alreadyInLibrary ? (
+                            <button
+                              type="button"
+                              disabled={loading || linkMetaBusy}
+                              onClick={() => {
+                                setLinkMetaError(null)
+                                setPublishKindModal({ linkId: lid!, publicUrl: quizUrl })
+                              }}
+                              className="inline-flex min-h-[40px] items-center gap-2 rounded-lg border-2 border-indigo-500 bg-white px-3 py-2 text-sm font-semibold text-indigo-900 hover:bg-indigo-50 disabled:cursor-not-allowed disabled:opacity-50 touch-manipulation"
+                            >
+                              Publicar na minha biblioteca…
+                            </button>
+                          ) : null}
+                          {proLideresPayload && proLideresLeaderLibraryFlow && lid && alreadyInLibrary ? (
+                            <Link
+                              href={`${proLideresPainelCatalogHref}?highlightYladaLink=${lid}&section=mine`}
+                              className="inline-flex min-h-[40px] items-center gap-2 rounded-lg border border-indigo-300 bg-white px-3 py-2 text-sm font-semibold text-indigo-800 hover:bg-indigo-50 touch-manipulation"
+                            >
+                              Abrir o meu catálogo
+                            </Link>
+                          ) : null}
                           {quizUrl && (
                             <button
                               type="button"

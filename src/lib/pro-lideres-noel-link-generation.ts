@@ -5,6 +5,7 @@
 import type { NextRequest } from 'next/server'
 import { formatDisplayTitle } from '@/lib/ylada/strategic-intro'
 import { YLADA_SEGMENT_CODES } from '@/config/ylada-areas'
+import { assistantContentIsProLideresQuizDraftNoOfficialLink } from '@/lib/pro-lideres-noel-quiz-draft-detect'
 
 type FormField = { id?: string; label?: string; type?: string; options?: string[] }
 
@@ -148,10 +149,21 @@ function aprovacaoCurtaPosRascunho(message: string): boolean {
   if (/^(gostei|adorei|curti|perfeito|ótimo|otimo|show|fechei|fechou|legal|concordo|isso|manda|bora)(\s*[!.❤️🔥])*$/iu.test(t)) return true
   if (/^(sim|ok|okay)(\s*[!.])*$/iu.test(t)) return true
   if (/^(pode ser|pode sim|vamos|vamos em frente)(\s*[!.])*$/iu.test(t)) return true
+  if (/^(gera|gerar)(\s+o)?\s+link\b/i.test(t)) return true
+  if (/^pode\s+gerar(\s+o)?\s+link\b/i.test(m)) return true
   if (
     m.length <= 72 &&
     /^(gostei|adorei|curti|perfeito|ótimo|otimo)\b/i.test(m) &&
     !/\b(não|nao)\s+gostei\b/i.test(m)
+  ) {
+    return true
+  }
+  /** Frase do botão «Gostei — gerar o link» e variações explícitas com o mesmo efeito que «gostei». */
+  if (
+    m.length <= 180 &&
+    /aprovo\b/.test(m) &&
+    /(gera|gerar)(\s+o)?\s+link\b/i.test(m) &&
+    !/\b(não|nao)\s+aprovo\b/i.test(m)
   ) {
     return true
   }
@@ -164,25 +176,7 @@ function ultimoAssistantEntregouRascunhoQuizSemLinkOficial(
 ): boolean {
   const last = conversationHistory?.filter((h) => h.role === 'assistant').pop()?.content
   if (!last) return false
-  const flat = stripAccentsForMatch(last).toLowerCase()
-  const temModelo =
-    flat.includes('### titulo do fluxo') &&
-    (flat.includes('### pergunta 1') || flat.includes('### pergunta')) &&
-    (flat.includes('### cta whatsapp') || flat.includes('### cta'))
-  const jaLinkOficial =
-    flat.includes('### quiz e link (oficial)') ||
-    flat.includes('[link gerado') ||
-    flat.includes('link gerado agora')
-  return temModelo && !jaLinkOficial
-}
-
-/** «A» ou «A)» após bloco ### Decisão rápida = mesmo efeito que «gostei» para gerar link. */
-function letraAAprovacaoDecisaoRapida(message: string, lastAssistantContent: string): boolean {
-  const msgTrim = message.trim()
-  if (msgTrim.length > 12) return false
-  if (!/^a\)?[\s!.]*$/i.test(msgTrim)) return false
-  const flatLast = stripAccentsForMatch(lastAssistantContent).toLowerCase()
-  return flatLast.includes('### decisao rapida')
+  return assistantContentIsProLideresQuizDraftNoOfficialLink(last)
 }
 
 function isShortApprovalAfterQuizDraft(
@@ -190,9 +184,15 @@ function isShortApprovalAfterQuizDraft(
   conversationHistory: Array<{ role: string; content: string }>
 ): boolean {
   if (!ultimoAssistantEntregouRascunhoQuizSemLinkOficial(conversationHistory)) return false
-  if (aprovacaoCurtaPosRascunho(message)) return true
-  const lastAsst = conversationHistory.filter((h) => h.role === 'assistant').pop()?.content ?? ''
-  return letraAAprovacaoDecisaoRapida(message, lastAsst)
+  return aprovacaoCurtaPosRascunho(message)
+}
+
+/** Histórico = mensagens anteriores ao turno atual; último assistant = rascunho do quiz. */
+export function isProLideresNoelShortApprovalAfterQuizDraft(
+  userMessage: string,
+  conversationHistory: Array<{ role: string; content: string }>
+): boolean {
+  return isShortApprovalAfterQuizDraft(userMessage.trim(), conversationHistory)
 }
 
 /**

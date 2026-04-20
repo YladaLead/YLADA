@@ -71,19 +71,6 @@ D) Outro (especificar)
 
 ### CTA WhatsApp
 "Entre em contato conosco para receber orientações personalizadas e dicas práticas sobre treino e alimentação!"
-
----
-
-### Decisão rápida — o que você achou desta versão?
-Responda com **A**, **B**, **C** ou **D**:
-
-A) Gostei — pode gerar o link
-
-B) Quero ajustar título ou gancho
-
-C) Quero mudar alguma pergunta
-
-D) Prefiro revisar depois na Ylada
 `
 
 export function proLideresNoelThreadMentionsMassaMuscular(text: string): boolean {
