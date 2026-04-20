@@ -99,6 +99,24 @@ function proLideresEffectivePublicHref(
   return canonicalQuizUrl
 }
 
+/** `/l/…` relativo no chat do painel resolve mal; força origem canónica do deploy. */
+function absolutizeYladaPublicLinkHref(href: string | undefined): string | undefined {
+  if (!href) return href
+  const t = href.trim()
+  if (!t.startsWith('/l/')) return href
+  const fromEnv = process.env.NEXT_PUBLIC_APP_URL?.trim().replace(/\/$/, '')
+  const base =
+    fromEnv ||
+    (typeof window !== 'undefined' ? window.location.origin.replace(/\/$/, '') : '') ||
+    ''
+  if (!base) return href
+  try {
+    return new URL(t, `${base}/`).href
+  } catch {
+    return href
+  }
+}
+
 /** Remove blocos ``` só com o URL do quiz (o chat Pro Líderes já tem um botão de copiar). */
 function stripRedundantUrlCodeFence(text: string, url: string | null): string {
   if (!url || !text) return text
@@ -1024,10 +1042,12 @@ export default function NoelChat({
                       remarkPlugins={[remarkGfm, remarkBreaks]}
                       components={{
                         a: ({ href, children }) => {
+                          const hrefAbsolutized =
+                            proLideresPayload && href ? absolutizeYladaPublicLinkHref(href) ?? href : href
                           const effectiveHref =
-                            proLideresPayload && quizSlimHref && href
-                              ? proLideresEffectivePublicHref(href, quizSlimHref)
-                              : href
+                            proLideresPayload && quizSlimHref && hrefAbsolutized
+                              ? proLideresEffectivePublicHref(hrefAbsolutized, quizSlimHref)
+                              : hrefAbsolutized
                           const slim =
                             Boolean(
                               proLideresPayload &&
@@ -1156,7 +1176,7 @@ export default function NoelChat({
                       proLideresPayload &&
                       Boolean(lid && quizUrl) &&
                       isSessionQuizLink &&
-                      /###\s*Quiz\s+e\s+link\s*\(oficial/i.test(msg.content)
+                      hasQuizContent
                     const alreadyInLibrary =
                       Boolean(lid) &&
                       (Boolean(libraryPublishedIds[lid!]) || readProLideresLibraryPublishedFlag(lid!))
@@ -1238,6 +1258,14 @@ export default function NoelChat({
                                   : 'Copiar link do quiz'}
                             </button>
                           )}
+                          {proLideresLeaderLibraryFlow && ctxForMessage?.link_id ? (
+                            <Link
+                              href={`${proLideresPainelCatalogHref}?highlightYladaLink=${ctxForMessage.link_id}&section=mine`}
+                              className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-violet-50 text-violet-900 text-sm font-medium border border-violet-200 hover:bg-violet-100 transition-colors touch-manipulation"
+                            >
+                              Catálogo (Minhas ferramentas)
+                            </Link>
+                          ) : null}
                           {showDisponibilizarCatalog ? (
                             <button
                               type="button"

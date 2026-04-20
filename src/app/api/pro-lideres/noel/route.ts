@@ -208,8 +208,19 @@ export async function POST(request: NextRequest) {
     text = text.replace(/\n{3,}/g, '\n\n')
 
     if (linkModeEnabled && canonicalAppendix && lastLinkContextOut?.url) {
-      const marker = '### Quiz e link (oficial'
-      if (!text.includes(marker)) {
+      const footer = buildCanonicalQuizMarkdownForProLideresResponse(
+        canonicalAppendix.title,
+        canonicalAppendix.url,
+        canonicalAppendix.flowId,
+        canonicalAppendix.config
+      )
+      /** Modelo pode já incluir «Quiz e link (oficial)» com URL errado — substituímos pelo bloco canónico do backend. */
+      const officialHeading = /(^|\n)(\*{0,2}#{1,3}\s*quiz\s+e\s+link\s*\(oficial[^\n]*)/i
+      const headingMatch = text.match(officialHeading)
+      if (headingMatch && headingMatch.index !== undefined) {
+        const cut = headingMatch.index
+        text = `${text.slice(0, cut).trimEnd()}\n\n${footer}`
+      } else {
         const intro = [
           'Perfeito — o diagnóstico/link **já foi gravado** na sua conta YLADA (**Links / Ferramentas** na matriz).',
           '',
@@ -221,12 +232,6 @@ export async function POST(request: NextRequest) {
           '',
           'Abaixo está o bloco **Quiz e link (oficial)** com as perguntas alinhadas ao link público e à edição.',
         ].join('\n')
-        const footer = buildCanonicalQuizMarkdownForProLideresResponse(
-          canonicalAppendix.title,
-          canonicalAppendix.url,
-          canonicalAppendix.flowId,
-          canonicalAppendix.config
-        )
         text = `${intro}\n\n---\n\n${footer}`
       }
     }
