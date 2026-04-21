@@ -15,8 +15,7 @@ import { YLADA_FREEMIUM_NOEL_MONTHLY_LIMIT_MESSAGE } from '@/config/freemium-lim
 import { copyTextToClipboard } from '@/lib/clipboard'
 import { trackFreemiumConversionEvent } from '@/lib/ylada-freemium-client'
 import {
-  rewriteYladaQuizUrlsInMarkdownToCanonical,
-  stripBareYladaPublicQuizUrlLines,
+  sanitizeProLideresQuizMarkdownToCanonicalUrl,
   stripMarkdownProLideresProximoPassoSection,
 } from '@/lib/ylada-quiz-markdown-url-canonicalize'
 import { assistantContentIsProLideresQuizDraftNoOfficialLink } from '@/lib/pro-lideres-noel-quiz-draft-detect'
@@ -985,11 +984,8 @@ export default function NoelChat({
           const assistantMarkdownSource =
             msg.role === 'assistant' && quizSlimHref
               ? stripMarkdownProLideresProximoPassoSection(
-                  stripBareYladaPublicQuizUrlLines(
-                    rewriteYladaQuizUrlsInMarkdownToCanonical(
-                      stripRedundantUrlCodeFence(msg.content, quizSlimHref),
-                      quizSlimHref
-                    ),
+                  sanitizeProLideresQuizMarkdownToCanonicalUrl(
+                    stripRedundantUrlCodeFence(msg.content, quizSlimHref),
                     quizSlimHref
                   )
                 )

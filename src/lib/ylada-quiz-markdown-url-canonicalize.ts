@@ -51,3 +51,49 @@ export function stripBareYladaPublicQuizUrlLines(markdown: string, canonicalPubl
 export function stripMarkdownProLideresProximoPassoSection(markdown: string): string {
   return markdown.replace(/\n+###\s*Pr[oó]ximo\s+passo\b[\s\S]*$/i, '').trimEnd()
 }
+
+/**
+ * Pós-processamento completo quando o backend já devolveu o URL público do quiz neste turno.
+ * - Reescreve hosts (ylada, localhost, etc.) para o slug canónico.
+ * - Remove linhas só-URL.
+ * - `www.ylada.com/l/…` sem `https://`.
+ * - Se o slug canónico **não** for preset `pl-{12hex}-{v|r}-…`, remove substituições de URLs `pl-…` inventadas pelo modelo.
+ */
+export function sanitizeProLideresQuizMarkdownToCanonicalUrl(markdown: string, canonicalPublicUrl: string): string {
+  let t = markdown || ''
+  if (!t.trim() || !canonicalPublicUrl.trim()) return markdown
+  const meta = canonicalSlugAndOrigin(canonicalPublicUrl)
+  if (!meta) return markdown
+  const { slug: good, url } = meta
+
+  t = rewriteYladaQuizUrlsInMarkdownToCanonical(t, canonicalPublicUrl)
+  t = stripBareYladaPublicQuizUrlLines(t, canonicalPublicUrl)
+
+  t = t.replace(/(?:https?:\/\/)?(?:www\.)?ylada\.com\/l\/([a-z0-9_-]+)/gi, (full, slug: string) => {
+    if (String(slug).toLowerCase() === good) {
+      return full.startsWith('http') ? full : `https://www.ylada.com/l/${slug}`
+    }
+    return url
+  })
+
+  for (let i = 0; i < 4; i++) {
+    const prev = t
+    t = t.replace(/https?:\/\/[^\s)"']+\/l\/([a-z0-9_-]+)/gi, (full, slug: string) =>
+      String(slug).toLowerCase() === good ? full : url
+    )
+    if (prev === t) break
+  }
+
+  t = t.replace(/\]\(\/l\/([a-z0-9_-]+)\)/gi, (full, slug: string) => {
+    if (String(slug).toLowerCase() === good) return full
+    return `](${meta.origin}/l/${good})`
+  })
+
+  const canonicalIsPresetPl = /^pl-[a-f0-9]{12}-[vr]-/i.test(good)
+  if (!canonicalIsPresetPl) {
+    t = t.replace(/\bhttps?:\/\/[^\s)"']*\/l\/pl-[a-f0-9]{12}-[vr]-[a-z0-9_-]+/gi, url)
+    t = t.replace(/\]\(\/l\/(pl-[a-f0-9]{12}-[vr]-[a-z0-9_-]+)\)/gi, `](${url})`)
+  }
+
+  return t.replace(/\n{3,}/g, '\n\n').trimEnd()
+}

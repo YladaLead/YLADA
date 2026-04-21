@@ -24,8 +24,7 @@ import {
   proLideresNoelThreadMentionsMassaMuscular,
 } from '@/lib/pro-lideres-noel-flow-preset-massa-muscular'
 import {
-  rewriteYladaQuizUrlsInMarkdownToCanonical,
-  stripBareYladaPublicQuizUrlLines,
+  sanitizeProLideresQuizMarkdownToCanonicalUrl,
   stripMarkdownProLideresProximoPassoSection,
 } from '@/lib/ylada-quiz-markdown-url-canonicalize'
 
@@ -243,8 +242,10 @@ export async function POST(request: NextRequest) {
           'O link **já foi gravado** na sua conta YLADA. Use os botões abaixo da mensagem (copiar, abrir, editar, catálogo, biblioteca, equipe).'
         text = `${intro}\n\n---\n\n${footer}`
       }
-      text = rewriteYladaQuizUrlsInMarkdownToCanonical(text, lastLinkContextOut.url)
-      text = stripBareYladaPublicQuizUrlLines(text, lastLinkContextOut.url)
+    }
+
+    if (lastLinkContextForResponse?.url?.trim()) {
+      text = sanitizeProLideresQuizMarkdownToCanonicalUrl(text, lastLinkContextForResponse.url)
       text = stripMarkdownProLideresProximoPassoSection(text)
     }
 
