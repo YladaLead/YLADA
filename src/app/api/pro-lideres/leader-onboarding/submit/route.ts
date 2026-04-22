@@ -1,5 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
+import {
+  buildMainChallengeAnswerLine,
+  buildTeamBottleneckLine,
+  LEADER_ONBOARDING_ALLOWED_BOTTLENECK,
+  LEADER_ONBOARDING_ALLOWED_FOLLOWUP,
+  LEADER_ONBOARDING_ALLOWED_MAIN_CHALLENGE,
+  LEADER_ONBOARDING_ALLOWED_TEAM_ACTIVITY,
+  LEADER_ONBOARDING_ALLOWED_TOOL_IDS,
+} from '@/lib/pro-lideres-leader-onboarding-fields'
 
 type SubmitBody = {
   token?: string
@@ -8,6 +17,15 @@ type SubmitBody = {
   whatsapp?: string
   focus_notes?: string
   primary_goal?: string
+  primary_goal_measure?: string
+  main_challenge_preset?: string
+  main_challenge_other?: string
+  team_activity_level?: string
+  follow_up_frequency?: string
+  tools_used?: string[] | string
+  team_bottleneck?: string
+  team_bottleneck_other?: string
+  /** Legado: ignorado se main_challenge_preset vier preenchido. */
   main_challenge?: string
   /** Idade do líder (anos). */
   leader_age?: number | string
@@ -34,6 +52,25 @@ function parseOptionalInt(value: unknown, opts: { min: number; max: number }): n
   if (!Number.isFinite(n)) return null
   if (n < opts.min || n > opts.max) return null
   return n
+}
+
+function parseToolsUsed(raw: unknown): string[] | null {
+  if (raw == null) return null
+  let arr: string[]
+  if (Array.isArray(raw)) {
+    arr = raw.map((x) => String(x).trim()).filter(Boolean)
+  } else if (typeof raw === 'string') {
+    arr = raw.split(',').map((s) => s.trim()).filter(Boolean)
+  } else {
+    return null
+  }
+  const out = [...new Set(arr)]
+  for (const id of out) {
+    if (!LEADER_ONBOARDING_ALLOWED_TOOL_IDS.has(id)) return null
+  }
+  if (out.length === 0) return null
+  if (out.includes('none_consistent') && out.length > 1) return null
+  return out.sort()
 }
 
 export async function POST(request: NextRequest) {
@@ -81,13 +118,75 @@ export async function POST(request: NextRequest) {
   const teamLeaders = parseOptionalInt(body.team_leaders_count, { min: 0, max: 100_000 })
   const teamLines = parseOptionalInt(body.team_distinct_lines, { min: 0, max: 50_000 })
 
+  const teamActivity = String(body.team_activity_level ?? '').trim()
+  if (!teamActivity || !LEADER_ONBOARDING_ALLOWED_TEAM_ACTIVITY.has(teamActivity)) {
+    return NextResponse.json({ error: 'Selecione o nível de atividade da equipe.' }, { status: 400 })
+  }
+
+  const follow = String(body.follow_up_frequency ?? '').trim()
+  if (!follow || !LEADER_ONBOARDING_ALLOWED_FOLLOWUP.has(follow)) {
+    return NextResponse.json({ error: 'Selecione a frequência de acompanhamento.' }, { status: 400 })
+  }
+
+  const toolsUsed = parseToolsUsed(body.tools_used)
+  if (!toolsUsed) {
+    return NextResponse.json({ error: 'Indique as ferramentas que usa (opções válidas).' }, { status: 400 })
+  }
+
+  const primaryGoal = clip(body.primary_goal, 200)
+  if (!primaryGoal || primaryGoal.length < 3) {
+    return NextResponse.json({ error: 'Objetivo principal (30 dias) é obrigatório.' }, { status: 400 })
+  }
+
+  const primaryGoalMeasure = clip(body.primary_goal_measure, 400)
+  if (!primaryGoalMeasure || primaryGoalMeasure.length < 8) {
+    return NextResponse.json(
+      { error: 'Indique como saberá que atingiu o objetivo (critério mensurável).' },
+      { status: 400 }
+    )
+  }
+
+  const preset = String(body.main_challenge_preset ?? '').trim()
+  const otherMc = String(body.main_challenge_other ?? '').trim().slice(0, 200)
+
+  let mainChallengeFinal: string | null
+  if (preset && LEADER_ONBOARDING_ALLOWED_MAIN_CHALLENGE.has(preset)) {
+    if (preset === 'other' && otherMc.length < 2) {
+      return NextResponse.json({ error: 'Descreva o desafio em “Outro”.' }, { status: 400 })
+    }
+    mainChallengeFinal = buildMainChallengeAnswerLine(preset, otherMc)
+  } else if (clip(body.main_challenge, 300)) {
+    mainChallengeFinal = clip(body.main_challenge, 300)
+  } else {
+    return NextResponse.json({ error: 'Selecione o maior desafio hoje.' }, { status: 400 })
+  }
+
+  const bottleneck = String(body.team_bottleneck ?? '').trim()
+  const otherBn = String(body.team_bottleneck_other ?? '').trim().slice(0, 200)
+  if (!bottleneck || !LEADER_ONBOARDING_ALLOWED_BOTTLENECK.has(bottleneck)) {
+    return NextResponse.json({ error: 'Selecione o que mais trava a equipe.' }, { status: 400 })
+  }
+  if (bottleneck === 'other' && otherBn.length < 2) {
+    return NextResponse.json({ error: 'Descreva o gargalo em “Outro”.' }, { status: 400 })
+  }
+  const teamBottleneckLine = buildTeamBottleneckLine(bottleneck, otherBn)
+
   const answers = {
     display_name: displayName,
     team_name: clip(body.team_name, 160),
     whatsapp: clip(body.whatsapp, 40),
     focus_notes: clip(body.focus_notes, 2000),
-    primary_goal: clip(body.primary_goal, 200),
-    main_challenge: clip(body.main_challenge, 300),
+    primary_goal: primaryGoal,
+    primary_goal_measure: primaryGoalMeasure,
+    main_challenge: mainChallengeFinal,
+    main_challenge_preset: preset && LEADER_ONBOARDING_ALLOWED_MAIN_CHALLENGE.has(preset) ? preset : null,
+    main_challenge_other: preset === 'other' ? otherMc || null : null,
+    team_activity_level: teamActivity,
+    follow_up_frequency: follow,
+    tools_used: toolsUsed,
+    team_bottleneck: bottleneck,
+    team_bottleneck_other: bottleneck === 'other' ? otherBn || null : null,
+    team_bottleneck_line: teamBottleneckLine,
     leader_age: leaderAge,
     herbalife_years: herbalifeYears,
     career_before_herbalife: clip(body.career_before_herbalife, 300),

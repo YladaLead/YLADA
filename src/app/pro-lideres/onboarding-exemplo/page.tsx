@@ -23,8 +23,15 @@ export default function ProLideresLeaderOnboardingExemploPage() {
     teamTotalPeople: '18',
     teamLeadersCount: '4',
     teamDistinctLines: '3',
+    teamActivityLevel: 'medium',
+    followupFrequency: '2_3_week',
+    toolsUsedCsv: 'evs,challenge_21,plan_90',
     primaryGoal: 'Duplicar o acompanhamento semanal com cada líder',
-    mainChallenge: 'Consistência de follow-up com quem está a começar',
+    primaryGoalMeasure: 'Passar de 1 para 2 contactos por líder por semana, registados no grupo',
+    mainChallengePreset: 'followup',
+    mainChallengeOther: '',
+    teamBottleneck: 'time',
+    teamBottleneckOther: '',
     focusNotes: '',
   }))
 

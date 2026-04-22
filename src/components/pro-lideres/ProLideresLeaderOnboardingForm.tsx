@@ -1,5 +1,15 @@
 'use client'
 
+import { useState } from 'react'
+
+import {
+  LEADER_ONBOARDING_BOTTLENECK_OPTIONS,
+  LEADER_ONBOARDING_FOLLOWUP_FREQUENCY_OPTIONS,
+  LEADER_ONBOARDING_MAIN_CHALLENGE_OPTIONS,
+  LEADER_ONBOARDING_TEAM_ACTIVITY_OPTIONS,
+  LEADER_ONBOARDING_TOOL_OPTIONS,
+} from '@/lib/pro-lideres-leader-onboarding-fields'
+
 export type LeaderOnboardingFormValues = {
   displayName: string
   teamName: string
@@ -10,12 +20,56 @@ export type LeaderOnboardingFormValues = {
   teamTotalPeople: string
   teamLeadersCount: string
   teamDistinctLines: string
+  teamActivityLevel: string
+  followupFrequency: string
+  toolsUsedCsv: string
   primaryGoal: string
-  mainChallenge: string
+  primaryGoalMeasure: string
+  mainChallengePreset: string
+  mainChallengeOther: string
+  teamBottleneck: string
+  teamBottleneckOther: string
   focusNotes: string
 }
 
 type FieldKey = keyof LeaderOnboardingFormValues
+
+function parseToolsCsv(csv: string): string[] {
+  return [...new Set(csv.split(',').map((s) => s.trim()).filter(Boolean))].sort()
+}
+
+function toggleToolInCsv(csv: string, key: string): string {
+  const cur = parseToolsCsv(csv)
+  if (key === 'none_consistent') {
+    return cur.includes('none_consistent') ? '' : 'none_consistent'
+  }
+  const withoutNone = cur.filter((k) => k !== 'none_consistent')
+  const set = new Set(withoutNone)
+  if (set.has(key)) set.delete(key)
+  else set.add(key)
+  return [...set].sort().join(',')
+}
+
+export function validateProLideresLeaderOnboardingForm(v: LeaderOnboardingFormValues): string | null {
+  if (!v.teamActivityLevel.trim()) return 'Selecione o nível de atividade atual da equipe.'
+  if (!v.followupFrequency.trim()) return 'Selecione a frequência de acompanhamento atual.'
+  const tools = parseToolsCsv(v.toolsUsedCsv)
+  if (tools.length === 0) return 'Indique pelo menos uma opção em “Ferramentas que usa hoje”.'
+  if (tools.includes('none_consistent') && tools.length > 1) {
+    return 'Se marcar “Não uso nenhuma com consistência”, não combine com outras ferramentas.'
+  }
+  const pg = v.primaryGoal.trim()
+  if (pg.length < 3) return 'Descreva o objetivo principal (30 dias).'
+  const pm = v.primaryGoalMeasure.trim()
+  if (pm.length < 8) return 'Explique como saberá que atingiu o objetivo (critério mensurável).'
+  const preset = v.mainChallengePreset.trim()
+  if (!preset) return 'Selecione a opção que melhor descreve o maior desafio hoje.'
+  if (preset === 'other' && v.mainChallengeOther.trim().length < 2) return 'Descreva o desafio em “Outro”.'
+  const bot = v.teamBottleneck.trim()
+  if (!bot) return 'Selecione o que mais trava a equipe hoje.'
+  if (bot === 'other' && v.teamBottleneckOther.trim().length < 2) return 'Descreva o gargalo em “Outro”.'
+  return null
+}
 
 export function ProLideresLeaderOnboardingForm({
   values,
@@ -34,9 +88,22 @@ export function ProLideresLeaderOnboardingForm({
 }) {
   const v = values
   const set = onChange
+  const toolsSelected = parseToolsCsv(v.toolsUsedCsv)
+  const [clientError, setClientError] = useState<string | null>(null)
+
+  function submitWrapped(e: React.FormEvent) {
+    e.preventDefault()
+    const err = validateProLideresLeaderOnboardingForm(v)
+    if (err) {
+      setClientError(err)
+      return
+    }
+    setClientError(null)
+    void onSubmit(e)
+  }
 
   return (
-    <form className="grid gap-3" onSubmit={(e) => void onSubmit(e)}>
+    <form className="grid gap-3" onSubmit={submitWrapped}>
       <label className="block">
         <span className="mb-1 block text-sm font-medium text-gray-700">Nome para exibição</span>
         <input
@@ -160,6 +227,62 @@ export function ProLideresLeaderOnboardingForm({
         </div>
       </details>
 
+      <fieldset disabled={disabled} className="rounded-xl border border-gray-200 bg-white px-4 py-3">
+        <legend className="px-1 text-sm font-semibold text-gray-900">Nível de atividade atual da equipe</legend>
+        <div className="mt-2 grid gap-2">
+          {LEADER_ONBOARDING_TEAM_ACTIVITY_OPTIONS.map((o) => (
+            <label key={o.id} className="flex cursor-pointer items-start gap-2 text-sm text-gray-800">
+              <input
+                type="radio"
+                name="teamActivityLevel"
+                value={o.id}
+                checked={v.teamActivityLevel === o.id}
+                onChange={() => set('teamActivityLevel', o.id)}
+                className="mt-1"
+              />
+              <span>{o.label}</span>
+            </label>
+          ))}
+        </div>
+      </fieldset>
+
+      <fieldset disabled={disabled} className="rounded-xl border border-gray-200 bg-white px-4 py-3">
+        <legend className="px-1 text-sm font-semibold text-gray-900">Frequência de acompanhamento atual</legend>
+        <div className="mt-2 grid gap-2">
+          {LEADER_ONBOARDING_FOLLOWUP_FREQUENCY_OPTIONS.map((o) => (
+            <label key={o.id} className="flex cursor-pointer items-start gap-2 text-sm text-gray-800">
+              <input
+                type="radio"
+                name="followupFrequency"
+                value={o.id}
+                checked={v.followupFrequency === o.id}
+                onChange={() => set('followupFrequency', o.id)}
+                className="mt-1"
+              />
+              <span>{o.label}</span>
+            </label>
+          ))}
+        </div>
+      </fieldset>
+
+      <fieldset disabled={disabled} className="rounded-xl border border-gray-200 bg-white px-4 py-3">
+        <legend className="px-1 text-sm font-semibold text-gray-900">Ferramentas que usa hoje</legend>
+        <p className="mt-1 text-xs text-gray-500">Pode marcar várias; a última opção é exclusiva.</p>
+        <div className="mt-2 grid gap-2">
+          {LEADER_ONBOARDING_TOOL_OPTIONS.map((o) => (
+            <label key={o.id} className="flex cursor-pointer items-start gap-2 text-sm text-gray-800">
+              <input
+                type="checkbox"
+                checked={toolsSelected.includes(o.id)}
+                onChange={() => set('toolsUsedCsv', toggleToolInCsv(v.toolsUsedCsv, o.id))}
+                className="mt-1"
+              />
+              <span>{o.label}</span>
+            </label>
+          ))}
+        </div>
+      </fieldset>
+
       <label className="block">
         <span className="mb-1 block text-sm font-medium text-gray-700">Objetivo principal (30 dias)</span>
         <input
@@ -171,25 +294,98 @@ export function ProLideresLeaderOnboardingForm({
         />
       </label>
       <label className="block">
-        <span className="mb-1 block text-sm font-medium text-gray-700">Maior desafio hoje</span>
+        <span className="mb-1 block text-sm font-medium text-gray-700">
+          Como você saberá que atingiu esse objetivo?
+        </span>
         <input
           disabled={disabled}
-          value={v.mainChallenge}
-          onChange={(e) => set('mainChallenge', e.target.value)}
-          placeholder="Ex.: consistência de acompanhamento da equipe"
+          value={v.primaryGoalMeasure}
+          onChange={(e) => set('primaryGoalMeasure', e.target.value)}
+          placeholder="Ex.: de 1 para 2 contactos por líder por semana"
           className="w-full rounded-lg border border-gray-300 px-3 py-2.5 disabled:cursor-not-allowed disabled:bg-gray-100"
         />
       </label>
+
+      <fieldset disabled={disabled} className="rounded-xl border border-gray-200 bg-white px-4 py-3">
+        <legend className="px-1 text-sm font-semibold text-gray-900">Maior desafio hoje</legend>
+        <div className="mt-2 grid gap-2">
+          {LEADER_ONBOARDING_MAIN_CHALLENGE_OPTIONS.map((o) => (
+            <label key={o.id} className="flex cursor-pointer items-start gap-2 text-sm text-gray-800">
+              <input
+                type="radio"
+                name="mainChallengePreset"
+                value={o.id}
+                checked={v.mainChallengePreset === o.id}
+                onChange={() => set('mainChallengePreset', o.id)}
+                className="mt-1"
+              />
+              <span>{o.label}</span>
+            </label>
+          ))}
+        </div>
+        {v.mainChallengePreset === 'other' && (
+          <label className="mt-3 block">
+            <span className="mb-1 block text-xs font-medium text-gray-600">Descreva o desafio</span>
+            <input
+              disabled={disabled}
+              value={v.mainChallengeOther}
+              onChange={(e) => set('mainChallengeOther', e.target.value)}
+              placeholder="Texto livre"
+              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm disabled:cursor-not-allowed disabled:bg-gray-100"
+            />
+          </label>
+        )}
+      </fieldset>
+
+      <fieldset disabled={disabled} className="rounded-xl border border-gray-200 bg-white px-4 py-3">
+        <legend className="px-1 text-sm font-semibold text-gray-900">O que mais trava sua equipe hoje?</legend>
+        <div className="mt-2 grid gap-2">
+          {LEADER_ONBOARDING_BOTTLENECK_OPTIONS.map((o) => (
+            <label key={o.id} className="flex cursor-pointer items-start gap-2 text-sm text-gray-800">
+              <input
+                type="radio"
+                name="teamBottleneck"
+                value={o.id}
+                checked={v.teamBottleneck === o.id}
+                onChange={() => set('teamBottleneck', o.id)}
+                className="mt-1"
+              />
+              <span>{o.label}</span>
+            </label>
+          ))}
+        </div>
+        {v.teamBottleneck === 'other' && (
+          <label className="mt-3 block">
+            <span className="mb-1 block text-xs font-medium text-gray-600">Descreva o gargalo</span>
+            <input
+              disabled={disabled}
+              value={v.teamBottleneckOther}
+              onChange={(e) => set('teamBottleneckOther', e.target.value)}
+              placeholder="Texto livre"
+              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm disabled:cursor-not-allowed disabled:bg-gray-100"
+            />
+          </label>
+        )}
+      </fieldset>
+
       <label className="block">
-        <span className="mb-1 block text-sm font-medium text-gray-700">Observações adicionais (opcional)</span>
+        <span className="mb-1 block text-sm font-medium text-gray-700">
+          Existe algo importante que, se resolvido, faria sua equipe crescer rápido? (opcional)
+        </span>
         <textarea
           disabled={disabled}
           value={v.focusNotes}
           onChange={(e) => set('focusNotes', e.target.value)}
-          placeholder="Contexto extra que o seu mentor precisa saber (opcional)."
+          placeholder="Contexto extra para o mentor (opcional)."
           className="min-h-[100px] w-full rounded-lg border border-gray-300 px-3 py-2.5 disabled:cursor-not-allowed disabled:bg-gray-100"
         />
       </label>
+
+      {clientError && (
+        <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700" role="alert">
+          {clientError}
+        </p>
+      )}
 
       <button
         type="submit"
@@ -212,7 +408,14 @@ export const emptyLeaderOnboardingFormValues = (): LeaderOnboardingFormValues =>
   teamTotalPeople: '',
   teamLeadersCount: '',
   teamDistinctLines: '',
+  teamActivityLevel: '',
+  followupFrequency: '',
+  toolsUsedCsv: '',
   primaryGoal: '',
-  mainChallenge: '',
+  primaryGoalMeasure: '',
+  mainChallengePreset: '',
+  mainChallengeOther: '',
+  teamBottleneck: '',
+  teamBottleneckOther: '',
   focusNotes: '',
 })

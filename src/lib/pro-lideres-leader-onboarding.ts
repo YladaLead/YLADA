@@ -1,5 +1,10 @@
 import { randomBytes } from 'crypto'
 import type { SupabaseClient } from '@supabase/supabase-js'
+import {
+  humanizeFollowupFrequency,
+  humanizeTeamActivity,
+  humanizeToolsUsed,
+} from '@/lib/pro-lideres-leader-onboarding-fields'
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
@@ -96,9 +101,23 @@ export async function applyCompletedLeaderOnboardingForEmail(params: {
   if (leadersN != null) lines.push(`Líderes na equipe: ${leadersN}`)
   if (linesN != null) lines.push(`Linhas distintas: ${linesN}`)
   const goal = typeof ans.primary_goal === 'string' ? ans.primary_goal.trim() : ''
+  const goalMeasure = typeof ans.primary_goal_measure === 'string' ? ans.primary_goal_measure.trim() : ''
   const challenge = typeof ans.main_challenge === 'string' ? ans.main_challenge.trim() : ''
+  const teamAct = typeof ans.team_activity_level === 'string' ? ans.team_activity_level.trim() : ''
+  const follow = typeof ans.follow_up_frequency === 'string' ? ans.follow_up_frequency.trim() : ''
+  const toolsUsed = Array.isArray(ans.tools_used)
+    ? (ans.tools_used as unknown[]).map((x) => String(x).trim()).filter(Boolean)
+    : []
+  const bottleneckLine =
+    typeof ans.team_bottleneck_line === 'string' ? ans.team_bottleneck_line.trim() : ''
+
+  if (teamAct) lines.push(`Atividade da equipe: ${humanizeTeamActivity(teamAct)}`)
+  if (follow) lines.push(`Acompanhamento: ${humanizeFollowupFrequency(follow)}`)
+  if (toolsUsed.length) lines.push(`Ferramentas: ${humanizeToolsUsed(toolsUsed)}`)
   if (goal) lines.push(`Objetivo (30 dias): ${goal}`)
+  if (goalMeasure) lines.push(`Como saberá que atingiu: ${goalMeasure}`)
   if (challenge) lines.push(`Maior desafio: ${challenge}`)
+  if (bottleneckLine) lines.push(`O que mais trava a equipe: ${bottleneckLine}`)
   const structured =
     lines.length > 0 ? ['[Contexto onboarding Pro Líderes]', ...lines].join('\n') : ''
 

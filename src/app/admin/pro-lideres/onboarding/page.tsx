@@ -15,7 +15,12 @@ type OnboardingItem = {
   response_completed_at: string | null
   questionnaire_answers?: {
     primary_goal?: string | null
+    primary_goal_measure?: string | null
     main_challenge?: string | null
+    team_activity_level?: string | null
+    follow_up_frequency?: string | null
+    tools_used?: string[] | null
+    team_bottleneck_line?: string | null
   } | null
 }
 
