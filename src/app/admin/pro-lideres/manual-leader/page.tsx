@@ -28,7 +28,7 @@ function AdminProLideresManualLeaderContent() {
 
   const handoutText =
     result != null
-      ? `Pro Líderes — acesso\n\nEntrar em: ${result.login_url}\nE-mail: ${result.email}\nSenha: ${result.password}\n\n(Recomendamos trocar a senha após o primeiro login.)`
+      ? `Pro Líderes — acesso\n\nEntrar em: ${result.login_url}\nE-mail: ${result.email}\nSenha: ${result.password}\n\n(Esta senha é a definitiva da conta; o líder pode alterá-la nas definições quando quiser.)`
       : ''
 
   const copyHandout = useCallback(async () => {
@@ -100,8 +100,9 @@ function AdminProLideresManualLeaderContent() {
         </div>
 
         <section className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-950">
-          <strong>Aviso de segurança:</strong> evite reutilizar senhas pessoais. O ideal é o líder trocar a senha após
-          entrar. Não guarde capturas desta página em canais inseguros.
+          <strong>Aviso de segurança:</strong> evite reutilizar senhas pessoais alheias. A senha que definir é a
+          definitiva da conta; o líder pode trocá-la nas definições se quiser. Não guarde capturas desta página em
+          canais inseguros.
         </section>
 
         <form className="space-y-4 rounded-xl border border-gray-200 bg-white p-4 sm:p-5" onSubmit={(e) => void onSubmit(e)}>
@@ -128,14 +129,14 @@ function AdminProLideresManualLeaderContent() {
             />
           </label>
           <div className="block">
-            <span className="mb-1 block text-sm font-medium text-gray-700">Senha inicial (mín. 8 caracteres)</span>
+            <span className="mb-1 block text-sm font-medium text-gray-700">Senha de acesso (mín. 8 caracteres)</span>
             <div className="relative">
               <input
                 required
                 type={showPassword ? 'text' : 'password'}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="Defina uma senha temporária"
+                placeholder="Senha definitiva da conta"
                 autoComplete="new-password"
                 minLength={8}
                 className="w-full rounded-lg border border-gray-300 py-2.5 pl-3 pr-12"

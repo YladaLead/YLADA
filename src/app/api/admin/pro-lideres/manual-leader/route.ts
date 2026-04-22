@@ -209,6 +209,6 @@ export async function POST(request: NextRequest) {
     password,
     login_url: loginUrl,
     message:
-      'Conta e espaço Pro Líderes prontos. Envie ao líder o link de entrada, o e-mail e a senha (recomende trocar a senha após o primeiro login).',
+      'Conta e espaço Pro Líderes prontos. Envie ao líder o link de entrada, o e-mail e a senha — é a senha definitiva da conta; pode alterá-la nas definições quando quiser.',
   })
 }
