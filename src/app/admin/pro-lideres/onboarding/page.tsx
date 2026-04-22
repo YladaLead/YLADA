@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import AdminProtectedRoute from '@/components/auth/AdminProtectedRoute'
+import { formatLeaderOnboardingAnswersForAdmin } from '@/lib/pro-lideres-leader-onboarding-admin-format'
 
 type OnboardingItem = {
   id: string
@@ -13,15 +14,7 @@ type OnboardingItem = {
   expires_at: string
   created_at: string
   response_completed_at: string | null
-  questionnaire_answers?: {
-    primary_goal?: string | null
-    primary_goal_measure?: string | null
-    main_challenge?: string | null
-    team_activity_level?: string | null
-    follow_up_frequency?: string | null
-    tools_used?: string[] | null
-    team_bottleneck_line?: string | null
-  } | null
+  questionnaire_answers?: Record<string, unknown> | null
 }
 
 function fmt(d: string | null | undefined): string {
@@ -40,6 +33,16 @@ function AdminProLideresOnboardingPageContent() {
   const [items, setItems] = useState<OnboardingItem[]>([])
   const [loading, setLoading] = useState(true)
   const [query, setQuery] = useState('')
+  const [detailItem, setDetailItem] = useState<OnboardingItem | null>(null)
+
+  useEffect(() => {
+    if (!detailItem) return
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setDetailItem(null)
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [detailItem])
 
   async function load() {
     setLoading(true)
@@ -100,7 +103,7 @@ function AdminProLideresOnboardingPageContent() {
           <p className="text-sm text-gray-600">
             Crie um link para o líder responder o questionário. As respostas ficam vinculadas ao e-mail.
           </p>
-          <p className="mt-2 text-sm">
+          <p className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm">
             <Link
               href="/pro-lideres/onboarding-exemplo"
               className="font-semibold text-blue-600 underline hover:text-blue-800"
@@ -108,6 +111,9 @@ function AdminProLideresOnboardingPageContent() {
               rel="noreferrer"
             >
               Ver pré-visualização do formulário (exemplo, não grava dados)
+            </Link>
+            <Link href="/admin/pro-lideres/manual-leader" className="font-semibold text-blue-600 underline hover:text-blue-800">
+              Cadastro manual de líder (senha + acesso)
             </Link>
           </p>
         </div>
@@ -187,22 +193,40 @@ function AdminProLideresOnboardingPageContent() {
                     <th className="px-2 py-2">Status</th>
                     <th className="px-2 py-2">Criado</th>
                     <th className="px-2 py-2">Respondido</th>
+                    <th className="px-2 py-2">Respostas</th>
                   </tr>
                 </thead>
                 <tbody>
                   {items.map((item) => (
                     <tr key={item.id} className="border-b border-gray-100 align-top">
-                      <td className="px-2 py-2 font-medium text-gray-900">{item.leader_name}</td>
+                      <td className="px-2 py-2">
+                        <button
+                          type="button"
+                          onClick={() => setDetailItem(item)}
+                          className="text-left font-medium text-blue-700 underline decoration-blue-400 decoration-1 underline-offset-2 hover:text-blue-900"
+                        >
+                          {item.leader_name}
+                        </button>
+                      </td>
                       <td className="px-2 py-2 text-gray-700">{item.invited_email}</td>
                       <td className="px-2 py-2 text-gray-700">{item.segment_code}</td>
                       <td className="px-2 py-2 text-gray-700">{item.status}</td>
                       <td className="px-2 py-2 text-gray-600">{fmt(item.created_at)}</td>
                       <td className="px-2 py-2 text-gray-600">{fmt(item.response_completed_at)}</td>
+                      <td className="px-2 py-2">
+                        <button
+                          type="button"
+                          onClick={() => setDetailItem(item)}
+                          className="whitespace-nowrap rounded-lg border border-gray-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-blue-700 hover:bg-gray-50"
+                        >
+                          Ver respostas
+                        </button>
+                      </td>
                     </tr>
                   ))}
                   {items.length === 0 && (
                     <tr>
-                      <td colSpan={6} className="px-2 py-6 text-center text-gray-500">
+                      <td colSpan={7} className="px-2 py-6 text-center text-gray-500">
                         Nenhum link encontrado.
                       </td>
                     </tr>
@@ -212,6 +236,76 @@ function AdminProLideresOnboardingPageContent() {
             </div>
           )}
         </section>
+
+        {detailItem && (
+          <div
+            className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-4 sm:items-center"
+            role="presentation"
+            onClick={() => setDetailItem(null)}
+          >
+            <div
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="onboarding-detail-title"
+              className="max-h-[90vh] w-full max-w-2xl overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-start justify-between gap-3 border-b border-gray-100 px-4 py-3 sm:px-5">
+                <div>
+                  <h2 id="onboarding-detail-title" className="text-lg font-bold text-gray-900">
+                    Respostas do onboarding
+                  </h2>
+                  <p className="mt-0.5 text-sm text-gray-600">
+                    <span className="font-medium text-gray-800">{detailItem.leader_name}</span>
+                    {' · '}
+                    {detailItem.invited_email}
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    Status: {detailItem.status}
+                    {detailItem.response_completed_at
+                      ? ` · Respondido em ${fmt(detailItem.response_completed_at)}`
+                      : ''}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setDetailItem(null)}
+                  className="shrink-0 rounded-lg border border-gray-200 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                >
+                  Fechar
+                </button>
+              </div>
+              <div className="max-h-[calc(90vh-5rem)] overflow-y-auto px-4 py-4 sm:px-5">
+                {(() => {
+                  const rows = formatLeaderOnboardingAnswersForAdmin(detailItem.questionnaire_answers)
+                  if (rows.length === 0) {
+                    return (
+                      <p className="text-sm text-gray-600">
+                        Ainda não há questionário guardado neste link (ou está vazio).
+                      </p>
+                    )
+                  }
+                  return (
+                    <dl className="space-y-3 text-sm">
+                      {rows.map((row) => (
+                        <div key={row.label} className="border-b border-gray-100 pb-3 last:border-0">
+                          <dt className="font-semibold text-gray-900">{row.label}</dt>
+                          <dd className="mt-1 whitespace-pre-wrap text-gray-700">{row.value}</dd>
+                        </div>
+                      ))}
+                    </dl>
+                  )
+                })()}
+                <details className="mt-6 rounded-lg border border-gray-100 bg-gray-50 p-3 text-xs">
+                  <summary className="cursor-pointer font-medium text-gray-700">JSON bruto (avançado)</summary>
+                  <pre className="mt-2 max-h-48 overflow-auto whitespace-pre-wrap break-all text-gray-600">
+                    {JSON.stringify(detailItem.questionnaire_answers ?? null, null, 2)}
+                  </pre>
+                </details>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </main>
   )

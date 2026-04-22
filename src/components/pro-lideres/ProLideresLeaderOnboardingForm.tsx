@@ -4,15 +4,23 @@ import { useState } from 'react'
 
 import {
   LEADER_ONBOARDING_BOTTLENECK_OPTIONS,
+  LEADER_ONBOARDING_DEFAULT_WHATSAPP_DIAL,
   LEADER_ONBOARDING_FOLLOWUP_FREQUENCY_OPTIONS,
   LEADER_ONBOARDING_MAIN_CHALLENGE_OPTIONS,
   LEADER_ONBOARDING_TEAM_ACTIVITY_OPTIONS,
   LEADER_ONBOARDING_TOOL_OPTIONS,
+  LEADER_ONBOARDING_WHATSAPP_COUNTRIES,
 } from '@/lib/pro-lideres-leader-onboarding-fields'
+
+export function leaderOnboardingDigitsOnly(value: string): string {
+  return value.replace(/\D/g, '')
+}
 
 export type LeaderOnboardingFormValues = {
   displayName: string
   teamName: string
+  whatsappDialCode: string
+  whatsappLocal: string
   whatsapp: string
   leaderAge: string
   herbalifeYears: string
@@ -115,32 +123,65 @@ export function ProLideresLeaderOnboardingForm({
         />
       </label>
       <label className="block">
-        <span className="mb-1 block text-sm font-medium text-gray-700">Nome da operação/equipe</span>
+        <span className="mb-1 block text-sm font-medium text-gray-700">
+          Sua equipe tem nome?{' '}
+          <span className="font-normal text-gray-500">(opcional)</span>
+        </span>
         <input
           disabled={disabled}
           value={v.teamName}
           onChange={(e) => set('teamName', e.target.value)}
-          placeholder="Ex.: Equipe Sul"
+          placeholder="Ex.: Equipe Sul — pode deixar em branco"
           className="w-full rounded-lg border border-gray-300 px-3 py-2.5 disabled:cursor-not-allowed disabled:bg-gray-100"
         />
       </label>
-      <label className="block">
+      <div className="block">
         <span className="mb-1 block text-sm font-medium text-gray-700">WhatsApp</span>
-        <input
-          disabled={disabled}
-          value={v.whatsapp}
-          onChange={(e) => set('whatsapp', e.target.value)}
-          placeholder="Com DDI, ex.: 5511999999999"
-          className="w-full rounded-lg border border-gray-300 px-3 py-2.5 disabled:cursor-not-allowed disabled:bg-gray-100"
-        />
-      </label>
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-stretch">
+          <label className="shrink-0 sm:w-[min(100%,220px)]">
+            <span className="sr-only">País / DDI</span>
+            <select
+              disabled={disabled}
+              value={
+                LEADER_ONBOARDING_WHATSAPP_COUNTRIES.some((c) => c.dial === v.whatsappDialCode)
+                  ? v.whatsappDialCode
+                  : LEADER_ONBOARDING_DEFAULT_WHATSAPP_DIAL
+              }
+              onChange={(e) => set('whatsappDialCode', e.target.value)}
+              className="h-[42px] w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm disabled:cursor-not-allowed disabled:bg-gray-100"
+            >
+              {LEADER_ONBOARDING_WHATSAPP_COUNTRIES.map((c) => (
+                <option key={c.dial} value={c.dial}>
+                  {c.label}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="min-w-0 flex-1">
+            <span className="sr-only">Número com DDD</span>
+            <input
+              disabled={disabled}
+              value={v.whatsappLocal}
+              onChange={(e) => set('whatsappLocal', e.target.value)}
+              inputMode="tel"
+              autoComplete="tel-national"
+              placeholder="DDD + número, ex.: 11999999999"
+              className="h-[42px] w-full rounded-lg border border-gray-300 px-3 py-2.5 disabled:cursor-not-allowed disabled:bg-gray-100"
+            />
+          </label>
+        </div>
+        <p className="mt-1 text-xs text-gray-500">Padrão: Brasil (+55). Só dígitos no número; o DDI é aplicado automaticamente.</p>
+      </div>
 
-      <details className="rounded-xl border border-gray-200 bg-gray-50/90 open:bg-gray-50">
+      <details
+        open
+        className="rounded-xl border border-gray-200 bg-gray-50/90 open:bg-gray-50"
+      >
         <summary className="cursor-pointer list-none px-4 py-3 text-sm font-semibold text-gray-900 [&::-webkit-details-marker]:hidden">
           <span className="inline-flex items-center gap-2">
             <span aria-hidden>☰</span>
             Perfil e estrutura da equipe
-            <span className="font-normal text-gray-500">(expandir)</span>
+            <span className="font-normal text-gray-500">(pode fechar)</span>
           </span>
         </summary>
         <div className="grid gap-3 border-t border-gray-200 px-4 pb-4 pt-2 sm:grid-cols-2">
@@ -401,6 +442,8 @@ export function ProLideresLeaderOnboardingForm({
 export const emptyLeaderOnboardingFormValues = (): LeaderOnboardingFormValues => ({
   displayName: '',
   teamName: '',
+  whatsappDialCode: LEADER_ONBOARDING_DEFAULT_WHATSAPP_DIAL,
+  whatsappLocal: '',
   whatsapp: '',
   leaderAge: '',
   herbalifeYears: '',
@@ -419,3 +462,21 @@ export const emptyLeaderOnboardingFormValues = (): LeaderOnboardingFormValues =>
   teamBottleneckOther: '',
   focusNotes: '',
 })
+
+/** Atualiza um campo e mantém `whatsapp` alinhado com DDI + número local. */
+export function reduceLeaderOnboardingFormChange(
+  prev: LeaderOnboardingFormValues,
+  field: keyof LeaderOnboardingFormValues,
+  value: string
+): LeaderOnboardingFormValues {
+  if (field === 'whatsappDialCode') {
+    const dial = leaderOnboardingDigitsOnly(value) || LEADER_ONBOARDING_DEFAULT_WHATSAPP_DIAL
+    const localDigits = leaderOnboardingDigitsOnly(prev.whatsappLocal)
+    return { ...prev, whatsappDialCode: dial, whatsapp: `${dial}${localDigits}` }
+  }
+  if (field === 'whatsappLocal') {
+    const dial = leaderOnboardingDigitsOnly(prev.whatsappDialCode) || LEADER_ONBOARDING_DEFAULT_WHATSAPP_DIAL
+    return { ...prev, whatsappLocal: value, whatsapp: `${dial}${leaderOnboardingDigitsOnly(value)}` }
+  }
+  return { ...prev, [field]: value }
+}

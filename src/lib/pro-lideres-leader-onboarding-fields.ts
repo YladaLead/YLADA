@@ -120,3 +120,23 @@ export const LEADER_ONBOARDING_ALLOWED_FOLLOWUP = new Set<string>(
 export const LEADER_ONBOARDING_ALLOWED_BOTTLENECK = new Set<string>(
   LEADER_ONBOARDING_BOTTLENECK_OPTIONS.map((o) => o.id)
 )
+
+/** País / DDI para WhatsApp no onboarding (Brasil como padrão). */
+export const LEADER_ONBOARDING_WHATSAPP_COUNTRIES = [
+  { dial: '55', label: 'Brasil (+55)' },
+  { dial: '351', label: 'Portugal (+351)' },
+  { dial: '34', label: 'Espanha (+34)' },
+  { dial: '1', label: 'EUA / Canadá (+1)' },
+  { dial: '52', label: 'México (+52)' },
+  { dial: '54', label: 'Argentina (+54)' },
+  { dial: '595', label: 'Paraguai (+595)' },
+  { dial: '598', label: 'Uruguai (+598)' },
+  { dial: '244', label: 'Angola (+244)' },
+  { dial: '238', label: 'Cabo Verde (+238)' },
+  { dial: '245', label: 'Guiné-Bissau (+245)' },
+  { dial: '258', label: 'Moçambique (+258)' },
+  { dial: '239', label: 'São Tomé e Príncipe (+239)' },
+  { dial: '670', label: 'Timor-Leste (+670)' },
+] as const
+
+export const LEADER_ONBOARDING_DEFAULT_WHATSAPP_DIAL = '55'

@@ -286,6 +286,15 @@ function AdminDashboardContent() {
       destaque: true,
     },
     {
+      id: 'pro-lideres-manual-leader',
+      title: 'Pro Líderes — cadastro manual',
+      description: 'Senha definida por ti, conta + tenant + texto para enviar ao líder',
+      icon: '🔑',
+      link: '/admin/pro-lideres/manual-leader',
+      color: 'bg-teal-700',
+      destaque: true,
+    },
+    {
       id: 'pro-estetica-corporal-onboarding',
       title: 'Pro Estética Corporal — onboarding',
       description: 'Links de questionário (consultoria); respostas aplicadas ao ambiente da dona',

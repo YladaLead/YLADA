@@ -7,6 +7,7 @@ import { YLADA_OG_FALLBACK_LOGO_PATH } from '@/lib/ylada-og-fallback-logo'
 import {
   emptyLeaderOnboardingFormValues,
   ProLideresLeaderOnboardingForm,
+  reduceLeaderOnboardingFormChange,
   type LeaderOnboardingFormValues,
 } from '@/components/pro-lideres/ProLideresLeaderOnboardingForm'
 
@@ -16,6 +17,8 @@ export default function ProLideresLeaderOnboardingExemploPage() {
     ...emptyLeaderOnboardingFormValues(),
     displayName: 'Maria Exemplo',
     teamName: 'Equipe Sul',
+    whatsappDialCode: '55',
+    whatsappLocal: '11999999999',
     whatsapp: '5511999999999',
     leaderAge: '38',
     herbalifeYears: '4',
@@ -38,7 +41,7 @@ export default function ProLideresLeaderOnboardingExemploPage() {
   const [demoSent, setDemoSent] = useState(false)
 
   const onFormChange = (field: keyof LeaderOnboardingFormValues, value: string) => {
-    setForm((prev) => ({ ...prev, [field]: value }))
+    setForm((prev) => reduceLeaderOnboardingFormChange(prev, field, value))
   }
 
   function onSubmit(e: React.FormEvent) {

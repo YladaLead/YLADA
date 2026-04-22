@@ -7,6 +7,7 @@ import { YLADA_OG_FALLBACK_LOGO_PATH } from '@/lib/ylada-og-fallback-logo'
 import {
   emptyLeaderOnboardingFormValues,
   ProLideresLeaderOnboardingForm,
+  reduceLeaderOnboardingFormChange,
   type LeaderOnboardingFormValues,
 } from '@/components/pro-lideres/ProLideresLeaderOnboardingForm'
 
@@ -32,7 +33,7 @@ export default function ProLideresLeaderOnboardingPage() {
   const [form, setForm] = useState<LeaderOnboardingFormValues>(() => emptyLeaderOnboardingFormValues())
 
   const onFormChange = useCallback((field: keyof LeaderOnboardingFormValues, value: string) => {
-    setForm((prev) => ({ ...prev, [field]: value }))
+    setForm((prev) => reduceLeaderOnboardingFormChange(prev, field, value))
   }, [])
 
   const validate = useCallback(async () => {
