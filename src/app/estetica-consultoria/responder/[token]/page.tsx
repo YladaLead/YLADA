@@ -1,7 +1,13 @@
+import type { Metadata } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
 import ConsultoriaPublicFormClient from '@/components/consultoria/ConsultoriaPublicFormClient'
+import { buildEsteticaConsultoriaResponderShareMetadata } from '@/lib/estetica-consultoria-responder-og'
 import { YLADA_OG_FALLBACK_LOGO_PATH } from '@/lib/ylada-og-fallback-logo'
+
+export function generateMetadata(): Metadata {
+  return buildEsteticaConsultoriaResponderShareMetadata()
+}
 
 export default async function EsteticaConsultoriaResponderPage({
   params,

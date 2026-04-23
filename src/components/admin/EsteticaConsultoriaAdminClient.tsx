@@ -13,6 +13,7 @@ import {
   type YladaEsteticaConsultancyShareLinkRow,
 } from '@/lib/estetica-consultoria'
 import { TEMPLATE_DIAGNOSTICO_CORPORAL_TITLE } from '@/lib/estetica-consultoria-form-templates'
+import { consultoriaCsvFilenameBase, consultoriaFormResponsesToCsv } from '@/lib/consultoria-form-csv'
 import { consultoriaAnswersToDisplayRows } from '@/lib/consultoria-form-display'
 import {
   consultoriaKindLabel,
@@ -311,7 +312,7 @@ export default function EsteticaConsultoriaAdminClient() {
       })
       const data = await res.json().catch(() => ({}))
       if (!res.ok) {
-        setError((data as { error?: string }).error || 'Erro ao guardar nota.')
+        setError((data as { error?: string }).error || 'Erro ao salvar nota.')
         return
       }
       setNewNoteBody('')
@@ -358,7 +359,7 @@ export default function EsteticaConsultoriaAdminClient() {
       })
       const data = await res.json().catch(() => ({}))
       if (!res.ok) {
-        setError((data as { error?: string }).error || 'Erro ao guardar dados da estética.')
+        setError((data as { error?: string }).error || 'Erro ao salvar dados da estética.')
         return
       }
       const item = (data as { item?: YladaEsteticaConsultClientRow }).item
@@ -405,14 +406,14 @@ export default function EsteticaConsultoriaAdminClient() {
 
   const deleteClient = async () => {
     if (!selectedClient?.id) return
-    if (!confirm('Eliminar esta estética e todos os materiais/respostas associados?')) return
+    if (!confirm('Excluir esta estética e todos os materiais/respostas associados?')) return
     const res = await fetch(`/api/admin/estetica-consultoria/clients/${selectedClient.id}`, {
       method: 'DELETE',
       credentials: 'include',
     })
     if (!res.ok) {
       const data = await res.json().catch(() => ({}))
-      setError((data as { error?: string }).error || 'Erro ao eliminar.')
+      setError((data as { error?: string }).error || 'Erro ao excluir.')
       return
     }
     setSelectedClient(null)
@@ -521,7 +522,7 @@ export default function EsteticaConsultoriaAdminClient() {
       })
       const data = await res.json().catch(() => ({}))
       if (!res.ok) {
-        setError((data as { error?: string }).error || 'Erro ao guardar.')
+        setError((data as { error?: string }).error || 'Erro ao salvar.')
         return
       }
       const item = (data as { item?: YladaEsteticaConsultancyMaterialRow }).item
@@ -535,14 +536,14 @@ export default function EsteticaConsultoriaAdminClient() {
 
   const remove = async (id: string) => {
     if (!selectedClient?.id) return
-    if (!confirm('Eliminar este material e respostas associadas?')) return
+    if (!confirm('Excluir este material e respostas associadas?')) return
     const res = await fetch(`/api/admin/estetica-consultoria/materials/${id}`, {
       method: 'DELETE',
       credentials: 'include',
     })
     if (!res.ok) {
       const data = await res.json().catch(() => ({}))
-      setError((data as { error?: string }).error || 'Erro ao eliminar.')
+      setError((data as { error?: string }).error || 'Erro ao excluir.')
       return
     }
     if (selected?.id === id) setSelected(null)
@@ -597,6 +598,32 @@ export default function EsteticaConsultoriaAdminClient() {
     const c = selected.content && typeof selected.content === 'object' ? selected.content : {}
     return getConsultoriaFormFields(c as Record<string, unknown>)
   }, [selected])
+
+  const triggerCsvDownload = useCallback((filename: string, csv: string) => {
+    const blob = new Blob([`\uFEFF${csv}`], { type: 'text/csv;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = filename
+    a.rel = 'noopener'
+    a.click()
+    URL.revokeObjectURL(url)
+  }, [])
+
+  const downloadDiagnosticResponsesCsv = useCallback(() => {
+    if (!selectedClient || !diagnosticCorporal?.responses.length) return
+    const csv = consultoriaFormResponsesToCsv(diagnosticFieldDefs, diagnosticCorporal.responses)
+    const fn = consultoriaCsvFilenameBase(selectedClient.business_name, 'diagnostico-corporal-respostas')
+    triggerCsvDownload(fn, csv)
+  }, [selectedClient, diagnosticCorporal?.responses, diagnosticFieldDefs, triggerCsvDownload])
+
+  const downloadSelectedMaterialResponsesCsv = useCallback(() => {
+    if (!selectedClient || !selected?.title || responses.length === 0) return
+    const slug = (selected.title || 'formulario').replace(/\s+/g, '-').slice(0, 32)
+    const csv = consultoriaFormResponsesToCsv(formFieldsForResponses, responses)
+    const fn = consultoriaCsvFilenameBase(selectedClient.business_name, `${slug}-respostas`)
+    triggerCsvDownload(fn, csv)
+  }, [selectedClient, selected?.title, responses, formFieldsForResponses, triggerCsvDownload])
 
   const execBlock = useMemo(() => {
     if (!selected) return null
@@ -662,7 +689,7 @@ export default function EsteticaConsultoriaAdminClient() {
     if (k === 'formulario') {
       return (
         <p className="text-sm text-gray-600">
-          Abre o separador <strong>Links</strong> e envia o URL à profissional. As respostas aparecem em{' '}
+          Abra a aba <strong>Links</strong>, envie o URL para a profissional e acompanhe as respostas na aba{' '}
           <strong>Respostas</strong>.
         </p>
       )
@@ -676,9 +703,9 @@ export default function EsteticaConsultoriaAdminClient() {
         <p className="text-sm font-medium text-pink-700">Estética · YLADA</p>
         <h1 className="text-2xl font-bold text-gray-900">Consultoria (capilar / corporal)</h1>
         <p className="text-gray-600 text-sm max-w-2xl">
-          Por estética: registo comercial (pagamento, plano anual, renovação), o <strong>formulário de diagnóstico corporal</strong>{' '}
+          Por estética: cadastro comercial (pagamento, plano anual, renovação), o <strong>formulário de diagnóstico corporal</strong>{' '}
           (quando aplicável) e <strong>outros materiais</strong> com link (roteiros, checklists, formulários extra). Tudo
-          isso só aparece <strong>depois de escolheres ou criares uma clínica</strong> na caixa «Estéticas acompanhadas».
+          isso só aparece <strong>depois de escolher ou criar uma clínica</strong> na caixa «Estéticas acompanhadas».
         </p>
         <div className="flex flex-wrap items-center gap-2 text-sm">
           {segmentoFiltro ? (
@@ -708,7 +735,7 @@ export default function EsteticaConsultoriaAdminClient() {
         <div>
           <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide">Estéticas acompanhadas</h2>
           <p className="mt-1 text-xs text-gray-600 max-w-2xl">
-            Clica num nome na lista ou usa <strong>Criar e abrir</strong>. Sem clínica selecionada não há formulário nem
+            Clique em um nome na lista ou use <strong>Criar e abrir</strong>. Sem clínica selecionada não há formulário nem
             materiais — é o primeiro passo obrigatório.
           </p>
         </div>
@@ -740,7 +767,7 @@ export default function EsteticaConsultoriaAdminClient() {
             disabled={creatingClient}
             className="rounded-lg bg-pink-600 px-4 py-2 text-sm font-semibold text-white hover:bg-pink-700 disabled:opacity-50"
           >
-            {creatingClient ? 'A criar…' : 'Criar e abrir'}
+            {creatingClient ? 'Criando…' : 'Criar e abrir'}
           </button>
         </form>
         <div className="flex flex-wrap gap-2 items-center">
@@ -759,7 +786,7 @@ export default function EsteticaConsultoriaAdminClient() {
           </button>
         </div>
         {clientsLoading ? (
-          <p className="text-sm text-gray-500">A carregar clientes…</p>
+          <p className="text-sm text-gray-500">Carregando clientes…</p>
         ) : (
           <ul className="flex flex-wrap gap-2">
             {clientsVisiveis.map((c) => (
@@ -786,14 +813,14 @@ export default function EsteticaConsultoriaAdminClient() {
         <section className="rounded-2xl border border-dashed border-pink-300 bg-gradient-to-b from-pink-50/80 to-white p-5 shadow-sm space-y-4">
           <h2 className="text-base font-semibold text-gray-900">Onde estão o formulário e os materiais?</h2>
           <p className="text-sm text-gray-700 max-w-3xl">
-            Não falta nada no sistema: esta área abre <strong>só quando há uma clínica selecionada</strong>. Em baixo
-            ficam dados comerciais, depois o que podes enviar à profissional — em duas partes distintas.
+            Não falta nada no sistema: esta área abre <strong>só quando há uma clínica selecionada</strong>. Abaixo
+            ficam dados comerciais e, em seguida, o que você pode enviar para a profissional — em duas partes distintas.
           </p>
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="rounded-xl border-2 border-rose-200 bg-rose-50/60 p-4">
               <p className="text-xs font-semibold uppercase tracking-wide text-rose-900">Formulário fixo (YLADA)</p>
               <p className="mt-2 text-sm text-gray-900 leading-relaxed">
-                <strong>Diagnóstico corporal</strong> — mesmo questionário para todas as clínicas; tu geras{' '}
+                <strong>Diagnóstico corporal</strong> — mesmo questionário para todas as clínicas; você gera{' '}
                 <strong>um link por clínica</strong>. Aparece como bloco <span className="text-rose-800">rosa</span>{' '}
                 só para estéticas <em>Corporal</em> ou <em>Ambos</em>.
               </p>
@@ -962,14 +989,14 @@ export default function EsteticaConsultoriaAdminClient() {
               disabled={savingClient}
               className="rounded-lg bg-pink-600 px-4 py-2 text-sm font-semibold text-white hover:bg-pink-700 disabled:opacity-50"
             >
-              {savingClient ? 'A guardar…' : 'Guardar dados da estética'}
+              {savingClient ? 'Salvando…' : 'Salvar dados da estética'}
             </button>
             <button
               type="button"
               onClick={() => void deleteClient()}
               className="rounded-lg border border-red-200 bg-white px-4 py-2 text-sm font-medium text-red-800 hover:bg-red-50"
             >
-              Eliminar estética
+              Excluir estética
             </button>
           </div>
         </section>
@@ -986,7 +1013,7 @@ export default function EsteticaConsultoriaAdminClient() {
           </div>
           <div className="grid gap-3 sm:grid-cols-3">
             <label className="block text-sm">
-              <span className="text-gray-600">Tipo de registo</span>
+              <span className="text-gray-600">Tipo de cadastro</span>
               <select
                 className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
                 value={newNoteKind}
@@ -1014,10 +1041,10 @@ export default function EsteticaConsultoriaAdminClient() {
             onClick={() => void addCoachingNote()}
             className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700 disabled:opacity-50"
           >
-            {savingNote ? 'A guardar…' : 'Adicionar nota'}
+            {savingNote ? 'Salvando…' : 'Adicionar nota'}
           </button>
           {coachingLoading ? (
-            <p className="text-sm text-gray-500">A carregar notas…</p>
+            <p className="text-sm text-gray-500">Carregando notas…</p>
           ) : coachingNotes.length === 0 ? (
             <p className="text-sm text-gray-500">Ainda não há notas de acompanhamento.</p>
           ) : (
@@ -1050,23 +1077,23 @@ export default function EsteticaConsultoriaAdminClient() {
                   Questionário <strong>fixo YLADA</strong> (igual para todas as clínicas) — não se edita no painel. Cada{' '}
                   <strong>link</strong> é só para <strong>{selectedClient.business_name}</strong>: primeiro enviamos
                   confirmação para o <strong>e-mail dos dados administrativos</strong>; depois ela preenche o
-                  diagnóstico completo aqui.
+                  questionário completo aqui.
                 </p>
                 <p className="text-xs text-amber-900 bg-amber-50 border border-amber-100 rounded-lg px-2 py-1.5 max-w-2xl">
-                  Garante um <strong>e-mail válido</strong> em «Dados administrativos» antes de gerar o link — é para lá
+                  Garanta um <strong>e-mail válido</strong> em «Dados administrativos» antes de gerar o link — é para lá
                   que vai o convite de confirmação.
                 </p>
               </div>
               {diagnosticLoading ? (
-                <p className="text-sm text-rose-900/80">A preparar o formulário global…</p>
+                <p className="text-sm text-rose-900/80">Preparando o formulário global…</p>
               ) : diagnosticCorporal?.material ? (
                 <>
                   <p className="text-xs text-rose-900/80">
                     Estado:{' '}
                     {diagnosticCorporal.material.is_published ? (
-                      <span className="font-semibold text-emerald-800">Ativo — podes gerar links</span>
+                      <span className="font-semibold text-emerald-800">Ativo — você pode gerar links</span>
                     ) : (
-                      <span className="font-semibold text-amber-800">Rascunho — contacta suporte se o global não estiver publicado</span>
+                      <span className="font-semibold text-amber-800">Rascunho — fale com o suporte se o global não estiver publicado</span>
                     )}
                   </p>
                   <button
@@ -1075,14 +1102,14 @@ export default function EsteticaConsultoriaAdminClient() {
                     onClick={() => void createDiagnosticCorporalLink()}
                     className="rounded-lg bg-rose-600 px-4 py-2 text-sm font-semibold text-white hover:bg-rose-700 disabled:opacity-50"
                   >
-                    {diagnosticLinkLoading ? 'A gerar…' : 'Gerar novo link para esta clínica'}
+                    {diagnosticLinkLoading ? 'Gerando…' : 'Gerar novo link para esta clínica'}
                   </button>
                   <div>
                     <h4 className="text-xs font-semibold uppercase tracking-wide text-rose-950/90">
                       Links desta clínica
                     </h4>
                     {diagnosticCorporal.links.length === 0 ? (
-                      <p className="mt-1 text-xs text-rose-900/70">Ainda não há links. Gera um acima.</p>
+                      <p className="mt-1 text-xs text-rose-900/70">Ainda não há links. Use o botão acima para gerar um.</p>
                     ) : (
                       <ul className="mt-2 space-y-2">
                         {diagnosticCorporal.links.map((lk) => (
@@ -1115,35 +1142,56 @@ export default function EsteticaConsultoriaAdminClient() {
                     )}
                   </div>
                   <div>
-                    <h4 className="text-xs font-semibold uppercase tracking-wide text-rose-950/90">
-                      Últimas respostas — {selectedClient.business_name}
-                    </h4>
+                    <div className="mt-1 flex flex-wrap items-start justify-between gap-2">
+                      <h4 className="text-xs font-semibold uppercase tracking-wide text-rose-950/90">
+                        Respostas do diagnóstico — {selectedClient.business_name}
+                      </h4>
+                      {diagnosticCorporal.responses.length > 0 ? (
+                        <button
+                          type="button"
+                          onClick={() => downloadDiagnosticResponsesCsv()}
+                          className="shrink-0 rounded-lg border border-rose-300 bg-white px-2.5 py-1 text-xs font-medium text-rose-900 hover:bg-rose-100"
+                        >
+                          Baixar CSV
+                        </button>
+                      ) : null}
+                    </div>
+                    <p className="mt-1 text-[11px] text-rose-900/75">
+                      Cada envio mostra <strong>todas</strong> as perguntas e respostas desta clínica (acompanhamento no
+                      painel).
+                    </p>
                     {diagnosticCorporal.responses.length === 0 ? (
                       <p className="mt-1 text-xs text-rose-900/70">Ainda sem envios por este link.</p>
                     ) : (
-                      <div className="mt-2 max-h-[320px] space-y-3 overflow-auto">
+                      <div className="mt-2 max-h-[min(70vh,560px)] space-y-3 overflow-auto pr-1">
                         {diagnosticCorporal.responses.map((r) => {
                           const ans = (r.answers && typeof r.answers === 'object' && !Array.isArray(r.answers)
                             ? r.answers
                             : {}) as Record<string, unknown>
                           const rows = consultoriaAnswersToDisplayRows(diagnosticFieldDefs, ans)
                           return (
-                            <div key={r.id} className="rounded-lg border border-rose-100 bg-white p-3 text-xs">
-                              <p className="text-gray-500">
+                            <div key={r.id} className="rounded-lg border border-rose-100 bg-white p-3 text-sm">
+                              <p className="text-xs text-gray-500">
                                 {new Date(r.submitted_at).toLocaleString('pt-BR')}
                                 {r.respondent_name ? ` · ${r.respondent_name}` : ''}
+                                {r.respondent_email ? ` · ${r.respondent_email}` : ''}
                               </p>
-                              <dl className="mt-2 space-y-2">
-                                {rows.slice(0, 12).map((row) => (
+                              <dl className="mt-3 space-y-3">
+                                {rows.map((row) => (
                                   <div key={row.fieldId}>
-                                    <dt className="font-semibold text-gray-700">{row.label}</dt>
-                                    <dd className="text-gray-900">{row.value}</dd>
+                                    <dt className="text-xs font-semibold uppercase tracking-wide text-gray-600">
+                                      {row.label}
+                                    </dt>
+                                    <dd className="mt-1 whitespace-pre-wrap text-base text-gray-900">{row.value}</dd>
                                   </div>
                                 ))}
                               </dl>
-                              {rows.length > 12 ? (
-                                <p className="mt-1 text-[10px] text-gray-500">+ mais campos (abre o material em Respostas)</p>
-                              ) : null}
+                              <details className="mt-3 border-t border-rose-100/80 pt-2">
+                                <summary className="cursor-pointer text-xs text-gray-500">JSON bruto</summary>
+                                <pre className="mt-2 max-h-40 overflow-auto whitespace-pre-wrap break-words text-xs text-gray-600">
+                                  {JSON.stringify(r.answers, null, 2)}
+                                </pre>
+                              </details>
                             </div>
                           )
                         })}
@@ -1153,7 +1201,7 @@ export default function EsteticaConsultoriaAdminClient() {
                 </>
               ) : (
                 <p className="text-sm text-rose-900/80">
-                  Não foi possível carregar o diagnóstico. Confirma a migração 331 no Supabase e recarrega a página.
+                  Não foi possível carregar o diagnóstico. Confirme se a migração 331 está aplicada no Supabase e recarregue a página.
                 </p>
               )}
             </section>
@@ -1192,7 +1240,7 @@ export default function EsteticaConsultoriaAdminClient() {
           <div className="rounded-xl border border-gray-200 bg-gray-50/80 px-3 py-2 mb-2">
             <p className="text-xs text-gray-700">
               <span className="font-semibold text-gray-900">Outros envios</span> — abaixo estão roteiros, checklists e
-              formulários <em>criados por ti</em> para esta clínica. O diagnóstico corporal fixo fica no{' '}
+              formulários <em>criados por você</em> para esta clínica. O diagnóstico corporal fixo fica no{' '}
               <span className="text-rose-800 font-medium">bloco rosa</span> acima (não entra nesta lista).
             </p>
           </div>
@@ -1200,12 +1248,12 @@ export default function EsteticaConsultoriaAdminClient() {
           <div className="grid gap-6 lg:grid-cols-5">
             <div className="lg:col-span-2 space-y-2">
               <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide">
-                Materiais desta estética (à parte do diagnóstico fixo)
+                Materiais desta estética (além do diagnóstico fixo)
               </h2>
               {loadingMaterials ? (
-                <p className="text-sm text-gray-500">A carregar…</p>
+                <p className="text-sm text-gray-500">Carregando…</p>
               ) : itemsDisplayed.length === 0 ? (
-                <p className="text-sm text-gray-500">Ainda não há materiais. Cria um com os botões acima.</p>
+                <p className="text-sm text-gray-500">Ainda não há materiais. Crie um com os botões acima.</p>
               ) : (
                 <ul className="space-y-2">
                   {itemsDisplayed.map((it) => (
@@ -1241,7 +1289,7 @@ export default function EsteticaConsultoriaAdminClient() {
 
             <div className="lg:col-span-3 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm min-h-[320px]">
               {!selected ? (
-                <p className="text-sm text-gray-500">Seleciona um material à esquerda ou cria um novo.</p>
+                <p className="text-sm text-gray-500">Selecione um material à esquerda ou crie um novo.</p>
               ) : (
                 <div className="space-y-4">
                   <div className="flex flex-wrap gap-2 border-b border-gray-100 pb-3">
@@ -1306,10 +1354,10 @@ export default function EsteticaConsultoriaAdminClient() {
                       </div>
                       {!selected.is_published ? (
                         <p className="text-xs text-amber-800 bg-amber-50 border border-amber-100 rounded-lg px-3 py-2">
-                          Publica o formulário no separador Editar para os links funcionarem.
+                          Publique o formulário na aba Editar para os links funcionarem.
                         </p>
                       ) : null}
-                      {auxLoading ? <p className="text-xs text-gray-500">A carregar…</p> : null}
+                      {auxLoading ? <p className="text-xs text-gray-500">Carregando…</p> : null}
                       <ul className="space-y-2 text-sm">
                         {shareLinks.map((lk) => (
                           <li key={lk.id} className="flex flex-col gap-1 rounded-lg border border-gray-100 bg-gray-50 p-3">
@@ -1334,14 +1382,26 @@ export default function EsteticaConsultoriaAdminClient() {
 
                   {tab === 'respostas' && selected.material_kind === 'formulario' ? (
                     <div className="space-y-3">
-                      <h3 className="text-sm font-semibold text-gray-900">
-                        Respostas recebidas —{' '}
-                        <span className="text-pink-800">{selectedClient.business_name}</span>
-                      </h3>
+                      <div className="flex flex-wrap items-start justify-between gap-2">
+                        <h3 className="text-sm font-semibold text-gray-900">
+                          Respostas recebidas —{' '}
+                          <span className="text-pink-800">{selectedClient.business_name}</span>
+                        </h3>
+                        {responses.length > 0 ? (
+                          <button
+                            type="button"
+                            onClick={() => downloadSelectedMaterialResponsesCsv()}
+                            className="shrink-0 rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-800 hover:bg-gray-50"
+                          >
+                            Baixar CSV
+                          </button>
+                        ) : null}
+                      </div>
                       <p className="text-xs text-gray-500">
-                        Cada envio fica ligado a esta estética; o material é «{selected.title}».
+                        Cada envio fica ligado a esta estética; o material é «{selected.title}». Todas as perguntas
+                        aparecem abaixo.
                       </p>
-                      {auxLoading ? <p className="text-xs text-gray-500">A carregar…</p> : null}
+                      {auxLoading ? <p className="text-xs text-gray-500">Carregando…</p> : null}
                       {responses.length === 0 ? (
                         <p className="text-sm text-gray-500">Ainda não há respostas.</p>
                       ) : (
@@ -1451,7 +1511,7 @@ export default function EsteticaConsultoriaAdminClient() {
                           disabled={saving}
                           className="rounded-lg bg-pink-600 px-4 py-2 text-sm font-semibold text-white hover:bg-pink-700 disabled:opacity-50"
                         >
-                          {saving ? 'A guardar…' : creating ? 'Criar material' : 'Guardar alterações'}
+                          {saving ? 'Salvando…' : creating ? 'Criar material' : 'Salvar alterações'}
                         </button>
                         {selected.id && !selected.template_key ? (
                           <button
@@ -1459,7 +1519,7 @@ export default function EsteticaConsultoriaAdminClient() {
                             onClick={() => void remove(selected.id)}
                             className="rounded-lg border border-red-200 bg-white px-4 py-2 text-sm font-medium text-red-800 hover:bg-red-50"
                           >
-                            Eliminar
+                            Excluir
                           </button>
                         ) : !selected.id ? (
                           <button

@@ -70,7 +70,7 @@ export async function GET(request: NextRequest, context: Ctx) {
     .eq('material_id', materialId)
     .eq('estetica_consult_client_id', clientId)
     .order('submitted_at', { ascending: false })
-    .limit(80)
+    .limit(500)
 
   if (rErr) {
     return NextResponse.json({ error: 'Erro ao listar respostas' }, { status: 500 })
