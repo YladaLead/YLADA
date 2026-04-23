@@ -49,7 +49,7 @@ export async function GET(request: NextRequest) {
     )
   }
 
-  const paid = await requireProLideresPaidContext(supabaseAdmin, user)
+  const paid = await requireProLideresPaidContext(supabaseAdmin, user, { allowUnpaidOwnerDraft: true })
   if (!paid.ok) return paid.response
 
   const cookieStore = await cookies()

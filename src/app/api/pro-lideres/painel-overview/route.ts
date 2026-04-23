@@ -34,7 +34,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Apenas o líder vê o resumo do painel.' }, { status: 403 })
   }
 
-  const paid = await requireProLideresPaidContext(supabaseAdmin, user)
+  const paid = await requireProLideresPaidContext(supabaseAdmin, user, { allowUnpaidOwnerDraft: true })
   if (!paid.ok) return paid.response
 
   const sp = request.nextUrl.searchParams

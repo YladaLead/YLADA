@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Laboratório disponível apenas para o líder do espaço.' }, { status: 403 })
   }
 
-  const paid = await requireProLideresPaidContext(supabaseAdmin, user)
+  const paid = await requireProLideresPaidContext(supabaseAdmin, user, { allowUnpaidOwnerDraft: true })
   if (!paid.ok) return paid.response
 
   let body: { scenarioId?: string; transcript?: TranscriptTurn[] }

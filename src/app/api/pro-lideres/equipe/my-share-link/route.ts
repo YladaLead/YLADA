@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Servidor sem service role' }, { status: 503 })
   }
 
-  const paid = await requireProLideresPaidContext(supabaseAdmin, user)
+  const paid = await requireProLideresPaidContext(supabaseAdmin, user, { allowUnpaidOwnerDraft: true })
   if (!paid.ok) return paid.response
 
   const linkId = request.nextUrl.searchParams.get('ylada_link_id')?.trim()

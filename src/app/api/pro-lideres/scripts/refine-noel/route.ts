@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
     )
   }
 
-  const paid = await requireProLideresPaidContext(supabaseAdmin, user)
+  const paid = await requireProLideresPaidContext(supabaseAdmin, user, { allowUnpaidOwnerDraft: true })
   if (!paid.ok) return paid.response
 
   let body: {
@@ -141,7 +141,7 @@ ${JSON.stringify(draftIn)}
 PEDIDO DO LÍDER PARA ALTERAR:
 ${instruction}
 
-Regras: mantém destinatário dos \`body\` como cliente/lead/público; português do Brasil; sem "follow-up" (usa acompanhamento). Só JSON.`
+Regras: mantém destinatário dos \`body\` como cliente/lead/público; português do Brasil; sem "follow-up" (usa acompanhamento); preserva **abertura com educação/conscientização** e **continuidade lógica** entre mensagens (filosofia YLADA), salvo o pedido do líder pedir explicitamente o contrário. Só JSON.`
 
   try {
     const completion = await openai.chat.completions.create({

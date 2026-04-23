@@ -75,7 +75,7 @@ export async function PATCH(request: NextRequest) {
     )
   }
 
-  const paid = await requireProLideresPaidContext(supabaseAdmin, user)
+  const paid = await requireProLideresPaidContext(supabaseAdmin, user, { allowUnpaidOwnerDraft: true })
   if (!paid.ok) return paid.response
 
   let body: Record<string, unknown>

@@ -43,7 +43,7 @@ export async function PATCH(
     return NextResponse.json({ error: 'Apenas o líder do espaço pode editar situações.' }, { status: 403 })
   }
 
-  const paidPatch = await requireProLideresPaidContext(supabaseAdmin, user)
+  const paidPatch = await requireProLideresPaidContext(supabaseAdmin, user, { allowUnpaidOwnerDraft: true })
   if (!paidPatch.ok) return paidPatch.response
 
   let body: {
@@ -156,7 +156,7 @@ export async function DELETE(
     return NextResponse.json({ error: 'Apenas o líder do espaço pode apagar situações.' }, { status: 403 })
   }
 
-  const paidDel = await requireProLideresPaidContext(supabaseAdmin, user)
+  const paidDel = await requireProLideresPaidContext(supabaseAdmin, user, { allowUnpaidOwnerDraft: true })
   if (!paidDel.ok) return paidDel.response
 
   const { data: removed, error } = await supabaseAdmin

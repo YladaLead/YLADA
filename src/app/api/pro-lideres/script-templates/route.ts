@@ -58,7 +58,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Tenant não encontrado' }, { status: 404 })
   }
 
-  const paid = await requireProLideresPaidContext(supabaseAdmin, user)
+  const paid = await requireProLideresPaidContext(supabaseAdmin, user, { allowUnpaidOwnerDraft: true })
   if (!paid.ok) return paid.response
 
   const { searchParams } = new URL(request.url)

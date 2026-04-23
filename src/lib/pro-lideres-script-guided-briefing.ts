@@ -12,10 +12,10 @@ export type PlScriptGuidedFocusId = (typeof PL_SCRIPT_GUIDED_FOCUS)[number]['id'
 export const PL_SCRIPT_GUIDED_ANGLE_SALES = [
   {
     id: 'sales_rotina',
-    label: 'Rotina e bem-estar (leve, sem claims médicos)',
+    label: 'Consciência + rotina (leve, sem prometer cura nem resultado médico)',
   },
-  { id: 'sales_curiosidade', label: 'Curiosidade e benefício prático leve' },
-  { id: 'sales_equilibrado', label: 'Equilibrado (Noel equilibra o tom)' },
+  { id: 'sales_curiosidade', label: 'Dúvida genuína + benefício prático leve' },
+  { id: 'sales_equilibrado', label: 'Equilibrado (Noel prioriza educação antes de vender)' },
 ] as const
 
 export const PL_SCRIPT_GUIDED_ANGLE_RECRUIT = [
@@ -247,9 +247,12 @@ export function composeGuidedScriptPurpose(b: PlScriptGuidedBriefing): string {
     `CANAL / FORMATO: ${channel}`,
     notes ? `NOTAS DO LÍDER: ${notes}` : null,
     '',
-    'CHARTER DE COPY (obrigatório): light copy; pedido de permissão explícito antes de link, dado sensível ou pedido de indicação; credibilidade educada e conforto para quem recebe; evitar gatilhos mentais agressivos e tom de pressão.',
+    'CHARTER DE COPY (obrigatório): light copy; pedido de permissão explícito antes de link, dado sensível ou pedido de indicação; credibilidade educada e conforto para quem recebe; curiosidade leve e relevância sim — sem pressão, culpa, urgência falsa nem manipulação.',
     '',
-    'Instrução: monta a sequência de textos para o distribuidor copiar e colar nesse canal, respeitando tom, público e o charter acima.',
+    'FILOSOFIA YLADA (prioridade absoluta): na primeira mensagem e nas seguintes, **educar ou conscientizar antes de vender** — tema ou hábito relevante, micro-valor ou pergunta que toca na rotina (sem prometer cura nem resultado médico). **Proibido** abrir com pitch de marca ou "tenho um espaço que oferece…" como gancho principal, salvo NOTAS DO LÍDER pedirem explicitamente abertura comercial direta. Cada mensagem seguinte deve **continuar o fio** da anterior até permissão → diagnóstico ou ferramenta gratuita → link ou marcador «(teu link…)» → próximo passo (ex.: WhatsApp).',
+    'RÓTULOS DAS MENSAGENS (title em cada entrada): use fases claras — reflexão → permissão → diagnóstico/ferramenta → link; **opcional** última peça: convite a usar o **botão de WhatsApp na página** do resultado para dúvidas (sem inventar número). **Não** use "Apresentação do Espaço" ou equivalente na mensagem 1 salvo NOTAS DO LÍDER pedirem.',
+    '',
+    'Instrução: monta a sequência de textos para o distribuidor copiar e colar nesse canal, respeitando tom, público, o charter e a filosofia acima.',
   ].filter(Boolean) as string[]
 
   return lines.join('\n')

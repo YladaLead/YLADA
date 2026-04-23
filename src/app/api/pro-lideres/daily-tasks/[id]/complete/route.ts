@@ -33,7 +33,7 @@ export async function POST(request: NextRequest, ctx: RouteCtx) {
     return NextResponse.json({ error: 'Tenant não encontrado' }, { status: 404 })
   }
 
-  const paidPost = await requireProLideresPaidContext(supabaseAdmin, user)
+  const paidPost = await requireProLideresPaidContext(supabaseAdmin, user, { allowUnpaidOwnerDraft: true })
   if (!paidPost.ok) return paidPost.response
 
   if (proLideresDailyTasksBlockedForMember(tenantCtx.tenant, tenantCtx.role)) {
@@ -116,7 +116,7 @@ export async function DELETE(request: NextRequest, ctx: RouteCtx) {
     return NextResponse.json({ error: 'Tenant não encontrado' }, { status: 404 })
   }
 
-  const paidDel = await requireProLideresPaidContext(supabaseAdmin, user)
+  const paidDel = await requireProLideresPaidContext(supabaseAdmin, user, { allowUnpaidOwnerDraft: true })
   if (!paidDel.ok) return paidDel.response
 
   if (proLideresDailyTasksBlockedForMember(tenantCtx.tenant, tenantCtx.role)) {

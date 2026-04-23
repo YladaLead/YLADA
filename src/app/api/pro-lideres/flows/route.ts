@@ -44,7 +44,7 @@ export async function GET(request: NextRequest) {
     )
   }
 
-  const paidGet = await requireProLideresPaidContext(supabaseAdmin, user)
+  const paidGet = await requireProLideresPaidContext(supabaseAdmin, user, { allowUnpaidOwnerDraft: true })
   if (!paidGet.ok) return paidGet.response
 
   const { data: rows, error } = await supabaseAdmin
@@ -121,7 +121,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Apenas o líder pode adicionar itens ao catálogo.' }, { status: 403 })
   }
 
-  const paidPost = await requireProLideresPaidContext(supabaseAdmin, user)
+  const paidPost = await requireProLideresPaidContext(supabaseAdmin, user, { allowUnpaidOwnerDraft: true })
   if (!paidPost.ok) return paidPost.response
 
   let body: { category?: string; label?: string; href?: string; sort_order?: number; notes?: string }

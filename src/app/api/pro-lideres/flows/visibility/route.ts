@@ -53,7 +53,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Apenas o líder pode consultar a visibilidade do catálogo.' }, { status: 403 })
   }
 
-  const paid = await requireProLideresPaidContext(supabaseAdmin, user)
+  const paid = await requireProLideresPaidContext(supabaseAdmin, user, { allowUnpaidOwnerDraft: true })
   if (!paid.ok) return paid.response
 
   const yladaLinkId = String(request.nextUrl.searchParams.get('yladaLinkId') ?? '').trim()
@@ -98,7 +98,7 @@ export async function PATCH(request: NextRequest) {
     return NextResponse.json({ error: 'Apenas o líder pode alterar a visibilidade do catálogo.' }, { status: 403 })
   }
 
-  const paid = await requireProLideresPaidContext(supabaseAdmin, user)
+  const paid = await requireProLideresPaidContext(supabaseAdmin, user, { allowUnpaidOwnerDraft: true })
   if (!paid.ok) return paid.response
 
   let body: { yladaLinkId?: string; visibleToTeam?: boolean }

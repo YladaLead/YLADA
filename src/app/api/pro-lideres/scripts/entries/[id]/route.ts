@@ -61,7 +61,7 @@ export async function PATCH(
     return NextResponse.json({ error: 'Apenas o líder do espaço pode editar scripts.' }, { status: 403 })
   }
 
-  const paidPatch = await requireProLideresPaidContext(supabaseAdmin, user)
+  const paidPatch = await requireProLideresPaidContext(supabaseAdmin, user, { allowUnpaidOwnerDraft: true })
   if (!paidPatch.ok) return paidPatch.response
 
   const exists = await loadEntryForOwnerTenant(supabaseAdmin, id, ctx.tenant.id)
@@ -145,7 +145,7 @@ export async function DELETE(
     return NextResponse.json({ error: 'Apenas o líder do espaço pode apagar scripts.' }, { status: 403 })
   }
 
-  const paidDel = await requireProLideresPaidContext(supabaseAdmin, user)
+  const paidDel = await requireProLideresPaidContext(supabaseAdmin, user, { allowUnpaidOwnerDraft: true })
   if (!paidDel.ok) return paidDel.response
 
   const exists = await loadEntryForOwnerTenant(supabaseAdmin, id, ctx.tenant.id)

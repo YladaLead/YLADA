@@ -110,7 +110,7 @@ export function ProLideresCatalogMemberShareBlock({ yladaLinkId }: { yladaLinkId
                 /* ignore */
               }
             }}
-            className="mt-2 inline-flex min-h-[36px] items-center rounded-lg border border-sky-300 bg-white px-3 text-xs font-semibold text-sky-900 hover:bg-sky-50"
+            className="mt-2 inline-flex min-h-[44px] items-center rounded-lg border border-sky-300 bg-white px-3 text-xs font-semibold text-sky-900 hover:bg-sky-50"
           >
             Copiar o meu link
           </button>

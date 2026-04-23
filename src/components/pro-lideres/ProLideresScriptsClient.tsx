@@ -5,10 +5,8 @@ import Link from 'next/link'
 
 import { useProLideresPainel } from '@/components/pro-lideres/pro-lideres-painel-context'
 import { ProLideresCatalogToolPicker } from '@/components/pro-lideres/ProLideresCatalogToolPicker'
-import { ProLideresScriptsDemoShowcase } from '@/components/pro-lideres/ProLideresScriptsDemoShowcase'
 import { ProLideresScriptsLibraryFilters } from '@/components/pro-lideres/ProLideresScriptsLibraryFilters'
 import { ProLideresScriptsNoelGenerator } from '@/components/pro-lideres/ProLideresScriptsNoelGenerator'
-import { ProLideresScriptsYladaTemplateList } from '@/components/pro-lideres/ProLideresScriptsYladaTemplateList'
 import { ALL_SCRIPT_TOOL_ROWS } from '@/lib/pro-lideres-script-guided-briefing'
 import {
   DEFAULT_SCRIPT_LIBRARY_FILTERS,
@@ -24,7 +22,7 @@ import {
   type ScriptLibraryFilters,
 } from '@/lib/pro-lideres-script-section-meta'
 import type { ProLideresCatalogItem } from '@/lib/pro-lideres-catalog-build'
-import type { ProLideresScriptSectionWithEntries, ProLideresScriptTemplateRow } from '@/types/leader-tenant'
+import type { ProLideresScriptSectionWithEntries } from '@/types/leader-tenant'
 
 type ScriptsPayload = {
   sections?: ProLideresScriptSectionWithEntries[]
@@ -51,153 +49,43 @@ function formatScriptBlock(s: ProLideresScriptSectionWithEntries['entries'][0]):
   return lines.join('\n')
 }
 
-function focusPlScriptSectionInDom(sectionId: string): void {
-  window.requestAnimationFrame(() => {
-    const root = document.getElementById(`pl-script-section-${sectionId}`)
-    root?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-    const det = root?.querySelector('details')
-    if (det) (det as HTMLDetailsElement).open = true
-  })
-}
-
-function YladaTemplateReviewDialog({
-  template,
-  saving,
-  onClose,
-  onConfirm,
-}: {
-  template: ProLideresScriptTemplateRow
-  saving: boolean
-  onClose: () => void
-  onConfirm: (visibleToTeam: boolean) => void | Promise<void>
-}) {
-  const [visibleToTeam, setVisibleToTeam] = useState(false)
-
-  useEffect(() => {
-    setVisibleToTeam(false)
-  }, [template.id])
-
+function ScriptsEmptyStateLeader() {
   return (
-    <div
-      className="fixed inset-0 z-[100] flex items-end justify-center sm:items-center sm:p-4"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="ylada-review-title"
-    >
-      <button
-        type="button"
-        className="absolute inset-0 bg-black/45"
-        aria-label="Fechar revisão"
-        onClick={onClose}
-      />
-      <div className="relative z-10 flex max-h-[min(92vh,900px)] w-full max-w-2xl flex-col rounded-t-2xl border border-violet-200 bg-white shadow-2xl sm:rounded-2xl">
-        <div className="shrink-0 border-b border-violet-100 px-5 py-4 sm:px-6">
-          <p className="text-xs font-semibold uppercase tracking-wide text-violet-700">Revisar antes de salvar</p>
-          <h2 id="ylada-review-title" className="mt-1 text-lg font-bold leading-snug text-gray-900 sm:text-xl">
-            {template.title}
-          </h2>
-          {template.subtitle?.trim() ? (
-            <p className="mt-1 text-sm text-gray-600">{template.subtitle.trim()}</p>
-          ) : null}
-          <div className="mt-3 flex flex-wrap gap-1.5">
-            <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-800">
-              {focusLabel(template.focus_main)}
-            </span>
-            <span className="rounded-full bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-900">
-              {intentionLabel(template.intention_key)}
-            </span>
-            {template.tool_preset_key ? (
-              <span className="rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-950">
-                {toolPresetLabelFromKey(template.tool_preset_key) ?? template.tool_preset_key}
-              </span>
-            ) : null}
-            {conversationStageLabel(template.conversation_stage) ? (
-              <span className="rounded-full bg-teal-50 px-2 py-0.5 text-xs font-medium text-teal-900">
-                {conversationStageLabel(template.conversation_stage)}
-              </span>
-            ) : null}
-          </div>
-          {template.usage_hint?.trim() ? (
-            <p className="mt-3 text-sm leading-relaxed text-gray-700">
-              <span className="font-semibold text-gray-900">Quando usar: </span>
-              {template.usage_hint.trim()}
-            </p>
-          ) : null}
-          {template.sequence_label?.trim() ? (
-            <p className="mt-1 text-xs text-gray-600">
-              <span className="font-semibold text-gray-800">Sequência: </span>
-              {template.sequence_label.trim()}
-            </p>
-          ) : null}
-        </div>
-
-        <div className="min-h-0 flex-1 overflow-y-auto px-5 py-4 sm:px-6">
-          <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-gray-500">
-            Textos que vão para a sua biblioteca ({template.entries.length})
-          </p>
-          <ol className="list-decimal space-y-4 pl-5 marker:font-semibold marker:text-violet-700">
-            {template.entries.map((ent, idx) => (
-              <li key={`${idx}-${ent.title}`} className="pl-1">
-                <div className="rounded-xl border border-gray-200 bg-gray-50/60 p-3 sm:p-4">
-                  <p className="font-semibold text-gray-900">{ent.title}</p>
-                  {ent.subtitle?.trim() ? (
-                    <p className="mt-0.5 text-sm text-gray-600">{ent.subtitle.trim()}</p>
-                  ) : null}
-                  <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-gray-800">{ent.body}</p>
-                  {ent.how_to_use?.trim() ? (
-                    <p className="mt-2 border-t border-gray-200/80 pt-2 text-xs text-gray-600">
-                      <span className="font-semibold text-gray-700">Como usar: </span>
-                      {ent.how_to_use.trim()}
-                    </p>
-                  ) : null}
-                </div>
-              </li>
-            ))}
-          </ol>
-        </div>
-
-        <div className="shrink-0 space-y-3 border-t border-gray-100 bg-gray-50/90 px-5 py-4 sm:px-6">
-          <p className="text-sm text-gray-700">
-            Ao salvar, o app muda para «Minha biblioteca» e abre o cartão do grupo. Para ajustar: use{' '}
-            <strong className="text-gray-900">Editar grupo</strong> (nome, notas, visibilidade para a equipe) e, em
-            cada mensagem, <strong className="text-gray-900">Editar texto</strong>. Também pode copiar o texto pronto
-            para colar no WhatsApp.
-          </p>
-          <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-emerald-200 bg-white px-3 py-3 text-sm text-gray-900 shadow-sm">
-            <input
-              type="checkbox"
-              className="mt-0.5 h-4 w-4 shrink-0 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
-              checked={visibleToTeam}
-              disabled={saving}
-              onChange={(e) => setVisibleToTeam(e.target.checked)}
-            />
-            <span>
-              <span className="font-semibold text-gray-900">Autorizar para a equipe já agora</span>
-              <span className="mt-0.5 block text-xs font-normal text-gray-600">
-                Se deixar desmarcado, o grupo fica só com você até ativar «Equipe vê no painel» na biblioteca.
-              </span>
-            </span>
-          </label>
-          <div className="flex flex-wrap gap-2">
-            <button
-              type="button"
-              disabled={saving}
-              onClick={onClose}
-              className="min-h-[44px] rounded-xl border border-gray-300 bg-white px-4 text-sm font-semibold text-gray-800 hover:bg-gray-50 disabled:opacity-50"
-            >
-              Cancelar
-            </button>
-            <button
-              type="button"
-              disabled={saving}
-              onClick={() => void onConfirm(visibleToTeam)}
-              className="min-h-[44px] rounded-xl bg-violet-600 px-4 text-sm font-semibold text-white hover:bg-violet-700 disabled:opacity-50"
-            >
-              {saving ? 'Salvando…' : 'Salvar na minha biblioteca'}
-            </button>
-          </div>
-        </div>
-      </div>
+    <div className="rounded-2xl border border-dashed border-indigo-200/90 bg-gradient-to-b from-indigo-50/50 via-white to-white px-5 py-10 text-center shadow-sm sm:px-8">
+      <p className="text-base font-semibold text-gray-900">Ainda sem scripts — faça nesta ordem</p>
+      <p className="mx-auto mt-2 max-w-md text-sm text-gray-600">
+        O caminho mais rápido é o <strong className="text-gray-800">Guiado</strong>: o Noel pergunta; você escolhe e
+        avança até guardar.
+      </p>
+      <ol className="mx-auto mt-8 max-w-lg space-y-4 text-left text-sm text-gray-800">
+        <li className="flex gap-3">
+          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-indigo-600 text-xs font-bold text-white">
+            1
+          </span>
+          <span>
+            Aí em cima: <strong className="text-gray-900">Guiado</strong> → responda até o fim → <strong className="text-gray-900">Gerar</strong> →{' '}
+            <strong className="text-gray-900">Salvar</strong>.
+          </span>
+        </li>
+        <li className="flex gap-3">
+          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-indigo-600 text-xs font-bold text-white">
+            2
+          </span>
+          <span>
+            Quando o fluxo pedir <strong className="text-gray-900">ferramenta</strong>, escolha uma — o link aparece no
+            cartão (abrir / copiar). Se saltou esse passo, abra <strong className="text-gray-900">Editar grupo</strong> e
+            ligue lá.
+          </span>
+        </li>
+        <li className="flex gap-3">
+          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-indigo-600 text-xs font-bold text-white">
+            3
+          </span>
+          <span>
+            Para a rede usar: marque <strong className="text-gray-900">Equipe vê no painel</strong>.
+          </span>
+        </li>
+      </ol>
     </div>
   )
 }
@@ -212,13 +100,7 @@ export function ProLideresScriptsClient() {
   const [devHint, setDevHint] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
   const [copiedId, setCopiedId] = useState<string | null>(null)
-  const [libraryTab, setLibraryTab] = useState<'ylada' | 'mine'>('mine')
   const [scriptFilters, setScriptFilters] = useState<ScriptLibraryFilters>(DEFAULT_SCRIPT_LIBRARY_FILTERS)
-  const [templates, setTemplates] = useState<ProLideresScriptTemplateRow[]>([])
-  const [tplLoading, setTplLoading] = useState(false)
-  const [yladaReviewTemplate, setYladaReviewTemplate] = useState<ProLideresScriptTemplateRow | null>(null)
-  const [libraryImportHint, setLibraryImportHint] = useState<{ sectionId: string; title: string } | null>(null)
-  const libraryImportDomDoneRef = useRef<string | null>(null)
 
   const toolLabelByLinkId = useMemo(() => {
     const m = new Map<string, string>()
@@ -234,81 +116,30 @@ export function ProLideresScriptsClient() {
     return sections.filter((s) => sectionMatchesLibraryFilters(s, scriptFilters))
   }, [sections, scriptFilters])
 
-  useEffect(() => {
-    if (!canEditUi || libraryTab !== 'ylada') {
-      setTemplates([])
-      return
-    }
-    let ignore = false
-    const q = new URLSearchParams()
-    if (scriptFilters.focus !== 'todos') q.set('focus_main', scriptFilters.focus)
-    if (scriptFilters.intention !== 'todos') q.set('intention_key', scriptFilters.intention)
-    if (scriptFilters.tool !== 'todos' && scriptFilters.tool !== '__ylada__') {
-      q.set('tool_preset_key', scriptFilters.tool)
-    }
+  const scriptFiltersSummaryLine = useMemo(() => {
+    const parts: string[] = []
     if (scriptFilters.stage !== 'todos') {
-      q.set('conversation_stage', scriptFilters.stage)
+      const lbl = conversationStageLabel(scriptFilters.stage)
+      if (lbl) parts.push(`Situação: ${lbl}`)
     }
-    setTplLoading(true)
-    void fetch(`/api/pro-lideres/script-templates?${q}`, { credentials: 'include' })
-      .then((r) => r.json().catch(() => ({})))
-      .then((d: { templates?: ProLideresScriptTemplateRow[] }) => {
-        if (!ignore) setTemplates(Array.isArray(d.templates) ? d.templates : [])
-      })
-      .catch(() => {
-        if (!ignore) setTemplates([])
-      })
-      .finally(() => {
-        if (!ignore) setTplLoading(false)
-      })
-    return () => {
-      ignore = true
+    if (scriptFilters.intention !== 'todos') {
+      parts.push(`Objetivo: ${intentionLabel(scriptFilters.intention)}`)
     }
-  }, [canEditUi, libraryTab, scriptFilters.focus, scriptFilters.intention, scriptFilters.tool, scriptFilters.stage])
+    if (scriptFilters.tool !== 'todos') {
+      if (scriptFilters.tool === '__ylada__') parts.push('Ferramenta: com link ligado (painel)')
+      else parts.push(`Ferramenta: ${toolPresetLabelFromKey(scriptFilters.tool) ?? scriptFilters.tool}`)
+    }
+    if (scriptFilters.focus !== 'todos') {
+      parts.push(`Linha: ${focusLabel(scriptFilters.focus)}`)
+    }
+    return parts.length ? parts.join(' · ') : null
+  }, [scriptFilters])
 
-  async function copyTemplateToLibrary(
-    templateId: string,
-    visibleToTeam: boolean,
-    hintTitle?: string
-  ): Promise<boolean> {
-    setSaving(true)
-    setError(null)
-    try {
-      const res = await fetch(`/api/pro-lideres/script-templates/${encodeURIComponent(templateId)}/use`, {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ visible_to_team: visibleToTeam }),
-      })
-      const data = (await res.json().catch(() => ({}))) as {
-        section?: { id?: string; title?: string }
-        error?: string
-      }
-      if (!res.ok) {
-        setError(data.error || 'Não foi possível copiar o modelo.')
-        return false
-      }
-      const newSectionId = typeof data.section?.id === 'string' ? data.section.id : null
-      const rawHintTitle =
-        (typeof data.section?.title === 'string' && data.section.title.trim()) ||
-        (hintTitle && hintTitle.trim()) ||
-        'Novo grupo'
-      const titleForHint = rawHintTitle.replace(/\bcontacto\b/gi, 'contato')
-      setLibraryTab('mine')
-      setScriptFilters(DEFAULT_SCRIPT_LIBRARY_FILTERS)
-      await load()
-      if (newSectionId) {
-        libraryImportDomDoneRef.current = null
-        setLibraryImportHint({ sectionId: newSectionId, title: titleForHint })
-      }
-      return true
-    } catch {
-      setError('Erro de rede ao copiar o modelo.')
-      return false
-    } finally {
-      setSaving(false)
-    }
-  }
+  const scriptFiltersDirty =
+    scriptFilters.stage !== 'todos' ||
+    scriptFilters.intention !== 'todos' ||
+    scriptFilters.tool !== 'todos' ||
+    scriptFilters.focus !== 'todos'
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -355,14 +186,6 @@ export function ProLideresScriptsClient() {
   useEffect(() => {
     void load()
   }, [load])
-
-  useEffect(() => {
-    if (!libraryImportHint || loading) return
-    if (libraryImportDomDoneRef.current === libraryImportHint.sectionId) return
-    if (!sections.some((s) => s.id === libraryImportHint.sectionId)) return
-    libraryImportDomDoneRef.current = libraryImportHint.sectionId
-    window.setTimeout(() => focusPlScriptSectionInDom(libraryImportHint.sectionId), 200)
-  }, [sections, loading, libraryImportHint])
 
   async function moveSection(index: number, dir: -1 | 1) {
     const next = index + dir
@@ -458,11 +281,11 @@ export function ProLideresScriptsClient() {
       <div
         className={`overflow-hidden rounded-2xl border px-5 py-6 sm:px-8 sm:py-7 ${
           teamExperience
-            ? 'border-emerald-200/90 bg-gradient-to-br from-emerald-50/90 via-white to-teal-50/30'
+            ? 'border-blue-200/90 bg-gradient-to-br from-blue-50/90 via-white to-sky-50/35'
             : 'border-gray-200/80 bg-gradient-to-br from-slate-50/80 via-white to-indigo-50/20'
         }`}
       >
-        <p className={`text-sm font-semibold ${teamExperience ? 'text-emerald-800' : 'text-blue-600'}`}>
+        <p className={`text-sm font-semibold ${teamExperience ? 'text-blue-700' : 'text-blue-600'}`}>
           {teamExperience ? 'Biblioteca da equipe' : 'Conteúdo'}
         </p>
         <h1 className="mt-1 text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl">Scripts</h1>
@@ -474,9 +297,9 @@ export function ProLideresScriptsClient() {
             </>
           ) : (
             <>
-              Você organiza <strong className="text-gray-800">sequências de conversa</strong> (contexto, intenção e
-              textos) para a equipe usar com clientes. A equipe <strong className="text-gray-800">só vê e copia</strong>
-              o que estiver visível para ela.
+              Use o <strong className="text-gray-800">Guiado</strong> embaixo: o Noel leva passo a passo (incluindo
+              ferramenta quando fizer sentido). A equipe <strong className="text-gray-800">só vê e copia</strong> o que
+              você deixar visível.
             </>
           )}
         </p>
@@ -497,39 +320,27 @@ export function ProLideresScriptsClient() {
         </div>
       )}
 
-      {yladaReviewTemplate ? (
-        <YladaTemplateReviewDialog
-          template={yladaReviewTemplate}
-          saving={saving}
-          onClose={() => {
-            if (!saving) setYladaReviewTemplate(null)
-          }}
-          onConfirm={async (visibleToTeam) => {
-            const tpl = yladaReviewTemplate
-            if (!tpl) return
-            const ok = await copyTemplateToLibrary(tpl.id, visibleToTeam, tpl.title)
-            if (ok) setYladaReviewTemplate(null)
-          }}
-        />
-      ) : null}
-
-      {canEditUi && (
-        <section className="space-y-3" aria-labelledby="scripts-adicionar-heading">
-          <h2 id="scripts-adicionar-heading" className="text-xs font-semibold uppercase tracking-wide text-gray-500">
-            Criar
+      {canEditUi ? (
+        <section className="space-y-4" aria-labelledby="scripts-construir-heading">
+          <h2 id="scripts-construir-heading" className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+            Construir biblioteca
           </h2>
+          <p className="text-sm text-gray-600">
+            Ordem rápida: <strong className="text-gray-800">Guiado</strong> → gerar → salvar → (se quiser) equipe vê.
+          </p>
 
-          <details className="rounded-2xl border border-indigo-200 bg-gradient-to-b from-indigo-50/90 to-white shadow-md ring-1 ring-indigo-100/60">
-            <summary className="cursor-pointer list-none px-4 py-4 text-sm font-semibold text-indigo-950 sm:px-5 [&::-webkit-details-marker]:hidden">
-              <span className="flex items-center justify-between gap-2">
-                <span>1. Com o Noel — montar scripts para a equipe</span>
-                <span className="text-xs font-normal text-indigo-700">abrir</span>
-              </span>
-              <span className="mt-1 block text-xs font-normal text-indigo-900/80">
-                Fluxo guiado em poucos passos ou modo livre; o Noel monta o grupo e você salva para a equipe
-              </span>
-            </summary>
-            <div className="border-t border-indigo-100 px-4 pb-5 pt-4 sm:px-5">
+          <div className="overflow-hidden rounded-2xl border border-indigo-200/90 bg-gradient-to-b from-indigo-50/95 via-white to-white shadow-md ring-1 ring-indigo-100/50">
+            <div className="border-b border-indigo-100/90 bg-indigo-50/50 px-4 py-4 sm:px-6 sm:py-5">
+              <p className="text-xs font-bold uppercase tracking-wide text-indigo-700">Noel de Scripts</p>
+              <h3 className="mt-1 text-base font-bold text-indigo-950 sm:text-lg">Montar sequência com o Noel</h3>
+              <p className="mt-2 max-w-2xl text-sm leading-snug text-indigo-950/90">
+                <strong className="text-indigo-950">Comece por «Guiado».</strong> São poucos cliques por pergunta. No
+                passo da ferramenta, escolha o link se o script falar de uma página sua — o Noel já encaixa o texto; a
+                equipe vê o URL no cartão. Nos textos para vários distribuidores, o Noel pode usar marcadores tipo «(teu
+                link da ferramenta)».
+              </p>
+            </div>
+            <div className="px-4 pb-6 pt-4 sm:px-6 sm:pb-7 sm:pt-5">
               <ProLideresScriptsNoelGenerator
                 catalog={catalog}
                 saving={saving}
@@ -545,19 +356,19 @@ export function ProLideresScriptsClient() {
                 }}
               />
             </div>
-          </details>
+          </div>
 
           <details className="rounded-xl border border-gray-200 bg-white shadow-sm">
-            <summary className="cursor-pointer list-none px-4 py-3 text-sm font-semibold text-gray-900 [&::-webkit-details-marker]:hidden">
+            <summary className="cursor-pointer list-none px-4 py-3.5 text-sm font-semibold text-gray-900 sm:px-5 [&::-webkit-details-marker]:hidden">
               <span className="flex items-center justify-between gap-2">
-                <span>2. Grupo novo (manual, sem Noel)</span>
-                <span className="text-xs font-normal text-gray-500">abrir</span>
+                <span>Grupo novo (manual)</span>
+                <span className="text-xs font-normal text-gray-500">expandir</span>
               </span>
               <span className="mt-1 block text-xs font-normal text-gray-600">
-                Só o nome do grupo; depois você adiciona os textos um a um
+                Só se não for usar o Noel: nome do grupo e mensagens à mão.
               </span>
             </summary>
-            <div className="border-t border-gray-100 px-4 pb-4 pt-3">
+            <div className="border-t border-gray-100 px-4 pb-5 pt-4 sm:px-5">
               <NewSectionForm
                 saving={saving}
                 catalog={catalog}
@@ -575,7 +386,7 @@ export function ProLideresScriptsClient() {
             </div>
           </details>
         </section>
-      )}
+      ) : null}
 
       {loading ? (
         <p className="text-gray-600">Carregando…</p>
@@ -585,169 +396,107 @@ export function ProLideresScriptsClient() {
             value={scriptFilters}
             onChange={setScriptFilters}
             disabled={saving}
-            showYladaLinkFilter={!canEditUi || libraryTab === 'mine'}
+            showYladaLinkFilter
+            hideFieldOrderHint={!canEditUi}
           />
 
-          {canEditUi ? (
-            <div className="flex flex-wrap gap-2 rounded-xl border border-gray-200 bg-white p-1.5 shadow-sm">
-              <button
-                type="button"
-                disabled={saving}
-                onClick={() => setLibraryTab('ylada')}
-                className={`min-h-[44px] flex-1 rounded-lg px-3 text-sm font-semibold transition sm:flex-none sm:px-5 ${
-                  libraryTab === 'ylada'
-                    ? 'bg-violet-600 text-white shadow-sm'
-                    : 'text-gray-600 hover:text-gray-900'
-                }`}
-              >
-                Biblioteca YLADA
-              </button>
-              <button
-                type="button"
-                disabled={saving}
-                onClick={() => setLibraryTab('mine')}
-                className={`min-h-[44px] flex-1 rounded-lg px-3 text-sm font-semibold transition sm:flex-none sm:px-5 ${
-                  libraryTab === 'mine'
-                    ? 'bg-indigo-600 text-white shadow-sm'
-                    : 'text-gray-600 hover:text-gray-900'
-                }`}
-              >
-                Minha biblioteca
-              </button>
-            </div>
-          ) : null}
-
-          {canEditUi && libraryTab === 'ylada' ? (
-            <div className="space-y-2">
-              <h2 className="text-xs font-semibold uppercase tracking-wide text-violet-700">Modelos prontos</h2>
-              <p className="text-sm text-gray-600">
-                «Usar e ajustar» abre uma revisão com todos os textos: confira e escolha se a equipe já pode ver. Depois
-                de salvar, o grupo fica em «Minha biblioteca» — expanda o cartão e use <strong>Editar grupo</strong> ou{' '}
-                <strong>Editar texto</strong> em cada mensagem.
+          {scriptFiltersDirty && scriptFiltersSummaryLine ? (
+            <div className="flex flex-col gap-2 rounded-xl border border-blue-100 bg-blue-50/70 px-4 py-3 text-sm text-blue-950 sm:flex-row sm:items-center sm:justify-between">
+              <p className="min-w-0 pr-2">
+                <span className="font-semibold text-blue-900">Filtros ativos:</span>{' '}
+                <span className="text-blue-950/95">{scriptFiltersSummaryLine}</span>
               </p>
-              <ProLideresScriptsYladaTemplateList
-                templates={templates}
-                loading={tplLoading}
-                saving={saving}
-                onReview={(t) => setYladaReviewTemplate(t)}
-                onError={setError}
-              />
+              <button
+                type="button"
+                disabled={saving}
+                className="shrink-0 rounded-lg border border-blue-200 bg-white px-3 py-2 text-sm font-semibold text-blue-900 hover:bg-blue-50 disabled:opacity-50"
+                onClick={() => setScriptFilters(DEFAULT_SCRIPT_LIBRARY_FILTERS)}
+              >
+                Limpar filtros
+              </button>
             </div>
           ) : null}
 
-          {(!canEditUi || libraryTab === 'mine') && (
-            <>
-              {canEditUi && libraryTab === 'mine' && libraryImportHint ? (
-                <div
-                  role="status"
-                  className="rounded-xl border border-violet-200 bg-violet-50/95 px-4 py-3 text-sm text-violet-950 shadow-sm sm:px-5"
-                >
-                  <p className="font-semibold text-violet-900">Grupo salvo na sua biblioteca</p>
-                  <p className="mt-1 text-violet-950/95">
-                    <span className="font-medium text-violet-950">«{libraryImportHint.title}»</span> — para ajustar,
-                    expanda o cartão abaixo (clique no título) e use <strong>Editar grupo</strong> ou{' '}
-                    <strong>Editar texto</strong> em cada mensagem.
-                  </p>
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    <button
-                      type="button"
-                      className="min-h-[40px] rounded-lg bg-violet-600 px-3 text-sm font-semibold text-white hover:bg-violet-700"
-                      onClick={() => focusPlScriptSectionInDom(libraryImportHint.sectionId)}
-                    >
-                      Ir ao grupo
-                    </button>
-                    <button
-                      type="button"
-                      className="min-h-[40px] rounded-lg border border-violet-200 bg-white px-3 text-sm font-medium text-violet-900 hover:bg-violet-100/40"
-                      onClick={() => {
-                        libraryImportDomDoneRef.current = null
-                        setLibraryImportHint(null)
-                      }}
-                    >
-                      Fechar aviso
-                    </button>
-                  </div>
-                </div>
-              ) : null}
-              {filteredSections.length === 0 && sections.length > 0 ? (
-                <div className="rounded-xl border border-amber-200 bg-amber-50/90 px-4 py-3 text-sm text-amber-950">
-                  <p>Nenhum grupo corresponde a estes filtros.</p>
-                  <button
-                    type="button"
-                    className="mt-2 text-sm font-semibold text-amber-900 underline"
-                    onClick={() => setScriptFilters(DEFAULT_SCRIPT_LIBRARY_FILTERS)}
-                  >
-                    Limpar filtros
-                  </button>
-                </div>
-              ) : null}
+          {filteredSections.length === 0 && sections.length > 0 ? (
+            <div className="rounded-xl border border-amber-200 bg-amber-50/90 px-4 py-3 text-sm text-amber-950">
+              <p>Nenhum grupo corresponde a estes filtros.</p>
+              <button
+                type="button"
+                className="mt-2 text-sm font-semibold text-amber-900 underline"
+                onClick={() => setScriptFilters(DEFAULT_SCRIPT_LIBRARY_FILTERS)}
+              >
+                Limpar filtros
+              </button>
+            </div>
+          ) : null}
 
-              {sections.length === 0 ? (
-                <div className="space-y-5">
-                  {!error ? (
-                    <ProLideresScriptsDemoShowcase
-                      mode={teamExperience ? 'team' : 'leader'}
-                      copiedId={copiedId}
-                      onCopyEntry={onCopyEntry}
-                    />
-                  ) : null}
-                  <p className="rounded-2xl border border-dashed border-gray-300 bg-gray-50/90 px-4 py-10 text-center text-sm text-gray-600">
-                    {canEditUi
-                      ? 'Ainda não há grupos na sua biblioteca. Use «Criar» acima, a aba «Biblioteca YLADA» ou grupo vazio.'
-                      : 'O líder ainda não compartilhou grupos visíveis para a equipe aqui.'}
-                  </p>
-                </div>
-              ) : filteredSections.length > 0 ? (
-                <div className="space-y-3">
-                  <h2 className="text-xs font-semibold uppercase tracking-wide text-gray-500">
-                    {canEditUi ? 'Grupos na sua biblioteca' : 'Grupos para copiar'}
-                  </h2>
-                  <ul className="space-y-3">
-                    {filteredSections.map((sec) => {
-                      const secIdx = sections.findIndex((s) => s.id === sec.id)
-                      return (
-                        <li
-                          key={sec.id}
-                          id={`pl-script-section-${sec.id}`}
-                          className={`scroll-mt-4 rounded-xl border border-gray-200 bg-white shadow-sm ${
-                            libraryImportHint?.sectionId === sec.id ? 'ring-2 ring-violet-300/90' : ''
-                          }`}
-                        >
-                          <SectionBlock
-                            section={sec}
-                            secIdx={secIdx >= 0 ? secIdx : 0}
-                            secCount={sections.length}
-                            toolLabel={sec.ylada_link_id ? toolLabelByLinkId.get(sec.ylada_link_id) ?? null : null}
-                            canEditUi={canEditUi}
-                            teamExperience={teamExperience}
-                            saving={saving}
-                            copiedId={copiedId}
-                            catalog={catalog}
-                            onReload={load}
-                            onError={setError}
-                            onSaving={setSaving}
-                            onCopyEntry={onCopyEntry}
-                            onMoveSection={moveSection}
-                            onMoveEntry={moveEntry}
-                          />
-                        </li>
-                      )
-                    })}
-                  </ul>
-                </div>
+          {sections.length === 0 ? (
+            <div className="space-y-4">
+              {canEditUi && !error ? <ScriptsEmptyStateLeader /> : null}
+              {teamExperience && !error ? (
+                <p className="rounded-2xl border border-dashed border-blue-200/80 bg-blue-50/40 px-4 py-10 text-center text-sm text-blue-950/90">
+                  O líder ainda não partilhou grupos visíveis para a equipe aqui.
+                </p>
               ) : null}
-            </>
-          )}
+              {error && canEditUi ? (
+                <p className="rounded-2xl border border-dashed border-gray-300 bg-gray-50/90 px-4 py-8 text-center text-sm text-gray-600">
+                  Corrija o erro acima para carregar os seus grupos.
+                </p>
+              ) : null}
+            </div>
+          ) : filteredSections.length > 0 ? (
+            <div className="space-y-3">
+              <h2 className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                {canEditUi ? 'Os seus grupos' : 'Grupos para copiar'}
+              </h2>
+              <ul className="space-y-3">
+                {filteredSections.map((sec) => {
+                  const secIdx = sections.findIndex((s) => s.id === sec.id)
+                  const linkedCatalogItem =
+                    sec.ylada_link_id != null
+                      ? catalog.find((c) => c.yladaLinkId === sec.ylada_link_id) ?? null
+                      : null
+                  return (
+                    <li
+                      key={sec.id}
+                      id={`pl-script-section-${sec.id}`}
+                      className="scroll-mt-4 rounded-xl border border-gray-200 bg-white shadow-sm"
+                    >
+                      <SectionBlock
+                        section={sec}
+                        secIdx={secIdx >= 0 ? secIdx : 0}
+                        secCount={sections.length}
+                        toolLabel={sec.ylada_link_id ? toolLabelByLinkId.get(sec.ylada_link_id) ?? null : null}
+                        linkedCatalogItem={linkedCatalogItem}
+                        canEditUi={canEditUi}
+                        teamExperience={teamExperience}
+                        saving={saving}
+                        copiedId={copiedId}
+                        catalog={catalog}
+                        onReload={load}
+                        onError={setError}
+                        onSaving={setSaving}
+                        onCopyEntry={onCopyEntry}
+                        onMoveSection={moveSection}
+                        onMoveEntry={moveEntry}
+                      />
+                    </li>
+                  )
+                })}
+              </ul>
+            </div>
+          ) : null}
         </div>
       )}
 
       <p className="text-sm text-gray-500">
-        <strong className="font-medium text-gray-700">Scripts</strong> = o que a equipe envia a{' '}
-        <strong className="font-medium text-gray-700">clientes</strong>. Para falar com a equipe, use o{' '}
+        <strong className="font-medium text-gray-700">Scripts</strong> = textos para{' '}
+        <strong className="font-medium text-gray-700">clientes</strong> que o líder publica com visibilidade para a
+        equipe. Para falar <strong className="font-medium text-gray-700">com a equipe</strong>, use o{' '}
         <Link href="/pro-lideres/painel/noel" className="font-medium text-violet-700 hover:text-violet-900">
           Noel
-        </Link>{' '}
-        (mensagens internas e conversa livre).
+        </Link>
+        .
       </p>
     </div>
   )
@@ -920,11 +669,84 @@ function NewSectionForm({
   )
 }
 
+function LinkedCatalogStrip({
+  item,
+  teamExperience,
+}: {
+  item: ProLideresCatalogItem
+  teamExperience: boolean
+}) {
+  const [copied, setCopied] = useState(false)
+  const url = (item.publicUrl || item.href || '').trim()
+
+  async function copyUrl() {
+    if (!url) return
+    const ok = await copyText(url)
+    if (ok) {
+      setCopied(true)
+      window.setTimeout(() => setCopied(false), 2000)
+    }
+  }
+
+  return (
+    <div
+      className={`mt-3 rounded-xl border px-3 py-3 shadow-sm sm:px-4 ${
+        teamExperience
+          ? 'border-blue-200/90 bg-gradient-to-r from-blue-50 to-white'
+          : 'border-indigo-200/90 bg-gradient-to-r from-indigo-50/80 to-white'
+      }`}
+      onClick={(e) => e.stopPropagation()}
+      role="group"
+      aria-label="Ferramenta ligada ao script"
+    >
+      <p
+        className={`text-[10px] font-bold uppercase tracking-wide ${
+          teamExperience ? 'text-blue-800' : 'text-indigo-800'
+        }`}
+      >
+        {teamExperience ? 'Link da ferramenta' : 'Ferramenta ligada a este grupo'}
+      </p>
+      <p className="mt-1 text-sm font-semibold leading-snug text-gray-900">{item.label}</p>
+      {url ? (
+        <p className="mt-1.5 break-all font-mono text-[11px] leading-relaxed text-gray-600">{url}</p>
+      ) : (
+        <p className="mt-2 text-xs text-gray-500">URL não disponível no catálogo.</p>
+      )}
+      {url ? (
+        <div className="mt-3 flex flex-wrap gap-2">
+          <a
+            href={url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={`inline-flex min-h-[40px] items-center justify-center rounded-lg border px-3 text-sm font-semibold transition ${
+              teamExperience
+                ? 'border-blue-300 bg-white text-blue-900 hover:bg-blue-50'
+                : 'border-indigo-200 bg-white text-indigo-900 hover:bg-indigo-50/80'
+            }`}
+          >
+            Abrir link
+          </a>
+          <button
+            type="button"
+            onClick={() => void copyUrl()}
+            className={`inline-flex min-h-[40px] items-center justify-center rounded-lg px-3 text-sm font-semibold text-white transition ${
+              teamExperience ? 'bg-blue-600 hover:bg-blue-700' : 'bg-indigo-600 hover:bg-indigo-700'
+            }`}
+          >
+            {copied ? 'Copiado' : 'Copiar URL'}
+          </button>
+        </div>
+      ) : null}
+    </div>
+  )
+}
+
 function SectionBlock({
   section,
   secIdx,
   secCount,
   toolLabel,
+  linkedCatalogItem,
   canEditUi,
   teamExperience,
   saving,
@@ -941,6 +763,7 @@ function SectionBlock({
   secIdx: number
   secCount: number
   toolLabel: string | null
+  linkedCatalogItem: ProLideresCatalogItem | null
   canEditUi: boolean
   teamExperience: boolean
   saving: boolean
@@ -1273,7 +1096,7 @@ function SectionBlock({
         </span>
       ) : null}
       {conversationStageLabel(section.conversation_stage) ? (
-        <span className="rounded-full bg-teal-50 px-2 py-0.5 text-[11px] font-semibold text-teal-900">
+        <span className="rounded-full bg-blue-50 px-2 py-0.5 text-[11px] font-semibold text-blue-900">
           {conversationStageLabel(section.conversation_stage)}
         </span>
       ) : null}
@@ -1317,12 +1140,12 @@ function SectionBlock({
         Editar grupo
       </button>
       <label
-        className="inline-flex min-h-[40px] max-w-full cursor-pointer items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50/60 px-3 text-sm font-medium text-emerald-950"
+        className="inline-flex min-h-[40px] max-w-full cursor-pointer items-center gap-2 rounded-lg border border-blue-200 bg-blue-50/60 px-3 text-sm font-medium text-blue-950"
         onClick={(e) => e.stopPropagation()}
       >
         <input
           type="checkbox"
-          className="h-4 w-4 shrink-0 rounded border-gray-300 text-emerald-700 focus:ring-emerald-500"
+          className="h-4 w-4 shrink-0 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
           checked={visibleToTeam}
           disabled={saving}
           onChange={(e) => void patchTeamVisible(e.target.checked)}
@@ -1359,7 +1182,7 @@ function SectionBlock({
             <span className="flex flex-wrap items-center gap-2">
               <span className="block text-base font-bold text-gray-900">{section.title}</span>
               {teamExperience ? (
-                <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-emerald-900">
+                <span className="rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-blue-900">
                   Campo
                 </span>
               ) : null}
@@ -1380,16 +1203,21 @@ function SectionBlock({
               </span>
             ) : null}
             {metaBadges}
+            {linkedCatalogItem ? (
+              <LinkedCatalogStrip item={linkedCatalogItem} teamExperience={teamExperience} />
+            ) : null}
             <span className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-gray-500">
               <span>{section.entries.length} texto(s)</span>
               {canEditUi && section.visible_to_team === false ? (
                 <span className="rounded-full bg-slate-200 px-2 py-0.5 font-medium text-slate-800">Só o líder</span>
               ) : null}
-              {toolLabel ? (
+              {!linkedCatalogItem && toolLabel ? (
                 <span className="rounded-full bg-gray-100 px-2 py-0.5 font-medium text-gray-700">{toolLabel}</span>
               ) : null}
-              {section.ylada_link_id && !toolLabel ? (
-                <span className="text-amber-700">Ferramenta ligada</span>
+              {section.ylada_link_id && !linkedCatalogItem && !toolLabel ? (
+                <span className="rounded-full bg-amber-50 px-2 py-0.5 font-medium text-amber-900">
+                  Ferramenta sem entrada no catálogo — edite o grupo para reassociar
+                </span>
               ) : null}
             </span>
           </span>
@@ -1617,7 +1445,13 @@ function EntryCard({
   const block = formatScriptBlock(entry)
 
   return (
-    <div className="rounded-lg border border-gray-100 bg-gray-50/80 p-4">
+    <div
+      className={`rounded-xl border p-4 sm:p-5 ${
+        teamExperience
+          ? 'border-blue-100/90 bg-gradient-to-b from-white to-blue-50/25 shadow-sm'
+          : 'border-gray-200/80 bg-gray-50/90 shadow-sm'
+      }`}
+    >
       {editing ? (
         <div className="space-y-3">
           <input
@@ -1677,7 +1511,7 @@ function EntryCard({
                 onClick={() => void onCopyEntry(entry.id, block)}
                 className={`min-h-[44px] rounded-xl px-4 text-sm font-semibold shadow-sm transition ${
                   teamExperience
-                    ? 'bg-emerald-600 text-white hover:bg-emerald-700'
+                    ? 'bg-blue-600 text-white hover:bg-blue-700'
                     : 'border border-gray-200 bg-white text-xs text-gray-700 hover:bg-gray-50'
                 }`}
               >
@@ -1723,8 +1557,10 @@ function EntryCard({
           </div>
           {entry.body?.trim() && (
             <pre
-              className={`mt-3 max-h-[min(22rem,55vh)] overflow-auto whitespace-pre-wrap rounded-xl bg-white p-3 font-sans text-gray-800 ring-1 ring-gray-100/90 sm:p-4 ${
-                teamExperience ? 'text-[15px] leading-relaxed sm:text-base' : 'text-sm'
+              className={`mt-3 max-h-[min(22rem,55vh)] overflow-auto whitespace-pre-wrap rounded-xl border p-3 font-sans text-gray-800 sm:p-4 ${
+                teamExperience
+                  ? 'border-blue-100/80 bg-white text-[15px] leading-relaxed sm:text-base'
+                  : 'border-gray-100 bg-white text-sm'
               }`}
             >
               {entry.body}
@@ -1734,7 +1570,7 @@ function EntryCard({
             <div
               className={`mt-3 rounded-xl border px-3 py-2.5 text-sm ${
                 teamExperience
-                  ? 'border-emerald-200/80 bg-emerald-50/90 text-emerald-950'
+                  ? 'border-blue-200/80 bg-blue-50/90 text-blue-950'
                   : 'border-sky-100 bg-sky-50/90 text-sky-950'
               }`}
             >

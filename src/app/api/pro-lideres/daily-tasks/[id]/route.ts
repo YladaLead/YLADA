@@ -36,7 +36,7 @@ export async function PATCH(request: NextRequest, ctx: RouteCtx) {
     return NextResponse.json({ error: 'Apenas o líder pode editar tarefas.' }, { status: 403 })
   }
 
-  const paidPatch = await requireProLideresPaidContext(supabaseAdmin, user)
+  const paidPatch = await requireProLideresPaidContext(supabaseAdmin, user, { allowUnpaidOwnerDraft: true })
   if (!paidPatch.ok) return paidPatch.response
 
   let body: Record<string, unknown>
@@ -105,7 +105,7 @@ export async function DELETE(request: NextRequest, ctx: RouteCtx) {
     return NextResponse.json({ error: 'Apenas o líder pode remover tarefas.' }, { status: 403 })
   }
 
-  const paidDel = await requireProLideresPaidContext(supabaseAdmin, user)
+  const paidDel = await requireProLideresPaidContext(supabaseAdmin, user, { allowUnpaidOwnerDraft: true })
   if (!paidDel.ok) return paidDel.response
 
   const { error } = await supabaseAdmin

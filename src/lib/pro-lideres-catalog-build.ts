@@ -473,7 +473,7 @@ export async function buildProLideresCatalog(
     .sort((a, b) => a.sort_order - b.sort_order)
 
   const customFallbackWhen =
-    'Fluxo definido por ti. Preferir links YLADA em /l/… quando for diagnóstico ou quiz; ajusta o texto acima à tua necessidade.'
+    'Entrada extra no catálogo. Os links principais vêm de Meus links ou do Noel; podes remover esta linha se já não precisares.'
 
   for (const r of customs) {
     const href = r.href.trim()
@@ -488,7 +488,7 @@ export async function buildProLideresCatalog(
         ? `Ferramenta · ~1 min`
         : rawNotes
           ? `${rawNotes.slice(0, 40)}${rawNotes.length > 40 ? '…' : ''}`
-          : `${label.slice(0, 24)}${label.length > 24 ? '…' : ''} · fluxo próprio`
+          : `${label.slice(0, 24)}${label.length > 24 ? '…' : ''} · extra`
 
     out.push({
       id: r.id,

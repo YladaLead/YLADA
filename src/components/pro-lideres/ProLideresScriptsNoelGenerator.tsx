@@ -152,7 +152,7 @@ export function ProLideresScriptsNoelGenerator({
     }
     if (inputMode === 'guided' || guidedReq) {
       if (guided.toolPresetId === 'outra' && !guided.toolFreeform.trim() && !yladaLinkId) {
-        onError('Em «Outra ferramenta», escreve uma linha ou escolhe uma ferramenta do catálogo YLADA.')
+        onError('Em «Outra ferramenta», escreve uma linha ou escolhe uma ferramenta do catálogo do painel.')
         return
       }
     }
@@ -365,11 +365,11 @@ export function ProLideresScriptsNoelGenerator({
       case 1:
         return 'Esse script é para qual foco principal?'
       case 2:
-        return 'Qual ângulo puxar primeiro?'
+        return 'Por onde quer começar a conversa?'
       case 3:
         return 'O que esse script precisa gerar?'
       case 4:
-        return 'Está ligado a alguma ferramenta ou situação?'
+        return 'Qual ferramenta ou diagnóstico entra depois da conversa?'
       case 5:
         return 'Para quem é a mensagem?'
       case 6:
@@ -385,12 +385,10 @@ export function ProLideresScriptsNoelGenerator({
 
   return (
     <div className="space-y-5">
-      <p className="rounded-2xl border border-indigo-100 bg-gradient-to-br from-indigo-50/90 via-white to-violet-50/40 px-4 py-3 text-sm leading-relaxed text-indigo-950 sm:px-5 sm:py-3.5">
-        O Noel foi treinado para gerar <strong className="text-indigo-950">light copy</strong>: pedido de{' '}
-        <strong className="text-indigo-950">permissão</strong> antes de link ou pedido delicado; indicação como{' '}
-        <strong className="text-indigo-950">missão de ajudar</strong> (terceira pessoa, conforto para quem recebe), sem
-        pressão nem gatilhos agressivos. Depois você pode <strong className="text-indigo-950">ajustar com o Noel</strong>{' '}
-        e <strong className="text-indigo-950">salvar para a equipe</strong>.
+      <p className="rounded-2xl border border-indigo-100 bg-gradient-to-br from-indigo-50/90 via-white to-violet-50/40 px-4 py-3 text-sm leading-snug text-indigo-950 sm:px-5 sm:py-3.5">
+        <strong className="text-indigo-950">Prefira «Guiado»</strong> — o Noel pergunta, você escolhe e avança. O texto
+        já sai em tom leve (permissão antes de link; convite a ajudar, sem pressão). No fim: ajustar se quiser e{' '}
+        <strong className="text-indigo-950">salvar</strong>.
       </p>
 
       <div className="flex flex-wrap gap-2 rounded-xl border border-gray-200 bg-gray-50/80 p-1.5">
@@ -407,7 +405,7 @@ export function ProLideresScriptsNoelGenerator({
               : 'text-gray-600 hover:text-gray-900'
           }`}
         >
-          Guiado
+          Guiado (recomendado)
         </button>
         <button
           type="button"
@@ -466,7 +464,7 @@ export function ProLideresScriptsNoelGenerator({
           )}
 
           {guidedStep === 2 && (
-            <div className="grid gap-2 sm:grid-cols-1 sm:grid-cols-2">
+            <div className="grid gap-2 sm:grid-cols-2">
               {anglesForFocus(guided.focusMainId).map((a) => (
                 <Chip
                   key={a.id}

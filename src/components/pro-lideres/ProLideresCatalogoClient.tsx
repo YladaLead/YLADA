@@ -63,29 +63,31 @@ function CatalogRowCard({
   item,
   showRemove,
   onRemove,
-  onEdit,
   copied,
   onCopied,
-  flowsApiBase,
   showTeamVisibilityControls,
   teamVisibilityBusy,
   onTeamVisibilityChange,
   showMemberSharePanel,
   rowHighlight,
+  showScriptsLink = true,
+  showOriginKindChips = true,
 }: {
   item: ProLideresCatalogItem
   showRemove: boolean
   onRemove: (id: string) => void
-  onEdit?: () => void
   copied: 'link' | 'qr' | null
   onCopied: (mode: 'link' | 'qr') => void
-  flowsApiBase: string
   showTeamVisibilityControls: boolean
   teamVisibilityBusy: boolean
   onTeamVisibilityChange: (item: ProLideresCatalogItem, visible: boolean) => void
   showMemberSharePanel?: boolean
   /** Destaque vindo do Noel (query highlightYladaLink). */
   rowHighlight?: boolean
+  /** Ambiente do líder: atalho para scripts no editor de links. */
+  showScriptsLink?: boolean
+  /** Líder: mostra se veio da biblioteca base, Meus links ou extra. Equipe: omitir (só vê o que foi liberado). */
+  showOriginKindChips?: boolean
 }) {
   const [whenOpen, setWhenOpen] = useState(false)
   const scriptsHref = item.yladaLinkId ? `/pt/links/editar/${item.yladaLinkId}` : '/pt/links'
@@ -104,19 +106,21 @@ function CatalogRowCard({
           <div className="flex flex-wrap items-start justify-between gap-2">
             <h3 className="text-base font-bold leading-snug text-gray-900">{item.label}</h3>
             <div className="flex shrink-0 flex-wrap justify-end gap-1.5">
-              {item.origin === 'library' ? (
-                <span className="inline-flex items-center rounded-full bg-violet-50 px-2 py-0.5 text-[11px] font-semibold text-violet-900 ring-1 ring-violet-100">
-                  Biblioteca
-                </span>
-              ) : item.source === 'custom' ? (
-                <span className="inline-flex items-center rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-900 ring-1 ring-amber-100">
-                  Fluxo próprio
-                </span>
-              ) : (
-                <span className="inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-800 ring-1 ring-slate-200">
-                  Criado por você
-                </span>
-              )}
+              {showOriginKindChips ? (
+                item.origin === 'library' ? (
+                  <span className="inline-flex items-center rounded-full bg-violet-50 px-2 py-0.5 text-[11px] font-semibold text-violet-900 ring-1 ring-violet-100">
+                    Biblioteca
+                  </span>
+                ) : item.source === 'custom' ? (
+                  <span className="inline-flex items-center rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-900 ring-1 ring-amber-100">
+                    Extra
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-800 ring-1 ring-slate-200">
+                    Criado por você
+                  </span>
+                )
+              ) : null}
               {item.badge === 'most_used' && (
                 <span className="inline-flex items-center rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-800 ring-1 ring-emerald-100">
                   🔥 Mais usado
@@ -160,7 +164,7 @@ function CatalogRowCard({
           href={item.publicUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex min-h-[36px] items-center rounded-lg border border-gray-200 bg-white px-3 text-xs font-semibold text-gray-700 hover:bg-gray-50"
+          className="inline-flex min-h-[44px] items-center rounded-lg border border-gray-200 bg-white px-3 text-xs font-semibold text-gray-700 hover:bg-gray-50"
         >
           Preview
         </a>
@@ -170,7 +174,7 @@ function CatalogRowCard({
             const ok = await copyText(item.publicUrl)
             if (ok) onCopied('link')
           }}
-          className="inline-flex min-h-[36px] items-center rounded-lg border border-gray-200 bg-white px-3 text-xs font-semibold text-gray-700 hover:bg-gray-50"
+          className="inline-flex min-h-[44px] items-center rounded-lg border border-gray-200 bg-white px-3 text-xs font-semibold text-gray-700 hover:bg-gray-50"
         >
           {copied === 'link' ? '✓ Link' : 'Copiar link'}
         </button>
@@ -180,29 +184,22 @@ function CatalogRowCard({
             const ok = await copyQrImage(item.publicUrl)
             if (ok) onCopied('qr')
           }}
-          className="inline-flex min-h-[36px] items-center rounded-lg border border-gray-200 bg-white px-3 text-xs font-semibold text-gray-700 hover:bg-gray-50"
+          className="inline-flex min-h-[44px] items-center rounded-lg border border-gray-200 bg-white px-3 text-xs font-semibold text-gray-700 hover:bg-gray-50"
         >
           {copied === 'qr' ? '✓ QR' : 'Copiar QR'}
         </button>
-        <Link
-          href={scriptsHref}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex min-h-[36px] items-center rounded-lg bg-gray-800 px-3 text-xs font-semibold text-white hover:bg-gray-900"
-        >
-          Scripts
-        </Link>
+        {showScriptsLink ? (
+          <Link
+            href={scriptsHref}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex min-h-[44px] items-center rounded-lg bg-gray-800 px-3 text-xs font-semibold text-white hover:bg-gray-900"
+          >
+            Scripts
+          </Link>
+        ) : null}
         {showRemove && item.source === 'custom' && (
           <span className="ml-auto flex flex-wrap items-center gap-2">
-            {onEdit && (
-              <button
-                type="button"
-                onClick={onEdit}
-                className="text-xs font-medium text-indigo-600 underline-offset-2 hover:underline"
-              >
-                Editar
-              </button>
-            )}
             <button
               type="button"
               onClick={() => onRemove(item.id)}
@@ -226,7 +223,8 @@ function CatalogRowCard({
         <div className="mt-3 border-t border-slate-100 pt-3">
           <p className="text-xs font-semibold text-slate-800">Equipe no painel</p>
           <p className="mt-0.5 text-[11px] leading-snug text-slate-600">
-            Defina se esta ferramenta aparece na biblioteca dos membros (biblioteca YLADA ou fluxo próprio).
+            Defina se esta ferramenta aparece na biblioteca dos membros (biblioteca YLADA ou o que criaste em Meus
+            links).
           </p>
           <div className="mt-2 flex flex-wrap items-center gap-2">
             {item.visibleToTeam ? (
@@ -273,7 +271,6 @@ export function ProLideresCatalogoClient({
   salesTabLabel = 'Vendas',
   catalogTitle = 'Catálogo de ferramentas',
   catalogIntro,
-  addFormAudienceNote = 'à equipe',
 }: {
   /** Base da API de fluxos (ex.: `/api/pro-estetica-corporal`). */
   flowsApiBase?: string
@@ -285,31 +282,25 @@ export function ProLideresCatalogoClient({
   catalogTitle?: string
   /** Parágrafo introdutório abaixo do título. */
   catalogIntro?: string
-  /** Texto no formulário "link extra" (ex.: "à tua operação"). */
-  addFormAudienceNote?: string
 } = {}) {
   const { isLeaderWorkspace, verticalCode } = useProLideresPainel()
   const brandDisplay = verticalCode === 'h-lider' ? PRO_LIDERES_VERTICAL_BRAND_LABEL : verticalCode
   const [catalog, setCatalog] = useState<ProLideresCatalogItem[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [label, setLabel] = useState('')
-  const [href, setHref] = useState('')
-  const [flowNotes, setFlowNotes] = useState('')
-  const [editFlowId, setEditFlowId] = useState<string | null>(null)
-  const [saving, setSaving] = useState(false)
   const [copyState, setCopyState] = useState<Record<string, 'link' | 'qr'>>({})
   const [tab, setTab] = useState<TabKey>('sales')
   const [section, setSection] = useState<SectionKey>('library')
   const [search, setSearch] = useState('')
-  const [addCategory, setAddCategory] = useState<TabKey>('sales')
   const [teamVisibilityBusyId, setTeamVisibilityBusyId] = useState<string | null>(null)
   const [highlightYladaLinkId, setHighlightYladaLinkId] = useState<string | null>(null)
 
-  const defaultIntro =
+  const defaultIntroLeader =
     'Aqui você separa a biblioteca que a YLADA já deixa pronta dos links que você mesmo criar. Depois é só escolher entre ferramentas de vendas ou de recrutamento.'
+  const defaultIntroTeam =
+    'Aqui aparecem só as ferramentas que o líder liberou para a equipe. Escolha o funil (vendas ou recrutamento), use o fluxo e copie o seu link para divulgar.'
 
-  const introText = catalogIntro ?? defaultIntro
+  const introText = catalogIntro ?? (isLeaderWorkspace ? defaultIntroLeader : defaultIntroTeam)
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -346,7 +337,7 @@ export function ProLideresCatalogoClient({
     const match = catalog.find((i) => i.yladaLinkId === highlightYladaLinkId)
     if (match) {
       setTab(match.catalogCategory)
-      setSection(match.origin)
+      if (isLeaderWorkspace) setSection(match.origin)
     }
     const tid = window.setTimeout(() => {
       document.getElementById(`pro-lideres-catalog-yd-${highlightYladaLinkId}`)?.scrollIntoView({
@@ -355,12 +346,13 @@ export function ProLideresCatalogoClient({
       })
     }, 200)
     return () => window.clearTimeout(tid)
-  }, [highlightYladaLinkId, loading, catalog])
+  }, [highlightYladaLinkId, loading, catalog, isLeaderWorkspace])
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase()
+    const teamCatalogOnlyReleased = !isLeaderWorkspace
     return catalog.filter((item) => {
-      if (item.origin !== section) return false
+      if (!teamCatalogOnlyReleased && item.origin !== section) return false
       if (item.catalogCategory !== tab) return false
       if (!q) return true
       const name = item.label.toLowerCase()
@@ -368,58 +360,7 @@ export function ProLideresCatalogoClient({
       const when = (item.whenToUse ?? '').toLowerCase()
       return name.includes(q) || desc.includes(q) || when.includes(q)
     })
-  }, [catalog, tab, section, search])
-
-  function resetFlowForm() {
-    setEditFlowId(null)
-    setLabel('')
-    setHref('')
-    setFlowNotes('')
-  }
-
-  function startEditFlow(item: ProLideresCatalogItem) {
-    if (item.source !== 'custom') return
-    setEditFlowId(item.id)
-    setLabel(item.label)
-    setHref(item.href)
-    setAddCategory(item.catalogCategory)
-    setFlowNotes(item.customFlowNotes ?? '')
-    setError(null)
-    const el = document.getElementById('pro-lideres-flow-form')
-    el?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-  }
-
-  async function onAdd(e: React.FormEvent) {
-    e.preventDefault()
-    setSaving(true)
-    setError(null)
-    try {
-      const payload = { category: addCategory, label, href, notes: flowNotes }
-      const res = await fetch(
-        editFlowId ? `${flowsApiBase}/flows/${editFlowId}` : `${flowsApiBase}/flows`,
-        {
-          method: editFlowId ? 'PATCH' : 'POST',
-          credentials: 'include',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
-        }
-      )
-      const data = await res.json().catch(() => ({}))
-      if (!res.ok) {
-        setError(
-          (data as { error?: string }).error ||
-            (editFlowId ? 'Não foi possível guardar.' : 'Não foi possível adicionar.')
-        )
-        return
-      }
-      resetFlowForm()
-      await load()
-    } catch {
-      setError(editFlowId ? 'Erro de rede ao guardar.' : 'Erro de rede ao adicionar.')
-    } finally {
-      setSaving(false)
-    }
-  }
+  }, [catalog, tab, section, search, isLeaderWorkspace])
 
   async function removeCustom(id: string) {
     if (!confirm('Remover esta entrada extra do catálogo?')) return
@@ -434,7 +375,6 @@ export function ProLideresCatalogoClient({
         setError((data as { error?: string }).error || 'Não foi possível remover.')
         return
       }
-      if (editFlowId === id) resetFlowForm()
       await load()
     } catch {
       setError('Erro de rede ao remover.')
@@ -506,41 +446,47 @@ export function ProLideresCatalogoClient({
 
       <div className="rounded-2xl border-2 border-slate-200 bg-gradient-to-b from-slate-50/90 to-white p-5 shadow-md ring-1 ring-slate-900/5">
         <div className="flex flex-col gap-5">
-          <div className="rounded-xl border border-violet-200/80 bg-violet-50/60 p-4 shadow-sm">
-            <p className="text-sm font-semibold text-slate-900">Origem</p>
-            <p className="mt-0.5 text-xs text-slate-600">Biblioteca pronta ou o que você criou em Meus links</p>
-            <div className="mt-3 flex max-w-xl rounded-xl bg-slate-300/35 p-1.5 shadow-inner">
-              <button
-                type="button"
-                onClick={() => setSection('library')}
-                title="Ferramentas da biblioteca base Pro Líderes"
-                className={`min-h-[46px] flex-1 rounded-lg px-3 text-sm font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 ${
-                  section === 'library'
-                    ? 'bg-white text-violet-900 shadow-md ring-2 ring-violet-400/70'
-                    : 'text-slate-600 hover:bg-white/60 hover:text-slate-900'
-                }`}
-              >
-                Biblioteca
-              </button>
-              <button
-                type="button"
-                onClick={() => setSection('mine')}
-                title="Links criados em Meus links e extras do painel"
-                className={`min-h-[46px] flex-1 rounded-lg px-3 text-sm font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2 ${
-                  section === 'mine'
-                    ? 'bg-white text-slate-900 shadow-md ring-2 ring-slate-400/80'
-                    : 'text-slate-600 hover:bg-white/60 hover:text-slate-900'
-                }`}
-              >
-                Minhas ferramentas
-              </button>
+          {isLeaderWorkspace ? (
+            <div className="rounded-xl border border-violet-200/80 bg-violet-50/60 p-4 shadow-sm">
+              <p className="text-sm font-semibold text-slate-900">Origem</p>
+              <p className="mt-0.5 text-xs text-slate-600">Biblioteca pronta ou o que você criou em Meus links</p>
+              <div className="mt-3 flex max-w-xl rounded-xl bg-slate-300/35 p-1.5 shadow-inner">
+                <button
+                  type="button"
+                  onClick={() => setSection('library')}
+                  title="Ferramentas da biblioteca base Pro Líderes"
+                  className={`min-h-[46px] flex-1 rounded-lg px-3 text-sm font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 ${
+                    section === 'library'
+                      ? 'bg-white text-violet-900 shadow-md ring-2 ring-violet-400/70'
+                      : 'text-slate-600 hover:bg-white/60 hover:text-slate-900'
+                  }`}
+                >
+                  Biblioteca
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSection('mine')}
+                  title="Links criados em Meus links e extras do painel"
+                  className={`min-h-[46px] flex-1 rounded-lg px-3 text-sm font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2 ${
+                    section === 'mine'
+                      ? 'bg-white text-slate-900 shadow-md ring-2 ring-slate-400/80'
+                      : 'text-slate-600 hover:bg-white/60 hover:text-slate-900'
+                  }`}
+                >
+                  Minhas ferramentas
+                </button>
+              </div>
             </div>
-          </div>
+          ) : null}
 
           <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:gap-4">
             <div className="min-w-0 flex-1 space-y-2 rounded-xl border border-sky-200/80 bg-sky-50/50 p-4 shadow-sm">
               <p className="text-sm font-semibold text-slate-900">Vendas ou recrutamento</p>
-              <p className="text-xs text-slate-600">Escolha o tipo de ferramenta que quer ver</p>
+              <p className="text-xs text-slate-600">
+                {isLeaderWorkspace
+                  ? 'Escolha o tipo de ferramenta que quer ver'
+                  : 'Só aparecem fluxos que o líder liberou para a equipe neste funil.'}
+              </p>
               <div className={`mt-2 flex rounded-xl bg-slate-300/35 p-1.5 shadow-inner ${hideRecruitmentTab ? 'max-w-md' : ''}`}>
                 <button
                   type="button"
@@ -594,26 +540,39 @@ export function ProLideresCatalogoClient({
       ) : catalog.length === 0 ? (
         <div className="rounded-xl border-2 border-dashed border-slate-200 bg-slate-50/80 px-6 py-12 text-center">
           <p className="text-lg font-semibold text-slate-900">Nenhuma ferramenta listada</p>
-          {isLeaderWorkspace && (
+          {isLeaderWorkspace ? (
             <Link
               href="/pt/links"
               className="mt-6 inline-flex min-h-[44px] items-center justify-center rounded-lg bg-blue-600 px-6 text-sm font-semibold text-white hover:bg-blue-700"
             >
               Abrir Meus links
             </Link>
+          ) : (
+            <p className="mx-auto mt-4 max-w-md text-sm text-slate-600">
+              Quando o líder liberar ferramentas para a equipe no catálogo, elas aparecem aqui por funil (vendas ou
+              recrutamento).
+            </p>
           )}
         </div>
       ) : filtered.length === 0 ? (
         <div className="rounded-xl border-2 border-slate-200 bg-white p-8 text-center text-slate-600 shadow-sm">
           <p className="font-semibold text-slate-900">Nada nesta combinação</p>
           <p className="mt-1 text-sm">
-            {search.trim()
-              ? hideRecruitmentTab
-                ? 'Nenhum resultado — tente outro nome.'
-                : 'Nenhum resultado — tente outro nome ou troque os filtros (Vendas / Recrutamento ou Biblioteca / Minhas ferramentas).'
-              : hideRecruitmentTab
-                ? 'Tente outra origem (Biblioteca / Minhas) ou crie ferramentas em Meus links.'
-                : 'Troque Biblioteca / Minhas ferramentas ou Vendas / Recrutamento, ou crie algo novo em Meus links.'}
+            {isLeaderWorkspace
+              ? search.trim()
+                ? hideRecruitmentTab
+                  ? 'Nenhum resultado — tente outro nome.'
+                  : 'Nenhum resultado — tente outro nome ou troque os filtros (Vendas / Recrutamento ou Biblioteca / Minhas ferramentas).'
+                : hideRecruitmentTab
+                  ? 'Tente outra origem (Biblioteca / Minhas) ou crie ferramentas em Meus links.'
+                  : 'Troque Biblioteca / Minhas ferramentas ou Vendas / Recrutamento, ou crie algo novo em Meus links.'
+              : search.trim()
+                ? hideRecruitmentTab
+                  ? 'Nenhum resultado — tente outro nome.'
+                  : 'Nenhum resultado — tente outro nome ou troque entre Vendas e Recrutamento.'
+                : hideRecruitmentTab
+                  ? 'Ainda não há ferramentas liberadas para si neste funil.'
+                  : 'Ainda não há ferramentas liberadas para si neste funil — experimente Vendas ou Recrutamento.'}
           </p>
         </div>
       ) : (
@@ -624,121 +583,18 @@ export function ProLideresCatalogoClient({
               item={item}
               showRemove={isLeaderWorkspace}
               onRemove={(id) => void removeCustom(id)}
-              onEdit={
-                item.source === 'custom' && isLeaderWorkspace ? () => startEditFlow(item) : undefined
-              }
               copied={copyState[item.id] ?? null}
               onCopied={(mode) => setCopiedFor(item.id, mode)}
-              flowsApiBase={flowsApiBase}
               showTeamVisibilityControls={isLeaderWorkspace}
               teamVisibilityBusy={teamVisibilityBusyId === item.id}
               onTeamVisibilityChange={(i, vis) => void setItemTeamVisible(i, vis)}
               showMemberSharePanel={!isLeaderWorkspace}
+              showScriptsLink={isLeaderWorkspace}
+              showOriginKindChips={isLeaderWorkspace}
               rowHighlight={Boolean(highlightYladaLinkId && item.yladaLinkId === highlightYladaLinkId)}
             />
           ))}
         </div>
-      )}
-
-      {isLeaderWorkspace && (
-        <section
-          id="pro-lideres-flow-form"
-          className="rounded-2xl border-2 border-slate-200 bg-white p-5 shadow-md ring-1 ring-slate-900/5"
-          aria-labelledby="add-catalog-extra"
-        >
-          <h2 id="add-catalog-extra" className="text-base font-semibold text-slate-900">
-            {editFlowId ? 'Editar fluxo próprio' : 'Criar fluxo próprio'}
-          </h2>
-          <p className="mt-1 text-sm text-slate-600">
-            Defina um nome, o destino (caminho <code className="rounded bg-slate-100 px-1">/l/…</code> ou URL) e, se
-            quiser, a <strong>necessidade ou contexto</strong> deste fluxo para você e {addFormAudienceNote}. Os links
-            YLADA criados em <strong>Meus links</strong> já aparecem em &quot;Minhas ferramentas&quot;; aqui você
-            acrescenta atalhos e notas à sua estratégia.
-          </p>
-          <form onSubmit={onAdd} className="mt-4 grid gap-3 sm:grid-cols-2">
-            {!hideRecruitmentTab && (
-              <fieldset className="sm:col-span-2">
-                <legend className="mb-2 text-sm font-medium text-gray-700">Categoria</legend>
-                <div className="flex flex-wrap gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setAddCategory('sales')}
-                    className={`min-h-[40px] rounded-lg px-4 text-sm font-semibold transition ${
-                      addCategory === 'sales'
-                        ? 'bg-blue-600 text-white shadow-sm'
-                        : 'border border-gray-200 bg-white text-gray-700 hover:bg-gray-50'
-                    }`}
-                  >
-                    Vendas
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setAddCategory('recruitment')}
-                    title="Guardar como fluxo de recrutamento"
-                    className={`min-h-[40px] rounded-lg px-4 text-sm font-semibold transition ${
-                      addCategory === 'recruitment'
-                        ? 'bg-blue-600 text-white shadow-sm'
-                        : 'border border-gray-200 bg-white text-gray-700 hover:bg-gray-50'
-                    }`}
-                  >
-                    Recrutamento
-                  </button>
-                </div>
-              </fieldset>
-            )}
-            <label className="block text-sm sm:col-span-2">
-              <span className="mb-1 block font-medium text-gray-700">Nome</span>
-              <input
-                value={label}
-                onChange={(e) => setLabel(e.target.value)}
-                className="w-full rounded-lg border border-gray-200 px-3 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
-                maxLength={200}
-                required
-              />
-            </label>
-            <label className="block text-sm sm:col-span-2">
-              <span className="mb-1 block font-medium text-gray-700">URL ou caminho</span>
-              <input
-                value={href}
-                onChange={(e) => setHref(e.target.value)}
-                className="w-full rounded-lg border border-gray-200 px-3 py-2.5 font-mono text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
-                placeholder="/l/meu-slug"
-                required
-              />
-            </label>
-            <label className="block text-sm sm:col-span-2">
-              <span className="mb-1 block font-medium text-gray-700">
-                Necessidade / quando usar <span className="font-normal text-gray-500">(opcional)</span>
-              </span>
-              <textarea
-                value={flowNotes}
-                onChange={(e) => setFlowNotes(e.target.value)}
-                rows={3}
-                maxLength={4000}
-                placeholder="Ex.: usar com quem já mostrou interesse em negócio paralelo; enviar depois do café da manhã…"
-                className="w-full rounded-lg border border-gray-200 px-3 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
-              />
-            </label>
-            <div className="flex flex-wrap gap-2 sm:col-span-2">
-              <button
-                type="submit"
-                disabled={saving}
-                className="min-h-[44px] rounded-lg bg-blue-600 px-5 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
-              >
-                {saving ? 'Salvando…' : editFlowId ? 'Guardar alterações' : 'Adicionar fluxo'}
-              </button>
-              {editFlowId && (
-                <button
-                  type="button"
-                  onClick={() => resetFlowForm()}
-                  className="min-h-[44px] rounded-lg border border-gray-300 bg-white px-5 text-sm font-semibold text-gray-800 hover:bg-gray-50"
-                >
-                  Cancelar edição
-                </button>
-              )}
-            </div>
-          </form>
-        </section>
       )}
 
       <p className="text-sm text-gray-500">

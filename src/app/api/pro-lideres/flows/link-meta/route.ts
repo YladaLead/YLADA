@@ -30,7 +30,7 @@ export async function PATCH(request: NextRequest) {
     return NextResponse.json({ error: 'Apenas o líder pode atualizar metadados do link.' }, { status: 403 })
   }
 
-  const paid = await requireProLideresPaidContext(supabaseAdmin, user)
+  const paid = await requireProLideresPaidContext(supabaseAdmin, user, { allowUnpaidOwnerDraft: true })
   if (!paid.ok) return paid.response
 
   let body: { yladaLinkId?: string; proLideresKind?: string }

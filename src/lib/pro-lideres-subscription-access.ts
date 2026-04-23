@@ -40,17 +40,42 @@ export function proLideresSubscriptionRequiredResponse(): NextResponse {
   )
 }
 
-/** Para APIs autenticadas que precisam do tenant + assinatura ativa do líder. */
+export type RequireProLideresPaidContextOptions = {
+  /**
+   * Quando true, só exige tenant autenticado — não bloqueia por assinatura da equipe (qualquer papel).
+   * Evitar em rotas expostas a membros; preferir `allowUnpaidOwnerDraft`.
+   */
+  allowUnpaid?: boolean
+  /**
+   * Dono do tenant (`owner_user_id`) pode usar a rota sem assinatura Pro Líderes equipe ativa,
+   * para montar catálogo/scripts antes de pagar ou convidar. Membros continuam a precisar da
+   * assinatura do dono (`proLideresTeamSubscriptionAllowsAccess`).
+   */
+  allowUnpaidOwnerDraft?: boolean
+}
+
+/** Para APIs autenticadas que precisam do tenant; regra de assinatura conforme as opções. */
 export async function requireProLideresPaidContext(
   supabase: SupabaseClient,
-  user: User
+  user: User,
+  options?: RequireProLideresPaidContextOptions
 ): Promise<{ ok: true; ctx: ProLideresTenantContext } | { ok: false; response: NextResponse }> {
   const ctx = await resolveProLideresTenantContext(supabase, user)
   if (!ctx) {
     return { ok: false, response: NextResponse.json({ error: 'Tenant não encontrado' }, { status: 404 }) }
   }
-  if (!(await proLideresTeamSubscriptionAllowsAccess(user, ctx))) {
-    return { ok: false, response: proLideresSubscriptionRequiredResponse() }
+
+  if (options?.allowUnpaid) {
+    return { ok: true, ctx }
   }
-  return { ok: true, ctx }
+
+  if (await proLideresTeamSubscriptionAllowsAccess(user, ctx)) {
+    return { ok: true, ctx }
+  }
+
+  if (options?.allowUnpaidOwnerDraft && ctx.tenant.owner_user_id === user.id) {
+    return { ok: true, ctx }
+  }
+
+  return { ok: false, response: proLideresSubscriptionRequiredResponse() }
 }

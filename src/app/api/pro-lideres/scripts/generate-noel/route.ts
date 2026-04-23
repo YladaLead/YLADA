@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
     )
   }
 
-  const paid = await requireProLideresPaidContext(supabaseAdmin, user)
+  const paid = await requireProLideresPaidContext(supabaseAdmin, user, { allowUnpaidOwnerDraft: true })
   if (!paid.ok) return paid.response
 
   let body: {
@@ -122,8 +122,11 @@ export async function POST(request: NextRequest) {
   const userMessage = `Gera o JSON para o pilar "${pillar}" e o propósito acima. Regras absolutas:
 - Cada entries[].body é texto que o DISTRIBUIDOR envia a CLIENTE/LEAD/PÚBLICO (copiar/colar), nunca mensagem "Olá equipe" nem ao grupo interno.
 - Português do Brasil: **nunca** uses "follow-up" — usa **"acompanhamento"** se precisares desse conceito.
-- Se houver link/ferramenta no contexto: inclui **pedido de permissão** antes do link; **coleta de indicação** (quem mais pode se beneficiar) de forma natural; ângulo **família / quem ama** para preparar **compartilhar o link** com gatilhos mentais sutis e éticos.
-${guided ? '- O propósito veio de um **fluxo guiado** (rótulos OBJETIVO / PÚBLICO / TOM / CANAL, etc.): **respeita cada linha** como combinado com o líder.\n' : ''}Só JSON.`
+- **Abertura YLADA**: a primeira mensagem deve **educar ou conscientizar** (tema, hábito, micro-valor) **antes** de apresentar marca, espaço ou catálogo de produtos; as seguintes seguem **fio lógico** até permissão, ferramenta/diagnóstico e próximo passo.
+- **title** de cada entrada: deve refletir a fase (reflexão → permissão → diagnóstico/ferramenta → link); **não** ponha "Apresentação do Espaço" ou pitch de produto na mensagem 1 salvo o propósito pedir explicitamente.
+- Se o fluxo tiver **ferramenta/diagnóstico** e **WhatsApp 1:1**, pode acrescentar **uma última mensagem curta** em **português do Brasil** (ex.: se depois do diagnóstico fizer sentido pra você uma orientação rápida, **na própria página tem** o botão pra me chamar no Zap) — **sem** inventar número ou link de Zap; evite tratamento europeu (ex.: «quiseres», «vires»).
+- Se houver link/ferramenta no contexto: **permissão** antes do link; indicação ou "quem mais pode se beneficiar" só com **tom de cooperação** (ajudar quem importa), **saída honrosa** se a pessoa não tiver ninguém em mente; **sem** urgência falsa nem culpa.
+${guided ? '- O propósito veio de um **fluxo guiado** (rótulos OBJETIVO / PÚBLICO / TOM / CANAL, etc.): **respeita cada linha** como combinado com o líder.\n' : ''}- Se o material for para a **equipe** reutilizar: onde couber um link pessoal, usa **(teu link de [nome da ferramenta])** em vez de URL inventada.\nSó JSON.`
 
   try {
     const completion = await openai.chat.completions.create({
@@ -132,7 +135,7 @@ ${guided ? '- O propósito veio de um **fluxo guiado** (rótulos OBJETIVO / PÚB
         { role: 'system', content: systemPrompt },
         { role: 'user', content: userMessage },
       ],
-      temperature: 0.55,
+      temperature: 0.45,
       max_tokens: 3500,
       response_format: { type: 'json_object' },
     })

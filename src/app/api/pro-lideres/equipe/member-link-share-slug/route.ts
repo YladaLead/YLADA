@@ -21,7 +21,7 @@ export async function PATCH(request: NextRequest) {
     return NextResponse.json({ error: 'Servidor sem service role' }, { status: 503 })
   }
 
-  const paid = await requireProLideresPaidContext(supabaseAdmin, user)
+  const paid = await requireProLideresPaidContext(supabaseAdmin, user, { allowUnpaidOwnerDraft: true })
   if (!paid.ok) return paid.response
 
   const body = (await request.json().catch(() => ({}))) as Record<string, unknown>

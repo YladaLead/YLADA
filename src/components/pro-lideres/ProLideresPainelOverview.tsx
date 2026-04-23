@@ -190,7 +190,7 @@ export function ProLideresPainelOverview() {
           </div>
         </div>
 
-        <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-6">
+        <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-6">
           <ThermoPill
             emoji="🔥"
             label={activeLabel}
@@ -279,41 +279,80 @@ export function ProLideresPainelOverview() {
         {data.teamMemberCount === 0 ? (
           <p className="text-sm text-gray-600">Não há membros na equipe ainda. Convide pessoas para encher este ranking.</p>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[640px] text-left text-sm">
-              <thead>
-                <tr className="border-b border-gray-200 text-xs font-semibold uppercase text-gray-500">
-                  <th className="pb-2 pr-2">#</th>
-                  <th className="pb-2 pr-2">Nome</th>
-                  <th className="pb-2 pr-2">Pontos</th>
-                  <th className="pb-2 pr-2">Tarefas</th>
-                  <th className="pb-2 pr-2">WhatsApp</th>
-                  <th className="pb-2">Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {data.teamRanking.map((m, i) => (
-                  <tr key={m.userId} className="border-b border-gray-100 last:border-0">
-                    <td className="py-2.5 pr-2 font-medium text-gray-500">{i + 1}</td>
-                    <td className="py-2.5 pr-2 font-medium text-gray-900">{m.displayName}</td>
-                    <td className="py-2.5 pr-2 font-medium text-gray-800">{m.points}</td>
-                    <td className="py-2.5 pr-2 text-gray-700">
-                      {m.completionsInRange}
-                      {m.completedToday > 0 ? (
-                        <span className="ml-1 text-emerald-700">
-                          (+{m.completedToday} {data.focusDayShortLabel})
-                        </span>
-                      ) : null}
-                    </td>
-                    <td className="py-2.5 pr-2 text-gray-700">{m.trackedWhatsapp}</td>
-                    <td className="py-2.5">
-                      <StatusBadge status={m.status} />
-                    </td>
+          <>
+            <ul className="space-y-3 md:hidden" aria-label="Ranking da equipe">
+              {data.teamRanking.map((m, i) => (
+                <li
+                  key={m.userId}
+                  className="rounded-xl border border-gray-100 bg-gray-50/60 p-3 shadow-sm"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs font-medium text-gray-500">#{i + 1}</p>
+                      <p className="truncate text-sm font-semibold text-gray-900">{m.displayName}</p>
+                    </div>
+                    <StatusBadge status={m.status} />
+                  </div>
+                  <dl className="mt-3 grid grid-cols-2 gap-x-3 gap-y-2 text-sm">
+                    <div>
+                      <dt className="text-xs font-medium text-gray-500">Pontos</dt>
+                      <dd className="font-semibold text-gray-800">{m.points}</dd>
+                    </div>
+                    <div>
+                      <dt className="text-xs font-medium text-gray-500">WhatsApp</dt>
+                      <dd className="text-gray-800">{m.trackedWhatsapp}</dd>
+                    </div>
+                    <div className="col-span-2">
+                      <dt className="text-xs font-medium text-gray-500">Tarefas</dt>
+                      <dd className="text-gray-800">
+                        {m.completionsInRange}
+                        {m.completedToday > 0 ? (
+                          <span className="ml-1 text-emerald-700">
+                            (+{m.completedToday} {data.focusDayShortLabel})
+                          </span>
+                        ) : null}
+                      </dd>
+                    </div>
+                  </dl>
+                </li>
+              ))}
+            </ul>
+            <div className="hidden overflow-x-auto md:block">
+              <table className="w-full min-w-[640px] text-left text-sm">
+                <thead>
+                  <tr className="border-b border-gray-200 text-xs font-semibold uppercase text-gray-500">
+                    <th className="pb-2 pr-2">#</th>
+                    <th className="pb-2 pr-2">Nome</th>
+                    <th className="pb-2 pr-2">Pontos</th>
+                    <th className="pb-2 pr-2">Tarefas</th>
+                    <th className="pb-2 pr-2">WhatsApp</th>
+                    <th className="pb-2">Status</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {data.teamRanking.map((m, i) => (
+                    <tr key={m.userId} className="border-b border-gray-100 last:border-0">
+                      <td className="py-2.5 pr-2 font-medium text-gray-500">{i + 1}</td>
+                      <td className="py-2.5 pr-2 font-medium text-gray-900">{m.displayName}</td>
+                      <td className="py-2.5 pr-2 font-medium text-gray-800">{m.points}</td>
+                      <td className="py-2.5 pr-2 text-gray-700">
+                        {m.completionsInRange}
+                        {m.completedToday > 0 ? (
+                          <span className="ml-1 text-emerald-700">
+                            (+{m.completedToday} {data.focusDayShortLabel})
+                          </span>
+                        ) : null}
+                      </td>
+                      <td className="py-2.5 pr-2 text-gray-700">{m.trackedWhatsapp}</td>
+                      <td className="py-2.5">
+                        <StatusBadge status={m.status} />
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
       </section>
 
@@ -458,7 +497,7 @@ function ThermoPill({
 }) {
   return (
     <div className="rounded-xl border border-white/60 bg-white/80 p-3 shadow-sm">
-      <p className="text-xs text-gray-500">
+      <p className="line-clamp-2 text-xs text-gray-500">
         <span className="mr-1">{emoji}</span>
         {label}
       </p>
