@@ -295,6 +295,15 @@ function AdminDashboardContent() {
       destaque: true,
     },
     {
+      id: 'pro-lideres-consultoria',
+      title: 'Pro Líderes — consultoria',
+      description: 'Materiais, passo a passo, documentos e formulários com respostas guardadas',
+      icon: '📋',
+      link: '/admin/pro-lideres/consultoria',
+      color: 'bg-emerald-700',
+      destaque: true,
+    },
+    {
       id: 'pro-estetica-corporal-onboarding',
       title: 'Pro Estética Corporal — onboarding',
       description: 'Links de questionário (consultoria); respostas aplicadas ao ambiente da dona',
