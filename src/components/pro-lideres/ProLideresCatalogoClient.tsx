@@ -594,10 +594,6 @@ export function ProLideresCatalogoClient({
       ) : catalog.length === 0 ? (
         <div className="rounded-xl border-2 border-dashed border-slate-200 bg-slate-50/80 px-6 py-12 text-center">
           <p className="text-lg font-semibold text-slate-900">Nenhuma ferramenta listada</p>
-          <p className="mt-2 text-sm text-slate-600">
-            A biblioteca e as ferramentas que você criar vêm de <strong>Meus links</strong> (YLADA, /l/…) e de extras;
-            Use os filtros <strong>Biblioteca</strong> e <strong>Minhas ferramentas</strong> para ver cada grupo.
-          </p>
           {isLeaderWorkspace && (
             <Link
               href="/pt/links"
@@ -643,22 +639,6 @@ export function ProLideresCatalogoClient({
           ))}
         </div>
       )}
-
-      <div className="rounded-xl border border-amber-200/90 bg-amber-50 px-4 py-3 text-xs font-medium text-amber-950 shadow-sm">
-        {hideRecruitmentTab ? (
-          <>
-            Se o mesmo link ou o mesmo nome aparecer duas vezes, o sistema mostra só um cartão (fica a versão com mais
-            uso). Extras:{' '}
-            <code className="rounded bg-amber-100/90 px-1.5 py-0.5 font-mono text-[11px]">leader_tenant_flow_entries</code>.
-          </>
-        ) : (
-          <>
-            Mesmo URL ou mesmo nome no mesmo grupo (<strong>Biblioteca</strong> ou <strong>Minhas</strong>) e na mesma
-            categoria (<strong>Vendas</strong> / <strong>Recrutamento</strong>) viram um único cartão. Extras:{' '}
-            <code className="rounded bg-amber-100/90 px-1.5 py-0.5 font-mono text-[11px]">leader_tenant_flow_entries</code>.
-          </>
-        )}
-      </div>
 
       {isLeaderWorkspace && (
         <section
