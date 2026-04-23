@@ -217,7 +217,7 @@ export async function resolveProLideresTenantContext(
 
 /**
  * Garante sessão + acesso a um tenant (dono ou membro). Auto-provision só cria tenant para o dono (dev/bootstrap).
- * Redireciona para entrar se não autenticado; aguardando-acesso se sem tenant e sem provision.
+ * Redireciona para entrar se não autenticado; aguardando-acesso se sem tenant e sem forma de o resolver.
  */
 export async function ensureLeaderTenantAccess(): Promise<
   | { ok: true; tenant: LeaderTenantRow; role: ProLideresTenantRole }
@@ -251,6 +251,24 @@ export async function ensureLeaderTenantAccess(): Promise<
     ctx = await resolveProLideresTenantContext(admin, user)
   }
 
+  /**
+   * Dono com tenant já criado (ex.: cadastro manual no admin) mas SELECT com JWT falhou:
+   * localizar sempre com service role — não depender de `shouldProvisionProLideresTenant`.
+   */
+  if (!ctx && admin) {
+    const { data: ownerRow, error: ownerFetchErr } = await admin
+      .from('leader_tenants')
+      .select('*')
+      .eq('owner_user_id', user.id)
+      .maybeSingle()
+    if (ownerFetchErr) {
+      console.error('[ensureLeaderTenantAccess] admin lookup owner_tenant:', ownerFetchErr.message, resolvedUserEmail(user))
+    }
+    if (ownerRow) {
+      ctx = { tenant: ownerRow as LeaderTenantRow, role: 'leader' }
+    }
+  }
+
   if (!ctx && shouldProvisionProLideresTenant(user)) {
     const { data: inserted, error } = await supabase
       .from('leader_tenants')
@@ -272,38 +290,26 @@ export async function ensureLeaderTenantAccess(): Promise<
   }
 
   /**
-   * Fallback com service role: corrige casos em que RLS/cookie impede SELECT/INSERT com o JWT
-   * (utilizador autenticado mas sem contexto → aguardando-acesso em loop).
+   * Inserção com service role só quando o provisionamento automático está ligado
+   * (o tenant existente já foi resolvido no lookup admin acima).
    */
   if (!ctx && shouldProvisionProLideresTenant(user) && admin) {
-    const { data: existingOwner, error: fetchErr } = await admin
+    const { data: ins, error: insErr } = await admin
       .from('leader_tenants')
-      .select('*')
-      .eq('owner_user_id', user.id)
-      .maybeSingle()
-    if (fetchErr) {
-      console.error('[ensureLeaderTenantAccess] admin lookup owner:', fetchErr.message, resolvedUserEmail(user))
+      .insert(newLeaderTenantInsertPayload(user))
+      .select()
+      .single()
+    if (insErr) {
+      console.error(
+        '[ensureLeaderTenantAccess] provision (admin) falhou:',
+        insErr.code,
+        insErr.message,
+        resolvedUserEmail(user),
+        user.id
+      )
     }
-    if (existingOwner) {
-      ctx = { tenant: existingOwner as LeaderTenantRow, role: 'leader' }
-    } else {
-      const { data: ins, error: insErr } = await admin
-        .from('leader_tenants')
-        .insert(newLeaderTenantInsertPayload(user))
-        .select()
-        .single()
-      if (insErr) {
-        console.error(
-          '[ensureLeaderTenantAccess] provision (admin) falhou:',
-          insErr.code,
-          insErr.message,
-          resolvedUserEmail(user),
-          user.id
-        )
-      }
-      if (!insErr && ins) {
-        ctx = { tenant: ins as LeaderTenantRow, role: 'leader' }
-      }
+    if (!insErr && ins) {
+      ctx = { tenant: ins as LeaderTenantRow, role: 'leader' }
     }
   }
 
