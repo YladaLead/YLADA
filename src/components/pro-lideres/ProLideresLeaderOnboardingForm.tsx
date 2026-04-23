@@ -138,8 +138,8 @@ export function ProLideresLeaderOnboardingForm({
       <div className="block">
         <span className="mb-1 block text-sm font-medium text-gray-700">WhatsApp</span>
         <div className="flex flex-col gap-2 sm:flex-row sm:items-stretch">
-          <label className="shrink-0 sm:w-[min(100%,220px)]">
-            <span className="sr-only">País / DDI</span>
+          <label className="shrink-0 sm:w-[min(100%,240px)]">
+            <span className="mb-1 block text-xs font-medium text-gray-600">País (DDI)</span>
             <select
               disabled={disabled}
               value={
@@ -158,19 +158,22 @@ export function ProLideresLeaderOnboardingForm({
             </select>
           </label>
           <label className="min-w-0 flex-1">
-            <span className="sr-only">Número com DDD</span>
+            <span className="mb-1 block text-xs font-medium text-gray-600">DDD + número (só dígitos)</span>
             <input
               disabled={disabled}
               value={v.whatsappLocal}
               onChange={(e) => set('whatsappLocal', e.target.value)}
               inputMode="tel"
               autoComplete="tel-national"
-              placeholder="DDD + número, ex.: 11999999999"
+              placeholder="Ex.: 11999999999 (11 + 9 dígitos)"
               className="h-[42px] w-full rounded-lg border border-gray-300 px-3 py-2.5 disabled:cursor-not-allowed disabled:bg-gray-100"
             />
           </label>
         </div>
-        <p className="mt-1 text-xs text-gray-500">Padrão: Brasil (+55). Só dígitos no número; o DDI é aplicado automaticamente.</p>
+        <p className="mt-1 text-xs text-gray-500">
+          O sistema junta o DDI do país ao número da direita. Não voltes a escrever o +55 (ou outro DDI) no segundo
+          campo.
+        </p>
       </div>
 
       <details

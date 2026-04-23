@@ -1,0 +1,362 @@
+import type { ConsultoriaFormField } from '@/lib/pro-lideres-consultoria'
+
+/** Título exacto do material — usado para evitar duplicar o modelo na mesma clínica. */
+export const TEMPLATE_DIAGNOSTICO_CORPORAL_TITLE = 'Diagnóstico — Estética corporal (YLADA)'
+
+export const TEMPLATE_DIAGNOSTICO_CORPORAL_ID = 'diagnostico_corporal_v1' as const
+
+const SIM_NAO_AS_VEZES = ['Sim', 'Não', 'Às vezes']
+
+const SERVICOS_CHECKLIST: string[] = [
+  'Drenagem linfática',
+  'Massagem modeladora',
+  'Criolipólise',
+  'Radiofrequência',
+  'Ultrassom',
+  'Lipocavitação',
+  'Endermologia',
+  'Pós-operatório',
+  'Celulite e flacidez',
+  'Gordura localizada',
+  'Detox corporal',
+  'Protocolos personalizados',
+]
+
+const CANAIS_CHECKLIST: string[] = [
+  'Instagram',
+  'Indicação',
+  'WhatsApp',
+  'Tráfego pago',
+  'Parcerias',
+]
+
+const DORES_CHECKLIST: string[] = [
+  'Agenda vazia',
+  'Clientes que não fecham',
+  'Clientes que não voltam',
+  'Falta de posicionamento',
+  'Não sabe o que postar',
+  'Baixo faturamento',
+  'Desorganização',
+  'Precificação',
+]
+
+const PROCESSOS_CHECKLIST: string[] = [
+  'Retorno agendado',
+  'Acompanhamento',
+  'Pós-atendimento',
+  'Nenhum',
+]
+
+export type EsteticaConsultClientPrefill = {
+  business_name: string
+  contact_name: string | null
+  phone: string | null
+  contact_email: string | null
+}
+
+/** Dados do cadastro admin → respostas iniciais (a pessoa pode editar). Sem valores comerciais. */
+export function buildEsteticaDiagnosticoPublicPrefill(client: EsteticaConsultClientPrefill): {
+  initialAnswers: Record<string, string>
+  respondentName: string
+  respondentEmail: string
+} {
+  const initialAnswers: Record<string, string> = {}
+  const bn = (client.business_name ?? '').trim()
+  if (bn) initialAnswers.nome_clinica = bn
+  const cn = (client.contact_name ?? '').trim()
+  if (cn) initialAnswers.nome_proprietaria = cn
+  const ph = (client.phone ?? '').trim()
+  if (ph) initialAnswers.whatsapp = ph
+  return {
+    initialAnswers,
+    respondentName: cn,
+    respondentEmail: (client.contact_email ?? '').trim(),
+  }
+}
+
+/** Formulário diagnóstico corporal (estrutura por blocos). */
+export function buildDiagnosticoCorporalV1Fields(): ConsultoriaFormField[] {
+  return [
+    {
+      id: 'nome_clinica',
+      label: '1. Nome da clínica / marca',
+      type: 'text',
+      required: true,
+    },
+    {
+      id: 'nome_proprietaria',
+      label: '1. Nome da proprietária (ou quem decide)',
+      type: 'text',
+      required: true,
+    },
+    {
+      id: 'instagram',
+      label: '1. Instagram (@ ou link)',
+      type: 'text',
+      required: true,
+    },
+    {
+      id: 'whatsapp',
+      label: '1. WhatsApp (com DDD)',
+      type: 'text',
+      required: true,
+    },
+    {
+      id: 'cidade_estado',
+      label: '1. Cidade / Estado',
+      type: 'text',
+      required: true,
+    },
+    {
+      id: 'tempo_atuacao',
+      label: '1. Tempo de atuação em estética corporal',
+      type: 'text',
+      required: false,
+    },
+    {
+      id: 'trabalha_sozinha_equipe',
+      label: '1. Trabalha sozinha ou com equipe?',
+      type: 'select',
+      required: true,
+      options: ['Sozinha', 'Com equipe'],
+    },
+    {
+      id: 'equipe_quantas',
+      label: '1. Se tem equipe: quantas pessoas (incluindo você)?',
+      type: 'text',
+      required: false,
+    },
+    {
+      id: 'servicos_chk',
+      label: '2. Serviços que oferece (marque todos que aplicam)',
+      type: 'checkbox_group',
+      required: true,
+      options: SERVICOS_CHECKLIST,
+    },
+    {
+      id: 'servicos_outros',
+      label: '2. Outros serviços (texto livre, opcional)',
+      type: 'text',
+      required: false,
+    },
+    {
+      id: 'servico_1_nome',
+      label: '3. Serviço principal 1 — nome do tratamento / protocolo',
+      type: 'text',
+      required: true,
+    },
+    {
+      id: 'servico_1_valor_sessao',
+      label: '3. Serviço 1 — valor por sessão (R$)',
+      type: 'text',
+      required: false,
+    },
+    {
+      id: 'servico_1_duracao_min',
+      label: '3. Serviço 1 — duração média (minutos)',
+      type: 'text',
+      required: false,
+    },
+    {
+      id: 'servico_1_custo_aprox',
+      label: '3. Serviço 1 — custo aproximado por sessão (R$ ou “não sei”)',
+      type: 'text',
+      required: false,
+    },
+    {
+      id: 'servico_1_sessoes_por_dia',
+      label: '3. Serviço 1 — sessões por dia (média)',
+      type: 'text',
+      required: false,
+    },
+    {
+      id: 'servico_2_nome',
+      label: '3. Serviço principal 2 — nome (opcional)',
+      type: 'text',
+      required: false,
+    },
+    {
+      id: 'servico_2_valor_sessao',
+      label: '3. Serviço 2 — valor por sessão (R$)',
+      type: 'text',
+      required: false,
+    },
+    {
+      id: 'servico_2_duracao_min',
+      label: '3. Serviço 2 — duração média (minutos)',
+      type: 'text',
+      required: false,
+    },
+    {
+      id: 'servico_2_custo_aprox',
+      label: '3. Serviço 2 — custo aproximado',
+      type: 'text',
+      required: false,
+    },
+    {
+      id: 'servico_2_sessoes_por_dia',
+      label: '3. Serviço 2 — sessões por dia (média)',
+      type: 'text',
+      required: false,
+    },
+    {
+      id: 'servico_3_nome',
+      label: '3. Serviço principal 3 — nome (opcional)',
+      type: 'text',
+      required: false,
+    },
+    {
+      id: 'servico_3_valor_sessao',
+      label: '3. Serviço 3 — valor por sessão (R$)',
+      type: 'text',
+      required: false,
+    },
+    {
+      id: 'servico_3_duracao_min',
+      label: '3. Serviço 3 — duração média (minutos)',
+      type: 'text',
+      required: false,
+    },
+    {
+      id: 'servico_3_custo_aprox',
+      label: '3. Serviço 3 — custo aproximado',
+      type: 'text',
+      required: false,
+    },
+    {
+      id: 'servico_3_sessoes_por_dia',
+      label: '3. Serviço 3 — sessões por dia (média)',
+      type: 'text',
+      required: false,
+    },
+    {
+      id: 'atendimentos_por_semana',
+      label: '4. Atendimentos por semana (média)',
+      type: 'text',
+      required: false,
+    },
+    {
+      id: 'agenda_situacao',
+      label: '4. Sua agenda hoje está:',
+      type: 'select',
+      required: true,
+      options: [
+        'Vazia',
+        'Parcialmente cheia',
+        'Cheia, mas com horários ociosos',
+        'Cheia e organizada',
+      ],
+    },
+    {
+      id: 'horarios_mais_vazios',
+      label: '4. Dias/horários mais vazios',
+      type: 'textarea',
+      required: false,
+    },
+    {
+      id: 'canais_chk',
+      label: '5. Como consegue clientes hoje? (marque)',
+      type: 'checkbox_group',
+      required: false,
+      options: CANAIS_CHECKLIST,
+    },
+    {
+      id: 'canais_outros',
+      label: '5. Outros canais (texto)',
+      type: 'text',
+      required: false,
+    },
+    {
+      id: 'posta_frequencia',
+      label: '5. Posta com frequência no Instagram?',
+      type: 'select',
+      required: false,
+      options: SIM_NAO_AS_VEZES,
+    },
+    {
+      id: 'instagram_traz_qualidade',
+      label: '5. O Instagram traz clientes de qualidade?',
+      type: 'select',
+      required: false,
+      options: ['Sim', 'Não', 'Mais curiosos do que clientes'],
+    },
+    {
+      id: 'conversao_situacao',
+      label: '6. Quando alguém chama, você sente que:',
+      type: 'select',
+      required: false,
+      options: [
+        'Fecha fácil',
+        'Tem dificuldade em converter',
+        'A pessoa pergunta preço e some',
+      ],
+    },
+    {
+      id: 'oferece_formato',
+      label: '6. Você oferece principalmente:',
+      type: 'select',
+      required: false,
+      options: ['Sessões avulsas', 'Pacotes', 'Programas completos', 'Mistura'],
+    },
+    {
+      id: 'ticket_medio',
+      label: '6. Ticket médio atual (R$, se souber)',
+      type: 'text',
+      required: false,
+    },
+    {
+      id: 'clientes_voltam',
+      label: '7. Seus clientes costumam voltar?',
+      type: 'select',
+      required: false,
+      options: ['Sim', 'Não', 'Pouco'],
+    },
+    {
+      id: 'processos_pos_chk',
+      label: '7. Processo de: (marque o que tiver)',
+      type: 'checkbox_group',
+      required: false,
+      options: PROCESSOS_CHECKLIST,
+    },
+    {
+      id: 'dores_chk',
+      label: '8. O que mais incomoda no negócio? (marque)',
+      type: 'checkbox_group',
+      required: true,
+      options: DORES_CHECKLIST,
+    },
+    {
+      id: 'dores_detalhe',
+      label: '8. Quer complementar? (opcional)',
+      type: 'textarea',
+      required: false,
+    },
+    {
+      id: 'objetivo_30_dias',
+      label: '9. Principal resultado nos próximos 30 dias',
+      type: 'textarea',
+      required: true,
+    },
+    {
+      id: 'uma_coisa_so',
+      label: '10. Se pudesse resolver só UMA coisa hoje no negócio, qual seria?',
+      type: 'textarea',
+      required: true,
+    },
+    {
+      id: 'comentarios_finais',
+      label:
+        '11. Comentários livres (opcional) — contexto extra, dúvidas, ideias ou o que quiser que a consultoria saiba',
+      type: 'textarea',
+      required: false,
+    },
+  ]
+}
+
+export function getDiagnosticoCorporalV1Description(): string {
+  return [
+    'Ajuda a ver onde você está travando — faturamento, agenda e clientes.',
+    'Passos curtos no celular. No final: Enviar.',
+  ].join('\n')
+}

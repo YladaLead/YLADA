@@ -295,12 +295,22 @@ function AdminDashboardContent() {
       destaque: true,
     },
     {
-      id: 'pro-lideres-consultoria',
-      title: 'Pro Líderes — consultoria',
-      description: 'Materiais, passo a passo, documentos e formulários com respostas guardadas',
+      id: 'consultorias-hub',
+      title: 'Consultorias',
+      description: 'Pro Líderes ou estética capilar/corporal — materiais, formulários e respostas',
       icon: '📋',
-      link: '/admin/pro-lideres/consultoria',
-      color: 'bg-emerald-700',
+      link: '/admin/consultorias',
+      color: 'bg-indigo-700',
+      destaque: true,
+    },
+    {
+      id: 'ylada-estetica-consultoria-corporal',
+      title: 'Estética corporal — consultoria YLADA',
+      description:
+        'Atalho direto: clientes, diagnóstico corporal fixo, gerar link por clínica e respostas (não confundir com Pro Estética Corporal)',
+      icon: '🧾',
+      link: '/admin/estetica-consultoria?segmento=corporal',
+      color: 'bg-rose-600',
       destaque: true,
     },
     {

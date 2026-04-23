@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import type { LeaderTenantRow } from '@/types/leader-tenant'
 import PhoneInputWithCountry from '@/components/PhoneInputWithCountry'
+import { inferCountryIsoFromLeadingDigits } from '@/components/CountrySelector'
 
 export function ProLideresPerfilForm({
   tenantApiPath = '/api/pro-lideres/tenant',
@@ -41,8 +42,9 @@ export function ProLideresPerfilForm({
       setTenant(t)
       setDisplayName(t.display_name ?? '')
       setTeamName(t.team_name ?? '')
-      setWhatsapp(t.whatsapp ?? '')
-      setWhatsappCountryCode('BR')
+      const wa = t.whatsapp ?? ''
+      setWhatsapp(wa)
+      setWhatsappCountryCode(inferCountryIsoFromLeadingDigits(wa, 'BR'))
       setContactEmail(t.contact_email ?? '')
       setFocusNotes(t.focus_notes ?? '')
     } catch {

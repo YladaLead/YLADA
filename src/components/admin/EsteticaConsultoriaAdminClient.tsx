@@ -1,0 +1,1487 @@
+'use client'
+
+import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { ConsultoriaKindEditor } from '@/components/admin/consultoria/ConsultoriaKindEditor'
+import {
+  buildEsteticaConsultoriaResponderUrl,
+  esteticaConsultSegmentLabel,
+  type YladaEsteticaConsultClientRow,
+  type YladaEsteticaConsultancyFormResponseRow,
+  type YladaEsteticaConsultancyMaterialRow,
+  type YladaEsteticaConsultancyShareLinkRow,
+} from '@/lib/estetica-consultoria'
+import { TEMPLATE_DIAGNOSTICO_CORPORAL_TITLE } from '@/lib/estetica-consultoria-form-templates'
+import { consultoriaAnswersToDisplayRows } from '@/lib/consultoria-form-display'
+import {
+  consultoriaKindLabel,
+  defaultContentForKind,
+  getConsultoriaFormFields,
+  type ProLideresConsultoriaMaterialKind,
+} from '@/lib/pro-lideres-consultoria'
+
+type TabKey = 'editar' | 'execucao' | 'links' | 'respostas'
+
+type DiagnosticCorporalLink = YladaEsteticaConsultancyShareLinkRow & { responder_url?: string }
+
+type DiagnosticCorporalBundle = {
+  client: { id: string; business_name: string; segment: string }
+  material: YladaEsteticaConsultancyMaterialRow
+  links: DiagnosticCorporalLink[]
+  responses: YladaEsteticaConsultancyFormResponseRow[]
+}
+
+type CoachingNoteRow = {
+  id: string
+  created_at: string
+  client_id: string
+  note_kind: string
+  body: string
+  created_by_user_id: string | null
+}
+
+const NOTE_KIND_LABEL: Record<string, string> = {
+  acompanhamento: 'Acompanhamento',
+  observacao: 'Observação',
+  recomendacao: 'Recomendação',
+  evolucao: 'Evolução',
+}
+
+function emptyMaterialRow(clientId: string, kind: ProLideresConsultoriaMaterialKind): YladaEsteticaConsultancyMaterialRow {
+  const now = new Date().toISOString()
+  return {
+    id: '',
+    client_id: clientId,
+    template_key: null,
+    created_at: now,
+    updated_at: now,
+    title: '',
+    material_kind: kind,
+    description: null,
+    content: defaultContentForKind(kind),
+    sort_order: 0,
+    is_published: false,
+    created_by_user_id: null,
+  }
+}
+
+function clientFormDefaults(c: YladaEsteticaConsultClientRow) {
+  return {
+    business_name: c.business_name,
+    segment: c.segment,
+    contact_name: c.contact_name ?? '',
+    contact_email: c.contact_email ?? '',
+    phone: c.phone ?? '',
+    leader_tenant_id: c.leader_tenant_id ?? '',
+    consulting_paid_amount:
+      c.consulting_paid_amount == null ? '' : String(c.consulting_paid_amount).replace('.', ','),
+    payment_currency: c.payment_currency || 'BRL',
+    last_payment_at: c.last_payment_at ? c.last_payment_at.slice(0, 16) : '',
+    is_annual_plan: c.is_annual_plan,
+    annual_plan_start: c.annual_plan_start ?? '',
+    annual_plan_end: c.annual_plan_end ?? '',
+    admin_notes: c.admin_notes ?? '',
+  }
+}
+
+export default function EsteticaConsultoriaAdminClient() {
+  const searchParams = useSearchParams()
+  const segmentoFiltro = useMemo(() => {
+    const raw = searchParams.get('segmento')?.trim().toLowerCase()
+    if (raw === 'capilar' || raw === 'corporal') return raw
+    return null
+  }, [searchParams])
+
+  const [clients, setClients] = useState<YladaEsteticaConsultClientRow[]>([])
+  const [clientsLoading, setClientsLoading] = useState(true)
+  const [clientSearch, setClientSearch] = useState('')
+  const [selectedClient, setSelectedClient] = useState<YladaEsteticaConsultClientRow | null>(null)
+  const [clientForm, setClientForm] = useState<ReturnType<typeof clientFormDefaults> | null>(null)
+  const [savingClient, setSavingClient] = useState(false)
+
+  const [newBusinessName, setNewBusinessName] = useState('')
+  const [newSegment, setNewSegment] = useState<'capilar' | 'corporal' | 'ambos'>('capilar')
+  const [creatingClient, setCreatingClient] = useState(false)
+
+  const [items, setItems] = useState<YladaEsteticaConsultancyMaterialRow[]>([])
+  const [loadingMaterials, setLoadingMaterials] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [selected, setSelected] = useState<YladaEsteticaConsultancyMaterialRow | null>(null)
+  const [tab, setTab] = useState<TabKey>('editar')
+  const [saving, setSaving] = useState(false)
+  const [creating, setCreating] = useState(false)
+  const [kindFilter, setKindFilter] = useState<string>('all')
+
+  const [shareLinks, setShareLinks] = useState<YladaEsteticaConsultancyShareLinkRow[]>([])
+  const [responses, setResponses] = useState<YladaEsteticaConsultancyFormResponseRow[]>([])
+  const [auxLoading, setAuxLoading] = useState(false)
+
+  const [coachingNotes, setCoachingNotes] = useState<CoachingNoteRow[]>([])
+  const [coachingLoading, setCoachingLoading] = useState(false)
+  const [newNoteBody, setNewNoteBody] = useState('')
+  const [newNoteKind, setNewNoteKind] = useState<string>('acompanhamento')
+  const [savingNote, setSavingNote] = useState(false)
+
+  const [diagnosticCorporal, setDiagnosticCorporal] = useState<DiagnosticCorporalBundle | null>(null)
+  const [diagnosticLoading, setDiagnosticLoading] = useState(false)
+  const [diagnosticLinkLoading, setDiagnosticLinkLoading] = useState(false)
+
+  const loadClients = useCallback(async (search?: string) => {
+    setClientsLoading(true)
+    setError(null)
+    const q = (search ?? '').trim()
+    const qs = q ? `?q=${encodeURIComponent(q)}` : ''
+    const res = await fetch(`/api/admin/estetica-consultoria/clients${qs}`, { credentials: 'include' })
+    const data = await res.json().catch(() => ({}))
+    if (!res.ok) {
+      setError((data as { error?: string }).error || 'Erro ao carregar clientes.')
+      setClients([])
+      setClientsLoading(false)
+      return
+    }
+    setClients(((data as { items?: YladaEsteticaConsultClientRow[] }).items ?? []) as YladaEsteticaConsultClientRow[])
+    setClientsLoading(false)
+  }, [])
+
+  useEffect(() => {
+    void loadClients()
+  }, [loadClients])
+
+  useEffect(() => {
+    if (segmentoFiltro === 'capilar') setNewSegment('capilar')
+    else if (segmentoFiltro === 'corporal') setNewSegment('corporal')
+  }, [segmentoFiltro])
+
+  const clientsVisiveis = useMemo(() => {
+    if (!segmentoFiltro) return clients
+    return clients.filter((c) => {
+      if (segmentoFiltro === 'capilar') return c.segment === 'capilar' || c.segment === 'ambos'
+      return c.segment === 'corporal' || c.segment === 'ambos'
+    })
+  }, [clients, segmentoFiltro])
+
+  useEffect(() => {
+    if (!selectedClient) return
+    if (!clientsVisiveis.some((c) => c.id === selectedClient.id)) {
+      setSelectedClient(null)
+      setClientForm(null)
+      setSelected(null)
+    }
+  }, [clientsVisiveis, selectedClient])
+
+  const loadMaterials = useCallback(async (clientId: string) => {
+    setLoadingMaterials(true)
+    setError(null)
+    const qs = kindFilter !== 'all' ? `?kind=${encodeURIComponent(kindFilter)}` : ''
+    const res = await fetch(
+      `/api/admin/estetica-consultoria/clients/${encodeURIComponent(clientId)}/materials${qs}`,
+      { credentials: 'include' }
+    )
+    const data = await res.json().catch(() => ({}))
+    if (!res.ok) {
+      setError((data as { error?: string }).error || 'Erro ao carregar materiais.')
+      setItems([])
+      setLoadingMaterials(false)
+      return
+    }
+    setItems(((data as { items?: YladaEsteticaConsultancyMaterialRow[] }).items ?? []) as YladaEsteticaConsultancyMaterialRow[])
+    setLoadingMaterials(false)
+  }, [kindFilter])
+
+  useEffect(() => {
+    if (!selectedClient?.id) {
+      setItems([])
+      setSelected(null)
+      return
+    }
+    void loadMaterials(selectedClient.id)
+  }, [selectedClient?.id, loadMaterials])
+
+  const loadCoachingNotes = useCallback(async (clientId: string) => {
+    setCoachingLoading(true)
+    try {
+      const res = await fetch(`/api/admin/estetica-consultoria/clients/${encodeURIComponent(clientId)}/notes`, {
+        credentials: 'include',
+      })
+      const data = await res.json().catch(() => ({}))
+      setCoachingNotes(
+        res.ok ? ((data as { items?: CoachingNoteRow[] }).items ?? []) as CoachingNoteRow[] : []
+      )
+    } finally {
+      setCoachingLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!selectedClient?.id) {
+      setCoachingNotes([])
+      setNewNoteBody('')
+      return
+    }
+    void loadCoachingNotes(selectedClient.id)
+  }, [selectedClient?.id, loadCoachingNotes])
+
+  const loadDiagnosticCorporal = useCallback(async () => {
+    if (!selectedClient?.id) return
+    if (selectedClient.segment !== 'corporal' && selectedClient.segment !== 'ambos') {
+      setDiagnosticCorporal(null)
+      return
+    }
+    setDiagnosticLoading(true)
+    setError(null)
+    try {
+      const res = await fetch(
+        `/api/admin/estetica-consultoria/clients/${encodeURIComponent(selectedClient.id)}/diagnostic-corporal`,
+        { credentials: 'include' }
+      )
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) {
+        setDiagnosticCorporal(null)
+        setError((data as { error?: string }).error || 'Erro ao carregar diagnóstico corporal.')
+        return
+      }
+      setDiagnosticCorporal(data as DiagnosticCorporalBundle)
+    } finally {
+      setDiagnosticLoading(false)
+    }
+  }, [selectedClient])
+
+  useEffect(() => {
+    void loadDiagnosticCorporal()
+  }, [loadDiagnosticCorporal])
+
+  const itemsDisplayed = useMemo(() => {
+    if (!diagnosticCorporal?.material?.template_key || !selectedClient?.id) return items
+    return items.filter(
+      (m) =>
+        !(
+          m.title === TEMPLATE_DIAGNOSTICO_CORPORAL_TITLE &&
+          m.client_id === selectedClient.id &&
+          !m.template_key
+        )
+    )
+  }, [items, diagnosticCorporal?.material?.template_key, selectedClient?.id])
+
+  const diagnosticFieldDefs = useMemo(() => {
+    const c =
+      diagnosticCorporal?.material?.content && typeof diagnosticCorporal.material.content === 'object'
+        ? diagnosticCorporal.material.content
+        : {}
+    return getConsultoriaFormFields(c as Record<string, unknown>)
+  }, [diagnosticCorporal?.material?.content])
+
+  const createDiagnosticCorporalLink = async () => {
+    if (!selectedClient?.id) return
+    setDiagnosticLinkLoading(true)
+    setError(null)
+    try {
+      const res = await fetch(
+        `/api/admin/estetica-consultoria/clients/${encodeURIComponent(selectedClient.id)}/diagnostic-corporal`,
+        {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({}),
+        }
+      )
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) {
+        setError((data as { error?: string }).error || 'Erro ao gerar link.')
+        return
+      }
+      await loadDiagnosticCorporal()
+    } finally {
+      setDiagnosticLinkLoading(false)
+    }
+  }
+
+  const addCoachingNote = async () => {
+    if (!selectedClient?.id) return
+    const body = newNoteBody.trim()
+    if (body.length < 2) return
+    setSavingNote(true)
+    setError(null)
+    try {
+      const res = await fetch(`/api/admin/estetica-consultoria/clients/${selectedClient.id}/notes`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ body, note_kind: newNoteKind }),
+      })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) {
+        setError((data as { error?: string }).error || 'Erro ao guardar nota.')
+        return
+      }
+      setNewNoteBody('')
+      await loadCoachingNotes(selectedClient.id)
+    } finally {
+      setSavingNote(false)
+    }
+  }
+
+  const selectClient = (c: YladaEsteticaConsultClientRow) => {
+    setSelectedClient(c)
+    setClientForm(clientFormDefaults(c))
+    setSelected(null)
+    setTab('editar')
+  }
+
+  const saveClientData = async () => {
+    if (!selectedClient?.id || !clientForm) return
+    setSavingClient(true)
+    setError(null)
+    try {
+      const amtStr = clientForm.consulting_paid_amount.replace(',', '.').trim()
+      const consulting_paid_amount = amtStr === '' ? null : Number(amtStr)
+      const res = await fetch(`/api/admin/estetica-consultoria/clients/${selectedClient.id}`, {
+        method: 'PATCH',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          business_name: clientForm.business_name,
+          segment: clientForm.segment,
+          contact_name: clientForm.contact_name || null,
+          contact_email: clientForm.contact_email || null,
+          phone: clientForm.phone || null,
+          leader_tenant_id: clientForm.leader_tenant_id || null,
+          consulting_paid_amount:
+            consulting_paid_amount != null && Number.isFinite(consulting_paid_amount) ? consulting_paid_amount : null,
+          payment_currency: clientForm.payment_currency || 'BRL',
+          last_payment_at: clientForm.last_payment_at ? `${clientForm.last_payment_at}:00` : null,
+          is_annual_plan: clientForm.is_annual_plan,
+          annual_plan_start: clientForm.annual_plan_start || null,
+          annual_plan_end: clientForm.annual_plan_end || null,
+          admin_notes: clientForm.admin_notes || null,
+        }),
+      })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) {
+        setError((data as { error?: string }).error || 'Erro ao guardar dados da estética.')
+        return
+      }
+      const item = (data as { item?: YladaEsteticaConsultClientRow }).item
+      if (item) {
+        setSelectedClient(item)
+        setClientForm(clientFormDefaults(item))
+        setClients((prev) => prev.map((x) => (x.id === item.id ? item : x)))
+      }
+    } finally {
+      setSavingClient(false)
+    }
+  }
+
+  const createClient = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setCreatingClient(true)
+    setError(null)
+    try {
+      const res = await fetch('/api/admin/estetica-consultoria/clients', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          business_name: newBusinessName,
+          segment: newSegment,
+        }),
+      })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) {
+        setError((data as { error?: string }).error || 'Erro ao criar cliente.')
+        return
+      }
+      const item = (data as { item?: YladaEsteticaConsultClientRow }).item
+      if (item) {
+        setClients((prev) => [item, ...prev])
+        selectClient(item)
+        setNewBusinessName('')
+        setNewSegment(segmentoFiltro === 'corporal' ? 'corporal' : 'capilar')
+      }
+    } finally {
+      setCreatingClient(false)
+    }
+  }
+
+  const deleteClient = async () => {
+    if (!selectedClient?.id) return
+    if (!confirm('Eliminar esta estética e todos os materiais/respostas associados?')) return
+    const res = await fetch(`/api/admin/estetica-consultoria/clients/${selectedClient.id}`, {
+      method: 'DELETE',
+      credentials: 'include',
+    })
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}))
+      setError((data as { error?: string }).error || 'Erro ao eliminar.')
+      return
+    }
+    setSelectedClient(null)
+    setClientForm(null)
+    setSelected(null)
+    await loadClients()
+  }
+
+  const loadAuxForForm = useCallback(async (materialId: string, filterClientId: string | null) => {
+    setAuxLoading(true)
+    try {
+      const qc = filterClientId
+        ? `?estetica_consult_client_id=${encodeURIComponent(filterClientId)}`
+        : ''
+      const [r1, r2] = await Promise.all([
+        fetch(`/api/admin/estetica-consultoria/materials/${materialId}/share-links${qc}`, {
+          credentials: 'include',
+        }),
+        fetch(`/api/admin/estetica-consultoria/materials/${materialId}/responses${qc}`, { credentials: 'include' }),
+      ])
+      const d1 = await r1.json().catch(() => ({}))
+      const d2 = await r2.json().catch(() => ({}))
+      setShareLinks(r1.ok ? ((d1 as { items?: YladaEsteticaConsultancyShareLinkRow[] }).items ?? []) : [])
+      setResponses(r2.ok ? ((d2 as { items?: YladaEsteticaConsultancyFormResponseRow[] }).items ?? []) : [])
+    } finally {
+      setAuxLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!selected?.id || selected.material_kind !== 'formulario') {
+      setShareLinks([])
+      setResponses([])
+      return
+    }
+    if (tab === 'links' || tab === 'respostas') {
+      const filterId =
+        selected.template_key && selectedClient?.id ? selectedClient.id : null
+      void loadAuxForForm(selected.id, filterId)
+    }
+  }, [selected, selected?.id, selected?.material_kind, selected?.template_key, selectedClient?.id, tab, loadAuxForForm])
+
+  const openNew = (kind: ProLideresConsultoriaMaterialKind) => {
+    if (!selectedClient?.id) return
+    setSelected(emptyMaterialRow(selectedClient.id, kind))
+    setTab('editar')
+    setCreating(true)
+  }
+
+  const patchSelected = (patch: Partial<YladaEsteticaConsultancyMaterialRow>) => {
+    setSelected((prev) => (prev ? { ...prev, ...patch } : prev))
+  }
+
+  const patchContent = (next: Record<string, unknown>) => {
+    setSelected((prev) => (prev ? { ...prev, content: next } : prev))
+  }
+
+  const save = async () => {
+    if (!selected || !selectedClient?.id) return
+    setSaving(true)
+    setError(null)
+    try {
+      if (!selected.id) {
+        const res = await fetch(
+          `/api/admin/estetica-consultoria/clients/${encodeURIComponent(selectedClient.id)}/materials`,
+          {
+            method: 'POST',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              title: selected.title,
+              material_kind: selected.material_kind,
+              description: selected.description,
+              content: selected.content,
+              sort_order: selected.sort_order,
+              is_published: selected.is_published,
+            }),
+          }
+        )
+        const data = await res.json().catch(() => ({}))
+        if (!res.ok) {
+          setError((data as { error?: string }).error || 'Erro ao criar.')
+          return
+        }
+        const item = (data as { item?: YladaEsteticaConsultancyMaterialRow }).item
+        if (item) {
+          setSelected(item)
+          setCreating(false)
+          await loadMaterials(selectedClient.id)
+        }
+        return
+      }
+
+      const res = await fetch(`/api/admin/estetica-consultoria/materials/${selected.id}`, {
+        method: 'PATCH',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: selected.title,
+          material_kind: selected.material_kind,
+          description: selected.description,
+          content: selected.content,
+          sort_order: selected.sort_order,
+          is_published: selected.is_published,
+        }),
+      })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) {
+        setError((data as { error?: string }).error || 'Erro ao guardar.')
+        return
+      }
+      const item = (data as { item?: YladaEsteticaConsultancyMaterialRow }).item
+      if (item) setSelected(item)
+      await loadMaterials(selectedClient.id)
+      if (selected.template_key) void loadDiagnosticCorporal()
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const remove = async (id: string) => {
+    if (!selectedClient?.id) return
+    if (!confirm('Eliminar este material e respostas associadas?')) return
+    const res = await fetch(`/api/admin/estetica-consultoria/materials/${id}`, {
+      method: 'DELETE',
+      credentials: 'include',
+    })
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}))
+      setError((data as { error?: string }).error || 'Erro ao eliminar.')
+      return
+    }
+    if (selected?.id === id) setSelected(null)
+    await loadMaterials(selectedClient.id)
+  }
+
+  const createShareLink = async () => {
+    if (!selected?.id || !selectedClient?.id) return
+    setAuxLoading(true)
+    setError(null)
+    const payload =
+      selected.template_key && selectedClient.id
+        ? { estetica_consult_client_id: selectedClient.id }
+        : {}
+    const res = await fetch(`/api/admin/estetica-consultoria/materials/${selected.id}/share-links`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    })
+    const data = await res.json().catch(() => ({}))
+    setAuxLoading(false)
+    if (!res.ok) {
+      setError((data as { error?: string }).error || 'Erro ao criar link.')
+      return
+    }
+    await loadAuxForForm(
+      selected.id,
+      selected.template_key && selectedClient?.id ? selectedClient.id : null
+    )
+  }
+
+  const copyResponderUrl = (token: string) => {
+    const url = buildEsteticaConsultoriaResponderUrl(typeof window !== 'undefined' ? window.location.origin : '', token)
+    void navigator.clipboard.writeText(url)
+  }
+
+  const content = selected?.content as Record<string, unknown>
+
+  const renewalHint = useMemo(() => {
+    if (!selectedClient?.annual_plan_end || !selectedClient.is_annual_plan) return null
+    const end = new Date(`${selectedClient.annual_plan_end}T12:00:00`)
+    if (!Number.isFinite(end.getTime())) return null
+    const days = Math.ceil((end.getTime() - Date.now()) / (86400 * 1000))
+    if (days < 0) return { tone: 'red' as const, text: `Plano anual terminou há ${Math.abs(days)} dia(s).` }
+    if (days <= 60) return { tone: 'amber' as const, text: `Renovação em ${days} dia(s) (${selectedClient.annual_plan_end}).` }
+    return { tone: 'gray' as const, text: `Plano até ${selectedClient.annual_plan_end}.` }
+  }, [selectedClient])
+
+  const formFieldsForResponses = useMemo(() => {
+    if (!selected || selected.material_kind !== 'formulario') return []
+    const c = selected.content && typeof selected.content === 'object' ? selected.content : {}
+    return getConsultoriaFormFields(c as Record<string, unknown>)
+  }, [selected])
+
+  const execBlock = useMemo(() => {
+    if (!selected) return null
+    const k = selected.material_kind
+    if (k === 'roteiro') {
+      const steps = Array.isArray(content?.steps) ? content.steps : []
+      return (
+        <ol className="list-decimal space-y-4 pl-5 text-sm text-gray-800">
+          {steps.map((s: unknown, i: number) => {
+            const step = s as { title?: string; detail?: string; links?: { label: string; url: string }[] }
+            return (
+              <li key={i} className="pl-1">
+                <p className="font-semibold text-gray-900">{step.title || `Passo ${i + 1}`}</p>
+                {step.detail ? <p className="mt-1 whitespace-pre-wrap text-gray-700">{step.detail}</p> : null}
+                {Array.isArray(step.links) && step.links.length ? (
+                  <ul className="mt-2 space-y-1">
+                    {step.links.map((l, j) => (
+                      <li key={j}>
+                        <a href={l.url} className="text-blue-700 underline" target="_blank" rel="noreferrer">
+                          {l.label || l.url}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                ) : null}
+              </li>
+            )
+          })}
+        </ol>
+      )
+    }
+    if (k === 'checklist') {
+      const itemsList = Array.isArray(content?.items) ? content.items : []
+      return (
+        <ul className="space-y-2">
+          {itemsList.map((it: unknown, i: number) => (
+            <li key={i} className="flex gap-2 text-sm text-gray-800">
+              <span className="text-gray-400">☐</span>
+              <span>{String((it as { text?: string })?.text ?? '')}</span>
+            </li>
+          ))}
+        </ul>
+      )
+    }
+    if (k === 'dicas') {
+      const tips = Array.isArray(content?.tips) ? content.tips : []
+      return (
+        <ul className="list-disc space-y-2 pl-5 text-sm text-gray-800">
+          {tips.map((t: unknown, i: number) => (
+            <li key={i}>{String(t)}</li>
+          ))}
+        </ul>
+      )
+    }
+    if (k === 'documento') {
+      const md = String(content?.markdown ?? '')
+      return (
+        <pre className="whitespace-pre-wrap rounded-lg border border-gray-200 bg-white p-4 text-sm text-gray-800">
+          {md || '—'}
+        </pre>
+      )
+    }
+    if (k === 'formulario') {
+      return (
+        <p className="text-sm text-gray-600">
+          Abre o separador <strong>Links</strong> e envia o URL à profissional. As respostas aparecem em{' '}
+          <strong>Respostas</strong>.
+        </p>
+      )
+    }
+    return null
+  }, [selected, content])
+
+  return (
+    <div className="max-w-6xl mx-auto px-4 py-8 space-y-6">
+      <header className="space-y-1">
+        <p className="text-sm font-medium text-pink-700">Estética · YLADA</p>
+        <h1 className="text-2xl font-bold text-gray-900">Consultoria (capilar / corporal)</h1>
+        <p className="text-gray-600 text-sm max-w-2xl">
+          Por estética: registo comercial (pagamento, plano anual, renovação), o <strong>formulário de diagnóstico corporal</strong>{' '}
+          (quando aplicável) e <strong>outros materiais</strong> com link (roteiros, checklists, formulários extra). Tudo
+          isso só aparece <strong>depois de escolheres ou criares uma clínica</strong> na caixa «Estéticas acompanhadas».
+        </p>
+        <div className="flex flex-wrap items-center gap-2 text-sm">
+          {segmentoFiltro ? (
+            <span className="rounded-full border border-pink-200 bg-pink-50 px-2.5 py-0.5 text-xs font-medium text-pink-900">
+              Vista: {segmentoFiltro === 'capilar' ? 'Capilar (+ ambos)' : 'Corporal (+ ambos)'}
+            </span>
+          ) : null}
+          <Link href="/admin/consultorias" className="font-semibold text-blue-600 underline hover:text-blue-800">
+            Todas as consultorias
+          </Link>
+          {segmentoFiltro ? (
+            <>
+              <span className="text-gray-300">·</span>
+              <Link href="/admin/estetica-consultoria" className="text-blue-600 underline hover:text-blue-800">
+                Ver todas as estéticas
+              </Link>
+            </>
+          ) : null}
+        </div>
+      </header>
+
+      {error ? (
+        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-900">{error}</div>
+      ) : null}
+
+      <section className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm space-y-4">
+        <div>
+          <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide">Estéticas acompanhadas</h2>
+          <p className="mt-1 text-xs text-gray-600 max-w-2xl">
+            Clica num nome na lista ou usa <strong>Criar e abrir</strong>. Sem clínica selecionada não há formulário nem
+            materiais — é o primeiro passo obrigatório.
+          </p>
+        </div>
+        <form className="flex flex-wrap gap-2 items-end" onSubmit={(e) => void createClient(e)}>
+          <label className="text-sm flex-1 min-w-[180px]">
+            <span className="text-gray-600">Nova estética (nome)</span>
+            <input
+              required
+              className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+              value={newBusinessName}
+              onChange={(e) => setNewBusinessName(e.target.value)}
+              placeholder="Nome da clínica / profissional"
+            />
+          </label>
+          <label className="text-sm">
+            <span className="text-gray-600">Segmento</span>
+            <select
+              className="mt-1 block rounded-lg border border-gray-300 px-3 py-2 text-sm"
+              value={newSegment}
+              onChange={(e) => setNewSegment(e.target.value as typeof newSegment)}
+            >
+              <option value="capilar">Capilar</option>
+              <option value="corporal">Corporal</option>
+              <option value="ambos">Ambos</option>
+            </select>
+          </label>
+          <button
+            type="submit"
+            disabled={creatingClient}
+            className="rounded-lg bg-pink-600 px-4 py-2 text-sm font-semibold text-white hover:bg-pink-700 disabled:opacity-50"
+          >
+            {creatingClient ? 'A criar…' : 'Criar e abrir'}
+          </button>
+        </form>
+        <div className="flex flex-wrap gap-2 items-center">
+          <input
+            className="rounded-lg border border-gray-300 px-3 py-2 text-sm flex-1 min-w-[200px]"
+            placeholder="Pesquisar…"
+            value={clientSearch}
+            onChange={(e) => setClientSearch(e.target.value)}
+          />
+          <button
+            type="button"
+            onClick={() => void loadClients(clientSearch)}
+            className="rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 text-sm"
+          >
+            Pesquisar
+          </button>
+        </div>
+        {clientsLoading ? (
+          <p className="text-sm text-gray-500">A carregar clientes…</p>
+        ) : (
+          <ul className="flex flex-wrap gap-2">
+            {clientsVisiveis.map((c) => (
+              <li key={c.id}>
+                <button
+                  type="button"
+                  onClick={() => selectClient(c)}
+                  className={`rounded-xl border px-3 py-2 text-left text-sm transition ${
+                    selectedClient?.id === c.id
+                      ? 'border-pink-500 bg-pink-50/80'
+                      : 'border-gray-200 bg-white hover:border-gray-300'
+                  }`}
+                >
+                  <span className="font-medium text-gray-900">{c.business_name}</span>
+                  <span className="ml-2 text-xs text-gray-500">{esteticaConsultSegmentLabel(c.segment)}</span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
+      {!selectedClient ? (
+        <section className="rounded-2xl border border-dashed border-pink-300 bg-gradient-to-b from-pink-50/80 to-white p-5 shadow-sm space-y-4">
+          <h2 className="text-base font-semibold text-gray-900">Onde estão o formulário e os materiais?</h2>
+          <p className="text-sm text-gray-700 max-w-3xl">
+            Não falta nada no sistema: esta área abre <strong>só quando há uma clínica selecionada</strong>. Em baixo
+            ficam dados comerciais, depois o que podes enviar à profissional — em duas partes distintas.
+          </p>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="rounded-xl border-2 border-rose-200 bg-rose-50/60 p-4">
+              <p className="text-xs font-semibold uppercase tracking-wide text-rose-900">Formulário fixo (YLADA)</p>
+              <p className="mt-2 text-sm text-gray-900 leading-relaxed">
+                <strong>Diagnóstico corporal</strong> — mesmo questionário para todas as clínicas; tu geras{' '}
+                <strong>um link por clínica</strong>. Aparece como bloco <span className="text-rose-800">rosa</span>{' '}
+                só para estéticas <em>Corporal</em> ou <em>Ambos</em>.
+              </p>
+            </div>
+            <div className="rounded-xl border border-gray-200 bg-white p-4">
+              <p className="text-xs font-semibold uppercase tracking-wide text-gray-600">Materiais para enviar</p>
+              <p className="mt-2 text-sm text-gray-900 leading-relaxed">
+                Lista <strong>«Materiais desta estética»</strong>: passo a passo, checklists, documentos e{' '}
+                <strong>outros formulários</strong> (cada um com separadores <em>Links</em> e <em>Respostas</em>). Isto é
+                independente do diagnóstico fixo.
+              </p>
+            </div>
+          </div>
+          {segmentoFiltro === 'capilar' ? (
+            <p className="text-xs text-amber-950 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
+              Vista <strong>só capilar</strong>: o diagnóstico corporal (rosa) não é mostrado para clínica só capilar.
+              Para esse formulário, escolhe uma estética <em>Corporal</em> ou <em>Ambos</em> ou muda a vista para
+              corporal.
+            </p>
+          ) : null}
+        </section>
+      ) : null}
+
+      {selectedClient && clientForm ? (
+        <section className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm space-y-4">
+          <div className="flex flex-wrap items-start justify-between gap-2">
+            <h2 className="text-lg font-semibold text-gray-900">Dados administrativos</h2>
+            {renewalHint ? (
+              <p
+                className={`text-xs rounded-lg px-2 py-1 ${
+                  renewalHint.tone === 'red'
+                    ? 'bg-red-50 text-red-900 border border-red-100'
+                    : renewalHint.tone === 'amber'
+                      ? 'bg-amber-50 text-amber-900 border border-amber-100'
+                      : 'bg-gray-50 text-gray-700 border border-gray-100'
+                }`}
+              >
+                {renewalHint.text}
+              </p>
+            ) : null}
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            <label className="block text-sm sm:col-span-2">
+              <span className="text-gray-600">Nome da estética</span>
+              <input
+                className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                value={clientForm.business_name}
+                onChange={(e) => setClientForm((f) => (f ? { ...f, business_name: e.target.value } : f))}
+              />
+            </label>
+            <label className="block text-sm">
+              <span className="text-gray-600">Segmento</span>
+              <select
+                className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                value={clientForm.segment}
+                onChange={(e) =>
+                  setClientForm((f) =>
+                    f ? { ...f, segment: e.target.value as YladaEsteticaConsultClientRow['segment'] } : f
+                  )
+                }
+              >
+                <option value="capilar">Capilar</option>
+                <option value="corporal">Corporal</option>
+                <option value="ambos">Ambos</option>
+              </select>
+            </label>
+            <label className="block text-sm">
+              <span className="text-gray-600">Contacto — nome</span>
+              <input
+                className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                value={clientForm.contact_name}
+                onChange={(e) => setClientForm((f) => (f ? { ...f, contact_name: e.target.value } : f))}
+              />
+            </label>
+            <label className="block text-sm">
+              <span className="text-gray-600">E-mail</span>
+              <input
+                type="email"
+                className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                value={clientForm.contact_email}
+                onChange={(e) => setClientForm((f) => (f ? { ...f, contact_email: e.target.value } : f))}
+              />
+            </label>
+            <label className="block text-sm">
+              <span className="text-gray-600">Telefone</span>
+              <input
+                className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                value={clientForm.phone}
+                onChange={(e) => setClientForm((f) => (f ? { ...f, phone: e.target.value } : f))}
+              />
+            </label>
+            <label className="block text-sm sm:col-span-2">
+              <span className="text-gray-600">Leader tenant ID (opcional — ligação ao painel Pro Estética)</span>
+              <input
+                className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 font-mono text-xs"
+                value={clientForm.leader_tenant_id}
+                onChange={(e) => setClientForm((f) => (f ? { ...f, leader_tenant_id: e.target.value } : f))}
+                placeholder="UUID do tenant"
+              />
+            </label>
+            <label className="block text-sm">
+              <span className="text-gray-600">Valor pago (consultoria)</span>
+              <input
+                className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                value={clientForm.consulting_paid_amount}
+                onChange={(e) => setClientForm((f) => (f ? { ...f, consulting_paid_amount: e.target.value } : f))}
+                placeholder="ex: 1500 ou 1500,50"
+              />
+            </label>
+            <label className="block text-sm">
+              <span className="text-gray-600">Moeda</span>
+              <input
+                className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                value={clientForm.payment_currency}
+                onChange={(e) => setClientForm((f) => (f ? { ...f, payment_currency: e.target.value } : f))}
+              />
+            </label>
+            <label className="block text-sm">
+              <span className="text-gray-600">Data do último pagamento</span>
+              <input
+                type="datetime-local"
+                className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                value={clientForm.last_payment_at}
+                onChange={(e) => setClientForm((f) => (f ? { ...f, last_payment_at: e.target.value } : f))}
+              />
+            </label>
+            <label className="flex items-center gap-2 text-sm sm:col-span-3 pt-1">
+              <input
+                type="checkbox"
+                checked={clientForm.is_annual_plan}
+                onChange={(e) => setClientForm((f) => (f ? { ...f, is_annual_plan: e.target.checked } : f))}
+              />
+              <span>Incluída no plano anual</span>
+            </label>
+            <label className="block text-sm">
+              <span className="text-gray-600">Início plano anual</span>
+              <input
+                type="date"
+                className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                value={clientForm.annual_plan_start}
+                onChange={(e) => setClientForm((f) => (f ? { ...f, annual_plan_start: e.target.value } : f))}
+              />
+            </label>
+            <label className="block text-sm">
+              <span className="text-gray-600">Fim plano anual (renovação)</span>
+              <input
+                type="date"
+                className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                value={clientForm.annual_plan_end}
+                onChange={(e) => setClientForm((f) => (f ? { ...f, annual_plan_end: e.target.value } : f))}
+              />
+            </label>
+            <label className="block text-sm sm:col-span-3">
+              <span className="text-gray-600">Notas internas</span>
+              <textarea
+                className="mt-1 w-full min-h-[80px] rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                value={clientForm.admin_notes}
+                onChange={(e) => setClientForm((f) => (f ? { ...f, admin_notes: e.target.value } : f))}
+              />
+            </label>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => void saveClientData()}
+              disabled={savingClient}
+              className="rounded-lg bg-pink-600 px-4 py-2 text-sm font-semibold text-white hover:bg-pink-700 disabled:opacity-50"
+            >
+              {savingClient ? 'A guardar…' : 'Guardar dados da estética'}
+            </button>
+            <button
+              type="button"
+              onClick={() => void deleteClient()}
+              className="rounded-lg border border-red-200 bg-white px-4 py-2 text-sm font-medium text-red-800 hover:bg-red-50"
+            >
+              Eliminar estética
+            </button>
+          </div>
+        </section>
+      ) : null}
+
+      {selectedClient ? (
+        <section className="rounded-2xl border border-indigo-200 bg-white p-4 shadow-sm space-y-4">
+          <div>
+            <h2 className="text-lg font-semibold text-gray-900">Acompanhamento ao vivo</h2>
+            <p className="mt-1 text-xs text-gray-600 max-w-2xl">
+              Regista o que observas em tempo real, recomendações e evolução da clínica. Tudo fica por cliente, com
+              data — base para conduzires a consultoria e, mais tarde, para análise assistida (IA).
+            </p>
+          </div>
+          <div className="grid gap-3 sm:grid-cols-3">
+            <label className="block text-sm">
+              <span className="text-gray-600">Tipo de registo</span>
+              <select
+                className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                value={newNoteKind}
+                onChange={(e) => setNewNoteKind(e.target.value)}
+              >
+                <option value="acompanhamento">Acompanhamento</option>
+                <option value="observacao">Observação</option>
+                <option value="recomendacao">Recomendação</option>
+                <option value="evolucao">Evolução</option>
+              </select>
+            </label>
+            <label className="block text-sm sm:col-span-2">
+              <span className="text-gray-600">Nota</span>
+              <textarea
+                className="mt-1 w-full min-h-[100px] rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                value={newNoteBody}
+                onChange={(e) => setNewNoteBody(e.target.value)}
+                placeholder="Ex.: combinado na call, próximo foco, risco, vitória da semana…"
+              />
+            </label>
+          </div>
+          <button
+            type="button"
+            disabled={savingNote || newNoteBody.trim().length < 2}
+            onClick={() => void addCoachingNote()}
+            className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700 disabled:opacity-50"
+          >
+            {savingNote ? 'A guardar…' : 'Adicionar nota'}
+          </button>
+          {coachingLoading ? (
+            <p className="text-sm text-gray-500">A carregar notas…</p>
+          ) : coachingNotes.length === 0 ? (
+            <p className="text-sm text-gray-500">Ainda não há notas de acompanhamento.</p>
+          ) : (
+            <ul className="max-h-[360px] space-y-3 overflow-auto border-t border-gray-100 pt-3">
+              {coachingNotes.map((n) => (
+                <li key={n.id} className="rounded-lg border border-gray-100 bg-gray-50/80 p-3 text-sm">
+                  <p className="text-xs text-gray-500">
+                    {new Date(n.created_at).toLocaleString('pt-BR')}
+                    <span className="ml-2 rounded bg-indigo-100 px-1.5 py-0.5 font-medium text-indigo-900">
+                      {NOTE_KIND_LABEL[n.note_kind] ?? n.note_kind}
+                    </span>
+                  </p>
+                  <p className="mt-2 whitespace-pre-wrap text-gray-900">{n.body}</p>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+      ) : null}
+
+      {selectedClient ? (
+        <>
+          {(selectedClient.segment === 'corporal' || selectedClient.segment === 'ambos') ? (
+            <section className="rounded-2xl border border-rose-200 bg-rose-50/50 p-4 shadow-sm space-y-4">
+              <div>
+                <h3 className="text-sm font-semibold text-rose-950">
+                  Formulário para enviar — diagnóstico corporal (YLADA fixo)
+                </h3>
+                <p className="mt-1 text-xs text-rose-900/90 max-w-2xl">
+                  Questionário <strong>fixo YLADA</strong> (igual para todas as clínicas) — não se edita no painel. Cada{' '}
+                  <strong>link</strong> é só para <strong>{selectedClient.business_name}</strong>: primeiro enviamos
+                  confirmação para o <strong>e-mail dos dados administrativos</strong>; depois ela preenche o
+                  diagnóstico completo aqui.
+                </p>
+                <p className="text-xs text-amber-900 bg-amber-50 border border-amber-100 rounded-lg px-2 py-1.5 max-w-2xl">
+                  Garante um <strong>e-mail válido</strong> em «Dados administrativos» antes de gerar o link — é para lá
+                  que vai o convite de confirmação.
+                </p>
+              </div>
+              {diagnosticLoading ? (
+                <p className="text-sm text-rose-900/80">A preparar o formulário global…</p>
+              ) : diagnosticCorporal?.material ? (
+                <>
+                  <p className="text-xs text-rose-900/80">
+                    Estado:{' '}
+                    {diagnosticCorporal.material.is_published ? (
+                      <span className="font-semibold text-emerald-800">Ativo — podes gerar links</span>
+                    ) : (
+                      <span className="font-semibold text-amber-800">Rascunho — contacta suporte se o global não estiver publicado</span>
+                    )}
+                  </p>
+                  <button
+                    type="button"
+                    disabled={diagnosticLinkLoading || !diagnosticCorporal.material.is_published}
+                    onClick={() => void createDiagnosticCorporalLink()}
+                    className="rounded-lg bg-rose-600 px-4 py-2 text-sm font-semibold text-white hover:bg-rose-700 disabled:opacity-50"
+                  >
+                    {diagnosticLinkLoading ? 'A gerar…' : 'Gerar novo link para esta clínica'}
+                  </button>
+                  <div>
+                    <h4 className="text-xs font-semibold uppercase tracking-wide text-rose-950/90">
+                      Links desta clínica
+                    </h4>
+                    {diagnosticCorporal.links.length === 0 ? (
+                      <p className="mt-1 text-xs text-rose-900/70">Ainda não há links. Gera um acima.</p>
+                    ) : (
+                      <ul className="mt-2 space-y-2">
+                        {diagnosticCorporal.links.map((lk) => (
+                          <li key={lk.id} className="rounded-lg border border-rose-100 bg-white p-2 text-xs">
+                            <code className="break-all text-gray-800">
+                              {lk.responder_url ??
+                                buildEsteticaConsultoriaResponderUrl(
+                                  typeof window !== 'undefined' ? window.location.origin : '',
+                                  lk.token
+                                )}
+                            </code>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const url =
+                                  lk.responder_url ??
+                                  buildEsteticaConsultoriaResponderUrl(
+                                    typeof window !== 'undefined' ? window.location.origin : '',
+                                    lk.token
+                                  )
+                                void navigator.clipboard.writeText(url)
+                              }}
+                              className="mt-1 block text-xs font-medium text-blue-700 hover:underline"
+                            >
+                              Copiar URL
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-semibold uppercase tracking-wide text-rose-950/90">
+                      Últimas respostas — {selectedClient.business_name}
+                    </h4>
+                    {diagnosticCorporal.responses.length === 0 ? (
+                      <p className="mt-1 text-xs text-rose-900/70">Ainda sem envios por este link.</p>
+                    ) : (
+                      <div className="mt-2 max-h-[320px] space-y-3 overflow-auto">
+                        {diagnosticCorporal.responses.map((r) => {
+                          const ans = (r.answers && typeof r.answers === 'object' && !Array.isArray(r.answers)
+                            ? r.answers
+                            : {}) as Record<string, unknown>
+                          const rows = consultoriaAnswersToDisplayRows(diagnosticFieldDefs, ans)
+                          return (
+                            <div key={r.id} className="rounded-lg border border-rose-100 bg-white p-3 text-xs">
+                              <p className="text-gray-500">
+                                {new Date(r.submitted_at).toLocaleString('pt-BR')}
+                                {r.respondent_name ? ` · ${r.respondent_name}` : ''}
+                              </p>
+                              <dl className="mt-2 space-y-2">
+                                {rows.slice(0, 12).map((row) => (
+                                  <div key={row.fieldId}>
+                                    <dt className="font-semibold text-gray-700">{row.label}</dt>
+                                    <dd className="text-gray-900">{row.value}</dd>
+                                  </div>
+                                ))}
+                              </dl>
+                              {rows.length > 12 ? (
+                                <p className="mt-1 text-[10px] text-gray-500">+ mais campos (abre o material em Respostas)</p>
+                              ) : null}
+                            </div>
+                          )
+                        })}
+                      </div>
+                    )}
+                  </div>
+                </>
+              ) : (
+                <p className="text-sm text-rose-900/80">
+                  Não foi possível carregar o diagnóstico. Confirma a migração 331 no Supabase e recarrega a página.
+                </p>
+              )}
+            </section>
+          ) : null}
+
+          <div className="flex flex-wrap items-center gap-2">
+            <label className="text-sm text-gray-600">
+              Filtrar materiais:
+              <select
+                className="ml-2 rounded-lg border border-gray-300 px-2 py-1.5 text-sm"
+                value={kindFilter}
+                onChange={(e) => setKindFilter(e.target.value)}
+              >
+                <option value="all">Todos</option>
+                <option value="roteiro">Passo a passo</option>
+                <option value="formulario">Formulários</option>
+                <option value="checklist">Checklists</option>
+                <option value="dicas">Dicas</option>
+                <option value="documento">Documentos</option>
+              </select>
+            </label>
+            <span className="text-gray-300">|</span>
+            <span className="text-xs text-gray-500">Novo material:</span>
+            {(['roteiro', 'formulario', 'checklist', 'dicas', 'documento'] as const).map((k) => (
+              <button
+                key={k}
+                type="button"
+                onClick={() => openNew(k)}
+                className="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-800 hover:bg-gray-50"
+              >
+                + {consultoriaKindLabel(k)}
+              </button>
+            ))}
+          </div>
+
+          <div className="rounded-xl border border-gray-200 bg-gray-50/80 px-3 py-2 mb-2">
+            <p className="text-xs text-gray-700">
+              <span className="font-semibold text-gray-900">Outros envios</span> — abaixo estão roteiros, checklists e
+              formulários <em>criados por ti</em> para esta clínica. O diagnóstico corporal fixo fica no{' '}
+              <span className="text-rose-800 font-medium">bloco rosa</span> acima (não entra nesta lista).
+            </p>
+          </div>
+
+          <div className="grid gap-6 lg:grid-cols-5">
+            <div className="lg:col-span-2 space-y-2">
+              <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide">
+                Materiais desta estética (à parte do diagnóstico fixo)
+              </h2>
+              {loadingMaterials ? (
+                <p className="text-sm text-gray-500">A carregar…</p>
+              ) : itemsDisplayed.length === 0 ? (
+                <p className="text-sm text-gray-500">Ainda não há materiais. Cria um com os botões acima.</p>
+              ) : (
+                <ul className="space-y-2">
+                  {itemsDisplayed.map((it) => (
+                    <li key={it.id}>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSelected(it)
+                          setCreating(false)
+                          setTab('editar')
+                        }}
+                        className={`w-full rounded-xl border px-3 py-3 text-left text-sm transition ${
+                          selected?.id === it.id
+                            ? 'border-pink-500 bg-pink-50/80'
+                            : 'border-gray-200 bg-white hover:border-gray-300'
+                        }`}
+                      >
+                        <span className="font-medium text-gray-900 line-clamp-2">{it.title}</span>
+                        <div className="mt-1 flex flex-wrap gap-2 text-xs text-gray-500">
+                          <span className="rounded bg-gray-100 px-1.5 py-0.5">{consultoriaKindLabel(it.material_kind)}</span>
+                          {it.is_published ? (
+                            <span className="rounded bg-emerald-100 px-1.5 py-0.5 text-emerald-900">Publicado</span>
+                          ) : (
+                            <span className="rounded bg-amber-100 px-1.5 py-0.5 text-amber-900">Rascunho</span>
+                          )}
+                        </div>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+
+            <div className="lg:col-span-3 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm min-h-[320px]">
+              {!selected ? (
+                <p className="text-sm text-gray-500">Seleciona um material à esquerda ou cria um novo.</p>
+              ) : (
+                <div className="space-y-4">
+                  <div className="flex flex-wrap gap-2 border-b border-gray-100 pb-3">
+                    {(['editar', 'execucao'] as const).map((t) => (
+                      <button
+                        key={t}
+                        type="button"
+                        onClick={() => setTab(t)}
+                        className={`rounded-lg px-3 py-1.5 text-sm font-medium ${
+                          tab === t ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        }`}
+                      >
+                        {t === 'editar' ? 'Editar' : 'Modo consultoria'}
+                      </button>
+                    ))}
+                    {selected.material_kind === 'formulario' && selected.id ? (
+                      <>
+                        <button
+                          type="button"
+                          onClick={() => setTab('links')}
+                          className={`rounded-lg px-3 py-1.5 text-sm font-medium ${
+                            tab === 'links' ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                          }`}
+                        >
+                          Links
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setTab('respostas')}
+                          className={`rounded-lg px-3 py-1.5 text-sm font-medium ${
+                            tab === 'respostas' ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                          }`}
+                        >
+                          Respostas
+                        </button>
+                      </>
+                    ) : null}
+                  </div>
+
+                  {tab === 'execucao' ? (
+                    <div className="space-y-3">
+                      <h3 className="text-lg font-semibold text-gray-900">{selected.title || 'Sem título'}</h3>
+                      {selected.description ? (
+                        <p className="text-sm text-gray-600 whitespace-pre-wrap">{selected.description}</p>
+                      ) : null}
+                      {execBlock}
+                    </div>
+                  ) : null}
+
+                  {tab === 'links' && selected.material_kind === 'formulario' ? (
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between gap-2">
+                        <h3 className="text-sm font-semibold text-gray-900">Links para a profissional</h3>
+                        <button
+                          type="button"
+                          disabled={!selected.is_published || auxLoading}
+                          onClick={() => void createShareLink()}
+                          className="rounded-lg bg-pink-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-pink-700 disabled:opacity-50"
+                        >
+                          Gerar novo link
+                        </button>
+                      </div>
+                      {!selected.is_published ? (
+                        <p className="text-xs text-amber-800 bg-amber-50 border border-amber-100 rounded-lg px-3 py-2">
+                          Publica o formulário no separador Editar para os links funcionarem.
+                        </p>
+                      ) : null}
+                      {auxLoading ? <p className="text-xs text-gray-500">A carregar…</p> : null}
+                      <ul className="space-y-2 text-sm">
+                        {shareLinks.map((lk) => (
+                          <li key={lk.id} className="flex flex-col gap-1 rounded-lg border border-gray-100 bg-gray-50 p-3">
+                            <code className="text-xs break-all text-gray-800">
+                              {buildEsteticaConsultoriaResponderUrl(
+                                typeof window !== 'undefined' ? window.location.origin : '',
+                                lk.token
+                              )}
+                            </code>
+                            <button
+                              type="button"
+                              onClick={() => copyResponderUrl(lk.token)}
+                              className="self-start text-xs font-medium text-blue-700 hover:underline"
+                            >
+                              Copiar URL
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ) : null}
+
+                  {tab === 'respostas' && selected.material_kind === 'formulario' ? (
+                    <div className="space-y-3">
+                      <h3 className="text-sm font-semibold text-gray-900">
+                        Respostas recebidas —{' '}
+                        <span className="text-pink-800">{selectedClient.business_name}</span>
+                      </h3>
+                      <p className="text-xs text-gray-500">
+                        Cada envio fica ligado a esta estética; o material é «{selected.title}».
+                      </p>
+                      {auxLoading ? <p className="text-xs text-gray-500">A carregar…</p> : null}
+                      {responses.length === 0 ? (
+                        <p className="text-sm text-gray-500">Ainda não há respostas.</p>
+                      ) : (
+                        <div className="max-h-[420px] overflow-auto space-y-3">
+                          {responses.map((r) => {
+                            const ans = (r.answers && typeof r.answers === 'object' && !Array.isArray(r.answers)
+                              ? r.answers
+                              : {}) as Record<string, unknown>
+                            const rows = consultoriaAnswersToDisplayRows(formFieldsForResponses, ans)
+                            return (
+                              <div key={r.id} className="rounded-lg border border-gray-100 p-3 text-sm">
+                                <p className="text-xs text-gray-500">
+                                  {new Date(r.submitted_at).toLocaleString('pt-BR')}
+                                  {r.respondent_name ? ` · ${r.respondent_name}` : ''}
+                                  {r.respondent_email ? ` · ${r.respondent_email}` : ''}
+                                </p>
+                                <dl className="mt-3 space-y-3">
+                                  {rows.map((row) => (
+                                    <div key={row.fieldId}>
+                                      <dt className="text-xs font-semibold uppercase tracking-wide text-gray-600">
+                                        {row.label}
+                                      </dt>
+                                      <dd className="mt-1 whitespace-pre-wrap text-base text-gray-900">{row.value}</dd>
+                                    </div>
+                                  ))}
+                                </dl>
+                                <details className="mt-3 border-t border-gray-100 pt-2">
+                                  <summary className="cursor-pointer text-xs text-gray-500">JSON bruto</summary>
+                                  <pre className="mt-2 max-h-40 overflow-auto whitespace-pre-wrap break-words text-xs text-gray-600">
+                                    {JSON.stringify(r.answers, null, 2)}
+                                  </pre>
+                                </details>
+                              </div>
+                            )
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  ) : null}
+
+                  {tab === 'editar' ? (
+                    <div className="space-y-4">
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        <label className="block text-sm">
+                          <span className="text-gray-600">Título</span>
+                          <input
+                            className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                            value={selected.title}
+                            onChange={(e) => patchSelected({ title: e.target.value })}
+                          />
+                        </label>
+                        <label className="block text-sm">
+                          <span className="text-gray-600">Tipo</span>
+                          <select
+                            className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                            value={selected.material_kind}
+                            onChange={(e) => {
+                              const k = e.target.value as ProLideresConsultoriaMaterialKind
+                              patchSelected({
+                                material_kind: k,
+                                content: defaultContentForKind(k),
+                              })
+                            }}
+                          >
+                            <option value="roteiro">{consultoriaKindLabel('roteiro')}</option>
+                            <option value="formulario">{consultoriaKindLabel('formulario')}</option>
+                            <option value="checklist">{consultoriaKindLabel('checklist')}</option>
+                            <option value="dicas">{consultoriaKindLabel('dicas')}</option>
+                            <option value="documento">{consultoriaKindLabel('documento')}</option>
+                          </select>
+                        </label>
+                      </div>
+                      <label className="block text-sm">
+                        <span className="text-gray-600">Descrição (opcional)</span>
+                        <textarea
+                          className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm min-h-[72px]"
+                          value={selected.description ?? ''}
+                          onChange={(e) => patchSelected({ description: e.target.value || null })}
+                        />
+                      </label>
+                      <div className="grid gap-3 sm:grid-cols-2 items-end">
+                        <label className="block text-sm">
+                          <span className="text-gray-600">Ordem (lista)</span>
+                          <input
+                            type="number"
+                            className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                            value={selected.sort_order}
+                            onChange={(e) => patchSelected({ sort_order: Number(e.target.value) || 0 })}
+                          />
+                        </label>
+                        <label className="flex items-center gap-2 text-sm pb-2">
+                          <input
+                            type="checkbox"
+                            checked={selected.is_published}
+                            onChange={(e) => patchSelected({ is_published: e.target.checked })}
+                          />
+                          <span className="text-gray-800">Publicado</span>
+                        </label>
+                      </div>
+
+                      <ConsultoriaKindEditor kind={selected.material_kind} content={content} onChange={patchContent} />
+
+                      <div className="flex flex-wrap gap-2 pt-2">
+                        <button
+                          type="button"
+                          onClick={() => void save()}
+                          disabled={saving}
+                          className="rounded-lg bg-pink-600 px-4 py-2 text-sm font-semibold text-white hover:bg-pink-700 disabled:opacity-50"
+                        >
+                          {saving ? 'A guardar…' : creating ? 'Criar material' : 'Guardar alterações'}
+                        </button>
+                        {selected.id && !selected.template_key ? (
+                          <button
+                            type="button"
+                            onClick={() => void remove(selected.id)}
+                            className="rounded-lg border border-red-200 bg-white px-4 py-2 text-sm font-medium text-red-800 hover:bg-red-50"
+                          >
+                            Eliminar
+                          </button>
+                        ) : !selected.id ? (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setSelected(null)
+                              setCreating(false)
+                            }}
+                            className="rounded-lg border border-gray-200 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                          >
+                            Cancelar
+                          </button>
+                        ) : null}
+                      </div>
+                    </div>
+                  ) : null}
+                </div>
+              )}
+            </div>
+          </div>
+        </>
+      ) : null}
+    </div>
+  )
+}

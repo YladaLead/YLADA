@@ -8,6 +8,7 @@ import { Eye, EyeOff } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { createClient } from '@/lib/supabase-client'
 import { YLADA_OG_FALLBACK_LOGO_PATH } from '@/lib/ylada-og-fallback-logo'
+import PhoneInputWithCountry from '@/components/PhoneInputWithCountry'
 
 type ValidateOk = {
   ok: true
@@ -32,6 +33,7 @@ export default function ProLideresConviteTokenPage() {
 
   const [nome, setNome] = useState('')
   const [whatsapp, setWhatsapp] = useState('')
+  const [whatsappCountryCode, setWhatsappCountryCode] = useState('BR')
   const [shareSlug, setShareSlug] = useState('')
   const [password, setPassword] = useState('')
   const [passwordConfirm, setPasswordConfirm] = useState('')
@@ -268,16 +270,19 @@ export default function ProLideresConviteTokenPage() {
                     />
                   </label>
                   <label className="block">
-                    <span className="mb-1 block text-xs font-medium text-gray-600">WhatsApp com DDI (obrigatório)</span>
-                    <input
-                      required
-                      minLength={10}
+                    <span className="mb-1 block text-xs font-medium text-gray-600">WhatsApp (obrigatório)</span>
+                    <PhoneInputWithCountry
+                      className="w-full"
                       value={whatsapp}
-                      onChange={(e) => setWhatsapp(e.target.value)}
-                      className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-gray-900"
-                      placeholder="ex.: 5511999998888"
-                      autoComplete="tel"
+                      defaultCountryCode={whatsappCountryCode || 'BR'}
+                      onChange={(phone, countryCode) => {
+                        setWhatsapp(phone)
+                        setWhatsappCountryCode(countryCode || 'BR')
+                      }}
                     />
+                    <span className="mt-1 block text-[11px] leading-snug text-gray-500">
+                      País = DDI (ex.: Brasil +55). No campo ao lado, só o número com DDD — sem repetir o +55.
+                    </span>
                   </label>
                   <label className="block">
                     <span className="mb-1 block text-xs font-medium text-gray-600">Senha</span>
@@ -377,7 +382,7 @@ export default function ProLideresConviteTokenPage() {
               <div className="space-y-3">
                 <p className="text-sm text-gray-700">
                   Preencha <strong className="text-gray-900">nome</strong>, <strong className="text-gray-900">slug</strong>{' '}
-                  e <strong className="text-gray-900">WhatsApp com DDI</strong> para aceitar o convite.
+                  e <strong className="text-gray-900">WhatsApp</strong> (país + número com DDD) para aceitar o convite.
                 </p>
                 <div className="grid gap-2">
                   <label className="block">
@@ -407,16 +412,19 @@ export default function ProLideresConviteTokenPage() {
                     />
                   </label>
                   <label className="block">
-                    <span className="mb-1 block text-xs font-medium text-gray-600">WhatsApp com DDI (obrigatório)</span>
-                    <input
-                      required
-                      minLength={10}
+                    <span className="mb-1 block text-xs font-medium text-gray-600">WhatsApp (obrigatório)</span>
+                    <PhoneInputWithCountry
+                      className="w-full"
                       value={whatsapp}
-                      onChange={(e) => setWhatsapp(e.target.value)}
-                      className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-gray-900"
-                      placeholder="ex.: 5511999998888"
-                      autoComplete="tel"
+                      defaultCountryCode={whatsappCountryCode || 'BR'}
+                      onChange={(phone, countryCode) => {
+                        setWhatsapp(phone)
+                        setWhatsappCountryCode(countryCode || 'BR')
+                      }}
                     />
+                    <span className="mt-1 block text-[11px] leading-snug text-gray-500">
+                      País = DDI (ex.: Brasil +55). No campo ao lado, só o número com DDD — sem repetir o +55.
+                    </span>
                   </label>
                 </div>
                 {acceptError && (

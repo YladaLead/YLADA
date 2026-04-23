@@ -17,7 +17,17 @@ const NAV_GROUPS: { title: string; items: { href: string; label: string; emoji: 
   {
     title: 'Operação',
     items: [
-      { href: '/admin/pro-lideres/consultoria', label: 'Pro Líderes — consultoria', emoji: '📋' },
+      { href: '/admin/consultorias', label: 'Consultorias (hub)', emoji: '📋' },
+      {
+        href: '/admin/estetica-consultoria?segmento=corporal',
+        label: 'Estética corporal — consultoria YLADA',
+        emoji: '💆‍♀️',
+      },
+      {
+        href: '/admin/estetica-consultoria?segmento=capilar',
+        label: 'Estética capilar — consultoria YLADA',
+        emoji: '💇‍♀️',
+      },
       { href: '/admin/whatsapp/cadastros-workshop', label: 'Workshop — inscrições (WhatsApp)', emoji: '📋' },
       { href: '/admin/whatsapp/workshop', label: 'Workshop — agenda & sessões', emoji: '📅' },
       { href: '/admin/whatsapp', label: 'WhatsApp — conversas (Carol)', emoji: '💬' },

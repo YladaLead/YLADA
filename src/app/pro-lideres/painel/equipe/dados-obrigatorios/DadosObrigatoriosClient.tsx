@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import type { ProLideresMemberMandatoryGap } from '@/lib/pro-lideres-member-mandatory-profile'
+import PhoneInputWithCountry from '@/components/PhoneInputWithCountry'
 
 export function DadosObrigatoriosClient({
   spaceLabel,
@@ -14,6 +15,7 @@ export function DadosObrigatoriosClient({
   const router = useRouter()
   const [slug, setSlug] = useState('')
   const [whatsapp, setWhatsapp] = useState('')
+  const [whatsappCountryCode, setWhatsappCountryCode] = useState('BR')
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -67,8 +69,8 @@ export function DadosObrigatoriosClient({
           reconheça — por exemplo o teu nome.
         </p>
         <p className="mt-2">
-          O <strong>WhatsApp</strong> tem de ter <strong>DDI + número completo</strong> (no Brasil costuma ser 55 e
-          onze dígitos depois do DDI).
+          O <strong>WhatsApp</strong>: escolhe o <strong>país (DDI)</strong> e escreve o <strong>número com DDD</strong>{' '}
+          (no Brasil, +55 e onze dígitos no total após o DDI: DDD + celular).
         </p>
       </div>
 
@@ -98,15 +100,19 @@ export function DadosObrigatoriosClient({
           />
         </label>
         <label className="block">
-          <span className="mb-1 block text-sm font-medium text-gray-800">WhatsApp (com DDI)</span>
-          <input
-            required
+          <span className="mb-1 block text-sm font-medium text-gray-800">WhatsApp</span>
+          <PhoneInputWithCountry
+            className="w-full"
             value={whatsapp}
-            onChange={(e) => setWhatsapp(e.target.value)}
-            placeholder="ex.: 5511999998888"
-            autoComplete="tel"
-            className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-gray-900"
+            defaultCountryCode={whatsappCountryCode || 'BR'}
+            onChange={(phone, countryCode) => {
+              setWhatsapp(phone)
+              setWhatsappCountryCode(countryCode || 'BR')
+            }}
           />
+          <span className="mt-1 block text-xs text-gray-500">
+            País = DDI. No campo ao lado, só DDD + número (sem repetir o código do país).
+          </span>
         </label>
         <button
           type="submit"

@@ -61,6 +61,24 @@ export function getCountryByCode(code: string): Country | undefined {
   return COUNTRIES.find(c => c.code === code)
 }
 
+/** DDI mais longo primeiro (ex.: 351 antes de 3) para não confundir prefixos. */
+const COUNTRIES_WITH_DIAL_SORTED = [...COUNTRIES]
+  .filter((c) => c.phoneCode.length > 0)
+  .sort((a, b) => b.phoneCode.length - a.phoneCode.length)
+
+/**
+ * Infere o código ISO (ex.: BR) pelo início dos dígitos E.164.
+ * Se não houver match, devolve `fallback` (padrão: Brasil).
+ */
+export function inferCountryIsoFromLeadingDigits(digits: string, fallback = 'BR'): string {
+  const d = digits.replace(/\D/g, '')
+  if (!d) return fallback
+  for (const c of COUNTRIES_WITH_DIAL_SORTED) {
+    if (d.startsWith(c.phoneCode)) return c.code
+  }
+  return fallback
+}
+
 export default function CountrySelector({ value, onChange, className = '' }: {
   value?: string
   onChange: (countryCode: string) => void

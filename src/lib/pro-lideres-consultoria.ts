@@ -13,7 +13,7 @@ export type ProLideresConsultoriaMaterialKind = (typeof PRO_LIDERES_CONSULTORIA_
 export type ConsultoriaFormField = {
   id: string
   label: string
-  type: 'text' | 'textarea' | 'select'
+  type: 'text' | 'textarea' | 'select' | 'checkbox_group'
   options?: string[]
   required?: boolean
 }
@@ -126,15 +126,23 @@ export function normalizeConsultoriaContent(
         const label = String(f.label ?? '').trim().slice(0, 500)
         const typeRaw = String(f.type ?? 'text').toLowerCase()
         const type: ConsultoriaFormField['type'] =
-          typeRaw === 'textarea' ? 'textarea' : typeRaw === 'select' ? 'select' : 'text'
+          typeRaw === 'textarea'
+            ? 'textarea'
+            : typeRaw === 'select'
+              ? 'select'
+              : typeRaw === 'checkbox_group'
+                ? 'checkbox_group'
+                : 'text'
         const options = Array.isArray(f.options)
           ? f.options.map((o) => String(o).trim().slice(0, 200)).filter(Boolean)
           : undefined
+        const withOptions =
+          (type === 'select' || type === 'checkbox_group') && options?.length ? options : undefined
         return {
           id,
           label,
           type,
-          options: type === 'select' && options?.length ? options : undefined,
+          options: withOptions,
           required: Boolean(f.required),
         }
       })
@@ -210,6 +218,17 @@ export function validateConsultoriaFormAnswers(
       const s = v == null ? '' : String(v).trim()
       if (s && !f.options.includes(s)) {
         return { ok: false, error: `Valor inválido no campo "${f.label}".` }
+      }
+    }
+    if (f.type === 'checkbox_group' && f.options?.length) {
+      const lines = String(v ?? '')
+        .split('\n')
+        .map((x) => x.trim())
+        .filter(Boolean)
+      for (const line of lines) {
+        if (!f.options.includes(line)) {
+          return { ok: false, error: `Opção inválida em "${f.label}".` }
+        }
       }
     }
   }

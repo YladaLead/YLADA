@@ -1,7 +1,11 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { COUNTRIES, getCountryByCode, Country } from '@/components/CountrySelector'
+import {
+  COUNTRIES,
+  getCountryByCode,
+  inferCountryIsoFromLeadingDigits,
+} from '@/components/CountrySelector'
 
 interface PhoneInputWithCountryProps {
   value: string // Full phone number including country code, e.g., "5511999999999"
@@ -20,32 +24,33 @@ export default function PhoneInputWithCountry({
   placeholder = 'Ex: 5511999999999',
   disabled = false,
 }: PhoneInputWithCountryProps) {
-  const [countryCode, setCountryCode] = useState(defaultCountryCode)
+  const fallbackIso = defaultCountryCode || 'BR'
+  const [countryCode, setCountryCode] = useState(fallbackIso)
   const [phoneNumber, setPhoneNumber] = useState('')
   const [otherCountryCode, setOtherCountryCode] = useState('')
 
   useEffect(() => {
-    // Se o valor estiver vazio, resetar para o país padrão
-    if (!value || value.trim() === '') {
-      setCountryCode(defaultCountryCode)
+    const trimmed = typeof value === 'string' ? value.trim() : ''
+    const digits = trimmed.replace(/\D/g, '')
+
+    // Sem número: país volta ao padrão (Brasil = BR por omissão)
+    if (!digits) {
+      setCountryCode(fallbackIso)
       setPhoneNumber('')
       return
     }
 
-    // Try to infer country code from the value if it starts with a known country code
-    let inferredCountryCode = defaultCountryCode
-    let remainingPhoneNumber = value
-
-    for (const country of COUNTRIES) {
-      if (value.startsWith(country.phoneCode)) {
-        inferredCountryCode = country.code
-        remainingPhoneNumber = value.substring(country.phoneCode.length)
-        break
-      }
+    const inferredIso = inferCountryIsoFromLeadingDigits(digits, fallbackIso)
+    const country = getCountryByCode(inferredIso)
+    if (country?.phoneCode) {
+      setCountryCode(inferredIso)
+      setPhoneNumber(digits.slice(country.phoneCode.length))
+      return
     }
-    setCountryCode(inferredCountryCode)
-    setPhoneNumber(remainingPhoneNumber)
-  }, [value, defaultCountryCode])
+
+    setCountryCode(fallbackIso)
+    setPhoneNumber(digits)
+  }, [value, fallbackIso])
 
   const handleCountryChange = (newCountryCode: string) => {
     setCountryCode(newCountryCode)
@@ -82,7 +87,7 @@ export default function PhoneInputWithCountry({
   return (
     <div className={`flex items-stretch border border-gray-300 rounded-lg focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-transparent bg-white ${className}`}>
       {/* Seletor de País Compacto - Apenas Bandeira Visível */}
-      <div className="relative flex-shrink-0">
+      <div className="relative h-full min-h-[42px] w-[3.25rem] flex-shrink-0">
         {/* Select invisível mas clicável */}
         <select
           value={countryCode}
@@ -97,15 +102,26 @@ export default function PhoneInputWithCountry({
             </option>
           ))}
         </select>
-        {/* Bandeira visível - área clicável */}
-        <div className="w-12 h-full flex min-h-[42px] items-center justify-center rounded-l-lg border-r border-gray-300 bg-white transition-colors hover:bg-gray-50">
-          <span className="text-xl">{selectedCountry?.flag || '🌍'}</span>
+        {/* Bandeira + código ISO (ajuda quando o emoji falha; BR é o padrão habitual) */}
+        <div className="w-[3.25rem] h-full flex min-h-[42px] flex-col items-center justify-center gap-0.5 rounded-l-lg border-r border-gray-300 bg-white py-1 transition-colors hover:bg-gray-50">
+          <span className="text-xl leading-none" aria-hidden>
+            {selectedCountry?.flag || '🌍'}
+          </span>
+          <span className="text-[10px] font-semibold leading-none text-gray-600">{countryCode === 'OTHER' ? '…' : countryCode}</span>
         </div>
       </div>
       
       {/* Código do País */}
       {!isOtherCountry ? (
-        <span className="text-gray-600 px-2 border-r border-gray-300 text-sm font-medium min-w-[42px] text-center flex items-center">+{selectedCountry?.phoneCode || '--'}</span>
+        <span
+          className="flex min-w-0 flex-col justify-center border-r border-gray-300 px-2 py-1 text-center"
+          title={selectedCountry ? `${selectedCountry.name} — toca na bandeira para mudar` : undefined}
+        >
+          <span className="text-sm font-medium text-gray-600">+{selectedCountry?.phoneCode || '--'}</span>
+          <span className="truncate text-[10px] font-medium leading-tight text-gray-400">
+            {selectedCountry?.name ?? ''}
+          </span>
+        </span>
       ) : (
         <div className="flex items-center border-r border-gray-300 px-2">
           <span className="text-gray-400 text-sm">+</span>
