@@ -54,6 +54,11 @@ const PUBLIC_LINK_UI: Record<Language, {
   recruitmentBoxHint: string
   recruitmentTalkNow: string
   recruitmentYourResult: string
+  /** Intro antes do quiz por template (`DiagnosticoQuiz`) */
+  quizIntroBadge: string
+  quizIntroLead: string
+  quizIntroMicro: string
+  quizResultHelperLine: string
 }> = {
   pt: {
     start: 'Começar',
@@ -97,6 +102,12 @@ const PUBLIC_LINK_UI: Record<Language, {
     recruitmentBoxHint: 'Usa o WhatsApp abaixo para continuar a conversa com a pessoa que partilhou o quiz.',
     recruitmentTalkNow: '💬 Falar no WhatsApp',
     recruitmentYourResult: 'O teu resultado',
+    quizIntroBadge: 'Análise guiada',
+    quizIntroLead:
+      'Em poucos cliques você vê um primeiro recorte sobre o que o seu corpo e a sua rotina pedem neste tema: o que pesa no dia a dia e por onde costuma fazer sentido começar. Rápido, direto e pensado para quem quer se entender melhor.',
+    quizIntroMicro: 'Tempo estimado: cerca de 1 a 2 minutos',
+    quizResultHelperLine:
+      'Cada corpo responde de um jeito. Este resumo ajuda a abrir a conversa com um profissional.',
   },
   en: {
     start: 'Start',
@@ -140,6 +151,12 @@ const PUBLIC_LINK_UI: Record<Language, {
     recruitmentBoxHint: 'Use WhatsApp below to continue the conversation with the person who shared the quiz.',
     recruitmentTalkNow: '💬 Continue on WhatsApp',
     recruitmentYourResult: 'Your result',
+    quizIntroBadge: 'Guided check-in',
+    quizIntroLead:
+      'In just a few taps, get a first read on what your body and routine are asking for here: what shows up in daily life and where it usually makes sense to start. Quick, clear, and built for anyone curious to understand themselves better.',
+    quizIntroMicro: 'Estimated time: about 1 to 2 minutes',
+    quizResultHelperLine:
+      'Every body responds differently. This summary helps you start the conversation with a professional.',
   },
   es: {
     start: 'Comenzar',
@@ -183,7 +200,18 @@ const PUBLIC_LINK_UI: Record<Language, {
     recruitmentBoxHint: 'Usa el WhatsApp abajo para seguir la conversación con quien compartió el quiz.',
     recruitmentTalkNow: '💬 Hablar por WhatsApp',
     recruitmentYourResult: 'Tu resultado',
+    quizIntroBadge: 'Análisis guiado',
+    quizIntroLead:
+      'En pocos toques ves un primer recorte de lo que tu cuerpo y tu rutina piden en este tema: qué pesa en el día a día y por dónde suele tener sentido empezar. Rápido, directo y pensado para quien quiere entenderse mejor.',
+    quizIntroMicro: 'Tiempo estimado: unos 1 a 2 minutos',
+    quizResultHelperLine:
+      'Cada cuerpo responde distinto. Este resumen ayuda a abrir la conversación con un profesional.',
   },
+}
+
+/** Exibe textos de template sem travessão longa (substituição suave para leitura em tela). */
+function softenTemplateEmDashes(text: string): string {
+  return text.replace(/\s*—\s*/g, ': ').replace(/\s*–\s*/g, ', ')
 }
 
 /** Remove marcadores no texto quando a lista HTML já usa `list-disc` (evita bolinhas duplicadas em `summary_bullets`). */
@@ -658,7 +686,6 @@ export default function PublicLinkView({
       <ConfigDrivenLinkView
         slug={slug}
         config={normalizedConfig}
-        ctaText={ctaText}
         whatsappUrl={whatsappUrl}
         onCtaClick={handleCtaClick}
         locale={locale}
@@ -724,14 +751,12 @@ type DiagnosisResultState = {
 function ConfigDrivenLinkView({
   slug,
   config,
-  ctaText,
   whatsappUrl,
   onCtaClick,
   locale = 'pt',
 }: {
   slug: string
   config: Record<string, unknown>
-  ctaText: string
   whatsappUrl: string
   onCtaClick: (metricsId?: string, whatsappPrefill?: string) => void
   locale?: Language
@@ -899,7 +924,7 @@ function ConfigDrivenLinkView({
         // No modo quiz, enviar apenas os valores de quizFields
         const answersToSend = isQuizMode 
           ? Object.fromEntries(
-              quizFields.map(f => [f.id, values[f.id]]).filter(([_, v]) => v !== undefined && v !== null)
+              quizFields.map(f => [f.id, values[f.id]]).filter(([, v]) => v !== undefined && v !== null)
             )
           : values
         const body = {
@@ -995,7 +1020,6 @@ function ConfigDrivenLinkView({
       ? resultConfig.description.trim()
       : ''
   const summaryBullets = Array.isArray(resultConfig.summary_bullets) ? resultConfig.summary_bullets : []
-  const resultCtaText = resultConfig.cta?.text || ctaText
 
   // StrategicIntro: bloco antes da primeira pergunta; para quiz paciente (emagrecimento etc.) usa intro voltada ao visitante
   const themeFromMeta = typeof meta.theme_raw === 'string' ? meta.theme_raw : (meta.theme as { raw?: string })?.raw
@@ -1380,7 +1404,7 @@ function ConfigDrivenLinkView({
                   }
                   className="w-full py-4 px-4 bg-sky-600 hover:bg-sky-700 text-white font-semibold rounded-xl shadow-lg shadow-sky-500/25 transition-colors"
                 >
-                  {t.talkNow}
+                  {ctaText || t.talkNow}
                 </button>
                 <button
                   type="button"
@@ -1742,6 +1766,11 @@ type DiagnosticoConfig = {
   questions?: Array<{ id: string; text: string; type: string; options?: string[] }>
   results?: Array<{ id: string; minScore: number; headline: string; description: string }>
   resultIntro?: string
+  /** Sobrescrevem textos padrão da tela inicial (opcional no schema_json) */
+  introTitle?: string
+  introSubtitle?: string
+  introMicro?: string
+  introBullets?: string[]
 }
 
 function DiagnosticoQuiz({
@@ -1766,23 +1795,52 @@ function DiagnosticoQuiz({
   const questions = Array.isArray(cfg.questions) ? cfg.questions : []
   const results = Array.isArray(cfg.results) ? cfg.results : []
   const resultIntro = (cfg.resultIntro as string) || (locale === 'en' ? 'Your result:' : locale === 'es' ? 'Tu resultado:' : 'Seu resultado:')
+  const pessoaLabel = locale === 'en' ? 'professional' : locale === 'es' ? 'profesional' : 'profissional'
 
   const [answers, setAnswers] = useState<Record<string, number>>({})
-  const [step, setStep] = useState<'quiz' | 'result'>('quiz')
+  const [step, setStep] = useState<'intro' | 'quiz' | 'result'>('intro')
 
   const currentIndex = Object.keys(answers).length
   const currentQuestion = questions[currentIndex]
   const isComplete = currentIndex >= questions.length && questions.length > 0
 
-  const startSent = useRef(false)
   const completeSent = useRef(false)
+  const [showFullAnalysis, setShowFullAnalysis] = useState(false)
+
+  const handleShareQuizResult = async () => {
+    trackLinkEvent(slug, 'share_click')
+    const shareText =
+      locale === 'en'
+        ? 'I just took this quiz on Ylada. Try it too:'
+        : locale === 'es'
+          ? 'Acabo de hacer este quiz en Ylada. Pruébalo tú también:'
+          : 'Acabei de fazer este quiz no Ylada. Experimenta também:'
+    const shareUrl = typeof window !== 'undefined' ? window.location.href : ''
+    try {
+      if (typeof navigator !== 'undefined' && navigator.share) {
+        await navigator.share({
+          title: 'Ylada',
+          text: shareText,
+          url: shareUrl,
+        })
+        return
+      }
+    } catch {
+      /* fallback below */
+    }
+    if (typeof window !== 'undefined') {
+      const waUrl = `https://wa.me/?text=${encodeURIComponent(`${shareText} ${shareUrl}`)}`
+      window.open(waUrl, '_blank', 'noopener,noreferrer')
+    }
+  }
+
+  const beginQuiz = () => {
+    trackLinkEvent(slug, 'start')
+    setStep('quiz')
+  }
 
   const handleAnswer = (optionIndex: number) => {
     if (!currentQuestion) return
-    if (!startSent.current) {
-      startSent.current = true
-      trackLinkEvent(slug, 'start')
-    }
     const next = { ...answers, [currentQuestion.id]: optionIndex }
     setAnswers(next)
     if (currentIndex + 1 >= questions.length) {
@@ -1798,39 +1856,151 @@ function DiagnosticoQuiz({
   const score = Object.values(answers).reduce((a, b) => a + b, 0)
   const sortedResults = [...results].sort((a, b) => (b.minScore ?? 0) - (a.minScore ?? 0))
   const result = sortedResults.find((r) => score >= (r.minScore ?? 0)) ?? sortedResults[sortedResults[0] ? 0 : 0]
+  const resultHeadline = (result?.headline ?? '').trim()
+  const resultDescription = softenTemplateEmDashes((result?.description ?? '').trim())
+
+  if (step === 'intro') {
+    const introTitle = (cfg.introTitle as string)?.trim() || title
+    const introSubtitle = (cfg.introSubtitle as string)?.trim() || t.quizIntroLead
+    const introMicro = (cfg.introMicro as string)?.trim() || t.quizIntroMicro
+    const bullets =
+      Array.isArray(cfg.introBullets) && cfg.introBullets.length > 0
+        ? cfg.introBullets.map((b) => String(b).trim()).filter(Boolean)
+        : []
+
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-sky-50 via-sky-50/90 to-blue-50 flex items-center justify-center p-4 sm:p-6">
+        <div className="max-w-md w-full bg-white rounded-2xl shadow-xl border border-gray-100/80 p-6 sm:p-8">
+          <div className="mb-4">
+            <span className="inline-block text-xs font-semibold text-sky-600 bg-sky-50 px-3 py-1.5 rounded-full border border-sky-100">
+              {t.quizIntroBadge}
+            </span>
+          </div>
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3 leading-tight">{introTitle}</h1>
+          <p className="text-gray-600 text-sm leading-relaxed mb-3">{introSubtitle}</p>
+          <p className={`text-xs text-gray-500 ${bullets.length > 0 ? 'mb-3' : 'mb-8'}`}>{introMicro}</p>
+          {bullets.length > 0 ? (
+            <ul className="list-disc list-inside text-gray-600 text-sm space-y-2 mb-8">
+              {bullets.map((line, i) => (
+                <li key={i}>{line}</li>
+              ))}
+            </ul>
+          ) : null}
+          <button
+            type="button"
+            onClick={beginQuiz}
+            className="w-full py-4 px-4 bg-sky-600 hover:bg-sky-700 text-white font-semibold rounded-xl shadow-lg shadow-sky-500/25 transition-colors"
+          >
+            {t.start}
+          </button>
+        </div>
+      </div>
+    )
+  }
 
   if (step === 'result' && isComplete) {
+    const toggleFullAnalysis = () => {
+      setShowFullAnalysis((prev) => {
+        if (!prev) {
+          trackLinkEvent(slug, 'full_analysis_expand')
+        }
+        return !prev
+      })
+    }
+
     return (
-      <div className="min-h-screen bg-gradient-to-br from-sky-50 via-sky-50/90 to-blue-50 flex items-center justify-center p-4">
-        <div className="max-w-md w-full bg-white rounded-2xl shadow-lg border border-gray-100 p-6 sm:p-8">
-          <h1 className="text-xl font-bold text-gray-900 mb-2">{title}</h1>
-          <p className="text-sm text-gray-600 mb-4">{resultIntro}</p>
-          <div className="mb-6">
-            <h2 className="text-lg font-semibold text-gray-900">{result?.headline}</h2>
-            <p className="text-gray-600 mt-2">{result?.description}</p>
+      <div className="min-h-screen bg-gradient-to-b from-sky-50 via-sky-50/90 to-blue-50 flex items-center justify-center p-4 sm:p-6">
+        <div className="max-w-md w-full bg-white rounded-2xl shadow-xl shadow-sky-100/50 border border-sky-100/60 p-6 sm:p-8">
+          <div className="mb-4">
+            <span className="inline-block text-xs font-semibold text-sky-600 bg-sky-50 px-3 py-1.5 rounded-full border border-sky-100">
+              {t.yourResult}
+            </span>
           </div>
-          {whatsappUrl ? (
-            <button
-              type="button"
-              onClick={onCtaClick}
-              className="w-full py-3 px-4 bg-sky-600 hover:bg-sky-700 text-white font-medium rounded-lg transition-colors"
+          <p className="text-xs text-gray-500 mb-2">{title}</p>
+          <p className="text-sm text-gray-500 mb-4">{resultIntro}</p>
+
+          <div className="relative mb-5 overflow-hidden rounded-2xl bg-gradient-to-br from-sky-50 to-white border border-sky-100/80 shadow-sm">
+            <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-gradient-to-b from-sky-400 to-sky-600 rounded-l-2xl" />
+            <div className="pl-5 pr-5 py-5 sm:pl-6 sm:pr-6 sm:py-6">
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-sky-600 mb-2">{t.diagnosis}</p>
+              <p className="text-lg sm:text-xl font-bold text-gray-900 leading-snug">{resultHeadline}</p>
+            </div>
+          </div>
+
+          <div className="mb-5 p-4 rounded-xl border border-gray-100 bg-gray-50/70">
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-gray-500 mb-2">{t.whatItMeans}</p>
+            <p
+              className={`text-sm text-gray-700 leading-relaxed ${showFullAnalysis ? '' : 'line-clamp-5'}`}
             >
-              {ctaText}
-            </button>
-          ) : (
-            <span className="text-gray-500 text-sm">{t.contactNotAvailable.replace('{pessoa}', locale === 'en' ? 'professional' : locale === 'es' ? 'profesional' : 'profissional')}</span>
+              {resultDescription}
+            </p>
+          </div>
+
+          {showFullAnalysis && (
+            <>
+              <div className="mb-4 p-4 rounded-xl bg-green-50/80 border border-green-100">
+                <p className="text-gray-700 text-sm leading-relaxed">{t.goodNews}</p>
+              </div>
+              <div className="mb-6 p-4 rounded-xl bg-sky-50/80 border border-sky-100">
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-sky-600 mb-2">{t.moreFactors}</p>
+                <p className="text-gray-600 text-sm leading-relaxed mb-2">
+                  {t.resultDisclaimer.replace('{pessoa}', pessoaLabel)}
+                </p>
+                <p className="text-gray-700 text-sm font-medium">{t.talkToPro.replace('{pessoa}', pessoaLabel)}</p>
+              </div>
+            </>
           )}
 
-          <DiagnosisDisclaimer variant="informative" className="mt-5 pt-4" />
-          <PoweredByYlada variant="compact" />
+          {whatsappUrl ? (
+            <div className="space-y-3">
+              <p className="text-center text-sm text-gray-600">{t.quizResultHelperLine}</p>
+              <button
+                type="button"
+                onClick={() => onCtaClick()}
+                className="w-full py-4 px-4 bg-sky-600 hover:bg-sky-700 text-white font-semibold rounded-xl shadow-lg shadow-sky-500/25 transition-colors"
+              >
+                {ctaText}
+              </button>
+              <button
+                type="button"
+                onClick={() => void handleShareQuizResult()}
+                className="w-full py-3 px-4 border border-sky-200 text-sky-700 hover:bg-sky-50 font-semibold rounded-xl transition-colors"
+              >
+                {t.shareResult}
+              </button>
+              <button
+                type="button"
+                onClick={toggleFullAnalysis}
+                className="w-full py-3 px-4 border border-sky-200 text-sky-700 hover:bg-sky-50 font-semibold rounded-xl transition-colors"
+              >
+                {showFullAnalysis ? t.hideFullAnalysis : t.seeFullAnalysis}
+              </button>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              <span className="text-gray-500 text-sm block">{t.contactNotAvailable.replace('{pessoa}', pessoaLabel)}</span>
+              <button
+                type="button"
+                onClick={toggleFullAnalysis}
+                className="w-full py-3 px-4 border border-sky-200 text-sky-700 hover:bg-sky-50 font-semibold rounded-xl transition-colors"
+              >
+                {showFullAnalysis ? t.hideFullAnalysis : t.seeFullAnalysis}
+              </button>
+            </div>
+          )}
+
+          <div className="mt-5 pt-4 border-t border-gray-100">
+            <PoweredByYlada variant="compact" />
+          </div>
+          <DiagnosisDisclaimer variant="informative" className="mt-4" />
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-sky-50 via-sky-50/90 to-blue-50 flex items-center justify-center p-4">
-      <div className="max-w-md w-full bg-white rounded-2xl shadow-lg border border-gray-100 p-6 sm:p-8">
+    <div className="min-h-screen bg-gradient-to-b from-sky-50 via-sky-50/90 to-blue-50 flex items-center justify-center p-4 sm:p-6">
+      <div className="max-w-md w-full bg-white rounded-2xl shadow-xl border border-gray-100/80 p-6 sm:p-8">
         <h1 className="text-xl font-bold text-gray-900 mb-2">{title}</h1>
         <p className="text-sm text-gray-500 mb-4">
           {t.questionOf} {currentIndex + 1} {locale === 'en' ? 'of' : 'de'} {questions.length}
@@ -1844,7 +2014,7 @@ function DiagnosticoQuiz({
                   key={i}
                   type="button"
                   onClick={() => handleAnswer(i)}
-                  className="w-full text-left py-3 px-4 rounded-lg border border-gray-200 hover:border-sky-500 hover:bg-sky-50 text-gray-800 transition-colors"
+                  className="w-full text-left py-3 px-4 rounded-xl border border-gray-200 hover:border-sky-500 hover:bg-sky-50 text-gray-800 transition-colors"
                 >
                   {opt}
                 </button>
