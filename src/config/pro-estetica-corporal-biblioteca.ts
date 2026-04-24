@@ -1,7 +1,7 @@
 /**
  * Pro Estética Corporal — biblioteca (`subscope=estetica_corporal`):
- * **lista fechada por `template_id`**: 5 calculadoras + 7 quizzes (corporal + retenção/hidratação + 2 diagnósticos novos na migration 308).
- * Tópicos prontos + links que a pessoa cria continuam noutras áreas da UI; aqui só estes doze itens globais passam no filtro.
+ * **lista fechada por `template_id`**: calculadoras + quizzes corporais (migrations 236, 242, 293, 308, **333**).
+ * Tópicos prontos + links que a pessoa cria continuam noutras áreas da UI; aqui só estes itens globais passam no filtro.
  */
 
 import type { IdeiaRapidaNoel } from '@/config/ylada-biblioteca'
@@ -33,8 +33,7 @@ export const SEGMENT_CODES_BIBLIOTECA_ESTETICA_CORPORAL = ['aesthetics', 'nutrit
 
 /**
  * Únicos itens da biblioteca YLADA mostrados no painel Pro Estética Corporal.
- * Calculadoras: 236 + hidratação avançada 293.
- * Quizzes: 242 + retenção 241 + hidratação pele 242 + corporal 308.
+ * Inclui migration **333** (drenagem vs tecnologia, tecnologia-alvo, expectativa de sessões, camadas, agenda, retenção/hábitos).
  */
 export const TEMPLATE_IDS_BIBLIOTECA_ESTETICA_CORPORAL_PERMITIDOS = new Set([
   'b1000026-0026-4000-8000-000000000026',
@@ -49,6 +48,12 @@ export const TEMPLATE_IDS_BIBLIOTECA_ESTETICA_CORPORAL_PERMITIDOS = new Set([
   'b1000050-0050-4000-8000-000000000050',
   'b1000119-0119-4000-8000-000000000119',
   'b1000120-0120-4000-8000-000000000120',
+  'b1000121-0121-4000-8000-000000000121',
+  'b1000122-0122-4000-8000-000000000122',
+  'b1000123-0123-4000-8000-000000000123',
+  'b1000124-0124-4000-8000-000000000124',
+  'b1000125-0125-4000-8000-000000000125',
+  'b1000126-0126-4000-8000-000000000126',
 ])
 
 export type BibliotecaItemSegmentFilter = {
@@ -69,13 +74,19 @@ export function filtrarBibliotecaItensEsteticaCorporal<T extends BibliotecaItemS
   return items.filter(itemBibliotecaEsteticaCorporal)
 }
 
-/** Ordem no topo: calculadoras → quizzes corporais (pele, retenção, hidratação, celulite, flacidez, prontidão, mapa). */
+/** Ordem no topo: calculadoras → conteúdo estratégico (333) → demais quizzes. */
 export const TEMPLATE_IDS_ORDEM_DESTAQUE_ESTETICA_CORPORAL = [
   'b1000026-0026-4000-8000-000000000026',
   'b1000025-0025-4000-8000-000000000025',
   'b1000028-0028-4000-8000-000000000028',
   'b1000027-0027-4000-8000-000000000027',
   'b1000031-0031-4000-8000-000000000031',
+  'b1000123-0123-4000-8000-000000000123',
+  'b1000121-0121-4000-8000-000000000121',
+  'b1000122-0122-4000-8000-000000000122',
+  'b1000124-0124-4000-8000-000000000124',
+  'b1000125-0125-4000-8000-000000000125',
+  'b1000126-0126-4000-8000-000000000126',
   'b1000044-0044-4000-8000-000000000044',
   'b1000038-0038-4000-8000-000000000038',
   'b1000048-0048-4000-8000-000000000048',

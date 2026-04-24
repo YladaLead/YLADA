@@ -2,7 +2,10 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireApiAuth } from '@/lib/api-auth'
 import { supabaseAdmin } from '@/lib/supabase'
 import { generateEsteticaConsultoriaShareToken } from '@/lib/estetica-consultoria'
-import { TEMPLATE_DIAGNOSTICO_CORPORAL_ID } from '@/lib/estetica-consultoria-form-templates'
+import {
+  TEMPLATE_DIAGNOSTICO_CAPILAR_ID,
+  TEMPLATE_DIAGNOSTICO_CORPORAL_ID,
+} from '@/lib/estetica-consultoria-form-templates'
 
 type Ctx = { params: Promise<{ id: string }> }
 
@@ -104,8 +107,15 @@ export async function POST(request: NextRequest, context: Ctx) {
       return NextResponse.json({ error: 'Cliente inválido.' }, { status: 400 })
     }
     const seg = String(cli.segment ?? '')
-    if (seg !== 'corporal' && seg !== 'ambos') {
-      return NextResponse.json({ error: 'Cliente tem de ser Corporal ou Ambos.' }, { status: 400 })
+    const tk = String(mat.template_key ?? '')
+    if (tk === TEMPLATE_DIAGNOSTICO_CORPORAL_ID) {
+      if (seg !== 'corporal' && seg !== 'ambos') {
+        return NextResponse.json({ error: 'Diagnóstico corporal: cliente tem de ser Corporal ou Ambos.' }, { status: 400 })
+      }
+    } else if (tk === TEMPLATE_DIAGNOSTICO_CAPILAR_ID) {
+      if (seg !== 'capilar' && seg !== 'ambos') {
+        return NextResponse.json({ error: 'Diagnóstico capilar: cliente tem de ser Capilar ou Ambos.' }, { status: 400 })
+      }
     }
     targetClientId = cid
   }
@@ -114,7 +124,8 @@ export async function POST(request: NextRequest, context: Ctx) {
 
   const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
   let recipientEmail: string | null = null
-  if (isGlobal && String(mat.template_key) === TEMPLATE_DIAGNOSTICO_CORPORAL_ID) {
+  const tplKey = String(mat.template_key ?? '')
+  if (isGlobal && (tplKey === TEMPLATE_DIAGNOSTICO_CORPORAL_ID || tplKey === TEMPLATE_DIAGNOSTICO_CAPILAR_ID)) {
     const { data: cliEm } = await supabaseAdmin
       .from('ylada_estetica_consult_clients')
       .select('contact_email')
@@ -125,10 +136,11 @@ export async function POST(request: NextRequest, context: Ctx) {
         ? String((cliEm as { contact_email: string }).contact_email).trim().toLowerCase()
         : ''
     if (!em || !EMAIL_RE.test(em)) {
+      const msgCap =
+        tplKey === TEMPLATE_DIAGNOSTICO_CAPILAR_ID ? 'diagnóstico capilar' : 'diagnóstico corporal'
       return NextResponse.json(
         {
-          error:
-            'Para o diagnóstico corporal, a clínica precisa de um e-mail válido nos dados administrativos antes de gerar o link.',
+          error: `Para o ${msgCap}, a clínica precisa de um e-mail válido nos dados administrativos antes de gerar o link.`,
         },
         { status: 400 }
       )

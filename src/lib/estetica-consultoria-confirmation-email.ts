@@ -17,15 +17,19 @@ export async function sendEsteticaDiagnosticoConfirmEmail(params: {
   confirmToken: string
   toEmail: string
   clinicName: string
+  /** Qual formulário fixo — texto do e-mail. */
+  formArea?: 'corporal' | 'capilar'
 }): Promise<{ ok: true } | { ok: false; error: string }> {
   if (!isResendConfigured() || !resend) {
     return { ok: false, error: 'Envio de e-mail não configurado (RESEND_API_KEY).' }
   }
+  const area = params.formArea ?? 'corporal'
+  const areaLabel = area === 'capilar' ? 'terapia capilar' : 'estética corporal'
   const url = `${buildEsteticaConsultoriaResponderUrl(params.origin, params.shareToken)}?confirm=${encodeURIComponent(params.confirmToken)}`
   const subject = 'Confirme para abrir o diagnóstico — YLADA'
   const html = `
 <p>Olá,</p>
-<p>Você recebeu o convite para preencher o <strong>diagnóstico de estética corporal</strong> da clínica <strong>${escapeHtml(
+<p>Você recebeu o convite para preencher o <strong>diagnóstico de ${escapeHtml(areaLabel)}</strong> da clínica <strong>${escapeHtml(
     params.clinicName
   )}</strong>.</p>
 <p><a href="${url}" style="display:inline-block;margin:16px 0;padding:12px 20px;background:#2563eb;color:#fff;text-decoration:none;border-radius:10px;font-weight:600;">Confirmar e abrir o formulário</a></p>

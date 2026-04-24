@@ -5,6 +5,15 @@ export const TEMPLATE_DIAGNOSTICO_CORPORAL_TITLE = 'Diagnóstico — Estética c
 
 export const TEMPLATE_DIAGNOSTICO_CORPORAL_ID = 'diagnostico_corporal_v1' as const
 
+export const TEMPLATE_DIAGNOSTICO_CAPILAR_TITLE = 'Diagnóstico — Estética capilar (YLADA)'
+
+export const TEMPLATE_DIAGNOSTICO_CAPILAR_ID = 'diagnostico_capilar_v1' as const
+
+/** Formulários fixos YLADA com confirmação por e-mail antes de preencher. */
+export function isDiagnosticoEmailConfirmationTemplate(templateKey: string | null | undefined): boolean {
+  return templateKey === TEMPLATE_DIAGNOSTICO_CORPORAL_ID || templateKey === TEMPLATE_DIAGNOSTICO_CAPILAR_ID
+}
+
 const SIM_NAO_AS_VEZES = ['Sim', 'Não', 'Às vezes']
 
 const SERVICOS_CHECKLIST: string[] = [
@@ -359,4 +368,269 @@ export function getDiagnosticoCorporalV1Description(): string {
     'Ajuda a ver onde você está travando — faturamento, agenda e clientes.',
     'Passos curtos no celular. No final: Enviar.',
   ].join('\n')
+}
+
+const ESPECIALIDADES_CAPILAR_CHECKLIST: string[] = [
+  'Queda de cabelo',
+  'Alopecia',
+  'Caspa / dermatite',
+  'Oleosidade excessiva',
+  'Crescimento capilar',
+  'Fortalecimento dos fios',
+  'Terapia capilar preventiva',
+  'Microagulhamento capilar',
+  'Laser capilar',
+  'Ozonioterapia capilar',
+  'Detox capilar',
+]
+
+const CANAIS_AQUISICAO_CAPILAR: string[] = ['Instagram', 'Indicação', 'Tráfego pago', 'Parcerias', 'Outros']
+
+const DORES_CAPILAR_CHECKLIST: string[] = [
+  'Falta de clientes',
+  'Clientes não fecham',
+  'Clientes não continuam o tratamento',
+  'Dificuldade de explicar o tratamento',
+  'Baixo faturamento',
+  'Falta de posicionamento',
+  'Não sabe o que postar',
+]
+
+const TRABALHA_COM_CAPILAR_CHK: string[] = ['Protocolos completos', 'Sessões avulsas', 'Planos de tratamento']
+
+function tratamentoCapilarFields(n: 1 | 2 | 3 | 4 | 5): ConsultoriaFormField[] {
+  const req = n === 1
+  return [
+    {
+      id: `trat_cap_${n}_nome`,
+      label: `3.${n} Nome do tratamento / protocolo`,
+      type: 'text',
+      required: req,
+    },
+    {
+      id: `trat_cap_${n}_valor_sessao`,
+      label: `3.${n} Valor por sessão (R$)`,
+      type: 'text',
+      required: false,
+    },
+    {
+      id: `trat_cap_${n}_duracao`,
+      label: `3.${n} Duração média (minutos ou texto)`,
+      type: 'text',
+      required: false,
+    },
+    {
+      id: `trat_cap_${n}_sessoes_recomendadas`,
+      label: `3.${n} Quantas sessões você recomenda por cliente (média)`,
+      type: 'text',
+      required: false,
+    },
+    {
+      id: `trat_cap_${n}_sessoes_por_dia`,
+      label: `3.${n} Quantas sessões consegue fazer por dia (média)`,
+      type: 'text',
+      required: false,
+    },
+  ]
+}
+
+/** Formulário diagnóstico capilar (recorrência, posicionamento, conversão). */
+export function buildDiagnosticoCapilarV1Fields(): ConsultoriaFormField[] {
+  return [
+    {
+      id: 'nome_clinica',
+      label: '1. Nome da clínica / marca',
+      type: 'text',
+      required: true,
+    },
+    {
+      id: 'nome_proprietaria',
+      label: '1. Nome da profissional (ou quem decide)',
+      type: 'text',
+      required: true,
+    },
+    {
+      id: 'instagram',
+      label: '1. Instagram (@ ou link)',
+      type: 'text',
+      required: true,
+    },
+    {
+      id: 'whatsapp',
+      label: '1. WhatsApp (com DDD)',
+      type: 'text',
+      required: true,
+    },
+    {
+      id: 'cidade_estado',
+      label: '1. Cidade / Estado',
+      type: 'text',
+      required: true,
+    },
+    {
+      id: 'tempo_atuacao',
+      label: '1. Tempo de atuação em estética capilar',
+      type: 'text',
+      required: false,
+    },
+    {
+      id: 'trabalha_sozinha_equipe',
+      label: '1. Trabalha sozinha ou com equipe?',
+      type: 'select',
+      required: true,
+      options: ['Sozinha', 'Com equipe'],
+    },
+    {
+      id: 'equipe_quantas',
+      label: '1. Se tem equipe: quantas pessoas (incluindo você)?',
+      type: 'text',
+      required: false,
+    },
+    {
+      id: 'especialidades_capilar_chk',
+      label: '2. Especialidades (marque todas que aplicam)',
+      type: 'checkbox_group',
+      required: true,
+      options: ESPECIALIDADES_CAPILAR_CHECKLIST,
+    },
+    {
+      id: 'especialidades_outros',
+      label: '2. Outras especialidades (texto livre, opcional)',
+      type: 'text',
+      required: false,
+    },
+    ...tratamentoCapilarFields(1),
+    ...tratamentoCapilarFields(2),
+    ...tratamentoCapilarFields(3),
+    ...tratamentoCapilarFields(4),
+    ...tratamentoCapilarFields(5),
+    {
+      id: 'posicionamento_como',
+      label: '4. Hoje você se posiciona mais como:',
+      type: 'select',
+      required: true,
+      options: ['Tratamento estético', 'Tratamento terapêutico', 'Saúde capilar', 'Não sei exatamente'],
+    },
+    {
+      id: 'clientes_percebem_valor',
+      label: '4. Você sente que seus clientes:',
+      type: 'select',
+      required: true,
+      options: ['Entendem o valor do tratamento', 'Acham caro', 'Comparam muito com preço'],
+    },
+    {
+      id: 'chegam_clientes_chk',
+      label: '5. Como chegam seus clientes hoje? (marque)',
+      type: 'checkbox_group',
+      required: false,
+      options: CANAIS_AQUISICAO_CAPILAR,
+    },
+    {
+      id: 'chegam_clientes_outros',
+      label: '5. Outros canais (texto, opcional)',
+      type: 'text',
+      required: false,
+    },
+    {
+      id: 'instagram_hoje',
+      label: '5. Seu Instagram hoje:',
+      type: 'select',
+      required: false,
+      options: ['Atrai clientes certos', 'Atrai curiosos', 'Não gera resultado'],
+    },
+    {
+      id: 'conversao_quando_chamam',
+      label: '6. Quando alguém te chama:',
+      type: 'select',
+      required: true,
+      options: ['Fecha fácil', 'Precisa explicar muito', 'A pessoa some depois do preço'],
+    },
+    {
+      id: 'tratamento_continuo',
+      label: '7. Seus clientes fazem tratamento contínuo?',
+      type: 'select',
+      required: true,
+      options: ['Sim', 'Não', 'Só alguns'],
+    },
+    {
+      id: 'trabalha_com_chk',
+      label: '7. Você trabalha com: (marque)',
+      type: 'checkbox_group',
+      required: false,
+      options: TRABALHA_COM_CAPILAR_CHK,
+    },
+    {
+      id: 'acompanhamento_cliente',
+      label: '7. Você tem acompanhamento do cliente?',
+      type: 'select',
+      required: false,
+      options: ['Sim', 'Não'],
+    },
+    {
+      id: 'agenda_hoje',
+      label: '8. Sua agenda hoje está:',
+      type: 'select',
+      required: true,
+      options: ['Vazia', 'Parcial', 'Cheia, mas desorganizada', 'Cheia e previsível'],
+    },
+    {
+      id: 'dias_fracos',
+      label: '8. Tem dias fracos?',
+      type: 'select',
+      required: false,
+      options: ['Sim', 'Não'],
+    },
+    {
+      id: 'dores_capilar_chk',
+      label: '9. Principais dores (marque)',
+      type: 'checkbox_group',
+      required: true,
+      options: DORES_CAPILAR_CHECKLIST,
+    },
+    {
+      id: 'dores_capilar_outros',
+      label: '9. Outras dores (texto, opcional)',
+      type: 'text',
+      required: false,
+    },
+    {
+      id: 'objetivo_30_dias_capilar',
+      label: '10. Objetivo (30 dias) — o que você mais gostaria de melhorar agora?',
+      type: 'textarea',
+      required: true,
+    },
+    {
+      id: 'impede_crescer_capilar',
+      label: '11. O que hoje mais te impede de crescer na área capilar?',
+      type: 'textarea',
+      required: true,
+    },
+    {
+      id: 'cliente_entende_processo',
+      label:
+        '12. (Opcional) Você acredita que seu cliente entende que o tratamento capilar é um processo (e não algo imediato)?',
+      type: 'select',
+      required: false,
+      options: ['Sim', 'Não', 'Em parte'],
+    },
+    {
+      id: 'comentarios_finais_capilar',
+      label: '13. Comentários livres (opcional)',
+      type: 'textarea',
+      required: false,
+    },
+  ]
+}
+
+export function getDiagnosticoCapilarV1Description(): string {
+  return [
+    'Foco em recorrência, posicionamento e conversão na capilar.',
+    'Confirme o e-mail, depois responda com calma no celular.',
+  ].join('\n')
+}
+
+export function getDiagnosticoTemplateDescription(templateKey: string | null | undefined): string | null {
+  if (templateKey === TEMPLATE_DIAGNOSTICO_CORPORAL_ID) return getDiagnosticoCorporalV1Description()
+  if (templateKey === TEMPLATE_DIAGNOSTICO_CAPILAR_ID) return getDiagnosticoCapilarV1Description()
+  return null
 }

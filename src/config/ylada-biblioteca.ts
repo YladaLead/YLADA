@@ -180,9 +180,24 @@ export function isTemaMaisUsado(tema: string): boolean {
   return (TEMAS_MAIS_USADOS as readonly string[]).includes(tema)
 }
 
-/** Dica do Noel para a biblioteca (por segmento). Exibida acima da lista quando há segmento ativo. */
-export function getDicaNoelBiblioteca(segmentCode: BibliotecaSegmentCode | null): string {
+/** Linha da biblioteca `/pt/estetica/links` (query `linha`: `terapia-capilar` / `estetica-corporal`, legado `terapia=` e slugs curtos) — só para personalizar a dica do Noel. */
+export type NoelDicaEsteticaLinha = 'todos' | 'capilar' | 'corporal'
+
+/** Dica do Noel para a biblioteca (por segmento). Em `/pt/estetica/links`, passe `esteticaLinha` para alinhar ao filtro capilar/corporal. */
+export function getDicaNoelBiblioteca(
+  segmentCode: BibliotecaSegmentCode | null,
+  esteticaLinha?: NoelDicaEsteticaLinha | null,
+): string {
   if (!segmentCode) return ''
+  if (segmentCode === 'aesthetics' && esteticaLinha === 'corporal') {
+    return 'Noel: em estética corporal, fluxos de contorno, retenção, celulite e “expectativa de sessões” costumam abrir conversa com intenção real — use também os quizzes de ordem de protocolo e agenda.'
+  }
+  if (segmentCode === 'aesthetics' && esteticaLinha === 'capilar') {
+    return 'Noel: em terapia capilar, queda, couro cabeludo e hidratação geram resposta rápida; envie o link com uma pergunta curta no WhatsApp ou no story.'
+  }
+  if (segmentCode === 'aesthetics' && esteticaLinha === 'todos') {
+    return 'Noel: use o filtro Linha (terapia capilar ou estética corporal) para achar o modelo certo. A sugestão do dia acima já traz um ângulo pronto para postar ou mandar no direct.'
+  }
   const dicas: Partial<Record<BibliotecaSegmentCode, string>> = {
     nutrition: 'Comece pelo diagnóstico de Metabolismo ou Emagrecimento. São os que mais geram conversas com clientes.',
     nutrition_vendedor: 'Comece pelo diagnóstico de Metabolismo ou Emagrecimento. São os que mais geram conversas.',
@@ -436,42 +451,95 @@ export const IDEIAS_RAPIDAS_NOEL: IdeiaRapidaNoel[] = [
 /** Ideias por área da estética (vinculadas ao perfil area_estetica). */
 const IDEIAS_RAPIDAS_ESTETICA: Record<string, IdeiaRapidaNoel[]> = {
   facial: [
-    { texto: 'O que sua pele está precisando?', tema: 'pele', titulo_sugerido: 'O que sua pele está precisando?' },
-    { texto: 'Sua rotina de skincare está adequada?', tema: 'rotina_cuidados', titulo_sugerido: 'Sua rotina de skincare funciona?' },
-    { texto: 'Sua pele parece mais jovem ou mais velha que sua idade?', tema: 'rejuvenescimento', titulo_sugerido: 'Sua pele reflete sua idade?' },
+    {
+      texto: 'Noel: em estética facial, “o que sua pele precisa” abre conversa sem prometer milagre — bom para story ou direct.',
+      tema: 'pele',
+      titulo_sugerido: 'O que sua pele está precisando?',
+    },
+    {
+      texto: 'Noel: rotina de skincare mal montada gera fricção na venda de procedimento; um quiz educa antes do orçamento.',
+      tema: 'rotina_cuidados',
+      titulo_sugerido: 'Sua rotina de skincare funciona?',
+    },
+    {
+      texto: 'Noel: rejuvenescimento é tema sensível; prefira pergunta leve e encaminhamento para avaliação presencial.',
+      tema: 'rejuvenescimento',
+      titulo_sugerido: 'Sua pele reflete sua idade?',
+    },
   ],
   corporal: [
-    { texto: 'O que pode estar causando sua celulite?', tema: 'celulite', titulo_sugerido: 'O que pode estar causando sua celulite?' },
     {
-      texto: 'Descubra o que pode estar travando os benefícios da sua pele.',
+      texto: 'Noel: celulite é um dos ganchos que mais geram conversa em estética corporal — vale um quiz curto no link.',
+      tema: 'celulite',
+      titulo_sugerido: 'O que pode estar causando sua celulite?',
+    },
+    {
+      texto: 'Noel: quando o foco é corpo, “pele” entra como textura e firmeza; use para falar de protocolo sem prometer milagre.',
       tema: 'pele',
       titulo_sugerido: 'Descubra o que pode estar travando os benefícios da sua pele',
     },
     {
-      texto: 'Flacidez costuma começar antes de ficar evidente no espelho.',
+      texto: 'Noel: flacidez costuma aparecer na conversa antes do espelho “confirmar”; qualifique com diagnóstico leve.',
       tema: 'flacidez',
       titulo_sugerido: 'Você tem sinais de flacidez que ainda não percebeu?',
     },
     {
-      texto: 'Inchaço e retenção mascaram resultado e desanimam na balança.',
+      texto: 'Noel: inchaço e retenção desanimam na balança; um fluxo educativo alinha expectativa antes da drenagem ou tecnologia.',
       tema: 'inchaço_retencao',
       titulo_sugerido: 'Seu corpo está acumulando retenção de líquido?',
     },
     {
-      texto: 'Antes de montar protocolo, ajuda a cliente a nomear o que a trava.',
+      texto: 'Noel: antes de protocolo fechado, ajude a cliente a nomear o que trava — hábito e prioridade entram no mesmo pacote.',
       tema: 'habitos',
       titulo_sugerido: 'O que mais te impede de investir no seu corpo agora?',
     },
     {
-      texto: 'Mapa de zonas abre conversa sobre prioridade e pacote.',
+      texto: 'Noel: “mapa de zonas” organiza prioridade e ajuda você a sugerir pacote com critério.',
       tema: 'peso_gordura',
       titulo_sugerido: 'Quais zonas do seu corpo mais te incomodam hoje?',
     },
+    {
+      texto: 'Noel: entre drenagem, modeladora e tecnologia, quem responde um quiz chega menos perdida na primeira avaliação.',
+      tema: 'inchaço_retencao',
+      titulo_sugerido: 'Seu corpo pede drenagem, modeladora ou tecnologia primeiro?',
+    },
+    {
+      texto: 'Noel: objetivo e região mudam o equipamento; este ângulo evita “me indica tudo” no WhatsApp.',
+      tema: 'peso_gordura',
+      titulo_sugerido: 'Qual tecnologia corporal faz mais sentido para o seu objetivo agora?',
+    },
+    {
+      texto: 'Noel: alinhar prazo com frequência evita frustração — ótimo gancho antes de fechar pacote.',
+      tema: 'peso_gordura',
+      titulo_sugerido: 'Quantas sessões cabem no seu prazo e na sua rotina?',
+    },
+    {
+      texto: 'Noel: quem empilha tudo na mesma semana perde ritmo; falar em camadas educa e qualifica.',
+      tema: 'habitos',
+      titulo_sugerido: 'Seu protocolo corporal precisa de quantas camadas?',
+    },
+    {
+      texto: 'Noel: intervalo e combinação no mesmo dia são dúvidas reais; um quiz vira ponte para você explicar o cronograma.',
+      tema: 'habitos',
+      titulo_sugerido: 'Sua agenda de sessões está ajudando ou atrapalhando o resultado?',
+    },
   ],
   capilar: [
-    { texto: 'Seu cabelo está recebendo os cuidados certos?', tema: 'cabelo', titulo_sugerido: 'Seu cabelo está saudável?' },
-    { texto: 'O que pode estar afetando a saúde do seu cabelo?', tema: 'cabelo', titulo_sugerido: 'O que seu cabelo está precisando?' },
-    { texto: 'Seu couro cabeludo está saudável?', tema: 'cabelo', titulo_sugerido: 'Como está seu couro cabeludo?' },
+    {
+      texto: 'Noel: em terapia capilar, quem responde um quiz curto já chega no salão com contexto — ótimo para qualificar antes da cadeira.',
+      tema: 'cabelo',
+      titulo_sugerido: 'Seu cabelo está recebendo os cuidados certos?',
+    },
+    {
+      texto: 'Queda e couro cabeludo são temas quentes; um diagnóstico leve no link costuma gerar mais resposta que post genérico.',
+      tema: 'cabelo',
+      titulo_sugerido: 'O que pode estar afetando a saúde do seu cabelo?',
+    },
+    {
+      texto: 'Hidratação e porosidade confundem muita gente; um fluxo simples educa e abre conversa sobre protocolo.',
+      tema: 'cabelo',
+      titulo_sugerido: 'Seu cabelo está realmente hidratado?',
+    },
   ],
   unhas: [
     { texto: 'Suas unhas estão fortes e saudáveis?', tema: 'unhas', titulo_sugerido: 'Suas unhas estão fortes?' },

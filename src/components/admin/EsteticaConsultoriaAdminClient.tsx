@@ -12,9 +12,16 @@ import {
   type YladaEsteticaConsultancyMaterialRow,
   type YladaEsteticaConsultancyShareLinkRow,
 } from '@/lib/estetica-consultoria'
-import { TEMPLATE_DIAGNOSTICO_CORPORAL_TITLE } from '@/lib/estetica-consultoria-form-templates'
+import {
+  TEMPLATE_DIAGNOSTICO_CAPILAR_TITLE,
+  TEMPLATE_DIAGNOSTICO_CORPORAL_TITLE,
+} from '@/lib/estetica-consultoria-form-templates'
 import { consultoriaCsvFilenameBase, consultoriaFormResponsesToCsv } from '@/lib/consultoria-form-csv'
-import { consultoriaAnswersToDisplayRows } from '@/lib/consultoria-form-display'
+import {
+  consultoriaAnswersToDisplayRows,
+  groupConsultoriaAnswerRowsBySection,
+  type ConsultoriaAnswerRow,
+} from '@/lib/consultoria-form-display'
 import {
   consultoriaKindLabel,
   defaultContentForKind,
@@ -65,6 +72,97 @@ function emptyMaterialRow(clientId: string, kind: ProLideresConsultoriaMaterialK
     is_published: false,
     created_by_user_id: null,
   }
+}
+
+type ConsultoriaAdminResponseCardProps = {
+  tone: 'rose' | 'gray' | 'sky'
+  submittedAt: string
+  respondentName?: string | null
+  respondentEmail?: string | null
+  rows: ConsultoriaAnswerRow[]
+  rawAnswers: unknown
+}
+
+function ConsultoriaAdminResponseCard({
+  tone,
+  submittedAt,
+  respondentName,
+  respondentEmail,
+  rows,
+  rawAnswers,
+}: ConsultoriaAdminResponseCardProps) {
+  const sections = useMemo(() => groupConsultoriaAnswerRowsBySection(rows), [rows])
+  const shell =
+    tone === 'rose'
+      ? 'border-rose-200/90 bg-white shadow-sm'
+      : tone === 'sky'
+        ? 'border-sky-200/90 bg-white shadow-sm'
+        : 'border-gray-200 bg-white shadow-sm'
+  const accentBar = tone === 'rose' ? 'bg-rose-600' : tone === 'sky' ? 'bg-sky-600' : 'bg-gray-700'
+  const blockTitle = tone === 'rose' ? 'text-rose-900/55' : tone === 'sky' ? 'text-sky-900/55' : 'text-gray-500'
+  const qTone = tone === 'rose' ? 'text-rose-950/90' : tone === 'sky' ? 'text-sky-950/90' : 'text-gray-800'
+  const aTone =
+    tone === 'rose'
+      ? 'border-rose-100/90 bg-rose-50/40 text-gray-900'
+      : tone === 'sky'
+        ? 'border-sky-100/90 bg-sky-50/40 text-gray-900'
+        : 'border-gray-200/90 bg-gray-50 text-gray-900'
+
+  return (
+    <article className={`overflow-hidden rounded-xl border ${shell}`}>
+      <div className={`h-1 w-full ${accentBar}`} aria-hidden />
+      <div className="p-4">
+        <header className="flex flex-wrap items-start justify-between gap-3 border-b border-black/[0.06] pb-3">
+          <div>
+            <p className="text-[11px] font-medium uppercase tracking-wide text-gray-500">Envio</p>
+            <p className="text-sm font-semibold text-gray-900">
+              {new Date(submittedAt).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })}
+            </p>
+          </div>
+          <div className="min-w-0 max-w-full text-right text-xs sm:max-w-[55%]">
+            {respondentName ? <p className="font-semibold text-gray-900">{respondentName}</p> : null}
+            {respondentEmail ? (
+              <p className="break-all text-gray-600" title={respondentEmail ?? undefined}>
+                {respondentEmail}
+              </p>
+            ) : null}
+          </div>
+        </header>
+
+        <div className="mt-4 space-y-6">
+          {sections.map((sec, idx) => (
+            <section key={`${sec.sectionKey}-${idx}`}>
+              <h5 className={`mb-2.5 text-[11px] font-bold uppercase tracking-wider ${blockTitle}`}>
+                {sec.sectionTitle}
+              </h5>
+              <dl className="space-y-3">
+                {sec.rows.map((row) => (
+                  <div
+                    key={row.fieldId}
+                    className="grid gap-1.5 sm:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)] sm:items-start sm:gap-x-4"
+                  >
+                    <dt className={`text-xs font-semibold leading-snug sm:pt-1.5 ${qTone}`}>{row.label}</dt>
+                    <dd
+                      className={`rounded-lg border px-3 py-2 text-sm leading-relaxed whitespace-pre-wrap ${aTone}`}
+                    >
+                      {row.value}
+                    </dd>
+                  </div>
+                ))}
+              </dl>
+            </section>
+          ))}
+        </div>
+
+        <details className="mt-4 border-t border-black/[0.06] pt-3">
+          <summary className="cursor-pointer text-xs text-gray-500 hover:text-gray-700">JSON bruto (avançado)</summary>
+          <pre className="mt-2 max-h-40 overflow-auto whitespace-pre-wrap break-words rounded-md bg-gray-900/[0.04] p-2.5 text-[11px] text-gray-600">
+            {JSON.stringify(rawAnswers, null, 2)}
+          </pre>
+        </details>
+      </div>
+    </article>
+  )
 }
 
 function clientFormDefaults(c: YladaEsteticaConsultClientRow) {
@@ -125,8 +223,11 @@ export default function EsteticaConsultoriaAdminClient() {
   const [savingNote, setSavingNote] = useState(false)
 
   const [diagnosticCorporal, setDiagnosticCorporal] = useState<DiagnosticCorporalBundle | null>(null)
-  const [diagnosticLoading, setDiagnosticLoading] = useState(false)
-  const [diagnosticLinkLoading, setDiagnosticLinkLoading] = useState(false)
+  const [diagnosticCapilar, setDiagnosticCapilar] = useState<DiagnosticCorporalBundle | null>(null)
+  const [diagnosticCorporalLoading, setDiagnosticCorporalLoading] = useState(false)
+  const [diagnosticCapilarLoading, setDiagnosticCapilarLoading] = useState(false)
+  const [diagnosticCorporalLinkLoading, setDiagnosticCorporalLinkLoading] = useState(false)
+  const [diagnosticCapilarLinkLoading, setDiagnosticCapilarLinkLoading] = useState(false)
 
   const loadClients = useCallback(async (search?: string) => {
     setClientsLoading(true)
@@ -229,7 +330,7 @@ export default function EsteticaConsultoriaAdminClient() {
       setDiagnosticCorporal(null)
       return
     }
-    setDiagnosticLoading(true)
+    setDiagnosticCorporalLoading(true)
     setError(null)
     try {
       const res = await fetch(
@@ -244,7 +345,32 @@ export default function EsteticaConsultoriaAdminClient() {
       }
       setDiagnosticCorporal(data as DiagnosticCorporalBundle)
     } finally {
-      setDiagnosticLoading(false)
+      setDiagnosticCorporalLoading(false)
+    }
+  }, [selectedClient])
+
+  const loadDiagnosticCapilar = useCallback(async () => {
+    if (!selectedClient?.id) return
+    if (selectedClient.segment !== 'capilar' && selectedClient.segment !== 'ambos') {
+      setDiagnosticCapilar(null)
+      return
+    }
+    setDiagnosticCapilarLoading(true)
+    setError(null)
+    try {
+      const res = await fetch(
+        `/api/admin/estetica-consultoria/clients/${encodeURIComponent(selectedClient.id)}/diagnostic-capilar`,
+        { credentials: 'include' }
+      )
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) {
+        setDiagnosticCapilar(null)
+        setError((data as { error?: string }).error || 'Erro ao carregar diagnóstico capilar.')
+        return
+      }
+      setDiagnosticCapilar(data as DiagnosticCorporalBundle)
+    } finally {
+      setDiagnosticCapilarLoading(false)
     }
   }, [selectedClient])
 
@@ -252,19 +378,31 @@ export default function EsteticaConsultoriaAdminClient() {
     void loadDiagnosticCorporal()
   }, [loadDiagnosticCorporal])
 
-  const itemsDisplayed = useMemo(() => {
-    if (!diagnosticCorporal?.material?.template_key || !selectedClient?.id) return items
-    return items.filter(
-      (m) =>
-        !(
-          m.title === TEMPLATE_DIAGNOSTICO_CORPORAL_TITLE &&
-          m.client_id === selectedClient.id &&
-          !m.template_key
-        )
-    )
-  }, [items, diagnosticCorporal?.material?.template_key, selectedClient?.id])
+  useEffect(() => {
+    void loadDiagnosticCapilar()
+  }, [loadDiagnosticCapilar])
 
-  const diagnosticFieldDefs = useMemo(() => {
+  const itemsDisplayed = useMemo(() => {
+    if (!selectedClient?.id) return items
+    const hasCorp = Boolean(diagnosticCorporal?.material?.template_key)
+    const hasCap = Boolean(diagnosticCapilar?.material?.template_key)
+    if (!hasCorp && !hasCap) return items
+    return items.filter((m) => {
+      const dupCorp =
+        hasCorp &&
+        m.title === TEMPLATE_DIAGNOSTICO_CORPORAL_TITLE &&
+        m.client_id === selectedClient.id &&
+        !m.template_key
+      const dupCap =
+        hasCap &&
+        m.title === TEMPLATE_DIAGNOSTICO_CAPILAR_TITLE &&
+        m.client_id === selectedClient.id &&
+        !m.template_key
+      return !(dupCorp || dupCap)
+    })
+  }, [items, diagnosticCorporal?.material?.template_key, diagnosticCapilar?.material?.template_key, selectedClient?.id])
+
+  const diagnosticCorporalFieldDefs = useMemo(() => {
     const c =
       diagnosticCorporal?.material?.content && typeof diagnosticCorporal.material.content === 'object'
         ? diagnosticCorporal.material.content
@@ -272,9 +410,17 @@ export default function EsteticaConsultoriaAdminClient() {
     return getConsultoriaFormFields(c as Record<string, unknown>)
   }, [diagnosticCorporal?.material?.content])
 
+  const diagnosticCapilarFieldDefs = useMemo(() => {
+    const c =
+      diagnosticCapilar?.material?.content && typeof diagnosticCapilar.material.content === 'object'
+        ? diagnosticCapilar.material.content
+        : {}
+    return getConsultoriaFormFields(c as Record<string, unknown>)
+  }, [diagnosticCapilar?.material?.content])
+
   const createDiagnosticCorporalLink = async () => {
     if (!selectedClient?.id) return
-    setDiagnosticLinkLoading(true)
+    setDiagnosticCorporalLinkLoading(true)
     setError(null)
     try {
       const res = await fetch(
@@ -293,7 +439,32 @@ export default function EsteticaConsultoriaAdminClient() {
       }
       await loadDiagnosticCorporal()
     } finally {
-      setDiagnosticLinkLoading(false)
+      setDiagnosticCorporalLinkLoading(false)
+    }
+  }
+
+  const createDiagnosticCapilarLink = async () => {
+    if (!selectedClient?.id) return
+    setDiagnosticCapilarLinkLoading(true)
+    setError(null)
+    try {
+      const res = await fetch(
+        `/api/admin/estetica-consultoria/clients/${encodeURIComponent(selectedClient.id)}/diagnostic-capilar`,
+        {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({}),
+        }
+      )
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) {
+        setError((data as { error?: string }).error || 'Erro ao gerar link.')
+        return
+      }
+      await loadDiagnosticCapilar()
+    } finally {
+      setDiagnosticCapilarLinkLoading(false)
     }
   }
 
@@ -528,7 +699,10 @@ export default function EsteticaConsultoriaAdminClient() {
       const item = (data as { item?: YladaEsteticaConsultancyMaterialRow }).item
       if (item) setSelected(item)
       await loadMaterials(selectedClient.id)
-      if (selected.template_key) void loadDiagnosticCorporal()
+      if (selected.template_key) {
+        void loadDiagnosticCorporal()
+        void loadDiagnosticCapilar()
+      }
     } finally {
       setSaving(false)
     }
@@ -610,12 +784,19 @@ export default function EsteticaConsultoriaAdminClient() {
     URL.revokeObjectURL(url)
   }, [])
 
-  const downloadDiagnosticResponsesCsv = useCallback(() => {
+  const downloadDiagnosticCorporalResponsesCsv = useCallback(() => {
     if (!selectedClient || !diagnosticCorporal?.responses.length) return
-    const csv = consultoriaFormResponsesToCsv(diagnosticFieldDefs, diagnosticCorporal.responses)
+    const csv = consultoriaFormResponsesToCsv(diagnosticCorporalFieldDefs, diagnosticCorporal.responses)
     const fn = consultoriaCsvFilenameBase(selectedClient.business_name, 'diagnostico-corporal-respostas')
     triggerCsvDownload(fn, csv)
-  }, [selectedClient, diagnosticCorporal?.responses, diagnosticFieldDefs, triggerCsvDownload])
+  }, [selectedClient, diagnosticCorporal?.responses, diagnosticCorporalFieldDefs, triggerCsvDownload])
+
+  const downloadDiagnosticCapilarResponsesCsv = useCallback(() => {
+    if (!selectedClient || !diagnosticCapilar?.responses.length) return
+    const csv = consultoriaFormResponsesToCsv(diagnosticCapilarFieldDefs, diagnosticCapilar.responses)
+    const fn = consultoriaCsvFilenameBase(selectedClient.business_name, 'diagnostico-capilar-respostas')
+    triggerCsvDownload(fn, csv)
+  }, [selectedClient, diagnosticCapilar?.responses, diagnosticCapilarFieldDefs, triggerCsvDownload])
 
   const downloadSelectedMaterialResponsesCsv = useCallback(() => {
     if (!selectedClient || !selected?.title || responses.length === 0) return
@@ -703,9 +884,10 @@ export default function EsteticaConsultoriaAdminClient() {
         <p className="text-sm font-medium text-pink-700">Estética · YLADA</p>
         <h1 className="text-2xl font-bold text-gray-900">Consultoria (capilar / corporal)</h1>
         <p className="text-gray-600 text-sm max-w-2xl">
-          Por estética: cadastro comercial (pagamento, plano anual, renovação), o <strong>formulário de diagnóstico corporal</strong>{' '}
-          (quando aplicável) e <strong>outros materiais</strong> com link (roteiros, checklists, formulários extra). Tudo
-          isso só aparece <strong>depois de escolher ou criar uma clínica</strong> na caixa «Estéticas acompanhadas».
+          Por estética: cadastro comercial (pagamento, plano anual, renovação), os <strong>diagnósticos fixos YLADA</strong>{' '}
+          (capilar e/ou corporal, conforme o segmento da clínica) e <strong>outros materiais</strong> com link (roteiros,
+          checklists, formulários extra). Tudo isso só aparece{' '}
+          <strong>depois de escolher ou criar uma clínica</strong> na caixa «Estéticas acompanhadas».
         </p>
         <div className="flex flex-wrap items-center gap-2 text-sm">
           {segmentoFiltro ? (
@@ -818,27 +1000,38 @@ export default function EsteticaConsultoriaAdminClient() {
           </p>
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="rounded-xl border-2 border-rose-200 bg-rose-50/60 p-4">
-              <p className="text-xs font-semibold uppercase tracking-wide text-rose-900">Formulário fixo (YLADA)</p>
+              <p className="text-xs font-semibold uppercase tracking-wide text-rose-900">Diagnóstico corporal (YLADA)</p>
               <p className="mt-2 text-sm text-gray-900 leading-relaxed">
-                <strong>Diagnóstico corporal</strong> — mesmo questionário para todas as clínicas; você gera{' '}
-                <strong>um link por clínica</strong>. Aparece como bloco <span className="text-rose-800">rosa</span>{' '}
-                só para estéticas <em>Corporal</em> ou <em>Ambos</em>.
+                Mesmo questionário para todas as clínicas; você gera <strong>um link por clínica</strong>. Bloco{' '}
+                <span className="text-rose-800 font-medium">rosa</span> — segmentos <em>Corporal</em> ou <em>Ambos</em>.
               </p>
             </div>
-            <div className="rounded-xl border border-gray-200 bg-white p-4">
+            <div className="rounded-xl border-2 border-sky-200 bg-sky-50/60 p-4">
+              <p className="text-xs font-semibold uppercase tracking-wide text-sky-900">Diagnóstico capilar (YLADA)</p>
+              <p className="mt-2 text-sm text-gray-900 leading-relaxed">
+                Questionário focado em recorrência e posicionamento; <strong>um link por clínica</strong>. Bloco{' '}
+                <span className="text-sky-800 font-medium">azul</span> — segmentos <em>Capilar</em> ou <em>Ambos</em>.
+              </p>
+            </div>
+            <div className="rounded-xl border border-gray-200 bg-white p-4 sm:col-span-2">
               <p className="text-xs font-semibold uppercase tracking-wide text-gray-600">Materiais para enviar</p>
               <p className="mt-2 text-sm text-gray-900 leading-relaxed">
                 Lista <strong>«Materiais desta estética»</strong>: passo a passo, checklists, documentos e{' '}
-                <strong>outros formulários</strong> (cada um com separadores <em>Links</em> e <em>Respostas</em>). Isto é
-                independente do diagnóstico fixo.
+                <strong>outros formulários</strong> (abas <em>Links</em> e <em>Respostas</em>). Independente dos
+                diagnósticos fixos.
               </p>
             </div>
           </div>
           {segmentoFiltro === 'capilar' ? (
             <p className="text-xs text-amber-950 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
-              Vista <strong>só capilar</strong>: o diagnóstico corporal (rosa) não é mostrado para clínica só capilar.
-              Para esse formulário, escolhe uma estética <em>Corporal</em> ou <em>Ambos</em> ou muda a vista para
-              corporal.
+              Vista <strong>só capilar</strong>: o diagnóstico corporal (rosa) só aparece para clínicas{' '}
+              <em>Corporal</em> ou <em>Ambos</em>. Troque a vista ou o segmento da clínica se precisar do rosa.
+            </p>
+          ) : null}
+          {segmentoFiltro === 'corporal' ? (
+            <p className="text-xs text-amber-950 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
+              Vista <strong>só corporal</strong>: o diagnóstico capilar (azul) só aparece para clínicas <em>Capilar</em>{' '}
+              ou <em>Ambos</em>.
             </p>
           ) : null}
         </section>
@@ -1084,7 +1277,7 @@ export default function EsteticaConsultoriaAdminClient() {
                   que vai o convite de confirmação.
                 </p>
               </div>
-              {diagnosticLoading ? (
+              {diagnosticCorporalLoading ? (
                 <p className="text-sm text-rose-900/80">Preparando o formulário global…</p>
               ) : diagnosticCorporal?.material ? (
                 <>
@@ -1098,11 +1291,11 @@ export default function EsteticaConsultoriaAdminClient() {
                   </p>
                   <button
                     type="button"
-                    disabled={diagnosticLinkLoading || !diagnosticCorporal.material.is_published}
+                    disabled={diagnosticCorporalLinkLoading || !diagnosticCorporal.material.is_published}
                     onClick={() => void createDiagnosticCorporalLink()}
                     className="rounded-lg bg-rose-600 px-4 py-2 text-sm font-semibold text-white hover:bg-rose-700 disabled:opacity-50"
                   >
-                    {diagnosticLinkLoading ? 'Gerando…' : 'Gerar novo link para esta clínica'}
+                    {diagnosticCorporalLinkLoading ? 'Gerando…' : 'Gerar novo link para esta clínica'}
                   </button>
                   <div>
                     <h4 className="text-xs font-semibold uppercase tracking-wide text-rose-950/90">
@@ -1149,7 +1342,7 @@ export default function EsteticaConsultoriaAdminClient() {
                       {diagnosticCorporal.responses.length > 0 ? (
                         <button
                           type="button"
-                          onClick={() => downloadDiagnosticResponsesCsv()}
+                          onClick={() => downloadDiagnosticCorporalResponsesCsv()}
                           className="shrink-0 rounded-lg border border-rose-300 bg-white px-2.5 py-1 text-xs font-medium text-rose-900 hover:bg-rose-100"
                         >
                           Baixar CSV
@@ -1158,41 +1351,27 @@ export default function EsteticaConsultoriaAdminClient() {
                     </div>
                     <p className="mt-1 text-[11px] text-rose-900/75">
                       Cada envio mostra <strong>todas</strong> as perguntas e respostas desta clínica (acompanhamento no
-                      painel).
+                      painel). CSV em UTF-8 com separador vírgula (BOM para Excel).
                     </p>
                     {diagnosticCorporal.responses.length === 0 ? (
                       <p className="mt-1 text-xs text-rose-900/70">Ainda sem envios por este link.</p>
                     ) : (
-                      <div className="mt-2 max-h-[min(70vh,560px)] space-y-3 overflow-auto pr-1">
+                      <div className="mt-2 max-h-[min(70vh,560px)] space-y-4 overflow-auto pr-1">
                         {diagnosticCorporal.responses.map((r) => {
                           const ans = (r.answers && typeof r.answers === 'object' && !Array.isArray(r.answers)
                             ? r.answers
                             : {}) as Record<string, unknown>
-                          const rows = consultoriaAnswersToDisplayRows(diagnosticFieldDefs, ans)
+                          const rows = consultoriaAnswersToDisplayRows(diagnosticCorporalFieldDefs, ans)
                           return (
-                            <div key={r.id} className="rounded-lg border border-rose-100 bg-white p-3 text-sm">
-                              <p className="text-xs text-gray-500">
-                                {new Date(r.submitted_at).toLocaleString('pt-BR')}
-                                {r.respondent_name ? ` · ${r.respondent_name}` : ''}
-                                {r.respondent_email ? ` · ${r.respondent_email}` : ''}
-                              </p>
-                              <dl className="mt-3 space-y-3">
-                                {rows.map((row) => (
-                                  <div key={row.fieldId}>
-                                    <dt className="text-xs font-semibold uppercase tracking-wide text-gray-600">
-                                      {row.label}
-                                    </dt>
-                                    <dd className="mt-1 whitespace-pre-wrap text-base text-gray-900">{row.value}</dd>
-                                  </div>
-                                ))}
-                              </dl>
-                              <details className="mt-3 border-t border-rose-100/80 pt-2">
-                                <summary className="cursor-pointer text-xs text-gray-500">JSON bruto</summary>
-                                <pre className="mt-2 max-h-40 overflow-auto whitespace-pre-wrap break-words text-xs text-gray-600">
-                                  {JSON.stringify(r.answers, null, 2)}
-                                </pre>
-                              </details>
-                            </div>
+                            <ConsultoriaAdminResponseCard
+                              key={r.id}
+                              tone="rose"
+                              submittedAt={r.submitted_at}
+                              respondentName={r.respondent_name}
+                              respondentEmail={r.respondent_email}
+                              rows={rows}
+                              rawAnswers={r.answers}
+                            />
                           )
                         })}
                       </div>
@@ -1202,6 +1381,133 @@ export default function EsteticaConsultoriaAdminClient() {
               ) : (
                 <p className="text-sm text-rose-900/80">
                   Não foi possível carregar o diagnóstico. Confirme se a migração 331 está aplicada no Supabase e recarregue a página.
+                </p>
+              )}
+            </section>
+          ) : null}
+
+          {(selectedClient.segment === 'capilar' || selectedClient.segment === 'ambos') ? (
+            <section className="rounded-2xl border border-sky-200 bg-sky-50/50 p-4 shadow-sm space-y-4">
+              <div>
+                <h3 className="text-sm font-semibold text-sky-950">
+                  Formulário para enviar — diagnóstico capilar (YLADA fixo)
+                </h3>
+                <p className="mt-1 text-xs text-sky-900/90 max-w-2xl">
+                  Questionário <strong>fixo YLADA</strong> (igual para todas as clínicas capilar) — não se edita no
+                  painel. Cada <strong>link</strong> é só para <strong>{selectedClient.business_name}</strong>: primeiro
+                  enviamos confirmação para o <strong>e-mail dos dados administrativos</strong>; depois ela preenche o
+                  questionário completo aqui.
+                </p>
+                <p className="text-xs text-amber-900 bg-amber-50 border border-amber-100 rounded-lg px-2 py-1.5 max-w-2xl">
+                  Garanta um <strong>e-mail válido</strong> em «Dados administrativos» antes de gerar o link — é para lá
+                  que vai o convite de confirmação.
+                </p>
+              </div>
+              {diagnosticCapilarLoading ? (
+                <p className="text-sm text-sky-900/80">Preparando o formulário global…</p>
+              ) : diagnosticCapilar?.material ? (
+                <>
+                  <p className="text-xs text-sky-900/80">
+                    Estado:{' '}
+                    {diagnosticCapilar.material.is_published ? (
+                      <span className="font-semibold text-emerald-800">Ativo — você pode gerar links</span>
+                    ) : (
+                      <span className="font-semibold text-amber-800">Rascunho — fale com o suporte se o global não estiver publicado</span>
+                    )}
+                  </p>
+                  <button
+                    type="button"
+                    disabled={diagnosticCapilarLinkLoading || !diagnosticCapilar.material.is_published}
+                    onClick={() => void createDiagnosticCapilarLink()}
+                    className="rounded-lg bg-sky-600 px-4 py-2 text-sm font-semibold text-white hover:bg-sky-700 disabled:opacity-50"
+                  >
+                    {diagnosticCapilarLinkLoading ? 'Gerando…' : 'Gerar novo link (capilar) para esta clínica'}
+                  </button>
+                  <div>
+                    <h4 className="text-xs font-semibold uppercase tracking-wide text-sky-950/90">
+                      Links capilar desta clínica
+                    </h4>
+                    {diagnosticCapilar.links.length === 0 ? (
+                      <p className="mt-1 text-xs text-sky-900/70">Ainda não há links. Use o botão acima para gerar um.</p>
+                    ) : (
+                      <ul className="mt-2 space-y-2">
+                        {diagnosticCapilar.links.map((lk) => (
+                          <li key={lk.id} className="rounded-lg border border-sky-100 bg-white p-2 text-xs">
+                            <code className="break-all text-gray-800">
+                              {lk.responder_url ??
+                                buildEsteticaConsultoriaResponderUrl(
+                                  typeof window !== 'undefined' ? window.location.origin : '',
+                                  lk.token
+                                )}
+                            </code>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const url =
+                                  lk.responder_url ??
+                                  buildEsteticaConsultoriaResponderUrl(
+                                    typeof window !== 'undefined' ? window.location.origin : '',
+                                    lk.token
+                                  )
+                                void navigator.clipboard.writeText(url)
+                              }}
+                              className="mt-1 block text-xs font-medium text-blue-700 hover:underline"
+                            >
+                              Copiar URL
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                  <div>
+                    <div className="mt-1 flex flex-wrap items-start justify-between gap-2">
+                      <h4 className="text-xs font-semibold uppercase tracking-wide text-sky-950/90">
+                        Respostas do diagnóstico capilar — {selectedClient.business_name}
+                      </h4>
+                      {diagnosticCapilar.responses.length > 0 ? (
+                        <button
+                          type="button"
+                          onClick={() => downloadDiagnosticCapilarResponsesCsv()}
+                          className="shrink-0 rounded-lg border border-sky-300 bg-white px-2.5 py-1 text-xs font-medium text-sky-900 hover:bg-sky-100"
+                        >
+                          Baixar CSV
+                        </button>
+                      ) : null}
+                    </div>
+                    <p className="mt-1 text-[11px] text-sky-900/75">
+                      Cada envio mostra <strong>todas</strong> as perguntas e respostas desta clínica. CSV em UTF-8 com
+                      separador vírgula (BOM para Excel).
+                    </p>
+                    {diagnosticCapilar.responses.length === 0 ? (
+                      <p className="mt-1 text-xs text-sky-900/70">Ainda sem envios por este link.</p>
+                    ) : (
+                      <div className="mt-2 max-h-[min(70vh,560px)] space-y-4 overflow-auto pr-1">
+                        {diagnosticCapilar.responses.map((r) => {
+                          const ans = (r.answers && typeof r.answers === 'object' && !Array.isArray(r.answers)
+                            ? r.answers
+                            : {}) as Record<string, unknown>
+                          const rows = consultoriaAnswersToDisplayRows(diagnosticCapilarFieldDefs, ans)
+                          return (
+                            <ConsultoriaAdminResponseCard
+                              key={r.id}
+                              tone="sky"
+                              submittedAt={r.submitted_at}
+                              respondentName={r.respondent_name}
+                              respondentEmail={r.respondent_email}
+                              rows={rows}
+                              rawAnswers={r.answers}
+                            />
+                          )
+                        })}
+                      </div>
+                    )}
+                  </div>
+                </>
+              ) : (
+                <p className="text-sm text-sky-900/80">
+                  Não foi possível carregar o diagnóstico capilar. Confirme se a migração 331 está aplicada no Supabase e
+                  recarregue a página.
                 </p>
               )}
             </section>
@@ -1240,8 +1546,10 @@ export default function EsteticaConsultoriaAdminClient() {
           <div className="rounded-xl border border-gray-200 bg-gray-50/80 px-3 py-2 mb-2">
             <p className="text-xs text-gray-700">
               <span className="font-semibold text-gray-900">Outros envios</span> — abaixo estão roteiros, checklists e
-              formulários <em>criados por você</em> para esta clínica. O diagnóstico corporal fixo fica no{' '}
-              <span className="text-rose-800 font-medium">bloco rosa</span> acima (não entra nesta lista).
+              formulários <em>criados por você</em> para esta clínica. Os diagnósticos fixos ficam nos blocos{' '}
+              <span className="text-rose-800 font-medium">rosa</span> (corporal) e/ou{' '}
+              <span className="text-sky-800 font-medium">azul</span> (capilar), conforme o segmento — não entram nesta
+              lista.
             </p>
           </div>
 
@@ -1399,42 +1707,28 @@ export default function EsteticaConsultoriaAdminClient() {
                       </div>
                       <p className="text-xs text-gray-500">
                         Cada envio fica ligado a esta estética; o material é «{selected.title}». Todas as perguntas
-                        aparecem abaixo.
+                        aparecem abaixo. CSV com separador <strong>ponto e vírgula</strong> (Excel PT-BR).
                       </p>
                       {auxLoading ? <p className="text-xs text-gray-500">Carregando…</p> : null}
                       {responses.length === 0 ? (
                         <p className="text-sm text-gray-500">Ainda não há respostas.</p>
                       ) : (
-                        <div className="max-h-[420px] overflow-auto space-y-3">
+                        <div className="max-h-[420px] space-y-4 overflow-auto">
                           {responses.map((r) => {
                             const ans = (r.answers && typeof r.answers === 'object' && !Array.isArray(r.answers)
                               ? r.answers
                               : {}) as Record<string, unknown>
                             const rows = consultoriaAnswersToDisplayRows(formFieldsForResponses, ans)
                             return (
-                              <div key={r.id} className="rounded-lg border border-gray-100 p-3 text-sm">
-                                <p className="text-xs text-gray-500">
-                                  {new Date(r.submitted_at).toLocaleString('pt-BR')}
-                                  {r.respondent_name ? ` · ${r.respondent_name}` : ''}
-                                  {r.respondent_email ? ` · ${r.respondent_email}` : ''}
-                                </p>
-                                <dl className="mt-3 space-y-3">
-                                  {rows.map((row) => (
-                                    <div key={row.fieldId}>
-                                      <dt className="text-xs font-semibold uppercase tracking-wide text-gray-600">
-                                        {row.label}
-                                      </dt>
-                                      <dd className="mt-1 whitespace-pre-wrap text-base text-gray-900">{row.value}</dd>
-                                    </div>
-                                  ))}
-                                </dl>
-                                <details className="mt-3 border-t border-gray-100 pt-2">
-                                  <summary className="cursor-pointer text-xs text-gray-500">JSON bruto</summary>
-                                  <pre className="mt-2 max-h-40 overflow-auto whitespace-pre-wrap break-words text-xs text-gray-600">
-                                    {JSON.stringify(r.answers, null, 2)}
-                                  </pre>
-                                </details>
-                              </div>
+                              <ConsultoriaAdminResponseCard
+                                key={r.id}
+                                tone="gray"
+                                submittedAt={r.submitted_at}
+                                respondentName={r.respondent_name}
+                                respondentEmail={r.respondent_email}
+                                rows={rows}
+                                rawAnswers={r.answers}
+                              />
                             )
                           })}
                         </div>

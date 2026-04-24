@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { randomBytes } from 'crypto'
 import { supabaseAdmin } from '@/lib/supabase'
-import { TEMPLATE_DIAGNOSTICO_CORPORAL_ID } from '@/lib/estetica-consultoria-form-templates'
+import {
+  TEMPLATE_DIAGNOSTICO_CAPILAR_ID,
+  TEMPLATE_DIAGNOSTICO_CORPORAL_ID,
+} from '@/lib/estetica-consultoria-form-templates'
 import { sendEsteticaDiagnosticoConfirmEmail } from '@/lib/estetica-consultoria-confirmation-email'
 
 type Ctx = { params: Promise<{ token: string }> }
@@ -39,7 +42,7 @@ export async function POST(request: NextRequest, context: Ctx) {
     .maybeSingle()
 
   const templateKey = (mat as { template_key?: string | null } | null)?.template_key
-  if (templateKey !== TEMPLATE_DIAGNOSTICO_CORPORAL_ID) {
+  if (templateKey !== TEMPLATE_DIAGNOSTICO_CORPORAL_ID && templateKey !== TEMPLATE_DIAGNOSTICO_CAPILAR_ID) {
     return NextResponse.json({ error: 'Este link não usa confirmação por e-mail.' }, { status: 400 })
   }
 
@@ -99,6 +102,7 @@ export async function POST(request: NextRequest, context: Ctx) {
     confirmToken,
     toEmail,
     clinicName,
+    formArea: templateKey === TEMPLATE_DIAGNOSTICO_CAPILAR_ID ? 'capilar' : 'corporal',
   })
 
   if (!sent.ok) {

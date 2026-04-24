@@ -16,7 +16,7 @@ function normalizeAnswers(raw: unknown): Record<string, unknown> {
 
 function csvEscape(cell: string): string {
   const s = cell ?? ''
-  if (/[",\n\r]/.test(s)) {
+  if (/[";\n\r]/.test(s)) {
     return `"${s.replace(/"/g, '""')}"`
   }
   return s
@@ -33,7 +33,7 @@ function columnHeadersForFields(fields: ConsultoriaFormField[]): { id: string; h
   })
 }
 
-/** CSV (UTF-8, separador vírgula) com metadados por envio e colunas por campo do formulário. */
+/** CSV UTF-8 com separador ponto e vírgula (lista do Excel em português) e colunas por campo. */
 export function consultoriaFormResponsesToCsv(
   fields: ConsultoriaFormField[],
   responses: ConsultoriaCsvResponseRow[]
@@ -51,7 +51,8 @@ export function consultoriaFormResponsesToCsv(
   }
   const extraKeys = [...extraKeySet].sort()
 
-  const headerLine = [...colMeta, ...fieldCols.map((c) => c.header), ...extraKeys].map(csvEscape).join(',')
+  const sep = ';'
+  const headerLine = [...colMeta, ...fieldCols.map((c) => c.header), ...extraKeys].map(csvEscape).join(sep)
 
   const lines: string[] = [headerLine]
 
@@ -76,7 +77,7 @@ export function consultoriaFormResponsesToCsv(
       return csvEscape(s)
     })
 
-    lines.push([...core, ...fieldVals, ...extraVals].join(','))
+    lines.push([...core, ...fieldVals, ...extraVals].join(sep))
   }
 
   return lines.join('\r\n')

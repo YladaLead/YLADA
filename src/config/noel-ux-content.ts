@@ -55,6 +55,11 @@ const ESTETICA_SUGGESTIONS = [
   { label: 'Criar meu primeiro link', prompt: 'Quero criar um link para atrair clientes na estética' },
   { label: 'Atrair mais clientes', prompt: 'Como atrair mais clientes para meus serviços de estética?' },
   { label: 'Melhorar minhas conversas', prompt: 'Como melhorar minhas conversas depois que a cliente responde?' },
+  {
+    label: 'Terapia capilar e estética corporal',
+    prompt:
+      'Sou da estética e atendo terapia capilar e estética corporal: como o Noel sugere eu separar o discurso (stories, bio e WhatsApp) sem misturar os dois nichos na mesma mensagem?',
+  },
 ]
 
 const ODONTO_SUGGESTIONS = [
@@ -166,6 +171,11 @@ const PRO_ESTETICA_CORPORAL_SUGGESTIONS = [
     label: 'Link de diagnóstico',
     prompt:
       'Quero criar ou ajustar um link YLADA focado em diagnóstico / avaliação inicial (qualificar interesse antes do WhatsApp). Não quero soar como “formulário de contato”. Me guia no que a cliente vê, no que pergunto no fluxo e num texto curto para eu compartilhar o link.',
+  },
+  {
+    label: 'Mensagem + biblioteca',
+    prompt:
+      'Quero uma mensagem curta (WhatsApp ou Instagram) convidando a responder um quiz da biblioteca YLADA de estética corporal, em tom consultivo, sem promessa de resultado e com convite à avaliação presencial.',
   },
 ]
 

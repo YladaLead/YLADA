@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireApiAuth } from '@/lib/api-auth'
 import { supabaseAdmin } from '@/lib/supabase'
-import { TEMPLATE_DIAGNOSTICO_CORPORAL_ID } from '@/lib/estetica-consultoria-form-templates'
+import {
+  TEMPLATE_DIAGNOSTICO_CAPILAR_ID,
+  TEMPLATE_DIAGNOSTICO_CORPORAL_ID,
+} from '@/lib/estetica-consultoria-form-templates'
 import {
   getConsultoriaFormFields,
   isConsultoriaMaterialKind,
@@ -54,12 +57,13 @@ export async function PATCH(request: NextRequest, context: Ctx) {
       )
     }
   }
-  if (templateKey === TEMPLATE_DIAGNOSTICO_CORPORAL_ID) {
+  if (templateKey === TEMPLATE_DIAGNOSTICO_CORPORAL_ID || templateKey === TEMPLATE_DIAGNOSTICO_CAPILAR_ID) {
     if (body.content !== undefined || body.description !== undefined) {
+      const label =
+        templateKey === TEMPLATE_DIAGNOSTICO_CAPILAR_ID ? 'capilar' : 'corporal'
       return NextResponse.json(
         {
-          error:
-            'O diagnóstico corporal YLADA é fixo no sistema (sempre o mesmo). Não é editável pelo painel — só por código.',
+          error: `O diagnóstico ${label} YLADA é fixo no sistema (sempre o mesmo). Não é editável pelo painel — só por código.`,
         },
         { status: 400 }
       )

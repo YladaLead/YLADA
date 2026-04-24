@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
 import {
   buildEsteticaDiagnosticoPublicPrefill,
-  getDiagnosticoCorporalV1Description,
-  TEMPLATE_DIAGNOSTICO_CORPORAL_ID,
+  getDiagnosticoTemplateDescription,
+  isDiagnosticoEmailConfirmationTemplate,
 } from '@/lib/estetica-consultoria-form-templates'
 import { maskRecipientEmail } from '@/lib/estetica-consultoria-confirmation-email'
 import { getConsultoriaFormFields } from '@/lib/pro-lideres-consultoria'
@@ -70,10 +70,10 @@ export async function GET(request: NextRequest, context: Ctx) {
   }
 
   const templateKey = (mat as { template_key?: string | null }).template_key
-  const isDiagnosticoCorporal = templateKey === TEMPLATE_DIAGNOSTICO_CORPORAL_ID
+  const isDiagnosticoFixoEmail = isDiagnosticoEmailConfirmationTemplate(templateKey)
   const recipientEmail = (link.recipient_email ?? '').trim()
 
-  if (confirmParam && isDiagnosticoCorporal && recipientEmail) {
+  if (confirmParam && isDiagnosticoFixoEmail && recipientEmail) {
     if (!link.recipient_confirmed_at) {
       const expMs = link.email_confirm_expires_at ? new Date(link.email_confirm_expires_at).getTime() : 0
       const tokenOk =
@@ -117,11 +117,10 @@ export async function GET(request: NextRequest, context: Ctx) {
   >
   const fields = getConsultoriaFormFields(content)
 
-  const description =
-    isDiagnosticoCorporal ? getDiagnosticoCorporalV1Description() : mat.description
+  const descOverride = getDiagnosticoTemplateDescription(templateKey)
+  const description = descOverride ?? mat.description
 
-  const emailGate =
-    isDiagnosticoCorporal && recipientEmail.length > 0 && !link.recipient_confirmed_at
+  const emailGate = isDiagnosticoFixoEmail && recipientEmail.length > 0 && !link.recipient_confirmed_at
 
   if (emailGate) {
     return NextResponse.json({
@@ -136,7 +135,7 @@ export async function GET(request: NextRequest, context: Ctx) {
 
   let prefill: ReturnType<typeof buildEsteticaDiagnosticoPublicPrefill> | null = null
   const clientId = link.estetica_consult_client_id
-  if (isDiagnosticoCorporal && clientId) {
+  if (isDiagnosticoFixoEmail && clientId) {
     const { data: cli } = await supabaseAdmin
       .from('ylada_estetica_consult_clients')
       .select('business_name, contact_name, phone, contact_email')

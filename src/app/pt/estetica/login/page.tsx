@@ -1,10 +1,5 @@
-import LoginForm from '@/components/auth/LoginForm'
+import EsteticaLoginClient from './EsteticaLoginClient'
 
 export default function EsteticaLoginPage() {
-  return (
-    <LoginForm
-      perfil="estetica"
-      redirectPath="/pt/estetica/links"
-    />
-  )
+  return <EsteticaLoginClient />
 }

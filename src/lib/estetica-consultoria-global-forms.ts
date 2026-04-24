@@ -1,7 +1,11 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import {
+  buildDiagnosticoCapilarV1Fields,
   buildDiagnosticoCorporalV1Fields,
+  getDiagnosticoCapilarV1Description,
   getDiagnosticoCorporalV1Description,
+  TEMPLATE_DIAGNOSTICO_CAPILAR_ID,
+  TEMPLATE_DIAGNOSTICO_CAPILAR_TITLE,
   TEMPLATE_DIAGNOSTICO_CORPORAL_ID,
   TEMPLATE_DIAGNOSTICO_CORPORAL_TITLE,
 } from '@/lib/estetica-consultoria-form-templates'
@@ -84,6 +88,85 @@ export async function ensureDiagnosticoCorporalGlobalMaterialId(sb: SupabaseClie
 
   if (insErr || !created?.id) {
     throw new Error(insErr?.message ?? 'Falha ao criar formulário global')
+  }
+
+  return created.id as string
+}
+
+/** Garante material global publicado para o diagnóstico capilar (fixo YLADA). */
+export async function ensureDiagnosticoCapilarGlobalMaterialId(sb: SupabaseClient): Promise<string> {
+  const { data: existing, error: selErr } = await sb
+    .from('ylada_estetica_consultancy_materials')
+    .select('id')
+    .eq('template_key', TEMPLATE_DIAGNOSTICO_CAPILAR_ID)
+    .maybeSingle()
+
+  if (selErr) {
+    throw new Error(selErr.message)
+  }
+  if (existing?.id) {
+    const { data: matRow, error: matErr } = await sb
+      .from('ylada_estetica_consultancy_materials')
+      .select('content')
+      .eq('id', existing.id as string)
+      .maybeSingle()
+    if (matErr) {
+      throw new Error(matErr.message)
+    }
+    const contentObj = (matRow?.content && typeof matRow.content === 'object' ? matRow.content : {}) as Record<
+      string,
+      unknown
+    >
+    const currentIds = getConsultoriaFormFields(contentObj)
+      .map((f) => f.id)
+      .join('\0')
+    const targetIds = buildDiagnosticoCapilarV1Fields()
+      .map((f) => f.id)
+      .join('\0')
+    if (currentIds !== targetIds) {
+      const rawContent = { fields: buildDiagnosticoCapilarV1Fields() }
+      const content = normalizeConsultoriaContent('formulario', rawContent)
+      const { error: upErr } = await sb
+        .from('ylada_estetica_consultancy_materials')
+        .update({
+          title: TEMPLATE_DIAGNOSTICO_CAPILAR_TITLE,
+          description: getDiagnosticoCapilarV1Description(),
+          content,
+          material_kind: 'formulario',
+        })
+        .eq('id', existing.id as string)
+        .eq('template_key', TEMPLATE_DIAGNOSTICO_CAPILAR_ID)
+      if (upErr) {
+        throw new Error(upErr.message)
+      }
+    }
+    return existing.id as string
+  }
+
+  const rawContent = { fields: buildDiagnosticoCapilarV1Fields() }
+  const content = normalizeConsultoriaContent('formulario', rawContent)
+  if (getConsultoriaFormFields(content).length === 0) {
+    throw new Error('Modelo capilar sem campos')
+  }
+
+  const { data: created, error: insErr } = await sb
+    .from('ylada_estetica_consultancy_materials')
+    .insert({
+      client_id: null,
+      template_key: TEMPLATE_DIAGNOSTICO_CAPILAR_ID,
+      title: TEMPLATE_DIAGNOSTICO_CAPILAR_TITLE,
+      material_kind: 'formulario',
+      description: getDiagnosticoCapilarV1Description(),
+      content,
+      sort_order: 0,
+      is_published: true,
+      created_by_user_id: null,
+    })
+    .select('id')
+    .single()
+
+  if (insErr || !created?.id) {
+    throw new Error(insErr?.message ?? 'Falha ao criar formulário global capilar')
   }
 
   return created.id as string

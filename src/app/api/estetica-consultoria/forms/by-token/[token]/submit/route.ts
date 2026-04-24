@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
-import { TEMPLATE_DIAGNOSTICO_CORPORAL_ID } from '@/lib/estetica-consultoria-form-templates'
+import { isDiagnosticoEmailConfirmationTemplate } from '@/lib/estetica-consultoria-form-templates'
 import { getConsultoriaFormFields, validateConsultoriaFormAnswers } from '@/lib/pro-lideres-consultoria'
 
 type Ctx = { params: Promise<{ token: string }> }
@@ -82,7 +82,7 @@ export async function POST(request: NextRequest, context: Ctx) {
   const tpl = (mat as { template_key?: string | null }).template_key
   const rec = String((link as { recipient_email?: string | null }).recipient_email ?? '').trim()
   const confirmed = Boolean((link as { recipient_confirmed_at?: string | null }).recipient_confirmed_at)
-  if (tpl === TEMPLATE_DIAGNOSTICO_CORPORAL_ID && rec.length > 0 && !confirmed) {
+  if (isDiagnosticoEmailConfirmationTemplate(tpl) && rec.length > 0 && !confirmed) {
     return NextResponse.json(
       { error: 'Confirme o e-mail (link no inbox) antes de enviar o diagnóstico.' },
       { status: 403 }

@@ -1,11 +1,11 @@
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, Suspense } from 'react'
 import Link from 'next/link'
+import { useSearchParams, useRouter, usePathname } from 'next/navigation'
 import YladaAreaShell from './YladaAreaShell'
 import { getYladaAreaPathPrefix } from '@/config/ylada-areas'
 import {
-  BIBLIOTECA_TIPOS,
   BIBLIOTECA_SEGMENTOS,
   BIBLIOTECA_SITUACOES,
   BIBLIOTECA_SITUACOES_OPTIONS,
@@ -23,7 +23,6 @@ import {
   getIdeiaRapidaDoDia,
   itemCaiNaSituacao,
   TEMAS_MAIS_USADOS,
-  type BibliotecaTipo,
   type BibliotecaSegmentCode,
   type SituacaoBiblioteca,
 } from '@/config/ylada-biblioteca'
@@ -36,6 +35,18 @@ import {
   getIdeiaRapidaDoDiaEsteticaCorporal,
   ordenarItemsEsteticaCorporal,
 } from '@/config/pro-estetica-corporal-biblioteca'
+import {
+  dedupeEsteticaBibliotecaPorTitulo,
+  ESTETICA_BIBLIOTECA_LINHA_QUERY_KEY,
+  ESTETICA_BIBLIOTECA_LINHA_QUERY_KEY_LEGACY,
+  esteticaLinhaToQueryValue,
+  filterBibliotecaItemsByEsteticaTerapiaLinha,
+  itemMatchesTerapiaCapilar,
+  itemMatchesTerapiaCorporal,
+  parseEsteticaTerapiaLinhaParam,
+  rawEsteticaBibliotecaLinhaFromSearchParams,
+  type EsteticaTerapiaLinha,
+} from '@/config/estetica-terapia-biblioteca'
 
 function getSimulateCookie(): string | null {
   if (typeof document === 'undefined') return null
@@ -63,6 +74,14 @@ interface BibliotecaItemRow {
     uso_principal?: 'marketing' | 'crm' | 'ambos'
   }) | null
   sort_order: number
+}
+
+function labelTipoBibliotecaItem(tipo: string): string {
+  const t = (tipo || '').toLowerCase()
+  if (t === 'calculadora') return 'Calculadora'
+  if (t === 'quiz') return 'Quiz'
+  if (t === 'link') return 'Link pronto'
+  return tipo || 'Modelo'
 }
 
 function getCardMeta(item: BibliotecaItemRow): { tempo: string; perguntas: string } {
@@ -174,7 +193,12 @@ function BibliotecaCard({
               <span aria-hidden>{badge.icon}</span> {badge.label}
             </p>
           )}
-          <h3 className={`font-semibold text-gray-900 ${compacto ? 'text-sm leading-snug' : ''}`}>{tituloExibido}</h3>
+          <div className="flex flex-wrap items-center gap-2">
+            <h3 className={`font-semibold text-gray-900 ${compacto ? 'text-sm leading-snug' : ''}`}>{tituloExibido}</h3>
+            <span className="shrink-0 rounded-md bg-gray-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-gray-600">
+              {labelTipoBibliotecaItem(item.tipo)}
+            </span>
+          </div>
           {item.description && (
             <p className={`mt-1 text-gray-500 ${compacto ? 'text-xs line-clamp-1' : 'text-sm line-clamp-1'}`}>{item.description}</p>
           )}
@@ -255,7 +279,7 @@ interface BibliotecaPageContentProps {
   esteticaCorporalScope?: boolean
 }
 
-export default function BibliotecaPageContent({
+function BibliotecaPageContentInner({
   areaCodigo,
   areaLabel,
   embedded = false,
@@ -264,7 +288,6 @@ export default function BibliotecaPageContent({
   const prefix = getYladaAreaPathPrefix(areaCodigo)
   const linksPath = `${prefix}/links`
 
-  const [tipoAtivo, setTipoAtivo] = useState<BibliotecaTipo>('quiz')
   const [segmentoFiltro, setSegmentoFiltro] = useState<BibliotecaSegmentCode | ''>('')
   const [temaFiltro, setTemaFiltro] = useState<string>('')
   /** Painel corporal: filtro local por texto (título, descrição, rótulo do tema). */
@@ -296,11 +319,26 @@ export default function BibliotecaPageContent({
   } | null>(null)
   const [areaEspecifica, setAreaEspecifica] = useState<Record<string, unknown> | null>(null)
   const { userProfile } = useAuth()
+  const searchParams = useSearchParams()
+  const router = useRouter()
+  const pathname = usePathname()
+  const linhaBibliotecaQueryRaw = rawEsteticaBibliotecaLinhaFromSearchParams(searchParams)
 
   /** Só faz sentido escolher segmento se não há um fixo pelo perfil/URL ou se é admin/suporte. */
   const isPrivilegedBiblioteca = !!(userProfile?.is_admin || userProfile?.is_support)
   const mostrarFiltroSegmento =
     !esteticaCorporalScope && (isPrivilegedBiblioteca || !segmentoSugerido)
+
+  const terapiaLinhaAtual = parseEsteticaTerapiaLinhaParam(linhaBibliotecaQueryRaw)
+  const setTerapiaLinhaUrl = (linha: EsteticaTerapiaLinha) => {
+    const params = new URLSearchParams(searchParams.toString())
+    params.delete(ESTETICA_BIBLIOTECA_LINHA_QUERY_KEY)
+    params.delete(ESTETICA_BIBLIOTECA_LINHA_QUERY_KEY_LEGACY)
+    const qv = esteticaLinhaToQueryValue(linha)
+    if (qv) params.set(ESTETICA_BIBLIOTECA_LINHA_QUERY_KEY, qv)
+    const qs = params.toString()
+    router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false })
+  }
 
   useEffect(() => {
     if (esteticaCorporalScope) {
@@ -346,6 +384,11 @@ export default function BibliotecaPageContent({
     return () => { cancelled = true }
   }, [linkCriado])
 
+  const isEsteticaLinksBiblioteca =
+    (areaCodigo || '').toLowerCase().trim() === 'estetica' &&
+    !esteticaCorporalScope &&
+    segmentoFiltro === 'aesthetics'
+
   const sugestaoTemas = esteticaCorporalScope
     ? SUGESTAO_NOEL_TEMAS_ESTETICA_CORPORAL
     : getSugestaoNoelTemas(segmentoFiltro || null)
@@ -357,6 +400,13 @@ export default function BibliotecaPageContent({
     const ordenados = ordenarItemsEsteticaCorporal(items)
     return dedupeBibliotecaItensEsteticaCorporal(ordenados, 'aesthetics')
   }, [items, esteticaCorporalScope])
+
+  const itemsListaParaEsteticaTerapia = useMemo(() => {
+    if (!isEsteticaLinksBiblioteca) return itemsLista
+    const linha = parseEsteticaTerapiaLinhaParam(linhaBibliotecaQueryRaw)
+    const filtrados = filterBibliotecaItemsByEsteticaTerapiaLinha(itemsLista, linha)
+    return dedupeEsteticaBibliotecaPorTitulo(filtrados)
+  }, [isEsteticaLinksBiblioteca, itemsLista, linhaBibliotecaQueryRaw])
 
   const itemsListaComBusca = useMemo(() => {
     const q = buscaNome.trim().toLowerCase()
@@ -381,27 +431,83 @@ export default function BibliotecaPageContent({
     return getTemasParaBiblioteca(segmentoFiltro || undefined)
   }, [esteticaCorporalScope, itemsLista, segmentoFiltro])
 
-  const itemsComecePorAqui: BibliotecaItemRow[] = []
-  if (!esteticaCorporalScope) {
+  const itemsComecePorAqui = useMemo(() => {
+    const out: BibliotecaItemRow[] = []
+    if (esteticaCorporalScope) return out
+    const sourceList = isEsteticaLinksBiblioteca ? itemsListaParaEsteticaTerapia : itemsLista
+    const linhaEstetica = parseEsteticaTerapiaLinhaParam(linhaBibliotecaQueryRaw)
+
+    if (isEsteticaLinksBiblioteca) {
+      if (linhaEstetica === 'capilar') {
+        return sourceList.filter(itemMatchesTerapiaCapilar).slice(0, 3)
+      }
+      if (linhaEstetica === 'corporal') {
+        return sourceList.filter(itemMatchesTerapiaCorporal).slice(0, 3)
+      }
+      const cap = sourceList.filter(itemMatchesTerapiaCapilar).slice(0, 1)
+      const corp = sourceList.filter(itemMatchesTerapiaCorporal).slice(0, 3)
+      const byId = new Map<string, BibliotecaItemRow>()
+      for (const it of [...cap, ...corp]) byId.set(it.id, it)
+      return Array.from(byId.values()).slice(0, 3)
+    }
+
     const titulosSugestaoVistos = new Set<string>()
     for (const tema of sugestaoTemas) {
-      const found = itemsLista.find((i) => i.tema === tema && !itemsComecePorAqui.includes(i))
+      const found = sourceList.find((i) => i.tema === tema && !out.includes(i))
       if (!found) continue
       const display =
         (segParaTituloBiblioteca && getTituloAdaptado(found.tema, segParaTituloBiblioteca)) || found.titulo
       const key = display.trim().toLowerCase().replace(/\s+/g, ' ')
       if (titulosSugestaoVistos.has(key)) continue
       titulosSugestaoVistos.add(key)
-      itemsComecePorAqui.push(found)
+      out.push(found)
     }
-  }
+    return out
+  }, [
+    esteticaCorporalScope,
+    isEsteticaLinksBiblioteca,
+    itemsLista,
+    itemsListaParaEsteticaTerapia,
+    segParaTituloBiblioteca,
+    sugestaoTemas,
+    linhaBibliotecaQueryRaw,
+  ])
 
-  const baseLista = esteticaCorporalScope ? itemsListaComBusca : itemsLista
+  const baseLista = esteticaCorporalScope ? itemsListaComBusca : isEsteticaLinksBiblioteca ? itemsListaParaEsteticaTerapia : itemsLista
+
+  const listaAposBuscaNome = useMemo(() => {
+    if (esteticaCorporalScope) return baseLista
+    const q = buscaNome.trim().toLowerCase()
+    if (!q) return baseLista
+    const seg = segParaTituloBiblioteca
+    return baseLista.filter((i) => {
+      const titulo = ((seg && getTituloAdaptado(i.tema, seg)) || i.titulo).toLowerCase()
+      const desc = (i.description || '').toLowerCase()
+      const temaLab = getTemaLabel(i.tema).toLowerCase()
+      const tipoLab = labelTipoBibliotecaItem(i.tipo).toLowerCase()
+      return titulo.includes(q) || desc.includes(q) || temaLab.includes(q) || tipoLab.includes(q)
+    })
+  }, [esteticaCorporalScope, baseLista, buscaNome, segParaTituloBiblioteca])
+
+  const itemsComecePorAquiVisiveis = useMemo(() => {
+    if (!buscaNome.trim()) return itemsComecePorAqui
+    const ok = new Set(listaAposBuscaNome.map((i) => i.id))
+    return itemsComecePorAqui.filter((i) => ok.has(i.id))
+  }, [buscaNome, itemsComecePorAqui, listaAposBuscaNome])
+
   const itemsFiltered = situacaoFiltro
-    ? baseLista.filter((i) => itemCaiNaSituacao(getUsoPrincipal(i.tema, i.meta), situacaoFiltro))
-    : baseLista
+    ? listaAposBuscaNome.filter((i) => itemCaiNaSituacao(getUsoPrincipal(i.tema, i.meta), situacaoFiltro))
+    : listaAposBuscaNome
 
-  const idsEmSugestoesTopo = new Set(itemsComecePorAqui.slice(0, 3).map((i) => i.id))
+  const dicaNoelBibliotecaTooltip = useMemo(() => {
+    if (!segmentoSugerido || segmentoFiltro !== segmentoSugerido) return ''
+    return getDicaNoelBiblioteca(
+      segmentoSugerido,
+      isEsteticaLinksBiblioteca ? terapiaLinhaAtual : null,
+    )
+  }, [segmentoSugerido, segmentoFiltro, isEsteticaLinksBiblioteca, terapiaLinhaAtual])
+
+  const idsEmSugestoesTopo = new Set(itemsComecePorAquiVisiveis.slice(0, 3).map((i) => i.id))
   const itemsListaCorporalSemRepetirSugestao = esteticaCorporalScope
     ? itemsFiltered
     : itemsFiltered.filter((i) => !idsEmSugestoesTopo.has(i.id))
@@ -467,7 +573,6 @@ export default function BibliotecaPageContent({
     let cancelled = false
     setLoading(true)
     const params = new URLSearchParams()
-    if (!esteticaCorporalScope && tipoAtivo) params.set('tipo', tipoAtivo)
     if (esteticaCorporalScope) {
       params.set('subscope', 'estetica_corporal')
     } else if (segmentoFiltro) {
@@ -486,7 +591,7 @@ export default function BibliotecaPageContent({
         if (!cancelled) setLoading(false)
       })
     return () => { cancelled = true }
-  }, [tipoAtivo, segmentoFiltro, temaFiltro, esteticaCorporalScope])
+  }, [segmentoFiltro, temaFiltro, esteticaCorporalScope])
 
   const renderNoelSugestao = () => {
     const ideiaDoDia = esteticaCorporalScope
@@ -495,7 +600,10 @@ export default function BibliotecaPageContent({
           segmentCode: (segmentoFiltro || getBibliotecaSegmentFromArea(areaCodigo)) ?? undefined,
           areaEspecifica: areaEspecifica ?? undefined,
         })
-    const itemIdeia = itemsLista.find((i) => i.tema === ideiaDoDia.tema && i.tipo === 'quiz')
+    const listaIdeiaNoel = isEsteticaLinksBiblioteca ? itemsListaParaEsteticaTerapia : itemsLista
+    const itemIdeia =
+      listaIdeiaNoel.find((i) => i.tema === ideiaDoDia.tema && i.tipo === 'quiz') ??
+      listaIdeiaNoel.find((i) => i.tema === ideiaDoDia.tema)
     const tituloParaLink = ideiaDoDia.titulo_sugerido || itemIdeia?.titulo || getTemaLabel(ideiaDoDia.tema)
     const handleCriarDaIdeia = async () => {
       if (itemIdeia) {
@@ -549,6 +657,15 @@ export default function BibliotecaPageContent({
       <div className="rounded-xl border border-sky-200 bg-sky-50/50 p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div className="min-w-0">
           <h2 className="text-sm font-semibold text-sky-900 mb-0.5">🧠 Sugestão do Noel</h2>
+          {isEsteticaLinksBiblioteca ? (
+            <p className="text-xs text-sky-800/85 mb-1">
+              {terapiaLinhaAtual === 'capilar'
+                ? 'Noel nesta linha (terapia capilar): a ideia do dia conversa com os modelos capilares da lista.'
+                : terapiaLinhaAtual === 'corporal'
+                  ? 'Noel nesta linha (estética corporal): a ideia do dia conversa com contorno, retenção e protocolo.'
+                  : 'Noel mostra uma ideia por dia; use o filtro Linha para priorizar terapia capilar ou estética corporal na lista.'}
+            </p>
+          ) : null}
           <p className="text-sm text-gray-700 line-clamp-2 sm:line-clamp-1">{ideiaDoDia.texto}</p>
         </div>
         <button
@@ -569,7 +686,7 @@ export default function BibliotecaPageContent({
       <select
         value={segmentoFiltro}
         onChange={(e) => setSegmentoFiltro(e.target.value as BibliotecaSegmentCode | '')}
-        className="min-w-0 max-w-[200px] sm:max-w-none rounded-lg border border-gray-200 bg-white px-2.5 py-1.5 text-sm text-gray-700 focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
+        className="min-w-0 max-w-[min(100%,200px)] sm:max-w-[220px] md:max-w-[200px] rounded-lg border border-gray-200 bg-white px-2.5 py-1.5 text-sm text-gray-700 focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
       >
         {isPrivilegedBiblioteca || !segmentoSugerido ? (
           <>
@@ -598,7 +715,7 @@ export default function BibliotecaPageContent({
       <select
         value={situacaoFiltro}
         onChange={(e) => setSituacaoFiltro((e.target.value || '') as '' | SituacaoBiblioteca)}
-        className="rounded border border-gray-200 px-2 py-1.5 text-sm text-gray-700 focus:ring-2 focus:ring-sky-500 min-w-[9rem]"
+        className="rounded border border-gray-200 px-2 py-1.5 text-sm text-gray-700 focus:ring-2 focus:ring-sky-500 min-w-0 w-[min(100%,10rem)] md:w-36"
       >
         {BIBLIOTECA_SITUACOES_OPTIONS.map((o) => (
           <option key={o.value || 'todas'} value={o.value}>
@@ -615,7 +732,7 @@ export default function BibliotecaPageContent({
       <select
         value={temaFiltro}
         onChange={(e) => setTemaFiltro(e.target.value)}
-        className="rounded border border-gray-200 px-2 py-1.5 text-sm text-gray-700 focus:ring-2 focus:ring-sky-500 w-40 sm:w-44 min-w-0"
+        className="rounded border border-gray-200 px-2 py-1.5 text-sm text-gray-700 focus:ring-2 focus:ring-sky-500 min-w-0 w-[min(100%,11rem)] sm:w-40 md:max-w-[11rem]"
       >
         <option value="">Todos</option>
         {temasOpcoesBiblioteca.map((t) => (
@@ -677,15 +794,11 @@ export default function BibliotecaPageContent({
             {segmentoSelect}
             {mostrarFiltroSegmento ? <span className="text-gray-300">|</span> : null}
             <div className="flex flex-wrap items-center gap-2">
-              {segmentoSugerido && segmentoFiltro === segmentoSugerido && getDicaNoelBiblioteca(segmentoSugerido) && (
-                <span
-                  className="cursor-help"
-                  title={getDicaNoelBiblioteca(segmentoSugerido) ?? undefined}
-                  aria-label="Dica do Noel"
-                >
+              {dicaNoelBibliotecaTooltip ? (
+                <span className="cursor-help" title={dicaNoelBibliotecaTooltip} aria-label="Dica do Noel">
                   💡
                 </span>
-              )}
+              ) : null}
               {(segmentoFiltro && !esteticaCorporalScope
                 ? temasOpcoesBiblioteca
                 : (TEMAS_MAIS_USADOS as readonly string[]).map((value) => ({ value, label: getTemaLabel(value) }))
@@ -708,6 +821,36 @@ export default function BibliotecaPageContent({
             </div>
           </div>
 
+          {isEsteticaLinksBiblioteca && (
+            <div
+              className="flex flex-wrap items-center gap-2 pt-1"
+              role="group"
+              aria-label="Filtro da biblioteca: terapia capilar ou estética corporal"
+            >
+              <span className="text-xs font-medium text-gray-600 shrink-0">Linha</span>
+              {(
+                [
+                  { value: 'todos' as const, label: 'Tudo' },
+                  { value: 'capilar' as const, label: 'Terapia capilar' },
+                  { value: 'corporal' as const, label: 'Estética corporal' },
+                ] as const
+              ).map(({ value, label }) => (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() => setTerapiaLinhaUrl(value)}
+                  className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
+                    terapiaLinhaAtual === value
+                      ? 'bg-sky-600 text-white shadow-sm'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          )}
+
           <div className="flex flex-wrap items-center gap-4 pt-2">
             <h2 className="text-base font-semibold text-gray-900 flex items-center gap-2">
               <span aria-hidden>📚</span> Todos os diagnósticos
@@ -717,6 +860,23 @@ export default function BibliotecaPageContent({
               {temaSelect}
             </div>
           </div>
+
+          {!esteticaCorporalScope && (
+            <div className="pt-2">
+              <label htmlFor="busca-biblioteca-nome-full" className="sr-only">
+                Buscar por nome ou palavra-chave
+              </label>
+              <input
+                id="busca-biblioteca-nome-full"
+                type="search"
+                value={buscaNome}
+                onChange={(e) => setBuscaNome(e.target.value)}
+                placeholder="Buscar por nome, tema ou tipo…"
+                autoComplete="off"
+                className="w-full max-w-xl rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm placeholder:text-gray-400 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/30"
+              />
+            </div>
+          )}
         </>
       )}
 
@@ -737,103 +897,111 @@ export default function BibliotecaPageContent({
             />
           </div>
         ) : (
-          <div className="rounded-lg sm:rounded-xl border border-gray-200 bg-white p-2 sm:p-3">
+          <div className="rounded-lg sm:rounded-xl border border-gray-200 bg-white p-2 sm:p-2.5">
             <p className="sr-only">
               {segmentoFiltro && BIBLIOTECA_SEGMENTOS.find((s) => s.value === segmentoFiltro)?.label
                 ? `Modelos para ${BIBLIOTECA_SEGMENTOS.find((s) => s.value === segmentoFiltro)!.label}.`
                 : 'Biblioteca de modelos.'}
             </p>
-            <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-              {segmentoSelect}
-              {segmentoSugerido &&
-                segmentoFiltro === segmentoSugerido &&
-                getDicaNoelBiblioteca(segmentoSugerido) && (
+            {/* Linha 1: segmento + situação + tema; contador à direita (evita sobrepor os chips) */}
+            <div className="flex flex-wrap items-end justify-between gap-x-2 gap-y-2">
+              <div className="flex min-w-0 flex-1 flex-wrap items-end gap-x-2 gap-y-1.5 sm:gap-x-2.5">
+                {segmentoSelect ? (
+                  <div className="shrink-0 [&_label]:items-center [&_label]:gap-1.5 [&_label]:text-xs [&_label]:text-gray-700 [&_select]:max-w-[7.75rem] sm:[&_select]:max-w-[9rem] [&_select]:py-1.5 [&_select]:text-sm">
+                    {segmentoSelect}
+                  </div>
+                ) : null}
+                {dicaNoelBibliotecaTooltip ? (
                   <span
-                    className="cursor-help text-base leading-none"
-                    title={getDicaNoelBiblioteca(segmentoSugerido) ?? undefined}
+                    className="cursor-help shrink-0 self-center text-base leading-none"
+                    title={dicaNoelBibliotecaTooltip}
                     aria-label="Dica do Noel"
                   >
                     💡
                   </span>
-                )}
-              {situacaoSelect}
-              {temaSelect}
-              {linksCreatedToday !== null && (
-                <span className="text-xs text-gray-500 ml-auto">
+                ) : null}
+                <div className="shrink-0 [&_label]:items-center [&_label]:gap-1.5 [&_label]:text-xs [&_select]:max-w-[9.5rem] sm:[&_select]:max-w-[10.5rem] [&_select]:py-1.5 [&_select]:text-sm">
+                  {situacaoSelect}
+                </div>
+                <div className="min-w-0 flex-1 basis-[min(100%,9.5rem)] sm:basis-[11rem] [&_label]:items-center [&_label]:gap-1.5 [&_label]:text-xs [&_select]:w-full [&_select]:max-w-full [&_select]:py-1.5 [&_select]:text-sm">
+                  {temaSelect}
+                </div>
+              </div>
+              {linksCreatedToday !== null ? (
+                <span className="shrink-0 self-end whitespace-nowrap pb-0.5 text-right text-[11px] leading-tight text-gray-500 sm:text-xs">
                   {linksCreatedToday} criado{linksCreatedToday !== 1 ? 's' : ''} hoje
                 </span>
-              )}
+              ) : null}
             </div>
-          </div>
-        ))}
-
-        {!esteticaCorporalScope &&
-          (embedded ? (
-            <>
-              <div className="md:hidden">
-                <label htmlFor="biblioteca-tipo-embedded" className="sr-only">
-                  Tipo de modelo
-                </label>
-                <select
-                  id="biblioteca-tipo-embedded"
-                  value={tipoAtivo}
-                  onChange={(e) => setTipoAtivo(e.target.value as BibliotecaTipo)}
-                  className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-800 shadow-sm focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
-                >
-                  {BIBLIOTECA_TIPOS.map((t) => (
-                    <option key={t.value} value={t.value}>
-                      {t.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="hidden md:flex gap-1 p-1 rounded-lg bg-gray-100">
-                {BIBLIOTECA_TIPOS.map((t) => (
+            {isEsteticaLinksBiblioteca ? (
+              <div
+                className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1.5 border-t border-gray-100 pt-2"
+                role="group"
+                aria-label="Filtro da biblioteca: terapia capilar ou estética corporal"
+              >
+                <span className="text-xs font-medium text-gray-600">Linha</span>
+                {(
+                  [
+                    { value: 'todos' as const, label: 'Tudo' },
+                    { value: 'capilar' as const, label: 'Terapia capilar' },
+                    { value: 'corporal' as const, label: 'Estética corporal' },
+                  ] as const
+                ).map(({ value, label }) => (
                   <button
-                    key={t.value}
+                    key={value}
                     type="button"
-                    onClick={() => setTipoAtivo(t.value)}
-                    className={`flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                      tipoAtivo === t.value ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600 hover:text-gray-900'
+                    onClick={() => setTerapiaLinhaUrl(value)}
+                    className={`rounded-full px-2.5 py-1 text-xs font-medium transition-colors sm:px-3 ${
+                      terapiaLinhaAtual === value
+                        ? 'bg-sky-600 text-white shadow-sm'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                     }`}
                   >
-                    {t.label}
+                    {label}
                   </button>
                 ))}
               </div>
-            </>
-          ) : (
-            <div className="flex gap-1 p-1 rounded-lg bg-gray-100">
-              {BIBLIOTECA_TIPOS.map((t) => (
-                <button
-                  key={t.value}
-                  type="button"
-                  onClick={() => setTipoAtivo(t.value)}
-                  className={`flex-1 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-                    tipoAtivo === t.value ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600 hover:text-gray-900'
-                  }`}
-                >
-                  {t.label}
-                </button>
-              ))}
-            </div>
-          ))}
+            ) : null}
+          </div>
+        ))}
+
+        {embedded && !esteticaCorporalScope && (
+          <div className="rounded-lg border border-gray-200 bg-white p-2 sm:p-3">
+            <label htmlFor="busca-biblioteca-nome-embedded" className="sr-only">
+              Buscar por nome ou palavra-chave
+            </label>
+            <input
+              id="busca-biblioteca-nome-embedded"
+              type="search"
+              value={buscaNome}
+              onChange={(e) => setBuscaNome(e.target.value)}
+              placeholder="Buscar por nome, tema ou tipo…"
+              autoComplete="off"
+              className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm placeholder:text-gray-400 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/30"
+            />
+          </div>
+        )}
 
         {loading ? (
           <div className="rounded-2xl border border-gray-200 bg-white p-12 text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-2 border-sky-500 border-t-transparent mx-auto" />
             <p className="mt-4 text-sm text-gray-500">Carregando...</p>
           </div>
-        ) : itemsLista.length > 0 ? (
+        ) : itemsFiltered.length > 0 ? (
           <div className="space-y-8">
             {/* Sugestões para hoje — 3 recomendados com selos (camada 2) */}
-            {itemsComecePorAqui.length > 0 && !esteticaCorporalScope && (
+            {itemsComecePorAquiVisiveis.length > 0 && !esteticaCorporalScope && (
               <section className={embedded ? '-mt-0.5' : ''}>
                 <h2 className="text-sm font-semibold text-gray-900 mb-2 sm:mb-3 flex items-center gap-2">
                   <span aria-hidden>💡</span> Sugestões para hoje
                 </h2>
+                {isEsteticaLinksBiblioteca ? (
+                  <p className="text-xs text-gray-600 mb-2 sm:mb-3">
+                    Noel monta estes três com base na linha ativa (terapia capilar, estética corporal ou mistura em «Tudo»).
+                  </p>
+                ) : null}
                 <div className={`grid sm:grid-cols-3 ${embedded ? 'gap-3' : 'gap-4'}`}>
-                  {itemsComecePorAqui.slice(0, 3).map((item, idx) => {
+                  {itemsComecePorAquiVisiveis.slice(0, 3).map((item, idx) => {
                     const badges: { icon: string; label: string }[] = [
                       { icon: '🔥', label: 'Mais usado' },
                       { icon: '⭐', label: 'Alta taxa de resposta' },
@@ -978,6 +1146,19 @@ export default function BibliotecaPageContent({
                   ? `Nenhum resultado para “${buscaNome.trim()}”. Tente outras palavras.`
                   : 'Nenhum modelo disponível neste momento.'}
               </p>
+            ) : buscaNome.trim() ? (
+              <>
+                <p className="text-sm text-gray-500 max-w-md mx-auto mb-4">
+                  Nenhum resultado para &quot;{buscaNome.trim()}&quot;. Tente outro termo ou limpe a busca para ver a lista completa.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setBuscaNome('')}
+                  className="rounded-xl border border-gray-300 bg-white px-5 py-2.5 text-sm font-medium text-gray-800 hover:bg-gray-50"
+                >
+                  Limpar busca
+                </button>
+              </>
             ) : segmentoFiltro ? (
               <>
                 <p className="text-sm text-gray-500 max-w-md mx-auto mb-4">
@@ -999,7 +1180,8 @@ export default function BibliotecaPageContent({
                   Tente ajustar os filtros ou use o Noel para criar um link do zero.
                 </p>
                 <p className="text-xs text-gray-400 mt-4">
-                  Filtros: {tipoAtivo} | {segmentoFiltro || 'todos'} | {temaFiltro ? getTemaLabel(temaFiltro) : 'todos'}
+                  Filtros: {segmentoFiltro || 'todos'} | {temaFiltro ? getTemaLabel(temaFiltro) : 'todos'}
+                  {buscaNome.trim() ? ` | busca: “${buscaNome.trim()}”` : ''}
                 </p>
               </>
             )}
@@ -1199,4 +1381,20 @@ export default function BibliotecaPageContent({
 
   if (embedded) return inner
   return <YladaAreaShell areaCodigo={areaCodigo} areaLabel={areaLabel}>{inner}</YladaAreaShell>
+}
+
+export default function BibliotecaPageContent(props: BibliotecaPageContentProps) {
+  const fallback = (
+    <div className="flex min-h-[30vh] items-center justify-center py-10">
+      <div className="text-center">
+        <div className="mx-auto h-8 w-8 animate-spin rounded-full border-2 border-sky-500 border-t-transparent" />
+        <p className="mt-3 text-sm text-gray-500">Carregando biblioteca…</p>
+      </div>
+    </div>
+  )
+  return (
+    <Suspense fallback={fallback}>
+      <BibliotecaPageContentInner {...props} />
+    </Suspense>
+  )
 }
