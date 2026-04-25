@@ -480,6 +480,41 @@ export const IDEIAS_RAPIDAS_NOEL: IdeiaRapidaNoel[] = [
   },
 ]
 
+/** Ideias rápidas para biblioteca em /pt/joias/links (sem nutrição/emagrecimento). */
+const IDEIAS_RAPIDAS_JOIAS: IdeiaRapidaNoel[] = [
+  {
+    texto:
+      'Noel: em joias e bijuterias, “só preço no WhatsApp” costuma matar margem — um quiz curto qualifica antes do catálogo.',
+    tema: 'joias_whatsapp',
+    titulo_sugerido: 'Seu atendimento no WhatsApp está travando vendas?',
+  },
+  {
+    texto: 'Linha de produto (fina, semijoia ou bijuteria) muda expectativa e discurso; vale um diagnóstico rápido no link.',
+    tema: 'joias_linha',
+    titulo_sugerido: 'Qual linha de joias combina mais com você?',
+  },
+  {
+    texto: 'Estilo e ocasião abrem conversa sem prometer desconto; use em story ou direct.',
+    tema: 'joias_estilo',
+    titulo_sugerido: 'Você compra joias mais por estilo ou por ocasião?',
+  },
+  {
+    texto: 'Marca própria pede posicionamento claro antes do portfólio — um fluxo leve ajuda a filtrar.',
+    tema: 'joias_marca',
+    titulo_sugerido: 'Marca própria: seu posicionamento está claro para a cliente?',
+  },
+  {
+    texto: 'Presentes e datas geram urgência; diagnóstico educativo costuma converter melhor que post genérico.',
+    tema: 'joias_presente',
+    titulo_sugerido: 'Presentes especiais: como escolher a peça certa sem erro?',
+  },
+  {
+    texto: 'Cuidados com peças geram confiança na compra — bom para pós-venda e remarketing.',
+    tema: 'joias_cuidados',
+    titulo_sugerido: 'Suas peças vão durar o que você promete?',
+  },
+]
+
 /** Ideias por área da estética (vinculadas ao perfil area_estetica). */
 const IDEIAS_RAPIDAS_ESTETICA: Record<string, IdeiaRapidaNoel[]> = {
   facial: [
@@ -615,6 +650,11 @@ export function getIdeiaRapidaDoDia(options?: {
   areaEspecifica?: Record<string, unknown> | null
 }): IdeiaRapidaNoel {
   const dayIndex = Math.floor(Date.now() / 86400000)
+
+  if (options?.segmentCode === 'joias') {
+    const idx = dayIndex % IDEIAS_RAPIDAS_JOIAS.length
+    return IDEIAS_RAPIDAS_JOIAS[idx]!
+  }
 
   if (options?.segmentCode === 'aesthetics' && options?.areaEspecifica) {
     const areaEstetica = (options.areaEspecifica.area_estetica as string)?.toLowerCase()?.trim()

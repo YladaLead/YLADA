@@ -575,8 +575,12 @@ function BibliotecaPageContentInner({
     const params = new URLSearchParams()
     if (esteticaCorporalScope) {
       params.set('subscope', 'estetica_corporal')
-    } else if (segmentoFiltro) {
-      params.set('segmento', segmentoFiltro)
+    } else {
+      const areaNorm = (areaCodigo || '').toLowerCase().trim()
+      const implicitFromArea =
+        !segmentoFiltro && areaNorm && areaNorm !== 'ylada' ? getBibliotecaSegmentFromArea(areaCodigo) : null
+      const segForApi = (segmentoFiltro || implicitFromArea || '') as string
+      if (segForApi) params.set('segmento', segForApi)
     }
     if (!esteticaCorporalScope && temaFiltro) params.set('tema', temaFiltro)
     fetch(`/api/ylada/biblioteca?${params}`)
@@ -591,7 +595,7 @@ function BibliotecaPageContentInner({
         if (!cancelled) setLoading(false)
       })
     return () => { cancelled = true }
-  }, [segmentoFiltro, temaFiltro, esteticaCorporalScope])
+  }, [segmentoFiltro, temaFiltro, esteticaCorporalScope, areaCodigo])
 
   const renderNoelSugestao = () => {
     const ideiaDoDia = esteticaCorporalScope

@@ -30,6 +30,9 @@ export const DEFAULT_ARCHITECTURE: DiagnosisArchitecture = 'RISK_DIAGNOSIS'
 /** Palavras-chave para inferir segment_code e architecture a partir do título. */
 const PERFUMARIA_KEYWORDS = /perfume|fragrância|fragrancia|olfativo|perfumaria|perfil olfativo/i
 
+const JOIAS_KEYWORDS =
+  /joia|joias|semijoia|bijuter|pulseira|anel|colar|brinco|prata|ouro|acess[oó]rio/i
+
 /**
  * Infere architecture e segment_code a partir do título (fallback quando meta está vazio).
  */
@@ -40,6 +43,9 @@ export function inferArchitectureFromTitle(title: string): {
   const t = (title || '').trim()
   if (PERFUMARIA_KEYWORDS.test(t)) {
     return { architecture: 'PERFUME_PROFILE', segment_code: 'perfumaria' }
+  }
+  if (JOIAS_KEYWORDS.test(t)) {
+    return { architecture: DEFAULT_ARCHITECTURE, segment_code: 'joias' }
   }
   return { architecture: DEFAULT_ARCHITECTURE }
 }
