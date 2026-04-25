@@ -21,6 +21,7 @@ export type BibliotecaSegmentCode =
   | 'aesthetics'
   | 'fitness'
   | 'perfumaria'
+  | 'joias'
 
 /** Segmentos para filtro da biblioteca (alinhado com diagnosis-segment). */
 export const BIBLIOTECA_SEGMENTOS: { value: BibliotecaSegmentCode; label: string }[] = [
@@ -33,6 +34,7 @@ export const BIBLIOTECA_SEGMENTOS: { value: BibliotecaSegmentCode; label: string
   { value: 'aesthetics', label: 'Estética' },
   { value: 'fitness', label: 'Fitness' },
   { value: 'perfumaria', label: 'Perfumaria e fragrâncias' },
+  { value: 'joias', label: 'Joias e bijuterias' },
 ]
 
 /** Top 12 temas estratégicos — filtro universal da biblioteca (não depende de segmento). */
@@ -69,6 +71,16 @@ export const BIBLIOTECA_TEMAS_POR_SEGMENTO: Record<BibliotecaSegmentCode, string
   aesthetics: BIBLIOTECA_TEMAS.map((t) => t.value),
   fitness: BIBLIOTECA_TEMAS.map((t) => t.value),
   perfumaria: BIBLIOTECA_TEMAS.map((t) => t.value),
+  joias: [
+    'joias_linha',
+    'joias_estilo',
+    'joias_whatsapp',
+    'joias_marca',
+    'joias_presente',
+    'joias_cuidados',
+    'joias_equipe',
+    'joias_canal',
+  ],
 }
 
 /**
@@ -119,7 +131,7 @@ const AREA_TO_BIBLIOTECA: Partial<Record<string, BibliotecaSegmentCode>> = {
   coach: 'fitness',
   perfumaria: 'perfumaria',
   fitness: 'fitness',
-  joias: 'nutrition_vendedor',
+  joias: 'joias',
   nutri: 'nutrition',
   seller: 'nutrition_vendedor',
   ylada: 'nutrition',
@@ -140,7 +152,7 @@ const USER_PERFIL_TO_BIBLIOTECA: Partial<Record<string, BibliotecaSegmentCode>> 
   coach: 'fitness',
   nutra: 'nutrition_vendedor',
   perfumaria: 'perfumaria',
-  joias: 'nutrition_vendedor',
+  joias: 'joias',
   seller: 'nutrition_vendedor',
   wellness: 'nutrition',
   'coach-bem-estar': 'fitness',
@@ -211,6 +223,7 @@ export function getDicaNoelBiblioteca(
       'Comece por Autoconhecimento, Ansiedade ou Relacionamentos. Ajuste o tom ao setting analítico quando for publicar.',
     dentistry: 'Comece por Saúde bucal ou Clareamento. São os que mais geram agendamentos.',
     perfumaria: 'Comece pelo diagnóstico de perfil olfativo. É o que mais qualifica e converte leads.',
+    joias: 'Comece por linha de produto ou atendimento no WhatsApp — qualificam antes do preço e abrem conversa com intenção de compra.',
   }
   return dicas[segmentCode] ?? 'Escolha um diagnóstico para criar seu link em um clique e começar a captar clientes.'
 }
@@ -290,6 +303,14 @@ const QUANDO_USAR_POR_TEMA: Record<string, string> = {
   alimentacao: 'Perfeito para quem quer melhorar a alimentação. Use em posts ou no primeiro contato.',
   habitos: 'Use para aprofundar com quem já é cliente e quer evoluir hábitos.',
   rotina: 'Ideal para acompanhar clientes ativos e qualificar rotina.',
+  joias_linha: 'Ideal para quem vende semijoia, joia fina ou bijuteria e quer qualificar o perfil de compra.',
+  joias_estilo: 'Use com quem busca estilo, ocasião de uso ou combinação de peças.',
+  joias_whatsapp: 'Perfeito para reduzir conversa só em preço e trazer contexto antes do orçamento.',
+  joias_marca: 'Para quem vende marca própria: posicionamento e narrativa antes do catálogo.',
+  joias_presente: 'Datas especiais e presentes geram urgência; bom para stories e remarketing.',
+  joias_cuidados: 'Educa a cliente sobre durabilidade e cuidados — aumenta confiança na compra.',
+  joias_equipe: 'Para revenda e equipe: mapeia dúvidas e alinha discurso de venda.',
+  joias_canal: 'Compare Instagram, loja física e site para saber onde investir primeiro.',
   saude_bucal: 'Perfeito para stories e bio. Gera agendamentos para avaliação.',
   clareamento: 'Use com quem pergunta sobre clareamento. Alta intenção de compra.',
   treino: 'Ideal para captar alunos. Use em posts sobre resultados e consistência.',
@@ -325,6 +346,14 @@ const USO_PRINCIPAL_POR_TEMA: Record<string, UsoBiblioteca> = {
   clareamento: 'marketing',
   treino: 'marketing',
   perfil_olfativo: 'marketing',
+  joias_linha: 'marketing',
+  joias_estilo: 'marketing',
+  joias_whatsapp: 'marketing',
+  joias_marca: 'ambos',
+  joias_presente: 'marketing',
+  joias_cuidados: 'ambos',
+  joias_equipe: 'crm',
+  joias_canal: 'marketing',
   autoestima: 'marketing',
   rotina_cuidados: 'crm',
   sensibilidade_pele: 'marketing',
@@ -349,6 +378,7 @@ const SUGESTAO_NOEL_TEMAS: Partial<Record<BibliotecaSegmentCode, [string, string
   psychoanalysis: ['autoconhecimento', 'ansiedade', 'equilibrio_emocional'],
   dentistry: ['saude_bucal', 'clareamento', 'saude_bucal'],
   perfumaria: ['perfil_olfativo', 'perfil_olfativo', 'perfil_olfativo'],
+  joias: ['joias_whatsapp', 'joias_linha', 'joias_estilo'],
 }
 
 /** Retorna os 3 temas recomendados para "Comece por aqui" / Sugestão do Noel. */

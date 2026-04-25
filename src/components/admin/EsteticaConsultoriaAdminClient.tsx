@@ -249,6 +249,11 @@ function PreDiagnosticoLeituraRapidaCard({
     variant === 'corporal' ? 'bg-rose-100/90 text-rose-950' : 'bg-sky-100/90 text-sky-950'
   const dor = a('pre_dor_principal')
   const queixaKey = variant === 'corporal' ? 'pre_queixa_corporal' : 'pre_queixa_capilar'
+  const queixaOutrosKey = variant === 'corporal' ? 'pre_queixa_corporal_outros' : 'pre_queixa_capilar_outros'
+  const queixaRaw = a(queixaKey)
+  const queixaOutros = a(queixaOutrosKey)
+  const queixa =
+    queixaRaw.includes('Outros') && queixaOutros ? `${queixaRaw} — ${queixaOutros}` : queixaRaw
   const ig = a('instagram')
   const wa = a('whatsapp')
   const ddi = a('whatsapp_ddi')
@@ -319,10 +324,7 @@ function PreDiagnosticoLeituraRapidaCard({
             ['Agenda hoje', a('pre_agenda')],
             ['Clientes voltam', a('pre_retorno')],
             ['Dificuldade em cobrar', a('pre_cobrar_preco')],
-            [
-              variant === 'corporal' ? 'Buscas no corporal' : 'Queixa capilar',
-              a(queixaKey),
-            ],
+            [variant === 'corporal' ? 'Buscas no corporal' : 'Queixa capilar', queixa],
           ] as const
         ).map(([label, val]) => (
           <div key={label} className="rounded-lg border border-black/[0.05] bg-white/60 px-2.5 py-2">
