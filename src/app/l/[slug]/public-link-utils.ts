@@ -76,10 +76,22 @@ export async function fetchPublicLinkPayload(
 
   const config = (link.config_json as Record<string, unknown>) ?? {}
   const meta = config.meta as Record<string, unknown> | undefined
-  const isFlowLink = !!(meta?.flow_id || meta?.architecture)
+  /**
+   * Links criados pelo Noel / generate (Etapa 6) trazem `meta.flow_id` + `meta.architecture`.
+   * Se `meta` vier incompleta na BD mas o JSON tiver `page` + `form.fields` (formato unificado),
+   * ainda assim é um quiz/diagnóstico — não usar `template_id` (ex.: calculadora de passos aleatória).
+   */
+  const formBlock = config.form as { fields?: unknown } | undefined
+  const hasUnifiedPublicSurface =
+    typeof config.page === 'object' &&
+    config.page !== null &&
+    typeof formBlock === 'object' &&
+    formBlock !== null &&
+    Array.isArray(formBlock.fields)
+  const isFlowLike = !!(meta?.flow_id || meta?.architecture || hasUnifiedPublicSurface)
 
   let type: 'diagnostico' | 'calculator' = 'diagnostico'
-  if (!isFlowLink) {
+  if (!isFlowLike) {
     const { data: template } = await supabaseAdmin
       .from('ylada_link_templates')
       .select('type')

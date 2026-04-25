@@ -299,6 +299,7 @@ export async function POST(request: NextRequest) {
         .select('id, name, type, schema_json')
         .eq('type', templateType)
         .eq('active', true)
+        .order('id', { ascending: true })
         .limit(1)
         .maybeSingle()
 
