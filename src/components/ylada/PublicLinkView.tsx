@@ -10,8 +10,10 @@ import {
 } from '@/config/freemium-limits'
 import DiagnosisDisclaimer from '@/components/ylada/DiagnosisDisclaimer'
 import {
+  buildMatrixCommerceNarrativeFromSelectedLabels,
   enrichCommerceResultDescriptionIfGeneric,
   getMatrixCommercePublicLinkCopy,
+  isGenericCommerceLibraryDescription,
   isMatrixCommercePublicLinkSegment,
 } from '@/config/ylada-public-link-commerce-ui'
 import PoweredByYlada from '@/components/ylada/PoweredByYlada'
@@ -447,6 +449,7 @@ function shouldAvoidAsProfileName(text: string): boolean {
 function isGenericProfileToken(text: string): boolean {
   const v = normalizeForCompare(text)
   if (!v) return true
+  if (v === 'seu resultado' || v === 'your result' || v === 'tu resultado') return true
   const generic = new Set([
     'unha',
     'unhas',
@@ -1240,6 +1243,18 @@ function ConfigDrivenLinkView({
       const primaryInsightText = buildPrimaryInsight(diagnosis, diagnosisCardText)
       const showDetailedCause = !!diagnosis.causa_provavel && !isVerySimilarText(diagnosis.causa_provavel, primaryInsightText)
 
+      const commerceQuizLabels =
+        commercePublicCopy && isQuizMode && quizFields.length > 0
+          ? quizFields.map((f) => String(values[f.id] || '').trim()).filter(Boolean)
+          : []
+      const commerceNarrative =
+        commercePublicCopy && commerceQuizLabels.length >= 2
+          ? buildMatrixCommerceNarrativeFromSelectedLabels(locale, commerceQuizLabels, segmentCodeForUi)
+          : null
+      const profileTitleForUi = commerceNarrative?.profileTitle ?? formattedProfileTitle
+      const impactDiagnosisTextForUi = commerceNarrative?.impactLine ?? impactDiagnosisText
+      const primaryInsightTextForUi = commerceNarrative?.supportingLine ?? primaryInsightText
+
       const handleShareResult = async () => {
         trackLinkEvent(slug, 'share_click', { metrics_id: metricsId })
         const shareText =
@@ -1282,7 +1297,7 @@ function ConfigDrivenLinkView({
               {t.profileLabel}
             </p>
             <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3 leading-tight">
-              {formattedProfileTitle}
+              {profileTitleForUi}
             </h1>
 
             <div className="relative mb-5 overflow-hidden rounded-2xl bg-gradient-to-br from-sky-50 to-white border border-sky-100/80 shadow-sm">
@@ -1292,7 +1307,7 @@ function ConfigDrivenLinkView({
                   {t.diagnosis}
                 </p>
                 <p className="text-lg sm:text-xl font-bold text-gray-900 leading-snug mb-2">
-                  {impactDiagnosisText}
+                  {impactDiagnosisTextForUi}
                 </p>
                 {diagnosis.espelho_comportamental && (
                   <p className="text-sm text-sky-700 font-medium italic">
@@ -1307,7 +1322,7 @@ function ConfigDrivenLinkView({
                 {commercePublicCopy ? t.whatItMeans : locale === 'en' ? 'Main point' : locale === 'es' ? 'Punto principal' : 'Ponto principal'}
               </p>
               <p className="text-sm text-gray-700 leading-relaxed">
-                {primaryInsightText}
+                {primaryInsightTextForUi}
               </p>
             </div>
 
@@ -1319,7 +1334,7 @@ function ConfigDrivenLinkView({
                   </p>
                 )}
 
-                {showDetailedCause && diagnosis.causa_provavel && (
+                {showDetailedCause && diagnosis.causa_provavel && !commerceNarrative && (
                   <div className="mb-4">
                     <p className="text-[10px] font-semibold uppercase tracking-wider text-sky-600 mb-1">
                       {isPerfumery ? t.whatItMeans : t.probableCause}
@@ -1906,6 +1921,24 @@ function DiagnosticoQuiz({
   const resultHeadline = (result?.headline ?? '').trim()
   const resultDescriptionRaw = softenTemplateEmDashes((result?.description ?? '').trim())
   const resultDescription = enrichCommerceResultDescriptionIfGeneric(locale, segmentCode, resultDescriptionRaw)
+  const selectedOptionLabels = questions
+    .map((q) => {
+      const idx = answers[q.id]
+      if (typeof idx !== 'number' || !Array.isArray(q.options)) return ''
+      return String(q.options[idx] ?? '').trim()
+    })
+    .filter(Boolean)
+  const commerceQuizNarrative =
+    commerceUi != null && selectedOptionLabels.length >= 2
+      ? buildMatrixCommerceNarrativeFromSelectedLabels(locale, selectedOptionLabels, segmentCode)
+      : null
+  const displayQuizResultHeadline = commerceQuizNarrative?.profileTitle ?? resultHeadline
+  const descIsLibraryPlaceholder = isGenericCommerceLibraryDescription(resultDescriptionRaw, locale)
+  const displayQuizResultDescription = commerceQuizNarrative
+    ? descIsLibraryPlaceholder
+      ? `${commerceQuizNarrative.impactLine}\n\n${commerceQuizNarrative.supportingLine}`
+      : `${resultDescription}\n\n${commerceQuizNarrative.supportingLine}`
+    : resultDescription
 
   if (step === 'intro') {
     const introTitle = (cfg.introTitle as string)?.trim() || title
@@ -1971,7 +2004,7 @@ function DiagnosticoQuiz({
             <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-gradient-to-b from-sky-400 to-sky-600 rounded-l-2xl" />
             <div className="pl-5 pr-5 py-5 sm:pl-6 sm:pr-6 sm:py-6">
               <p className="text-[10px] font-semibold uppercase tracking-wider text-sky-600 mb-2">{t.diagnosis}</p>
-              <p className="text-lg sm:text-xl font-bold text-gray-900 leading-snug">{resultHeadline}</p>
+              <p className="text-lg sm:text-xl font-bold text-gray-900 leading-snug">{displayQuizResultHeadline}</p>
             </div>
           </div>
 
@@ -1980,7 +2013,7 @@ function DiagnosticoQuiz({
             <p
               className={`text-sm text-gray-700 leading-relaxed ${showFullAnalysis ? '' : 'line-clamp-5'}`}
             >
-              {resultDescription}
+              {displayQuizResultDescription}
             </p>
           </div>
 
