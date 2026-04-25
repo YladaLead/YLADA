@@ -24,94 +24,6 @@ export interface JoiasDemoNichoClienteConfig {
 
 const NICHOS: JoiasDemoNichoClienteConfig[] = [
   {
-    value: 'semijoia',
-    label: 'Semijoias',
-    tituloQuiz: 'Cliente compara preço antes de ver estilo?',
-    subtitulo: 'Organize a conversa antes do catálogo. Você encaixa no que realmente vende.',
-    perguntas: [
-      {
-        id: 'p1',
-        texto: 'O que descreve melhor a cliente neste momento?',
-        opcoes: [
-          { label: 'Quer comparar várias peças', valor: 0 },
-          { label: 'Já tem um estilo em mente', valor: 1 },
-          { label: 'Está descobrindo o que combina com ela', valor: 2 },
-        ],
-      },
-      {
-        id: 'p2',
-        texto: 'O que mais pesa na decisão dela?',
-        opcoes: [
-          { label: 'Preço ou parcelamento', valor: 0 },
-          { label: 'Confiar na qualidade e garantia', valor: 1 },
-          { label: 'Prazo, troca ou ajuste', valor: 2 },
-        ],
-      },
-      {
-        id: 'p3',
-        texto: 'Como prefere continuar com você?',
-        opcoes: [
-          { label: 'Tirar dúvidas no WhatsApp', valor: 0 },
-          { label: 'Receber sugestões por ocasião', valor: 1 },
-          { label: 'Ver poucas opções e decidir', valor: 2 },
-        ],
-      },
-      {
-        id: 'p4',
-        texto: 'Próximo passo ideal?',
-        opcoes: [
-          { label: 'Fechar pedido ou reserva', valor: 0 },
-          { label: 'Experimentar ou ver ao vivo', valor: 1 },
-          { label: 'Pensar e retomar depois', valor: 2 },
-        ],
-      },
-    ],
-  },
-  {
-    value: 'bijuteria',
-    label: 'Bijuterias',
-    tituloQuiz: 'Muito volume barato e a conversa vira só preço?',
-    subtitulo: 'Cliente mais clara antes do primeiro contato.',
-    perguntas: [
-      {
-        id: 'p1',
-        texto: 'O que ela busca primeiro?',
-        opcoes: [
-          { label: 'Tendência e troca frequente', valor: 0 },
-          { label: 'Peça para evento ou presente', valor: 1 },
-          { label: 'Montar kit ou conjunto', valor: 2 },
-        ],
-      },
-      {
-        id: 'p2',
-        texto: 'Sensibilidade a preço?',
-        opcoes: [
-          { label: 'Muito — compara com marketplace', valor: 0 },
-          { label: 'Média — quer custo-benefício', valor: 1 },
-          { label: 'Baixa — prioriza estilo', valor: 2 },
-        ],
-      },
-      {
-        id: 'p3',
-        texto: 'Canal preferido para fechar?',
-        opcoes: [
-          { label: 'WhatsApp com fotos', valor: 0 },
-          { label: 'Loja ou prova presencial', valor: 1 },
-          { label: 'Compra direta no link', valor: 2 },
-        ],
-      },
-      {
-        id: 'p4',
-        texto: 'Próximo passo?',
-        opcoes: [
-          { label: 'Lista curta personalizada', valor: 0 },
-          { label: 'Indicação por ocasião', valor: 1 },
-          { label: 'Orçamento com prazo', valor: 2 },
-        ],
-      },
-    ],
-  },
-  {
     value: 'marca_propria',
     label: 'Marca própria',
     tituloQuiz: 'Cliente não entende por que pagar mais que genérico?',
@@ -298,6 +210,10 @@ export function getJoiasDemoClienteConfig(
   return NICHOS.find((n) => n.value === nicho) ?? null
 }
 
-export function isJoiasDemoNicho(s: string): s is JoiasDemoNicho {
+export function isJoiasFunilFoco(s: string): s is JoiasFunilFoco {
   return NICHOS.some((n) => n.value === s)
+}
+
+export function isJoiasDemoNicho(s: string): s is JoiasDemoNicho {
+  return isJoiasFunilFoco(s)
 }

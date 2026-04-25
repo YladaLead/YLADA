@@ -126,6 +126,7 @@ export type AnalyticsEventName =
   | 'joias_demo_nicho'
   | 'joias_demo_cliente_concluiu'
   | 'joias_entrada_nicho'
+  | 'joias_entrada_linha'
   | 'joias_quiz_step'
   | 'joias_quiz_concluiu'
   | 'joias_quiz_ver_pratica'

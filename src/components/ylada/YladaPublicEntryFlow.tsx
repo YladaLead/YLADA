@@ -22,11 +22,12 @@ export default function YladaPublicEntryFlow({ config, entradaComNicho = false }
   const { user, loading } = useAuth()
   const [authTimeout, setAuthTimeout] = useState(false)
   const [profNicho, setProfNicho] = useState<string | null>(null)
+  const [profLinha, setProfLinha] = useState<string | null>(null)
   const [step, setStep] = useState(0)
   const [, setAnswers] = useState<Record<string, string>>({})
   const [urlNichoSynced, setUrlNichoSynced] = useState(false)
 
-  const { pathPrefix, nichoQueryKey, sessionStorageKey, isValidNicho } = config
+  const { pathPrefix, nichoQueryKey, sessionStorageKey, isValidNicho, produtoLinhaStep } = config
 
   const isEntradaRoot = pathname === pathPrefix || pathname.startsWith(`${pathPrefix}?`)
   const legacyQuizPath = `${pathPrefix}/quiz`
@@ -35,24 +36,34 @@ export default function YladaPublicEntryFlow({ config, entradaComNicho = false }
 
   useEffect(() => {
     if (!entradaComNicho || urlNichoSynced) return
-    const q = searchParams.get(nichoQueryKey)
-    if (isValidNicho(q)) {
-      setProfNicho(q)
+    const qNicho = searchParams.get(nichoQueryKey)
+    const qLinha = produtoLinhaStep ? searchParams.get(produtoLinhaStep.queryKey) : null
+
+    if (produtoLinhaStep && qLinha && produtoLinhaStep.isValidLinha(qLinha)) {
+      setProfLinha(qLinha)
+    }
+    if (isValidNicho(qNicho)) {
+      setProfNicho(qNicho)
       setStep(0)
       setAnswers({})
     } else {
       const handoff = readPublicFlowHandoff()
       const slug = handoff?.nichoSlug ?? null
-      if (
-        handoff?.areaCodigo === config.areaCodigo &&
-        slug &&
-        isValidNicho(slug)
-      ) {
-        setProfNicho(slug)
-        setStep(0)
-        setAnswers({})
-        clearPublicFlowHandoff()
-        router.replace(`${pathPrefix}?${nichoQueryKey}=${encodeURIComponent(slug)}`, { scroll: false })
+      const linhaHandoff = handoff?.linhaSlug ?? null
+      if (handoff?.areaCodigo === config.areaCodigo) {
+        if (produtoLinhaStep && linhaHandoff && produtoLinhaStep.isValidLinha(linhaHandoff)) {
+          setProfLinha(linhaHandoff)
+        }
+        if (slug && isValidNicho(slug)) {
+          setProfNicho(slug)
+          setStep(0)
+          setAnswers({})
+          clearPublicFlowHandoff()
+          const linQ = produtoLinhaStep && linhaHandoff && produtoLinhaStep.isValidLinha(linhaHandoff)
+            ? `&${produtoLinhaStep.queryKey}=${encodeURIComponent(linhaHandoff)}`
+            : ''
+          router.replace(`${pathPrefix}?${nichoQueryKey}=${encodeURIComponent(slug)}${linQ}`, { scroll: false })
+        }
       }
     }
     setUrlNichoSynced(true)
@@ -65,11 +76,12 @@ export default function YladaPublicEntryFlow({ config, entradaComNicho = false }
     config.areaCodigo,
     pathPrefix,
     router,
+    produtoLinhaStep,
   ])
 
   const quizQuestions = useMemo(
-    () => config.resolveQuestions(entradaComNicho, profNicho),
-    [config, entradaComNicho, profNicho]
+    () => config.resolveQuestions(entradaComNicho, profNicho, produtoLinhaStep ? profLinha : null),
+    [config, entradaComNicho, profNicho, profLinha, produtoLinhaStep]
   )
 
   const isResult = step >= quizQuestions.length
@@ -80,8 +92,12 @@ export default function YladaPublicEntryFlow({ config, entradaComNicho = false }
     if (areaCodigo === 'nutri' || areaCodigo === 'estetica' || areaCodigo === 'med') {
       return `${pathPrefix}/cadastro`
     }
-    return `/pt/cadastro?area=${encodeURIComponent(areaCodigo)}`
-  }, [config])
+    let href = `/pt/cadastro?area=${encodeURIComponent(areaCodigo)}`
+    if (areaCodigo === 'joias' && produtoLinhaStep && profLinha && profNicho) {
+      href += `&${produtoLinhaStep.queryKey}=${encodeURIComponent(profLinha)}&${nichoQueryKey}=${encodeURIComponent(profNicho)}`
+    }
+    return href
+  }, [config, produtoLinhaStep, profLinha, profNicho, nichoQueryKey])
 
   const irParaCadastro = useCallback(
     (opcao: 'sim' | 'sim_certeza') => {
@@ -90,9 +106,10 @@ export default function YladaPublicEntryFlow({ config, entradaComNicho = false }
         origem: 'quiz_result',
         opcao,
         nicho: profNicho,
+        linha: profLinha,
       })
     },
-    [config, profNicho]
+    [config, profNicho, profLinha]
   )
 
   useEffect(() => {
@@ -116,13 +133,34 @@ export default function YladaPublicEntryFlow({ config, entradaComNicho = false }
   }, [])
 
   const progress = useMemo(() => {
-    if (entradaComNicho && !profNicho) return 8
+    if (entradaComNicho && produtoLinhaStep && !profLinha) return 6
+    if (entradaComNicho && !profNicho) return 10
     if (isResult) return 100
     const n = quizQuestions.length
     if (n <= 0) return 100
     // Uma fatia por pergunta (última pergunta = barra cheia); ecrã final continua 100%
     return ((step + 1) / n) * 100
-  }, [entradaComNicho, profNicho, step, isResult, quizQuestions.length])
+  }, [entradaComNicho, produtoLinhaStep, profLinha, profNicho, step, isResult, quizQuestions.length])
+
+  const pickProfLinha = useCallback(
+    (value: string) => {
+      if (!produtoLinhaStep || !produtoLinhaStep.isValidLinha(value)) return
+      setProfLinha(value)
+      setProfNicho(null)
+      setStep(0)
+      setAnswers({})
+      try {
+        sessionStorage.removeItem(sessionStorageKey)
+      } catch {
+        /* ignore */
+      }
+      if (config.analytics.entradaLinha) {
+        trackEvent(config.analytics.entradaLinha, { area: config.areaCodigo, opcao: value })
+      }
+      router.replace(`${pathPrefix}?${produtoLinhaStep.queryKey}=${encodeURIComponent(value)}`, { scroll: false })
+    },
+    [router, produtoLinhaStep, sessionStorageKey, config, pathPrefix, pathPrefix]
+  )
 
   const pickProfNicho = useCallback(
     (value: string) => {
@@ -136,9 +174,13 @@ export default function YladaPublicEntryFlow({ config, entradaComNicho = false }
         /* ignore */
       }
       trackEvent(config.analytics.entradaNicho, { area: config.areaCodigo, opcao: value })
-      router.replace(`${pathPrefix}?${nichoQueryKey}=${encodeURIComponent(value)}`, { scroll: false })
+      const linhaQ =
+        produtoLinhaStep && profLinha
+          ? `${produtoLinhaStep.queryKey}=${encodeURIComponent(profLinha)}&`
+          : ''
+      router.replace(`${pathPrefix}?${linhaQ}${nichoQueryKey}=${encodeURIComponent(value)}`, { scroll: false })
     },
-    [router, isValidNicho, sessionStorageKey, config, pathPrefix, nichoQueryKey]
+    [router, isValidNicho, sessionStorageKey, config, pathPrefix, nichoQueryKey, produtoLinhaStep, profLinha]
   )
 
   const pickOption = useCallback(
@@ -159,17 +201,18 @@ export default function YladaPublicEntryFlow({ config, entradaComNicho = false }
         step: qId,
         value,
         nicho: profNicho,
+        linha: profLinha,
       })
       setStep((s) => s + 1)
     },
-    [current, profNicho, sessionStorageKey, config]
+    [current, profNicho, profLinha, sessionStorageKey, config]
   )
 
   useEffect(() => {
     if (isResult) {
-      trackEvent(config.analytics.quizConcluiu, { area: config.areaCodigo, nicho: profNicho })
+      trackEvent(config.analytics.quizConcluiu, { area: config.areaCodigo, nicho: profNicho, linha: profLinha })
     }
-  }, [isResult, profNicho, config])
+  }, [isResult, profNicho, profLinha, config])
 
   const showAuthLoading = loading && isPublicFlowPath && !authTimeout
   if (showAuthLoading) {
@@ -188,9 +231,10 @@ export default function YladaPublicEntryFlow({ config, entradaComNicho = false }
     )
   }
 
-  const showNichoPicker = entradaComNicho && !profNicho
+  const showLinhaPicker = entradaComNicho && !!produtoLinhaStep && !profLinha
+  const showNichoPicker = entradaComNicho && (!produtoLinhaStep || !!profLinha) && !profNicho
   const showEntrarNoTopo =
-    (!entradaComNicho && step === 0 && !isResult) || (entradaComNicho && showNichoPicker)
+    (!entradaComNicho && step === 0 && !isResult) || (entradaComNicho && (showLinhaPicker || showNichoPicker))
   const rc = config.resultCopy
 
   const rootClass =
@@ -242,6 +286,26 @@ export default function YladaPublicEntryFlow({ config, entradaComNicho = false }
       </header>
 
       <main className={mainClass}>
+        {showLinhaPicker && produtoLinhaStep && (
+          <div className="animate-fade-in-up flex flex-col pb-2 space-y-6" role="region" aria-live="polite">
+            <h1 className="text-xl sm:text-2xl font-semibold text-gray-900 leading-snug tracking-tight">
+              {produtoLinhaStep.pickerTitle}
+            </h1>
+            <div className="flex flex-col gap-3">
+              {produtoLinhaStep.options.map((opt) => (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => pickProfLinha(opt.value)}
+                  className="w-full min-h-[48px] rounded-2xl border-2 border-gray-300 bg-slate-50/90 px-5 py-3.5 text-base font-semibold text-gray-900 shadow-sm shadow-gray-900/5 hover:border-gray-500 hover:bg-white hover:shadow-md active:scale-[0.99] transition-all text-left"
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
         {showNichoPicker && (
           <div className="animate-fade-in-up flex flex-col pb-2 space-y-6" role="region" aria-live="polite">
             <h1 className="text-xl sm:text-2xl font-semibold text-gray-900 leading-snug tracking-tight">

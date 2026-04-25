@@ -35,7 +35,7 @@ export function buildPerfumariaPublicFlowConfig(): PublicFlowConfig {
       'estetica-touch supports-[height:100svh]:h-[100svh] supports-[height:100svh]:max-h-[100svh]',
     mainExtraClassName: 'estetica-safe-main-bottom',
     isValidNicho: isValidPerfumariaNicho,
-    resolveQuestions: (entradaComNicho, nicho) => {
+    resolveQuestions: (entradaComNicho, nicho, _produtoLinha) => {
       if (entradaComNicho && nicho) {
         return getPerfumariaQuizQuestionsForNicho(nicho)
       }

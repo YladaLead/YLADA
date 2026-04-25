@@ -5,11 +5,16 @@ import {
   JOIAS_QUIZ_VER_PRATICA_HREF,
   getJoiasQuizQuestionsForNicho,
 } from '@/config/joias-quiz-public'
+import {
+  JOIAS_LINHA_OPTIONS,
+  JOIAS_LINHA_QUERY_KEY,
+  isValidJoiasLinhaProduto,
+} from '@/config/joias-linha-produto'
 import type { PublicFlowConfig } from '@/config/ylada-public-flow-types'
-import { JOIAS_DEMO_CLIENTE_NICHOS } from '@/lib/joias-demo-cliente-data'
+import { JOIAS_DEMO_CLIENTE_NICHOS, isJoiasFunilFoco } from '@/lib/joias-demo-cliente-data'
 
-function isValidJoiasNicho(v: string | null): v is string {
-  return !!v && JOIAS_DEMO_CLIENTE_NICHOS.some((n) => n.value === v)
+function isValidJoiasFunilFoco(v: string | null): v is string {
+  return !!v && isJoiasFunilFoco(v)
 }
 
 export function buildJoiasPublicFlowConfig(): PublicFlowConfig {
@@ -23,10 +28,18 @@ export function buildJoiasPublicFlowConfig(): PublicFlowConfig {
     verPraticaHrefBase: JOIAS_QUIZ_VER_PRATICA_HREF,
     nichoQueryKey: 'nicho',
     nichos: JOIAS_DEMO_CLIENTE_NICHOS,
-    nichoPickerTitle: 'Em qual foco você atua em joias e bijuterias?',
+    nichoPickerTitle: 'E como você vende hoje?',
+    produtoLinhaStep: {
+      queryKey: JOIAS_LINHA_QUERY_KEY,
+      options: JOIAS_LINHA_OPTIONS,
+      pickerTitle: 'Primeiro: qual linha de produto é o centro do seu negócio?',
+      isValidLinha: isValidJoiasLinhaProduto,
+      entradaLinha: 'joias_entrada_linha',
+    },
     resultCopy: JOIAS_QUIZ_RESULT_COPY,
     analytics: {
       entradaNicho: 'joias_entrada_nicho',
+      entradaLinha: 'joias_entrada_linha',
       quizStep: 'joias_quiz_step',
       quizConcluiu: 'joias_quiz_concluiu',
       cadastroPromoCta: 'joias_cadastro_promo_cta',
@@ -34,10 +47,10 @@ export function buildJoiasPublicFlowConfig(): PublicFlowConfig {
     rootExtraClassName:
       'estetica-touch supports-[height:100svh]:h-[100svh] supports-[height:100svh]:max-h-[100svh]',
     mainExtraClassName: 'estetica-safe-main-bottom',
-    isValidNicho: isValidJoiasNicho,
-    resolveQuestions: (entradaComNicho, nicho) => {
+    isValidNicho: isValidJoiasFunilFoco,
+    resolveQuestions: (entradaComNicho, nicho, produtoLinha) => {
       if (entradaComNicho && nicho) {
-        return getJoiasQuizQuestionsForNicho(nicho)
+        return getJoiasQuizQuestionsForNicho(nicho, produtoLinha ?? null)
       }
       return JOIAS_QUIZ_QUESTIONS
     },

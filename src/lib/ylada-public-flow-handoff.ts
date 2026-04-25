@@ -8,6 +8,8 @@ export const YLADA_PUBLIC_FLOW_HANDOFF_KEY = 'ylada_public_flow_handoff_v1'
 export type PublicFlowHandoffPayload = {
   areaCodigo: string
   nichoSlug?: string | null
+  /** Joias: joia_fina | semijoia | bijuteria (opcional na entrada matriz). */
+  linhaSlug?: string | null
   /** Origem opcional (ex.: matrix_home) para analytics futuro */
   source?: string
 }
@@ -20,10 +22,12 @@ function parseHandoff(raw: string | null): PublicFlowHandoffPayload | null {
     const areaCodigo = (o as { areaCodigo?: unknown }).areaCodigo
     if (typeof areaCodigo !== 'string' || !areaCodigo.trim()) return null
     const nichoSlug = (o as { nichoSlug?: unknown }).nichoSlug
+    const linhaSlug = (o as { linhaSlug?: unknown }).linhaSlug
     const source = (o as { source?: unknown }).source
     return {
       areaCodigo: areaCodigo.trim(),
       nichoSlug: typeof nichoSlug === 'string' ? nichoSlug : nichoSlug == null ? null : String(nichoSlug),
+      linhaSlug: typeof linhaSlug === 'string' ? linhaSlug : linhaSlug == null ? null : String(linhaSlug),
       source: typeof source === 'string' ? source : undefined,
     }
   } catch {

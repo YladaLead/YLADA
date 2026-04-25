@@ -21,6 +21,16 @@ export interface PublicFlowNichoOption {
   label: string
 }
 
+/** Passo opcional antes do “nicho” comercial (ex.: Joias — linha de produto). */
+export interface PublicFlowProdutoLinhaStep {
+  queryKey: string
+  options: PublicFlowNichoOption[]
+  pickerTitle: string
+  isValidLinha: (v: string | null) => v is string
+  /** Analytics ao escolher a linha (declarar em analytics-events). */
+  entradaLinha: AnalyticsEventName
+}
+
 export interface PublicFlowResultCopy {
   question: string
   ctaSim: string
@@ -32,6 +42,8 @@ export interface PublicFlowResultCopy {
 /** Eventos de analytics do fluxo de quiz por área (nomes já declarados em analytics-events). */
 export interface PublicFlowQuizAnalytics {
   entradaNicho: AnalyticsEventName
+  /** Só Joias: escolha joia fina / semijoia / bijuteria */
+  entradaLinha?: AnalyticsEventName
   quizStep: AnalyticsEventName
   quizConcluiu: AnalyticsEventName
   /** CTA pós-quiz (ir para cadastro) — reutiliza evento de promo cadastro por área */
@@ -57,6 +69,8 @@ export interface PublicFlowConfig {
   nichoQueryKey: string
   nichos: PublicFlowNichoOption[]
   nichoPickerTitle: string
+  /** Joias: primeiro escolhe linha de produto; depois o “nicho” = foco comercial. */
+  produtoLinhaStep?: PublicFlowProdutoLinhaStep
   resultCopy: PublicFlowResultCopy
   analytics: PublicFlowQuizAnalytics
   /** Classes extras no container raiz (ex.: estetica-touch, 100svh) */
@@ -64,5 +78,9 @@ export interface PublicFlowConfig {
   /** Classes extras no main (ex.: estetica-safe-main-bottom) */
   mainExtraClassName?: string
   isValidNicho: (v: string | null) => v is string
-  resolveQuestions: (entradaComNicho: boolean, nicho: string | null) => PublicFlowQuizQuestion[]
+  resolveQuestions: (
+    entradaComNicho: boolean,
+    nicho: string | null,
+    produtoLinha?: string | null
+  ) => PublicFlowQuizQuestion[]
 }
