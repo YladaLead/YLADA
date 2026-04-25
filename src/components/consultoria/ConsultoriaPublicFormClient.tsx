@@ -1,9 +1,12 @@
 'use client'
 
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { Fragment, useCallback, useEffect, useMemo, useState } from 'react'
 import type { ConsultoriaFormField } from '@/lib/pro-lideres-consultoria'
 import { isConsultoriaFieldVisibleForAnswers } from '@/lib/pro-lideres-consultoria'
-import { flagEmojiForEsteticaWhatsappDdiOption } from '@/lib/estetica-consultoria-form-templates'
+import {
+  DEFAULT_WHATSAPP_DDI,
+  flagEmojiForEsteticaWhatsappDdiOption,
+} from '@/lib/estetica-consultoria-form-templates'
 
 type Area = 'pro_lideres' | 'estetica'
 
@@ -146,6 +149,121 @@ function validateFieldsChunk(fields: ConsultoriaFormField[], answers: Record<str
 const FIELD_TOUCH_BASE =
   'w-full min-h-[44px] touch-manipulation rounded-xl border border-gray-300 bg-white px-3 py-3 text-base text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500'
 
+function whatsappDdiLocalPairAt(chunk: ConsultoriaFormField[], idx: number): boolean {
+  return chunk[idx]?.id === 'whatsapp_ddi' && chunk[idx + 1]?.id === 'whatsapp'
+}
+
+function skipWhatsappLocalAfterDdi(chunk: ConsultoriaFormField[], idx: number): boolean {
+  return chunk[idx]?.id === 'whatsapp' && idx > 0 && chunk[idx - 1]?.id === 'whatsapp_ddi'
+}
+
+/** DDI + número na mesma linha — usado em todos os formulários de estética consultoria (corporal e capilar). */
+function WhatsappDdiLocalRow({
+  ddiField,
+  localField,
+  answers,
+  setAnswers,
+}: {
+  ddiField: ConsultoriaFormField
+  localField: ConsultoriaFormField
+  answers: Record<string, string>
+  setAnswers: React.Dispatch<React.SetStateAction<Record<string, string>>>
+}) {
+  const opts = ddiField.options ?? []
+  const stored = (answers.whatsapp_ddi ?? '').trim()
+  const ddiValue = stored && opts.includes(stored) ? stored : DEFAULT_WHATSAPP_DDI
+  const flag = flagEmojiForEsteticaWhatsappDdiOption(ddiValue)
+  const bothRequired = Boolean(ddiField.required && localField.required)
+
+  return (
+    <div className="block text-sm">
+      <span className="font-medium text-gray-900">WhatsApp</span>
+      {bothRequired ? <span className="text-red-600"> *</span> : null}
+      <p className="mt-1 text-xs leading-snug text-gray-600">
+        Para pré-diagnóstico e diagnóstico, estética corporal ou terapia capilar. País (DDI) e número com DDD na mesma
+        linha — não repita o código do país no número.
+      </p>
+      <div className="mt-2 flex flex-col gap-2 sm:flex-row sm:items-stretch">
+        <div className="relative min-w-0 sm:w-[min(100%,220px)] sm:shrink-0">
+          <span
+            className="pointer-events-none absolute left-3 top-1/2 z-[1] -translate-y-1/2 text-xl leading-none"
+            aria-hidden
+          >
+            {flag}
+          </span>
+          <select
+            required={ddiField.required}
+            className={`${FIELD_TOUCH_BASE} w-full appearance-none pl-11 pr-9`}
+            value={ddiValue}
+            onChange={(e) => setAnswers((prev) => ({ ...prev, whatsapp_ddi: e.target.value }))}
+            aria-label={ddiField.label}
+          >
+            {opts.map((o) => {
+              const tail = o.includes(' — ') ? o.split(' — ').slice(1).join(' — ') : o
+              return (
+                <option key={o} value={o}>
+                  {tail}
+                </option>
+              )
+            })}
+          </select>
+          <span
+            className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-gray-400"
+            aria-hidden
+          >
+            ▼
+          </span>
+        </div>
+        <label className="min-w-0 flex-1">
+          <span className="sr-only">{localField.label}</span>
+          <input
+            required={localField.required}
+            className={`${FIELD_TOUCH_BASE} w-full`}
+            value={answers.whatsapp ?? ''}
+            onChange={(e) => setAnswers((prev) => ({ ...prev, whatsapp: e.target.value }))}
+            inputMode="tel"
+            autoComplete="tel-national"
+            placeholder="DDD + número (sem +55)"
+            aria-label={localField.label}
+          />
+        </label>
+      </div>
+    </div>
+  )
+}
+
+function renderConsultoriaFieldRow(
+  chunk: ConsultoriaFormField[],
+  idx: number,
+  answers: Record<string, string>,
+  setAnswers: React.Dispatch<React.SetStateAction<Record<string, string>>>
+) {
+  const f = chunk[idx]
+  if (!f) return null
+  if (!isConsultoriaFieldVisibleForAnswers(f, answers)) {
+    return null
+  }
+  if (skipWhatsappLocalAfterDdi(chunk, idx)) {
+    return null
+  }
+  if (whatsappDdiLocalPairAt(chunk, idx)) {
+    const local = chunk[idx + 1]
+    if (!local || !isConsultoriaFieldVisibleForAnswers(local, answers)) {
+      return <FieldEditor key={f.id} f={f} answers={answers} setAnswers={setAnswers} />
+    }
+    return (
+      <WhatsappDdiLocalRow
+        key="whatsapp-ddi-local"
+        ddiField={f}
+        localField={local}
+        answers={answers}
+        setAnswers={setAnswers}
+      />
+    )
+  }
+  return <FieldEditor key={f.id} f={f} answers={answers} setAnswers={setAnswers} />
+}
+
 function FieldEditor({
   f,
   answers,
@@ -156,8 +274,6 @@ function FieldEditor({
   setAnswers: React.Dispatch<React.SetStateAction<Record<string, string>>>
 }) {
   const inputClass = `mt-2 ${FIELD_TOUCH_BASE}`
-  const ddiSelect = f.id === 'whatsapp_ddi' && f.type === 'select'
-  const storedDdi = (answers[f.id] ?? '').trim()
 
   if (!isConsultoriaFieldVisibleForAnswers(f, answers)) {
     return null
@@ -178,53 +294,19 @@ function FieldEditor({
           rows={4}
         />
       ) : f.type === 'select' ? (
-        ddiSelect ? (
-          <div className="relative mt-2">
-            <select
-              required={f.required}
-              className={`${FIELD_TOUCH_BASE} appearance-none pl-11 pr-9`}
-              value={answers[f.id] ?? ''}
-              onChange={(e) => setAnswers((prev) => ({ ...prev, [f.id]: e.target.value }))}
-              title="DDI do país"
-            >
-              <option value="">Escolher…</option>
-              {(f.options ?? []).map((o) => {
-                const tail = o.includes(' — ') ? o.split(' — ').slice(1).join(' — ') : o
-                return (
-                  <option key={o} value={o}>
-                    {flagEmojiForEsteticaWhatsappDdiOption(o)} {tail}
-                  </option>
-                )
-              })}
-            </select>
-            <span
-              className="pointer-events-none absolute left-3 top-1/2 z-[1] -translate-y-1/2 text-xl leading-none"
-              aria-hidden
-            >
-              {storedDdi ? flagEmojiForEsteticaWhatsappDdiOption(storedDdi) : '🌍'}
-            </span>
-            <span
-              className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
-              aria-hidden
-            >
-              ▼
-            </span>
-          </div>
-        ) : (
-          <select
-            required={f.required}
-            className={inputClass}
-            value={answers[f.id] ?? ''}
-            onChange={(e) => setAnswers((prev) => ({ ...prev, [f.id]: e.target.value }))}
-          >
-            <option value="">Escolher…</option>
-            {(f.options ?? []).map((o) => (
-              <option key={o} value={o}>
-                {o}
-              </option>
-            ))}
-          </select>
-        )
+        <select
+          required={f.required}
+          className={inputClass}
+          value={answers[f.id] ?? ''}
+          onChange={(e) => setAnswers((prev) => ({ ...prev, [f.id]: e.target.value }))}
+        >
+          <option value="">Escolher…</option>
+          {(f.options ?? []).map((o) => (
+            <option key={o} value={o}>
+              {o}
+            </option>
+          ))}
+        </select>
       ) : f.type === 'checkbox_group' ? (
         <CheckboxGroupField f={f} answers={answers} setAnswers={setAnswers} />
       ) : (
@@ -323,9 +405,13 @@ export default function ConsultoriaPublicFormClient({
       prefill?: { initialAnswers?: Record<string, string>; respondentName?: string; respondentEmail?: string }
     }).prefill
     if (prefill?.initialAnswers && typeof prefill.initialAnswers === 'object') {
-      setAnswers({ ...prefill.initialAnswers })
+      const merged = { ...(prefill.initialAnswers as Record<string, string>) }
+      if (area === 'estetica' && !String(merged.whatsapp_ddi ?? '').trim()) {
+        merged.whatsapp_ddi = DEFAULT_WHATSAPP_DDI
+      }
+      setAnswers(merged)
     } else {
-      setAnswers({})
+      setAnswers(area === 'estetica' ? { whatsapp_ddi: DEFAULT_WHATSAPP_DDI } : {})
     }
     if (prefill?.respondentName != null && String(prefill.respondentName).trim()) {
       setName(String(prefill.respondentName).trim())
@@ -564,8 +650,8 @@ export default function ConsultoriaPublicFormClient({
         <>
           {contactGrid}
           <div className="space-y-5">
-            {fields.map((f) => (
-              <FieldEditor key={f.id} f={f} answers={answers} setAnswers={setAnswers} />
+            {fields.map((f, idx) => (
+              <Fragment key={f.id}>{renderConsultoriaFieldRow(fields, idx, answers, setAnswers)}</Fragment>
             ))}
           </div>
           <button
@@ -582,8 +668,10 @@ export default function ConsultoriaPublicFormClient({
         </>
       ) : (
         <div className="space-y-5">
-          {(fieldChunks[wizardStep] ?? []).map((f) => (
-            <FieldEditor key={f.id} f={f} answers={answers} setAnswers={setAnswers} />
+          {(fieldChunks[wizardStep] ?? []).map((f, idx) => (
+            <Fragment key={`${wizardStep}-${f.id}`}>
+              {renderConsultoriaFieldRow(fieldChunks[wizardStep] ?? [], idx, answers, setAnswers)}
+            </Fragment>
           ))}
           <div className="flex flex-col-reverse gap-2 pt-2 sm:flex-row sm:justify-between">
             {wizardStep > 0 ? (

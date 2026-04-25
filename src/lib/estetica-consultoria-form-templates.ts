@@ -122,7 +122,8 @@ export const ESTETICA_WHATSAPP_DDI_OPTIONS: string[] = [
   '+81 — Japão',
 ]
 
-const DEFAULT_WHATSAPP_DDI = ESTETICA_WHATSAPP_DDI_OPTIONS[0] as string
+/** Valor inicial do select DDI (Brasil) nos formulários públicos. */
+export const DEFAULT_WHATSAPP_DDI = ESTETICA_WHATSAPP_DDI_OPTIONS[0] as string
 
 /** Extrai "+digits" do início de uma opção DDI. */
 function ddiCodeFromOption(opt: string): string {
