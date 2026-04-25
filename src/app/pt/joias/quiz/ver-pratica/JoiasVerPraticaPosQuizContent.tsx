@@ -1,6 +1,7 @@
 'use client'
 
 import MatrixVerPraticaAfterQuizContent from '@/components/ylada/MatrixVerPraticaAfterQuizContent'
+import { JOIAS_LINHA_QUERY_KEY, isValidJoiasLinhaProduto } from '@/config/joias-linha-produto'
 import { JOIAS_QUIZ_LOGIN_HREF } from '@/config/joias-quiz-public'
 import { JOIAS_DEMO_CLIENTE_NICHOS } from '@/lib/joias-demo-cliente-data'
 import {
@@ -30,6 +31,8 @@ export default function JoiasVerPraticaPosQuizContent() {
         tituloNicho: 'Qual foco do exemplo?',
         textoNicho: 'Fluxo curto só para demonstração. Depois você vê como a pessoa responderia.',
       }}
+      linhaQueryKey={JOIAS_LINHA_QUERY_KEY}
+      isValidLinha={isValidJoiasLinhaProduto}
     />
   )
 }

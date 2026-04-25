@@ -2,7 +2,7 @@
 
 /**
  * Script para criar contas demo para vídeos de demonstração da plataforma.
- * Cria: demo.med, demo.psi, demo.vendedor (vendas em gerais), demo.nutra, demo.nutri, demo.coach, demo.estetica, demo.perfumaria
+ * Cria: demo.med, demo.psi, demo.vendedor (vendas em gerais), demo.nutra, demo.nutri, demo.coach, demo.estetica, demo.perfumaria, demo.joias
  * Senha: Demo@2025!
  *
  * Execute: node scripts/criar-contas-demo-videos.js
@@ -279,6 +279,37 @@ const DEMO_ACCOUNTS = [
         temas_atuacao: ['perfil_olfativo', 'familia_olfativa', 'ocasiao_uso']
       }
     }
+  },
+  {
+    email: 'demo.joias@ylada.app',
+    nome: 'Demo Joias e bijuterias',
+    perfil: 'joias',
+    noelProfile: {
+      segment: 'joias',
+      profile_type: 'vendas',
+      profession: 'vendedor',
+      category: 'joias',
+      tempo_atuacao_anos: 3,
+      dor_principal: 'nao_converte',
+      prioridade_atual: 'Qualificar antes do preço e usar links com contexto no WhatsApp',
+      fase_negocio: 'em_crescimento',
+      metas_principais: 'Aumentar conversão e reduzir conversa só em valor',
+      objetivos_curto_prazo: 'Diagnóstico rápido para semijoias e marca própria',
+      modelo_atuacao: ['loja', 'online'],
+      capacidade_semana: 18,
+      ticket_medio: 120,
+      modelo_pagamento: 'avulso',
+      canais_principais: ['instagram', 'whatsapp'],
+      rotina_atual_resumo: 'Vendo por redes e WhatsApp; quero padronizar qualificação',
+      area_specific: {
+        nome: 'Demo Joias e bijuterias',
+        whatsapp: '19997230912',
+        countryCode: 'BR',
+        jewelry_line: 'semijoia',
+        joias_funil_foco: 'marca_propria',
+        temas_atuacao: ['semijoia', 'whatsapp', 'qualificacao']
+      }
+    }
   }
 ]
 
@@ -407,6 +438,7 @@ async function main() {
   console.log('   demo.nutra@ylada.app      → Nutra')
   console.log('   demo.estetica@ylada.app   → Esteticista (liberal)')
   console.log('   demo.perfumaria@ylada.app → Vendedor Perfumaria')
+  console.log('   demo.joias@ylada.app      → Joias e bijuterias')
   console.log('   demo.nutri@ylada.app      → Nutricionista')
   console.log('   demo.coach@ylada.app      → Coach')
   console.log('\n🔐 Senha para todas: Demo@2025!\n')

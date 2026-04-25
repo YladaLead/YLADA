@@ -11,6 +11,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireApiAuth } from '@/lib/api-auth'
 import { YLADA_SEGMENT_CODES } from '@/config/ylada-areas'
 import { supabaseAdmin } from '@/lib/supabase'
+import { getNoelJoiasLinhaPlaybookBlock } from '@/config/noel-joias-playbook'
 import { buildProfileResumo, type YladaNoelProfileRow } from '@/lib/ylada-profile-resumo'
 import { getNoelYladaLinks, formatLinksAtivosParaNoel } from '@/lib/noel-ylada-links'
 import { getPerfilSimuladoByKey, SIMULATE_COOKIE_NAME } from '@/data/perfis-simulados'
@@ -1189,6 +1190,10 @@ export async function POST(request: NextRequest) {
       parts.push(
         '\n[USE O PERFIL]\nBaseie sempre sua resposta no perfil acima. Use a linguagem e o contexto da profissão/segmento: médico → pacientes, consultório, agenda; nutri/estética/fitness → clientes; psicologia/psicanálise → pacientes ou clientes conforme o perfil; vendedor/perfumaria/joias → clientes, leads. Sugestões de diagnóstico, captação e comunicação devem ser direcionadas ao tipo de atuação dele.'
       )
+      const joiasLinhaPlaybook = getNoelJoiasLinhaPlaybookBlock(profileRow)
+      if (joiasLinhaPlaybook) {
+        parts.push(joiasLinhaPlaybook)
+      }
     } else {
       parts.push('\nO profissional ainda não preencheu o perfil empresarial. Oriente de forma útil e, se fizer sentido, sugira completar o perfil em "Perfil empresarial" para orientações mais personalizadas.')
     }

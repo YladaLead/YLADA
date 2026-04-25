@@ -38,11 +38,13 @@ export default function YladaPublicEntryFlow({ config, entradaComNicho = false }
     if (!entradaComNicho || urlNichoSynced) return
     const qNicho = searchParams.get(nichoQueryKey)
     const qLinha = produtoLinhaStep ? searchParams.get(produtoLinhaStep.queryKey) : null
+    const linhaOk =
+      !produtoLinhaStep || (!!qLinha && produtoLinhaStep.isValidLinha(qLinha))
 
     if (produtoLinhaStep && qLinha && produtoLinhaStep.isValidLinha(qLinha)) {
       setProfLinha(qLinha)
     }
-    if (isValidNicho(qNicho)) {
+    if (isValidNicho(qNicho) && linhaOk) {
       setProfNicho(qNicho)
       setStep(0)
       setAnswers({})
@@ -54,15 +56,21 @@ export default function YladaPublicEntryFlow({ config, entradaComNicho = false }
         if (produtoLinhaStep && linhaHandoff && produtoLinhaStep.isValidLinha(linhaHandoff)) {
           setProfLinha(linhaHandoff)
         }
-        if (slug && isValidNicho(slug)) {
+        const podeAplicarNicho =
+          slug &&
+          isValidNicho(slug) &&
+          (!produtoLinhaStep ||
+            !!(linhaHandoff && produtoLinhaStep.isValidLinha(linhaHandoff)))
+        if (podeAplicarNicho && slug) {
           setProfNicho(slug)
           setStep(0)
           setAnswers({})
           clearPublicFlowHandoff()
-          const linQ = produtoLinhaStep && linhaHandoff && produtoLinhaStep.isValidLinha(linhaHandoff)
-            ? `&${produtoLinhaStep.queryKey}=${encodeURIComponent(linhaHandoff)}`
-            : ''
-          router.replace(`${pathPrefix}?${nichoQueryKey}=${encodeURIComponent(slug)}${linQ}`, { scroll: false })
+          const linQ =
+            produtoLinhaStep && linhaHandoff && produtoLinhaStep.isValidLinha(linhaHandoff)
+              ? `${produtoLinhaStep.queryKey}=${encodeURIComponent(linhaHandoff)}&`
+              : ''
+          router.replace(`${pathPrefix}?${linQ}${nichoQueryKey}=${encodeURIComponent(slug)}`, { scroll: false })
         }
       }
     }
@@ -159,7 +167,7 @@ export default function YladaPublicEntryFlow({ config, entradaComNicho = false }
       }
       router.replace(`${pathPrefix}?${produtoLinhaStep.queryKey}=${encodeURIComponent(value)}`, { scroll: false })
     },
-    [router, produtoLinhaStep, sessionStorageKey, config, pathPrefix, pathPrefix]
+    [router, produtoLinhaStep, sessionStorageKey, config, pathPrefix]
   )
 
   const pickProfNicho = useCallback(

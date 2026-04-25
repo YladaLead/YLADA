@@ -11,7 +11,14 @@ import Image from 'next/image'
 import { useEffect, useState } from 'react'
 import PhoneInputWithCountry from '@/components/PhoneInputWithCountry'
 import { getYladaAreaPathPrefix } from '@/config/ylada-areas'
+import {
+  JOIAS_AREA_SPECIFIC_FUNIL_FOCO,
+  JOIAS_AREA_SPECIFIC_JEWELRY_LINE,
+  JOIAS_LINHA_QUERY_KEY,
+  isValidJoiasLinhaProduto,
+} from '@/config/joias-linha-produto'
 import { getOnboardingCopyForArea } from '@/config/onboarding-by-area'
+import { isJoiasFunilFoco } from '@/lib/joias-demo-cliente-data'
 import { YLADA_POS_ONBOARDING_STORAGE_KEY } from '@/lib/ylada-pos-onboarding'
 
 export type OnboardingAreaCodigo =
@@ -217,6 +224,22 @@ export function OnboardingPageContent({
             existingAreaSpecific = { ...(p.area_specific as Record<string, unknown>) }
           }
         }
+        const joiasFunilExtras: Record<string, unknown> = {}
+        if (areaCodigo === 'joias' && typeof window !== 'undefined') {
+          try {
+            const sp = new URLSearchParams(window.location.search)
+            const linha = sp.get(JOIAS_LINHA_QUERY_KEY)
+            const foco = sp.get('nicho')
+            if (linha && isValidJoiasLinhaProduto(linha)) {
+              joiasFunilExtras[JOIAS_AREA_SPECIFIC_JEWELRY_LINE] = linha
+            }
+            if (foco && isJoiasFunilFoco(foco)) {
+              joiasFunilExtras[JOIAS_AREA_SPECIFIC_FUNIL_FOCO] = foco
+            }
+          } catch {
+            /* URL inválida */
+          }
+        }
         const response = await fetch('/api/ylada/profile', {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json', ...authHeader },
@@ -225,6 +248,7 @@ export function OnboardingPageContent({
             segment: areaCodigo,
             area_specific: {
               ...existingAreaSpecific,
+              ...joiasFunilExtras,
               nome: nomeCompleto.trim(),
               whatsapp: telefoneLimpo,
               countryCode,

@@ -3,6 +3,8 @@
  * @see docs/PERFIL-EMPRESARIAL-YLADA-MODELO.md §4
  */
 
+import { labelJoiasLinhaProduto } from '@/config/joias-linha-produto'
+
 const SEGMENT_LABELS: Record<string, string> = {
   ylada: 'YLADA',
   med: 'Médicos',
@@ -15,6 +17,7 @@ const SEGMENT_LABELS: Record<string, string> = {
   perfumaria: 'Perfumaria',
   estetica: 'Estética',
   fitness: 'Fitness',
+  joias: 'Joias e bijuterias',
 }
 
 export interface YladaNoelProfileRow {
@@ -156,6 +159,12 @@ export function buildProfileResumo(profile: YladaNoelProfileRow | null): string 
   if (areaSpec.area_nutri) areaParts.push(`Área nutri: ${areaSpec.area_nutri}.`)
   if (areaSpec.coach_tipo) areaParts.push(`Tipo coach: ${areaSpec.coach_tipo}.`)
   if (areaSpec.modelo_entrega_coach) areaParts.push(`Modelo entrega (coach): ${areaSpec.modelo_entrega_coach}.`)
+  if (areaSpec.jewelry_line && String(areaSpec.jewelry_line).trim()) {
+    areaParts.push(`Linha de produto (joias): ${labelJoiasLinhaProduto(String(areaSpec.jewelry_line))}.`)
+  }
+  if (areaSpec.joias_funil_foco && String(areaSpec.joias_funil_foco).trim()) {
+    areaParts.push(`Foco comercial (funil joias): ${areaSpec.joias_funil_foco}.`)
+  }
   if (Array.isArray(areaSpec.abordagens) && areaSpec.abordagens.length > 0) {
     areaParts.push(`Abordagens: ${(areaSpec.abordagens as string[]).join(', ')}.`)
   }

@@ -11,10 +11,12 @@ import { useRouter, usePathname } from 'next/navigation'
 import YLADALogo from '@/components/YLADALogo'
 import { useAuth } from '@/contexts/AuthContext'
 import { trackEvent } from '@/lib/analytics-events'
+import { JOIAS_LINHA_OPTIONS, JOIAS_LINHA_QUERY_KEY } from '@/config/joias-linha-produto'
 import {
   JOIAS_DEMO_LOCAIS,
   JOIAS_DEMO_CLIENTE_BASE_PATH,
   STORAGE_KEY_JOIAS_DEMO_LOCAL,
+  STORAGE_KEY_JOIAS_DEMO_LINHA,
   STORAGE_KEY_JOIAS_DEMO_NICHO,
   STORAGE_KEY_JOIAS_CONTINUAR_TOUR,
   JOIAS_LANDING_STEP_APOS_DEMO,
@@ -209,8 +211,9 @@ export default function JoiasEntradaSocraticaContent() {
   const [step, setStep] = useState(0)
   const [authTimeout, setAuthTimeout] = useState(false)
   const [demoOpen, setDemoOpen] = useState(false)
-  const [demoPhase, setDemoPhase] = useState<'local' | 'nicho' | 'intro'>('local')
+  const [demoPhase, setDemoPhase] = useState<'local' | 'linha' | 'nicho' | 'intro'>('local')
   const [demoLocalChoice, setDemoLocalChoice] = useState<string | null>(null)
+  const [demoLinhaChoice, setDemoLinhaChoice] = useState<string | null>(null)
   const [demoNichoChoice, setDemoNichoChoice] = useState<string | null>(null)
 
   const isJoiasRoot = pathname === '/pt/joias' || pathname.startsWith('/pt/joias?')
@@ -248,6 +251,7 @@ export default function JoiasEntradaSocraticaContent() {
     if (demoOpen) {
       setDemoPhase('local')
       setDemoLocalChoice(null)
+      setDemoLinhaChoice(null)
       setDemoNichoChoice(null)
     }
   }, [demoOpen])
@@ -279,6 +283,17 @@ export default function JoiasEntradaSocraticaContent() {
       /* storage indisponível */
     }
     setDemoLocalChoice(value)
+    setDemoPhase('linha')
+  }, [])
+
+  const pickDemoLinha = useCallback((value: string) => {
+    trackEvent('joias_demo_linha', { area: 'joias', opcao: value })
+    try {
+      sessionStorage.setItem(STORAGE_KEY_JOIAS_DEMO_LINHA, value)
+    } catch {
+      /* ok */
+    }
+    setDemoLinhaChoice(value)
     setDemoPhase('nicho')
   }, [])
 
@@ -294,15 +309,18 @@ export default function JoiasEntradaSocraticaContent() {
   }, [])
 
   const startDemoQuiz = useCallback(() => {
-    if (!demoLocalChoice || !demoNichoChoice) return
+    if (!demoLocalChoice || !demoLinhaChoice || !demoNichoChoice) return
     trackEvent('joias_demo_inicio', {
       area: 'joias',
       opcao: demoLocalChoice,
       segmento: demoNichoChoice,
+      linha: demoLinhaChoice,
     })
     setDemoOpen(false)
-    router.push(`${JOIAS_DEMO_CLIENTE_BASE_PATH}?nicho=${encodeURIComponent(demoNichoChoice)}`)
-  }, [demoLocalChoice, demoNichoChoice, router])
+    router.push(
+      `${JOIAS_DEMO_CLIENTE_BASE_PATH}?${JOIAS_LINHA_QUERY_KEY}=${encodeURIComponent(demoLinhaChoice)}&nicho=${encodeURIComponent(demoNichoChoice)}`
+    )
+  }, [demoLocalChoice, demoLinhaChoice, demoNichoChoice, router])
 
   const onChoicePick = useCallback(
     (choice: ChoiceItem) => {
@@ -447,10 +465,10 @@ export default function JoiasEntradaSocraticaContent() {
               {demoPhase === 'local' ? (
                 <>
                   <h2 id="demo-title" className="text-lg font-semibold text-gray-900">
-                    Onde você atua com treino ou performance?
+                    Onde você vende ou atende?
                   </h2>
                   <p className="mt-2 text-sm text-gray-600 leading-relaxed">
-                    Escolha o contexto. Na próxima tela você define o foco do exemplo.
+                    Escolha o contexto. Depois você define a linha de produto e o foco do exemplo.
                   </p>
                   <div className="mt-5 flex flex-col gap-2">
                     {JOIAS_DEMO_LOCAIS.map((opt) => (
@@ -472,13 +490,41 @@ export default function JoiasEntradaSocraticaContent() {
                     Fechar
                   </button>
                 </>
+              ) : demoPhase === 'linha' ? (
+                <>
+                  <h2 id="demo-title" className="text-lg font-semibold text-gray-900">
+                    Qual linha de produto no exemplo?
+                  </h2>
+                  <p className="mt-2 text-sm text-gray-600 leading-relaxed">
+                    Joia fina, semijoia ou bijuteria — o mesmo fluxo YLADA, com linguagem alinhada ao que você vende.
+                  </p>
+                  <div className="mt-5 flex flex-col gap-2">
+                    {JOIAS_LINHA_OPTIONS.map((opt) => (
+                      <button
+                        key={opt.value}
+                        type="button"
+                        onClick={() => pickDemoLinha(opt.value)}
+                        className="w-full min-h-[48px] rounded-xl border-2 border-gray-300 bg-slate-50/90 px-4 py-3 text-left text-sm font-semibold text-gray-900 shadow-sm shadow-gray-900/5 hover:border-gray-500 hover:bg-white hover:shadow-md"
+                      >
+                        {opt.label}
+                      </button>
+                    ))}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setDemoPhase('local')}
+                    className="mt-4 w-full min-h-[44px] rounded-xl text-gray-600 font-medium hover:bg-gray-50 text-sm"
+                  >
+                    ← Voltar
+                  </button>
+                </>
               ) : demoPhase === 'nicho' ? (
                 <>
                   <h2 id="demo-title" className="text-lg font-semibold text-gray-900">
                     Qual foco do exemplo?
                   </h2>
                   <p className="mt-2 text-sm text-gray-600 leading-relaxed">
-                    Fluxo curto só para demonstração. Não substitui avaliação médica nem fisioterapia.
+                    Fluxo curto só para demonstração — como a cliente responderia no seu contexto.
                   </p>
                   <div className="mt-5 flex flex-col gap-2">
                     {JOIAS_DEMO_CLIENTE_NICHOS.map((opt) => (
@@ -494,7 +540,7 @@ export default function JoiasEntradaSocraticaContent() {
                   </div>
                   <button
                     type="button"
-                    onClick={() => setDemoPhase('local')}
+                    onClick={() => setDemoPhase('linha')}
                     className="mt-4 w-full min-h-[44px] rounded-xl text-gray-600 font-medium hover:bg-gray-50 text-sm"
                   >
                     ← Voltar
@@ -502,10 +548,10 @@ export default function JoiasEntradaSocraticaContent() {
                 </>
               ) : (
                 <EntradaSocraticaDemoIntroPanel
-                  quemRespondeNoExemplo="seu aluno"
+                  quemRespondeNoExemplo="sua cliente"
                   onAbrirExemplo={startDemoQuiz}
                   onVoltar={() => setDemoPhase('nicho')}
-                  disabled={!demoLocalChoice || !demoNichoChoice}
+                  disabled={!demoLocalChoice || !demoLinhaChoice || !demoNichoChoice}
                 />
               )}
             </div>

@@ -37,6 +37,9 @@ export interface MatrixVerPraticaAfterQuizContentProps {
   analyticsVerPratica: AnalyticsEventName
   areaForPayload: string
   strings: MatrixVerPraticaStrings
+  /** Joias: repete `linha` na URL do exemplo-cliente quando veio do quiz (?linha=). */
+  linhaQueryKey?: string
+  isValidLinha?: (v: string | null) => v is string
 }
 
 type Fase = 'local' | 'nicho'
@@ -52,10 +55,23 @@ export default function MatrixVerPraticaAfterQuizContent({
   analyticsVerPratica,
   areaForPayload,
   strings,
+  linhaQueryKey,
+  isValidLinha,
 }: MatrixVerPraticaAfterQuizContentProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [fase, setFase] = useState<Fase>('local')
+
+  const linhaPredefinido = useMemo(() => {
+    if (!linhaQueryKey || !isValidLinha) return null
+    const l = searchParams.get(linhaQueryKey)
+    return l && isValidLinha(l) ? l : null
+  }, [searchParams, linhaQueryKey, isValidLinha])
+
+  const linhaQs = useMemo(
+    () => (linhaPredefinido ? `&${linhaQueryKey}=${encodeURIComponent(linhaPredefinido)}` : ''),
+    [linhaPredefinido, linhaQueryKey]
+  )
 
   const nichoPredefinido = useMemo(() => {
     const n = searchParams.get('nicho')
@@ -82,7 +98,7 @@ export default function MatrixVerPraticaAfterQuizContent({
           /* ok */
         }
         router.push(
-          `${exemploClienteBasePath}?nicho=${encodeURIComponent(nichoPredefinido)}&origem=matriz`
+          `${exemploClienteBasePath}?nicho=${encodeURIComponent(nichoPredefinido)}${linhaQs}&origem=matriz`
         )
       } else {
         setFase('nicho')
@@ -96,6 +112,7 @@ export default function MatrixVerPraticaAfterQuizContent({
       exemploClienteBasePath,
       analyticsVerPratica,
       areaForPayload,
+      linhaQs,
     ]
   )
 
@@ -107,9 +124,9 @@ export default function MatrixVerPraticaAfterQuizContent({
         /* ok */
       }
       trackEvent(analyticsVerPratica, { area: areaForPayload, step: 'nicho', opcao: value })
-      router.push(`${exemploClienteBasePath}?nicho=${encodeURIComponent(value)}&origem=matriz`)
+      router.push(`${exemploClienteBasePath}?nicho=${encodeURIComponent(value)}${linhaQs}&origem=matriz`)
     },
-    [router, storageNichoKey, exemploClienteBasePath, analyticsVerPratica, areaForPayload]
+    [router, storageNichoKey, exemploClienteBasePath, analyticsVerPratica, areaForPayload, linhaQs]
   )
 
   const textoLocalIntro = (

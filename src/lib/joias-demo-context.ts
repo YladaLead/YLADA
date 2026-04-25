@@ -15,6 +15,8 @@ export const JOIAS_DEMO_LOCAIS: { value: string; label: string }[] = [
 
 export const STORAGE_KEY_JOIAS_DEMO_LOCAL = 'ylada_joias_demo_local' as const
 
+export const STORAGE_KEY_JOIAS_DEMO_LINHA = 'ylada_joias_demo_linha' as const
+
 export const STORAGE_KEY_JOIAS_DEMO_NICHO = 'ylada_joias_demo_nicho' as const
 
 export const STORAGE_KEY_JOIAS_CONTINUAR_TOUR = 'ylada_joias_continuar_tour' as const

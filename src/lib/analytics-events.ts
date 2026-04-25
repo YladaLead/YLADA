@@ -122,6 +122,7 @@ export type AnalyticsEventName =
   | 'joias_cadastro_promo_cta'
   | 'joias_landing_escolha_inicial'
   | 'joias_demo_local'
+  | 'joias_demo_linha'
   | 'joias_demo_inicio'
   | 'joias_demo_nicho'
   | 'joias_demo_cliente_concluiu'

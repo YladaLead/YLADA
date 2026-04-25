@@ -55,6 +55,7 @@ function ContasDemoContent() {
                   ['Coach', 'demo.coach@ylada.app', '/pt/coach/login'],
                   ['Esteticista', 'demo.estetica@ylada.app', '/pt/estetica/login'],
                   ['Perfumaria', 'demo.perfumaria@ylada.app', '/pt/perfumaria/login'],
+                  ['Joias e bijuterias', 'demo.joias@ylada.app', '/pt/joias/login'],
                 ].map(([area, email, login]) => (
                   <tr key={email} className="border-b border-gray-100">
                     <td className="py-2 px-3 font-medium text-gray-900">{area}</td>

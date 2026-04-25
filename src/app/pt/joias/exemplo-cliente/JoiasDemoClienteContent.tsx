@@ -2,13 +2,19 @@
 
 /**
  * Demo: fluxo no lugar da cliente final (joias / semijoias / bijuterias).
- * Rota: /pt/joias/exemplo-cliente?nicho=semijoia
+ * Rota: /pt/joias/exemplo-cliente?linha=semijoia&nicho=marca_propria
  */
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import YLADALogo from '@/components/YLADALogo'
+import {
+  JOIAS_LINHA_OPTIONS,
+  JOIAS_LINHA_QUERY_KEY,
+  isValidJoiasLinhaProduto,
+  labelJoiasLinhaProduto,
+} from '@/config/joias-linha-produto'
 import {
   JOIAS_DEMO_CLIENTE_NICHOS,
   getJoiasDemoClienteConfig,
@@ -26,6 +32,7 @@ export default function JoiasDemoClienteContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const nichoParam = searchParams.get('nicho')
+  const linhaParam = searchParams.get(JOIAS_LINHA_QUERY_KEY)
 
   const configFromUrl = useMemo(() => getJoiasDemoClienteConfig(nichoParam), [nichoParam])
 
@@ -56,7 +63,21 @@ export default function JoiasDemoClienteContent() {
       setNichoAtivo(v)
       setEtapa(0)
       setFinalizado(false)
-      router.replace(`/pt/joias/exemplo-cliente?nicho=${v}`, { scroll: false })
+      const linhaQ =
+        linhaParam && isValidJoiasLinhaProduto(linhaParam)
+          ? `${JOIAS_LINHA_QUERY_KEY}=${encodeURIComponent(linhaParam)}&`
+          : ''
+      router.replace(`/pt/joias/exemplo-cliente?${linhaQ}nicho=${encodeURIComponent(v)}`, { scroll: false })
+    },
+    [router, linhaParam]
+  )
+
+  const escolherLinha = useCallback(
+    (linha: string) => {
+      if (!isValidJoiasLinhaProduto(linha)) return
+      router.replace(`/pt/joias/exemplo-cliente?${JOIAS_LINHA_QUERY_KEY}=${encodeURIComponent(linha)}`, {
+        scroll: false,
+      })
     },
     [router]
   )
@@ -86,6 +107,45 @@ export default function JoiasDemoClienteContent() {
     router.push('/pt/joias')
   }, [router])
 
+  if (!linhaParam || !isValidJoiasLinhaProduto(linhaParam)) {
+    return (
+      <div className="min-h-[100dvh] bg-white text-gray-900 flex flex-col estetica-touch supports-[height:100svh]:min-h-[100svh]">
+        <header className="sticky top-0 z-10 shrink-0 border-b border-gray-100 bg-white/95 pt-[env(safe-area-inset-top,0px)]">
+          <div className="max-w-lg mx-auto flex items-center justify-between px-4 py-3">
+            <Link
+              href="/pt/joias"
+              className="inline-flex min-h-[48px] min-w-[48px] items-center justify-center -ml-1"
+              aria-label="Voltar"
+            >
+              <YLADALogo size="md" responsive className="bg-transparent" />
+            </Link>
+          </div>
+        </header>
+        <main className="flex-1 max-w-lg mx-auto w-full px-4 py-8">
+          <p className="text-sm text-gray-600 mb-6">
+            Primeiro escolha a linha de produto do exemplo (joia fina, semijoia ou bijuteria).
+          </p>
+          <ul className="space-y-2">
+            {JOIAS_LINHA_OPTIONS.map((n) => (
+              <li key={n.value}>
+                <button
+                  type="button"
+                  onClick={() => escolherLinha(n.value)}
+                  className="w-full text-left rounded-xl border border-gray-200 px-4 py-3 text-sm font-medium text-gray-900 hover:border-blue-300 hover:bg-blue-50/40 transition"
+                >
+                  {n.label}
+                </button>
+              </li>
+            ))}
+          </ul>
+          <Link href="/pt/joias" className="mt-8 block text-center text-sm text-gray-500 hover:text-gray-800">
+            ← Voltar
+          </Link>
+        </main>
+      </div>
+    )
+  }
+
   if (!cfg && !nichoParam) {
     return (
       <div className="min-h-[100dvh] bg-white text-gray-900 flex flex-col estetica-touch supports-[height:100svh]:min-h-[100svh]">
@@ -101,7 +161,8 @@ export default function JoiasDemoClienteContent() {
           </div>
         </header>
         <main className="flex-1 max-w-lg mx-auto w-full px-4 py-8">
-          <p className="text-sm text-gray-600 mb-6">Escolha um foco para ver o exemplo no lugar da sua cliente.</p>
+          <p className="text-xs text-gray-500 mb-1">Linha: {labelJoiasLinhaProduto(linhaParam)}</p>
+          <p className="text-sm text-gray-600 mb-6">Agora escolha o foco comercial do exemplo.</p>
           <ul className="space-y-2">
             {JOIAS_DEMO_CLIENTE_NICHOS.map((n) => (
               <li key={n.value}>
@@ -190,7 +251,13 @@ export default function JoiasDemoClienteContent() {
         </div>
       </header>
       <main className="flex-1 max-w-lg mx-auto w-full px-4 py-8">
-        <p className="text-xs font-semibold uppercase tracking-wide text-blue-600 mb-2">{cfg.label}</p>
+        {linhaParam && isValidJoiasLinhaProduto(linhaParam) ? (
+          <p className="text-xs text-gray-500 mb-1">
+            {labelJoiasLinhaProduto(linhaParam)} · {cfg.label}
+          </p>
+        ) : (
+          <p className="text-xs font-semibold uppercase tracking-wide text-blue-600 mb-2">{cfg.label}</p>
+        )}
         <h1 className="text-xl font-bold text-gray-900 mb-2">{perguntaAtual?.texto}</h1>
         <ul className="mt-6 space-y-2">
           {perguntaAtual?.opcoes.map((op) => (
