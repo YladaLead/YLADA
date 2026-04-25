@@ -3,6 +3,7 @@
 import { useEffect } from 'react'
 import Link from 'next/link'
 import { trackFreemiumConversionEvent } from '@/lib/ylada-freemium-client'
+import { YLADA_FREEMIUM_ACTIVE_LINK_EXPLANATION_SHORT, YLADA_PRO_UPGRADE_PITCH } from '@/config/freemium-limits'
 
 /**
  * Modal quando o usuário Free atinge o limite de diagnósticos ativos (freemium).
@@ -11,12 +12,14 @@ import { trackFreemiumConversionEvent } from '@/lib/ylada-freemium-client'
 export function ActiveLinksProModal({
   open,
   onClose,
-  message,
+  message: _legacyMessageFromApi,
 }: {
   open: boolean
   onClose: () => void
+  /** Mantido para compatibilidade com chamadores; o texto exibido vem das constantes centrais. */
   message: string
 }) {
+  void _legacyMessageFromApi
   useEffect(() => {
     if (!open) return
     const onKey = (e: KeyboardEvent) => {
@@ -57,20 +60,8 @@ export function ActiveLinksProModal({
         <h2 id="active-links-pro-modal-title" className="text-lg font-bold text-gray-900">
           Limite do plano gratuito
         </h2>
-        <p className="mt-1 text-sm font-medium text-amber-900">
-          O link não foi criado: no plano gratuito você pode manter <strong>1 diagnóstico ativo por vez</strong>.
-          Isso não é &quot;um link por mês&quot; — é um diagnóstico no ar ao mesmo tempo. Para criar outro, pause ou
-          arquive um na página Links ou assine o Pro.
-        </p>
-        {message.trim() ? (
-          <p className="mt-3 text-sm text-gray-700 whitespace-pre-wrap border-t border-amber-100 pt-3">
-            {message.trim()}
-          </p>
-        ) : null}
-        <p className="mt-3 text-sm text-gray-600">
-          Com o <strong>Plano Pro</strong> você cria vários diagnósticos ativos, contatos ilimitados no WhatsApp
-          por mês e análises completas do Noel.
-        </p>
+        <p className="mt-1 text-sm font-medium text-amber-900">{YLADA_FREEMIUM_ACTIVE_LINK_EXPLANATION_SHORT}</p>
+        <p className="mt-3 text-sm text-gray-600 border-t border-amber-100 pt-3">{YLADA_PRO_UPGRADE_PITCH}</p>
         <div className="mt-6 flex flex-col-reverse sm:flex-row gap-2 sm:justify-end">
           <button
             type="button"

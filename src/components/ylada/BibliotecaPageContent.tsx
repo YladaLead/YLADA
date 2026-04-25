@@ -36,6 +36,7 @@ import {
   getIdeiaRapidaDoDiaEsteticaCorporal,
   ordenarItemsEsteticaCorporal,
 } from '@/config/pro-estetica-corporal-biblioteca'
+import { YLADA_FREEMIUM_ACTIVE_LINK_EXPLANATION_SHORT, YLADA_PRO_UPGRADE_PITCH } from '@/config/freemium-limits'
 import {
   dedupeEsteticaBibliotecaPorTitulo,
   ESTETICA_BIBLIOTECA_LINHA_QUERY_KEY,
@@ -99,17 +100,6 @@ function funnelPathFromGeneratePayload(payload: { slug?: string; url?: string })
 /** Checkout/preços da matriz (mesmo padrão de `ActiveLinksProModal`). */
 const YLADA_MATRIX_PRECOS_HREF = '/pt/precos'
 
-/** API devolve explicação + pitch separados por linha dupla — melhora leitura no banner. */
-function splitFreemiumActiveLinkMessage(text: string): { principal: string; pitch: string | null } {
-  const t = text.trim()
-  if (!t) return { principal: '', pitch: null }
-  const i = t.indexOf('\n\n')
-  if (i === -1) return { principal: t, pitch: null }
-  const principal = t.slice(0, i).trim()
-  const pitch = t.slice(i + 2).trim() || null
-  return { principal: principal || t, pitch }
-}
-
 /**
  * Erro ao criar link pela biblioteca: não fica “espremido” ao lado do botão (evita sobreposição no layout compacto).
  */
@@ -138,18 +128,15 @@ function BibliotecaLinkCreationAlert({
   }, [showUpgradeCta, analyticsSurface])
 
   if (showUpgradeCta) {
-    const { principal, pitch } = splitFreemiumActiveLinkMessage(trimmed)
     return (
       <div
         className="mt-4 w-full rounded-xl border border-amber-200/90 bg-gradient-to-b from-amber-50 via-amber-50/95 to-amber-100/40 p-4 text-left shadow-sm ring-1 ring-amber-100/60"
         role="alert"
       >
         <p className="text-sm font-semibold tracking-tight text-amber-950">Limite do plano gratuito</p>
-        <p className="mt-2 text-sm leading-relaxed text-amber-950/95">{principal}</p>
-        {pitch ? (
-          <p className="mt-3 border-t border-amber-200/80 pt-3 text-xs leading-relaxed text-amber-900/88">{pitch}</p>
-        ) : null}
-        <div className="mt-4 flex flex-wrap items-center gap-2">
+        <p className="mt-2 text-sm leading-relaxed text-amber-950/95">{YLADA_FREEMIUM_ACTIVE_LINK_EXPLANATION_SHORT}</p>
+        <p className="mt-3 border-t border-amber-200/80 pt-3 text-sm leading-relaxed text-amber-900/90">{YLADA_PRO_UPGRADE_PITCH}</p>
+        <div className="mt-4">
           <Link
             href={YLADA_MATRIX_PRECOS_HREF}
             onClick={() =>
@@ -162,7 +149,6 @@ function BibliotecaLinkCreationAlert({
           >
             Ver planos e assinar o Pro
           </Link>
-          <span className="text-xs text-amber-900/75">Pausa ou arquiva um link ativo para criar outro no grátis.</span>
         </div>
       </div>
     )

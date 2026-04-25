@@ -8,6 +8,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import { getCachedSubscription, setCachedSubscription } from '@/lib/subscription-cache'
 import { getAccessRule, getRenewOrCheckoutPath, getHomePath, getAreaFromPath } from '@/lib/access-rules'
 import { isPerfilMatrizYlada } from '@/lib/admin-matriz-constants'
+import { YLADA_PRO_UPGRADE_PITCH } from '@/config/freemium-limits'
 
 interface RequireSubscriptionProps {
   children: React.ReactNode
@@ -505,9 +506,8 @@ function MatrixFreedomPlanBanner({ upgradeHref }: { upgradeHref: string }) {
     >
       <div className="max-w-4xl mx-auto flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
         <p className="leading-snug">
-          <span className="font-semibold">Plano Freedom:</span> na matriz valem os limites do plano gratuito
-          (diagnóstico ativo, contatos no WhatsApp por mês e análises estratégicas do Noel). No Pro esses tetos
-          são ampliados ou removidos.
+          <span className="font-semibold">Plano Freedom:</span> na matriz valem os limites do plano gratuito (1
+          diagnóstico ativo, contatos no WhatsApp por mês e análises do Noel). {YLADA_PRO_UPGRADE_PITCH}
         </p>
         <Link
           href={upgradeHref}

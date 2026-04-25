@@ -23,13 +23,23 @@ export type FreemiumConversionKind = (typeof FREEMIUM_CONVERSION_KINDS)[number]
 /** Resposta API quando o link não é o único ativo permitido no Free (só o mais antigo fica público). */
 export const FREEMIUM_LIMIT_TYPE_EXTRA_ACTIVE_LINK = 'freemium_extra_active_link' as const
 
-/** Bloco único de benefícios Pro (tom: profissional / segunda pessoa). */
+/**
+ * Benefícios Pro — **uma frase** (tom objetivo; alinhado ao `ActiveLinksProModal` e paywalls da matriz).
+ * Textos longos de “documentário” ficam fora da UI; detalhe fica em marketing/docs.
+ */
 export const YLADA_PRO_UPGRADE_PITCH =
-  'No plano Pro você tem o Noel sem limite para pensar em estratégias, atrair clientes e promover melhor o seu trabalho. Também cria links ilimitados e usa vários fluxos para gerar contato, com conversas ilimitadas chegando no seu WhatsApp.' as const
+  'Com o Plano Pro você cria vários diagnósticos ativos, contatos ilimitados no WhatsApp por mês e análises completas do Noel.' as const
 
-/** Mesmo pitch na terceira pessoa (visitante do link falando da profissional). */
+/** Terceira pessoa (visitante do link). */
 export const YLADA_PRO_UPGRADE_PITCH_VISITOR =
-  'Com o plano Pro ela libera o Noel sem limite para pensar em estratégias, atrair clientes e promover melhor o trabalho; cria links ilimitados e usa vários fluxos para gerar contato, com conversas ilimitadas no WhatsApp.' as const
+  'Com o plano Pro ela cria vários diagnósticos ativos, contatos ilimitados no WhatsApp por mês e análises completas do Noel.' as const
+
+/**
+ * Limite “1 diagnóstico ativo por vez” — texto curto (modal Links, biblioteca, resposta da API ao criar link).
+ * @see ActiveLinksProModal
+ */
+export const YLADA_FREEMIUM_ACTIVE_LINK_EXPLANATION_SHORT =
+  'No plano gratuito você pode manter 1 diagnóstico ativo por vez. Isso não é "um link por mês": é um diagnóstico no ar ao mesmo tempo. Para criar outro, pause ou arquive um na página Links ou assine o Pro.' as const
 
 /** Limite mensal de contatos WhatsApp (visitante) — texto completo da API + fallback da UI pública. */
 export const YLADA_FREEMIUM_WHATSAPP_MONTHLY_LIMIT_MESSAGE_VISITOR =
@@ -43,9 +53,9 @@ export const YLADA_FREEMIUM_EXTRA_ACTIVE_LINK_MESSAGE_VISITOR =
 export const YLADA_FREEMIUM_NOEL_MONTHLY_LIMIT_MESSAGE =
   `Seus créditos com o Noel neste mês já foram utilizados — quando o ciclo renovar, eles voltam automaticamente.\n\n${YLADA_PRO_UPGRADE_PITCH}` as const
 
-/** Só um link ativo no Free (profissional) — texto completo ao tentar criar outro. */
+/** Só um link ativo no Free (profissional) — API + sessionStorage; corpo = curto + pitch curto. */
 export const YLADA_FREEMIUM_ACTIVE_LINK_LIMIT_MESSAGE =
-  `No plano gratuito você mantém um diagnóstico ativo por vez (não é um limite por mês em quantidade de links — é um diagnóstico publicado ao mesmo tempo). Para criar outro, pause ou arquive um link na lista desta página, ou assine o Pro para vários ativos.\n\n${YLADA_PRO_UPGRADE_PITCH}` as const
+  `${YLADA_FREEMIUM_ACTIVE_LINK_EXPLANATION_SHORT}\n\n${YLADA_PRO_UPGRADE_PITCH}` as const
 
 /** Texto curto para banner na página de Links (plano gratuito). */
 export const YLADA_FREEMIUM_LINKS_PAGE_HINT =
