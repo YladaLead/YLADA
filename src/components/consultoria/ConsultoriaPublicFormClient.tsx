@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { ConsultoriaFormField } from '@/lib/pro-lideres-consultoria'
+import { isConsultoriaFieldVisibleForAnswers } from '@/lib/pro-lideres-consultoria'
+import { flagEmojiForEsteticaWhatsappDdiOption } from '@/lib/estetica-consultoria-form-templates'
 
 type Area = 'pro_lideres' | 'estetica'
 
@@ -111,6 +113,9 @@ function CheckboxGroupField({
 
 function validateFieldsChunk(fields: ConsultoriaFormField[], answers: Record<string, string>): string | null {
   for (const f of fields) {
+    if (!isConsultoriaFieldVisibleForAnswers(f, answers)) {
+      continue
+    }
     const s = (answers[f.id] ?? '').trim()
     if (f.required && !s) {
       return `O campo «${f.label}» é obrigatório.`
@@ -138,6 +143,9 @@ function validateFieldsChunk(fields: ConsultoriaFormField[], answers: Record<str
   return null
 }
 
+const FIELD_TOUCH_BASE =
+  'w-full min-h-[44px] touch-manipulation rounded-xl border border-gray-300 bg-white px-3 py-3 text-base text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500'
+
 function FieldEditor({
   f,
   answers,
@@ -147,8 +155,14 @@ function FieldEditor({
   answers: Record<string, string>
   setAnswers: React.Dispatch<React.SetStateAction<Record<string, string>>>
 }) {
-  const inputClass =
-    'mt-2 w-full min-h-[44px] touch-manipulation rounded-xl border border-gray-300 bg-white px-3 py-3 text-base text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500'
+  const inputClass = `mt-2 ${FIELD_TOUCH_BASE}`
+  const ddiSelect = f.id === 'whatsapp_ddi' && f.type === 'select'
+  const storedDdi = (answers[f.id] ?? '').trim()
+
+  if (!isConsultoriaFieldVisibleForAnswers(f, answers)) {
+    return null
+  }
+
   return (
     <label className="block text-sm">
       <span className="font-medium text-gray-900">
@@ -164,19 +178,53 @@ function FieldEditor({
           rows={4}
         />
       ) : f.type === 'select' ? (
-        <select
-          required={f.required}
-          className={inputClass}
-          value={answers[f.id] ?? ''}
-          onChange={(e) => setAnswers((prev) => ({ ...prev, [f.id]: e.target.value }))}
-        >
-          <option value="">Escolher…</option>
-          {(f.options ?? []).map((o) => (
-            <option key={o} value={o}>
-              {o}
-            </option>
-          ))}
-        </select>
+        ddiSelect ? (
+          <div className="relative mt-2">
+            <select
+              required={f.required}
+              className={`${FIELD_TOUCH_BASE} appearance-none pl-11 pr-9`}
+              value={answers[f.id] ?? ''}
+              onChange={(e) => setAnswers((prev) => ({ ...prev, [f.id]: e.target.value }))}
+              title="DDI do país"
+            >
+              <option value="">Escolher…</option>
+              {(f.options ?? []).map((o) => {
+                const tail = o.includes(' — ') ? o.split(' — ').slice(1).join(' — ') : o
+                return (
+                  <option key={o} value={o}>
+                    {flagEmojiForEsteticaWhatsappDdiOption(o)} {tail}
+                  </option>
+                )
+              })}
+            </select>
+            <span
+              className="pointer-events-none absolute left-3 top-1/2 z-[1] -translate-y-1/2 text-xl leading-none"
+              aria-hidden
+            >
+              {storedDdi ? flagEmojiForEsteticaWhatsappDdiOption(storedDdi) : '🌍'}
+            </span>
+            <span
+              className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+              aria-hidden
+            >
+              ▼
+            </span>
+          </div>
+        ) : (
+          <select
+            required={f.required}
+            className={inputClass}
+            value={answers[f.id] ?? ''}
+            onChange={(e) => setAnswers((prev) => ({ ...prev, [f.id]: e.target.value }))}
+          >
+            <option value="">Escolher…</option>
+            {(f.options ?? []).map((o) => (
+              <option key={o} value={o}>
+                {o}
+              </option>
+            ))}
+          </select>
+        )
       ) : f.type === 'checkbox_group' ? (
         <CheckboxGroupField f={f} answers={answers} setAnswers={setAnswers} />
       ) : (
@@ -223,7 +271,8 @@ export default function ConsultoriaPublicFormClient({
 
   const useWizard = area === 'estetica' && fields.length >= WIZARD_MIN_FIELDS
   const fieldChunks = useMemo(() => chunkFields(fields, FIELDS_PER_STEP), [fields])
-  const totalWizardSteps = 1 + fieldChunks.length
+  /** Estética: só blocos de perguntas (sem etapa inicial só de nome/e-mail). */
+  const totalWizardSteps = fieldChunks.length
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -354,11 +403,7 @@ export default function ConsultoriaPublicFormClient({
 
   const goNextWizard = () => {
     setError(null)
-    if (wizardStep === 0) {
-      setWizardStep(1)
-      return
-    }
-    const chunk = fieldChunks[wizardStep - 1]
+    const chunk = fieldChunks[wizardStep]
     if (!chunk) return
     const err = validateFieldsChunk(chunk, answers)
     if (err) {
@@ -497,13 +542,7 @@ export default function ConsultoriaPublicFormClient({
               area === 'estetica' ? 'text-blue-900/60' : 'text-gray-600'
             }`}
           >
-            <span>
-              {area === 'estetica'
-                ? wizardStep === 0
-                  ? 'Início'
-                  : m.stepOf(wizardStep, totalWizardSteps - 1)
-                : m.stepOf(wizardStep + 1, totalWizardSteps)}
-            </span>
+            <span>{m.stepOf(wizardStep + 1, totalWizardSteps)}</span>
             <span>{Math.round(progressPct)}%</span>
           </div>
           <div
@@ -541,36 +580,27 @@ export default function ConsultoriaPublicFormClient({
             {saving ? m.submitting : m.submit}
           </button>
         </>
-      ) : wizardStep === 0 ? (
-        <div className="space-y-5">
-          {contactGrid}
-          <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-            <button
-              type="button"
-              onClick={() => goNextWizard()}
-              className="min-h-[44px] w-full touch-manipulation rounded-xl bg-blue-600 px-4 py-3 text-base font-semibold text-white shadow-sm hover:bg-blue-700 sm:w-auto sm:min-w-[160px]"
-            >
-              {m.next}
-            </button>
-          </div>
-        </div>
       ) : (
         <div className="space-y-5">
-          {(fieldChunks[wizardStep - 1] ?? []).map((f) => (
+          {(fieldChunks[wizardStep] ?? []).map((f) => (
             <FieldEditor key={f.id} f={f} answers={answers} setAnswers={setAnswers} />
           ))}
           <div className="flex flex-col-reverse gap-2 pt-2 sm:flex-row sm:justify-between">
-            <button
-              type="button"
-              onClick={() => goBackWizard()}
-              className={`min-h-[44px] w-full touch-manipulation rounded-xl border bg-white px-4 py-3 text-base font-semibold shadow-sm sm:w-auto sm:min-w-[120px] ${
-                area === 'estetica'
-                  ? 'border-blue-200/90 text-blue-950 hover:bg-blue-50/80'
-                  : 'border-gray-300 text-gray-800 hover:bg-gray-50'
-              }`}
-            >
-              {m.back}
-            </button>
+            {wizardStep > 0 ? (
+              <button
+                type="button"
+                onClick={() => goBackWizard()}
+                className={`min-h-[44px] w-full touch-manipulation rounded-xl border bg-white px-4 py-3 text-base font-semibold shadow-sm sm:w-auto sm:min-w-[120px] ${
+                  area === 'estetica'
+                    ? 'border-blue-200/90 text-blue-950 hover:bg-blue-50/80'
+                    : 'border-gray-300 text-gray-800 hover:bg-gray-50'
+                }`}
+              >
+                {m.back}
+              </button>
+            ) : (
+              <span className="hidden sm:block sm:min-w-[120px]" aria-hidden />
+            )}
             <button
               type="button"
               disabled={saving}

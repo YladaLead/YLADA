@@ -130,6 +130,54 @@ function ddiCodeFromOption(opt: string): string {
   return m ? `+${m[1]}` : ''
 }
 
+/** Bandeira por código discado (alinhado a `ESTETICA_WHATSAPP_DDI_OPTIONS`). */
+const ESTETICA_DIAL_FLAG: Record<string, string> = {
+  '+55': '🇧🇷',
+  '+351': '🇵🇹',
+  '+34': '🇪🇸',
+  '+1': '🇺🇸',
+  '+52': '🇲🇽',
+  '+54': '🇦🇷',
+  '+56': '🇨🇱',
+  '+57': '🇨🇴',
+  '+51': '🇵🇪',
+  '+598': '🇺🇾',
+  '+595': '🇵🇾',
+  '+593': '🇪🇨',
+  '+591': '🇧🇴',
+  '+506': '🇨🇷',
+  '+507': '🇵🇦',
+  '+502': '🇬🇹',
+  '+503': '🇸🇻',
+  '+504': '🇭🇳',
+  '+505': '🇳🇮',
+  '+53': '🇨🇺',
+  '+592': '🇬🇾',
+  '+594': '🇬🇫',
+  '+49': '🇩🇪',
+  '+33': '🇫🇷',
+  '+39': '🇮🇹',
+  '+44': '🇬🇧',
+  '+31': '🇳🇱',
+  '+41': '🇨🇭',
+  '+43': '🇦🇹',
+  '+972': '🇮🇱',
+  '+971': '🇦🇪',
+  '+244': '🇦🇴',
+  '+258': '🇲🇿',
+  '+238': '🇨🇻',
+  '+670': '🇹🇱',
+  '+86': '🇨🇳',
+  '+81': '🇯🇵',
+}
+
+/** Emoji de bandeira para uma linha de opção DDI (ex.: "+55 — Brasil") ou valor já guardado. */
+export function flagEmojiForEsteticaWhatsappDdiOption(optionLine: string): string {
+  const dial = ddiCodeFromOption(optionLine.trim())
+  if (!dial) return '🌍'
+  return ESTETICA_DIAL_FLAG[dial] ?? '🌍'
+}
+
 /** Prefill: separa DDI e número local a partir do telefone guardado no admin (com ou sem +). */
 export function splitPhoneForEsteticaWhatsappPrefill(phone: string): { ddi: string; local: string } {
   const raw = phone.trim()
@@ -597,7 +645,27 @@ export function buildPreDiagnosticoCorporalV1Fields(): ConsultoriaFormField[] {
       label: '7. O que suas clientes mais buscam no corporal?',
       type: 'select',
       required: true,
-      options: ['Gordura localizada', 'Flacidez', 'Celulite', 'Retenção de líquido', 'Mais de um destes (equilibrado)'],
+      options: [
+        'Gordura localizada',
+        'Flacidez',
+        'Celulite',
+        'Retenção de líquido',
+        'Contorno corporal / definição',
+        'Estrias ou firmeza de pele no corpo',
+        'Drenagem ou desconforto de inchaço',
+        'Pós-cirúrgico ou cicatrizes (corporal)',
+        'Manchas ou textura da pele no corpo',
+        'Massagem por tensão ou bem-estar',
+        'Mais de um destes (equilibrado)',
+        'Outros',
+      ],
+    },
+    {
+      id: 'pre_queixa_corporal_outros',
+      label: '7. Se escolheu «Outros», descreva o que as clientes mais buscam',
+      type: 'textarea',
+      required: true,
+      visibleWhenAnswerIncludes: { fieldId: 'pre_queixa_corporal', substring: 'Outros' },
     },
     {
       id: 'pre_aberta_estrategia',
@@ -954,7 +1022,26 @@ export function buildPreDiagnosticoCapilarV1Fields(): ConsultoriaFormField[] {
       label: '7. Qual a principal queixa que suas clientes trazem?',
       type: 'select',
       required: true,
-      options: ['Queda de cabelo', 'Falhas / falhas de preenchimento', 'Afinamento dos fios', 'Caspa ou oleosidade', 'Mais de um destes'],
+      options: [
+        'Queda de cabelo',
+        'Afinamento ou fios finos',
+        'Falhas / falta de densidade',
+        'Caspa ou oleosidade',
+        'Ressecamento ou pontas espigadas',
+        'Danos por química, coloração ou calor',
+        'Crescimento ou fortalecimento',
+        'Couro cabeludo sensível ou com comichão',
+        'Ausência de brilho ou volume',
+        'Mais de um destes',
+        'Outros',
+      ],
+    },
+    {
+      id: 'pre_queixa_capilar_outros',
+      label: '7. Se escolheu «Outros», descreva a principal queixa',
+      type: 'textarea',
+      required: true,
+      visibleWhenAnswerIncludes: { fieldId: 'pre_queixa_capilar', substring: 'Outros' },
     },
     {
       id: 'pre_aberta_estrategia',

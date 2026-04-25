@@ -16,6 +16,8 @@ export type ConsultoriaFormField = {
   type: 'text' | 'textarea' | 'select' | 'checkbox_group'
   options?: string[]
   required?: boolean
+  /** Só mostrar / validar quando a resposta de `fieldId` contém `substring` (ex.: opção «Outros»). */
+  visibleWhenAnswerIncludes?: { fieldId: string; substring: string }
 }
 
 export type ConsultoriaRoteiroStep = {
@@ -202,11 +204,24 @@ export function getConsultoriaFormFields(content: Record<string, unknown>): Cons
   }) as ConsultoriaFormField[]
 }
 
+export function isConsultoriaFieldVisibleForAnswers(
+  f: ConsultoriaFormField,
+  answers: Record<string, unknown>
+): boolean {
+  if (!f.visibleWhenAnswerIncludes) return true
+  const p = answers[f.visibleWhenAnswerIncludes.fieldId]
+  const parentStr = p == null ? '' : String(p)
+  return parentStr.includes(f.visibleWhenAnswerIncludes.substring)
+}
+
 export function validateConsultoriaFormAnswers(
   fields: ConsultoriaFormField[],
   answers: Record<string, unknown>
 ): { ok: true } | { ok: false; error: string } {
   for (const f of fields) {
+    if (!isConsultoriaFieldVisibleForAnswers(f, answers)) {
+      continue
+    }
     const v = answers[f.id]
     if (f.required) {
       const s = v == null ? '' : String(v).trim()

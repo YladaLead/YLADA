@@ -2,11 +2,22 @@ import type { Metadata } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
 import ConsultoriaPublicFormClient from '@/components/consultoria/ConsultoriaPublicFormClient'
-import { buildEsteticaConsultoriaResponderShareMetadata } from '@/lib/estetica-consultoria-responder-og'
+import {
+  buildEsteticaConsultoriaResponderShareMetadata,
+  resolveEsteticaConsultoriaResponderOgBand,
+  responderOgBandLabel,
+} from '@/lib/estetica-consultoria-responder-og'
 import { YLADA_OG_FALLBACK_LOGO_PATH } from '@/lib/ylada-og-fallback-logo'
 
-export function generateMetadata(): Metadata {
-  return buildEsteticaConsultoriaResponderShareMetadata()
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ token: string }>
+}): Promise<Metadata> {
+  const { token } = await params
+  const safe = typeof token === 'string' ? decodeURIComponent(token).trim() : ''
+  const band = safe ? await resolveEsteticaConsultoriaResponderOgBand(safe) : 'unknown'
+  return buildEsteticaConsultoriaResponderShareMetadata(band)
 }
 
 export default async function EsteticaConsultoriaResponderPage({
@@ -18,6 +29,8 @@ export default async function EsteticaConsultoriaResponderPage({
 }) {
   const { token } = await params
   const safe = typeof token === 'string' ? token : ''
+  const band = safe ? await resolveEsteticaConsultoriaResponderOgBand(safe) : 'unknown'
+  const bandLine = responderOgBandLabel(band)
   const sp = searchParams ? await searchParams : {}
   const confirmRaw = sp?.confirm
   const initialConfirmCode =
@@ -32,7 +45,9 @@ export default async function EsteticaConsultoriaResponderPage({
             className="inline-flex min-h-[44px] min-w-[44px] touch-manipulation flex-col items-center justify-center gap-2 rounded-xl px-2 py-1"
           >
             <Image src={YLADA_OG_FALLBACK_LOGO_PATH} alt="YLADA" width={100} height={32} className="h-8 w-auto" />
-            <span className="text-xs font-medium text-blue-900/55 tracking-wide">Estética · Consultoria</span>
+            <span className="text-xs font-medium text-blue-900/55 tracking-wide">
+              {bandLine} · Confidencial
+            </span>
           </Link>
         </div>
         <div className="rounded-2xl border border-blue-100/80 bg-white p-4 shadow-sm shadow-blue-900/5 sm:p-6">

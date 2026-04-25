@@ -1,4 +1,5 @@
 import type { ConsultoriaFormField } from '@/lib/pro-lideres-consultoria'
+import { isConsultoriaFieldVisibleForAnswers } from '@/lib/pro-lideres-consultoria'
 
 export type ConsultoriaAnswerRow = { label: string; value: string; fieldId: string }
 
@@ -39,6 +40,9 @@ export function consultoriaAnswersToDisplayRows(
   const seen = new Set<string>()
   for (const f of fields) {
     seen.add(f.id)
+    if (!isConsultoriaFieldVisibleForAnswers(f, answers)) {
+      continue
+    }
     const v = answers[f.id]
     let str = v == null ? '' : String(v).trim()
     if (str.length && f.type === 'checkbox_group') {
