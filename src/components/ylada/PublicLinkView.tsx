@@ -9,6 +9,11 @@ import {
   YLADA_PRO_UPGRADE_PITCH_VISITOR,
 } from '@/config/freemium-limits'
 import DiagnosisDisclaimer from '@/components/ylada/DiagnosisDisclaimer'
+import {
+  enrichCommerceResultDescriptionIfGeneric,
+  getMatrixCommercePublicLinkCopy,
+  isMatrixCommercePublicLinkSegment,
+} from '@/config/ylada-public-link-commerce-ui'
 import PoweredByYlada from '@/components/ylada/PoweredByYlada'
 import type { Language } from '@/lib/i18n'
 import { createClient } from '@/lib/supabase-client'
@@ -764,16 +769,21 @@ function ConfigDrivenLinkView({
   onCtaClick: (metricsId?: string, whatsappPrefill?: string) => void
   locale?: Language
 }) {
-  const t = PUBLIC_LINK_UI[locale]
   const page = (config.page as Record<string, unknown>) || {}
   const formConfig = (config.form as Record<string, unknown>) || {}
   const resultConfig = (config.result as ResultConfig) || {}
   const meta = (config.meta as Record<string, unknown>) || {}
+  const archMeta = typeof meta.architecture === 'string' ? meta.architecture : ''
+  const segmentCodeForUi =
+    typeof meta.segment_code === 'string' ? String(meta.segment_code).toLowerCase().trim() : ''
+  const useCommercePublicCopy =
+    isMatrixCommercePublicLinkSegment(segmentCodeForUi) && archMeta !== 'PERFUME_PROFILE'
+  const commercePublicCopy = useCommercePublicCopy ? getMatrixCommercePublicLinkCopy(locale) : null
+  const t = commercePublicCopy ? { ...PUBLIC_LINK_UI[locale], ...commercePublicCopy } : PUBLIC_LINK_UI[locale]
   const isProLideresRecruitmentLink =
     meta.pro_lideres_preset === true && meta.pro_lideres_kind === 'recruitment'
   const fieldsRaw = (formConfig.fields as FormField[]) || []
   const submitLabel = (formConfig.submit_label as string) || t.seeResult
-  const archMeta = typeof meta.architecture === 'string' ? meta.architecture : ''
   /** Calculadora de projeção: nunca injetar opções Sim/Não — sempre entrada numérica (corrige links antigos mal gerados). */
   const fields =
     archMeta === 'PROJECTION_CALCULATOR'
@@ -1018,10 +1028,11 @@ function ConfigDrivenLinkView({
   }
 
   const headline = resultConfig.headline || (isProLideresRecruitmentLink ? t.recruitmentYourResult : t.yourResult)
-  const resultDescription =
+  const resultDescriptionRaw =
     typeof resultConfig.description === 'string' && resultConfig.description.trim()
       ? resultConfig.description.trim()
       : ''
+  const resultDescription = enrichCommerceResultDescriptionIfGeneric(locale, segmentCodeForUi, resultDescriptionRaw)
   const summaryBullets = Array.isArray(resultConfig.summary_bullets) ? resultConfig.summary_bullets : []
 
   // StrategicIntro: bloco antes da primeira pergunta; para quiz paciente (emagrecimento etc.) usa intro voltada ao visitante
@@ -1193,9 +1204,8 @@ function ConfigDrivenLinkView({
     if (diagnosis && metricsId && !isProLideresRecruitmentLink) {
       const isPerfumery = meta.architecture === 'PERFUME_PROFILE' || meta.segment_code === 'perfumaria'
       const areaProf = typeof meta.area_profissional === 'string' ? meta.area_profissional : ''
-      const segmentCode = typeof meta.segment_code === 'string' ? meta.segment_code : ''
       const useEspecialista =
-        areaProf === 'vendas' || ['seller', 'perfumaria', 'nutra'].includes(segmentCode)
+        areaProf === 'vendas' || ['seller', 'perfumaria', 'nutra', 'joias'].includes(segmentCodeForUi)
       const pessoaLabel = useEspecialista ? 'especialista' : 'profissional'
       const rawProfileName = sanitizeResultTitle(diagnosis.profile_title || '')
       const fallbackProfileFromInsight = sanitizeResultTitle(diagnosis.main_blocker || diagnosis.causa_provavel || '')
@@ -1293,7 +1303,9 @@ function ConfigDrivenLinkView({
             </div>
 
             <div className="mb-5 p-4 rounded-xl border border-gray-100 bg-gray-50/70">
-              <p className="text-[10px] font-semibold uppercase tracking-wider text-gray-500 mb-2">Ponto principal</p>
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-gray-500 mb-2">
+                {commercePublicCopy ? t.whatItMeans : locale === 'en' ? 'Main point' : locale === 'es' ? 'Punto principal' : 'Ponto principal'}
+              </p>
               <p className="text-sm text-gray-700 leading-relaxed">
                 {primaryInsightText}
               </p>
@@ -1393,9 +1405,7 @@ function ConfigDrivenLinkView({
 
             {whatsappUrl ? (
               <div className="space-y-3">
-                <p className="text-center text-sm text-gray-600">
-                  Esse padrão é comum e pode ser ajustado com orientação certa.
-                </p>
+                <p className="text-center text-sm text-gray-600">{t.quizResultHelperLine}</p>
                 <button
                   type="button"
                   onClick={() =>
@@ -1440,8 +1450,15 @@ function ConfigDrivenLinkView({
             </div>
             <DiagnosisDisclaimer
               variant={
-                isPerfumery ? 'wellness' : isProLideresRecruitmentLink ? 'recrutamento_pro_lideres' : 'informative'
+                isProLideresRecruitmentLink
+                  ? 'recrutamento_pro_lideres'
+                  : commercePublicCopy
+                    ? 'commerce'
+                    : isPerfumery
+                      ? 'wellness'
+                      : 'informative'
               }
+              locale={locale}
               className="mt-4"
             />
           </div>
@@ -1450,9 +1467,9 @@ function ConfigDrivenLinkView({
     }
 
     const areaProfStatic = typeof meta.area_profissional === 'string' ? meta.area_profissional : ''
-    const segmentCodeStatic = typeof meta.segment_code === 'string' ? meta.segment_code : ''
+    const isPerfumeryStatic = meta.architecture === 'PERFUME_PROFILE' || meta.segment_code === 'perfumaria'
     const useEspecialistaStatic =
-      areaProfStatic === 'vendas' || ['seller', 'perfumaria', 'nutra'].includes(segmentCodeStatic)
+      areaProfStatic === 'vendas' || ['seller', 'perfumaria', 'nutra', 'joias'].includes(segmentCodeForUi)
     const pessoaLabelStatic = useEspecialistaStatic ? 'especialista' : 'profissional'
     const handleShareStaticResult = () => {
       trackLinkEvent(slug, 'share_click')
@@ -1531,7 +1548,16 @@ function ConfigDrivenLinkView({
             <PoweredByYlada variant="compact" />
           </div>
           <DiagnosisDisclaimer
-            variant={isProLideresRecruitmentLink ? 'recrutamento_pro_lideres' : 'informative'}
+            variant={
+              isProLideresRecruitmentLink
+                ? 'recrutamento_pro_lideres'
+                : commercePublicCopy
+                  ? 'commerce'
+                  : isPerfumeryStatic
+                    ? 'wellness'
+                    : 'informative'
+            }
+            locale={locale}
             className="mt-4"
           />
         </div>
@@ -1793,12 +1819,30 @@ function DiagnosticoQuiz({
   title: string
   locale?: Language
 }) {
-  const t = PUBLIC_LINK_UI[locale]
+  const segmentCode =
+    typeof (config as { meta?: { segment_code?: string } }).meta?.segment_code === 'string'
+      ? String((config as { meta: { segment_code: string } }).meta.segment_code)
+          .toLowerCase()
+          .trim()
+      : ''
+  const commerceUi = isMatrixCommercePublicLinkSegment(segmentCode) ? getMatrixCommercePublicLinkCopy(locale) : null
+  const t = commerceUi ? { ...PUBLIC_LINK_UI[locale], ...commerceUi } : PUBLIC_LINK_UI[locale]
   const cfg = config as DiagnosticoConfig
   const questions = Array.isArray(cfg.questions) ? cfg.questions : []
   const results = Array.isArray(cfg.results) ? cfg.results : []
   const resultIntro = (cfg.resultIntro as string) || (locale === 'en' ? 'Your result:' : locale === 'es' ? 'Tu resultado:' : 'Seu resultado:')
-  const pessoaLabel = locale === 'en' ? 'professional' : locale === 'es' ? 'profesional' : 'profissional'
+  const pessoaLabel =
+    commerceUi != null
+      ? locale === 'en'
+        ? 'seller'
+        : locale === 'es'
+          ? 'vendedora'
+          : 'especialista'
+      : locale === 'en'
+        ? 'professional'
+        : locale === 'es'
+          ? 'profesional'
+          : 'profissional'
 
   const [answers, setAnswers] = useState<Record<string, number>>({})
   const [step, setStep] = useState<'intro' | 'quiz' | 'result'>('intro')
@@ -1860,7 +1904,8 @@ function DiagnosticoQuiz({
   const sortedResults = [...results].sort((a, b) => (b.minScore ?? 0) - (a.minScore ?? 0))
   const result = sortedResults.find((r) => score >= (r.minScore ?? 0)) ?? sortedResults[sortedResults[0] ? 0 : 0]
   const resultHeadline = (result?.headline ?? '').trim()
-  const resultDescription = softenTemplateEmDashes((result?.description ?? '').trim())
+  const resultDescriptionRaw = softenTemplateEmDashes((result?.description ?? '').trim())
+  const resultDescription = enrichCommerceResultDescriptionIfGeneric(locale, segmentCode, resultDescriptionRaw)
 
   if (step === 'intro') {
     const introTitle = (cfg.introTitle as string)?.trim() || title
@@ -1995,7 +2040,11 @@ function DiagnosticoQuiz({
           <div className="mt-5 pt-4 border-t border-gray-100">
             <PoweredByYlada variant="compact" />
           </div>
-          <DiagnosisDisclaimer variant="informative" className="mt-4" />
+          <DiagnosisDisclaimer
+            variant={commerceUi ? 'commerce' : 'informative'}
+            locale={locale}
+            className="mt-4"
+          />
         </div>
       </div>
     )

@@ -1,5 +1,7 @@
 'use client'
 
+import type { Language } from '@/lib/i18n'
+
 /**
  * Bloco padrão de orientação (disclaimer) para resultados de diagnóstico.
  * Protege a plataforma e os profissionais em áreas como saúde, psicologia, nutrição e bem-estar.
@@ -15,6 +17,14 @@ export type DisclaimerVariant =
   | 'recrutamento'
   /** Pro Líderes + contexto equipe Herbalife (oportunidade de negócio independente). */
   | 'recrutamento_pro_lideres'
+  /** Varejo matriz (joias, perfumaria, nutra, seller): quiz orientativo, sem tom clínico. */
+  | 'commerce'
+
+const COMMERCE_DISCLAIMER_PT = [
+  'Este resultado é um quiz orientativo com base nas respostas que você enviou.',
+  'Não substitui atendimento em loja, avaliação presencial de produto nem orientação de saúde.',
+  'Para combinações, pedidos, disponibilidade e políticas da loja, converse com quem compartilhou o link.',
+] as const
 
 const TEXTS: Record<DisclaimerVariant, string[]> = {
   informative: [
@@ -37,17 +47,39 @@ const TEXTS: Record<DisclaimerVariant, string[]> = {
     'Não substitui aconselhamento jurídico, fiscal ou contabilístico; não constitui promessa de ganhos nem avaliação médica.',
     'Para produtos, oportunidade e regras oficiais, esclarece com quem te enviou o link ou com os canais da Herbalife.',
   ],
+  commerce: [...COMMERCE_DISCLAIMER_PT],
+}
+
+const TEXTS_COMMERCE_LOCALE: Record<Language, string[]> = {
+  pt: [...COMMERCE_DISCLAIMER_PT],
+  en: [
+    'This result is an orientation quiz based on the answers you submitted.',
+    'It does not replace in-store service, in-person product evaluation, or health advice.',
+    'For combinations, orders, availability, and store policies, message whoever shared this link.',
+  ],
+  es: [
+    'Este resultado es un quiz orientativo basado en las respuestas que enviaste.',
+    'No sustituye atención en tienda, evaluación presencial del producto ni orientación de salud.',
+    'Para combinaciones, pedidos, disponibilidad y políticas de la tienda, habla con quien compartió el enlace.',
+  ],
 }
 
 type Props = {
   /** Variante do texto (bem-estar, recrutamento, Pro Líderes, etc.) */
   variant?: DisclaimerVariant
+  /** Usado com `variant="commerce"` para EN/ES no link público. */
+  locale?: Language
   /** Classe CSS adicional para o container */
   className?: string
 }
 
-export default function DiagnosisDisclaimer({ variant = 'informative', className = '' }: Props) {
-  const lines = TEXTS[variant]
+export default function DiagnosisDisclaimer({
+  variant = 'informative',
+  locale = 'pt',
+  className = '',
+}: Props) {
+  const lines =
+    variant === 'commerce' ? TEXTS_COMMERCE_LOCALE[locale] ?? TEXTS_COMMERCE_LOCALE.pt : TEXTS[variant]
 
   return (
     <div
