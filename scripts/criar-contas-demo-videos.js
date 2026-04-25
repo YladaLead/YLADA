@@ -3,6 +3,7 @@
 /**
  * Script para criar contas demo para vídeos de demonstração da plataforma.
  * Cria: demo.med, demo.psi, demo.vendedor (vendas em gerais), demo.nutra, demo.nutri, demo.coach, demo.estetica, demo.perfumaria, demo.joias
+ * Para cada conta: perfil + Noel + assinatura **trial** na área do segmento (evita limite freemium de 1 link ativo nas demos).
  * Senha: Demo@2025!
  *
  * Execute: node scripts/criar-contas-demo-videos.js
@@ -406,6 +407,99 @@ async function createOrUpdateNoelProfile(userId, noelProfile) {
   return data
 }
 
+/** Áreas da matriz YLADA válidas em `subscriptions.area` (alinhado a `hasYladaProPlan` / perfil). */
+const DEMO_MATRIX_SUBSCRIPTION_AREAS = new Set([
+  'med',
+  'psi',
+  'seller',
+  'nutra',
+  'estetica',
+  'nutri',
+  'coach',
+  'perfumaria',
+  'joias',
+])
+
+/**
+ * Garante assinatura ativa equivalente a Pro (trial) no segmento do perfil, para vídeos/demo não baterem no freemium (1 link ativo).
+ * Idempotente: se já existir mensal/anual/trial ou free cortesia (`free_cor_`), não altera.
+ */
+async function ensureDemoMatrixTrialSubscription(userId, perfil) {
+  const area = String(perfil || '')
+    .toLowerCase()
+    .trim()
+  if (!DEMO_MATRIX_SUBSCRIPTION_AREAS.has(area)) {
+    console.log(`   ⏭️ Sem assinatura matriz automática para perfil: ${perfil}`)
+    return
+  }
+
+  const now = new Date()
+  const periodStart = now.toISOString()
+  const periodEnd = new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000).toISOString()
+
+  const { data: row, error: fetchErr } = await supabaseAdmin
+    .from('subscriptions')
+    .select('id, plan_type, stripe_subscription_id')
+    .eq('user_id', userId)
+    .eq('area', area)
+    .eq('status', 'active')
+    .gt('current_period_end', now.toISOString())
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+
+  if (fetchErr && fetchErr.code !== 'PGRST116') {
+    console.error(`   ⚠️ Erro ao ler assinatura (${area}):`, fetchErr.message)
+    return
+  }
+
+  const rowUnlimited = (sub) => {
+    if (!sub) return false
+    const pt = String(sub.plan_type || '').toLowerCase()
+    if (pt === 'monthly' || pt === 'annual' || pt === 'trial') return true
+    if (pt === 'free' && String(sub.stripe_subscription_id || '').startsWith('free_cor_')) return true
+    return false
+  }
+
+  if (row && rowUnlimited(row)) {
+    console.log(`   ✅ Assinatura já cobre Pro na área ${area}`)
+    return
+  }
+
+  const trialFields = {
+    plan_type: 'trial',
+    stripe_account: 'br',
+    stripe_subscription_id: `demo_videos_trial_${userId}_${area}_${Date.now()}`,
+    stripe_customer_id: `demo_videos_${userId}`,
+    stripe_price_id: 'demo_videos',
+    amount: 0,
+    currency: 'brl',
+    status: 'active',
+    current_period_start: periodStart,
+    current_period_end: periodEnd,
+    cancel_at_period_end: false,
+  }
+
+  if (row) {
+    const { error: upErr } = await supabaseAdmin.from('subscriptions').update(trialFields).eq('id', row.id)
+    if (upErr) {
+      console.error(`   ❌ Erro ao atualizar assinatura (${area}):`, upErr.message)
+      return
+    }
+    console.log(`   ✅ Assinatura atualizada para trial (demo vídeos) — área ${area}`)
+    return
+  }
+
+  const { error: insErr } = await supabaseAdmin
+    .from('subscriptions')
+    .insert({ user_id: userId, area, ...trialFields })
+  if (insErr) {
+    console.error(`   ❌ Erro ao criar assinatura (${area}):`, insErr.message)
+    return
+  }
+  console.log(`   ✅ Assinatura trial criada (demo vídeos) — área ${area}`)
+}
+
 async function main() {
   console.log('\n🎬 Criando contas demo para vídeos...\n')
 
@@ -428,6 +522,7 @@ async function main() {
 
     await createOrUpdateUserProfile(userId, account.email, account.nome, account.perfil)
     await createOrUpdateNoelProfile(userId, account.noelProfile)
+    await ensureDemoMatrixTrialSubscription(userId, account.perfil)
   }
 
   console.log('\n✅ Concluído!\n')

@@ -29,6 +29,7 @@ import {
 import { getPerfilSimuladoByKey, SIMULATE_COOKIE_NAME } from '@/data/perfis-simulados'
 import { DiagnosticoLinkQrPanel } from '@/components/shared/DiagnosticoLinkQrPanel'
 import { useAuth } from '@/hooks/useAuth'
+import { trackFreemiumConversionEvent } from '@/lib/ylada-freemium-client'
 import {
   SUGESTAO_NOEL_TEMAS_ESTETICA_CORPORAL,
   dedupeBibliotecaItensEsteticaCorporal,
@@ -95,6 +96,97 @@ function funnelPathFromGeneratePayload(payload: { slug?: string; url?: string })
   return null
 }
 
+/** Checkout/preços da matriz (mesmo padrão de `ActiveLinksProModal`). */
+const YLADA_MATRIX_PRECOS_HREF = '/pt/precos'
+
+/** API devolve explicação + pitch separados por linha dupla — melhora leitura no banner. */
+function splitFreemiumActiveLinkMessage(text: string): { principal: string; pitch: string | null } {
+  const t = text.trim()
+  if (!t) return { principal: '', pitch: null }
+  const i = t.indexOf('\n\n')
+  if (i === -1) return { principal: t, pitch: null }
+  const principal = t.slice(0, i).trim()
+  const pitch = t.slice(i + 2).trim() || null
+  return { principal: principal || t, pitch }
+}
+
+/**
+ * Erro ao criar link pela biblioteca: não fica “espremido” ao lado do botão (evita sobreposição no layout compacto).
+ */
+function BibliotecaLinkCreationAlert({
+  message,
+  showUpgradeCta,
+  analyticsSurface,
+}: {
+  message: string
+  showUpgradeCta: boolean
+  analyticsSurface: 'biblioteca_card' | 'biblioteca_sugestao_noel'
+}) {
+  const trimmed = message.trim()
+  if (!trimmed) return null
+
+  useEffect(() => {
+    if (!showUpgradeCta) return
+    try {
+      const k = `ylada_paywall_view_${analyticsSurface}_v1`
+      if (sessionStorage.getItem(k)) return
+      sessionStorage.setItem(k, '1')
+      trackFreemiumConversionEvent('freemium_paywall_view', { surface: analyticsSurface, kind: 'active_link' })
+    } catch {
+      trackFreemiumConversionEvent('freemium_paywall_view', { surface: analyticsSurface, kind: 'active_link' })
+    }
+  }, [showUpgradeCta, analyticsSurface])
+
+  if (showUpgradeCta) {
+    const { principal, pitch } = splitFreemiumActiveLinkMessage(trimmed)
+    return (
+      <div
+        className="mt-4 w-full rounded-xl border border-amber-200/90 bg-gradient-to-b from-amber-50 via-amber-50/95 to-amber-100/40 p-4 text-left shadow-sm ring-1 ring-amber-100/60"
+        role="alert"
+      >
+        <p className="text-sm font-semibold tracking-tight text-amber-950">Limite do plano gratuito</p>
+        <p className="mt-2 text-sm leading-relaxed text-amber-950/95">{principal}</p>
+        {pitch ? (
+          <p className="mt-3 border-t border-amber-200/80 pt-3 text-xs leading-relaxed text-amber-900/88">{pitch}</p>
+        ) : null}
+        <div className="mt-4 flex flex-wrap items-center gap-2">
+          <Link
+            href={YLADA_MATRIX_PRECOS_HREF}
+            onClick={() =>
+              trackFreemiumConversionEvent('freemium_upgrade_cta_click', {
+                surface: analyticsSurface,
+                kind: 'active_link',
+              })
+            }
+            className="inline-flex items-center justify-center rounded-lg bg-sky-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-sky-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2"
+          >
+            Ver planos e assinar o Pro
+          </Link>
+          <span className="text-xs text-amber-900/75">Pausa ou arquiva um link ativo para criar outro no grátis.</span>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div
+      className="mt-4 w-full rounded-xl border border-rose-200 bg-rose-50/95 p-4 text-left shadow-sm"
+      role="alert"
+    >
+      <p className="text-sm font-medium text-rose-950">Não foi possível criar o link</p>
+      <p className="mt-2 text-sm leading-relaxed text-rose-900/95 whitespace-pre-line">{trimmed}</p>
+    </div>
+  )
+}
+
+/** Hub de links (`…/links`): evitar `location.href` para a mesma URL (parece “não fez nada”) e mostrar erro na UI. */
+function isCurrentPathLinksHub(linksPath: string): boolean {
+  if (typeof window === 'undefined') return false
+  const cur = window.location.pathname.replace(/\/$/, '') || '/'
+  const hub = linksPath.replace(/\/$/, '') || '/'
+  return cur === hub
+}
+
 /** URL absoluta do funil no browser atual (evita problemas com path relativo ou host). */
 function absoluteFunnelUrlFromPayload(payload: { slug?: string; url?: string }): string | null {
   if (typeof window === 'undefined') return null
@@ -107,13 +199,49 @@ function absoluteFunnelUrlFromPayload(payload: { slug?: string; url?: string }):
   }
 }
 
-/** Navegação “dura” fora do tick do React — em alguns browsers o redirect falha se vier logo após setState. */
-function scheduleHardNavigation(href: string) {
-  const go = () => {
-    window.location.href = href
+/** Navegação completa síncrona (replace): evita empilhar histórico a cada “Usar esse”. */
+function hardNavigateTo(href: string) {
+  if (typeof window === 'undefined' || !href) return
+  window.location.replace(href)
+}
+
+function slugFromPublicLinkUrl(url: string): string {
+  try {
+    const u = new URL(url, typeof window !== 'undefined' ? window.location.origin : 'http://localhost')
+    const m = u.pathname.match(/^\/l\/([^/]+)/)
+    return m?.[1] ? decodeURIComponent(m[1]) : ''
+  } catch {
+    return ''
   }
-  if (typeof window !== 'undefined') {
-    window.setTimeout(go, 0)
+}
+
+function parseGenerateResponseData(data: Record<string, unknown>): {
+  linkId: string
+  slug: string
+  url: string
+  payload: { id?: string; slug?: string; url?: string }
+} {
+  let rawRoot: unknown = data?.data
+  if (Array.isArray(rawRoot) && rawRoot.length > 0) rawRoot = rawRoot[0]
+  const raw =
+    rawRoot != null && typeof rawRoot === 'object' && !Array.isArray(rawRoot)
+      ? (rawRoot as Record<string, unknown>)
+      : {}
+  const idRaw = raw.id ?? raw.link_id ?? raw.ylada_link_id
+  const linkId =
+    typeof idRaw === 'string' && idRaw.trim()
+      ? idRaw.trim()
+      : typeof idRaw === 'number' && Number.isFinite(idRaw)
+        ? String(idRaw)
+        : ''
+  let slug = typeof raw.slug === 'string' ? raw.slug.trim() : ''
+  const url = typeof raw.url === 'string' ? raw.url : ''
+  if (!slug && url) slug = slugFromPublicLinkUrl(url)
+  return {
+    linkId,
+    slug,
+    url,
+    payload: { id: linkId || undefined, slug: slug || undefined, url: url || undefined },
   }
 }
 
@@ -172,6 +300,7 @@ function BibliotecaCard({
   isTemaMaisUsado: (t: string) => boolean
 }) {
   const [criarErro, setCriarErro] = useState<string | null>(null)
+  const [criarErroPrecosCta, setCriarErroPrecosCta] = useState(false)
   const { tempo, perguntas } = getMeta(item)
   const tituloExibido = (segmentCode && getTituloAdaptadoFn(item.tema, segmentCode)) || item.titulo
   const mostraMaisUsado = item.tipo === 'quiz' && isTemaMaisUsado(item.tema)
@@ -179,8 +308,14 @@ function BibliotecaCard({
   const isComece = variant === 'comece'
 
   const handleUse = async () => {
+    if (creatingId === item.id) return
+    if (!String(item.id ?? '').trim()) {
+      setCriarErro('Modelo sem identificador. Recarrega a página.')
+      return
+    }
     setCreatingId(item.id)
     setCriarErro(null)
+    setCriarErroPrecosCta(false)
     try {
       const body: Record<string, unknown> = {
         flow_id: item.flow_id ?? 'diagnostico_risco',
@@ -198,6 +333,7 @@ function BibliotecaCard({
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
+        cache: 'no-store',
         body: JSON.stringify(body),
       })
       let data: Record<string, unknown> = {}
@@ -207,27 +343,55 @@ function BibliotecaCard({
         setCriarErro('Resposta inválida do servidor. Tenta outra vez.')
         return
       }
-      const payload = data?.data as { id?: string; url?: string; slug?: string } | undefined
-      if (data?.success && payload?.id) {
-        onLinkCreated(payload.id, payload)
-      } else if (data?.success && typeof payload?.url === 'string') {
-        const abs = absoluteFunnelUrlFromPayload(payload)
-        if (abs) scheduleHardNavigation(abs)
-        else scheduleHardNavigation(typeof window !== 'undefined' ? `${window.location.origin}${linksPath}` : linksPath)
-      } else if (data?.limit_reached && typeof data?.message === 'string' && data.message.trim()) {
+      const { linkId, payload } = parseGenerateResponseData(data)
+      const createdWithId =
+        Boolean(linkId) &&
+        res.ok &&
+        data?.success !== false &&
+        !data?.limit_reached &&
+        typeof data?.error !== 'string'
+      if (data?.success && linkId) {
         try {
-          if (data.limit_type === 'active_links') {
-            sessionStorage.setItem(
-              'ylada_pending_link_limit_modal',
-              JSON.stringify({ limit_type: 'active_links', message: data.message.trim() })
-            )
-          } else {
-            sessionStorage.setItem('ylada_pending_freemium_link_message', data.message.trim())
+          onLinkCreated(linkId, payload)
+        } catch {
+          const editPath = `${linksPath.replace(/\/$/, '')}/editar/${encodeURIComponent(linkId)}`
+          hardNavigateTo(new URL(editPath, window.location.origin).href)
+        }
+      } else if (createdWithId) {
+        try {
+          onLinkCreated(linkId, payload)
+        } catch {
+          const editPath = `${linksPath.replace(/\/$/, '')}/editar/${encodeURIComponent(linkId)}`
+          hardNavigateTo(new URL(editPath, window.location.origin).href)
+        }
+      } else if (data?.success && (payload.slug || payload.url)) {
+        const abs = absoluteFunnelUrlFromPayload(payload)
+        if (abs) hardNavigateTo(abs)
+        else if (payload.slug)
+          hardNavigateTo(new URL(`/l/${encodeURIComponent(payload.slug)}`, window.location.origin).href)
+        else hardNavigateTo(`${window.location.origin}${linksPath}`)
+      } else if (data?.limit_reached && typeof data?.message === 'string' && data.message.trim()) {
+        const msg = data.message.trim()
+        try {
+          if (!isCurrentPathLinksHub(linksPath)) {
+            if (data.limit_type === 'active_links') {
+              sessionStorage.setItem(
+                'ylada_pending_link_limit_modal',
+                JSON.stringify({ limit_type: 'active_links', message: msg })
+              )
+            } else {
+              sessionStorage.setItem('ylada_pending_freemium_link_message', msg)
+            }
           }
         } catch {
           // ignore
         }
-        window.location.href = linksPath
+        if (isCurrentPathLinksHub(linksPath)) {
+          setCriarErro(msg)
+          setCriarErroPrecosCta(data.limit_type === 'active_links')
+        } else {
+          window.location.href = linksPath
+        }
       } else {
         const errMsg =
           typeof data.error === 'string'
@@ -238,6 +402,7 @@ function BibliotecaCard({
                 ? `Erro ${res.status} ao criar o link.`
                 : 'Não foi possível criar o link.'
         setCriarErro(errMsg)
+        setCriarErroPrecosCta(false)
       }
     } catch {
       setCriarErro('Erro de rede. Verifica a ligação e tenta de novo.')
@@ -323,25 +488,31 @@ function BibliotecaCard({
               📈 Alta taxa de conversa
             </span>
           )}
-          <div className="flex flex-col items-end gap-1">
+          <div className="relative z-10 flex flex-col items-end gap-1">
             <button
               type="button"
-              disabled={!!creatingId}
-              onClick={handleUse}
-              className={`rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors disabled:opacity-50 ${
+              disabled={creatingId === item.id}
+              onClick={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+                void handleUse()
+              }}
+              className={`touch-manipulation rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors disabled:opacity-50 ${
                 isSugestao ? 'bg-amber-600 hover:bg-amber-700' : 'bg-sky-600 hover:bg-sky-700'
               }`}
             >
               {creatingId === item.id ? 'Criando...' : 'Usar esse'}
             </button>
-            {criarErro ? (
-              <p className="max-w-[14rem] text-right text-xs text-red-600" role="alert">
-                {criarErro}
-              </p>
-            ) : null}
           </div>
         </div>
       </div>
+      {criarErro ? (
+        <BibliotecaLinkCreationAlert
+          message={criarErro}
+          showUpgradeCta={criarErroPrecosCta}
+          analyticsSurface="biblioteca_card"
+        />
+      ) : null}
     </article>
   )
 }
@@ -393,6 +564,7 @@ function BibliotecaPageContentInner({
     Array<{ id: string; slug: string; title: string | null; url: string; theme_raw?: string | null; stats?: { diagnosis_count?: number } }>
   >([])
   const [ideiaLinkErro, setIdeiaLinkErro] = useState<string | null>(null)
+  const [ideiaLinkPrecosCta, setIdeiaLinkPrecosCta] = useState(false)
   const [linkQrModal, setLinkQrModal] = useState<{
     id: string
     slug: string
@@ -410,13 +582,16 @@ function BibliotecaPageContentInner({
 
   const navigateAfterLinkCreated = useCallback(
     (linkId: string, payload: { slug?: string; url?: string }) => {
-      setMeusLinksRefreshTick((n) => n + 1)
       if (typeof window === 'undefined') return
       const funnelAbs = absoluteFunnelUrlFromPayload(payload)
       const editPath = `${linksPath.replace(/\/$/, '')}/editar/${encodeURIComponent(linkId)}`
       const editAbs = new URL(editPath, window.location.origin).href
-      // Sempre navegação completa: no hub de links o router.push pode não aplicar (layout/aba).
-      scheduleHardNavigation(funnelAbs || editAbs)
+      const slugOnly = typeof payload.slug === 'string' && payload.slug.trim()
+      const target = funnelAbs || (linkId ? editAbs : slugOnly ? new URL(`/l/${encodeURIComponent(slugOnly)}`, window.location.origin).href : null)
+      if (!target) return
+      // Navegar ANTES de setState: o tick refaz GET /api/ylada/links (pesado) e um re-render pode atrasar/atrasar o replace no main thread.
+      hardNavigateTo(target)
+      setMeusLinksRefreshTick((n) => n + 1)
     },
     [linksPath]
   )
@@ -706,10 +881,13 @@ function BibliotecaPageContentInner({
       listaIdeiaNoel.find((i) => i.tema === ideiaDoDia.tema && i.tipo === 'quiz') ??
       listaIdeiaNoel.find((i) => i.tema === ideiaDoDia.tema)
     const tituloParaLink = ideiaDoDia.titulo_sugerido || itemIdeia?.titulo || getTemaLabel(ideiaDoDia.tema)
+    const ideiaCreatingKey = `ideia-${ideiaDoDia.tema}`
     const handleCriarDaIdeia = async () => {
+      if (creatingId === ideiaCreatingKey) return
       if (itemIdeia) {
-        setCreatingId(`ideia-${ideiaDoDia.tema}`)
+        setCreatingId(ideiaCreatingKey)
         setIdeiaLinkErro(null)
+        setIdeiaLinkPrecosCta(false)
         try {
           const body: Record<string, unknown> = {
             flow_id: itemIdeia.flow_id ?? 'diagnostico_risco',
@@ -726,6 +904,7 @@ function BibliotecaPageContentInner({
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             credentials: 'include',
+            cache: 'no-store',
             body: JSON.stringify(body),
           })
           let data: Record<string, unknown> = {}
@@ -735,27 +914,55 @@ function BibliotecaPageContentInner({
             setIdeiaLinkErro('Resposta inválida do servidor. Tenta outra vez.')
             return
           }
-          const payload = data?.data as { id?: string; url?: string; slug?: string } | undefined
-          if (data?.success && payload?.id) {
-            navigateAfterLinkCreated(payload.id, payload)
-          } else if (data?.success && typeof payload?.url === 'string') {
-            const abs = absoluteFunnelUrlFromPayload(payload)
-            if (abs) scheduleHardNavigation(abs)
-            else scheduleHardNavigation(`${window.location.origin}${linksPath}`)
-          } else if (data?.limit_reached && typeof data?.message === 'string' && data.message.trim()) {
+          const { linkId, payload } = parseGenerateResponseData(data)
+          const createdWithId =
+            Boolean(linkId) &&
+            res.ok &&
+            data?.success !== false &&
+            !data?.limit_reached &&
+            typeof data?.error !== 'string'
+          if (data?.success && linkId) {
             try {
-              if (data.limit_type === 'active_links') {
-                sessionStorage.setItem(
-                  'ylada_pending_link_limit_modal',
-                  JSON.stringify({ limit_type: 'active_links', message: data.message.trim() })
-                )
-              } else {
-                sessionStorage.setItem('ylada_pending_freemium_link_message', data.message.trim())
+              navigateAfterLinkCreated(linkId, payload)
+            } catch {
+              const editPath = `${linksPath.replace(/\/$/, '')}/editar/${encodeURIComponent(linkId)}`
+              hardNavigateTo(new URL(editPath, window.location.origin).href)
+            }
+          } else if (createdWithId) {
+            try {
+              navigateAfterLinkCreated(linkId, payload)
+            } catch {
+              const editPath = `${linksPath.replace(/\/$/, '')}/editar/${encodeURIComponent(linkId)}`
+              hardNavigateTo(new URL(editPath, window.location.origin).href)
+            }
+          } else if (data?.success && (payload.slug || payload.url)) {
+            const abs = absoluteFunnelUrlFromPayload(payload)
+            if (abs) hardNavigateTo(abs)
+            else if (payload.slug)
+              hardNavigateTo(new URL(`/l/${encodeURIComponent(payload.slug)}`, window.location.origin).href)
+            else hardNavigateTo(`${window.location.origin}${linksPath}`)
+          } else if (data?.limit_reached && typeof data?.message === 'string' && data.message.trim()) {
+            const msg = data.message.trim()
+            try {
+              if (!isCurrentPathLinksHub(linksPath)) {
+                if (data.limit_type === 'active_links') {
+                  sessionStorage.setItem(
+                    'ylada_pending_link_limit_modal',
+                    JSON.stringify({ limit_type: 'active_links', message: msg })
+                  )
+                } else {
+                  sessionStorage.setItem('ylada_pending_freemium_link_message', msg)
+                }
               }
             } catch {
               // ignore
             }
-            window.location.href = linksPath
+            if (isCurrentPathLinksHub(linksPath)) {
+              setIdeiaLinkErro(msg)
+              setIdeiaLinkPrecosCta(data.limit_type === 'active_links')
+            } else {
+              window.location.href = linksPath
+            }
           } else {
             const errMsg =
               typeof data.error === 'string'
@@ -766,6 +973,7 @@ function BibliotecaPageContentInner({
                     ? `Erro ${res.status} ao criar o link.`
                     : 'Não foi possível criar o link.'
             setIdeiaLinkErro(errMsg)
+            setIdeiaLinkPrecosCta(false)
           }
         } catch {
           setIdeiaLinkErro('Erro de rede. Verifica a ligação e tenta de novo.')
@@ -777,35 +985,43 @@ function BibliotecaPageContentInner({
       }
     }
     return (
-      <div className="rounded-xl border border-sky-200 bg-sky-50/50 p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <div className="min-w-0">
-          <h2 className="text-sm font-semibold text-sky-900 mb-0.5">🧠 Sugestão do Noel</h2>
-          {isEsteticaLinksBiblioteca ? (
-            <p className="text-xs text-sky-800/85 mb-1">
-              {terapiaLinhaAtual === 'capilar'
-                ? 'Noel nesta linha (terapia capilar): a ideia do dia conversa com os modelos capilares da lista.'
-                : terapiaLinhaAtual === 'corporal'
-                  ? 'Noel nesta linha (estética corporal): a ideia do dia conversa com contorno, retenção e protocolo.'
-                  : 'Noel mostra uma ideia por dia; use o filtro Linha para priorizar terapia capilar ou estética corporal na lista.'}
-            </p>
-          ) : null}
-          <p className="text-sm text-gray-700 line-clamp-2 sm:line-clamp-1">{ideiaDoDia.texto}</p>
-          {ideiaLinkErro ? (
-            <p className="mt-2 text-xs text-red-600" role="alert">
-              {ideiaLinkErro}
-            </p>
-          ) : null}
+      <div className="rounded-xl border border-sky-200 bg-sky-50/50 p-4 flex flex-col gap-3">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div className="min-w-0 flex-1">
+            <h2 className="text-sm font-semibold text-sky-900 mb-0.5">🧠 Sugestão do Noel</h2>
+            {isEsteticaLinksBiblioteca ? (
+              <p className="text-xs text-sky-800/85 mb-1">
+                {terapiaLinhaAtual === 'capilar'
+                  ? 'Noel nesta linha (terapia capilar): a ideia do dia conversa com os modelos capilares da lista.'
+                  : terapiaLinhaAtual === 'corporal'
+                    ? 'Noel nesta linha (estética corporal): a ideia do dia conversa com contorno, retenção e protocolo.'
+                    : 'Noel mostra uma ideia por dia; use o filtro Linha para priorizar terapia capilar ou estética corporal na lista.'}
+              </p>
+            ) : null}
+            <p className="text-sm text-gray-700 line-clamp-2 sm:line-clamp-2">{ideiaDoDia.texto}</p>
+          </div>
+          <div className="relative z-10 flex shrink-0 flex-col items-stretch sm:items-end sm:pt-0.5">
+            <button
+              type="button"
+              onClick={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+                void handleCriarDaIdeia()
+              }}
+              disabled={creatingId === ideiaCreatingKey}
+              className="touch-manipulation rounded-lg bg-sky-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-sky-700 disabled:opacity-60 transition-colors"
+            >
+              {creatingId === ideiaCreatingKey ? 'Criando...' : 'Usar esse'}
+            </button>
+          </div>
         </div>
-        <div className="flex shrink-0 flex-col items-stretch sm:items-end gap-1">
-          <button
-            type="button"
-            onClick={handleCriarDaIdeia}
-            disabled={!!creatingId}
-            className="rounded-lg bg-sky-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-sky-700 disabled:opacity-60 transition-colors"
-          >
-            {creatingId === `ideia-${ideiaDoDia.tema}` ? 'Criando...' : 'Usar esse'}
-          </button>
-        </div>
+        {ideiaLinkErro ? (
+          <BibliotecaLinkCreationAlert
+            message={ideiaLinkErro}
+            showUpgradeCta={ideiaLinkPrecosCta}
+            analyticsSurface="biblioteca_sugestao_noel"
+          />
+        ) : null}
       </div>
     )
   }
