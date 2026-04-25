@@ -4,6 +4,7 @@ import { supabaseAdmin } from '@/lib/supabase'
 import {
   TEMPLATE_DIAGNOSTICO_CAPILAR_ID,
   TEMPLATE_DIAGNOSTICO_CORPORAL_ID,
+  TEMPLATE_PRE_AVALIACAO_CAPILAR_CLIENTE_ID,
   TEMPLATE_PRE_DIAGNOSTICO_CAPILAR_ID,
   TEMPLATE_PRE_DIAGNOSTICO_CORPORAL_ID,
 } from '@/lib/estetica-consultoria-form-templates'
@@ -63,20 +64,29 @@ export async function PATCH(request: NextRequest, context: Ctx) {
     templateKey === TEMPLATE_DIAGNOSTICO_CORPORAL_ID ||
     templateKey === TEMPLATE_DIAGNOSTICO_CAPILAR_ID ||
     templateKey === TEMPLATE_PRE_DIAGNOSTICO_CORPORAL_ID ||
-    templateKey === TEMPLATE_PRE_DIAGNOSTICO_CAPILAR_ID
+    templateKey === TEMPLATE_PRE_DIAGNOSTICO_CAPILAR_ID ||
+    templateKey === TEMPLATE_PRE_AVALIACAO_CAPILAR_CLIENTE_ID
   if (isFixedDiagnostico) {
     if (body.content !== undefined || body.description !== undefined) {
       const label =
-        templateKey === TEMPLATE_DIAGNOSTICO_CAPILAR_ID || templateKey === TEMPLATE_PRE_DIAGNOSTICO_CAPILAR_ID
+        templateKey === TEMPLATE_DIAGNOSTICO_CAPILAR_ID ||
+        templateKey === TEMPLATE_PRE_DIAGNOSTICO_CAPILAR_ID ||
+        templateKey === TEMPLATE_PRE_AVALIACAO_CAPILAR_CLIENTE_ID
           ? 'capilar'
           : 'corporal'
       const kind =
         templateKey === TEMPLATE_PRE_DIAGNOSTICO_CORPORAL_ID || templateKey === TEMPLATE_PRE_DIAGNOSTICO_CAPILAR_ID
           ? 'pré-diagnóstico'
-          : 'diagnóstico'
+          : templateKey === TEMPLATE_PRE_AVALIACAO_CAPILAR_CLIENTE_ID
+            ? 'pré-avaliação cliente'
+            : 'diagnóstico'
+      const msgFixo =
+        templateKey === TEMPLATE_PRE_AVALIACAO_CAPILAR_CLIENTE_ID
+          ? 'A pré-avaliação cliente capilar YLADA é fixa no sistema (sempre a mesma). Não é editável pelo painel — só por código.'
+          : `O ${kind} ${label} YLADA é fixo no sistema (sempre o mesmo). Não é editável pelo painel — só por código.`
       return NextResponse.json(
         {
-          error: `O ${kind} ${label} YLADA é fixo no sistema (sempre o mesmo). Não é editável pelo painel — só por código.`,
+          error: msgFixo,
         },
         { status: 400 }
       )

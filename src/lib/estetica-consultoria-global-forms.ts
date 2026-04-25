@@ -2,16 +2,20 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 import {
   buildDiagnosticoCapilarV1Fields,
   buildDiagnosticoCorporalV1Fields,
+  buildPreAvaliacaoCapilarClienteV1Fields,
   buildPreDiagnosticoCapilarV1Fields,
   buildPreDiagnosticoCorporalV1Fields,
   getDiagnosticoCapilarV1Description,
   getDiagnosticoCorporalV1Description,
+  getPreAvaliacaoCapilarClienteV1Description,
   getPreDiagnosticoCapilarV1Description,
   getPreDiagnosticoCorporalV1Description,
   TEMPLATE_DIAGNOSTICO_CAPILAR_ID,
   TEMPLATE_DIAGNOSTICO_CAPILAR_TITLE,
   TEMPLATE_DIAGNOSTICO_CORPORAL_ID,
   TEMPLATE_DIAGNOSTICO_CORPORAL_TITLE,
+  TEMPLATE_PRE_AVALIACAO_CAPILAR_CLIENTE_ID,
+  TEMPLATE_PRE_AVALIACAO_CAPILAR_CLIENTE_TITLE,
   TEMPLATE_PRE_DIAGNOSTICO_CAPILAR_ID,
   TEMPLATE_PRE_DIAGNOSTICO_CAPILAR_TITLE,
   TEMPLATE_PRE_DIAGNOSTICO_CORPORAL_ID,
@@ -372,5 +376,88 @@ export async function ensurePreDiagnosticoCapilarGlobalMaterialId(sb: SupabaseCl
   }
 
   await ensureOpenPreEntryShareLink(sb, materialId)
+  return materialId
+}
+
+/** Material global: pré-avaliação capilar para cliente final (sem link público sem clínica). */
+export async function ensurePreAvaliacaoCapilarClienteGlobalMaterialId(sb: SupabaseClient): Promise<string> {
+  const { data: existing, error: selErr } = await sb
+    .from('ylada_estetica_consultancy_materials')
+    .select('id')
+    .eq('template_key', TEMPLATE_PRE_AVALIACAO_CAPILAR_CLIENTE_ID)
+    .maybeSingle()
+
+  if (selErr) {
+    throw new Error(selErr.message)
+  }
+
+  let materialId: string
+
+  if (existing?.id) {
+    materialId = existing.id as string
+    const { data: matRow, error: matErr } = await sb
+      .from('ylada_estetica_consultancy_materials')
+      .select('content')
+      .eq('id', materialId)
+      .maybeSingle()
+    if (matErr) {
+      throw new Error(matErr.message)
+    }
+    const contentObj = (matRow?.content && typeof matRow.content === 'object' ? matRow.content : {}) as Record<
+      string,
+      unknown
+    >
+    const currentIds = getConsultoriaFormFields(contentObj)
+      .map((f) => f.id)
+      .join('\0')
+    const targetIds = buildPreAvaliacaoCapilarClienteV1Fields()
+      .map((f) => f.id)
+      .join('\0')
+    if (currentIds !== targetIds) {
+      const rawContent = { fields: buildPreAvaliacaoCapilarClienteV1Fields() }
+      const content = normalizeConsultoriaContent('formulario', rawContent)
+      const { error: upErr } = await sb
+        .from('ylada_estetica_consultancy_materials')
+        .update({
+          title: TEMPLATE_PRE_AVALIACAO_CAPILAR_CLIENTE_TITLE,
+          description: getPreAvaliacaoCapilarClienteV1Description(),
+          content,
+          material_kind: 'formulario',
+        })
+        .eq('id', materialId)
+        .eq('template_key', TEMPLATE_PRE_AVALIACAO_CAPILAR_CLIENTE_ID)
+      if (upErr) {
+        throw new Error(upErr.message)
+      }
+    }
+  } else {
+    const rawContent = { fields: buildPreAvaliacaoCapilarClienteV1Fields() }
+    const content = normalizeConsultoriaContent('formulario', rawContent)
+    if (getConsultoriaFormFields(content).length === 0) {
+      throw new Error('Pré-avaliação cliente capilar sem campos')
+    }
+
+    const { data: created, error: insErr } = await sb
+      .from('ylada_estetica_consultancy_materials')
+      .insert({
+        client_id: null,
+        template_key: TEMPLATE_PRE_AVALIACAO_CAPILAR_CLIENTE_ID,
+        title: TEMPLATE_PRE_AVALIACAO_CAPILAR_CLIENTE_TITLE,
+        material_kind: 'formulario',
+        description: getPreAvaliacaoCapilarClienteV1Description(),
+        content,
+        sort_order: 0,
+        is_published: true,
+        created_by_user_id: null,
+      })
+      .select('id')
+      .single()
+
+    if (insErr || !created?.id) {
+      throw new Error(insErr?.message ?? 'Falha ao criar pré-avaliação cliente capilar global')
+    }
+    materialId = created.id as string
+  }
+
   return materialId
 }

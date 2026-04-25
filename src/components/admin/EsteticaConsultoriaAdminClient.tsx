@@ -15,10 +15,12 @@ import {
 import {
   TEMPLATE_DIAGNOSTICO_CAPILAR_TITLE,
   TEMPLATE_DIAGNOSTICO_CORPORAL_TITLE,
+  TEMPLATE_PRE_AVALIACAO_CAPILAR_CLIENTE_TITLE,
   TEMPLATE_PRE_DIAGNOSTICO_CAPILAR_TITLE,
   TEMPLATE_PRE_DIAGNOSTICO_CORPORAL_TITLE,
   buildDiagnosticoCapilarV1Fields,
   buildDiagnosticoCorporalV1Fields,
+  buildPreAvaliacaoCapilarClienteV1Fields,
   buildPreDiagnosticoCapilarV1Fields,
   buildPreDiagnosticoCorporalV1Fields,
 } from '@/lib/estetica-consultoria-form-templates'
@@ -67,8 +69,14 @@ const ESTETICA_MODELO_CAMPOS_CORPORAL = buildDiagnosticoCorporalV1Fields()
 const ESTETICA_MODELO_CAMPOS_CAPILAR = buildDiagnosticoCapilarV1Fields()
 const ESTETICA_MODELO_CAMPOS_PRE_CORPORAL = buildPreDiagnosticoCorporalV1Fields()
 const ESTETICA_MODELO_CAMPOS_PRE_CAPILAR = buildPreDiagnosticoCapilarV1Fields()
+const ESTETICA_MODELO_CAMPOS_PRE_AVALIACAO_CLIENTE_CAPILAR = buildPreAvaliacaoCapilarClienteV1Fields()
 
-type EsteticaFormModelKind = 'corporal' | 'capilar' | 'pre_corporal' | 'pre_capilar'
+type EsteticaFormModelKind =
+  | 'corporal'
+  | 'capilar'
+  | 'pre_corporal'
+  | 'pre_capilar'
+  | 'pre_avaliacao_cliente_capilar'
 
 function emptyMaterialRow(clientId: string, kind: ProLideresConsultoriaMaterialKind): YladaEsteticaConsultancyMaterialRow {
   const now = new Date().toISOString()
@@ -355,6 +363,7 @@ function EsteticaConsultoriaFormModelDialog({
     if (variant === 'capilar') return ESTETICA_MODELO_CAMPOS_CAPILAR
     if (variant === 'pre_corporal') return ESTETICA_MODELO_CAMPOS_PRE_CORPORAL
     if (variant === 'pre_capilar') return ESTETICA_MODELO_CAMPOS_PRE_CAPILAR
+    if (variant === 'pre_avaliacao_cliente_capilar') return ESTETICA_MODELO_CAMPOS_PRE_AVALIACAO_CLIENTE_CAPILAR
     return []
   }, [variant])
 
@@ -384,7 +393,8 @@ function EsteticaConsultoriaFormModelDialog({
   if (!open || !variant) return null
 
   const isCorporal = variant === 'corporal' || variant === 'pre_corporal'
-  const isPre = variant === 'pre_corporal' || variant === 'pre_capilar'
+  const isPre =
+    variant === 'pre_corporal' || variant === 'pre_capilar' || variant === 'pre_avaliacao_cliente_capilar'
   const title =
     variant === 'corporal'
       ? TEMPLATE_DIAGNOSTICO_CORPORAL_TITLE
@@ -392,7 +402,9 @@ function EsteticaConsultoriaFormModelDialog({
         ? TEMPLATE_DIAGNOSTICO_CAPILAR_TITLE
         : variant === 'pre_corporal'
           ? TEMPLATE_PRE_DIAGNOSTICO_CORPORAL_TITLE
-          : TEMPLATE_PRE_DIAGNOSTICO_CAPILAR_TITLE
+          : variant === 'pre_avaliacao_cliente_capilar'
+            ? TEMPLATE_PRE_AVALIACAO_CAPILAR_CLIENTE_TITLE
+            : TEMPLATE_PRE_DIAGNOSTICO_CAPILAR_TITLE
   const bar = isCorporal ? 'bg-rose-600' : 'bg-sky-600'
   const secTitle = isCorporal ? 'text-rose-900/60' : 'text-sky-900/60'
   const qClass = isCorporal ? 'text-rose-950/90' : 'text-sky-950/90'
@@ -420,7 +432,12 @@ function EsteticaConsultoriaFormModelDialog({
             </h2>
             <p className="mt-1 text-xs leading-relaxed text-gray-500">
               Vista prévia do <strong>modelo global</strong> ({fields.length} campos)
-              {isPre ? ' — formulário curto antes da reunião' : ''}. O texto e as opções vivem no código (
+              {isPre
+                ? variant === 'pre_avaliacao_cliente_capilar'
+                  ? ' — para cliente final (captação)'
+                  : ' — formulário curto antes da reunião'
+                : ''}
+              . O texto e as opções vivem no código (
               <code className="rounded bg-gray-100 px-1 text-[11px]">estetica-consultoria-form-templates.ts</code>) e no
               material global no Supabase; alterar perguntas implica mudança de código e/ou migração.
             </p>
@@ -533,6 +550,12 @@ export default function EsteticaConsultoriaAdminClient() {
   const [diagnosticPreCapilarLoading, setDiagnosticPreCapilarLoading] = useState(false)
   const [diagnosticPreCorporalLinkLoading, setDiagnosticPreCorporalLinkLoading] = useState(false)
   const [diagnosticPreCapilarLinkLoading, setDiagnosticPreCapilarLinkLoading] = useState(false)
+  const [diagnosticPreAvaliacaoClienteCapilar, setDiagnosticPreAvaliacaoClienteCapilar] =
+    useState<DiagnosticCorporalBundle | null>(null)
+  const [diagnosticPreAvaliacaoClienteCapilarLoading, setDiagnosticPreAvaliacaoClienteCapilarLoading] =
+    useState(false)
+  const [diagnosticPreAvaliacaoClienteCapilarLinkLoading, setDiagnosticPreAvaliacaoClienteCapilarLinkLoading] =
+    useState(false)
   const [formModelDialog, setFormModelDialog] = useState<EsteticaFormModelKind | null>(null)
 
   type OpenPreLinkPack = { token: string; responder_url: string }
@@ -784,6 +807,35 @@ export default function EsteticaConsultoriaAdminClient() {
     void loadDiagnosticPreCapilar()
   }, [loadDiagnosticPreCapilar])
 
+  const loadDiagnosticPreAvaliacaoClienteCapilar = useCallback(async () => {
+    if (!selectedClient?.id) return
+    if (selectedClient.segment !== 'capilar' && selectedClient.segment !== 'ambos') {
+      setDiagnosticPreAvaliacaoClienteCapilar(null)
+      return
+    }
+    setDiagnosticPreAvaliacaoClienteCapilarLoading(true)
+    setError(null)
+    try {
+      const res = await fetch(
+        `/api/admin/estetica-consultoria/clients/${encodeURIComponent(selectedClient.id)}/pre-avaliacao-capilar-cliente`,
+        { credentials: 'include' }
+      )
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) {
+        setDiagnosticPreAvaliacaoClienteCapilar(null)
+        setError((data as { error?: string }).error || 'Erro ao carregar pré-avaliação cliente capilar.')
+        return
+      }
+      setDiagnosticPreAvaliacaoClienteCapilar(data as DiagnosticCorporalBundle)
+    } finally {
+      setDiagnosticPreAvaliacaoClienteCapilarLoading(false)
+    }
+  }, [selectedClient])
+
+  useEffect(() => {
+    void loadDiagnosticPreAvaliacaoClienteCapilar()
+  }, [loadDiagnosticPreAvaliacaoClienteCapilar])
+
   const itemsDisplayed = useMemo(() => {
     if (!selectedClient?.id) return items
     const hasCorp = Boolean(diagnosticCorporal?.material?.template_key)
@@ -835,6 +887,15 @@ export default function EsteticaConsultoriaAdminClient() {
         : {}
     return getConsultoriaFormFields(c as Record<string, unknown>)
   }, [diagnosticPreCapilar?.material?.content])
+
+  const diagnosticPreAvaliacaoClienteCapilarFieldDefs = useMemo(() => {
+    const c =
+      diagnosticPreAvaliacaoClienteCapilar?.material?.content &&
+      typeof diagnosticPreAvaliacaoClienteCapilar.material.content === 'object'
+        ? diagnosticPreAvaliacaoClienteCapilar.material.content
+        : {}
+    return getConsultoriaFormFields(c as Record<string, unknown>)
+  }, [diagnosticPreAvaliacaoClienteCapilar?.material?.content])
 
   const latestPreCorporalResponse = useMemo(() => {
     const list = diagnosticPreCorporal?.responses ?? []
@@ -949,6 +1010,31 @@ export default function EsteticaConsultoriaAdminClient() {
       await loadDiagnosticPreCapilar()
     } finally {
       setDiagnosticPreCapilarLinkLoading(false)
+    }
+  }
+
+  const createDiagnosticPreAvaliacaoClienteCapilarLink = async () => {
+    if (!selectedClient?.id) return
+    setDiagnosticPreAvaliacaoClienteCapilarLinkLoading(true)
+    setError(null)
+    try {
+      const res = await fetch(
+        `/api/admin/estetica-consultoria/clients/${encodeURIComponent(selectedClient.id)}/pre-avaliacao-capilar-cliente`,
+        {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({}),
+        }
+      )
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) {
+        setError((data as { error?: string }).error || 'Erro ao gerar link da pré-avaliação.')
+        return
+      }
+      await loadDiagnosticPreAvaliacaoClienteCapilar()
+    } finally {
+      setDiagnosticPreAvaliacaoClienteCapilarLinkLoading(false)
     }
   }
 
@@ -1295,6 +1381,21 @@ export default function EsteticaConsultoriaAdminClient() {
     const fn = consultoriaCsvFilenameBase(selectedClient.business_name, 'pre-diagnostico-capilar-respostas')
     triggerCsvDownload(fn, csv)
   }, [selectedClient, diagnosticPreCapilar?.responses, diagnosticPreCapilarFieldDefs, triggerCsvDownload])
+
+  const downloadDiagnosticPreAvaliacaoClienteCapilarResponsesCsv = useCallback(() => {
+    if (!selectedClient || !diagnosticPreAvaliacaoClienteCapilar?.responses.length) return
+    const csv = consultoriaFormResponsesToCsv(
+      diagnosticPreAvaliacaoClienteCapilarFieldDefs,
+      diagnosticPreAvaliacaoClienteCapilar.responses
+    )
+    const fn = consultoriaCsvFilenameBase(selectedClient.business_name, 'pre-avaliacao-capilar-cliente-respostas')
+    triggerCsvDownload(fn, csv)
+  }, [
+    selectedClient,
+    diagnosticPreAvaliacaoClienteCapilar?.responses,
+    diagnosticPreAvaliacaoClienteCapilarFieldDefs,
+    triggerCsvDownload,
+  ])
 
   const downloadSelectedMaterialResponsesCsv = useCallback(() => {
     if (!selectedClient || !selected?.title || responses.length === 0) return
@@ -2174,6 +2275,134 @@ export default function EsteticaConsultoriaAdminClient() {
                   </>
                 ) : (
                   <p className="text-xs text-sky-900/80">Não foi possível carregar o pré-diagnóstico.</p>
+                )}
+              </div>
+
+              <div className="rounded-xl border border-sky-200/90 bg-white/70 p-3 shadow-sm space-y-3">
+                <div className="flex flex-wrap items-start justify-between gap-2">
+                  <h3 className="text-sm font-semibold text-sky-950">
+                    Pré-avaliação capilar — cliente final (YLADA)
+                  </h3>
+                  <button
+                    type="button"
+                    onClick={() => setFormModelDialog('pre_avaliacao_cliente_capilar')}
+                    className="shrink-0 rounded-lg border border-sky-300 bg-white px-2.5 py-1 text-xs font-semibold text-sky-900 hover:bg-sky-100"
+                  >
+                    Ver perguntas do quiz
+                  </button>
+                </div>
+                <p className="text-xs text-sky-900/85 max-w-2xl">
+                  Questionário para a <strong>cliente</strong> refletir sobre couro, fios e interesse em protocolos
+                  antes de falar com <strong>{selectedClient.business_name}</strong>. Cada link fica associado a esta
+                  ficha; não há entrada pública sem clínica.
+                </p>
+                {diagnosticPreAvaliacaoClienteCapilarLoading ? (
+                  <p className="text-sm text-sky-900/80">Carregando pré-avaliação…</p>
+                ) : diagnosticPreAvaliacaoClienteCapilar?.material ? (
+                  <>
+                    <p className="text-xs text-sky-900/80">
+                      Estado:{' '}
+                      {diagnosticPreAvaliacaoClienteCapilar.material.is_published ? (
+                        <span className="font-semibold text-emerald-800">Ativo</span>
+                      ) : (
+                        <span className="font-semibold text-amber-800">Rascunho</span>
+                      )}
+                    </p>
+                    <button
+                      type="button"
+                      disabled={
+                        diagnosticPreAvaliacaoClienteCapilarLinkLoading ||
+                        !diagnosticPreAvaliacaoClienteCapilar.material.is_published
+                      }
+                      onClick={() => void createDiagnosticPreAvaliacaoClienteCapilarLink()}
+                      className="rounded-lg bg-sky-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg-sky-800 disabled:opacity-50"
+                    >
+                      {diagnosticPreAvaliacaoClienteCapilarLinkLoading
+                        ? 'Gerando…'
+                        : 'Gerar link para enviar à cliente'}
+                    </button>
+                    <div>
+                      <h4 className="text-[11px] font-semibold uppercase tracking-wide text-sky-950/90">
+                        Links da pré-avaliação
+                      </h4>
+                      {diagnosticPreAvaliacaoClienteCapilar.links.length === 0 ? (
+                        <p className="mt-1 text-xs text-sky-900/70">Nenhum link ainda.</p>
+                      ) : (
+                        <ul className="mt-2 space-y-2">
+                          {diagnosticPreAvaliacaoClienteCapilar.links.map((lk) => (
+                            <li key={lk.id} className="rounded-lg border border-sky-100 bg-white p-2 text-xs">
+                              <code className="break-all text-gray-800">
+                                {lk.responder_url ??
+                                  buildEsteticaConsultoriaResponderUrl(
+                                    typeof window !== 'undefined' ? window.location.origin : '',
+                                    lk.token
+                                  )}
+                              </code>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const url =
+                                    lk.responder_url ??
+                                    buildEsteticaConsultoriaResponderUrl(
+                                      typeof window !== 'undefined' ? window.location.origin : '',
+                                      lk.token
+                                    )
+                                  void navigator.clipboard.writeText(url)
+                                }}
+                                className="mt-1 block text-xs font-medium text-blue-700 hover:underline"
+                              >
+                                Copiar URL
+                              </button>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+                    <div>
+                      <div className="mt-1 flex flex-wrap items-start justify-between gap-2">
+                        <h4 className="text-[11px] font-semibold uppercase tracking-wide text-sky-950/90">
+                          Respostas (clientes finais)
+                        </h4>
+                        {diagnosticPreAvaliacaoClienteCapilar.responses.length > 0 ? (
+                          <button
+                            type="button"
+                            onClick={() => downloadDiagnosticPreAvaliacaoClienteCapilarResponsesCsv()}
+                            className="shrink-0 rounded-lg border border-sky-300 bg-white px-2 py-0.5 text-[11px] font-medium text-sky-900 hover:bg-sky-100"
+                          >
+                            CSV
+                          </button>
+                        ) : null}
+                      </div>
+                      {diagnosticPreAvaliacaoClienteCapilar.responses.length === 0 ? (
+                        <p className="mt-1 text-xs text-sky-900/70">Ainda sem envios.</p>
+                      ) : (
+                        <div className="mt-2 max-h-[min(40vh,320px)] space-y-3 overflow-auto pr-1">
+                          {diagnosticPreAvaliacaoClienteCapilar.responses.map((r) => {
+                            const ans = (r.answers && typeof r.answers === 'object' && !Array.isArray(r.answers)
+                              ? r.answers
+                              : {}) as Record<string, unknown>
+                            const rows = consultoriaAnswersToDisplayRows(
+                              diagnosticPreAvaliacaoClienteCapilarFieldDefs,
+                              ans
+                            )
+                            return (
+                              <ConsultoriaAdminResponseCard
+                                key={r.id}
+                                tone="sky"
+                                submittedAt={r.submitted_at}
+                                respondentName={r.respondent_name}
+                                respondentEmail={r.respondent_email}
+                                rows={rows}
+                                rawAnswers={r.answers}
+                              />
+                            )
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  </>
+                ) : (
+                  <p className="text-xs text-sky-900/80">Não foi possível carregar a pré-avaliação cliente.</p>
                 )}
               </div>
 

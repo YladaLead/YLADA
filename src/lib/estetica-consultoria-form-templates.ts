@@ -18,6 +18,11 @@ export const TEMPLATE_PRE_DIAGNOSTICO_CAPILAR_TITLE = 'Pré-diagnóstico — Ter
 
 export const TEMPLATE_PRE_DIAGNOSTICO_CAPILAR_ID = 'pre_diagnostico_capilar_v1' as const
 
+/** Pré-avaliação para cliente final (quem vai ao salão). Material global compartilhado; cada link fica associado à clínica. */
+export const TEMPLATE_PRE_AVALIACAO_CAPILAR_CLIENTE_TITLE = 'Pré-avaliação capilar — cliente (YLADA)'
+
+export const TEMPLATE_PRE_AVALIACAO_CAPILAR_CLIENTE_ID = 'pre_avaliacao_capilar_cliente_v1' as const
+
 /** Formulários fixos YLADA com confirmação por e-mail antes de preencher. */
 export function isDiagnosticoEmailConfirmationTemplate(templateKey: string | null | undefined): boolean {
   return templateKey === TEMPLATE_DIAGNOSTICO_CORPORAL_ID || templateKey === TEMPLATE_DIAGNOSTICO_CAPILAR_ID
@@ -975,10 +980,214 @@ export function getPreDiagnosticoCapilarV1Description(): string {
   ].join('\n')
 }
 
+const CLI_CAP_PROTOCOLOS_CHK: string[] = [
+  'Ozonioterapia capilar',
+  'Blend de óleos essenciais',
+  'Ativos naturais no ritual de lavagem (ex.: cúrcuma)',
+  'Microagulhamento capilar',
+  'Detox / esfoliação suave do couro',
+  'LED / fototerapia',
+  'Vacuoterapia / sucção suave no couro',
+  'Não sei — quero orientação da profissional',
+]
+
+/** Questionário reflexivo para a cliente marcar interesse e contexto antes de falar com a clínica. */
+export function buildPreAvaliacaoCapilarClienteV1Fields(): ConsultoriaFormField[] {
+  return [
+    {
+      id: 'cli_cap_confirmo_aviso',
+      label:
+        '1. Este questionário é informativo e ajuda a profissional a preparar o seu atendimento. Não substitui consulta médica nem diagnóstico clínico. Confirma que compreende e quer continuar?',
+      type: 'select',
+      required: true,
+      options: ['Sim, compreendo e quero continuar'],
+    },
+    {
+      id: 'cli_cap_nome_completo',
+      label: '1. Seu nome completo',
+      type: 'text',
+      required: true,
+    },
+    WHATSAPP_DDI_FIELD,
+    WHATSAPP_LOCAL_FIELD,
+    {
+      id: 'cli_cap_email',
+      label: '1. E-mail (opcional — para contato ou envio de informações)',
+      type: 'text',
+      required: false,
+    },
+    {
+      id: 'cli_cap_couro_hoje',
+      label: '2. Como você descreve o couro cabeludo na maior parte do tempo?',
+      type: 'select',
+      required: true,
+      options: [
+        'Normal / sem queixas fortes',
+        'Oleoso na raiz',
+        'Seco ou repuxa',
+        'Misto (oleoso na raiz, seco nas pontas)',
+        'Muito sensível (ardor, comichão ou reação fácil a produtos)',
+        'Não tenho certeza',
+      ],
+    },
+    {
+      id: 'cli_cap_queda',
+      label: '2. Queda de cabelo — o que você sente hoje?',
+      type: 'select',
+      required: true,
+      options: [
+        'Quase nada / sazonal leve',
+        'Notei mais fios na escova ou no chuveiro',
+        'Afinamento visível ou falhas',
+        'Já fui orientada por médica/o para isso',
+        'Prefiro não responder aqui',
+      ],
+    },
+    {
+      id: 'cli_cap_ressecamento',
+      label: '2. Ressecamento, porosidade ou frizz — como está?',
+      type: 'select',
+      required: true,
+      options: ['Leve', 'Moderado', 'Forte', 'Depende da estação ou do que aplico', 'Raramente noto'],
+    },
+    {
+      id: 'cli_cap_caspa',
+      label: '2. Caspa ou descamação do couro?',
+      type: 'select',
+      required: true,
+      options: ['Não', 'Ocasional', 'Frequente', 'Já tive diagnóstico de dermatite / seborreia', 'Não sei distinguir'],
+    },
+    {
+      id: 'cli_cap_oleosidade_raiz',
+      label: '2. Oleosidade na raiz — quanto tempo até sentir a raiz “pesada” após lavar?',
+      type: 'select',
+      required: true,
+      options: [
+        '1 dia ou menos',
+        '2 dias',
+        '3 ou mais dias',
+        'Varia muito',
+        'Não noto oleosidade',
+      ],
+    },
+    {
+      id: 'cli_cap_quimica',
+      label: '2. Química ou coloração nos últimos 6 meses?',
+      type: 'select',
+      required: true,
+      options: [
+        'Nenhuma',
+        'Coloração ou madeixas',
+        'Alisamento / relaxamento / progressiva',
+        'Descoloração ou luzes',
+        'Mais de um destes',
+      ],
+    },
+    {
+      id: 'cli_cap_calor_styling',
+      label: '3. Calor (secador, chapinha) ou penteados bem presos com frequência?',
+      type: 'select',
+      required: true,
+      options: ['Quase todos os dias', 'Algumas vezes por semana', 'Raramente', 'Evito de propósito'],
+    },
+    {
+      id: 'cli_cap_frequencia_lavagem',
+      label: '3. Com que frequência você lava o cabelo em média?',
+      type: 'select',
+      required: true,
+      options: ['Todos os dias', 'Em dia sim, dia não', '2 vezes por semana', '1 vez por semana ou menos', 'Varia muito'],
+    },
+    {
+      id: 'cli_cap_estresse_sono',
+      label: '3. Você sente que estresse ou sono influenciam seu cabelo ou couro?',
+      type: 'select',
+      required: true,
+      options: ['Sim, claramente', 'Um pouco', 'Não sei', 'Não'],
+    },
+    {
+      id: 'cli_cap_sensibilidade_produtos',
+      label: '3. O couro reage facilmente a perfumes fortes, tintas ou shampoos novos?',
+      type: 'select',
+      required: true,
+      options: ['Sim', 'Às vezes', 'Não', 'Nunca reparei'],
+    },
+    {
+      id: 'cli_cap_agua_ambiente',
+      label: '3. Água dura, piscina, mar ou poluição — você sente que pioram o estado do cabelo/couro?',
+      type: 'select',
+      required: false,
+      options: ['Sim', 'Um pouco', 'Não', 'Não aplicável'],
+    },
+    {
+      id: 'cli_cap_mudanca_hormonal',
+      label: '3. Mudança hormonal recente (ex.: pós-parto, contracepção, menopausa) que você associa ao cabelo?',
+      type: 'select',
+      required: false,
+      options: ['Sim', 'Possivelmente', 'Não', 'Prefiro não responder'],
+    },
+    {
+      id: 'cli_cap_objetivo_principal',
+      label: '4. O que mais você gostaria de melhorar nos próximos meses?',
+      type: 'select',
+      required: true,
+      options: [
+        'Reduzir queda ou quebra',
+        'Mais brilho e maciez',
+        'Equilibrar oleosidade / caspa',
+        'Fortalecer e “engrossar” o aspeto do fio',
+        'Manutenção / prevenção',
+        'Outro (explico na mensagem final)',
+      ],
+    },
+    {
+      id: 'cli_cap_interesse_protocolos',
+      label: '4. Que tipos de protocolo te interessam explorar? (pode marcar vários)',
+      type: 'checkbox_group',
+      required: true,
+      options: CLI_CAP_PROTOCOLOS_CHK,
+    },
+    {
+      id: 'cli_cap_frequencia_clinica',
+      label: '4. Com que frequência você conseguiria ir ao salão para acompanhamento?',
+      type: 'select',
+      required: true,
+      options: [
+        'Semanal',
+        'Quinzenal',
+        'Mensal',
+        'Só quando der',
+        'Quero só uma primeira avaliação por agora',
+      ],
+    },
+    {
+      id: 'cli_cap_contacto_preferido',
+      label: '4. Você prefere ser contactada como?',
+      type: 'select',
+      required: true,
+      options: ['WhatsApp', 'Ligação telefónica', 'Instagram', 'E-mail'],
+    },
+    {
+      id: 'cli_cap_mensagem_livre',
+      label: '4. Mensagem ou dúvida para a profissional (opcional)',
+      type: 'textarea',
+      required: false,
+    },
+  ]
+}
+
+export function getPreAvaliacaoCapilarClienteV1Description(): string {
+  return [
+    'Cerca de 5 minutos. Ajuda a cliente a refletir sobre couro, fios e rotina — antes de falar com você.',
+    'Cada link fica associado à tua ficha no painel; não há entrada pública sem clínica.',
+    'Resultado orientativo: a avaliação definitiva é sempre presencial.',
+  ].join('\n')
+}
+
 export function getDiagnosticoTemplateDescription(templateKey: string | null | undefined): string | null {
   if (templateKey === TEMPLATE_DIAGNOSTICO_CORPORAL_ID) return getDiagnosticoCorporalV1Description()
   if (templateKey === TEMPLATE_DIAGNOSTICO_CAPILAR_ID) return getDiagnosticoCapilarV1Description()
   if (templateKey === TEMPLATE_PRE_DIAGNOSTICO_CORPORAL_ID) return getPreDiagnosticoCorporalV1Description()
   if (templateKey === TEMPLATE_PRE_DIAGNOSTICO_CAPILAR_ID) return getPreDiagnosticoCapilarV1Description()
+  if (templateKey === TEMPLATE_PRE_AVALIACAO_CAPILAR_CLIENTE_ID) return getPreAvaliacaoCapilarClienteV1Description()
   return null
 }
