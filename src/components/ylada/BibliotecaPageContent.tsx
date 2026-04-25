@@ -95,6 +95,28 @@ function funnelPathFromGeneratePayload(payload: { slug?: string; url?: string })
   return null
 }
 
+/** URL absoluta do funil no browser atual (evita problemas com path relativo ou host). */
+function absoluteFunnelUrlFromPayload(payload: { slug?: string; url?: string }): string | null {
+  if (typeof window === 'undefined') return null
+  const rel = funnelPathFromGeneratePayload(payload)
+  if (!rel) return null
+  try {
+    return new URL(rel, window.location.origin).href
+  } catch {
+    return null
+  }
+}
+
+/** Navegação “dura” fora do tick do React — em alguns browsers o redirect falha se vier logo após setState. */
+function scheduleHardNavigation(href: string) {
+  const go = () => {
+    window.location.href = href
+  }
+  if (typeof window !== 'undefined') {
+    window.setTimeout(go, 0)
+  }
+}
+
 function labelTipoBibliotecaItem(tipo: string): string {
   const t = (tipo || '').toLowerCase()
   if (t === 'calculadora') return 'Calculadora'
@@ -189,9 +211,9 @@ function BibliotecaCard({
       if (data?.success && payload?.id) {
         onLinkCreated(payload.id, payload)
       } else if (data?.success && typeof payload?.url === 'string') {
-        const funnel = funnelPathFromGeneratePayload(payload)
-        if (funnel && typeof window !== 'undefined') window.location.assign(funnel)
-        else window.location.href = linksPath
+        const abs = absoluteFunnelUrlFromPayload(payload)
+        if (abs) scheduleHardNavigation(abs)
+        else scheduleHardNavigation(typeof window !== 'undefined' ? `${window.location.origin}${linksPath}` : linksPath)
       } else if (data?.limit_reached && typeof data?.message === 'string' && data.message.trim()) {
         try {
           if (data.limit_type === 'active_links') {
@@ -291,7 +313,7 @@ function BibliotecaCard({
           )}
         </div>
         <div className="flex shrink-0 flex-col items-end gap-2">
-          {mostraMaisUsado && !isSugestao && (
+          {mostraMaisUsado && !isSugestao && !badge && (
             <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-medium text-emerald-800">
               <span aria-hidden>🔥</span> Mais usado
             </span>
@@ -389,14 +411,14 @@ function BibliotecaPageContentInner({
   const navigateAfterLinkCreated = useCallback(
     (linkId: string, payload: { slug?: string; url?: string }) => {
       setMeusLinksRefreshTick((n) => n + 1)
-      const funnel = funnelPathFromGeneratePayload(payload)
-      if (funnel && typeof window !== 'undefined') {
-        window.location.assign(funnel)
-        return
-      }
-      router.push(`${linksPath}/editar/${linkId}`)
+      if (typeof window === 'undefined') return
+      const funnelAbs = absoluteFunnelUrlFromPayload(payload)
+      const editPath = `${linksPath.replace(/\/$/, '')}/editar/${encodeURIComponent(linkId)}`
+      const editAbs = new URL(editPath, window.location.origin).href
+      // Sempre navegação completa: no hub de links o router.push pode não aplicar (layout/aba).
+      scheduleHardNavigation(funnelAbs || editAbs)
     },
-    [router, linksPath]
+    [linksPath]
   )
 
   /** Só faz sentido escolher segmento se não há um fixo pelo perfil/URL ou se é admin/suporte. */
@@ -717,9 +739,9 @@ function BibliotecaPageContentInner({
           if (data?.success && payload?.id) {
             navigateAfterLinkCreated(payload.id, payload)
           } else if (data?.success && typeof payload?.url === 'string') {
-            const funnel = funnelPathFromGeneratePayload(payload)
-            if (funnel && typeof window !== 'undefined') window.location.assign(funnel)
-            else window.location.href = linksPath
+            const abs = absoluteFunnelUrlFromPayload(payload)
+            if (abs) scheduleHardNavigation(abs)
+            else scheduleHardNavigation(`${window.location.origin}${linksPath}`)
           } else if (data?.limit_reached && typeof data?.message === 'string' && data.message.trim()) {
             try {
               if (data.limit_type === 'active_links') {
