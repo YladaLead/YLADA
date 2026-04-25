@@ -17,10 +17,37 @@ import {
   TEMPLATE_PRE_DIAGNOSTICO_CORPORAL_ID,
   TEMPLATE_PRE_DIAGNOSTICO_CORPORAL_TITLE,
 } from '@/lib/estetica-consultoria-form-templates'
+import { generateEsteticaConsultoriaShareToken } from '@/lib/estetica-consultoria'
 import {
   getConsultoriaFormFields,
   normalizeConsultoriaContent,
 } from '@/lib/pro-lideres-consultoria'
+
+/** Um link por material global de pré, sem clínica (entrada pública). */
+async function ensureOpenPreEntryShareLink(sb: SupabaseClient, materialId: string): Promise<void> {
+  const { data: ex, error: sel } = await sb
+    .from('ylada_estetica_consultancy_share_links')
+    .select('id')
+    .eq('material_id', materialId)
+    .is('estetica_consult_client_id', null)
+    .maybeSingle()
+  if (sel) {
+    throw new Error(sel.message)
+  }
+  if (ex?.id) {
+    return
+  }
+  const token = generateEsteticaConsultoriaShareToken()
+  const { error: ins } = await sb.from('ylada_estetica_consultancy_share_links').insert({
+    material_id: materialId,
+    estetica_consult_client_id: null,
+    token,
+    label: 'entrada_publica_pre',
+  })
+  if (ins) {
+    throw new Error(ins.message)
+  }
+}
 
 /** Garante uma única linha de material global para o diagnóstico corporal (publicado). Devolve o id. */
 export async function ensureDiagnosticoCorporalGlobalMaterialId(sb: SupabaseClient): Promise<string> {
@@ -191,11 +218,15 @@ export async function ensurePreDiagnosticoCorporalGlobalMaterialId(sb: SupabaseC
   if (selErr) {
     throw new Error(selErr.message)
   }
+
+  let materialId: string
+
   if (existing?.id) {
+    materialId = existing.id as string
     const { data: matRow, error: matErr } = await sb
       .from('ylada_estetica_consultancy_materials')
       .select('content')
-      .eq('id', existing.id as string)
+      .eq('id', materialId)
       .maybeSingle()
     if (matErr) {
       throw new Error(matErr.message)
@@ -221,42 +252,43 @@ export async function ensurePreDiagnosticoCorporalGlobalMaterialId(sb: SupabaseC
           content,
           material_kind: 'formulario',
         })
-        .eq('id', existing.id as string)
+        .eq('id', materialId)
         .eq('template_key', TEMPLATE_PRE_DIAGNOSTICO_CORPORAL_ID)
       if (upErr) {
         throw new Error(upErr.message)
       }
     }
-    return existing.id as string
+  } else {
+    const rawContent = { fields: buildPreDiagnosticoCorporalV1Fields() }
+    const content = normalizeConsultoriaContent('formulario', rawContent)
+    if (getConsultoriaFormFields(content).length === 0) {
+      throw new Error('Pré corporal sem campos')
+    }
+
+    const { data: created, error: insErr } = await sb
+      .from('ylada_estetica_consultancy_materials')
+      .insert({
+        client_id: null,
+        template_key: TEMPLATE_PRE_DIAGNOSTICO_CORPORAL_ID,
+        title: TEMPLATE_PRE_DIAGNOSTICO_CORPORAL_TITLE,
+        material_kind: 'formulario',
+        description: getPreDiagnosticoCorporalV1Description(),
+        content,
+        sort_order: 0,
+        is_published: true,
+        created_by_user_id: null,
+      })
+      .select('id')
+      .single()
+
+    if (insErr || !created?.id) {
+      throw new Error(insErr?.message ?? 'Falha ao criar pré-diagnóstico corporal global')
+    }
+    materialId = created.id as string
   }
 
-  const rawContent = { fields: buildPreDiagnosticoCorporalV1Fields() }
-  const content = normalizeConsultoriaContent('formulario', rawContent)
-  if (getConsultoriaFormFields(content).length === 0) {
-    throw new Error('Pré corporal sem campos')
-  }
-
-  const { data: created, error: insErr } = await sb
-    .from('ylada_estetica_consultancy_materials')
-    .insert({
-      client_id: null,
-      template_key: TEMPLATE_PRE_DIAGNOSTICO_CORPORAL_ID,
-      title: TEMPLATE_PRE_DIAGNOSTICO_CORPORAL_TITLE,
-      material_kind: 'formulario',
-      description: getPreDiagnosticoCorporalV1Description(),
-      content,
-      sort_order: 0,
-      is_published: true,
-      created_by_user_id: null,
-    })
-    .select('id')
-    .single()
-
-  if (insErr || !created?.id) {
-    throw new Error(insErr?.message ?? 'Falha ao criar pré-diagnóstico corporal global')
-  }
-
-  return created.id as string
+  await ensureOpenPreEntryShareLink(sb, materialId)
+  return materialId
 }
 
 /** Material global: pré-diagnóstico capilar. */
@@ -270,11 +302,15 @@ export async function ensurePreDiagnosticoCapilarGlobalMaterialId(sb: SupabaseCl
   if (selErr) {
     throw new Error(selErr.message)
   }
+
+  let materialId: string
+
   if (existing?.id) {
+    materialId = existing.id as string
     const { data: matRow, error: matErr } = await sb
       .from('ylada_estetica_consultancy_materials')
       .select('content')
-      .eq('id', existing.id as string)
+      .eq('id', materialId)
       .maybeSingle()
     if (matErr) {
       throw new Error(matErr.message)
@@ -300,40 +336,41 @@ export async function ensurePreDiagnosticoCapilarGlobalMaterialId(sb: SupabaseCl
           content,
           material_kind: 'formulario',
         })
-        .eq('id', existing.id as string)
+        .eq('id', materialId)
         .eq('template_key', TEMPLATE_PRE_DIAGNOSTICO_CAPILAR_ID)
       if (upErr) {
         throw new Error(upErr.message)
       }
     }
-    return existing.id as string
+  } else {
+    const rawContent = { fields: buildPreDiagnosticoCapilarV1Fields() }
+    const content = normalizeConsultoriaContent('formulario', rawContent)
+    if (getConsultoriaFormFields(content).length === 0) {
+      throw new Error('Pré capilar sem campos')
+    }
+
+    const { data: created, error: insErr } = await sb
+      .from('ylada_estetica_consultancy_materials')
+      .insert({
+        client_id: null,
+        template_key: TEMPLATE_PRE_DIAGNOSTICO_CAPILAR_ID,
+        title: TEMPLATE_PRE_DIAGNOSTICO_CAPILAR_TITLE,
+        material_kind: 'formulario',
+        description: getPreDiagnosticoCapilarV1Description(),
+        content,
+        sort_order: 0,
+        is_published: true,
+        created_by_user_id: null,
+      })
+      .select('id')
+      .single()
+
+    if (insErr || !created?.id) {
+      throw new Error(insErr?.message ?? 'Falha ao criar pré-diagnóstico capilar global')
+    }
+    materialId = created.id as string
   }
 
-  const rawContent = { fields: buildPreDiagnosticoCapilarV1Fields() }
-  const content = normalizeConsultoriaContent('formulario', rawContent)
-  if (getConsultoriaFormFields(content).length === 0) {
-    throw new Error('Pré capilar sem campos')
-  }
-
-  const { data: created, error: insErr } = await sb
-    .from('ylada_estetica_consultancy_materials')
-    .insert({
-      client_id: null,
-      template_key: TEMPLATE_PRE_DIAGNOSTICO_CAPILAR_ID,
-      title: TEMPLATE_PRE_DIAGNOSTICO_CAPILAR_TITLE,
-      material_kind: 'formulario',
-      description: getPreDiagnosticoCapilarV1Description(),
-      content,
-      sort_order: 0,
-      is_published: true,
-      created_by_user_id: null,
-    })
-    .select('id')
-    .single()
-
-  if (insErr || !created?.id) {
-    throw new Error(insErr?.message ?? 'Falha ao criar pré-diagnóstico capilar global')
-  }
-
-  return created.id as string
+  await ensureOpenPreEntryShareLink(sb, materialId)
+  return materialId
 }

@@ -2,13 +2,11 @@
  * Exemplo no lugar da cliente final (joias, semijoias, bijuterias). Tom neutro; a vendedora vê como essa pessoa responderia.
  */
 
-export type JoiasDemoNicho =
-  | 'semijoia'
-  | 'bijuteria'
-  | 'marca_propria'
-  | 'loja_online'
-  | 'equipe_revenda'
-  | 'iniciando'
+/** Foco comercial no funil (após escolher linha: joia fina / semijoia / bijuteria). */
+export type JoiasFunilFoco = 'marca_propria' | 'loja_online' | 'equipe_revenda' | 'iniciando'
+
+/** @deprecated Use JoiasFunilFoco — mantido para imports existentes. */
+export type JoiasDemoNicho = JoiasFunilFoco
 
 export interface JoiasDemoPerguntaCliente {
   id: string
@@ -17,7 +15,7 @@ export interface JoiasDemoPerguntaCliente {
 }
 
 export interface JoiasDemoNichoClienteConfig {
-  value: JoiasDemoNicho
+  value: JoiasFunilFoco
   label: string
   tituloQuiz: string
   subtitulo: string

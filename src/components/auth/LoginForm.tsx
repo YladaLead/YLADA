@@ -194,6 +194,7 @@ export default function LoginForm({
     wellness: 'Wellness',
     coach: 'Coach',
     nutra: 'Nutra',
+    admin: 'Administrador',
     ylada: 'YLADA',
     med: 'Médicos',
     seller: 'Vendedores',

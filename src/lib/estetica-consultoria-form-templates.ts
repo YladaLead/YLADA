@@ -1,3 +1,4 @@
+import type { EsteticaConsultSegment } from '@/lib/estetica-consultoria'
 import type { ConsultoriaFormField } from '@/lib/pro-lideres-consultoria'
 
 /** Título exacto do material — usado para evitar duplicar o modelo na mesma clínica. */
@@ -30,6 +31,133 @@ export function isEsteticaConsultoriaPrefillTemplate(templateKey: string | null 
     templateKey === TEMPLATE_PRE_DIAGNOSTICO_CORPORAL_ID ||
     templateKey === TEMPLATE_PRE_DIAGNOSTICO_CAPILAR_ID
   )
+}
+
+/** Pré com link público (sem clínica criada antes do envio). */
+export function isOpenEntryPreDiagnosticoTemplate(templateKey: string | null | undefined): boolean {
+  return templateKey === TEMPLATE_PRE_DIAGNOSTICO_CORPORAL_ID || templateKey === TEMPLATE_PRE_DIAGNOSTICO_CAPILAR_ID
+}
+
+function pickAnswerStr(answers: Record<string, unknown>, key: string): string {
+  const v = answers[key]
+  return v == null ? '' : String(v).trim()
+}
+
+/** Monta payload para INSERT em ylada_estetica_consult_clients após envio do pré (link público). */
+export function buildEsteticaLeadClientPayloadFromPreAnswers(
+  templateKey: string,
+  answers: Record<string, unknown>,
+  respondentEmail: string | null
+): {
+  business_name: string
+  contact_name: string | null
+  phone: string | null
+  contact_email: string | null
+  segment: EsteticaConsultSegment
+} {
+  const nomeClinica = pickAnswerStr(answers, 'nome_clinica')
+  const nomeProp = pickAnswerStr(answers, 'nome_proprietaria')
+  const ddiRaw = pickAnswerStr(answers, 'whatsapp_ddi')
+  const ddi = ddiRaw ? ddiRaw.replace(/\s+—\s+.+$/, '').trim() : '+55'
+  const wa = pickAnswerStr(answers, 'whatsapp')
+  const phone = [ddi, wa].filter(Boolean).join(' ').trim() || null
+  const segment: EsteticaConsultSegment =
+    templateKey === TEMPLATE_PRE_DIAGNOSTICO_CORPORAL_ID ? 'corporal' : 'capilar'
+  const business = (nomeClinica || nomeProp || 'Lead — pré-diagnóstico').slice(0, 300)
+  return {
+    business_name: business,
+    contact_name: nomeProp || null,
+    phone,
+    contact_email: respondentEmail,
+    segment,
+  }
+}
+
+/**
+ * Opções do select «DDI do país» em formulários com WhatsApp.
+ * Formato: "+NN — Nome" (valor guardado = string completa).
+ */
+export const ESTETICA_WHATSAPP_DDI_OPTIONS: string[] = [
+  '+55 — Brasil',
+  '+351 — Portugal',
+  '+34 — Espanha',
+  '+1 — EUA / Canadá',
+  '+52 — México',
+  '+54 — Argentina',
+  '+56 — Chile',
+  '+57 — Colômbia',
+  '+51 — Peru',
+  '+598 — Uruguai',
+  '+595 — Paraguai',
+  '+593 — Equador',
+  '+591 — Bolívia',
+  '+506 — Costa Rica',
+  '+507 — Panamá',
+  '+502 — Guatemala',
+  '+503 — El Salvador',
+  '+504 — Honduras',
+  '+505 — Nicarágua',
+  '+53 — Cuba',
+  '+592 — Guiana',
+  '+594 — Guiana Francesa',
+  '+49 — Alemanha',
+  '+33 — França',
+  '+39 — Itália',
+  '+44 — Reino Unido',
+  '+31 — Países Baixos',
+  '+41 — Suíça',
+  '+43 — Áustria',
+  '+972 — Israel',
+  '+971 — Emirados Árabes',
+  '+244 — Angola',
+  '+258 — Moçambique',
+  '+238 — Cabo Verde',
+  '+670 — Timor-Leste',
+  '+86 — China',
+  '+81 — Japão',
+]
+
+const DEFAULT_WHATSAPP_DDI = ESTETICA_WHATSAPP_DDI_OPTIONS[0] as string
+
+/** Extrai "+digits" do início de uma opção DDI. */
+function ddiCodeFromOption(opt: string): string {
+  const m = opt.match(/^\+(\d+)/)
+  return m ? `+${m[1]}` : ''
+}
+
+/** Prefill: separa DDI e número local a partir do telefone guardado no admin (com ou sem +). */
+export function splitPhoneForEsteticaWhatsappPrefill(phone: string): { ddi: string; local: string } {
+  const raw = phone.trim()
+  if (!raw) {
+    return { ddi: DEFAULT_WHATSAPP_DDI, local: '' }
+  }
+  const ranked = [...ESTETICA_WHATSAPP_DDI_OPTIONS]
+    .map((opt) => ({ opt, code: ddiCodeFromOption(opt) }))
+    .filter((x) => x.code.length > 0)
+    .sort((a, b) => b.code.length - a.code.length)
+
+  for (const { opt, code } of ranked) {
+    if (raw.startsWith(code)) {
+      const local = raw.slice(code.length).replace(/^[\s\-–]+/, '').trim()
+      return { ddi: opt, local: local || raw }
+    }
+  }
+  return { ddi: DEFAULT_WHATSAPP_DDI, local: raw.replace(/^\+/, '') }
+}
+
+const WHATSAPP_DDI_FIELD: ConsultoriaFormField = {
+  id: 'whatsapp_ddi',
+  label: '1. DDI do país (WhatsApp)',
+  type: 'select',
+  required: true,
+  options: ESTETICA_WHATSAPP_DDI_OPTIONS,
+}
+
+const WHATSAPP_LOCAL_FIELD: ConsultoriaFormField = {
+  id: 'whatsapp',
+  label: '1. WhatsApp (número com DDD, sem o código do país)',
+  type: 'text',
+  required: true,
 }
 
 const SIM_NAO_AS_VEZES = ['Sim', 'Não', 'Às vezes']
@@ -94,7 +222,11 @@ export function buildEsteticaDiagnosticoPublicPrefill(client: EsteticaConsultCli
   const cn = (client.contact_name ?? '').trim()
   if (cn) initialAnswers.nome_proprietaria = cn
   const ph = (client.phone ?? '').trim()
-  if (ph) initialAnswers.whatsapp = ph
+  if (ph) {
+    const { ddi, local } = splitPhoneForEsteticaWhatsappPrefill(ph)
+    initialAnswers.whatsapp_ddi = ddi
+    initialAnswers.whatsapp = local
+  }
   return {
     initialAnswers,
     respondentName: cn,
@@ -123,12 +255,8 @@ export function buildDiagnosticoCorporalV1Fields(): ConsultoriaFormField[] {
       type: 'text',
       required: true,
     },
-    {
-      id: 'whatsapp',
-      label: '1. WhatsApp (com DDD)',
-      type: 'text',
-      required: true,
-    },
+    WHATSAPP_DDI_FIELD,
+    WHATSAPP_LOCAL_FIELD,
     {
       id: 'cidade_estado',
       label: '1. Cidade / Estado',
@@ -397,12 +525,8 @@ export function buildPreDiagnosticoCorporalV1Fields(): ConsultoriaFormField[] {
       type: 'text',
       required: true,
     },
-    {
-      id: 'whatsapp',
-      label: '1. WhatsApp (com DDD)',
-      type: 'text',
-      required: true,
-    },
+    WHATSAPP_DDI_FIELD,
+    WHATSAPP_LOCAL_FIELD,
     {
       id: 'nome_clinica',
       label: '1. Nome do salão / clínica (ou marca)',
@@ -579,12 +703,8 @@ export function buildDiagnosticoCapilarV1Fields(): ConsultoriaFormField[] {
       type: 'text',
       required: true,
     },
-    {
-      id: 'whatsapp',
-      label: '1. WhatsApp (com DDD)',
-      type: 'text',
-      required: true,
-    },
+    WHATSAPP_DDI_FIELD,
+    WHATSAPP_LOCAL_FIELD,
     {
       id: 'cidade_estado',
       label: '1. Cidade / Estado',
@@ -762,12 +882,8 @@ export function buildPreDiagnosticoCapilarV1Fields(): ConsultoriaFormField[] {
       type: 'text',
       required: true,
     },
-    {
-      id: 'whatsapp',
-      label: '1. WhatsApp (com DDD)',
-      type: 'text',
-      required: true,
-    },
+    WHATSAPP_DDI_FIELD,
+    WHATSAPP_LOCAL_FIELD,
     {
       id: 'nome_clinica',
       label: '1. Nome do salão / clínica (ou marca)',

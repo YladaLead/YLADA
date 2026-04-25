@@ -15,7 +15,7 @@ type ShareLinkRow = {
   id: string
   material_id: string
   expires_at: string | null
-  estetica_consult_client_id: string
+  estetica_consult_client_id: string | null
   recipient_email?: string | null
   recipient_confirmed_at?: string | null
   email_confirm_token?: string | null

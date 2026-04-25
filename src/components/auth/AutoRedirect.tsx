@@ -3,7 +3,7 @@
 import { useEffect, useRef } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
-import { isPublicPage, getAccessRule, getHomePath, getAreaFromPath } from '@/lib/access-rules'
+import { isPublicPage, getAccessRule, getAppHomePathForPerfil, getAreaFromPath } from '@/lib/access-rules'
 
 /**
  * Componente que gerencia redirecionamento automático baseado em autenticação
@@ -160,7 +160,7 @@ export default function AutoRedirect() {
               const hasSubscription = data.hasActiveSubscription || data.bypassed
               
               if (hasSubscription) {
-                const redirectPath = getHomePath(perfil)
+                const redirectPath = getAppHomePathForPerfil(perfil)
                 console.log('✅ AutoRedirect (UX): redirecionando para:', redirectPath)
                 hasRedirectedRef.current = true
                 router.replace(redirectPath)

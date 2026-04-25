@@ -243,6 +243,7 @@ function PreDiagnosticoLeituraRapidaCard({
   const queixaKey = variant === 'corporal' ? 'pre_queixa_corporal' : 'pre_queixa_capilar'
   const ig = a('instagram')
   const wa = a('whatsapp')
+  const ddi = a('whatsapp_ddi')
   const igHref = preInstagramHref(ig)
 
   return (
@@ -272,7 +273,21 @@ function PreDiagnosticoLeituraRapidaCard({
         </div>
         <div>
           <p className={`text-[11px] font-semibold uppercase tracking-wide ${labelClass}`}>WhatsApp</p>
-          <p className="mt-0.5 font-mono text-sm text-gray-900">{wa || '—'}</p>
+          <p className="mt-0.5 font-mono text-sm text-gray-900">
+            {!ddi && !wa ? (
+              '—'
+            ) : (
+              <>
+                {ddi ? (
+                  <span className="font-semibold text-gray-800">
+                    {ddi.replace(/\s+—\s+.+$/, '').trim()}
+                  </span>
+                ) : null}
+                {ddi && wa ? <span className="mx-1 text-gray-400">·</span> : null}
+                {wa ? <span>{wa}</span> : null}
+              </>
+            )}
+          </p>
         </div>
         <div>
           <p className={`text-[11px] font-semibold uppercase tracking-wide ${labelClass}`}>Instagram</p>
@@ -520,6 +535,14 @@ export default function EsteticaConsultoriaAdminClient() {
   const [diagnosticPreCapilarLinkLoading, setDiagnosticPreCapilarLinkLoading] = useState(false)
   const [formModelDialog, setFormModelDialog] = useState<EsteticaFormModelKind | null>(null)
 
+  type OpenPreLinkPack = { token: string; responder_url: string }
+  const [openPreLinks, setOpenPreLinks] = useState<{
+    corporal: OpenPreLinkPack | null
+    capilar: OpenPreLinkPack | null
+  } | null>(null)
+  const [openPreLinksLoading, setOpenPreLinksLoading] = useState(true)
+  const [openPreLinksError, setOpenPreLinksError] = useState<string | null>(null)
+
   const closeFormModelDialog = useCallback(() => setFormModelDialog(null), [])
 
   const loadClients = useCallback(async (search?: string) => {
@@ -542,6 +565,34 @@ export default function EsteticaConsultoriaAdminClient() {
   useEffect(() => {
     void loadClients()
   }, [loadClients])
+
+  useEffect(() => {
+    let cancelled = false
+    ;(async () => {
+      setOpenPreLinksLoading(true)
+      const res = await fetch('/api/admin/estetica-consultoria/open-pre-links', { credentials: 'include' })
+      const data = await res.json().catch(() => ({}))
+      if (cancelled) return
+      if (res.ok) {
+        setOpenPreLinksError(null)
+        setOpenPreLinks({
+          corporal: (data as { corporal?: OpenPreLinkPack | null }).corporal ?? null,
+          capilar: (data as { capilar?: OpenPreLinkPack | null }).capilar ?? null,
+        })
+      } else {
+        setOpenPreLinks(null)
+        setOpenPreLinksError(
+          (data as { error?: string; hint?: string }).error ??
+            (data as { hint?: string }).hint ??
+            'Não foi possível carregar os links públicos de pré.'
+        )
+      }
+      setOpenPreLinksLoading(false)
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   useEffect(() => {
     if (segmentoFiltro === 'capilar') setNewSegment('capilar')
@@ -1331,10 +1382,10 @@ export default function EsteticaConsultoriaAdminClient() {
         <p className="text-sm font-medium text-pink-700">Estética · YLADA</p>
         <h1 className="text-2xl font-bold text-gray-900">Consultoria (capilar / corporal)</h1>
         <p className="text-gray-600 text-sm max-w-2xl">
-          Por estética: cadastro comercial (pagamento, plano anual, renovação), os <strong>diagnósticos fixos YLADA</strong>{' '}
-          (capilar e/ou corporal, conforme o segmento da clínica) e <strong>outros materiais</strong> com link (roteiros,
-          checklists, formulários extra). Tudo isso só aparece{' '}
-          <strong>depois de escolher ou criar uma clínica</strong> na caixa «Estéticas acompanhadas».
+          O <strong>pré-diagnóstico</strong> tem <strong>link público fixo</strong> (abaixo): a pessoa responde sem ficha
+          pré-criada e o sistema <strong>cria a clínica automaticamente</strong> ao enviar. Depois escolhe a ficha na
+          lista para diagnóstico completo, pagamento e materiais. Os <strong>diagnósticos fixos YLADA</strong> e outros
+          materiais aparecem <strong>depois de selecionar uma clínica</strong>.
         </p>
         <div className="flex flex-wrap items-center gap-2 text-sm">
           {segmentoFiltro ? (
@@ -1372,6 +1423,50 @@ export default function EsteticaConsultoriaAdminClient() {
         </div>
       </header>
 
+      <section className="rounded-2xl border border-indigo-200 bg-gradient-to-br from-indigo-50/80 to-white p-4 shadow-sm space-y-3">
+        <h2 className="text-sm font-semibold text-indigo-950">Links públicos — pré-diagnóstico (entrada)</h2>
+        <p className="text-xs text-indigo-900/85 max-w-3xl">
+          Envie um destes URLs no WhatsApp ou Instagram. Cada envio válido <strong>cria uma nova ficha</strong> na lista
+          «Estéticas acompanhadas» com segmento capilar ou corporal conforme o formulário. O mesmo link serve para
+          todas as pessoas; não precisa criar a clínica antes.
+        </p>
+        {openPreLinksLoading ? (
+          <p className="text-sm text-indigo-800/80">A carregar links…</p>
+        ) : openPreLinksError ? (
+          <p className="text-sm text-red-800">{openPreLinksError}</p>
+        ) : (
+          <div className="grid gap-3 sm:grid-cols-2">
+            {(
+              [
+                { key: 'corporal' as const, label: 'Pré — estética corporal', pack: openPreLinks?.corporal },
+                { key: 'capilar' as const, label: 'Pré — terapia capilar', pack: openPreLinks?.capilar },
+              ] as const
+            ).map(({ key, label, pack }) => (
+              <div
+                key={key}
+                className={`rounded-xl border p-3 ${key === 'corporal' ? 'border-rose-200 bg-white' : 'border-sky-200 bg-white'}`}
+              >
+                <p className="text-xs font-semibold text-gray-800">{label}</p>
+                {pack?.responder_url ? (
+                  <>
+                    <code className="mt-2 block break-all text-[11px] text-gray-800">{pack.responder_url}</code>
+                    <button
+                      type="button"
+                      onClick={() => void navigator.clipboard.writeText(pack.responder_url)}
+                      className="mt-2 text-xs font-medium text-blue-700 hover:underline"
+                    >
+                      Copiar URL
+                    </button>
+                  </>
+                ) : (
+                  <p className="mt-2 text-xs text-amber-800">Link ainda não disponível. Aplique a migração 336 no Supabase e recarregue.</p>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
+
       {error ? (
         <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-900">{error}</div>
       ) : null}
@@ -1380,8 +1475,8 @@ export default function EsteticaConsultoriaAdminClient() {
         <div>
           <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide">Estéticas acompanhadas</h2>
           <p className="mt-1 text-xs text-gray-600 max-w-2xl">
-            Clique em um nome na lista ou use <strong>Criar e abrir</strong>. Sem clínica selecionada não há formulário nem
-            materiais — é o primeiro passo obrigatório.
+            Inclui fichas criadas pelo pré público. Clique num nome ou use <strong>Criar e abrir</strong> só quando
+            quiseres abrir uma ficha manualmente (ex.: antes da pessoa preencher o pré).
           </p>
         </div>
         <form className="flex flex-wrap gap-2 items-end" onSubmit={(e) => void createClient(e)}>
@@ -1693,9 +1788,9 @@ export default function EsteticaConsultoriaAdminClient() {
                   </button>
                 </div>
                 <p className="text-xs text-rose-900/85 max-w-2xl">
-                  Curto (2–3 min), <strong>sem</strong> confirmação por e-mail. Ideal para enviar no WhatsApp antes da
-                  consultoria; as perguntas ecoam o diagnóstico completo (dores, agenda, canais, retorno, ticket,
-                  foco corporal).
+                  O fluxo principal é o <strong>link público</strong> no topo da página (cria ficha ao enviar). Aqui:
+                  opcionalmente, gera um link <strong>só desta clínica</strong> com dados pré-preenchidos a partir do
+                  cadastro admin.
                 </p>
                 {diagnosticPreCorporalLoading ? (
                   <p className="text-sm text-rose-900/80">Carregando pré…</p>
@@ -1728,7 +1823,7 @@ export default function EsteticaConsultoriaAdminClient() {
                       onClick={() => void createDiagnosticPreCorporalLink()}
                       className="rounded-lg bg-rose-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg-rose-800 disabled:opacity-50"
                     >
-                      {diagnosticPreCorporalLinkLoading ? 'Gerando…' : 'Gerar link do pré para esta clínica'}
+                      {diagnosticPreCorporalLinkLoading ? 'Gerando…' : 'Gerar link do pré só desta clínica (opcional)'}
                     </button>
                     <div>
                       <h4 className="text-[11px] font-semibold uppercase tracking-wide text-rose-950/90">
@@ -1964,8 +2059,8 @@ export default function EsteticaConsultoriaAdminClient() {
                   </button>
                 </div>
                 <p className="text-xs text-sky-900/85 max-w-2xl">
-                  Curto (2–3 min), <strong>sem</strong> confirmação por e-mail. Coerente com o diagnóstico capilar longo
-                  (dores, agenda, canais, retorno, queixas típicas).
+                  O fluxo principal é o <strong>link público</strong> no topo. Aqui: link opcional <strong>só desta
+                  ficha</strong>, com pré-preenchimento a partir dos dados administrativos.
                 </p>
                 {diagnosticPreCapilarLoading ? (
                   <p className="text-sm text-sky-900/80">Carregando pré…</p>
@@ -1998,7 +2093,7 @@ export default function EsteticaConsultoriaAdminClient() {
                       onClick={() => void createDiagnosticPreCapilarLink()}
                       className="rounded-lg bg-sky-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg-sky-800 disabled:opacity-50"
                     >
-                      {diagnosticPreCapilarLinkLoading ? 'Gerando…' : 'Gerar link do pré para esta clínica'}
+                      {diagnosticPreCapilarLinkLoading ? 'Gerando…' : 'Gerar link do pré só desta clínica (opcional)'}
                     </button>
                     <div>
                       <h4 className="text-[11px] font-semibold uppercase tracking-wide text-sky-950/90">

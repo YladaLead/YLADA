@@ -19,6 +19,7 @@ export type YladaOgSegment =
   | 'psychology'
   | 'dentistry'
   | 'nutrition_vendedor'
+  | 'joias'
   | 'ylada'
 
 /** Pasta única compartilhada — todas as imagens em /images/og/ylada/ */
@@ -160,6 +161,7 @@ const SEGMENT_DEFAULT_IMAGE: Record<YladaOgSegment, string> = {
   psychology: 'psicologia-ansiedade.jpg',
   dentistry: 'odonto-saude.jpg',
   nutrition_vendedor: 'vendedor-energia.png',
+  joias: 'vendedor-energia.png',
   ylada: 'default.jpg', // resolvido para logo em ogPathFromFilename
 }
 
@@ -175,6 +177,7 @@ function normalizeSegment(segment: string | null | undefined): YladaOgSegment {
     estetica: 'estetica',
     aesthetics: 'estetica',
     fitness: 'fitness',
+    joias: 'joias',
     coach: 'coach',
     med: 'medicine',
     medicine: 'medicine',

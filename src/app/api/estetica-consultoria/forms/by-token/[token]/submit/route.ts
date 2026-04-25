@@ -1,6 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
-import { isDiagnosticoEmailConfirmationTemplate } from '@/lib/estetica-consultoria-form-templates'
+import {
+  buildEsteticaLeadClientPayloadFromPreAnswers,
+  isDiagnosticoEmailConfirmationTemplate,
+  isOpenEntryPreDiagnosticoTemplate,
+} from '@/lib/estetica-consultoria-form-templates'
+import {
+  resolveEsteticaPreNotifyEmail,
+  sendEsteticaPreDiagnosticoFilledNotifyEmail,
+} from '@/lib/estetica-consultoria-pre-notify-email'
 import { getConsultoriaFormFields, validateConsultoriaFormAnswers } from '@/lib/pro-lideres-consultoria'
 
 type Ctx = { params: Promise<{ token: string }> }
@@ -94,10 +102,44 @@ export async function POST(request: NextRequest, context: Ctx) {
     return NextResponse.json({ error: check.error }, { status: 400 })
   }
 
+  const rawClientId = (link as { estetica_consult_client_id?: string | null }).estetica_consult_client_id
+  let esteticaConsultClientId =
+    rawClientId == null || rawClientId === '' ? null : String(rawClientId).trim()
+
+  if (!esteticaConsultClientId) {
+    if (!tpl || !isOpenEntryPreDiagnosticoTemplate(tpl)) {
+      return NextResponse.json(
+        { error: 'Este formulário exige uma clínica associada ao link. Use o link público de pré-diagnóstico ou peça um link válido.' },
+        { status: 400 }
+      )
+    }
+    const payload = buildEsteticaLeadClientPayloadFromPreAnswers(tpl, answers, respondentEmail)
+    const { data: newCli, error: cliErr } = await supabaseAdmin
+      .from('ylada_estetica_consult_clients')
+      .insert({
+        business_name: payload.business_name,
+        contact_name: payload.contact_name,
+        phone: payload.phone,
+        contact_email: payload.contact_email,
+        segment: payload.segment,
+        created_by_user_id: null,
+      })
+      .select('id')
+      .single()
+
+    if (cliErr || !newCli?.id) {
+      return NextResponse.json(
+        { error: cliErr?.message ?? 'Não foi possível criar a ficha a partir do pré-diagnóstico.' },
+        { status: 500 }
+      )
+    }
+    esteticaConsultClientId = newCli.id as string
+  }
+
   const { error: insErr } = await supabaseAdmin.from('ylada_estetica_consultancy_form_responses').insert({
     material_id: mat.id,
     share_link_id: link.id,
-    estetica_consult_client_id: link.estetica_consult_client_id,
+    estetica_consult_client_id: esteticaConsultClientId,
     respondent_name: respondentName,
     respondent_email: respondentEmail,
     answers,
@@ -105,6 +147,22 @@ export async function POST(request: NextRequest, context: Ctx) {
 
   if (insErr) {
     return NextResponse.json({ error: 'Não foi possível guardar a resposta.' }, { status: 500 })
+  }
+
+  if (tpl && isOpenEntryPreDiagnosticoTemplate(tpl)) {
+    const to = resolveEsteticaPreNotifyEmail()
+    if (to) {
+      const prePayload = buildEsteticaLeadClientPayloadFromPreAnswers(tpl, answers, respondentEmail)
+      const adminPanelUrl = `${request.nextUrl.origin}/admin/estetica-consultoria`
+      void sendEsteticaPreDiagnosticoFilledNotifyEmail({
+        toEmail: to,
+        businessName: prePayload.business_name,
+        segment: prePayload.segment,
+        adminPanelUrl,
+      }).then((r) => {
+        if (!r.ok) console.warn('[estetica-pre-notify]', r.error)
+      })
+    }
   }
 
   return NextResponse.json({ ok: true })

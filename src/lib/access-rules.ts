@@ -5,6 +5,8 @@
  * e para onde redirecionar usuários sem acesso.
  */
 
+import { getYladaAreaPathPrefix } from '@/config/ylada-areas'
+
 export type Area = 'wellness' | 'nutri' | 'coach' | 'nutra' | 'c'
 
 export interface AccessRule {
@@ -247,6 +249,25 @@ export function getRenewOrCheckoutPath(area: Area | null): string {
 export function getHomePath(area: Area | null): string {
   if (!area) return '/pt/wellness/home'
   return `/pt/${area}/home`
+}
+
+/**
+ * Home pós-login conforme o perfil (wellness, matriz YLADA, admin, etc.).
+ * Usa rotas reais (ex.: /pt/joias/home), não só o tipo `Area` legado.
+ */
+export function getAppHomePathForPerfil(perfil: string | null | undefined): string {
+  if (!perfil) return getHomePath(null)
+  const p = String(perfil)
+  if (p === 'wellness' || p === 'nutri' || p === 'coach' || p === 'nutra' || p === 'c') {
+    return getHomePath(p as Area)
+  }
+  if (p === 'admin' || p === 'outros') {
+    return '/pt/home'
+  }
+  if (p === 'coach-bem-estar') {
+    return '/pt/coach-bem-estar/home'
+  }
+  return `${getYladaAreaPathPrefix(p)}/home`
 }
 
 /**

@@ -47,7 +47,8 @@ export type YladaEsteticaConsultancyMaterialRow = {
 export type YladaEsteticaConsultancyShareLinkRow = {
   id: string
   material_id: string
-  estetica_consult_client_id: string
+  /** Null = link público de pré (cria ficha ao enviar). */
+  estetica_consult_client_id: string | null
   token: string
   label: string | null
   expires_at: string | null
