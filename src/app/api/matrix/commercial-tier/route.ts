@@ -69,23 +69,36 @@ export async function GET(request: NextRequest) {
       })
     }
 
+    const isYladaPro = await hasYladaProPlan(user.id)
+    const noelAdvancedLimitPerMonth = FREEMIUM_LIMITS.FREE_LIMIT_NOEL_ADVANCED_ANALYSES_PER_MONTH
+
     const subscription = await getActiveSubscription(user.id, subscriptionArea)
     if (!subscription) {
+      if (isYladaPro) {
+        return NextResponse.json({
+          onMatrix: true,
+          perfil,
+          matrixCommercialTier: 'pro' as const,
+          subscriptionArea,
+          noelAdvancedUsedThisMonth: 0,
+          noelAdvancedLimitPerMonth,
+          upgradePath: `/pt/${perfil}/checkout`,
+        })
+      }
       return NextResponse.json({
         onMatrix: true,
         perfil,
         matrixCommercialTier: 'none' as const,
         subscriptionArea,
         noelAdvancedUsedThisMonth: 0,
-        noelAdvancedLimitPerMonth: FREEMIUM_LIMITS.FREE_LIMIT_NOEL_ADVANCED_ANALYSES_PER_MONTH,
+        noelAdvancedLimitPerMonth,
         upgradePath: `/pt/${perfil}/checkout`,
       })
     }
 
     const unlimited = subscriptionRowIsMatrixSegmentCommercialUnlimited(subscription)
-    const matrixCommercialTier = unlimited ? ('pro' as const) : ('freedom' as const)
-    const noelAdvancedLimitPerMonth = FREEMIUM_LIMITS.FREE_LIMIT_NOEL_ADVANCED_ANALYSES_PER_MONTH
-    const isYladaPro = await hasYladaProPlan(user.id)
+    const matrixCommercialTier =
+      isYladaPro || unlimited ? ('pro' as const) : ('freedom' as const)
     const noelAdvancedUsedThisMonth =
       !isYladaPro ? await getNoelUsageCount(user.id) : 0
 

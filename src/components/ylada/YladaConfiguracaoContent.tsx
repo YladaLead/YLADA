@@ -64,6 +64,8 @@ export default function YladaConfiguracaoContent({ areaCodigo, areaLabel }: Ylad
     steps_total: number
   } | null>(null)
   const [loadingSubscription, setLoadingSubscription] = useState(true)
+  /** Conta `demo.*@ylada.app` — API devolve trial sintético; não mostrar cancelar assinatura real. */
+  const [demoMatrixAccount, setDemoMatrixAccount] = useState(false)
   const [showCancelModal, setShowCancelModal] = useState(false)
   const [erroAssinatura, setErroAssinatura] = useState<string | null>(null)
 
@@ -105,10 +107,12 @@ export default function YladaConfiguracaoContent({ areaCodigo, areaLabel }: Ylad
       const data = await res.json()
       if (data.subscription) setSubscription(data.subscription)
       else setSubscription(null)
+      setDemoMatrixAccount(!!data.demo_matrix_account)
       if (data.stats) setStats(data.stats)
       if (data.progress) setProgress(data.progress)
     } catch {
       setSubscription(null)
+      setDemoMatrixAccount(false)
     } finally {
       setLoadingSubscription(false)
     }
@@ -538,15 +542,21 @@ export default function YladaConfiguracaoContent({ areaCodigo, areaLabel }: Ylad
                   <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Plano atual</p>
                   <p className="text-lg font-semibold text-gray-900 mt-0.5">
                     {subscription.plan_type === 'free' && 'Plano gratuito'}
-                    {(subscription.plan_type === 'monthly' || subscription.plan_type === 'annual') && 'YLADA Professional'}
-                    {!['free', 'monthly', 'annual'].includes(subscription.plan_type) && subscription.plan_type}
+                    {(subscription.plan_type === 'monthly' ||
+                      subscription.plan_type === 'annual' ||
+                      subscription.plan_type === 'trial') &&
+                      'YLADA Professional'}
+                    {!['free', 'monthly', 'annual', 'trial'].includes(subscription.plan_type) && subscription.plan_type}
                   </p>
                 </div>
                 <div>
                   <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Status</p>
                   <p className="text-lg font-semibold text-green-700 mt-0.5">Ativo</p>
                 </div>
-                {(subscription.plan_type === 'monthly' || subscription.plan_type === 'annual') && subscription.current_period_end && (
+                {(subscription.plan_type === 'monthly' ||
+                  subscription.plan_type === 'annual' ||
+                  (subscription.plan_type === 'trial' && !demoMatrixAccount)) &&
+                  subscription.current_period_end && (
                   <div>
                     <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Próxima cobrança</p>
                     <p className="text-lg font-semibold text-gray-900 mt-0.5">
@@ -576,14 +586,21 @@ export default function YladaConfiguracaoContent({ areaCodigo, areaLabel }: Ylad
                     Alterar plano
                   </Link>
                 )}
-                <button
-                  type="button"
-                  onClick={() => setShowCancelModal(true)}
-                  className="px-4 py-2 text-sm text-gray-600 hover:text-gray-900 border border-gray-300 rounded-lg hover:bg-gray-50"
-                >
-                  Cancelar assinatura
-                </button>
+                {!demoMatrixAccount && (
+                  <button
+                    type="button"
+                    onClick={() => setShowCancelModal(true)}
+                    className="px-4 py-2 text-sm text-gray-600 hover:text-gray-900 border border-gray-300 rounded-lg hover:bg-gray-50"
+                  >
+                    Cancelar assinatura
+                  </button>
+                )}
               </div>
+              {demoMatrixAccount ? (
+                <p className="text-xs text-gray-500 pt-1">
+                  Conta de demonstração: acesso completo para testes e gravações, sem cobrança neste email.
+                </p>
+              ) : null}
             </div>
 
             {/* Impacto da YLADA — retenção */}
@@ -627,7 +644,7 @@ export default function YladaConfiguracaoContent({ areaCodigo, areaLabel }: Ylad
         )}
       </section>
 
-      {showCancelModal && subscription?.id && (
+      {showCancelModal && subscription?.id && !demoMatrixAccount && (
         <YladaCancelRetentionModal
           isOpen={showCancelModal}
           onClose={() => setShowCancelModal(false)}

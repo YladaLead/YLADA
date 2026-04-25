@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireApiAuth } from '@/lib/api-auth'
-import { getActiveSubscriptionForYladaConfig } from '@/lib/subscription-helpers'
+import {
+  emailIsMatrixDemoVideoAccount,
+  getActiveSubscriptionForYladaConfig,
+  subscriptionRowIsMatrixSegmentCommercialUnlimited,
+} from '@/lib/subscription-helpers'
 import { YLADA_API_ALLOWED_PROFILES } from '@/config/ylada-areas'
 import { supabaseAdmin } from '@/lib/supabase'
 
@@ -14,7 +18,34 @@ export async function GET(request: NextRequest) {
     if (auth instanceof NextResponse) return auth
     const { user } = auth
 
-    const subscription = await getActiveSubscriptionForYladaConfig(user.id)
+    const { data: profileEmailRow } = await supabaseAdmin
+      .from('user_profiles')
+      .select('email')
+      .eq('user_id', user.id)
+      .maybeSingle()
+
+    const isDemoMatrixEmail = emailIsMatrixDemoVideoAccount(profileEmailRow?.email as string | undefined)
+
+    let subscription = await getActiveSubscriptionForYladaConfig(user.id)
+    let demoMatrixAccount = false
+
+    if (
+      isDemoMatrixEmail &&
+      (!subscription || !subscriptionRowIsMatrixSegmentCommercialUnlimited(subscription))
+    ) {
+      demoMatrixAccount = true
+      const periodEnd = new Date()
+      periodEnd.setFullYear(periodEnd.getFullYear() + 1)
+      subscription = {
+        id: user.id,
+        plan_type: 'trial',
+        status: 'active',
+        current_period_start: new Date().toISOString(),
+        current_period_end: periodEnd.toISOString(),
+        stripe_subscription_id: 'demo_matrix_email',
+        area: null,
+      } as NonNullable<Awaited<ReturnType<typeof getActiveSubscriptionForYladaConfig>>>
+    }
 
     let stats: { links_count: number; respostas_total: number; leads_capturados: number } = {
       links_count: 0,
@@ -76,6 +107,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({
         hasActiveSubscription: false,
         subscription: null,
+        demo_matrix_account: demoMatrixAccount,
         stats,
         progress: { ...progress, steps_done: stepsDone, steps_total: stepsTotal },
       })
@@ -84,6 +116,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       hasActiveSubscription: true,
       subscription,
+      demo_matrix_account: demoMatrixAccount,
       stats,
       progress: { ...progress, steps_done: stepsDone, steps_total: stepsTotal },
     })

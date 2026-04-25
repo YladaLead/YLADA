@@ -107,7 +107,13 @@ export function NovoLinkPageContent({
         const lj = (await lr.json().catch(() => ({}))) as { data?: Array<{ status: string }> }
         const sj = (await sr.json().catch(() => ({}))) as { subscription?: { plan_type?: string } | null }
         if (cancelled) return
-        const pro = sj?.subscription?.plan_type === 'monthly' || sj?.subscription?.plan_type === 'annual'
+        const pt = sj?.subscription?.plan_type
+        const stripeId = sj?.subscription?.stripe_subscription_id as string | undefined
+        const pro =
+          pt === 'monthly' ||
+          pt === 'annual' ||
+          pt === 'trial' ||
+          (pt === 'free' && typeof stripeId === 'string' && stripeId.startsWith('free_cor_'))
         const active = Array.isArray(lj?.data) ? lj.data!.filter((l) => l.status === 'active').length : 0
         setFreeTierBlocksNewActive(!pro && active >= 1)
       })

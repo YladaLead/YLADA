@@ -246,9 +246,18 @@ export async function isMatrixFreedomTierUser(userId: string): Promise<boolean> 
 /** @deprecated Use isMatrixFreedomTierUser (cobre todos os segmentos da matriz). */
 export const isNutriFreedomTierUser = isMatrixFreedomTierUser
 
+/** Contas de vídeo/teste criadas pelo script interno (`demo.*@ylada.app` / legado `.com`). */
+export function emailIsMatrixDemoVideoAccount(email: string | null | undefined): boolean {
+  const e = String(email || '')
+    .trim()
+    .toLowerCase()
+  return /^demo\.[a-z0-9._-]+@ylada\.(app|com)$/.test(e)
+}
+
 /**
  * Verifica se usuário tem benefícios “sem limite freemium” na matriz YLADA (links, Noel, WhatsApp).
  * Inclui: **admin ou suporte** (contas demo e equipe, ex. `demo.nutri@ylada.com` com `is_support`);
+ * **emails `demo.*@ylada.app` (e `@ylada.com`)** usados em gravações — mesmo sem linha em `subscriptions`;
  * ylada mensal/anual/trial ou free cortesia; **ou** assinatura ativa no **segmento do perfil** (nutri, med, coach, …) equivalente a pago/trial/cortesia.
  * Wellness não entra aqui. Não inclui: free migração/legado no segmento.
  * @see docs/SPEC-FREEMIUM-YLADA.md
@@ -257,14 +266,16 @@ export async function hasYladaProPlan(userId: string): Promise<boolean> {
   try {
     if (await canBypassSubscription(userId)) return true
 
-    const yladaSub = await getActiveSubscription(userId, 'ylada')
-    if (yladaSub && activeYladaRowIsUnlimited(yladaSub)) return true
-
     const { data: profile } = await supabaseAdmin
       .from('user_profiles')
-      .select('perfil')
+      .select('perfil, email')
       .eq('user_id', userId)
       .maybeSingle()
+
+    if (emailIsMatrixDemoVideoAccount(profile?.email as string | undefined)) return true
+
+    const yladaSub = await getActiveSubscription(userId, 'ylada')
+    if (yladaSub && activeYladaRowIsUnlimited(yladaSub)) return true
 
     const area = perfilMatrizToSubscriptionArea(profile?.perfil as string | undefined)
     if (!area) return false
