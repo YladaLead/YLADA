@@ -61,7 +61,20 @@ type CreatedLink = {
   questions: { label: string }[]
 }
 
-export type AreaCodigo = 'ylada' | 'med' | 'psi' | 'odonto' | 'nutra' | 'nutri' | 'coach' | 'psicanalise' | 'perfumaria' | 'seller' | 'estetica' | 'fitness'
+export type AreaCodigo =
+  | 'ylada'
+  | 'med'
+  | 'psi'
+  | 'odonto'
+  | 'nutra'
+  | 'nutri'
+  | 'coach'
+  | 'psicanalise'
+  | 'perfumaria'
+  | 'seller'
+  | 'estetica'
+  | 'fitness'
+  | 'joias'
 
 export function NovoLinkPageContent({
   areaCodigo,

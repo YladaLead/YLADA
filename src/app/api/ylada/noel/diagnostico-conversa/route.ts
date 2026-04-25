@@ -10,7 +10,7 @@ import { supabaseAdmin } from '@/lib/supabase'
 
 const ALLOWED_PROFILES = [
   'ylada', 'med', 'psi', 'psicanalise', 'odonto', 'nutra', 'coach', 'seller',
-  'perfumaria', 'estetica', 'fitness', 'nutri', 'admin',
+  'perfumaria', 'estetica', 'fitness', 'joias', 'nutri', 'admin',
 ] as const
 
 export async function GET(request: NextRequest) {

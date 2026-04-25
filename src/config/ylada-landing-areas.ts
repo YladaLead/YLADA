@@ -12,9 +12,8 @@ export interface YladaLandingArea {
 }
 
 /**
- * Áreas do Método YLADA — ordem sugerida para o grid:
- * Linha 1: Saúde (Médicos, Nutricionistas, Psicólogos, Psicanalistas, Odontologia)
- * Linha 2: Estética e bem-estar + Mercado de vendas (Estética, Fitness, Perfumaria, Vendedores)
+ * Áreas do Método YLADA — ordem sugerida para o grid público (home, profissionais, landings).
+ * **seller** não aparece nas listagens públicas; interesse fora da lista → WhatsApp (ver componentes).
  */
 const YLADA_LANDING_AREAS_BASE: Omit<YladaLandingArea, 'href'>[] = [
   { codigo: 'med', label: 'Médicos', slogan: 'Atrair pacientes que já entendem o valor da consulta', descricao: 'Para médicos e clínicas.' },
@@ -31,14 +30,19 @@ const YLADA_LANDING_AREAS_BASE: Omit<YladaLandingArea, 'href'>[] = [
   { codigo: 'coach', label: 'Coach', slogan: 'Começar conversas com clientes mais preparados', descricao: 'Para coaches (bem-estar, carreira, vida).' },
   { codigo: 'fitness', label: 'Fitness', slogan: 'Atrair alunos que já entendem o valor do treino', descricao: 'Para profissionais de fitness.' },
   { codigo: 'perfumaria', label: 'Perfumaria', slogan: 'Atrair clientes interessados em fragrâncias ideais', descricao: 'Para consultores de fragrância, vendedores especializados e lojas de perfume.' },
-  { codigo: 'seller', label: 'Vendedores', slogan: 'Iniciar conversas com clientes mais qualificados', descricao: 'Profissionais que vendem produtos ou serviços consultivos podem usar diagnósticos para gerar conversas mais qualificadas.' },
+  {
+    codigo: 'joias',
+    label: 'Joias e bijuterias',
+    slogan: 'Qualificar antes do preço e encher o WhatsApp de contexto',
+    descricao: 'Para quem vende semijoias, bijuterias ou joias — loja, marca, revenda ou equipe.',
+  },
 ]
 
 /** Retorna áreas com href usando locale (ex: getYladaLandingAreas('es')) */
 export function getYladaLandingAreas(locale: string): YladaLandingArea[] {
   return YLADA_LANDING_AREAS_BASE.map((a) => ({
     ...a,
-    href: `/${locale}/${a.codigo === 'seller' ? 'seller' : a.codigo === 'coach' ? 'coach' : a.codigo}`,
+    href: `/${locale}/${a.codigo === 'coach' ? 'coach' : a.codigo}`,
   }))
 }
 

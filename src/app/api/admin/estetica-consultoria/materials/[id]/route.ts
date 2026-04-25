@@ -4,6 +4,8 @@ import { supabaseAdmin } from '@/lib/supabase'
 import {
   TEMPLATE_DIAGNOSTICO_CAPILAR_ID,
   TEMPLATE_DIAGNOSTICO_CORPORAL_ID,
+  TEMPLATE_PRE_DIAGNOSTICO_CAPILAR_ID,
+  TEMPLATE_PRE_DIAGNOSTICO_CORPORAL_ID,
 } from '@/lib/estetica-consultoria-form-templates'
 import {
   getConsultoriaFormFields,
@@ -57,13 +59,24 @@ export async function PATCH(request: NextRequest, context: Ctx) {
       )
     }
   }
-  if (templateKey === TEMPLATE_DIAGNOSTICO_CORPORAL_ID || templateKey === TEMPLATE_DIAGNOSTICO_CAPILAR_ID) {
+  const isFixedDiagnostico =
+    templateKey === TEMPLATE_DIAGNOSTICO_CORPORAL_ID ||
+    templateKey === TEMPLATE_DIAGNOSTICO_CAPILAR_ID ||
+    templateKey === TEMPLATE_PRE_DIAGNOSTICO_CORPORAL_ID ||
+    templateKey === TEMPLATE_PRE_DIAGNOSTICO_CAPILAR_ID
+  if (isFixedDiagnostico) {
     if (body.content !== undefined || body.description !== undefined) {
       const label =
-        templateKey === TEMPLATE_DIAGNOSTICO_CAPILAR_ID ? 'capilar' : 'corporal'
+        templateKey === TEMPLATE_DIAGNOSTICO_CAPILAR_ID || templateKey === TEMPLATE_PRE_DIAGNOSTICO_CAPILAR_ID
+          ? 'capilar'
+          : 'corporal'
+      const kind =
+        templateKey === TEMPLATE_PRE_DIAGNOSTICO_CORPORAL_ID || templateKey === TEMPLATE_PRE_DIAGNOSTICO_CAPILAR_ID
+          ? 'pré-diagnóstico'
+          : 'diagnóstico'
       return NextResponse.json(
         {
-          error: `O diagnóstico ${label} YLADA é fixo no sistema (sempre o mesmo). Não é editável pelo painel — só por código.`,
+          error: `O ${kind} ${label} YLADA é fixo no sistema (sempre o mesmo). Não é editável pelo painel — só por código.`,
         },
         { status: 400 }
       )

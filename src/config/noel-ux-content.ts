@@ -19,6 +19,7 @@ export type NoelArea =
   | 'perfumaria'
   | 'estetica'
   | 'fitness'
+  | 'joias'
   /** Mentor no painel Pro Líderes (operador / equipe; contexto em /api/pro-lideres/noel). */
   | 'pro_lideres'
   /** Mentor no painel Pro Estética Corporal (/api/pro-estetica-corporal/noel). */
@@ -120,6 +121,12 @@ const SELLER_SUGGESTIONS = [
   { label: 'Criar meu primeiro link', prompt: 'Quero criar um link para vender mais' },
   { label: 'Atrair mais clientes', prompt: 'Como atrair mais clientes?' },
   { label: 'Melhorar minhas conversas', prompt: 'Como melhorar minhas conversas de venda?' },
+]
+
+const JOIAS_SUGGESTIONS = [
+  { label: 'Criar meu primeiro link', prompt: 'Quero criar um link para qualificar clientes de semijoia antes do preço' },
+  { label: 'Menos “só preço” no WhatsApp', prompt: 'Como fazer a cliente falar de estilo e ocasião antes de ver valores?' },
+  { label: 'Melhorar minhas conversas', prompt: 'Como melhorar conversas depois que alguém responde meu link?' },
 ]
 
 const PRO_LIDERES_SUGGESTIONS = [
@@ -252,6 +259,11 @@ const NOEL_UX_BY_AREA: Record<NoelArea, NoelUxContentWithoutWelcome> = {
     suggestions: FITNESS_SUGGESTIONS,
     placeholder: 'Pergunte algo ao Noel...',
     placeholderExample: 'Ex: Como atrair mais alunos para academia',
+  },
+  joias: {
+    suggestions: JOIAS_SUGGESTIONS,
+    placeholder: 'Pergunte algo ao Noel...',
+    placeholderExample: 'Ex: Como vender semijoia sem brigar por preço',
   },
   pro_lideres: {
     suggestions: PRO_LIDERES_SUGGESTIONS,

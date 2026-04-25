@@ -6,7 +6,9 @@ import { NovoLinkPageContent, type AreaCodigo } from '@/components/ylada/NovoLin
 function useAreaFromPath(): { areaCodigo: AreaCodigo; areaLabel: string } {
   const pathname = usePathname()
   if (!pathname) return { areaCodigo: 'ylada', areaLabel: 'YLADA' }
-  const m = pathname.match(/^\/pt\/(med|psi|odonto|nutra|nutri|coach|psicanalise|perfumaria|seller|estetica|fitness)\//)
+  const m = pathname.match(
+    /^\/pt\/(med|psi|odonto|nutra|nutri|coach|psicanalise|perfumaria|seller|estetica|fitness|joias)\//
+  )
   const area = m?.[1] ?? 'ylada'
   const labels: Record<string, string> = {
     med: 'Médicos',
@@ -20,6 +22,7 @@ function useAreaFromPath(): { areaCodigo: AreaCodigo; areaLabel: string } {
     seller: 'Vendedores',
     estetica: 'Estética',
     fitness: 'Fitness',
+    joias: 'Joias e bijuterias',
   }
   return {
     areaCodigo: area as AreaCodigo,

@@ -167,6 +167,7 @@ SEGMENTOS DISPONÍVEIS:
 - aesthetics: Estética
 - fitness: Fitness
 - perfumaria: Perfumaria
+- joias: Joias e bijuterias
 
 IMPORTANTE:
 - Sempre retorne JSON válido

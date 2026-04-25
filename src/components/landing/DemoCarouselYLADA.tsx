@@ -29,7 +29,9 @@ const CARROSSEL_AREAS = YLADA_LANDING_AREAS.map((a) => ({
                     ? '💪'
                     : a.codigo === 'perfumaria'
                       ? '🌸'
-                      : '💼',
+                      : a.codigo === 'joias'
+                        ? '💎'
+                        : '💼',
 }))
 
 type ChatMessage = { from: 'client' | 'pro'; text: string; time?: string }

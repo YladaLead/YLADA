@@ -22,6 +22,7 @@ const ALLOWED = [
   'psicanalise',
   'odonto',
   'fitness',
+  'joias',
   'estetica',
   'med',
   'perfumaria',

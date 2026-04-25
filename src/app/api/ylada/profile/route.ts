@@ -12,7 +12,20 @@ import { validateProfessionForSegment } from '@/config/ylada-profile-flows'
 import { getPerfilSimuladoByKey, SIMULATE_COOKIE_NAME } from '@/data/perfis-simulados'
 import { yladaApiRejectWellnessProductUser } from '@/lib/ylada-api-guard'
 
-const VALID_SEGMENTS = ['ylada', 'med', 'psi', 'psicanalise', 'odonto', 'nutra', 'coach', 'seller', 'perfumaria', 'estetica', 'fitness'] as const
+const VALID_SEGMENTS = [
+  'ylada',
+  'med',
+  'psi',
+  'psicanalise',
+  'odonto',
+  'nutra',
+  'coach',
+  'seller',
+  'perfumaria',
+  'estetica',
+  'fitness',
+  'joias',
+] as const
 
 type ProfilePayload = {
   segment: string

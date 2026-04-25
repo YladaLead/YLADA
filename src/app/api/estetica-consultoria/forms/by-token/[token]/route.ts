@@ -4,6 +4,7 @@ import {
   buildEsteticaDiagnosticoPublicPrefill,
   getDiagnosticoTemplateDescription,
   isDiagnosticoEmailConfirmationTemplate,
+  isEsteticaConsultoriaPrefillTemplate,
 } from '@/lib/estetica-consultoria-form-templates'
 import { maskRecipientEmail } from '@/lib/estetica-consultoria-confirmation-email'
 import { getConsultoriaFormFields } from '@/lib/pro-lideres-consultoria'
@@ -135,7 +136,7 @@ export async function GET(request: NextRequest, context: Ctx) {
 
   let prefill: ReturnType<typeof buildEsteticaDiagnosticoPublicPrefill> | null = null
   const clientId = link.estetica_consult_client_id
-  if (isDiagnosticoFixoEmail && clientId) {
+  if (clientId && (isDiagnosticoFixoEmail || isEsteticaConsultoriaPrefillTemplate(templateKey))) {
     const { data: cli } = await supabaseAdmin
       .from('ylada_estetica_consult_clients')
       .select('business_name, contact_name, phone, contact_email')

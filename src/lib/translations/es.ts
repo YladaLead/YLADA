@@ -129,6 +129,10 @@ export const esTranslations: Translations = {
         estetica: { title: 'Estética', description: 'Profesionales de estética: captación de clientes y enlaces inteligentes.' },
         fitness: { title: 'Fitness', description: 'Entrenadores personales y coaches: captación y formación empresarial.' },
         perfumaria: { title: 'Perfumería', description: 'Vendedores de fragancias: quizzes de perfil olfativo y leads.' },
+        joias: {
+          title: 'Joyería y bisutería',
+          description: 'Semiorfebrería y bisutería: calificar antes del precio y leads con contexto.',
+        },
         nutra: { title: 'Ventas de suplementos y nutracéuticos', description: 'Vendedores de suplementos: leads y conversión.' },
         'profissional-liberal': { title: 'Profesional liberal', description: 'Abogados, contadores, consultores: captación y diagnósticos para tu área.' },
         'vendedores-geral': { title: 'Vendedores en general', description: 'Vendedores de cualquier segmento: embudo, enlaces inteligentes y conversaciones cualificadas.' },
@@ -172,16 +176,19 @@ export const esTranslations: Translations = {
       back: 'Volver al inicio'
     },
     areaRequest: {
+      headingMinhaArea: 'Quiero que analicen mi área',
       title: 'Solicitar acceso',
-      subtitle: 'Completa el formulario y nos pondremos en contacto cuando esta área esté disponible.',
+      subtitle:
+        'Completa tus datos. Nuestro equipo se pondrá en contacto para alinear tu segmento y los próximos pasos, también por WhatsApp si indicas el número abajo.',
       labelName: 'Nombre',
       labelProfession: 'Profesión o segmento',
       labelCountry: 'País',
       labelEmail: 'Correo',
+      labelWhatsApp: 'WhatsApp',
       submit: 'Enviar solicitud',
       submitting: 'Enviando...',
       successTitle: '¡Solicitud registrada!',
-      successMessage: 'Nos pondremos en contacto cuando el área esté disponible.',
+      successMessage: 'Hemos recibido tu solicitud. Nos pondremos en contacto pronto.',
       successButton: 'OK'
     },
     footer: {

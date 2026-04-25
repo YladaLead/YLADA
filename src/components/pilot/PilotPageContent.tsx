@@ -9,6 +9,10 @@ import { useTranslations } from '@/hooks/useTranslations'
 import { freeTextMatchesBelezaEsteticaSegment } from '@/lib/pilot-other-to-estetica'
 import { getMatrixHubHrefForArea } from '@/lib/ylada-matrix-entry'
 import { trackYladaFunnelEvent } from '@/lib/ylada-funnel-client'
+import {
+  getYladaPublicAreaAnalysisWhatsAppUrl,
+  getYladaPublicAreaSupportLinkLabel,
+} from '@/lib/ylada-public-area-support'
 
 /** Itens só por solicitação — no piloto entram apenas pelo campo livre. */
 const PILOT_EXCLUDED_IDS = new Set(['profissional-liberal'])
@@ -105,6 +109,16 @@ export default function PilotPageContent() {
                 )
               })}
             </ul>
+            <p className="pt-3 text-center">
+              <a
+                href={getYladaPublicAreaAnalysisWhatsAppUrl('pt')}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm font-medium text-emerald-800 hover:text-emerald-950 underline-offset-2 hover:underline"
+              >
+                {getYladaPublicAreaSupportLinkLabel('pt')}
+              </a>
+            </p>
           </section>
 
           <section className="space-y-3 border-t border-gray-100 pt-2">

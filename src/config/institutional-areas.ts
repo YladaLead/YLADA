@@ -10,12 +10,25 @@ export interface InstitutionalArea {
   path: string
   status: AreaStatus
   /** Chave em t.institutional.areas.list[id] */
-  translationKey: 'nutri' | 'coach' | 'med' | 'estetica' | 'fitness' | 'perfumaria' | 'nutra' | 'profissional-liberal' | 'vendedores-geral' | 'psi' | 'psicanalise' | 'odonto'
+  translationKey:
+    | 'nutri'
+    | 'coach'
+    | 'med'
+    | 'estetica'
+    | 'fitness'
+    | 'joias'
+    | 'perfumaria'
+    | 'nutra'
+    | 'profissional-liberal'
+    | 'vendedores-geral'
+    | 'psi'
+    | 'psicanalise'
+    | 'odonto'
 }
 
 /**
- * Áreas na ordem de exibição: profissionais de saúde, bem-estar, vendedores, em breve.
- * Paths ready: raiz do segmento (/pt/{id}), entrada para divulgação.
+ * Áreas na ordem de exibição no hub público (/pt/segmentos): saúde, bem-estar, vendas (nutra/perfumaria), em breve.
+ * **seller** não entra aqui — acesso direto /pt/seller permanece em AREA_BASE_PATHS para quem já tem URL.
  * Coach é a única porta de entrada para coaches; a diferenciação (bem-estar, carreira, vida) ocorre no perfil.
  * Wellness (Herbalife) não aparece — funciona em paralelo, fora da divulgação oficial.
  */
@@ -33,12 +46,7 @@ export const INSTITUTIONAL_AREAS: InstitutionalArea[] = [
   // Vendedores
   { id: 'nutra', path: '/pt/nutra', status: 'ready', translationKey: 'nutra' },
   { id: 'perfumaria', path: '/pt/perfumaria', status: 'ready', translationKey: 'perfumaria' },
-  {
-    id: 'seller',
-    path: '/pt/seller',
-    status: 'ready',
-    translationKey: 'vendedores-geral',
-  },
+  { id: 'joias', path: '/pt/joias', status: 'ready', translationKey: 'joias' },
   // Em breve
   { id: 'profissional-liberal', path: '/pt/solicitar-acesso?area=profissional-liberal', status: 'construction', translationKey: 'profissional-liberal' },
 ]
@@ -55,6 +63,7 @@ const AREA_BASE_PATHS: Record<string, string> = {
   fitness: '/fitness',
   nutra: '/nutra',
   perfumaria: '/perfumaria',
+  joias: '/joias',
   seller: '/seller',
   'profissional-liberal': '/solicitar-acesso?area=profissional-liberal',
   /** Legado: solicitar acesso por interesse */

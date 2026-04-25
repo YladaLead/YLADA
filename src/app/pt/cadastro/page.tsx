@@ -4,6 +4,10 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import LoginForm, { type LoginFormPerfil, YLADA_SIGNUP_PAGE_HERO } from '@/components/auth/LoginForm'
 import { trackYladaFunnelEvent } from '@/lib/ylada-funnel-client'
+import {
+  getYladaPublicAreaAnalysisWhatsAppUrl,
+  getYladaPublicAreaSupportLinkLabel,
+} from '@/lib/ylada-public-area-support'
 
 /** Áreas disponíveis para cadastro (sem ylada — matriz não é área pública). */
 const AREAS_CADASTRO: { value: string; label: string }[] = [
@@ -15,8 +19,8 @@ const AREAS_CADASTRO: { value: string; label: string }[] = [
   { value: 'psicanalise', label: 'Psicanálise' },
   { value: 'odonto', label: 'Odontologia' },
   { value: 'fitness', label: 'Fitness' },
+  { value: 'joias', label: 'Joias e bijuterias' },
   { value: 'perfumaria', label: 'Perfumaria' },
-  { value: 'seller', label: 'Vendedores' },
   { value: 'nutra', label: 'Nutra' },
 ]
 
@@ -106,6 +110,16 @@ export default function CadastroPage() {
             </li>
           ))}
         </ul>
+        <p className="mt-4 text-center">
+          <a
+            href={getYladaPublicAreaAnalysisWhatsAppUrl('pt')}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-sm font-medium text-emerald-800 hover:text-emerald-950 underline-offset-2 hover:underline"
+          >
+            {getYladaPublicAreaSupportLinkLabel('pt')}
+          </a>
+        </p>
 
         <section className="mt-6 pt-6 border-t border-gray-100 space-y-3">
           <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Outro</p>

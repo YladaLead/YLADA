@@ -94,7 +94,7 @@ export async function GET(request: NextRequest) {
 
     // Buscar todos os perfis de usuários
     const LEGADO_AREAS = ['nutri', 'coach', 'nutra']
-    const DEMAIS_SEGMENTOS = ['med', 'psi', 'psicanalise', 'odonto', 'estetica', 'fitness', 'perfumaria', 'seller']
+    const DEMAIS_SEGMENTOS = ['med', 'psi', 'psicanalise', 'odonto', 'estetica', 'fitness', 'joias', 'perfumaria', 'seller']
     let profilesQuery = supabaseAdmin
       .from('user_profiles')
       .select('id, user_id, nome_completo, email, whatsapp, perfil, created_at, nome_presidente')

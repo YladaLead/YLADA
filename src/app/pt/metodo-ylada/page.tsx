@@ -7,6 +7,10 @@ import ManifestoYLADA from '@/components/landing/ManifestoYLADA'
 import DemoCarouselYLADA from '@/components/landing/DemoCarouselYLADA'
 import FluxoTrilhaPlataforma from '@/components/landing/FluxoTrilhaPlataforma'
 import { YLADA_LANDING_AREAS } from '@/config/ylada-landing-areas'
+import {
+  getYladaPublicAreaAnalysisWhatsAppUrl,
+  getYladaPublicAreaSupportLinkLabel,
+} from '@/lib/ylada-public-area-support'
 
 export default function MetodoYLADALandingPage() {
   return (
@@ -460,6 +464,16 @@ export default function MetodoYLADALandingPage() {
                   </Link>
                 ))}
               </div>
+              <p className="text-center mt-10">
+                <a
+                  href={getYladaPublicAreaAnalysisWhatsAppUrl('pt')}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm font-medium text-emerald-800 hover:text-emerald-950 underline-offset-2 hover:underline"
+                >
+                  {getYladaPublicAreaSupportLinkLabel('pt')}
+                </a>
+              </p>
             </div>
           </div>
         </section>

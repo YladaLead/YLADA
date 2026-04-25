@@ -9,9 +9,27 @@ export const TEMPLATE_DIAGNOSTICO_CAPILAR_TITLE = 'Diagnóstico — Estética ca
 
 export const TEMPLATE_DIAGNOSTICO_CAPILAR_ID = 'diagnostico_capilar_v1' as const
 
+export const TEMPLATE_PRE_DIAGNOSTICO_CORPORAL_TITLE = 'Pré-diagnóstico — Estética corporal (YLADA)'
+
+export const TEMPLATE_PRE_DIAGNOSTICO_CORPORAL_ID = 'pre_diagnostico_corporal_v1' as const
+
+export const TEMPLATE_PRE_DIAGNOSTICO_CAPILAR_TITLE = 'Pré-diagnóstico — Terapia capilar (YLADA)'
+
+export const TEMPLATE_PRE_DIAGNOSTICO_CAPILAR_ID = 'pre_diagnostico_capilar_v1' as const
+
 /** Formulários fixos YLADA com confirmação por e-mail antes de preencher. */
 export function isDiagnosticoEmailConfirmationTemplate(templateKey: string | null | undefined): boolean {
   return templateKey === TEMPLATE_DIAGNOSTICO_CORPORAL_ID || templateKey === TEMPLATE_DIAGNOSTICO_CAPILAR_ID
+}
+
+/** Pré e diagnóstico completo: mesmos campos iniciais (nome, WhatsApp, etc.) para prefill a partir do cadastro admin. */
+export function isEsteticaConsultoriaPrefillTemplate(templateKey: string | null | undefined): boolean {
+  return (
+    templateKey === TEMPLATE_DIAGNOSTICO_CORPORAL_ID ||
+    templateKey === TEMPLATE_DIAGNOSTICO_CAPILAR_ID ||
+    templateKey === TEMPLATE_PRE_DIAGNOSTICO_CORPORAL_ID ||
+    templateKey === TEMPLATE_PRE_DIAGNOSTICO_CAPILAR_ID
+  )
 }
 
 const SIM_NAO_AS_VEZES = ['Sim', 'Não', 'Às vezes']
@@ -370,6 +388,112 @@ export function getDiagnosticoCorporalV1Description(): string {
   ].join('\n')
 }
 
+/** Pré curto antes da consultoria — ecoa temas do diagnóstico completo (dores, agenda, canais, retorno, ticket). */
+export function buildPreDiagnosticoCorporalV1Fields(): ConsultoriaFormField[] {
+  return [
+    {
+      id: 'nome_proprietaria',
+      label: '1. Nome completo',
+      type: 'text',
+      required: true,
+    },
+    {
+      id: 'whatsapp',
+      label: '1. WhatsApp (com DDD)',
+      type: 'text',
+      required: true,
+    },
+    {
+      id: 'nome_clinica',
+      label: '1. Nome do salão / clínica (ou marca)',
+      type: 'text',
+      required: true,
+    },
+    {
+      id: 'instagram',
+      label: '1. Instagram do negócio (@ ou link)',
+      type: 'text',
+      required: true,
+    },
+    {
+      id: 'cidade_estado',
+      label: '1. Cidade / Estado',
+      type: 'text',
+      required: true,
+    },
+    {
+      id: 'pre_dor_principal',
+      label: '2. Hoje, o que mais incomoda no seu negócio?',
+      type: 'select',
+      required: true,
+      options: [
+        'Agenda com horários livres',
+        'Clientes não retornam',
+        'Dificuldade de atrair novos clientes',
+        'Muito interesse, pouca conversão',
+        'Preciso baixar preço pra fechar',
+        'Falta de posicionamento ou autoridade',
+      ],
+    },
+    {
+      id: 'pre_agenda',
+      label: '3. Sua agenda hoje está:',
+      type: 'select',
+      required: true,
+      options: ['Cheia e organizada', 'Oscila bastante', 'Com muitos horários livres'],
+    },
+    {
+      id: 'pre_canais',
+      label: '4. De onde vêm seus clientes hoje? (marque)',
+      type: 'checkbox_group',
+      required: true,
+      options: ['Instagram', 'Indicação', 'Tráfego pago', 'WhatsApp', 'Outros'],
+    },
+    {
+      id: 'pre_retorno',
+      label: '5. Seus clientes costumam voltar?',
+      type: 'select',
+      required: true,
+      options: ['Sim, com frequência', 'Às vezes', 'Raramente'],
+    },
+    {
+      id: 'pre_cobrar_preco',
+      label: '6. Você sente dificuldade em cobrar seu preço?',
+      type: 'select',
+      required: true,
+      options: ['Sim', 'Às vezes', 'Não'],
+    },
+    {
+      id: 'pre_queixa_corporal',
+      label: '7. O que suas clientes mais buscam no corporal?',
+      type: 'select',
+      required: true,
+      options: ['Gordura localizada', 'Flacidez', 'Celulite', 'Retenção de líquido', 'Mais de um destes (equilibrado)'],
+    },
+    {
+      id: 'pre_aberta_estrategia',
+      label: '8. Você está aberta a ajustar sua estratégia para melhorar resultados nos próximos 30 dias?',
+      type: 'select',
+      required: true,
+      options: ['Sim', 'Depende do que for', 'Só quero entender melhor por enquanto'],
+    },
+    {
+      id: 'pre_interesse_plano',
+      label: '9. Se fizer sentido, teria interesse em aplicar um plano para melhorar seus resultados?',
+      type: 'select',
+      required: true,
+      options: ['Sim', 'Talvez', 'Não no momento'],
+    },
+  ]
+}
+
+export function getPreDiagnosticoCorporalV1Description(): string {
+  return [
+    'Antes da consultoria: 2 a 3 minutos. Leve e estratégico — para chegarmos na conversa com foco.',
+    'Depois você recebe o diagnóstico completo (outro link), com mais detalhe operacional.',
+  ].join('\n')
+}
+
 const ESPECIALIDADES_CAPILAR_CHECKLIST: string[] = [
   'Queda de cabelo',
   'Alopecia',
@@ -629,8 +753,116 @@ export function getDiagnosticoCapilarV1Description(): string {
   ].join('\n')
 }
 
+/** Pré capilar — alinhado a dores, canais, retorno e queixas típicas do diagnóstico longo. */
+export function buildPreDiagnosticoCapilarV1Fields(): ConsultoriaFormField[] {
+  return [
+    {
+      id: 'nome_proprietaria',
+      label: '1. Nome completo',
+      type: 'text',
+      required: true,
+    },
+    {
+      id: 'whatsapp',
+      label: '1. WhatsApp (com DDD)',
+      type: 'text',
+      required: true,
+    },
+    {
+      id: 'nome_clinica',
+      label: '1. Nome do salão / clínica (ou marca)',
+      type: 'text',
+      required: true,
+    },
+    {
+      id: 'instagram',
+      label: '1. Instagram do negócio (@ ou link)',
+      type: 'text',
+      required: true,
+    },
+    {
+      id: 'cidade_estado',
+      label: '1. Cidade / Estado',
+      type: 'text',
+      required: true,
+    },
+    {
+      id: 'pre_dor_principal',
+      label: '2. Hoje, o que mais incomoda no seu negócio?',
+      type: 'select',
+      required: true,
+      options: [
+        'Agenda com horários livres',
+        'Clientes não fecham ou não continuam o tratamento',
+        'Dificuldade de atrair novas clientes',
+        'Muito interesse, pouca conversão',
+        'Preciso baixar preço pra fechar',
+        'Falta de posicionamento ou autoridade',
+      ],
+    },
+    {
+      id: 'pre_agenda',
+      label: '3. Sua agenda hoje está:',
+      type: 'select',
+      required: true,
+      options: ['Cheia e organizada', 'Oscila bastante', 'Com muitos horários livres'],
+    },
+    {
+      id: 'pre_canais',
+      label: '4. De onde vêm suas clientes hoje? (marque)',
+      type: 'checkbox_group',
+      required: true,
+      options: ['Instagram', 'Indicação', 'Tráfego pago', 'WhatsApp', 'Outros'],
+    },
+    {
+      id: 'pre_retorno',
+      label: '5. As clientes costumam voltar para manter o tratamento?',
+      type: 'select',
+      required: true,
+      options: ['Sim, com frequência', 'Às vezes', 'Raramente'],
+    },
+    {
+      id: 'pre_cobrar_preco',
+      label: '6. Você sente dificuldade em cobrar seu preço?',
+      type: 'select',
+      required: true,
+      options: ['Sim', 'Às vezes', 'Não'],
+    },
+    {
+      id: 'pre_queixa_capilar',
+      label: '7. Qual a principal queixa que suas clientes trazem?',
+      type: 'select',
+      required: true,
+      options: ['Queda de cabelo', 'Falhas / falhas de preenchimento', 'Afinamento dos fios', 'Caspa ou oleosidade', 'Mais de um destes'],
+    },
+    {
+      id: 'pre_aberta_estrategia',
+      label: '8. Você está aberta a ajustar sua estratégia para melhorar resultados nos próximos 30 dias?',
+      type: 'select',
+      required: true,
+      options: ['Sim', 'Depende do que for', 'Só quero entender melhor por enquanto'],
+    },
+    {
+      id: 'pre_interesse_plano',
+      label: '9. Se fizer sentido, teria interesse em aplicar um plano para melhorar seus resultados?',
+      type: 'select',
+      required: true,
+      options: ['Sim', 'Talvez', 'Não no momento'],
+    },
+  ]
+}
+
+export function getPreDiagnosticoCapilarV1Description(): string {
+  return [
+    'Antes da consultoria: 2 a 3 minutos. Para reflexão rápida e conversa mais produtiva.',
+    'O diagnóstico completo capilar (outro link) aprofunda protocolos, valores e processos.',
+  ].join('\n')
+}
+
 export function getDiagnosticoTemplateDescription(templateKey: string | null | undefined): string | null {
   if (templateKey === TEMPLATE_DIAGNOSTICO_CORPORAL_ID) return getDiagnosticoCorporalV1Description()
   if (templateKey === TEMPLATE_DIAGNOSTICO_CAPILAR_ID) return getDiagnosticoCapilarV1Description()
+  if (templateKey === TEMPLATE_PRE_DIAGNOSTICO_CORPORAL_ID) return getPreDiagnosticoCorporalV1Description()
+  if (templateKey === TEMPLATE_PRE_DIAGNOSTICO_CAPILAR_ID) return getPreDiagnosticoCapilarV1Description()
   return null
 }

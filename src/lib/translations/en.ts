@@ -129,6 +129,10 @@ export const enTranslations: Translations = {
         estetica: { title: 'Aesthetics', description: 'Aesthetics professionals: client capture and smart links.' },
         fitness: { title: 'Fitness', description: 'Personal trainers and coaches: capture and business training.' },
         perfumaria: { title: 'Perfumery', description: 'Fragrance sellers: olfactory profile quizzes and leads.' },
+        joias: {
+          title: 'Jewelry & fashion jewelry',
+          description: 'Semi-fine and costume jewelry: qualify before price and leads with context.',
+        },
         nutra: { title: 'Nutra / supplements', description: 'Supplement sellers: leads and conversion.' },
         'profissional-liberal': { title: 'Liberal professional', description: 'Lawyers, accountants, consultants: capture and diagnostics for your area.' },
         'vendedores-geral': { title: 'Sales in general', description: 'Sellers of any segment: funnel, smart links and qualified conversations.' },
@@ -172,16 +176,19 @@ export const enTranslations: Translations = {
       back: 'Back to home'
     },
     areaRequest: {
+      headingMinhaArea: "I'd like my area on YLADA",
       title: 'Request access',
-      subtitle: 'Fill out the form and we will contact you when this area is available.',
+      subtitle:
+        'Fill in your details. Our team will reach out to align your segment and next steps, including via WhatsApp if you provide your number below.',
       labelName: 'Name',
       labelProfession: 'Profession or segment',
       labelCountry: 'Country',
       labelEmail: 'Email',
+      labelWhatsApp: 'WhatsApp',
       submit: 'Submit request',
       submitting: 'Sending...',
       successTitle: 'Request registered!',
-      successMessage: 'We will contact you when the area is available.',
+      successMessage: "We've received your request. We'll be in touch soon.",
       successButton: 'OK'
     },
     footer: {

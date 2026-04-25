@@ -21,6 +21,7 @@ const ALLOWED_SEGMENT_IDS = new Set([
   'med',
   'estetica',
   'fitness',
+  'joias',
   'perfumaria',
   'nutra',
   'seller',

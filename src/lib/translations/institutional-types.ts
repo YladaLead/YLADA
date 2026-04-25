@@ -11,6 +11,7 @@ export interface InstitutionalAreas {
   estetica: InstitutionalAreaTranslation
   fitness: InstitutionalAreaTranslation
   perfumaria: InstitutionalAreaTranslation
+  joias: InstitutionalAreaTranslation
   nutra: InstitutionalAreaTranslation
   'profissional-liberal': InstitutionalAreaTranslation
   'vendedores-geral': InstitutionalAreaTranslation
@@ -87,12 +88,15 @@ export interface InstitutionalTranslations {
     back: string
   }
   areaRequest: {
+    /** Título quando o fluxo vem de “não encontrei minha área” (area=profissional-liberal) */
+    headingMinhaArea: string
     title: string
     subtitle: string
     labelName: string
     labelProfession: string
     labelCountry: string
     labelEmail: string
+    labelWhatsApp: string
     submit: string
     submitting: string
     successTitle: string

@@ -15,11 +15,20 @@ const VALID_AREAS = [
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { nome, profissao, pais, email, area_interesse } = body
+    const { nome, profissao, pais, email, area_interesse, telefone: telefoneBody } = body
 
     if (!nome || !email) {
       return NextResponse.json(
         { error: 'Nome e e-mail são obrigatórios' },
+        { status: 400 }
+      )
+    }
+
+    const telefoneDigits =
+      typeof telefoneBody === 'string' ? telefoneBody.replace(/\D/g, '') : ''
+    if (telefoneDigits.length < 10) {
+      return NextResponse.json(
+        { error: 'WhatsApp com DDI é obrigatório (código do país e número).' },
         { status: 400 }
       )
     }
@@ -47,7 +56,7 @@ export async function POST(request: NextRequest) {
       profissao: profissao?.trim().substring(0, 255) || null,
       pais: pais?.trim().substring(0, 100) || null,
       email: email.trim().toLowerCase().substring(0, 255),
-      telefone: null as string | null,
+      telefone: telefoneDigits.substring(0, 20),
       area_interesse,
       source: 'area_solicitacao',
       ip_address: ip,
@@ -97,6 +106,7 @@ export async function POST(request: NextRequest) {
                   <p><strong>Área solicitada:</strong> ${areaLabel}</p>
                   <p><strong>Nome:</strong> ${sanitizedData.nome}</p>
                   <p><strong>E-mail:</strong> ${sanitizedData.email}</p>
+                  <p><strong>WhatsApp (E.164):</strong> +${sanitizedData.telefone}</p>
                   ${sanitizedData.profissao ? `<p><strong>Profissão/Segmento:</strong> ${sanitizedData.profissao}</p>` : ''}
                   ${sanitizedData.pais ? `<p><strong>País:</strong> ${sanitizedData.pais}</p>` : ''}
                 </div>

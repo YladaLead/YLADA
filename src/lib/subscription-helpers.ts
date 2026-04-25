@@ -19,6 +19,7 @@ export type SubscriptionArea =
   | 'odonto'
   | 'estetica'
   | 'fitness'
+  | 'joias'
   | 'perfumaria'
   | 'seller'
   | 'pro_lideres_team'
@@ -158,6 +159,7 @@ export const YLADA_MATRIX_CANCEL_SUBSCRIPTION_AREAS: SubscriptionArea[] = [
   'perfumaria',
   'estetica',
   'fitness',
+  'joias',
   'nutri',
 ]
 

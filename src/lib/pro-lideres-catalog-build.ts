@@ -156,6 +156,7 @@ function segmentCodeToLabel(code: string | null | undefined): string | null {
     estetica: 'Estética',
     medicine: 'Saúde',
     fitness: 'Fitness',
+    joias: 'Joias e bijuterias',
     alimentacao: 'Alimentação',
     metabolismo: 'Metabolismo',
     intestino: 'Intestino',

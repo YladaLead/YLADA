@@ -22,6 +22,7 @@ export type LoginFormPerfil =
   | 'perfumaria'
   | 'estetica'
   | 'fitness'
+  | 'joias'
   | 'coach-bem-estar'
   | 'psi'
   | 'psicanalise'
@@ -181,6 +182,7 @@ export default function LoginForm({
     perfumaria: 'Perfumaria',
     estetica: 'Estética',
     fitness: 'Fitness',
+    joias: 'Joias e bijuterias',
     'coach-bem-estar': 'Coach de bem-estar',
     psi: 'Psicologia',
     psicanalise: 'Psicanálise',
@@ -198,6 +200,7 @@ export default function LoginForm({
     perfumaria: 'Perfumaria',
     estetica: 'Estética',
     fitness: 'Fitness',
+    joias: 'Joias e bijuterias',
     'coach-bem-estar': 'Coach de bem-estar',
     psi: 'Psicologia',
     psicanalise: 'Psicanálise',

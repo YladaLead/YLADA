@@ -15,8 +15,12 @@ import {
 import {
   TEMPLATE_DIAGNOSTICO_CAPILAR_TITLE,
   TEMPLATE_DIAGNOSTICO_CORPORAL_TITLE,
+  TEMPLATE_PRE_DIAGNOSTICO_CAPILAR_TITLE,
+  TEMPLATE_PRE_DIAGNOSTICO_CORPORAL_TITLE,
   buildDiagnosticoCapilarV1Fields,
   buildDiagnosticoCorporalV1Fields,
+  buildPreDiagnosticoCapilarV1Fields,
+  buildPreDiagnosticoCorporalV1Fields,
 } from '@/lib/estetica-consultoria-form-templates'
 import { consultoriaCsvFilenameBase, consultoriaFormResponsesToCsv } from '@/lib/consultoria-form-csv'
 import {
@@ -61,8 +65,10 @@ const NOTE_KIND_LABEL: Record<string, string> = {
 
 const ESTETICA_MODELO_CAMPOS_CORPORAL = buildDiagnosticoCorporalV1Fields()
 const ESTETICA_MODELO_CAMPOS_CAPILAR = buildDiagnosticoCapilarV1Fields()
+const ESTETICA_MODELO_CAMPOS_PRE_CORPORAL = buildPreDiagnosticoCorporalV1Fields()
+const ESTETICA_MODELO_CAMPOS_PRE_CAPILAR = buildPreDiagnosticoCapilarV1Fields()
 
-type EsteticaFormModelKind = 'corporal' | 'capilar'
+type EsteticaFormModelKind = 'corporal' | 'capilar' | 'pre_corporal' | 'pre_capilar'
 
 function emptyMaterialRow(clientId: string, kind: ProLideresConsultoriaMaterialKind): YladaEsteticaConsultancyMaterialRow {
   const now = new Date().toISOString()
@@ -197,6 +203,129 @@ function describeConsultoriaModelField(f: ConsultoriaFormField): string {
   return lines.join('\n')
 }
 
+function preAnswerString(v: unknown): string {
+  if (v == null) return ''
+  if (typeof v === 'string') return v
+  if (typeof v === 'number' || typeof v === 'boolean') return String(v)
+  return ''
+}
+
+function preInstagramHref(raw: string): string {
+  const t = raw.trim()
+  if (!t) return ''
+  if (/^https?:\/\//i.test(t)) return t
+  const h = t.replace(/^@/, '').replace(/^\s+|\s+$/g, '')
+  if (!h) return ''
+  return `https://www.instagram.com/${h.replace(/^instagram\.com\//i, '')}`
+}
+
+type PreLeituraVariant = 'corporal' | 'capilar'
+
+function PreDiagnosticoLeituraRapidaCard({
+  variant,
+  submittedAt,
+  answers,
+}: {
+  variant: PreLeituraVariant
+  submittedAt: string
+  answers: Record<string, unknown>
+}) {
+  const a = (k: string) => preAnswerString(answers[k]).trim()
+  const shell =
+    variant === 'corporal'
+      ? 'border-rose-200/90 bg-gradient-to-br from-rose-50/90 via-white to-white'
+      : 'border-sky-200/90 bg-gradient-to-br from-sky-50/90 via-white to-white'
+  const labelClass = variant === 'corporal' ? 'text-rose-800/70' : 'text-sky-800/70'
+  const valueClass = variant === 'corporal' ? 'text-rose-950' : 'text-sky-950'
+  const chip =
+    variant === 'corporal' ? 'bg-rose-100/90 text-rose-950' : 'bg-sky-100/90 text-sky-950'
+  const dor = a('pre_dor_principal')
+  const queixaKey = variant === 'corporal' ? 'pre_queixa_corporal' : 'pre_queixa_capilar'
+  const ig = a('instagram')
+  const wa = a('whatsapp')
+  const igHref = preInstagramHref(ig)
+
+  return (
+    <div className={`rounded-2xl border p-4 shadow-sm ${shell}`}>
+      <div className="mb-3 flex flex-wrap items-end justify-between gap-2 border-b border-black/[0.06] pb-2">
+        <h4 className="text-sm font-bold tracking-tight text-gray-900">Leitura rápida — último pré</h4>
+        <p className="text-[11px] text-gray-500">
+          Enviado em{' '}
+          {new Date(submittedAt).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })}
+        </p>
+      </div>
+      {dor ? (
+        <p className={`mb-4 rounded-xl px-3 py-2.5 text-sm font-semibold leading-snug ${chip}`}>
+          <span className="mr-1 font-normal text-gray-600">O que mais incomoda: </span>
+          {dor}
+        </p>
+      ) : null}
+      <div className="grid gap-3 sm:grid-cols-2">
+        <div>
+          <p className={`text-[11px] font-semibold uppercase tracking-wide ${labelClass}`}>Quem</p>
+          <p className={`mt-0.5 text-sm font-medium ${valueClass}`}>{a('nome_proprietaria') || '—'}</p>
+          <p className="text-xs text-gray-600">{a('nome_clinica') || '—'}</p>
+        </div>
+        <div>
+          <p className={`text-[11px] font-semibold uppercase tracking-wide ${labelClass}`}>Cidade</p>
+          <p className={`mt-0.5 text-sm ${valueClass}`}>{a('cidade_estado') || '—'}</p>
+        </div>
+        <div>
+          <p className={`text-[11px] font-semibold uppercase tracking-wide ${labelClass}`}>WhatsApp</p>
+          <p className="mt-0.5 font-mono text-sm text-gray-900">{wa || '—'}</p>
+        </div>
+        <div>
+          <p className={`text-[11px] font-semibold uppercase tracking-wide ${labelClass}`}>Instagram</p>
+          {ig ? (
+            <a
+              href={igHref}
+              className="mt-0.5 block text-sm font-medium text-blue-700 break-all hover:underline"
+              target="_blank"
+              rel="noreferrer"
+            >
+              {ig}
+            </a>
+          ) : (
+            <p className="mt-0.5 text-sm text-gray-500">—</p>
+          )}
+        </div>
+      </div>
+      <div className="mt-4 grid gap-2.5 sm:grid-cols-2">
+        {(
+          [
+            ['Agenda hoje', a('pre_agenda')],
+            ['Clientes voltam', a('pre_retorno')],
+            ['Dificuldade em cobrar', a('pre_cobrar_preco')],
+            [
+              variant === 'corporal' ? 'Buscas no corporal' : 'Queixa capilar',
+              a(queixaKey),
+            ],
+          ] as const
+        ).map(([label, val]) => (
+          <div key={label} className="rounded-lg border border-black/[0.05] bg-white/60 px-2.5 py-2">
+            <p className="text-[10px] font-bold uppercase tracking-wide text-gray-500">{label}</p>
+            <p className="mt-0.5 text-sm text-gray-900">{val || '—'}</p>
+          </div>
+        ))}
+        <div className="rounded-lg border border-black/[0.05] bg-white/60 px-2.5 py-2 sm:col-span-2">
+          <p className="text-[10px] font-bold uppercase tracking-wide text-gray-500">Canais de aquisição</p>
+          <p className="mt-0.5 whitespace-pre-wrap text-sm text-gray-900">{a('pre_canais') || '—'}</p>
+        </div>
+        <div className="rounded-lg border border-black/[0.05] bg-white/60 px-2.5 py-2 sm:col-span-2">
+          <p className="text-[10px] font-bold uppercase tracking-wide text-gray-500">
+            Aberta a ajustar estratégia (30 dias)
+          </p>
+          <p className="mt-0.5 text-sm text-gray-900">{a('pre_aberta_estrategia') || '—'}</p>
+        </div>
+        <div className="rounded-lg border border-black/[0.05] bg-white/60 px-2.5 py-2 sm:col-span-2">
+          <p className="text-[10px] font-bold uppercase tracking-wide text-gray-500">Interesse em plano</p>
+          <p className="mt-0.5 text-sm font-medium text-gray-900">{a('pre_interesse_plano') || '—'}</p>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function EsteticaConsultoriaFormModelDialog({
   open,
   variant,
@@ -209,6 +338,8 @@ function EsteticaConsultoriaFormModelDialog({
   const fields = useMemo(() => {
     if (variant === 'corporal') return ESTETICA_MODELO_CAMPOS_CORPORAL
     if (variant === 'capilar') return ESTETICA_MODELO_CAMPOS_CAPILAR
+    if (variant === 'pre_corporal') return ESTETICA_MODELO_CAMPOS_PRE_CORPORAL
+    if (variant === 'pre_capilar') return ESTETICA_MODELO_CAMPOS_PRE_CAPILAR
     return []
   }, [variant])
 
@@ -237,8 +368,16 @@ function EsteticaConsultoriaFormModelDialog({
 
   if (!open || !variant) return null
 
-  const isCorporal = variant === 'corporal'
-  const title = isCorporal ? TEMPLATE_DIAGNOSTICO_CORPORAL_TITLE : TEMPLATE_DIAGNOSTICO_CAPILAR_TITLE
+  const isCorporal = variant === 'corporal' || variant === 'pre_corporal'
+  const isPre = variant === 'pre_corporal' || variant === 'pre_capilar'
+  const title =
+    variant === 'corporal'
+      ? TEMPLATE_DIAGNOSTICO_CORPORAL_TITLE
+      : variant === 'capilar'
+        ? TEMPLATE_DIAGNOSTICO_CAPILAR_TITLE
+        : variant === 'pre_corporal'
+          ? TEMPLATE_PRE_DIAGNOSTICO_CORPORAL_TITLE
+          : TEMPLATE_PRE_DIAGNOSTICO_CAPILAR_TITLE
   const bar = isCorporal ? 'bg-rose-600' : 'bg-sky-600'
   const secTitle = isCorporal ? 'text-rose-900/60' : 'text-sky-900/60'
   const qClass = isCorporal ? 'text-rose-950/90' : 'text-sky-950/90'
@@ -265,8 +404,8 @@ function EsteticaConsultoriaFormModelDialog({
               {title}
             </h2>
             <p className="mt-1 text-xs leading-relaxed text-gray-500">
-              Vista prévia do <strong>modelo global</strong> ({fields.length} campos). O texto e as opções vivem no
-              código (
+              Vista prévia do <strong>modelo global</strong> ({fields.length} campos)
+              {isPre ? ' — formulário curto antes da reunião' : ''}. O texto e as opções vivem no código (
               <code className="rounded bg-gray-100 px-1 text-[11px]">estetica-consultoria-form-templates.ts</code>) e no
               material global no Supabase; alterar perguntas implica mudança de código e/ou migração.
             </p>
@@ -373,6 +512,12 @@ export default function EsteticaConsultoriaAdminClient() {
   const [diagnosticCapilarLoading, setDiagnosticCapilarLoading] = useState(false)
   const [diagnosticCorporalLinkLoading, setDiagnosticCorporalLinkLoading] = useState(false)
   const [diagnosticCapilarLinkLoading, setDiagnosticCapilarLinkLoading] = useState(false)
+  const [diagnosticPreCorporal, setDiagnosticPreCorporal] = useState<DiagnosticCorporalBundle | null>(null)
+  const [diagnosticPreCapilar, setDiagnosticPreCapilar] = useState<DiagnosticCorporalBundle | null>(null)
+  const [diagnosticPreCorporalLoading, setDiagnosticPreCorporalLoading] = useState(false)
+  const [diagnosticPreCapilarLoading, setDiagnosticPreCapilarLoading] = useState(false)
+  const [diagnosticPreCorporalLinkLoading, setDiagnosticPreCorporalLinkLoading] = useState(false)
+  const [diagnosticPreCapilarLinkLoading, setDiagnosticPreCapilarLinkLoading] = useState(false)
   const [formModelDialog, setFormModelDialog] = useState<EsteticaFormModelKind | null>(null)
 
   const closeFormModelDialog = useCallback(() => setFormModelDialog(null), [])
@@ -530,6 +675,64 @@ export default function EsteticaConsultoriaAdminClient() {
     void loadDiagnosticCapilar()
   }, [loadDiagnosticCapilar])
 
+  const loadDiagnosticPreCorporal = useCallback(async () => {
+    if (!selectedClient?.id) return
+    if (selectedClient.segment !== 'corporal' && selectedClient.segment !== 'ambos') {
+      setDiagnosticPreCorporal(null)
+      return
+    }
+    setDiagnosticPreCorporalLoading(true)
+    setError(null)
+    try {
+      const res = await fetch(
+        `/api/admin/estetica-consultoria/clients/${encodeURIComponent(selectedClient.id)}/pre-diagnostico-corporal`,
+        { credentials: 'include' }
+      )
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) {
+        setDiagnosticPreCorporal(null)
+        setError((data as { error?: string }).error || 'Erro ao carregar pré-diagnóstico corporal.')
+        return
+      }
+      setDiagnosticPreCorporal(data as DiagnosticCorporalBundle)
+    } finally {
+      setDiagnosticPreCorporalLoading(false)
+    }
+  }, [selectedClient])
+
+  const loadDiagnosticPreCapilar = useCallback(async () => {
+    if (!selectedClient?.id) return
+    if (selectedClient.segment !== 'capilar' && selectedClient.segment !== 'ambos') {
+      setDiagnosticPreCapilar(null)
+      return
+    }
+    setDiagnosticPreCapilarLoading(true)
+    setError(null)
+    try {
+      const res = await fetch(
+        `/api/admin/estetica-consultoria/clients/${encodeURIComponent(selectedClient.id)}/pre-diagnostico-capilar`,
+        { credentials: 'include' }
+      )
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) {
+        setDiagnosticPreCapilar(null)
+        setError((data as { error?: string }).error || 'Erro ao carregar pré-diagnóstico capilar.')
+        return
+      }
+      setDiagnosticPreCapilar(data as DiagnosticCorporalBundle)
+    } finally {
+      setDiagnosticPreCapilarLoading(false)
+    }
+  }, [selectedClient])
+
+  useEffect(() => {
+    void loadDiagnosticPreCorporal()
+  }, [loadDiagnosticPreCorporal])
+
+  useEffect(() => {
+    void loadDiagnosticPreCapilar()
+  }, [loadDiagnosticPreCapilar])
+
   const itemsDisplayed = useMemo(() => {
     if (!selectedClient?.id) return items
     const hasCorp = Boolean(diagnosticCorporal?.material?.template_key)
@@ -565,6 +768,38 @@ export default function EsteticaConsultoriaAdminClient() {
         : {}
     return getConsultoriaFormFields(c as Record<string, unknown>)
   }, [diagnosticCapilar?.material?.content])
+
+  const diagnosticPreCorporalFieldDefs = useMemo(() => {
+    const c =
+      diagnosticPreCorporal?.material?.content && typeof diagnosticPreCorporal.material.content === 'object'
+        ? diagnosticPreCorporal.material.content
+        : {}
+    return getConsultoriaFormFields(c as Record<string, unknown>)
+  }, [diagnosticPreCorporal?.material?.content])
+
+  const diagnosticPreCapilarFieldDefs = useMemo(() => {
+    const c =
+      diagnosticPreCapilar?.material?.content && typeof diagnosticPreCapilar.material.content === 'object'
+        ? diagnosticPreCapilar.material.content
+        : {}
+    return getConsultoriaFormFields(c as Record<string, unknown>)
+  }, [diagnosticPreCapilar?.material?.content])
+
+  const latestPreCorporalResponse = useMemo(() => {
+    const list = diagnosticPreCorporal?.responses ?? []
+    if (list.length === 0) return null
+    return [...list].sort(
+      (x, y) => new Date(y.submitted_at).getTime() - new Date(x.submitted_at).getTime()
+    )[0]
+  }, [diagnosticPreCorporal?.responses])
+
+  const latestPreCapilarResponse = useMemo(() => {
+    const list = diagnosticPreCapilar?.responses ?? []
+    if (list.length === 0) return null
+    return [...list].sort(
+      (x, y) => new Date(y.submitted_at).getTime() - new Date(x.submitted_at).getTime()
+    )[0]
+  }, [diagnosticPreCapilar?.responses])
 
   const createDiagnosticCorporalLink = async () => {
     if (!selectedClient?.id) return
@@ -613,6 +848,56 @@ export default function EsteticaConsultoriaAdminClient() {
       await loadDiagnosticCapilar()
     } finally {
       setDiagnosticCapilarLinkLoading(false)
+    }
+  }
+
+  const createDiagnosticPreCorporalLink = async () => {
+    if (!selectedClient?.id) return
+    setDiagnosticPreCorporalLinkLoading(true)
+    setError(null)
+    try {
+      const res = await fetch(
+        `/api/admin/estetica-consultoria/clients/${encodeURIComponent(selectedClient.id)}/pre-diagnostico-corporal`,
+        {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({}),
+        }
+      )
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) {
+        setError((data as { error?: string }).error || 'Erro ao gerar link do pré.')
+        return
+      }
+      await loadDiagnosticPreCorporal()
+    } finally {
+      setDiagnosticPreCorporalLinkLoading(false)
+    }
+  }
+
+  const createDiagnosticPreCapilarLink = async () => {
+    if (!selectedClient?.id) return
+    setDiagnosticPreCapilarLinkLoading(true)
+    setError(null)
+    try {
+      const res = await fetch(
+        `/api/admin/estetica-consultoria/clients/${encodeURIComponent(selectedClient.id)}/pre-diagnostico-capilar`,
+        {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({}),
+        }
+      )
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) {
+        setError((data as { error?: string }).error || 'Erro ao gerar link do pré.')
+        return
+      }
+      await loadDiagnosticPreCapilar()
+    } finally {
+      setDiagnosticPreCapilarLinkLoading(false)
     }
   }
 
@@ -945,6 +1230,20 @@ export default function EsteticaConsultoriaAdminClient() {
     const fn = consultoriaCsvFilenameBase(selectedClient.business_name, 'diagnostico-capilar-respostas')
     triggerCsvDownload(fn, csv)
   }, [selectedClient, diagnosticCapilar?.responses, diagnosticCapilarFieldDefs, triggerCsvDownload])
+
+  const downloadDiagnosticPreCorporalResponsesCsv = useCallback(() => {
+    if (!selectedClient || !diagnosticPreCorporal?.responses.length) return
+    const csv = consultoriaFormResponsesToCsv(diagnosticPreCorporalFieldDefs, diagnosticPreCorporal.responses)
+    const fn = consultoriaCsvFilenameBase(selectedClient.business_name, 'pre-diagnostico-corporal-respostas')
+    triggerCsvDownload(fn, csv)
+  }, [selectedClient, diagnosticPreCorporal?.responses, diagnosticPreCorporalFieldDefs, triggerCsvDownload])
+
+  const downloadDiagnosticPreCapilarResponsesCsv = useCallback(() => {
+    if (!selectedClient || !diagnosticPreCapilar?.responses.length) return
+    const csv = consultoriaFormResponsesToCsv(diagnosticPreCapilarFieldDefs, diagnosticPreCapilar.responses)
+    const fn = consultoriaCsvFilenameBase(selectedClient.business_name, 'pre-diagnostico-capilar-respostas')
+    triggerCsvDownload(fn, csv)
+  }, [selectedClient, diagnosticPreCapilar?.responses, diagnosticPreCapilarFieldDefs, triggerCsvDownload])
 
   const downloadSelectedMaterialResponsesCsv = useCallback(() => {
     if (!selectedClient || !selected?.title || responses.length === 0) return
@@ -1380,16 +1679,150 @@ export default function EsteticaConsultoriaAdminClient() {
         <>
           {(selectedClient.segment === 'corporal' || selectedClient.segment === 'ambos') ? (
             <section className="rounded-2xl border border-rose-200 bg-rose-50/50 p-4 shadow-sm space-y-4">
+              <div className="rounded-xl border border-rose-200/90 bg-white/70 p-3 shadow-sm space-y-3">
+                <div className="flex flex-wrap items-start justify-between gap-2">
+                  <h3 className="text-sm font-semibold text-rose-950">
+                    Pré-diagnóstico corporal (antes da reunião)
+                  </h3>
+                  <button
+                    type="button"
+                    onClick={() => setFormModelDialog('pre_corporal')}
+                    className="shrink-0 rounded-lg border border-rose-300 bg-white px-2.5 py-1 text-xs font-semibold text-rose-900 hover:bg-rose-100"
+                  >
+                    Ver perguntas do pré
+                  </button>
+                </div>
+                <p className="text-xs text-rose-900/85 max-w-2xl">
+                  Curto (2–3 min), <strong>sem</strong> confirmação por e-mail. Ideal para enviar no WhatsApp antes da
+                  consultoria; as perguntas ecoam o diagnóstico completo (dores, agenda, canais, retorno, ticket,
+                  foco corporal).
+                </p>
+                {diagnosticPreCorporalLoading ? (
+                  <p className="text-sm text-rose-900/80">Carregando pré…</p>
+                ) : diagnosticPreCorporal?.material ? (
+                  <>
+                    {latestPreCorporalResponse ? (
+                      <PreDiagnosticoLeituraRapidaCard
+                        variant="corporal"
+                        submittedAt={latestPreCorporalResponse.submitted_at}
+                        answers={
+                          (latestPreCorporalResponse.answers &&
+                          typeof latestPreCorporalResponse.answers === 'object' &&
+                          !Array.isArray(latestPreCorporalResponse.answers)
+                            ? latestPreCorporalResponse.answers
+                            : {}) as Record<string, unknown>
+                        }
+                      />
+                    ) : null}
+                    <p className="text-xs text-rose-900/80">
+                      Estado:{' '}
+                      {diagnosticPreCorporal.material.is_published ? (
+                        <span className="font-semibold text-emerald-800">Ativo</span>
+                      ) : (
+                        <span className="font-semibold text-amber-800">Rascunho</span>
+                      )}
+                    </p>
+                    <button
+                      type="button"
+                      disabled={diagnosticPreCorporalLinkLoading || !diagnosticPreCorporal.material.is_published}
+                      onClick={() => void createDiagnosticPreCorporalLink()}
+                      className="rounded-lg bg-rose-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg-rose-800 disabled:opacity-50"
+                    >
+                      {diagnosticPreCorporalLinkLoading ? 'Gerando…' : 'Gerar link do pré para esta clínica'}
+                    </button>
+                    <div>
+                      <h4 className="text-[11px] font-semibold uppercase tracking-wide text-rose-950/90">
+                        Links do pré
+                      </h4>
+                      {diagnosticPreCorporal.links.length === 0 ? (
+                        <p className="mt-1 text-xs text-rose-900/70">Nenhum link ainda.</p>
+                      ) : (
+                        <ul className="mt-2 space-y-2">
+                          {diagnosticPreCorporal.links.map((lk) => (
+                            <li key={lk.id} className="rounded-lg border border-rose-100 bg-white p-2 text-xs">
+                              <code className="break-all text-gray-800">
+                                {lk.responder_url ??
+                                  buildEsteticaConsultoriaResponderUrl(
+                                    typeof window !== 'undefined' ? window.location.origin : '',
+                                    lk.token
+                                  )}
+                              </code>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const url =
+                                    lk.responder_url ??
+                                    buildEsteticaConsultoriaResponderUrl(
+                                      typeof window !== 'undefined' ? window.location.origin : '',
+                                      lk.token
+                                    )
+                                  void navigator.clipboard.writeText(url)
+                                }}
+                                className="mt-1 block text-xs font-medium text-blue-700 hover:underline"
+                              >
+                                Copiar URL
+                              </button>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+                    <div>
+                      <div className="mt-1 flex flex-wrap items-start justify-between gap-2">
+                        <h4 className="text-[11px] font-semibold uppercase tracking-wide text-rose-950/90">
+                          Respostas do pré
+                        </h4>
+                        {diagnosticPreCorporal.responses.length > 0 ? (
+                          <button
+                            type="button"
+                            onClick={() => downloadDiagnosticPreCorporalResponsesCsv()}
+                            className="shrink-0 rounded-lg border border-rose-300 bg-white px-2 py-0.5 text-[11px] font-medium text-rose-900 hover:bg-rose-100"
+                          >
+                            CSV
+                          </button>
+                        ) : null}
+                      </div>
+                      {diagnosticPreCorporal.responses.length === 0 ? (
+                        <p className="mt-1 text-xs text-rose-900/70">Ainda sem envios.</p>
+                      ) : (
+                        <div className="mt-2 max-h-[min(40vh,320px)] space-y-3 overflow-auto pr-1">
+                          {diagnosticPreCorporal.responses.map((r) => {
+                            const ans = (r.answers && typeof r.answers === 'object' && !Array.isArray(r.answers)
+                              ? r.answers
+                              : {}) as Record<string, unknown>
+                            const rows = consultoriaAnswersToDisplayRows(diagnosticPreCorporalFieldDefs, ans)
+                            return (
+                              <ConsultoriaAdminResponseCard
+                                key={r.id}
+                                tone="rose"
+                                submittedAt={r.submitted_at}
+                                respondentName={r.respondent_name}
+                                respondentEmail={r.respondent_email}
+                                rows={rows}
+                                rawAnswers={r.answers}
+                              />
+                            )
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  </>
+                ) : (
+                  <p className="text-xs text-rose-900/80">Não foi possível carregar o pré-diagnóstico.</p>
+                )}
+              </div>
+
+              <div className="border-t border-rose-200/80 pt-4 space-y-4">
               <div className="flex flex-wrap items-start justify-between gap-2">
                 <h3 className="text-sm font-semibold text-rose-950">
-                  Formulário para enviar — diagnóstico corporal (YLADA fixo)
+                  Diagnóstico completo — estética corporal (YLADA fixo)
                 </h3>
                 <button
                   type="button"
                   onClick={() => setFormModelDialog('corporal')}
                   className="shrink-0 rounded-lg border border-rose-300 bg-white px-2.5 py-1 text-xs font-semibold text-rose-900 hover:bg-rose-100"
                 >
-                  Ver modelo (todas as perguntas)
+                  Ver perguntas do diagnóstico completo
                 </button>
               </div>
               <div>
@@ -1511,21 +1944,155 @@ export default function EsteticaConsultoriaAdminClient() {
                   Não foi possível carregar o diagnóstico. Confirme se a migração 331 está aplicada no Supabase e recarregue a página.
                 </p>
               )}
+              </div>
             </section>
           ) : null}
 
           {(selectedClient.segment === 'capilar' || selectedClient.segment === 'ambos') ? (
             <section className="rounded-2xl border border-sky-200 bg-sky-50/50 p-4 shadow-sm space-y-4">
+              <div className="rounded-xl border border-sky-200/90 bg-white/70 p-3 shadow-sm space-y-3">
+                <div className="flex flex-wrap items-start justify-between gap-2">
+                  <h3 className="text-sm font-semibold text-sky-950">
+                    Pré-diagnóstico capilar (antes da reunião)
+                  </h3>
+                  <button
+                    type="button"
+                    onClick={() => setFormModelDialog('pre_capilar')}
+                    className="shrink-0 rounded-lg border border-sky-300 bg-white px-2.5 py-1 text-xs font-semibold text-sky-900 hover:bg-sky-100"
+                  >
+                    Ver perguntas do pré
+                  </button>
+                </div>
+                <p className="text-xs text-sky-900/85 max-w-2xl">
+                  Curto (2–3 min), <strong>sem</strong> confirmação por e-mail. Coerente com o diagnóstico capilar longo
+                  (dores, agenda, canais, retorno, queixas típicas).
+                </p>
+                {diagnosticPreCapilarLoading ? (
+                  <p className="text-sm text-sky-900/80">Carregando pré…</p>
+                ) : diagnosticPreCapilar?.material ? (
+                  <>
+                    {latestPreCapilarResponse ? (
+                      <PreDiagnosticoLeituraRapidaCard
+                        variant="capilar"
+                        submittedAt={latestPreCapilarResponse.submitted_at}
+                        answers={
+                          (latestPreCapilarResponse.answers &&
+                          typeof latestPreCapilarResponse.answers === 'object' &&
+                          !Array.isArray(latestPreCapilarResponse.answers)
+                            ? latestPreCapilarResponse.answers
+                            : {}) as Record<string, unknown>
+                        }
+                      />
+                    ) : null}
+                    <p className="text-xs text-sky-900/80">
+                      Estado:{' '}
+                      {diagnosticPreCapilar.material.is_published ? (
+                        <span className="font-semibold text-emerald-800">Ativo</span>
+                      ) : (
+                        <span className="font-semibold text-amber-800">Rascunho</span>
+                      )}
+                    </p>
+                    <button
+                      type="button"
+                      disabled={diagnosticPreCapilarLinkLoading || !diagnosticPreCapilar.material.is_published}
+                      onClick={() => void createDiagnosticPreCapilarLink()}
+                      className="rounded-lg bg-sky-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg-sky-800 disabled:opacity-50"
+                    >
+                      {diagnosticPreCapilarLinkLoading ? 'Gerando…' : 'Gerar link do pré para esta clínica'}
+                    </button>
+                    <div>
+                      <h4 className="text-[11px] font-semibold uppercase tracking-wide text-sky-950/90">
+                        Links do pré
+                      </h4>
+                      {diagnosticPreCapilar.links.length === 0 ? (
+                        <p className="mt-1 text-xs text-sky-900/70">Nenhum link ainda.</p>
+                      ) : (
+                        <ul className="mt-2 space-y-2">
+                          {diagnosticPreCapilar.links.map((lk) => (
+                            <li key={lk.id} className="rounded-lg border border-sky-100 bg-white p-2 text-xs">
+                              <code className="break-all text-gray-800">
+                                {lk.responder_url ??
+                                  buildEsteticaConsultoriaResponderUrl(
+                                    typeof window !== 'undefined' ? window.location.origin : '',
+                                    lk.token
+                                  )}
+                              </code>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const url =
+                                    lk.responder_url ??
+                                    buildEsteticaConsultoriaResponderUrl(
+                                      typeof window !== 'undefined' ? window.location.origin : '',
+                                      lk.token
+                                    )
+                                  void navigator.clipboard.writeText(url)
+                                }}
+                                className="mt-1 block text-xs font-medium text-blue-700 hover:underline"
+                              >
+                                Copiar URL
+                              </button>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+                    <div>
+                      <div className="mt-1 flex flex-wrap items-start justify-between gap-2">
+                        <h4 className="text-[11px] font-semibold uppercase tracking-wide text-sky-950/90">
+                          Respostas do pré
+                        </h4>
+                        {diagnosticPreCapilar.responses.length > 0 ? (
+                          <button
+                            type="button"
+                            onClick={() => downloadDiagnosticPreCapilarResponsesCsv()}
+                            className="shrink-0 rounded-lg border border-sky-300 bg-white px-2 py-0.5 text-[11px] font-medium text-sky-900 hover:bg-sky-100"
+                          >
+                            CSV
+                          </button>
+                        ) : null}
+                      </div>
+                      {diagnosticPreCapilar.responses.length === 0 ? (
+                        <p className="mt-1 text-xs text-sky-900/70">Ainda sem envios.</p>
+                      ) : (
+                        <div className="mt-2 max-h-[min(40vh,320px)] space-y-3 overflow-auto pr-1">
+                          {diagnosticPreCapilar.responses.map((r) => {
+                            const ans = (r.answers && typeof r.answers === 'object' && !Array.isArray(r.answers)
+                              ? r.answers
+                              : {}) as Record<string, unknown>
+                            const rows = consultoriaAnswersToDisplayRows(diagnosticPreCapilarFieldDefs, ans)
+                            return (
+                              <ConsultoriaAdminResponseCard
+                                key={r.id}
+                                tone="sky"
+                                submittedAt={r.submitted_at}
+                                respondentName={r.respondent_name}
+                                respondentEmail={r.respondent_email}
+                                rows={rows}
+                                rawAnswers={r.answers}
+                              />
+                            )
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  </>
+                ) : (
+                  <p className="text-xs text-sky-900/80">Não foi possível carregar o pré-diagnóstico.</p>
+                )}
+              </div>
+
+              <div className="border-t border-sky-200/80 pt-4 space-y-4">
               <div className="flex flex-wrap items-start justify-between gap-2">
                 <h3 className="text-sm font-semibold text-sky-950">
-                  Formulário para enviar — diagnóstico capilar (YLADA fixo)
+                  Diagnóstico completo — terapia capilar (YLADA fixo)
                 </h3>
                 <button
                   type="button"
                   onClick={() => setFormModelDialog('capilar')}
                   className="shrink-0 rounded-lg border border-sky-300 bg-white px-2.5 py-1 text-xs font-semibold text-sky-900 hover:bg-sky-100"
                 >
-                  Ver modelo (todas as perguntas)
+                  Ver perguntas do diagnóstico completo
                 </button>
               </div>
               <div>
@@ -1647,6 +2214,7 @@ export default function EsteticaConsultoriaAdminClient() {
                   recarregue a página.
                 </p>
               )}
+              </div>
             </section>
           ) : null}
 

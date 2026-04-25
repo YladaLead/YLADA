@@ -2,10 +2,14 @@
 
 /**
  * Grid único "Para quais profissionais o YLADA foi criado" — usado em todas as landings por área.
- * Fonte de verdade: getYladaLandingAreas (ylada-landing-areas.ts). Inclui psicanalistas junto às demais áreas.
+ * Fonte de verdade: getYladaLandingAreas (ylada-landing-areas.ts). Área seller não entra na listagem pública.
  */
 import Link from 'next/link'
 import { getYladaLandingAreas } from '@/config/ylada-landing-areas'
+import {
+  getYladaPublicAreaAnalysisWhatsAppUrl,
+  getYladaPublicAreaSupportLinkLabel,
+} from '@/lib/ylada-public-area-support'
 
 const DEFAULT_TITLE = 'Para quais profissionais o YLADA foi criado'
 const DEFAULT_SUBTITLE =
@@ -54,13 +58,23 @@ export function YladaProfissionaisGridSection({
             </Link>
           ))}
         </div>
-        <div className="text-center">
+        <div className="text-center space-y-4">
           <Link
             href={verTodasHref}
             className="inline-flex items-center justify-center px-6 py-3 border-2 border-gray-300 text-gray-700 font-medium rounded-xl hover:bg-gray-50 transition-all"
           >
             {verTodasLabel}
           </Link>
+          <p>
+            <a
+              href={getYladaPublicAreaAnalysisWhatsAppUrl(locale)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm font-medium text-emerald-800 hover:text-emerald-950 underline-offset-2 hover:underline"
+            >
+              {getYladaPublicAreaSupportLinkLabel(locale)}
+            </a>
+          </p>
         </div>
       </div>
     </section>

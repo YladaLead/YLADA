@@ -7,6 +7,10 @@ import YLADALogo from '@/components/YLADALogo'
 import Link from 'next/link'
 import PhoneInputWithCountry from '@/components/PhoneInputWithCountry'
 import { YLADA_LANDING_AREAS } from '@/config/ylada-landing-areas'
+import {
+  getYladaPublicAreaAnalysisWhatsAppUrl,
+  getYladaPublicAreaSupportLinkLabel,
+} from '@/lib/ylada-public-area-support'
 
 export default function HomePageContent() {
   const router = useRouter()
@@ -120,6 +124,16 @@ export default function HomePageContent() {
                 </Link>
               ))}
             </div>
+            <p className="text-center mt-8">
+              <a
+                href={getYladaPublicAreaAnalysisWhatsAppUrl('pt')}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm font-medium text-emerald-800 hover:text-emerald-950 underline-offset-2 hover:underline"
+              >
+                {getYladaPublicAreaSupportLinkLabel('pt')}
+              </a>
+            </p>
           </div>
         </section>
 
@@ -227,6 +241,16 @@ export default function HomePageContent() {
                 </Link>
               ))}
             </div>
+            <p className="text-center mt-8">
+              <a
+                href={getYladaPublicAreaAnalysisWhatsAppUrl('pt')}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm font-medium text-emerald-800 hover:text-emerald-950 underline-offset-2 hover:underline"
+              >
+                {getYladaPublicAreaSupportLinkLabel('pt')}
+              </a>
+            </p>
           </div>
         </section>
 

@@ -39,10 +39,41 @@ type LinkData = {
 function useAreaFromPath() {
   const pathname = usePathname()
   if (!pathname) return { areaCodigo: 'ylada' as const, areaLabel: 'YLADA' }
-  const m = pathname.match(/^\/pt\/(med|psi|odonto|nutra|nutri|coach|psicanalise|perfumaria|seller|estetica|fitness)\//)
+  const m = pathname.match(
+    /^\/pt\/(med|psi|odonto|nutra|nutri|coach|psicanalise|perfumaria|seller|estetica|fitness|joias)\//
+  )
   const area = m?.[1] ?? 'ylada'
-  const labels: Record<string, string> = { med: 'Médicos', psi: 'Psicologia', odonto: 'Odontologia', nutra: 'Nutra', nutri: 'Nutri', coach: 'Coach', psicanalise: 'Psicanálise', perfumaria: 'Perfumaria', seller: 'Vendedores', estetica: 'Estética', fitness: 'Fitness' }
-  return { areaCodigo: area as 'ylada' | 'med' | 'psi' | 'odonto' | 'nutra' | 'nutri' | 'coach' | 'psicanalise' | 'perfumaria' | 'seller' | 'estetica' | 'fitness', areaLabel: labels[area] ?? 'YLADA' }
+  const labels: Record<string, string> = {
+    med: 'Médicos',
+    psi: 'Psicologia',
+    odonto: 'Odontologia',
+    nutra: 'Nutra',
+    nutri: 'Nutri',
+    coach: 'Coach',
+    psicanalise: 'Psicanálise',
+    perfumaria: 'Perfumaria',
+    seller: 'Vendedores',
+    estetica: 'Estética',
+    fitness: 'Fitness',
+    joias: 'Joias e bijuterias',
+  }
+  return {
+    areaCodigo: area as
+      | 'ylada'
+      | 'med'
+      | 'psi'
+      | 'odonto'
+      | 'nutra'
+      | 'nutri'
+      | 'coach'
+      | 'psicanalise'
+      | 'perfumaria'
+      | 'seller'
+      | 'estetica'
+      | 'fitness'
+      | 'joias',
+    areaLabel: labels[area] ?? 'YLADA',
+  }
 }
 
 export default function EditarLinkPage({ params }: { params: Promise<{ id: string }> }) {

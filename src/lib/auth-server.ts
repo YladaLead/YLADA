@@ -5,7 +5,22 @@ import { hasActiveSubscription, canBypassSubscription } from '@/lib/subscription
 import { supabaseAdmin } from '@/lib/supabase'
 import { PERFIS_MATRIZ_YLADA } from '@/lib/admin-matriz-constants'
 
-type Area = 'wellness' | 'nutri' | 'coach' | 'nutra' | 'ylada' | 'med' | 'psi' | 'psicanalise' | 'odonto' | 'seller' | 'perfumaria' | 'estetica' | 'fitness' | 'coach-bem-estar'
+type Area =
+  | 'wellness'
+  | 'nutri'
+  | 'coach'
+  | 'nutra'
+  | 'ylada'
+  | 'med'
+  | 'psi'
+  | 'psicanalise'
+  | 'odonto'
+  | 'seller'
+  | 'perfumaria'
+  | 'estetica'
+  | 'fitness'
+  | 'joias'
+  | 'coach-bem-estar'
 
 interface AuthValidationResult {
   session: any
@@ -280,7 +295,19 @@ export async function validateProtectedAccess(
 
     // 4. Verificar se perfil corresponde (admin/suporte pode bypassar)
     const canBypassProfile = (allowAdmin && profile.is_admin) || (allowSupport && profile.is_support)
-    const matrixAreas = ['med', 'psi', 'psicanalise', 'odonto', 'nutra', 'coach', 'seller', 'perfumaria', 'estetica', 'fitness'] as const
+    const matrixAreas = [
+      'med',
+      'psi',
+      'psicanalise',
+      'odonto',
+      'nutra',
+      'coach',
+      'seller',
+      'perfumaria',
+      'estetica',
+      'fitness',
+      'joias',
+    ] as const
     const isMatrixArea = (a: string): a is (typeof matrixAreas)[number] => matrixAreas.includes(a as any)
     // Área ylada (matriz): perfil "ylada" não é público — só admin/suporte. Demais perfis (estética, nutri, med, etc.) acessam o painel normalmente.
     const canAccessYladaMatrix =

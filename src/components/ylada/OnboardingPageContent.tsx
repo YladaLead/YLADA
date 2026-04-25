@@ -27,9 +27,21 @@ export type OnboardingAreaCodigo =
   | 'seller'
   | 'estetica'
   | 'fitness'
+  | 'joias'
 
 const AREA_SEGMENT_YLADA: OnboardingAreaCodigo[] = [
-  'ylada', 'med', 'psi', 'odonto', 'nutra', 'coach', 'psicanalise', 'perfumaria', 'seller', 'estetica', 'fitness',
+  'ylada',
+  'med',
+  'psi',
+  'odonto',
+  'nutra',
+  'coach',
+  'psicanalise',
+  'perfumaria',
+  'seller',
+  'estetica',
+  'fitness',
+  'joias',
 ]
 
 export interface OnboardingPageContentProps {

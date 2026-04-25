@@ -4,6 +4,7 @@ import { useState, useEffect, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import YLADALogo from '@/components/YLADALogo'
+import PhoneInputWithCountry from '@/components/PhoneInputWithCountry'
 import { useTranslations } from '@/hooks/useTranslations'
 
 const VALID_AREAS = ['profissional-liberal', 'vendedores-geral', 'psi', 'psicanalise', 'odonto', 'coach']
@@ -19,6 +20,8 @@ function SolicitarAcessoContent() {
     profissao: '',
     pais: '',
     email: '',
+    /** E.164 digits only (ex.: 5511999999999) */
+    telefone: '',
   })
   const [submitting, setSubmitting] = useState(false)
 
@@ -37,6 +40,11 @@ function SolicitarAcessoContent() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!inst) return
+    const phoneDigits = (formData.telefone || '').replace(/\D/g, '')
+    if (phoneDigits.length < 10) {
+      setError('Informe um WhatsApp válido com DDI (código do país e número).')
+      return
+    }
     setSubmitting(true)
     setError(null)
     try {
@@ -44,13 +52,17 @@ function SolicitarAcessoContent() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          ...formData,
+          nome: formData.nome,
+          profissao: formData.profissao,
+          pais: formData.pais,
+          email: formData.email,
+          telefone: formData.telefone,
           area_interesse: areaInteresse,
         }),
       })
       const data = await response.json()
       if (!response.ok) throw new Error(data.error || 'Erro ao enviar')
-      setFormData({ nome: '', profissao: '', pais: '', email: '' })
+      setFormData({ nome: '', profissao: '', pais: '', email: '', telefone: '' })
       setShowSuccess(true)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro ao enviar. Tente novamente.')
@@ -68,6 +80,11 @@ function SolicitarAcessoContent() {
   }
 
   const ar = inst.areaRequest
+  const contact = inst.contact
+  const isMinhaAreaFlow = areaInteresse === 'profissional-liberal'
+  const pageTitle = isMinhaAreaFlow
+    ? ar.headingMinhaArea
+    : `${ar.title}: ${areaLabel}`
 
   return (
     <div className="min-h-screen bg-white">
@@ -88,7 +105,7 @@ function SolicitarAcessoContent() {
             Em breve
           </span>
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
-            {ar.title}: {areaLabel}
+            {pageTitle}
           </h1>
           <p className="text-gray-600">{ar.subtitle}</p>
         </div>
@@ -137,6 +154,20 @@ function SolicitarAcessoContent() {
                   />
                 </div>
               ))}
+              <div>
+                <label htmlFor="solicitar-whatsapp" className="block text-sm font-medium text-gray-700 mb-1.5">
+                  {ar.labelWhatsApp}
+                </label>
+                <PhoneInputWithCountry
+                  value={formData.telefone}
+                  onChange={(phone) => setFormData((prev) => ({ ...prev, telefone: phone }))}
+                  defaultCountryCode="BR"
+                  className="min-h-[44px] rounded-lg"
+                />
+                {contact?.phoneHint ? (
+                  <p className="mt-1.5 text-xs text-gray-500">{contact.phoneHint}</p>
+                ) : null}
+              </div>
               <button
                 type="submit"
                 disabled={submitting}

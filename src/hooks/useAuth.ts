@@ -24,6 +24,7 @@ interface UserProfile {
     | 'psicanalise'
     | 'odonto'
     | 'fitness'
+    | 'joias'
     | 'perfumaria'
     | 'seller'
     | 'outros'

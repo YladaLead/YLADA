@@ -7,6 +7,7 @@ import { getYladaAreaPublicEntryMode } from '@/config/ylada-areas'
 import { buildCoachPublicFlowConfig } from '@/config/ylada-public-flow-coach'
 import { buildEsteticaPublicFlowConfig } from '@/config/ylada-public-flow-estetica'
 import { buildFitnessPublicFlowConfig } from '@/config/ylada-public-flow-fitness'
+import { buildJoiasPublicFlowConfig } from '@/config/ylada-public-flow-joias'
 import { buildMedPublicFlowConfig } from '@/config/ylada-public-flow-med'
 import { buildNutraPublicFlowConfig } from '@/config/ylada-public-flow-nutra'
 import { buildNutriPublicFlowConfig } from '@/config/ylada-public-flow-nutri'
@@ -21,6 +22,7 @@ const CONFIG_BY_AREA: Record<string, () => PublicFlowConfig> = {
   coach: buildCoachPublicFlowConfig,
   estetica: buildEsteticaPublicFlowConfig,
   fitness: buildFitnessPublicFlowConfig,
+  joias: buildJoiasPublicFlowConfig,
   med: buildMedPublicFlowConfig,
   nutra: buildNutraPublicFlowConfig,
   nutri: buildNutriPublicFlowConfig,

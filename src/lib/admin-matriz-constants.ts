@@ -12,6 +12,7 @@ export const PERFIS_MATRIZ_YLADA = [
   'odonto',
   'estetica',
   'fitness',
+  'joias',
   'perfumaria',
   'ylada',
   'seller',

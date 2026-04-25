@@ -9,7 +9,7 @@ import { supabaseAdmin } from '@/lib/supabase'
  */
 export async function requireApiAuth(
   request: NextRequest,
-  allowedProfiles?: ('nutri' | 'wellness' | 'coach' | 'nutra' | 'admin' | 'ylada' | 'psi' | 'psicanalise' | 'odonto' | 'fitness' | 'estetica' | 'med' | 'perfumaria' | 'seller' | 'coach-bem-estar')[]
+  allowedProfiles?: ('nutri' | 'wellness' | 'coach' | 'nutra' | 'admin' | 'ylada' | 'psi' | 'psicanalise' | 'odonto' | 'fitness' | 'joias' | 'estetica' | 'med' | 'perfumaria' | 'seller' | 'coach-bem-estar')[]
 ): Promise<{ user: any; profile: any } | NextResponse> {
   try {
     // NOVO: Tentar ler access token do header Authorization (fallback quando cookies falharem)

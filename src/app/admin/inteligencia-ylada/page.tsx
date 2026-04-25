@@ -21,6 +21,7 @@ const SEG_LABEL: Record<string, string> = {
   med: 'Médicos',
   estetica: 'Estética',
   fitness: 'Fitness',
+  joias: 'Joias e bijuterias',
   perfumaria: 'Perfumaria',
   nutra: 'Nutra',
   seller: 'Vendas',

@@ -11,6 +11,7 @@ export type AreaCodigo =
   | 'coach'
   | 'fitness'
   | 'perfumaria'
+  | 'joias'
   | 'seller'
 
 export interface AreaFlowContent {
@@ -200,6 +201,24 @@ const FLOW_PERFUMARIA: AreaFlowContent = {
   closingBenefit: 'Cliente já decidido',
 }
 
+const FLOW_JOIAS: AreaFlowContent = {
+  slide1Problem: 'A cliente só pergunta preço e some depois do catálogo?',
+  slide1ProblemHint: 'Muita conversa, pouca decisão',
+  slide3Question: 'Como fazer ela entender estilo antes do valor?',
+  linkTitle: 'Descubra o que combina com você',
+  linkHint: 'Perguntas rápidas · Resultado na hora',
+  formQuestion: 'O que mais importa na sua escolha hoje?',
+  formOptions: ['Ocasião (trabalho, festa, dia a dia)', 'Estilo e combinações', 'Qualidade e garantia', 'Presente para alguém'],
+  resultInsight: 'Seu foco hoje é estilo e ocasião — o preço vem depois.',
+  resultSubtext: 'Com isso, a conversa no WhatsApp fica mais simples.',
+  resultInsights: ['Menos comparação com barato', 'Mais clareza de intenção', 'Melhor encaixe de peça'],
+  resultCta: 'Quero ver opções',
+  whatsappProTitle: 'Joias · Atendimento',
+  whatsappClientMsg1: 'Oi! Fiz o diagnóstico. Vi que preciso alinhar estilo antes de fechar.',
+  whatsappClientMsg2: 'Podemos conversar?',
+  closingBenefit: 'Clientes mais decididas',
+}
+
 const FLOW_SELLER: AreaFlowContent = {
   slide1Problem: 'Você tenta vender, mas as pessoas não se interessam.',
   slide1ProblemHint: 'Tenta várias coisas, mas nada conecta',
@@ -228,6 +247,7 @@ const FLOWS: Record<AreaCodigo, AreaFlowContent> = {
   coach: FLOW_COACH,
   fitness: FLOW_FITNESS,
   perfumaria: FLOW_PERFUMARIA,
+  joias: FLOW_JOIAS,
   seller: FLOW_SELLER,
 }
 

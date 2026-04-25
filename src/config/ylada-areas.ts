@@ -7,7 +7,20 @@
  * Nutri mantém `/api/nutri/*` para clientes, avaliações e fluxos legados; o **mentor na matriz** é o Noel (`POST /api/ylada/noel`).
  * @see docs/MATRIZ-CENTRAL-CRONOGRAMA.md
  */
-export type YladaSegmentCode = 'ylada' | 'med' | 'psi' | 'psicanalise' | 'odonto' | 'nutra' | 'nutri' | 'coach' | 'seller' | 'perfumaria' | 'estetica' | 'fitness'
+export type YladaSegmentCode =
+  | 'ylada'
+  | 'med'
+  | 'psi'
+  | 'psicanalise'
+  | 'odonto'
+  | 'nutra'
+  | 'nutri'
+  | 'coach'
+  | 'seller'
+  | 'perfumaria'
+  | 'estetica'
+  | 'fitness'
+  | 'joias'
 
 /**
  * Funil público na entrada da área (quiz matriz / ylada.com → área).
@@ -62,6 +75,13 @@ export const YLADA_AREAS: YladaAreaConfig[] = [
     publicEntry: 'standard',
   },
   { codigo: 'fitness', segment_code: 'fitness', label: 'Fitness', pathPrefix: '/pt/fitness', publicEntry: 'standard' },
+  {
+    codigo: 'joias',
+    segment_code: 'joias',
+    label: 'Joias e bijuterias',
+    pathPrefix: '/pt/joias',
+    publicEntry: 'standard',
+  },
   {
     codigo: 'nutri',
     segment_code: 'nutri',
@@ -160,10 +180,36 @@ export function getYladaSegmentPathPrefix(segmentCode: YladaSegmentCode): string
 }
 
 /** Lista de segment_code válidos para validação (ex.: body.segment na API Noel). */
-export const YLADA_SEGMENT_CODES: YladaSegmentCode[] = ['ylada', 'med', 'psi', 'psicanalise', 'odonto', 'nutra', 'nutri', 'coach', 'seller', 'perfumaria', 'estetica', 'fitness']
+export const YLADA_SEGMENT_CODES: YladaSegmentCode[] = [
+  'ylada',
+  'med',
+  'psi',
+  'psicanalise',
+  'odonto',
+  'nutra',
+  'nutri',
+  'coach',
+  'seller',
+  'perfumaria',
+  'estetica',
+  'fitness',
+  'joias',
+]
 
 /** Perfis permitidos nas APIs YLADA (Links, Templates, Biblioteca, etc.). Wellness/coach-bem-estar ficam só em /api/wellness/*. */
 export const YLADA_API_ALLOWED_PROFILES = [
-  'ylada', 'med', 'psi', 'psicanalise', 'odonto', 'nutra', 'coach', 'seller',
-  'perfumaria', 'estetica', 'fitness', 'nutri', 'admin',
+  'ylada',
+  'med',
+  'psi',
+  'psicanalise',
+  'odonto',
+  'nutra',
+  'coach',
+  'seller',
+  'perfumaria',
+  'estetica',
+  'fitness',
+  'joias',
+  'nutri',
+  'admin',
 ] as const

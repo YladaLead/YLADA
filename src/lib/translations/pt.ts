@@ -133,6 +133,10 @@ export const ptTranslations: Translations = {
         estetica: { title: 'Beleza/Estética', description: 'Profissionais de estética: captação de clientes e links inteligentes.' },
         fitness: { title: 'Fitness', description: 'Personal trainers e coaches: captação e formação empresarial.' },
         perfumaria: { title: 'Perfumaria', description: 'Vendedores de fragrâncias: quizzes de perfil olfativo e leads.' },
+        joias: {
+          title: 'Joias e bijuterias',
+          description: 'Semijoias, bijuterias e joias: qualificar antes do preço e leads com contexto.',
+        },
         nutra: { title: 'Vendas de suplementos e nutracêuticos', description: 'Vendedores de suplementos: leads e conversão.' },
         'profissional-liberal': { title: 'Profissional liberal', description: 'Advogados, contadores, consultores: captação e diagnósticos para sua área.' },
         'vendedores-geral': { title: 'Vendedores em geral', description: 'Vendedores de qualquer segmento: funil, links inteligentes e conversas qualificadas.' },
@@ -176,16 +180,19 @@ export const ptTranslations: Translations = {
       back: 'Voltar à página inicial'
     },
     areaRequest: {
+      headingMinhaArea: 'Gostaria da minha área',
       title: 'Solicitar acesso',
-      subtitle: 'Preencha o formulário e entraremos em contato quando esta área estiver disponível.',
+      subtitle:
+        'Preencha seus dados. Nossa equipe entra em contato para alinhar seu segmento e próximos passos, inclusive pelo WhatsApp, se você informar o número abaixo.',
       labelName: 'Nome',
       labelProfession: 'Profissão ou segmento',
       labelCountry: 'País',
       labelEmail: 'E-mail',
+      labelWhatsApp: 'WhatsApp',
       submit: 'Enviar solicitação',
       submitting: 'Enviando...',
       successTitle: 'Solicitação registrada!',
-      successMessage: 'Entraremos em contato quando a área estiver disponível.',
+      successMessage: 'Recebemos seu pedido. Em breve entramos em contato.',
       successButton: 'OK'
     },
     footer: {

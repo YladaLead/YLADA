@@ -2,7 +2,7 @@
  * Entrada pública por segmento:
  * - Marketing PT: / → /pt (só “Explique menos. Venda mais.” + Comece agora); /pt/segmentos = lista de segmentos; fluxos em /pt/{area}.
  * - Rotas *v2 redirecionam para /pt/{area} (landing minimal descontinuada).
- * - /pt/{area} → fluxo progressivo (estética, nutri, odonto, nutra, psi, med, psicanalise, perfumaria, coach, fitness); cadastro ?area=
+ * - /pt/{area} → fluxo progressivo (…, perfumaria, coach, fitness, joias); cadastro ?area=
  * - /pt/{area}/como-funciona → landing longa (quiz, seções)
  */
 
@@ -111,6 +111,14 @@ export const AREA_MINIMAL_LANDING_PROPS: Record<string, AreaMinimalLandingProps>
     headline: 'Indicações que não viram compra? Traga quem já refletiu sobre fragrância.',
     subline: 'Diagnósticos ajudam o cliente a entender preferências antes da conversa com você.',
     primaryHref: '/pt/cadastro?area=perfumaria',
+    primaryLabel: 'Começar grátis',
+    proofLine: '+3.000 profissionais já testaram o YLADA',
+  },
+  joias: {
+    segmentBadge: 'Joias e bijuterias',
+    headline: 'Cliente só pergunta preço? Traga quem já refletiu sobre estilo e ocasião.',
+    subline: 'Diagnósticos qualificam antes do catálogo — semijoias, bijuterias ou joias.',
+    primaryHref: '/pt/cadastro?area=joias',
     primaryLabel: 'Começar grátis',
     proofLine: '+3.000 profissionais já testaram o YLADA',
   },

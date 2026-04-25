@@ -110,6 +110,18 @@ const ONBOARDING_BY_AREA: Partial<Record<OnboardingAreaCodigo, Partial<Onboardin
     nomePlaceholder: 'Ex.: Pedro Oliveira',
     proofText: 'Mais de 1.200 profissionais de fitness já usaram este diagnóstico para entender melhor seu momento profissional.',
   },
+  joias: {
+    welcomeTitle: (areaLabel) => `Bem-vindo(a) à YLADA ${areaLabel}`,
+    valueSubtitle: 'Aqui você não precisa fazer seu marketing de joias e bijuterias sozinha.',
+    publicoTerm: 'clientes',
+    benefits: [
+      'atrair clientes com mais intenção antes do preço',
+      'entender estilo, ocasião e ticket',
+      'transformar conversas em vendas com mais contexto',
+    ],
+    nomePlaceholder: 'Ex.: Letícia Mendes',
+    proofText: 'Vendedoras e lojistas de semijoias e bijuterias usam o YLADA para qualificar antes do WhatsApp.',
+  },
   coach: {
     welcomeTitle: (areaLabel) => `Bem-vindo(a) à YLADA ${areaLabel}`,
     valueSubtitle: 'Aqui você não precisa fazer seu marketing de coaching sozinho(a).',

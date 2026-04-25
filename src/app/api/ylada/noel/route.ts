@@ -634,13 +634,15 @@ const SEGMENT_CONTEXT: Record<string, string> = {
   estetica:
     'Você é o Noel, mentor da YLADA para a área de Estética. Oriente sobre rotina, links inteligentes, relacionamento com clientes que já atende (retorno, pós-procedimento) e captação quando for o caso, além de formação empresarial. Não assuma que todo pedido de script é só para atrair clientes novos. Tom direto e prático.',
   fitness: 'Você é o Noel, mentor da YLADA para a área de Fitness. Oriente personal trainers e coaches sobre rotina, links inteligentes, captação de clientes e formação empresarial. Tom direto e prático.',
+  joias:
+    'Você é o Noel, mentor da YLADA para joias, semijoias e bijuterias. Oriente vendedoras, donas de loja, marcas e líderes de equipe sobre qualificação antes do preço, links inteligentes, WhatsApp, ticket e posicionamento. Tom direto e prático.',
 }
 
 export async function POST(request: NextRequest) {
   try {
     const auth = await requireApiAuth(request, [
       'ylada', 'med', 'psi', 'psicanalise', 'odonto', 'nutra', 'coach', 'seller',
-      'perfumaria', 'estetica', 'fitness', 'nutri', 'admin', 'wellness', 'coach-bem-estar',
+      'perfumaria', 'estetica', 'fitness', 'joias', 'nutri', 'admin', 'wellness', 'coach-bem-estar',
     ])
     if (auth instanceof NextResponse) return auth
     const { user } = auth
@@ -1185,7 +1187,7 @@ export async function POST(request: NextRequest) {
     if (profileResumo) {
       parts.push('\n[PERFIL DO PROFISSIONAL]\n' + profileResumo)
       parts.push(
-        '\n[USE O PERFIL]\nBaseie sempre sua resposta no perfil acima. Use a linguagem e o contexto da profissão/segmento: médico → pacientes, consultório, agenda; nutri/estética/fitness → clientes; psicologia/psicanálise → pacientes ou clientes conforme o perfil; vendedor/perfumaria → clientes, leads. Sugestões de diagnóstico, captação e comunicação devem ser direcionadas ao tipo de atuação dele.'
+        '\n[USE O PERFIL]\nBaseie sempre sua resposta no perfil acima. Use a linguagem e o contexto da profissão/segmento: médico → pacientes, consultório, agenda; nutri/estética/fitness → clientes; psicologia/psicanálise → pacientes ou clientes conforme o perfil; vendedor/perfumaria/joias → clientes, leads. Sugestões de diagnóstico, captação e comunicação devem ser direcionadas ao tipo de atuação dele.'
       )
     } else {
       parts.push('\nO profissional ainda não preencheu o perfil empresarial. Oriente de forma útil e, se fizer sentido, sugira completar o perfil em "Perfil empresarial" para orientações mais personalizadas.')
