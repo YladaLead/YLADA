@@ -15,6 +15,8 @@ import {
 import {
   TEMPLATE_DIAGNOSTICO_CAPILAR_TITLE,
   TEMPLATE_DIAGNOSTICO_CORPORAL_TITLE,
+  buildDiagnosticoCapilarV1Fields,
+  buildDiagnosticoCorporalV1Fields,
 } from '@/lib/estetica-consultoria-form-templates'
 import { consultoriaCsvFilenameBase, consultoriaFormResponsesToCsv } from '@/lib/consultoria-form-csv'
 import {
@@ -26,6 +28,7 @@ import {
   consultoriaKindLabel,
   defaultContentForKind,
   getConsultoriaFormFields,
+  type ConsultoriaFormField,
   type ProLideresConsultoriaMaterialKind,
 } from '@/lib/pro-lideres-consultoria'
 
@@ -55,6 +58,11 @@ const NOTE_KIND_LABEL: Record<string, string> = {
   recomendacao: 'Recomendação',
   evolucao: 'Evolução',
 }
+
+const ESTETICA_MODELO_CAMPOS_CORPORAL = buildDiagnosticoCorporalV1Fields()
+const ESTETICA_MODELO_CAMPOS_CAPILAR = buildDiagnosticoCapilarV1Fields()
+
+type EsteticaFormModelKind = 'corporal' | 'capilar'
 
 function emptyMaterialRow(clientId: string, kind: ProLideresConsultoriaMaterialKind): YladaEsteticaConsultancyMaterialRow {
   const now = new Date().toISOString()
@@ -165,6 +173,143 @@ function ConsultoriaAdminResponseCard({
   )
 }
 
+function describeConsultoriaModelField(f: ConsultoriaFormField): string {
+  const typePt =
+    f.type === 'textarea'
+      ? 'Texto longo'
+      : f.type === 'select'
+        ? 'Escolha única (lista)'
+        : f.type === 'checkbox_group'
+          ? 'Várias opções (marque as que aplicam)'
+          : 'Texto curto'
+  const lines: string[] = [
+    f.required ? 'Obrigatório' : 'Opcional',
+    `ID interno: ${f.id}`,
+    `Tipo: ${typePt}`,
+  ]
+  if (f.options?.length) {
+    lines.push('')
+    lines.push(`Opções (${f.options.length}):`)
+    for (const o of f.options) {
+      lines.push(`· ${o}`)
+    }
+  }
+  return lines.join('\n')
+}
+
+function EsteticaConsultoriaFormModelDialog({
+  open,
+  variant,
+  onClose,
+}: {
+  open: boolean
+  variant: EsteticaFormModelKind | null
+  onClose: () => void
+}) {
+  const fields = useMemo(() => {
+    if (variant === 'corporal') return ESTETICA_MODELO_CAMPOS_CORPORAL
+    if (variant === 'capilar') return ESTETICA_MODELO_CAMPOS_CAPILAR
+    return []
+  }, [variant])
+
+  const sections = useMemo(() => {
+    const previewRows: ConsultoriaAnswerRow[] = fields.map((f) => ({
+      fieldId: f.id,
+      label: f.label,
+      value: describeConsultoriaModelField(f),
+    }))
+    return groupConsultoriaAnswerRowsBySection(previewRows)
+  }, [fields])
+
+  useEffect(() => {
+    if (!open) return
+    const prevOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose()
+    }
+    window.addEventListener('keydown', onKey)
+    return () => {
+      document.body.style.overflow = prevOverflow
+      window.removeEventListener('keydown', onKey)
+    }
+  }, [open, onClose])
+
+  if (!open || !variant) return null
+
+  const isCorporal = variant === 'corporal'
+  const title = isCorporal ? TEMPLATE_DIAGNOSTICO_CORPORAL_TITLE : TEMPLATE_DIAGNOSTICO_CAPILAR_TITLE
+  const bar = isCorporal ? 'bg-rose-600' : 'bg-sky-600'
+  const secTitle = isCorporal ? 'text-rose-900/60' : 'text-sky-900/60'
+  const qClass = isCorporal ? 'text-rose-950/90' : 'text-sky-950/90'
+  const boxClass = isCorporal
+    ? 'border-rose-100/90 bg-rose-50/50 text-gray-900'
+    : 'border-sky-100/90 bg-sky-50/50 text-gray-900'
+
+  return (
+    <div
+      className="fixed inset-0 z-[120] flex items-center justify-center bg-black/50 p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="estetica-form-model-title"
+      onClick={onClose}
+    >
+      <div
+        className="flex max-h-[min(92vh,880px)] w-full max-w-3xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className={`h-1.5 w-full shrink-0 ${bar}`} aria-hidden />
+        <div className="flex shrink-0 items-start justify-between gap-3 border-b border-gray-100 px-4 py-3 sm:px-5">
+          <div className="min-w-0 pr-2">
+            <h2 id="estetica-form-model-title" className="text-base font-semibold leading-snug text-gray-900">
+              {title}
+            </h2>
+            <p className="mt-1 text-xs leading-relaxed text-gray-500">
+              Vista prévia do <strong>modelo global</strong> ({fields.length} campos). O texto e as opções vivem no
+              código (
+              <code className="rounded bg-gray-100 px-1 text-[11px]">estetica-consultoria-form-templates.ts</code>) e no
+              material global no Supabase; alterar perguntas implica mudança de código e/ou migração.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="shrink-0 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-sm font-medium text-gray-800 hover:bg-gray-50"
+          >
+            Fechar
+          </button>
+        </div>
+        <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4 sm:px-5">
+          <div className="space-y-6">
+            {sections.map((sec, idx) => (
+              <section key={`${sec.sectionKey}-${idx}`}>
+                <h3 className={`mb-2.5 text-[11px] font-bold uppercase tracking-wider ${secTitle}`}>
+                  {sec.sectionTitle}
+                </h3>
+                <dl className="space-y-3">
+                  {sec.rows.map((row) => (
+                    <div
+                      key={row.fieldId}
+                      className="grid gap-1.5 sm:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)] sm:items-start sm:gap-x-4"
+                    >
+                      <dt className={`text-xs font-semibold leading-snug sm:pt-1.5 ${qClass}`}>{row.label}</dt>
+                      <dd
+                        className={`rounded-lg border px-3 py-2 text-xs leading-relaxed whitespace-pre-wrap ${boxClass}`}
+                      >
+                        {row.value}
+                      </dd>
+                    </div>
+                  ))}
+                </dl>
+              </section>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function clientFormDefaults(c: YladaEsteticaConsultClientRow) {
   return {
     business_name: c.business_name,
@@ -228,6 +373,9 @@ export default function EsteticaConsultoriaAdminClient() {
   const [diagnosticCapilarLoading, setDiagnosticCapilarLoading] = useState(false)
   const [diagnosticCorporalLinkLoading, setDiagnosticCorporalLinkLoading] = useState(false)
   const [diagnosticCapilarLinkLoading, setDiagnosticCapilarLinkLoading] = useState(false)
+  const [formModelDialog, setFormModelDialog] = useState<EsteticaFormModelKind | null>(null)
+
+  const closeFormModelDialog = useCallback(() => setFormModelDialog(null), [])
 
   const loadClients = useCallback(async (search?: string) => {
     setClientsLoading(true)
@@ -907,6 +1055,22 @@ export default function EsteticaConsultoriaAdminClient() {
             </>
           ) : null}
         </div>
+        <div className="flex flex-wrap gap-2 pt-2">
+          <button
+            type="button"
+            onClick={() => setFormModelDialog('corporal')}
+            className="rounded-lg border border-rose-200 bg-rose-50 px-3 py-1.5 text-xs font-semibold text-rose-900 hover:bg-rose-100"
+          >
+            Ver formulário modelo — corporal
+          </button>
+          <button
+            type="button"
+            onClick={() => setFormModelDialog('capilar')}
+            className="rounded-lg border border-sky-200 bg-sky-50 px-3 py-1.5 text-xs font-semibold text-sky-900 hover:bg-sky-100"
+          >
+            Ver formulário modelo — capilar
+          </button>
+        </div>
       </header>
 
       {error ? (
@@ -990,52 +1154,6 @@ export default function EsteticaConsultoriaAdminClient() {
           </ul>
         )}
       </section>
-
-      {!selectedClient ? (
-        <section className="rounded-2xl border border-dashed border-pink-300 bg-gradient-to-b from-pink-50/80 to-white p-5 shadow-sm space-y-4">
-          <h2 className="text-base font-semibold text-gray-900">Onde estão o formulário e os materiais?</h2>
-          <p className="text-sm text-gray-700 max-w-3xl">
-            Não falta nada no sistema: esta área abre <strong>só quando há uma clínica selecionada</strong>. Abaixo
-            ficam dados comerciais e, em seguida, o que você pode enviar para a profissional — em duas partes distintas.
-          </p>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="rounded-xl border-2 border-rose-200 bg-rose-50/60 p-4">
-              <p className="text-xs font-semibold uppercase tracking-wide text-rose-900">Diagnóstico corporal (YLADA)</p>
-              <p className="mt-2 text-sm text-gray-900 leading-relaxed">
-                Mesmo questionário para todas as clínicas; você gera <strong>um link por clínica</strong>. Bloco{' '}
-                <span className="text-rose-800 font-medium">rosa</span> — segmentos <em>Corporal</em> ou <em>Ambos</em>.
-              </p>
-            </div>
-            <div className="rounded-xl border-2 border-sky-200 bg-sky-50/60 p-4">
-              <p className="text-xs font-semibold uppercase tracking-wide text-sky-900">Diagnóstico capilar (YLADA)</p>
-              <p className="mt-2 text-sm text-gray-900 leading-relaxed">
-                Questionário focado em recorrência e posicionamento; <strong>um link por clínica</strong>. Bloco{' '}
-                <span className="text-sky-800 font-medium">azul</span> — segmentos <em>Capilar</em> ou <em>Ambos</em>.
-              </p>
-            </div>
-            <div className="rounded-xl border border-gray-200 bg-white p-4 sm:col-span-2">
-              <p className="text-xs font-semibold uppercase tracking-wide text-gray-600">Materiais para enviar</p>
-              <p className="mt-2 text-sm text-gray-900 leading-relaxed">
-                Lista <strong>«Materiais desta estética»</strong>: passo a passo, checklists, documentos e{' '}
-                <strong>outros formulários</strong> (abas <em>Links</em> e <em>Respostas</em>). Independente dos
-                diagnósticos fixos.
-              </p>
-            </div>
-          </div>
-          {segmentoFiltro === 'capilar' ? (
-            <p className="text-xs text-amber-950 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
-              Vista <strong>só capilar</strong>: o diagnóstico corporal (rosa) só aparece para clínicas{' '}
-              <em>Corporal</em> ou <em>Ambos</em>. Troque a vista ou o segmento da clínica se precisar do rosa.
-            </p>
-          ) : null}
-          {segmentoFiltro === 'corporal' ? (
-            <p className="text-xs text-amber-950 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
-              Vista <strong>só corporal</strong>: o diagnóstico capilar (azul) só aparece para clínicas <em>Capilar</em>{' '}
-              ou <em>Ambos</em>.
-            </p>
-          ) : null}
-        </section>
-      ) : null}
 
       {selectedClient && clientForm ? (
         <section className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm space-y-4">
@@ -1262,10 +1380,19 @@ export default function EsteticaConsultoriaAdminClient() {
         <>
           {(selectedClient.segment === 'corporal' || selectedClient.segment === 'ambos') ? (
             <section className="rounded-2xl border border-rose-200 bg-rose-50/50 p-4 shadow-sm space-y-4">
-              <div>
+              <div className="flex flex-wrap items-start justify-between gap-2">
                 <h3 className="text-sm font-semibold text-rose-950">
                   Formulário para enviar — diagnóstico corporal (YLADA fixo)
                 </h3>
+                <button
+                  type="button"
+                  onClick={() => setFormModelDialog('corporal')}
+                  className="shrink-0 rounded-lg border border-rose-300 bg-white px-2.5 py-1 text-xs font-semibold text-rose-900 hover:bg-rose-100"
+                >
+                  Ver modelo (todas as perguntas)
+                </button>
+              </div>
+              <div>
                 <p className="mt-1 text-xs text-rose-900/90 max-w-2xl">
                   Questionário <strong>fixo YLADA</strong> (igual para todas as clínicas) — não se edita no painel. Cada{' '}
                   <strong>link</strong> é só para <strong>{selectedClient.business_name}</strong>: primeiro enviamos
@@ -1351,7 +1478,8 @@ export default function EsteticaConsultoriaAdminClient() {
                     </div>
                     <p className="mt-1 text-[11px] text-rose-900/75">
                       Cada envio mostra <strong>todas</strong> as perguntas e respostas desta clínica (acompanhamento no
-                      painel). CSV em UTF-8 com separador vírgula (BOM para Excel).
+                      painel). CSV em UTF-8 com separador <strong>ponto e vírgula</strong> (BOM; compatível com Excel
+                      PT-BR).
                     </p>
                     {diagnosticCorporal.responses.length === 0 ? (
                       <p className="mt-1 text-xs text-rose-900/70">Ainda sem envios por este link.</p>
@@ -1388,10 +1516,19 @@ export default function EsteticaConsultoriaAdminClient() {
 
           {(selectedClient.segment === 'capilar' || selectedClient.segment === 'ambos') ? (
             <section className="rounded-2xl border border-sky-200 bg-sky-50/50 p-4 shadow-sm space-y-4">
-              <div>
+              <div className="flex flex-wrap items-start justify-between gap-2">
                 <h3 className="text-sm font-semibold text-sky-950">
                   Formulário para enviar — diagnóstico capilar (YLADA fixo)
                 </h3>
+                <button
+                  type="button"
+                  onClick={() => setFormModelDialog('capilar')}
+                  className="shrink-0 rounded-lg border border-sky-300 bg-white px-2.5 py-1 text-xs font-semibold text-sky-900 hover:bg-sky-100"
+                >
+                  Ver modelo (todas as perguntas)
+                </button>
+              </div>
+              <div>
                 <p className="mt-1 text-xs text-sky-900/90 max-w-2xl">
                   Questionário <strong>fixo YLADA</strong> (igual para todas as clínicas capilar) — não se edita no
                   painel. Cada <strong>link</strong> é só para <strong>{selectedClient.business_name}</strong>: primeiro
@@ -1836,6 +1973,12 @@ export default function EsteticaConsultoriaAdminClient() {
           </div>
         </>
       ) : null}
+
+      <EsteticaConsultoriaFormModelDialog
+        open={formModelDialog !== null}
+        variant={formModelDialog}
+        onClose={closeFormModelDialog}
+      />
     </div>
   )
 }

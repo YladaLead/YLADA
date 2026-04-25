@@ -686,6 +686,7 @@ export default function PublicLinkView({
       <ConfigDrivenLinkView
         slug={slug}
         config={normalizedConfig}
+        ctaText={ctaText}
         whatsappUrl={whatsappUrl}
         onCtaClick={handleCtaClick}
         locale={locale}
@@ -751,12 +752,14 @@ type DiagnosisResultState = {
 function ConfigDrivenLinkView({
   slug,
   config,
+  ctaText,
   whatsappUrl,
   onCtaClick,
   locale = 'pt',
 }: {
   slug: string
   config: Record<string, unknown>
+  ctaText: string
   whatsappUrl: string
   onCtaClick: (metricsId?: string, whatsappPrefill?: string) => void
   locale?: Language
