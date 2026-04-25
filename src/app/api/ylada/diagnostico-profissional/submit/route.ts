@@ -29,6 +29,7 @@ const ALLOWED_PROFILES = [
   'perfumaria',
   'estetica',
   'fitness',
+  'joias',
   'nutri',
   'admin',
 ] as const

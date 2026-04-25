@@ -61,6 +61,7 @@ export interface AdminUsuariosTranslations {
     odonto: string
     estetica: string
     fitness: string
+    joias: string
     perfumaria: string
     ylada: string
     seller: string
@@ -284,6 +285,7 @@ const pt: AdminUsuariosTranslations = {
     odonto: 'Odonto',
     estetica: 'Estética',
     fitness: 'Fitness',
+    joias: 'Joias e bijuterias',
     perfumaria: 'Perfumaria',
     ylada: 'YLADA',
     seller: 'Vendas',
@@ -503,6 +505,7 @@ const es: AdminUsuariosTranslations = {
     odonto: 'Odonto',
     estetica: 'Estética',
     fitness: 'Fitness',
+    joias: 'Joyería y bisutería',
     perfumaria: 'Perfumaria',
     ylada: 'YLADA',
     seller: 'Ventas',
@@ -722,6 +725,7 @@ const en: AdminUsuariosTranslations = {
     odonto: 'Odonto',
     estetica: 'Aesthetics',
     fitness: 'Fitness',
+    joias: 'Jewelry & fashion jewelry',
     perfumaria: 'Perfumaria',
     ylada: 'YLADA',
     seller: 'Sales',

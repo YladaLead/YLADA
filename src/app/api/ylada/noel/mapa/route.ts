@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
   try {
     const auth = await requireApiAuth(request, [
       'ylada', 'med', 'psi', 'psicanalise', 'odonto', 'nutra', 'coach', 'seller',
-      'perfumaria', 'estetica', 'fitness', 'nutri', 'admin',
+      'perfumaria', 'estetica', 'fitness', 'joias', 'nutri', 'admin',
     ])
     if (auth instanceof NextResponse) return auth
     const { user } = auth

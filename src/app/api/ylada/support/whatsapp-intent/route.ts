@@ -21,6 +21,7 @@ const ALLOWED = [
   'perfumaria',
   'estetica',
   'fitness',
+  'joias',
   'nutri',
   'admin',
   'wellness',

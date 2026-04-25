@@ -3,7 +3,20 @@ import { supabaseAdmin } from '@/lib/supabase'
 import { requireApiAuth } from '@/lib/api-auth'
 
 /** Áreas YLADA (ylada.com) - página institucional */
-const YLADA_AREAS = ['nutri', 'coach', 'nutra', 'med', 'psi', 'psicanalise', 'odonto', 'estetica', 'fitness', 'perfumaria', 'ylada']
+const YLADA_AREAS = [
+  'nutri',
+  'coach',
+  'nutra',
+  'med',
+  'psi',
+  'psicanalise',
+  'odonto',
+  'estetica',
+  'fitness',
+  'joias',
+  'perfumaria',
+  'ylada',
+]
 
 /** Área Herbalife - fora da página oficial */
 const HERBALIFE_AREAS = ['wellness']

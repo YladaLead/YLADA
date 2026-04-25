@@ -15,6 +15,7 @@ const ADMIN_MANUAL_SUBSCRIPTION_AREAS = [
   'odonto',
   'estetica',
   'fitness',
+  'joias',
   'perfumaria',
   'seller',
 ] as const

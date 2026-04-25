@@ -139,6 +139,7 @@ export default function AdminUsuarios() {
     { value: 'odonto', label: t.areas.odonto },
     { value: 'estetica', label: t.areas.estetica },
     { value: 'fitness', label: t.areas.fitness },
+    { value: 'joias', label: t.areas.joias },
     { value: 'perfumaria', label: t.areas.perfumaria },
     { value: 'ylada', label: t.areas.ylada },
     { value: 'seller', label: t.areas.seller },
