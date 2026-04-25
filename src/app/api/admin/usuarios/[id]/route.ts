@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
 import { requireApiAuth } from '@/lib/api-auth'
-import { PERFIS_MATRIZ_YLADA } from '@/lib/admin-matriz-constants'
+import { isPerfilMatrizYlada, PERFIS_MATRIZ_YLADA } from '@/lib/admin-matriz-constants'
 
 /** Alinhado à matriz + Wellness + perfis extra no CHECK do banco (ex.: coach-bem-estar). Inclui seller (Vendas). */
 const PERFIS_VALIDOS: string[] = ['wellness', ...PERFIS_MATRIZ_YLADA, 'coach-bem-estar']
@@ -50,6 +50,23 @@ export async function PUT(
     if (nome_presidente !== undefined) updateData.nome_presidente = nome_presidente || null
     updateData.updated_at = new Date().toISOString()
 
+    let previousPerfil: string | undefined
+    if (area) {
+      const { data: before, error: beforeErr } = await supabaseAdmin
+        .from('user_profiles')
+        .select('perfil')
+        .eq('user_id', userId)
+        .maybeSingle()
+      if (beforeErr) {
+        console.error('❌ Erro ao ler perfil atual:', beforeErr)
+        return NextResponse.json(
+          { error: 'Erro ao atualizar usuário', details: beforeErr.message },
+          { status: 500 }
+        )
+      }
+      previousPerfil = before?.perfil as string | undefined
+    }
+
     // Atualizar perfil
     const { data, error } = await supabaseAdmin
       .from('user_profiles')
@@ -64,6 +81,39 @@ export async function PUT(
         { error: 'Erro ao atualizar usuário', details: error.message },
         { status: 500 }
       )
+    }
+
+    if (
+      area &&
+      previousPerfil &&
+      previousPerfil !== area &&
+      isPerfilMatrizYlada(previousPerfil) &&
+      isPerfilMatrizYlada(area)
+    ) {
+      const { error: subErr } = await supabaseAdmin
+        .from('subscriptions')
+        .update({ area })
+        .eq('user_id', userId)
+        .eq('area', previousPerfil)
+
+      if (subErr) {
+        console.error('❌ Erro ao alinhar subscriptions.area:', subErr)
+        await supabaseAdmin
+          .from('user_profiles')
+          .update({
+            perfil: previousPerfil,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('user_id', userId)
+        return NextResponse.json(
+          {
+            error:
+              'Perfil não foi alterado: falha ao alinhar assinaturas ao novo segmento. Corrija no banco ou tente de novo.',
+            details: subErr.message,
+          },
+          { status: 500 }
+        )
+      }
     }
 
     return NextResponse.json({
