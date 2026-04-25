@@ -1,10 +1,10 @@
 'use client'
 
-import { useState, useEffect, useMemo, Suspense } from 'react'
+import { useState, useEffect, useMemo, useCallback, Suspense } from 'react'
 import Link from 'next/link'
 import { useSearchParams, useRouter, usePathname } from 'next/navigation'
 import YladaAreaShell from './YladaAreaShell'
-import { getYladaAreaPathPrefix } from '@/config/ylada-areas'
+import { getYladaAreaConfig, getYladaAreaPathPrefix } from '@/config/ylada-areas'
 import {
   BIBLIOTECA_SEGMENTOS,
   BIBLIOTECA_SITUACOES,
@@ -76,6 +76,25 @@ interface BibliotecaItemRow {
   sort_order: number
 }
 
+/** Caminho do funil público (`/l/...`) a partir da resposta do generate. */
+function funnelPathFromGeneratePayload(payload: { slug?: string; url?: string }): string | null {
+  if (typeof payload.slug === 'string' && payload.slug.trim()) {
+    return `/l/${payload.slug.trim()}`
+  }
+  if (typeof payload.url === 'string' && payload.url.includes('/l/')) {
+    try {
+      const base = typeof window !== 'undefined' ? window.location.origin : 'http://localhost'
+      const u = new URL(payload.url, base)
+      if (u.pathname.startsWith('/l/')) {
+        return `${u.pathname}${u.search || ''}`
+      }
+    } catch {
+      /* ignore */
+    }
+  }
+  return null
+}
+
 function labelTipoBibliotecaItem(tipo: string): string {
   const t = (tipo || '').toLowerCase()
   if (t === 'calculadora') return 'Calculadora'
@@ -98,9 +117,10 @@ function BibliotecaCard({
   linksPath,
   creatingId,
   setCreatingId,
-  setLinkCriado,
+  onLinkCreated,
   variant,
   segmentCode,
+  apiSegment,
   getCardMeta: getMeta,
   getTemaLabel,
   getQuandoUsar,
@@ -112,9 +132,15 @@ function BibliotecaCard({
   linksPath: string
   creatingId: string | null
   setCreatingId: (id: string | null) => void
-  setLinkCriado: (v: { id: string; url: string; slug: string; titulo: string; tema?: string } | null) => void
+  /**
+   * Após criar o link: abre o funil público `/l/{slug}` (navegação completa, fiável no localhost);
+   * se não houver slug, cai na página de edição.
+   */
+  onLinkCreated: (linkId: string, payload: { slug?: string; url?: string }) => void
   variant: 'default' | 'sugestao' | 'comece'
   segmentCode?: BibliotecaSegmentCode | null
+  /** segment da área YLADA (coluna ylada_links.segment + perfil Noel), alinhado ao Noel e às outras áreas. */
+  apiSegment: string | null
   /** Selo para "Sugestões para hoje" (ex: "🔥 Mais usado"). */
   badge?: { icon: string; label: string }
   getCardMeta: (i: BibliotecaItemRow) => { tempo: string; perguntas: string }
@@ -123,6 +149,7 @@ function BibliotecaCard({
   getTituloAdaptado: (tema: string, seg: BibliotecaSegmentCode | null) => string | null
   isTemaMaisUsado: (t: string) => boolean
 }) {
+  const [criarErro, setCriarErro] = useState<string | null>(null)
   const { tempo, perguntas } = getMeta(item)
   const tituloExibido = (segmentCode && getTituloAdaptadoFn(item.tema, segmentCode)) || item.titulo
   const mostraMaisUsado = item.tipo === 'quiz' && isTemaMaisUsado(item.tema)
@@ -131,25 +158,40 @@ function BibliotecaCard({
 
   const handleUse = async () => {
     setCreatingId(item.id)
+    setCriarErro(null)
     try {
+      const body: Record<string, unknown> = {
+        flow_id: item.flow_id ?? 'diagnostico_risco',
+        biblioteca_template_id: item.template_id || undefined,
+        interpretacao: { tema: item.tema, objetivo: 'captar' },
+        title: item.titulo,
+      }
+      const segmentFromMeta =
+        item.meta && typeof (item.meta as { segment_code?: unknown }).segment_code === 'string'
+          ? String((item.meta as { segment_code: string }).segment_code).trim()
+          : ''
+      const segmentToSend = (apiSegment || segmentFromMeta || '').trim() || null
+      if (segmentToSend) body.segment = segmentToSend
       const res = await fetch('/api/ylada/links/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({
-          flow_id: item.flow_id ?? 'diagnostico_risco',
-          biblioteca_template_id: item.template_id || undefined,
-          interpretacao: { tema: item.tema, objetivo: 'captar' },
-          title: item.titulo,
-        }),
+        body: JSON.stringify(body),
       })
-      const data = await res.json()
-      if (data?.success && data?.data?.id) {
-        const base = typeof window !== 'undefined' ? window.location.origin : ''
-        const url = data.data.url || `${base}/l/${data.data.slug}`
-        setLinkCriado({ id: data.data.id, url, slug: data.data.slug, titulo: item.titulo, tema: item.tema })
-      } else if (data?.success && data?.data?.url) {
-        window.location.href = `${linksPath}?created=1`
+      let data: Record<string, unknown> = {}
+      try {
+        data = (await res.json()) as Record<string, unknown>
+      } catch {
+        setCriarErro('Resposta inválida do servidor. Tenta outra vez.')
+        return
+      }
+      const payload = data?.data as { id?: string; url?: string; slug?: string } | undefined
+      if (data?.success && payload?.id) {
+        onLinkCreated(payload.id, payload)
+      } else if (data?.success && typeof payload?.url === 'string') {
+        const funnel = funnelPathFromGeneratePayload(payload)
+        if (funnel && typeof window !== 'undefined') window.location.assign(funnel)
+        else window.location.href = linksPath
       } else if (data?.limit_reached && typeof data?.message === 'string' && data.message.trim()) {
         try {
           if (data.limit_type === 'active_links') {
@@ -165,10 +207,18 @@ function BibliotecaCard({
         }
         window.location.href = linksPath
       } else {
-        window.location.href = `${linksPath}?tema=${encodeURIComponent(item.tema)}&flow_id=${item.flow_id ?? 'diagnostico_risco'}`
+        const errMsg =
+          typeof data.error === 'string'
+            ? data.error
+            : typeof data.message === 'string'
+              ? data.message
+              : !res.ok
+                ? `Erro ${res.status} ao criar o link.`
+                : 'Não foi possível criar o link.'
+        setCriarErro(errMsg)
       }
     } catch {
-      window.location.href = `${linksPath}?tema=${encodeURIComponent(item.tema)}&flow_id=${item.flow_id ?? 'diagnostico_risco'}`
+      setCriarErro('Erro de rede. Verifica a ligação e tenta de novo.')
     } finally {
       setCreatingId(null)
     }
@@ -251,16 +301,23 @@ function BibliotecaCard({
               📈 Alta taxa de conversa
             </span>
           )}
-          <button
-            type="button"
-            disabled={!!creatingId}
-            onClick={handleUse}
-            className={`rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors disabled:opacity-50 ${
-              isSugestao ? 'bg-amber-600 hover:bg-amber-700' : 'bg-sky-600 hover:bg-sky-700'
-            }`}
-          >
-            {creatingId === item.id ? 'Criando...' : 'Usar esse'}
-          </button>
+          <div className="flex flex-col items-end gap-1">
+            <button
+              type="button"
+              disabled={!!creatingId}
+              onClick={handleUse}
+              className={`rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors disabled:opacity-50 ${
+                isSugestao ? 'bg-amber-600 hover:bg-amber-700' : 'bg-sky-600 hover:bg-sky-700'
+              }`}
+            >
+              {creatingId === item.id ? 'Criando...' : 'Usar esse'}
+            </button>
+            {criarErro ? (
+              <p className="max-w-[14rem] text-right text-xs text-red-600" role="alert">
+                {criarErro}
+              </p>
+            ) : null}
+          </div>
         </div>
       </div>
     </article>
@@ -287,6 +344,11 @@ function BibliotecaPageContentInner({
 }: BibliotecaPageContentProps) {
   const prefix = getYladaAreaPathPrefix(areaCodigo)
   const linksPath = `${prefix}/links`
+  /** Mesmo `segment` que o Noel envia ao generate — grava em ylada_links e alinha WhatsApp/perfil. */
+  const segmentForLinkGenerate = useMemo(() => {
+    const code = (areaCodigo || '').toLowerCase().trim()
+    return getYladaAreaConfig(code)?.segment_code ?? null
+  }, [areaCodigo])
 
   const [segmentoFiltro, setSegmentoFiltro] = useState<BibliotecaSegmentCode | ''>('')
   const [temaFiltro, setTemaFiltro] = useState<string>('')
@@ -297,8 +359,7 @@ function BibliotecaPageContentInner({
   const [items, setItems] = useState<BibliotecaItemRow[]>([])
   const [loading, setLoading] = useState(true)
   const [creatingId, setCreatingId] = useState<string | null>(null)
-  const [linkCriado, setLinkCriado] = useState<{ id: string; url: string; slug: string; titulo: string; tema?: string } | null>(null)
-  const [copiado, setCopiado] = useState(false)
+  const [meusLinksRefreshTick, setMeusLinksRefreshTick] = useState(0)
   const [progressao, setProgressao] = useState<{
     passo1: boolean
     passo2: boolean
@@ -309,6 +370,7 @@ function BibliotecaPageContentInner({
   const [meusLinks, setMeusLinks] = useState<
     Array<{ id: string; slug: string; title: string | null; url: string; theme_raw?: string | null; stats?: { diagnosis_count?: number } }>
   >([])
+  const [ideiaLinkErro, setIdeiaLinkErro] = useState<string | null>(null)
   const [linkQrModal, setLinkQrModal] = useState<{
     id: string
     slug: string
@@ -323,6 +385,19 @@ function BibliotecaPageContentInner({
   const router = useRouter()
   const pathname = usePathname()
   const linhaBibliotecaQueryRaw = rawEsteticaBibliotecaLinhaFromSearchParams(searchParams)
+
+  const navigateAfterLinkCreated = useCallback(
+    (linkId: string, payload: { slug?: string; url?: string }) => {
+      setMeusLinksRefreshTick((n) => n + 1)
+      const funnel = funnelPathFromGeneratePayload(payload)
+      if (funnel && typeof window !== 'undefined') {
+        window.location.assign(funnel)
+        return
+      }
+      router.push(`${linksPath}/editar/${linkId}`)
+    },
+    [router, linksPath]
+  )
 
   /** Só faz sentido escolher segmento se não há um fixo pelo perfil/URL ou se é admin/suporte. */
   const isPrivilegedBiblioteca = !!(userProfile?.is_admin || userProfile?.is_support)
@@ -382,7 +457,7 @@ function BibliotecaPageContentInner({
       })
       .catch(() => {})
     return () => { cancelled = true }
-  }, [linkCriado])
+  }, [meusLinksRefreshTick])
 
   const isEsteticaLinksBiblioteca =
     (areaCodigo || '').toLowerCase().trim() === 'estetica' &&
@@ -612,25 +687,39 @@ function BibliotecaPageContentInner({
     const handleCriarDaIdeia = async () => {
       if (itemIdeia) {
         setCreatingId(`ideia-${ideiaDoDia.tema}`)
+        setIdeiaLinkErro(null)
         try {
+          const body: Record<string, unknown> = {
+            flow_id: itemIdeia.flow_id ?? 'diagnostico_risco',
+            biblioteca_template_id: itemIdeia.template_id || undefined,
+            interpretacao: { tema: itemIdeia.tema, objetivo: 'captar' },
+            title: tituloParaLink,
+          }
+          const metaI = itemIdeia.meta as { segment_code?: unknown } | null | undefined
+          const segMeta =
+            metaI && typeof metaI.segment_code === 'string' ? metaI.segment_code.trim() : ''
+          const segIdeia = (segmentForLinkGenerate || segMeta || '').trim()
+          if (segIdeia) body.segment = segIdeia
           const res = await fetch('/api/ylada/links/generate', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             credentials: 'include',
-            body: JSON.stringify({
-              flow_id: itemIdeia.flow_id ?? 'diagnostico_risco',
-              biblioteca_template_id: itemIdeia.template_id || undefined,
-              interpretacao: { tema: itemIdeia.tema, objetivo: 'captar' },
-              title: tituloParaLink,
-            }),
+            body: JSON.stringify(body),
           })
-          const data = await res.json()
-          if (data?.success && data?.data?.id) {
-            const base = typeof window !== 'undefined' ? window.location.origin : ''
-            const url = data.data.url || `${base}/l/${data.data.slug}`
-            setLinkCriado({ id: data.data.id, url, slug: data.data.slug, titulo: tituloParaLink, tema: ideiaDoDia.tema })
-          } else if (data?.success && data?.data?.url) {
-            window.location.href = `${linksPath}?created=1`
+          let data: Record<string, unknown> = {}
+          try {
+            data = (await res.json()) as Record<string, unknown>
+          } catch {
+            setIdeiaLinkErro('Resposta inválida do servidor. Tenta outra vez.')
+            return
+          }
+          const payload = data?.data as { id?: string; url?: string; slug?: string } | undefined
+          if (data?.success && payload?.id) {
+            navigateAfterLinkCreated(payload.id, payload)
+          } else if (data?.success && typeof payload?.url === 'string') {
+            const funnel = funnelPathFromGeneratePayload(payload)
+            if (funnel && typeof window !== 'undefined') window.location.assign(funnel)
+            else window.location.href = linksPath
           } else if (data?.limit_reached && typeof data?.message === 'string' && data.message.trim()) {
             try {
               if (data.limit_type === 'active_links') {
@@ -646,15 +735,23 @@ function BibliotecaPageContentInner({
             }
             window.location.href = linksPath
           } else {
-            window.location.href = `${linksPath}?tema=${encodeURIComponent(ideiaDoDia.tema)}&flow_id=${itemIdeia.flow_id ?? 'diagnostico_risco'}`
+            const errMsg =
+              typeof data.error === 'string'
+                ? data.error
+                : typeof data.message === 'string'
+                  ? data.message
+                  : !res.ok
+                    ? `Erro ${res.status} ao criar o link.`
+                    : 'Não foi possível criar o link.'
+            setIdeiaLinkErro(errMsg)
           }
         } catch {
-          window.location.href = `${linksPath}?tema=${encodeURIComponent(ideiaDoDia.tema)}&flow_id=${itemIdeia.flow_id ?? 'diagnostico_risco'}`
+          setIdeiaLinkErro('Erro de rede. Verifica a ligação e tenta de novo.')
         } finally {
           setCreatingId(null)
         }
       } else {
-        window.location.href = `${linksPath}?tema=${encodeURIComponent(ideiaDoDia.tema)}&flow_id=diagnostico_risco`
+        setIdeiaLinkErro('Modelo do dia indisponível na lista. Escolhe um cartão abaixo.')
       }
     }
     return (
@@ -671,15 +768,22 @@ function BibliotecaPageContentInner({
             </p>
           ) : null}
           <p className="text-sm text-gray-700 line-clamp-2 sm:line-clamp-1">{ideiaDoDia.texto}</p>
+          {ideiaLinkErro ? (
+            <p className="mt-2 text-xs text-red-600" role="alert">
+              {ideiaLinkErro}
+            </p>
+          ) : null}
         </div>
-        <button
-          type="button"
-          onClick={handleCriarDaIdeia}
-          disabled={!!creatingId}
-          className="shrink-0 rounded-lg bg-sky-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-sky-700 disabled:opacity-60 transition-colors"
-        >
-          {creatingId === `ideia-${ideiaDoDia.tema}` ? 'Criando...' : 'Usar esse'}
-        </button>
+        <div className="flex shrink-0 flex-col items-stretch sm:items-end gap-1">
+          <button
+            type="button"
+            onClick={handleCriarDaIdeia}
+            disabled={!!creatingId}
+            className="rounded-lg bg-sky-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-sky-700 disabled:opacity-60 transition-colors"
+          >
+            {creatingId === `ideia-${ideiaDoDia.tema}` ? 'Criando...' : 'Usar esse'}
+          </button>
+        </div>
       </div>
     )
   }
@@ -1018,9 +1122,10 @@ function BibliotecaPageContentInner({
                         linksPath={linksPath}
                         creatingId={creatingId}
                         setCreatingId={setCreatingId}
-                        setLinkCriado={setLinkCriado}
+                        onLinkCreated={navigateAfterLinkCreated}
                         variant="comece"
                         segmentCode={segmentoFiltro || null}
+                        apiSegment={segmentForLinkGenerate}
                         getCardMeta={getCardMeta}
                         getTemaLabel={getTemaLabel}
                         getQuandoUsar={getQuandoUsar}
@@ -1055,9 +1160,10 @@ function BibliotecaPageContentInner({
                             linksPath={linksPath}
                             creatingId={creatingId}
                             setCreatingId={setCreatingId}
-                            setLinkCriado={setLinkCriado}
+                            onLinkCreated={navigateAfterLinkCreated}
                             variant="default"
                             segmentCode={segmentoFiltro || null}
+                            apiSegment={segmentForLinkGenerate}
                             getCardMeta={getCardMeta}
                             getTemaLabel={getTemaLabel}
                             getQuandoUsar={getQuandoUsar}
@@ -1096,9 +1202,10 @@ function BibliotecaPageContentInner({
                               linksPath={linksPath}
                               creatingId={creatingId}
                               setCreatingId={setCreatingId}
-                              setLinkCriado={setLinkCriado}
+                              onLinkCreated={navigateAfterLinkCreated}
                               variant="default"
                               segmentCode={segmentoFiltro || null}
+                              apiSegment={segmentForLinkGenerate}
                               getCardMeta={getCardMeta}
                               getTemaLabel={getTemaLabel}
                               getQuandoUsar={getQuandoUsar}
@@ -1125,9 +1232,10 @@ function BibliotecaPageContentInner({
                         linksPath={linksPath}
                         creatingId={creatingId}
                         setCreatingId={setCreatingId}
-                        setLinkCriado={setLinkCriado}
+                        onLinkCreated={navigateAfterLinkCreated}
                         variant="default"
                         segmentCode={segmentoFiltro || null}
+                        apiSegment={segmentForLinkGenerate}
                         getCardMeta={getCardMeta}
                         getTemaLabel={getTemaLabel}
                         getQuandoUsar={getQuandoUsar}
@@ -1319,67 +1427,6 @@ function BibliotecaPageContentInner({
           </div>
         )}
 
-        {linkCriado && (
-          <div
-            className="fixed inset-0 z-50 flex items-end justify-center sm:items-center sm:p-4 bg-black/50"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="biblioteca-link-pronto-title"
-            onClick={() => setLinkCriado(null)}
-          >
-            <div
-              className="w-full max-w-md bg-white rounded-t-2xl sm:rounded-2xl shadow-xl p-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:p-5 sm:max-h-[min(90vh,520px)] sm:overflow-y-auto"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-gray-200 sm:hidden" aria-hidden />
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <h3 id="biblioteca-link-pronto-title" className="text-base font-semibold text-gray-900">
-                    Link pronto
-                  </h3>
-                  <p className="text-sm text-gray-600 mt-1 line-clamp-3">{linkCriado.titulo}</p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setLinkCriado(null)}
-                  className="shrink-0 rounded-lg px-2 py-1 text-sm text-gray-500 hover:bg-gray-100 hover:text-gray-800"
-                  aria-label="Fechar"
-                >
-                  ✕
-                </button>
-              </div>
-              <p className="text-xs text-gray-500 mt-3 mb-2">O que você quer fazer?</p>
-              <div className="flex flex-col gap-2">
-                <a
-                  href={linkCriado.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-2 rounded-xl bg-sky-600 px-4 py-3 text-sm font-medium text-white hover:bg-sky-700"
-                >
-                  Ver preview
-                </a>
-                <button
-                  type="button"
-                  onClick={() => {
-                    navigator.clipboard.writeText(linkCriado!.url)
-                    setCopiado(true)
-                    setTimeout(() => setCopiado(false), 2000)
-                  }}
-                  className="flex items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm font-medium text-gray-800 hover:bg-gray-50"
-                >
-                  {copiado ? '✓ URL copiada' : 'Copiar URL'}
-                </button>
-                <Link
-                  href={`${linksPath}/editar/${linkCriado.id}`}
-                  className="flex items-center justify-center rounded-xl border border-sky-200 bg-sky-50 px-4 py-3 text-sm font-medium text-sky-800 hover:bg-sky-100"
-                  onClick={() => setLinkCriado(null)}
-                >
-                  Editar link
-                </Link>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
   )
 
