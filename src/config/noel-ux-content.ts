@@ -24,6 +24,8 @@ export type NoelArea =
   | 'pro_lideres'
   /** Mentor no painel Pro Estética Corporal (/api/pro-estetica-corporal/noel). */
   | 'pro_estetica_corporal'
+  /** Mentor no painel Pro Estética Capilar (/api/pro-estetica-capilar/noel). */
+  | 'pro_estetica_capilar'
 
 export interface NoelUxContent {
   welcomeMessage: string
@@ -186,6 +188,40 @@ const PRO_ESTETICA_CORPORAL_SUGGESTIONS = [
   },
 ]
 
+/** Pro Estética Capilar: sem parágrafo de boas-vindas longo — atalhos abaixo. */
+const PRO_ESTETICA_CAPILAR_SUGGESTIONS = [
+  {
+    label: 'Quero atrair clientes',
+    prompt:
+      'Quero atrair mais clientes para estética capilar. Me guia no próximo passo prático (Instagram, WhatsApp ou link de diagnóstico YLADA, sem promessa de resultado de cabelo).',
+  },
+  {
+    label: 'Quero fechar sessões',
+    prompt:
+      'Quero fechar mais sessões e marcar a primeira visita. Me ajuda com objeções de preço e tempo e o próximo passo no WhatsApp, em tom consultivo, para nicho capilar.',
+  },
+  {
+    label: 'Quero reter clientes',
+    prompt:
+      'Quero reter clientes e manter a recorrência (cronograma, retorno). Me dá um plano simples de acompanhamento e mensagens curtas entre sessões.',
+  },
+  {
+    label: 'Pós-atendimento',
+    prompt:
+      'Preciso de mensagens de pós-atendimento e acompanhamento entre sessões para estética capilar (próximo passo claro, sem pressão).',
+  },
+  {
+    label: 'Link de diagnóstico',
+    prompt:
+      'Quero criar ou ajustar um link YLADA de diagnóstico / triagem capilar. Me guia no que a cliente vê, nas perguntas e num texto curto para partilhar o link, com pedido de permissão.',
+  },
+  {
+    label: 'Reativar quem sumiu',
+    prompt:
+      'Tenho clientes que sumiram. Quero mensagens para reativar sem ser insistente, e como encaixar um link YLADA (mensagem da dona para a cliente, sem Google Forms).',
+  },
+]
+
 const NOEL_PRO_LIDERES_WELCOME = `Sou o **Noel** no teu espaço **Pro Líderes**.
 
 Estou focado na operação de campo: **contato**, **WhatsApp**, **links YLADA** e **scripts** para tu e a tua equipe — no contexto do teu operador (ex.: Herbalife / h‑líder).
@@ -275,13 +311,18 @@ const NOEL_UX_BY_AREA: Record<NoelArea, NoelUxContentWithoutWelcome> = {
     placeholder: 'Escreva o que precisa…',
     placeholderExample: 'Ex.: legenda para reel ou resposta no WhatsApp',
   },
+  pro_estetica_capilar: {
+    suggestions: PRO_ESTETICA_CAPILAR_SUGGESTIONS,
+    placeholder: 'Escreva o que precisa…',
+    placeholderExample: 'Ex.: script WhatsApp pós-sessão ou reativação',
+  },
 }
 
 export function getNoelUxContent(area: NoelArea): NoelUxContent {
   const row = NOEL_UX_BY_AREA[area] ?? DEFAULT_NOEL_UX_ROW
   let welcomeMessage = NOEL_UNIVERSAL_WELCOME
   if (area === 'pro_lideres') welcomeMessage = NOEL_PRO_LIDERES_WELCOME
-  if (area === 'pro_estetica_corporal') welcomeMessage = ''
+  if (area === 'pro_estetica_corporal' || area === 'pro_estetica_capilar') welcomeMessage = ''
   return {
     welcomeMessage,
     ...row,

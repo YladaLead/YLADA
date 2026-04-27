@@ -30,12 +30,15 @@ export default function ProEsteticaCapilarSidebar() {
                   <Link
                     key={item.key}
                     href={href}
-                    className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium ${
+                    className={`flex min-h-[44px] items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium ${
                       active ? 'bg-blue-50 text-blue-800' : 'text-gray-700 hover:bg-gray-100'
                     }`}
                   >
                     <span aria-hidden>{item.icon}</span>
-                    {item.label}
+                    <div className="min-w-0">
+                      <p className="truncate">{item.label}</p>
+                      {item.hint ? <p className="truncate text-[11px] font-medium text-gray-500">{item.hint}</p> : null}
+                    </div>
                   </Link>
                 )
               })}

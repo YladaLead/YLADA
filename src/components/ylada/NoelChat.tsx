@@ -362,7 +362,11 @@ interface NoelChatProps {
 }
 
 function isProLideresNoelApiPath(path: string | undefined): boolean {
-  return Boolean(path?.includes('/pro-lideres/noel') || path?.includes('/pro-estetica-corporal/noel'))
+  return Boolean(
+    path?.includes('/pro-lideres/noel') ||
+      path?.includes('/pro-estetica-corporal/noel') ||
+      path?.includes('/pro-estetica-capilar/noel')
+  )
 }
 
 export default function NoelChat({
@@ -390,13 +394,20 @@ export default function NoelChat({
   const resolvedChatApi = chatApiPath ?? '/api/ylada/noel'
   const proLideresPayload = isProLideresNoelApiPath(resolvedChatApi)
   const proLideresPainelCatalogHref =
-    area === 'pro_estetica_corporal' ? '/pro-estetica-corporal/painel/catalogo' : '/pro-lideres/painel/catalogo'
+    area === 'pro_estetica_corporal'
+      ? '/pro-estetica-corporal/painel/catalogo'
+      : area === 'pro_estetica_capilar'
+        ? '/pro-estetica-capilar/painel/biblioteca-links'
+        : '/pro-lideres/painel/catalogo'
   /** Guia «publicar na biblioteca» + PATCH link-meta: só o Noel do painel Pro Líderes clássico. */
   const proLideresLeaderLibraryFlow = Boolean(resolvedChatApi?.includes('/pro-lideres/noel'))
   /** Links da matriz YLADA para esteticista ficam em /pt/estetica, não na rota do painel embed. */
   /** Pro Líderes: links do dono ficam na matriz central `/pt/links`, não em `/pt/pro_lideres/...`. */
   const yladaMatrixPathPrefix =
-    area === 'pro_estetica_corporal' || resolvedChatApi?.includes('/pro-estetica-corporal/noel')
+    area === 'pro_estetica_corporal' ||
+    area === 'pro_estetica_capilar' ||
+    resolvedChatApi?.includes('/pro-estetica-corporal/noel') ||
+    resolvedChatApi?.includes('/pro-estetica-capilar/noel')
       ? getYladaAreaPathPrefix('estetica')
       : area === 'pro_lideres' || resolvedChatApi?.includes('/pro-lideres/noel')
         ? getYladaAreaPathPrefix('ylada')
