@@ -32,7 +32,7 @@ export default function ProEsteticaCorporalAreaShell({
       user?.user_metadata?.full_name ||
       user?.user_metadata?.name ||
       user?.email?.split('@')[0] ||
-      'Profissional'
+      'Conta'
   const userName = displayName
   const initials = previewWithoutLogin
     ? 'PV'
@@ -85,7 +85,7 @@ export default function ProEsteticaCorporalAreaShell({
                 href={PAINEL_HOME}
                 title={
                   operationLabel
-                    ? `Pro Estética Corporal — ${isLeaderWorkspace ? 'Profissional' : 'Equipe'} — ${operationLabel}`
+                    ? `Pro Estética Corporal — ${isLeaderWorkspace ? 'Sua clínica' : 'Equipe'} — ${operationLabel}`
                     : undefined
                 }
                 className="flex min-w-0 flex-col gap-0.5 touch-manipulation sm:flex-row sm:items-center sm:gap-2"
@@ -105,7 +105,7 @@ export default function ProEsteticaCorporalAreaShell({
                       isLeaderWorkspace ? 'text-blue-800' : 'text-emerald-700'
                     }`}
                   >
-                    {isLeaderWorkspace ? 'Teu espaço' : 'Equipe'}
+                    {isLeaderWorkspace ? 'Tua clínica' : 'Equipe'}
                   </span>
                   {operationLabel ? (
                     <span className="hidden max-w-[10rem] truncate text-xs text-gray-400 lg:inline">

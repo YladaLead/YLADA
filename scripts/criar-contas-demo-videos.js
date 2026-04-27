@@ -2,7 +2,7 @@
 
 /**
  * Script para criar contas demo para vídeos de demonstração da plataforma.
- * Cria: demo.med, demo.psi, demo.vendedor (vendas em gerais), demo.nutra, demo.nutri, demo.coach, demo.estetica, demo.perfumaria, demo.joias
+ * Cria: demo.med, demo.psi, demo.vendedor (vendas em gerais), demo.nutra, demo.nutri, demo.coach, demo.estetica, demo.capilar, demo.perfumaria, demo.joias
  * Para cada conta: perfil + Noel + assinatura **trial** na área do segmento (evita limite freemium de 1 link ativo nas demos).
  * Senha: Demo@2025!
  *
@@ -189,6 +189,35 @@ const DEMO_ACCOUNTS = [
         whatsapp: '19997230912',
         countryCode: 'BR',
         temas_atuacao: ['pele', 'skincare', 'autocuidado', 'retencao']
+      }
+    }
+  },
+  {
+    email: 'demo.capilar@ylada.app',
+    nome: 'Demo Pro Estética Capilar',
+    perfil: 'estetica',
+    noelProfile: {
+      segment: 'estetica',
+      profile_type: 'liberal',
+      profession: 'estetica',
+      category: 'estetica',
+      tempo_atuacao_anos: 4,
+      dor_principal: 'agenda_vazia',
+      prioridade_atual: 'Recorrência e conversão no nicho capilar',
+      fase_negocio: 'em_crescimento',
+      metas_principais: 'Preencher agenda com protocolos e fidelizar',
+      objetivos_curto_prazo: 'Padronizar triagem e acompanhamento pós-serviço',
+      modelo_atuacao: ['consultorio'],
+      capacidade_semana: 20,
+      ticket_medio: 160,
+      modelo_pagamento: 'particular',
+      canais_principais: ['instagram', 'whatsapp'],
+      rotina_atual_resumo: 'Foco em estética capilar, quero fluxos e links alinhados ao Pro Estética',
+      area_specific: {
+        nome: 'Demo Pro Estética Capilar',
+        whatsapp: '19997230912',
+        countryCode: 'BR',
+        temas_atuacao: ['couro_cabeludo', 'cronograma_capilar', 'queda', 'recorrencia'],
       }
     }
   },
@@ -531,7 +560,8 @@ async function main() {
   console.log('   demo.psi@ylada.app       → Psicólogo (liberal)')
   console.log('   demo.vendedor@ylada.app   → Vendas em gerais (seller)')
   console.log('   demo.nutra@ylada.app      → Nutra')
-  console.log('   demo.estetica@ylada.app   → Esteticista (liberal)')
+  console.log('   demo.estetica@ylada.app   → Esteticista (liberal) — /pt/estetica')
+  console.log('   demo.capilar@ylada.app     → Pro Estética capilar (perfil) — /pro-estetica-capilar/entrar')
   console.log('   demo.perfumaria@ylada.app → Vendedor Perfumaria')
   console.log('   demo.joias@ylada.app      → Joias e bijuterias')
   console.log('   demo.nutri@ylada.app      → Nutricionista')

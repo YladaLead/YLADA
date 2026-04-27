@@ -167,12 +167,12 @@ const PRO_ESTETICA_CORPORAL_SUGGESTIONS = [
   {
     label: 'Quero reter clientes',
     prompt:
-      'Quero reter clientes e manter a recorrência de sessões. Me dá um plano simples de follow-up e mensagens curtas entre sessões.',
+      'Quero reter clientes e manter a recorrência de sessões. Me dá um plano simples de acompanhamento e mensagens curtas entre sessões.',
   },
   {
     label: 'Pós-atendimento',
     prompt:
-      'Preciso de mensagens de pós-atendimento e follow-up entre sessões para estética corporal (próximo passo claro, sem pressão).',
+      'Preciso de mensagens de pós-atendimento e acompanhamento entre sessões para estética corporal (próximo passo claro, sem pressão).',
   },
   {
     label: 'Link de diagnóstico',

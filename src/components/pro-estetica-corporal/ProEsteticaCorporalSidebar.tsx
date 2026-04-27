@@ -34,7 +34,7 @@ export default function ProEsteticaCorporalSidebar({
       user?.user_metadata?.full_name ||
       user?.user_metadata?.name ||
       user?.email?.split('@')[0] ||
-      'Profissional'
+      'Conta'
 
   const initials = previewWithoutLogin
     ? 'PV'

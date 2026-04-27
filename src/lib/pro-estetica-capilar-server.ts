@@ -50,8 +50,11 @@ export function proEsteticaCapilarAutoProvisionEnabled(): boolean {
   return process.env.NODE_ENV === 'development'
 }
 
-/** Conta demo capilar (separada de corporal / Pro Líderes). */
-const PRO_ESTETICA_CAPILAR_BOOTSTRAP_EMAILS_BUILTIN = ['demo@proesteticacapilar.com'] as const
+/** Conta demo capilar (separada de corporal / Pro Líderes) + demo vídeos matriz YLADA. */
+const PRO_ESTETICA_CAPILAR_BOOTSTRAP_EMAILS_BUILTIN = [
+  'demo@proesteticacapilar.com',
+  'demo.capilar@ylada.app',
+] as const
 
 /** Lista: built-in + `PRO_ESTETICA_CAPILAR_BOOTSTRAP_LEADER_EMAILS` (vírgulas). */
 export function isProEsteticaCapilarBootstrapLeaderEmail(email: string | undefined | null): boolean {

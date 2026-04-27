@@ -5,12 +5,46 @@ import type { LeaderTenantRow } from '@/types/leader-tenant'
 import PhoneInputWithCountry from '@/components/PhoneInputWithCountry'
 import { inferCountryIsoFromLeadingDigits } from '@/components/CountrySelector'
 
+export type ProLideresPerfilCopyProfile = 'pro_lideres' | 'estetica_clinica'
+
+const PERFIL_COPY: Record<
+  ProLideresPerfilCopyProfile,
+  {
+    readOnlyMessage: string
+    teamNameLabel: string
+    teamNamePlaceholder: string
+    displayNamePlaceholder: string
+    focusPlaceholder: string
+  }
+> = {
+  pro_lideres: {
+    readOnlyMessage:
+      'Só o líder responsável altera os dados desta operação. A sua conta entra como equipe neste espaço.',
+    teamNameLabel: 'Nome da operação/equipe',
+    teamNamePlaceholder: 'Ex.: Equipe Sul',
+    displayNamePlaceholder: 'Como a equipe vê o teu nome',
+    focusPlaceholder: 'Objetivos da operação, tom de mensagens, prioridades…',
+  },
+  estetica_clinica: {
+    readOnlyMessage:
+      'Só o dono ou a gestão da clínica altera estes dados. A tua conta entra como equipe neste espaço.',
+    teamNameLabel: 'Nome da clínica ou equipe',
+    teamNamePlaceholder: 'Ex.: Clínica Nome + cidade',
+    displayNamePlaceholder: 'Como a equipe e os clientes veem o teu nome',
+    focusPlaceholder: 'Objetivos da clínica, tom de mensagens, prioridades comerciais…',
+  },
+}
+
 export function ProLideresPerfilForm({
   tenantApiPath = '/api/pro-lideres/tenant',
+  copyProfile = 'pro_lideres',
 }: {
   /** ex.: `/api/pro-estetica-corporal/tenant` */
   tenantApiPath?: string
+  /** Textos alinhados ao contexto: rede (Pro Líderes) vs clínica (Pro Estética). */
+  copyProfile?: ProLideresPerfilCopyProfile
 } = {}) {
+  const c = PERFIL_COPY[copyProfile]
   const [tenant, setTenant] = useState<LeaderTenantRow | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -115,7 +149,7 @@ export function ProLideresPerfilForm({
       {savedAt && <p className="text-sm font-medium text-green-700">Guardado às {savedAt}.</p>}
       {!canEditTenantProfile && (
         <p className="rounded-lg border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm text-gray-700">
-          Só o líder responsável altera os dados desta operação. A sua conta entra como equipe neste espaço.
+          {c.readOnlyMessage}
         </p>
       )}
 
@@ -127,19 +161,19 @@ export function ProLideresPerfilForm({
             className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-600"
             value={displayName}
             onChange={(e) => setDisplayName(e.target.value)}
-            placeholder="Como a equipe vê o teu nome"
+            placeholder={c.displayNamePlaceholder}
             maxLength={500}
             autoComplete="name"
           />
         </label>
         <label className="block sm:col-span-2">
-          <span className="mb-1 block text-sm font-medium text-gray-700">Nome da operação/equipe</span>
+          <span className="mb-1 block text-sm font-medium text-gray-700">{c.teamNameLabel}</span>
           <input
             disabled={!canEditTenantProfile}
             className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-600"
             value={teamName}
             onChange={(e) => setTeamName(e.target.value)}
-            placeholder="Ex.: Equipe Sul"
+            placeholder={c.teamNamePlaceholder}
             maxLength={500}
           />
         </label>
@@ -176,7 +210,7 @@ export function ProLideresPerfilForm({
             className="min-h-[120px] w-full rounded-lg border border-gray-300 px-3 py-2.5 text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-600"
             value={focusNotes}
             onChange={(e) => setFocusNotes(e.target.value)}
-            placeholder="Objetivos da operação, tom de mensagens, prioridades…"
+            placeholder={c.focusPlaceholder}
             maxLength={2000}
           />
         </label>

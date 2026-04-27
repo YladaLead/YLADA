@@ -53,7 +53,8 @@ function ContasDemoContent() {
                   ['Nutra', 'demo.nutra@ylada.app', '/pt/nutra/login'],
                   ['Nutricionista', 'demo.nutri@ylada.app', '/pt/nutri/login'],
                   ['Coach', 'demo.coach@ylada.app', '/pt/coach/login'],
-                  ['Esteticista', 'demo.estetica@ylada.app', '/pt/estetica/login'],
+                  ['Esteticista (segmento YLADA /pt)', 'demo.estetica@ylada.app', '/pt/estetica/login'],
+                  ['Pro Estética capilar', 'demo.capilar@ylada.app', '/pro-estetica-capilar/entrar'],
                   ['Perfumaria', 'demo.perfumaria@ylada.app', '/pt/perfumaria/login'],
                   ['Joias e bijuterias', 'demo.joias@ylada.app', '/pt/joias/login'],
                 ].map(([area, email, login]) => (
