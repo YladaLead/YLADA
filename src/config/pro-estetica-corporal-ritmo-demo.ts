@@ -1,6 +1,6 @@
 /**
  * Contas **só Pro Estética corporal** — números ilustrativos na tela Ritmo (demo).
- * Capilar usa outro e-mail: `demo@proesteticacapilar.com` (ver script SQL e bootstrap capilar).
+ * Capilar: números demo em `pro-estetica-capilar-ritmo-demo.ts` (e-mails demo capilar).
  */
 export const PRO_ESTETICA_CORPORAL_RITMO_DEMO_EMAILS = ['demo@proesteticacorporal.com'] as const
 

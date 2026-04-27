@@ -123,6 +123,28 @@ export async function PATCH(request: NextRequest, context: Ctx) {
         : String(body.annual_plan_end).trim().slice(0, 32) || null
   }
 
+  if (body.access_valid_until !== undefined) {
+    patch.access_valid_until =
+      body.access_valid_until == null || body.access_valid_until === ''
+        ? null
+        : String(body.access_valid_until).trim().slice(0, 32) || null
+
+    const { data: curRow } = await supabaseAdmin
+      .from('ylada_estetica_consult_clients')
+      .select('access_valid_until')
+      .eq('id', id)
+      .maybeSingle()
+    const oldV = (curRow as { access_valid_until?: string | null } | null)?.access_valid_until ?? null
+    const newV = patch.access_valid_until ?? null
+    const unchanged =
+      (oldV == null && newV == null) || String(oldV || '') === String(newV || '')
+    if (!unchanged) {
+      patch.access_expiry_reminder_sent_15d = false
+      patch.access_expiry_reminder_sent_7d = false
+      patch.access_expiry_reminder_sent_1d = false
+    }
+  }
+
   if (body.admin_notes !== undefined) {
     patch.admin_notes =
       body.admin_notes == null || body.admin_notes === ''

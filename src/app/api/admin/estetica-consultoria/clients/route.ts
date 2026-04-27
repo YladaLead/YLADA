@@ -54,6 +54,7 @@ export async function POST(request: NextRequest) {
     is_annual_plan?: boolean
     annual_plan_start?: string | null
     annual_plan_end?: string | null
+    access_valid_until?: string | null
     admin_notes?: string | null
   }
   try {
@@ -115,6 +116,11 @@ export async function POST(request: NextRequest) {
       ? null
       : String(body.annual_plan_end).trim().slice(0, 32) || null
 
+  const accessValidUntil =
+    body.access_valid_until == null || body.access_valid_until === ''
+      ? null
+      : String(body.access_valid_until).trim().slice(0, 32) || null
+
   const adminNotes =
     body.admin_notes == null || body.admin_notes === ''
       ? null
@@ -135,6 +141,7 @@ export async function POST(request: NextRequest) {
       is_annual_plan: isAnnual,
       annual_plan_start: annualStart,
       annual_plan_end: annualEnd,
+      access_valid_until: accessValidUntil,
       admin_notes: adminNotes,
       created_by_user_id: user.id,
     })

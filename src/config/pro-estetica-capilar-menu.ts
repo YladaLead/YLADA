@@ -16,6 +16,7 @@ export const PRO_ESTETICA_CAPILAR_MENU_GROUPS: { label: string; items: ProEsteti
       { key: 'visao', label: 'Inicio', path: '', icon: '✨', hint: 'Visao geral' },
       { key: 'noel', label: 'Noel', path: 'noel', icon: '💬', hint: 'Mentor estrategico' },
       { key: 'biblioteca', label: 'Biblioteca e links', path: 'biblioteca-links', icon: '🔗', hint: 'Ferramentas YLADA' },
+      { key: 'resultados', label: 'Ritmo', path: 'resultados', icon: '📈', hint: 'Sua semana' },
       { key: 'scripts', label: 'Scripts', path: 'scripts', icon: '📝', hint: 'Roteiros de conversa' },
       { key: 'captar', label: 'Captar', path: 'captar', icon: '🎯' },
       { key: 'retencao', label: 'Retencao', path: 'retencao', icon: '🔁' },

@@ -1,1 +1,13 @@
-{"version":2,"env":{"NEXT_PUBLIC_BASE_DOMAIN":"ylada.com"}}
+{
+  "version": 2,
+  "env": {
+    "NEXT_PUBLIC_BASE_DOMAIN": "ylada.com"
+  },
+  "crons": [
+    {
+      "path": "/api/cron/estetica-consult-access-reminders",
+      "schedule": "0 12 * * *"
+    }
+  ]
+}
+

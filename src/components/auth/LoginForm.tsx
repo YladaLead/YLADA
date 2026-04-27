@@ -47,6 +47,8 @@ interface LoginFormProps {
   proLideresLogin?: boolean
   /** Login em /pro-estetica-corporal/entrar — mesmo comportamento do Pro Líderes para rotas desta área. */
   proEsteticaCorporalLogin?: boolean
+  /** Login em /pro-estetica-capilar/entrar — destino fixo no painel vertical capilar (não matriz /pt). */
+  proEsteticaCapilarLogin?: boolean
 }
 
 function forgotPasswordHref(perfil: LoginFormPerfil): string {
@@ -68,6 +70,7 @@ export default function LoginForm({
   disableSignUp = false,
   proLideresLogin = false,
   proEsteticaCorporalLogin = false,
+  proEsteticaCapilarLogin = false,
 }: LoginFormProps) {
   const router = useRouter()
   const { getLastVisitedPage, clearLastVisitedPage } = useLastVisitedPage()
@@ -524,7 +527,7 @@ export default function LoginForm({
         // Dono de tenant Pro Líderes / Pro Estética corporal: mesmo que entre por /pt/login, não mandar para onboarding da matriz.
         // Se tem nome+whatsapp mas falta profile_type/profession → perfil-empresarial (ex.: usuárias Nutri migradas).
         // Usuárias da área Nutri (e outras) que já estavam cadastradas: ir para o board (/pt/home) para evitar tela piscando.
-        if (!proLideresLogin && !proEsteticaCorporalLogin && perfil === 'ylada') {
+        if (!proLideresLogin && !proEsteticaCorporalLogin && !proEsteticaCapilarLogin && perfil === 'ylada') {
           let skipYladaMatrixRedirect = false
           try {
             const { data: plTenant } = await supabase
@@ -618,7 +621,8 @@ export default function LoginForm({
             lastPage.startsWith('/en/') ||
             lastPage.startsWith('/es/') ||
             ((proLideresLogin && lastPage.startsWith('/pro-lideres')) ||
-              (proEsteticaCorporalLogin && lastPage.startsWith('/pro-estetica-corporal')))) &&
+              (proEsteticaCorporalLogin && lastPage.startsWith('/pro-estetica-corporal')) ||
+              (proEsteticaCapilarLogin && lastPage.startsWith('/pro-estetica-capilar')))) &&
           !excludedFromRedirect.some(path => lastPage.includes(path)) &&
           lastPage.length > 3 && // Garantir que não é apenas "/pt" ou "/e"
           !lastPage.includes('/checkout') && // Garantir que não é checkout
@@ -633,8 +637,10 @@ export default function LoginForm({
         const preferProWorkspaceDestination =
           proLideresLogin ||
           proEsteticaCorporalLogin ||
+          proEsteticaCapilarLogin ||
           baseRedirectPath.startsWith('/pro-lideres') ||
-          baseRedirectPath.startsWith('/pro-estetica-corporal')
+          baseRedirectPath.startsWith('/pro-estetica-corporal') ||
+          baseRedirectPath.startsWith('/pro-estetica-capilar')
         const finalRedirectPath = preferProWorkspaceDestination
           ? baseRedirectPath
           : isValidRoute
@@ -653,7 +659,7 @@ export default function LoginForm({
                 : '(padrão)'
         )
 
-        if (proLideresLogin || proEsteticaCorporalLogin) {
+        if (proLideresLogin || proEsteticaCorporalLogin || proEsteticaCapilarLogin) {
           try {
             clearLastVisitedPage()
           } catch {

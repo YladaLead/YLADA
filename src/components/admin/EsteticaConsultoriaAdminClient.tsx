@@ -498,6 +498,7 @@ function clientFormDefaults(c: YladaEsteticaConsultClientRow) {
     is_annual_plan: c.is_annual_plan,
     annual_plan_start: c.annual_plan_start ?? '',
     annual_plan_end: c.annual_plan_end ?? '',
+    access_valid_until: c.access_valid_until ?? '',
     admin_notes: c.admin_notes ?? '',
   }
 }
@@ -1116,6 +1117,7 @@ export default function EsteticaConsultoriaAdminClient() {
           is_annual_plan: clientForm.is_annual_plan,
           annual_plan_start: clientForm.annual_plan_start || null,
           annual_plan_end: clientForm.annual_plan_end || null,
+          access_valid_until: clientForm.access_valid_until || null,
           admin_notes: clientForm.admin_notes || null,
         }),
       })
@@ -1357,6 +1359,21 @@ export default function EsteticaConsultoriaAdminClient() {
     if (days <= 60) return { tone: 'amber' as const, text: `Renovação em ${days} dia(s) (${selectedClient.annual_plan_end}).` }
     return { tone: 'gray' as const, text: `Plano até ${selectedClient.annual_plan_end}.` }
   }, [selectedClient])
+
+  const accessValidityHint = useMemo(() => {
+    const until = selectedClient?.access_valid_until
+    if (!until) return null
+    const end = new Date(`${until}T12:00:00`)
+    if (!Number.isFinite(end.getTime())) return null
+    const days = Math.ceil((end.getTime() - Date.now()) / (86400 * 1000))
+    if (days < 0) {
+      return { tone: 'red' as const, text: `Acesso caducado há ${Math.abs(days)} dia(s) (${until}).` }
+    }
+    if (days <= 15) {
+      return { tone: 'amber' as const, text: `Acesso caduca em ${days} dia(s), até ${until} (inclusive).` }
+    }
+    return { tone: 'gray' as const, text: `Acesso válido até ${until} (inclusive).` }
+  }, [selectedClient?.access_valid_until])
 
   const formFieldsForResponses = useMemo(() => {
     if (!selected || selected.material_kind !== 'formulario') return []
@@ -1675,19 +1692,51 @@ export default function EsteticaConsultoriaAdminClient() {
         <section className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm space-y-4">
           <div className="flex flex-wrap items-start justify-between gap-2">
             <h2 className="text-lg font-semibold text-gray-900">Dados administrativos</h2>
-            {renewalHint ? (
-              <p
-                className={`text-xs rounded-lg px-2 py-1 ${
-                  renewalHint.tone === 'red'
-                    ? 'bg-red-50 text-red-900 border border-red-100'
-                    : renewalHint.tone === 'amber'
-                      ? 'bg-amber-50 text-amber-900 border border-amber-100'
-                      : 'bg-gray-50 text-gray-700 border border-gray-100'
-                }`}
-              >
-                {renewalHint.text}
-              </p>
-            ) : null}
+            <div className="flex flex-wrap gap-2 justify-end">
+              {accessValidityHint ? (
+                <p
+                  className={`text-xs rounded-lg px-2 py-1 ${
+                    accessValidityHint.tone === 'red'
+                      ? 'bg-red-50 text-red-900 border border-red-100'
+                      : accessValidityHint.tone === 'amber'
+                        ? 'bg-amber-50 text-amber-900 border border-amber-100'
+                        : 'bg-gray-50 text-gray-700 border border-gray-100'
+                  }`}
+                >
+                  {accessValidityHint.text}
+                </p>
+              ) : null}
+              {renewalHint ? (
+                <p
+                  className={`text-xs rounded-lg px-2 py-1 ${
+                    renewalHint.tone === 'red'
+                      ? 'bg-red-50 text-red-900 border border-red-100'
+                      : renewalHint.tone === 'amber'
+                        ? 'bg-amber-50 text-amber-900 border border-amber-100'
+                        : 'bg-gray-50 text-gray-700 border border-gray-100'
+                  }`}
+                >
+                  {renewalHint.text}
+                </p>
+              ) : null}
+            </div>
+          </div>
+          <div className="rounded-xl border border-indigo-100 bg-indigo-50/40 p-3 space-y-2">
+            <label className="block text-sm max-w-md">
+              <span className="font-medium text-gray-900">Acesso (plano) válido até</span>
+              <span className="block text-xs text-gray-600 mt-0.5">
+                Uma data para esta ficha inteira — capilar, corporal ou ambos. Inclusive neste dia. Com{' '}
+                <strong>Leader tenant ID</strong> preenchido e migrações 339–340 aplicadas: o painel Pro Estética bloqueia
+                após esta data; o cron diário (Resend + <code className="text-[10px]">CRON_SECRET</code>) pode enviar
+                lembretes ~15, ~7 e ~1 dia antes ao e-mail dos dados administrativos.
+              </span>
+              <input
+                type="date"
+                className="mt-2 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm"
+                value={clientForm.access_valid_until}
+                onChange={(e) => setClientForm((f) => (f ? { ...f, access_valid_until: e.target.value } : f))}
+              />
+            </label>
           </div>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             <label className="block text-sm sm:col-span-2">

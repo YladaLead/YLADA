@@ -7,6 +7,8 @@ import {
   resolveProLideresTenantContext,
   resolvedUserEmail,
 } from '@/lib/pro-lideres-server'
+import { isEsteticaConsultPainelAccessExpiredForTenant } from '@/lib/estetica-consult-access'
+import { applyCompletedCapilarOnboardingForEmail } from '@/lib/pro-estetica-capilar-onboarding'
 import { getSupabaseAdmin } from '@/lib/supabase'
 
 export const PRO_ESTETICA_CAPILAR_VERTICAL_CODE = 'estetica-capilar'
@@ -124,7 +126,13 @@ export async function resolveEsteticaCapilarTenantContext(
   return ctx
 }
 
-export async function ensureEsteticaCapilarTenantAccess(): Promise<
+export type EnsureEsteticaCapilarConsultoriaPainelGateOptions = {
+  skipConsultoriaAccessCheck?: boolean
+}
+
+export async function ensureEsteticaCapilarTenantAccess(
+  options?: EnsureEsteticaCapilarConsultoriaPainelGateOptions
+): Promise<
   | { ok: true; tenant: LeaderTenantRow; role: ProLideresTenantRole; previewWithoutLogin?: boolean }
   | { ok: false; redirect: string }
 > {
@@ -255,6 +263,24 @@ export async function ensureEsteticaCapilarTenantAccess(): Promise<
       return { ok: true, tenant: devStubCapilarTenant(user.id), role: 'leader' }
     }
     return { ok: false, redirect: '/pro-estetica-capilar/aguardando-acesso' }
+  }
+
+  if (!options?.skipConsultoriaAccessCheck && admin) {
+    if (
+      !isProEsteticaCapilarDevStubTenant(ctx.tenant) &&
+      (await isEsteticaConsultPainelAccessExpiredForTenant(admin, ctx.tenant.id))
+    ) {
+      return { ok: false, redirect: '/pro-estetica-capilar/acesso-expirado' }
+    }
+  }
+
+  if (ctx.role === 'leader') {
+    await applyCompletedCapilarOnboardingForEmail({
+      supabase,
+      email: user.email,
+      ownerUserId: user.id,
+      tenantId: ctx.tenant.id,
+    })
   }
 
   return { ok: true, tenant: ctx.tenant, role: ctx.role }

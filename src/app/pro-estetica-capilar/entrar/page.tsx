@@ -1,5 +1,8 @@
 import LoginForm from '@/components/auth/LoginForm'
 
+/**
+ * Login Pro Estética Capilar — `?next=/pro-estetica-capilar/...` após sessão (demos no vertical).
+ */
 export default async function ProEsteticaCapilarEntrarPage({
   searchParams,
 }: {
@@ -13,7 +16,12 @@ export default async function ProEsteticaCapilarEntrarPage({
   return (
     <div className="flex min-h-[100dvh] min-h-screen items-center justify-center bg-gray-50 px-4 py-8">
       <div className="w-full max-w-md">
-        <LoginForm perfil="ylada" redirectPath={redirectPath} disableSignUp />
+        <LoginForm
+          perfil="ylada"
+          redirectPath={redirectPath}
+          disableSignUp
+          proEsteticaCapilarLogin
+        />
       </div>
     </div>
   )

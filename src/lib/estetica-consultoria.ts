@@ -24,6 +24,11 @@ export type YladaEsteticaConsultClientRow = {
   is_annual_plan: boolean
   annual_plan_start: string | null
   annual_plan_end: string | null
+  /** Até esta data (inclusive) o acesso contratado vale para esta ficha (capilar, corporal ou ambos). */
+  access_valid_until?: string | null
+  access_expiry_reminder_sent_15d?: boolean
+  access_expiry_reminder_sent_7d?: boolean
+  access_expiry_reminder_sent_1d?: boolean
   admin_notes: string | null
   created_by_user_id: string | null
 }

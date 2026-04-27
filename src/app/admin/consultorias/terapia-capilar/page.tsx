@@ -22,6 +22,20 @@ export default function AdminConsultoriasTerapiaCapilarPage() {
           <ul className="grid gap-3">
             <li>
               <Link
+                href="/admin/pro-estetica-capilar/onboarding"
+                className="block rounded-2xl border border-sky-200 bg-white p-5 shadow-sm transition hover:border-sky-400 hover:bg-sky-50/40"
+              >
+                <span className="text-2xl" aria-hidden>
+                  🔗
+                </span>
+                <h2 className="mt-2 text-lg font-semibold text-gray-900">Onboarding Pro Estética Capilar</h2>
+                <p className="mt-1 text-sm text-gray-600">
+                  Gerar link de micro-diagnóstico inicial (consultoria / implantação) para o produto vertical capilar.
+                </p>
+              </Link>
+            </li>
+            <li>
+              <Link
                 href="/admin/estetica-consultoria?segmento=capilar"
                 className="block rounded-2xl border border-violet-200 bg-white p-5 shadow-sm transition hover:border-violet-400 hover:bg-violet-50/40"
               >

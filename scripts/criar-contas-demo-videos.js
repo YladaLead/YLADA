@@ -343,6 +343,26 @@ const DEMO_ACCOUNTS = [
   }
 ]
 
+/** Lista utilizadores Auth por páginas até encontrar o e-mail (listUsers() só devolve a 1.ª página por defeito). */
+async function findAuthUserByEmail(email) {
+  const target = String(email || '').toLowerCase().trim()
+  if (!target) return null
+  let page = 1
+  const perPage = 1000
+  for (;;) {
+    const { data, error } = await supabaseAdmin.auth.admin.listUsers({ page, perPage })
+    if (error) {
+      console.error(`   ⚠️ listUsers página ${page}:`, error.message)
+      return null
+    }
+    const users = data?.users ?? []
+    const u = users.find((x) => x.email?.toLowerCase() === target)
+    if (u) return u
+    if (users.length < perPage) return null
+    page += 1
+  }
+}
+
 async function createDemoUser(email, password) {
   const { data, error } = await supabaseAdmin.auth.admin.createUser({
     email,
@@ -535,18 +555,34 @@ async function main() {
   for (const account of DEMO_ACCOUNTS) {
     console.log(`\n--- ${account.email} (${account.perfil}) ---`)
 
-    // Verificar se usuário já existe
-    const { data: existingUsers } = await supabaseAdmin.auth.admin.listUsers()
-    const existing = existingUsers?.users?.find(u => u.email?.toLowerCase() === account.email.toLowerCase())
-
+    let existing = await findAuthUserByEmail(account.email)
     let userId
+
     if (existing) {
-      console.log(`⚠️ Usuário já existe, atualizando perfil...`)
+      console.log(`⚠️ Usuário já existe — sincronizando senha demo e perfis...`)
       userId = existing.id
+      const { error: pwdErr } = await supabaseAdmin.auth.admin.updateUserById(userId, { password: PASSWORD })
+      if (pwdErr) {
+        console.error(`   ❌ Não foi possível atualizar a senha de ${account.email}:`, pwdErr.message)
+      } else {
+        console.log(`   🔐 Senha alinhada a Demo@2025!`)
+      }
     } else {
       const user = await createDemoUser(account.email, PASSWORD)
-      if (!user) continue
-      userId = user.id
+      if (user) {
+        userId = user.id
+      } else {
+        existing = await findAuthUserByEmail(account.email)
+        if (!existing) continue
+        console.log(`⚠️ Criação falhou mas o utilizador existe — a sincronizar senha...`)
+        userId = existing.id
+        const { error: pwdErr } = await supabaseAdmin.auth.admin.updateUserById(userId, { password: PASSWORD })
+        if (pwdErr) {
+          console.error(`   ❌ Não foi possível atualizar a senha de ${account.email}:`, pwdErr.message)
+          continue
+        }
+        console.log(`   🔐 Senha alinhada a Demo@2025!`)
+      }
     }
 
     await createOrUpdateUserProfile(userId, account.email, account.nome, account.perfil)

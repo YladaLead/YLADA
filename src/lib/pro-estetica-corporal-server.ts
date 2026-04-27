@@ -7,6 +7,7 @@ import {
   resolveProLideresTenantContext,
   resolvedUserEmail,
 } from '@/lib/pro-lideres-server'
+import { isEsteticaConsultPainelAccessExpiredForTenant } from '@/lib/estetica-consult-access'
 import { getSupabaseAdmin } from '@/lib/supabase'
 import { applyCompletedCorporalOnboardingForEmail } from '@/lib/pro-estetica-corporal-onboarding'
 
@@ -217,7 +218,14 @@ export async function resolveEsteticaCorporalTenantContext(
  * Pré-visualização pública (sem login) só quando **não** há sessão — quem está autenticado
  * segue sempre para resolução real do tenant (painel / aguardando / outra edição).
  */
-export async function ensureEsteticaCorporalTenantAccess(): Promise<
+export type EnsureEsteticaConsultoriaPainelGateOptions = {
+  /** Evita redirecionar para /acesso-expirado (usado na própria página de aviso). */
+  skipConsultoriaAccessCheck?: boolean
+}
+
+export async function ensureEsteticaCorporalTenantAccess(
+  options?: EnsureEsteticaConsultoriaPainelGateOptions
+): Promise<
   | { ok: true; tenant: LeaderTenantRow; role: ProLideresTenantRole; previewWithoutLogin?: boolean }
   | { ok: false; redirect: string }
 > {
@@ -375,6 +383,15 @@ export async function ensureEsteticaCorporalTenantAccess(): Promise<
       ownerUserId: user.id,
       tenantId: ctx.tenant.id,
     })
+  }
+
+  if (!options?.skipConsultoriaAccessCheck && admin) {
+    if (
+      !isProEsteticaCorporalDevStubTenant(ctx.tenant) &&
+      (await isEsteticaConsultPainelAccessExpiredForTenant(admin, ctx.tenant.id))
+    ) {
+      return { ok: false, redirect: '/pro-estetica-corporal/acesso-expirado' }
+    }
   }
 
   return { ok: true, tenant: ctx.tenant, role: ctx.role }

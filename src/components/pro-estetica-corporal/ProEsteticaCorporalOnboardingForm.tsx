@@ -28,6 +28,7 @@ export function ProEsteticaCorporalOnboardingForm({
   saving = false,
   submitLabel = 'Concluir e preparar o meu espaço',
   disabled = false,
+  serviceToGrowPlaceholder = 'Ex.: drenagem linfática, radiofrequência, pacotes de manutenção…',
 }: {
   values: CorporalOnboardingFormValues
   onChange: (field: FieldKey, value: string) => void
@@ -35,6 +36,8 @@ export function ProEsteticaCorporalOnboardingForm({
   saving?: boolean
   submitLabel?: string
   disabled?: boolean
+  /** Opcional (ex.: Pro Estética Capilar — exemplos capilares). */
+  serviceToGrowPlaceholder?: string
 }) {
   const v = values
   const set = onChange
@@ -101,7 +104,7 @@ export function ProEsteticaCorporalOnboardingForm({
           disabled={disabled}
           value={v.serviceToGrow}
           onChange={(e) => set('serviceToGrow', e.target.value)}
-          placeholder="Ex.: drenagem linfática, radiofrequência, pacotes de manutenção…"
+          placeholder={serviceToGrowPlaceholder}
           className="w-full rounded-lg border border-gray-300 px-3 py-2.5 disabled:cursor-not-allowed disabled:bg-gray-100"
         />
       </label>

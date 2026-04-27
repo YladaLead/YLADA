@@ -23,7 +23,7 @@ function fmt(d: string | null | undefined): string {
   return new Date(d).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })
 }
 
-function AdminProEsteticaCorporalOnboardingContent() {
+function AdminProEsteticaCapilarOnboardingContent() {
   const [professionalName, setProfessionalName] = useState('')
   const [email, setEmail] = useState('')
   const [creating, setCreating] = useState(false)
@@ -37,7 +37,7 @@ function AdminProEsteticaCorporalOnboardingContent() {
   async function load() {
     setLoading(true)
     const qs = query.trim() ? `?q=${encodeURIComponent(query.trim())}` : ''
-    const res = await fetch(`/api/admin/pro-estetica-corporal/leader-onboarding${qs}`, { credentials: 'include' })
+    const res = await fetch(`/api/admin/pro-estetica-capilar/leader-onboarding${qs}`, { credentials: 'include' })
     const data = await res.json().catch(() => ({}))
     if (!res.ok) {
       setError((data as { error?: string }).error || 'Erro ao carregar.')
@@ -60,7 +60,7 @@ function AdminProEsteticaCorporalOnboardingContent() {
     setError(null)
     setNewUrl(null)
     try {
-      const res = await fetch('/api/admin/pro-estetica-corporal/leader-onboarding', {
+      const res = await fetch('/api/admin/pro-estetica-capilar/leader-onboarding', {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
@@ -87,26 +87,19 @@ function AdminProEsteticaCorporalOnboardingContent() {
     <main className="min-h-screen bg-gray-50 p-4 sm:p-6">
       <div className="mx-auto max-w-6xl space-y-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Admin — Onboarding Pro Estética Corporal</h1>
+          <h1 className="text-2xl font-bold text-gray-900">Admin — Onboarding Pro Estética Capilar</h1>
           <p className="text-sm text-gray-600">
             Gere um link para a dona fazer o <strong className="font-semibold text-gray-800">micro-diagnóstico inicial</strong>{' '}
             (entrada para o mentor Noel, não só cadastro). As respostas aplicam-se ao ambiente quando ela entrar no painel
             com o mesmo e-mail.
           </p>
           <p className="mt-2 text-sm">
-            <Link href="/admin/pro-lideres/onboarding" className="font-semibold text-blue-600 underline hover:text-blue-800">
-              Pro Líderes onboarding
+            <Link href="/admin/pro-estetica-corporal/onboarding" className="font-semibold text-blue-600 underline hover:text-blue-800">
+              Onboarding Corporal
             </Link>
             {' · '}
-            <Link
-              href="/admin/pro-estetica-capilar/onboarding"
-              className="font-semibold text-blue-600 underline hover:text-blue-800"
-            >
-              Onboarding Capilar
-            </Link>
-            {' · '}
-            <Link href="/pro-estetica-corporal/entrar" className="font-semibold text-blue-600 underline hover:text-blue-800">
-              Entrar Pro Estética Corporal
+            <Link href="/pro-estetica-capilar/entrar" className="font-semibold text-blue-600 underline hover:text-blue-800">
+              Entrar Pro Estética Capilar
             </Link>
           </p>
         </div>
@@ -208,10 +201,10 @@ function AdminProEsteticaCorporalOnboardingContent() {
   )
 }
 
-export default function AdminProEsteticaCorporalOnboardingPage() {
+export default function AdminProEsteticaCapilarOnboardingPage() {
   return (
     <AdminProtectedRoute>
-      <AdminProEsteticaCorporalOnboardingContent />
+      <AdminProEsteticaCapilarOnboardingContent />
     </AdminProtectedRoute>
   )
 }

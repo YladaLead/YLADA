@@ -9,6 +9,7 @@ export default async function ProEsteticaCapilarPainelPage() {
 
   const op = gate.tenant.display_name?.trim() || gate.tenant.team_name?.trim() || 'a tua operacao'
   const cards = [
+    { title: 'Ritmo', desc: 'Ver foco da semana e atalhos para o Noel e scripts.', href: `${BASE}/resultados` },
     { title: 'Captar', desc: 'Primeiro contato e triagem para casos capilares.', href: `${BASE}/captar` },
     { title: 'Retencao', desc: 'Aderencia ao plano e recorrencia de sessoes.', href: `${BASE}/retencao` },
     { title: 'Acompanhar', desc: 'Follow-up entre sessoes e proximo passo.', href: `${BASE}/acompanhar` },
