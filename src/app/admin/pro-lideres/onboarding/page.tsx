@@ -34,6 +34,7 @@ function AdminProLideresOnboardingPageContent() {
   const [loading, setLoading] = useState(true)
   const [query, setQuery] = useState('')
   const [detailItem, setDetailItem] = useState<OnboardingItem | null>(null)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
 
   useEffect(() => {
     if (!detailItem) return
@@ -63,6 +64,34 @@ function AdminProLideresOnboardingPageContent() {
     void load()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  async function onDeleteRow(item: OnboardingItem) {
+    const label = `“${item.leader_name}” (${item.invited_email})`
+    if (
+      !window.confirm(
+        `Excluir este link de onboarding? ${label}\n\nA pessoa deixa de poder usar o URL antigo. Esta ação não dá para desfazer.`
+      )
+    ) {
+      return
+    }
+    setDeletingId(item.id)
+    setError(null)
+    try {
+      const res = await fetch(
+        `/api/admin/pro-lideres/leader-onboarding/${encodeURIComponent(item.id)}`,
+        { method: 'DELETE', credentials: 'include' }
+      )
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) {
+        setError((data as { error?: string }).error || 'Não foi possível excluir o link.')
+        return
+      }
+      if (detailItem?.id === item.id) setDetailItem(null)
+      await load()
+    } finally {
+      setDeletingId(null)
+    }
+  }
 
   async function onCreate(e: React.FormEvent) {
     e.preventDefault()
@@ -194,6 +223,7 @@ function AdminProLideresOnboardingPageContent() {
                     <th className="px-2 py-2">Criado</th>
                     <th className="px-2 py-2">Respondido</th>
                     <th className="px-2 py-2">Respostas</th>
+                    <th className="px-2 py-2 w-[1%]">Ações</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -222,11 +252,21 @@ function AdminProLideresOnboardingPageContent() {
                           Ver respostas
                         </button>
                       </td>
+                      <td className="px-2 py-2">
+                        <button
+                          type="button"
+                          disabled={deletingId === item.id}
+                          onClick={() => void onDeleteRow(item)}
+                          className="whitespace-nowrap rounded-lg border border-red-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-red-700 hover:bg-red-50 disabled:opacity-50"
+                        >
+                          {deletingId === item.id ? 'A excluir…' : 'Excluir'}
+                        </button>
+                      </td>
                     </tr>
                   ))}
                   {items.length === 0 && (
                     <tr>
-                      <td colSpan={7} className="px-2 py-6 text-center text-gray-500">
+                      <td colSpan={8} className="px-2 py-6 text-center text-gray-500">
                         Nenhum link encontrado.
                       </td>
                     </tr>
