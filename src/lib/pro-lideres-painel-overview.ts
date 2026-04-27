@@ -353,8 +353,8 @@ function buildDiagnostic(p: {
 
   if (p.teamMemberCount === 0) {
     diagnostic =
-      'Ainda não há outros membros na equipe além de você. Use a área Convidar equipe para gerar links e acompanhar a atividade aqui.'
-    nextSteps.push('Gerar um link de convite em Convidar equipe.')
+      'Ainda não há outros membros na equipe além de você. Use Convites equipe para gerar links e acompanhar a atividade aqui.'
+    nextSteps.push('Gerar um link de convite em Convites equipe.')
     return { diagnostic, nextSteps }
   }
 

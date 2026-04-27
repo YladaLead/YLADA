@@ -659,6 +659,8 @@ const IDEIAS_RAPIDAS_ESTETICA: Record<string, IdeiaRapidaNoel[]> = {
 /** Ideias rápidas só corpo (Pro Estética Corporal / biblioteca com subscope). */
 export const IDEIAS_RAPIDAS_ESTETICA_CORPORAIS: IdeiaRapidaNoel[] = IDEIAS_RAPIDAS_ESTETICA.corporal
 
+export const IDEIAS_RAPIDAS_ESTETICA_CAPILAR: IdeiaRapidaNoel[] = IDEIAS_RAPIDAS_ESTETICA.capilar
+
 /** Retorna a "ideia do dia" para o gatilho de criação (índice estável por dia, sem IA). */
 export function getIdeiaRapidaDoDia(options?: {
   segmentCode?: BibliotecaSegmentCode | null

@@ -476,7 +476,7 @@ export function ProLideresPainelOverview() {
             href="/pro-lideres/painel/links"
             className="inline-flex items-center justify-center rounded-lg border border-violet-300 bg-white px-4 py-2 text-sm font-medium text-violet-900 hover:bg-violet-100/80"
           >
-            Convidar equipe
+            Convites equipe
           </Link>
         </div>
       </section>

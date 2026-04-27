@@ -114,7 +114,7 @@ export function ProLideresPreviewConviteClient() {
 
         <p className="text-center text-xs text-gray-500">
           <Link href="/pro-lideres/painel/links" className="font-medium text-blue-600 hover:text-blue-800">
-            ← Voltar a Convidar equipe
+            ← Voltar a Convites equipe
           </Link>
         </p>
       </div>

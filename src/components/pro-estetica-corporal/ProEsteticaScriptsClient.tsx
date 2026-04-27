@@ -21,7 +21,23 @@ async function copyText(text: string): Promise<boolean> {
   }
 }
 
-export function ProEsteticaScriptsClient() {
+const DEFAULT_SCRIPTS_API_BASE = '/api/pro-estetica-corporal'
+const DEFAULT_NOEL_PAINEL_HREF = '/pro-estetica-corporal/painel/noel'
+const DEFAULT_ENTRAR_NEXT_HREF =
+  '/pro-estetica-corporal/entrar?next=%2Fpro-estetica-corporal%2Fpainel%2Fscripts'
+
+export type ProEsteticaScriptsClientProps = {
+  /** Base da API (ex.: `/api/pro-estetica-capilar`). */
+  scriptsApiBase?: string
+  noelPainelHref?: string
+  entrarWithNextHref?: string
+}
+
+export function ProEsteticaScriptsClient({
+  scriptsApiBase = DEFAULT_SCRIPTS_API_BASE,
+  noelPainelHref = DEFAULT_NOEL_PAINEL_HREF,
+  entrarWithNextHref = DEFAULT_ENTRAR_NEXT_HREF,
+}: ProEsteticaScriptsClientProps = {}) {
   const { previewWithoutLogin } = useProLideresPainel()
   const [scripts, setScripts] = useState<LeaderTenantEsteticaScriptRow[]>([])
   const [canEdit, setCanEdit] = useState(true)
@@ -49,7 +65,7 @@ export function ProEsteticaScriptsClient() {
     setLoading(true)
     setError(null)
     try {
-      const res = await fetch('/api/pro-estetica-corporal/scripts', { credentials: 'include' })
+      const res = await fetch(`${scriptsApiBase}/scripts`, { credentials: 'include' })
       const data = await res.json().catch(() => ({}))
       if (!res.ok) {
         setError((data as { error?: string }).error || 'Não foi possível carregar os scripts.')
@@ -64,7 +80,7 @@ export function ProEsteticaScriptsClient() {
     } finally {
       setLoading(false)
     }
-  }, [previewWithoutLogin])
+  }, [previewWithoutLogin, scriptsApiBase])
 
   useEffect(() => {
     void load()
@@ -78,7 +94,7 @@ export function ProEsteticaScriptsClient() {
     setSaving(true)
     setError(null)
     try {
-      const res = await fetch('/api/pro-estetica-corporal/scripts', {
+      const res = await fetch(`${scriptsApiBase}/scripts`, {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
@@ -112,7 +128,7 @@ export function ProEsteticaScriptsClient() {
     setSaving(true)
     setError(null)
     try {
-      const res = await fetch(`/api/pro-estetica-corporal/scripts/${editingId}`, {
+      const res = await fetch(`${scriptsApiBase}/scripts/${editingId}`, {
         method: 'PATCH',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
@@ -140,7 +156,7 @@ export function ProEsteticaScriptsClient() {
     if (!canEdit || !confirm('Apagar este script?')) return
     setError(null)
     try {
-      const res = await fetch(`/api/pro-estetica-corporal/scripts/${id}`, {
+      const res = await fetch(`${scriptsApiBase}/scripts/${id}`, {
         method: 'DELETE',
         credentials: 'include',
       })
@@ -172,7 +188,7 @@ export function ProEsteticaScriptsClient() {
           Em pré-visualização sem login não é possível gravar. Inicia sessão para criares e gerires os teus roteiros.
         </p>
         <Link
-          href="/pro-estetica-corporal/entrar?next=%2Fpro-estetica-corporal%2Fpainel%2Fscripts"
+          href={entrarWithNextHref}
           className="inline-flex min-h-[44px] items-center justify-center rounded-lg bg-blue-600 px-4 text-sm font-semibold text-white hover:bg-blue-700"
         >
           Iniciar sessão
@@ -350,7 +366,7 @@ export function ProEsteticaScriptsClient() {
       </section>
 
       <p className="text-sm text-gray-500">
-        Dica: usa o <Link href="/pro-estetica-corporal/painel/noel" className="font-medium text-blue-600 hover:text-blue-800">Noel</Link> para gerar variantes e depois grava aqui o que funcionar.
+        Dica: usa o <Link href={noelPainelHref} className="font-medium text-blue-600 hover:text-blue-800">Noel</Link> para gerar variantes e depois grava aqui o que funcionar.
       </p>
     </div>
   )

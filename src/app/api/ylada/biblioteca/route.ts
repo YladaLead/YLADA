@@ -1,9 +1,9 @@
 /**
  * GET /api/ylada/biblioteca — lista itens da biblioteca com filtros.
- * Query: tipo?, segmento?, tema?, subscope=estetica_corporal (lista fechada por template_id em `pro-estetica-corporal-biblioteca.ts`)
+ * Query: tipo?, segmento?, tema?, subscope=estetica_corporal | estetica_capilar (listas fechadas por `template_id` nas configs Pro).
  *
- * Sem login: só quando `subscope=estetica_corporal` e pré-visualização pública estiver ligada
- * (`PRO_ESTETICA_CORPORAL_PUBLIC_PREVIEW` / dev) — catálogo é leitura pública da BD, sem dado de conta.
+ * Sem login: quando `subscope=estetica_corporal` ou `estetica_capilar` e a pré-visualização pública
+ * correspondente estiver ligada (env / dev) — catálogo é leitura pública da BD, sem dado de conta.
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { requireApiAuth } from '@/lib/api-auth'
@@ -13,7 +13,12 @@ import {
   SEGMENT_CODES_BIBLIOTECA_ESTETICA_CORPORAL,
   filtrarBibliotecaItensEsteticaCorporal,
 } from '@/config/pro-estetica-corporal-biblioteca'
+import {
+  SEGMENT_CODES_BIBLIOTECA_ESTETICA_CAPILAR,
+  filtrarBibliotecaItensEsteticaCapilar,
+} from '@/config/pro-estetica-capilar-biblioteca'
 import { proEsteticaCorporalPublicPreviewNoAuthEnabled } from '@/lib/pro-estetica-corporal-server'
+import { proEsteticaCapilarPublicPreviewNoAuthEnabled } from '@/lib/pro-estetica-capilar-server'
 
 export async function GET(request: NextRequest) {
   try {
@@ -66,6 +71,8 @@ export async function GET(request: NextRequest) {
     let items = data ?? []
     if (esteticaCorporal) {
       items = filtrarBibliotecaItensEsteticaCorporal(items)
+    } else if (esteticaCapilar) {
+      items = filtrarBibliotecaItensEsteticaCapilar(items)
     }
     return NextResponse.json({ items })
   } catch (err: unknown) {

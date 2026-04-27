@@ -64,7 +64,9 @@ export default function ProLideresConviteTokenPage() {
               ? 'Este convite expirou.'
               : r === 'revoked'
                 ? 'Este convite foi revogado.'
-                : 'Este convite não é válido.'
+                : r === 'leader_subscription_inactive'
+                  ? 'Este espaço está temporariamente indisponível na YLADA por pendência de assinatura. Tente novamente mais tarde.'
+                  : 'Este convite não é válido.'
         setInvalidReason(msg)
       }
     } catch {

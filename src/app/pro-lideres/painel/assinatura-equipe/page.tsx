@@ -90,7 +90,8 @@ function ProLideresAssinaturaEquipeContent() {
           <p className="text-sm text-gray-600">A redirecionar…</p>
         ) : !isLeaderOwner ? (
           <p className="w-full max-w-sm text-sm leading-relaxed text-gray-600">
-            Fale com quem lidera sua equipe.
+            Seu acesso está bloqueado no momento. Há uma pendência de assinatura na YLADA para este espaço; quando estiver
+            regularizada, você volta a entrar normalmente. Pode atualizar a página daqui a pouco.
           </p>
         ) : (
           <div className="flex w-full flex-col items-center space-y-6">

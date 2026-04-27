@@ -1,8 +1,30 @@
 'use client'
 
 import Link from 'next/link'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { FichaPipelineItem, FichasPipelineLinha } from '@/lib/estetica-consultoria-fichas-pipeline'
+
+function normalizeSearchText(s: string) {
+  return s
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/\p{M}/gu, '')
+}
+
+function fichaMatchesQuery(item: FichaPipelineItem, rawQuery: string) {
+  const q = rawQuery.trim()
+  if (!q) return true
+  const nq = normalizeSearchText(q)
+  const blob = [
+    item.client.business_name,
+    item.client.contact_name,
+    item.client.contact_email,
+    item.client.phone,
+  ]
+    .filter(Boolean)
+    .join(' ')
+  return normalizeSearchText(blob).includes(nq)
+}
 
 function formatData(iso: string | null) {
   if (!iso) return '—'
@@ -44,6 +66,8 @@ function Coluna({
   items,
   linha,
   empty,
+  emptyNoSearchMatch,
+  buscaAtiva,
   large,
 }: {
   titulo: string
@@ -52,6 +76,8 @@ function Coluna({
   items: FichaPipelineItem[]
   linha: FichasPipelineLinha
   empty: string
+  emptyNoSearchMatch: string
+  buscaAtiva: boolean
   large?: boolean
 }) {
   const border =
@@ -76,7 +102,7 @@ function Coluna({
       <p className="text-[11px] font-medium text-gray-500 mb-2">{items.length} ficha(s)</p>
       <div className="space-y-2 flex-1 overflow-y-auto max-h-[min(52vh,28rem)] pr-1">
         {items.length === 0 ? (
-          <p className="text-sm text-gray-400 py-4 text-center">{empty}</p>
+          <p className="text-sm text-gray-400 py-4 text-center">{buscaAtiva ? emptyNoSearchMatch : empty}</p>
         ) : (
           items.map((item) => (
             <FichaCard key={item.client.id} item={item} linha={linha} accent={accent} />
@@ -93,6 +119,19 @@ export function FichasPipelineBento({ linha }: { linha: FichasPipelineLinha }) {
   const [preReuniao, setPreReuniao] = useState<FichaPipelineItem[]>([])
   const [diagnostico, setDiagnostico] = useState<FichaPipelineItem[]>([])
   const [novas, setNovas] = useState<FichaPipelineItem[]>([])
+  const [busca, setBusca] = useState('')
+
+  const buscaAtiva = busca.trim().length > 0
+
+  const preFiltrado = useMemo(
+    () => preReuniao.filter((it) => fichaMatchesQuery(it, busca)),
+    [preReuniao, busca]
+  )
+  const diagFiltrado = useMemo(
+    () => diagnostico.filter((it) => fichaMatchesQuery(it, busca)),
+    [diagnostico, busca]
+  )
+  const novasFiltrado = useMemo(() => novas.filter((it) => fichaMatchesQuery(it, busca)), [novas, busca])
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -143,6 +182,18 @@ export function FichasPipelineBento({ linha }: { linha: FichasPipelineLinha }) {
         </button>
       </div>
 
+      <label className="block max-w-md">
+        <span className="sr-only">Buscar fichas</span>
+        <input
+          type="search"
+          value={busca}
+          onChange={(e) => setBusca(e.target.value)}
+          placeholder="Buscar por nome, clínica ou e-mail…"
+          autoComplete="off"
+          className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm placeholder:text-gray-400 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+        />
+      </label>
+
       {err ? <p className="text-sm text-red-600">{err}</p> : null}
       {loading ? (
         <p className="text-sm text-gray-500">A carregar fichas…</p>
@@ -152,27 +203,33 @@ export function FichasPipelineBento({ linha }: { linha: FichasPipelineLinha }) {
             titulo="Pré e reunião"
             subtitulo={`Já enviou o pré na linha ${labelLinha}; ainda sem diagnóstico completo YLADA.`}
             cor="amber"
-            items={preReuniao}
+            items={preFiltrado}
             linha={linha}
             empty="Nenhuma ficha nesta fase."
+            emptyNoSearchMatch="Nenhum resultado nesta coluna."
+            buscaAtiva={buscaAtiva}
             large
           />
           <Coluna
             titulo="Diagnóstico (início)"
             subtitulo="Diagnóstico YLADA completo recebido — integração e avanço."
             cor="emerald"
-            items={diagnostico}
+            items={diagFiltrado}
             linha={linha}
             empty="Nenhuma ainda."
+            emptyNoSearchMatch="Nenhum resultado nesta coluna."
+            buscaAtiva={buscaAtiva}
             large
           />
           <Coluna
             titulo="Novas / sem envio"
             subtitulo="Ficha criada; ainda sem pré nem diagnóstico nesta linha."
             cor="slate"
-            items={novas}
+            items={novasFiltrado}
             linha={linha}
             empty="Nenhuma ficha vazia."
+            emptyNoSearchMatch="Nenhum resultado nesta coluna."
+            buscaAtiva={buscaAtiva}
             large
           />
         </div>

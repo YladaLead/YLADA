@@ -15,6 +15,30 @@ import {
 
 type TabKey = 'editar' | 'execucao' | 'links' | 'respostas'
 
+function normalizeSearchText(s: string) {
+  return s
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/\p{M}/gu, '')
+}
+
+function responseMatchesQuery(
+  r: ProLideresConsultoriaFormResponseRow,
+  rawQuery: string
+): boolean {
+  const q = rawQuery.trim()
+  if (!q) return true
+  const nq = normalizeSearchText(q)
+  const head = [r.respondent_name, r.respondent_email].filter(Boolean).join(' ')
+  if (normalizeSearchText(head).includes(nq)) return true
+  try {
+    const answersBlob = normalizeSearchText(JSON.stringify(r.answers ?? {}))
+    return answersBlob.includes(nq)
+  } catch {
+    return false
+  }
+}
+
 function emptyRow(kind: ProLideresConsultoriaMaterialKind): ProLideresConsultoriaMaterialRow {
   const now = new Date().toISOString()
   return {
@@ -44,6 +68,12 @@ export default function ProLideresConsultoriaAdminClient() {
   const [shareLinks, setShareLinks] = useState<ProLideresConsultoriaShareLinkRow[]>([])
   const [responses, setResponses] = useState<ProLideresConsultoriaFormResponseRow[]>([])
   const [auxLoading, setAuxLoading] = useState(false)
+  const [buscaRespostas, setBuscaRespostas] = useState('')
+
+  const respostasFiltradas = useMemo(
+    () => responses.filter((r) => responseMatchesQuery(r, buscaRespostas)),
+    [responses, buscaRespostas]
+  )
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -95,6 +125,10 @@ export default function ProLideresConsultoriaAdminClient() {
       void loadAuxForForm(selected.id)
     }
   }, [selected?.id, selected?.material_kind, tab, loadAuxForForm])
+
+  useEffect(() => {
+    setBuscaRespostas('')
+  }, [selected?.id])
 
   const openNew = (kind: ProLideresConsultoriaMaterialKind) => {
     setSelected(emptyRow(kind))
@@ -472,20 +506,37 @@ export default function ProLideresConsultoriaAdminClient() {
                   {responses.length === 0 ? (
                     <p className="text-sm text-gray-500">Ainda não há respostas.</p>
                   ) : (
-                    <div className="max-h-[420px] overflow-auto space-y-3">
-                      {responses.map((r) => (
-                        <div key={r.id} className="rounded-lg border border-gray-100 p-3 text-xs">
-                          <p className="text-gray-500">
-                            {new Date(r.submitted_at).toLocaleString('pt-BR')}
-                            {r.respondent_name ? ` · ${r.respondent_name}` : ''}
-                            {r.respondent_email ? ` · ${r.respondent_email}` : ''}
-                          </p>
-                          <pre className="mt-2 whitespace-pre-wrap break-words text-gray-800">
-                            {JSON.stringify(r.answers, null, 2)}
-                          </pre>
+                    <>
+                      <label className="block max-w-md">
+                        <span className="sr-only">Buscar respostas</span>
+                        <input
+                          type="search"
+                          value={buscaRespostas}
+                          onChange={(e) => setBuscaRespostas(e.target.value)}
+                          placeholder="Buscar por nome, e-mail ou texto das respostas…"
+                          autoComplete="off"
+                          className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm placeholder:text-gray-400 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                        />
+                      </label>
+                      {respostasFiltradas.length === 0 ? (
+                        <p className="text-sm text-gray-500">Nenhum resultado para esta busca.</p>
+                      ) : (
+                        <div className="max-h-[420px] overflow-auto space-y-3">
+                          {respostasFiltradas.map((r) => (
+                            <div key={r.id} className="rounded-lg border border-gray-100 p-3 text-xs">
+                              <p className="text-gray-500">
+                                {new Date(r.submitted_at).toLocaleString('pt-BR')}
+                                {r.respondent_name ? ` · ${r.respondent_name}` : ''}
+                                {r.respondent_email ? ` · ${r.respondent_email}` : ''}
+                              </p>
+                              <pre className="mt-2 whitespace-pre-wrap break-words text-gray-800">
+                                {JSON.stringify(r.answers, null, 2)}
+                              </pre>
+                            </div>
+                          ))}
                         </div>
-                      ))}
-                    </div>
+                      )}
+                    </>
                   )}
                 </div>
               ) : null}

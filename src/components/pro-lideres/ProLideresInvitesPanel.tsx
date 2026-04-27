@@ -21,6 +21,8 @@ function statusLabel(s: string): string {
 
 type QuotaInfo = { pendingLimit: number; pendingUsed: number; totalListed: number }
 
+type YladaTeamSubHint = { monthlyAmountBrl: number; pendingInviteQuota: number }
+
 export function ProLideresInvitesPanel() {
   const [email, setEmail] = useState('')
   const [invites, setInvites] = useState<LeaderTenantInviteListItem[]>([])
@@ -33,6 +35,7 @@ export function ProLideresInvitesPanel() {
   const lastCreatedInviteIdRef = useRef<string | null>(null)
   const [copied, setCopied] = useState(false)
   const [subscriptionAccessOk, setSubscriptionAccessOk] = useState<boolean | null>(null)
+  const [yladaSubHint, setYladaSubHint] = useState<YladaTeamSubHint | null>(null)
 
   const [search, setSearch] = useState('')
   const [debouncedSearch, setDebouncedSearch] = useState('')
@@ -57,14 +60,24 @@ export function ProLideresInvitesPanel() {
     try {
       const subRes = await fetch('/api/pro-lideres/subscription', { credentials: 'include' })
       const subData = await subRes.json().catch(() => ({}))
-      const accessBlocked =
-        subRes.ok && !Boolean((subData as { accessOk?: boolean }).accessOk)
+      const accessOk = Boolean((subData as { accessOk?: boolean }).accessOk)
+      const accessBlocked = subRes.ok && !accessOk
+      const monthlyAmountBrl = Number((subData as { monthlyAmountBrl?: number }).monthlyAmountBrl) || 750
+      const pendingInviteQuota =
+        Number((subData as { pendingInviteQuota?: number }).pendingInviteQuota) || 50
 
       if (accessBlocked) {
         setSubscriptionAccessOk(false)
+        setYladaSubHint(null)
         setInvites([])
         setQuota(null)
         return
+      }
+
+      if (subRes.ok && accessOk) {
+        setYladaSubHint({ monthlyAmountBrl, pendingInviteQuota })
+      } else {
+        setYladaSubHint(null)
       }
 
       const res = await fetch(`/api/pro-lideres/invites${queryString}`, { credentials: 'include' })
@@ -72,6 +85,7 @@ export function ProLideresInvitesPanel() {
       if (!res.ok) {
         if (res.status === 402) {
           setSubscriptionAccessOk(false)
+          setYladaSubHint(null)
           setInvites([])
           setQuota(null)
           return
@@ -119,7 +133,7 @@ export function ProLideresInvitesPanel() {
       if (!res.ok) {
         if (res.status === 402) {
           setSubscriptionAccessOk(false)
-          setError((data as { error?: string }).error || 'Ativa o plano para gerar convites.')
+          setError((data as { error?: string }).error || 'Ative a assinatura YLADA deste espaço para gerar convites.')
           return
         }
         setError((data as { error?: string }).error || 'Não foi possível criar o convite.')
@@ -184,16 +198,29 @@ export function ProLideresInvitesPanel() {
 
       {subscriptionAccessOk === false && (
         <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-4 text-amber-950 shadow-sm">
-          <p className="text-base font-semibold text-amber-950">Ativar convites</p>
+          <p className="text-base font-semibold text-amber-950">Assinatura YLADA — necessária para convidar</p>
           <p className="mt-2 text-sm leading-relaxed text-amber-900/95">
-            Comece a convidar sua equipe e construa um <strong className="text-amber-950">crescimento organizado e previsível</strong> com clareza para orientar.
+            Sem o plano equipe ativo na YLADA não é possível gerar novos convites nem concluir cadastros pelo link.
+            Ative o pagamento seguro; em seguida volte aqui para criar os links.
           </p>
           <Link
             href="/pro-lideres/painel/assinatura-equipe"
             className="mt-4 inline-flex min-h-[44px] items-center justify-center rounded-xl bg-amber-800 px-6 text-sm font-semibold text-white hover:bg-amber-900"
           >
-            Ativar
+            Ativar assinatura YLADA
           </Link>
+        </div>
+      )}
+
+      {yladaSubHint && subscriptionAccessOk === true && (
+        <div className="rounded-xl border border-emerald-200 bg-emerald-50/90 px-4 py-3 text-sm text-emerald-950 shadow-sm">
+          <p className="font-semibold text-emerald-950">Assinatura YLADA (equipe)</p>
+          <p className="mt-1 leading-relaxed text-emerald-900/95">
+            <strong className="text-emerald-950">Ativa.</strong> Referência do plano: até{' '}
+            <strong>{yladaSubHint.pendingInviteQuota} convites pendentes</strong> no ciclo ·{' '}
+            <strong>R$ {yladaSubHint.monthlyAmountBrl.toLocaleString('pt-BR')}/mês</strong> na YLADA. Se o plano expirar,
+            o aviso laranja volta acima com o botão para regularizar no Mercado Pago.
+          </p>
         </div>
       )}
 

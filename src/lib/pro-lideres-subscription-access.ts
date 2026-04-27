@@ -33,7 +33,7 @@ export async function ownerHasProLideresTeamSubscription(ownerUserId: string): P
 export function proLideresSubscriptionRequiredResponse(): NextResponse {
   return NextResponse.json(
     {
-      error: 'Assinatura Pro Líderes (equipe) inativa ou pagamento em atraso.',
+      error: 'Assinatura YLADA deste espaço inativa ou pagamento em atraso.',
       code: 'pro_lideres_team_subscription_required',
     },
     { status: 402 }

@@ -35,7 +35,7 @@ export default async function ProLideresEquipePage() {
           {isLeader ? (
             <>
               Aqui vês <strong className="text-gray-900">quem está contigo neste espaço</strong> e geres o acesso: convida
-              novas pessoas em <strong className="text-gray-800">Convidar equipe</strong>. Para cada nome, podes{' '}
+              novas pessoas em <strong className="text-gray-800">Convites equipe</strong>. Para cada nome, podes{' '}
               <strong className="text-gray-800">pausar o acesso</strong> (a pessoa deixa de entrar até tu reativares),{' '}
               <strong className="text-gray-800">voltar a dar acesso</strong> ou <strong className="text-gray-800">remover</strong>{' '}
               da lista deste espaço — <strong className="text-gray-800">o que ela já criou na conta YLADA dela não some</strong>.

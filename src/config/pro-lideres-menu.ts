@@ -30,7 +30,14 @@ export const PRO_LIDERES_MENU_GROUPS: { label: string; items: ProLideresMenuItem
       { key: 'scripts', label: 'Scripts', path: 'scripts', icon: '📝' },
       { key: 'tarefas', label: 'Tarefas diárias', path: 'tarefas', icon: '✅' },
       { key: 'equipe', label: 'Análise da equipe', path: 'equipe', icon: '👥', leaderOnly: true },
-      { key: 'links', label: 'Convidar equipe', path: 'links', icon: '🔗', leaderOnly: true },
+      { key: 'links', label: 'Convites equipe', path: 'links', icon: '🔗', leaderOnly: true },
+      {
+        key: 'cobranca-equipe',
+        label: 'Cobrança da equipe',
+        path: 'cobranca-equipe',
+        icon: '🧾',
+        leaderOnly: true,
+      },
       {
         key: 'configuracao',
         label: 'Configurações',

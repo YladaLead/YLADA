@@ -12,6 +12,7 @@ export default async function ProEsteticaCapilarPainelPage() {
     { title: 'Captar', desc: 'Primeiro contato e triagem para casos capilares.', href: `${BASE}/captar` },
     { title: 'Retencao', desc: 'Aderencia ao plano e recorrencia de sessoes.', href: `${BASE}/retencao` },
     { title: 'Acompanhar', desc: 'Follow-up entre sessoes e proximo passo.', href: `${BASE}/acompanhar` },
+    { title: 'Scripts', desc: 'Roteiros de mensagem e triagem (guardados na tua conta).', href: `${BASE}/scripts` },
     { title: 'Perfil', desc: 'Dados da operacao e notas de foco.', href: `${BASE}/perfil` },
   ] as const
 

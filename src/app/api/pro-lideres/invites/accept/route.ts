@@ -103,7 +103,7 @@ export async function POST(request: NextRequest) {
   if (!(await ownerHasProLideresTeamSubscription(tenant.owner_user_id as string))) {
     return NextResponse.json(
       {
-        error: 'A assinatura do líder está inativa. Não é possível aceitar o convite neste momento.',
+        error: 'A assinatura YLADA deste espaço está inativa. Não é possível aceitar o convite neste momento.',
         code: 'pro_lideres_team_subscription_required',
       },
       { status: 402 }

@@ -18,6 +18,8 @@ interface LinksHubContentProps {
   noAreaShell?: boolean
   /** Biblioteca “Usar modelo pronto” só com conteúdo de estética corporal (sem fluxos faciais/capilar genéricos). */
   bibliotecaEsteticaCorporalScope?: boolean
+  /** Pro Estética Capilar: lista fechada capilar (subscope `estetica_capilar`). */
+  bibliotecaEsteticaCapilarScope?: boolean
 }
 
 function LinksHubContentInner({
@@ -25,7 +27,10 @@ function LinksHubContentInner({
   areaLabel,
   noAreaShell,
   bibliotecaEsteticaCorporalScope,
+  bibliotecaEsteticaCapilarScope,
 }: LinksHubContentProps) {
+  const proEsteticaProBiblioteca =
+    Boolean(bibliotecaEsteticaCorporalScope) || Boolean(bibliotecaEsteticaCapilarScope)
   const searchParams = useSearchParams()
   const router = useRouter()
   const pathname = usePathname()
@@ -51,7 +56,7 @@ function LinksHubContentInner({
     <div className="space-y-3">
         {/* Dois blocos lado a lado desde o mobile — menos altura, sugestões aparecem antes no scroll */}
         <div className="space-y-2">
-          {!bibliotecaEsteticaCorporalScope ? (
+          {!proEsteticaProBiblioteca ? (
             <>
               <h1 className="text-lg sm:text-xl font-bold text-gray-900 leading-tight">Links</h1>
               <p className="text-gray-600 text-xs sm:text-sm">O que você quer fazer?</p>
@@ -132,6 +137,7 @@ function LinksHubContentInner({
             areaLabel={areaLabel}
             embedded
             esteticaCorporalScope={bibliotecaEsteticaCorporalScope}
+            esteticaCapilarScope={bibliotecaEsteticaCapilarScope}
           />
         )}
         {tab === 'meus' && (
@@ -139,7 +145,7 @@ function LinksHubContentInner({
             areaCodigo={areaCodigo as OnboardingAreaCodigo}
             areaLabel={areaLabel}
             embedded
-            proEsteticaCorporalEmbedded={!!bibliotecaEsteticaCorporalScope}
+            proEsteticaCorporalEmbedded={proEsteticaProBiblioteca}
           />
         )}
     </div>
