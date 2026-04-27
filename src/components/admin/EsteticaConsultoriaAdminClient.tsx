@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { ConsultoriaKindEditor } from '@/components/admin/consultoria/ConsultoriaKindEditor'
 import {
   buildEsteticaConsultoriaResponderUrl,
@@ -509,6 +509,8 @@ export default function EsteticaConsultoriaAdminClient() {
     if (raw === 'capilar' || raw === 'corporal') return raw
     return null
   }, [searchParams])
+  const clienteParam = useMemo(() => searchParams.get('cliente')?.trim() ?? '', [searchParams])
+  const deepLinkClienteAplicado = useRef<string>('')
 
   const [clients, setClients] = useState<YladaEsteticaConsultClientRow[]>([])
   const [clientsLoading, setClientsLoading] = useState(true)
@@ -1071,6 +1073,23 @@ export default function EsteticaConsultoriaAdminClient() {
     setSelected(null)
     setTab('editar')
   }
+
+  useEffect(() => {
+    if (!clienteParam) {
+      deepLinkClienteAplicado.current = ''
+      return
+    }
+    if (deepLinkClienteAplicado.current === clienteParam) return
+    if (clientsLoading) return
+    const c = clients.find((x) => x.id === clienteParam)
+    if (c) {
+      setSelectedClient(c)
+      setClientForm(clientFormDefaults(c))
+      setSelected(null)
+      setTab('editar')
+      deepLinkClienteAplicado.current = clienteParam
+    }
+  }, [clienteParam, clients, clientsLoading])
 
   const saveClientData = async () => {
     if (!selectedClient?.id || !clientForm) return

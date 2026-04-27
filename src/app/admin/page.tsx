@@ -16,6 +16,8 @@ type QuickAction = {
   link: string
   color: string
   destaque?: boolean
+  /** Secção Estratégia — aparência mais neutra */
+  reservada?: boolean
 }
 
 interface StatsData {
@@ -74,9 +76,11 @@ function ActionCard({ acao }: { acao: QuickAction }) {
     <Link
       href={acao.link}
       className={`bg-white rounded-xl p-5 shadow-sm border-2 transition-all group ${
-        acao.destaque
-          ? 'border-blue-300 hover:border-blue-400 hover:shadow-lg'
-          : 'border-gray-200 hover:border-blue-300 hover:shadow-md'
+        acao.reservada
+          ? 'border-slate-200/90 hover:border-slate-300 bg-slate-50/50 hover:shadow'
+          : acao.destaque
+            ? 'border-blue-300 hover:border-blue-400 hover:shadow-lg'
+            : 'border-gray-200 hover:border-blue-300 hover:shadow-md'
       }`}
     >
       <div className="flex items-start space-x-3">
@@ -153,23 +157,14 @@ function AdminDashboardContent() {
 
   const negocio = useMemo(() => resumoPorNegocio(stats), [stats])
 
-  const acoesOperacao: QuickAction[] = [
+  const acoesOperacaoFoco: QuickAction[] = [
     {
-      id: 'minha-orientacao',
-      title: 'Minha orientação',
-      description: 'Tarefas semanais para otimizar: checklist + próximo passo sugerido',
+      id: 'consultorias-hub',
+      title: 'Consultorias',
+      description: 'Pró Líderes, estética corporal e terapia capilar',
       icon: '📋',
-      link: '/admin/minha-orientacao',
-      color: 'bg-emerald-600',
-      destaque: true,
-    },
-    {
-      id: 'inteligencia-ylada',
-      title: 'Inteligência YLADA',
-      description: 'Decisões em um lugar: insights, funil, intenção e links para o restante',
-      icon: '🧠',
-      link: '/admin/inteligencia-ylada',
-      color: 'bg-indigo-600',
+      link: '/admin/consultorias',
+      color: 'bg-indigo-700',
       destaque: true,
     },
     {
@@ -181,19 +176,12 @@ function AdminDashboardContent() {
       color: 'bg-blue-500',
       destaque: true,
     },
-    {
-      id: 'whatsapp-workshop-inscricoes',
-      title: 'Workshop — inscrições (WhatsApp)',
-      description:
-        'Quem preencheu as landings (ex.: Nutri → Empresária, Gláucia); pendentes e 1ª mensagem. Agenda: WhatsApp → workshop.',
-      icon: '📱',
-      link: '/admin/whatsapp/cadastros-workshop',
-      color: 'bg-purple-600',
-      destaque: true,
-    },
+  ]
+
+  const acoesFinancasSistema: QuickAction[] = [
     {
       id: 'subscriptions',
-      title: 'Gerenciar Assinaturas',
+      title: 'Gerenciar assinaturas',
       description: 'Planos gratuitos e migração de assinaturas',
       icon: '🎁',
       link: '/admin/subscriptions',
@@ -201,12 +189,11 @@ function AdminDashboardContent() {
     },
     {
       id: 'receitas',
-      title: 'Receitas & Assinaturas',
+      title: 'Receitas e assinaturas',
       description: 'Controle financeiro e assinaturas',
       icon: '💰',
       link: '/admin/receitas',
       color: 'bg-yellow-500',
-      destaque: true,
     },
     {
       id: 'trials',
@@ -216,7 +203,6 @@ function AdminDashboardContent() {
       icon: '🎁',
       link: '/admin/trials',
       color: 'bg-emerald-600',
-      destaque: true,
     },
     {
       id: 'ylada-links',
@@ -227,127 +213,12 @@ function AdminDashboardContent() {
       color: 'bg-indigo-500',
     },
     {
-      id: 'ylada-valuation',
-      title: 'Valuation (intenção & conversão)',
-      description: 'Dados estruturados para narrativa estratégica — separado de Analytics',
-      icon: '💎',
-      link: '/admin/ylada/valuation',
-      color: 'bg-slate-700',
-      destaque: true,
-    },
-    {
-      id: 'funnel-tracking',
-      title: 'Funil visitante (Tracking)',
-      description: 'Da página inicial ao cadastro: quantos passam em cada etapa',
-      icon: '📍',
-      link: '/admin/tracking',
-      color: 'bg-cyan-600',
-      destaque: true,
-    },
-    {
-      id: 'ylada-behavioral-data',
-      title: 'Dados comportamentais',
-      description: 'Telemetria geral; o funil da landing está em “Funil visitante (Tracking)”',
-      icon: '📈',
-      link: '/admin/ylada/behavioral-data',
-      color: 'bg-violet-500',
-    },
-    {
-      id: 'ylada-usage-survey',
-      title: 'Pesquisa de uso (anônima)',
-      description: 'Respostas da página /pt/pesquisa-uso-ylada — perfil 1–4 e JSON',
-      icon: '📝',
-      link: '/admin/ylada/usage-survey',
-      color: 'bg-teal-600',
-    },
-    {
-      id: 'ylada-uso-wellness-v1',
-      title: 'Pesquisa Wellness v1',
-      description: 'Respostas de /uso-wellness-v1 — hábitos, Noel e JSON',
-      icon: '🌿',
-      link: '/admin/ylada/uso-wellness-v1',
-      color: 'bg-emerald-600',
-    },
-    {
-      id: 'ylada-clinicas-estetica-corporal',
-      title: 'Clínicas estética corporal',
-      description: 'Intake B2B /pt/clinicas-estetica-corporal — CSV e notificação e-mail',
-      icon: '💆‍♀️',
-      link: '/admin/ylada/clinicas-estetica-corporal',
-      color: 'bg-teal-600',
-    },
-    {
-      id: 'pro-lideres-onboarding',
-      title: 'Pro Líderes onboarding',
-      description: 'Criar links de onboarding e acompanhar respostas por e-mail',
-      icon: '🧭',
-      link: '/admin/pro-lideres/onboarding',
-      color: 'bg-emerald-600',
-      destaque: true,
-    },
-    {
-      id: 'pro-lideres-manual-leader',
-      title: 'Pro Líderes — cadastro manual',
-      description: 'Senha definida por ti, conta + tenant + texto para enviar ao líder',
-      icon: '🔑',
-      link: '/admin/pro-lideres/manual-leader',
-      color: 'bg-teal-700',
-      destaque: true,
-    },
-    {
-      id: 'consultorias-hub',
-      title: 'Consultorias',
-      description: 'Pro Líderes ou estética capilar/corporal — materiais, formulários e respostas',
-      icon: '📋',
-      link: '/admin/consultorias',
-      color: 'bg-indigo-700',
-      destaque: true,
-    },
-    {
-      id: 'ylada-estetica-consultoria-corporal',
-      title: 'Estética corporal — consultoria YLADA',
-      description:
-        'Atalho direto: clientes, diagnóstico corporal fixo, gerar link por clínica e respostas (não confundir com Pro Estética Corporal)',
-      icon: '🧾',
-      link: '/admin/estetica-consultoria?segmento=corporal',
-      color: 'bg-rose-600',
-      destaque: true,
-    },
-    {
-      id: 'pro-estetica-corporal-onboarding',
-      title: 'Pro Estética Corporal — onboarding',
-      description: 'Links de questionário (consultoria); respostas aplicadas ao ambiente da dona',
-      icon: '💆‍♀️',
-      link: '/admin/pro-estetica-corporal/onboarding',
-      color: 'bg-sky-600',
-      destaque: true,
-    },
-    {
-      id: 'motor-crescimento-hub',
-      title: 'Motor de crescimento',
-      description: 'Documentação, agentes e checklist',
-      icon: '📚',
-      link: '/admin/motor-crescimento',
-      color: 'bg-indigo-600',
-      destaque: true,
-    },
-    {
-      id: 'minhas-acoes-growth',
-      title: 'Minhas ações (growth)',
-      description: 'Checklist de captação — salva no navegador',
-      icon: '✅',
-      link: '/admin/minhas-acoes',
-      color: 'bg-emerald-600',
-      destaque: true,
-    },
-    {
       id: 'analytics',
       title: 'Analytics',
       description: 'Relatórios detalhados',
       icon: '📊',
       link: '/admin/analytics',
       color: 'bg-orange-500',
-      destaque: true,
     },
     {
       id: 'config',
@@ -364,6 +235,98 @@ function AdminDashboardContent() {
       icon: '👨‍💼',
       link: '/admin/support/agents',
       color: 'bg-pink-500',
+    },
+  ]
+
+  const acoesEstrategiaValorSchon: QuickAction[] = [
+    {
+      id: 'inteligencia-ylada',
+      title: 'Inteligência YLADA',
+      description: 'Insights, funil e intenção — para rebalancear quando fizeres análise',
+      icon: '🧠',
+      link: '/admin/inteligencia-ylada',
+      color: 'bg-indigo-600',
+      reservada: true,
+    },
+    {
+      id: 'ylada-valuation',
+      title: 'Valuation (intenção e conversão)',
+      description: 'Dados para narrativa estratégica — separado de Analytics',
+      icon: '💎',
+      link: '/admin/ylada/valuation',
+      color: 'bg-slate-600',
+      reservada: true,
+    },
+    {
+      id: 'motor-crescimento-hub',
+      title: 'Motor de crescimento (Valor Schon)',
+      description: 'Documentação, agentes e checklist — uso pontual',
+      icon: '📚',
+      link: '/admin/motor-crescimento',
+      color: 'bg-indigo-500',
+      reservada: true,
+    },
+    {
+      id: 'minhas-acoes-growth',
+      title: 'Minhas ações (growth)',
+      description: 'Checklist de captação (navegador) — alinhado a operações Valor Schon',
+      icon: '✅',
+      link: '/admin/minhas-acoes',
+      color: 'bg-emerald-600',
+      reservada: true,
+    },
+    {
+      id: 'funnel-tracking',
+      title: 'Funil visitante (tracking)',
+      description: 'Da página inicial ao cadastro: etapas do funil',
+      icon: '📍',
+      link: '/admin/tracking',
+      color: 'bg-cyan-600',
+      reservada: true,
+    },
+    {
+      id: 'ylada-behavioral-data',
+      title: 'Dados comportamentais',
+      description: 'Telemetria geral; funil de landing no item “Funil visitante”',
+      icon: '📈',
+      link: '/admin/ylada/behavioral-data',
+      color: 'bg-violet-500',
+      reservada: true,
+    },
+  ]
+
+  const acoesArquivo: QuickAction[] = [
+    {
+      id: 'minha-orientacao',
+      title: 'Minha orientação',
+      description: 'Tarefas semanais e checklist (legado / baixo uso)',
+      icon: '📋',
+      link: '/admin/minha-orientacao',
+      color: 'bg-gray-500',
+    },
+    {
+      id: 'whatsapp-workshop-inscricoes',
+      title: 'Workshop — inscrições (WhatsApp)',
+      description: 'Landings e fila de mensagens — se precisares ver histórico',
+      icon: '📱',
+      link: '/admin/whatsapp/cadastros-workshop',
+      color: 'bg-purple-600',
+    },
+    {
+      id: 'ylada-uso-wellness-v1',
+      title: 'Pesquisa Wellness v1',
+      description: 'Respostas de /uso-wellness-v1 (descontinuada no dia a dia)',
+      icon: '🌿',
+      link: '/admin/ylada/uso-wellness-v1',
+      color: 'bg-emerald-600',
+    },
+    {
+      id: 'ylada-usage-survey',
+      title: 'Pesquisa de uso (anônima)',
+      description: 'Respostas /pt/pesquisa-uso-ylada — arquivo',
+      icon: '📝',
+      link: '/admin/ylada/usage-survey',
+      color: 'bg-teal-600',
     },
   ]
 
@@ -433,11 +396,11 @@ function AdminDashboardContent() {
     },
   ]
 
-  const acoesSecundarias: QuickAction[] = [
+  const acoesArquivoUtilitarios: QuickAction[] = [
     {
       id: 'chat-qa',
-      title: 'ChatIA — Perguntas e respostas',
-      description: 'Respostas do assistente (revisar se ainda em uso)',
+      title: 'ChatIA — perguntas e respostas',
+      description: 'Respostas do assistente (rever se ainda em uso)',
       icon: '🤖',
       link: '/admin/chat-qa',
       color: 'bg-cyan-500',
@@ -553,9 +516,23 @@ function AdminDashboardContent() {
         )}
 
         <section className="mb-10">
-          <h2 className="text-lg font-semibold text-gray-900 mb-3">Operação & YLADA</h2>
+          <h2 className="text-lg font-semibold text-gray-900 mb-0.5">Operação — consultorias e contas</h2>
+          <p className="text-sm text-gray-500 mb-3 max-w-2xl">
+            <strong className="font-medium text-gray-700">Consultorias</strong>: Pró Líderes, estética corporal e
+            terapia capilar. <strong className="font-medium text-gray-700">Usuários</strong>: contas gerais.
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 max-w-3xl gap-3">
+            {acoesOperacaoFoco.map((a) => (
+              <ActionCard key={a.id} acao={a} />
+            ))}
+          </div>
+        </section>
+
+        <section className="mb-10">
+          <h2 className="text-lg font-semibold text-gray-900 mb-0.5">Finanças e sistema</h2>
+          <p className="text-sm text-gray-500 mb-3">Assinaturas, receita, diagnósticos, relatórios e configuração.</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {acoesOperacao.map((a) => (
+            {acoesFinancasSistema.map((a) => (
               <ActionCard key={a.id} acao={a} />
             ))}
           </div>
@@ -582,12 +559,35 @@ function AdminDashboardContent() {
           </div>
         </section>
 
-        <details className="mb-10">
-          <summary className="cursor-pointer text-sm font-medium text-gray-600 hover:text-gray-900">
-            Outros (templates, ChatIA)
+        <section className="mb-10">
+          <h2 className="text-base font-semibold text-slate-700 mb-0.5">Estratégia e análise (Valor Schon)</h2>
+          <p className="text-sm text-slate-500 mb-3 max-w-3xl">
+            Crescimento, funil, valuation e checklists — para revisões e momentos de análise, não precisa de destaque
+            no dia a dia.
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {acoesEstrategiaValorSchon.map((a) => (
+              <ActionCard key={a.id} acao={a} />
+            ))}
+          </div>
+        </section>
+
+        <details className="mb-10 group">
+          <summary className="cursor-pointer text-sm font-medium text-gray-500 hover:text-gray-800 list-none flex items-center gap-2 marker:hidden">
+            <span className="text-gray-400 group-open:rotate-90 transition-transform" aria-hidden>
+              ▸
+            </span>
+            Arquivo, pesquisas antigas e utilitários
           </summary>
-          <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3 pl-4 border-l-2 border-gray-200">
-            {acoesSecundarias.map((a) => (
+          <p className="text-xs text-gray-500 mt-2 mb-3 pl-6 max-w-2xl">
+            Rotinas que deixaste de usar no fluxo normal (ex.: orientação, workshop, pesquisa Wells) e ferramentas
+            acessórias.
+          </p>
+          <div className="mt-1 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 pl-4 border-l-2 border-gray-200">
+            {acoesArquivo.map((a) => (
+              <ActionCard key={a.id} acao={a} />
+            ))}
+            {acoesArquivoUtilitarios.map((a) => (
               <ActionCard key={a.id} acao={a} />
             ))}
           </div>
