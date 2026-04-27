@@ -89,8 +89,9 @@ function AdminProEsteticaCorporalOnboardingContent() {
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Admin — Onboarding Pro Estética Corporal</h1>
           <p className="text-sm text-gray-600">
-            Gere um link para a dona responder o questionário antes da consultoria. As respostas aplicam-se ao ambiente
-            quando ela entrar no painel com o mesmo e-mail.
+            Gere um link para a dona fazer o <strong className="font-semibold text-gray-800">micro-diagnóstico inicial</strong>{' '}
+            (entrada para o mentor Noel, não só cadastro). As respostas aplicam-se ao ambiente quando ela entrar no painel
+            com o mesmo e-mail.
           </p>
           <p className="mt-2 text-sm">
             <Link href="/admin/pro-lideres/onboarding" className="font-semibold text-blue-600 underline hover:text-blue-800">

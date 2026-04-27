@@ -49,6 +49,37 @@ export function corporalOnboardingExpiresAtDefault(): Date {
   return d
 }
 
+/** Valores guardados em `questionnaire_answers.market_context` (UI: select opcional). */
+export const CORPORAL_ONBOARDING_MARKET_CONTEXT_VALUES = [
+  '',
+  'interior_pequena',
+  'cidade_media',
+  'capital_metro',
+] as const
+
+export type CorporalOnboardingMarketContext = (typeof CORPORAL_ONBOARDING_MARKET_CONTEXT_VALUES)[number]
+
+export const CORPORAL_ONBOARDING_MARKET_CONTEXT_LABELS: Record<
+  Exclude<CorporalOnboardingMarketContext, ''>,
+  string
+> = {
+  interior_pequena: 'Interior ou cidade pequena',
+  cidade_media: 'Cidade média / polo regional',
+  capital_metro: 'Capital ou grande metrópole',
+}
+
+export function normalizeCorporalOnboardingMarketContext(raw: unknown): CorporalOnboardingMarketContext {
+  const s = String(raw ?? '').trim()
+  return (CORPORAL_ONBOARDING_MARKET_CONTEXT_VALUES as readonly string[]).includes(s)
+    ? (s as CorporalOnboardingMarketContext)
+    : ''
+}
+
+export function labelForCorporalOnboardingMarketContext(v: CorporalOnboardingMarketContext): string | null {
+  if (!v) return null
+  return CORPORAL_ONBOARDING_MARKET_CONTEXT_LABELS[v] ?? null
+}
+
 /**
  * Aplica respostas do onboarding (por e-mail) ao `leader_tenants` corporal da dona,
  * após primeiro acesso com tenant resolvido — mesmo fluxo que Pro Líderes.
@@ -95,13 +126,24 @@ export async function applyCompletedCorporalOnboardingForEmail(params: {
   const years = typeof ans.years_in_aesthetics === 'number' ? ans.years_in_aesthetics : null
   const goal = typeof ans.primary_goal === 'string' ? ans.primary_goal.trim() : ''
   const challenge = typeof ans.main_challenge === 'string' ? ans.main_challenge.trim() : ''
+  const cityRegion = typeof ans.city_region === 'string' ? ans.city_region.trim() : ''
+  const marketCtx = normalizeCorporalOnboardingMarketContext(ans.market_context)
+  const marketLabel = labelForCorporalOnboardingMarketContext(marketCtx)
+  const serviceToGrow = typeof ans.service_to_grow === 'string' ? ans.service_to_grow.trim() : ''
+  const mainLeadChannel = typeof ans.main_lead_channel === 'string' ? ans.main_lead_channel.trim() : ''
 
   const bodyLines: string[] = []
+  if (cityRegion) bodyLines.push(`Cidade ou região: ${cityRegion}`)
+  if (marketLabel) bodyLines.push(`Contexto de mercado: ${marketLabel}`)
+  if (serviceToGrow) bodyLines.push(`Linha de serviço que mais quer fazer crescer: ${serviceToGrow}`)
+  if (mainLeadChannel) bodyLines.push(`Principal origem de contactos hoje: ${mainLeadChannel}`)
   if (years != null) bodyLines.push(`Tempo na estética: ${years} ${years === 1 ? 'ano' : 'anos'}`)
   if (goal) bodyLines.push(`Objetivo (90 dias): ${goal}`)
-  if (challenge) bodyLines.push(`Maior desafio: ${challenge}`)
+  if (challenge) bodyLines.push(`Maior desafio agora: ${challenge}`)
   const structured =
-    bodyLines.length > 0 ? ['[Onboarding Pro Estética Corporal]', ...bodyLines].join('\n') : ''
+    bodyLines.length > 0
+      ? ['[Micro-diagnóstico inicial — Pro Estética Corporal]', ...bodyLines].join('\n')
+      : ''
 
   const focusExtra = focusRaw.trim()
   const focus_notes =

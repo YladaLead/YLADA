@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
+import { normalizeCorporalOnboardingMarketContext } from '@/lib/pro-estetica-corporal-onboarding'
 
 type SubmitBody = {
   token?: string
@@ -10,6 +11,10 @@ type SubmitBody = {
   primary_goal?: string
   main_challenge?: string
   years_in_aesthetics?: number | string
+  city_region?: string
+  market_context?: string
+  service_to_grow?: string
+  main_lead_channel?: string
 }
 
 const clip = (value: unknown, max = 500): string | null => {
@@ -61,10 +66,11 @@ export async function POST(request: NextRequest) {
 
   const displayName = clip(body.display_name, 160)
   if (!displayName || displayName.length < 2) {
-    return NextResponse.json({ error: 'Nome para exibição é obrigatório.' }, { status: 400 })
+    return NextResponse.json({ error: 'Indica como queres ser chamada no painel.' }, { status: 400 })
   }
 
   const yearsAesthetics = parseOptionalInt(body.years_in_aesthetics, { min: 0, max: 70 })
+  const market_context = normalizeCorporalOnboardingMarketContext(body.market_context)
 
   const answers = {
     display_name: displayName,
@@ -74,6 +80,10 @@ export async function POST(request: NextRequest) {
     primary_goal: clip(body.primary_goal, 200),
     main_challenge: clip(body.main_challenge, 300),
     years_in_aesthetics: yearsAesthetics,
+    city_region: clip(body.city_region, 120),
+    market_context: market_context || null,
+    service_to_grow: clip(body.service_to_grow, 200),
+    main_lead_channel: clip(body.main_lead_channel, 120),
   }
 
   const { error: updateErr } = await supabaseAdmin

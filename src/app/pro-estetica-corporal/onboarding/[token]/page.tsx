@@ -51,7 +51,7 @@ export default function ProEsteticaCorporalOnboardingPage() {
         reason === 'expired'
           ? 'Este link expirou.'
           : reason === 'completed'
-            ? 'Este questionário já foi respondido.'
+            ? 'Este diagnóstico inicial já foi concluído.'
             : reason === 'cancelled'
               ? 'Este link foi cancelado.'
               : 'Link indisponível.'
@@ -81,6 +81,10 @@ export default function ProEsteticaCorporalOnboardingPage() {
         token,
         display_name: form.displayName,
         team_name: form.teamName,
+        city_region: form.cityRegion,
+        market_context: form.marketContext,
+        service_to_grow: form.serviceToGrow,
+        main_lead_channel: form.mainLeadChannel,
         whatsapp: form.whatsapp,
         years_in_aesthetics: form.yearsInAesthetics,
         primary_goal: form.primaryGoal,
@@ -118,20 +122,29 @@ export default function ProEsteticaCorporalOnboardingPage() {
           <p className="rounded-lg bg-red-50 px-3 py-2 text-center text-sm text-red-700">{invalidMessage}</p>
         ) : saved ? (
           <div className="space-y-3 text-center">
-            <h1 className="text-xl font-bold text-gray-900">Recebido com sucesso</h1>
+            <h1 className="text-xl font-bold text-gray-900">Recebido — obrigada</h1>
             <p className="text-sm text-gray-600">
-              Obrigada! Já recebemos os dados do onboarding. Quando entrares no Pro Estética Corporal com este e-mail,
-              vamos aplicar automaticamente ao teu ambiente.
+              O teu micro-diagnóstico inicial já está connosco. Quando entrares no Pro Estética Corporal com este e-mail,
+              aplicamos estes dados ao teu espaço e o Noel pode usar este contexto desde o primeiro contacto.
             </p>
           </div>
         ) : validData ? (
           <div className="space-y-4">
-            <h1 className="text-center text-xl font-bold text-gray-900">Onboarding — Estética corporal</h1>
+            <div className="space-y-2 text-center">
+              <p className="text-xs font-semibold uppercase tracking-wide text-blue-600">Pro Estética Corporal</p>
+              <h1 className="text-xl font-bold text-gray-900">Micro-diagnóstico inicial</h1>
+              <p className="text-sm text-gray-600">
+                Em poucos minutos clarificamos o teu contexto — não é um formulário anónimo: é a{' '}
+                <strong className="font-semibold text-gray-800">entrada para o mentor inteligente</strong> (Noel) e para o
+                teu painel. Respostas honestas geram sugestões mais certeiras.
+              </p>
+            </div>
             <p className="text-center text-sm text-gray-600">
-              E-mail vinculado: <strong>{validData.invitedEmail}</strong>
+              E-mail: <strong>{validData.invitedEmail}</strong>
             </p>
             <p className="text-center text-xs text-gray-500">
-              Prazo: {new Date(validData.expiresAt).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })}
+              Este link vale até{' '}
+              {new Date(validData.expiresAt).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })}
             </p>
 
             {error && <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
