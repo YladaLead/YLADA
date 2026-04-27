@@ -46,7 +46,7 @@ export async function PATCH(
 
   const ctx = await resolveEsteticaCapilarTenantContext(supabaseAdmin, user)
   if (!ctx) {
-    return NextResponse.json({ error: 'Sem acesso ao espaço Pro Estética Capilar.' }, { status: 403 })
+    return NextResponse.json({ error: 'Sem acesso ao espaço Terapia capilar.' }, { status: 403 })
   }
   if (ctx.tenant.owner_user_id !== user.id) {
     return NextResponse.json({ error: 'Apenas o profissional responsável pode editar scripts.' }, { status: 403 })
@@ -117,7 +117,7 @@ export async function DELETE(
 
   const ctx = await resolveEsteticaCapilarTenantContext(supabaseAdmin, user)
   if (!ctx) {
-    return NextResponse.json({ error: 'Sem acesso ao espaço Pro Estética Capilar.' }, { status: 403 })
+    return NextResponse.json({ error: 'Sem acesso ao espaço Terapia capilar.' }, { status: 403 })
   }
   if (ctx.tenant.owner_user_id !== user.id) {
     return NextResponse.json({ error: 'Apenas o profissional responsável pode apagar scripts.' }, { status: 403 })

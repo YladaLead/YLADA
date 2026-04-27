@@ -13,7 +13,7 @@ function WhatsAppGlyph({ className }: { className?: string }) {
 export default function ProEsteticaCorporalAguardandoPage() {
   return (
     <div className="mx-auto max-w-md space-y-6 text-center">
-      <h1 className="text-2xl font-bold text-gray-900">Acesso Pro Estética Corporal</h1>
+      <h1 className="text-2xl font-bold text-gray-900">Acesso — Estética corporal</h1>
       <p className="text-base text-gray-600">
         A sua conta ainda não tem este espaço ativo. Fale com a nossa equipe para implantação ou use outra conta já
         associada a esta edição.

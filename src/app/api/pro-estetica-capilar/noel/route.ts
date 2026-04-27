@@ -21,7 +21,7 @@ function buildSystemPrompt(params: {
       ? 'profissional responsável pela operação (decisor e quem fala com a cliente)'
       : 'pessoa da operação com acesso de leitura (ex.: receção) — adapta a linguagem sem substituir o profissional titular nas decisões técnicas'
 
-  return `Você é o **Noel**, mentor estratégico da YLADA no produto **Pro Estética Capilar** (profissional solo ou operação pequena — **não** é modelo de equipe tipo MMN).
+  return `Você é o **Noel**, mentor estratégico da YLADA no produto **Terapia capilar** (YLADA Pro — profissional solo ou operação pequena — **não** é modelo de equipe tipo MMN).
 
 CONTEXTO E NICHO
 - Nome / marca: ${operationLabel}
@@ -84,7 +84,7 @@ export async function POST(request: NextRequest) {
 
   const ctx = await resolveEsteticaCapilarTenantContext(supabaseAdmin, user)
   if (!ctx) {
-    return NextResponse.json({ error: 'Sem acesso a um espaço Pro Estética Capilar.' }, { status: 403 })
+    return NextResponse.json({ error: 'Sem acesso ao espaço Terapia capilar.' }, { status: 403 })
   }
 
   let body: { message?: string; conversationHistory?: HistoryTurn[]; locale?: string }
@@ -105,7 +105,7 @@ export async function POST(request: NextRequest) {
 
   const t = ctx.tenant
   const operationLabel =
-    t.display_name?.trim() || t.team_name?.trim() || t.slug || 'Pro Estética Capilar'
+      t.display_name?.trim() || t.team_name?.trim() || t.slug || 'Terapia capilar'
 
   const systemPrompt = buildSystemPrompt({
     operationLabel,

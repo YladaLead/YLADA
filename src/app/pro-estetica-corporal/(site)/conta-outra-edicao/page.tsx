@@ -10,7 +10,7 @@ export default function ProEsteticaCorporalContaOutraEdicaoPage() {
       <p className="text-gray-700">
         O teu e-mail já está ligado a um espaço de <strong className="text-gray-900">outra linha</strong> (por exemplo
         Pro Líderes). Por agora, cada conta tem <strong className="text-gray-900">um</strong> tenant — usa um e-mail
-        dedicado para <strong className="text-gray-900">Pro Estética Corporal</strong> ou fala connosco para
+        dedicado para <strong className="text-gray-900">Estética corporal</strong> ou fala connosco para
         reorganizar o acesso.
       </p>
       <div className="flex flex-col gap-3 sm:flex-row">

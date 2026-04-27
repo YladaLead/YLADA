@@ -9,7 +9,7 @@ export function ProEsteticaCorporalHomeBody() {
   return (
     <div className="mx-auto max-w-3xl space-y-10">
       <div className="space-y-3">
-        <p className="text-sm font-semibold text-blue-600">YLADA Pro Estética Corporal</p>
+        <p className="text-sm font-semibold text-blue-600">YLADA Pro — Estética corporal</p>
         <h1 className="text-2xl font-bold leading-tight text-gray-900 sm:text-3xl">
           Aumente a performance do seu negócio em estética corporal com um sistema completo de desenvolvimento.
         </h1>

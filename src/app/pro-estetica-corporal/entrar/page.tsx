@@ -1,7 +1,7 @@
 import LoginForm from '@/components/auth/LoginForm'
 
 /**
- * Login Pro Estética Corporal — `?next=/pro-estetica-corporal/...` após sessão.
+ * Login YLADA Pro — Estética corporal. E-mail dedicado recomendado. `?next=/pro-estetica-corporal/...` após sessão.
  */
 export default async function ProEsteticaCorporalEntrarPage({
   searchParams,

@@ -35,7 +35,7 @@ export async function GET(request: NextRequest) {
 
   const ctx = await resolveEsteticaCapilarTenantContext(supabaseAdmin, user)
   if (!ctx) {
-    return NextResponse.json({ error: 'Sem acesso ao espaço Pro Estética Capilar.' }, { status: 403 })
+    return NextResponse.json({ error: 'Sem acesso ao espaço Terapia capilar.' }, { status: 403 })
   }
 
   const { data, error } = await supabaseAdmin
@@ -67,7 +67,7 @@ export async function POST(request: NextRequest) {
 
   const ctx = await resolveEsteticaCapilarTenantContext(supabaseAdmin, user)
   if (!ctx) {
-    return NextResponse.json({ error: 'Sem acesso ao espaço Pro Estética Capilar.' }, { status: 403 })
+    return NextResponse.json({ error: 'Sem acesso ao espaço Terapia capilar.' }, { status: 403 })
   }
   if (ctx.tenant.owner_user_id !== user.id) {
     return NextResponse.json({ error: 'Apenas o profissional responsável pode criar scripts.' }, { status: 403 })

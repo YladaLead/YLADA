@@ -17,6 +17,21 @@ export default function AdminConsultoriasTerapiaCapilarPage() {
             </p>
           </header>
 
+          <aside className="rounded-xl border border-amber-200 bg-amber-50/70 px-4 py-3 text-sm text-amber-950 space-y-1 max-w-3xl">
+            <p className="font-semibold text-gray-900">Painel Terapia capilar — demo (se aplicaste o SQL no Supabase)</p>
+            <p>
+              <strong>E-mail:</strong>{' '}
+              <code className="text-xs bg-white/80 px-1 rounded border border-amber-100">demo@proesteticacapilar.com</code>{' '}
+              · <strong>Senha:</strong>{' '}
+              <code className="text-xs bg-white/80 px-1 rounded border border-amber-100">123456</code>
+            </p>
+            <p className="text-xs text-amber-900/90">
+              Script: <code className="text-[11px]">scripts/pro-estetica-capilar-demo-login.sql</code> · Entrada:{' '}
+              <code className="text-[11px]">/pro-estetica-capilar/entrar</code>. Clientes reais: e-mail dedicado + senha
+              própria.
+            </p>
+          </aside>
+
           <FichasPipelineBento linha="capilar" />
 
           <ul className="grid gap-3">
@@ -28,7 +43,7 @@ export default function AdminConsultoriasTerapiaCapilarPage() {
                 <span className="text-2xl" aria-hidden>
                   🔗
                 </span>
-                <h2 className="mt-2 text-lg font-semibold text-gray-900">Onboarding Pro Estética Capilar</h2>
+                <h2 className="mt-2 text-lg font-semibold text-gray-900">Onboarding — Terapia capilar</h2>
                 <p className="mt-1 text-sm text-gray-600">
                   Gerar link de micro-diagnóstico inicial (consultoria / implantação) para o produto vertical capilar.
                 </p>
@@ -42,7 +57,7 @@ export default function AdminConsultoriasTerapiaCapilarPage() {
                 <span className="text-2xl" aria-hidden>
                   ✨
                 </span>
-                <h2 className="mt-2 text-lg font-semibold text-gray-900">Consultoria e diagnóstico (capilar)</h2>
+                <h2 className="mt-2 text-lg font-semibold text-gray-900">Consultoria e diagnóstico — Terapia capilar</h2>
                 <p className="mt-1 text-sm text-gray-600">
                   Clientes, terapia capilar, materiais e respostas (inclui registos “ambos” com corporal, se existirem).
                 </p>

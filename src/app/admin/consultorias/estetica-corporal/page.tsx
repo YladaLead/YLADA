@@ -19,6 +19,21 @@ export default function AdminConsultoriasEsteticaCorporalPage() {
             </p>
           </header>
 
+          <aside className="rounded-xl border border-amber-200 bg-amber-50/70 px-4 py-3 text-sm text-amber-950 space-y-1 max-w-3xl">
+            <p className="font-semibold text-gray-900">Painel Estética corporal — demo (se aplicaste o SQL no Supabase)</p>
+            <p>
+              <strong>E-mail:</strong>{' '}
+              <code className="text-xs bg-white/80 px-1 rounded border border-amber-100">demo@proesteticacorporal.com</code>{' '}
+              · <strong>Senha:</strong>{' '}
+              <code className="text-xs bg-white/80 px-1 rounded border border-amber-100">123456</code>
+            </p>
+            <p className="text-xs text-amber-900/90">
+              Script: <code className="text-[11px]">scripts/pro-estetica-corporal-demo-login.sql</code> · Entrada:{' '}
+              <code className="text-[11px]">/pro-estetica-corporal/entrar</code>. Clientes reais: e-mail dedicado + senha
+              própria.
+            </p>
+          </aside>
+
           <FichasPipelineBento linha="corporal" />
 
           <ul className="grid gap-3 sm:grid-cols-1 md:grid-cols-3">
@@ -33,7 +48,7 @@ export default function AdminConsultoriasEsteticaCorporalPage() {
             <HubRow
               href="/admin/pro-estetica-corporal/onboarding"
               icon="💆‍♀️"
-              title="Pro Estética — onboarding"
+              title="Estética corporal — onboarding"
               description="Questionários; respostas no ambiente da clínica"
               border="border-sky-200"
               hover="hover:border-sky-400 hover:bg-sky-50/50"

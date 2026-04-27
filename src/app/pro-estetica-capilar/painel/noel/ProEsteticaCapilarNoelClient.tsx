@@ -24,7 +24,7 @@ export default function ProEsteticaCapilarNoelClient() {
         className="flex min-h-[min(70vh,560px)] flex-1 flex-col"
         chatApiPath="/api/pro-estetica-capilar/noel"
         skipYladaContextualWelcome
-        headerTitle="Noel — Estética capilar"
+        headerTitle="Noel — Terapia capilar"
         hideSuggestionsHeading
         hideInputHint={false}
         sendButtonLabel="Enviar para o Noel"

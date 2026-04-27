@@ -759,14 +759,36 @@ export default function LoginForm({
             </>
           ) : (
             <>
-              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
-                {isSignUp ? 'Criar conta' : 'Bem-vindo'}
-              </h1>
-              <p className="text-sm sm:text-base text-gray-600">
-                {isSignUp
-                  ? `Cadastre-se como ${perfilLabels[perfil]}`
-                  : `Entre na sua conta de ${perfilLabels[perfil]}`}
-              </p>
+              {!isSignUp && proEsteticaCapilarLogin ? (
+                <>
+                  <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Entrar — Terapia capilar</h1>
+                  <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
+                    <strong className="text-gray-800">YLADA Pro — Terapia capilar.</strong> Usa o{' '}
+                    <strong>e-mail dedicado</strong> que combinaste para esta área (não o mesmo de outros produtos
+                    YLADA). Assim evitas conflitos de conta.
+                  </p>
+                </>
+              ) : !isSignUp && proEsteticaCorporalLogin ? (
+                <>
+                  <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Entrar — Estética corporal</h1>
+                  <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
+                    <strong className="text-gray-800">YLADA Pro — Estética corporal.</strong> Usa o{' '}
+                    <strong>e-mail dedicado</strong> que combinaste para esta área (não o mesmo de outros produtos
+                    YLADA). Assim evitas conflitos de conta.
+                  </p>
+                </>
+              ) : (
+                <>
+                  <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
+                    {isSignUp ? 'Criar conta' : 'Bem-vindo'}
+                  </h1>
+                  <p className="text-sm sm:text-base text-gray-600">
+                    {isSignUp
+                      ? `Cadastre-se como ${perfilLabels[perfil]}`
+                      : `Entre na sua conta de ${perfilLabels[perfil]}`}
+                  </p>
+                </>
+              )}
             </>
           )}
         </div>
@@ -801,8 +823,18 @@ export default function LoginForm({
               onChange={handleInputChange(setEmail)}
               required
               className="w-full px-4 py-3 border border-gray-300 rounded-lg transition-all focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-gray-900 placeholder-gray-400"
-              placeholder="seu@email.com"
+              placeholder={
+                proEsteticaCapilarLogin || proEsteticaCorporalLogin
+                  ? 'e-mail dedicado (ex.: pro.sua-clinica@…)'
+                  : 'seu@email.com'
+              }
             />
+            {(proEsteticaCapilarLogin || proEsteticaCorporalLogin) && !isSignUp ? (
+              <p className="mt-2 text-xs text-gray-500 leading-relaxed">
+                Se o sistema disser que o e-mail já está noutro espaço YLADA, trata de um endereço só para{' '}
+                {proEsteticaCapilarLogin ? 'Terapia capilar' : 'Estética corporal'} ou fala connosco.
+              </p>
+            ) : null}
             {(perfil === 'wellness' || perfil === 'coach-bem-estar') && hadTrialEmail && !isSignUp && (
               <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-lg">
                 <p className="text-sm font-medium text-green-800 mb-2">

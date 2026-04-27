@@ -14,7 +14,7 @@ export function ProEsteticaCorporalHeader() {
           <YLADALogo size="md" responsive className="bg-transparent" />
         </Link>
         <div className="flex items-center gap-1 sm:gap-3">
-          <span className="hidden text-sm text-blue-600/80 sm:inline">Pro Estética</span>
+          <span className="hidden text-sm text-blue-600/80 sm:inline">Estética corporal</span>
           <Link
             href="/pro-estetica-corporal/acompanhar"
             className="hidden rounded-lg px-2 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 md:inline md:px-3"

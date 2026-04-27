@@ -36,8 +36,8 @@ export default function ProEsteticaCapilarAreaShell({
           )}
           <header className="sticky top-0 z-20 flex min-h-14 items-center justify-between gap-3 border-b border-gray-200 bg-white px-4 lg:px-6">
             <Link href="/pro-estetica-capilar/painel" className="flex min-w-0 items-center gap-2">
-              <Image src={YLADA_LOGO} alt="YLADA Pro Estetica Capilar" width={90} height={28} className="h-6 w-auto" priority />
-              <span className="truncate text-sm text-gray-700">Pro Estetica Capilar · {operationLabel}</span>
+              <Image src={YLADA_LOGO} alt="YLADA Pro — Terapia capilar" width={90} height={28} className="h-6 w-auto" priority />
+              <span className="truncate text-sm text-gray-700">Terapia capilar · {operationLabel}</span>
             </Link>
           </header>
           <main className="flex-1 p-4 sm:p-5 lg:p-6">{children}</main>

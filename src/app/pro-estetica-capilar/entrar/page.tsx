@@ -1,7 +1,7 @@
 import LoginForm from '@/components/auth/LoginForm'
 
 /**
- * Login Pro Estética Capilar — `?next=/pro-estetica-capilar/...` após sessão (demos no vertical).
+ * Login YLADA Pro — Terapia capilar. E-mail dedicado recomendado. `?next=/pro-estetica-capilar/...` após sessão.
  */
 export default async function ProEsteticaCapilarEntrarPage({
   searchParams,

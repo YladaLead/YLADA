@@ -124,14 +124,15 @@ export default function ProEsteticaCapilarOnboardingPage() {
           <div className="space-y-3 text-center">
             <h1 className="text-xl font-bold text-gray-900">Recebido — obrigada</h1>
             <p className="text-sm text-gray-600">
-              O teu micro-diagnóstico inicial já está connosco. Quando entrares no Pro Estética Capilar com este e-mail,
+              O teu micro-diagnóstico inicial já está connosco. Quando entrares no YLADA Pro — Terapia capilar com este
+              e-mail,
               aplicamos estes dados ao teu espaço e o Noel pode usar este contexto desde o primeiro contacto.
             </p>
           </div>
         ) : validData ? (
           <div className="space-y-4">
             <div className="space-y-2 text-center">
-              <p className="text-xs font-semibold uppercase tracking-wide text-blue-600">Pro Estética Capilar</p>
+              <p className="text-xs font-semibold uppercase tracking-wide text-blue-600">Terapia capilar</p>
               <h1 className="text-xl font-bold text-gray-900">Micro-diagnóstico inicial</h1>
               <p className="text-sm text-gray-600">
                 Em poucos minutos clarificamos o teu contexto — não é um formulário anónimo: é a{' '}

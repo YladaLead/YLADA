@@ -7,7 +7,7 @@ export default function ProEsteticaCorporalBibliotecaLinksPage() {
     <div className="space-y-3">
       <LinksHubContent
         areaCodigo="estetica"
-        areaLabel="Pro Estética Corporal"
+        areaLabel="Estética corporal"
         noAreaShell
         bibliotecaEsteticaCorporalScope
       />

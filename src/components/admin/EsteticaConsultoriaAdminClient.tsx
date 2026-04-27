@@ -1562,6 +1562,51 @@ export default function EsteticaConsultoriaAdminClient() {
         </div>
       </header>
 
+      <section
+        className="rounded-2xl border border-amber-200 bg-amber-50/60 p-4 shadow-sm space-y-2"
+        aria-label="Contas demo Pro Estética"
+      >
+        <h2 className="text-sm font-semibold text-amber-950">Painel Pro Estética — e-mail e senha (referência)</h2>
+        <p className="text-xs text-amber-950/90 max-w-3xl leading-relaxed">
+          <strong>Clientes reais:</strong> cada clínica usa o <strong>próprio e-mail dedicado</strong> (um para Terapia
+          capilar, outro para Estética corporal, se forem produtos separados) e a <strong>senha que definirem</strong> no
+          primeiro acesso ou em «Recuperar senha». Não existe senha fixa na aplicação para contratos pagos.
+        </p>
+        <div className="grid gap-3 sm:grid-cols-2 text-xs text-amber-950/95">
+          <div className="rounded-lg border border-amber-100 bg-white/80 p-3 space-y-1">
+            <p className="font-semibold text-gray-900">Terapia capilar — conta demo (opcional)</p>
+            <p>
+              <strong>E-mail:</strong> <code className="text-[11px] bg-amber-100/80 px-1 rounded">demo@proesteticacapilar.com</code>
+            </p>
+            <p>
+              <strong>Senha:</strong> <code className="text-[11px] bg-amber-100/80 px-1 rounded">123456</code>
+            </p>
+            <p className="text-amber-900/85">
+              Só existe se correste o script <code className="text-[10px]">scripts/pro-estetica-capilar-demo-login.sql</code> no
+              Supabase. Entrada:{' '}
+              <code className="text-[10px] break-all">/pro-estetica-capilar/entrar</code>
+            </p>
+          </div>
+          <div className="rounded-lg border border-amber-100 bg-white/80 p-3 space-y-1">
+            <p className="font-semibold text-gray-900">Estética corporal — conta demo (opcional)</p>
+            <p>
+              <strong>E-mail:</strong>{' '}
+              <code className="text-[11px] bg-amber-100/80 px-1 rounded">demo@proesteticacorporal.com</code>
+            </p>
+            <p>
+              <strong>Senha:</strong> <code className="text-[11px] bg-amber-100/80 px-1 rounded">123456</code>
+            </p>
+            <p className="text-amber-900/85">
+              Só existe se correste <code className="text-[10px]">scripts/pro-estetica-corporal-demo-login.sql</code>. Entrada:{' '}
+              <code className="text-[10px] break-all">/pro-estetica-corporal/entrar</code>
+            </p>
+          </div>
+        </div>
+        <p className="text-[11px] text-amber-900/80">
+          Em produção pública: troca ou remove estas demos e nunca partilhes senhas fracas fora de testes.
+        </p>
+      </section>
+
       <section className="rounded-2xl border border-indigo-200 bg-gradient-to-br from-indigo-50/80 to-white p-4 shadow-sm space-y-3">
         <h2 className="text-sm font-semibold text-indigo-950">Links públicos — pré-diagnóstico (entrada)</h2>
         <p className="text-xs text-indigo-900/85 max-w-3xl">

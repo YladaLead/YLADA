@@ -115,7 +115,7 @@ export async function applyCompletedCapilarOnboardingForEmail(params: {
   if (challenge) bodyLines.push(`Maior desafio agora: ${challenge}`)
   const structured =
     bodyLines.length > 0
-      ? ['[Micro-diagnóstico inicial — Pro Estética Capilar]', ...bodyLines].join('\n')
+      ? ['[Micro-diagnóstico inicial — Terapia capilar]', ...bodyLines].join('\n')
       : ''
 
   const focusExtra = focusRaw.trim()

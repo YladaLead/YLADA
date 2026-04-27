@@ -21,7 +21,7 @@ export default async function ProEsteticaCapilarPainelPage() {
     <div className="space-y-8">
       <div>
         <p className="text-sm font-medium text-blue-600">Visao geral</p>
-        <h1 className="text-2xl font-bold text-gray-900">Pro Estetica Capilar</h1>
+        <h1 className="text-2xl font-bold text-gray-900">Terapia capilar</h1>
         <p className="mt-1 text-gray-600">
           Espaco de consultoria para <strong className="text-gray-800">{op}</strong>: captar com criterio, reter com
           consistencia e acompanhar para manter previsibilidade comercial.

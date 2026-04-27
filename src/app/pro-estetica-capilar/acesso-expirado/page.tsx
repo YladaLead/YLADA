@@ -6,7 +6,7 @@ export default function ProEsteticaCapilarAcessoExpiradoPage() {
       <div className="max-w-md w-full rounded-2xl border border-sky-200 bg-white p-8 shadow-sm text-center space-y-4">
         <h1 className="text-xl font-bold text-gray-900">Acesso ao plano caducado</h1>
         <p className="text-sm text-gray-600 leading-relaxed">
-          O período de acesso ao <strong>YLADA Pro Terapia Capilar</strong> associado à tua conta terminou. Para
+          O período de acesso ao <strong>YLADA Pro — Terapia capilar</strong> associado à tua conta terminou. Para
           continuar a usar o painel, renova connosco.
         </p>
         <p className="text-sm text-gray-600">

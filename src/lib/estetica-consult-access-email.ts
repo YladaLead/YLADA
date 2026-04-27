@@ -10,9 +10,9 @@ function baseUrlFromEnv() {
 }
 
 function segmentLabel(s: EsteticaConsultSegment): string {
-  if (s === 'corporal') return 'Pro Estética Corporal'
-  if (s === 'capilar') return 'Pro Terapia Capilar'
-  return 'Pro Estética (capilar e corporal)'
+  if (s === 'corporal') return 'YLADA Pro — Estética corporal'
+  if (s === 'capilar') return 'YLADA Pro — Terapia capilar'
+  return 'YLADA Pro — Terapia capilar e Estética corporal'
 }
 
 function loginLinksHtml(segment: EsteticaConsultSegment, base: string): string {
