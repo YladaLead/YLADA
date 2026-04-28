@@ -2134,6 +2134,31 @@ type CalculatorConfig = {
   resultIntro?: string
 }
 
+/** Substitui identificadores na fórmula com limites de palavra e ids mais longos primeiro (evita `peso` dentro de `peso_atual`). */
+function evaluateCalculatorFormula(
+  formula: string,
+  fields: CalculatorField[],
+  values: Record<string, number | undefined>
+): number {
+  const trimmed = (formula || '').trim()
+  if (!trimmed) return 0
+  const sorted = [...fields].sort((a, b) => b.id.length - a.id.length)
+  let expr = trimmed
+  for (const f of sorted) {
+    const id = (f.id || '').trim()
+    if (!id) continue
+    const val = values[f.id] ?? 0
+    const escaped = id.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+    expr = expr.replace(new RegExp(`\\b${escaped}\\b`, 'g'), String(val))
+  }
+  try {
+    const n = Number(new Function(`return (${expr})`)())
+    return Number.isFinite(n) ? n : 0
+  } catch {
+    return 0
+  }
+}
+
 function getCalculatorResultCopy(title: string, value: number, locale: Language): { insight: string; tip: string } | null {
   const normalized = title.toLowerCase()
 
@@ -2224,6 +2249,73 @@ function getCalculatorResultCopy(title: string, value: number, locale: Language)
   return null
 }
 
+/** Texto expandido “análise completa” só para calculadora de IMC no link público. */
+function getCalculatorImcFullAnalysisParagraphs(imc: number, locale: Language): string[] {
+  let faixa = ''
+  if (locale === 'en') {
+    if (imc < 18.5) faixa = 'underweight'
+    else if (imc < 25) faixa = 'normal weight'
+    else if (imc < 30) faixa = 'overweight'
+    else faixa = 'obesity'
+    return [
+      `WHO-style screening puts this BMI in the “${faixa}” range. It is a population-level signal, not a medical label for you personally.`,
+      'Age and sex do not change the BMI math, but they change how a professional reads your context (growth in younger people, muscle mass, menopause, etc.).',
+      'If your goal is change in body composition, combine BMI with waist circumference, strength, sleep, and nutrition patterns — not the number alone.',
+    ]
+  }
+  if (locale === 'es') {
+    if (imc < 18.5) faixa = 'bajo peso'
+    else if (imc < 25) faixa = 'peso normal'
+    else if (imc < 30) faixa = 'sobrepeso'
+    else faixa = 'obesidad'
+    return [
+      `Como referencia tipo OMS, este IMC suele clasificarse en la zona de “${faixa}”. Es una señal de cribado, no un diagnóstico personal.`,
+      'La edad y el sexo no cambian el cálculo del IMC, pero sí cómo un profesional interpreta tu contexto (músculo, etapa vital, etc.).',
+      'Si buscas composición corporal, combina el IMC con cintura, fuerza, sueño y hábitos — no solo con el número.',
+    ]
+  }
+  if (imc < 18.5) faixa = 'baixo peso'
+  else if (imc < 25) faixa = 'peso normal'
+  else if (imc < 30) faixa = 'sobrepeso'
+  else faixa = 'obesidade'
+  return [
+    `Como referência amplamente usada (incluindo critérios da OMS), esse IMC costuma cair na faixa de “${faixa}”. É um sinal de triagem em população, não um rótulo clínico só seu.`,
+    'Idade e sexo não entram na fórmula do IMC, mas mudam como um profissional interpreta o seu contexto (massa magra, fase da vida, menopausa, crescimento em adolescentes, etc.).',
+    'Se o objetivo é composição corporal ou saúde metabólica, o ideal é cruzar o IMC com circunferência de cintura, força, sono e padrão alimentar — não olhar só para o número.',
+  ]
+}
+
+function buildCalculatorWhatsAppPrefill(
+  title: string,
+  fields: CalculatorField[],
+  values: Record<string, number | undefined>,
+  resultNum: number,
+  resultLabel: string,
+  locale: Language
+): string {
+  const loc = locale === 'en' ? 'en-US' : locale === 'es' ? 'es-ES' : 'pt-BR'
+  const n = resultNum.toLocaleString(loc, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+  const head =
+    locale === 'en'
+      ? `Hi! I used your calculator "${title}".`
+      : locale === 'es'
+        ? `¡Hola! Usé tu calculadora "${title}".`
+        : `Oi! Usei sua calculadora "${title}".`
+  const lines = [head, `${resultLabel.trim()} ${n}`.trim()]
+  for (const f of fields) {
+    const v = values[f.id]
+    if (v === undefined || v === null || Number.isNaN(v)) continue
+    const tipo = (f.type as string)?.toLowerCase()
+    if (tipo === 'select' && Array.isArray(f.options)) {
+      const opt = f.options.find((o) => Number(o.value) === Number(v))
+      lines.push(`${f.label}: ${opt?.label ?? String(v)}`)
+    } else {
+      lines.push(`${f.label}: ${v}`)
+    }
+  }
+  return lines.join('\n')
+}
+
 /** Meta em copos de 250 ml: mostra litros no destaque e a contagem entre parênteses. */
 function formatCopos250HydrationDisplay(
   resultNum: number,
@@ -2260,7 +2352,7 @@ function CalculatorBlock({
   config: Record<string, unknown>
   ctaText: string
   whatsappUrl: string
-  onCtaClick: () => void
+  onCtaClick: (metricsId?: string, whatsappPrefill?: string) => void
   title: string
   locale?: Language
 }) {
@@ -2294,6 +2386,7 @@ function CalculatorBlock({
     return init
   })
   const [showResult, setShowResult] = useState(false)
+  const [showFullAnalysis, setShowFullAnalysis] = useState(false)
   const calculatorStartSent = useRef(false)
   const calculatorCompleteSent = useRef(false)
   const calculatorResultViewSent = useRef(false)
@@ -2305,19 +2398,10 @@ function CalculatorBlock({
     return v !== undefined && v !== null && !Number.isNaN(v)
   })
 
-  let resultNum = 0
-  try {
-    let expr = formula
-    fieldsParaCalculadora.forEach((f) => {
-      const val = values[f.id] ?? 0
-      expr = expr.replace(new RegExp(f.id.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'), String(val))
-    })
-    resultNum = Number(new Function(`return (${expr})`)())
-    if (Number.isNaN(resultNum)) resultNum = 0
-  } catch {
-    resultNum = 0
-  }
+  const resultNum = evaluateCalculatorFormula(formula, fieldsParaCalculadora, values)
   const resultCopy = getCalculatorResultCopy(title, resultNum, locale)
+  const isImcCalculator = title.toLowerCase().includes('imc')
+  const imcFullAnalysis = isImcCalculator ? getCalculatorImcFullAnalysisParagraphs(resultNum, locale) : null
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -2366,12 +2450,24 @@ function CalculatorBlock({
     }
   }
 
+  const numLocale = locale === 'en' ? 'en-US' : locale === 'es' ? 'es-ES' : 'pt-BR'
+  const whatsappPrefillResult =
+    showResult && whatsappUrl
+      ? buildCalculatorWhatsAppPrefill(title, fieldsParaCalculadora, values, resultNum, resultLabel, locale)
+      : ''
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-sky-50 via-sky-50/90 to-blue-50 flex items-center justify-center p-4">
-      <div className="max-w-md w-full bg-white rounded-2xl shadow-lg border border-gray-100 p-6 sm:p-8">
-        <h1 className="text-xl font-bold text-gray-900 mb-2">{title}</h1>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-sky-50 via-sky-50/90 to-blue-50 p-4 sm:p-6">
+      <div
+        className={`max-w-md w-full bg-white p-6 sm:p-8 ${
+          showResult
+            ? 'rounded-2xl border border-sky-100/60 shadow-xl shadow-sky-100/50'
+            : 'rounded-2xl border border-gray-100 shadow-lg'
+        }`}
+      >
         {!showResult ? (
           <form onSubmit={handleSubmit} className="space-y-4">
+            <h1 className="text-xl font-bold text-gray-900 mb-2">{title}</h1>
             {fieldsParaCalculadora.map((f) => (
               <div key={f.id}>
                 <label className="block text-sm font-medium text-gray-700 mb-1">{f.label}</label>
@@ -2417,58 +2513,91 @@ function CalculatorBlock({
                 {t.yourResult}
               </span>
             </div>
-            <p className="text-gray-600 mb-2">{resultIntro}</p>
-            <p className="text-sm font-medium text-gray-700 mb-1">{resultLabel}</p>
-            <p className="text-2xl font-bold text-gray-900 mb-6">
-              {formatCopos250HydrationDisplay(resultNum, resultPrefix, resultSuffix, locale) ?? (
-                <>
-                  {resultPrefix}
-                  {resultNum.toLocaleString('pt-BR')}
-                  {resultSuffix}
-                </>
-              )}
-            </p>
-            {resultCopy && (
-              <div className="mb-6 space-y-3">
-                <div className="p-4 rounded-xl border border-sky-100 bg-sky-50/70">
-                  <p className="text-[10px] font-semibold uppercase tracking-wider text-sky-600 mb-1">
-                    {locale === 'en' ? 'What this may indicate' : locale === 'es' ? 'Qué puede indicar' : 'O que isso pode indicar'}
-                  </p>
-                  <p className="text-sm text-gray-700 leading-relaxed">{resultCopy.insight}</p>
-                </div>
-                <div className="p-4 rounded-xl border border-emerald-100 bg-emerald-50/70">
-                  <p className="text-[10px] font-semibold uppercase tracking-wider text-emerald-700 mb-1">
-                    {locale === 'en' ? 'Quick action' : locale === 'es' ? 'Acción rápida' : 'Ajuste rápido'}
-                  </p>
-                  <p className="text-sm text-gray-700 leading-relaxed">{resultCopy.tip}</p>
-                </div>
-              </div>
-            )}
-            {whatsappUrl ? (
-              <div className="space-y-3">
-                <button
-                  type="button"
-                  onClick={onCtaClick}
-                  className="w-full py-3 px-4 bg-sky-600 hover:bg-sky-700 text-white font-medium rounded-lg transition-colors"
-                >
-                  {ctaLabel}
-                </button>
-                <button
-                  type="button"
-                  onClick={handleShareCalculatorResult}
-                  className="w-full py-3 px-4 border border-sky-200 text-sky-700 hover:bg-sky-50 font-semibold rounded-lg transition-colors"
-                >
-                  {t.shareResult}
-                </button>
-              </div>
-            ) : (
-              <span className="text-gray-500 text-sm">{t.contactNotAvailable.replace('{pessoa}', locale === 'en' ? 'professional' : locale === 'es' ? 'profesional' : 'profissional')}</span>
-            )}
+            <p className="mb-2 text-xs text-gray-500">{title}</p>
+            <p className="mb-4 text-sm text-gray-500">{resultIntro}</p>
 
-            <div className="mt-5 pt-4 border-t border-gray-100">
+            <div className="relative mb-5 overflow-hidden rounded-2xl border border-sky-100/80 bg-gradient-to-br from-sky-50 to-white shadow-sm">
+              <div className="absolute bottom-0 left-0 top-0 w-1.5 rounded-l-2xl bg-gradient-to-b from-sky-400 to-sky-600" />
+              <div className="px-5 py-5 pl-6 sm:px-6 sm:py-6">
+                <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-sky-600">{resultLabel}</p>
+                <p className="text-2xl font-bold leading-tight text-gray-900 sm:text-3xl">
+                  {formatCopos250HydrationDisplay(resultNum, resultPrefix, resultSuffix, locale) ?? (
+                    <>
+                      {resultPrefix}
+                      {resultNum.toLocaleString(numLocale, { minimumFractionDigits: 0, maximumFractionDigits: 2 })}
+                      {resultSuffix}
+                    </>
+                  )}
+                </p>
+              </div>
+            </div>
+
+            {resultCopy ? (
+              <div className="mb-5 space-y-3">
+                <div className="rounded-xl border border-gray-100 bg-gray-50/70 p-4">
+                  <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-gray-500">{t.whatItMeans}</p>
+                  <p className="text-sm leading-relaxed text-gray-700">{resultCopy.insight}</p>
+                </div>
+                <div className="rounded-xl border border-emerald-100 bg-emerald-50/70 p-4">
+                  <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-emerald-700">{t.quickTip}</p>
+                  <p className="text-sm leading-relaxed text-gray-700">{resultCopy.tip}</p>
+                </div>
+                {showFullAnalysis && imcFullAnalysis ? (
+                  <div className="space-y-3 rounded-xl border border-violet-100 bg-violet-50/60 p-4">
+                    {imcFullAnalysis.map((p, i) => (
+                      <p key={i} className="text-sm leading-relaxed text-gray-700">
+                        {p}
+                      </p>
+                    ))}
+                  </div>
+                ) : null}
+              </div>
+            ) : null}
+
+            <div className="space-y-3">
+              {whatsappUrl ? (
+                <>
+                  <p className="text-center text-sm text-gray-600">{t.quizResultHelperLine}</p>
+                  <button
+                    type="button"
+                    onClick={() => onCtaClick(undefined, whatsappPrefillResult)}
+                    className="w-full rounded-xl bg-sky-600 px-4 py-4 font-semibold text-white shadow-lg shadow-sky-500/25 transition-colors hover:bg-sky-700"
+                  >
+                    {ctaLabel}
+                  </button>
+                </>
+              ) : (
+                <p className="text-center text-sm text-gray-500">
+                  {t.contactNotAvailable.replace('{pessoa}', locale === 'en' ? 'professional' : locale === 'es' ? 'profesional' : 'profissional')}
+                </p>
+              )}
+              <button
+                type="button"
+                onClick={handleShareCalculatorResult}
+                className="w-full rounded-xl border border-sky-200 px-4 py-3 font-semibold text-sky-700 transition-colors hover:bg-sky-50"
+              >
+                {t.shareResult}
+              </button>
+              {imcFullAnalysis ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowFullAnalysis((prev) => {
+                      if (!prev) trackLinkEvent(slug, 'full_analysis_expand')
+                      return !prev
+                    })
+                  }}
+                  className="w-full rounded-xl border border-sky-200 px-4 py-3 font-semibold text-sky-700 transition-colors hover:bg-sky-50"
+                >
+                  {showFullAnalysis ? t.hideFullAnalysis : t.seeFullAnalysis}
+                </button>
+              ) : null}
+            </div>
+
+            <div className="mt-5 border-t border-gray-100 pt-4">
               <PoweredByYlada variant="compact" />
             </div>
-            <DiagnosisDisclaimer variant="informative" className="mt-4" />
+            <DiagnosisDisclaimer variant="informative" locale={locale} className="mt-4" />
           </>
         )}
       </div>

@@ -262,6 +262,88 @@ function getCardMeta(item: BibliotecaItemRow): { tempo: string; perguntas: strin
   return { tempo, perguntas }
 }
 
+type BibliotecaPreviewModel =
+  | {
+      kind: 'quiz'
+      introTitle: string
+      introSubtitle: string
+      introMicro: string
+      bullets: string[]
+      questions: string[]
+    }
+  | {
+      kind: 'calculator'
+      titleLine: string
+      resultIntro: string
+      resultLabel: string
+      fieldLines: string[]
+      formulaLine: string
+    }
+
+/** Resume o `schema_json` para o modal de preview (quiz ou calculadora). */
+function buildBibliotecaPreviewModel(
+  schema: Record<string, unknown>,
+  apiTemplateType: string,
+  fallbackName: string
+): BibliotecaPreviewModel {
+  const norm = (apiTemplateType || '').toLowerCase()
+  const isCalculator = norm === 'calculator' || norm === 'calculadora'
+  const titleLine =
+    (typeof schema.title === 'string' && schema.title.trim()) ||
+    (typeof schema.quizTitle === 'string' && schema.quizTitle.trim()) ||
+    fallbackName
+  if (isCalculator) {
+    const rawFields = Array.isArray(schema.fields) ? schema.fields : []
+    const fieldLines = rawFields
+      .map((raw) => {
+        if (!raw || typeof raw !== 'object') return ''
+        const label = (raw as { label?: string }).label
+        const id = (raw as { id?: string }).id
+        const typ = (raw as { type?: string }).type?.toLowerCase()
+        const head =
+          typeof label === 'string' && label.trim()
+            ? label.trim()
+            : typeof id === 'string' && id.trim()
+              ? id.trim()
+              : ''
+        if (!head) return ''
+        return typ ? `${head} (${typ})` : head
+      })
+      .filter(Boolean)
+    return {
+      kind: 'calculator',
+      titleLine,
+      resultIntro: typeof schema.resultIntro === 'string' ? schema.resultIntro.trim() : '',
+      resultLabel: typeof schema.resultLabel === 'string' ? schema.resultLabel.trim() : '',
+      fieldLines,
+      formulaLine: typeof schema.formula === 'string' ? schema.formula.trim() : '',
+    }
+  }
+  const introTitle = (typeof schema.introTitle === 'string' && schema.introTitle.trim()) || titleLine
+  const introSubtitle = typeof schema.introSubtitle === 'string' ? schema.introSubtitle.trim() : ''
+  const introMicro = typeof schema.introMicro === 'string' ? schema.introMicro.trim() : ''
+  const bullets = Array.isArray(schema.introBullets)
+    ? schema.introBullets.filter((x): x is string => typeof x === 'string' && x.trim())
+    : []
+  const questions = Array.isArray(schema.questions)
+    ? schema.questions
+        .map((q) => {
+          if (!q || typeof q !== 'object') return ''
+          const text = (q as { text?: string }).text
+          return typeof text === 'string' ? text.trim() : ''
+        })
+        .filter(Boolean)
+    : []
+  return { kind: 'quiz', introTitle, introSubtitle, introMicro, bullets, questions }
+}
+
+function labelBibliotecaTemplateTypeForPreview(apiType: string): string {
+  const t = (apiType || '').toLowerCase()
+  if (t === 'calculator' || t === 'calculadora') return 'Calculadora'
+  if (t === 'diagnostico') return 'Diagnóstico / quiz'
+  return apiType || 'Modelo'
+}
+
 function BibliotecaCard({
   item,
   linksPath,
@@ -278,6 +360,7 @@ function BibliotecaCard({
   isTemaMaisUsado,
   badge,
   stayOnProEsteticaPanel = false,
+  onRefreshMeusLinks,
 }: {
   item: BibliotecaItemRow
   linksPath: string
@@ -301,16 +384,28 @@ function BibliotecaCard({
   isTemaMaisUsado: (t: string) => boolean
   /** Biblioteca embutida no painel Pro Estética: não redirecionar para a matriz `/pt/estetica/links`. */
   stayOnProEsteticaPanel?: boolean
+  /** Após criar link em modo “copiar”, atualiza a lista em “Os teus links” sem navegar. */
+  onRefreshMeusLinks?: () => void
 }) {
   const [criarErro, setCriarErro] = useState<string | null>(null)
   const [criarErroPrecosCta, setCriarErroPrecosCta] = useState(false)
+  const [previewOpen, setPreviewOpen] = useState(false)
+  const [previewLoading, setPreviewLoading] = useState(false)
+  const [previewErro, setPreviewErro] = useState<string | null>(null)
+  const [previewPayload, setPreviewPayload] = useState<{
+    name: string
+    type: string
+    schema: Record<string, unknown>
+    model: BibliotecaPreviewModel
+  } | null>(null)
+  const [copyOkFlash, setCopyOkFlash] = useState(false)
   const { tempo, perguntas } = getMeta(item)
   const tituloExibido = (segmentCode && getTituloAdaptadoFn(item.tema, segmentCode)) || item.titulo
   const mostraMaisUsado = item.tipo === 'quiz' && isTemaMaisUsado(item.tema)
   const isSugestao = variant === 'sugestao'
   const isComece = variant === 'comece'
 
-  const handleUse = async () => {
+  const handleUse = async (intent: 'use' | 'copy' = 'use') => {
     if (creatingId === item.id) return
     if (!String(item.id ?? '').trim()) {
       setCriarErro('Modelo sem identificador. Recarrega a página.')
@@ -319,6 +414,7 @@ function BibliotecaCard({
     setCreatingId(item.id)
     setCriarErro(null)
     setCriarErroPrecosCta(false)
+    setCopyOkFlash(false)
     try {
       const body: Record<string, unknown> = {
         flow_id: item.flow_id ?? 'diagnostico_risco',
@@ -353,6 +449,36 @@ function BibliotecaCard({
         data?.success !== false &&
         !data?.limit_reached &&
         typeof data?.error !== 'string'
+
+      const tryCopyAndStay = async () => {
+        const abs = absoluteFunnelUrlFromPayload(payload)
+        const slug = typeof payload.slug === 'string' ? payload.slug.trim() : ''
+        const toCopy =
+          abs ||
+          (slug && typeof window !== 'undefined'
+            ? `${window.location.origin}/l/${encodeURIComponent(slug)}`
+            : typeof payload.url === 'string'
+              ? payload.url
+              : '')
+        if (!toCopy) {
+          setCriarErro('Link criado, mas não foi possível obter o URL para copiar. Abra “Os teus links”.')
+          return
+        }
+        try {
+          await navigator.clipboard.writeText(toCopy)
+          setCopyOkFlash(true)
+          window.setTimeout(() => setCopyOkFlash(false), 4000)
+          onRefreshMeusLinks?.()
+        } catch {
+          setCriarErro('Não foi possível copiar para a área de transferência. Copie manualmente em “Os teus links”.')
+        }
+      }
+
+      if (data?.success && linkId && stayOnProEsteticaPanel && intent === 'copy') {
+        await tryCopyAndStay()
+        return
+      }
+
       if (data?.success && linkId) {
         try {
           onLinkCreated(linkId, payload)
@@ -365,6 +491,10 @@ function BibliotecaCard({
           }
         }
       } else if (createdWithId) {
+        if (stayOnProEsteticaPanel && intent === 'copy') {
+          await tryCopyAndStay()
+          return
+        }
         try {
           onLinkCreated(linkId, payload)
         } catch {
@@ -376,6 +506,10 @@ function BibliotecaCard({
           }
         }
       } else if (data?.success && (payload.slug || payload.url)) {
+        if (stayOnProEsteticaPanel && intent === 'copy') {
+          await tryCopyAndStay()
+          return
+        }
         const abs = absoluteFunnelUrlFromPayload(payload)
         if (abs) hardNavigateTo(abs)
         else if (payload.slug)
@@ -423,19 +557,75 @@ function BibliotecaCard({
     }
   }
 
+  const openTemplatePreview = async () => {
+    const tid = item.template_id?.trim()
+    if (!tid) return
+    setPreviewOpen(true)
+    setPreviewLoading(true)
+    setPreviewErro(null)
+    setPreviewPayload(null)
+    try {
+      const r = await fetch(`/api/ylada/link-template-schema?template_id=${encodeURIComponent(tid)}`, {
+        credentials: 'include',
+        cache: 'no-store',
+      })
+      const j = (await r.json()) as {
+        success?: boolean
+        error?: string
+        data?: { name?: string; type?: string; schema_json?: unknown }
+      }
+      if (!r.ok || !j?.success || !j.data) {
+        throw new Error(typeof j?.error === 'string' && j.error.trim() ? j.error : 'Erro ao carregar o modelo.')
+      }
+      const raw = j.data.schema_json
+      const schema =
+        raw && typeof raw === 'object' && !Array.isArray(raw) ? (raw as Record<string, unknown>) : {}
+      const apiType =
+        typeof j.data.type === 'string' && j.data.type.trim() ? j.data.type.trim() : item.tipo
+      const displayName =
+        typeof j.data.name === 'string' && j.data.name.trim() ? j.data.name.trim() : tituloExibido
+      setPreviewPayload({
+        name: displayName,
+        type: apiType,
+        schema,
+        model: buildBibliotecaPreviewModel(schema, apiType, displayName),
+      })
+    } catch (e) {
+      setPreviewErro(e instanceof Error ? e.message : 'Erro ao carregar preview.')
+    } finally {
+      setPreviewLoading(false)
+    }
+  }
+
+  const closeTemplatePreview = () => {
+    setPreviewOpen(false)
+    setPreviewErro(null)
+    setPreviewPayload(null)
+    setPreviewLoading(false)
+  }
+
   const compacto = isSugestao || isComece
   const quandoUsarText = getQuandoUsar(item.tema, item.meta)
   const metaParts = [getTemaLabel(item.tema), tempo, perguntas].filter(Boolean)
   const metaLine = metaParts.join(' · ')
   const hasTags = !!(item.dor_principal || item.objetivo_principal || (item.pilar && !item.dor_principal))
 
+  const creatingThis = creatingId === item.id
+
   return (
+    <>
     <article
       className={`rounded-xl border bg-white shadow-sm hover:shadow-md transition-shadow ${
         isSugestao ? 'border-amber-200 bg-amber-50/50 p-4' : isComece ? 'border-sky-100 p-4' : 'border-gray-200 p-5'
       }`}
     >
-      <div className="flex items-start gap-4">
+      <div
+        className={
+          stayOnProEsteticaPanel
+            ? 'flex flex-col gap-5 sm:flex-row sm:items-start sm:gap-6'
+            : 'flex items-start gap-4'
+        }
+      >
         <div className="min-w-0 flex-1">
           {badge && (
             <p className="mb-1.5 inline-flex items-center gap-1 rounded-full bg-sky-100 px-2.5 py-0.5 text-xs font-medium text-sky-800">
@@ -489,32 +679,117 @@ function BibliotecaCard({
             </details>
           )}
         </div>
-        <div className="flex shrink-0 flex-col items-end gap-2">
+        <div
+          className={
+            stayOnProEsteticaPanel
+              ? 'relative z-10 flex w-full shrink-0 flex-col gap-3 border-t border-gray-100 pt-4 sm:w-[min(100%,13.75rem)] sm:border-l sm:border-t-0 sm:border-gray-100 sm:pl-6 sm:pt-0'
+              : 'flex shrink-0 flex-col items-end gap-2'
+          }
+        >
           {mostraMaisUsado && !isSugestao && !badge && (
-            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-medium text-emerald-800">
+            <span
+              className={`inline-flex w-fit items-center gap-1 rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-medium text-emerald-800 ${
+                stayOnProEsteticaPanel ? 'self-start sm:self-end' : ''
+              }`}
+            >
               <span aria-hidden>🔥</span> Mais usado
             </span>
           )}
           {isSugestao && (
-            <span className="inline-flex items-center gap-1 rounded-full bg-amber-200 px-2.5 py-0.5 text-xs font-medium text-amber-900">
+            <span
+              className={`inline-flex w-fit items-center gap-1 rounded-full bg-amber-200 px-2.5 py-0.5 text-xs font-medium text-amber-900 ${
+                stayOnProEsteticaPanel ? 'self-start sm:self-end' : ''
+              }`}
+            >
               📈 Alta taxa de conversa
             </span>
           )}
-          <div className="relative z-10 flex flex-col items-end gap-1">
-            <button
-              type="button"
-              disabled={creatingId === item.id}
-              onClick={(e) => {
-                e.preventDefault()
-                e.stopPropagation()
-                void handleUse()
-              }}
-              className={`touch-manipulation rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors disabled:opacity-50 ${
-                isSugestao ? 'bg-amber-600 hover:bg-amber-700' : 'bg-sky-600 hover:bg-sky-700'
-              }`}
-            >
-              {creatingId === item.id ? 'Criando...' : 'Usar esse'}
-            </button>
+          <div
+            className={
+              stayOnProEsteticaPanel
+                ? 'flex w-full flex-col gap-2.5'
+                : 'relative z-10 flex flex-col items-end gap-1'
+            }
+          >
+            {stayOnProEsteticaPanel ? (
+              <>
+                <div
+                  className={
+                    item.template_id
+                      ? 'grid grid-cols-1 gap-2.5 sm:grid-cols-2 sm:gap-2'
+                      : 'flex flex-col gap-2.5'
+                  }
+                >
+                  {item.template_id ? (
+                    <button
+                      type="button"
+                      className="touch-manipulation inline-flex min-h-[44px] w-full items-center justify-center rounded-lg border border-sky-200 bg-white px-3 py-2 text-sm font-medium text-sky-900 shadow-sm transition-colors hover:bg-sky-50 active:bg-sky-100 disabled:opacity-50"
+                      disabled={creatingThis}
+                      onClick={(e) => {
+                        e.preventDefault()
+                        e.stopPropagation()
+                        void openTemplatePreview()
+                      }}
+                    >
+                      Ver preview
+                    </button>
+                  ) : null}
+                  <button
+                    type="button"
+                    className="touch-manipulation inline-flex min-h-[44px] w-full items-center justify-center rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-800 shadow-sm transition-colors hover:bg-gray-50 active:bg-gray-100 disabled:opacity-50"
+                    disabled={creatingThis}
+                    onClick={(e) => {
+                      e.preventDefault()
+                      e.stopPropagation()
+                      void handleUse('copy')
+                    }}
+                  >
+                    {creatingThis ? (
+                      'A criar…'
+                    ) : (
+                      <>
+                        <span className="sm:hidden">Copiar link</span>
+                        <span className="hidden sm:inline">Criar e copiar link</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+                {copyOkFlash ? (
+                  <p className="text-center text-xs font-medium text-emerald-700 sm:text-right">
+                    Link copiado. Vê em «Os teus links».
+                  </p>
+                ) : null}
+                <button
+                  type="button"
+                  disabled={creatingThis}
+                  onClick={(e) => {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    void handleUse('use')
+                  }}
+                  className={`touch-manipulation inline-flex min-h-[48px] w-full items-center justify-center rounded-lg px-4 py-2.5 text-sm font-semibold text-white transition-colors disabled:opacity-50 ${
+                    isSugestao ? 'bg-amber-600 hover:bg-amber-700' : 'bg-sky-600 hover:bg-sky-700'
+                  }`}
+                >
+                  {creatingThis ? 'Criando...' : 'Usar esse'}
+                </button>
+              </>
+            ) : (
+              <button
+                type="button"
+                disabled={creatingThis}
+                onClick={(e) => {
+                  e.preventDefault()
+                  e.stopPropagation()
+                  void handleUse('use')
+                }}
+                className={`touch-manipulation rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors disabled:opacity-50 ${
+                  isSugestao ? 'bg-amber-600 hover:bg-amber-700' : 'bg-sky-600 hover:bg-sky-700'
+                }`}
+              >
+                {creatingThis ? 'Criando...' : 'Usar esse'}
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -526,6 +801,121 @@ function BibliotecaCard({
         />
       ) : null}
     </article>
+    {previewOpen ? (
+      <div
+        className="fixed inset-0 z-[80] flex items-center justify-center bg-black/40 p-4"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="biblioteca-preview-title"
+        onClick={() => closeTemplatePreview()}
+      >
+        <div
+          className="max-h-[85vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-white p-5 shadow-xl"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="mb-3 flex items-start justify-between gap-3">
+            <h2 id="biblioteca-preview-title" className="pr-8 text-lg font-semibold text-gray-900">
+              {previewPayload?.name ?? 'Preview do modelo'}
+            </h2>
+            <button
+              type="button"
+              className="shrink-0 rounded-lg px-2 py-1 text-sm text-gray-500 hover:bg-gray-100"
+              onClick={closeTemplatePreview}
+            >
+              Fechar
+            </button>
+          </div>
+          {previewLoading ? <p className="text-sm text-gray-500">A carregar…</p> : null}
+          {previewErro ? <p className="text-sm text-red-600">{previewErro}</p> : null}
+          {!previewLoading && previewPayload ? (
+            <div className="mt-2 space-y-3 text-sm text-gray-700">
+              <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                {labelBibliotecaTemplateTypeForPreview(previewPayload.type)}
+              </p>
+              {previewPayload.model.kind === 'calculator' ? (
+                <>
+                  <div>
+                    <p className="text-xs font-medium text-gray-500">Título</p>
+                    <p className="font-medium text-gray-900">{previewPayload.model.titleLine}</p>
+                  </div>
+                  {previewPayload.model.fieldLines.length > 0 ? (
+                    <div>
+                      <p className="mb-1.5 text-xs font-medium text-gray-500">Campos (o visitante preenche no link)</p>
+                      <ul className="list-disc space-y-1 pl-5">
+                        {previewPayload.model.fieldLines.map((line, i) => (
+                          <li key={i}>{line}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  ) : (
+                    <p className="text-xs text-gray-500">Sem campos definidos neste template.</p>
+                  )}
+                  {previewPayload.model.formulaLine ? (
+                    <div>
+                      <p className="mb-1 text-xs font-medium text-gray-500">Fórmula (resumo técnico)</p>
+                      <pre className="max-h-24 overflow-x-auto overflow-y-auto rounded-lg border border-gray-100 bg-gray-50 p-2 text-xs text-gray-800">
+                        {previewPayload.model.formulaLine}
+                      </pre>
+                    </div>
+                  ) : null}
+                  {(previewPayload.model.resultLabel || previewPayload.model.resultIntro) && (
+                    <div className="rounded-lg border border-sky-100 bg-sky-50/50 p-3 text-xs">
+                      {previewPayload.model.resultLabel ? (
+                        <p className="font-medium text-sky-900">{previewPayload.model.resultLabel}</p>
+                      ) : null}
+                      {previewPayload.model.resultIntro ? (
+                        <p className="mt-1 text-gray-600">{previewPayload.model.resultIntro}</p>
+                      ) : null}
+                      <p className="mt-2 text-gray-500">
+                        O valor é calculado no link público com os dados do visitante (não é simulado aqui).
+                      </p>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <>
+                  <div>
+                    <p className="text-xs font-medium text-gray-500">Título / abertura</p>
+                    <p className="font-medium text-gray-900">{previewPayload.model.introTitle}</p>
+                    {previewPayload.model.introSubtitle ? (
+                      <p className="mt-1 text-gray-600">{previewPayload.model.introSubtitle}</p>
+                    ) : null}
+                    {previewPayload.model.introMicro ? (
+                      <p className="mt-1 text-gray-500">{previewPayload.model.introMicro}</p>
+                    ) : null}
+                  </div>
+                  {previewPayload.model.bullets.length > 0 ? (
+                    <ul className="list-disc space-y-1 pl-5">
+                      {previewPayload.model.bullets.map((b, i) => (
+                        <li key={i}>{b}</li>
+                      ))}
+                    </ul>
+                  ) : null}
+                  {previewPayload.model.questions.length > 0 ? (
+                    <div>
+                      <p className="mb-2 text-xs font-medium text-gray-500">Perguntas (pré-visualização)</p>
+                      <ol className="list-decimal space-y-2 pl-5">
+                        {previewPayload.model.questions.slice(0, 8).map((q, i) => (
+                          <li key={i}>{q}</li>
+                        ))}
+                      </ol>
+                      {previewPayload.model.questions.length > 8 ? (
+                        <p className="mt-2 text-xs text-gray-500">
+                          +{previewPayload.model.questions.length - 8} no link público
+                        </p>
+                      ) : null}
+                    </div>
+                  ) : (
+                    <p className="text-xs text-gray-500">Sem perguntas listadas neste schema.</p>
+                  )}
+                </>
+              )}
+            </div>
+          ) : null}
+        </div>
+      </div>
+    ) : null}
+    </>
   )
 }
 
@@ -1427,6 +1817,9 @@ function BibliotecaPageContentInner({
                         isTemaMaisUsado={isTemaMaisUsado}
                         badge={badges[idx]}
                         stayOnProEsteticaPanel={stayInProEsteticaHub}
+                        onRefreshMeusLinks={
+                          stayInProEsteticaHub ? () => setMeusLinksRefreshTick((n) => n + 1) : undefined
+                        }
                       />
                     )
                   })}
@@ -1447,7 +1840,7 @@ function BibliotecaPageContentInner({
                           : 'Nenhum modelo disponível.'}
                       </p>
                     ) : (
-                      <div className={`grid gap-3 sm:grid-cols-2 ${embedded ? '' : 'gap-4'}`}>
+                      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5">
                         {itemsListaCorporalSemRepetirSugestao.map((item) => (
                           <BibliotecaCard
                             key={item.id}
@@ -1465,6 +1858,9 @@ function BibliotecaPageContentInner({
                             getTituloAdaptado={getTituloAdaptado}
                             isTemaMaisUsado={isTemaMaisUsado}
                             stayOnProEsteticaPanel={stayInProEsteticaHub}
+                            onRefreshMeusLinks={
+                              stayInProEsteticaHub ? () => setMeusLinksRefreshTick((n) => n + 1) : undefined
+                            }
                           />
                         ))}
                       </div>
@@ -1508,6 +1904,9 @@ function BibliotecaPageContentInner({
                               getTituloAdaptado={getTituloAdaptado}
                               isTemaMaisUsado={isTemaMaisUsado}
                               stayOnProEsteticaPanel={stayInProEsteticaHub}
+                              onRefreshMeusLinks={
+                                stayInProEsteticaHub ? () => setMeusLinksRefreshTick((n) => n + 1) : undefined
+                              }
                             />
                           ))}
                         </div>
@@ -1539,6 +1938,9 @@ function BibliotecaPageContentInner({
                         getTituloAdaptado={getTituloAdaptado}
                         isTemaMaisUsado={isTemaMaisUsado}
                         stayOnProEsteticaPanel={stayInProEsteticaHub}
+                        onRefreshMeusLinks={
+                          stayInProEsteticaHub ? () => setMeusLinksRefreshTick((n) => n + 1) : undefined
+                        }
                       />
                     ))}
                   </div>
