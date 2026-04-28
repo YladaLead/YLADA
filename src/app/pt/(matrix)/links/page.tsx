@@ -139,6 +139,23 @@ function LinksPageContent({
 }: LinksPageContentProps) {
   const pathname = usePathname()
   const prefix = getYladaAreaPathPrefix(areaCodigo)
+  /** Hub Pro Estética (corporal/capilar): manter URLs no painel Pro, não em /pt/estetica. */
+  const proBibliotecaLinksBase =
+    embedded && proEsteticaCorporalEmbedded && pathname?.startsWith('/pro-estetica-corporal')
+      ? '/pro-estetica-corporal/painel/biblioteca-links'
+      : embedded && proEsteticaCorporalEmbedded && pathname?.startsWith('/pro-estetica-capilar')
+        ? '/pro-estetica-capilar/painel/biblioteca-links'
+        : null
+  const proNoelPainelPath = pathname?.startsWith('/pro-estetica-corporal')
+    ? '/pro-estetica-corporal/painel/noel'
+    : pathname?.startsWith('/pro-estetica-capilar')
+      ? '/pro-estetica-capilar/painel/noel'
+      : null
+  const proPerfilPainelPath = pathname?.startsWith('/pro-estetica-corporal')
+    ? '/pro-estetica-corporal/painel/perfil'
+    : pathname?.startsWith('/pro-estetica-capilar')
+      ? '/pro-estetica-capilar/painel/perfil'
+      : null
   const [templates, setTemplates] = useState<Template[]>([])
   const [links, setLinks] = useState<LinkRow[]>([])
   const [loading, setLoading] = useState(true)
@@ -712,10 +729,9 @@ function LinksPageContent({
   /** Enquanto GET /api/ylada/links não termina, `links` fica [] — sem isso a tela “clean” aparece e some (parece cache). */
   const proEsteticaAwaitingLinks = proEsteticaCorporalEmbedded && loading
   const showProEsteticaEmpty = proEsteticaCorporalEmbedded && !loading && !hasLinks
-  const libraryTabHref =
-    embedded && pathname?.includes('pro-estetica-corporal')
-      ? `${pathname.split('?')[0]}?tab=prontos`
-      : `${prefix}/links?tab=prontos`
+  const libraryTabHref = proBibliotecaLinksBase
+    ? `${proBibliotecaLinksBase}?tab=prontos`
+    : `${prefix}/links?tab=prontos`
 
   const scrollToCriadorTexto = () => {
     if (freeTierBlocksNewActive) {
@@ -978,6 +994,9 @@ function LinksPageContent({
                           <div className="mt-2 flex flex-col gap-1 rounded-lg border border-gray-200 bg-white p-2 shadow-sm">
                             <Link
                               href={`${prefix}/links/editar/${link.id}`}
+                              {...(proBibliotecaLinksBase
+                                ? { target: '_blank', rel: 'noopener noreferrer' }
+                                : {})}
                               className="rounded px-2 py-2 text-xs font-medium text-sky-600 hover:bg-sky-50 text-left"
                             >
                               Editar quiz
@@ -987,6 +1006,9 @@ function LinksPageContent({
                                 href={`${prefix}/home?msg=${encodeURIComponent(
                                   `Quero melhorar o diagnóstico do link "${link.title || link.slug}". Ele está com ${stats.conversion_rate ?? 0}% de conversão.`
                                 )}`}
+                                {...(proBibliotecaLinksBase
+                                  ? { target: '_blank', rel: 'noopener noreferrer' }
+                                  : {})}
                                 className="rounded px-2 py-2 text-xs font-medium text-amber-700 hover:bg-amber-50 text-left"
                               >
                                 Melhorar diagnóstico
@@ -1068,7 +1090,10 @@ function LinksPageContent({
               </Link>
             </div>
             <p className="text-xs text-gray-500 mt-4">
-              <Link href={`${prefix}/links/novo`} className="text-sky-700 underline hover:text-sky-900">
+              <Link
+                href={proBibliotecaLinksBase ? `${proBibliotecaLinksBase}?tab=meus` : `${prefix}/links/novo`}
+                className="text-sky-700 underline hover:text-sky-900"
+              >
                 Criador completo
               </Link>
               {' — tema e fluxo passo a passo.'}
@@ -1157,7 +1182,7 @@ function LinksPageContent({
               <p className="text-xs text-gray-500">Comece pelo tema — é o caminho principal.</p>
             </div>
             <Link
-              href={`${prefix}/links/novo`}
+              href={proNoelPainelPath ?? `${prefix}/links/novo`}
               onClick={(e) => {
                 if (freeTierBlocksNewActive) {
                   e.preventDefault()
@@ -1180,7 +1205,15 @@ function LinksPageContent({
                     <span className="text-amber-600" aria-hidden>💡</span>
                     <div>
                       <p className="font-medium">Complete seu perfil</p>
-                      <p className="text-xs text-amber-700 mt-0.5">Recomendações personalizadas em <a href={`${prefix}/perfil-empresarial`} className="underline hover:no-underline">Perfil empresarial</a></p>
+                      <p className="text-xs text-amber-700 mt-0.5">
+                        Recomendações personalizadas em{' '}
+                        <a
+                          href={proPerfilPainelPath ?? `${prefix}/perfil-empresarial`}
+                          className="underline hover:no-underline"
+                        >
+                          {proPerfilPainelPath ? 'Perfil (painel Pro)' : 'Perfil empresarial'}
+                        </a>
+                      </p>
                     </div>
                   </div>
                 )}

@@ -576,10 +576,28 @@ function BibliotecaPageContentInner({
   const pathname = usePathname()
   const linhaBibliotecaQueryRaw = rawEsteticaBibliotecaLinhaFromSearchParams(searchParams)
 
+  const stayInProEsteticaHub =
+    embedded &&
+    proEsteticaNarrow &&
+    (pathname?.startsWith('/pro-estetica-corporal') || pathname?.startsWith('/pro-estetica-capilar'))
+
   const navigateAfterLinkCreated = useCallback(
     (linkId: string, payload: { slug?: string; url?: string }) => {
       if (typeof window === 'undefined') return
       const funnelAbs = absoluteFunnelUrlFromPayload(payload)
+      if (stayInProEsteticaHub) {
+        if (funnelAbs) {
+          hardNavigateTo(funnelAbs)
+          setMeusLinksRefreshTick((n) => n + 1)
+          return
+        }
+        const base = pathname.split('?')[0]
+        const params = new URLSearchParams(searchParams.toString())
+        params.set('tab', 'meus')
+        router.replace(params.toString() ? `${base}?${params.toString()}` : base, { scroll: false })
+        setMeusLinksRefreshTick((n) => n + 1)
+        return
+      }
       const editPath = `${linksPath.replace(/\/$/, '')}/editar/${encodeURIComponent(linkId)}`
       const editAbs = new URL(editPath, window.location.origin).href
       const slugOnly = typeof payload.slug === 'string' && payload.slug.trim()
@@ -589,7 +607,7 @@ function BibliotecaPageContentInner({
       hardNavigateTo(target)
       setMeusLinksRefreshTick((n) => n + 1)
     },
-    [linksPath]
+    [linksPath, stayInProEsteticaHub, pathname, searchParams, router]
   )
 
   /** Só faz sentido escolher segmento se não há um fixo pelo perfil/URL ou se é admin/suporte. */
