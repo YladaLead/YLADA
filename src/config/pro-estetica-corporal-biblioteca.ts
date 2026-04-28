@@ -1,6 +1,6 @@
 /**
  * Pro Estética Corporal — biblioteca (`subscope=estetica_corporal`):
- * **lista fechada por `template_id`**: calculadoras + quizzes corporais (migrations 236, 242, 293, 308, **333**).
+ * **lista fechada por `template_id`**: calculadoras + quizzes corporais (migrations 236, 242, 293, 308, **333**, **342**).
  * Tópicos prontos + links que a pessoa cria continuam noutras áreas da UI; aqui só estes itens globais passam no filtro.
  */
 
@@ -33,7 +33,7 @@ export const SEGMENT_CODES_BIBLIOTECA_ESTETICA_CORPORAL = ['aesthetics', 'nutrit
 
 /**
  * Únicos itens da biblioteca YLADA mostrados no painel Pro Estética Corporal.
- * Inclui migration **333** (drenagem vs tecnologia, tecnologia-alvo, expectativa de sessões, camadas, agenda, retenção/hábitos).
+ * Inclui migration **333** (drenagem vs tecnologia, tecnologia-alvo, expectativa de sessões, camadas, agenda, retenção/hábitos) e **342** (massagem + resultados completos 119/120).
  */
 export const TEMPLATE_IDS_BIBLIOTECA_ESTETICA_CORPORAL_PERMITIDOS = new Set([
   'b1000026-0026-4000-8000-000000000026',
@@ -54,6 +54,7 @@ export const TEMPLATE_IDS_BIBLIOTECA_ESTETICA_CORPORAL_PERMITIDOS = new Set([
   'b1000124-0124-4000-8000-000000000124',
   'b1000125-0125-4000-8000-000000000125',
   'b1000126-0126-4000-8000-000000000126',
+  'b1000127-0127-4000-8000-000000000127',
 ])
 
 export type BibliotecaItemSegmentFilter = {
@@ -82,6 +83,7 @@ export const TEMPLATE_IDS_ORDEM_DESTAQUE_ESTETICA_CORPORAL = [
   'b1000027-0027-4000-8000-000000000027',
   'b1000031-0031-4000-8000-000000000031',
   'b1000123-0123-4000-8000-000000000123',
+  'b1000127-0127-4000-8000-000000000127',
   'b1000121-0121-4000-8000-000000000121',
   'b1000122-0122-4000-8000-000000000122',
   'b1000124-0124-4000-8000-000000000124',

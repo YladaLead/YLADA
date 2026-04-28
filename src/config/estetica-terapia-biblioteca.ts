@@ -31,6 +31,7 @@ const CORPORAL_TEMPLATE_IDS_EXTRAS = new Set([
   'b1000124-0124-4000-8000-000000000124',
   'b1000125-0125-4000-8000-000000000125',
   'b1000126-0126-4000-8000-000000000126',
+  'b1000127-0127-4000-8000-000000000127',
 ])
 
 export function parseEsteticaTerapiaLinhaParam(raw: string | null | undefined): EsteticaTerapiaLinha {

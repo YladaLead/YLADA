@@ -1846,6 +1846,8 @@ function DiagnosticoQuiz({
   const questions = Array.isArray(cfg.questions) ? cfg.questions : []
   const results = Array.isArray(cfg.results) ? cfg.results : []
   const resultIntro = (cfg.resultIntro as string) || (locale === 'en' ? 'Your result:' : locale === 'es' ? 'Tu resultado:' : 'Seu resultado:')
+  /** Título do schema (biblioteca) quando o título do link ainda é genérico. */
+  const quizTitle = ((cfg.title as string)?.trim() || title).trim()
   const pessoaLabel =
     commerceUi != null
       ? locale === 'en'
@@ -1941,7 +1943,7 @@ function DiagnosticoQuiz({
     : resultDescription
 
   if (step === 'intro') {
-    const introTitle = (cfg.introTitle as string)?.trim() || title
+    const introTitle = (cfg.introTitle as string)?.trim() || quizTitle
     const introSubtitle = (cfg.introSubtitle as string)?.trim() || t.quizIntroLead
     const introMicro = (cfg.introMicro as string)?.trim() || t.quizIntroMicro
     const bullets =
@@ -1997,7 +1999,7 @@ function DiagnosticoQuiz({
               {t.yourResult}
             </span>
           </div>
-          <p className="text-xs text-gray-500 mb-2">{title}</p>
+          <p className="text-xs text-gray-500 mb-2">{quizTitle}</p>
           <p className="text-sm text-gray-500 mb-4">{resultIntro}</p>
 
           <div className="relative mb-5 overflow-hidden rounded-2xl bg-gradient-to-br from-sky-50 to-white border border-sky-100/80 shadow-sm">
@@ -2086,7 +2088,7 @@ function DiagnosticoQuiz({
   return (
     <div className="min-h-screen bg-gradient-to-b from-sky-50 via-sky-50/90 to-blue-50 flex items-center justify-center p-4 sm:p-6">
       <div className="max-w-md w-full bg-white rounded-2xl shadow-xl border border-gray-100/80 p-6 sm:p-8">
-        <h1 className="text-xl font-bold text-gray-900 mb-2">{title}</h1>
+        <h1 className="text-xl font-bold text-gray-900 mb-2">{quizTitle}</h1>
         <p className="text-sm text-gray-500 mb-4">
           {t.questionOf} {currentIndex + 1} {locale === 'en' ? 'of' : 'de'} {questions.length}
         </p>

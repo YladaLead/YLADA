@@ -179,6 +179,14 @@ function isCurrentPathLinksHub(linksPath: string): boolean {
   return cur === hub
 }
 
+/** Painel Pro Estética (biblioteca embutida): manter query e só mudar `tab=meus` em vez de ir para `/pt/estetica/links`. */
+function sameOriginUrlWithTabMeus(): string {
+  if (typeof window === 'undefined') return ''
+  const u = new URL(window.location.href)
+  u.searchParams.set('tab', 'meus')
+  return u.href
+}
+
 /** URL absoluta do funil no browser atual (evita problemas com path relativo ou host). */
 function absoluteFunnelUrlFromPayload(payload: { slug?: string; url?: string }): string | null {
   if (typeof window === 'undefined') return null
@@ -269,6 +277,7 @@ function BibliotecaCard({
   getTituloAdaptado: getTituloAdaptadoFn,
   isTemaMaisUsado,
   badge,
+  stayOnProEsteticaPanel = false,
 }: {
   item: BibliotecaItemRow
   linksPath: string
@@ -290,6 +299,8 @@ function BibliotecaCard({
   getQuandoUsar: (t: string, m: BibliotecaItemRow['meta']) => string
   getTituloAdaptado: (tema: string, seg: BibliotecaSegmentCode | null) => string | null
   isTemaMaisUsado: (t: string) => boolean
+  /** Biblioteca embutida no painel Pro Estética: não redirecionar para a matriz `/pt/estetica/links`. */
+  stayOnProEsteticaPanel?: boolean
 }) {
   const [criarErro, setCriarErro] = useState<string | null>(null)
   const [criarErroPrecosCta, setCriarErroPrecosCta] = useState(false)
@@ -346,26 +357,35 @@ function BibliotecaCard({
         try {
           onLinkCreated(linkId, payload)
         } catch {
-          const editPath = `${linksPath.replace(/\/$/, '')}/editar/${encodeURIComponent(linkId)}`
-          hardNavigateTo(new URL(editPath, window.location.origin).href)
+          if (stayOnProEsteticaPanel) {
+            hardNavigateTo(sameOriginUrlWithTabMeus())
+          } else {
+            const editPath = `${linksPath.replace(/\/$/, '')}/editar/${encodeURIComponent(linkId)}`
+            hardNavigateTo(new URL(editPath, window.location.origin).href)
+          }
         }
       } else if (createdWithId) {
         try {
           onLinkCreated(linkId, payload)
         } catch {
-          const editPath = `${linksPath.replace(/\/$/, '')}/editar/${encodeURIComponent(linkId)}`
-          hardNavigateTo(new URL(editPath, window.location.origin).href)
+          if (stayOnProEsteticaPanel) {
+            hardNavigateTo(sameOriginUrlWithTabMeus())
+          } else {
+            const editPath = `${linksPath.replace(/\/$/, '')}/editar/${encodeURIComponent(linkId)}`
+            hardNavigateTo(new URL(editPath, window.location.origin).href)
+          }
         }
       } else if (data?.success && (payload.slug || payload.url)) {
         const abs = absoluteFunnelUrlFromPayload(payload)
         if (abs) hardNavigateTo(abs)
         else if (payload.slug)
           hardNavigateTo(new URL(`/l/${encodeURIComponent(payload.slug)}`, window.location.origin).href)
+        else if (stayOnProEsteticaPanel) hardNavigateTo(sameOriginUrlWithTabMeus())
         else hardNavigateTo(`${window.location.origin}${linksPath}`)
       } else if (data?.limit_reached && typeof data?.message === 'string' && data.message.trim()) {
         const msg = data.message.trim()
         try {
-          if (!isCurrentPathLinksHub(linksPath)) {
+          if (!isCurrentPathLinksHub(linksPath) && !stayOnProEsteticaPanel) {
             if (data.limit_type === 'active_links') {
               sessionStorage.setItem(
                 'ylada_pending_link_limit_modal',
@@ -378,7 +398,7 @@ function BibliotecaCard({
         } catch {
           // ignore
         }
-        if (isCurrentPathLinksHub(linksPath)) {
+        if (isCurrentPathLinksHub(linksPath) || stayOnProEsteticaPanel) {
           setCriarErro(msg)
           setCriarErroPrecosCta(data.limit_type === 'active_links')
         } else {
@@ -576,10 +596,11 @@ function BibliotecaPageContentInner({
   const pathname = usePathname()
   const linhaBibliotecaQueryRaw = rawEsteticaBibliotecaLinhaFromSearchParams(searchParams)
 
-  const stayInProEsteticaHub =
-    embedded &&
-    proEsteticaNarrow &&
-    (pathname?.startsWith('/pro-estetica-corporal') || pathname?.startsWith('/pro-estetica-capilar'))
+  /**
+   * Biblioteca corporal/capilar só existe embutida no painel Pro — não depender do `pathname`
+   * (evita cair na matriz `/pt/estetica/links` quando o prefixo da rota difere).
+   */
+  const stayInProEsteticaHub = embedded && proEsteticaNarrow
 
   const navigateAfterLinkCreated = useCallback(
     (linkId: string, payload: { slug?: string; url?: string }) => {
@@ -951,26 +972,35 @@ function BibliotecaPageContentInner({
             try {
               navigateAfterLinkCreated(linkId, payload)
             } catch {
-              const editPath = `${linksPath.replace(/\/$/, '')}/editar/${encodeURIComponent(linkId)}`
-              hardNavigateTo(new URL(editPath, window.location.origin).href)
+              if (stayInProEsteticaHub) {
+                hardNavigateTo(sameOriginUrlWithTabMeus())
+              } else {
+                const editPath = `${linksPath.replace(/\/$/, '')}/editar/${encodeURIComponent(linkId)}`
+                hardNavigateTo(new URL(editPath, window.location.origin).href)
+              }
             }
           } else if (createdWithId) {
             try {
               navigateAfterLinkCreated(linkId, payload)
             } catch {
-              const editPath = `${linksPath.replace(/\/$/, '')}/editar/${encodeURIComponent(linkId)}`
-              hardNavigateTo(new URL(editPath, window.location.origin).href)
+              if (stayInProEsteticaHub) {
+                hardNavigateTo(sameOriginUrlWithTabMeus())
+              } else {
+                const editPath = `${linksPath.replace(/\/$/, '')}/editar/${encodeURIComponent(linkId)}`
+                hardNavigateTo(new URL(editPath, window.location.origin).href)
+              }
             }
           } else if (data?.success && (payload.slug || payload.url)) {
             const abs = absoluteFunnelUrlFromPayload(payload)
             if (abs) hardNavigateTo(abs)
             else if (payload.slug)
               hardNavigateTo(new URL(`/l/${encodeURIComponent(payload.slug)}`, window.location.origin).href)
+            else if (stayInProEsteticaHub) hardNavigateTo(sameOriginUrlWithTabMeus())
             else hardNavigateTo(`${window.location.origin}${linksPath}`)
           } else if (data?.limit_reached && typeof data?.message === 'string' && data.message.trim()) {
             const msg = data.message.trim()
             try {
-              if (!isCurrentPathLinksHub(linksPath)) {
+              if (!isCurrentPathLinksHub(linksPath) && !stayInProEsteticaHub) {
                 if (data.limit_type === 'active_links') {
                   sessionStorage.setItem(
                     'ylada_pending_link_limit_modal',
@@ -983,7 +1013,7 @@ function BibliotecaPageContentInner({
             } catch {
               // ignore
             }
-            if (isCurrentPathLinksHub(linksPath)) {
+            if (isCurrentPathLinksHub(linksPath) || stayInProEsteticaHub) {
               setIdeiaLinkErro(msg)
               setIdeiaLinkPrecosCta(data.limit_type === 'active_links')
             } else {
@@ -1396,6 +1426,7 @@ function BibliotecaPageContentInner({
                         getTituloAdaptado={getTituloAdaptado}
                         isTemaMaisUsado={isTemaMaisUsado}
                         badge={badges[idx]}
+                        stayOnProEsteticaPanel={stayInProEsteticaHub}
                       />
                     )
                   })}
@@ -1433,6 +1464,7 @@ function BibliotecaPageContentInner({
                             getQuandoUsar={getQuandoUsar}
                             getTituloAdaptado={getTituloAdaptado}
                             isTemaMaisUsado={isTemaMaisUsado}
+                            stayOnProEsteticaPanel={stayInProEsteticaHub}
                           />
                         ))}
                       </div>
@@ -1475,6 +1507,7 @@ function BibliotecaPageContentInner({
                               getQuandoUsar={getQuandoUsar}
                               getTituloAdaptado={getTituloAdaptado}
                               isTemaMaisUsado={isTemaMaisUsado}
+                              stayOnProEsteticaPanel={stayInProEsteticaHub}
                             />
                           ))}
                         </div>
@@ -1505,6 +1538,7 @@ function BibliotecaPageContentInner({
                         getQuandoUsar={getQuandoUsar}
                         getTituloAdaptado={getTituloAdaptado}
                         isTemaMaisUsado={isTemaMaisUsado}
+                        stayOnProEsteticaPanel={stayInProEsteticaHub}
                       />
                     ))}
                   </div>
