@@ -190,66 +190,49 @@ function AdminProLideresManualLeaderContent() {
               </button>
             </div>
           </div>
-          <fieldset className="block space-y-2 rounded-lg border border-gray-200 bg-gray-50/80 p-3">
-            <legend className="mb-1 px-1 text-sm font-medium text-gray-900">Produto (vertical)</legend>
+          <div className="block space-y-2 rounded-lg border border-gray-200 bg-gray-50/80 p-3">
+            <label htmlFor="manual-leader-vertical" className="block text-sm font-medium text-gray-900">
+              Produto (vertical)
+            </label>
             <p className="text-xs text-gray-600">
-              Um cadastro = <strong className="font-medium text-gray-800">um</strong> produto. Para outro produto (outro
-              e-mail na vossa regra), faz outro cadastro.
+              Um cadastro = <strong className="font-medium text-gray-800">um</strong> produto. Clica no campo para
+              abrir a lista. Para outro produto (outro e-mail na vossa regra), faz outro cadastro.
             </p>
-            <div className="space-y-2 pt-1">
+            <select
+              id="manual-leader-vertical"
+              value={verticalSelectValue}
+              onChange={(e) => {
+                const v = e.target.value
+                if (v === '__custom__') {
+                  if (VERTICAL_PRESET_VALUES.has(segmentCode)) setSegmentCode('')
+                  return
+                }
+                setSegmentCode(v)
+              }}
+              className="min-h-[48px] w-full cursor-pointer rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/30"
+            >
               {VERTICAL_PRESETS.map((p) => (
-                <label
-                  key={p.value}
-                  className={`flex cursor-pointer items-start gap-3 rounded-lg border px-3 py-2.5 text-sm ${
-                    segmentCode === p.value
-                      ? 'border-blue-500 bg-blue-50 ring-1 ring-blue-500'
-                      : 'border-gray-200 bg-white hover:border-gray-300'
-                  }`}
-                >
-                  <input
-                    type="radio"
-                    name="vertical-product"
-                    className="mt-1"
-                    checked={segmentCode === p.value}
-                    onChange={() => setSegmentCode(p.value)}
-                  />
-                  <span>
-                    <span className="font-medium text-gray-900">{p.label}</span>
-                    <span className="mt-0.5 block font-mono text-[11px] text-gray-500">{p.value}</span>
-                  </span>
-                </label>
+                <option key={p.value} value={p.value}>
+                  {p.label} ({p.value})
+                </option>
               ))}
-              <label
-                className={`flex cursor-pointer items-start gap-3 rounded-lg border px-3 py-2.5 text-sm ${
-                  verticalSelectValue === '__custom__'
-                    ? 'border-amber-500 bg-amber-50/80 ring-1 ring-amber-400'
-                    : 'border-gray-200 bg-white hover:border-gray-300'
-                }`}
-              >
-                <input
-                  type="radio"
-                  name="vertical-product"
-                  className="mt-1"
-                  checked={verticalSelectValue === '__custom__'}
-                  onChange={() => {
-                    if (VERTICAL_PRESET_VALUES.has(segmentCode)) setSegmentCode('')
-                  }}
-                />
-                <span className="flex-1">
-                  <span className="font-medium text-gray-900">Outro (código manual)</span>
-                  {verticalSelectValue === '__custom__' ? (
-                    <input
-                      value={segmentCode}
-                      onChange={(e) => setSegmentCode(e.target.value)}
-                      placeholder="ex.: h-lider"
-                      className="mt-2 w-full rounded-lg border border-amber-200 bg-white px-3 py-2 font-mono text-sm"
-                      aria-label="Código vertical manual"
-                    />
-                  ) : null}
-                </span>
-              </label>
-            </div>
-          </fieldset>
+              <option value="__custom__">Outro (código manual)…</option>
+            </select>
+            {verticalSelectValue !== '__custom__' ? (
+              <p className="text-[11px] text-gray-500">
+                Código enviado: <code className="rounded bg-white px-1">{segmentCode}</code>
+              </p>
+            ) : null}
+            {verticalSelectValue === '__custom__' ? (
+              <input
+                value={segmentCode}
+                onChange={(e) => setSegmentCode(e.target.value)}
+                placeholder="ex.: h-lider"
+                className="w-full rounded-lg border border-amber-200 bg-white px-3 py-2.5 font-mono text-sm"
+                aria-label="Código vertical manual"
+              />
+            ) : null}
+          </div>
           {error && <p className="text-sm text-red-700">{error}</p>}
           <button
             type="submit"
