@@ -63,6 +63,21 @@ export default function AdminConsultoriasTerapiaCapilarPage() {
                 </p>
               </Link>
             </li>
+            <li>
+              <Link
+                href="/admin/pro-lideres/manual-leader"
+                className="block rounded-2xl border border-blue-200 bg-white p-5 shadow-sm transition hover:border-blue-400 hover:bg-blue-50/40"
+              >
+                <span className="text-2xl" aria-hidden>
+                  🔐
+                </span>
+                <h2 className="mt-2 text-lg font-semibold text-gray-900">Cadastro manual — Pro Terapia capilar</h2>
+                <p className="mt-1 text-sm text-gray-600">
+                  Na ficha (consultoria), usa o atalho com dados pré-preenchidos; no formulário, segmento{' '}
+                  <code className="text-xs">estetica-capilar</code>.
+                </p>
+              </Link>
+            </li>
           </ul>
 
           <p className="text-xs text-gray-500">

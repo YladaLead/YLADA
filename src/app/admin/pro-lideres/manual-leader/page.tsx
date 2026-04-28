@@ -1,9 +1,11 @@
 'use client'
 
-import { useCallback, useState } from 'react'
+import { Suspense, useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
 import { Eye, EyeOff } from 'lucide-react'
 import AdminProtectedRoute from '@/components/auth/AdminProtectedRoute'
+import { manualLeaderHandoutTitleForVerticalCode } from '@/lib/manual-leader-entrar-path'
 
 type OkResponse = {
   ok: true
@@ -13,9 +15,12 @@ type OkResponse = {
   password: string
   login_url: string
   message: string
+  tenant_id?: string
+  vertical_code?: string
 }
 
 function AdminProLideresManualLeaderContent() {
+  const searchParams = useSearchParams()
   const [leaderName, setLeaderName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -26,9 +31,22 @@ function AdminProLideresManualLeaderContent() {
   const [copied, setCopied] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
 
+  useEffect(() => {
+    const qEmail = searchParams.get('email')?.trim()
+    const qName = searchParams.get('leaderName')?.trim()
+    const qSegment = searchParams.get('segment')?.trim()
+    if (qEmail) setEmail(qEmail)
+    if (qName) setLeaderName(qName)
+    if (qSegment) setSegmentCode(qSegment)
+  }, [searchParams])
+
+  const handoutTitleForResult =
+    result?.vertical_code != null
+      ? manualLeaderHandoutTitleForVerticalCode(result.vertical_code)
+      : manualLeaderHandoutTitleForVerticalCode(segmentCode)
   const handoutText =
     result != null
-      ? `Pro Líderes — acesso\n\nEntrar em: ${result.login_url}\nE-mail: ${result.email}\nSenha: ${result.password}\n\n(Esta senha é a definitiva da conta; o líder pode alterá-la nas definições quando quiser.)`
+      ? `${handoutTitleForResult} — acesso\n\nEntrar em: ${result.login_url}\nE-mail: ${result.email}\nSenha: ${result.password}\n\n(Esta senha é a definitiva da conta; o líder pode alterá-la nas definições quando quiser.)`
       : ''
 
   const copyHandout = useCallback(async () => {
@@ -91,11 +109,13 @@ function AdminProLideresManualLeaderContent() {
               Pro Líderes onboarding
             </Link>
           </p>
-          <h1 className="mt-2 text-2xl font-bold text-gray-900">Cadastro manual — líder Pro Líderes</h1>
+          <h1 className="mt-2 text-2xl font-bold text-gray-900">Cadastro manual — dono (Pro Líderes / Estética Pro)</h1>
           <p className="mt-2 text-sm text-gray-600">
             Cria ou atualiza o utilizador no Supabase Auth, define a senha que indicar, garante o perfil YLADA e o
-            espaço <strong>leader_tenants</strong> (dono). Use só em suporte interno; a senha aparece uma vez neste
-            ecrã para enviar ao líder.
+            espaço <strong>leader_tenants</strong> (dono). O link de entrada muda conforme o segmento (
+            <code className="text-xs">h-lider</code>, <code className="text-xs">estetica-corporal</code>,{' '}
+            <code className="text-xs">estetica-capilar</code>). Use só em suporte interno; a senha aparece uma vez neste
+            ecrã.
           </p>
         </div>
 
@@ -194,6 +214,12 @@ function AdminProLideresManualLeaderContent() {
                 {result.login_url}
               </a>
             </p>
+            {result.tenant_id ? (
+              <p className="text-xs text-green-900">
+                <strong>Leader tenant ID</strong> (para colar na ficha de consultoria):{' '}
+                <code className="break-all rounded bg-white/80 px-1">{result.tenant_id}</code>
+              </p>
+            ) : null}
           </section>
         )}
       </div>
@@ -204,7 +230,15 @@ function AdminProLideresManualLeaderContent() {
 export default function AdminProLideresManualLeaderPage() {
   return (
     <AdminProtectedRoute>
-      <AdminProLideresManualLeaderContent />
+      <Suspense
+        fallback={
+          <main className="min-h-screen bg-gray-50 p-6">
+            <p className="text-sm text-gray-600">A carregar…</p>
+          </main>
+        }
+      >
+        <AdminProLideresManualLeaderContent />
+      </Suspense>
     </AdminProtectedRoute>
   )
 }

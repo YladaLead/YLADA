@@ -7,6 +7,7 @@ import {
 } from '@/lib/pro-lideres-leader-onboarding'
 import { newLeaderTenantInsertPayload, resolvedUserEmail } from '@/lib/pro-lideres-server'
 import { supabaseAdmin } from '@/lib/supabase'
+import { manualLeaderEntrarPathForVerticalCode } from '@/lib/manual-leader-entrar-path'
 import { generateAvailableUserSlug } from '@/lib/user-slug-generator'
 
 function requestOrigin(request: NextRequest): string {
@@ -198,17 +199,20 @@ export async function POST(request: NextRequest) {
   })
 
   const origin = requestOrigin(request)
-  const loginUrl = `${origin}/pro-lideres/entrar`
+  const loginPath = manualLeaderEntrarPathForVerticalCode(segmentCode)
+  const loginUrl = `${origin}${loginPath}`
 
   return NextResponse.json({
     ok: true,
     created_new_auth_user: createdNewAuthUser,
     tenant_existed: tenantExisted,
     user_id: userId,
+    tenant_id: tenantId,
+    vertical_code: segmentCode,
     email: normalizedEmail,
     password,
     login_url: loginUrl,
     message:
-      'Conta e espaço Pro Líderes prontos. Envie ao líder o link de entrada, o e-mail e a senha — é a senha definitiva da conta; pode alterá-la nas definições quando quiser.',
+      'Conta e espaço (dona) prontos. Envie o link de entrada correcto para o produto, o e-mail e a senha — é a senha definitiva da conta; pode alterá-la nas definições quando quiser.',
   })
 }

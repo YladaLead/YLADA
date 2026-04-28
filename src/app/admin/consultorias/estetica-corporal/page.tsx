@@ -54,6 +54,14 @@ export default function AdminConsultoriasEsteticaCorporalPage() {
               hover="hover:border-sky-400 hover:bg-sky-50/50"
             />
             <HubRow
+              href="/admin/pro-lideres/manual-leader"
+              icon="🔐"
+              title="Cadastro manual — Pro Estética corporal"
+              description="Na ficha (consultoria corporal), há atalho com dados pré-preenchidos; segmento estetica-corporal"
+              border="border-blue-200"
+              hover="hover:border-blue-400 hover:bg-blue-50/50"
+            />
+            <HubRow
               href="/admin/ylada/clinicas-estetica-corporal"
               icon="🏥"
               title="Clínicas (B2B)"

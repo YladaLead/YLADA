@@ -1842,6 +1842,52 @@ export default function EsteticaConsultoriaAdminClient() {
                 placeholder="UUID do tenant"
               />
             </label>
+            {(clientForm.segment === 'corporal' || clientForm.segment === 'ambos') && (
+              <div className="sm:col-span-2 lg:col-span-3 rounded-lg border border-sky-200 bg-sky-50/80 p-3 text-sm text-sky-950">
+                <p className="font-medium text-gray-900">Conta no painel Pro Estética corporal</p>
+                <p className="mt-1 text-xs text-gray-700">
+                  Abre o cadastro manual com e-mail e nome desta ficha. Depois de criar, copie o{' '}
+                  <strong>Leader tenant ID</strong> que o ecrã mostra e guarde aqui em cima.
+                </p>
+                <Link
+                  href={`/admin/pro-lideres/manual-leader?${new URLSearchParams({
+                    ...(clientForm.contact_email?.trim() ? { email: clientForm.contact_email.trim() } : {}),
+                    ...(() => {
+                      const n =
+                        clientForm.contact_name?.trim() || clientForm.business_name?.trim() || ''
+                      return n ? { leaderName: n } : {}
+                    })(),
+                    segment: 'estetica-corporal',
+                  }).toString()}`}
+                  className="mt-2 inline-flex font-semibold text-sky-800 underline hover:text-sky-950"
+                >
+                  Abrir cadastro manual — Pro Estética corporal →
+                </Link>
+              </div>
+            )}
+            {(clientForm.segment === 'capilar' || clientForm.segment === 'ambos') && (
+              <div className="sm:col-span-2 lg:col-span-3 rounded-lg border border-violet-200 bg-violet-50/80 p-3 text-sm text-violet-950">
+                <p className="font-medium text-gray-900">Conta no painel Pro Terapia capilar</p>
+                <p className="mt-1 text-xs text-gray-700">
+                  Mesmo fluxo: cadastro manual com dados desta ficha; depois cole o tenant ID aqui se for o painel
+                  capilar.
+                </p>
+                <Link
+                  href={`/admin/pro-lideres/manual-leader?${new URLSearchParams({
+                    ...(clientForm.contact_email?.trim() ? { email: clientForm.contact_email.trim() } : {}),
+                    ...(() => {
+                      const n =
+                        clientForm.contact_name?.trim() || clientForm.business_name?.trim() || ''
+                      return n ? { leaderName: n } : {}
+                    })(),
+                    segment: 'estetica-capilar',
+                  }).toString()}`}
+                  className="mt-2 inline-flex font-semibold text-violet-900 underline hover:text-violet-950"
+                >
+                  Abrir cadastro manual — Pro Terapia capilar →
+                </Link>
+              </div>
+            )}
             <label className="block text-sm">
               <span className="text-gray-600">Valor pago (consultoria)</span>
               <input
