@@ -1,6 +1,8 @@
 import { supabaseAdmin } from '@/lib/supabase'
 import { parseYladaFreeGrantKind } from '@/lib/admin-ylada-free-matriz'
 import { isPerfilMatrizYlada } from '@/lib/admin-matriz-constants'
+import { isProEsteticaCorporalBootstrapLeaderEmail } from '@/lib/pro-estetica-corporal-server'
+import { isProEsteticaCapilarBootstrapLeaderEmail } from '@/lib/pro-estetica-capilar-server'
 
 /**
  * Verifica se usuário tem assinatura ativa para uma área específica
@@ -255,6 +257,26 @@ export function emailIsMatrixDemoVideoAccount(email: string | null | undefined):
 }
 
 /**
+ * E-mails que devem ter benefícios comerciais YLADA (vários links ativos, Noel, etc.) como plano pago,
+ * sem linha obrigatória em `subscriptions`: contas demo oficiais Pro Estética corporal/capilar
+ * (`demo@proesteticacorporal.com`, env `PRO_*_BOOTSTRAP_LEADER_EMAILS`) e lista extra em
+ * `YLADA_COMMERCIAL_UNLIMITED_EMAILS` (separada por vírgulas), ex.: conta real de parceira.
+ */
+export function emailHasYladaCommercialUnlimitedByEsteticaOrEnv(email: string | null | undefined): boolean {
+  const e = String(email || '')
+    .trim()
+    .toLowerCase()
+  if (!e) return false
+  if (isProEsteticaCorporalBootstrapLeaderEmail(e)) return true
+  if (isProEsteticaCapilarBootstrapLeaderEmail(e)) return true
+  const extra =
+    process.env.YLADA_COMMERCIAL_UNLIMITED_EMAILS?.split(',')
+      .map((x) => x.trim().toLowerCase())
+      .filter(Boolean) ?? []
+  return extra.includes(e)
+}
+
+/**
  * Verifica se usuário tem benefícios “sem limite freemium” na matriz YLADA (links, Noel, WhatsApp).
  * Inclui: **admin ou suporte** (contas demo e equipe, ex. `demo.nutri@ylada.com` com `is_support`);
  * **emails `demo.*@ylada.app` (e `@ylada.com`)** usados em gravações — mesmo sem linha em `subscriptions`;
@@ -273,6 +295,7 @@ export async function hasYladaProPlan(userId: string): Promise<boolean> {
       .maybeSingle()
 
     if (emailIsMatrixDemoVideoAccount(profile?.email as string | undefined)) return true
+    if (emailHasYladaCommercialUnlimitedByEsteticaOrEnv(profile?.email as string | undefined)) return true
 
     const yladaSub = await getActiveSubscription(userId, 'ylada')
     if (yladaSub && activeYladaRowIsUnlimited(yladaSub)) return true
