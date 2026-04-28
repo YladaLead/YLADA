@@ -224,17 +224,29 @@ export async function POST(request: NextRequest) {
         .eq('id', bibliotecaTemplateId)
         .eq('active', true)
         .maybeSingle()
-      if (!btErr && bibliotecaTemplate && (bibliotecaTemplate.type === 'calculator' || bibliotecaTemplate.type === 'diagnostico')) {
-        const schema = (bibliotecaTemplate.schema_json as Record<string, unknown>) || {}
-        const title = titleOverride ?? (schema.title as string) ?? bibliotecaTemplate.name
-        templateId = bibliotecaTemplate.id
-        configJson = {
-          title,
-          ctaText: ctaSuggestion ?? (schema.ctaDefault as string) ?? 'Falar no WhatsApp',
-          ...schema,
-        }
-        // Diagnóstico da biblioteca: adicionar meta + form para fluxo unificado (API de diagnóstico)
-        if (bibliotecaTemplate.type === 'diagnostico') {
+      if (btErr) {
+        console.error('[ylada/links/generate] biblioteca template', btErr)
+        return NextResponse.json({ success: false, error: 'Erro ao carregar template da biblioteca.' }, { status: 500 })
+      }
+      if (!bibliotecaTemplate) {
+        return NextResponse.json(
+          { success: false, error: 'Template da biblioteca não encontrado ou inativo.' },
+          { status: 404 }
+        )
+      }
+      if (bibliotecaTemplate.type !== 'calculator' && bibliotecaTemplate.type !== 'diagnostico') {
+        return NextResponse.json({ success: false, error: 'Tipo de template da biblioteca não suportado.' }, { status: 400 })
+      }
+      const schema = (bibliotecaTemplate.schema_json as Record<string, unknown>) || {}
+      const title = titleOverride ?? (schema.title as string) ?? bibliotecaTemplate.name
+      templateId = bibliotecaTemplate.id
+      configJson = {
+        title,
+        ctaText: ctaSuggestion ?? (schema.ctaDefault as string) ?? 'Falar no WhatsApp',
+        ...schema,
+      }
+      // Diagnóstico da biblioteca: adicionar meta + form para fluxo unificado (API de diagnóstico)
+      if (bibliotecaTemplate.type === 'diagnostico') {
           const questions = Array.isArray(schema.questions) ? schema.questions as Array<{ id?: string; text?: string; type?: string; options?: string[] }> : []
           const formFields = questions.map((q, i) => ({
             id: q.id ?? `q${i + 1}`,
@@ -280,7 +292,6 @@ export async function POST(request: NextRequest) {
             },
             result: configJson.result ?? { headline: 'Seu resultado', summary_bullets: [], cta: { text: configJson.ctaText ?? 'Falar no WhatsApp' } },
           }
-        }
       }
     }
 

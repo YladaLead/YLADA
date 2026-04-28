@@ -90,16 +90,30 @@ export async function fetchPublicLinkPayload(
     Array.isArray(formBlock.fields)
   const isFlowLike = !!(meta?.flow_id || meta?.architecture || hasUnifiedPublicSurface)
 
+  /**
+   * O tipo do template na BD deve prevalecer: calculadoras da biblioteca costumam vir só com
+   * `fields` + `formula` (sem `meta.flow_id`). Se algum `meta.architecture` residual existir,
+   * `isFlowLike` ficaria true e o link era tratado como diagnóstico — quebrando cálculo e resultado.
+   */
   let type: 'diagnostico' | 'calculator' = 'diagnostico'
-  if (!isFlowLike) {
-    const { data: template } = await supabaseAdmin
+  if (link.template_id) {
+    const { data: templateRow } = await supabaseAdmin
       .from('ylada_link_templates')
       .select('type')
       .eq('id', link.template_id)
       .maybeSingle()
-    const t = template?.type
-    if (!t || !['diagnostico', 'calculator'].includes(t)) notFound()
-    type = t as 'diagnostico' | 'calculator'
+    const tmplType = templateRow?.type
+    if (tmplType === 'calculator') {
+      type = 'calculator'
+    } else if (tmplType === 'diagnostico') {
+      type = 'diagnostico'
+    } else if (!tmplType) {
+      notFound()
+    } else {
+      notFound()
+    }
+  } else if (!isFlowLike) {
+    notFound()
   }
 
   let ctaWhatsapp = link.cta_whatsapp ?? null
