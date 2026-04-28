@@ -1,11 +1,11 @@
 -- =====================================================
--- Fernanda (clinicaesteticfer@gmail.com): remover assinatura duplicada em `ylada`.
--- Usa só Pro Estética + perfil estética → uma linha em `subscriptions` com area = estetica.
--- Idempotente (DELETE sem erro se já não existir).
+-- Fernanda (clinicaesteticfer@gmail.com): remover linha `estetica` em subscriptions.
+-- Pro Estética corporal → uma linha ativa em `area = 'ylada'` (ver migration 343).
+-- Idempotente.
 -- =====================================================
 
 DELETE FROM subscriptions s
 USING user_profiles up
 WHERE s.user_id = up.user_id
   AND lower(trim(up.email)) = lower(trim('clinicaesteticfer@gmail.com'))
-  AND s.area = 'ylada';
+  AND s.area = 'estetica';
