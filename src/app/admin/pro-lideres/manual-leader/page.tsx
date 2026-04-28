@@ -7,6 +7,15 @@ import { Eye, EyeOff } from 'lucide-react'
 import AdminProtectedRoute from '@/components/auth/AdminProtectedRoute'
 import { manualLeaderHandoutTitleForVerticalCode } from '@/lib/manual-leader-entrar-path'
 
+/** Códigos suportados no cadastro manual; um por conta — escolhe o produto que a pessoa está a contratar. */
+const VERTICAL_PRESETS = [
+  { value: 'h-lider', label: 'Pró Líderes (equipe / Herbalife)' },
+  { value: 'estetica-corporal', label: 'Pro Estética corporal' },
+  { value: 'estetica-capilar', label: 'Pro Terapia capilar' },
+] as const
+
+const VERTICAL_PRESET_VALUES = new Set<string>(VERTICAL_PRESETS.map((p) => p.value))
+
 type OkResponse = {
   ok: true
   created_new_auth_user: boolean
@@ -34,11 +43,15 @@ function AdminProLideresManualLeaderContent() {
   useEffect(() => {
     const qEmail = searchParams.get('email')?.trim()
     const qName = searchParams.get('leaderName')?.trim()
-    const qSegment = searchParams.get('segment')?.trim()
+    let qSegment = searchParams.get('segment')?.trim().toLowerCase() ?? ''
+    if (qSegment === 'estetica_corporal' || qSegment === 'estética-corporal') qSegment = 'estetica-corporal'
+    if (qSegment === 'estetica_capilar') qSegment = 'estetica-capilar'
     if (qEmail) setEmail(qEmail)
     if (qName) setLeaderName(qName)
     if (qSegment) setSegmentCode(qSegment)
   }, [searchParams])
+
+  const verticalSelectValue = VERTICAL_PRESET_VALUES.has(segmentCode) ? segmentCode : '__custom__'
 
   const handoutTitleForResult =
     result?.vertical_code != null
@@ -65,6 +78,12 @@ function AdminProLideresManualLeaderContent() {
     setSubmitting(true)
     setError(null)
     setResult(null)
+    const segmentPayload = segmentCode.trim()
+    if (!VERTICAL_PRESET_VALUES.has(segmentPayload) && !segmentPayload) {
+      setError('Escolhe um produto na lista ou preenche o código em «Outro».')
+      setSubmitting(false)
+      return
+    }
     try {
       const res = await fetch('/api/admin/pro-lideres/manual-leader', {
         method: 'POST',
@@ -74,7 +93,7 @@ function AdminProLideresManualLeaderContent() {
           leaderName,
           email,
           password,
-          segmentCode,
+          segmentCode: segmentPayload,
         }),
       })
       const data = await res.json().catch(() => ({}))
@@ -171,15 +190,66 @@ function AdminProLideresManualLeaderContent() {
               </button>
             </div>
           </div>
-          <label className="block">
-            <span className="mb-1 block text-sm font-medium text-gray-700">Segmento (vertical)</span>
-            <input
-              value={segmentCode}
-              onChange={(e) => setSegmentCode(e.target.value)}
-              placeholder="h-lider"
-              className="w-full rounded-lg border border-gray-300 px-3 py-2.5"
-            />
-          </label>
+          <fieldset className="block space-y-2 rounded-lg border border-gray-200 bg-gray-50/80 p-3">
+            <legend className="mb-1 px-1 text-sm font-medium text-gray-900">Produto (vertical)</legend>
+            <p className="text-xs text-gray-600">
+              Um cadastro = <strong className="font-medium text-gray-800">um</strong> produto. Para outro produto (outro
+              e-mail na vossa regra), faz outro cadastro.
+            </p>
+            <div className="space-y-2 pt-1">
+              {VERTICAL_PRESETS.map((p) => (
+                <label
+                  key={p.value}
+                  className={`flex cursor-pointer items-start gap-3 rounded-lg border px-3 py-2.5 text-sm ${
+                    segmentCode === p.value
+                      ? 'border-blue-500 bg-blue-50 ring-1 ring-blue-500'
+                      : 'border-gray-200 bg-white hover:border-gray-300'
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="vertical-product"
+                    className="mt-1"
+                    checked={segmentCode === p.value}
+                    onChange={() => setSegmentCode(p.value)}
+                  />
+                  <span>
+                    <span className="font-medium text-gray-900">{p.label}</span>
+                    <span className="mt-0.5 block font-mono text-[11px] text-gray-500">{p.value}</span>
+                  </span>
+                </label>
+              ))}
+              <label
+                className={`flex cursor-pointer items-start gap-3 rounded-lg border px-3 py-2.5 text-sm ${
+                  verticalSelectValue === '__custom__'
+                    ? 'border-amber-500 bg-amber-50/80 ring-1 ring-amber-400'
+                    : 'border-gray-200 bg-white hover:border-gray-300'
+                }`}
+              >
+                <input
+                  type="radio"
+                  name="vertical-product"
+                  className="mt-1"
+                  checked={verticalSelectValue === '__custom__'}
+                  onChange={() => {
+                    if (VERTICAL_PRESET_VALUES.has(segmentCode)) setSegmentCode('')
+                  }}
+                />
+                <span className="flex-1">
+                  <span className="font-medium text-gray-900">Outro (código manual)</span>
+                  {verticalSelectValue === '__custom__' ? (
+                    <input
+                      value={segmentCode}
+                      onChange={(e) => setSegmentCode(e.target.value)}
+                      placeholder="ex.: h-lider"
+                      className="mt-2 w-full rounded-lg border border-amber-200 bg-white px-3 py-2 font-mono text-sm"
+                      aria-label="Código vertical manual"
+                    />
+                  ) : null}
+                </span>
+              </label>
+            </div>
+          </fieldset>
           {error && <p className="text-sm text-red-700">{error}</p>}
           <button
             type="submit"
