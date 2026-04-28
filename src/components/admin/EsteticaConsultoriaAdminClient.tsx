@@ -503,6 +503,146 @@ function clientFormDefaults(c: YladaEsteticaConsultClientRow) {
   }
 }
 
+type EsteticaFichaTab = 'jornada' | 'ficha' | 'notas' | 'materiais'
+
+function esteticaConsultoriaPaymentRecorded(consulting_paid_amount: string, last_payment_at: string): boolean {
+  if (last_payment_at.trim() !== '') return true
+  const raw = consulting_paid_amount.replace(',', '.').trim()
+  if (raw === '') return false
+  const n = Number.parseFloat(raw)
+  return Number.isFinite(n) && n > 0
+}
+
+function esteticaPreReceivedForSegment(
+  segment: YladaEsteticaConsultClientRow['segment'],
+  preCorporalCount: number,
+  preCapilarCount: number
+): boolean {
+  if (segment === 'corporal') return preCorporalCount > 0
+  if (segment === 'capilar') return preCapilarCount > 0
+  return preCorporalCount > 0 || preCapilarCount > 0
+}
+
+function esteticaFullDiagnosticReceivedForSegment(
+  segment: YladaEsteticaConsultClientRow['segment'],
+  fullCorporalCount: number,
+  fullCapilarCount: number
+): boolean {
+  if (segment === 'corporal') return fullCorporalCount > 0
+  if (segment === 'capilar') return fullCapilarCount > 0
+  return fullCorporalCount > 0 || fullCapilarCount > 0
+}
+
+type EsteticaConsultoriaFichaStepperProps = {
+  segment: YladaEsteticaConsultClientRow['segment']
+  preCorporalCount: number
+  preCapilarCount: number
+  fullCorporalCount: number
+  fullCapilarCount: number
+  paymentOk: boolean
+}
+
+function EsteticaConsultoriaFichaStepper({
+  segment,
+  preCorporalCount,
+  preCapilarCount,
+  fullCorporalCount,
+  fullCapilarCount,
+  paymentOk,
+}: EsteticaConsultoriaFichaStepperProps) {
+  const preOk = esteticaPreReceivedForSegment(segment, preCorporalCount, preCapilarCount)
+  const fullOk = esteticaFullDiagnosticReceivedForSegment(segment, fullCorporalCount, fullCapilarCount)
+  const focusClosing = preOk && !paymentOk
+  const focusLongForm = paymentOk && !fullOk
+
+  let proximoPasso = 'Envia o pré-diagnóstico (link público no topo da página).'
+  if (preOk && !paymentOk) {
+    proximoPasso =
+      'Pré recebido: prepara a pré-reunião e o fecho. Depois regista pagamento em «Ficha e pagamento» antes do formulário longo.'
+  } else if (paymentOk && !fullOk) {
+    proximoPasso = 'Pagamento registado: gera e envia o link do diagnóstico longo e combina a 1.ª reunião.'
+  } else if (paymentOk && fullOk) {
+    proximoPasso = 'Diagnóstico longo com respostas. Usa «Notas» e «Materiais» para acompanhar.'
+  }
+
+  const steps: {
+    id: number
+    title: string
+    subtitle: string
+    done: boolean
+    highlight: boolean
+  }[] = [
+    {
+      id: 1,
+      title: 'Pré-diagnóstico',
+      subtitle: preOk ? 'Resposta na ficha' : 'Aguarda a lead',
+      done: preOk,
+      highlight: !preOk,
+    },
+    {
+      id: 2,
+      title: 'Pré-reunião e fecho',
+      subtitle: focusClosing ? 'Foco aqui' : preOk ? 'Qualificar e propor' : 'Depois do pré',
+      done: false,
+      highlight: focusClosing,
+    },
+    {
+      id: 3,
+      title: 'Pagamento',
+      subtitle: paymentOk ? 'Registado' : 'Valor / data na ficha',
+      done: paymentOk,
+      highlight: false,
+    },
+    {
+      id: 4,
+      title: 'Diagnóstico longo',
+      subtitle: fullOk ? 'Respostas recebidas' : paymentOk ? 'Gerar link' : 'Após pagar',
+      done: fullOk,
+      highlight: focusLongForm,
+    },
+  ]
+
+  return (
+    <section
+      className="rounded-2xl border border-gray-200 bg-gradient-to-b from-white to-gray-50/80 p-4 shadow-sm"
+      aria-label="Progresso da ficha"
+    >
+      <h2 className="text-sm font-semibold text-gray-900">Onde estás nesta ficha</h2>
+      <p className="mt-2 text-xs text-gray-700 max-w-3xl rounded-lg border border-pink-100 bg-pink-50/50 px-3 py-2">
+        <strong className="text-pink-900">Próximo passo:</strong> {proximoPasso}
+      </p>
+      <ol className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4 list-none p-0 m-0">
+        {steps.map((s) => (
+          <li
+            key={s.id}
+            className={`rounded-xl border px-3 py-3 text-sm transition ${
+              s.highlight
+                ? 'border-pink-400 bg-pink-50/90 ring-2 ring-pink-200'
+                : s.done
+                  ? 'border-emerald-200 bg-emerald-50/60'
+                  : 'border-gray-200 bg-white'
+            }`}
+          >
+            <div className="flex items-start gap-2">
+              <span
+                className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold ${
+                  s.done ? 'bg-emerald-600 text-white' : s.highlight ? 'bg-pink-600 text-white' : 'bg-gray-200 text-gray-700'
+                }`}
+              >
+                {s.done ? '✓' : s.id}
+              </span>
+              <div className="min-w-0">
+                <p className="font-semibold text-gray-900 leading-tight">{s.title}</p>
+                <p className="mt-1 text-xs text-gray-600 leading-snug">{s.subtitle}</p>
+              </div>
+            </div>
+          </li>
+        ))}
+      </ol>
+    </section>
+  )
+}
+
 export default function EsteticaConsultoriaAdminClient() {
   const searchParams = useSearchParams()
   const segmentoFiltro = useMemo(() => {
@@ -562,6 +702,7 @@ export default function EsteticaConsultoriaAdminClient() {
   const [diagnosticPreAvaliacaoClienteCapilarLinkLoading, setDiagnosticPreAvaliacaoClienteCapilarLinkLoading] =
     useState(false)
   const [formModelDialog, setFormModelDialog] = useState<EsteticaFormModelKind | null>(null)
+  const [fichaTab, setFichaTab] = useState<EsteticaFichaTab>('jornada')
 
   type OpenPreLinkPack = { token: string; responder_url: string }
   const [openPreLinks, setOpenPreLinks] = useState<{
@@ -1073,6 +1214,7 @@ export default function EsteticaConsultoriaAdminClient() {
     setClientForm(clientFormDefaults(c))
     setSelected(null)
     setTab('editar')
+    setFichaTab('jornada')
   }
 
   useEffect(() => {
@@ -1088,6 +1230,7 @@ export default function EsteticaConsultoriaAdminClient() {
       setClientForm(clientFormDefaults(c))
       setSelected(null)
       setTab('editar')
+      setFichaTab('jornada')
       deepLinkClienteAplicado.current = clienteParam
     }
   }, [clienteParam, clients, clientsLoading])
@@ -1517,15 +1660,48 @@ export default function EsteticaConsultoriaAdminClient() {
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8 space-y-6">
-      <header className="space-y-1">
+      <header className="space-y-3">
         <p className="text-sm font-medium text-pink-700">Estética · YLADA</p>
         <h1 className="text-2xl font-bold text-gray-900">Consultoria (capilar / corporal)</h1>
         <p className="text-gray-600 text-sm max-w-2xl">
-          O <strong>pré-diagnóstico</strong> tem <strong>link público fixo</strong> (abaixo): a pessoa responde sem ficha
-          pré-criada e o sistema <strong>cria a clínica automaticamente</strong> ao enviar. Depois escolhe a ficha na
-          lista para diagnóstico completo, pagamento e materiais. Os <strong>diagnósticos fixos YLADA</strong> e outros
-          materiais aparecem <strong>depois de selecionar uma clínica</strong>.
+          Segue o teu fluxo comercial em quatro passos; os detalhes técnicos (links, CSV, materiais) ficam nas secções
+          abaixo, depois de escolheres a ficha.
         </p>
+        <ol className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 text-sm list-none p-0 m-0">
+          {(
+            [
+              {
+                n: 1,
+                title: 'Pré-diagnóstico',
+                body: 'Envias o link público (abaixo). A pessoa preenche o pré; a ficha aparece em «Estéticas acompanhadas».',
+              },
+              {
+                n: 2,
+                title: 'Qualificar',
+                body: 'Lês as respostas e falas com a pessoa. Só avança se fizer sentido para as duas partes.',
+              },
+              {
+                n: 3,
+                title: 'Pagamento',
+                body: 'Quando fecharem, regista o pagamento na ficha (dados administrativos).',
+              },
+              {
+                n: 4,
+                title: 'Formulário longo + 1.ª reunião',
+                body: 'Depois de pago, geras o link do diagnóstico completo e combinas a primeira sessão.',
+              },
+            ] as const
+          ).map((step) => (
+            <li
+              key={step.n}
+              className="rounded-xl border border-pink-100 bg-gradient-to-b from-pink-50/80 to-white p-3 shadow-sm"
+            >
+              <p className="text-[11px] font-bold uppercase tracking-wide text-pink-800/90">Passo {step.n}</p>
+              <p className="mt-1 font-semibold text-gray-900">{step.title}</p>
+              <p className="mt-1 text-xs text-gray-600 leading-relaxed">{step.body}</p>
+            </li>
+          ))}
+        </ol>
         <div className="flex flex-wrap items-center gap-2 text-sm">
           {segmentoFiltro ? (
             <span className="rounded-full border border-pink-200 bg-pink-50 px-2.5 py-0.5 text-xs font-medium text-pink-900">
@@ -1562,12 +1738,14 @@ export default function EsteticaConsultoriaAdminClient() {
         </div>
       </header>
 
-      <section
+      <details
         className="rounded-2xl border border-amber-200 bg-amber-50/60 p-4 shadow-sm space-y-2"
         aria-label="Contas demo Pro Estética"
       >
-        <h2 className="text-sm font-semibold text-amber-950">Painel Pro Estética — e-mail e senha (referência)</h2>
-        <p className="text-xs text-amber-950/90 max-w-3xl leading-relaxed">
+        <summary className="cursor-pointer text-sm font-semibold text-amber-950">
+          Painel Pro Estética — credenciais demo e nota para clientes reais (referência)
+        </summary>
+        <p className="text-xs text-amber-950/90 max-w-3xl leading-relaxed pt-2">
           <strong>Clientes reais:</strong> cada clínica usa o <strong>próprio e-mail dedicado</strong> (um para Terapia
           capilar, outro para Estética corporal, se forem produtos separados) e a <strong>senha que definirem</strong> no
           primeiro acesso ou em «Recuperar senha». Não existe senha fixa na aplicação para contratos pagos.
@@ -1605,14 +1783,13 @@ export default function EsteticaConsultoriaAdminClient() {
         <p className="text-[11px] text-amber-900/80">
           Em produção pública: troca ou remove estas demos e nunca partilhes senhas fracas fora de testes.
         </p>
-      </section>
+      </details>
 
       <section className="rounded-2xl border border-indigo-200 bg-gradient-to-br from-indigo-50/80 to-white p-4 shadow-sm space-y-3">
-        <h2 className="text-sm font-semibold text-indigo-950">Links públicos — pré-diagnóstico (entrada)</h2>
+        <h2 className="text-sm font-semibold text-indigo-950">Links públicos — pré-diagnóstico (passo 1)</h2>
         <p className="text-xs text-indigo-900/85 max-w-3xl">
-          Envie um destes URLs no WhatsApp ou Instagram. Cada envio válido <strong>cria uma nova ficha</strong> na lista
-          «Estéticas acompanhadas» com segmento capilar ou corporal conforme o formulário. O mesmo link serve para
-          todas as pessoas; não precisa criar a clínica antes.
+          Um URL para todas as leads: ao enviar o formulário, <strong>cria-se a ficha</strong> na lista (não precisas
+          criar a clínica antes).
         </p>
         {openPreLinksLoading ? (
           <p className="text-sm text-indigo-800/80">A carregar links…</p>
@@ -1659,8 +1836,7 @@ export default function EsteticaConsultoriaAdminClient() {
         <div>
           <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide">Estéticas acompanhadas</h2>
           <p className="mt-1 text-xs text-gray-600 max-w-2xl">
-            Inclui fichas criadas pelo pré público. Clique num nome ou use <strong>Criar e abrir</strong> só quando
-            quiseres abrir uma ficha manualmente (ex.: antes da pessoa preencher o pré).
+            Inclui fichas vindas do pré. <strong>Criar e abrir</strong> só para casos manuais (ex.: ficha antes do pré).
           </p>
         </div>
         <form className="flex flex-wrap gap-2 items-end" onSubmit={(e) => void createClient(e)}>
@@ -1733,7 +1909,56 @@ export default function EsteticaConsultoriaAdminClient() {
         )}
       </section>
 
-      {selectedClient && clientForm ? (
+      {selectedClient ? (
+        <section className="rounded-2xl border border-pink-200 bg-white p-4 shadow-sm space-y-4">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <p className="text-xs font-medium uppercase tracking-wide text-pink-700">Ficha selecionada</p>
+              <h2 className="text-lg font-bold text-gray-900">{selectedClient.business_name}</h2>
+              <p className="text-sm text-gray-600">{esteticaConsultSegmentLabel(selectedClient.segment)}</p>
+            </div>
+          </div>
+          <nav className="flex flex-wrap gap-2" aria-label="Secções da ficha">
+            {(
+              [
+                { key: 'jornada' as const, label: 'Jornada (pré → fecho → longo)' },
+                { key: 'ficha' as const, label: 'Ficha e pagamento' },
+                { key: 'notas' as const, label: 'Notas de acompanhamento' },
+                { key: 'materiais' as const, label: 'Materiais extra' },
+              ] as const
+            ).map(({ key, label }) => (
+              <button
+                key={key}
+                type="button"
+                onClick={() => setFichaTab(key)}
+                className={`rounded-lg px-3 py-2 text-sm font-medium transition ${
+                  fichaTab === key
+                    ? 'bg-pink-600 text-white shadow-sm'
+                    : 'border border-gray-200 bg-gray-50 text-gray-800 hover:bg-gray-100'
+                }`}
+              >
+                {label}
+                {key === 'notas' && coachingNotes.length > 0 ? (
+                  <span className="ml-1.5 rounded-full bg-white/25 px-1.5 text-xs tabular-nums">
+                    {coachingNotes.length}
+                  </span>
+                ) : null}
+                {key === 'materiais' && itemsDisplayed.length > 0 ? (
+                  <span
+                    className={`ml-1.5 rounded-full px-1.5 text-xs tabular-nums ${
+                      fichaTab === key ? 'bg-white/25' : 'bg-gray-200 text-gray-800'
+                    }`}
+                  >
+                    {itemsDisplayed.length}
+                  </span>
+                ) : null}
+              </button>
+            ))}
+          </nav>
+        </section>
+      ) : null}
+
+      {selectedClient && clientForm && fichaTab === 'ficha' ? (
         <section className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm space-y-4">
           <div className="flex flex-wrap items-start justify-between gap-2">
             <h2 className="text-lg font-semibold text-gray-900">Dados administrativos</h2>
@@ -1969,7 +2194,7 @@ export default function EsteticaConsultoriaAdminClient() {
         </section>
       ) : null}
 
-      {selectedClient ? (
+      {selectedClient && fichaTab === 'notas' ? (
         <section className="rounded-2xl border border-indigo-200 bg-white p-4 shadow-sm space-y-4">
           <div>
             <h2 className="text-lg font-semibold text-gray-900">Acompanhamento ao vivo</h2>
@@ -2032,8 +2257,26 @@ export default function EsteticaConsultoriaAdminClient() {
         </section>
       ) : null}
 
-      {selectedClient ? (
+      {selectedClient && fichaTab === 'jornada' ? (
         <>
+          <EsteticaConsultoriaFichaStepper
+            segment={selectedClient.segment}
+            preCorporalCount={diagnosticPreCorporal?.responses.length ?? 0}
+            preCapilarCount={diagnosticPreCapilar?.responses.length ?? 0}
+            fullCorporalCount={diagnosticCorporal?.responses.length ?? 0}
+            fullCapilarCount={diagnosticCapilar?.responses.length ?? 0}
+            paymentOk={
+              clientForm
+                ? esteticaConsultoriaPaymentRecorded(
+                    clientForm.consulting_paid_amount,
+                    clientForm.last_payment_at
+                  )
+                : esteticaConsultoriaPaymentRecorded(
+                    selectedClient.consulting_paid_amount != null ? String(selectedClient.consulting_paid_amount) : '',
+                    selectedClient.last_payment_at ?? ''
+                  )
+            }
+          />
           {(selectedClient.segment === 'corporal' || selectedClient.segment === 'ambos') ? (
             <section className="rounded-2xl border border-rose-200 bg-rose-50/50 p-4 shadow-sm space-y-4">
               <div className="rounded-xl border border-rose-200/90 bg-white/70 p-3 shadow-sm space-y-3">
@@ -2050,9 +2293,8 @@ export default function EsteticaConsultoriaAdminClient() {
                   </button>
                 </div>
                 <p className="text-xs text-rose-900/85 max-w-2xl">
-                  O fluxo principal é o <strong>link público</strong> no topo da página (cria ficha ao enviar). Aqui:
-                  opcionalmente, gera um link <strong>só desta clínica</strong> com dados pré-preenchidos a partir do
-                  cadastro admin.
+                  O <strong>link do topo</strong> é o caminho normal. Aqui podes gerar um pré <strong>só desta ficha</strong>{' '}
+                  (pré-preenchido a partir do admin), se precisares.
                 </p>
                 {diagnosticPreCorporalLoading ? (
                   <p className="text-sm text-rose-900/80">Carregando pré…</p>
@@ -2184,10 +2426,10 @@ export default function EsteticaConsultoriaAdminClient() {
               </div>
               <div>
                 <p className="mt-1 text-xs text-rose-900/90 max-w-2xl">
-                  Questionário <strong>fixo YLADA</strong> (igual para todas as clínicas) — não se edita no painel. Cada{' '}
-                  <strong>link</strong> é só para <strong>{selectedClient.business_name}</strong>: primeiro enviamos
-                  confirmação para o <strong>e-mail dos dados administrativos</strong>; depois ela preenche o
-                  questionário completo aqui.
+                  <strong>Passo 4 do fluxo:</strong> formulário longo YLADA (fixo; não se edita aqui). Na prática, envia
+                  depois do <strong>pagamento</strong>. Cada link é só para{' '}
+                  <strong>{selectedClient.business_name}</strong>: confirmação vai para o e-mail dos dados administrativos;
+                  depois ela preenche o questionário completo.
                 </p>
                 <p className="text-xs text-amber-900 bg-amber-50 border border-amber-100 rounded-lg px-2 py-1.5 max-w-2xl">
                   Garanta um <strong>e-mail válido</strong> em «Dados administrativos» antes de gerar o link — é para lá
@@ -2321,8 +2563,8 @@ export default function EsteticaConsultoriaAdminClient() {
                   </button>
                 </div>
                 <p className="text-xs text-sky-900/85 max-w-2xl">
-                  O fluxo principal é o <strong>link público</strong> no topo. Aqui: link opcional <strong>só desta
-                  ficha</strong>, com pré-preenchimento a partir dos dados administrativos.
+                  O <strong>link do topo</strong> é o normal. Aqui: pré opcional <strong>só desta ficha</strong>, pré-preenchido
+                  a partir dos dados administrativos.
                 </p>
                 {diagnosticPreCapilarLoading ? (
                   <p className="text-sm text-sky-900/80">Carregando pré…</p>
@@ -2582,10 +2824,10 @@ export default function EsteticaConsultoriaAdminClient() {
               </div>
               <div>
                 <p className="mt-1 text-xs text-sky-900/90 max-w-2xl">
-                  Questionário <strong>fixo YLADA</strong> (igual para todas as clínicas capilar) — não se edita no
-                  painel. Cada <strong>link</strong> é só para <strong>{selectedClient.business_name}</strong>: primeiro
-                  enviamos confirmação para o <strong>e-mail dos dados administrativos</strong>; depois ela preenche o
-                  questionário completo aqui.
+                  <strong>Passo 4 do fluxo:</strong> formulário longo YLADA (fixo; não se edita aqui). Na prática, envia
+                  depois do <strong>pagamento</strong>. Cada link é só para{' '}
+                  <strong>{selectedClient.business_name}</strong>: confirmação para o e-mail dos dados administrativos;
+                  depois ela preenche o questionário completo.
                 </p>
                 <p className="text-xs text-amber-900 bg-amber-50 border border-amber-100 rounded-lg px-2 py-1.5 max-w-2xl">
                   Garanta um <strong>e-mail válido</strong> em «Dados administrativos» antes de gerar o link — é para lá
@@ -2702,7 +2944,11 @@ export default function EsteticaConsultoriaAdminClient() {
               </div>
             </section>
           ) : null}
+        </>
+      ) : null}
 
+      {selectedClient && fichaTab === 'materiais' ? (
+        <>
           <div className="flex flex-wrap items-center gap-2">
             <label className="text-sm text-gray-600">
               Filtrar materiais:
