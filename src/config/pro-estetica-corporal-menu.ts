@@ -1,6 +1,6 @@
 /**
  * Pro Estética Corporal — navegação mínima.
- * Entrada: central de resolução (dores); Noel, links e ritmo esticam a mesma promessa.
+ * Entrada: central de resolução (dores); Noel e links esticam a mesma promessa.
  */
 export const PRO_ESTETICA_CORPORAL_BASE_PATH = '/pro-estetica-corporal/painel'
 
@@ -25,7 +25,6 @@ export const PRO_ESTETICA_CORPORAL_MENU_GROUPS: { label: string; items: ProEstet
       { key: 'inicio', label: 'Início', path: '', icon: '✨', hint: 'O que resolver hoje' },
       { key: 'noel', label: 'Noel', path: 'noel', icon: '💬', hint: 'Pergunte o que precisa' },
       { key: 'links', label: 'Links', path: 'biblioteca-links', icon: '🔗', hint: 'Biblioteca e os teus links' },
-      { key: 'resultados', label: 'Ritmo', path: 'resultados', icon: '📈', hint: 'Sua semana' },
       { key: 'perfil', label: 'Perfil', path: 'perfil', icon: '👤', hint: 'Sua clínica' },
     ],
   },

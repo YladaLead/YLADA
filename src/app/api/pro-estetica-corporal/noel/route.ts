@@ -2,6 +2,11 @@ import { NextRequest, NextResponse } from 'next/server'
 import OpenAI from 'openai'
 import { requireApiAuth } from '@/lib/api-auth'
 import { supabaseAdmin } from '@/lib/supabase'
+import {
+  instructionForEsteticaMessageTone,
+  isEsteticaMessageToneId,
+  type EsteticaMessageToneId,
+} from '@/config/estetica-message-tone'
 import { resolveEsteticaCorporalTenantContext } from '@/lib/pro-estetica-corporal-server'
 import type { ProLideresTenantRole } from '@/types/leader-tenant'
 
@@ -12,10 +17,14 @@ type HistoryTurn = { role?: string; content?: string }
 function buildSystemPrompt(params: {
   operationLabel: string
   focusNotes: string | null
+  messageToneId: EsteticaMessageToneId
+  messageToneNotes: string | null
   role: ProLideresTenantRole
   replyLanguage: string
 }): string {
-  const { operationLabel, focusNotes, role, replyLanguage } = params
+  const { operationLabel, focusNotes, messageToneId, messageToneNotes, role, replyLanguage } = params
+  const toneBlock = instructionForEsteticaMessageTone(messageToneId)
+  const toneNotesLine = messageToneNotes?.trim()
   const papel =
     role === 'leader'
       ? 'profissional responsável pela operação (decisor e quem fala com o cliente)'
@@ -26,7 +35,9 @@ function buildSystemPrompt(params: {
 CONTEXTO DA OPERAÇÃO
 - Nome / marca: ${operationLabel}
 - Quem está falando com você: ${papel}
-${focusNotes ? `- Notas de foco do profissional (use com critério): ${focusNotes}` : ''}
+- Tom preferido para mensagens e scripts: ${toneBlock}
+${toneNotesLine ? `- Refinamento do tom (priorize se conflitar): ${toneNotesLine}` : ''}
+${focusNotes ? `- Situação, objetivos e prioridades (use com critério): ${focusNotes}` : ''}
 
 MISSÃO
 - Ajudar a **qualificar interesse**, **preencher agenda**, **comunicar valor** e **responder objeções** (tempo, preço, desconfiança) com tom consultivo, nunca agressivo.
@@ -105,9 +116,15 @@ export async function POST(request: NextRequest) {
   const operationLabel =
     t.display_name?.trim() || t.team_name?.trim() || t.slug || 'Pro Estética Corporal'
 
+  const messageToneId: EsteticaMessageToneId = isEsteticaMessageToneId(t.message_tone)
+    ? t.message_tone
+    : 'profissional'
+
   const systemPrompt = buildSystemPrompt({
     operationLabel,
     focusNotes: t.focus_notes?.trim() || null,
+    messageToneId,
+    messageToneNotes: t.message_tone_notes?.trim() || null,
     role: ctx.role,
     replyLanguage,
   })

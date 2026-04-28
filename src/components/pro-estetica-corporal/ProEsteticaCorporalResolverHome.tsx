@@ -91,11 +91,8 @@ export default function ProEsteticaCorporalResolverHome() {
 
       <footer className="rounded-xl border border-gray-200 bg-white p-4 text-sm text-gray-600">
         <p>
-          <strong className="text-gray-900">Noel</strong>, <strong className="text-gray-900">Links</strong> e{' '}
-          <Link href={`${PRO_ESTETICA_CORPORAL_BASE_PATH}/resultados`} className="font-semibold text-blue-700 underline hover:text-blue-900">
-            Ritmo da semana
-          </Link>{' '}
-          trabalham juntos: comece por uma dor e vá aprofundando quando fizer sentido no dia a dia.
+          <strong className="text-gray-900">Noel</strong> e <strong className="text-gray-900">Links</strong> trabalham
+          juntos: comece por uma dor e vá aprofundando quando fizer sentido no dia a dia.
         </p>
       </footer>
     </div>

@@ -11,6 +11,10 @@ export type LeaderTenantRow = {
   whatsapp: string | null
   contact_email: string | null
   focus_notes: string | null
+  /** Preset de tom (Noel) — ex.: acolhedor, profissional. */
+  message_tone?: string | null
+  /** Refinamento opcional do tom da clínica. */
+  message_tone_notes?: string | null
   /** Operador / vertical (ex. h-lider = Herbalife). */
   vertical_code?: string
   /** Máximo de convites pending (não expirados) em simultâneo. */

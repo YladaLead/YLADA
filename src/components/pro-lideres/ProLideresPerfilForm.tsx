@@ -4,6 +4,11 @@ import { useCallback, useEffect, useState } from 'react'
 import type { LeaderTenantRow } from '@/types/leader-tenant'
 import PhoneInputWithCountry from '@/components/PhoneInputWithCountry'
 import { inferCountryIsoFromLeadingDigits } from '@/components/CountrySelector'
+import {
+  ESTETICA_MESSAGE_TONE_OPTIONS,
+  isEsteticaMessageToneId,
+  type EsteticaMessageToneId,
+} from '@/config/estetica-message-tone'
 
 export type ProLideresPerfilCopyProfile = 'pro_lideres' | 'estetica_clinica'
 
@@ -15,6 +20,8 @@ const PERFIL_COPY: Record<
     teamNamePlaceholder: string
     displayNamePlaceholder: string
     focusPlaceholder: string
+    focusSectionLabel: string
+    focusSectionHint?: string
   }
 > = {
   pro_lideres: {
@@ -24,6 +31,7 @@ const PERFIL_COPY: Record<
     teamNamePlaceholder: 'Ex.: Equipe Sul',
     displayNamePlaceholder: 'Como a equipe vê o teu nome',
     focusPlaceholder: 'Objetivos da operação, tom de mensagens, prioridades…',
+    focusSectionLabel: 'Foco e tom',
   },
   estetica_clinica: {
     readOnlyMessage:
@@ -31,7 +39,11 @@ const PERFIL_COPY: Record<
     teamNameLabel: 'Nome da clínica ou equipe',
     teamNamePlaceholder: 'Ex.: Clínica Nome + cidade',
     displayNamePlaceholder: 'Como a equipe e os clientes veem o teu nome',
-    focusPlaceholder: 'Objetivos da clínica, tom de mensagens, prioridades comerciais…',
+    focusPlaceholder:
+      'Ex.: abri há 8 meses; quero ocupar as tardes; prioridade fichas de avaliação; concorrência forte na zona com preço menor…',
+    focusSectionLabel: 'Situação, objetivos e prioridades',
+    focusSectionHint:
+      'Resume onde o negócio está, metas próximas e o que mais importa comercialmente — o Noel usa isto como contexto, não só “estilo de escrita”.',
   },
 }
 
@@ -57,6 +69,8 @@ export function ProLideresPerfilForm({
   const [whatsappCountryCode, setWhatsappCountryCode] = useState('BR')
   const [contactEmail, setContactEmail] = useState('')
   const [focusNotes, setFocusNotes] = useState('')
+  const [messageTone, setMessageTone] = useState<EsteticaMessageToneId>('profissional')
+  const [messageToneNotes, setMessageToneNotes] = useState('')
   const [canEditTenantProfile, setCanEditTenantProfile] = useState(true)
 
   const load = useCallback(async () => {
@@ -81,6 +95,8 @@ export function ProLideresPerfilForm({
       setWhatsappCountryCode(inferCountryIsoFromLeadingDigits(wa, 'BR'))
       setContactEmail(t.contact_email ?? '')
       setFocusNotes(t.focus_notes ?? '')
+      setMessageTone(isEsteticaMessageToneId(t.message_tone) ? t.message_tone : 'profissional')
+      setMessageToneNotes(t.message_tone_notes ?? '')
     } catch {
       setError('Erro de rede ao carregar.')
     } finally {
@@ -109,6 +125,12 @@ export function ProLideresPerfilForm({
           whatsapp,
           contact_email: contactEmail,
           focus_notes: focusNotes,
+          ...(copyProfile === 'estetica_clinica'
+            ? {
+                message_tone: messageTone,
+                message_tone_notes: messageToneNotes.trim() ? messageToneNotes.trim() : null,
+              }
+            : {}),
         }),
       })
       const data = await res.json().catch(() => ({}))
@@ -204,7 +226,10 @@ export function ProLideresPerfilForm({
           />
         </label>
         <label className="block sm:col-span-2">
-          <span className="mb-1 block text-sm font-medium text-gray-700">Foco e tom</span>
+          <span className="mb-1 block text-sm font-medium text-gray-700">{c.focusSectionLabel}</span>
+          {copyProfile === 'estetica_clinica' && c.focusSectionHint ? (
+            <span className="mb-2 block text-xs text-gray-500">{c.focusSectionHint}</span>
+          ) : null}
           <textarea
             disabled={!canEditTenantProfile}
             className="min-h-[120px] w-full rounded-lg border border-gray-300 px-3 py-2.5 text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-600"
@@ -214,6 +239,56 @@ export function ProLideresPerfilForm({
             maxLength={2000}
           />
         </label>
+
+        {copyProfile === 'estetica_clinica' ? (
+          <>
+            <div className="sm:col-span-2">
+              <span className="mb-2 block text-sm font-medium text-gray-700">Tom das mensagens</span>
+              <p className="mb-3 text-xs text-gray-500">
+                Escolhe como o Noel deve soar nos scripts para WhatsApp e redes — refina abaixo se precisares.
+              </p>
+              <fieldset disabled={!canEditTenantProfile} className="grid gap-2 sm:grid-cols-2">
+                {ESTETICA_MESSAGE_TONE_OPTIONS.map((opt) => (
+                  <label
+                    key={opt.id}
+                    className={`flex cursor-pointer gap-2 rounded-lg border p-3 text-sm shadow-sm transition-colors touch-manipulation ${
+                      messageTone === opt.id
+                        ? 'border-blue-400 bg-blue-50/90'
+                        : 'border-gray-200 bg-white hover:bg-gray-50'
+                    } ${!canEditTenantProfile ? 'cursor-not-allowed opacity-75' : ''}`}
+                  >
+                    <input
+                      type="radio"
+                      name="message_tone"
+                      value={opt.id}
+                      checked={messageTone === opt.id}
+                      onChange={() => setMessageTone(opt.id)}
+                      className="mt-0.5 h-4 w-4 shrink-0 border-gray-300 text-blue-600 focus:ring-blue-500"
+                    />
+                    <span>
+                      <span className="block font-medium text-gray-900">{opt.label}</span>
+                      <span className="mt-0.5 block text-xs text-gray-500">{opt.hint}</span>
+                    </span>
+                  </label>
+                ))}
+              </fieldset>
+            </div>
+            <label className="block sm:col-span-2">
+              <span className="mb-1 block text-sm font-medium text-gray-700">Refino do tom (opcional)</span>
+              <span className="mb-1.5 block text-xs text-gray-500">
+                Ex.: evitar gírias, não usar exclamações, assinar sempre com o primeiro nome…
+              </span>
+              <textarea
+                disabled={!canEditTenantProfile}
+                className="min-h-[72px] w-full rounded-lg border border-gray-300 px-3 py-2.5 text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-600"
+                value={messageToneNotes}
+                onChange={(e) => setMessageToneNotes(e.target.value)}
+                placeholder="Deixa em branco se a opção acima já basta."
+                maxLength={400}
+              />
+            </label>
+          </>
+        ) : null}
       </div>
 
       <p className="text-xs text-gray-500">

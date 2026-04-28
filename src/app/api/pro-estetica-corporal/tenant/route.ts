@@ -8,6 +8,7 @@ import {
   shouldProvisionEsteticaCorporalTenant,
 } from '@/lib/pro-estetica-corporal-server'
 import { resolveProLideresTenantContext } from '@/lib/pro-lideres-server'
+import { parseMessageTonePatchBody } from '@/lib/leader-tenant-message-tone'
 
 const MAX_LEN = 500
 
@@ -108,6 +109,14 @@ export async function PATCH(request: NextRequest) {
     whatsapp: clip(body.whatsapp),
     contact_email: clip(body.contact_email, 320),
     focus_notes: clip(body.focus_notes, 2000),
+  }
+
+  const tonePatch = parseMessageTonePatchBody(body)
+  if (!tonePatch.ok) {
+    return NextResponse.json({ error: tonePatch.error }, { status: 400 })
+  }
+  if (!tonePatch.empty) {
+    Object.assign(payload, tonePatch.patch)
   }
 
   const { data: tenant, error } = await supabaseAdmin

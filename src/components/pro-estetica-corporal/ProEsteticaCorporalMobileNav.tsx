@@ -34,7 +34,7 @@ export default function ProEsteticaCorporalMobileNav() {
       className="fixed inset-x-0 bottom-0 z-40 border-t border-gray-200 bg-white/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-sm lg:hidden"
       aria-label="Navegação principal"
     >
-      <ul className="mx-auto grid max-w-lg grid-cols-5 gap-0">
+      <ul className="mx-auto grid max-w-lg grid-cols-4 gap-0">
         {items.map((item) => {
           const href = proEsteticaCorporalItemHref(item.path)
           const active = itemActive(pathname, item)
