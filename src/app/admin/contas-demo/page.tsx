@@ -46,7 +46,7 @@ function ContasDemoContent() {
                 </tr>
               </thead>
               <tbody>
-                {[
+                {([
                   ['Médico', 'demo.med@ylada.app', '/pt/med/login'],
                   ['Psicólogo', 'demo.psi@ylada.app', '/pt/psi/login'],
                   ['Vendas em gerais', 'demo.vendedor@ylada.app', '/pt/seller/login'],
@@ -55,13 +55,17 @@ function ContasDemoContent() {
                   ['Coach', 'demo.coach@ylada.app', '/pt/coach/login'],
                   ['Esteticista (segmento YLADA /pt)', 'demo.estetica@ylada.app', '/pt/estetica/login'],
                   ['Pro Estética capilar', 'demo.capilar@ylada.app', '/pro-estetica-capilar/entrar'],
+                  ['Pro Estética corporal', 'demo@proesteticacorporal.com', '/pro-estetica-corporal/entrar', '123456'],
                   ['Perfumaria', 'demo.perfumaria@ylada.app', '/pt/perfumaria/login'],
                   ['Joias e bijuterias', 'demo.joias@ylada.app', '/pt/joias/login'],
-                ].map(([area, email, login]) => (
+                ] satisfies [string, string, string, string?][]).map((row) => {
+                  const [area, email, login, pwd] = row
+                  const senha = pwd ?? 'Demo@2025!'
+                  return (
                   <tr key={email} className="border-b border-gray-100">
                     <td className="py-2 px-3 font-medium text-gray-900">{area}</td>
                     <td className="py-2 px-3 font-mono text-gray-800">{email}</td>
-                    <td className="py-2 px-3 font-mono text-gray-800">Demo@2025!</td>
+                    <td className="py-2 px-3 font-mono text-gray-800">{senha}</td>
                     <td className="py-2 px-3">
                       <a
                         href={login}
@@ -73,14 +77,21 @@ function ContasDemoContent() {
                       </a>
                     </td>
                   </tr>
-                ))}
+                  )
+                })}
               </tbody>
             </table>
           </div>
         </div>
-        <p className="text-xs text-gray-500 mt-4">
-          Script para recriar:{' '}
-          <code className="bg-gray-100 px-1 rounded">node scripts/criar-contas-demo-videos.js</code>
+        <p className="text-xs text-gray-500 mt-4 space-y-1">
+          <span className="block">
+            Demo YLADA <code className="bg-gray-100 px-1 rounded">@ylada.app</code>:{' '}
+            <code className="bg-gray-100 px-1 rounded">node scripts/criar-contas-demo-videos.js</code>
+          </span>
+          <span className="block">
+            Pro Estética corporal (mesmo e-mail da tabela): se o login não existir no Supabase, aplicar{' '}
+            <code className="bg-gray-100 px-1 rounded">scripts/pro-estetica-corporal-demo-login.sql</code>
+          </span>
         </p>
       </main>
     </div>
