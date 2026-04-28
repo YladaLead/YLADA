@@ -363,6 +363,32 @@ export async function ensureEsteticaCorporalTenantAccess(
     ctx = await resolveEsteticaCorporalTenantContext(admin, user)
   }
 
+  /**
+   * Dona com tenant já criado (ex.: cadastro manual) mas SELECT com JWT falhou por RLS:
+   * mesmo padrão que `ensureLeaderTenantAccess` no Pro Líderes.
+   */
+  if (!ctx && admin) {
+    const { data: ownerRow, error: ownerFetchErr } = await admin
+      .from('leader_tenants')
+      .select('*')
+      .eq('owner_user_id', user.id)
+      .maybeSingle()
+    if (ownerFetchErr) {
+      console.error(
+        '[ensureEsteticaCorporalTenantAccess] admin lookup owner_tenant:',
+        ownerFetchErr.message,
+        resolvedUserEmail(user)
+      )
+    }
+    if (ownerRow) {
+      if (isEsteticaCorporalVertical(ownerRow as LeaderTenantRow)) {
+        ctx = { tenant: ownerRow as LeaderTenantRow, role: 'leader' }
+      } else {
+        return { ok: false, redirect: '/pro-estetica-corporal/conta-outra-edicao' }
+      }
+    }
+  }
+
   if (!ctx) {
     if (proEsteticaCorporalPainelDevBypassEnabled()) {
       return {
