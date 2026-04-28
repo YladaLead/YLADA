@@ -1,8 +1,8 @@
 -- =====================================================
--- Assinatura anual (1 ano) — clinicaesteticfer@gmail.com (Fernanda / clínica)
--- Pagamento anual tratado fora do Stripe: registo manual em `subscriptions`.
--- Idempotente: atualiza a linha mais recente por (user_id, area) ou insere.
--- Áreas: `ylada` (links inteligentes / limites) + `estetica` (matriz / perfil estética).
+-- Assinatura anual (1 ano) — clinicaesteticfer@gmail.com (Pro Estética / matriz estética)
+-- Só área `estetica`: alinha com perfil estética e com `hasYladaProPlan` (usa assinatura do segmento).
+-- Pagamento anual fora do Stripe: registo manual em `subscriptions`.
+-- Idempotente: atualiza a linha mais recente (user_id + area estetica) ou insere.
 -- Executar no Supabase SQL Editor após o utilizador existir em auth + user_profiles.
 -- =====================================================
 
@@ -35,46 +35,6 @@ BEGIN
 
   v_stripe_sub := 'manual_annual_fernanda_' || replace(v_user_id::text, '-', '') || '_' || floor(extract(epoch from now()))::text;
 
-  -- --- area ylada ---
-  SELECT s.id INTO v_sub_id
-  FROM subscriptions s
-  WHERE s.user_id = v_user_id AND s.area = 'ylada'
-  ORDER BY s.created_at DESC NULLS LAST, s.id DESC
-  LIMIT 1;
-
-  IF v_sub_id IS NOT NULL THEN
-    UPDATE subscriptions
-    SET
-      status = 'active',
-      plan_type = 'annual',
-      features = COALESCE(features, '["completo"]'::jsonb),
-      stripe_account = COALESCE(NULLIF(trim(stripe_account), ''), 'br'),
-      stripe_subscription_id = v_stripe_sub || '_ylada',
-      stripe_customer_id = COALESCE(NULLIF(trim(stripe_customer_id), ''), 'manual_' || v_user_id::text),
-      stripe_price_id = 'manual_annual',
-      amount = COALESCE(amount, 0),
-      currency = COALESCE(NULLIF(trim(currency), ''), 'brl'),
-      current_period_start = NOW(),
-      current_period_end = NOW() + INTERVAL '1 year',
-      updated_at = NOW()
-    WHERE id = v_sub_id;
-    RAISE NOTICE '✅ subscriptions (ylada) atualizada: user_id=%, id=%', v_user_id, v_sub_id;
-  ELSE
-    INSERT INTO subscriptions (
-      user_id, area, status, plan_type, features,
-      stripe_account, stripe_subscription_id, stripe_customer_id, stripe_price_id,
-      amount, currency, current_period_start, current_period_end, created_at, updated_at
-    )
-    VALUES (
-      v_user_id, 'ylada', 'active', 'annual', '["completo"]'::jsonb,
-      'br', v_stripe_sub || '_ylada', 'manual_' || v_user_id::text, 'manual_annual',
-      0, 'brl', NOW(), NOW() + INTERVAL '1 year', NOW(), NOW()
-    );
-    RAISE NOTICE '✅ subscriptions (ylada) criada: user_id=%', v_user_id;
-  END IF;
-
-  -- --- area estetica (matriz) ---
-  v_sub_id := NULL;
   SELECT s.id INTO v_sub_id
   FROM subscriptions s
   WHERE s.user_id = v_user_id AND s.area = 'estetica'
@@ -113,11 +73,9 @@ BEGIN
   END IF;
 END $$;
 
--- Verificação (leitura)
 SELECT s.id, s.area, s.plan_type, s.status, s.current_period_start, s.current_period_end, up.email
 FROM subscriptions s
 JOIN user_profiles up ON up.user_id = s.user_id
 WHERE lower(trim(up.email)) = lower(trim('clinicaesteticfer@gmail.com'))
-  AND s.area IN ('ylada', 'estetica')
-  AND s.status = 'active'
-ORDER BY s.area;
+  AND s.area = 'estetica'
+  AND s.status = 'active';
