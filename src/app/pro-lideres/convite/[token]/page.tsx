@@ -41,6 +41,8 @@ export default function ProLideresConviteTokenPage() {
   const [showPasswordConfirm, setShowPasswordConfirm] = useState(false)
   const [registering, setRegistering] = useState(false)
   const [registerError, setRegisterError] = useState<string | null>(null)
+  /** Após cadastro ou aceite: URL de cobrança externa do líder (banco), quando configurada. */
+  const [pendingBankPaymentUrl, setPendingBankPaymentUrl] = useState<string | null>(null)
 
   const validate = useCallback(async () => {
     if (!token) {
@@ -125,6 +127,12 @@ export default function ProLideresConviteTokenPage() {
         setRegisterError('Conta criada. Entre com o e-mail e a senha que definiu.')
         return
       }
+      const pay = (data as { teamBankPaymentUrl?: string | null }).teamBankPaymentUrl
+      const payTrimmed = typeof pay === 'string' && pay.trim() ? pay.trim() : null
+      if (payTrimmed) {
+        setPendingBankPaymentUrl(payTrimmed)
+        return
+      }
       // Navegação completa evita ficar na área matriz (ex. /pt/estetica) se houver efeitos de sessão/última página.
       if (typeof window !== 'undefined') {
         window.location.assign('/pro-lideres/painel')
@@ -159,6 +167,13 @@ export default function ProLideresConviteTokenPage() {
       const data = await res.json().catch(() => ({}))
       if (!res.ok) {
         setAcceptError((data as { error?: string }).error || 'Não foi possível aceitar.')
+        return
+      }
+      const pay = (data as { teamBankPaymentUrl?: string | null }).teamBankPaymentUrl
+      const payTrimmed = typeof pay === 'string' && pay.trim() ? pay.trim() : null
+      if (payTrimmed) {
+        setAcceptOk(true)
+        setPendingBankPaymentUrl(payTrimmed)
         return
       }
       setAcceptOk(true)
@@ -202,6 +217,40 @@ export default function ProLideresConviteTokenPage() {
             <Link href="/pro-lideres" className="text-sm font-semibold text-blue-600 underline">
               Voltar ao Pro Líderes
             </Link>
+          </div>
+        ) : valid && pendingBankPaymentUrl ? (
+          <div className="space-y-5 text-center">
+            <h1 className="text-xl font-bold text-gray-900">Tudo certo com o acesso</h1>
+            <p className="text-sm leading-relaxed text-gray-700">
+              O líder desta operação deixou um <strong className="text-gray-900">link para pagamento</strong> (banco
+              ou boleto). Abre num separador seguro, conclui o pagamento conforme combinado com a equipa e depois entra
+              no painel.
+            </p>
+            <div className="rounded-xl border border-amber-200 bg-amber-50/90 px-4 py-3 text-left text-sm text-amber-950">
+              <p className="font-semibold">Link de cobrança</p>
+              <p className="mt-1 break-all font-mono text-xs">{pendingBankPaymentUrl}</p>
+            </div>
+            <div className="flex flex-col gap-2 sm:flex-row sm:justify-center">
+              <a
+                href={pendingBankPaymentUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex min-h-[48px] items-center justify-center rounded-xl bg-amber-700 px-5 text-sm font-semibold text-white hover:bg-amber-800"
+              >
+                Abrir link de pagamento
+              </a>
+              <button
+                type="button"
+                onClick={() => {
+                  if (typeof window !== 'undefined') {
+                    window.location.assign('/pro-lideres/painel')
+                  }
+                }}
+                className="inline-flex min-h-[48px] items-center justify-center rounded-xl border border-gray-300 bg-white px-5 text-sm font-semibold text-gray-900 hover:bg-gray-50"
+              >
+                Ir para o painel Pro Líderes
+              </button>
+            </div>
           </div>
         ) : valid ? (
           <div className="space-y-5">

@@ -243,6 +243,10 @@ export async function POST(request: NextRequest) {
 
   const invite = inserted as LeaderTenantInviteRow
   const invite_url = buildProLideresInviteUrl(requestOrigin(request), invite.token)
+  const team_bank_payment_url =
+    typeof paid.ctx.tenant.team_bank_payment_url === 'string' && paid.ctx.tenant.team_bank_payment_url.trim()
+      ? paid.ctx.tenant.team_bank_payment_url.trim()
+      : null
 
-  return NextResponse.json({ invite, invite_url })
+  return NextResponse.json({ invite, invite_url, team_bank_payment_url })
 }

@@ -71,6 +71,7 @@ export function ProLideresPerfilForm({
   const [focusNotes, setFocusNotes] = useState('')
   const [messageTone, setMessageTone] = useState<EsteticaMessageToneId>('profissional')
   const [messageToneNotes, setMessageToneNotes] = useState('')
+  const [teamBankPaymentUrl, setTeamBankPaymentUrl] = useState('')
   const [canEditTenantProfile, setCanEditTenantProfile] = useState(true)
 
   const load = useCallback(async () => {
@@ -97,12 +98,17 @@ export function ProLideresPerfilForm({
       setFocusNotes(t.focus_notes ?? '')
       setMessageTone(isEsteticaMessageToneId(t.message_tone) ? t.message_tone : 'profissional')
       setMessageToneNotes(t.message_tone_notes ?? '')
+      setTeamBankPaymentUrl(
+        copyProfile === 'pro_lideres' && typeof t.team_bank_payment_url === 'string'
+          ? t.team_bank_payment_url.trim()
+          : ''
+      )
     } catch {
       setError('Erro de rede ao carregar.')
     } finally {
       setLoading(false)
     }
-  }, [tenantApiPath])
+  }, [tenantApiPath, copyProfile])
 
   useEffect(() => {
     load()
@@ -131,6 +137,11 @@ export function ProLideresPerfilForm({
                 message_tone_notes: messageToneNotes.trim() ? messageToneNotes.trim() : null,
               }
             : {}),
+          ...(copyProfile === 'pro_lideres'
+            ? {
+                team_bank_payment_url: teamBankPaymentUrl.trim() === '' ? null : teamBankPaymentUrl.trim(),
+              }
+            : {}),
         }),
       })
       const data = await res.json().catch(() => ({}))
@@ -140,6 +151,11 @@ export function ProLideresPerfilForm({
       }
       const t = (data as { tenant: LeaderTenantRow }).tenant
       setTenant(t)
+      if (copyProfile === 'pro_lideres') {
+        setTeamBankPaymentUrl(
+          typeof t.team_bank_payment_url === 'string' ? t.team_bank_payment_url.trim() : ''
+        )
+      }
       setSavedAt(new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }))
     } catch {
       setError('Erro de rede ao guardar.')
@@ -288,6 +304,28 @@ export function ProLideresPerfilForm({
               />
             </label>
           </>
+        ) : null}
+
+        {copyProfile === 'pro_lideres' ? (
+          <label className="block sm:col-span-2">
+            <span className="mb-1 block text-sm font-medium text-gray-700">
+              Link de cobrança da equipa (opcional)
+            </span>
+            <span className="mb-1.5 block text-xs text-gray-500">
+              URL https do teu banco ou boleto. Quem aceitar o convite vê este link na app depois do cadastro. Podes
+              também gerir em Convites equipe.
+            </span>
+            <input
+              type="url"
+              disabled={!canEditTenantProfile}
+              className="w-full rounded-lg border border-gray-300 px-3 py-2.5 font-mono text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-600"
+              value={teamBankPaymentUrl}
+              onChange={(e) => setTeamBankPaymentUrl(e.target.value)}
+              placeholder="https://…"
+              maxLength={2000}
+              autoComplete="off"
+            />
+          </label>
         ) : null}
       </div>
 

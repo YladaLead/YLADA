@@ -33,9 +33,14 @@ export function ProLideresInvitesPanel() {
   const [lastCreatedUrl, setLastCreatedUrl] = useState<string | null>(null)
   const [lastCreatedInviteId, setLastCreatedInviteId] = useState<string | null>(null)
   const lastCreatedInviteIdRef = useRef<string | null>(null)
-  const [copied, setCopied] = useState(false)
+  const [copiedInvite, setCopiedInvite] = useState(false)
+  const [copiedBank, setCopiedBank] = useState(false)
   const [subscriptionAccessOk, setSubscriptionAccessOk] = useState<boolean | null>(null)
   const [yladaSubHint, setYladaSubHint] = useState<YladaTeamSubHint | null>(null)
+  const [teamBankPaymentUrlDraft, setTeamBankPaymentUrlDraft] = useState('')
+  const [teamBankUrlSaving, setTeamBankUrlSaving] = useState(false)
+  const [teamBankUrlSavedMsg, setTeamBankUrlSavedMsg] = useState<string | null>(null)
+  const [lastCreatedBankUrl, setLastCreatedBankUrl] = useState<string | null>(null)
 
   const [search, setSearch] = useState('')
   const [debouncedSearch, setDebouncedSearch] = useState('')
@@ -58,7 +63,18 @@ export function ProLideresInvitesPanel() {
     setLoading(true)
     setError(null)
     try {
-      const subRes = await fetch('/api/pro-lideres/subscription', { credentials: 'include' })
+      const [subRes, tenantRes] = await Promise.all([
+        fetch('/api/pro-lideres/subscription', { credentials: 'include' }),
+        fetch('/api/pro-lideres/tenant', { credentials: 'include' }),
+      ])
+      const tenantData = await tenantRes.json().catch(() => ({}))
+      if (tenantRes.ok) {
+        const t = (tenantData as { tenant?: { team_bank_payment_url?: string | null } }).tenant
+        setTeamBankPaymentUrlDraft(
+          typeof t?.team_bank_payment_url === 'string' ? t.team_bank_payment_url.trim() : ''
+        )
+      }
+
       const subData = await subRes.json().catch(() => ({}))
       const accessOk = Boolean((subData as { accessOk?: boolean }).accessOk)
       const accessBlocked = subRes.ok && !accessOk
@@ -122,6 +138,7 @@ export function ProLideresInvitesPanel() {
     setError(null)
     setLastCreatedUrl(null)
     setLastCreatedInviteId(null)
+    setLastCreatedBankUrl(null)
     try {
       const res = await fetch('/api/pro-lideres/invites', {
         method: 'POST',
@@ -141,6 +158,8 @@ export function ProLideresInvitesPanel() {
       }
       const url = (data as { invite_url?: string }).invite_url
       const inv = (data as { invite?: { id?: string } }).invite
+      const bank = (data as { team_bank_payment_url?: string | null }).team_bank_payment_url
+      setLastCreatedBankUrl(typeof bank === 'string' && bank.trim() ? bank.trim() : null)
       if (url) setLastCreatedUrl(url)
       if (inv?.id) {
         setLastCreatedInviteId(inv.id)
@@ -181,11 +200,50 @@ export function ProLideresInvitesPanel() {
     }
   }
 
-  function copyUrl(url: string) {
+  function copyInviteUrl(url: string) {
     void navigator.clipboard.writeText(url).then(() => {
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
+      setCopiedInvite(true)
+      setTimeout(() => setCopiedInvite(false), 2000)
     })
+  }
+
+  function copyBankUrl(url: string) {
+    void navigator.clipboard.writeText(url).then(() => {
+      setCopiedBank(true)
+      setTimeout(() => setCopiedBank(false), 2000)
+    })
+  }
+
+  async function saveTeamBankPaymentUrl(e: React.FormEvent) {
+    e.preventDefault()
+    setTeamBankUrlSaving(true)
+    setTeamBankUrlSavedMsg(null)
+    setError(null)
+    try {
+      const res = await fetch('/api/pro-lideres/tenant', {
+        method: 'PATCH',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          team_bank_payment_url: teamBankPaymentUrlDraft.trim() === '' ? null : teamBankPaymentUrlDraft.trim(),
+        }),
+      })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) {
+        setError((data as { error?: string }).error || 'Não foi possível guardar o link.')
+        return
+      }
+      const t = (data as { tenant?: { team_bank_payment_url?: string | null } }).tenant
+      setTeamBankPaymentUrlDraft(
+        typeof t?.team_bank_payment_url === 'string' ? t.team_bank_payment_url.trim() : ''
+      )
+      setTeamBankUrlSavedMsg('Link de cobrança guardado.')
+      setTimeout(() => setTeamBankUrlSavedMsg(null), 4000)
+    } catch {
+      setError('Erro de rede ao guardar o link.')
+    } finally {
+      setTeamBankUrlSaving(false)
+    }
   }
 
   const origin = typeof window !== 'undefined' ? window.location.origin : ''
@@ -195,6 +253,42 @@ export function ProLideresInvitesPanel() {
       {error && (
         <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">{error}</div>
       )}
+
+      <form
+        onSubmit={(e) => void saveTeamBankPaymentUrl(e)}
+        className="space-y-3 rounded-xl border border-gray-200 bg-white p-4 shadow-sm"
+      >
+        <p className="text-sm font-semibold text-gray-900">Link de cobrança (banco / boleto)</p>
+        <p className="text-sm leading-relaxed text-gray-600">
+          Cola aqui o endereço que o teu banco ou gateway te dá (https…).{' '}
+          <strong className="text-gray-800">Não é o Mercado Pago da YLADA</strong> — é o teu link para a equipa pagar
+          a operação. Depois de guardar, <strong className="text-gray-800">cada convite</strong> continua a ser só o
+          link de cadastro; a pessoa <strong className="text-gray-800">vê este link de pagamento a seguir</strong> ao
+          concluir o registo ou ao aceitar com conta existente.
+        </p>
+        <label className="block">
+          <span className="mb-1 block text-xs font-medium text-gray-600">URL (https ou http)</span>
+          <input
+            type="url"
+            value={teamBankPaymentUrlDraft}
+            onChange={(e) => setTeamBankPaymentUrlDraft(e.target.value)}
+            className="w-full rounded-lg border border-gray-300 px-3 py-2.5 font-mono text-sm text-gray-900"
+            placeholder="https://…"
+            maxLength={2000}
+            autoComplete="off"
+          />
+        </label>
+        {teamBankUrlSavedMsg && (
+          <p className="text-sm font-medium text-green-700">{teamBankUrlSavedMsg}</p>
+        )}
+        <button
+          type="submit"
+          disabled={teamBankUrlSaving}
+          className="min-h-[44px] rounded-xl border border-gray-300 bg-white px-5 py-2.5 text-sm font-semibold text-gray-900 hover:bg-gray-50 disabled:opacity-60"
+        >
+          {teamBankUrlSaving ? 'A guardar…' : 'Guardar link de cobrança'}
+        </button>
+      </form>
 
       {subscriptionAccessOk === false && (
         <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-4 text-amber-950 shadow-sm">
@@ -271,13 +365,31 @@ export function ProLideresInvitesPanel() {
             Os convites pendentes expiram na data indicada na lista abaixo. Podes revogar a qualquer momento.
           </p>
           <p className="mt-2 break-all font-mono text-xs text-green-800">{lastCreatedUrl}</p>
+          {lastCreatedBankUrl ? (
+            <div className="mt-3 rounded-lg border border-green-300/80 bg-white/90 px-3 py-2.5 text-xs text-green-950">
+              <p className="font-semibold text-green-900">Cobrança da operação (também na app após o cadastro)</p>
+              <p className="mt-1 break-all font-mono text-[11px] text-green-900/90">{lastCreatedBankUrl}</p>
+              <button
+                type="button"
+                onClick={() => copyBankUrl(lastCreatedBankUrl)}
+                className="mt-2 min-h-[36px] rounded-md border border-green-600 bg-green-50 px-3 py-1.5 text-xs font-semibold text-green-900 hover:bg-green-100"
+              >
+                {copiedBank ? 'Copiado!' : 'Copiar link de cobrança'}
+              </button>
+            </div>
+          ) : (
+            <p className="mt-2 text-xs text-green-800/85">
+              Sem link de cobrança configurado acima — a pessoa só entra pelo convite; podes enviar o pagamento por
+              fora se quiseres.
+            </p>
+          )}
           <div className="mt-3 flex flex-wrap gap-2">
             <button
               type="button"
-              onClick={() => copyUrl(lastCreatedUrl)}
+              onClick={() => copyInviteUrl(lastCreatedUrl)}
               className="min-h-[40px] rounded-lg bg-green-700 px-4 py-2 text-sm font-semibold text-white hover:bg-green-800"
             >
-              {copied ? 'Copiado!' : 'Copiar link'}
+              {copiedInvite ? 'Copiado!' : 'Copiar link'}
             </button>
             <button
               type="button"
@@ -366,7 +478,7 @@ export function ProLideresInvitesPanel() {
                     {link && (
                       <button
                         type="button"
-                        onClick={() => copyUrl(link)}
+                        onClick={() => copyInviteUrl(link)}
                         className="rounded-lg border border-gray-300 px-3 py-1.5 text-xs font-semibold text-gray-800 hover:bg-gray-50"
                       >
                         Copiar

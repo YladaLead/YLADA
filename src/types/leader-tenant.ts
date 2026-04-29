@@ -23,6 +23,11 @@ export type LeaderTenantRow = {
   daily_tasks_visible_to_team?: boolean
   /** Pontos extra uma vez por dia quando o membro marca todas as tarefas desse dia. */
   daily_tasks_full_day_bonus_points?: number
+  /**
+   * Link de cobrança externa (banco, boleto, etc.) definido pelo líder;
+   * repassado no fluxo de convite após cadastro ou aceite.
+   */
+  team_bank_payment_url?: string | null
   created_at: string
   updated_at: string
 }

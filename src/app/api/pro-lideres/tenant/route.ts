@@ -11,6 +11,7 @@ import {
   requireProLideresPaidContext,
 } from '@/lib/pro-lideres-subscription-access'
 import type { LeaderTenantRow } from '@/types/leader-tenant'
+import { parseTeamBankPaymentUrlField } from '@/lib/pro-lideres-team-bank-payment-url'
 
 const MAX_LEN = 500
 
@@ -92,12 +93,21 @@ export async function PATCH(request: NextRequest) {
     return s.slice(0, max)
   }
 
-  const payload: Record<string, string | null | boolean | number> = {
-    display_name: clip(body.display_name),
-    team_name: clip(body.team_name),
-    whatsapp: clip(body.whatsapp),
-    contact_email: clip(body.contact_email, 320),
-    focus_notes: clip(body.focus_notes, 2000),
+  const payload: Record<string, string | null | boolean | number> = {}
+  if (Object.prototype.hasOwnProperty.call(body, 'display_name')) {
+    payload.display_name = clip(body.display_name)
+  }
+  if (Object.prototype.hasOwnProperty.call(body, 'team_name')) {
+    payload.team_name = clip(body.team_name)
+  }
+  if (Object.prototype.hasOwnProperty.call(body, 'whatsapp')) {
+    payload.whatsapp = clip(body.whatsapp)
+  }
+  if (Object.prototype.hasOwnProperty.call(body, 'contact_email')) {
+    payload.contact_email = clip(body.contact_email, 320)
+  }
+  if (Object.prototype.hasOwnProperty.call(body, 'focus_notes')) {
+    payload.focus_notes = clip(body.focus_notes, 2000)
   }
   if (body.daily_tasks_visible_to_team !== undefined) {
     payload.daily_tasks_visible_to_team = Boolean(body.daily_tasks_visible_to_team)
@@ -108,6 +118,22 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ error: 'Bónus de dia completo inválido (0–100000).' }, { status: 400 })
     }
     payload.daily_tasks_full_day_bonus_points = Math.floor(n)
+  }
+
+  if (Object.prototype.hasOwnProperty.call(body, 'team_bank_payment_url')) {
+    const parsed = parseTeamBankPaymentUrlField(body.team_bank_payment_url)
+    if (parsed.action === 'error') {
+      return NextResponse.json({ error: parsed.message }, { status: 400 })
+    }
+    if (parsed.action === 'clear') {
+      payload.team_bank_payment_url = null
+    } else if (parsed.action === 'set') {
+      payload.team_bank_payment_url = parsed.url
+    }
+  }
+
+  if (Object.keys(payload).length === 0) {
+    return NextResponse.json({ error: 'Nenhum campo para atualizar.' }, { status: 400 })
   }
 
   const { data: tenant, error } = await supabaseAdmin
