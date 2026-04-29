@@ -434,86 +434,92 @@ export default function ConsultoriaPublicFormClient({
       area === 'estetica' && initialConfirmCode?.trim()
         ? `?confirm=${encodeURIComponent(initialConfirmCode.trim())}`
         : ''
-    const res = await fetch(`${loadUrl}${confirmQ}`)
-    const data = await res.json().catch(() => ({}))
-    if (!res.ok) {
-      setError((data as { error?: string }).error || 'Não foi possível abrir o formulário.')
+    try {
+      const res = await fetch(`${loadUrl}${confirmQ}`, { cache: 'no-store' })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) {
+        setError((data as { error?: string }).error || 'Não foi possível abrir o formulário.')
+        setNeedsEmailGate(false)
+        setUiHints(null)
+        setMaterialId(null)
+        return
+      }
+      setTitle(String((data as { title?: string }).title ?? ''))
+      setDescription((data as { description?: string | null }).description ?? null)
+
+      if ((data as { needsEmailConfirmation?: boolean }).needsEmailConfirmation) {
+        setNeedsEmailGate(true)
+        setRecipientMasked(String((data as { recipientMasked?: string }).recipientMasked ?? ''))
+        setFields([])
+        setAnswers({})
+        setName('')
+        setEmail('')
+        setWhatsapp('')
+        setUiHints(null)
+        setMaterialId(null)
+        return
+      }
+
+      setNeedsEmailGate(false)
+      setMaterialId(
+        typeof (data as { materialId?: unknown }).materialId === 'string'
+          ? String((data as { materialId: string }).materialId).trim() || null
+          : null
+      )
+
+      if (
+        area === 'estetica' &&
+        initialConfirmCode?.trim() &&
+        typeof window !== 'undefined' &&
+        window.location.search.includes('confirm=')
+      ) {
+        const u = new URL(window.location.href)
+        u.searchParams.delete('confirm')
+        window.history.replaceState({}, '', `${u.pathname}${u.search}`)
+      }
+
+      setUiHints(((data as { ui?: ConsultoriaFormUIHints | null }).ui ?? null) as ConsultoriaFormUIHints | null)
+      const nextFields = ((data as { fields?: ConsultoriaFormField[] }).fields ?? []) as ConsultoriaFormField[]
+      setFields(nextFields)
+      const prefill = (data as {
+        prefill?: { initialAnswers?: Record<string, string>; respondentName?: string; respondentEmail?: string }
+      }).prefill
+      if (prefill?.initialAnswers && typeof prefill.initialAnswers === 'object') {
+        const merged = { ...(prefill.initialAnswers as Record<string, string>) }
+        if (area === 'estetica' && !String(merged.whatsapp_ddi ?? '').trim()) {
+          merged.whatsapp_ddi = DEFAULT_WHATSAPP_DDI
+        }
+        if (area === 'pro_lideres' && nextFields.some((x) => x.id === 'whatsapp_ddi') && !String(merged.whatsapp_ddi ?? '').trim()) {
+          merged.whatsapp_ddi = DEFAULT_WHATSAPP_DDI
+        }
+        setAnswers(ensureDefaultWhatsappDdi(area, nextFields, merged))
+      } else {
+        const init: Record<string, string> = {}
+        if (area === 'estetica') init.whatsapp_ddi = DEFAULT_WHATSAPP_DDI
+        if (area === 'pro_lideres' && nextFields.some((x) => x.id === 'whatsapp_ddi')) {
+          init.whatsapp_ddi = DEFAULT_WHATSAPP_DDI
+        }
+        setAnswers(ensureDefaultWhatsappDdi(area, nextFields, init))
+      }
+      if (prefill?.respondentName != null && String(prefill.respondentName).trim()) {
+        setName(String(prefill.respondentName).trim())
+      } else {
+        setName('')
+      }
+      if (prefill?.respondentEmail != null && String(prefill.respondentEmail).trim()) {
+        setEmail(String(prefill.respondentEmail).trim())
+      } else {
+        setEmail('')
+      }
+      setWhatsapp('')
+    } catch {
+      setError('Ligação interrompida. Verifique a rede e atualize a página.')
       setNeedsEmailGate(false)
       setUiHints(null)
       setMaterialId(null)
+    } finally {
       setLoading(false)
-      return
     }
-    setTitle(String((data as { title?: string }).title ?? ''))
-    setDescription((data as { description?: string | null }).description ?? null)
-
-    if ((data as { needsEmailConfirmation?: boolean }).needsEmailConfirmation) {
-      setNeedsEmailGate(true)
-      setRecipientMasked(String((data as { recipientMasked?: string }).recipientMasked ?? ''))
-      setFields([])
-      setAnswers({})
-      setName('')
-      setEmail('')
-      setWhatsapp('')
-      setUiHints(null)
-      setMaterialId(null)
-      setLoading(false)
-      return
-    }
-
-    setNeedsEmailGate(false)
-    setMaterialId(
-      typeof (data as { materialId?: unknown }).materialId === 'string'
-        ? String((data as { materialId: string }).materialId).trim() || null
-        : null
-    )
-
-    if (
-      area === 'estetica' &&
-      initialConfirmCode?.trim() &&
-      typeof window !== 'undefined' &&
-      window.location.search.includes('confirm=')
-    ) {
-      const u = new URL(window.location.href)
-      u.searchParams.delete('confirm')
-      window.history.replaceState({}, '', `${u.pathname}${u.search}`)
-    }
-
-    setUiHints(((data as { ui?: ConsultoriaFormUIHints | null }).ui ?? null) as ConsultoriaFormUIHints | null)
-    const nextFields = ((data as { fields?: ConsultoriaFormField[] }).fields ?? []) as ConsultoriaFormField[]
-    setFields(nextFields)
-    const prefill = (data as {
-      prefill?: { initialAnswers?: Record<string, string>; respondentName?: string; respondentEmail?: string }
-    }).prefill
-    if (prefill?.initialAnswers && typeof prefill.initialAnswers === 'object') {
-      const merged = { ...(prefill.initialAnswers as Record<string, string>) }
-      if (area === 'estetica' && !String(merged.whatsapp_ddi ?? '').trim()) {
-        merged.whatsapp_ddi = DEFAULT_WHATSAPP_DDI
-      }
-      if (area === 'pro_lideres' && nextFields.some((x) => x.id === 'whatsapp_ddi') && !String(merged.whatsapp_ddi ?? '').trim()) {
-        merged.whatsapp_ddi = DEFAULT_WHATSAPP_DDI
-      }
-      setAnswers(ensureDefaultWhatsappDdi(area, nextFields, merged))
-    } else {
-      const init: Record<string, string> = {}
-      if (area === 'estetica') init.whatsapp_ddi = DEFAULT_WHATSAPP_DDI
-      if (area === 'pro_lideres' && nextFields.some((x) => x.id === 'whatsapp_ddi')) {
-        init.whatsapp_ddi = DEFAULT_WHATSAPP_DDI
-      }
-      setAnswers(ensureDefaultWhatsappDdi(area, nextFields, init))
-    }
-    if (prefill?.respondentName != null && String(prefill.respondentName).trim()) {
-      setName(String(prefill.respondentName).trim())
-    } else {
-      setName('')
-    }
-    if (prefill?.respondentEmail != null && String(prefill.respondentEmail).trim()) {
-      setEmail(String(prefill.respondentEmail).trim())
-    } else {
-      setEmail('')
-    }
-    setWhatsapp('')
-    setLoading(false)
   }, [loadUrl, area, initialConfirmCode])
 
   const sendConfirmationEmail = useCallback(async () => {

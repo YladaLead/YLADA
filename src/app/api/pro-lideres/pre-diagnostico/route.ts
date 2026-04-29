@@ -9,7 +9,8 @@ import { PRO_LIDERES_PRE_DIAGNOSTICO_MATERIAL_ID } from '@/lib/pro-lideres-pre-d
 import { requireProLideresPaidContext } from '@/lib/pro-lideres-subscription-access'
 
 /**
- * GET: link público do pré-diagnóstico do tenant (cria token na primeira vez) + contagem de respostas.
+ * GET: convites do pré-diagnóstico — mostra o link mais recente; cria o primeiro token se ainda não existir.
+ * Vários tokens por tenant são permitidos (um convite = um link).
  */
 export async function GET(request: NextRequest) {
   const auth = await requireApiAuth(request)
@@ -43,17 +44,21 @@ export async function GET(request: NextRequest) {
 
   const tenantId = ctx.tenant.id
 
-  const { data: existing } = await supabaseAdmin
+  const { data: linkRows, error: linkRowsErr } = await supabaseAdmin
     .from('pro_lideres_consultancy_share_links')
-    .select('id, token, created_at')
+    .select('id, token, created_at, label')
     .eq('material_id', PRO_LIDERES_PRE_DIAGNOSTICO_MATERIAL_ID)
     .eq('leader_tenant_id', tenantId)
     .is('expires_at', null)
-    .order('created_at', { ascending: true })
-    .limit(1)
-    .maybeSingle()
+    .order('created_at', { ascending: false })
+    .limit(25)
 
-  let token = existing?.token ?? null
+  if (linkRowsErr) {
+    console.error('[pre-diagnostico] list share links', linkRowsErr)
+  }
+
+  let rows = linkRows ?? []
+  let token = rows[0]?.token ?? null
   if (!token) {
     const newTok = generateConsultoriaShareToken()
     const { data: inserted, error: insErr } = await supabaseAdmin
@@ -61,21 +66,29 @@ export async function GET(request: NextRequest) {
       .insert({
         material_id: PRO_LIDERES_PRE_DIAGNOSTICO_MATERIAL_ID,
         token: newTok,
-        label: 'Pré-diagnóstico líder',
+        label: 'Pré-diagnóstico — primeiro convite',
         leader_tenant_id: tenantId,
         expires_at: null,
       })
-      .select('token')
+      .select('id, token, created_at, label')
       .single()
     if (insErr || !inserted?.token) {
       console.error('[pre-diagnostico] insert share link', insErr)
       return NextResponse.json({ error: 'Não foi possível criar o link público.' }, { status: 500 })
     }
     token = inserted.token
+    rows = [inserted]
   }
 
   const origin = request.nextUrl.origin
   const responderUrl = buildProLideresConsultoriaResponderUrl(origin, token)
+  const inviteHistory = rows.map((r) => ({
+    id: r.id as string,
+    token: r.token as string,
+    createdAt: r.created_at as string,
+    label: (r.label as string | null) ?? null,
+    responderUrl: buildProLideresConsultoriaResponderUrl(origin, r.token as string),
+  }))
 
   const { count, error: cntErr } = await supabaseAdmin
     .from('pro_lideres_consultancy_form_responses')
@@ -93,6 +106,7 @@ export async function GET(request: NextRequest) {
     materialDescription: mat.description,
     responderPath: `/pro-lideres/consultoria/responder/${encodeURIComponent(token)}`,
     responderUrl,
+    inviteHistory,
     responseCount: count ?? 0,
   })
 }

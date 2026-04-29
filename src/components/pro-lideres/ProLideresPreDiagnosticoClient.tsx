@@ -8,10 +8,19 @@ import {
   sharePreDiagnosticoWithOptionalImage,
 } from '@/lib/pro-lideres-pre-diagnostico-share'
 
+type InviteHistoryRow = {
+  id: string
+  token: string
+  createdAt: string
+  label: string | null
+  responderUrl: string
+}
+
 type Overview = {
   materialTitle: string
   materialDescription: string | null
   responderUrl: string
+  inviteHistory: InviteHistoryRow[]
 }
 
 type ResponseItem = {
@@ -30,6 +39,8 @@ export function ProLideresPreDiagnosticoClient() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [copied, setCopied] = useState(false)
+  const [copiedInviteId, setCopiedInviteId] = useState<string | null>(null)
+  const [inviteBusy, setInviteBusy] = useState(false)
   const [csvBusy, setCsvBusy] = useState(false)
   const [waBusy, setWaBusy] = useState(false)
 
@@ -49,10 +60,21 @@ export function ProLideresPreDiagnosticoClient() {
         setFields([])
         return
       }
+      const rawHistory = (oData as { inviteHistory?: unknown }).inviteHistory
+      const inviteHistory = Array.isArray(rawHistory)
+        ? (rawHistory as InviteHistoryRow[]).filter(
+            (h) =>
+              h &&
+              typeof h.id === 'string' &&
+              typeof h.responderUrl === 'string' &&
+              typeof h.createdAt === 'string'
+          )
+        : []
       setOverview({
         materialTitle: String((oData as { materialTitle?: string }).materialTitle ?? ''),
         materialDescription: (oData as { materialDescription?: string | null }).materialDescription ?? null,
         responderUrl: String((oData as { responderUrl?: string }).responderUrl ?? ''),
+        inviteHistory,
       })
       const rData = await rRes.json().catch(() => ({}))
       if (!rRes.ok) {
@@ -93,6 +115,37 @@ export function ProLideresPreDiagnosticoClient() {
       setTimeout(() => setCopied(false), 2000)
     } catch {
       setError('Não foi possível copiar. Copie manualmente da caixa abaixo.')
+    }
+  }
+
+  const copyInviteRow = async (id: string, url: string) => {
+    try {
+      await navigator.clipboard.writeText(url)
+      setCopiedInviteId(id)
+      setTimeout(() => setCopiedInviteId((cur) => (cur === id ? null : cur)), 2000)
+    } catch {
+      setError('Não foi possível copiar esse link.')
+    }
+  }
+
+  const createNewInvite = async () => {
+    setInviteBusy(true)
+    setError(null)
+    try {
+      const res = await fetch('/api/pro-lideres/pre-diagnostico/invite', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({}),
+      })
+      const j = await res.json().catch(() => ({}))
+      if (!res.ok) {
+        setError((j as { error?: string }).error || 'Não foi possível gerar um novo convite.')
+        return
+      }
+      await loadAll()
+    } finally {
+      setInviteBusy(false)
     }
   }
 
@@ -144,16 +197,25 @@ export function ProLideresPreDiagnosticoClient() {
             ) : null}
           </div>
           <p className="text-sm text-gray-700">
-            Partilhe o link com quem vai preencher o pré-diagnóstico. As respostas ficam associadas ao seu espaço
-            Pro Líderes (nome, e-mail e WhatsApp servem também para cadastro posterior).
+            <strong>Um convite, um link.</strong> Para cada pessoa, use «Gerar novo link de convite» e envie só esse
+            URL — cada submissão fica ligada a esse convite. Links que já partilhou continuam válidos para quem ainda os
+            tiver. Todas as respostas aparecem na lista abaixo, no seu espaço Pro Líderes.
           </p>
           <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+            <button
+              type="button"
+              disabled={inviteBusy}
+              onClick={() => void createNewInvite()}
+              className="min-h-[44px] touch-manipulation rounded-xl bg-indigo-700 px-4 py-3 text-sm font-semibold text-white shadow-sm hover:bg-indigo-800 disabled:opacity-50"
+            >
+              {inviteBusy ? 'A gerar…' : 'Gerar novo link de convite'}
+            </button>
             <button
               type="button"
               onClick={() => void copyLink()}
               className="min-h-[44px] touch-manipulation rounded-xl bg-blue-700 px-4 py-3 text-sm font-semibold text-white shadow-sm hover:bg-blue-800"
             >
-              {copied ? 'Copiado.' : 'Copiar link'}
+              {copied ? 'Copiado.' : 'Copiar link mais recente'}
             </button>
             <button
               type="button"
@@ -191,13 +253,38 @@ export function ProLideresPreDiagnosticoClient() {
               {items.length} resposta{items.length === 1 ? '' : 's'}
             </span>
           </div>
-          <label className="block text-xs font-medium uppercase tracking-wide text-gray-500">URL pública</label>
+          <label className="block text-xs font-medium uppercase tracking-wide text-gray-500">
+            URL do convite mais recente
+          </label>
           <input
             readOnly
             className="w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 font-mono text-xs text-gray-800"
             value={overview.responderUrl}
             onFocus={(e) => e.target.select()}
           />
+          {overview.inviteHistory.length > 1 ? (
+            <div className="space-y-2">
+              <p className="text-xs font-medium uppercase tracking-wide text-gray-500">Outros convites (mais antigos)</p>
+              <ul className="max-h-48 space-y-2 overflow-y-auto rounded-xl border border-gray-100 bg-gray-50/80 p-3 text-xs">
+                {overview.inviteHistory.slice(1).map((inv) => (
+                  <li key={inv.id} className="flex flex-col gap-1 border-b border-gray-200 pb-2 last:border-0 last:pb-0 sm:flex-row sm:items-center sm:justify-between sm:gap-2">
+                    <div className="min-w-0 flex-1">
+                      <div className="truncate font-medium text-gray-800">{inv.label ?? 'Convite'}</div>
+                      <div className="text-gray-500">{new Date(inv.createdAt).toLocaleString('pt-PT')}</div>
+                      <div className="truncate font-mono text-[11px] text-gray-600">{inv.responderUrl}</div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => void copyInviteRow(inv.id, inv.responderUrl)}
+                      className="shrink-0 rounded-lg border border-gray-300 bg-white px-2 py-1.5 text-gray-800 hover:bg-gray-100"
+                    >
+                      {copiedInviteId === inv.id ? 'Copiado' : 'Copiar'}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
           <p className="text-xs leading-relaxed text-gray-500">
             <strong>WhatsApp com imagem:</strong> em telemóvel abre o menu de partilha com o cartão YLADA e o texto;
             escolha WhatsApp para anexar a imagem. Em computador costuma abrir só o texto e o link da imagem — pode
@@ -234,7 +321,7 @@ export function ProLideresPreDiagnosticoClient() {
       <section className="space-y-3">
         <h2 className="text-lg font-semibold text-gray-900">Respostas recebidas</h2>
         {items.length === 0 ? (
-          <p className="text-sm text-gray-600">Ainda não há envios por este link.</p>
+          <p className="text-sm text-gray-600">Ainda não há envios.</p>
         ) : (
           <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white shadow-sm">
             <table className="min-w-full divide-y divide-gray-200 text-sm">
