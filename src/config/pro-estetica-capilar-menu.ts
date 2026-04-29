@@ -24,7 +24,7 @@ export const PRO_ESTETICA_CAPILAR_MENU_GROUPS: { label: string; items: ProEsteti
     items: [
       { key: 'inicio', label: 'Início', path: '', icon: '✨', hint: 'O que resolver hoje' },
       { key: 'noel', label: 'Noel', path: 'noel', icon: '💬', hint: 'Pergunte o que precisa' },
-      { key: 'links', label: 'Links', path: 'biblioteca-links', icon: '🔗', hint: 'Biblioteca e os teus links' },
+      { key: 'links', label: 'Links', path: 'biblioteca-links', icon: '🔗', hint: 'Biblioteca e seus links' },
       {
         key: 'links-analise',
         label: 'Análise',

@@ -3,7 +3,7 @@ import ProEsteticaCapilarLinksAnaliseClient from '@/components/pro-estetica-capi
 
 export const metadata: Metadata = {
   title: 'Análise dos links',
-  description: 'Ordenar os teus links por cliques, diagnósticos concluídos ou WhatsApp.',
+  description: 'Ordenar os seus links por cliques, diagnósticos concluídos ou WhatsApp.',
 }
 
 export default function ProEsteticaCapilarLinksAnalisePage() {

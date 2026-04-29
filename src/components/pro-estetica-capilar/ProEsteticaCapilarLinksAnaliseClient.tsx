@@ -93,9 +93,9 @@ export default function ProEsteticaCapilarLinksAnaliseClient() {
       <div>
         <h1 className="text-lg font-bold text-gray-900 sm:text-xl">Análise dos links</h1>
         <p className="mt-1 text-sm text-gray-600 leading-snug">
-          Ordena os teus fluxos por desempenho. Para copiar URL, QR ou editar, vai a{' '}
+          Ordene seus fluxos por desempenho. Para copiar URL, QR ou editar, vá em{' '}
           <Link href={HUB_MEUS} className="font-medium text-sky-700 underline hover:text-sky-900">
-            Links → Os teus links
+            Links → Seus links
           </Link>
           .
         </p>

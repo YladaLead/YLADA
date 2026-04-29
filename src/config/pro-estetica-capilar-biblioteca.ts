@@ -32,8 +32,12 @@ export const TEMPLATE_IDS_BIBLIOTECA_ESTETICA_CAPILAR_PERMITIDOS = new Set([
   'b1000107-0107-4000-8000-000000000107',
 ])
 
+function normalizeBibliotecaTemplateId(id: unknown): string {
+  return String(id ?? '').trim().toLowerCase()
+}
+
 export function itemBibliotecaEsteticaCapilar(item: BibliotecaItemSegmentFilter): boolean {
-  const tid = String(item.template_id ?? '').trim()
+  const tid = normalizeBibliotecaTemplateId(item.template_id)
   return tid.length > 0 && TEMPLATE_IDS_BIBLIOTECA_ESTETICA_CAPILAR_PERMITIDOS.has(tid)
 }
 
@@ -57,7 +61,7 @@ export function ordenarItemsEsteticaCapilar<T extends { id: string; template_id?
   const used = new Set<string>()
   const out: T[] = []
   for (const tid of TEMPLATE_IDS_ORDEM_DESTAQUE_ESTETICA_CAPILAR) {
-    const found = items.find((i) => (i.template_id || '') === tid)
+    const found = items.find((i) => normalizeBibliotecaTemplateId(i.template_id) === tid.toLowerCase())
     if (found) {
       out.push(found)
       used.add(found.id)

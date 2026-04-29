@@ -86,7 +86,7 @@ export default function ProEsteticaCapilarAreaShell({
                 href={PAINEL_HOME}
                 title={
                   operationLabel
-                    ? `Pro Estética Capilar — ${isLeaderWorkspace ? 'Tua clínica' : 'Equipa'} — ${operationLabel}`
+                    ? `Pro Estética Capilar — ${isLeaderWorkspace ? 'Sua clínica' : 'Equipa'} — ${operationLabel}`
                     : undefined
                 }
                 className="flex min-w-0 flex-col gap-0.5 touch-manipulation sm:flex-row sm:items-center sm:gap-2"
@@ -106,7 +106,7 @@ export default function ProEsteticaCapilarAreaShell({
                       isLeaderWorkspace ? 'text-blue-800' : 'text-emerald-700'
                     }`}
                   >
-                    {isLeaderWorkspace ? 'Tua clínica' : 'Equipa'}
+                    {isLeaderWorkspace ? 'Sua clínica' : 'Equipa'}
                   </span>
                   {operationLabel ? (
                     <span className="hidden max-w-[10rem] truncate text-xs text-gray-400 lg:inline">

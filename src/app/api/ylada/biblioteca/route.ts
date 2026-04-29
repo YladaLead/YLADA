@@ -14,7 +14,7 @@ import {
   filtrarBibliotecaItensEsteticaCorporal,
 } from '@/config/pro-estetica-corporal-biblioteca'
 import {
-  SEGMENT_CODES_BIBLIOTECA_ESTETICA_CAPILAR,
+  TEMPLATE_IDS_BIBLIOTECA_ESTETICA_CAPILAR_PERMITIDOS,
   filtrarBibliotecaItensEsteticaCapilar,
 } from '@/config/pro-estetica-capilar-biblioteca'
 import { proEsteticaCorporalPublicPreviewNoAuthEnabled } from '@/lib/pro-estetica-corporal-server'
@@ -28,12 +28,15 @@ export async function GET(request: NextRequest) {
     const tema = searchParams.get('tema')?.trim() || ''
     const subscope = searchParams.get('subscope')?.trim() || ''
     const esteticaCorporal = subscope === 'estetica_corporal'
+    const esteticaCapilar = subscope === 'estetica_capilar'
     const allowPublicEsteticaCorporalCatalog =
       esteticaCorporal && proEsteticaCorporalPublicPreviewNoAuthEnabled()
+    const allowPublicEsteticaCapilarCatalog =
+      esteticaCapilar && proEsteticaCapilarPublicPreviewNoAuthEnabled()
 
     const auth = await requireApiAuth(request, [...YLADA_API_ALLOWED_PROFILES])
     if (auth instanceof NextResponse) {
-      if (!allowPublicEsteticaCorporalCatalog) return auth
+      if (!allowPublicEsteticaCorporalCatalog && !allowPublicEsteticaCapilarCatalog) return auth
     }
 
     if (!supabaseAdmin) {
@@ -55,6 +58,9 @@ export async function GET(request: NextRequest) {
     }
     if (esteticaCorporal) {
       query = query.overlaps('segment_codes', [...SEGMENT_CODES_BIBLIOTECA_ESTETICA_CORPORAL])
+    } else if (esteticaCapilar) {
+      // Lista fechada por template_id: não depender só de `segment_codes` (evita catálogo vazio se a coluna divergir).
+      query = query.in('template_id', [...TEMPLATE_IDS_BIBLIOTECA_ESTETICA_CAPILAR_PERMITIDOS])
     } else if (segmento) {
       // Overlap: segment_codes do item intersecta o array. Psicanálise ainda pode reutilizar itens marcados só como psychology até migrar no admin.
       const codes = segmento === 'psychoanalysis' ? ['psychoanalysis', 'psychology'] : [segmento]

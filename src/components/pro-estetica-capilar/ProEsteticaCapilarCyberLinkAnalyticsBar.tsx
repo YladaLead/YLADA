@@ -66,7 +66,7 @@ export default function ProEsteticaCapilarCyberLinkAnalyticsBar({
         className="border-b border-violet-300/40 bg-gradient-to-r from-slate-900 via-violet-950 to-slate-900 px-3 py-2 text-center text-[11px] text-violet-200 sm:px-4 sm:text-xs"
         role="status"
       >
-        Inicia sessão para veres aqui a análise dos teus links (aberturas e WhatsApp).
+        Entre na conta para ver aqui a análise dos seus links (aberturas e WhatsApp).
       </div>
     )
   }
@@ -95,18 +95,18 @@ export default function ProEsteticaCapilarCyberLinkAnalyticsBar({
           </span>
           <p className="min-w-0 text-[11px] font-medium leading-snug text-violet-100 sm:text-xs">
             <span className="hidden sm:inline">Análise rápida — </span>
-            totais de todos os teus links YLADA nesta conta.
+            totais de todos os seus links YLADA nesta conta.
           </p>
         </div>
         {error ? (
           <p className="text-center text-[11px] text-rose-300 sm:text-left sm:text-xs">{error}</p>
         ) : loading && !data ? (
-          <p className="w-full text-center text-[11px] text-violet-200 sm:text-left sm:text-xs">A carregar métricas…</p>
+          <p className="w-full text-center text-[11px] text-violet-200 sm:text-left sm:text-xs">Carregando métricas…</p>
         ) : (
           <div className="flex w-full flex-wrap gap-2 sm:max-w-xl sm:flex-nowrap sm:justify-end">
             {kpi('Links ativos', data?.links_active ?? 0, 'Fluxos com link ligado (estado ativo).')}
             {kpi('Cliques no link', data?.link_opens ?? 0, 'Vezes que alguém abriu o link (página do fluxo).')}
-            {kpi('WhatsApp', data?.whatsapp_clicks ?? 0, 'Cliques no botão para falar contigo no WhatsApp.')}
+            {kpi('WhatsApp', data?.whatsapp_clicks ?? 0, 'Cliques no botão para falar com você no WhatsApp.')}
           </div>
         )}
         <Link

@@ -11,12 +11,12 @@ type TabId = 'prontos' | 'meus'
 
 const TAB_PARAM = 'tab'
 
-/** Tooltip (desktop): separador Biblioteca no hub Pro Estética (PT). */
+/** Tooltip (desktop): separador Biblioteca no hub Pro Estética (PT-BR). */
 const TITLE_TAB_BIBLIOTECA_PRO =
-  'Vitrine de modelos: escolhes um e geras um link novo. Só aparece em «Os teus links» depois de criado.'
-/** Tooltip (desktop): separador Os teus links no hub Pro Estética (PT). */
+  'Vitrine de modelos: você escolhe um e gera um link novo. Só aparece em “Seus links” depois de criado.'
+/** Tooltip (desktop): separador Seus links no hub Pro Estética (PT-BR). */
 const TITLE_TAB_MEUS_LINKS_PRO =
-  'Lista dos links já na tua conta (Biblioteca, Noel, etc.) — URL, QR e análise: aberturas, respostas, WhatsApp.'
+  'Lista dos links já na sua conta (Biblioteca, Noel, etc.) — URL, QR e análise: aberturas, respostas, WhatsApp.'
 
 interface LinksHubContentProps {
   areaCodigo: OnboardingAreaCodigo | string
@@ -111,7 +111,7 @@ function LinksHubContentInner({
               </div>
             </>
           ) : (
-            <div className="flex gap-1 border-b border-gray-200 pb-0.5" role="tablist" aria-label="Biblioteca e os teus links">
+            <div className="flex gap-1 border-b border-gray-200 pb-0.5" role="tablist" aria-label="Biblioteca e seus links">
               <button
                 type="button"
                 role="tab"
@@ -134,7 +134,7 @@ function LinksHubContentInner({
                   tab === 'meus' ? 'bg-white text-gray-900 shadow-sm ring-1 ring-gray-200' : 'text-gray-600 hover:text-gray-900'
                 }`}
               >
-                Os teus links
+                Seus links
               </button>
             </div>
           )}
@@ -144,12 +144,12 @@ function LinksHubContentInner({
               role="note"
             >
               <p>
-                <span className="font-semibold text-slate-900">Biblioteca</span> — modelos para gerares um{' '}
-                <span className="font-medium">link novo</span> (ex.: «Usar esse»).
+                <span className="font-semibold text-slate-900">Biblioteca</span> — modelos para gerar um{' '}
+                <span className="font-medium">link novo</span> (ex.: “Usar esse”).
               </p>
               <p className="mt-1 border-t border-slate-200/80 pt-1.5">
-                <span className="font-semibold text-slate-900">Os teus links</span> — os links que{' '}
-                <span className="font-medium">já estão na tua conta</span> (Biblioteca, Noel ou outro), com URL, QR e{' '}
+                <span className="font-semibold text-slate-900">Seus links</span> — os links que{' '}
+                <span className="font-medium">já estão na sua conta</span> (Biblioteca, Noel ou outro), com URL, QR e{' '}
                 <span className="font-medium">análise</span> (aberturas, respostas, WhatsApp).
               </p>
             </div>

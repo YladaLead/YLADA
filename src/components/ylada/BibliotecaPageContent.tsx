@@ -411,12 +411,12 @@ function BibliotecaCard({
   isTemaMaisUsado: (t: string) => boolean
   /** Biblioteca embutida no painel Pro Estética: não redirecionar para a matriz `/pt/estetica/links`. */
   stayOnProEsteticaPanel?: boolean
-  /** Após criar link em modo “copiar”, atualiza a lista em “Os teus links” sem navegar. */
+  /** Após criar link em modo “copiar”, atualiza a lista em “Seus links” sem navegar. */
   onRefreshMeusLinks?: () => void
 }) {
   const [criarErro, setCriarErro] = useState<string | null>(null)
   const [criarErroPrecosCta, setCriarErroPrecosCta] = useState(false)
-  /** Painel Pro Estética: após «Criar e copiar link», URL pública para mostrar o mesmo QR que em «Os teus links». */
+  /** Painel Pro Estética: após “Criar e copiar link”, URL pública para mostrar o mesmo QR que em “Seus links”. */
   const [postCopyQrUrl, setPostCopyQrUrl] = useState<string | null>(null)
   const [previewOpen, setPreviewOpen] = useState(false)
   const [previewLoading, setPreviewLoading] = useState(false)
@@ -437,7 +437,7 @@ function BibliotecaCard({
   const handleUse = async (intent: 'use' | 'copy' = 'use') => {
     if (creatingId === item.id) return
     if (!String(item.id ?? '').trim()) {
-      setCriarErro('Modelo sem identificador. Recarrega a página.')
+      setCriarErro('Modelo sem identificador. Recarregue a página.')
       return
     }
     let preOpenedForFunnel: Window | null = null
@@ -477,7 +477,7 @@ function BibliotecaCard({
       try {
         data = (await res.json()) as Record<string, unknown>
       } catch {
-        setCriarErro('Resposta inválida do servidor. Tenta outra vez.')
+        setCriarErro('Resposta inválida do servidor. Tente de novo.')
         return
       }
       const { linkId, payload } = parseGenerateResponseData(data)
@@ -499,7 +499,7 @@ function BibliotecaCard({
               ? payload.url
               : '')
         if (!toCopy) {
-          setCriarErro('Link criado, mas não foi possível obter o URL para copiar. Abra “Os teus links”.')
+          setCriarErro('Link criado, mas não foi possível obter o URL para copiar. Abra “Seus links”.')
           return
         }
         try {
@@ -509,7 +509,7 @@ function BibliotecaCard({
           window.setTimeout(() => setCopyOkFlash(false), 4000)
           onRefreshMeusLinks?.()
         } catch {
-          setCriarErro('Não foi possível copiar para a área de transferência. Copie manualmente em “Os teus links”.')
+          setCriarErro('Não foi possível copiar para a área de transferência. Copie manualmente em “Seus links”.')
         }
       }
 
@@ -796,7 +796,7 @@ function BibliotecaCard({
                     }}
                   >
                     {creatingThis ? (
-                      'A criar…'
+                      'Criando…'
                     ) : (
                       <>
                         <span className="sm:hidden">Copiar link</span>
@@ -807,14 +807,14 @@ function BibliotecaCard({
                 </div>
                 {copyOkFlash ? (
                   <p className="text-center text-xs font-medium text-emerald-700 sm:text-right">
-                    Link copiado. Podes colar onde quiseres; o QR está abaixo ou em «Os teus links».
+                    Link copiado. Você pode colar onde quiser; o QR está abaixo ou em “Seus links”.
                   </p>
                 ) : null}
                 {postCopyQrUrl ? (
                   <div className="w-full rounded-xl border border-indigo-100 bg-indigo-50/40 p-3 text-left shadow-sm">
                     <p className="text-xs font-semibold text-gray-900">QR deste link</p>
                     <p className="mt-0.5 text-[11px] text-gray-600 leading-snug">
-                      Copia a imagem do QR ou o link — o mesmo que encontras em «Os teus links» → QR Code.
+                      Copie a imagem do QR ou o link — o mesmo que você encontra em “Seus links” → QR Code.
                     </p>
                     <div className="mt-2">
                       <DiagnosticoLinkQrPanel url={postCopyQrUrl} />
@@ -1369,10 +1369,12 @@ function BibliotecaPageContentInner({
       if (segForApi) params.set('segmento', segForApi)
     }
     if (!esteticaCorporalScope && !esteticaCapilarScope && temaFiltro) params.set('tema', temaFiltro)
-    fetch(`/api/ylada/biblioteca?${params}`)
-      .then((r) => r.json())
-      .then((data) => {
-        if (!cancelled && Array.isArray(data.items)) setItems(data.items)
+    fetch(`/api/ylada/biblioteca?${params}`, { credentials: 'include', cache: 'no-store' })
+      .then(async (r) => {
+        const data = (await r.json()) as { items?: unknown }
+        if (cancelled) return
+        if (r.ok && Array.isArray(data.items)) setItems(data.items as BibliotecaItemRow[])
+        else setItems([])
       })
       .catch(() => {
         if (!cancelled) setItems([])
@@ -1436,7 +1438,7 @@ function BibliotecaPageContentInner({
           try {
             data = (await res.json()) as Record<string, unknown>
           } catch {
-            setIdeiaLinkErro('Resposta inválida do servidor. Tenta outra vez.')
+            setIdeiaLinkErro('Resposta inválida do servidor. Tente de novo.')
             return
           }
           const { linkId, payload } = parseGenerateResponseData(data)
@@ -1882,7 +1884,7 @@ function BibliotecaPageContentInner({
                 </h2>
                 {isEsteticaLinksBiblioteca ? (
                   <p className="text-xs text-gray-600 mb-2 sm:mb-3">
-                    Noel monta estes três com base na linha ativa (terapia capilar, estética corporal ou mistura em «Tudo»).
+                    Noel monta estes três com base na linha ativa (terapia capilar, estética corporal ou mistura em “Tudo”).
                   </p>
                 ) : null}
                 <div className={`grid sm:grid-cols-3 ${embedded ? 'gap-3' : 'gap-4'}`}>
