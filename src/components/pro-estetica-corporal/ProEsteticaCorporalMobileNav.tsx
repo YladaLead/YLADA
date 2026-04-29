@@ -34,7 +34,7 @@ export default function ProEsteticaCorporalMobileNav() {
       className="fixed inset-x-0 bottom-0 z-40 border-t border-gray-200 bg-white/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-sm lg:hidden"
       aria-label="Navegação principal"
     >
-      <ul className="mx-auto grid max-w-lg grid-cols-4 gap-0">
+      <ul className={`mx-auto grid max-w-xl gap-0 ${items.length >= 5 ? 'grid-cols-5' : 'grid-cols-4'}`}>
         {items.map((item) => {
           const href = proEsteticaCorporalItemHref(item.path)
           const active = itemActive(pathname, item)
@@ -42,7 +42,7 @@ export default function ProEsteticaCorporalMobileNav() {
             <li key={item.key}>
               <Link
                 href={href}
-                className={`flex min-h-[52px] flex-col items-center justify-center gap-0.5 px-1 py-2 text-[10px] font-semibold touch-manipulation ${
+                className={`flex min-h-[52px] flex-col items-center justify-center gap-0.5 px-0.5 py-2 text-[9px] font-semibold leading-tight touch-manipulation sm:px-1 sm:text-[10px] ${
                   active ? 'text-blue-700' : 'text-gray-600'
                 }`}
               >

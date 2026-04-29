@@ -25,6 +25,13 @@ export const PRO_ESTETICA_CORPORAL_MENU_GROUPS: { label: string; items: ProEstet
       { key: 'inicio', label: 'Início', path: '', icon: '✨', hint: 'O que resolver hoje' },
       { key: 'noel', label: 'Noel', path: 'noel', icon: '💬', hint: 'Pergunte o que precisa' },
       { key: 'links', label: 'Links', path: 'biblioteca-links', icon: '🔗', hint: 'Biblioteca e os teus links' },
+      {
+        key: 'links-analise',
+        label: 'Análise',
+        path: 'links-analise',
+        icon: '📊',
+        hint: 'Cliques, diagnósticos e WhatsApp',
+      },
       { key: 'perfil', label: 'Perfil', path: 'perfil', icon: '👤', hint: 'Sua clínica' },
     ],
   },

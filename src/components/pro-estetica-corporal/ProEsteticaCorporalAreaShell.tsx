@@ -5,6 +5,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import ProEsteticaCorporalSidebar from './ProEsteticaCorporalSidebar'
 import ProEsteticaCorporalMobileNav from './ProEsteticaCorporalMobileNav'
+import ProEsteticaCorporalCyberLinkAnalyticsBar from './ProEsteticaCorporalCyberLinkAnalyticsBar'
 import { PRO_ESTETICA_CORPORAL_INICIO_PATH } from '@/config/pro-estetica-corporal-menu'
 import { ProLideresPainelProvider, type ProLideresPainelContextValue } from '@/components/pro-lideres/pro-lideres-painel-context'
 import { useAuth } from '@/hooks/useAuth'
@@ -128,6 +129,7 @@ export default function ProEsteticaCorporalAreaShell({
               </span>
             </Link>
           </header>
+          <ProEsteticaCorporalCyberLinkAnalyticsBar previewWithoutLogin={previewWithoutLogin} />
           <main className="flex-1 p-4 pb-24 sm:p-5 lg:pb-6 lg:p-6">{children}</main>
           <ProEsteticaCorporalMobileNav />
         </div>

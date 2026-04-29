@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import ShareQrCode from '@/components/shared/ShareQrCode'
 import { copyTextToClipboard } from '@/lib/clipboard'
+import { copyQrPngToClipboardOrDownload } from '@/lib/ylada-qrcode-share'
 
 type DiagnosticoLinkQrPanelProps = {
   /** URL pública completa do link. */
@@ -15,6 +16,7 @@ type DiagnosticoLinkQrPanelProps = {
  */
 export function DiagnosticoLinkQrPanel({ url, className = '' }: DiagnosticoLinkQrPanelProps) {
   const [copied, setCopied] = useState(false)
+  const [qrCopyHint, setQrCopyHint] = useState<string | null>(null)
 
   const copiar = async () => {
     const ok = await copyTextToClipboard(url.trim())
@@ -24,12 +26,35 @@ export function DiagnosticoLinkQrPanel({ url, className = '' }: DiagnosticoLinkQ
     }
   }
 
+  const copiarImagemQr = async () => {
+    setQrCopyHint(null)
+    const result = await copyQrPngToClipboardOrDownload(url, { downloadFilename: 'ylada-qrcode.png' })
+    if (result === 'clipboard') {
+      setQrCopyHint('Imagem do QR copiada — cole no WhatsApp, Stories ou e-mail.')
+    } else if (result === 'download') {
+      setQrCopyHint('Fizemos o download do PNG do QR (neste navegador não dá para copiar a imagem).')
+    } else {
+      setQrCopyHint('Não foi possível copiar nem baixar o QR. Tente outro navegador ou copie o link abaixo.')
+    }
+    if (result !== 'failed') {
+      setTimeout(() => setQrCopyHint(null), 5000)
+    }
+  }
+
   return (
     <div className={`space-y-4 ${className}`}>
       <p className="text-xs text-gray-600 leading-relaxed">
-        Escaneie com a câmera do celular ou copie o link para enviar para outras pessoas.
+        Escaneie com a câmera do celular, copie a imagem do QR ou copie o link para enviar a outras pessoas.
       </p>
       <ShareQrCode url={url} size={176} />
+      <button
+        type="button"
+        onClick={() => void copiarImagemQr()}
+        className="w-full rounded-xl border-2 border-indigo-300 bg-indigo-50 px-4 py-3 text-sm font-semibold text-indigo-900 hover:bg-indigo-100"
+      >
+        Copiar imagem do QR
+      </button>
+      {qrCopyHint ? <p className="text-xs text-gray-600 leading-relaxed">{qrCopyHint}</p> : null}
       <button
         type="button"
         onClick={() => void copiar()}

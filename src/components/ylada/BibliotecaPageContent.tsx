@@ -416,6 +416,8 @@ function BibliotecaCard({
 }) {
   const [criarErro, setCriarErro] = useState<string | null>(null)
   const [criarErroPrecosCta, setCriarErroPrecosCta] = useState(false)
+  /** Painel Pro Estética: após «Criar e copiar link», URL pública para mostrar o mesmo QR que em «Os teus links». */
+  const [postCopyQrUrl, setPostCopyQrUrl] = useState<string | null>(null)
   const [previewOpen, setPreviewOpen] = useState(false)
   const [previewLoading, setPreviewLoading] = useState(false)
   const [previewErro, setPreviewErro] = useState<string | null>(null)
@@ -450,6 +452,7 @@ function BibliotecaCard({
     setCriarErro(null)
     setCriarErroPrecosCta(false)
     setCopyOkFlash(false)
+    setPostCopyQrUrl(null)
     try {
       const body: Record<string, unknown> = {
         flow_id: item.flow_id ?? 'diagnostico_risco',
@@ -502,6 +505,7 @@ function BibliotecaCard({
         try {
           await navigator.clipboard.writeText(toCopy)
           setCopyOkFlash(true)
+          setPostCopyQrUrl(toCopy)
           window.setTimeout(() => setCopyOkFlash(false), 4000)
           onRefreshMeusLinks?.()
         } catch {
@@ -803,8 +807,30 @@ function BibliotecaCard({
                 </div>
                 {copyOkFlash ? (
                   <p className="text-center text-xs font-medium text-emerald-700 sm:text-right">
-                    Link copiado. Vê em «Os teus links».
+                    Link copiado. Podes colar onde quiseres; o QR está abaixo ou em «Os teus links».
                   </p>
+                ) : null}
+                {postCopyQrUrl ? (
+                  <div className="w-full rounded-xl border border-indigo-100 bg-indigo-50/40 p-3 text-left shadow-sm">
+                    <p className="text-xs font-semibold text-gray-900">QR deste link</p>
+                    <p className="mt-0.5 text-[11px] text-gray-600 leading-snug">
+                      Copia a imagem do QR ou o link — o mesmo que encontras em «Os teus links» → QR Code.
+                    </p>
+                    <div className="mt-2">
+                      <DiagnosticoLinkQrPanel url={postCopyQrUrl} />
+                    </div>
+                    <button
+                      type="button"
+                      className="mt-2 w-full rounded-lg py-1.5 text-xs font-medium text-gray-600 hover:bg-white/80 hover:text-gray-900"
+                      onClick={(e) => {
+                        e.preventDefault()
+                        e.stopPropagation()
+                        setPostCopyQrUrl(null)
+                      }}
+                    >
+                      Ocultar QR
+                    </button>
+                  </div>
                 ) : null}
                 <button
                   type="button"
