@@ -72,6 +72,7 @@ export default function ProLideresConsultoriaAdminClient() {
   const [shareLinks, setShareLinks] = useState<ProLideresConsultoriaShareLinkRow[]>([])
   const [responses, setResponses] = useState<ProLideresConsultoriaFormResponseRow[]>([])
   const [auxLoading, setAuxLoading] = useState(false)
+  const [deleteLinkBusy, setDeleteLinkBusy] = useState<string | null>(null)
   const [buscaRespostas, setBuscaRespostas] = useState('')
 
   const respostasFiltradas = useMemo(
@@ -249,6 +250,12 @@ export default function ProLideresConsultoriaAdminClient() {
 
   const createShareLink = async () => {
     if (!selected?.id) return
+    if (shareLinks.length >= 1) {
+      const ok = window.confirm(
+        'Isto cria mais um URL público. Só use se precisar de um link extra. Pode apagar links a mais na lista. Continuar?'
+      )
+      if (!ok) return
+    }
     setAuxLoading(true)
     setError(null)
     const res = await fetch(`/api/admin/pro-lideres/consultoria/materials/${selected.id}/share-links`, {
@@ -264,6 +271,33 @@ export default function ProLideresConsultoriaAdminClient() {
       return
     }
     await loadAuxForForm(selected.id)
+  }
+
+  const deleteShareLink = async (linkId: string) => {
+    if (!selected?.id) return
+    if (
+      !confirm(
+        'Eliminar este link? Quem já o tiver deixa de abrir o formulário por este endereço. Respostas já enviadas mantêm-se.'
+      )
+    ) {
+      return
+    }
+    setDeleteLinkBusy(linkId)
+    setError(null)
+    try {
+      const res = await fetch(
+        `/api/admin/pro-lideres/consultoria/materials/${selected.id}/share-links/${encodeURIComponent(linkId)}`,
+        { method: 'DELETE', credentials: 'include' }
+      )
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) {
+        setError((data as { error?: string }).error || 'Erro ao eliminar o link.')
+        return
+      }
+      await loadAuxForForm(selected.id)
+    } finally {
+      setDeleteLinkBusy(null)
+    }
   }
 
   const copyResponderUrl = (token: string) => {
@@ -489,15 +523,20 @@ export default function ProLideresConsultoriaAdminClient() {
 
               {tab === 'links' && selected.material_kind === 'formulario' ? (
                 <div className="space-y-3">
-                  <div className="flex items-center justify-between gap-2">
-                    <h3 className="text-sm font-semibold text-gray-900">Links para o líder</h3>
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                    <div>
+                      <h3 className="text-sm font-semibold text-gray-900">Links para o líder</h3>
+                      <p className="mt-1 text-xs text-gray-500">
+                        Cada URL é um convite. Evite duplicar sem necessidade — pode apagar os que sobrem.
+                      </p>
+                    </div>
                     <button
                       type="button"
                       disabled={!selected.is_published || auxLoading}
                       onClick={() => void createShareLink()}
-                      className="rounded-lg bg-emerald-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-50"
+                      className="shrink-0 rounded-lg border border-emerald-600 bg-emerald-50 px-3 py-1.5 text-sm font-medium text-emerald-900 hover:bg-emerald-100 disabled:opacity-50"
                     >
-                      Gerar novo link
+                      Gerar link adicional
                     </button>
                   </div>
                   {!selected.is_published ? (
@@ -508,20 +547,33 @@ export default function ProLideresConsultoriaAdminClient() {
                   {auxLoading ? <p className="text-xs text-gray-500">A carregar…</p> : null}
                   <ul className="space-y-2 text-sm">
                     {shareLinks.map((lk) => (
-                      <li key={lk.id} className="flex flex-col gap-1 rounded-lg border border-gray-100 bg-gray-50 p-3">
-                        <code className="text-xs break-all text-gray-800">
+                      <li
+                        key={lk.id}
+                        className="flex flex-col gap-2 rounded-lg border border-gray-100 bg-gray-50 p-3 sm:flex-row sm:items-center sm:justify-between"
+                      >
+                        <code className="min-w-0 flex-1 text-xs break-all text-gray-800">
                           {buildProLideresConsultoriaResponderUrl(
                             typeof window !== 'undefined' ? window.location.origin : '',
                             lk.token
                           )}
                         </code>
-                        <button
-                          type="button"
-                          onClick={() => copyResponderUrl(lk.token)}
-                          className="self-start text-xs font-medium text-blue-700 hover:underline"
-                        >
-                          Copiar URL
-                        </button>
+                        <div className="flex shrink-0 flex-wrap gap-2">
+                          <button
+                            type="button"
+                            onClick={() => copyResponderUrl(lk.token)}
+                            className="rounded-md px-2 py-1 text-xs font-medium text-blue-700 hover:bg-white hover:underline"
+                          >
+                            Copiar URL
+                          </button>
+                          <button
+                            type="button"
+                            disabled={deleteLinkBusy === lk.id || auxLoading}
+                            onClick={() => void deleteShareLink(lk.id)}
+                            className="rounded-md border border-red-200 bg-white px-2 py-1 text-xs font-medium text-red-800 hover:bg-red-50 disabled:opacity-50"
+                          >
+                            {deleteLinkBusy === lk.id ? 'A eliminar…' : 'Eliminar'}
+                          </button>
+                        </div>
                       </li>
                     ))}
                   </ul>
