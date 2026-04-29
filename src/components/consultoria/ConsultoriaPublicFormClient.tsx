@@ -156,6 +156,24 @@ function validateFieldsChunk(fields: ConsultoriaFormField[], answers: Record<str
   return null
 }
 
+/** Garante valor guardado no select DDI (evita UI com Brasil mas `answers` vazio ou valor fora da lista). */
+function ensureDefaultWhatsappDdi(
+  area: Area,
+  nextFields: ConsultoriaFormField[],
+  answers: Record<string, string>
+): Record<string, string> {
+  if (area !== 'pro_lideres' && area !== 'estetica') return answers
+  const ddiField = nextFields.find((f) => f.id === 'whatsapp_ddi')
+  const opts = ddiField?.options
+  if (!ddiField || !Array.isArray(opts) || opts.length === 0) return answers
+  const cur = String(answers.whatsapp_ddi ?? '').trim()
+  if (cur && opts.includes(cur)) return answers
+  if (opts.includes(DEFAULT_WHATSAPP_DDI)) {
+    return { ...answers, whatsapp_ddi: DEFAULT_WHATSAPP_DDI }
+  }
+  return answers
+}
+
 const FIELD_TOUCH_BASE =
   'w-full min-h-[44px] touch-manipulation rounded-xl border border-gray-300 bg-white px-3 py-3 text-base text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500'
 
@@ -185,6 +203,20 @@ function WhatsappDdiLocalRow({
   const stored = (answers.whatsapp_ddi ?? '').trim()
   const ddiValue = stored && opts.includes(stored) ? stored : DEFAULT_WHATSAPP_DDI
   const flag = flagEmojiForEsteticaWhatsappDdiOption(ddiValue)
+
+  /** O select mostrava o país por defeito, mas `answers.whatsapp_ddi` podia ficar vazio até haver `onChange` — a validação falhava. */
+  useEffect(() => {
+    if (!opts.length) return
+    const cur = (answers.whatsapp_ddi ?? '').trim()
+    if (cur && opts.includes(cur)) return
+    const def = DEFAULT_WHATSAPP_DDI
+    if (!opts.includes(def)) return
+    setAnswers((prev) => {
+      const p = (prev.whatsapp_ddi ?? '').trim()
+      if (p && opts.includes(p)) return prev
+      return { ...prev, whatsapp_ddi: def }
+    })
+  }, [opts, answers.whatsapp_ddi, setAnswers])
   const bothRequired = Boolean(ddiField.required && localField.required)
 
   const help =
@@ -461,14 +493,14 @@ export default function ConsultoriaPublicFormClient({
       if (area === 'pro_lideres' && nextFields.some((x) => x.id === 'whatsapp_ddi') && !String(merged.whatsapp_ddi ?? '').trim()) {
         merged.whatsapp_ddi = DEFAULT_WHATSAPP_DDI
       }
-      setAnswers(merged)
+      setAnswers(ensureDefaultWhatsappDdi(area, nextFields, merged))
     } else {
       const init: Record<string, string> = {}
       if (area === 'estetica') init.whatsapp_ddi = DEFAULT_WHATSAPP_DDI
       if (area === 'pro_lideres' && nextFields.some((x) => x.id === 'whatsapp_ddi')) {
         init.whatsapp_ddi = DEFAULT_WHATSAPP_DDI
       }
-      setAnswers(init)
+      setAnswers(ensureDefaultWhatsappDdi(area, nextFields, init))
     }
     if (prefill?.respondentName != null && String(prefill.respondentName).trim()) {
       setName(String(prefill.respondentName).trim())
