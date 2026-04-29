@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useEffect, useCallback, type ReactNode } from 'react'
+import { useState, useRef, useEffect, useCallback, useMemo, type ReactNode } from 'react'
 import Link from 'next/link'
 import { useRouter, usePathname } from 'next/navigation'
 import ReactMarkdown from 'react-markdown'
@@ -401,6 +401,10 @@ export default function NoelChat({
         : '/pro-lideres/painel/catalogo'
   /** Guia «publicar na biblioteca» + PATCH link-meta: só o Noel do painel Pro Líderes clássico. */
   const proLideresLeaderLibraryFlow = Boolean(resolvedChatApi?.includes('/pro-lideres/noel'))
+  /** Noel embed Pro Estética: mesmos atalhos de testar link / catálogo que o líder, sem modal Vendas/Recrutamento. */
+  const proEsteticaNoelLinkToolbar =
+    Boolean(resolvedChatApi?.includes('/pro-estetica-corporal/noel')) ||
+    Boolean(resolvedChatApi?.includes('/pro-estetica-capilar/noel'))
   /** Links da matriz YLADA para esteticista ficam em /pt/estetica, não na rota do painel embed. */
   /** Pro Líderes: links do dono ficam na matriz central `/pt/links`, não em `/pt/pro_lideres/...`. */
   const yladaMatrixPathPrefix =
@@ -412,6 +416,22 @@ export default function NoelChat({
       : area === 'pro_lideres' || resolvedChatApi?.includes('/pro-lideres/noel')
         ? getYladaAreaPathPrefix('ylada')
         : getYladaAreaPathPrefix(area)
+
+  const flowsVisibilityApiBase = useMemo(() => {
+    if (resolvedChatApi?.includes('/pro-estetica-corporal/noel')) return '/api/pro-estetica-corporal/flows/visibility'
+    if (resolvedChatApi?.includes('/pro-estetica-capilar/noel')) return '/api/pro-estetica-capilar/flows/visibility'
+    return '/api/pro-lideres/flows/visibility'
+  }, [resolvedChatApi])
+
+  const noelPainelSecondaryToolsHref =
+    area === 'pro_estetica_corporal'
+      ? '/pro-estetica-corporal/painel/biblioteca-links'
+      : area === 'pro_estetica_capilar'
+        ? '/pro-estetica-capilar/painel/biblioteca-links'
+        : '/pro-lideres/painel/links'
+
+  const noelPainelSecondaryToolsLabel =
+    area === 'pro_estetica_corporal' || area === 'pro_estetica_capilar' ? 'Biblioteca e links' : 'Convites equipe'
   const [messages, setMessages] = useState<Message[]>(() => {
     const saved = normalizeSavedMessagesForSkipWelcome(loadMessages(area), skipWelcomeMessage)
     if (saved.length > 0) return saved
@@ -526,7 +546,13 @@ export default function NoelChat({
     return () => {
       cancelled = true
     }
-  }, [proLideresPayload, lastLinkContext?.link_id, lastLinkContext?.visible_to_team_in_catalog, authenticatedFetch])
+  }, [
+    proLideresPayload,
+    flowsVisibilityApiBase,
+    lastLinkContext?.link_id,
+    lastLinkContext?.visible_to_team_in_catalog,
+    authenticatedFetch,
+  ])
 
   const sendMessage = useCallback(async (forcedText?: string) => {
     const textSource = forcedText !== undefined ? forcedText : input
@@ -778,7 +804,7 @@ export default function NoelChat({
     setShareCatalogBusy(true)
     setShareCatalogError(null)
     try {
-      const res = await authenticatedFetch('/api/pro-lideres/flows/visibility', {
+      const res = await authenticatedFetch(flowsVisibilityApiBase, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ yladaLinkId: linkId, visibleToTeam: true }),
@@ -801,7 +827,7 @@ export default function NoelChat({
     } finally {
       setShareCatalogBusy(false)
     }
-  }, [proLideresPayload, lastLinkContext?.link_id, shareCatalogBusy, authenticatedFetch])
+  }, [proLideresPayload, flowsVisibilityApiBase, lastLinkContext?.link_id, shareCatalogBusy, authenticatedFetch])
 
   const confirmPublishCatalogKind = useCallback(
     async (kind: 'sales' | 'recruitment') => {
@@ -1189,7 +1215,7 @@ export default function NoelChat({
                               {proLideresPayload ? 'Editar na Ylada' : 'Editar quiz'}
                             </Link>
                           )}
-                          {proLideresPayload && proLideresLeaderLibraryFlow && quizUrl ? (
+                          {proLideresPayload && (proLideresLeaderLibraryFlow || proEsteticaNoelLinkToolbar) && quizUrl ? (
                             <a
                               href={quizUrl}
                               target="_blank"
@@ -1238,7 +1264,7 @@ export default function NoelChat({
                                   : 'Copiar link do quiz'}
                             </button>
                           )}
-                          {proLideresLeaderLibraryFlow && ctxForMessage?.link_id ? (
+                          {proLideresPayload && ctxForMessage?.link_id ? (
                             <Link
                               href={`${proLideresPainelCatalogHref}?highlightYladaLink=${ctxForMessage.link_id}&section=mine`}
                               className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-violet-50 text-violet-900 text-sm font-medium border border-violet-200 hover:bg-violet-100 transition-colors touch-manipulation"
@@ -1258,7 +1284,7 @@ export default function NoelChat({
                           ) : null}
                           {showVerCatalogoAposDisponibilizar ? (
                             <Link
-                              href="/pro-lideres/painel/catalogo"
+                              href={proLideresPainelCatalogHref}
                               className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-emerald-50 text-emerald-900 text-sm font-medium border border-emerald-200 hover:bg-emerald-100 transition-colors touch-manipulation"
                             >
                               Ver no catálogo
@@ -1422,7 +1448,7 @@ export default function NoelChat({
                     A equipe <strong>só vê no Catálogo</strong> depois de <strong>Disponibilizar à equipe</strong> (botão
                     na mensagem do quiz ou abaixo) ou ao ativar a visibilidade em{' '}
                     <Link
-                      href="/pro-lideres/painel/catalogo"
+                      href={proLideresPainelCatalogHref}
                       className="font-semibold text-emerald-950 underline decoration-emerald-600/60 hover:no-underline"
                     >
                       Catálogo de ferramentas
@@ -1458,7 +1484,7 @@ export default function NoelChat({
               <p className="text-xs text-emerald-800 bg-emerald-50/80 border border-emerald-200 rounded-lg px-3 py-2">
                 Esta ferramenta já está <strong>disponível para a equipe</strong> no catálogo. Você pode ajustar a
                 visibilidade em{' '}
-                <Link href="/pro-lideres/painel/catalogo" className="font-semibold underline hover:no-underline">
+                <Link href={proLideresPainelCatalogHref} className="font-semibold underline hover:no-underline">
                   Catálogo → Minhas ferramentas
                 </Link>
                 .
@@ -1500,13 +1526,13 @@ export default function NoelChat({
                     Links na Ylada
                   </button>
                   <Link
-                    href="/pro-lideres/painel/links"
+                    href={noelPainelSecondaryToolsHref}
                     className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-violet-50 text-violet-900 text-sm font-medium border border-violet-200 hover:bg-violet-100 transition-colors touch-manipulation"
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
                     </svg>
-                    Convites equipe
+                    {noelPainelSecondaryToolsLabel}
                   </Link>
                 </>
               ) : (

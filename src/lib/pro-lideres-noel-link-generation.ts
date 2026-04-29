@@ -23,6 +23,8 @@ export type ProLideresNoelLastLinkContext = {
 export function mapProLideresVerticalToYladaSegment(verticalCode: string): string {
   const v = verticalCode.trim().toLowerCase()
   if (v === 'h-lider' || v.startsWith('h-')) return 'nutra'
+  /** Pro Estética (painéis embed): mesma área de links `/pt/estetica/…` na matriz. */
+  if (v === 'estetica-corporal' || v === 'estetica-capilar') return 'estetica'
   const candidate = v.replace(/_/g, '-')
   if (YLADA_SEGMENT_CODES.includes(candidate as (typeof YLADA_SEGMENT_CODES)[number])) return candidate
   return 'ylada'

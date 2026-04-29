@@ -2,8 +2,60 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireApiAuth } from '@/lib/api-auth'
 import { supabaseAdmin } from '@/lib/supabase'
 import { resolveEsteticaCorporalTenantContext } from '@/lib/pro-estetica-corporal-server'
+import { isProLideresYladaLinkVisibleToTeamInCatalog } from '@/lib/pro-lideres-ylada-catalog-team-visibility'
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+
+/**
+ * GET ?yladaLinkId= — dona consulta se a equipe vê a ferramenta no catálogo (default: sim).
+ * Espelha `/api/pro-lideres/flows/visibility` para o painel Pro Estética Corporal.
+ */
+export async function GET(request: NextRequest) {
+  const auth = await requireApiAuth(request)
+  if (auth instanceof NextResponse) return auth
+  const { user } = auth
+
+  if (!supabaseAdmin) {
+    return NextResponse.json({ error: 'Servidor sem service role' }, { status: 503 })
+  }
+
+  const ctx = await resolveEsteticaCorporalTenantContext(supabaseAdmin, user)
+  if (!ctx || ctx.tenant.owner_user_id !== user.id) {
+    return NextResponse.json({ error: 'Apenas o profissional pode consultar a visibilidade do catálogo.' }, { status: 403 })
+  }
+
+  const yladaLinkId = String(request.nextUrl.searchParams.get('yladaLinkId') ?? '').trim()
+  if (!yladaLinkId || !UUID_RE.test(yladaLinkId)) {
+    return NextResponse.json({ error: 'yladaLinkId inválido' }, { status: 400 })
+  }
+
+  const { data: linkRow, error: linkErr } = await supabaseAdmin
+    .from('ylada_links')
+    .select('id')
+    .eq('id', yladaLinkId)
+    .eq('user_id', ctx.tenant.owner_user_id)
+    .maybeSingle()
+
+  if (linkErr) {
+    console.error('[pro-estetica-corporal/flows/visibility GET] link lookup', linkErr)
+    return NextResponse.json({ error: 'Erro ao validar o link' }, { status: 500 })
+  }
+  if (!linkRow) {
+    return NextResponse.json({ error: 'Link não encontrado nesta conta' }, { status: 404 })
+  }
+
+  try {
+    const visibleToTeam = await isProLideresYladaLinkVisibleToTeamInCatalog(
+      supabaseAdmin,
+      ctx.tenant.id,
+      yladaLinkId
+    )
+    return NextResponse.json({ ok: true, yladaLinkId, visibleToTeam })
+  } catch (e) {
+    console.error('[pro-estetica-corporal/flows/visibility GET]', e)
+    return NextResponse.json({ error: 'Erro ao ler visibilidade' }, { status: 500 })
+  }
+}
 
 /** Mesma regra do Pro Líderes: visibilidade YLADA no catálogo para a equipe. */
 export async function PATCH(request: NextRequest) {
