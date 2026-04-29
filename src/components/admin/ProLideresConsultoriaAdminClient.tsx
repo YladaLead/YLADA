@@ -3,10 +3,14 @@
 import Link from 'next/link'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { ConsultoriaKindEditor } from '@/components/admin/consultoria/ConsultoriaKindEditor'
+import { ConsultoriaAdminResponseCard } from '@/components/admin/consultoria/ConsultoriaAdminResponseCard'
+import { consultoriaCsvFilenameBase, consultoriaFormResponsesToCsv } from '@/lib/consultoria-form-csv'
+import { consultoriaAnswersToDisplayRows } from '@/lib/consultoria-form-display'
 import {
   buildProLideresConsultoriaResponderUrl,
   consultoriaKindLabel,
   defaultContentForKind,
+  getConsultoriaFormFields,
   type ProLideresConsultoriaMaterialKind,
   type ProLideresConsultoriaMaterialRow,
   type ProLideresConsultoriaFormResponseRow,
@@ -74,6 +78,31 @@ export default function ProLideresConsultoriaAdminClient() {
     () => responses.filter((r) => responseMatchesQuery(r, buscaRespostas)),
     [responses, buscaRespostas]
   )
+
+  const formFieldsForResponses = useMemo(() => {
+    if (!selected || selected.material_kind !== 'formulario') return []
+    const c = selected.content && typeof selected.content === 'object' ? selected.content : {}
+    return getConsultoriaFormFields(c as Record<string, unknown>)
+  }, [selected])
+
+  const triggerCsvDownload = useCallback((filename: string, csv: string) => {
+    const blob = new Blob([`\uFEFF${csv}`], { type: 'text/csv;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = filename
+    a.rel = 'noopener'
+    a.click()
+    URL.revokeObjectURL(url)
+  }, [])
+
+  const downloadResponsesCsv = useCallback(() => {
+    if (!selected?.title || respostasFiltradas.length === 0) return
+    const slug = (selected.title || 'formulario').replace(/\s+/g, '-').slice(0, 32)
+    const csv = consultoriaFormResponsesToCsv(formFieldsForResponses, respostasFiltradas)
+    const fn = consultoriaCsvFilenameBase('pro-lideres-admin', `${slug}-respostas`)
+    triggerCsvDownload(fn, csv)
+  }, [selected?.title, respostasFiltradas, formFieldsForResponses, triggerCsvDownload])
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -501,7 +530,21 @@ export default function ProLideresConsultoriaAdminClient() {
 
               {tab === 'respostas' && selected.material_kind === 'formulario' ? (
                 <div className="space-y-3">
-                  <h3 className="text-sm font-semibold text-gray-900">Respostas recebidas</h3>
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                    <h3 className="text-sm font-semibold text-gray-900">Respostas recebidas</h3>
+                    <button
+                      type="button"
+                      disabled={respostasFiltradas.length === 0 || auxLoading}
+                      onClick={() => downloadResponsesCsv()}
+                      className="inline-flex min-h-[40px] items-center justify-center rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-900 hover:bg-emerald-100 disabled:opacity-50"
+                    >
+                      Descarregar CSV
+                    </button>
+                  </div>
+                  <p className="text-xs text-gray-500">
+                    Cada envio em cartão com pergunta e resposta legíveis. O CSV inclui as linhas visíveis (com o
+                    filtro de busca atual, se houver). Separador ponto e vírgula, compatível com Excel em PT.
+                  </p>
                   {auxLoading ? <p className="text-xs text-gray-500">A carregar…</p> : null}
                   {responses.length === 0 ? (
                     <p className="text-sm text-gray-500">Ainda não há respostas.</p>
@@ -521,19 +564,25 @@ export default function ProLideresConsultoriaAdminClient() {
                       {respostasFiltradas.length === 0 ? (
                         <p className="text-sm text-gray-500">Nenhum resultado para esta busca.</p>
                       ) : (
-                        <div className="max-h-[420px] overflow-auto space-y-3">
-                          {respostasFiltradas.map((r) => (
-                            <div key={r.id} className="rounded-lg border border-gray-100 p-3 text-xs">
-                              <p className="text-gray-500">
-                                {new Date(r.submitted_at).toLocaleString('pt-BR')}
-                                {r.respondent_name ? ` · ${r.respondent_name}` : ''}
-                                {r.respondent_email ? ` · ${r.respondent_email}` : ''}
-                              </p>
-                              <pre className="mt-2 whitespace-pre-wrap break-words text-gray-800">
-                                {JSON.stringify(r.answers, null, 2)}
-                              </pre>
-                            </div>
-                          ))}
+                        <div className="max-h-[min(72vh,720px)] overflow-y-auto space-y-4 pr-1">
+                          {respostasFiltradas.map((r) => {
+                            const ans = (r.answers && typeof r.answers === 'object' && !Array.isArray(r.answers)
+                              ? r.answers
+                              : {}) as Record<string, unknown>
+                            const rows = consultoriaAnswersToDisplayRows(formFieldsForResponses, ans)
+                            return (
+                              <ConsultoriaAdminResponseCard
+                                key={r.id}
+                                tone="gray"
+                                submittedAt={r.submitted_at}
+                                respondentName={r.respondent_name}
+                                respondentEmail={r.respondent_email}
+                                respondentWhatsapp={r.respondent_whatsapp}
+                                rows={rows}
+                                rawAnswers={r.answers}
+                              />
+                            )
+                          })}
                         </div>
                       )}
                     </>
