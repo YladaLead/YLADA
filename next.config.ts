@@ -46,6 +46,15 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       {
+        source: '/pro-lideres/consultoria/responder/:path*',
+        headers: [
+          {
+            key: 'X-Frame-Options',
+            value: 'SAMEORIGIN',
+          },
+        ],
+      },
+      {
         source: '/(.*)',
         headers: [
           {

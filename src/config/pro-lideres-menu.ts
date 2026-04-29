@@ -32,6 +32,13 @@ export const PRO_LIDERES_MENU_GROUPS: { label: string; items: ProLideresMenuItem
       { key: 'equipe', label: 'Análise da equipe', path: 'equipe', icon: '👥', leaderOnly: true },
       { key: 'links', label: 'Convites equipe', path: 'links', icon: '🔗', leaderOnly: true },
       {
+        key: 'pre-diagnostico',
+        label: 'Pré-diagnóstico',
+        path: 'pre-diagnostico',
+        icon: '📋',
+        leaderOnly: true,
+      },
+      {
         key: 'cobranca-equipe',
         label: 'Cobrança da equipe',
         path: 'cobranca-equipe',

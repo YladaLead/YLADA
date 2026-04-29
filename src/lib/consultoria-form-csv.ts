@@ -6,6 +6,7 @@ export type ConsultoriaCsvResponseRow = {
   submitted_at: string
   respondent_name?: string | null
   respondent_email?: string | null
+  respondent_whatsapp?: string | null
   answers: unknown
 }
 
@@ -39,7 +40,12 @@ export function consultoriaFormResponsesToCsv(
   responses: ConsultoriaCsvResponseRow[]
 ): string {
   const fieldIds = new Set(fields.map((f) => f.id))
-  const colMeta = ['id_envio', 'data_envio', 'nome_respondente', 'email_respondente']
+  const hasWhatsapp = responses.some(
+    (r) => r.respondent_whatsapp != null && String(r.respondent_whatsapp).trim() !== ''
+  )
+  const colMeta = hasWhatsapp
+    ? ['id_envio', 'data_envio', 'nome_respondente', 'email_respondente', 'whatsapp_respondente']
+    : ['id_envio', 'data_envio', 'nome_respondente', 'email_respondente']
   const fieldCols = columnHeadersForFields(fields)
 
   const extraKeySet = new Set<string>()
@@ -61,9 +67,10 @@ export function consultoriaFormResponsesToCsv(
     const displayRows = consultoriaAnswersToDisplayRows(fields, ans)
     const byFieldId = new Map(displayRows.map((x) => [x.fieldId, x.value]))
 
-    const core = [r.id, r.submitted_at, r.respondent_name ?? '', r.respondent_email ?? ''].map((v) =>
-      csvEscape(String(v ?? ''))
-    )
+    const coreCells = hasWhatsapp
+      ? [r.id, r.submitted_at, r.respondent_name ?? '', r.respondent_email ?? '', r.respondent_whatsapp ?? '']
+      : [r.id, r.submitted_at, r.respondent_name ?? '', r.respondent_email ?? '']
+    const core = coreCells.map((v) => csvEscape(String(v ?? '')))
 
     const fieldVals = fieldCols.map(({ id }) => {
       const v = byFieldId.get(id)

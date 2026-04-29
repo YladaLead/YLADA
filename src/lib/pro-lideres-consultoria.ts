@@ -16,8 +16,17 @@ export type ConsultoriaFormField = {
   type: 'text' | 'textarea' | 'select' | 'checkbox_group'
   options?: string[]
   required?: boolean
-  /** Só mostrar / validar quando a resposta de `fieldId` contém `substring` (ex.: opção «Outros»). */
+  /** Só mostrar / validar quando a resposta de `fieldId` contém `substring` (ex.: «Brasil» para listar estados). */
   visibleWhenAnswerIncludes?: { fieldId: string; substring: string }
+}
+
+/** Metadados opcionais em `content` de materiais do tipo `formulario` (ex.: pré-diagnóstico Pro Líderes). */
+export type ConsultoriaFormUIHints = {
+  /** Nome + e-mail obrigatórios; WhatsApp vem dos campos `whatsapp_ddi` + `whatsapp`. */
+  contactBlockMode?: 'optional' | 'required_with_whatsapp' | 'required_name_email'
+  nameLabel?: string
+  emailLabel?: string
+  whatsappLabel?: string
 }
 
 export type ConsultoriaRoteiroStep = {
@@ -63,6 +72,7 @@ export type ProLideresConsultoriaFormResponseRow = {
   leader_tenant_id: string | null
   respondent_name: string | null
   respondent_email: string | null
+  respondent_whatsapp?: string | null
   answers: Record<string, unknown>
   submitted_at: string
 }
@@ -140,15 +150,32 @@ export function normalizeConsultoriaContent(
           : undefined
         const withOptions =
           (type === 'select' || type === 'checkbox_group') && options?.length ? options : undefined
+        const visRaw = f.visibleWhenAnswerIncludes
+        const visibleWhenAnswerIncludes =
+          visRaw &&
+          typeof visRaw === 'object' &&
+          !Array.isArray(visRaw) &&
+          typeof (visRaw as { fieldId?: unknown }).fieldId === 'string' &&
+          typeof (visRaw as { substring?: unknown }).substring === 'string'
+            ? {
+                fieldId: String((visRaw as { fieldId: string }).fieldId).slice(0, 80),
+                substring: String((visRaw as { substring: string }).substring).slice(0, 200),
+              }
+            : undefined
         return {
           id,
           label,
           type,
           options: withOptions,
           required: Boolean(f.required),
+          ...(visibleWhenAnswerIncludes ? { visibleWhenAnswerIncludes } : {}),
         }
       })
-      return { fields }
+      const out: Record<string, unknown> = { fields }
+      if (isPlainObject(raw.ui) && !Array.isArray(raw.ui)) {
+        out.ui = raw.ui
+      }
+      return out
     }
     case 'checklist': {
       const itemsIn = Array.isArray(raw.items) ? raw.items : []
@@ -191,6 +218,27 @@ export function defaultContentForKind(kind: ProLideresConsultoriaMaterialKind): 
       return { markdown: '# Documento\n\nEscreve aqui o conteúdo em Markdown.\n' }
     default:
       return {}
+  }
+}
+
+export function getConsultoriaFormUIHints(content: Record<string, unknown>): ConsultoriaFormUIHints | null {
+  const ui = content.ui
+  if (!ui || typeof ui !== 'object' || Array.isArray(ui)) return null
+  const o = ui as Record<string, unknown>
+  const mode = o.contactBlockMode
+  const contactBlockMode: ConsultoriaFormUIHints['contactBlockMode'] =
+    mode === 'required_with_whatsapp'
+      ? 'required_with_whatsapp'
+      : mode === 'required_name_email'
+        ? 'required_name_email'
+        : mode === 'optional'
+          ? 'optional'
+          : undefined
+  return {
+    contactBlockMode,
+    nameLabel: typeof o.nameLabel === 'string' ? o.nameLabel.slice(0, 200) : undefined,
+    emailLabel: typeof o.emailLabel === 'string' ? o.emailLabel.slice(0, 200) : undefined,
+    whatsappLabel: typeof o.whatsappLabel === 'string' ? o.whatsappLabel.slice(0, 200) : undefined,
   }
 }
 

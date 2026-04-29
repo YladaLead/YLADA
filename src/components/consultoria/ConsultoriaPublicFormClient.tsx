@@ -1,12 +1,16 @@
 'use client'
 
 import { Fragment, useCallback, useEffect, useMemo, useState } from 'react'
-import type { ConsultoriaFormField } from '@/lib/pro-lideres-consultoria'
+import type { ConsultoriaFormField, ConsultoriaFormUIHints } from '@/lib/pro-lideres-consultoria'
 import { isConsultoriaFieldVisibleForAnswers } from '@/lib/pro-lideres-consultoria'
 import {
   DEFAULT_WHATSAPP_DDI,
   flagEmojiForEsteticaWhatsappDdiOption,
 } from '@/lib/estetica-consultoria-form-templates'
+import {
+  consultoriaAnswersToWhatsappLine,
+  consultoriaWhatsappLineHasMinDigits,
+} from '@/lib/pro-lideres-pre-diagnostico-whatsapp'
 
 type Area = 'pro_lideres' | 'estetica'
 
@@ -28,8 +32,8 @@ const MSGS: Record<
   pro_lideres: {
     loading: 'A carregar…',
     thanksTitle: 'Obrigado.',
-    thanksBody: 'A tua resposta foi registada.',
-    nameLabel: 'O teu nome (opcional)',
+    thanksBody: 'A sua resposta foi registada.',
+    nameLabel: 'O seu nome (opcional)',
     emailLabel: 'E-mail (opcional)',
     submit: 'Enviar respostas',
     submitting: 'A enviar…',
@@ -53,6 +57,8 @@ const MSGS: Record<
 
 const FIELDS_PER_STEP = 5
 const WIZARD_MIN_FIELDS = 5
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 function chunkFields<T>(arr: T[], size: number): T[][] {
   const out: T[][] = []
@@ -157,17 +163,19 @@ function skipWhatsappLocalAfterDdi(chunk: ConsultoriaFormField[], idx: number): 
   return chunk[idx]?.id === 'whatsapp' && idx > 0 && chunk[idx - 1]?.id === 'whatsapp_ddi'
 }
 
-/** DDI + número na mesma linha — usado em todos os formulários de estética consultoria (corporal e capilar). */
+/** DDI + número na mesma linha — estética consultoria e Pro Líderes (pré-diagnóstico). */
 function WhatsappDdiLocalRow({
   ddiField,
   localField,
   answers,
   setAnswers,
+  variant = 'estetica',
 }: {
   ddiField: ConsultoriaFormField
   localField: ConsultoriaFormField
   answers: Record<string, string>
   setAnswers: React.Dispatch<React.SetStateAction<Record<string, string>>>
+  variant?: 'estetica' | 'pro_lideres'
 }) {
   const opts = ddiField.options ?? []
   const stored = (answers.whatsapp_ddi ?? '').trim()
@@ -175,14 +183,16 @@ function WhatsappDdiLocalRow({
   const flag = flagEmojiForEsteticaWhatsappDdiOption(ddiValue)
   const bothRequired = Boolean(ddiField.required && localField.required)
 
+  const help =
+    variant === 'pro_lideres'
+      ? 'Escolha o país (DDI) à esquerda e digite só o número com DDD à direita — não repita o código do país no número.'
+      : 'Para pré-diagnóstico e diagnóstico, estética corporal ou terapia capilar. País (DDI) e número com DDD na mesma linha — não repita o código do país no número.'
+
   return (
     <div className="block text-sm">
       <span className="font-medium text-gray-900">WhatsApp</span>
       {bothRequired ? <span className="text-red-600"> *</span> : null}
-      <p className="mt-1 text-xs leading-snug text-gray-600">
-        Para pré-diagnóstico e diagnóstico, estética corporal ou terapia capilar. País (DDI) e número com DDD na mesma
-        linha — não repita o código do país no número.
-      </p>
+      <p className="mt-1 text-xs leading-snug text-gray-600">{help}</p>
       <div className="mt-2 flex flex-col gap-2 sm:flex-row sm:items-stretch">
         <div className="relative min-w-0 sm:w-[min(100%,220px)] sm:shrink-0">
           <span
@@ -236,7 +246,8 @@ function renderConsultoriaFieldRow(
   chunk: ConsultoriaFormField[],
   idx: number,
   answers: Record<string, string>,
-  setAnswers: React.Dispatch<React.SetStateAction<Record<string, string>>>
+  setAnswers: React.Dispatch<React.SetStateAction<Record<string, string>>>,
+  area: Area
 ) {
   const f = chunk[idx]
   if (!f) return null
@@ -258,6 +269,7 @@ function renderConsultoriaFieldRow(
         localField={local}
         answers={answers}
         setAnswers={setAnswers}
+        variant={area === 'pro_lideres' ? 'pro_lideres' : 'estetica'}
       />
     )
   }
@@ -341,6 +353,8 @@ export default function ConsultoriaPublicFormClient({
   const [answers, setAnswers] = useState<Record<string, string>>({})
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
+  const [whatsapp, setWhatsapp] = useState('')
+  const [uiHints, setUiHints] = useState<ConsultoriaFormUIHints | null>(null)
   const [saving, setSaving] = useState(false)
   const [done, setDone] = useState(false)
   const [wizardStep, setWizardStep] = useState(0)
@@ -370,6 +384,7 @@ export default function ConsultoriaPublicFormClient({
     if (!res.ok) {
       setError((data as { error?: string }).error || 'Não foi possível abrir o formulário.')
       setNeedsEmailGate(false)
+      setUiHints(null)
       setLoading(false)
       return
     }
@@ -383,6 +398,8 @@ export default function ConsultoriaPublicFormClient({
       setAnswers({})
       setName('')
       setEmail('')
+      setWhatsapp('')
+      setUiHints(null)
       setLoading(false)
       return
     }
@@ -400,7 +417,9 @@ export default function ConsultoriaPublicFormClient({
       window.history.replaceState({}, '', `${u.pathname}${u.search}`)
     }
 
-    setFields(((data as { fields?: ConsultoriaFormField[] }).fields ?? []) as ConsultoriaFormField[])
+    setUiHints(((data as { ui?: ConsultoriaFormUIHints | null }).ui ?? null) as ConsultoriaFormUIHints | null)
+    const nextFields = ((data as { fields?: ConsultoriaFormField[] }).fields ?? []) as ConsultoriaFormField[]
+    setFields(nextFields)
     const prefill = (data as {
       prefill?: { initialAnswers?: Record<string, string>; respondentName?: string; respondentEmail?: string }
     }).prefill
@@ -409,9 +428,17 @@ export default function ConsultoriaPublicFormClient({
       if (area === 'estetica' && !String(merged.whatsapp_ddi ?? '').trim()) {
         merged.whatsapp_ddi = DEFAULT_WHATSAPP_DDI
       }
+      if (area === 'pro_lideres' && nextFields.some((x) => x.id === 'whatsapp_ddi') && !String(merged.whatsapp_ddi ?? '').trim()) {
+        merged.whatsapp_ddi = DEFAULT_WHATSAPP_DDI
+      }
       setAnswers(merged)
     } else {
-      setAnswers(area === 'estetica' ? { whatsapp_ddi: DEFAULT_WHATSAPP_DDI } : {})
+      const init: Record<string, string> = {}
+      if (area === 'estetica') init.whatsapp_ddi = DEFAULT_WHATSAPP_DDI
+      if (area === 'pro_lideres' && nextFields.some((x) => x.id === 'whatsapp_ddi')) {
+        init.whatsapp_ddi = DEFAULT_WHATSAPP_DDI
+      }
+      setAnswers(init)
     }
     if (prefill?.respondentName != null && String(prefill.respondentName).trim()) {
       setName(String(prefill.respondentName).trim())
@@ -423,6 +450,7 @@ export default function ConsultoriaPublicFormClient({
     } else {
       setEmail('')
     }
+    setWhatsapp('')
     setLoading(false)
   }, [loadUrl, area, initialConfirmCode])
 
@@ -454,17 +482,60 @@ export default function ConsultoriaPublicFormClient({
   const submitPayload = async () => {
     setSaving(true)
     setError(null)
+    if (area === 'pro_lideres' && uiHints?.contactBlockMode === 'required_name_email') {
+      if (!name.trim()) {
+        setSaving(false)
+        setError('O nome completo é obrigatório.')
+        return
+      }
+      const em = email.trim().toLowerCase()
+      if (!em || !EMAIL_RE.test(em)) {
+        setSaving(false)
+        setError('Indique um e-mail válido.')
+        return
+      }
+      const waLine = consultoriaAnswersToWhatsappLine(answers as unknown as Record<string, unknown>)
+      if (!consultoriaWhatsappLineHasMinDigits(waLine)) {
+        setSaving(false)
+        setError('Preencha o WhatsApp: país (DDI) e número com DDD.')
+        return
+      }
+    }
+    if (area === 'pro_lideres' && uiHints?.contactBlockMode === 'required_with_whatsapp') {
+      if (!name.trim()) {
+        setSaving(false)
+        setError('O nome completo é obrigatório.')
+        return
+      }
+      const em = email.trim().toLowerCase()
+      if (!em || !EMAIL_RE.test(em)) {
+        setSaving(false)
+        setError('Indique um e-mail válido.')
+        return
+      }
+      const wa = whatsapp.trim()
+      if (!wa || wa.replace(/\D/g, '').length < 8) {
+        setSaving(false)
+        setError('Indique um WhatsApp válido (com DDI ou DDD).')
+        return
+      }
+    }
     const payload: Record<string, unknown> = {}
     for (const f of fields) {
       payload[f.id] = answers[f.id] ?? ''
     }
+    const emailOut = email.trim().toLowerCase()
     const res = await fetch(submitUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         answers: payload,
         respondent_name: name.trim() || null,
-        respondent_email: email.trim() || null,
+        respondent_email: emailOut || null,
+        respondent_whatsapp:
+          area === 'pro_lideres' && uiHints?.contactBlockMode === 'required_with_whatsapp'
+            ? whatsapp.trim() || null
+            : null,
       }),
     })
     const data = await res.json().catch(() => ({}))
@@ -541,7 +612,7 @@ export default function ConsultoriaPublicFormClient({
         <p className="font-semibold text-lg">{m.thanksTitle}</p>
         <p className="mt-2 text-sm">{m.thanksBody}</p>
         <p className={`mt-3 text-xs ${area === 'estetica' ? 'text-blue-800/90' : 'text-emerald-800'}`}>
-          {area === 'estetica' ? 'Pode fechar esta página.' : 'Podes fechar esta página ou voltar ao WhatsApp.'}
+          {area === 'estetica' ? 'Pode fechar esta página.' : 'Pode fechar esta página ou voltar ao WhatsApp.'}
         </p>
       </div>
     )
@@ -580,7 +651,90 @@ export default function ConsultoriaPublicFormClient({
     )
   }
 
-  const contactGrid = (
+  const strictLegacyWhatsapp =
+    area === 'pro_lideres' && uiHints?.contactBlockMode === 'required_with_whatsapp'
+  const strictNameEmail = area === 'pro_lideres' && uiHints?.contactBlockMode === 'required_name_email'
+  const strictProContact = strictLegacyWhatsapp || strictNameEmail
+  const nameLabel = strictProContact && uiHints?.nameLabel ? uiHints.nameLabel : m.nameLabel
+  const emailLabel = strictProContact && uiHints?.emailLabel ? uiHints.emailLabel : m.emailLabel
+  const whatsappLabel = strictLegacyWhatsapp && uiHints?.whatsappLabel ? uiHints.whatsappLabel : 'WhatsApp'
+
+  const contactGrid = strictLegacyWhatsapp ? (
+    <div className="space-y-4">
+      <label className="block text-sm">
+        <span className="font-medium text-gray-800">
+          {nameLabel}
+          <span className="text-red-600"> *</span>
+        </span>
+        <input
+          required
+          className="mt-2 min-h-[44px] w-full touch-manipulation rounded-xl border border-gray-300 bg-white px-3 py-3 text-base shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          autoComplete="name"
+        />
+      </label>
+      <label className="block text-sm">
+        <span className="font-medium text-gray-800">
+          {emailLabel}
+          <span className="text-red-600"> *</span>
+        </span>
+        <input
+          type="email"
+          required
+          className="mt-2 min-h-[44px] w-full touch-manipulation rounded-xl border border-gray-300 bg-white px-3 py-3 text-base shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          autoComplete="email"
+        />
+      </label>
+      <label className="block text-sm">
+        <span className="font-medium text-gray-800">
+          {whatsappLabel}
+          <span className="text-red-600"> *</span>
+        </span>
+        <input
+          required
+          inputMode="tel"
+          autoComplete="tel"
+          placeholder="+55 11 99999-9999"
+          className="mt-2 min-h-[44px] w-full touch-manipulation rounded-xl border border-gray-300 bg-white px-3 py-3 text-base shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          value={whatsapp}
+          onChange={(e) => setWhatsapp(e.target.value)}
+        />
+      </label>
+    </div>
+  ) : strictNameEmail ? (
+    <div className="space-y-4">
+      <label className="block text-sm">
+        <span className="font-medium text-gray-800">
+          {nameLabel}
+          <span className="text-red-600"> *</span>
+        </span>
+        <input
+          required
+          className="mt-2 min-h-[44px] w-full touch-manipulation rounded-xl border border-gray-300 bg-white px-3 py-3 text-base shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          autoComplete="name"
+        />
+      </label>
+      <label className="block text-sm">
+        <span className="font-medium text-gray-800">
+          {emailLabel}
+          <span className="text-red-600"> *</span>
+        </span>
+        <input
+          type="email"
+          required
+          className="mt-2 min-h-[44px] w-full touch-manipulation rounded-xl border border-gray-300 bg-white px-3 py-3 text-base shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          autoComplete="email"
+        />
+      </label>
+    </div>
+  ) : (
     <div className="grid gap-4 sm:grid-cols-2">
       <label className="block text-sm sm:col-span-1">
         <span className="font-medium text-gray-800">{m.nameLabel}</span>
@@ -651,7 +805,7 @@ export default function ConsultoriaPublicFormClient({
           {contactGrid}
           <div className="space-y-5">
             {fields.map((f, idx) => (
-              <Fragment key={f.id}>{renderConsultoriaFieldRow(fields, idx, answers, setAnswers)}</Fragment>
+              <Fragment key={f.id}>{renderConsultoriaFieldRow(fields, idx, answers, setAnswers, area)}</Fragment>
             ))}
           </div>
           <button
@@ -670,7 +824,7 @@ export default function ConsultoriaPublicFormClient({
         <div className="space-y-5">
           {(fieldChunks[wizardStep] ?? []).map((f, idx) => (
             <Fragment key={`${wizardStep}-${f.id}`}>
-              {renderConsultoriaFieldRow(fieldChunks[wizardStep] ?? [], idx, answers, setAnswers)}
+              {renderConsultoriaFieldRow(fieldChunks[wizardStep] ?? [], idx, answers, setAnswers, area)}
             </Fragment>
           ))}
           <div className="flex flex-col-reverse gap-2 pt-2 sm:flex-row sm:justify-between">

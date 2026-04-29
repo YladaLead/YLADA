@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
-import { getConsultoriaFormFields } from '@/lib/pro-lideres-consultoria'
+import { getConsultoriaFormFields, getConsultoriaFormUIHints } from '@/lib/pro-lideres-consultoria'
 
 type Ctx = { params: Promise<{ token: string }> }
 
@@ -51,11 +51,13 @@ export async function GET(_request: NextRequest, context: Ctx) {
     unknown
   >
   const fields = getConsultoriaFormFields(content)
+  const ui = getConsultoriaFormUIHints(content)
 
   return NextResponse.json({
     title: mat.title,
     description: mat.description,
     fields,
+    ui,
     shareLinkId: link.id,
   })
 }
