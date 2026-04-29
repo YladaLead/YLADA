@@ -17,7 +17,7 @@ export default async function ProLideresPreDiagnosticoPage() {
       <div>
         <p className="text-sm font-medium text-blue-600">Principal · Ambiente do líder</p>
         <h1 className="text-2xl font-bold text-gray-900">
-          Pré-diagnóstico estratégico para líderes em liderança
+          Pré-diagnóstico estratégico para líderes
         </h1>
       </div>
       <p className="text-gray-700">

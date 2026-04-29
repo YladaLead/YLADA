@@ -16,9 +16,8 @@ function resolvePublicOrigin(): string {
 }
 
 /** Textos para pré-visualização do link (WhatsApp, redes, etc.) — curtos e coerentes com o material Pro Líderes. */
-const OG_TITLE = 'Pré-diagnóstico estratégico para líderes em liderança · YLADA Pro Líderes'
-const OG_DESCRIPTION =
-  'Convite confidencial: responda com calma para alinharmos equipa, comunicação e prioridades antes da conversa com o seu consultor Pro Líderes. Leva poucos minutos.'
+const OG_TITLE = 'Pré-diagnóstico estratégico para líderes · YLADA Pro Líderes'
+const OG_DESCRIPTION = 'Convite confidencial: responda com calma. Leva poucos minutos.'
 
 export async function generateMetadata({
   params,
