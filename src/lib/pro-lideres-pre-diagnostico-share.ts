@@ -1,16 +1,17 @@
+import { PRO_LIDERES_PRE_DIAGNOSTICO_CARD_IMAGE_PATH } from '@/lib/pro-lideres-pre-diagnostico'
+
 /**
  * Imagem de apoio ao envio do pré-diagnóstico (pasta `public/pro-lideres/`).
  * O protocolo `wa.me` não aceita anexos; em telemóveis usamos Web Share com ficheiro.
  */
-export const PRO_LIDERES_PRE_DIAGNOSTICO_SHARE_IMAGE_PATH =
-  '/pro-lideres/pre-diagnostico-estrategico-lideranca.png'
+export const PRO_LIDERES_PRE_DIAGNOSTICO_SHARE_IMAGE_PATH = PRO_LIDERES_PRE_DIAGNOSTICO_CARD_IMAGE_PATH
 
 export function buildPreDiagnosticoWhatsAppShareText(formUrl: string): string {
   const u = formUrl.trim()
   return [
-    'Olá! Segue o pré-diagnóstico estratégico YLADA Pro Líderes (expansão, reativação e liderança).',
+    'Olá! Segue o convite do pré-diagnóstico estratégico YLADA Pro Líderes (liderança em campo — confidencial).',
     '',
-    'Quando puder, preencha com calma:',
+    'Quando puder, responda com calma para alinharmos a conversa:',
     u,
   ].join('\n')
 }

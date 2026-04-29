@@ -11,6 +11,10 @@ import {
   consultoriaAnswersToWhatsappLine,
   consultoriaWhatsappLineHasMinDigits,
 } from '@/lib/pro-lideres-pre-diagnostico-whatsapp'
+import { PRO_LIDERES_PRE_DIAGNOSTICO_MATERIAL_ID } from '@/lib/pro-lideres-pre-diagnostico'
+
+const PRE_DIAGNOSTICO_DEFAULT_NAME_LABEL = 'Nome completo (se for casal, os dois nomes)'
+const PRE_DIAGNOSTICO_DEFAULT_EMAIL_LABEL = 'E-mail'
 
 type Area = 'pro_lideres' | 'estetica'
 
@@ -355,6 +359,7 @@ export default function ConsultoriaPublicFormClient({
   const [email, setEmail] = useState('')
   const [whatsapp, setWhatsapp] = useState('')
   const [uiHints, setUiHints] = useState<ConsultoriaFormUIHints | null>(null)
+  const [materialId, setMaterialId] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
   const [done, setDone] = useState(false)
   const [wizardStep, setWizardStep] = useState(0)
@@ -369,6 +374,24 @@ export default function ConsultoriaPublicFormClient({
   const fieldChunks = useMemo(() => chunkFields(fields, FIELDS_PER_STEP), [fields])
   /** Estética: só blocos de perguntas (sem etapa inicial só de nome/e-mail). */
   const totalWizardSteps = fieldChunks.length
+
+  /**
+   * Produção: se o JSON na BD vier sem `ui.contactBlockMode`, o bloco nome/e-mail caía no grid de 2 colunas
+   * (igual em ecrãs largos). Para o material do pré-diagnóstico, forçamos o mesmo modo que na migração 357.
+   */
+  const contactUiHints = useMemo((): ConsultoriaFormUIHints | null => {
+    if (area !== 'pro_lideres') return uiHints
+    if (!materialId || materialId !== PRO_LIDERES_PRE_DIAGNOSTICO_MATERIAL_ID) return uiHints
+    if (uiHints?.contactBlockMode === 'required_with_whatsapp') return uiHints
+    return {
+      contactBlockMode: 'required_name_email',
+      nameLabel:
+        (uiHints?.nameLabel && uiHints.nameLabel.trim()) || PRE_DIAGNOSTICO_DEFAULT_NAME_LABEL,
+      emailLabel:
+        (uiHints?.emailLabel && uiHints.emailLabel.trim()) || PRE_DIAGNOSTICO_DEFAULT_EMAIL_LABEL,
+      whatsappLabel: uiHints?.whatsappLabel,
+    }
+  }, [area, materialId, uiHints])
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -385,6 +408,7 @@ export default function ConsultoriaPublicFormClient({
       setError((data as { error?: string }).error || 'Não foi possível abrir o formulário.')
       setNeedsEmailGate(false)
       setUiHints(null)
+      setMaterialId(null)
       setLoading(false)
       return
     }
@@ -400,11 +424,17 @@ export default function ConsultoriaPublicFormClient({
       setEmail('')
       setWhatsapp('')
       setUiHints(null)
+      setMaterialId(null)
       setLoading(false)
       return
     }
 
     setNeedsEmailGate(false)
+    setMaterialId(
+      typeof (data as { materialId?: unknown }).materialId === 'string'
+        ? String((data as { materialId: string }).materialId).trim() || null
+        : null
+    )
 
     if (
       area === 'estetica' &&
@@ -482,7 +512,7 @@ export default function ConsultoriaPublicFormClient({
   const submitPayload = async () => {
     setSaving(true)
     setError(null)
-    if (area === 'pro_lideres' && uiHints?.contactBlockMode === 'required_name_email') {
+    if (area === 'pro_lideres' && contactUiHints?.contactBlockMode === 'required_name_email') {
       if (!name.trim()) {
         setSaving(false)
         setError('O nome completo é obrigatório.')
@@ -501,7 +531,7 @@ export default function ConsultoriaPublicFormClient({
         return
       }
     }
-    if (area === 'pro_lideres' && uiHints?.contactBlockMode === 'required_with_whatsapp') {
+    if (area === 'pro_lideres' && contactUiHints?.contactBlockMode === 'required_with_whatsapp') {
       if (!name.trim()) {
         setSaving(false)
         setError('O nome completo é obrigatório.')
@@ -533,7 +563,7 @@ export default function ConsultoriaPublicFormClient({
         respondent_name: name.trim() || null,
         respondent_email: emailOut || null,
         respondent_whatsapp:
-          area === 'pro_lideres' && uiHints?.contactBlockMode === 'required_with_whatsapp'
+          area === 'pro_lideres' && contactUiHints?.contactBlockMode === 'required_with_whatsapp'
             ? whatsapp.trim() || null
             : null,
       }),
@@ -652,12 +682,13 @@ export default function ConsultoriaPublicFormClient({
   }
 
   const strictLegacyWhatsapp =
-    area === 'pro_lideres' && uiHints?.contactBlockMode === 'required_with_whatsapp'
-  const strictNameEmail = area === 'pro_lideres' && uiHints?.contactBlockMode === 'required_name_email'
+    area === 'pro_lideres' && contactUiHints?.contactBlockMode === 'required_with_whatsapp'
+  const strictNameEmail = area === 'pro_lideres' && contactUiHints?.contactBlockMode === 'required_name_email'
   const strictProContact = strictLegacyWhatsapp || strictNameEmail
-  const nameLabel = strictProContact && uiHints?.nameLabel ? uiHints.nameLabel : m.nameLabel
-  const emailLabel = strictProContact && uiHints?.emailLabel ? uiHints.emailLabel : m.emailLabel
-  const whatsappLabel = strictLegacyWhatsapp && uiHints?.whatsappLabel ? uiHints.whatsappLabel : 'WhatsApp'
+  const nameLabel = strictProContact && contactUiHints?.nameLabel ? contactUiHints.nameLabel : m.nameLabel
+  const emailLabel = strictProContact && contactUiHints?.emailLabel ? contactUiHints.emailLabel : m.emailLabel
+  const whatsappLabel =
+    strictLegacyWhatsapp && contactUiHints?.whatsappLabel ? contactUiHints.whatsappLabel : 'WhatsApp'
 
   const contactGrid = strictLegacyWhatsapp ? (
     <div className="space-y-4">

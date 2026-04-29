@@ -1,7 +1,57 @@
+import type { Metadata } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
 import { YLADA_OG_FALLBACK_LOGO_PATH } from '@/lib/ylada-og-fallback-logo'
+import {
+  PRO_LIDERES_PRE_DIAGNOSTICO_CARD_IMAGE_PATH,
+} from '@/lib/pro-lideres-pre-diagnostico'
 import ProLideresConsultoriaFormResponderClient from '@/components/pro-lideres/ProLideresConsultoriaFormResponderClient'
+
+function resolvePublicOrigin(): string {
+  return (
+    process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, '') ||
+    process.env.NEXT_PUBLIC_APP_URL_PRODUCTION?.replace(/\/$/, '') ||
+    'https://www.ylada.com'
+  )
+}
+
+/** Textos para pré-visualização do link (WhatsApp, redes, etc.) — curtos e coerentes com o material Pro Líderes. */
+const OG_TITLE = 'Pré-diagnóstico estratégico para líderes em liderança · YLADA Pro Líderes'
+const OG_DESCRIPTION =
+  'Convite confidencial: responda com calma para alinharmos equipa, comunicação e prioridades antes da conversa com o seu consultor Pro Líderes. Leva poucos minutos.'
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ token: string }>
+}): Promise<Metadata> {
+  const { token } = await params
+  const raw = typeof token === 'string' ? token : ''
+  const base = resolvePublicOrigin()
+  const pagePath = `/pro-lideres/consultoria/responder/${encodeURIComponent(raw)}`
+  const pageUrl = `${base}${pagePath}`
+  const imageUrl = `${base}${PRO_LIDERES_PRE_DIAGNOSTICO_CARD_IMAGE_PATH}`
+
+  return {
+    title: OG_TITLE,
+    description: OG_DESCRIPTION,
+    openGraph: {
+      title: OG_TITLE,
+      description: OG_DESCRIPTION,
+      url: pageUrl,
+      siteName: 'YLADA',
+      locale: 'pt_BR',
+      type: 'website',
+      images: [{ url: imageUrl, alt: OG_TITLE, type: 'image/png' }],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: OG_TITLE,
+      description: OG_DESCRIPTION,
+      images: [imageUrl],
+    },
+  }
+}
 
 export default async function ProLideresConsultoriaResponderPage({
   params,

@@ -54,6 +54,7 @@ export async function GET(_request: NextRequest, context: Ctx) {
   const ui = getConsultoriaFormUIHints(content)
 
   return NextResponse.json({
+    materialId: mat.id,
     title: mat.title,
     description: mat.description,
     fields,
