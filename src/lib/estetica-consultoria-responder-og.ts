@@ -89,7 +89,7 @@ function isDiagnosticoCompletoTemplate(templateKey: string | null | undefined): 
 /** Linha curta no cartão OG: diagnóstico longo vs pré — não confundir com Pro Líderes. */
 export function responderOgFormKindLabel(templateKey: string | null | undefined): string {
   if (isDiagnosticoCompletoTemplate(templateKey)) {
-    return 'Diagnóstico completo YLADA'
+    return 'Diagnóstico'
   }
   if (
     templateKey === TEMPLATE_PRE_DIAGNOSTICO_CAPILAR_ID ||
@@ -116,10 +116,10 @@ export function buildEsteticaResponderShareTitle(
           : null
 
   if (templateKey === TEMPLATE_DIAGNOSTICO_CAPILAR_ID) {
-    return 'YLADA — Diagnóstico completo (terapia capilar)'
+    return 'Diagnóstico terapia capilar'
   }
   if (templateKey === TEMPLATE_DIAGNOSTICO_CORPORAL_ID) {
-    return 'YLADA — Diagnóstico completo (estética corporal)'
+    return 'Diagnóstico estética corporal'
   }
   if (templateKey === TEMPLATE_PRE_DIAGNOSTICO_CAPILAR_ID) {
     return 'YLADA — Pré-diagnóstico (terapia capilar)'
@@ -220,7 +220,7 @@ export function buildEsteticaResponderShareDescription(
 ): string {
   const line = responderOgBandLabel(band)
   if (isDiagnosticoCompletoTemplate(templateKey)) {
-    return `${line} — diagnóstico completo YLADA (questionário confidencial). Pode incluir confirmação por e-mail antes de abrir. Responda com calma.`
+    return 'Questionário confidencial. Responda com calma.'
   }
   return `${line} — questionário confidencial para o seu plano de acompanhamento. Responda com calma; as informações são confidenciais.`
 }
