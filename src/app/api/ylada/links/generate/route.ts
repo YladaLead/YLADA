@@ -8,6 +8,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { resolveYladaPublicLinkBaseUrl } from '@/lib/ylada-public-link-base-url'
 import { supabaseAdmin } from '@/lib/supabase'
 import { requireAuthForYladaLinkCreation } from '@/lib/ylada-link-api-auth'
+import { fetchWhatsappE164FromLeaderTenants } from '@/lib/ylada-public-link-whatsapp'
 import OpenAI from 'openai'
 import { generateDiagnosisForLink } from '@/lib/ylada/generate-diagnosis-for-link'
 import { getFlowById, VALID_FLOW_IDS } from '@/config/ylada-flow-catalog'
@@ -211,6 +212,14 @@ export async function POST(request: NextRequest) {
       } else {
         console.warn('[ylada/links/generate] WhatsApp não encontrado no perfil do usuário:', user.id)
       }
+
+      if (!ctaWhatsapp) {
+        const fromTenant = await fetchWhatsappE164FromLeaderTenants(supabaseAdmin, user.id)
+        if (fromTenant) {
+          ctaWhatsapp = fromTenant
+          console.log('[ylada/links/generate] WhatsApp do leader_tenants (ex.: Pro Estética):', fromTenant)
+        }
+      }
     }
 
     let templateId = templateIdLegacy
@@ -240,10 +249,11 @@ export async function POST(request: NextRequest) {
       const schema = (bibliotecaTemplate.schema_json as Record<string, unknown>) || {}
       const title = titleOverride ?? (schema.title as string) ?? bibliotecaTemplate.name
       templateId = bibliotecaTemplate.id
+      // schema depois de title/ctaText faria o título do cartão (override) perder para schema.title
       configJson = {
+        ...schema,
         title,
         ctaText: ctaSuggestion ?? (schema.ctaDefault as string) ?? 'Falar no WhatsApp',
-        ...schema,
       }
       // Diagnóstico da biblioteca: adicionar meta + form para fluxo unificado (API de diagnóstico)
       if (bibliotecaTemplate.type === 'diagnostico') {
@@ -496,9 +506,9 @@ export async function POST(request: NextRequest) {
       }
       const schema = (template.schema_json as Record<string, unknown>) || {}
       configJson = {
+        ...schema,
         title: titleOverride ?? schema.title ?? template.name,
         ctaText: ctaWhatsapp ?? schema.ctaDefault ?? 'Falar no WhatsApp',
-        ...schema,
       }
     }
 

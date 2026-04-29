@@ -344,6 +344,29 @@ function labelBibliotecaTemplateTypeForPreview(apiType: string): string {
   return apiType || 'Modelo'
 }
 
+/** Navegação pós-criar link (ex.: aba pré-aberta no gesto do utilizador para o funil `/l/…`). */
+export type BibliotecaLinkCreatedNavigation = {
+  usePreOpenedTab: Window | null
+}
+
+/** Abre o funil público num separador novo. Sem `noopener` no about:blank para o browser devolver referência utilizável. */
+function openPublicFunnelUrlInNewTab(abs: string, preOpened: Window | null | undefined): boolean {
+  if (preOpened && !preOpened.closed) {
+    try {
+      preOpened.location.href = abs
+      return true
+    } catch {
+      try {
+        preOpened.close()
+      } catch {
+        /* ignore */
+      }
+    }
+  }
+  const w = window.open(abs, '_blank', 'noopener,noreferrer')
+  return !!(w && !w.closed)
+}
+
 function BibliotecaCard({
   item,
   linksPath,
@@ -370,7 +393,11 @@ function BibliotecaCard({
    * Após criar o link: abre o funil público `/l/{slug}` (navegação completa, fiável no localhost);
    * se não houver slug, cai na página de edição.
    */
-  onLinkCreated: (linkId: string, payload: { slug?: string; url?: string }) => void
+  onLinkCreated: (
+    linkId: string,
+    payload: { slug?: string; url?: string },
+    navigation?: BibliotecaLinkCreatedNavigation
+  ) => void
   variant: 'default' | 'sugestao' | 'comece'
   segmentCode?: BibliotecaSegmentCode | null
   /** segment da área YLADA (coluna ylada_links.segment + perfil Noel), alinhado ao Noel e às outras áreas. */
@@ -410,6 +437,14 @@ function BibliotecaCard({
     if (!String(item.id ?? '').trim()) {
       setCriarErro('Modelo sem identificador. Recarrega a página.')
       return
+    }
+    let preOpenedForFunnel: Window | null = null
+    if (intent === 'use' && stayOnProEsteticaPanel && typeof window !== 'undefined') {
+      try {
+        preOpenedForFunnel = window.open('about:blank', '_blank')
+      } catch {
+        preOpenedForFunnel = null
+      }
     }
     setCreatingId(item.id)
     setCriarErro(null)
@@ -479,9 +514,12 @@ function BibliotecaCard({
         return
       }
 
+      const navForUse =
+        intent === 'use' && stayOnProEsteticaPanel ? { usePreOpenedTab: preOpenedForFunnel } : undefined
+
       if (data?.success && linkId) {
         try {
-          onLinkCreated(linkId, payload)
+          onLinkCreated(linkId, payload, navForUse)
         } catch {
           if (stayOnProEsteticaPanel) {
             hardNavigateTo(sameOriginUrlWithTabMeus())
@@ -496,7 +534,7 @@ function BibliotecaCard({
           return
         }
         try {
-          onLinkCreated(linkId, payload)
+          onLinkCreated(linkId, payload, navForUse)
         } catch {
           if (stayOnProEsteticaPanel) {
             hardNavigateTo(sameOriginUrlWithTabMeus())
@@ -511,6 +549,13 @@ function BibliotecaCard({
           return
         }
         const abs = absoluteFunnelUrlFromPayload(payload)
+        if (stayOnProEsteticaPanel && intent === 'use' && abs) {
+          if (!openPublicFunnelUrlInNewTab(abs, preOpenedForFunnel)) {
+            window.location.href = abs
+          }
+          onRefreshMeusLinks?.()
+          return
+        }
         if (abs) hardNavigateTo(abs)
         else if (payload.slug)
           hardNavigateTo(new URL(`/l/${encodeURIComponent(payload.slug)}`, window.location.origin).href)
@@ -553,6 +598,8 @@ function BibliotecaCard({
     } catch {
       setCriarErro('Erro de rede. Verifica a ligação e tenta de novo.')
     } finally {
+      // Não fechar o separador pré-aberto aqui: após `location.href = /l/…` o href pode ainda
+      // ser `about:blank` por um instante e fecharíamos o separador certo por engano.
       setCreatingId(null)
     }
   }
@@ -993,12 +1040,18 @@ function BibliotecaPageContentInner({
   const stayInProEsteticaHub = embedded && proEsteticaNarrow
 
   const navigateAfterLinkCreated = useCallback(
-    (linkId: string, payload: { slug?: string; url?: string }) => {
+    (
+      linkId: string,
+      payload: { slug?: string; url?: string },
+      navigation?: BibliotecaLinkCreatedNavigation
+    ) => {
       if (typeof window === 'undefined') return
       const funnelAbs = absoluteFunnelUrlFromPayload(payload)
       if (stayInProEsteticaHub) {
         if (funnelAbs) {
-          hardNavigateTo(funnelAbs)
+          if (!openPublicFunnelUrlInNewTab(funnelAbs, navigation?.usePreOpenedTab)) {
+            window.location.href = funnelAbs
+          }
           setMeusLinksRefreshTick((n) => n + 1)
           return
         }
@@ -1325,6 +1378,15 @@ function BibliotecaPageContentInner({
         setCreatingId(ideiaCreatingKey)
         setIdeiaLinkErro(null)
         setIdeiaLinkPrecosCta(false)
+        let preOpenedIdeia: Window | null = null
+        if (stayInProEsteticaHub && typeof window !== 'undefined') {
+          try {
+            preOpenedIdeia = window.open('about:blank', '_blank')
+          } catch {
+            preOpenedIdeia = null
+          }
+        }
+        const ideiaNav = stayInProEsteticaHub ? { usePreOpenedTab: preOpenedIdeia } : undefined
         try {
           const body: Record<string, unknown> = {
             flow_id: itemIdeia.flow_id ?? 'diagnostico_risco',
@@ -1360,7 +1422,7 @@ function BibliotecaPageContentInner({
             typeof data?.error !== 'string'
           if (data?.success && linkId) {
             try {
-              navigateAfterLinkCreated(linkId, payload)
+              navigateAfterLinkCreated(linkId, payload, ideiaNav)
             } catch {
               if (stayInProEsteticaHub) {
                 hardNavigateTo(sameOriginUrlWithTabMeus())
@@ -1371,7 +1433,7 @@ function BibliotecaPageContentInner({
             }
           } else if (createdWithId) {
             try {
-              navigateAfterLinkCreated(linkId, payload)
+              navigateAfterLinkCreated(linkId, payload, ideiaNav)
             } catch {
               if (stayInProEsteticaHub) {
                 hardNavigateTo(sameOriginUrlWithTabMeus())
@@ -1382,7 +1444,12 @@ function BibliotecaPageContentInner({
             }
           } else if (data?.success && (payload.slug || payload.url)) {
             const abs = absoluteFunnelUrlFromPayload(payload)
-            if (abs) hardNavigateTo(abs)
+            if (stayInProEsteticaHub && abs) {
+              if (!openPublicFunnelUrlInNewTab(abs, preOpenedIdeia)) {
+                window.location.href = abs
+              }
+              setMeusLinksRefreshTick((n) => n + 1)
+            } else if (abs) hardNavigateTo(abs)
             else if (payload.slug)
               hardNavigateTo(new URL(`/l/${encodeURIComponent(payload.slug)}`, window.location.origin).href)
             else if (stayInProEsteticaHub) hardNavigateTo(sameOriginUrlWithTabMeus())

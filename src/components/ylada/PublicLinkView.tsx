@@ -66,6 +66,10 @@ const PUBLIC_LINK_UI: Record<Language, {
   quizIntroLead: string
   quizIntroMicro: string
   quizResultHelperLine: string
+  /** Entrada da calculadora pública (antes do formulário). */
+  calculatorIntroBadge: string
+  calculatorIntroLead: string
+  calculatorIntroMicro: string
 }> = {
   pt: {
     start: 'Começar',
@@ -115,6 +119,10 @@ const PUBLIC_LINK_UI: Record<Language, {
     quizIntroMicro: 'Tempo estimado: cerca de 1 a 2 minutos',
     quizResultHelperLine:
       'Cada corpo responde de um jeito. Este resumo ajuda a abrir a conversa com um profissional.',
+    calculatorIntroBadge: 'Antes de começar',
+    calculatorIntroLead:
+      'Em poucos passos você recebe um primeiro resultado com base no que informar aqui — rápido, direto e pensado para quem quer um número de partida antes de falar com um profissional. Não substitui avaliação presencial.',
+    calculatorIntroMicro: 'Tempo estimado: cerca de 1 minuto · sem cadastro: preencher e ver o resultado.',
   },
   en: {
     start: 'Start',
@@ -164,6 +172,10 @@ const PUBLIC_LINK_UI: Record<Language, {
     quizIntroMicro: 'Estimated time: about 1 to 2 minutes',
     quizResultHelperLine:
       'Every body responds differently. This summary helps you start the conversation with a professional.',
+    calculatorIntroBadge: 'Before you start',
+    calculatorIntroLead:
+      'In a few steps you get a first result based on what you enter here — quick, clear, and meant as a starting number before talking to a professional. It does not replace an in-person assessment.',
+    calculatorIntroMicro: 'Estimated time: about 1 minute · no sign-up: fill in and see your result.',
   },
   es: {
     start: 'Comenzar',
@@ -213,6 +225,10 @@ const PUBLIC_LINK_UI: Record<Language, {
     quizIntroMicro: 'Tiempo estimado: unos 1 a 2 minutos',
     quizResultHelperLine:
       'Cada cuerpo responde distinto. Este resumen ayuda a abrir la conversación con un profesional.',
+    calculatorIntroBadge: 'Antes de empezar',
+    calculatorIntroLead:
+      'En pocos pasos recibes un primer resultado según lo que indiques aquí: rápido, claro y pensado como punto de partida antes de hablar con un profesional. No sustituye una valoración presencial.',
+    calculatorIntroMicro: 'Tiempo estimado: cerca de 1 minuto · sin registro: rellenar y ver el resultado.',
   },
 }
 
@@ -2134,6 +2150,35 @@ type CalculatorConfig = {
   resultIntro?: string
 }
 
+/** Substitui tokens que ainda ficaram na expressão (fórmula `genero`, campo só `sexo`, etc.). */
+function applyCalculatorFormulaTokenAliases(
+  expr: string,
+  values: Record<string, number | undefined>
+): string {
+  let out = expr
+  const rep = (token: string, n: number) => {
+    const escaped = token.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+    out = out.replace(new RegExp(`\\b${escaped}\\b`, 'g'), String(n))
+  }
+  const num = (k: string): number | undefined => {
+    const v = values[k]
+    if (v === undefined || v === null) return undefined
+    const x = Number(v)
+    return Number.isFinite(x) ? x : undefined
+  }
+  if (/\bgenero\b/.test(out) && num('genero') === undefined && num('sexo') !== undefined) rep('genero', num('sexo')!)
+  if (/\bsexo\b/.test(out) && num('sexo') === undefined && num('genero') !== undefined) rep('sexo', num('genero')!)
+  if (/\batividade\b/.test(out) && num('atividade') === undefined && num('nivel_atividade') !== undefined)
+    rep('atividade', num('nivel_atividade')!)
+  if (/\bnivel_atividade\b/.test(out) && num('nivel_atividade') === undefined && num('atividade') !== undefined)
+    rep('nivel_atividade', num('atividade')!)
+  if (/\bobjetivo\b/.test(out) && num('objetivo') === undefined && num('objetivo_peso') !== undefined)
+    rep('objetivo', num('objetivo_peso')!)
+  if (/\bobjetivo_peso\b/.test(out) && num('objetivo_peso') === undefined && num('objetivo') !== undefined)
+    rep('objetivo_peso', num('objetivo')!)
+  return out
+}
+
 /** Substitui identificadores na fórmula com limites de palavra e ids mais longos primeiro (evita `peso` dentro de `peso_atual`). */
 function evaluateCalculatorFormula(
   formula: string,
@@ -2142,15 +2187,19 @@ function evaluateCalculatorFormula(
 ): number {
   const trimmed = (formula || '').trim()
   if (!trimmed) return 0
+  const merged: Record<string, number | undefined> = { ...values }
   const sorted = [...fields].sort((a, b) => b.id.length - a.id.length)
   let expr = trimmed
   for (const f of sorted) {
     const id = (f.id || '').trim()
     if (!id) continue
-    const val = values[f.id] ?? 0
+    const raw = merged[f.id]
+    const num = raw === undefined || raw === null ? NaN : Number(raw)
+    const val = Number.isFinite(num) ? num : 0
     const escaped = id.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
     expr = expr.replace(new RegExp(`\\b${escaped}\\b`, 'g'), String(val))
   }
+  expr = applyCalculatorFormulaTokenAliases(expr, merged)
   try {
     const n = Number(new Function(`return (${expr})`)())
     return Number.isFinite(n) ? n : 0
@@ -2365,6 +2414,23 @@ function CalculatorBlock({
   const resultPrefix = (cfg.resultPrefix as string) ?? ''
   const resultSuffix = (cfg.resultSuffix as string) ?? ''
   const resultIntro = (cfg.resultIntro as string) || (locale === 'en' ? 'Based on what you provided:' : locale === 'es' ? 'Según lo que proporcionaste:' : 'Com base no que você informou:')
+  const extraCfg = config as Record<string, unknown>
+  const introTitleFromCfg =
+    typeof extraCfg.introTitle === 'string' && extraCfg.introTitle.trim() ? extraCfg.introTitle.trim() : ''
+  const introTitle = introTitleFromCfg || title
+  const introLeadFromCfg =
+    typeof extraCfg.introSubtitle === 'string' && extraCfg.introSubtitle.trim() ? extraCfg.introSubtitle.trim() : ''
+  const introLead = introLeadFromCfg || t.calculatorIntroLead
+  const introMicroFromCfg =
+    typeof extraCfg.introMicro === 'string' && extraCfg.introMicro.trim() ? extraCfg.introMicro.trim() : ''
+  const introMicro = introMicroFromCfg || t.calculatorIntroMicro
+  const introBadgeFromCfg =
+    typeof extraCfg.introBadge === 'string' && extraCfg.introBadge.trim()
+      ? extraCfg.introBadge.trim()
+      : typeof extraCfg.calculatorIntroBadge === 'string' && extraCfg.calculatorIntroBadge.trim()
+        ? extraCfg.calculatorIntroBadge.trim()
+        : ''
+  const introBadge = introBadgeFromCfg || t.calculatorIntroBadge
   const ctaLabel =
     /quero falar no whatsapp/i.test(ctaText)
       ? locale === 'en'
@@ -2386,6 +2452,7 @@ function CalculatorBlock({
     return init
   })
   const [showResult, setShowResult] = useState(false)
+  const [showCalculatorIntro, setShowCalculatorIntro] = useState(true)
   const [showFullAnalysis, setShowFullAnalysis] = useState(false)
   const calculatorStartSent = useRef(false)
   const calculatorCompleteSent = useRef(false)
@@ -2402,6 +2469,14 @@ function CalculatorBlock({
   const resultCopy = getCalculatorResultCopy(title, resultNum, locale)
   const isImcCalculator = title.toLowerCase().includes('imc')
   const imcFullAnalysis = isImcCalculator ? getCalculatorImcFullAnalysisParagraphs(resultNum, locale) : null
+
+  const beginCalculatorForm = () => {
+    if (!calculatorStartSent.current) {
+      calculatorStartSent.current = true
+      trackLinkEvent(slug, 'start')
+    }
+    setShowCalculatorIntro(false)
+  }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -2462,12 +2537,42 @@ function CalculatorBlock({
         className={`max-w-md w-full bg-white p-6 sm:p-8 ${
           showResult
             ? 'rounded-2xl border border-sky-100/60 shadow-xl shadow-sky-100/50'
-            : 'rounded-2xl border border-gray-100 shadow-lg'
+            : showCalculatorIntro
+              ? 'rounded-2xl border border-gray-100/80 shadow-xl'
+              : 'rounded-2xl border border-gray-100 shadow-lg'
         }`}
       >
-        {!showResult ? (
+        {!showResult && showCalculatorIntro ? (
+          <>
+            <div className="mb-4">
+              <span className="inline-block text-xs font-semibold text-sky-600 bg-sky-50 px-3 py-1.5 rounded-full border border-sky-100">
+                {introBadge}
+              </span>
+            </div>
+            <h1 className="mb-3 text-xl font-bold leading-tight text-gray-900 sm:text-2xl">{introTitle}</h1>
+            <p className="mb-3 text-sm leading-relaxed text-gray-600">{introLead}</p>
+            <p className="mb-8 text-xs text-gray-500">{introMicro}</p>
+            <button
+              type="button"
+              onClick={beginCalculatorForm}
+              className="w-full rounded-xl bg-sky-600 px-4 py-4 font-semibold text-white shadow-lg shadow-sky-500/25 transition-colors hover:bg-sky-700"
+            >
+              {t.start}
+            </button>
+          </>
+        ) : null}
+        {!showResult && !showCalculatorIntro ? (
           <form onSubmit={handleSubmit} className="space-y-4">
-            <h1 className="text-xl font-bold text-gray-900 mb-2">{title}</h1>
+            <div className="mb-1 flex items-start justify-between gap-2">
+              <h1 className="text-xl font-bold text-gray-900">{title}</h1>
+              <button
+                type="button"
+                onClick={() => setShowCalculatorIntro(true)}
+                className="shrink-0 text-xs font-medium text-sky-700 underline-offset-2 hover:underline"
+              >
+                {t.back}
+              </button>
+            </div>
             {fieldsParaCalculadora.map((f) => (
               <div key={f.id}>
                 <label className="block text-sm font-medium text-gray-700 mb-1">{f.label}</label>
@@ -2506,7 +2611,8 @@ function CalculatorBlock({
               {t.calculate}
             </button>
           </form>
-        ) : (
+        ) : null}
+        {showResult ? (
           <>
             <div className="mb-4">
               <span className="inline-block text-xs font-semibold text-sky-600 bg-sky-50 px-3 py-1.5 rounded-full border border-sky-100">
@@ -2599,7 +2705,7 @@ function CalculatorBlock({
             </div>
             <DiagnosisDisclaimer variant="informative" locale={locale} className="mt-4" />
           </>
-        )}
+        ) : null}
       </div>
     </div>
   )

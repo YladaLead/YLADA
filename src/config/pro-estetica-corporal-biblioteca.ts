@@ -1,6 +1,6 @@
 /**
  * Pro Estética Corporal — biblioteca (`subscope=estetica_corporal`):
- * **lista fechada por `template_id`**: calculadoras + quizzes corporais (migrations 236, 242, 293, 308, **333**, **342**).
+ * **lista fechada por `template_id`**: calculadoras + quizzes corporais (migrations 236, 242, 293, 308, **333**, **342**, **347**, **348**).
  * Tópicos prontos + links que a pessoa cria continuam noutras áreas da UI; aqui só estes itens globais passam no filtro.
  */
 
@@ -33,7 +33,7 @@ export const SEGMENT_CODES_BIBLIOTECA_ESTETICA_CORPORAL = ['aesthetics', 'nutrit
 
 /**
  * Únicos itens da biblioteca YLADA mostrados no painel Pro Estética Corporal.
- * Inclui migration **333** (drenagem vs tecnologia, tecnologia-alvo, expectativa de sessões, camadas, agenda, retenção/hábitos) e **342** (massagem + resultados completos 119/120).
+ * Inclui migration **333**, **342**, **347** e **348** (fluxos por técnica: drenagem, modeladora, criolipo, RF, ultrassom, lipocavitação, endermologia, celulite+flacidez, localizado, detox).
  */
 export const TEMPLATE_IDS_BIBLIOTECA_ESTETICA_CORPORAL_PERMITIDOS = new Set([
   'b1000026-0026-4000-8000-000000000026',
@@ -55,6 +55,16 @@ export const TEMPLATE_IDS_BIBLIOTECA_ESTETICA_CORPORAL_PERMITIDOS = new Set([
   'b1000125-0125-4000-8000-000000000125',
   'b1000126-0126-4000-8000-000000000126',
   'b1000127-0127-4000-8000-000000000127',
+  'b1000142-0142-4000-8000-000000000142',
+  'b1000143-0143-4000-8000-000000000143',
+  'b1000144-0144-4000-8000-000000000144',
+  'b1000145-0145-4000-8000-000000000145',
+  'b1000146-0146-4000-8000-000000000146',
+  'b1000147-0147-4000-8000-000000000147',
+  'b1000148-0148-4000-8000-000000000148',
+  'b1000149-0149-4000-8000-000000000149',
+  'b1000150-0150-4000-8000-000000000150',
+  'b1000151-0151-4000-8000-000000000151',
 ])
 
 export type BibliotecaItemSegmentFilter = {
@@ -75,27 +85,37 @@ export function filtrarBibliotecaItensEsteticaCorporal<T extends BibliotecaItemS
   return items.filter(itemBibliotecaEsteticaCorporal)
 }
 
-/** Ordem no topo: calculadoras → conteúdo estratégico (333) → demais quizzes. */
+/** Ordem no topo: calculadoras → inchaço / massagem / protocolo (captação) → demais. */
 export const TEMPLATE_IDS_ORDEM_DESTAQUE_ESTETICA_CORPORAL = [
   'b1000026-0026-4000-8000-000000000026',
   'b1000025-0025-4000-8000-000000000025',
   'b1000028-0028-4000-8000-000000000028',
   'b1000027-0027-4000-8000-000000000027',
   'b1000031-0031-4000-8000-000000000031',
-  'b1000123-0123-4000-8000-000000000123',
+  'b1000126-0126-4000-8000-000000000126',
   'b1000127-0127-4000-8000-000000000127',
   'b1000121-0121-4000-8000-000000000121',
+  'b1000119-0119-4000-8000-000000000119',
+  'b1000038-0038-4000-8000-000000000038',
+  'b1000046-0046-4000-8000-000000000046',
+  'b1000120-0120-4000-8000-000000000120',
   'b1000122-0122-4000-8000-000000000122',
+  'b1000142-0142-4000-8000-000000000142',
+  'b1000143-0143-4000-8000-000000000143',
+  'b1000144-0144-4000-8000-000000000144',
+  'b1000145-0145-4000-8000-000000000145',
+  'b1000146-0146-4000-8000-000000000146',
+  'b1000147-0147-4000-8000-000000000147',
+  'b1000148-0148-4000-8000-000000000148',
+  'b1000149-0149-4000-8000-000000000149',
+  'b1000150-0150-4000-8000-000000000150',
+  'b1000151-0151-4000-8000-000000000151',
+  'b1000123-0123-4000-8000-000000000123',
   'b1000124-0124-4000-8000-000000000124',
   'b1000125-0125-4000-8000-000000000125',
-  'b1000126-0126-4000-8000-000000000126',
   'b1000044-0044-4000-8000-000000000044',
-  'b1000038-0038-4000-8000-000000000038',
   'b1000048-0048-4000-8000-000000000048',
-  'b1000046-0046-4000-8000-000000000046',
   'b1000050-0050-4000-8000-000000000050',
-  'b1000119-0119-4000-8000-000000000119',
-  'b1000120-0120-4000-8000-000000000120',
 ] as const
 
 /** Chave estável para agrupar o mesmo título que aparece no cartão (adaptado + base). */
@@ -111,7 +131,7 @@ export function tituloExibidoBibliotecaCorporalKey(
     .replace(/[?.!,:;'"()[\]]/g, '')
     .replace(/\s+/g, ' ')
     .trim()
-  return key.length > 0 ? key : item.tema + '|' + item.id
+  return key.length > 0 ? key : item.tema
 }
 
 /**

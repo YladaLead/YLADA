@@ -2,6 +2,11 @@ import { NextRequest, NextResponse } from 'next/server'
 import OpenAI from 'openai'
 import { requireApiAuth } from '@/lib/api-auth'
 import { supabaseAdmin } from '@/lib/supabase'
+import {
+  instructionForEsteticaMessageTone,
+  isEsteticaMessageToneId,
+  type EsteticaMessageToneId,
+} from '@/config/estetica-message-tone'
 import { resolveEsteticaCapilarTenantContext } from '@/lib/pro-estetica-capilar-server'
 import type { ProLideresTenantRole } from '@/types/leader-tenant'
 
@@ -12,22 +17,28 @@ type HistoryTurn = { role?: string; content?: string }
 function buildSystemPrompt(params: {
   operationLabel: string
   focusNotes: string | null
+  messageToneId: EsteticaMessageToneId
+  messageToneNotes: string | null
   role: ProLideresTenantRole
   replyLanguage: string
 }): string {
-  const { operationLabel, focusNotes, role, replyLanguage } = params
+  const { operationLabel, focusNotes, messageToneId, messageToneNotes, role, replyLanguage } = params
+  const toneBlock = instructionForEsteticaMessageTone(messageToneId)
+  const toneNotesLine = messageToneNotes?.trim()
   const papel =
     role === 'leader'
       ? 'profissional responsável pela operação (decisor e quem fala com a cliente)'
       : 'pessoa da operação com acesso de leitura (ex.: receção) — adapta a linguagem sem substituir o profissional titular nas decisões técnicas'
 
-  return `Você é o **Noel**, mentor estratégico da YLADA no produto **Terapia capilar** (YLADA Pro — profissional solo ou operação pequena — **não** é modelo de equipe tipo MMN).
+  return `Você é o **Noel**, mentor estratégico da YLADA no produto **Terapia capilar** (painel **Pro Estética Capilar** — profissional solo ou operação pequena — **não** é modelo de equipe tipo MMN).
 
 CONTEXTO E NICHO
 - Nome / marca: ${operationLabel}
-- Nicho: **estética capilar** (queixas comuns: couro cabeludo, queda, rotina, cronograma, coloração, hidratação, alisamento, manutenção entre sessões).
+- Nicho: **terapia / estética capilar** (queixas comuns: couro cabeludo, queda, rotina, cronograma, coloração, hidratação, alisamento, manutenção entre sessões).
 - Quem está falando com você: ${papel}
-${focusNotes ? `- Notas de foco do profissional (use com critério): ${focusNotes}` : ''}
+- Tom preferido para mensagens e scripts: ${toneBlock}
+${toneNotesLine ? `- Refinamento do tom (priorize se conflitar): ${toneNotesLine}` : ''}
+${focusNotes ? `- Situação, objetivos e prioridades (use com critério): ${focusNotes}` : ''}
 
 MISSÃO
 - Ajudar a **qualificar interesse**, **preencher agenda**, **comunicar valor** e **responder objeções** (tempo, preço, desconfiança) com tom consultivo, nunca agressivo.
@@ -35,6 +46,7 @@ MISSÃO
 - Orientar **o que postar** (educação capilar, rotina, expectativa realista; evitar promessa de resultado garantido, "antes e depois" enganoso ou claim de saúde/crescimento capilar não comprovável).
 - Cobrir a jornada: atrair → fechar → manter → pós entre sessões (lembretes, próximo passo, continuidade do plano capilar).
 - Quando fizer sentido, orientar sobre **links YLADA** (criar, ajustar, explicar para a cliente), com preferência por **diagnóstico / avaliação inicial** no link — linguagem de consulta, não de "formulário de contato" genérico.
+- Na **Biblioteca de links** deste painel (**Terapia capilar**), os modelos já são filtrados para **couro cabeludo, fios e rotina capilar**. Nas tuas sugestões (fluxos, exemplos, linguagem ao cliente), **não** mistures como foco principal temas de **metabolismo / peso corporal**, **manicure** ou **estética facial** — mantém sempre o foco **capilar**. Calculadoras genéricas de nutrição não são o protagonista aqui salvo se a profissional pedir explicitamente esse cruzamento.
 
 SCRIPTS, INDICAÇÃO E WHATSAPP (OBRIGATÓRIO QUANDO ENTREGAR TEXTO PARA COPIAR)
 - Em **convite**, **indicação**, **pedido de encaminhamento** ou **primeiro contacto**: use **terceira pessoa** de forma **consultiva** - ex.: "Sabe de alguém que...", "Quem na tua rede...", "Se conheces alguém que...", em vez de comando direto ao "tu" ("Indica três pessoas agora").
@@ -107,9 +119,15 @@ export async function POST(request: NextRequest) {
   const operationLabel =
       t.display_name?.trim() || t.team_name?.trim() || t.slug || 'Terapia capilar'
 
+  const messageToneId: EsteticaMessageToneId = isEsteticaMessageToneId(t.message_tone)
+    ? t.message_tone
+    : 'profissional'
+
   const systemPrompt = buildSystemPrompt({
     operationLabel,
     focusNotes: t.focus_notes?.trim() || null,
+    messageToneId,
+    messageToneNotes: t.message_tone_notes?.trim() || null,
     role: ctx.role,
     replyLanguage,
   })

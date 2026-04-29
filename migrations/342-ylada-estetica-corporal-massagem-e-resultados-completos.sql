@@ -12,13 +12,9 @@ SET
 {
   "title": "Do travamento ao plano: onde você está com o seu corpo agora?",
   "introTitle": "O que está entre você e o protocolo corporal que você quer?",
-  "introSubtitle": "Em cinco perguntas você mapeia travas, urgência e a vitória que mais importa. No final recebe um perfil claro (de primeiro passo a prioridade máxima), o que isso costuma significar na consulta e como usar o resultado ao falar com sua esteticista — sem substituir avaliação presencial.",
+  "introSubtitle": "Em cinco perguntas você mapeia travas, urgência e a vitória que mais importa. No final, um perfil claro para abrir a conversa com a sua esteticista.",
   "introMicro": "~2 minutos · 5 perguntas · resultado para levar à clínica",
-  "introBullets": [
-    "Travas comuns (tempo, preço, medo, prioridade) em linguagem simples",
-    "Quão forte é a sua prioridade nos próximos 30 dias",
-    "Uma vitória concreta para alinhar expectativa com a profissional"
-  ],
+  "introBullets": [],
   "questions": [
     {"id": "q1", "text": "O que mais segura você de começar um protocolo corporal?", "type": "single", "options": ["Medo de não funcionar", "Investimento ou preço", "Falta de prioridade", "Tempo na rotina", "Quero começar — falta um plano claro na agenda"]},
     {"id": "q2", "text": "Em quanto tempo você gostaria de ver uma mudança visível?", "type": "single", "options": ["Sem pressa ou não sei", "2 a 3 meses", "Até 1 mês", "Até 2 semanas"]},
@@ -88,13 +84,9 @@ VALUES
 {
   "title": "Que tipo de massagem faz mais sentido para o seu corpo neste momento?",
   "introTitle": "Em 2 minutos: massagem certa para o que você sente — e o que levar à consulta",
-  "introSubtitle": "Responda cinco perguntas sobre sensação, objetivo, frequência e preferências. No final recebe um perfil (relaxamento, drenagem, modeladora ou combinação), o que costuma funcionar por perfil, o que perguntar na avaliação e um próximo passo claro com sua esteticista. Não substitui avaliação presencial nem orientação médica.",
+  "introSubtitle": "Responda cinco perguntas sobre sensação, objetivo, frequência e preferências. No final recebe um perfil (relaxamento, drenagem, modeladora ou combinação) e um próximo passo para combinar com a sua esteticista.",
   "introMicro": "~2 min · 5 perguntas · resultado para enviar à clínica",
-  "introBullets": [
-    "Entenda o foco inicial: bem-estar, leveza, contorno ou textura",
-    "Saiba como falar de pressão e frequência sem termo técnico",
-    "Leve um resumo pronto para a primeira conversa"
-  ],
+  "introBullets": [],
   "questions": [
     {"id": "q1", "text": "Hoje, o que você mais sente no corpo?", "type": "single", "options": ["Cansaço geral e tensão difusa", "Costas ou pescoço carregados", "Pernas pesadas ou inchaço ao fim do dia", "Quero trabalhar uma zona (abdômen, culote, flancos) com apoio de massagem"]},
     {"id": "q2", "text": "Nas próximas semanas, o que seria mais valioso para você?", "type": "single", "options": ["Dormir melhor e descontrair", "Aliviar tensão muscular do dia a dia", "Sentir mais leveza e circulação", "Somar bem-estar com contorno ou textura da pele"]},

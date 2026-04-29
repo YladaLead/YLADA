@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import type { ReactNode } from 'react'
 import { redirect } from 'next/navigation'
 import {
@@ -6,6 +7,14 @@ import {
   PRO_ESTETICA_CORPORAL_VERTICAL_CODE,
 } from '@/lib/pro-estetica-corporal-server'
 import ProEsteticaCorporalAreaShell from '@/components/pro-estetica-corporal/ProEsteticaCorporalAreaShell'
+
+export const metadata: Metadata = {
+  title: {
+    default: 'Início | Pro Estética Corporal',
+    template: '%s | Pro Estética Corporal',
+  },
+  description: 'Painel YLADA — corpo, hábitos, Noel e links inteligentes.',
+}
 
 export default async function ProEsteticaCorporalPainelLayout({ children }: { children: ReactNode }) {
   const gate = await ensureEsteticaCorporalTenantAccess()
