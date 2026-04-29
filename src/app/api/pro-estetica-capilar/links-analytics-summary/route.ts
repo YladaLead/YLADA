@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireApiAuth, unwrapRequireApiAuthUser } from '@/lib/api-auth'
 import { supabaseAdmin } from '@/lib/supabase'
-import { resolveEsteticaCorporalTenantContext } from '@/lib/pro-estetica-corporal-server'
+import { resolveEsteticaCapilarTenantContext } from '@/lib/pro-estetica-capilar-server'
 
 type StatsRow = { link_id: string; event_type: string; cnt: number | string }
 
@@ -29,8 +29,8 @@ function sumViewsAndWhatsapp(
 }
 
 /**
- * GET — totais agregados dos links YLADA da conta da clínica (dona do tenant corporal).
- * Usado na faixa de análise rápida do painel.
+ * GET — totais agregados dos links YLADA da conta da clínica (dona do tenant capilar).
+ * Usado na faixa de análise rápida do painel (paridade com Pro Estética Corporal).
  */
 export async function GET(request: NextRequest) {
   try {
@@ -42,9 +42,9 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'Backend não configurado' }, { status: 503 })
     }
 
-    const ctx = await resolveEsteticaCorporalTenantContext(supabaseAdmin, user)
+    const ctx = await resolveEsteticaCapilarTenantContext(supabaseAdmin, user)
     if (!ctx) {
-      return NextResponse.json({ success: false, error: 'Sem acesso ao painel Pro Estética Corporal.' }, { status: 403 })
+      return NextResponse.json({ success: false, error: 'Sem acesso ao painel Pro Estética Capilar.' }, { status: 403 })
     }
 
     const ownerId = ctx.tenant.owner_user_id
@@ -55,7 +55,7 @@ export async function GET(request: NextRequest) {
       .eq('user_id', ownerId)
 
     if (linksErr) {
-      console.error('[pro-estetica-corporal/links-analytics-summary]', linksErr)
+      console.error('[pro-estetica-capilar/links-analytics-summary]', linksErr)
       return NextResponse.json({ success: false, error: 'Erro ao listar links' }, { status: 500 })
     }
 
@@ -92,7 +92,7 @@ export async function GET(request: NextRequest) {
       { headers: { 'Cache-Control': 'private, no-store, must-revalidate' } }
     )
   } catch (e) {
-    console.error('[pro-estetica-corporal/links-analytics-summary]', e)
+    console.error('[pro-estetica-capilar/links-analytics-summary]', e)
     return NextResponse.json({ success: false, error: 'Erro ao agregar métricas' }, { status: 500 })
   }
 }

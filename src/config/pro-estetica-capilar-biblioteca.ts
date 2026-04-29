@@ -1,6 +1,7 @@
 /**
  * Pro Estética Capilar — biblioteca (`subscope=estetica_capilar`):
  * **lista fechada por `template_id`**: quizzes capilares (migration **284**).
+ * Intros/capas e descrições dos cards: migration **353** (padrão gancho + presencial + micro, alinhado ao corporal mig. 351).
  */
 
 import {

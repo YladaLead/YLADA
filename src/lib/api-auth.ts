@@ -447,6 +447,31 @@ export async function requireApiAuth(
 }
 
 /**
+ * Desembrulha o retorno de `requireApiAuth` sem depender só de `instanceof NextResponse`.
+ * Em alguns bundles de produção a identidade da classe pode não coincidir; aí o erro HTTP
+ * era tratado como sucesso, `user` ficava undefined e rotas quebravam no `catch` genérico.
+ */
+export function unwrapRequireApiAuthUser(
+  auth: { user: { id?: string }; profile?: unknown } | NextResponse
+): { user: { id: string }; profile: unknown } | NextResponse {
+  if (typeof auth === 'object' && auth !== null && 'user' in auth) {
+    const id = (auth as { user?: { id?: string } }).user?.id
+    if (typeof id === 'string' && id.length > 0) {
+      return auth as { user: { id: string }; profile: unknown }
+    }
+  }
+  if (
+    typeof auth === 'object' &&
+    auth !== null &&
+    typeof (auth as Response).status === 'number' &&
+    typeof (auth as Response).json === 'function'
+  ) {
+    return auth as NextResponse
+  }
+  return NextResponse.json({ error: 'Não autenticado' }, { status: 401 })
+}
+
+/**
  * Garantir que o user_id fornecido pertence ao usuário autenticado
  * Use quando precisar validar propriedade de recursos
  */

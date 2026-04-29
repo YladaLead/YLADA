@@ -65,6 +65,12 @@ function normalizeNoelAssistantMarkdown(raw: string): string {
   return t
 }
 
+function clampNoelFeedbackExcerpt(raw: string, max: number): string {
+  const t = raw.replace(/\s+/g, ' ').trim()
+  if (t.length <= max) return t
+  return `${t.slice(0, max - 1)}…`
+}
+
 function normalizeHrefForCompare(h: string): string {
   const s = h.trim()
   try {
@@ -431,7 +437,11 @@ export default function NoelChat({
         : '/pro-lideres/painel/links'
 
   const noelPainelSecondaryToolsLabel =
-    area === 'pro_estetica_corporal' || area === 'pro_estetica_capilar' ? 'Biblioteca e links' : 'Convites equipe'
+    area === 'pro_estetica_corporal' || area === 'pro_estetica_capilar' ? 'Links' : 'Convites equipe'
+  const capilarFeedbackEnabled = area === 'pro_estetica_capilar'
+  const [capilarFeedbackByMsgId, setCapilarFeedbackByMsgId] = useState<Record<string, 'up' | 'down'>>({})
+  const capilarFeedbackSubmittedRef = useRef<Set<string>>(new Set())
+
   const [messages, setMessages] = useState<Message[]>(() => {
     const saved = normalizeSavedMessagesForSkipWelcome(loadMessages(area), skipWelcomeMessage)
     if (saved.length > 0) return saved
@@ -459,6 +469,36 @@ export default function NoelChat({
     }
     trackFreemiumConversionEvent('freemium_paywall_view', { surface: 'noel_chat', kind: 'noel' })
   }, [])
+
+  const submitCapilarNoelFeedback = useCallback(
+    async (msgId: string, rating: 'up' | 'down', excerptSource: string) => {
+      if (!capilarFeedbackEnabled) return
+      if (capilarFeedbackSubmittedRef.current.has(msgId)) return
+      capilarFeedbackSubmittedRef.current.add(msgId)
+      setCapilarFeedbackByMsgId((prev) => ({ ...prev, [msgId]: rating }))
+      try {
+        const res = await fetch('/api/pro-estetica-capilar/noel-feedback', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({
+            messageId: msgId,
+            rating,
+            excerpt: excerptSource.trim() ? clampNoelFeedbackExcerpt(excerptSource, 600) : undefined,
+          }),
+        })
+        if (!res.ok) throw new Error('feedback_failed')
+      } catch {
+        capilarFeedbackSubmittedRef.current.delete(msgId)
+        setCapilarFeedbackByMsgId((prev) => {
+          const next = { ...prev }
+          delete next[msgId]
+          return next
+        })
+      }
+    },
+    [capilarFeedbackEnabled]
+  )
 
   useEffect(() => {
     if (initializedRef.current) return
@@ -1113,6 +1153,36 @@ export default function NoelChat({
                       {assistantMarkdownNormalized}
                     </ReactMarkdown>
                   </div>
+                  {capilarFeedbackEnabled &&
+                  msg.role === 'assistant' &&
+                  msg.id !== 'welcome' &&
+                  String((assistantMarkdownNormalized || msg.content) ?? '').trim().length >= 20 ? (
+                    <div className="mt-2 flex flex-wrap items-center gap-2 border-t border-gray-100 pt-2">
+                      <span className="text-[11px] font-medium text-gray-500">Esta resposta ajudou?</span>
+                      {capilarFeedbackByMsgId[msg.id] ? (
+                        <span className="text-[11px] font-medium text-emerald-700">Obrigado pelo feedback.</span>
+                      ) : (
+                        <>
+                          <button
+                            type="button"
+                            className="touch-manipulation rounded-lg border border-gray-200 bg-white px-2.5 py-1 text-xs font-semibold text-gray-700 hover:border-emerald-300 hover:bg-emerald-50/80"
+                            aria-label="Marcar como útil"
+                            onClick={() => void submitCapilarNoelFeedback(msg.id, 'up', msg.content)}
+                          >
+                            Útil
+                          </button>
+                          <button
+                            type="button"
+                            className="touch-manipulation rounded-lg border border-gray-200 bg-white px-2.5 py-1 text-xs font-semibold text-gray-700 hover:border-rose-200 hover:bg-rose-50/80"
+                            aria-label="Marcar como não útil"
+                            onClick={() => void submitCapilarNoelFeedback(msg.id, 'down', msg.content)}
+                          >
+                            Não ajudou
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  ) : null}
                   {proLideresPayload &&
                     !disableYladaLinkEditor &&
                     msg.role === 'assistant' &&

@@ -1,5 +1,6 @@
 /**
- * Query `?focus=` no Noel do painel Pro Estética capilar (alinhado às chaves do corporal para rotas futuras).
+ * Query `?focus=` no Noel do painel Pro Estética capilar (chaves alinhadas ao corporal).
+ * Textos em **português do Brasil** (mensagem inicial enviada ao modelo).
  */
 export type ProEsteticaCapilarNoelFocus =
   | 'atrair'
@@ -14,19 +15,19 @@ export const PRO_ESTETICA_CAPILAR_NOEL_FOCUS_PARAM = 'focus'
 
 export const PRO_ESTETICA_CAPILAR_NOEL_FOCUS_MESSAGES: Record<ProEsteticaCapilarNoelFocus, string> = {
   atrair:
-    'Quero ideias para atrair clientes para estetica capilar (queixa, cronograma, retorno). Sugere temas para esta semana e uma legenda pronta com CTA consultivo.',
+    'Quero ideias para atrair clientes para estética capilar (queixa, cronograma, retorno). Sugira temas para esta semana e uma legenda pronta com CTA consultivo.',
   responder:
-    'No WhatsApp, quando a cliente pergunta preco ou some, quero respostas curtas e naturais no meu tom, para nicho capilar.',
+    'No WhatsApp, quando a cliente pergunta preço ou some, quero respostas curtas e naturais no meu tom, para o nicho capilar.',
   reativar:
-    'Tenho clientes que sumiram ou nao voltaram. Quero mensagens para reativar sem ser insistente, no contexto capilar.',
+    'Tenho clientes que sumiram ou não voltaram. Quero mensagens para reativar sem ser insistente, no contexto de terapia capilar.',
   destravar:
-    'Ajuda-me a responder quem pediu preco e parou de responder — mensagens curtas no meu tom, para tratamento capilar.',
+    'Me ajude a responder quem pediu preço e parou de responder — mensagens curtas no meu tom, para tratamento capilar.',
   ret_faltou:
-    'Uma cliente faltou ou sumiu depois de marcar. Preciso de uma mensagem curta no WhatsApp para reativar com educacao.',
+    'Uma cliente faltou ou sumiu depois de marcar. Preciso de uma mensagem curta no WhatsApp para reativar com educação.',
   ret_confirmar:
-    'Quero uma mensagem leve para confirmar a proxima sessao sem parecer automatica nem insistente.',
+    'Quero uma mensagem leve para confirmar a próxima sessão sem parecer automática nem insistente.',
   ret_pos:
-    'Preciso de uma mensagem de pos-atendimento depois da sessao capilar, com proximo passo claro e sem pressao.',
+    'Preciso de uma mensagem de pós-atendimento depois da sessão capilar, com próximo passo claro e sem pressão.',
 }
 
 const FOCUS_KEYS = new Set<string>(Object.keys(PRO_ESTETICA_CAPILAR_NOEL_FOCUS_MESSAGES))

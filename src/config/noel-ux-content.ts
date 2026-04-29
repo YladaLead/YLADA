@@ -213,7 +213,7 @@ const PRO_ESTETICA_CAPILAR_SUGGESTIONS = [
   {
     label: 'Link de diagnóstico',
     prompt:
-      'Quero criar ou ajustar um link YLADA de diagnóstico / triagem capilar. Me guia no que a cliente vê, nas perguntas e num texto curto para partilhar o link, com pedido de permissão.',
+      'Quero criar ou ajustar um link YLADA de diagnóstico / triagem capilar. Me guia no que a cliente vê, nas perguntas e num texto curto para compartilhar o link, com pedido de permissão.',
   },
   {
     label: 'Reativar quem sumiu',
