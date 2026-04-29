@@ -4,11 +4,14 @@ import {
   buildEsteticaLeadClientPayloadFromPreAnswers,
   isDiagnosticoEmailConfirmationTemplate,
   isOpenEntryPreDiagnosticoTemplate,
+  TEMPLATE_DIAGNOSTICO_CORPORAL_ID,
 } from '@/lib/estetica-consultoria-form-templates'
 import {
   resolveEsteticaPreNotifyEmail,
+  sendEsteticaDiagnosticoFilledNotifyEmail,
   sendEsteticaPreDiagnosticoFilledNotifyEmail,
 } from '@/lib/estetica-consultoria-pre-notify-email'
+import type { EsteticaConsultSegment } from '@/lib/estetica-consultoria'
 import { getConsultoriaFormFields, validateConsultoriaFormAnswers } from '@/lib/pro-lideres-consultoria'
 
 type Ctx = { params: Promise<{ token: string }> }
@@ -161,6 +164,26 @@ export async function POST(request: NextRequest, context: Ctx) {
         adminPanelUrl,
       }).then((r) => {
         if (!r.ok) console.warn('[estetica-pre-notify]', r.error)
+      })
+    }
+  }
+
+  if (tpl && isDiagnosticoEmailConfirmationTemplate(tpl)) {
+    const to = resolveEsteticaPreNotifyEmail()
+    if (to) {
+      const nomeClinica = answers.nome_clinica == null ? '' : String(answers.nome_clinica).trim()
+      const nomeProp = answers.nome_proprietaria == null ? '' : String(answers.nome_proprietaria).trim()
+      const businessName = (nomeClinica || nomeProp || 'Diagnóstico enviado').slice(0, 300)
+      const segment: EsteticaConsultSegment =
+        tpl === TEMPLATE_DIAGNOSTICO_CORPORAL_ID ? 'corporal' : 'capilar'
+      const adminPanelUrl = `${request.nextUrl.origin}/admin/estetica-consultoria`
+      void sendEsteticaDiagnosticoFilledNotifyEmail({
+        toEmail: to,
+        businessName,
+        segment,
+        adminPanelUrl,
+      }).then((r) => {
+        if (!r.ok) console.warn('[estetica-diagnostico-notify]', r.error)
       })
     }
   }
