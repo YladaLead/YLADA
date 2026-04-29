@@ -41,6 +41,7 @@ export function ProLideresPreDiagnosticoClient() {
   const [copied, setCopied] = useState(false)
   const [copiedInviteId, setCopiedInviteId] = useState<string | null>(null)
   const [inviteBusy, setInviteBusy] = useState(false)
+  const [deleteBusyId, setDeleteBusyId] = useState<string | null>(null)
   const [csvBusy, setCsvBusy] = useState(false)
   const [waBusy, setWaBusy] = useState(false)
 
@@ -129,6 +130,12 @@ export function ProLideresPreDiagnosticoClient() {
   }
 
   const createNewInvite = async () => {
+    if (overview && overview.inviteHistory.length >= 1) {
+      const ok = window.confirm(
+        'Isto cria um novo endereço (outro convite). Só use se precisar de um link diferente para outra pessoa. O link que já enviou continua válido. Continuar?'
+      )
+      if (!ok) return
+    }
     setInviteBusy(true)
     setError(null)
     try {
@@ -146,6 +153,29 @@ export function ProLideresPreDiagnosticoClient() {
       await loadAll()
     } finally {
       setInviteBusy(false)
+    }
+  }
+
+  const deleteInvite = async (id: string) => {
+    const ok = window.confirm(
+      'Eliminar este link? Quem já o guardou deixa de conseguir abrir o formulário por este endereço. As respostas já enviadas mantêm-se no painel.'
+    )
+    if (!ok) return
+    setDeleteBusyId(id)
+    setError(null)
+    try {
+      const res = await fetch(`/api/pro-lideres/pre-diagnostico/share-link/${encodeURIComponent(id)}`, {
+        method: 'DELETE',
+        credentials: 'include',
+      })
+      const j = await res.json().catch(() => ({}))
+      if (!res.ok) {
+        setError((j as { error?: string }).error || 'Não foi possível eliminar o convite.')
+        return
+      }
+      await loadAll()
+    } finally {
+      setDeleteBusyId(null)
     }
   }
 
@@ -197,25 +227,17 @@ export function ProLideresPreDiagnosticoClient() {
             ) : null}
           </div>
           <p className="text-sm text-gray-700">
-            <strong>Um convite, um link.</strong> Para cada pessoa, use «Gerar novo link de convite» e envie só esse
-            URL — cada submissão fica ligada a esse convite. Links que já partilhou continuam válidos para quem ainda os
-            tiver. Todas as respostas aparecem na lista abaixo, no seu espaço Pro Líderes.
+            <strong>Um link para partilhar.</strong> Use o endereço abaixo com a sua equipa. Só precisa de outro link
+            se quiser um convite separado para outra pessoa — evite gerar vários sem necessidade; pode apagar os que
+            sobrem em «Gerir links de convite». Todas as respostas ficam na lista abaixo.
           </p>
           <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
-            <button
-              type="button"
-              disabled={inviteBusy}
-              onClick={() => void createNewInvite()}
-              className="min-h-[44px] touch-manipulation rounded-xl bg-indigo-700 px-4 py-3 text-sm font-semibold text-white shadow-sm hover:bg-indigo-800 disabled:opacity-50"
-            >
-              {inviteBusy ? 'A gerar…' : 'Gerar novo link de convite'}
-            </button>
             <button
               type="button"
               onClick={() => void copyLink()}
               className="min-h-[44px] touch-manipulation rounded-xl bg-blue-700 px-4 py-3 text-sm font-semibold text-white shadow-sm hover:bg-blue-800"
             >
-              {copied ? 'Copiado.' : 'Copiar link mais recente'}
+              {copied ? 'Copiado.' : 'Copiar link'}
             </button>
             <button
               type="button"
@@ -253,38 +275,71 @@ export function ProLideresPreDiagnosticoClient() {
               {items.length} resposta{items.length === 1 ? '' : 's'}
             </span>
           </div>
-          <label className="block text-xs font-medium uppercase tracking-wide text-gray-500">
-            URL do convite mais recente
-          </label>
+          <label className="block text-xs font-medium uppercase tracking-wide text-gray-500">URL do convite</label>
           <input
             readOnly
             className="w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 font-mono text-xs text-gray-800"
             value={overview.responderUrl}
             onFocus={(e) => e.target.select()}
           />
-          {overview.inviteHistory.length > 1 ? (
-            <div className="space-y-2">
-              <p className="text-xs font-medium uppercase tracking-wide text-gray-500">Outros convites (mais antigos)</p>
-              <ul className="max-h-48 space-y-2 overflow-y-auto rounded-xl border border-gray-100 bg-gray-50/80 p-3 text-xs">
-                {overview.inviteHistory.slice(1).map((inv) => (
-                  <li key={inv.id} className="flex flex-col gap-1 border-b border-gray-200 pb-2 last:border-0 last:pb-0 sm:flex-row sm:items-center sm:justify-between sm:gap-2">
-                    <div className="min-w-0 flex-1">
-                      <div className="truncate font-medium text-gray-800">{inv.label ?? 'Convite'}</div>
-                      <div className="text-gray-500">{new Date(inv.createdAt).toLocaleString('pt-PT')}</div>
-                      <div className="truncate font-mono text-[11px] text-gray-600">{inv.responderUrl}</div>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => void copyInviteRow(inv.id, inv.responderUrl)}
-                      className="shrink-0 rounded-lg border border-gray-300 bg-white px-2 py-1.5 text-gray-800 hover:bg-gray-100"
+
+          <details className="rounded-xl border border-gray-200 bg-gray-50/90 p-4 text-sm">
+            <summary className="cursor-pointer font-semibold text-gray-800">
+              Gerir links de convite
+              {overview.inviteHistory.length > 0 ? (
+                <span className="ml-2 font-normal text-gray-500">({overview.inviteHistory.length})</span>
+              ) : null}
+            </summary>
+            <div className="mt-4 space-y-4 border-t border-gray-200 pt-4">
+              <p className="text-xs text-gray-600">
+                O link em destaque acima é sempre o mais recente. Apague convites que criou por engano; se apagar
+                todos, ao recarregar a página é criado um link novo automaticamente.
+              </p>
+              {overview.inviteHistory.length > 0 ? (
+                <ul className="max-h-56 space-y-2 overflow-y-auto rounded-lg border border-gray-100 bg-white p-2 text-xs">
+                  {overview.inviteHistory.map((inv) => (
+                    <li
+                      key={inv.id}
+                      className="flex flex-col gap-2 border-b border-gray-100 py-2 last:border-0 sm:flex-row sm:items-center sm:justify-between"
                     >
-                      {copiedInviteId === inv.id ? 'Copiado' : 'Copiar'}
-                    </button>
-                  </li>
-                ))}
-              </ul>
+                      <div className="min-w-0 flex-1">
+                        <div className="truncate font-medium text-gray-800">{inv.label ?? 'Convite'}</div>
+                        <div className="text-gray-500">{new Date(inv.createdAt).toLocaleString('pt-PT')}</div>
+                        <div className="truncate font-mono text-[11px] text-gray-600">{inv.responderUrl}</div>
+                      </div>
+                      <div className="flex shrink-0 flex-wrap gap-2">
+                        <button
+                          type="button"
+                          onClick={() => void copyInviteRow(inv.id, inv.responderUrl)}
+                          className="rounded-lg border border-gray-300 bg-white px-2 py-1.5 text-gray-800 hover:bg-gray-100"
+                        >
+                          {copiedInviteId === inv.id ? 'Copiado' : 'Copiar'}
+                        </button>
+                        <button
+                          type="button"
+                          disabled={deleteBusyId === inv.id}
+                          onClick={() => void deleteInvite(inv.id)}
+                          className="rounded-lg border border-red-200 bg-white px-2 py-1.5 text-red-800 hover:bg-red-50 disabled:opacity-50"
+                        >
+                          {deleteBusyId === inv.id ? 'A eliminar…' : 'Eliminar'}
+                        </button>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-xs text-gray-500">Nenhum convite listado.</p>
+              )}
+              <button
+                type="button"
+                disabled={inviteBusy}
+                onClick={() => void createNewInvite()}
+                className="min-h-[40px] w-full touch-manipulation rounded-lg border border-indigo-200 bg-indigo-50 px-3 py-2 text-sm font-semibold text-indigo-900 hover:bg-indigo-100 disabled:opacity-50 sm:w-auto"
+              >
+                {inviteBusy ? 'A gerar…' : 'Gerar link adicional (outra pessoa)'}
+              </button>
             </div>
-          ) : null}
+          </details>
           <p className="text-xs leading-relaxed text-gray-500">
             <strong>WhatsApp com imagem:</strong> em telemóvel abre o menu de partilha com o cartão YLADA e o texto;
             escolha WhatsApp para anexar a imagem. Em computador costuma abrir só o texto e o link da imagem — pode
