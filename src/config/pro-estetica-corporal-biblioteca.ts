@@ -33,7 +33,7 @@ export const SEGMENT_CODES_BIBLIOTECA_ESTETICA_CORPORAL = ['aesthetics', 'nutrit
 
 /**
  * Únicos itens da biblioteca YLADA mostrados no painel Pro Estética Corporal.
- * Inclui migration **333**, **342**, **347** e **348** (fluxos por técnica: drenagem, modeladora, criolipo, RF, ultrassom, lipocavitação, endermologia, celulite+flacidez, localizado, detox).
+ * Inclui migration **333**, **342**, **347**, **348** e **351** (capas intro alinhadas: 351 aplica na DB; 348 é fonte em novos installs).
  */
 export const TEMPLATE_IDS_BIBLIOTECA_ESTETICA_CORPORAL_PERMITIDOS = new Set([
   'b1000026-0026-4000-8000-000000000026',

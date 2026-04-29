@@ -14,9 +14,9 @@ VALUES
     $t142$
     {
       "title": "Drenagem linfática: faz sentido para o seu corpo agora?",
-      "introTitle": "Em cerca de 2 minutos: leveza, inchaço e rotina",
-      "introSubtitle": "Cinco perguntas para levar um perfil claro à consulta — sem substituir avaliação presencial.",
-      "introMicro": "~2 min · 5 perguntas",
+      "introTitle": "Pernas pesadas ou inchadas: será que a drenagem combina comigo?",
+      "introSubtitle": "Cinco perguntas para organizar o que contar na avaliação; na presencial a profissional indica se faz sentido no seu caso e em que ritmo.",
+      "introMicro": "Cerca de 2 min · 5 perguntas",
       "introBullets": [],
       "questions": [
         {"id": "q1", "text": "O que mais descreve o que você sente hoje?", "type": "single", "options": ["Pernas pesadas ou inchaço ao fim do dia", "Abdômen ou corpo “inchado” com frequência", "Recuperação pós-procedimento (com orientação médica)", "Curiosidade: quero entender se drenagem combina comigo"]},
@@ -46,9 +46,9 @@ VALUES
     $t143$
     {
       "title": "Massagem modeladora: expectativa realista para o seu caso?",
-      "introTitle": "Contorno, firmeza e rotina — em cerca de 2 minutos",
-      "introSubtitle": "Entenda o que costuma alinhar na consulta antes de fechar pacote.",
-      "introMicro": "~2 min · 5 perguntas",
+      "introTitle": "Contorno e massagem firme: faz sentido na sua rotina?",
+      "introSubtitle": "Cinco perguntas para alinhar expectativa antes de fechar pacote; na consulta vocês definem pressão, frequência e combinações seguras.",
+      "introMicro": "Cerca de 2 min · 5 perguntas",
       "introBullets": [],
       "questions": [
         {"id": "q1", "text": "Seu foco principal hoje é…", "type": "single", "options": ["Contorno (abdômen, culote, flancos)", "Textura da pele junto com contorno", "Só relaxamento, sem foco em medida", "Ainda estou definindo"]},
@@ -78,9 +78,9 @@ VALUES
     $t144$
     {
       "title": "Criolipólise: você está no ponto de conversar com segurança?",
-      "introTitle": "Frio local, expectativa e rotina — ~2 min",
-      "introSubtitle": "Organize dúvidas para a avaliação presencial; contraindicações só na clínica.",
-      "introMicro": "~2 min · 5 perguntas",
+      "introTitle": "Frio na zona certa: será que faz sentido para mim?",
+      "introSubtitle": "Cinco perguntas para organizar o que levar à avaliação; na presencial você confere com a profissional o que é indicado para o seu caso.",
+      "introMicro": "Cerca de 2 min · 5 perguntas",
       "introBullets": [],
       "questions": [
         {"id": "q1", "text": "Seu objetivo principal com criolipólise é…", "type": "single", "options": ["Reduzir gordura localizada numa zona", "Refinar contorno já trabalhado com hábitos", "Ainda estou pesquisando", "Vi resultado em outra pessoa e quero avaliar se cabe em mim"]},
@@ -110,9 +110,9 @@ VALUES
     $t145$
     {
       "title": "Radiofrequência corporal: firmeza, textura ou combinação?",
-      "introTitle": "Calor controlado e expectativa — ~2 min",
-      "introSubtitle": "Mapeie foco para conversar com a esteticista sobre protocolo e sessões.",
-      "introMicro": "~2 min · 5 perguntas",
+      "introTitle": "Calor na pele com objetivo: será que a radiofrequência corporal cabe em mim?",
+      "introSubtitle": "Cinco perguntas para mapear foco e sensibilidade antes da avaliação; na presencial a profissional fecha protocolo e sessões.",
+      "introMicro": "Cerca de 2 min · 5 perguntas",
       "introBullets": [],
       "questions": [
         {"id": "q1", "text": "O que você mais quer melhorar com RF corporal?", "type": "single", "options": ["Firmeza da pele", "Textura / aspecto da pele", "Contorno com apoio de outras etapas", "Ainda não sei explicar"]},
@@ -142,9 +142,9 @@ VALUES
     $t146$
     {
       "title": "Ultrassom corporal: onde entra no seu objetivo?",
-      "introTitle": "Foco em zona e expectativa — ~2 min",
-      "introSubtitle": "Separe curiosidade de prioridade antes de fechar protocolo.",
-      "introMicro": "~2 min · 5 perguntas",
+      "introTitle": "Ultrassom corporal: será que é o próximo passo para a sua zona?",
+      "introSubtitle": "Cinco perguntas para separar curiosidade de prioridade; na consulta vocês veem se encaixa com seu objetivo e pele.",
+      "introMicro": "Cerca de 2 min · 5 perguntas",
       "introBullets": [],
       "questions": [
         {"id": "q1", "text": "Você busca ultrassom corporal mais para…", "type": "single", "options": ["Apoio a contorno / localizado", "Textura ou sensação na pele", "Combinar com outra tecnologia", "Entender se faz sentido no meu caso"]},
@@ -174,9 +174,9 @@ VALUES
     $t147$
     {
       "title": "Lipocavitação: indicação e expectativa para o seu perfil?",
-      "introTitle": "Ultrassom focal, contorno e segurança — ~2 min",
-      "introSubtitle": "Prepare a conversa com a esteticista sobre zona e protocolo.",
-      "introMicro": "~2 min · 5 perguntas",
+      "introTitle": "Cavitação e contorno: vale a pena levar isso na consulta?",
+      "introSubtitle": "Cinco perguntas sobre zona, pele e expectativa; na presencial a profissional indica se lipocavitação entra no seu plano.",
+      "introMicro": "Cerca de 2 min · 5 perguntas",
       "introBullets": [],
       "questions": [
         {"id": "q1", "text": "Seu interesse em lipocavitação vem mais de…", "type": "single", "options": ["Gordura localizada visível", "Complementar dieta e exercício", "Indicação após avaliação anterior", "Curiosidade após ver resultado de outras pessoas"]},
@@ -206,9 +206,9 @@ VALUES
     $t148$
     {
       "title": "Endermologia: textura, circulação ou contorno em primeiro lugar?",
-      "introTitle": "Vácuo, rolagem e expectativa — ~2 min",
-      "introSubtitle": "Entenda o que levar à consulta sobre celulite e rotina.",
-      "introMicro": "~2 min · 5 perguntas",
+      "introTitle": "Celulite e sucção: será que a endermologia é o caminho para mim?",
+      "introSubtitle": "Cinco perguntas para levar sensações e rotina à avaliação; na consulta vocês alinham frequência e combinações.",
+      "introMicro": "Cerca de 2 min · 5 perguntas",
       "introBullets": [],
       "questions": [
         {"id": "q1", "text": "O que mais te incomoda na região de interesse?", "type": "single", "options": ["Aspecto “ondulado” da pele", "Sensação de peso ou inchaço", "Os dois", "Quero contorno mais definido"]},
@@ -238,9 +238,9 @@ VALUES
     $t149$
     {
       "title": "Celulite e flacidez: o que atacar primeiro no seu caso?",
-      "introTitle": "Textura vs firmeza — ~2 min",
-      "introSubtitle": "Priorize a conversa com a esteticista sem prometer resultado único.",
-      "introMicro": "~2 min · 5 perguntas",
+      "introTitle": "Textura ou firmeza: o que te incomoda mais ao espelho?",
+      "introSubtitle": "Cinco perguntas para priorizar o assunto na consulta — sem promessa de resultado; na presencial define-se ordem de protocolo.",
+      "introMicro": "Cerca de 2 min · 5 perguntas",
       "introBullets": [],
       "questions": [
         {"id": "q1", "text": "No espelho, o que mais chama atenção?", "type": "single", "options": ["Ondulação / irregularidade", "Falta de firmeza", "Os dois parecem iguais", "Inchaço junto"]},
@@ -270,9 +270,9 @@ VALUES
     $t150$
     {
       "title": "Gordura localizada: qual primeiro passo com a esteticista?",
-      "introTitle": "Contorno, hábitos e tecnologia — ~2 min",
-      "introSubtitle": "Alinhe expectativa antes de fechar pacote ou procedimento.",
-      "introMicro": "~2 min · 5 perguntas",
+      "introTitle": "Gordura localizada: por onde começar sem promessa milagrosa?",
+      "introSubtitle": "Cinco perguntas sobre zona, hábitos e expectativa; na avaliação fechas tecnologia, massagem e ritmo com a profissional.",
+      "introMicro": "Cerca de 2 min · 5 perguntas",
       "introBullets": [],
       "questions": [
         {"id": "q1", "text": "A zona que mais te incomoda…", "type": "single", "options": ["Abdômen", "Culote/coxas", "Flancos/costas", "Várias"]},
@@ -302,9 +302,9 @@ VALUES
     $t151$
     {
       "title": "Detox corporal: rotina, sensação e o que perguntar na clínica",
-      "introTitle": "Sem promessa milagrosa — ~2 min de mapeamento",
-      "introSubtitle": "Relacione hábitos e sensação para abrir conversa com a esteticista sobre drenagem e bem-estar.",
-      "introMicro": "~2 min · 5 perguntas",
+      "introTitle": "Detox corporal: o que isso pode significar para o seu corpo?",
+      "introSubtitle": "Cinco perguntas sobre hábitos e sensação antes da consulta; na presencial vocês separam o que é rotina, o que é protocolo e o que é promessa realista.",
+      "introMicro": "Cerca de 2 min · 5 perguntas",
       "introBullets": [],
       "questions": [
         {"id": "q1", "text": "O que “detox corporal” significa mais para você hoje?", "type": "single", "options": ["Menos inchaço e sensação de leveza", "Pele e aspecto do corpo", "Energia e rotina", "Seguir indicação da clínica"]},
@@ -337,41 +337,41 @@ ON CONFLICT (id) DO UPDATE SET
   updated_at = NOW();
 
 INSERT INTO ylada_biblioteca_itens (tipo, segment_codes, tema, pilar, titulo, description, dor_principal, objetivo_principal, source_type, template_id, flow_id, meta, sort_order, active)
-SELECT 'quiz', ARRAY['aesthetics', 'nutrition', 'fitness'], 'inchaço_retencao', 'metabolismo', 'Drenagem linfática: faz sentido para o seu corpo agora?', 'Mapeie inchaço, rotina e expectativa para levar à consulta.', 'Inchaço ou pernas pesadas', 'Agendar avaliação / drenagem', 'custom', 'b1000142-0142-4000-8000-000000000142'::uuid, 'diagnostico_risco', '{"nomenclatura": "quiz_drenagem_linfatica_indicacao_corporal", "num_perguntas": 5, "tempo_minutos": 2}'::jsonb, 301, true
+SELECT 'quiz', ARRAY['aesthetics', 'nutrition', 'fitness'], 'inchaço_retencao', 'metabolismo', 'Drenagem linfática: faz sentido para o seu corpo agora?', 'Inchaço, rotina e expectativa — organiza ideias antes da consulta.', 'Inchaço ou pernas pesadas', 'Agendar avaliação / drenagem', 'custom', 'b1000142-0142-4000-8000-000000000142'::uuid, 'diagnostico_risco', '{"nomenclatura": "quiz_drenagem_linfatica_indicacao_corporal", "num_perguntas": 5, "tempo_minutos": 2}'::jsonb, 301, true
 WHERE NOT EXISTS (SELECT 1 FROM ylada_biblioteca_itens WHERE template_id = 'b1000142-0142-4000-8000-000000000142');
 
 INSERT INTO ylada_biblioteca_itens (tipo, segment_codes, tema, pilar, titulo, description, dor_principal, objetivo_principal, source_type, template_id, flow_id, meta, sort_order, active)
-SELECT 'quiz', ARRAY['aesthetics', 'nutrition', 'fitness'], 'peso_gordura', 'metabolismo', 'Massagem modeladora: expectativa realista para o seu caso?', 'Contorno, pressão e frequência — perfil para a consulta.', 'Dúvida sobre modeladora', 'Alinhar expectativa e pacote', 'custom', 'b1000143-0143-4000-8000-000000000143'::uuid, 'diagnostico_risco', '{"nomenclatura": "quiz_massagem_modeladora_expectativa_corporal", "num_perguntas": 5, "tempo_minutos": 2}'::jsonb, 302, true
+SELECT 'quiz', ARRAY['aesthetics', 'nutrition', 'fitness'], 'peso_gordura', 'metabolismo', 'Massagem modeladora: expectativa realista para o seu caso?', 'Contorno, pressão e frequência — perfil para conversar com a esteticista.', 'Dúvida sobre modeladora', 'Alinhar expectativa e pacote', 'custom', 'b1000143-0143-4000-8000-000000000143'::uuid, 'diagnostico_risco', '{"nomenclatura": "quiz_massagem_modeladora_expectativa_corporal", "num_perguntas": 5, "tempo_minutos": 2}'::jsonb, 302, true
 WHERE NOT EXISTS (SELECT 1 FROM ylada_biblioteca_itens WHERE template_id = 'b1000143-0143-4000-8000-000000000143');
 
 INSERT INTO ylada_biblioteca_itens (tipo, segment_codes, tema, pilar, titulo, description, dor_principal, objetivo_principal, source_type, template_id, flow_id, meta, sort_order, active)
-SELECT 'quiz', ARRAY['aesthetics', 'nutrition', 'fitness'], 'peso_gordura', 'metabolismo', 'Criolipólise: prontidão e dúvidas para a consulta', 'Frio local, expectativa e combinação com massagem — leve à clínica.', 'Dúvida sobre criolipo', 'Marcar avaliação técnica', 'custom', 'b1000144-0144-4000-8000-000000000144'::uuid, 'diagnostico_risco', '{"nomenclatura": "quiz_criolipolise_prontidao_corporal", "num_perguntas": 5, "tempo_minutos": 2}'::jsonb, 303, true
+SELECT 'quiz', ARRAY['aesthetics', 'nutrition', 'fitness'], 'peso_gordura', 'metabolismo', 'Criolipólise: prontidão e dúvidas para a consulta', 'Frio local, expectativa e combinação com massagem — organiza ideias antes da consulta.', 'Dúvida sobre criolipo', 'Marcar avaliação técnica', 'custom', 'b1000144-0144-4000-8000-000000000144'::uuid, 'diagnostico_risco', '{"nomenclatura": "quiz_criolipolise_prontidao_corporal", "num_perguntas": 5, "tempo_minutos": 2}'::jsonb, 303, true
 WHERE NOT EXISTS (SELECT 1 FROM ylada_biblioteca_itens WHERE template_id = 'b1000144-0144-4000-8000-000000000144');
 
 INSERT INTO ylada_biblioteca_itens (tipo, segment_codes, tema, pilar, titulo, description, dor_principal, objetivo_principal, source_type, template_id, flow_id, meta, sort_order, active)
-SELECT 'quiz', ARRAY['aesthetics', 'nutrition', 'fitness'], 'flacidez', 'metabolismo', 'Radiofrequência corporal: firmeza, textura ou combinação?', 'Calor controlado, pele e frequência — roteiro para a esteticista.', 'Flacidez ou textura', 'Explorar RF corporal', 'custom', 'b1000145-0145-4000-8000-000000000145'::uuid, 'diagnostico_risco', '{"nomenclatura": "quiz_radiofrequencia_corporal_protocolo", "num_perguntas": 5, "tempo_minutos": 2}'::jsonb, 304, true
+SELECT 'quiz', ARRAY['aesthetics', 'nutrition', 'fitness'], 'flacidez', 'metabolismo', 'Radiofrequência corporal: firmeza, textura ou combinação?', 'Calor, pele e ritmo — roteiro objetivo para a avaliação.', 'Flacidez ou textura', 'Explorar RF corporal', 'custom', 'b1000145-0145-4000-8000-000000000145'::uuid, 'diagnostico_risco', '{"nomenclatura": "quiz_radiofrequencia_corporal_protocolo", "num_perguntas": 5, "tempo_minutos": 2}'::jsonb, 304, true
 WHERE NOT EXISTS (SELECT 1 FROM ylada_biblioteca_itens WHERE template_id = 'b1000145-0145-4000-8000-000000000145');
 
 INSERT INTO ylada_biblioteca_itens (tipo, segment_codes, tema, pilar, titulo, description, dor_principal, objetivo_principal, source_type, template_id, flow_id, meta, sort_order, active)
-SELECT 'quiz', ARRAY['aesthetics', 'nutrition', 'fitness'], 'peso_gordura', 'metabolismo', 'Ultrassom corporal: onde entra no seu objetivo?', 'Zona, foco e combinação com outras etapas.', 'Dúvida sobre ultrassom', 'Qualificar interesse', 'custom', 'b1000146-0146-4000-8000-000000000146'::uuid, 'diagnostico_risco', '{"nomenclatura": "quiz_ultrassom_corporal_foco_corporal", "num_perguntas": 5, "tempo_minutos": 2}'::jsonb, 305, true
+SELECT 'quiz', ARRAY['aesthetics', 'nutrition', 'fitness'], 'peso_gordura', 'metabolismo', 'Ultrassom corporal: onde entra no seu objetivo?', 'Zona e objetivo — o que levar antes de fechar protocolo.', 'Dúvida sobre ultrassom', 'Qualificar interesse', 'custom', 'b1000146-0146-4000-8000-000000000146'::uuid, 'diagnostico_risco', '{"nomenclatura": "quiz_ultrassom_corporal_foco_corporal", "num_perguntas": 5, "tempo_minutos": 2}'::jsonb, 305, true
 WHERE NOT EXISTS (SELECT 1 FROM ylada_biblioteca_itens WHERE template_id = 'b1000146-0146-4000-8000-000000000146');
 
 INSERT INTO ylada_biblioteca_itens (tipo, segment_codes, tema, pilar, titulo, description, dor_principal, objetivo_principal, source_type, template_id, flow_id, meta, sort_order, active)
-SELECT 'quiz', ARRAY['aesthetics', 'nutrition', 'fitness'], 'peso_gordura', 'metabolismo', 'Lipocavitação: indicação e expectativa para o seu perfil?', 'Localizado, pele e plano com ou sem massagem.', 'Dúvida sobre cavitação', 'Marcar avaliação', 'custom', 'b1000147-0147-4000-8000-000000000147'::uuid, 'diagnostico_risco', '{"nomenclatura": "quiz_lipocavitacao_indicacao_corporal", "num_perguntas": 5, "tempo_minutos": 2}'::jsonb, 306, true
+SELECT 'quiz', ARRAY['aesthetics', 'nutrition', 'fitness'], 'peso_gordura', 'metabolismo', 'Lipocavitação: indicação e expectativa para o seu perfil?', 'Localizado e expectativa — clareza antes da consulta.', 'Dúvida sobre cavitação', 'Marcar avaliação', 'custom', 'b1000147-0147-4000-8000-000000000147'::uuid, 'diagnostico_risco', '{"nomenclatura": "quiz_lipocavitacao_indicacao_corporal", "num_perguntas": 5, "tempo_minutos": 2}'::jsonb, 306, true
 WHERE NOT EXISTS (SELECT 1 FROM ylada_biblioteca_itens WHERE template_id = 'b1000147-0147-4000-8000-000000000147');
 
 INSERT INTO ylada_biblioteca_itens (tipo, segment_codes, tema, pilar, titulo, description, dor_principal, objetivo_principal, source_type, template_id, flow_id, meta, sort_order, active)
-SELECT 'quiz', ARRAY['aesthetics', 'nutrition', 'fitness'], 'celulite', 'metabolismo', 'Endermologia: textura, circulação ou contorno primeiro?', 'Celulite, sucção e rotina — leve à consulta.', 'Textura ou celulite', 'Explorar endermologia', 'custom', 'b1000148-0148-4000-8000-000000000148'::uuid, 'diagnostico_risco', '{"nomenclatura": "quiz_endermologia_celulite_corporal", "num_perguntas": 5, "tempo_minutos": 2}'::jsonb, 307, true
+SELECT 'quiz', ARRAY['aesthetics', 'nutrition', 'fitness'], 'celulite', 'metabolismo', 'Endermologia: textura, circulação ou contorno primeiro?', 'Celulite, sucção e hábitos — o que mencionar na avaliação.', 'Textura ou celulite', 'Explorar endermologia', 'custom', 'b1000148-0148-4000-8000-000000000148'::uuid, 'diagnostico_risco', '{"nomenclatura": "quiz_endermologia_celulite_corporal", "num_perguntas": 5, "tempo_minutos": 2}'::jsonb, 307, true
 WHERE NOT EXISTS (SELECT 1 FROM ylada_biblioteca_itens WHERE template_id = 'b1000148-0148-4000-8000-000000000148');
 
 INSERT INTO ylada_biblioteca_itens (tipo, segment_codes, tema, pilar, titulo, description, dor_principal, objetivo_principal, source_type, template_id, flow_id, meta, sort_order, active)
-SELECT 'quiz', ARRAY['aesthetics', 'nutrition', 'fitness'], 'celulite', 'metabolismo', 'Celulite e flacidez: o que atacar primeiro no seu caso?', 'Prioridade textura vs firmeza para a esteticista.', 'Celulite e flacidez', 'Definir ordem de protocolo', 'custom', 'b1000149-0149-4000-8000-000000000149'::uuid, 'diagnostico_risco', '{"nomenclatura": "quiz_celulite_flacidez_prioridade_corporal", "num_perguntas": 5, "tempo_minutos": 2}'::jsonb, 308, true
+SELECT 'quiz', ARRAY['aesthetics', 'nutrition', 'fitness'], 'celulite', 'metabolismo', 'Celulite e flacidez: o que atacar primeiro no seu caso?', 'Textura vs firmeza — prioridade para a consulta.', 'Celulite e flacidez', 'Definir ordem de protocolo', 'custom', 'b1000149-0149-4000-8000-000000000149'::uuid, 'diagnostico_risco', '{"nomenclatura": "quiz_celulite_flacidez_prioridade_corporal", "num_perguntas": 5, "tempo_minutos": 2}'::jsonb, 308, true
 WHERE NOT EXISTS (SELECT 1 FROM ylada_biblioteca_itens WHERE template_id = 'b1000149-0149-4000-8000-000000000149');
 
 INSERT INTO ylada_biblioteca_itens (tipo, segment_codes, tema, pilar, titulo, description, dor_principal, objetivo_principal, source_type, template_id, flow_id, meta, sort_order, active)
-SELECT 'quiz', ARRAY['aesthetics', 'nutrition', 'fitness'], 'peso_gordura', 'metabolismo', 'Gordura localizada: qual primeiro passo com a esteticista?', 'Zona, hábitos e tecnologia — antes de fechar pacote.', 'Gordura localizada', 'Agendar avaliação de contorno', 'custom', 'b1000150-0150-4000-8000-000000000150'::uuid, 'diagnostico_risco', '{"nomenclatura": "quiz_gordura_localizada_primeiro_passo_corporal", "num_perguntas": 5, "tempo_minutos": 2}'::jsonb, 309, true
+SELECT 'quiz', ARRAY['aesthetics', 'nutrition', 'fitness'], 'peso_gordura', 'metabolismo', 'Gordura localizada: qual primeiro passo com a esteticista?', 'Zona, hábitos e tecnologia — organiza ideias antes de fechar pacote ou procedimento.', 'Gordura localizada', 'Agendar avaliação de contorno', 'custom', 'b1000150-0150-4000-8000-000000000150'::uuid, 'diagnostico_risco', '{"nomenclatura": "quiz_gordura_localizada_primeiro_passo_corporal", "num_perguntas": 5, "tempo_minutos": 2}'::jsonb, 309, true
 WHERE NOT EXISTS (SELECT 1 FROM ylada_biblioteca_itens WHERE template_id = 'b1000150-0150-4000-8000-000000000150');
 
 INSERT INTO ylada_biblioteca_itens (tipo, segment_codes, tema, pilar, titulo, description, dor_principal, objetivo_principal, source_type, template_id, flow_id, meta, sort_order, active)
-SELECT 'quiz', ARRAY['aesthetics', 'nutrition', 'fitness'], 'inchaço_retencao', 'metabolismo', 'Detox corporal: rotina, sensação e o que perguntar na clínica', 'Sem milagre — mapeamento para drenagem e bem-estar.', 'Sensação de peso ou confusão com detox', 'Abrir conversa na clínica', 'custom', 'b1000151-0151-4000-8000-000000000151'::uuid, 'diagnostico_risco', '{"nomenclatura": "quiz_detox_corporal_rotina_corporal", "num_perguntas": 5, "tempo_minutos": 2}'::jsonb, 310, true
+SELECT 'quiz', ARRAY['aesthetics', 'nutrition', 'fitness'], 'inchaço_retencao', 'metabolismo', 'Detox corporal: rotina, sensação e o que perguntar na clínica', 'Rotina e sensação — abre conversa sobre drenagem e bem-estar sem milagre.', 'Sensação de peso ou confusão com detox', 'Abrir conversa na clínica', 'custom', 'b1000151-0151-4000-8000-000000000151'::uuid, 'diagnostico_risco', '{"nomenclatura": "quiz_detox_corporal_rotina_corporal", "num_perguntas": 5, "tempo_minutos": 2}'::jsonb, 310, true
 WHERE NOT EXISTS (SELECT 1 FROM ylada_biblioteca_itens WHERE template_id = 'b1000151-0151-4000-8000-000000000151');
