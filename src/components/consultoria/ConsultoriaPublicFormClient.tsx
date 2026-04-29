@@ -35,8 +35,8 @@ const MSGS: Record<
 > = {
   pro_lideres: {
     loading: 'A carregar…',
-    thanksTitle: 'Obrigado.',
-    thanksBody: 'A sua resposta foi registada.',
+    thanksTitle: 'Obrigado',
+    thanksBody: 'Sua resposta foi registrada.',
     nameLabel: 'O seu nome (opcional)',
     emailLabel: 'E-mail (opcional)',
     submit: 'Enviar respostas',
