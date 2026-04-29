@@ -19,6 +19,15 @@ import {
 
 type TabKey = 'editar' | 'execucao' | 'links' | 'respostas'
 
+/** Rótulo na lista à esquerda (admin respostas). */
+function adminRespondentListLabel(r: ProLideresConsultoriaFormResponseRow): string {
+  const n = r.respondent_name?.trim()
+  if (n) return n
+  const e = r.respondent_email?.trim()
+  if (e) return e
+  return 'Sem nome no envio'
+}
+
 function normalizeSearchText(s: string) {
   return s
     .toLowerCase()
@@ -73,12 +82,39 @@ export default function ProLideresConsultoriaAdminClient() {
   const [responses, setResponses] = useState<ProLideresConsultoriaFormResponseRow[]>([])
   const [auxLoading, setAuxLoading] = useState(false)
   const [deleteLinkBusy, setDeleteLinkBusy] = useState<string | null>(null)
+  const [adminFichaResponseId, setAdminFichaResponseId] = useState<string | null>(null)
+  const [deleteResponseBusy, setDeleteResponseBusy] = useState<string | null>(null)
   const [buscaRespostas, setBuscaRespostas] = useState('')
 
   const respostasFiltradas = useMemo(
     () => responses.filter((r) => responseMatchesQuery(r, buscaRespostas)),
     [responses, buscaRespostas]
   )
+
+  const respostasPorNome = useMemo(() => {
+    return [...respostasFiltradas].sort((a, b) => {
+      const la = adminRespondentListLabel(a).toLocaleLowerCase('pt')
+      const lb = adminRespondentListLabel(b).toLocaleLowerCase('pt')
+      if (la !== lb) return la.localeCompare(lb, 'pt')
+      return new Date(b.submitted_at).getTime() - new Date(a.submitted_at).getTime()
+    })
+  }, [respostasFiltradas])
+
+  const fichaResponse = useMemo(
+    () => (adminFichaResponseId ? respostasFiltradas.find((r) => r.id === adminFichaResponseId) ?? null : null),
+    [respostasFiltradas, adminFichaResponseId]
+  )
+
+  useEffect(() => {
+    setAdminFichaResponseId(null)
+  }, [selected?.id])
+
+  useEffect(() => {
+    if (!adminFichaResponseId) return
+    if (!respostasFiltradas.some((r) => r.id === adminFichaResponseId)) {
+      setAdminFichaResponseId(null)
+    }
+  }, [respostasFiltradas, adminFichaResponseId])
 
   const formFieldsForResponses = useMemo(() => {
     if (!selected || selected.material_kind !== 'formulario') return []
@@ -271,6 +307,28 @@ export default function ProLideresConsultoriaAdminClient() {
       return
     }
     await loadAuxForForm(selected.id)
+  }
+
+  const deleteFormResponse = async (responseId: string) => {
+    if (!selected?.id) return
+    if (!confirm('Eliminar definitivamente esta ficha de resposta? Não é possível desfazer.')) return
+    setDeleteResponseBusy(responseId)
+    setError(null)
+    try {
+      const res = await fetch(
+        `/api/admin/pro-lideres/consultoria/materials/${selected.id}/responses/${encodeURIComponent(responseId)}`,
+        { method: 'DELETE', credentials: 'include' }
+      )
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) {
+        setError((data as { error?: string }).error || 'Erro ao eliminar a resposta.')
+        return
+      }
+      setAdminFichaResponseId(null)
+      await loadAuxForForm(selected.id)
+    } finally {
+      setDeleteResponseBusy(null)
+    }
   }
 
   const deleteShareLink = async (linkId: string) => {
@@ -594,8 +652,8 @@ export default function ProLideresConsultoriaAdminClient() {
                     </button>
                   </div>
                   <p className="text-xs text-gray-500">
-                    Cada envio em cartão com pergunta e resposta legíveis. O CSV inclui as linhas visíveis (com o
-                    filtro de busca atual, se houver). Separador ponto e vírgula, compatível com Excel em PT.
+                    Lista por nome à esquerda; à direita abre a ficha completa. O CSV usa o filtro de busca atual.
+                    Separador ponto e vírgula no Excel (PT).
                   </p>
                   {auxLoading ? <p className="text-xs text-gray-500">A carregar…</p> : null}
                   {responses.length === 0 ? (
@@ -616,25 +674,81 @@ export default function ProLideresConsultoriaAdminClient() {
                       {respostasFiltradas.length === 0 ? (
                         <p className="text-sm text-gray-500">Nenhum resultado para esta busca.</p>
                       ) : (
-                        <div className="max-h-[min(72vh,720px)] overflow-y-auto space-y-4 pr-1">
-                          {respostasFiltradas.map((r) => {
-                            const ans = (r.answers && typeof r.answers === 'object' && !Array.isArray(r.answers)
-                              ? r.answers
-                              : {}) as Record<string, unknown>
-                            const rows = consultoriaAnswersToDisplayRows(formFieldsForResponses, ans)
-                            return (
+                        <div className="grid gap-4 lg:grid-cols-[minmax(220px,280px)_1fr] lg:items-start">
+                          <div className="rounded-xl border border-gray-200 bg-gray-50/80 p-2">
+                            <p className="px-2 py-1.5 text-xs font-semibold uppercase tracking-wide text-gray-500">
+                              Respostas por nome
+                            </p>
+                            <ul className="max-h-[min(60vh,560px)] space-y-1 overflow-y-auto pr-1">
+                              {respostasPorNome.map((r) => {
+                                const active = adminFichaResponseId === r.id
+                                return (
+                                  <li key={r.id}>
+                                    <button
+                                      type="button"
+                                      onClick={() => setAdminFichaResponseId(r.id)}
+                                      className={`w-full rounded-lg px-3 py-2.5 text-left text-sm transition-colors ${
+                                        active
+                                          ? 'bg-emerald-600 text-white shadow-sm'
+                                          : 'bg-white text-gray-900 hover:bg-emerald-50/80 border border-transparent hover:border-emerald-100'
+                                      }`}
+                                    >
+                                      <span className="block font-semibold leading-snug">
+                                        {adminRespondentListLabel(r)}
+                                      </span>
+                                      <span
+                                        className={`mt-0.5 block text-xs ${active ? 'text-emerald-100' : 'text-gray-500'}`}
+                                      >
+                                        {new Date(r.submitted_at).toLocaleString('pt-BR', {
+                                          dateStyle: 'short',
+                                          timeStyle: 'short',
+                                        })}
+                                      </span>
+                                    </button>
+                                  </li>
+                                )
+                              })}
+                            </ul>
+                          </div>
+                          <div className="min-w-0">
+                            {!fichaResponse ? (
+                              <div className="rounded-xl border border-dashed border-gray-200 bg-gray-50/50 px-4 py-12 text-center text-sm text-gray-500">
+                                Clique num nome à esquerda para ver a ficha completa e eliminar se precisar.
+                              </div>
+                            ) : (
                               <ConsultoriaAdminResponseCard
-                                key={r.id}
                                 tone="gray"
-                                submittedAt={r.submitted_at}
-                                respondentName={r.respondent_name}
-                                respondentEmail={r.respondent_email}
-                                respondentWhatsapp={r.respondent_whatsapp}
-                                rows={rows}
-                                rawAnswers={r.answers}
+                                submittedAt={fichaResponse.submitted_at}
+                                respondentName={fichaResponse.respondent_name}
+                                respondentEmail={fichaResponse.respondent_email}
+                                respondentWhatsapp={fichaResponse.respondent_whatsapp}
+                                rows={consultoriaAnswersToDisplayRows(
+                                  formFieldsForResponses,
+                                  (fichaResponse.answers &&
+                                  typeof fichaResponse.answers === 'object' &&
+                                  !Array.isArray(fichaResponse.answers)
+                                    ? fichaResponse.answers
+                                    : {}) as Record<string, unknown>
+                                )}
+                                rawAnswers={fichaResponse.answers}
+                                footer={
+                                  <div className="flex flex-wrap items-center justify-between gap-2">
+                                    <p className="text-xs text-gray-600">
+                                      Elimina só este envio; o formulário e os links mantêm-se.
+                                    </p>
+                                    <button
+                                      type="button"
+                                      disabled={deleteResponseBusy === fichaResponse.id || auxLoading}
+                                      onClick={() => void deleteFormResponse(fichaResponse.id)}
+                                      className="rounded-lg border border-red-200 bg-white px-3 py-2 text-sm font-semibold text-red-800 hover:bg-red-50 disabled:opacity-50"
+                                    >
+                                      {deleteResponseBusy === fichaResponse.id ? 'A eliminar…' : 'Eliminar ficha'}
+                                    </button>
+                                  </div>
+                                }
                               />
-                            )
-                          })}
+                            )}
+                          </div>
                         </div>
                       )}
                     </>

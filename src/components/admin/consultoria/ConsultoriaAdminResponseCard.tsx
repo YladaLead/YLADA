@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo } from 'react'
+import { useMemo, type ReactNode } from 'react'
 import {
   groupConsultoriaAnswerRowsBySection,
   type ConsultoriaAnswerRow,
@@ -14,6 +14,8 @@ export type ConsultoriaAdminResponseCardProps = {
   respondentWhatsapp?: string | null
   rows: ConsultoriaAnswerRow[]
   rawAnswers: unknown
+  /** Ações extra (ex.: eliminar ficha) — renderizado abaixo do JSON bruto. */
+  footer?: ReactNode
 }
 
 export function ConsultoriaAdminResponseCard({
@@ -24,6 +26,7 @@ export function ConsultoriaAdminResponseCard({
   respondentWhatsapp,
   rows,
   rawAnswers,
+  footer,
 }: ConsultoriaAdminResponseCardProps) {
   const sections = useMemo(() => groupConsultoriaAnswerRowsBySection(rows), [rows])
   const shell =
@@ -99,6 +102,7 @@ export function ConsultoriaAdminResponseCard({
             {JSON.stringify(rawAnswers, null, 2)}
           </pre>
         </details>
+        {footer ? <div className="mt-4 border-t border-black/[0.06] pt-4">{footer}</div> : null}
       </div>
     </article>
   )
