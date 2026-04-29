@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { EsteticaConsultoriaStableLinkPanel } from '@/components/admin/estetica/EsteticaConsultoriaStableLinkPanel'
 import { ConsultoriaKindEditor } from '@/components/admin/consultoria/ConsultoriaKindEditor'
 import { ConsultoriaAdminResponseCard } from '@/components/admin/consultoria/ConsultoriaAdminResponseCard'
 import {
@@ -618,6 +619,8 @@ export default function EsteticaConsultoriaAdminClient() {
   const [openPreLinks, setOpenPreLinks] = useState<{
     corporal: OpenPreLinkPack | null
     capilar: OpenPreLinkPack | null
+    diagnostico_corporal: OpenPreLinkPack | null
+    diagnostico_capilar: OpenPreLinkPack | null
   } | null>(null)
   const [openPreLinksLoading, setOpenPreLinksLoading] = useState(true)
   const [openPreLinksError, setOpenPreLinksError] = useState<string | null>(null)
@@ -657,13 +660,17 @@ export default function EsteticaConsultoriaAdminClient() {
         setOpenPreLinks({
           corporal: (data as { corporal?: OpenPreLinkPack | null }).corporal ?? null,
           capilar: (data as { capilar?: OpenPreLinkPack | null }).capilar ?? null,
+          diagnostico_corporal:
+            (data as { diagnostico_corporal?: OpenPreLinkPack | null }).diagnostico_corporal ?? null,
+          diagnostico_capilar:
+            (data as { diagnostico_capilar?: OpenPreLinkPack | null }).diagnostico_capilar ?? null,
         })
       } else {
         setOpenPreLinks(null)
         setOpenPreLinksError(
           (data as { error?: string; hint?: string }).error ??
             (data as { hint?: string }).hint ??
-            'Não foi possível carregar os links públicos de pré.'
+            'Não foi possível carregar os links públicos.'
         )
       }
       setOpenPreLinksLoading(false)
@@ -1730,7 +1737,74 @@ export default function EsteticaConsultoriaAdminClient() {
                     </button>
                   </>
                 ) : (
-                  <p className="mt-2 text-xs text-amber-800">Link ainda não disponível. Aplique a migração 336 no Supabase e recarregue.</p>
+                  <p className="mt-2 text-xs text-amber-800">
+                    Link ainda não disponível. Aplique a migração 336 no Supabase e recarregue.
+                  </p>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
+
+      <section className="rounded-2xl border border-indigo-200 bg-gradient-to-br from-indigo-50/80 to-white p-4 shadow-sm space-y-3">
+        <h2 className="text-sm font-semibold text-indigo-950">Links públicos — diagnóstico completo (formulário longo)</h2>
+        <p className="text-xs text-indigo-900/85 max-w-3xl">
+          <strong>Substitui o link único por clínica</strong> que geravas depois de «Criar e abrir»: são sempre{' '}
+          <strong>estes dois endereços</strong> (corporal / capilar). A cliente preenche o diagnóstico longo aqui; ao
+          enviar, <strong>cria-se a ficha</strong> em «Estéticas acompanhadas», como no pré.
+        </p>
+        <p className="text-xs text-indigo-900/85 max-w-3xl">
+          Depois, em «Estéticas acompanhadas», usa <strong>Pesquisar</strong> com o <strong>e-mail de contacto</strong>{' '}
+          (ou nome da clínica) e clica na ficha para rever respostas ou gerar um link com confirmação por e-mail (fluxo
+          pós-pagamento). Pedir à lead que indique e-mail no fim do formulário (ou no capilar no campo de e-mail) ajuda
+          a encontrar a ficha depressa.
+        </p>
+        <p className="text-[11px] text-indigo-800/80 max-w-3xl">
+          «Ver formulário modelo — corporal/capilar» no topo é só pré-visualização; para enviar à cliente usa os URLs
+          abaixo (ou o link gerado na ficha, se precisares de confirmação no e-mail da clínica antes de preencher).
+        </p>
+        {openPreLinksLoading ? (
+          <p className="text-sm text-indigo-800/80">A carregar links…</p>
+        ) : openPreLinksError ? (
+          <p className="text-sm text-red-800">{openPreLinksError}</p>
+        ) : (
+          <div className="grid gap-3 sm:grid-cols-2">
+            {(
+              [
+                {
+                  key: 'diag_corp' as const,
+                  label: 'Diagnóstico completo — estética corporal',
+                  pack: openPreLinks?.diagnostico_corporal,
+                },
+                {
+                  key: 'diag_cap' as const,
+                  label: 'Diagnóstico completo — terapia capilar',
+                  pack: openPreLinks?.diagnostico_capilar,
+                },
+              ] as const
+            ).map(({ key, label, pack }) => (
+              <div
+                key={key}
+                className={`rounded-xl border p-3 ${key === 'diag_corp' ? 'border-rose-200 bg-white' : 'border-sky-200 bg-white'}`}
+              >
+                <p className="text-xs font-semibold text-gray-800">{label}</p>
+                {pack?.responder_url ? (
+                  <>
+                    <code className="mt-2 block break-all text-[11px] text-gray-800">{pack.responder_url}</code>
+                    <button
+                      type="button"
+                      onClick={() => void navigator.clipboard.writeText(pack.responder_url)}
+                      className="mt-2 text-xs font-medium text-blue-700 hover:underline"
+                    >
+                      Copiar URL
+                    </button>
+                  </>
+                ) : (
+                  <p className="mt-2 text-xs text-amber-800">
+                    Link ainda não disponível. Recarrega a página; se persistir, confirma migração 336 e permissões no
+                    Supabase.
+                  </p>
                 )}
               </div>
             ))}
@@ -1746,7 +1820,11 @@ export default function EsteticaConsultoriaAdminClient() {
         <div>
           <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide">Estéticas acompanhadas</h2>
           <p className="mt-1 text-xs text-gray-600 max-w-2xl">
-            Inclui fichas vindas do pré. <strong>Criar e abrir</strong> só para casos manuais (ex.: ficha antes do pré).
+            Com os <strong>links públicos estáveis</strong> de diagnóstico completo, <strong>não precisas</strong> de
+            criar a ficha antes de partilhar o URL: a ficha aparece aqui após o envio. Usa <strong>Pesquisar</strong> com
+            e-mail ou nome para abrir a pessoa. <strong>Criar e abrir</strong> continua disponível para casos manuais
+            (ex.: ficha vazia antes de qualquer formulário). Dentro da ficha: pré opcional por clínica, pré-avaliação
+            cliente (capilar) e <strong>Gerar link</strong> do diagnóstico com confirmação por e-mail, se precisares.
           </p>
         </div>
         <form className="flex flex-wrap gap-2 items-end" onSubmit={(e) => void createClient(e)}>
@@ -1783,9 +1861,15 @@ export default function EsteticaConsultoriaAdminClient() {
         <div className="flex flex-wrap gap-2 items-center">
           <input
             className="rounded-lg border border-gray-300 px-3 py-2 text-sm flex-1 min-w-[200px]"
-            placeholder="Pesquisar…"
+            placeholder="Nome da clínica, e-mail de contacto ou profissional…"
             value={clientSearch}
             onChange={(e) => setClientSearch(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault()
+                void loadClients(clientSearch)
+              }
+            }}
           />
           <button
             type="button"
@@ -1812,6 +1896,9 @@ export default function EsteticaConsultoriaAdminClient() {
                 >
                   <span className="font-medium text-gray-900">{c.business_name}</span>
                   <span className="ml-2 text-xs text-gray-500">{esteticaConsultSegmentLabel(c.segment)}</span>
+                  {c.contact_email ? (
+                    <span className="mt-0.5 block truncate text-[11px] text-gray-500">{c.contact_email}</span>
+                  ) : null}
                 </button>
               </li>
             ))}
@@ -2231,51 +2318,14 @@ export default function EsteticaConsultoriaAdminClient() {
                         <span className="font-semibold text-amber-800">Rascunho</span>
                       )}
                     </p>
-                    <button
-                      type="button"
-                      disabled={diagnosticPreCorporalLinkLoading || !diagnosticPreCorporal.material.is_published}
-                      onClick={() => void createDiagnosticPreCorporalLink()}
-                      className="rounded-lg bg-rose-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg-rose-800 disabled:opacity-50"
-                    >
-                      {diagnosticPreCorporalLinkLoading ? 'Gerando…' : 'Gerar link do pré só desta clínica (opcional)'}
-                    </button>
-                    <div>
-                      <h4 className="text-[11px] font-semibold uppercase tracking-wide text-rose-950/90">
-                        Links do pré
-                      </h4>
-                      {diagnosticPreCorporal.links.length === 0 ? (
-                        <p className="mt-1 text-xs text-rose-900/70">Nenhum link ainda.</p>
-                      ) : (
-                        <ul className="mt-2 space-y-2">
-                          {diagnosticPreCorporal.links.map((lk) => (
-                            <li key={lk.id} className="rounded-lg border border-rose-100 bg-white p-2 text-xs">
-                              <code className="break-all text-gray-800">
-                                {lk.responder_url ??
-                                  buildEsteticaConsultoriaResponderUrl(
-                                    typeof window !== 'undefined' ? window.location.origin : '',
-                                    lk.token
-                                  )}
-                              </code>
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  const url =
-                                    lk.responder_url ??
-                                    buildEsteticaConsultoriaResponderUrl(
-                                      typeof window !== 'undefined' ? window.location.origin : '',
-                                      lk.token
-                                    )
-                                  void navigator.clipboard.writeText(url)
-                                }}
-                                className="mt-1 block text-xs font-medium text-blue-700 hover:underline"
-                              >
-                                Copiar URL
-                              </button>
-                            </li>
-                          ))}
-                        </ul>
-                      )}
-                    </div>
+                    <EsteticaConsultoriaStableLinkPanel
+                      links={diagnosticPreCorporal.links}
+                      primaryHint="O primeiro link desta clínica é o principal: podes copiar sempre o mesmo para enviar. Quem já tem outro URL continua a conseguir responder."
+                      generateFirstLabel="Gerar link do pré (esta clínica)"
+                      generateLoading={diagnosticPreCorporalLinkLoading}
+                      canGenerate={diagnosticPreCorporal.material.is_published}
+                      onGenerateFirst={() => void createDiagnosticPreCorporalLink()}
+                    />
                     <div>
                       <div className="mt-1 flex flex-wrap items-start justify-between gap-2">
                         <h4 className="text-[11px] font-semibold uppercase tracking-wide text-rose-950/90">
@@ -2358,51 +2408,14 @@ export default function EsteticaConsultoriaAdminClient() {
                       <span className="font-semibold text-amber-800">Rascunho — fale com o suporte se o global não estiver publicado</span>
                     )}
                   </p>
-                  <button
-                    type="button"
-                    disabled={diagnosticCorporalLinkLoading || !diagnosticCorporal.material.is_published}
-                    onClick={() => void createDiagnosticCorporalLink()}
-                    className="rounded-lg bg-rose-600 px-4 py-2 text-sm font-semibold text-white hover:bg-rose-700 disabled:opacity-50"
-                  >
-                    {diagnosticCorporalLinkLoading ? 'Gerando…' : 'Gerar novo link para esta clínica'}
-                  </button>
-                  <div>
-                    <h4 className="text-xs font-semibold uppercase tracking-wide text-rose-950/90">
-                      Links desta clínica
-                    </h4>
-                    {diagnosticCorporal.links.length === 0 ? (
-                      <p className="mt-1 text-xs text-rose-900/70">Ainda não há links. Use o botão acima para gerar um.</p>
-                    ) : (
-                      <ul className="mt-2 space-y-2">
-                        {diagnosticCorporal.links.map((lk) => (
-                          <li key={lk.id} className="rounded-lg border border-rose-100 bg-white p-2 text-xs">
-                            <code className="break-all text-gray-800">
-                              {lk.responder_url ??
-                                buildEsteticaConsultoriaResponderUrl(
-                                  typeof window !== 'undefined' ? window.location.origin : '',
-                                  lk.token
-                                )}
-                            </code>
-                            <button
-                              type="button"
-                              onClick={() => {
-                                const url =
-                                  lk.responder_url ??
-                                  buildEsteticaConsultoriaResponderUrl(
-                                    typeof window !== 'undefined' ? window.location.origin : '',
-                                    lk.token
-                                  )
-                                void navigator.clipboard.writeText(url)
-                              }}
-                              className="mt-1 block text-xs font-medium text-blue-700 hover:underline"
-                            >
-                              Copiar URL
-                            </button>
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-                  </div>
+                  <EsteticaConsultoriaStableLinkPanel
+                    links={diagnosticCorporal.links}
+                    primaryHint="Diagnóstico completo (após pagamento): o primeiro link é o estável para esta clínica — copia e envia sempre o mesmo. Confirmação por e-mail continua a funcionar como hoje."
+                    generateFirstLabel="Gerar link do diagnóstico completo"
+                    generateLoading={diagnosticCorporalLinkLoading}
+                    canGenerate={diagnosticCorporal.material.is_published}
+                    onGenerateFirst={() => void createDiagnosticCorporalLink()}
+                  />
                   <div>
                     <div className="mt-1 flex flex-wrap items-start justify-between gap-2">
                       <h4 className="text-xs font-semibold uppercase tracking-wide text-rose-950/90">
@@ -2501,51 +2514,14 @@ export default function EsteticaConsultoriaAdminClient() {
                         <span className="font-semibold text-amber-800">Rascunho</span>
                       )}
                     </p>
-                    <button
-                      type="button"
-                      disabled={diagnosticPreCapilarLinkLoading || !diagnosticPreCapilar.material.is_published}
-                      onClick={() => void createDiagnosticPreCapilarLink()}
-                      className="rounded-lg bg-sky-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg-sky-800 disabled:opacity-50"
-                    >
-                      {diagnosticPreCapilarLinkLoading ? 'Gerando…' : 'Gerar link do pré só desta clínica (opcional)'}
-                    </button>
-                    <div>
-                      <h4 className="text-[11px] font-semibold uppercase tracking-wide text-sky-950/90">
-                        Links do pré
-                      </h4>
-                      {diagnosticPreCapilar.links.length === 0 ? (
-                        <p className="mt-1 text-xs text-sky-900/70">Nenhum link ainda.</p>
-                      ) : (
-                        <ul className="mt-2 space-y-2">
-                          {diagnosticPreCapilar.links.map((lk) => (
-                            <li key={lk.id} className="rounded-lg border border-sky-100 bg-white p-2 text-xs">
-                              <code className="break-all text-gray-800">
-                                {lk.responder_url ??
-                                  buildEsteticaConsultoriaResponderUrl(
-                                    typeof window !== 'undefined' ? window.location.origin : '',
-                                    lk.token
-                                  )}
-                              </code>
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  const url =
-                                    lk.responder_url ??
-                                    buildEsteticaConsultoriaResponderUrl(
-                                      typeof window !== 'undefined' ? window.location.origin : '',
-                                      lk.token
-                                    )
-                                  void navigator.clipboard.writeText(url)
-                                }}
-                                className="mt-1 block text-xs font-medium text-blue-700 hover:underline"
-                              >
-                                Copiar URL
-                              </button>
-                            </li>
-                          ))}
-                        </ul>
-                      )}
-                    </div>
+                    <EsteticaConsultoriaStableLinkPanel
+                      links={diagnosticPreCapilar.links}
+                      primaryHint="O primeiro link do pré capilar desta clínica é o principal — podes reutilizar o mesmo URL. Links antigos continuam válidos."
+                      generateFirstLabel="Gerar link do pré (esta clínica)"
+                      generateLoading={diagnosticPreCapilarLinkLoading}
+                      canGenerate={diagnosticPreCapilar.material.is_published}
+                      onGenerateFirst={() => void createDiagnosticPreCapilarLink()}
+                    />
                     <div>
                       <div className="mt-1 flex flex-wrap items-start justify-between gap-2">
                         <h4 className="text-[11px] font-semibold uppercase tracking-wide text-sky-950/90">
@@ -2621,56 +2597,14 @@ export default function EsteticaConsultoriaAdminClient() {
                         <span className="font-semibold text-amber-800">Rascunho</span>
                       )}
                     </p>
-                    <button
-                      type="button"
-                      disabled={
-                        diagnosticPreAvaliacaoClienteCapilarLinkLoading ||
-                        !diagnosticPreAvaliacaoClienteCapilar.material.is_published
-                      }
-                      onClick={() => void createDiagnosticPreAvaliacaoClienteCapilarLink()}
-                      className="rounded-lg bg-sky-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg-sky-800 disabled:opacity-50"
-                    >
-                      {diagnosticPreAvaliacaoClienteCapilarLinkLoading
-                        ? 'Gerando…'
-                        : 'Gerar link para enviar à cliente'}
-                    </button>
-                    <div>
-                      <h4 className="text-[11px] font-semibold uppercase tracking-wide text-sky-950/90">
-                        Links da pré-avaliação
-                      </h4>
-                      {diagnosticPreAvaliacaoClienteCapilar.links.length === 0 ? (
-                        <p className="mt-1 text-xs text-sky-900/70">Nenhum link ainda.</p>
-                      ) : (
-                        <ul className="mt-2 space-y-2">
-                          {diagnosticPreAvaliacaoClienteCapilar.links.map((lk) => (
-                            <li key={lk.id} className="rounded-lg border border-sky-100 bg-white p-2 text-xs">
-                              <code className="break-all text-gray-800">
-                                {lk.responder_url ??
-                                  buildEsteticaConsultoriaResponderUrl(
-                                    typeof window !== 'undefined' ? window.location.origin : '',
-                                    lk.token
-                                  )}
-                              </code>
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  const url =
-                                    lk.responder_url ??
-                                    buildEsteticaConsultoriaResponderUrl(
-                                      typeof window !== 'undefined' ? window.location.origin : '',
-                                      lk.token
-                                    )
-                                  void navigator.clipboard.writeText(url)
-                                }}
-                                className="mt-1 block text-xs font-medium text-blue-700 hover:underline"
-                              >
-                                Copiar URL
-                              </button>
-                            </li>
-                          ))}
-                        </ul>
-                      )}
-                    </div>
+                    <EsteticaConsultoriaStableLinkPanel
+                      links={diagnosticPreAvaliacaoClienteCapilar.links}
+                      primaryHint="O primeiro link da pré-avaliação para a cliente é o que deves reutilizar; URLs antigos continuam a abrir o mesmo formulário."
+                      generateFirstLabel="Gerar link para enviar à cliente"
+                      generateLoading={diagnosticPreAvaliacaoClienteCapilarLinkLoading}
+                      canGenerate={diagnosticPreAvaliacaoClienteCapilar.material.is_published}
+                      onGenerateFirst={() => void createDiagnosticPreAvaliacaoClienteCapilarLink()}
+                    />
                     <div>
                       <div className="mt-1 flex flex-wrap items-start justify-between gap-2">
                         <h4 className="text-[11px] font-semibold uppercase tracking-wide text-sky-950/90">
@@ -2756,51 +2690,14 @@ export default function EsteticaConsultoriaAdminClient() {
                       <span className="font-semibold text-amber-800">Rascunho — fale com o suporte se o global não estiver publicado</span>
                     )}
                   </p>
-                  <button
-                    type="button"
-                    disabled={diagnosticCapilarLinkLoading || !diagnosticCapilar.material.is_published}
-                    onClick={() => void createDiagnosticCapilarLink()}
-                    className="rounded-lg bg-sky-600 px-4 py-2 text-sm font-semibold text-white hover:bg-sky-700 disabled:opacity-50"
-                  >
-                    {diagnosticCapilarLinkLoading ? 'Gerando…' : 'Gerar novo link (capilar) para esta clínica'}
-                  </button>
-                  <div>
-                    <h4 className="text-xs font-semibold uppercase tracking-wide text-sky-950/90">
-                      Links capilar desta clínica
-                    </h4>
-                    {diagnosticCapilar.links.length === 0 ? (
-                      <p className="mt-1 text-xs text-sky-900/70">Ainda não há links. Use o botão acima para gerar um.</p>
-                    ) : (
-                      <ul className="mt-2 space-y-2">
-                        {diagnosticCapilar.links.map((lk) => (
-                          <li key={lk.id} className="rounded-lg border border-sky-100 bg-white p-2 text-xs">
-                            <code className="break-all text-gray-800">
-                              {lk.responder_url ??
-                                buildEsteticaConsultoriaResponderUrl(
-                                  typeof window !== 'undefined' ? window.location.origin : '',
-                                  lk.token
-                                )}
-                            </code>
-                            <button
-                              type="button"
-                              onClick={() => {
-                                const url =
-                                  lk.responder_url ??
-                                  buildEsteticaConsultoriaResponderUrl(
-                                    typeof window !== 'undefined' ? window.location.origin : '',
-                                    lk.token
-                                  )
-                                void navigator.clipboard.writeText(url)
-                              }}
-                              className="mt-1 block text-xs font-medium text-blue-700 hover:underline"
-                            >
-                              Copiar URL
-                            </button>
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-                  </div>
+                  <EsteticaConsultoriaStableLinkPanel
+                    links={diagnosticCapilar.links}
+                    primaryHint="Diagnóstico completo capilar (após pagamento): o primeiro link é o estável para esta clínica. Quem já recebeu outro URL continua a poder usar."
+                    generateFirstLabel="Gerar link do diagnóstico completo (capilar)"
+                    generateLoading={diagnosticCapilarLinkLoading}
+                    canGenerate={diagnosticCapilar.material.is_published}
+                    onGenerateFirst={() => void createDiagnosticCapilarLink()}
+                  />
                   <div>
                     <div className="mt-1 flex flex-wrap items-start justify-between gap-2">
                       <h4 className="text-xs font-semibold uppercase tracking-wide text-sky-950/90">

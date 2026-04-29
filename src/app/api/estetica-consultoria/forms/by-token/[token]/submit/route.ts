@@ -110,9 +110,15 @@ export async function POST(request: NextRequest, context: Ctx) {
     rawClientId == null || rawClientId === '' ? null : String(rawClientId).trim()
 
   if (!esteticaConsultClientId) {
-    if (!tpl || !isOpenEntryPreDiagnosticoTemplate(tpl)) {
+    const openEntrySemClinica =
+      Boolean(tpl) &&
+      (isOpenEntryPreDiagnosticoTemplate(tpl) || isDiagnosticoEmailConfirmationTemplate(tpl))
+    if (!openEntrySemClinica) {
       return NextResponse.json(
-        { error: 'Este formulário exige uma clínica associada ao link. Use o link público de pré-diagnóstico ou peça um link válido.' },
+        {
+          error:
+            'Este formulário exige uma clínica associada ao link. Usa o link público de pré ou de diagnóstico completo no painel admin, ou pede um link válido.',
+        },
         { status: 400 }
       )
     }

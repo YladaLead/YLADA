@@ -2,9 +2,8 @@ import type { Metadata } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
 import { YLADA_OG_FALLBACK_LOGO_PATH } from '@/lib/ylada-og-fallback-logo'
-import {
-  PRO_LIDERES_PRE_DIAGNOSTICO_CARD_IMAGE_PATH,
-} from '@/lib/pro-lideres-pre-diagnostico'
+import { PRO_LIDERES_PRE_DIAGNOSTICO_CARD_IMAGE_PATH } from '@/lib/pro-lideres-pre-diagnostico'
+import { resolveProLideresConsultoriaResponderOgImagePath } from '@/lib/pro-lideres-responder-og'
 import ProLideresConsultoriaFormResponderClient from '@/components/pro-lideres/ProLideresConsultoriaFormResponderClient'
 
 function resolvePublicOrigin(): string {
@@ -15,9 +14,14 @@ function resolvePublicOrigin(): string {
   )
 }
 
-/** Textos para pré-visualização do link (WhatsApp, redes, etc.) — curtos e coerentes com o material Pro Líderes. */
-const OG_TITLE = 'Pré-diagnóstico estratégico para líderes · YLADA Pro Líderes'
-const OG_DESCRIPTION = 'Convite confidencial: responda com calma. Leva poucos minutos.'
+/** Pré-diagnóstico (material fixo) — cartão e OG. */
+const OG_TITLE_PRE = 'Pré-diagnóstico estratégico para líderes · YLADA Pro Líderes'
+const OG_DESCRIPTION_PRE = 'Convite confidencial: responda com calma. Leva poucos minutos.'
+
+/** Diagnóstico pré-reunião após pagamento — outro material / outro cartão. */
+const OG_TITLE_POS = 'Diagnóstico pré-reunião (após pagamento) · YLADA Pro Líderes'
+const OG_DESCRIPTION_POS =
+  'Questionário confidencial para o teu plano de acompanhamento. Responde com tranquilidade; as informações são confidenciais.'
 
 export async function generateMetadata({
   params,
@@ -29,24 +33,28 @@ export async function generateMetadata({
   const base = resolvePublicOrigin()
   const pagePath = `/pro-lideres/consultoria/responder/${encodeURIComponent(raw)}`
   const pageUrl = `${base}${pagePath}`
-  const imageUrl = `${base}${PRO_LIDERES_PRE_DIAGNOSTICO_CARD_IMAGE_PATH}`
+  const imagePath = await resolveProLideresConsultoriaResponderOgImagePath(raw)
+  const imageUrl = `${base}${imagePath}`
+  const isPre = imagePath === PRO_LIDERES_PRE_DIAGNOSTICO_CARD_IMAGE_PATH
+  const title = isPre ? OG_TITLE_PRE : OG_TITLE_POS
+  const description = isPre ? OG_DESCRIPTION_PRE : OG_DESCRIPTION_POS
 
   return {
-    title: OG_TITLE,
-    description: OG_DESCRIPTION,
+    title,
+    description,
     openGraph: {
-      title: OG_TITLE,
-      description: OG_DESCRIPTION,
+      title,
+      description,
       url: pageUrl,
       siteName: 'YLADA',
       locale: 'pt_BR',
       type: 'website',
-      images: [{ url: imageUrl, alt: OG_TITLE, type: 'image/png' }],
+      images: [{ url: imageUrl, alt: title, type: 'image/png' }],
     },
     twitter: {
       card: 'summary_large_image',
-      title: OG_TITLE,
-      description: OG_DESCRIPTION,
+      title,
+      description,
       images: [imageUrl],
     },
   }

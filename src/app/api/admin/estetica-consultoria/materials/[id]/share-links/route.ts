@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireApiAuth } from '@/lib/api-auth'
 import { supabaseAdmin } from '@/lib/supabase'
 import { generateEsteticaConsultoriaShareToken } from '@/lib/estetica-consultoria'
+import { insertEsteticaConsultancyShareLinkRow } from '@/lib/estetica-consultoria-share-links'
 import {
   TEMPLATE_DIAGNOSTICO_CAPILAR_ID,
   TEMPLATE_DIAGNOSTICO_CORPORAL_ID,
@@ -35,6 +36,7 @@ export async function GET(request: NextRequest, context: Ctx) {
     .from('ylada_estetica_consultancy_share_links')
     .select('*')
     .eq('material_id', materialId)
+    .order('is_primary', { ascending: false })
     .order('created_at', { ascending: false })
 
   const clientFilter = request.nextUrl.searchParams.get('estetica_consult_client_id')?.trim()
@@ -148,18 +150,14 @@ export async function POST(request: NextRequest, context: Ctx) {
     recipientEmail = em
   }
 
-  const { data, error } = await supabaseAdmin
-    .from('ylada_estetica_consultancy_share_links')
-    .insert({
-      material_id: materialId,
-      estetica_consult_client_id: targetClientId,
-      token,
-      label,
-      expires_at: expiresAt,
-      ...(recipientEmail ? { recipient_email: recipientEmail } : {}),
-    })
-    .select('*')
-    .single()
+  const { data, error } = await insertEsteticaConsultancyShareLinkRow(supabaseAdmin, {
+    material_id: materialId,
+    estetica_consult_client_id: targetClientId,
+    token,
+    label,
+    expires_at: expiresAt,
+    ...(recipientEmail ? { recipient_email: recipientEmail } : {}),
+  })
 
   if (error) {
     return NextResponse.json({ error: 'Erro ao criar link' }, { status: 500 })

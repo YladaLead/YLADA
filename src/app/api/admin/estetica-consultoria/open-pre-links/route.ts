@@ -3,13 +3,15 @@ import { requireApiAuth } from '@/lib/api-auth'
 import { supabaseAdmin } from '@/lib/supabase'
 import { buildEsteticaConsultoriaResponderUrl } from '@/lib/estetica-consultoria'
 import {
+  ensureDiagnosticoCapilarGlobalMaterialId,
+  ensureDiagnosticoCorporalGlobalMaterialId,
   ensurePreDiagnosticoCapilarGlobalMaterialId,
   ensurePreDiagnosticoCorporalGlobalMaterialId,
 } from '@/lib/estetica-consultoria-global-forms'
 
 /**
- * Links públicos fixos do pré-diagnóstico (sem criar clínica antes).
- * Garante materiais globais + linha de share_link com estetica_consult_client_id NULL.
+ * Links públicos fixos: pré-diagnóstico e diagnóstico completo YLADA (sem criar clínica antes).
+ * Garante materiais globais + linha de share_link com estetica_consult_client_id NULL por material.
  */
 export async function GET(request: NextRequest) {
   const auth = await requireApiAuth(request, ['admin'])
@@ -22,6 +24,8 @@ export async function GET(request: NextRequest) {
   try {
     const corpMid = await ensurePreDiagnosticoCorporalGlobalMaterialId(supabaseAdmin)
     const capMid = await ensurePreDiagnosticoCapilarGlobalMaterialId(supabaseAdmin)
+    const corpDiagMid = await ensureDiagnosticoCorporalGlobalMaterialId(supabaseAdmin)
+    const capDiagMid = await ensureDiagnosticoCapilarGlobalMaterialId(supabaseAdmin)
 
     const { data: corpLink, error: cErr } = await supabaseAdmin
       .from('ylada_estetica_consultancy_share_links')
@@ -37,8 +41,25 @@ export async function GET(request: NextRequest) {
       .is('estetica_consult_client_id', null)
       .maybeSingle()
 
-    if (cErr || kErr) {
-      return NextResponse.json({ error: cErr?.message ?? kErr?.message ?? 'Erro ao ler links' }, { status: 500 })
+    const { data: corpDiagLink, error: cdErr } = await supabaseAdmin
+      .from('ylada_estetica_consultancy_share_links')
+      .select('token')
+      .eq('material_id', corpDiagMid)
+      .is('estetica_consult_client_id', null)
+      .maybeSingle()
+
+    const { data: capDiagLink, error: kdErr } = await supabaseAdmin
+      .from('ylada_estetica_consultancy_share_links')
+      .select('token')
+      .eq('material_id', capDiagMid)
+      .is('estetica_consult_client_id', null)
+      .maybeSingle()
+
+    if (cErr || kErr || cdErr || kdErr) {
+      return NextResponse.json(
+        { error: cErr?.message ?? kErr?.message ?? cdErr?.message ?? kdErr?.message ?? 'Erro ao ler links' },
+        { status: 500 }
+      )
     }
 
     const origin = request.nextUrl.origin
@@ -53,6 +74,8 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       corporal: pack(corpLink?.token as string | undefined),
       capilar: pack(capLink?.token as string | undefined),
+      diagnostico_corporal: pack(corpDiagLink?.token as string | undefined),
+      diagnostico_capilar: pack(capDiagLink?.token as string | undefined),
     })
   } catch (e) {
     const msg = e instanceof Error ? e.message : 'Erro'

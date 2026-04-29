@@ -64,6 +64,8 @@ export type YladaEsteticaConsultancyShareLinkRow = {
   email_confirm_token?: string | null
   email_confirm_expires_at?: string | null
   last_confirmation_sent_at?: string | null
+  /** Link canónico desta clínica para este material (migração 371). */
+  is_primary?: boolean | null
 }
 
 export type YladaEsteticaConsultancyFormResponseRow = {

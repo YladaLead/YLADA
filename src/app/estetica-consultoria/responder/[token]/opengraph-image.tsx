@@ -1,21 +1,76 @@
+import fs from 'node:fs/promises'
+import path from 'node:path'
 import { ImageResponse } from 'next/og'
 import {
-  ESTETICA_RESPONDER_SHARE_TITLE,
+  TEMPLATE_DIAGNOSTICO_CAPILAR_ID,
+  TEMPLATE_DIAGNOSTICO_CORPORAL_ID,
+} from '@/lib/estetica-consultoria-form-templates'
+import {
   buildEsteticaResponderShareDescription,
-  resolveEsteticaConsultoriaResponderOgBand,
+  buildEsteticaResponderShareTitle,
+  responderOgAccentColor,
   responderOgBandLabel,
+  responderOgFormKindLabel,
+  resolveEsteticaConsultoriaResponderShareContext,
 } from '@/lib/estetica-consultoria-responder-og'
 
 export const runtime = 'nodejs'
 export const size = { width: 1200, height: 630 }
 export const contentType = 'image/png'
 
+const DIAGNOSTICO_POS_PAGAMENTO_FILE: Record<string, string> = {
+  [TEMPLATE_DIAGNOSTICO_CAPILAR_ID]: 'marketing/estetica-diagnostico-pre-reuniao-pos-pagamento-capilar.png',
+  [TEMPLATE_DIAGNOSTICO_CORPORAL_ID]: 'marketing/estetica-diagnostico-pre-reuniao-pos-pagamento-corporal.png',
+}
+
+async function pngPublicPathToDataUrl(publicPathNoLeadingSlash: string): Promise<string | null> {
+  try {
+    const full = path.join(process.cwd(), 'public', publicPathNoLeadingSlash)
+    const buf = await fs.readFile(full)
+    return `data:image/png;base64,${buf.toString('base64')}`
+  } catch {
+    return null
+  }
+}
+
 export default async function Image({ params }: { params: Promise<{ token: string }> }) {
   const { token } = await params
   const safe = typeof token === 'string' ? decodeURIComponent(token).trim() : ''
-  const band = safe ? await resolveEsteticaConsultoriaResponderOgBand(safe) : 'unknown'
+  const ctx = safe ? await resolveEsteticaConsultoriaResponderShareContext(safe) : { band: 'unknown' as const, templateKey: null }
+  const { band, templateKey } = ctx
+
+  const relFile =
+    templateKey && DIAGNOSTICO_POS_PAGAMENTO_FILE[templateKey]
+      ? DIAGNOSTICO_POS_PAGAMENTO_FILE[templateKey]
+      : null
+  if (relFile) {
+    const src = await pngPublicPathToDataUrl(relFile)
+    if (src) {
+      return new ImageResponse(
+        (
+          <div
+            style={{
+              width: '100%',
+              height: '100%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              background: '#f8fafc',
+            }}
+          >
+            <img src={src} width={1200} height={630} alt="" style={{ objectFit: 'cover', width: 1200, height: 630 }} />
+          </div>
+        ),
+        { ...size }
+      )
+    }
+  }
+
+  const headline = buildEsteticaResponderShareTitle(band, templateKey)
+  const kindLine = responderOgFormKindLabel(templateKey)
   const line = responderOgBandLabel(band)
-  const paragraph = buildEsteticaResponderShareDescription(band)
+  const paragraph = buildEsteticaResponderShareDescription(band, templateKey)
+  const accent = responderOgAccentColor(templateKey, band)
 
   return new ImageResponse(
     (
@@ -34,30 +89,30 @@ export default async function Image({ params }: { params: Promise<{ token: strin
       >
         <div
           style={{
-            fontSize: 52,
+            fontSize: 44,
             fontWeight: 800,
             color: '#0f172a',
             letterSpacing: '-0.03em',
-            lineHeight: 1.1,
+            lineHeight: 1.12,
           }}
         >
-          {ESTETICA_RESPONDER_SHARE_TITLE}
+          {headline}
         </div>
         <div
           style={{
-            marginTop: 18,
-            fontSize: 36,
+            marginTop: 14,
+            fontSize: 30,
             fontWeight: 700,
-            color: '#0369a1',
+            color: accent,
             lineHeight: 1.15,
           }}
         >
-          {line}
+          {kindLine} · {line}
         </div>
         <div
           style={{
-            marginTop: 26,
-            fontSize: 26,
+            marginTop: 22,
+            fontSize: 24,
             fontWeight: 500,
             color: '#334155',
             maxWidth: 1040,

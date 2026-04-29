@@ -652,8 +652,9 @@ export default function ProLideresConsultoriaAdminClient() {
                     </button>
                   </div>
                   <p className="text-xs text-gray-500">
-                    Lista por nome à esquerda; à direita abre a ficha completa. O CSV usa o filtro de busca atual.
-                    Separador ponto e vírgula no Excel (PT).
+                    Lista por nome à esquerda — <strong>Abrir</strong> para ver a ficha completa ou{' '}
+                    <strong>Eliminar</strong> para apagar só esse envio (irreversível). O CSV usa o filtro de busca
+                    atual. Separador ponto e vírgula no Excel (PT).
                   </p>
                   {auxLoading ? <p className="text-xs text-gray-500">A carregar…</p> : null}
                   {responses.length === 0 ? (
@@ -679,15 +680,15 @@ export default function ProLideresConsultoriaAdminClient() {
                             <p className="px-2 py-1.5 text-xs font-semibold uppercase tracking-wide text-gray-500">
                               Respostas por nome
                             </p>
-                            <ul className="max-h-[min(60vh,560px)] space-y-1 overflow-y-auto pr-1">
+                            <ul className="max-h-[min(60vh,560px)] space-y-1.5 overflow-y-auto pr-1">
                               {respostasPorNome.map((r) => {
                                 const active = adminFichaResponseId === r.id
                                 return (
-                                  <li key={r.id}>
+                                  <li key={r.id} className="flex gap-1.5">
                                     <button
                                       type="button"
                                       onClick={() => setAdminFichaResponseId(r.id)}
-                                      className={`w-full rounded-lg px-3 py-2.5 text-left text-sm transition-colors ${
+                                      className={`min-w-0 flex-1 rounded-lg px-3 py-2.5 text-left text-sm transition-colors ${
                                         active
                                           ? 'bg-emerald-600 text-white shadow-sm'
                                           : 'bg-white text-gray-900 hover:bg-emerald-50/80 border border-transparent hover:border-emerald-100'
@@ -705,6 +706,16 @@ export default function ProLideresConsultoriaAdminClient() {
                                         })}
                                       </span>
                                     </button>
+                                    <button
+                                      type="button"
+                                      title="Eliminar esta resposta"
+                                      aria-label={`Eliminar resposta de ${adminRespondentListLabel(r)}`}
+                                      disabled={deleteResponseBusy === r.id || auxLoading}
+                                      onClick={() => void deleteFormResponse(r.id)}
+                                      className="shrink-0 self-stretch rounded-lg border border-red-200 bg-white px-2 py-1 text-[11px] font-semibold leading-tight text-red-800 hover:bg-red-50 disabled:opacity-50 sm:min-w-[4.5rem]"
+                                    >
+                                      {deleteResponseBusy === r.id ? '…' : 'Eliminar'}
+                                    </button>
                                   </li>
                                 )
                               })}
@@ -713,7 +724,8 @@ export default function ProLideresConsultoriaAdminClient() {
                           <div className="min-w-0">
                             {!fichaResponse ? (
                               <div className="rounded-xl border border-dashed border-gray-200 bg-gray-50/50 px-4 py-12 text-center text-sm text-gray-500">
-                                Clique num nome à esquerda para ver a ficha completa e eliminar se precisar.
+                                Clique num nome à esquerda para ver a ficha completa aqui, ou use <strong>Eliminar</strong>{' '}
+                                na lista para apagar sem abrir.
                               </div>
                             ) : (
                               <ConsultoriaAdminResponseCard

@@ -7,6 +7,10 @@ import {
   isEsteticaConsultoriaPrefillTemplate,
 } from '@/lib/estetica-consultoria-form-templates'
 import { maskRecipientEmail } from '@/lib/estetica-consultoria-confirmation-email'
+import {
+  isEsteticaConsultoriaGlobalTemplateKey,
+  syncEsteticaConsultoriaGlobalMaterialFromTemplateKey,
+} from '@/lib/estetica-consultoria-global-forms'
 import { getConsultoriaFormFields } from '@/lib/pro-lideres-consultoria'
 
 type Ctx = { params: Promise<{ token: string }> }
@@ -56,7 +60,7 @@ export async function GET(request: NextRequest, context: Ctx) {
     }
   }
 
-  const { data: mat, error: matErr } = await supabaseAdmin
+  let { data: mat, error: matErr } = await supabaseAdmin
     .from('ylada_estetica_consultancy_materials')
     .select('id, title, description, material_kind, content, is_published, template_key')
     .eq('id', link.material_id)
@@ -70,7 +74,20 @@ export async function GET(request: NextRequest, context: Ctx) {
     return NextResponse.json({ error: 'Este formulário ainda não está publicado.' }, { status: 403 })
   }
 
-  const templateKey = (mat as { template_key?: string | null }).template_key
+  let templateKey = (mat as { template_key?: string | null }).template_key
+  if (isEsteticaConsultoriaGlobalTemplateKey(templateKey)) {
+    await syncEsteticaConsultoriaGlobalMaterialFromTemplateKey(supabaseAdmin, templateKey)
+    const { data: matRefreshed, error: refreshErr } = await supabaseAdmin
+      .from('ylada_estetica_consultancy_materials')
+      .select('id, title, description, material_kind, content, is_published, template_key')
+      .eq('id', link.material_id)
+      .maybeSingle()
+    if (!refreshErr && matRefreshed) {
+      mat = matRefreshed
+      templateKey = (mat as { template_key?: string | null }).template_key
+    }
+  }
+
   const isDiagnosticoFixoEmail = isDiagnosticoEmailConfirmationTemplate(templateKey)
   const recipientEmail = (link.recipient_email ?? '').trim()
 

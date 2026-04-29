@@ -6,6 +6,7 @@ import {
   generateEsteticaConsultoriaShareToken,
 } from '@/lib/estetica-consultoria'
 import { ensurePreDiagnosticoCorporalGlobalMaterialId } from '@/lib/estetica-consultoria-global-forms'
+import { insertEsteticaConsultancyShareLinkRow } from '@/lib/estetica-consultoria-share-links'
 
 type Ctx = { params: Promise<{ id: string }> }
 
@@ -57,6 +58,7 @@ export async function GET(request: NextRequest, context: Ctx) {
     .select('*')
     .eq('material_id', materialId)
     .eq('estetica_consult_client_id', clientId)
+    .order('is_primary', { ascending: false })
     .order('created_at', { ascending: false })
     .limit(100)
 
@@ -135,28 +137,25 @@ export async function POST(request: NextRequest, context: Ctx) {
 
   const token = generateEsteticaConsultoriaShareToken()
 
-  const { data, error } = await supabaseAdmin
-    .from('ylada_estetica_consultancy_share_links')
-    .insert({
-      material_id: materialId,
-      estetica_consult_client_id: clientId,
-      token,
-      label,
-      expires_at: expiresAt,
-      recipient_email: null,
-    })
-    .select('*')
-    .single()
+  const { data, error } = await insertEsteticaConsultancyShareLinkRow(supabaseAdmin, {
+    material_id: materialId,
+    estetica_consult_client_id: clientId,
+    token,
+    label,
+    expires_at: expiresAt,
+    recipient_email: null,
+  })
 
   if (error) {
     return NextResponse.json({ error: 'Erro ao criar link' }, { status: 500 })
   }
 
+  const row = data as { token: string }
   const origin = request.nextUrl.origin
   return NextResponse.json({
     item: {
       ...data,
-      responder_url: buildEsteticaConsultoriaResponderUrl(origin, token),
+      responder_url: buildEsteticaConsultoriaResponderUrl(origin, row.token),
     },
   })
 }

@@ -48,6 +48,17 @@ function pickAnswerStr(answers: Record<string, unknown>, key: string): string {
   return v == null ? '' : String(v).trim()
 }
 
+const LEAD_EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
+/** E-mail de contacto na ficha: rodapé do formulário público e/ou campo do próprio questionário (ex. capilar). */
+function pickLeadContactEmail(answers: Record<string, unknown>, respondentEmail: string | null): string | null {
+  const r = respondentEmail == null ? '' : String(respondentEmail).trim().toLowerCase()
+  if (r && LEAD_EMAIL_RE.test(r)) return r.slice(0, 320)
+  const fromCapilarField = pickAnswerStr(answers, 'cli_cap_email').trim().toLowerCase()
+  if (fromCapilarField && LEAD_EMAIL_RE.test(fromCapilarField)) return fromCapilarField.slice(0, 320)
+  return null
+}
+
 /** Monta payload para INSERT em ylada_estetica_consult_clients após envio do pré (link público). */
 export function buildEsteticaLeadClientPayloadFromPreAnswers(
   templateKey: string,
@@ -67,13 +78,21 @@ export function buildEsteticaLeadClientPayloadFromPreAnswers(
   const wa = pickAnswerStr(answers, 'whatsapp')
   const phone = [ddi, wa].filter(Boolean).join(' ').trim() || null
   const segment: EsteticaConsultSegment =
-    templateKey === TEMPLATE_PRE_DIAGNOSTICO_CORPORAL_ID ? 'corporal' : 'capilar'
-  const business = (nomeClinica || nomeProp || 'Lead — pré-diagnóstico').slice(0, 300)
+    templateKey === TEMPLATE_PRE_DIAGNOSTICO_CORPORAL_ID || templateKey === TEMPLATE_DIAGNOSTICO_CORPORAL_ID
+      ? 'corporal'
+      : 'capilar'
+  const isDiagnosticoCompleto =
+    templateKey === TEMPLATE_DIAGNOSTICO_CORPORAL_ID || templateKey === TEMPLATE_DIAGNOSTICO_CAPILAR_ID
+  const business = (
+    nomeClinica ||
+    nomeProp ||
+    (isDiagnosticoCompleto ? 'Lead — diagnóstico completo' : 'Lead — pré-diagnóstico')
+  ).slice(0, 300)
   return {
     business_name: business,
     contact_name: nomeProp || null,
     phone,
-    contact_email: respondentEmail,
+    contact_email: pickLeadContactEmail(answers, respondentEmail),
     segment,
   }
 }

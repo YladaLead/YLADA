@@ -4,8 +4,9 @@ import Link from 'next/link'
 import ConsultoriaPublicFormClient from '@/components/consultoria/ConsultoriaPublicFormClient'
 import {
   buildEsteticaConsultoriaResponderShareMetadata,
-  resolveEsteticaConsultoriaResponderOgBand,
+  resolveEsteticaConsultoriaResponderShareContext,
   responderOgBandLabel,
+  responderOgFormKindLabel,
 } from '@/lib/estetica-consultoria-responder-og'
 import { YLADA_OG_FALLBACK_LOGO_PATH } from '@/lib/ylada-og-fallback-logo'
 
@@ -16,8 +17,8 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { token } = await params
   const safe = typeof token === 'string' ? decodeURIComponent(token).trim() : ''
-  const band = safe ? await resolveEsteticaConsultoriaResponderOgBand(safe) : 'unknown'
-  return buildEsteticaConsultoriaResponderShareMetadata(band)
+  const ctx = safe ? await resolveEsteticaConsultoriaResponderShareContext(safe) : { band: 'unknown' as const, templateKey: null }
+  return buildEsteticaConsultoriaResponderShareMetadata(ctx.band, ctx.templateKey)
 }
 
 export default async function EsteticaConsultoriaResponderPage({
@@ -29,8 +30,8 @@ export default async function EsteticaConsultoriaResponderPage({
 }) {
   const { token } = await params
   const safe = typeof token === 'string' ? token : ''
-  const band = safe ? await resolveEsteticaConsultoriaResponderOgBand(safe) : 'unknown'
-  const bandLine = responderOgBandLabel(band)
+  const ctx = safe ? await resolveEsteticaConsultoriaResponderShareContext(safe) : { band: 'unknown' as const, templateKey: null }
+  const bandLine = `${responderOgFormKindLabel(ctx.templateKey)} · ${responderOgBandLabel(ctx.band)}`
   const sp = searchParams ? await searchParams : {}
   const confirmRaw = sp?.confirm
   const initialConfirmCode =

@@ -27,6 +27,48 @@ import {
   normalizeConsultoriaContent,
 } from '@/lib/pro-lideres-consultoria'
 
+function normalizeMultilineCopy(s: string): string {
+  return s.trim().replace(/\r\n/g, '\n')
+}
+
+/** Título/descrição na BD podem ficar desatualizados se só o JSON de campos mudar — alinha ao canónico. */
+function storedMetaDiffersFromCanonical(
+  rowTitle: unknown,
+  rowDesc: unknown,
+  canonTitle: string,
+  canonDesc: string
+): boolean {
+  const t = typeof rowTitle === 'string' ? rowTitle.trim() : ''
+  const d = typeof rowDesc === 'string' ? normalizeMultilineCopy(rowDesc) : ''
+  return t !== canonTitle.trim() || d !== normalizeMultilineCopy(canonDesc)
+}
+
+/** Um link por material global de diagnóstico completo YLADA, sem clínica (URL público estável no painel). */
+async function ensureOpenDiagnosticoCompletoEntryShareLink(sb: SupabaseClient, materialId: string): Promise<void> {
+  const { data: ex, error: sel } = await sb
+    .from('ylada_estetica_consultancy_share_links')
+    .select('id')
+    .eq('material_id', materialId)
+    .is('estetica_consult_client_id', null)
+    .maybeSingle()
+  if (sel) {
+    throw new Error(sel.message)
+  }
+  if (ex?.id) {
+    return
+  }
+  const token = generateEsteticaConsultoriaShareToken()
+  const { error: ins } = await sb.from('ylada_estetica_consultancy_share_links').insert({
+    material_id: materialId,
+    estetica_consult_client_id: null,
+    token,
+    label: 'entrada_publica_diagnostico_completo',
+  })
+  if (ins) {
+    throw new Error(ins.message)
+  }
+}
+
 /** Um link por material global de pré, sem clínica (entrada pública). */
 async function ensureOpenPreEntryShareLink(sb: SupabaseClient, materialId: string): Promise<void> {
   const { data: ex, error: sel } = await sb
@@ -65,10 +107,13 @@ export async function ensureDiagnosticoCorporalGlobalMaterialId(sb: SupabaseClie
     throw new Error(selErr.message)
   }
   if (existing?.id) {
+    const materialId = existing.id as string
+    const canonTitle = TEMPLATE_DIAGNOSTICO_CORPORAL_TITLE
+    const canonDesc = getDiagnosticoCorporalV1Description()
     const { data: matRow, error: matErr } = await sb
       .from('ylada_estetica_consultancy_materials')
-      .select('content')
-      .eq('id', existing.id as string)
+      .select('content, title, description')
+      .eq('id', materialId)
       .maybeSingle()
     if (matErr) {
       throw new Error(matErr.message)
@@ -89,18 +134,28 @@ export async function ensureDiagnosticoCorporalGlobalMaterialId(sb: SupabaseClie
       const { error: upErr } = await sb
         .from('ylada_estetica_consultancy_materials')
         .update({
-          title: TEMPLATE_DIAGNOSTICO_CORPORAL_TITLE,
-          description: getDiagnosticoCorporalV1Description(),
+          title: canonTitle,
+          description: canonDesc,
           content,
           material_kind: 'formulario',
         })
-        .eq('id', existing.id as string)
+        .eq('id', materialId)
         .eq('template_key', TEMPLATE_DIAGNOSTICO_CORPORAL_ID)
       if (upErr) {
         throw new Error(upErr.message)
       }
+    } else if (storedMetaDiffersFromCanonical(matRow?.title, matRow?.description, canonTitle, canonDesc)) {
+      const { error: metaErr } = await sb
+        .from('ylada_estetica_consultancy_materials')
+        .update({ title: canonTitle, description: canonDesc })
+        .eq('id', materialId)
+        .eq('template_key', TEMPLATE_DIAGNOSTICO_CORPORAL_ID)
+      if (metaErr) {
+        throw new Error(metaErr.message)
+      }
     }
-    return existing.id as string
+    await ensureOpenDiagnosticoCompletoEntryShareLink(sb, materialId)
+    return materialId
   }
 
   const rawContent = { fields: buildDiagnosticoCorporalV1Fields() }
@@ -129,7 +184,9 @@ export async function ensureDiagnosticoCorporalGlobalMaterialId(sb: SupabaseClie
     throw new Error(insErr?.message ?? 'Falha ao criar formulário global')
   }
 
-  return created.id as string
+  const newId = created.id as string
+  await ensureOpenDiagnosticoCompletoEntryShareLink(sb, newId)
+  return newId
 }
 
 /** Garante material global publicado para o diagnóstico capilar (fixo YLADA). */
@@ -144,10 +201,13 @@ export async function ensureDiagnosticoCapilarGlobalMaterialId(sb: SupabaseClien
     throw new Error(selErr.message)
   }
   if (existing?.id) {
+    const materialId = existing.id as string
+    const canonTitle = TEMPLATE_DIAGNOSTICO_CAPILAR_TITLE
+    const canonDesc = getDiagnosticoCapilarV1Description()
     const { data: matRow, error: matErr } = await sb
       .from('ylada_estetica_consultancy_materials')
-      .select('content')
-      .eq('id', existing.id as string)
+      .select('content, title, description')
+      .eq('id', materialId)
       .maybeSingle()
     if (matErr) {
       throw new Error(matErr.message)
@@ -168,18 +228,28 @@ export async function ensureDiagnosticoCapilarGlobalMaterialId(sb: SupabaseClien
       const { error: upErr } = await sb
         .from('ylada_estetica_consultancy_materials')
         .update({
-          title: TEMPLATE_DIAGNOSTICO_CAPILAR_TITLE,
-          description: getDiagnosticoCapilarV1Description(),
+          title: canonTitle,
+          description: canonDesc,
           content,
           material_kind: 'formulario',
         })
-        .eq('id', existing.id as string)
+        .eq('id', materialId)
         .eq('template_key', TEMPLATE_DIAGNOSTICO_CAPILAR_ID)
       if (upErr) {
         throw new Error(upErr.message)
       }
+    } else if (storedMetaDiffersFromCanonical(matRow?.title, matRow?.description, canonTitle, canonDesc)) {
+      const { error: metaErr } = await sb
+        .from('ylada_estetica_consultancy_materials')
+        .update({ title: canonTitle, description: canonDesc })
+        .eq('id', materialId)
+        .eq('template_key', TEMPLATE_DIAGNOSTICO_CAPILAR_ID)
+      if (metaErr) {
+        throw new Error(metaErr.message)
+      }
     }
-    return existing.id as string
+    await ensureOpenDiagnosticoCompletoEntryShareLink(sb, materialId)
+    return materialId
   }
 
   const rawContent = { fields: buildDiagnosticoCapilarV1Fields() }
@@ -208,7 +278,9 @@ export async function ensureDiagnosticoCapilarGlobalMaterialId(sb: SupabaseClien
     throw new Error(insErr?.message ?? 'Falha ao criar formulário global capilar')
   }
 
-  return created.id as string
+  const newCapId = created.id as string
+  await ensureOpenDiagnosticoCompletoEntryShareLink(sb, newCapId)
+  return newCapId
 }
 
 /** Material global: pré-diagnóstico corporal (curto, sem confirmação por e-mail). */
@@ -227,9 +299,11 @@ export async function ensurePreDiagnosticoCorporalGlobalMaterialId(sb: SupabaseC
 
   if (existing?.id) {
     materialId = existing.id as string
+    const canonTitle = TEMPLATE_PRE_DIAGNOSTICO_CORPORAL_TITLE
+    const canonDesc = getPreDiagnosticoCorporalV1Description()
     const { data: matRow, error: matErr } = await sb
       .from('ylada_estetica_consultancy_materials')
-      .select('content')
+      .select('content, title, description')
       .eq('id', materialId)
       .maybeSingle()
     if (matErr) {
@@ -251,8 +325,8 @@ export async function ensurePreDiagnosticoCorporalGlobalMaterialId(sb: SupabaseC
       const { error: upErr } = await sb
         .from('ylada_estetica_consultancy_materials')
         .update({
-          title: TEMPLATE_PRE_DIAGNOSTICO_CORPORAL_TITLE,
-          description: getPreDiagnosticoCorporalV1Description(),
+          title: canonTitle,
+          description: canonDesc,
           content,
           material_kind: 'formulario',
         })
@@ -260,6 +334,15 @@ export async function ensurePreDiagnosticoCorporalGlobalMaterialId(sb: SupabaseC
         .eq('template_key', TEMPLATE_PRE_DIAGNOSTICO_CORPORAL_ID)
       if (upErr) {
         throw new Error(upErr.message)
+      }
+    } else if (storedMetaDiffersFromCanonical(matRow?.title, matRow?.description, canonTitle, canonDesc)) {
+      const { error: metaErr } = await sb
+        .from('ylada_estetica_consultancy_materials')
+        .update({ title: canonTitle, description: canonDesc })
+        .eq('id', materialId)
+        .eq('template_key', TEMPLATE_PRE_DIAGNOSTICO_CORPORAL_ID)
+      if (metaErr) {
+        throw new Error(metaErr.message)
       }
     }
   } else {
@@ -311,9 +394,11 @@ export async function ensurePreDiagnosticoCapilarGlobalMaterialId(sb: SupabaseCl
 
   if (existing?.id) {
     materialId = existing.id as string
+    const canonTitle = TEMPLATE_PRE_DIAGNOSTICO_CAPILAR_TITLE
+    const canonDesc = getPreDiagnosticoCapilarV1Description()
     const { data: matRow, error: matErr } = await sb
       .from('ylada_estetica_consultancy_materials')
-      .select('content')
+      .select('content, title, description')
       .eq('id', materialId)
       .maybeSingle()
     if (matErr) {
@@ -335,8 +420,8 @@ export async function ensurePreDiagnosticoCapilarGlobalMaterialId(sb: SupabaseCl
       const { error: upErr } = await sb
         .from('ylada_estetica_consultancy_materials')
         .update({
-          title: TEMPLATE_PRE_DIAGNOSTICO_CAPILAR_TITLE,
-          description: getPreDiagnosticoCapilarV1Description(),
+          title: canonTitle,
+          description: canonDesc,
           content,
           material_kind: 'formulario',
         })
@@ -344,6 +429,15 @@ export async function ensurePreDiagnosticoCapilarGlobalMaterialId(sb: SupabaseCl
         .eq('template_key', TEMPLATE_PRE_DIAGNOSTICO_CAPILAR_ID)
       if (upErr) {
         throw new Error(upErr.message)
+      }
+    } else if (storedMetaDiffersFromCanonical(matRow?.title, matRow?.description, canonTitle, canonDesc)) {
+      const { error: metaErr } = await sb
+        .from('ylada_estetica_consultancy_materials')
+        .update({ title: canonTitle, description: canonDesc })
+        .eq('id', materialId)
+        .eq('template_key', TEMPLATE_PRE_DIAGNOSTICO_CAPILAR_ID)
+      if (metaErr) {
+        throw new Error(metaErr.message)
       }
     }
   } else {
@@ -395,9 +489,11 @@ export async function ensurePreAvaliacaoCapilarClienteGlobalMaterialId(sb: Supab
 
   if (existing?.id) {
     materialId = existing.id as string
+    const canonTitle = TEMPLATE_PRE_AVALIACAO_CAPILAR_CLIENTE_TITLE
+    const canonDesc = getPreAvaliacaoCapilarClienteV1Description()
     const { data: matRow, error: matErr } = await sb
       .from('ylada_estetica_consultancy_materials')
-      .select('content')
+      .select('content, title, description')
       .eq('id', materialId)
       .maybeSingle()
     if (matErr) {
@@ -419,8 +515,8 @@ export async function ensurePreAvaliacaoCapilarClienteGlobalMaterialId(sb: Supab
       const { error: upErr } = await sb
         .from('ylada_estetica_consultancy_materials')
         .update({
-          title: TEMPLATE_PRE_AVALIACAO_CAPILAR_CLIENTE_TITLE,
-          description: getPreAvaliacaoCapilarClienteV1Description(),
+          title: canonTitle,
+          description: canonDesc,
           content,
           material_kind: 'formulario',
         })
@@ -428,6 +524,15 @@ export async function ensurePreAvaliacaoCapilarClienteGlobalMaterialId(sb: Supab
         .eq('template_key', TEMPLATE_PRE_AVALIACAO_CAPILAR_CLIENTE_ID)
       if (upErr) {
         throw new Error(upErr.message)
+      }
+    } else if (storedMetaDiffersFromCanonical(matRow?.title, matRow?.description, canonTitle, canonDesc)) {
+      const { error: metaErr } = await sb
+        .from('ylada_estetica_consultancy_materials')
+        .update({ title: canonTitle, description: canonDesc })
+        .eq('id', materialId)
+        .eq('template_key', TEMPLATE_PRE_AVALIACAO_CAPILAR_CLIENTE_ID)
+      if (metaErr) {
+        throw new Error(metaErr.message)
       }
     }
   } else {
@@ -460,4 +565,50 @@ export async function ensurePreAvaliacaoCapilarClienteGlobalMaterialId(sb: Supab
   }
 
   return materialId
+}
+
+const GLOBAL_ESTETICA_TEMPLATE_KEYS = new Set<string>([
+  TEMPLATE_DIAGNOSTICO_CAPILAR_ID,
+  TEMPLATE_DIAGNOSTICO_CORPORAL_ID,
+  TEMPLATE_PRE_DIAGNOSTICO_CAPILAR_ID,
+  TEMPLATE_PRE_DIAGNOSTICO_CORPORAL_ID,
+  TEMPLATE_PRE_AVALIACAO_CAPILAR_CLIENTE_ID,
+])
+
+export function isEsteticaConsultoriaGlobalTemplateKey(templateKey: string | null | undefined): boolean {
+  return Boolean(templateKey && GLOBAL_ESTETICA_TEMPLATE_KEYS.has(templateKey))
+}
+
+/**
+ * Alinha materiais globais YLADA ao abrir o link público (título, descrição e campos canónicos).
+ * Falhas são ignoradas para não bloquear o respondente.
+ */
+export async function syncEsteticaConsultoriaGlobalMaterialFromTemplateKey(
+  sb: SupabaseClient,
+  templateKey: string | null | undefined
+): Promise<void> {
+  if (!templateKey || !GLOBAL_ESTETICA_TEMPLATE_KEYS.has(templateKey)) return
+  try {
+    switch (templateKey) {
+      case TEMPLATE_DIAGNOSTICO_CAPILAR_ID:
+        await ensureDiagnosticoCapilarGlobalMaterialId(sb)
+        break
+      case TEMPLATE_DIAGNOSTICO_CORPORAL_ID:
+        await ensureDiagnosticoCorporalGlobalMaterialId(sb)
+        break
+      case TEMPLATE_PRE_DIAGNOSTICO_CAPILAR_ID:
+        await ensurePreDiagnosticoCapilarGlobalMaterialId(sb)
+        break
+      case TEMPLATE_PRE_DIAGNOSTICO_CORPORAL_ID:
+        await ensurePreDiagnosticoCorporalGlobalMaterialId(sb)
+        break
+      case TEMPLATE_PRE_AVALIACAO_CAPILAR_CLIENTE_ID:
+        await ensurePreAvaliacaoCapilarClienteGlobalMaterialId(sb)
+        break
+      default:
+        break
+    }
+  } catch (e) {
+    console.error('[syncEsteticaConsultoriaGlobalMaterialFromTemplateKey]', templateKey, e)
+  }
 }
