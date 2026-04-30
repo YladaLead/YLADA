@@ -109,3 +109,13 @@ export function buildFichasBuckets(
 
   return { preReuniao, diagnostico, novas }
 }
+
+/** Todas as fichas da linha com metadados de pré/diagnóstico (uma entrada por cliente). */
+export function buildAllFichaPipelineItems(
+  clientsInLinha: YladaEsteticaConsultClientRow[],
+  responses: ResponseRow[],
+  linha: FichasPipelineLinha
+): FichaPipelineItem[] {
+  const { preReuniao, diagnostico, novas } = buildFichasBuckets(clientsInLinha, responses, linha)
+  return [...diagnostico, ...preReuniao, ...novas]
+}

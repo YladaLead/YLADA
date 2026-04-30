@@ -1,5 +1,6 @@
 import { randomBytes } from 'crypto'
 import type { ProLideresConsultoriaMaterialKind } from '@/lib/pro-lideres-consultoria'
+import type { EsteticaConsultFunnelStage } from '@/lib/estetica-consultoria-funnel'
 
 export const ESTETICA_CONSULT_SEGMENTS = ['capilar', 'corporal', 'ambos'] as const
 export type EsteticaConsultSegment = (typeof ESTETICA_CONSULT_SEGMENTS)[number]
@@ -32,6 +33,8 @@ export type YladaEsteticaConsultClientRow = {
   admin_notes: string | null
   /** Resumo da reunião pré-diagnóstico (admin) — lembrete do combinado na call após o pré. */
   meeting_summary?: string | null
+  /** Estágio manual do funil (Kanban admin). */
+  funnel_stage?: EsteticaConsultFunnelStage | string | null
   created_by_user_id: string | null
 }
 

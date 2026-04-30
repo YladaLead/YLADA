@@ -1662,6 +1662,13 @@ export default function EsteticaConsultoriaAdminClient() {
               Vista: {segmentoFiltro === 'capilar' ? 'Capilar (+ ambos)' : 'Corporal (+ ambos)'}
             </span>
           ) : null}
+          <Link
+            href={`/admin/estetica-consultoria/funil${segmentoFiltro ? `?segmento=${segmentoFiltro}` : ''}`}
+            className="font-semibold text-emerald-700 underline hover:text-emerald-900"
+          >
+            Funil (Kanban)
+          </Link>
+          <span className="text-gray-300">·</span>
           <Link href="/admin/consultorias" className="font-semibold text-blue-600 underline hover:text-blue-800">
             Todas as consultorias
           </Link>

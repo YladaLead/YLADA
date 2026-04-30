@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireApiAuth } from '@/lib/api-auth'
 import { supabaseAdmin } from '@/lib/supabase'
 import { isEsteticaConsultSegment } from '@/lib/estetica-consultoria'
+import { isEsteticaConsultFunnelStage } from '@/lib/estetica-consultoria-funnel'
 
 type Ctx = { params: Promise<{ id: string }> }
 
@@ -157,6 +158,11 @@ export async function PATCH(request: NextRequest, context: Ctx) {
       body.meeting_summary == null || body.meeting_summary === ''
         ? null
         : String(body.meeting_summary).trim().slice(0, 20000) || null
+  }
+
+  if (body.funnel_stage !== undefined) {
+    const raw = body.funnel_stage == null || body.funnel_stage === '' ? 'entrada' : String(body.funnel_stage).trim()
+    patch.funnel_stage = isEsteticaConsultFunnelStage(raw) ? raw : 'entrada'
   }
 
   if (Object.keys(patch).length === 0) {
