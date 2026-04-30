@@ -48,7 +48,7 @@ export async function sendProLideresPreDiagnosticoFilledNotifyEmail(params: {
   respondentName: string | null
   respondentEmail: string | null
   respondentWhatsapp: string | null
-  painelPreDiagnosticoUrl: string
+  respostasAdminUrl: string
 }): Promise<{ ok: true } | { ok: false; error: string }> {
   if (!isResendConfigured() || !resend) {
     return { ok: false, error: 'Envio de e-mail não configurado (RESEND_API_KEY).' }
@@ -66,9 +66,9 @@ export async function sendProLideresPreDiagnosticoFilledNotifyEmail(params: {
   <li><strong>E-mail:</strong> ${escapeHtml(params.respondentEmail ?? '—')}</li>
   <li><strong>WhatsApp:</strong> ${escapeHtml(params.respondentWhatsapp ?? '—')}</li>
 </ul>
-<p><a href="${escapeHtml(params.painelPreDiagnosticoUrl)}" style="display:inline-block;margin:16px 0;padding:12px 20px;background:#1d4ed8;color:#fff;text-decoration:none;border-radius:10px;font-weight:600;">Abrir respostas no Pro Líderes</a></p>
-<p style="word-break:break-all;font-size:13px;color:#444">${escapeHtml(params.painelPreDiagnosticoUrl)}</p>
-<p style="font-size:12px;color:#666">O préenchimento já está guardado na lista de respostas do pré-diagnóstico.</p>
+<p><a href="${escapeHtml(params.respostasAdminUrl)}" style="display:inline-block;margin:16px 0;padding:12px 20px;background:#1d4ed8;color:#fff;text-decoration:none;border-radius:10px;font-weight:600;">Abrir respostas no admin (Pro Líderes)</a></p>
+<p style="word-break:break-all;font-size:13px;color:#444">${escapeHtml(params.respostasAdminUrl)}</p>
+<p style="font-size:12px;color:#666">O préenchimento está na consultoria Pro Líderes (área administrativa YLADA).</p>
 <p>— YLADA</p>
 `.trim()
 

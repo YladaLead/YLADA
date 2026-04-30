@@ -140,6 +140,9 @@ export async function POST(request: NextRequest, context: Ctx) {
   const respondentWhatsappInsert =
     hasWaPair && computedWhatsapp ? computedWhatsapp : respondentWhatsapp
 
+  const adminFunnelStage =
+    mat.id === PRO_LIDERES_PRE_DIAGNOSTICO_MATERIAL_ID ? 'pendente_pagamento' : 'entrada'
+
   const { error: insErr } = await supabaseAdmin.from('pro_lideres_consultancy_form_responses').insert({
     material_id: mat.id,
     share_link_id: link.id,
@@ -148,6 +151,7 @@ export async function POST(request: NextRequest, context: Ctx) {
     respondent_email: respondentEmail,
     respondent_whatsapp: respondentWhatsappInsert,
     answers,
+    admin_funnel_stage: adminFunnelStage,
   })
 
   if (insErr) {
@@ -156,7 +160,7 @@ export async function POST(request: NextRequest, context: Ctx) {
 
   if (mat.id === PRO_LIDERES_PRE_DIAGNOSTICO_MATERIAL_ID && link.leader_tenant_id && supabaseAdmin) {
     const origin = request.nextUrl.origin
-    const painelUrl = `${origin.replace(/\/$/, '')}/pro-lideres/painel/pre-diagnostico`
+    const adminRespostasUrl = `${origin.replace(/\/$/, '')}/admin/pro-lideres/consultoria`
     void (async () => {
       const target = await resolveProLideresLeaderNotifyTarget(supabaseAdmin, link.leader_tenant_id as string)
       if (!target) {
@@ -169,7 +173,7 @@ export async function POST(request: NextRequest, context: Ctx) {
         respondentName,
         respondentEmail,
         respondentWhatsapp: respondentWhatsappInsert,
-        painelPreDiagnosticoUrl: painelUrl,
+        respostasAdminUrl: adminRespostasUrl,
       })
       if (!r.ok) console.warn('[pro-lideres-pre-diagnostico-notify]', r.error)
     })()
