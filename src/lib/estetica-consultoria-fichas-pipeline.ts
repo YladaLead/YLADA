@@ -1,4 +1,5 @@
 import type { YladaEsteticaConsultClientRow } from '@/lib/estetica-consultoria'
+import { ESTETICA_CONSULT_FUNNEL_COLUMNS } from '@/lib/estetica-consultoria-funnel'
 import {
   TEMPLATE_DIAGNOSTICO_CAPILAR_ID,
   TEMPLATE_DIAGNOSTICO_CORPORAL_ID,
@@ -14,6 +15,36 @@ export type EsteticaConsultFunilVista = 'todos' | 'corporal' | 'capilar' | 'lide
 
 export function isEsteticaConsultFunilVista(v: string): v is EsteticaConsultFunilVista {
   return v === 'todos' || v === 'corporal' || v === 'capilar' || v === 'lider'
+}
+
+/** Rótulos do quadro quando a vista é só Pro líder (onboarding + fichas com tenant). */
+export function funnelColumnsForVista(vista: EsteticaConsultFunilVista) {
+  if (vista !== 'lider') return ESTETICA_CONSULT_FUNNEL_COLUMNS
+  return ESTETICA_CONSULT_FUNNEL_COLUMNS.map((c) => {
+    if (c.key === 'entrada') {
+      return {
+        ...c,
+        label: 'Convite / diagnóstico pendente',
+        description: 'Link enviado; ainda não preencheu o formulário inicial Pro Líderes.',
+      }
+    }
+    if (c.key === 'pendente_pagamento') {
+      return {
+        ...c,
+        label: 'Pré-reunião feita · ficou de pagar',
+        description:
+          'Já enviou o formulário (proposta / pré); conta como pré-reunião feita — falta fechar pagamento ou confirmar o valor com o líder.',
+      }
+    }
+    if (c.key === 'em_andamento') {
+      return {
+        ...c,
+        label: 'Consultoria em curso',
+        description: 'Consultoria ou acompanhamento com o líder já em execução.',
+      }
+    }
+    return c
+  })
 }
 
 function linhasForSegment(segment: YladaEsteticaConsultClientRow['segment']): FichasPipelineLinha[] {
@@ -60,6 +91,8 @@ export type FichaPipelineItem = {
   client: YladaEsteticaConsultClientRow
   ultimoPreAt: string | null
   ultimoDiagnosticoAt: string | null
+  /** No funil vista «Pro líder»: cartão vindo do onboarding (não da ficha estética). */
+  funilCardSource?: 'estetica' | 'leader_onboarding'
 }
 
 /**

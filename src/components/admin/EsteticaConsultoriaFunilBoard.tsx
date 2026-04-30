@@ -63,11 +63,13 @@ function FunilCard({
     transform: CSS.Translate.toString(transform),
     opacity: isDragging ? 0.45 : 1,
   }
-  const href = `/admin/estetica-consultoria?segmento=${segmentoLink}&cliente=${encodeURIComponent(item.client.id)}`
+  const hrefConsultoria = `/admin/estetica-consultoria?segmento=${segmentoLink}&cliente=${encodeURIComponent(item.client.id)}`
+  const hrefOnboarding = `/admin/pro-lideres/onboarding?q=${encodeURIComponent(item.client.contact_email ?? '')}`
   const pre = formatShort(item.ultimoPreAt)
   const diag = formatShort(item.ultimoDiagnosticoAt)
+  const isOnb = item.funilCardSource === 'leader_onboarding'
   const showSegmento =
-    vista === 'todos' || vista === 'lider' || item.client.segment === 'ambos'
+    isOnb || vista === 'todos' || vista === 'lider' || item.client.segment === 'ambos'
 
   return (
     <div
@@ -92,25 +94,52 @@ function FunilCard({
           ) : null}
           {showSegmento ? (
             <p className="mt-1 text-[10px] font-medium text-gray-600">
-              <span className="rounded bg-gray-100 px-1.5 py-0.5">
-                {esteticaConsultSegmentLabel(item.client.segment)}
-              </span>
-              {vista !== 'lider' && item.client.leader_tenant_id ? (
+              {isOnb ? (
+                <span className="rounded bg-teal-100 px-1.5 py-0.5 text-teal-900">Onboarding Pro Líderes</span>
+              ) : (
+                <span className="rounded bg-gray-100 px-1.5 py-0.5">
+                  {esteticaConsultSegmentLabel(item.client.segment)}
+                </span>
+              )}
+              {!isOnb && vista !== 'lider' && item.client.leader_tenant_id ? (
                 <span className="ml-1.5 rounded bg-emerald-100 px-1.5 py-0.5 text-emerald-900">Pro líder</span>
               ) : null}
             </p>
           ) : null}
           <div className="mt-1.5 flex flex-wrap gap-x-2 gap-y-0.5 text-[10px] text-gray-500">
-            {pre ? <span>Pré: {pre}</span> : <span className="text-amber-700/90">Sem pré</span>}
-            {diag ? <span>Diag.: {diag}</span> : null}
+            {isOnb ? (
+              pre ? (
+                <span>Proposta / formulário: {pre}</span>
+              ) : (
+                <span className="text-amber-800/90">Ainda sem envio do formulário</span>
+              )
+            ) : (
+              <>
+                {pre ? <span>Pré: {pre}</span> : <span className="text-amber-700/90">Sem pré</span>}
+                {diag ? <span>Diag.: {diag}</span> : null}
+              </>
+            )}
           </div>
-          <Link
-            href={href}
-            className="mt-2 inline-block text-xs font-semibold text-pink-700 hover:text-pink-900 hover:underline"
-            onPointerDown={(e) => e.stopPropagation()}
-          >
-            Abrir ficha →
-          </Link>
+          <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1">
+            {!isOnb ? (
+              <Link
+                href={hrefConsultoria}
+                className="inline-block text-xs font-semibold text-pink-700 hover:text-pink-900 hover:underline"
+                onPointerDown={(e) => e.stopPropagation()}
+              >
+                Abrir ficha →
+              </Link>
+            ) : null}
+            {isOnb ? (
+              <Link
+                href={hrefOnboarding}
+                className="inline-block text-xs font-semibold text-teal-800 hover:text-teal-950 hover:underline"
+                onPointerDown={(e) => e.stopPropagation()}
+              >
+                Ver onboarding →
+              </Link>
+            ) : null}
+          </div>
         </div>
       </div>
     </div>
@@ -260,7 +289,11 @@ export default function EsteticaConsultoriaFunilBoard() {
     )
 
     try {
-      const res = await fetch(`/api/admin/estetica-consultoria/clients/${encodeURIComponent(clientId)}`, {
+      const isOnb = found.item.funilCardSource === 'leader_onboarding'
+      const url = isOnb
+        ? `/api/admin/pro-lideres/leader-onboarding/${encodeURIComponent(clientId)}`
+        : `/api/admin/estetica-consultoria/clients/${encodeURIComponent(clientId)}`
+      const res = await fetch(url, {
         method: 'PATCH',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
@@ -281,7 +314,7 @@ export default function EsteticaConsultoriaFunilBoard() {
       case 'todos':
         return 'Todas as fichas (capilar + corporal + ambos)'
       case 'lider':
-        return 'Só fichas com tenant Pro líder (leader_tenant_id)'
+        return 'Onboarding Pro Líderes (links) + fichas estética com tenant; colunas com nomes para este fluxo'
       case 'capilar':
         return 'Terapia capilar (+ segmento «ambos»)'
       default:
@@ -317,6 +350,14 @@ export default function EsteticaConsultoriaFunilBoard() {
           >
             Ir à consultoria
           </Link>
+          {vista === 'lider' ? (
+            <Link
+              href="/admin/pro-lideres/onboarding"
+              className="rounded-lg border border-teal-200 bg-teal-50 px-3 py-2 text-sm font-semibold text-teal-900 hover:bg-teal-100"
+            >
+              Onboarding Pro Líderes
+            </Link>
+          ) : null}
         </div>
       </div>
 
@@ -351,7 +392,8 @@ export default function EsteticaConsultoriaFunilBoard() {
 
       <p className="text-xs text-gray-500">
         Vista activa: <strong>{vistaLabel}</strong>. O estágio no funil é o mesmo registo em todas as vistas; em
-        «Todos» ou «Pro líder» vês uma ficha por clínica com o segmento assinalado no cartão.
+        «Todos» vês o segmento no cartão. Em «Pro líder» entram também os envios do formulário de onboarding (cartão
+        verde «Onboarding Pro Líderes») — ao enviar o formulário caem em «Pré-reunião feita · ficou de pagar».
       </p>
 
       {err ? (

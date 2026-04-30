@@ -201,6 +201,8 @@ export async function POST(request: NextRequest) {
       questionnaire_answers: answers,
       status: 'completed',
       response_completed_at: new Date().toISOString(),
+      /** Funil admin: formulário enviado = pré-reunião feita; segue-se fechar pagamento. */
+      admin_funnel_stage: 'pendente_pagamento',
     })
     .eq('id', row.id)
     .eq('status', 'pending')
