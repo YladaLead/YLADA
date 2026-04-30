@@ -411,6 +411,7 @@ function clientFormDefaults(c: YladaEsteticaConsultClientRow) {
     annual_plan_end: c.annual_plan_end ?? '',
     access_valid_until: c.access_valid_until ?? '',
     admin_notes: c.admin_notes ?? '',
+    meeting_summary: c.meeting_summary ?? '',
   }
 }
 
@@ -570,6 +571,9 @@ export default function EsteticaConsultoriaAdminClient() {
   const [selectedClient, setSelectedClient] = useState<YladaEsteticaConsultClientRow | null>(null)
   const [clientForm, setClientForm] = useState<ReturnType<typeof clientFormDefaults> | null>(null)
   const [savingClient, setSavingClient] = useState(false)
+  const [savingMeetingSummary, setSavingMeetingSummary] = useState(false)
+  /** Secção «Resumo da reunião pré-diagnóstico» recolhível na Jornada. */
+  const [preDiagnosticoMeetingSummaryOpen, setPreDiagnosticoMeetingSummaryOpen] = useState(false)
 
   const [newBusinessName, setNewBusinessName] = useState('')
   const [newSegment, setNewSegment] = useState<'capilar' | 'corporal' | 'ambos'>('capilar')
@@ -1126,6 +1130,34 @@ export default function EsteticaConsultoriaAdminClient() {
     }
   }
 
+  const saveMeetingSummary = async () => {
+    if (!selectedClient?.id || !clientForm) return
+    setSavingMeetingSummary(true)
+    setError(null)
+    try {
+      const meeting_summary = clientForm.meeting_summary.trim() ? clientForm.meeting_summary.trim() : null
+      const res = await fetch(`/api/admin/estetica-consultoria/clients/${selectedClient.id}`, {
+        method: 'PATCH',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ meeting_summary }),
+      })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) {
+        setError((data as { error?: string }).error || 'Erro ao salvar o resumo.')
+        return
+      }
+      const item = (data as { item?: YladaEsteticaConsultClientRow }).item
+      if (item) {
+        setSelectedClient(item)
+        setClientForm(clientFormDefaults(item))
+        setClients((prev) => prev.map((x) => (x.id === item.id ? item : x)))
+      }
+    } finally {
+      setSavingMeetingSummary(false)
+    }
+  }
+
   const selectClient = (c: YladaEsteticaConsultClientRow) => {
     setSelectedClient(c)
     setClientForm(clientFormDefaults(c))
@@ -1133,6 +1165,10 @@ export default function EsteticaConsultoriaAdminClient() {
     setTab('editar')
     setFichaTab('jornada')
   }
+
+  useEffect(() => {
+    setPreDiagnosticoMeetingSummaryOpen(false)
+  }, [selectedClient?.id])
 
   useEffect(() => {
     if (!clienteParam) {
@@ -1179,6 +1215,7 @@ export default function EsteticaConsultoriaAdminClient() {
           annual_plan_end: clientForm.annual_plan_end || null,
           access_valid_until: clientForm.access_valid_until || null,
           admin_notes: clientForm.admin_notes || null,
+          meeting_summary: clientForm.meeting_summary?.trim() ? clientForm.meeting_summary.trim() : null,
         }),
       })
       const data = await res.json().catch(() => ({}))
@@ -1935,6 +1972,17 @@ export default function EsteticaConsultoriaAdminClient() {
                 }`}
               >
                 {label}
+                {key === 'jornada' &&
+                (clientForm?.meeting_summary ?? selectedClient.meeting_summary ?? '').trim().length > 0 ? (
+                  <span
+                    className={`ml-1.5 rounded-full px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${
+                      fichaTab === key ? 'bg-white/25 text-white' : 'bg-emerald-100 text-emerald-900'
+                    }`}
+                    title="Já existe resumo da reunião pré-diagnóstico guardado"
+                  >
+                    pré
+                  </span>
+                ) : null}
                 {key === 'notas' && coachingNotes.length > 0 ? (
                   <span className="ml-1.5 rounded-full bg-white/25 px-1.5 text-xs tabular-nums">
                     {coachingNotes.length}
@@ -2274,6 +2322,67 @@ export default function EsteticaConsultoriaAdminClient() {
                   )
             }
           />
+          {clientForm ? (
+            <section className="rounded-2xl border border-emerald-200 bg-emerald-50/50 shadow-sm overflow-hidden">
+              <button
+                type="button"
+                onClick={() => setPreDiagnosticoMeetingSummaryOpen((v) => !v)}
+                aria-expanded={preDiagnosticoMeetingSummaryOpen}
+                aria-controls="pre-diagnostico-meeting-summary-panel"
+                id="pre-diagnostico-meeting-summary-trigger"
+                className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left transition hover:bg-emerald-100/60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600"
+              >
+                <span className="text-sm font-semibold text-gray-900">
+                  Resumo da reunião pré-diagnóstico
+                </span>
+                <svg
+                  className={`h-5 w-5 shrink-0 text-emerald-800 transition-transform ${
+                    preDiagnosticoMeetingSummaryOpen ? 'rotate-180' : ''
+                  }`}
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                  aria-hidden
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+              </button>
+              {preDiagnosticoMeetingSummaryOpen ? (
+                <div
+                  id="pre-diagnostico-meeting-summary-panel"
+                  role="region"
+                  aria-labelledby="pre-diagnostico-meeting-summary-trigger"
+                  className="space-y-3 border-t border-emerald-200/80 px-4 pb-4 pt-3"
+                >
+                  <p className="text-xs text-gray-600 max-w-2xl">
+                    Para a fase em que já tens o pré na ficha e falas com a clínica: regista o que combinaram ou o que
+                    importa lembrar antes do fecho e do diagnóstico longo (corporal, capilar ou ambos).
+                  </p>
+                  <textarea
+                    id="estetica-meeting-summary"
+                    aria-label="Resumo da reunião pré-diagnóstico"
+                    className="w-full min-h-[120px] rounded-lg border border-emerald-200/90 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm"
+                    value={clientForm.meeting_summary}
+                    onChange={(e) =>
+                      setClientForm((f) => (f ? { ...f, meeting_summary: e.target.value } : f))
+                    }
+                    placeholder="Ex.: o que exploraram na call, próximos passos, materiais combinados…"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => void saveMeetingSummary()}
+                    disabled={savingMeetingSummary}
+                    className="rounded-lg bg-emerald-700 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-800 disabled:opacity-50"
+                  >
+                    {savingMeetingSummary ? 'Salvando…' : 'Salvar resumo pré-diagnóstico'}
+                  </button>
+                </div>
+              ) : null}
+            </section>
+          ) : null}
           {(selectedClient.segment === 'corporal' || selectedClient.segment === 'ambos') ? (
             <section className="rounded-2xl border border-rose-200 bg-rose-50/50 p-4 shadow-sm space-y-4">
               <div className="rounded-xl border border-rose-200/90 bg-white/70 p-3 shadow-sm space-y-3">

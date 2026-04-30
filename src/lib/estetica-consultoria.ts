@@ -30,6 +30,8 @@ export type YladaEsteticaConsultClientRow = {
   access_expiry_reminder_sent_7d?: boolean
   access_expiry_reminder_sent_1d?: boolean
   admin_notes: string | null
+  /** Resumo da reunião pré-diagnóstico (admin) — lembrete do combinado na call após o pré. */
+  meeting_summary?: string | null
   created_by_user_id: string | null
 }
 

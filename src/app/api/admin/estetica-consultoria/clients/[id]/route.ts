@@ -152,6 +152,13 @@ export async function PATCH(request: NextRequest, context: Ctx) {
         : String(body.admin_notes).trim().slice(0, 20000) || null
   }
 
+  if (body.meeting_summary !== undefined) {
+    patch.meeting_summary =
+      body.meeting_summary == null || body.meeting_summary === ''
+        ? null
+        : String(body.meeting_summary).trim().slice(0, 20000) || null
+  }
+
   if (Object.keys(patch).length === 0) {
     return NextResponse.json({ error: 'Nada para atualizar.' }, { status: 400 })
   }
