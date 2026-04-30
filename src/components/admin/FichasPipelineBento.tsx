@@ -172,7 +172,7 @@ export function FichasPipelineBento({ linha }: { linha: FichasPipelineLinha }) {
             fechado) · Diagnóstico YLADA completo (início) · Fichas ainda sem estes envios. Clica numa ficha para abrir
             na consultoria. Para controlo manual por estágio (reunião, pagamento, etc.), usa o{' '}
             <Link
-              href={`/admin/estetica-consultoria/funil?segmento=${linha}`}
+              href={`/admin/estetica-consultoria/funil?vista=${linha}`}
               className="font-medium text-emerald-700 underline hover:text-emerald-900"
             >
               funil Kanban

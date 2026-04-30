@@ -4,8 +4,10 @@ import { supabaseAdmin } from '@/lib/supabase'
 import type { YladaEsteticaConsultClientRow } from '@/lib/estetica-consultoria'
 import {
   buildAllFichaPipelineItems,
+  buildAllFichaPipelineItemsMerged,
   clientsMatchingLinha,
-  type FichasPipelineLinha,
+  isEsteticaConsultFunilVista,
+  type EsteticaConsultFunilVista,
 } from '@/lib/estetica-consultoria-fichas-pipeline'
 import {
   ESTETICA_CONSULT_FUNNEL_COLUMNS,
@@ -27,13 +29,33 @@ const ALL_TEMPLATE_KEYS = [
   TEMPLATE_DIAGNOSTICO_CORPORAL_ID,
 ]
 
-function isLinha(v: string | null): v is FichasPipelineLinha {
-  return v === 'capilar' || v === 'corporal'
+function resolveVista(request: NextRequest): EsteticaConsultFunilVista {
+  const rawVista = request.nextUrl.searchParams.get('vista')?.trim().toLowerCase() ?? ''
+  if (isEsteticaConsultFunilVista(rawVista)) return rawVista
+
+  const legacyLinha = request.nextUrl.searchParams.get('linha')?.trim().toLowerCase() ?? ''
+  if (legacyLinha === 'capilar') return 'capilar'
+  if (legacyLinha === 'corporal') return 'corporal'
+
+  const legacySeg = request.nextUrl.searchParams.get('segmento')?.trim().toLowerCase() ?? ''
+  if (legacySeg === 'capilar') return 'capilar'
+  if (legacySeg === 'corporal') return 'corporal'
+
+  return 'corporal'
+}
+
+function clientsForVista(clients: YladaEsteticaConsultClientRow[], vista: EsteticaConsultFunilVista) {
+  if (vista === 'todos') return clients
+  if (vista === 'lider') {
+    return clients.filter((c) => c.leader_tenant_id != null && String(c.leader_tenant_id).trim() !== '')
+  }
+  if (vista === 'capilar') return clientsMatchingLinha(clients, 'capilar')
+  return clientsMatchingLinha(clients, 'corporal')
 }
 
 /**
- * GET ?linha=capilar|corporal
- * Fichas da linha agrupadas por funnel_stage (Kanban admin).
+ * GET ?vista=todos|corporal|capilar|lider
+ * Compat: ?linha= ou ?segmento= (capilar|corporal) mapeiam para a vista equivalente.
  */
 export async function GET(request: NextRequest) {
   const auth = await requireApiAuth(request, ['admin'])
@@ -43,11 +65,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Servidor sem service role' }, { status: 503 })
   }
 
-  const raw = request.nextUrl.searchParams.get('linha')?.trim().toLowerCase() ?? ''
-  if (!isLinha(raw)) {
-    return NextResponse.json({ error: 'Parâmetro linha=capilar ou linha=corporal é obrigatório.' }, { status: 400 })
-  }
-  const linha = raw
+  const vista = resolveVista(request)
 
   const { data: materials, error: mErr } = await supabaseAdmin
     .from('ylada_estetica_consultancy_materials')
@@ -62,7 +80,7 @@ export async function GET(request: NextRequest) {
   const matRows = (materials ?? []) as { id: string; template_key: string }[]
   if (matRows.length === 0) {
     return NextResponse.json({
-      linha,
+      vista,
       columns: ESTETICA_CONSULT_FUNNEL_COLUMNS.map((c) => ({ ...c, items: [] })),
     })
   }
@@ -80,11 +98,11 @@ export async function GET(request: NextRequest) {
   }
 
   const clients = (allClients ?? []) as YladaEsteticaConsultClientRow[]
-  const clientsInLinha = clientsMatchingLinha(clients, linha)
-  const idSet = new Set(clientsInLinha.map((c) => c.id))
+  const clientsInVista = clientsForVista(clients, vista)
+  const idSet = new Set(clientsInVista.map((c) => c.id))
   if (idSet.size === 0) {
     return NextResponse.json({
-      linha,
+      vista,
       columns: ESTETICA_CONSULT_FUNNEL_COLUMNS.map((c) => ({ ...c, items: [] })),
     })
   }
@@ -115,7 +133,14 @@ export async function GET(request: NextRequest) {
     })
     .filter((x): x is NonNullable<typeof x> => x != null)
 
-  const allItems = buildAllFichaPipelineItems(clientsInLinha, responses, linha)
+  let allItems: ReturnType<typeof buildAllFichaPipelineItems>
+  if (vista === 'corporal') {
+    allItems = buildAllFichaPipelineItems(clientsInVista, responses, 'corporal')
+  } else if (vista === 'capilar') {
+    allItems = buildAllFichaPipelineItems(clientsInVista, responses, 'capilar')
+  } else {
+    allItems = buildAllFichaPipelineItemsMerged(clientsInVista, responses)
+  }
 
   const byStage = new Map<string, typeof allItems>()
   for (const col of ESTETICA_CONSULT_FUNNEL_COLUMNS) {
@@ -138,5 +163,5 @@ export async function GET(request: NextRequest) {
     items: [...(byStage.get(c.key) ?? [])].sort(sortByUpdated),
   }))
 
-  return NextResponse.json({ linha, columns })
+  return NextResponse.json({ vista, columns })
 }

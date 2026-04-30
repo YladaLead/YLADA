@@ -9,6 +9,19 @@ import {
 
 export type FichasPipelineLinha = 'capilar' | 'corporal'
 
+/** Vista do funil admin: linha única, todas as fichas, ou só com tenant Pro líder. */
+export type EsteticaConsultFunilVista = 'todos' | 'corporal' | 'capilar' | 'lider'
+
+export function isEsteticaConsultFunilVista(v: string): v is EsteticaConsultFunilVista {
+  return v === 'todos' || v === 'corporal' || v === 'capilar' || v === 'lider'
+}
+
+function linhasForSegment(segment: YladaEsteticaConsultClientRow['segment']): FichasPipelineLinha[] {
+  if (segment === 'ambos') return ['capilar', 'corporal']
+  if (segment === 'capilar') return ['capilar']
+  return ['corporal']
+}
+
 const PRE_CAPILAR = new Set<string>([
   TEMPLATE_PRE_DIAGNOSTICO_CAPILAR_ID,
   TEMPLATE_PRE_AVALIACAO_CAPILAR_CLIENTE_ID,
@@ -118,4 +131,48 @@ export function buildAllFichaPipelineItems(
 ): FichaPipelineItem[] {
   const { preReuniao, diagnostico, novas } = buildFichasBuckets(clientsInLinha, responses, linha)
   return [...diagnostico, ...preReuniao, ...novas]
+}
+
+/**
+ * Uma ficha por cliente: junta pré/diagnóstico nas linhas que fazem sentido para o segmento (ex.: «ambos» = capilar + corporal).
+ * Usado nas vistas «todos» e «lider» do funil.
+ */
+export function buildAllFichaPipelineItemsMerged(
+  clientsSubset: YladaEsteticaConsultClientRow[],
+  responses: ResponseRow[]
+): FichaPipelineItem[] {
+  const items: FichaPipelineItem[] = []
+  for (const c of clientsSubset) {
+    const linhas = linhasForSegment(c.segment)
+    let ultimoPre: string | null = null
+    let ultimoDiag: string | null = null
+    for (const r of responses) {
+      if (r.estetica_consult_client_id !== c.id) continue
+      const t = r.template_key
+      const at = r.submitted_at
+      for (const L of linhas) {
+        if (isPreTemplateForLinha(t, L)) {
+          if (!ultimoPre || at > ultimoPre) ultimoPre = at
+        }
+        if (isDiagnosticoTemplateForLinha(t, L)) {
+          if (!ultimoDiag || at > ultimoDiag) ultimoDiag = at
+        }
+      }
+    }
+    items.push({ client: c, ultimoPreAt: ultimoPre, ultimoDiagnosticoAt: ultimoDiag })
+  }
+  items.sort((a, b) => b.client.updated_at.localeCompare(a.client.updated_at))
+  return items
+}
+
+/** Segmento na URL da consultoria ao abrir a ficha (vista «todos» / «lider» com «ambos»). */
+export function segmentoParamForConsultoriaLink(
+  client: YladaEsteticaConsultClientRow,
+  vista: EsteticaConsultFunilVista
+): FichasPipelineLinha {
+  if (vista === 'capilar') return 'capilar'
+  if (vista === 'corporal') return 'corporal'
+  if (client.segment === 'capilar') return 'capilar'
+  if (client.segment === 'corporal') return 'corporal'
+  return 'corporal'
 }

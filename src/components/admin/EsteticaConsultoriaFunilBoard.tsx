@@ -16,9 +16,15 @@ import {
   useDroppable,
 } from '@dnd-kit/core'
 import { CSS } from '@dnd-kit/utilities'
-import type { FichaPipelineItem, FichasPipelineLinha } from '@/lib/estetica-consultoria-fichas-pipeline'
+import {
+  type EsteticaConsultFunilVista,
+  isEsteticaConsultFunilVista,
+  type FichaPipelineItem,
+  type FichasPipelineLinha,
+  segmentoParamForConsultoriaLink,
+} from '@/lib/estetica-consultoria-fichas-pipeline'
 import type { EsteticaConsultFunnelStage } from '@/lib/estetica-consultoria-funnel'
-import type { YladaEsteticaConsultClientRow } from '@/lib/estetica-consultoria'
+import { esteticaConsultSegmentLabel, type YladaEsteticaConsultClientRow } from '@/lib/estetica-consultoria'
 
 type FunilColumnApi = {
   key: EsteticaConsultFunnelStage
@@ -40,11 +46,13 @@ function formatShort(iso: string | null) {
 
 function FunilCard({
   item,
-  linha,
+  vista,
+  segmentoLink,
   dragId,
 }: {
   item: FichaPipelineItem
-  linha: FichasPipelineLinha
+  vista: EsteticaConsultFunilVista
+  segmentoLink: FichasPipelineLinha
   dragId: string
 }) {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
@@ -55,9 +63,11 @@ function FunilCard({
     transform: CSS.Translate.toString(transform),
     opacity: isDragging ? 0.45 : 1,
   }
-  const href = `/admin/estetica-consultoria?segmento=${linha}&cliente=${encodeURIComponent(item.client.id)}`
+  const href = `/admin/estetica-consultoria?segmento=${segmentoLink}&cliente=${encodeURIComponent(item.client.id)}`
   const pre = formatShort(item.ultimoPreAt)
   const diag = formatShort(item.ultimoDiagnosticoAt)
+  const showSegmento =
+    vista === 'todos' || vista === 'lider' || item.client.segment === 'ambos'
 
   return (
     <div
@@ -79,6 +89,16 @@ function FunilCard({
           <p className="font-semibold text-gray-900 leading-snug text-sm">{item.client.business_name}</p>
           {item.client.contact_name ? (
             <p className="text-xs text-gray-500 mt-0.5 truncate">{item.client.contact_name}</p>
+          ) : null}
+          {showSegmento ? (
+            <p className="mt-1 text-[10px] font-medium text-gray-600">
+              <span className="rounded bg-gray-100 px-1.5 py-0.5">
+                {esteticaConsultSegmentLabel(item.client.segment)}
+              </span>
+              {vista !== 'lider' && item.client.leader_tenant_id ? (
+                <span className="ml-1.5 rounded bg-emerald-100 px-1.5 py-0.5 text-emerald-900">Pro líder</span>
+              ) : null}
+            </p>
           ) : null}
           <div className="mt-1.5 flex flex-wrap gap-x-2 gap-y-0.5 text-[10px] text-gray-500">
             {pre ? <span>Pré: {pre}</span> : <span className="text-amber-700/90">Sem pré</span>}
@@ -135,11 +155,20 @@ function FunilColumnDrop({
   )
 }
 
+function resolveVistaFromSearchParams(searchParams: URLSearchParams): EsteticaConsultFunilVista {
+  const rawVista = searchParams.get('vista')?.trim().toLowerCase() ?? ''
+  if (isEsteticaConsultFunilVista(rawVista)) return rawVista
+  const legacySeg = searchParams.get('segmento')?.trim().toLowerCase() ?? ''
+  const legacyLinha = searchParams.get('linha')?.trim().toLowerCase() ?? ''
+  if (legacySeg === 'capilar' || legacyLinha === 'capilar') return 'capilar'
+  if (legacySeg === 'corporal' || legacyLinha === 'corporal') return 'corporal'
+  return 'corporal'
+}
+
 export default function EsteticaConsultoriaFunilBoard() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const rawSeg = searchParams.get('segmento')?.trim().toLowerCase() ?? ''
-  const linha: FichasPipelineLinha = rawSeg === 'capilar' ? 'capilar' : 'corporal'
+  const vista = resolveVistaFromSearchParams(searchParams)
 
   const [columns, setColumns] = useState<FunilColumnApi[]>([])
   const [loading, setLoading] = useState(true)
@@ -156,7 +185,9 @@ export default function EsteticaConsultoriaFunilBoard() {
     setLoading(true)
     setErr(null)
     try {
-      const res = await fetch(`/api/admin/estetica-consultoria/funil?linha=${linha}`, { credentials: 'include' })
+      const res = await fetch(`/api/admin/estetica-consultoria/funil?vista=${encodeURIComponent(vista)}`, {
+        credentials: 'include',
+      })
       const data = await res.json().catch(() => ({}))
       if (!res.ok) {
         setErr((data as { error?: string }).error || 'Erro ao carregar funil.')
@@ -167,16 +198,14 @@ export default function EsteticaConsultoriaFunilBoard() {
     } finally {
       setLoading(false)
     }
-  }, [linha])
+  }, [vista])
 
   useEffect(() => {
     void load()
   }, [load])
 
-  const setSegmento = (next: FichasPipelineLinha) => {
-    const p = new URLSearchParams(searchParams.toString())
-    p.set('segmento', next)
-    router.push(`/admin/estetica-consultoria/funil?${p.toString()}`)
+  const setVista = (next: EsteticaConsultFunilVista) => {
+    router.push(`/admin/estetica-consultoria/funil?vista=${encodeURIComponent(next)}`)
   }
 
   const findItemByClientId = useCallback(
@@ -247,7 +276,21 @@ export default function EsteticaConsultoriaFunilBoard() {
     }
   }
 
-  const labelLinha = useMemo(() => (linha === 'capilar' ? 'Terapia capilar' : 'Estética corporal'), [linha])
+  const vistaLabel = useMemo(() => {
+    switch (vista) {
+      case 'todos':
+        return 'Todas as fichas (capilar + corporal + ambos)'
+      case 'lider':
+        return 'Só fichas com tenant Pro líder (leader_tenant_id)'
+      case 'capilar':
+        return 'Terapia capilar (+ segmento «ambos»)'
+      default:
+        return 'Estética corporal (+ segmento «ambos»)'
+    }
+  }, [vista])
+
+  const consultoriaSegmentoDefault: FichasPipelineLinha =
+    vista === 'capilar' ? 'capilar' : vista === 'corporal' ? 'corporal' : 'corporal'
 
   return (
     <div className="space-y-4">
@@ -269,7 +312,7 @@ export default function EsteticaConsultoriaFunilBoard() {
             Atualizar
           </button>
           <Link
-            href={`/admin/estetica-consultoria?segmento=${linha}`}
+            href={`/admin/estetica-consultoria?segmento=${consultoriaSegmentoDefault}`}
             className="rounded-lg bg-pink-600 px-3 py-2 text-sm font-semibold text-white hover:bg-pink-700"
           >
             Ir à consultoria
@@ -277,27 +320,38 @@ export default function EsteticaConsultoriaFunilBoard() {
         </div>
       </div>
 
-      <div className="flex flex-wrap gap-2" role="tablist" aria-label="Linha de negócio">
-        {(['corporal', 'capilar'] as const).map((seg) => (
+      <div className="flex flex-wrap gap-2" role="tablist" aria-label="Filtro do funil">
+        {(
+          [
+            { key: 'todos' as const, label: 'Todos juntos' },
+            { key: 'corporal' as const, label: 'Estética corporal' },
+            { key: 'capilar' as const, label: 'Terapia capilar' },
+            { key: 'lider' as const, label: 'Pro líder' },
+          ] as const
+        ).map(({ key, label }) => (
           <button
-            key={seg}
+            key={key}
             type="button"
             role="tab"
-            aria-selected={linha === seg}
-            onClick={() => setSegmento(seg)}
+            aria-selected={vista === key}
+            onClick={() => setVista(key)}
             className={`rounded-lg px-3 py-2 text-sm font-medium transition ${
-              linha === seg ? 'bg-pink-600 text-white shadow-sm' : 'border border-gray-200 bg-white text-gray-800 hover:bg-gray-50'
+              vista === key
+                ? 'bg-pink-600 text-white shadow-sm'
+                : 'border border-gray-200 bg-white text-gray-800 hover:bg-gray-50'
             }`}
           >
-            {seg === 'corporal' ? 'Estética corporal' : 'Terapia capilar'}
-            <span className="ml-1 text-[11px] opacity-80">(+ ambos)</span>
+            {label}
+            {key === 'corporal' || key === 'capilar' ? (
+              <span className="ml-1 text-[11px] opacity-80">(+ ambos)</span>
+            ) : null}
           </button>
         ))}
       </div>
 
       <p className="text-xs text-gray-500">
-        Linha activa: <strong>{labelLinha}</strong> — fichas com segmento «ambos» aparecem nas duas vistas (mesmo
-        registo; ao moveres num quadro, o estágio actualiza-se para as duas).
+        Vista activa: <strong>{vistaLabel}</strong>. O estágio no funil é o mesmo registo em todas as vistas; em
+        «Todos» ou «Pro líder» vês uma ficha por clínica com o segmento assinalado no cartão.
       </p>
 
       {err ? (
@@ -332,7 +386,8 @@ export default function EsteticaConsultoriaFunilBoard() {
                     <FunilCard
                       key={item.client.id}
                       item={item}
-                      linha={linha}
+                      vista={vista}
+                      segmentoLink={segmentoParamForConsultoriaLink(item.client, vista)}
                       dragId={`ficha-${item.client.id}`}
                     />
                   ))}

@@ -1663,7 +1663,9 @@ export default function EsteticaConsultoriaAdminClient() {
             </span>
           ) : null}
           <Link
-            href={`/admin/estetica-consultoria/funil${segmentoFiltro ? `?segmento=${segmentoFiltro}` : ''}`}
+            href={`/admin/estetica-consultoria/funil?vista=${
+              segmentoFiltro === 'capilar' ? 'capilar' : segmentoFiltro === 'corporal' ? 'corporal' : 'todos'
+            }`}
             className="font-semibold text-emerald-700 underline hover:text-emerald-900"
           >
             Funil (Kanban)
