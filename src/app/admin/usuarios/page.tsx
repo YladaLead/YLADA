@@ -58,6 +58,8 @@ interface Usuario {
   isContaTeste?: boolean
   /** Já existiu assinatura mensal ou anual (qualquer área), ver API `everHadPaid` */
   everHadPaid?: boolean
+  /** Produto Pro (tenant vertical); coluna Área — ver API GET /api/admin/usuarios */
+  proProductBadge?: 'pro_terapia_capilar' | 'pro_estetica_corporal' | 'pro_lideres' | null
 }
 
 interface Stats {
@@ -686,6 +688,8 @@ export default function AdminUsuarios() {
   }
 
 
+  const usuarioAreaBadgeKey = (u: Usuario) => u.proProductBadge ?? u.area
+
   const getAreaIcon = (area: string) => {
     switch (area) {
       case 'nutri': return '🥗'
@@ -694,6 +698,9 @@ export default function AdminUsuarios() {
       case 'wellness': return '💖'
       case 'ylada': return '🔷'
       case 'seller': return '🛒'
+      case 'pro_terapia_capilar': return '💇'
+      case 'pro_estetica_corporal': return '🧖'
+      case 'pro_lideres': return '📣'
       default: return '👤'
     }
   }
@@ -706,6 +713,9 @@ export default function AdminUsuarios() {
       case 'wellness': return 'bg-teal-100 text-teal-800'
       case 'ylada': return 'bg-sky-100 text-sky-800'
       case 'seller': return 'bg-amber-100 text-amber-900'
+      case 'pro_terapia_capilar': return 'bg-cyan-100 text-cyan-900'
+      case 'pro_estetica_corporal': return 'bg-rose-100 text-rose-900'
+      case 'pro_lideres': return 'bg-violet-100 text-violet-900'
       default: return 'bg-gray-100 text-gray-800'
     }
   }
@@ -790,7 +800,7 @@ export default function AdminUsuarios() {
         u.nome,
         u.email,
         u.whatsapp || '',
-        u.area,
+        getAreaLabel(usuarioAreaBadgeKey(u) as Usuario['area']),
       ]
       const pres = mostrarColunasPresidente
         ? [u.is_presidente ? t.table.yes : '—', u.nome_presidente_canonico || u.nome_presidente || '']
@@ -1212,12 +1222,12 @@ export default function AdminUsuarios() {
                         </td>
                         <td className="px-2 py-2 whitespace-nowrap">
                           <div className="flex items-center">
-                            <span className="text-base mr-1.5">{getAreaIcon(usuario.area)}</span>
+                            <span className="text-base mr-1.5">{getAreaIcon(usuarioAreaBadgeKey(usuario))}</span>
                             <span
-                              className={`px-1.5 py-0.5 rounded-full text-[10px] font-semibold ${getAreaColor(usuario.area)}`}
-                              title={usuario.area}
+                              className={`px-1.5 py-0.5 rounded-full text-[10px] font-semibold ${getAreaColor(usuarioAreaBadgeKey(usuario))}`}
+                              title={usuarioAreaBadgeKey(usuario)}
                             >
-                              {getAreaLabel(usuario.area)}
+                              {getAreaLabel(usuarioAreaBadgeKey(usuario) as Usuario['area'])}
                             </span>
                           </div>
                         </td>

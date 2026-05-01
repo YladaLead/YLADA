@@ -5,6 +5,7 @@ import { getNamesForCanonical, getCanonicalName } from '@/lib/presidente-canonic
 import { isPerfilMatrizYlada, PERFIS_MATRIZ_YLADA } from '@/lib/admin-matriz-constants'
 import { parseYladaFreeGrantKind } from '@/lib/admin-ylada-free-matriz'
 import { isAdminTestAccountEmail } from '@/lib/admin-test-accounts'
+import { fetchAdminProProductBadgesByUserId } from '@/lib/admin-usuarios-pro-product-badge'
 import { toYmdInTimeZone } from '@/lib/date-utils'
 
 /**
@@ -235,6 +236,8 @@ export async function GET(request: NextRequest) {
 
     // Buscar assinaturas (ativas e vencidas) para todos os usuários
     const userIds = profiles.map(p => p.user_id)
+    const proProductBadgesByUser = await fetchAdminProProductBadgesByUserId(supabaseAdmin, userIds)
+
     const { data: subscriptions } = await supabaseAdmin
       .from('subscriptions')
       .select('id, user_id, area, plan_type, status, current_period_end, is_migrated, stripe_subscription_id')
@@ -564,6 +567,7 @@ export async function GET(request: NextRequest) {
         email: emailExibicao,
         whatsapp: whatsappExibicao,
         area: profile.perfil || 'wellness',
+        proProductBadge: proProductBadgesByUser.get(profile.user_id) ?? null,
         status,
         assinatura: assinaturaTipo,
         assinaturaId: subscriptionToEdit?.id || null,

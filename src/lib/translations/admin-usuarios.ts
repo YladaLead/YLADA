@@ -65,6 +65,10 @@ export interface AdminUsuariosTranslations {
     perfumaria: string
     ylada: string
     seller: string
+    /** Produtos YLADA Pro (vertical em leader_tenants) — coluna Área na listagem admin */
+    pro_terapia_capilar: string
+    pro_estetica_corporal: string
+    pro_lideres: string
   }
   export: string
   stats: {
@@ -289,6 +293,9 @@ const pt: AdminUsuariosTranslations = {
     perfumaria: 'Perfumaria',
     ylada: 'YLADA',
     seller: 'Vendas',
+    pro_terapia_capilar: 'Pro Terapia capilar',
+    pro_estetica_corporal: 'Pro Estética corporal',
+    pro_lideres: 'Pro Líderes',
   },
   export: 'Exportar planilha (CSV)',
   stats: {
@@ -509,6 +516,9 @@ const es: AdminUsuariosTranslations = {
     perfumaria: 'Perfumaria',
     ylada: 'YLADA',
     seller: 'Ventas',
+    pro_terapia_capilar: 'Pro Terapia capilar',
+    pro_estetica_corporal: 'Pro Estética corporal',
+    pro_lideres: 'Pro Líderes',
   },
   export: 'Exportar hoja (CSV)',
   stats: {
@@ -729,6 +739,9 @@ const en: AdminUsuariosTranslations = {
     perfumaria: 'Perfumaria',
     ylada: 'YLADA',
     seller: 'Sales',
+    pro_terapia_capilar: 'Pro Hair therapy',
+    pro_estetica_corporal: 'Pro Body aesthetics',
+    pro_lideres: 'Pro Leaders',
   },
   export: 'Export spreadsheet (CSV)',
   stats: {
