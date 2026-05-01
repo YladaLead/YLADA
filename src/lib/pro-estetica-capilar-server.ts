@@ -258,6 +258,34 @@ export async function ensureEsteticaCapilarTenantAccess(
   if (!ctx && isProEsteticaCapilarBootstrapLeaderEmail(user.email) && admin) {
     ctx = await resolveEsteticaCapilarTenantContext(admin, user)
   }
+
+  /**
+   * Dona com tenant já criado (ex.: cadastro manual) mas SELECT com JWT falha por RLS:
+   * mesmo padrão que `ensureEsteticaCorporalTenantAccess` — sem isto, cai em aguardando-acesso
+   * mesmo com `leader_tenants` correcto no Supabase.
+   */
+  if (!ctx && admin) {
+    const { data: ownerRow, error: ownerFetchErr } = await admin
+      .from('leader_tenants')
+      .select('*')
+      .eq('owner_user_id', user.id)
+      .maybeSingle()
+    if (ownerFetchErr) {
+      console.error(
+        '[ensureEsteticaCapilarTenantAccess] admin lookup owner_tenant:',
+        ownerFetchErr.message,
+        resolvedUserEmail(user)
+      )
+    }
+    if (ownerRow) {
+      if (isEsteticaCapilarVertical(ownerRow as LeaderTenantRow)) {
+        ctx = { tenant: ownerRow as LeaderTenantRow, role: 'leader' }
+      } else {
+        return { ok: false, redirect: '/pro-estetica-capilar/conta-outra-edicao' }
+      }
+    }
+  }
+
   if (!ctx) {
     if (proEsteticaCapilarPainelDevBypassEnabled()) {
       return { ok: true, tenant: devStubCapilarTenant(user.id), role: 'leader' }
