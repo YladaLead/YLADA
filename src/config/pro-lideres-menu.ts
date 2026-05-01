@@ -23,7 +23,7 @@ export const PRO_LIDERES_MENU_GROUPS: { label: string; items: ProLideresMenuItem
       { key: 'noel', label: 'Noel', path: 'noel', icon: '💬', leaderOnly: true },
       {
         key: 'catalogo',
-        label: 'Catálogo de ferramentas',
+        label: 'Meus links',
         path: 'catalogo',
         icon: '🛠️',
       },

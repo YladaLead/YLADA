@@ -269,7 +269,7 @@ export function ProLideresCatalogoClient({
   /** Pro Estética: só o separador de vendas/fluxos — sem recrutamento MMN. */
   hideRecruitmentTab = false,
   salesTabLabel = 'Vendas',
-  catalogTitle = 'Catálogo de ferramentas',
+  catalogTitle = 'Meus links',
   catalogIntro,
 }: {
   /** Base da API de fluxos (ex.: `/api/pro-estetica-corporal`). */

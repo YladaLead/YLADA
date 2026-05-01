@@ -237,7 +237,7 @@ export function ProLideresInvitesPanel() {
       setTeamBankPaymentUrlDraft(
         typeof t?.team_bank_payment_url === 'string' ? t.team_bank_payment_url.trim() : ''
       )
-      setTeamBankUrlSavedMsg('Link de cobrança guardado.')
+      setTeamBankUrlSavedMsg('Guardado.')
       setTimeout(() => setTeamBankUrlSavedMsg(null), 4000)
     } catch {
       setError('Erro de rede ao guardar o link.')
@@ -252,80 +252,6 @@ export function ProLideresInvitesPanel() {
     <div className="space-y-6">
       {error && (
         <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">{error}</div>
-      )}
-
-      <form
-        onSubmit={(e) => void saveTeamBankPaymentUrl(e)}
-        className="space-y-3 rounded-xl border border-gray-200 bg-white p-4 shadow-sm"
-      >
-        <p className="text-sm font-semibold text-gray-900">Link de cobrança (banco / boleto)</p>
-        <p className="text-sm leading-relaxed text-gray-600">
-          Cola aqui o endereço que o teu banco ou gateway te dá (https…).{' '}
-          <strong className="text-gray-800">Não é o Mercado Pago da YLADA</strong> — é o teu link para a equipa pagar
-          a operação. Depois de guardar, <strong className="text-gray-800">cada convite</strong> continua a ser só o
-          link de cadastro; a pessoa <strong className="text-gray-800">vê este link de pagamento a seguir</strong> ao
-          concluir o registo ou ao aceitar com conta existente.
-        </p>
-        <label className="block">
-          <span className="mb-1 block text-xs font-medium text-gray-600">URL (https ou http)</span>
-          <input
-            type="url"
-            value={teamBankPaymentUrlDraft}
-            onChange={(e) => setTeamBankPaymentUrlDraft(e.target.value)}
-            className="w-full rounded-lg border border-gray-300 px-3 py-2.5 font-mono text-sm text-gray-900"
-            placeholder="https://…"
-            maxLength={2000}
-            autoComplete="off"
-          />
-        </label>
-        {teamBankUrlSavedMsg && (
-          <p className="text-sm font-medium text-green-700">{teamBankUrlSavedMsg}</p>
-        )}
-        <button
-          type="submit"
-          disabled={teamBankUrlSaving}
-          className="min-h-[44px] rounded-xl border border-gray-300 bg-white px-5 py-2.5 text-sm font-semibold text-gray-900 hover:bg-gray-50 disabled:opacity-60"
-        >
-          {teamBankUrlSaving ? 'A guardar…' : 'Guardar link de cobrança'}
-        </button>
-      </form>
-
-      {subscriptionAccessOk === false && (
-        <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-4 text-amber-950 shadow-sm">
-          <p className="text-base font-semibold text-amber-950">Assinatura YLADA — necessária para convidar</p>
-          <p className="mt-2 text-sm leading-relaxed text-amber-900/95">
-            Sem o plano equipe ativo na YLADA não é possível gerar novos convites nem concluir cadastros pelo link.
-            Ative o pagamento seguro; em seguida volte aqui para criar os links.
-          </p>
-          <Link
-            href="/pro-lideres/painel/assinatura-equipe"
-            className="mt-4 inline-flex min-h-[44px] items-center justify-center rounded-xl bg-amber-800 px-6 text-sm font-semibold text-white hover:bg-amber-900"
-          >
-            Ativar assinatura YLADA
-          </Link>
-        </div>
-      )}
-
-      {yladaSubHint && subscriptionAccessOk === true && (
-        <div className="rounded-xl border border-emerald-200 bg-emerald-50/90 px-4 py-3 text-sm text-emerald-950 shadow-sm">
-          <p className="font-semibold text-emerald-950">Assinatura YLADA (equipe)</p>
-          <p className="mt-1 leading-relaxed text-emerald-900/95">
-            <strong className="text-emerald-950">Ativa.</strong> Referência do plano: até{' '}
-            <strong>{yladaSubHint.pendingInviteQuota} convites pendentes</strong> no ciclo ·{' '}
-            <strong>R$ {yladaSubHint.monthlyAmountBrl.toLocaleString('pt-BR')}/mês</strong> na YLADA. Se o plano expirar,
-            o aviso laranja volta acima com o botão para regularizar no Mercado Pago.
-          </p>
-        </div>
-      )}
-
-      {quota && subscriptionAccessOk !== false && (
-        <div className="rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-700 shadow-sm">
-          <span className="font-semibold text-gray-900">Cota de convites pendentes:</span>{' '}
-          <span>
-            {quota.pendingUsed} / {quota.pendingLimit} ativos
-          </span>
-          <span className="text-gray-500"> · {quota.totalListed} linhas no histórico (todos os estados)</span>
-        </div>
       )}
 
       <form onSubmit={onCreate} className="space-y-3 rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
@@ -379,8 +305,8 @@ export function ProLideresInvitesPanel() {
             </div>
           ) : (
             <p className="mt-2 text-xs text-green-800/85">
-              Sem link de cobrança configurado acima — a pessoa só entra pelo convite; podes enviar o pagamento por
-              fora se quiseres.
+              Sem link de cobrança configurado — a pessoa só entra pelo convite; podes enviar o pagamento por fora se
+              quiseres ou indicar o link no fim desta página.
             </p>
           )}
           <div className="mt-3 flex flex-wrap gap-2">
@@ -399,6 +325,44 @@ export function ProLideresInvitesPanel() {
               Excluir convite
             </button>
           </div>
+        </div>
+      )}
+
+      {subscriptionAccessOk === false && (
+        <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-4 text-amber-950 shadow-sm">
+          <p className="text-base font-semibold text-amber-950">Assinatura YLADA — necessária para convidar</p>
+          <p className="mt-2 text-sm leading-relaxed text-amber-900/95">
+            Sem o plano equipe ativo na YLADA não é possível gerar novos convites nem concluir cadastros pelo link.
+            Ative o pagamento seguro; em seguida volte aqui para criar os links.
+          </p>
+          <Link
+            href="/pro-lideres/painel/assinatura-equipe"
+            className="mt-4 inline-flex min-h-[44px] items-center justify-center rounded-xl bg-amber-800 px-6 text-sm font-semibold text-white hover:bg-amber-900"
+          >
+            Ativar assinatura YLADA
+          </Link>
+        </div>
+      )}
+
+      {yladaSubHint && subscriptionAccessOk === true && (
+        <div className="rounded-xl border border-emerald-200 bg-emerald-50/90 px-4 py-3 text-sm text-emerald-950 shadow-sm">
+          <p className="font-semibold text-emerald-950">Assinatura YLADA (equipe)</p>
+          <p className="mt-1 leading-relaxed text-emerald-900/95">
+            <strong className="text-emerald-950">Ativa.</strong> Referência do plano: até{' '}
+            <strong>{yladaSubHint.pendingInviteQuota} convites pendentes</strong> no ciclo ·{' '}
+            <strong>R$ {yladaSubHint.monthlyAmountBrl.toLocaleString('pt-BR')}/mês</strong> na YLADA. Se o plano
+            expirar, o aviso laranja volta acima com o botão para regularizar o pagamento.
+          </p>
+        </div>
+      )}
+
+      {quota && subscriptionAccessOk !== false && (
+        <div className="rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-700 shadow-sm">
+          <span className="font-semibold text-gray-900">Cota de convites pendentes:</span>{' '}
+          <span>
+            {quota.pendingUsed} / {quota.pendingLimit} ativos
+          </span>
+          <span className="text-gray-500"> · {quota.totalListed} linhas no histórico (todos os estados)</span>
         </div>
       )}
 
@@ -500,6 +464,34 @@ export function ProLideresInvitesPanel() {
           </ul>
         )}
       </div>
+
+      <form
+        onSubmit={(e) => void saveTeamBankPaymentUrl(e)}
+        className="space-y-3 rounded-xl border border-gray-200 bg-white p-4 shadow-sm"
+      >
+        <label className="block">
+          <span className="mb-1 block text-sm font-medium text-gray-900">Coloque aqui seu link de cobrança</span>
+          <input
+            type="url"
+            value={teamBankPaymentUrlDraft}
+            onChange={(e) => setTeamBankPaymentUrlDraft(e.target.value)}
+            className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2.5 font-mono text-sm text-gray-900"
+            placeholder="https://…"
+            maxLength={2000}
+            autoComplete="off"
+          />
+        </label>
+        {teamBankUrlSavedMsg && (
+          <p className="text-sm font-medium text-green-700">{teamBankUrlSavedMsg}</p>
+        )}
+        <button
+          type="submit"
+          disabled={teamBankUrlSaving}
+          className="min-h-[44px] rounded-xl border border-gray-300 bg-white px-5 py-2.5 text-sm font-semibold text-gray-900 hover:bg-gray-50 disabled:opacity-60"
+        >
+          {teamBankUrlSaving ? 'A guardar…' : 'Guardar'}
+        </button>
+      </form>
     </div>
   )
 }

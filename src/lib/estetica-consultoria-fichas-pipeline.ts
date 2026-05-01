@@ -91,8 +91,14 @@ export type FichaPipelineItem = {
   client: YladaEsteticaConsultClientRow
   ultimoPreAt: string | null
   ultimoDiagnosticoAt: string | null
-  /** No funil vista «Pro líder»: cartão vindo do onboarding (não da ficha estética). */
-  funilCardSource?: 'estetica' | 'leader_onboarding'
+  /**
+   * No funil vista «Pro líder»:
+   * - leader_onboarding: link pro_lideres_leader_onboarding_links
+   * - pro_lideres_consultoria: resposta pro_lideres_consultancy_form_responses (ex. pré-diagnóstico)
+   */
+  funilCardSource?: 'estetica' | 'leader_onboarding' | 'pro_lideres_consultoria'
+  /** Para PATCH ao arrastar resposta da consultoria Pro Líderes. */
+  proLideresConsultoria?: { materialId: string; responseId: string }
 }
 
 /**

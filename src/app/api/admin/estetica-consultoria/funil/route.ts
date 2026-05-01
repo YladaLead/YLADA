@@ -12,9 +12,14 @@ import {
 } from '@/lib/estetica-consultoria-fichas-pipeline'
 import { normalizeEsteticaConsultFunnelStage } from '@/lib/estetica-consultoria-funnel'
 import {
+  proLideresConsultoriaResponseToFichaPipelineItem,
+  type ProLideresConsultancyResponseFunilRow,
+} from '@/lib/pro-lideres-consultoria-funil'
+import {
   leaderOnboardingRowToFichaPipelineItem,
   type ProLideresLeaderOnboardingFunilRow,
 } from '@/lib/pro-lideres-onboarding-funil'
+import { PRO_LIDERES_PRE_DIAGNOSTICO_MATERIAL_ID } from '@/lib/pro-lideres-pre-diagnostico'
 import {
   TEMPLATE_DIAGNOSTICO_CAPILAR_ID,
   TEMPLATE_DIAGNOSTICO_CORPORAL_ID,
@@ -108,6 +113,21 @@ export async function GET(request: NextRequest) {
       leaderOnboardingRowToFichaPipelineItem(r as ProLideresLeaderOnboardingFunilRow)
     )
 
+    const { data: plConsultRows, error: plConsultErr } = await supabaseAdmin
+      .from('pro_lideres_consultancy_form_responses')
+      .select('*')
+      .eq('material_id', PRO_LIDERES_PRE_DIAGNOSTICO_MATERIAL_ID)
+      .order('submitted_at', { ascending: false })
+      .limit(500)
+
+    if (plConsultErr) {
+      return NextResponse.json({ error: 'Erro ao listar respostas da consultoria Pro Líderes.' }, { status: 500 })
+    }
+
+    const consultoriaPreItems = (plConsultRows ?? []).map((r) =>
+      proLideresConsultoriaResponseToFichaPipelineItem(r as ProLideresConsultancyResponseFunilRow)
+    )
+
     const { data: allClients, error: cErr } = await supabaseAdmin
       .from('ylada_estetica_consult_clients')
       .select('*')
@@ -172,7 +192,7 @@ export async function GET(request: NextRequest) {
       funilCardSource: 'estetica' as const,
     }))
 
-    const allItems: FichaItem[] = [...onboardingItems, ...esteticaItems]
+    const allItems: FichaItem[] = [...onboardingItems, ...consultoriaPreItems, ...esteticaItems]
 
     return NextResponse.json({
       vista,

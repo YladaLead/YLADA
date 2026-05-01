@@ -68,8 +68,9 @@ function FunilCard({
   const pre = formatShort(item.ultimoPreAt)
   const diag = formatShort(item.ultimoDiagnosticoAt)
   const isOnb = item.funilCardSource === 'leader_onboarding'
+  const isPlr = item.funilCardSource === 'pro_lideres_consultoria'
   const showSegmento =
-    isOnb || vista === 'todos' || vista === 'lider' || item.client.segment === 'ambos'
+    isOnb || isPlr || vista === 'todos' || vista === 'lider' || item.client.segment === 'ambos'
 
   return (
     <div
@@ -96,12 +97,16 @@ function FunilCard({
             <p className="mt-1 text-[10px] font-medium text-gray-600">
               {isOnb ? (
                 <span className="rounded bg-teal-100 px-1.5 py-0.5 text-teal-900">Onboarding Pro Líderes</span>
+              ) : isPlr ? (
+                <span className="rounded bg-indigo-100 px-1.5 py-0.5 text-indigo-900">
+                  Pré-diagnóstico Pro Líderes
+                </span>
               ) : (
                 <span className="rounded bg-gray-100 px-1.5 py-0.5">
                   {esteticaConsultSegmentLabel(item.client.segment)}
                 </span>
               )}
-              {!isOnb && vista !== 'lider' && item.client.leader_tenant_id ? (
+              {!isOnb && !isPlr && vista !== 'lider' && item.client.leader_tenant_id ? (
                 <span className="ml-1.5 rounded bg-emerald-100 px-1.5 py-0.5 text-emerald-900">Pro líder</span>
               ) : null}
             </p>
@@ -113,6 +118,12 @@ function FunilCard({
               ) : (
                 <span className="text-amber-800/90">Ainda sem envio do formulário</span>
               )
+            ) : isPlr ? (
+              pre ? (
+                <span>Formulário enviado: {pre}</span>
+              ) : (
+                <span className="text-amber-800/90">Sem data de envio</span>
+              )
             ) : (
               <>
                 {pre ? <span>Pré: {pre}</span> : <span className="text-amber-700/90">Sem pré</span>}
@@ -121,7 +132,7 @@ function FunilCard({
             )}
           </div>
           <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1">
-            {!isOnb ? (
+            {!isOnb && !isPlr ? (
               <Link
                 href={hrefConsultoria}
                 className="inline-block text-xs font-semibold text-pink-700 hover:text-pink-900 hover:underline"
@@ -137,6 +148,15 @@ function FunilCard({
                 onPointerDown={(e) => e.stopPropagation()}
               >
                 Ver onboarding →
+              </Link>
+            ) : null}
+            {isPlr && item.proLideresConsultoria ? (
+              <Link
+                href="/admin/pro-lideres/consultoria"
+                className="inline-block text-xs font-semibold text-indigo-800 hover:text-indigo-950 hover:underline"
+                onPointerDown={(e) => e.stopPropagation()}
+              >
+                Consultoria Pro Líderes →
               </Link>
             ) : null}
           </div>
@@ -290,9 +310,13 @@ export default function EsteticaConsultoriaFunilBoard() {
 
     try {
       const isOnb = found.item.funilCardSource === 'leader_onboarding'
+      const isPlr = found.item.funilCardSource === 'pro_lideres_consultoria'
+      const plMeta = found.item.proLideresConsultoria
       const url = isOnb
         ? `/api/admin/pro-lideres/leader-onboarding/${encodeURIComponent(clientId)}`
-        : `/api/admin/estetica-consultoria/clients/${encodeURIComponent(clientId)}`
+        : isPlr && plMeta
+          ? `/api/admin/pro-lideres/consultoria/materials/${encodeURIComponent(plMeta.materialId)}/responses/${encodeURIComponent(plMeta.responseId)}`
+          : `/api/admin/estetica-consultoria/clients/${encodeURIComponent(clientId)}`
       const res = await fetch(url, {
         method: 'PATCH',
         credentials: 'include',
@@ -392,8 +416,9 @@ export default function EsteticaConsultoriaFunilBoard() {
 
       <p className="text-xs text-gray-500">
         Vista activa: <strong>{vistaLabel}</strong>. O estágio no funil é o mesmo registo em todas as vistas; em
-        «Todos» vês o segmento no cartão. Em «Pro líder» entram também os envios do formulário de onboarding (cartão
-        verde «Onboarding Pro Líderes») — ao enviar o formulário caem em «Pré-reunião feita · ficou de pagar».
+        «Todos» vês o segmento no cartão.         Em «Pro líder» entram o onboarding (verde), as respostas do pré-diagnóstico estratégico na consultoria Pro
+        Líderes (roxo) e fichas estética com tenant — o pré-diagnóstico enviado cai em «Pré-reunião feita · ficou de
+        pagar».
       </p>
 
       {err ? (

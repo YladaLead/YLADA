@@ -56,6 +56,7 @@ function ContasDemoContent() {
                   ['Esteticista (segmento YLADA /pt)', 'demo.estetica@ylada.app', '/pt/estetica/login'],
                   ['Pro Estética capilar', 'demo.capilar@ylada.app', '/pro-estetica-capilar/entrar'],
                   ['Pro Estética corporal', 'demo@proesteticacorporal.com', '/pro-estetica-corporal/entrar', '123456'],
+                  ['Pró Líderes', 'demo@prolider.com', '/pro-lideres/entrar', '123456'],
                   ['Perfumaria', 'demo.perfumaria@ylada.app', '/pt/perfumaria/login'],
                   ['Joias e bijuterias', 'demo.joias@ylada.app', '/pt/joias/login'],
                 ] satisfies [string, string, string, string?][]).map((row) => {
@@ -91,6 +92,10 @@ function ContasDemoContent() {
           <span className="block">
             Pro Estética corporal (mesmo e-mail da tabela): se o login não existir no Supabase, aplicar{' '}
             <code className="bg-gray-100 px-1 rounded">scripts/pro-estetica-corporal-demo-login.sql</code>
+          </span>
+          <span className="block">
+            Pró Líderes (mesmo e-mail da tabela): para criar o líder demo, tenant, equipe sintética e telemetria, aplicar{' '}
+            <code className="bg-gray-100 px-1 rounded">scripts/pro-lideres-demo-prolider-equipe.sql</code>
           </span>
         </p>
       </main>

@@ -19,8 +19,7 @@ export default async function ProLideresLinksPage() {
         <h1 className="text-2xl font-bold text-gray-900">Convites equipe</h1>
       </div>
       <p className="text-gray-700">
-        Configura o link de cobrança do teu banco (opcional) e gera o convite por e-mail; quem aceitar vê o pagamento
-        depois do cadastro. O plano YLADA da equipe aparece no topo da lista abaixo.
+        Gera o convite por e-mail e acompanha os links na lista. O link de cobrança opcional fica no fim da página.
       </p>
       <ProLideresInvitesPanel />
     </div>
