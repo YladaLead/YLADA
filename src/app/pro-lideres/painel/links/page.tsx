@@ -19,8 +19,8 @@ export default async function ProLideresLinksPage() {
         <h1 className="text-2xl font-bold text-gray-900">Convites equipe</h1>
       </div>
       <p className="text-gray-700">
-        Gera o convite por e-mail e acompanha os links na lista. No fim da página tens o link de cobrança opcional da
-        tua operação e o pacote extra (+50 convites) via Mercado Pago.
+        Gera o convite por e-mail e acompanha os links na lista. No fim da página tens o link de cobrança opcional da tua
+        operação e a opção de adquirir mais 50 convites.
       </p>
       <ProLideresInvitesPanel />
     </div>

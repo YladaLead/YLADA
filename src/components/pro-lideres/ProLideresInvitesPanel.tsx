@@ -137,13 +137,13 @@ export function ProLideresInvitesPanel() {
     if (!v) return
     if (v === 'ok') {
       setQuotaTopupMsg(
-        'Se o pagamento foi aprovado, os +50 convites pendentes já entram automaticamente. Atualiza daqui a instantes se a cota ainda não tiver subido.'
+        'Concluído. Os +50 convites entram em breve — atualiza a página daqui a instantes se a cota ainda não tiver subido.'
       )
     } else if (v === 'fail') {
-      setQuotaTopupMsg('Pagamento não concluído no Mercado Pago. Podes tentar outra vez quando quiseres.')
+      setQuotaTopupMsg('Não foi possível concluir. Podes tentar outra vez quando quiseres.')
     } else if (v === 'pending') {
       setQuotaTopupMsg(
-        'Pagamento pendente (por exemplo boleto). Quando o Mercado Pago confirmar, o webhook soma +50 convites pendentes sozinho.'
+        'Ainda pendente. Quando for confirmado, os +50 convites são somados automaticamente à tua cota.'
       )
     }
     sp.delete('mp_inv_quota')
@@ -251,14 +251,14 @@ export function ProLideresInvitesPanel() {
       })
       const data = await res.json().catch(() => ({}))
       if (!res.ok) {
-        setError((data as { error?: string }).error || 'Não foi possível abrir o Mercado Pago.')
+        setError((data as { error?: string }).error || 'Não foi possível continuar. Tenta outra vez.')
         return
       }
       const url = (data as { checkoutUrl?: string }).checkoutUrl
       if (url) window.location.href = url
       else setError('Resposta inválida do servidor.')
     } catch {
-      setError('Erro de rede ao abrir o checkout.')
+      setError('Erro de rede. Tenta outra vez.')
     } finally {
       setQuotaTopupLoading(false)
     }
@@ -545,25 +545,19 @@ export function ProLideresInvitesPanel() {
 
       {subscriptionAccessOk === true && (
         <section className="space-y-3 rounded-xl border border-indigo-200 bg-indigo-50/80 p-4 text-sm text-indigo-950 shadow-sm">
-          <p className="text-base font-semibold text-indigo-950">Mais 50 convites pendentes (pagamento único)</p>
+          <p className="text-base font-semibold text-indigo-950">Adquirir mais 50 convites</p>
           {quotaTopupMsg && (
             <p className="rounded-lg border border-indigo-200 bg-white/90 px-3 py-2 text-sm text-indigo-900">
               {quotaTopupMsg}
             </p>
           )}
-          <p className="leading-relaxed text-indigo-900/95">
-            O plano da equipa inclui uma cota base de convites pendentes. Se precisares de mais links ativos ao mesmo
-            tempo, podes pagar <strong className="text-indigo-950">R$ 750</strong> (uma vez) no Mercado Pago: após a
-            aprovação o sistema soma <strong className="text-indigo-950">+50</strong> à tua cota automaticamente
-            (webhook).
-          </p>
           <button
             type="button"
             disabled={quotaTopupLoading}
             onClick={() => void startInviteQuotaTopupCheckout()}
             className="min-h-[44px] w-full rounded-xl bg-indigo-700 px-5 py-2.5 text-sm font-semibold text-white hover:bg-indigo-800 disabled:opacity-60 sm:w-auto"
           >
-            {quotaTopupLoading ? 'A abrir Mercado Pago…' : 'Pagar R$ 750 no Mercado Pago (+50 convites)'}
+            {quotaTopupLoading ? 'A carregar…' : 'Adquirir mais 50 convites'}
           </button>
         </section>
       )}
