@@ -53,7 +53,7 @@ export async function POST(request: NextRequest) {
         userId: user.id,
         userEmail: email,
         amount: MONTHLY_BRL,
-        description: 'YLADA Pro Líderes — Equipe (50 convites, assinatura mensal)',
+        description: 'YLADA Pro Líderes — Até 50 membros na equipa (assinatura mensal)',
         successUrl,
         failureUrl,
         pendingUrl,
