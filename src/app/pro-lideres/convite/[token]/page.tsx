@@ -9,13 +9,13 @@ import { useAuth } from '@/hooks/useAuth'
 import { createClient } from '@/lib/supabase-client'
 import { YLADA_OG_FALLBACK_LOGO_PATH } from '@/lib/ylada-og-fallback-logo'
 import PhoneInputWithCountry from '@/components/PhoneInputWithCountry'
-import { PRO_LIDERES_TABULATOR_NAME_OPTIONS } from '@/config/pro-lideres-tabulator-names'
 
 type ValidateOk = {
   ok: true
   invitedEmail: string
   spaceName: string
   expiresAt: string
+  tabulatorNames: string[]
 }
 
 export default function ProLideresConviteTokenPage() {
@@ -58,7 +58,14 @@ export default function ProLideresConviteTokenPage() {
       const res = await fetch(`/api/pro-lideres/invites/validate?token=${encodeURIComponent(token)}`)
       const data = await res.json().catch(() => ({}))
       if (data.ok) {
-        setValid(data as ValidateOk)
+        const v = data as ValidateOk & { tabulatorNames?: string[] }
+        setValid({
+          ok: true,
+          invitedEmail: v.invitedEmail,
+          spaceName: v.spaceName,
+          expiresAt: v.expiresAt,
+          tabulatorNames: Array.isArray(v.tabulatorNames) ? v.tabulatorNames : [],
+        })
       } else {
         const r = (data as { reason?: string }).reason
         const msg =
@@ -84,11 +91,26 @@ export default function ProLideresConviteTokenPage() {
     void validate()
   }, [validate])
 
+  const tabulatorOptions = valid?.tabulatorNames ?? []
+  const tabulatorsReady = tabulatorOptions.length > 0
+
+  useEffect(() => {
+    const opts = valid?.tabulatorNames ?? []
+    if (!tabulatorName || opts.length === 0) return
+    if (!opts.includes(tabulatorName)) {
+      setTabulatorName('')
+    }
+  }, [tabulatorName, valid?.tabulatorNames])
+
   const loginHref = `/pro-lideres/entrar?next=${encodeURIComponent(`/pro-lideres/convite/${token}`)}`
 
   async function onRegister(e: React.FormEvent) {
     e.preventDefault()
     setRegisterError(null)
+    if (!tabulatorsReady || !tabulatorName) {
+      setRegisterError('Seleciona o nome do tabulador na lista.')
+      return
+    }
     if (password.length < 6) {
       setRegisterError('A senha deve ter pelo menos 6 caracteres.')
       return
@@ -154,8 +176,12 @@ export default function ProLideresConviteTokenPage() {
   }
 
   async function onAccept() {
-    setAccepting(true)
     setAcceptError(null)
+    if (!tabulatorsReady || !tabulatorName) {
+      setAcceptError('Seleciona o nome do tabulador na lista.')
+      return
+    }
+    setAccepting(true)
     try {
       const body = {
         token,
@@ -270,6 +296,14 @@ export default function ProLideresConviteTokenPage() {
               Prazo: até {new Date(valid.expiresAt).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })}
             </p>
 
+            {!tabulatorsReady && (
+              <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-950">
+                O líder ainda não definiu tabuladores neste espaço. Quando existir pelo menos um nome em{' '}
+                <strong className="text-amber-950">Pro Líderes → Tabuladores</strong>, o convite volta a ficar
+                completo.
+              </div>
+            )}
+
             {!emailMatches && (
               <div className="space-y-4 text-sm text-gray-700">
                 <p className="font-medium text-gray-900">Criar conta</p>
@@ -298,13 +332,14 @@ export default function ProLideresConviteTokenPage() {
                   <label className="block">
                     <span className="mb-1 block text-xs font-medium text-gray-600">Nome do tabulador (obrigatório)</span>
                     <select
-                      required
+                      required={tabulatorsReady}
                       value={tabulatorName}
                       onChange={(e) => setTabulatorName(e.target.value)}
-                      className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-gray-900"
+                      disabled={!tabulatorsReady}
+                      className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-gray-900 disabled:bg-gray-100"
                     >
-                      <option value="">Selecionar…</option>
-                      {PRO_LIDERES_TABULATOR_NAME_OPTIONS.map((opt) => (
+                      <option value="">{tabulatorsReady ? 'Selecionar…' : 'Lista vazia — aguardar o líder'}</option>
+                      {tabulatorOptions.map((opt) => (
                         <option key={opt} value={opt}>
                           {opt}
                         </option>
@@ -395,7 +430,7 @@ export default function ProLideresConviteTokenPage() {
                   </label>
                   <button
                     type="submit"
-                    disabled={registering}
+                    disabled={registering || !tabulatorsReady}
                     className="w-full min-h-[48px] rounded-xl bg-blue-600 py-3 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-60"
                   >
                     {registering ? 'A criar conta…' : 'Criar conta e entrar'}
@@ -428,13 +463,14 @@ export default function ProLideresConviteTokenPage() {
                   <label className="block">
                     <span className="mb-1 block text-xs font-medium text-gray-600">Nome do tabulador (obrigatório)</span>
                     <select
-                      required
+                      required={tabulatorsReady}
                       value={tabulatorName}
                       onChange={(e) => setTabulatorName(e.target.value)}
-                      className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-gray-900"
+                      disabled={!tabulatorsReady}
+                      className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-gray-900 disabled:bg-gray-100"
                     >
-                      <option value="">Selecionar…</option>
-                      {PRO_LIDERES_TABULATOR_NAME_OPTIONS.map((opt) => (
+                      <option value="">{tabulatorsReady ? 'Selecionar…' : 'Lista vazia — aguardar o líder'}</option>
+                      {tabulatorOptions.map((opt) => (
                         <option key={opt} value={opt}>
                           {opt}
                         </option>
@@ -482,7 +518,7 @@ export default function ProLideresConviteTokenPage() {
                 ) : (
                   <button
                     type="button"
-                    disabled={accepting}
+                    disabled={accepting || !tabulatorsReady}
                     onClick={() => void onAccept()}
                     className="w-full min-h-[48px] rounded-xl bg-green-600 py-3 text-sm font-semibold text-white hover:bg-green-700 disabled:opacity-60"
                   >

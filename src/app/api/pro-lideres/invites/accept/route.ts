@@ -11,7 +11,7 @@ import {
   syncProLideresMemberLinkTokensShareSlug,
   whatsappMeetsProLideresMandatory,
 } from '@/lib/pro-lideres-member-mandatory-profile'
-import { isProLideresTabulatorNameOption } from '@/config/pro-lideres-tabulator-names'
+import { resolveCanonicalTabulatorLabelForTenant } from '@/lib/pro-lideres-tabulators'
 
 export async function POST(request: NextRequest) {
   const auth = await requireApiAuth(request)
@@ -141,10 +141,7 @@ export async function POST(request: NextRequest) {
       { status: 400 }
     )
   }
-  const tabulator = body.pro_lideres_tabulator_name?.trim() ?? ''
-  if (!tabulator || !isProLideresTabulatorNameOption(tabulator)) {
-    return NextResponse.json({ error: 'Seleciona o nome do tabulador na lista.' }, { status: 400 })
-  }
+  const tabulatorRaw = body.pro_lideres_tabulator_name?.trim() ?? ''
 
   const slugRes = parseProLideresMemberSharePathSlug(slugInput)
   if (!slugRes.ok) {
@@ -173,12 +170,24 @@ export async function POST(request: NextRequest) {
     )
   }
 
+  if (!tabulatorRaw) {
+    return NextResponse.json({ error: 'Seleciona o nome do tabulador na lista.' }, { status: 400 })
+  }
+  const canonicalTabulator = await resolveCanonicalTabulatorLabelForTenant(
+    supabaseAdmin,
+    inv.leader_tenant_id as string,
+    tabulatorRaw
+  )
+  if (!canonicalTabulator) {
+    return NextResponse.json({ error: 'Seleciona um tabulador válido da lista.' }, { status: 400 })
+  }
+
   const { error: insErr } = await supabaseAdmin.from('leader_tenant_members').insert({
     leader_tenant_id: inv.leader_tenant_id,
     user_id: user.id,
     role: 'member',
     pro_lideres_share_slug: slugRes.value,
-    pro_lideres_tabulator_name: tabulator,
+    pro_lideres_tabulator_name: canonicalTabulator,
   })
 
   if (insErr) {

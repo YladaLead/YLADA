@@ -1,11 +1,11 @@
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 
-import { ProLideresInvitesPanel } from '@/components/pro-lideres/ProLideresInvitesPanel'
+import { ProLideresTabuladoresPanel } from '@/components/pro-lideres/ProLideresTabuladoresPanel'
 import { ensureLeaderTenantAccess } from '@/lib/pro-lideres-server'
 import { proLideresTeamViewPreviewFromCookies } from '@/lib/pro-lideres-team-preview'
 
-export default async function ProLideresLinksPage() {
+export default async function ProLideresTabuladoresPage() {
   const gate = await ensureLeaderTenantAccess()
   if (!gate.ok) redirect(gate.redirect)
   const cookieStore = await cookies()
@@ -16,13 +16,13 @@ export default async function ProLideresLinksPage() {
     <div className="max-w-2xl space-y-6">
       <div>
         <p className="text-sm font-medium text-blue-600">Principal · Ambiente do líder</p>
-        <h1 className="text-2xl font-bold text-gray-900">Convites equipe</h1>
+        <h1 className="text-2xl font-bold text-gray-900">Tabuladores</h1>
       </div>
       <p className="text-gray-700">
-        Gera o convite por e-mail e acompanha os links na lista. No fim da página tens o link de cobrança opcional da
-        tua operação e o pacote extra (+50 convites) via Mercado Pago.
+        Cadastra os nomes de tabulador da tua operação. Essa lista aparece no link de convite para a equipa escolher o
+        tabulador ao criar conta ou ao aceitar o convite.
       </p>
-      <ProLideresInvitesPanel />
+      <ProLideresTabuladoresPanel />
     </div>
   )
 }

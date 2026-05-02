@@ -31,6 +31,7 @@ export const PRO_LIDERES_MENU_GROUPS: { label: string; items: ProLideresMenuItem
       { key: 'tarefas', label: 'Tarefas diárias', path: 'tarefas', icon: '✅' },
       { key: 'equipe', label: 'Análise da equipe', path: 'equipe', icon: '👥', leaderOnly: true },
       { key: 'links', label: 'Convites equipe', path: 'links', icon: '🔗', leaderOnly: true },
+      { key: 'tabuladores', label: 'Tabuladores', path: 'tabuladores', icon: '📋', leaderOnly: true },
       {
         key: 'cobranca-equipe',
         label: 'Cobrança da equipe',

@@ -6,6 +6,10 @@ import { sendWelcomeEmail } from '@/lib/email-templates'
 import { getCarolAutomationDisabled } from '@/lib/carol-admin-settings'
 import { redirectToSupportAfterPayment } from '@/lib/whatsapp-carol-ai'
 import { createYladaFreeMatrizSubscription } from '@/lib/admin-ylada-free-matriz'
+import {
+  reverseLeaderTenantInviteQuotaTopupFromMercadoPago,
+  tryHandleProLideresInviteQuotaTopupWebhook,
+} from '@/lib/pro-lideres-invite-quota-mp'
 
 function mercadoPagoReversalStatus(status: string | undefined): boolean {
   return status === 'refunded' || status === 'charged_back'
@@ -17,6 +21,10 @@ function mercadoPagoReversalStatus(status: string | undefined): boolean {
  */
 async function applyMercadoPagoReversal(paymentId: string, fullData: any) {
   console.log('💸 Estorno/chargeback Mercado Pago:', paymentId, fullData?.status)
+  if (supabaseAdmin) {
+    const reversedQuota = await reverseLeaderTenantInviteQuotaTopupFromMercadoPago(supabaseAdmin, paymentId)
+    if (reversedQuota) return
+  }
   const stripeSubId = `mp_${paymentId}`
   const nowIso = new Date().toISOString()
 
@@ -401,6 +409,15 @@ async function handlePaymentEvent(data: any, isTest: boolean = false, preFetched
     const fullData = paymentDataFull || data
 
     try {
+      if (supabaseAdmin) {
+        const handledTopup = await tryHandleProLideresInviteQuotaTopupWebhook(
+          supabaseAdmin,
+          fullData,
+          String(paymentId)
+        )
+        if (handledTopup) return
+      }
+
       // Obter metadata do pagamento (usar dados completos obtidos via API)
     const metadata = fullData.metadata || {}
     let userId = metadata.user_id

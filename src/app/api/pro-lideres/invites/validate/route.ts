@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
 import { ownerHasProLideresTeamSubscription } from '@/lib/pro-lideres-subscription-access'
+import { fetchTabulatorLabelsForTenant } from '@/lib/pro-lideres-tabulators'
 import type { LeaderTenantInviteRow } from '@/types/leader-tenant'
 
 /**
@@ -68,10 +69,13 @@ export async function GET(request: NextRequest) {
     (tenant?.team_name as string) ||
     'Pro Líderes'
 
+  const tabulatorNames = await fetchTabulatorLabelsForTenant(supabaseAdmin, row.leader_tenant_id as string)
+
   return NextResponse.json({
     ok: true,
     invitedEmail: row.invited_email,
     spaceName,
     expiresAt: row.expires_at,
+    tabulatorNames,
   })
 }
