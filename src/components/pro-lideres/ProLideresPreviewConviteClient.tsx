@@ -6,7 +6,7 @@ import { useState } from 'react'
 import { YLADA_OG_FALLBACK_LOGO_PATH } from '@/lib/ylada-og-fallback-logo'
 
 /**
- * Pré-visualização estática do ecrã de convite + atalhos para testar pagamento (líder).
+ * Pré-visualização estática da tela de convite + atalhos para testar pagamento (líder).
  * Não chama a API de validação de token.
  */
 export function ProLideresPreviewConviteClient() {
@@ -50,7 +50,7 @@ export function ProLideresPreviewConviteClient() {
         <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950 shadow-sm">
           <p className="font-semibold text-amber-950">Pré-visualização (teste)</p>
           <p className="mt-1 text-amber-900/90">
-            Isto imita o ecrã que a equipe vê ao abrir o link de convite. Não usa token real.
+            Isto imita a tela que a equipe vê ao abrir o link de convite. Não usa token real.
           </p>
         </div>
 
@@ -75,7 +75,7 @@ export function ProLideresPreviewConviteClient() {
             <p className="text-center text-xs text-gray-500">Prazo: até {mockExpires}</p>
 
             <div className="rounded-lg border border-dashed border-gray-200 bg-gray-50/80 px-3 py-2 text-center text-xs text-gray-500">
-              Formulário de registo / entrar — oculto na pré-visualização
+              Formulário de cadastro / entrar — oculto na pré-visualização
             </div>
           </div>
         </div>
@@ -83,7 +83,7 @@ export function ProLideresPreviewConviteClient() {
         <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
           <p className="text-sm font-semibold text-gray-900">Testar fluxo do líder (pagamento)</p>
           <p className="mt-1 text-xs text-gray-600">
-            Com sessão de <strong>líder</strong>, podes testar a ativação e o link de pagamento.
+            Com sessão de <strong>líder</strong>, você pode testar a ativação e o link de pagamento.
           </p>
           <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
             <Link
@@ -98,7 +98,7 @@ export function ProLideresPreviewConviteClient() {
               disabled={checkoutLoading}
               className="inline-flex min-h-[44px] items-center justify-center rounded-xl border border-blue-600 bg-white px-4 text-sm font-semibold text-blue-700 hover:bg-blue-50 disabled:opacity-60"
             >
-              {checkoutLoading ? 'A abrir…' : 'Testar pagamento'}
+              {checkoutLoading ? 'Abrindo…' : 'Testar pagamento'}
             </button>
           </div>
           {checkoutError && (
@@ -108,7 +108,7 @@ export function ProLideresPreviewConviteClient() {
 
         <p className="text-center text-xs text-gray-500">
           <Link href="/pro-lideres/painel/links" className="font-medium text-blue-600 hover:text-blue-800">
-            ← Voltar a Convites equipe
+            ← Voltar para Convites equipe
           </Link>
         </p>
       </div>

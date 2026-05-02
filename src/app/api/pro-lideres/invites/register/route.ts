@@ -44,11 +44,11 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Token é obrigatório' }, { status: 400 })
   }
   if (nomeCompleto.length < 2) {
-    return NextResponse.json({ error: 'Indique o nome completo.' }, { status: 400 })
+    return NextResponse.json({ error: 'Informe o nome completo.' }, { status: 400 })
   }
   if (!whatsappMeetsProLideresMandatory(whatsapp)) {
     return NextResponse.json(
-      { error: 'Indique o WhatsApp com DDI e número completo (mínimo 10 dígitos no total).' },
+      { error: 'Informe o WhatsApp com DDI e número completo (mínimo 10 dígitos no total).' },
       { status: 400 }
     )
   }
@@ -60,11 +60,11 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: slugRes.error }, { status: 400 })
   }
   if (!slugRes.value) {
-    return NextResponse.json({ error: 'Escolhe o teu slug de divulgação (obrigatório).' }, { status: 400 })
+    return NextResponse.json({ error: 'Escolha o slug de divulgação (obrigatório).' }, { status: 400 })
   }
   if (/^[a-f0-9]{32}$/i.test(slugRes.value)) {
     return NextResponse.json(
-      { error: 'Esse formato é reservado ao sistema. Escolhe outro slug (ex.: o-teu-nome).' },
+      { error: 'Esse formato é reservado ao sistema. Escolha outro slug (ex.: seu-nome).' },
       { status: 400 }
     )
   }
@@ -101,7 +101,7 @@ export async function POST(request: NextRequest) {
   if (!(await ownerHasProLideresTeamSubscription(tenant.owner_user_id as string))) {
     return NextResponse.json(
       {
-        error: 'A assinatura YLADA deste espaço está inativa. Não é possível concluir o registo neste momento.',
+        error: 'A assinatura YLADA deste espaço está inativa. Não é possível concluir o cadastro neste momento.',
         code: 'pro_lideres_team_subscription_required',
       },
       { status: 402 }
@@ -116,13 +116,13 @@ export async function POST(request: NextRequest) {
   )
   if (slugTaken) {
     return NextResponse.json(
-      { error: 'Já existe alguém nesta equipe com este slug. Escolhe outro.' },
+      { error: 'Já existe alguém nesta equipe com este slug. Escolha outro.' },
       { status: 409 }
     )
   }
 
   if (!tabulatorRaw) {
-    return NextResponse.json({ error: 'Seleciona o nome do tabulador na lista.' }, { status: 400 })
+    return NextResponse.json({ error: 'Selecione o nome do tabulador na lista.' }, { status: 400 })
   }
   const canonicalTabulator = await resolveCanonicalTabulatorLabelForTenant(
     supabaseAdmin,
@@ -130,7 +130,7 @@ export async function POST(request: NextRequest) {
     tabulatorRaw
   )
   if (!canonicalTabulator) {
-    return NextResponse.json({ error: 'Seleciona um tabulador válido da lista.' }, { status: 400 })
+    return NextResponse.json({ error: 'Selecione um tabulador válido da lista.' }, { status: 400 })
   }
 
   const { data: newUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
@@ -156,7 +156,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           error:
-            'Já existe uma conta com este e-mail. Use «Entrar para aceitar» e depois confirme o convite com a sua senha.',
+            'Já existe uma conta com este e-mail. Use "Entrar para aceitar" e depois confirme o convite com sua senha.',
         },
         { status: 409 }
       )
@@ -201,7 +201,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           error:
-            'Este slug já está em uso nesta equipe ou não foi possível concluir o registo. Escolha outro slug e tente de novo.',
+            'Este slug já está em uso nesta equipe ou não foi possível concluir o cadastro. Escolha outro slug e tente novamente.',
         },
         { status: 409 }
       )

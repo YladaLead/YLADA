@@ -91,7 +91,7 @@ export async function POST(request: NextRequest) {
   if (normalizeInviteEmail(loaded.invite.invited_email) !== sessionEmail) {
     return NextResponse.json(
       {
-        error: 'Entre com a conta do e-mail convidado. O convite foi enviado para outro endereço.',
+        error: 'Faça login com a conta do e-mail convidado. O convite foi enviado para outro endereço.',
       },
       { status: 403 }
     )
@@ -133,11 +133,11 @@ export async function POST(request: NextRequest) {
   }
 
   if (!nomeOpt || nomeOpt.length < 2) {
-    return NextResponse.json({ error: 'Indica o nome completo.' }, { status: 400 })
+    return NextResponse.json({ error: 'Informe o nome completo.' }, { status: 400 })
   }
   if (!whatsappOpt || !whatsappMeetsProLideresMandatory(whatsappOpt)) {
     return NextResponse.json(
-      { error: 'Indica o WhatsApp com DDI e número completo (mínimo 10 dígitos no total).' },
+      { error: 'Informe o WhatsApp com DDI e número completo (mínimo 10 dígitos no total).' },
       { status: 400 }
     )
   }
@@ -148,11 +148,11 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: slugRes.error }, { status: 400 })
   }
   if (!slugRes.value) {
-    return NextResponse.json({ error: 'Escolhe o teu slug de divulgação (obrigatório).' }, { status: 400 })
+    return NextResponse.json({ error: 'Escolha o slug de divulgação (obrigatório).' }, { status: 400 })
   }
   if (/^[a-f0-9]{32}$/i.test(slugRes.value)) {
     return NextResponse.json(
-      { error: 'Esse formato é reservado ao sistema. Escolhe outro slug (ex.: o-teu-nome).' },
+      { error: 'Esse formato é reservado ao sistema. Escolha outro slug (ex.: seu-nome).' },
       { status: 400 }
     )
   }
@@ -165,13 +165,13 @@ export async function POST(request: NextRequest) {
   )
   if (slugTaken) {
     return NextResponse.json(
-      { error: 'Já existe alguém nesta equipe com este slug. Escolhe outro.' },
+      { error: 'Já existe alguém nesta equipe com este slug. Escolha outro.' },
       { status: 409 }
     )
   }
 
   if (!tabulatorRaw) {
-    return NextResponse.json({ error: 'Seleciona o nome do tabulador na lista.' }, { status: 400 })
+    return NextResponse.json({ error: 'Selecione o nome do tabulador na lista.' }, { status: 400 })
   }
   const canonicalTabulator = await resolveCanonicalTabulatorLabelForTenant(
     supabaseAdmin,
@@ -179,7 +179,7 @@ export async function POST(request: NextRequest) {
     tabulatorRaw
   )
   if (!canonicalTabulator) {
-    return NextResponse.json({ error: 'Seleciona um tabulador válido da lista.' }, { status: 400 })
+    return NextResponse.json({ error: 'Selecione um tabulador válido da lista.' }, { status: 400 })
   }
 
   const { error: insErr } = await supabaseAdmin.from('leader_tenant_members').insert({
@@ -193,7 +193,7 @@ export async function POST(request: NextRequest) {
   if (insErr) {
     if (insErr.code === '23505') {
       return NextResponse.json(
-        { error: 'Já existe alguém nesta equipe com este slug. Volte atrás e escolha outro.' },
+        { error: 'Já existe alguém nesta equipe com este slug. Volte e escolha outro.' },
         { status: 409 }
       )
     }

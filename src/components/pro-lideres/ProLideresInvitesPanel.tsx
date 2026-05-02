@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { ChevronDown } from 'lucide-react'
 import type { LeaderTenantInviteListItem } from '@/types/leader-tenant'
 
 function statusLabel(s: string): string {
@@ -48,6 +49,8 @@ export function ProLideresInvitesPanel() {
   const [search, setSearch] = useState('')
   const [debouncedSearch, setDebouncedSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState<string>('all')
+  const [invitesExpanded, setInvitesExpanded] = useState(false)
+  const [purgingId, setPurgingId] = useState<string | null>(null)
 
   useEffect(() => {
     const t = setTimeout(() => setDebouncedSearch(search.trim()), 320)
@@ -200,19 +203,22 @@ export function ProLideresInvitesPanel() {
     }
   }
 
-  async function revoke(id: string) {
-    if (!confirm('Revogar este convite? O link deixa de funcionar.')) return
+  async function purgeInviteFromList(id: string, status: string) {
+    const isPending = status === 'pending'
+    const msg = isPending
+      ? 'Remover este convite? O link deixa de funcionar e a linha some do histórico.'
+      : 'Remover esta linha do histórico?'
+    if (!confirm(msg)) return
+    setPurgingId(id)
     setError(null)
     try {
-      const res = await fetch('/api/pro-lideres/invites/revoke', {
-        method: 'POST',
+      const res = await fetch(`/api/pro-lideres/invites/${encodeURIComponent(id)}`, {
+        method: 'DELETE',
         credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id }),
       })
       const data = await res.json().catch(() => ({}))
       if (!res.ok) {
-        setError((data as { error?: string }).error || 'Não foi possível revogar.')
+        setError((data as { error?: string }).error || 'Não foi possível remover.')
         return
       }
       if (lastCreatedInviteIdRef.current === id) {
@@ -222,7 +228,9 @@ export function ProLideresInvitesPanel() {
       }
       await load()
     } catch {
-      setError('Erro de rede ao revogar.')
+      setError('Erro de rede ao remover.')
+    } finally {
+      setPurgingId(null)
     }
   }
 
@@ -369,10 +377,13 @@ export function ProLideresInvitesPanel() {
             </button>
             <button
               type="button"
-              onClick={() => lastCreatedInviteId && revoke(lastCreatedInviteId)}
-              className="min-h-[40px] rounded-lg border border-red-300 bg-white px-4 py-2 text-sm font-semibold text-red-800 hover:bg-red-50"
+              onClick={() =>
+                lastCreatedInviteId && void purgeInviteFromList(lastCreatedInviteId, 'pending')
+              }
+              disabled={purgingId === lastCreatedInviteId}
+              className="min-h-[40px] rounded-lg border border-red-300 bg-white px-4 py-2 text-sm font-semibold text-red-800 hover:bg-red-50 disabled:opacity-50"
             >
-              Excluir convite
+              {purgingId === lastCreatedInviteId ? 'Removendo…' : 'Excluir convite'}
             </button>
           </div>
         </div>
@@ -416,102 +427,126 @@ export function ProLideresInvitesPanel() {
         </div>
       )}
 
-      <div className="flex flex-col gap-3 rounded-xl border border-gray-200 bg-white p-4 shadow-sm sm:flex-row sm:items-end">
-        <label className="block min-w-0 flex-1">
-          <span className="mb-1 block text-xs font-medium text-gray-600">Buscar</span>
-          <input
-            type="search"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="E-mail, nome ou WhatsApp"
-            className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-gray-900"
-          />
-        </label>
-        <label className="block shrink-0 sm:w-44">
-          <span className="mb-1 block text-xs font-medium text-gray-600">Estado</span>
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-gray-900"
-          >
-            <option value="all">Todos</option>
-            <option value="pending">Pendente</option>
-            <option value="used">Cadastro feito</option>
-            <option value="expired">Expirado</option>
-            <option value="revoked">Revogado</option>
-          </select>
-        </label>
-      </div>
-
       <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
-        <div className="border-b border-gray-100 px-4 py-3">
-          <p className="text-sm font-semibold text-gray-900">Convites</p>
-        </div>
-        {loading ? (
-          <p className="p-4 text-sm text-gray-600">A carregar…</p>
-        ) : invites.length === 0 ? (
-          <p className="p-4 text-sm text-gray-600">
-            {!debouncedSearch && statusFilter === 'all' && quota && quota.totalListed === 0
-              ? 'Ainda não há convites. Crie o primeiro acima.'
-              : 'Nenhum convite corresponde à busca ou ao filtro.'}
-          </p>
-        ) : (
-          <ul className="divide-y divide-gray-100">
-            {invites.map((inv) => {
-              const eff = inv.effectiveStatus
-              const linkActive = inv.status === 'pending' && eff === 'pending'
-              const link = linkActive ? `${origin}/pro-lideres/convite/${encodeURIComponent(inv.token)}` : null
-              return (
-                <li key={inv.id} className="flex flex-col gap-2 px-4 py-3 sm:flex-row sm:items-start sm:justify-between">
-                  <div className="min-w-0 space-y-1">
-                    <p className="truncate font-medium text-gray-900">{inv.invited_email}</p>
-                    {(inv.memberNome || inv.memberWhatsapp) && (
-                      <p className="text-sm text-gray-700">
-                        {inv.memberNome && <span>{inv.memberNome}</span>}
-                        {inv.memberNome && inv.memberWhatsapp && <span> · </span>}
-                        {inv.memberWhatsapp && <span className="tabular-nums">{inv.memberWhatsapp}</span>}
-                      </p>
-                    )}
-                    <p className="text-xs text-gray-500">
-                      {statusLabel(eff)} · expira {new Date(inv.expires_at).toLocaleDateString('pt-BR')}
-                      {eff === 'used' && (
-                        <>
-                          {' '}
-                          · Links{' '}
-                          {inv.linksEngaged ? (
-                            <span className="font-medium text-green-700">com atividade</span>
-                          ) : (
-                            <span>sem atividade ainda</span>
+        <button
+          type="button"
+          onClick={() => setInvitesExpanded((v) => !v)}
+          className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left hover:bg-gray-50/80"
+          aria-expanded={invitesExpanded}
+        >
+          <span className="text-sm font-semibold text-gray-900">Convites gerados</span>
+          <span className="flex shrink-0 items-center gap-2">
+            {!loading && invites.length > 0 && (
+              <span className="text-xs font-medium text-gray-500">{invites.length} no histórico</span>
+            )}
+            <ChevronDown
+              className={`h-5 w-5 shrink-0 text-gray-600 transition-transform ${invitesExpanded ? 'rotate-180' : ''}`}
+              aria-hidden
+            />
+          </span>
+        </button>
+
+        {invitesExpanded && (
+          <div className="border-t border-gray-100">
+            <div className="flex flex-col gap-3 p-4 sm:flex-row sm:items-end">
+              <label className="block min-w-0 flex-1">
+                <span className="mb-1 block text-xs font-medium text-gray-600">Buscar</span>
+                <input
+                  type="search"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="E-mail, nome ou WhatsApp"
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-gray-900"
+                />
+              </label>
+              <label className="block shrink-0 sm:w-44">
+                <span className="mb-1 block text-xs font-medium text-gray-600">Estado</span>
+                <select
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-gray-900"
+                >
+                  <option value="all">Todos</option>
+                  <option value="pending">Pendente</option>
+                  <option value="used">Cadastro feito</option>
+                  <option value="expired">Expirado</option>
+                  <option value="revoked">Revogado</option>
+                </select>
+              </label>
+            </div>
+
+            {loading ? (
+              <p className="border-t border-gray-100 px-4 py-4 text-sm text-gray-600">Carregando…</p>
+            ) : invites.length === 0 ? (
+              <p className="border-t border-gray-100 px-4 py-4 text-sm text-gray-600">
+                {!debouncedSearch && statusFilter === 'all' && quota && quota.totalListed === 0
+                  ? 'Ainda não há convites. Crie o primeiro acima.'
+                  : 'Nenhum convite corresponde à busca ou ao filtro.'}
+              </p>
+            ) : (
+              <ul className="max-h-[min(28rem,60vh)] divide-y divide-gray-100 overflow-y-auto border-t border-gray-100">
+                {invites.map((inv) => {
+                  const eff = inv.effectiveStatus
+                  const linkActive = inv.status === 'pending' && eff === 'pending'
+                  const link = linkActive ? `${origin}/pro-lideres/convite/${encodeURIComponent(inv.token)}` : null
+                  const canRemove = inv.status !== 'used'
+                  return (
+                    <li
+                      key={inv.id}
+                      className="flex flex-col gap-2 px-4 py-3 sm:flex-row sm:items-start sm:justify-between"
+                    >
+                      <div className="min-w-0 space-y-1">
+                        <p className="truncate font-medium text-gray-900">{inv.invited_email}</p>
+                        {(inv.memberNome || inv.memberWhatsapp) && (
+                          <p className="text-sm text-gray-700">
+                            {inv.memberNome && <span>{inv.memberNome}</span>}
+                            {inv.memberNome && inv.memberWhatsapp && <span> · </span>}
+                            {inv.memberWhatsapp && <span className="tabular-nums">{inv.memberWhatsapp}</span>}
+                          </p>
+                        )}
+                        <p className="text-xs text-gray-500">
+                          {statusLabel(eff)} · expira {new Date(inv.expires_at).toLocaleDateString('pt-BR')}
+                          {eff === 'used' && (
+                            <>
+                              {' '}
+                              · Links{' '}
+                              {inv.linksEngaged ? (
+                                <span className="font-medium text-green-700">com atividade</span>
+                              ) : (
+                                <span>sem atividade ainda</span>
+                              )}
+                            </>
                           )}
-                        </>
-                      )}
-                    </p>
-                    {link && <p className="break-all font-mono text-[11px] text-gray-500">{link}</p>}
-                  </div>
-                  <div className="flex shrink-0 gap-2">
-                    {link && (
-                      <button
-                        type="button"
-                        onClick={() => copyInviteUrl(link)}
-                        className="rounded-lg border border-gray-300 px-3 py-1.5 text-xs font-semibold text-gray-800 hover:bg-gray-50"
-                      >
-                        Copiar
-                      </button>
-                    )}
-                    {inv.status === 'pending' && (
-                      <button
-                        type="button"
-                        onClick={() => revoke(inv.id)}
-                        className="rounded-lg border border-red-200 px-3 py-1.5 text-xs font-semibold text-red-700 hover:bg-red-50"
-                      >
-                        Revogar
-                      </button>
-                    )}
-                  </div>
-                </li>
-              )
-            })}
-          </ul>
+                        </p>
+                        {link && <p className="break-all font-mono text-[11px] text-gray-500">{link}</p>}
+                      </div>
+                      <div className="flex shrink-0 flex-wrap gap-2">
+                        {link && (
+                          <button
+                            type="button"
+                            onClick={() => copyInviteUrl(link)}
+                            className="rounded-lg border border-gray-300 px-3 py-1.5 text-xs font-semibold text-gray-800 hover:bg-gray-50"
+                          >
+                            Copiar
+                          </button>
+                        )}
+                        {canRemove && (
+                          <button
+                            type="button"
+                            disabled={purgingId === inv.id}
+                            onClick={() => void purgeInviteFromList(inv.id, inv.status)}
+                            className="rounded-lg border border-red-200 px-3 py-1.5 text-xs font-semibold text-red-700 hover:bg-red-50 disabled:opacity-50"
+                          >
+                            {purgingId === inv.id ? 'Removendo…' : 'Remover'}
+                          </button>
+                        )}
+                      </div>
+                    </li>
+                  )
+                })}
+              </ul>
+            )}
+          </div>
         )}
       </div>
 

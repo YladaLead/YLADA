@@ -108,7 +108,7 @@ export default function ProLideresConviteTokenPage() {
     e.preventDefault()
     setRegisterError(null)
     if (!tabulatorsReady || !tabulatorName) {
-      setRegisterError('Seleciona o nome do tabulador na lista.')
+      setRegisterError('Selecione o nome do tabulador na lista.')
       return
     }
     if (password.length < 6) {
@@ -116,7 +116,7 @@ export default function ProLideresConviteTokenPage() {
       return
     }
     if (password !== passwordConfirm) {
-      setRegisterError('As senhas não coincidem. Confirme a mesma senha nos dois campos.')
+      setRegisterError('As senhas não coincidem. Digite a mesma senha nos dois campos.')
       return
     }
     setRegistering(true)
@@ -152,7 +152,7 @@ export default function ProLideresConviteTokenPage() {
         password,
       })
       if (signErr) {
-        setRegisterError('Conta criada. Entre com o e-mail e a senha que definiu.')
+        setRegisterError('Conta criada. Entre com o e-mail e a senha que você cadastrou.')
         return
       }
       const pay = (data as { teamBankPaymentUrl?: string | null }).teamBankPaymentUrl
@@ -178,7 +178,7 @@ export default function ProLideresConviteTokenPage() {
   async function onAccept() {
     setAcceptError(null)
     if (!tabulatorsReady || !tabulatorName) {
-      setAcceptError('Seleciona o nome do tabulador na lista.')
+      setAcceptError('Selecione o nome do tabulador na lista.')
       return
     }
     setAccepting(true)
@@ -242,7 +242,7 @@ export default function ProLideresConviteTokenPage() {
         </div>
 
         {validating || authLoading ? (
-          <p className="text-center text-gray-600">A carregar…</p>
+          <p className="text-center text-gray-600">Carregando…</p>
         ) : invalidReason ? (
           <div className="space-y-4 text-center">
             <h1 className="text-lg font-bold text-gray-900">Convite indisponível</h1>
@@ -256,8 +256,8 @@ export default function ProLideresConviteTokenPage() {
             <h1 className="text-xl font-bold text-gray-900">Tudo certo com o acesso</h1>
             <p className="text-sm leading-relaxed text-gray-700">
               O líder desta operação deixou um <strong className="text-gray-900">link para pagamento</strong> (banco
-              ou boleto). Abre num separador seguro, conclui o pagamento conforme combinado com a equipa e depois entra
-              no painel.
+              ou boleto). Abra em uma nova aba segura, conclua o pagamento conforme combinado com a equipe e depois
+              entre no painel.
             </p>
             <div className="rounded-xl border border-amber-200 bg-amber-50/90 px-4 py-3 text-left text-sm text-amber-950">
               <p className="font-semibold">Link de cobrança</p>
@@ -298,7 +298,7 @@ export default function ProLideresConviteTokenPage() {
 
             {!tabulatorsReady && (
               <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-950">
-                O líder ainda não definiu tabuladores neste espaço. Quando existir pelo menos um nome em{' '}
+                O líder ainda não cadastrou tabuladores neste espaço. Quando houver pelo menos um nome em{' '}
                 <strong className="text-amber-950">Pro Líderes → Tabuladores</strong>, o convite volta a ficar
                 completo.
               </div>
@@ -309,7 +309,8 @@ export default function ProLideresConviteTokenPage() {
                 <p className="font-medium text-gray-900">Criar conta</p>
                 {user ? (
                   <p className="text-xs text-gray-600">
-                    Tens sessão com outro e-mail. Ao criar conta, usas <strong className="text-gray-800">{valid.invitedEmail}</strong> e entras com ele.
+                    Você está logado(a) com outro e-mail. Ao criar a conta, você usará{' '}
+                    <strong className="text-gray-800">{valid.invitedEmail}</strong> e fará login com ele.
                   </p>
                 ) : null}
                 {registerError && (
@@ -338,7 +339,7 @@ export default function ProLideresConviteTokenPage() {
                       disabled={!tabulatorsReady}
                       className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-gray-900 disabled:bg-gray-100"
                     >
-                      <option value="">{tabulatorsReady ? 'Selecionar…' : 'Lista vazia — aguardar o líder'}</option>
+                      <option value="">{tabulatorsReady ? 'Selecionar…' : 'Lista vazia — aguarde o líder cadastrar'}</option>
                       {tabulatorOptions.map((opt) => (
                         <option key={opt} value={opt}>
                           {opt}
@@ -353,7 +354,7 @@ export default function ProLideresConviteTokenPage() {
                       minLength={3}
                       maxLength={40}
                       pattern="[a-z0-9]+(-[a-z0-9]+)*"
-                      title="Só minúsculas, números e hífens"
+                      title="Só letras minúsculas, números e hífens"
                       value={shareSlug}
                       onChange={(e) => setShareSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
                       className="w-full rounded-lg border border-gray-300 px-3 py-2.5 font-mono text-sm text-gray-900"
@@ -361,7 +362,8 @@ export default function ProLideresConviteTokenPage() {
                       autoComplete="off"
                     />
                     <span className="mt-1 block text-[11px] leading-snug text-gray-500">
-                      O teu nome no URL do quiz — como preferes ser chamada ou o teu nome de preferência (único).
+                      Seu nome no URL do quiz — como prefere ser chamado(a), ou o nome pelo qual quer ser identificado(a)
+                      (único).
                     </span>
                   </label>
                   <label className="block">
@@ -433,7 +435,7 @@ export default function ProLideresConviteTokenPage() {
                     disabled={registering || !tabulatorsReady}
                     className="w-full min-h-[48px] rounded-xl bg-blue-600 py-3 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-60"
                   >
-                    {registering ? 'A criar conta…' : 'Criar conta e entrar'}
+                    {registering ? 'Criando conta…' : 'Criar conta e entrar'}
                   </button>
                 </form>
                 <p className="text-center text-xs text-gray-500">
@@ -447,7 +449,7 @@ export default function ProLideresConviteTokenPage() {
 
             {user && emailMatches && (
               <div className="space-y-3">
-                <p className="text-sm text-gray-700">Completa os dados para entrares na equipe.</p>
+                <p className="text-sm text-gray-700">Preencha os dados para entrar na equipe.</p>
                 <div className="grid gap-2">
                   <label className="block">
                     <span className="mb-1 block text-xs font-medium text-gray-600">Nome completo (obrigatório)</span>
@@ -469,7 +471,7 @@ export default function ProLideresConviteTokenPage() {
                       disabled={!tabulatorsReady}
                       className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-gray-900 disabled:bg-gray-100"
                     >
-                      <option value="">{tabulatorsReady ? 'Selecionar…' : 'Lista vazia — aguardar o líder'}</option>
+                      <option value="">{tabulatorsReady ? 'Selecionar…' : 'Lista vazia — aguarde o líder cadastrar'}</option>
                       {tabulatorOptions.map((opt) => (
                         <option key={opt} value={opt}>
                           {opt}
@@ -484,7 +486,7 @@ export default function ProLideresConviteTokenPage() {
                       minLength={3}
                       maxLength={40}
                       pattern="[a-z0-9]+(-[a-z0-9]+)*"
-                      title="Só minúsculas, números e hífens"
+                      title="Só letras minúsculas, números e hífens"
                       value={shareSlug}
                       onChange={(e) => setShareSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
                       className="w-full rounded-lg border border-gray-300 px-3 py-2.5 font-mono text-sm text-gray-900"
@@ -492,7 +494,8 @@ export default function ProLideresConviteTokenPage() {
                       autoComplete="off"
                     />
                     <span className="mt-1 block text-[11px] leading-snug text-gray-500">
-                      O teu nome no URL do quiz — como preferes ser chamada ou o teu nome de preferência (único).
+                      Seu nome no URL do quiz — como prefere ser chamado(a), ou o nome pelo qual quer ser identificado(a)
+                      (único).
                     </span>
                   </label>
                   <label className="block">
@@ -514,7 +517,7 @@ export default function ProLideresConviteTokenPage() {
                   </div>
                 )}
                 {acceptOk ? (
-                  <p className="text-center text-sm text-green-700">A redirecionar para o painel…</p>
+                  <p className="text-center text-sm text-green-700">Redirecionando para o painel…</p>
                 ) : (
                   <button
                     type="button"
@@ -522,7 +525,7 @@ export default function ProLideresConviteTokenPage() {
                     onClick={() => void onAccept()}
                     className="w-full min-h-[48px] rounded-xl bg-green-600 py-3 text-sm font-semibold text-white hover:bg-green-700 disabled:opacity-60"
                   >
-                    {accepting ? 'A confirmar…' : 'Aceitar e entrar na equipe'}
+                    {accepting ? 'Confirmando…' : 'Aceitar e entrar na equipe'}
                   </button>
                 )}
               </div>

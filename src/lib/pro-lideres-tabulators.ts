@@ -33,13 +33,14 @@ export async function fetchTabulatorsForTenant(
   return (data ?? []) as LeaderTenantTabulatorRow[]
 }
 
-/** Rótulos na ordem do painel (para resposta pública do validate). */
+/** Rótulos em ordem alfabética (A–Z, locale pt) para o convite público e `/invites/validate`. */
 export async function fetchTabulatorLabelsForTenant(
   admin: SupabaseClient,
   leaderTenantId: string
 ): Promise<string[]> {
   const rows = await fetchTabulatorsForTenant(admin, leaderTenantId)
-  return rows.map((r) => r.label.trim()).filter(Boolean)
+  const labels = rows.map((r) => r.label.trim()).filter(Boolean)
+  return labels.sort((a, b) => a.localeCompare(b, 'pt', { sensitivity: 'base' }))
 }
 
 /**

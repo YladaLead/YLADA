@@ -19,7 +19,7 @@ export default async function ProLideresTabuladoresPage() {
         <h1 className="text-2xl font-bold text-gray-900">Tabuladores</h1>
       </div>
       <p className="text-gray-700">
-        Cadastra os nomes de tabulador da tua operação. Essa lista aparece no link de convite para a equipa escolher o
+        Cadastre os nomes de tabulador da sua operação. Essa lista aparece no link de convite para a equipe escolher o
         tabulador ao criar conta ou ao aceitar o convite.
       </p>
       <ProLideresTabuladoresPanel />
