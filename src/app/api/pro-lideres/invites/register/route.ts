@@ -11,6 +11,7 @@ import {
   syncProLideresMemberLinkTokensShareSlug,
   whatsappMeetsProLideresMandatory,
 } from '@/lib/pro-lideres-member-mandatory-profile'
+import { isProLideresTabulatorNameOption } from '@/config/pro-lideres-tabulator-names'
 
 /**
  * Público: cria conta com o e-mail do convite, grava nome/WhatsApp no perfil, entra na equipe e marca o convite como usado.
@@ -26,6 +27,7 @@ export async function POST(request: NextRequest) {
     whatsapp?: string
     password?: string
     pro_lideres_share_slug?: string
+    pro_lideres_tabulator_name?: string
   }
   try {
     body = await request.json()
@@ -49,6 +51,11 @@ export async function POST(request: NextRequest) {
       { error: 'Indique o WhatsApp com DDI e número completo (mínimo 10 dígitos no total).' },
       { status: 400 }
     )
+  }
+
+  const tabulator = body.pro_lideres_tabulator_name?.trim() ?? ''
+  if (!tabulator || !isProLideresTabulatorNameOption(tabulator)) {
+    return NextResponse.json({ error: 'Seleciona o nome do tabulador na lista.' }, { status: 400 })
   }
 
   const slugRes = parseProLideresMemberSharePathSlug(body.pro_lideres_share_slug)
@@ -175,6 +182,7 @@ export async function POST(request: NextRequest) {
     user_id: userId,
     role: 'member',
     pro_lideres_share_slug: slugRes.value,
+    pro_lideres_tabulator_name: tabulator,
   })
 
   if (insErr) {

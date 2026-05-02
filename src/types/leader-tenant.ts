@@ -45,6 +45,8 @@ export type LeaderTenantMemberRow = {
   team_access_state: ProLideresTeamAccessState
   /** Slug escolhido no convite; segmento padrão nos links /l/…/… por membro. */
   pro_lideres_share_slug?: string | null
+  /** Nome do tabulador (lista no convite). */
+  pro_lideres_tabulator_name?: string | null
   created_at: string
 }
 

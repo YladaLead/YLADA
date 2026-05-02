@@ -9,6 +9,7 @@ import { useAuth } from '@/hooks/useAuth'
 import { createClient } from '@/lib/supabase-client'
 import { YLADA_OG_FALLBACK_LOGO_PATH } from '@/lib/ylada-og-fallback-logo'
 import PhoneInputWithCountry from '@/components/PhoneInputWithCountry'
+import { PRO_LIDERES_TABULATOR_NAME_OPTIONS } from '@/config/pro-lideres-tabulator-names'
 
 type ValidateOk = {
   ok: true
@@ -35,6 +36,7 @@ export default function ProLideresConviteTokenPage() {
   const [whatsapp, setWhatsapp] = useState('')
   const [whatsappCountryCode, setWhatsappCountryCode] = useState('BR')
   const [shareSlug, setShareSlug] = useState('')
+  const [tabulatorName, setTabulatorName] = useState('')
   const [password, setPassword] = useState('')
   const [passwordConfirm, setPasswordConfirm] = useState('')
   const [showPassword, setShowPassword] = useState(false)
@@ -106,6 +108,7 @@ export default function ProLideresConviteTokenPage() {
           whatsapp: whatsapp.trim(),
           password,
           pro_lideres_share_slug: shareSlug.trim(),
+          pro_lideres_tabulator_name: tabulatorName,
         }),
       })
       const data = await res.json().catch(() => ({}))
@@ -119,6 +122,9 @@ export default function ProLideresConviteTokenPage() {
         return
       }
       const supabase = createClient()
+      if (user) {
+        await signOut()
+      }
       const { error: signErr } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -156,6 +162,7 @@ export default function ProLideresConviteTokenPage() {
         nome_completo: nome.trim(),
         whatsapp: whatsapp.trim(),
         pro_lideres_share_slug: shareSlug.trim(),
+        pro_lideres_tabulator_name: tabulatorName,
       }
 
       const res = await fetch('/api/pro-lideres/invites/accept', {
@@ -254,40 +261,23 @@ export default function ProLideresConviteTokenPage() {
           </div>
         ) : valid ? (
           <div className="space-y-5">
-            <h1 className="text-center text-xl font-bold text-gray-900">Convite para a equipe</h1>
-            <p className="text-center text-sm text-gray-600">
-              Espaço: <strong className="text-gray-900">{valid.spaceName}</strong>
-            </p>
+            <p className="text-center text-lg font-semibold text-gray-900">{valid.spaceName}</p>
+            <h1 className="text-center text-xl font-bold text-gray-900">Convite para equipe</h1>
             <p className="rounded-lg bg-blue-50 px-3 py-2 text-center text-sm text-blue-900">
-              Convite para <strong>{valid.invitedEmail}</strong>
+              <strong>{valid.invitedEmail}</strong>
             </p>
-            <p className="text-xs text-gray-500">
+            <p className="text-center text-xs text-gray-500">
               Prazo: até {new Date(valid.expiresAt).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })}
             </p>
-            <p className="rounded-lg border border-gray-100 bg-gray-50 px-3 py-2 text-xs leading-relaxed text-gray-600">
-              <strong className="text-gray-800">Onde fica a equipe:</strong> depois de entrar, o painel Pro Líderes
-              abre em <span className="font-mono text-gray-800">/pro-lideres/painel</span> — é um espaço à parte da
-              tua área YLADA habitual (ex.: Estética ou Nutri), que continua igual.
-            </p>
-            <div className="rounded-lg border border-sky-200 bg-sky-50/90 px-3 py-2.5 text-xs leading-relaxed text-sky-950">
-              <p className="font-semibold text-sky-950">Antes de continuar (obrigatório)</p>
-              <p className="mt-1">
-                <strong>Slug</strong> — é o teu pedaço no fim do link do quiz (só letras minúsculas, números e
-                hífens). Quem faz o quiz é encaminhado para o <strong>teu WhatsApp</strong>.
-              </p>
-              <p className="mt-1">
-                <strong>WhatsApp</strong> — indica com <strong>DDI + número completo</strong> (ex.: Brasil 55 e o
-                número com DDD; no total pelo menos <strong>10 dígitos</strong> só contando os números).
-              </p>
-            </div>
 
-            {!user && (
+            {!emailMatches && (
               <div className="space-y-4 text-sm text-gray-700">
-                <p className="font-medium text-gray-900">Criar conta e entrar na equipe</p>
-                <p className="text-xs text-gray-600">
-                  Use o mesmo e-mail do convite (já indicado acima). Escolha uma senha, confirme-a e use o ícone do
-                  olho para ver o que está a escrever. Depois do registo entraremos automaticamente no painel.
-                </p>
+                <p className="font-medium text-gray-900">Criar conta</p>
+                {user ? (
+                  <p className="text-xs text-gray-600">
+                    Tens sessão com outro e-mail. Ao criar conta, usas <strong className="text-gray-800">{valid.invitedEmail}</strong> e entras com ele.
+                  </p>
+                ) : null}
                 {registerError && (
                   <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800">
                     {registerError}
@@ -306,7 +296,23 @@ export default function ProLideresConviteTokenPage() {
                     />
                   </label>
                   <label className="block">
-                    <span className="mb-1 block text-xs font-medium text-gray-600">O teu slug no link (obrigatório)</span>
+                    <span className="mb-1 block text-xs font-medium text-gray-600">Nome do tabulador (obrigatório)</span>
+                    <select
+                      required
+                      value={tabulatorName}
+                      onChange={(e) => setTabulatorName(e.target.value)}
+                      className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-gray-900"
+                    >
+                      <option value="">Selecionar…</option>
+                      {PRO_LIDERES_TABULATOR_NAME_OPTIONS.map((opt) => (
+                        <option key={opt} value={opt}>
+                          {opt}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <label className="block">
+                    <span className="mb-1 block text-xs font-medium text-gray-600">Endereço nos links (obrigatório)</span>
                     <input
                       required
                       minLength={3}
@@ -319,6 +325,9 @@ export default function ProLideresConviteTokenPage() {
                       placeholder="ex.: maria-silva"
                       autoComplete="off"
                     />
+                    <span className="mt-1 block text-[11px] leading-snug text-gray-500">
+                      O teu nome no URL do quiz — como preferes ser chamada ou o teu nome de preferência (único).
+                    </span>
                   </label>
                   <label className="block">
                     <span className="mb-1 block text-xs font-medium text-gray-600">WhatsApp (obrigatório)</span>
@@ -331,9 +340,6 @@ export default function ProLideresConviteTokenPage() {
                         setWhatsappCountryCode(countryCode || 'BR')
                       }}
                     />
-                    <span className="mt-1 block text-[11px] leading-snug text-gray-500">
-                      País = DDI (ex.: Brasil +55). No campo ao lado, só o número com DDD — sem repetir o +55.
-                    </span>
                   </label>
                   <label className="block">
                     <span className="mb-1 block text-xs font-medium text-gray-600">Senha</span>
@@ -404,37 +410,9 @@ export default function ProLideresConviteTokenPage() {
               </div>
             )}
 
-            {user && !emailMatches && (
-              <div className="space-y-4 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-950">
-                <p>
-                  Está autenticado como <strong className="text-amber-950">{user.email}</strong>. Este convite é para{' '}
-                  <strong className="text-amber-950">{valid.invitedEmail}</strong> — tem de sair desta sessão e entrar
-                  com esse e-mail para aceitar.
-                </p>
-                <button
-                  type="button"
-                  onClick={async () => {
-                    await signOut()
-                    router.push(loginHref)
-                    router.refresh()
-                  }}
-                  className="flex w-full min-h-[48px] items-center justify-center rounded-xl bg-blue-600 px-4 py-3 text-center text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 active:scale-[0.99]"
-                >
-                  Sair e ir para o login ({valid.invitedEmail})
-                </button>
-                <p className="text-center text-xs text-amber-900/85">
-                  Ao clicar, a sessão atual termina e abre o login; depois de entrar com{' '}
-                  <strong>{valid.invitedEmail}</strong>, esta página reabre para aceitar o convite.
-                </p>
-              </div>
-            )}
-
             {user && emailMatches && (
               <div className="space-y-3">
-                <p className="text-sm text-gray-700">
-                  Preencha <strong className="text-gray-900">nome</strong>, <strong className="text-gray-900">slug</strong>{' '}
-                  e <strong className="text-gray-900">WhatsApp</strong> (país + número com DDD) para aceitar o convite.
-                </p>
+                <p className="text-sm text-gray-700">Completa os dados para entrares na equipe.</p>
                 <div className="grid gap-2">
                   <label className="block">
                     <span className="mb-1 block text-xs font-medium text-gray-600">Nome completo (obrigatório)</span>
@@ -448,7 +426,23 @@ export default function ProLideresConviteTokenPage() {
                     />
                   </label>
                   <label className="block">
-                    <span className="mb-1 block text-xs font-medium text-gray-600">Slug no link (obrigatório)</span>
+                    <span className="mb-1 block text-xs font-medium text-gray-600">Nome do tabulador (obrigatório)</span>
+                    <select
+                      required
+                      value={tabulatorName}
+                      onChange={(e) => setTabulatorName(e.target.value)}
+                      className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-gray-900"
+                    >
+                      <option value="">Selecionar…</option>
+                      {PRO_LIDERES_TABULATOR_NAME_OPTIONS.map((opt) => (
+                        <option key={opt} value={opt}>
+                          {opt}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <label className="block">
+                    <span className="mb-1 block text-xs font-medium text-gray-600">Endereço nos links (obrigatório)</span>
                     <input
                       required
                       minLength={3}
@@ -461,6 +455,9 @@ export default function ProLideresConviteTokenPage() {
                       placeholder="ex.: maria-silva"
                       autoComplete="off"
                     />
+                    <span className="mt-1 block text-[11px] leading-snug text-gray-500">
+                      O teu nome no URL do quiz — como preferes ser chamada ou o teu nome de preferência (único).
+                    </span>
                   </label>
                   <label className="block">
                     <span className="mb-1 block text-xs font-medium text-gray-600">WhatsApp (obrigatório)</span>
@@ -473,9 +470,6 @@ export default function ProLideresConviteTokenPage() {
                         setWhatsappCountryCode(countryCode || 'BR')
                       }}
                     />
-                    <span className="mt-1 block text-[11px] leading-snug text-gray-500">
-                      País = DDI (ex.: Brasil +55). No campo ao lado, só o número com DDD — sem repetir o +55.
-                    </span>
                   </label>
                 </div>
                 {acceptError && (

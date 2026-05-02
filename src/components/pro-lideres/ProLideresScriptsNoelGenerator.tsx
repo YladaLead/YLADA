@@ -224,7 +224,12 @@ export function ProLideresScriptsNoelGenerator({
         return
       }
       setDraft(data.draft)
-      setDraftMeta({ ylada_link_id: data.ylada_link_id ?? (yladaLinkId || null) })
+      setDraftMeta({
+        ylada_link_id: data.ylada_link_id ?? (yladaLinkId || null),
+        adapt:
+          data.adapt_meta ??
+          (inputMode === 'adapt' ? { audience: adaptAudience, compactness: adaptCompactness } : undefined),
+      })
       setRefineLines([
         {
           id: chatId(),
@@ -273,6 +278,9 @@ export function ProLideresScriptsNoelGenerator({
           purpose: purposeForRefine,
           ylada_link_id: (draftMeta?.ylada_link_id ?? yladaLinkId) || null,
           locale: 'pt',
+          adapt_training_refine:
+            draftMeta?.adapt ??
+            (inputMode === 'adapt' ? { audience: adaptAudience, compactness: adaptCompactness } : undefined),
         }),
       })
       const data = (await res.json().catch(() => ({}))) as GenerateResponse
@@ -441,10 +449,11 @@ export function ProLideresScriptsNoelGenerator({
         <p className="rounded-xl border border-indigo-100 bg-gradient-to-br from-indigo-50/90 via-white to-violet-50/40 px-4 py-3 text-sm leading-snug text-indigo-950 sm:px-5 sm:py-3.5">
           {inputMode === 'adapt' ? (
             <>
-              <strong className="text-indigo-950">Adaptar treino ao tom YLADA</strong> — cola o teu material (passos,
-              lista, texto de campo). O Noel <strong className="text-indigo-950">mantém o conteúdo</strong> e muda o{' '}
-              <strong className="text-indigo-950">jeito de falar</strong>: reflexão, permissão, educação, sem urgência
-              falsa. Depois podes refinar ou salvar na biblioteca.
+              <strong className="text-indigo-950">Adaptar treino ao tom YLADA</strong> — cola o material como treinas
+              (passos, lista, texto de campo). O Noel devolve o <strong className="text-indigo-950">mesmo conteúdo</strong>{' '}
+              num <strong className="text-indigo-950">jeito YLADA</strong>: perguntas que fazem a pessoa{' '}
+              <strong className="text-indigo-950">refletir</strong>, permissão, ritmo de execução quando já existir no
+              original. Depois refina ou guarda na biblioteca.
             </>
           ) : (
             <>
@@ -463,8 +472,6 @@ export function ProLideresScriptsNoelGenerator({
             onClick={() => {
               setInputMode('guided')
               onError(null)
-              resetFlow()
-              setAdaptSource('')
             }}
             className={`min-h-[44px] flex-1 rounded-lg px-3 text-sm font-semibold transition sm:flex-none sm:px-5 ${
               inputMode === 'guided'
@@ -480,8 +487,6 @@ export function ProLideresScriptsNoelGenerator({
             onClick={() => {
               setInputMode('free')
               onError(null)
-              resetFlow()
-              setAdaptSource('')
             }}
             className={`min-h-[44px] flex-1 rounded-lg px-3 text-sm font-semibold transition sm:flex-none sm:px-5 ${
               inputMode === 'free'
@@ -497,7 +502,6 @@ export function ProLideresScriptsNoelGenerator({
             onClick={() => {
               setInputMode('adapt')
               onError(null)
-              resetFlow()
             }}
             className={`min-h-[44px] flex-1 rounded-lg px-3 text-sm font-semibold transition sm:flex-none sm:px-5 ${
               inputMode === 'adapt'
@@ -936,7 +940,7 @@ export function ProLideresScriptsNoelGenerator({
               Escreva em português o que quer mudar; o rascunho acima atualiza quando o Noel responder.
             </p>
             <div
-              className="mt-3 max-h-44 overflow-y-auto rounded-xl border border-violet-100 bg-white/95 px-3 py-2 text-xs text-gray-800"
+              className="mt-3 max-h-72 overflow-y-auto rounded-xl border border-violet-100 bg-white/95 px-3 py-2 text-xs text-gray-800 sm:max-h-80"
               aria-live="polite"
             >
               {refineLines.map((line) => (

@@ -120,6 +120,22 @@ export default function ProLideresAreaShell({
           </Link>
         </header>
         <main className="flex-1 p-4 sm:p-5 lg:p-6">{children}</main>
+        {isLeaderWorkspace && !teamViewPreview && (
+          <footer className="shrink-0 border-t border-gray-200 bg-white px-4 py-3 text-center text-[11px] leading-snug text-gray-500 sm:px-5 sm:py-3.5 sm:text-xs">
+            <p>
+              Precisa de mais capacidade?{' '}
+              <strong className="text-gray-700">Adquirir mais 50 membros ativos (+50 convites)</strong>
+              {' — '}
+              <a
+                href="mailto:suporte@ylada.com?subject=YLADA%20Pro%20L%C3%ADderes%20%E2%80%94%20mais%2050%20membros%20e%20convites"
+                className="font-medium text-blue-600 underline-offset-2 hover:underline"
+              >
+                fale com a YLADA
+              </a>
+              {' '}para combinarmos o add-on à tua assinatura.
+            </p>
+          </footer>
+        )}
         </div>
       </div>
     </ProLideresPainelProvider>

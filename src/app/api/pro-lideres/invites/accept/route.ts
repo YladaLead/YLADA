@@ -11,6 +11,7 @@ import {
   syncProLideresMemberLinkTokensShareSlug,
   whatsappMeetsProLideresMandatory,
 } from '@/lib/pro-lideres-member-mandatory-profile'
+import { isProLideresTabulatorNameOption } from '@/config/pro-lideres-tabulator-names'
 
 export async function POST(request: NextRequest) {
   const auth = await requireApiAuth(request)
@@ -21,7 +22,13 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Servidor sem service role' }, { status: 503 })
   }
 
-  let body: { token?: string; nome_completo?: string; whatsapp?: string; pro_lideres_share_slug?: string }
+  let body: {
+    token?: string
+    nome_completo?: string
+    whatsapp?: string
+    pro_lideres_share_slug?: string
+    pro_lideres_tabulator_name?: string
+  }
   try {
     body = await request.json()
   } catch {
@@ -134,6 +141,11 @@ export async function POST(request: NextRequest) {
       { status: 400 }
     )
   }
+  const tabulator = body.pro_lideres_tabulator_name?.trim() ?? ''
+  if (!tabulator || !isProLideresTabulatorNameOption(tabulator)) {
+    return NextResponse.json({ error: 'Seleciona o nome do tabulador na lista.' }, { status: 400 })
+  }
+
   const slugRes = parseProLideresMemberSharePathSlug(slugInput)
   if (!slugRes.ok) {
     return NextResponse.json({ error: slugRes.error }, { status: 400 })
@@ -166,6 +178,7 @@ export async function POST(request: NextRequest) {
     user_id: user.id,
     role: 'member',
     pro_lideres_share_slug: slugRes.value,
+    pro_lideres_tabulator_name: tabulator,
   })
 
   if (insErr) {

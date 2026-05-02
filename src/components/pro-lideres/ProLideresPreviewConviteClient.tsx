@@ -67,18 +67,12 @@ export function ProLideresPreviewConviteClient() {
           </div>
 
           <div className="space-y-5">
-            <h1 className="text-center text-xl font-bold text-gray-900">Convite para a equipe</h1>
-            <p className="text-center text-sm text-gray-600">
-              Espaço: <strong className="text-gray-900">Nome de exemplo (líder)</strong>
-            </p>
+            <p className="text-center text-lg font-semibold text-gray-900">Nome de exemplo (líder)</p>
+            <h1 className="text-center text-xl font-bold text-gray-900">Convite para equipe</h1>
             <p className="rounded-lg bg-blue-50 px-3 py-2 text-center text-sm text-blue-900">
-              Convite para <strong>exemplo@email.com</strong>
+              <strong>exemplo@email.com</strong>
             </p>
-            <p className="text-xs text-gray-500">Prazo: até {mockExpires}</p>
-            <p className="rounded-lg border border-gray-100 bg-gray-50 px-3 py-2 text-xs leading-relaxed text-gray-600">
-              <strong className="text-gray-800">Onde fica a equipe:</strong> depois de entrar, o painel Pro Líderes abre
-              em <span className="font-mono text-gray-800">/pro-lideres/painel</span>.
-            </p>
+            <p className="text-center text-xs text-gray-500">Prazo: até {mockExpires}</p>
 
             <div className="rounded-lg border border-dashed border-gray-200 bg-gray-50/80 px-3 py-2 text-center text-xs text-gray-500">
               Formulário de registo / entrar — oculto na pré-visualização
