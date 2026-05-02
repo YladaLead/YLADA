@@ -10,9 +10,30 @@ import {
   buildProLideresScriptsNoelRefineSystemPrompt,
   normalizeScriptPillarId,
   parseNoelScriptDraft,
+  type AdaptTrainingAudienceId,
+  type AdaptTrainingCompactnessId,
   type NoelScriptDraft,
   type ProLideresScriptPillarId,
 } from '@/lib/pro-lideres-scripts-noel'
+
+const ADAPT_AUDIENCES = new Set<AdaptTrainingAudienceId>(['equipe', 'cliente', 'ambos'])
+const ADAPT_COMPACT = new Set<AdaptTrainingCompactnessId>(['só_linguagem', 'linguagem_encurtar'])
+
+function parseAdaptRefine(raw: unknown): {
+  audience: AdaptTrainingAudienceId
+  compactness: AdaptTrainingCompactnessId
+} | null {
+  if (!raw || typeof raw !== 'object') return null
+  const o = raw as Record<string, unknown>
+  const audience = typeof o.audience === 'string' ? o.audience.trim() : ''
+  const compactness = typeof o.compactness === 'string' ? o.compactness.trim() : ''
+  if (!ADAPT_AUDIENCES.has(audience as AdaptTrainingAudienceId)) return null
+  if (!ADAPT_COMPACT.has(compactness as AdaptTrainingCompactnessId)) return null
+  return {
+    audience: audience as AdaptTrainingAudienceId,
+    compactness: compactness as AdaptTrainingCompactnessId,
+  }
+}
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
 
@@ -68,6 +89,7 @@ export async function POST(request: NextRequest) {
     purpose?: unknown
     ylada_link_id?: unknown
     locale?: unknown
+    adapt_training_refine?: unknown
   }
   try {
     body = await request.json()
@@ -123,6 +145,8 @@ export async function POST(request: NextRequest) {
     t.display_name?.trim() || t.team_name?.trim() || t.slug || 'Pro Líderes'
   const verticalCode = (t.vertical_code ?? 'h-lider').trim() || 'h-lider'
 
+  const adaptRefine = parseAdaptRefine(body.adapt_training_refine)
+
   const systemPrompt = buildProLideresScriptsNoelRefineSystemPrompt({
     operationLabel,
     verticalCode,
@@ -133,7 +157,12 @@ export async function POST(request: NextRequest) {
     toolLabel,
     toolWhenToUse,
     replyLanguage,
+    adaptRefine: adaptRefine ?? null,
   })
+
+  const destinatarioRegra = adaptRefine
+    ? 'mantém o **destinatário** de cada entrada (líder→distribuidor vs campo) coerente com títulos/subtítulos; não inventes passos novos nos `body`.'
+    : 'mantém destinatário dos `body` como cliente/lead/público;'
 
   const userMessage = `RASCUNHO ATUAL (JSON — devolve o objeto completo atualizado):
 ${JSON.stringify(draftIn)}
@@ -141,7 +170,7 @@ ${JSON.stringify(draftIn)}
 PEDIDO DO LÍDER PARA ALTERAR:
 ${instruction}
 
-Regras: mantém destinatário dos \`body\` como cliente/lead/público; português do Brasil; sem "follow-up" (usa acompanhamento); preserva **abertura com educação/conscientização** e **continuidade lógica** entre mensagens (filosofia YLADA), salvo o pedido do líder pedir explicitamente o contrário. Só JSON.`
+Regras: ${destinatarioRegra} português do Brasil; sem "follow-up" (usa acompanhamento); preserva **abertura com educação/conscientização** e **continuidade lógica** entre mensagens (filosofia YLADA), salvo o pedido do líder pedir explicitamente o contrário. Só JSON.`
 
   try {
     const completion = await openai.chat.completions.create({

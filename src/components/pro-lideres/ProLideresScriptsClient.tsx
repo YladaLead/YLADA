@@ -63,8 +63,8 @@ function ScriptsEmptyStateLeader() {
             1
           </span>
           <span>
-            Aí em cima: <strong className="text-gray-900">Guiado</strong> → responda até o fim → <strong className="text-gray-900">Gerar</strong> →{' '}
-            <strong className="text-gray-900">Salvar</strong>.
+            No bloco do Noel: <strong className="text-gray-900">Guiado</strong> → responda até o fim →{' '}
+            <strong className="text-gray-900">Gerar</strong> → <strong className="text-gray-900">Salvar</strong>.
           </span>
         </li>
         <li className="flex gap-3">
@@ -278,32 +278,7 @@ export function ProLideresScriptsClient() {
 
   return (
     <div className="mx-auto max-w-4xl space-y-8">
-      <div
-        className={`overflow-hidden rounded-2xl border px-5 py-6 sm:px-8 sm:py-7 ${
-          teamExperience
-            ? 'border-blue-200/90 bg-gradient-to-br from-blue-50/90 via-white to-sky-50/35'
-            : 'border-gray-200/80 bg-gradient-to-br from-slate-50/80 via-white to-indigo-50/20'
-        }`}
-      >
-        <p className={`text-sm font-semibold ${teamExperience ? 'text-blue-700' : 'text-blue-600'}`}>
-          {teamExperience ? 'Biblioteca da equipe' : 'Conteúdo'}
-        </p>
-        <h1 className="mt-1 text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl">Scripts</h1>
-        <p className="mt-2 max-w-2xl text-pretty text-gray-600">
-          {teamExperience ? (
-            <>
-              <strong className="text-gray-800">Grupos de textos</strong> para usar com clientes. A equipe{' '}
-              <strong className="text-gray-800">só vê e copia</strong>.
-            </>
-          ) : (
-            <>
-              Use o <strong className="text-gray-800">Guiado</strong> embaixo: o Noel leva passo a passo (incluindo
-              ferramenta quando fizer sentido). A equipe <strong className="text-gray-800">só vê e copia</strong> o que
-              você deixar visível.
-            </>
-          )}
-        </p>
-      </div>
+      <h1 className="sr-only">{teamExperience ? 'Scripts — biblioteca da equipe' : 'Scripts'}</h1>
 
       {devStubPanel && (
         <p className="rounded-xl border border-amber-200 bg-amber-50/90 px-4 py-3 text-sm text-amber-950">
@@ -321,24 +296,11 @@ export function ProLideresScriptsClient() {
       )}
 
       {canEditUi ? (
-        <section className="space-y-4" aria-labelledby="scripts-construir-heading">
-          <h2 id="scripts-construir-heading" className="text-xs font-semibold uppercase tracking-wide text-gray-500">
-            Construir biblioteca
-          </h2>
-          <p className="text-sm text-gray-600">
-            Ordem rápida: <strong className="text-gray-800">Guiado</strong> → gerar → salvar → (se quiser) equipe vê.
-          </p>
-
+        <section className="space-y-4" aria-label="Noel de scripts">
           <div className="overflow-hidden rounded-2xl border border-indigo-200/90 bg-gradient-to-b from-indigo-50/95 via-white to-white shadow-md ring-1 ring-indigo-100/50">
-            <div className="border-b border-indigo-100/90 bg-indigo-50/50 px-4 py-4 sm:px-6 sm:py-5">
+            <div className="border-b border-indigo-100/90 bg-indigo-50/50 px-4 py-3 sm:px-6 sm:py-4">
               <p className="text-xs font-bold uppercase tracking-wide text-indigo-700">Noel de Scripts</p>
-              <h3 className="mt-1 text-base font-bold text-indigo-950 sm:text-lg">Montar sequência com o Noel</h3>
-              <p className="mt-2 max-w-2xl text-sm leading-snug text-indigo-950/90">
-                <strong className="text-indigo-950">Comece por «Guiado».</strong> São poucos cliques por pergunta. No
-                passo da ferramenta, escolha o link se o script falar de uma página sua — o Noel já encaixa o texto; a
-                equipe vê o URL no cartão. Nos textos para vários distribuidores, o Noel pode usar marcadores tipo «(teu
-                link da ferramenta)».
-              </p>
+              <h2 className="mt-1 text-base font-bold text-indigo-950 sm:text-lg">Montar sequência com o Noel</h2>
             </div>
             <div className="px-4 pb-6 pt-4 sm:px-6 sm:pb-7 sm:pt-5">
               <ProLideresScriptsNoelGenerator

@@ -10,7 +10,6 @@ import type {
   ProLideresCatalogOrigin,
 } from '@/lib/pro-lideres-catalog-build'
 import { useProLideresPainel } from '@/components/pro-lideres/pro-lideres-painel-context'
-import { ProLideresCatalogMemberShareBlock } from '@/components/pro-lideres/ProLideresCatalogMemberShareBlock'
 
 type CatalogPayload = {
   catalog?: ProLideresCatalogItem[]
@@ -68,7 +67,6 @@ function CatalogRowCard({
   showTeamVisibilityControls,
   teamVisibilityBusy,
   onTeamVisibilityChange,
-  showMemberSharePanel,
   rowHighlight,
   showScriptsLink = true,
   showOriginKindChips = true,
@@ -81,7 +79,6 @@ function CatalogRowCard({
   showTeamVisibilityControls: boolean
   teamVisibilityBusy: boolean
   onTeamVisibilityChange: (item: ProLideresCatalogItem, visible: boolean) => void
-  showMemberSharePanel?: boolean
   /** Destaque vindo do Noel (query highlightYladaLink). */
   rowHighlight?: boolean
   /** Ambiente do líder: atalho para scripts no editor de links. */
@@ -214,10 +211,6 @@ function CatalogRowCard({
       <p className="mt-2 truncate font-mono text-[10px] text-gray-400" title={item.publicUrl}>
         {item.publicUrl}
       </p>
-
-      {showMemberSharePanel && item.yladaLinkId ? (
-        <ProLideresCatalogMemberShareBlock yladaLinkId={item.yladaLinkId} />
-      ) : null}
 
       {showTeamVisibilityControls ? (
         <div className="mt-3 border-t border-slate-100 pt-3">
@@ -438,11 +431,13 @@ export function ProLideresCatalogoClient({
       data-pro-lideres-vertical={verticalCode}
       data-pro-lideres-brand={brandDisplay}
     >
-      <header className="space-y-2">
-        <p className="text-sm font-semibold text-blue-700">Conteúdo</p>
-        <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">{catalogTitle}</h1>
-        <p className="max-w-2xl text-base leading-relaxed text-slate-700">{introText}</p>
-      </header>
+      {isLeaderWorkspace ? (
+        <header className="space-y-2">
+          <p className="text-sm font-semibold text-blue-700">Conteúdo</p>
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">{catalogTitle}</h1>
+          <p className="max-w-2xl text-base leading-relaxed text-slate-700">{introText}</p>
+        </header>
+      ) : null}
 
       <div className="rounded-2xl border-2 border-slate-200 bg-gradient-to-b from-slate-50/90 to-white p-5 shadow-md ring-1 ring-slate-900/5">
         <div className="flex flex-col gap-5">
@@ -482,12 +477,10 @@ export function ProLideresCatalogoClient({
           <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:gap-4">
             <div className="min-w-0 flex-1 space-y-2 rounded-xl border border-sky-200/80 bg-sky-50/50 p-4 shadow-sm">
               <p className="text-sm font-semibold text-slate-900">Vendas ou recrutamento</p>
-              <p className="text-xs text-slate-600">
-                {isLeaderWorkspace
-                  ? 'Escolha o tipo de ferramenta que quer ver'
-                  : 'Só aparecem fluxos que o líder liberou para a equipe neste funil.'}
-              </p>
-              <div className={`mt-2 flex rounded-xl bg-slate-300/35 p-1.5 shadow-inner ${hideRecruitmentTab ? 'max-w-md' : ''}`}>
+              {isLeaderWorkspace ? (
+                <p className="text-xs text-slate-600">Escolha o tipo de ferramenta que quer ver</p>
+              ) : null}
+              <div className={`${isLeaderWorkspace ? 'mt-2' : 'mt-0'} flex rounded-xl bg-slate-300/35 p-1.5 shadow-inner ${hideRecruitmentTab ? 'max-w-md' : ''}`}>
                 <button
                   type="button"
                   onClick={() => setTab('sales')}
@@ -588,7 +581,6 @@ export function ProLideresCatalogoClient({
               showTeamVisibilityControls={isLeaderWorkspace}
               teamVisibilityBusy={teamVisibilityBusyId === item.id}
               onTeamVisibilityChange={(i, vis) => void setItemTeamVisible(i, vis)}
-              showMemberSharePanel={!isLeaderWorkspace}
               showScriptsLink={isLeaderWorkspace}
               showOriginKindChips={isLeaderWorkspace}
               rowHighlight={Boolean(highlightYladaLinkId && item.yladaLinkId === highlightYladaLinkId)}

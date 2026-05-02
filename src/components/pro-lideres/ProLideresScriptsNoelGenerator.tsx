@@ -11,7 +11,6 @@ import {
   PL_SCRIPT_GUIDED_OBJECTIVES,
   PL_SCRIPT_GUIDED_SITUATIONS,
   PL_SCRIPT_GUIDED_TONES,
-  anglesForFocus,
   defaultAngleForFocus,
   normalizeToolPresetForFocus,
   toolsForFocus,
@@ -25,20 +24,25 @@ import {
 } from '@/lib/pro-lideres-script-section-meta'
 import {
   PRO_LIDERES_SCRIPT_PILLARS,
+  type AdaptTrainingAudienceId,
+  type AdaptTrainingCompactnessId,
   type NoelScriptDraft,
   type ProLideresScriptPillarId,
 } from '@/lib/pro-lideres-scripts-noel'
+
+type AdaptMeta = { audience: AdaptTrainingAudienceId; compactness: AdaptTrainingCompactnessId }
 
 type GenerateResponse = {
   draft?: NoelScriptDraft
   error?: string
   pillar?: ProLideresScriptPillarId
   ylada_link_id?: string | null
+  adapt_meta?: AdaptMeta
 }
 
 type ChatLine = { id: string; role: 'user' | 'assistant'; text: string }
 
-const GUIDED_STEPS = 8
+const GUIDED_STEPS = 7
 
 const defaultGuided = (): PlScriptGuidedBriefing => ({
   focusMainId: 'vendas',
@@ -98,7 +102,7 @@ export function ProLideresScriptsNoelGenerator({
   onError: (e: string | null) => void
   onApplied: () => Promise<void>
 }) {
-  const [inputMode, setInputMode] = useState<'guided' | 'free'>('guided')
+  const [inputMode, setInputMode] = useState<'guided' | 'free' | 'adapt'>('guided')
   const [guidedStep, setGuidedStep] = useState(1)
   const [guided, setGuided] = useState<PlScriptGuidedBriefing>(defaultGuided)
 
@@ -106,9 +110,12 @@ export function ProLideresScriptsNoelGenerator({
   const [pillarLocked, setPillarLocked] = useState(false)
   const [purpose, setPurpose] = useState('')
   const [yladaLinkId, setYladaLinkId] = useState('')
+  const [adaptSource, setAdaptSource] = useState('')
+  const [adaptAudience, setAdaptAudience] = useState<AdaptTrainingAudienceId>('equipe')
+  const [adaptCompactness, setAdaptCompactness] = useState<AdaptTrainingCompactnessId>('só_linguagem')
   const [generating, setGenerating] = useState(false)
   const [draft, setDraft] = useState<NoelScriptDraft | null>(null)
-  const [draftMeta, setDraftMeta] = useState<{ ylada_link_id: string | null } | null>(null)
+  const [draftMeta, setDraftMeta] = useState<{ ylada_link_id: string | null; adapt?: AdaptMeta } | null>(null)
 
   const [refineLines, setRefineLines] = useState<ChatLine[]>([])
   const [refineInput, setRefineInput] = useState('')
@@ -143,14 +150,34 @@ export function ProLideresScriptsNoelGenerator({
     setRefineInput('')
   }, [])
 
+  const resetDraftOnly = useCallback(() => {
+    setDraft(null)
+    setDraftMeta(null)
+    setRefineLines([])
+    setRefineInput('')
+  }, [])
+
   async function onGenerate(opts?: { purposeText?: string; guidedRequest?: boolean }) {
-    const p = (opts?.purposeText ?? purpose).trim()
     const guidedReq = opts?.guidedRequest ?? (inputMode === 'guided')
-    if (p.length < 8) {
-      onError('Precisamos de um pouco mais de contexto (mínimo 8 caracteres).')
-      return
+    const p = (opts?.purposeText ?? purpose).trim()
+
+    if (inputMode === 'adapt') {
+      const src = adaptSource.trim()
+      if (src.length < 50) {
+        onError('Cola o treino ou texto com pelo menos 50 caracteres.')
+        return
+      }
+      if (src.length > 14000) {
+        onError('Texto demasiado longo (máx. 14 000 caracteres).')
+        return
+      }
+    } else {
+      if (p.length < 8) {
+        onError('Precisamos de um pouco mais de contexto (mínimo 8 caracteres).')
+        return
+      }
     }
-    if (inputMode === 'guided' || guidedReq) {
+    if (inputMode !== 'adapt' && (inputMode === 'guided' || guidedReq)) {
       if (guided.toolPresetId === 'outra' && !guided.toolFreeform.trim() && !yladaLinkId) {
         onError('Em «Outra ferramenta», escreve uma linha ou escolhe uma ferramenta do catálogo do painel.')
         return
@@ -159,16 +186,29 @@ export function ProLideresScriptsNoelGenerator({
     onError(null)
     setGenerating(true)
     try {
+      const purposePayload =
+        inputMode === 'adapt'
+          ? `[MODO ADAPTAR TREINO] audiência=${adaptAudience}; intensidade=${adaptCompactness}`
+          : p
+
       const res = await fetch('/api/pro-lideres/scripts/generate-noel', {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          purpose: p,
-          pillar,
-          ylada_link_id: yladaLinkId || null,
+          purpose: purposePayload,
+          pillar: inputMode === 'adapt' ? 'geral' : pillar,
+          ylada_link_id: inputMode === 'adapt' ? null : yladaLinkId || null,
           locale: 'pt',
-          guided: guidedReq,
+          guided: inputMode === 'adapt' ? false : guidedReq,
+          adapt_training:
+            inputMode === 'adapt'
+              ? {
+                  source_text: adaptSource.trim(),
+                  audience: adaptAudience,
+                  compactness: adaptCompactness,
+                }
+              : undefined,
         }),
       })
       const data = (await res.json().catch(() => ({}))) as GenerateResponse
@@ -211,7 +251,11 @@ export function ProLideresScriptsNoelGenerator({
       return
     }
     const purposeForRefine =
-      inputMode === 'guided' ? guidedPurpose.trim() || purpose.trim() : purpose.trim() || undefined
+      inputMode === 'adapt'
+        ? `[MODO ADAPTAR TREINO] audiência=${draftMeta?.adapt?.audience ?? adaptAudience}; intensidade=${draftMeta?.adapt?.compactness ?? adaptCompactness}. Trecho original (resumo): ${adaptSource.trim().slice(0, 400)}`
+        : inputMode === 'guided'
+          ? guidedPurpose.trim() || purpose.trim()
+          : purpose.trim() || undefined
     onError(null)
     setRefining(true)
     const userLine: ChatLine = { id: chatId(), role: 'user', text: instruction }
@@ -287,7 +331,13 @@ export function ProLideresScriptsNoelGenerator({
               toolPresetKey: clipToolPresetKey(guided.toolPresetId),
               entryTitles: draft.entries.map((e) => e.title),
             })
-          : { usage_hint: null, sequence_label: null, conversation_stage: null }
+          : inputMode === 'adapt'
+            ? {
+                usage_hint: 'Treino adaptado ao tom YLADA.',
+                sequence_label: 'Adaptação de material',
+                conversation_stage: null,
+              }
+            : { usage_hint: null, sequence_label: null, conversation_stage: null }
 
       const res = await fetch('/api/pro-lideres/scripts/sections', {
         method: 'POST',
@@ -298,7 +348,8 @@ export function ProLideresScriptsNoelGenerator({
           subtitle: draft.section_subtitle,
           ylada_link_id: draftMeta?.ylada_link_id || null,
           visible_to_team: visibleToTeam,
-          focus_main: inputMode === 'guided' ? guided.focusMainId : 'vendas',
+          focus_main:
+            inputMode === 'guided' ? guided.focusMainId : inputMode === 'adapt' ? 'recrutamento' : 'vendas',
           intention_key: inputMode === 'guided' ? guided.objectiveId : 'geral',
           tool_preset_key: inputMode === 'guided' ? clipToolPresetKey(guided.toolPresetId) : null,
           usage_hint: noelMeta.usage_hint,
@@ -350,6 +401,9 @@ export function ProLideresScriptsNoelGenerator({
       setGuided(defaultGuided())
       setGuidedStep(1)
       setPillarLocked(false)
+      if (inputMode === 'adapt') {
+        setAdaptSource('')
+      }
       await onApplied()
     } catch {
       onError('Erro de rede ao salvar.')
@@ -365,18 +419,16 @@ export function ProLideresScriptsNoelGenerator({
       case 1:
         return 'Esse script é para qual foco principal?'
       case 2:
-        return 'Por onde quer começar a conversa?'
-      case 3:
         return 'O que esse script precisa gerar?'
-      case 4:
+      case 3:
         return 'Qual ferramenta ou diagnóstico entra depois da conversa?'
-      case 5:
+      case 4:
         return 'Para quem é a mensagem?'
-      case 6:
+      case 5:
         return 'Como você quer soar?'
-      case 7:
+      case 6:
         return 'Algum detalhe do momento?'
-      case 8:
+      case 7:
         return 'Canal e tipo de texto'
       default:
         return ''
@@ -385,332 +437,426 @@ export function ProLideresScriptsNoelGenerator({
 
   return (
     <div className="space-y-5">
-      <p className="rounded-2xl border border-indigo-100 bg-gradient-to-br from-indigo-50/90 via-white to-violet-50/40 px-4 py-3 text-sm leading-snug text-indigo-950 sm:px-5 sm:py-3.5">
-        <strong className="text-indigo-950">Prefira «Guiado»</strong> — o Noel pergunta, você escolhe e avança. O texto
-        já sai em tom leve (permissão antes de link; convite a ajudar, sem pressão). No fim: ajustar se quiser e{' '}
-        <strong className="text-indigo-950">salvar</strong>.
-      </p>
-
-      <div className="flex flex-wrap gap-2 rounded-xl border border-gray-200 bg-gray-50/80 p-1.5">
-        <button
-          type="button"
-          disabled={busy}
-          onClick={() => {
-            setInputMode('guided')
-            onError(null)
-          }}
-          className={`min-h-[44px] flex-1 rounded-lg px-3 text-sm font-semibold transition sm:flex-none sm:px-5 ${
-            inputMode === 'guided'
-              ? 'bg-white text-indigo-900 shadow-sm ring-1 ring-indigo-200'
-              : 'text-gray-600 hover:text-gray-900'
-          }`}
-        >
-          Guiado (recomendado)
-        </button>
-        <button
-          type="button"
-          disabled={busy}
-          onClick={() => {
-            setInputMode('free')
-            onError(null)
-          }}
-          className={`min-h-[44px] flex-1 rounded-lg px-3 text-sm font-semibold transition sm:flex-none sm:px-5 ${
-            inputMode === 'free'
-              ? 'bg-white text-indigo-900 shadow-sm ring-1 ring-indigo-200'
-              : 'text-gray-600 hover:text-gray-900'
-          }`}
-        >
-          Livre
-        </button>
-      </div>
-
-      {inputMode === 'guided' && !draft ? (
-        <div className="space-y-4 rounded-2xl border border-indigo-200/80 bg-white p-4 shadow-sm sm:p-5">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <p className="text-xs font-semibold uppercase tracking-wide text-indigo-600">
-              Passo {guidedStep} de {GUIDED_STEPS}
-            </p>
-            <div className="flex gap-1" aria-hidden>
-              {Array.from({ length: GUIDED_STEPS }, (_, i) => (
-                <span
-                  key={i}
-                  className={`h-1.5 w-6 rounded-full ${i < guidedStep ? 'bg-indigo-600' : 'bg-gray-200'}`}
-                />
-              ))}
-            </div>
-          </div>
-          <h3 className="text-base font-bold text-gray-900">{stepTitle}</h3>
-
-          {guidedStep === 1 && (
-            <div className="grid gap-2 sm:grid-cols-2">
-              {PL_SCRIPT_GUIDED_FOCUS.map((f) => (
-                <Chip
-                  key={f.id}
-                  selected={guided.focusMainId === f.id}
-                  disabled={busy}
-                  onSelect={() =>
-                    setGuided((g) => ({
-                      ...g,
-                      focusMainId: f.id,
-                      angleId: defaultAngleForFocus(f.id),
-                      toolPresetId: normalizeToolPresetForFocus(g.toolPresetId, f.id),
-                    }))
-                  }
-                >
-                  {f.label}
-                </Chip>
-              ))}
-            </div>
+      <div className="space-y-4 rounded-2xl border border-indigo-200/80 bg-white p-4 shadow-sm sm:p-5">
+        <p className="rounded-xl border border-indigo-100 bg-gradient-to-br from-indigo-50/90 via-white to-violet-50/40 px-4 py-3 text-sm leading-snug text-indigo-950 sm:px-5 sm:py-3.5">
+          {inputMode === 'adapt' ? (
+            <>
+              <strong className="text-indigo-950">Adaptar treino ao tom YLADA</strong> — cola o teu material (passos,
+              lista, texto de campo). O Noel <strong className="text-indigo-950">mantém o conteúdo</strong> e muda o{' '}
+              <strong className="text-indigo-950">jeito de falar</strong>: reflexão, permissão, educação, sem urgência
+              falsa. Depois podes refinar ou salvar na biblioteca.
+            </>
+          ) : (
+            <>
+              <strong className="text-indigo-950">Prefira «Guiado»</strong> — o Noel pergunta, você escolhe e avança. O
+              texto já sai em tom leve (permissão antes de link; convite a ajudar, sem pressão). No fim: ajustar se
+              quiser e <strong className="text-indigo-950">salvar</strong>. O tom de abertura fica sempre no perfil
+              equilibrado (educação antes de vender).
+            </>
           )}
+        </p>
 
-          {guidedStep === 2 && (
-            <div className="grid gap-2 sm:grid-cols-2">
-              {anglesForFocus(guided.focusMainId).map((a) => (
-                <Chip
-                  key={a.id}
-                  selected={guided.angleId === a.id}
-                  disabled={busy}
-                  onSelect={() => setGuided((g) => ({ ...g, angleId: a.id }))}
-                >
-                  {a.label}
-                </Chip>
-              ))}
+        <div className="flex flex-wrap gap-2 rounded-xl border border-gray-200 bg-gray-50/80 p-1.5">
+          <button
+            type="button"
+            disabled={busy}
+            onClick={() => {
+              setInputMode('guided')
+              onError(null)
+              resetFlow()
+              setAdaptSource('')
+            }}
+            className={`min-h-[44px] flex-1 rounded-lg px-3 text-sm font-semibold transition sm:flex-none sm:px-5 ${
+              inputMode === 'guided'
+                ? 'bg-white text-indigo-900 shadow-sm ring-1 ring-indigo-200'
+                : 'text-gray-600 hover:text-gray-900'
+            }`}
+          >
+            Guiado (recomendado)
+          </button>
+          <button
+            type="button"
+            disabled={busy}
+            onClick={() => {
+              setInputMode('free')
+              onError(null)
+              resetFlow()
+              setAdaptSource('')
+            }}
+            className={`min-h-[44px] flex-1 rounded-lg px-3 text-sm font-semibold transition sm:flex-none sm:px-5 ${
+              inputMode === 'free'
+                ? 'bg-white text-indigo-900 shadow-sm ring-1 ring-indigo-200'
+                : 'text-gray-600 hover:text-gray-900'
+            }`}
+          >
+            Livre
+          </button>
+          <button
+            type="button"
+            disabled={busy}
+            onClick={() => {
+              setInputMode('adapt')
+              onError(null)
+              resetFlow()
+            }}
+            className={`min-h-[44px] flex-1 rounded-lg px-3 text-sm font-semibold transition sm:flex-none sm:px-5 ${
+              inputMode === 'adapt'
+                ? 'bg-white text-indigo-900 shadow-sm ring-1 ring-indigo-200'
+                : 'text-gray-600 hover:text-gray-900'
+            }`}
+          >
+            Adaptar treino
+          </button>
+        </div>
+
+        {!draft && inputMode === 'guided' ? (
+          <>
+            <div className="flex flex-wrap items-center justify-between gap-2 border-t border-indigo-100 pt-4">
+              <p className="text-xs font-semibold uppercase tracking-wide text-indigo-600">
+                Passo {guidedStep} de {GUIDED_STEPS}
+              </p>
+              <div className="flex gap-1" aria-hidden>
+                {Array.from({ length: GUIDED_STEPS }, (_, i) => (
+                  <span
+                    key={i}
+                    className={`h-1.5 w-6 rounded-full ${i < guidedStep ? 'bg-indigo-600' : 'bg-gray-200'}`}
+                  />
+                ))}
+              </div>
             </div>
-          )}
+            <h3 className="text-base font-bold text-gray-900">{stepTitle}</h3>
 
-          {guidedStep === 3 && (
-            <div className="grid gap-2 sm:grid-cols-2">
-              {PL_SCRIPT_GUIDED_OBJECTIVES.map((o) => (
-                <Chip
-                  key={o.id}
-                  selected={guided.objectiveId === o.id}
-                  disabled={busy}
-                  onSelect={() => setGuided((g) => ({ ...g, objectiveId: o.id }))}
-                >
-                  {o.label}
-                </Chip>
-              ))}
-            </div>
-          )}
-
-          {guidedStep === 4 && (
-            <div className="space-y-4">
+            {guidedStep === 1 && (
               <div className="grid gap-2 sm:grid-cols-2">
-                {toolsForFocus(guided.focusMainId).map((t) => (
+                {PL_SCRIPT_GUIDED_FOCUS.map((f) => (
+                  <Chip
+                    key={f.id}
+                    selected={guided.focusMainId === f.id}
+                    disabled={busy}
+                    onSelect={() =>
+                      setGuided((g) => ({
+                        ...g,
+                        focusMainId: f.id,
+                        angleId: defaultAngleForFocus(f.id),
+                        toolPresetId: normalizeToolPresetForFocus(g.toolPresetId, f.id),
+                      }))
+                    }
+                  >
+                    {f.label}
+                  </Chip>
+                ))}
+              </div>
+            )}
+
+            {guidedStep === 2 && (
+              <div className="grid gap-2 sm:grid-cols-2">
+                {PL_SCRIPT_GUIDED_OBJECTIVES.map((o) => (
+                  <Chip
+                    key={o.id}
+                    selected={guided.objectiveId === o.id}
+                    disabled={busy}
+                    onSelect={() => setGuided((g) => ({ ...g, objectiveId: o.id }))}
+                  >
+                    {o.label}
+                  </Chip>
+                ))}
+              </div>
+            )}
+
+            {guidedStep === 3 && (
+              <div className="space-y-4">
+                <div className="grid gap-2 sm:grid-cols-2">
+                  {toolsForFocus(guided.focusMainId).map((t) => (
+                    <Chip
+                      key={t.id}
+                      selected={guided.toolPresetId === t.id}
+                      disabled={busy}
+                      onSelect={() => setGuided((g) => ({ ...g, toolPresetId: t.id }))}
+                    >
+                      {t.label}
+                    </Chip>
+                  ))}
+                </div>
+                <ProLideresCatalogToolPicker
+                  catalog={catalog}
+                  value={yladaLinkId}
+                  onChange={setYladaLinkId}
+                  disabled={busy}
+                  accent="indigo"
+                />
+                <label className="block text-sm">
+                  <span className="mb-1 block font-medium text-gray-800">
+                    {guided.toolPresetId === 'outra'
+                      ? 'Descreva a ferramenta ou campanha (uma ou duas frases)'
+                      : 'Complemento opcional (nome do desafio, datas, etc.)'}
+                  </span>
+                  <textarea
+                    value={guided.toolFreeform}
+                    onChange={(e) => setGuided((g) => ({ ...g, toolFreeform: e.target.value }))}
+                    rows={2}
+                    maxLength={800}
+                    disabled={busy}
+                    className="w-full rounded-xl border border-indigo-100 bg-indigo-50/20 px-3 py-2.5 text-sm"
+                    placeholder="Ex.: segunda semana do desafio, foco em hidratação…"
+                  />
+                </label>
+              </div>
+            )}
+
+            {guidedStep === 4 && (
+              <div className="grid gap-2 sm:grid-cols-2">
+                {PL_SCRIPT_GUIDED_AUDIENCES.map((a) => (
+                  <Chip
+                    key={a.id}
+                    selected={guided.audienceId === a.id}
+                    disabled={busy}
+                    onSelect={() => setGuided((g) => ({ ...g, audienceId: a.id }))}
+                  >
+                    {a.label}
+                  </Chip>
+                ))}
+              </div>
+            )}
+
+            {guidedStep === 5 && (
+              <div className="grid gap-2 sm:grid-cols-2">
+                {PL_SCRIPT_GUIDED_TONES.map((t) => (
                   <Chip
                     key={t.id}
-                    selected={guided.toolPresetId === t.id}
+                    selected={guided.toneId === t.id}
                     disabled={busy}
-                    onSelect={() => setGuided((g) => ({ ...g, toolPresetId: t.id }))}
+                    onSelect={() => setGuided((g) => ({ ...g, toneId: t.id }))}
                   >
                     {t.label}
                   </Chip>
                 ))}
               </div>
-              <ProLideresCatalogToolPicker
-                catalog={catalog}
-                value={yladaLinkId}
-                onChange={setYladaLinkId}
-                disabled={busy}
-                accent="indigo"
-              />
-              <label className="block text-sm">
-                <span className="mb-1 block font-medium text-gray-800">
-                  {guided.toolPresetId === 'outra'
-                    ? 'Descreva a ferramenta ou campanha (uma ou duas frases)'
-                    : 'Complemento opcional (nome do desafio, datas, etc.)'}
-                </span>
-                <textarea
-                  value={guided.toolFreeform}
-                  onChange={(e) => setGuided((g) => ({ ...g, toolFreeform: e.target.value }))}
-                  rows={2}
-                  maxLength={800}
-                  disabled={busy}
-                  className="w-full rounded-xl border border-indigo-100 bg-indigo-50/20 px-3 py-2.5 text-sm"
-                  placeholder="Ex.: segunda semana do desafio, foco em hidratação…"
-                />
-              </label>
-            </div>
-          )}
+            )}
 
-          {guidedStep === 5 && (
-            <div className="grid gap-2 sm:grid-cols-2">
-              {PL_SCRIPT_GUIDED_AUDIENCES.map((a) => (
-                <Chip
-                  key={a.id}
-                  selected={guided.audienceId === a.id}
-                  disabled={busy}
-                  onSelect={() => setGuided((g) => ({ ...g, audienceId: a.id }))}
-                >
-                  {a.label}
-                </Chip>
-              ))}
-            </div>
-          )}
-
-          {guidedStep === 6 && (
-            <div className="grid gap-2 sm:grid-cols-2">
-              {PL_SCRIPT_GUIDED_TONES.map((t) => (
-                <Chip
-                  key={t.id}
-                  selected={guided.toneId === t.id}
-                  disabled={busy}
-                  onSelect={() => setGuided((g) => ({ ...g, toneId: t.id }))}
-                >
-                  {t.label}
-                </Chip>
-              ))}
-            </div>
-          )}
-
-          {guidedStep === 7 && (
-            <div className="grid gap-2 sm:grid-cols-2">
-              {PL_SCRIPT_GUIDED_SITUATIONS.map((s) => (
-                <Chip
-                  key={s.id}
-                  selected={guided.situationId === s.id}
-                  disabled={busy}
-                  onSelect={() => setGuided((g) => ({ ...g, situationId: s.id }))}
-                >
-                  {s.label}
-                </Chip>
-              ))}
-            </div>
-          )}
-
-          {guidedStep === 8 && (
-            <div className="space-y-4">
+            {guidedStep === 6 && (
               <div className="grid gap-2 sm:grid-cols-2">
-                {PL_SCRIPT_GUIDED_CHANNELS.map((c) => (
+                {PL_SCRIPT_GUIDED_SITUATIONS.map((s) => (
+                  <Chip
+                    key={s.id}
+                    selected={guided.situationId === s.id}
+                    disabled={busy}
+                    onSelect={() => setGuided((g) => ({ ...g, situationId: s.id }))}
+                  >
+                    {s.label}
+                  </Chip>
+                ))}
+              </div>
+            )}
+
+            {guidedStep === 7 && (
+              <div className="space-y-4">
+                <div className="grid gap-2 sm:grid-cols-2">
+                  {PL_SCRIPT_GUIDED_CHANNELS.map((c) => (
+                    <Chip
+                      key={c.id}
+                      selected={guided.channelId === c.id}
+                      disabled={busy}
+                      onSelect={() => setGuided((g) => ({ ...g, channelId: c.id }))}
+                    >
+                      {c.label}
+                    </Chip>
+                  ))}
+                </div>
+                <label className="block text-sm">
+                  <span className="mb-1 block font-medium text-gray-800">Tipo de texto (formato Noel)</span>
+                  <select
+                    value={pillar}
+                    onChange={(e) => {
+                      setPillarLocked(true)
+                      setPillar(e.target.value as ProLideresScriptPillarId)
+                    }}
+                    className="w-full rounded-xl border border-indigo-200 bg-white px-3 py-2.5 text-sm"
+                  >
+                    {PRO_LIDERES_SCRIPT_PILLARS.map((p) => (
+                      <option key={p.id} value={p.id}>
+                        {p.label}
+                      </option>
+                    ))}
+                  </select>
+                  <span className="mt-1 block text-xs text-gray-500">
+                    Sugestão pelo briefing:{' '}
+                    {PRO_LIDERES_SCRIPT_PILLARS.find((p) => p.id === suggestPillarFromBriefing(guided))?.label}. Você
+                    pode mudar acima.
+                  </span>
+                </label>
+                <label className="block text-sm">
+                  <span className="mb-1 block font-medium text-gray-800">
+                    Algo mais que o Noel deve saber? (opcional)
+                  </span>
+                  <textarea
+                    value={guided.leaderNotes}
+                    onChange={(e) => setGuided((g) => ({ ...g, leaderNotes: e.target.value }))}
+                    rows={2}
+                    maxLength={1200}
+                    disabled={busy}
+                    className="w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm"
+                    placeholder="Ex.: não mencionar preço; time muito novo…"
+                  />
+                </label>
+                <details className="rounded-xl border border-gray-100 bg-gray-50/80 px-3 py-2 text-sm text-gray-700">
+                  <summary className="cursor-pointer font-medium text-gray-800">Ver resumo enviado ao Noel</summary>
+                  <pre className="mt-2 max-h-36 overflow-auto whitespace-pre-wrap rounded-lg bg-white p-2 text-xs text-gray-600 ring-1 ring-gray-100">
+                    {guidedPurpose}
+                  </pre>
+                </details>
+              </div>
+            )}
+
+            <div className="flex flex-wrap gap-2 border-t border-indigo-100 pt-4">
+              <button
+                type="button"
+                disabled={busy || guidedStep <= 1}
+                onClick={() => setGuidedStep((s) => Math.max(1, s - 1))}
+                className="min-h-[44px] rounded-xl border border-gray-300 bg-white px-4 text-sm font-semibold text-gray-700 hover:bg-gray-50 disabled:opacity-40"
+              >
+                Voltar
+              </button>
+              {guidedStep < GUIDED_STEPS ? (
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={() => setGuidedStep((s) => Math.min(GUIDED_STEPS, s + 1))}
+                  className="min-h-[44px] rounded-xl bg-indigo-600 px-5 text-sm font-semibold text-white hover:bg-indigo-700"
+                >
+                  Próximo
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={() => void onGenerate({ purposeText: guidedPurpose, guidedRequest: true })}
+                  className="min-h-[44px] rounded-xl bg-indigo-600 px-5 text-sm font-semibold text-white hover:bg-indigo-700 disabled:opacity-50"
+                >
+                  {generating ? 'Gerando…' : 'Gerar rascunho com o Noel'}
+                </button>
+              )}
+            </div>
+          </>
+        ) : null}
+
+        {!draft && inputMode === 'adapt' ? (
+          <div className="space-y-4 border-t border-indigo-100 pt-4">
+            <div>
+              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-indigo-700">Para quem é o texto</p>
+              <div className="grid gap-2 sm:grid-cols-3">
+                {(
+                  [
+                    { id: 'equipe' as const, label: 'Líder → distribuidor / treino interno' },
+                    { id: 'cliente' as const, label: 'Distribuidor → cliente ou lead' },
+                    { id: 'ambos' as const, label: 'Os dois (subtítulo em cada peça)' },
+                  ] satisfies { id: AdaptTrainingAudienceId; label: string }[]
+                ).map((a) => (
+                  <Chip
+                    key={a.id}
+                    selected={adaptAudience === a.id}
+                    disabled={busy}
+                    onSelect={() => setAdaptAudience(a.id)}
+                  >
+                    {a.label}
+                  </Chip>
+                ))}
+              </div>
+            </div>
+            <div>
+              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-indigo-700">Intensidade</p>
+              <div className="grid gap-2 sm:grid-cols-2">
+                {(
+                  [
+                    { id: 'só_linguagem' as const, label: 'Só linguagem (mantém extensão)' },
+                    { id: 'linguagem_encurtar' as const, label: 'Linguagem + encurtar' },
+                  ] satisfies { id: AdaptTrainingCompactnessId; label: string }[]
+                ).map((c) => (
                   <Chip
                     key={c.id}
-                    selected={guided.channelId === c.id}
+                    selected={adaptCompactness === c.id}
                     disabled={busy}
-                    onSelect={() => setGuided((g) => ({ ...g, channelId: c.id }))}
+                    onSelect={() => setAdaptCompactness(c.id)}
                   >
                     {c.label}
                   </Chip>
                 ))}
               </div>
-              <label className="block text-sm">
-                <span className="mb-1 block font-medium text-gray-800">Tipo de texto (formato Noel)</span>
-                <select
-                  value={pillar}
-                  onChange={(e) => {
-                    setPillarLocked(true)
-                    setPillar(e.target.value as ProLideresScriptPillarId)
-                  }}
-                  className="w-full rounded-xl border border-indigo-200 bg-white px-3 py-2.5 text-sm"
-                >
-                  {PRO_LIDERES_SCRIPT_PILLARS.map((p) => (
-                    <option key={p.id} value={p.id}>
-                      {p.label}
-                    </option>
-                  ))}
-                </select>
-                <span className="mt-1 block text-xs text-gray-500">
-                  Sugestão pelo briefing:{' '}
-                  {PRO_LIDERES_SCRIPT_PILLARS.find((p) => p.id === suggestPillarFromBriefing(guided))?.label}. Você pode
-                  mudar acima.
-                </span>
-              </label>
-              <label className="block text-sm">
-                <span className="mb-1 block font-medium text-gray-800">Algo mais que o Noel deve saber? (opcional)</span>
-                <textarea
-                  value={guided.leaderNotes}
-                  onChange={(e) => setGuided((g) => ({ ...g, leaderNotes: e.target.value }))}
-                  rows={2}
-                  maxLength={1200}
-                  disabled={busy}
-                  className="w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm"
-                  placeholder="Ex.: não mencionar preço; time muito novo…"
-                />
-              </label>
-              <details className="rounded-xl border border-gray-100 bg-gray-50/80 px-3 py-2 text-sm text-gray-700">
-                <summary className="cursor-pointer font-medium text-gray-800">Ver resumo enviado ao Noel</summary>
-                <pre className="mt-2 max-h-36 overflow-auto whitespace-pre-wrap rounded-lg bg-white p-2 text-xs text-gray-600 ring-1 ring-gray-100">
-                  {guidedPurpose}
-                </pre>
-              </details>
             </div>
-          )}
+            <label className="block text-sm">
+              <span className="mb-1 block font-medium text-gray-800">Cola aqui o treino ou texto original</span>
+              <textarea
+                value={adaptSource}
+                onChange={(e) => setAdaptSource(e.target.value)}
+                rows={12}
+                maxLength={14000}
+                disabled={busy}
+                className="w-full rounded-xl border border-indigo-200 bg-white px-3 py-2.5 font-sans text-sm leading-relaxed"
+                placeholder="Apresentação, passos, lista quente, mensagens de exemplo… O Noel adapta o tom, sem inventar regras novas."
+              />
+              <span className="mt-1 block text-xs text-gray-500">
+                {adaptSource.trim().length.toLocaleString('pt-BR')} / 14 000 caracteres (mín. 50)
+              </span>
+            </label>
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                disabled={busy}
+                onClick={() => void onGenerate()}
+                className="min-h-[44px] rounded-xl bg-indigo-600 px-4 text-sm font-semibold text-white hover:bg-indigo-700 disabled:opacity-50"
+              >
+                {generating ? 'Adaptando…' : 'Adaptar com o Noel'}
+              </button>
+            </div>
+          </div>
+        ) : null}
 
-          <div className="flex flex-wrap gap-2 border-t border-indigo-100 pt-4">
-            <button
-              type="button"
-              disabled={busy || guidedStep <= 1}
-              onClick={() => setGuidedStep((s) => Math.max(1, s - 1))}
-              className="min-h-[44px] rounded-xl border border-gray-300 bg-white px-4 text-sm font-semibold text-gray-700 hover:bg-gray-50 disabled:opacity-40"
-            >
-              Voltar
-            </button>
-            {guidedStep < GUIDED_STEPS ? (
-              <button
-                type="button"
-                disabled={busy}
-                onClick={() => setGuidedStep((s) => Math.min(GUIDED_STEPS, s + 1))}
-                className="min-h-[44px] rounded-xl bg-indigo-600 px-5 text-sm font-semibold text-white hover:bg-indigo-700"
+        {!draft && inputMode === 'free' ? (
+          <div className="space-y-3 border-t border-indigo-100 pt-4">
+            <label className="block text-sm">
+              <span className="mb-1 block font-medium text-gray-800">Tipo de texto</span>
+              <select
+                value={pillar}
+                onChange={(e) => setPillar(e.target.value as ProLideresScriptPillarId)}
+                className="w-full rounded-xl border border-indigo-200 bg-white px-3 py-2.5 text-sm"
               >
-                Próximo
-              </button>
-            ) : (
-              <button
-                type="button"
-                disabled={busy}
-                onClick={() => void onGenerate({ purposeText: guidedPurpose, guidedRequest: true })}
-                className="min-h-[44px] rounded-xl bg-indigo-600 px-5 text-sm font-semibold text-white hover:bg-indigo-700 disabled:opacity-50"
-              >
-                {generating ? 'Gerando…' : 'Gerar rascunho com o Noel'}
-              </button>
-            )}
-          </div>
-        </div>
-      ) : (
-        <div className="space-y-3 rounded-2xl border border-gray-200 bg-white p-4 sm:p-5">
-          <label className="block text-sm">
-            <span className="mb-1 block font-medium text-gray-800">Tipo de texto</span>
-            <select
-              value={pillar}
-              onChange={(e) => setPillar(e.target.value as ProLideresScriptPillarId)}
-              className="w-full rounded-xl border border-indigo-200 bg-white px-3 py-2.5 text-sm"
-            >
-              {PRO_LIDERES_SCRIPT_PILLARS.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.label}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="block text-sm">
-            <span className="mb-1 block font-medium text-gray-800">O que você quer que o Noel escreva</span>
-            <textarea
-              value={purpose}
-              onChange={(e) => setPurpose(e.target.value)}
-              rows={4}
-              className="w-full rounded-xl border border-indigo-200 bg-white px-3 py-2.5 text-sm"
-              placeholder="Ex.: sequência no WhatsApp para enviar o link do espaço saudável, com permissão e ideia de indicar alguém da família…"
-              maxLength={4000}
-            />
-          </label>
-          <ProLideresCatalogToolPicker
-            catalog={catalog}
-            value={yladaLinkId}
-            onChange={setYladaLinkId}
-            disabled={busy}
-            accent="indigo"
-          />
-          <div className="flex flex-wrap gap-2">
-            <button
-              type="button"
+                {PRO_LIDERES_SCRIPT_PILLARS.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="block text-sm">
+              <span className="mb-1 block font-medium text-gray-800">O que você quer que o Noel escreva</span>
+              <textarea
+                value={purpose}
+                onChange={(e) => setPurpose(e.target.value)}
+                rows={4}
+                className="w-full rounded-xl border border-indigo-200 bg-white px-3 py-2.5 text-sm"
+                placeholder="Ex.: sequência no WhatsApp para enviar o link do espaço saudável, com permissão e ideia de indicar alguém da família…"
+                maxLength={4000}
+              />
+            </label>
+            <ProLideresCatalogToolPicker
+              catalog={catalog}
+              value={yladaLinkId}
+              onChange={setYladaLinkId}
               disabled={busy}
-              onClick={() => void onGenerate({ purposeText: purpose, guidedRequest: false })}
-              className="min-h-[44px] rounded-xl bg-indigo-600 px-4 text-sm font-semibold text-white hover:bg-indigo-700 disabled:opacity-50"
-            >
-              {generating ? 'Gerando…' : 'Gerar rascunho'}
-            </button>
+              accent="indigo"
+            />
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                disabled={busy}
+                onClick={() => void onGenerate({ purposeText: purpose, guidedRequest: false })}
+                className="min-h-[44px] rounded-xl bg-indigo-600 px-4 text-sm font-semibold text-white hover:bg-indigo-700 disabled:opacity-50"
+              >
+                {generating ? 'Gerando…' : 'Gerar rascunho'}
+              </button>
+            </div>
           </div>
-        </div>
-      )}
+        ) : null}
+      </div>
 
       {draft ? (
         <div className="mt-2 space-y-4 border-t border-indigo-200/80 pt-5">
@@ -723,11 +869,23 @@ export function ProLideresScriptsNoelGenerator({
                   disabled={busy}
                   onClick={() => {
                     resetFlow()
-                    setGuidedStep(8)
+                    setGuidedStep(GUIDED_STEPS)
                   }}
                   className="min-h-[40px] rounded-xl border border-indigo-200 bg-indigo-50 px-3 text-xs font-semibold text-indigo-900 hover:bg-indigo-100 disabled:opacity-50"
                 >
                   Ajustar briefing
+                </button>
+              ) : null}
+              {inputMode === 'adapt' ? (
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={() => {
+                    resetDraftOnly()
+                  }}
+                  className="min-h-[40px] rounded-xl border border-indigo-200 bg-indigo-50 px-3 text-xs font-semibold text-indigo-900 hover:bg-indigo-100 disabled:opacity-50"
+                >
+                  Ajustar material
                 </button>
               ) : null}
               <button

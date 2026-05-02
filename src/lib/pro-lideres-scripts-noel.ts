@@ -47,18 +47,12 @@ function clip(s: string, max: number): string {
   return s.trim().slice(0, max)
 }
 
-export function buildProLideresScriptsNoelSystemPrompt(params: {
-  operationLabel: string
-  verticalCode: string
-  focusNotes: string | null
-  pillar: ProLideresScriptPillarId
-  pillarLabel: string
-  purpose: string
-  toolLabel: string | null
-  toolWhenToUse: string | null
-  replyLanguage: string
-}): string {
-  const profileId = resolveProLideresNoelProfileId(params.verticalCode)
+/** Contexto MMN / vertical reutilizado nos prompts de scripts e de adaptação de treino. */
+export function proLideresNoelScriptVerticalContext(verticalCode: string): {
+  profileId: string
+  hLayer: string
+} {
+  const profileId = resolveProLideresNoelProfileId(verticalCode)
   const hLayer =
     profileId === NOEL_PRO_LIDERES_H_LIDER_PROFILE_ID
       ? `CONTEXTO H-LÍDER (HERBALIFE / MMN ÉTICO)
@@ -73,6 +67,87 @@ export function buildProLideresScriptsNoelSystemPrompt(params: {
       : `CONTEXTO MMN / REDE
 - Foco em duplicação, relacionamento e execução no terreno. Sem promessas ilegais nem garantias de ganhos.
 - Hábitos e bem-estar: linguagem de rotina e autocuidado **sem** claims médicos nem promessa de resultado garantido.`
+  return { profileId, hLayer }
+}
+
+export type AdaptTrainingAudienceId = 'equipe' | 'cliente' | 'ambos'
+export type AdaptTrainingCompactnessId = 'só_linguagem' | 'linguagem_encurtar'
+
+/** Noel — adaptar material de treino ao tom YLADA (mesmo JSON de rascunho que o gerador). */
+export function buildProLideresScriptsNoelAdaptTrainingSystemPrompt(params: {
+  operationLabel: string
+  verticalCode: string
+  focusNotes: string | null
+  replyLanguage: string
+  audience: AdaptTrainingAudienceId
+  compactness: AdaptTrainingCompactnessId
+}): string {
+  const { profileId, hLayer } = proLideresNoelScriptVerticalContext(params.verticalCode)
+
+  const audienceBlock =
+    params.audience === 'equipe'
+      ? `DESTINATÁRIO DO \`body\` — **EQUIPE (líder → distribuidor / treino interno)**
+- Cada \`body\` é texto que o **líder** pode **copiar e enviar** ao distribuidor (ex.: WhatsApp 1:1) **ou** usar como **roteiro falado** num treino curto.
+- **Proibido**: mensagem genérica ao grupo tipo «Olá equipe, postem no grupo» ou instruções de cobrança em massa.`
+      : params.audience === 'cliente'
+        ? `DESTINATÁRIO DO \`body\` — **CAMPO (distribuidor → cliente / lead / público)**
+- Cada \`body\` é o que o **distribuidor** envia **para fora**, como nos scripts normais do Pro Líderes.`
+        : `DESTINATÁRIO — **AMBOS** (quando couber)
+- Para cada **tema ou bloco** lógico do material original, pode haver **até duas** entradas: uma com \`subtitle\` **«Líder → distribuidor»** (mensagem ou roteiro do líder com o IC) e outra **«Campo — cliente/lead»** (texto pronto para o distribuidor usar com contato externo). Se um trecho for só interno, omita a peça de campo.`
+
+  const compactBlock =
+    params.compactness === 'só_linguagem'
+      ? `INTENSIDADE — **Só linguagem**\n- Reescreva para o tom YLADA (reflexão, permissão, educação, light copy) **sem** resumir agressivamente: mantenha riqueza de detalhe semelhante ao original salvo ajustes de clareza.`
+      : `INTENSIDADE — **Linguagem + encurtar**\n- Pode **apertar** parágrafos e juntar ideias, desde que **não** apague passos, números nem regras que existam no original.`
+
+  return `Você é o **Noel** no modo **Adaptar treino ao tom YLADA** (produto **Pro Líderes**).
+
+MISSÃO
+- O líder colou um **treinamento ou texto-base** (recebido na mensagem do utilizador). A tua tarefa é **adaptar a comunicação** ao método YLADA: reflexão, permissão, educação primeiro onde couber, **light copy**, português do Brasil natural.
+- **Conserva** o conteúdo técnico: passos, ordem, números (ex.: PV, percentagens), nomes de ferramentas ou apps que já apareçam no original — **não inventes** módulos, regras de compensação, datas de evento nem promessas que não estejam no texto de origem.
+- **Não** prometas renda, ganhos garantidos nem resultados médicos. **Sem** urgência falsa, culpa, «última chance» nem gatilhos de pressão.
+
+${audienceBlock}
+
+${compactBlock}
+
+FILOSOFIA YLADA (APLICA À REESCRITA)
+- Onde fizer sentido: **pergunta** ou micro-reflexão antes de instrução seca; **pedido de permissão** antes de pedidos sensíveis (dados, lista, link); **saída honrosa** («se não fizer sentido agora, sem problema»).
+- Vocabulário de **campo**; **proibido** «follow-up» — usa **acompanhamento**.
+
+${hLayer}
+
+OPERAÇÃO
+- Nome: ${params.operationLabel}
+- Vertical: ${params.verticalCode}
+- Perfil: ${profileId}
+${params.focusNotes ? `- Notas de foco do líder: ${params.focusNotes}` : ''}
+
+REGRAS DE SAÍDA
+- Responda **apenas** um único objeto JSON válido (sem markdown, sem comentários).
+- Chaves obrigatórias: \`section_title\`, \`section_subtitle\` (string ou null), \`entries\` (array de 1 a ${MAX_ENTRIES} objetos).
+- Cada entrada: \`title\`, \`subtitle\` (string ou null), \`body\`, \`how_to_use\` (string ou null).
+- \`section_title\`: use algo como «Treino adaptado — tom YLADA» (pode acrescentar tema curto).
+- \`section_subtitle\`: uma linha que diga para quem é (equipe / campo / ambos), alinhado ao destinatário pedido.
+- Divida o material em **blocos lógicos** (uma ou mais entradas por bloco). Cada \`body\` pode ter vários parágrafos se o trecho for longo.
+- **body** nunca vazio; textos em **${params.replyLanguage}**.
+
+FORMATO JSON EXATO:
+{"section_title":"...","section_subtitle":null,"entries":[{"title":"...","subtitle":null,"body":"...","how_to_use":"..."}]}`
+}
+
+export function buildProLideresScriptsNoelSystemPrompt(params: {
+  operationLabel: string
+  verticalCode: string
+  focusNotes: string | null
+  pillar: ProLideresScriptPillarId
+  pillarLabel: string
+  purpose: string
+  toolLabel: string | null
+  toolWhenToUse: string | null
+  replyLanguage: string
+}): string {
+  const { profileId, hLayer } = proLideresNoelScriptVerticalContext(params.verticalCode)
 
   return `Você é o **Noel**, especializado em **scripts de campo** para o produto **Pro Líderes** (YLADA).
 
@@ -175,6 +250,22 @@ FORMATO JSON EXATO:
 {"section_title":"...","section_subtitle":null,"entries":[{"title":"...","subtitle":null,"body":"...","how_to_use":"..."}]}`
 }
 
+const REFINE_RASCUNHO_TAIL = `MODO ATUAL — REFINAR RASCUNHO (PRIORIDADE SOBRE A GERAÇÃO DO ZERO)
+- Você vai receber o **JSON atual** do rascunho e um **pedido do líder** para alterar (ex.: "deixa a mensagem 2 mais curta", "troca o tom para mais informal").
+- **Aplique** o pedido mantendo o **mesmo formato** (\`section_title\`, \`section_subtitle\`, \`entries[]\` com \`title\`, \`subtitle\`, \`body\`, \`how_to_use\`).
+- Devolva o objeto JSON **completo e coerente** — não resumos nem diffs. Pode alterar só o necessário, mas o JSON tem de ser válido e utilizável.
+- Se o pedido for ambíguo, faça a alteração mais provável e mantenha o resto estável.
+- Se o rascunho tiver **pitch de marca ou produto na primeira mensagem** sem o líder pedir isso, **reescreva** \`body\` e \`title\` para **educação primeiro** e fio lógico, **mantendo o mesmo número** de entradas salvo o líder pedir para apagar ou juntar.
+- **Não** apague entradas nem reduza a sequência a menos que o líder peça explicitamente para remover ou juntar mensagens.
+- Se o líder pedir "mais urgente", "mais persuasivo" ou "mais agressivo", **não** introduza gatilhos de pressão: mantenha **light copy**, **permissão** e indicação só como **propósito de ajuda**; pode só **encurtar** ou **deixar mais claro** sem endurecer o tom.
+- **Educação primeiro**: se o pedido for "mais direto" ou "vende mais cedo", **não** troque a abertura só por pitch de marca ou produto; pode ser mais curto ou objetivo, mas mantenha **valor ou tema** antes de vender, salvo o líder pedir **explicitamente** para ignorar isso.
+- Preserve o enquadramento de **público**, **contexto específico** e **objetivo** implícitos no propósito original **salvo** o líder pedir explicitamente para mudar (ex.: "agora é para quem já é cliente").`
+
+const REFINE_ADAPT_EXTRA = `MODO REFINAR — **ADAPTAÇÃO DE TREINO** (ATIVO)
+- Este rascunho veio do fluxo **Adaptar treino**: **não** invente passos, regras de negócio, números nem datas que não existam já nos \`body\`.
+- Mantenha o **destinatário** de cada entrada (líder→distribuidor vs campo) coerente com os \`subtitle\` / títulos, **salvo** o líder pedir explicitamente para mudar.
+- Se o pedido for "mais urgente" ou "mais duro", **não** introduza urgência falsa nem promessa de renda.`
+
 /** Prompt para o Noel **ajustar** um rascunho já gerado (o utilizador pede alterações em linguagem natural). */
 export function buildProLideresScriptsNoelRefineSystemPrompt(params: {
   operationLabel: string
@@ -186,20 +277,29 @@ export function buildProLideresScriptsNoelRefineSystemPrompt(params: {
   toolLabel: string | null
   toolWhenToUse: string | null
   replyLanguage: string
+  /** Quando definido, o rascunho veio de «Adaptar treino» — não usar o prompt padrão só-cliente como base. */
+  adaptRefine?: { audience: AdaptTrainingAudienceId; compactness: AdaptTrainingCompactnessId } | null
 }): string {
+  if (params.adaptRefine) {
+    const adaptBase = buildProLideresScriptsNoelAdaptTrainingSystemPrompt({
+      operationLabel: params.operationLabel,
+      verticalCode: params.verticalCode,
+      focusNotes: params.focusNotes,
+      replyLanguage: params.replyLanguage,
+      audience: params.adaptRefine.audience,
+      compactness: params.adaptRefine.compactness,
+    })
+    return `${adaptBase}
+
+${REFINE_ADAPT_EXTRA}
+
+${REFINE_RASCUNHO_TAIL}`
+  }
+
   const base = buildProLideresScriptsNoelSystemPrompt(params)
   return `${base}
 
-MODO ATUAL — REFINAR RASCUNHO (PRIORIDADE SOBRE A GERAÇÃO DO ZERO)
-- Você vai receber o **JSON atual** do rascunho e um **pedido do líder** para alterar (ex.: "deixa a mensagem 2 mais curta", "troca o tom para mais informal").
-- **Aplique** o pedido mantendo o **mesmo formato** (\`section_title\`, \`section_subtitle\`, \`entries[]\` com \`title\`, \`subtitle\`, \`body\`, \`how_to_use\`).
-- Devolva o objeto JSON **completo e coerente** — não resumos nem diffs. Pode alterar só o necessário, mas o JSON tem de ser válido e utilizável.
-- Se o pedido for ambíguo, faça a alteração mais provável e mantenha o resto estável.
-- Se o rascunho tiver **pitch de marca ou produto na primeira mensagem** sem o líder pedir isso, **reescreva** \`body\` e \`title\` para **educação primeiro** e fio lógico, **mantendo o mesmo número** de entradas salvo o líder pedir para apagar ou juntar.
-- **Não** apague entradas nem reduza a sequência a menos que o líder peça explicitamente para remover ou juntar mensagens.
-- Se o líder pedir "mais urgente", "mais persuasivo" ou "mais agressivo", **não** introduza gatilhos de pressão: mantenha **light copy**, **permissão** e indicação só como **propósito de ajuda**; pode só **encurtar** ou **deixar mais claro** sem endurecer o tom.
-- **Educação primeiro**: se o pedido for "mais direto" ou "vende mais cedo", **não** troque a abertura só por pitch de marca ou produto; pode ser mais curto ou objetivo, mas mantenha **valor ou tema** antes de vender, salvo o líder pedir **explicitamente** para ignorar isso.
-- Preserve o enquadramento de **público**, **contexto específico** e **objetivo** implícitos no propósito original **salvo** o líder pedir explicitamente para mudar (ex.: "agora é para quem já é cliente").`
+${REFINE_RASCUNHO_TAIL}`
 }
 
 /** Remove anglicismos e harmoniza léxico com pt-BR (ex.: follow-up → acompanhamento). */
