@@ -186,6 +186,7 @@ export async function POST(request: NextRequest) {
     leader_tenant_id: inv.leader_tenant_id,
     user_id: user.id,
     role: 'member',
+    team_access_state: 'pending_activation',
     pro_lideres_share_slug: slugRes.value,
     pro_lideres_tabulator_name: canonicalTabulator,
   })
@@ -198,7 +199,14 @@ export async function POST(request: NextRequest) {
       )
     }
     console.error('[pro-lideres/invites/accept insert member]', insErr)
-    return NextResponse.json({ error: 'Não foi possível adicionar à equipe.' }, { status: 500 })
+    return NextResponse.json(
+      {
+        error: 'Não foi possível adicionar à equipe.',
+        code: insErr.code,
+        details: insErr.message,
+      },
+      { status: 500 }
+    )
   }
 
   const now = new Date()

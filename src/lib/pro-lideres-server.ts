@@ -170,7 +170,7 @@ export async function isProLideresLeaderForYladaLinkApis(userId: string): Promis
 
   if (!row) return false
   const st = (row.team_access_state as string | undefined) ?? 'active'
-  return st !== 'paused'
+  return st === 'active'
 }
 
 /**
@@ -192,15 +192,28 @@ export async function resolveProLideresTenantContext(
 
   const { data: membership } = await supabase
     .from('leader_tenant_members')
-    .select('leader_tenant_id, role, team_access_state')
+    .select('leader_tenant_id, role, team_access_state, team_access_expires_at')
     .eq('user_id', user.id)
     .limit(1)
     .maybeSingle()
 
   if (!membership) return null
 
-  const accessState = (membership.team_access_state as string | undefined) ?? 'active'
-  if (accessState === 'paused') return null
+  const accessStateRaw = (membership.team_access_state as string | undefined) ?? 'active'
+  if (accessStateRaw === 'paused') return null
+  if (accessStateRaw === 'pending_activation') return null
+
+  const dbRole = membership.role as string
+  const role: ProLideresTenantRole =
+    dbRole === 'leader' || dbRole === 'member' ? (dbRole as ProLideresTenantRole) : 'member'
+
+  if (role === 'member' && accessStateRaw === 'active') {
+    const expRaw = membership.team_access_expires_at as string | null | undefined
+    if (expRaw) {
+      const end = new Date(expRaw).getTime()
+      if (!Number.isNaN(end) && end <= Date.now()) return null
+    }
+  }
 
   const { data: tenant } = await supabase
     .from('leader_tenants')
@@ -209,10 +222,6 @@ export async function resolveProLideresTenantContext(
     .maybeSingle()
 
   if (!tenant) return null
-
-  const dbRole = membership.role as string
-  const role: ProLideresTenantRole =
-    dbRole === 'leader' || dbRole === 'member' ? (dbRole as ProLideresTenantRole) : 'member'
 
   return { tenant: tenant as LeaderTenantRow, role }
 }
@@ -237,12 +246,24 @@ export async function ensureLeaderTenantAccess(): Promise<
   if (!ctx) {
     const { data: selfMembership } = await supabase
       .from('leader_tenant_members')
-      .select('team_access_state')
+      .select('team_access_state, team_access_expires_at')
       .eq('user_id', user.id)
       .maybeSingle()
     const st = (selfMembership?.team_access_state as string | undefined) ?? 'active'
     if (st === 'paused') {
       return { ok: false, redirect: '/pro-lideres/acesso-pausado' }
+    }
+    if (st === 'pending_activation') {
+      return { ok: false, redirect: '/pro-lideres/membro/ativacao' }
+    }
+    if (st === 'active') {
+      const expRaw = selfMembership?.team_access_expires_at as string | null | undefined
+      if (expRaw) {
+        const end = new Date(expRaw).getTime()
+        if (!Number.isNaN(end) && end <= Date.now()) {
+          return { ok: false, redirect: '/pro-lideres/membro/acesso-expirado' }
+        }
+      }
     }
   }
 

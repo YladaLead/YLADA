@@ -187,10 +187,10 @@ export default function ProLideresConviteTokenPage() {
       }
       // Navegação completa evita ficar na área matriz (ex. /pt/estetica) se houver efeitos de sessão/última página.
       if (typeof window !== 'undefined') {
-        window.location.assign('/pro-lideres/painel')
+        window.location.assign('/pro-lideres/membro/ativacao')
         return
       }
-      router.push('/pro-lideres/painel')
+      router.push('/pro-lideres/membro/ativacao')
       router.refresh()
     } catch {
       setRegisterError('Erro de rede.')
@@ -244,10 +244,10 @@ export default function ProLideresConviteTokenPage() {
       }
       setAcceptOk(true)
       if (typeof window !== 'undefined') {
-        window.location.assign('/pro-lideres/painel')
+        window.location.assign('/pro-lideres/membro/ativacao')
         return
       }
-      router.push('/pro-lideres/painel')
+      router.push('/pro-lideres/membro/ativacao')
       router.refresh()
     } catch {
       setAcceptError('Erro de rede.')
@@ -285,12 +285,10 @@ export default function ProLideresConviteTokenPage() {
             </Link>
           </div>
         ) : valid && invitePaymentFlow?.step === 'choose' ? (
-          <div className="space-y-5 text-center">
-            <h1 className="text-xl font-bold text-gray-900">Como prefere pagar?</h1>
-            <p className="text-sm leading-relaxed text-gray-700">
-              O líder configurou duas formas de cobrança. <strong className="text-gray-900">Assinaturas no Mercado Pago</strong>{' '}
-              costumam não aceitar Pix — escolha a opção combinada com a equipe.
-            </p>
+          <div className="space-y-6 text-center">
+            <h1 className="text-xl font-bold text-gray-900">
+              Prefere fazer a sua assinatura pelo Pix ou pelo cartão?
+            </h1>
             <div className="flex flex-col gap-3">
               <button
                 type="button"
@@ -307,7 +305,7 @@ export default function ProLideresConviteTokenPage() {
                 }
                 className="inline-flex min-h-[48px] w-full items-center justify-center rounded-xl bg-emerald-700 px-5 text-sm font-semibold text-white hover:bg-emerald-800"
               >
-                Pagar com Pix
+                Pix
               </button>
               <button
                 type="button"
@@ -324,12 +322,9 @@ export default function ProLideresConviteTokenPage() {
                 }
                 className="inline-flex min-h-[48px] w-full items-center justify-center rounded-xl bg-amber-700 px-5 text-sm font-semibold text-white hover:bg-amber-800"
               >
-                Cartão ou Mercado Pago
+                Cartão
               </button>
             </div>
-            <p className="text-xs text-gray-500">
-              Depois de pagar, pode entrar no painel pelo botão na página seguinte.
-            </p>
           </div>
         ) : valid && invitePaymentFlow?.step === 'open_link' ? (
           <div className="space-y-5 text-center">
@@ -338,12 +333,12 @@ export default function ProLideresConviteTokenPage() {
               {invitePaymentFlow.kind === 'pix' ? (
                 <>
                   Abra o <strong className="text-gray-900">link de pagamento via Pix</strong> que o líder deixou,
-                  conclua conforme combinado com a equipe e depois entre no painel.
+                  conclua conforme combinado com a equipe; em seguida o líder liberta o acesso ao painel.
                 </>
               ) : (
                 <>
                   Abra o <strong className="text-gray-900">link de pagamento com cartão ou no Mercado Pago</strong>,
-                  conclua conforme combinado com a equipe e depois entre no painel.
+                  conclua conforme combinado com a equipe; em seguida o líder liberta o acesso ao painel.
                 </>
               )}
             </p>
@@ -366,12 +361,12 @@ export default function ProLideresConviteTokenPage() {
                 type="button"
                 onClick={() => {
                   if (typeof window !== 'undefined') {
-                    window.location.assign('/pro-lideres/painel')
+                    window.location.assign('/pro-lideres/membro/ativacao')
                   }
                 }}
                 className="inline-flex min-h-[48px] items-center justify-center rounded-xl border border-gray-300 bg-white px-5 text-sm font-semibold text-gray-900 hover:bg-gray-50"
               >
-                Ir para o painel Pro Líderes
+                Ver página de espera do acesso
               </button>
             </div>
             {invitePaymentFlow.chooseBack ? (
@@ -620,7 +615,7 @@ export default function ProLideresConviteTokenPage() {
                   </div>
                 )}
                 {acceptOk ? (
-                  <p className="text-center text-sm text-green-700">Redirecionando para o painel…</p>
+                  <p className="text-center text-sm text-green-700">A seguir: página de espera até o líder ativar o acesso…</p>
                 ) : (
                   <button
                     type="button"

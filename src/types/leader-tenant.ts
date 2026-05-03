@@ -35,7 +35,7 @@ export type LeaderTenantRow = {
 }
 
 /** Estado de acesso à equipe (linha em leader_tenant_members). */
-export type ProLideresTeamAccessState = 'active' | 'paused'
+export type ProLideresTeamAccessState = 'active' | 'paused' | 'pending_activation'
 
 /** Membro do tenant (líder ou equipe). */
 export type LeaderTenantMemberRow = {
@@ -45,6 +45,8 @@ export type LeaderTenantMemberRow = {
   role: ProLideresTenantRole
   /** Só aplica a role member; líder fica sempre active. */
   team_access_state: ProLideresTeamAccessState
+  /** Opcional: fim do período de acesso definido pelo líder na ativação. */
+  team_access_expires_at?: string | null
   /** Slug escolhido no convite; segmento padrão nos links /l/…/… por membro. */
   pro_lideres_share_slug?: string | null
   /** Nome do tabulador (lista no convite). */
