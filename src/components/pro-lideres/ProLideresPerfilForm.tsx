@@ -26,7 +26,7 @@ const PERFIL_COPY: Record<
 > = {
   pro_lideres: {
     readOnlyMessage:
-      'Só o líder responsável altera os dados desta operação. A sua conta entra como equipe neste espaço.',
+      'Os dados desta operação são geridos pela conta principal do espaço. A sua conta entra como equipe.',
     teamNameLabel: 'Nome da operação/equipe',
     teamNamePlaceholder: 'Ex.: Equipe Sul',
     displayNamePlaceholder: 'Como a equipe vê o teu nome',

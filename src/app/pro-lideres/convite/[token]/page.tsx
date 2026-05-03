@@ -18,7 +18,7 @@ type ValidateOk = {
   tabulatorNames: string[]
 }
 
-/** Após cadastro/aceite: escolha Pix vs cartão ou abertura do link configurado pelo líder. */
+/** Após cadastro/aceite: escolha Pix vs cartão ou abertura do link de pagamento. */
 type InvitePaymentFlowState =
   | null
   | { step: 'choose'; cardUrl: string; pixUrl: string }
@@ -332,13 +332,13 @@ export default function ProLideresConviteTokenPage() {
             <p className="text-sm leading-relaxed text-gray-700">
               {invitePaymentFlow.kind === 'pix' ? (
                 <>
-                  Abra o <strong className="text-gray-900">link de pagamento via Pix</strong> que o líder deixou,
-                  conclua conforme combinado com a equipe; em seguida o líder liberta o acesso ao painel.
+                  Use o <strong className="text-gray-900">link de pagamento via Pix</strong> abaixo, conclua o passo indicado e
+                  aguarde — em breve o teu acesso ao painel fica disponível.
                 </>
               ) : (
                 <>
-                  Abra o <strong className="text-gray-900">link de pagamento com cartão ou no Mercado Pago</strong>,
-                  conclua conforme combinado com a equipe; em seguida o líder liberta o acesso ao painel.
+                  Use o <strong className="text-gray-900">link de pagamento com cartão ou no Mercado Pago</strong> abaixo, conclua o
+                  passo indicado e aguarde — em breve o teu acesso ao painel fica disponível.
                 </>
               )}
             </p>
@@ -396,9 +396,8 @@ export default function ProLideresConviteTokenPage() {
 
             {!tabulatorsReady && (
               <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-950">
-                O líder ainda não cadastrou tabuladores neste espaço. Quando houver pelo menos um nome em{' '}
-                <strong className="text-amber-950">Pro Líderes → Tabuladores</strong>, o convite volta a ficar
-                completo.
+                Ainda não há tabuladores disponíveis neste convite. Volta a tentar mais tarde ou fala com quem te enviou o link se
+                precisares de ajuda.
               </div>
             )}
 
@@ -437,7 +436,7 @@ export default function ProLideresConviteTokenPage() {
                       disabled={!tabulatorsReady}
                       className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-gray-900 disabled:bg-gray-100"
                     >
-                      <option value="">{tabulatorsReady ? 'Selecionar…' : 'Lista vazia — aguarde o líder cadastrar'}</option>
+                      <option value="">{tabulatorsReady ? 'Selecionar…' : 'Lista vazia — tenta mais tarde'}</option>
                       {tabulatorOptions.map((opt) => (
                         <option key={opt} value={opt}>
                           {opt}
@@ -569,7 +568,7 @@ export default function ProLideresConviteTokenPage() {
                       disabled={!tabulatorsReady}
                       className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-gray-900 disabled:bg-gray-100"
                     >
-                      <option value="">{tabulatorsReady ? 'Selecionar…' : 'Lista vazia — aguarde o líder cadastrar'}</option>
+                      <option value="">{tabulatorsReady ? 'Selecionar…' : 'Lista vazia — tenta mais tarde'}</option>
                       {tabulatorOptions.map((opt) => (
                         <option key={opt} value={opt}>
                           {opt}
@@ -615,7 +614,7 @@ export default function ProLideresConviteTokenPage() {
                   </div>
                 )}
                 {acceptOk ? (
-                  <p className="text-center text-sm text-green-700">A seguir: página de espera até o líder ativar o acesso…</p>
+                  <p className="text-center text-sm text-green-700">A seguir: página de confirmação…</p>
                 ) : (
                   <button
                     type="button"

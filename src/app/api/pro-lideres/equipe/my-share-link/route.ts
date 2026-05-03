@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
     .maybeSingle()
 
   if (linkErr || !ylLink || ylLink.user_id !== ownerId || ylLink.status !== 'active') {
-    return NextResponse.json({ error: 'Link não encontrado ou não pertence ao líder deste espaço.' }, { status: 404 })
+    return NextResponse.json({ error: 'Link não encontrado ou não disponível neste espaço.' }, { status: 404 })
   }
 
   const visibleInCatalog = await isProLideresYladaLinkVisibleToTeamInCatalog(supabaseAdmin, tenantId, linkId)
@@ -73,9 +73,9 @@ export async function GET(request: NextRequest) {
     shareUrl,
     whatsappReady,
     hint: !tokenReady
-      ? 'O líder pode gerar os tokens em Análise da equipe → Atribuição por membro (Gerar tokens).'
+      ? 'O teu link pessoal ainda não está pronto — pede à equipa para concluírem a configuração em Análise da equipe → Atribuição por membro (Gerar tokens).'
       : !visibleInCatalog && role !== 'leader'
-        ? 'Esta ferramenta está oculta para a equipe no catálogo — confirma com o líder.'
+        ? 'Esta ferramenta está oculta no catálogo da equipa — confirma com a operação.'
         : !whatsappReady
           ? 'Completa o teu WhatsApp no perfil YLADA para o botão de conversa usar o teu número.'
           : null,

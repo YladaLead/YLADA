@@ -65,8 +65,8 @@ export default async function ProLideresMembroAcessoExpiradoPage() {
         </div>
         <h1 className="text-center text-xl font-bold text-gray-900">Período de acesso terminado</h1>
         <p className="mt-3 text-center text-sm leading-relaxed text-gray-700">
-          O acesso configurado pelo líder terminou em <strong className="text-gray-900">{expLabel}</strong>. Fala com o líder do teu
-          espaço Pro Líderes para renovar ou alinhar um novo período.
+          O período de acesso associado ao teu plano terminou em <strong className="text-gray-900">{expLabel}</strong>. Fala com a
+          tua equipa para renovares ou alinhares um novo período.
         </p>
         <p className="mt-6 text-center text-sm text-gray-600">
           <Link href="/pro-lideres/entrar" className="font-semibold text-blue-600 underline hover:text-blue-800">

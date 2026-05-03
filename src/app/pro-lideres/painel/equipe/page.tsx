@@ -43,8 +43,7 @@ export default async function ProLideresEquipePage() {
             </>
           ) : (
             <>
-              Lista de quem partilha este espaço contigo: o <strong className="text-gray-900">líder</strong> e a{' '}
-              <strong className="text-gray-900">equipe</strong>. Novos acessos são geridos pelo líder.
+              Aqui vês quem partilha este espaço contigo. A gestão de novos acessos é feita pela operação.
             </>
           )}
         </p>

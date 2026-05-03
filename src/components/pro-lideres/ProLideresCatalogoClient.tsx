@@ -291,7 +291,7 @@ export function ProLideresCatalogoClient({
   const defaultIntroLeader =
     'Aqui você separa a biblioteca que a YLADA já deixa pronta dos links que você mesmo criar. Depois é só escolher entre ferramentas de vendas ou de recrutamento.'
   const defaultIntroTeam =
-    'Aqui aparecem só as ferramentas que o líder liberou para a equipe. Escolha o funil (vendas ou recrutamento), use o fluxo e copie o seu link para divulgar.'
+    'Aqui aparecem as ferramentas disponíveis para a equipe neste espaço. Escolha o funil (vendas ou recrutamento), use o fluxo e copie o seu link para divulgar.'
 
   const introText = catalogIntro ?? (isLeaderWorkspace ? defaultIntroLeader : defaultIntroTeam)
 
@@ -542,7 +542,7 @@ export function ProLideresCatalogoClient({
             </Link>
           ) : (
             <p className="mx-auto mt-4 max-w-md text-sm text-slate-600">
-              Quando o líder liberar ferramentas para a equipe no catálogo, elas aparecem aqui por funil (vendas ou
+              Quando houver ferramentas disponíveis para a equipe neste catálogo, elas aparecem aqui por funil (vendas ou
               recrutamento).
             </p>
           )}

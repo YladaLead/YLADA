@@ -91,7 +91,7 @@ export async function POST(request: NextRequest) {
   if (action === 'activate') {
     if (state !== 'pending_activation') {
       return NextResponse.json(
-        { error: 'Só é possível usar «Ativar» em quem ainda aguarda a primeira liberação pelo líder.' },
+        { error: 'Só é possível usar «Ativar» quando o membro ainda aguarda a primeira liberação do acesso.' },
         { status: 400 }
       )
     }

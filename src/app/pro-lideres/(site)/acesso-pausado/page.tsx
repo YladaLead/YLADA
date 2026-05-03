@@ -15,8 +15,8 @@ export default function ProLideresAcessoPausadoPage() {
     <div className="mx-auto max-w-md space-y-6 text-center">
       <h1 className="text-2xl font-bold text-gray-900">Acesso pausado</h1>
       <p className="text-base text-gray-600">
-        O líder do teu espaço Pro Líderes pausou o teu acesso por agora. Os teus dados e ferramentas associadas à
-        conta mantêm-se; quando o líder reativar o acesso, voltas a entrar no painel normalmente.
+        O teu acesso a este espaço Pro Líderes está pausado por agora. Os teus dados e ferramentas associadas à conta mantêm-se;
+        quando o acesso for reativado, voltas a entrar no painel normalmente. Se tiveres dúvidas, fala com a tua equipa.
       </p>
       <div className="mx-auto flex w-full max-w-xs flex-col gap-3">
         <a

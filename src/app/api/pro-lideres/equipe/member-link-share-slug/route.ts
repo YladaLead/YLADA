@@ -52,7 +52,7 @@ export async function PATCH(request: NextRequest) {
     .maybeSingle()
 
   if (linkErr || !ylLink || ylLink.user_id !== ownerId || ylLink.status !== 'active') {
-    return NextResponse.json({ error: 'Link não encontrado ou não pertence ao líder deste espaço.' }, { status: 404 })
+    return NextResponse.json({ error: 'Link não encontrado ou não disponível neste espaço.' }, { status: 404 })
   }
 
   const { data: row, error: rowErr } = await supabaseAdmin
@@ -65,7 +65,7 @@ export async function PATCH(request: NextRequest) {
 
   if (rowErr || !row) {
     return NextResponse.json(
-      { error: 'Ainda não tens token neste link — pede ao líder para gerar em Análise da equipe.' },
+      { error: 'Ainda não tens token neste link — pede à equipa para gerar em Análise da equipe.' },
       { status: 404 }
     )
   }

@@ -139,13 +139,13 @@ export default function ProLideresPreviewFluxoPagamentoConvitePage() {
               <p className="text-sm leading-relaxed text-gray-700">
                 {openLinkState.kind === 'pix' ? (
                   <>
-                    Abra o <strong className="text-gray-900">link de pagamento via Pix</strong> que o líder deixou, conclua conforme
-                    combinado com a equipe; em seguida o líder liberta o acesso ao painel.
+                    Use o <strong className="text-gray-900">link de pagamento via Pix</strong> abaixo, conclua o passo indicado e
+                    aguarde — em breve o teu acesso ao painel fica disponível.
                   </>
                 ) : (
                   <>
-                    Abra o <strong className="text-gray-900">link de pagamento com cartão ou no Mercado Pago</strong>, conclua conforme
-                    combinado com a equipe; em seguida o líder liberta o acesso ao painel.
+                    Use o <strong className="text-gray-900">link de pagamento com cartão ou no Mercado Pago</strong> abaixo, conclua o
+                    passo indicado e aguarde — em breve o teu acesso ao painel fica disponível.
                   </>
                 )}
               </p>
@@ -174,7 +174,7 @@ export default function ProLideresPreviewFluxoPagamentoConvitePage() {
       <div className="mx-auto mt-10 max-w-3xl rounded-lg border border-gray-200 bg-white p-4 text-sm text-gray-700">
         <p className="font-semibold text-gray-900">No convite, após «Aceitar e entrar» (fluxo já logado)</p>
         <p className="mt-2 text-gray-600">
-          Mensagem verde: <strong>«A seguir: página de espera até o líder ativar o acesso…»</strong> (enquanto o pedido é processado).
+          Mensagem verde no convite: <strong>«A seguir: página de confirmação…»</strong>
         </p>
       </div>
     </div>
